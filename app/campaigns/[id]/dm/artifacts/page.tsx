@@ -54,19 +54,19 @@ export default async function DMArtifactsPage({
 
   return (
     <div className="container mx-auto p-4 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col">
           <h1 className="text-3xl font-bold">Артефакти</h1>
           <p className="text-muted-foreground mt-1">
             Управління артефактами та сетами
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 shrink-0">
           <Link href={`/campaigns/${id}/dm/artifacts/sets/new`}>
-            <Button variant="outline">+ Сет</Button>
+            <Button variant="outline" className="whitespace-nowrap">+ Сет</Button>
           </Link>
           <Link href={`/campaigns/${id}/dm/artifacts/new`}>
-            <Button>+ Створити артефакт</Button>
+            <Button className="whitespace-nowrap">+ Створити артефакт</Button>
           </Link>
         </div>
       </div>

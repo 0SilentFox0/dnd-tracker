@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     const {
       data: { user: authUser },
     } = await supabase.auth.getUser();
-    
+
     if (!authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -45,12 +45,9 @@ export async function POST(request: Request) {
     }
 
     // Перевіряємо чи юзер вже є учасником
-    const existingMember = campaign.members.find(m => m.userId === userId);
+    const existingMember = campaign.members.find((m) => m.userId === userId);
     if (existingMember) {
-      return NextResponse.json(
-        { error: "Already a member" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Already a member" }, { status: 400 });
     }
 
     // Перевіряємо чи юзер існує в базі
@@ -63,8 +60,15 @@ export async function POST(request: Request) {
         data: {
           id: userId,
           email: authUser.email || "",
-          displayName: authUser.user_metadata?.full_name || authUser.user_metadata?.name || authUser.email?.split('@')[0] || "User",
-          avatar: authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture || null,
+          displayName:
+            authUser.user_metadata?.full_name ||
+            authUser.user_metadata?.name ||
+            authUser.email?.split("@")[0] ||
+            "User",
+          avatar:
+            authUser.user_metadata?.avatar_url ||
+            authUser.user_metadata?.picture ||
+            null,
         },
       });
     }

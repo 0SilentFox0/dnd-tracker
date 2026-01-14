@@ -53,9 +53,10 @@ function SignInForm() {
       }
       
       // Якщо все добре, redirect відбудеться автоматично
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error signing in:", error);
-      alert(`Помилка при вході: ${error.message || "Невідома помилка"}`);
+      const errorMessage = error instanceof Error ? error.message : "Невідома помилка";
+      alert(`Помилка при вході: ${errorMessage}`);
     } finally {
       setLoading(false);
     }

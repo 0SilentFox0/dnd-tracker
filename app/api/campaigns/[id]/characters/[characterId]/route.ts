@@ -23,7 +23,7 @@ const updateCharacterSchema = z.object({
   background: z.string().optional(),
   experience: z.number().min(0).optional(),
   avatar: z.string().optional(),
-  
+
   // Ability Scores
   strength: z.number().min(1).max(30).optional(),
   dexterity: z.number().min(1).max(30).optional(),
@@ -31,7 +31,7 @@ const updateCharacterSchema = z.object({
   intelligence: z.number().min(1).max(30).optional(),
   wisdom: z.number().min(1).max(30).optional(),
   charisma: z.number().min(1).max(30).optional(),
-  
+
   // Бойові параметри
   armorClass: z.number().min(0).optional(),
   initiative: z.number().optional(),
@@ -40,30 +40,37 @@ const updateCharacterSchema = z.object({
   currentHp: z.number().min(0).optional(),
   tempHp: z.number().min(0).optional(),
   hitDice: z.string().optional(),
-  
+
   // Saving Throws & Skills
   savingThrows: z.record(z.string(), z.boolean()).optional(),
   skills: z.record(z.string(), z.boolean()).optional(),
-  
+
   // Заклинання
   spellcastingClass: z.string().optional(),
-  spellcastingAbility: z.enum(["intelligence", "wisdom", "charisma"]).optional(),
-  spellSlots: z.record(z.string(), z.object({
-    max: z.number(),
-    current: z.number(),
-  })).optional(),
+  spellcastingAbility: z
+    .enum(["intelligence", "wisdom", "charisma"])
+    .optional(),
+  spellSlots: z
+    .record(
+      z.string(),
+      z.object({
+        max: z.number(),
+        current: z.number(),
+      })
+    )
+    .optional(),
   knownSpells: z.array(z.string()).optional(),
-  
+
   // Інше
   languages: z.array(z.string()).optional(),
   proficiencies: z.record(z.string(), z.array(z.string())).optional(),
-  
+
   // Roleplay
   personalityTraits: z.string().optional(),
   ideals: z.string().optional(),
   bonds: z.string().optional(),
   flaws: z.string().optional(),
-  
+
   // Прокачка
   controlledBy: z.string().optional(),
 });
@@ -78,7 +85,7 @@ export async function GET(
     const {
       data: { user: authUser },
     } = await supabase.auth.getUser();
-    
+
     if (!authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -106,7 +113,7 @@ export async function GET(
     // Перевіряємо права доступу
     const isDM = character.campaign.members[0]?.role === "dm";
     const isOwner = character.controlledBy === userId;
-    
+
     if (!isDM && !isOwner) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
@@ -131,7 +138,7 @@ export async function PATCH(
     const {
       data: { user: authUser },
     } = await supabase.auth.getUser();
-    
+
     if (!authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -171,7 +178,8 @@ export async function PATCH(
     const intelligence = data.intelligence ?? character.intelligence;
     const wisdom = data.wisdom ?? character.wisdom;
     const charisma = data.charisma ?? character.charisma;
-    const savingThrows = (data.savingThrows ?? character.savingThrows) as Record<string, boolean>;
+    const savingThrows = (data.savingThrows ??
+      character.savingThrows) as Record<string, boolean>;
     const skills = (data.skills ?? character.skills) as Record<string, boolean>;
     const hitDice = data.hitDice ?? character.hitDice;
 
@@ -206,15 +214,19 @@ export async function PATCH(
     );
 
     // Розраховуємо spellcasting параметри якщо є
-    const spellcastingAbility = data.spellcastingAbility ?? character.spellcastingAbility;
+    const spellcastingAbility =
+      data.spellcastingAbility ?? character.spellcastingAbility;
     let spellSaveDC: number | null = character.spellSaveDC;
     let spellAttackBonus: number | null = character.spellAttackBonus;
-    
+
     if (spellcastingAbility) {
-      const abilityMod = 
-        spellcastingAbility === "intelligence" ? intMod :
-        spellcastingAbility === "wisdom" ? wisMod : chaMod;
-      
+      const abilityMod =
+        spellcastingAbility === "intelligence"
+          ? intMod
+          : spellcastingAbility === "wisdom"
+          ? wisMod
+          : chaMod;
+
       spellSaveDC = getSpellSaveDC(proficiencyBonus, abilityMod);
       spellAttackBonus = getSpellAttackBonus(proficiencyBonus, abilityMod);
     }
@@ -222,7 +234,7 @@ export async function PATCH(
     // Якщо рівень збільшився, додаємо HP
     let maxHp = data.maxHp ?? character.maxHp;
     let currentHp = data.currentHp ?? character.currentHp;
-    
+
     if (finalLevel > character.level) {
       const levelsGained = finalLevel - character.level;
       for (let i = 0; i < levelsGained; i++) {
@@ -276,7 +288,7 @@ export async function DELETE(
     const {
       data: { user: authUser },
     } = await supabase.auth.getUser();
-    
+
     if (!authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

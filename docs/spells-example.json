@@ -1,0 +1,72 @@
+[
+  {
+    "name": "Fireball",
+    "level": 3,
+    "school": "Evocation",
+    "type": "aoe",
+    "damageType": "damage",
+    "castingTime": "1 action",
+    "range": "150 feet",
+    "components": "V, S, M",
+    "duration": "Instantaneous",
+    "concentration": false,
+    "damageDice": "8d6",
+    "savingThrowAbility": "dexterity",
+    "savingThrowOnSuccess": "half",
+    "description": "A bright streak flashes from your pointing finger to a point you choose within range and then blossoms with a low roar into an explosion of flame."
+  },
+  {
+    "name": "Magic Missile",
+    "level": 1,
+    "school": "Evocation",
+    "type": "target",
+    "damageType": "damage",
+    "castingTime": "1 action",
+    "range": "120 feet",
+    "components": "V, S",
+    "duration": "Instantaneous",
+    "concentration": false,
+    "damageDice": "1d4+1",
+    "description": "You create three glowing darts of magical force. Each dart hits a creature of your choice that you can see within range."
+  },
+  {
+    "name": "Cure Wounds",
+    "level": 1,
+    "school": "Evocation",
+    "type": "target",
+    "damageType": "heal",
+    "castingTime": "1 action",
+    "range": "Touch",
+    "components": "V, S",
+    "duration": "Instantaneous",
+    "concentration": false,
+    "damageDice": "1d8+spellcasting",
+    "description": "A creature you touch regains a number of hit points equal to 1d8 + your spellcasting ability modifier."
+  },
+  {
+    "name": "Shield",
+    "level": 1,
+    "school": "Abjuration",
+    "type": "target",
+    "damageType": "heal",
+    "castingTime": "1 reaction",
+    "range": "Self",
+    "components": "V, S",
+    "duration": "1 round",
+    "concentration": false,
+    "description": "An invisible barrier of magical force appears and protects you."
+  },
+  {
+    "name": "Mage Armor",
+    "level": 1,
+    "school": "Abjuration",
+    "type": "target",
+    "damageType": "heal",
+    "castingTime": "1 action",
+    "range": "Touch",
+    "components": "V, S, M",
+    "duration": "8 hours",
+    "concentration": false,
+    "description": "You touch a willing creature who isn't wearing armor, and a protective magical force surrounds it until the spell ends."
+  }
+]

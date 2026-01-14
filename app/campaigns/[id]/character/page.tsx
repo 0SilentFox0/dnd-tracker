@@ -1,7 +1,13 @@
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
@@ -76,15 +82,15 @@ export default async function CharacterPage({
 
   return (
     <div className="container mx-auto p-4 space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Avatar className="w-16 h-16">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <Avatar className="w-16 h-16 shrink-0">
             <AvatarImage src={character.avatar || undefined} />
             <AvatarFallback>
               {character.name.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <div>
+          <div className="flex flex-col">
             <h1 className="text-3xl font-bold">{character.name}</h1>
             <p className="text-muted-foreground">
               {character.race} {character.subrace || ""} • {character.class}
@@ -92,7 +98,7 @@ export default async function CharacterPage({
             </p>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 shrink-0">
           {campaign.allowPlayerEdit && (
             <Link href={`/campaigns/${id}/character/edit`}>
               <Button variant="outline">Редагувати</Button>
@@ -121,7 +127,9 @@ export default async function CharacterPage({
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Proficiency Bonus:</span>
-              <span className="font-semibold">+{character.proficiencyBonus}</span>
+              <span className="font-semibold">
+                +{character.proficiencyBonus}
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -179,18 +187,49 @@ export default async function CharacterPage({
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {[
-              { name: "Сила", score: character.strength, mod: strMod, abbr: "STR" },
-              { name: "Спритність", score: character.dexterity, mod: dexMod, abbr: "DEX" },
-              { name: "Статура", score: character.constitution, mod: conMod, abbr: "CON" },
-              { name: "Інтелект", score: character.intelligence, mod: intMod, abbr: "INT" },
-              { name: "Мудрість", score: character.wisdom, mod: wisMod, abbr: "WIS" },
-              { name: "Харизма", score: character.charisma, mod: chaMod, abbr: "CHA" },
+              {
+                name: "Сила",
+                score: character.strength,
+                mod: strMod,
+                abbr: "STR",
+              },
+              {
+                name: "Спритність",
+                score: character.dexterity,
+                mod: dexMod,
+                abbr: "DEX",
+              },
+              {
+                name: "Статура",
+                score: character.constitution,
+                mod: conMod,
+                abbr: "CON",
+              },
+              {
+                name: "Інтелект",
+                score: character.intelligence,
+                mod: intMod,
+                abbr: "INT",
+              },
+              {
+                name: "Мудрість",
+                score: character.wisdom,
+                mod: wisMod,
+                abbr: "WIS",
+              },
+              {
+                name: "Харизма",
+                score: character.charisma,
+                mod: chaMod,
+                abbr: "CHA",
+              },
             ].map(({ name, score, mod, abbr }) => (
               <div key={abbr} className="text-center p-3 border rounded-lg">
                 <div className="text-sm text-muted-foreground">{name}</div>
                 <div className="text-2xl font-bold">{score}</div>
                 <div className="text-sm">
-                  {mod >= 0 ? "+" : ""}{mod}
+                  {mod >= 0 ? "+" : ""}
+                  {mod}
                 </div>
               </div>
             ))}
@@ -206,16 +245,28 @@ export default async function CharacterPage({
         <CardContent>
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <div className="text-sm text-muted-foreground">Пасивна Уважність</div>
-              <div className="text-xl font-semibold">{character.passivePerception}</div>
+              <div className="text-sm text-muted-foreground">
+                Пасивна Уважність
+              </div>
+              <div className="text-xl font-semibold">
+                {character.passivePerception}
+              </div>
             </div>
             <div>
-              <div className="text-sm text-muted-foreground">Пасивне Розслідування</div>
-              <div className="text-xl font-semibold">{character.passiveInvestigation}</div>
+              <div className="text-sm text-muted-foreground">
+                Пасивне Розслідування
+              </div>
+              <div className="text-xl font-semibold">
+                {character.passiveInvestigation}
+              </div>
             </div>
             <div>
-              <div className="text-sm text-muted-foreground">Пасивне Розуміння</div>
-              <div className="text-xl font-semibold">{character.passiveInsight}</div>
+              <div className="text-sm text-muted-foreground">
+                Пасивне Розуміння
+              </div>
+              <div className="text-xl font-semibold">
+                {character.passiveInsight}
+              </div>
             </div>
           </div>
         </CardContent>
@@ -231,15 +282,21 @@ export default async function CharacterPage({
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Золото:</span>
-                <span className="font-semibold">{character.inventory.gold as number}</span>
+                <span className="font-semibold">
+                  {character.inventory.gold as number}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Срібло:</span>
-                <span className="font-semibold">{character.inventory.silver as number}</span>
+                <span className="font-semibold">
+                  {character.inventory.silver as number}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Мідь:</span>
-                <span className="font-semibold">{character.inventory.copper as number}</span>
+                <span className="font-semibold">
+                  {character.inventory.copper as number}
+                </span>
               </div>
             </div>
           </CardContent>

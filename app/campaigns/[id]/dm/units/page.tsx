@@ -52,19 +52,19 @@ export default async function DMUnitsPage({
 
   return (
     <div className="container mx-auto p-4 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col">
           <h1 className="text-3xl font-bold">NPC Юніти</h1>
           <p className="text-muted-foreground mt-1">
             Управління мобами та юнітами
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 shrink-0">
           <Link href={`/campaigns/${id}/dm/units/groups/new`}>
-            <Button variant="outline">+ Група</Button>
+            <Button variant="outline" className="whitespace-nowrap">+ Група</Button>
           </Link>
           <Link href={`/campaigns/${id}/dm/units/new`}>
-            <Button>+ Створити юніта</Button>
+            <Button className="whitespace-nowrap">+ Створити юніта</Button>
           </Link>
         </div>
       </div>

@@ -115,10 +115,12 @@ export default async function CampaignsPage() {
 
   return (
     <div className="container mx-auto p-4 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <h1 className="text-3xl font-bold">Мої Кампанії</h1>
-        <Link href="/campaigns/new">
-          <Button>+ Нова Кампанія</Button>
+        <Link href="/campaigns/new" className="shrink-0">
+          <Button className="whitespace-nowrap w-full md:w-auto">
+            + Нова Кампанія
+          </Button>
         </Link>
       </div>
 

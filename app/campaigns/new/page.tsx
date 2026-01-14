@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import Link from "next/link";
+import { createCampaign } from "@/lib/api/campaigns";
 
 export default function NewCampaignPage() {
   const router = useRouter();
@@ -25,19 +26,7 @@ export default function NewCampaignPage() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/campaigns", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to create campaign");
-      }
-
-      const campaign = await response.json();
+      const campaign = await createCampaign(formData);
       router.push(`/campaigns/${campaign.id}`);
     } catch (error) {
       console.error("Error creating campaign:", error);

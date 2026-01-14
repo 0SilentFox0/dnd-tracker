@@ -41,15 +41,15 @@ export default async function DMNPCHeroesPage({
 
   return (
     <div className="container mx-auto p-4 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col">
           <h1 className="text-3xl font-bold">NPC Герої</h1>
           <p className="text-muted-foreground mt-1">
             Управління NPC героями кампанії
           </p>
         </div>
-        <Link href={`/campaigns/${id}/dm/npc-heroes/new`}>
-          <Button>+ Створити NPC Героя</Button>
+        <Link href={`/campaigns/${id}/dm/npc-heroes/new`} className="shrink-0">
+          <Button className="whitespace-nowrap w-full md:w-auto">+ Створити NPC Героя</Button>
         </Link>
       </div>
 

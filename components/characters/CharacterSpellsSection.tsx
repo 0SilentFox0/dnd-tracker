@@ -4,13 +4,20 @@
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { SPELLCASTING_ABILITIES } from "@/lib/constants";
 import { CharacterFormData } from "@/lib/api/characters";
+import { SpellMultiSelect } from "./SpellMultiSelect";
 
 interface CharacterSpellsSectionProps {
   formData: CharacterFormData;
+  campaignId: string;
   onUpdate: <K extends keyof CharacterFormData>(
     field: K,
     value: CharacterFormData[K]
@@ -21,19 +28,13 @@ interface CharacterSpellsSectionProps {
 
 export function CharacterSpellsSection({
   formData,
+  campaignId,
   onUpdate,
   onAddSpell,
   onRemoveSpell,
 }: CharacterSpellsSectionProps) {
-  const handleSpellInputKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const spellId = (e.target as HTMLInputElement).value.trim();
-      if (spellId && !formData.knownSpells.includes(spellId)) {
-        onAddSpell(spellId);
-        (e.target as HTMLInputElement).value = "";
-      }
-    }
+  const handleSpellSelectionChange = (spellIds: string[]) => {
+    onUpdate("knownSpells", spellIds);
   };
 
   return (
@@ -71,33 +72,12 @@ export function CharacterSpellsSection({
       </div>
 
       <div className="w-full min-w-0">
-        <Label>Відомі заклинання (ID)</Label>
-        <div className="flex gap-2 w-full">
-          <Input
-            placeholder="Введіть ID заклинання"
-            className="w-full"
-            onKeyPress={handleSpellInputKeyPress}
-          />
-        </div>
-        {formData.knownSpells.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-2">
-            {formData.knownSpells.map((spellId, index) => (
-              <span
-                key={index}
-                className="bg-muted px-2 py-1 rounded text-sm flex items-center gap-1"
-              >
-                {spellId}
-                <button
-                  type="button"
-                  onClick={() => onRemoveSpell(index)}
-                  className="text-destructive hover:underline"
-                >
-                  ×
-                </button>
-              </span>
-            ))}
-          </div>
-        )}
+        <Label>Відомі заклинання</Label>
+        <SpellMultiSelect
+          campaignId={campaignId}
+          selectedSpellIds={formData.knownSpells}
+          onSelectionChange={handleSpellSelectionChange}
+        />
       </div>
     </div>
   );

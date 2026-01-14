@@ -1,7 +1,13 @@
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -51,21 +57,26 @@ export default async function DMCharactersPage({
 
   return (
     <div className="container mx-auto p-4 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col">
           <h1 className="text-3xl font-bold">Персонажі Гравців</h1>
           <p className="text-muted-foreground mt-1">
             Управління персонажами гравців кампанії
           </p>
         </div>
-        <Link href={`/campaigns/${id}/dm/characters/new`}>
-          <Button>+ Створити персонажа</Button>
+        <Link href={`/campaigns/${id}/dm/characters/new`} className="shrink-0">
+          <Button className="whitespace-nowrap w-full md:w-auto">
+            + Створити персонажа
+          </Button>
         </Link>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {characters.map((character) => (
-          <Card key={character.id} className="hover:shadow-lg transition-shadow">
+          <Card
+            key={character.id}
+            className="hover:shadow-lg transition-shadow"
+          >
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
@@ -92,7 +103,7 @@ export default async function DMCharactersPage({
                 <Badge variant="outline">{character.class}</Badge>
                 <Badge variant="default">Рівень {character.level}</Badge>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div>
                   <span className="text-muted-foreground">HP:</span>{" "}

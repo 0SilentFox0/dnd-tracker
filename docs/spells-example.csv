@@ -1,0 +1,6 @@
+name,level,school,type,damageType,castingTime,range,components,duration,concentration,damageDice,savingThrowAbility,savingThrowOnSuccess,description
+Fireball,3,Evocation,aoe,damage,1 action,150 feet,"V, S, M",Instantaneous,false,8d6,dexterity,half,"A bright streak flashes from your pointing finger to a point you choose within range and then blossoms with a low roar into an explosion of flame."
+Magic Missile,1,Evocation,target,damage,1 action,120 feet,"V, S",Instantaneous,false,1d4+1,,,"You create three glowing darts of magical force. Each dart hits a creature of your choice that you can see within range."
+Cure Wounds,1,Evocation,target,heal,1 action,Touch,"V, S",Instantaneous,false,1d8+spellcasting,,,"A creature you touch regains a number of hit points equal to 1d8 + your spellcasting ability modifier."
+Shield,1,Abjuration,target,heal,1 reaction,Self,"V, S",1 round,false,,,,"An invisible barrier of magical force appears and protects you."
+Mage Armor,1,Abjuration,target,heal,1 action,Touch,"V, S, M",8 hours,false,,,,"You touch a willing creature who isn't wearing armor, and a protective magical force surrounds it until the spell ends."

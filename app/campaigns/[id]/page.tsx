@@ -41,14 +41,14 @@ export default async function CampaignDetailPage({
 
   return (
     <div className="container mx-auto p-4 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col">
           <h1 className="text-3xl font-bold">{campaign.name}</h1>
           {campaign.description && (
             <p className="text-muted-foreground mt-1">{campaign.description}</p>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <span className="text-sm text-muted-foreground">{user.email}</span>
         </div>
       </div>

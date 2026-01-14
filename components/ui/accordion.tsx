@@ -82,7 +82,11 @@ export function AccordionItem({
     >
       {React.Children.map(children, (child) => {
         if (React.isValidElement(child)) {
-          return React.cloneElement(child as React.ReactElement<any>, {
+          return React.cloneElement(child as React.ReactElement<{
+            id?: string;
+            isOpen?: boolean;
+            toggleItem?: (id: string) => void;
+          }>, {
             id,
             isOpen,
             toggleItem,
@@ -122,7 +126,7 @@ export function AccordionTrigger({
       data-state={isOpen ? "open" : "closed"}
     >
       {children}
-      <ChevronDownIcon className="h-4 w-4 shrink-0 transition-transform duration-200" />
+      <ChevronDownIcon className="h-5 w-5 shrink-0 transition-transform duration-200 ml-2" />
     </button>
   )
 }

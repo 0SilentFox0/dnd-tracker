@@ -132,6 +132,7 @@ export default function NewCharacterPage({
                 <AccordionContent>
                   <CharacterSpellsSection
                     formData={formData}
+                    campaignId={id}
                     onUpdate={updateField}
                     onAddSpell={addKnownSpell}
                     onRemoveSpell={removeKnownSpell}

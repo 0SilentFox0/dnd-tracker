@@ -11,57 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Link from "next/link";
-
-interface InitiativeParticipant {
-  participantId: string;
-  participantType: "character" | "unit";
-  instanceId?: string;
-  initiative: number;
-  name: string;
-  avatar?: string;
-  side: "ally" | "enemy";
-  currentHp: number;
-  maxHp: number;
-  tempHp: number;
-  status: "active" | "dead" | "unconscious";
-  activeEffects: Array<{
-    name: string;
-    type: "buff" | "debuff" | "condition";
-    duration: number;
-    effect: object;
-    description?: string;
-  }>;
-}
-
-interface BattleScene {
-  id: string;
-  campaignId: string;
-  name: string;
-  description?: string;
-  status: "prepared" | "active" | "completed";
-  participants: Array<{
-    id: string;
-    type: "character" | "unit";
-    side: "ally" | "enemy";
-    quantity?: number;
-  }>;
-  currentRound: number;
-  currentTurnIndex: number;
-  initiativeOrder: InitiativeParticipant[];
-  battleLog: Array<{
-    round: number;
-    timestamp: string;
-    actorName: string;
-    action: string;
-    target?: string;
-    result: string;
-    damage?: number;
-    healing?: number;
-  }>;
-  createdAt: string;
-  startedAt?: string;
-  completedAt?: string;
-}
+import { useBattle, useNextTurn, useAttack } from "@/lib/hooks/useBattles";
+import type { InitiativeParticipant, BattleScene } from "@/lib/api/battles";
 
 export default function BattlePage({
   params,
@@ -70,8 +21,6 @@ export default function BattlePage({
 }) {
   const { id, battleId } = use(params);
   const router = useRouter();
-  const [battle, setBattle] = useState<BattleScene | null>(null);
-  const [loading, setLoading] = useState(true);
   const [attackDialogOpen, setAttackDialogOpen] = useState(false);
   const [spellDialogOpen, setSpellDialogOpen] = useState(false);
   const [selectedAttacker, setSelectedAttacker] = useState<InitiativeParticipant | null>(null);
@@ -79,12 +28,14 @@ export default function BattlePage({
   const [attackRoll, setAttackRoll] = useState("");
   const [damageRolls, setDamageRolls] = useState<string[]>([]);
 
+  const { data: battle, isLoading: loading } = useBattle(id, battleId);
+  const nextTurnMutation = useNextTurn(id, battleId);
+  const attackMutation = useAttack(id, battleId);
+
   useEffect(() => {
-    fetchBattle();
-    
     // Налаштування Pusher для real-time оновлень
     if (typeof window !== "undefined" && process.env.NEXT_PUBLIC_PUSHER_KEY) {
-      let pusher: any = null;
+      let pusher: ReturnType<typeof import("@/lib/pusher").getPusherClient> = null;
       
       import("@/lib/pusher").then(({ getPusherClient }) => {
         pusher = getPusherClient();
@@ -93,11 +44,11 @@ export default function BattlePage({
           const channel = pusher.subscribe(`battle-${battleId}`);
           
           channel.bind("battle-updated", (data: BattleScene) => {
-            setBattle(data);
+            // Оновлюємо через queryClient в хуку
           });
           
           channel.bind("battle-started", (data: BattleScene) => {
-            setBattle(data);
+            // Оновлюємо через queryClient в хуку
           });
         }
       });
@@ -110,63 +61,35 @@ export default function BattlePage({
     }
   }, [battleId]);
 
-  const fetchBattle = async () => {
-    try {
-      const response = await fetch(`/api/campaigns/${id}/battles/${battleId}`);
-      if (!response.ok) throw new Error("Failed to fetch battle");
-      const data = await response.json();
-      setBattle(data);
-    } catch (error) {
-      console.error("Error fetching battle:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleNextTurn = async () => {
     if (!battle) return;
-    
-    try {
-      const response = await fetch(`/api/campaigns/${id}/battles/${battleId}/next-turn`, {
-        method: "POST",
-      });
-      if (!response.ok) throw new Error("Failed to advance turn");
-      const updatedBattle = await response.json();
-      setBattle(updatedBattle);
-    } catch (error) {
-      console.error("Error advancing turn:", error);
-    }
+    nextTurnMutation.mutate();
   };
 
   const handleAttack = async () => {
     if (!battle || !selectedAttacker || !selectedTarget || !attackRoll) return;
 
-    try {
-      const response = await fetch(`/api/campaigns/${id}/battles/${battleId}/attack`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+    attackMutation.mutate(
+      {
+        attackerId: selectedAttacker.participantId,
+        attackerType: selectedAttacker.participantType,
+        targetId: selectedTarget.participantId,
+        targetType: selectedTarget.participantType,
+        attackRoll: parseInt(attackRoll),
+        damageRolls: damageRolls.map((r) => parseInt(r)).filter((n) => !isNaN(n)),
+      },
+      {
+        onSuccess: () => {
+          setAttackDialogOpen(false);
+          setAttackRoll("");
+          setDamageRolls([]);
         },
-        body: JSON.stringify({
-          attackerId: selectedAttacker.participantId,
-          attackerType: selectedAttacker.participantType,
-          targetId: selectedTarget.participantId,
-          targetType: selectedTarget.participantType,
-          attackRoll: parseInt(attackRoll),
-          damageRolls: damageRolls.map(r => parseInt(r)).filter(n => !isNaN(n)),
-        }),
-      });
-
-      if (!response.ok) throw new Error("Failed to process attack");
-      const updatedBattle = await response.json();
-      setBattle(updatedBattle);
-      setAttackDialogOpen(false);
-      setAttackRoll("");
-      setDamageRolls([]);
-    } catch (error) {
-      console.error("Error processing attack:", error);
-      alert("Помилка при обробці атаки");
-    }
+        onError: (error) => {
+          console.error("Error processing attack:", error);
+          alert("Помилка при обробці атаки");
+        },
+      }
+    );
   };
 
   if (loading) {
@@ -194,19 +117,19 @@ export default function BattlePage({
 
   return (
     <div className="container mx-auto p-4 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col">
           <h1 className="text-3xl font-bold">{battle.name}</h1>
           {battle.description && (
             <p className="text-muted-foreground mt-1">{battle.description}</p>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
           <Badge variant={battle.status === "active" ? "default" : "secondary"}>
             {battle.status === "active" ? "Активний" : battle.status === "prepared" ? "Підготовлено" : "Завершено"}
           </Badge>
           <Link href={`/campaigns/${id}`}>
-            <Button variant="outline">Назад</Button>
+            <Button variant="outline" className="whitespace-nowrap">Назад</Button>
           </Link>
         </div>
       </div>
@@ -214,9 +137,9 @@ export default function BattlePage({
       {/* Поточний раунд та хід */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <CardTitle>Раунд {battle.currentRound}</CardTitle>
-            <Button onClick={handleNextTurn}>Наступний хід</Button>
+            <Button onClick={handleNextTurn} className="whitespace-nowrap w-full sm:w-auto">Наступний хід</Button>
           </div>
         </CardHeader>
         <CardContent>

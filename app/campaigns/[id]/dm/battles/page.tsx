@@ -43,15 +43,15 @@ export default async function DMBattlesPage({
 
   return (
     <div className="container mx-auto p-4 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col">
           <h1 className="text-3xl font-bold">Сцени Боїв</h1>
           <p className="text-muted-foreground mt-1">
             Створення та управління боями
           </p>
         </div>
-        <Link href={`/campaigns/${id}/dm/battles/new`}>
-          <Button>+ Створити сцену бою</Button>
+        <Link href={`/campaigns/${id}/dm/battles/new`} className="shrink-0">
+          <Button className="whitespace-nowrap w-full md:w-auto">+ Створити сцену бою</Button>
         </Link>
       </div>
 
