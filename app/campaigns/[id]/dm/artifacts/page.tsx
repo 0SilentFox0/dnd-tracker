@@ -1,0 +1,159 @@
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+import { prisma } from "@/lib/db";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+
+export default async function DMArtifactsPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const { userId } = await auth();
+  
+  if (!userId) {
+    redirect("/sign-in");
+  }
+
+  const campaign = await prisma.campaign.findUnique({
+    where: { id: params.id },
+    include: {
+      members: {
+        where: { userId },
+      },
+    },
+  });
+
+  if (!campaign || campaign.members[0]?.role !== "dm") {
+    redirect(`/campaigns/${params.id}`);
+  }
+
+  const artifacts = await prisma.artifact.findMany({
+    where: {
+      campaignId: params.id,
+    },
+    include: {
+      artifactSet: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  const artifactSets = await prisma.artifactSet.findMany({
+    where: {
+      campaignId: params.id,
+    },
+    include: {
+      artifacts: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return (
+    <div className="container mx-auto p-4 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Артефакти</h1>
+          <p className="text-muted-foreground mt-1">
+            Управління артефактами та сетами
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Link href={`/campaigns/${params.id}/dm/artifacts/sets/new`}>
+            <Button variant="outline">+ Сет</Button>
+          </Link>
+          <Link href={`/campaigns/${params.id}/dm/artifacts/new`}>
+            <Button>+ Створити артефакт</Button>
+          </Link>
+        </div>
+      </div>
+
+      {/* Сети артефактів */}
+      {artifactSets.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="text-2xl font-semibold">Сети артефактів</h2>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {artifactSets.map((set) => (
+              <Card key={set.id} className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle>{set.name}</CardTitle>
+                  <CardDescription>
+                    {set.artifacts.length} артефактів в сеті
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Link href={`/campaigns/${params.id}/dm/artifacts/sets/${set.id}`}>
+                    <Button variant="outline" size="sm" className="w-full">
+                      Редагувати сет
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Артефакти */}
+      <div className="space-y-4">
+        <h2 className="text-2xl font-semibold">Артефакти</h2>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {artifacts.map((artifact) => (
+            <Card key={artifact.id} className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <CardTitle className="text-base">{artifact.name}</CardTitle>
+                  {artifact.rarity && (
+                    <Badge variant="outline">{artifact.rarity}</Badge>
+                  )}
+                </div>
+                <CardDescription className="flex gap-2 mt-2">
+                  <Badge variant="secondary">{artifact.slot}</Badge>
+                  {artifact.artifactSet && (
+                    <Badge variant="outline">Сет: {artifact.artifactSet.name}</Badge>
+                  )}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {artifact.description && (
+                  <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+                    {artifact.description}
+                  </p>
+                )}
+                <Link href={`/campaigns/${params.id}/dm/artifacts/${artifact.id}`}>
+                  <Button variant="outline" size="sm" className="w-full">
+                    Редагувати
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      {artifacts.length === 0 && artifactSets.length === 0 && (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <p className="text-muted-foreground mb-4">
+              Поки немає артефактів
+            </p>
+            <Link href={`/campaigns/${params.id}/dm/artifacts/new`}>
+              <Button>Створити перший артефакт</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="flex gap-2">
+        <Link href={`/campaigns/${params.id}`}>
+          <Button variant="outline">← Назад до кампанії</Button>
+        </Link>
+      </div>
+    </div>
+  );
+}

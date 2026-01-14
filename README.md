@@ -1,36 +1,134 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# D&D Combat Tracker
 
-## Getting Started
+Веб-додаток для спрощення розрахунків та управління бойовими сесіями в D&D 5e. Mobile-first підхід з real-time синхронізацією між DM та гравцями.
 
-First, run the development server:
+## Tech Stack
+
+- **Next.js 16** (App Router)
+- **Vercel** (хостинг)
+- **Supabase PostgreSQL** (база даних)
+- **Prisma** (ORM)
+- **shadcn/ui** (UI компоненти)
+- **Clerk** (авторизація через Google OAuth)
+- **Pusher** (real-time синхронізація)
+
+## Налаштування
+
+### 1. Встановлення залежностей
+
+```bash
+npm install
+```
+
+### 2. Налаштування змінних середовища
+
+Створіть файл `.env.local` в корені проекту:
+
+```env
+# Database (Supabase)
+DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres"
+
+# Clerk Authentication
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+CLERK_SECRET_KEY=your_clerk_secret_key
+
+# Pusher (для real-time синхронізації)
+PUSHER_APP_ID=your_pusher_app_id
+PUSHER_SECRET=your_pusher_secret
+NEXT_PUBLIC_PUSHER_KEY=your_pusher_key
+NEXT_PUBLIC_PUSHER_CLUSTER=mt1
+```
+
+### 3. Налаштування бази даних
+
+```bash
+# Генерує Prisma Client
+npx prisma generate
+
+# Застосовує міграції
+npx prisma migrate dev
+
+# Або якщо база вже існує
+npx prisma db push
+```
+
+### 4. Запуск проекту
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Відкрийте [http://localhost:3000](http://localhost:3000) у браузері.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Структура проекту
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+/app
+  /(auth)          # Сторінки авторизації
+  /api             # API routes
+  /campaigns       # Сторінки кампаній
+    /[id]
+      /dm          # Сторінки для DM
+        /characters
+        /npc-heroes
+        /units
+        /spells
+        /artifacts
+        /skill-trees
+        /battles
+      /battles     # Інтерфейс бою
+      /character   # Сторінка персонажа для гравця
+/components        # React компоненти
+/lib               # Утиліти та конфігурація
+/prisma            # Prisma schema
+```
 
-## Learn More
+## Основні функції
 
-To learn more about Next.js, take a look at the following resources:
+### Для DM (Dungeon Master)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- ✅ Управління персонажами гравців
+- ✅ Управління NPC героями та юнітами
+- ✅ База заклинань та артефактів
+- ✅ Створення та управління сценами боїв
+- ✅ Інтерфейс бою з real-time синхронізацією
+- ✅ Автоматичні розрахунки урону та ефектів
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Для Гравців
 
-## Deploy on Vercel
+- ✅ Перегляд та редагування персонажа (якщо дозволено DM)
+- ✅ Участь в боях з real-time оновленнями
+- ✅ Перегляд інвентаря та характеристик
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## API Routes
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `/api/campaigns` - CRUD операції для кампаній
+- `/api/campaigns/[id]/characters` - Управління персонажами
+- `/api/campaigns/[id]/units` - Управління юнітами
+- `/api/campaigns/[id]/spells` - Управління заклинаннями
+- `/api/campaigns/[id]/artifacts` - Управління артефактами
+- `/api/campaigns/[id]/battles` - Управління боями
+- `/api/campaigns/[id]/battles/[battleId]/start` - Запуск бою
+- `/api/campaigns/[id]/battles/[battleId]/attack` - Обробка атаки
+- `/api/campaigns/[id]/battles/[battleId]/next-turn` - Наступний хід
+
+## Розгортання
+
+### Vercel
+
+1. Підключіть репозиторій до Vercel
+2. Додайте змінні середовища в налаштуваннях проекту
+3. Запустіть деплой
+
+### База даних
+
+Проект використовує Supabase PostgreSQL. Створіть базу даних на [supabase.com](https://supabase.com) та додайте `DATABASE_URL` в змінні середовища.
+
+**Важливо для Supabase:**
+- Для production рекомендовано використовувати **Connection Pooling** URI замість прямого підключення
+- Connection Pooling URI знаходиться в **Settings** → **Database** → **Connection string** → **Connection pooling**
+- Це покращує продуктивність та дозволяє більше одночасних підключень
+
+## Ліцензія
+
+MIT

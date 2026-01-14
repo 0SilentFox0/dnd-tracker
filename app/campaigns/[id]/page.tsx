@@ -1,0 +1,207 @@
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+import { prisma } from "@/lib/db";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+import { UserButton } from "@clerk/nextjs";
+
+export default async function CampaignDetailPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const { userId } = await auth();
+  
+  if (!userId) {
+    redirect("/sign-in");
+  }
+
+  const campaign = await prisma.campaign.findUnique({
+    where: { id: params.id },
+    include: {
+      members: {
+        include: {
+          user: true,
+        },
+      },
+      dm: true,
+    },
+  });
+
+  if (!campaign) {
+    redirect("/campaigns");
+  }
+
+  const userMember = campaign.members.find(m => m.userId === userId);
+  if (!userMember) {
+    redirect("/campaigns");
+  }
+
+  const isDM = userMember.role === "dm";
+
+  return (
+    <div className="container mx-auto p-4 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">{campaign.name}</h1>
+          {campaign.description && (
+            <p className="text-muted-foreground mt-1">{campaign.description}</p>
+          )}
+        </div>
+        <UserButton />
+      </div>
+
+      {/* Налаштування кампанії */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Налаштування кампанії</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+              <p className="text-sm text-muted-foreground">Макс. рівень</p>
+              <p className="text-lg font-semibold">{campaign.maxLevel}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Множник XP</p>
+              <p className="text-lg font-semibold">{campaign.xpMultiplier}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Код запрошення</p>
+              <code className="text-lg font-semibold bg-muted px-2 py-1 rounded">
+                {campaign.inviteCode}
+              </code>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Статус</p>
+              <Badge>{campaign.status === "active" ? "Активна" : "Архівована"}</Badge>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Список гравців */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Учасники</CardTitle>
+          <CardDescription>
+            {campaign.members.length} учасник(ів) в кампанії
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {campaign.members.map((member) => (
+              <div
+                key={member.id}
+                className="flex items-center justify-between p-2 border rounded"
+              >
+                <div className="flex items-center gap-2">
+                  <span>{member.user.displayName}</span>
+                  <Badge variant={member.role === "dm" ? "default" : "secondary"}>
+                    {member.role === "dm" ? "DM" : "Player"}
+                  </Badge>
+                </div>
+                {isDM && member.role === "player" && (
+                  <Button variant="ghost" size="sm">
+                    Виключити
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Навігація для DM */}
+      {isDM && (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <Link href={`/campaigns/${params.id}/dm/characters`}>
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader>
+                <CardTitle>Персонажі</CardTitle>
+                <CardDescription>Управління персонажами гравців</CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
+
+          <Link href={`/campaigns/${params.id}/dm/npc-heroes`}>
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader>
+                <CardTitle>NPC Герої</CardTitle>
+                <CardDescription>Управління NPC героями</CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
+
+          <Link href={`/campaigns/${params.id}/dm/units`}>
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader>
+                <CardTitle>NPC Юніти</CardTitle>
+                <CardDescription>Управління мобами та юнітами</CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
+
+          <Link href={`/campaigns/${params.id}/dm/spells`}>
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader>
+                <CardTitle>Заклинання</CardTitle>
+                <CardDescription>База заклинань кампанії</CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
+
+          <Link href={`/campaigns/${params.id}/dm/artifacts`}>
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader>
+                <CardTitle>Артефакти</CardTitle>
+                <CardDescription>Управління артефактами та сетами</CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
+
+          <Link href={`/campaigns/${params.id}/dm/skill-trees`}>
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader>
+                <CardTitle>Дерева Прокачки</CardTitle>
+                <CardDescription>Налаштування дерев прокачки для рас</CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
+
+          <Link href={`/campaigns/${params.id}/dm/battles`}>
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader>
+                <CardTitle>Сцени Боїв</CardTitle>
+                <CardDescription>Створення та управління боями</CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
+        </div>
+      )}
+
+      {/* Навігація для Player */}
+      {!isDM && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Мій персонаж</CardTitle>
+            <CardDescription>Перегляд та редагування персонажа</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href={`/campaigns/${params.id}/character`}>
+              <Button>Переглянути персонажа</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="flex gap-2">
+        <Link href="/campaigns">
+          <Button variant="outline">← Назад до кампаній</Button>
+        </Link>
+      </div>
+    </div>
+  );
+}
