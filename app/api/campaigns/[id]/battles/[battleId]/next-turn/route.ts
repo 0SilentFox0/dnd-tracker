@@ -1,21 +1,27 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { createClient } from "@/lib/supabase/server";
+import { InitiativeParticipant } from "@/lib/types/battle";
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string; battleId: string } }
+  { params }: { params: Promise<{ id: string; battleId: string }> }
 ) {
   try {
-    const { userId } = await auth();
-    
-    if (!userId) {
+    const { id, battleId } = await params;
+    const supabase = await createClient();
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
+
+    if (!authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const userId = authUser.id;
     // Перевіряємо права DM
     const campaign = await prisma.campaign.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         members: {
           where: { userId },
@@ -28,10 +34,10 @@ export async function POST(
     }
 
     const battle = await prisma.battleScene.findUnique({
-      where: { id: params.battleId },
+      where: { id: battleId },
     });
 
-    if (!battle || battle.campaignId !== params.id) {
+    if (!battle || battle.campaignId !== id) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
@@ -42,7 +48,7 @@ export async function POST(
       );
     }
 
-    const initiativeOrder = battle.initiativeOrder as Array<any>;
+    const initiativeOrder = battle.initiativeOrder as unknown as InitiativeParticipant[];
     let nextTurnIndex = battle.currentTurnIndex + 1;
     let nextRound = battle.currentRound;
 
@@ -54,7 +60,7 @@ export async function POST(
 
     // Оновлюємо бій
     const updatedBattle = await prisma.battleScene.update({
-      where: { id: params.battleId },
+      where: { id: battleId },
       data: {
         currentTurnIndex: nextTurnIndex,
         currentRound: nextRound,
@@ -65,7 +71,7 @@ export async function POST(
     if (process.env.PUSHER_APP_ID) {
       const { pusherServer } = await import("@/lib/pusher");
       await pusherServer.trigger(
-        `battle-${params.battleId}`,
+        `battle-${battleId}`,
         "battle-updated",
         updatedBattle
       );

@@ -13,6 +13,8 @@ export const prisma =
         url: process.env.DATABASE_URL,
       },
     },
+    // Для Transaction mode (порт 6543) вимикаємо prepared statements
+    // Prisma автоматично визначає це, але можна явно вказати
   })
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma

@@ -1,8 +1,9 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
 import { getProficiencyBonus } from "@/lib/utils/calculations";
+import { createClient } from "@/lib/supabase/server";
+import { Prisma } from "@prisma/client";
 
 const createUnitSchema = z.object({
   name: z.string().min(1).max(100),
@@ -38,7 +39,7 @@ const createUnitSchema = z.object({
     name: z.string(),
     description: z.string(),
     type: z.enum(["passive", "active"]),
-    effect: z.any(),
+    effect: z.record(z.string(), z.unknown()).optional(),
   })).default([]),
   
   knownSpells: z.array(z.string()).default([]),
@@ -47,17 +48,22 @@ const createUnitSchema = z.object({
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = await auth();
+    const { id } = await params;
+    const supabase = await createClient();
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
     
-    if (!userId) {
+    if (!authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const userId = authUser.id;
     const campaign = await prisma.campaign.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         members: {
           where: { userId },
@@ -85,7 +91,7 @@ export async function POST(
 
     const unit = await prisma.unit.create({
       data: {
-        campaignId: params.id,
+        campaignId: id,
         name: data.name,
         groupId: data.groupId,
         groupColor,
@@ -101,8 +107,8 @@ export async function POST(
         speed: data.speed,
         maxHp: data.maxHp,
         proficiencyBonus,
-        attacks: data.attacks,
-        specialAbilities: data.specialAbilities,
+        attacks: data.attacks as Prisma.InputJsonValue,
+        specialAbilities: data.specialAbilities as Prisma.InputJsonValue,
         knownSpells: data.knownSpells,
         avatar: data.avatar,
       },
@@ -115,7 +121,7 @@ export async function POST(
   } catch (error) {
     console.error("Error creating unit:", error);
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.errors }, { status: 400 });
+      return NextResponse.json({ error: error.issues }, { status: 400 });
     }
     return NextResponse.json(
       { error: "Internal server error" },
@@ -126,17 +132,22 @@ export async function POST(
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = await auth();
+    const { id } = await params;
+    const supabase = await createClient();
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
     
-    if (!userId) {
+    if (!authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const userId = authUser.id;
     const campaign = await prisma.campaign.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         members: {
           where: { userId },
@@ -150,7 +161,7 @@ export async function GET(
 
     const units = await prisma.unit.findMany({
       where: {
-        campaignId: params.id,
+        campaignId: id,
       },
       include: {
         unitGroup: true,

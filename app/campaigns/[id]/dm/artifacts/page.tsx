@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { getAuthUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/button";
@@ -9,16 +9,14 @@ import Link from "next/link";
 export default async function DMArtifactsPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const { userId } = await auth();
-  
-  if (!userId) {
-    redirect("/sign-in");
-  }
+  const { id } = await params;
+  const user = await getAuthUser();
+  const userId = user.id;
 
   const campaign = await prisma.campaign.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       members: {
         where: { userId },
@@ -27,12 +25,12 @@ export default async function DMArtifactsPage({
   });
 
   if (!campaign || campaign.members[0]?.role !== "dm") {
-    redirect(`/campaigns/${params.id}`);
+    redirect(`/campaigns/${id}`);
   }
 
   const artifacts = await prisma.artifact.findMany({
     where: {
-      campaignId: params.id,
+      campaignId: id,
     },
     include: {
       artifactSet: true,
@@ -44,7 +42,7 @@ export default async function DMArtifactsPage({
 
   const artifactSets = await prisma.artifactSet.findMany({
     where: {
-      campaignId: params.id,
+      campaignId: id,
     },
     include: {
       artifacts: true,
@@ -64,10 +62,10 @@ export default async function DMArtifactsPage({
           </p>
         </div>
         <div className="flex gap-2">
-          <Link href={`/campaigns/${params.id}/dm/artifacts/sets/new`}>
+          <Link href={`/campaigns/${id}/dm/artifacts/sets/new`}>
             <Button variant="outline">+ Сет</Button>
           </Link>
-          <Link href={`/campaigns/${params.id}/dm/artifacts/new`}>
+          <Link href={`/campaigns/${id}/dm/artifacts/new`}>
             <Button>+ Створити артефакт</Button>
           </Link>
         </div>
@@ -87,7 +85,7 @@ export default async function DMArtifactsPage({
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Link href={`/campaigns/${params.id}/dm/artifacts/sets/${set.id}`}>
+                  <Link href={`/campaigns/${id}/dm/artifacts/sets/${set.id}`}>
                     <Button variant="outline" size="sm" className="w-full">
                       Редагувати сет
                     </Button>
@@ -125,7 +123,7 @@ export default async function DMArtifactsPage({
                     {artifact.description}
                   </p>
                 )}
-                <Link href={`/campaigns/${params.id}/dm/artifacts/${artifact.id}`}>
+                <Link href={`/campaigns/${id}/dm/artifacts/${artifact.id}`}>
                   <Button variant="outline" size="sm" className="w-full">
                     Редагувати
                   </Button>
@@ -142,7 +140,7 @@ export default async function DMArtifactsPage({
             <p className="text-muted-foreground mb-4">
               Поки немає артефактів
             </p>
-            <Link href={`/campaigns/${params.id}/dm/artifacts/new`}>
+            <Link href={`/campaigns/${id}/dm/artifacts/new`}>
               <Button>Створити перший артефакт</Button>
             </Link>
           </CardContent>
@@ -150,7 +148,7 @@ export default async function DMArtifactsPage({
       )}
 
       <div className="flex gap-2">
-        <Link href={`/campaigns/${params.id}`}>
+        <Link href={`/campaigns/${id}`}>
           <Button variant="outline">← Назад до кампанії</Button>
         </Link>
       </div>

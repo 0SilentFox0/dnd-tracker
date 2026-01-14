@@ -15,13 +15,15 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value, options }) => {
+            request.cookies.set(name, value)
+          })
           supabaseResponse = NextResponse.next({
             request,
           })
-          cookiesToSet.forEach(({ name, value, options }) =>
+          cookiesToSet.forEach(({ name, value, options }) => {
             supabaseResponse.cookies.set(name, value, options)
-          )
+          })
         },
       },
     }
@@ -33,9 +35,20 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   // Захищаємо приватні маршрути
-  if (!user && !request.nextUrl.pathname.startsWith('/sign-in') && !request.nextUrl.pathname.startsWith('/sign-up')) {
+  // Виключаємо публічні маршрути та callback
+  const publicPaths = ['/sign-in', '/sign-up', '/auth/callback']
+  const isPublicPath = publicPaths.some(path => request.nextUrl.pathname.startsWith(path))
+  
+  if (!user && !isPublicPath) {
     const url = request.nextUrl.clone()
     url.pathname = '/sign-in'
+    return NextResponse.redirect(url)
+  }
+  
+  // Якщо користувач авторизований і на сторінці входу - перенаправляємо на campaigns
+  if (user && request.nextUrl.pathname.startsWith('/sign-in')) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/campaigns'
     return NextResponse.redirect(url)
   }
 

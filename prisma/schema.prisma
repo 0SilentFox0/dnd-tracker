@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,446 +7,310 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// User (Юзер) - використовуємо Clerk ID як primary key
 model User {
-  id          String   @id // Clerk user ID
-  email       String   @unique
-  displayName String
-  avatar      String?
-  createdAt   DateTime @default(now())
-
-  // Relations
+  id              String           @id
+  email           String           @unique
+  displayName     String
+  avatar          String?
+  createdAt       DateTime         @default(now())
   campaignMembers CampaignMember[]
+  dmCampaigns     Campaign[]       @relation("DMCampaigns")
   characters      Character[]
 
   @@map("users")
 }
 
-// Campaign (Кампанія)
 model Campaign {
-  id              String   @id @default(cuid())
+  id              String           @id @default(cuid())
   name            String
   description     String?
-  inviteCode      String   @unique
+  inviteCode      String           @unique
   dmUserId        String
-  maxLevel        Int      @default(20)
-  xpMultiplier    Float    @default(2.5)
-  allowPlayerEdit Boolean  @default(true)
-  status          String   @default("active") // 'active' | 'archived'
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  // Relations
-  dm              User              @relation(fields: [dmUserId], references: [id])
-  members         CampaignMember[]
-  characters      Character[]
-  units           Unit[]
-  unitGroups      UnitGroup[]
-  spells          Spell[]
-  spellGroups     SpellGroup[]
-  artifacts       Artifact[]
+  maxLevel        Int              @default(20)
+  xpMultiplier    Float            @default(2.5)
+  allowPlayerEdit Boolean          @default(true)
+  status          String           @default("active")
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
   artifactSets    ArtifactSet[]
-  skillTrees      SkillTree[]
+  artifacts       Artifact[]
   battles         BattleScene[]
+  members         CampaignMember[]
+  dm              User             @relation("DMCampaigns", fields: [dmUserId], references: [id])
+  characters      Character[]
   racialAbilities RacialAbility[]
+  skillTrees      SkillTree[]
+  spellGroups     SpellGroup[]
+  spells          Spell[]
+  unitGroups      UnitGroup[]
+  units           Unit[]
 
   @@map("campaigns")
 }
 
-// CampaignMember (Учасник Кампанії)
 model CampaignMember {
   id         String   @id @default(cuid())
   campaignId String
   userId     String
-  role       String   // 'dm' | 'player'
+  role       String
   joinedAt   DateTime @default(now())
-
-  // Relations
-  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([campaignId, userId])
   @@map("campaign_members")
 }
 
-// Character (Персонаж - Player/NPC Hero)
 model Character {
-  id          String   @id @default(cuid())
-  campaignId  String
-  type        String   // 'player' | 'npc_hero'
-  controlledBy String // userId або 'dm'
-
-  // Загальна інформація
-  name        String
-  level       Int      @default(1)
-  class       String
-  subclass    String?
-  race        String
-  subrace     String?
-  alignment   String?
-  background  String?
-  experience  Int      @default(0)
-  avatar      String?
-
-  // Ability Scores
-  strength     Int @default(10)
-  dexterity    Int @default(10)
-  constitution Int @default(10)
-  intelligence Int @default(10)
-  wisdom       Int @default(10)
-  charisma     Int @default(10)
-
-  // Бойові параметри
-  armorClass        Int    @default(10)
-  initiative        Int    @default(0)
-  speed             Int    @default(30)
-  maxHp             Int    @default(10)
-  currentHp         Int    @default(10)
-  tempHp            Int    @default(0)
-  hitDice           String @default("1d8")
-  proficiencyBonus  Int    @default(2)
-
-  // Saving Throws (JSON)
-  savingThrows Json @default("{}")
-
-  // Skills (JSON)
-  skills Json @default("{}")
-
-  // Пасивні значення
-  passivePerception    Int @default(10)
-  passiveInvestigation Int @default(10)
-  passiveInsight       Int @default(10)
-
-  // Заклинання
+  id                   String              @id @default(cuid())
+  campaignId           String
+  type                 String
+  controlledBy         String
+  name                 String
+  level                Int                 @default(1)
+  class                String
+  subclass             String?
+  race                 String
+  subrace              String?
+  alignment            String?
+  background           String?
+  experience           Int                 @default(0)
+  avatar               String?
+  strength             Int                 @default(10)
+  dexterity            Int                 @default(10)
+  constitution         Int                 @default(10)
+  intelligence         Int                 @default(10)
+  wisdom               Int                 @default(10)
+  charisma             Int                 @default(10)
+  armorClass           Int                 @default(10)
+  initiative           Int                 @default(0)
+  speed                Int                 @default(30)
+  maxHp                Int                 @default(10)
+  currentHp            Int                 @default(10)
+  tempHp               Int                 @default(0)
+  hitDice              String              @default("1d8")
+  proficiencyBonus     Int                 @default(2)
+  savingThrows         Json                @default("{}")
+  skills               Json                @default("{}")
+  passivePerception    Int                 @default(10)
+  passiveInvestigation Int                 @default(10)
+  passiveInsight       Int                 @default(10)
   spellcastingClass    String?
   spellcastingAbility  String?
-  spellSaveDC         Int?
+  spellSaveDC          Int?
   spellAttackBonus     Int?
-  spellSlots           Json @default("{}")
-  knownSpells          Json @default("[]")
-
-  // Інше
-  languages     Json @default("[]")
-  proficiencies Json @default("{}")
-
-  // Roleplay
-  personalityTraits String?
-  ideals           String?
-  bonds            String?
-  flaws            String?
-
-  // Прокачка
-  skillTreeProgress Json @default("{}")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  campaign      Campaign          @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  user          User?             @relation(fields: [controlledBy], references: [id], onDelete: SetNull)
-  inventory     CharacterInventory?
-  characterSkills CharacterSkills[]
+  spellSlots           Json                @default("{}")
+  knownSpells          Json                @default("[]")
+  languages            Json                @default("[]")
+  proficiencies        Json                @default("{}")
+  personalityTraits    String?
+  ideals               String?
+  bonds                String?
+  flaws                String?
+  skillTreeProgress    Json                @default("{}")
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  inventory            CharacterInventory?
+  characterSkills      CharacterSkills[]
+  campaign             Campaign            @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  user                 User                @relation(fields: [controlledBy], references: [id], onDelete: SetNull)
 
   @@map("characters")
 }
 
-// Unit (NPC Юніт - Моби)
 model Unit {
-  id         String   @id @default(cuid())
-  campaignId String
-  name       String
-  groupId    String?
-  groupColor String?
-
-  level Int @default(1)
-
-  // Ability Scores
-  strength     Int @default(10)
-  dexterity    Int @default(10)
-  constitution Int @default(10)
-  intelligence Int @default(10)
-  wisdom       Int @default(10)
-  charisma     Int @default(10)
-
-  // Бойові параметри
-  armorClass       Int @default(10)
-  initiative       Int @default(0)
-  speed            Int @default(30)
-  maxHp            Int @default(10)
-  proficiencyBonus Int @default(2)
-
-  // Атаки (JSON)
-  attacks Json @default("[]")
-
-  // Здібності (JSON)
-  specialAbilities Json @default("[]")
-
-  knownSpells Json @default("[]")
-
-  avatar    String?
-  createdAt DateTime @default(now())
-
-  // Relations
-  campaign  Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  unitGroup UnitGroup? @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  id               String     @id @default(cuid())
+  campaignId       String
+  name             String
+  groupId          String?
+  groupColor       String?
+  level            Int        @default(1)
+  strength         Int        @default(10)
+  dexterity        Int        @default(10)
+  constitution     Int        @default(10)
+  intelligence     Int        @default(10)
+  wisdom           Int        @default(10)
+  charisma         Int        @default(10)
+  armorClass       Int        @default(10)
+  initiative       Int        @default(0)
+  speed            Int        @default(30)
+  maxHp            Int        @default(10)
+  proficiencyBonus Int        @default(2)
+  attacks          Json       @default("[]")
+  specialAbilities Json       @default("[]")
+  knownSpells      Json       @default("[]")
+  avatar           String?
+  createdAt        DateTime   @default(now())
+  campaign         Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  unitGroup        UnitGroup? @relation(fields: [groupId], references: [id])
 
   @@map("units")
 }
 
-// UnitGroup (Група Юнітів)
 model UnitGroup {
   id         String   @id @default(cuid())
   campaignId String
   name       String
   color      String
   createdAt  DateTime @default(now())
-
-  // Relations
-  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  units     Unit[]
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  units      Unit[]
 
   @@map("unit_groups")
 }
 
-// Spell (Заклинання)
 model Spell {
-  id         String   @id @default(cuid())
-  campaignId String
-  name       String
-  level      Int      @default(0) // 0-5
-  school     String?
-
-  type       String   // 'target' | 'aoe'
-  damageType String   // 'damage' | 'heal'
-
-  // Механіка
-  castingTime  String?
-  range        String?
-  components   String?
-  duration     String?
-  concentration Boolean @default(false)
-
-  // Урон/Лікування
-  damageDice String?
-  savingThrow Json?
-
-  description String
-  groupId     String?
-
-  createdAt DateTime @default(now())
-
-  // Relations
-  campaign  Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  spellGroup SpellGroup? @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  id            String      @id @default(cuid())
+  campaignId    String
+  name          String
+  level         Int         @default(0)
+  school        String?
+  type          String
+  damageType    String
+  castingTime   String?
+  range         String?
+  components    String?
+  duration      String?
+  concentration Boolean     @default(false)
+  damageDice    String?
+  savingThrow   Json?
+  description   String
+  groupId       String?
+  createdAt     DateTime    @default(now())
+  campaign      Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  spellGroup    SpellGroup? @relation(fields: [groupId], references: [id])
 
   @@map("spells")
 }
 
-// SpellGroup (Група Заклинань)
 model SpellGroup {
   id         String   @id @default(cuid())
   campaignId String
   name       String
   createdAt  DateTime @default(now())
-
-  // Relations
-  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  spells    Spell[]
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  spells     Spell[]
 
   @@map("spell_groups")
 }
 
-// Artifact (Артефакт)
 model Artifact {
-  id          String   @id @default(cuid())
-  campaignId  String
-  name        String
-  description String?
-  rarity      String?   // common, uncommon, rare, epic, legendary
-
-  slot String // 'weapon' | 'shield' | 'cloak' | 'ring' | 'helmet' | 'amulet' | 'item'
-
-  // Бонуси (JSON)
-  bonuses Json @default("{}")
-
-  // Модифікатори (JSON)
-  modifiers Json @default("[]")
-
-  // Пасивні здібності (JSON)
+  id             String       @id @default(cuid())
+  campaignId     String
+  name           String
+  description    String?
+  rarity         String?
+  slot           String
+  bonuses        Json         @default("{}")
+  modifiers      Json         @default("[]")
   passiveAbility Json?
-
-  // Для сетів
-  setId String?
-
-  icon     String?
-  createdAt DateTime @default(now())
-
-  // Relations
-  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  artifactSet ArtifactSet? @relation(fields: [setId], references: [id], onDelete: SetNull)
+  setId          String?
+  icon           String?
+  createdAt      DateTime     @default(now())
+  campaign       Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  artifactSet    ArtifactSet? @relation(fields: [setId], references: [id])
 
   @@map("artifacts")
 }
 
-// ArtifactSet (Сет Артефактів)
 model ArtifactSet {
-  id          String   @id @default(cuid())
+  id          String     @id @default(cuid())
   campaignId  String
   name        String
   description String?
-
-  artifactIds Json @default("[]")
-
-  // Бонус сету (JSON)
-  setBonus Json?
-
-  createdAt DateTime @default(now())
-
-  // Relations
-  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  artifacts Artifact[]
+  artifactIds Json       @default("[]")
+  setBonus    Json?
+  createdAt   DateTime   @default(now())
+  campaign    Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  artifacts   Artifact[]
 
   @@map("artifact_sets")
 }
 
-// CharacterInventory (Інвентар Персонажа)
 model CharacterInventory {
-  id         String   @id @default(cuid())
-  characterId String  @unique
-
-  // Екіпіровані артефакти (JSON)
-  equipped Json @default("{}")
-
-  // Не екіпіровані артефакти (JSON)
-  backpack Json @default("[]")
-
-  // Гроші
-  gold   Int @default(0)
-  silver Int @default(0)
-  copper Int @default(0)
-
-  // Інше спорядження (JSON)
-  items Json @default("[]")
-
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  id          String    @id @default(cuid())
+  characterId String    @unique
+  equipped    Json      @default("{}")
+  backpack    Json      @default("[]")
+  gold        Int       @default(0)
+  silver      Int       @default(0)
+  copper      Int       @default(0)
+  items       Json      @default("[]")
+  updatedAt   DateTime  @updatedAt
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
 
   @@map("character_inventories")
 }
 
-// SkillTree (Дерево Прокачки)
 model SkillTree {
-  id         String   @id @default(cuid())
-  campaignId String
-  race       String
-
-  // Skills (JSON)
-  skills Json @default("[]")
-
-  createdAt DateTime @default(now())
-
-  // Relations
-  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  id              String            @id @default(cuid())
+  campaignId      String
+  race            String
+  skills          Json              @default("[]")
+  createdAt       DateTime          @default(now())
   characterSkills CharacterSkills[]
+  campaign        Campaign          @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   @@map("skill_trees")
 }
 
-// CharacterSkills (Прогрес по Дереву)
 model CharacterSkills {
-  id         String   @id @default(cuid())
-  characterId String
-  skillTreeId String
-
-  unlockedSkills Json @default("[]")
-
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
-  skillTree SkillTree @relation(fields: [skillTreeId], references: [id], onDelete: Cascade)
+  id             String    @id @default(cuid())
+  characterId    String
+  skillTreeId    String
+  unlockedSkills Json      @default("[]")
+  updatedAt      DateTime  @updatedAt
+  character      Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  skillTree      SkillTree @relation(fields: [skillTreeId], references: [id], onDelete: Cascade)
 
   @@unique([characterId, skillTreeId])
   @@map("character_skills")
 }
 
-// BattleScene (Сцена Бою)
 model BattleScene {
-  id          String   @id @default(cuid())
-  campaignId  String
-  name        String
-  description String?
-
-  status String @default("prepared") // 'prepared' | 'active' | 'completed'
-
-  // Учасники (JSON)
-  participants Json @default("[]")
-
-  // Поточний стан
-  currentRound    Int @default(1)
-  currentTurnIndex Int @default(0)
-
-  // Черга ходів (JSON)
-  initiativeOrder Json @default("[]")
-
-  // Лог подій (JSON)
-  battleLog Json @default("[]")
-
-  createdAt  DateTime @default(now())
-  startedAt DateTime?
-  completedAt DateTime?
-
-  // Relations
-  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  id               String    @id @default(cuid())
+  campaignId       String
+  name             String
+  description      String?
+  status           String    @default("prepared")
+  participants     Json      @default("[]")
+  currentRound     Int       @default(1)
+  currentTurnIndex Int       @default(0)
+  initiativeOrder  Json      @default("[]")
+  battleLog        Json      @default("[]")
+  createdAt        DateTime  @default(now())
+  startedAt        DateTime?
+  completedAt      DateTime?
+  campaign         Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   @@map("battle_scenes")
 }
 
-// StatusEffect (Статусний Ефект/Дебаф)
 model StatusEffect {
-  id          String   @id @default(cuid())
+  id          String  @id @default(cuid())
   name        String
-  type        String   // 'buff' | 'debuff' | 'condition'
-
-  condition String? // D&D стани
-
+  type        String
+  condition   String?
   description String
-
-  // Ефекти (JSON)
-  effects Json @default("[]")
-
-  // Візуальне
-  icon  String?
-  color String?
+  effects     Json    @default("[]")
+  icon        String?
+  color       String?
 
   @@map("status_effects")
 }
 
-// RacialAbility (Расова Здібність)
 model RacialAbility {
-  id         String   @id @default(cuid())
-  campaignId String
-  race       String
-
+  id          String   @id @default(cuid())
+  campaignId  String
+  race        String
   name        String
   description String
-  type        String // 'passive' | 'active' | 'trigger'
-
-  // Тригер (JSON)
-  trigger Json?
-
-  // Ефект (JSON)
-  effect Json
-
-  // Модифікатори (JSON)
-  appliesTo Json?
-
-  createdAt DateTime @default(now())
-
-  // Relations
-  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  type        String
+  trigger     Json?
+  effect      Json
+  appliesTo   Json?
+  createdAt   DateTime @default(now())
+  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   @@map("racial_abilities")
 }

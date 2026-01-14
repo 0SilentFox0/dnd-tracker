@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { getAuthUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/button";
@@ -9,16 +9,14 @@ import Link from "next/link";
 export default async function DMUnitsPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const { userId } = await auth();
-  
-  if (!userId) {
-    redirect("/sign-in");
-  }
+  const { id } = await params;
+  const user = await getAuthUser();
+  const userId = user.id;
 
   const campaign = await prisma.campaign.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       members: {
         where: { userId },
@@ -27,12 +25,12 @@ export default async function DMUnitsPage({
   });
 
   if (!campaign || campaign.members[0]?.role !== "dm") {
-    redirect(`/campaigns/${params.id}`);
+    redirect(`/campaigns/${id}`);
   }
 
   const units = await prisma.unit.findMany({
     where: {
-      campaignId: params.id,
+      campaignId: id,
     },
     include: {
       unitGroup: true,
@@ -62,10 +60,10 @@ export default async function DMUnitsPage({
           </p>
         </div>
         <div className="flex gap-2">
-          <Link href={`/campaigns/${params.id}/dm/units/groups/new`}>
+          <Link href={`/campaigns/${id}/dm/units/groups/new`}>
             <Button variant="outline">+ Група</Button>
           </Link>
-          <Link href={`/campaigns/${params.id}/dm/units/new`}>
+          <Link href={`/campaigns/${id}/dm/units/new`}>
             <Button>+ Створити юніта</Button>
           </Link>
         </div>
@@ -97,7 +95,7 @@ export default async function DMUnitsPage({
                     </CardHeader>
                     <CardContent>
                       <Link
-                        href={`/campaigns/${params.id}/dm/units/${unit.id}`}
+                        href={`/campaigns/${id}/dm/units/${unit.id}`}
                       >
                         <Button variant="outline" size="sm" className="w-full">
                           Редагувати
@@ -118,7 +116,7 @@ export default async function DMUnitsPage({
             <p className="text-muted-foreground mb-4">
               Поки немає юнітів
             </p>
-            <Link href={`/campaigns/${params.id}/dm/units/new`}>
+            <Link href={`/campaigns/${id}/dm/units/new`}>
               <Button>Створити першого юніта</Button>
             </Link>
           </CardContent>
@@ -126,7 +124,7 @@ export default async function DMUnitsPage({
       )}
 
       <div className="flex gap-2">
-        <Link href={`/campaigns/${params.id}`}>
+        <Link href={`/campaigns/${id}`}>
           <Button variant="outline">← Назад до кампанії</Button>
         </Link>
       </div>

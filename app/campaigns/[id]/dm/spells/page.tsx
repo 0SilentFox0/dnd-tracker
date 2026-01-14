@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { getAuthUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/button";
@@ -9,16 +9,14 @@ import Link from "next/link";
 export default async function DMSpellsPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const { userId } = await auth();
-  
-  if (!userId) {
-    redirect("/sign-in");
-  }
+  const { id } = await params;
+  const user = await getAuthUser();
+  const userId = user.id;
 
   const campaign = await prisma.campaign.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       members: {
         where: { userId },
@@ -27,12 +25,12 @@ export default async function DMSpellsPage({
   });
 
   if (!campaign || campaign.members[0]?.role !== "dm") {
-    redirect(`/campaigns/${params.id}`);
+    redirect(`/campaigns/${id}`);
   }
 
   const spells = await prisma.spell.findMany({
     where: {
-      campaignId: params.id,
+      campaignId: id,
     },
     include: {
       spellGroup: true,
@@ -61,10 +59,10 @@ export default async function DMSpellsPage({
           </p>
         </div>
         <div className="flex gap-2">
-          <Link href={`/campaigns/${params.id}/dm/spells/groups/new`}>
+          <Link href={`/campaigns/${id}/dm/spells/groups/new`}>
             <Button variant="outline">+ Група</Button>
           </Link>
-          <Link href={`/campaigns/${params.id}/dm/spells/new`}>
+          <Link href={`/campaigns/${id}/dm/spells/new`}>
             <Button>+ Створити заклинання</Button>
           </Link>
         </div>
@@ -97,7 +95,7 @@ export default async function DMSpellsPage({
                       {spell.description}
                     </p>
                     <Link
-                      href={`/campaigns/${params.id}/dm/spells/${spell.id}`}
+                      href={`/campaigns/${id}/dm/spells/${spell.id}`}
                       className="mt-2 block"
                     >
                       <Button variant="outline" size="sm" className="w-full mt-2">
@@ -118,7 +116,7 @@ export default async function DMSpellsPage({
             <p className="text-muted-foreground mb-4">
               Поки немає заклинань
             </p>
-            <Link href={`/campaigns/${params.id}/dm/spells/new`}>
+            <Link href={`/campaigns/${id}/dm/spells/new`}>
               <Button>Створити перше заклинання</Button>
             </Link>
           </CardContent>
@@ -126,7 +124,7 @@ export default async function DMSpellsPage({
       )}
 
       <div className="flex gap-2">
-        <Link href={`/campaigns/${params.id}`}>
+        <Link href={`/campaigns/${id}`}>
           <Button variant="outline">← Назад до кампанії</Button>
         </Link>
       </div>

@@ -1,42 +1,64 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
+import { createClient } from "@/lib/supabase/server";
+import { Prisma } from "@prisma/client";
 
 const createArtifactSchema = z.object({
   name: z.string().min(1).max(100),
   description: z.string().optional(),
-  rarity: z.enum(["common", "uncommon", "rare", "epic", "legendary"]).optional(),
-  slot: z.enum(["weapon", "shield", "cloak", "ring", "helmet", "amulet", "item"]),
-  bonuses: z.record(z.number()).default({}),
-  modifiers: z.array(z.object({
-    type: z.string(),
-    value: z.number(),
-    isPercentage: z.boolean(),
-    element: z.string().optional(),
-  })).default([]),
-  passiveAbility: z.object({
-    name: z.string(),
-    description: z.string(),
-    effect: z.any(),
-  }).optional(),
+  rarity: z
+    .enum(["common", "uncommon", "rare", "epic", "legendary"])
+    .optional(),
+  slot: z.enum([
+    "weapon",
+    "shield",
+    "cloak",
+    "ring",
+    "helmet",
+    "amulet",
+    "item",
+  ]),
+  bonuses: z.record(z.string(), z.number()).default({}),
+  modifiers: z
+    .array(
+      z.object({
+        type: z.string(),
+        value: z.number(),
+        isPercentage: z.boolean(),
+        element: z.string().optional(),
+      })
+    )
+    .default([]),
+  passiveAbility: z
+    .object({
+      name: z.string(),
+      description: z.string(),
+      effect: z.record(z.string(), z.unknown()).optional(),
+    })
+    .optional(),
   setId: z.string().optional(),
   icon: z.string().optional(),
 });
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = await auth();
-    
-    if (!userId) {
+    const { id } = await params;
+    const supabase = await createClient();
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
+
+    if (!authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const userId = authUser.id;
     const campaign = await prisma.campaign.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         members: {
           where: { userId },
@@ -53,14 +75,16 @@ export async function POST(
 
     const artifact = await prisma.artifact.create({
       data: {
-        campaignId: params.id,
+        campaignId: id,
         name: data.name,
         description: data.description,
         rarity: data.rarity,
         slot: data.slot,
-        bonuses: data.bonuses,
-        modifiers: data.modifiers,
-        passiveAbility: data.passiveAbility || null,
+        bonuses: data.bonuses as Prisma.InputJsonValue,
+        modifiers: data.modifiers as Prisma.InputJsonValue,
+        passiveAbility: data.passiveAbility
+          ? (data.passiveAbility as Prisma.InputJsonValue)
+          : undefined,
         setId: data.setId,
         icon: data.icon,
       },
@@ -73,7 +97,7 @@ export async function POST(
   } catch (error) {
     console.error("Error creating artifact:", error);
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.errors }, { status: 400 });
+      return NextResponse.json({ error: error.issues }, { status: 400 });
     }
     return NextResponse.json(
       { error: "Internal server error" },
@@ -84,17 +108,22 @@ export async function POST(
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = await auth();
-    
-    if (!userId) {
+    const { id } = await params;
+    const supabase = await createClient();
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
+
+    if (!authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const userId = authUser.id;
     const campaign = await prisma.campaign.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         members: {
           where: { userId },
@@ -108,7 +137,7 @@ export async function GET(
 
     const artifacts = await prisma.artifact.findMany({
       where: {
-        campaignId: params.id,
+        campaignId: id,
       },
       include: {
         artifactSet: true,

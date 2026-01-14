@@ -1,4 +1,3 @@
-import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/button";
@@ -6,20 +5,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getAuthUser } from "@/lib/auth";
 
 export default async function DMCharactersPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const { userId } = await auth();
-  
-  if (!userId) {
-    redirect("/sign-in");
-  }
+  const { id } = await params;
+  const user = await getAuthUser();
+  const userId = user.id;
 
   const campaign = await prisma.campaign.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       members: {
         where: { userId },
@@ -33,13 +31,13 @@ export default async function DMCharactersPage({
 
   const userMember = campaign.members[0];
   if (!userMember || userMember.role !== "dm") {
-    redirect(`/campaigns/${params.id}`);
+    redirect(`/campaigns/${id}`);
   }
 
   // Отримуємо всіх персонажів кампанії
   const characters = await prisma.character.findMany({
     where: {
-      campaignId: params.id,
+      campaignId: id,
       type: "player",
     },
     include: {
@@ -60,7 +58,7 @@ export default async function DMCharactersPage({
             Управління персонажами гравців кампанії
           </p>
         </div>
-        <Link href={`/campaigns/${params.id}/dm/characters/new`}>
+        <Link href={`/campaigns/${id}/dm/characters/new`}>
           <Button>+ Створити персонажа</Button>
         </Link>
       </div>
@@ -118,7 +116,7 @@ export default async function DMCharactersPage({
 
               <div className="flex gap-2 pt-2">
                 <Link
-                  href={`/campaigns/${params.id}/dm/characters/${character.id}`}
+                  href={`/campaigns/${id}/dm/characters/${character.id}`}
                   className="flex-1"
                 >
                   <Button variant="outline" className="w-full" size="sm">
@@ -126,7 +124,7 @@ export default async function DMCharactersPage({
                   </Button>
                 </Link>
                 <Link
-                  href={`/campaigns/${params.id}/dm/characters/${character.id}/inventory`}
+                  href={`/campaigns/${id}/dm/characters/${character.id}/inventory`}
                   className="flex-1"
                 >
                   <Button variant="outline" className="w-full" size="sm">
@@ -145,7 +143,7 @@ export default async function DMCharactersPage({
             <p className="text-muted-foreground mb-4">
               Поки немає персонажів гравців
             </p>
-            <Link href={`/campaigns/${params.id}/dm/characters/new`}>
+            <Link href={`/campaigns/${id}/dm/characters/new`}>
               <Button>Створити першого персонажа</Button>
             </Link>
           </CardContent>
@@ -153,7 +151,7 @@ export default async function DMCharactersPage({
       )}
 
       <div className="flex gap-2">
-        <Link href={`/campaigns/${params.id}`}>
+        <Link href={`/campaigns/${id}`}>
           <Button variant="outline">← Назад до кампанії</Button>
         </Link>
       </div>

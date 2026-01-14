@@ -1,7 +1,7 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
+import { createClient } from "@/lib/supabase/server";
 import {
   getProficiencyBonus,
   getAbilityModifier,
@@ -42,13 +42,13 @@ const createCharacterSchema = z.object({
   hitDice: z.string().default("1d8"),
   
   // Saving Throws & Skills
-  savingThrows: z.record(z.boolean()).default({}),
-  skills: z.record(z.boolean()).default({}),
+  savingThrows: z.record(z.string(), z.boolean()).default({}),
+  skills: z.record(z.string(), z.boolean()).default({}),
   
   // Заклинання
   spellcastingClass: z.string().optional(),
   spellcastingAbility: z.enum(["intelligence", "wisdom", "charisma"]).optional(),
-  spellSlots: z.record(z.object({
+  spellSlots: z.record(z.string(), z.object({
     max: z.number(),
     current: z.number(),
   })).default({}),
@@ -56,7 +56,7 @@ const createCharacterSchema = z.object({
   
   // Інше
   languages: z.array(z.string()).default([]),
-  proficiencies: z.record(z.array(z.string())).default({}),
+  proficiencies: z.record(z.string(), z.array(z.string())).default({}),
   
   // Roleplay
   personalityTraits: z.string().optional(),
@@ -67,18 +67,23 @@ const createCharacterSchema = z.object({
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = await auth();
+    const { id } = await params;
+    const supabase = await createClient();
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
     
-    if (!userId) {
+    if (!authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const userId = authUser.id;
     // Перевіряємо права DM
     const campaign = await prisma.campaign.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         members: {
           where: { userId },
@@ -138,7 +143,7 @@ export async function POST(
     // Створюємо персонажа
     const character = await prisma.character.create({
       data: {
-        campaignId: params.id,
+        campaignId: id,
         type: data.type,
         controlledBy: data.controlledBy,
         name: data.name,
@@ -214,7 +219,7 @@ export async function POST(
   } catch (error) {
     console.error("Error creating character:", error);
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.errors }, { status: 400 });
+      return NextResponse.json({ error: error.issues }, { status: 400 });
     }
     return NextResponse.json(
       { error: "Internal server error" },
@@ -225,18 +230,23 @@ export async function POST(
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = await auth();
+    const { id } = await params;
+    const supabase = await createClient();
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
     
-    if (!userId) {
+    if (!authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const userId = authUser.id;
     // Перевіряємо чи юзер є учасником кампанії
     const campaign = await prisma.campaign.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         members: {
           where: { userId },
@@ -250,7 +260,7 @@ export async function GET(
 
     const characters = await prisma.character.findMany({
       where: {
-        campaignId: params.id,
+        campaignId: id,
       },
       include: {
         user: true,

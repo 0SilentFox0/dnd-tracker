@@ -1,21 +1,28 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { createClient } from "@/lib/supabase/server";
+import { InitiativeParticipant } from "@/lib/types/battle";
+import { Prisma } from "@prisma/client";
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string; battleId: string } }
+  { params }: { params: Promise<{ id: string; battleId: string }> }
 ) {
   try {
-    const { userId } = await auth();
-    
-    if (!userId) {
+    const { id, battleId } = await params;
+    const supabase = await createClient();
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
+
+    if (!authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const userId = authUser.id;
     // Перевіряємо права DM
     const campaign = await prisma.campaign.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         members: {
           where: { userId },
@@ -28,10 +35,10 @@ export async function POST(
     }
 
     const battle = await prisma.battleScene.findUnique({
-      where: { id: params.battleId },
+      where: { id: battleId },
     });
 
-    if (!battle || battle.campaignId !== params.id) {
+    if (!battle || battle.campaignId !== id) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
@@ -43,20 +50,7 @@ export async function POST(
     }>;
 
     // Створюємо initiativeOrder з усіх учасників
-    const initiativeOrder: Array<{
-      participantId: string;
-      participantType: "character" | "unit";
-      instanceId?: string;
-      initiative: number;
-      name: string;
-      avatar?: string;
-      side: "ally" | "enemy";
-      currentHp: number;
-      maxHp: number;
-      tempHp: number;
-      status: "active" | "dead" | "unconscious";
-      activeEffects: Array<any>;
-    }> = [];
+    const initiativeOrder: InitiativeParticipant[] = [];
 
     for (const participant of participants) {
       if (participant.type === "character") {
@@ -111,11 +105,11 @@ export async function POST(
 
     // Оновлюємо бій
     const updatedBattle = await prisma.battleScene.update({
-      where: { id: params.battleId },
+      where: { id: battleId },
       data: {
         status: "active",
         startedAt: new Date(),
-        initiativeOrder,
+        initiativeOrder: initiativeOrder as unknown as Prisma.InputJsonValue,
         currentRound: 1,
         currentTurnIndex: 0,
       },
@@ -125,7 +119,7 @@ export async function POST(
     if (process.env.PUSHER_APP_ID) {
       const { pusherServer } = await import("@/lib/pusher");
       await pusherServer.trigger(
-        `battle-${params.battleId}`,
+        `battle-${battleId}`,
         "battle-started",
         updatedBattle
       );

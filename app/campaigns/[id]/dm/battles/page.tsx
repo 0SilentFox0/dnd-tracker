@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { getAuthUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/button";
@@ -9,16 +9,14 @@ import Link from "next/link";
 export default async function DMBattlesPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const { userId } = await auth();
-  
-  if (!userId) {
-    redirect("/sign-in");
-  }
+  const { id } = await params;
+  const user = await getAuthUser();
+  const userId = user.id;
 
   const campaign = await prisma.campaign.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       members: {
         where: { userId },
@@ -27,12 +25,12 @@ export default async function DMBattlesPage({
   });
 
   if (!campaign || campaign.members[0]?.role !== "dm") {
-    redirect(`/campaigns/${params.id}`);
+    redirect(`/campaigns/${id}`);
   }
 
   const battles = await prisma.battleScene.findMany({
     where: {
-      campaignId: params.id,
+      campaignId: id,
     },
     orderBy: {
       createdAt: "desc",
@@ -52,7 +50,7 @@ export default async function DMBattlesPage({
             Створення та управління боями
           </p>
         </div>
-        <Link href={`/campaigns/${params.id}/dm/battles/new`}>
+        <Link href={`/campaigns/${id}/dm/battles/new`}>
           <Button>+ Створити сцену бою</Button>
         </Link>
       </div>
@@ -84,7 +82,7 @@ export default async function DMBattlesPage({
                         Учасників: <span className="font-semibold">{participants.length}</span>
                       </p>
                     </div>
-                    <Link href={`/campaigns/${params.id}/battles/${battle.id}`}>
+                    <Link href={`/campaigns/${id}/battles/${battle.id}`}>
                       <Button className="w-full">Перейти до бою</Button>
                     </Link>
                   </CardContent>
@@ -120,12 +118,12 @@ export default async function DMBattlesPage({
                       </p>
                     </div>
                     <div className="flex gap-2">
-                      <Link href={`/campaigns/${params.id}/dm/battles/${battle.id}`} className="flex-1">
+                      <Link href={`/campaigns/${id}/dm/battles/${battle.id}`} className="flex-1">
                         <Button variant="outline" className="w-full" size="sm">
                           Редагувати
                         </Button>
                       </Link>
-                      <Link href={`/campaigns/${params.id}/battles/${battle.id}`} className="flex-1">
+                      <Link href={`/campaigns/${id}/battles/${battle.id}`} className="flex-1">
                         <Button className="w-full" size="sm">
                           Запустити
                         </Button>
@@ -163,7 +161,7 @@ export default async function DMBattlesPage({
                         Учасників: <span className="font-semibold">{participants.length}</span>
                       </p>
                     </div>
-                    <Link href={`/campaigns/${params.id}/dm/battles/${battle.id}`}>
+                    <Link href={`/campaigns/${id}/dm/battles/${battle.id}`}>
                       <Button variant="outline" size="sm" className="w-full">
                         Переглянути
                       </Button>
@@ -182,7 +180,7 @@ export default async function DMBattlesPage({
             <p className="text-muted-foreground mb-4">
               Поки немає сцен боїв
             </p>
-            <Link href={`/campaigns/${params.id}/dm/battles/new`}>
+            <Link href={`/campaigns/${id}/dm/battles/new`}>
               <Button>Створити першу сцену бою</Button>
             </Link>
           </CardContent>
@@ -190,7 +188,7 @@ export default async function DMBattlesPage({
       )}
 
       <div className="flex gap-2">
-        <Link href={`/campaigns/${params.id}`}>
+        <Link href={`/campaigns/${id}`}>
           <Button variant="outline">← Назад до кампанії</Button>
         </Link>
       </div>

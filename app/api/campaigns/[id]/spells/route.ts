@@ -1,7 +1,7 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
+import { createClient } from "@/lib/supabase/server";
 
 const createSpellSchema = z.object({
   name: z.string().min(1).max(100),
@@ -25,17 +25,22 @@ const createSpellSchema = z.object({
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = await auth();
+    const { id } = await params;
+    const supabase = await createClient();
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
     
-    if (!userId) {
+    if (!authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const userId = authUser.id;
     const campaign = await prisma.campaign.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         members: {
           where: { userId },
@@ -52,7 +57,7 @@ export async function POST(
 
     const spell = await prisma.spell.create({
       data: {
-        campaignId: params.id,
+        campaignId: id,
         name: data.name,
         level: data.level,
         school: data.school,
@@ -64,7 +69,7 @@ export async function POST(
         duration: data.duration,
         concentration: data.concentration,
         damageDice: data.damageDice,
-        savingThrow: data.savingThrow || null,
+        savingThrow: data.savingThrow || undefined,
         description: data.description,
         groupId: data.groupId,
       },
@@ -77,7 +82,7 @@ export async function POST(
   } catch (error) {
     console.error("Error creating spell:", error);
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.errors }, { status: 400 });
+      return NextResponse.json({ error: error.issues }, { status: 400 });
     }
     return NextResponse.json(
       { error: "Internal server error" },
@@ -88,17 +93,22 @@ export async function POST(
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = await auth();
+    const { id } = await params;
+    const supabase = await createClient();
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
     
-    if (!userId) {
+    if (!authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const userId = authUser.id;
     const campaign = await prisma.campaign.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         members: {
           where: { userId },
@@ -112,7 +122,7 @@ export async function GET(
 
     const spells = await prisma.spell.findMany({
       where: {
-        campaignId: params.id,
+        campaignId: id,
       },
       include: {
         spellGroup: true,

@@ -1,20 +1,25 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string; battleId: string } }
+  { params }: { params: Promise<{ id: string; battleId: string }> }
 ) {
   try {
-    const { userId } = await auth();
+    const { id, battleId } = await params;
+    const supabase = await createClient();
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
     
-    if (!userId) {
+    if (!authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const userId = authUser.id;
     const battle = await prisma.battleScene.findUnique({
-      where: { id: params.battleId },
+      where: { id: battleId },
       include: {
         campaign: {
           include: {
@@ -26,7 +31,7 @@ export async function GET(
       },
     });
 
-    if (!battle || battle.campaignId !== params.id) {
+    if (!battle || battle.campaignId !== id) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
@@ -47,18 +52,23 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string; battleId: string } }
+  { params }: { params: Promise<{ id: string; battleId: string }> }
 ) {
   try {
-    const { userId } = await auth();
+    const { id, battleId } = await params;
+    const supabase = await createClient();
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
     
-    if (!userId) {
+    if (!authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const userId = authUser.id;
     // Перевіряємо права DM
     const campaign = await prisma.campaign.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         members: {
           where: { userId },
@@ -71,17 +81,17 @@ export async function PATCH(
     }
 
     const battle = await prisma.battleScene.findUnique({
-      where: { id: params.battleId },
+      where: { id: battleId },
     });
 
-    if (!battle || battle.campaignId !== params.id) {
+    if (!battle || battle.campaignId !== id) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
     const body = await request.json();
 
     const updatedBattle = await prisma.battleScene.update({
-      where: { id: params.battleId },
+      where: { id: battleId },
       data: body,
     });
 

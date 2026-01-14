@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -66,8 +66,9 @@ interface BattleScene {
 export default function BattlePage({
   params,
 }: {
-  params: { id: string; battleId: string };
+  params: Promise<{ id: string; battleId: string }>;
 }) {
+  const { id, battleId } = use(params);
   const router = useRouter();
   const [battle, setBattle] = useState<BattleScene | null>(null);
   const [loading, setLoading] = useState(true);
@@ -89,7 +90,7 @@ export default function BattlePage({
         pusher = getPusherClient();
         
         if (pusher) {
-          const channel = pusher.subscribe(`battle-${params.battleId}`);
+          const channel = pusher.subscribe(`battle-${battleId}`);
           
           channel.bind("battle-updated", (data: BattleScene) => {
             setBattle(data);
@@ -103,15 +104,15 @@ export default function BattlePage({
       
       return () => {
         if (pusher) {
-          pusher.unsubscribe(`battle-${params.battleId}`);
+          pusher.unsubscribe(`battle-${battleId}`);
         }
       };
     }
-  }, [params.battleId]);
+  }, [battleId]);
 
   const fetchBattle = async () => {
     try {
-      const response = await fetch(`/api/campaigns/${params.id}/battles/${params.battleId}`);
+      const response = await fetch(`/api/campaigns/${id}/battles/${battleId}`);
       if (!response.ok) throw new Error("Failed to fetch battle");
       const data = await response.json();
       setBattle(data);
@@ -126,7 +127,7 @@ export default function BattlePage({
     if (!battle) return;
     
     try {
-      const response = await fetch(`/api/campaigns/${params.id}/battles/${params.battleId}/next-turn`, {
+      const response = await fetch(`/api/campaigns/${id}/battles/${battleId}/next-turn`, {
         method: "POST",
       });
       if (!response.ok) throw new Error("Failed to advance turn");
@@ -141,7 +142,7 @@ export default function BattlePage({
     if (!battle || !selectedAttacker || !selectedTarget || !attackRoll) return;
 
     try {
-      const response = await fetch(`/api/campaigns/${params.id}/battles/${params.battleId}/attack`, {
+      const response = await fetch(`/api/campaigns/${id}/battles/${battleId}/attack`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -180,7 +181,7 @@ export default function BattlePage({
     return (
       <div className="container mx-auto p-4">
         <p>Бій не знайдено</p>
-        <Link href={`/campaigns/${params.id}`}>
+        <Link href={`/campaigns/${id}`}>
           <Button variant="outline">Назад</Button>
         </Link>
       </div>
@@ -204,7 +205,7 @@ export default function BattlePage({
           <Badge variant={battle.status === "active" ? "default" : "secondary"}>
             {battle.status === "active" ? "Активний" : battle.status === "prepared" ? "Підготовлено" : "Завершено"}
           </Badge>
-          <Link href={`/campaigns/${params.id}`}>
+          <Link href={`/campaigns/${id}`}>
             <Button variant="outline">Назад</Button>
           </Link>
         </div>

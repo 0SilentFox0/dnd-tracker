@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { getAuthUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/button";
@@ -10,16 +10,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 export default async function DMNPCHeroesPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const { userId } = await auth();
-  
-  if (!userId) {
-    redirect("/sign-in");
-  }
+  const { id } = await params;
+  const user = await getAuthUser();
+  const userId = user.id;
 
   const campaign = await prisma.campaign.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       members: {
         where: { userId },
@@ -28,12 +26,12 @@ export default async function DMNPCHeroesPage({
   });
 
   if (!campaign || campaign.members[0]?.role !== "dm") {
-    redirect(`/campaigns/${params.id}`);
+    redirect(`/campaigns/${id}`);
   }
 
   const npcHeroes = await prisma.character.findMany({
     where: {
-      campaignId: params.id,
+      campaignId: id,
       type: "npc_hero",
     },
     orderBy: {
@@ -50,7 +48,7 @@ export default async function DMNPCHeroesPage({
             Управління NPC героями кампанії
           </p>
         </div>
-        <Link href={`/campaigns/${params.id}/dm/npc-heroes/new`}>
+        <Link href={`/campaigns/${id}/dm/npc-heroes/new`}>
           <Button>+ Створити NPC Героя</Button>
         </Link>
       </div>
@@ -98,7 +96,7 @@ export default async function DMNPCHeroesPage({
 
               <div className="flex gap-2 pt-2">
                 <Link
-                  href={`/campaigns/${params.id}/dm/npc-heroes/${hero.id}`}
+                  href={`/campaigns/${id}/dm/npc-heroes/${hero.id}`}
                   className="flex-1"
                 >
                   <Button variant="outline" className="w-full" size="sm">
@@ -117,7 +115,7 @@ export default async function DMNPCHeroesPage({
             <p className="text-muted-foreground mb-4">
               Поки немає NPC героїв
             </p>
-            <Link href={`/campaigns/${params.id}/dm/npc-heroes/new`}>
+            <Link href={`/campaigns/${id}/dm/npc-heroes/new`}>
               <Button>Створити першого NPC героя</Button>
             </Link>
           </CardContent>
@@ -125,7 +123,7 @@ export default async function DMNPCHeroesPage({
       )}
 
       <div className="flex gap-2">
-        <Link href={`/campaigns/${params.id}`}>
+        <Link href={`/campaigns/${id}`}>
           <Button variant="outline">← Назад до кампанії</Button>
         </Link>
       </div>

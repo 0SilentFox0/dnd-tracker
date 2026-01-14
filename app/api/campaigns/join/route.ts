@@ -1,7 +1,7 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
+import { createClient } from "@/lib/supabase/server";
 
 const joinCampaignSchema = z.object({
   inviteCode: z.string().min(1),
@@ -9,12 +9,16 @@ const joinCampaignSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const { userId } = await auth();
+    const supabase = await createClient();
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
     
-    if (!userId) {
+    if (!authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const userId = authUser.id;
     const body = await request.json();
     const { inviteCode } = joinCampaignSchema.parse(body);
 
@@ -55,20 +59,12 @@ export async function POST(request: Request) {
     });
 
     if (!user) {
-      const clerkUser = await fetch(`https://api.clerk.com/v1/users/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${process.env.CLERK_SECRET_KEY}`,
-        },
-      }).then(res => res.json());
-
       user = await prisma.user.create({
         data: {
           id: userId,
-          email: clerkUser.email_addresses[0]?.email_address || "",
-          displayName: clerkUser.first_name && clerkUser.last_name
-            ? `${clerkUser.first_name} ${clerkUser.last_name}`
-            : clerkUser.username || "User",
-          avatar: clerkUser.image_url,
+          email: authUser.email || "",
+          displayName: authUser.user_metadata?.full_name || authUser.user_metadata?.name || authUser.email?.split('@')[0] || "User",
+          avatar: authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture || null,
         },
       });
     }
@@ -90,7 +86,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Error joining campaign:", error);
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.errors }, { status: 400 });
+      return NextResponse.json({ error: error.issues }, { status: 400 });
     }
     return NextResponse.json(
       { error: "Internal server error" },

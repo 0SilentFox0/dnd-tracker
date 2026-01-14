@@ -1,4 +1,3 @@
-import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/button";
@@ -7,20 +6,19 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { getAbilityModifier } from "@/lib/utils/calculations";
+import { getAuthUser } from "@/lib/auth";
 
 export default async function CharacterPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const { userId } = await auth();
-  
-  if (!userId) {
-    redirect("/sign-in");
-  }
+  const { id } = await params;
+  const user = await getAuthUser();
+  const userId = user.id;
 
   const campaign = await prisma.campaign.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       members: {
         where: { userId },
@@ -40,7 +38,7 @@ export default async function CharacterPage({
   // Знаходимо персонажа гравця
   const character = await prisma.character.findFirst({
     where: {
-      campaignId: params.id,
+      campaignId: id,
       controlledBy: userId,
       type: "player",
     },
@@ -57,7 +55,7 @@ export default async function CharacterPage({
             <p className="text-muted-foreground mb-4">
               У вас поки немає персонажа в цій кампанії
             </p>
-            <Link href={`/campaigns/${params.id}`}>
+            <Link href={`/campaigns/${id}`}>
               <Button variant="outline">Назад до кампанії</Button>
             </Link>
           </CardContent>
@@ -96,11 +94,11 @@ export default async function CharacterPage({
         </div>
         <div className="flex gap-2">
           {campaign.allowPlayerEdit && (
-            <Link href={`/campaigns/${params.id}/character/edit`}>
+            <Link href={`/campaigns/${id}/character/edit`}>
               <Button variant="outline">Редагувати</Button>
             </Link>
           )}
-          <Link href={`/campaigns/${params.id}`}>
+          <Link href={`/campaigns/${id}`}>
             <Button variant="outline">Назад</Button>
           </Link>
         </div>

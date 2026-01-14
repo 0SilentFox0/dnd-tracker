@@ -1,7 +1,7 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
+import { createClient } from "@/lib/supabase/server";
 
 const createBattleSchema = z.object({
   name: z.string().min(1).max(100),
@@ -16,18 +16,23 @@ const createBattleSchema = z.object({
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = await auth();
+    const { id } = await params;
+    const supabase = await createClient();
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
     
-    if (!userId) {
+    if (!authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const userId = authUser.id;
     // Перевіряємо права DM
     const campaign = await prisma.campaign.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         members: {
           where: { userId },
@@ -45,7 +50,7 @@ export async function POST(
     // Створюємо сцену бою
     const battle = await prisma.battleScene.create({
       data: {
-        campaignId: params.id,
+        campaignId: id,
         name: data.name,
         description: data.description,
         status: "prepared",
@@ -61,7 +66,7 @@ export async function POST(
   } catch (error) {
     console.error("Error creating battle:", error);
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.errors }, { status: 400 });
+      return NextResponse.json({ error: error.issues }, { status: 400 });
     }
     return NextResponse.json(
       { error: "Internal server error" },
@@ -72,18 +77,23 @@ export async function POST(
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = await auth();
+    const { id } = await params;
+    const supabase = await createClient();
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
     
-    if (!userId) {
+    if (!authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const userId = authUser.id;
     // Перевіряємо чи юзер є учасником кампанії
     const campaign = await prisma.campaign.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         members: {
           where: { userId },
@@ -97,7 +107,7 @@ export async function GET(
 
     const battles = await prisma.battleScene.findMany({
       where: {
-        campaignId: params.id,
+        campaignId: id,
       },
       orderBy: {
         createdAt: "desc",

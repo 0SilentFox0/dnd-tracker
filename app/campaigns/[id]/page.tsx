@@ -1,25 +1,23 @@
-import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { UserButton } from "@clerk/nextjs";
+import { getAuthUser } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function CampaignDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const { userId } = await auth();
-  
-  if (!userId) {
-    redirect("/sign-in");
-  }
+  const { id } = await params;
+  const user = await getAuthUser();
+  const userId = user.id;
 
   const campaign = await prisma.campaign.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       members: {
         include: {
@@ -50,7 +48,9 @@ export default async function CampaignDetailPage({
             <p className="text-muted-foreground mt-1">{campaign.description}</p>
           )}
         </div>
-        <UserButton />
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">{user.email}</span>
+        </div>
       </div>
 
       {/* Налаштування кампанії */}
@@ -117,7 +117,7 @@ export default async function CampaignDetailPage({
       {/* Навігація для DM */}
       {isDM && (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <Link href={`/campaigns/${params.id}/dm/characters`}>
+          <Link href={`/campaigns/${id}/dm/characters`}>
             <Card className="hover:shadow-lg transition-shadow cursor-pointer">
               <CardHeader>
                 <CardTitle>Персонажі</CardTitle>
@@ -126,7 +126,7 @@ export default async function CampaignDetailPage({
             </Card>
           </Link>
 
-          <Link href={`/campaigns/${params.id}/dm/npc-heroes`}>
+          <Link href={`/campaigns/${id}/dm/npc-heroes`}>
             <Card className="hover:shadow-lg transition-shadow cursor-pointer">
               <CardHeader>
                 <CardTitle>NPC Герої</CardTitle>
@@ -135,7 +135,7 @@ export default async function CampaignDetailPage({
             </Card>
           </Link>
 
-          <Link href={`/campaigns/${params.id}/dm/units`}>
+          <Link href={`/campaigns/${id}/dm/units`}>
             <Card className="hover:shadow-lg transition-shadow cursor-pointer">
               <CardHeader>
                 <CardTitle>NPC Юніти</CardTitle>
@@ -144,7 +144,7 @@ export default async function CampaignDetailPage({
             </Card>
           </Link>
 
-          <Link href={`/campaigns/${params.id}/dm/spells`}>
+          <Link href={`/campaigns/${id}/dm/spells`}>
             <Card className="hover:shadow-lg transition-shadow cursor-pointer">
               <CardHeader>
                 <CardTitle>Заклинання</CardTitle>
@@ -153,7 +153,7 @@ export default async function CampaignDetailPage({
             </Card>
           </Link>
 
-          <Link href={`/campaigns/${params.id}/dm/artifacts`}>
+          <Link href={`/campaigns/${id}/dm/artifacts`}>
             <Card className="hover:shadow-lg transition-shadow cursor-pointer">
               <CardHeader>
                 <CardTitle>Артефакти</CardTitle>
@@ -162,7 +162,7 @@ export default async function CampaignDetailPage({
             </Card>
           </Link>
 
-          <Link href={`/campaigns/${params.id}/dm/skill-trees`}>
+          <Link href={`/campaigns/${id}/dm/skill-trees`}>
             <Card className="hover:shadow-lg transition-shadow cursor-pointer">
               <CardHeader>
                 <CardTitle>Дерева Прокачки</CardTitle>
@@ -171,7 +171,7 @@ export default async function CampaignDetailPage({
             </Card>
           </Link>
 
-          <Link href={`/campaigns/${params.id}/dm/battles`}>
+          <Link href={`/campaigns/${id}/dm/battles`}>
             <Card className="hover:shadow-lg transition-shadow cursor-pointer">
               <CardHeader>
                 <CardTitle>Сцени Боїв</CardTitle>
@@ -190,7 +190,7 @@ export default async function CampaignDetailPage({
             <CardDescription>Перегляд та редагування персонажа</CardDescription>
           </CardHeader>
           <CardContent>
-            <Link href={`/campaigns/${params.id}/character`}>
+            <Link href={`/campaigns/${id}/character`}>
               <Button>Переглянути персонажа</Button>
             </Link>
           </CardContent>
