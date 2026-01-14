@@ -32,6 +32,10 @@ const updateSpellSchema = z.object({
     .nullable(),
   description: z.string().min(1).optional(),
   groupId: z.string().optional().nullable(),
+  icon: z.preprocess(
+    (val) => (val === "" ? null : val),
+    z.string().url().nullable().optional()
+  ),
 });
 
 export async function GET(
@@ -146,6 +150,7 @@ export async function PATCH(
             : undefined,
         description: data.description,
         groupId: data.groupId === null ? null : data.groupId,
+        icon: data.icon !== undefined ? (data.icon || null) : undefined,
       },
       include: {
         spellGroup: true,

@@ -51,6 +51,7 @@ export default function EditSpellPage({
     savingThrow: null,
     description: "",
     groupId: null,
+    icon: null,
   });
 
   const { data: spell, isLoading: fetching } = useSpell(id, spellId);
@@ -76,6 +77,7 @@ export default function EditSpellPage({
         savingThrow: spell.savingThrow,
         description: spell.description,
         groupId: spell.groupId,
+        icon: spell.icon || null,
       });
     }
   }, [spell]);
@@ -94,6 +96,7 @@ export default function EditSpellPage({
         damageDice: formData.damageDice || null,
         savingThrow: formData.savingThrow || null,
         groupId: formData.groupId || null,
+        icon: formData.icon || null,
       },
       {
         onSuccess: () => {
@@ -441,6 +444,38 @@ export default function EditSpellPage({
                 placeholder="Детальний опис заклинання"
                 rows={6}
               />
+            </div>
+
+            <div>
+              <Label htmlFor="icon">Посилання на картинку</Label>
+              <Input
+                id="icon"
+                type="url"
+                value={formData.icon || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, icon: e.target.value || null })
+                }
+                placeholder="https://example.com/spell-icon.png"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Введіть URL картинки з інтернету
+              </p>
+              {formData.icon && (
+                <div className="mt-3">
+                  <Label>Попередній перегляд:</Label>
+                  <div className="mt-2 w-32 h-32 rounded-lg overflow-hidden bg-muted border">
+                    <img
+                      src={formData.icon}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = "none";
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex gap-2 pt-4">

@@ -13,6 +13,7 @@ import { PrismaClient } from "@prisma/client";
 import * as fs from "fs";
 import * as path from "path";
 import { parse } from "csv-parse/sync";
+import { DEFAULT_CAMPAIGN_ID } from "../lib/constants/campaigns";
 
 const prisma = new PrismaClient();
 
@@ -217,15 +218,11 @@ async function importSpellsFromCSV(campaignId: string, csvContent: string) {
 async function main() {
   const args = process.argv.slice(2);
 
-  if (args.length < 2) {
-    console.error("Використання: npm run import-spells-csv <campaignId> <csvContent|filePath>");
-    console.error("\nПриклад:");
-    console.error('  npm run import-spells-csv abc123 "School,Level,UA Name..."');
-    console.error("  npm run import-spells-csv abc123 spells.csv");
-    process.exit(1);
-  }
+  // Використовуємо дефолтні значення якщо не вказано
+  const csvInput = args[0] || "imports/spells-import.csv";
+  const campaignId = args[1] || DEFAULT_CAMPAIGN_ID;
 
-  const [campaignId, csvInput] = args;
+  console.log(`Використання кампанії: ${campaignId}`);
 
   try {
     let csvContent: string;

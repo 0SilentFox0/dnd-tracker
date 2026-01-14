@@ -86,7 +86,9 @@ export async function createCampaign(data: {
 /**
  * Приєднується до кампанії за кодом запрошення
  */
-export async function joinCampaign(inviteCode: string): Promise<Campaign> {
+export async function joinCampaign(inviteCode: string): Promise<{
+  campaign: Campaign;
+}> {
   const response = await fetch("/api/campaigns/join", {
     method: "POST",
     headers: {
@@ -97,8 +99,17 @@ export async function joinCampaign(inviteCode: string): Promise<Campaign> {
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.error || "Failed to join campaign");
+    const errorMessage = typeof error.error === "string" 
+      ? error.error 
+      : Array.isArray(error.error) 
+        ? error.error.map((e: { message?: string }) => e.message || JSON.stringify(e)).join(", ")
+        : "Failed to join campaign";
+    throw new Error(errorMessage);
   }
 
-  return response.json();
+  const data = await response.json();
+  // API повертає member з campaign включеним
+  return {
+    campaign: data.campaign as Campaign,
+  };
 }

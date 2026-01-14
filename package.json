@@ -14,10 +14,9 @@
     "deploy:preview": "vercel",
     "deploy:dev": "vercel --dev",
     "import-spells": "tsx scripts/import-spells.ts",
-    "import-spells-csv": "tsx scripts/import-spells-from-csv.ts"
+    "import-units": "tsx scripts/import-units.ts"
   },
   "dependencies": {
-    "@clerk/nextjs": "^6.36.7",
     "@hookform/resolvers": "^5.2.2",
     "@neondatabase/serverless": "^1.0.2",
     "@prisma/client": "^5.20.0",

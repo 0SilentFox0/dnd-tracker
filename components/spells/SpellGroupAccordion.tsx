@@ -6,10 +6,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import {
-  CardDescription,
-  CardTitle,
-} from "@/components/ui/card";
+import { CardDescription, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,14 +14,41 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreVertical, Edit, X } from "lucide-react";
+import {
+  MoreVertical,
+  Edit,
+  X,
+  Moon,
+  Flame,
+  Sparkles,
+  Sun,
+} from "lucide-react";
 import { SpellLevelAccordion } from "./SpellLevelAccordion";
 import type { Spell, SpellGroup } from "@/lib/api/spells";
-import { getSpellGroupIcon } from "@/lib/utils/spell-icons";
 import { calculateTotalSpellsInGroup } from "@/lib/utils/spells";
 import { useSpellGroupActions } from "@/lib/hooks/useSpellGroupActions";
 import { RenameGroupDialog } from "./RenameGroupDialog";
 import { RemoveAllSpellsDialog } from "./RemoveAllSpellsDialog";
+
+interface SpellGroupIconProps {
+  groupName: string;
+  className?: string;
+}
+
+function SpellGroupIcon({ groupName, className }: SpellGroupIconProps) {
+  switch (groupName) {
+    case "Dark":
+      return <Moon className={className} />;
+    case "Destr":
+      return <Flame className={className} />;
+    case "Summ":
+      return <Sparkles className={className} />;
+    case "Light":
+      return <Sun className={className} />;
+    default:
+      return <Sparkles className={className} />;
+  }
+}
 
 interface SpellGroupAccordionProps {
   groupName: string;
@@ -46,8 +70,6 @@ export function SpellGroupAccordion({
   const groupId = spellGroups.find((g) => g.name === groupName)?.id;
   const isUngrouped = groupName === "Без групи";
   const totalSpells = calculateTotalSpellsInGroup(levels);
-
-  const GroupIcon = getSpellGroupIcon(groupName);
 
   const {
     renameDialogOpen,
@@ -71,9 +93,12 @@ export function SpellGroupAccordion({
   return (
     <>
       <AccordionItem key={groupName} defaultOpen={true}>
-        <AccordionTrigger className="px-4 sm:px-6 pr-14 sm:pr-16 relative">
+        <AccordionTrigger className="px-4 sm:px-6 relative">
           <div className="flex items-center gap-3 sm:gap-4 text-left w-full">
-            <GroupIcon className="h-6 w-6 sm:h-7 sm:w-7 shrink-0" />
+            <SpellGroupIcon
+              groupName={groupName}
+              className="h-6 w-6 sm:h-7 sm:w-7 shrink-0"
+            />
             <div className="flex-1 min-w-0">
               <CardTitle className="text-lg truncate">{groupName}</CardTitle>
               <CardDescription className="mt-1">
@@ -89,7 +114,11 @@ export function SpellGroupAccordion({
             >
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-10 w-10 sm:h-12 sm:w-12">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-10 w-10 sm:h-12 sm:w-12"
+                  >
                     <MoreVertical className="h-5 w-5 sm:h-6 sm:w-6" />
                   </Button>
                 </DropdownMenuTrigger>

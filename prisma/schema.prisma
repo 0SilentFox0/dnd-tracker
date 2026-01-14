@@ -176,6 +176,7 @@ model Spell {
   savingThrow   Json?
   description   String
   groupId       String?
+  icon          String?
   createdAt     DateTime    @default(now())
   campaign      Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   spellGroup    SpellGroup? @relation(fields: [groupId], references: [id])

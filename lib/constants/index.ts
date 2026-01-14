@@ -7,3 +7,4 @@ export * from "./alignment";
 export * from "./spellcasting";
 export * from "./equipment";
 export * from "./abilities";
+export * from "./campaigns";

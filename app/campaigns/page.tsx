@@ -10,6 +10,7 @@ import {
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { getAuthUser } from "@/lib/auth";
+import { JoinCampaignDialog } from "@/components/campaigns/JoinCampaignDialog";
 
 export default async function CampaignsPage() {
   const user = await getAuthUser();
@@ -117,11 +118,14 @@ export default async function CampaignsPage() {
     <div className="container mx-auto p-4 space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <h1 className="text-3xl font-bold">Мої Кампанії</h1>
-        <Link href="/campaigns/new" className="shrink-0">
-          <Button className="whitespace-nowrap w-full md:w-auto">
-            + Нова Кампанія
-          </Button>
-        </Link>
+        <div className="flex gap-2 shrink-0">
+          <JoinCampaignDialog />
+          <Link href="/campaigns/new">
+            <Button className="whitespace-nowrap w-full md:w-auto">
+              + Нова Кампанія
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Кнопка JOIN BATTLE */}

@@ -20,6 +20,7 @@ export interface Spell {
     | unknown;
   description: string;
   groupId: string | null;
+  icon: string | null;
   spellGroup?: {
     id: string;
     name: string;

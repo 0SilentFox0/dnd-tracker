@@ -38,7 +38,10 @@ const createArtifactSchema = z.object({
     })
     .optional(),
   setId: z.string().optional(),
-  icon: z.string().optional(),
+  icon: z.preprocess(
+    (val) => (val === "" ? null : val),
+    z.string().url().nullable().optional()
+  ),
 });
 
 export async function POST(

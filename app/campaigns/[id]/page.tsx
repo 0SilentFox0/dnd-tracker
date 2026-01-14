@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { getAuthUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { InviteCodeDisplay } from "@/components/campaigns/InviteCodeDisplay";
 
 export default async function CampaignDetailPage({
   params,
@@ -69,10 +70,8 @@ export default async function CampaignDetailPage({
               <p className="text-lg font-semibold">{campaign.xpMultiplier}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Код запрошення</p>
-              <code className="text-lg font-semibold bg-muted px-2 py-1 rounded">
-                {campaign.inviteCode}
-              </code>
+              <p className="text-sm text-muted-foreground mb-2">Код запрошення</p>
+              <InviteCodeDisplay inviteCode={campaign.inviteCode} />
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Статус</p>

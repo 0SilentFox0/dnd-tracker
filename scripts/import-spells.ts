@@ -6,14 +6,15 @@
  *   npm run import-spells <campaignId> <filePath> [groupId]
  * 
  * Приклад:
- *   npm run import-spells abc123 spells.csv
- *   npm run import-spells abc123 spells.json my-group-id
+ *   npm run import-spells abc123 imports/spells-import.csv
+ *   npm run import-spells abc123 imports/spells.json my-group-id
  */
 
 import { PrismaClient } from "@prisma/client";
 import * as fs from "fs";
 import * as path from "path";
 import { parse } from "csv-parse/sync";
+import { DEFAULT_CAMPAIGN_ID } from "../lib/constants/campaigns";
 
 const prisma = new PrismaClient();
 
@@ -133,12 +134,13 @@ async function importSpells(campaignId: string, filePath: string, groupId?: stri
 async function main() {
   const args = process.argv.slice(2);
 
-  if (args.length < 2) {
-    console.error("Використання: npm run import-spells <campaignId> <filePath> [groupId]");
-    process.exit(1);
-  }
+  // Використовуємо дефолтні значення якщо не вказано
+  const filePath = args[0] || "imports/spells-import.csv";
+  const campaignId = args[1] || DEFAULT_CAMPAIGN_ID;
+  const groupId = args[2];
 
-  const [campaignId, filePath, groupId] = args;
+  console.log(`Використання файлу: ${filePath}`);
+  console.log(`Використання кампанії: ${campaignId}`);
 
   try {
     await importSpells(campaignId, filePath, groupId);

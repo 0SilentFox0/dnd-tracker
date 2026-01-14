@@ -21,6 +21,10 @@ const createSpellSchema = z.object({
   }).optional(),
   description: z.string().min(1),
   groupId: z.string().optional(),
+  icon: z.preprocess(
+    (val) => (val === "" ? null : val),
+    z.string().url().nullable().optional()
+  ),
 });
 
 export async function POST(
@@ -72,6 +76,7 @@ export async function POST(
         savingThrow: data.savingThrow || undefined,
         description: data.description,
         groupId: data.groupId,
+        icon: data.icon || null,
       },
       include: {
         spellGroup: true,

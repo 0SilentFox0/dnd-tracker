@@ -46,28 +46,55 @@ export function SpellCard({
   return (
     <Card className="hover:shadow-md transition-shadow h-full flex flex-col">
       <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-2 min-w-0">
-          <CardTitle className="text-sm sm:text-base truncate flex-1 min-w-0">
-            {spell.name}
-          </CardTitle>
-          <Badge
-            variant={spell.level === 0 ? "secondary" : "default"}
-            className="flex items-center gap-1 shrink-0 text-xs"
-          >
-            {spell.level === 0 ? (
-              <>
-                <Sparkles className="h-3 w-3" />
-                <span className="hidden sm:inline">Cantrip</span>
-                <span className="sm:hidden">C</span>
-              </>
-            ) : (
-              <>
-                <Sparkles className="h-3 w-3" />
-                <span className="hidden sm:inline">Рівень {spell.level}</span>
-                <span className="sm:hidden">{spell.level}</span>
-              </>
-            )}
-          </Badge>
+        <div className="flex items-start gap-3 mb-2">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden bg-muted flex items-center justify-center shrink-0 relative">
+            {spell.icon ? (
+              <img
+                src={spell.icon}
+                alt={spell.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  // Fallback to placeholder if image fails to load
+                  const target = e.target as HTMLImageElement;
+                  const placeholder = target.parentElement?.querySelector(
+                    ".spell-placeholder"
+                  ) as HTMLElement;
+                  if (placeholder) {
+                    target.style.display = "none";
+                    placeholder.style.display = "flex";
+                  }
+                }}
+              />
+            ) : null}
+            <div className={`spell-placeholder absolute inset-0 w-full h-full flex items-center justify-center ${spell.icon ? "hidden" : ""}`}>
+              <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
+            </div>
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2 min-w-0">
+              <CardTitle className="text-sm sm:text-base truncate flex-1 min-w-0">
+                {spell.name}
+              </CardTitle>
+              <Badge
+                variant={spell.level === 0 ? "secondary" : "default"}
+                className="flex items-center gap-1 shrink-0 text-xs"
+              >
+                {spell.level === 0 ? (
+                  <>
+                    <Sparkles className="h-3 w-3" />
+                    <span className="hidden sm:inline">Cantrip</span>
+                    <span className="sm:hidden">C</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-3 w-3" />
+                    <span className="hidden sm:inline">Рівень {spell.level}</span>
+                    <span className="sm:hidden">{spell.level}</span>
+                  </>
+                )}
+              </Badge>
+            </div>
+          </div>
         </div>
         <CardDescription className="flex flex-wrap gap-1 sm:gap-2 mt-2">
           <Badge variant="outline" className="flex items-center gap-1 text-xs">
