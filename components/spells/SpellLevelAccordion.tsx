@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { useState } from "react";
 import {
   Accordion,
@@ -21,6 +22,49 @@ import { Trash2 } from "lucide-react";
 import { SpellCard } from "./SpellCard";
 import type { Spell, SpellGroup } from "@/lib/api/spells";
 import { useDeleteSpellsByLevel } from "@/lib/hooks/useSpells";
+
+// Wrapper component to filter out accordion props from button
+function ButtonWrapper({
+  children,
+}: {
+  children: React.ReactNode;
+  id?: string;
+  isOpen?: boolean;
+  toggleItem?: (id: string) => void;
+}) {
+  return <>{children}</>;
+}
+
+// Wrapper that forwards accordion props to AccordionTrigger but filters them for button
+function AccordionTriggerWrapper({
+  trigger,
+  button,
+  id,
+  isOpen,
+  toggleItem,
+}: {
+  trigger: React.ReactNode;
+  button: React.ReactNode;
+  id?: string;
+  isOpen?: boolean;
+  toggleItem?: (id: string) => void;
+}) {
+  return (
+    <div className="relative">
+      {React.isValidElement(trigger)
+        ? React.cloneElement(
+            trigger as React.ReactElement<{
+              id?: string;
+              isOpen?: boolean;
+              toggleItem?: (id: string) => void;
+            }>,
+            { id, isOpen, toggleItem }
+          )
+        : trigger}
+      {button}
+    </div>
+  );
+}
 
 interface SpellLevelAccordionProps {
   levelName: string;
@@ -55,33 +99,41 @@ export function SpellLevelAccordion({
   return (
     <>
       <AccordionItem key={levelName} defaultOpen={true}>
-        <AccordionTrigger className="px-3 sm:px-5 pr-12 sm:pr-14 relative">
-          <div className="flex items-center justify-between w-full min-w-0 gap-2 sm:gap-3">
-            <span className="font-medium text-sm sm:text-base truncate">
-              {levelName}
-            </span>
-            <Badge variant="secondary" className="ml-2 shrink-0">
-              {spells.length}
-            </Badge>
-          </div>
-          {spells.length > 0 && (
-            <div
-              className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 z-10"
-              onClick={(e) => e.stopPropagation()}
-              onMouseDown={(e) => e.stopPropagation()}
-            >
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-10 w-10 sm:h-12 sm:w-12"
-                onClick={() => setDeleteDialogOpen(true)}
-                title="Видалити всі заклинання рівня"
-              >
-                <Trash2 className="h-5 w-5 sm:h-6 sm:w-6" />
-              </Button>
-            </div>
-          )}
-        </AccordionTrigger>
+        <AccordionTriggerWrapper
+          trigger={
+            <AccordionTrigger className="px-3 sm:px-5 pr-12 sm:pr-14">
+              <div className="flex items-center justify-between w-full min-w-0 gap-2 sm:gap-3">
+                <span className="font-medium text-sm sm:text-base truncate">
+                  {levelName}
+                </span>
+                <Badge variant="secondary" className="ml-2 shrink-0">
+                  {spells.length}
+                </Badge>
+              </div>
+            </AccordionTrigger>
+          }
+          button={
+            spells.length > 0 ? (
+              <ButtonWrapper>
+                <div
+                  className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 z-10"
+                  onClick={(e) => e.stopPropagation()}
+                  onMouseDown={(e) => e.stopPropagation()}
+                >
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-10 w-10 sm:h-12 sm:w-12"
+                    onClick={() => setDeleteDialogOpen(true)}
+                    title="Видалити всі заклинання рівня"
+                  >
+                    <Trash2 className="h-5 w-5 sm:h-6 sm:w-6" />
+                  </Button>
+                </div>
+              </ButtonWrapper>
+            ) : null
+          }
+        />
         <AccordionContent>
           <div className="grid gap-2 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {spells.map((spell) => (

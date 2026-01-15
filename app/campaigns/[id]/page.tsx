@@ -7,6 +7,7 @@ import Link from "next/link";
 import { getAuthUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { InviteCodeDisplay } from "@/components/campaigns/InviteCodeDisplay";
+import { CampaignMembersList } from "@/components/campaigns/CampaignMembersList";
 
 export default async function CampaignDetailPage({
   params,
@@ -90,26 +91,11 @@ export default async function CampaignDetailPage({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
-            {campaign.members.map((member) => (
-              <div
-                key={member.id}
-                className="flex items-center justify-between p-2 border rounded"
-              >
-                <div className="flex items-center gap-2">
-                  <span>{member.user.displayName}</span>
-                  <Badge variant={member.role === "dm" ? "default" : "secondary"}>
-                    {member.role === "dm" ? "DM" : "Player"}
-                  </Badge>
-                </div>
-                {isDM && member.role === "player" && (
-                  <Button variant="ghost" size="sm">
-                    Виключити
-                  </Button>
-                )}
-              </div>
-            ))}
-          </div>
+          <CampaignMembersList
+            campaignId={id}
+            members={campaign.members}
+            isDM={isDM}
+          />
         </CardContent>
       </Card>
 

@@ -146,6 +146,11 @@ export function AccordionContent({
   toggleItem?: (id: string) => void;
   id?: string;
 }) {
+  // Видаляємо не-DOM пропси перед передачею на div
+  const { toggleItem, id, ...domProps } = props;
+  void toggleItem; // Приглушуємо попередження про невикористану змінну
+  void id; // Приглушуємо попередження про невикористану змінну
+
   return (
     <div
       className={cn(
@@ -153,7 +158,7 @@ export function AccordionContent({
         isOpen ? "max-h-[5000px] opacity-100" : "max-h-0 opacity-0",
         className
       )}
-      {...props}
+      {...domProps}
     >
       <div className="p-1 md:p-4 pt-0 w-full min-w-0">{children}</div>
     </div>

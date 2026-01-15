@@ -1,0 +1,52 @@
+import type { MainSkill } from "@/lib/types/skill-tree";
+import { SectorLevel } from "./SectorLevel";
+
+interface SectorLevelsProps {
+  mainSkills: MainSkill[];
+  sectorAngle: number;
+  outerRadiusPercent: number;
+  innerRadiusPercent: number;
+}
+
+export function SectorLevels({
+  mainSkills,
+  sectorAngle,
+  outerRadiusPercent,
+  innerRadiusPercent,
+}: SectorLevelsProps) {
+  const levelHeight = (outerRadiusPercent - innerRadiusPercent) / 3;
+  const basicRadiusPercent = innerRadiusPercent + levelHeight;
+  const advancedRadiusPercent = innerRadiusPercent + levelHeight * 2;
+  const expertRadiusPercent = outerRadiusPercent;
+
+  return (
+    <>
+      {/* Рівень Expert (найтемніший, зовні) */}
+      <SectorLevel
+        mainSkills={mainSkills}
+        sectorAngle={sectorAngle}
+        radiusPercent={expertRadiusPercent}
+        levelName="expert"
+        darkenPercent={0.4}
+      />
+
+      {/* Рівень Advanced (середній) */}
+      <SectorLevel
+        mainSkills={mainSkills}
+        sectorAngle={sectorAngle}
+        radiusPercent={advancedRadiusPercent}
+        levelName="advanced"
+        darkenPercent={0.2}
+      />
+
+      {/* Рівень Basic (найсвітліший, всередині) */}
+      <SectorLevel
+        mainSkills={mainSkills}
+        sectorAngle={sectorAngle}
+        radiusPercent={basicRadiusPercent}
+        levelName="basic"
+        darkenPercent={0}
+      />
+    </>
+  );
+}
