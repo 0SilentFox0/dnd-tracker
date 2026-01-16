@@ -24,6 +24,33 @@ export interface Campaign {
   }>;
 }
 
+export async function updateCampaign(
+  campaignId: string,
+  data: Partial<{
+    name: string;
+    description: string | null;
+    maxLevel: number;
+    xpMultiplier: number;
+    allowPlayerEdit: boolean;
+    status: string;
+  }>
+): Promise<Campaign> {
+  const response = await fetch(`/api/campaigns/${campaignId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to update campaign");
+  }
+
+  return response.json();
+}
+
 export interface CampaignMember {
   id: string;
   displayName: string;

@@ -8,6 +8,7 @@ import { getAuthUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { InviteCodeDisplay } from "@/components/campaigns/InviteCodeDisplay";
 import { CampaignMembersList } from "@/components/campaigns/CampaignMembersList";
+import { CampaignSettingsButton } from "@/components/campaigns/CampaignSettingsButton";
 
 export default async function CampaignDetailPage({
   params,
@@ -40,7 +41,6 @@ export default async function CampaignDetailPage({
   }
 
   const isDM = userMember.role === "dm";
-
   return (
     <div className="container mx-auto p-4 space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -58,7 +58,20 @@ export default async function CampaignDetailPage({
       {/* Налаштування кампанії */}
       <Card>
         <CardHeader>
-          <CardTitle>Налаштування кампанії</CardTitle>
+          <div className="flex items-center justify-between gap-2">
+            <CardTitle>Налаштування кампанії</CardTitle>
+            {isDM && (
+              <CampaignSettingsButton
+                campaignId={id}
+                initialName={campaign.name}
+                initialDescription={campaign.description || null}
+                initialMaxLevel={campaign.maxLevel}
+                initialXpMultiplier={campaign.xpMultiplier}
+                initialAllowPlayerEdit={campaign.allowPlayerEdit}
+                initialStatus={campaign.status}
+              />
+            )}
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -147,6 +160,15 @@ export default async function CampaignDetailPage({
             </Card>
           </Link>
 
+          <Link href={`/campaigns/${id}/dm/skills`}>
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader>
+                <CardTitle>Бібліотека Скілів</CardTitle>
+                <CardDescription>Управління скілами та їх ефектами</CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
+
           <Link href={`/campaigns/${id}/dm/skill-trees`}>
             <Card className="hover:shadow-lg transition-shadow cursor-pointer">
               <CardHeader>
@@ -182,11 +204,6 @@ export default async function CampaignDetailPage({
         </Card>
       )}
 
-      <div className="flex gap-2">
-        <Link href="/campaigns">
-          <Button variant="outline">← Назад до кампаній</Button>
-        </Link>
-      </div>
     </div>
   );
 }

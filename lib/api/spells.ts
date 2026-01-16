@@ -5,6 +5,7 @@ export interface Spell {
   school: string | null;
   type: string;
   damageType: string;
+  damageElement: string | null;
   castingTime: string | null;
   range: string | null;
   components: string | null;

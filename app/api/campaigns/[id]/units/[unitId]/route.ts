@@ -7,6 +7,10 @@ import { Prisma } from "@prisma/client";
 const updateUnitSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   groupId: z.string().optional().nullable(),
+  damageModifier: z.preprocess(
+    (val) => (val === "" ? null : val),
+    z.string().nullable().optional()
+  ),
   level: z.number().min(1).max(30).optional(),
   strength: z.number().min(1).max(30).optional(),
   dexterity: z.number().min(1).max(30).optional(),
@@ -35,12 +39,15 @@ const updateUnitSchema = z.object({
     .array(
       z.object({
         name: z.string(),
-        description: z.string(),
+        description: z.string().optional(),
         type: z.enum(["passive", "active"]),
+        spellId: z.string().optional(),
+        actionType: z.enum(["action", "bonus_action"]).optional(),
         effect: z.record(z.string(), z.unknown()).optional(),
       })
     )
     .optional(),
+  immunities: z.array(z.string()).optional(),
   knownSpells: z.array(z.string()).optional(),
   avatar: z.preprocess(
     (val) => (val === "" ? null : val),
@@ -208,6 +215,8 @@ export async function PATCH(
         name: data.name,
         groupId: data.groupId !== undefined ? data.groupId : undefined,
         groupColor: data.groupId !== undefined ? groupColor : undefined,
+        damageModifier:
+          data.damageModifier !== undefined ? data.damageModifier : undefined,
         level: data.level,
         strength: data.strength,
         dexterity: data.dexterity,
@@ -227,6 +236,10 @@ export async function PATCH(
         specialAbilities:
           data.specialAbilities !== undefined
             ? (data.specialAbilities as Prisma.InputJsonValue)
+            : undefined,
+        immunities:
+          data.immunities !== undefined
+            ? (data.immunities as Prisma.InputJsonValue)
             : undefined,
         knownSpells:
           data.knownSpells !== undefined

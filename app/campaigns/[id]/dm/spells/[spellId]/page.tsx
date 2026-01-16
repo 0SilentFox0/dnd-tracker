@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Link from "next/link";
+import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
 
 export default function EditSpellPage({
   params,
@@ -42,6 +43,7 @@ export default function EditSpellPage({
     school: "",
     type: "target",
     damageType: "damage",
+    damageElement: null,
     castingTime: "",
     range: "",
     components: "",
@@ -68,6 +70,7 @@ export default function EditSpellPage({
         school: spell.school || "",
         type: spell.type,
         damageType: spell.damageType,
+        damageElement: spell.damageElement || null,
         castingTime: spell.castingTime || "",
         range: spell.range || "",
         components: spell.components || "",
@@ -97,6 +100,7 @@ export default function EditSpellPage({
         savingThrow: formData.savingThrow || null,
         groupId: formData.groupId || null,
         icon: formData.icon || null,
+        damageElement: formData.damageElement || null,
       },
       {
         onSuccess: () => {
@@ -138,12 +142,6 @@ export default function EditSpellPage({
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
-        <Link href={`/campaigns/${id}/dm/spells`}>
-          <Button variant="ghost">← Назад</Button>
-        </Link>
-      </div>
-
       <Card>
         <CardHeader>
           <CardTitle>Редагувати заклинання: {formData.name}</CardTitle>
@@ -271,6 +269,31 @@ export default function EditSpellPage({
                   <SelectContent>
                     <SelectItem value="damage">Урон</SelectItem>
                     <SelectItem value="heal">Лікування</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Модифікатор шкоди</Label>
+                <Select
+                  value={formData.damageElement || "none"}
+                  onValueChange={(value) =>
+                    setFormData({
+                      ...formData,
+                      damageElement: value === "none" ? null : value,
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Без модифікатора" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Без модифікатора</SelectItem>
+                    {DAMAGE_ELEMENT_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

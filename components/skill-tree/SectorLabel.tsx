@@ -10,7 +10,7 @@ export function SectorLabel({ name, midAngle }: SectorLabelProps) {
 
   return (
     <div
-      className="absolute pointer-events-none text-white text-xs font-bold"
+      className="absolute pointer-events-none text-white text-[10px] sm:text-xs font-bold whitespace-nowrap"
       style={{
         ...getPositionPercent(
           midAngle,

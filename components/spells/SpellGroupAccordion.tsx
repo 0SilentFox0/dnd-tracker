@@ -93,7 +93,7 @@ export function SpellGroupAccordion({
   return (
     <>
       <AccordionItem key={groupName} defaultOpen={true}>
-        <AccordionTrigger className="px-4 sm:px-6 relative">
+        <AccordionTrigger className="px-4 sm:px-6  relative">
           <div className="flex items-center gap-3 sm:gap-4 text-left w-full">
             <SpellGroupIcon
               groupName={groupName}

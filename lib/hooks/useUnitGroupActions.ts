@@ -8,6 +8,7 @@ interface UseUnitGroupActionsProps {
   campaignId: string;
   groupName: string;
   groupId?: string;
+  groupDamageModifier?: string | null;
 }
 
 /**
@@ -17,10 +18,14 @@ export function useUnitGroupActions({
   campaignId,
   groupName,
   groupId,
+  groupDamageModifier,
 }: UseUnitGroupActionsProps) {
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [removeAllDialogOpen, setRemoveAllDialogOpen] = useState(false);
   const [newGroupName, setNewGroupName] = useState(groupName);
+  const [newGroupDamageModifier, setNewGroupDamageModifier] = useState<
+    string | null
+  >(groupDamageModifier ?? null);
 
   const renameGroupMutation = useRenameUnitGroup(campaignId);
   const removeAllUnitsMutation = useRemoveAllUnitsFromGroup(campaignId);
@@ -31,15 +36,24 @@ export function useUnitGroupActions({
       {
         groupId,
         name: newGroupName,
+        damageModifier: newGroupDamageModifier,
       },
       {
         onSuccess: () => {
           setRenameDialogOpen(false);
           setNewGroupName(groupName);
+          setNewGroupDamageModifier(groupDamageModifier ?? null);
         },
       }
     );
-  }, [groupId, newGroupName, groupName, renameGroupMutation]);
+  }, [
+    groupId,
+    newGroupName,
+    groupName,
+    renameGroupMutation,
+    newGroupDamageModifier,
+    groupDamageModifier,
+  ]);
 
   const handleRemoveAllUnits = useCallback(() => {
     if (!groupId) return;
@@ -52,19 +66,23 @@ export function useUnitGroupActions({
 
   const openRenameDialog = useCallback(() => {
     setNewGroupName(groupName);
+    setNewGroupDamageModifier(groupDamageModifier ?? null);
     setRenameDialogOpen(true);
-  }, [groupName]);
+  }, [groupName, groupDamageModifier]);
 
   const closeRenameDialog = useCallback(() => {
     setRenameDialogOpen(false);
     setNewGroupName(groupName);
-  }, [groupName]);
+    setNewGroupDamageModifier(groupDamageModifier ?? null);
+  }, [groupName, groupDamageModifier]);
 
   return {
     renameDialogOpen,
     removeAllDialogOpen,
     newGroupName,
     setNewGroupName,
+    newGroupDamageModifier,
+    setNewGroupDamageModifier,
     setRenameDialogOpen,
     setRemoveAllDialogOpen,
     handleRenameGroup,

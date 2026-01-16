@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import type { Unit } from "@/lib/api/units";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
+import { getDamageElementLabel } from "@/lib/constants/damage";
 
 interface UnitCardProps {
   unit: Unit;
@@ -21,6 +23,12 @@ export function UnitCard({ unit, campaignId, onDelete }: UnitCardProps) {
   )
     ? unit.specialAbilities
     : [];
+  const damageModifiers = [
+    unit.damageModifier ? getDamageElementLabel(unit.damageModifier) : null,
+    unit.unitGroup?.damageModifier
+      ? `${getDamageElementLabel(unit.unitGroup.damageModifier)} (група)`
+      : null,
+  ].filter(Boolean) as string[];
 
   return (
     <div className="border rounded-lg p-4 hover:shadow-md transition-shadow space-y-3">
@@ -51,6 +59,15 @@ export function UnitCard({ unit, campaignId, onDelete }: UnitCardProps) {
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-base">{unit.name}</h3>
+          {damageModifiers.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-1">
+              {damageModifiers.map((modifier) => (
+                <Badge key={modifier} variant="outline" className="text-xs">
+                  {modifier}
+                </Badge>
+              ))}
+            </div>
+          )}
           <div className="text-sm text-muted-foreground space-y-1">
             <div>
               Рівень {unit.level} • AC {unit.armorClass} • HP {unit.maxHp}

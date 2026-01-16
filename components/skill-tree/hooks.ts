@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import type { SkillTree, Skill, MainSkill } from "@/lib/types/skill-tree";
-import { RACE_MAGIC } from "@/lib/types/skill-tree";
+import { RACE_MAGIC, SkillLevel, SKILL_LEVELS } from "@/lib/types/skill-tree";
 
 // Хук для фільтрації основних навиків
 export function useAvailableMainSkills(skillTree: SkillTree) {
@@ -59,20 +59,86 @@ export function isSkillUnlocked(
   if (!skill.prerequisites || skill.prerequisites.length === 0) {
     return true; // Навики без вимог доступні відразу
   }
-  return skill.prerequisites.every((prereq) =>
-    unlockedSkills.includes(prereq)
-  );
+  return skill.prerequisites.every((prereq) => unlockedSkills.includes(prereq));
+}
+
+// Утиліта для підрахунку прокачаних навиків з кола 3 (зовнішнє коло, початок прокачки)
+export function getCircle4UnlockedCount(
+  skillTree: SkillTree,
+  unlockedSkills: string[]
+): number {
+  let count = 0;
+  skillTree.mainSkills.forEach((mainSkill) => {
+    // Перевіряємо всі рівні кола 3 (circle3 в структурі)
+    SKILL_LEVELS.forEach((level) => {
+      const levelSkills = mainSkill.levels[level];
+      levelSkills.circle3.forEach((skill) => {
+        if (unlockedSkills.includes(skill.id)) {
+          count++;
+        }
+      });
+    });
+  });
+  return count;
+}
+
+// Утиліта для підрахунку прокачаних навиків з кола 2 (внутрішнє коло)
+export function getCircle2UnlockedCount(
+  skillTree: SkillTree,
+  unlockedSkills: string[]
+): number {
+  let count = 0;
+  skillTree.mainSkills.forEach((mainSkill) => {
+    // Перевіряємо всі рівні кола 2 (circle1 в структурі)
+    SKILL_LEVELS.forEach((level) => {
+      const levelSkills = mainSkill.levels[level];
+      levelSkills.circle1.forEach((skill) => {
+        if (unlockedSkills.includes(skill.id)) {
+          count++;
+        }
+      });
+    });
+  });
+  return count;
 }
 
 // Утиліта для перевірки чи можна вивчити навик
 export function canLearnSkill(
   skill: Skill,
-  unlockedSkills: string[]
+  unlockedSkills: string[],
+  skillTree?: SkillTree
 ): boolean {
-  return (
-    isSkillUnlocked(skill, unlockedSkills) &&
-    !unlockedSkills.includes(skill.id)
-  );
+  // Перевіряємо чи навик вже вивчений
+  if (unlockedSkills.includes(skill.id)) {
+    return false;
+  }
+
+  // Перевіряємо prerequisites
+  if (!isSkillUnlocked(skill, unlockedSkills)) {
+    return false;
+  }
+
+  // Перевіряємо доступність на основі кола
+  if (skillTree) {
+    const circle4Count = getCircle4UnlockedCount(skillTree, unlockedSkills);
+
+    // Коло 3 - доступне відразу (початок прокачки)
+    if (skill.circle === 3) {
+      return true;
+    }
+
+    // Коло 2 - доступне після прокачки 1 навики з кола 3 (будь-якої)
+    if (skill.circle === 2) {
+      return circle4Count >= 1;
+    }
+
+    // Коло 1 - доступне після прокачки 2 навик з кола 3
+    if (skill.circle === 1) {
+      return circle4Count >= 2;
+    }
+  }
+
+  return true;
 }
 
 // Утиліта для перевірки чи основний навик повністю прокачений
@@ -87,7 +153,7 @@ export function isMainSkillFullyUnlocked(
 // Утиліта для отримання статусу рівня навику
 export function getLevelStatus(
   mainSkill: MainSkill,
-  level: "basic" | "advanced" | "expert",
+  level: SkillLevel,
   unlockedSkills: string[]
 ) {
   const levelSkills = mainSkill.levels[level];
@@ -96,11 +162,87 @@ export function getLevelStatus(
     ...levelSkills.circle2,
     ...levelSkills.circle3,
   ];
-  const hasUnlocked = allLevelSkills.some((s) =>
-    unlockedSkills.includes(s.id)
-  );
+  const hasUnlocked = allLevelSkills.some((s) => unlockedSkills.includes(s.id));
   const isFullyUnlocked = allLevelSkills.every((s) =>
     unlockedSkills.includes(s.id)
   );
   return { hasUnlocked, isFullyUnlocked };
+}
+
+/**
+ * Перевіряє чи можна прокачати рівень main-skill-level з урахуванням послідовності
+ * Послідовність: basic -> advanced -> expert
+ */
+export function canLearnMainSkillLevel(
+  level: SkillLevel,
+  mainSkillId: string,
+  unlockedSkills: string[]
+): boolean {
+  if (level === SkillLevel.BASIC) {
+    return true; // basic можна прокачати завжди
+  }
+
+  const mainSkillLevelBasicId = `${mainSkillId}_${SkillLevel.BASIC}_level`;
+  const mainSkillLevelAdvancedId = `${mainSkillId}_${SkillLevel.ADVANCED}_level`;
+
+  if (level === SkillLevel.ADVANCED) {
+    // advanced можна прокачати тільки якщо basic прокачаний
+    return unlockedSkills.includes(mainSkillLevelBasicId);
+  }
+
+  if (level === SkillLevel.EXPERT) {
+    // expert можна прокачати тільки якщо advanced прокачаний
+    return unlockedSkills.includes(mainSkillLevelAdvancedId);
+  }
+
+  return false;
+}
+
+/**
+ * Перевіряє чи можна прокачати рівень расового навику з урахуванням послідовності
+ * Послідовність: basic -> advanced -> expert
+ */
+export function canLearnRacialSkillLevel(
+  level: SkillLevel,
+  racialSkillId: string,
+  unlockedSkills: string[]
+): boolean {
+  if (level === SkillLevel.BASIC) {
+    return true; // basic можна прокачати завжди
+  }
+
+  const racialSkillBasicId = `${racialSkillId}_${SkillLevel.BASIC}_racial`;
+  const racialSkillAdvancedId = `${racialSkillId}_${SkillLevel.ADVANCED}_racial`;
+
+  if (level === SkillLevel.ADVANCED) {
+    // advanced можна прокачати тільки якщо basic прокачаний
+    return unlockedSkills.includes(racialSkillBasicId);
+  }
+
+  if (level === SkillLevel.EXPERT) {
+    // expert можна прокачати тільки якщо advanced прокачаний
+    return unlockedSkills.includes(racialSkillAdvancedId);
+  }
+
+  return false;
+}
+
+/**
+ * Створює ID для main-skill-level
+ */
+export function getMainSkillLevelId(
+  mainSkillId: string,
+  level: SkillLevel
+): string {
+  return `${mainSkillId}_${level}_level`;
+}
+
+/**
+ * Створює ID для расового навику рівня
+ */
+export function getRacialSkillLevelId(
+  racialSkillId: string,
+  level: SkillLevel
+): string {
+  return `${racialSkillId}_${level}_racial`;
 }

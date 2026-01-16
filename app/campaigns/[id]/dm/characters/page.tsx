@@ -161,11 +161,6 @@ export default async function DMCharactersPage({
         </Card>
       )}
 
-      <div className="flex gap-2">
-        <Link href={`/campaigns/${id}`}>
-          <Button variant="outline">← Назад до кампанії</Button>
-        </Link>
-      </div>
     </div>
   );
 }

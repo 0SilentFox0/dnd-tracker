@@ -61,9 +61,6 @@ export default async function CharacterPage({
             <p className="text-muted-foreground mb-4">
               У вас поки немає персонажа в цій кампанії
             </p>
-            <Link href={`/campaigns/${id}`}>
-              <Button variant="outline">Назад до кампанії</Button>
-            </Link>
           </CardContent>
         </Card>
       </div>
@@ -104,9 +101,6 @@ export default async function CharacterPage({
               <Button variant="outline">Редагувати</Button>
             </Link>
           )}
-          <Link href={`/campaigns/${id}`}>
-            <Button variant="outline">Назад</Button>
-          </Link>
         </div>
       </div>
 

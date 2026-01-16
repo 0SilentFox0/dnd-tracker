@@ -3,6 +3,7 @@ import {
   getUnits,
   getUnitGroups,
   getUnit,
+  createUnitGroup,
   deleteAllUnits,
   deleteUnitsByLevel,
   deleteUnit,
@@ -27,6 +28,18 @@ export function useUnitGroups(campaignId: string) {
   return useQuery<UnitGroup[]>({
     queryKey: ["unitGroups", campaignId],
     queryFn: () => getUnitGroups(campaignId),
+  });
+}
+
+export function useCreateUnitGroup(campaignId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: { name: string; damageModifier?: string | null }) =>
+      createUnitGroup(campaignId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["unitGroups", campaignId] });
+    },
   });
 }
 
@@ -77,8 +90,11 @@ export function useRenameUnitGroup(campaignId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: { groupId: string; name: string }) =>
-      renameUnitGroup(campaignId, data.groupId, data.name),
+    mutationFn: (data: {
+      groupId: string;
+      name: string;
+      damageModifier?: string | null;
+    }) => renameUnitGroup(campaignId, data.groupId, data.name, data.damageModifier),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["units", campaignId] });
       queryClient.invalidateQueries({

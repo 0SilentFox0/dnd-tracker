@@ -9,6 +9,7 @@ const createUnitSchema = z.object({
   name: z.string().min(1).max(100),
   groupId: z.string().optional(),
   level: z.number().min(1).max(30).default(1),
+  damageModifier: z.string().optional(),
   
   // Ability Scores
   strength: z.number().min(1).max(30).default(10),
@@ -37,11 +38,14 @@ const createUnitSchema = z.object({
   
   specialAbilities: z.array(z.object({
     name: z.string(),
-    description: z.string(),
+    description: z.string().optional(),
     type: z.enum(["passive", "active"]),
+    spellId: z.string().optional(),
+    actionType: z.enum(["action", "bonus_action"]).optional(),
     effect: z.record(z.string(), z.unknown()).optional(),
   })).default([]),
   
+  immunities: z.array(z.string()).default([]),
   knownSpells: z.array(z.string()).default([]),
   avatar: z.string().optional(),
 });
@@ -95,6 +99,7 @@ export async function POST(
         name: data.name,
         groupId: data.groupId,
         groupColor,
+        damageModifier: data.damageModifier || null,
         level: data.level,
         strength: data.strength,
         dexterity: data.dexterity,
@@ -109,6 +114,7 @@ export async function POST(
         proficiencyBonus,
         attacks: data.attacks as Prisma.InputJsonValue,
         specialAbilities: data.specialAbilities as Prisma.InputJsonValue,
+        immunities: data.immunities as Prisma.InputJsonValue,
         knownSpells: data.knownSpells,
         avatar: data.avatar,
       },

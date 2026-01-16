@@ -10,6 +10,7 @@ import { convertCSVRowToUnit } from "@/lib/utils/unit-parsing";
 const importUnitSchema = z.object({
   name: z.string().min(1),
   groupId: z.string().optional(),
+  damageModifier: z.string().optional(),
   level: z.number().min(1).max(30).default(1),
   strength: z.number().min(1).max(30).default(10),
   dexterity: z.number().min(1).max(30).default(10),
@@ -178,6 +179,7 @@ export async function POST(
             name: unit.name,
             groupId: groupId || null,
             groupColor,
+            damageModifier: unit.damageModifier || null,
             level: unit.level,
             strength: unit.strength,
             dexterity: unit.dexterity,

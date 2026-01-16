@@ -5,6 +5,10 @@ import { z } from "zod";
 
 const updateGroupSchema = z.object({
   name: z.string().min(1).max(100),
+  damageModifier: z.preprocess(
+    (val) => (val === "" ? null : val),
+    z.string().nullable().optional()
+  ),
 });
 
 export async function PATCH(
@@ -45,11 +49,15 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { name } = updateGroupSchema.parse(body);
+    const { name, damageModifier } = updateGroupSchema.parse(body);
 
     const updatedGroup = await prisma.unitGroup.update({
       where: { id: groupId },
-      data: { name: name.trim() },
+      data: {
+        name: name.trim(),
+        damageModifier:
+          damageModifier !== undefined ? damageModifier : undefined,
+      },
     });
 
     return NextResponse.json(updatedGroup);

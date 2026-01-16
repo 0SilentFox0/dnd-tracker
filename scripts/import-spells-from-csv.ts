@@ -77,6 +77,27 @@ function parseDamageType(effect: string): "damage" | "heal" {
   return "damage";
 }
 
+function parseDamageElement(effect: string): string | undefined {
+  const lower = effect.toLowerCase();
+  const map: Array<{ value: string; keywords: string[] }> = [
+    { value: "fire", keywords: ["fire", "вогонь", "полум", "burn"] },
+    { value: "cold", keywords: ["cold", "ice", "лід", "криж"] },
+    { value: "lightning", keywords: ["lightning", "bolt", "блискав"] },
+    { value: "acid", keywords: ["acid", "кислот"] },
+    { value: "poison", keywords: ["poison", "отрут"] },
+    { value: "necrotic", keywords: ["necrotic", "некрот"] },
+    { value: "radiant", keywords: ["radiant", "світл"] },
+    { value: "thunder", keywords: ["thunder", "грім"] },
+    { value: "psychic", keywords: ["psychic", "психіч"] },
+    { value: "force", keywords: ["force", "сила"] },
+  ];
+
+  const match = map.find((item) =>
+    item.keywords.some((keyword) => lower.includes(keyword))
+  );
+  return match?.value;
+}
+
 function extractDamageDice(effect: string): string | undefined {
   // Шукаємо патерни типу "3d10", "8d6", "2d8 + MOD" тощо
   const diceMatch = effect.match(/(\d+d\d+[\s\+]*[\w]*)/i);
@@ -152,6 +173,7 @@ async function importSpellsFromCSV(campaignId: string, csvContent: string) {
       const concentration = parseConcentration(effect);
       const type = parseSpellType(effect);
       const damageType = parseDamageType(effect);
+      const damageElement = parseDamageElement(effect);
 
       // Визначаємо школу магії (можна покращити маппінг)
       let school = "";
@@ -168,6 +190,7 @@ async function importSpellsFromCSV(campaignId: string, csvContent: string) {
         school: school || null,
         type,
         damageType,
+        damageElement: damageElement || null,
         castingTime: "1 action", // За замовчуванням
         range: type === "aoe" ? "60 feet" : "Touch", // Можна покращити
         components: "V, S", // За замовчуванням

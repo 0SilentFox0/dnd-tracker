@@ -18,6 +18,7 @@ import { CharacterSkill } from "@/lib/types/skills";
 import { EquippedItems } from "@/lib/types/inventory";
 import { BattleLogEntry, InitiativeParticipant } from "@/lib/types/battle";
 import { Prisma } from "@prisma/client";
+import { getDamageElementLabel } from "@/lib/constants/damage";
 
 const attackSchema = z.object({
   attackerId: z.string(),
@@ -83,6 +84,8 @@ export async function POST(
       strength: number;
       dexterity: number;
       armorClass: number;
+      damageModifier?: string | null;
+      unitGroup?: { damageModifier: string | null } | null;
       inventory?: { equipped: EquippedItems } | null;
       characterSkills?: CharacterSkill[];
     };
@@ -131,6 +134,7 @@ export async function POST(
     } else {
       attacker = await prisma.unit.findUnique({
         where: { id: data.attackerId },
+        include: { unitGroup: true },
       });
       attackerAC = attacker?.armorClass || 10;
     }
@@ -207,11 +211,24 @@ export async function POST(
         }
       }
 
+      let damageModifierLabel = "";
+      if (data.attackerType === "unit") {
+        const modifiers = [
+          attacker.damageModifier || null,
+          attacker.unitGroup?.damageModifier || null,
+        ].filter(Boolean) as string[];
+        if (modifiers.length > 0) {
+          damageModifierLabel = ` (${modifiers
+            .map((modifier) => getDamageElementLabel(modifier))
+            .join(", ")})`;
+        }
+      }
+
       if (criticalHit) {
         damage *= 2; // Критичне попадання подвоює урон
-        result = `Критичне попадання! ${attacker.name} завдав ${damage} урону ${target.name}`;
+        result = `Критичне попадання! ${attacker.name} завдав ${damage} урону${damageModifierLabel} ${target.name}`;
       } else {
-        result = `${attacker.name} завдав ${damage} урону ${target.name}`;
+        result = `${attacker.name} завдав ${damage} урону${damageModifierLabel} ${target.name}`;
       }
 
       // Оновлюємо HP цілі в initiativeOrder

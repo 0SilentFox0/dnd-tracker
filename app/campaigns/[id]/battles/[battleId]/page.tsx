@@ -104,9 +104,6 @@ export default function BattlePage({
     return (
       <div className="container mx-auto p-4">
         <p>Бій не знайдено</p>
-        <Link href={`/campaigns/${id}`}>
-          <Button variant="outline">Назад</Button>
-        </Link>
       </div>
     );
   }
@@ -128,9 +125,6 @@ export default function BattlePage({
           <Badge variant={battle.status === "active" ? "default" : "secondary"}>
             {battle.status === "active" ? "Активний" : battle.status === "prepared" ? "Підготовлено" : "Завершено"}
           </Badge>
-          <Link href={`/campaigns/${id}`}>
-            <Button variant="outline" className="whitespace-nowrap">Назад</Button>
-          </Link>
         </div>
       </div>
 

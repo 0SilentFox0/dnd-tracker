@@ -10,18 +10,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Home, ArrowLeft, Menu, User, LogOut } from "lucide-react";
+import { Home, Menu, User, LogOut } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
+import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 
 export function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     const supabase = createClient();
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUserEmail(user?.email || null);
@@ -32,10 +31,6 @@ export function Header() {
     const supabase = createClient();
     await supabase.auth.signOut();
     router.push("/sign-in");
-  };
-
-  const handleGoBack = () => {
-    router.back();
   };
 
   // Не показуємо хедер на сторінках авторизації
@@ -54,12 +49,8 @@ export function Header() {
   const isDMPage = pathname?.includes("/dm/") || false;
   const isPlayerPage = !isDMPage && isCampaignPage;
 
-  // Визначаємо чи можна повернутися назад (є історія)
-  // Використовуємо mounted для уникнення проблем з гідрацією
-  const canGoBack = mounted && typeof window !== "undefined" && window.history.length > 1;
-
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="container mx-auto flex h-14 items-center justify-between px-4">
         <div className="flex items-center gap-2">
           {/* Кнопка "На головну" */}
@@ -69,19 +60,6 @@ export function Header() {
               <span className="sr-only">На головну</span>
             </Button>
           </Link>
-
-          {/* Кнопка "Назад" */}
-          {canGoBack && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9"
-              onClick={handleGoBack}
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span className="sr-only">Назад</span>
-            </Button>
-          )}
 
           {/* Меню навігації для кампанії */}
           {isCampaignPage && (
@@ -178,6 +156,9 @@ export function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+      </div>
+      <div className="container mx-auto px-4 pb-2">
+        <Breadcrumbs />
       </div>
     </header>
   );

@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { SpellImportDialog } from "@/components/spells/SpellImportDialog";
+import { CreateGroupDialog } from "@/components/skills/CreateGroupDialog";
 
 interface SpellsPageHeaderProps {
   campaignId: string;
@@ -25,14 +26,7 @@ export function SpellsPageHeader({
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 shrink-0">
         <SpellImportDialog campaignId={campaignId} />
-        <Link href={`/campaigns/${campaignId}/dm/spells/groups/new`}>
-          <Button
-            variant="outline"
-            className="whitespace-nowrap text-xs sm:text-sm w-full"
-          >
-            + Група
-          </Button>
-        </Link>
+        <CreateGroupDialog campaignId={campaignId} />
         <Link href={`/campaigns/${campaignId}/dm/spells/new`}>
           <Button className="whitespace-nowrap text-xs sm:text-sm w-full">
             + Створити заклинання

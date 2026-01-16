@@ -84,6 +84,7 @@ export interface ImportUnit {
   specialAbilities: UnitSpecialAbility[];
   knownSpells: string[];
   avatar?: string;
+  damageModifier?: string;
 }
 
 export interface UnitImportResult {

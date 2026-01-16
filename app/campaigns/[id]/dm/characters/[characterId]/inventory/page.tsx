@@ -100,12 +100,6 @@ export default function CharacterInventoryPage({
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">
-      <div className="mb-6">
-        <Link href={`/campaigns/${id}/dm/characters`}>
-          <Button variant="ghost">← Назад</Button>
-        </Link>
-      </div>
-
       <Card>
         <CardHeader>
           <CardTitle>Інвентар</CardTitle>

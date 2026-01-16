@@ -16,6 +16,9 @@ function transformPrismaUnitToUnit(
     specialAbilities: Array.isArray(unit.specialAbilities)
       ? (unit.specialAbilities as Unit["specialAbilities"])
       : [],
+    immunities: Array.isArray(unit.immunities)
+      ? (unit.immunities as string[])
+      : [],
     knownSpells: Array.isArray(unit.knownSpells)
       ? (unit.knownSpells as string[])
       : [],
@@ -24,6 +27,7 @@ function transformPrismaUnitToUnit(
           id: unit.unitGroup.id,
           name: unit.unitGroup.name,
           color: unit.unitGroup.color,
+          damageModifier: unit.unitGroup.damageModifier,
         }
       : null,
   };

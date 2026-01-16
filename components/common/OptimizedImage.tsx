@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { normalizeImageUrl } from "@/lib/utils/image-url";
 
 interface OptimizedImageProps {
   src: string;
@@ -21,6 +22,7 @@ export function OptimizedImage({
   fallback,
 }: OptimizedImageProps) {
   const [hasError, setHasError] = useState(false);
+  const normalizedSrc = normalizeImageUrl(src);
 
   if (hasError && fallback) {
     return <>{fallback}</>;
@@ -28,11 +30,12 @@ export function OptimizedImage({
 
   return (
     <Image
-      src={src}
+      src={normalizedSrc}
       alt={alt}
       width={width}
       height={height}
       className={className}
+      referrerPolicy="no-referrer"
       unoptimized
       onError={() => setHasError(true)}
     />

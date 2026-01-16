@@ -4,6 +4,7 @@ export interface Unit {
   name: string;
   groupId: string | null;
   groupColor: string | null;
+  damageModifier: string | null;
   level: number;
   strength: number;
   dexterity: number;
@@ -26,16 +27,20 @@ export interface Unit {
   }>;
   specialAbilities: Array<{
     name: string;
-    description: string;
+    description?: string;
     type: "passive" | "active";
+    spellId?: string;
+    actionType?: "action" | "bonus_action";
     effect?: Record<string, unknown>;
   }>;
+  immunities: string[];
   knownSpells: string[];
   avatar: string | null;
   unitGroup?: {
     id: string;
     name: string;
     color: string;
+    damageModifier: string | null;
   } | null;
 }
 
@@ -43,6 +48,7 @@ export interface UnitGroup {
   id: string;
   name: string;
   color: string;
+  damageModifier: string | null;
 }
 
 export async function getUnits(campaignId: string): Promise<Unit[]> {
@@ -54,6 +60,19 @@ export async function getUnits(campaignId: string): Promise<Unit[]> {
 export async function getUnitGroups(campaignId: string): Promise<UnitGroup[]> {
   const response = await fetch(`/api/campaigns/${campaignId}/units/groups`);
   if (!response.ok) throw new Error("Failed to fetch unit groups");
+  return response.json();
+}
+
+export async function createUnitGroup(
+  campaignId: string,
+  data: { name: string; damageModifier?: string | null }
+): Promise<UnitGroup> {
+  const response = await fetch(`/api/campaigns/${campaignId}/units/groups`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) throw new Error("Failed to create unit group");
   return response.json();
 }
 
@@ -114,14 +133,18 @@ export async function deleteUnit(
 export async function renameUnitGroup(
   campaignId: string,
   groupId: string,
-  name: string
+  name: string,
+  damageModifier?: string | null
 ): Promise<UnitGroup> {
   const response = await fetch(
     `/api/campaigns/${campaignId}/units/groups/${groupId}`,
     {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: name.trim() }),
+      body: JSON.stringify({
+        name: name.trim(),
+        damageModifier: damageModifier ?? null,
+      }),
     }
   );
   if (!response.ok) throw new Error("Failed to rename group");

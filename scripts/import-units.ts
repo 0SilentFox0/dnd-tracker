@@ -9,7 +9,7 @@ const prisma = new PrismaClient();
 
 async function main() {
   const args = process.argv.slice(2);
-  
+
   // Використовуємо дефолтні значення якщо не вказано
   const csvFilePath = args[0] || "imports/units-import.csv";
   const campaignId = args[1] || DEFAULT_CAMPAIGN_ID;
@@ -38,7 +38,7 @@ async function main() {
 
   const fileContent = fs.readFileSync(filePath, "utf-8");
   const lines = fileContent.split("\n").filter((line) => line.trim());
-  
+
   if (lines.length === 0) {
     console.error("CSV файл порожній");
     process.exit(1);
@@ -87,7 +87,11 @@ async function main() {
     if (values.length > headers.length) {
       const lastIndex = headers.length - 1;
       const extraValues = values.slice(lastIndex);
-      values.splice(lastIndex, values.length - lastIndex, extraValues.join(", "));
+      values.splice(
+        lastIndex,
+        values.length - lastIndex,
+        extraValues.join(", ")
+      );
     }
 
     if (values.length < headers.length) {
@@ -104,7 +108,7 @@ async function main() {
       }
       row[header] = value;
     });
-    
+
     // Дебаг: перевіряємо перший рядок
     if (csvRows.length === 0) {
       console.log("Перший рядок після парсингу:", {
@@ -114,7 +118,7 @@ async function main() {
         name: row.Назва || row.name || row.Name,
       });
     }
-    
+
     csvRows.push(row);
   }
 
@@ -126,14 +130,14 @@ async function main() {
     // Перевіряємо різні варіанти назв колонки
     const rawGroup = (row.Група || row.group || row.Group || "").trim();
     const { unit, groupName } = convertCSVRowToUnit(row);
-    
+
     // Використовуємо rawGroup якщо він є, інакше groupName з парсера
     const finalGroupName = rawGroup || groupName || undefined;
-    
+
     if (!finalGroupName) {
       console.warn(`⚠️  Для юніта "${unit.name}" група не знайдена`);
     }
-    
+
     return {
       ...unit,
       groupName: finalGroupName,
@@ -150,7 +154,7 @@ async function main() {
       uniqueGroupNames.add(groupName.trim());
     }
   }
-  
+
   console.log(`Знайдені групи: ${Array.from(uniqueGroupNames).join(", ")}`);
 
   console.log(`Створення/отримання ${uniqueGroupNames.size} груп...`);
@@ -208,7 +212,9 @@ async function main() {
   }
 
   console.log(
-    `Створення ${unitsToCreate.length} нових юнітів (пропущено ${unitsWithGroups.length - unitsToCreate.length} дублікатів)...`
+    `Створення ${unitsToCreate.length} нових юнітів (пропущено ${
+      unitsWithGroups.length - unitsToCreate.length
+    } дублікатів)...`
   );
 
   // Отримуємо кольори груп один раз

@@ -1,4 +1,5 @@
 import type { MainSkill } from "@/lib/types/skill-tree";
+import { SkillLevel } from "@/lib/types/skill-tree";
 import { SectorLevel } from "./SectorLevel";
 
 interface SectorLevelsProps {
@@ -26,7 +27,7 @@ export function SectorLevels({
         mainSkills={mainSkills}
         sectorAngle={sectorAngle}
         radiusPercent={expertRadiusPercent}
-        levelName="expert"
+        levelName={SkillLevel.EXPERT}
         darkenPercent={0.4}
       />
 
@@ -35,7 +36,7 @@ export function SectorLevels({
         mainSkills={mainSkills}
         sectorAngle={sectorAngle}
         radiusPercent={advancedRadiusPercent}
-        levelName="advanced"
+        levelName={SkillLevel.ADVANCED}
         darkenPercent={0.2}
       />
 
@@ -44,7 +45,7 @@ export function SectorLevels({
         mainSkills={mainSkills}
         sectorAngle={sectorAngle}
         radiusPercent={basicRadiusPercent}
-        levelName="basic"
+        levelName={SkillLevel.BASIC}
         darkenPercent={0}
       />
     </>

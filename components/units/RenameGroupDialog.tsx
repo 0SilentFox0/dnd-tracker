@@ -11,6 +11,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
 
 interface RenameGroupDialogProps {
   open: boolean;
@@ -18,6 +26,8 @@ interface RenameGroupDialogProps {
   groupName: string;
   newGroupName: string;
   onNewGroupNameChange: (name: string) => void;
+  damageModifier: string | null;
+  onDamageModifierChange: (value: string | null) => void;
   onConfirm: () => void;
   onCancel: () => void;
   isRenaming: boolean;
@@ -29,6 +39,8 @@ export function RenameGroupDialog({
   groupName,
   newGroupName,
   onNewGroupNameChange,
+  damageModifier,
+  onDamageModifierChange,
   onConfirm,
   onCancel,
   isRenaming,
@@ -57,6 +69,28 @@ export function RenameGroupDialog({
                 }
               }}
             />
+          </div>
+          <div className="space-y-2">
+            <Label>Модифікатор шкоди для групи</Label>
+            <Select
+              value={damageModifier || "none"}
+              onValueChange={(value) =>
+                onDamageModifierChange(value === "none" ? null : value)
+              }
+              disabled={isRenaming}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Без модифікатора" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Без модифікатора</SelectItem>
+                {DAMAGE_ELEMENT_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
         <DialogFooter>

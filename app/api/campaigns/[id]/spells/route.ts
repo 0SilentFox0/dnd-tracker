@@ -9,6 +9,10 @@ const createSpellSchema = z.object({
   school: z.string().optional(),
   type: z.enum(["target", "aoe"]),
   damageType: z.enum(["damage", "heal"]),
+  damageElement: z.preprocess(
+    (val) => (val === "" ? null : val),
+    z.string().nullable().optional()
+  ),
   castingTime: z.string().optional(),
   range: z.string().optional(),
   components: z.string().optional(),
@@ -67,6 +71,7 @@ export async function POST(
         school: data.school,
         type: data.type,
         damageType: data.damageType,
+        damageElement: data.damageElement || null,
         castingTime: data.castingTime,
         range: data.range,
         components: data.components,

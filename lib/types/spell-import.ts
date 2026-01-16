@@ -26,6 +26,7 @@ export interface ImportSpell {
   school?: string;
   type: SpellType;
   damageType: SpellDamageType;
+  damageElement?: string;
   castingTime?: string;
   range?: string;
   components?: string;

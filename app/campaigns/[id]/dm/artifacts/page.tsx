@@ -13,6 +13,38 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 
+function formatSetBonus(setBonus: unknown): { title?: string; description: string } | null {
+  if (!setBonus) return null;
+
+  if (typeof setBonus === "string") {
+    return { description: setBonus };
+  }
+
+  if (typeof setBonus === "object") {
+    const value = setBonus as { name?: string; description?: string; effect?: string };
+    const description = value.description || value.effect || JSON.stringify(setBonus);
+    return {
+      title: value.name,
+      description,
+    };
+  }
+
+  return { description: String(setBonus) };
+}
+
+function formatPassiveAbility(passiveAbility: unknown): { title?: string; description: string } | null {
+  if (!passiveAbility) return null;
+  if (typeof passiveAbility === "string") {
+    return { description: passiveAbility };
+  }
+  if (typeof passiveAbility === "object") {
+    const value = passiveAbility as { name?: string; description?: string };
+    const description = value.description || JSON.stringify(passiveAbility);
+    return { title: value.name, description };
+  }
+  return { description: String(passiveAbility) };
+}
+
 export default async function DMArtifactsPage({
   params,
 }: {
@@ -59,6 +91,8 @@ export default async function DMArtifactsPage({
     },
   });
 
+  const ungroupedArtifacts = artifacts.filter((artifact) => !artifact.setId);
+
   return (
     <div className="container mx-auto p-4 space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -85,32 +119,119 @@ export default async function DMArtifactsPage({
         <div className="space-y-4">
           <h2 className="text-2xl font-semibold">Сети артефактів</h2>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {artifactSets.map((set) => (
-              <Card key={set.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <CardTitle>{set.name}</CardTitle>
-                  <CardDescription>
-                    {set.artifacts.length} артефактів в сеті
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Link href={`/campaigns/${id}/dm/artifacts/sets/${set.id}`}>
-                    <Button variant="outline" size="sm" className="w-full">
-                      Редагувати сет
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            ))}
+            {artifactSets.map((set) => {
+              const setBonus = formatSetBonus(set.setBonus);
+              return (
+                <Card key={set.id} className="hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <CardTitle>{set.name}</CardTitle>
+                    <CardDescription>
+                      {set.artifacts.length} артефактів в сеті
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {set.description && (
+                      <p className="text-sm text-muted-foreground">
+                        {set.description}
+                      </p>
+                    )}
+                    {setBonus && (
+                      <div className="rounded-md border border-dashed p-3 text-sm">
+                        <p className="font-semibold">Ефект сету</p>
+                        {setBonus.title && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {setBonus.title}
+                          </p>
+                        )}
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {setBonus.description}
+                        </p>
+                      </div>
+                    )}
+                    <div className="space-y-3">
+                      {set.artifacts.map((artifact) => {
+                        const passive = formatPassiveAbility(
+                          artifact.passiveAbility
+                        );
+                        return (
+                          <div
+                            key={artifact.id}
+                            className="rounded-md border p-3"
+                          >
+                            <div className="flex items-center gap-2">
+                              <div className="w-10 h-10 rounded-md overflow-hidden bg-muted flex items-center justify-center shrink-0">
+                                {artifact.icon ? (
+                                  <OptimizedImage
+                                    src={artifact.icon}
+                                    alt={artifact.name}
+                                    width={40}
+                                    height={40}
+                                    className="w-full h-full object-cover"
+                                    fallback={
+                                      <span className="text-sm text-muted-foreground">
+                                        {artifact.name[0]?.toUpperCase() || "?"}
+                                      </span>
+                                    }
+                                  />
+                                ) : (
+                                  <span className="text-sm text-muted-foreground">
+                                    {artifact.name[0]?.toUpperCase() || "?"}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="min-w-0">
+                                <p className="font-semibold text-sm truncate">
+                                  {artifact.name}
+                                </p>
+                                <div className="flex gap-2 flex-wrap mt-1">
+                                  {artifact.rarity && (
+                                    <Badge variant="outline">
+                                      {artifact.rarity}
+                                    </Badge>
+                                  )}
+                                  <Badge variant="secondary">
+                                    {artifact.slot}
+                                  </Badge>
+                                </div>
+                              </div>
+                            </div>
+                            {artifact.description && (
+                              <p className="text-xs text-muted-foreground mt-2">
+                                {artifact.description}
+                              </p>
+                            )}
+                            {passive && (
+                              <p className="text-xs text-muted-foreground mt-2">
+                                <span className="font-semibold">
+                                  {passive.title || "Ефект"}:
+                                </span>{" "}
+                                {passive.description}
+                              </p>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <Link href={`/campaigns/${id}/dm/artifacts/sets/${set.id}`}>
+                      <Button variant="outline" size="sm" className="w-full">
+                        Редагувати сет
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
       )}
 
-      {/* Артефакти */}
+      {/* Артефакти без сету */}
       <div className="space-y-4">
-        <h2 className="text-2xl font-semibold">Артефакти</h2>
+        <h2 className="text-2xl font-semibold">Артефакти без сету</h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {artifacts.map((artifact) => (
+          {ungroupedArtifacts.map((artifact) => {
+            const passive = formatPassiveAbility(artifact.passiveAbility);
+            return (
             <Card
               key={artifact.id}
               className="hover:shadow-lg transition-shadow"
@@ -169,6 +290,14 @@ export default async function DMArtifactsPage({
                     {artifact.description}
                   </p>
                 )}
+                {passive && (
+                  <p className="text-xs text-muted-foreground mb-2">
+                    <span className="font-semibold">
+                      {passive.title || "Ефект"}:
+                    </span>{" "}
+                    {passive.description}
+                  </p>
+                )}
                 <Link href={`/campaigns/${id}/dm/artifacts/${artifact.id}`}>
                   <Button variant="outline" size="sm" className="w-full">
                     Редагувати
@@ -176,7 +305,8 @@ export default async function DMArtifactsPage({
                 </Link>
               </CardContent>
             </Card>
-          ))}
+          );
+          })}
         </div>
       </div>
 
@@ -191,11 +321,6 @@ export default async function DMArtifactsPage({
         </Card>
       )}
 
-      <div className="flex gap-2">
-        <Link href={`/campaigns/${id}`}>
-          <Button variant="outline">← Назад до кампанії</Button>
-        </Link>
-      </div>
     </div>
   );
 }

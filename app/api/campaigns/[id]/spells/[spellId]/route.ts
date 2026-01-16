@@ -10,6 +10,10 @@ const updateSpellSchema = z.object({
   school: z.string().optional(),
   type: z.enum(["target", "aoe"]).optional(),
   damageType: z.enum(["damage", "heal"]).optional(),
+  damageElement: z.preprocess(
+    (val) => (val === "" ? null : val),
+    z.string().nullable().optional()
+  ),
   castingTime: z.string().optional(),
   range: z.string().optional(),
   components: z.string().optional(),
@@ -136,6 +140,8 @@ export async function PATCH(
         school: data.school,
         type: data.type,
         damageType: data.damageType,
+        damageElement:
+          data.damageElement !== undefined ? data.damageElement : undefined,
         castingTime: data.castingTime,
         range: data.range,
         components: data.components,

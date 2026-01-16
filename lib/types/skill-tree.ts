@@ -2,9 +2,22 @@
  * Типи для системи дерев прокачки
  */
 
-export type SkillLevel = "basic" | "advanced" | "expert";
+export enum SkillLevel {
+  BASIC = "basic",
+  ADVANCED = "advanced",
+  EXPERT = "expert",
+}
 
-export type SkillCircle = 1 | 2 | 3; // Внутрішнє (1), Середнє (2), Зовнішнє (3)
+// Константа з усіма рівнями навиків (типізована)
+export const SKILL_LEVELS = [
+  SkillLevel.BASIC,
+  SkillLevel.ADVANCED,
+  SkillLevel.EXPERT,
+] as const;
+
+export type SkillLevelType = SkillLevel;
+
+export type SkillCircle = 1 | 2 | 3; // Внутрішнє (1), Середнє (2), Зовнішнє (3) - починається з 3
 
 export interface Skill {
   id: string;
@@ -53,7 +66,6 @@ export interface UltimateSkill {
   name: string;
   description: string;
   icon?: string;
-  requiredCentralSkillIds: string[]; // IDs 3 центральних навиків, які потрібно вивчити
 }
 
 export interface SkillTree {
@@ -87,15 +99,15 @@ export const RACE_MAGIC: Record<string, string[]> = {
 
 // Основні навики (однакові для всіх рас)
 export const MAIN_SKILLS = [
-  { id: "attack", name: "Напад", color: "#ef4444" },
-  { id: "defense", name: "Захист", color: "#3b82f6" },
-  { id: "archery", name: "Стрільба", color: "#10b981" },
-  { id: "leadership", name: "Лідерство", color: "#f59e0b" },
-  { id: "learning", name: "Навчання", color: "#06b6d4" },
-  { id: "sorcery", name: "Чародійство", color: "#6366f1" },
-  { id: "light_magic", name: "Світла магія", color: "#fbbf24" },
-  { id: "dark_magic", name: "Темна магія", color: "#1f2937" },
-  { id: "chaos_magic", name: "Магія Хаосу", color: "#dc2626" },
-  { id: "summoning_magic", name: "Магія Призиву", color: "#7c3aed" },
-  { id: "racial", name: "Рассовий Навик", color: "#14b8a6" },
+  { id: "attack", name: "Напад", color: "rgba(217, 78, 74, 1)" },
+  { id: "defense", name: "Захист", color: "darkblue" },
+  { id: "archery", name: "Стрільба", color: "forestgreen" },
+  { id: "leadership", name: "Лідерство", color: "sandybrown" },
+  { id: "learning", name: "Навчання", color: "gainsboro" },
+  { id: "sorcery", name: "Чародійство", color: "#ae2978" },
+  { id: "light_magic", name: "Світла магія", color: "yellow" },
+  { id: "dark_magic", name: "Темна магія", color: "darkred" },
+  { id: "chaos_magic", name: "Магія Хаосу", color: "dodgerblue" },
+  { id: "summoning_magic", name: "Магія Призиву", color: "sandybrown" },
+  { id: "racial", name: "Рассовий Навик", color: "gainsboro" },
 ] as const;

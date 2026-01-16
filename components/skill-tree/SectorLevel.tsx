@@ -1,11 +1,12 @@
 import type { MainSkill } from "@/lib/types/skill-tree";
+import { SkillLevel } from "@/lib/types/skill-tree";
 import { darkenColor } from "./utils";
 
 interface SectorLevelProps {
   mainSkills: MainSkill[];
   sectorAngle: number;
   radiusPercent: number;
-  levelName: "expert" | "advanced" | "basic";
+  levelName: SkillLevel;
   darkenPercent: number;
 }
 
@@ -20,7 +21,7 @@ export function SectorLevel({
 
   return (
     <div
-      className="circle circle_color absolute opacity-40 overflow-hidden"
+      className="circle circle_color absolute overflow-hidden"
       style={{
         height: `${radiusPercent * 2}%`,
         width: `${radiusPercent * 2}%`,
@@ -45,6 +46,8 @@ export function SectorLevel({
 
           return (
             <li
+              data-level={levelName}
+              data-main-skill-id={mainSkill.id}
               key={`${levelName}-${mainSkill.id}`}
               style={{
                 position: "absolute",
@@ -53,13 +56,12 @@ export function SectorLevel({
                 width: "50%",
                 height: "50%",
                 transformOrigin: "0 100%",
-                transform: `rotate(${
-                  (startAngle * 180) / Math.PI
-                }deg) skewY(${skewY}deg)`,
-                borderLeft: "2px solid rgba(255,255,255,0.3)",
+                transform: `rotate(${(startAngle * 180) / Math.PI}deg) skewY(${
+                  index === mainSkills.length - 1 ? -45 : skewY
+                }deg)`,
+                borderLeft: "1px solid rgba(0,0,0,0.15)",
                 overflow: "hidden",
-                backgroundColor: `${color}CC`,
-                boxShadow: `0 0 90px ${color}`,
+                backgroundColor: color,
               }}
             />
           );

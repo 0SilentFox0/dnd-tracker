@@ -27,8 +27,8 @@ export const SKILL_SIZES = {
     margin: "-3%",
   },
   racialSkill: {
-    width: "40px",
-    height: "40px",
+    width: "72px",
+    height: "72px",
   },
 } as const;
 

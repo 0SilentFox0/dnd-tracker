@@ -1,15 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import type {
   SkillTree,
   Skill,
-  CentralSkill,
   UltimateSkill,
+  MainSkill,
 } from "@/lib/types/skill-tree";
+import { SkillLevel } from "@/lib/types/skill-tree";
+import { getMainSkillLevelId, canLearnMainSkillLevel } from "./hooks";
 import { SKILL_TREE_CONSTANTS } from "./utils";
 import { useAvailableMainSkills, useRacialSkill } from "./hooks";
-import { CentralSkills } from "./CentralSkills";
 import { UltimateSkillComponent } from "./UltimateSkill";
 import { SectorLevels } from "./SectorLevels";
 import { SectorLabel } from "./SectorLabel";
@@ -20,30 +21,42 @@ import { RacialSkill } from "./RacialSkill";
 import {
   canLearnSkill,
   isMainSkillFullyUnlocked,
+  getCircle4UnlockedCount,
+  getCircle2UnlockedCount,
+  getLevelStatus,
 } from "./hooks";
 
 interface CircularSkillTreeProps {
   skillTree: SkillTree;
   unlockedSkills?: string[];
-  unlockedCentralSkills?: string[];
-  unlockedUltimateSkill?: boolean;
+  playerLevel?: number;
+  isDMMode?: boolean;
+  isTrainingCompleted?: boolean;
   onSkillClick?: (skill: Skill) => void;
-  onCentralSkillClick?: (skill: CentralSkill) => void;
   onUltimateSkillClick?: (skill: UltimateSkill) => void;
+  onRacialSkillClick?: (mainSkill: MainSkill, level: SkillLevel) => void;
+  onSkillSlotClick?: (slot: {
+    mainSkillId: string;
+    circle: 1 | 2 | 3;
+    level: SkillLevel;
+    index: number;
+  }) => void;
+  selectedSkillFromLibrary?: string | null;
 }
 
 export function CircularSkillTree({
   skillTree,
   unlockedSkills = [],
-  unlockedCentralSkills = [],
-  unlockedUltimateSkill = false,
+  playerLevel = 1,
+  isDMMode = false,
+  isTrainingCompleted = false,
   onSkillClick,
-  onCentralSkillClick,
   onUltimateSkillClick,
+  onRacialSkillClick,
+  onSkillSlotClick,
+  selectedSkillFromLibrary,
 }: CircularSkillTreeProps) {
   const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
-  const [selectedCentralSkill, setSelectedCentralSkill] =
-    useState<CentralSkill | null>(null);
   const [selectedUltimateSkill, setSelectedUltimateSkill] =
     useState<UltimateSkill | null>(null);
 
@@ -56,9 +69,15 @@ export function CircularSkillTree({
   const { containerSize, outerRadiusPercent, innerRadiusPercent } =
     SKILL_TREE_CONSTANTS;
 
+  // Підраховуємо кількість прокачаних навиків з кола 4
+  const circle4UnlockedCount = getCircle4UnlockedCount(
+    skillTree,
+    unlockedSkills
+  );
+
   // Обгортки для перевірок з правильними параметрами
   const canLearnSkillWrapper = (skill: Skill) =>
-    canLearnSkill(skill, unlockedSkills);
+    canLearnSkill(skill, unlockedSkills, skillTree);
 
   const isMainSkillFullyUnlockedWrapper = (mainSkillId: string) => {
     const mainSkill = skillTree.mainSkills.find((ms) => ms.id === mainSkillId);
@@ -66,32 +85,25 @@ export function CircularSkillTree({
     return isMainSkillFullyUnlocked(mainSkill, unlockedSkills);
   };
 
-  // Перевірка чи можна вивчити центральний навик
-  const canLearnCentralSkill = (centralSkill: CentralSkill) => {
-    return (
-      isMainSkillFullyUnlockedWrapper(centralSkill.requiredMainSkillId) &&
-      !unlockedCentralSkills.includes(centralSkill.id)
-    );
-  };
-
   // Перевірка чи можна вивчити ультимативний навик
-  const canLearnUltimateSkill = () => {
-    if (unlockedUltimateSkill) return false;
-    const unlockedCount =
-      skillTree.ultimateSkill.requiredCentralSkillIds.filter((id) =>
-        unlockedCentralSkills.includes(id)
-      ).length;
-    return unlockedCount >= 3;
-  };
+  // Ультимативний навик доступний тільки коли є 3 прокачані навики з кола 2
+  const canLearnUltimateSkill = useMemo(() => {
+    // Перевіряємо чи ультимативний навик вже вивчений
+    const isUltimateSkillUnlocked = unlockedSkills.includes(
+      skillTree.ultimateSkill.id
+    );
+    if (isUltimateSkillUnlocked) return false;
+
+    const circle2UnlockedCount = getCircle2UnlockedCount(
+      skillTree,
+      unlockedSkills
+    );
+    return circle2UnlockedCount >= 3;
+  }, [skillTree, unlockedSkills]);
 
   const handleSkillClick = (skill: Skill) => {
     setSelectedSkill(skill);
     onSkillClick?.(skill);
-  };
-
-  const handleCentralSkillClick = (skill: CentralSkill) => {
-    setSelectedCentralSkill(skill);
-    onCentralSkillClick?.(skill);
   };
 
   const handleUltimateSkillClick = (skill: UltimateSkill) => {
@@ -99,114 +111,152 @@ export function CircularSkillTree({
     onUltimateSkillClick?.(skill);
   };
 
+  const { containerSizeMobile } = SKILL_TREE_CONSTANTS;
+
   return (
-    <div className="flex flex-col items-center gap-4 p-4">
+    <div className="flex flex-col items-center gap-2 sm:gap-4 p-0 sm:p-4 w-full">
       {/* Кругове дерево */}
-      <div
-        className="relative border-2 rounded-full bg-gray-50 shadow-lg"
-        style={{ width: containerSize, height: containerSize }}
-      >
-        {/* Центральні навики */}
-        <CentralSkills
-          centralSkills={skillTree.centralSkills}
-          unlockedCentralSkills={unlockedCentralSkills}
-          canLearnCentralSkill={canLearnCentralSkill}
-          onSkillClick={handleCentralSkillClick}
-        />
-
-        {/* Ультимативний навик */}
-        <UltimateSkillComponent
-          ultimateSkill={skillTree.ultimateSkill}
-          unlockedUltimateSkill={unlockedUltimateSkill}
-          canLearnUltimateSkill={canLearnUltimateSkill()}
-          onSkillClick={handleUltimateSkillClick}
-        />
-
-        {/* Назва раси в центрі */}
+      <div className="w-full max-w-full overflow-visible pb-4 touch-pan-x touch-pan-y mt-24 md:mt-24 -mx-2 sm:mx-0">
         <div
-          className="absolute pointer-events-none text-white text-xs font-bold"
+          className="relative border-2 rounded-full bg-gray-600 shadow-lg mx-auto skill-tree-container"
           style={{
-            left: "50%",
-            top: "50%",
-            transform: "translate(-50%, -50%)",
-            marginTop: "-12%",
-            textShadow: "1px 1px 2px rgba(0,0,0,0.7)",
-            zIndex: 12,
+            width: containerSize,
+            height: containerSize,
+            minWidth: containerSizeMobile,
+            minHeight: containerSizeMobile,
           }}
         >
-          {skillTree.race}
+          {/* Ультимативний навик */}
+          <UltimateSkillComponent
+            ultimateSkill={skillTree.ultimateSkill}
+            unlockedUltimateSkill={unlockedSkills.includes(
+              skillTree.ultimateSkill.id
+            )}
+            canLearnUltimateSkill={canLearnUltimateSkill}
+            isDMMode={isDMMode}
+            onSkillClick={isDMMode ? undefined : handleUltimateSkillClick}
+          />
+
+          {/* Рассовий навик над колом */}
+          <RacialSkill
+            racialSkill={racialSkill}
+            unlockedSkills={unlockedSkills}
+            playerLevel={playerLevel}
+            isDMMode={isDMMode}
+            onRacialSkillClick={isDMMode ? undefined : onRacialSkillClick}
+          />
+
+          {/* Рівні секторів - показуємо тільки в режимі Player */}
+          <SectorLevels
+            mainSkills={availableMainSkills}
+            sectorAngle={sectorAngle}
+            outerRadiusPercent={outerRadiusPercent}
+            innerRadiusPercent={innerRadiusPercent}
+          />
+
+          {/* Внутрішнє коло для створення порожнини (бублик) */}
+          <div
+            className="absolute rounded-full bg-gray-50"
+            style={{
+              height: `${innerRadiusPercent * 2}%`,
+              width: `${innerRadiusPercent * 2}%`,
+              left: `${50 - innerRadiusPercent}%`,
+              top: `${50 - innerRadiusPercent}%`,
+              zIndex: 7,
+            }}
+          />
+
+          {/* Сектори та навики */}
+          {availableMainSkills.map((mainSkill, index) => {
+            const startAngle = index * sectorAngle - Math.PI / 2;
+            const endAngle = (index + 1) * sectorAngle - Math.PI / 2;
+            const midAngle = (startAngle + endAngle) / 2;
+
+            return (
+              <div key={mainSkill.id}>
+                {/* Назва сектора */}
+                {/* <SectorLabel name={mainSkill.name} midAngle={midAngle} /> */}
+
+                {/* Основні навики ЗА колом */}
+                <MainSkillLevels
+                  mainSkill={mainSkill}
+                  midAngle={midAngle}
+                  sectorAngle={sectorAngle}
+                  unlockedSkills={unlockedSkills}
+                  isDMMode={isDMMode}
+                  onLevelClick={(mainSkill, level) => {
+                    // В DM mode всі скіли доступні для редагування
+                    if (isDMMode) {
+                      // В DM mode не прокачуємо скіли, тільки редагуємо дерево
+                      return;
+                    }
+                    
+                    // Перевіряємо послідовність прокачки: basic -> advanced -> expert
+                    const canLearn = canLearnMainSkillLevel(
+                      level,
+                      mainSkill.id,
+                      unlockedSkills
+                    );
+
+                    if (!canLearn) {
+                      // Не показуємо діалог якщо не можна прокачати
+                      return;
+                    }
+
+                    // main-skill-level - це окремий навик, який можна прокачати
+                    // Створюємо унікальний ID для main-skill-level
+                    const mainSkillLevelId = getMainSkillLevelId(
+                      mainSkill.id,
+                      level
+                    );
+
+                    // Створюємо фейковий навик для main-skill-level
+                    const levelNames: Record<SkillLevel, string> = {
+                      [SkillLevel.BASIC]: "Основи",
+                      [SkillLevel.ADVANCED]: "Просунутий",
+                      [SkillLevel.EXPERT]: "Експертний",
+                    };
+
+                    const mainSkillLevelSkill: Skill = {
+                      id: mainSkillLevelId,
+                      name: `${mainSkill.name} - ${levelNames[level]}`,
+                      description: `Рівень ${level} основного навику ${mainSkill.name}`,
+                      circle: 3, // Вважаємо його частиною кола 3 для логіки
+                      level: level,
+                    };
+
+                    if (onSkillClick) {
+                      onSkillClick(mainSkillLevelSkill);
+                    }
+                  }}
+                />
+
+                {/* Навики в сегменті - показуємо завжди */}
+                <SegmentSkills
+                  mainSkill={mainSkill}
+                  midAngle={midAngle}
+                  sectorAngle={sectorAngle}
+                  unlockedSkills={unlockedSkills}
+                  canLearnSkill={canLearnSkillWrapper}
+                  onSkillClick={isDMMode ? undefined : handleSkillClick}
+                  onSkillSlotClick={onSkillSlotClick}
+                  circle4UnlockedCount={circle4UnlockedCount}
+                  isDMMode={isDMMode}
+                  selectedSkillFromLibrary={selectedSkillFromLibrary}
+                />
+              </div>
+            );
+          })}
         </div>
-
-        {/* Рассовий навик в правому верхньому куті */}
-        <RacialSkill
-          racialSkill={racialSkill}
-          unlockedSkills={unlockedSkills}
-        />
-
-        {/* Рівні секторів */}
-        <SectorLevels
-          mainSkills={availableMainSkills}
-          sectorAngle={sectorAngle}
-          outerRadiusPercent={outerRadiusPercent}
-          innerRadiusPercent={innerRadiusPercent}
-        />
-
-        {/* Внутрішнє коло для створення порожнини (бублик) */}
-        <div
-          className="absolute rounded-full bg-gray-50"
-          style={{
-            height: `${innerRadiusPercent * 2}%`,
-            width: `${innerRadiusPercent * 2}%`,
-            left: `${50 - innerRadiusPercent}%`,
-            top: `${50 - innerRadiusPercent}%`,
-            zIndex: 7,
-          }}
-        />
-
-        {/* Сектори та навики */}
-        {availableMainSkills.map((mainSkill, index) => {
-          const startAngle = index * sectorAngle - Math.PI / 2;
-          const endAngle = (index + 1) * sectorAngle - Math.PI / 2;
-          const midAngle = (startAngle + endAngle) / 2;
-
-          return (
-            <div key={mainSkill.id}>
-              {/* Назва сектора */}
-              <SectorLabel name={mainSkill.name} midAngle={midAngle} />
-
-              {/* Основні навики ЗА колом */}
-              <MainSkillLevels
-                mainSkill={mainSkill}
-                midAngle={midAngle}
-                sectorAngle={sectorAngle}
-                unlockedSkills={unlockedSkills}
-              />
-
-              {/* Навики в сегменті */}
-              <SegmentSkills
-                mainSkill={mainSkill}
-                midAngle={midAngle}
-                sectorAngle={sectorAngle}
-                unlockedSkills={unlockedSkills}
-                canLearnSkill={canLearnSkillWrapper}
-                onSkillClick={handleSkillClick}
-              />
-            </div>
-          );
-        })}
       </div>
 
       {/* Діалоги */}
       <SkillDialogs
         selectedSkill={selectedSkill}
-        selectedCentralSkill={selectedCentralSkill}
         selectedUltimateSkill={selectedUltimateSkill}
         skillTree={skillTree}
         unlockedSkills={unlockedSkills}
-        unlockedCentralSkills={unlockedCentralSkills}
-        isMainSkillFullyUnlocked={isMainSkillFullyUnlockedWrapper}
         onCloseSkill={() => setSelectedSkill(null)}
-        onCloseCentralSkill={() => setSelectedCentralSkill(null)}
         onCloseUltimateSkill={() => setSelectedUltimateSkill(null)}
       />
     </div>

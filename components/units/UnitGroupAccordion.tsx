@@ -8,6 +8,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { CardDescription, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +22,7 @@ import { useUnitGroupActions } from "@/lib/hooks/useUnitGroupActions";
 import { RenameGroupDialog } from "./RenameGroupDialog";
 import { RemoveAllUnitsDialog } from "./RemoveAllUnitsDialog";
 import { UnitCard } from "./UnitCard";
+import { getDamageElementLabel } from "@/lib/constants/damage";
 
 // Wrapper component to filter out accordion props from dropdown
 function DropdownWrapper({
@@ -81,6 +83,8 @@ export function UnitGroupAccordion({
   onDeleteUnit,
 }: UnitGroupAccordionProps) {
   const groupId = unitGroups.find((g) => g.name === groupName)?.id;
+  const groupDamageModifier =
+    unitGroups.find((g) => g.name === groupName)?.damageModifier || null;
   const isUngrouped = groupName === "Без групи";
   const groupColor = units[0]?.unitGroup?.color || "#666";
 
@@ -89,6 +93,8 @@ export function UnitGroupAccordion({
     removeAllDialogOpen,
     newGroupName,
     setNewGroupName,
+    newGroupDamageModifier,
+    setNewGroupDamageModifier,
     setRenameDialogOpen,
     setRemoveAllDialogOpen,
     handleRenameGroup,
@@ -101,6 +107,7 @@ export function UnitGroupAccordion({
     campaignId,
     groupName,
     groupId,
+    groupDamageModifier,
   });
 
   return (
@@ -119,6 +126,11 @@ export function UnitGroupAccordion({
                   <CardDescription className="mt-1">
                     {units.length} юнітів
                   </CardDescription>
+                  {groupDamageModifier && (
+                    <Badge variant="outline" className="mt-2 text-xs">
+                      {getDamageElementLabel(groupDamageModifier)}
+                    </Badge>
+                  )}
                 </div>
               </div>
             </AccordionTrigger>
@@ -206,6 +218,8 @@ export function UnitGroupAccordion({
         groupName={groupName}
         newGroupName={newGroupName}
         onNewGroupNameChange={setNewGroupName}
+        damageModifier={newGroupDamageModifier}
+        onDamageModifierChange={setNewGroupDamageModifier}
         onConfirm={handleRenameGroup}
         onCancel={closeRenameDialog}
         isRenaming={isRenaming}

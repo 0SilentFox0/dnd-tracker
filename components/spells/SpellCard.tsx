@@ -21,6 +21,7 @@ import {
   getSpellTypeIcon,
   getSpellDamageTypeIcon,
 } from "@/lib/utils/spell-icons";
+import { getDamageElementLabel } from "@/lib/constants/damage";
 
 interface SpellCardProps {
   spell: Spell;
@@ -53,6 +54,7 @@ export function SpellCard({
                 src={spell.icon}
                 alt={spell.name}
                 className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
                 onError={(e) => {
                   // Fallback to placeholder if image fails to load
                   const target = e.target as HTMLImageElement;
@@ -94,6 +96,11 @@ export function SpellCard({
                 )}
               </Badge>
             </div>
+            {spell.damageElement && (
+              <Badge variant="outline" className="mt-2 text-xs">
+                {getDamageElementLabel(spell.damageElement)}
+              </Badge>
+            )}
           </div>
         </div>
         <CardDescription className="flex flex-wrap gap-1 sm:gap-2 mt-2">

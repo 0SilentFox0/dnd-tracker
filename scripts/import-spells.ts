@@ -24,6 +24,7 @@ interface SpellRow {
   school?: string;
   type?: "target" | "aoe";
   damageType?: "damage" | "heal";
+  damageElement?: string;
   castingTime?: string;
   range?: string;
   components?: string;
@@ -58,6 +59,7 @@ function normalizeSpell(row: SpellRow) {
     school: row.school?.trim() || undefined,
     type: (row.type || "target") as "target" | "aoe",
     damageType: (row.damageType || "damage") as "damage" | "heal",
+    damageElement: row.damageElement?.trim() || undefined,
     castingTime: row.castingTime?.trim() || undefined,
     range: row.range?.trim() || undefined,
     components: row.components?.trim() || undefined,
@@ -100,6 +102,7 @@ async function importSpells(campaignId: string, filePath: string, groupId?: stri
       school: spell.school || null,
       type: spell.type,
       damageType: spell.damageType,
+      damageElement: spell.damageElement || null,
       castingTime: spell.castingTime || null,
       range: spell.range || null,
       components: spell.components || null,
