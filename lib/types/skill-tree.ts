@@ -34,6 +34,16 @@ export interface MainSkill {
   name: string;
   color: string;
   icon?: string;
+  levelIcons?: {
+    basic?: string;
+    advanced?: string;
+    expert?: string;
+  };
+  levelSkillIds?: {
+    basic?: string;
+    advanced?: string;
+    expert?: string;
+  };
   levels: {
     basic: {
       circle1: Skill[];
@@ -95,6 +105,11 @@ export const RACE_MAGIC: Record<string, string[]> = {
   wizard: ["light", "dark", "chaos", "summoning"],
   dwarf: ["runic"], // В майбутньому
   orc: ["battle_cries"], // В майбутньому
+};
+
+// Відключені скіли для кожної раси
+export const DISABLED_SKILLS_BY_RACE: Record<string, string[]> = {
+  wizard: ["attack", "archery"],
 };
 
 // Основні навики (однакові для всіх рас)

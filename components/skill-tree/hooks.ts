@@ -1,31 +1,50 @@
 import { useMemo } from "react";
 import type { SkillTree, Skill, MainSkill } from "@/lib/types/skill-tree";
-import { RACE_MAGIC, SkillLevel, SKILL_LEVELS } from "@/lib/types/skill-tree";
+import {
+  RACE_MAGIC,
+  DISABLED_SKILLS_BY_RACE,
+  SkillLevel,
+  SKILL_LEVELS,
+} from "@/lib/types/skill-tree";
 
 // Хук для фільтрації основних навиків
 export function useAvailableMainSkills(skillTree: SkillTree) {
   return useMemo(() => {
-    return skillTree.mainSkills.filter((ms) => {
-      // Виключаємо расовий навик, удачу та логістику
-      if (ms.id === "racial" || ms.id === "luck" || ms.id === "logistics") {
+    const filtered = skillTree.mainSkills.filter((ms) => {
+      // Виключаємо расовий навик
+      if (ms.id === "racial") {
         return false;
       }
       // Магія доступна залежно від раси
       if (ms.id === "light_magic") {
-        return RACE_MAGIC[skillTree.race]?.includes("light") ?? false;
+        const available =
+          RACE_MAGIC[skillTree.race]?.includes("light") ?? false;
+        return available;
       }
       if (ms.id === "dark_magic") {
-        return RACE_MAGIC[skillTree.race]?.includes("dark") ?? false;
+        const available = RACE_MAGIC[skillTree.race]?.includes("dark") ?? false;
+        return available;
       }
       if (ms.id === "chaos_magic") {
-        return RACE_MAGIC[skillTree.race]?.includes("chaos") ?? false;
+        const available =
+          RACE_MAGIC[skillTree.race]?.includes("chaos") ?? false;
+        return available;
       }
       if (ms.id === "summoning_magic") {
-        return RACE_MAGIC[skillTree.race]?.includes("summoning") ?? false;
+        const available =
+          RACE_MAGIC[skillTree.race]?.includes("summoning") ?? false;
+        return available;
       }
-      // Всі інші навики доступні
+      // Перевіряємо, чи навик не відключений для цієї раси
+      const disabledSkills = DISABLED_SKILLS_BY_RACE[skillTree.race] ?? [];
+      if (disabledSkills.includes(ms.id)) {
+        return false;
+      }
+      // Всі інші навики (атака, захист, стрільба, лідерство, навчання, чародійство) доступні для всіх рас
       return true;
     });
+
+    return filtered;
   }, [skillTree]);
 }
 

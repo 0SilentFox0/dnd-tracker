@@ -30,21 +30,21 @@ const CIRCLE_CONFIG = {
   3: {
     angleSpread: 0.6,
     radiusMultiplier: 0.9,
-    sizePercent: 4.5,
+    sizePercent: 6,
     getAngleOffset: (index: number, total: number, angleSpread: number) =>
       ((index - 1) / (total - 1 || 1)) * angleSpread,
   },
   2: {
     angleSpread: 0.7,
     radiusMultiplier: 0.5,
-    sizePercent: 4.5,
+    sizePercent: 6,
     getAngleOffset: (index: number, _total: number, angleSpread: number) =>
       ((index - 0.5) / 2) * angleSpread,
   },
   1: {
     angleSpread: 0.01,
     radiusMultiplier: 1.19,
-    sizePercent: 4.5,
+    sizePercent: 6,
     getAngleOffset: (index: number, _total: number, angleSpread: number) =>
       ((index + 1) / 2) * angleSpread,
   },
@@ -74,7 +74,7 @@ export function SkillCircleGroup({
   const filteredSkills = skills
     .map((skill, originalIndex) => ({ skill, originalIndex }))
     .filter(({ skill }) => skill.id && !skill.id.startsWith("placeholder_"));
-  
+
   return (
     <>
       {filteredSkills.map(({ skill, originalIndex }, filteredIndex) => {
@@ -112,8 +112,10 @@ export function SkillCircleGroup({
         if (circleNumber === 3) {
           // Коло 3 - можна прокачати стільки навиків, скільки прокачано main-skill-level
           // Наприклад: 1 main-skill-level = 1 навик з кола 3, 2 main-skill-level = 2 навики з кола 3
-          const canLearnMore = circle3UnlockedInSector < mainSkillLevelsUnlocked;
-          canLearnThisSkill = mainSkillLevelsUnlocked > 0 && canLearnMore && hasPrerequisites;
+          const canLearnMore =
+            circle3UnlockedInSector < mainSkillLevelsUnlocked;
+          canLearnThisSkill =
+            mainSkillLevelsUnlocked > 0 && canLearnMore && hasPrerequisites;
         } else if (circleNumber === 2) {
           // Коло 2 - доступне після прокачки 1 навики з кола 3
           canLearnThisSkill = circle3UnlockedInSector >= 1 && hasPrerequisites;
@@ -121,12 +123,16 @@ export function SkillCircleGroup({
           // Коло 1 - доступне після прокачки 1 навики з кола 2 в цьому секторі
           // АЛЕ також потрібно щоб всі 3 рівня main-skill-level були прокачані (basic, advanced, expert)
           const allMainSkillLevelsUnlocked = mainSkillLevelsUnlocked >= 3;
-          canLearnThisSkill = circle2UnlockedInSector >= 1 && allMainSkillLevelsUnlocked && hasPrerequisites;
+          canLearnThisSkill =
+            circle2UnlockedInSector >= 1 &&
+            allMainSkillLevelsUnlocked &&
+            hasPrerequisites;
         }
 
         // Для кола 1 використовуємо тільки локальну перевірку, оскільки canLearnSkill може мати інші вимоги
         // Для інших кіл також перевіряємо через canLearnSkill для додаткової валідації
-        const canLearnFromFunction = circleNumber === 1 ? true : canLearnSkill(skill);
+        const canLearnFromFunction =
+          circleNumber === 1 ? true : canLearnSkill(skill);
 
         // Для кола 3 пріоритет має локальна перевірка (hasPrerequisites)
         // Для інших кіл використовуємо обидві перевірки

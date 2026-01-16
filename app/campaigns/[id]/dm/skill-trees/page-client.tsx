@@ -153,15 +153,6 @@ export function SkillTreePageClient({
   // Використовуємо editedSkillTree якщо він є, інакше baseSkillTree
   const currentSkillTree = editedSkillTree || baseSkillTree;
   
-  console.log("Current skill tree:", {
-    isEdited: !!editedSkillTree,
-    treeId: currentSkillTree?.id,
-    race: currentSkillTree?.race,
-    attackBasicCircle4Skills: currentSkillTree?.mainSkills
-      .find(ms => ms.id === "attack")
-      ?.levels.basic.circle3?.map(s => ({ id: s.id, name: s.name, icon: (s as any).icon })),
-  });
-  
   // Перевіряємо чи є незбережені зміни
   const hasUnsavedChanges = editedSkillTree !== null;
   
@@ -224,16 +215,18 @@ export function SkillTreePageClient({
   };
 
   // Обогачуємо скіли в дереві прокачки даними з бібліотеки (icon, description тощо)
+  // Використовуємо editedSkillTree якщо він є, інакше currentSkillTree
   const enrichedSkillTree = useMemo(() => {
-    if (!currentSkillTree || !skillsFromLibrary.length) {
-      return currentSkillTree;
+    const baseSkillTreeForEnrichment = editedSkillTree || currentSkillTree;
+    if (!baseSkillTreeForEnrichment || !skillsFromLibrary.length) {
+      return baseSkillTreeForEnrichment;
     }
 
     // Створюємо Map для швидкого пошуку скілів з бібліотеки
     const skillsMap = new Map(skillsFromLibrary.map((s) => [s.id, s]));
 
     // Клонуємо дерево та обогачуємо скіли даними з бібліотеки
-    const enrichedMainSkills = currentSkillTree.mainSkills.map((mainSkill) => {
+    const enrichedMainSkills = baseSkillTreeForEnrichment.mainSkills.map((mainSkill) => {
       const enrichedLevels = { ...mainSkill.levels };
 
       // Обогачуємо скіли на всіх рівнях
@@ -246,13 +239,6 @@ export function SkillTreePageClient({
             enrichedCircles[circleKey as keyof typeof enrichedCircles];
           const enrichedCircleSkills = circleSkills.map((skill, index) => {
             const skillWithIcon = skill as Skill & { icon?: string };
-            
-            console.log(`Processing skill at circle ${circleKey}, index ${index}:`, {
-              id: skill.id,
-              name: skill.name,
-              hasIcon: !!skillWithIcon.icon,
-              icon: skillWithIcon.icon,
-            });
             
             // Якщо скіл має id з бібліотеки, обогачуємо його даними з бібліотеки
             if (skill.id && skillsMap.has(skill.id)) {
@@ -268,36 +254,17 @@ export function SkillTreePageClient({
               // Якщо icon немає в скілі, використовуємо icon з бібліотеки
               if (skillWithIcon.icon) {
                 enrichedSkill.icon = skillWithIcon.icon;
-                console.log("Using icon from skill:", skillWithIcon.icon);
               } else if (librarySkill.icon) {
                 enrichedSkill.icon = librarySkill.icon;
-                console.log("Using icon from library:", librarySkill.icon);
               }
-              console.log("Enriching skill (from library):", {
-                skillId: skill.id,
-                skillName: skill.name,
-                skillHasIcon: !!skillWithIcon.icon,
-                skillIcon: skillWithIcon.icon,
-                libraryIcon: librarySkill.icon,
-                finalIcon: enrichedSkill.icon,
-              });
               return enrichedSkill as Skill;
             }
             
             // Якщо скіл не з бібліотеки, але має icon (був присвоєний), зберігаємо його
             if (skillWithIcon.icon) {
-              console.log("Skill has icon (not from library):", {
-                skillId: skill.id,
-                skillName: skill.name,
-                icon: skillWithIcon.icon,
-              });
               return skill;
             }
             
-            console.log("Skill without icon:", {
-              skillId: skill.id,
-              skillName: skill.name,
-            });
             return skill;
           });
 
@@ -316,18 +283,12 @@ export function SkillTreePageClient({
     });
 
     const enrichedTree = {
-      ...currentSkillTree,
+      ...baseSkillTreeForEnrichment,
       mainSkills: enrichedMainSkills,
     };
     
-    console.log("Enriched skill tree updated:", {
-      treeId: enrichedTree.id,
-      race: enrichedTree.race,
-      mainSkillsCount: enrichedTree.mainSkills.length,
-    });
-    
     return enrichedTree;
-  }, [currentSkillTree, skillsFromLibrary]);
+  }, [editedSkillTree, currentSkillTree, skillsFromLibrary]);
 
   // Отримуємо список вже присвоєних скілів для цієї раси
   const assignedSkillIds = useMemo(() => {
@@ -345,17 +306,27 @@ export function SkillTreePageClient({
             if (
               skill.id &&
               !skill.id.includes("_circle") &&
-              !skill.id.includes("_level")
+              !skill.id.includes("_level") &&
+              !skill.id.startsWith("placeholder_")
             ) {
               assignedIds.add(skill.id);
             }
           });
         });
       });
+      
+      // Також перевіряємо levelSkillIds для main-skill-level та racial
+      if (mainSkill.levelSkillIds) {
+        Object.values(mainSkill.levelSkillIds).forEach((skillId) => {
+          if (skillId) {
+            assignedIds.add(skillId);
+          }
+        });
+      }
     });
 
     return assignedIds;
-  }, [enrichedSkillTree, selectedRace]);
+  }, [enrichedSkillTree]);
 
   // Фільтруємо скіли: прибираємо вже присвоєні та фільтруємо по расам
   const availableSkills = useMemo(() => {
@@ -364,9 +335,6 @@ export function SkillTreePageClient({
     const filtered = skillsFromLibrary.filter((skill) => {
       // Перевіряємо чи скіл вже присвоєний
       if (assignedSkillIds.has(skill.id)) {
-        console.log(
-          `Skill ${skill.name} (${skill.id}) already assigned, skipping`
-        );
         return false;
       }
 
@@ -375,17 +343,10 @@ export function SkillTreePageClient({
       // Якщо races заповнений - скіл доступний тільки для вказаних рас
       if (skill.races && skill.races.length > 0) {
         const isAvailableForRace = skill.races.includes(selectedRace);
-        if (!isAvailableForRace) {
-          console.log(
-            `Skill ${skill.name} (${skill.id}) not available for race ${selectedRace}, races:`,
-            skill.races
-          );
-        }
         return isAvailableForRace;
       }
 
       // Якщо рас не вказано - показуємо для всіх
-      console.log(`Skill ${skill.name} (${skill.id}) available for all races`);
       return true;
     });
 
@@ -575,16 +536,7 @@ export function SkillTreePageClient({
               }
               onRacialSkillClick={isDMMode ? undefined : handleRacialSkillClick}
               onSkillSlotClick={(slot) => {
-                console.log("=== onSkillSlotClick called ===");
-                console.log("Slot:", slot);
-                console.log(
-                  "selectedSkillFromLibrary:",
-                  selectedSkillFromLibrary
-                );
-                console.log("skillsFromLibrary:", skillsFromLibrary);
-
                 if (!selectedSkillFromLibrary) {
-                  console.log("No skill selected from library");
                   alert("Спочатку виберіть скіл з бібліотеки");
                   return;
                 }
@@ -593,17 +545,56 @@ export function SkillTreePageClient({
                 const selectedSkill = skillsFromLibrary.find(
                   (s) => s.id === selectedSkillFromLibrary
                 );
-                console.log("Selected skill found:", selectedSkill);
 
                 if (!selectedSkill) {
-                  console.error("Selected skill not found in library!");
                   alert("Помилка: скіл не знайдено в бібліотеці");
                   return;
                 }
 
                 if (!currentSkillTree) {
-                  console.error("Skill tree not found!");
                   alert("Помилка: дерево прокачки не знайдено");
+                  return;
+                }
+
+                // Перевіряємо, чи це main-skill-level або racial слот (circle === 1 та index === 0)
+                const isMainSkillLevelOrRacial = slot.circle === 1 && slot.index === 0;
+
+                // Для main-skill-level та racial оновлюємо icon для конкретного рівня
+                if (isMainSkillLevelOrRacial) {
+
+                  const updatedMainSkills = currentSkillTree.mainSkills.map(
+                    (mainSkill) => {
+                      if (mainSkill.id !== slot.mainSkillId) {
+                        return mainSkill;
+                      }
+
+                      // Оновлюємо icon та skillId для конкретного рівня
+                      const levelIcons = mainSkill.levelIcons || {};
+                      const levelSkillIds = mainSkill.levelSkillIds || {};
+                      return {
+                        ...mainSkill,
+                        levelIcons: {
+                          ...levelIcons,
+                          [slot.level]: selectedSkill.icon || levelIcons[slot.level as keyof typeof levelIcons],
+                        },
+                        levelSkillIds: {
+                          ...levelSkillIds,
+                          [slot.level]: selectedSkill.id,
+                        },
+                      };
+                    }
+                  );
+
+                  const updatedSkillTree: SkillTree = {
+                    ...currentSkillTree,
+                    mainSkills: updatedMainSkills,
+                  };
+
+                  setEditedSkillTree(updatedSkillTree);
+                  alert(
+                    `Скіл "${selectedSkill.name}" успішно присвоєно до ${slot.mainSkillId === "racial" ? "расового навику" : `основного навику "${slot.mainSkillId}"`}`
+                  );
+                  setSelectedSkillFromLibrary(null);
                   return;
                 }
 
@@ -628,12 +619,6 @@ export function SkillTreePageClient({
                     };
                     const circleKey = circleMapping[slot.circle] as keyof typeof levelCircles;
                     const circleSkills = levelCircles[circleKey] || [];
-                    
-                    console.log("Circle mapping:", {
-                      uiCircle: slot.circle,
-                      dataCircle: circleKey,
-                      circleSkillsCount: circleSkills.length,
-                    });
 
                     // Створюємо новий масив скілів з оновленим скілом на позиції slot.index
                     const updatedCircleSkills = [...circleSkills];
@@ -648,15 +633,6 @@ export function SkillTreePageClient({
                     if (selectedSkill.icon) {
                       skillToAssign.icon = selectedSkill.icon;
                     }
-                    console.log("Skill to assign:", {
-                      id: skillToAssign.id,
-                      name: skillToAssign.name,
-                      icon: skillToAssign.icon,
-                      selectedSkillIcon: selectedSkill.icon,
-                      hasIcon: !!skillToAssign.icon,
-                      slotIndex: slot.index,
-                      currentArrayLength: updatedCircleSkills.length,
-                    });
 
                     // Замінюємо скіл на позиції slot.index
                     // Якщо індекс більший за довжину масиву, заповнюємо масив до потрібного індексу placeholder'ами
@@ -674,21 +650,6 @@ export function SkillTreePageClient({
                     }
                     // Тепер замінюємо скіл на позиції slot.index
                     updatedCircleSkills[slot.index] = skillToAssign as Skill;
-                    console.log("Replaced skill at index", slot.index, "with:", skillToAssign);
-                    console.log("Updated circle skills (full array):", updatedCircleSkills.map((s, idx) => ({ 
-                      index: idx, 
-                      id: s.id, 
-                      name: s.name || "(placeholder)", 
-                      icon: (s as any).icon 
-                    })));
-                    console.log("Updated circle skills (filtered):", updatedCircleSkills
-                      .filter((s) => s.id && !s.id.startsWith("placeholder_"))
-                      .map((s, idx) => ({ 
-                        filteredIndex: idx,
-                        id: s.id, 
-                        name: s.name, 
-                        icon: (s as any).icon 
-                      })));
 
                     updatedLevels[levelKey] = {
                       ...levelCircles,
@@ -714,21 +675,7 @@ export function SkillTreePageClient({
                 };
 
                 // Оновлюємо стан
-                console.log("Setting editedSkillTree:", {
-                  treeId: updatedSkillTree.id,
-                  race: updatedSkillTree.race,
-                  mainSkillsCount: updatedSkillTree.mainSkills.length,
-                  updatedMainSkill: updatedSkillTree.mainSkills.find(ms => ms.id === slot.mainSkillId),
-                });
                 setEditedSkillTree(updatedSkillTree);
-
-                // TODO: Зберегти оновлене дерево в базу даних
-                console.log("Assigning skill:", {
-                  skillId: selectedSkill.id,
-                  skillName: selectedSkill.name,
-                  slot: slot,
-                  race: selectedRace,
-                });
 
                 // Показуємо нотифікацію про успішне присвоєння
                 alert(
@@ -737,7 +684,6 @@ export function SkillTreePageClient({
 
                 // Очищаємо селектор
                 setSelectedSkillFromLibrary(null);
-                console.log("Selector cleared");
               }}
               selectedSkillFromLibrary={selectedSkillFromLibrary}
             />

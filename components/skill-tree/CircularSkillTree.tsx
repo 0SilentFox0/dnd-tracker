@@ -143,7 +143,21 @@ export function CircularSkillTree({
             unlockedSkills={unlockedSkills}
             playerLevel={playerLevel}
             isDMMode={isDMMode}
-            onRacialSkillClick={isDMMode ? undefined : onRacialSkillClick}
+            onRacialSkillClick={
+              isDMMode
+                ? (mainSkill, level) => {
+                    // В DM режимі викликаємо onSkillSlotClick для призначення скілу
+                    if (onSkillSlotClick) {
+                      onSkillSlotClick({
+                        mainSkillId: mainSkill.id,
+                        circle: 1, // Використовуємо circle 1 як placeholder для racial
+                        level,
+                        index: 0,
+                      });
+                    }
+                  }
+                : onRacialSkillClick
+            }
           />
 
           {/* Рівні секторів - показуємо тільки в режимі Player */}
@@ -185,9 +199,14 @@ export function CircularSkillTree({
                   unlockedSkills={unlockedSkills}
                   isDMMode={isDMMode}
                   onLevelClick={(mainSkill, level) => {
-                    // В DM mode всі скіли доступні для редагування
-                    if (isDMMode) {
-                      // В DM mode не прокачуємо скіли, тільки редагуємо дерево
+                    // В DM mode викликаємо onSkillSlotClick для призначення скілу
+                    if (isDMMode && onSkillSlotClick) {
+                      onSkillSlotClick({
+                        mainSkillId: mainSkill.id,
+                        circle: 1, // Використовуємо circle 1 як placeholder для main-skill-level
+                        level,
+                        index: 0,
+                      });
                       return;
                     }
                     

@@ -12,18 +12,18 @@ export const SKILL_COLORS = {
 // Константи для розмірів елементів
 export const SKILL_SIZES = {
   centralSkill: {
-    width: "6%",
-    height: "6%",
+    width: "8%",
+    height: "8%",
     margin: "-3%",
   },
   ultimateSkill: {
-    width: "7.5%",
-    height: "7.5%",
+    width: "8%",
+    height: "8%",
     margin: "-3.75%",
   },
   mainSkillLevel: {
-    width: "6%",
-    height: "6%",
+    width: "8%",
+    height: "8%",
     margin: "-3%",
   },
   racialSkill: {

@@ -78,5 +78,5 @@ export const SKILL_TREE_CONSTANTS = {
   containerSizeMobile: 340, // Менший розмір для мобільних
   outerRadiusPercent: 35, // 35% від центру (70% діаметр)
   innerRadiusPercent: 15, // 15% від центру (30% діаметр)
-  mainSkillRadiusPercent: 40, // 40% від центру (80% діаметр)
+  mainSkillRadiusPercent: 42, // 40% від центру (80% діаметр)
 } as const;

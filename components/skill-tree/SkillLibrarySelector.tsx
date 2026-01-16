@@ -25,10 +25,6 @@ export function SkillLibrarySelector({
   selectedSkillId,
   onSkillSelect,
 }: SkillLibrarySelectorProps) {
-  console.log("SkillLibrarySelector - skills:", skills);
-  console.log("SkillLibrarySelector - groupedSkills:", groupedSkills);
-  console.log("SkillLibrarySelector - selectedSkillId:", selectedSkillId);
-
   const hasGroups = Object.keys(groupedSkills.groups).length > 0;
   const hasUngrouped = groupedSkills.ungrouped.length > 0;
 
@@ -40,17 +36,6 @@ export function SkillLibrarySelector({
       <Select
         value={selectedSkillId || ""}
         onValueChange={(skillId) => {
-          const selectedSkill = skills.find((s) => s.id === skillId);
-          console.log("=== Skill selected from dropdown ===");
-          console.log("Skill ID:", skillId);
-          console.log("Full skill object:", selectedSkill);
-          if (selectedSkill) {
-            console.log("Skill name:", selectedSkill.name);
-            console.log("Skill description:", selectedSkill.description);
-            console.log("Skill icon:", selectedSkill.icon);
-            console.log("Skill races:", selectedSkill.races);
-            console.log("Skill bonuses:", selectedSkill.bonuses);
-          }
           onSkillSelect(skillId || null);
         }}
       >

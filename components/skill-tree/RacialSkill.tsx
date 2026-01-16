@@ -114,10 +114,10 @@ export function RacialSkill({
                   : ` (Потрібен ${requiredLevel} рівень, зараз ${playerLevel})`
               }`}
             >
-              {racialSkill.icon ? (
+              {(racialSkill.levelIcons?.[level] || racialSkill.icon) ? (
                 <div className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-full">
                   <OptimizedImage
-                    src={racialSkill.icon}
+                    src={racialSkill.levelIcons?.[level] || racialSkill.icon || ""}
                     alt={`${racialSkill.name} - ${LEVEL_NAMES[level]}`}
                     width={64}
                     height={64}

@@ -31,11 +31,7 @@ export function MainSkillLevel({
   const adjustedAngle = Math.round((angle - 0.2) * 1000) / 1000;
   const position = getPositionPercent(adjustedAngle, mainSkillRadiusPercent);
 
-  const { hasUnlocked } = getLevelStatus(
-    mainSkill,
-    level,
-    unlockedSkills
-  );
+  const { hasUnlocked } = getLevelStatus(mainSkill, level, unlockedSkills);
 
   // Перевіряємо чи прокачаний main-skill-level (окремий навик)
   const mainSkillLevelId = getMainSkillLevelId(mainSkill.id, level);
@@ -43,11 +39,8 @@ export function MainSkillLevel({
 
   // Перевіряємо послідовність прокачки: basic -> advanced -> expert
   // В DM mode всі скіли доступні для редагування
-  const canLearnThisLevel = isDMMode || canLearnMainSkillLevel(
-    level,
-    mainSkill.id,
-    unlockedSkills
-  );
+  const canLearnThisLevel =
+    isDMMode || canLearnMainSkillLevel(level, mainSkill.id, unlockedSkills);
 
   return (
     <div
@@ -59,7 +52,9 @@ export function MainSkillLevel({
       data-partially-unlocked={hasUnlocked ? "true" : "false"}
       data-can-learn={canLearnThisLevel ? "true" : "false"}
       className={`absolute rounded-full border-2 sm:border-3 transition-all ${
-        canLearnThisLevel ? "hover:opacity-80 active:opacity-70 cursor-pointer" : "cursor-not-allowed"
+        canLearnThisLevel
+          ? "hover:opacity-80 active:opacity-70 cursor-pointer"
+          : "cursor-not-allowed"
       }`}
       onClick={() => {
         if (canLearnThisLevel && onLevelClick) {
@@ -80,7 +75,7 @@ export function MainSkillLevel({
       }}
       title={`${mainSkill.name} - ${LEVEL_NAMES[level]}${
         isMainSkillLevelLearned
-          ? " (Прокачано - дає доступ до кола 4)"
+          ? " (Прокачано - дає доступ до кола 3)"
           : canLearnThisLevel
           ? " (Не прокачано - клікніть щоб прокачати)"
           : level === SkillLevel.ADVANCED
@@ -88,10 +83,10 @@ export function MainSkillLevel({
           : " (Спочатку прокачайте Просунутий)"
       }`}
     >
-      {mainSkill.icon ? (
+      {mainSkill.levelIcons?.[level] || mainSkill.icon ? (
         <div className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-full">
           <OptimizedImage
-            src={mainSkill.icon}
+            src={mainSkill.levelIcons?.[level] || mainSkill.icon || ""}
             alt={mainSkill.name}
             width={64}
             height={64}

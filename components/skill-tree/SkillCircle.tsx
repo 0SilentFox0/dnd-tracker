@@ -77,18 +77,6 @@ export function SkillCircle({
         zIndex: Z_INDEX.skills,
       }}
       onClick={() => {
-        console.log("=== SkillCircle onClick ===");
-        console.log("isDMMode:", isDMMode);
-        console.log("onSkillSlotClick:", !!onSkillSlotClick);
-        console.log("selectedSkillFromLibrary:", selectedSkillFromLibrary);
-        console.log("skill:", skill);
-        console.log("mainSkillId:", mainSkillId);
-        console.log("circleNumber:", circleNumber);
-        console.log("skillIndex:", skillIndex);
-        console.log("isUnlocked:", isUnlocked);
-        console.log("canLearn:", canLearn);
-        console.log("onSkillClick:", !!onSkillClick);
-
         if (isDMMode && onSkillSlotClick) {
           // У режимі DM клік на слот призначає вибраний скіл цьому слоту
           // Викликаємо onSkillSlotClick завжди, навіть якщо скіл не вибрано
@@ -99,34 +87,10 @@ export function SkillCircle({
             level: skill.level,
             index: skillIndex,
           };
-          console.log("DM Mode - Calling onSkillSlotClick with:", slotData);
-          console.log("Slot data details:", {
-            mainSkillId: slotData.mainSkillId,
-            circle: slotData.circle,
-            level: slotData.level,
-            index: slotData.index,
-            selectedSkillId: selectedSkillFromLibrary,
-          });
           onSkillSlotClick(slotData);
         } else if ((canLearn || isUnlocked) && onSkillClick) {
           // У режимі Player клік на скіл прокачує його
-          console.log("Player mode - calling onSkillClick");
-          console.log("Skill to learn:", {
-            id: skill.id,
-            name: skill.name,
-            level: skill.level,
-            circle: circleNumber,
-          });
           onSkillClick(skill);
-        } else {
-          console.log("Click ignored - conditions not met");
-          console.log("Conditions check:", {
-            isDMMode,
-            hasOnSkillSlotClick: !!onSkillSlotClick,
-            canLearn,
-            isUnlocked,
-            hasOnSkillClick: !!onSkillClick,
-          });
         }
       }}
       title={`${skill.name} (Коло ${circleNumber})${
