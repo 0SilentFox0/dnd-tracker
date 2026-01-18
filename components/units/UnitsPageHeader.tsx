@@ -5,6 +5,7 @@ import Link from "next/link";
 import { UnitImportDialog } from "@/components/units/UnitImportDialog";
 import { CreateGroupDialog } from "@/components/units/CreateGroupDialog";
 import { useCreateUnitGroup } from "@/lib/hooks/useUnits";
+import { PageHeader } from "@/components/common/PageHeader";
 
 interface UnitsPageHeaderProps {
   campaignId: string;
@@ -42,13 +43,11 @@ export function UnitsPageHeader({
   };
 
   return (
-    <div className="flex flex-col gap-3 sm:gap-4">
-      <div className="flex flex-col min-w-0">
-        <h1 className="text-2xl sm:text-3xl font-bold truncate">NPC Юніти</h1>
-        <p className="text-sm sm:text-base text-muted-foreground mt-1">
-          Управління мобами та юнітами
-        </p>
-      </div>
+    <PageHeader
+      title="NPC Юніти"
+      description="Управління мобами та юнітами"
+      stats={unitsCount}
+    >
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 shrink-0">
         <UnitImportDialog campaignId={campaignId} />
         <Button
@@ -84,6 +83,6 @@ export function UnitsPageHeader({
         onConfirm={handleCreateGroup}
         isCreating={createGroupMutation.isPending}
       />
-    </div>
+    </PageHeader>
   );
 }

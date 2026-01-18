@@ -63,6 +63,7 @@ export async function updateSkill(
     magicalResistance?: number | null;
     spellId?: string | null;
     spellGroupId?: string | null;
+    mainSkillId?: string | null;
   }
 ): Promise<Skill> {
   const response = await fetch(

@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   useUnit,
-  useUnitGroups,
   useUpdateUnit,
   useDeleteUnit,
 } from "@/lib/hooks/useUnits";
+import { useRaces } from "@/lib/hooks/useRaces";
 import type { Unit } from "@/lib/api/units";
 import type { Spell } from "@/lib/api/spells";
 import { getSpells } from "@/lib/api/spells";
@@ -35,7 +35,7 @@ export default function EditUnitPage({
   const { id, unitId } = use(params);
   const router = useRouter();
   const { data: unit, isLoading: fetching } = useUnit(id, unitId);
-  const { data: unitGroups = [] } = useUnitGroups(id);
+  const { data: races = [] } = useRaces(id);
   const updateUnitMutation = useUpdateUnit(id, unitId);
   const deleteUnitMutation = useDeleteUnit(id);
   const [spells, setSpells] = useState<Spell[]>([]);
@@ -45,6 +45,7 @@ export default function EditUnitPage({
     if (unit) {
       return {
         name: unit.name,
+        race: unit.race || null,
         level: unit.level,
         strength: unit.strength,
         dexterity: unit.dexterity,
@@ -86,9 +87,9 @@ export default function EditUnitPage({
       specialAbilities: [],
       immunities: [],
       knownSpells: [],
-      groupId: null,
       avatar: null,
       damageModifier: null,
+      race: null,
     };
   }, [unit]);
 
@@ -112,8 +113,6 @@ export default function EditUnitPage({
     updateUnitMutation.mutate(
       {
         ...formData,
-        groupId:
-          formData.groupId === undefined ? undefined : formData.groupId || null,
         avatar:
           formData.avatar === undefined ? undefined : formData.avatar || null,
         damageModifier:
@@ -185,7 +184,7 @@ export default function EditUnitPage({
           <form key={unitId} onSubmit={handleSubmit} className="space-y-6">
             <UnitBasicInfo
               formData={formData}
-              unitGroups={unitGroups}
+              races={races}
               onChange={handleFormDataChange}
             />
 
@@ -206,6 +205,11 @@ export default function EditUnitPage({
 
             <UnitImmunities
               formData={formData}
+              race={
+                formData.race
+                  ? races.find((r) => r.name === formData.race) || null
+                  : null
+              }
               onChange={handleFormDataChange}
             />
 

@@ -14,6 +14,23 @@ interface RacialSkillProps {
   playerLevel?: number;
   isDMMode?: boolean;
   onRacialSkillClick?: (mainSkill: MainSkill, level: SkillLevel) => void;
+  onSelectSkillForRemoval?: (slot: {
+    mainSkillId: string;
+    circle: number;
+    level: SkillLevel;
+    index: number;
+    skillName: string;
+    isMainSkillLevel?: boolean;
+    isRacial?: boolean;
+  }) => void;
+  selectedSkillForRemoval?: {
+    mainSkillId: string;
+    circle: number;
+    level: SkillLevel;
+    index: number;
+    isMainSkillLevel?: boolean;
+    isRacial?: boolean;
+  } | null;
 }
 
 // Вимоги до рівня гравця для кожного рівня расового навику
@@ -29,6 +46,8 @@ export function RacialSkill({
   playerLevel = 1,
   isDMMode = false,
   onRacialSkillClick,
+  onSelectSkillForRemoval,
+  selectedSkillForRemoval,
 }: RacialSkillProps) {
   if (!racialSkill) return null;
 
@@ -76,6 +95,17 @@ export function RacialSkill({
           // В DM mode всі скіли доступні
           const canLearn = isDMMode || (playerLevel >= requiredLevel && canLearnBySequence);
 
+          // Перевіряємо чи скіл присвоєний (має icon для цього рівня)
+          const hasAssignedSkill = !!(racialSkill.levelIcons?.[level] || racialSkill.icon);
+
+          // Перевіряємо чи цей скіл вибраний для видалення
+          const isSelectedForRemoval = selectedSkillForRemoval
+            ? selectedSkillForRemoval.mainSkillId === racialSkill.id &&
+              selectedSkillForRemoval.level === level &&
+              selectedSkillForRemoval.index === 0 &&
+              selectedSkillForRemoval.isRacial === true // Тільки для racial
+            : false;
+
           return (
             <div
               key={level}
@@ -91,14 +121,37 @@ export function RacialSkill({
                   : "cursor-not-allowed"
               }`}
               style={{
-                backgroundColor: isLearned
+                backgroundColor: isSelectedForRemoval
+                  ? "#ef4444" // Червоний колір для вибраного для видалення
+                  : isLearned
                   ? SKILL_COLORS.unlocked
                   : SKILL_COLORS.centralLocked,
-                borderColor: canLearn ? "white" : "#6b7280",
+                borderColor: isSelectedForRemoval
+                  ? "#dc2626" // Темно-червоний border
+                  : canLearn
+                  ? "white"
+                  : "#6b7280",
+                borderWidth: isSelectedForRemoval ? "3px" : undefined,
                 opacity: isLearned ? 1 : 0.5,
               }}
               onClick={() => {
-                if (canLearn && onRacialSkillClick) {
+                if (isDMMode) {
+                  if (hasAssignedSkill && onSelectSkillForRemoval) {
+                    // Якщо скіл присвоєний - активуємо видалення
+                    onSelectSkillForRemoval({
+                      mainSkillId: racialSkill.id,
+                      circle: 1, // Placeholder для racial
+                      level,
+                      index: 0,
+                      skillName: racialSkill.name,
+                      isMainSkillLevel: false,
+                      isRacial: true,
+                    });
+                  } else if (onRacialSkillClick) {
+                    // Якщо скіл не присвоєний - призначаємо вибраний скіл
+                    onRacialSkillClick(racialSkill, level);
+                  }
+                } else if (canLearn && onRacialSkillClick) {
                   onRacialSkillClick(racialSkill, level);
                 }
               }}

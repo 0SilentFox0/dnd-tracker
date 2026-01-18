@@ -4,10 +4,10 @@ import { useState, useMemo } from "react";
 import { Accordion } from "@/components/ui/accordion";
 import {
   useUnits,
-  useUnitGroups,
   useDeleteAllUnits,
   useDeleteUnit,
 } from "@/lib/hooks/useUnits";
+import { useRaces } from "@/lib/hooks/useRaces";
 import type { Unit } from "@/lib/api/units";
 import { UnitsPageHeader } from "@/components/units/UnitsPageHeader";
 import { UnitGroupAccordion } from "@/components/units/UnitGroupAccordion";
@@ -25,12 +25,14 @@ export function DMUnitsPageClient({
   const [deleteAllUnitsDialogOpen, setDeleteAllUnitsDialogOpen] =
     useState(false);
 
-  // Запити для юнітів та груп
+  // Запити для юнітів
   const { data: units = initialUnits, isLoading: unitsLoading } = useUnits(
     campaignId,
     initialUnits
   );
-  const { data: unitGroups = [] } = useUnitGroups(campaignId);
+
+  // Запити для рас
+  const { data: races = [] } = useRaces(campaignId);
 
   // Мутації
   const deleteAllUnitsMutation = useDeleteAllUnits(campaignId);
@@ -48,19 +50,19 @@ export function DMUnitsPageClient({
     });
   };
 
-  // Групуємо юніти по групах
+  // Групуємо юніти по расах
   const groupedUnits = useMemo(() => {
     const grouped: Record<string, Unit[]> = {};
     for (const unit of units) {
-      const groupName = unit.unitGroup?.name || "Без групи";
-      if (!grouped[groupName]) {
-        grouped[groupName] = [];
+      const raceName = unit.race || "Без раси";
+      if (!grouped[raceName]) {
+        grouped[raceName] = [];
       }
-      grouped[groupName].push(unit);
+      grouped[raceName].push(unit);
     }
     return Object.entries(grouped).sort(([a], [b]) => {
-      if (a === "Без групи") return 1;
-      if (b === "Без групи") return -1;
+      if (a === "Без раси") return 1;
+      if (b === "Без раси") return -1;
       return a.localeCompare(b);
     });
   }, [units]);
@@ -88,14 +90,18 @@ export function DMUnitsPageClient({
           </p>
         </div>
       ) : (
-        <Accordion className="space-y-2 sm:space-y-4">
-          {groupedUnits.map(([groupName, groupUnits]) => (
+        <Accordion
+          type="multiple"
+          defaultValue={groupedUnits.map(([raceName]) => raceName)}
+          className="space-y-2 sm:space-y-4"
+        >
+          {groupedUnits.map(([raceName, raceUnits]) => (
             <UnitGroupAccordion
-              key={groupName}
-              groupName={groupName}
-              units={groupUnits}
+              key={raceName}
+              groupName={raceName}
+              units={raceUnits}
               campaignId={campaignId}
-              unitGroups={unitGroups}
+              races={races}
               onDeleteUnit={handleDeleteUnit}
             />
           ))}

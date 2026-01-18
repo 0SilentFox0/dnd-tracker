@@ -19,6 +19,7 @@ import {
 import Link from "next/link";
 import { useCharacterForm } from "@/lib/hooks/useCharacterForm";
 import { useCampaignMembers } from "@/lib/hooks/useCampaignMembers";
+import { useRaces } from "@/lib/hooks/useRaces";
 import { createCharacter } from "@/lib/api/characters";
 import { CharacterBasicInfo } from "@/components/characters/CharacterBasicInfo";
 import { CharacterAbilityScores } from "@/components/characters/CharacterAbilityScores";
@@ -27,6 +28,7 @@ import { CharacterSkillsSection } from "@/components/characters/CharacterSkillsS
 import { CharacterSpellsSection } from "@/components/characters/CharacterSpellsSection";
 import { CharacterLanguagesSection } from "@/components/characters/CharacterLanguagesSection";
 import { CharacterRoleplaySection } from "@/components/characters/CharacterRoleplaySection";
+import { CharacterImmunities } from "@/components/characters/CharacterImmunities";
 
 export default function NewCharacterPage({
   params,
@@ -36,6 +38,7 @@ export default function NewCharacterPage({
   const { id } = use(params);
   const router = useRouter();
   const { members, loading: membersLoading } = useCampaignMembers(id);
+  const { data: races = [] } = useRaces(id);
 
   const {
     formData,
@@ -73,21 +76,22 @@ export default function NewCharacterPage({
             </div>
           )}
           <form onSubmit={handleSubmit} className="space-y-6 w-full">
-            <Accordion>
+            <Accordion type="single" defaultValue="item-1" collapsible>
               {/* Етап 1: Загальна інформація */}
-              <AccordionItem defaultOpen>
+              <AccordionItem value="item-1">
                 <AccordionTrigger>1. Загальна інформація</AccordionTrigger>
                 <AccordionContent>
                   <CharacterBasicInfo
                     formData={formData}
                     onUpdate={updateField}
                     campaignMembers={members}
+                    races={races}
                   />
                 </AccordionContent>
               </AccordionItem>
 
               {/* Етап 2: Основні характеристики */}
-              <AccordionItem>
+              <AccordionItem value="item-2">
                 <AccordionTrigger>2. Основні характеристики</AccordionTrigger>
                 <AccordionContent>
                   <CharacterAbilityScores
@@ -98,7 +102,7 @@ export default function NewCharacterPage({
               </AccordionItem>
 
               {/* Етап 3: Бойові параметри */}
-              <AccordionItem>
+              <AccordionItem value="item-3">
                 <AccordionTrigger>3. Бойові параметри</AccordionTrigger>
                 <AccordionContent>
                   <CharacterCombatParams
@@ -109,7 +113,7 @@ export default function NewCharacterPage({
               </AccordionItem>
 
               {/* Етап 4: Навички та Збереження */}
-              <AccordionItem>
+              <AccordionItem value="item-4">
                 <AccordionTrigger>4. Навички та Збереження</AccordionTrigger>
                 <AccordionContent>
                   <CharacterSkillsSection
@@ -120,9 +124,9 @@ export default function NewCharacterPage({
                 </AccordionContent>
               </AccordionItem>
 
-              {/* Етап 5: Заклинання */}
-              <AccordionItem>
-                <AccordionTrigger>5. Заклинання</AccordionTrigger>
+              {/* Етап 5: Магічна Книга */}
+              <AccordionItem value="item-5">
+                <AccordionTrigger>5. Магічна Книга</AccordionTrigger>
                 <AccordionContent>
                   <CharacterSpellsSection
                     formData={formData}
@@ -135,7 +139,7 @@ export default function NewCharacterPage({
               </AccordionItem>
 
               {/* Етап 6: Мови та Профісії */}
-              <AccordionItem>
+              <AccordionItem value="item-6">
                 <AccordionTrigger>6. Мови та Профісії</AccordionTrigger>
                 <AccordionContent>
                   <CharacterLanguagesSection
@@ -147,9 +151,25 @@ export default function NewCharacterPage({
                 </AccordionContent>
               </AccordionItem>
 
-              {/* Етап 7: Рольова гра */}
-              <AccordionItem>
-                <AccordionTrigger>7. Рольова гра</AccordionTrigger>
+              {/* Етап 7: Імунітети */}
+              <AccordionItem value="item-7">
+                <AccordionTrigger>7. Імунітети</AccordionTrigger>
+                <AccordionContent>
+                  <CharacterImmunities
+                    formData={formData}
+                    race={
+                      formData.race
+                        ? races.find((r) => r.name === formData.race) || null
+                        : null
+                    }
+                    onUpdate={updateField}
+                  />
+                </AccordionContent>
+              </AccordionItem>
+
+              {/* Етап 8: Рольова гра */}
+              <AccordionItem value="item-8">
+                <AccordionTrigger>8. Рольова гра</AccordionTrigger>
                 <AccordionContent>
                   <CharacterRoleplaySection
                     formData={formData}

@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { createClient } from "@/lib/supabase/server";
+import { requireDM, requireCampaignAccess, validateCampaignOwnership } from "@/lib/utils/api-auth";
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
 
 const updateUnitSchema = z.object({
   name: z.string().min(1).max(100).optional(),
+  race: z.string().optional().nullable(),
   groupId: z.string().optional().nullable(),
   damageModifier: z.preprocess(
     (val) => (val === "" ? null : val),
@@ -61,27 +62,11 @@ export async function GET(
 ) {
   try {
     const { id, unitId } = await params;
-    const supabase = await createClient();
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = authUser.id;
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
-      include: {
-        members: {
-          where: { userId },
-        },
-      },
-    });
-
-    if (!campaign || campaign.members.length === 0) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    
+    // Перевіряємо доступ до кампанії (не обов'язково DM)
+    const accessResult = await requireCampaignAccess(id, false);
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
     }
 
     const unit = await prisma.unit.findUnique({
@@ -91,8 +76,9 @@ export async function GET(
       },
     });
 
-    if (!unit || unit.campaignId !== id) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const validationError = validateCampaignOwnership(unit, id);
+    if (validationError) {
+      return validationError;
     }
 
     return NextResponse.json(unit);
@@ -111,35 +97,20 @@ export async function DELETE(
 ) {
   try {
     const { id, unitId } = await params;
-    const supabase = await createClient();
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = authUser.id;
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
-      include: {
-        members: {
-          where: { userId },
-        },
-      },
-    });
-
-    if (!campaign || campaign.members[0]?.role !== "dm") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    
+    // Перевіряємо права DM
+    const accessResult = await requireDM(id);
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
     }
 
     const unit = await prisma.unit.findUnique({
       where: { id: unitId },
     });
 
-    if (!unit || unit.campaignId !== id) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const validationError = validateCampaignOwnership(unit, id);
+    if (validationError) {
+      return validationError;
     }
 
     await prisma.unit.delete({
@@ -162,35 +133,20 @@ export async function PATCH(
 ) {
   try {
     const { id, unitId } = await params;
-    const supabase = await createClient();
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = authUser.id;
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
-      include: {
-        members: {
-          where: { userId },
-        },
-      },
-    });
-
-    if (!campaign || campaign.members[0]?.role !== "dm") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    
+    // Перевіряємо права DM
+    const accessResult = await requireDM(id);
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
     }
 
     const unit = await prisma.unit.findUnique({
       where: { id: unitId },
     });
 
-    if (!unit || unit.campaignId !== id) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const validationError = validateCampaignOwnership(unit, id);
+    if (validationError) {
+      return validationError;
     }
 
     const body = await request.json();
@@ -213,6 +169,7 @@ export async function PATCH(
       where: { id: unitId },
       data: {
         name: data.name,
+        race: data.race !== undefined ? data.race : undefined,
         groupId: data.groupId !== undefined ? data.groupId : undefined,
         groupColor: data.groupId !== undefined ? groupColor : undefined,
         damageModifier:

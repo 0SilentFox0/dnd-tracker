@@ -8,7 +8,11 @@ import type {
   Skill,
   UltimateSkill,
 } from "@/lib/types/skill-tree";
-import { MAIN_SKILLS, SkillLevel } from "@/lib/types/skill-tree";
+import {
+  SkillLevel,
+  SkillCircle as SkillCircleEnum,
+} from "@/lib/types/skill-tree";
+import type { MainSkill as MainSkillType } from "@/lib/types/main-skills";
 
 // Генерація мокових навиків для основного навику
 function generateSkillsForMainSkill(
@@ -21,19 +25,19 @@ function generateSkillsForMainSkill(
     [SkillLevel.EXPERT]: "Експертний",
   };
 
-  const circleNames: Record<1 | 2 | 3, string> = {
-    1: "I",
-    2: "II",
-    3: "III",
+  const circleNames: Record<SkillCircleEnum, string> = {
+    [SkillCircleEnum.INNER]: "I",
+    [SkillCircleEnum.MIDDLE]: "II",
+    [SkillCircleEnum.OUTER]: "III",
   };
 
   const generateSkill = (
-    circle: 1 | 2 | 3, // circle1, circle2, circle3 в структурі
+    circle: SkillCircleEnum, // circle1, circle2, circle3 в структурі
     level: SkillLevel,
     index: number
   ): Skill => {
-    // Мапінг: circle3 → коло 3, circle2 → коло 2, circle1 → коло 1
-    const skillCircle: 1 | 2 | 3 = circle;
+    // Мапінг: circle3 → коло OUTER (3), circle2 → коло MIDDLE (2), circle1 → коло INNER (1)
+    const skillCircle: SkillCircleEnum = circle;
     return {
       id: `${mainSkillId}_${level}_circle${circle}_skill${index}`,
       name: `${mainSkillName} ${levelNames[level]} ${circleNames[skillCircle]}-${index}`,
@@ -45,39 +49,39 @@ function generateSkillsForMainSkill(
 
   return {
     [SkillLevel.BASIC]: {
-      circle1: [generateSkill(1, SkillLevel.BASIC, 1)],
+      circle1: [generateSkill(SkillCircleEnum.INNER, SkillLevel.BASIC, 1)],
       circle2: [
-        generateSkill(2, SkillLevel.BASIC, 1),
-        generateSkill(2, SkillLevel.BASIC, 2),
+        generateSkill(SkillCircleEnum.MIDDLE, SkillLevel.BASIC, 1),
+        generateSkill(SkillCircleEnum.MIDDLE, SkillLevel.BASIC, 2),
       ],
       circle3: [
-        generateSkill(3, SkillLevel.BASIC, 1),
-        generateSkill(3, SkillLevel.BASIC, 2),
-        generateSkill(3, SkillLevel.BASIC, 3),
+        generateSkill(SkillCircleEnum.OUTER, SkillLevel.BASIC, 1),
+        generateSkill(SkillCircleEnum.OUTER, SkillLevel.BASIC, 2),
+        generateSkill(SkillCircleEnum.OUTER, SkillLevel.BASIC, 3),
       ],
     },
     [SkillLevel.ADVANCED]: {
-      circle1: [generateSkill(1, SkillLevel.ADVANCED, 1)],
+      circle1: [generateSkill(SkillCircleEnum.INNER, SkillLevel.ADVANCED, 1)],
       circle2: [
-        generateSkill(2, SkillLevel.ADVANCED, 1),
-        generateSkill(2, SkillLevel.ADVANCED, 2),
+        generateSkill(SkillCircleEnum.MIDDLE, SkillLevel.ADVANCED, 1),
+        generateSkill(SkillCircleEnum.MIDDLE, SkillLevel.ADVANCED, 2),
       ],
       circle3: [
-        generateSkill(3, SkillLevel.ADVANCED, 1),
-        generateSkill(3, SkillLevel.ADVANCED, 2),
-        generateSkill(3, SkillLevel.ADVANCED, 3),
+        generateSkill(SkillCircleEnum.OUTER, SkillLevel.ADVANCED, 1),
+        generateSkill(SkillCircleEnum.OUTER, SkillLevel.ADVANCED, 2),
+        generateSkill(SkillCircleEnum.OUTER, SkillLevel.ADVANCED, 3),
       ],
     },
     [SkillLevel.EXPERT]: {
-      circle1: [generateSkill(1, SkillLevel.EXPERT, 1)],
+      circle1: [generateSkill(SkillCircleEnum.INNER, SkillLevel.EXPERT, 1)],
       circle2: [
-        generateSkill(2, SkillLevel.EXPERT, 1),
-        generateSkill(2, SkillLevel.EXPERT, 2),
+        generateSkill(SkillCircleEnum.MIDDLE, SkillLevel.EXPERT, 1),
+        generateSkill(SkillCircleEnum.MIDDLE, SkillLevel.EXPERT, 2),
       ],
       circle3: [
-        generateSkill(3, SkillLevel.EXPERT, 1),
-        generateSkill(3, SkillLevel.EXPERT, 2),
-        generateSkill(3, SkillLevel.EXPERT, 3),
+        generateSkill(SkillCircleEnum.OUTER, SkillLevel.EXPERT, 1),
+        generateSkill(SkillCircleEnum.OUTER, SkillLevel.EXPERT, 2),
+        generateSkill(SkillCircleEnum.OUTER, SkillLevel.EXPERT, 3),
       ],
     },
   };
@@ -103,9 +107,29 @@ function addPrerequisites(skills: MainSkill["levels"]): MainSkill["levels"] {
 // Створюємо мокове дерево прокачки для раси
 export function createMockSkillTree(
   campaignId: string,
-  race: string
+  race: string,
+  mainSkillsData?: MainSkillType[]
 ): SkillTree {
-  const mainSkills: MainSkill[] = MAIN_SKILLS.map((ms) => {
+  // Якщо передано mainSkillsData, використовуємо їх, інакше створюємо дефолтні
+  const defaultMainSkills: MainSkillType[] = [
+    { id: "attack", name: "Напад", color: "rgba(217, 78, 74, 1)", campaignId, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: "defense", name: "Захист", color: "darkblue", campaignId, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: "archery", name: "Стрільба", color: "forestgreen", campaignId, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: "leadership", name: "Лідерство", color: "sandybrown", campaignId, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: "learning", name: "Навчання", color: "gainsboro", campaignId, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: "sorcery", name: "Чародійство", color: "#ae2978", campaignId, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: "light_magic", name: "Світла магія", color: "yellow", campaignId, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: "dark_magic", name: "Темна магія", color: "darkred", campaignId, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: "chaos_magic", name: "Магія Хаосу", color: "dodgerblue", campaignId, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: "summoning_magic", name: "Магія Призиву", color: "sandybrown", campaignId, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: "racial", name: "Рассовий Навик", color: "gainsboro", campaignId, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  ];
+  
+  const skillsToUse = mainSkillsData || defaultMainSkills;
+  
+  // Зберігаємо порядок з mainSkillsData (якщо передано), інакше використовуємо порядок defaultMainSkills
+  // Це важливо для правильного відображення кольорів секторів
+  const mainSkills: MainSkill[] = skillsToUse.map((ms) => {
     const skills = generateSkillsForMainSkill(ms.id, ms.name);
     const skillsWithPrerequisites = addPrerequisites(skills);
 

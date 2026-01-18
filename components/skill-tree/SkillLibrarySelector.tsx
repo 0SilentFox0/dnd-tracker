@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { SkillFromLibrary } from "@/lib/hooks/useSkills";
+import type { MainSkill } from "@/lib/types/main-skills";
 
 interface SkillLibrarySelectorProps {
   skills: SkillFromLibrary[];
@@ -15,6 +16,7 @@ interface SkillLibrarySelectorProps {
     groups: Record<string, SkillFromLibrary[]>;
     ungrouped: SkillFromLibrary[];
   };
+  mainSkills?: MainSkill[];
   selectedSkillId: string | null;
   onSkillSelect: (skillId: string | null) => void;
 }
@@ -22,6 +24,7 @@ interface SkillLibrarySelectorProps {
 export function SkillLibrarySelector({
   skills,
   groupedSkills,
+  mainSkills = [],
   selectedSkillId,
   onSkillSelect,
 }: SkillLibrarySelectorProps) {
@@ -49,15 +52,13 @@ export function SkillLibrarySelector({
             </SelectItem>
           ) : (
             <>
-              {/* Групи скілів */}
+              {/* Групи скілів по основним навикам */}
               {hasGroups &&
-                Object.entries(groupedSkills.groups).map(([groupId, groupSkills]) => {
-                  const firstSkill = groupSkills[0] as SkillFromLibrary & { spellGroup?: { id: string; name: string } | null; spellGroupName?: string };
-                  const groupName = firstSkill?.spellGroup?.name || 
-                                   firstSkill?.spellGroupName || 
-                                   `Група ${groupId}`;
+                Object.entries(groupedSkills.groups).map(([mainSkillId, groupSkills]) => {
+                  const mainSkill = mainSkills.find((ms) => ms.id === mainSkillId);
+                  const groupName = mainSkill?.name || `Група ${mainSkillId}`;
                   return (
-                    <div key={groupId}>
+                    <div key={mainSkillId}>
                       <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
                         {groupName}
                       </div>

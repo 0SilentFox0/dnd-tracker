@@ -1,6 +1,12 @@
 /**
  * Enum для характеристик збереження заклинань
+з * Значення наслідуються від ABILITY_SCORES
  */
+import { ABILITY_SCORES } from "./abilities";
+
+// Отримуємо ключі основних характеристик з ABILITY_SCORES
+const ABILITY_KEYS = ABILITY_SCORES.slice(0, 6).map((a) => a.key);
+
 export enum SpellSavingThrowAbility {
   STRENGTH = "strength",
   DEXTERITY = "dexterity",
@@ -8,6 +14,18 @@ export enum SpellSavingThrowAbility {
   INTELLIGENCE = "intelligence",
   WISDOM = "wisdom",
   CHARISMA = "charisma",
+}
+
+// Перевірка що всі значення enum відповідають ABILITY_SCORES
+const enumValues = Object.values(SpellSavingThrowAbility);
+if (
+  !enumValues.every((val) =>
+    ABILITY_KEYS.includes(val as (typeof ABILITY_KEYS)[number])
+  )
+) {
+  throw new Error(
+    "SpellSavingThrowAbility enum values must match ABILITY_SCORES"
+  );
 }
 
 /**
@@ -27,7 +45,7 @@ export enum SpellType {
 }
 
 /**
- * Enum для типів урону заклинань
+ * Enum для типів шкоди заклинань
  */
 export enum SpellDamageType {
   DAMAGE = "damage",

@@ -5,16 +5,27 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import type { Unit } from "@/lib/api/units";
+import type { Race } from "@/lib/types/races";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { getDamageElementLabel } from "@/lib/constants/damage";
+import {
+  getUnitDamageModifiers,
+  getUnitImmunities,
+} from "@/lib/utils/race-effects";
 
 interface UnitCardProps {
   unit: Unit;
   campaignId: string;
+  race?: Race | null;
   onDelete: (unitId: string) => void;
 }
 
-export function UnitCard({ unit, campaignId, onDelete }: UnitCardProps) {
+export function UnitCard({
+  unit,
+  campaignId,
+  race,
+  onDelete,
+}: UnitCardProps) {
   const attacks: Unit["attacks"] = Array.isArray(unit.attacks)
     ? unit.attacks
     : [];
@@ -23,12 +34,15 @@ export function UnitCard({ unit, campaignId, onDelete }: UnitCardProps) {
   )
     ? unit.specialAbilities
     : [];
-  const damageModifiers = [
-    unit.damageModifier ? getDamageElementLabel(unit.damageModifier) : null,
-    unit.unitGroup?.damageModifier
-      ? `${getDamageElementLabel(unit.unitGroup.damageModifier)} (група)`
-      : null,
-  ].filter(Boolean) as string[];
+
+  // Отримуємо модифікатори урону з раси та юніта
+  const allDamageModifiers = getUnitDamageModifiers(unit, race);
+  const damageModifiers = allDamageModifiers
+    .map((modifier) => getDamageElementLabel(modifier))
+    .filter(Boolean);
+
+  // Отримуємо імунітети з раси та юніта
+  const allImmunities = getUnitImmunities(unit, race);
 
   return (
     <div className="border rounded-lg p-4 hover:shadow-md transition-shadow space-y-3">
@@ -123,6 +137,24 @@ export function UnitCard({ unit, campaignId, onDelete }: UnitCardProps) {
               +{specialAbilities.length - 1} інших...
             </div>
           )}
+        </div>
+      )}
+
+      {allImmunities.length > 0 && (
+        <div className="space-y-1">
+          <div className="text-xs font-semibold">Імунітети:</div>
+          <div className="flex flex-wrap gap-1">
+            {allImmunities.slice(0, 3).map((immunity, idx) => (
+              <Badge key={idx} variant="outline" className="text-xs">
+                {immunity}
+              </Badge>
+            ))}
+            {allImmunities.length > 3 && (
+              <Badge variant="outline" className="text-xs">
+                +{allImmunities.length - 3}
+              </Badge>
+            )}
+          </div>
         </div>
       )}
 

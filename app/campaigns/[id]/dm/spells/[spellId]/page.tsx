@@ -28,7 +28,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Link from "next/link";
+import { DAMAGE_MODIFIER_OPTIONS, HEAL_MODIFIER_OPTIONS, SPELL_TARGET_OPTIONS } from "@/lib/constants/spells";
 import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
+import { DICE_OPTIONS } from "@/lib/constants/dice";
 
 export default function EditSpellPage({
   params,
@@ -40,16 +42,19 @@ export default function EditSpellPage({
   const [formData, setFormData] = useState<Partial<Spell>>({
     name: "",
     level: 0,
-    school: "",
     type: "target",
+    target: null,
     damageType: "damage",
     damageElement: null,
+    damageModifier: null,
+    healModifier: null,
     castingTime: "",
     range: "",
     components: "",
     duration: "",
     concentration: false,
-    damageDice: "",
+    diceCount: null,
+    diceType: null,
     savingThrow: null,
     description: "",
     groupId: null,
@@ -67,16 +72,19 @@ export default function EditSpellPage({
       setFormData({
         name: spell.name,
         level: spell.level,
-        school: spell.school || "",
         type: spell.type,
+        target: spell.target || null,
         damageType: spell.damageType,
         damageElement: spell.damageElement || null,
+        damageModifier: spell.damageModifier || null,
+        healModifier: spell.healModifier || null,
         castingTime: spell.castingTime || "",
         range: spell.range || "",
         components: spell.components || "",
         duration: spell.duration || "",
         concentration: spell.concentration,
-        damageDice: spell.damageDice || "",
+        diceCount: spell.diceCount || null,
+        diceType: spell.diceType || null,
         savingThrow: spell.savingThrow,
         description: spell.description,
         groupId: spell.groupId,
@@ -91,16 +99,19 @@ export default function EditSpellPage({
     updateSpellMutation.mutate(
       {
         ...formData,
-        school: formData.school || null,
+        target: formData.target || null,
+        damageElement: formData.damageElement || null,
+        damageModifier: formData.damageModifier || null,
+        healModifier: formData.healModifier || null,
         castingTime: formData.castingTime || null,
         range: formData.range || null,
         components: formData.components || null,
         duration: formData.duration || null,
-        damageDice: formData.damageDice || null,
+        diceCount: formData.diceCount || null,
+        diceType: formData.diceType || null,
         savingThrow: formData.savingThrow || null,
         groupId: formData.groupId || null,
         icon: formData.icon || null,
-        damageElement: formData.damageElement || null,
       },
       {
         onSuccess: () => {
@@ -201,18 +212,6 @@ export default function EditSpellPage({
               </div>
 
               <div>
-                <Label htmlFor="school">Школа магії</Label>
-                <Input
-                  id="school"
-                  value={formData.school || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, school: e.target.value })
-                  }
-                  placeholder="Школа магії"
-                />
-              </div>
-
-              <div>
                 <Label htmlFor="groupId">Група заклинань</Label>
                 <Select
                   value={formData.groupId || ""}
@@ -256,40 +255,22 @@ export default function EditSpellPage({
               </div>
 
               <div>
-                <Label htmlFor="damageType">Тип урону/ефекту *</Label>
+                <Label htmlFor="target">Ціль</Label>
                 <Select
-                  value={formData.damageType}
-                  onValueChange={(value: "damage" | "heal") =>
-                    setFormData({ ...formData, damageType: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="damage">Урон</SelectItem>
-                    <SelectItem value="heal">Лікування</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Модифікатор шкоди</Label>
-                <Select
-                  value={formData.damageElement || "none"}
+                  value={formData.target || "none"}
                   onValueChange={(value) =>
                     setFormData({
                       ...formData,
-                      damageElement: value === "none" ? null : value,
+                      target: value === "none" ? null : value,
                     })
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Без модифікатора" />
+                    <SelectValue placeholder="Виберіть ціль" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">Без модифікатора</SelectItem>
-                    {DAMAGE_ELEMENT_OPTIONS.map((option) => (
+                    <SelectItem value="none">Не вказано</SelectItem>
+                    {SPELL_TARGET_OPTIONS.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
                       </SelectItem>
@@ -297,6 +278,105 @@ export default function EditSpellPage({
                   </SelectContent>
                 </Select>
               </div>
+
+              <div>
+                <Label htmlFor="damageType">Тип шкоди/ефекту *</Label>
+                <Select
+                  value={formData.damageType}
+                  onValueChange={(value: "damage" | "heal" | "all") =>
+                    setFormData({ ...formData, damageType: value, damageModifier: value === "damage" || value === "all" ? formData.damageModifier : null, healModifier: value === "heal" ? formData.healModifier : null })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="damage">Шкода</SelectItem>
+                    <SelectItem value="heal">Лікування</SelectItem>
+                    <SelectItem value="all">Усі</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {(formData.damageType === "damage" || formData.damageType === "all") && (
+                <>
+                  <div>
+                    <Label>Елемент шкоди</Label>
+                    <Select
+                      value={formData.damageElement || "none"}
+                      onValueChange={(value) =>
+                        setFormData({
+                          ...formData,
+                          damageElement: value === "none" ? null : value,
+                        })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Без елементу" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Без елементу</SelectItem>
+                        {DAMAGE_ELEMENT_OPTIONS.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Модифікатор шкоди</Label>
+                    <Select
+                      value={formData.damageModifier || "none"}
+                      onValueChange={(value) =>
+                        setFormData({
+                          ...formData,
+                          damageModifier: value === "none" ? null : value,
+                        })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Без модифікатора" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Без модифікатора</SelectItem>
+                        {DAMAGE_MODIFIER_OPTIONS.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
+
+              {formData.damageType === "heal" && (
+                <div>
+                  <Label>Модифікатор лікування</Label>
+                  <Select
+                    value={formData.healModifier || "none"}
+                    onValueChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        healModifier: value === "none" ? null : value,
+                      })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Без модифікатора" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Без модифікатора</SelectItem>
+                      {HEAL_MODIFIER_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               <div>
                 <Label htmlFor="castingTime">Час створення</Label>
@@ -346,16 +426,48 @@ export default function EditSpellPage({
                 />
               </div>
 
-              <div>
-                <Label htmlFor="damageDice">Кубики урону</Label>
-                <Input
-                  id="damageDice"
-                  value={formData.damageDice || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, damageDice: e.target.value })
-                  }
-                  placeholder="1d6"
-                />
+              <div className="md:col-span-2">
+                <Label htmlFor="dice">
+                  {formData.damageType === "heal" ? "Кубики лікування" : "Кубики шкоди"}
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="diceCount"
+                    type="number"
+                    min="0"
+                    max="10"
+                    value={formData.diceCount ?? ""}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        diceCount: e.target.value === "" ? null : parseInt(e.target.value) || 0,
+                      })
+                    }
+                    placeholder="0"
+                    className="w-20"
+                  />
+                  <Select
+                    value={formData.diceType || "none"}
+                    onValueChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        diceType: value === "none" ? null : value,
+                      })
+                    }
+                  >
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder="Тип кубика" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Без кубиків</SelectItem>
+                      {DICE_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               <div className="flex items-center space-x-2">
@@ -447,7 +559,7 @@ export default function EditSpellPage({
                       <SelectValue placeholder="Виберіть ефект" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="half">Половина урону</SelectItem>
+                      <SelectItem value="half">Половина шкоди</SelectItem>
                       <SelectItem value="none">Без урону</SelectItem>
                     </SelectContent>
                   </Select>
@@ -473,7 +585,7 @@ export default function EditSpellPage({
               <Label htmlFor="icon">Посилання на картинку</Label>
               <Input
                 id="icon"
-                type="url"
+                type="text"
                 value={formData.icon || ""}
                 onChange={(e) =>
                   setFormData({ ...formData, icon: e.target.value || null })
@@ -495,6 +607,7 @@ export default function EditSpellPage({
                         const target = e.target as HTMLImageElement;
                         target.style.display = "none";
                       }}
+                      referrerPolicy="no-referrer"
                     />
                   </div>
                 </div>

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { requireDM, validateCampaignOwnership } from "@/lib/utils/api-auth";
 
 const updateSpellGroupSchema = z.object({
   name: z.string().min(1).max(100).optional(),
@@ -13,35 +13,20 @@ export async function PATCH(
 ) {
   try {
     const { id, groupId } = await params;
-    const supabase = await createClient();
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = authUser.id;
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
-      include: {
-        members: {
-          where: { userId },
-        },
-      },
-    });
-
-    if (!campaign || campaign.members[0]?.role !== "dm") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    
+    // Перевіряємо права DM
+    const accessResult = await requireDM(id);
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
     }
 
     const spellGroup = await prisma.spellGroup.findUnique({
       where: { id: groupId },
     });
 
-    if (!spellGroup || spellGroup.campaignId !== id) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const validationError = validateCampaignOwnership(spellGroup, id);
+    if (validationError) {
+      return validationError;
     }
 
     const body = await request.json();
@@ -73,35 +58,20 @@ export async function DELETE(
 ) {
   try {
     const { id, groupId } = await params;
-    const supabase = await createClient();
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = authUser.id;
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
-      include: {
-        members: {
-          where: { userId },
-        },
-      },
-    });
-
-    if (!campaign || campaign.members[0]?.role !== "dm") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    
+    // Перевіряємо права DM
+    const accessResult = await requireDM(id);
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
     }
 
     const spellGroup = await prisma.spellGroup.findUnique({
       where: { id: groupId },
     });
 
-    if (!spellGroup || spellGroup.campaignId !== id) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const validationError = validateCampaignOwnership(spellGroup, id);
+    if (validationError) {
+      return validationError;
     }
 
     // Видаляємо групу (заклинання автоматично втратять зв'язок через onDelete: SetNull в схемі)

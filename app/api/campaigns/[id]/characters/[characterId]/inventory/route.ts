@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { requireAuth, requireDM, validateCampaignOwnership } from "@/lib/utils/api-auth";
 import { Prisma } from "@prisma/client";
 
 const inventoryItemSchema = z.object({
@@ -24,28 +24,11 @@ export async function PATCH(
 ) {
   try {
     const { id, characterId } = await params;
-    const supabase = await createClient();
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
     
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = authUser.id;
     // Перевіряємо права DM
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
-      include: {
-        members: {
-          where: { userId },
-        },
-      },
-    });
-
-    if (!campaign || campaign.members[0]?.role !== "dm") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const accessResult = await requireDM(id);
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
     }
 
     const character = await prisma.character.findUnique({
@@ -55,8 +38,14 @@ export async function PATCH(
       },
     });
 
-    if (!character || character.campaignId !== id) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const validationError = validateCampaignOwnership(character, id);
+    if (validationError) {
+      return validationError;
+    }
+
+    // Після перевірки character гарантовано не null
+    if (!character) {
+      return NextResponse.json({ error: "Character not found" }, { status: 404 });
     }
 
     const body = await request.json();
@@ -117,16 +106,14 @@ export async function GET(
 ) {
   try {
     const { id, characterId } = await params;
-    const supabase = await createClient();
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
     
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // Перевіряємо авторизацію
+    const authResult = await requireAuth();
+    if (authResult instanceof NextResponse) {
+      return authResult;
     }
 
-    const userId = authUser.id;
+    const { userId } = authResult;
     const character = await prisma.character.findUnique({
       where: { id: characterId },
       include: {

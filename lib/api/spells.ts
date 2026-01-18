@@ -2,16 +2,19 @@ export interface Spell {
   id: string;
   name: string;
   level: number;
-  school: string | null;
   type: string;
+  target: string | null;
   damageType: string;
   damageElement: string | null;
+  damageModifier: string | null;
+  healModifier: string | null;
   castingTime: string | null;
   range: string | null;
   components: string | null;
   duration: string | null;
   concentration: boolean;
-  damageDice: string | null;
+  diceCount: number | null;
+  diceType: string | null;
   savingThrow:
     | {
         ability: string;
@@ -117,6 +120,26 @@ export async function deleteAllSpells(
     }
   );
   if (!response.ok) throw new Error("Failed to delete all spells");
+  return response.json();
+}
+
+export async function createSpell(
+  campaignId: string,
+  data: Partial<Spell> & { name: string; description: string; type: string; damageType: string }
+): Promise<Spell> {
+  const response = await fetch(`/api/campaigns/${campaignId}/spells`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to create spell");
+  }
+
   return response.json();
 }
 

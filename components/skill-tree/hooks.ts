@@ -1,51 +1,52 @@
 import { useMemo } from "react";
 import type { SkillTree, Skill, MainSkill } from "@/lib/types/skill-tree";
+import type { Race } from "@/lib/types/races";
 import {
-  RACE_MAGIC,
-  DISABLED_SKILLS_BY_RACE,
   SkillLevel,
   SKILL_LEVELS,
+  SkillCircle as SkillCircleEnum,
 } from "@/lib/types/skill-tree";
 
 // Хук для фільтрації основних навиків
-export function useAvailableMainSkills(skillTree: SkillTree) {
+export function useAvailableMainSkills(
+  skillTree: SkillTree,
+  race?: Race | null
+) {
   return useMemo(() => {
-    const filtered = skillTree.mainSkills.filter((ms) => {
-      // Виключаємо расовий навик
-      if (ms.id === "racial") {
-        return false;
-      }
-      // Магія доступна залежно від раси
-      if (ms.id === "light_magic") {
-        const available =
-          RACE_MAGIC[skillTree.race]?.includes("light") ?? false;
-        return available;
-      }
-      if (ms.id === "dark_magic") {
-        const available = RACE_MAGIC[skillTree.race]?.includes("dark") ?? false;
-        return available;
-      }
-      if (ms.id === "chaos_magic") {
-        const available =
-          RACE_MAGIC[skillTree.race]?.includes("chaos") ?? false;
-        return available;
-      }
-      if (ms.id === "summoning_magic") {
-        const available =
-          RACE_MAGIC[skillTree.race]?.includes("summoning") ?? false;
-        return available;
-      }
-      // Перевіряємо, чи навик не відключений для цієї раси
-      const disabledSkills = DISABLED_SKILLS_BY_RACE[skillTree.race] ?? [];
-      if (disabledSkills.includes(ms.id)) {
-        return false;
-      }
-      // Всі інші навики (атака, захист, стрільба, лідерство, навчання, чародійство) доступні для всіх рас
-      return true;
-    });
+    // Отримуємо доступні навики з налаштувань раси
+    const availableSkills = race
+      ? Array.isArray(race.availableSkills)
+        ? race.availableSkills
+        : []
+      : [];
+
+    // Зберігаємо оригінальний порядок з skillTree.mainSkills
+    // Фільтруємо, але зберігаємо порядок елементів
+    const filtered = skillTree.mainSkills
+      .filter((ms) => {
+        // Виключаємо расовий навик
+        if (ms.id === "racial") {
+          return false;
+        }
+
+        // Якщо є налаштування раси з availableSkills, показуємо тільки доступні
+        // Всі невказані автоматично недоступні
+        if (availableSkills.length > 0) {
+          return availableSkills.includes(ms.id);
+        }
+
+        // Якщо немає налаштувань раси (порожній масив), всі навики доступні
+        return true;
+      })
+      // Сортуємо за оригінальним порядком з skillTree.mainSkills
+      .sort((a, b) => {
+        const indexA = skillTree.mainSkills.findIndex((ms) => ms.id === a.id);
+        const indexB = skillTree.mainSkills.findIndex((ms) => ms.id === b.id);
+        return indexA - indexB;
+      });
 
     return filtered;
-  }, [skillTree]);
+  }, [skillTree, race]);
 }
 
 // Хук для отримання расового навику
@@ -141,18 +142,18 @@ export function canLearnSkill(
   if (skillTree) {
     const circle4Count = getCircle4UnlockedCount(skillTree, unlockedSkills);
 
-    // Коло 3 - доступне відразу (початок прокачки)
-    if (skill.circle === 3) {
+    // Коло OUTER (3) - доступне відразу (початок прокачки)
+    if (skill.circle === SkillCircleEnum.OUTER) {
       return true;
     }
 
-    // Коло 2 - доступне після прокачки 1 навики з кола 3 (будь-якої)
-    if (skill.circle === 2) {
+    // Коло MIDDLE (2) - доступне після прокачки 1 навики з кола OUTER (будь-якої)
+    if (skill.circle === SkillCircleEnum.MIDDLE) {
       return circle4Count >= 1;
     }
 
-    // Коло 1 - доступне після прокачки 2 навик з кола 3
-    if (skill.circle === 1) {
+    // Коло INNER (1) - доступне після прокачки 2 навик з кола OUTER
+    if (skill.circle === SkillCircleEnum.INNER) {
       return circle4Count >= 2;
     }
   }

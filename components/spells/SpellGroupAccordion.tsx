@@ -92,23 +92,25 @@ export function SpellGroupAccordion({
 
   return (
     <>
-      <AccordionItem key={groupName} defaultOpen={true}>
-        <AccordionTrigger className="px-4 sm:px-6  relative">
-          <div className="flex items-center gap-3 sm:gap-4 text-left w-full">
-            <SpellGroupIcon
-              groupName={groupName}
-              className="h-6 w-6 sm:h-7 sm:w-7 shrink-0"
-            />
-            <div className="flex-1 min-w-0">
-              <CardTitle className="text-lg truncate">{groupName}</CardTitle>
-              <CardDescription className="mt-1">
-                {totalSpells} заклинань
-              </CardDescription>
+      <AccordionItem value={groupName} key={groupName}>
+        <div className="relative">
+          <AccordionTrigger className="px-4 sm:px-6">
+            <div className="flex items-center gap-3 sm:gap-4 text-left w-full">
+              <SpellGroupIcon
+                groupName={groupName}
+                className="h-6 w-6 sm:h-7 sm:w-7 shrink-0"
+              />
+              <div className="flex-1 min-w-0">
+                <CardTitle className="text-lg truncate">{groupName}</CardTitle>
+                <CardDescription className="mt-1">
+                  {totalSpells} заклинань
+                </CardDescription>
+              </div>
             </div>
-          </div>
+          </AccordionTrigger>
           {!isUngrouped && groupId && (
             <div
-              className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 z-10"
+              className="absolute right-12 sm:right-14 top-1/2 -translate-y-1/2 z-10"
               onClick={(e) => e.stopPropagation()}
               onMouseDown={(e) => e.stopPropagation()}
             >
@@ -145,9 +147,13 @@ export function SpellGroupAccordion({
               </DropdownMenu>
             </div>
           )}
-        </AccordionTrigger>
+        </div>
         <AccordionContent>
-          <Accordion className="space-y-2">
+          <Accordion
+            type="multiple"
+            defaultValue={levels.map(([levelName]) => levelName)}
+            className="space-y-2"
+          >
             {levels.map(([levelName, levelSpells]) => {
               const level = levelSpells[0]?.level ?? 0;
               return (

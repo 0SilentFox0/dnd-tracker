@@ -88,7 +88,11 @@ export function DMSpellsPageClient({
           </p>
         </div>
       ) : (
-        <Accordion className="space-y-2 sm:space-y-4">
+        <Accordion
+          type="multiple"
+          defaultValue={sortedGroupedSpells.map(([groupName]) => groupName)}
+          className="space-y-2 sm:space-y-4"
+        >
           {sortedGroupedSpells.map(([groupName, levels]) => (
             <SpellGroupAccordion
               key={groupName}

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { requireDM, validateCampaignOwnership } from "@/lib/utils/api-auth";
 import { Prisma } from "@prisma/client";
 
 const updateSkillSchema = z.object({
@@ -21,6 +21,26 @@ const updateSkillSchema = z.object({
   magicalResistance: z.number().optional(),
   spellId: z.string().nullable().optional(),
   spellGroupId: z.string().nullable().optional(),
+  mainSkillId: z.string().nullable().optional(),
+  spellEnhancementTypes: z
+    .array(z.enum(["effect_increase", "target_change", "additional_modifier", "new_spell"]))
+    .optional(),
+  spellEffectIncrease: z.number().min(0).max(200).optional().nullable(),
+  spellTargetChange: z
+    .object({
+      target: z.enum(["enemies", "allies", "all"]),
+    })
+    .optional()
+    .nullable(),
+  spellAdditionalModifier: z
+    .object({
+      modifier: z.string().optional(),
+      damageDice: z.string().optional(),
+      duration: z.number().optional(),
+    })
+    .optional()
+    .nullable(),
+  spellNewSpellId: z.string().nullable().optional(),
 });
 
 export async function PATCH(
@@ -29,35 +49,20 @@ export async function PATCH(
 ) {
   try {
     const { id, skillId } = await params;
-    const supabase = await createClient();
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = authUser.id;
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
-      include: {
-        members: {
-          where: { userId },
-        },
-      },
-    });
-
-    if (!campaign || campaign.members[0]?.role !== "dm") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    
+    // Перевіряємо права DM
+    const accessResult = await requireDM(id);
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
     }
 
     const skill = await prisma.skill.findUnique({
       where: { id: skillId },
     });
 
-    if (!skill || skill.campaignId !== id) {
-      return NextResponse.json({ error: "Skill not found" }, { status: 404 });
+    const validationError = validateCampaignOwnership(skill, id);
+    if (validationError) {
+      return validationError;
     }
 
     const body = await request.json();
@@ -89,6 +94,40 @@ export async function PATCH(
         updateData.spellGroup = { connect: { id: data.spellGroupId } };
       }
     }
+    if (data.mainSkillId !== undefined) {
+      if (data.mainSkillId === null) {
+        updateData.mainSkill = { disconnect: true };
+      } else {
+        updateData.mainSkill = { connect: { id: data.mainSkillId } };
+      }
+    }
+    if (data.spellEnhancementTypes !== undefined) {
+      updateData.spellEnhancementTypes = data.spellEnhancementTypes as Prisma.InputJsonValue;
+    }
+    if (data.spellEffectIncrease !== undefined) {
+      updateData.spellEffectIncrease = data.spellEffectIncrease;
+    }
+    if (data.spellTargetChange !== undefined) {
+      if (data.spellTargetChange === null) {
+        updateData.spellTargetChange = Prisma.JsonNull;
+      } else {
+        updateData.spellTargetChange = data.spellTargetChange as Prisma.InputJsonValue;
+      }
+    }
+    if (data.spellAdditionalModifier !== undefined) {
+      if (data.spellAdditionalModifier === null) {
+        updateData.spellAdditionalModifier = Prisma.JsonNull;
+      } else {
+        updateData.spellAdditionalModifier = data.spellAdditionalModifier as Prisma.InputJsonValue;
+      }
+    }
+    if (data.spellNewSpellId !== undefined) {
+      if (data.spellNewSpellId === null) {
+        updateData.spellNewSpell = { disconnect: true };
+      } else {
+        updateData.spellNewSpell = { connect: { id: data.spellNewSpellId } };
+      }
+    }
 
     const updatedSkill = await prisma.skill.update({
       where: { id: skillId },
@@ -96,10 +135,40 @@ export async function PATCH(
       include: {
         spell: true,
         spellGroup: true,
+        mainSkill: true,
       },
     });
 
-    return NextResponse.json(updatedSkill);
+    // Форматуємо відповідь для фронтенду
+    const formattedSkill = {
+      id: updatedSkill.id,
+      campaignId: updatedSkill.campaignId,
+      name: updatedSkill.name,
+      description: updatedSkill.description,
+      icon: updatedSkill.icon,
+      races: Array.isArray(updatedSkill.races) ? updatedSkill.races : (updatedSkill.races as any) || [],
+      isRacial: updatedSkill.isRacial,
+      bonuses: (updatedSkill.bonuses as Record<string, number>) || {},
+      damage: updatedSkill.damage,
+      armor: updatedSkill.armor,
+      speed: updatedSkill.speed,
+      physicalResistance: updatedSkill.physicalResistance,
+      magicalResistance: updatedSkill.magicalResistance,
+      spellId: updatedSkill.spellId,
+      spellGroupId: updatedSkill.spellGroupId,
+      mainSkillId: updatedSkill.mainSkillId,
+      createdAt: updatedSkill.createdAt,
+      spell: updatedSkill.spell ? {
+        id: updatedSkill.spell.id,
+        name: updatedSkill.spell.name,
+      } : null,
+      spellGroup: updatedSkill.spellGroup ? {
+        id: updatedSkill.spellGroup.id,
+        name: updatedSkill.spellGroup.name,
+      } : null,
+    };
+
+    return NextResponse.json(formattedSkill);
   } catch (error) {
     console.error("Error updating skill:", error);
     if (error instanceof z.ZodError) {
@@ -118,35 +187,20 @@ export async function DELETE(
 ) {
   try {
     const { id, skillId } = await params;
-    const supabase = await createClient();
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = authUser.id;
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
-      include: {
-        members: {
-          where: { userId },
-        },
-      },
-    });
-
-    if (!campaign || campaign.members[0]?.role !== "dm") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    
+    // Перевіряємо права DM
+    const accessResult = await requireDM(id);
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
     }
 
     const skill = await prisma.skill.findUnique({
       where: { id: skillId },
     });
 
-    if (!skill || skill.campaignId !== id) {
-      return NextResponse.json({ error: "Skill not found" }, { status: 404 });
+    const validationError = validateCampaignOwnership(skill, id);
+    if (validationError) {
+      return validationError;
     }
 
     await prisma.skill.delete({

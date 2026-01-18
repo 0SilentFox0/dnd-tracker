@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { SpellImportDialog } from "@/components/spells/SpellImportDialog";
 import { CreateGroupDialog } from "@/components/skills/CreateGroupDialog";
+import { PageHeader } from "@/components/common/PageHeader";
 
 interface SpellsPageHeaderProps {
   campaignId: string;
@@ -15,15 +16,11 @@ export function SpellsPageHeader({
   onDeleteAll,
 }: SpellsPageHeaderProps) {
   return (
-    <div className="flex flex-col gap-3 sm:gap-4">
-      <div className="flex flex-col min-w-0">
-        <h1 className="text-2xl sm:text-3xl font-bold truncate">
-          Заклинання
-        </h1>
-        <p className="text-sm sm:text-base text-muted-foreground mt-1">
-          База заклинань кампанії
-        </p>
-      </div>
+    <PageHeader
+      title="Заклинання"
+      description="База заклинань кампанії"
+      stats={spellsCount}
+    >
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 shrink-0">
         <SpellImportDialog campaignId={campaignId} />
         <CreateGroupDialog campaignId={campaignId} />
@@ -42,6 +39,6 @@ export function SpellsPageHeader({
           </Button>
         )}
       </div>
-    </div>
+    </PageHeader>
   );
 }

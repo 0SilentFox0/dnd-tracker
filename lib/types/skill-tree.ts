@@ -17,7 +17,20 @@ export const SKILL_LEVELS = [
 
 export type SkillLevelType = SkillLevel;
 
-export type SkillCircle = 1 | 2 | 3; // Внутрішнє (1), Середнє (2), Зовнішнє (3) - починається з 3
+export enum SkillCircle {
+  INNER = 1, // Внутрішнє коло
+  MIDDLE = 2, // Середнє коло
+  OUTER = 3, // Зовнішнє коло
+}
+
+// Константа з усіма колами (типізована)
+export const SKILL_CIRCLES = [
+  SkillCircle.INNER,
+  SkillCircle.MIDDLE,
+  SkillCircle.OUTER,
+] as const;
+
+export type SkillCircleType = SkillCircle;
 
 export interface Skill {
   id: string;
@@ -95,34 +108,5 @@ export interface CharacterSkillProgress {
   updatedAt: Date;
 }
 
-// Доступні раси та їх магія
-export const RACE_MAGIC: Record<string, string[]> = {
-  human: ["light", "summoning"],
-  elf: ["light", "summoning"],
-  dark_elf: ["dark", "chaos"],
-  necromancer: ["dark", "chaos"],
-  demon: ["dark", "chaos"],
-  wizard: ["light", "dark", "chaos", "summoning"],
-  dwarf: ["runic"], // В майбутньому
-  orc: ["battle_cries"], // В майбутньому
-};
-
-// Відключені скіли для кожної раси
-export const DISABLED_SKILLS_BY_RACE: Record<string, string[]> = {
-  wizard: ["attack", "archery"],
-};
-
-// Основні навики (однакові для всіх рас)
-export const MAIN_SKILLS = [
-  { id: "attack", name: "Напад", color: "rgba(217, 78, 74, 1)" },
-  { id: "defense", name: "Захист", color: "darkblue" },
-  { id: "archery", name: "Стрільба", color: "forestgreen" },
-  { id: "leadership", name: "Лідерство", color: "sandybrown" },
-  { id: "learning", name: "Навчання", color: "gainsboro" },
-  { id: "sorcery", name: "Чародійство", color: "#ae2978" },
-  { id: "light_magic", name: "Світла магія", color: "yellow" },
-  { id: "dark_magic", name: "Темна магія", color: "darkred" },
-  { id: "chaos_magic", name: "Магія Хаосу", color: "dodgerblue" },
-  { id: "summoning_magic", name: "Магія Призиву", color: "sandybrown" },
-  { id: "racial", name: "Рассовий Навик", color: "gainsboro" },
-] as const;
+// Функції для отримання даних з налаштувань раси
+// Ці функції використовуються для визначення доступності навиків на основі Race об'єкта

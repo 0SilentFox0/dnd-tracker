@@ -1,5 +1,8 @@
 import type { Skill } from "@/lib/types/skill-tree";
-import { SkillLevel } from "@/lib/types/skill-tree";
+import {
+  SkillLevel,
+  SkillCircle as SkillCircleEnum,
+} from "@/lib/types/skill-tree";
 import { getPositionPercent } from "./utils";
 import { SKILL_COLORS, Z_INDEX } from "./constants";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
@@ -7,7 +10,7 @@ import { OptimizedImage } from "@/components/common/OptimizedImage";
 interface SkillCircleProps {
   skill: Skill;
   mainSkillId: string;
-  circleNumber: 1 | 2 | 3;
+  circleNumber: SkillCircleEnum;
   angle: number;
   radiusPercent: number;
   sizePercent: number;
@@ -16,10 +19,26 @@ interface SkillCircleProps {
   onSkillClick?: (skill: Skill) => void;
   onSkillSlotClick?: (slot: {
     mainSkillId: string;
-    circle: 1 | 2 | 3;
+    circle: SkillCircleEnum;
+    level: SkillLevel;
+    index: number;
+    isMainSkillLevel?: boolean;
+    isRacial?: boolean;
+  }) => void;
+  onRemoveSkill?: (slot: {
+    mainSkillId: string;
+    circle: SkillCircleEnum;
     level: SkillLevel;
     index: number;
   }) => void;
+  onSelectSkillForRemoval?: (slot: {
+    mainSkillId: string;
+    circle: SkillCircleEnum;
+    level: SkillLevel;
+    index: number;
+    skillName: string;
+  }) => void;
+  isSelectedForRemoval?: boolean;
   skillIndex?: number;
   isDMMode?: boolean;
   selectedSkillFromLibrary?: string | null;
@@ -36,6 +55,9 @@ export function SkillCircle({
   canLearn,
   onSkillClick,
   onSkillSlotClick,
+  onRemoveSkill,
+  onSelectSkillForRemoval,
+  isSelectedForRemoval = false,
   skillIndex = 0,
   isDMMode = false,
   selectedSkillFromLibrary,
@@ -69,36 +91,75 @@ export function SkillCircle({
         height: `${Math.round(sizePercent * 100) / 100}%`,
         marginLeft: marginOffset,
         marginTop: marginOffset,
-        backgroundColor: isUnlocked
+        backgroundColor: isSelectedForRemoval
+          ? "#ef4444" // Червоний колір для вибраного для видалення
+          : isUnlocked
           ? SKILL_COLORS.unlocked
           : SKILL_COLORS.locked,
-        borderColor: canLearn || isUnlocked ? "white" : "#6b7280",
+        borderColor: isSelectedForRemoval
+          ? "#dc2626" // Темно-червоний border
+          : canLearn || isUnlocked
+          ? "white"
+          : "#6b7280",
+        borderWidth: isSelectedForRemoval ? "3px" : undefined,
         opacity: isUnlocked ? 1 : 0.5,
         zIndex: Z_INDEX.skills,
       }}
       onClick={() => {
-        if (isDMMode && onSkillSlotClick) {
-          // У режимі DM клік на слот призначає вибраний скіл цьому слоту
-          // Викликаємо onSkillSlotClick завжди, навіть якщо скіл не вибрано
-          // (обробка відбувається в батьківському компоненті)
+        if (isDMMode) {
           const slotData = {
             mainSkillId,
             circle: circleNumber,
             level: skill.level,
             index: skillIndex,
           };
-          onSkillSlotClick(slotData);
+
+          // Перевіряємо чи скіл вже присвоєний (має icon або name, і не є placeholder)
+          const skillIcon = (skill as Skill & { icon?: string }).icon;
+          const isPlaceholder =
+            !skill.id || skill.id.startsWith("placeholder_");
+          const isAssigned = !isPlaceholder && (skillIcon || skill.name);
+
+          if (isAssigned) {
+            // Якщо скіл присвоєний - активуємо стан видалення
+            if (onSelectSkillForRemoval) {
+              onSelectSkillForRemoval({
+                ...slotData,
+                skillName: skill.name,
+              });
+            }
+          } else {
+            // Якщо скіл не присвоєний (placeholder або порожній) - перевіряємо чи вибрано скіл з бібліотеки
+            if (onSkillSlotClick) {
+              // onSkillSlotClick перевірить чи вибрано скіл і покаже повідомлення якщо ні
+              onSkillSlotClick(slotData);
+            }
+          }
         } else if ((canLearn || isUnlocked) && onSkillClick) {
           // У режимі Player клік на скіл прокачує його
           onSkillClick(skill);
         }
       }}
-      title={`${skill.name} (Коло ${circleNumber})${
-        isUnlocked ? " - Вивчено" : canLearn ? " - Доступно" : " - Недоступно"
-      }`}
+      title={
+        skill.id && skill.id.startsWith("placeholder_")
+          ? `Порожній слот (Коло ${circleNumber}) - Натисніть для призначення скіла`
+          : `${skill.name} (Коло ${circleNumber})${
+              isUnlocked
+                ? " - Вивчено"
+                : canLearn
+                ? " - Доступно"
+                : " - Недоступно"
+            }`
+      }
     >
       {(() => {
         const skillIcon = (skill as Skill & { icon?: string }).icon;
+        const isPlaceholder = !skill.id || skill.id.startsWith("placeholder_");
+
+        // Якщо це placeholder - відображаємо порожнє коло
+        if (isPlaceholder) {
+          return null; // Порожнє коло без контенту
+        }
 
         return skillIcon ? (
           <div className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-full">

@@ -8,6 +8,7 @@ import {
   moveSpellToGroup,
   deleteAllSpells,
   getSpell,
+  createSpell,
   updateSpell,
   deleteSpell,
   deleteSpellsByLevel,
@@ -100,6 +101,18 @@ export function useSpell(campaignId: string, spellId: string) {
   return useQuery<Spell>({
     queryKey: ["spell", campaignId, spellId],
     queryFn: () => getSpell(campaignId, spellId),
+  });
+}
+
+export function useCreateSpell(campaignId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: Partial<Spell> & { name: string; description: string; type: string; damageType: string }) =>
+      createSpell(campaignId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["spells", campaignId] });
+    },
   });
 }
 

@@ -1,3 +1,6 @@
+"use client";
+
+import { useMemo } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,7 +24,9 @@ import {
   getSpellTypeIcon,
   getSpellDamageTypeIcon,
 } from "@/lib/utils/spell-icons";
+import { getDamageModifierLabel, getHealModifierLabel, getSpellTargetLabel } from "@/lib/constants/spells";
 import { getDamageElementLabel } from "@/lib/constants/damage";
+import { OptimizedImage } from "@/components/common/OptimizedImage";
 
 interface SpellCardProps {
   spell: Spell;
@@ -31,6 +36,7 @@ interface SpellCardProps {
   onMoveToGroup: (spellId: string, groupId: string | null) => void;
 }
 
+
 export function SpellCard({
   spell,
   campaignId,
@@ -38,11 +44,16 @@ export function SpellCard({
   onRemoveFromGroup,
   onMoveToGroup,
 }: SpellCardProps) {
-  const SpellGroupIcon = getSpellGroupIcon(
-    spell.spellGroup?.name || "Без групи"
+  // These are references to existing lucide-react components, not new component instances
+  const SpellGroupIcon = useMemo(
+    () => getSpellGroupIcon(spell.spellGroup?.name || "Без групи"),
+    [spell.spellGroup?.name]
   );
-  const TypeIcon = getSpellTypeIcon(spell.type);
-  const DamageTypeIcon = getSpellDamageTypeIcon(spell.damageType);
+  const TypeIcon = useMemo(() => getSpellTypeIcon(spell.type), [spell.type]);
+  const DamageTypeIcon = useMemo(
+    () => getSpellDamageTypeIcon(spell.damageType),
+    [spell.damageType]
+  );
 
   return (
     <Card className="hover:shadow-md transition-shadow h-full flex flex-col">
@@ -50,27 +61,23 @@ export function SpellCard({
         <div className="flex items-start gap-3 mb-2">
           <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden bg-muted flex items-center justify-center shrink-0 relative">
             {spell.icon ? (
-              <img
+              <OptimizedImage
                 src={spell.icon}
                 alt={spell.name}
+                width={64}
+                height={64}
                 className="w-full h-full object-cover"
-                referrerPolicy="no-referrer"
-                onError={(e) => {
-                  // Fallback to placeholder if image fails to load
-                  const target = e.target as HTMLImageElement;
-                  const placeholder = target.parentElement?.querySelector(
-                    ".spell-placeholder"
-                  ) as HTMLElement;
-                  if (placeholder) {
-                    target.style.display = "none";
-                    placeholder.style.display = "flex";
-                  }
-                }}
+                fallback={
+                  <div className="absolute inset-0 w-full h-full flex items-center justify-center">
+                    <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
+                  </div>
+                }
               />
-            ) : null}
-            <div className={`spell-placeholder absolute inset-0 w-full h-full flex items-center justify-center ${spell.icon ? "hidden" : ""}`}>
-              <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
-            </div>
+            ) : (
+              <div className="absolute inset-0 w-full h-full flex items-center justify-center">
+                <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
+              </div>
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2 min-w-0">
@@ -90,7 +97,7 @@ export function SpellCard({
                 ) : (
                   <>
                     <Sparkles className="h-3 w-3" />
-                    <span className="hidden sm:inline">Рівень {spell.level}</span>
+                    <span className="hidden sm:inline">{spell.level}</span>
                     <span className="sm:hidden">{spell.level}</span>
                   </>
                 )}
@@ -99,6 +106,21 @@ export function SpellCard({
             {spell.damageElement && (
               <Badge variant="outline" className="mt-2 text-xs">
                 {getDamageElementLabel(spell.damageElement)}
+              </Badge>
+            )}
+            {spell.damageModifier && (
+              <Badge variant="outline" className="mt-2 text-xs">
+                {getDamageModifierLabel(spell.damageModifier)}
+              </Badge>
+            )}
+            {spell.healModifier && (
+              <Badge variant="outline" className="mt-2 text-xs">
+                {getHealModifierLabel(spell.healModifier)}
+              </Badge>
+            )}
+            {spell.target && (
+              <Badge variant="outline" className="mt-2 text-xs">
+                {getSpellTargetLabel(spell.target)}
               </Badge>
             )}
           </div>
@@ -131,7 +153,7 @@ export function SpellCard({
                 <DamageTypeIcon className="h-3 w-3" />
                 <span className="hidden sm:inline">
                   {spell.damageType === "damage"
-                    ? "Урон"
+                    ? "Шкода"
                     : spell.damageType === "heal"
                     ? "Лікування"
                     : spell.damageType === "buff"

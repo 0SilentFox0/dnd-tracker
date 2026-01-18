@@ -16,6 +16,16 @@ interface MainSkillLevelProps {
   unlockedSkills: string[];
   isDMMode?: boolean;
   onLevelClick?: (mainSkill: MainSkill, level: SkillLevel) => void;
+  onSelectSkillForRemoval?: (slot: {
+    mainSkillId: string;
+    circle: number;
+    level: SkillLevel;
+    index: number;
+    skillName: string;
+    isMainSkillLevel?: boolean;
+    isRacial?: boolean;
+  }) => void;
+  isSelectedForRemoval?: boolean;
 }
 
 export function MainSkillLevel({
@@ -25,11 +35,16 @@ export function MainSkillLevel({
   unlockedSkills,
   isDMMode = false,
   onLevelClick,
+  onSelectSkillForRemoval,
+  isSelectedForRemoval = false,
 }: MainSkillLevelProps) {
   const { mainSkillRadiusPercent } = SKILL_TREE_CONSTANTS;
   // Округлюємо кут для уникнення помилок гідрації
-  const adjustedAngle = Math.round((angle - 0.2) * 1000) / 1000;
-  const position = getPositionPercent(adjustedAngle, mainSkillRadiusPercent);
+  const adjustedAngle = Math.round((angle + 0) * 1000) / 1000;
+  const position = getPositionPercent(
+    adjustedAngle,
+    mainSkillRadiusPercent + 1
+  );
 
   const { hasUnlocked } = getLevelStatus(mainSkill, level, unlockedSkills);
 
@@ -41,6 +56,9 @@ export function MainSkillLevel({
   // В DM mode всі скіли доступні для редагування
   const canLearnThisLevel =
     isDMMode || canLearnMainSkillLevel(level, mainSkill.id, unlockedSkills);
+
+  // Перевіряємо чи скіл присвоєний (має icon для цього рівня)
+  const hasAssignedSkill = !!(mainSkill.levelIcons?.[level] || mainSkill.icon);
 
   return (
     <div
@@ -57,7 +75,23 @@ export function MainSkillLevel({
           : "cursor-not-allowed"
       }`}
       onClick={() => {
-        if (canLearnThisLevel && onLevelClick) {
+        if (isDMMode) {
+          if (hasAssignedSkill && onSelectSkillForRemoval) {
+            // Якщо скіл присвоєний - активуємо видалення
+            onSelectSkillForRemoval({
+              mainSkillId: mainSkill.id,
+              circle: 1, // Placeholder для main-skill-level
+              level,
+              index: 0,
+              skillName: mainSkill.name,
+              isMainSkillLevel: true,
+              isRacial: false,
+            });
+          } else if (onLevelClick) {
+            // Якщо скіл не присвоєний - призначаємо вибраний скіл
+            onLevelClick(mainSkill, level);
+          }
+        } else if (canLearnThisLevel && onLevelClick) {
           onLevelClick(mainSkill, level);
         }
       }}
@@ -66,10 +100,17 @@ export function MainSkillLevel({
         ...SKILL_SIZES.mainSkillLevel,
         marginLeft: SKILL_SIZES.mainSkillLevel.margin,
         marginTop: SKILL_SIZES.mainSkillLevel.margin,
-        backgroundColor: isMainSkillLevelLearned
+        backgroundColor: isSelectedForRemoval
+          ? "#ef4444" // Червоний колір для вибраного для видалення
+          : isMainSkillLevelLearned
           ? SKILL_COLORS.unlocked
           : SKILL_COLORS.centralLocked,
-        borderColor: canLearnThisLevel ? "white" : "#6b7280",
+        borderColor: isSelectedForRemoval
+          ? "#dc2626" // Темно-червоний border
+          : canLearnThisLevel
+          ? "white"
+          : "#6b7280",
+        borderWidth: isSelectedForRemoval ? "3px" : undefined,
         opacity: isMainSkillLevelLearned ? 1 : 0.5,
         zIndex: Z_INDEX.skills,
       }}

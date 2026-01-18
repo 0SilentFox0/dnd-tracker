@@ -1,7 +1,13 @@
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { getAuthUser } from "@/lib/auth";
@@ -35,7 +41,7 @@ export default async function CampaignDetailPage({
     redirect("/campaigns");
   }
 
-  const userMember = campaign.members.find(m => m.userId === userId);
+  const userMember = campaign.members.find((m) => m.userId === userId);
   if (!userMember) {
     redirect("/campaigns");
   }
@@ -84,12 +90,16 @@ export default async function CampaignDetailPage({
               <p className="text-lg font-semibold">{campaign.xpMultiplier}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground mb-2">Код запрошення</p>
+              <p className="text-sm text-muted-foreground mb-2">
+                Код запрошення
+              </p>
               <InviteCodeDisplay inviteCode={campaign.inviteCode} />
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Статус</p>
-              <Badge>{campaign.status === "active" ? "Активна" : "Архівована"}</Badge>
+              <Badge>
+                {campaign.status === "active" ? "Активна" : "Архівована"}
+              </Badge>
             </div>
           </div>
         </CardContent>
@@ -119,7 +129,9 @@ export default async function CampaignDetailPage({
             <Card className="hover:shadow-lg transition-shadow cursor-pointer">
               <CardHeader>
                 <CardTitle>Персонажі</CardTitle>
-                <CardDescription>Управління персонажами гравців</CardDescription>
+                <CardDescription>
+                  Управління персонажами гравців
+                </CardDescription>
               </CardHeader>
             </Card>
           </Link>
@@ -155,7 +167,9 @@ export default async function CampaignDetailPage({
             <Card className="hover:shadow-lg transition-shadow cursor-pointer">
               <CardHeader>
                 <CardTitle>Артефакти</CardTitle>
-                <CardDescription>Управління артефактами та сетами</CardDescription>
+                <CardDescription>
+                  Управління артефактами та сетами
+                </CardDescription>
               </CardHeader>
             </Card>
           </Link>
@@ -164,7 +178,9 @@ export default async function CampaignDetailPage({
             <Card className="hover:shadow-lg transition-shadow cursor-pointer">
               <CardHeader>
                 <CardTitle>Бібліотека Скілів</CardTitle>
-                <CardDescription>Управління скілами та їх ефектами</CardDescription>
+                <CardDescription>
+                  Управління скілами та їх ефектами
+                </CardDescription>
               </CardHeader>
             </Card>
           </Link>
@@ -173,7 +189,20 @@ export default async function CampaignDetailPage({
             <Card className="hover:shadow-lg transition-shadow cursor-pointer">
               <CardHeader>
                 <CardTitle>Дерева Прокачки</CardTitle>
-                <CardDescription>Налаштування дерев прокачки для рас</CardDescription>
+                <CardDescription>
+                  Налаштування дерев прокачки для рас
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
+
+          <Link href={`/campaigns/${id}/dm/races`}>
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader>
+                <CardTitle>Ігрові Раси</CardTitle>
+                <CardDescription>
+                  Управління расами та їх здібностями
+                </CardDescription>
               </CardHeader>
             </Card>
           </Link>
@@ -203,7 +232,6 @@ export default async function CampaignDetailPage({
           </CardContent>
         </Card>
       )}
-
     </div>
   );
 }

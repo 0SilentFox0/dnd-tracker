@@ -7,17 +7,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Unit, UnitGroup } from "@/lib/api/units";
+import type { Unit } from "@/lib/api/units";
+import type { Race } from "@/lib/types/races";
 
 interface UnitBasicInfoProps {
   formData: Partial<Unit>;
-  unitGroups: UnitGroup[];
+  races?: Race[];
   onChange: (data: Partial<Unit>) => void;
 }
 
 export function UnitBasicInfo({
   formData,
-  unitGroups,
+  races,
   onChange,
 }: UnitBasicInfoProps) {
   return (
@@ -34,39 +35,31 @@ export function UnitBasicInfo({
       </div>
 
       <div>
-        <Label htmlFor="groupId">Група юнітів</Label>
-        <Select
-          key={`group-select-${formData.groupId || "none"}-${unitGroups.length}`}
-          value={formData.groupId ? String(formData.groupId) : "none"}
-          onValueChange={(value) =>
-            onChange({ groupId: value === "none" ? null : value })
-          }
-          disabled={unitGroups.length === 0}
-        >
-          <SelectTrigger>
-            <SelectValue
-              placeholder={
-                unitGroups.length === 0
-                  ? "Завантаження..."
-                  : "Виберіть групу"
-              }
-            />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="none">Без групи</SelectItem>
-            {unitGroups.map((group) => (
-              <SelectItem key={group.id} value={group.id}>
-                {group.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {formData.groupId && unitGroups.length > 0 && (
-          <p className="text-xs text-muted-foreground mt-1">
-            Поточна група:{" "}
-            {unitGroups.find((g) => g.id === formData.groupId)?.name ||
-              "Не знайдено"}
-          </p>
+        <Label htmlFor="race">Раса</Label>
+        {races && races.length > 0 ? (
+          <Select
+            value={formData.race || ""}
+            onValueChange={(value) => onChange({ race: value || null })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Виберіть расу" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Без раси</SelectItem>
+              {races.map((race) => (
+                <SelectItem key={race.id} value={race.name}>
+                  {race.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        ) : (
+          <Input
+            id="race"
+            value={formData.race || ""}
+            onChange={(e) => onChange({ race: e.target.value || null })}
+            placeholder="Наприклад: Ельф"
+          />
         )}
       </div>
 

@@ -2,6 +2,7 @@ export interface Unit {
   id: string;
   campaignId: string;
   name: string;
+  race: string | null;
   groupId: string | null;
   groupColor: string | null;
   damageModifier: string | null;

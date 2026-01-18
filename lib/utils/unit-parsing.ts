@@ -1,5 +1,6 @@
 import type { CSVUnitRow, UnitAttack, UnitSpecialAbility } from "@/lib/types/unit-import";
 import { getProficiencyBonus } from "@/lib/utils/calculations";
+import { ABILITY_SCORES } from "@/lib/constants/abilities";
 
 /**
  * Парсить значення ability score з рядка
@@ -112,7 +113,7 @@ export function parseAttacks(value: string): UnitAttack[] {
     }
 
     // Нормалізуємо формат кубиків (к -> d)
-    let damageDice = damageMatch ? damageMatch[1].replace(/к/g, "d").replace(/k/g, "d") : "1d4";
+    const damageDice = damageMatch ? damageMatch[1].replace(/к/g, "d").replace(/k/g, "d") : "1d4";
 
     attacks.push({
       name,
@@ -135,26 +136,18 @@ export function parseSavingThrows(value: string): string[] {
   }
 
   const saves: string[] = [];
-  const saveMap: Record<string, string> = {
-    "СИЛ": "strength",
-    "сила": "strength",
-    "STR": "strength",
-    "ЛОВ": "dexterity",
-    "спритність": "dexterity",
-    "DEX": "dexterity",
-    "ТІЛ": "constitution",
-    "статура": "constitution",
-    "CON": "constitution",
-    "ІНТ": "intelligence",
-    "інтелект": "intelligence",
-    "INT": "intelligence",
-    "МДР": "wisdom",
-    "мудрість": "wisdom",
-    "WIS": "wisdom",
-    "ХАР": "charisma",
-    "харизма": "charisma",
-    "CHA": "charisma",
-  };
+  
+  // Створюємо мапінг на основі ABILITY_SCORES (тільки перші 6 - основні характеристики)
+  // Використовуємо тільки англійські ключі та абревіатури
+  const saveMap: Record<string, string> = {};
+  const baseAbilities = ABILITY_SCORES.slice(0, 6);
+  
+  for (const ability of baseAbilities) {
+    // Додаємо англійський ключ (напр. "strength")
+    saveMap[ability.key] = ability.key;
+    // Додаємо англійську абревіатуру (напр. "STR")
+    saveMap[ability.abbreviation] = ability.key;
+  }
 
   const parts = value.split(",").map((s) => s.trim());
   for (const part of parts) {

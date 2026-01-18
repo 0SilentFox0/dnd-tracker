@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { requireDM, requireCampaignAccess } from "@/lib/utils/api-auth";
 import {
   getProficiencyBonus,
   getAbilityModifier,
@@ -57,6 +57,7 @@ const createCharacterSchema = z.object({
   // Інше
   languages: z.array(z.string()).default([]),
   proficiencies: z.record(z.string(), z.array(z.string())).default({}),
+  immunities: z.array(z.string()).default([]),
   
   // Roleplay
   personalityTraits: z.string().optional(),
@@ -71,30 +72,14 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const supabase = await createClient();
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
     
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = authUser.id;
     // Перевіряємо права DM
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
-      include: {
-        members: {
-          where: { userId },
-        },
-      },
-    });
-
-    if (!campaign || campaign.members[0]?.role !== "dm") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const accessResult = await requireDM(id);
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
     }
 
+    const { campaign } = accessResult;
     const body = await request.json();
     const data = createCharacterSchema.parse(body);
 
@@ -188,6 +173,7 @@ export async function POST(
         knownSpells: data.knownSpells,
         
         languages: data.languages,
+        immunities: data.immunities || [],
         proficiencies: data.proficiencies,
         
         personalityTraits: data.personalityTraits,
@@ -234,28 +220,11 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const supabase = await createClient();
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
     
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = authUser.id;
-    // Перевіряємо чи юзер є учасником кампанії
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
-      include: {
-        members: {
-          where: { userId },
-        },
-      },
-    });
-
-    if (!campaign || campaign.members.length === 0) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    // Перевіряємо доступ до кампанії (не обов'язково DM)
+    const accessResult = await requireCampaignAccess(id, false);
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
     }
 
     const characters = await prisma.character.findMany({

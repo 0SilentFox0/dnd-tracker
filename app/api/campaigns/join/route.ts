@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { requireAuth } from "@/lib/utils/api-auth";
 
 const joinCampaignSchema = z.object({
   inviteCode: z.string().min(1),
@@ -9,16 +9,13 @@ const joinCampaignSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // Перевіряємо авторизацію
+    const authResult = await requireAuth();
+    if (authResult instanceof NextResponse) {
+      return authResult;
     }
 
-    const userId = authUser.id;
+    const { userId, authUser } = authResult;
     const body = await request.json();
     const { inviteCode } = joinCampaignSchema.parse(body);
 

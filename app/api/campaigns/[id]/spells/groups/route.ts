@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { createClient } from "@/lib/supabase/server";
+import { requireDM, requireCampaignAccess } from "@/lib/utils/api-auth";
 import { z } from "zod";
 
 const createSpellGroupSchema = z.object({
@@ -13,27 +13,11 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const supabase = await createClient();
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = authUser.id;
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
-      include: {
-        members: {
-          where: { userId },
-        },
-      },
-    });
-
-    if (!campaign || campaign.members[0]?.role !== "dm") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    
+    // Перевіряємо права DM
+    const accessResult = await requireDM(id);
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
     }
 
     const body = await request.json();
@@ -65,27 +49,11 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const supabase = await createClient();
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = authUser.id;
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
-      include: {
-        members: {
-          where: { userId },
-        },
-      },
-    });
-
-    if (!campaign || campaign.members.length === 0) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    
+    // Перевіряємо доступ до кампанії (не обов'язково DM)
+    const accessResult = await requireCampaignAccess(id, false);
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
     }
 
     const spellGroups = await prisma.spellGroup.findMany({

@@ -38,6 +38,7 @@ export interface CharacterFormData {
   knownSpells: string[];
   languages: string[];
   proficiencies: Record<string, string[]>;
+  immunities?: string[];
   personalityTraits?: string;
   ideals?: string;
   bonds?: string;

@@ -70,7 +70,7 @@ export function CreateGroupDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" className="whitespace-nowrap">
-          + Створити групу
+          + Створити групу заклинань
         </Button>
       </DialogTrigger>
       <DialogContent>

@@ -14,6 +14,7 @@ import { Home, Menu, User, LogOut } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
+import { AbbreviationsInfoDialog } from "@/components/common/AbbreviationsInfoDialog";
 
 export function Header() {
   const pathname = usePathname();
@@ -128,6 +129,7 @@ export function Header() {
 
         {/* Інформація про користувача та вихід */}
         <div className="flex items-center gap-2">
+          <AbbreviationsInfoDialog />
           {userEmail && (
             <span className="hidden sm:inline text-sm text-muted-foreground">
               {userEmail}

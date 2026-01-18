@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,17 +22,26 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { RACE_OPTIONS, BONUS_ATTRIBUTES } from "@/lib/types/skills";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { createSkill, updateSkill } from "@/lib/api/skills";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
+import { useMainSkills } from "@/lib/hooks/useMainSkills";
+import { useRaces } from "@/lib/hooks/useRaces";
+import { ABILITY_SCORES } from "@/lib/constants/abilities";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  SPELL_ENHANCEMENT_TYPES,
+  type SpellEnhancementType,
+} from "@/lib/constants/spell-enhancement";
+import {
+  DAMAGE_MODIFIER_OPTIONS,
+  SPELL_TARGET_OPTIONS,
+} from "@/lib/constants/spells";
+import { DICE_OPTIONS } from "@/lib/constants/dice";
 
 interface SpellOption {
   id: string;
@@ -43,10 +53,13 @@ interface SpellGroupOption {
   name: string;
 }
 
+import type { Race } from "@/lib/types/races";
+
 interface SkillCreateFormProps {
   campaignId: string;
   spells: SpellOption[];
   spellGroups: SpellGroupOption[];
+  initialRaces?: Race[];
   initialData?: {
     id: string;
     name: string;
@@ -62,6 +75,12 @@ interface SkillCreateFormProps {
     magicalResistance: number | null;
     spellId: string | null;
     spellGroupId: string | null;
+    mainSkillId: string | null;
+    spellEnhancementTypes?: unknown;
+    spellEffectIncrease?: number | null;
+    spellTargetChange?: unknown;
+    spellAdditionalModifier?: unknown;
+    spellNewSpellId?: string | null;
   };
 }
 
@@ -69,21 +88,52 @@ export function SkillCreateForm({
   campaignId,
   spells,
   spellGroups,
+  initialRaces = [],
   initialData,
 }: SkillCreateFormProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const { data: mainSkills = [] } = useMainSkills(campaignId);
+  const { data: races = [] } = useRaces(campaignId, initialRaces);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const isEdit = !!initialData;
 
   const [name, setName] = useState(initialData?.name || "");
-  const [description, setDescription] = useState(initialData?.description || "");
-  const [icon, setIcon] = useState(initialData?.icon || "");
-  const [selectedRaces, setSelectedRaces] = useState<string[]>(
-    (initialData?.races && Array.isArray(initialData.races)
-      ? initialData.races
-      : []) as string[]
+  const [description, setDescription] = useState(
+    initialData?.description || ""
   );
+  const [icon, setIcon] = useState(initialData?.icon || "");
+  // selectedRaces тепер зберігає ID рас, а не назви
+  const [selectedRaces, setSelectedRaces] = useState<string[]>([]);
+
+  // Оновлюємо selectedRaces коли races завантажуються або змінюється initialData
+  useEffect(() => {
+    if (!initialData?.races || !Array.isArray(initialData.races)) {
+      setSelectedRaces([]);
+      return;
+    }
+
+    // Конвертуємо race values (можуть бути ID або назви) в ID
+    const convertedRaces = initialData.races
+      .map((raceValue: string) => {
+        // Перевіряємо чи це ID (cuid зазвичай довший ~25 символів) або назва
+        const isLikelyId = raceValue.length > 20;
+
+        if (isLikelyId) {
+          // Схоже на ID, перевіряємо чи він існує в списку рас
+          const race = races.find((r) => r.id === raceValue);
+          return race ? race.id : null;
+        } else {
+          // Схоже на назву, шукаємо ID
+          const race = races.find((r) => r.name === raceValue);
+          return race ? race.id : null;
+        }
+      })
+      .filter((id): id is string => Boolean(id));
+
+    setSelectedRaces(convertedRaces);
+  }, [initialData?.races, races]);
   const [isRacial, setIsRacial] = useState(initialData?.isRacial || false);
   const [bonuses, setBonuses] = useState<Record<string, number>>(
     (initialData?.bonuses &&
@@ -92,9 +142,7 @@ export function SkillCreateForm({
       ? initialData.bonuses
       : {}) as Record<string, number>
   );
-  const [damage, setDamage] = useState(
-    initialData?.damage?.toString() || ""
-  );
+  const [damage, setDamage] = useState(initialData?.damage?.toString() || "");
   const [armor, setArmor] = useState(initialData?.armor?.toString() || "");
   const [speed, setSpeed] = useState(initialData?.speed?.toString() || "");
   const [physicalResistance, setPhysicalResistance] = useState(
@@ -109,16 +157,66 @@ export function SkillCreateForm({
   const [spellGroupId, setSpellGroupId] = useState<string | null>(
     initialData?.spellGroupId || null
   );
+  const [mainSkillId, setMainSkillId] = useState<string | null>(
+    initialData?.mainSkillId || null
+  );
   const [newGroupName, setNewGroupName] = useState("");
   const [isCreatingGroup, setIsCreatingGroup] = useState(false);
   const [isGroupDialogOpen, setIsGroupDialogOpen] = useState(false);
-  const [localSpellGroups, setLocalSpellGroups] = useState(spellGroups);
+
+  // Поля для покращення спела
+  const [spellEnhancementTypes, setSpellEnhancementTypes] = useState<
+    SpellEnhancementType[]
+  >(
+    initialData && Array.isArray(initialData.spellEnhancementTypes)
+      ? (initialData.spellEnhancementTypes as SpellEnhancementType[])
+      : []
+  );
+  const [spellEffectIncrease, setSpellEffectIncrease] = useState(
+    (initialData?.spellEffectIncrease?.toString() || "") as string
+  );
+  const [spellTargetChange, setSpellTargetChange] = useState<string | null>(
+    initialData?.spellTargetChange &&
+    typeof initialData.spellTargetChange === "object" &&
+    initialData.spellTargetChange !== null &&
+    "target" in initialData.spellTargetChange
+      ? (initialData.spellTargetChange as { target: string }).target
+      : null
+  );
+  const [spellAdditionalModifier, setSpellAdditionalModifier] = useState<{
+    modifier?: string;
+    damageDice?: string;
+    duration?: number;
+  }>(
+    initialData?.spellAdditionalModifier &&
+    typeof initialData.spellAdditionalModifier === "object" &&
+    initialData.spellAdditionalModifier !== null
+      ? (initialData.spellAdditionalModifier as {
+          modifier?: string;
+          damageDice?: string;
+          duration?: number;
+        })
+      : {
+          modifier: undefined,
+          damageDice: "",
+          duration: undefined,
+        }
+  );
+  const [spellNewSpellId, setSpellNewSpellId] = useState<string | null>(
+    initialData?.spellNewSpellId || null
+  );
 
   const handleRaceToggle = (race: string) => {
     setSelectedRaces((prev) =>
-      prev.includes(race)
-        ? prev.filter((r) => r !== race)
-        : [...prev, race]
+      prev.includes(race) ? prev.filter((r) => r !== race) : [...prev, race]
+    );
+  };
+
+  const handleEnhancementTypeToggle = (type: SpellEnhancementType) => {
+    setSpellEnhancementTypes((prev) =>
+      prev.includes(type)
+        ? prev.filter((t) => t !== type)
+        : [...prev, type]
     );
   };
 
@@ -154,7 +252,6 @@ export function SkillCreateForm({
       }
 
       const newGroup = await response.json();
-      setLocalSpellGroups((prev) => [...prev, newGroup]);
       setSpellGroupId(newGroup.id);
       setIsGroupDialogOpen(false);
       setNewGroupName("");
@@ -193,6 +290,26 @@ export function SkillCreateForm({
           : undefined,
         spellId: spellId || undefined,
         spellGroupId: spellGroupId || undefined,
+        mainSkillId: mainSkillId || undefined,
+        spellEnhancementTypes:
+          spellEnhancementTypes.length > 0 ? spellEnhancementTypes : undefined,
+        spellEffectIncrease: spellEffectIncrease
+          ? parseInt(spellEffectIncrease, 10)
+          : undefined,
+        spellTargetChange:
+          spellTargetChange && spellEnhancementTypes.includes("target_change")
+            ? { target: spellTargetChange }
+            : undefined,
+        spellAdditionalModifier:
+          spellEnhancementTypes.includes("additional_modifier") &&
+          spellAdditionalModifier.modifier
+            ? {
+                modifier: spellAdditionalModifier.modifier,
+                damageDice: spellAdditionalModifier.damageDice || undefined,
+                duration: spellAdditionalModifier.duration || undefined,
+              }
+            : undefined,
+        spellNewSpellId: spellNewSpellId || undefined,
       };
 
       if (isEdit && initialData) {
@@ -201,8 +318,9 @@ export function SkillCreateForm({
         await createSkill(campaignId, payload);
       }
 
+      // Оновлюємо кеш React Query перед перенаправленням
+      await queryClient.invalidateQueries({ queryKey: ["skills", campaignId] });
       router.push(`/campaigns/${campaignId}/dm/skills`);
-      router.refresh();
     } catch (err) {
       const message = err instanceof Error ? err.message : "Помилка створення";
       setError(message);
@@ -280,18 +398,18 @@ export function SkillCreateForm({
           <div className="space-y-3">
             <Label>Раси (для яких підходить скіл)</Label>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-              {RACE_OPTIONS.map((race) => (
-                <div key={race.value} className="flex items-center space-x-2">
+              {races.map((race) => (
+                <div key={race.id} className="flex items-center space-x-2">
                   <Checkbox
-                    id={`race-${race.value}`}
-                    checked={selectedRaces.includes(race.value)}
-                    onCheckedChange={() => handleRaceToggle(race.value)}
+                    id={`race-${race.id}`}
+                    checked={selectedRaces.includes(race.id)}
+                    onCheckedChange={() => handleRaceToggle(race.id)}
                   />
                   <Label
-                    htmlFor={`race-${race.value}`}
+                    htmlFor={`race-${race.id}`}
                     className="text-sm font-normal cursor-pointer"
                   >
-                    {race.label}
+                    {race.name}
                   </Label>
                 </div>
               ))}
@@ -304,7 +422,10 @@ export function SkillCreateForm({
               checked={isRacial}
               onCheckedChange={(checked) => setIsRacial(checked === true)}
             />
-            <Label htmlFor="is-racial" className="text-sm font-normal cursor-pointer">
+            <Label
+              htmlFor="is-racial"
+              className="text-sm font-normal cursor-pointer"
+            >
               Рассовий навик
             </Label>
           </div>
@@ -312,16 +433,18 @@ export function SkillCreateForm({
           <div className="rounded-md border p-4 space-y-3">
             <p className="text-sm font-semibold">Бонуси до характеристик</p>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {BONUS_ATTRIBUTES.map((attr) => (
-                <div key={attr.value} className="space-y-1">
-                  <Label htmlFor={`bonus-${attr.value}`} className="text-xs">
+              {ABILITY_SCORES.map((attr) => (
+                <div key={attr.key} className="space-y-1">
+                  <Label htmlFor={`bonus-${attr.key}`} className="text-xs">
                     {attr.label}
                   </Label>
                   <Input
-                    id={`bonus-${attr.value}`}
+                    id={`bonus-${attr.key}`}
                     type="number"
-                    value={bonuses[attr.value] || ""}
-                    onChange={(e) => handleBonusChange(attr.value, e.target.value)}
+                    value={bonuses[attr.key] || ""}
+                    onChange={(e) =>
+                      handleBonusChange(attr.key, e.target.value)
+                    }
                     placeholder="0"
                   />
                 </div>
@@ -382,102 +505,295 @@ export function SkillCreateForm({
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="skill-spell">Покращення спела</Label>
-              <Select
-                value={spellId || "none"}
-                onValueChange={(value) =>
-                  setSpellId(value === "none" ? null : value)
-                }
-              >
-                <SelectTrigger id="skill-spell">
-                  <SelectValue placeholder="Без спела" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Без спела</SelectItem>
-                  {spells.map((spell) => (
-                    <SelectItem key={spell.id} value={spell.id}>
-                      {spell.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          <div className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="skill-spell">Покращення спела</Label>
+                <Select
+                  value={spellId || "none"}
+                  onValueChange={(value) =>
+                    setSpellId(value === "none" ? null : value)
+                  }
+                >
+                  <SelectTrigger id="skill-spell">
+                    <SelectValue placeholder="Без спела" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Без спела</SelectItem>
+                    {spells.map((spell) => (
+                      <SelectItem key={spell.id} value={spell.id}>
+                        {spell.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="skill-main-skill">Основний навик</Label>
+                <Select
+                  value={mainSkillId || "none"}
+                  onValueChange={(value) =>
+                    setMainSkillId(value === "none" ? null : value)
+                  }
+                >
+                  <SelectTrigger id="skill-main-skill">
+                    <SelectValue placeholder="Без основного навику" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Без основного навику</SelectItem>
+                    {mainSkills.map((mainSkill) => (
+                      <SelectItem key={mainSkill.id} value={mainSkill.id}>
+                        {mainSkill.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="skill-spell-group">Група заклинань</Label>
-                <Dialog open={isGroupDialogOpen} onOpenChange={setIsGroupDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button type="button" variant="outline" size="sm">
-                      + Створити групу
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Створити нову групу</DialogTitle>
-                      <DialogDescription>
-                        Введіть назву нової групи заклинань
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="new-group-name">Назва групи</Label>
-                        <Input
-                          id="new-group-name"
-                          value={newGroupName}
-                          onChange={(e) => setNewGroupName(e.target.value)}
-                          placeholder="Назва групи"
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                              handleCreateGroup();
-                            }
-                          }}
-                        />
-                      </div>
-                      <div className="flex gap-2 justify-end">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => {
-                            setIsGroupDialogOpen(false);
-                            setNewGroupName("");
-                          }}
-                        >
-                          Скасувати
-                        </Button>
-                        <Button
-                          type="button"
-                          onClick={handleCreateGroup}
-                          disabled={isCreatingGroup || !newGroupName.trim()}
-                        >
-                          {isCreatingGroup ? "Створення..." : "Створити"}
-                        </Button>
+
+            {spellId && (
+              <Accordion type="single" collapsible className="border rounded-lg">
+                <AccordionItem value="spell-enhancement">
+                  <AccordionTrigger className="px-4">
+                    <span className="font-medium">Налаштування покращення спела</span>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-4 pb-4 space-y-4">
+                    <div className="space-y-3">
+                      <Label>Типи покращення (можна вибрати декілька)</Label>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {SPELL_ENHANCEMENT_TYPES.map((type) => (
+                          <div key={type.value} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`enhancement-${type.value}`}
+                              checked={spellEnhancementTypes.includes(type.value)}
+                              onCheckedChange={() =>
+                                handleEnhancementTypeToggle(type.value)
+                              }
+                            />
+                            <Label
+                              htmlFor={`enhancement-${type.value}`}
+                              className="text-sm font-normal cursor-pointer"
+                            >
+                              {type.label}
+                            </Label>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
-              <Select
-                value={spellGroupId || "none"}
-                onValueChange={(value) =>
-                  setSpellGroupId(value === "none" ? null : value)
-                }
-              >
-                <SelectTrigger id="skill-spell-group">
-                  <SelectValue placeholder="Без групи" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Без групи</SelectItem>
-                  {localSpellGroups.map((group) => (
-                    <SelectItem key={group.id} value={group.id}>
-                      {group.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+
+                    {spellEnhancementTypes.includes("effect_increase") && (
+                      <div className="space-y-2 border-t pt-4">
+                        <Label htmlFor="spell-effect-increase">
+                          Збільшення ефекту (%)
+                        </Label>
+                        <Input
+                          id="spell-effect-increase"
+                          type="number"
+                          min="0"
+                          max="200"
+                          value={spellEffectIncrease}
+                          onChange={(e) =>
+                            setSpellEffectIncrease(e.target.value)
+                          }
+                          placeholder="Наприклад: 25"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Відсоток, на який збільшується ефективність заклинання
+                          (шкода/лікування)
+                        </p>
+                      </div>
+                    )}
+
+                    {spellEnhancementTypes.includes("target_change") && (
+                      <div className="space-y-2 border-t pt-4">
+                        <Label htmlFor="spell-target-change">Новий таргет</Label>
+                        <Select
+                          value={spellTargetChange || "none"}
+                          onValueChange={(value) =>
+                            setSpellTargetChange(
+                              value === "none" ? null : value
+                            )
+                          }
+                        >
+                          <SelectTrigger id="spell-target-change">
+                            <SelectValue placeholder="Виберіть таргет" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">Без зміни</SelectItem>
+                            {SPELL_TARGET_OPTIONS.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
+                    {spellEnhancementTypes.includes("additional_modifier") && (
+                      <div className="space-y-3 border-t pt-4">
+                        <Label>Додатковий модифікатор</Label>
+                        <div className="space-y-3">
+                          <div className="space-y-2">
+                            <Label htmlFor="additional-modifier-type">
+                              Тип модифікатора
+                            </Label>
+                            <Select
+                              value={spellAdditionalModifier.modifier || "none"}
+                              onValueChange={(value) =>
+                                setSpellAdditionalModifier({
+                                  ...spellAdditionalModifier,
+                                  modifier: value === "none" ? undefined : value,
+                                })
+                              }
+                            >
+                              <SelectTrigger id="additional-modifier-type">
+                                <SelectValue placeholder="Виберіть модифікатор" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="none">
+                                  Без модифікатора
+                                </SelectItem>
+                                {DAMAGE_MODIFIER_OPTIONS.map((option) => (
+                                  <SelectItem key={option.value} value={option.value}>
+                                    {option.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          {spellAdditionalModifier.modifier && (
+                            <>
+                              <div className="grid gap-3 md:grid-cols-2">
+                                <div className="space-y-2">
+                                  <Label htmlFor="additional-modifier-dice">
+                                    Кубики шкоди
+                                  </Label>
+                                  <div className="flex gap-2">
+                                    <Input
+                                      id="additional-modifier-dice-count"
+                                      type="number"
+                                      min="0"
+                                      max="10"
+                                      placeholder="Кількість"
+                                      value={
+                                        spellAdditionalModifier.damageDice?.match(
+                                          /^(\d+)/
+                                        )?.[1] || ""
+                                      }
+                                      onChange={(e) => {
+                                        const count = e.target.value;
+                                        const diceMatch = spellAdditionalModifier.damageDice?.match(
+                                          /d(\d+)/
+                                        );
+                                        const diceType = diceMatch?.[1] || "6";
+                                        setSpellAdditionalModifier({
+                                          ...spellAdditionalModifier,
+                                          damageDice: count
+                                            ? `${count}d${diceType}`
+                                            : "",
+                                        });
+                                      }}
+                                    />
+                                    <Select
+                                      value={
+                                        (() => {
+                                          const match = spellAdditionalModifier.damageDice?.match(
+                                            /d(\d+)/
+                                          );
+                                          return match?.[1] || "6";
+                                        })()
+                                      }
+                                      onValueChange={(diceTypeNum) => {
+                                        const count =
+                                          spellAdditionalModifier.damageDice?.match(
+                                            /^(\d+)/
+                                          )?.[1] || "1";
+                                        setSpellAdditionalModifier({
+                                          ...spellAdditionalModifier,
+                                          damageDice: `${count}d${diceTypeNum}`,
+                                        });
+                                      }}
+                                    >
+                                      <SelectTrigger className="w-24">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        {DICE_OPTIONS.map((dice) => (
+                                          <SelectItem
+                                            key={dice.value}
+                                            value={dice.value.replace("d", "")}
+                                          >
+                                            {dice.label}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                </div>
+                                <div className="space-y-2">
+                                  <Label htmlFor="additional-modifier-duration">
+                                    Тривалість (раунди)
+                                  </Label>
+                                  <Input
+                                    id="additional-modifier-duration"
+                                    type="number"
+                                    min="0"
+                                    max="10"
+                                    value={
+                                      spellAdditionalModifier.duration?.toString() ||
+                                      ""
+                                    }
+                                    onChange={(e) =>
+                                      setSpellAdditionalModifier({
+                                        ...spellAdditionalModifier,
+                                        duration: e.target.value
+                                          ? parseInt(e.target.value, 10)
+                                          : undefined,
+                                      })
+                                    }
+                                    placeholder="Наприклад: 3"
+                                  />
+                                </div>
+                              </div>
+                              <p className="text-xs text-muted-foreground">
+                                Вороги отримують додаткову шкоду протягом вказаної
+                                кількості раундів
+                              </p>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {spellEnhancementTypes.includes("new_spell") && (
+                      <div className="space-y-2 border-t pt-4">
+                        <Label htmlFor="spell-new-spell">Нове заклинання</Label>
+                        <Select
+                          value={spellNewSpellId || "none"}
+                          onValueChange={(value) =>
+                            setSpellNewSpellId(value === "none" ? null : value)
+                          }
+                        >
+                          <SelectTrigger id="spell-new-spell">
+                            <SelectValue placeholder="Виберіть заклинання" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">Без нового заклинання</SelectItem>
+                            {spells.map((spell) => (
+                              <SelectItem key={spell.id} value={spell.id}>
+                                {spell.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            )}
           </div>
 
           <div className="flex gap-2">
@@ -487,8 +803,8 @@ export function SkillCreateForm({
                   ? "Збереження..."
                   : "Створення..."
                 : isEdit
-                  ? "Зберегти зміни"
-                  : "Створити скіл"}
+                ? "Зберегти зміни"
+                : "Створити скіл"}
             </Button>
             <Button
               type="button"

@@ -41,6 +41,8 @@ export function SectorLevel({
         }}
       >
         {mainSkills.map((mainSkill, index) => {
+          // Використовуємо індекс для обчислення кута
+          // Важливо: mainSkills вже відсортовані за правильним порядком з skillTree.mainSkills
           const startAngle = index * sectorAngle - Math.PI / 2;
           const color = darkenColor(mainSkill.color, darkenPercent);
 
@@ -57,7 +59,7 @@ export function SectorLevel({
                 height: "50%",
                 transformOrigin: "0 100%",
                 transform: `rotate(${(startAngle * 180) / Math.PI}deg) skewY(${
-                  index === mainSkills.length - 1 ? -45 : skewY
+                  index === mainSkills.length - 1 ? -37 : skewY
                 }deg)`,
                 borderLeft: "1px solid rgba(0,0,0,0.15)",
                 overflow: "hidden",

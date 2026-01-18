@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
@@ -24,7 +23,8 @@ import { useSpellGroupActions } from "@/lib/hooks/useSpellGroupActions";
 import { RenameGroupDialog } from "@/components/spells/RenameGroupDialog";
 import { RemoveAllSpellsDialog } from "@/components/spells/RemoveAllSpellsDialog";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
-import { RACE_OPTIONS } from "@/lib/types/skills";
+import { useRaces } from "@/lib/hooks/useRaces";
+import type { Race } from "@/lib/types/races";
 import { AbilityBonusIcons, SkillStatsIcons } from "./AbilityBonusIcons";
 
 interface SkillGroupAccordionProps {
@@ -32,6 +32,7 @@ interface SkillGroupAccordionProps {
   skills: Skill[];
   campaignId: string;
   spellGroups: SpellGroup[];
+  initialRaces?: Race[];
 }
 
 export function SkillGroupAccordion({
@@ -39,9 +40,12 @@ export function SkillGroupAccordion({
   skills,
   campaignId,
   spellGroups,
+  initialRaces = [],
 }: SkillGroupAccordionProps) {
+  const { data: races = [] } = useRaces(campaignId, initialRaces);
   const groupId = spellGroups.find((g) => g.name === groupName)?.id;
-  const isUngrouped = groupName === "Без групи";
+  const isUngrouped =
+    groupName === "Без групи" || groupName === "Без основного навику";
   const totalSkills = calculateTotalSkillsInGroup(skills);
 
   const {
@@ -64,24 +68,27 @@ export function SkillGroupAccordion({
   });
 
   const getRaceLabel = (raceValue: string) => {
-    return RACE_OPTIONS.find((r) => r.value === raceValue)?.label || raceValue;
+    const race = races.find((r) => r.id === raceValue || r.name === raceValue);
+    return race ? race.name : raceValue;
   };
 
   return (
     <>
-      <AccordionItem key={groupName} defaultOpen={true}>
-        <AccordionTrigger className="px-4 sm:px-6 relative">
-          <div className="flex items-center gap-3 sm:gap-4 text-left w-full">
-            <div className="flex-1 min-w-0">
-              <CardTitle className="text-lg truncate">{groupName}</CardTitle>
-              <CardDescription className="mt-1">
-                {totalSkills} скілів
-              </CardDescription>
+      <AccordionItem value={groupName} key={groupName}>
+        <div className="relative">
+          <AccordionTrigger className="px-4 sm:px-6">
+            <div className="flex items-center gap-3 sm:gap-4 text-left w-full">
+              <div className="flex-1 min-w-0">
+                <CardTitle className="text-lg truncate">{groupName}</CardTitle>
+                <CardDescription className="mt-1">
+                  {totalSkills} скілів
+                </CardDescription>
+              </div>
             </div>
-          </div>
+          </AccordionTrigger>
           {!isUngrouped && groupId && (
             <div
-              className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 z-10"
+              className="absolute right-12 sm:right-14 top-1/2 -translate-y-1/2 z-10"
               onClick={(e) => e.stopPropagation()}
               onMouseDown={(e) => e.stopPropagation()}
             >
@@ -118,7 +125,7 @@ export function SkillGroupAccordion({
               </DropdownMenu>
             </div>
           )}
-        </AccordionTrigger>
+        </div>
         <AccordionContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 px-4 sm:px-6 pb-4">
             {skills.map((skill) => (
@@ -156,15 +163,21 @@ export function SkillGroupAccordion({
                         </Badge>
                       )}
                     </div>
-                    {skill.races && Array.isArray(skill.races) && skill.races.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {skill.races.map((race: string) => (
-                          <Badge key={race} variant="secondary" className="text-xs">
-                            {getRaceLabel(race)}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
+                    {skill.races &&
+                      Array.isArray(skill.races) &&
+                      skill.races.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {skill.races.map((race: string) => (
+                            <Badge
+                              key={race}
+                              variant="secondary"
+                              className="text-xs"
+                            >
+                              {getRaceLabel(race)}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
                   </div>
                 </div>
 
@@ -177,7 +190,9 @@ export function SkillGroupAccordion({
                 <div className="space-y-2 mb-3">
                   {Object.keys(skill.bonuses || {}).length > 0 && (
                     <div className="flex flex-col gap-1">
-                      <span className="text-xs font-semibold text-muted-foreground">Бонуси:</span>
+                      <span className="text-xs font-semibold text-muted-foreground">
+                        Бонуси:
+                      </span>
                       <AbilityBonusIcons bonuses={skill.bonuses || {}} />
                     </div>
                   )}
@@ -186,7 +201,9 @@ export function SkillGroupAccordion({
                     skill.physicalResistance ||
                     skill.magicalResistance) && (
                     <div className="flex flex-col gap-1">
-                      <span className="text-xs font-semibold text-muted-foreground">Захист:</span>
+                      <span className="text-xs font-semibold text-muted-foreground">
+                        Захист:
+                      </span>
                       <SkillStatsIcons
                         armor={skill.armor}
                         physicalResistance={skill.physicalResistance}
@@ -211,7 +228,11 @@ export function SkillGroupAccordion({
                 </div>
 
                 <Link href={`/campaigns/${campaignId}/dm/skills/${skill.id}`}>
-                  <Button variant="outline" size="sm" className="w-full text-xs sm:text-sm">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-xs sm:text-sm"
+                  >
                     Редагувати
                   </Button>
                 </Link>

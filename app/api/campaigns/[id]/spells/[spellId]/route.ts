@@ -1,25 +1,28 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { requireDM, requireCampaignAccess, validateCampaignOwnership } from "@/lib/utils/api-auth";
 import { Prisma } from "@prisma/client";
 
 const updateSpellSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   level: z.number().min(0).max(9).optional(),
-  school: z.string().optional(),
   type: z.enum(["target", "aoe"]).optional(),
-  damageType: z.enum(["damage", "heal"]).optional(),
+  target: z.enum(["enemies", "allies", "all"]).optional().nullable(),
+  damageType: z.enum(["damage", "heal", "all"]).optional(),
   damageElement: z.preprocess(
     (val) => (val === "" ? null : val),
     z.string().nullable().optional()
   ),
-  castingTime: z.string().optional(),
-  range: z.string().optional(),
-  components: z.string().optional(),
-  duration: z.string().optional(),
+  damageModifier: z.enum(["control", "charm", "sleep", "state", "burning", "poison", "freezing"]).optional().nullable(),
+  healModifier: z.enum(["heal", "regeneration", "dispel", "shield", "vampirism"]).optional().nullable(),
+  castingTime: z.string().optional().nullable(),
+  range: z.string().optional().nullable(),
+  components: z.string().optional().nullable(),
+  duration: z.string().optional().nullable(),
   concentration: z.boolean().optional(),
-  damageDice: z.string().optional(),
+  diceCount: z.number().min(0).max(10).optional().nullable(),
+  diceType: z.enum(["d4", "d6", "d8", "d10", "d12", "d20", "d100"]).optional().nullable(),
   savingThrow: z
     .object({
       ability: z.enum([
@@ -38,7 +41,7 @@ const updateSpellSchema = z.object({
   groupId: z.string().optional().nullable(),
   icon: z.preprocess(
     (val) => (val === "" ? null : val),
-    z.string().url().nullable().optional()
+    z.string().nullable().optional()
   ),
 });
 
@@ -48,27 +51,11 @@ export async function GET(
 ) {
   try {
     const { id, spellId } = await params;
-    const supabase = await createClient();
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = authUser.id;
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
-      include: {
-        members: {
-          where: { userId },
-        },
-      },
-    });
-
-    if (!campaign || campaign.members.length === 0) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    
+    // Перевіряємо доступ до кампанії (не обов'язково DM)
+    const accessResult = await requireCampaignAccess(id, false);
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
     }
 
     const spell = await prisma.spell.findUnique({
@@ -78,8 +65,9 @@ export async function GET(
       },
     });
 
-    if (!spell || spell.campaignId !== id) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const validationError = validateCampaignOwnership(spell, id);
+    if (validationError) {
+      return validationError;
     }
 
     return NextResponse.json(spell);
@@ -98,35 +86,20 @@ export async function PATCH(
 ) {
   try {
     const { id, spellId } = await params;
-    const supabase = await createClient();
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = authUser.id;
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
-      include: {
-        members: {
-          where: { userId },
-        },
-      },
-    });
-
-    if (!campaign || campaign.members[0]?.role !== "dm") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    
+    // Перевіряємо права DM
+    const accessResult = await requireDM(id);
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
     }
 
     const spell = await prisma.spell.findUnique({
       where: { id: spellId },
     });
 
-    if (!spell || spell.campaignId !== id) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const validationError = validateCampaignOwnership(spell, id);
+    if (validationError) {
+      return validationError;
     }
 
     const body = await request.json();
@@ -137,17 +110,19 @@ export async function PATCH(
       data: {
         name: data.name,
         level: data.level,
-        school: data.school,
         type: data.type,
+        target: data.target !== undefined ? data.target : undefined,
         damageType: data.damageType,
-        damageElement:
-          data.damageElement !== undefined ? data.damageElement : undefined,
-        castingTime: data.castingTime,
-        range: data.range,
-        components: data.components,
-        duration: data.duration,
+        damageElement: data.damageElement !== undefined ? data.damageElement : undefined,
+        damageModifier: data.damageModifier !== undefined ? data.damageModifier : undefined,
+        healModifier: data.healModifier !== undefined ? data.healModifier : undefined,
+        castingTime: data.castingTime !== undefined ? data.castingTime : undefined,
+        range: data.range !== undefined ? data.range : undefined,
+        components: data.components !== undefined ? data.components : undefined,
+        duration: data.duration !== undefined ? data.duration : undefined,
         concentration: data.concentration,
-        damageDice: data.damageDice,
+        diceCount: data.diceCount !== undefined ? data.diceCount : undefined,
+        diceType: data.diceType !== undefined ? data.diceType : undefined,
         savingThrow:
           data.savingThrow === null
             ? Prisma.JsonNull
@@ -155,7 +130,7 @@ export async function PATCH(
             ? (data.savingThrow as unknown as Prisma.InputJsonValue)
             : undefined,
         description: data.description,
-        groupId: data.groupId === null ? null : data.groupId,
+        groupId: data.groupId !== undefined ? data.groupId : undefined,
         icon: data.icon !== undefined ? (data.icon || null) : undefined,
       },
       include: {
@@ -182,35 +157,20 @@ export async function DELETE(
 ) {
   try {
     const { id, spellId } = await params;
-    const supabase = await createClient();
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = authUser.id;
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
-      include: {
-        members: {
-          where: { userId },
-        },
-      },
-    });
-
-    if (!campaign || campaign.members[0]?.role !== "dm") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    
+    // Перевіряємо права DM
+    const accessResult = await requireDM(id);
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
     }
 
     const spell = await prisma.spell.findUnique({
       where: { id: spellId },
     });
 
-    if (!spell || spell.campaignId !== id) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const validationError = validateCampaignOwnership(spell, id);
+    if (validationError) {
+      return validationError;
     }
 
     await prisma.spell.delete({

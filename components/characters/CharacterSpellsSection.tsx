@@ -1,5 +1,5 @@
 /**
- * Компонент для заклинань персонажа
+ * Компонент для Магічної Книги персонажа
  */
 
 import { Input } from "@/components/ui/input";
@@ -72,7 +72,10 @@ export function CharacterSpellsSection({
       </div>
 
       <div className="w-full min-w-0">
-        <Label>Відомі заклинання</Label>
+        <Label>Стартові заклинання (Магічна Книга)</Label>
+        <p className="text-xs text-muted-foreground mb-2">
+          Оберіть заклинання, які персонаж знає на початку. Додаткові заклинання будуть автоматично додаватися при вивченні скілів.
+        </p>
         <SpellMultiSelect
           campaignId={campaignId}
           selectedSpellIds={formData.knownSpells}

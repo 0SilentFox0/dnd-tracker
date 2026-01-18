@@ -8,6 +8,7 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/
 import Link from "next/link";
 import { useCharacterForm } from "@/lib/hooks/useCharacterForm";
 import { useCampaignMembers } from "@/lib/hooks/useCampaignMembers";
+import { useRaces } from "@/lib/hooks/useRaces";
 import { getCharacter, updateCharacter, Character } from "@/lib/api/characters";
 import { CharacterBasicInfo } from "@/components/characters/CharacterBasicInfo";
 import { CharacterAbilityScores } from "@/components/characters/CharacterAbilityScores";
@@ -16,6 +17,7 @@ import { CharacterSkillsSection } from "@/components/characters/CharacterSkillsS
 import { CharacterSpellsSection } from "@/components/characters/CharacterSpellsSection";
 import { CharacterLanguagesSection } from "@/components/characters/CharacterLanguagesSection";
 import { CharacterRoleplaySection } from "@/components/characters/CharacterRoleplaySection";
+import { CharacterImmunities } from "@/components/characters/CharacterImmunities";
 
 export default function EditCharacterPage({
   params,
@@ -25,6 +27,7 @@ export default function EditCharacterPage({
   const { id, characterId } = use(params);
   const router = useRouter();
   const { members, loading: membersLoading } = useCampaignMembers(id);
+  const { data: races = [] } = useRaces(id);
 
   const {
     formData,
@@ -124,33 +127,34 @@ export default function EditCharacterPage({
             </div>
           )}
           <form onSubmit={handleSubmit} className="space-y-6 w-full">
-            <Accordion>
-              <AccordionItem defaultOpen>
+            <Accordion type="single" defaultValue="item-1" collapsible>
+              <AccordionItem value="item-1">
                 <AccordionTrigger>1. Загальна інформація</AccordionTrigger>
                 <AccordionContent>
                   <CharacterBasicInfo
                     formData={formData}
                     onUpdate={updateField}
                     campaignMembers={members}
+                    races={races}
                   />
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem>
+              <AccordionItem value="item-2">
                 <AccordionTrigger>2. Основні характеристики</AccordionTrigger>
                 <AccordionContent>
                   <CharacterAbilityScores formData={formData} onUpdate={updateField} />
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem>
+              <AccordionItem value="item-3">
                 <AccordionTrigger>3. Бойові параметри</AccordionTrigger>
                 <AccordionContent>
                   <CharacterCombatParams formData={formData} onUpdate={updateField} />
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem>
+              <AccordionItem value="item-4">
                 <AccordionTrigger>4. Навички та Збереження</AccordionTrigger>
                 <AccordionContent>
                   <CharacterSkillsSection
@@ -161,7 +165,7 @@ export default function EditCharacterPage({
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem>
+              <AccordionItem value="item-5">
                 <AccordionTrigger>5. Заклинання</AccordionTrigger>
                 <AccordionContent>
                   <CharacterSpellsSection
@@ -174,7 +178,7 @@ export default function EditCharacterPage({
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem>
+              <AccordionItem value="item-6">
                 <AccordionTrigger>6. Мови та Профісії</AccordionTrigger>
                 <AccordionContent>
                   <CharacterLanguagesSection
@@ -186,8 +190,23 @@ export default function EditCharacterPage({
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem>
-                <AccordionTrigger>7. Рольова гра</AccordionTrigger>
+              <AccordionItem value="item-7">
+                <AccordionTrigger>7. Імунітети</AccordionTrigger>
+                <AccordionContent>
+                  <CharacterImmunities
+                    formData={formData}
+                    race={
+                      formData.race
+                        ? races.find((r) => r.name === formData.race) || null
+                        : null
+                    }
+                    onUpdate={updateField}
+                  />
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-8">
+                <AccordionTrigger>8. Рольова гра</AccordionTrigger>
                 <AccordionContent>
                   <CharacterRoleplaySection formData={formData} onUpdate={updateField} />
                 </AccordionContent>
@@ -197,6 +216,58 @@ export default function EditCharacterPage({
             <div className="flex gap-2 pt-4">
               <Button type="submit" disabled={loading || membersLoading}>
                 {loading ? "Збереження..." : "Зберегти зміни"}
+              </Button>
+              <Button
+                type="button"
+                variant="default"
+                onClick={async (e) => {
+                  e.preventDefault();
+                  if (
+                    confirm(
+                      `Підняти рівень персонажа ${formData.name}? (Рівень ${formData.level} → ${formData.level + 1})`
+                    )
+                  ) {
+                    try {
+                      const response = await fetch(
+                        `/api/campaigns/${id}/characters/${characterId}/level-up`,
+                        {
+                          method: "POST",
+                        }
+                      );
+                      if (!response.ok) {
+                        const error = await response.json();
+                        alert(error.error || "Помилка при піднятті рівня");
+                        return;
+                      }
+                      const updatedCharacter = await response.json();
+                      setFormData({
+                        ...formData,
+                        level: updatedCharacter.level,
+                        strength: updatedCharacter.strength,
+                        dexterity: updatedCharacter.dexterity,
+                        constitution: updatedCharacter.constitution,
+                        intelligence: updatedCharacter.intelligence,
+                        wisdom: updatedCharacter.wisdom,
+                        charisma: updatedCharacter.charisma,
+                        maxHp: updatedCharacter.maxHp,
+                        currentHp: updatedCharacter.currentHp,
+                        spellSlots: (updatedCharacter.spellSlots || {}) as Record<string, { max: number; current: number }>,
+                      });
+                      if (updatedCharacter.levelUpDetails) {
+                        const details = updatedCharacter.levelUpDetails;
+                        alert(
+                          `Рівень піднято! ${details.abilityIncreased}: +1, HP: +${details.hpGain}, Додано магічні слоти.`
+                        );
+                      }
+                      router.refresh();
+                    } catch (err) {
+                      console.error("Error leveling up:", err);
+                      alert("Помилка при піднятті рівня");
+                    }
+                  }
+                }}
+              >
+                Підняти рівень ({formData.level} → {formData.level + 1})
               </Button>
               <Link href={`/campaigns/${id}/dm/characters`}>
                 <Button type="button" variant="outline">

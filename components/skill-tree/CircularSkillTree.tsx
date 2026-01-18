@@ -7,10 +7,14 @@ import type {
   UltimateSkill,
   MainSkill,
 } from "@/lib/types/skill-tree";
-import { SkillLevel } from "@/lib/types/skill-tree";
+import {
+  SkillLevel,
+  SkillCircle as SkillCircleEnum,
+} from "@/lib/types/skill-tree";
 import { getMainSkillLevelId, canLearnMainSkillLevel } from "./hooks";
 import { SKILL_TREE_CONSTANTS } from "./utils";
 import { useAvailableMainSkills, useRacialSkill } from "./hooks";
+import type { Race } from "@/lib/types/races";
 import { UltimateSkillComponent } from "./UltimateSkill";
 import { SectorLevels } from "./SectorLevels";
 import { SectorLabel } from "./SectorLabel";
@@ -28,6 +32,7 @@ import {
 
 interface CircularSkillTreeProps {
   skillTree: SkillTree;
+  race?: Race | null;
   unlockedSkills?: string[];
   playerLevel?: number;
   isDMMode?: boolean;
@@ -37,15 +42,39 @@ interface CircularSkillTreeProps {
   onRacialSkillClick?: (mainSkill: MainSkill, level: SkillLevel) => void;
   onSkillSlotClick?: (slot: {
     mainSkillId: string;
-    circle: 1 | 2 | 3;
+    circle: SkillCircleEnum;
+    level: SkillLevel;
+    index: number;
+    isMainSkillLevel?: boolean; // true для main-skill-level, false/null для звичайного кола
+    isRacial?: boolean; // true для racial skill
+  }) => void;
+  onRemoveSkill?: (slot: {
+    mainSkillId: string;
+    circle: SkillCircleEnum;
     level: SkillLevel;
     index: number;
   }) => void;
+  onSelectSkillForRemoval?: (slot: {
+    mainSkillId: string;
+    circle: SkillCircleEnum;
+    level: SkillLevel;
+    index: number;
+    skillName: string;
+  }) => void;
+  selectedSkillForRemoval?: {
+    mainSkillId: string;
+    circle: SkillCircleEnum;
+    level: SkillLevel;
+    index: number;
+    isMainSkillLevel?: boolean;
+    isRacial?: boolean;
+  } | null;
   selectedSkillFromLibrary?: string | null;
 }
 
 export function CircularSkillTree({
   skillTree,
+  race,
   unlockedSkills = [],
   playerLevel = 1,
   isDMMode = false,
@@ -54,6 +83,9 @@ export function CircularSkillTree({
   onUltimateSkillClick,
   onRacialSkillClick,
   onSkillSlotClick,
+  onRemoveSkill,
+  onSelectSkillForRemoval,
+  selectedSkillForRemoval,
   selectedSkillFromLibrary,
 }: CircularSkillTreeProps) {
   const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
@@ -62,9 +94,10 @@ export function CircularSkillTree({
 
   // Отримуємо расовий навик та фільтруємо основні навики
   const racialSkill = useRacialSkill(skillTree);
-  const availableMainSkills = useAvailableMainSkills(skillTree);
+  const availableMainSkills = useAvailableMainSkills(skillTree, race);
 
   const sectors = availableMainSkills.length;
+
   const sectorAngle = (360 / sectors) * (Math.PI / 180); // Конвертуємо в радіани
   const { containerSize, outerRadiusPercent, innerRadiusPercent } =
     SKILL_TREE_CONSTANTS;
@@ -150,9 +183,11 @@ export function CircularSkillTree({
                     if (onSkillSlotClick) {
                       onSkillSlotClick({
                         mainSkillId: mainSkill.id,
-                        circle: 1, // Використовуємо circle 1 як placeholder для racial
+                        circle: SkillCircleEnum.INNER, // Використовуємо INNER як placeholder для racial
                         level,
                         index: 0,
+                        isMainSkillLevel: false,
+                        isRacial: true, // Позначаємо що це racial skill
                       });
                     }
                   }
@@ -198,18 +233,22 @@ export function CircularSkillTree({
                   sectorAngle={sectorAngle}
                   unlockedSkills={unlockedSkills}
                   isDMMode={isDMMode}
+                  onSelectSkillForRemoval={onSelectSkillForRemoval}
+                  selectedSkillForRemoval={selectedSkillForRemoval}
                   onLevelClick={(mainSkill, level) => {
                     // В DM mode викликаємо onSkillSlotClick для призначення скілу
                     if (isDMMode && onSkillSlotClick) {
                       onSkillSlotClick({
                         mainSkillId: mainSkill.id,
-                        circle: 1, // Використовуємо circle 1 як placeholder для main-skill-level
+                        circle: SkillCircleEnum.INNER, // Використовуємо INNER як placeholder для main-skill-level
                         level,
                         index: 0,
+                        isMainSkillLevel: true, // Позначаємо що це main-skill-level
+                        isRacial: false,
                       });
                       return;
                     }
-                    
+
                     // Перевіряємо послідовність прокачки: basic -> advanced -> expert
                     const canLearn = canLearnMainSkillLevel(
                       level,
@@ -240,7 +279,7 @@ export function CircularSkillTree({
                       id: mainSkillLevelId,
                       name: `${mainSkill.name} - ${levelNames[level]}`,
                       description: `Рівень ${level} основного навику ${mainSkill.name}`,
-                      circle: 3, // Вважаємо його частиною кола 3 для логіки
+                      circle: SkillCircleEnum.OUTER, // Вважаємо його частиною кола OUTER для логіки
                       level: level,
                     };
 
@@ -259,6 +298,9 @@ export function CircularSkillTree({
                   canLearnSkill={canLearnSkillWrapper}
                   onSkillClick={isDMMode ? undefined : handleSkillClick}
                   onSkillSlotClick={onSkillSlotClick}
+                  onRemoveSkill={onRemoveSkill}
+                  onSelectSkillForRemoval={onSelectSkillForRemoval}
+                  selectedSkillForRemoval={selectedSkillForRemoval}
                   circle4UnlockedCount={circle4UnlockedCount}
                   isDMMode={isDMMode}
                   selectedSkillFromLibrary={selectedSkillFromLibrary}

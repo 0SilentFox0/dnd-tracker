@@ -45,6 +45,7 @@ const defaultFormData: CharacterFormData = {
   knownSpells: [],
   languages: [],
   proficiencies: {},
+  immunities: [],
   personalityTraits: "",
   ideals: "",
   bonds: "",

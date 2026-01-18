@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { requireAuth } from "@/lib/utils/api-auth";
 
 const createCampaignSchema = z.object({
   name: z.string().min(1).max(100),
@@ -18,16 +18,13 @@ function generateInviteCode(): string {
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-    
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // Перевіряємо авторизацію
+    const authResult = await requireAuth();
+    if (authResult instanceof NextResponse) {
+      return authResult;
     }
 
-    const userId = authUser.id;
+    const { userId, authUser } = authResult;
     const body = await request.json();
     const data = createCampaignSchema.parse(body);
 
@@ -84,16 +81,13 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-    
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // Перевіряємо авторизацію
+    const authResult = await requireAuth();
+    if (authResult instanceof NextResponse) {
+      return authResult;
     }
 
-    const userId = authUser.id;
+    const { userId } = authResult;
 
     const campaigns = await prisma.campaign.findMany({
       where: {

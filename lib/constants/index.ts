@@ -8,3 +8,6 @@ export * from "./spellcasting";
 export * from "./equipment";
 export * from "./abilities";
 export * from "./campaigns";
+export * from "./dice";
+export * from "./spells";
+export * from "./spell-enhancement";

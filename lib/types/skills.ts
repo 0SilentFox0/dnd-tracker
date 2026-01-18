@@ -14,6 +14,16 @@ export interface Skill {
   magicalResistance: number | null;
   spellId: string | null;
   spellGroupId: string | null;
+  mainSkillId?: string | null;
+  spellEnhancementTypes?: string[];
+  spellEffectIncrease?: number | null;
+  spellTargetChange?: { target: string } | null;
+  spellAdditionalModifier?: {
+    modifier?: string;
+    damageDice?: string;
+    duration?: number;
+  } | null;
+  spellNewSpellId?: string | null;
   createdAt: Date;
   spell?: {
     id: string;
@@ -43,22 +53,5 @@ export interface CharacterSkill {
   } | null;
 }
 
-export const RACE_OPTIONS = [
-  { value: "human", label: "Людина" },
-  { value: "elf", label: "Ельф" },
-  { value: "dark_elf", label: "Темний Ельф" },
-  { value: "necromancer", label: "Некромант" },
-  { value: "demon", label: "Демон" },
-  { value: "wizard", label: "Чародій" },
-  { value: "dwarf", label: "Дворф" },
-  { value: "orc", label: "Орк" },
-] as const;
-
-export const BONUS_ATTRIBUTES = [
-  { value: "strength", label: "Сила" },
-  { value: "dexterity", label: "Спритність" },
-  { value: "constitution", label: "Тіло" },
-  { value: "intelligence", label: "Інтелект" },
-  { value: "wisdom", label: "Мудрість" },
-  { value: "charisma", label: "Харизма" },
-] as const;
+// RACE_OPTIONS видалено - використовуйте раси з бази через useRaces hook
+// BONUS_ATTRIBUTES видалено - використовуйте ABILITY_SCORES з @/lib/constants/abilities

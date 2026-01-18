@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { createClient } from "@/lib/supabase/server";
+import { requireAuth, requireDM } from "@/lib/utils/api-auth";
 import { z } from "zod";
 
 const updateCampaignSchema = z.object({
@@ -18,16 +18,14 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const supabase = await createClient();
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
     
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // Перевіряємо авторизацію
+    const authResult = await requireAuth();
+    if (authResult instanceof NextResponse) {
+      return authResult;
     }
 
-    const userId = authUser.id;
+    const { userId } = authResult;
 
     const campaign = await prisma.campaign.findUnique({
       where: { id },
@@ -67,16 +65,14 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params;
-    const supabase = await createClient();
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    
+    // Перевіряємо права DM
+    const accessResult = await requireDM(id);
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
     }
 
-    const userId = authUser.id;
+    const { userId } = accessResult;
     const campaign = await prisma.campaign.findUnique({
       where: { id },
       include: {

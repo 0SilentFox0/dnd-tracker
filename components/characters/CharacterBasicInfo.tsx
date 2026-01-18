@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ALIGNMENTS } from "@/lib/constants";
 import { CharacterFormData } from "@/lib/api/characters";
 import { CampaignMember } from "@/lib/api/campaigns";
+import type { Race } from "@/lib/types/races";
 
 interface CharacterBasicInfoProps {
   formData: CharacterFormData;
@@ -16,12 +17,14 @@ interface CharacterBasicInfoProps {
     value: CharacterFormData[K]
   ) => void;
   campaignMembers?: CampaignMember[];
+  races?: Race[];
 }
 
 export function CharacterBasicInfo({
   formData,
   onUpdate,
   campaignMembers = [],
+  races = [],
 }: CharacterBasicInfoProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
@@ -77,14 +80,33 @@ export function CharacterBasicInfo({
 
       <div className="w-full min-w-0">
         <Label htmlFor="race">Раса *</Label>
-        <Input
-          id="race"
-          value={formData.race}
-          onChange={(e) => onUpdate("race", e.target.value)}
-          required
-          placeholder="Наприклад: Ельф"
-          className="w-full"
-        />
+        {races.length > 0 ? (
+          <Select
+            value={formData.race}
+            onValueChange={(value) => onUpdate("race", value)}
+            required
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Виберіть расу" />
+            </SelectTrigger>
+            <SelectContent>
+              {races.map((race) => (
+                <SelectItem key={race.id} value={race.name}>
+                  {race.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        ) : (
+          <Input
+            id="race"
+            value={formData.race}
+            onChange={(e) => onUpdate("race", e.target.value)}
+            required
+            placeholder="Наприклад: Ельф"
+            className="w-full"
+          />
+        )}
       </div>
 
       <div className="w-full min-w-0">

@@ -45,6 +45,8 @@ model Campaign {
   unitGroups      UnitGroup[]
   units           Unit[]
   skills          Skill[]
+  races           Race[]
+  mainSkills      MainSkill[]
 
   @@map("campaigns")
 }
@@ -104,6 +106,7 @@ model Character {
   knownSpells          Json                @default("[]")
   languages            Json                @default("[]")
   proficiencies        Json                @default("{}")
+  immunities           Json                @default("[]")
   personalityTraits    String?
   ideals               String?
   bonds                String?
@@ -123,6 +126,7 @@ model Unit {
   id               String     @id @default(cuid())
   campaignId       String
   name             String
+  race             String?
   groupId          String?
   groupColor       String?
   damageModifier   String?
@@ -151,41 +155,45 @@ model Unit {
 }
 
 model UnitGroup {
-  id         String   @id @default(cuid())
-  campaignId String
-  name       String
-  color      String
+  id             String   @id @default(cuid())
+  campaignId     String
+  name           String
+  color          String
   damageModifier String?
-  createdAt  DateTime @default(now())
-  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  units      Unit[]
+  createdAt      DateTime @default(now())
+  campaign       Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  units          Unit[]
 
   @@map("unit_groups")
 }
 
 model Spell {
-  id            String      @id @default(cuid())
-  campaignId    String
-  name          String
-  level         Int         @default(0)
-  school        String?
-  type          String
-  damageType    String
-  damageElement String?
-  castingTime   String?
-  range         String?
-  components    String?
-  duration      String?
-  concentration Boolean     @default(false)
-  damageDice    String?
-  savingThrow   Json?
-  description   String
-  groupId       String?
-  icon          String?
-  createdAt     DateTime    @default(now())
-  campaign      Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  spellGroup    SpellGroup? @relation(fields: [groupId], references: [id])
-  skills        Skill[]
+  id               String      @id @default(cuid())
+  campaignId       String
+  name             String
+  level            Int         @default(0)
+  type             String
+  target           String?
+  damageType       String
+  damageElement    String?
+  damageModifier   String?
+  healModifier     String?
+  castingTime      String?
+  range            String?
+  components       String?
+  duration         String?
+  concentration    Boolean     @default(false)
+  diceCount        Int?
+  diceType         String?
+  savingThrow      Json?
+  description      String
+  groupId          String?
+  icon             String?
+  createdAt        DateTime    @default(now())
+  campaign         Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  spellGroup       SpellGroup? @relation(fields: [groupId], references: [id])
+  skills           Skill[]
+  skillsAsNewSpell Skill[]     @relation("SkillNewSpell")
 
   @@map("spells")
 }
@@ -324,25 +332,62 @@ model RacialAbility {
 }
 
 model Skill {
-  id                  String   @id @default(cuid())
-  campaignId          String
-  name                String
-  description         String?
-  icon                String?
-  races               Json     @default("[]")
-  isRacial            Boolean  @default(false)
-  bonuses             Json     @default("{}")
-  damage              Int?
-  armor               Int?
-  speed               Int?
-  physicalResistance  Int?
-  magicalResistance    Int?
-  spellId             String?
-  spellGroupId        String?
-  createdAt           DateTime @default(now())
-  campaign            Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  spell               Spell?   @relation(fields: [spellId], references: [id], onDelete: SetNull)
-  spellGroup          SpellGroup? @relation(fields: [spellGroupId], references: [id], onDelete: SetNull)
+  id                      String      @id @default(cuid())
+  campaignId              String
+  name                    String
+  description             String?
+  icon                    String?
+  races                   Json        @default("[]")
+  isRacial                Boolean     @default(false)
+  bonuses                 Json        @default("{}")
+  damage                  Int?
+  armor                   Int?
+  speed                   Int?
+  physicalResistance      Int?
+  magicalResistance       Int?
+  spellId                 String?
+  spellGroupId            String?
+  mainSkillId             String?
+  spellEnhancementTypes   Json        @default("[]")
+  spellEffectIncrease     Int?
+  spellTargetChange       Json?
+  spellAdditionalModifier Json?
+  spellNewSpellId         String?
+  createdAt               DateTime    @default(now())
+  campaign                Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  spell                   Spell?      @relation(fields: [spellId], references: [id], onDelete: SetNull)
+  spellGroup              SpellGroup? @relation(fields: [spellGroupId], references: [id], onDelete: SetNull)
+  mainSkill               MainSkill?  @relation(fields: [mainSkillId], references: [id], onDelete: SetNull)
+  spellNewSpell           Spell?      @relation("SkillNewSpell", fields: [spellNewSpellId], references: [id], onDelete: SetNull)
 
   @@map("skills")
+}
+
+model Race {
+  id              String   @id @default(cuid())
+  campaignId      String
+  name            String
+  availableSkills Json     @default("[]")
+  disabledSkills  Json     @default("[]")
+  passiveAbility  Json?
+  spellSlotProgression Json @default("[]")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  campaign        Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@map("races")
+}
+
+model MainSkill {
+  id         String   @id @default(cuid())
+  campaignId String
+  name       String
+  color      String
+  icon       String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  skills     Skill[]
+
+  @@map("main_skills")
 }

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { requireDM, requireCampaignAccess } from "@/lib/utils/api-auth";
 import { Prisma } from "@prisma/client";
 
 const createSkillSchema = z.object({
@@ -21,6 +21,24 @@ const createSkillSchema = z.object({
   magicalResistance: z.number().optional(),
   spellId: z.string().optional(),
   spellGroupId: z.string().optional(),
+  mainSkillId: z.string().optional(),
+  spellEnhancementTypes: z
+    .array(z.enum(["effect_increase", "target_change", "additional_modifier", "new_spell"]))
+    .optional(),
+  spellEffectIncrease: z.number().min(0).max(200).optional(),
+  spellTargetChange: z
+    .object({
+      target: z.enum(["enemies", "allies", "all"]),
+    })
+    .optional(),
+  spellAdditionalModifier: z
+    .object({
+      modifier: z.string().optional(),
+      damageDice: z.string().optional(),
+      duration: z.number().optional(),
+    })
+    .optional(),
+  spellNewSpellId: z.string().optional(),
 });
 
 export async function POST(
@@ -29,28 +47,14 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const supabase = await createClient();
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    
+    // Перевіряємо права DM
+    const accessResult = await requireDM(id);
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
     }
 
-    const userId = authUser.id;
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
-      include: {
-        members: {
-          where: { userId },
-        },
-      },
-    });
-
-    if (!campaign || campaign.members[0]?.role !== "dm") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+    const { campaign } = accessResult;
 
     const body = await request.json();
     const data = createSkillSchema.parse(body);
@@ -71,6 +75,18 @@ export async function POST(
         magicalResistance: data.magicalResistance,
         spellId: data.spellId,
         spellGroupId: data.spellGroupId,
+        mainSkillId: data.mainSkillId,
+        spellEnhancementTypes: data.spellEnhancementTypes
+          ? (data.spellEnhancementTypes as Prisma.InputJsonValue)
+          : [],
+        spellEffectIncrease: data.spellEffectIncrease,
+        spellTargetChange: data.spellTargetChange
+          ? (data.spellTargetChange as Prisma.InputJsonValue)
+          : undefined,
+        spellAdditionalModifier: data.spellAdditionalModifier
+          ? (data.spellAdditionalModifier as Prisma.InputJsonValue)
+          : undefined,
+        spellNewSpellId: data.spellNewSpellId || null,
       },
       include: {
         spell: true,
@@ -97,27 +113,11 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const supabase = await createClient();
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = authUser.id;
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
-      include: {
-        members: {
-          where: { userId },
-        },
-      },
-    });
-
-    if (!campaign || campaign.members.length === 0) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    
+    // Перевіряємо доступ до кампанії (не обов'язково DM)
+    const accessResult = await requireCampaignAccess(id, false);
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
     }
 
     const skills = await prisma.skill.findMany({
@@ -127,6 +127,7 @@ export async function GET(
       include: {
         spell: true,
         spellGroup: true,
+        mainSkill: true,
       },
       orderBy: {
         createdAt: "desc",
@@ -150,6 +151,14 @@ export async function GET(
       magicalResistance: skill.magicalResistance,
       spellId: skill.spellId,
       spellGroupId: skill.spellGroupId,
+      mainSkillId: skill.mainSkillId,
+      spellEnhancementTypes: Array.isArray(skill.spellEnhancementTypes)
+        ? skill.spellEnhancementTypes
+        : [],
+      spellEffectIncrease: skill.spellEffectIncrease,
+      spellTargetChange: skill.spellTargetChange,
+      spellAdditionalModifier: skill.spellAdditionalModifier,
+      spellNewSpellId: skill.spellNewSpellId,
       createdAt: skill.createdAt,
       spell: skill.spell ? {
         id: skill.spell.id,

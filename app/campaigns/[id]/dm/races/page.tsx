@@ -1,0 +1,62 @@
+import { getAuthUser } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { prisma } from "@/lib/db";
+import type { Race } from "@/lib/types/races";
+import { DMRacesPageClient } from "./page-client";
+
+export default async function DMRacesPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const user = await getAuthUser();
+  const userId = user.id;
+
+  const campaign = await prisma.campaign.findUnique({
+    where: { id },
+    include: {
+      members: {
+        where: { userId },
+      },
+    },
+  });
+
+  if (!campaign || campaign.members[0]?.role !== "dm") {
+    redirect(`/campaigns/${id}`);
+  }
+
+  const racesData = await prisma.race.findMany({
+    where: {
+      campaignId: id,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  // Конвертуємо Prisma дані в формат Race
+  const races: Race[] = racesData.map((race) => ({
+    ...race,
+    availableSkills: Array.isArray(race.availableSkills)
+      ? (race.availableSkills as string[])
+      : [],
+    disabledSkills: Array.isArray(race.disabledSkills)
+      ? (race.disabledSkills as string[])
+      : [],
+    passiveAbility: race.passiveAbility
+      ? typeof race.passiveAbility === "object" &&
+        race.passiveAbility !== null &&
+        !Array.isArray(race.passiveAbility)
+        ? (race.passiveAbility as unknown as Race["passiveAbility"])
+        : null
+      : null,
+    spellSlotProgression: Array.isArray(race.spellSlotProgression)
+      ? (race.spellSlotProgression as unknown as Race["spellSlotProgression"])
+      : undefined,
+    createdAt: race.createdAt,
+    updatedAt: race.updatedAt,
+  }));
+
+  return <DMRacesPageClient campaignId={id} initialRaces={races} />;
+}

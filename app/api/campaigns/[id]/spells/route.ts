@@ -1,33 +1,37 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { Prisma } from "@prisma/client";
+import { requireDM, requireCampaignAccess } from "@/lib/utils/api-auth";
 
 const createSpellSchema = z.object({
   name: z.string().min(1).max(100),
-  level: z.number().min(0).max(5).default(0),
-  school: z.string().optional(),
+  level: z.number().min(0).max(9).default(0),
   type: z.enum(["target", "aoe"]),
-  damageType: z.enum(["damage", "heal"]),
+  target: z.enum(["enemies", "allies", "all"]).optional(),
+  damageType: z.enum(["damage", "heal", "all"]),
   damageElement: z.preprocess(
     (val) => (val === "" ? null : val),
     z.string().nullable().optional()
   ),
-  castingTime: z.string().optional(),
-  range: z.string().optional(),
-  components: z.string().optional(),
-  duration: z.string().optional(),
+  damageModifier: z.enum(["control", "charm", "sleep", "state", "burning", "poison", "freezing"]).optional().nullable(),
+  healModifier: z.enum(["heal", "regeneration", "dispel", "shield", "vampirism"]).optional().nullable(),
+  castingTime: z.string().optional().nullable(),
+  range: z.string().optional().nullable(),
+  components: z.string().optional().nullable(),
+  duration: z.string().optional().nullable(),
   concentration: z.boolean().default(false),
-  damageDice: z.string().optional(),
+  diceCount: z.number().min(0).max(10).optional().nullable(),
+  diceType: z.enum(["d4", "d6", "d8", "d10", "d12", "d20", "d100"]).optional().nullable(),
   savingThrow: z.object({
     ability: z.enum(["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"]),
     onSuccess: z.enum(["half", "none"]),
-  }).optional(),
+  }).optional().nullable(),
   description: z.string().min(1),
-  groupId: z.string().optional(),
+  groupId: z.string().optional().nullable(),
   icon: z.preprocess(
     (val) => (val === "" ? null : val),
-    z.string().url().nullable().optional()
+    z.string().nullable().optional()
   ),
 });
 
@@ -37,28 +41,14 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const supabase = await createClient();
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
     
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // Перевіряємо права DM
+    const accessResult = await requireDM(id);
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
     }
 
-    const userId = authUser.id;
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
-      include: {
-        members: {
-          where: { userId },
-        },
-      },
-    });
-
-    if (!campaign || campaign.members[0]?.role !== "dm") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+    const { campaign } = accessResult;
 
     const body = await request.json();
     const data = createSpellSchema.parse(body);
@@ -68,19 +58,24 @@ export async function POST(
         campaignId: id,
         name: data.name,
         level: data.level,
-        school: data.school,
         type: data.type,
+        target: data.target || null,
         damageType: data.damageType,
         damageElement: data.damageElement || null,
-        castingTime: data.castingTime,
-        range: data.range,
-        components: data.components,
-        duration: data.duration,
+        damageModifier: data.damageModifier || null,
+        healModifier: data.healModifier || null,
+        castingTime: data.castingTime || null,
+        range: data.range || null,
+        components: data.components || null,
+        duration: data.duration || null,
         concentration: data.concentration,
-        damageDice: data.damageDice,
-        savingThrow: data.savingThrow || undefined,
+        diceCount: data.diceCount || null,
+        diceType: data.diceType || null,
+        savingThrow: data.savingThrow
+          ? (data.savingThrow as unknown as Prisma.InputJsonValue)
+          : undefined,
         description: data.description,
-        groupId: data.groupId,
+        groupId: data.groupId || null,
         icon: data.icon || null,
       },
       include: {
@@ -107,27 +102,11 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const supabase = await createClient();
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
     
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = authUser.id;
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
-      include: {
-        members: {
-          where: { userId },
-        },
-      },
-    });
-
-    if (!campaign || campaign.members.length === 0) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    // Перевіряємо доступ до кампанії (не обов'язково DM)
+    const accessResult = await requireCampaignAccess(id, false);
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
     }
 
     const spells = await prisma.spell.findMany({

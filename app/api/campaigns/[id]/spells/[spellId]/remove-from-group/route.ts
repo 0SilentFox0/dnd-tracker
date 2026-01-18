@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { createClient } from "@/lib/supabase/server";
+import { requireDM, validateCampaignOwnership } from "@/lib/utils/api-auth";
 
 export async function POST(
   request: Request,
@@ -8,35 +8,20 @@ export async function POST(
 ) {
   try {
     const { id, spellId } = await params;
-    const supabase = await createClient();
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = authUser.id;
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
-      include: {
-        members: {
-          where: { userId },
-        },
-      },
-    });
-
-    if (!campaign || campaign.members[0]?.role !== "dm") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    
+    // Перевіряємо права DM
+    const accessResult = await requireDM(id);
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
     }
 
     const spell = await prisma.spell.findUnique({
       where: { id: spellId },
     });
 
-    if (!spell || spell.campaignId !== id) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const validationError = validateCampaignOwnership(spell, id);
+    if (validationError) {
+      return validationError;
     }
 
     const updatedSpell = await prisma.spell.update({
