@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
-import { InitiativeParticipant } from "@/lib/types/battle";
+import { BattleParticipant } from "@/lib/types/battle";
 
 export async function POST(
   request: Request,
@@ -48,7 +48,7 @@ export async function POST(
       );
     }
 
-    const initiativeOrder = battle.initiativeOrder as unknown as InitiativeParticipant[];
+    const initiativeOrder = battle.initiativeOrder as unknown as BattleParticipant[];
     let nextTurnIndex = battle.currentTurnIndex + 1;
     let nextRound = battle.currentRound;
 

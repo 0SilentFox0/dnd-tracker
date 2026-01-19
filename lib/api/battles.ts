@@ -1,23 +1,4 @@
-export interface InitiativeParticipant {
-  participantId: string;
-  participantType: "character" | "unit";
-  instanceId?: string;
-  initiative: number;
-  name: string;
-  avatar?: string;
-  side: "ally" | "enemy";
-  currentHp: number;
-  maxHp: number;
-  tempHp: number;
-  status: "active" | "dead" | "unconscious";
-  activeEffects: Array<{
-    name: string;
-    type: "buff" | "debuff" | "condition";
-    duration: number;
-    effect: object;
-    description?: string;
-  }>;
-}
+import { BattleParticipant, BattlePreparationParticipant, BattleAction } from "@/lib/types/battle";
 
 export interface BattleScene {
   id: string;
@@ -25,25 +6,11 @@ export interface BattleScene {
   name: string;
   description?: string;
   status: "prepared" | "active" | "completed";
-  participants: Array<{
-    id: string;
-    type: "character" | "unit";
-    side: "ally" | "enemy";
-    quantity?: number;
-  }>;
+  participants: BattlePreparationParticipant[];
   currentRound: number;
   currentTurnIndex: number;
-  initiativeOrder: InitiativeParticipant[];
-  battleLog: Array<{
-    round: number;
-    timestamp: string;
-    actorName: string;
-    action: string;
-    target?: string;
-    result: string;
-    damage?: number;
-    healing?: number;
-  }>;
+  initiativeOrder: BattleParticipant[];
+  battleLog: BattleAction[]; // Розширено для зберігання повних BattleAction замість простих записів
   createdAt: string;
   startedAt?: string;
   completedAt?: string;

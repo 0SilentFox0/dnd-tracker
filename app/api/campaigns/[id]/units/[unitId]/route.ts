@@ -50,6 +50,7 @@ const updateUnitSchema = z.object({
     .optional(),
   immunities: z.array(z.string()).optional(),
   knownSpells: z.array(z.string()).optional(),
+  morale: z.number().min(-3).max(3).optional(),
   avatar: z.preprocess(
     (val) => (val === "" ? null : val),
     z.string().url().nullable().optional()

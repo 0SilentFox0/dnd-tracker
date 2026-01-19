@@ -158,6 +158,16 @@ export function UnitCard({
         </div>
       )}
 
+      {unit.knownSpells && unit.knownSpells.length > 0 && (
+        <div className="space-y-1">
+          <div className="text-xs font-semibold">Заклинання:</div>
+          <div className="text-xs text-muted-foreground">
+            {unit.knownSpells.length}{" "}
+            {unit.knownSpells.length === 1 ? "заклинання" : "заклинань"}
+          </div>
+        </div>
+      )}
+
       <div className="flex gap-2">
         <Link
           href={`/campaigns/${campaignId}/dm/units/${unit.id}`}

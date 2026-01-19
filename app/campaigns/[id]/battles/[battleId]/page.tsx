@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Link from "next/link";
 import { useBattle, useNextTurn, useAttack } from "@/lib/hooks/useBattles";
-import type { InitiativeParticipant, BattleScene } from "@/lib/api/battles";
+import type { BattleParticipant, BattleScene } from "@/lib/api/battles";
 
 export default function BattlePage({
   params,
@@ -23,8 +23,8 @@ export default function BattlePage({
   const router = useRouter();
   const [attackDialogOpen, setAttackDialogOpen] = useState(false);
   const [spellDialogOpen, setSpellDialogOpen] = useState(false);
-  const [selectedAttacker, setSelectedAttacker] = useState<InitiativeParticipant | null>(null);
-  const [selectedTarget, setSelectedTarget] = useState<InitiativeParticipant | null>(null);
+  const [selectedAttacker, setSelectedAttacker] = useState<BattleParticipant | null>(null);
+  const [selectedTarget, setSelectedTarget] = useState<BattleParticipant | null>(null);
   const [attackRoll, setAttackRoll] = useState("");
   const [damageRolls, setDamageRolls] = useState<string[]>([]);
 
@@ -71,10 +71,10 @@ export default function BattlePage({
 
     attackMutation.mutate(
       {
-        attackerId: selectedAttacker.participantId,
-        attackerType: selectedAttacker.participantType,
-        targetId: selectedTarget.participantId,
-        targetType: selectedTarget.participantType,
+        attackerId: selectedAttacker.sourceId,
+        attackerType: selectedAttacker.sourceType,
+        targetId: selectedTarget.sourceId,
+        targetType: selectedTarget.sourceType,
         attackRoll: parseInt(attackRoll),
         damageRolls: damageRolls.map((r) => parseInt(r)).filter((n) => !isNaN(n)),
       },
@@ -178,10 +178,10 @@ export default function BattlePage({
                       <div>
                         <Label>Ціль</Label>
                         <Select
-                          value={selectedTarget?.participantId}
+                          value={selectedTarget?.id}
                           onValueChange={(value) => {
                             const target = battle.initiativeOrder.find(
-                              p => p.participantId === value
+                              p => p.id === value
                             );
                             setSelectedTarget(target || null);
                           }}
@@ -191,7 +191,7 @@ export default function BattlePage({
                           </SelectTrigger>
                           <SelectContent>
                             {enemies.map((enemy) => (
-                              <SelectItem key={enemy.participantId} value={enemy.participantId}>
+                              <SelectItem key={enemy.id} value={enemy.id}>
                                 {enemy.name} (HP: {enemy.currentHp}/{enemy.maxHp})
                               </SelectItem>
                             ))}
@@ -243,7 +243,7 @@ export default function BattlePage({
               const isCurrentTurn = index === battle.currentTurnIndex;
               return (
                 <div
-                  key={`${participant.participantId}-${participant.instanceId || ""}`}
+                  key={`${participant.id}-${participant.instanceId || ""}`}
                   className={`flex items-center gap-4 p-3 border rounded-lg ${
                     isCurrentTurn ? "bg-primary/10 border-primary" : ""
                   }`}

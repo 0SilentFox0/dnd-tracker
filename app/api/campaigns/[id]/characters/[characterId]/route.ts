@@ -66,6 +66,7 @@ const updateCharacterSchema = z.object({
   languages: z.array(z.string()).optional(),
   proficiencies: z.record(z.string(), z.array(z.string())).optional(),
   immunities: z.array(z.string()).optional(),
+  morale: z.number().min(-3).max(3).optional(),
 
   // Roleplay
   personalityTraits: z.string().optional(),

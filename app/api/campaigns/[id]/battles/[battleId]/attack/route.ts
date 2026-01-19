@@ -16,7 +16,7 @@ import {
 import { Artifact, ArtifactModifier } from "@/lib/types/artifacts";
 import { CharacterSkill } from "@/lib/types/skills";
 import { EquippedItems } from "@/lib/types/inventory";
-import { BattleLogEntry, InitiativeParticipant } from "@/lib/types/battle";
+import { BattleLogEntry, BattleParticipant } from "@/lib/types/battle";
 import { Prisma } from "@prisma/client";
 import { getDamageElementLabel } from "@/lib/constants/damage";
 
@@ -233,11 +233,11 @@ export async function POST(
 
       // Оновлюємо HP цілі в initiativeOrder
       const initiativeOrder =
-        battle.initiativeOrder as unknown as InitiativeParticipant[];
+        battle.initiativeOrder as unknown as BattleParticipant[];
 
       const targetInOrder = initiativeOrder.find(
         (p) =>
-          p.participantId === data.targetId &&
+          p.sourceId === data.targetId &&
           (data.targetType === "character" || p.instanceId === data.targetId)
       );
 

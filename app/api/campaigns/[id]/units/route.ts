@@ -48,6 +48,7 @@ const createUnitSchema = z.object({
   
   immunities: z.array(z.string()).default([]),
   knownSpells: z.array(z.string()).default([]),
+  morale: z.number().min(-3).max(3).default(0),
   avatar: z.string().optional(),
 });
 
@@ -104,6 +105,7 @@ export async function POST(
         specialAbilities: data.specialAbilities as Prisma.InputJsonValue,
         immunities: data.immunities as Prisma.InputJsonValue,
         knownSpells: data.knownSpells,
+        morale: data.morale,
         avatar: data.avatar,
       },
       include: {

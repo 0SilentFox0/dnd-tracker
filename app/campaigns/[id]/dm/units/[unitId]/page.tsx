@@ -26,6 +26,7 @@ import { UnitAvatarInput } from "@/components/units/UnitAvatarInput";
 import { UnitDamageModifier } from "@/components/units/UnitDamageModifier";
 import { UnitImmunities } from "@/components/units/UnitImmunities";
 import { UnitSpecialAbilities } from "@/components/units/UnitSpecialAbilities";
+import { UnitKnownSpells } from "@/components/units/UnitKnownSpells";
 
 export default function EditUnitPage({
   params,
@@ -221,6 +222,12 @@ export default function EditUnitPage({
                   specialAbilities: abilities as Unit["specialAbilities"],
                 })
               }
+            />
+
+            <UnitKnownSpells
+              formData={formData}
+              spells={spells}
+              onChange={handleFormDataChange}
             />
 
             <div className="flex gap-2 pt-4">

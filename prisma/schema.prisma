@@ -146,6 +146,7 @@ model Unit {
   specialAbilities Json       @default("[]")
   immunities       Json       @default("[]")
   knownSpells      Json       @default("[]")
+  morale           Int        @default(0)
   avatar           String?
   createdAt        DateTime   @default(now())
   campaign         Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)

@@ -1,8 +1,17 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
-import { InitiativeParticipant } from "@/lib/types/battle";
+import { BattleParticipant } from "@/lib/types/battle";
 import { Prisma } from "@prisma/client";
+import {
+  createBattleParticipantFromCharacter,
+  createBattleParticipantFromUnit,
+} from "@/lib/utils/battle-participant";
+import {
+  applyStartOfBattleEffects,
+  calculateInitiative,
+  sortByInitiative,
+} from "@/lib/utils/battle-start";
 
 export async function POST(
   request: Request,
@@ -50,28 +59,30 @@ export async function POST(
     }>;
 
     // Створюємо initiativeOrder з усіх учасників
-    const initiativeOrder: InitiativeParticipant[] = [];
+    const initiativeOrder: BattleParticipant[] = [];
 
     for (const participant of participants) {
       if (participant.type === "character") {
         const character = await prisma.character.findUnique({
           where: { id: participant.id },
+          include: {
+            inventory: true,
+            characterSkills: {
+              include: {
+                skillTree: true,
+              },
+            },
+          },
         });
 
         if (character) {
-          initiativeOrder.push({
-            participantId: character.id,
-            participantType: "character",
-            initiative: character.initiative,
-            name: character.name,
-            avatar: character.avatar || undefined,
-            side: participant.side,
-            currentHp: character.currentHp,
-            maxHp: character.maxHp,
-            tempHp: character.tempHp,
-            status: character.currentHp <= 0 ? "dead" : "active",
-            activeEffects: [],
-          });
+          let battleParticipant = await createBattleParticipantFromCharacter(
+            character,
+            battleId,
+            participant.side
+          );
+          // Застосовуємо початкові ефекти (після створення всіх учасників)
+          initiativeOrder.push(battleParticipant);
         }
       } else if (participant.type === "unit") {
         const unit = await prisma.unit.findUnique({
@@ -81,27 +92,36 @@ export async function POST(
         if (unit) {
           const quantity = participant.quantity || 1;
           for (let i = 0; i < quantity; i++) {
-            initiativeOrder.push({
-              participantId: unit.id,
-              participantType: "unit",
-              instanceId: `${unit.id}-${i}`,
-              initiative: unit.initiative,
-              name: `${unit.name} #${i + 1}`,
-              avatar: unit.avatar || undefined,
-              side: participant.side,
-              currentHp: unit.maxHp,
-              maxHp: unit.maxHp,
-              tempHp: 0,
-              status: "active",
-              activeEffects: [],
-            });
+            const battleParticipant = createBattleParticipantFromUnit(
+              unit,
+              battleId,
+              participant.side,
+              i + 1
+            );
+            initiativeOrder.push(battleParticipant);
           }
         }
       }
     }
 
-    // Сортуємо по initiative (від більшого до меншого)
-    initiativeOrder.sort((a, b) => b.initiative - a.initiative);
+    // Застосовуємо початкові ефекти для всіх учасників (start_of_battle тригери)
+    const updatedInitiativeOrder = initiativeOrder.map((participant) => {
+      return applyStartOfBattleEffects(participant, 1, initiativeOrder);
+    });
+
+    // Розраховуємо ініціативу з урахуванням спеціальних правил та ефектів
+    const initiativeOrderWithCalculatedInitiative = updatedInitiativeOrder.map(
+      (participant) => {
+        const calculatedInitiative = calculateInitiative(participant);
+        return {
+          ...participant,
+          initiative: calculatedInitiative,
+        };
+      }
+    );
+
+    // Сортуємо за ініціативою (initiative → baseInitiative → dexterity)
+    const sortedInitiativeOrder = sortByInitiative(initiativeOrderWithCalculatedInitiative);
 
     // Оновлюємо бій
     const updatedBattle = await prisma.battleScene.update({
@@ -109,7 +129,7 @@ export async function POST(
       data: {
         status: "active",
         startedAt: new Date(),
-        initiativeOrder: initiativeOrder as unknown as Prisma.InputJsonValue,
+        initiativeOrder: sortedInitiativeOrder as unknown as Prisma.InputJsonValue,
         currentRound: 1,
         currentTurnIndex: 0,
       },

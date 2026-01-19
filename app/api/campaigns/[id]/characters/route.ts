@@ -58,6 +58,7 @@ const createCharacterSchema = z.object({
   languages: z.array(z.string()).default([]),
   proficiencies: z.record(z.string(), z.array(z.string())).default({}),
   immunities: z.array(z.string()).default([]),
+  morale: z.number().min(-3).max(3).default(0),
   
   // Roleplay
   personalityTraits: z.string().optional(),
