@@ -2,7 +2,8 @@ import { getAuthUser } from "@/lib/auth";
 import { redirect, notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { SkillCreateForm } from "@/components/skills/SkillCreateForm";
-import type { Race } from "@/lib/types/races";
+import type { Race } from "@/types/races";
+import type { SkillTriggers } from "@/types/skill-triggers";
 
 export default async function EditSkillPage({
   params,
@@ -78,7 +79,38 @@ export default async function EditSkillPage({
           createdAt: race.createdAt,
           updatedAt: race.updatedAt,
         }))}
-        initialData={skill}
+        initialData={{
+          ...skill,
+          races: Array.isArray(skill.races) ? skill.races : [],
+          bonuses: typeof skill.bonuses === "object" && skill.bonuses !== null
+            ? (skill.bonuses as Record<string, number>)
+            : {},
+          spellEnhancementTypes: Array.isArray(skill.spellEnhancementTypes)
+            ? (skill.spellEnhancementTypes as string[])
+            : undefined,
+          spellTargetChange:
+            skill.spellTargetChange &&
+            typeof skill.spellTargetChange === "object" &&
+            skill.spellTargetChange !== null &&
+            !Array.isArray(skill.spellTargetChange) &&
+            "target" in skill.spellTargetChange
+              ? (skill.spellTargetChange as { target: string })
+              : null,
+          spellAdditionalModifier:
+            skill.spellAdditionalModifier &&
+            typeof skill.spellAdditionalModifier === "object" &&
+            skill.spellAdditionalModifier !== null &&
+            !Array.isArray(skill.spellAdditionalModifier)
+              ? (skill.spellAdditionalModifier as {
+                  modifier?: string;
+                  damageDice?: string;
+                  duration?: number;
+                })
+              : null,
+          skillTriggers: Array.isArray(skill.skillTriggers)
+            ? (skill.skillTriggers as unknown as SkillTriggers)
+            : undefined,
+        }}
       />
     </div>
   );

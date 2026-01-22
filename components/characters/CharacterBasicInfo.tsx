@@ -6,9 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ALIGNMENTS } from "@/lib/constants";
-import { CharacterFormData } from "@/lib/api/characters";
-import { CampaignMember } from "@/lib/api/campaigns";
-import type { Race } from "@/lib/types/races";
+import { CharacterFormData } from "@/types/characters";
+import { CampaignMember } from "@/types/campaigns";
+import type { Race } from "@/types/races";
 
 interface CharacterBasicInfoProps {
   formData: CharacterFormData;

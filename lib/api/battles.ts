@@ -1,29 +1,4 @@
-import { BattleParticipant, BattlePreparationParticipant, BattleAction } from "@/lib/types/battle";
-
-export interface BattleScene {
-  id: string;
-  campaignId: string;
-  name: string;
-  description?: string;
-  status: "prepared" | "active" | "completed";
-  participants: BattlePreparationParticipant[];
-  currentRound: number;
-  currentTurnIndex: number;
-  initiativeOrder: BattleParticipant[];
-  battleLog: BattleAction[]; // Розширено для зберігання повних BattleAction замість простих записів
-  createdAt: string;
-  startedAt?: string;
-  completedAt?: string;
-}
-
-export interface AttackData {
-  attackerId: string;
-  attackerType: "character" | "unit";
-  targetId: string;
-  targetType: "character" | "unit";
-  attackRoll: number;
-  damageRolls: number[];
-}
+import type { BattleScene, AttackData, MoraleCheckData, SpellCastData } from "@/types/api";
 
 export async function getBattle(
   campaignId: string,
@@ -66,5 +41,45 @@ export async function attack(
     }
   );
   if (!response.ok) throw new Error("Failed to process attack");
+  return response.json();
+}
+
+
+export async function moraleCheck(
+  campaignId: string,
+  battleId: string,
+  data: MoraleCheckData
+): Promise<{ battle: BattleScene; moraleResult: { shouldSkipTurn: boolean; hasExtraTurn: boolean; message: string } }> {
+  const response = await fetch(
+    `/api/campaigns/${campaignId}/battles/${battleId}/morale-check`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    }
+  );
+  if (!response.ok) throw new Error("Failed to process morale check");
+  return response.json();
+}
+
+
+export async function castSpell(
+  campaignId: string,
+  battleId: string,
+  data: SpellCastData
+): Promise<BattleScene> {
+  const response = await fetch(
+    `/api/campaigns/${campaignId}/battles/${battleId}/spell`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    }
+  );
+  if (!response.ok) throw new Error("Failed to process spell");
   return response.json();
 }

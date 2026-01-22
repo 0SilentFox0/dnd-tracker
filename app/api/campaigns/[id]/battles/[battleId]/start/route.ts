@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
-import { BattleParticipant } from "@/lib/types/battle";
+import { BattleParticipant } from "@/types/battle";
 import { Prisma } from "@prisma/client";
 import {
   createBattleParticipantFromCharacter,
@@ -92,7 +92,7 @@ export async function POST(
         if (unit) {
           const quantity = participant.quantity || 1;
           for (let i = 0; i < quantity; i++) {
-            const battleParticipant = createBattleParticipantFromUnit(
+            const battleParticipant = await createBattleParticipantFromUnit(
               unit,
               battleId,
               participant.side,

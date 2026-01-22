@@ -20,7 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { SpellCard } from "./SpellCard";
-import type { Spell, SpellGroup } from "@/lib/api/spells";
+import type { Spell, SpellGroup } from "@/types/spells";
 import { useDeleteSpellsByLevel } from "@/lib/hooks/useSpells";
 
 

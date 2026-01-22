@@ -1,5 +1,5 @@
-import type { MainSkill } from "@/lib/types/skill-tree";
-import { SkillLevel, SKILL_LEVELS } from "@/lib/types/skill-tree";
+import type { MainSkill } from "@/types/skill-tree";
+import { SkillLevel, SKILL_LEVELS } from "@/types/skill-tree";
 import { MainSkillLevel } from "./MainSkillLevel";
 
 interface MainSkillLevelsProps {

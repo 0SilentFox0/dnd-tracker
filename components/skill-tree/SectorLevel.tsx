@@ -1,5 +1,5 @@
-import type { MainSkill } from "@/lib/types/skill-tree";
-import { SkillLevel } from "@/lib/types/skill-tree";
+import type { MainSkill } from "@/types/skill-tree";
+import { SkillLevel } from "@/types/skill-tree";
 import { darkenColor } from "./utils";
 
 interface SectorLevelProps {

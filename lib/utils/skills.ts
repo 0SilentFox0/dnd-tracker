@@ -1,5 +1,5 @@
-import type { Skill } from "@/lib/types/skills";
-import type { MainSkill } from "@/lib/types/main-skills";
+import type { Skill } from "@/types/skills";
+import type { MainSkill } from "@/types/main-skills";
 
 /**
  * Групує скіли по групах (застаріла функція, використовується для сумісності)

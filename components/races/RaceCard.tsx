@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreVertical, Trash2, Edit, Plus, Circle, Shield } from "lucide-react";
-import type { Race, StatModifier } from "@/lib/types/races";
+import type { Race, StatModifier } from "@/types/races";
 import { ABILITY_SCORES } from "@/lib/constants/abilities";
 
 interface RaceCardProps {

@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SPELLCASTING_ABILITIES } from "@/lib/constants";
-import { CharacterFormData } from "@/lib/api/characters";
+import { CharacterFormData } from "@/types/characters";
 import { SpellMultiSelect } from "./SpellMultiSelect";
 
 interface CharacterSpellsSectionProps {

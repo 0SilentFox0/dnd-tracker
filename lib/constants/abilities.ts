@@ -14,7 +14,7 @@ export const ABILITY_SCORES = [
   { key: "armorClass", label: "Захист", abbreviation: "AC" },
   { key: "initiative", label: "Ініціатива", abbreviation: "INIT" },
   { key: "spellSaveDC", label: "Захист від Заклинань", abbreviation: "SPD" },
-  { key: "spellAttackBonus", label: "Бонус атаки від Заклинань", abbreviation: "SAB" },
+  { key: "spellAttackBonus", label: "Бонус до заклинань", abbreviation: "SAB" },
   { key: "spellSlots", label: "Заклинання", abbreviation: "SS" },
   { key: "moral", label: "Мораль", abbreviation: "MOR" },
 ] as const;

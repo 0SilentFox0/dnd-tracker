@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
-import type { Spell } from "@/lib/api/spells";
+import type { Spell } from "@/types/spells";
 import {
   groupSpellsByGroup,
   filterSelectedSpells,

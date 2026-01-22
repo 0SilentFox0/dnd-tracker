@@ -2,7 +2,7 @@
  * API сервіс для роботи з інвентарем персонажа
  */
 
-import { InventoryFormData, InventoryItem, EquippedItems } from "@/lib/types/inventory";
+import { InventoryFormData, InventoryItem, EquippedItems } from "@/types/inventory";
 
 export interface Inventory {
   id: string;

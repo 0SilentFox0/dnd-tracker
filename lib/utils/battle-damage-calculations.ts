@@ -2,7 +2,7 @@
  * Утиліти для розрахунку урону з урахуванням всіх модифікаторів
  */
 
-import { BattleParticipant } from "@/lib/types/battle";
+import { BattleParticipant } from "@/types/battle";
 import { AttackType, matchesAttackType, calculatePercentBonus, formatPercentBonusBreakdown, formatFlatBonusBreakdown } from "./battle-modifiers-common";
 import { hasAnyAllyLowHp } from "./battle-participant-helpers";
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";

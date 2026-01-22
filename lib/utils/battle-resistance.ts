@@ -2,7 +2,7 @@
  * Утиліти для роботи з імунітетами та опором в бою
  */
 
-import { BattleParticipant } from "@/lib/types/battle";
+import { BattleParticipant } from "@/types/battle";
 import { findRacialAbilityByPattern, extractResistanceValue } from "./battle-resistance-helpers";
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
 

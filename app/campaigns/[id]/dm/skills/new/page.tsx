@@ -2,7 +2,7 @@ import { getAuthUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { SkillCreateForm } from "@/components/skills/SkillCreateForm";
-import type { Race } from "@/lib/types/races";
+import type { Race } from "@/types/races";
 
 export default async function NewSkillPage({
   params,

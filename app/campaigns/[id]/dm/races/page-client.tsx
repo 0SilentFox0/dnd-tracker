@@ -8,7 +8,7 @@ import {
   useUpdateRace,
   useDeleteRace,
 } from "@/lib/hooks/useRaces";
-import type { Race } from "@/lib/types/races";
+import type { Race } from "@/types/races";
 import { RacesPageHeader } from "@/components/races/RacesPageHeader";
 import { RaceCard } from "@/components/races/RaceCard";
 import { CreateRaceDialog } from "@/components/races/CreateRaceDialog";

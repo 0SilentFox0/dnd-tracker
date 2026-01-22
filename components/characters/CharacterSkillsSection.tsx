@@ -3,7 +3,7 @@
  */
 
 import { DND_SKILLS, DND_SAVING_THROWS } from "@/lib/constants";
-import { CharacterFormData } from "@/lib/api/characters";
+import { CharacterFormData } from "@/types/characters";
 
 interface CharacterSkillsSectionProps {
   formData: CharacterFormData;

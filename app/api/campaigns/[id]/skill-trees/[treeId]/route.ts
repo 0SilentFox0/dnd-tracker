@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
 import { requireDM } from "@/lib/utils/api-auth";
-import type { SkillTree } from "@/lib/types/skill-tree";
+import type { SkillTree } from "@/types/skill-tree";
 
 const updateSkillTreeSchema = z.object({
   skills: z.any(), // SkillTree structure

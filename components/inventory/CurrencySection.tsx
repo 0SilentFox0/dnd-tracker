@@ -4,7 +4,7 @@
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { InventoryFormData } from "@/lib/types/inventory";
+import { InventoryFormData } from "@/types/inventory";
 
 interface CurrencySectionProps {
   formData: InventoryFormData;

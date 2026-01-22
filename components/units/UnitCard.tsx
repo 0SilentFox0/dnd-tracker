@@ -4,8 +4,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
-import type { Unit } from "@/lib/api/units";
-import type { Race } from "@/lib/types/races";
+import type { Unit } from "@/types/units";
+import type { Race } from "@/types/races";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { getDamageElementLabel } from "@/lib/constants/damage";
 import {

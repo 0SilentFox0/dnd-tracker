@@ -2,8 +2,8 @@
  * Утиліти для роботи з ефектами рас
  */
 
-import type { Race } from "@/lib/types/races";
-import type { Unit } from "@/lib/api/units";
+import type { Race } from "@/types/races";
+import type { Unit } from "@/types/units";
 import { COMMON_IMMUNITIES, IMMUNITY_PATTERNS } from "@/lib/constants/immunities";
 
 // Тип для Race з Prisma (JSON поля)

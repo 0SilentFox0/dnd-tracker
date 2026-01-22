@@ -2,9 +2,9 @@
  * Утиліти для автоматичного додавання заклинань при вивченні скілів
  */
 
-import type { Skill } from "@/lib/types/skills";
-import type { Spell } from "@/lib/api/spells";
-import { SkillLevel, type SkillLevelType } from "@/lib/types/skill-tree";
+import type { Skill } from "@/types/skills";
+import type { Spell } from "@/types/spells";
+import { SkillLevel, type SkillLevelType } from "@/types/skill-tree";
 
 /**
  * Визначає рівень магії на основі прокачки скілу

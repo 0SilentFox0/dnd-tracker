@@ -2,7 +2,7 @@
  * API сервіс для роботи з основними навиками
  */
 
-import type { MainSkill, MainSkillFormData } from "@/lib/types/main-skills";
+import type { MainSkill, MainSkillFormData } from "@/types/main-skills";
 
 /**
  * Отримує список основних навиків кампанії

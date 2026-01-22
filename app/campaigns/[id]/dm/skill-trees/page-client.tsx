@@ -1,8 +1,8 @@
 "use client";
 
-import type { SkillTree } from "@/lib/types/skill-tree";
+import type { SkillTree } from "@/types/skill-tree";
 import type { SkillFromLibrary } from "@/lib/hooks/useSkills";
-import type { Race } from "@/lib/types/races";
+import type { Race } from "@/types/races";
 import { SkillTreeHeader } from "@/components/skill-tree/SkillTreeHeader";
 import { SkillTreeContent } from "@/components/skill-tree/SkillTreeContent";
 import { SkillTreeCard } from "@/components/skill-tree/SkillTreeCard";

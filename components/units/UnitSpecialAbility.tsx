@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import type { Spell } from "@/lib/api/spells";
+import type { Spell } from "@/types/spells";
 
 export interface SpecialAbility {
   name?: string;

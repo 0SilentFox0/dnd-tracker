@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { X } from "lucide-react";
 import { getSpellGroupIcon } from "@/lib/utils/spell-icons";
-import type { Spell } from "@/lib/api/spells";
+import type { Spell } from "@/types/spells";
 import {
   calculateAverageSpellEffect,
   formatSpellAverage,

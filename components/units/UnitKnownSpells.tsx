@@ -9,8 +9,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { X } from "lucide-react";
-import type { Unit } from "@/lib/api/units";
-import type { Spell } from "@/lib/api/spells";
+import type { Unit } from "@/types/units";
+import type { Spell } from "@/types/spells";
 
 interface UnitKnownSpellsProps {
   formData: Partial<Unit>;

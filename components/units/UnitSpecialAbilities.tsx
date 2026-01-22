@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import type { Spell } from "@/lib/api/spells";
+import type { Spell } from "@/types/spells";
 import { UnitSpecialAbility, type SpecialAbility } from "./UnitSpecialAbility";
 
 interface UnitSpecialAbilitiesProps {

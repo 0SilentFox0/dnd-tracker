@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import type { Skill } from "@/lib/types/skills";
+import type { Skill } from "@/types/skills";
 
 export interface SkillFromLibrary {
   id: string;

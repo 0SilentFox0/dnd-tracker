@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { Unit } from "@/lib/api/units";
+import type { Unit } from "@/types/units";
 
 interface UnitAbilityScoresProps {
   formData: Partial<Unit>;

@@ -7,8 +7,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Unit } from "@/lib/api/units";
-import type { Race } from "@/lib/types/races";
+import type { Unit } from "@/types/units";
+import type { Race } from "@/types/races";
 
 interface UnitBasicInfoProps {
   formData: Partial<Unit>;

@@ -2,7 +2,8 @@ import { getAuthUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { DMSkillsPageClient } from "./page-client";
-import type { Race } from "@/lib/types/races";
+import type { Race } from "@/types/races";
+import type { SkillTriggers } from "@/types/skill-triggers";
 
 export default async function DMSkillsPage({
   params,
@@ -68,6 +69,9 @@ export default async function DMSkillsPage({
             duration?: number;
           })
         : null,
+    skillTriggers: Array.isArray(skill.skillTriggers)
+      ? (skill.skillTriggers as unknown as SkillTriggers)
+      : undefined,
   }));
 
   // Завантажуємо раси для відображення назв

@@ -4,9 +4,9 @@ import {
   Artifact,
   ArtifactBonus,
   ArtifactModifier,
-} from "@/lib/types/artifacts";
-import { EquippedItems } from "@/lib/types/inventory";
-import { CharacterSkill, UnlockedSkill } from "@/lib/types/skills";
+} from "@/types/artifacts";
+import { EquippedItems } from "@/types/inventory";
+import { CharacterSkill, UnlockedSkill } from "@/types/skills";
 
 /**
  * Розраховує модифікатор з ability score

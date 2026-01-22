@@ -8,12 +8,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { FormCard } from "@/components/common/FormCard";
 import { FormField } from "@/components/common/FormField";
 import { useUpdateRace } from "@/lib/hooks/useRaces";
-import type { Race } from "@/lib/types/races";
-import type { RaceFormData, StatModifier } from "@/lib/types/races";
+import type { Race } from "@/types/races";
+import type { RaceFormData, StatModifier } from "@/types/races";
 import { useMainSkills } from "@/lib/hooks/useMainSkills";
 import { ABILITY_SCORES } from "@/lib/constants/abilities";
 import { Checkbox } from "@/components/ui/checkbox";
-import type { SpellSlotProgression } from "@/lib/types/races";
+import type { SpellSlotProgression } from "@/types/races";
 
 interface RaceEditFormProps {
   campaignId: string;

@@ -13,7 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { getAbilityModifier } from "@/lib/utils/calculations";
 import { getAuthUser } from "@/lib/auth";
-import type { Character } from "@/lib/api/characters";
+import type { Character } from "@/types/characters";
 import {
   getCharacterImmunities,
   getCharacterDamageModifiers,

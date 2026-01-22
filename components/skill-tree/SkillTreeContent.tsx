@@ -4,11 +4,11 @@ import { CircularSkillTree } from "@/components/skill-tree/CircularSkillTree";
 import { SkillLibrarySelector } from "@/components/skill-tree/SkillLibrarySelector";
 import { TrainingCompletion } from "@/components/skill-tree/TrainingCompletion";
 import { TrainingCompletedMessage } from "@/components/skill-tree/TrainingCompletedMessage";
-import type { SkillTree, Skill, UltimateSkill, MainSkill } from "@/lib/types/skill-tree";
-import { SkillLevel } from "@/lib/types/skill-tree";
+import type { SkillTree, Skill, UltimateSkill, MainSkill } from "@/types/skill-tree";
+import { SkillLevel } from "@/types/skill-tree";
 import type { SkillFromLibrary } from "@/lib/hooks/useSkills";
-import type { Race } from "@/lib/types/races";
-import type { MainSkill as MainSkillType } from "@/lib/types/main-skills";
+import type { Race } from "@/types/races";
+import type { MainSkill as MainSkillType } from "@/types/main-skills";
 
 interface SkillTreeContentProps {
   enrichedSkillTree: SkillTree | null;

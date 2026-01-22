@@ -7,7 +7,7 @@ import {
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
 import { getSpellGroupIcon } from "@/lib/utils/spell-icons";
-import type { Spell } from "@/lib/api/spells";
+import type { Spell } from "@/types/spells";
 
 interface SpellDropdownContentProps {
   groupedSpells: [string, Spell[]][];

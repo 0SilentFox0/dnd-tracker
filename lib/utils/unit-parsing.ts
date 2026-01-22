@@ -1,4 +1,4 @@
-import type { CSVUnitRow, UnitAttack, UnitSpecialAbility } from "@/lib/types/unit-import";
+import type { CSVUnitRow, UnitAttack, UnitSpecialAbility } from "@/types/import";
 import { getProficiencyBonus } from "@/lib/utils/calculations";
 import { ABILITY_SCORES } from "@/lib/constants/abilities";
 
@@ -207,7 +207,7 @@ export function parseSpecialAbilities(value: string): UnitSpecialAbility[] {
  * Конвертує CSV рядок юніта в формат для імпорту
  */
 export function convertCSVRowToUnit(row: CSVUnitRow): {
-  unit: Omit<import("@/lib/types/unit-import").ImportUnit, "groupId">;
+  unit: Omit<import("@/types/import").ImportUnit, "groupId">;
   groupName: string | undefined;
 } {
   const name = (row.Назва || row.name || row.Name || "").trim();

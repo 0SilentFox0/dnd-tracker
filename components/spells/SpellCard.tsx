@@ -18,7 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sparkles, X, Move, Zap } from "lucide-react";
-import type { Spell, SpellGroup } from "@/lib/api/spells";
+import type { Spell, SpellGroup } from "@/types/spells";
 import {
   getSpellGroupIcon,
   getSpellTypeIcon,

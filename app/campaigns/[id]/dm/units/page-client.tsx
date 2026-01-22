@@ -8,7 +8,7 @@ import {
   useDeleteUnit,
 } from "@/lib/hooks/useUnits";
 import { useRaces } from "@/lib/hooks/useRaces";
-import type { Unit } from "@/lib/api/units";
+import type { Unit } from "@/types/units";
 import { UnitsPageHeader } from "@/components/units/UnitsPageHeader";
 import { UnitGroupAccordion } from "@/components/units/UnitGroupAccordion";
 import { DeleteAllUnitsDialog } from "@/components/units/DeleteAllUnitsDialog";

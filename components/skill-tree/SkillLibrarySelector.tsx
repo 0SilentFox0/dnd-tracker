@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { SkillFromLibrary } from "@/lib/hooks/useSkills";
-import type { MainSkill } from "@/lib/types/main-skills";
+import type { MainSkill } from "@/types/main-skills";
 
 interface SkillLibrarySelectorProps {
   skills: SkillFromLibrary[];

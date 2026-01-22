@@ -2,7 +2,7 @@
  * Утиліти для перевірки тригерів пасивних здібностей
  */
 
-import { BattleParticipant, PassiveAbility } from "@/lib/types/battle";
+import { BattleParticipant, PassiveAbility } from "@/types/battle";
 import { hasAnyAllyLowHp } from "./battle-participant-helpers";
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
 

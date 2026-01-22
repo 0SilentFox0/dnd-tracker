@@ -9,7 +9,7 @@ import {
   updateMainSkill,
   deleteMainSkill,
 } from "@/lib/api/main-skills";
-import type { MainSkill, MainSkillFormData } from "@/lib/types/main-skills";
+import type { MainSkill, MainSkillFormData } from "@/types/main-skills";
 
 /**
  * Отримує список основних навиків кампанії

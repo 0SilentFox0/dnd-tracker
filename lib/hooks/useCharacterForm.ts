@@ -3,7 +3,7 @@
  */
 
 import { useState, useCallback } from "react";
-import { CharacterFormData } from "@/lib/api/characters";
+import { CharacterFormData } from "@/types/characters";
 
 export interface UseCharacterFormOptions {
   initialData?: Partial<CharacterFormData>;

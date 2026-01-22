@@ -2,7 +2,7 @@ import { getAuthUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { DMUnitsPageClient } from "./page-client";
-import type { Unit } from "@/lib/api/units";
+import type { Unit } from "@/types/units";
 import { Prisma } from "@prisma/client";
 
 function transformPrismaUnitToUnit(

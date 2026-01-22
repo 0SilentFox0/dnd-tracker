@@ -2,7 +2,7 @@
  * Допоміжні функції для роботи з BattleParticipant
  */
 
-import { BattleParticipant } from "@/lib/types/battle";
+import { BattleParticipant } from "@/types/battle";
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
 
 /**

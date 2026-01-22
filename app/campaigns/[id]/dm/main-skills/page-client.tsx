@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMainSkills, useDeleteMainSkill } from "@/lib/hooks/useMainSkills";
-import type { MainSkill } from "@/lib/types/main-skills";
+import type { MainSkill } from "@/types/main-skills";
 import { MainSkillsPageHeader } from "@/components/main-skills/MainSkillsPageHeader";
 import { MainSkillCard } from "@/components/main-skills/MainSkillCard";
 import { CreateMainSkillDialog } from "@/components/main-skills/CreateMainSkillDialog";

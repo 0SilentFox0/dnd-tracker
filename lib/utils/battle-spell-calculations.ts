@@ -2,7 +2,7 @@
  * Утиліти для розрахунку заклинання з урахуванням покращень
  */
 
-import { BattleParticipant, ActiveSkill } from "@/lib/types/battle";
+import { BattleParticipant, ActiveSkill } from "@/types/battle";
 import { calculatePercentBonus } from "./battle-modifiers-common";
 
 /**

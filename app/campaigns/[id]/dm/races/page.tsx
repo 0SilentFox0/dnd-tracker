@@ -1,7 +1,7 @@
 import { getAuthUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
-import type { Race } from "@/lib/types/races";
+import type { Race } from "@/types/races";
 import { DMRacesPageClient } from "./page-client";
 
 export default async function DMRacesPage({

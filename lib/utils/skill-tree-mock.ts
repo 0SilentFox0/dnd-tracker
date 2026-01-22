@@ -7,12 +7,12 @@ import type {
   MainSkill,
   Skill,
   UltimateSkill,
-} from "@/lib/types/skill-tree";
+} from "@/types/skill-tree";
 import {
   SkillLevel,
   SkillCircle as SkillCircleEnum,
-} from "@/lib/types/skill-tree";
-import type { MainSkill as MainSkillType } from "@/lib/types/main-skills";
+} from "@/types/skill-tree";
+import type { MainSkill as MainSkillType } from "@/types/main-skills";
 
 // Генерація мокових навиків для основного навику
 function generateSkillsForMainSkill(

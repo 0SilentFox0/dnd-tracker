@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { z } from "zod";
 import { requireDM } from "@/lib/utils/api-auth";
 import { Prisma } from "@prisma/client";
-import type { ImportUnit } from "@/lib/types/unit-import";
+import type { ImportUnit } from "@/types/import";
 import { convertCSVRowToUnit } from "@/lib/utils/unit-parsing";
 
 // Схема для одного юніта в імпорті

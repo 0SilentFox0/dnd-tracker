@@ -17,7 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MoreVertical, Trash2, Edit } from "lucide-react";
-import type { MainSkill } from "@/lib/types/main-skills";
+import type { MainSkill } from "@/types/main-skills";
 
 interface MainSkillCardProps {
   mainSkill: MainSkill;

@@ -1,4 +1,5 @@
-import type { Skill } from "@/lib/types/skills";
+import type { Skill } from "@/types/skills";
+import type { SkillPayload, SkillUpdatePayload } from "@/types/api";
 
 export async function getSkills(campaignId: string): Promise<Skill[]> {
   const response = await fetch(`/api/campaigns/${campaignId}/skills`, {
@@ -14,21 +15,7 @@ export async function getSkills(campaignId: string): Promise<Skill[]> {
 
 export async function createSkill(
   campaignId: string,
-  data: {
-    name: string;
-    description?: string;
-    icon?: string;
-    races: string[];
-    isRacial: boolean;
-    bonuses: Record<string, number>;
-    damage?: number;
-    armor?: number;
-    speed?: number;
-    physicalResistance?: number;
-    magicalResistance?: number;
-    spellId?: string;
-    spellGroupId?: string;
-  }
+  data: SkillPayload
 ): Promise<Skill> {
   const response = await fetch(`/api/campaigns/${campaignId}/skills`, {
     method: "POST",
@@ -49,22 +36,7 @@ export async function createSkill(
 export async function updateSkill(
   campaignId: string,
   skillId: string,
-  data: {
-    name?: string;
-    description?: string;
-    icon?: string | null;
-    races?: string[];
-    isRacial?: boolean;
-    bonuses?: Record<string, number>;
-    damage?: number | null;
-    armor?: number | null;
-    speed?: number | null;
-    physicalResistance?: number | null;
-    magicalResistance?: number | null;
-    spellId?: string | null;
-    spellGroupId?: string | null;
-    mainSkillId?: string | null;
-  }
+  data: SkillUpdatePayload
 ): Promise<Skill> {
   const response = await fetch(
     `/api/campaigns/${campaignId}/skills/${skillId}`,

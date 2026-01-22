@@ -1,8 +1,8 @@
 import { useMemo } from "react";
-import type { SkillTree } from "@/lib/types/skill-tree";
-import type { Skill as SkillFromLibraryType } from "@/lib/types/skills";
-import type { MainSkill } from "@/lib/types/main-skills";
-import type { Race } from "@/lib/types/races";
+import type { SkillTree } from "@/types/skill-tree";
+import type { Skill as SkillFromLibraryType } from "@/types/skills";
+import type { MainSkill } from "@/types/main-skills";
+import type { Race } from "@/types/races";
 
 interface UseSkillTreeFiltersOptions {
   skillTree: SkillTree | null;
@@ -59,7 +59,15 @@ export function useSkillTreeFilters({
 
   // Фільтруємо скіли: прибираємо вже присвоєні та фільтруємо по расам
   const availableSkills = useMemo(() => {
+    console.log("Filtering skills:", {
+      totalSkills: skillsFromLibrary.length,
+      selectedRace,
+      raceId: race?.id,
+      raceName: race?.name,
+    });
+    
     if (!skillsFromLibrary.length) {
+      console.warn("No skills in library to filter");
       return [];
     }
 
@@ -70,14 +78,8 @@ export function useSkillTreeFilters({
       : null;
 
     if (raceAvailableSkills && raceAvailableSkills.length > 0) {
-      // Конвертуємо ID основних навиків в назви
-      const availableMainSkillNames = raceAvailableSkills
-        .map((id) => {
-          const mainSkill = mainSkills.find((ms) => ms.id === id);
-          return mainSkill ? mainSkill.name : id;
-        })
-        .join(", ");
-    } else {
+      // Раса має обмежений список доступних основних навиків
+      console.log(`Race has ${raceAvailableSkills.length} available main skills`);
     }
 
     // Збираємо інформацію про відфільтровані скіли
@@ -121,27 +123,23 @@ export function useSkillTreeFilters({
       }
 
       // Перевіряємо чи скіл підходить для цієї раси (через skill.races)
-      // skill.races тепер містить ID рас, а не назви
-      // selectedRace - це назва раси, тому потрібно знайти ID раси
+      // skill.races може містити як ID рас, так і назви рас
+      // selectedRace - це назва раси
       if (skill.races && skill.races.length > 0) {
-        // Знаходимо ID обраної раси
+        // Знаходимо ID та назву обраної раси
         const selectedRaceId = race?.id;
+        const selectedRaceName = race?.name || selectedRace;
         
-        if (selectedRaceId) {
-          // Перевіряємо чи ID раси є в списку доступних для скіла
-          const isAvailableForRace = skill.races.includes(selectedRaceId);
-          if (!isAvailableForRace) {
-            excludedSkills.push({
-              name: skill.name,
-              reason: `не доступний для раси "${selectedRace}" (ID: ${selectedRaceId})`,
-            });
-            return false;
-          }
-        } else {
-          // Якщо не знайдено ID раси, виключаємо скіл
+        // Перевіряємо чи ID раси або назва раси є в списку доступних для скіла
+        const isAvailableForRace = 
+          (selectedRaceId && skill.races.includes(selectedRaceId)) ||
+          skill.races.includes(selectedRaceName) ||
+          skill.races.includes(selectedRace);
+        
+        if (!isAvailableForRace) {
           excludedSkills.push({
             name: skill.name,
-            reason: `не можна визначити ID раси "${selectedRace}"`,
+            reason: `не доступний для раси "${selectedRace}"`,
           });
           return false;
         }
@@ -164,14 +162,15 @@ export function useSkillTreeFilters({
           return `${s.name} (${mainSkillName})`;
         })
         .join(", ");
+      console.log(`Available skills (${filtered.length}):`, availableSkillNames);
     }
 
     // Виводимо список обмежених/виключених скілів
     if (excludedSkills.length > 0) {
-      excludedSkills.forEach(({ name, reason }) => {
-      });
+      console.log(`Excluded skills (${excludedSkills.length}):`, excludedSkills.map(s => `${s.name} - ${s.reason}`).join(", "));
     }
 
+    console.log(`Final filtered skills count: ${filtered.length}`);
     return filtered;
   }, [skillsFromLibrary, assignedSkillIds, selectedRace, race, mainSkills]);
 

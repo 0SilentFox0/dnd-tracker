@@ -9,7 +9,7 @@ import {
   useMoveSpellToGroup,
   useDeleteAllSpells,
 } from "@/lib/hooks/useSpells";
-import type { Spell } from "@/lib/api/spells";
+import type { Spell } from "@/types/spells";
 import {
   groupSpellsByGroupAndLevel,
   convertGroupedSpellsToArray,

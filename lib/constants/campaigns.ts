@@ -5,4 +5,4 @@
 /**
  * ID тестової/робочої кампанії для розробки
  */
-export const DEFAULT_CAMPAIGN_ID = "cmkdu1n490001102ndfu2eb7j";
+export const DEFAULT_CAMPAIGN_ID = "cmkfwmhxi0001kgzwpq5pwwr9";

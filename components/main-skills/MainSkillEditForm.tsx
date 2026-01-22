@@ -6,8 +6,8 @@ import { Input } from "@/components/ui/input";
 import { FormCard } from "@/components/common/FormCard";
 import { FormField } from "@/components/common/FormField";
 import { useUpdateMainSkill } from "@/lib/hooks/useMainSkills";
-import type { MainSkill } from "@/lib/types/main-skills";
-import type { MainSkillFormData } from "@/lib/types/main-skills";
+import type { MainSkill } from "@/types/main-skills";
+import type { MainSkillFormData } from "@/types/main-skills";
 
 interface MainSkillEditFormProps {
   campaignId: string;

@@ -1,9 +1,9 @@
-import type { Skill, MainSkill } from "@/lib/types/skill-tree";
+import type { Skill, MainSkill } from "@/types/skill-tree";
 import {
   SKILL_LEVELS,
   SkillLevel,
   SkillCircle as SkillCircleEnum,
-} from "@/lib/types/skill-tree";
+} from "@/types/skill-tree";
 import { SkillCircleGroup } from "./SkillCircleGroup";
 
 interface SegmentSkillsProps {

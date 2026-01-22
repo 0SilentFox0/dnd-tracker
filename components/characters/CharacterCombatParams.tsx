@@ -4,7 +4,7 @@
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CharacterFormData } from "@/lib/api/characters";
+import { CharacterFormData } from "@/types/characters";
 
 interface CharacterCombatParamsProps {
   formData: CharacterFormData;

@@ -1,4 +1,4 @@
-import type { CentralSkill } from "@/lib/types/skill-tree";
+import type { CentralSkill } from "@/types/skill-tree";
 import { getPositionPercent, SKILL_TREE_CONSTANTS } from "./utils";
 import { SKILL_COLORS, SKILL_SIZES, Z_INDEX } from "./constants";
 

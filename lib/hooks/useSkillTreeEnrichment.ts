@@ -1,6 +1,6 @@
 import { useMemo } from "react";
-import type { SkillTree, Skill } from "@/lib/types/skill-tree";
-import type { Skill as SkillFromLibraryType } from "@/lib/types/skills";
+import type { SkillTree, Skill } from "@/types/skill-tree";
+import type { Skill as SkillFromLibraryType } from "@/types/skills";
 
 interface UseSkillTreeEnrichmentOptions {
   skillTree: SkillTree | null;

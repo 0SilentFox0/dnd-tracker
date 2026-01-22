@@ -13,7 +13,7 @@ import {
   deleteSpell,
   deleteSpellsByLevel,
 } from "@/lib/api/spells";
-import type { Spell, SpellGroup } from "@/lib/api/spells";
+import type { Spell, SpellGroup } from "@/types/spells";
 
 export type { Spell, SpellGroup };
 

@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import type { RaceFormData, StatModifier } from "@/lib/types/races";
+import type { RaceFormData, StatModifier } from "@/types/races";
 import { useMainSkills } from "@/lib/hooks/useMainSkills";
 import { ABILITY_SCORES } from "@/lib/constants/abilities";
 import { Checkbox } from "@/components/ui/checkbox";

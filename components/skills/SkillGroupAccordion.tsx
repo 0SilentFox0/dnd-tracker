@@ -16,15 +16,15 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MoreVertical, Edit, X } from "lucide-react";
 import Link from "next/link";
-import type { Skill } from "@/lib/types/skills";
-import type { SpellGroup } from "@/lib/api/spells";
+import type { Skill } from "@/types/skills";
+import type { SpellGroup } from "@/types/spells";
 import { calculateTotalSkillsInGroup } from "@/lib/utils/skills";
 import { useSpellGroupActions } from "@/lib/hooks/useSpellGroupActions";
 import { RenameGroupDialog } from "@/components/spells/RenameGroupDialog";
 import { RemoveAllSpellsDialog } from "@/components/spells/RemoveAllSpellsDialog";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { useRaces } from "@/lib/hooks/useRaces";
-import type { Race } from "@/lib/types/races";
+import type { Race } from "@/types/races";
 import { AbilityBonusIcons, SkillStatsIcons } from "./AbilityBonusIcons";
 
 interface SkillGroupAccordionProps {

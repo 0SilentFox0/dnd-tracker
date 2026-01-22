@@ -9,7 +9,7 @@ import {
   useUpdateSpell,
   useDeleteSpell,
 } from "@/lib/hooks/useSpells";
-import type { Spell, SpellGroup } from "@/lib/api/spells";
+import type { Spell, SpellGroup } from "@/types/spells";
 import {
   Card,
   CardContent,

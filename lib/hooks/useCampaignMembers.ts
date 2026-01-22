@@ -3,7 +3,8 @@
  */
 
 import { useState, useEffect } from "react";
-import { getCampaignMembers, CampaignMember } from "@/lib/api/campaigns";
+import { getCampaignMembers } from "@/lib/api/campaigns";
+import type { CampaignMember } from "@/types/campaigns";
 
 export function useCampaignMembers(campaignId: string) {
   const [members, setMembers] = useState<CampaignMember[]>([]);

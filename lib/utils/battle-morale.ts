@@ -2,7 +2,7 @@
  * Утиліти для перевірки моралі в бою
  */
 
-import { BattleParticipant } from "@/lib/types/battle";
+import { BattleParticipant } from "@/types/battle";
 
 /**
  * Результат перевірки моралі

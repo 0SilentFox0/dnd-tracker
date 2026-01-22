@@ -2,7 +2,7 @@
  * Допоміжні функції для роботи з расовими здібностями та імунітетами
  */
 
-import { BattleParticipant, RacialAbility } from "@/lib/types/battle";
+import { BattleParticipant, RacialAbility } from "@/types/battle";
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
 
 /**

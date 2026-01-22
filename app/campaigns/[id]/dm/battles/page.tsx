@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import { DeleteAllBattlesButton } from "./page-client";
 
 export default async function DMBattlesPage({
   params,
@@ -50,9 +51,12 @@ export default async function DMBattlesPage({
             Створення та управління боями
           </p>
         </div>
-        <Link href={`/campaigns/${id}/dm/battles/new`} className="shrink-0">
-          <Button className="whitespace-nowrap w-full md:w-auto">+ Створити сцену бою</Button>
-        </Link>
+        <div className="flex flex-wrap gap-2 shrink-0">
+          <Link href={`/campaigns/${id}/dm/battles/new`} className="shrink-0">
+            <Button className="whitespace-nowrap w-full md:w-auto">+ Створити сцену бою</Button>
+          </Link>
+          <DeleteAllBattlesButton campaignId={id} battlesCount={battles.length} />
+        </div>
       </div>
 
       {/* Активні бої */}

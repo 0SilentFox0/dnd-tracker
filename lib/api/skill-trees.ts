@@ -2,21 +2,8 @@
  * API функції для роботи з деревом навиків
  */
 
-import type { SkillTree } from "@/lib/types/skill-tree";
-
-export interface UpdateSkillTreeParams {
-  campaignId: string;
-  treeId: string;
-  skills: SkillTree;
-}
-
-export interface UpdateSkillTreeResponse {
-  id: string;
-  campaignId: string;
-  race: string;
-  skills: SkillTree | { mainSkills?: SkillTree["mainSkills"] };
-  createdAt: string;
-}
+import type { SkillTree } from "@/types/skill-tree";
+import type { UpdateSkillTreeParams, UpdateSkillTreeResponse } from "@/types/api";
 
 /**
  * Оновлює дерево навиків

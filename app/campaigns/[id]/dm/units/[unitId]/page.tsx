@@ -9,8 +9,8 @@ import {
   useDeleteUnit,
 } from "@/lib/hooks/useUnits";
 import { useRaces } from "@/lib/hooks/useRaces";
-import type { Unit } from "@/lib/api/units";
-import type { Spell } from "@/lib/api/spells";
+import type { Unit } from "@/types/units";
+import type { Spell } from "@/types/spells";
 import { getSpells } from "@/lib/api/spells";
 import {
   Card,

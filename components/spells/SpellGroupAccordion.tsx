@@ -24,7 +24,7 @@ import {
   Sun,
 } from "lucide-react";
 import { SpellLevelAccordion } from "./SpellLevelAccordion";
-import type { Spell, SpellGroup } from "@/lib/api/spells";
+import type { Spell, SpellGroup } from "@/types/spells";
 import { calculateTotalSpellsInGroup } from "@/lib/utils/spells";
 import { useSpellGroupActions } from "@/lib/hooks/useSpellGroupActions";
 import { RenameGroupDialog } from "./RenameGroupDialog";

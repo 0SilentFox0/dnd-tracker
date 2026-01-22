@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { Race, RaceFormData } from "@/lib/types/races";
+import type { Race, RaceFormData } from "@/types/races";
 
 export function useRaces(campaignId: string, initialRaces: Race[] = []) {
   return useQuery<Race[]>({

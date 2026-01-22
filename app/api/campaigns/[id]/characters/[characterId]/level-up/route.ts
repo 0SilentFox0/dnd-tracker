@@ -10,7 +10,7 @@ import {
   calculateHPGain,
 } from "@/lib/utils/calculations";
 import { calculateSpellSlotGain } from "@/lib/utils/spell-slots";
-import type { SpellSlotProgression } from "@/lib/types/races";
+import type { SpellSlotProgression } from "@/types/races";
 
 export async function POST(
   request: Request,

@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { normalizeImageUrl } from "@/lib/utils/image-url";
-import type { Unit } from "@/lib/api/units";
+import type { Unit } from "@/types/units";
 
 interface UnitAvatarInputProps {
   formData: Partial<Unit>;

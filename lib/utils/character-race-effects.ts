@@ -2,8 +2,8 @@
  * Утиліти для роботи з ефектами рас для персонажів
  */
 
-import type { Race } from "@/lib/types/races";
-import type { Character } from "@/lib/api/characters";
+import type { Race } from "@/types/races";
+import type { Character } from "@/types/characters";
 import {
   extractRaceImmunities,
   extractRaceDamageModifiers,

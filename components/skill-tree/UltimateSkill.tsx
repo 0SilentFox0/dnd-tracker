@@ -1,4 +1,4 @@
-import type { UltimateSkill } from "@/lib/types/skill-tree";
+import type { UltimateSkill } from "@/types/skill-tree";
 import { SKILL_COLORS, SKILL_SIZES, Z_INDEX } from "./constants";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 

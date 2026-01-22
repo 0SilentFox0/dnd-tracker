@@ -3,7 +3,7 @@
  */
 
 import { useState, useCallback } from "react";
-import { InventoryFormData } from "@/lib/types/inventory";
+import { InventoryFormData } from "@/types/inventory";
 
 export interface UseInventoryOptions {
   initialData?: Partial<InventoryFormData>;

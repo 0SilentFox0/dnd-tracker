@@ -1,8 +1,8 @@
-import type { Skill, MainSkill } from "@/lib/types/skill-tree";
+import type { Skill, MainSkill } from "@/types/skill-tree";
 import {
   SkillLevel,
   SkillCircle as SkillCircleEnum,
-} from "@/lib/types/skill-tree";
+} from "@/types/skill-tree";
 import { SKILL_TREE_CONSTANTS } from "./utils";
 import { SkillCircle } from "./SkillCircle";
 

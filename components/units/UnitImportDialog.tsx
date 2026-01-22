@@ -5,7 +5,7 @@ import type {
   CSVUnitRow,
   ImportUnit,
   UnitImportResult,
-} from "@/lib/types/unit-import";
+} from "@/types/import";
 import { convertCSVRowToUnit } from "@/lib/utils/unit-parsing";
 import { parseCSVFile, parseJSONFile } from "@/lib/utils/file-import";
 import { useFileImport } from "@/lib/hooks/useFileImport";

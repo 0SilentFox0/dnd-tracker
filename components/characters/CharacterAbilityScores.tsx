@@ -5,7 +5,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ABILITY_SCORES } from "@/lib/constants";
-import { CharacterFormData } from "@/lib/api/characters";
+import { CharacterFormData } from "@/types/characters";
 
 interface CharacterAbilityScoresProps {
   formData: CharacterFormData;

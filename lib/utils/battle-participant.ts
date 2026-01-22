@@ -2,8 +2,8 @@
  * Утиліти для створення BattleParticipant з Character/Unit
  */
 
-import { BattleParticipant, ActiveSkill, EquippedArtifact, RacialAbility } from "@/lib/types/battle";
-import { Character } from "@/lib/api/characters";
+import { BattleParticipant, ActiveSkill, EquippedArtifact, RacialAbility } from "@/types/battle";
+import { Character } from "@/types/characters";
 import { getAbilityModifier } from "./calculations";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
@@ -52,6 +52,9 @@ export async function createBattleParticipantFromCharacter(
     character
   );
 
+  // Витягуємо атаки з екіпірованої зброї
+  const attacks = await extractAttacksFromCharacter(character);
+
   // Завантажуємо расові здібності
   const racialAbilities = await extractRacialAbilities(
     character.race,
@@ -93,7 +96,7 @@ export async function createBattleParticipantFromCharacter(
     spellAttackBonus: character.spellAttackBonus || undefined,
     spellSlots: (character.spellSlots as Record<string, { max: number; current: number }>) || {},
     knownSpells: (character.knownSpells as string[]) || [],
-    attacks: [], // TODO: Додати атаки з inventory або окремого поля
+    attacks,
     activeEffects: [],
     passiveAbilities: [], // TODO: Розпакувати з артефактів, скілів
     racialAbilities,
@@ -109,12 +112,12 @@ export async function createBattleParticipantFromCharacter(
 /**
  * Створює BattleParticipant з Unit
  */
-export function createBattleParticipantFromUnit(
+export async function createBattleParticipantFromUnit(
   unit: UnitFromPrisma,
   battleId: string,
   side: "ally" | "enemy",
   instanceNumber: number
-): BattleParticipant {
+): Promise<BattleParticipant> {
   const modifiers = {
     strength: getAbilityModifier(unit.strength),
     dexterity: getAbilityModifier(unit.dexterity),
@@ -135,7 +138,8 @@ export function createBattleParticipantFromUnit(
     properties?: string;
   }>) || [];
 
-  const battleAttacks = attacks.map((attack) => ({
+  const battleAttacks = attacks.map((attack, index) => ({
+    id: (attack as { id?: string }).id || `${unit.id}-attack-${index}`,
     name: attack.name,
     type: (attack.type || "melee") as "melee" | "ranged",
     attackBonus: attack.attackBonus,
@@ -145,10 +149,16 @@ export function createBattleParticipantFromUnit(
     properties: attack.properties,
   }));
 
-  // Завантажуємо расові здібності
-  const racialAbilities = unit.race
-    ? await extractRacialAbilities(unit.race, unit.campaignId)
-    : [];
+  // Завантажуємо расові здібності (синхронно, бо функція не async)
+  let racialAbilities: RacialAbility[] = [];
+  if (unit.race) {
+    try {
+      racialAbilities = await extractRacialAbilities(unit.race, unit.campaignId);
+    } catch (error) {
+      console.error("Error extracting racial abilities:", error);
+      racialAbilities = [];
+    }
+  }
 
   return {
     id: `${unit.id}-${instanceNumber}-${Date.now()}`,
@@ -336,6 +346,86 @@ async function extractActiveSkillsFromCharacter(
   }
 
   return activeSkills;
+}
+
+/**
+ * Витягує атаки з екіпірованої зброї (артефактів зі слота "weapon")
+ */
+async function extractAttacksFromCharacter(
+  character: CharacterFromPrisma
+): Promise<Array<{
+  id: string;
+  name: string;
+  type: "melee" | "ranged";
+  attackBonus: number;
+  damageDice: string;
+  damageType: string;
+  range?: string;
+  properties?: string;
+}>> {
+  const attacks: Array<{
+    id: string;
+    name: string;
+    type: "melee" | "ranged";
+    attackBonus: number;
+    damageDice: string;
+    damageType: string;
+    range?: string;
+    properties?: string;
+  }> = [];
+
+  if (!character.inventory) {
+    return attacks;
+  }
+
+  const equipped = (character.inventory.equipped as Record<string, string>) || {};
+  const weaponId = equipped.weapon || equipped.weapon1 || equipped.weapon2;
+
+  if (!weaponId) {
+    return attacks;
+  }
+
+  // Завантажуємо зброю з БД
+  const weapon = await prisma.artifact.findUnique({
+    where: {
+      id: weaponId,
+      campaignId: character.campaignId,
+    },
+  });
+
+  if (!weapon || weapon.slot !== "weapon") {
+    return attacks;
+  }
+
+  // Розбираємо modifiers для атаки
+  const modifiers = (weapon.modifiers as Array<{
+    type: string;
+    value: number;
+    isPercentage?: boolean;
+  }>) || [];
+
+  // Знаходимо дані атаки в modifiers або bonuses
+  const bonuses = (weapon.bonuses as Record<string, number>) || {};
+  
+  // Базові значення (можна налаштувати пізніше)
+  const attackBonus = bonuses.attackBonus || bonuses.attack || 0;
+  const damageDice = modifiers.find(m => m.type === "damageDice")?.value?.toString() || "1d6";
+  const damageType = modifiers.find(m => m.type === "damageType")?.value?.toString() || "slashing";
+  const attackType = modifiers.find(m => m.type === "attackType")?.value?.toString() || "melee";
+
+  // Створюємо атаку з ID
+  attacks.push({
+    id: weapon.id,
+    name: weapon.name,
+    type: (attackType === "ranged" ? "ranged" : "melee") as "melee" | "ranged",
+    attackBonus,
+    damageDice,
+    damageType,
+    range: modifiers.find(m => m.type === "range")?.value?.toString(),
+    properties: modifiers.find(m => m.type === "properties")?.value?.toString(),
+  });
+
+  return attacks;
 }
 
 /**

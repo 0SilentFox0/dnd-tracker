@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCreateMainSkill } from "@/lib/hooks/useMainSkills";
-import type { MainSkillFormData } from "@/lib/types/main-skills";
+import type { MainSkillFormData } from "@/types/main-skills";
 
 interface CreateMainSkillDialogProps {
   open: boolean;

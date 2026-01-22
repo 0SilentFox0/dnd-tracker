@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { SkillTree } from "@/lib/types/skill-tree";
+import type { SkillTree } from "@/types/skill-tree";
 import { updateSkillTree } from "@/lib/api/skill-trees";
 
 interface UseSkillTreeSaveOptions {

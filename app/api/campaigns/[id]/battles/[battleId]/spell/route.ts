@@ -1,0 +1,209 @@
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
+import { z } from "zod";
+import { createClient } from "@/lib/supabase/server";
+import { BattleParticipant, BattleAction } from "@/types/battle";
+import { Prisma } from "@prisma/client";
+import { processSpell, BattleSpell } from "@/lib/utils/battle-spell-process";
+
+const spellSchema = z.object({
+  casterId: z.string(), // ID BattleParticipant з initiativeOrder
+  casterType: z.string().optional(), // опціонально для сумісності
+  spellId: z.string(), // ID заклинання з бази даних
+  targetIds: z.array(z.string()), // масив ID цілей
+  damageRolls: z.array(z.number()).default([]), // результати кубиків урону/лікування
+  savingThrows: z
+    .array(
+      z.object({
+        participantId: z.string(),
+        roll: z.number().min(1).max(20),
+      })
+    )
+    .optional(), // результати saving throws
+  additionalRollResult: z.number().optional(), // результат додаткових кубиків
+});
+
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ id: string; battleId: string }> }
+) {
+  try {
+    const { id, battleId } = await params;
+    const supabase = await createClient();
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
+
+    if (!authUser) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const userId = authUser.id;
+    // Перевіряємо права DM
+    const campaign = await prisma.campaign.findUnique({
+      where: { id },
+      include: {
+        members: {
+          where: { userId },
+        },
+      },
+    });
+
+    if (!campaign || campaign.members[0]?.role !== "dm") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const battle = await prisma.battleScene.findUnique({
+      where: { id: battleId },
+    });
+
+    if (!battle || battle.campaignId !== id) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    if (battle.status !== "active") {
+      return NextResponse.json(
+        { error: "Battle is not active" },
+        { status: 400 }
+      );
+    }
+
+    const body = await request.json();
+    const data = spellSchema.parse(body);
+
+    // Отримуємо учасників з initiativeOrder
+    const initiativeOrder = battle.initiativeOrder as unknown as BattleParticipant[];
+    const caster = initiativeOrder.find((p) => p.id === data.casterId);
+
+    if (!caster) {
+      return NextResponse.json(
+        { error: "Caster not found in battle" },
+        { status: 404 }
+      );
+    }
+
+    // Перевіряємо чи кастер може використати заклинання
+    if (caster.hasUsedAction) {
+      return NextResponse.json(
+        { error: "Caster has already used their action" },
+        { status: 400 }
+      );
+    }
+
+    // Перевіряємо чи кастер активний
+    if (caster.status !== "active") {
+      return NextResponse.json(
+        { error: "Caster is not active (unconscious or dead)" },
+        { status: 400 }
+      );
+    }
+
+    // Перевіряємо чи заклинання є в knownSpells
+    if (!caster.knownSpells.includes(data.spellId)) {
+      return NextResponse.json(
+        { error: "Spell is not in caster's known spells" },
+        { status: 400 }
+      );
+    }
+
+    // Отримуємо заклинання з бази даних
+    const spellData = await prisma.spell.findUnique({
+      where: { id: data.spellId },
+    });
+
+    if (!spellData || spellData.campaignId !== id) {
+      return NextResponse.json(
+        { error: "Spell not found" },
+        { status: 404 }
+      );
+    }
+
+    // Конвертуємо Spell в BattleSpell
+    const battleSpell: BattleSpell = {
+      id: spellData.id,
+      name: spellData.name,
+      level: spellData.level,
+      type: spellData.type as "target" | "aoe",
+      target: spellData.target as "enemies" | "allies" | "all" | undefined,
+      damageType: spellData.damageType as "damage" | "heal" | "all",
+      damageElement: spellData.damageElement,
+      damageModifier: spellData.damageModifier,
+      healModifier: spellData.healModifier,
+      diceCount: spellData.diceCount,
+      diceType: spellData.diceType,
+      savingThrow: spellData.savingThrow as
+        | {
+            ability: string;
+            onSuccess: "half" | "none";
+          }
+        | null,
+      description: spellData.description,
+    };
+
+    // Обробляємо заклинання через нову функцію
+    const spellResult = processSpell({
+      caster,
+      spell: battleSpell,
+      targetIds: data.targetIds,
+      allParticipants: initiativeOrder,
+      currentRound: battle.currentRound,
+      battleId,
+      damageRolls: data.damageRolls,
+      savingThrows: data.savingThrows,
+      additionalRollResult: data.additionalRollResult,
+    });
+
+    // Оновлюємо учасників в initiativeOrder
+    const updatedInitiativeOrder = initiativeOrder.map((p) => {
+      if (p.id === caster.id) {
+        return spellResult.casterUpdated;
+      }
+      const updatedTarget = spellResult.targetsUpdated.find((t) => t.id === p.id);
+      if (updatedTarget) {
+        return updatedTarget;
+      }
+      return p;
+    });
+
+    // Отримуємо поточний battleLog та додаємо нову дію
+    const battleLog = (battle.battleLog as unknown as BattleAction[]) || [];
+    const actionIndex = battleLog.length;
+    const battleAction: BattleAction = {
+      ...spellResult.battleAction,
+      actionIndex,
+    };
+
+    // Оновлюємо бій
+    const updatedBattle = await prisma.battleScene.update({
+      where: { id: battleId },
+      data: {
+        initiativeOrder: updatedInitiativeOrder as unknown as Prisma.InputJsonValue,
+        battleLog: [
+          ...battleLog,
+          battleAction,
+        ] as unknown as Prisma.InputJsonValue,
+      },
+    });
+
+    // Відправляємо real-time оновлення через Pusher
+    if (process.env.PUSHER_APP_ID) {
+      const { pusherServer } = await import("@/lib/pusher");
+      await pusherServer.trigger(
+        `battle-${battleId}`,
+        "battle-updated",
+        updatedBattle
+      );
+    }
+
+    return NextResponse.json(updatedBattle);
+  } catch (error) {
+    console.error("Error processing spell:", error);
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: error.issues }, { status: 400 });
+    }
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}

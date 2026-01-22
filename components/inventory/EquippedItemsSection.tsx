@@ -5,7 +5,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { EQUIPMENT_SLOTS } from "@/lib/constants/equipment";
-import { EquippedItems } from "@/lib/types/inventory";
+import { EquippedItems } from "@/types/inventory";
 
 interface EquippedItemsSectionProps {
   equipped: EquippedItems;

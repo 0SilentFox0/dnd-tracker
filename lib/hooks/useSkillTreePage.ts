@@ -4,8 +4,8 @@ import type {
   Skill,
   UltimateSkill,
   MainSkill,
-} from "@/lib/types/skill-tree";
-import { SkillLevel } from "@/lib/types/skill-tree";
+} from "@/types/skill-tree";
+import { SkillLevel } from "@/types/skill-tree";
 import {
   canLearnRacialSkillLevel,
   getRacialSkillLevelId,
@@ -19,7 +19,7 @@ import { useSkillTreeFilters } from "@/lib/hooks/useSkillTreeFilters";
 import { assignSkillToSlot } from "@/lib/hooks/useSkillTreeAssignment";
 import { createMockSkillTree } from "@/lib/utils/skill-tree-mock";
 
-import type { Race } from "@/lib/types/races";
+import type { Race } from "@/types/races";
 
 interface UseSkillTreePageOptions {
   campaignId: string;
@@ -102,16 +102,26 @@ export function useSkillTreePage({
   >(null);
 
   // Отримуємо скіли з бібліотеки
-  const { data: skillsFromLibrary = [], error: skillsError } =
+  const { data: skillsFromLibrary = [], error: skillsError, isLoading: skillsLoading } =
     useSkills(campaignId);
   
   // Отримуємо основні навики (використовуємо для створення мокового дерева)
   const { data: mainSkills = [] } = useMainSkills(campaignId);
 
-  // Логуємо помилки для дебагу
-  if (skillsError) {
-    console.error("Error loading skills:", skillsError);
-  }
+  // Логуємо помилки та стан завантаження для дебагу
+  useEffect(() => {
+    if (skillsError) {
+      console.error("Error loading skills:", skillsError);
+    }
+    if (skillsLoading) {
+      console.log("Loading skills...");
+    }
+    if (skillsFromLibrary.length > 0) {
+      console.log(`Loaded ${skillsFromLibrary.length} skills from library:`, skillsFromLibrary.map(s => s.name));
+    } else if (!skillsLoading && !skillsError) {
+      console.warn("No skills found in library. Make sure skills are created in the skills library.");
+    }
+  }, [skillsError, skillsLoading, skillsFromLibrary]);
 
   // Рівень гравця (для тесту 25)
   const playerLevel = 25;

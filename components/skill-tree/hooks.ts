@@ -1,11 +1,11 @@
 import { useMemo } from "react";
-import type { SkillTree, Skill, MainSkill } from "@/lib/types/skill-tree";
-import type { Race } from "@/lib/types/races";
+import type { SkillTree, Skill, MainSkill } from "@/types/skill-tree";
+import type { Race } from "@/types/races";
 import {
   SkillLevel,
   SKILL_LEVELS,
   SkillCircle as SkillCircleEnum,
-} from "@/lib/types/skill-tree";
+} from "@/types/skill-tree";
 
 // Хук для фільтрації основних навиків
 export function useAvailableMainSkills(

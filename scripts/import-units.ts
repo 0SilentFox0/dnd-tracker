@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import * as fs from "fs";
 import * as path from "path";
-import type { CSVUnitRow } from "../lib/types/unit-import";
+import type { CSVUnitRow, ImportUnit } from "../types/import";
 import { convertCSVRowToUnit } from "../lib/utils/unit-parsing";
 import { DEFAULT_CAMPAIGN_ID } from "../lib/constants/campaigns";
 

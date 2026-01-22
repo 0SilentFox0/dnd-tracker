@@ -3,7 +3,7 @@
  */
 
 import { Button } from "@/components/ui/button";
-import { InventoryItem } from "@/lib/types/inventory";
+import { InventoryItem } from "@/types/inventory";
 
 interface ItemListSectionProps {
   title: string;

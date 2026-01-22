@@ -40,7 +40,19 @@ export async function GET(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    return NextResponse.json(battle);
+    const userRole = battle.campaign.members[0]?.role || "player";
+    const isDM = userRole === "dm";
+
+    // Повертаємо битву з додатковою інформацією про кампанію та роль користувача
+    return NextResponse.json({
+      ...battle,
+      campaign: {
+        id: battle.campaign.id,
+        friendlyFire: battle.campaign.friendlyFire || false,
+      },
+      userRole,
+      isDM,
+    });
   } catch (error) {
     console.error("Error fetching battle:", error);
     return NextResponse.json(

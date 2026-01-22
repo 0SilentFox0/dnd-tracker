@@ -1,4 +1,4 @@
-import type { Spell } from "@/lib/api/spells";
+import type { Spell } from "@/types/spells";
 
 /**
  * Форматує рівень заклинання для відображення

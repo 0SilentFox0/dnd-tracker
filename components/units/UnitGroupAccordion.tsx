@@ -7,9 +7,9 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { CardDescription, CardTitle } from "@/components/ui/card";
-import type { Unit } from "@/lib/api/units";
+import type { Unit } from "@/types/units";
 import { UnitCard } from "./UnitCard";
-import type { Race } from "@/lib/types/races";
+import type { Race } from "@/types/races";
 
 interface UnitGroupAccordionProps {
   groupName: string;

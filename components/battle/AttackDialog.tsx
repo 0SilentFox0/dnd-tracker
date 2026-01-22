@@ -1,0 +1,252 @@
+"use client";
+
+import { useState } from "react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import type { BattleParticipant } from "@/types/battle";
+import type { BattleScene } from "@/types/api";
+import type { BattleAttack } from "@/types/battle";
+
+interface AttackDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  attacker: BattleParticipant | null;
+  battle: BattleScene | null;
+  availableTargets: BattleParticipant[];
+  isDM: boolean;
+  canSeeEnemyHp: boolean;
+  onAttack: (data: {
+    attackerId: string;
+    attackerType?: "character" | "unit";
+    targetId: string;
+    targetType?: "character" | "unit";
+    attackId?: string;
+    attackRoll: number;
+    advantageRoll?: number;
+    damageRolls: number[];
+  }) => void;
+}
+
+export function AttackDialog({
+  open,
+  onOpenChange,
+  attacker,
+  battle,
+  availableTargets,
+  isDM,
+  canSeeEnemyHp,
+  onAttack,
+}: AttackDialogProps) {
+  const [selectedAttack, setSelectedAttack] = useState<BattleAttack | null>(null);
+  const [selectedTarget, setSelectedTarget] = useState<BattleParticipant | null>(null);
+  const [attackRoll, setAttackRoll] = useState("");
+  const [advantageRoll, setAdvantageRoll] = useState("");
+  const [damageRolls, setDamageRolls] = useState<string[]>([]);
+
+  // Визначаємо чи потрібен Advantage (ельфи з ranged зброєю)
+  const needsAdvantage = attacker?.race === "elf" && selectedAttack?.type === "ranged";
+
+  // Парсимо damageDice для визначення кількості кубиків
+  const parseDamageDice = (dice: string): { count: number; type: number; modifier?: number } => {
+    const match = dice.match(/(\d+)d(\d+)([+-]\d+)?/);
+    if (!match) return { count: 1, type: 6 };
+    return {
+      count: parseInt(match[1]) || 1,
+      type: parseInt(match[2]) || 6,
+      modifier: match[3] ? parseInt(match[3]) : undefined,
+    };
+  };
+
+  const damageDiceInfo = selectedAttack ? parseDamageDice(selectedAttack.damageDice) : null;
+
+  const handleAttack = () => {
+    if (!attacker || !selectedTarget || !selectedAttack || !attackRoll) return;
+
+    onAttack({
+      attackerId: attacker.id,
+      attackerType: attacker.sourceType,
+      targetId: selectedTarget.id,
+      targetType: selectedTarget.sourceType,
+      attackId: selectedAttack.id,
+      attackRoll: parseInt(attackRoll),
+      advantageRoll: advantageRoll ? parseInt(advantageRoll) : undefined,
+      damageRolls: damageRolls.map((r) => parseInt(r)).filter((n) => !isNaN(n)),
+    });
+
+    // Скидаємо форму
+    setSelectedAttack(null);
+    setSelectedTarget(null);
+    setAttackRoll("");
+    setAdvantageRoll("");
+    setDamageRolls([]);
+  };
+
+  // Скидаємо форму при закритті
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      setSelectedAttack(null);
+      setSelectedTarget(null);
+      setAttackRoll("");
+      setAdvantageRoll("");
+      setDamageRolls([]);
+    }
+    onOpenChange(open);
+  };
+
+  if (!attacker || !battle) {
+    return null;
+  }
+
+  const availableAttacks = attacker.attacks || [];
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>⚔️ Атака</DialogTitle>
+          <DialogDescription>
+            {attacker.name} атакує {selectedTarget?.name || "ціль"}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          {/* Вибір зброї */}
+          {availableAttacks.length > 0 && (
+            <div>
+              <Label>Зброя</Label>
+              <Select
+                value={selectedAttack?.id || selectedAttack?.name}
+                onValueChange={(value) => {
+                  const attack = availableAttacks.find(
+                    a => a.id === value || a.name === value
+                  );
+                  setSelectedAttack(attack || null);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Оберіть зброю" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableAttacks.map((attack) => (
+                    <SelectItem key={attack.id || attack.name} value={attack.id || attack.name}>
+                      {attack.name} ({attack.type}) - {attack.damageDice} {attack.damageType}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* Вибір цілі */}
+          <div>
+            <Label>Ціль</Label>
+            <Select
+              value={selectedTarget?.id}
+              onValueChange={(value) => {
+                const target = battle.initiativeOrder.find(
+                  p => p.id === value
+                );
+                setSelectedTarget(target || null);
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Оберіть ціль" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableTargets.map((target) => (
+                  <SelectItem key={target.id} value={target.id}>
+                    {target.name}
+                    {(isDM || canSeeEnemyHp || target.side === "ally") && (
+                      <span className="text-muted-foreground ml-2">
+                        (HP: {target.currentHp}/{target.maxHp})
+                      </span>
+                    )}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* AC цілі */}
+          {selectedTarget && (
+            <div>
+              <Label>
+                AC цілі: {(isDM || selectedTarget.side === "ally") ? selectedTarget.armorClass : "?"}
+              </Label>
+            </div>
+          )}
+
+          {/* Attack Roll */}
+          <div>
+            <Label>Результат кидка d20</Label>
+            <Input
+              type="number"
+              min="1"
+              max="20"
+              value={attackRoll}
+              onChange={(e) => setAttackRoll(e.target.value)}
+              placeholder="Введіть результат кидка"
+            />
+          </div>
+
+          {/* Advantage Roll (для ельфів з ranged) */}
+          {needsAdvantage && (
+            <div>
+              <Label>Другий кидок d20 (Advantage)</Label>
+              <Input
+                type="number"
+                min="1"
+                max="20"
+                value={advantageRoll}
+                onChange={(e) => setAdvantageRoll(e.target.value)}
+                placeholder="Введіть другий кидок"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Ельфійське вміння: обирається кращий результат
+              </p>
+            </div>
+          )}
+
+          {/* Damage Rolls */}
+          {selectedAttack && damageDiceInfo && (
+            <div>
+              <Label>Кубики урону ({selectedAttack.damageDice})</Label>
+              <div className="space-y-2">
+                {Array.from({ length: damageDiceInfo.count }).map((_, index) => (
+                  <Input
+                    key={index}
+                    type="number"
+                    min="1"
+                    max={damageDiceInfo.type}
+                    value={damageRolls[index] || ""}
+                    onChange={(e) => {
+                      const newRolls = [...damageRolls];
+                      newRolls[index] = e.target.value;
+                      setDamageRolls(newRolls);
+                    }}
+                    placeholder={`Кубик ${index + 1} (1-${damageDiceInfo.type})`}
+                  />
+                ))}
+                {damageDiceInfo.modifier && (
+                  <p className="text-xs text-muted-foreground">
+                    Модифікатор: {damageDiceInfo.modifier > 0 ? "+" : ""}{damageDiceInfo.modifier}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          <Button
+            onClick={handleAttack}
+            disabled={!selectedTarget || !selectedAttack || !attackRoll || (needsAdvantage && !advantageRoll)}
+            className="w-full"
+          >
+            Застосувати атаку
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}

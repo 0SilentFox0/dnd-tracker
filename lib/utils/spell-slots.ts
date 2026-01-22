@@ -2,7 +2,7 @@
  * Утиліти для розрахунку магічних слотів при прокачці рівня
  */
 
-import type { SpellSlotProgression } from "@/lib/types/races";
+import type { SpellSlotProgression } from "@/types/races";
 
 export interface SpellSlots {
   [key: string]: {

@@ -2,8 +2,8 @@ import type {
   SkillTree,
   Skill,
   UltimateSkill,
-} from "@/lib/types/skill-tree";
-import { SkillLevel } from "@/lib/types/skill-tree";
+} from "@/types/skill-tree";
+import { SkillLevel } from "@/types/skill-tree";
 import {
   Dialog,
   DialogContent,

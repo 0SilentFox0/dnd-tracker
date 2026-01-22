@@ -54,7 +54,7 @@ export function Breadcrumbs() {
   const allSegments = pathname.split("/").filter(Boolean);
   if (allSegments.length === 0) return null;
 
-  // Build crumbs, skipping 'dm' segments but keeping them in hrefs
+  // Build crumbs, skipping 'dm' and 'battles' segments but keeping them in hrefs
   const crumbs: Array<{ href: string; label: string; isLast: boolean }> = [];
   let previousDisplaySegment: string | undefined;
 
@@ -66,7 +66,12 @@ export function Breadcrumbs() {
       continue;
     }
 
-    // Build href using all segments up to this point (including any 'dm' segments)
+    // Skip 'battles' segments - don't create breadcrumb for them
+    if (segment === "battles") {
+      continue;
+    }
+
+    // Build href using all segments up to this point (including any 'dm' or 'battles' segments)
     const href = `/${allSegments.slice(0, i + 1).join("/")}`;
     const label = getLabel(segment, previousDisplaySegment);
 

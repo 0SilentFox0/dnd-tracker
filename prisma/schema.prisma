@@ -29,6 +29,7 @@ model Campaign {
   maxLevel        Int              @default(20)
   xpMultiplier    Float            @default(2.5)
   allowPlayerEdit Boolean          @default(true)
+  friendlyFire    Boolean          @default(false)
   status          String           @default("active")
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
@@ -93,6 +94,7 @@ model Character {
   tempHp               Int                 @default(0)
   hitDice              String              @default("1d8")
   proficiencyBonus     Int                 @default(2)
+  morale               Int                 @default(0)
   savingThrows         Json                @default("{}")
   skills               Json                @default("{}")
   passivePerception    Int                 @default(10)
@@ -335,12 +337,20 @@ model RacialAbility {
 model Skill {
   id                      String      @id @default(cuid())
   campaignId              String
-  name                    String
+  // Згруповані дані (основна структура)
+  basicInfo               Json        @default("{}")
+  bonuses                 Json        @default("{}")
+  combatStats             Json        @default("{}")
+  spellData               Json        @default("{}")
+  spellEnhancementData    Json        @default("{}")
+  mainSkillData           Json        @default("{}")
+  skillTriggers           Json        @default("[]")
+  // Старі поля (залишаємо для зворотної сумісності, можна видалити пізніше)
+  name                    String      @default("")
   description             String?
   icon                    String?
   races                   Json        @default("[]")
   isRacial                Boolean     @default(false)
-  bonuses                 Json        @default("{}")
   damage                  Int?
   armor                   Int?
   speed                   Int?

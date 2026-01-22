@@ -1,8 +1,8 @@
-import type { Skill } from "@/lib/types/skill-tree";
+import type { Skill } from "@/types/skill-tree";
 import {
   SkillLevel,
   SkillCircle as SkillCircleEnum,
-} from "@/lib/types/skill-tree";
+} from "@/types/skill-tree";
 import { getPositionPercent } from "./utils";
 import { SKILL_COLORS, Z_INDEX } from "./constants";
 import { OptimizedImage } from "@/components/common/OptimizedImage";

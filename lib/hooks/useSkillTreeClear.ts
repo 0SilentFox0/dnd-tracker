@@ -1,5 +1,5 @@
-import type { SkillTree, MainSkill } from "@/lib/types/skill-tree";
-import { SkillLevel, SkillCircle as SkillCircleEnum } from "@/lib/types/skill-tree";
+import type { SkillTree, MainSkill } from "@/types/skill-tree";
+import { SkillLevel, SkillCircle as SkillCircleEnum } from "@/types/skill-tree";
 
 export function clearSkillTree(treeToClear: SkillTree): SkillTree {
   // Очищаємо всі присвоєння скілів, залишаючи структуру дерева

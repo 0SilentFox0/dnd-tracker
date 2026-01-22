@@ -6,15 +6,15 @@ import type {
   Skill,
   UltimateSkill,
   MainSkill,
-} from "@/lib/types/skill-tree";
+} from "@/types/skill-tree";
 import {
   SkillLevel,
   SkillCircle as SkillCircleEnum,
-} from "@/lib/types/skill-tree";
+} from "@/types/skill-tree";
 import { getMainSkillLevelId, canLearnMainSkillLevel } from "./hooks";
 import { SKILL_TREE_CONSTANTS } from "./utils";
 import { useAvailableMainSkills, useRacialSkill } from "./hooks";
-import type { Race } from "@/lib/types/races";
+import type { Race } from "@/types/races";
 import { UltimateSkillComponent } from "./UltimateSkill";
 import { SectorLevels } from "./SectorLevels";
 import { SectorLabel } from "./SectorLabel";

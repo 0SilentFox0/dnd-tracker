@@ -4,43 +4,86 @@ import { z } from "zod";
 import { requireDM, validateCampaignOwnership } from "@/lib/utils/api-auth";
 import { Prisma } from "@prisma/client";
 
+// Схема для згрупованої структури (всі поля опціональні для оновлення)
 const updateSkillSchema = z.object({
-  name: z.string().min(1).max(100).optional(),
-  description: z.string().optional(),
-  icon: z.preprocess(
-    (val) => (val === "" ? null : val),
-    z.string().url().nullable().optional()
-  ),
-  races: z.array(z.string()).optional(),
-  isRacial: z.boolean().optional(),
+  basicInfo: z.object({
+    name: z.string().min(1).max(100).optional(),
+    description: z.string().optional(),
+    icon: z.preprocess(
+      (val) => (val === "" ? null : val),
+      z.string().url().nullable().optional()
+    ),
+    races: z.array(z.string()).optional(),
+    isRacial: z.boolean().optional(),
+  }).optional(),
   bonuses: z.record(z.string(), z.number()).optional(),
-  damage: z.number().optional(),
-  armor: z.number().optional(),
-  speed: z.number().optional(),
-  physicalResistance: z.number().optional(),
-  magicalResistance: z.number().optional(),
-  spellId: z.string().nullable().optional(),
-  spellGroupId: z.string().nullable().optional(),
-  mainSkillId: z.string().nullable().optional(),
-  spellEnhancementTypes: z
-    .array(z.enum(["effect_increase", "target_change", "additional_modifier", "new_spell"]))
+  combatStats: z.object({
+    damage: z.number().optional(),
+    armor: z.number().optional(),
+    speed: z.number().optional(),
+    physicalResistance: z.number().optional(),
+    magicalResistance: z.number().optional(),
+  }).optional(),
+  spellData: z.object({
+    spellId: z.string().nullable().optional(),
+    spellGroupId: z.string().nullable().optional(),
+  }).optional(),
+  spellEnhancementData: z.object({
+    spellEnhancementTypes: z
+      .array(z.enum(["effect_increase", "target_change", "additional_modifier", "new_spell"]))
+      .optional(),
+    spellEffectIncrease: z.number().min(0).max(200).optional().nullable(),
+    spellTargetChange: z
+      .object({
+        target: z.enum(["enemies", "allies", "all"]),
+      })
+      .optional()
+      .nullable(),
+    spellAdditionalModifier: z
+      .object({
+        modifier: z.string().optional(),
+        damageDice: z.string().optional(),
+        duration: z.number().optional(),
+      })
+      .optional()
+      .nullable(),
+    spellNewSpellId: z.string().nullable().optional(),
+  }).optional(),
+  mainSkillData: z.object({
+    mainSkillId: z.string().nullable().optional(),
+  }).optional(),
+  skillTriggers: z
+    .array(
+      z.union([
+        // Простий тригер
+        z.object({
+          type: z.literal("simple"),
+          trigger: z.enum([
+            "startRound",
+            "endRound",
+            "beforeOwnerAttack",
+            "beforeEnemyAttack",
+            "afterOwnerAttack",
+            "afterEnemyAttack",
+            "beforeOwnerSpellCast",
+            "afterOwnerSpellCast",
+            "beforeEnemySpellCast",
+            "afterEnemySpellCast",
+            "bonusAction",
+          ]),
+        }),
+        // Складний тригер
+        z.object({
+          type: z.literal("complex"),
+          target: z.enum(["ally", "enemy"]),
+          operator: z.enum([">", "<", "=", "<=", ">="]),
+          value: z.number(),
+          valueType: z.enum(["number", "percent"]),
+          stat: z.enum(["HP", "Attack", "AC", "Speed", "Morale", "Level"]),
+        }),
+      ])
+    )
     .optional(),
-  spellEffectIncrease: z.number().min(0).max(200).optional().nullable(),
-  spellTargetChange: z
-    .object({
-      target: z.enum(["enemies", "allies", "all"]),
-    })
-    .optional()
-    .nullable(),
-  spellAdditionalModifier: z
-    .object({
-      modifier: z.string().optional(),
-      damageDice: z.string().optional(),
-      duration: z.number().optional(),
-    })
-    .optional()
-    .nullable(),
-  spellNewSpellId: z.string().nullable().optional(),
 });
 
 export async function PATCH(
@@ -69,64 +112,99 @@ export async function PATCH(
     const data = updateSkillSchema.parse(body);
 
     const updateData: Prisma.SkillUpdateInput = {};
-    if (data.name !== undefined) updateData.name = data.name;
-    if (data.description !== undefined) updateData.description = data.description;
-    if (data.icon !== undefined) updateData.icon = data.icon;
-    if (data.races !== undefined) updateData.races = data.races as Prisma.InputJsonValue;
-    if (data.isRacial !== undefined) updateData.isRacial = data.isRacial;
-    if (data.bonuses !== undefined) updateData.bonuses = data.bonuses as Prisma.InputJsonValue;
-    if (data.damage !== undefined) updateData.damage = data.damage;
-    if (data.armor !== undefined) updateData.armor = data.armor;
-    if (data.speed !== undefined) updateData.speed = data.speed;
-    if (data.physicalResistance !== undefined) updateData.physicalResistance = data.physicalResistance;
-    if (data.magicalResistance !== undefined) updateData.magicalResistance = data.magicalResistance;
-    if (data.spellId !== undefined) {
-      if (data.spellId === null) {
-        updateData.spell = { disconnect: true };
-      } else {
-        updateData.spell = { connect: { id: data.spellId } };
+    
+    // Оновлюємо згруповані дані
+    if (data.basicInfo !== undefined) {
+      updateData.basicInfo = data.basicInfo as Prisma.InputJsonValue;
+      // Також оновлюємо старі поля для зворотної сумісності
+      const basicInfo = data.basicInfo as any;
+      if (basicInfo.name !== undefined) updateData.name = basicInfo.name;
+      if (basicInfo.description !== undefined) updateData.description = basicInfo.description;
+      if (basicInfo.icon !== undefined) updateData.icon = basicInfo.icon;
+      if (basicInfo.races !== undefined) updateData.races = basicInfo.races as Prisma.InputJsonValue;
+      if (basicInfo.isRacial !== undefined) updateData.isRacial = basicInfo.isRacial;
+    }
+    
+    if (data.bonuses !== undefined) {
+      updateData.bonuses = data.bonuses as Prisma.InputJsonValue;
+    }
+    
+    if (data.combatStats !== undefined) {
+      updateData.combatStats = data.combatStats as Prisma.InputJsonValue;
+      // Також оновлюємо старі поля
+      const combatStats = data.combatStats as any;
+      if (combatStats.damage !== undefined) updateData.damage = combatStats.damage;
+      if (combatStats.armor !== undefined) updateData.armor = combatStats.armor;
+      if (combatStats.speed !== undefined) updateData.speed = combatStats.speed;
+      if (combatStats.physicalResistance !== undefined) updateData.physicalResistance = combatStats.physicalResistance;
+      if (combatStats.magicalResistance !== undefined) updateData.magicalResistance = combatStats.magicalResistance;
+    }
+    
+    if (data.spellData !== undefined) {
+      updateData.spellData = data.spellData as Prisma.InputJsonValue;
+      const spellData = data.spellData as any;
+      if (spellData.spellId !== undefined) {
+        if (spellData.spellId === null) {
+          updateData.spell = { disconnect: true };
+        } else {
+          updateData.spell = { connect: { id: spellData.spellId } };
+        }
+      }
+      if (spellData.spellGroupId !== undefined) {
+        if (spellData.spellGroupId === null) {
+          updateData.spellGroup = { disconnect: true };
+        } else {
+          updateData.spellGroup = { connect: { id: spellData.spellGroupId } };
+        }
       }
     }
-    if (data.spellGroupId !== undefined) {
-      if (data.spellGroupId === null) {
-        updateData.spellGroup = { disconnect: true };
-      } else {
-        updateData.spellGroup = { connect: { id: data.spellGroupId } };
+    
+    if (data.spellEnhancementData !== undefined) {
+      updateData.spellEnhancementData = data.spellEnhancementData as Prisma.InputJsonValue;
+      const spellEnhancementData = data.spellEnhancementData as any;
+      if (spellEnhancementData.spellEnhancementTypes !== undefined) {
+        updateData.spellEnhancementTypes = spellEnhancementData.spellEnhancementTypes as Prisma.InputJsonValue;
+      }
+      if (spellEnhancementData.spellEffectIncrease !== undefined) {
+        updateData.spellEffectIncrease = spellEnhancementData.spellEffectIncrease;
+      }
+      if (spellEnhancementData.spellTargetChange !== undefined) {
+        if (spellEnhancementData.spellTargetChange === null) {
+          updateData.spellTargetChange = Prisma.JsonNull;
+        } else {
+          updateData.spellTargetChange = spellEnhancementData.spellTargetChange as Prisma.InputJsonValue;
+        }
+      }
+      if (spellEnhancementData.spellAdditionalModifier !== undefined) {
+        if (spellEnhancementData.spellAdditionalModifier === null) {
+          updateData.spellAdditionalModifier = Prisma.JsonNull;
+        } else {
+          updateData.spellAdditionalModifier = spellEnhancementData.spellAdditionalModifier as Prisma.InputJsonValue;
+        }
+      }
+      if (spellEnhancementData.spellNewSpellId !== undefined) {
+        if (spellEnhancementData.spellNewSpellId === null) {
+          updateData.spellNewSpell = { disconnect: true };
+        } else {
+          updateData.spellNewSpell = { connect: { id: spellEnhancementData.spellNewSpellId } };
+        }
       }
     }
-    if (data.mainSkillId !== undefined) {
-      if (data.mainSkillId === null) {
-        updateData.mainSkill = { disconnect: true };
-      } else {
-        updateData.mainSkill = { connect: { id: data.mainSkillId } };
+    
+    if (data.mainSkillData !== undefined) {
+      updateData.mainSkillData = data.mainSkillData as Prisma.InputJsonValue;
+      const mainSkillData = data.mainSkillData as any;
+      if (mainSkillData.mainSkillId !== undefined) {
+        if (mainSkillData.mainSkillId === null) {
+          updateData.mainSkill = { disconnect: true };
+        } else {
+          updateData.mainSkill = { connect: { id: mainSkillData.mainSkillId } };
+        }
       }
     }
-    if (data.spellEnhancementTypes !== undefined) {
-      updateData.spellEnhancementTypes = data.spellEnhancementTypes as Prisma.InputJsonValue;
-    }
-    if (data.spellEffectIncrease !== undefined) {
-      updateData.spellEffectIncrease = data.spellEffectIncrease;
-    }
-    if (data.spellTargetChange !== undefined) {
-      if (data.spellTargetChange === null) {
-        updateData.spellTargetChange = Prisma.JsonNull;
-      } else {
-        updateData.spellTargetChange = data.spellTargetChange as Prisma.InputJsonValue;
-      }
-    }
-    if (data.spellAdditionalModifier !== undefined) {
-      if (data.spellAdditionalModifier === null) {
-        updateData.spellAdditionalModifier = Prisma.JsonNull;
-      } else {
-        updateData.spellAdditionalModifier = data.spellAdditionalModifier as Prisma.InputJsonValue;
-      }
-    }
-    if (data.spellNewSpellId !== undefined) {
-      if (data.spellNewSpellId === null) {
-        updateData.spellNewSpell = { disconnect: true };
-      } else {
-        updateData.spellNewSpell = { connect: { id: data.spellNewSpellId } };
-      }
+    
+    if (data.skillTriggers !== undefined) {
+      updateData.skillTriggers = data.skillTriggers as Prisma.InputJsonValue;
     }
 
     const updatedSkill = await prisma.skill.update({
@@ -139,24 +217,64 @@ export async function PATCH(
       },
     });
 
-    // Форматуємо відповідь для фронтенду
+    // Форматуємо відповідь для фронтенду (згрупована структура)
+    const basicInfo = updatedSkill.basicInfo && typeof updatedSkill.basicInfo === 'object' && !Array.isArray(updatedSkill.basicInfo)
+      ? updatedSkill.basicInfo as any
+      : {
+          name: updatedSkill.name || "",
+          description: updatedSkill.description || "",
+          icon: updatedSkill.icon || "",
+          races: Array.isArray(updatedSkill.races) ? updatedSkill.races : (updatedSkill.races as any) || [],
+          isRacial: updatedSkill.isRacial || false,
+        };
+    
+    const combatStats = updatedSkill.combatStats && typeof updatedSkill.combatStats === 'object' && !Array.isArray(updatedSkill.combatStats)
+      ? updatedSkill.combatStats as any
+      : {
+          damage: updatedSkill.damage || undefined,
+          armor: updatedSkill.armor || undefined,
+          speed: updatedSkill.speed || undefined,
+          physicalResistance: updatedSkill.physicalResistance || undefined,
+          magicalResistance: updatedSkill.magicalResistance || undefined,
+        };
+    
+    const spellData = updatedSkill.spellData && typeof updatedSkill.spellData === 'object' && !Array.isArray(updatedSkill.spellData)
+      ? updatedSkill.spellData as any
+      : {
+          spellId: updatedSkill.spellId || undefined,
+          spellGroupId: updatedSkill.spellGroupId || undefined,
+        };
+    
+    const spellEnhancementData = updatedSkill.spellEnhancementData && typeof updatedSkill.spellEnhancementData === 'object' && !Array.isArray(updatedSkill.spellEnhancementData)
+      ? updatedSkill.spellEnhancementData as any
+      : {
+          spellEnhancementTypes: Array.isArray(updatedSkill.spellEnhancementTypes)
+            ? updatedSkill.spellEnhancementTypes
+            : [],
+          spellEffectIncrease: updatedSkill.spellEffectIncrease || undefined,
+          spellTargetChange: updatedSkill.spellTargetChange || undefined,
+          spellAdditionalModifier: updatedSkill.spellAdditionalModifier || undefined,
+          spellNewSpellId: updatedSkill.spellNewSpellId || undefined,
+        };
+    
+    const mainSkillData = updatedSkill.mainSkillData && typeof updatedSkill.mainSkillData === 'object' && !Array.isArray(updatedSkill.mainSkillData)
+      ? updatedSkill.mainSkillData as any
+      : {
+          mainSkillId: updatedSkill.mainSkillId || undefined,
+        };
+
     const formattedSkill = {
       id: updatedSkill.id,
       campaignId: updatedSkill.campaignId,
-      name: updatedSkill.name,
-      description: updatedSkill.description,
-      icon: updatedSkill.icon,
-      races: Array.isArray(updatedSkill.races) ? updatedSkill.races : (updatedSkill.races as any) || [],
-      isRacial: updatedSkill.isRacial,
+      basicInfo,
       bonuses: (updatedSkill.bonuses as Record<string, number>) || {},
-      damage: updatedSkill.damage,
-      armor: updatedSkill.armor,
-      speed: updatedSkill.speed,
-      physicalResistance: updatedSkill.physicalResistance,
-      magicalResistance: updatedSkill.magicalResistance,
-      spellId: updatedSkill.spellId,
-      spellGroupId: updatedSkill.spellGroupId,
-      mainSkillId: updatedSkill.mainSkillId,
+      combatStats,
+      spellData,
+      spellEnhancementData,
+      mainSkillData,
+      skillTriggers: Array.isArray(updatedSkill.skillTriggers)
+        ? updatedSkill.skillTriggers
+        : [],
       createdAt: updatedSkill.createdAt,
       spell: updatedSkill.spell ? {
         id: updatedSkill.spell.id,

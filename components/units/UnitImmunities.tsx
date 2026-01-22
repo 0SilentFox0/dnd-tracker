@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import type { Unit } from "@/lib/api/units";
-import type { Race } from "@/lib/types/races";
+import type { Unit } from "@/types/units";
+import type { Race } from "@/types/races";
 import {
   getUnitImmunities,
   extractRaceImmunities,

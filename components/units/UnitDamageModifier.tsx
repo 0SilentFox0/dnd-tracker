@@ -7,7 +7,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
-import type { Unit } from "@/lib/api/units";
+import type { Unit } from "@/types/units";
 
 interface UnitDamageModifierProps {
   formData: Partial<Unit>;

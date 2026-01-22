@@ -1,3 +1,5 @@
+import type { SkillTriggers } from "./skill-triggers";
+
 export interface Skill {
   id: string;
   campaignId: string;
@@ -24,6 +26,7 @@ export interface Skill {
     duration?: number;
   } | null;
   spellNewSpellId?: string | null;
+  skillTriggers?: SkillTriggers;
   createdAt: Date;
   spell?: {
     id: string;

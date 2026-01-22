@@ -123,3 +123,53 @@ export async function GET(
     );
   }
 }
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const supabase = await createClient();
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
+    
+    if (!authUser) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const userId = authUser.id;
+    // Перевіряємо права DM
+    const campaign = await prisma.campaign.findUnique({
+      where: { id },
+      include: {
+        members: {
+          where: { userId },
+        },
+      },
+    });
+
+    if (!campaign || campaign.members[0]?.role !== "dm") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // Видаляємо всі битви кампанії
+    const result = await prisma.battleScene.deleteMany({
+      where: {
+        campaignId: id,
+      },
+    });
+
+    return NextResponse.json({ 
+      success: true, 
+      deletedCount: result.count 
+    });
+  } catch (error) {
+    console.error("Error deleting all battles:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}

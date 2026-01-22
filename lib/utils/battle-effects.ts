@@ -2,7 +2,7 @@
  * Утиліти для роботи з активними ефектами в бою
  */
 
-import { ActiveEffect, BattleParticipant } from "@/lib/types/battle";
+import { ActiveEffect, BattleParticipant } from "@/types/battle";
 
 /**
  * Застосовує DOT (Damage Over Time) ефекти на початку ходу

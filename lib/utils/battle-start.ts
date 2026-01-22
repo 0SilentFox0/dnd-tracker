@@ -2,7 +2,7 @@
  * Утиліти для старту бою
  */
 
-import { BattleParticipant, ActiveEffect } from "@/lib/types/battle";
+import { BattleParticipant, ActiveEffect } from "@/types/battle";
 import { addActiveEffect } from "./battle-effects";
 import { getPassiveAbilitiesByTrigger, checkTriggerCondition } from "./battle-triggers";
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";

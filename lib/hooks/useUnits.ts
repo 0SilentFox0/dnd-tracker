@@ -11,7 +11,7 @@ import {
   removeAllUnitsFromGroup,
   updateUnit,
 } from "@/lib/api/units";
-import type { Unit, UnitGroup } from "@/lib/api/units";
+import type { Unit, UnitGroup } from "@/types/units";
 
 export type { Unit, UnitGroup };
 

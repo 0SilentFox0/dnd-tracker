@@ -3,8 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import type { CharacterFormData } from "@/lib/api/characters";
-import type { Race } from "@/lib/types/races";
+import type { CharacterFormData } from "@/types/characters";
+import type { Race } from "@/types/races";
 import { getCharacterImmunities } from "@/lib/utils/character-race-effects";
 import { extractRaceImmunities } from "@/lib/utils/race-effects";
 

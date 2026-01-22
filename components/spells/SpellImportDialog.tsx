@@ -5,7 +5,7 @@ import type {
   CSVSpellRow,
   ImportSpell,
   SpellImportResult,
-} from "@/lib/types/spell-import";
+} from "@/types/import";
 import {
   determineSpellType,
   determineSpellDamageType,
