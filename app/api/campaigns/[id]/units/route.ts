@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { z } from "zod";
-import { getProficiencyBonus } from "@/lib/utils/calculations";
-import { requireDM, requireCampaignAccess } from "@/lib/utils/api-auth";
 import { Prisma } from "@prisma/client";
+import { z } from "zod";
+
+import { prisma } from "@/lib/db";
+import { requireCampaignAccess,requireDM } from "@/lib/utils/api-auth";
+import { getProficiencyBonus } from "@/lib/utils/calculations";
 
 const createUnitSchema = z.object({
   name: z.string().min(1).max(100),
@@ -61,6 +62,7 @@ export async function POST(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -68,14 +70,17 @@ export async function POST(
     const { campaign } = accessResult;
 
     const body = await request.json();
+
     const data = createUnitSchema.parse(body);
 
     // Отримуємо колір групи якщо є
     let groupColor: string | null = null;
+
     if (data.groupId) {
       const group = await prisma.unitGroup.findUnique({
         where: { id: data.groupId },
       });
+
       groupColor = group?.color || null;
     }
 
@@ -116,9 +121,11 @@ export async function POST(
     return NextResponse.json(unit);
   } catch (error) {
     console.error("Error creating unit:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -135,6 +142,7 @@ export async function GET(
     
     // Перевіряємо доступ до кампанії (не обов'язково DM)
     const accessResult = await requireCampaignAccess(id, false);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -154,6 +162,7 @@ export async function GET(
     return NextResponse.json(units);
   } catch (error) {
     console.error("Error fetching units:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

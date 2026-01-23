@@ -1,14 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect,useState } from "react";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import type { BattleParticipant } from "@/types/battle";
+import { LabeledInput } from "@/components/ui/labeled-input";
+import { SelectField } from "@/components/ui/select-field";
 import type { BattleScene } from "@/types/api";
+import type { BattleParticipant } from "@/types/battle";
 
 interface Spell {
   id: string;
@@ -57,10 +59,15 @@ export function SpellDialog({
   onCast,
 }: SpellDialogProps) {
   const [selectedSpellId, setSelectedSpellId] = useState<string>("");
+
   const [selectedTargets, setSelectedTargets] = useState<string[]>([]);
+
   const [savingThrows, setSavingThrows] = useState<Record<string, { roll: number; ability: string }>>({});
+
   const [damageRolls, setDamageRolls] = useState<string[]>([]);
+
   const [additionalRoll, setAdditionalRoll] = useState("");
+
   const [spells, setSpells] = useState<Spell[]>([]);
 
   // Завантажуємо деталі заклинань
@@ -70,21 +77,27 @@ export function SpellDialog({
     const loadSpells = async () => {
       try {
         const knownSpellIds = caster.knownSpells || [];
+
         if (knownSpellIds.length === 0) {
           setSpells([]);
+
           return;
         }
 
         const response = await fetch(`/api/campaigns/${campaignId}/spells`);
+
         if (!response.ok) {
           setSpells([]);
+
           return;
         }
 
         const allSpells: Spell[] = await response.json();
+
         const knownSpells = allSpells.filter((spell: Spell) =>
           knownSpellIds.includes(spell.id)
         );
+
         setSpells(knownSpells);
       } catch (error) {
         console.error("Error loading spells:", error);
@@ -100,16 +113,20 @@ export function SpellDialog({
   }
 
   const spellSlots = caster.spellSlots || {};
+
   const selectedSpell = spells.find(s => s.id === selectedSpellId);
 
   // Парсимо diceType для визначення кількості кубиків
   const parseDiceType = (diceType: string | null | undefined): number => {
     if (!diceType) return 6;
+
     const match = diceType.match(/d(\d+)/);
+
     return match ? parseInt(match[1]) : 6;
   };
 
   const diceTypeValue = selectedSpell?.diceType ? parseDiceType(selectedSpell.diceType) : 6;
+
   const diceCount = selectedSpell?.diceCount || 1;
 
   const handleCast = () => {
@@ -149,6 +166,7 @@ export function SpellDialog({
       setDamageRolls([]);
       setAdditionalRoll("");
     }
+
     onOpenChange(open);
   };
 
@@ -177,27 +195,22 @@ export function SpellDialog({
           {/* Вибір заклинання */}
           <div>
             <Label>Заклинання</Label>
-            <Select value={selectedSpellId} onValueChange={setSelectedSpellId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Оберіть заклинання" />
-              </SelectTrigger>
-              <SelectContent>
-                {spells.map((spell) => {
-                  const slot = spellSlots[spell.level.toString()];
-                  const isAvailable = slot && slot.current > 0;
-                  return (
-                    <SelectItem
-                      key={spell.id}
-                      value={spell.id}
-                      disabled={!isAvailable}
-                    >
-                      {spell.name} (Level {spell.level}) {spell.type === "aoe" ? "AOE" : "Target"}
-                      {!isAvailable && " - Немає slots"}
-                    </SelectItem>
-                  );
-                })}
-              </SelectContent>
-            </Select>
+            <SelectField
+              value={selectedSpellId}
+              onValueChange={setSelectedSpellId}
+              placeholder="Оберіть заклинання"
+              options={spells.map(spell => {
+                const slot = spellSlots[spell.level.toString()];
+
+                const isAvailable = slot && slot.current > 0;
+
+                return {
+                  value: spell.id,
+                  label: `${spell.name} (Level ${spell.level}) ${spell.type === "aoe" ? "AOE" : "Target"}${!isAvailable ? " - Немає slots" : ""}`,
+                  disabled: !isAvailable,
+                };
+              })}
+            />
             {selectedSpell && (
               <p className="text-xs text-muted-foreground mt-1">
                 {selectedSpell.description}
@@ -219,8 +232,10 @@ export function SpellDialog({
                         setSelectedTargets([...selectedTargets, target.id]);
                       } else {
                         setSelectedTargets(selectedTargets.filter(id => id !== target.id));
+
                         // Видаляємо saving throw для цієї цілі
                         const newSavingThrows = { ...savingThrows };
+
                         delete newSavingThrows[target.id];
                         setSavingThrows(newSavingThrows);
                       }
@@ -253,6 +268,7 @@ export function SpellDialog({
                     value={damageRolls[index] || ""}
                     onChange={(e) => {
                       const newRolls = [...damageRolls];
+
                       newRolls[index] = e.target.value;
                       setDamageRolls(newRolls);
                     }}
@@ -277,6 +293,7 @@ export function SpellDialog({
                     value={damageRolls[index] || ""}
                     onChange={(e) => {
                       const newRolls = [...damageRolls];
+
                       newRolls[index] = e.target.value;
                       setDamageRolls(newRolls);
                     }}
@@ -294,6 +311,7 @@ export function SpellDialog({
               <div className="space-y-2">
                 {selectedTargets.map((targetId) => {
                   const target = availableTargets.find(t => t.id === targetId);
+
                   if (!target) return null;
                   
                   return (

@@ -14,7 +14,9 @@ export function parseCSVLine(
   delimiter: string | RegExp = /[,;]/
 ): string[] {
   const result: string[] = [];
+
   let current = "";
+
   let inQuotes = false;
 
   // Якщо delimiter - це регулярний вираз, використовуємо більш складну логіку
@@ -22,6 +24,7 @@ export function parseCSVLine(
     // Для regex використовуємо простий підхід з перевіркою лапок
     for (let i = 0; i < line.length; i++) {
       const char = line[i];
+
       const nextChar = i < line.length - 1 ? line[i + 1] : null;
 
       if (char === '"') {
@@ -35,7 +38,9 @@ export function parseCSVLine(
       } else if (!inQuotes) {
         // Перевіряємо чи поточний символ відповідає delimiter
         const remaining = line.substring(i);
+
         const match = remaining.match(delimiter);
+
         if (match && match.index === 0) {
           result.push(current.trim());
           current = "";
@@ -43,12 +48,14 @@ export function parseCSVLine(
           continue;
         }
       }
+
       current += char;
     }
   } else {
     // Для простого рядкового delimiter
     for (let i = 0; i < line.length; i++) {
       const char = line[i];
+
       const nextChar = i < line.length - 1 ? line[i + 1] : null;
 
       if (char === '"') {
@@ -69,6 +76,7 @@ export function parseCSVLine(
   }
 
   result.push(current.trim());
+
   return result;
 }
 
@@ -80,6 +88,7 @@ export async function parseCSVFile<T extends CSVRow>(
   delimiter: string | RegExp = /[,;]/
 ): Promise<T[]> {
   const text = await file.text();
+
   const lines = text.split("\n").filter((line) => line.trim());
   
   if (lines.length === 0) {
@@ -88,6 +97,7 @@ export async function parseCSVFile<T extends CSVRow>(
 
   // Парсимо заголовки
   const headers = parseCSVLine(lines[0], delimiter);
+
   const rows: T[] = [];
 
   for (let i = 1; i < lines.length; i++) {
@@ -96,7 +106,9 @@ export async function parseCSVFile<T extends CSVRow>(
     // Якщо кількість колонок не співпадає, об'єднуємо зайві колонки в останнє поле
     if (values.length > headers.length) {
       const lastIndex = headers.length - 1;
+
       const extraValues = values.slice(lastIndex);
+
       values.splice(
         lastIndex,
         values.length - lastIndex,
@@ -112,12 +124,15 @@ export async function parseCSVFile<T extends CSVRow>(
     }
 
     const row: Record<string, string> = {};
+
     headers.forEach((header, index) => {
       // Видаляємо лапки якщо є
       let value = values[index] || "";
+
       if (value.startsWith('"') && value.endsWith('"')) {
         value = value.slice(1, -1);
       }
+
       row[header] = value;
     });
     rows.push(row as T);
@@ -131,7 +146,9 @@ export async function parseCSVFile<T extends CSVRow>(
  */
 export async function parseJSONFile<T>(file: File): Promise<T[]> {
   const text = await file.text();
+
   const data = JSON.parse(text) as T | T[];
+
   return Array.isArray(data) ? data : [data];
 }
 

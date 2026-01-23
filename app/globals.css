@@ -139,7 +139,7 @@
   }
   body {
     @apply text-foreground;
-    background-image: url("/tavern.png");
+    background-image: var(--background-image-url, url("/screen-bg/tavern.png"));
     background-size: cover;
     background-position: center;
     background-attachment: fixed;

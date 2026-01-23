@@ -10,9 +10,10 @@
  */
 
 import { PrismaClient } from "@prisma/client";
+import { parse } from "csv-parse/sync";
 import * as fs from "fs";
 import * as path from "path";
-import { parse } from "csv-parse/sync";
+
 import { DEFAULT_CAMPAIGN_ID } from "../lib/constants/campaigns";
 
 const prisma = new PrismaClient();
@@ -58,27 +59,33 @@ async function getOrCreateSpellGroup(
 
 function parseLevel(levelStr: string): number {
   const level = parseInt(levelStr.trim(), 10);
+
   return isNaN(level) ? 0 : level;
 }
 
 function parseSpellType(effect: string): "target" | "aoe" {
   const lower = effect.toLowerCase();
+
   if (lower.includes("aoe") || lower.includes("всі") || lower.includes("коло") || lower.includes("лінія") || lower.includes("стіна")) {
     return "aoe";
   }
+
   return "target";
 }
 
 function parseDamageType(effect: string): "damage" | "heal" {
   const lower = effect.toLowerCase();
+
   if (lower.includes("heal") || lower.includes("лікування") || lower.includes("регенерація") || lower.includes("воскресіння") || lower.includes("revive")) {
     return "heal";
   }
+
   return "damage";
 }
 
 function parseDamageElement(effect: string): string | undefined {
   const lower = effect.toLowerCase();
+
   const map: Array<{ value: string; keywords: string[] }> = [
     { value: "fire", keywords: ["fire", "вогонь", "полум", "burn"] },
     { value: "cold", keywords: ["cold", "ice", "лід", "криж"] },
@@ -95,15 +102,18 @@ function parseDamageElement(effect: string): string | undefined {
   const match = map.find((item) =>
     item.keywords.some((keyword) => lower.includes(keyword))
   );
+
   return match?.value;
 }
 
 function extractDamageDice(effect: string): string | undefined {
   // Шукаємо патерни типу "3d10", "8d6", "2d8 + MOD" тощо
   const diceMatch = effect.match(/(\d+d\d+[\s\+]*[\w]*)/i);
+
   if (diceMatch) {
     return diceMatch[1].trim();
   }
+
   return undefined;
 }
 
@@ -112,6 +122,7 @@ function extractSavingThrow(effect: string): {
   onSuccess?: "half" | "none";
 } {
   const lower = effect.toLowerCase();
+
   const abilities = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"];
   
   for (const ability of abilities) {
@@ -125,10 +136,15 @@ function extractSavingThrow(effect: string): {
 
   // Перевіряємо українські назви
   if (lower.includes("сила")) return { ability: "strength", onSuccess: "half" };
+
   if (lower.includes("спритність")) return { ability: "dexterity", onSuccess: "half" };
+
   if (lower.includes("статура")) return { ability: "constitution", onSuccess: "half" };
+
   if (lower.includes("інтелект")) return { ability: "intelligence", onSuccess: "half" };
+
   if (lower.includes("мудрість")) return { ability: "wisdom", onSuccess: "half" };
+
   if (lower.includes("харизма")) return { ability: "charisma", onSuccess: "half" };
 
   return {};
@@ -136,6 +152,7 @@ function extractSavingThrow(effect: string): {
 
 function parseConcentration(effect: string): boolean {
   const lower = effect.toLowerCase();
+
   return lower.includes("conc.") || lower.includes("concentration") || lower.includes("концентрація");
 }
 
@@ -154,12 +171,14 @@ async function importSpellsFromCSV(campaignId: string, csvContent: string) {
 
     // Створюємо або отримуємо групи заклинань
     const spellGroups: SpellGroup = {};
+
     const uniqueSchools = [...new Set(records.map((r) => r.School.trim()))];
 
     console.log(`Створюємо групи заклинань: ${uniqueSchools.join(", ")}`);
 
     for (const school of uniqueSchools) {
       const groupId = await getOrCreateSpellGroup(campaignId, school);
+
       spellGroups[school] = groupId;
       console.log(`  ✓ Група "${school}": ${groupId}`);
     }
@@ -167,16 +186,24 @@ async function importSpellsFromCSV(campaignId: string, csvContent: string) {
     // Конвертуємо заклинання в правильний формат
     const spellsToCreate = records.map((row) => {
       const level = parseLevel(row.Level);
+
       const effect = row.Effect.trim();
+
       const damageDice = extractDamageDice(effect);
+
       const savingThrow = extractSavingThrow(effect);
+
       const concentration = parseConcentration(effect);
+
       const type = parseSpellType(effect);
+
       const damageType = parseDamageType(effect);
+
       const damageElement = parseDamageElement(effect);
 
       // Визначаємо школу магії (можна покращити маппінг)
       let school = "";
+
       if (row.School === "Dark") school = "Necromancy";
       else if (row.School === "Destr") school = "Evocation";
       else if (row.School === "Summ") school = "Conjuration";
@@ -228,6 +255,7 @@ async function importSpellsFromCSV(campaignId: string, csvContent: string) {
           groupId,
         },
       });
+
       console.log(`  ${school}: ${count} заклинань`);
     }
 
@@ -243,6 +271,7 @@ async function main() {
 
   // Використовуємо дефолтні значення якщо не вказано
   const csvInput = args[0] || "imports/spells-import.csv";
+
   const campaignId = args[1] || DEFAULT_CAMPAIGN_ID;
 
   console.log(`Використання кампанії: ${campaignId}`);

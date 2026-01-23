@@ -1,7 +1,8 @@
 "use client";
 
-import type { BattleParticipant } from "@/types/battle";
 import { InitiativeParticipantCard } from "./InitiativeParticipantCard";
+
+import type { BattleParticipant } from "@/types/battle";
 
 interface BattleInitiativeBarProps {
   initiativeOrder: BattleParticipant[];
@@ -15,6 +16,7 @@ export function BattleInitiativeBar({
   isDM,
 }: BattleInitiativeBarProps) {
   const currentParticipant = initiativeOrder[currentTurnIndex];
+
   const otherParticipants = initiativeOrder.filter((_, index) => index !== currentTurnIndex);
 
   return (
@@ -38,6 +40,7 @@ export function BattleInitiativeBar({
           <div className="flex items-center gap-2 flex-1 overflow-y-visible overflow-x-auto scrollbar-hide">
             {otherParticipants.map((participant) => {
               const originalIndex = initiativeOrder.findIndex((p) => p.id === participant.id);
+
               const isNext = originalIndex === (currentTurnIndex + 1) % initiativeOrder.length;
               
               return (

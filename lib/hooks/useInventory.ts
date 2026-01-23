@@ -2,7 +2,8 @@
  * Хук для управління інвентарем персонажа
  */
 
-import { useState, useCallback } from "react";
+import { useCallback,useState } from "react";
+
 import { InventoryFormData } from "@/types/inventory";
 
 export interface UseInventoryOptions {
@@ -25,7 +26,9 @@ export function useInventory(options: UseInventoryOptions) {
     ...defaultInventoryData,
     ...options.initialData,
   }));
+
   const [loading, setLoading] = useState(false);
+
   const [error, setError] = useState<string | null>(null);
 
   const updateField = useCallback(<K extends keyof InventoryFormData>(
@@ -47,6 +50,7 @@ export function useInventory(options: UseInventoryOptions) {
 
   const addBackpackItem = useCallback(() => {
     const name = prompt("Назва предмета:");
+
     if (name && name.trim()) {
       setFormData((prev) => ({
         ...prev,
@@ -64,6 +68,7 @@ export function useInventory(options: UseInventoryOptions) {
 
   const addItem = useCallback(() => {
     const name = prompt("Назва предмета:");
+
     if (name && name.trim()) {
       setFormData((prev) => ({
         ...prev,

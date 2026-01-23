@@ -2,9 +2,10 @@
  * Утиліти для роботи з імунітетами та опором в бою
  */
 
-import { BattleParticipant } from "@/types/battle";
-import { findRacialAbilityByPattern, extractResistanceValue } from "./battle-resistance-helpers";
+import { extractResistanceValue,findRacialAbilityByPattern } from "./battle-resistance-helpers";
+
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
+import { BattleParticipant } from "@/types/battle";
 
 /**
  * Результат застосування імунітетів/опору
@@ -62,12 +63,14 @@ export function applyResistance(
   damageType: string
 ): ResistanceResult {
   const breakdown: string[] = [];
+
   let finalDamage = damage;
 
   // Перевіряємо імунітет
   if (hasImmunity(target, damageType)) {
     finalDamage = 0;
     breakdown.push(`${damage} ${damageType} → ІМУНІТЕТ (0 урону)`);
+
     return {
       finalDamage: 0,
       immunityApplied: true,
@@ -78,13 +81,17 @@ export function applyResistance(
 
   // Перевіряємо опір
   const resistance = getResistance(target, damageType);
+
   if (resistance > 0) {
     const resistancePercent = Math.round(resistance * 100);
+
     const reducedDamage = Math.floor(damage * (1 - resistance));
+
     finalDamage = reducedDamage;
     breakdown.push(
       `${damage} ${damageType} → -${resistancePercent}% опір (${finalDamage} урону)`
     );
+
     return {
       finalDamage,
       immunityApplied: false,
@@ -95,6 +102,7 @@ export function applyResistance(
 
   // Немає імунітету або опору
   breakdown.push(`${damage} ${damageType} урону`);
+
   return {
     finalDamage,
     immunityApplied: false,
@@ -115,19 +123,24 @@ export function applyResistanceToMultipleDamage(
   damageByType: Record<string, number>
 ): ResistanceResult {
   const breakdown: string[] = [];
+
   let totalFinalDamage = 0;
+
   let hasImmunity = false;
+
   let hasResistance = false;
 
   for (const [damageType, damage] of Object.entries(damageByType)) {
     if (damage <= 0) continue;
 
     const result = applyResistance(target, damage, damageType);
+
     totalFinalDamage += result.finalDamage;
     
     if (result.immunityApplied) {
       hasImmunity = true;
     }
+
     if (result.resistanceApplied) {
       hasResistance = true;
     }

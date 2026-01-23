@@ -2,11 +2,13 @@
  * Утиліти для створення BattleParticipant з Character/Unit
  */
 
-import { BattleParticipant, ActiveSkill, EquippedArtifact, RacialAbility } from "@/types/battle";
-import { Character } from "@/types/characters";
-import { getAbilityModifier } from "./calculations";
 import type { Prisma } from "@prisma/client";
+
+import { getAbilityModifier } from "./calculations";
+
 import { prisma } from "@/lib/db";
+import { ActiveSkill, BattleParticipant, EquippedArtifact, RacialAbility } from "@/types/battle";
+import { Character } from "@/types/characters";
 
 // Типи для Prisma моделей
 type CharacterFromPrisma = Prisma.CharacterGetPayload<{
@@ -151,6 +153,7 @@ export async function createBattleParticipantFromUnit(
 
   // Завантажуємо расові здібності (синхронно, бо функція не async)
   let racialAbilities: RacialAbility[] = [];
+
   if (unit.race) {
     try {
       racialAbilities = await extractRacialAbilities(unit.race, unit.campaignId);
@@ -229,7 +232,9 @@ async function extractActiveSkillsFromCharacter(
 
   // Збираємо всі skillIds для масового завантаження
   const allSkillIds: string[] = [];
+
   const skillIdToMainSkill: Record<string, string> = {};
+
   const skillIdToLevel: Record<string, "basic" | "advanced" | "expert"> = {};
 
   for (const [mainSkillId, progress] of Object.entries(skillTreeProgress)) {
@@ -263,6 +268,7 @@ async function extractActiveSkillsFromCharacter(
   // Створюємо ActiveSkill для кожного скілу
   for (const skillId of allSkillIds) {
     const skill = skillsMap.get(skillId);
+
     if (!skill) {
       // Якщо скіл не знайдено, створюємо базову структуру
       activeSkills.push({
@@ -278,6 +284,7 @@ async function extractActiveSkillsFromCharacter(
 
     // Розпаковуємо bonuses в effects
     const bonuses = (skill.bonuses as Record<string, number>) || {};
+
     const effects = Object.entries(bonuses).map(([type, value]) => ({
       type,
       value,
@@ -286,6 +293,7 @@ async function extractActiveSkillsFromCharacter(
 
     // Формуємо spellEnhancements якщо є покращення заклинання
     let spellEnhancements: ActiveSkill["spellEnhancements"] | undefined;
+
     const enhancementTypes =
       (skill.spellEnhancementTypes as string[]) || [];
     
@@ -305,6 +313,7 @@ async function extractActiveSkillsFromCharacter(
       if (skill.spellTargetChange) {
         const targetChange =
           skill.spellTargetChange as unknown as { target: string };
+
         if (targetChange && typeof targetChange === "object" && "target" in targetChange) {
           spellEnhancements.spellTargetChange = {
             target: targetChange.target,
@@ -318,6 +327,7 @@ async function extractActiveSkillsFromCharacter(
           damageDice?: string;
           duration?: number;
         };
+
         if (
           additionalModifier &&
           typeof additionalModifier === "object"
@@ -379,6 +389,7 @@ async function extractAttacksFromCharacter(
   }
 
   const equipped = (character.inventory.equipped as Record<string, string>) || {};
+
   const weaponId = equipped.weapon || equipped.weapon1 || equipped.weapon2;
 
   if (!weaponId) {
@@ -409,8 +420,11 @@ async function extractAttacksFromCharacter(
   
   // Базові значення (можна налаштувати пізніше)
   const attackBonus = bonuses.attackBonus || bonuses.attack || 0;
+
   const damageDice = modifiers.find(m => m.type === "damageDice")?.value?.toString() || "1d6";
+
   const damageType = modifiers.find(m => m.type === "damageType")?.value?.toString() || "slashing";
+
   const attackType = modifiers.find(m => m.type === "attackType")?.value?.toString() || "melee";
 
   // Створюємо атаку з ID
@@ -445,6 +459,7 @@ async function extractEquippedArtifactsFromCharacter(
 
   // Збираємо всі artifactIds для масового завантаження
   const artifactIds: string[] = [];
+
   const artifactIdToSlot: Record<string, string> = {};
 
   for (const [slot, artifactId] of Object.entries(equipped)) {
@@ -470,6 +485,7 @@ async function extractEquippedArtifactsFromCharacter(
   // Створюємо EquippedArtifact для кожного артефакту
   for (const artifact of artifacts) {
     const bonuses = (artifact.bonuses as Record<string, number>) || {};
+
     const modifiers = (artifact.modifiers as Array<{
       type: string;
       value: number;

@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
-import { BattleParticipant, BattleAction } from "@/types/battle";
 import { Prisma } from "@prisma/client";
-import { processSpell, BattleSpell } from "@/lib/utils/battle-spell-process";
+import { z } from "zod";
+
+import { prisma } from "@/lib/db";
+import { createClient } from "@/lib/supabase/server";
+import { BattleSpell,processSpell } from "@/lib/utils/battle-spell-process";
+import { BattleAction,BattleParticipant } from "@/types/battle";
 
 const spellSchema = z.object({
   casterId: z.string(), // ID BattleParticipant з initiativeOrder
@@ -29,7 +30,9 @@ export async function POST(
 ) {
   try {
     const { id, battleId } = await params;
+
     const supabase = await createClient();
+
     const {
       data: { user: authUser },
     } = await supabase.auth.getUser();
@@ -39,6 +42,7 @@ export async function POST(
     }
 
     const userId = authUser.id;
+
     // Перевіряємо права DM
     const campaign = await prisma.campaign.findUnique({
       where: { id },
@@ -69,10 +73,12 @@ export async function POST(
     }
 
     const body = await request.json();
+
     const data = spellSchema.parse(body);
 
     // Отримуємо учасників з initiativeOrder
     const initiativeOrder = battle.initiativeOrder as unknown as BattleParticipant[];
+
     const caster = initiativeOrder.find((p) => p.id === data.casterId);
 
     if (!caster) {
@@ -158,16 +164,21 @@ export async function POST(
       if (p.id === caster.id) {
         return spellResult.casterUpdated;
       }
+
       const updatedTarget = spellResult.targetsUpdated.find((t) => t.id === p.id);
+
       if (updatedTarget) {
         return updatedTarget;
       }
+
       return p;
     });
 
     // Отримуємо поточний battleLog та додаємо нову дію
     const battleLog = (battle.battleLog as unknown as BattleAction[]) || [];
+
     const actionIndex = battleLog.length;
+
     const battleAction: BattleAction = {
       ...spellResult.battleAction,
       actionIndex,
@@ -188,6 +199,7 @@ export async function POST(
     // Відправляємо real-time оновлення через Pusher
     if (process.env.PUSHER_APP_ID) {
       const { pusherServer } = await import("@/lib/pusher");
+
       await pusherServer.trigger(
         `battle-${battleId}`,
         "battle-updated",
@@ -198,9 +210,11 @@ export async function POST(
     return NextResponse.json(updatedBattle);
   } catch (error) {
     console.error("Error processing spell:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -3,8 +3,9 @@
  */
 
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+
 import { prisma } from "@/lib/db";
+import { createClient } from "@/lib/supabase/server";
 
 export interface AuthResult {
   userId: string;
@@ -35,6 +36,7 @@ export interface CampaignAccessResult extends AuthResult {
  */
 export async function requireAuth(): Promise<AuthResult | NextResponse> {
   const supabase = await createClient();
+
   const {
     data: { user: authUser },
   } = await supabase.auth.getUser();
@@ -65,6 +67,7 @@ export async function requireCampaignAccess(
 ): Promise<CampaignAccessResult | NextResponse> {
   // Перевіряємо авторизацію
   const authResult = await requireAuth();
+
   if (authResult instanceof NextResponse) {
     return authResult;
   }

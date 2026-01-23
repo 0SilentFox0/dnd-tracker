@@ -1,8 +1,9 @@
 import { useMemo } from "react";
-import type { SkillTree } from "@/types/skill-tree";
-import type { Skill as SkillFromLibraryType } from "@/types/skills";
+
 import type { MainSkill } from "@/types/main-skills";
 import type { Race } from "@/types/races";
+import type { SkillTree } from "@/types/skill-tree";
+import type { Skill as SkillFromLibraryType } from "@/types/skills";
 
 interface UseSkillTreeFiltersOptions {
   skillTree: SkillTree | null;
@@ -22,6 +23,7 @@ export function useSkillTreeFilters({
   // Отримуємо список вже присвоєних скілів для цієї раси
   const assignedSkillIds = useMemo(() => {
     if (!skillTree) return new Set<string>();
+
     const assignedIds = new Set<string>();
 
     // Проходимо по всіх mainSkills та їх рівнях
@@ -68,6 +70,7 @@ export function useSkillTreeFilters({
     
     if (!skillsFromLibrary.length) {
       console.warn("No skills in library to filter");
+
       return [];
     }
 
@@ -92,6 +95,7 @@ export function useSkillTreeFilters({
           name: skill.name,
           reason: "вже присвоєний",
         });
+
         return false;
       }
 
@@ -102,19 +106,23 @@ export function useSkillTreeFilters({
         const skillWithMainSkill = skill as unknown as {
           mainSkillId?: string | null;
         };
+
         const mainSkillId = skillWithMainSkill.mainSkillId;
 
         // Якщо скіл має mainSkillId, перевіряємо чи він в списку доступних
         if (mainSkillId) {
           const isInAvailableList = raceAvailableSkills.includes(mainSkillId);
+
           if (!isInAvailableList) {
             const mainSkillName =
               mainSkills.find((ms) => ms.id === mainSkillId)?.name ||
               mainSkillId;
+
             excludedSkills.push({
               name: skill.name,
               reason: `основний навик "${mainSkillName}" не доступний для цієї раси`,
             });
+
             return false;
           }
         }
@@ -128,6 +136,7 @@ export function useSkillTreeFilters({
       if (skill.races && skill.races.length > 0) {
         // Знаходимо ID та назву обраної раси
         const selectedRaceId = race?.id;
+
         const selectedRaceName = race?.name || selectedRace;
         
         // Перевіряємо чи ID раси або назва раси є в списку доступних для скіла
@@ -141,6 +150,7 @@ export function useSkillTreeFilters({
             name: skill.name,
             reason: `не доступний для раси "${selectedRace}"`,
           });
+
           return false;
         }
       }
@@ -155,13 +165,16 @@ export function useSkillTreeFilters({
         .map((s) => {
           const mainSkillId = (s as unknown as { mainSkillId?: string | null })
             .mainSkillId;
+
           const mainSkillName = mainSkillId
             ? mainSkills.find((ms) => ms.id === mainSkillId)?.name ||
               mainSkillId
             : "Без основного навику";
+
           return `${s.name} (${mainSkillName})`;
         })
         .join(", ");
+
       console.log(`Available skills (${filtered.length}):`, availableSkillNames);
     }
 
@@ -171,12 +184,14 @@ export function useSkillTreeFilters({
     }
 
     console.log(`Final filtered skills count: ${filtered.length}`);
+
     return filtered;
   }, [skillsFromLibrary, assignedSkillIds, selectedRace, race, mainSkills]);
 
   // Групуємо скіли по основним навикам
   const groupedSkills = useMemo(() => {
     const groups: Record<string, typeof availableSkills> = {};
+
     const ungrouped: typeof availableSkills = [];
 
     availableSkills.forEach((skill) => {
@@ -184,15 +199,18 @@ export function useSkillTreeFilters({
       const skillWithMainSkill = skill as unknown as {
         mainSkillId?: string | null;
       };
+
       const mainSkillId = skillWithMainSkill.mainSkillId;
 
       if (mainSkillId) {
         // Знаходимо назву основного навику
         const mainSkill = mainSkills.find((ms) => ms.id === mainSkillId);
+
         if (mainSkill) {
           if (!groups[mainSkillId]) {
             groups[mainSkillId] = [];
           }
+
           groups[mainSkillId].push(skill);
         } else {
           ungrouped.push(skill);

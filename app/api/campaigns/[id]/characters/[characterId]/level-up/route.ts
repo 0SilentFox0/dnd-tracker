@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
+
 import { prisma } from "@/lib/db";
 import { requireDM, validateCampaignOwnership } from "@/lib/utils/api-auth";
 import {
-  getProficiencyBonus,
+  calculateHPGain,
   getAbilityModifier,
   getPassiveScore,
-  getSpellSaveDC,
+  getProficiencyBonus,
   getSpellAttackBonus,
-  calculateHPGain,
+  getSpellSaveDC,
 } from "@/lib/utils/calculations";
 import { calculateSpellSlotGain } from "@/lib/utils/spell-slots";
 import type { SpellSlotProgression } from "@/types/races";
@@ -21,6 +22,7 @@ export async function POST(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -33,6 +35,7 @@ export async function POST(
     });
 
     const validationError = validateCampaignOwnership(character, id);
+
     if (validationError) {
       return validationError;
     }
@@ -68,10 +71,15 @@ export async function POST(
 
     // Розраховуємо модифікатори атрибутів
     const strMod = getAbilityModifier(character.strength);
+
     const dexMod = getAbilityModifier(character.dexterity);
+
     const conMod = getAbilityModifier(character.constitution);
+
     const intMod = getAbilityModifier(character.intelligence);
+
     const wisMod = getAbilityModifier(character.wisdom);
+
     const chaMod = getAbilityModifier(character.charisma);
 
     // Обираємо випадковий атрибут для +1
@@ -83,6 +91,7 @@ export async function POST(
       "wisdom",
       "charisma",
     ] as const;
+
     const randomAbility =
       abilities[Math.floor(Math.random() * abilities.length)];
 
@@ -101,22 +110,32 @@ export async function POST(
 
     // Розраховуємо нові модифікатори
     const newStrMod = getAbilityModifier(updatedAbilities.strength);
+
     const newDexMod = getAbilityModifier(updatedAbilities.dexterity);
+
     const newConMod = getAbilityModifier(updatedAbilities.constitution);
+
     const newIntMod = getAbilityModifier(updatedAbilities.intelligence);
+
     const newWisMod = getAbilityModifier(updatedAbilities.wisdom);
+
     const newChaMod = getAbilityModifier(updatedAbilities.charisma);
 
     // Збільшуємо HP
     const hitDice = character.hitDice;
+
     const hpGain = calculateHPGain(hitDice, conMod);
+
     const newMaxHp = character.maxHp + hpGain;
+
     const newCurrentHp = character.currentHp + hpGain; // Автоматично лікуємо при прокачці
 
     // Розраховуємо нові автоматичні значення
     const proficiencyBonus = getProficiencyBonus(newLevel);
+
     const savingThrows = (character.savingThrows ||
       {}) as Record<string, boolean>;
+
     const skills = (character.skills || {}) as Record<string, boolean>;
 
     const passivePerception = getPassiveScore(
@@ -124,11 +143,13 @@ export async function POST(
       skills.perception || false,
       proficiencyBonus
     );
+
     const passiveInvestigation = getPassiveScore(
       newIntMod,
       skills.investigation || false,
       proficiencyBonus
     );
+
     const passiveInsight = getPassiveScore(
       newWisMod,
       skills.insight || false,
@@ -137,6 +158,7 @@ export async function POST(
 
     // Розраховуємо spellcasting параметри якщо є
     let spellSaveDC: number | null = character.spellSaveDC;
+
     let spellAttackBonus: number | null = character.spellAttackBonus;
 
     if (character.spellcastingAbility) {
@@ -213,6 +235,7 @@ export async function POST(
     });
   } catch (error) {
     console.error("Error leveling up character:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

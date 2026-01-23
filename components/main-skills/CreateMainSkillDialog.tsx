@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,7 +11,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCreateMainSkill } from "@/lib/hooks/useMainSkills";
@@ -27,7 +28,9 @@ export function CreateMainSkillDialog({
   campaignId,
 }: CreateMainSkillDialogProps) {
   const router = useRouter();
+
   const createMainSkillMutation = useCreateMainSkill(campaignId);
+
   const [formData, setFormData] = useState<MainSkillFormData>({
     name: "",
     color: "#000000",
@@ -42,14 +45,17 @@ export function CreateMainSkillDialog({
         ...formData,
         icon: formData.icon?.trim() || undefined,
       };
+
       await createMainSkillMutation.mutateAsync(dataToSend);
       setFormData({ name: "", color: "#000000", icon: "" });
       onOpenChange(false);
       router.refresh();
     } catch (error) {
       console.error("Error creating main skill:", error);
+
       const errorMessage =
         error instanceof Error ? error.message : "Помилка при створенні основного навику";
+
       alert(errorMessage);
     }
   };

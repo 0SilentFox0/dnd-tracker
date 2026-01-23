@@ -16,8 +16,9 @@
  * 
  * ВИДАЛИТИ ПІСЛЯ ТЕСТУВАННЯ!
  */
+import { Prisma,PrismaClient } from "@prisma/client";
+
 import { DEFAULT_CAMPAIGN_ID } from "../lib/constants/campaigns";
-import { PrismaClient, Prisma } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -136,6 +137,7 @@ async function seedMockData() {
     ];
 
     const createdSpells = [];
+
     for (const spellData of spells) {
       // Перевіряємо чи вже існує заклинання з такою назвою
       const existing = await prisma.spell.findFirst({
@@ -160,6 +162,7 @@ async function seedMockData() {
             : Prisma.JsonNull,
         },
       });
+
       createdSpells.push(spell);
       console.log(`  ✅ Створено: ${spell.name}`);
     }
@@ -177,6 +180,7 @@ async function seedMockData() {
     ];
 
     const createdMainSkills = [];
+
     for (const mainSkillData of mainSkills) {
       // Перевіряємо чи вже існує
       const existing = await prisma.mainSkill.findFirst({
@@ -198,6 +202,7 @@ async function seedMockData() {
           ...mainSkillData,
         },
       });
+
       createdMainSkills.push(mainSkill);
       console.log(`  ✅ Створено: ${mainSkill.name}`);
     }
@@ -258,6 +263,7 @@ async function seedMockData() {
     ];
 
     const createdHumanSkills = [];
+
     for (const skillData of humanSkills) {
       // Перевіряємо чи вже існує
       const existing = await prisma.skill.findFirst({
@@ -285,6 +291,7 @@ async function seedMockData() {
           spellEffectIncrease: skillData.spellEffectIncrease || null,
         },
       });
+
       createdHumanSkills.push(skill);
       console.log(`  ✅ Створено: ${skill.name}`);
     }
@@ -339,6 +346,7 @@ async function seedMockData() {
     ];
 
     const createdElfSkills = [];
+
     for (const skillData of elfSkills) {
       // Перевіряємо чи вже існує
       const existing = await prisma.skill.findFirst({
@@ -370,6 +378,7 @@ async function seedMockData() {
           spellEffectIncrease: skillData.spellEffectIncrease || null,
         },
       });
+
       createdElfSkills.push(skill);
       console.log(`  ✅ Створено: ${skill.name}`);
     }
@@ -670,6 +679,7 @@ async function seedMockData() {
     ];
 
     const allCharacters = [...humanCharacters, ...elfCharacters];
+
     const createdCharacters = [];
 
     for (const charData of allCharacters) {
@@ -703,6 +713,7 @@ async function seedMockData() {
       
       // Визначаємо розблоковані скіли залежно від персонажа
       let unlockedSkills: string[] = [];
+
       if (character.race === "human") {
         if (character.name === "Годрик Воїн") {
           unlockedSkills = [createdHumanSkills[0].id, createdHumanSkills[2].id];
@@ -739,6 +750,7 @@ async function seedMockData() {
 
       // Створюємо інвентар з базовою зброєю
       let equippedItems: Record<string, unknown> = {};
+
       if (character.class === "Fighter") {
         equippedItems = {
           mainHand: {

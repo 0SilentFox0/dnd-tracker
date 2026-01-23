@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+
 import { getAuthUserOptional } from "@/lib/auth";
 
 export default async function HomePage() {

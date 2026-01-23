@@ -1,25 +1,25 @@
-import { useState, useMemo, useEffect } from "react";
-import type {
-  SkillTree,
-  Skill,
-  UltimateSkill,
-  MainSkill,
-} from "@/types/skill-tree";
-import { SkillLevel } from "@/types/skill-tree";
+import { useEffect,useMemo, useState } from "react";
+
 import {
   canLearnRacialSkillLevel,
   getRacialSkillLevelId,
-} from "@/components/skill-tree/hooks";
-import { useSkills } from "@/lib/hooks/useSkills";
+} from "@/components/skill-tree/utils/hooks";
 import { useMainSkills } from "@/lib/hooks/useMainSkills";
-import { useSkillTreeSave } from "@/lib/hooks/useSkillTreeSave";
+import { useSkills } from "@/lib/hooks/useSkills";
+import { assignSkillToSlot } from "@/lib/hooks/useSkillTreeAssignment";
 import { clearSkillTree } from "@/lib/hooks/useSkillTreeClear";
 import { useSkillTreeEnrichment } from "@/lib/hooks/useSkillTreeEnrichment";
 import { useSkillTreeFilters } from "@/lib/hooks/useSkillTreeFilters";
-import { assignSkillToSlot } from "@/lib/hooks/useSkillTreeAssignment";
+import { useSkillTreeSave } from "@/lib/hooks/useSkillTreeSave";
 import { createMockSkillTree } from "@/lib/utils/skill-tree-mock";
-
 import type { Race } from "@/types/races";
+import type {
+  MainSkill,
+  Skill,
+  SkillTree,
+  UltimateSkill,
+} from "@/types/skill-tree";
+import { SkillLevel } from "@/types/skill-tree";
 
 interface UseSkillTreePageOptions {
   campaignId: string;
@@ -61,6 +61,7 @@ function convertPrismaToSkillTree(prismaTree: {
         mainSkills: SkillTree["mainSkills"];
         ultimateSkill?: SkillTree["ultimateSkill"];
       };
+
       return {
         id: prismaTree.id,
         campaignId: prismaTree.campaignId,
@@ -81,6 +82,7 @@ function convertPrismaToSkillTree(prismaTree: {
   } catch (error) {
     console.error("Error converting skill tree:", error);
   }
+
   return null;
 }
 
@@ -93,10 +95,14 @@ export function useSkillTreePage({
   const [selectedRace, setSelectedRace] = useState<string>(
     defaultRace || skillTrees[0]?.race || ""
   );
+
   const [unlockedSkills, setUnlockedSkills] = useState<string[]>([]);
+
   const [isDMMode, setIsDMMode] = useState<boolean>(true);
+
   const [isTrainingCompleted, setIsTrainingCompleted] =
     useState<boolean>(false);
+
   const [selectedSkillFromLibrary, setSelectedSkillFromLibrary] = useState<
     string | null
   >(null);
@@ -113,9 +119,11 @@ export function useSkillTreePage({
     if (skillsError) {
       console.error("Error loading skills:", skillsError);
     }
+
     if (skillsLoading) {
       console.log("Loading skills...");
     }
+
     if (skillsFromLibrary.length > 0) {
       console.log(`Loaded ${skillsFromLibrary.length} skills from library:`, skillsFromLibrary.map(s => s.name));
     } else if (!skillsLoading && !skillsError) {
@@ -125,6 +133,7 @@ export function useSkillTreePage({
 
   // Рівень гравця (для тесту 25)
   const playerLevel = 25;
+
   const maxSkills = playerLevel;
 
   // Конвертуємо всі дерева в правильний формат
@@ -134,6 +143,7 @@ export function useSkillTreePage({
         if ((st as SkillTree).mainSkills) {
           return st as SkillTree;
         }
+
         return convertPrismaToSkillTree(
           st as {
             id: string;
@@ -151,6 +161,7 @@ export function useSkillTreePage({
   const [editedSkillTree, setEditedSkillTree] = useState<SkillTree | null>(
     null
   );
+
   const [baseSkillTrees, setBaseSkillTrees] =
     useState<SkillTree[]>(convertedTrees);
 
@@ -162,13 +173,16 @@ export function useSkillTreePage({
   // Знаходимо вибране дерево з baseSkillTrees, або створюємо мокове, якщо не знайдено
   const baseSkillTree = useMemo(() => {
     const found = baseSkillTrees.find((st) => st.race === selectedRace);
+
     if (found) {
       return found;
     }
+
     // Якщо дерево не знайдено, створюємо мокове для обраної раси
     if (selectedRace) {
       return createMockSkillTree(campaignId, selectedRace, mainSkills);
     }
+
     return null;
   }, [baseSkillTrees, selectedRace, campaignId, mainSkills]);
 
@@ -209,9 +223,11 @@ export function useSkillTreePage({
   // Функція збереження skill tree
   const handleSave = async () => {
     const treeToSave = editedSkillTree || currentSkillTree;
+
     if (!treeToSave) {
       return;
     }
+
     await saveSkillTree(treeToSave);
   };
 
@@ -221,11 +237,13 @@ export function useSkillTreePage({
 
     if (!treeToClear) {
       alert("Помилка: дерево прокачки не знайдено");
+
       return;
     }
 
     try {
       const clearedTree = clearSkillTree(treeToClear);
+
       setEditedSkillTree(clearedTree);
 
       // Автоматично зберігаємо очищене дерево
@@ -267,12 +285,14 @@ export function useSkillTreePage({
     if (unlockedSkills.includes(skill.id)) {
       // Якщо вивчений - видаляємо
       setUnlockedSkills((prev) => prev.filter((id) => id !== skill.id));
+
       return;
     }
 
     // Перевіряємо чи не перевищено ліміт навиків
     if (unlockedSkills.length >= maxSkills) {
       alert(`Досягнуто максимальну кількість навиків (${maxSkills})`);
+
       return;
     }
 
@@ -285,12 +305,14 @@ export function useSkillTreePage({
     if (unlockedSkills.includes(skill.id)) {
       // Якщо вивчений - видаляємо
       setUnlockedSkills((prev) => prev.filter((id) => id !== skill.id));
+
       return;
     }
 
     // Перевіряємо чи не перевищено ліміт навиків
     if (unlockedSkills.length >= maxSkills) {
       alert(`Досягнуто максимальну кількість навиків (${maxSkills})`);
+
       return;
     }
 
@@ -320,12 +342,14 @@ export function useSkillTreePage({
       setUnlockedSkills((prev) =>
         prev.filter((id) => id !== racialSkillLevelId)
       );
+
       return;
     }
 
     // Перевіряємо чи не перевищено ліміт навиків
     if (unlockedSkills.length >= maxSkills) {
       alert(`Досягнуто максимальну кількість навиків (${maxSkills})`);
+
       return;
     }
 
@@ -336,8 +360,10 @@ export function useSkillTreePage({
   const handleCompleteTraining = () => {
     if (unlockedSkills.length === 0) {
       alert("Спочатку виберіть навики для прокачки");
+
       return;
     }
+
     setIsTrainingCompleted(true);
   };
 
@@ -349,6 +375,7 @@ export function useSkillTreePage({
   }) => {
     if (!selectedSkillFromLibrary) {
       alert("Спочатку виберіть скіл з бібліотеки");
+
       return;
     }
 
@@ -359,11 +386,13 @@ export function useSkillTreePage({
 
     if (!selectedSkill) {
       alert("Помилка: скіл не знайдено в бібліотеці");
+
       return;
     }
 
     if (!currentSkillTree) {
       alert("Помилка: дерево прокачки не знайдено");
+
       return;
     }
 
@@ -378,6 +407,7 @@ export function useSkillTreePage({
 
     // Показуємо нотифікацію про успішне присвоєння
     const isMainSkillLevelOrRacial = slot.circle === 1 && slot.index === 0;
+
     if (isMainSkillLevelOrRacial) {
       alert(
         `Скіл "${selectedSkill.name}" успішно присвоєно до ${

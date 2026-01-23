@@ -3,8 +3,8 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import type { BattleParticipant } from "@/types/battle";
 import { cn } from "@/lib/utils";
+import type { BattleParticipant } from "@/types/battle";
 
 interface ParticipantCardProps {
   participant: BattleParticipant;
@@ -24,7 +24,9 @@ export function ParticipantCard({
   className,
 }: ParticipantCardProps) {
   const isEnemy = participant.side === "enemy";
+
   const showHp = isDM || !isEnemy || canSeeEnemyHp;
+
   const hpPercent = (participant.currentHp / participant.maxHp) * 100;
 
   return (

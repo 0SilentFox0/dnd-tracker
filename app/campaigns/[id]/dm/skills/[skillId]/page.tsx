@@ -1,7 +1,8 @@
+import { notFound,redirect } from "next/navigation";
+
+import { SkillCreateForm } from "@/components/skills/form/SkillCreateForm";
 import { getAuthUser } from "@/lib/auth";
-import { redirect, notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
-import { SkillCreateForm } from "@/components/skills/SkillCreateForm";
 import type { Race } from "@/types/races";
 import type { SkillTriggers } from "@/types/skill-triggers";
 
@@ -11,7 +12,9 @@ export default async function EditSkillPage({
   params: Promise<{ id: string; skillId: string }>;
 }) {
   const { id, skillId } = await params;
+
   const user = await getAuthUser();
+
   const userId = user.id;
 
   const campaign = await prisma.campaign.findUnique({

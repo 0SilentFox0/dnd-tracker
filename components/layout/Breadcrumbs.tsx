@@ -34,9 +34,11 @@ const ID_LABELS_BY_PARENT: Record<string, string> = {
 
 function getLabel(segment: string, previous?: string) {
   if (SEGMENT_LABELS[segment]) return SEGMENT_LABELS[segment];
+
   if (previous && ID_LABELS_BY_PARENT[previous]) {
     return ID_LABELS_BY_PARENT[previous];
   }
+
   return "Деталі";
 }
 
@@ -52,10 +54,12 @@ export function Breadcrumbs() {
   }
 
   const allSegments = pathname.split("/").filter(Boolean);
+
   if (allSegments.length === 0) return null;
 
   // Build crumbs, skipping 'dm' and 'battles' segments but keeping them in hrefs
   const crumbs: Array<{ href: string; label: string; isLast: boolean }> = [];
+
   let previousDisplaySegment: string | undefined;
 
   for (let i = 0; i < allSegments.length; i++) {
@@ -73,6 +77,7 @@ export function Breadcrumbs() {
 
     // Build href using all segments up to this point (including any 'dm' or 'battles' segments)
     const href = `/${allSegments.slice(0, i + 1).join("/")}`;
+
     const label = getLabel(segment, previousDisplaySegment);
 
     crumbs.push({

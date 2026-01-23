@@ -18,6 +18,7 @@ export enum SpellSavingThrowAbility {
 
 // Перевірка що всі значення enum відповідають ABILITY_SCORES
 const enumValues = Object.values(SpellSavingThrowAbility);
+
 if (
   !enumValues.every((val) =>
     ABILITY_KEYS.includes(val as (typeof ABILITY_KEYS)[number])

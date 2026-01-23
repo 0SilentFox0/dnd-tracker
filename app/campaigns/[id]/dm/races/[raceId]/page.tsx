@@ -1,8 +1,9 @@
-import { getAuthUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
+
+import { RaceEditForm } from "@/components/races/RaceEditForm";
+import { getAuthUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import type { Race } from "@/types/races";
-import { RaceEditForm } from "@/components/races/RaceEditForm";
 
 export default async function EditRacePage({
   params,
@@ -10,7 +11,9 @@ export default async function EditRacePage({
   params: Promise<{ id: string; raceId: string }>;
 }) {
   const { id, raceId } = await params;
+
   const user = await getAuthUser();
+
   const userId = user.id;
 
   const campaign = await prisma.campaign.findUnique({

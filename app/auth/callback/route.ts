@@ -1,21 +1,27 @@
-import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+
 import { prisma } from '@/lib/db'
+import { createClient } from '@/lib/supabase/server'
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
+
   const code = requestUrl.searchParams.get('code')
+
   const error = requestUrl.searchParams.get('error')
+
   const origin = requestUrl.origin
 
   // Якщо є помилка від OAuth провайдера
   if (error) {
     console.error('OAuth error:', error)
+
     return NextResponse.redirect(`${origin}/sign-in?error=${encodeURIComponent(error)}`)
   }
 
   if (!code) {
     console.error('No code parameter in callback')
+
     return NextResponse.redirect(`${origin}/sign-in?error=no_code`)
   }
 
@@ -27,6 +33,7 @@ export async function GET(request: Request) {
     
     if (exchangeError) {
       console.error('Error exchanging code for session:', exchangeError)
+
       return NextResponse.redirect(`${origin}/sign-in?error=exchange_failed`)
     }
 
@@ -38,6 +45,7 @@ export async function GET(request: Request) {
 
     if (userError || !user) {
       console.error('Error getting user:', userError)
+
       return NextResponse.redirect(`${origin}/sign-in?error=user_not_found`)
     }
 
@@ -77,6 +85,7 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/campaigns`)
   } catch (error) {
     console.error('Unexpected error in callback:', error)
+
     return NextResponse.redirect(`${origin}/sign-in?error=unexpected`)
   }
 }

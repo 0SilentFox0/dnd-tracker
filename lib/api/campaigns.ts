@@ -25,6 +25,7 @@ export async function updateCampaign(
 
   if (!response.ok) {
     const error = await response.json();
+
     throw new Error(error.error || "Failed to update campaign");
   }
 
@@ -36,9 +37,11 @@ export async function updateCampaign(
  */
 export async function getCampaign(campaignId: string): Promise<Campaign> {
   const response = await fetch(`/api/campaigns/${campaignId}`);
+
   if (!response.ok) {
     throw new Error("Failed to fetch campaign");
   }
+
   return response.json();
 }
 
@@ -49,6 +52,7 @@ export async function getCampaignMembers(
   campaignId: string
 ): Promise<CampaignMember[]> {
   const campaign = await getCampaign(campaignId);
+
   return (
     campaign.members?.map((m) => ({
       id: m.user?.id || m.userId,
@@ -78,6 +82,7 @@ export async function createCampaign(data: {
 
   if (!response.ok) {
     const error = await response.json();
+
     throw new Error(error.error || "Failed to create campaign");
   }
 
@@ -100,15 +105,18 @@ export async function joinCampaign(inviteCode: string): Promise<{
 
   if (!response.ok) {
     const error = await response.json();
+
     const errorMessage = typeof error.error === "string" 
       ? error.error 
       : Array.isArray(error.error) 
         ? error.error.map((e: { message?: string }) => e.message || JSON.stringify(e)).join(", ")
         : "Failed to join campaign";
+
     throw new Error(errorMessage);
   }
 
   const data = await response.json();
+
   // API повертає member з campaign включеним
   return {
     campaign: data.campaign as Campaign,

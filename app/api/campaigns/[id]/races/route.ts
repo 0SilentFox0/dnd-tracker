@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { z } from "zod";
 import { Prisma } from "@prisma/client";
+import { z } from "zod";
+
+import { prisma } from "@/lib/db";
 import { requireDM } from "@/lib/utils/api-auth";
 
 const createRaceSchema = z.object({
@@ -45,6 +46,7 @@ export async function GET(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -61,6 +63,7 @@ export async function GET(
     return NextResponse.json(races);
   } catch (error) {
     console.error("Error fetching races:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -77,11 +80,13 @@ export async function POST(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
 
     const body = await request.json();
+
     const data = createRaceSchema.parse(body);
 
     const race = await prisma.race.create({
@@ -102,12 +107,14 @@ export async function POST(
     return NextResponse.json(race, { status: 201 });
   } catch (error) {
     console.error("Error creating race:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "Validation error", details: error.issues },
         { status: 400 }
       );
     }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

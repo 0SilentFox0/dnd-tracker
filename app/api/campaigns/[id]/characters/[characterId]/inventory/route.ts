@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { z } from "zod";
-import { requireAuth, requireDM, validateCampaignOwnership } from "@/lib/utils/api-auth";
 import { Prisma } from "@prisma/client";
+import { z } from "zod";
+
+import { prisma } from "@/lib/db";
+import { requireAuth, requireDM, validateCampaignOwnership } from "@/lib/utils/api-auth";
 
 const inventoryItemSchema = z.object({
   name: z.string(),
@@ -27,6 +28,7 @@ export async function PATCH(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -39,6 +41,7 @@ export async function PATCH(
     });
 
     const validationError = validateCampaignOwnership(character, id);
+
     if (validationError) {
       return validationError;
     }
@@ -49,18 +52,22 @@ export async function PATCH(
     }
 
     const body = await request.json();
+
     const data = updateInventorySchema.parse(body);
 
     // Конвертуємо дані для Prisma (обробка null значень та типізація JSON)
     const equippedData: Prisma.InputJsonValue = 
       (data.equipped ?? character.inventory?.equipped ?? {}) as Prisma.InputJsonValue;
+
     const backpackData: Prisma.InputJsonValue = 
       (data.backpack ?? character.inventory?.backpack ?? []) as Prisma.InputJsonValue;
+
     const itemsData: Prisma.InputJsonValue = 
       (data.items ?? character.inventory?.items ?? []) as Prisma.InputJsonValue;
 
     // Оновлюємо або створюємо інвентар
     let inventory;
+
     if (character.inventory) {
       inventory = await prisma.characterInventory.update({
         where: { characterId },
@@ -90,9 +97,11 @@ export async function PATCH(
     return NextResponse.json(inventory);
   } catch (error) {
     console.error("Error updating inventory:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -109,11 +118,13 @@ export async function GET(
     
     // Перевіряємо авторизацію
     const authResult = await requireAuth();
+
     if (authResult instanceof NextResponse) {
       return authResult;
     }
 
     const { userId } = authResult;
+
     const character = await prisma.character.findUnique({
       where: { id: characterId },
       include: {
@@ -134,6 +145,7 @@ export async function GET(
 
     // Перевіряємо права доступу
     const isDM = character.campaign.members[0]?.role === "dm";
+
     const isOwner = character.controlledBy === userId;
     
     if (!isDM && !isOwner) {
@@ -153,12 +165,14 @@ export async function GET(
           items: [],
         },
       });
+
       return NextResponse.json(newInventory);
     }
 
     return NextResponse.json(character.inventory);
   } catch (error) {
     console.error("Error fetching inventory:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

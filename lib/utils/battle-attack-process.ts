@@ -3,25 +3,26 @@
  */
 
 import {
-  BattleParticipant,
-  BattleAttack,
-  BattleAction,
-} from "@/types/battle";
-import type { CriticalEffect } from "@/lib/constants/critical-effects";
-import { AttackType } from "./battle-modifiers-common";
-import {
-  calculateAttackRoll,
-  calculateAttackBonus,
   applyCriticalEffect,
+  AttackRollResult,
+  calculateAttackBonus,
+  calculateAttackRoll,
   canPerformReaction,
   performReaction,
-  AttackRollResult,
 } from "./battle-attack";
 import { calculateDamageWithModifiers } from "./battle-damage-calculations";
+import { AttackType } from "./battle-modifiers-common";
 import { applyResistance } from "./battle-resistance";
-import { getPassiveAbilitiesByTrigger, checkTriggerCondition } from "./battle-triggers";
+import { checkTriggerCondition,getPassiveAbilitiesByTrigger } from "./battle-triggers";
 import { getAbilityModifier } from "./calculations";
+
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
+import type { CriticalEffect } from "@/lib/constants/critical-effects";
+import {
+  BattleAction,
+  BattleAttack,
+  BattleParticipant,
+} from "@/types/battle";
 
 /**
  * Параметри для обробки атаки
@@ -76,6 +77,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
   } = params;
 
   let updatedAttacker = { ...attacker };
+
   let updatedTarget = { ...target };
 
   // 1. Розраховуємо Attack Roll
@@ -96,6 +98,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
   // Якщо критичний промах, застосовуємо негативний ефект та завершуємо
   if (attackRoll.isCriticalFail && attackRoll.criticalEffect) {
     const criticalEffectApplied = attackRoll.criticalEffect;
+
     updatedAttacker = applyCriticalEffect(
       updatedAttacker,
       criticalEffectApplied,
@@ -189,6 +192,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   // 3. Розраховуємо урон
   const baseDamage = damageRolls.reduce((sum, roll) => sum + roll, 0);
+
   const statModifier =
     attack.type === "melee"
       ? updatedAttacker.modifiers.strength
@@ -196,6 +200,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   // Перевіряємо пасивки з тригером "on_attack" (до розрахунку урону)
   const onAttackAbilities = getPassiveAbilitiesByTrigger(updatedAttacker, "on_attack");
+
   const additionalDamageModifiers: Array<{ type: string; value: number }> = [];
 
   for (const ability of onAttackAbilities) {
@@ -208,7 +213,9 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
       // Додаємо додаткові модифікатори урону (fire, poison, тощо)
       if (ability.effect.type === "additional_damage") {
         const modifierType = (ability.effect as { damageType?: string }).damageType || "fire";
+
         const modifierValue = ability.effect.value || 0;
+
         additionalDamageModifiers.push({
           type: modifierType,
           value: modifierValue,
@@ -231,6 +238,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   // 4. Застосовуємо критичний ефект (якщо є)
   let criticalEffectApplied: CriticalEffect | undefined;
+
   if (attackRoll.isCritical && attackRoll.criticalEffect) {
     criticalEffectApplied = attackRoll.criticalEffect;
 
@@ -266,6 +274,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   // 6. Застосовуємо опір/імунітет для додаткових модифікаторів урону (fire, poison, тощо)
   let totalAdditionalDamage = 0;
+
   const additionalDamageBreakdown: string[] = [];
 
   for (const additionalDamage of damageCalculation.additionalDamage) {
@@ -274,19 +283,24 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
       additionalDamage.value,
       additionalDamage.type
     );
+
     totalAdditionalDamage += additionalResistance.finalDamage;
     additionalDamageBreakdown.push(...additionalResistance.breakdown);
   }
 
   // 7. Застосовуємо урон до цілі (фізичний + додатковий)
   const oldHp = updatedTarget.currentHp;
+
   const oldTempHp = updatedTarget.tempHp;
+
   const totalFinalDamage = resistanceResult.finalDamage + totalAdditionalDamage;
+
   let remainingDamage = totalFinalDamage;
 
   // Спочатку віднімаємо з tempHp
   if (updatedTarget.tempHp > 0 && remainingDamage > 0) {
     const tempDamage = Math.min(updatedTarget.tempHp, remainingDamage);
+
     updatedTarget.tempHp -= tempDamage;
     remainingDamage -= tempDamage;
   }
@@ -304,6 +318,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   // 8. Перевіряємо пасивки з тригером "on_hit" (після попадання)
   const onHitAbilities = getPassiveAbilitiesByTrigger(updatedAttacker, "on_hit");
+
   for (const ability of onHitAbilities) {
     if (
       checkTriggerCondition(ability.trigger, updatedAttacker, {
@@ -319,7 +334,9 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   // 9. Перевіряємо контр-удар (Reaction)
   let reactionTriggered = false;
+
   let reactionDamage = 0;
+
   let reactionAttackerHpChange: {
     oldHp: number;
     newHp: number;
@@ -329,6 +346,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     canPerformReaction(updatedTarget, updatedAttacker, allParticipants, currentRound)
   ) {
     const reactionResult = performReaction(updatedTarget, updatedAttacker, currentRound);
+
     reactionTriggered = true;
     reactionDamage = reactionResult.damage;
     // Оновлюємо defender (щоб позначити що реакцію використано)
@@ -336,12 +354,15 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     
     // Застосовуємо урон від контр-удару до атакуючого
     const oldAttackerHp = updatedAttacker.currentHp;
+
     const oldAttackerTempHp = updatedAttacker.tempHp;
+
     let remainingReactionDamage = reactionDamage;
 
     // Спочатку віднімаємо з tempHp
     if (updatedAttacker.tempHp > 0 && remainingReactionDamage > 0) {
       const tempDamage = Math.min(updatedAttacker.tempHp, remainingReactionDamage);
+
       updatedAttacker.tempHp -= tempDamage;
       remainingReactionDamage -= tempDamage;
     }

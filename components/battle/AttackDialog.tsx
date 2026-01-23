@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
+
+import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import type { BattleParticipant } from "@/types/battle";
+import { LabeledInput } from "@/components/ui/labeled-input";
+import { SelectField } from "@/components/ui/select-field";
 import type { BattleScene } from "@/types/api";
+import type { BattleParticipant } from "@/types/battle";
 import type { BattleAttack } from "@/types/battle";
 
 interface AttackDialogProps {
@@ -41,9 +43,13 @@ export function AttackDialog({
   onAttack,
 }: AttackDialogProps) {
   const [selectedAttack, setSelectedAttack] = useState<BattleAttack | null>(null);
+
   const [selectedTarget, setSelectedTarget] = useState<BattleParticipant | null>(null);
+
   const [attackRoll, setAttackRoll] = useState("");
+
   const [advantageRoll, setAdvantageRoll] = useState("");
+
   const [damageRolls, setDamageRolls] = useState<string[]>([]);
 
   // Визначаємо чи потрібен Advantage (ельфи з ranged зброєю)
@@ -52,7 +58,9 @@ export function AttackDialog({
   // Парсимо damageDice для визначення кількості кубиків
   const parseDamageDice = (dice: string): { count: number; type: number; modifier?: number } => {
     const match = dice.match(/(\d+)d(\d+)([+-]\d+)?/);
+
     if (!match) return { count: 1, type: 6 };
+
     return {
       count: parseInt(match[1]) || 1,
       type: parseInt(match[2]) || 6,
@@ -93,6 +101,7 @@ export function AttackDialog({
       setAdvantageRoll("");
       setDamageRolls([]);
     }
+
     onOpenChange(open);
   };
 
@@ -116,57 +125,42 @@ export function AttackDialog({
           {availableAttacks.length > 0 && (
             <div>
               <Label>Зброя</Label>
-              <Select
-                value={selectedAttack?.id || selectedAttack?.name}
+              <SelectField
+                value={selectedAttack?.id || selectedAttack?.name || ""}
                 onValueChange={(value) => {
                   const attack = availableAttacks.find(
                     a => a.id === value || a.name === value
                   );
+
                   setSelectedAttack(attack || null);
                 }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Оберіть зброю" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableAttacks.map((attack) => (
-                    <SelectItem key={attack.id || attack.name} value={attack.id || attack.name}>
-                      {attack.name} ({attack.type}) - {attack.damageDice} {attack.damageType}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                placeholder="Оберіть зброю"
+                options={availableAttacks.map(attack => ({
+                  value: attack.id || attack.name,
+                  label: `${attack.name} (${attack.type}) - ${attack.damageDice} ${attack.damageType}`,
+                }))}
+              />
             </div>
           )}
 
           {/* Вибір цілі */}
           <div>
             <Label>Ціль</Label>
-            <Select
-              value={selectedTarget?.id}
+            <SelectField
+              value={selectedTarget?.id || ""}
               onValueChange={(value) => {
                 const target = battle.initiativeOrder.find(
                   p => p.id === value
                 );
+
                 setSelectedTarget(target || null);
               }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Оберіть ціль" />
-              </SelectTrigger>
-              <SelectContent>
-                {availableTargets.map((target) => (
-                  <SelectItem key={target.id} value={target.id}>
-                    {target.name}
-                    {(isDM || canSeeEnemyHp || target.side === "ally") && (
-                      <span className="text-muted-foreground ml-2">
-                        (HP: {target.currentHp}/{target.maxHp})
-                      </span>
-                    )}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              placeholder="Оберіть ціль"
+              options={availableTargets.map(target => ({
+                value: target.id,
+                label: `${target.name}${(isDM || canSeeEnemyHp || target.side === "ally") ? ` (HP: ${target.currentHp}/${target.maxHp})` : ""}`,
+              }))}
+            />
           </div>
 
           {/* AC цілі */}
@@ -223,6 +217,7 @@ export function AttackDialog({
                     value={damageRolls[index] || ""}
                     onChange={(e) => {
                       const newRolls = [...damageRolls];
+
                       newRolls[index] = e.target.value;
                       setDamageRolls(newRolls);
                     }}

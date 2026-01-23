@@ -1,18 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Accordion } from "@/components/ui/accordion";
-import { useSkills } from "@/lib/hooks/useSkills";
-import { useMainSkills } from "@/lib/hooks/useMainSkills";
-import type { Skill } from "@/types/skills";
-import type { Race } from "@/types/races";
-import {
-  groupSkillsByMainSkill,
-  convertGroupedSkillsToArray,
-} from "@/lib/utils/skills";
-import { SkillGroupAccordion } from "@/components/skills/SkillGroupAccordion";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+
+import { SkillGroupAccordion } from "@/components/skills/list/SkillGroupAccordion";
+import { Accordion } from "@/components/ui/accordion";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,7 +16,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { useMainSkills } from "@/lib/hooks/useMainSkills";
+import { useSkills } from "@/lib/hooks/useSkills";
+import {
+  convertGroupedSkillsToArray,
+  groupSkillsByMainSkill,
+} from "@/lib/utils/skills";
+import type { Race } from "@/types/races";
+import type { Skill } from "@/types/skills";
 
 interface DMSkillsPageClientProps {
   campaignId: string;
@@ -37,7 +38,9 @@ export function DMSkillsPageClient({
   initialRaces,
 }: DMSkillsPageClientProps) {
   const router = useRouter();
+
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Запити для скілів та основних навиків
@@ -45,11 +48,13 @@ export function DMSkillsPageClient({
     campaignId,
     initialSkills
   );
+
   const { data: mainSkills = [] } = useMainSkills(campaignId);
 
   // Групуємо скіли по основним навикам
   const groupedSkills = useMemo(() => {
     const groupedSkillsMap = groupSkillsByMainSkill(skills, mainSkills);
+
     return convertGroupedSkillsToArray(groupedSkillsMap);
   }, [skills, mainSkills]);
 

@@ -1,15 +1,15 @@
 import {
-  Moon,
+  ArrowDown,
+  ArrowUp,
+  Circle,
+  Crosshair,
   Flame,
+  Heart,
+  LucideIcon,
+  Moon,
   Sparkles,
   Sun,
-  LucideIcon,
-  Crosshair,
-  Circle,
   Sword,
-  Heart,
-  ArrowUp,
-  ArrowDown,
 } from "lucide-react";
 
 export function getSpellGroupIcon(groupName: string): LucideIcon {
@@ -19,6 +19,7 @@ export function getSpellGroupIcon(groupName: string): LucideIcon {
     Summ: Sparkles,
     Light: Sun,
   };
+
   return iconMap[groupName] || Sparkles;
 }
 
@@ -27,6 +28,7 @@ export function getSpellTypeIcon(type: string): LucideIcon {
     target: Crosshair,
     aoe: Circle,
   };
+
   return iconMap[type] || Crosshair;
 }
 
@@ -37,5 +39,6 @@ export function getSpellDamageTypeIcon(damageType: string): LucideIcon {
     buff: ArrowUp,
     debuff: ArrowDown,
   };
+
   return iconMap[damageType] || Sword;
 }

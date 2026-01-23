@@ -1,4 +1,7 @@
-import { prisma } from "@/lib/db";
+import Link from "next/link";
+
+import { JoinCampaignDialog } from "@/components/campaigns/join/JoinCampaignDialog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -7,13 +10,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
 import { getAuthUser } from "@/lib/auth";
-import { JoinCampaignDialog } from "@/components/campaigns/JoinCampaignDialog";
+import { prisma } from "@/lib/db";
 
 export default async function CampaignsPage() {
   const user = await getAuthUser();
+
   const userId = user.id;
 
   // Отримуємо кампанії де юзер є учасником
@@ -32,6 +34,7 @@ export default async function CampaignsPage() {
   >;
 
   let campaigns: CampaignWithMembers = [];
+
   try {
     campaigns = await prisma.campaign.findMany({
       where: {
@@ -55,8 +58,10 @@ export default async function CampaignsPage() {
     });
   } catch (error: unknown) {
     console.error("Error fetching campaigns:", error);
+
     // Якщо помилка підключення до бази - показуємо повідомлення
     const prismaError = error as { code?: string; message?: string };
+
     if (
       prismaError?.code === "P1001" ||
       prismaError?.message?.includes("Can't reach database")
@@ -84,11 +89,13 @@ export default async function CampaignsPage() {
         </div>
       );
     }
+
     throw error; // Якщо інша помилка - пробрасываем далі
   }
 
   // Перевіряємо чи є активні бої
   let activeBattles: Array<{ id: string; campaignId: string }> = [];
+
   try {
     activeBattles = await prisma.battleScene.findMany({
       where: {
@@ -157,6 +164,7 @@ export default async function CampaignsPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {campaigns.map((campaign) => {
           const userMember = campaign.members.find((m) => m.userId === userId);
+
           const isDM = userMember?.role === "dm";
 
           return (

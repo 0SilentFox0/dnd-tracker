@@ -1,9 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import * as fs from "fs";
 import * as path from "path";
-import type { CSVUnitRow, ImportUnit } from "../types/import";
-import { convertCSVRowToUnit } from "../lib/utils/unit-parsing";
+
 import { DEFAULT_CAMPAIGN_ID } from "../lib/constants/campaigns";
+import { convertCSVRowToUnit } from "../lib/utils/unit-parsing";
+import type { CSVUnitRow, ImportUnit } from "../types/import";
 
 const prisma = new PrismaClient();
 
@@ -12,6 +13,7 @@ async function main() {
 
   // Використовуємо дефолтні значення якщо не вказано
   const csvFilePath = args[0] || "imports/units-import.csv";
+
   const campaignId = args[1] || DEFAULT_CAMPAIGN_ID;
 
   console.log(`Використання файлу: ${csvFilePath}`);
@@ -31,12 +33,14 @@ async function main() {
 
   // Читаємо CSV файл
   const filePath = path.resolve(process.cwd(), csvFilePath);
+
   if (!fs.existsSync(filePath)) {
     console.error(`Файл ${filePath} не знайдено`);
     process.exit(1);
   }
 
   const fileContent = fs.readFileSync(filePath, "utf-8");
+
   const lines = fileContent.split("\n").filter((line) => line.trim());
 
   if (lines.length === 0) {
@@ -47,11 +51,14 @@ async function main() {
   // Простий CSV парсер для Node.js з правильним обробленням лапок та крапкою з комою як роздільником
   const parseCSVLine = (line: string): string[] => {
     const result: string[] = [];
+
     let current = "";
+
     let inQuotes = false;
 
     for (let i = 0; i < line.length; i++) {
       const char = line[i];
+
       const nextChar = i < line.length - 1 ? line[i + 1] : null;
 
       if (char === '"') {
@@ -74,11 +81,13 @@ async function main() {
     }
     // Додаємо останнє поле
     result.push(current.trim());
+
     return result;
   };
 
   // Парсимо заголовки
   const headers = parseCSVLine(lines[0]);
+
   const csvRows: CSVUnitRow[] = [];
 
   for (let i = 1; i < lines.length; i++) {
@@ -86,7 +95,9 @@ async function main() {
 
     if (values.length > headers.length) {
       const lastIndex = headers.length - 1;
+
       const extraValues = values.slice(lastIndex);
+
       values.splice(
         lastIndex,
         values.length - lastIndex,
@@ -101,11 +112,14 @@ async function main() {
     }
 
     const row = {} as CSVUnitRow;
+
     headers.forEach((header, index) => {
       let value = values[index] || "";
+
       if (value.startsWith('"') && value.endsWith('"')) {
         value = value.slice(1, -1);
       }
+
       row[header] = value;
     });
 
@@ -129,6 +143,7 @@ async function main() {
     // Беремо групу напряму з CSV рядка - це остання колонка
     // Перевіряємо різні варіанти назв колонки
     const rawGroup = (row.Група || row.group || row.Group || "").trim();
+
     const { unit, groupName } = convertCSVRowToUnit(row);
 
     // Використовуємо rawGroup якщо він є, інакше groupName з парсера
@@ -146,10 +161,12 @@ async function main() {
 
   // Створюємо або отримуємо групи юнітів
   const unitGroups: Record<string, string> = {};
+
   const uniqueGroupNames = new Set<string>();
 
   for (const unit of unitsWithGroups) {
     const groupName = unit.groupName;
+
     if (groupName) {
       uniqueGroupNames.add(groupName.trim());
     }
@@ -163,6 +180,7 @@ async function main() {
     const existing = await prisma.unitGroup.findFirst({
       where: { campaignId, name: groupName },
     });
+
     if (existing) {
       unitGroups[groupName] = existing.id;
       console.log(`  Група "${groupName}" вже існує`);
@@ -177,12 +195,15 @@ async function main() {
         "#8b5cf6", // purple
         "#ec4899", // pink
       ];
+
       const colorIndex = Array.from(uniqueGroupNames).indexOf(groupName);
+
       const color = colors[colorIndex % colors.length];
 
       const group = await prisma.unitGroup.create({
         data: { campaignId, name: groupName, color },
       });
+
       unitGroups[groupName] = group.id;
       console.log(`  Створено групу "${groupName}" з кольором ${color}`);
     }
@@ -202,12 +223,14 @@ async function main() {
   });
 
   const existingNamesSet = new Set(existingUnitNames.map((u) => u.name));
+
   const unitsToCreate = unitsWithGroups.filter(
     (unit) => !existingNamesSet.has(unit.name)
   );
 
   if (unitsToCreate.length === 0) {
     console.log("Всі юніти вже існують в кампанії");
+
     return;
   }
 
@@ -219,10 +242,12 @@ async function main() {
 
   // Отримуємо кольори груп один раз
   const groupColors: Record<string, string> = {};
+
   for (const [groupName, groupId] of Object.entries(unitGroups)) {
     const group = await prisma.unitGroup.findUnique({
       where: { id: groupId },
     });
+
     if (group) {
       groupColors[groupName] = group.color;
     }
@@ -231,7 +256,9 @@ async function main() {
   // Підготовлюємо дані для масового створення
   const unitsData = unitsToCreate.map((unit) => {
     const groupName = unit.groupName;
+
     const groupId = groupName ? unitGroups[groupName] : undefined;
+
     const groupColor = groupName ? groupColors[groupName] || null : null;
 
     return {

@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
-import { BattleParticipant, BattleAction } from "@/types/battle";
 import { Prisma } from "@prisma/client";
+import { z } from "zod";
+
+import { prisma } from "@/lib/db";
+import { createClient } from "@/lib/supabase/server";
 import { checkMorale } from "@/lib/utils/battle-morale";
+import { BattleAction,BattleParticipant } from "@/types/battle";
 
 const moraleCheckSchema = z.object({
   participantId: z.string(), // ID BattleParticipant з initiativeOrder
@@ -17,7 +18,9 @@ export async function POST(
 ) {
   try {
     const { id, battleId } = await params;
+
     const supabase = await createClient();
+
     const {
       data: { user: authUser },
     } = await supabase.auth.getUser();
@@ -27,6 +30,7 @@ export async function POST(
     }
 
     const userId = authUser.id;
+
     // Перевіряємо права DM
     const campaign = await prisma.campaign.findUnique({
       where: { id },
@@ -57,10 +61,12 @@ export async function POST(
     }
 
     const body = await request.json();
+
     const data = moraleCheckSchema.parse(body);
 
     // Отримуємо учасників з initiativeOrder
     const initiativeOrder = battle.initiativeOrder as unknown as BattleParticipant[];
+
     const participant = initiativeOrder.find((p) => p.id === data.participantId);
 
     if (!participant) {
@@ -86,6 +92,7 @@ export async function POST(
 
     // Створюємо BattleAction для логу
     const battleLog = (battle.battleLog as unknown as BattleAction[]) || [];
+
     const battleAction: BattleAction = {
       id: `morale-${participant.id}-${Date.now()}`,
       battleId,
@@ -121,6 +128,7 @@ export async function POST(
     // Відправляємо real-time оновлення через Pusher
     if (process.env.PUSHER_APP_ID) {
       const { pusherServer } = await import("@/lib/pusher");
+
       await pusherServer.trigger(
         `battle-${battleId}`,
         "battle-updated",
@@ -134,9 +142,11 @@ export async function POST(
     });
   } catch (error) {
     console.error("Error processing morale check:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

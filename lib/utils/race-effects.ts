@@ -2,9 +2,9 @@
  * Утиліти для роботи з ефектами рас
  */
 
+import { COMMON_IMMUNITIES, IMMUNITY_PATTERNS } from "@/lib/constants/immunities";
 import type { Race } from "@/types/races";
 import type { Unit } from "@/types/units";
-import { COMMON_IMMUNITIES, IMMUNITY_PATTERNS } from "@/lib/constants/immunities";
 
 // Тип для Race з Prisma (JSON поля)
 type RaceFromPrisma = Omit<Race, "availableSkills" | "disabledSkills" | "spellSlotProgression" | "passiveAbility"> & {
@@ -21,6 +21,7 @@ export function extractRaceImmunities(race: Race | RaceFromPrisma | null | undef
   if (!race?.passiveAbility) return [];
 
   const passiveAbility = race.passiveAbility;
+
   const description =
     typeof passiveAbility === "string"
       ? passiveAbility
@@ -31,6 +32,7 @@ export function extractRaceImmunities(race: Race | RaceFromPrisma | null | undef
   if (!description) return [];
 
   const immunities: string[] = [];
+
   const descriptionLower = description.toLowerCase();
 
   // Перевіряємо загальні імунітети з констант
@@ -48,9 +50,11 @@ export function extractRaceImmunities(race: Race | RaceFromPrisma | null | undef
   // Шукаємо фрази типу "імунітет до X" за допомогою патернів
   for (const pattern of IMMUNITY_PATTERNS) {
     const matches = description.matchAll(pattern);
+
     for (const match of matches) {
       if (match[1]) {
         const immunity = match[1].trim();
+
         if (immunity && !immunities.includes(immunity)) {
           immunities.push(immunity);
         }
@@ -71,10 +75,12 @@ export function getUnitImmunities(
   const unitImmunities = Array.isArray(unit.immunities)
     ? unit.immunities
     : [];
+
   const raceImmunities = extractRaceImmunities(race);
 
   // Об'єднуємо та видаляємо дублікати
   const allImmunities = [...unitImmunities, ...raceImmunities];
+
   return Array.from(new Set(allImmunities.map((i) => i.toLowerCase().trim())))
     .map((i) => {
       // Знаходимо оригінальну назву (з правильним регістром)
@@ -99,6 +105,7 @@ export function extractRaceDamageModifiers(
   if (!race?.passiveAbility) return [];
 
   const passiveAbility = race.passiveAbility;
+
   const description =
     typeof passiveAbility === "string"
       ? passiveAbility
@@ -109,6 +116,7 @@ export function extractRaceDamageModifiers(
   if (!description) return [];
 
   const modifiers: string[] = [];
+
   const descriptionLower = description.toLowerCase();
 
   // Шукаємо фрази типу "модифікатор атаки - X"
@@ -120,9 +128,11 @@ export function extractRaceDamageModifiers(
 
   for (const pattern of modifierPatterns) {
     const matches = description.matchAll(pattern);
+
     for (const match of matches) {
       if (match[1]) {
         const modifier = match[1].trim();
+
         if (modifier && !modifiers.includes(modifier)) {
           modifiers.push(modifier);
         }
@@ -141,6 +151,7 @@ export function getUnitDamageModifiers(
   race: Race | null | undefined
 ): string[] {
   const unitModifiers: string[] = [];
+
   if (unit.damageModifier) {
     unitModifiers.push(unit.damageModifier);
   }
@@ -149,6 +160,7 @@ export function getUnitDamageModifiers(
 
   // Об'єднуємо та видаляємо дублікати
   const allModifiers = [...unitModifiers, ...raceModifiers];
+
   return Array.from(
     new Set(allModifiers.map((m) => m.toLowerCase().trim()))
   ).map((m) => {

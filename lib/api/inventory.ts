@@ -2,7 +2,7 @@
  * API сервіс для роботи з інвентарем персонажа
  */
 
-import { InventoryFormData, InventoryItem, EquippedItems } from "@/types/inventory";
+import { EquippedItems,InventoryFormData, InventoryItem } from "@/types/inventory";
 
 export interface Inventory {
   id: string;
@@ -26,9 +26,11 @@ export async function getInventory(
   const response = await fetch(
     `/api/campaigns/${campaignId}/characters/${characterId}/inventory`
   );
+
   if (!response.ok) {
     throw new Error("Failed to fetch inventory");
   }
+
   return response.json();
 }
 
@@ -53,6 +55,7 @@ export async function updateInventory(
 
   if (!response.ok) {
     const error = await response.json();
+
     throw new Error(error.error || "Failed to update inventory");
   }
 

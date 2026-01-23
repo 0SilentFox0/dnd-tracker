@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { requireDM, requireCampaignAccess } from "@/lib/utils/api-auth";
 import { z } from "zod";
+
+import { prisma } from "@/lib/db";
+import { requireCampaignAccess,requireDM } from "@/lib/utils/api-auth";
 
 const createGroupSchema = z.object({
   name: z.string().min(1).max(100),
@@ -20,6 +21,7 @@ export async function GET(
     
     // Перевіряємо доступ до кампанії (не обов'язково DM)
     const accessResult = await requireCampaignAccess(id, false);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -36,6 +38,7 @@ export async function GET(
     return NextResponse.json(groups);
   } catch (error) {
     console.error("Error fetching unit groups:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -52,16 +55,19 @@ export async function POST(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
 
     const body = await request.json();
+
     const data = createGroupSchema.parse(body);
 
     const existing = await prisma.unitGroup.findFirst({
       where: { campaignId: id, name: data.name.trim() },
     });
+
     if (existing) {
       return NextResponse.json(
         { error: "Group already exists" },
@@ -72,6 +78,7 @@ export async function POST(
     const groupCount = await prisma.unitGroup.count({
       where: { campaignId: id },
     });
+
     const colors = [
       "#ef4444", // red
       "#f97316", // orange
@@ -81,6 +88,7 @@ export async function POST(
       "#8b5cf6", // purple
       "#ec4899", // pink
     ];
+
     const color = colors[groupCount % colors.length];
 
     const group = await prisma.unitGroup.create({
@@ -95,9 +103,11 @@ export async function POST(
     return NextResponse.json(group);
   } catch (error) {
     console.error("Error creating unit group:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

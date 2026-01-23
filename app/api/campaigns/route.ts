@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
 import { z } from "zod";
+
+import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/utils/api-auth";
 
 const createCampaignSchema = z.object({
@@ -20,12 +21,15 @@ export async function POST(request: Request) {
   try {
     // Перевіряємо авторизацію
     const authResult = await requireAuth();
+
     if (authResult instanceof NextResponse) {
       return authResult;
     }
 
     const { userId, authUser } = authResult;
+
     const body = await request.json();
+
     const data = createCampaignSchema.parse(body);
 
     // Перевіряємо чи юзер існує в базі, якщо ні - створюємо
@@ -69,9 +73,11 @@ export async function POST(request: Request) {
     return NextResponse.json(campaign);
   } catch (error) {
     console.error("Error creating campaign:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -83,6 +89,7 @@ export async function GET(request: Request) {
   try {
     // Перевіряємо авторизацію
     const authResult = await requireAuth();
+
     if (authResult instanceof NextResponse) {
       return authResult;
     }
@@ -112,6 +119,7 @@ export async function GET(request: Request) {
     return NextResponse.json(campaigns);
   } catch (error) {
     console.error("Error fetching campaigns:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

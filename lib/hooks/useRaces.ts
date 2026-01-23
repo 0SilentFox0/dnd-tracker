@@ -1,4 +1,5 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import type { Race, RaceFormData } from "@/types/races";
 
 export function useRaces(campaignId: string, initialRaces: Race[] = []) {
@@ -6,9 +7,11 @@ export function useRaces(campaignId: string, initialRaces: Race[] = []) {
     queryKey: ["races", campaignId],
     queryFn: async () => {
       const response = await fetch(`/api/campaigns/${campaignId}/races`);
+
       if (!response.ok) {
         throw new Error("Failed to fetch races");
       }
+
       return response.json();
     },
     initialData: initialRaces,
@@ -30,6 +33,7 @@ export function useCreateRace(campaignId: string) {
 
       if (!response.ok) {
         const error = await response.json();
+
         throw new Error(error.error || "Failed to create race");
       }
 
@@ -65,6 +69,7 @@ export function useUpdateRace(campaignId: string) {
 
       if (!response.ok) {
         const error = await response.json();
+
         throw new Error(error.error || "Failed to update race");
       }
 
@@ -90,6 +95,7 @@ export function useDeleteRace(campaignId: string) {
 
       if (!response.ok) {
         const error = await response.json();
+
         throw new Error(error.error || "Failed to delete race");
       }
 

@@ -1,6 +1,8 @@
-import { getAuthUser } from "@/lib/auth";
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/db";
+
+import { OptimizedImage } from "@/components/common/OptimizedImage";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,9 +11,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
-import { OptimizedImage } from "@/components/common/OptimizedImage";
+import { getAuthUser } from "@/lib/auth";
+import { prisma } from "@/lib/db";
 
 function formatSetBonus(setBonus: unknown): { title?: string; description: string } | null {
   if (!setBonus) return null;
@@ -22,7 +23,9 @@ function formatSetBonus(setBonus: unknown): { title?: string; description: strin
 
   if (typeof setBonus === "object") {
     const value = setBonus as { name?: string; description?: string; effect?: string };
+
     const description = value.description || value.effect || JSON.stringify(setBonus);
+
     return {
       title: value.name,
       description,
@@ -34,14 +37,19 @@ function formatSetBonus(setBonus: unknown): { title?: string; description: strin
 
 function formatPassiveAbility(passiveAbility: unknown): { title?: string; description: string } | null {
   if (!passiveAbility) return null;
+
   if (typeof passiveAbility === "string") {
     return { description: passiveAbility };
   }
+
   if (typeof passiveAbility === "object") {
     const value = passiveAbility as { name?: string; description?: string };
+
     const description = value.description || JSON.stringify(passiveAbility);
+
     return { title: value.name, description };
   }
+
   return { description: String(passiveAbility) };
 }
 
@@ -51,7 +59,9 @@ export default async function DMArtifactsPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+
   const user = await getAuthUser();
+
   const userId = user.id;
 
   const campaign = await prisma.campaign.findUnique({
@@ -121,6 +131,7 @@ export default async function DMArtifactsPage({
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {artifactSets.map((set) => {
               const setBonus = formatSetBonus(set.setBonus);
+
               return (
                 <Card key={set.id} className="hover:shadow-lg transition-shadow">
                   <CardHeader>
@@ -153,6 +164,7 @@ export default async function DMArtifactsPage({
                         const passive = formatPassiveAbility(
                           artifact.passiveAbility
                         );
+
                         return (
                           <div
                             key={artifact.id}
@@ -231,6 +243,7 @@ export default async function DMArtifactsPage({
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {ungroupedArtifacts.map((artifact) => {
             const passive = formatPassiveAbility(artifact.passiveAbility);
+
             return (
             <Card
               key={artifact.id}

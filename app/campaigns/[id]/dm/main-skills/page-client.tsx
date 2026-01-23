@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useMainSkills, useDeleteMainSkill } from "@/lib/hooks/useMainSkills";
-import type { MainSkill } from "@/types/main-skills";
-import { MainSkillsPageHeader } from "@/components/main-skills/MainSkillsPageHeader";
-import { MainSkillCard } from "@/components/main-skills/MainSkillCard";
+
 import { CreateMainSkillDialog } from "@/components/main-skills/CreateMainSkillDialog";
+import { MainSkillCard } from "@/components/main-skills/MainSkillCard";
+import { MainSkillsPageHeader } from "@/components/main-skills/MainSkillsPageHeader";
+import { useDeleteMainSkill,useMainSkills } from "@/lib/hooks/useMainSkills";
+import type { MainSkill } from "@/types/main-skills";
 
 interface DMMainSkillsPageClientProps {
   campaignId: string;
@@ -18,7 +19,9 @@ export function DMMainSkillsPageClient({
   initialMainSkills,
 }: DMMainSkillsPageClientProps) {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+
   const { data: mainSkills = initialMainSkills } = useMainSkills(campaignId);
+
   const deleteMainSkillMutation = useDeleteMainSkill(campaignId);
 
   const handleDelete = async (mainSkillId: string) => {

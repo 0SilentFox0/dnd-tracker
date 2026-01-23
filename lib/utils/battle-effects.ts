@@ -13,11 +13,13 @@ export function applyDOTEffects(
   participant: BattleParticipant
 ): { newHp: number; damageMessages: string[] } {
   let currentHp = participant.currentHp;
+
   const damageMessages: string[] = [];
 
   for (const effect of participant.activeEffects) {
     if (effect.dotDamage) {
       const { damagePerRound, damageType } = effect.dotDamage;
+
       currentHp = Math.max(0, currentHp - damagePerRound);
       damageMessages.push(
         `${participant.name} отримав ${damagePerRound} ${damageType} урону від ${effect.name}`
@@ -44,6 +46,7 @@ export function decreaseEffectDurations(
   expiredEffects: string[];
 } {
   const updatedEffects: ActiveEffect[] = [];
+
   const expiredEffects: string[] = [];
 
   for (const effect of participant.activeEffects) {

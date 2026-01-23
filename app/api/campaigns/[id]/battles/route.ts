@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
 import { z } from "zod";
+
+import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 
 const createBattleSchema = z.object({
@@ -20,7 +21,9 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
+
     const supabase = await createClient();
+
     const {
       data: { user: authUser },
     } = await supabase.auth.getUser();
@@ -30,6 +33,7 @@ export async function POST(
     }
 
     const userId = authUser.id;
+
     // Перевіряємо права DM
     const campaign = await prisma.campaign.findUnique({
       where: { id },
@@ -45,6 +49,7 @@ export async function POST(
     }
 
     const body = await request.json();
+
     const data = createBattleSchema.parse(body);
 
     // Створюємо сцену бою
@@ -65,9 +70,11 @@ export async function POST(
     return NextResponse.json(battle);
   } catch (error) {
     console.error("Error creating battle:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -81,7 +88,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+
     const supabase = await createClient();
+
     const {
       data: { user: authUser },
     } = await supabase.auth.getUser();
@@ -91,6 +100,7 @@ export async function GET(
     }
 
     const userId = authUser.id;
+
     // Перевіряємо чи юзер є учасником кампанії
     const campaign = await prisma.campaign.findUnique({
       where: { id },
@@ -117,6 +127,7 @@ export async function GET(
     return NextResponse.json(battles);
   } catch (error) {
     console.error("Error fetching battles:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -130,7 +141,9 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
+
     const supabase = await createClient();
+
     const {
       data: { user: authUser },
     } = await supabase.auth.getUser();
@@ -140,6 +153,7 @@ export async function DELETE(
     }
 
     const userId = authUser.id;
+
     // Перевіряємо права DM
     const campaign = await prisma.campaign.findUnique({
       where: { id },
@@ -167,6 +181,7 @@ export async function DELETE(
     });
   } catch (error) {
     console.error("Error deleting all battles:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

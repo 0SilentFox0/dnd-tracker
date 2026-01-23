@@ -2,8 +2,8 @@
  * Допоміжні функції для роботи з BattleParticipant
  */
 
-import { BattleParticipant } from "@/types/battle";
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
+import { BattleParticipant } from "@/types/battle";
 
 /**
  * Отримує всіх союзників учасника
@@ -31,6 +31,7 @@ export function hasLowHp(
   thresholdPercent: number = BATTLE_CONSTANTS.DEFAULT_LOW_HP_THRESHOLD_PERCENT
 ): boolean {
   const hpPercentage = (ally.currentHp / ally.maxHp) * 100;
+
   return hpPercentage <= thresholdPercent;
 }
 
@@ -47,5 +48,6 @@ export function hasAnyAllyLowHp(
   thresholdPercent: number = BATTLE_CONSTANTS.DEFAULT_LOW_HP_THRESHOLD_PERCENT
 ): boolean {
   const allies = getAllies(participant, allParticipants);
+
   return allies.some((ally) => hasLowHp(ally, thresholdPercent));
 }

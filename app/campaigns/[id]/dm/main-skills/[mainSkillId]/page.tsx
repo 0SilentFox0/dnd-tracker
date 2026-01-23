@@ -1,7 +1,8 @@
-import { getAuthUser } from "@/lib/auth";
-import { redirect, notFound } from "next/navigation";
-import { prisma } from "@/lib/db";
+import { notFound,redirect } from "next/navigation";
+
 import { MainSkillEditForm } from "@/components/main-skills/MainSkillEditForm";
+import { getAuthUser } from "@/lib/auth";
+import { prisma } from "@/lib/db";
 
 export default async function EditMainSkillPage({
   params,
@@ -9,7 +10,9 @@ export default async function EditMainSkillPage({
   params: Promise<{ id: string; mainSkillId: string }>;
 }) {
   const { id, mainSkillId } = await params;
+
   const user = await getAuthUser();
+
   const userId = user.id;
 
   const campaign = await prisma.campaign.findUnique({

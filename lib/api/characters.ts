@@ -2,7 +2,8 @@
  * API сервіс для роботи з персонажами
  */
 
-import type { CharacterFormData, Character } from "@/types/characters";
+import { formDataToCharacter } from "@/lib/utils/character-form";
+import type { Character,CharacterFormData } from "@/types/characters";
 
 /**
  * Отримує персонажа за ID
@@ -12,9 +13,11 @@ export async function getCharacter(
   characterId: string
 ): Promise<Character> {
   const response = await fetch(`/api/campaigns/${campaignId}/characters/${characterId}`);
+
   if (!response.ok) {
     throw new Error("Failed to fetch character");
   }
+
   return response.json();
 }
 
@@ -23,9 +26,11 @@ export async function getCharacter(
  */
 export async function getCharacters(campaignId: string): Promise<Character[]> {
   const response = await fetch(`/api/campaigns/${campaignId}/characters`);
+
   if (!response.ok) {
     throw new Error("Failed to fetch characters");
   }
+
   return response.json();
 }
 
@@ -36,16 +41,19 @@ export async function createCharacter(
   campaignId: string,
   data: CharacterFormData
 ): Promise<Character> {
+  const flatData = formDataToCharacter(data);
+
   const response = await fetch(`/api/campaigns/${campaignId}/characters`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify(flatData),
   });
 
   if (!response.ok) {
     const error = await response.json();
+
     throw new Error(error.error || "Failed to create character");
   }
 
@@ -60,16 +68,23 @@ export async function updateCharacter(
   characterId: string,
   data: Partial<CharacterFormData>
 ): Promise<Character> {
+  // Якщо це повна CharacterFormData, конвертуємо в плоску структуру
+  // Якщо це Partial<CharacterFormData>, конвертуємо тільки заповнені групи
+  const flatData = "basicInfo" in data && data.basicInfo
+    ? formDataToCharacter(data as CharacterFormData)
+    : data;
+
   const response = await fetch(`/api/campaigns/${campaignId}/characters/${characterId}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify(flatData),
   });
 
   if (!response.ok) {
     const error = await response.json();
+
     throw new Error(error.error || "Failed to update character");
   }
 
@@ -89,6 +104,7 @@ export async function deleteCharacter(
 
   if (!response.ok) {
     const error = await response.json();
+
     throw new Error(error.error || "Failed to delete character");
   }
 }

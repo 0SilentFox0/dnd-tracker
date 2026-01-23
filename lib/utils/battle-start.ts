@@ -2,10 +2,11 @@
  * Утиліти для старту бою
  */
 
-import { BattleParticipant, ActiveEffect } from "@/types/battle";
 import { addActiveEffect } from "./battle-effects";
-import { getPassiveAbilitiesByTrigger, checkTriggerCondition } from "./battle-triggers";
+import { checkTriggerCondition,getPassiveAbilitiesByTrigger } from "./battle-triggers";
+
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
+import { ActiveEffect,BattleParticipant } from "@/types/battle";
 
 /**
  * Застосовує початкові ефекти з артефактів та пасивних здібностей
@@ -21,6 +22,7 @@ export function applyStartOfBattleEffects(
   allParticipants: BattleParticipant[]
 ): BattleParticipant {
   let updatedParticipant = { ...participant };
+
   const appliedEffects: ActiveEffect[] = [];
 
   // Перевіряємо пасивні здібності з тригером "start_of_battle"

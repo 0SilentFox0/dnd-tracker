@@ -1,9 +1,11 @@
-import { getAuthUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/db";
-import { DMUnitsPageClient } from "./page-client";
-import type { Unit } from "@/types/units";
 import { Prisma } from "@prisma/client";
+
+import { DMUnitsPageClient } from "./page-client";
+
+import { getAuthUser } from "@/lib/auth";
+import { prisma } from "@/lib/db";
+import type { Unit } from "@/types/units";
 
 function transformPrismaUnitToUnit(
   unit: Prisma.UnitGetPayload<{ include: { unitGroup: true } }>
@@ -39,7 +41,9 @@ export default async function DMUnitsPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+
   const user = await getAuthUser();
+
   const userId = user.id;
 
   const campaign = await prisma.campaign.findUnique({

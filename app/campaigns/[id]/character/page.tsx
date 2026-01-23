@@ -1,5 +1,8 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/db";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,16 +11,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import Link from "next/link";
-import { getAbilityModifier } from "@/lib/utils/calculations";
 import { getAuthUser } from "@/lib/auth";
-import type { Character } from "@/types/characters";
+import { prisma } from "@/lib/db";
+import { getAbilityModifier } from "@/lib/utils/calculations";
 import {
-  getCharacterImmunities,
   getCharacterDamageModifiers,
+  getCharacterImmunities,
 } from "@/lib/utils/character-race-effects";
+import type { Character } from "@/types/characters";
 
 export default async function CharacterPage({
   params,
@@ -25,7 +26,9 @@ export default async function CharacterPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+
   const user = await getAuthUser();
+
   const userId = user.id;
 
   const campaign = await prisma.campaign.findUnique({
@@ -42,6 +45,7 @@ export default async function CharacterPage({
   }
 
   const userMember = campaign.members[0];
+
   if (!userMember) {
     redirect("/campaigns");
   }
@@ -73,13 +77,19 @@ export default async function CharacterPage({
   }
 
   const strMod = getAbilityModifier(character.strength);
+
   const dexMod = getAbilityModifier(character.dexterity);
+
   const conMod = getAbilityModifier(character.constitution);
+
   const intMod = getAbilityModifier(character.intelligence);
+
   const wisMod = getAbilityModifier(character.wisdom);
+
   const chaMod = getAbilityModifier(character.charisma);
 
   const savingThrows = character.savingThrows as Record<string, boolean>;
+
   const skills = character.skills as Record<string, boolean>;
   
   // Отримуємо расу персонажа
@@ -93,7 +103,9 @@ export default async function CharacterPage({
   const characterImmunities = Array.isArray(character.immunities)
     ? character.immunities
     : [];
+
   const allImmunities = getCharacterImmunities(character as unknown as Character, race);
+
   const allDamageModifiers = getCharacterDamageModifiers(character as unknown as Character, race);
 
   return (

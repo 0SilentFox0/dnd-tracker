@@ -1,6 +1,7 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getBattle, nextTurn, attack, moraleCheck, castSpell } from "@/lib/api/battles";
-import type { BattleScene, AttackData, MoraleCheckData, SpellCastData } from "@/types/api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
+import { attack, castSpell,getBattle, moraleCheck, nextTurn } from "@/lib/api/battles";
+import type { AttackData, BattleScene, MoraleCheckData, SpellCastData } from "@/types/api";
 
 export function useBattle(campaignId: string, battleId: string) {
   return useQuery<BattleScene>({

@@ -9,9 +9,11 @@ import type { MainSkill, MainSkillFormData } from "@/types/main-skills";
  */
 export async function getMainSkills(campaignId: string): Promise<MainSkill[]> {
   const response = await fetch(`/api/campaigns/${campaignId}/main-skills`);
+
   if (!response.ok) {
     throw new Error("Failed to fetch main skills");
   }
+
   return response.json();
 }
 
@@ -32,16 +34,20 @@ export async function createMainSkill(
 
   if (!response.ok) {
     const error = await response.json();
+
     // Якщо це помилка валідації Zod, показуємо деталі
     if (Array.isArray(error.error)) {
       const errorMessages = error.error
         .map((issue: { path: string[]; message: string }) => {
           const field = issue.path.join(".");
+
           return `${field}: ${issue.message}`;
         })
         .join(", ");
+
       throw new Error(errorMessages);
     }
+
     throw new Error(error.error || "Failed to create main skill");
   }
 
@@ -69,6 +75,7 @@ export async function updateMainSkill(
 
   if (!response.ok) {
     const error = await response.json();
+
     throw new Error(error.error || "Failed to update main skill");
   }
 
@@ -91,6 +98,7 @@ export async function deleteMainSkill(
 
   if (!response.ok) {
     const error = await response.json();
+
     throw new Error(error.error || "Failed to delete main skill");
   }
 }

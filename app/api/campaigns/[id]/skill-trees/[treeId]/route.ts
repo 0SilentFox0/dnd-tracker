@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
 import { z } from "zod";
+
+import { prisma } from "@/lib/db";
 import { requireDM } from "@/lib/utils/api-auth";
 import type { SkillTree } from "@/types/skill-tree";
 
@@ -17,11 +18,13 @@ export async function PATCH(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
 
     const body = await request.json();
+
     const data = updateSkillTreeSchema.parse(body);
 
     // Перевіряємо чи існує skill tree
@@ -35,6 +38,7 @@ export async function PATCH(
       // Якщо skill tree не існує - створюємо новий
       // Витягуємо race з skills (якщо це SkillTree об'єкт)
       const skillsData = data.skills as SkillTree;
+
       const race = skillsData.race || existingTree?.race || "unknown";
       
       updatedTree = await prisma.skillTree.create({
@@ -58,12 +62,14 @@ export async function PATCH(
     return NextResponse.json(updatedTree);
   } catch (error) {
     console.error("Error updating skill tree:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "Invalid request data", details: error.issues },
         { status: 400 }
       );
     }
+
     return NextResponse.json(
       { error: "Failed to update skill tree" },
       { status: 500 }

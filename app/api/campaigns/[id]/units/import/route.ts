@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { z } from "zod";
-import { requireDM } from "@/lib/utils/api-auth";
 import { Prisma } from "@prisma/client";
-import type { ImportUnit } from "@/types/import";
+import { z } from "zod";
+
+import { prisma } from "@/lib/db";
+import { requireDM } from "@/lib/utils/api-auth";
 import { convertCSVRowToUnit } from "@/lib/utils/unit-parsing";
+import type { ImportUnit } from "@/types/import";
 
 // Схема для одного юніта в імпорті
 const importUnitSchema = z.object({
@@ -66,16 +67,20 @@ export async function POST(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
 
     const body = await request.json();
+
     const rawUnits = body.units as Array<ImportUnit & { groupName?: string }>;
+
     const defaultGroupName = body.groupName as string | undefined;
 
     // Валідуємо units без groupName
     const unitsForValidation = rawUnits.map(({ groupName, ...unit }) => unit);
+
     const validationResult = importUnitsSchema.parse({
       units: unitsForValidation,
       groupName: defaultGroupName,
@@ -89,11 +94,13 @@ export async function POST(
 
     // Створюємо або отримуємо групи юнітів
     const unitGroups: Record<string, string> = {};
+
     const uniqueGroupNames = new Set<string>();
 
     // Збираємо всі унікальні групи з юнітів
     for (const unit of validatedUnitsWithGroups) {
       const groupName = unit.groupName;
+
       if (groupName) {
         uniqueGroupNames.add(groupName);
       }
@@ -104,6 +111,7 @@ export async function POST(
       const existing = await prisma.unitGroup.findFirst({
         where: { campaignId: id, name: groupName },
       });
+
       if (existing) {
         unitGroups[groupName] = existing.id;
       } else {
@@ -117,12 +125,15 @@ export async function POST(
           "#8b5cf6", // purple
           "#ec4899", // pink
         ];
+
         const colorIndex = Array.from(uniqueGroupNames).indexOf(groupName);
+
         const color = colors[colorIndex % colors.length];
 
         const group = await prisma.unitGroup.create({
           data: { campaignId: id, name: groupName, color },
         });
+
         unitGroups[groupName] = group.id;
       }
     }
@@ -148,13 +159,16 @@ export async function POST(
         .filter((unit) => !existingNamesSet.has(unit.name))
         .map(async (unit) => {
           const groupName = unit.groupName;
+
           const groupId = groupName ? unitGroups[groupName] : undefined;
           
           let groupColor: string | null = null;
+
           if (groupId) {
             const group = await prisma.unitGroup.findUnique({
               where: { id: groupId },
             });
+
             groupColor = group?.color || null;
           }
 
@@ -186,6 +200,7 @@ export async function POST(
 
     // Створюємо тільки нові юніти
     let result;
+
     if (unitsToCreate.length > 0) {
       result = await prisma.unit.createMany({
         data: unitsToCreate,
@@ -222,12 +237,14 @@ export async function POST(
     });
   } catch (error) {
     console.error("Error importing units:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "Validation error", details: error.issues },
         { status: 400 }
       );
     }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

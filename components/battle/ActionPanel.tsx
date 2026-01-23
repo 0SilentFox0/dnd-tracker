@@ -17,9 +17,13 @@ export function ActionPanel({
   onBonusAction,
 }: ActionPanelProps) {
   const hasAttacks = participant.attacks && participant.attacks.length > 0;
+
   const hasSpells = participant.knownSpells && participant.knownSpells.length > 0;
+
   const canAttack = !participant.hasUsedAction && hasAttacks;
+
   const canCastSpell = !participant.hasUsedAction && hasSpells;
+
   const canUseBonusAction = !participant.hasUsedBonusAction;
 
   return (

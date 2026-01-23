@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { z } from "zod";
-import { requireDM, requireCampaignAccess } from "@/lib/utils/api-auth";
 import { Prisma } from "@prisma/client";
+import { z } from "zod";
+
+import { prisma } from "@/lib/db";
+import { requireCampaignAccess,requireDM } from "@/lib/utils/api-auth";
 
 const createArtifactSchema = z.object({
   name: z.string().min(1).max(100),
@@ -53,11 +54,13 @@ export async function POST(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
 
     const body = await request.json();
+
     const data = createArtifactSchema.parse(body);
 
     const artifact = await prisma.artifact.create({
@@ -83,9 +86,11 @@ export async function POST(
     return NextResponse.json(artifact);
   } catch (error) {
     console.error("Error creating artifact:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -102,6 +107,7 @@ export async function GET(
     
     // Перевіряємо доступ до кампанії (не обов'язково DM)
     const accessResult = await requireCampaignAccess(id, false);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -121,6 +127,7 @@ export async function GET(
     return NextResponse.json(artifacts);
   } catch (error) {
     console.error("Error fetching artifacts:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

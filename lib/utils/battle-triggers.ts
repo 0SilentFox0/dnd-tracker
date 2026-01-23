@@ -2,9 +2,10 @@
  * Утиліти для перевірки тригерів пасивних здібностей
  */
 
-import { BattleParticipant, PassiveAbility } from "@/types/battle";
 import { hasAnyAllyLowHp } from "./battle-participant-helpers";
+
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
+import { BattleParticipant, PassiveAbility } from "@/types/battle";
 
 /**
  * Перевіряє чи виконана умова тригера
@@ -39,6 +40,7 @@ export function checkTriggerCondition(
   // Використовуємо налаштовуваний поріг з тригера або константу за замовчуванням
   if (trigger.type === "ally_low_hp" && context?.allParticipants) {
     const threshold = trigger.lowHpThresholdPercent ?? BATTLE_CONSTANTS.DEFAULT_LOW_HP_THRESHOLD_PERCENT;
+
     return hasAnyAllyLowHp(participant, context.allParticipants, threshold);
   }
 
@@ -86,6 +88,7 @@ export function evaluateCondition(
     // Витягуємо поріг з умови (наприклад, "ally_hp <= 25%" → 25)
     // Якщо не вказано, використовуємо константу за замовчуванням
     const threshold = parseFloat(condition.match(/(\d+)%?/)?.[1] || String(BATTLE_CONSTANTS.DEFAULT_LOW_HP_THRESHOLD_PERCENT));
+
     return hasAnyAllyLowHp(participant, context.allParticipants, threshold);
   }
 

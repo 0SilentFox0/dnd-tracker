@@ -5,6 +5,7 @@ import { ABILITY_SCORES } from "./abilities";
 
 // Витягуємо тільки характеристики для заклинань з ABILITY_SCORES
 const SPELLCASTING_ABILITY_KEYS = ["intelligence", "wisdom", "charisma"] as const;
+
 type SpellcastingKey = (typeof SPELLCASTING_ABILITY_KEYS)[number];
 
 export const SPELLCASTING_ABILITIES = ABILITY_SCORES

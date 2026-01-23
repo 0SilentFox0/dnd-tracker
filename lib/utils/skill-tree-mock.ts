@@ -2,17 +2,17 @@
  * Моки даних для дерев прокачки
  */
 
+import type { MainSkill as MainSkillType } from "@/types/main-skills";
 import type {
-  SkillTree,
   MainSkill,
   Skill,
+  SkillTree,
   UltimateSkill,
 } from "@/types/skill-tree";
 import {
-  SkillLevel,
   SkillCircle as SkillCircleEnum,
+  SkillLevel,
 } from "@/types/skill-tree";
-import type { MainSkill as MainSkillType } from "@/types/main-skills";
 
 // Генерація мокових навиків для основного навику
 function generateSkillsForMainSkill(
@@ -38,6 +38,7 @@ function generateSkillsForMainSkill(
   ): Skill => {
     // Мапінг: circle3 → коло OUTER (3), circle2 → коло MIDDLE (2), circle1 → коло INNER (1)
     const skillCircle: SkillCircleEnum = circle;
+
     return {
       id: `${mainSkillId}_${level}_circle${circle}_skill${index}`,
       name: `${mainSkillName} ${levelNames[level]} ${circleNames[skillCircle]}-${index}`,
@@ -131,6 +132,7 @@ export function createMockSkillTree(
   // Це важливо для правильного відображення кольорів секторів
   const mainSkills: MainSkill[] = skillsToUse.map((ms) => {
     const skills = generateSkillsForMainSkill(ms.id, ms.name);
+
     const skillsWithPrerequisites = addPrerequisites(skills);
 
     return {

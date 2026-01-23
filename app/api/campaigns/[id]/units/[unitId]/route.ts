@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { requireDM, requireCampaignAccess, validateCampaignOwnership } from "@/lib/utils/api-auth";
-import { z } from "zod";
 import { Prisma } from "@prisma/client";
+import { z } from "zod";
+
+import { prisma } from "@/lib/db";
+import { requireCampaignAccess, requireDM, validateCampaignOwnership } from "@/lib/utils/api-auth";
 
 const updateUnitSchema = z.object({
   name: z.string().min(1).max(100).optional(),
@@ -66,6 +67,7 @@ export async function GET(
     
     // Перевіряємо доступ до кампанії (не обов'язково DM)
     const accessResult = await requireCampaignAccess(id, false);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -78,6 +80,7 @@ export async function GET(
     });
 
     const validationError = validateCampaignOwnership(unit, id);
+
     if (validationError) {
       return validationError;
     }
@@ -85,6 +88,7 @@ export async function GET(
     return NextResponse.json(unit);
   } catch (error) {
     console.error("Error fetching unit:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -101,6 +105,7 @@ export async function DELETE(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -110,6 +115,7 @@ export async function DELETE(
     });
 
     const validationError = validateCampaignOwnership(unit, id);
+
     if (validationError) {
       return validationError;
     }
@@ -121,6 +127,7 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting unit:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -137,6 +144,7 @@ export async function PATCH(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -146,20 +154,24 @@ export async function PATCH(
     });
 
     const validationError = validateCampaignOwnership(unit, id);
+
     if (validationError) {
       return validationError;
     }
 
     const body = await request.json();
+
     const data = updateUnitSchema.parse(body);
 
     // Отримуємо колір групи якщо змінюється groupId
     let groupColor: string | null = null;
+
     if (data.groupId !== undefined) {
       if (data.groupId) {
         const group = await prisma.unitGroup.findUnique({
           where: { id: data.groupId },
         });
+
         groupColor = group?.color || null;
       } else {
         groupColor = null;
@@ -213,9 +225,11 @@ export async function PATCH(
     return NextResponse.json(updatedUnit);
   } catch (error) {
     console.error("Error updating unit:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

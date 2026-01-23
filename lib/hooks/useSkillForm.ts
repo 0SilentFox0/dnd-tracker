@@ -1,14 +1,16 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback,useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { createSkill, updateSkill } from "@/lib/api/skills";
+
 import { useMainSkills } from "./useMainSkills";
 import { useRaces } from "./useRaces";
-import type { Race } from "@/types/races";
+
+import { createSkill, updateSkill } from "@/lib/api/skills";
+import { SpellEnhancementType } from "@/lib/constants/spell-enhancement";
 import type { GroupedSkillPayload } from "@/types/hooks";
-import type { Skill, GroupedSkill } from "@/types/skills";
+import type { Race } from "@/types/races";
 import type { SkillTriggers } from "@/types/skill-triggers";
-import type { SpellEnhancementType } from "@/lib/constants/spell-enhancement";
+import type { GroupedSkill,Skill } from "@/types/skills";
 
 interface SpellOption {
   id: string;
@@ -71,6 +73,7 @@ const normalizeInitialData = (data: InitialData | undefined): {
   // Якщо це згрупована структура
   if ('basicInfo' in data && 'combatStats' in data) {
     const grouped = data as GroupedSkill;
+
     return {
       id: grouped.id,
       name: grouped.basicInfo.name,
@@ -111,6 +114,7 @@ const parseInitialBonuses = (bonuses: unknown): Record<string, number> => {
   ) {
     return bonuses as Record<string, number>;
   }
+
   return {};
 };
 
@@ -120,6 +124,7 @@ const parseInitialSpellEnhancementTypes = (
   if (Array.isArray(types)) {
     return types as SpellEnhancementType[];
   }
+
   return [];
 };
 
@@ -134,6 +139,7 @@ const parseInitialSpellTargetChange = (
   ) {
     return (targetChange as { target: string }).target;
   }
+
   return null;
 };
 
@@ -153,6 +159,7 @@ const parseInitialSpellAdditionalModifier = (modifier: unknown): {
       duration?: number;
     };
   }
+
   return {
     modifier: undefined,
     damageDice: "",
@@ -168,9 +175,11 @@ const convertRaceValueToId = (
 
   if (isLikelyId) {
     const race = races.find((r) => r.id === raceValue);
+
     return race ? race.id : null;
   } else {
     const race = races.find((r) => r.name === raceValue);
+
     return race ? race.id : null;
   }
 };
@@ -195,34 +204,45 @@ export function useSkillForm(
   initialData?: InitialData
 ) {
   const router = useRouter();
+
   const queryClient = useQueryClient();
+
   const { data: mainSkills = [] } = useMainSkills(campaignId);
+
   const { data: races = [] } = useRaces(campaignId, initialRaces);
+
   const isEdit = !!initialData;
 
   // Нормалізуємо initialData до плоскої структури для сумісності
   const normalizedData = normalizeInitialData(initialData);
 
   const [isSaving, setIsSaving] = useState(false);
+
   const [error, setError] = useState<string | null>(null);
 
   // Basic info
   const [name, setName] = useState(normalizedData?.name || "");
+
   const [description, setDescription] = useState(
     normalizedData?.description || ""
   );
+
   const [icon, setIcon] = useState(normalizedData?.icon || "");
+
   const [selectedRaces, setSelectedRaces] = useState<string[]>([]);
+
   const [isRacial, setIsRacial] = useState(normalizedData?.isRacial || false);
 
   // Оновлюємо selectedRaces коли races завантажуються або змінюється initialData
   useEffect(() => {
     if (!normalizedData?.races) {
       setSelectedRaces([]);
+
       return;
     }
 
     const convertedRaces = parseInitialRaces(normalizedData.races, races);
+
     setSelectedRaces(convertedRaces);
   }, [normalizedData?.races, races]);
 
@@ -235,11 +255,15 @@ export function useSkillForm(
   const [damage, setDamage] = useState(
     normalizedData?.damage?.toString() || ""
   );
+
   const [armor, setArmor] = useState(normalizedData?.armor?.toString() || "");
+
   const [speed, setSpeed] = useState(normalizedData?.speed?.toString() || "");
+
   const [physicalResistance, setPhysicalResistance] = useState(
     normalizedData?.physicalResistance?.toString() || ""
   );
+
   const [magicalResistance, setMagicalResistance] = useState(
     normalizedData?.magicalResistance?.toString() || ""
   );
@@ -248,9 +272,11 @@ export function useSkillForm(
   const [spellId, setSpellId] = useState<string | null>(
     normalizedData?.spellId || null
   );
+
   const [spellGroupId, setSpellGroupId] = useState<string | null>(
     normalizedData?.spellGroupId || null
   );
+
   const [mainSkillId, setMainSkillId] = useState<string | null>(
     normalizedData?.mainSkillId || null
   );
@@ -263,14 +289,17 @@ export function useSkillForm(
   const [spellEffectIncrease, setSpellEffectIncrease] = useState(
     normalizedData?.spellEffectIncrease?.toString() || ""
   );
+
   const [spellTargetChange, setSpellTargetChange] = useState<string | null>(
     () => parseInitialSpellTargetChange(normalizedData?.spellTargetChange)
   );
+
   const [spellAdditionalModifier, setSpellAdditionalModifier] = useState<{
     modifier?: string;
     damageDice?: string;
     duration?: number;
   }>(() => parseInitialSpellAdditionalModifier(normalizedData?.spellAdditionalModifier));
+
   const [spellNewSpellId, setSpellNewSpellId] = useState<string | null>(
     normalizedData?.spellNewSpellId || null
   );
@@ -300,7 +329,9 @@ export function useSkillForm(
 
   const handleBonusChange = useCallback((attr: string, value: string) => {
     const numValue = value === "" ? 0 : parseInt(value, 10);
+
     if (isNaN(numValue)) return;
+
     setBonuses((prev) => ({
       ...prev,
       [attr]: numValue,
@@ -343,13 +374,13 @@ export function useSkillForm(
         spellEffectIncrease: parseNumber(spellEffectIncrease),
         spellTargetChange:
           spellTargetChange &&
-          spellEnhancementTypes.includes("target_change")
+          spellEnhancementTypes.includes(SpellEnhancementType.TARGET_CHANGE)
             ? {
                 target: spellTargetChange as "enemies" | "allies" | "all",
               }
             : undefined,
         spellAdditionalModifier:
-          spellEnhancementTypes.includes("additional_modifier") &&
+          spellEnhancementTypes.includes(SpellEnhancementType.ADDITIONAL_MODIFIER) &&
           spellAdditionalModifier.modifier
             ? {
                 modifier: spellAdditionalModifier.modifier,
@@ -392,6 +423,7 @@ export function useSkillForm(
   const handleSubmit = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
+
       if (!name.trim()) return;
 
       setIsSaving(true);
@@ -413,6 +445,7 @@ export function useSkillForm(
       } catch (err) {
         const message =
           err instanceof Error ? err.message : "Помилка створення";
+
         setError(message);
       } finally {
         setIsSaving(false);

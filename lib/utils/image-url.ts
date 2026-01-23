@@ -14,6 +14,7 @@ export function normalizeImageUrl(src: string): string {
       // Інакше нормалізуємо URL
       if (!url.pathname.includes("/revision/")) {
         const trimmedPath = url.pathname.replace(/\/$/, "");
+
         url.pathname = `${trimmedPath}/revision/latest`;
       }
 

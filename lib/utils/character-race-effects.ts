@@ -2,12 +2,13 @@
  * Утиліти для роботи з ефектами рас для персонажів
  */
 
-import type { Race } from "@/types/races";
-import type { Character } from "@/types/characters";
 import {
-  extractRaceImmunities,
   extractRaceDamageModifiers,
+  extractRaceImmunities,
 } from "./race-effects";
+
+import type { Character } from "@/types/characters";
+import type { Race } from "@/types/races";
 
 // Тип для Race з Prisma (JSON поля)
 type RaceFromPrisma = Omit<Race, "availableSkills" | "disabledSkills" | "spellSlotProgression" | "passiveAbility"> & {
@@ -27,10 +28,12 @@ export function getCharacterImmunities(
   const characterImmunities = Array.isArray(character.immunities)
     ? character.immunities
     : [];
+
   const raceImmunities = extractRaceImmunities(race);
 
   // Об'єднуємо та видаляємо дублікати
   const allImmunities = [...characterImmunities, ...raceImmunities];
+
   return Array.from(new Set(allImmunities.map((i) => i.toLowerCase().trim())))
     .map((i) => {
       // Знаходимо оригінальну назву (з правильним регістром)
@@ -54,8 +57,10 @@ export function getCharacterDamageModifiers(
   race: Race | RaceFromPrisma | null | undefined
 ): string[] {
   const characterModifiers: string[] = [];
+
   // Якщо в Character є поле damageModifier, додаємо його
   const characterWithModifier = character as Character & { damageModifier?: string };
+
   if (characterWithModifier.damageModifier) {
     characterModifiers.push(characterWithModifier.damageModifier);
   }
@@ -64,6 +69,7 @@ export function getCharacterDamageModifiers(
 
   // Об'єднуємо та видаляємо дублікати
   const allModifiers = [...characterModifiers, ...raceModifiers];
+
   return Array.from(
     new Set(allModifiers.map((m) => m.toLowerCase().trim()))
   ).map((m) => {

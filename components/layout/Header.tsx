@@ -1,7 +1,12 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { Home, LogOut,Menu, User } from "lucide-react";
+
+import { AbbreviationsInfoDialog } from "@/components/common/AbbreviationsInfoDialog";
+import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,19 +15,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Home, Menu, User, LogOut } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { useEffect, useState } from "react";
-import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
-import { AbbreviationsInfoDialog } from "@/components/common/AbbreviationsInfoDialog";
 
 export function Header() {
   const pathname = usePathname();
+
   const router = useRouter();
+
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
+
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUserEmail(user?.email || null);
     });
@@ -30,6 +34,7 @@ export function Header() {
 
   const handleSignOut = async () => {
     const supabase = createClient();
+
     await supabase.auth.signOut();
     router.push("/sign-in");
   };
@@ -45,9 +50,13 @@ export function Header() {
 
   // Визначаємо чи ми на сторінці кампанії
   const campaignMatch = pathname?.match(/^\/campaigns\/([^/]+)/);
+
   const campaignId = campaignMatch?.[1];
+
   const isCampaignPage = !!campaignId;
+
   const isDMPage = pathname?.includes("/dm/") || false;
+
   const isPlayerPage = !isDMPage && isCampaignPage;
 
   return (

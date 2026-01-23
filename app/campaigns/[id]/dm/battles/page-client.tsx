@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,6 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 
 interface DeleteAllBattlesButtonProps {
   campaignId: string;
@@ -24,7 +25,9 @@ export function DeleteAllBattlesButton({
   battlesCount,
 }: DeleteAllBattlesButtonProps) {
   const router = useRouter();
+
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDeleteAll = async () => {

@@ -1,7 +1,8 @@
-import { useState, useCallback } from "react";
+import { useCallback,useState } from "react";
+
 import {
-  useRenameUnitGroup,
   useRemoveAllUnitsFromGroup,
+  useRenameUnitGroup,
 } from "@/lib/hooks/useUnits";
 
 interface UseUnitGroupActionsProps {
@@ -21,17 +22,22 @@ export function useUnitGroupActions({
   groupDamageModifier,
 }: UseUnitGroupActionsProps) {
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+
   const [removeAllDialogOpen, setRemoveAllDialogOpen] = useState(false);
+
   const [newGroupName, setNewGroupName] = useState(groupName);
+
   const [newGroupDamageModifier, setNewGroupDamageModifier] = useState<
     string | null
   >(groupDamageModifier ?? null);
 
   const renameGroupMutation = useRenameUnitGroup(campaignId);
+
   const removeAllUnitsMutation = useRemoveAllUnitsFromGroup(campaignId);
 
   const handleRenameGroup = useCallback(() => {
     if (!groupId || !newGroupName.trim()) return;
+
     renameGroupMutation.mutate(
       {
         groupId,
@@ -57,6 +63,7 @@ export function useUnitGroupActions({
 
   const handleRemoveAllUnits = useCallback(() => {
     if (!groupId) return;
+
     removeAllUnitsMutation.mutate(groupId, {
       onSuccess: () => {
         setRemoveAllDialogOpen(false);

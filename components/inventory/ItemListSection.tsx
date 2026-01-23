@@ -24,8 +24,11 @@ export function ItemListSection({
     if (typeof item === "string") {
       return item;
     }
+
     const name = item.name || `Предмет ${index + 1}`;
+
     const quantity = item.quantity ? ` (x${item.quantity})` : "";
+
     return `${name}${quantity}`;
   };
 

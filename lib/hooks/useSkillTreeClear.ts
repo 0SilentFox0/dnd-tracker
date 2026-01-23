@@ -1,11 +1,12 @@
-import type { SkillTree, MainSkill } from "@/types/skill-tree";
-import { SkillLevel, SkillCircle as SkillCircleEnum } from "@/types/skill-tree";
+import type { MainSkill,SkillTree } from "@/types/skill-tree";
+import { SkillCircle as SkillCircleEnum,SkillLevel } from "@/types/skill-tree";
 
 export function clearSkillTree(treeToClear: SkillTree): SkillTree {
   // Очищаємо всі присвоєння скілів, залишаючи структуру дерева
   const clearedMainSkills = treeToClear.mainSkills.map((mainSkill) => {
     // Очищаємо levelIcons та levelSkillIds для main-skill-level та racial
     const clearedLevelIcons: Record<string, string> = {};
+
     const clearedLevelSkillIds: Record<string, string> = {};
 
     // Очищаємо всі скіли в колах, замінюючи їх на placeholder'и
@@ -34,6 +35,7 @@ export function clearSkillTree(treeToClear: SkillTree): SkillTree {
             level: levelKey as SkillLevel,
           })),
         };
+
         return {
           ...acc,
           [levelKey]: clearedCircles,

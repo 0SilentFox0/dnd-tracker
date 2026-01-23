@@ -2,9 +2,10 @@
  * Типи для API payloads та responses
  */
 
-import type { SkillTriggers } from "./skill-triggers";
-import type { SpellEnhancementType } from "@/lib/constants/spell-enhancement";
 import type { GroupedSkillPayload } from "./hooks";
+import type { SkillTriggers } from "./skill-triggers";
+
+import type { SpellEnhancementType } from "@/lib/constants/spell-enhancement";
 
 // Skills API
 export type SkillPayload = GroupedSkillPayload;
@@ -47,7 +48,7 @@ export interface SkillUpdatePayload {
 }
 
 // Battles API
-import type { BattleParticipant, BattlePreparationParticipant, BattleAction } from "./battle";
+import type { BattleAction,BattleParticipant, BattlePreparationParticipant } from "./battle";
 
 export interface BattleScene {
   id: string;

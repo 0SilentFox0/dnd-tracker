@@ -15,8 +15,9 @@
  * 
  * УВАГА: Цей скрипт видаляє дані без підтвердження!
  */
-import { DEFAULT_CAMPAIGN_ID } from "../lib/constants/campaigns";
 import { PrismaClient } from "@prisma/client";
+
+import { DEFAULT_CAMPAIGN_ID } from "../lib/constants/campaigns";
 
 const prisma = new PrismaClient();
 
@@ -74,7 +75,9 @@ async function deleteMockData() {
     // 1. ВИДАЛЕННЯ ПЕРСОНАЖІВ
     // ============================================
     console.log("\n👥 Видалення персонажів...");
+
     let deletedCharacters = 0;
+
     for (const name of mockCharacterNames) {
       const deleted = await prisma.character.deleteMany({
         where: {
@@ -82,7 +85,9 @@ async function deleteMockData() {
           name: name,
         },
       });
+
       deletedCharacters += deleted.count;
+
       if (deleted.count > 0) {
         console.log(`  ✅ Видалено: ${name}`);
       }
@@ -93,7 +98,9 @@ async function deleteMockData() {
     // 2. ВИДАЛЕННЯ ДЕРЕВ СКІЛІВ
     // ============================================
     console.log("\n🌳 Видалення дерев скілів...");
+
     let deletedSkillTrees = 0;
+
     for (const raceName of mockRaceNames) {
       const deleted = await prisma.skillTree.deleteMany({
         where: {
@@ -101,7 +108,9 @@ async function deleteMockData() {
           race: raceName,
         },
       });
+
       deletedSkillTrees += deleted.count;
+
       if (deleted.count > 0) {
         console.log(`  ✅ Видалено дерево для: ${raceName}`);
       }
@@ -112,7 +121,9 @@ async function deleteMockData() {
     // 3. ВИДАЛЕННЯ РАС
     // ============================================
     console.log("\n🏛️ Видалення рас...");
+
     let deletedRaces = 0;
+
     for (const raceName of mockRaceNames) {
       const deleted = await prisma.race.deleteMany({
         where: {
@@ -120,7 +131,9 @@ async function deleteMockData() {
           name: raceName,
         },
       });
+
       deletedRaces += deleted.count;
+
       if (deleted.count > 0) {
         console.log(`  ✅ Видалено: ${raceName}`);
       }
@@ -147,6 +160,7 @@ async function deleteMockData() {
     ];
 
     let deletedSkills = 0;
+
     for (const skillName of mockSkillNames) {
       const deleted = await prisma.skill.deleteMany({
         where: {
@@ -154,7 +168,9 @@ async function deleteMockData() {
           name: skillName,
         },
       });
+
       deletedSkills += deleted.count;
+
       if (deleted.count > 0) {
         console.log(`  ✅ Видалено: ${skillName}`);
       }
@@ -165,7 +181,9 @@ async function deleteMockData() {
     // 5. ВИДАЛЕННЯ ОСНОВНИХ СКІЛІВ
     // ============================================
     console.log("\n📚 Видалення основних скілів...");
+
     let deletedMainSkills = 0;
+
     for (const mainSkillName of mockMainSkillNames) {
       const deleted = await prisma.mainSkill.deleteMany({
         where: {
@@ -173,7 +191,9 @@ async function deleteMockData() {
           name: mainSkillName,
         },
       });
+
       deletedMainSkills += deleted.count;
+
       if (deleted.count > 0) {
         console.log(`  ✅ Видалено: ${mainSkillName}`);
       }
@@ -184,7 +204,9 @@ async function deleteMockData() {
     // 6. ВИДАЛЕННЯ ЗАКЛИНАНЬ
     // ============================================
     console.log("\n📜 Видалення заклинань...");
+
     let deletedSpells = 0;
+
     for (const spellName of mockSpellNames) {
       const deleted = await prisma.spell.deleteMany({
         where: {
@@ -192,7 +214,9 @@ async function deleteMockData() {
           name: spellName,
         },
       });
+
       deletedSpells += deleted.count;
+
       if (deleted.count > 0) {
         console.log(`  ✅ Видалено: ${spellName}`);
       }
@@ -203,12 +227,14 @@ async function deleteMockData() {
     // 7. ВИДАЛЕННЯ СЦЕН БОЮ
     // ============================================
     console.log("\n⚔️ Видалення сцен бою...");
+
     const mockBattleNames = [
       "Маленький бій (Мок)",
       "Великий бій (Мок)",
     ];
 
     let deletedBattles = 0;
+
     for (const battleName of mockBattleNames) {
       const deleted = await prisma.battleScene.deleteMany({
         where: {
@@ -216,7 +242,9 @@ async function deleteMockData() {
           name: battleName,
         },
       });
+
       deletedBattles += deleted.count;
+
       if (deleted.count > 0) {
         console.log(`  ✅ Видалено: ${battleName}`);
       }

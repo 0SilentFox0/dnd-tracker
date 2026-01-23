@@ -2,7 +2,7 @@
  * Утиліти для перевірки перемоги та завершення бою
  */
 
-import { BattleParticipant, BattleAction } from "@/types/battle";
+import { BattleAction,BattleParticipant } from "@/types/battle";
 
 /**
  * Перевіряє умови перемоги
@@ -21,6 +21,7 @@ export function checkVictoryConditions(
 ): VictoryCheckResult {
   // Розділяємо на союзників та ворогів
   const allies = initiativeOrder.filter((p) => p.side === "ally");
+
   const enemies = initiativeOrder.filter((p) => p.side === "enemy");
 
   // Перевіряємо чи всі вороги мертві або непритомні
@@ -111,6 +112,7 @@ export function completeBattle(
       .filter((p) => p.side === "ally" && p.status === "unconscious")
           .map((p) => {
             const oldHp = p.currentHp;
+
             return {
               participantId: p.id,
               participantName: p.name,

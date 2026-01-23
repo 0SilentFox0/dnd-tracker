@@ -1,5 +1,7 @@
 "use client";
 
+import { AlertCircle, CheckCircle2,FileText, Upload } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,7 +13,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Upload, FileText, AlertCircle, CheckCircle2 } from "lucide-react";
 import type { UseFileImportReturn } from "@/lib/hooks/useFileImport";
 
 interface ImportDialogProps {
@@ -45,11 +46,13 @@ export function ImportDialog({
     if (!newOpen) {
       reset();
     }
+
     onOpenChange?.(newOpen);
   };
 
   const handleImportClick = async () => {
     await handleImport();
+
     // Закриваємо діалог через 2 секунди після успішного імпорту
     if (success) {
       setTimeout(() => {

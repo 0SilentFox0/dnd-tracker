@@ -1,6 +1,6 @@
-import type { CSVUnitRow, UnitAttack, UnitSpecialAbility } from "@/types/import";
-import { getProficiencyBonus } from "@/lib/utils/calculations";
 import { ABILITY_SCORES } from "@/lib/constants/abilities";
+import { getProficiencyBonus } from "@/lib/utils/calculations";
+import type { CSVUnitRow, UnitAttack, UnitSpecialAbility } from "@/types/import";
 
 /**
  * Парсить значення ability score з рядка
@@ -8,6 +8,7 @@ import { ABILITY_SCORES } from "@/lib/constants/abilities";
  */
 export function parseAbilityScore(value: string): number {
   const match = value.match(/(\d+)/);
+
   return match ? parseInt(match[1], 10) : 10;
 }
 
@@ -17,6 +18,7 @@ export function parseAbilityScore(value: string): number {
  */
 export function parseArmorClass(value: string): number {
   const match = value.match(/(\d+)/);
+
   return match ? parseInt(match[1], 10) : 10;
 }
 
@@ -27,11 +29,14 @@ export function parseArmorClass(value: string): number {
 export function parseMaxHp(value: string): number {
   // Спочатку шукаємо число перед дужками
   const beforeParentheses = value.match(/^(\d+)\s*\(/);
+
   if (beforeParentheses) {
     return parseInt(beforeParentheses[1], 10);
   }
+
   // Якщо немає дужок, шукаємо перше число
   const match = value.match(/(\d+)/);
+
   return match ? parseInt(match[1], 10) : 10;
 }
 
@@ -41,6 +46,7 @@ export function parseMaxHp(value: string): number {
  */
 export function parseSpeed(value: string): number {
   const match = value.match(/(\d+)/);
+
   return match ? parseInt(match[1], 10) : 30;
 }
 
@@ -49,6 +55,7 @@ export function parseSpeed(value: string): number {
  */
 export function parseLevel(value: string): number {
   const match = value.match(/(\d+)/);
+
   return match ? parseInt(match[1], 10) : 1;
 }
 
@@ -78,11 +85,14 @@ export function parseAttacks(value: string): UnitAttack[] {
     // Шукаємо назву атаки, бонус, урон та тип
     // Формат: "Назва +бонус, урон тип" або "Назва +бонус, урон"
     const bonusMatch = attackStr.match(/\+(\d+)/);
+
     const damageMatch = attackStr.match(/(\d+[кk]?\d+[\+\-]?\d*)/i);
     
     // Назва - все до першого "+" або до першої коми
     let name = "";
+
     const plusIndex = attackStr.indexOf("+");
+
     const commaIndex = attackStr.indexOf(",");
     
     if (plusIndex > 0) {
@@ -99,7 +109,9 @@ export function parseAttacks(value: string): UnitAttack[] {
     
     // Визначаємо тип урону
     let damageType = "bludgeoning";
+
     const lowerStr = attackStr.toLowerCase();
+
     if (lowerStr.includes("колючий") || lowerStr.includes("piercing")) {
       damageType = "piercing";
     } else if (lowerStr.includes("рублячий") || lowerStr.includes("slashing")) {
@@ -140,6 +152,7 @@ export function parseSavingThrows(value: string): string[] {
   // Створюємо мапінг на основі ABILITY_SCORES (тільки перші 6 - основні характеристики)
   // Використовуємо тільки англійські ключі та абревіатури
   const saveMap: Record<string, string> = {};
+
   const baseAbilities = ABILITY_SCORES.slice(0, 6);
   
   for (const ability of baseAbilities) {
@@ -150,6 +163,7 @@ export function parseSavingThrows(value: string): string[] {
   }
 
   const parts = value.split(",").map((s) => s.trim());
+
   for (const part of parts) {
     for (const [key, ability] of Object.entries(saveMap)) {
       if (part.includes(key)) {
@@ -181,8 +195,10 @@ export function parseSpecialAbilities(value: string): UnitSpecialAbility[] {
   for (const abilityStr of abilityStrings) {
     // Шукаємо назву та опис
     const colonIndex = abilityStr.indexOf(":");
+
     if (colonIndex > 0) {
       const name = abilityStr.substring(0, colonIndex).trim();
+
       const description = abilityStr.substring(colonIndex + 1).trim();
       
       abilities.push({
@@ -211,19 +227,29 @@ export function convertCSVRowToUnit(row: CSVUnitRow): {
   groupName: string | undefined;
 } {
   const name = (row.Назва || row.name || row.Name || "").trim();
+
   const tier = parseLevel(row.Tier || row.tier || "1");
+
   const armorClass = parseArmorClass(row.КД || row.ac || row.AC || "10");
+
   const maxHp = parseMaxHp(row.ХП || row.hp || row.HP || "10");
+
   const speed = parseSpeed(row.Швидкість || row.speed || row.Speed || "30");
   
   const strength = parseAbilityScore(row.СИЛ || row.str || row.STR || "10");
+
   const dexterity = parseAbilityScore(row.ЛОВ || row.dex || row.DEX || "10");
+
   const constitution = parseAbilityScore(row.ТІЛ || row.con || row.CON || "10");
+
   const intelligence = parseAbilityScore(row.ІНТ || row.int || row.INT || "10");
+
   const wisdom = parseAbilityScore(row.МДР || row.wis || row.WIS || "10");
+
   const charisma = parseAbilityScore(row.ХАР || row.cha || row.CHA || "10");
 
   const attacks = parseAttacks(row.Атаки || row.attacks || row.Attacks || "");
+
   const specialAbilities = parseSpecialAbilities(
     (row["Навички/Здібності"] || row.abilities || row.Abilities || "") + 
     (row.Особливості || row.features || row.Features ? ". " + (row.Особливості || row.features || row.Features) : "")

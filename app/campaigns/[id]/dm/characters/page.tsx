@@ -1,5 +1,8 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/db";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,10 +11,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getAuthUser } from "@/lib/auth";
+import { prisma } from "@/lib/db";
 
 export default async function DMCharactersPage({
   params,
@@ -19,7 +20,9 @@ export default async function DMCharactersPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+
   const user = await getAuthUser();
+
   const userId = user.id;
 
   const campaign = await prisma.campaign.findUnique({
@@ -36,6 +39,7 @@ export default async function DMCharactersPage({
   }
 
   const userMember = campaign.members[0];
+
   if (!userMember || userMember.role !== "dm") {
     redirect(`/campaigns/${id}`);
   }

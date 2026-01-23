@@ -2,8 +2,8 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import type { BattleParticipant } from "@/types/battle";
 import { cn } from "@/lib/utils";
+import type { BattleParticipant } from "@/types/battle";
 
 interface InitiativeParticipantCardProps {
   participant: BattleParticipant;
@@ -19,10 +19,15 @@ export function InitiativeParticipantCard({
   size = "small",
 }: InitiativeParticipantCardProps) {
   const isLarge = size === "large";
+
   const avatarSize = isLarge ? "w-16 h-16 sm:w-20 sm:h-20" : "w-12 h-12 sm:w-14 sm:h-14";
+
   const textSize = isLarge ? "text-xs sm:text-sm" : "text-[10px] sm:text-xs";
+
   const badgeSize = isLarge ? "text-[10px] sm:text-xs" : "text-[9px] sm:text-[10px]";
+
   const minWidth = isLarge ? "min-w-[80px] sm:min-w-[100px]" : "min-w-[60px] sm:min-w-[70px]";
+
   const maxWidth = isLarge ? "max-w-[80px] sm:max-w-[100px]" : "max-w-[60px] sm:max-w-[70px]";
 
   return (

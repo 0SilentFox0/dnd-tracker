@@ -2,8 +2,8 @@
  * Допоміжні функції для роботи з расовими здібностями та імунітетами
  */
 
-import { BattleParticipant, RacialAbility } from "@/types/battle";
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
+import { BattleParticipant, RacialAbility } from "@/types/battle";
 
 /**
  * Знаходить расову здібність за патерном
@@ -21,6 +21,7 @@ export function findRacialAbilityByPattern(
 
   for (const racial of target.racialAbilities) {
     const abilityId = racial.id.toLowerCase();
+
     const abilityName = racial.name.toLowerCase();
 
     // Перевіряємо загальні патерни
@@ -38,9 +39,11 @@ export function findRacialAbilityByPattern(
       if (damageTypeLower === "fire" && (abilityId.includes("fire") || abilityName.includes("вогонь"))) {
         return racial;
       }
+
       if (damageTypeLower === "poison" && (abilityId.includes("poison") || abilityName.includes("отрута"))) {
         return racial;
       }
+
       if (damageTypeLower === "physical" && (abilityId.includes("physical") || abilityName.includes("фізичний"))) {
         return racial;
       }

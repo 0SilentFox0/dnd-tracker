@@ -28,18 +28,25 @@ export function useFileImport<T>({
   parseJSON,
 }: UseFileImportOptions<T>): UseFileImportReturn {
   const [file, setFile] = useState<File | null>(null);
+
   const [error, setError] = useState<string | null>(null);
+
   const [success, setSuccess] = useState<{ imported: number; total: number } | null>(null);
+
   const [isLoading, setIsLoading] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
+
     if (selectedFile) {
       const ext = selectedFile.name.split(".").pop()?.toLowerCase();
+
       if (ext !== "csv" && ext !== "json") {
         setError("Підтримуються тільки CSV та JSON файли");
+
         return;
       }
+
       setFile(selectedFile);
       setError(null);
       setSuccess(null);
@@ -49,11 +56,13 @@ export function useFileImport<T>({
   const handleImport = async () => {
     if (!file) {
       setError("Виберіть файл для імпорту");
+
       return;
     }
 
     if (!parseCSV && !parseJSON) {
       setError("Не вказано функції парсингу");
+
       return;
     }
 
@@ -63,23 +72,27 @@ export function useFileImport<T>({
 
     try {
       const ext = file.name.split(".").pop()?.toLowerCase();
+
       let data: T[];
 
       if (ext === "csv") {
         if (!parseCSV) {
           throw new Error("CSV парсинг не підтримується");
         }
+
         data = await parseCSV(file);
       } else if (ext === "json") {
         if (!parseJSON) {
           throw new Error("JSON парсинг не підтримується");
         }
+
         data = await parseJSON(file);
       } else {
         throw new Error("Непідтримуваний формат файлу");
       }
 
       const result = await onImport(data);
+
       setSuccess({
         imported: result.imported,
         total: result.total,
@@ -87,6 +100,7 @@ export function useFileImport<T>({
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Помилка при імпорті";
+
       setError(errorMessage);
     } finally {
       setIsLoading(false);

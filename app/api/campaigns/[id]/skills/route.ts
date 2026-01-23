@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { z } from "zod";
-import { requireDM, requireCampaignAccess } from "@/lib/utils/api-auth";
 import { Prisma } from "@prisma/client";
+import { z } from "zod";
+
+import { prisma } from "@/lib/db";
+import { requireCampaignAccess,requireDM } from "@/lib/utils/api-auth";
 
 // Схема для згрупованої структури
 const createSkillSchema = z.object({
@@ -94,6 +95,7 @@ export async function POST(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -101,12 +103,16 @@ export async function POST(
     const { campaign } = accessResult;
 
     const body = await request.json();
+
     const data = createSkillSchema.parse(body);
 
     // Витягуємо значення для зворотної сумісності (для relations)
     const basicInfo = data.basicInfo as any;
+
     const spellData = data.spellData as any;
+
     const mainSkillData = data.mainSkillData as any;
+
     const spellEnhancementData = data.spellEnhancementData as any;
 
     const skill = await prisma.skill.create({
@@ -157,9 +163,11 @@ export async function POST(
     return NextResponse.json(skill);
   } catch (error) {
     console.error("Error creating skill:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -176,6 +184,7 @@ export async function GET(
     
     // Перевіряємо доступ до кампанії (не обов'язково DM)
     const accessResult = await requireCampaignAccess(id, false);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -269,6 +278,7 @@ export async function GET(
     return NextResponse.json(formattedSkills);
   } catch (error) {
     console.error("Error fetching skills:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -285,6 +295,7 @@ export async function DELETE(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -302,6 +313,7 @@ export async function DELETE(
     });
   } catch (error) {
     console.error("Error deleting all skills:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

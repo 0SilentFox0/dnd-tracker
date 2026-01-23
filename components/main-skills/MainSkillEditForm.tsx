@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Input } from "@/components/ui/input";
+
 import { FormCard } from "@/components/common/FormCard";
 import { FormField } from "@/components/common/FormField";
+import { Input } from "@/components/ui/input";
 import { useUpdateMainSkill } from "@/lib/hooks/useMainSkills";
 import type { MainSkill } from "@/types/main-skills";
 import type { MainSkillFormData } from "@/types/main-skills";
@@ -19,6 +20,7 @@ export function MainSkillEditForm({
   mainSkill,
 }: MainSkillEditFormProps) {
   const router = useRouter();
+
   const updateMainSkillMutation = useUpdateMainSkill(campaignId);
 
   const [formData, setFormData] = useState<MainSkillFormData>({

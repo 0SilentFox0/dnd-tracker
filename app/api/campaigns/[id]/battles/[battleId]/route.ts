@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 
@@ -8,7 +9,9 @@ export async function GET(
 ) {
   try {
     const { id, battleId } = await params;
+
     const supabase = await createClient();
+
     const {
       data: { user: authUser },
     } = await supabase.auth.getUser();
@@ -18,6 +21,7 @@ export async function GET(
     }
 
     const userId = authUser.id;
+
     const battle = await prisma.battleScene.findUnique({
       where: { id: battleId },
       include: {
@@ -41,6 +45,7 @@ export async function GET(
     }
 
     const userRole = battle.campaign.members[0]?.role || "player";
+
     const isDM = userRole === "dm";
 
     // Повертаємо битву з додатковою інформацією про кампанію та роль користувача
@@ -55,6 +60,7 @@ export async function GET(
     });
   } catch (error) {
     console.error("Error fetching battle:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -68,7 +74,9 @@ export async function PATCH(
 ) {
   try {
     const { id, battleId } = await params;
+
     const supabase = await createClient();
+
     const {
       data: { user: authUser },
     } = await supabase.auth.getUser();
@@ -78,6 +86,7 @@ export async function PATCH(
     }
 
     const userId = authUser.id;
+
     // Перевіряємо права DM
     const campaign = await prisma.campaign.findUnique({
       where: { id },
@@ -110,6 +119,7 @@ export async function PATCH(
     return NextResponse.json(updatedBattle);
   } catch (error) {
     console.error("Error updating battle:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

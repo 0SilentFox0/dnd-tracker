@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
 import { z } from "zod";
-import { requireDM, requireCampaignAccess } from "@/lib/utils/api-auth";
+
+import { prisma } from "@/lib/db";
+import { requireCampaignAccess,requireDM } from "@/lib/utils/api-auth";
 import {
-  getProficiencyBonus,
   getAbilityModifier,
   getPassiveScore,
-  getSpellSaveDC,
+  getProficiencyBonus,
   getSpellAttackBonus,
+  getSpellSaveDC,
 } from "@/lib/utils/calculations";
 
 const createCharacterSchema = z.object({
@@ -76,25 +77,35 @@ export async function POST(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
 
     const { campaign } = accessResult;
+
     const body = await request.json();
+
     const data = createCharacterSchema.parse(body);
 
     // Розраховуємо автоматичні значення
     const proficiencyBonus = getProficiencyBonus(data.level);
+
     const strMod = getAbilityModifier(data.strength);
+
     const dexMod = getAbilityModifier(data.dexterity);
+
     const conMod = getAbilityModifier(data.constitution);
+
     const intMod = getAbilityModifier(data.intelligence);
+
     const wisMod = getAbilityModifier(data.wisdom);
+
     const chaMod = getAbilityModifier(data.charisma);
 
     // Розраховуємо пасивні значення
     const savingThrows = data.savingThrows as Record<string, boolean>;
+
     const skills = data.skills as Record<string, boolean>;
     
     const passivePerception = getPassiveScore(
@@ -102,11 +113,13 @@ export async function POST(
       skills.perception || false,
       proficiencyBonus
     );
+
     const passiveInvestigation = getPassiveScore(
       intMod,
       skills.investigation || false,
       proficiencyBonus
     );
+
     const passiveInsight = getPassiveScore(
       wisMod,
       skills.insight || false,
@@ -115,6 +128,7 @@ export async function POST(
 
     // Розраховуємо spellcasting параметри якщо є
     let spellSaveDC: number | null = null;
+
     let spellAttackBonus: number | null = null;
     
     if (data.spellcastingAbility) {
@@ -205,9 +219,11 @@ export async function POST(
     return NextResponse.json(character);
   } catch (error) {
     console.error("Error creating character:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -224,6 +240,7 @@ export async function GET(
     
     // Перевіряємо доступ до кампанії (не обов'язково DM)
     const accessResult = await requireCampaignAccess(id, false);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -244,6 +261,7 @@ export async function GET(
     return NextResponse.json(characters);
   } catch (error) {
     console.error("Error fetching characters:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

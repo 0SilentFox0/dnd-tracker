@@ -26,6 +26,7 @@ export const DND_SKILLS = [
 
 // Витягуємо основні характеристики для saving throws (перші 6 елементів)
 const BASE_ABILITIES = ABILITY_SCORES.slice(0, 6);
+
 export const DND_SAVING_THROWS = [
   BASE_ABILITIES[0].key,
   BASE_ABILITIES[1].key,

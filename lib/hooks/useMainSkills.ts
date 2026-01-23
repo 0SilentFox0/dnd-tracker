@@ -2,12 +2,13 @@
  * React Query hooks для роботи з основними навиками
  */
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import {
-  getMainSkills,
   createMainSkill,
-  updateMainSkill,
   deleteMainSkill,
+  getMainSkills,
+  updateMainSkill,
 } from "@/lib/api/main-skills";
 import type { MainSkill, MainSkillFormData } from "@/types/main-skills";
 

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+
 import { prisma } from "@/lib/db";
 import { requireDM } from "@/lib/utils/api-auth";
 
@@ -11,6 +12,7 @@ export async function DELETE(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -28,6 +30,7 @@ export async function DELETE(
     });
   } catch (error) {
     console.error("Error deleting all spells:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

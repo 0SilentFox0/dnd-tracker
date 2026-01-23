@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
+
 import { prisma } from "@/lib/db";
 import { requireDM, validateCampaignOwnership } from "@/lib/utils/api-auth";
-import { z } from "zod";
 
 const updateGroupSchema = z.object({
   name: z.string().min(1).max(100),
@@ -20,6 +21,7 @@ export async function PATCH(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -29,11 +31,13 @@ export async function PATCH(
     });
 
     const validationError = validateCampaignOwnership(group, id);
+
     if (validationError) {
       return validationError;
     }
 
     const body = await request.json();
+
     const { name, damageModifier } = updateGroupSchema.parse(body);
 
     const updatedGroup = await prisma.unitGroup.update({
@@ -48,9 +52,11 @@ export async function PATCH(
     return NextResponse.json(updatedGroup);
   } catch (error) {
     console.error("Error updating unit group:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

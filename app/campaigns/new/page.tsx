@@ -1,18 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { LabeledInput } from "@/components/ui/labeled-input";
 import { Textarea } from "@/components/ui/textarea";
-import Link from "next/link";
 import { createCampaign } from "@/lib/api/campaigns";
 
 export default function NewCampaignPage() {
   const router = useRouter();
+
   const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -27,6 +30,7 @@ export default function NewCampaignPage() {
 
     try {
       const campaign = await createCampaign(formData);
+
       router.push(`/campaigns/${campaign.id}`);
     } catch (error) {
       console.error("Error creating campaign:", error);
@@ -47,16 +51,14 @@ export default function NewCampaignPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="name">Назва кампанії *</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
-                placeholder="Назва вашої кампанії"
-              />
-            </div>
+            <LabeledInput
+              id="name"
+              label="Назва кампанії"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              required
+              placeholder="Назва вашої кампанії"
+            />
 
             <div>
               <Label htmlFor="description">Опис</Label>
@@ -70,30 +72,25 @@ export default function NewCampaignPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="maxLevel">Максимальний рівень</Label>
-                <Input
-                  id="maxLevel"
-                  type="number"
-                  min="1"
-                  max="30"
-                  value={formData.maxLevel}
-                  onChange={(e) => setFormData({ ...formData, maxLevel: parseInt(e.target.value) })}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="xpMultiplier">Множник досвіду</Label>
-                <Input
-                  id="xpMultiplier"
-                  type="number"
-                  min="1"
-                  max="10"
-                  step="0.1"
-                  value={formData.xpMultiplier}
-                  onChange={(e) => setFormData({ ...formData, xpMultiplier: parseFloat(e.target.value) })}
-                />
-              </div>
+              <LabeledInput
+                id="maxLevel"
+                label="Максимальний рівень"
+                type="number"
+                min="1"
+                max="30"
+                value={formData.maxLevel}
+                onChange={(e) => setFormData({ ...formData, maxLevel: parseInt(e.target.value) })}
+              />
+              <LabeledInput
+                id="xpMultiplier"
+                label="Множник досвіду"
+                type="number"
+                min="1"
+                max="10"
+                step="0.1"
+                value={formData.xpMultiplier}
+                onChange={(e) => setFormData({ ...formData, xpMultiplier: parseFloat(e.target.value) })}
+              />
             </div>
 
             <div className="flex items-center space-x-2">

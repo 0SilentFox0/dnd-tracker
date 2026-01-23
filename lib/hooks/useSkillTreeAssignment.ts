@@ -1,5 +1,5 @@
-import type { SkillTree, Skill, SkillLevel, SkillCircle } from "@/types/skill-tree";
-import { SkillLevel as SkillLevelEnum, SkillCircle as SkillCircleEnum } from "@/types/skill-tree";
+import type { Skill, SkillCircle,SkillLevel, SkillTree } from "@/types/skill-tree";
+import { SkillCircle as SkillCircleEnum,SkillLevel as SkillLevelEnum } from "@/types/skill-tree";
 import type { Skill as SkillFromLibraryType } from "@/types/skills";
 
 interface SkillSlot {
@@ -26,7 +26,9 @@ export function assignSkillToSlot(
 
       // Оновлюємо icon та skillId для конкретного рівня
       const levelIcons = mainSkill.levelIcons || {};
+
       const levelSkillIds = mainSkill.levelSkillIds || {};
+
       return {
         ...mainSkill,
         levelIcons: {
@@ -56,7 +58,9 @@ export function assignSkillToSlot(
 
     // Оновлюємо рівень, де знаходиться слот
     const updatedLevels = { ...mainSkill.levels };
+
     const levelKey = slot.level as SkillLevel;
+
     const levelCircles = updatedLevels[levelKey];
 
     // Мапінг між UI колами та структурою даних:
@@ -69,11 +73,14 @@ export function assignSkillToSlot(
       2: "circle2",
       3: "circle3",
     };
+
     const circleKey = circleMapping[slot.circle] as keyof typeof levelCircles;
+
     const circleSkills = levelCircles[circleKey] || [];
 
     // Створюємо новий масив скілів з оновленим скілом на позиції slot.index
     const updatedCircleSkills = [...circleSkills];
+
     const skillToAssign: Skill = {
       id: selectedSkill.id,
       name: selectedSkill.name,
@@ -95,6 +102,7 @@ export function assignSkillToSlot(
         circle: slot.circle as SkillCircle,
         level: slot.level as SkillLevel,
       };
+
       updatedCircleSkills.push(placeholderSkill);
     }
     // Тепер замінюємо скіл на позиції slot.index

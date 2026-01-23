@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
+
+import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import type { BattleParticipant } from "@/types/battle";
 import { getMoraleCheckDescription } from "@/lib/utils/battle-morale";
+import type { BattleParticipant } from "@/types/battle";
 
 interface MoraleCheckDialogProps {
   open: boolean;
@@ -28,12 +29,16 @@ export function MoraleCheckDialog({
   }
 
   const description = getMoraleCheckDescription(participant);
+
   const currentMorale = participant.morale;
+
   const moraleValue = Math.abs(currentMorale);
+
   const chance = moraleValue * 10;
 
   const handleConfirm = () => {
     const roll = parseInt(d10Roll);
+
     if (roll >= 1 && roll <= 10) {
       onConfirm(roll);
       setD10Roll("");

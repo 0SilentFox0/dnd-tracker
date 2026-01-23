@@ -1,16 +1,17 @@
 "use client";
 
-import { useState, useEffect, use, useMemo } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { useBattle, useNextTurn, useAttack, useMoraleCheck, useCastSpell } from "@/lib/hooks/useBattles";
-import type { BattleParticipant } from "@/types/battle";
-import { BattleInitiativeBar } from "@/components/battle/BattleInitiativeBar";
-import { ParticipantCard } from "@/components/battle/ParticipantCard";
-import { BattleHeader } from "@/components/battle/BattleHeader";
+import { use, useEffect, useMemo,useState } from "react";
+
 import { ActionPanel } from "@/components/battle/ActionPanel";
 import { AttackDialog } from "@/components/battle/AttackDialog";
+import { BattleHeader } from "@/components/battle/BattleHeader";
+import { BattleInitiativeBar } from "@/components/battle/BattleInitiativeBar";
 import { MoraleCheckDialog } from "@/components/battle/MoraleCheckDialog";
+import { ParticipantCard } from "@/components/battle/ParticipantCard";
 import { SpellDialog } from "@/components/battle/SpellDialog";
+import { Card, CardContent } from "@/components/ui/card";
+import { useAttack, useBattle, useCastSpell,useMoraleCheck, useNextTurn } from "@/lib/hooks/useBattles";
+import type { BattleParticipant } from "@/types/battle";
 
 export default function BattlePage({
   params,
@@ -18,17 +19,30 @@ export default function BattlePage({
   params: Promise<{ id: string; battleId: string }>;
 }) {
   const { id, battleId } = use(params);
+
   const [attackDialogOpen, setAttackDialogOpen] = useState(false);
+
   const [spellDialogOpen, setSpellDialogOpen] = useState(false);
+
   const [moraleDialogOpen, setMoraleDialogOpen] = useState(false);
+
   const [selectedAttacker, setSelectedAttacker] = useState<BattleParticipant | null>(null);
+
   const [selectedCaster, setSelectedCaster] = useState<BattleParticipant | null>(null);
+
   const [participantForMorale, setParticipantForMorale] = useState<BattleParticipant | null>(null);
+  
+  // Відстежуємо, для якого учасника вже було закрито діалог моралі (щоб не відкривати знову)
+  const [moraleDialogDismissedFor, setMoraleDialogDismissedFor] = useState<string | null>(null);
 
   const { data: battle, isLoading: loading } = useBattle(id, battleId);
+
   const nextTurnMutation = useNextTurn(id, battleId);
+
   const attackMutation = useAttack(id, battleId);
+
   const spellMutation = useCastSpell(id, battleId);
+
   const moraleCheckMutation = useMoraleCheck(id, battleId);
 
   useEffect(() => {
@@ -63,10 +77,17 @@ export default function BattlePage({
   // Перевірка моралі для нового учасника після переходу ходу
   useEffect(() => {
     if (!battle || battle.status !== "active") return;
+
     if (moraleDialogOpen) return; // Не показуємо діалог якщо він вже відкритий
     
     const currentParticipant = battle.initiativeOrder[battle.currentTurnIndex];
+
     if (!currentParticipant) return;
+
+    // Якщо для цього учасника вже було закрито діалог, не відкриваємо знову
+    if (moraleDialogDismissedFor === currentParticipant.id) {
+      return;
+    }
 
     console.log("Checking morale for participant:", currentParticipant.name, "morale:", currentParticipant.morale);
 
@@ -75,12 +96,15 @@ export default function BattlePage({
     if (currentParticipant.morale !== 0) {
       // Перевіряємо расові модифікатори
       let currentMorale = currentParticipant.morale;
+
       if (currentParticipant.race === "human" && currentMorale < 0) {
         currentMorale = 0;
       }
+
       if (currentParticipant.race === "necromancer") {
         // Некроманти пропускають перевірку
         console.log("Necromancer - skipping morale check");
+
         return;
       }
       
@@ -93,10 +117,14 @@ export default function BattlePage({
     } else {
       console.log("Participant has neutral morale (0) - no check needed");
     }
-  }, [battle?.currentTurnIndex, battle?.currentRound, battle?.status, moraleDialogOpen]);
+  }, [battle, moraleDialogOpen, moraleDialogDismissedFor]);
 
   const handleNextTurn = async () => {
     if (!battle) return;
+
+    // Скидаємо відстеження закритого діалогу при переході ходу
+    setMoraleDialogDismissedFor(null);
+    
     // Просто переходимо до наступного ходу
     // Перевірка моралі буде виконана після оновлення через useEffect
     nextTurnMutation.mutate();
@@ -118,6 +146,8 @@ export default function BattlePage({
           if (result.moraleResult.shouldSkipTurn) {
             console.log("Skipping turn due to morale");
             setMoraleDialogOpen(false);
+            // Скидаємо відстеження закритого діалогу при переході ходу
+            setMoraleDialogDismissedFor(null);
             setParticipantForMorale(null);
             // Невелика затримка перед переходом
             setTimeout(() => {
@@ -128,6 +158,8 @@ export default function BattlePage({
             // (hasExtraTurn вже встановлено в API)
             console.log("Morale check passed, continuing turn");
             setMoraleDialogOpen(false);
+            // Скидаємо відстеження закритого діалогу після підтвердження
+            setMoraleDialogDismissedFor(null);
             setParticipantForMorale(null);
           }
         },
@@ -143,11 +175,14 @@ export default function BattlePage({
   // Перевіряємо чи є скіл для перегляду HP ворогів
   const canSeeEnemyHp = useMemo(() => {
     if (!battle) return false;
+
     const isDM = battle.isDM || false;
+
     if (isDM) return true;
     
     // Перевіряємо чи є спеціальний скіл у поточного учасника
     const currentParticipant = battle.initiativeOrder?.[battle.currentTurnIndex];
+
     if (!currentParticipant) return false;
     
     // Шукаємо скіл який дозволяє бачити HP ворогів
@@ -164,10 +199,13 @@ export default function BattlePage({
   // Визначаємо доступні цілі для атаки/заклинання
   const availableTargets = useMemo(() => {
     if (!battle) return [];
+
     const selectedParticipant = selectedAttacker || selectedCaster;
+
     if (!selectedParticipant) return [];
     
     const participantSide = selectedParticipant.side;
+
     const friendlyFire = battle.campaign?.friendlyFire || false;
     
     if (friendlyFire) {
@@ -198,8 +236,11 @@ export default function BattlePage({
   }
 
   const isDM = battle.isDM || false;
+
   const currentParticipant = battle.initiativeOrder[battle.currentTurnIndex];
+
   const allies = battle.initiativeOrder.filter((p: BattleParticipant) => p.side === "ally");
+
   const enemies = battle.initiativeOrder.filter((p: BattleParticipant) => p.side === "enemy");
 
   return (
@@ -262,6 +303,7 @@ export default function BattlePage({
               ) : (
                 allies.map((participant: BattleParticipant) => {
                   const isCurrentTurn = participant.id === currentParticipant?.id;
+
                   return (
                     <ParticipantCard
                       key={participant.id}
@@ -303,6 +345,7 @@ export default function BattlePage({
               ) : (
                 enemies.map((participant: BattleParticipant) => {
                   const isCurrentTurn = participant.id === currentParticipant?.id;
+
                   return (
                     <ParticipantCard
                       key={participant.id}
@@ -363,7 +406,13 @@ export default function BattlePage({
 
       <MoraleCheckDialog
         open={moraleDialogOpen}
-        onOpenChange={setMoraleDialogOpen}
+        onOpenChange={(open) => {
+          setMoraleDialogOpen(open);
+          // Якщо діалог закривається без підтвердження (скасування), позначаємо що для цього учасника він був закритий
+          if (!open && participantForMorale) {
+            setMoraleDialogDismissedFor(participantForMorale.id);
+          }
+        }}
         participant={participantForMorale}
         onConfirm={handleMoraleCheck}
       />

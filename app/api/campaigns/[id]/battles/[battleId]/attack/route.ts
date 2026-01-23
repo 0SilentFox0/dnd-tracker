@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
-import { BattleParticipant, BattleAction } from "@/types/battle";
 import { Prisma } from "@prisma/client";
+import { z } from "zod";
+
+import { prisma } from "@/lib/db";
+import { createClient } from "@/lib/supabase/server";
 import { processAttack } from "@/lib/utils/battle-attack-process";
+import { BattleAction,BattleParticipant } from "@/types/battle";
 
 const attackSchema = z.object({
   attackerId: z.string(), // ID BattleParticipant з initiativeOrder
@@ -25,7 +26,9 @@ export async function POST(
 ) {
   try {
     const { id, battleId } = await params;
+
     const supabase = await createClient();
+
     const {
       data: { user: authUser },
     } = await supabase.auth.getUser();
@@ -35,6 +38,7 @@ export async function POST(
     }
 
     const userId = authUser.id;
+
     // Перевіряємо права DM
     const campaign = await prisma.campaign.findUnique({
       where: { id },
@@ -65,10 +69,12 @@ export async function POST(
     }
 
     const body = await request.json();
+
     const data = attackSchema.parse(body);
     
     // Нормалізуємо d20Roll (може бути передано як attackRoll)
     const d20Roll = data.d20Roll ?? data.attackRoll;
+
     if (!d20Roll) {
       return NextResponse.json(
         { error: "d20Roll is required" },
@@ -78,7 +84,9 @@ export async function POST(
 
     // Отримуємо учасників з initiativeOrder
     const initiativeOrder = battle.initiativeOrder as unknown as BattleParticipant[];
+
     const attacker = initiativeOrder.find((p) => p.id === data.attackerId);
+
     const target = initiativeOrder.find((p) => p.id === data.targetId);
 
     if (!attacker || !target) {
@@ -90,6 +98,7 @@ export async function POST(
 
     // Перевіряємо чи це поточний хід атакуючого
     const currentParticipant = initiativeOrder[battle.currentTurnIndex];
+
     if (!currentParticipant || currentParticipant.id !== attacker.id) {
       return NextResponse.json(
         { error: "It is not attacker's turn" },
@@ -117,6 +126,7 @@ export async function POST(
     let attack = data.attackId
       ? attacker.attacks.find((a) => a.id === data.attackId || a.name === data.attackId)
       : null;
+
     if (!attack) {
       // Якщо не вказано ID або не знайдено, використовуємо першу доступну атаку
       attack = attacker.attacks[0];
@@ -147,15 +157,19 @@ export async function POST(
       if (p.id === attacker.id) {
         return attackResult.attackerUpdated;
       }
+
       if (p.id === target.id) {
         return attackResult.targetUpdated;
       }
+
       return p;
     });
 
     // Отримуємо поточний battleLog та додаємо нову дію
     const battleLog = (battle.battleLog as unknown as BattleAction[]) || [];
+
     const actionIndex = battleLog.length;
+
     const battleAction: BattleAction = {
       ...attackResult.battleAction,
       actionIndex,
@@ -176,6 +190,7 @@ export async function POST(
     // Відправляємо real-time оновлення через Pusher
     if (process.env.PUSHER_APP_ID) {
       const { pusherServer } = await import("@/lib/pusher");
+
       await pusherServer.trigger(
         `battle-${battleId}`,
         "battle-updated",
@@ -186,9 +201,11 @@ export async function POST(
     return NextResponse.json(updatedBattle);
   } catch (error) {
     console.error("Error processing attack:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

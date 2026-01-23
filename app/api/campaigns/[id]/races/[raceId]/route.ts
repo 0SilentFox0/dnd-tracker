@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { z } from "zod";
 import { Prisma } from "@prisma/client";
+import { z } from "zod";
+
+import { prisma } from "@/lib/db";
 import { requireDM, validateCampaignOwnership } from "@/lib/utils/api-auth";
 
 const updateRaceSchema = z.object({
@@ -43,6 +44,7 @@ export async function GET(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -61,6 +63,7 @@ export async function GET(
     return NextResponse.json(race);
   } catch (error) {
     console.error("Error fetching race:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -77,6 +80,7 @@ export async function PATCH(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -93,6 +97,7 @@ export async function PATCH(
     }
 
     const body = await request.json();
+
     const data = updateRaceSchema.parse(body);
 
     const updatedRace = await prisma.race.update({
@@ -121,12 +126,14 @@ export async function PATCH(
     return NextResponse.json(updatedRace);
   } catch (error) {
     console.error("Error updating race:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "Validation error", details: error.issues },
         { status: 400 }
       );
     }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -143,6 +150,7 @@ export async function DELETE(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -167,6 +175,7 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting race:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

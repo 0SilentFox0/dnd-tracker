@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
 import { z } from "zod";
+
+import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/utils/api-auth";
 
 const joinCampaignSchema = z.object({
@@ -11,12 +12,15 @@ export async function POST(request: Request) {
   try {
     // Перевіряємо авторизацію
     const authResult = await requireAuth();
+
     if (authResult instanceof NextResponse) {
       return authResult;
     }
 
     const { userId, authUser } = authResult;
+
     const body = await request.json();
+
     const { inviteCode } = joinCampaignSchema.parse(body);
 
     // Знаходимо кампанію за кодом
@@ -43,6 +47,7 @@ export async function POST(request: Request) {
 
     // Перевіряємо чи юзер вже є учасником
     const existingMember = campaign.members.find((m) => m.userId === userId);
+
     if (existingMember) {
       return NextResponse.json({ error: "Already a member" }, { status: 400 });
     }
@@ -86,9 +91,11 @@ export async function POST(request: Request) {
     return NextResponse.json(member);
   } catch (error) {
     console.error("Error joining campaign:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

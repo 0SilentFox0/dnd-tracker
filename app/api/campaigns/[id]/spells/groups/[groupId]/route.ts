@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
 import { z } from "zod";
+
+import { prisma } from "@/lib/db";
 import { requireDM, validateCampaignOwnership } from "@/lib/utils/api-auth";
 
 const updateSpellGroupSchema = z.object({
@@ -16,6 +17,7 @@ export async function PATCH(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -25,11 +27,13 @@ export async function PATCH(
     });
 
     const validationError = validateCampaignOwnership(spellGroup, id);
+
     if (validationError) {
       return validationError;
     }
 
     const body = await request.json();
+
     const data = updateSpellGroupSchema.parse(body);
 
     const updatedGroup = await prisma.spellGroup.update({
@@ -42,9 +46,11 @@ export async function PATCH(
     return NextResponse.json(updatedGroup);
   } catch (error) {
     console.error("Error updating spell group:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -61,6 +67,7 @@ export async function DELETE(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -70,6 +77,7 @@ export async function DELETE(
     });
 
     const validationError = validateCampaignOwnership(spellGroup, id);
+
     if (validationError) {
       return validationError;
     }
@@ -82,6 +90,7 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting spell group:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

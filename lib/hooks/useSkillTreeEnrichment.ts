@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import type { SkillTree, Skill } from "@/types/skill-tree";
+
+import type { Skill,SkillTree } from "@/types/skill-tree";
 import type { Skill as SkillFromLibraryType } from "@/types/skills";
 
 interface UseSkillTreeEnrichmentOptions {
@@ -26,11 +27,13 @@ export function useSkillTreeEnrichment({
       // Обогачуємо скіли на всіх рівнях
       Object.keys(enrichedLevels).forEach((levelKey) => {
         const level = enrichedLevels[levelKey as keyof typeof enrichedLevels];
+
         const enrichedCircles = { ...level };
 
         Object.keys(enrichedCircles).forEach((circleKey) => {
           const circleSkills =
             enrichedCircles[circleKey as keyof typeof enrichedCircles];
+
           const enrichedCircleSkills = circleSkills.map((skill) => {
             const skillWithIcon = skill as Skill & { icon?: string };
 
@@ -39,6 +42,7 @@ export function useSkillTreeEnrichment({
               const librarySkill = skillsMap.get(
                 skill.id
               )! as SkillFromLibraryType;
+
               const enrichedSkill: Skill = {
                 id: skill.id,
                 name: skill.name,
@@ -51,6 +55,7 @@ export function useSkillTreeEnrichment({
                     ? { icon: librarySkill.icon } 
                     : {}),
               };
+
               return enrichedSkill;
             }
 

@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
+
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
-import { BattleParticipant, BattleAction } from "@/types/battle";
-import { Prisma } from "@prisma/client";
 import {
-  processStartOfTurn,
   processEndOfTurn,
   processStartOfRound,
+  processStartOfTurn,
 } from "@/lib/utils/battle-turn";
 import { checkVictoryConditions } from "@/lib/utils/battle-victory";
+import { BattleAction,BattleParticipant } from "@/types/battle";
 
 export async function POST(
   request: Request,
@@ -16,7 +17,9 @@ export async function POST(
 ) {
   try {
     const { id, battleId } = await params;
+
     const supabase = await createClient();
+
     const {
       data: { user: authUser },
     } = await supabase.auth.getUser();
@@ -26,6 +29,7 @@ export async function POST(
     }
 
     const userId = authUser.id;
+
     // Перевіряємо права DM
     const campaign = await prisma.campaign.findUnique({
       where: { id },
@@ -55,7 +59,8 @@ export async function POST(
       );
     }
 
-    let initiativeOrder = battle.initiativeOrder as unknown as BattleParticipant[];
+    const initiativeOrder = battle.initiativeOrder as unknown as BattleParticipant[];
+
     const currentParticipant = initiativeOrder[battle.currentTurnIndex];
 
     if (!currentParticipant) {
@@ -79,16 +84,19 @@ export async function POST(
     if (nextRound > battle.currentRound) {
       // TODO: Додати pendingSummons в схему BattleScene
       const pendingSummons: BattleParticipant[] = [];
+
       const roundResult = processStartOfRound(
         initiativeOrder,
         nextRound,
         pendingSummons
       );
+
       updatedInitiativeOrder = roundResult.updatedInitiativeOrder;
     }
 
     // Обробляємо початок ходу нового учасника
     const nextParticipant = updatedInitiativeOrder[nextTurnIndex];
+
     if (nextParticipant) {
       const turnResult = processStartOfTurn(
         nextParticipant,
@@ -101,6 +109,7 @@ export async function POST(
 
       // Створюємо BattleAction для логу (якщо є зміни)
       const battleLog = (battle.battleLog as unknown as BattleAction[]) || [];
+
       const newLogEntries: BattleAction[] = [];
 
       if (turnResult.damageMessages.length > 0) {
@@ -164,7 +173,9 @@ export async function POST(
 
       // Перевіряємо умови перемоги після оновлення
       const victoryCheck = checkVictoryConditions(updatedInitiativeOrder);
+
       let finalStatus = battle.status;
+
       let completedAt = battle.completedAt;
 
       // Якщо умови перемоги виконані - автоматично завершуємо бій
@@ -185,6 +196,7 @@ export async function POST(
                 status: "active",
               };
             }
+
             return participant;
           });
         }
@@ -208,7 +220,9 @@ export async function POST(
             .map((p) => {
               // Знаходимо оригінального учасника для отримання oldHp
               const original = initiativeOrder.find((orig) => orig.id === p.id);
+
               const oldHp = original?.currentHp || p.currentHp;
+
               const newHp = p.currentHp;
               
               // Додаємо тільки якщо була зміна HP
@@ -221,6 +235,7 @@ export async function POST(
                   change: newHp - oldHp,
                 };
               }
+
               return null;
             })
             .filter((change): change is NonNullable<typeof change> => change !== null),
@@ -249,6 +264,7 @@ export async function POST(
       // Відправляємо real-time оновлення через Pusher
       if (process.env.PUSHER_APP_ID) {
         const { pusherServer } = await import("@/lib/pusher");
+
         await pusherServer.trigger(
           `battle-${battleId}`,
           "battle-updated",
@@ -288,6 +304,7 @@ export async function POST(
     );
   } catch (error) {
     console.error("Error advancing turn:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

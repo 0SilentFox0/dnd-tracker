@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { SkillTree } from "@/types/skill-tree";
+
 import { updateSkillTree } from "@/lib/api/skill-trees";
+import type { SkillTree } from "@/types/skill-tree";
 
 interface UseSkillTreeSaveOptions {
   campaignId: string;
@@ -15,6 +16,7 @@ export function useSkillTreeSave({
   onError,
 }: UseSkillTreeSaveOptions) {
   const router = useRouter();
+
   const [isSaving, setIsSaving] = useState(false);
 
   const saveSkillTree = async (treeToSave: SkillTree) => {
@@ -34,6 +36,7 @@ export function useSkillTreeSave({
       const skillsData = updatedTree.skills as SkillTree | { mainSkills?: SkillTree["mainSkills"] };
       
       let convertedTree: SkillTree;
+
       if ((skillsData as SkillTree).mainSkills) {
         // Вже правильний формат
         convertedTree = {
@@ -49,6 +52,7 @@ export function useSkillTreeSave({
           mainSkills: SkillTree["mainSkills"];
           ultimateSkill?: SkillTree["ultimateSkill"];
         };
+
         convertedTree = {
           id: updatedTree.id,
           campaignId: updatedTree.campaignId,
@@ -76,6 +80,7 @@ export function useSkillTreeSave({
       return convertedTree;
     } catch (error) {
       const err = error instanceof Error ? error : new Error("Unknown error");
+
       onError?.(err);
       throw err;
     } finally {

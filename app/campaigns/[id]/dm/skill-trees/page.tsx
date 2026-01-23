@@ -1,9 +1,11 @@
-import { getAuthUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/db";
-import type { Race } from "@/types/races";
+
 import { SkillTreePageClient } from "./page-client";
+
+import { getAuthUser } from "@/lib/auth";
+import { prisma } from "@/lib/db";
 import { createMockSkillTree } from "@/lib/utils/skill-tree-mock";
+import type { Race } from "@/types/races";
 
 export default async function SkillTreesPage({
   params,
@@ -11,7 +13,9 @@ export default async function SkillTreesPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+
   const user = await getAuthUser();
+
   const userId = user.id;
 
   const campaign = await prisma.campaign.findUnique({

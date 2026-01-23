@@ -63,6 +63,7 @@ export function calculateSpellSlotsForLevel(
   // Додаємо "особливі" слоти високого рівня
   for (let i = 1; i <= specialLevels; i++) {
     const specialSlotLevel = getSpecialSlotLevel(i);
+
     slots[specialSlotLevel.toString()].max += 1;
   }
 
@@ -72,6 +73,7 @@ export function calculateSpellSlotsForLevel(
   if (remainingSlots > 0) {
     // Розподіляємо рівномірно між рівнями 1, 2, 3
     const slotsPerLevel = Math.floor(remainingSlots / 3);
+
     const remainder = remainingSlots % 3;
 
     slots["1"].max = slotsPerLevel + (remainder >= 1 ? 1 : 0);
@@ -96,6 +98,7 @@ export function calculateSpellSlotGain(
     maxLevel,
     spellSlotProgression
   );
+
   const newSlots = calculateSpellSlotsForLevel(
     newLevel,
     maxLevel,
@@ -107,7 +110,9 @@ export function calculateSpellSlotGain(
   
   for (let level = 1; level <= 5; level++) {
     const levelKey = level.toString();
+
     const increase = newSlots[levelKey].max - currentSlots[levelKey].max;
+
     if (increase > 0) {
       gain[levelKey] = {
         max: increase,

@@ -14,6 +14,7 @@ export function calculateAverageSpellEffect(
 
   // Витягуємо число з типу кубика (d4 -> 4, d6 -> 6, etc.)
   const diceSize = parseInt(diceType.replace("d", ""), 10);
+
   if (isNaN(diceSize)) return 0;
 
   // Середнє значення для одного кубика

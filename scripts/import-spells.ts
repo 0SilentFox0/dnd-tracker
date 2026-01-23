@@ -11,9 +11,10 @@
  */
 
 import { PrismaClient } from "@prisma/client";
+import { parse } from "csv-parse/sync";
 import * as fs from "fs";
 import * as path from "path";
-import { parse } from "csv-parse/sync";
+
 import { DEFAULT_CAMPAIGN_ID } from "../lib/constants/campaigns";
 
 const prisma = new PrismaClient();
@@ -39,16 +40,19 @@ interface SpellRow {
 
 function parseCSV(filePath: string): SpellRow[] {
   const content = fs.readFileSync(filePath, "utf-8");
+
   const records = parse(content, {
     columns: true,
     skip_empty_lines: true,
     trim: true,
   });
+
   return records as SpellRow[];
 }
 
 function parseJSON(filePath: string): SpellRow[] {
   const content = fs.readFileSync(filePath, "utf-8");
+
   return JSON.parse(content);
 }
 
@@ -78,9 +82,11 @@ function normalizeSpell(row: SpellRow) {
 async function importSpells(campaignId: string, filePath: string, groupId?: string) {
   try {
     const fullPath = path.resolve(filePath);
+
     const ext = path.extname(fullPath).toLowerCase();
 
     let spells: SpellRow[];
+
     if (ext === ".csv") {
       spells = parseCSV(fullPath);
     } else if (ext === ".json") {
@@ -139,7 +145,9 @@ async function main() {
 
   // Використовуємо дефолтні значення якщо не вказано
   const filePath = args[0] || "imports/spells-import.csv";
+
   const campaignId = args[1] || DEFAULT_CAMPAIGN_ID;
+
   const groupId = args[2];
 
   console.log(`Використання файлу: ${filePath}`);

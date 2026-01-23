@@ -1,6 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { Edit,MoreVertical, Trash2 } from "lucide-react";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -14,9 +18,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { MoreVertical, Trash2, Edit } from "lucide-react";
 import type { MainSkill } from "@/types/main-skills";
 
 interface MainSkillCardProps {

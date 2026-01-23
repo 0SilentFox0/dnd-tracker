@@ -250,6 +250,7 @@ export function getCriticalEffect(
 ): CriticalEffect | undefined {
   const effects =
     type === "success" ? CRITICAL_SUCCESS_EFFECTS : CRITICAL_FAIL_EFFECTS;
+
   return effects.find((effect) => effect.id === id);
 }
 
@@ -261,6 +262,8 @@ export function getRandomCriticalEffect(
 ): CriticalEffect {
   const effects =
     type === "success" ? CRITICAL_SUCCESS_EFFECTS : CRITICAL_FAIL_EFFECTS;
+
   const randomId = Math.floor(Math.random() * effects.length) + 1;
+
   return getCriticalEffect(randomId, type) || effects[0];
 }

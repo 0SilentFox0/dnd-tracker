@@ -1,14 +1,15 @@
 "use client";
 
-import type { SkillTree } from "@/types/skill-tree";
-import type { SkillFromLibrary } from "@/lib/hooks/useSkills";
-import type { Race } from "@/types/races";
-import { SkillTreeHeader } from "@/components/skill-tree/SkillTreeHeader";
-import { SkillTreeContent } from "@/components/skill-tree/SkillTreeContent";
-import { SkillTreeCard } from "@/components/skill-tree/SkillTreeCard";
-import { useSkillTreePage } from "@/lib/hooks/useSkillTreePage";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
+
+import { SkillTreeCard } from "@/components/skill-tree/core/SkillTreeCard";
+import { SkillTreeContent } from "@/components/skill-tree/core/SkillTreeContent";
+import { SkillTreeHeader } from "@/components/skill-tree/core/SkillTreeHeader";
+import { Button } from "@/components/ui/button";
+import type { SkillFromLibrary } from "@/lib/hooks/useSkills";
+import { useSkillTreePage } from "@/lib/hooks/useSkillTreePage";
+import type { Race } from "@/types/races";
+import type { SkillTree } from "@/types/skill-tree";
 
 type SkillTreeData =
   | SkillTree

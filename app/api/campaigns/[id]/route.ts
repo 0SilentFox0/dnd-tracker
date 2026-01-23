@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
+
 import { prisma } from "@/lib/db";
 import { requireAuth, requireDM } from "@/lib/utils/api-auth";
-import { z } from "zod";
 
 const updateCampaignSchema = z.object({
   name: z.string().min(1).max(100).optional(),
@@ -21,6 +22,7 @@ export async function GET(
     
     // Перевіряємо авторизацію
     const authResult = await requireAuth();
+
     if (authResult instanceof NextResponse) {
       return authResult;
     }
@@ -45,6 +47,7 @@ export async function GET(
 
     // Перевіряємо чи юзер є учасником кампанії
     const userMember = campaign.members.find(m => m.userId === userId);
+
     if (!userMember) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
@@ -52,6 +55,7 @@ export async function GET(
     return NextResponse.json(campaign);
   } catch (error) {
     console.error("Error fetching campaign:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -68,11 +72,13 @@ export async function PATCH(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
 
     const { userId } = accessResult;
+
     const campaign = await prisma.campaign.findUnique({
       where: { id },
       include: {
@@ -85,11 +91,13 @@ export async function PATCH(
     }
 
     const userMember = campaign.members.find((m) => m.userId === userId);
+
     if (!userMember || userMember.role !== "dm") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const body = await request.json();
+
     const data = updateCampaignSchema.parse(body);
 
     const updatedCampaign = await prisma.campaign.update({
@@ -114,9 +122,11 @@ export async function PATCH(
     return NextResponse.json(updatedCampaign);
   } catch (error) {
     console.error("Error updating campaign:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -1,5 +1,5 @@
-import type { Skill } from "@/types/skills";
 import type { MainSkill } from "@/types/main-skills";
+import type { Skill } from "@/types/skills";
 
 /**
  * Групує скіли по групах (застаріла функція, використовується для сумісності)
@@ -10,6 +10,7 @@ export function groupSkillsByGroup(skills: Skill[]): Map<string, Skill[]> {
   skills.forEach((skill) => {
     // Перевіряємо чи є spellGroup об'єкт або spellGroupId
     let groupName = "Без групи";
+
     if (skill.spellGroup?.name) {
       groupName = skill.spellGroup.name;
     } else if (skill.spellGroupId) {
@@ -21,6 +22,7 @@ export function groupSkillsByGroup(skills: Skill[]): Map<string, Skill[]> {
     if (!grouped.has(groupName)) {
       grouped.set(groupName, []);
     }
+
     grouped.get(groupName)!.push(skill);
   });
 
@@ -44,8 +46,10 @@ export function groupSkillsByMainSkill(
   skills.forEach((skill) => {
     // Перевіряємо чи є mainSkillId
     let groupName = "Без основного навику";
+
     if (skill.mainSkillId) {
       const mainSkill = mainSkills.find((ms) => ms.id === skill.mainSkillId);
+
       if (mainSkill) {
         groupName = mainSkill.name;
       }
@@ -54,6 +58,7 @@ export function groupSkillsByMainSkill(
     if (!grouped.has(groupName)) {
       grouped.set(groupName, []);
     }
+
     grouped.get(groupName)!.push(skill);
   });
 
@@ -74,7 +79,9 @@ export function convertGroupedSkillsToArray(
   return Array.from(groupedSkillsMap.entries()).sort(([nameA], [nameB]) => {
     // "Без групи" або "Без основного навику" завжди останній
     if (nameA === "Без групи" || nameA === "Без основного навику") return 1;
+
     if (nameB === "Без групи" || nameB === "Без основного навику") return -1;
+
     return nameA.localeCompare(nameB);
   });
 }

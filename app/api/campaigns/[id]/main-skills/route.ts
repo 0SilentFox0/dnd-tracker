@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
 import { z } from "zod";
+
+import { prisma } from "@/lib/db";
 import { requireDM } from "@/lib/utils/api-auth";
 
 const createMainSkillSchema = z.object({
@@ -22,6 +23,7 @@ export async function GET(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -34,6 +36,7 @@ export async function GET(
     return NextResponse.json(mainSkills);
   } catch (error) {
     console.error("Error fetching main skills:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -50,11 +53,13 @@ export async function POST(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
 
     const body = await request.json();
+
     const data = createMainSkillSchema.parse(body);
 
     const mainSkill = await prisma.mainSkill.create({
@@ -69,9 +74,11 @@ export async function POST(
     return NextResponse.json(mainSkill);
   } catch (error) {
     console.error("Error creating main skill:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

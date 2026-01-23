@@ -1,17 +1,18 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo,useState } from "react";
+
 import { Accordion } from "@/components/ui/accordion";
+import { DeleteAllUnitsDialog } from "@/components/units/dialogs/DeleteAllUnitsDialog";
+import { UnitGroupAccordion } from "@/components/units/list/UnitGroupAccordion";
+import { UnitsPageHeader } from "@/components/units/ui/UnitsPageHeader";
+import { useRaces } from "@/lib/hooks/useRaces";
 import {
-  useUnits,
   useDeleteAllUnits,
   useDeleteUnit,
+  useUnits,
 } from "@/lib/hooks/useUnits";
-import { useRaces } from "@/lib/hooks/useRaces";
 import type { Unit } from "@/types/units";
-import { UnitsPageHeader } from "@/components/units/UnitsPageHeader";
-import { UnitGroupAccordion } from "@/components/units/UnitGroupAccordion";
-import { DeleteAllUnitsDialog } from "@/components/units/DeleteAllUnitsDialog";
 
 interface DMUnitsPageClientProps {
   campaignId: string;
@@ -36,6 +37,7 @@ export function DMUnitsPageClient({
 
   // Мутації
   const deleteAllUnitsMutation = useDeleteAllUnits(campaignId);
+
   const deleteUnitMutation = useDeleteUnit(campaignId);
 
   const handleDeleteUnit = (unitId: string) => {
@@ -53,16 +55,22 @@ export function DMUnitsPageClient({
   // Групуємо юніти по расах
   const groupedUnits = useMemo(() => {
     const grouped: Record<string, Unit[]> = {};
+
     for (const unit of units) {
       const raceName = unit.race || "Без раси";
+
       if (!grouped[raceName]) {
         grouped[raceName] = [];
       }
+
       grouped[raceName].push(unit);
     }
+
     return Object.entries(grouped).sort(([a], [b]) => {
       if (a === "Без раси") return 1;
+
       if (b === "Без раси") return -1;
+
       return a.localeCompare(b);
     });
   }, [units]);

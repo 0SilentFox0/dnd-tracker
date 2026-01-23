@@ -1,22 +1,23 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo,useState } from "react";
+
+import { DeleteAllSpellsDialog } from "@/components/spells/dialogs/DeleteAllSpellsDialog";
+import { SpellGroupAccordion } from "@/components/spells/list/SpellGroupAccordion";
+import { SpellsPageHeader } from "@/components/spells/ui/SpellsPageHeader";
 import { Accordion } from "@/components/ui/accordion";
 import {
-  useSpells,
-  useSpellGroups,
-  useRemoveSpellFromGroup,
-  useMoveSpellToGroup,
   useDeleteAllSpells,
+  useMoveSpellToGroup,
+  useRemoveSpellFromGroup,
+  useSpellGroups,
+  useSpells,
 } from "@/lib/hooks/useSpells";
-import type { Spell } from "@/types/spells";
 import {
-  groupSpellsByGroupAndLevel,
   convertGroupedSpellsToArray,
+  groupSpellsByGroupAndLevel,
 } from "@/lib/utils/spells";
-import { SpellsPageHeader } from "@/components/spells/SpellsPageHeader";
-import { SpellGroupAccordion } from "@/components/spells/SpellGroupAccordion";
-import { DeleteAllSpellsDialog } from "@/components/spells/DeleteAllSpellsDialog";
+import type { Spell } from "@/types/spells";
 
 interface DMSpellsPageClientProps {
   campaignId: string;
@@ -35,11 +36,14 @@ export function DMSpellsPageClient({
     campaignId,
     initialSpells
   );
+
   const { data: spellGroups = [] } = useSpellGroups(campaignId);
 
   // Мутації
   const removeSpellFromGroupMutation = useRemoveSpellFromGroup(campaignId);
+
   const moveSpellMutation = useMoveSpellToGroup(campaignId);
+
   const deleteAllSpellsMutation = useDeleteAllSpells(campaignId);
 
   const handleRemoveSpellFromGroup = (spellId: string) => {
@@ -61,6 +65,7 @@ export function DMSpellsPageClient({
   // Групуємо заклинання спочатку по групах, потім по рівнях
   const sortedGroupedSpells = useMemo(() => {
     const groupedSpellsMap = groupSpellsByGroupAndLevel(spells);
+
     return convertGroupedSpellsToArray(groupedSpellsMap);
   }, [spells]);
 

@@ -1,8 +1,10 @@
-import { getAuthUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
+
+import { DMRacesPageClient } from "./page-client";
+
+import { getAuthUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import type { Race } from "@/types/races";
-import { DMRacesPageClient } from "./page-client";
 
 export default async function DMRacesPage({
   params,
@@ -10,7 +12,9 @@ export default async function DMRacesPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+
   const user = await getAuthUser();
+
   const userId = user.id;
 
   const campaign = await prisma.campaign.findUnique({

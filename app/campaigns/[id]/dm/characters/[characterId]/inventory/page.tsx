@@ -1,7 +1,12 @@
 "use client";
 
 import { use, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+
+import { CurrencySection } from "@/components/inventory/CurrencySection";
+import { EquippedItemsSection } from "@/components/inventory/EquippedItemsSection";
+import { ItemListSection } from "@/components/inventory/ItemListSection";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,13 +15,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import Link from "next/link";
-import { useInventory } from "@/lib/hooks/useInventory";
-import { getInventory, updateInventory } from "@/lib/api/inventory";
 import { getCharacter } from "@/lib/api/characters";
-import { CurrencySection } from "@/components/inventory/CurrencySection";
-import { EquippedItemsSection } from "@/components/inventory/EquippedItemsSection";
-import { ItemListSection } from "@/components/inventory/ItemListSection";
+import { getInventory, updateInventory } from "@/lib/api/inventory";
+import { useInventory } from "@/lib/hooks/useInventory";
 
 export default function CharacterInventoryPage({
   params,
@@ -24,6 +25,7 @@ export default function CharacterInventoryPage({
   params: Promise<{ id: string; characterId: string }>;
 }) {
   const { id, characterId } = use(params);
+
   const router = useRouter();
 
   const {

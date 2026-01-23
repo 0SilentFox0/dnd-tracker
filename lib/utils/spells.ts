@@ -15,9 +15,11 @@ export function groupSpellsByGroup(spells: Spell[]): Map<string, Spell[]> {
 
   spells.forEach((spell) => {
     const groupName = spell.spellGroup?.name || "Без групи";
+
     if (!grouped.has(groupName)) {
       grouped.set(groupName, []);
     }
+
     grouped.get(groupName)!.push(spell);
   });
 
@@ -25,6 +27,7 @@ export function groupSpellsByGroup(spells: Spell[]): Map<string, Spell[]> {
   grouped.forEach((groupSpells) => {
     groupSpells.sort((a, b) => {
       if (a.level !== b.level) return a.level - b.level;
+
       return a.name.localeCompare(b.name);
     });
   });
@@ -42,6 +45,7 @@ export function groupSpellsByGroupAndLevel(
 
   spells.forEach((spell) => {
     const groupName = spell.spellGroup?.name || "Без групи";
+
     const levelKey = formatSpellLevel(spell.level);
 
     if (!groupedSpellsMap.has(groupName)) {
@@ -49,6 +53,7 @@ export function groupSpellsByGroupAndLevel(
     }
 
     const levelMap = groupedSpellsMap.get(groupName)!;
+
     if (!levelMap.has(levelKey)) {
       levelMap.set(levelKey, []);
     }
@@ -75,10 +80,14 @@ export function sortSpellLevels(
   return [...levels].sort(([levelA], [levelB]) => {
     // Cantrip завжди перший
     if (levelA === "Cantrip") return -1;
+
     if (levelB === "Cantrip") return 1;
+
     // Інші рівні сортуються числово
     const numA = parseInt(levelA.replace("Рівень ", "")) || 0;
+
     const numB = parseInt(levelB.replace("Рівень ", "")) || 0;
+
     return numA - numB;
   });
 }
@@ -92,6 +101,7 @@ export function convertGroupedSpellsToArray(
   return Array.from(groupedSpellsMap.entries()).map(
     ([groupName, levelMap]) => {
       const sortedLevels = sortSpellLevels(Array.from(levelMap.entries()));
+
       return [groupName, sortedLevels] as [string, [string, Spell[]][]];
     }
   );

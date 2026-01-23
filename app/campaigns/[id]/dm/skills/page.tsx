@@ -1,7 +1,9 @@
-import { getAuthUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/db";
+
 import { DMSkillsPageClient } from "./page-client";
+
+import { getAuthUser } from "@/lib/auth";
+import { prisma } from "@/lib/db";
 import type { Race } from "@/types/races";
 import type { SkillTriggers } from "@/types/skill-triggers";
 
@@ -11,7 +13,9 @@ export default async function DMSkillsPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+
   const user = await getAuthUser();
+
   const userId = user.id;
 
   const campaign = await prisma.campaign.findUnique({

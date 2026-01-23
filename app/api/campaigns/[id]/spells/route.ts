@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { z } from "zod";
 import { Prisma } from "@prisma/client";
-import { requireDM, requireCampaignAccess } from "@/lib/utils/api-auth";
+import { z } from "zod";
+
+import { prisma } from "@/lib/db";
+import { requireCampaignAccess,requireDM } from "@/lib/utils/api-auth";
 
 const createSpellSchema = z.object({
   name: z.string().min(1).max(100),
@@ -44,6 +45,7 @@ export async function POST(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -51,6 +53,7 @@ export async function POST(
     const { campaign } = accessResult;
 
     const body = await request.json();
+
     const data = createSpellSchema.parse(body);
 
     const spell = await prisma.spell.create({
@@ -86,9 +89,11 @@ export async function POST(
     return NextResponse.json(spell);
   } catch (error) {
     console.error("Error creating spell:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -105,6 +110,7 @@ export async function GET(
     
     // Перевіряємо доступ до кампанії (не обов'язково DM)
     const accessResult = await requireCampaignAccess(id, false);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -124,6 +130,7 @@ export async function GET(
     return NextResponse.json(spells);
   } catch (error) {
     console.error("Error fetching spells:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -1,17 +1,18 @@
 "use client";
 
 import { useState } from "react";
+
+import { CreateRaceDialog } from "@/components/races/CreateRaceDialog";
+import { RaceCard } from "@/components/races/RaceCard";
+import { RacesPageHeader } from "@/components/races/RacesPageHeader";
 import { Accordion } from "@/components/ui/accordion";
 import {
-  useRaces,
   useCreateRace,
-  useUpdateRace,
   useDeleteRace,
+  useRaces,
+  useUpdateRace,
 } from "@/lib/hooks/useRaces";
 import type { Race } from "@/types/races";
-import { RacesPageHeader } from "@/components/races/RacesPageHeader";
-import { RaceCard } from "@/components/races/RaceCard";
-import { CreateRaceDialog } from "@/components/races/CreateRaceDialog";
 
 interface DMRacesPageClientProps {
   campaignId: string;
@@ -32,7 +33,9 @@ export function DMRacesPageClient({
 
   // Мутації
   const createRaceMutation = useCreateRace(campaignId);
+
   const updateRaceMutation = useUpdateRace(campaignId);
+
   const deleteRaceMutation = useDeleteRace(campaignId);
 
   const handleDeleteRace = (raceId: string) => {

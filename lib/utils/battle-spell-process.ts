@@ -2,18 +2,19 @@
  * Повна обробка заклинання з усіма модифікаторами та ефектами
  */
 
-import {
-  BattleParticipant,
-  BattleAction,
-} from "@/types/battle";
-import {
-  calculateSpellDamageWithEnhancements,
-  calculateSpellAdditionalModifier,
-} from "./battle-spell-calculations";
-import { applyResistance } from "./battle-resistance";
-import { getAbilityModifier, getProficiencyBonus } from "./calculations";
-import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
 import { addActiveEffect } from "./battle-effects";
+import { applyResistance } from "./battle-resistance";
+import {
+  calculateSpellAdditionalModifier,
+  calculateSpellDamageWithEnhancements,
+} from "./battle-spell-calculations";
+import { getAbilityModifier, getProficiencyBonus } from "./calculations";
+
+import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
+import {
+  BattleAction,
+  BattleParticipant,
+} from "@/types/battle";
 
 /**
  * Інтерфейс заклинання для бою
@@ -87,13 +88,17 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
     additionalRollResult,
   } = params;
 
-  let updatedCaster = { ...caster };
+  const updatedCaster = { ...caster };
+
   const targets = allParticipants.filter((p) => targetIds.includes(p.id));
-  let updatedTargets = targets.map((t) => ({ ...t }));
+
+  const updatedTargets = targets.map((t) => ({ ...t }));
 
   // 1. Перевіряємо чи є spell slot
   const spellLevel = spell.level.toString();
+
   const spellSlot = updatedCaster.spellSlots[spellLevel];
+
   if (!spellSlot || spellSlot.current <= 0) {
     const battleAction: BattleAction = {
       id: `spell-${caster.id}-${Date.now()}`,
@@ -107,6 +112,7 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
       actionType: "spell",
       targets: targetIds.map((id) => {
         const target = allParticipants.find((p) => p.id === id);
+
         return {
           participantId: id,
           participantName: target?.name || "Unknown",
@@ -152,10 +158,12 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
 
     // Застосовуємо опір/імунітет для кожної цілі
     const allResistanceBreakdown: string[] = [];
+
     const targetDamages: Array<{ target: BattleParticipant; finalDamage: number }> = [];
 
     for (let i = 0; i < updatedTargets.length; i++) {
       const target = updatedTargets[i];
+
       const savingThrow = savingThrows.find((st) => st.participantId === target.id);
 
       // Розраховуємо урон з урахуванням saving throw
@@ -164,11 +172,14 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
       if (spell.savingThrow && savingThrow) {
         // Розраховуємо totalSave
         const ability = spell.savingThrow.ability.toLowerCase();
+
         const statModifier = updatedCaster.modifiers[ability as keyof typeof updatedCaster.modifiers] || 0;
+
         const totalSave = savingThrow.roll + statModifier;
 
         // Перевіряємо чи успішний save
         const spellSaveDC = updatedCaster.spellSaveDC || 10;
+
         if (totalSave >= spellSaveDC) {
           // Успішний save
           if (spell.savingThrow.onSuccess === "half") {
@@ -181,7 +192,9 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
 
       // Застосовуємо опір/імунітет
       const damageType = spell.damageElement || "magic";
+
       const resistanceResult = applyResistance(target, damageToApply, damageType);
+
       targetDamages.push({ target, finalDamage: resistanceResult.finalDamage });
       allResistanceBreakdown.push(...resistanceResult.breakdown);
     }
@@ -195,15 +208,19 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
     // Застосовуємо урон до цілей
     for (const { target, finalDamage } of targetDamages) {
       const targetIndex = updatedTargets.findIndex((t) => t.id === target.id);
+
       if (targetIndex === -1) continue;
 
       const oldHp = updatedTargets[targetIndex].currentHp;
+
       const oldTempHp = updatedTargets[targetIndex].tempHp;
+
       let remainingDamage = finalDamage;
 
       // Спочатку віднімаємо з tempHp
       if (updatedTargets[targetIndex].tempHp > 0 && remainingDamage > 0) {
         const tempDamage = Math.min(updatedTargets[targetIndex].tempHp, remainingDamage);
+
         updatedTargets[targetIndex].tempHp -= tempDamage;
         remainingDamage -= tempDamage;
       }
@@ -238,9 +255,11 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
     // Застосовуємо лікування до цілей
     for (const target of updatedTargets) {
       const targetIndex = updatedTargets.findIndex((t) => t.id === target.id);
+
       if (targetIndex === -1) continue;
 
       const healing = spellCalculation.totalHealing || 0;
+
       updatedTargets[targetIndex].currentHp = Math.min(
         updatedTargets[targetIndex].maxHp,
         updatedTargets[targetIndex].currentHp + healing
@@ -270,9 +289,11 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
     // Додаємо DOT ефект до цілей
     for (const target of updatedTargets) {
       const targetIndex = updatedTargets.findIndex((t) => t.id === target.id);
+
       if (targetIndex === -1) continue;
 
       const modifierType = additionalModifier.modifier || "poison";
+
       const dotDamage = additionalModifier.damage || 0;
 
       if (dotDamage > 0 && additionalModifier.duration > 0) {
@@ -317,6 +338,7 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
   // 7. Створюємо BattleAction
   const hpChanges = updatedTargets.map((target, index) => {
     const originalTarget = targets[index];
+
     if (!originalTarget) return null;
 
     const change = spell.damageType === "heal"
@@ -334,10 +356,15 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
 
   const savingThrowsDetails = savingThrows.map((st) => {
     const target = allParticipants.find((p) => p.id === st.participantId);
+
     const ability = spell.savingThrow?.ability || "unknown";
+
     const statModifier = updatedCaster.modifiers[ability.toLowerCase() as keyof typeof updatedCaster.modifiers] || 0;
+
     const totalSave = st.roll + statModifier;
+
     const spellSaveDC = updatedCaster.spellSaveDC || 10;
+
     const result = totalSave >= spellSaveDC ? "success" : "fail";
 
     return {
@@ -360,6 +387,7 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
     actionType: "spell",
     targets: targetIds.map((id) => {
       const target = allParticipants.find((p) => p.id === id);
+
       return {
         participantId: id,
         participantName: target?.name || "Unknown",

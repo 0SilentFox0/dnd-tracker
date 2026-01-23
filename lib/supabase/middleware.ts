@@ -1,5 +1,5 @@
+import { type NextRequest,NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
-import { NextResponse, type NextRequest } from 'next/server'
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -37,18 +37,23 @@ export async function updateSession(request: NextRequest) {
   // Захищаємо приватні маршрути
   // Виключаємо публічні маршрути та callback
   const publicPaths = ['/sign-in', '/sign-up', '/auth/callback']
+
   const isPublicPath = publicPaths.some(path => request.nextUrl.pathname.startsWith(path))
   
   if (!user && !isPublicPath) {
     const url = request.nextUrl.clone()
+
     url.pathname = '/sign-in'
+
     return NextResponse.redirect(url)
   }
   
   // Якщо користувач авторизований і на сторінці входу - перенаправляємо на campaigns
   if (user && request.nextUrl.pathname.startsWith('/sign-in')) {
     const url = request.nextUrl.clone()
+
     url.pathname = '/campaigns'
+
     return NextResponse.redirect(url)
   }
 

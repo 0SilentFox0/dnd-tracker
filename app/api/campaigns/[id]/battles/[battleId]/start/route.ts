@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
+
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
-import { BattleParticipant } from "@/types/battle";
-import { Prisma } from "@prisma/client";
 import {
   createBattleParticipantFromCharacter,
   createBattleParticipantFromUnit,
@@ -12,6 +12,7 @@ import {
   calculateInitiative,
   sortByInitiative,
 } from "@/lib/utils/battle-start";
+import { BattleParticipant } from "@/types/battle";
 
 export async function POST(
   request: Request,
@@ -19,7 +20,9 @@ export async function POST(
 ) {
   try {
     const { id, battleId } = await params;
+
     const supabase = await createClient();
+
     const {
       data: { user: authUser },
     } = await supabase.auth.getUser();
@@ -29,6 +32,7 @@ export async function POST(
     }
 
     const userId = authUser.id;
+
     // Перевіряємо права DM
     const campaign = await prisma.campaign.findUnique({
       where: { id },
@@ -76,11 +80,12 @@ export async function POST(
         });
 
         if (character) {
-          let battleParticipant = await createBattleParticipantFromCharacter(
+          const battleParticipant = await createBattleParticipantFromCharacter(
             character,
             battleId,
             participant.side
           );
+
           // Застосовуємо початкові ефекти (після створення всіх учасників)
           initiativeOrder.push(battleParticipant);
         }
@@ -91,6 +96,7 @@ export async function POST(
 
         if (unit) {
           const quantity = participant.quantity || 1;
+
           for (let i = 0; i < quantity; i++) {
             const battleParticipant = await createBattleParticipantFromUnit(
               unit,
@@ -98,6 +104,7 @@ export async function POST(
               participant.side,
               i + 1
             );
+
             initiativeOrder.push(battleParticipant);
           }
         }
@@ -113,6 +120,7 @@ export async function POST(
     const initiativeOrderWithCalculatedInitiative = updatedInitiativeOrder.map(
       (participant) => {
         const calculatedInitiative = calculateInitiative(participant);
+
         return {
           ...participant,
           initiative: calculatedInitiative,
@@ -138,6 +146,7 @@ export async function POST(
     // Відправляємо real-time оновлення через Pusher
     if (process.env.PUSHER_APP_ID) {
       const { pusherServer } = await import("@/lib/pusher");
+
       await pusherServer.trigger(
         `battle-${battleId}`,
         "battle-started",
@@ -148,6 +157,7 @@ export async function POST(
     return NextResponse.json(updatedBattle);
   } catch (error) {
     console.error("Error starting battle:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

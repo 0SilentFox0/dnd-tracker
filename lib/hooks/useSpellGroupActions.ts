@@ -1,7 +1,8 @@
-import { useState, useCallback } from "react";
+import { useCallback,useState } from "react";
+
 import {
-  useRenameSpellGroup,
   useRemoveAllSpellsFromGroup,
+  useRenameSpellGroup,
 } from "@/lib/hooks/useSpells";
 
 interface UseSpellGroupActionsProps {
@@ -19,14 +20,18 @@ export function useSpellGroupActions({
   groupId,
 }: UseSpellGroupActionsProps) {
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+
   const [removeAllDialogOpen, setRemoveAllDialogOpen] = useState(false);
+
   const [newGroupName, setNewGroupName] = useState(groupName);
 
   const renameGroupMutation = useRenameSpellGroup(campaignId);
+
   const removeAllSpellsMutation = useRemoveAllSpellsFromGroup(campaignId);
 
   const handleRenameGroup = useCallback(() => {
     if (!groupId || !newGroupName.trim()) return;
+
     renameGroupMutation.mutate(
       {
         groupId,
@@ -43,6 +48,7 @@ export function useSpellGroupActions({
 
   const handleRemoveAllSpells = useCallback(() => {
     if (!groupId) return;
+
     removeAllSpellsMutation.mutate(groupId, {
       onSuccess: () => {
         setRemoveAllDialogOpen(false);

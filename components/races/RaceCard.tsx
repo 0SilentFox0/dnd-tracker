@@ -1,18 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Circle, Edit, MoreVertical, Plus, Shield,Trash2 } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreVertical, Trash2, Edit, Plus, Circle, Shield } from "lucide-react";
-import type { Race, StatModifier } from "@/types/races";
 import { ABILITY_SCORES } from "@/lib/constants/abilities";
+import type { Race, StatModifier } from "@/types/races";
 
 interface RaceCardProps {
   race: Race;
@@ -24,6 +25,7 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
   const availableSkillsCount = Array.isArray(race.availableSkills)
     ? race.availableSkills.length
     : 0;
+
   const disabledSkillsCount = Array.isArray(race.disabledSkills)
     ? race.disabledSkills.length
     : 0;
@@ -59,6 +61,7 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
   // Отримуємо всі характеристики з модифікаторами
   const modifiedAbilities = ABILITY_SCORES.filter((ability) => {
     const modifiers = passiveAbility?.statModifiers?.[ability.key];
+
     return (
       modifiers &&
       (modifiers.bonus || modifiers.nonNegative || modifiers.alwaysZero)
@@ -125,12 +128,14 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
                   {modifiedAbilities.map((ability) => {
                     const modifiers =
                       passiveAbility.statModifiers?.[ability.key];
+
                     // Визначаємо яку іконку показувати (тільки одну)
                     let iconToShow:
                       | "bonus"
                       | "nonNegative"
                       | "alwaysZero"
                       | null = null;
+
                     if (modifiers?.alwaysZero) {
                       iconToShow = "alwaysZero";
                     } else if (modifiers?.nonNegative) {

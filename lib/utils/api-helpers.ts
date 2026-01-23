@@ -15,9 +15,11 @@ export function getCampaignId(
   if (paramsId) {
     return paramsId;
   }
+
   if (useDefault) {
     return DEFAULT_CAMPAIGN_ID;
   }
+
   throw new Error("Campaign ID is required");
 }
 
@@ -29,5 +31,6 @@ export function getCampaignApiUrl(
   campaignId?: string | null
 ): string {
   const id = getCampaignId(campaignId);
+
   return `/api/campaigns/${id}${endpoint}`;
 }

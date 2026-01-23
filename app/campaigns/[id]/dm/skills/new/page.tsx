@@ -1,7 +1,8 @@
-import { getAuthUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
+
+import { SkillCreateForm } from "@/components/skills/form/SkillCreateForm";
+import { getAuthUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { SkillCreateForm } from "@/components/skills/SkillCreateForm";
 import type { Race } from "@/types/races";
 
 export default async function NewSkillPage({
@@ -10,7 +11,9 @@ export default async function NewSkillPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+
   const user = await getAuthUser();
+
   const userId = user.id;
 
   const campaign = await prisma.campaign.findUnique({

@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
-import { BattleParticipant, BattleAction } from "@/types/battle";
 import { Prisma } from "@prisma/client";
-import { completeBattle, checkVictoryConditions } from "@/lib/utils/battle-victory";
+import { z } from "zod";
+
+import { prisma } from "@/lib/db";
+import { createClient } from "@/lib/supabase/server";
+import { checkVictoryConditions,completeBattle } from "@/lib/utils/battle-victory";
+import { BattleAction,BattleParticipant } from "@/types/battle";
 
 const completeBattleSchema = z.object({
   result: z.enum(["victory", "defeat"]).optional(), // Якщо не вказано - автоматична перевірка
@@ -16,7 +17,9 @@ export async function POST(
 ) {
   try {
     const { id, battleId } = await params;
+
     const supabase = await createClient();
+
     const {
       data: { user: authUser },
     } = await supabase.auth.getUser();
@@ -26,6 +29,7 @@ export async function POST(
     }
 
     const userId = authUser.id;
+
     // Перевіряємо права DM
     const campaign = await prisma.campaign.findUnique({
       where: { id },
@@ -56,18 +60,21 @@ export async function POST(
     }
 
     const body = await request.json();
+
     const data = completeBattleSchema.parse(body);
 
     const initiativeOrder = battle.initiativeOrder as unknown as BattleParticipant[];
 
     // Визначаємо результат бою
     let result: "victory" | "defeat";
+
     if (data.result) {
       // Якщо результат вказано вручну
       result = data.result;
     } else {
       // Автоматична перевірка умов перемоги
       const victoryCheck = checkVictoryConditions(initiativeOrder);
+
       if (victoryCheck.result) {
         result = victoryCheck.result;
       } else {
@@ -85,7 +92,9 @@ export async function POST(
 
     // Отримуємо поточний battleLog та додаємо нову дію
     const battleLog = (battle.battleLog as unknown as BattleAction[]) || [];
+
     const actionIndex = battleLog.length;
+
     const finalBattleAction: BattleAction = {
       ...battleAction,
       battleId,
@@ -109,6 +118,7 @@ export async function POST(
     // Відправляємо real-time оновлення через Pusher
     if (process.env.PUSHER_APP_ID) {
       const { pusherServer } = await import("@/lib/pusher");
+
       await pusherServer.trigger(
         `battle-${battleId}`,
         "battle-completed",
@@ -124,9 +134,11 @@ export async function POST(
     return NextResponse.json(updatedBattle);
   } catch (error) {
     console.error("Error completing battle:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

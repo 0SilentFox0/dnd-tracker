@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
 import { z } from "zod";
+
+import { prisma } from "@/lib/db";
 import { requireDM, validateCampaignOwnership } from "@/lib/utils/api-auth";
 
 const updateMainSkillSchema = z.object({
@@ -22,6 +23,7 @@ export async function GET(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -31,6 +33,7 @@ export async function GET(
     });
 
     const validationError = validateCampaignOwnership(mainSkill, id);
+
     if (validationError) {
       return validationError;
     }
@@ -38,6 +41,7 @@ export async function GET(
     return NextResponse.json(mainSkill);
   } catch (error) {
     console.error("Error fetching main skill:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -54,6 +58,7 @@ export async function PATCH(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -63,11 +68,13 @@ export async function PATCH(
     });
 
     const validationError = validateCampaignOwnership(mainSkill, id);
+
     if (validationError) {
       return validationError;
     }
 
     const body = await request.json();
+
     const data = updateMainSkillSchema.parse(body);
 
     const updatedMainSkill = await prisma.mainSkill.update({
@@ -82,9 +89,11 @@ export async function PATCH(
     return NextResponse.json(updatedMainSkill);
   } catch (error) {
     console.error("Error updating main skill:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -101,6 +110,7 @@ export async function DELETE(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -110,6 +120,7 @@ export async function DELETE(
     });
 
     const validationError = validateCampaignOwnership(mainSkill, id);
+
     if (validationError) {
       return validationError;
     }
@@ -121,6 +132,7 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting main skill:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -1,7 +1,23 @@
 "use client";
 
 import { use } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+
+import { CharacterBasicInfo } from "@/components/characters/basic/CharacterBasicInfo";
+import { CharacterLanguagesSection } from "@/components/characters/roleplay/CharacterLanguagesSection";
+import { CharacterRoleplaySection } from "@/components/characters/roleplay/CharacterRoleplaySection";
+import { CharacterSkillsSection } from "@/components/characters/skills/CharacterSkillsSection";
+import { CharacterSpellsSection } from "@/components/characters/spells/CharacterSpellsSection";
+import { CharacterAbilityScores } from "@/components/characters/stats/CharacterAbilityScores";
+import { CharacterCombatParams } from "@/components/characters/stats/CharacterCombatParams";
+import { CharacterImmunities } from "@/components/characters/stats/CharacterImmunities";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,25 +26,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from "@/components/ui/accordion";
-import Link from "next/link";
-import { useCharacterForm } from "@/lib/hooks/useCharacterForm";
-import { useCampaignMembers } from "@/lib/hooks/useCampaignMembers";
-import { useRaces } from "@/lib/hooks/useRaces";
 import { createCharacter } from "@/lib/api/characters";
-import { CharacterBasicInfo } from "@/components/characters/CharacterBasicInfo";
-import { CharacterAbilityScores } from "@/components/characters/CharacterAbilityScores";
-import { CharacterCombatParams } from "@/components/characters/CharacterCombatParams";
-import { CharacterSkillsSection } from "@/components/characters/CharacterSkillsSection";
-import { CharacterSpellsSection } from "@/components/characters/CharacterSpellsSection";
-import { CharacterLanguagesSection } from "@/components/characters/CharacterLanguagesSection";
-import { CharacterRoleplaySection } from "@/components/characters/CharacterRoleplaySection";
-import { CharacterImmunities } from "@/components/characters/CharacterImmunities";
+import { useCampaignMembers } from "@/lib/hooks/useCampaignMembers";
+import { useCharacterForm } from "@/lib/hooks/useCharacterForm";
+import { useRaces } from "@/lib/hooks/useRaces";
 
 export default function NewCharacterPage({
   params,
@@ -36,21 +37,23 @@ export default function NewCharacterPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+
   const router = useRouter();
+
   const { members, loading: membersLoading } = useCampaignMembers(id);
+
   const { data: races = [] } = useRaces(id);
 
   const {
     formData,
     loading,
     error,
-    updateField,
-    toggleSavingThrow,
-    toggleSkill,
-    addLanguage,
-    removeLanguage,
-    addKnownSpell,
-    removeKnownSpell,
+    basicInfo,
+    abilityScores,
+    combatStats,
+    skills,
+    spellcasting,
+    roleplay,
     handleSubmit,
   } = useCharacterForm({
     onSubmit: async (data) => {
@@ -82,8 +85,7 @@ export default function NewCharacterPage({
                 <AccordionTrigger>1. Загальна інформація</AccordionTrigger>
                 <AccordionContent>
                   <CharacterBasicInfo
-                    formData={formData}
-                    onUpdate={updateField}
+                    basicInfo={basicInfo}
                     campaignMembers={members}
                     races={races}
                   />
@@ -95,8 +97,7 @@ export default function NewCharacterPage({
                 <AccordionTrigger>2. Основні характеристики</AccordionTrigger>
                 <AccordionContent>
                   <CharacterAbilityScores
-                    formData={formData}
-                    onUpdate={updateField}
+                    abilityScores={abilityScores}
                   />
                 </AccordionContent>
               </AccordionItem>
@@ -106,8 +107,7 @@ export default function NewCharacterPage({
                 <AccordionTrigger>3. Бойові параметри</AccordionTrigger>
                 <AccordionContent>
                   <CharacterCombatParams
-                    formData={formData}
-                    onUpdate={updateField}
+                    combatStats={combatStats}
                   />
                 </AccordionContent>
               </AccordionItem>
@@ -117,9 +117,7 @@ export default function NewCharacterPage({
                 <AccordionTrigger>4. Навички та Збереження</AccordionTrigger>
                 <AccordionContent>
                   <CharacterSkillsSection
-                    formData={formData}
-                    onToggleSavingThrow={toggleSavingThrow}
-                    onToggleSkill={toggleSkill}
+                    skills={skills}
                   />
                 </AccordionContent>
               </AccordionItem>
@@ -129,11 +127,8 @@ export default function NewCharacterPage({
                 <AccordionTrigger>5. Магічна Книга</AccordionTrigger>
                 <AccordionContent>
                   <CharacterSpellsSection
-                    formData={formData}
+                    spellcasting={spellcasting}
                     campaignId={id}
-                    onUpdate={updateField}
-                    onAddSpell={addKnownSpell}
-                    onRemoveSpell={removeKnownSpell}
                   />
                 </AccordionContent>
               </AccordionItem>
@@ -143,10 +138,7 @@ export default function NewCharacterPage({
                 <AccordionTrigger>6. Мови та Профісії</AccordionTrigger>
                 <AccordionContent>
                   <CharacterLanguagesSection
-                    formData={formData}
-                    onUpdate={updateField}
-                    onAddLanguage={addLanguage}
-                    onRemoveLanguage={removeLanguage}
+                    roleplay={roleplay}
                   />
                 </AccordionContent>
               </AccordionItem>
@@ -156,13 +148,13 @@ export default function NewCharacterPage({
                 <AccordionTrigger>7. Імунітети</AccordionTrigger>
                 <AccordionContent>
                   <CharacterImmunities
-                    formData={formData}
+                    roleplay={roleplay}
                     race={
-                      formData.race
-                        ? races.find((r) => r.name === formData.race) || null
+                      basicInfo.race
+                        ? races.find((r) => r.name === basicInfo.race) || null
                         : null
                     }
-                    onUpdate={updateField}
+                    raceName={basicInfo.race}
                   />
                 </AccordionContent>
               </AccordionItem>
@@ -172,8 +164,7 @@ export default function NewCharacterPage({
                 <AccordionTrigger>8. Рольова гра</AccordionTrigger>
                 <AccordionContent>
                   <CharacterRoleplaySection
-                    formData={formData}
-                    onUpdate={updateField}
+                    roleplay={roleplay}
                   />
                 </AccordionContent>
               </AccordionItem>

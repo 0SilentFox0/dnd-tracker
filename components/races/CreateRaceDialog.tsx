@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -8,14 +11,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import type { RaceFormData, StatModifier } from "@/types/races";
-import { useMainSkills } from "@/lib/hooks/useMainSkills";
 import { ABILITY_SCORES } from "@/lib/constants/abilities";
-import { Checkbox } from "@/components/ui/checkbox";
+import { useMainSkills } from "@/lib/hooks/useMainSkills";
+import type { RaceFormData, StatModifier } from "@/types/races";
 
 interface CreateRaceDialogProps {
   open: boolean;
@@ -31,6 +32,7 @@ export function CreateRaceDialog({
   onCreateRace,
 }: CreateRaceDialogProps) {
   const { data: mainSkills = [] } = useMainSkills(campaignId);
+
   const [formData, setFormData] = useState<RaceFormData>({
     name: "",
     availableSkills: [],
@@ -68,9 +70,11 @@ export function CreateRaceDialog({
   const toggleAvailableSkill = (skillId: string) => {
     setFormData((prev) => {
       const isSelected = prev.availableSkills.includes(skillId);
+
       const newAvailable = isSelected
         ? prev.availableSkills.filter((id) => id !== skillId)
         : [...prev.availableSkills, skillId];
+
       return {
         ...prev,
         availableSkills: newAvailable,
@@ -165,6 +169,7 @@ export function CreateRaceDialog({
             <div className="border rounded-md p-3 space-y-4 max-h-96 overflow-y-auto">
               {ABILITY_SCORES.map((ability) => {
                 const modifiers = formData.passiveAbility?.statModifiers?.[ability.key] || {};
+
                 return (
                   <div key={ability.key} className="space-y-2 pb-3 border-b last:border-0">
                     <Label className="text-sm font-semibold">
@@ -283,6 +288,7 @@ export function CreateRaceDialog({
               </div>
               {[1, 2, 3, 4, 5].map((level) => {
                 const progression = formData.spellSlotProgression?.find((p) => p.level === level);
+
                 return (
                   <div key={level} className="grid grid-cols-2 gap-4 py-2">
                     <div className="flex items-center text-sm">
@@ -294,16 +300,21 @@ export function CreateRaceDialog({
                       value={progression?.slots || 0}
                       onChange={(e) => {
                         const slots = parseInt(e.target.value, 10) || 0;
+
                         setFormData((prev) => {
                           const current = prev.spellSlotProgression || [];
+
                           const index = current.findIndex((p) => p.level === level);
+
                           let updated;
+
                           if (index >= 0) {
                             updated = [...current];
                             updated[index] = { level, slots };
                           } else {
                             updated = [...current, { level, slots }];
                           }
+
                           return {
                             ...prev,
                             spellSlotProgression: updated,

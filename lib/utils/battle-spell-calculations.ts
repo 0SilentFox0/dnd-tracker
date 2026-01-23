@@ -2,8 +2,9 @@
  * Утиліти для розрахунку заклинання з урахуванням покращень
  */
 
-import { BattleParticipant, ActiveSkill } from "@/types/battle";
 import { calculatePercentBonus } from "./battle-modifiers-common";
+
+import { ActiveSkill,BattleParticipant } from "@/types/battle";
 
 /**
  * Результат розрахунку урону/ефекту заклинання
@@ -108,6 +109,7 @@ export function calculateSpellAdditionalModifier(
       
       // Якщо є damageDice та rollResult, додаємо урон
       let damage = 0;
+
       if (modifier.damageDice && rollResult !== undefined) {
         damage = rollResult;
       }
@@ -144,7 +146,9 @@ export function calculateSpellDamageWithEnhancements(
 
   // Процентне збільшення ефекту
   const effectIncrease = calculateSpellEffectIncrease(participant, spellId);
+
   const increaseDamage = calculatePercentBonus(baseDamage, effectIncrease);
+
   if (effectIncrease > 0) {
     breakdown.push(`+${effectIncrease}% ефекту (+${increaseDamage})`);
   }
@@ -155,7 +159,9 @@ export function calculateSpellDamageWithEnhancements(
     spellId,
     additionalRollResult
   );
+
   const additionalDamage = additionalModifier.damage || 0;
+
   if (additionalDamage > 0) {
     breakdown.push(`+${additionalDamage} (${additionalModifier.modifier || "додатковий урон"})`);
   }

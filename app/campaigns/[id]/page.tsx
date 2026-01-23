@@ -1,5 +1,10 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/db";
+
+import { CampaignMembersList } from "@/components/campaigns/members/CampaignMembersList";
+import { CampaignSettingsButton } from "@/components/campaigns/settings/CampaignSettingsButton";
+import { InviteCodeDisplay } from "@/components/campaigns/settings/InviteCodeDisplay";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,13 +13,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
 import { getAuthUser } from "@/lib/auth";
+import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
-import { InviteCodeDisplay } from "@/components/campaigns/InviteCodeDisplay";
-import { CampaignMembersList } from "@/components/campaigns/CampaignMembersList";
-import { CampaignSettingsButton } from "@/components/campaigns/CampaignSettingsButton";
 
 export default async function CampaignDetailPage({
   params,
@@ -22,7 +23,9 @@ export default async function CampaignDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+
   const user = await getAuthUser();
+
   const userId = user.id;
 
   const campaign = await prisma.campaign.findUnique({
@@ -42,11 +45,13 @@ export default async function CampaignDetailPage({
   }
 
   const userMember = campaign.members.find((m) => m.userId === userId);
+
   if (!userMember) {
     redirect("/campaigns");
   }
 
   const isDM = userMember.role === "dm";
+
   return (
     <div className="container mx-auto p-4 space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+
 import { prisma } from "@/lib/db";
 import { requireDM, validateCampaignOwnership } from "@/lib/utils/api-auth";
 
@@ -11,6 +12,7 @@ export async function POST(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -21,6 +23,7 @@ export async function POST(
     });
 
     const validationError = validateCampaignOwnership(group, id);
+
     if (validationError) {
       return validationError;
     }
@@ -40,6 +43,7 @@ export async function POST(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error removing all units from group:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

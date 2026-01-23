@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { z } from "zod";
-import { requireDM } from "@/lib/utils/api-auth";
 import { Prisma } from "@prisma/client";
+import { z } from "zod";
+
+import { prisma } from "@/lib/db";
+import { requireDM } from "@/lib/utils/api-auth";
 
 // Схема для одного заклинання в імпорті
 const importSpellSchema = z.object({
@@ -18,10 +19,13 @@ const importSpellSchema = z.object({
   duration: z.string().optional(),
   concentration: z.union([z.boolean(), z.string()]).optional().transform((val) => {
     if (typeof val === "boolean") return val;
+
     if (typeof val === "string") {
       const lower = val.toLowerCase();
+
       return lower === "true" || lower === "yes" || lower === "1" || lower === "так";
     }
+
     return false;
   }),
   damageDice: z.string().optional(),
@@ -46,11 +50,13 @@ export async function POST(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
 
     const body = await request.json();
+
     const data = importSpellsSchema.parse(body);
 
     // Створюємо або отримуємо групи заклинань на основі school з CSV
@@ -66,8 +72,10 @@ export async function POST(
 
     // Збираємо всі унікальні школи з заклинань
     const uniqueSchools = new Set<string>();
+
     for (const spell of data.spells) {
       const spellAny = spell as any;
+
       if (spellAny.School) {
         uniqueSchools.add(spellAny.School);
       }
@@ -78,12 +86,14 @@ export async function POST(
       const existing = await prisma.spellGroup.findFirst({
         where: { campaignId: id, name: school },
       });
+
       if (existing) {
         spellGroups[school] = existing.id;
       } else {
         const group = await prisma.spellGroup.create({
           data: { campaignId: id, name: school },
         });
+
         spellGroups[school] = group.id;
       }
     }
@@ -135,6 +145,7 @@ export async function POST(
 
     // Створюємо тільки нові заклинання
     let result;
+
     if (spellsToCreate.length > 0) {
       result = await prisma.spell.createMany({
         data: spellsToCreate,
@@ -171,12 +182,14 @@ export async function POST(
     });
   } catch (error) {
     console.error("Error importing spells:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "Validation error", details: error.issues },
         { status: 400 }
       );
     }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

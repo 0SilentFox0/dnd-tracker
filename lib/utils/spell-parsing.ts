@@ -1,8 +1,8 @@
 import {
-  SpellType,
   SpellDamageType,
   SpellSavingThrowAbility,
   SpellSavingThrowOnSuccess,
+  SpellType,
 } from "@/lib/constants/spell-abilities";
 
 /**
@@ -51,7 +51,9 @@ const ABILITY_KEYWORDS: Record<SpellSavingThrowAbility, string[]> = {
  */
 export function determineSpellType(effect: string): SpellType {
   const lowerEffect = effect.toLowerCase();
+
   const isAOE = AOE_KEYWORDS.some((keyword) => lowerEffect.includes(keyword));
+
   return isAOE ? SpellType.AOE : SpellType.TARGET;
 }
 
@@ -60,7 +62,9 @@ export function determineSpellType(effect: string): SpellType {
  */
 export function determineSpellDamageType(effect: string): SpellDamageType {
   const lowerEffect = effect.toLowerCase();
+
   const isHeal = HEAL_KEYWORDS.some((keyword) => lowerEffect.includes(keyword));
+
   return isHeal ? SpellDamageType.HEAL : SpellDamageType.DAMAGE;
 }
 
@@ -69,6 +73,7 @@ export function determineSpellDamageType(effect: string): SpellDamageType {
  */
 export function extractDamageDice(effect: string): string | undefined {
   const damageDiceMatch = effect.match(/(\d+d\d+[\s\+]*[\w]*)/i);
+
   return damageDiceMatch ? damageDiceMatch[1].trim() : undefined;
 }
 
@@ -81,15 +86,18 @@ export function parseDiceString(diceString: string | undefined): { diceCount: nu
   }
   
   const match = diceString.match(/(\d+)d(\d+)/i);
+
   if (!match) {
     return { diceCount: null, diceType: null };
   }
   
   const count = parseInt(match[1], 10);
+
   const type = `d${match[2]}`;
   
   // Перевіряємо чи тип кубика валідний
   const validTypes = ["d4", "d6", "d8", "d10", "d12", "d20", "d100"];
+
   if (!validTypes.includes(type)) {
     return { diceCount: null, diceType: null };
   }
@@ -124,7 +132,9 @@ export function determineSavingThrowOnSuccess(
   effect: string
 ): SpellSavingThrowOnSuccess {
   const lowerEffect = effect.toLowerCase();
+
   const hasHalf = lowerEffect.includes("half") || lowerEffect.includes("/2");
+
   return hasHalf ? SpellSavingThrowOnSuccess.HALF : SpellSavingThrowOnSuccess.NONE;
 }
 
@@ -133,7 +143,9 @@ export function determineSavingThrowOnSuccess(
  */
 export function determineConcentration(effect: string): boolean {
   const lowerEffect = effect.toLowerCase();
+
   const concentrationKeywords = ["conc.", "concentration", "concentrate"];
+
   return concentrationKeywords.some((keyword) => lowerEffect.includes(keyword));
 }
 
@@ -142,11 +154,13 @@ export function determineConcentration(effect: string): boolean {
  */
 export function normalizeSchoolName(schoolName: string): string {
   const normalized = schoolName.trim();
+
   const schoolMap: Record<string, string> = {
     Dark: "Necromancy",
     Destr: "Evocation",
     Summ: "Conjuration",
     Light: "Abjuration",
   };
+
   return schoolMap[normalized] || normalized;
 }

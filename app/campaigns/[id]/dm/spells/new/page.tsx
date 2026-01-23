@@ -1,13 +1,10 @@
 "use client";
 
 import { use, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+
 import { Button } from "@/components/ui/button";
-import {
-  useSpellGroups,
-  useCreateSpell,
-} from "@/lib/hooks/useSpells";
-import type { Spell, SpellGroup } from "@/types/spells";
 import {
   Card,
   CardContent,
@@ -17,18 +14,17 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { LabeledInput } from "@/components/ui/labeled-input";
+import { SelectField } from "@/components/ui/select-field";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import Link from "next/link";
-import { DAMAGE_MODIFIER_OPTIONS, HEAL_MODIFIER_OPTIONS, SPELL_TARGET_OPTIONS } from "@/lib/constants/spells";
 import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
 import { DICE_OPTIONS } from "@/lib/constants/dice";
+import { DAMAGE_MODIFIER_OPTIONS, HEAL_MODIFIER_OPTIONS, SPELL_TARGET_OPTIONS } from "@/lib/constants/spells";
+import {
+  useCreateSpell,
+  useSpellGroups,
+} from "@/lib/hooks/useSpells";
+import type { Spell, SpellGroup } from "@/types/spells";
 
 export default function NewSpellPage({
   params,
@@ -36,7 +32,9 @@ export default function NewSpellPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+
   const router = useRouter();
+
   const [formData, setFormData] = useState<Partial<Spell>>({
     name: "",
     level: 0,
@@ -60,6 +58,7 @@ export default function NewSpellPage({
   });
 
   const { data: spellGroups = [] } = useSpellGroups(id);
+
   const createSpellMutation = useCreateSpell(id);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -67,6 +66,7 @@ export default function NewSpellPage({
 
     if (!formData.name || !formData.description) {
       alert("Будь ласка, заповніть обов'язкові поля: назва та опис");
+
       return;
     }
 
@@ -121,181 +121,145 @@ export default function NewSpellPage({
           )}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <Label htmlFor="name">Назва заклинання *</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  required
-                  placeholder="Назва заклинання"
-                />
-              </div>
-
+              <LabeledInput
+                id="name"
+                label="Назва заклинання"
+                value={formData.name || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+                required
+                placeholder="Назва заклинання"
+              />
               <div>
                 <Label htmlFor="level">Рівень *</Label>
-                <Select
-                  value={formData.level?.toString()}
+                <SelectField
+                  id="level"
+                  value={formData.level?.toString() || "0"}
                   onValueChange={(value) =>
                     setFormData({ ...formData, level: parseInt(value) })
                   }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Виберіть рівень" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="0">Cantrip</SelectItem>
-                    <SelectItem value="1">1</SelectItem>
-                    <SelectItem value="2">2</SelectItem>
-                    <SelectItem value="3">3</SelectItem>
-                    <SelectItem value="4">4</SelectItem>
-                    <SelectItem value="5">5</SelectItem>
-                    <SelectItem value="6">6</SelectItem>
-                    <SelectItem value="7">7</SelectItem>
-                    <SelectItem value="8">8</SelectItem>
-                    <SelectItem value="9">9</SelectItem>
-                  </SelectContent>
-                </Select>
+                  placeholder="Виберіть рівень"
+                  options={[
+                    { value: "0", label: "Cantrip" },
+                    { value: "1", label: "1" },
+                    { value: "2", label: "2" },
+                    { value: "3", label: "3" },
+                    { value: "4", label: "4" },
+                    { value: "5", label: "5" },
+                    { value: "6", label: "6" },
+                    { value: "7", label: "7" },
+                    { value: "8", label: "8" },
+                    { value: "9", label: "9" },
+                  ]}
+                />
               </div>
-
               <div>
                 <Label htmlFor="groupId">Група заклинань</Label>
-                <Select
+                <SelectField
+                  id="groupId"
                   value={formData.groupId || ""}
                   onValueChange={(value) =>
                     setFormData({
                       ...formData,
-                      groupId: value === "none" ? null : value,
+                      groupId: value || null,
                     })
                   }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Виберіть групу" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Без групи</SelectItem>
-                    {spellGroups.map((group) => (
-                      <SelectItem key={group.id} value={group.id}>
-                        {group.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  placeholder="Виберіть групу"
+                  options={spellGroups.map(group => ({ value: group.id, label: group.name }))}
+                  allowNone
+                  noneLabel="Без групи"
+                />
               </div>
-
               <div>
                 <Label htmlFor="type">Тип *</Label>
-                <Select
-                  value={formData.type}
-                  onValueChange={(value: "target" | "aoe") =>
-                    setFormData({ ...formData, type: value })
+                <SelectField
+                  id="type"
+                  value={formData.type || "target"}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, type: value as "target" | "aoe" })
                   }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="target">Цільове</SelectItem>
-                    <SelectItem value="aoe">Область дії</SelectItem>
-                  </SelectContent>
-                </Select>
+                  placeholder="Виберіть тип"
+                  options={[
+                    { value: "target", label: "Цільове" },
+                    { value: "aoe", label: "Область дії" },
+                  ]}
+                />
               </div>
-
               <div>
                 <Label htmlFor="target">Ціль</Label>
-                <Select
-                  value={formData.target || "none"}
+                <SelectField
+                  id="target"
+                  value={formData.target || ""}
                   onValueChange={(value) =>
                     setFormData({
                       ...formData,
-                      target: value === "none" ? null : value,
+                      target: value || null,
                     })
                   }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Виберіть ціль" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Не вказано</SelectItem>
-                    {SPELL_TARGET_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  placeholder="Виберіть ціль"
+                  options={SPELL_TARGET_OPTIONS.map(opt => ({ value: opt.value, label: opt.label }))}
+                  allowNone
+                  noneLabel="Не вказано"
+                />
               </div>
-
               <div>
                 <Label htmlFor="damageType">Тип шкоди/ефекту *</Label>
-                <Select
-                  value={formData.damageType}
-                  onValueChange={(value: "damage" | "heal" | "all") =>
-                    setFormData({ ...formData, damageType: value, damageModifier: value === "damage" || value === "all" ? formData.damageModifier : null, healModifier: value === "heal" ? formData.healModifier : null })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="damage">Шкода</SelectItem>
-                    <SelectItem value="heal">Лікування</SelectItem>
-                    <SelectItem value="all">Усі</SelectItem>
-                  </SelectContent>
-                </Select>
+                <SelectField
+                  id="damageType"
+                  value={formData.damageType || "damage"}
+                  onValueChange={(value: string) => {
+                    const newValue = value as "damage" | "heal" | "all";
+
+                    setFormData({
+                      ...formData,
+                      damageType: newValue,
+                      damageModifier: newValue === "damage" || newValue === "all" ? formData.damageModifier : null,
+                      healModifier: newValue === "heal" ? formData.healModifier : null,
+                    });
+                  }}
+                  placeholder="Виберіть тип"
+                  options={[
+                    { value: "damage", label: "Шкода" },
+                    { value: "heal", label: "Лікування" },
+                    { value: "all", label: "Усі" },
+                  ]}
+                />
               </div>
 
               {(formData.damageType === "damage" || formData.damageType === "all") && (
                 <>
                   <div>
                     <Label>Елемент шкоди</Label>
-                    <Select
-                      value={formData.damageElement || "none"}
+                    <SelectField
+                      value={formData.damageElement || ""}
                       onValueChange={(value) =>
                         setFormData({
                           ...formData,
-                          damageElement: value === "none" ? null : value,
+                          damageElement: value || null,
                         })
                       }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Без елементу" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Без елементу</SelectItem>
-                        {DAMAGE_ELEMENT_OPTIONS.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      placeholder="Без елементу"
+                      options={DAMAGE_ELEMENT_OPTIONS.map(opt => ({ value: opt.value, label: opt.label }))}
+                      allowNone
+                      noneLabel="Без елементу"
+                    />
                   </div>
                   <div>
                     <Label>Модифікатор шкоди</Label>
-                    <Select
-                      value={formData.damageModifier || "none"}
+                    <SelectField
+                      value={formData.damageModifier || ""}
                       onValueChange={(value) =>
                         setFormData({
                           ...formData,
-                          damageModifier: value === "none" ? null : value,
+                          damageModifier: value || null,
                         })
                       }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Без модифікатора" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Без модифікатора</SelectItem>
-                        {DAMAGE_MODIFIER_OPTIONS.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      placeholder="Без модифікатора"
+                      options={DAMAGE_MODIFIER_OPTIONS.map(opt => ({ value: opt.value, label: opt.label }))}
+                      allowNone
+                      noneLabel="Без модифікатора"
+                    />
                   </div>
                 </>
               )}
@@ -303,27 +267,19 @@ export default function NewSpellPage({
               {formData.damageType === "heal" && (
                 <div>
                   <Label>Модифікатор лікування</Label>
-                  <Select
-                    value={formData.healModifier || "none"}
+                  <SelectField
+                    value={formData.healModifier || ""}
                     onValueChange={(value) =>
                       setFormData({
                         ...formData,
-                        healModifier: value === "none" ? null : value,
+                        healModifier: value || null,
                       })
                     }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Без модифікатора" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Без модифікатора</SelectItem>
-                      {HEAL_MODIFIER_OPTIONS.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    placeholder="Без модифікатора"
+                    options={HEAL_MODIFIER_OPTIONS.map(opt => ({ value: opt.value, label: opt.label }))}
+                    allowNone
+                    noneLabel="Без модифікатора"
+                  />
                 </div>
               )}
 
@@ -395,27 +351,20 @@ export default function NewSpellPage({
                     placeholder="0"
                     className="w-20"
                   />
-                  <Select
-                    value={formData.diceType || "none"}
+                  <SelectField
+                    value={formData.diceType || ""}
                     onValueChange={(value) =>
                       setFormData({
                         ...formData,
-                        diceType: value === "none" ? null : value,
+                        diceType: value || null,
                       })
                     }
-                  >
-                    <SelectTrigger className="flex-1">
-                      <SelectValue placeholder="Тип кубика" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Без кубиків</SelectItem>
-                      {DICE_OPTIONS.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    placeholder="Тип кубика"
+                    options={DICE_OPTIONS.map(opt => ({ value: opt.value, label: opt.label }))}
+                    allowNone
+                    noneLabel="Без кубиків"
+                    triggerClassName="flex-1"
+                  />
                 </div>
               </div>
 
@@ -443,7 +392,8 @@ export default function NewSpellPage({
               <div className="grid gap-4 md:grid-cols-2 mt-2">
                 <div>
                   <Label htmlFor="savingThrowAbility">Характеристика</Label>
-                  <Select
+                  <SelectField
+                    id="savingThrowAbility"
                     value={
                       formData.savingThrow &&
                       typeof formData.savingThrow === "object" &&
@@ -465,23 +415,21 @@ export default function NewSpellPage({
                         },
                       })
                     }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Виберіть характеристику" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="strength">Сила</SelectItem>
-                      <SelectItem value="dexterity">Спритність</SelectItem>
-                      <SelectItem value="constitution">Статура</SelectItem>
-                      <SelectItem value="intelligence">Інтелект</SelectItem>
-                      <SelectItem value="wisdom">Мудрість</SelectItem>
-                      <SelectItem value="charisma">Харизма</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    placeholder="Виберіть характеристику"
+                    options={[
+                      { value: "strength", label: "Сила" },
+                      { value: "dexterity", label: "Спритність" },
+                      { value: "constitution", label: "Статура" },
+                      { value: "intelligence", label: "Інтелект" },
+                      { value: "wisdom", label: "Мудрість" },
+                      { value: "charisma", label: "Харизма" },
+                    ]}
+                  />
                 </div>
                 <div>
                   <Label htmlFor="savingThrowOnSuccess">При успіху</Label>
-                  <Select
+                  <SelectField
+                    id="savingThrowOnSuccess"
                     value={
                       formData.savingThrow &&
                       typeof formData.savingThrow === "object" &&
@@ -503,15 +451,12 @@ export default function NewSpellPage({
                         },
                       })
                     }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Виберіть ефект" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="half">Половина шкоди</SelectItem>
-                      <SelectItem value="none">Без шкоди</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    placeholder="Виберіть ефект"
+                    options={[
+                      { value: "half", label: "Половина шкоди" },
+                      { value: "none", label: "Без шкоди" },
+                    ]}
+                  />
                 </div>
               </div>
             </div>
@@ -554,6 +499,7 @@ export default function NewSpellPage({
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
+
                         target.style.display = "none";
                       }}
                       referrerPolicy="no-referrer"

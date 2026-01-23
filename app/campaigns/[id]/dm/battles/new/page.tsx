@@ -1,8 +1,10 @@
 "use client";
 
 import { use } from "react";
+import { useEffect,useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,11 +13,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import Link from "next/link";
 
 interface Character {
   id: string;
@@ -45,15 +46,22 @@ export default function NewBattlePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+
   const router = useRouter();
+
   const [loading, setLoading] = useState(false);
+
   const [characters, setCharacters] = useState<Character[]>([]);
+
   const [units, setUnits] = useState<Unit[]>([]);
+
   const [loadingData, setLoadingData] = useState(true);
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
   });
+
   const [participants, setParticipants] = useState<Participant[]>([]);
 
   // Завантажуємо персонажів та юнітів
@@ -62,15 +70,19 @@ export default function NewBattlePage({
       try {
         // Завантажуємо персонажів
         const charactersRes = await fetch(`/api/campaigns/${id}/characters`);
+
         if (charactersRes.ok) {
           const chars = await charactersRes.json();
+
           setCharacters(chars);
         }
 
         // Завантажуємо юнітів
         const unitsRes = await fetch(`/api/campaigns/${id}/units`);
+
         if (unitsRes.ok) {
           const unitsData = await unitsRes.json();
+
           setUnits(unitsData);
         }
       } catch (error) {
@@ -121,8 +133,10 @@ export default function NewBattlePage({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (participants.length === 0) {
       alert("Оберіть хоча б одного учасника");
+
       return;
     }
 
@@ -143,10 +157,12 @@ export default function NewBattlePage({
 
       if (!response.ok) {
         const error = await response.json();
+
         throw new Error(error.error || "Помилка при створенні бою");
       }
 
       const battle = await response.json();
+
       router.push(`/campaigns/${id}/dm/battles/${battle.id}`);
     } catch (error) {
       console.error("Error creating battle:", error);
@@ -166,11 +182,13 @@ export default function NewBattlePage({
 
   const getParticipantSide = (id: string): "ally" | "enemy" | null => {
     const participant = participants.find((p) => p.id === id);
+
     return participant?.side || null;
   };
 
   const getParticipantQuantity = (id: string): number => {
     const participant = participants.find((p) => p.id === id);
+
     return participant?.quantity || 1;
   };
 
@@ -178,6 +196,7 @@ export default function NewBattlePage({
   const playerCharacters = characters.filter(
     (c) => c.type === "player" && c.controlledBy !== null
   );
+
   const npcCharacters = characters.filter((c) => c.type === "npc");
 
   if (loadingData) {
@@ -267,6 +286,7 @@ export default function NewBattlePage({
                         const entity = characters.find(
                           (c) => c.id === participant.id
                         );
+
                         if (!entity) return null;
 
                         return (
@@ -318,6 +338,7 @@ export default function NewBattlePage({
                         const entity = units.find(
                           (u) => u.id === participant.id
                         );
+
                         if (!entity) return null;
 
                         return (
@@ -393,6 +414,7 @@ export default function NewBattlePage({
                         const entity = characters.find(
                           (c) => c.id === participant.id
                         );
+
                         if (!entity) return null;
 
                         return (
@@ -444,6 +466,7 @@ export default function NewBattlePage({
                         const entity = units.find(
                           (u) => u.id === participant.id
                         );
+
                         if (!entity) return null;
 
                         return (
@@ -605,6 +628,7 @@ export default function NewBattlePage({
                 <div className="space-y-2">
                   {units.map((unit) => {
                     const isSelected = isParticipantSelected(unit.id);
+
                     const quantity = getParticipantQuantity(unit.id);
 
                     return (

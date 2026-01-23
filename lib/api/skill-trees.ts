@@ -2,8 +2,8 @@
  * API функції для роботи з деревом навиків
  */
 
-import type { SkillTree } from "@/types/skill-tree";
 import type { UpdateSkillTreeParams, UpdateSkillTreeResponse } from "@/types/api";
+import type { SkillTree } from "@/types/skill-tree";
 
 /**
  * Оновлює дерево навиків
@@ -28,6 +28,7 @@ export async function updateSkillTree({
 
   if (!response.ok) {
     const error = await response.json();
+
     throw new Error(error.error || "Failed to update skill tree");
   }
 

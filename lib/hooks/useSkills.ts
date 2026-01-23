@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+
 import type { Skill } from "@/types/skills";
 
 export interface SkillFromLibrary {
@@ -24,9 +25,11 @@ export function useSkills(campaignId: string, initialData?: Skill[]) {
     queryKey: ["skills", campaignId],
     queryFn: async () => {
       const response = await fetch(`/api/campaigns/${campaignId}/skills`);
+
       if (!response.ok) {
         throw new Error("Failed to fetch skills");
       }
+
       return response.json();
     },
     initialData,

@@ -2,13 +2,17 @@ import type { Spell, SpellGroup } from "@/types/spells";
 
 export async function getSpells(campaignId: string): Promise<Spell[]> {
   const response = await fetch(`/api/campaigns/${campaignId}/spells`);
+
   if (!response.ok) throw new Error("Failed to fetch spells");
+
   return response.json();
 }
 
 export async function getSpellGroups(campaignId: string): Promise<SpellGroup[]> {
   const response = await fetch(`/api/campaigns/${campaignId}/spells/groups`);
+
   if (!response.ok) throw new Error("Failed to fetch spell groups");
+
   return response.json();
 }
 
@@ -25,7 +29,9 @@ export async function renameSpellGroup(
       body: JSON.stringify({ name: name.trim() }),
     }
   );
+
   if (!response.ok) throw new Error("Failed to rename group");
+
   return response.json();
 }
 
@@ -39,7 +45,9 @@ export async function removeAllSpellsFromGroup(
       method: "POST",
     }
   );
+
   if (!response.ok) throw new Error("Failed to remove all spells from group");
+
   return response.json();
 }
 
@@ -53,7 +61,9 @@ export async function removeSpellFromGroup(
       method: "POST",
     }
   );
+
   if (!response.ok) throw new Error("Failed to remove spell from group");
+
   return response.json();
 }
 
@@ -70,7 +80,9 @@ export async function moveSpellToGroup(
       body: JSON.stringify({ groupId }),
     }
   );
+
   if (!response.ok) throw new Error("Failed to move spell");
+
   return response.json();
 }
 
@@ -83,7 +95,9 @@ export async function deleteAllSpells(
       method: "DELETE",
     }
   );
+
   if (!response.ok) throw new Error("Failed to delete all spells");
+
   return response.json();
 }
 
@@ -101,6 +115,7 @@ export async function createSpell(
 
   if (!response.ok) {
     const error = await response.json();
+
     throw new Error(error.error || "Failed to create spell");
   }
 
@@ -114,7 +129,9 @@ export async function getSpell(
   const response = await fetch(
     `/api/campaigns/${campaignId}/spells/${spellId}`
   );
+
   if (!response.ok) throw new Error("Failed to fetch spell");
+
   return response.json();
 }
 
@@ -131,7 +148,9 @@ export async function updateSpell(
       body: JSON.stringify(data),
     }
   );
+
   if (!response.ok) throw new Error("Failed to update spell");
+
   return response.json();
 }
 
@@ -145,7 +164,9 @@ export async function deleteSpell(
       method: "DELETE",
     }
   );
+
   if (!response.ok) throw new Error("Failed to delete spell");
+
   return response.json();
 }
 
@@ -161,6 +182,8 @@ export async function deleteSpellsByLevel(
       body: JSON.stringify({ level }),
     }
   );
+
   if (!response.ok) throw new Error("Failed to delete spells by level");
+
   return response.json();
 }

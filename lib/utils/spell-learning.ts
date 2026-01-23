@@ -2,9 +2,9 @@
  * Утиліти для автоматичного додавання заклинань при вивченні скілів
  */
 
+import { SkillLevel, type SkillLevelType } from "@/types/skill-tree";
 import type { Skill } from "@/types/skills";
 import type { Spell } from "@/types/spells";
-import { SkillLevel, type SkillLevelType } from "@/types/skill-tree";
 
 /**
  * Визначає рівень магії на основі прокачки скілу
@@ -54,11 +54,13 @@ export function getSpellsToAddForSkill(
   // Якщо скіл має групу заклинань та вказано рівень скілу
   if (skill.spellGroupId && skillLevel) {
     const levels = getSpellLevelsForSkillLevel(skillLevel);
+
     const groupSpells = allSpells.filter(
       (spell) =>
         spell.spellGroup?.id === skill.spellGroupId &&
         levels.includes(spell.level)
     );
+
     spellIdsToAdd.push(...groupSpells.map((s) => s.id));
   }
 
@@ -83,6 +85,7 @@ export function calculateSpellsToAdd(
 
   for (const skillId of unlockedSkillIds) {
     const skill = allSkills.find((s) => s.id === skillId);
+
     if (!skill) continue;
 
     // Знаходимо рівень прокачки скілу (якщо він є в skillTreeProgress)
@@ -101,6 +104,7 @@ export function calculateSpellsToAdd(
     }
 
     const spellsToAdd = getSpellsToAddForSkill(skill, allSpells, skillLevel);
+
     newSpellIds.push(...spellsToAdd);
   }
 

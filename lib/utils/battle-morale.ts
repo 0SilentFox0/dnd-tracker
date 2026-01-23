@@ -55,6 +55,7 @@ export function checkMorale(
 
   // Розрахунок шансу
   const moraleValue = Math.abs(currentMorale);
+
   const chance = moraleValue * 10; // 1 мораль = 10%, 2 = 20%, тощо
 
   if (currentMorale > 0) {
@@ -111,6 +112,7 @@ export function getMoraleCheckDescription(
   }
 
   const moraleValue = Math.abs(currentMorale);
+
   const chance = moraleValue * 10;
 
   if (currentMorale > 0) {

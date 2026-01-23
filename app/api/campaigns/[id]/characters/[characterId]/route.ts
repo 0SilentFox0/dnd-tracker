@@ -1,16 +1,17 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { z } from "zod";
 import { Prisma } from "@prisma/client";
+import { z } from "zod";
+
+import { prisma } from "@/lib/db";
 import { requireAuth, requireCampaignAccess, requireDM, validateCampaignOwnership } from "@/lib/utils/api-auth";
 import {
-  getProficiencyBonus,
-  getAbilityModifier,
-  getPassiveScore,
-  getSpellSaveDC,
-  getSpellAttackBonus,
-  getLevelFromXP,
   calculateHPGain,
+  getAbilityModifier,
+  getLevelFromXP,
+  getPassiveScore,
+  getProficiencyBonus,
+  getSpellAttackBonus,
+  getSpellSaveDC,
 } from "@/lib/utils/calculations";
 
 const updateCharacterSchema = z.object({
@@ -87,6 +88,7 @@ export async function GET(
     
     // Перевіряємо авторизацію
     const authResult = await requireAuth();
+
     if (authResult instanceof NextResponse) {
       return authResult;
     }
@@ -114,6 +116,7 @@ export async function GET(
 
     // Перевіряємо права доступу (DM або власник)
     const isDM = character.campaign.members[0]?.role === "dm";
+
     const isOwner = character.controlledBy === userId;
 
     if (!isDM && !isOwner) {
@@ -123,6 +126,7 @@ export async function GET(
     return NextResponse.json(character);
   } catch (error) {
     console.error("Error fetching character:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -139,6 +143,7 @@ export async function PATCH(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -150,6 +155,7 @@ export async function PATCH(
     });
 
     const validationError = validateCampaignOwnership(character, id);
+
     if (validationError) {
       return validationError;
     }
@@ -160,33 +166,51 @@ export async function PATCH(
     }
 
     const body = await request.json();
+
     const data = updateCharacterSchema.parse(body);
 
     // Отримуємо поточні значення або нові
     const level = data.level ?? character.level;
+
     const experience = data.experience ?? character.experience;
+
     const strength = data.strength ?? character.strength;
+
     const dexterity = data.dexterity ?? character.dexterity;
+
     const constitution = data.constitution ?? character.constitution;
+
     const intelligence = data.intelligence ?? character.intelligence;
+
     const wisdom = data.wisdom ?? character.wisdom;
+
     const charisma = data.charisma ?? character.charisma;
+
     const savingThrows = (data.savingThrows ??
       character.savingThrows) as Record<string, boolean>;
+
     const skills = (data.skills ?? character.skills) as Record<string, boolean>;
+
     const hitDice = data.hitDice ?? character.hitDice;
 
     // Перевіряємо чи змінився рівень через XP
     const newLevelFromXP = getLevelFromXP(experience, campaign.xpMultiplier);
+
     const finalLevel = Math.max(level, newLevelFromXP);
 
     // Розраховуємо автоматичні значення
     const proficiencyBonus = getProficiencyBonus(finalLevel);
+
     const strMod = getAbilityModifier(strength);
+
     const dexMod = getAbilityModifier(dexterity);
+
     const conMod = getAbilityModifier(constitution);
+
     const intMod = getAbilityModifier(intelligence);
+
     const wisMod = getAbilityModifier(wisdom);
+
     const chaMod = getAbilityModifier(charisma);
 
     // Розраховуємо пасивні значення
@@ -195,11 +219,13 @@ export async function PATCH(
       skills.perception || false,
       proficiencyBonus
     );
+
     const passiveInvestigation = getPassiveScore(
       intMod,
       skills.investigation || false,
       proficiencyBonus
     );
+
     const passiveInsight = getPassiveScore(
       wisMod,
       skills.insight || false,
@@ -209,7 +235,9 @@ export async function PATCH(
     // Розраховуємо spellcasting параметри якщо є
     const spellcastingAbility =
       data.spellcastingAbility ?? character.spellcastingAbility;
+
     let spellSaveDC: number | null = character.spellSaveDC;
+
     let spellAttackBonus: number | null = character.spellAttackBonus;
 
     if (spellcastingAbility) {
@@ -226,12 +254,15 @@ export async function PATCH(
 
     // Якщо рівень збільшився, додаємо HP
     let maxHp = data.maxHp ?? character.maxHp;
+
     let currentHp = data.currentHp ?? character.currentHp;
 
     if (finalLevel > character.level) {
       const levelsGained = finalLevel - character.level;
+
       for (let i = 0; i < levelsGained; i++) {
         const hpGain = calculateHPGain(hitDice, conMod);
+
         maxHp += hpGain;
         currentHp += hpGain; // Автоматично лікуємо при прокачці
       }
@@ -264,9 +295,11 @@ export async function PATCH(
     return NextResponse.json(updatedCharacter);
   } catch (error) {
     console.error("Error updating character:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -283,6 +316,7 @@ export async function DELETE(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -292,6 +326,7 @@ export async function DELETE(
     });
 
     const validationError = validateCampaignOwnership(character, id);
+
     if (validationError) {
       return validationError;
     }
@@ -303,6 +338,7 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting character:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

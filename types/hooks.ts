@@ -3,6 +3,7 @@
  */
 
 import type { SkillTriggers } from "./skill-triggers";
+
 import type { SpellEnhancementType } from "@/lib/constants/spell-enhancement";
 
 // useSkillForm

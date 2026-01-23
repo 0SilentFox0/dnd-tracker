@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { z } from "zod";
-import { requireDM, validateCampaignOwnership } from "@/lib/utils/api-auth";
 import { Prisma } from "@prisma/client";
+import { z } from "zod";
+
+import { prisma } from "@/lib/db";
+import { requireDM, validateCampaignOwnership } from "@/lib/utils/api-auth";
 
 // Схема для згрупованої структури (всі поля опціональні для оновлення)
 const updateSkillSchema = z.object({
@@ -95,6 +96,7 @@ export async function PATCH(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -104,11 +106,13 @@ export async function PATCH(
     });
 
     const validationError = validateCampaignOwnership(skill, id);
+
     if (validationError) {
       return validationError;
     }
 
     const body = await request.json();
+
     const data = updateSkillSchema.parse(body);
 
     const updateData: Prisma.SkillUpdateInput = {};
@@ -116,12 +120,18 @@ export async function PATCH(
     // Оновлюємо згруповані дані
     if (data.basicInfo !== undefined) {
       updateData.basicInfo = data.basicInfo as Prisma.InputJsonValue;
+
       // Також оновлюємо старі поля для зворотної сумісності
       const basicInfo = data.basicInfo as any;
+
       if (basicInfo.name !== undefined) updateData.name = basicInfo.name;
+
       if (basicInfo.description !== undefined) updateData.description = basicInfo.description;
+
       if (basicInfo.icon !== undefined) updateData.icon = basicInfo.icon;
+
       if (basicInfo.races !== undefined) updateData.races = basicInfo.races as Prisma.InputJsonValue;
+
       if (basicInfo.isRacial !== undefined) updateData.isRacial = basicInfo.isRacial;
     }
     
@@ -131,18 +141,26 @@ export async function PATCH(
     
     if (data.combatStats !== undefined) {
       updateData.combatStats = data.combatStats as Prisma.InputJsonValue;
+
       // Також оновлюємо старі поля
       const combatStats = data.combatStats as any;
+
       if (combatStats.damage !== undefined) updateData.damage = combatStats.damage;
+
       if (combatStats.armor !== undefined) updateData.armor = combatStats.armor;
+
       if (combatStats.speed !== undefined) updateData.speed = combatStats.speed;
+
       if (combatStats.physicalResistance !== undefined) updateData.physicalResistance = combatStats.physicalResistance;
+
       if (combatStats.magicalResistance !== undefined) updateData.magicalResistance = combatStats.magicalResistance;
     }
     
     if (data.spellData !== undefined) {
       updateData.spellData = data.spellData as Prisma.InputJsonValue;
+
       const spellData = data.spellData as any;
+
       if (spellData.spellId !== undefined) {
         if (spellData.spellId === null) {
           updateData.spell = { disconnect: true };
@@ -150,6 +168,7 @@ export async function PATCH(
           updateData.spell = { connect: { id: spellData.spellId } };
         }
       }
+
       if (spellData.spellGroupId !== undefined) {
         if (spellData.spellGroupId === null) {
           updateData.spellGroup = { disconnect: true };
@@ -161,13 +180,17 @@ export async function PATCH(
     
     if (data.spellEnhancementData !== undefined) {
       updateData.spellEnhancementData = data.spellEnhancementData as Prisma.InputJsonValue;
+
       const spellEnhancementData = data.spellEnhancementData as any;
+
       if (spellEnhancementData.spellEnhancementTypes !== undefined) {
         updateData.spellEnhancementTypes = spellEnhancementData.spellEnhancementTypes as Prisma.InputJsonValue;
       }
+
       if (spellEnhancementData.spellEffectIncrease !== undefined) {
         updateData.spellEffectIncrease = spellEnhancementData.spellEffectIncrease;
       }
+
       if (spellEnhancementData.spellTargetChange !== undefined) {
         if (spellEnhancementData.spellTargetChange === null) {
           updateData.spellTargetChange = Prisma.JsonNull;
@@ -175,6 +198,7 @@ export async function PATCH(
           updateData.spellTargetChange = spellEnhancementData.spellTargetChange as Prisma.InputJsonValue;
         }
       }
+
       if (spellEnhancementData.spellAdditionalModifier !== undefined) {
         if (spellEnhancementData.spellAdditionalModifier === null) {
           updateData.spellAdditionalModifier = Prisma.JsonNull;
@@ -182,6 +206,7 @@ export async function PATCH(
           updateData.spellAdditionalModifier = spellEnhancementData.spellAdditionalModifier as Prisma.InputJsonValue;
         }
       }
+
       if (spellEnhancementData.spellNewSpellId !== undefined) {
         if (spellEnhancementData.spellNewSpellId === null) {
           updateData.spellNewSpell = { disconnect: true };
@@ -193,7 +218,9 @@ export async function PATCH(
     
     if (data.mainSkillData !== undefined) {
       updateData.mainSkillData = data.mainSkillData as Prisma.InputJsonValue;
+
       const mainSkillData = data.mainSkillData as any;
+
       if (mainSkillData.mainSkillId !== undefined) {
         if (mainSkillData.mainSkillId === null) {
           updateData.mainSkill = { disconnect: true };
@@ -289,9 +316,11 @@ export async function PATCH(
     return NextResponse.json(formattedSkill);
   } catch (error) {
     console.error("Error updating skill:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -308,6 +337,7 @@ export async function DELETE(
     
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
@@ -317,6 +347,7 @@ export async function DELETE(
     });
 
     const validationError = validateCampaignOwnership(skill, id);
+
     if (validationError) {
       return validationError;
     }
@@ -328,6 +359,7 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting skill:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

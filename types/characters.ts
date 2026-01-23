@@ -2,12 +2,74 @@
  * Типи для персонажів
  */
 
-import type { InventoryItem, EquippedItems } from "./inventory";
+import type { EquippedItems,InventoryItem } from "./inventory";
 
+/**
+ * Згрупована структура даних персонажа (як використовується в формі)
+ */
 export interface CharacterFormData {
-  name: string;
-  type: "player" | "npc_hero";
+  basicInfo: {
+    name: string;
+    type: "player" | "npc_hero";
+    controlledBy: string;
+    level: number;
+    class: string;
+    subclass?: string;
+    race: string;
+    subrace?: string;
+    alignment?: string;
+    background?: string;
+    experience: number;
+    avatar?: string;
+  };
+  abilityScores: {
+    strength: number;
+    dexterity: number;
+    constitution: number;
+    intelligence: number;
+    wisdom: number;
+    charisma: number;
+  };
+  combatStats: {
+    armorClass: number;
+    initiative: number;
+    speed: number;
+    maxHp: number;
+    currentHp: number;
+    tempHp: number;
+    hitDice: string;
+  };
+  skills: {
+    savingThrows: Record<string, boolean>;
+    skills: Record<string, boolean>;
+  };
+  spellcasting: {
+    spellcastingClass?: string;
+    spellcastingAbility?: "intelligence" | "wisdom" | "charisma";
+    spellSlots?: Record<string, { max: number; current: number }>;
+    knownSpells: string[];
+  };
+  roleplay: {
+    languages: string[];
+    proficiencies: Record<string, string[]>;
+    immunities?: string[];
+    morale?: number;
+    personalityTraits?: string;
+    ideals?: string;
+    bonds?: string;
+    flaws?: string;
+  };
+}
+
+/**
+ * Плоска структура персонажа (як зберігається в БД та повертається з API)
+ */
+export interface Character {
+  id: string;
+  campaignId: string;
+  type: string;
   controlledBy: string;
+  name: string;
   level: number;
   class: string;
   subclass?: string;
@@ -44,11 +106,6 @@ export interface CharacterFormData {
   ideals?: string;
   bonds?: string;
   flaws?: string;
-}
-
-export interface Character extends CharacterFormData {
-  id: string;
-  campaignId: string;
   createdAt: string;
   updatedAt: string;
   user?: {

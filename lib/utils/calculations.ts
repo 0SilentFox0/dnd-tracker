@@ -64,6 +64,7 @@ export function getSpellAttackBonus(
  */
 export function getXPForLevel(level: number, multiplier: number = 2.5): number {
   if (level === 1) return 1000;
+
   return Math.floor(getXPForLevel(level - 1, multiplier) * multiplier);
 }
 
@@ -72,6 +73,7 @@ export function getXPForLevel(level: number, multiplier: number = 2.5): number {
  */
 export function getLevelFromXP(xp: number, multiplier: number = 2.5): number {
   let level = 1;
+
   let requiredXP = 1000;
 
   while (xp >= requiredXP) {
@@ -92,9 +94,11 @@ export function calculateHPGain(
 ): number {
   // Парсимо hitDice (наприклад "1d8" -> 8)
   const match = hitDice.match(/(\d+)d(\d+)/);
+
   if (!match) return 0;
 
   const diceSize = parseInt(match[2]);
+
   const averageRoll = Math.ceil(diceSize / 2) + 0.5; // Середнє значення для dN
 
   return Math.floor(averageRoll) + constitutionModifier;
@@ -106,10 +110,13 @@ export function calculateHPGain(
  */
 export function rollDamage(dice: string, modifier: number = 0): number {
   const match = dice.match(/(\d+)d(\d+)([+-]\d+)?/);
+
   if (!match) return 0;
 
   const count = parseInt(match[1]);
+
   const size = parseInt(match[2]);
+
   const diceModifier = match[3] ? parseInt(match[3]) : 0;
 
   // В реальному застосунку тут буде генерація випадкових чисел
@@ -175,9 +182,11 @@ export function getArtifactDamageBonus(
   Object.values(equipped).forEach((artifactId) => {
     if (typeof artifactId === "string" && artifactId) {
       const artifact = artifacts.find((a) => a.id === artifactId);
+
       if (artifact) {
         // Додаємо бонуси з bonuses (наприклад { damage: 2 })
         const bonuses = artifact.bonuses as ArtifactBonus;
+
         if (bonuses?.damage) {
           bonus += Number(bonuses.damage) || 0;
         }
@@ -212,8 +221,10 @@ export function getArtifactAttackBonus(
   Object.values(equipped).forEach((artifactId) => {
     if (typeof artifactId === "string" && artifactId) {
       const artifact = artifacts.find((a) => a.id === artifactId);
+
       if (artifact) {
         const bonuses = artifact.bonuses as ArtifactBonus;
+
         if (bonuses?.attack) {
           bonus += Number(bonuses.attack) || 0;
         }
@@ -247,11 +258,13 @@ export function getSkillTreeBonus(
   const characterSkill = characterSkills.find(
     (cs: CharacterSkill) => cs.skillTreeId === skillTreeId
   );
+
   if (!characterSkill) return 0;
 
   const unlockedSkills = Array.isArray(characterSkill.unlockedSkills)
     ? characterSkill.unlockedSkills
     : [];
+
   const skill = unlockedSkills.find(
     (s: UnlockedSkill) => s && (s.name === skillName || s.id === skillName)
   );

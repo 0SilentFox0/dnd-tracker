@@ -1,5 +1,5 @@
-import type { Skill } from "@/types/skills";
 import type { SkillPayload, SkillUpdatePayload } from "@/types/api";
+import type { Skill } from "@/types/skills";
 
 export async function getSkills(campaignId: string): Promise<Skill[]> {
   const response = await fetch(`/api/campaigns/${campaignId}/skills`, {
@@ -27,6 +27,7 @@ export async function createSkill(
 
   if (!response.ok) {
     const error = await response.json();
+
     throw new Error(error.error || "Failed to create skill");
   }
 
@@ -51,6 +52,7 @@ export async function updateSkill(
 
   if (!response.ok) {
     const error = await response.json();
+
     throw new Error(error.error || "Failed to update skill");
   }
 
@@ -70,6 +72,7 @@ export async function deleteSkill(
 
   if (!response.ok) {
     const error = await response.json();
+
     throw new Error(error.error || "Failed to delete skill");
   }
 }

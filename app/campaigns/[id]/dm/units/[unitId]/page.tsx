@@ -1,17 +1,10 @@
 "use client";
 
-import { use, useEffect, useState, useMemo } from "react";
+import { use, useEffect, useMemo,useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+
 import { Button } from "@/components/ui/button";
-import {
-  useUnit,
-  useUpdateUnit,
-  useDeleteUnit,
-} from "@/lib/hooks/useUnits";
-import { useRaces } from "@/lib/hooks/useRaces";
-import type { Unit } from "@/types/units";
-import type { Spell } from "@/types/spells";
-import { getSpells } from "@/lib/api/spells";
 import {
   Card,
   CardContent,
@@ -19,14 +12,22 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import Link from "next/link";
-import { UnitBasicInfo } from "@/components/units/UnitBasicInfo";
-import { UnitAbilityScores } from "@/components/units/UnitAbilityScores";
-import { UnitAvatarInput } from "@/components/units/UnitAvatarInput";
-import { UnitDamageModifier } from "@/components/units/UnitDamageModifier";
-import { UnitImmunities } from "@/components/units/UnitImmunities";
-import { UnitSpecialAbilities } from "@/components/units/UnitSpecialAbilities";
-import { UnitKnownSpells } from "@/components/units/UnitKnownSpells";
+import { UnitAbilityScores } from "@/components/units/form/UnitAbilityScores";
+import { UnitAvatarInput } from "@/components/units/form/UnitAvatarInput";
+import { UnitBasicInfo } from "@/components/units/form/UnitBasicInfo";
+import { UnitDamageModifier } from "@/components/units/form/UnitDamageModifier";
+import { UnitImmunities } from "@/components/units/form/UnitImmunities";
+import { UnitKnownSpells } from "@/components/units/form/UnitKnownSpells";
+import { UnitSpecialAbilities } from "@/components/units/form/UnitSpecialAbilities";
+import { getSpells } from "@/lib/api/spells";
+import { useRaces } from "@/lib/hooks/useRaces";
+import {
+  useDeleteUnit,
+  useUnit,
+  useUpdateUnit,
+} from "@/lib/hooks/useUnits";
+import type { Spell } from "@/types/spells";
+import type { Unit } from "@/types/units";
 
 export default function EditUnitPage({
   params,
@@ -34,11 +35,17 @@ export default function EditUnitPage({
   params: Promise<{ id: string; unitId: string }>;
 }) {
   const { id, unitId } = use(params);
+
   const router = useRouter();
+
   const { data: unit, isLoading: fetching } = useUnit(id, unitId);
+
   const { data: races = [] } = useRaces(id);
+
   const updateUnitMutation = useUpdateUnit(id, unitId);
+
   const deleteUnitMutation = useDeleteUnit(id);
+
   const [spells, setSpells] = useState<Spell[]>([]);
 
   // Використовуємо useMemo для обчислення початкових даних форми
@@ -70,6 +77,7 @@ export default function EditUnitPage({
         damageModifier: unit.damageModifier || null,
       };
     }
+
     return {
       name: "",
       level: 1,

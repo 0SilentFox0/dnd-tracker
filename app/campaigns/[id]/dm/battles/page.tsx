@@ -1,11 +1,13 @@
-import { getAuthUser } from "@/lib/auth";
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/db";
+
+import { DeleteAllBattlesButton } from "./page-client";
+
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
-import { DeleteAllBattlesButton } from "./page-client";
+import { getAuthUser } from "@/lib/auth";
+import { prisma } from "@/lib/db";
 
 export default async function DMBattlesPage({
   params,
@@ -13,7 +15,9 @@ export default async function DMBattlesPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+
   const user = await getAuthUser();
+
   const userId = user.id;
 
   const campaign = await prisma.campaign.findUnique({
@@ -39,7 +43,9 @@ export default async function DMBattlesPage({
   });
 
   const activeBattles = battles.filter(b => b.status === "active");
+
   const preparedBattles = battles.filter(b => b.status === "prepared");
+
   const completedBattles = battles.filter(b => b.status === "completed");
 
   return (
@@ -66,6 +72,7 @@ export default async function DMBattlesPage({
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {activeBattles.map((battle) => {
               const participants = battle.participants as Array<{ id: string; type: string; side: string }>;
+
               return (
                 <Card key={battle.id} className="border-green-500 hover:shadow-lg transition-shadow">
                   <CardHeader>
@@ -104,6 +111,7 @@ export default async function DMBattlesPage({
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {preparedBattles.map((battle) => {
               const participants = battle.participants as Array<{ id: string; type: string; side: string }>;
+
               return (
                 <Card key={battle.id} className="hover:shadow-lg transition-shadow">
                   <CardHeader>
@@ -148,6 +156,7 @@ export default async function DMBattlesPage({
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {completedBattles.map((battle) => {
               const participants = battle.participants as Array<{ id: string; type: string; side: string }>;
+
               return (
                 <Card key={battle.id} className="opacity-75 hover:shadow-lg transition-shadow">
                   <CardHeader>

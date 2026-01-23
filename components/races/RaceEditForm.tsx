@@ -2,17 +2,18 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+
+import { FormCard } from "@/components/common/FormCard";
+import { FormField } from "@/components/common/FormField";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { FormCard } from "@/components/common/FormCard";
-import { FormField } from "@/components/common/FormField";
+import { ABILITY_SCORES } from "@/lib/constants/abilities";
+import { useMainSkills } from "@/lib/hooks/useMainSkills";
 import { useUpdateRace } from "@/lib/hooks/useRaces";
 import type { Race } from "@/types/races";
 import type { RaceFormData, StatModifier } from "@/types/races";
-import { useMainSkills } from "@/lib/hooks/useMainSkills";
-import { ABILITY_SCORES } from "@/lib/constants/abilities";
-import { Checkbox } from "@/components/ui/checkbox";
 import type { SpellSlotProgression } from "@/types/races";
 
 interface RaceEditFormProps {
@@ -22,19 +23,25 @@ interface RaceEditFormProps {
 
 export function RaceEditForm({ campaignId, race }: RaceEditFormProps) {
   const router = useRouter();
+
   const updateRaceMutation = useUpdateRace(campaignId);
+
   const { data: mainSkills = [] } = useMainSkills(campaignId);
 
   const parsePassiveAbility = (pa: unknown) => {
     if (!pa) {
       return { description: "", statImprovements: "", statModifiers: {} };
     }
+
     if (typeof pa === "string") {
       return { description: pa, statImprovements: "", statModifiers: {} };
     }
+
     if (typeof pa === "object" && pa !== null) {
       const obj = pa as Record<string, unknown>;
+
       const statModifiers = obj.statModifiers;
+
       // Переконуємося, що statModifiers є об'єктом
       const parsedModifiers =
         statModifiers &&
@@ -49,14 +56,17 @@ export function RaceEditForm({ campaignId, race }: RaceEditFormProps) {
         statModifiers: parsedModifiers,
       };
     }
+
     return { description: "", statImprovements: "", statModifiers: {} };
   };
 
   const [formData, setFormData] = useState<RaceFormData>(() => {
     const parsedPassiveAbility = parsePassiveAbility(race.passiveAbility);
+
     const progression = Array.isArray(race.spellSlotProgression)
       ? (race.spellSlotProgression as SpellSlotProgression[])
       : [];
+
     return {
       name: race.name,
       availableSkills: Array.isArray(race.availableSkills)
@@ -72,6 +82,7 @@ export function RaceEditForm({ campaignId, race }: RaceEditFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     // Переконуємося, що statModifiers включені в дані для збереження
     const dataToSave: RaceFormData = {
       ...formData,
@@ -81,6 +92,7 @@ export function RaceEditForm({ campaignId, race }: RaceEditFormProps) {
         statModifiers: formData.passiveAbility?.statModifiers || {},
       },
     };
+
     updateRaceMutation.mutate(
       { raceId: race.id, data: dataToSave },
       {
@@ -95,9 +107,11 @@ export function RaceEditForm({ campaignId, race }: RaceEditFormProps) {
   const toggleAvailableSkill = (skillId: string) => {
     setFormData((prev) => {
       const isSelected = prev.availableSkills.includes(skillId);
+
       const newAvailable = isSelected
         ? prev.availableSkills.filter((id) => id !== skillId)
         : [...prev.availableSkills, skillId];
+
       return {
         ...prev,
         availableSkills: newAvailable,
@@ -189,6 +203,7 @@ export function RaceEditForm({ campaignId, race }: RaceEditFormProps) {
               {ABILITY_SCORES.map((ability) => {
                 const modifiers =
                   formData.passiveAbility?.statModifiers?.[ability.key] || {};
+
                 return (
                   <div
                     key={ability.key}
@@ -324,6 +339,7 @@ export function RaceEditForm({ campaignId, race }: RaceEditFormProps) {
               </div>
               {[1, 2, 3, 4, 5].map((level) => {
                 const progression = formData.spellSlotProgression?.find((p) => p.level === level);
+
                 return (
                   <div key={level} className="grid grid-cols-2 gap-4 py-2">
                     <div className="flex items-center text-sm">
@@ -335,16 +351,21 @@ export function RaceEditForm({ campaignId, race }: RaceEditFormProps) {
                       value={progression?.slots || 0}
                       onChange={(e) => {
                         const slots = parseInt(e.target.value, 10) || 0;
+
                         setFormData((prev) => {
                           const current = prev.spellSlotProgression || [];
+
                           const index = current.findIndex((p) => p.level === level);
+
                           let updated;
+
                           if (index >= 0) {
                             updated = [...current];
                             updated[index] = { level, slots };
                           } else {
                             updated = [...current, { level, slots }];
                           }
+
                           return {
                             ...prev,
                             spellSlotProgression: updated,

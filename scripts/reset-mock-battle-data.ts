@@ -8,6 +8,7 @@
  *   npm run reset-mock-battle YOUR_CAMPAIGN_ID
  */
 import { execSync } from "child_process";
+
 import { DEFAULT_CAMPAIGN_ID } from "../lib/constants/campaigns";
 
 const CAMPAIGN_ID = process.argv[2] || DEFAULT_CAMPAIGN_ID;

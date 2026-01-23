@@ -1,4 +1,4 @@
-import type { BattleScene, AttackData, MoraleCheckData, SpellCastData } from "@/types/api";
+import type { AttackData, BattleScene, MoraleCheckData, SpellCastData } from "@/types/api";
 
 export async function getBattle(
   campaignId: string,
@@ -7,7 +7,9 @@ export async function getBattle(
   const response = await fetch(
     `/api/campaigns/${campaignId}/battles/${battleId}`
   );
+
   if (!response.ok) throw new Error("Failed to fetch battle");
+
   return response.json();
 }
 
@@ -21,7 +23,9 @@ export async function nextTurn(
       method: "POST",
     }
   );
+
   if (!response.ok) throw new Error("Failed to advance turn");
+
   return response.json();
 }
 
@@ -40,7 +44,9 @@ export async function attack(
       body: JSON.stringify(data),
     }
   );
+
   if (!response.ok) throw new Error("Failed to process attack");
+
   return response.json();
 }
 
@@ -60,7 +66,9 @@ export async function moraleCheck(
       body: JSON.stringify(data),
     }
   );
+
   if (!response.ok) throw new Error("Failed to process morale check");
+
   return response.json();
 }
 
@@ -80,6 +88,8 @@ export async function castSpell(
       body: JSON.stringify(data),
     }
   );
+
   if (!response.ok) throw new Error("Failed to process spell");
+
   return response.json();
 }

@@ -34,6 +34,7 @@ export function matchesAttackType(effectType: string, attackType: AttackType): b
  */
 export function calculatePercentBonus(baseValue: number, percentBonus: number): number {
   if (percentBonus <= 0) return 0;
+
   return Math.floor(baseValue * (percentBonus / 100));
 }
 
@@ -45,6 +46,7 @@ export function calculatePercentBonus(baseValue: number, percentBonus: number): 
  */
 export function formatPercentBonusBreakdown(source: string, percent: number): string {
   if (percent <= 0) return "";
+
   return `${source}: +${percent}%`;
 }
 
@@ -56,5 +58,6 @@ export function formatPercentBonusBreakdown(source: string, percent: number): st
  */
 export function formatFlatBonusBreakdown(source: string, flat: number): string {
   if (flat <= 0) return "";
+
   return `${source}: +${flat}`;
 }

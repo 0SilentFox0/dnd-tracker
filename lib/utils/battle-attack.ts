@@ -2,16 +2,17 @@
  * Утиліти для обробки атак в бою
  */
 
-import { BattleParticipant, BattleAttack } from "@/types/battle";
-import type { CriticalEffect } from "@/lib/constants/critical-effects";
-import { getAbilityModifier, getProficiencyBonus } from "./calculations";
 import { calculateDamageWithModifiers } from "./battle-damage-calculations";
-import { applyResistance } from "./battle-resistance";
-import { getRandomCriticalEffect } from "@/lib/constants/critical-effects";
-import { AttackType } from "./battle-modifiers-common";
-import { getPassiveAbilitiesByTrigger, checkTriggerCondition } from "./battle-triggers";
 import { addActiveEffect } from "./battle-effects";
+import { AttackType } from "./battle-modifiers-common";
+import { applyResistance } from "./battle-resistance";
+import { checkTriggerCondition,getPassiveAbilitiesByTrigger } from "./battle-triggers";
+import { getAbilityModifier, getProficiencyBonus } from "./calculations";
+
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
+import type { CriticalEffect } from "@/lib/constants/critical-effects";
+import { getRandomCriticalEffect } from "@/lib/constants/critical-effects";
+import { BattleAttack,BattleParticipant } from "@/types/battle";
 
 /**
  * Результат Attack Roll
@@ -137,10 +138,12 @@ export function calculateAttackRoll(
   advantageRoll?: number
 ): AttackRollResult {
   const attackBonus = calculateAttackBonus(attacker, attack);
+
   const hasAdv = hasAdvantage(attacker, attack);
 
   // Якщо є Advantage, використовуємо кращий результат
   let finalRoll = d20Roll;
+
   let advantageUsed = false;
 
   // Якщо є Advantage, але advantageRoll не надано, використовуємо тільки d20Roll
@@ -161,6 +164,7 @@ export function calculateAttackRoll(
 
   // Критичне попадання (Natural 20)
   const isCritical = finalRoll === 20;
+
   // Критичний промах (Natural 1)
   const isCriticalFail = finalRoll === 1;
 
@@ -202,6 +206,7 @@ export function applyCriticalEffect(
   target?: BattleParticipant
 ): BattleParticipant {
   const targetParticipant = target || participant;
+
   let updated = { ...targetParticipant };
 
   switch (effect.effect.type) {
@@ -333,11 +338,16 @@ export function performReaction(
   // Розраховуємо базовий урон з атаки (середнє значення кубиків)
   // Наприклад, для "1d8" базовий урон = 4.5 (округлюємо до 4)
   const diceMatch = reactionAttack.damageDice?.match(/(\d+)d(\d+)/);
+
   let baseDamage = 0;
+
   if (diceMatch) {
     const diceCount = parseInt(diceMatch[1]);
+
     const diceSize = parseInt(diceMatch[2]);
+
     const averageRoll = Math.floor((diceCount * (diceSize + 1)) / 2);
+
     baseDamage = averageRoll;
   }
 
@@ -346,6 +356,7 @@ export function performReaction(
     reactionAttack.type === "melee"
       ? defender.modifiers.strength
       : defender.modifiers.dexterity;
+
   baseDamage += statModifier;
 
   // Контр-удар зазвичай має +15% урону (згідно з ТЗ)

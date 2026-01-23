@@ -2,9 +2,10 @@
  * Утиліти для обробки ходу в бою
  */
 
-import { BattleParticipant, ActiveEffect } from "@/types/battle";
 import { applyDOTEffects, decreaseEffectDurations } from "./battle-effects";
-import { getPassiveAbilitiesByTrigger, checkTriggerCondition } from "./battle-triggers";
+import { checkTriggerCondition,getPassiveAbilitiesByTrigger } from "./battle-triggers";
+
+import { ActiveEffect,BattleParticipant } from "@/types/battle";
 
 /**
  * Результат обробки початку ходу
@@ -30,11 +31,14 @@ export function processStartOfTurn(
   allParticipants: BattleParticipant[]
 ): StartOfTurnResult {
   let updatedParticipant = { ...participant };
+
   const damageMessages: string[] = [];
+
   const triggeredAbilities: string[] = [];
 
   // 1. Застосовуємо DOT ефекти
   const dotResult = applyDOTEffects(updatedParticipant);
+
   updatedParticipant = {
     ...updatedParticipant,
     currentHp: dotResult.newHp,
@@ -43,6 +47,7 @@ export function processStartOfTurn(
 
   // 2. Зменшуємо тривалість всіх ефектів
   const durationResult = decreaseEffectDurations(updatedParticipant);
+
   updatedParticipant = {
     ...updatedParticipant,
     activeEffects: durationResult.updatedEffects,
@@ -50,6 +55,7 @@ export function processStartOfTurn(
 
   // 3. Перевіряємо чи учасник впав в непритомність або помер
   let statusChanged = false;
+
   if (updatedParticipant.currentHp <= 0 && updatedParticipant.status !== "dead") {
     updatedParticipant = {
       ...updatedParticipant,
@@ -118,6 +124,7 @@ export function processEndOfTurn(
 
   // Переходимо до наступного учасника
   let nextTurnIndex = currentTurnIndex + 1;
+
   let nextRound = currentRound;
 
   // Якщо досягли кінця черги, переходимо до наступного раунду
@@ -156,9 +163,11 @@ export function processStartOfRound(
     if (b.initiative !== a.initiative) {
       return b.initiative - a.initiative;
     }
+
     if (b.baseInitiative !== a.baseInitiative) {
       return b.baseInitiative - a.baseInitiative;
     }
+
     return b.dexterity - a.dexterity;
   });
 

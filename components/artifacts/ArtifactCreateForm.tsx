@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,14 +13,9 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { LabeledInput } from "@/components/ui/labeled-input";
+import { SelectField } from "@/components/ui/select-field";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 interface ArtifactSetOption {
   id: string;
@@ -54,21 +50,32 @@ export function ArtifactCreateForm({
   artifactSets,
 }: ArtifactCreateFormProps) {
   const router = useRouter();
+
   const [isSaving, setIsSaving] = useState(false);
+
   const [error, setError] = useState<string | null>(null);
 
   const [name, setName] = useState("");
+
   const [description, setDescription] = useState("");
+
   const [rarity, setRarity] = useState<string>("common");
+
   const [slot, setSlot] = useState<string>("item");
+
   const [icon, setIcon] = useState("");
+
   const [setId, setSetId] = useState<string | null>(null);
+
   const [effectName, setEffectName] = useState("");
+
   const [effectDescription, setEffectDescription] = useState("");
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+
     if (!name.trim()) return;
+
     setIsSaving(true);
     setError(null);
 
@@ -101,6 +108,7 @@ export function ArtifactCreateForm({
 
       if (!response.ok) {
         const data = await response.json();
+
         throw new Error(data.error || "Не вдалося створити артефакт");
       }
 
@@ -108,6 +116,7 @@ export function ArtifactCreateForm({
       router.refresh();
     } catch (err) {
       const message = err instanceof Error ? err.message : "Помилка створення";
+
       setError(message);
     } finally {
       setIsSaving(false);
@@ -126,66 +135,45 @@ export function ArtifactCreateForm({
         {error && <p className="text-sm text-destructive mb-4">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="grid gap-4 md:grid-cols-2">
+            <LabeledInput
+              id="artifact-name"
+              label="Назва"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Наприклад: Кільце Сар Ісси"
+              required
+            />
             <div className="space-y-2">
-              <Label htmlFor="artifact-name">Назва *</Label>
-              <Input
-                id="artifact-name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Наприклад: Кільце Сар Ісси"
-                required
+              <Label htmlFor="artifact-rarity">Рідкість</Label>
+              <SelectField
+                id="artifact-rarity"
+                value={rarity}
+                onValueChange={setRarity}
+                placeholder="Виберіть рідкість"
+                options={RARITY_OPTIONS.map(opt => ({ value: opt.value, label: opt.label }))}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="artifact-rarity">Рідкість</Label>
-              <Select value={rarity} onValueChange={setRarity}>
-                <SelectTrigger id="artifact-rarity">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {RARITY_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
               <Label htmlFor="artifact-slot">Слот</Label>
-              <Select value={slot} onValueChange={setSlot}>
-                <SelectTrigger id="artifact-slot">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {SLOT_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <SelectField
+                id="artifact-slot"
+                value={slot}
+                onValueChange={setSlot}
+                placeholder="Виберіть слот"
+                options={SLOT_OPTIONS.map(opt => ({ value: opt.value, label: opt.label }))}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="artifact-set">Сет</Label>
-              <Select
-                value={setId || "none"}
-                onValueChange={(value) =>
-                  setSetId(value === "none" ? null : value)
-                }
-              >
-                <SelectTrigger id="artifact-set">
-                  <SelectValue placeholder="Без сету" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Без сету</SelectItem>
-                  {artifactSets.map((set) => (
-                    <SelectItem key={set.id} value={set.id}>
-                      {set.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <SelectField
+                id="artifact-set"
+                value={setId || ""}
+                onValueChange={(value) => setSetId(value || null)}
+                placeholder="Без сету"
+                options={artifactSets.map(set => ({ value: set.id, label: set.name }))}
+                allowNone
+                noneLabel="Без сету"
+              />
             </div>
           </div>
 
@@ -200,15 +188,13 @@ export function ArtifactCreateForm({
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="artifact-icon">Іконка (URL)</Label>
-            <Input
-              id="artifact-icon"
-              value={icon}
-              onChange={(e) => setIcon(e.target.value)}
-              placeholder="https://example.com/icon.png"
-            />
-          </div>
+          <LabeledInput
+            id="artifact-icon"
+            label="Іконка (URL)"
+            value={icon}
+            onChange={(e) => setIcon(e.target.value)}
+            placeholder="https://example.com/icon.png"
+          />
 
           <div className="rounded-md border p-4 space-y-3">
             <p className="text-sm font-semibold">Ефект артефакту</p>

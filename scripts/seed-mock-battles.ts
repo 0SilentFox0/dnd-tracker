@@ -11,8 +11,9 @@
  * 
  * ВИДАЛИТИ ПІСЛЯ ТЕСТУВАННЯ!
  */
+import { Prisma,PrismaClient } from "@prisma/client";
+
 import { DEFAULT_CAMPAIGN_ID } from "../lib/constants/campaigns";
-import { PrismaClient, Prisma } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -215,6 +216,7 @@ async function seedMockBattles() {
     // Для моку використовуємо спрощену структуру
     const mockInitiativeOrder = battle2Participants.map((participant, index) => {
       const isCharacter = participant.type === "character";
+
       const char = isCharacter ? characters.find((c) => c.id === participant.id) : null;
       
       return {
