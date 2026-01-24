@@ -2,7 +2,7 @@
  * API сервіс для роботи з персонажами
  */
 
-import { formDataToCharacter } from "@/lib/utils/character-form";
+import { formDataToCharacter } from "@/lib/utils/characters/character-form";
 import type { Character,CharacterFormData } from "@/types/characters";
 
 /**

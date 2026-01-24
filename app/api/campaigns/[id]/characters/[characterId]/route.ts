@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { prisma } from "@/lib/db";
-import { requireAuth, requireCampaignAccess, requireDM, validateCampaignOwnership } from "@/lib/utils/api-auth";
+import { requireAuth, requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
 import {
   calculateHPGain,
   getAbilityModifier,
@@ -12,7 +12,7 @@ import {
   getProficiencyBonus,
   getSpellAttackBonus,
   getSpellSaveDC,
-} from "@/lib/utils/calculations";
+} from "@/lib/utils/common/calculations";
 
 const updateCharacterSchema = z.object({
   name: z.string().min(1).max(100).optional(),
@@ -174,10 +174,7 @@ export async function PATCH(
 
     const experience = data.experience ?? character.experience;
 
-    const strength = data.strength ?? character.strength;
-
-    const dexterity = data.dexterity ?? character.dexterity;
-
+    // strength та dexterity використовуються через ...data в prisma.character.update
     const constitution = data.constitution ?? character.constitution;
 
     const intelligence = data.intelligence ?? character.intelligence;
@@ -186,10 +183,6 @@ export async function PATCH(
 
     const charisma = data.charisma ?? character.charisma;
 
-    const savingThrows = (data.savingThrows ??
-      character.savingThrows) as Record<string, boolean>;
-
-    const skills = (data.skills ?? character.skills) as Record<string, boolean>;
 
     const hitDice = data.hitDice ?? character.hitDice;
 
@@ -201,10 +194,6 @@ export async function PATCH(
     // Розраховуємо автоматичні значення
     const proficiencyBonus = getProficiencyBonus(finalLevel);
 
-    const strMod = getAbilityModifier(strength);
-
-    const dexMod = getAbilityModifier(dexterity);
-
     const conMod = getAbilityModifier(constitution);
 
     const intMod = getAbilityModifier(intelligence);
@@ -214,21 +203,23 @@ export async function PATCH(
     const chaMod = getAbilityModifier(charisma);
 
     // Розраховуємо пасивні значення
+    const characterSkills = (data.skills ?? character.skills) as Record<string, boolean>;
+
     const passivePerception = getPassiveScore(
       wisMod,
-      skills.perception || false,
+      characterSkills.perception || false,
       proficiencyBonus
     );
 
     const passiveInvestigation = getPassiveScore(
       intMod,
-      skills.investigation || false,
+      characterSkills.investigation || false,
       proficiencyBonus
     );
 
     const passiveInsight = getPassiveScore(
       wisMod,
-      skills.insight || false,
+      characterSkills.insight || false,
       proficiencyBonus
     );
 

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { prisma } from "@/lib/db";
-import { requireDM } from "@/lib/utils/api-auth";
+import { requireDM } from "@/lib/utils/api/api-auth";
 
 const deleteByLevelSchema = z.object({
   level: z.number().int().min(1).max(30),

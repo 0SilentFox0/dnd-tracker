@@ -41,7 +41,7 @@ export function AbilityBonusIcons({
   bonuses,
   className = "",
 }: AbilityBonusIconsProps) {
-  const bonusEntries = Object.entries(bonuses).filter(([_, value]) => value !== 0);
+  const bonusEntries = Object.entries(bonuses).filter(([, value]) => value !== 0);
 
   if (bonusEntries.length === 0) {
     return null;
@@ -87,8 +87,6 @@ export function SkillStatsIcons({
   armor,
   physicalResistance,
   magicalResistance,
-  damage,
-  speed,
   className = "",
 }: SkillStatsIconsProps) {
   const stats = [];

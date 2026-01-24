@@ -2,9 +2,13 @@
  * Типи для боїв
  */
 
+import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
+import { SkillLevel } from "@/lib/types/skill-tree";
 
 export type { CriticalEffect };
+export { AttackType, ParticipantSide };
+export { SkillLevel };
 
 export interface BattleLogEntry {
   round: number;
@@ -80,7 +84,7 @@ export interface ActiveSkill {
   skillId: string;
   name: string;
   mainSkillId: string;
-  level: "basic" | "advanced" | "expert";
+  level: SkillLevel;
   effects: Array<{
     type: string; // тип модифікатора (melee_damage_percent, тощо)
     value: number;
@@ -96,6 +100,7 @@ export interface ActiveSkill {
     };
     spellNewSpellId?: string; // нове заклинання
   };
+  skillTriggers?: import("@/types/skill-triggers").SkillTriggers; // Тригери скіла
 }
 
 /**
@@ -120,7 +125,7 @@ export interface EquippedArtifact {
 export interface BattleAttack {
   id?: string;
   name: string;
-  type: "melee" | "ranged";
+  type: AttackType;
   attackBonus: number; // базовий бонус
   damageDice: string; // "2d6", "1d8+3" тощо
   damageType: string; // slashing, piercing, fire, тощо
@@ -132,8 +137,10 @@ export interface BattleAttack {
  * Повна структура учасника бою (BattleParticipant)
  * Містить всі дані персонажа/юніта для бою
  */
-export interface BattleParticipant {
-  // Базова інформація
+/**
+ * Базова інформація про учасника бою
+ */
+export interface BattleParticipantBasicInfo {
   id: string; // унікальний ID учасника В ЦІЙ БИТВІ
   battleId: string; // ID битви
   sourceId: string; // оригінальний ID character/unit
@@ -142,10 +149,14 @@ export interface BattleParticipant {
   instanceId?: string; // унікальний ID інстансу (для units)
   name: string;
   avatar?: string;
-  side: "ally" | "enemy";
+  side: ParticipantSide;
   controlledBy: string; // userId (для players) або "dm" (для NPC/units)
+}
 
-  // Характеристики
+/**
+ * Характеристики учасника бою
+ */
+export interface BattleParticipantAbilities {
   level: number;
   initiative: number; // поточна ініціатива (з урахуванням бонусів)
   baseInitiative: number; // базова ініціатива (без тимчасових бонусів)
@@ -165,46 +176,65 @@ export interface BattleParticipant {
   };
   proficiencyBonus: number;
   race: string;
+}
 
-  // Бойові параметри
+/**
+ * Бойові параметри учасника
+ */
+export interface BattleParticipantCombatStats {
   maxHp: number;
   currentHp: number;
   tempHp: number;
   armorClass: number;
+  speed: number; // швидкість переміщення
   morale: number; // від -3 до +3, default 0
   status: "active" | "unconscious" | "dead";
+}
 
-  // Заклинання (якщо кастер)
+/**
+ * Дані про заклинання учасника
+ */
+export interface BattleParticipantSpellcasting {
   spellcastingClass?: string;
   spellcastingAbility?: "intelligence" | "wisdom" | "charisma";
   spellSaveDC?: number;
   spellAttackBonus?: number;
   spellSlots: Record<string, { max: number; current: number }>; // "1" до "5"
   knownSpells: string[]; // масив ID заклинань
+}
 
-  // Атаки
+/**
+ * Бойові дані учасника
+ */
+export interface BattleParticipantBattleData {
   attacks: BattleAttack[];
-
-  // Активні ефекти
   activeEffects: ActiveEffect[];
-
-  // Пасивні здібності
   passiveAbilities: PassiveAbility[];
-
-  // Расові здібності
   racialAbilities: RacialAbility[];
-
-  // Прокачка (дерево скілів)
   activeSkills: ActiveSkill[];
-
-  // Екіпіровані артефакти
   equippedArtifacts: EquippedArtifact[];
+}
 
-  // Флаги дій
+/**
+ * Флаги дій учасника
+ */
+export interface BattleParticipantActionFlags {
   hasUsedAction: boolean;
   hasUsedBonusAction: boolean;
   hasUsedReaction: boolean;
   hasExtraTurn: boolean;
+}
+
+/**
+ * Повна структура учасника бою
+ */
+export interface BattleParticipant {
+  basicInfo: BattleParticipantBasicInfo;
+  abilities: BattleParticipantAbilities;
+  combatStats: BattleParticipantCombatStats;
+  spellcasting: BattleParticipantSpellcasting;
+  battleData: BattleParticipantBattleData;
+  actionFlags: BattleParticipantActionFlags;
 }
 
 /**
@@ -213,7 +243,7 @@ export interface BattleParticipant {
 export interface BattlePreparationParticipant {
   id: string;
   type: "character" | "unit";
-  side: "ally" | "enemy";
+  side: ParticipantSide;
   quantity?: number;
 }
 

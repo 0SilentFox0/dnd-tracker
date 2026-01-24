@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 
-import { normalizeImageUrl } from "@/lib/utils/image-url";
+import { normalizeImageUrl } from "@/lib/utils/common/image-url";
 
 interface OptimizedImageProps {
   src: string;

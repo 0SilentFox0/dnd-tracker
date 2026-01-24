@@ -1,6 +1,8 @@
+import Image from "next/image";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { normalizeImageUrl } from "@/lib/utils/image-url";
+import { normalizeImageUrl } from "@/lib/utils/common/image-url";
 import type { Unit } from "@/types/units";
 
 interface UnitAvatarInputProps {
@@ -8,10 +10,7 @@ interface UnitAvatarInputProps {
   onChange: (data: Partial<Unit>) => void;
 }
 
-export function UnitAvatarInput({
-  formData,
-  onChange,
-}: UnitAvatarInputProps) {
+export function UnitAvatarInput({ formData, onChange }: UnitAvatarInputProps) {
   return (
     <div>
       <Label htmlFor="avatar">Посилання на картинку</Label>
@@ -29,9 +28,11 @@ export function UnitAvatarInput({
         <div className="mt-3">
           <Label>Попередній перегляд:</Label>
           <div className="mt-2 w-32 h-32 rounded-lg overflow-hidden bg-muted border">
-            <img
+            <Image
               src={normalizeImageUrl(formData.avatar)}
               alt="Preview"
+              width={128}
+              height={128}
               className="w-full h-full object-cover"
               referrerPolicy="no-referrer"
               onError={(e) => {

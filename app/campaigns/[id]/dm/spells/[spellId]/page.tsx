@@ -1,6 +1,7 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -19,14 +20,18 @@ import { SelectField } from "@/components/ui/select-field";
 import { Textarea } from "@/components/ui/textarea";
 import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
 import { DICE_OPTIONS } from "@/lib/constants/dice";
-import { DAMAGE_MODIFIER_OPTIONS, HEAL_MODIFIER_OPTIONS, SPELL_TARGET_OPTIONS } from "@/lib/constants/spells";
+import {
+  DAMAGE_MODIFIER_OPTIONS,
+  HEAL_MODIFIER_OPTIONS,
+  SPELL_TARGET_OPTIONS,
+} from "@/lib/constants/spells";
 import {
   useDeleteSpell,
   useSpell,
   useSpellGroups,
   useUpdateSpell,
 } from "@/lib/hooks/useSpells";
-import type { Spell, SpellGroup } from "@/types/spells";
+import type { Spell } from "@/types/spells";
 
 export default function EditSpellPage({
   params,
@@ -126,7 +131,7 @@ export default function EditSpellPage({
         onError: (error) => {
           console.error("Error updating spell:", error);
         },
-      }
+      },
     );
   };
 
@@ -223,7 +228,10 @@ export default function EditSpellPage({
                     })
                   }
                   placeholder="Виберіть групу"
-                  options={spellGroups.map(group => ({ value: group.id, label: group.name }))}
+                  options={spellGroups.map((group) => ({
+                    value: group.id,
+                    label: group.name,
+                  }))}
                   allowNone
                   noneLabel="Без групи"
                 />
@@ -234,7 +242,10 @@ export default function EditSpellPage({
                   id="type"
                   value={formData.type || "target"}
                   onValueChange={(value) =>
-                    setFormData({ ...formData, type: value as "target" | "aoe" })
+                    setFormData({
+                      ...formData,
+                      type: value as "target" | "aoe",
+                    })
                   }
                   placeholder="Виберіть тип"
                   options={[
@@ -255,7 +266,10 @@ export default function EditSpellPage({
                     })
                   }
                   placeholder="Виберіть ціль"
-                  options={SPELL_TARGET_OPTIONS.map(opt => ({ value: opt.value, label: opt.label }))}
+                  options={SPELL_TARGET_OPTIONS.map((opt) => ({
+                    value: opt.value,
+                    label: opt.label,
+                  }))}
                   allowNone
                   noneLabel="Не вказано"
                 />
@@ -271,8 +285,12 @@ export default function EditSpellPage({
                     setFormData({
                       ...formData,
                       damageType: newValue,
-                      damageModifier: newValue === "damage" || newValue === "all" ? formData.damageModifier : null,
-                      healModifier: newValue === "heal" ? formData.healModifier : null,
+                      damageModifier:
+                        newValue === "damage" || newValue === "all"
+                          ? formData.damageModifier
+                          : null,
+                      healModifier:
+                        newValue === "heal" ? formData.healModifier : null,
                     });
                   }}
                   placeholder="Виберіть тип"
@@ -284,7 +302,8 @@ export default function EditSpellPage({
                 />
               </div>
 
-              {(formData.damageType === "damage" || formData.damageType === "all") && (
+              {(formData.damageType === "damage" ||
+                formData.damageType === "all") && (
                 <>
                   <div>
                     <Label>Елемент шкоди</Label>
@@ -297,7 +316,10 @@ export default function EditSpellPage({
                         })
                       }
                       placeholder="Без елементу"
-                      options={DAMAGE_ELEMENT_OPTIONS.map(opt => ({ value: opt.value, label: opt.label }))}
+                      options={DAMAGE_ELEMENT_OPTIONS.map((opt) => ({
+                        value: opt.value,
+                        label: opt.label,
+                      }))}
                       allowNone
                       noneLabel="Без елементу"
                     />
@@ -313,7 +335,10 @@ export default function EditSpellPage({
                         })
                       }
                       placeholder="Без модифікатора"
-                      options={DAMAGE_MODIFIER_OPTIONS.map(opt => ({ value: opt.value, label: opt.label }))}
+                      options={DAMAGE_MODIFIER_OPTIONS.map((opt) => ({
+                        value: opt.value,
+                        label: opt.label,
+                      }))}
                       allowNone
                       noneLabel="Без модифікатора"
                     />
@@ -333,7 +358,10 @@ export default function EditSpellPage({
                       })
                     }
                     placeholder="Без модифікатора"
-                    options={HEAL_MODIFIER_OPTIONS.map(opt => ({ value: opt.value, label: opt.label }))}
+                    options={HEAL_MODIFIER_OPTIONS.map((opt) => ({
+                      value: opt.value,
+                      label: opt.label,
+                    }))}
                     allowNone
                     noneLabel="Без модифікатора"
                   />
@@ -390,7 +418,9 @@ export default function EditSpellPage({
 
               <div className="md:col-span-2">
                 <Label htmlFor="dice">
-                  {formData.damageType === "heal" ? "Кубики лікування" : "Кубики шкоди"}
+                  {formData.damageType === "heal"
+                    ? "Кубики лікування"
+                    : "Кубики шкоди"}
                 </Label>
                 <div className="flex gap-2">
                   <Input
@@ -402,7 +432,10 @@ export default function EditSpellPage({
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        diceCount: e.target.value === "" ? null : parseInt(e.target.value) || 0,
+                        diceCount:
+                          e.target.value === ""
+                            ? null
+                            : parseInt(e.target.value) || 0,
                       })
                     }
                     placeholder="0"
@@ -417,7 +450,10 @@ export default function EditSpellPage({
                       })
                     }
                     placeholder="Тип кубика"
-                    options={DICE_OPTIONS.map(opt => ({ value: opt.value, label: opt.label }))}
+                    options={DICE_OPTIONS.map((opt) => ({
+                      value: opt.value,
+                      label: opt.label,
+                    }))}
                     allowNone
                     noneLabel="Без кубиків"
                     triggerClassName="flex-1"
@@ -550,9 +586,11 @@ export default function EditSpellPage({
                 <div className="mt-3">
                   <Label>Попередній перегляд:</Label>
                   <div className="mt-2 w-32 h-32 rounded-lg overflow-hidden bg-muted border">
-                    <img
+                    <Image
                       src={formData.icon}
                       alt="Preview"
+                      width={128}
+                      height={128}
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
@@ -567,10 +605,7 @@ export default function EditSpellPage({
             </div>
 
             <div className="flex gap-2 pt-4">
-              <Button
-                type="submit"
-                disabled={updateSpellMutation.isPending}
-              >
+              <Button type="submit" disabled={updateSpellMutation.isPending}>
                 {updateSpellMutation.isPending
                   ? "Збереження..."
                   : "Зберегти зміни"}

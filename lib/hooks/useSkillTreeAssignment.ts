@@ -1,5 +1,4 @@
 import type { Skill, SkillCircle,SkillLevel, SkillTree } from "@/types/skill-tree";
-import { SkillCircle as SkillCircleEnum,SkillLevel as SkillLevelEnum } from "@/types/skill-tree";
 import type { Skill as SkillFromLibraryType } from "@/types/skills";
 
 interface SkillSlot {

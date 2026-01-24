@@ -14,8 +14,7 @@ import {
 import {
   calculateAverageSpellEffect,
   formatSpellAverage,
-} from "@/lib/utils/spell-calculations";
-import { getSpellGroupIcon } from "@/lib/utils/spell-icons";
+} from "@/lib/utils/spells/spell-calculations";
 import type { Spell } from "@/types/spells";
 
 interface SelectedSpellsListProps {

@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ImportDialog } from "@/components/common/ImportDialog";
 import { SpellType } from "@/lib/constants/spell-abilities";
 import { useFileImport } from "@/lib/hooks/useFileImport";
-import { parseCSVFile, parseJSONFile } from "@/lib/utils/file-import";
+import { parseCSVFile, parseJSONFile } from "@/lib/utils/common/file-import";
 import {
   determineConcentration,
   determineSavingThrowAbility,
@@ -14,7 +14,7 @@ import {
   determineSpellType,
   extractDamageDice,
   normalizeSchoolName,
-} from "@/lib/utils/spell-parsing";
+} from "@/lib/utils/spells/spell-parsing";
 import type {
   CSVSpellRow,
   ImportSpell,

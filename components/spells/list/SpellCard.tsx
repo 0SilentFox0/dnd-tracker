@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import Link from "next/link";
 import { Move, Sparkles, X, Zap } from "lucide-react";
 
@@ -26,7 +25,7 @@ import {
   getSpellDamageTypeIcon,
   getSpellGroupIcon,
   getSpellTypeIcon,
-} from "@/lib/utils/spell-icons";
+} from "@/lib/utils/spells/spell-icons";
 import type { Spell, SpellGroup } from "@/types/spells";
 
 interface SpellCardProps {

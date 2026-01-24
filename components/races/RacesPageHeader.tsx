@@ -12,7 +12,6 @@ interface RacesPageHeaderProps {
 }
 
 export function RacesPageHeader({
-  campaignId,
   racesCount,
   onCreateRace,
 }: RacesPageHeaderProps) {

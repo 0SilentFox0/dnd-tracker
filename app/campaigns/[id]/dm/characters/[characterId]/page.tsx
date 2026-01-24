@@ -19,7 +19,7 @@ import { getCharacter, updateCharacter } from "@/lib/api/characters";
 import { useCampaignMembers } from "@/lib/hooks/useCampaignMembers";
 import { useCharacterForm } from "@/lib/hooks/useCharacterForm";
 import { useRaces } from "@/lib/hooks/useRaces";
-import { characterToFormData } from "@/lib/utils/character-form";
+import { characterToFormData } from "@/lib/utils/characters/character-form";
 import type { Character } from "@/types/characters";
 
 export default function EditCharacterPage({

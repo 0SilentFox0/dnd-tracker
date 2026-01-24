@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { prisma } from "@/lib/db";
-import { requireCampaignAccess, requireDM, validateCampaignOwnership } from "@/lib/utils/api-auth";
+import { requireCampaignAccess, requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
 
 const updateSpellSchema = z.object({
   name: z.string().min(1).max(100).optional(),

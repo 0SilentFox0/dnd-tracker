@@ -1,7 +1,8 @@
 "use client";
 
 import { use } from "react";
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -98,7 +99,7 @@ export default function NewBattlePage({
   const handleParticipantToggle = (
     participantId: string,
     type: "character" | "unit",
-    checked: boolean
+    checked: boolean,
   ) => {
     if (checked) {
       // Додаємо як союзника за замовчуванням
@@ -114,20 +115,15 @@ export default function NewBattlePage({
 
   const handleSideChange = (participantId: string, side: "ally" | "enemy") => {
     setParticipants(
-      participants.map((p) =>
-        p.id === participantId ? { ...p, side } : p
-      )
+      participants.map((p) => (p.id === participantId ? { ...p, side } : p)),
     );
   };
 
-  const handleQuantityChange = (
-    participantId: string,
-    quantity: number
-  ) => {
+  const handleQuantityChange = (participantId: string, quantity: number) => {
     setParticipants(
       participants.map((p) =>
-        p.id === participantId ? { ...p, quantity } : p
-      )
+        p.id === participantId ? { ...p, quantity } : p,
+      ),
     );
   };
 
@@ -167,9 +163,7 @@ export default function NewBattlePage({
     } catch (error) {
       console.error("Error creating battle:", error);
       alert(
-        error instanceof Error
-          ? error.message
-          : "Помилка при створенні бою"
+        error instanceof Error ? error.message : "Помилка при створенні бою",
       );
     } finally {
       setLoading(false);
@@ -180,12 +174,6 @@ export default function NewBattlePage({
     return participants.some((p) => p.id === id);
   };
 
-  const getParticipantSide = (id: string): "ally" | "enemy" | null => {
-    const participant = participants.find((p) => p.id === id);
-
-    return participant?.side || null;
-  };
-
   const getParticipantQuantity = (id: string): number => {
     const participant = participants.find((p) => p.id === id);
 
@@ -194,7 +182,7 @@ export default function NewBattlePage({
 
   // Розділяємо персонажів на Player Characters та NPC Heroes
   const playerCharacters = characters.filter(
-    (c) => c.type === "player" && c.controlledBy !== null
+    (c) => c.type === "player" && c.controlledBy !== null,
   );
 
   const npcCharacters = characters.filter((c) => c.type === "npc");
@@ -264,15 +252,13 @@ export default function NewBattlePage({
               <CardTitle className="text-green-600 dark:text-green-400">
                 ✅ Союзники
               </CardTitle>
-              <CardDescription>
-                Учасники на вашій стороні
-              </CardDescription>
+              <CardDescription>Учасники на вашій стороні</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 max-h-[500px] overflow-y-auto">
               {/* Персонажі-союзники */}
-              {participants
-                .filter((p) => p.side === "ally" && p.type === "character")
-                .length > 0 && (
+              {participants.filter(
+                (p) => p.side === "ally" && p.type === "character",
+              ).length > 0 && (
                 <div>
                   <h4 className="text-xs font-semibold text-muted-foreground mb-2 uppercase">
                     Персонажі
@@ -280,11 +266,11 @@ export default function NewBattlePage({
                   <div className="space-y-2">
                     {participants
                       .filter(
-                        (p) => p.side === "ally" && p.type === "character"
+                        (p) => p.side === "ally" && p.type === "character",
                       )
                       .map((participant) => {
                         const entity = characters.find(
-                          (c) => c.id === participant.id
+                          (c) => c.id === participant.id,
                         );
 
                         if (!entity) return null;
@@ -296,9 +282,11 @@ export default function NewBattlePage({
                           >
                             <div className="flex items-center gap-2">
                               {entity.avatar && (
-                                <img
+                                <Image
                                   src={entity.avatar}
                                   alt={entity.name}
+                                  width={32}
+                                  height={32}
                                   className="w-8 h-8 rounded"
                                 />
                               )}
@@ -324,9 +312,9 @@ export default function NewBattlePage({
               )}
 
               {/* Юніти-союзники */}
-              {participants
-                .filter((p) => p.side === "ally" && p.type === "unit")
-                .length > 0 && (
+              {participants.filter(
+                (p) => p.side === "ally" && p.type === "unit",
+              ).length > 0 && (
                 <div>
                   <h4 className="text-xs font-semibold text-muted-foreground mb-2 uppercase">
                     Юніти
@@ -336,7 +324,7 @@ export default function NewBattlePage({
                       .filter((p) => p.side === "ally" && p.type === "unit")
                       .map((participant) => {
                         const entity = units.find(
-                          (u) => u.id === participant.id
+                          (u) => u.id === participant.id,
                         );
 
                         if (!entity) return null;
@@ -348,9 +336,11 @@ export default function NewBattlePage({
                           >
                             <div className="flex items-center gap-2">
                               {entity.avatar && (
-                                <img
+                                <Image
                                   src={entity.avatar}
                                   alt={entity.name}
+                                  width={32}
+                                  height={32}
                                   className="w-8 h-8 rounded"
                                 />
                               )}
@@ -392,15 +382,13 @@ export default function NewBattlePage({
               <CardTitle className="text-red-600 dark:text-red-400">
                 ⚔️ Вороги
               </CardTitle>
-              <CardDescription>
-                Противники в битві
-              </CardDescription>
+              <CardDescription>Противники в битві</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 max-h-[500px] overflow-y-auto">
               {/* Персонажі-вороги */}
-              {participants
-                .filter((p) => p.side === "enemy" && p.type === "character")
-                .length > 0 && (
+              {participants.filter(
+                (p) => p.side === "enemy" && p.type === "character",
+              ).length > 0 && (
                 <div>
                   <h4 className="text-xs font-semibold text-muted-foreground mb-2 uppercase">
                     Персонажі
@@ -408,11 +396,11 @@ export default function NewBattlePage({
                   <div className="space-y-2">
                     {participants
                       .filter(
-                        (p) => p.side === "enemy" && p.type === "character"
+                        (p) => p.side === "enemy" && p.type === "character",
                       )
                       .map((participant) => {
                         const entity = characters.find(
-                          (c) => c.id === participant.id
+                          (c) => c.id === participant.id,
                         );
 
                         if (!entity) return null;
@@ -424,9 +412,11 @@ export default function NewBattlePage({
                           >
                             <div className="flex items-center gap-2">
                               {entity.avatar && (
-                                <img
+                                <Image
                                   src={entity.avatar}
                                   alt={entity.name}
+                                  width={32}
+                                  height={32}
                                   className="w-8 h-8 rounded"
                                 />
                               )}
@@ -452,9 +442,9 @@ export default function NewBattlePage({
               )}
 
               {/* Юніти-вороги */}
-              {participants
-                .filter((p) => p.side === "enemy" && p.type === "unit")
-                .length > 0 && (
+              {participants.filter(
+                (p) => p.side === "enemy" && p.type === "unit",
+              ).length > 0 && (
                 <div>
                   <h4 className="text-xs font-semibold text-muted-foreground mb-2 uppercase">
                     Юніти
@@ -464,7 +454,7 @@ export default function NewBattlePage({
                       .filter((p) => p.side === "enemy" && p.type === "unit")
                       .map((participant) => {
                         const entity = units.find(
-                          (u) => u.id === participant.id
+                          (u) => u.id === participant.id,
                         );
 
                         if (!entity) return null;
@@ -476,9 +466,11 @@ export default function NewBattlePage({
                           >
                             <div className="flex items-center gap-2">
                               {entity.avatar && (
-                                <img
+                                <Image
                                   src={entity.avatar}
                                   alt={entity.name}
+                                  width={32}
+                                  height={32}
                                   className="w-8 h-8 rounded"
                                 />
                               )}
@@ -521,9 +513,7 @@ export default function NewBattlePage({
           <Card>
             <CardHeader>
               <CardTitle>👥 Персонажі</CardTitle>
-              <CardDescription>
-                Гравці та NPC герої
-              </CardDescription>
+              <CardDescription>Гравці та NPC герої</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 max-h-[600px] overflow-y-auto">
               {/* Player Characters */}
@@ -545,14 +535,16 @@ export default function NewBattlePage({
                               handleParticipantToggle(
                                 character.id,
                                 "character",
-                                checked as boolean
+                                checked as boolean,
                               )
                             }
                           />
                           {character.avatar && (
-                            <img
+                            <Image
                               src={character.avatar}
                               alt={character.name}
+                              width={32}
+                              height={32}
                               className="w-8 h-8 rounded"
                             />
                           )}
@@ -585,14 +577,16 @@ export default function NewBattlePage({
                               handleParticipantToggle(
                                 character.id,
                                 "character",
-                                checked as boolean
+                                checked as boolean,
                               )
                             }
                           />
                           {character.avatar && (
-                            <img
+                            <Image
                               src={character.avatar}
                               alt={character.name}
+                              width={32}
+                              height={32}
                               className="w-8 h-8 rounded"
                             />
                           )}
@@ -606,12 +600,11 @@ export default function NewBattlePage({
                 </div>
               )}
 
-              {playerCharacters.length === 0 &&
-                npcCharacters.length === 0 && (
-                  <p className="text-sm text-muted-foreground text-center py-4">
-                    Немає доступних персонажів
-                  </p>
-                )}
+              {playerCharacters.length === 0 && npcCharacters.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  Немає доступних персонажів
+                </p>
+              )}
             </CardContent>
           </Card>
 
@@ -643,14 +636,16 @@ export default function NewBattlePage({
                               handleParticipantToggle(
                                 unit.id,
                                 "unit",
-                                checked as boolean
+                                checked as boolean,
                               )
                             }
                           />
                           {unit.avatar && (
-                            <img
+                            <Image
                               src={unit.avatar}
                               alt={unit.name}
+                              width={32}
+                              height={32}
                               className="w-8 h-8 rounded"
                             />
                           )}
@@ -675,7 +670,7 @@ export default function NewBattlePage({
                               onChange={(e) =>
                                 handleQuantityChange(
                                   unit.id,
-                                  Math.max(1, parseInt(e.target.value) || 1)
+                                  Math.max(1, parseInt(e.target.value) || 1),
                                 )
                               }
                               className="w-24"

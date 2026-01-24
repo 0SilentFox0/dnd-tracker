@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { prisma } from "@/lib/db";
-import { requireAuth, requireDM } from "@/lib/utils/api-auth";
+import { requireAuth, requireDM } from "@/lib/utils/api/api-auth";
 
 const updateCampaignSchema = z.object({
   name: z.string().min(1).max(100).optional(),

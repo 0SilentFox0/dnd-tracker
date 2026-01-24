@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/db";
-import { requireDM } from "@/lib/utils/api-auth";
+import { requireDM } from "@/lib/utils/api/api-auth";
 
 export async function DELETE(
   request: Request,

@@ -4,7 +4,6 @@ import { useMemo,useState } from "react";
 
 import { MainSkillLevels } from "@/components/skill-tree/elements/MainSkillLevels";
 import { RacialSkill } from "@/components/skill-tree/elements/RacialSkill";
-import { SectorLabel } from "@/components/skill-tree/elements/SectorLabel";
 import { SectorLevels } from "@/components/skill-tree/elements/SectorLevels";
 import { SegmentSkills } from "@/components/skill-tree/elements/SegmentSkills";
 import { UltimateSkillComponent } from "@/components/skill-tree/elements/UltimateSkill";
@@ -15,8 +14,6 @@ import {
   canLearnSkill,
   getCircle2UnlockedCount,
   getCircle4UnlockedCount,
-  getLevelStatus,
-  isMainSkillFullyUnlocked,
 } from "@/components/skill-tree/utils/hooks";
 import { SKILL_TREE_CONSTANTS } from "@/components/skill-tree/utils/utils";
 import type { Race } from "@/types/races";
@@ -79,7 +76,6 @@ export function CircularSkillTree({
   unlockedSkills = [],
   playerLevel = 1,
   isDMMode = false,
-  isTrainingCompleted = false,
   onSkillClick,
   onUltimateSkillClick,
   onRacialSkillClick,
@@ -115,14 +111,6 @@ export function CircularSkillTree({
   // Обгортки для перевірок з правильними параметрами
   const canLearnSkillWrapper = (skill: Skill) =>
     canLearnSkill(skill, unlockedSkills, skillTree);
-
-  const isMainSkillFullyUnlockedWrapper = (mainSkillId: string) => {
-    const mainSkill = skillTree.mainSkills.find((ms) => ms.id === mainSkillId);
-
-    if (!mainSkill) return false;
-
-    return isMainSkillFullyUnlocked(mainSkill, unlockedSkills);
-  };
 
   // Перевірка чи можна вивчити ультимативний навик
   // Ультимативний навик доступний тільки коли є 3 прокачані навики з кола 2
@@ -303,18 +291,21 @@ export function CircularSkillTree({
                 {/* Навики в сегменті - показуємо завжди */}
                 <SegmentSkills
                   mainSkill={mainSkill}
-                  midAngle={midAngle}
-                  sectorAngle={sectorAngle}
-                  unlockedSkills={unlockedSkills}
+                  geometry={{ midAngle, sectorAngle }}
+                  state={{
+                    unlockedSkills,
+                    selectedSkillForRemoval,
+                    selectedSkillFromLibrary,
+                  }}
+                  callbacks={{
+                    onSkillClick: isDMMode ? undefined : handleSkillClick,
+                    onSkillSlotClick,
+                    onRemoveSkill,
+                    onSelectSkillForRemoval,
+                  }}
+                  counts={{ circle4UnlockedCount }}
                   canLearnSkill={canLearnSkillWrapper}
-                  onSkillClick={isDMMode ? undefined : handleSkillClick}
-                  onSkillSlotClick={onSkillSlotClick}
-                  onRemoveSkill={onRemoveSkill}
-                  onSelectSkillForRemoval={onSelectSkillForRemoval}
-                  selectedSkillForRemoval={selectedSkillForRemoval}
-                  circle4UnlockedCount={circle4UnlockedCount}
                   isDMMode={isDMMode}
-                  selectedSkillFromLibrary={selectedSkillFromLibrary}
                 />
               </div>
             );

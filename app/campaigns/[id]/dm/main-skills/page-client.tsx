@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 
 import { CreateMainSkillDialog } from "@/components/main-skills/CreateMainSkillDialog";
 import { MainSkillCard } from "@/components/main-skills/MainSkillCard";

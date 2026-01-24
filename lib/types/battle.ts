@@ -2,6 +2,9 @@
  * Типи для боїв
  */
 
+import { ParticipantSide } from "@/lib/constants/battle";
+import { SkillLevel } from "@/lib/types/skill-tree";
+
 export interface BattleLogEntry {
   round: number;
   timestamp: string;
@@ -76,7 +79,7 @@ export interface ActiveSkill {
   skillId: string;
   name: string;
   mainSkillId: string;
-  level: "basic" | "advanced" | "expert";
+  level: SkillLevel;
   effects: Array<{
     type: string; // тип модифікатора (melee_damage_percent, тощо)
     value: number;
@@ -113,10 +116,12 @@ export interface EquippedArtifact {
 /**
  * Типи для атак
  */
+import { AttackType } from "@/lib/constants/battle";
+
 export interface BattleAttack {
   id?: string;
   name: string;
-  type: "melee" | "ranged";
+  type: AttackType;
   attackBonus: number; // базовий бонус
   damageDice: string; // "2d6", "1d8+3" тощо
   damageType: string; // slashing, piercing, fire, тощо
@@ -127,81 +132,9 @@ export interface BattleAttack {
 /**
  * Повна структура учасника бою (BattleParticipant)
  * Містить всі дані персонажа/юніта для бою
+ * Використовує згруповану структуру для кращої організації
  */
-export interface BattleParticipant {
-  // Базова інформація
-  id: string; // унікальний ID учасника В ЦІЙ БИТВІ
-  battleId: string; // ID битви
-  sourceId: string; // оригінальний ID character/unit
-  sourceType: "character" | "unit";
-  instanceNumber?: number; // номер копії (для units: 1, 2, 3...)
-  instanceId?: string; // унікальний ID інстансу (для units)
-  name: string;
-  avatar?: string;
-  side: "ally" | "enemy";
-  controlledBy: string; // userId (для players) або "dm" (для NPC/units)
-
-  // Характеристики
-  level: number;
-  initiative: number; // поточна ініціатива (з урахуванням бонусів)
-  baseInitiative: number; // базова ініціатива (без тимчасових бонусів)
-  strength: number;
-  dexterity: number;
-  constitution: number;
-  intelligence: number;
-  wisdom: number;
-  charisma: number;
-  modifiers: {
-    strength: number;
-    dexterity: number;
-    constitution: number;
-    intelligence: number;
-    wisdom: number;
-    charisma: number;
-  };
-  proficiencyBonus: number;
-  race: string;
-
-  // Бойові параметри
-  maxHp: number;
-  currentHp: number;
-  tempHp: number;
-  armorClass: number;
-  morale: number; // від -3 до +3, default 0
-  status: "active" | "unconscious" | "dead";
-
-  // Заклинання (якщо кастер)
-  spellcastingClass?: string;
-  spellcastingAbility?: "intelligence" | "wisdom" | "charisma";
-  spellSaveDC?: number;
-  spellAttackBonus?: number;
-  spellSlots: Record<string, { max: number; current: number }>; // "1" до "5"
-  knownSpells: string[]; // масив ID заклинань
-
-  // Атаки
-  attacks: BattleAttack[];
-
-  // Активні ефекти
-  activeEffects: ActiveEffect[];
-
-  // Пасивні здібності
-  passiveAbilities: PassiveAbility[];
-
-  // Расові здібності
-  racialAbilities: RacialAbility[];
-
-  // Прокачка (дерево скілів)
-  activeSkills: ActiveSkill[];
-
-  // Екіпіровані артефакти
-  equippedArtifacts: EquippedArtifact[];
-
-  // Флаги дій
-  hasUsedAction: boolean;
-  hasUsedBonusAction: boolean;
-  hasUsedReaction: boolean;
-  hasExtraTurn: boolean;
-}
+export type BattleParticipant = import("@/types/battle").BattleParticipant;
 
 
 /**
@@ -210,7 +143,7 @@ export interface BattleParticipant {
 export interface BattlePreparationParticipant {
   id: string;
   type: "character" | "unit";
-  side: "ally" | "enemy";
+  side: ParticipantSide;
   quantity?: number;
 }
 

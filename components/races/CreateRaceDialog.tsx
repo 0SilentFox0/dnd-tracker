@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ABILITY_SCORES } from "@/lib/constants/abilities";
 import { useMainSkills } from "@/lib/hooks/useMainSkills";
-import type { RaceFormData, StatModifier } from "@/types/races";
+import type { RaceFormData } from "@/types/races";
 
 interface CreateRaceDialogProps {
   open: boolean;

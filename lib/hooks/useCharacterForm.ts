@@ -4,7 +4,7 @@
 
 import { useCallback,useState } from "react";
 
-import { characterToFormData } from "@/lib/utils/character-form";
+import { characterToFormData } from "@/lib/utils/characters/character-form";
 import type { Character } from "@/types/characters";
 import { CharacterFormData } from "@/types/characters";
 

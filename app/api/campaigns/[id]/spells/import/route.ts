@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { prisma } from "@/lib/db";
-import { requireDM } from "@/lib/utils/api-auth";
+import { requireDM } from "@/lib/utils/api/api-auth";
 
 // Схема для одного заклинання в імпорті
 const importSpellSchema = z.object({
@@ -17,19 +17,36 @@ const importSpellSchema = z.object({
   range: z.string().optional(),
   components: z.string().optional(),
   duration: z.string().optional(),
-  concentration: z.union([z.boolean(), z.string()]).optional().transform((val) => {
-    if (typeof val === "boolean") return val;
+  concentration: z
+    .union([z.boolean(), z.string()])
+    .optional()
+    .transform((val) => {
+      if (typeof val === "boolean") return val;
 
-    if (typeof val === "string") {
-      const lower = val.toLowerCase();
+      if (typeof val === "string") {
+        const lower = val.toLowerCase();
 
-      return lower === "true" || lower === "yes" || lower === "1" || lower === "так";
-    }
+        return (
+          lower === "true" ||
+          lower === "yes" ||
+          lower === "1" ||
+          lower === "так"
+        );
+      }
 
-    return false;
-  }),
+      return false;
+    }),
   damageDice: z.string().optional(),
-  savingThrowAbility: z.enum(["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"]).optional(),
+  savingThrowAbility: z
+    .enum([
+      "strength",
+      "dexterity",
+      "constitution",
+      "intelligence",
+      "wisdom",
+      "charisma",
+    ])
+    .optional(),
   savingThrowOnSuccess: z.enum(["half", "none"]).optional(),
   description: z.string().min(1),
   groupId: z.string().optional(),
@@ -43,11 +60,11 @@ const importSpellsSchema = z.object({
 
 export async function POST(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
-    
+
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
 
@@ -61,23 +78,15 @@ export async function POST(
 
     // Створюємо або отримуємо групи заклинань на основі school з CSV
     const spellGroups: Record<string, string> = {};
-    
-    // Визначаємо унікальні школи з даних
-    const schoolMap: Record<string, string> = {
-      "Dark": "Dark",
-      "Destr": "Destr", 
-      "Summ": "Summ",
-      "Light": "Light",
-    };
 
     // Збираємо всі унікальні школи з заклинань
     const uniqueSchools = new Set<string>();
 
     for (const spell of data.spells) {
-      const spellAny = spell as any;
+      const spellAny = spell as Record<string, unknown>;
 
       if (spellAny.School) {
-        uniqueSchools.add(spellAny.School);
+        uniqueSchools.add(spellAny.School as string);
       }
     }
 
@@ -137,10 +146,13 @@ export async function POST(
             } as unknown as Prisma.InputJsonValue)
           : undefined,
         description: spell.description,
-        groupId: spell.groupId || 
-                 ((spell as any).School && spellGroups[(spell as any).School]) ||
-                 data.groupId || 
-                 null,
+        groupId:
+          spell.groupId ||
+          ((spell as Record<string, unknown>).School
+            ? spellGroups[(spell as Record<string, unknown>).School as string]
+            : undefined) ||
+          data.groupId ||
+          null,
       }));
 
     // Створюємо тільки нові заклинання
@@ -186,13 +198,13 @@ export async function POST(
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "Validation error", details: error.issues },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -10,7 +10,7 @@ import {
   getMainSkills,
   updateMainSkill,
 } from "@/lib/api/main-skills";
-import type { MainSkill, MainSkillFormData } from "@/types/main-skills";
+import type { MainSkillFormData } from "@/types/main-skills";
 
 /**
  * Отримує список основних навиків кампанії

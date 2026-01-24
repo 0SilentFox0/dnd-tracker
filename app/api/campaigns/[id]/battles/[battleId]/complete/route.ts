@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
-import { checkVictoryConditions,completeBattle } from "@/lib/utils/battle-victory";
+import { checkVictoryConditions,completeBattle } from "@/lib/utils/battle/battle-victory";
 import { BattleAction,BattleParticipant } from "@/types/battle";
 
 const completeBattleSchema = z.object({

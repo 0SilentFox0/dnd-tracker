@@ -57,7 +57,6 @@ export function SkillTreeContent({
   onRacialSkillClick,
   onSkillSlotClick,
   onSkillSelect,
-  onComplete,
 }: SkillTreeContentProps) {
   return (
     <div className="space-y-4">

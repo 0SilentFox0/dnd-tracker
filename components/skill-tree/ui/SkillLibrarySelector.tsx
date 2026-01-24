@@ -97,7 +97,7 @@ export function SkillLibrarySelector({
       </SelectField>
       {selectedSkillId && (
         <div className="text-xs text-blue-700 dark:text-blue-300">
-          Вибрано: {skills.find((s) => s.id === selectedSkillId)?.name}
+          Вибрано: {skills.find((s) => s.id === selectedSkillId)?.name || "Невідомо"}
           <br />
           Клікніть на коло для призначення скіла
         </div>

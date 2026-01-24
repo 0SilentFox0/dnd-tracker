@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { prisma } from "@/lib/db";
-import { requireDM, validateCampaignOwnership } from "@/lib/utils/api-auth";
+import { requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
 
 const updateSpellGroupSchema = z.object({
   name: z.string().min(1).max(100).optional(),

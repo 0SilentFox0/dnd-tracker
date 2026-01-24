@@ -16,7 +16,7 @@ import {
 import {
   convertGroupedSpellsToArray,
   groupSpellsByGroupAndLevel,
-} from "@/lib/utils/spells";
+} from "@/lib/utils/spells/spells";
 import type { Spell } from "@/types/spells";
 
 interface DMSpellsPageClientProps {

@@ -12,7 +12,6 @@
 import { PrismaClient } from "@prisma/client";
 import { parse } from "csv-parse/sync";
 import * as fs from "fs";
-import * as path from "path";
 
 import { DEFAULT_CAMPAIGN_ID } from "../lib/constants/campaigns";
 
@@ -128,7 +127,7 @@ function extractSavingThrow(effect: string): {
   for (const ability of abilities) {
     if (lower.includes(ability)) {
       return {
-        ability: ability as any,
+        ability: ability as "strength" | "dexterity" | "constitution" | "intelligence" | "wisdom" | "charisma",
         onSuccess: lower.includes("half") || lower.includes("/2") ? "half" : "none",
       };
     }
@@ -228,7 +227,7 @@ async function importSpellsFromCSV(campaignId: string, csvContent: string) {
           ? ({
               ability: savingThrow.ability,
               onSuccess: savingThrow.onSuccess || "half",
-            } as any)
+            } as { ability: string; onSuccess: "half" | "none" })
           : undefined,
         description: `${row["Original Name"]} (${row["UA Name"]}): ${effect}`,
         groupId: spellGroups[row.School.trim()],

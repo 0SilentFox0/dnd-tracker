@@ -1,56 +1,7 @@
 import { SkillCircle } from "@/components/skill-tree/elements/SkillCircle";
 import { SKILL_TREE_CONSTANTS } from "@/components/skill-tree/utils/utils";
-import type { MainSkill,Skill } from "@/types/skill-tree";
-import {
-  SkillCircle as SkillCircleEnum,
-  SkillLevel,
-} from "@/types/skill-tree";
-
-interface SkillCircleGroupProps {
-  skills: Skill[];
-  mainSkill: MainSkill;
-  circleNumber: SkillCircleEnum;
-  midAngle: number;
-  sectorAngle: number;
-  unlockedSkills: string[];
-  canLearnSkill: (skill: Skill) => boolean;
-  onSkillClick?: (skill: Skill) => void;
-  onSkillSlotClick?: (slot: {
-    mainSkillId: string;
-    circle: SkillCircleEnum;
-    level: SkillLevel;
-    index: number;
-    isMainSkillLevel?: boolean;
-    isRacial?: boolean;
-  }) => void;
-  onRemoveSkill?: (slot: {
-    mainSkillId: string;
-    circle: SkillCircleEnum;
-    level: SkillLevel;
-    index: number;
-  }) => void;
-  onSelectSkillForRemoval?: (slot: {
-    mainSkillId: string;
-    circle: SkillCircleEnum;
-    level: SkillLevel;
-    index: number;
-    skillName: string;
-  }) => void;
-  selectedSkillForRemoval?: {
-    mainSkillId: string;
-    circle: SkillCircleEnum;
-    level: SkillLevel;
-    index: number;
-    isMainSkillLevel?: boolean;
-    isRacial?: boolean;
-  } | null;
-  circle4UnlockedCount: number;
-  mainSkillLevelsUnlocked: number; // Кількість прокачаних main-skill-level
-  circle3UnlockedInSector: number;
-  circle2UnlockedInSector: number;
-  isDMMode?: boolean;
-  selectedSkillFromLibrary?: string | null;
-}
+import { SkillCircle as SkillCircleEnum } from "@/types/skill-tree";
+import type { SkillCircleGroupProps } from "@/types/skill-tree-ui";
 
 const CIRCLE_CONFIG: Record<
   SkillCircleEnum,
@@ -92,25 +43,25 @@ export function SkillCircleGroup({
   skills,
   mainSkill,
   circleNumber,
-  midAngle,
-  sectorAngle,
-  unlockedSkills,
-  canLearnSkill,
-  onSkillClick,
-  onSkillSlotClick,
-  onRemoveSkill,
-  onSelectSkillForRemoval,
-  selectedSkillForRemoval,
-  circle4UnlockedCount,
-  mainSkillLevelsUnlocked,
-  circle3UnlockedInSector,
-  circle2UnlockedInSector,
-  isDMMode = false,
-  selectedSkillFromLibrary,
+  geometry,
+  state,
+  callbacks,
+  counts,
+  config,
 }: SkillCircleGroupProps) {
+  const { midAngle, sectorAngle } = geometry;
+
+  const { unlockedSkills, selectedSkillForRemoval, selectedSkillFromLibrary } = state;
+
+  const { onSkillClick, onSkillSlotClick, onRemoveSkill, onSelectSkillForRemoval } = callbacks;
+
+  const { mainSkillLevelsUnlocked, circle3UnlockedInSector, circle2UnlockedInSector } = counts;
+
+  const { canLearnSkill, isDMMode = false } = config;
+
   const { outerRadiusPercent, innerRadiusPercent } = SKILL_TREE_CONSTANTS;
 
-  const config = CIRCLE_CONFIG[circleNumber];
+  const circleConfig = CIRCLE_CONFIG[circleNumber];
 
   // В DM режимі відображаємо всі скіли (включно з placeholder), щоб коло завжди залишалося на місці
   // В Player режимі фільтруємо placeholder скіли, але якщо всі скіли placeholder - показуємо їх
@@ -134,9 +85,9 @@ export function SkillCircleGroup({
   return (
     <>
       {filteredSkills.map(({ skill, originalIndex }, filteredIndex) => {
-        const angleSpread = sectorAngle * config.angleSpread;
+        const angleSpread = sectorAngle * circleConfig.angleSpread;
 
-        const skillAngleOffset = config.getAngleOffset(
+        const skillAngleOffset = circleConfig.getAngleOffset(
           filteredIndex,
           filteredSkills.length,
           angleSpread
@@ -147,12 +98,12 @@ export function SkillCircleGroup({
         let radiusPercent: number;
 
         if (circleNumber === SkillCircleEnum.OUTER) {
-          radiusPercent = outerRadiusPercent * config.radiusMultiplier;
+          radiusPercent = outerRadiusPercent * circleConfig.radiusMultiplier;
         } else if (circleNumber === SkillCircleEnum.MIDDLE) {
           radiusPercent =
-            (innerRadiusPercent + outerRadiusPercent) * config.radiusMultiplier;
+            (innerRadiusPercent + outerRadiusPercent) * circleConfig.radiusMultiplier;
         } else {
-          radiusPercent = innerRadiusPercent * config.radiusMultiplier;
+          radiusPercent = innerRadiusPercent * circleConfig.radiusMultiplier;
         }
 
         // Перевіряємо чи це placeholder
@@ -233,7 +184,7 @@ export function SkillCircleGroup({
             circleNumber={circleNumber}
             angle={skillAngle}
             radiusPercent={radiusPercent}
-            sizePercent={config.sizePercent}
+            sizePercent={circleConfig.sizePercent}
             isUnlocked={isUnlocked}
             canLearn={canLearn}
             onSkillClick={onSkillClick}

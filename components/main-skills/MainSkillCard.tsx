@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { Edit,MoreVertical, Trash2 } from "lucide-react";
 
@@ -87,9 +88,11 @@ export function MainSkillCard({
             <div>
               <span className="text-sm font-semibold">Іконка:</span>
               <div className="mt-1">
-                <img
+                <Image
                   src={mainSkill.icon}
                   alt={mainSkill.name}
+                  width={32}
+                  height={32}
                   className="w-8 h-8 object-cover rounded"
                   onError={(e) => {
                     (e.target as HTMLImageElement).style.display = "none";

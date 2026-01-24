@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { prisma } from "@/lib/db";
-import { requireAuth } from "@/lib/utils/api-auth";
+import { requireAuth } from "@/lib/utils/api/api-auth";
 
 const joinCampaignSchema = z.object({
   inviteCode: z.string().min(1),

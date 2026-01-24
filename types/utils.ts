@@ -54,7 +54,7 @@ export interface StartOfTurnResult {
   };
 }
 
-export type AttackType = "melee" | "ranged";
+export { AttackType } from "@/lib/constants/battle";
 
 export interface MoraleCheckResult {
   shouldSkipTurn: boolean;

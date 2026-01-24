@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
-import { BattleSpell,processSpell } from "@/lib/utils/battle-spell-process";
+import { BattleSpell,processSpell } from "@/lib/utils/battle/battle-spell-process";
 import { BattleAction,BattleParticipant } from "@/types/battle";
 
 const spellSchema = z.object({
@@ -79,7 +79,7 @@ export async function POST(
     // Отримуємо учасників з initiativeOrder
     const initiativeOrder = battle.initiativeOrder as unknown as BattleParticipant[];
 
-    const caster = initiativeOrder.find((p) => p.id === data.casterId);
+    const caster = initiativeOrder.find((p) => p.basicInfo.id === data.casterId);
 
     if (!caster) {
       return NextResponse.json(
@@ -89,7 +89,7 @@ export async function POST(
     }
 
     // Перевіряємо чи кастер може використати заклинання
-    if (caster.hasUsedAction) {
+    if (caster.actionFlags.hasUsedAction) {
       return NextResponse.json(
         { error: "Caster has already used their action" },
         { status: 400 }
@@ -97,7 +97,7 @@ export async function POST(
     }
 
     // Перевіряємо чи кастер активний
-    if (caster.status !== "active") {
+    if (caster.combatStats.status !== "active") {
       return NextResponse.json(
         { error: "Caster is not active (unconscious or dead)" },
         { status: 400 }
@@ -105,7 +105,7 @@ export async function POST(
     }
 
     // Перевіряємо чи заклинання є в knownSpells
-    if (!caster.knownSpells.includes(data.spellId)) {
+    if (!caster.spellcasting.knownSpells.includes(data.spellId)) {
       return NextResponse.json(
         { error: "Spell is not in caster's known spells" },
         { status: 400 }
@@ -161,11 +161,11 @@ export async function POST(
 
     // Оновлюємо учасників в initiativeOrder
     const updatedInitiativeOrder = initiativeOrder.map((p) => {
-      if (p.id === caster.id) {
+      if (p.basicInfo.id === caster.basicInfo.id) {
         return spellResult.casterUpdated;
       }
 
-      const updatedTarget = spellResult.targetsUpdated.find((t) => t.id === p.id);
+      const updatedTarget = spellResult.targetsUpdated.find((t) => t.basicInfo.id === p.basicInfo.id);
 
       if (updatedTarget) {
         return updatedTarget;

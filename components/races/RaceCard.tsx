@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import { Circle, Edit, MoreVertical, Plus, Shield,Trash2 } from "lucide-react";
 
@@ -13,6 +14,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ABILITY_SCORES } from "@/lib/constants/abilities";
+import { useSkills } from "@/lib/hooks/useSkills";
+import { getSkillMainSkillId, getSkillRaces } from "@/lib/utils/skills/skill-helpers";
 import type { Race, StatModifier } from "@/types/races";
 
 interface RaceCardProps {
@@ -22,9 +25,53 @@ interface RaceCardProps {
 }
 
 export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
-  const availableSkillsCount = Array.isArray(race.availableSkills)
-    ? race.availableSkills.length
-    : 0;
+  // Отримуємо всі скіли з бібліотеки для підрахунку
+  const { data: allSkills = [] } = useSkills(campaignId);
+
+  // Підраховуємо реальну кількість доступних скілів для цієї раси
+  const availableSkillsCount = useMemo(() => {
+    const raceAvailableMainSkills = Array.isArray(race.availableSkills)
+      ? race.availableSkills
+      : [];
+
+    // Якщо немає обмежень на основні навики, всі скіли доступні
+    if (raceAvailableMainSkills.length === 0) {
+      // Фільтруємо скіли, які доступні для цієї раси (через skill.races)
+      return allSkills.filter((skill) => {
+        const skillRaces = getSkillRaces(skill);
+        
+        // Якщо скіл не має обмежень по расам, він доступний
+        if (!skillRaces || skillRaces.length === 0) {
+          return true;
+        }
+
+        // Перевіряємо чи ID раси або назва раси є в списку доступних для скіла
+        return (
+          skillRaces.includes(race.id) ||
+          skillRaces.includes(race.name)
+        );
+      }).length;
+    }
+
+    // Якщо є обмеження на основні навики, фільтруємо скіли
+    return allSkills.filter((skill) => {
+      const mainSkillId = getSkillMainSkillId(skill);
+
+      const skillRaces = getSkillRaces(skill);
+
+      // Перевіряємо чи основний навик скіла є в списку доступних
+      const isMainSkillAvailable = mainSkillId
+        ? raceAvailableMainSkills.includes(mainSkillId)
+        : true; // Скіли без основного навику доступні, якщо немає обмежень
+
+      // Перевіряємо чи скіл доступний для цієї раси
+      const isRaceAvailable = !skillRaces || skillRaces.length === 0
+        ? true
+        : skillRaces.includes(race.id) || skillRaces.includes(race.name);
+
+      return isMainSkillAvailable && isRaceAvailable;
+    }).length;
+  }, [race, allSkills]);
 
   const disabledSkillsCount = Array.isArray(race.disabledSkills)
     ? race.disabledSkills.length

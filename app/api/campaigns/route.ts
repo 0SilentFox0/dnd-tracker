@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { prisma } from "@/lib/db";
-import { requireAuth } from "@/lib/utils/api-auth";
+import { requireAuth } from "@/lib/utils/api/api-auth";
 
 const createCampaignSchema = z.object({
   name: z.string().min(1).max(100),
@@ -85,7 +85,7 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     // Перевіряємо авторизацію
     const authResult = await requireAuth();

@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { prisma } from "@/lib/db";
-import { requireAuth, requireDM, validateCampaignOwnership } from "@/lib/utils/api-auth";
+import { requireAuth, requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
 
 const inventoryItemSchema = z.object({
   name: z.string(),

@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import {
   extractRaceImmunities,
   getUnitImmunities,
-} from "@/lib/utils/race-effects";
+} from "@/lib/utils/races/race-effects";
 import type { Race } from "@/types/races";
 import type { Unit } from "@/types/units";
 

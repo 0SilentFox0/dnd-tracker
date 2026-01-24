@@ -29,7 +29,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useSpellGroupActions } from "@/lib/hooks/useSpellGroupActions";
-import { calculateTotalSpellsInGroup } from "@/lib/utils/spells";
+import { calculateTotalSpellsInGroup } from "@/lib/utils/spells/spells";
 import type { Spell, SpellGroup } from "@/types/spells";
 
 interface SpellGroupIconProps {

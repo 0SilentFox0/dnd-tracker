@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { prisma } from "@/lib/db";
-import { requireDM } from "@/lib/utils/api-auth";
+import { requireDM } from "@/lib/utils/api/api-auth";
 import type { SkillTree } from "@/types/skill-tree";
 
 const updateSkillTreeSchema = z.object({
-  skills: z.any(), // SkillTree structure
+  skills: z.unknown(), // SkillTree structure
 });
 
 export async function PATCH(
@@ -46,7 +47,7 @@ export async function PATCH(
           id: treeId,
           campaignId: id,
           race: race,
-          skills: data.skills as any,
+          skills: data.skills as Prisma.InputJsonValue,
         },
       });
     } else {
@@ -54,7 +55,7 @@ export async function PATCH(
       updatedTree = await prisma.skillTree.update({
         where: { id: treeId },
         data: {
-          skills: data.skills as any,
+          skills: data.skills as Prisma.InputJsonValue,
         },
       });
     }

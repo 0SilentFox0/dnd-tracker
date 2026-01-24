@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 
+import { getSkillMainSkillId, getSkillRaces } from "@/lib/utils/skills/skill-helpers";
 import type { MainSkill } from "@/types/main-skills";
 import type { Race } from "@/types/races";
 import type { SkillTree } from "@/types/skill-tree";
@@ -61,16 +62,7 @@ export function useSkillTreeFilters({
 
   // Фільтруємо скіли: прибираємо вже присвоєні та фільтруємо по расам
   const availableSkills = useMemo(() => {
-    console.log("Filtering skills:", {
-      totalSkills: skillsFromLibrary.length,
-      selectedRace,
-      raceId: race?.id,
-      raceName: race?.name,
-    });
-    
     if (!skillsFromLibrary.length) {
-      console.warn("No skills in library to filter");
-
       return [];
     }
 
@@ -80,22 +72,9 @@ export function useSkillTreeFilters({
         : []
       : null;
 
-    if (raceAvailableSkills && raceAvailableSkills.length > 0) {
-      // Раса має обмежений список доступних основних навиків
-      console.log(`Race has ${raceAvailableSkills.length} available main skills`);
-    }
-
-    // Збираємо інформацію про відфільтровані скіли
-    const excludedSkills: Array<{ name: string; reason: string }> = [];
-
     const filtered = skillsFromLibrary.filter((skill) => {
       // Перевіряємо чи скіл вже присвоєний
       if (assignedSkillIds.has(skill.id)) {
-        excludedSkills.push({
-          name: skill.name,
-          reason: "вже присвоєний",
-        });
-
         return false;
       }
 
@@ -103,26 +82,13 @@ export function useSkillTreeFilters({
       // показуємо тільки скіли, чий mainSkillId є в цьому списку
       // Скіли без mainSkillId перевіряються через skill.races
       if (raceAvailableSkills && raceAvailableSkills.length > 0) {
-        const skillWithMainSkill = skill as unknown as {
-          mainSkillId?: string | null;
-        };
-
-        const mainSkillId = skillWithMainSkill.mainSkillId;
+        const mainSkillId = getSkillMainSkillId(skill);
 
         // Якщо скіл має mainSkillId, перевіряємо чи він в списку доступних
         if (mainSkillId) {
           const isInAvailableList = raceAvailableSkills.includes(mainSkillId);
 
           if (!isInAvailableList) {
-            const mainSkillName =
-              mainSkills.find((ms) => ms.id === mainSkillId)?.name ||
-              mainSkillId;
-
-            excludedSkills.push({
-              name: skill.name,
-              reason: `основний навик "${mainSkillName}" не доступний для цієї раси`,
-            });
-
             return false;
           }
         }
@@ -132,8 +98,9 @@ export function useSkillTreeFilters({
 
       // Перевіряємо чи скіл підходить для цієї раси (через skill.races)
       // skill.races може містити як ID рас, так і назви рас
-      // selectedRace - це назва раси
-      if (skill.races && skill.races.length > 0) {
+      const skillRaces = getSkillRaces(skill);
+      
+      if (skillRaces && skillRaces.length > 0) {
         // Знаходимо ID та назву обраної раси
         const selectedRaceId = race?.id;
 
@@ -141,16 +108,11 @@ export function useSkillTreeFilters({
         
         // Перевіряємо чи ID раси або назва раси є в списку доступних для скіла
         const isAvailableForRace = 
-          (selectedRaceId && skill.races.includes(selectedRaceId)) ||
-          skill.races.includes(selectedRaceName) ||
-          skill.races.includes(selectedRace);
+          (selectedRaceId && skillRaces.includes(selectedRaceId)) ||
+          skillRaces.includes(selectedRaceName) ||
+          skillRaces.includes(selectedRace);
         
         if (!isAvailableForRace) {
-          excludedSkills.push({
-            name: skill.name,
-            reason: `не доступний для раси "${selectedRace}"`,
-          });
-
           return false;
         }
       }
@@ -159,34 +121,8 @@ export function useSkillTreeFilters({
       return true;
     });
 
-    // Виводимо список доступних скілів з назвами
-    if (filtered.length > 0) {
-      const availableSkillNames = filtered
-        .map((s) => {
-          const mainSkillId = (s as unknown as { mainSkillId?: string | null })
-            .mainSkillId;
-
-          const mainSkillName = mainSkillId
-            ? mainSkills.find((ms) => ms.id === mainSkillId)?.name ||
-              mainSkillId
-            : "Без основного навику";
-
-          return `${s.name} (${mainSkillName})`;
-        })
-        .join(", ");
-
-      console.log(`Available skills (${filtered.length}):`, availableSkillNames);
-    }
-
-    // Виводимо список обмежених/виключених скілів
-    if (excludedSkills.length > 0) {
-      console.log(`Excluded skills (${excludedSkills.length}):`, excludedSkills.map(s => `${s.name} - ${s.reason}`).join(", "));
-    }
-
-    console.log(`Final filtered skills count: ${filtered.length}`);
-
     return filtered;
-  }, [skillsFromLibrary, assignedSkillIds, selectedRace, race, mainSkills]);
+  }, [skillsFromLibrary, assignedSkillIds, selectedRace, race]);
 
   // Групуємо скіли по основним навикам
   const groupedSkills = useMemo(() => {
@@ -196,11 +132,7 @@ export function useSkillTreeFilters({
 
     availableSkills.forEach((skill) => {
       // Перевіряємо чи є mainSkillId
-      const skillWithMainSkill = skill as unknown as {
-        mainSkillId?: string | null;
-      };
-
-      const mainSkillId = skillWithMainSkill.mainSkillId;
+      const mainSkillId = getSkillMainSkillId(skill);
 
       if (mainSkillId) {
         // Знаходимо назву основного навику

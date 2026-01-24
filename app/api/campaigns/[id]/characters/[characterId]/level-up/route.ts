@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/db";
-import { requireDM, validateCampaignOwnership } from "@/lib/utils/api-auth";
+import { requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
 import {
   calculateHPGain,
   getAbilityModifier,
@@ -9,8 +9,8 @@ import {
   getProficiencyBonus,
   getSpellAttackBonus,
   getSpellSaveDC,
-} from "@/lib/utils/calculations";
-import { calculateSpellSlotGain } from "@/lib/utils/spell-slots";
+} from "@/lib/utils/common/calculations";
+import { calculateSpellSlotGain } from "@/lib/utils/spells/spell-slots";
 import type { SpellSlotProgression } from "@/types/races";
 
 export async function POST(
@@ -69,18 +69,8 @@ export async function POST(
     // Новий рівень
     const newLevel = character.level + 1;
 
-    // Розраховуємо модифікатори атрибутів
-    const strMod = getAbilityModifier(character.strength);
-
-    const dexMod = getAbilityModifier(character.dexterity);
-
+    // Розраховуємо модифікатор конституції для розрахунку HP
     const conMod = getAbilityModifier(character.constitution);
-
-    const intMod = getAbilityModifier(character.intelligence);
-
-    const wisMod = getAbilityModifier(character.wisdom);
-
-    const chaMod = getAbilityModifier(character.charisma);
 
     // Обираємо випадковий атрибут для +1
     const abilities = [
@@ -108,12 +98,6 @@ export async function POST(
     // Додаємо +1 до випадкового атрибуту
     updatedAbilities[randomAbility] = (character[randomAbility as keyof typeof character] as number) + 1;
 
-    // Розраховуємо нові модифікатори
-    const newStrMod = getAbilityModifier(updatedAbilities.strength);
-
-    const newDexMod = getAbilityModifier(updatedAbilities.dexterity);
-
-    const newConMod = getAbilityModifier(updatedAbilities.constitution);
 
     const newIntMod = getAbilityModifier(updatedAbilities.intelligence);
 
@@ -132,9 +116,6 @@ export async function POST(
 
     // Розраховуємо нові автоматичні значення
     const proficiencyBonus = getProficiencyBonus(newLevel);
-
-    const savingThrows = (character.savingThrows ||
-      {}) as Record<string, boolean>;
 
     const skills = (character.skills || {}) as Record<string, boolean>;
 

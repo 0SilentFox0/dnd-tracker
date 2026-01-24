@@ -52,7 +52,7 @@ export function CharacterRoleplaySection({
       </div>
 
       <div className="w-full min-w-0">
-        <Label htmlFor="bonds">Зв'язки</Label>
+        <Label htmlFor="bonds">Зв&apos;язки</Label>
         <Textarea
           id="bonds"
           value={bonds || ""}

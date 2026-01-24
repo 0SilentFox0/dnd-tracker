@@ -55,7 +55,6 @@ export function SkillCircle({
   canLearn,
   onSkillClick,
   onSkillSlotClick,
-  onRemoveSkill,
   onSelectSkillForRemoval,
   isSelectedForRemoval = false,
   skillIndex = 0,

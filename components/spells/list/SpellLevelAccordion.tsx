@@ -6,7 +6,6 @@ import { Trash2 } from "lucide-react";
 
 import { SpellCard } from "@/components/spells/list/SpellCard";
 import {
-  Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,

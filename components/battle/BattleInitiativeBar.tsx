@@ -1,6 +1,6 @@
 "use client";
 
-import { InitiativeParticipantCard } from "./InitiativeParticipantCard";
+import { InitiativeParticipantCard } from "./cards/InitiativeParticipantCard";
 
 import type { BattleParticipant } from "@/types/battle";
 
@@ -13,7 +13,6 @@ interface BattleInitiativeBarProps {
 export function BattleInitiativeBar({
   initiativeOrder,
   currentTurnIndex,
-  isDM,
 }: BattleInitiativeBarProps) {
   const currentParticipant = initiativeOrder[currentTurnIndex];
 
@@ -39,13 +38,13 @@ export function BattleInitiativeBar({
           {/* Інші учасники (горизонтальна шкала) */}
           <div className="flex items-center gap-2 flex-1 overflow-y-visible overflow-x-auto scrollbar-hide">
             {otherParticipants.map((participant) => {
-              const originalIndex = initiativeOrder.findIndex((p) => p.id === participant.id);
+              const originalIndex = initiativeOrder.findIndex((p) => p.basicInfo.id === participant.basicInfo.id);
 
               const isNext = originalIndex === (currentTurnIndex + 1) % initiativeOrder.length;
               
               return (
                 <InitiativeParticipantCard
-                  key={participant.id}
+                  key={participant.basicInfo.id}
                   participant={participant}
                   isActive={false}
                   isNext={isNext}

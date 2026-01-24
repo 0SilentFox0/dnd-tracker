@@ -3,6 +3,22 @@
  */
 
 /**
+ * Enum для типів атаки
+ */
+export enum AttackType {
+  MELEE = "melee",
+  RANGED = "ranged",
+}
+
+/**
+ * Enum для сторін учасника бою
+ */
+export enum ParticipantSide {
+  ALLY = "ally",
+  ENEMY = "enemy",
+}
+
+/**
  * Глобальні константи бою
  */
 export const BATTLE_CONSTANTS = {

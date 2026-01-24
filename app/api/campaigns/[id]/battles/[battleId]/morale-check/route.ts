@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
-import { checkMorale } from "@/lib/utils/battle-morale";
+import { checkMorale } from "@/lib/utils/battle/battle-morale";
 import { BattleAction,BattleParticipant } from "@/types/battle";
 
 const moraleCheckSchema = z.object({
@@ -67,7 +67,7 @@ export async function POST(
     // Отримуємо учасників з initiativeOrder
     const initiativeOrder = battle.initiativeOrder as unknown as BattleParticipant[];
 
-    const participant = initiativeOrder.find((p) => p.id === data.participantId);
+    const participant = initiativeOrder.find((p) => p.basicInfo.id === data.participantId);
 
     if (!participant) {
       return NextResponse.json(
@@ -82,31 +82,34 @@ export async function POST(
     // Оновлюємо учасника
     const updatedParticipant: BattleParticipant = {
       ...participant,
-      hasExtraTurn: moraleResult.hasExtraTurn,
+      actionFlags: {
+        ...participant.actionFlags,
+        hasExtraTurn: moraleResult.hasExtraTurn,
+      },
     };
 
     // Оновлюємо initiativeOrder
     const updatedInitiativeOrder = initiativeOrder.map((p) =>
-      p.id === participant.id ? updatedParticipant : p
+      p.basicInfo.id === participant.basicInfo.id ? updatedParticipant : p
     );
 
     // Створюємо BattleAction для логу
     const battleLog = (battle.battleLog as unknown as BattleAction[]) || [];
 
     const battleAction: BattleAction = {
-      id: `morale-${participant.id}-${Date.now()}`,
+      id: `morale-${participant.basicInfo.id}-${Date.now()}`,
       battleId,
       round: battle.currentRound,
       actionIndex: battleLog.length,
       timestamp: new Date(),
-      actorId: participant.id,
-      actorName: participant.name,
-      actorSide: participant.side,
+      actorId: participant.basicInfo.id,
+      actorName: participant.basicInfo.name,
+      actorSide: participant.basicInfo.side,
       actionType: moraleResult.shouldSkipTurn ? "morale_skip" : "ability",
       targets: [],
       actionDetails: {
         d10Roll: data.d10Roll,
-        morale: participant.morale,
+        morale: participant.combatStats.morale,
       },
       resultText: moraleResult.message,
       hpChanges: [],

@@ -1,14 +1,18 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
+import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import {
   processEndOfTurn,
   processStartOfRound,
   processStartOfTurn,
-} from "@/lib/utils/battle-turn";
-import { checkVictoryConditions } from "@/lib/utils/battle-victory";
+} from "@/lib/utils/battle/battle-turn";
+import {
+  calculateAllyHpChangesOnVictory,
+  checkVictoryConditions,
+} from "@/lib/utils/battle/battle-victory";
 import { BattleAction,BattleParticipant } from "@/types/battle";
 
 export async function POST(
@@ -75,7 +79,7 @@ export async function POST(
       battle.currentTurnIndex,
       initiativeOrder,
       battle.currentRound,
-      currentParticipant.hasExtraTurn
+      currentParticipant.actionFlags.hasExtraTurn
     );
 
     // Якщо почався новий раунд, обробляємо start of round
@@ -92,6 +96,9 @@ export async function POST(
       );
 
       updatedInitiativeOrder = roundResult.updatedInitiativeOrder;
+
+      // Додаємо повідомлення про тригери startRound в лог (якщо є)
+      // Це буде додано до логу пізніше разом з іншими записами
     }
 
     // Обробляємо початок ходу нового учасника
@@ -119,13 +126,13 @@ export async function POST(
           round: nextRound,
           actionIndex: battleLog.length,
           timestamp: new Date(),
-          actorId: turnResult.participant.id,
-          actorName: turnResult.participant.name,
-          actorSide: turnResult.participant.side,
+          actorId: turnResult.participant.basicInfo.id,
+          actorName: turnResult.participant.basicInfo.name,
+          actorSide: turnResult.participant.basicInfo.side,
           actionType: "end_turn",
           targets: [],
           actionDetails: {
-            damageRolls: turnResult.damageMessages.map((msg, idx) => ({
+            damageRolls: turnResult.damageMessages.map(() => ({
               dice: "DOT",
               results: [],
               total: 0,
@@ -135,11 +142,11 @@ export async function POST(
           resultText: turnResult.damageMessages.join("; "),
           hpChanges: [
             {
-              participantId: turnResult.participant.id,
-              participantName: turnResult.participant.name,
-              oldHp: nextParticipant.currentHp,
-              newHp: turnResult.participant.currentHp,
-              change: turnResult.participant.currentHp - nextParticipant.currentHp,
+              participantId: turnResult.participant.basicInfo.id,
+              participantName: turnResult.participant.basicInfo.name,
+              oldHp: nextParticipant.combatStats.currentHp,
+              newHp: turnResult.participant.combatStats.currentHp,
+              change: turnResult.participant.combatStats.currentHp - nextParticipant.combatStats.currentHp,
             },
           ],
           isCancelled: false,
@@ -153,9 +160,9 @@ export async function POST(
           round: nextRound,
           actionIndex: battleLog.length + newLogEntries.length,
           timestamp: new Date(),
-          actorId: turnResult.participant.id,
-          actorName: turnResult.participant.name,
-          actorSide: turnResult.participant.side,
+          actorId: turnResult.participant.basicInfo.id,
+          actorName: turnResult.participant.basicInfo.name,
+          actorSide: turnResult.participant.basicInfo.side,
           actionType: "ability",
           targets: [],
           actionDetails: {
@@ -187,13 +194,16 @@ export async function POST(
         if (victoryCheck.result === "victory") {
           updatedInitiativeOrder = updatedInitiativeOrder.map((participant) => {
             if (
-              participant.side === "ally" &&
-              participant.status === "unconscious"
+              participant.basicInfo.side === ParticipantSide.ALLY &&
+              participant.combatStats.status === "unconscious"
             ) {
               return {
                 ...participant,
-                currentHp: participant.maxHp,
-                status: "active",
+                combatStats: {
+                  ...participant.combatStats,
+                  currentHp: participant.combatStats.maxHp,
+                  status: "active",
+                },
               };
             }
 
@@ -215,30 +225,11 @@ export async function POST(
           targets: [],
           actionDetails: {},
           resultText: victoryCheck.message,
-          hpChanges: updatedInitiativeOrder
-            .filter((p) => p.side === "ally")
-            .map((p) => {
-              // Знаходимо оригінального учасника для отримання oldHp
-              const original = initiativeOrder.find((orig) => orig.id === p.id);
-
-              const oldHp = original?.currentHp || p.currentHp;
-
-              const newHp = p.currentHp;
-              
-              // Додаємо тільки якщо була зміна HP
-              if (oldHp !== newHp && victoryCheck.result === "victory") {
-                return {
-                  participantId: p.id,
-                  participantName: p.name,
-                  oldHp,
-                  newHp,
-                  change: newHp - oldHp,
-                };
-              }
-
-              return null;
-            })
-            .filter((change): change is NonNullable<typeof change> => change !== null),
+          hpChanges: calculateAllyHpChangesOnVictory(
+            initiativeOrder,
+            updatedInitiativeOrder,
+            victoryCheck
+          ),
           isCancelled: false,
         };
 
@@ -281,14 +272,14 @@ export async function POST(
         }
         
         // Відправляємо notification активному гравцю про початок ходу
-        if (turnResult.participant.controlledBy !== "dm") {
+        if (turnResult.participant.basicInfo.controlledBy !== "dm") {
           await pusherServer.trigger(
-            `user-${turnResult.participant.controlledBy}`,
+            `user-${turnResult.participant.basicInfo.controlledBy}`,
             "turn-started",
             {
               battleId,
-              participantId: turnResult.participant.id,
-              participantName: turnResult.participant.name,
+              participantId: turnResult.participant.basicInfo.id,
+              participantName: turnResult.participant.basicInfo.name,
             }
           );
         }

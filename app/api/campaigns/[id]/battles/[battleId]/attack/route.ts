@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
-import { processAttack } from "@/lib/utils/battle-attack-process";
+import { processAttack } from "@/lib/utils/battle/battle-attack-process";
 import { BattleAction,BattleParticipant } from "@/types/battle";
 
 const attackSchema = z.object({
@@ -85,9 +85,9 @@ export async function POST(
     // Отримуємо учасників з initiativeOrder
     const initiativeOrder = battle.initiativeOrder as unknown as BattleParticipant[];
 
-    const attacker = initiativeOrder.find((p) => p.id === data.attackerId);
+    const attacker = initiativeOrder.find((p) => p.basicInfo.id === data.attackerId);
 
-    const target = initiativeOrder.find((p) => p.id === data.targetId);
+    const target = initiativeOrder.find((p) => p.basicInfo.id === data.targetId);
 
     if (!attacker || !target) {
       return NextResponse.json(
@@ -99,7 +99,7 @@ export async function POST(
     // Перевіряємо чи це поточний хід атакуючого
     const currentParticipant = initiativeOrder[battle.currentTurnIndex];
 
-    if (!currentParticipant || currentParticipant.id !== attacker.id) {
+    if (!currentParticipant || currentParticipant.basicInfo.id !== attacker.basicInfo.id) {
       return NextResponse.json(
         { error: "It is not attacker's turn" },
         { status: 400 }
@@ -107,7 +107,7 @@ export async function POST(
     }
 
     // Перевіряємо чи атакуючий може атакувати
-    if (attacker.hasUsedAction) {
+    if (attacker.actionFlags.hasUsedAction) {
       return NextResponse.json(
         { error: "Attacker has already used their action" },
         { status: 400 }
@@ -115,7 +115,7 @@ export async function POST(
     }
 
     // Перевіряємо чи атакуючий активний
-    if (attacker.status !== "active") {
+    if (attacker.combatStats.status !== "active") {
       return NextResponse.json(
         { error: "Attacker is not active (unconscious or dead)" },
         { status: 400 }
@@ -124,12 +124,12 @@ export async function POST(
 
     // Знаходимо атаку
     let attack = data.attackId
-      ? attacker.attacks.find((a) => a.id === data.attackId || a.name === data.attackId)
+      ? attacker.battleData.attacks.find((a) => a.id === data.attackId || a.name === data.attackId)
       : null;
 
     if (!attack) {
       // Якщо не вказано ID або не знайдено, використовуємо першу доступну атаку
-      attack = attacker.attacks[0];
+      attack = attacker.battleData.attacks[0];
     }
 
     if (!attack) {
@@ -154,11 +154,11 @@ export async function POST(
 
     // Оновлюємо учасників в initiativeOrder
     const updatedInitiativeOrder = initiativeOrder.map((p) => {
-      if (p.id === attacker.id) {
+      if (p.basicInfo.id === attacker.basicInfo.id) {
         return attackResult.attackerUpdated;
       }
 
-      if (p.id === target.id) {
+      if (p.basicInfo.id === target.basicInfo.id) {
         return attackResult.targetUpdated;
       }
 

@@ -45,7 +45,6 @@ export default function NewCharacterPage({
   const { data: races = [] } = useRaces(id);
 
   const {
-    formData,
     loading,
     error,
     basicInfo,

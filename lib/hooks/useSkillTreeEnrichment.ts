@@ -39,9 +39,11 @@ export function useSkillTreeEnrichment({
 
             // Якщо скіл має id з бібліотеки, обогачуємо його даними з бібліотеки
             if (skill.id && skillsMap.has(skill.id)) {
-              const librarySkill = skillsMap.get(
-                skill.id
-              )! as SkillFromLibraryType;
+              const librarySkill = skillsMap.get(skill.id) as SkillFromLibraryType | undefined;
+
+              if (!librarySkill) {
+                return skill;
+              }
 
               const enrichedSkill: Skill = {
                 id: skill.id,

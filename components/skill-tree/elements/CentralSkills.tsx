@@ -1,5 +1,4 @@
 import { SKILL_COLORS, SKILL_SIZES, Z_INDEX } from "@/components/skill-tree/utils/constants";
-import { getPositionPercent, SKILL_TREE_CONSTANTS } from "@/components/skill-tree/utils/utils";
 import type { CentralSkill } from "@/types/skill-tree";
 
 interface CentralSkillsProps {

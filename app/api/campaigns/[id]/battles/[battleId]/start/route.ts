@@ -1,17 +1,18 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
+import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import {
   createBattleParticipantFromCharacter,
   createBattleParticipantFromUnit,
-} from "@/lib/utils/battle-participant";
+} from "@/lib/utils/battle/battle-participant";
 import {
   applyStartOfBattleEffects,
   calculateInitiative,
   sortByInitiative,
-} from "@/lib/utils/battle-start";
+} from "@/lib/utils/battle/battle-start";
 import { BattleParticipant } from "@/types/battle";
 
 export async function POST(
@@ -55,12 +56,17 @@ export async function POST(
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const participants = battle.participants as Array<{
+    const participantsRaw = battle.participants as Array<{
       id: string;
       type: "character" | "unit";
-      side: "ally" | "enemy";
+      side: string;
       quantity?: number;
     }>;
+
+    const participants = participantsRaw.map((p) => ({
+      ...p,
+      side: (p.side === ParticipantSide.ALLY ? ParticipantSide.ALLY : ParticipantSide.ENEMY) as ParticipantSide,
+    }));
 
     // Створюємо initiativeOrder з усіх учасників
     const initiativeOrder: BattleParticipant[] = [];

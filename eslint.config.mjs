@@ -5,7 +5,6 @@ import typescriptParser from "@typescript-eslint/parser";
 import importPlugin from "eslint-plugin-import";
 import reactPlugin from "eslint-plugin-react";
 import reactRefreshPlugin from "eslint-plugin-react-refresh";
-import typescriptPlugin from "@typescript-eslint/eslint-plugin";
 import simpleImportSortPlugin from "eslint-plugin-simple-import-sort";
 import prettierConfig from "eslint-config-prettier";
 import reactHooks from "eslint-plugin-react-hooks";

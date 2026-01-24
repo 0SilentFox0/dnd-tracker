@@ -6,7 +6,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { getSpellGroupIcon } from "@/lib/utils/spell-icons";
+import { getSpellGroupIcon } from "@/lib/utils/spells/spell-icons";
 import type { Spell } from "@/types/spells";
 
 interface SpellDropdownContentProps {

@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/card";
 import { getAuthUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { createClient } from "@/lib/supabase/server";
 
 export default async function CampaignDetailPage({
   params,

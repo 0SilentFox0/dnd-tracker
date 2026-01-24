@@ -2,14 +2,14 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { prisma } from "@/lib/db";
-import { requireCampaignAccess,requireDM } from "@/lib/utils/api-auth";
+import { requireCampaignAccess,requireDM } from "@/lib/utils/api/api-auth";
 import {
   getAbilityModifier,
   getPassiveScore,
   getProficiencyBonus,
   getSpellAttackBonus,
   getSpellSaveDC,
-} from "@/lib/utils/calculations";
+} from "@/lib/utils/common/calculations";
 
 const createCharacterSchema = z.object({
   name: z.string().min(1).max(100),
@@ -82,20 +82,12 @@ export async function POST(
       return accessResult;
     }
 
-    const { campaign } = accessResult;
-
     const body = await request.json();
 
     const data = createCharacterSchema.parse(body);
 
     // Розраховуємо автоматичні значення
     const proficiencyBonus = getProficiencyBonus(data.level);
-
-    const strMod = getAbilityModifier(data.strength);
-
-    const dexMod = getAbilityModifier(data.dexterity);
-
-    const conMod = getAbilityModifier(data.constitution);
 
     const intMod = getAbilityModifier(data.intelligence);
 

@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 import { SkillGroupAccordion } from "@/components/skills/list/SkillGroupAccordion";
 import { Accordion } from "@/components/ui/accordion";
@@ -18,11 +17,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useMainSkills } from "@/lib/hooks/useMainSkills";
-import { useSkills } from "@/lib/hooks/useSkills";
+import { useDeleteAllSkills, useSkills } from "@/lib/hooks/useSkills";
 import {
   convertGroupedSkillsToArray,
   groupSkillsByMainSkill,
-} from "@/lib/utils/skills";
+} from "@/lib/utils/skills/skills";
 import type { Race } from "@/types/races";
 import type { Skill } from "@/types/skills";
 
@@ -37,11 +36,7 @@ export function DMSkillsPageClient({
   initialSkills,
   initialRaces,
 }: DMSkillsPageClientProps) {
-  const router = useRouter();
-
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-
-  const [isDeleting, setIsDeleting] = useState(false);
 
   // Запити для скілів та основних навиків
   const { data: skills = initialSkills, isLoading: skillsLoading } = useSkills(
@@ -51,6 +46,9 @@ export function DMSkillsPageClient({
 
   const { data: mainSkills = [] } = useMainSkills(campaignId);
 
+  // Мутація для видалення всіх скілів
+  const deleteAllSkillsMutation = useDeleteAllSkills(campaignId);
+
   // Групуємо скіли по основним навикам
   const groupedSkills = useMemo(() => {
     const groupedSkillsMap = groupSkillsByMainSkill(skills, mainSkills);
@@ -59,24 +57,12 @@ export function DMSkillsPageClient({
   }, [skills, mainSkills]);
 
   const handleDeleteAll = async () => {
-    setIsDeleting(true);
     try {
-      const response = await fetch(`/api/campaigns/${campaignId}/skills`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        throw new Error("Помилка при видаленні скілів");
-      }
-
-      // Оновлюємо сторінку
-      router.refresh();
+      await deleteAllSkillsMutation.mutateAsync();
       setShowDeleteDialog(false);
     } catch (error) {
       console.error("Error deleting all skills:", error);
       alert("Не вдалося видалити всі скіли. Спробуйте ще раз.");
-    } finally {
-      setIsDeleting(false);
     }
   };
 
@@ -161,13 +147,13 @@ export function DMSkillsPageClient({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Скасувати</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteAllSkillsMutation.isPending}>Скасувати</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteAll}
-              disabled={isDeleting}
+              disabled={deleteAllSkillsMutation.isPending}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {isDeleting ? "Видалення..." : "Видалити всі"}
+              {deleteAllSkillsMutation.isPending ? "Видалення..." : "Видалити всі"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

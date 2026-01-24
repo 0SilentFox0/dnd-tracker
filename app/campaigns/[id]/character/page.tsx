@@ -7,17 +7,16 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { getAuthUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { getAbilityModifier } from "@/lib/utils/calculations";
 import {
   getCharacterDamageModifiers,
   getCharacterImmunities,
-} from "@/lib/utils/character-race-effects";
+} from "@/lib/utils/characters/character-race-effects";
+import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import type { Character } from "@/types/characters";
 
 export default async function CharacterPage({
@@ -88,10 +87,6 @@ export default async function CharacterPage({
 
   const chaMod = getAbilityModifier(character.charisma);
 
-  const savingThrows = character.savingThrows as Record<string, boolean>;
-
-  const skills = character.skills as Record<string, boolean>;
-  
   // Отримуємо расу персонажа
   const race = await prisma.race.findFirst({
     where: {
@@ -99,10 +94,6 @@ export default async function CharacterPage({
       name: character.race,
     },
   });
-
-  const characterImmunities = Array.isArray(character.immunities)
-    ? character.immunities
-    : [];
 
   const allImmunities = getCharacterImmunities(character as unknown as Character, race);
 
@@ -161,7 +152,7 @@ export default async function CharacterPage({
 
         <Card>
           <CardHeader>
-            <CardTitle>Здоров'я</CardTitle>
+            <CardTitle>Здоров&apos;я</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="flex justify-between">

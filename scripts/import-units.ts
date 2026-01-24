@@ -1,10 +1,10 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import * as fs from "fs";
 import * as path from "path";
 
 import { DEFAULT_CAMPAIGN_ID } from "../lib/constants/campaigns";
-import { convertCSVRowToUnit } from "../lib/utils/unit-parsing";
-import type { CSVUnitRow, ImportUnit } from "../types/import";
+import { convertCSVRowToUnit } from "../lib/utils/common/unit-parsing";
+import type { CSVUnitRow } from "../types/import";
 
 const prisma = new PrismaClient();
 
@@ -101,7 +101,7 @@ async function main() {
       values.splice(
         lastIndex,
         values.length - lastIndex,
-        extraValues.join(", ")
+        extraValues.join(", "),
       );
     }
 
@@ -225,7 +225,7 @@ async function main() {
   const existingNamesSet = new Set(existingUnitNames.map((u) => u.name));
 
   const unitsToCreate = unitsWithGroups.filter(
-    (unit) => !existingNamesSet.has(unit.name)
+    (unit) => !existingNamesSet.has(unit.name),
   );
 
   if (unitsToCreate.length === 0) {
@@ -237,7 +237,7 @@ async function main() {
   console.log(
     `Створення ${unitsToCreate.length} нових юнітів (пропущено ${
       unitsWithGroups.length - unitsToCreate.length
-    } дублікатів)...`
+    } дублікатів)...`,
   );
 
   // Отримуємо кольори груп один раз
@@ -292,7 +292,7 @@ async function main() {
   });
 
   // Отримуємо створені юніти для повернення
-  const createdUnits = await prisma.unit.findMany({
+  await prisma.unit.findMany({
     where: {
       campaignId,
       name: {

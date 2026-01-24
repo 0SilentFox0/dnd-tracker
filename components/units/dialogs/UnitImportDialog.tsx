@@ -4,8 +4,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { ImportDialog } from "@/components/common/ImportDialog";
 import { useFileImport } from "@/lib/hooks/useFileImport";
-import { parseCSVFile, parseJSONFile } from "@/lib/utils/file-import";
-import { convertCSVRowToUnit } from "@/lib/utils/unit-parsing";
+import { parseCSVFile, parseJSONFile } from "@/lib/utils/common/file-import";
+import { convertCSVRowToUnit } from "@/lib/utils/common/unit-parsing";
 import type {
   CSVUnitRow,
   ImportUnit,

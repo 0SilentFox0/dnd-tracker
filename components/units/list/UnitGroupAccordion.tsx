@@ -26,8 +26,6 @@ export function UnitGroupAccordion({
   races = [],
   onDeleteUnit,
 }: UnitGroupAccordionProps) {
-  // Знаходимо расу за назвою
-  const race = races.find((r) => r.name === groupName) || null;
 
   return (
     <>

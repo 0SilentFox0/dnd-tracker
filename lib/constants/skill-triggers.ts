@@ -6,7 +6,6 @@ import type {
   ComparisonOperator,
   SimpleSkillTrigger,
   StatType,
-  ValueType,
 } from "@/types/skill-triggers";
 
 /**

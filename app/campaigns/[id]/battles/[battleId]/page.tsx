@@ -1,17 +1,17 @@
 "use client";
 
-import { use, useEffect, useMemo,useState } from "react";
+import { use, useEffect, useMemo, useState } from "react";
 
-import { ActionPanel } from "@/components/battle/ActionPanel";
-import { AttackDialog } from "@/components/battle/AttackDialog";
 import { BattleHeader } from "@/components/battle/BattleHeader";
-import { BattleInitiativeBar } from "@/components/battle/BattleInitiativeBar";
-import { MoraleCheckDialog } from "@/components/battle/MoraleCheckDialog";
-import { ParticipantCard } from "@/components/battle/ParticipantCard";
-import { SpellDialog } from "@/components/battle/SpellDialog";
-import { Card, CardContent } from "@/components/ui/card";
-import { useAttack, useBattle, useCastSpell,useMoraleCheck, useNextTurn } from "@/lib/hooks/useBattles";
-import type { BattleParticipant } from "@/types/battle";
+import { AttackDialog } from "@/components/battle/dialogs/AttackDialog";
+import { MoraleCheckDialog } from "@/components/battle/dialogs/MoraleCheckDialog";
+import { SpellDialog } from "@/components/battle/dialogs/SpellDialog";
+import { BattleFieldView } from "@/components/battle/views/BattleFieldView";
+import { PlayerTurnView } from "@/components/battle/views/PlayerTurnView";
+import { ParticipantSide } from "@/lib/constants/battle";
+import { useAttack, useBattle, useCastSpell, useMoraleCheck, useNextTurn } from "@/lib/hooks/useBattles";
+import { createClient } from "@/lib/supabase/client";
+import type { ActiveSkill,BattleParticipant } from "@/types/battle";
 
 export default function BattlePage({
   params,
@@ -26,16 +26,27 @@ export default function BattlePage({
 
   const [moraleDialogOpen, setMoraleDialogOpen] = useState(false);
 
-  const [selectedAttacker, setSelectedAttacker] = useState<BattleParticipant | null>(null);
-
-  const [selectedCaster, setSelectedCaster] = useState<BattleParticipant | null>(null);
 
   const [participantForMorale, setParticipantForMorale] = useState<BattleParticipant | null>(null);
   
   // Відстежуємо, для якого учасника вже було закрито діалог моралі (щоб не відкривати знову)
   const [moraleDialogDismissedFor, setMoraleDialogDismissedFor] = useState<string | null>(null);
 
+  // ID поточного користувача
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
   const { data: battle, isLoading: loading } = useBattle(id, battleId);
+
+  // Отримуємо ID поточного користувача
+  useEffect(() => {
+    const supabase = createClient();
+
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        setCurrentUserId(user.id);
+      }
+    });
+  }, []);
 
   const nextTurnMutation = useNextTurn(id, battleId);
 
@@ -74,80 +85,98 @@ export default function BattlePage({
     }
   }, [battleId]);
 
+  // Всі хуки мають бути перед умовними return-ами
+  const isDM = useMemo(() => battle?.isDM || false, [battle]);
+
+  const currentParticipant = useMemo(() => {
+    if (!battle) return null;
+
+    return battle.initiativeOrder[battle.currentTurnIndex] || null;
+  }, [battle]);
+
+  // Перевіряємо чи поточний учасник - це гравець (не DM і не NPC)
+  const isCurrentPlayerTurn = useMemo(() => {
+    if (!currentParticipant || !currentUserId || isDM) return false;
+    
+    // Перевіряємо чи це персонаж гравця (sourceType === "character" і controlledBy === currentUserId)
+    return (
+      currentParticipant.basicInfo.sourceType === "character" &&
+      currentParticipant.basicInfo.controlledBy === currentUserId
+    );
+  }, [currentParticipant, currentUserId, isDM]);
+
   // Перевірка моралі для нового учасника після переходу ходу
+  // Тільки для DM режиму або NPC (не для гравців - вони керують через PlayerTurnView)
   useEffect(() => {
     if (!battle || battle.status !== "active") return;
+
+    // Якщо це хід гравця, не показуємо діалог тут - він керується через PlayerTurnView
+    if (isCurrentPlayerTurn) {
+      return;
+    }
 
     if (moraleDialogOpen) return; // Не показуємо діалог якщо він вже відкритий
     
     const currentParticipant = battle.initiativeOrder[battle.currentTurnIndex];
 
-    if (!currentParticipant) return;
+    if (!currentParticipant || !currentParticipant.basicInfo) return;
 
     // Якщо для цього учасника вже було закрито діалог, не відкриваємо знову
-    if (moraleDialogDismissedFor === currentParticipant.id) {
+    if (moraleDialogDismissedFor === currentParticipant.basicInfo.id) {
       return;
     }
 
-    console.log("Checking morale for participant:", currentParticipant.name, "morale:", currentParticipant.morale);
-
     // Перевіряємо чи потрібна перевірка моралі для поточного учасника
     // Виконуємо відразу, оскільки processStartOfTurn вже виконався на бекенді
-    if (currentParticipant.morale !== 0) {
+    if (currentParticipant.combatStats.morale !== 0) {
       // Перевіряємо расові модифікатори
-      let currentMorale = currentParticipant.morale;
+      let currentMorale = currentParticipant.combatStats.morale;
 
-      if (currentParticipant.race === "human" && currentMorale < 0) {
+      if (currentParticipant.abilities.race === "human" && currentMorale < 0) {
         currentMorale = 0;
       }
 
-      if (currentParticipant.race === "necromancer") {
+      if (currentParticipant.abilities.race === "necromancer") {
         // Некроманти пропускають перевірку
-        console.log("Necromancer - skipping morale check");
-
         return;
       }
       
       // Якщо мораль не 0, показуємо діалог перевірки моралі
       if (currentMorale !== 0) {
-        console.log("Showing morale check dialog for:", currentParticipant.name, "morale:", currentMorale);
         setParticipantForMorale(currentParticipant);
         setMoraleDialogOpen(true);
       }
-    } else {
-      console.log("Participant has neutral morale (0) - no check needed");
     }
-  }, [battle, moraleDialogOpen, moraleDialogDismissedFor]);
+  }, [battle, moraleDialogOpen, moraleDialogDismissedFor, isCurrentPlayerTurn]);
 
   const handleNextTurn = async () => {
     if (!battle) return;
 
     // Скидаємо відстеження закритого діалогу при переході ходу
     setMoraleDialogDismissedFor(null);
+    setParticipantForMorale(null);
+    setMoraleDialogOpen(false);
     
     // Просто переходимо до наступного ходу
-    // Перевірка моралі буде виконана після оновлення через useEffect
+    // Перевірка моралі буде виконана після оновлення через useEffect (тільки для DM/NPC)
     nextTurnMutation.mutate();
   };
 
   const handleMoraleCheck = (d10Roll: number) => {
-    if (!participantForMorale) return;
+    if (!participantForMorale || !participantForMorale.basicInfo) return;
     
     moraleCheckMutation.mutate(
       {
-        participantId: participantForMorale.id,
+        participantId: participantForMorale.basicInfo.id,
         d10Roll,
       },
       {
         onSuccess: (result: { battle: typeof battle; moraleResult: { shouldSkipTurn: boolean; hasExtraTurn: boolean; message: string } }) => {
-          console.log("Morale check result:", result.moraleResult);
-          
           // Якщо треба пропустити хід, одразу переходимо до наступного
           if (result.moraleResult.shouldSkipTurn) {
-            console.log("Skipping turn due to morale");
             setMoraleDialogOpen(false);
-            // Скидаємо відстеження закритого діалогу при переході ходу
-            setMoraleDialogDismissedFor(null);
+            // Позначаємо що для цього учасника діалог був оброблений
+            setMoraleDialogDismissedFor(participantForMorale.basicInfo.id);
             setParticipantForMorale(null);
             // Невелика затримка перед переходом
             setTimeout(() => {
@@ -156,37 +185,49 @@ export default function BattlePage({
           } else {
             // Якщо є додатковий хід або просто продовжуємо, залишаємося на тому ж учаснику
             // (hasExtraTurn вже встановлено в API)
-            console.log("Morale check passed, continuing turn");
             setMoraleDialogOpen(false);
-            // Скидаємо відстеження закритого діалогу після підтвердження
-            setMoraleDialogDismissedFor(null);
+            // Позначаємо що для цього учасника діалог був оброблений
+            setMoraleDialogDismissedFor(participantForMorale.basicInfo.id);
             setParticipantForMorale(null);
           }
         },
-        onError: (error: unknown) => {
-          console.error("Error processing morale check:", error);
+          onError: () => {
+            // Error processing morale check
           alert("Помилка при обробці перевірки моралі");
         },
       }
     );
   };
 
+  const allies = useMemo(() => {
+    if (!battle) return [];
+
+    return battle.initiativeOrder.filter(
+      (p: BattleParticipant | null | undefined): p is BattleParticipant =>
+        p !== null && p !== undefined && p.basicInfo?.side === ParticipantSide.ALLY
+    );
+  }, [battle]);
+
+  const enemies = useMemo(() => {
+    if (!battle) return [];
+
+    return battle.initiativeOrder.filter(
+      (p: BattleParticipant | null | undefined): p is BattleParticipant =>
+        p !== null && p !== undefined && p.basicInfo?.side === ParticipantSide.ENEMY
+    );
+  }, [battle]);
 
   // Перевіряємо чи є скіл для перегляду HP ворогів
   const canSeeEnemyHp = useMemo(() => {
     if (!battle) return false;
 
-    const isDM = battle.isDM || false;
-
     if (isDM) return true;
     
     // Перевіряємо чи є спеціальний скіл у поточного учасника
-    const currentParticipant = battle.initiativeOrder?.[battle.currentTurnIndex];
-
     if (!currentParticipant) return false;
     
     // Шукаємо скіл який дозволяє бачити HP ворогів
-    const hasSeeEnemyHpSkill = currentParticipant.activeSkills?.some(
+    const hasSeeEnemyHpSkill = currentParticipant.battleData.activeSkills?.some(
       (skill: { name?: string; effects?: Array<{ type: string }> }) => 
         skill.name?.toLowerCase().includes("enemy hp") || 
         skill.name?.toLowerCase().includes("detect") ||
@@ -194,30 +235,17 @@ export default function BattlePage({
     );
     
     return hasSeeEnemyHpSkill || false;
-  }, [battle]);
+  }, [battle, isDM, currentParticipant]);
 
   // Визначаємо доступні цілі для атаки/заклинання
   const availableTargets = useMemo(() => {
     if (!battle) return [];
 
-    const selectedParticipant = selectedAttacker || selectedCaster;
-
-    if (!selectedParticipant) return [];
-    
-    const participantSide = selectedParticipant.side;
-
-    const friendlyFire = battle.campaign?.friendlyFire || false;
-    
-    if (friendlyFire) {
-      // Якщо friendlyFire увімкнено - можна атакувати всіх
-      return battle.initiativeOrder.filter((p: BattleParticipant) => p.id !== selectedParticipant.id && p.status === "active");
-    } else {
-      // Якщо вимкнено - тільки ворогів
-      return battle.initiativeOrder.filter(
-        (p: BattleParticipant) => p.side !== participantSide && p.id !== selectedParticipant.id && p.status === "active"
-      );
-    }
-  }, [battle, selectedAttacker, selectedCaster]);
+    return battle.initiativeOrder.filter(
+      (p: BattleParticipant | null | undefined): p is BattleParticipant =>
+        p !== null && p !== undefined && p.combatStats?.status === "active"
+    );
+  }, [battle]);
 
   if (loading) {
     return (
@@ -235,158 +263,74 @@ export default function BattlePage({
     );
   }
 
-  const isDM = battle.isDM || false;
-
-  const currentParticipant = battle.initiativeOrder[battle.currentTurnIndex];
-
-  const allies = battle.initiativeOrder.filter((p: BattleParticipant) => p.side === "ally");
-
-  const enemies = battle.initiativeOrder.filter((p: BattleParticipant) => p.side === "enemy");
-
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       <BattleHeader battle={battle} onNextTurn={handleNextTurn} />
 
-      {/* Панель дій для поточного учасника */}
-      {currentParticipant && battle.status === "active" && !moraleDialogOpen && (
-        <div className="shrink-0 border-b bg-background/95 backdrop-blur-sm z-40 px-2 sm:px-4 py-2">
-          <ActionPanel
-            participant={currentParticipant}
-            onAttack={() => {
-              if (currentParticipant.attacks && currentParticipant.attacks.length > 0) {
-                setSelectedAttacker(currentParticipant);
-                setAttackDialogOpen(true);
-              } else {
-                console.warn("Cannot attack - no attacks available:", {
-                  participant: currentParticipant.name,
-                  hasAttacks: currentParticipant.attacks?.length > 0,
-                  attacks: currentParticipant.attacks,
-                });
-                alert("Немає доступних атак");
-              }
-            }}
-            onSpell={() => {
-              if (currentParticipant.knownSpells && currentParticipant.knownSpells.length > 0) {
-                setSelectedCaster(currentParticipant);
-                setSpellDialogOpen(true);
-              } else {
-                console.warn("Cannot cast spell - no spells available:", {
-                  participant: currentParticipant.name,
-                  hasSpells: currentParticipant.knownSpells?.length > 0,
-                });
-                alert("Немає доступних заклинань");
-              }
-            }}
-            onBonusAction={() => {
-              // TODO: Реалізувати бонус дію
-              alert("Бонус дія (буде реалізовано)");
-            }}
-          />
-        </div>
-      )}
-
-      {/* Основний контент - 2 колонки (Союзники | Вороги) */}
-      <div className="flex-1 overflow-hidden">
-        <div className="h-full grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4 p-2 sm:p-4 overflow-y-auto">
-          {/* Союзники */}
-          <div className="space-y-2 sm:space-y-3 min-w-0">
-            <h2 className="text-lg sm:text-xl font-semibold sticky top-0 bg-background/95 backdrop-blur-sm z-10 py-2">
-              Союзники ({allies.length})
-            </h2>
-            <div className="space-y-2 sm:space-y-3">
-              {allies.length === 0 ? (
-                <Card>
-                  <CardContent className="py-8 text-center text-sm text-muted-foreground">
-                    Немає союзників
-                  </CardContent>
-                </Card>
-              ) : (
-                allies.map((participant: BattleParticipant) => {
-                  const isCurrentTurn = participant.id === currentParticipant?.id;
-
-                  return (
-                    <ParticipantCard
-                      key={participant.id}
-                      participant={participant}
-                      isCurrentTurn={isCurrentTurn}
-                      isDM={isDM}
-                      canSeeEnemyHp={true} // Союзники завжди видно
-                      onSelect={() => {
-                        if (isCurrentTurn) {
-                          // Визначаємо чи можна атакувати або кастувати
-                          if (participant.attacks && participant.attacks.length > 0) {
-                            setSelectedAttacker(participant);
-                            setAttackDialogOpen(true);
-                          } else if (participant.knownSpells && participant.knownSpells.length > 0) {
-                            setSelectedCaster(participant);
-                            setSpellDialogOpen(true);
-                          }
-                        }
-                      }}
-                    />
-                  );
-                })
-              )}
-            </div>
-          </div>
-
-          {/* Вороги */}
-          <div className="space-y-2 sm:space-y-3 min-w-0">
-            <h2 className="text-lg sm:text-xl font-semibold sticky top-0 bg-background/95 backdrop-blur-sm z-10 py-2">
-              Вороги ({enemies.length})
-            </h2>
-            <div className="space-y-2 sm:space-y-3">
-              {enemies.length === 0 ? (
-                <Card>
-                  <CardContent className="py-8 text-center text-sm text-muted-foreground">
-                    Немає ворогів
-                  </CardContent>
-                </Card>
-              ) : (
-                enemies.map((participant: BattleParticipant) => {
-                  const isCurrentTurn = participant.id === currentParticipant?.id;
-
-                  return (
-                    <ParticipantCard
-                      key={participant.id}
-                      participant={participant}
-                      isCurrentTurn={isCurrentTurn}
-                      isDM={isDM}
-                      canSeeEnemyHp={canSeeEnemyHp}
-                      onSelect={() => {
-                        if (isCurrentTurn) {
-                          // Визначаємо чи можна атакувати або кастувати
-                          if (participant.attacks && participant.attacks.length > 0) {
-                            setSelectedAttacker(participant);
-                            setAttackDialogOpen(true);
-                          } else if (participant.knownSpells && participant.knownSpells.length > 0) {
-                            setSelectedCaster(participant);
-                            setSpellDialogOpen(true);
-                          }
-                        }
-                      }}
-                    />
-                  );
-                })
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Черга ходів знизу (Heroes 5 style) */}
-      {battle.status === "active" && (
-        <BattleInitiativeBar
-          initiativeOrder={battle.initiativeOrder}
-          currentTurnIndex={battle.currentTurnIndex}
+      {/* Основний контент */}
+      {isCurrentPlayerTurn && currentParticipant && battle.status === "active" ? (
+        /* Екран ходу гравця */
+        <PlayerTurnView
+          battle={battle}
+          participant={currentParticipant}
           isDM={isDM}
+          campaignId={id}
+          onAttack={(data) => {
+            attackMutation.mutate(
+              {
+                attackerId: data.attackerId,
+                targetId: data.targetId,
+                attackId: data.attackId,
+                attackRoll: data.attackRoll,
+                advantageRoll: data.advantageRoll,
+                damageRolls: data.damageRolls,
+              },
+              {
+                onSuccess: () => {
+                  // Атака успішно виконана
+                },
+                onError: () => {
+                  // Error processing attack
+                  alert("Помилка при обробці атаки");
+                },
+              }
+            );
+          }}
+          onSpell={(data) => {
+            spellMutation.mutate(data, {
+              onSuccess: () => {
+                // Заклинання успішно виконано
+              },
+              onError: () => {
+                // Error processing spell
+                alert("Помилка при обробці заклинання");
+              },
+            });
+          }}
+          onBonusAction={(skill: ActiveSkill) => {
+            // TODO: Реалізувати виконання бонусної дії з тригера
+            // TODO: Реалізувати виконання бонусної дії з тригера
+            alert(`Бонусна дія: ${skill.name} (буде реалізовано)`);
+          }}
+          onSkipTurn={handleNextTurn}
+          onMoraleCheck={handleMoraleCheck}
         />
+      ) : (
+        /* Ігрове поле (коли не хід гравця або DM режим) */
+        battle.status === "active" && (
+          <BattleFieldView
+            battle={battle}
+            allies={allies}
+            enemies={enemies}
+            isDM={isDM}
+          />
+        )
       )}
 
       <AttackDialog
         open={attackDialogOpen}
         onOpenChange={setAttackDialogOpen}
-        attacker={selectedAttacker}
+        attacker={null}
         battle={battle}
         availableTargets={availableTargets}
         isDM={isDM}
@@ -396,31 +340,36 @@ export default function BattlePage({
             onSuccess: () => {
               setAttackDialogOpen(false);
             },
-            onError: (error: unknown) => {
-              console.error("Error processing attack:", error);
+            onError: () => {
+              // Error processing attack
               alert("Помилка при обробці атаки");
             },
           });
         }}
       />
 
-      <MoraleCheckDialog
-        open={moraleDialogOpen}
-        onOpenChange={(open) => {
-          setMoraleDialogOpen(open);
-          // Якщо діалог закривається без підтвердження (скасування), позначаємо що для цього учасника він був закритий
-          if (!open && participantForMorale) {
-            setMoraleDialogDismissedFor(participantForMorale.id);
-          }
-        }}
-        participant={participantForMorale}
-        onConfirm={handleMoraleCheck}
-      />
+      {/* Діалог моралі для DM режиму або NPC (не для гравців) */}
+      {!isCurrentPlayerTurn && (
+        <MoraleCheckDialog
+          open={moraleDialogOpen}
+          onOpenChange={(open) => {
+            setMoraleDialogOpen(open);
+
+            // Якщо діалог закривається без підтвердження (скасування), позначаємо що для цього учасника він був закритий
+            if (!open && participantForMorale && participantForMorale.basicInfo) {
+              setMoraleDialogDismissedFor(participantForMorale.basicInfo.id);
+              setParticipantForMorale(null);
+            }
+          }}
+          participant={participantForMorale}
+          onConfirm={handleMoraleCheck}
+        />
+      )}
 
       <SpellDialog
         open={spellDialogOpen}
         onOpenChange={setSpellDialogOpen}
-        caster={selectedCaster}
+        caster={null}
         battle={battle}
         campaignId={id}
         availableTargets={availableTargets}
@@ -431,8 +380,8 @@ export default function BattlePage({
             onSuccess: () => {
               setSpellDialogOpen(false);
             },
-            onError: (error: unknown) => {
-              console.error("Error processing spell:", error);
+            onError: () => {
+              // Error processing spell
               alert("Помилка при обробці заклинання");
             },
           });

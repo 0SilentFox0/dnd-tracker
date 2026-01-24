@@ -1,4 +1,4 @@
-import { useCallback,useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -10,7 +10,7 @@ import { SpellEnhancementType } from "@/lib/constants/spell-enhancement";
 import type { GroupedSkillPayload } from "@/types/hooks";
 import type { Race } from "@/types/races";
 import type { SkillTriggers } from "@/types/skill-triggers";
-import type { GroupedSkill,Skill } from "@/types/skills";
+import type { GroupedSkill, Skill } from "@/types/skills";
 
 interface SpellOption {
   id: string;
@@ -18,60 +18,67 @@ interface SpellOption {
 }
 
 // Підтримуємо обидві структури для сумісності
-type InitialData = Skill | GroupedSkill | {
-  id: string;
-  name: string;
-  description: string | null;
-  icon: string | null;
-  races: unknown;
-  isRacial: boolean;
-  bonuses: unknown;
-  damage: number | null;
-  armor: number | null;
-  speed: number | null;
-  physicalResistance: number | null;
-  magicalResistance: number | null;
-  spellId: string | null;
-  spellGroupId: string | null;
-  mainSkillId: string | null;
-  spellEnhancementTypes?: unknown;
-  spellEffectIncrease?: number | null;
-  spellTargetChange?: unknown;
-  spellAdditionalModifier?: unknown;
-  spellNewSpellId?: string | null;
-  skillTriggers?: SkillTriggers;
-};
+type InitialData =
+  | Skill
+  | GroupedSkill
+  | {
+      id: string;
+      name: string;
+      description: string | null;
+      icon: string | null;
+      races: unknown;
+      isRacial: boolean;
+      bonuses: unknown;
+      damage: number | null;
+      armor: number | null;
+      speed: number | null;
+      physicalResistance: number | null;
+      magicalResistance: number | null;
+      spellId: string | null;
+      spellGroupId: string | null;
+      mainSkillId: string | null;
+      spellEnhancementTypes?: unknown;
+      spellEffectIncrease?: number | null;
+      spellTargetChange?: unknown;
+      spellAdditionalModifier?: unknown;
+      spellNewSpellId?: string | null;
+      skillTriggers?: SkillTriggers;
+    };
 
 /**
  * Адаптер для конвертації згрупованої структури в плоску для сумісності
  */
-const normalizeInitialData = (data: InitialData | undefined): {
-  id?: string;
-  name: string;
-  description: string | null;
-  icon: string | null;
-  races: unknown;
-  isRacial: boolean;
-  bonuses: unknown;
-  damage: number | null;
-  armor: number | null;
-  speed: number | null;
-  physicalResistance: number | null;
-  magicalResistance: number | null;
-  spellId: string | null;
-  spellGroupId: string | null;
-  mainSkillId: string | null;
-  spellEnhancementTypes?: unknown;
-  spellEffectIncrease?: number | null;
-  spellTargetChange?: unknown;
-  spellAdditionalModifier?: unknown;
-  spellNewSpellId?: string | null;
-  skillTriggers?: SkillTriggers;
-} | undefined => {
+const normalizeInitialData = (
+  data: InitialData | undefined,
+):
+  | {
+      id?: string;
+      name: string;
+      description: string | null;
+      icon: string | null;
+      races: unknown;
+      isRacial: boolean;
+      bonuses: unknown;
+      damage: number | null;
+      armor: number | null;
+      speed: number | null;
+      physicalResistance: number | null;
+      magicalResistance: number | null;
+      spellId: string | null;
+      spellGroupId: string | null;
+      mainSkillId: string | null;
+      spellEnhancementTypes?: unknown;
+      spellEffectIncrease?: number | null;
+      spellTargetChange?: unknown;
+      spellAdditionalModifier?: unknown;
+      spellNewSpellId?: string | null;
+      skillTriggers?: SkillTriggers;
+    }
+  | undefined => {
   if (!data) return undefined;
 
   // Якщо це згрупована структура
-  if ('basicInfo' in data && 'combatStats' in data) {
+  if ("basicInfo" in data && "combatStats" in data) {
     const grouped = data as GroupedSkill;
 
     return {
@@ -91,9 +98,11 @@ const normalizeInitialData = (data: InitialData | undefined): {
       spellGroupId: grouped.spellData.spellGroupId || null,
       mainSkillId: grouped.mainSkillData.mainSkillId || null,
       spellEnhancementTypes: grouped.spellEnhancementData.spellEnhancementTypes,
-      spellEffectIncrease: grouped.spellEnhancementData.spellEffectIncrease || null,
+      spellEffectIncrease:
+        grouped.spellEnhancementData.spellEffectIncrease || null,
       spellTargetChange: grouped.spellEnhancementData.spellTargetChange || null,
-      spellAdditionalModifier: grouped.spellEnhancementData.spellAdditionalModifier || null,
+      spellAdditionalModifier:
+        grouped.spellEnhancementData.spellAdditionalModifier || null,
       spellNewSpellId: grouped.spellEnhancementData.spellNewSpellId || null,
       skillTriggers: grouped.skillTriggers,
     };
@@ -107,11 +116,7 @@ const normalizeInitialData = (data: InitialData | undefined): {
  * Утиліти для парсингу initialData
  */
 const parseInitialBonuses = (bonuses: unknown): Record<string, number> => {
-  if (
-    bonuses &&
-    typeof bonuses === "object" &&
-    !Array.isArray(bonuses)
-  ) {
+  if (bonuses && typeof bonuses === "object" && !Array.isArray(bonuses)) {
     return bonuses as Record<string, number>;
   }
 
@@ -119,7 +124,7 @@ const parseInitialBonuses = (bonuses: unknown): Record<string, number> => {
 };
 
 const parseInitialSpellEnhancementTypes = (
-  types: unknown
+  types: unknown,
 ): SpellEnhancementType[] => {
   if (Array.isArray(types)) {
     return types as SpellEnhancementType[];
@@ -129,7 +134,7 @@ const parseInitialSpellEnhancementTypes = (
 };
 
 const parseInitialSpellTargetChange = (
-  targetChange: unknown
+  targetChange: unknown,
 ): string | null => {
   if (
     targetChange &&
@@ -143,16 +148,14 @@ const parseInitialSpellTargetChange = (
   return null;
 };
 
-const parseInitialSpellAdditionalModifier = (modifier: unknown): {
+const parseInitialSpellAdditionalModifier = (
+  modifier: unknown,
+): {
   modifier?: string;
   damageDice?: string;
   duration?: number;
 } => {
-  if (
-    modifier &&
-    typeof modifier === "object" &&
-    modifier !== null
-  ) {
+  if (modifier && typeof modifier === "object" && modifier !== null) {
     return modifier as {
       modifier?: string;
       damageDice?: string;
@@ -169,7 +172,7 @@ const parseInitialSpellAdditionalModifier = (modifier: unknown): {
 
 const convertRaceValueToId = (
   raceValue: string,
-  races: Race[]
+  races: Race[],
 ): string | null => {
   const isLikelyId = raceValue.length > 20;
 
@@ -186,7 +189,7 @@ const convertRaceValueToId = (
 
 const parseInitialRaces = (
   races: unknown,
-  availableRaces: Race[]
+  availableRaces: Race[],
 ): string[] => {
   if (!races || !Array.isArray(races)) {
     return [];
@@ -201,7 +204,7 @@ export function useSkillForm(
   campaignId: string,
   spells: SpellOption[],
   initialRaces?: Race[],
-  initialData?: InitialData
+  initialData?: InitialData,
 ) {
   const router = useRouter();
 
@@ -224,7 +227,7 @@ export function useSkillForm(
   const [name, setName] = useState(normalizedData?.name || "");
 
   const [description, setDescription] = useState(
-    normalizedData?.description || ""
+    normalizedData?.description || "",
   );
 
   const [icon, setIcon] = useState(normalizedData?.icon || "");
@@ -248,12 +251,12 @@ export function useSkillForm(
 
   // Bonuses
   const [bonuses, setBonuses] = useState<Record<string, number>>(() =>
-    parseInitialBonuses(normalizedData?.bonuses)
+    parseInitialBonuses(normalizedData?.bonuses),
   );
 
   // Combat stats
   const [damage, setDamage] = useState(
-    normalizedData?.damage?.toString() || ""
+    normalizedData?.damage?.toString() || "",
   );
 
   const [armor, setArmor] = useState(normalizedData?.armor?.toString() || "");
@@ -261,70 +264,74 @@ export function useSkillForm(
   const [speed, setSpeed] = useState(normalizedData?.speed?.toString() || "");
 
   const [physicalResistance, setPhysicalResistance] = useState(
-    normalizedData?.physicalResistance?.toString() || ""
+    normalizedData?.physicalResistance?.toString() || "",
   );
 
   const [magicalResistance, setMagicalResistance] = useState(
-    normalizedData?.magicalResistance?.toString() || ""
+    normalizedData?.magicalResistance?.toString() || "",
   );
 
   // Spell and main skill
   const [spellId, setSpellId] = useState<string | null>(
-    normalizedData?.spellId || null
+    normalizedData?.spellId || null,
   );
 
   const [spellGroupId, setSpellGroupId] = useState<string | null>(
-    normalizedData?.spellGroupId || null
+    normalizedData?.spellGroupId || null,
   );
 
   const [mainSkillId, setMainSkillId] = useState<string | null>(
-    normalizedData?.mainSkillId || null
+    normalizedData?.mainSkillId || null,
   );
 
   // Spell enhancement
   const [spellEnhancementTypes, setSpellEnhancementTypes] = useState<
     SpellEnhancementType[]
-  >(() => parseInitialSpellEnhancementTypes(normalizedData?.spellEnhancementTypes));
+  >(() =>
+    parseInitialSpellEnhancementTypes(normalizedData?.spellEnhancementTypes),
+  );
 
   const [spellEffectIncrease, setSpellEffectIncrease] = useState(
-    normalizedData?.spellEffectIncrease?.toString() || ""
+    normalizedData?.spellEffectIncrease?.toString() || "",
   );
 
   const [spellTargetChange, setSpellTargetChange] = useState<string | null>(
-    () => parseInitialSpellTargetChange(normalizedData?.spellTargetChange)
+    () => parseInitialSpellTargetChange(normalizedData?.spellTargetChange),
   );
 
   const [spellAdditionalModifier, setSpellAdditionalModifier] = useState<{
     modifier?: string;
     damageDice?: string;
     duration?: number;
-  }>(() => parseInitialSpellAdditionalModifier(normalizedData?.spellAdditionalModifier));
+  }>(() =>
+    parseInitialSpellAdditionalModifier(
+      normalizedData?.spellAdditionalModifier,
+    ),
+  );
 
   const [spellNewSpellId, setSpellNewSpellId] = useState<string | null>(
-    normalizedData?.spellNewSpellId || null
+    normalizedData?.spellNewSpellId || null,
   );
 
   // Skill triggers
   const [skillTriggers, setSkillTriggers] = useState<SkillTriggers>(
-    (normalizedData?.skillTriggers as SkillTriggers) || []
+    (normalizedData?.skillTriggers as SkillTriggers) || [],
   );
 
   // Handlers
   const handleRaceToggle = useCallback((race: string) => {
     setSelectedRaces((prev) =>
-      prev.includes(race) ? prev.filter((r) => r !== race) : [...prev, race]
+      prev.includes(race) ? prev.filter((r) => r !== race) : [...prev, race],
     );
   }, []);
 
   const handleEnhancementTypeToggle = useCallback(
     (type: SpellEnhancementType) => {
       setSpellEnhancementTypes((prev) =>
-        prev.includes(type)
-          ? prev.filter((t) => t !== type)
-          : [...prev, type]
+        prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type],
       );
     },
-    []
+    [],
   );
 
   const handleBonusChange = useCallback((attr: string, value: string) => {
@@ -353,7 +360,7 @@ export function useSkillForm(
         isRacial,
       },
       bonuses: Object.fromEntries(
-        Object.entries(bonuses).filter(([, v]) => v !== 0)
+        Object.entries(bonuses).filter(([, v]) => v !== 0),
       ),
       combatStats: {
         damage: parseNumber(damage),
@@ -368,9 +375,7 @@ export function useSkillForm(
       },
       spellEnhancementData: {
         spellEnhancementTypes:
-          spellEnhancementTypes.length > 0
-            ? spellEnhancementTypes
-            : undefined,
+          spellEnhancementTypes.length > 0 ? spellEnhancementTypes : undefined,
         spellEffectIncrease: parseNumber(spellEffectIncrease),
         spellTargetChange:
           spellTargetChange &&
@@ -380,12 +385,12 @@ export function useSkillForm(
               }
             : undefined,
         spellAdditionalModifier:
-          spellEnhancementTypes.includes(SpellEnhancementType.ADDITIONAL_MODIFIER) &&
-          spellAdditionalModifier.modifier
+          spellEnhancementTypes.includes(
+            SpellEnhancementType.ADDITIONAL_MODIFIER,
+          ) && spellAdditionalModifier.modifier
             ? {
                 modifier: spellAdditionalModifier.modifier,
-                damageDice:
-                  spellAdditionalModifier.damageDice || undefined,
+                damageDice: spellAdditionalModifier.damageDice || undefined,
                 duration: spellAdditionalModifier.duration || undefined,
               }
             : undefined,
@@ -394,8 +399,7 @@ export function useSkillForm(
       mainSkillData: {
         mainSkillId: mainSkillId || undefined,
       },
-      skillTriggers:
-        skillTriggers.length > 0 ? skillTriggers : undefined,
+      skillTriggers: skillTriggers.length > 0 ? skillTriggers : undefined,
     };
   }, [
     name,
@@ -432,13 +436,18 @@ export function useSkillForm(
       try {
         const payload = createPayload();
 
-      if (isEdit && normalizedData?.id) {
-        await updateSkill(campaignId, normalizedData.id, payload);
-      } else {
-        await createSkill(campaignId, payload);
-      }
+        if (isEdit && normalizedData?.id) {
+          await updateSkill(campaignId, normalizedData.id, payload);
+        } else {
+          await createSkill(campaignId, payload);
+        }
 
+        // Інвалідуємо кеш для скілів
         await queryClient.invalidateQueries({
+          queryKey: ["skills", campaignId],
+        });
+        // Очікуємо на оновлення даних перед переходом
+        await queryClient.refetchQueries({
           queryKey: ["skills", campaignId],
         });
         router.push(`/campaigns/${campaignId}/dm/skills`);
@@ -451,7 +460,15 @@ export function useSkillForm(
         setIsSaving(false);
       }
     },
-    [createPayload, isEdit, normalizedData?.id, campaignId, queryClient, router, name]
+    [
+      createPayload,
+      isEdit,
+      normalizedData?.id,
+      campaignId,
+      queryClient,
+      router,
+      name,
+    ],
   );
 
   return {

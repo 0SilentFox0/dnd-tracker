@@ -16,20 +16,20 @@ export function ActionPanel({
   onSpell,
   onBonusAction,
 }: ActionPanelProps) {
-  const hasAttacks = participant.attacks && participant.attacks.length > 0;
+  const hasAttacks = participant.battleData.attacks && participant.battleData.attacks.length > 0;
 
-  const hasSpells = participant.knownSpells && participant.knownSpells.length > 0;
+  const hasSpells = participant.spellcasting.knownSpells && participant.spellcasting.knownSpells.length > 0;
 
-  const canAttack = !participant.hasUsedAction && hasAttacks;
+  const canAttack = !participant.actionFlags.hasUsedAction && hasAttacks;
 
-  const canCastSpell = !participant.hasUsedAction && hasSpells;
+  const canCastSpell = !participant.actionFlags.hasUsedAction && hasSpells;
 
-  const canUseBonusAction = !participant.hasUsedBonusAction;
+  const canUseBonusAction = !participant.actionFlags.hasUsedBonusAction;
 
   return (
     <div className="space-y-2">
       <div className="text-xs sm:text-sm font-semibold text-muted-foreground">
-        {participant.name} - Дії:
+        {participant.basicInfo.name} - Дії:
       </div>
       <div className="flex gap-2 flex-wrap">
         <Button
@@ -39,9 +39,9 @@ export function ActionPanel({
           size="sm"
           className="text-xs sm:text-sm"
         >
-          ⚔️ Атака {hasAttacks ? `(${participant.attacks.length})` : ""}
+          ⚔️ Атака {hasAttacks ? `(${participant.battleData.attacks.length})` : ""}
         </Button>
-        {(hasSpells || participant.knownSpells?.length > 0) && (
+        {(hasSpells || participant.spellcasting.knownSpells?.length > 0) && (
           <Button
             onClick={onSpell}
             disabled={!canCastSpell}
@@ -49,7 +49,7 @@ export function ActionPanel({
             size="sm"
             className="text-xs sm:text-sm"
           >
-            ✨ Заклинання {hasSpells ? `(${participant.knownSpells.length})` : ""}
+            ✨ Заклинання {hasSpells ? `(${participant.spellcasting.knownSpells.length})` : ""}
           </Button>
         )}
         {canUseBonusAction && (
@@ -64,10 +64,10 @@ export function ActionPanel({
           </Button>
         )}
       </div>
-      {(participant.hasUsedAction || participant.hasUsedBonusAction) && (
+      {(participant.actionFlags.hasUsedAction || participant.actionFlags.hasUsedBonusAction) && (
         <div className="text-xs text-muted-foreground">
-          {participant.hasUsedAction && "Основна дія використана. "}
-          {participant.hasUsedBonusAction && "Бонусна дія використана."}
+          {participant.actionFlags.hasUsedAction && "Основна дія використана. "}
+          {participant.actionFlags.hasUsedBonusAction && "Бонусна дія використана."}
         </div>
       )}
       {!hasAttacks && !hasSpells && (

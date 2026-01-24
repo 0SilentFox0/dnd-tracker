@@ -3,8 +3,8 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { getCharacterImmunities } from "@/lib/utils/character-race-effects";
-import { extractRaceImmunities } from "@/lib/utils/race-effects";
+import { getCharacterImmunities } from "@/lib/utils/characters/character-race-effects";
+import { extractRaceImmunities } from "@/lib/utils/races/race-effects";
 import type { Character } from "@/types/characters";
 import type { Race } from "@/types/races";
 

@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { prisma } from "@/lib/db";
-import { requireDM } from "@/lib/utils/api-auth";
+import { requireDM } from "@/lib/utils/api/api-auth";
 
 const createRaceSchema = z.object({
   name: z.string().min(1).max(100),
@@ -34,8 +34,6 @@ const createRaceSchema = z.object({
     )
     .optional(),
 });
-
-const updateRaceSchema = createRaceSchema.partial();
 
 export async function GET(
   request: Request,

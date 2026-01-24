@@ -4,7 +4,7 @@ import { SkillTreePageClient } from "./page-client";
 
 import { getAuthUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { createMockSkillTree } from "@/lib/utils/skill-tree-mock";
+import { createMockSkillTree } from "@/lib/utils/skills/skill-tree-mock";
 import type { Race } from "@/types/races";
 
 export default async function SkillTreesPage({

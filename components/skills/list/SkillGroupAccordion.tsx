@@ -23,14 +23,25 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useRaces } from "@/lib/hooks/useRaces";
 import { useSpellGroupActions } from "@/lib/hooks/useSpellGroupActions";
-import { calculateTotalSkillsInGroup } from "@/lib/utils/skills";
+import {
+  getSkillBonuses,
+  getSkillCombatStats,
+  getSkillDescription,
+  getSkillIcon,
+  getSkillId,
+  getSkillIsRacial,
+  getSkillName,
+  getSkillRaces,
+  getSkillSpell,
+} from "@/lib/utils/skills/skill-helpers";
+import { calculateTotalSkillsInGroup } from "@/lib/utils/skills/skills";
 import type { Race } from "@/types/races";
-import type { Skill } from "@/types/skills";
+import type { GroupedSkill, Skill } from "@/types/skills";
 import type { SpellGroup } from "@/types/spells";
 
 interface SkillGroupAccordionProps {
   groupName: string;
-  skills: Skill[];
+  skills: (Skill | GroupedSkill)[];
   campaignId: string;
   spellGroups: SpellGroup[];
   initialRaces?: Race[];
@@ -133,116 +144,136 @@ export function SkillGroupAccordion({
         </div>
         <AccordionContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 px-4 sm:px-6 pb-4">
-            {skills.map((skill) => (
-              <div
-                key={skill.id}
-                className="border rounded-lg p-4 hover:shadow-lg transition-shadow"
-              >
-                <div className="flex items-start gap-3 mb-3">
-                  {skill.icon && (
-                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden bg-muted flex items-center justify-center shrink-0">
-                      <OptimizedImage
-                        src={skill.icon}
-                        alt={skill.name}
-                        width={64}
-                        height={64}
-                        className="w-full h-full object-cover"
-                        fallback={
-                          <div className="w-full h-full flex items-center justify-center bg-muted">
-                            <span className="text-xl text-muted-foreground">
-                              {skill.name[0]?.toUpperCase() || "?"}
-                            </span>
+            {skills.map((skill) => {
+              const skillId = getSkillId(skill);
+
+              const skillName = getSkillName(skill);
+
+              const skillDescription = getSkillDescription(skill);
+
+              const skillIcon = getSkillIcon(skill);
+
+              const skillRaces = getSkillRaces(skill);
+
+              const skillIsRacial = getSkillIsRacial(skill);
+
+              const skillBonuses = getSkillBonuses(skill);
+
+              const combatStats = getSkillCombatStats(skill);
+
+              const skillSpell = getSkillSpell(skill);
+
+              return (
+                <div
+                  key={skillId}
+                  className="border rounded-lg p-4 hover:shadow-lg transition-shadow"
+                >
+                  <div className="flex items-start gap-3 mb-3">
+                    {skillIcon && (
+                      <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden bg-muted flex items-center justify-center shrink-0">
+                        <OptimizedImage
+                          src={skillIcon}
+                          alt={skillName}
+                          width={64}
+                          height={64}
+                          className="w-full h-full object-cover"
+                          fallback={
+                            <div className="w-full h-full flex items-center justify-center bg-muted">
+                              <span className="text-xl text-muted-foreground">
+                                {skillName[0]?.toUpperCase() || "?"}
+                              </span>
+                            </div>
+                          }
+                        />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="font-semibold text-sm sm:text-base flex-1 min-w-0 truncate">
+                          {skillName}
+                        </h3>
+                        {skillIsRacial && (
+                          <Badge variant="outline" className="shrink-0 text-xs">
+                            Рассовий
+                          </Badge>
+                        )}
+                      </div>
+                      {skillRaces &&
+                        Array.isArray(skillRaces) &&
+                        skillRaces.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {skillRaces.map((race: string) => (
+                              <Badge
+                                key={race}
+                                variant="secondary"
+                                className="text-xs"
+                              >
+                                {getRaceLabel(race)}
+                              </Badge>
+                            ))}
                           </div>
-                        }
-                      />
+                        )}
                     </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-semibold text-sm sm:text-base flex-1 min-w-0 truncate">
-                        {skill.name}
-                      </h3>
-                      {skill.isRacial && (
-                        <Badge variant="outline" className="shrink-0 text-xs">
-                          Рассовий
-                        </Badge>
-                      )}
-                    </div>
-                    {skill.races &&
-                      Array.isArray(skill.races) &&
-                      skill.races.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {skill.races.map((race: string) => (
-                            <Badge
-                              key={race}
-                              variant="secondary"
-                              className="text-xs"
-                            >
-                              {getRaceLabel(race)}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
                   </div>
-                </div>
 
-                {skill.description && (
-                  <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 mb-3">
-                    {skill.description}
-                  </p>
-                )}
-
-                <div className="space-y-2 mb-3">
-                  {Object.keys(skill.bonuses || {}).length > 0 && (
-                    <div className="flex flex-col gap-1">
-                      <span className="text-xs font-semibold text-muted-foreground">
-                        Бонуси:
-                      </span>
-                      <AbilityBonusIcons bonuses={skill.bonuses || {}} />
-                    </div>
+                  {skillDescription && (
+                    <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 mb-3">
+                      {skillDescription}
+                    </p>
                   )}
 
-                  {(skill.armor ||
-                    skill.physicalResistance ||
-                    skill.magicalResistance) && (
+                  <div className="space-y-2 mb-3">
+                    {Object.keys(skillBonuses || {}).length > 0 && (
+                      <div className="flex flex-col gap-1">
+                        <span className="text-xs font-semibold text-muted-foreground">
+                          Бонуси:
+                        </span>
+                        <AbilityBonusIcons bonuses={skillBonuses} />
+                      </div>
+                    )}
+
+                  {(combatStats.armor ||
+                    combatStats.physicalResistance ||
+                    combatStats.magicalResistance) && (
                     <div className="flex flex-col gap-1">
                       <span className="text-xs font-semibold text-muted-foreground">
                         Захист:
                       </span>
                       <SkillStatsIcons
-                        armor={skill.armor}
-                        physicalResistance={skill.physicalResistance}
-                        magicalResistance={skill.magicalResistance}
+                        armor={combatStats.armor}
+                        physicalResistance={combatStats.physicalResistance}
+                        magicalResistance={combatStats.magicalResistance}
                       />
                     </div>
                   )}
 
-                  {(skill.damage || skill.speed) && (
+                  {(combatStats.damage || combatStats.speed) && (
                     <div className="text-xs text-muted-foreground space-y-0.5">
-                      {skill.damage && <div>Шкода: {skill.damage}</div>}
-                      {skill.speed && <div>Швидкість: {skill.speed}</div>}
+                      {combatStats.damage && <div>Шкода: {combatStats.damage}</div>}
+                      {combatStats.speed && <div>Швидкість: {combatStats.speed}</div>}
                     </div>
                   )}
 
-                  {skill.spell && (
+                  {skillSpell && (
                     <div className="text-xs text-muted-foreground">
                       <span className="font-semibold">Покращення спела:</span>{" "}
-                      {skill.spell.name}
+                      {skillSpell.name}
                     </div>
                   )}
-                </div>
+                  </div>
 
-                <Link href={`/campaigns/${campaignId}/dm/skills/${skill.id}`}>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full text-xs sm:text-sm"
-                  >
-                    Редагувати
-                  </Button>
-                </Link>
-              </div>
-            ))}
+                  <Link href={`/campaigns/${campaignId}/dm/skills/${skillId}`}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full text-xs sm:text-sm"
+                    >
+                      Редагувати
+                    </Button>
+                  </Link>
+                </div>
+              );
+            })}
           </div>
         </AccordionContent>
       </AccordionItem>

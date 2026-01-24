@@ -3,7 +3,6 @@
  */
 
 import type { UpdateSkillTreeParams, UpdateSkillTreeResponse } from "@/types/api";
-import type { SkillTree } from "@/types/skill-tree";
 
 /**
  * Оновлює дерево навиків

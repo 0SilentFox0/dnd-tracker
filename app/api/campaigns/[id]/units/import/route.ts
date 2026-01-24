@@ -3,8 +3,7 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { prisma } from "@/lib/db";
-import { requireDM } from "@/lib/utils/api-auth";
-import { convertCSVRowToUnit } from "@/lib/utils/unit-parsing";
+import { requireDM } from "@/lib/utils/api/api-auth";
 import type { ImportUnit } from "@/types/import";
 
 // Схема для одного юніта в імпорті
@@ -79,7 +78,8 @@ export async function POST(
     const defaultGroupName = body.groupName as string | undefined;
 
     // Валідуємо units без groupName
-    const unitsForValidation = rawUnits.map(({ groupName, ...unit }) => unit);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const unitsForValidation = rawUnits.map(({ groupName: _groupName, ...unit }) => unit);
 
     const validationResult = importUnitsSchema.parse({
       units: unitsForValidation,

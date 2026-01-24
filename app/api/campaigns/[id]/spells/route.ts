@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { prisma } from "@/lib/db";
-import { requireCampaignAccess,requireDM } from "@/lib/utils/api-auth";
+import { requireCampaignAccess,requireDM } from "@/lib/utils/api/api-auth";
 
 const createSpellSchema = z.object({
   name: z.string().min(1).max(100),
@@ -50,7 +50,6 @@ export async function POST(
       return accessResult;
     }
 
-    const { campaign } = accessResult;
 
     const body = await request.json();
 

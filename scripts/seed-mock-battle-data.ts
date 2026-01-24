@@ -18,6 +18,7 @@
  */
 import { Prisma,PrismaClient } from "@prisma/client";
 
+import { AttackType } from "../lib/constants/battle";
 import { DEFAULT_CAMPAIGN_ID } from "../lib/constants/campaigns";
 
 const prisma = new PrismaClient();
@@ -760,7 +761,7 @@ async function seedMockData() {
             attackBonus: 7,
             damageDice: "1d8+4",
             damageType: "slashing",
-            weaponType: "melee",
+            weaponType: AttackType.MELEE,
           },
         };
       } else if (character.class === "Ranger") {
@@ -772,7 +773,7 @@ async function seedMockData() {
             attackBonus: 8,
             damageDice: "1d8+4",
             damageType: "piercing",
-            weaponType: "ranged",
+            weaponType: AttackType.RANGED,
             range: "150/600",
           },
         };
@@ -786,7 +787,7 @@ async function seedMockData() {
             attackBonus: 2,
             damageDice: "1d6",
             damageType: "bludgeoning",
-            weaponType: "melee",
+            weaponType: AttackType.MELEE,
           },
         };
       }

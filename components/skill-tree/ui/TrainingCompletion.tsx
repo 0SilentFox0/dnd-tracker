@@ -10,7 +10,6 @@ interface TrainingCompletionProps {
 
 export function TrainingCompletion({
   unlockedSkillsCount,
-  maxSkills,
   onComplete,
 }: TrainingCompletionProps) {
   return (
