@@ -163,6 +163,9 @@ export function processAttack(
 
     updatedAttacker = afterAttackResultFail.updatedAttacker;
 
+    // Позначаємо що атакуючий використав дію
+    updatedAttacker.actionFlags.hasUsedAction = true;
+
     return {
       success: false,
       attackRoll,
@@ -216,6 +219,9 @@ export function processAttack(
     );
 
     updatedAttacker = afterAttackResultMiss.updatedAttacker;
+
+    // Позначаємо що атакуючий використав дію
+    updatedAttacker.actionFlags.hasUsedAction = true;
 
     return {
       success: false,

@@ -1,10 +1,11 @@
 "use client";
 
-import { Crosshair, SkipForward,Sparkles, Sword, Zap } from "lucide-react";
+import { Crosshair, SkipForward, Sparkles, Sword, Zap } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { AttackType } from "@/lib/constants/battle";
-import type { ActiveSkill,BattleParticipant } from "@/types/battle";
+import type { ActiveSkill, BattleParticipant } from "@/types/battle";
 
 interface ActionButtonsPanelProps {
   participant: BattleParticipant;
@@ -30,31 +31,45 @@ export function ActionButtonsPanel({
   onBonusAction,
   onSkipTurn,
 }: ActionButtonsPanelProps) {
-  const hasMeleeAttacks = participant.battleData.attacks?.some(
-    (attack) => attack.type === AttackType.MELEE || attack.range === "5 ft"
-  ) || false;
+  const hasMeleeAttacks =
+    participant.battleData.attacks?.some(
+      (attack) => attack.type === AttackType.MELEE || attack.range === "5 ft",
+    ) || false;
 
-  const hasRangedAttacks = participant.battleData.attacks?.some(
-    (attack) => attack.type === AttackType.RANGED || (attack.range && attack.range !== "5 ft")
-  ) || false;
+  const hasRangedAttacks =
+    participant.battleData.attacks?.some(
+      (attack) =>
+        attack.type === AttackType.RANGED ||
+        (attack.range && attack.range !== "5 ft"),
+    ) || false;
 
-  const hasSpells = participant.spellcasting.knownSpells && participant.spellcasting.knownSpells.length > 0;
+  const hasSpells =
+    participant.spellcasting.knownSpells &&
+    participant.spellcasting.knownSpells.length > 0;
 
   const canUseBonusAction = !participant.actionFlags.hasUsedBonusAction;
 
   return (
-    <div className="w-full max-w-4xl space-y-4">
+    <div className="w-full max-w-4xl space-y-4 sm:space-y-8 px-2">
       {/* Ряд 1: Основні дії */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-6">
         <Button
           size="lg"
           variant={hasMeleeAttacks ? "default" : "outline"}
           disabled={!hasMeleeAttacks || participant.actionFlags.hasUsedAction}
           onClick={onMeleeAttack}
-          className="h-20 sm:h-24 flex flex-col items-center justify-center gap-2"
+          className={cn(
+            "h-20 sm:h-32 flex flex-col items-center justify-center gap-1 sm:gap-2 rounded-2xl transition-all duration-300 group relative overflow-hidden",
+            hasMeleeAttacks && !participant.actionFlags.hasUsedAction
+              ? "bg-gradient-to-br from-orange-600 to-red-700 hover:scale-105 hover:shadow-[0_0_20px_rgba(234,88,12,0.5)] border-none"
+              : "glass-card opacity-50",
+          )}
         >
-          <Sword className="w-6 h-6 sm:w-8 sm:h-8" />
-          <span className="text-sm sm:text-base">Атака Ближня</span>
+          <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <Sword className="w-6 h-6 sm:w-10 sm:h-10 drop-shadow-lg group-hover:rotate-12 transition-transform" />
+          <span className="text-[10px] sm:text-lg font-black uppercase tracking-widest italic drop-shadow-md">
+            Меч
+          </span>
         </Button>
 
         <Button
@@ -62,10 +77,18 @@ export function ActionButtonsPanel({
           variant={hasRangedAttacks ? "default" : "outline"}
           disabled={!hasRangedAttacks || participant.actionFlags.hasUsedAction}
           onClick={onRangedAttack}
-          className="h-20 sm:h-24 flex flex-col items-center justify-center gap-2"
+          className={cn(
+            "h-20 sm:h-32 flex flex-col items-center justify-center gap-1 sm:gap-2 rounded-2xl transition-all duration-300 group relative overflow-hidden",
+            hasRangedAttacks && !participant.actionFlags.hasUsedAction
+              ? "bg-gradient-to-br from-blue-600 to-indigo-700 hover:scale-105 hover:shadow-[0_0_20px_rgba(37,99,235,0.5)] border-none"
+              : "glass-card opacity-50",
+          )}
         >
-          <Crosshair className="w-6 h-6 sm:w-8 sm:h-8" />
-          <span className="text-sm sm:text-base">Атака Дальня</span>
+          <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <Crosshair className="w-6 h-6 sm:w-10 sm:h-10 drop-shadow-lg group-hover:scale-110 transition-transform" />
+          <span className="text-[10px] sm:text-lg font-black uppercase tracking-widest italic drop-shadow-md">
+            Лук
+          </span>
         </Button>
 
         <Button
@@ -73,15 +96,23 @@ export function ActionButtonsPanel({
           variant={hasSpells ? "default" : "outline"}
           disabled={!hasSpells || participant.actionFlags.hasUsedAction}
           onClick={onSpell}
-          className="h-20 sm:h-24 flex flex-col items-center justify-center gap-2"
+          className={cn(
+            "h-20 sm:h-32 col-span-2 sm:col-span-1 flex flex-col items-center justify-center gap-1 sm:gap-2 rounded-2xl transition-all duration-300 group relative overflow-hidden",
+            hasSpells && !participant.actionFlags.hasUsedAction
+              ? "bg-gradient-to-br from-purple-600 to-fuchsia-700 hover:scale-105 hover:shadow-[0_0_20px_rgba(147,51,234,0.5)] border-none"
+              : "glass-card opacity-50",
+          )}
         >
-          <Sparkles className="w-6 h-6 sm:w-8 sm:h-8" />
-          <span className="text-sm sm:text-base">Заклинання</span>
+          <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <Sparkles className="w-6 h-6 sm:w-10 sm:h-10 drop-shadow-lg group-hover:animate-pulse transition-transform" />
+          <span className="text-[10px] sm:text-lg font-black uppercase tracking-widest italic drop-shadow-md">
+            Магія
+          </span>
         </Button>
       </div>
 
       {/* Ряд 2: Бонусні дії та пропуск */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-6">
         {/* Бонусні дії з тригерів */}
         {bonusActions.length > 0 && canUseBonusAction ? (
           bonusActions.map((skill) => (
@@ -90,28 +121,33 @@ export function ActionButtonsPanel({
               size="lg"
               variant="secondary"
               onClick={() => onBonusAction(skill)}
-              className="h-20 sm:h-24 flex flex-col items-center justify-center gap-2"
+              className="h-20 sm:h-32 flex flex-col items-center justify-center gap-1 sm:gap-2 rounded-2xl bg-gradient-to-br from-yellow-500 to-orange-600 hover:scale-105 hover:shadow-[0_0_20px_rgba(245,158,11,0.5)] border-none group relative overflow-hidden"
             >
-              <Zap className="w-6 h-6 sm:w-8 sm:h-8" />
-              <span className="text-sm sm:text-base">{skill.name}</span>
+              <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Zap className="w-6 h-6 sm:w-10 sm:h-10 drop-shadow-lg group-hover:animate-bounce transition-transform" />
+              <span className="text-[10px] sm:text-lg font-black uppercase tracking-widest italic drop-shadow-md truncate w-full px-2">
+                {skill.name}
+              </span>
             </Button>
           ))
         ) : (
-          <div className="h-20 sm:h-24 flex items-center justify-center text-muted-foreground text-sm">
-            {canUseBonusAction ? "Немає бонусних дій" : "Бонусна дія використана"}
+          <div className="h-20 sm:h-32 flex items-center justify-center glass-card rounded-2xl text-muted-foreground text-[10px] sm:text-sm font-bold uppercase tracking-widest italic px-4 text-center">
+            {canUseBonusAction ? "No Bonus" : "Used"}
           </div>
         )}
 
         {/* Пропуск ходу */}
-        <div className="sm:col-start-3">
+        <div className="col-span-1 sm:col-start-3">
           <Button
             size="lg"
             variant="outline"
             onClick={onSkipTurn}
-            className="w-full h-20 sm:h-24 flex flex-col items-center justify-center gap-2"
+            className="w-full h-20 sm:h-32 flex flex-col items-center justify-center gap-1 sm:gap-2 rounded-2xl border-white/10 hover:bg-white/5 transition-all duration-300 group"
           >
-            <SkipForward className="w-6 h-6 sm:w-8 sm:h-8" />
-            <span className="text-sm sm:text-base">Пропуск ходу</span>
+            <SkipForward className="w-6 h-6 sm:w-10 sm:h-10 opacity-40 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+            <span className="text-[10px] sm:text-lg font-black uppercase tracking-widest italic opacity-40 group-hover:opacity-100">
+              Pass
+            </span>
           </Button>
         </div>
       </div>

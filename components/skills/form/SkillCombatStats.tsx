@@ -9,20 +9,31 @@ interface SkillCombatStatsProps {
     speed: string;
     physicalResistance: string;
     magicalResistance: string;
+    minTargets: string;
+    maxTargets: string;
     setters: {
       setDamage: (value: string) => void;
       setArmor: (value: string) => void;
       setSpeed: (value: string) => void;
       setPhysicalResistance: (value: string) => void;
       setMagicalResistance: (value: string) => void;
+      setMinTargets: (value: string) => void;
+      setMaxTargets: (value: string) => void;
     };
   };
 }
 
-export function SkillCombatStats({
-  combatStats,
-}: SkillCombatStatsProps) {
-  const { damage, armor, speed, physicalResistance, magicalResistance, setters } = combatStats;
+export function SkillCombatStats({ combatStats }: SkillCombatStatsProps) {
+  const {
+    damage,
+    armor,
+    speed,
+    physicalResistance,
+    magicalResistance,
+    minTargets,
+    maxTargets,
+    setters,
+  } = combatStats;
 
   return (
     <div className="rounded-md border p-4 space-y-3">
@@ -66,6 +77,22 @@ export function SkillCombatStats({
           type="number"
           value={magicalResistance}
           onChange={(e) => setters.setMagicalResistance(e.target.value)}
+          placeholder="0"
+        />
+        <LabeledInput
+          id="skill-min-targets"
+          label="Мін. цілей"
+          type="number"
+          value={minTargets}
+          onChange={(e) => setters.setMinTargets(e.target.value)}
+          placeholder="0"
+        />
+        <LabeledInput
+          id="skill-max-targets"
+          label="Макс. цілей"
+          type="number"
+          value={maxTargets}
+          onChange={(e) => setters.setMaxTargets(e.target.value)}
           placeholder="0"
         />
       </div>

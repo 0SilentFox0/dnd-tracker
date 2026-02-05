@@ -22,6 +22,8 @@ export interface GroupedSkillPayload {
     speed?: number;
     physicalResistance?: number;
     magicalResistance?: number;
+    min_targets?: number;
+    max_targets?: number;
   };
   spellData: {
     spellId?: string;

@@ -13,6 +13,8 @@ interface CharacterCombatParamsProps {
     currentHp: number;
     tempHp: number;
     hitDice: string;
+    minTargets: number;
+    maxTargets: number;
     setters: {
       setArmorClass: (value: number) => void;
       setInitiative: (value: number) => void;
@@ -21,6 +23,8 @@ interface CharacterCombatParamsProps {
       setCurrentHp: (value: number) => void;
       setTempHp: (value: number) => void;
       setHitDice: (value: string) => void;
+      setMinTargets: (value: number) => void;
+      setMaxTargets: (value: number) => void;
     };
   };
 }
@@ -28,8 +32,19 @@ interface CharacterCombatParamsProps {
 export function CharacterCombatParams({
   combatStats,
 }: CharacterCombatParamsProps) {
-  const { armorClass, initiative, speed, maxHp, currentHp, tempHp, hitDice, setters } = combatStats;
-  
+  const {
+    armorClass,
+    initiative,
+    speed,
+    maxHp,
+    currentHp,
+    tempHp,
+    hitDice,
+    minTargets,
+    maxTargets,
+    setters,
+  } = combatStats;
+
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
       <LabeledInput
@@ -97,6 +112,26 @@ export function CharacterCombatParams({
         min="0"
         value={tempHp}
         onChange={(e) => setters.setTempHp(parseInt(e.target.value) || 0)}
+        containerClassName="w-full min-w-0"
+        className="w-full"
+      />
+      <LabeledInput
+        id="minTargets"
+        label="Мін. цілей"
+        type="number"
+        min="1"
+        value={minTargets}
+        onChange={(e) => setters.setMinTargets(parseInt(e.target.value) || 1)}
+        containerClassName="w-full min-w-0"
+        className="w-full"
+      />
+      <LabeledInput
+        id="maxTargets"
+        label="Макс. цілей"
+        type="number"
+        min="1"
+        value={maxTargets}
+        onChange={(e) => setters.setMaxTargets(parseInt(e.target.value) || 1)}
         containerClassName="w-full min-w-0"
         className="w-full"
       />

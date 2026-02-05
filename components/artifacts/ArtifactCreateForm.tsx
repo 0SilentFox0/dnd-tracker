@@ -71,6 +71,10 @@ export function ArtifactCreateForm({
 
   const [effectDescription, setEffectDescription] = useState("");
 
+  const [minTargets, setMinTargets] = useState(1);
+
+  const [maxTargets, setMaxTargets] = useState(1);
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
@@ -87,7 +91,10 @@ export function ArtifactCreateForm({
         slot,
         icon: icon.trim() || null,
         setId: setId || undefined,
-        bonuses: {},
+        bonuses: {
+          minTargets: minTargets > 1 ? minTargets - 1 : undefined,
+          maxTargets: maxTargets > 1 ? maxTargets - 1 : undefined,
+        },
         modifiers: [],
         passiveAbility:
           effectName.trim() || effectDescription.trim()
@@ -150,7 +157,10 @@ export function ArtifactCreateForm({
                 value={rarity}
                 onValueChange={setRarity}
                 placeholder="Виберіть рідкість"
-                options={RARITY_OPTIONS.map(opt => ({ value: opt.value, label: opt.label }))}
+                options={RARITY_OPTIONS.map((opt) => ({
+                  value: opt.value,
+                  label: opt.label,
+                }))}
               />
             </div>
             <div className="space-y-2">
@@ -160,7 +170,10 @@ export function ArtifactCreateForm({
                 value={slot}
                 onValueChange={setSlot}
                 placeholder="Виберіть слот"
-                options={SLOT_OPTIONS.map(opt => ({ value: opt.value, label: opt.label }))}
+                options={SLOT_OPTIONS.map((opt) => ({
+                  value: opt.value,
+                  label: opt.label,
+                }))}
               />
             </div>
             <div className="space-y-2">
@@ -170,7 +183,10 @@ export function ArtifactCreateForm({
                 value={setId || ""}
                 onValueChange={(value) => setSetId(value || null)}
                 placeholder="Без сету"
-                options={artifactSets.map(set => ({ value: set.id, label: set.name }))}
+                options={artifactSets.map((set) => ({
+                  value: set.id,
+                  label: set.name,
+                }))}
                 allowNone
                 noneLabel="Без сету"
               />
@@ -195,6 +211,25 @@ export function ArtifactCreateForm({
             onChange={(e) => setIcon(e.target.value)}
             placeholder="https://example.com/icon.png"
           />
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <LabeledInput
+              id="artifact-min-targets"
+              label="Додаткові мін. цілі"
+              type="number"
+              min="0"
+              value={minTargets - 1}
+              onChange={(e) => setMinTargets(parseInt(e.target.value) + 1 || 1)}
+            />
+            <LabeledInput
+              id="artifact-max-targets"
+              label="Додаткові макс. цілі"
+              type="number"
+              min="0"
+              value={maxTargets - 1}
+              onChange={(e) => setMaxTargets(parseInt(e.target.value) + 1 || 1)}
+            />
+          </div>
 
           <div className="rounded-md border p-4 space-y-3">
             <p className="text-sm font-semibold">Ефект артефакту</p>
@@ -226,7 +261,9 @@ export function ArtifactCreateForm({
             <Button
               type="button"
               variant="outline"
-              onClick={() => router.push(`/campaigns/${campaignId}/dm/artifacts`)}
+              onClick={() =>
+                router.push(`/campaigns/${campaignId}/dm/artifacts`)
+              }
               disabled={isSaving}
             >
               Скасувати

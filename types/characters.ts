@@ -2,7 +2,7 @@
  * Типи для персонажів
  */
 
-import type { EquippedItems,InventoryItem } from "./inventory";
+import type { EquippedItems, InventoryItem } from "./inventory";
 
 /**
  * Згрупована структура даних персонажа (як використовується в формі)
@@ -38,6 +38,8 @@ export interface CharacterFormData {
     currentHp: number;
     tempHp: number;
     hitDice: string;
+    minTargets: number;
+    maxTargets: number;
   };
   skills: {
     savingThrows: Record<string, boolean>;
@@ -106,6 +108,8 @@ export interface Character {
   ideals?: string;
   bonds?: string;
   flaws?: string;
+  minTargets: number;
+  maxTargets: number;
   createdAt: string;
   updatedAt: string;
   user?: {

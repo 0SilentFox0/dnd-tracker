@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string; battleId: string }> }
+  { params }: { params: Promise<{ id: string; battleId: string }> },
 ) {
   try {
     const { id, battleId } = await params;
@@ -15,7 +15,7 @@ export async function GET(
     const {
       data: { user: authUser },
     } = await supabase.auth.getUser();
-    
+
     if (!authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -63,14 +63,14 @@ export async function GET(
 
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function PATCH(
   request: Request,
-  { params }: { params: Promise<{ id: string; battleId: string }> }
+  { params }: { params: Promise<{ id: string; battleId: string }> },
 ) {
   try {
     const { id, battleId } = await params;
@@ -80,7 +80,7 @@ export async function PATCH(
     const {
       data: { user: authUser },
     } = await supabase.auth.getUser();
-    
+
     if (!authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -122,7 +122,63 @@ export async function PATCH(
 
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string; battleId: string }> },
+) {
+  try {
+    const { id, battleId } = await params;
+
+    const supabase = await createClient();
+
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
+
+    if (!authUser) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const userId = authUser.id;
+
+    // Перевіряємо права DM
+    const campaign = await prisma.campaign.findUnique({
+      where: { id },
+      include: {
+        members: {
+          where: { userId },
+        },
+      },
+    });
+
+    if (!campaign || campaign.members[0]?.role !== "dm") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const battle = await prisma.battleScene.findUnique({
+      where: { id: battleId },
+    });
+
+    if (!battle || battle.campaignId !== id) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    await prisma.battleScene.delete({
+      where: { id: battleId },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting battle:", error);
+
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
     );
   }
 }

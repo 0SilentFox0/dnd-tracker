@@ -22,6 +22,8 @@ export interface Unit {
   speed: number;
   maxHp: number;
   proficiencyBonus: number;
+  minTargets: number;
+  maxTargets: number;
   attacks: Array<{
     name: string;
     attackBonus: number;

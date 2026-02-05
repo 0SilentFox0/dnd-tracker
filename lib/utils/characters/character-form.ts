@@ -41,6 +41,8 @@ export function characterToFormData(
       currentHp: character.currentHp || 10,
       tempHp: character.tempHp || 0,
       hitDice: character.hitDice || "1d8",
+      minTargets: character.minTargets || 1,
+      maxTargets: character.maxTargets || 1,
     },
     skills: {
       savingThrows: (character.savingThrows as Record<string, boolean>) || {},
@@ -104,6 +106,8 @@ export function formDataToCharacter(
     currentHp: formData.combatStats.currentHp,
     tempHp: formData.combatStats.tempHp,
     hitDice: formData.combatStats.hitDice,
+    minTargets: formData.combatStats.minTargets,
+    maxTargets: formData.combatStats.maxTargets,
     savingThrows: formData.skills.savingThrows,
     skills: formData.skills.skills,
     spellcastingClass: formData.spellcasting.spellcastingClass,

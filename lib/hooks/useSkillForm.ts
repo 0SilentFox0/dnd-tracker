@@ -64,6 +64,8 @@ const normalizeInitialData = (
       speed: number | null;
       physicalResistance: number | null;
       magicalResistance: number | null;
+      min_targets?: number | null;
+      max_targets?: number | null;
       spellId: string | null;
       spellGroupId: string | null;
       mainSkillId: string | null;
@@ -94,6 +96,8 @@ const normalizeInitialData = (
       speed: grouped.combatStats.speed || null,
       physicalResistance: grouped.combatStats.physicalResistance || null,
       magicalResistance: grouped.combatStats.magicalResistance || null,
+      min_targets: grouped.combatStats.min_targets || null,
+      max_targets: grouped.combatStats.max_targets || null,
       spellId: grouped.spellData.spellId || null,
       spellGroupId: grouped.spellData.spellGroupId || null,
       mainSkillId: grouped.mainSkillData.mainSkillId || null,
@@ -271,6 +275,14 @@ export function useSkillForm(
     normalizedData?.magicalResistance?.toString() || "",
   );
 
+  const [minTargets, setMinTargets] = useState(
+    normalizedData?.min_targets?.toString() || "",
+  );
+
+  const [maxTargets, setMaxTargets] = useState(
+    normalizedData?.max_targets?.toString() || "",
+  );
+
   // Spell and main skill
   const [spellId, setSpellId] = useState<string | null>(
     normalizedData?.spellId || null,
@@ -368,6 +380,8 @@ export function useSkillForm(
         speed: parseNumber(speed),
         physicalResistance: parseNumber(physicalResistance),
         magicalResistance: parseNumber(magicalResistance),
+        min_targets: parseNumber(minTargets),
+        max_targets: parseNumber(maxTargets),
       },
       spellData: {
         spellId: spellId || undefined,
@@ -509,12 +523,16 @@ export function useSkillForm(
       speed,
       physicalResistance,
       magicalResistance,
+      minTargets,
+      maxTargets,
       setters: {
         setDamage,
         setArmor,
         setSpeed,
         setPhysicalResistance,
         setMagicalResistance,
+        setMinTargets,
+        setMaxTargets,
       },
     },
     // Spell group

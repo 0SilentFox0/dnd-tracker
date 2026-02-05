@@ -18,6 +18,8 @@ export interface Skill {
   speed: number | null;
   physicalResistance: number | null;
   magicalResistance: number | null;
+  min_targets?: number | null;
+  max_targets?: number | null;
   spellId: string | null;
   spellGroupId: string | null;
   mainSkillId?: string | null;
@@ -62,6 +64,8 @@ export interface GroupedSkill {
     speed?: number;
     physicalResistance?: number;
     magicalResistance?: number;
+    min_targets?: number;
+    max_targets?: number;
   };
   spellData: {
     spellId?: string;

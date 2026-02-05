@@ -12,9 +12,20 @@ import { CharacterSpellsSection } from "@/components/characters/spells/Character
 import { CharacterAbilityScores } from "@/components/characters/stats/CharacterAbilityScores";
 import { CharacterCombatParams } from "@/components/characters/stats/CharacterCombatParams";
 import { CharacterImmunities } from "@/components/characters/stats/CharacterImmunities";
-import { Accordion, AccordionContent,AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { getCharacter, updateCharacter } from "@/lib/api/characters";
 import { useCampaignMembers } from "@/lib/hooks/useCampaignMembers";
 import { useCharacterForm } from "@/lib/hooks/useCharacterForm";
@@ -86,7 +97,9 @@ export default function EditCharacterPage({
     <div className="container mx-auto p-4 max-w-4xl">
       <Card>
         <CardHeader>
-          <CardTitle>Редагувати персонажа: {formData.basicInfo.name || "Завантаження..."}</CardTitle>
+          <CardTitle>
+            Редагувати персонажа: {formData.basicInfo.name || "Завантаження..."}
+          </CardTitle>
           <CardDescription>Оновіть інформацію про персонажа</CardDescription>
         </CardHeader>
         <CardContent className="w-full overflow-hidden">
@@ -96,8 +109,16 @@ export default function EditCharacterPage({
               <span className="block sm:inline"> {error}</span>
             </div>
           )}
-          <form onSubmit={handleSubmit} className="space-y-6 w-full">
-            <Accordion type="single" defaultValue="item-1" collapsible>
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-6 w-full flex flex-col"
+          >
+            <Accordion
+              type="single"
+              defaultValue="item-1"
+              collapsible
+              className="space-y-4"
+            >
               <AccordionItem value="item-1">
                 <AccordionTrigger>1. Загальна інформація</AccordionTrigger>
                 <AccordionContent>
@@ -182,7 +203,7 @@ export default function EditCharacterPage({
 
                   if (
                     confirm(
-                      `Підняти рівень персонажа ${basicInfo.name}? (Рівень ${basicInfo.level} → ${basicInfo.level + 1})`
+                      `Підняти рівень персонажа ${basicInfo.name}? (Рівень ${basicInfo.level} → ${basicInfo.level + 1})`,
                     )
                   ) {
                     try {
@@ -190,7 +211,7 @@ export default function EditCharacterPage({
                         `/api/campaigns/${id}/characters/${characterId}/level-up`,
                         {
                           method: "POST",
-                        }
+                        },
                       );
 
                       if (!response.ok) {
@@ -203,7 +224,8 @@ export default function EditCharacterPage({
 
                       const updatedCharacter = await response.json();
 
-                      const updatedFormData = characterToFormData(updatedCharacter);
+                      const updatedFormData =
+                        characterToFormData(updatedCharacter);
 
                       setFormData(updatedFormData);
 
@@ -211,7 +233,7 @@ export default function EditCharacterPage({
                         const details = updatedCharacter.levelUpDetails;
 
                         alert(
-                          `Рівень піднято! ${details.abilityIncreased}: +1, HP: +${details.hpGain}, Додано магічні слоти.`
+                          `Рівень піднято! ${details.abilityIncreased}: +1, HP: +${details.hpGain}, Додано магічні слоти.`,
                         );
                       }
 

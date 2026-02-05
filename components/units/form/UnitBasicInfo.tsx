@@ -37,7 +37,10 @@ export function UnitBasicInfo({
             value={formData.race || ""}
             onValueChange={(value) => onChange({ race: value || null })}
             placeholder="Виберіть расу"
-            options={races.map(race => ({ value: race.name, label: race.name }))}
+            options={races.map((race) => ({
+              value: race.name,
+              label: race.name,
+            }))}
             allowNone
             noneLabel="Без раси"
           />
@@ -60,9 +63,7 @@ export function UnitBasicInfo({
           min="1"
           max="30"
           value={formData.level || 1}
-          onChange={(e) =>
-            onChange({ level: parseInt(e.target.value) || 1 })
-          }
+          onChange={(e) => onChange({ level: parseInt(e.target.value) || 1 })}
           required
         />
       </div>
@@ -88,9 +89,7 @@ export function UnitBasicInfo({
           type="number"
           min="1"
           value={formData.maxHp || 10}
-          onChange={(e) =>
-            onChange({ maxHp: parseInt(e.target.value) || 10 })
-          }
+          onChange={(e) => onChange({ maxHp: parseInt(e.target.value) || 10 })}
           required
         />
       </div>
@@ -102,9 +101,7 @@ export function UnitBasicInfo({
           type="number"
           min="0"
           value={formData.speed || 30}
-          onChange={(e) =>
-            onChange({ speed: parseInt(e.target.value) || 30 })
-          }
+          onChange={(e) => onChange({ speed: parseInt(e.target.value) || 30 })}
           required
         />
       </div>
@@ -130,6 +127,32 @@ export function UnitBasicInfo({
           value={formData.proficiencyBonus || 2}
           onChange={(e) =>
             onChange({ proficiencyBonus: parseInt(e.target.value) || 2 })
+          }
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="minTargets">Мін. цілей</Label>
+        <Input
+          id="minTargets"
+          type="number"
+          min="1"
+          value={formData.minTargets || 1}
+          onChange={(e) =>
+            onChange({ minTargets: parseInt(e.target.value) || 1 })
+          }
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="maxTargets">Макс. цілей</Label>
+        <Input
+          id="maxTargets"
+          type="number"
+          min="1"
+          value={formData.maxTargets || 1}
+          onChange={(e) =>
+            onChange({ maxTargets: parseInt(e.target.value) || 1 })
           }
         />
       </div>

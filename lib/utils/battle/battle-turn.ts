@@ -3,7 +3,10 @@
  */
 
 import { applyDOTEffects, decreaseEffectDurations } from "./battle-effects";
-import { checkTriggerCondition,getPassiveAbilitiesByTrigger } from "./battle-triggers";
+import {
+  checkTriggerCondition,
+  getPassiveAbilitiesByTrigger,
+} from "./battle-triggers";
 
 import { executeStartOfRoundTriggers } from "@/lib/utils/skills/skill-triggers-execution";
 import { BattleParticipant } from "@/types/battle";
@@ -29,7 +32,7 @@ export interface StartOfTurnResult {
 export function processStartOfTurn(
   participant: BattleParticipant,
   currentRound: number,
-  allParticipants: BattleParticipant[]
+  allParticipants: BattleParticipant[],
 ): StartOfTurnResult {
   let updatedParticipant = { ...participant };
 
@@ -63,12 +66,16 @@ export function processStartOfTurn(
   // 3. Перевіряємо чи учасник впав в непритомність або помер
   let statusChanged = false;
 
-  if (updatedParticipant.combatStats.currentHp <= 0 && updatedParticipant.combatStats.status !== "dead") {
+  if (
+    updatedParticipant.combatStats.currentHp <= 0 &&
+    updatedParticipant.combatStats.status !== "dead"
+  ) {
     updatedParticipant = {
       ...updatedParticipant,
       combatStats: {
         ...updatedParticipant.combatStats,
-        status: updatedParticipant.combatStats.currentHp < 0 ? "dead" : "unconscious",
+        status:
+          updatedParticipant.combatStats.currentHp < 0 ? "dead" : "unconscious",
       },
     };
     statusChanged = true;
@@ -77,7 +84,7 @@ export function processStartOfTurn(
   // 4. Перевіряємо пасивки з тригером "start_of_turn"
   const startOfTurnAbilities = getPassiveAbilitiesByTrigger(
     updatedParticipant,
-    "start_of_turn"
+    "start_of_turn",
   );
 
   for (const ability of startOfTurnAbilities) {
@@ -118,33 +125,41 @@ export function processStartOfTurn(
  * @param currentTurnIndex - поточний індекс ходу
  * @param initiativeOrder - масив учасників
  * @param currentRound - поточний раунд
- * @param hasExtraTurn - чи є додатковий хід
  * @returns новий індекс ходу та раунд
  */
 export function processEndOfTurn(
   currentTurnIndex: number,
   initiativeOrder: BattleParticipant[],
   currentRound: number,
-  hasExtraTurn: boolean
 ): { nextTurnIndex: number; nextRound: number } {
-  // Якщо є додатковий хід, залишаємося на тому ж учаснику
-  if (hasExtraTurn) {
-    return {
-      nextTurnIndex: currentTurnIndex,
-      nextRound: currentRound,
-    };
-  }
-
-  // Переходимо до наступного учасника
-  let nextTurnIndex = currentTurnIndex + 1;
-
+  let nextTurnIndex = currentTurnIndex;
   let nextRound = currentRound;
+  let attempts = 0;
+  const maxAttempts = initiativeOrder.length;
 
-  // Якщо досягли кінця черги, переходимо до наступного раунду
-  if (nextTurnIndex >= initiativeOrder.length) {
-    nextTurnIndex = 0;
-    nextRound += 1;
-  }
+  do {
+    nextTurnIndex += 1;
+    attempts += 1;
+
+    // Якщо досягли кінця черги, переходимо до наступного раунду
+    if (nextTurnIndex >= initiativeOrder.length) {
+      nextTurnIndex = 0;
+      nextRound += 1;
+    }
+
+    // Перевіряємо, чи може наступний учасник ходити (не мертвий і не непритомний)
+    const nextParticipant = initiativeOrder[nextTurnIndex];
+    if (
+      nextParticipant &&
+      nextParticipant.combatStats.status !== "dead" &&
+      nextParticipant.combatStats.status !== "unconscious"
+    ) {
+      break;
+    }
+
+    // Якщо ми перевірили всіх і нікого живого немає - зупиняємось (безпека)
+    if (attempts >= maxAttempts) break;
+  } while (true);
 
   return {
     nextTurnIndex,
@@ -162,14 +177,19 @@ export function processEndOfTurn(
 export function processStartOfRound(
   initiativeOrder: BattleParticipant[],
   currentRound: number,
-  pendingSummons: BattleParticipant[] = []
+  pendingSummons: BattleParticipant[] = [],
 ): {
   updatedInitiativeOrder: BattleParticipant[];
   message: string;
   triggerMessages: string[];
 } {
-  // Додаємо призваних істот до initiativeOrder
-  const updatedOrder = [...initiativeOrder, ...pendingSummons];
+  // 0. Видаляємо тимчасові слоти додаткових ходів з попереднього раунду
+  const baseOrder = (initiativeOrder || []).filter(
+    (p) => !p.basicInfo?.isExtraTurnSlot,
+  );
+
+  // Додаємо призваних істот до baseOrder
+  const updatedOrder = [...baseOrder, ...pendingSummons];
 
   // Виконуємо тригери startRound для всіх учасників
   const triggerResult = executeStartOfRoundTriggers(updatedOrder, currentRound);

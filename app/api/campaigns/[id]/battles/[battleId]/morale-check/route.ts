@@ -5,7 +5,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { checkMorale } from "@/lib/utils/battle/battle-morale";
-import { BattleAction,BattleParticipant } from "@/types/battle";
+import { BattleAction, BattleParticipant } from "@/types/battle";
 
 const moraleCheckSchema = z.object({
   participantId: z.string(), // ID BattleParticipant з initiativeOrder
@@ -14,7 +14,7 @@ const moraleCheckSchema = z.object({
 
 export async function POST(
   request: Request,
-  { params }: { params: Promise<{ id: string; battleId: string }> }
+  { params }: { params: Promise<{ id: string; battleId: string }> },
 ) {
   try {
     const { id, battleId } = await params;
@@ -56,7 +56,7 @@ export async function POST(
     if (battle.status !== "active") {
       return NextResponse.json(
         { error: "Battle is not active" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -65,33 +65,46 @@ export async function POST(
     const data = moraleCheckSchema.parse(body);
 
     // Отримуємо учасників з initiativeOrder
-    const initiativeOrder = battle.initiativeOrder as unknown as BattleParticipant[];
+    const initiativeOrder =
+      battle.initiativeOrder as unknown as BattleParticipant[];
 
-    const participant = initiativeOrder.find((p) => p.basicInfo.id === data.participantId);
+    const participant = initiativeOrder.find(
+      (p) => p.basicInfo.id === data.participantId,
+    );
 
     if (!participant) {
       return NextResponse.json(
         { error: "Participant not found in battle" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     // Перевіряємо мораль
     const moraleResult = checkMorale(participant, data.d10Roll);
 
-    // Оновлюємо учасника
-    const updatedParticipant: BattleParticipant = {
-      ...participant,
-      actionFlags: {
-        ...participant.actionFlags,
-        hasExtraTurn: moraleResult.hasExtraTurn,
-      },
-    };
+    // Отримуємо учасників з initiativeOrder
+    let updatedInitiativeOrder = [...initiativeOrder];
 
-    // Оновлюємо initiativeOrder
-    const updatedInitiativeOrder = initiativeOrder.map((p) =>
-      p.basicInfo.id === participant.basicInfo.id ? updatedParticipant : p
-    );
+    // Якщо є додатковий хід, додаємо його в кінець черги ЦЬОГО раунду
+    if (moraleResult.hasExtraTurn) {
+      const extraParticipant: BattleParticipant = {
+        ...participant,
+        basicInfo: {
+          ...participant.basicInfo,
+          id: `${participant.basicInfo.id}-extra-${Date.now()}`,
+          isExtraTurnSlot: true,
+        },
+        actionFlags: {
+          ...participant.actionFlags,
+          hasExtraTurn: false, // видаляємо флаг зі слота, щоб не було рекурсії
+          hasUsedAction: false,
+          hasUsedBonusAction: false,
+          hasUsedReaction: false,
+        },
+      };
+
+      updatedInitiativeOrder.push(extraParticipant);
+    }
 
     // Створюємо BattleAction для логу
     const battleLog = (battle.battleLog as unknown as BattleAction[]) || [];
@@ -120,7 +133,8 @@ export async function POST(
     const updatedBattle = await prisma.battleScene.update({
       where: { id: battleId },
       data: {
-        initiativeOrder: updatedInitiativeOrder as unknown as Prisma.InputJsonValue,
+        initiativeOrder:
+          updatedInitiativeOrder as unknown as Prisma.InputJsonValue,
         battleLog: [
           ...battleLog,
           battleAction,
@@ -135,7 +149,7 @@ export async function POST(
       await pusherServer.trigger(
         `battle-${battleId}`,
         "battle-updated",
-        updatedBattle
+        updatedBattle,
       );
     }
 
@@ -152,7 +166,7 @@ export async function POST(
 
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

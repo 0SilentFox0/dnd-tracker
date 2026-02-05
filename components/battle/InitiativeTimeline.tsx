@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ChevronDown, ChevronUp, Skull } from "lucide-react";
+import { useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import type { BattleScene } from "@/types/api";
@@ -18,6 +20,8 @@ export function InitiativeTimeline({
   battle,
   roundsToShow = 3,
 }: InitiativeTimelineProps) {
+  const [isExpanded, setIsExpanded] = useState(true);
+
   const timelineData = useMemo(() => {
     const rounds: Array<{
       round: number;
@@ -28,45 +32,49 @@ export function InitiativeTimeline({
     }> = [];
 
     const currentRound = battle.currentRound;
+    const livingInitiativeOrder = battle.initiativeOrder.filter(
+      (p) =>
+        p.combatStats?.status !== "dead" &&
+        p.combatStats?.status !== "unconscious",
+    );
 
-    const currentTurnIndex = battle.currentTurnIndex;
-
-    const initiativeOrder = battle.initiativeOrder;
+    const currentParticipantId =
+      battle.initiativeOrder[battle.currentTurnIndex]?.basicInfo?.id;
+    const livingCurrentTurnIndex = Math.max(
+      0,
+      livingInitiativeOrder.findIndex(
+        (p) => p.basicInfo.id === currentParticipantId,
+      ),
+    );
 
     // Генеруємо дані для наступних roundsToShow раундів
     for (let roundOffset = 0; roundOffset < roundsToShow; roundOffset++) {
       const round = currentRound + roundOffset;
-
       const participants: Array<{
         participant: BattleParticipant;
         index: number;
       }> = [];
 
-      // Для поточного раунду починаємо з поточного ходу
-      // Для наступних раундів починаємо з початку
-      const startIndex = roundOffset === 0 ? currentTurnIndex : 0;
+      const startIndex = roundOffset === 0 ? livingCurrentTurnIndex : 0;
 
-      // Додаємо учасників від поточного/початкового індексу до кінця
-      for (let i = startIndex; i < initiativeOrder.length; i++) {
+      for (let i = startIndex; i < livingInitiativeOrder.length; i++) {
         participants.push({
-          participant: initiativeOrder[i],
+          participant: livingInitiativeOrder[i],
           index: i,
         });
       }
 
-      // Додаємо учасників від початку до початкового індексу (для циклічності)
       if (roundOffset === 0 && startIndex > 0) {
         for (let i = 0; i < startIndex; i++) {
           participants.push({
-            participant: initiativeOrder[i],
+            participant: livingInitiativeOrder[i],
             index: i,
           });
         }
       } else if (roundOffset > 0) {
-        // Для наступних раундів додаємо всіх від початку
         for (let i = 0; i < startIndex; i++) {
           participants.push({
-            participant: initiativeOrder[i],
+            participant: livingInitiativeOrder[i],
             index: i,
           });
         }
@@ -81,42 +89,116 @@ export function InitiativeTimeline({
     return rounds;
   }, [battle, roundsToShow]);
 
-  const currentParticipantId = battle.initiativeOrder[battle.currentTurnIndex]?.basicInfo.id;
+  const currentParticipantId =
+    battle.initiativeOrder[battle.currentTurnIndex]?.basicInfo?.id;
 
   return (
     <div className="space-y-2">
-      <h3 className="text-sm font-semibold">Шкала ходів (наступні {roundsToShow} раунди)</h3>
-      <div className="flex gap-2 overflow-x-auto pb-2">
-        {timelineData.map((roundData) => (
-          <div
-            key={roundData.round}
-            className="flex-shrink-0 min-w-[200px] border rounded-lg p-2 bg-card"
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="text-sm font-semibold flex items-center gap-2 w-full hover:opacity-80 transition-opacity"
+      >
+        <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
+        Шкала ходів
+        <div className="ml-auto">
+          {isExpanded ? (
+            <ChevronUp className="w-4 h-4" />
+          ) : (
+            <ChevronDown className="w-4 h-4" />
+          )}
+        </div>
+      </button>
+
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="overflow-hidden"
           >
-            <div className="flex items-center gap-2 mb-2">
-              <Badge variant={roundData.round === battle.currentRound ? "default" : "outline"}>
-                Раунд {roundData.round}
-              </Badge>
+            <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
+              <AnimatePresence mode="popLayout">
+                {timelineData.map((roundData) => (
+                  <motion.div
+                    key={roundData.round}
+                    layout
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    className="flex-shrink-0 min-w-[220px] border rounded-xl p-3 bg-card/50 backdrop-blur-sm shadow-sm"
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <Badge
+                        variant={
+                          roundData.round === battle.currentRound
+                            ? "default"
+                            : "outline"
+                        }
+                        className="rounded-full px-3"
+                      >
+                        Раунд {roundData.round}
+                      </Badge>
+                    </div>
+                    <div className="space-y-2">
+                      <AnimatePresence mode="popLayout">
+                        {roundData.participants.map(
+                          ({ participant, index }) => {
+                            const isCurrent =
+                              participant.basicInfo?.id ===
+                                currentParticipantId &&
+                              roundData.round === battle.currentRound;
+                            const isDead =
+                              participant.combatStats?.status === "dead";
+                            const isUnconscious =
+                              participant.combatStats?.status === "unconscious";
+
+                            if (isUnconscious) return null; // Should be filtered already but extra check
+
+                            return (
+                              <motion.div
+                                key={`${roundData.round}-${participant.basicInfo?.id}-${index}`}
+                                layout
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.8 }}
+                                transition={{ duration: 0.2 }}
+                                className={`text-xs p-2 rounded-lg transition-colors border ${
+                                  isCurrent
+                                    ? "bg-primary text-primary-foreground font-semibold border-primary shadow-md ring-2 ring-primary/20"
+                                    : isDead
+                                      ? "bg-muted/50 text-muted-foreground border-transparent grayscale"
+                                      : "bg-muted/80 border-transparent hover:bg-muted"
+                                } flex items-center justify-between gap-2`}
+                              >
+                                <div className="flex items-center gap-2 min-w-0">
+                                  {isDead && (
+                                    <Skull className="w-3 h-3 shrink-0" />
+                                  )}
+                                  <span className="truncate">
+                                    {participant.basicInfo?.name}
+                                  </span>
+                                </div>
+
+                                {isDead && (
+                                  <span className="text-[9px] font-bold opacity-70 hidden sm:inline">
+                                    DEAD
+                                  </span>
+                                )}
+                              </motion.div>
+                            );
+                          },
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
-            <div className="space-y-1">
-              {roundData.participants.map(({ participant, index }) => (
-                <div
-                  key={`${roundData.round}-${participant.basicInfo.id}-${index}`}
-                  className={`text-xs p-1 rounded ${
-                    participant.basicInfo.id === currentParticipantId && roundData.round === battle.currentRound
-                      ? "bg-primary text-primary-foreground font-semibold"
-                      : "bg-muted"
-                  }`}
-                >
-                  {participant.basicInfo.name}
-                  {participant.basicInfo.id === currentParticipantId && roundData.round === battle.currentRound && (
-                    <span className="ml-1">← Зараз</span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

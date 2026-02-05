@@ -1,5 +1,22 @@
 import type { SkillTriggers } from "./skill-triggers";
 
+// NEW: Support for string-based triggers and effects aligned with SKILLS.md
+export interface SkillEffect {
+  stat: string;
+  type:
+    | "flat"
+    | "percent"
+    | "dice"
+    | "formula"
+    | "range"
+    | "flag"
+    | "stack"
+    | "ignore"
+    | "min";
+  value: number | string | boolean;
+  duration?: number;
+}
+
 export interface Skill {
   id: string;
   campaignId: string;

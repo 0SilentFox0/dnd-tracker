@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useMemo,useState } from "react";
+import { use, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -21,11 +21,7 @@ import { UnitKnownSpells } from "@/components/units/form/UnitKnownSpells";
 import { UnitSpecialAbilities } from "@/components/units/form/UnitSpecialAbilities";
 import { getSpells } from "@/lib/api/spells";
 import { useRaces } from "@/lib/hooks/useRaces";
-import {
-  useDeleteUnit,
-  useUnit,
-  useUpdateUnit,
-} from "@/lib/hooks/useUnits";
+import { useDeleteUnit, useUnit, useUpdateUnit } from "@/lib/hooks/useUnits";
 import type { Spell } from "@/types/spells";
 import type { Unit } from "@/types/units";
 
@@ -75,6 +71,8 @@ export default function EditUnitPage({
         groupId: unit.groupId || null,
         avatar: unit.avatar || null,
         damageModifier: unit.damageModifier || null,
+        minTargets: unit.minTargets,
+        maxTargets: unit.maxTargets,
       };
     }
 
@@ -99,12 +97,14 @@ export default function EditUnitPage({
       avatar: null,
       damageModifier: null,
       race: null,
+      minTargets: 1,
+      maxTargets: 1,
     };
   }, [unit]);
 
   // Використовуємо lazy initialization для useState
   const [formData, setFormData] = useState<Partial<Unit>>(
-    () => initialFormData
+    () => initialFormData,
   );
 
   useEffect(() => {
@@ -136,7 +136,7 @@ export default function EditUnitPage({
         onError: (error) => {
           console.error("Error updating unit:", error);
         },
-      }
+      },
     );
   };
 

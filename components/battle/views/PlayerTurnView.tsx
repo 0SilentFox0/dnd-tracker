@@ -1,13 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
 
+import { RollResultOverlay } from "@/components/battle/RollResultOverlay";
+import { ParticipantStats } from "@/components/battle/ParticipantStats";
 import { ActionButtonsPanel } from "@/components/battle/ActionButtonsPanel";
 import { AttackRollDialog } from "@/components/battle/dialogs/AttackRollDialog";
-import { AttackTypeDialog } from "@/components/battle/dialogs/AttackTypeDialog";
 import { DamageRollDialog } from "@/components/battle/dialogs/DamageRollDialog";
 import { MoraleCheckDialog } from "@/components/battle/dialogs/MoraleCheckDialog";
-import { SpellSelectionDialog } from "@/components/battle/dialogs/SpellSelectionDialog";
+import { SpellDialog } from "@/components/battle/dialogs/SpellDialog";
 import { TargetSelectionDialog } from "@/components/battle/dialogs/TargetSelectionDialog";
 import { Button } from "@/components/ui/button";
 import { AttackType } from "@/lib/constants/battle";
@@ -37,7 +39,6 @@ export function PlayerTurnView({
   const [, setMoraleCheckDismissed] = useState(false);
 
   // Стан для послідовного відкриття діалогів атаки
-  const [attackTypeDialogOpen, setAttackTypeDialogOpen] = useState(false);
 
   const [targetSelectionDialogOpen, setTargetSelectionDialogOpen] =
     useState(false);
@@ -58,14 +59,16 @@ export function PlayerTurnView({
     advantageRoll?: number;
   } | null>(null);
 
-  // Стан для послідовного відкриття діалогів заклинання
   const [spellSelectionDialogOpen, setSpellSelectionDialogOpen] =
     useState(false);
 
-  const [spellTargetSelectionDialogOpen, setSpellTargetSelectionDialogOpen] =
-    useState(false);
+  // Локальний стан для миттєвого блокування дій після виконання
+  const [hasPerformedAction, setHasPerformedAction] = useState(false);
 
-  const [selectedSpell, setSelectedSpell] = useState<Spell | null>(null);
+  // Скидаємо локальний стан коли змінюється учасник або починається новий хід
+  useEffect(() => {
+    setHasPerformedAction(false);
+  }, [participant.basicInfo.id, turnStarted]);
 
   // Отримуємо бонусні дії з тригерів
   const bonusActions = useMemo(() => {
@@ -85,6 +88,41 @@ export function PlayerTurnView({
       },
     );
   }, [participant, battle.initiativeOrder, battle.currentRound]);
+
+  // Автоматичне завершення ходу, якщо не залишилося дій
+  useEffect(() => {
+    if (
+      turnStarted &&
+      (participant.actionFlags.hasUsedAction || hasPerformedAction) &&
+      (participant.actionFlags.hasUsedBonusAction || bonusActions.length === 0)
+    ) {
+      // Використовуємо setTimeout, щоб дати час на закриття останнього діалогу
+      const timer = setTimeout(() => {
+        onSkipTurn();
+      }, 1500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [
+    participant.actionFlags.hasUsedAction,
+    participant.actionFlags.hasUsedBonusAction,
+    hasPerformedAction,
+    bonusActions.length,
+    turnStarted,
+    onSkipTurn,
+  ]);
+
+  // ... (handleStartTurn, handleMoraleCheckConfirm, etc. - keep unchanged)
+  // But replace_file_content cannot skip large chunks easily without context.
+  // I will target the useEffect first.
+
+  // Actually, I can replace just the useEffect block.
+  // But wait, replace_file_content needs contiguous block.
+  // I will replace useEffect first.
+
+  // ...
+
+  // Wait, I will split these.
 
   const handleStartTurn = () => {
     setTurnStarted(true);
@@ -117,14 +155,30 @@ export function PlayerTurnView({
   };
 
   // Обробники для послідовного відкриття діалогів атаки
-  const handleAttackClick = () => {
-    setAttackTypeDialogOpen(true);
+  const handleMeleeAttack = () => {
+    const attack = participant.battleData.attacks?.find(
+      (a) => a.type === AttackType.MELEE || a.range === "5 ft",
+    );
+
+    if (attack) {
+      setSelectedAttack(attack);
+      setTargetSelectionDialogOpen(true);
+    } else {
+      alert("Немає доступної ближньої атаки");
+    }
   };
 
-  const handleAttackTypeSelect = (_type: AttackType, attack: BattleAttack) => {
-    setSelectedAttack(attack);
-    setAttackTypeDialogOpen(false);
-    setTargetSelectionDialogOpen(true);
+  const handleRangedAttack = () => {
+    const attack = participant.battleData.attacks?.find(
+      (a) => a.type === AttackType.RANGED || (a.range && a.range !== "5 ft"),
+    );
+
+    if (attack) {
+      setSelectedAttack(attack);
+      setTargetSelectionDialogOpen(true);
+    } else {
+      alert("Немає доступної дальньої атаки");
+    }
   };
 
   const handleTargetSelect = (targetIds: string[]) => {
@@ -141,17 +195,86 @@ export function PlayerTurnView({
     setAttackRollDialogOpen(true);
   };
 
+  const [rollResult, setRollResult] = useState<
+    import("@/components/battle/RollResultOverlay").RollResultType | null
+  >(null);
+
   const handleAttackRollConfirm = (data: {
     attackRoll: number;
     advantageRoll?: number;
   }) => {
     setAttackRollData(data);
     setAttackRollDialogOpen(false);
-    setDamageRollDialogOpen(true);
+
+    if (!selectedAttack || !selectedTarget) return;
+
+    // Розраховуємо результат
+    const d20 = data.advantageRoll
+      ? Math.max(data.attackRoll, data.advantageRoll)
+      : data.attackRoll;
+    const isCrit = d20 === 20;
+    const isCritFail = d20 === 1;
+
+    // Розрахунок бонусу (дублюється з діалогу, варто винести в утиліту)
+    const attackBonus = selectedAttack.attackBonus || 0;
+    const statModifier =
+      selectedAttack.type === AttackType.MELEE
+        ? Math.floor((participant.abilities.strength - 10) / 2)
+        : Math.floor((participant.abilities.dexterity - 10) / 2);
+    const totalBonus =
+      attackBonus + statModifier + participant.abilities.proficiencyBonus;
+
+    const totalRoll = d20 + totalBonus;
+    const targetAC = selectedTarget.combatStats.armorClass;
+
+    if (isCrit) {
+      setRollResult("crit");
+    } else if (isCritFail) {
+      setRollResult("crit_fail");
+    } else if (totalRoll >= targetAC) {
+      setRollResult("hit");
+    } else {
+      setRollResult("miss");
+    }
+  };
+
+  const handleRollResultComplete = () => {
+    if (!rollResult) return;
+
+    const isHit = rollResult === "hit" || rollResult === "crit";
+
+    // Скидаємо результат
+    setRollResult(null);
+
+    // Якщо це хіт -> відкриваємо діалог урону
+    if (isHit) {
+      setDamageRollDialogOpen(true);
+    } else {
+      // Якщо промах -> завершуємо дію без урону (але з записом в лог)
+      if (!selectedAttack || !selectedTarget || !attackRollData) return;
+
+      setHasPerformedAction(true); // Блокуємо дії миттєво
+
+      onAttack({
+        attackerId: participant.basicInfo.id,
+        targetId: selectedTarget.basicInfo.id,
+        attackId: selectedAttack.id || selectedAttack.name,
+        attackRoll: attackRollData.attackRoll,
+        advantageRoll: attackRollData.advantageRoll,
+        damageRolls: [], // Empty damage for miss
+      });
+
+      // Скидаємо стан
+      setSelectedAttack(null);
+      setSelectedTarget(null);
+      setAttackRollData(null);
+    }
   };
 
   const handleDamageRollConfirm = (damageRolls: number[]) => {
     if (!selectedAttack || !selectedTarget || !attackRollData) return;
+
+    setHasPerformedAction(true); // Блокуємо дії миттєво
 
     onAttack({
       attackerId: participant.basicInfo.id,
@@ -169,32 +292,69 @@ export function PlayerTurnView({
     setDamageRollDialogOpen(false);
   };
 
+  const effectiveParticipant = {
+    ...participant,
+    actionFlags: {
+      ...participant.actionFlags,
+      hasUsedAction:
+        participant.actionFlags.hasUsedAction || hasPerformedAction,
+    },
+  };
+
   if (!turnStarted) {
     return (
-      <div className="flex flex-col items-center justify-center h-full space-y-4 p-4">
-        <div className="text-center space-y-2">
-          <h2 className="text-2xl sm:text-3xl font-bold">🎯 Твій хід!</h2>
-          <p className="text-muted-foreground">{participant.basicInfo.name}</p>
+      <div className="flex flex-col items-center justify-center h-full space-y-8 p-6 bg-black/40 backdrop-blur-xl animate-in fade-in duration-700">
+        {/* Header Stats for context (optional, but requested during turn) */}
+        <div className="absolute top-4 w-full flex justify-center opacity-50 hover:opacity-100 transition-opacity">
+          <ParticipantStats
+            participant={participant}
+            className="px-4 py-2 bg-black/60 rounded-full border border-white/10"
+          />
         </div>
+
+        <motion.div
+          // ...
+          // Wait, replacing the whole block is risky.
+          // I will just perform smaller edits.
+
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="text-center space-y-4"
+        >
+          <div className="inline-block px-4 py-1 rounded-full bg-primary/20 text-primary text-xs font-black uppercase tracking-[0.3em] mb-2 animate-pulse">
+            Приготуватись
+          </div>
+          <h2 className="text-3xl sm:text-7xl font-black italic uppercase tracking-tighter text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]">
+            ТВІЙ ХІД
+          </h2>
+          <p className="text-xl sm:text-2xl text-white/60 font-medium italic">
+            — {participant.basicInfo.name} —
+          </p>
+        </motion.div>
+
         <Button
           size="lg"
           onClick={handleStartTurn}
-          className="text-lg px-8 py-6"
+          className="text-xl px-12 py-8 rounded-full bg-primary hover:bg-primary/90 shadow-[0_0_30px_rgba(var(--primary),0.5)] transition-all duration-300 transform hover:scale-110 active:scale-95 font-black uppercase tracking-widest"
         >
-          Почати хід
+          ПОЧАТИ БІЙ
         </Button>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-gradient-to-b from-black/60 to-transparent animate-in fade-in duration-500">
+      {/* Stats Header */}
+      <div className="shrink-0 flex justify-center bg-black/40 backdrop-blur-md border-b border-white/10 p-2">
+        <ParticipantStats participant={participant} className="text-white/90" />
+      </div>
+
       {/* Перевірка моралі */}
       <MoraleCheckDialog
         open={showMoraleCheck}
         onOpenChange={(open) => {
           if (!open) {
-            // Якщо діалог закривається без підтвердження, позначаємо що він був закритий
             setShowMoraleCheck(false);
             setMoraleCheckDismissed(true);
           }
@@ -203,21 +363,28 @@ export function PlayerTurnView({
         onConfirm={handleMoraleCheckConfirm}
       />
 
-      {/* Послідовні діалоги для атаки */}
-      <AttackTypeDialog
-        open={attackTypeDialogOpen}
-        onOpenChange={setAttackTypeDialogOpen}
-        participant={participant}
-        onSelect={handleAttackTypeSelect}
+      <SpellDialog
+        open={spellSelectionDialogOpen}
+        onOpenChange={setSpellSelectionDialogOpen}
+        caster={participant}
+        battle={battle}
+        campaignId={campaignId}
+        availableTargets={battle.initiativeOrder}
+        isDM={true}
+        canSeeEnemyHp={true}
+        onCast={(data) => {
+          setHasPerformedAction(true);
+          onSpell(data);
+          setSpellSelectionDialogOpen(false);
+        }}
       />
 
+      {/* ... TargetSelectionDialog ... */}
       <TargetSelectionDialog
         open={targetSelectionDialogOpen}
         onOpenChange={setTargetSelectionDialogOpen}
         availableTargets={(() => {
-          // Визначаємо доступні цілі (тільки вороги, якщо friendlyFire вимкнено)
           const friendlyFire = battle.campaign?.friendlyFire || false;
-
           const participantSide = participant.basicInfo.side;
 
           if (friendlyFire) {
@@ -237,8 +404,8 @@ export function PlayerTurnView({
         })()}
         isAOE={false}
         onSelect={handleTargetSelect}
-        title="🎯 Вибір Цілі"
-        description="Оберіть ціль для атаки"
+        title="🎯 ОБЕРІТЬ ЦІЛЬ"
+        description="Оберіть ворога для нанесення удару"
       />
 
       {selectedAttack && selectedTarget && (
@@ -261,95 +428,23 @@ export function PlayerTurnView({
         />
       )}
 
-      {/* Діалоги для заклинання */}
-      <SpellSelectionDialog
-        open={spellSelectionDialogOpen}
-        onOpenChange={setSpellSelectionDialogOpen}
-        caster={participant}
-        campaignId={campaignId}
-        onSelect={(spell) => {
-          setSelectedSpell(spell);
-          setSpellSelectionDialogOpen(false);
-          setSpellTargetSelectionDialogOpen(true);
-        }}
-      />
-
-      {selectedSpell && (
-        <TargetSelectionDialog
-          open={spellTargetSelectionDialogOpen}
-          onOpenChange={setSpellTargetSelectionDialogOpen}
-          availableTargets={(() => {
-            // Визначаємо доступні цілі для заклинання
-            const friendlyFire = battle.campaign?.friendlyFire || false;
-
-            const participantSide = participant.basicInfo.side;
-
-            if (selectedSpell.type === "aoe") {
-              // Для AOE можна вибрати кілька цілей
-              if (friendlyFire) {
-                return battle.initiativeOrder.filter(
-                  (p) =>
-                    p.basicInfo.id !== participant.basicInfo.id &&
-                    p.combatStats.status === "active",
-                );
-              } else {
-                // Для AOE зазвичай можна вибрати всіх ворогів
-                return battle.initiativeOrder.filter(
-                  (p) =>
-                    p.basicInfo.side !== participantSide &&
-                    p.basicInfo.id !== participant.basicInfo.id &&
-                    p.combatStats.status === "active",
-                );
-              }
-            } else {
-              // Для target тільки одна ціль
-              if (friendlyFire) {
-                return battle.initiativeOrder.filter(
-                  (p) =>
-                    p.basicInfo.id !== participant.basicInfo.id &&
-                    p.combatStats.status === "active",
-                );
-              } else {
-                return battle.initiativeOrder.filter(
-                  (p) =>
-                    p.basicInfo.side !== participantSide &&
-                    p.basicInfo.id !== participant.basicInfo.id &&
-                    p.combatStats.status === "active",
-                );
-              }
-            }
-          })()}
-          isAOE={selectedSpell.type === "aoe"}
-          onSelect={(targetIds) => {
-            setSpellTargetSelectionDialogOpen(false);
-            // TODO: Відкрити діалог для saving throws та damage rolls
-            // Поки що викликаємо onSpell з базовими даними
-            onSpell({
-              casterId: participant.basicInfo.id,
-              casterType: participant.basicInfo.sourceType,
-              spellId: selectedSpell.id,
-              targetIds,
-              damageRolls: [], // TODO: Додати діалог для damage rolls
-            });
-            setSelectedSpell(null);
-          }}
-          title="🎯 Вибір Цілі для Заклинання"
-          description={`Оберіть ціль для ${selectedSpell.name}`}
-        />
-      )}
-
       {/* Панель дій */}
-      <div className="flex-1 flex items-center justify-center p-4">
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-12">
         <ActionButtonsPanel
-          participant={participant}
+          participant={effectiveParticipant}
           bonusActions={bonusActions}
-          onMeleeAttack={handleAttackClick}
-          onRangedAttack={handleAttackClick}
+          onMeleeAttack={handleMeleeAttack}
+          onRangedAttack={handleRangedAttack}
           onSpell={() => setSpellSelectionDialogOpen(true)}
           onBonusAction={onBonusAction}
           onSkipTurn={onSkipTurn}
         />
       </div>
+
+      <RollResultOverlay
+        type={rollResult}
+        onComplete={handleRollResultComplete}
+      />
     </div>
   );
 }

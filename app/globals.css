@@ -61,6 +61,75 @@
   }
 }
 
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 0.5;
+    box-shadow: 0 0 10px var(--primary);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 20px var(--primary);
+  }
+}
+
+.glass-card {
+  @apply bg-card/60 backdrop-blur-md border border-white/10 shadow-xl;
+}
+
+.neon-border {
+  position: relative;
+}
+
+.neon-border::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(
+    45deg,
+    var(--primary),
+    transparent,
+    var(--primary)
+  );
+  z-index: -1;
+  border-radius: inherit;
+  opacity: 0.5;
+  filter: blur(4px);
+}
+
+.dead-state {
+  filter: grayscale(1) sepia(0.2) contrast(0.8);
+  opacity: 0.6;
+  background-image:
+    radial-gradient(circle at center, transparent 30%, rgba(0, 0, 0, 0.1) 100%),
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(0, 0, 0, 0.02) 10px,
+      rgba(0, 0, 0, 0.02) 20px
+    );
+}
+
+.dead-state::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 20, 20, 0.4);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
 :root {
   --radius: 0.65rem;
   --background: oklch(1 0 0);

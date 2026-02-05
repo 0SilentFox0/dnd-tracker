@@ -2,7 +2,7 @@
  * Хук для управління формою персонажа
  */
 
-import { useCallback,useState } from "react";
+import { useCallback, useState } from "react";
 
 import { characterToFormData } from "@/lib/utils/characters/character-form";
 import type { Character } from "@/types/characters";
@@ -45,6 +45,8 @@ const defaultFormData: CharacterFormData = {
     currentHp: 10,
     tempHp: 0,
     hitDice: "1d8",
+    minTargets: 1,
+    maxTargets: 1,
   },
   skills: {
     savingThrows: {},
@@ -85,11 +87,11 @@ export function useCharacterForm(options: UseCharacterFormOptions) {
   const updateField = useCallback(
     <K extends keyof CharacterFormData>(
       field: K,
-      value: CharacterFormData[K]
+      value: CharacterFormData[K],
     ) => {
       setFormData((prev) => ({ ...prev, [field]: value }));
     },
-    []
+    [],
   );
 
   const updateFields = useCallback((fields: Partial<CharacterFormData>) => {
@@ -167,7 +169,9 @@ export function useCharacterForm(options: UseCharacterFormOptions) {
       ...prev,
       spellcasting: {
         ...prev.spellcasting,
-        knownSpells: prev.spellcasting.knownSpells.filter((_, i) => i !== index),
+        knownSpells: prev.spellcasting.knownSpells.filter(
+          (_, i) => i !== index,
+        ),
       },
     }));
   }, []);
@@ -177,7 +181,10 @@ export function useCharacterForm(options: UseCharacterFormOptions) {
       e.preventDefault();
       setError(null);
 
-      if (formData.basicInfo.type === "player" && !formData.basicInfo.controlledBy) {
+      if (
+        formData.basicInfo.type === "player" &&
+        !formData.basicInfo.controlledBy
+      ) {
         setError("Будь ласка, виберіть гравця для персонажа типу 'Гравець'");
 
         return;
@@ -192,7 +199,7 @@ export function useCharacterForm(options: UseCharacterFormOptions) {
         setLoading(false);
       }
     },
-    [formData, options]
+    [formData, options],
   );
 
   const handleCancel = useCallback(() => {
@@ -205,43 +212,153 @@ export function useCharacterForm(options: UseCharacterFormOptions) {
   const basicInfo = {
     ...formData.basicInfo,
     setters: {
-      setName: (value: string) => setFormData(prev => ({ ...prev, basicInfo: { ...prev.basicInfo, name: value } })),
-      setType: (value: "player" | "npc_hero") => setFormData(prev => ({ ...prev, basicInfo: { ...prev.basicInfo, type: value } })),
-      setControlledBy: (value: string) => setFormData(prev => ({ ...prev, basicInfo: { ...prev.basicInfo, controlledBy: value } })),
-      setLevel: (value: number) => setFormData(prev => ({ ...prev, basicInfo: { ...prev.basicInfo, level: value } })),
-      setClass: (value: string) => setFormData(prev => ({ ...prev, basicInfo: { ...prev.basicInfo, class: value } })),
-      setSubclass: (value: string) => setFormData(prev => ({ ...prev, basicInfo: { ...prev.basicInfo, subclass: value } })),
-      setRace: (value: string) => setFormData(prev => ({ ...prev, basicInfo: { ...prev.basicInfo, race: value } })),
-      setSubrace: (value: string) => setFormData(prev => ({ ...prev, basicInfo: { ...prev.basicInfo, subrace: value } })),
-      setAlignment: (value: string) => setFormData(prev => ({ ...prev, basicInfo: { ...prev.basicInfo, alignment: value } })),
-      setBackground: (value: string) => setFormData(prev => ({ ...prev, basicInfo: { ...prev.basicInfo, background: value } })),
-      setExperience: (value: number) => setFormData(prev => ({ ...prev, basicInfo: { ...prev.basicInfo, experience: value } })),
-      setAvatar: (value: string) => setFormData(prev => ({ ...prev, basicInfo: { ...prev.basicInfo, avatar: value } })),
+      setName: (value: string) =>
+        setFormData((prev) => ({
+          ...prev,
+          basicInfo: { ...prev.basicInfo, name: value },
+        })),
+      setType: (value: "player" | "npc_hero") =>
+        setFormData((prev) => ({
+          ...prev,
+          basicInfo: { ...prev.basicInfo, type: value },
+        })),
+      setControlledBy: (value: string) =>
+        setFormData((prev) => ({
+          ...prev,
+          basicInfo: { ...prev.basicInfo, controlledBy: value },
+        })),
+      setLevel: (value: number) =>
+        setFormData((prev) => ({
+          ...prev,
+          basicInfo: { ...prev.basicInfo, level: value },
+        })),
+      setClass: (value: string) =>
+        setFormData((prev) => ({
+          ...prev,
+          basicInfo: { ...prev.basicInfo, class: value },
+        })),
+      setSubclass: (value: string) =>
+        setFormData((prev) => ({
+          ...prev,
+          basicInfo: { ...prev.basicInfo, subclass: value },
+        })),
+      setRace: (value: string) =>
+        setFormData((prev) => ({
+          ...prev,
+          basicInfo: { ...prev.basicInfo, race: value },
+        })),
+      setSubrace: (value: string) =>
+        setFormData((prev) => ({
+          ...prev,
+          basicInfo: { ...prev.basicInfo, subrace: value },
+        })),
+      setAlignment: (value: string) =>
+        setFormData((prev) => ({
+          ...prev,
+          basicInfo: { ...prev.basicInfo, alignment: value },
+        })),
+      setBackground: (value: string) =>
+        setFormData((prev) => ({
+          ...prev,
+          basicInfo: { ...prev.basicInfo, background: value },
+        })),
+      setExperience: (value: number) =>
+        setFormData((prev) => ({
+          ...prev,
+          basicInfo: { ...prev.basicInfo, experience: value },
+        })),
+      setAvatar: (value: string) =>
+        setFormData((prev) => ({
+          ...prev,
+          basicInfo: { ...prev.basicInfo, avatar: value },
+        })),
     },
   };
 
   const abilityScores = {
     ...formData.abilityScores,
     setters: {
-      setStrength: (value: number) => setFormData(prev => ({ ...prev, abilityScores: { ...prev.abilityScores, strength: value } })),
-      setDexterity: (value: number) => setFormData(prev => ({ ...prev, abilityScores: { ...prev.abilityScores, dexterity: value } })),
-      setConstitution: (value: number) => setFormData(prev => ({ ...prev, abilityScores: { ...prev.abilityScores, constitution: value } })),
-      setIntelligence: (value: number) => setFormData(prev => ({ ...prev, abilityScores: { ...prev.abilityScores, intelligence: value } })),
-      setWisdom: (value: number) => setFormData(prev => ({ ...prev, abilityScores: { ...prev.abilityScores, wisdom: value } })),
-      setCharisma: (value: number) => setFormData(prev => ({ ...prev, abilityScores: { ...prev.abilityScores, charisma: value } })),
+      setStrength: (value: number) =>
+        setFormData((prev) => ({
+          ...prev,
+          abilityScores: { ...prev.abilityScores, strength: value },
+        })),
+      setDexterity: (value: number) =>
+        setFormData((prev) => ({
+          ...prev,
+          abilityScores: { ...prev.abilityScores, dexterity: value },
+        })),
+      setConstitution: (value: number) =>
+        setFormData((prev) => ({
+          ...prev,
+          abilityScores: { ...prev.abilityScores, constitution: value },
+        })),
+      setIntelligence: (value: number) =>
+        setFormData((prev) => ({
+          ...prev,
+          abilityScores: { ...prev.abilityScores, intelligence: value },
+        })),
+      setWisdom: (value: number) =>
+        setFormData((prev) => ({
+          ...prev,
+          abilityScores: { ...prev.abilityScores, wisdom: value },
+        })),
+      setCharisma: (value: number) =>
+        setFormData((prev) => ({
+          ...prev,
+          abilityScores: { ...prev.abilityScores, charisma: value },
+        })),
     },
   };
 
   const combatStats = {
     ...formData.combatStats,
     setters: {
-      setArmorClass: (value: number) => setFormData(prev => ({ ...prev, combatStats: { ...prev.combatStats, armorClass: value } })),
-      setInitiative: (value: number) => setFormData(prev => ({ ...prev, combatStats: { ...prev.combatStats, initiative: value } })),
-      setSpeed: (value: number) => setFormData(prev => ({ ...prev, combatStats: { ...prev.combatStats, speed: value } })),
-      setMaxHp: (value: number) => setFormData(prev => ({ ...prev, combatStats: { ...prev.combatStats, maxHp: value } })),
-      setCurrentHp: (value: number) => setFormData(prev => ({ ...prev, combatStats: { ...prev.combatStats, currentHp: value } })),
-      setTempHp: (value: number) => setFormData(prev => ({ ...prev, combatStats: { ...prev.combatStats, tempHp: value } })),
-      setHitDice: (value: string) => setFormData(prev => ({ ...prev, combatStats: { ...prev.combatStats, hitDice: value } })),
+      setArmorClass: (value: number) =>
+        setFormData((prev) => ({
+          ...prev,
+          combatStats: { ...prev.combatStats, armorClass: value },
+        })),
+      setInitiative: (value: number) =>
+        setFormData((prev) => ({
+          ...prev,
+          combatStats: { ...prev.combatStats, initiative: value },
+        })),
+      setSpeed: (value: number) =>
+        setFormData((prev) => ({
+          ...prev,
+          combatStats: { ...prev.combatStats, speed: value },
+        })),
+      setMaxHp: (value: number) =>
+        setFormData((prev) => ({
+          ...prev,
+          combatStats: { ...prev.combatStats, maxHp: value },
+        })),
+      setCurrentHp: (value: number) =>
+        setFormData((prev) => ({
+          ...prev,
+          combatStats: { ...prev.combatStats, currentHp: value },
+        })),
+      setTempHp: (value: number) =>
+        setFormData((prev) => ({
+          ...prev,
+          combatStats: { ...prev.combatStats, tempHp: value },
+        })),
+      setHitDice: (value: string) =>
+        setFormData((prev) => ({
+          ...prev,
+          combatStats: { ...prev.combatStats, hitDice: value },
+        })),
+      setMinTargets: (value: number) =>
+        setFormData((prev) => ({
+          ...prev,
+          combatStats: { ...prev.combatStats, minTargets: value },
+        })),
+      setMaxTargets: (value: number) =>
+        setFormData((prev) => ({
+          ...prev,
+          combatStats: { ...prev.combatStats, maxTargets: value },
+        })),
     },
   };
 
@@ -256,10 +373,30 @@ export function useCharacterForm(options: UseCharacterFormOptions) {
   const spellcasting = {
     ...formData.spellcasting,
     setters: {
-      setSpellcastingClass: (value: string) => setFormData(prev => ({ ...prev, spellcasting: { ...prev.spellcasting, spellcastingClass: value } })),
-      setSpellcastingAbility: (value: "intelligence" | "wisdom" | "charisma" | undefined) => setFormData(prev => ({ ...prev, spellcasting: { ...prev.spellcasting, spellcastingAbility: value } })),
-      setSpellSlots: (value: Record<string, { max: number; current: number }>) => setFormData(prev => ({ ...prev, spellcasting: { ...prev.spellcasting, spellSlots: value } })),
-      setKnownSpells: (value: string[]) => setFormData(prev => ({ ...prev, spellcasting: { ...prev.spellcasting, knownSpells: value } })),
+      setSpellcastingClass: (value: string) =>
+        setFormData((prev) => ({
+          ...prev,
+          spellcasting: { ...prev.spellcasting, spellcastingClass: value },
+        })),
+      setSpellcastingAbility: (
+        value: "intelligence" | "wisdom" | "charisma" | undefined,
+      ) =>
+        setFormData((prev) => ({
+          ...prev,
+          spellcasting: { ...prev.spellcasting, spellcastingAbility: value },
+        })),
+      setSpellSlots: (
+        value: Record<string, { max: number; current: number }>,
+      ) =>
+        setFormData((prev) => ({
+          ...prev,
+          spellcasting: { ...prev.spellcasting, spellSlots: value },
+        })),
+      setKnownSpells: (value: string[]) =>
+        setFormData((prev) => ({
+          ...prev,
+          spellcasting: { ...prev.spellcasting, knownSpells: value },
+        })),
     },
     handlers: {
       addKnownSpell,
@@ -270,14 +407,46 @@ export function useCharacterForm(options: UseCharacterFormOptions) {
   const roleplay = {
     ...formData.roleplay,
     setters: {
-      setLanguages: (value: string[]) => setFormData(prev => ({ ...prev, roleplay: { ...prev.roleplay, languages: value } })),
-      setProficiencies: (value: Record<string, string[]>) => setFormData(prev => ({ ...prev, roleplay: { ...prev.roleplay, proficiencies: value } })),
-      setImmunities: (value: string[]) => setFormData(prev => ({ ...prev, roleplay: { ...prev.roleplay, immunities: value } })),
-      setMorale: (value: number | undefined) => setFormData(prev => ({ ...prev, roleplay: { ...prev.roleplay, morale: value } })),
-      setPersonalityTraits: (value: string) => setFormData(prev => ({ ...prev, roleplay: { ...prev.roleplay, personalityTraits: value } })),
-      setIdeals: (value: string) => setFormData(prev => ({ ...prev, roleplay: { ...prev.roleplay, ideals: value } })),
-      setBonds: (value: string) => setFormData(prev => ({ ...prev, roleplay: { ...prev.roleplay, bonds: value } })),
-      setFlaws: (value: string) => setFormData(prev => ({ ...prev, roleplay: { ...prev.roleplay, flaws: value } })),
+      setLanguages: (value: string[]) =>
+        setFormData((prev) => ({
+          ...prev,
+          roleplay: { ...prev.roleplay, languages: value },
+        })),
+      setProficiencies: (value: Record<string, string[]>) =>
+        setFormData((prev) => ({
+          ...prev,
+          roleplay: { ...prev.roleplay, proficiencies: value },
+        })),
+      setImmunities: (value: string[]) =>
+        setFormData((prev) => ({
+          ...prev,
+          roleplay: { ...prev.roleplay, immunities: value },
+        })),
+      setMorale: (value: number | undefined) =>
+        setFormData((prev) => ({
+          ...prev,
+          roleplay: { ...prev.roleplay, morale: value },
+        })),
+      setPersonalityTraits: (value: string) =>
+        setFormData((prev) => ({
+          ...prev,
+          roleplay: { ...prev.roleplay, personalityTraits: value },
+        })),
+      setIdeals: (value: string) =>
+        setFormData((prev) => ({
+          ...prev,
+          roleplay: { ...prev.roleplay, ideals: value },
+        })),
+      setBonds: (value: string) =>
+        setFormData((prev) => ({
+          ...prev,
+          roleplay: { ...prev.roleplay, bonds: value },
+        })),
+      setFlaws: (value: string) =>
+        setFormData((prev) => ({
+          ...prev,
+          roleplay: { ...prev.roleplay, flaws: value },
+        })),
     },
     handlers: {
       addLanguage,

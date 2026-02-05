@@ -55,7 +55,14 @@ export interface PassiveAbility {
   name: string;
   description: string;
   trigger: {
-    type: "always" | "on_hit" | "on_attack" | "ally_low_hp" | "start_of_turn" | "end_of_turn" | "start_of_battle";
+    type:
+      | "always"
+      | "on_hit"
+      | "on_attack"
+      | "ally_low_hp"
+      | "start_of_turn"
+      | "end_of_turn"
+      | "start_of_battle";
     condition?: string; // умова (наприклад "ally_hp <= 15%")
     chance?: number; // відсоток спрацювання (25%, 20%)
     lowHpThresholdPercent?: number; // поріг низького HP для trigger "ally_low_hp" (наприклад, 15, 25, тощо)
@@ -131,6 +138,8 @@ export interface BattleAttack {
   damageType: string; // slashing, piercing, fire, тощо
   range?: string; // для ranged
   properties?: string; // спеціальні властивості
+  minTargets?: number;
+  maxTargets?: number;
 }
 
 /**
@@ -151,6 +160,7 @@ export interface BattleParticipantBasicInfo {
   avatar?: string;
   side: ParticipantSide;
   controlledBy: string; // userId (для players) або "dm" (для NPC/units)
+  isExtraTurnSlot?: boolean; // чи є цей слот додатковим ходом
 }
 
 /**
@@ -189,6 +199,8 @@ export interface BattleParticipantCombatStats {
   speed: number; // швидкість переміщення
   morale: number; // від -3 до +3, default 0
   status: "active" | "unconscious" | "dead";
+  minTargets: number;
+  maxTargets: number;
 }
 
 /**
@@ -260,7 +272,14 @@ export interface BattleAction {
   actorId: string; // ID учасника що виконав дію
   actorName: string; // ім'я актора
   actorSide: "ally" | "enemy";
-  actionType: "attack" | "spell" | "bonus_action" | "ability" | "end_turn" | "skip_turn" | "morale_skip";
+  actionType:
+    | "attack"
+    | "spell"
+    | "bonus_action"
+    | "ability"
+    | "end_turn"
+    | "skip_turn"
+    | "morale_skip";
   targets: Array<{
     participantId: string;
     participantName: string;

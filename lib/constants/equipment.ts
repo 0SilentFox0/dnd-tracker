@@ -30,6 +30,8 @@ export enum ArtifactModifierType {
   ATTACK_TYPE = "attackType",
   RANGE = "range",
   PROPERTIES = "properties",
+  MIN_TARGETS = "minTargets",
+  MAX_TARGETS = "maxTargets",
 }
 
 /**

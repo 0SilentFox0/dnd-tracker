@@ -5,11 +5,19 @@
 import type { Prisma } from "@prisma/client";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
-import { ArtifactModifierType, DEFAULT_ARTIFACT_MODIFIERS } from "@/lib/constants/equipment";
+import {
+  ArtifactModifierType,
+  DEFAULT_ARTIFACT_MODIFIERS,
+} from "@/lib/constants/equipment";
 import { prisma } from "@/lib/db";
 import { SkillLevel } from "@/lib/types/skill-tree";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
-import { ActiveSkill, BattleParticipant, EquippedArtifact, RacialAbility } from "@/types/battle";
+import {
+  ActiveSkill,
+  BattleParticipant,
+  EquippedArtifact,
+  RacialAbility,
+} from "@/types/battle";
 import type { SkillTriggers } from "@/types/skill-triggers";
 
 /**
@@ -31,9 +39,12 @@ type ArtifactModifier = {
 function getModifierValue(
   modifiers: ArtifactModifier[],
   modifierType: ArtifactModifierType,
-  defaultValue: string
+  defaultValue: string,
 ): string {
-  return modifiers.find((m) => m.type === modifierType)?.value?.toString() || defaultValue;
+  return (
+    modifiers.find((m) => m.type === modifierType)?.value?.toString() ||
+    defaultValue
+  );
 }
 
 /**
@@ -44,7 +55,7 @@ function getModifierValue(
  */
 function getOptionalModifierValue(
   modifiers: ArtifactModifier[],
-  modifierType: ArtifactModifierType
+  modifierType: ArtifactModifierType,
 ): string | undefined {
   return modifiers.find((m) => m.type === modifierType)?.value?.toString();
 }
@@ -61,6 +72,8 @@ type ExtractedAttack = {
   damageType: string;
   range?: string;
   properties?: string;
+  minTargets?: number;
+  maxTargets?: number;
 };
 
 // Типи для Prisma моделей
@@ -85,7 +98,7 @@ export async function createBattleParticipantFromCharacter(
   character: CharacterFromPrisma,
   battleId: string,
   side: ParticipantSide,
-  instanceNumber?: number
+  instanceNumber?: number,
 ): Promise<BattleParticipant> {
   const modifiers = {
     strength: getAbilityModifier(character.strength),
@@ -99,13 +112,12 @@ export async function createBattleParticipantFromCharacter(
   // Розбираємо skillTreeProgress для активних скілів
   const activeSkills = await extractActiveSkillsFromCharacter(
     character,
-    character.campaignId
+    character.campaignId,
   );
 
   // Розбираємо inventory для екіпірованих артефактів
-  const equippedArtifacts = await extractEquippedArtifactsFromCharacter(
-    character
-  );
+  const equippedArtifacts =
+    await extractEquippedArtifactsFromCharacter(character);
 
   // Витягуємо атаки з екіпірованої зброї
   const attacks = await extractAttacksFromCharacter(character);
@@ -113,17 +125,19 @@ export async function createBattleParticipantFromCharacter(
   // Завантажуємо расові здібності
   const racialAbilities = await extractRacialAbilities(
     character.race,
-    character.campaignId
+    character.campaignId,
   );
 
-  return {
+  const participant: BattleParticipant = {
     basicInfo: {
       id: `${character.id}-${instanceNumber || 0}-${Date.now()}`,
       battleId,
       sourceId: character.id,
       sourceType: "character",
       instanceNumber: instanceNumber || undefined,
-      instanceId: instanceNumber ? `${character.id}-${instanceNumber - 1}` : undefined,
+      instanceId: instanceNumber
+        ? `${character.id}-${instanceNumber - 1}`
+        : undefined,
       name: character.name,
       avatar: character.avatar || undefined,
       side,
@@ -151,13 +165,23 @@ export async function createBattleParticipantFromCharacter(
       speed: character.speed,
       morale: (character as { morale?: number }).morale || 0,
       status: character.currentHp <= 0 ? "dead" : "active",
+      minTargets: character.minTargets ?? 1,
+      maxTargets: character.maxTargets ?? 1,
     },
     spellcasting: {
       spellcastingClass: character.spellcastingClass || undefined,
-      spellcastingAbility: character.spellcastingAbility as "intelligence" | "wisdom" | "charisma" | undefined,
+      spellcastingAbility: character.spellcastingAbility as
+        | "intelligence"
+        | "wisdom"
+        | "charisma"
+        | undefined,
       spellSaveDC: character.spellSaveDC || undefined,
       spellAttackBonus: character.spellAttackBonus || undefined,
-      spellSlots: (character.spellSlots as Record<string, { max: number; current: number }>) || {},
+      spellSlots:
+        (character.spellSlots as Record<
+          string,
+          { max: number; current: number }
+        >) || {},
       knownSpells: (character.knownSpells as string[]) || [],
     },
     battleData: {
@@ -175,6 +199,60 @@ export async function createBattleParticipantFromCharacter(
       hasExtraTurn: false,
     },
   };
+
+  // Застосовуємо бонуси до minTargets/maxTargets з скілів та артефактів
+  let minTargetsBonus = 0;
+
+  let maxTargetsBonus = 0;
+
+  // Бонуси зі скілів
+  for (const skill of participant.battleData.activeSkills) {
+    for (const effect of skill.effects) {
+      if (
+        effect.type === "min_targets" ||
+        effect.type === "min_targets_bonus"
+      ) {
+        minTargetsBonus += effect.value;
+      }
+
+      if (
+        effect.type === "max_targets" ||
+        effect.type === "max_targets_bonus"
+      ) {
+        maxTargetsBonus += effect.value;
+      }
+    }
+  }
+
+  // Бонуси з артефактів
+  for (const artifact of participant.battleData.equippedArtifacts) {
+    if (artifact.bonuses.minTargets)
+      minTargetsBonus += artifact.bonuses.minTargets;
+
+    if (artifact.bonuses.maxTargets)
+      maxTargetsBonus += artifact.bonuses.maxTargets;
+
+    for (const modifier of artifact.modifiers) {
+      if (
+        modifier.type === "min_targets" ||
+        modifier.type === ArtifactModifierType.MIN_TARGETS
+      ) {
+        minTargetsBonus += modifier.value;
+      }
+
+      if (
+        modifier.type === "max_targets" ||
+        modifier.type === ArtifactModifierType.MAX_TARGETS
+      ) {
+        maxTargetsBonus += modifier.value;
+      }
+    }
+  }
+
+  participant.combatStats.minTargets += minTargetsBonus;
+  participant.combatStats.maxTargets += maxTargetsBonus;
+
+  return participant;
 }
 
 /**
@@ -184,7 +262,7 @@ export async function createBattleParticipantFromUnit(
   unit: UnitFromPrisma,
   battleId: string,
   side: ParticipantSide,
-  instanceNumber: number
+  instanceNumber: number,
 ): Promise<BattleParticipant> {
   const modifiers = {
     strength: getAbilityModifier(unit.strength),
@@ -196,15 +274,16 @@ export async function createBattleParticipantFromUnit(
   };
 
   // Розбираємо атаки з JSON
-  const attacks = (unit.attacks as Array<{
-    name: string;
-    attackBonus: number;
-    damageDice: string;
-    damageType: string;
-    type?: AttackType;
-    range?: string;
-    properties?: string;
-  }>) || [];
+  const attacks =
+    (unit.attacks as Array<{
+      name: string;
+      attackBonus: number;
+      damageDice: string;
+      damageType: string;
+      type?: AttackType;
+      range?: string;
+      properties?: string;
+    }>) || [];
 
   const battleAttacks = attacks.map((attack, index) => ({
     id: (attack as { id?: string }).id || `${unit.id}-attack-${index}`,
@@ -222,14 +301,17 @@ export async function createBattleParticipantFromUnit(
 
   if (unit.race) {
     try {
-      racialAbilities = await extractRacialAbilities(unit.race, unit.campaignId);
+      racialAbilities = await extractRacialAbilities(
+        unit.race,
+        unit.campaignId,
+      );
     } catch (error) {
       console.error("Error extracting racial abilities:", error);
       racialAbilities = [];
     }
   }
 
-  return {
+  const participant: BattleParticipant = {
     basicInfo: {
       id: `${unit.id}-${instanceNumber}-${Date.now()}`,
       battleId,
@@ -264,6 +346,8 @@ export async function createBattleParticipantFromUnit(
       speed: unit.speed,
       morale: (unit as { morale?: number }).morale || 0,
       status: "active",
+      minTargets: unit.minTargets ?? 1,
+      maxTargets: unit.maxTargets ?? 1,
     },
     spellcasting: {
       spellcastingClass: undefined,
@@ -288,6 +372,34 @@ export async function createBattleParticipantFromUnit(
       hasExtraTurn: false,
     },
   };
+
+  // Units зазвичай не мають скілів з дерева, але можуть мати расові бонуси
+  let minTargetsBonus = 0;
+
+  let maxTargetsBonus = 0;
+
+  for (const racial of participant.battleData.racialAbilities) {
+    if (typeof racial.effect === "object" && racial.effect !== null) {
+      const effect = racial.effect as Record<string, unknown>;
+
+      if (typeof effect.min_targets === "number")
+        minTargetsBonus += effect.min_targets;
+
+      if (typeof effect.max_targets === "number")
+        maxTargetsBonus += effect.max_targets;
+
+      if (typeof effect.minTargets === "number")
+        minTargetsBonus += effect.minTargets;
+
+      if (typeof effect.maxTargets === "number")
+        maxTargetsBonus += effect.maxTargets;
+    }
+  }
+
+  participant.combatStats.minTargets += minTargetsBonus;
+  participant.combatStats.maxTargets += maxTargetsBonus;
+
+  return participant;
 }
 
 /**
@@ -296,18 +408,19 @@ export async function createBattleParticipantFromUnit(
  */
 async function extractActiveSkillsFromCharacter(
   character: CharacterFromPrisma,
-  campaignId: string
+  campaignId: string,
 ): Promise<ActiveSkill[]> {
   const activeSkills: ActiveSkill[] = [];
 
   // Розбираємо skillTreeProgress (JSON об'єкт)
-  const skillTreeProgress = (character.skillTreeProgress as Record<
-    string,
-    {
-      level?: SkillLevel;
-      unlockedSkills?: string[];
-    }
-  >) || {};
+  const skillTreeProgress =
+    (character.skillTreeProgress as Record<
+      string,
+      {
+        level?: SkillLevel;
+        unlockedSkills?: string[];
+      }
+    >) || {};
 
   // Збираємо всі skillIds для масового завантаження
   const allSkillIds: string[] = [];
@@ -373,9 +486,8 @@ async function extractActiveSkillsFromCharacter(
     // Формуємо spellEnhancements якщо є покращення заклинання
     let spellEnhancements: ActiveSkill["spellEnhancements"] | undefined;
 
-    const enhancementTypes =
-      (skill.spellEnhancementTypes as string[]) || [];
-    
+    const enhancementTypes = (skill.spellEnhancementTypes as string[]) || [];
+
     if (
       enhancementTypes.length > 0 ||
       skill.spellEffectIncrease ||
@@ -390,10 +502,15 @@ async function extractActiveSkillsFromCharacter(
       }
 
       if (skill.spellTargetChange) {
-        const targetChange =
-          skill.spellTargetChange as unknown as { target: string };
+        const targetChange = skill.spellTargetChange as unknown as {
+          target: string;
+        };
 
-        if (targetChange && typeof targetChange === "object" && "target" in targetChange) {
+        if (
+          targetChange &&
+          typeof targetChange === "object" &&
+          "target" in targetChange
+        ) {
           spellEnhancements.spellTargetChange = {
             target: targetChange.target,
           };
@@ -407,10 +524,7 @@ async function extractActiveSkillsFromCharacter(
           duration?: number;
         };
 
-        if (
-          additionalModifier &&
-          typeof additionalModifier === "object"
-        ) {
+        if (additionalModifier && typeof additionalModifier === "object") {
           spellEnhancements.spellAdditionalModifier = {
             modifier: additionalModifier.modifier,
             damageDice: additionalModifier.damageDice,
@@ -452,7 +566,7 @@ async function extractActiveSkillsFromCharacter(
  * Витягує атаки з екіпірованої зброї (артефактів зі слота "weapon")
  */
 async function extractAttacksFromCharacter(
-  character: CharacterFromPrisma
+  character: CharacterFromPrisma,
 ): Promise<ExtractedAttack[]> {
   const attacks: ExtractedAttack[] = [];
 
@@ -460,52 +574,91 @@ async function extractAttacksFromCharacter(
     return attacks;
   }
 
-  const equipped = (character.inventory.equipped as Record<string, string>) || {};
+  const equipped =
+    (character.inventory.equipped as Record<string, string>) || {};
 
-  const weaponId = equipped.weapon || equipped.weapon1 || equipped.weapon2;
+  // Шукаємо ID зброї в різних можливих слотах
+  const weaponIds = [
+    equipped.mainHand,
+    equipped.offHand,
+    equipped.weapon,
+    equipped.weapon1,
+    equipped.weapon2,
+  ].filter(Boolean) as string[];
 
-  if (!weaponId) {
+  if (weaponIds.length === 0) {
     return attacks;
   }
 
-  // Завантажуємо зброю з БД
-  const weapon = await prisma.artifact.findUnique({
+  // Завантажуємо всі знайдені предмети з БД
+  const potentialWeapons = await prisma.artifact.findMany({
     where: {
-      id: weaponId,
+      id: { in: weaponIds },
       campaignId: character.campaignId,
     },
   });
 
-  if (!weapon || weapon.slot !== "weapon") {
-    return attacks;
+  for (const weapon of potentialWeapons) {
+    if (
+      weapon.slot !== "weapon" &&
+      weapon.slot !== "mainHand" &&
+      weapon.slot !== "offHand"
+    ) {
+      continue;
+    }
+
+    // Розбираємо modifiers для атаки
+    const modifiers = (weapon.modifiers as ArtifactModifier[]) || [];
+
+    // Знаходимо дані атаки в modifiers або bonuses
+    const bonuses = (weapon.bonuses as Record<string, number>) || {};
+
+    // Базові значення (можна налаштувати пізніше)
+    const attackBonus = bonuses.attackBonus || bonuses.attack || 0;
+
+    const damageDice = getModifierValue(
+      modifiers,
+      ArtifactModifierType.DAMAGE_DICE,
+      DEFAULT_ARTIFACT_MODIFIERS.DAMAGE_DICE,
+    );
+
+    const damageType = getModifierValue(
+      modifiers,
+      ArtifactModifierType.DAMAGE_TYPE,
+      DEFAULT_ARTIFACT_MODIFIERS.DAMAGE_TYPE,
+    );
+
+    const attackType = getModifierValue(
+      modifiers,
+      ArtifactModifierType.ATTACK_TYPE,
+      AttackType.MELEE,
+    );
+
+    // Створюємо атаку з ID
+    attacks.push({
+      id: weapon.id,
+      name: weapon.name,
+      type: (attackType === AttackType.RANGED
+        ? AttackType.RANGED
+        : AttackType.MELEE) as AttackType,
+      attackBonus,
+      damageDice,
+      damageType,
+      range: getOptionalModifierValue(modifiers, ArtifactModifierType.RANGE),
+      properties: getOptionalModifierValue(
+        modifiers,
+        ArtifactModifierType.PROPERTIES,
+      ),
+      minTargets:
+        parseInt(
+          getModifierValue(modifiers, ArtifactModifierType.MIN_TARGETS, "0"),
+        ) || undefined,
+      maxTargets:
+        parseInt(
+          getModifierValue(modifiers, ArtifactModifierType.MAX_TARGETS, "0"),
+        ) || undefined,
+    });
   }
-
-  // Розбираємо modifiers для атаки
-  const modifiers = (weapon.modifiers as ArtifactModifier[]) || [];
-
-  // Знаходимо дані атаки в modifiers або bonuses
-  const bonuses = (weapon.bonuses as Record<string, number>) || {};
-  
-  // Базові значення (можна налаштувати пізніше)
-  const attackBonus = bonuses.attackBonus || bonuses.attack || 0;
-
-  const damageDice = getModifierValue(modifiers, ArtifactModifierType.DAMAGE_DICE, DEFAULT_ARTIFACT_MODIFIERS.DAMAGE_DICE);
-
-  const damageType = getModifierValue(modifiers, ArtifactModifierType.DAMAGE_TYPE, DEFAULT_ARTIFACT_MODIFIERS.DAMAGE_TYPE);
-
-  const attackType = getModifierValue(modifiers, ArtifactModifierType.ATTACK_TYPE, AttackType.MELEE);
-
-  // Створюємо атаку з ID
-  attacks.push({
-    id: weapon.id,
-    name: weapon.name,
-    type: (attackType === AttackType.RANGED ? AttackType.RANGED : AttackType.MELEE) as AttackType,
-    attackBonus,
-    damageDice,
-    damageType,
-    range: getOptionalModifierValue(modifiers, ArtifactModifierType.RANGE),
-    properties: getOptionalModifierValue(modifiers, ArtifactModifierType.PROPERTIES),
-  });
 
   return attacks;
 }
@@ -515,7 +668,7 @@ async function extractAttacksFromCharacter(
  * Завантажує деталі артефактів з БД
  */
 async function extractEquippedArtifactsFromCharacter(
-  character: CharacterFromPrisma
+  character: CharacterFromPrisma,
 ): Promise<EquippedArtifact[]> {
   const equippedArtifacts: EquippedArtifact[] = [];
 
@@ -523,7 +676,8 @@ async function extractEquippedArtifactsFromCharacter(
     return equippedArtifacts;
   }
 
-  const equipped = (character.inventory.equipped as Record<string, string>) || {};
+  const equipped =
+    (character.inventory.equipped as Record<string, string>) || {};
 
   // Збираємо всі artifactIds для масового завантаження
   const artifactIds: string[] = [];
@@ -554,11 +708,12 @@ async function extractEquippedArtifactsFromCharacter(
   for (const artifact of artifacts) {
     const bonuses = (artifact.bonuses as Record<string, number>) || {};
 
-    const modifiers = (artifact.modifiers as Array<{
-      type: string;
-      value: number;
-      isPercentage?: boolean;
-    }>) || [];
+    const modifiers =
+      (artifact.modifiers as Array<{
+        type: string;
+        value: number;
+        isPercentage?: boolean;
+      }>) || [];
 
     equippedArtifacts.push({
       artifactId: artifact.id,
@@ -583,7 +738,7 @@ async function extractEquippedArtifactsFromCharacter(
  */
 async function extractRacialAbilities(
   raceName: string,
-  campaignId: string
+  campaignId: string,
 ): Promise<RacialAbility[]> {
   const racialAbilities: RacialAbility[] = [];
 

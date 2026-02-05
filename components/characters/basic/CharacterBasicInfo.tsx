@@ -47,8 +47,22 @@ export function CharacterBasicInfo({
   campaignMembers = [],
   races = [],
 }: CharacterBasicInfoProps) {
-  const { name, type, controlledBy, level, class: className, subclass, race, subrace, alignment, background, experience, avatar, setters } = basicInfo;
-  
+  const {
+    name,
+    type,
+    controlledBy,
+    level,
+    class: className,
+    subclass,
+    race,
+    subrace,
+    alignment,
+    background,
+    experience,
+    avatar,
+    setters,
+  } = basicInfo;
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
       <LabeledInput
@@ -67,7 +81,9 @@ export function CharacterBasicInfo({
         <SelectField
           id="type"
           value={type}
-          onValueChange={(value) => setters.setType(value as "player" | "npc_hero")}
+          onValueChange={(value) =>
+            setters.setType(value as "player" | "npc_hero")
+          }
           placeholder="Виберіть тип"
           options={[
             { value: "player", label: "Гравець" },
@@ -86,7 +102,7 @@ export function CharacterBasicInfo({
             value={controlledBy}
             onValueChange={(value) => setters.setControlledBy(value)}
             placeholder="Виберіть гравця"
-            options={campaignMembers.map(member => ({
+            options={campaignMembers.map((member) => ({
               value: member.id,
               label: `${member.displayName} (${member.email})`,
             }))}
@@ -98,28 +114,15 @@ export function CharacterBasicInfo({
 
       <div className="w-full min-w-0">
         <Label htmlFor="race">Раса *</Label>
-        {races.length > 0 ? (
-          <SelectField
-            id="race"
-            value={race}
-            onValueChange={(value) => setters.setRace(value)}
-            placeholder="Виберіть расу"
-            options={races.map(r => ({ value: r.name, label: r.name }))}
-            required
-            triggerClassName="w-full"
-          />
-        ) : (
-          <LabeledInput
-            id="race"
-            label="Раса"
-            value={race}
-            onChange={(e) => setters.setRace(e.target.value)}
-            required
-            placeholder="Наприклад: Ельф"
-            containerClassName="w-full min-w-0"
-            className="w-full"
-          />
-        )}
+        <SelectField
+          id="race"
+          value={race}
+          onValueChange={(value) => setters.setRace(value)}
+          placeholder="Виберіть расу"
+          options={races.map((r) => ({ value: r.name, label: r.name }))}
+          required
+          triggerClassName="w-full"
+        />
       </div>
 
       <LabeledInput
@@ -158,7 +161,7 @@ export function CharacterBasicInfo({
           value={alignment || ""}
           onValueChange={(value) => setters.setAlignment(value)}
           placeholder="Виберіть світогляд"
-          options={ALIGNMENTS.map(align => ({ value: align, label: align }))}
+          options={ALIGNMENTS.map((align) => ({ value: align, label: align }))}
           allowNone
           triggerClassName="w-full"
         />
