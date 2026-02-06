@@ -110,12 +110,14 @@ export function CreateRaceDialog({
           <div className="space-y-2">
             <Label>Доступні скіли для прокачки</Label>
             <p className="text-xs text-muted-foreground">
-              Виберіть основні навики, які будуть доступні для прокачки цієї раси. Всі невказані навики будуть недоступні.
+              Виберіть основні навики, які будуть доступні для прокачки цієї
+              раси. Всі невказані навики будуть недоступні.
             </p>
             <div className="border rounded-md p-3 max-h-40 overflow-y-auto">
               {mainSkills.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  Немає доступних основних навиків. Створіть їх в розділі &quot;Основні Навики&quot;.
+                  Немає доступних основних навиків. Створіть їх в розділі
+                  &quot;Основні Навики&quot;.
                 </p>
               ) : (
                 <div className="space-y-2">
@@ -126,7 +128,9 @@ export function CreateRaceDialog({
                     >
                       <input
                         type="checkbox"
-                        checked={formData.availableSkills.includes(mainSkill.id)}
+                        checked={formData.availableSkills.includes(
+                          mainSkill.id,
+                        )}
                         onChange={() => toggleAvailableSkill(mainSkill.id)}
                         className="rounded"
                       />
@@ -139,9 +143,7 @@ export function CreateRaceDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="passiveDescription">
-              Опис пасивної здібності
-            </Label>
+            <Label htmlFor="passiveDescription">Опис пасивної здібності</Label>
             <Textarea
               id="passiveDescription"
               value={formData.passiveAbility?.description || ""}
@@ -168,10 +170,14 @@ export function CreateRaceDialog({
             </p>
             <div className="border rounded-md p-3 space-y-4 max-h-96 overflow-y-auto">
               {ABILITY_SCORES.map((ability) => {
-                const modifiers = formData.passiveAbility?.statModifiers?.[ability.key] || {};
+                const modifiers =
+                  formData.passiveAbility?.statModifiers?.[ability.key] || {};
 
                 return (
-                  <div key={ability.key} className="space-y-2 pb-3 border-b last:border-0">
+                  <div
+                    key={ability.key}
+                    className="space-y-2 pb-3 border-b last:border-0"
+                  >
                     <Label className="text-sm font-semibold">
                       {ability.label} ({ability.abbreviation})
                     </Label>
@@ -185,15 +191,20 @@ export function CreateRaceDialog({
                               ...prev,
                               passiveAbility: {
                                 ...prev.passiveAbility,
-                                description: prev.passiveAbility?.description || "",
-                                statImprovements: prev.passiveAbility?.statImprovements || "",
+                                description:
+                                  prev.passiveAbility?.description || "",
+                                statImprovements:
+                                  prev.passiveAbility?.statImprovements || "",
                                 statModifiers: {
                                   ...prev.passiveAbility?.statModifiers,
                                   [ability.key]: {
                                     ...modifiers,
                                     bonus: checked === true,
                                     // Якщо вибрано "завжди 0", знімаємо бонус
-                                    alwaysZero: checked === true ? false : modifiers.alwaysZero,
+                                    alwaysZero:
+                                      checked === true
+                                        ? false
+                                        : modifiers.alwaysZero,
                                   },
                                 },
                               },
@@ -216,15 +227,20 @@ export function CreateRaceDialog({
                               ...prev,
                               passiveAbility: {
                                 ...prev.passiveAbility,
-                                description: prev.passiveAbility?.description || "",
-                                statImprovements: prev.passiveAbility?.statImprovements || "",
+                                description:
+                                  prev.passiveAbility?.description || "",
+                                statImprovements:
+                                  prev.passiveAbility?.statImprovements || "",
                                 statModifiers: {
                                   ...prev.passiveAbility?.statModifiers,
                                   [ability.key]: {
                                     ...modifiers,
                                     nonNegative: checked === true,
                                     // Якщо вибрано "завжди 0", знімаємо невід'ємність
-                                    alwaysZero: checked === true ? false : modifiers.alwaysZero,
+                                    alwaysZero:
+                                      checked === true
+                                        ? false
+                                        : modifiers.alwaysZero,
                                   },
                                 },
                               },
@@ -247,14 +263,22 @@ export function CreateRaceDialog({
                               ...prev,
                               passiveAbility: {
                                 ...prev.passiveAbility,
-                                description: prev.passiveAbility?.description || "",
-                                statImprovements: prev.passiveAbility?.statImprovements || "",
+                                description:
+                                  prev.passiveAbility?.description || "",
+                                statImprovements:
+                                  prev.passiveAbility?.statImprovements || "",
                                 statModifiers: {
                                   ...prev.passiveAbility?.statModifiers,
                                   [ability.key]: {
                                     // Якщо вибрано "завжди 0", знімаємо всі інші опції
-                                    bonus: checked === true ? false : modifiers.bonus,
-                                    nonNegative: checked === true ? false : modifiers.nonNegative,
+                                    bonus:
+                                      checked === true
+                                        ? false
+                                        : modifiers.bonus,
+                                    nonNegative:
+                                      checked === true
+                                        ? false
+                                        : modifiers.nonNegative,
                                     alwaysZero: checked === true,
                                   },
                                 },
@@ -279,7 +303,8 @@ export function CreateRaceDialog({
           <div className="space-y-2">
             <Label>Прокачка магічних слотів</Label>
             <p className="text-xs text-muted-foreground">
-              Вкажіть максимальну кількість магічних слотів для кожного рівня магії при прокачці рівня персонажа
+              Вкажіть максимальну кількість магічних слотів для кожного рівня
+              магії при прокачці рівня персонажа
             </p>
             <div className="border rounded-md p-4">
               <div className="grid grid-cols-2 gap-4 mb-2 pb-2 border-b font-semibold text-sm">
@@ -287,7 +312,9 @@ export function CreateRaceDialog({
                 <div>Максимальна кількість слотів</div>
               </div>
               {[1, 2, 3, 4, 5].map((level) => {
-                const progression = formData.spellSlotProgression?.find((p) => p.level === level);
+                const progression = formData.spellSlotProgression?.find(
+                  (p) => p.level === level,
+                );
 
                 return (
                   <div key={level} className="grid grid-cols-2 gap-4 py-2">
@@ -296,7 +323,6 @@ export function CreateRaceDialog({
                     </div>
                     <Input
                       type="number"
-                      min="0"
                       value={progression?.slots || 0}
                       onChange={(e) => {
                         const slots = parseInt(e.target.value, 10) || 0;
@@ -304,7 +330,9 @@ export function CreateRaceDialog({
                         setFormData((prev) => {
                           const current = prev.spellSlotProgression || [];
 
-                          const index = current.findIndex((p) => p.level === level);
+                          const index = current.findIndex(
+                            (p) => p.level === level,
+                          );
 
                           let updated;
 

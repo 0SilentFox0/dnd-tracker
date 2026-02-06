@@ -32,9 +32,9 @@ export function UltimateSkillComponent({
       style={{
         left: "50%",
         top: "50%",
+        transform: "translate(-50%, -50%)",
         ...SKILL_SIZES.ultimateSkill,
-        marginLeft: SKILL_SIZES.ultimateSkill.margin,
-        marginTop: SKILL_SIZES.ultimateSkill.margin,
+        margin: 0,
         backgroundColor: unlockedUltimateSkill
           ? SKILL_COLORS.unlocked // Зелений фон для прокачаних
           : canLearnUltimateSkill

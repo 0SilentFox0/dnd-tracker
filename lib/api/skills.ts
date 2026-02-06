@@ -1,6 +1,21 @@
 import type { SkillPayload, SkillUpdatePayload } from "@/types/api";
 import type { Skill } from "@/types/skills";
 
+export async function getSkill(
+  campaignId: string,
+  skillId: string
+): Promise<Skill> {
+  const response = await fetch(
+    `/api/campaigns/${campaignId}/skills/${skillId}`,
+    { cache: "no-store" }
+  );
+  if (!response.ok) {
+    if (response.status === 404) throw new Error("Skill not found");
+    throw new Error("Failed to fetch skill");
+  }
+  return response.json();
+}
+
 export async function getSkills(campaignId: string): Promise<Skill[]> {
   const response = await fetch(`/api/campaigns/${campaignId}/skills`, {
     cache: "no-store",

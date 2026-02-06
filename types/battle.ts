@@ -87,16 +87,26 @@ export interface RacialAbility {
 /**
  * Типи для активних скілів
  */
+/**
+ * Один ефект скіла (збагачений формат)
+ */
+export interface SkillEffect {
+  stat: string;           // "counter_damage", "hp_bonus", "bleed_damage", "melee_damage" тощо
+  type: string;           // "percent", "flat", "formula", "dice", "flag", "ignore", "stack", "min"
+  value: number | string | boolean;  // 25, "2*hero_level", "1d4", true
+  isPercentage: boolean;  // зручний прапорець (type === "percent")
+  duration?: number;      // тривалість у раундах
+  target?: "self" | "enemy" | "all_enemies" | "all_allies";
+  /** Скільки разів може спрацювати: undefined/null = постійно, 1–100 = обмеження */
+  maxTriggers?: number | null;
+}
+
 export interface ActiveSkill {
   skillId: string;
   name: string;
   mainSkillId: string;
   level: SkillLevel;
-  effects: Array<{
-    type: string; // тип модифікатора (melee_damage_percent, тощо)
-    value: number;
-    isPercentage: boolean;
-  }>;
+  effects: SkillEffect[];
   spellEnhancements?: {
     spellEffectIncrease?: number; // +25% ефекту
     spellTargetChange?: { target: string }; // зміна цілі
@@ -225,6 +235,8 @@ export interface BattleParticipantBattleData {
   racialAbilities: RacialAbility[];
   activeSkills: ActiveSkill[];
   equippedArtifacts: EquippedArtifact[];
+  /** Лічильник використань скілів за бій (skillId → count). Для oncePerBattle/twicePerBattle */
+  skillUsageCounts?: Record<string, number>;
 }
 
 /**

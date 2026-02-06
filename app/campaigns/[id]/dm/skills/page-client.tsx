@@ -22,19 +22,16 @@ import {
   convertGroupedSkillsToArray,
   groupSkillsByMainSkill,
 } from "@/lib/utils/skills/skills";
-import type { Race } from "@/types/races";
 import type { Skill } from "@/types/skills";
 
 interface DMSkillsPageClientProps {
   campaignId: string;
   initialSkills: Skill[];
-  initialRaces: Race[];
 }
 
 export function DMSkillsPageClient({
   campaignId,
   initialSkills,
-  initialRaces,
 }: DMSkillsPageClientProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -124,16 +121,19 @@ export function DMSkillsPageClient({
           defaultValue={groupedSkills.map(([groupName]) => groupName)}
           className="space-y-2 sm:space-y-4"
         >
-          {groupedSkills.map(([groupName, groupSkills]) => (
-            <SkillGroupAccordion
-              key={groupName}
-              groupName={groupName}
-              skills={groupSkills}
-              campaignId={campaignId}
-              spellGroups={[]}
-              initialRaces={initialRaces}
-            />
-          ))}
+          {groupedSkills.map(([groupName, groupSkills]) => {
+            const mainSkill = mainSkills.find((ms) => ms.name === groupName);
+            return (
+              <SkillGroupAccordion
+                key={groupName}
+                groupName={groupName}
+                skills={groupSkills}
+                campaignId={campaignId}
+                spellGroups={[]}
+                mainSkillColor={mainSkill?.color}
+              />
+            );
+          })}
         </Accordion>
       )}
 

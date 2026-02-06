@@ -1,6 +1,9 @@
 import { useMemo } from "react";
 
-import { getSkillMainSkillId, getSkillRaces } from "@/lib/utils/skills/skill-helpers";
+import {
+  getSkillMainSkillId,
+  getSkillRaces,
+} from "@/lib/utils/skills/skill-helpers";
 import type { MainSkill } from "@/types/main-skills";
 import type { Race } from "@/types/races";
 import type { SkillTree } from "@/types/skill-tree";
@@ -99,19 +102,19 @@ export function useSkillTreeFilters({
       // Перевіряємо чи скіл підходить для цієї раси (через skill.races)
       // skill.races може містити як ID рас, так і назви рас
       const skillRaces = getSkillRaces(skill);
-      
+
       if (skillRaces && skillRaces.length > 0) {
         // Знаходимо ID та назву обраної раси
         const selectedRaceId = race?.id;
 
         const selectedRaceName = race?.name || selectedRace;
-        
+
         // Перевіряємо чи ID раси або назва раси є в списку доступних для скіла
-        const isAvailableForRace = 
+        const isAvailableForRace =
           (selectedRaceId && skillRaces.includes(selectedRaceId)) ||
           skillRaces.includes(selectedRaceName) ||
           skillRaces.includes(selectedRace);
-        
+
         if (!isAvailableForRace) {
           return false;
         }

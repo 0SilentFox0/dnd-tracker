@@ -2,10 +2,7 @@ import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { SKILL_COLORS, Z_INDEX } from "@/components/skill-tree/utils/constants";
 import { getPositionPercent } from "@/components/skill-tree/utils/utils";
 import type { Skill } from "@/types/skill-tree";
-import {
-  SkillCircle as SkillCircleEnum,
-  SkillLevel,
-} from "@/types/skill-tree";
+import { SkillCircle as SkillCircleEnum, SkillLevel } from "@/types/skill-tree";
 
 interface SkillCircleProps {
   skill: Skill;
@@ -61,7 +58,7 @@ export function SkillCircle({
   isDMMode = false,
   selectedSkillFromLibrary,
 }: SkillCircleProps) {
-  const position = getPositionPercent(angle, radiusPercent);
+  const position = getPositionPercent(angle - 1.83, radiusPercent);
 
   // Округлюємо marginOffset для уникнення помилок гідрації
   const marginOffsetValue = sizePercent / 2;
@@ -83,8 +80,8 @@ export function SkillCircle({
             ? "cursor-pointer hover:opacity-80 active:opacity-70 border-yellow-400 border-4"
             : "cursor-pointer hover:opacity-80 active:opacity-70 opacity-50"
           : canLearn || isUnlocked
-          ? "cursor-pointer hover:opacity-80 active:opacity-70"
-          : "cursor-not-allowed"
+            ? "cursor-pointer hover:opacity-80 active:opacity-70"
+            : "cursor-not-allowed"
       }`}
       style={{
         ...position,
@@ -95,13 +92,13 @@ export function SkillCircle({
         backgroundColor: isSelectedForRemoval
           ? "#ef4444" // Червоний колір для вибраного для видалення
           : isUnlocked
-          ? SKILL_COLORS.unlocked
-          : SKILL_COLORS.locked,
+            ? SKILL_COLORS.unlocked
+            : SKILL_COLORS.locked,
         borderColor: isSelectedForRemoval
           ? "#dc2626" // Темно-червоний border
           : canLearn || isUnlocked
-          ? "white"
-          : "#6b7280",
+            ? "white"
+            : "#6b7280",
         borderWidth: isSelectedForRemoval ? "3px" : undefined,
         opacity: isUnlocked ? 1 : 0.5,
         zIndex: Z_INDEX.skills,
@@ -150,8 +147,8 @@ export function SkillCircle({
               isUnlocked
                 ? " - Вивчено"
                 : canLearn
-                ? " - Доступно"
-                : " - Недоступно"
+                  ? " - Доступно"
+                  : " - Недоступно"
             }`
       }
     >

@@ -2,12 +2,11 @@
 
 import { useRouter } from "next/navigation";
 
-import { SkillBasicInfo } from "@/components/skills/form/SkillBasicInfo";
-import { SkillBonuses } from "@/components/skills/form/SkillBonuses";
-import { SkillCombatStats } from "@/components/skills/form/SkillCombatStats";
-import { SkillMainSkillSection } from "@/components/skills/form/SkillMainSkillSection";
-import { SkillSpellSection } from "@/components/skills/form/SkillSpellSection";
-import { SkillTriggersEditor } from "@/components/skills/form/SkillTriggersEditor";
+import { SkillBasicInfo } from "@/components/skills/form/basic";
+import { SkillEffectsEditor } from "@/components/skills/form/effects";
+import { SkillMainSkillSection } from "@/components/skills/form/main-skill";
+import { SkillSpellSection } from "@/components/skills/form/spell";
+import { SkillTriggersEditor } from "@/components/skills/form/triggers";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -29,22 +28,19 @@ interface SpellGroupOption {
   name: string;
 }
 
-import type { Race } from "@/types/races";
-import type { GroupedSkill,Skill } from "@/types/skills";
+import type { MainSkill } from "@/types/main-skills";
+import type { GroupedSkill, Skill } from "@/types/skills";
 
 interface SkillCreateFormProps {
   campaignId: string;
   spells: SpellOption[];
-  spellGroups?: SpellGroupOption[]; // Зарезервовано для майбутнього використання
-  initialRaces?: Race[];
-  // Підтримуємо обидві структури для сумісності
+  spellGroups?: SpellGroupOption[];
+  initialMainSkills?: MainSkill[];
   initialData?: Skill | GroupedSkill | {
     id: string;
     name: string;
     description: string | null;
     icon: string | null;
-    races: unknown;
-    isRacial: boolean;
     bonuses: unknown;
     damage: number | null;
     armor: number | null;
@@ -53,6 +49,7 @@ interface SkillCreateFormProps {
     magicalResistance: number | null;
     spellId: string | null;
     spellGroupId: string | null;
+    grantedSpellId?: string | null;
     mainSkillId: string | null;
     spellEnhancementTypes?: unknown;
     spellEffectIncrease?: number | null;
@@ -66,26 +63,29 @@ interface SkillCreateFormProps {
 export function SkillCreateForm({
   campaignId,
   spells,
-  initialRaces = [],
+  initialMainSkills,
   initialData,
 }: SkillCreateFormProps) {
   const router = useRouter();
-  
+
   const {
     isSaving,
     error,
     isEdit,
     mainSkills,
-    races,
     basicInfo,
-    bonuses,
-    combatStats,
+    effectsGroup,
     spell,
     spellEnhancement,
     mainSkill,
     skillTriggers: skillTriggersGroup,
     handleSubmit,
-  } = useSkillForm(campaignId, spells, initialRaces, initialData);
+  } = useSkillForm(
+    campaignId,
+    spells,
+    initialData,
+    initialMainSkills
+  );
 
   return (
     <Card>
@@ -100,14 +100,16 @@ export function SkillCreateForm({
       <CardContent>
         {error && <p className="text-sm text-destructive mb-4">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-5">
-          <SkillBasicInfo
-            basicInfo={basicInfo}
-            races={races}
+          <SkillBasicInfo basicInfo={basicInfo} />
+
+          <SkillEffectsEditor
+            effects={effectsGroup.effects}
+            minTargets={effectsGroup.minTargets}
+            maxTargets={effectsGroup.maxTargets}
+            onEffectsChange={effectsGroup.setters.setEffects}
+            onMinTargetsChange={effectsGroup.setters.setMinTargets}
+            onMaxTargetsChange={effectsGroup.setters.setMaxTargets}
           />
-
-          <SkillBonuses bonuses={bonuses} />
-
-          <SkillCombatStats combatStats={combatStats} />
 
           <SkillSpellSection
             spell={spell}

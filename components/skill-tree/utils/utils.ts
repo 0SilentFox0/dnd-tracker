@@ -79,7 +79,7 @@ export function darkenColor(color: string, percent: number): string {
 // Округлюємо до 3 знаків після коми для уникнення помилок гідрації
 export function getPositionPercent(
   angle: number,
-  radiusPercent: number
+  radiusPercent: number,
 ): { left: string; top: string } {
   const center = 50; // Центр контейнера в відсотках
 

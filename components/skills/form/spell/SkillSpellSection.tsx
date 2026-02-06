@@ -1,7 +1,7 @@
 "use client";
 
-import { SkillSpellEnhancement } from "@/components/skills/form/SkillSpellEnhancement";
-import { SkillSpellSelector } from "@/components/skills/form/SkillSpellSelector";
+import { SkillSpellEnhancement } from "./SkillSpellEnhancement";
+import { SkillSpellSelector } from "./SkillSpellSelector";
 import {
   Accordion,
   AccordionContent,
@@ -18,8 +18,10 @@ interface SpellOption {
 interface SkillSpellSectionProps {
   spell: {
     spellId: string | null;
+    grantedSpellId: string | null;
     setters: {
       setSpellId: (value: string | null) => void;
+      setGrantedSpellId: (value: string | null) => void;
     };
   };
   spellEnhancement: {
@@ -54,7 +56,7 @@ export function SkillSpellSection({
   spellEnhancement,
   spells,
 }: SkillSpellSectionProps) {
-  const { spellId, setters: spellSetters } = spell;
+  const { spellId, grantedSpellId, setters: spellSetters } = spell;
 
   const {
     spellEnhancementTypes,
@@ -73,6 +75,18 @@ export function SkillSpellSection({
           spellId={spellId}
           spells={spells}
           onSpellIdChange={spellSetters.setSpellId}
+          label="Покращення спела"
+          placeholder="Без спела"
+          noneLabel="Без спела"
+        />
+        <SkillSpellSelector
+          id="skill-granted-spell"
+          spellId={grantedSpellId}
+          spells={spells}
+          onSpellIdChange={spellSetters.setGrantedSpellId}
+          label="Скіл додає заклинання"
+          placeholder="Не додає заклинання"
+          noneLabel="Не додає заклинання"
         />
       </div>
 

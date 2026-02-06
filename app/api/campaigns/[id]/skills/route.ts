@@ -14,8 +14,6 @@ const createSkillSchema = z.object({
       (val) => (val === "" ? null : val),
       z.string().url().nullable().optional(),
     ),
-    races: z.array(z.string()).default([]),
-    isRacial: z.boolean().default(false),
   }),
   bonuses: z.record(z.string(), z.number()).default({}),
   combatStats: z.object({
@@ -24,10 +22,28 @@ const createSkillSchema = z.object({
     speed: z.number().optional(),
     physicalResistance: z.number().optional(),
     magicalResistance: z.number().optional(),
+    min_targets: z.number().optional(),
+    max_targets: z.number().optional(),
+    effects: z
+      .array(
+        z.object({
+            stat: z.string(),
+            type: z.string(),
+            value: z.union([z.number(), z.string(), z.boolean()]),
+            isPercentage: z.boolean().optional(),
+            duration: z.number().optional(),
+            target: z
+              .enum(["self", "enemy", "all_enemies", "all_allies"])
+              .optional(),
+            maxTriggers: z.number().min(1).max(100).nullable().optional(),
+          }),
+      )
+      .optional(),
   }),
   spellData: z.object({
     spellId: z.string().optional(),
     spellGroupId: z.string().optional(),
+    grantedSpellId: z.string().nullable().optional(),
   }),
   spellEnhancementData: z.object({
     spellEnhancementTypes: z
@@ -58,6 +74,7 @@ const createSkillSchema = z.object({
   mainSkillData: z.object({
     mainSkillId: z.string().optional(),
   }),
+  image: z.string().nullable().optional(),
   skillTriggers: z
     .array(
       z.union([
@@ -76,7 +93,26 @@ const createSkillSchema = z.object({
             "beforeEnemySpellCast",
             "afterEnemySpellCast",
             "bonusAction",
+            "passive",
+            "onBattleStart",
+            "onHit",
+            "onAttack",
+            "onKill",
+            "onAllyDeath",
+            "onLethalDamage",
+            "onCast",
+            "onFirstHitTakenPerRound",
+            "onFirstRangedAttack",
+            "onMoraleSuccess",
+            "allyMoraleCheck",
           ]),
+          modifiers: z.object({
+            probability: z.number().optional(),
+            oncePerBattle: z.boolean().optional(),
+            twicePerBattle: z.boolean().optional(),
+            stackable: z.boolean().optional(),
+            condition: z.string().optional(),
+          }).optional(),
         }),
         // Складний тригер
         z.object({
@@ -86,6 +122,13 @@ const createSkillSchema = z.object({
           value: z.number(),
           valueType: z.enum(["number", "percent"]),
           stat: z.enum(["HP", "Attack", "AC", "Speed", "Morale", "Level"]),
+          modifiers: z.object({
+            probability: z.number().optional(),
+            oncePerBattle: z.boolean().optional(),
+            twicePerBattle: z.boolean().optional(),
+            stackable: z.boolean().optional(),
+            condition: z.string().optional(),
+          }).optional(),
         }),
       ]),
     )
@@ -126,6 +169,7 @@ export async function POST(
     const skill = await prisma.skill.create({
       data: {
         campaignId: id,
+        image: data.image ?? null,
         // Згруповані дані
         basicInfo: data.basicInfo as Prisma.InputJsonValue,
         bonuses: data.bonuses as Prisma.InputJsonValue,
@@ -141,8 +185,6 @@ export async function POST(
         name: (basicInfo.name as string) || "",
         description: (basicInfo.description as string) || null,
         icon: (basicInfo.icon as string) || null,
-        races: basicInfo.races as Prisma.InputJsonValue,
-        isRacial: (basicInfo.isRacial as boolean) || false,
         damage: data.combatStats.damage || null,
         armor: data.combatStats.armor || null,
         speed: data.combatStats.speed || null,
@@ -150,6 +192,8 @@ export async function POST(
         magicalResistance: data.combatStats.magicalResistance || null,
         spellId: (spellData.spellId as string) || null,
         spellGroupId: (spellData.spellGroupId as string) || null,
+        grantedSpellId:
+          (spellData.grantedSpellId as string) || null,
         mainSkillId: (mainSkillData.mainSkillId as string) || null,
         spellEnhancementTypes: spellEnhancementData.spellEnhancementTypes
           ? (spellEnhancementData.spellEnhancementTypes as Prisma.InputJsonValue)
@@ -168,6 +212,7 @@ export async function POST(
       include: {
         spell: true,
         spellGroup: true,
+        grantedSpell: true,
       },
     });
 
@@ -207,6 +252,7 @@ export async function GET(
       include: {
         spell: true,
         spellGroup: true,
+        grantedSpell: true,
         mainSkill: true,
       },
       orderBy: {
@@ -217,20 +263,26 @@ export async function GET(
     // Перетворюємо дані з Prisma в формат для фронтенду (згрупована структура)
     const formattedSkills = skills.map((skill) => {
       // Використовуємо згруповані дані, якщо вони є, інакше формуємо з старих полів
-      const basicInfo =
+      let basicInfo: Record<string, unknown>;
+      if (
         skill.basicInfo &&
         typeof skill.basicInfo === "object" &&
         !Array.isArray(skill.basicInfo)
-          ? (skill.basicInfo as Record<string, unknown>)
-          : {
-              name: skill.name || "",
-              description: skill.description || "",
-              icon: skill.icon || "",
-              races: Array.isArray(skill.races)
-                ? skill.races
-                : (skill.races as unknown as string[]) || [],
-              isRacial: skill.isRacial || false,
-            };
+      ) {
+        basicInfo = { ...(skill.basicInfo as Record<string, unknown>) };
+        // Заповнюємо name/description з кореня, якщо в basicInfo їх нема (старі записи або імпорт)
+        if (basicInfo.name === undefined || basicInfo.name === "")
+          basicInfo.name = skill.name || "";
+        if (basicInfo.description === undefined)
+          basicInfo.description = skill.description ?? "";
+        if (basicInfo.icon === undefined) basicInfo.icon = skill.icon ?? "";
+      } else {
+        basicInfo = {
+          name: skill.name || "",
+          description: skill.description || "",
+          icon: skill.icon || "",
+        };
+      }
 
       const combatStats =
         skill.combatStats &&
@@ -245,15 +297,23 @@ export async function GET(
               magicalResistance: skill.magicalResistance || undefined,
             };
 
-      const spellData =
+      const baseSpellData =
         skill.spellData &&
         typeof skill.spellData === "object" &&
         !Array.isArray(skill.spellData)
           ? (skill.spellData as Record<string, unknown>)
-          : {
-              spellId: skill.spellId || undefined,
-              spellGroupId: skill.spellGroupId || undefined,
-            };
+          : {};
+      const spellData = {
+        spellId: skill.spellId || (baseSpellData.spellId as string) || undefined,
+        spellGroupId:
+          skill.spellGroupId ||
+          (baseSpellData.spellGroupId as string) ||
+          undefined,
+        grantedSpellId:
+          (skill as { grantedSpellId?: string }).grantedSpellId ||
+          (baseSpellData.grantedSpellId as string) ||
+          undefined,
+      };
 
       const spellEnhancementData =
         skill.spellEnhancementData &&
@@ -284,6 +344,7 @@ export async function GET(
         id: skill.id,
         campaignId: skill.campaignId,
         basicInfo,
+        image: skill.image ?? null,
         bonuses: (skill.bonuses as Record<string, number>) || {},
         combatStats,
         spellData,
@@ -305,6 +366,15 @@ export async function GET(
               name: skill.spellGroup.name,
             }
           : null,
+        grantedSpell:
+          (skill as { grantedSpell?: { id: string; name: string } })
+            .grantedSpell
+            ? {
+                id: (skill as { grantedSpell: { id: string } }).grantedSpell.id,
+                name: (skill as { grantedSpell: { name: string } }).grantedSpell
+                  .name,
+              }
+            : null,
       };
     });
 

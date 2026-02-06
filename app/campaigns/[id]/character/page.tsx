@@ -12,10 +12,7 @@ import {
 } from "@/components/ui/card";
 import { getAuthUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import {
-  getCharacterDamageModifiers,
-  getCharacterImmunities,
-} from "@/lib/utils/characters/character-race-effects";
+import { getCharacterDamageModifiers } from "@/lib/utils/characters/character-race-effects";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import type { Character } from "@/types/characters";
 
@@ -94,8 +91,6 @@ export default async function CharacterPage({
       name: character.race,
     },
   });
-
-  const allImmunities = getCharacterImmunities(character as unknown as Character, race);
 
   const allDamageModifiers = getCharacterDamageModifiers(character as unknown as Character, race);
 
@@ -288,39 +283,21 @@ export default async function CharacterPage({
         </CardContent>
       </Card>
 
-      {/* Імунітети та модифікатори */}
-      {(allImmunities.length > 0 || allDamageModifiers.length > 0) && (
+      {/* Модифікатори урону (ефекти раси) */}
+      {allDamageModifiers.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>Ефекти раси</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {allImmunities.length > 0 && (
-              <div>
-                <div className="text-sm font-semibold mb-2">Імунітети:</div>
-                <div className="flex flex-wrap gap-2">
-                  {allImmunities.map((immunity, index) => (
-                    <Badge key={index} variant="outline">
-                      {immunity}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-            {allDamageModifiers.length > 0 && (
-              <div>
-                <div className="text-sm font-semibold mb-2">
-                  Модифікатори урону:
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {allDamageModifiers.map((modifier, index) => (
-                    <Badge key={index} variant="secondary">
-                      {modifier}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
+          <CardContent>
+            <div className="text-sm font-semibold mb-2">Модифікатори урону:</div>
+            <div className="flex flex-wrap gap-2">
+              {allDamageModifiers.map((modifier, index) => (
+                <Badge key={index} variant="secondary">
+                  {modifier}
+                </Badge>
+              ))}
+            </div>
           </CardContent>
         </Card>
       )}

@@ -64,9 +64,10 @@ export function RacialSkill({
         className="text-[10px] sm:text-xs font-bold text-white mb-1"
         style={{ textShadow: "1px 1px 2px rgba(0,0,0,0.7)" }}
       >
-        {racialSkill.name}
+        Раса
       </div>
-      <div className="flex gap-1 sm:gap-2">
+      {/* 3 слоти для скілів в один ряд (Основи, Просунутий, Експертний) */}
+      <div className="flex flex-row gap-1 sm:gap-2 items-center justify-center">
         {SKILL_LEVELS.map((level) => {
           const { hasUnlocked } = getLevelStatus(
             racialSkill,

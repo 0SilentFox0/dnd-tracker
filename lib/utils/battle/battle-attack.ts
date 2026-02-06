@@ -290,28 +290,37 @@ export function applyCriticalEffect(
  * @param currentRound - поточний раунд
  * @returns true якщо контр-удар можливий
  */
-export function canPerformReaction(defender: BattleParticipant): boolean {
-  // Перевіряємо чи є скіл контр-удару
-  const reactionSkills = defender.battleData.activeSkills.filter(
-    (skill) =>
-      skill.name.toLowerCase().includes("контр") ||
-      skill.name.toLowerCase().includes("reaction"),
-  );
-
-  if (reactionSkills.length === 0) {
-    return false;
+/** Сумарний відсоток counter_damage зі скілів цілі (для контр-атаки) */
+export function getCounterDamagePercent(defender: BattleParticipant): number {
+  let total = 0;
+  for (const skill of defender.battleData.activeSkills) {
+    for (const effect of skill.effects) {
+      if (
+        effect.stat === "counter_damage" &&
+        effect.isPercentage &&
+        typeof effect.value === "number"
+      ) {
+        total += effect.value;
+      }
+    }
   }
+  return total;
+}
 
-  // Перевіряємо чи не використав реакцію
+export function canPerformReaction(defender: BattleParticipant): boolean {
   if (defender.actionFlags.hasUsedReaction) {
     return false;
   }
-
-  // Перевіряємо чи це перша атака на defender в цьому раунді
-  // (поки що просто перевіряємо флаг, в майбутньому можна перевірити лог)
-  // TODO: Перевірити кількість атак на defender в поточному раунді
-
-  return true;
+  const counterPercent = getCounterDamagePercent(defender);
+  if (counterPercent <= 0) {
+    return false;
+  }
+  const hasCounterSkill = defender.battleData.activeSkills.some((skill) =>
+    skill.effects.some(
+      (e) => e.stat === "counter_damage" && e.isPercentage && typeof e.value === "number" && e.value > 0
+    )
+  );
+  return hasCounterSkill;
 }
 
 /**
@@ -365,8 +374,9 @@ export function performReaction(
 
   baseDamage += statModifier;
 
-  // Контр-удар зазвичай має +15% урону (згідно з ТЗ)
-  const reactionDamage = Math.floor(baseDamage * 1.15);
+  const counterPercent = getCounterDamagePercent(defender);
+  const multiplier = counterPercent > 0 ? 1 + counterPercent / 100 : 1.15;
+  const reactionDamage = Math.floor(baseDamage * multiplier);
 
   // Оновлюємо defender (іммутабельно)
   const updatedDefender: BattleParticipant = {

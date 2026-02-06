@@ -229,7 +229,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    
+    const { searchParams } = new URL(request.url);
+    const type = searchParams.get("type"); // "player" | "npc_hero" | null = all
+
     // Перевіряємо доступ до кампанії (не обов'язково DM)
     const accessResult = await requireCampaignAccess(id, false);
 
@@ -237,10 +239,15 @@ export async function GET(
       return accessResult;
     }
 
+    const where: { campaignId: string; type?: "player" | "npc_hero" } = {
+      campaignId: id,
+    };
+    if (type === "player" || type === "npc_hero") {
+      where.type = type;
+    }
+
     const characters = await prisma.character.findMany({
-      where: {
-        campaignId: id,
-      },
+      where,
       include: {
         user: true,
         inventory: true,
@@ -253,6 +260,40 @@ export async function GET(
     return NextResponse.json(characters);
   } catch (error) {
     console.error("Error fetching characters:", error);
+
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+
+    const accessResult = await requireDM(id);
+
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
+    }
+
+    const result = await prisma.character.deleteMany({
+      where: {
+        campaignId: id,
+        type: "player",
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      deleted: result.count,
+    });
+  } catch (error) {
+    console.error("Error deleting all characters:", error);
 
     return NextResponse.json(
       { error: "Internal server error" },

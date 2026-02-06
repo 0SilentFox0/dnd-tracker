@@ -19,6 +19,25 @@ export enum ParticipantSide {
 }
 
 /**
+ * Статус учасника в бою (combatStats.status)
+ */
+export const CombatStatus = {
+  ACTIVE: "active",
+  UNCONSCIOUS: "unconscious",
+  DEAD: "dead",
+} as const;
+
+export type CombatStatusType = (typeof CombatStatus)[keyof typeof CombatStatus];
+
+/**
+ * Раси з особливою логікою в бою (мораль, перевірки)
+ */
+export const BATTLE_RACE = {
+  HUMAN: "human",
+  NECROMANCER: "necromancer",
+} as const;
+
+/**
  * Глобальні константи бою
  */
 export const BATTLE_CONSTANTS = {

@@ -12,24 +12,32 @@ interface SkillSpellSelectorProps {
   spellId: string | null;
   spells: SpellOption[];
   onSpellIdChange: (value: string | null) => void;
+  label?: string;
+  placeholder?: string;
+  noneLabel?: string;
+  id?: string;
 }
 
 export function SkillSpellSelector({
   spellId,
   spells,
   onSpellIdChange,
+  label = "Покращення спела",
+  placeholder = "Без спела",
+  noneLabel = "Без спела",
+  id = "skill-spell",
 }: SkillSpellSelectorProps) {
   return (
     <div className="space-y-2">
-      <Label htmlFor="skill-spell">Покращення спела</Label>
+      <Label htmlFor={id}>{label}</Label>
       <SelectField
-        id="skill-spell"
+        id={id}
         value={spellId || ""}
         onValueChange={(value) => onSpellIdChange(value || null)}
-        placeholder="Без спела"
-        options={spells.map(spell => ({ value: spell.id, label: spell.name }))}
+        placeholder={placeholder}
+        options={spells.map((spell) => ({ value: spell.id, label: spell.name }))}
         allowNone
-        noneLabel="Без спела"
+        noneLabel={noneLabel}
       />
     </div>
   );

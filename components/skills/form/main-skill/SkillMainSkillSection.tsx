@@ -33,7 +33,7 @@ export function SkillMainSkillSection({
           value={mainSkillId || ""}
           onValueChange={(value) => setters.setMainSkillId(value || null)}
           placeholder="Без основного навику"
-          options={mainSkills.map(skill => ({ value: skill.id, label: skill.name }))}
+          options={mainSkills.map((skill) => ({ value: skill.id, label: skill.name }))}
           allowNone
           noneLabel="Без основного навику"
         />

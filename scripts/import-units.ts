@@ -278,8 +278,8 @@ async function main() {
       speed: unit.speed,
       maxHp: unit.maxHp,
       proficiencyBonus: unit.proficiencyBonus,
-      attacks: unit.attacks as any,
-      specialAbilities: unit.specialAbilities as any,
+      attacks: unit.attacks as unknown as Prisma.InputJsonValue,
+      specialAbilities: unit.specialAbilities as unknown as Prisma.InputJsonValue,
       knownSpells: unit.knownSpells,
       avatar: unit.avatar || null,
     };

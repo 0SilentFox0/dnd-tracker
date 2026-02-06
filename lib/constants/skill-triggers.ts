@@ -22,6 +22,7 @@ export enum TriggerType {
 export enum TriggerTarget {
   ALLY = "ally",
   ENEMY = "enemy",
+  SELF = "self",
 }
 
 /**
@@ -35,7 +36,7 @@ export enum TriggerValueType {
 /**
  * Опції для простих тригерів
  */
-export const SIMPLE_TRIGGER_OPTIONS: {
+export const SIMPLE_TRIGGER_OPTIONS: readonly {
   value: SimpleSkillTrigger;
   label: string;
 }[] = [
@@ -52,10 +53,44 @@ export const SIMPLE_TRIGGER_OPTIONS: {
   { value: "bonusAction", label: "Бонусна дія" },
 ] as const;
 
+/** Лейбли для всіх простих тригерів (опції + додаткові для списку) */
+const SIMPLE_TRIGGER_LABELS: Record<string, string> = {
+  startRound: "Початок раунду",
+  endRound: "Кінець раунду",
+  beforeOwnerAttack: "Перед атакою власника",
+  beforeEnemyAttack: "Перед атакою ворога",
+  afterOwnerAttack: "Після атаки власника",
+  afterEnemyAttack: "Після атаки ворога",
+  beforeOwnerSpellCast: "Перед кастом заклинання власника",
+  afterOwnerSpellCast: "Після касту заклинання власника",
+  beforeEnemySpellCast: "Перед кастом заклинання ворога",
+  afterEnemySpellCast: "Після касту заклинання ворога",
+  bonusAction: "Бонусна дія",
+  passive: "Пасивний",
+  onBattleStart: "На початку бою",
+  onHit: "При влучанні",
+  onAttack: "При атаці",
+  onKill: "При вбивстві",
+  onAllyDeath: "При смерті союзника",
+  onLethalDamage: "При летальній шкоді",
+  onCast: "При касті",
+  onFirstHitTakenPerRound: "Перший удар за раунд",
+  onFirstRangedAttack: "Перша дальня атака",
+  onMoraleSuccess: "При успішній моралі",
+  allyMoraleCheck: "Перевірка моралі союзника",
+};
+
+/**
+ * Повертає людино-читабельну назву простого тригера
+ */
+export function getSimpleTriggerLabel(trigger: string): string {
+  return SIMPLE_TRIGGER_LABELS[trigger] ?? trigger;
+}
+
 /**
  * Опції для операторів порівняння
  */
-export const COMPARISON_OPERATOR_OPTIONS: {
+export const COMPARISON_OPERATOR_OPTIONS: readonly {
   value: ComparisonOperator;
   label: string;
 }[] = [
@@ -69,7 +104,7 @@ export const COMPARISON_OPERATOR_OPTIONS: {
 /**
  * Опції для типів статистики
  */
-export const STAT_TYPE_OPTIONS: {
+export const STAT_TYPE_OPTIONS: readonly {
   value: StatType;
   label: string;
 }[] = [
@@ -84,18 +119,19 @@ export const STAT_TYPE_OPTIONS: {
 /**
  * Опції для цілей складних тригерів
  */
-export const TARGET_OPTIONS: {
+export const TARGET_OPTIONS: readonly {
   value: TriggerTarget;
   label: string;
 }[] = [
   { value: TriggerTarget.ALLY, label: "Союзник" },
   { value: TriggerTarget.ENEMY, label: "Ворог" },
+  { value: TriggerTarget.SELF, label: "Герой" },
 ] as const;
 
 /**
  * Опції для типів значень
  */
-export const VALUE_TYPE_OPTIONS: {
+export const VALUE_TYPE_OPTIONS: readonly {
   value: TriggerValueType;
   label: string;
 }[] = [

@@ -2,6 +2,7 @@
  * Типи для React hooks
  */
 
+import type { SkillEffect } from "./battle";
 import type { SkillTriggers } from "./skill-triggers";
 
 import type { SpellEnhancementType } from "@/lib/constants/spell-enhancement";
@@ -12,8 +13,6 @@ export interface GroupedSkillPayload {
     name: string;
     description?: string;
     icon?: string;
-    races: string[];
-    isRacial: boolean;
   };
   bonuses: Record<string, number>;
   combatStats: {
@@ -24,10 +23,12 @@ export interface GroupedSkillPayload {
     magicalResistance?: number;
     min_targets?: number;
     max_targets?: number;
+    effects?: SkillEffect[];
   };
   spellData: {
     spellId?: string;
     spellGroupId?: string;
+    grantedSpellId?: string;
   };
   spellEnhancementData: {
     spellEnhancementTypes?: SpellEnhancementType[];

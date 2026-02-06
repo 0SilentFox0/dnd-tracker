@@ -1,28 +1,26 @@
 /**
- * Утиліти для перевірки тригерів пасивних здібностей
+ * Утиліти для перевірки тригерів пасивних здібностей (PassiveAbility).
+ * Для тригерів скілів (ActiveSkill.skillTriggers) використовуйте skill-triggers.ts.
+ * Спільний контекст: lib/utils/battle/trigger-context.ts
  */
 
 import { hasAnyAllyLowHp } from "./battle-participant-helpers";
 
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
+import type { TriggerContextBase } from "./trigger-context";
 import { BattleParticipant, PassiveAbility } from "@/types/battle";
 
 /**
  * Перевіряє чи виконана умова тригера
  * @param trigger - тригер з умовою
  * @param participant - учасник бою
- * @param context - додатковий контекст для перевірки умов
+ * @param context - додатковий контекст для перевірки умов (TriggerContextBase)
  * @returns true якщо тригер має спрацювати
  */
 export function checkTriggerCondition(
   trigger: PassiveAbility["trigger"],
   participant: BattleParticipant,
-  context?: {
-    target?: BattleParticipant;
-    allParticipants?: BattleParticipant[];
-    damage?: number;
-    currentRound?: number;
-  }
+  context?: TriggerContextBase
 ): boolean {
   // Завжди активні здібності
   if (trigger.type === "always") {
@@ -75,11 +73,7 @@ export function getPassiveAbilitiesByTrigger(
 export function evaluateCondition(
   condition: string,
   participant: BattleParticipant,
-  context?: {
-    target?: BattleParticipant;
-    allParticipants?: BattleParticipant[];
-    damage?: number;
-  }
+  context?: TriggerContextBase
 ): boolean {
   // Базова реалізація для найпоширеніших умов
   // В майбутньому можна розширити для складніших виразів

@@ -1,125 +1,9 @@
 {
 "meta": {
 "version": "1.0",
-"description": "Unified skill database"
+"description": "Unified skill database. У кожного скіла: category — код категорії (Attack, MagicDark тощо), mainSkill — канонічна назва базового навику в UI (Напад, Магія Темряви). Аліаси типу «Темна Магія» зводяться до «Магія Темряви» через lib/constants/main-skills.ts."
 },
 "skills": [
-
-    /* ========================= */
-    /* ======= ATTACK ========== */
-    /* ========================= */
-
-    {
-      "id": "attack_basic",
-      "category": "Attack",
-      "tier": "Basic",
-      "name": "Напад — Базовий",
-      "effects": [
-        { "stat": "melee_damage", "type": "percent", "value": 15 }
-      ],
-      "spells": [],
-      "trigger": "passive"
-    },
-    {
-      "id": "attack_advanced",
-      "category": "Attack",
-      "tier": "Advanced",
-      "name": "Напад — Просунутий",
-      "effects": [
-        { "stat": "melee_damage", "type": "percent", "value": 25 }
-      ],
-      "spells": [],
-      "trigger": "passive"
-    },
-    {
-      "id": "attack_expert",
-      "category": "Attack",
-      "tier": "Expert",
-      "name": "Напад — Експерт",
-      "effects": [
-        { "stat": "melee_damage", "type": "percent", "value": 40 }
-      ],
-      "spells": [],
-      "trigger": "passive"
-    },
-    {
-      "id": "cleaving_strike",
-      "category": "Attack",
-      "tier": 1,
-      "name": "Рублячий удар",
-      "effects": [
-        { "stat": "bleed_damage", "type": "dice", "value": "1d4", "duration": 2 }
-      ],
-      "spells": [],
-      "trigger": "onHit && rand() < 0.4"
-    },
-    {
-      "id": "stunning_strike",
-      "category": "Attack",
-      "tier": 1,
-      "name": "Оглушаючий удар",
-      "effects": [
-        { "stat": "initiative", "type": "flat", "value": -2, "duration": 1 }
-      ],
-      "spells": [],
-      "trigger": "onHit && rand() < 0.4"
-    },
-    {
-      "id": "armor_break",
-      "category": "Attack",
-      "tier": 1,
-      "name": "Пошкодження броні",
-      "effects": [
-        { "stat": "armor", "type": "flat", "value": -1 }
-      ],
-      "spells": [],
-      "trigger": "onHit && rand() < 0.4"
-    },
-    {
-      "id": "tenacity",
-      "category": "Attack",
-      "tier": 2,
-      "name": "Завзятість",
-      "effects": [
-        { "stat": "damage", "type": "flat", "value": 3, "duration": 1 },
-        { "stat": "armor", "type": "flat", "value": -1, "duration": 1 }
-      ],
-      "spells": [],
-      "trigger": "bonusAction"
-    },
-    {
-      "id": "piercing_strike",
-      "category": "Attack",
-      "tier": 2,
-      "name": "Пробивний удар",
-      "effects": [
-        { "stat": "damage_resistance", "type": "ignore", "value": true }
-      ],
-      "spells": [],
-      "trigger": "onHit"
-    },
-    {
-      "id": "sequence",
-      "category": "Attack",
-      "tier": 2,
-      "name": "Послідовність",
-      "effects": [
-        { "stat": "damage", "type": "stack", "value": 2 }
-      ],
-      "spells": [],
-      "trigger": "onHit"
-    },
-    {
-      "id": "reward",
-      "category": "Attack",
-      "tier": 3,
-      "name": "Нагорода",
-      "effects": [
-        { "stat": "actions", "type": "flat", "value": 1 }
-      ],
-      "spells": [],
-      "trigger": "onKill"
-    },
 
     /* ========================= */
     /* ===== RACE SKILLS ======= */
@@ -128,108 +12,127 @@
     {
       "id": "race_human_counter_basic",
       "category": "Race",
+      "mainSkill": "Раса",
       "tier": "Basic",
       "name": "Контр-атака — Люди",
       "effects": [
         { "stat": "counter_damage", "type": "percent", "value": 15 }
       ],
       "spells": [],
-      "trigger": "onFirstHitTakenPerRound"
+      "trigger": "onFirstHitTakenPerRound",
+      "image": ""
     },
     {
       "id": "race_human_counter_advanced",
       "category": "Race",
+      "mainSkill": "Раса",
       "tier": "Advanced",
       "name": "Контр-атака — Люди",
       "effects": [
         { "stat": "counter_damage", "type": "percent", "value": 25 }
       ],
       "spells": [],
-      "trigger": "onFirstHitTakenPerRound"
+      "trigger": "onFirstHitTakenPerRound",
+      "image": ""
     },
     {
       "id": "race_human_counter_expert",
       "category": "Race",
+      "mainSkill": "Раса",
       "tier": "Expert",
       "name": "Контр-атака — Люди",
       "effects": [
         { "stat": "counter_damage", "type": "percent", "value": 40 }
       ],
       "spells": [],
-      "trigger": "onFirstHitTakenPerRound"
+      "trigger": "onFirstHitTakenPerRound",
+      "image": ""
     },
 
     {
       "id": "race_demon_gate_basic",
       "category": "Race",
+      "mainSkill": "Раса",
       "tier": "Basic",
       "name": "Відкриття воріт — Демони",
       "effects": [
         { "stat": "summon_tier", "type": "flat", "value": 1 }
       ],
       "spells": [],
-      "trigger": "bonusAction"
+      "trigger": "bonusAction",
+      "image": ""
     },
     {
       "id": "race_demon_gate_advanced",
       "category": "Race",
+      "mainSkill": "Раса",
       "tier": "Advanced",
       "name": "Відкриття воріт — Демони",
       "effects": [
         { "stat": "summon_tier", "type": "flat", "value": 3 }
       ],
       "spells": [],
-      "trigger": "bonusAction"
+      "trigger": "bonusAction",
+      "image": ""
     },
     {
       "id": "race_demon_gate_expert",
       "category": "Race",
+      "mainSkill": "Раса",
       "tier": "Expert",
       "name": "Відкриття воріт — Демони",
       "effects": [
         { "stat": "summon_tier", "type": "flat", "value": 6 }
       ],
       "spells": [],
-      "trigger": "bonusAction"
+      "trigger": "bonusAction",
+      "image": ""
     },
 
     {
       "id": "race_elf_hunter_basic",
       "category": "Race",
+      "mainSkill": "Раса",
       "tier": "Basic",
       "name": "Мисливець — Ельфи",
       "effects": [
         { "stat": "marked_targets", "type": "flat", "value": 1 }
       ],
       "spells": [],
-      "trigger": "bonusAction"
+      "trigger": "bonusAction",
+      "image": ""
     },
     {
       "id": "race_elf_hunter_advanced",
       "category": "Race",
+      "mainSkill": "Раса",
       "tier": "Advanced",
       "name": "Мисливець — Ельфи",
       "effects": [
         { "stat": "marked_targets", "type": "flat", "value": 2 }
       ],
       "spells": [],
-      "trigger": "bonusAction"
+      "trigger": "bonusAction",
+      "image": ""
     },
     {
       "id": "race_elf_hunter_expert",
       "category": "Race",
+      "mainSkill": "Раса",
       "tier": "Expert",
       "name": "Мисливець — Ельфи",
       "effects": [
         { "stat": "marked_targets", "type": "flat", "value": 3 }
       ],
       "spells": [],
-      "trigger": "bonusAction"
+      "trigger": "bonusAction",
+      "image": ""
     },
 
     {
       "id": "race_necromancer_raise_basic",
       "category": "Race",
+      "mainSkill": "Раса",
       "tier": "Basic",
       "name": "Підняття мертвих",
       "effects": [
@@ -237,65 +140,1056 @@
         { "stat": "resurrect_hp", "type": "percent", "value": -10 }
       ],
       "spells": [],
-      "trigger": "onCast"
+      "trigger": "onCast",
+      "image": ""
     },
 
     {
       "id": "race_mage_omniscience_basic",
       "category": "Race",
+      "mainSkill": "Раса",
       "tier": "Basic",
       "name": "Всезнання",
       "effects": [
         { "stat": "spell_slots_lvl4_5", "type": "flat", "value": 1 }
       ],
       "spells": [],
-      "trigger": "passive"
+      "trigger": "passive",
+      "image": ""
     },
     {
       "id": "race_mage_omniscience_advanced",
       "category": "Race",
+      "mainSkill": "Раса",
       "tier": "Advanced",
       "name": "Всезнання",
       "effects": [
         { "stat": "spell_slots_lvl4_5", "type": "flat", "value": 2 }
       ],
       "spells": [],
-      "trigger": "passive"
+      "trigger": "passive",
+      "image": ""
     },
     {
       "id": "race_mage_omniscience_expert",
       "category": "Race",
+      "mainSkill": "Раса",
       "tier": "Expert",
       "name": "Всезнання",
       "effects": [
         { "stat": "spell_slots_lvl4_5", "type": "flat", "value": 3 }
       ],
       "spells": [],
-      "trigger": "passive"
+      "trigger": "passive",
+      "image": ""
     },
 
     {
       "id": "race_darkelf_bloodlust_basic",
       "category": "Race",
+      "mainSkill": "Раса",
       "tier": "Basic",
       "name": "Жага крові",
       "effects": [
         { "stat": "damage", "type": "formula", "value": "3 * floor(lost_hp_percent / 10)" }
       ],
       "spells": [],
-      "trigger": "passive"
+      "trigger": "passive",
+      "image": ""
     },
 
     {
       "id": "race_gnome_rune_armor_basic",
       "category": "Race",
+      "mainSkill": "Раса",
       "tier": "Basic",
       "name": "Рунна броня",
       "effects": [
         { "stat": "all_resistance", "type": "percent", "value": 10 }
       ],
       "spells": [],
-      "trigger": "passive"
+      "trigger": "passive",
+      "image": ""
+    },
+
+    /* ========================= */
+    /* ======= НАПАД =========== */
+    /* ========================= */
+
+    {
+      "id": "attack_melee_basic",
+      "category": "Attack",
+      "mainSkill": "Напад",
+      "tier": "Basic",
+      "name": "Напад — Базовий",
+      "effects": [
+        { "stat": "melee_damage", "type": "percent", "value": 15 }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+    {
+      "id": "attack_melee_advanced",
+      "category": "Attack",
+      "mainSkill": "Напад",
+      "tier": "Advanced",
+      "name": "Напад — Просунутий",
+      "effects": [
+        { "stat": "melee_damage", "type": "percent", "value": 25 }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+    {
+      "id": "attack_melee_expert",
+      "category": "Attack",
+      "mainSkill": "Напад",
+      "tier": "Expert",
+      "name": "Напад — Експерт",
+      "effects": [
+        { "stat": "melee_damage", "type": "percent", "value": 40 }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+    {
+      "id": "attack_cleaving_strike",
+      "category": "Attack",
+      "mainSkill": "Напад",
+      "tier": 1,
+      "name": "Рублячий удар",
+      "effects": [
+        { "stat": "bleed_damage", "type": "dice", "value": "1d4", "duration": 2 }
+      ],
+      "spells": [],
+      "trigger": "onHit && rand() < 0.4",
+      "image": ""
+    },
+    {
+      "id": "attack_stunning_strike",
+      "category": "Attack",
+      "mainSkill": "Напад",
+      "tier": 1,
+      "name": "Оглушаючий удар",
+      "effects": [
+        { "stat": "initiative", "type": "flat", "value": -2, "duration": 1 }
+      ],
+      "spells": [],
+      "trigger": "onHit && rand() < 0.4",
+      "image": ""
+    },
+    {
+      "id": "attack_armor_break",
+      "category": "Attack",
+      "mainSkill": "Напад",
+      "tier": 1,
+      "name": "Пошкодження броні",
+      "effects": [
+        { "stat": "armor", "type": "flat", "value": -1, "duration": 1 }
+      ],
+      "spells": [],
+      "trigger": "onHit && rand() < 0.4",
+      "image": ""
+    },
+    {
+      "id": "attack_piercing_strike",
+      "category": "Attack",
+      "mainSkill": "Напад",
+      "tier": 2,
+      "name": "Пробивний удар",
+      "effects": [
+        { "stat": "damage_resistance", "type": "ignore", "value": true }
+      ],
+      "spells": [],
+      "trigger": "onHit",
+      "image": ""
+    },
+    {
+      "id": "attack_sequence",
+      "category": "Attack",
+      "mainSkill": "Напад",
+      "tier": 2,
+      "name": "Послідовність",
+      "effects": [
+        { "stat": "damage", "type": "stack", "value": 2 }
+      ],
+      "spells": [],
+      "trigger": "onHit",
+      "image": ""
+    },
+    {
+      "id": "attack_reward",
+      "category": "Attack",
+      "mainSkill": "Напад",
+      "tier": 3,
+      "name": "Нагорода",
+      "effects": [
+        { "stat": "actions", "type": "flat", "value": 1 }
+      ],
+      "spells": [],
+      "trigger": "onKill && oncePerBattle",
+      "image": ""
+    },
+
+    /* ========================= */
+    /* ===== СТРІЛЬБА ========== */
+    /* ========================= */
+
+    {
+      "id": "ranged_basic",
+      "category": "Ranged",
+      "mainSkill": "Стрільба",
+      "tier": "Basic",
+      "name": "Стрільба — Базовий",
+      "effects": [
+        { "stat": "ranged_damage", "type": "percent", "value": 15 }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+    {
+      "id": "ranged_advanced",
+      "category": "Ranged",
+      "mainSkill": "Стрільба",
+      "tier": "Advanced",
+      "name": "Стрільба — Просунутий",
+      "effects": [
+        { "stat": "ranged_damage", "type": "percent", "value": 25 }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+    {
+      "id": "ranged_expert",
+      "category": "Ranged",
+      "mainSkill": "Стрільба",
+      "tier": "Expert",
+      "name": "Стрільба — Експерт",
+      "effects": [
+        { "stat": "ranged_damage", "type": "percent", "value": 40 }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+    {
+      "id": "ranged_wounding_shot",
+      "category": "Ranged",
+      "mainSkill": "Стрільба",
+      "tier": 1,
+      "name": "Травмуючий постріл",
+      "effects": [
+        { "stat": "speed", "type": "percent", "value": -50, "duration": 1 }
+      ],
+      "spells": [],
+      "trigger": "onHit && rand() < 0.4",
+      "image": ""
+    },
+    {
+      "id": "ranged_armor_piercing",
+      "category": "Ranged",
+      "mainSkill": "Стрільба",
+      "tier": 1,
+      "name": "Бронебійний снаряд",
+      "effects": [
+        { "stat": "armor", "type": "flat", "value": -1, "duration": 1 }
+      ],
+      "spells": [],
+      "trigger": "onHit && rand() < 0.4",
+      "image": ""
+    },
+    {
+      "id": "ranged_deflecting_arrow",
+      "category": "Ranged",
+      "mainSkill": "Стрільба",
+      "tier": 1,
+      "name": "Відбиваюча стріла",
+      "effects": [
+        { "stat": "initiative", "type": "flat", "value": -2, "duration": 1 }
+      ],
+      "spells": [],
+      "trigger": "onHit && rand() < 0.4",
+      "image": ""
+    },
+    {
+      "id": "ranged_bullseye",
+      "category": "Ranged",
+      "mainSkill": "Стрільба",
+      "tier": 2,
+      "name": "В яблучко",
+      "effects": [
+        { "stat": "guaranteed_hit", "type": "flag", "value": true }
+      ],
+      "spells": [],
+      "trigger": "onHit && oncePerBattle",
+      "image": ""
+    },
+    {
+      "id": "ranged_arrow_cloud",
+      "category": "Ranged",
+      "mainSkill": "Стрільба",
+      "tier": 2,
+      "name": "Хмара стріл",
+      "effects": [
+        { "stat": "area_damage", "type": "percent", "value": 40 },
+        { "stat": "area_cells", "type": "flat", "value": 9 }
+      ],
+      "spells": [],
+      "trigger": "onHit && rand() < 0.4",
+      "image": ""
+    },
+    {
+      "id": "ranged_double_target",
+      "category": "Ranged",
+      "mainSkill": "Стрільба",
+      "tier": 3,
+      "name": "Постріл по 2 цілям",
+      "effects": [
+        { "stat": "max_targets", "type": "flat", "value": 2 }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+
+    /* ========================= */
+    /* ===== ЗАХИСТ ============ */
+    /* ========================= */
+
+    {
+      "id": "defense_basic",
+      "category": "Defense",
+      "mainSkill": "Захист",
+      "tier": "Basic",
+      "name": "Захист — Базовий",
+      "effects": [
+        { "stat": "physical_resistance", "type": "percent", "value": 10 }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+    {
+      "id": "defense_advanced",
+      "category": "Defense",
+      "mainSkill": "Захист",
+      "tier": "Advanced",
+      "name": "Захист — Просунутий",
+      "effects": [
+        { "stat": "physical_resistance", "type": "percent", "value": 20 }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+    {
+      "id": "defense_expert",
+      "category": "Defense",
+      "mainSkill": "Захист",
+      "tier": "Expert",
+      "name": "Захист — Експерт",
+      "effects": [
+        { "stat": "physical_resistance", "type": "percent", "value": 30 }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+    {
+      "id": "defense_tenacity",
+      "category": "Defense",
+      "mainSkill": "Захист",
+      "tier": 1,
+      "name": "Стійкість",
+      "effects": [
+        { "stat": "hp_bonus", "type": "formula", "value": "2 * hero_level" }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+    {
+      "id": "defense_defiance",
+      "category": "Defense",
+      "mainSkill": "Захист",
+      "tier": 1,
+      "name": "Супротив",
+      "effects": [
+        { "stat": "clear_negative_effects", "type": "flag", "value": true }
+      ],
+      "spells": [],
+      "trigger": "allyHP <= 0.15 && oncePerBattle",
+      "image": ""
+    },
+    {
+      "id": "defense_redirection",
+      "category": "Defense",
+      "mainSkill": "Захист",
+      "tier": 1,
+      "name": "Перенаправлення",
+      "effects": [
+        { "stat": "redirect_physical_damage", "type": "percent", "value": 50 }
+      ],
+      "spells": [],
+      "trigger": "bonusAction",
+      "image": ""
+    },
+    {
+      "id": "defense_last_stand",
+      "category": "Defense",
+      "mainSkill": "Захист",
+      "tier": 2,
+      "name": "Битва до останнього",
+      "effects": [
+        { "stat": "survive_lethal", "type": "flat", "value": 1 }
+      ],
+      "spells": [],
+      "trigger": "onLethalDamage && oncePerBattle",
+      "image": ""
+    },
+    {
+      "id": "defense_magic_ward",
+      "category": "Defense",
+      "mainSkill": "Захист",
+      "tier": 2,
+      "name": "Магічний захист",
+      "effects": [
+        { "stat": "spell_resistance", "type": "percent", "value": 15 }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+    {
+      "id": "defense_readiness",
+      "category": "Defense",
+      "mainSkill": "Захист",
+      "tier": 3,
+      "name": "Готовність",
+      "effects": [
+        { "stat": "attack_before_enemy", "type": "flag", "value": true }
+      ],
+      "spells": [],
+      "trigger": "beforeEnemyAttack",
+      "image": ""
+    },
+
+    /* ========================= */
+    /* ===== МАГІЯ СВІТЛА ====== */
+    /* ========================= */
+
+    {
+      "id": "magic_light_basic",
+      "category": "MagicLight",
+      "mainSkill": "Магія Світла",
+      "tier": "Basic",
+      "name": "Магія Світла — Базовий",
+      "effects": [
+        { "stat": "spell_levels", "type": "flat", "value": 2 }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+    {
+      "id": "magic_light_advanced",
+      "category": "MagicLight",
+      "mainSkill": "Магія Світла",
+      "tier": "Advanced",
+      "name": "Магія Світла — Просунутий",
+      "effects": [
+        { "stat": "spell_levels", "type": "flat", "value": 4 }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+    {
+      "id": "magic_light_expert",
+      "category": "MagicLight",
+      "mainSkill": "Магія Світла",
+      "tier": "Expert",
+      "name": "Магія Світла — Експерт",
+      "effects": [
+        { "stat": "spell_levels", "type": "flat", "value": 5 }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+    {
+      "id": "magic_light_wrath",
+      "category": "MagicLight",
+      "mainSkill": "Магія Світла",
+      "tier": 1,
+      "name": "Гнів праведний",
+      "effects": [
+        { "stat": "spell_area", "type": "flag", "value": true }
+      ],
+      "spells": ["Караючий удар", "Прискорення"],
+      "trigger": "onCast",
+      "image": ""
+    },
+    {
+      "id": "magic_light_protection",
+      "category": "MagicLight",
+      "mainSkill": "Магія Світла",
+      "tier": 1,
+      "name": "Даруючий захист",
+      "effects": [
+        { "stat": "spell_area", "type": "flag", "value": true }
+      ],
+      "spells": ["Ухилення", "Кам'яна шкіра"],
+      "trigger": "onCast",
+      "image": ""
+    },
+    {
+      "id": "magic_light_blessing",
+      "category": "MagicLight",
+      "mainSkill": "Магія Світла",
+      "tier": 1,
+      "name": "Даруючий Благословення",
+      "effects": [
+        { "stat": "spell_area", "type": "flag", "value": true }
+      ],
+      "spells": ["Божественна сила", "Зняття чар"],
+      "trigger": "onCast",
+      "image": ""
+    },
+    {
+      "id": "magic_light_eternal_light",
+      "category": "MagicLight",
+      "mainSkill": "Магія Світла",
+      "tier": 2,
+      "name": "Вічне світло",
+      "effects": [
+        { "stat": "heal", "type": "formula", "value": "2d6 + hero_level" }
+      ],
+      "spells": [],
+      "trigger": "onCast",
+      "image": ""
+    },
+    {
+      "id": "magic_light_banishment",
+      "category": "MagicLight",
+      "mainSkill": "Магія Світла",
+      "tier": 2,
+      "name": "Вигнання",
+      "effects": [
+        { "stat": "enemy_summon_damage", "type": "percent", "value": 50 }
+      ],
+      "spells": [],
+      "trigger": "onCast",
+      "image": ""
+    },
+    {
+      "id": "magic_light_all_allies",
+      "category": "MagicLight",
+      "mainSkill": "Магія Світла",
+      "tier": 3,
+      "name": "Всі заклинання світла на союзників",
+      "effects": [
+        { "stat": "light_spells_target_all_allies", "type": "flag", "value": true }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+
+    /* ========================= */
+    /* ===== МАГІЯ ТЕМРЯВИ ===== */
+    /* ========================= */
+
+    {
+      "id": "magic_dark_basic",
+      "category": "MagicDark",
+      "mainSkill": "Магія Темряви",
+      "tier": "Basic",
+      "name": "Магія Темряви — Базовий",
+      "effects": [
+        { "stat": "spell_levels", "type": "flat", "value": 2 }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+    {
+      "id": "magic_dark_advanced",
+      "category": "MagicDark",
+      "mainSkill": "Магія Темряви",
+      "tier": "Advanced",
+      "name": "Магія Темряви — Просунутий",
+      "effects": [
+        { "stat": "spell_levels", "type": "flat", "value": 4 }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+    {
+      "id": "magic_dark_expert",
+      "category": "MagicDark",
+      "mainSkill": "Магія Темряви",
+      "tier": "Expert",
+      "name": "Магія Темряви — Експерт",
+      "effects": [
+        { "stat": "spell_levels", "type": "flat", "value": 5 }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+    {
+      "id": "magic_dark_lord_pain",
+      "category": "MagicDark",
+      "mainSkill": "Магія Темряви",
+      "tier": 1,
+      "name": "Повелитель болі",
+      "effects": [
+        { "stat": "spell_area", "type": "flag", "value": true }
+      ],
+      "spells": ["Чума", "Промінь Руйнації"],
+      "trigger": "onCast",
+      "image": ""
+    },
+    {
+      "id": "magic_dark_lord_mind",
+      "category": "MagicDark",
+      "mainSkill": "Магія Темряви",
+      "tier": 1,
+      "name": "Повелитель розуму",
+      "effects": [
+        { "stat": "spell_area", "type": "flag", "value": true }
+      ],
+      "spells": ["Сповільнення", "Розсіяність"],
+      "trigger": "onCast",
+      "image": ""
+    },
+    {
+      "id": "magic_dark_lord_curse",
+      "category": "MagicDark",
+      "mainSkill": "Магія Темряви",
+      "tier": 1,
+      "name": "Повелитель Проклять",
+      "effects": [
+        { "stat": "spell_area", "type": "flag", "value": true }
+      ],
+      "spells": ["Ослаблення", "Немічність"],
+      "trigger": "onCast",
+      "image": ""
+    },
+    {
+      "id": "magic_dark_death_march",
+      "category": "MagicDark",
+      "mainSkill": "Магія Темряви",
+      "tier": 2,
+      "name": "Поступ смерті",
+      "effects": [
+        { "stat": "dark_spell_damage", "type": "percent", "value": 25 }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+    {
+      "id": "magic_dark_devourer",
+      "category": "MagicDark",
+      "mainSkill": "Магія Темряви",
+      "tier": 2,
+      "name": "Пожирач",
+      "effects": [
+        { "stat": "restore_spell_slot", "type": "flat", "value": 1 }
+      ],
+      "spells": [],
+      "trigger": "bonusAction && onConsumeDead",
+      "image": ""
+    },
+    {
+      "id": "magic_dark_master",
+      "category": "MagicDark",
+      "mainSkill": "Магія Темряви",
+      "tier": 3,
+      "name": "Майстер темряви",
+      "effects": [
+        { "stat": "spell_targets_lvl4_5", "type": "flat", "value": 2 }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+
+    /* ========================= */
+    /* ===== МАГІЯ ХАОСУ ====== */
+    /* ========================= */
+
+    {
+      "id": "magic_chaos_basic",
+      "category": "MagicChaos",
+      "mainSkill": "Магія Хаосу",
+      "tier": "Basic",
+      "name": "Магія Хаосу — Базовий",
+      "effects": [
+        { "stat": "spell_levels", "type": "flat", "value": 2 }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+    {
+      "id": "magic_chaos_advanced",
+      "category": "MagicChaos",
+      "mainSkill": "Магія Хаосу",
+      "tier": "Advanced",
+      "name": "Магія Хаосу — Просунутий",
+      "effects": [
+        { "stat": "spell_levels", "type": "flat", "value": 4 }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+    {
+      "id": "magic_chaos_expert",
+      "category": "MagicChaos",
+      "mainSkill": "Магія Хаосу",
+      "tier": "Expert",
+      "name": "Магія Хаосу — Експерт",
+      "effects": [
+        { "stat": "spell_levels", "type": "flat", "value": 5 }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+    {
+      "id": "magic_chaos_lord_storm",
+      "category": "MagicChaos",
+      "mainSkill": "Магія Хаосу",
+      "tier": 1,
+      "name": "Повелитель бурі",
+      "effects": [
+        { "stat": "initiative", "type": "flat", "value": -5, "duration": 1 }
+      ],
+      "spells": ["Блискавка", "Ланцюгова блискавка"],
+      "trigger": "onCast",
+      "image": ""
+    },
+    {
+      "id": "magic_chaos_lord_fire",
+      "category": "MagicChaos",
+      "mainSkill": "Магія Хаосу",
+      "tier": 1,
+      "name": "Повелитель вогню",
+      "effects": [
+        { "stat": "armor_reduction", "type": "percent", "value": 30, "duration": 1 }
+      ],
+      "spells": ["Вогняний шар", "Стіна Вогню", "Армагедон"],
+      "trigger": "onCast",
+      "image": ""
+    },
+    {
+      "id": "magic_chaos_lord_cold",
+      "category": "MagicChaos",
+      "mainSkill": "Магія Хаосу",
+      "tier": 1,
+      "name": "Повелитель холоду",
+      "effects": [
+        { "stat": "speed", "type": "percent", "value": -50, "duration": 1 }
+      ],
+      "spells": ["Льодяна Брила", "Кільце Холоду", "Зупиняючий холод"],
+      "trigger": "onCast",
+      "image": ""
+    },
+    {
+      "id": "magic_chaos_mana_burst",
+      "category": "MagicChaos",
+      "mainSkill": "Магія Хаосу",
+      "tier": 2,
+      "name": "Вибух мани",
+      "effects": [
+        { "stat": "caster_self_damage", "type": "percent", "value": 100 }
+      ],
+      "spells": [],
+      "trigger": "bonusAction && rand() < 0.5 && twicePerBattle",
+      "image": ""
+    },
+    {
+      "id": "magic_chaos_infernal_power",
+      "category": "MagicChaos",
+      "mainSkill": "Магія Хаосу",
+      "tier": 2,
+      "name": "Пекельна сила",
+      "effects": [
+        { "stat": "chaos_spell_damage", "type": "percent", "value": 25 }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+    {
+      "id": "magic_chaos_pyrokinesis",
+      "category": "MagicChaos",
+      "mainSkill": "Магія Хаосу",
+      "tier": 3,
+      "name": "Пірокінез",
+      "effects": [
+        { "stat": "burn_damage", "type": "dice", "value": "2d6", "duration": 3 }
+      ],
+      "spells": [],
+      "trigger": "onCast",
+      "image": ""
+    },
+
+    /* ========================= */
+    /* ===== МАГІЯ ПРИЗИВУ ===== */
+    /* ========================= */
+
+    {
+      "id": "magic_summon_basic",
+      "category": "MagicSummon",
+      "mainSkill": "Магія Призиву",
+      "tier": "Basic",
+      "name": "Магія Призиву — Базовий",
+      "effects": [
+        { "stat": "spell_levels", "type": "flat", "value": 2 }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+    {
+      "id": "magic_summon_advanced",
+      "category": "MagicSummon",
+      "mainSkill": "Магія Призиву",
+      "tier": "Advanced",
+      "name": "Магія Призиву — Просунутий",
+      "effects": [
+        { "stat": "spell_levels", "type": "flat", "value": 4 }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+    {
+      "id": "magic_summon_expert",
+      "category": "MagicSummon",
+      "mainSkill": "Магія Призиву",
+      "tier": "Expert",
+      "name": "Магія Призиву — Експерт",
+      "effects": [
+        { "stat": "spell_levels", "type": "flat", "value": 5 }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+    {
+      "id": "magic_summon_lord_charms",
+      "category": "MagicSummon",
+      "mainSkill": "Магія Призиву",
+      "tier": 1,
+      "name": "Повелитель чар",
+      "effects": [
+        { "stat": "summon_hp", "type": "percent", "value": 25 },
+        { "stat": "summon_damage", "type": "percent", "value": 25 }
+      ],
+      "spells": ["Призив Фенікса", "Призив елементалів"],
+      "trigger": "onCast",
+      "image": ""
+    },
+    {
+      "id": "magic_summon_lord_crystal",
+      "category": "MagicSummon",
+      "mainSkill": "Магія Призиву",
+      "tier": 1,
+      "name": "Повелитель кристалу",
+      "effects": [
+        { "stat": "spell_damage", "type": "percent", "value": 25 },
+        { "stat": "spell_hp", "type": "percent", "value": 25 }
+      ],
+      "spells": ["Магічний Кристал", "Стіна Мечів", "Вогняна пастка"],
+      "trigger": "onCast",
+      "image": ""
+    },
+    {
+      "id": "magic_summon_banishment",
+      "category": "MagicSummon",
+      "mainSkill": "Магія Призиву",
+      "tier": 2,
+      "name": "Вигнання",
+      "effects": [
+        { "stat": "enemy_summon_damage", "type": "percent", "value": 50 }
+      ],
+      "spells": [],
+      "trigger": "onCast",
+      "image": ""
+    },
+    {
+      "id": "magic_summon_chosen_elemental",
+      "category": "MagicSummon",
+      "mainSkill": "Магія Призиву",
+      "tier": 2,
+      "name": "Обраний елементаль",
+      "effects": [
+        { "stat": "new_spell", "type": "flag", "value": "Призив обраного елементаля" }
+      ],
+      "spells": ["Призив обраного елементаля"],
+      "trigger": "passive",
+      "image": ""
+    },
+    {
+      "id": "magic_summon_forest_roots",
+      "category": "MagicSummon",
+      "mainSkill": "Магія Призиву",
+      "tier": 2,
+      "name": "Корені лісу",
+      "effects": [
+        { "stat": "new_spell", "type": "flag", "value": "Корені" }
+      ],
+      "spells": ["Корені"],
+      "trigger": "passive",
+      "image": ""
+    },
+    {
+      "id": "magic_summon_eternal_warriors",
+      "category": "MagicSummon",
+      "mainSkill": "Магія Призиву",
+      "tier": 3,
+      "name": "Вічні воїни",
+      "effects": [
+        { "stat": "summon_count", "type": "flat", "value": 2 }
+      ],
+      "spells": [],
+      "trigger": "onCast",
+      "image": ""
+    },
+
+    /* ========================= */
+    /* ===== ЛІДЕРСТВО ========= */
+    /* ========================= */
+
+    {
+      "id": "leadership_basic",
+      "category": "Leadership",
+      "mainSkill": "Лідерство",
+      "tier": "Basic",
+      "name": "Лідерство — Базовий",
+      "effects": [
+        { "stat": "morale", "type": "flat", "value": 1 }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+    {
+      "id": "leadership_advanced",
+      "category": "Leadership",
+      "mainSkill": "Лідерство",
+      "tier": "Advanced",
+      "name": "Лідерство — Просунутий",
+      "effects": [
+        { "stat": "morale", "type": "flat", "value": 1 }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+    {
+      "id": "leadership_expert",
+      "category": "Leadership",
+      "mainSkill": "Лідерство",
+      "tier": "Expert",
+      "name": "Лідерство — Експерт",
+      "effects": [
+        { "stat": "morale", "type": "flat", "value": 1 }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+    {
+      "id": "leadership_empathy",
+      "category": "Leadership",
+      "mainSkill": "Лідерство",
+      "tier": 1,
+      "name": "Співпереживання",
+      "effects": [
+        { "stat": "initiative", "type": "flat", "value": 1, "duration": 1 }
+      ],
+      "spells": [],
+      "trigger": "allyMoraleCheck && stackable",
+      "image": ""
+    },
+    {
+      "id": "leadership_recovery",
+      "category": "Leadership",
+      "mainSkill": "Лідерство",
+      "tier": 1,
+      "name": "Відновлення",
+      "effects": [
+        { "stat": "morale_restore", "type": "flat", "value": 0 }
+      ],
+      "spells": [],
+      "trigger": "passive && moraleNegativeNextRound",
+      "image": ""
+    },
+    {
+      "id": "leadership_vengeance",
+      "category": "Leadership",
+      "mainSkill": "Лідерство",
+      "tier": 1,
+      "name": "Відплата",
+      "effects": [
+        { "stat": "physical_damage", "type": "formula", "value": "0.05 * morale" }
+      ],
+      "spells": [],
+      "trigger": "passive",
+      "image": ""
+    },
+    {
+      "id": "leadership_inspiration",
+      "category": "Leadership",
+      "mainSkill": "Лідерство",
+      "tier": 2,
+      "name": "Натхнення",
+      "effects": [
+        { "stat": "morale", "type": "flat", "value": 1, "duration": 1 }
+      ],
+      "spells": [],
+      "trigger": "bonusAction",
+      "image": ""
+    },
+    {
+      "id": "leadership_vengeance_kill",
+      "category": "Leadership",
+      "mainSkill": "Лідерство",
+      "tier": 2,
+      "name": "Помста",
+      "effects": [
+        { "stat": "morale_per_kill", "type": "flat", "value": 1 },
+        { "stat": "morale_per_ally_death", "type": "flat", "value": -2 }
+      ],
+      "spells": [],
+      "trigger": "onKill || onAllyDeath",
+      "image": ""
+    },
+    {
+      "id": "leadership_success",
+      "category": "Leadership",
+      "mainSkill": "Лідерство",
+      "tier": 3,
+      "name": "Успіх",
+      "effects": [
+        { "stat": "damage", "type": "flat", "value": 5 }
+      ],
+      "spells": [],
+      "trigger": "onMoraleSuccess && stackable",
+      "image": ""
     },
 
     /* ========================= */
@@ -305,57 +1199,67 @@
     {
       "id": "ultimate_human_angel",
       "category": "Ultimate",
+      "mainSkill": "Ультимат",
       "tier": "Ultimate",
       "name": "Ангел Хранитель",
       "effects": [
         { "stat": "revive_hp", "type": "percent", "value": 50 }
       ],
       "spells": [],
-      "trigger": "action && oncePerBattle"
+      "trigger": "action && oncePerBattle",
+      "image": ""
     },
     {
       "id": "ultimate_demon_magma",
       "category": "Ultimate",
+      "mainSkill": "Ультимат",
       "tier": "Ultimate",
       "name": "Пекельна Земля",
       "effects": [
         { "stat": "field_damage", "type": "formula", "value": "hero_level / 2" }
       ],
       "spells": [],
-      "trigger": "oncePerBattle"
+      "trigger": "oncePerBattle",
+      "image": ""
     },
     {
       "id": "ultimate_elf_luck",
       "category": "Ultimate",
+      "mainSkill": "Ультимат",
       "tier": "Ultimate",
       "name": "Неймовірна удача",
       "effects": [
         { "stat": "crit_threshold", "type": "flat", "value": 18 }
       ],
       "spells": [],
-      "trigger": "passive"
+      "trigger": "passive",
+      "image": ""
     },
     {
       "id": "ultimate_necromancer_banshee",
       "category": "Ultimate",
+      "mainSkill": "Ультимат",
       "tier": "Ultimate",
       "name": "Крик Банші",
       "effects": [
         { "stat": "morale", "type": "flat", "value": -3 }
       ],
       "spells": [],
-      "trigger": "action && oncePerBattle"
+      "trigger": "action && oncePerBattle",
+      "image": ""
     },
     {
       "id": "ultimate_mage_mark",
       "category": "Ultimate",
+      "mainSkill": "Ультимат",
       "tier": "Ultimate",
       "name": "Знак Мага",
       "effects": [
         { "stat": "extra_casts", "type": "flat", "value": 2 }
       ],
       "spells": [],
-      "trigger": "bonusAction && twicePerBattle"
+      "trigger": "bonusAction && twicePerBattle",
+      "image": ""
     },
 
     /* ========================= */
@@ -365,6 +1269,7 @@
     {
       "id": "personal_isabel",
       "category": "Personal",
+      "mainSkill": "Персональні",
       "tier": "Hero",
       "name": "Ізабель",
       "effects": [
@@ -372,11 +1277,13 @@
         { "stat": "damage", "type": "formula", "value": "1d4 + hero_level / 3" }
       ],
       "spells": [],
-      "trigger": "onBattleStart"
+      "trigger": "onBattleStart",
+      "image": ""
     },
     {
       "id": "personal_godric",
       "category": "Personal",
+      "mainSkill": "Персональні",
       "tier": "Hero",
       "name": "Годрик",
       "effects": [
@@ -384,44 +1291,52 @@
         { "stat": "damage", "type": "formula", "value": "1d4 + hero_level / 3" }
       ],
       "spells": [],
-      "trigger": "passive && allyHP <= 0.15 * maxHP"
+      "trigger": "passive && allyHP <= 0.15 * maxHP",
+      "image": ""
     },
     {
       "id": "personal_agriel",
       "category": "Personal",
+      "mainSkill": "Персональні",
       "tier": "Hero",
       "name": "Аграїл",
       "effects": [
         { "stat": "fire_damage", "type": "dice", "value": "1d6" }
       ],
       "spells": [],
-      "trigger": "onAttack"
+      "trigger": "onAttack",
+      "image": ""
     },
     {
       "id": "personal_beatrice",
       "category": "Personal",
+      "mainSkill": "Персональні",
       "tier": "Hero",
       "name": "Беатріс",
       "effects": [
         { "stat": "control_units", "type": "flat", "value": 1 }
       ],
       "spells": [],
-      "trigger": "passive"
+      "trigger": "passive",
+      "image": ""
     },
     {
       "id": "personal_kha_beleth",
       "category": "Personal",
+      "mainSkill": "Персональні",
       "tier": "Hero",
       "name": "Кха-Белех",
       "effects": [
         { "stat": "area_damage", "type": "flag", "value": true }
       ],
       "spells": [],
-      "trigger": "onAttack"
+      "trigger": "onAttack",
+      "image": ""
     },
     {
       "id": "personal_ivan",
       "category": "Personal",
+      "mainSkill": "Персональні",
       "tier": "Hero",
       "name": "Айвен",
       "effects": [
@@ -429,33 +1344,39 @@
         { "stat": "advantage", "type": "flag", "value": true }
       ],
       "spells": [],
-      "trigger": "passive && onFirstRangedAttack"
+      "trigger": "passive && onFirstRangedAttack",
+      "image": ""
     },
     {
       "id": "personal_raillag",
       "category": "Personal",
+      "mainSkill": "Персональні",
       "tier": "Hero",
       "name": "Раїлаг",
       "effects": [
         { "stat": "poison_damage", "type": "dice", "value": "1d8", "duration": 3 }
       ],
       "spells": [],
-      "trigger": "onAttack"
+      "trigger": "onAttack",
+      "image": ""
     },
     {
       "id": "personal_wulfrina",
       "category": "Personal",
+      "mainSkill": "Персональні",
       "tier": "Hero",
       "name": "Вульфріна",
       "effects": [
         { "stat": "enemy_attack_disadvantage", "type": "flag", "value": true }
       ],
       "spells": [],
-      "trigger": "passive"
+      "trigger": "passive",
+      "image": ""
     },
     {
       "id": "personal_zehir",
       "category": "Personal",
+      "mainSkill": "Персональні",
       "tier": "Hero",
       "name": "Зехір",
       "effects": [
@@ -463,688 +1384,27 @@
         { "stat": "exp_gain", "type": "multiplier", "value": 2 }
       ],
       "spells": [],
-      "trigger": "passive"
+      "trigger": "passive",
+      "image": ""
     },
     {
       "id": "personal_markel",
       "category": "Personal",
+      "mainSkill": "Персональні",
       "tier": "Hero",
       "name": "Маркел",
       "effects": [
         { "stat": "new_spell", "type": "flag", "value": "Аватар" }
       ],
       "spells": ["Аватар"],
-      "trigger": "passive"
-    }
-
-]
-}
-{
-"magic_skills": [
-
-    /* ========================= */
-    /* ===== LIGHT MAGIC ====== */
-    /* ========================= */
-
-    {
-      "id": "light_basic",
-      "category": "MagicLight",
-      "tier": "Basic",
-      "name": "Магія Світла — Базовий",
-      "effects": [
-        { "stat": "spell_access", "type": "range", "value": "1-2" }
-      ],
-      "spells": [],
-      "trigger": "passive"
-    },
-    {
-      "id": "light_advanced",
-      "category": "MagicLight",
-      "tier": "Advanced",
-      "name": "Магія Світла — Просунутий",
-      "effects": [
-        { "stat": "spell_access", "type": "range", "value": "3-4" }
-      ],
-      "spells": [],
-      "trigger": "passive"
-    },
-    {
-      "id": "light_expert",
-      "category": "MagicLight",
-      "tier": "Expert",
-      "name": "Магія Світла — Експерт",
-      "effects": [
-        { "stat": "spell_access", "type": "flat", "value": 5 }
-      ],
-      "spells": [],
-      "trigger": "passive"
-    },
-    {
-      "id": "light_righteous_fury",
-      "category": "MagicLight",
-      "tier": 1,
-      "name": "Гнів праведний",
-      "effects": [
-        { "stat": "area_effect", "type": "flag", "value": true }
-      ],
-      "spells": ["Караючий удар", "Прискорення"],
-      "trigger": "onCast"
-    },
-    {
-      "id": "light_gifting_protection",
-      "category": "MagicLight",
-      "tier": 1,
-      "name": "Даруючий захист",
-      "effects": [
-        { "stat": "area_effect", "type": "flag", "value": true }
-      ],
-      "spells": ["Ухилення", "Кам’яна шкіра"],
-      "trigger": "onCast"
-    },
-    {
-      "id": "light_gifting_blessing",
-      "category": "MagicLight",
-      "tier": 1,
-      "name": "Даруючий благословення",
-      "effects": [
-        { "stat": "area_effect", "type": "flag", "value": true }
-      ],
-      "spells": ["Божественна сила", "Зняття чар"],
-      "trigger": "onCast"
-    },
-    {
-      "id": "light_divine_power",
-      "category": "MagicLight",
-      "tier": 2,
-      "name": "Божа сила",
-      "effects": [
-        { "stat": "spell_power", "type": "percent", "value": 25 }
-      ],
-      "spells": ["усі світлі"],
-      "trigger": "passive"
-    },
-    {
-      "id": "light_eternal_light",
-      "category": "MagicLight",
-      "tier": 2,
-      "name": "Вічне світло",
-      "effects": [
-        { "stat": "healing", "type": "dice", "value": "2d6 + hero_level" }
-      ],
-      "spells": ["нове заклинання"],
-      "trigger": "onCast"
-    },
-    {
-      "id": "light_banish",
-      "category": "MagicLight",
-      "tier": 2,
-      "name": "Вигнання",
-      "effects": [
-        { "stat": "summon_hp", "type": "percent", "value": -50 }
-      ],
-      "spells": [],
-      "trigger": "onCast"
-    },
-    {
-      "id": "light_master",
-      "category": "MagicLight",
-      "tier": 3,
-      "name": "Майстер Світла",
-      "effects": [
-        { "stat": "targets", "type": "flag", "value": "all_allies" }
-      ],
-      "spells": ["усі світлі"],
-      "trigger": "onCast"
-    },
-
-    /* ========================= */
-    /* ===== DARK MAGIC ======= */
-    /* ========================= */
-
-    {
-      "id": "dark_basic",
-      "category": "MagicDark",
-      "tier": "Basic",
-      "name": "Магія Темряви — Базовий",
-      "effects": [
-        { "stat": "spell_access", "type": "range", "value": "1-2" }
-      ],
-      "spells": [],
-      "trigger": "passive"
-    },
-    {
-      "id": "dark_advanced",
-      "category": "MagicDark",
-      "tier": "Advanced",
-      "name": "Магія Темряви — Просунутий",
-      "effects": [
-        { "stat": "spell_access", "type": "range", "value": "3-4" }
-      ],
-      "spells": [],
-      "trigger": "passive"
-    },
-    {
-      "id": "dark_expert",
-      "category": "MagicDark",
-      "tier": "Expert",
-      "name": "Магія Темряви — Експерт",
-      "effects": [
-        { "stat": "spell_access", "type": "flat", "value": 5 }
-      ],
-      "spells": [],
-      "trigger": "passive"
-    },
-    {
-      "id": "dark_lord_of_pain",
-      "category": "MagicDark",
-      "tier": 1,
-      "name": "Повелитель болі",
-      "effects": [
-        { "stat": "area_effect", "type": "flag", "value": true }
-      ],
-      "spells": ["Чума", "Промінь розрухи"],
-      "trigger": "onCast"
-    },
-    {
-      "id": "dark_lord_of_mind",
-      "category": "MagicDark",
-      "tier": 1,
-      "name": "Повелитель розуму",
-      "effects": [
-        { "stat": "area_effect", "type": "flag", "value": true }
-      ],
-      "spells": ["Сповільнення", "Розсіяність"],
-      "trigger": "onCast"
-    },
-    {
-      "id": "dark_lord_of_curses",
-      "category": "MagicDark",
-      "tier": 1,
-      "name": "Повелитель проклять",
-      "effects": [
-        { "stat": "area_effect", "type": "flag", "value": true }
-      ],
-      "spells": ["Ослаблення", "Немічність"],
-      "trigger": "onCast"
-    },
-    {
-      "id": "dark_march_of_death",
-      "category": "MagicDark",
-      "tier": 2,
-      "name": "Поступ смерті",
-      "effects": [
-        { "stat": "spell_power", "type": "percent", "value": 25 }
-      ],
-      "spells": ["усі темні"],
-      "trigger": "passive"
-    },
-    {
-      "id": "dark_compensation",
-      "category": "MagicDark",
-      "tier": 2,
-      "name": "Компенсація",
-      "effects": [
-        { "stat": "random_spell", "type": "range", "value": "1-3" }
-      ],
-      "spells": [],
-      "trigger": "onAttack"
-    },
-    {
-      "id": "dark_devourer",
-      "category": "MagicDark",
-      "tier": 2,
-      "name": "Пожирач",
-      "effects": [
-        { "stat": "spell_slots", "type": "flat", "value": 1 }
-      ],
-      "spells": [],
-      "trigger": "bonusAction && onUnitDeath"
-    },
-    {
-      "id": "dark_master",
-      "category": "MagicDark",
-      "tier": 3,
-      "name": "Майстер темряви",
-      "effects": [
-        { "stat": "targets", "type": "flat", "value": 2 }
-      ],
-      "spells": ["4-5 рівень"],
-      "trigger": "onCast"
-    },
-
-    /* ========================= */
-    /* ===== CHAOS MAGIC ====== */
-    /* ========================= */
-
-    {
-      "id": "chaos_basic",
-      "category": "MagicChaos",
-      "tier": "Basic",
-      "name": "Магія Хаосу — Базовий",
-      "effects": [
-        { "stat": "spell_access", "type": "range", "value": "1-2" }
-      ],
-      "spells": [],
-      "trigger": "passive"
-    },
-    {
-      "id": "chaos_advanced",
-      "category": "MagicChaos",
-      "tier": "Advanced",
-      "name": "Магія Хаосу — Просунутий",
-      "effects": [
-        { "stat": "spell_access", "type": "range", "value": "3-4" }
-      ],
-      "spells": [],
-      "trigger": "passive"
-    },
-    {
-      "id": "chaos_expert",
-      "category": "MagicChaos",
-      "tier": "Expert",
-      "name": "Магія Хаосу — Експерт",
-      "effects": [
-        { "stat": "spell_access", "type": "flat", "value": 5 }
-      ],
-      "spells": [],
-      "trigger": "passive"
-    },
-    {
-      "id": "chaos_storm_lord",
-      "category": "MagicChaos",
-      "tier": 1,
-      "name": "Повелитель бурі",
-      "effects": [
-        { "stat": "initiative", "type": "flat", "value": -5, "duration": 1 }
-      ],
-      "spells": ["Блискавка", "Ланцюгова блискавка"],
-      "trigger": "onCast"
-    },
-    {
-      "id": "chaos_fire_lord",
-      "category": "MagicChaos",
-      "tier": 1,
-      "name": "Повелитель вогню",
-      "effects": [
-        { "stat": "defense", "type": "percent", "value": -30, "duration": 1 }
-      ],
-      "spells": ["Вогняний шар", "Стіна вогню", "Армагедон"],
-      "trigger": "onCast"
-    },
-    {
-      "id": "chaos_ice_lord",
-      "category": "MagicChaos",
-      "tier": 1,
-      "name": "Повелитель холоду",
-      "effects": [
-        { "stat": "speed", "type": "percent", "value": -50, "duration": 1 }
-      ],
-      "spells": ["Льодяна брила", "Кільце холоду", "Зупиняючий холод"],
-      "trigger": "onCast"
-    },
-    {
-      "id": "chaos_mana_burst",
-      "category": "MagicChaos",
-      "tier": 2,
-      "name": "Вибух мани",
-      "effects": [
-        { "stat": "reflect_spell", "type": "flag", "value": true }
-      ],
-      "spells": [],
-      "trigger": "bonusAction && enemyCasts && rand() < 0.5 && uses < 2"
-    },
-    {
-      "id": "chaos_hell_power",
-      "category": "MagicChaos",
-      "tier": 2,
-      "name": "Пекельна сила",
-      "effects": [
-        { "stat": "spell_damage", "type": "percent", "value": 25 }
-      ],
-      "spells": ["усі хаосу"],
-      "trigger": "passive"
-    },
-    {
-      "id": "chaos_fire_attack",
-      "category": "MagicChaos",
-      "tier": 2,
-      "name": "Вогняна атака",
-      "effects": [
-        { "stat": "fire_damage", "type": "dice", "value": "1d6" }
-      ],
-      "spells": [],
-      "trigger": "onAttack"
-    },
-    {
-      "id": "chaos_pyrokinesis",
-      "category": "MagicChaos",
-      "tier": 3,
-      "name": "Пірокінез",
-      "effects": [
-        { "stat": "burn_damage", "type": "dice", "value": "2d6", "duration": 3 }
-      ],
-      "spells": ["усі хаосу"],
-      "trigger": "onCast"
-    },
-
-    /* ========================= */
-    /* ===== SUMMON MAGIC ===== */
-    /* ========================= */
-
-    {
-      "id": "summon_basic",
-      "category": "MagicSummon",
-      "tier": "Basic",
-      "name": "Магія Призиву — Базовий",
-      "effects": [
-        { "stat": "spell_access", "type": "range", "value": "1-2" }
-      ],
-      "spells": [],
-      "trigger": "passive"
-    },
-    {
-      "id": "summon_advanced",
-      "category": "MagicSummon",
-      "tier": "Advanced",
-      "name": "Магія Призиву — Просунутий",
-      "effects": [
-        { "stat": "spell_access", "type": "range", "value": "3-4" }
-      ],
-      "spells": [],
-      "trigger": "passive"
-    },
-    {
-      "id": "summon_expert",
-      "category": "MagicSummon",
-      "tier": "Expert",
-      "name": "Магія Призиву — Експерт",
-      "effects": [
-        { "stat": "spell_access", "type": "flat", "value": 5 }
-      ],
-      "spells": [],
-      "trigger": "passive"
-    },
-    {
-      "id": "summon_life_lord",
-      "category": "MagicSummon",
-      "tier": 1,
-      "name": "Повелитель життя",
-      "effects": [
-        { "stat": "spell_power", "type": "percent", "value": 25 }
-      ],
-      "spells": ["Магічний кулак", "Підняття мертвих"],
-      "trigger": "passive"
-    },
-    {
-      "id": "summon_charm_lord",
-      "category": "MagicSummon",
-      "tier": 1,
-      "name": "Повелитель чар",
-      "effects": [
-        { "stat": "summon_hp", "type": "percent", "value": 25 },
-        { "stat": "summon_damage", "type": "percent", "value": 25 }
-      ],
-      "spells": ["Фенікс", "Елементалі"],
-      "trigger": "passive"
-    },
-    {
-      "id": "summon_frost_lord",
-      "category": "MagicSummon",
-      "tier": 1,
-      "name": "Повелитель холоду",
-      "effects": [
-        { "stat": "summon_hp", "type": "percent", "value": 25 },
-        { "stat": "summon_damage", "type": "percent", "value": 25 }
-      ],
-      "spells": ["Магічний кристал", "Стіна мечів", "Вогняна пастка"],
-      "trigger": "passive"
-    },
-    {
-      "id": "summon_banish",
-      "category": "MagicSummon",
-      "tier": 2,
-      "name": "Вигнання",
-      "effects": [
-        { "stat": "summon_hp", "type": "percent", "value": -50 }
-      ],
-      "spells": [],
-      "trigger": "onCast"
-    },
-    {
-      "id": "summon_chosen_elemental",
-      "category": "MagicSummon",
-      "tier": 2,
-      "name": "Обраний елементаль",
-      "effects": [
-        { "stat": "new_spell", "type": "flag", "value": "Призив обраного елементаля" }
-      ],
-      "spells": ["Призив обраного елементаля"],
-      "trigger": "passive"
-    },
-    {
-      "id": "summon_forest_roots",
-      "category": "MagicSummon",
-      "tier": 2,
-      "name": "Корені лісу",
-      "effects": [
-        { "stat": "new_spell", "type": "flag", "value": "Корені" }
-      ],
-      "spells": ["Корені"],
-      "trigger": "passive"
-    },
-    {
-      "id": "summon_eternal_warriors",
-      "category": "MagicSummon",
-      "tier": 3,
-      "name": "Вічні воїни",
-      "effects": [
-        { "stat": "summon_count", "type": "flat", "value": 2 }
-      ],
-      "spells": ["Елементалі"],
-      "trigger": "onCast"
+      "trigger": "passive",
+      "image": ""
     }
 
 ]
 }
 
 # Скіли
-
-## Напад
-
-Базовий + 15% до мілі атак
-Просунутий + 25% до мілі атак
-Експерт + 40% до мілі атак
-
-### 1 рівень
-
-- Рублячий удар - з шансом 40% удар завдає рани яка кровить наступні 2 раунди з 1д4 урону
-- Оглушаючий удар - з шансом 40% удар зменшує ініціативу жертви на 2 на 1 раунд
-- Пошкодження броні - з шансом 40% удар зменшує 1 броню цілі
-
-### Рівень 2
-
-- Завзятість - обміняти на 1 раунд додаткові 3 шкоди на 1 броню
-- Пробивний удар - ігнорування опору шкоди цілі
-- Послідовність - кожен удар по цілі навішує на неї 1 стак, кожен стак + 2 шкоди по цілі від цього героя
-
-### Рівень 3
-
-- Нагорода - Вбивство ворога дає додаткову дію
-
----
-
-## Стрільба
-
-Базовий + 15% до рендж атак
-Просунутий + 25% до рендж атак
-Експерт + 40% до рендж атак
-
-## Рівень 1
-
-- Травмуючий постріл - з шаносом 40% зменшує швидкість на 50%
-- Бронебійний снаряд - з шансом 40% Постріл по цілі зменшує броню цілі на 1 на 1 раунд
-- Відбиваюча стріла - з шаносом 40%
-  зменшує ініціативу на 2 на 1 раунд
-
-## Рівень 2
-
-- Стріла сили - Якщо за ціллю стоїть ворог він також отримує шкоду 50%
-- В яблучко - гарантоване попадання по цілі 1 раз за бій
-- Хмара стріл - 40% шкоди по 9 клітинкам
-
-## Рівень 3
-
-- Постріл по 2 цілям
-
----
-
-## Захист
-
-Базовий + 10% до опору фізичної шкоди
-Просунутий + 20% до опору фізичної шкоди
-Експерт + 30%до опору фізичної шкоди
-
-## Рівень 1
-
-- Стійкість - додає {2 \* рівень героя} HP
-- Супротив - якщо у героя <= 15% HP
-  знімає всі негативні ефекти 1 раз за бій
-- Перенаправлення - бонус дія - накладає ефект на союзного героя і якщо цей герой отримує фізичну шкоду забирає 50% цієї шкоди на себе
-
-## Рівень 2
-
-- Битва до останнього - 1 раз за бій якщо герой втрачає всі життя - заишає йому 1 HP
-- Магічний захист Дає 15% опору від шкоди заклинань
-- Колюча броня - бонус дія - 1 раз за бій - наступна фізична атака ворога відбиває 100% шкоди в нього
-
-## Рівень 3
-
-- Готовність - проводить атаку на ворога перед атакою ворога
-
----
-
-## Магія Світла
-
-Базовий - дає заклинання 1-2 рівня
-Просунутий - дає заклинання 3-4 рівня
-Експерт - дає заклинання 5 рівня
-
-## Рівень 1
-
-- Гнів праведний - заклинання караючий удар та прискорення - діє по області
-- Даруючий захист - ухилення та камяна шкіра діють по області
-- Даруючий Благословення - божественна сила та Зняття чар діють по області
-
-## Рівень 2
-
-- Божа сила - посилення заклиань ствіла на 25%
-- Вічне світло - додає заклинанння
-  яке лікує на 2д6 + рівень героя
-- Вигнання - забирає 50% всім ворожим призваним істотам
-
-## Рівень 3
-
-- Всі заклиання світла діють на всіх союзників
-
----
-
-## Магія Темряви
-
-Базовий - дає заклинання 1-2 рівня
-Просунутий - дає заклинання 3-4 рівня
-Експерт - дає заклинання 5 рівня
-
-## Рівень 1
-
-- Повелитель болі - заклинання Чема та Промінь Розрухи діють на область
-- Повелитель розуму - сповільнення та розсіяність діють по області
-- Повелитель Проклять - Ослабелння та Немічність діють по області
-
-## Рівень 2
-
-- Поступ смерті - посилення заклиань темряви на 25%
-- Компенсація - Атака героя накладає випадкове заклинання 1-3 рівня
-- Пожирач - бонус дія - герой пожирає душу мертвого юніта і відновлює 1 спел слот
-
-## Рівень 3
-
-- Майстер темряви - Заклинання 4 та 5 рівня діють на 2 істоти
-
----
-
-## Магія Хаосу
-
-Базовий - дає заклинання 1-2 рівня
-Просунутий - дає заклинання 3-4 рівня
-Експерт - дає заклинання 5 рівня
-
-## Рівень 1
-
-- Повелитель бурі - заклинання Блискавка та Ланцюгова блискавка зменшують ініціативу ворога на 5 на 1 раунд
-- Повелитель вогню - заклинання Вогняний шар, Стіна Вогню та Армагедон знімають 30% захисту на 1 раунд
-- Повелитель Холоду - заклинаня Льодяна Брила, Кільце Холоду та Зупиняючий холод зменшує швидкість істот на 50% на 1 раунд
-
-## Рівень 2
-
-- Вибух мани- бонус дія Ворожий заклинатель отримують з шансом 50% отримує шкоду свого заклинання (2 рази за бій)
-- Пекельна сила -всі заклинання хаосу наносять на 25% більше шкоди
-- Вогняна атака - атаки героя наносять додаткову шкоду вогенм 1к6
-
-## Рівень 3
-
-- Пірокінез - всі заклинання накладають модифікатор підпал на 3 раунди який наносить 2к6 шкоди
-
----
-
-## Магія Призиву
-
-Базовий - дає заклинання 1-2 рівня
-Просунутий - дає заклинання 3-4 рівня
-Експерт - дає заклинання 5 рівня
-
-## Рівень 1
-
-- Повелитель життя - заклинання Магічний кулак та Підняття мертвих мають + 25% то сили заклианнь
-- Повелитель чар- заклинання призив Фенікса та призив елементалів прикликають сумонів з + 25% HP + 25% шкоди
-- Повелитель Холоду - заклинаня Магічний Кристал та Стіна Мечів та Вогяна пастка отримують +25% до шкоди і HP
-
-## Рівень 2
-
-- Вигнання - забирає 50% всім ворожим призваним істотам
-- Обраний елементаль - додає нове заклиання - призив обраного елементалю
-- Корені лісу - Додає нове заклиання “Корені”
-
-## Рівень 3
-
-- Вічні воіни - прикликає по 2 елементаля
-
----
-
-## Лідерство
-
-Базовий - дає + 1 моралі
-Просунутий - дає ще + 1 моралі
-Експерт - дає ще + 1 моралі
-
-## Рівень 1
-
-- Співпереживання - Кожного разу коли союзний герой проходить перевірку на мораль отримує +1 ініціативи на 1 раунд (ефект скається)
-- Відновлення - якщо мораль опускається до відємного значення - в наступному раунді відовлюється до 0
-- Відплата - завдає {5% \* мораль} більше фізичної шкоди
-
-## Рівень 2
-
-- Натхнення -бонус дія дає +1 моралі союзнику на 1 раунд
-- Успіх - за кожен успішний кидок моралі отримує +5 шкоди до кінця бою
-- Помста - за кожного вбитого ворога отримує +1 моралі до кінця бою за кожного вбитого союзника -2 моралі
-
-## Рівень 3
-
-- Вічні воіни - прикликає по 2 елементаля
-
-# Раси
-
-### Люди
 
 Расовий навик: Контр атака, 1 раз за раунд герой дає посилений удар відсіч першому ворогу який його атакував +15%/+25%/+40%
 Ульта - Ангел Хранитель - 1 раз за бій воскресити союзника з 50% HP - дія

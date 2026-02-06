@@ -33,8 +33,12 @@ export function SkillDialogs({
 }: SkillDialogsProps) {
   return (
     <>
-      {/* Діалог з описом навики */}
-      <Dialog open={!!selectedSkill} onOpenChange={(open) => !open && onCloseSkill()}>
+      {/* Діалог з описом навики (modal={false} щоб уникнути конфлікту aria-hidden з відкритим Select) */}
+      <Dialog
+        open={!!selectedSkill}
+        onOpenChange={(open) => !open && onCloseSkill()}
+        modal={false}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{selectedSkill?.name}</DialogTitle>
@@ -79,10 +83,11 @@ export function SkillDialogs({
         </DialogContent>
       </Dialog>
 
-      {/* Діалог з описом ультимативного навику */}
+      {/* Діалог з описом ультимативного навику (modal={false} щоб уникнути конфлікту aria-hidden з Select) */}
       <Dialog
         open={!!selectedUltimateSkill}
         onOpenChange={(open) => !open && onCloseUltimateSkill()}
+        modal={false}
       >
         <DialogContent>
           <DialogHeader>

@@ -1,50 +1,35 @@
 "use client";
 
-import Link from "next/link";
-import { Edit, MoreVertical, X } from "lucide-react";
-
-import { OptimizedImage } from "@/components/common/OptimizedImage";
-import { AbilityBonusIcons, SkillStatsIcons } from "@/components/skills/icons/AbilityBonusIcons";
+import { SkillGroupAccordionItem } from "@/components/skills/list/SkillGroupAccordionItem";
 import { RemoveAllSpellsDialog } from "@/components/spells/dialogs/RemoveAllSpellsDialog";
 import { RenameGroupDialog } from "@/components/spells/dialogs/RenameGroupDialog";
-import {
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { CardDescription, CardTitle } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useRaces } from "@/lib/hooks/useRaces";
 import { useSpellGroupActions } from "@/lib/hooks/useSpellGroupActions";
-import {
-  getSkillBonuses,
-  getSkillCombatStats,
-  getSkillDescription,
-  getSkillIcon,
-  getSkillId,
-  getSkillIsRacial,
-  getSkillName,
-  getSkillRaces,
-  getSkillSpell,
-} from "@/lib/utils/skills/skill-helpers";
 import { calculateTotalSkillsInGroup } from "@/lib/utils/skills/skills";
-import type { Race } from "@/types/races";
 import type { GroupedSkill, Skill } from "@/types/skills";
 import type { SpellGroup } from "@/types/spells";
+
+/** hex #RRGGBB → rgba(..., 0.4) */
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace(/^#/, "");
+
+  if (h.length !== 6) return hex;
+
+  const r = parseInt(h.slice(0, 2), 16);
+
+  const g = parseInt(h.slice(2, 4), 16);
+
+  const b = parseInt(h.slice(4, 6), 16);
+
+  return `rgba(${r},${g},${b},${alpha})`;
+}
 
 interface SkillGroupAccordionProps {
   groupName: string;
   skills: (Skill | GroupedSkill)[];
   campaignId: string;
   spellGroups: SpellGroup[];
-  initialRaces?: Race[];
+  /** Колір основного навику для підсвітки акордеону (40% opacity) */
+  mainSkillColor?: string | null;
 }
 
 export function SkillGroupAccordion({
@@ -52,9 +37,12 @@ export function SkillGroupAccordion({
   skills,
   campaignId,
   spellGroups,
-  initialRaces = [],
+  mainSkillColor,
 }: SkillGroupAccordionProps) {
-  const { data: races = [] } = useRaces(campaignId, initialRaces);
+  const accordionBg =
+    mainSkillColor != null && mainSkillColor
+      ? hexToRgba(mainSkillColor, 0.6)
+      : undefined;
 
   const groupId = spellGroups.find((g) => g.name === groupName)?.id;
 
@@ -82,201 +70,19 @@ export function SkillGroupAccordion({
     groupId,
   });
 
-  const getRaceLabel = (raceValue: string) => {
-    const race = races.find((r) => r.id === raceValue || r.name === raceValue);
-
-    return race ? race.name : raceValue;
-  };
-
   return (
     <>
-      <AccordionItem value={groupName} key={groupName}>
-        <div className="relative">
-          <AccordionTrigger className="px-4 sm:px-6">
-            <div className="flex items-center gap-3 sm:gap-4 text-left w-full">
-              <div className="flex-1 min-w-0">
-                <CardTitle className="text-lg truncate">{groupName}</CardTitle>
-                <CardDescription className="mt-1">
-                  {totalSkills} скілів
-                </CardDescription>
-              </div>
-            </div>
-          </AccordionTrigger>
-          {!isUngrouped && groupId && (
-            <div
-              className="absolute right-12 sm:right-14 top-1/2 -translate-y-1/2 z-10"
-              onClick={(e) => e.stopPropagation()}
-              onMouseDown={(e) => e.stopPropagation()}
-            >
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-10 w-10 sm:h-12 sm:w-12"
-                  >
-                    <MoreVertical className="h-5 w-5 sm:h-6 sm:w-6" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openRenameDialog();
-                    }}
-                  >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Перейменувати групу
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setRemoveAllDialogOpen(true);
-                    }}
-                  >
-                    <X className="h-4 w-4 mr-2" />
-                    Видалити всі скіли з групи
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          )}
-        </div>
-        <AccordionContent>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 px-4 sm:px-6 pb-4">
-            {skills.map((skill) => {
-              const skillId = getSkillId(skill);
-
-              const skillName = getSkillName(skill);
-
-              const skillDescription = getSkillDescription(skill);
-
-              const skillIcon = getSkillIcon(skill);
-
-              const skillRaces = getSkillRaces(skill);
-
-              const skillIsRacial = getSkillIsRacial(skill);
-
-              const skillBonuses = getSkillBonuses(skill);
-
-              const combatStats = getSkillCombatStats(skill);
-
-              const skillSpell = getSkillSpell(skill);
-
-              return (
-                <div
-                  key={skillId}
-                  className="border rounded-lg p-4 hover:shadow-lg transition-shadow"
-                >
-                  <div className="flex items-start gap-3 mb-3">
-                    {skillIcon && (
-                      <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden bg-muted flex items-center justify-center shrink-0">
-                        <OptimizedImage
-                          src={skillIcon}
-                          alt={skillName}
-                          width={64}
-                          height={64}
-                          className="w-full h-full object-cover"
-                          fallback={
-                            <div className="w-full h-full flex items-center justify-center bg-muted">
-                              <span className="text-xl text-muted-foreground">
-                                {skillName[0]?.toUpperCase() || "?"}
-                              </span>
-                            </div>
-                          }
-                        />
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <h3 className="font-semibold text-sm sm:text-base flex-1 min-w-0 truncate">
-                          {skillName}
-                        </h3>
-                        {skillIsRacial && (
-                          <Badge variant="outline" className="shrink-0 text-xs">
-                            Рассовий
-                          </Badge>
-                        )}
-                      </div>
-                      {skillRaces &&
-                        Array.isArray(skillRaces) &&
-                        skillRaces.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {skillRaces.map((race: string) => (
-                              <Badge
-                                key={race}
-                                variant="secondary"
-                                className="text-xs"
-                              >
-                                {getRaceLabel(race)}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
-                    </div>
-                  </div>
-
-                  {skillDescription && (
-                    <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 mb-3">
-                      {skillDescription}
-                    </p>
-                  )}
-
-                  <div className="space-y-2 mb-3">
-                    {Object.keys(skillBonuses || {}).length > 0 && (
-                      <div className="flex flex-col gap-1">
-                        <span className="text-xs font-semibold text-muted-foreground">
-                          Бонуси:
-                        </span>
-                        <AbilityBonusIcons bonuses={skillBonuses} />
-                      </div>
-                    )}
-
-                  {(combatStats.armor ||
-                    combatStats.physicalResistance ||
-                    combatStats.magicalResistance) && (
-                    <div className="flex flex-col gap-1">
-                      <span className="text-xs font-semibold text-muted-foreground">
-                        Захист:
-                      </span>
-                      <SkillStatsIcons
-                        armor={combatStats.armor}
-                        physicalResistance={combatStats.physicalResistance}
-                        magicalResistance={combatStats.magicalResistance}
-                      />
-                    </div>
-                  )}
-
-                  {(combatStats.damage || combatStats.speed) && (
-                    <div className="text-xs text-muted-foreground space-y-0.5">
-                      {combatStats.damage && <div>Шкода: {combatStats.damage}</div>}
-                      {combatStats.speed && <div>Швидкість: {combatStats.speed}</div>}
-                    </div>
-                  )}
-
-                  {skillSpell && (
-                    <div className="text-xs text-muted-foreground">
-                      <span className="font-semibold">Покращення спела:</span>{" "}
-                      {skillSpell.name}
-                    </div>
-                  )}
-                  </div>
-
-                  <Link href={`/campaigns/${campaignId}/dm/skills/${skillId}`}>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full text-xs sm:text-sm"
-                    >
-                      Редагувати
-                    </Button>
-                  </Link>
-                </div>
-              );
-            })}
-          </div>
-        </AccordionContent>
-      </AccordionItem>
+      <SkillGroupAccordionItem
+        groupName={groupName}
+        accordionBg={accordionBg}
+        totalSkills={totalSkills}
+        isUngrouped={isUngrouped}
+        groupId={groupId}
+        onRenameClick={openRenameDialog}
+        onRemoveAllClick={() => setRemoveAllDialogOpen(true)}
+        skills={skills}
+        campaignId={campaignId}
+      />
 
       <RenameGroupDialog
         open={renameDialogOpen}

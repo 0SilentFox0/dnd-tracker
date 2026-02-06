@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo,useState } from "react";
+import { useMemo, useState } from "react";
 
 import { MainSkillLevels } from "@/components/skill-tree/elements/MainSkillLevels";
 import { RacialSkill } from "@/components/skill-tree/elements/RacialSkill";
@@ -8,8 +8,14 @@ import { SectorLevels } from "@/components/skill-tree/elements/SectorLevels";
 import { SegmentSkills } from "@/components/skill-tree/elements/SegmentSkills";
 import { UltimateSkillComponent } from "@/components/skill-tree/elements/UltimateSkill";
 import { SkillDialogs } from "@/components/skill-tree/ui/SkillDialogs";
-import { canLearnMainSkillLevel,getMainSkillLevelId } from "@/components/skill-tree/utils/hooks";
-import { useAvailableMainSkills, useRacialSkill } from "@/components/skill-tree/utils/hooks";
+import {
+  canLearnMainSkillLevel,
+  getMainSkillLevelId,
+} from "@/components/skill-tree/utils/hooks";
+import {
+  useAvailableMainSkills,
+  useRacialSkill,
+} from "@/components/skill-tree/utils/hooks";
 import {
   canLearnSkill,
   getCircle2UnlockedCount,
@@ -23,10 +29,7 @@ import type {
   SkillTree,
   UltimateSkill,
 } from "@/types/skill-tree";
-import {
-  SkillCircle as SkillCircleEnum,
-  SkillLevel,
-} from "@/types/skill-tree";
+import { SkillCircle as SkillCircleEnum, SkillLevel } from "@/types/skill-tree";
 
 interface CircularSkillTreeProps {
   skillTree: SkillTree;
@@ -90,13 +93,12 @@ export function CircularSkillTree({
   const [selectedUltimateSkill, setSelectedUltimateSkill] =
     useState<UltimateSkill | null>(null);
 
-  // Отримуємо расовий навик та фільтруємо основні навики
+  // Расовий навик та основні навики для секторів (расові й ультимативні не входять у сектори)
   const racialSkill = useRacialSkill(skillTree);
+  const availableMainSkills = useAvailableMainSkills(skillTree, race); // уже без "racial"
 
-  const availableMainSkills = useAvailableMainSkills(skillTree, race);
-
+  // Раса та Ультимат не мають секторів у колі — тільки основні навики
   const sectors = availableMainSkills.length;
-
   const sectorAngle = (360 / sectors) * (Math.PI / 180); // Конвертуємо в радіани
 
   const { containerSize, outerRadiusPercent, innerRadiusPercent } =
@@ -105,7 +107,7 @@ export function CircularSkillTree({
   // Підраховуємо кількість прокачаних навиків з кола 4
   const circle4UnlockedCount = getCircle4UnlockedCount(
     skillTree,
-    unlockedSkills
+    unlockedSkills,
   );
 
   // Обгортки для перевірок з правильними параметрами
@@ -117,14 +119,14 @@ export function CircularSkillTree({
   const canLearnUltimateSkill = useMemo(() => {
     // Перевіряємо чи ультимативний навик вже вивчений
     const isUltimateSkillUnlocked = unlockedSkills.includes(
-      skillTree.ultimateSkill.id
+      skillTree.ultimateSkill.id,
     );
 
     if (isUltimateSkillUnlocked) return false;
 
     const circle2UnlockedCount = getCircle2UnlockedCount(
       skillTree,
-      unlockedSkills
+      unlockedSkills,
     );
 
     return circle2UnlockedCount >= 3;
@@ -155,18 +157,18 @@ export function CircularSkillTree({
             minHeight: containerSizeMobile,
           }}
         >
-          {/* Ультимативний навик */}
+          {/* Ультимат — один слот у самому центрі всіх секторів, доступний лише 1 для раси */}
           <UltimateSkillComponent
             ultimateSkill={skillTree.ultimateSkill}
             unlockedUltimateSkill={unlockedSkills.includes(
-              skillTree.ultimateSkill.id
+              skillTree.ultimateSkill.id,
             )}
             canLearnUltimateSkill={canLearnUltimateSkill}
             isDMMode={isDMMode}
             onSkillClick={isDMMode ? undefined : handleUltimateSkillClick}
           />
 
-          {/* Рассовий навик над колом */}
+          {/* Раса — окремо 3 слоти для скілів в один ряд (без сектора в колі) */}
           <RacialSkill
             racialSkill={racialSkill}
             unlockedSkills={unlockedSkills}
@@ -191,7 +193,7 @@ export function CircularSkillTree({
             }
           />
 
-          {/* Рівні секторів - показуємо тільки в режимі Player */}
+          {/* Рівні секторів тільки для основних навиків (без расових і ультимативних) */}
           <SectorLevels
             mainSkills={availableMainSkills}
             sectorAngle={sectorAngle}
@@ -252,7 +254,7 @@ export function CircularSkillTree({
                     const canLearn = canLearnMainSkillLevel(
                       level,
                       mainSkill.id,
-                      unlockedSkills
+                      unlockedSkills,
                     );
 
                     if (!canLearn) {
@@ -264,7 +266,7 @@ export function CircularSkillTree({
                     // Створюємо унікальний ID для main-skill-level
                     const mainSkillLevelId = getMainSkillLevelId(
                       mainSkill.id,
-                      level
+                      level,
                     );
 
                     // Створюємо фейковий навик для main-skill-level

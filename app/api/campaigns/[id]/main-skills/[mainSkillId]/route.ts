@@ -12,6 +12,7 @@ const updateMainSkillSchema = z.object({
     .optional()
     .nullable()
     .transform((val) => (val === "" ? null : val)),
+  isEnableInSkillTree: z.boolean().optional(),
 });
 
 export async function GET(
@@ -83,6 +84,7 @@ export async function PATCH(
         name: data.name,
         color: data.color,
         icon: data.icon !== undefined ? data.icon : undefined,
+        isEnableInSkillTree: data.isEnableInSkillTree !== undefined ? data.isEnableInSkillTree : undefined,
       },
     });
 

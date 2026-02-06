@@ -2,6 +2,8 @@
  * Утиліти для роботи зі скілами (підтримка обох структур)
  */
 
+import type { SkillEffect } from "@/types/battle";
+import type { SkillTriggers } from "@/types/skill-triggers";
 import type { GroupedSkill, Skill } from "@/types/skills";
 
 /**
@@ -37,21 +39,17 @@ export function getSkillIcon(skill: Skill | GroupedSkill): string | null {
 }
 
 /**
- * Отримує расы скіла
+ * Раси скіла (прибрано з моделі — завжди порожній масив для сумісності)
  */
-export function getSkillRaces(skill: Skill | GroupedSkill): string[] {
-  return 'basicInfo' in skill
-    ? (skill.basicInfo?.races || [])
-    : (skill.races || []);
+export function getSkillRaces(_skill: Skill | GroupedSkill): string[] {
+  return [];
 }
 
 /**
- * Отримує чи скіл расовий
+ * Чи скіл расовий (прибрано з моделі — завжди false для сумісності)
  */
-export function getSkillIsRacial(skill: Skill | GroupedSkill): boolean {
-  return 'basicInfo' in skill
-    ? (skill.basicInfo?.isRacial || false)
-    : (skill.isRacial || false);
+export function getSkillIsRacial(_skill: Skill | GroupedSkill): boolean {
+  return false;
 }
 
 /**
@@ -82,14 +80,13 @@ export function getSkillCombatStats(skill: Skill | GroupedSkill): {
   speed?: number;
   physicalResistance?: number;
   magicalResistance?: number;
+  effects?: SkillEffect[];
 } {
-  if ('combatStats' in skill) {
+  if ("combatStats" in skill) {
     return skill.combatStats || {};
   }
 
-  // TypeScript тепер знає, що це Skill
   const skillData = skill as Skill;
-
   return {
     damage: skillData.damage || undefined,
     armor: skillData.armor || undefined,
@@ -97,6 +94,23 @@ export function getSkillCombatStats(skill: Skill | GroupedSkill): {
     physicalResistance: skillData.physicalResistance || undefined,
     magicalResistance: skillData.magicalResistance || undefined,
   };
+}
+
+/**
+ * Отримує ефекти скіла (структуровані)
+ */
+export function getSkillEffects(skill: Skill | GroupedSkill): SkillEffect[] {
+  if ("combatStats" in skill && skill.combatStats?.effects) {
+    return skill.combatStats.effects;
+  }
+  return [];
+}
+
+/**
+ * Отримує тригери скіла
+ */
+export function getSkillTriggers(skill: Skill | GroupedSkill): SkillTriggers {
+  return skill.skillTriggers ?? [];
 }
 
 /**

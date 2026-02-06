@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCreateMainSkill } from "@/lib/hooks/useMainSkills";
@@ -35,6 +36,7 @@ export function CreateMainSkillDialog({
     name: "",
     color: "#000000",
     icon: "",
+    isEnableInSkillTree: false,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -47,7 +49,7 @@ export function CreateMainSkillDialog({
       };
 
       await createMainSkillMutation.mutateAsync(dataToSend);
-      setFormData({ name: "", color: "#000000", icon: "" });
+      setFormData({ name: "", color: "#000000", icon: "", isEnableInSkillTree: false });
       onOpenChange(false);
       router.refresh();
     } catch (error) {
@@ -121,6 +123,25 @@ export function CreateMainSkillDialog({
               }
               placeholder="https://example.com/icon.png"
             />
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="isEnableInSkillTree"
+              checked={formData.isEnableInSkillTree ?? false}
+              onCheckedChange={(checked) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  isEnableInSkillTree: checked === true,
+                }))
+              }
+            />
+            <Label
+              htmlFor="isEnableInSkillTree"
+              className="text-sm font-normal cursor-pointer"
+            >
+              Не показувати в дереві прокачки
+            </Label>
           </div>
 
           <div className="flex justify-end gap-2">

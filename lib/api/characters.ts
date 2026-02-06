@@ -24,8 +24,14 @@ export async function getCharacter(
 /**
  * Отримує список персонажів кампанії
  */
-export async function getCharacters(campaignId: string): Promise<Character[]> {
-  const response = await fetch(`/api/campaigns/${campaignId}/characters`);
+export async function getCharacters(
+  campaignId: string,
+  opts?: { type?: "player" | "npc_hero" }
+): Promise<Character[]> {
+  const params = opts?.type ? `?type=${opts.type}` : "";
+  const response = await fetch(
+    `/api/campaigns/${campaignId}/characters${params}`
+  );
 
   if (!response.ok) {
     throw new Error("Failed to fetch characters");
@@ -107,4 +113,23 @@ export async function deleteCharacter(
 
     throw new Error(error.error || "Failed to delete character");
   }
+}
+
+/**
+ * Видаляє всіх персонажів гравців кампанії
+ */
+export async function deleteAllCharacters(
+  campaignId: string
+): Promise<{ success: boolean; deleted: number }> {
+  const response = await fetch(`/api/campaigns/${campaignId}/characters`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+
+    throw new Error(error.error || "Failed to delete all characters");
+  }
+
+  return response.json();
 }

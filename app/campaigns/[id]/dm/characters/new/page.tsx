@@ -5,13 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { CharacterBasicInfo } from "@/components/characters/basic/CharacterBasicInfo";
-import { CharacterLanguagesSection } from "@/components/characters/roleplay/CharacterLanguagesSection";
-import { CharacterRoleplaySection } from "@/components/characters/roleplay/CharacterRoleplaySection";
+import { CharacterArtifactsSection } from "@/components/characters/artifacts/CharacterArtifactsSection";
 import { CharacterSkillsSection } from "@/components/characters/skills/CharacterSkillsSection";
 import { CharacterSpellsSection } from "@/components/characters/spells/CharacterSpellsSection";
 import { CharacterAbilityScores } from "@/components/characters/stats/CharacterAbilityScores";
 import { CharacterCombatParams } from "@/components/characters/stats/CharacterCombatParams";
-import { CharacterImmunities } from "@/components/characters/stats/CharacterImmunities";
 import {
   Accordion,
   AccordionContent,
@@ -52,7 +50,6 @@ export default function NewCharacterPage({
     combatStats,
     skills,
     spellcasting,
-    roleplay,
     handleSubmit,
   } = useCharacterForm({
     onSubmit: async (data) => {
@@ -132,38 +129,13 @@ export default function NewCharacterPage({
                 </AccordionContent>
               </AccordionItem>
 
-              {/* Етап 6: Мови та Профісії */}
+              {/* Етап 6: Артефакти */}
               <AccordionItem value="item-6">
-                <AccordionTrigger>6. Мови та Профісії</AccordionTrigger>
+                <AccordionTrigger>6. Артефакти</AccordionTrigger>
                 <AccordionContent>
-                  <CharacterLanguagesSection
-                    roleplay={roleplay}
-                  />
-                </AccordionContent>
-              </AccordionItem>
-
-              {/* Етап 7: Імунітети */}
-              <AccordionItem value="item-7">
-                <AccordionTrigger>7. Імунітети</AccordionTrigger>
-                <AccordionContent>
-                  <CharacterImmunities
-                    roleplay={roleplay}
-                    race={
-                      basicInfo.race
-                        ? races.find((r) => r.name === basicInfo.race) || null
-                        : null
-                    }
-                    raceName={basicInfo.race}
-                  />
-                </AccordionContent>
-              </AccordionItem>
-
-              {/* Етап 8: Рольова гра */}
-              <AccordionItem value="item-8">
-                <AccordionTrigger>8. Рольова гра</AccordionTrigger>
-                <AccordionContent>
-                  <CharacterRoleplaySection
-                    roleplay={roleplay}
+                  <CharacterArtifactsSection
+                    knownSpellIds={spellcasting.knownSpells}
+                    campaignId={id}
                   />
                 </AccordionContent>
               </AccordionItem>

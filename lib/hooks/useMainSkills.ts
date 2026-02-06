@@ -14,11 +14,16 @@ import type { MainSkillFormData } from "@/types/main-skills";
 
 /**
  * Отримує список основних навиків кампанії
+ * @param options.enabled - якщо false, запит не виконується (наприклад, коли дані передані з сервера)
  */
-export function useMainSkills(campaignId: string) {
+export function useMainSkills(
+  campaignId: string,
+  options?: { enabled?: boolean }
+) {
   return useQuery({
     queryKey: ["main-skills", campaignId],
     queryFn: () => getMainSkills(campaignId),
+    enabled: options?.enabled !== false,
   });
 }
 

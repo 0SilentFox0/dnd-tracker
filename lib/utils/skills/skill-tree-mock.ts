@@ -14,8 +14,8 @@ import {
   SkillLevel,
 } from "@/types/skill-tree";
 
-// Генерація мокових навиків для основного навику
-function generateSkillsForMainSkill(
+// Генерація мокових навиків для основного навику (експорт для додавання відсутніх секторів)
+export function generateSkillsForMainSkill(
   mainSkillId: string,
   mainSkillName: string
 ): MainSkill["levels"] {
@@ -105,6 +105,19 @@ function addPrerequisites(skills: MainSkill["levels"]): MainSkill["levels"] {
   return skills;
 }
 
+/** Створює один MainSkill у форматі дерева з даних API (для додавання відсутніх секторів раси). */
+export function createMainSkillFromApi(ms: MainSkillType): MainSkill {
+  const skills = generateSkillsForMainSkill(ms.id, ms.name);
+  const skillsWithPrerequisites = addPrerequisites(skills);
+  return {
+    id: ms.id,
+    name: ms.name,
+    color: ms.color,
+    levels: skillsWithPrerequisites,
+    ...(ms.isEnableInSkillTree !== undefined && { isEnableInSkillTree: ms.isEnableInSkillTree }),
+  };
+}
+
 // Створюємо мокове дерево прокачки для раси
 export function createMockSkillTree(
   campaignId: string,
@@ -140,6 +153,7 @@ export function createMockSkillTree(
       name: ms.name,
       color: ms.color,
       levels: skillsWithPrerequisites,
+      ...(ms.isEnableInSkillTree !== undefined && { isEnableInSkillTree: ms.isEnableInSkillTree }),
     };
   });
 

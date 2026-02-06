@@ -4,7 +4,6 @@ import { DMSkillsPageClient } from "./page-client";
 
 import { getAuthUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import type { Race } from "@/types/races";
 import type { SkillTriggers } from "@/types/skill-triggers";
 
 export default async function DMSkillsPage({
@@ -47,7 +46,6 @@ export default async function DMSkillsPage({
   // Перетворюємо дані з Prisma у правильний тип Skill
   const transformedSkills = skills.map((skill) => ({
     ...skill,
-    races: Array.isArray(skill.races) ? (skill.races as string[]) : [],
     bonuses: typeof skill.bonuses === "object" && skill.bonuses !== null
       ? (skill.bonuses as Record<string, number>)
       : {},
@@ -78,44 +76,10 @@ export default async function DMSkillsPage({
       : undefined,
   }));
 
-  // Завантажуємо раси для відображення назв
-  const racesData = await prisma.race.findMany({
-    where: {
-      campaignId: id,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-
-  // Перетворюємо дані з Prisma у правильний тип Race
-  const races: Race[] = racesData.map((race) => ({
-    ...race,
-    availableSkills: Array.isArray(race.availableSkills)
-      ? (race.availableSkills as string[])
-      : [],
-    disabledSkills: Array.isArray(race.disabledSkills)
-      ? (race.disabledSkills as string[])
-      : [],
-    passiveAbility: race.passiveAbility
-      ? typeof race.passiveAbility === "object" &&
-        race.passiveAbility !== null &&
-        !Array.isArray(race.passiveAbility)
-        ? (race.passiveAbility as unknown as Race["passiveAbility"])
-        : null
-      : null,
-    spellSlotProgression: Array.isArray(race.spellSlotProgression)
-      ? (race.spellSlotProgression as unknown as Race["spellSlotProgression"])
-      : undefined,
-    createdAt: race.createdAt,
-    updatedAt: race.updatedAt,
-  }));
-
   return (
     <DMSkillsPageClient
       campaignId={id}
       initialSkills={transformedSkills}
-      initialRaces={races}
     />
   );
 }

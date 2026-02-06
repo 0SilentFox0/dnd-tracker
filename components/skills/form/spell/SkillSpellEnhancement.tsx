@@ -1,6 +1,6 @@
 "use client";
 
-import { memo,useMemo } from "react";
+import { memo, useMemo } from "react";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -57,65 +57,59 @@ function SkillSpellEnhancementComponent({
   onAdditionalModifierChange,
   onNewSpellIdChange,
 }: SkillSpellEnhancementProps) {
-  // Мемоізуємо перевірки для оптимізації рендеру
   const hasEffectIncrease = useMemo(
     () => spellEnhancementTypes.includes(SpellEnhancementType.EFFECT_INCREASE),
-    [spellEnhancementTypes]
+    [spellEnhancementTypes],
   );
 
   const hasTargetChange = useMemo(
     () => spellEnhancementTypes.includes(SpellEnhancementType.TARGET_CHANGE),
-    [spellEnhancementTypes]
+    [spellEnhancementTypes],
   );
 
   const hasAdditionalModifier = useMemo(
     () => spellEnhancementTypes.includes(SpellEnhancementType.ADDITIONAL_MODIFIER),
-    [spellEnhancementTypes]
+    [spellEnhancementTypes],
   );
 
   const hasNewSpell = useMemo(
     () => spellEnhancementTypes.includes(SpellEnhancementType.NEW_SPELL),
-    [spellEnhancementTypes]
+    [spellEnhancementTypes],
   );
 
-  // Мемоізуємо опції для SelectField
   const spellTargetOptions = useMemo(
-    () => SPELL_TARGET_OPTIONS.map(opt => ({ value: opt.value, label: opt.label })),
-    []
+    () => SPELL_TARGET_OPTIONS.map((opt) => ({ value: opt.value, label: opt.label })),
+    [],
   );
 
   const damageModifierOptions = useMemo(
-    () => DAMAGE_MODIFIER_OPTIONS.map(opt => ({ value: opt.value, label: opt.label })),
-    []
+    () => DAMAGE_MODIFIER_OPTIONS.map((opt) => ({ value: opt.value, label: opt.label })),
+    [],
   );
 
   const diceOptions = useMemo(
-    () => DICE_OPTIONS.map(dice => ({
-      value: dice.value.replace("d", ""),
-      label: dice.label,
-    })),
-    []
+    () =>
+      DICE_OPTIONS.map((dice) => ({
+        value: dice.value.replace("d", ""),
+        label: dice.label,
+      })),
+    [],
   );
 
   const spellOptions = useMemo(
-    () => spells.map(spell => ({ value: spell.id, label: spell.name })),
-    [spells]
+    () => spells.map((spell) => ({ value: spell.id, label: spell.name })),
+    [spells],
   );
 
-  // Мемоізуємо обчислення для кубиків шкоди
   const diceCount = useMemo(
     () => spellAdditionalModifier.damageDice?.match(/^(\d+)/)?.[1] || "",
-    [spellAdditionalModifier.damageDice]
+    [spellAdditionalModifier.damageDice],
   );
 
-  const diceType = useMemo(
-    () => {
-      const match = spellAdditionalModifier.damageDice?.match(/d(\d+)/);
-
-      return match?.[1] || "6";
-    },
-    [spellAdditionalModifier.damageDice]
-  );
+  const diceType = useMemo(() => {
+    const match = spellAdditionalModifier.damageDice?.match(/d(\d+)/);
+    return match?.[1] || "6";
+  }, [spellAdditionalModifier.damageDice]);
 
   return (
     <div className="space-y-3">
@@ -210,7 +204,6 @@ function SkillSpellEnhancementComponent({
                         value={diceCount}
                         onChange={(e) => {
                           const count = e.target.value;
-
                           onAdditionalModifierChange({
                             ...spellAdditionalModifier,
                             damageDice: count ? `${count}d${diceType}` : "",
@@ -221,7 +214,6 @@ function SkillSpellEnhancementComponent({
                         value={diceType}
                         onValueChange={(diceTypeNum) => {
                           const count = diceCount || "1";
-
                           onAdditionalModifierChange({
                             ...spellAdditionalModifier,
                             damageDice: `${count}d${diceTypeNum}`,
@@ -280,5 +272,4 @@ function SkillSpellEnhancementComponent({
   );
 }
 
-// Мемоізуємо компонент для оптимізації рендеру
 export const SkillSpellEnhancement = memo(SkillSpellEnhancementComponent);

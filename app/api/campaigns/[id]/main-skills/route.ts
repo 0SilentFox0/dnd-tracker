@@ -12,6 +12,7 @@ const createMainSkillSchema = z.object({
     .optional()
     .nullable()
     .transform((val) => (val === "" ? null : val)),
+  isEnableInSkillTree: z.boolean().optional(),
 });
 
 export async function GET(
@@ -68,6 +69,7 @@ export async function POST(
         name: data.name,
         color: data.color,
         icon: data.icon || null,
+        isEnableInSkillTree: data.isEnableInSkillTree ?? false,
       },
     });
 

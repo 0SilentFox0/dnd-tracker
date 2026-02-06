@@ -1,6 +1,6 @@
 "use client";
 
-import { memo,useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { X } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -36,41 +36,55 @@ function SkillTriggersEditorComponent({
   triggers,
   onChange,
 }: SkillTriggersEditorProps) {
-  const [newTriggerType, setNewTriggerType] = useState<TriggerType | null>(null);
+  const [newTriggerType, setNewTriggerType] = useState<TriggerType | null>(
+    null,
+  );
 
-  const [newSimpleTrigger, setNewSimpleTrigger] = useState<SimpleSkillTrigger | "">("");
+  const [newSimpleTrigger, setNewSimpleTrigger] = useState<
+    SimpleSkillTrigger | ""
+  >("");
 
-  const [newComplexTrigger, setNewComplexTrigger] = useState<Partial<ComplexSkillTrigger>>({
+  const [newComplexTrigger, setNewComplexTrigger] = useState<
+    Partial<ComplexSkillTrigger>
+  >({
     ...DEFAULT_COMPLEX_TRIGGER,
   });
 
-  // Мемоізуємо опції для SelectField
   const simpleTriggerOptions = useMemo(
-    () => SIMPLE_TRIGGER_OPTIONS.map(t => ({ value: t.value, label: t.label })),
-    []
+    () =>
+      SIMPLE_TRIGGER_OPTIONS.map((t) => ({ value: t.value, label: t.label })),
+    [],
   );
 
   const comparisonOperatorOptions = useMemo(
-    () => COMPARISON_OPERATOR_OPTIONS.map(op => ({ value: op.value, label: op.label })),
-    []
+    () =>
+      COMPARISON_OPERATOR_OPTIONS.map((op) => ({
+        value: op.value,
+        label: op.label,
+      })),
+    [],
   );
 
   const statTypeOptions = useMemo(
-    () => STAT_TYPE_OPTIONS.map(stat => ({ value: stat.value, label: stat.label })),
-    []
+    () =>
+      STAT_TYPE_OPTIONS.map((stat) => ({
+        value: stat.value,
+        label: stat.label,
+      })),
+    [],
   );
 
   const targetOptions = useMemo(
-    () => TARGET_OPTIONS.map(t => ({ value: t.value, label: t.label })),
-    []
+    () => TARGET_OPTIONS.map((t) => ({ value: t.value, label: t.label })),
+    [],
   );
 
   const valueTypeOptions = useMemo(
-    () => VALUE_TYPE_OPTIONS.map(vt => ({ value: vt.value, label: vt.label })),
-    []
+    () =>
+      VALUE_TYPE_OPTIONS.map((vt) => ({ value: vt.value, label: vt.label })),
+    [],
   );
 
-  // Мемоізуємо функції обробки
   const addSimpleTrigger = useCallback(() => {
     if (!newSimpleTrigger) return;
 
@@ -113,12 +127,15 @@ function SkillTriggersEditorComponent({
     (index: number) => {
       onChange(triggers.filter((_, i) => i !== index));
     },
-    [triggers, onChange]
+    [triggers, onChange],
   );
 
-  const formatComplexTrigger = useCallback((trigger: ComplexSkillTrigger): string => {
-    return `if ${trigger.target} ${trigger.operator} ${trigger.value}${trigger.valueType === TriggerValueType.PERCENT ? "%" : ""} ${trigger.stat}`;
-  }, []);
+  const formatComplexTrigger = useCallback(
+    (trigger: ComplexSkillTrigger): string => {
+      return `if ${trigger.target} ${trigger.operator} ${trigger.value}${trigger.valueType === TriggerValueType.PERCENT ? "%" : ""} ${trigger.stat}`;
+    },
+    [],
+  );
 
   const resetComplexTrigger = useCallback(() => {
     setNewComplexTrigger({ ...DEFAULT_COMPLEX_TRIGGER });
@@ -134,20 +151,18 @@ function SkillTriggersEditorComponent({
     resetComplexTrigger();
   }, [resetComplexTrigger]);
 
-  // Мемоізуємо перевірку валідності складного тригера
   const isComplexTriggerValid = useMemo(
     () =>
       Boolean(
         newComplexTrigger.target &&
-          newComplexTrigger.operator &&
-          newComplexTrigger.value !== undefined &&
-          newComplexTrigger.valueType &&
-          newComplexTrigger.stat
+        newComplexTrigger.operator &&
+        newComplexTrigger.value !== undefined &&
+        newComplexTrigger.valueType &&
+        newComplexTrigger.stat,
       ),
-    [newComplexTrigger]
+    [newComplexTrigger],
   );
 
-  // Мемоізуємо список тригерів з форматуванням
   const formattedTriggers = useMemo(
     () =>
       triggers.map((trigger, index) => ({
@@ -155,11 +170,11 @@ function SkillTriggersEditorComponent({
         trigger,
         label:
           trigger.type === TriggerType.SIMPLE
-            ? SIMPLE_TRIGGER_OPTIONS.find((t) => t.value === trigger.trigger)?.label ||
-              trigger.trigger
+            ? SIMPLE_TRIGGER_OPTIONS.find((t) => t.value === trigger.trigger)
+                ?.label || trigger.trigger
             : formatComplexTrigger(trigger),
       })),
-    [triggers, formatComplexTrigger]
+    [triggers, formatComplexTrigger],
   );
 
   return (
@@ -168,7 +183,6 @@ function SkillTriggersEditorComponent({
         <CardTitle className="text-base">Тригери скіла</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Список існуючих тригерів */}
         {formattedTriggers.length > 0 && (
           <div className="space-y-2">
             <Label>Додані тригери:</Label>
@@ -193,7 +207,6 @@ function SkillTriggersEditorComponent({
           </div>
         )}
 
-        {/* Додавання нового тригера */}
         {newTriggerType === null ? (
           <div className="flex gap-2">
             <Button
@@ -247,10 +260,13 @@ function SkillTriggersEditorComponent({
           <div className="space-y-3 border rounded-lg p-3">
             <div className="flex items-center justify-between">
               <Label>
-                Складний тригер (if {newComplexTrigger.target || TriggerTarget.ALLY}{" "}
+                Складний тригер (if{" "}
+                {newComplexTrigger.target || TriggerTarget.ALLY}{" "}
                 {newComplexTrigger.operator || DEFAULT_COMPLEX_TRIGGER.operator}{" "}
                 {newComplexTrigger.value ?? DEFAULT_COMPLEX_TRIGGER.value}
-                {newComplexTrigger.valueType === TriggerValueType.PERCENT ? "%" : ""}{" "}
+                {newComplexTrigger.valueType === TriggerValueType.PERCENT
+                  ? "%"
+                  : ""}{" "}
                 {newComplexTrigger.stat || DEFAULT_COMPLEX_TRIGGER.stat})
               </Label>
               <Button
@@ -280,7 +296,10 @@ function SkillTriggersEditorComponent({
               <div className="space-y-1">
                 <Label className="text-xs">Оператор (b)</Label>
                 <SelectField
-                  value={newComplexTrigger.operator || DEFAULT_COMPLEX_TRIGGER.operator}
+                  value={
+                    newComplexTrigger.operator ||
+                    DEFAULT_COMPLEX_TRIGGER.operator
+                  }
                   onValueChange={(value) =>
                     setNewComplexTrigger({
                       ...newComplexTrigger,
@@ -309,7 +328,9 @@ function SkillTriggersEditorComponent({
               <div className="space-y-1">
                 <Label className="text-xs">Тип значення</Label>
                 <SelectField
-                  value={newComplexTrigger.valueType || TriggerValueType.PERCENT}
+                  value={
+                    newComplexTrigger.valueType || TriggerValueType.PERCENT
+                  }
                   onValueChange={(value) =>
                     setNewComplexTrigger({
                       ...newComplexTrigger,
@@ -350,5 +371,4 @@ function SkillTriggersEditorComponent({
   );
 }
 
-// Мемоізуємо компонент для оптимізації рендеру
 export const SkillTriggersEditor = memo(SkillTriggersEditorComponent);

@@ -1,11 +1,19 @@
 import { OptimizedImage } from "@/components/common/OptimizedImage";
-import { LEVEL_NAMES, SKILL_COLORS, SKILL_SIZES, Z_INDEX } from "@/components/skill-tree/utils/constants";
+import {
+  LEVEL_NAMES,
+  SKILL_COLORS,
+  SKILL_SIZES,
+  Z_INDEX,
+} from "@/components/skill-tree/utils/constants";
 import {
   canLearnMainSkillLevel,
   getLevelStatus,
   getMainSkillLevelId,
 } from "@/components/skill-tree/utils/hooks";
-import { getPositionPercent, SKILL_TREE_CONSTANTS } from "@/components/skill-tree/utils/utils";
+import {
+  getPositionPercent,
+  SKILL_TREE_CONSTANTS,
+} from "@/components/skill-tree/utils/utils";
 import type { MainSkill } from "@/types/skill-tree";
 import { SkillLevel } from "@/types/skill-tree";
 
@@ -41,11 +49,11 @@ export function MainSkillLevel({
   const { mainSkillRadiusPercent } = SKILL_TREE_CONSTANTS;
 
   // Округлюємо кут для уникнення помилок гідрації
-  const adjustedAngle = Math.round((angle + 0) * 1000) / 1000;
+  const adjustedAngle = Math.round((angle - 1.87) * 1000) / 1000;
 
   const position = getPositionPercent(
     adjustedAngle,
-    mainSkillRadiusPercent + 1
+    mainSkillRadiusPercent + 1,
   );
 
   const { hasUnlocked } = getLevelStatus(mainSkill, level, unlockedSkills);
@@ -106,13 +114,13 @@ export function MainSkillLevel({
         backgroundColor: isSelectedForRemoval
           ? "#ef4444" // Червоний колір для вибраного для видалення
           : isMainSkillLevelLearned
-          ? SKILL_COLORS.unlocked
-          : SKILL_COLORS.centralLocked,
+            ? SKILL_COLORS.unlocked
+            : SKILL_COLORS.centralLocked,
         borderColor: isSelectedForRemoval
           ? "#dc2626" // Темно-червоний border
           : canLearnThisLevel
-          ? "white"
-          : "#6b7280",
+            ? "white"
+            : "#6b7280",
         borderWidth: isSelectedForRemoval ? "3px" : undefined,
         opacity: isMainSkillLevelLearned ? 1 : 0.5,
         zIndex: Z_INDEX.skills,
@@ -121,10 +129,10 @@ export function MainSkillLevel({
         isMainSkillLevelLearned
           ? " (Прокачано - дає доступ до кола 3)"
           : canLearnThisLevel
-          ? " (Не прокачано - клікніть щоб прокачати)"
-          : level === SkillLevel.ADVANCED
-          ? " (Спочатку прокачайте Основи)"
-          : " (Спочатку прокачайте Просунутий)"
+            ? " (Не прокачано - клікніть щоб прокачати)"
+            : level === SkillLevel.ADVANCED
+              ? " (Спочатку прокачайте Основи)"
+              : " (Спочатку прокачайте Просунутий)"
       }`}
     >
       {mainSkill.levelIcons?.[level] || mainSkill.icon ? (

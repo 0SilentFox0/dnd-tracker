@@ -3,6 +3,7 @@
 import { use } from "react";
 import { BattleHeader } from "@/components/battle/BattleHeader";
 import { AttackDialog } from "@/components/battle/dialogs/AttackDialog";
+import { CounterAttackResultDialog } from "@/components/battle/dialogs/CounterAttackResultDialog";
 import { MoraleCheckDialog } from "@/components/battle/dialogs/MoraleCheckDialog";
 import { SpellDialog } from "@/components/battle/dialogs/SpellDialog";
 import { BattleFieldView } from "@/components/battle/views/BattleFieldView";
@@ -82,7 +83,7 @@ export default function BattlePage({
             participant={currentParticipant}
             isDM={isDM}
             campaignId={id}
-            onAttack={(data) => mutations.attack.mutate(data)}
+            onAttack={(data) => handlers.handleAttack(data)}
             onSpell={(data) => mutations.spell.mutate(data)}
             onBonusAction={(skill) => alert(`Бонусна дія: ${skill.name}`)}
             onSkipTurn={handlers.handleNextTurn}
@@ -110,9 +111,7 @@ export default function BattlePage({
         isDM={isDM}
         canSeeEnemyHp={canSeeEnemyHp}
         onAttack={(data) =>
-          mutations.attack.mutate(data, {
-            onSuccess: () => dialogs.attack.setOpen(false),
-          })
+          handlers.handleAttack(data, () => dialogs.attack.setOpen(false))
         }
       />
 
@@ -139,6 +138,12 @@ export default function BattlePage({
             onSuccess: () => dialogs.spell.setOpen(false),
           })
         }
+      />
+
+      <CounterAttackResultDialog
+        open={dialogs.counterAttack.open}
+        onOpenChange={dialogs.counterAttack.setOpen}
+        info={dialogs.counterAttack.info}
       />
     </div>
   );

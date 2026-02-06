@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  SelectContent,
   SelectGroup,
   SelectItem,
   SelectLabel,
@@ -45,55 +44,53 @@ export function SkillLibrarySelector({
         placeholder="Виберіть скіл з бібліотеки"
         triggerClassName="w-full"
       >
-        <SelectContent>
-          {skills.length === 0 ? (
-            <SelectItem value="no-skills" disabled>
-              Немає доступних скілів в бібліотеці
-            </SelectItem>
-          ) : (
-            <>
-              {/* Групи скілів по основним навикам */}
-              {hasGroups &&
-                Object.entries(groupedSkills.groups).map(([mainSkillId, groupSkills]) => {
-                  const mainSkill = mainSkills.find((ms) => ms.id === mainSkillId);
+        {skills.length === 0 ? (
+          <SelectItem value="no-skills" disabled>
+            Немає доступних скілів в бібліотеці
+          </SelectItem>
+        ) : (
+          <>
+            {/* Групи скілів по основним навикам */}
+            {hasGroups &&
+              Object.entries(groupedSkills.groups).map(([mainSkillId, groupSkills]) => {
+                const mainSkill = mainSkills.find((ms) => ms.id === mainSkillId);
 
-                  const groupName = mainSkill?.name || `Група ${mainSkillId}`;
+                const groupName = mainSkill?.name || `Група ${mainSkillId}`;
 
-                  return (
-                    <SelectGroup key={mainSkillId}>
-                      <SelectLabel>{groupName}</SelectLabel>
-                      {groupSkills.map((skill) => (
-                        <SelectItem key={skill.id} value={skill.id}>
-                          {skill.name}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  );
-                })}
-              
-              {/* Скіли без групи */}
-              {hasUngrouped && (
-                <>
-                  {hasGroups && (
-                    <SelectGroup>
-                      <SelectLabel>Без групи</SelectLabel>
-                      {groupedSkills.ungrouped.map((skill) => (
-                        <SelectItem key={skill.id} value={skill.id}>
-                          {skill.name}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  )}
-                  {!hasGroups && groupedSkills.ungrouped.map((skill) => (
-                    <SelectItem key={skill.id} value={skill.id}>
-                      {skill.name}
-                    </SelectItem>
-                  ))}
-                </>
-              )}
-            </>
-          )}
-        </SelectContent>
+                return (
+                  <SelectGroup key={mainSkillId}>
+                    <SelectLabel>{groupName}</SelectLabel>
+                    {groupSkills.map((skill) => (
+                      <SelectItem key={skill.id} value={skill.id}>
+                        {skill.name}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                );
+              })}
+            
+            {/* Скіли без групи */}
+            {hasUngrouped && (
+              <>
+                {hasGroups && (
+                  <SelectGroup>
+                    <SelectLabel>Без групи</SelectLabel>
+                    {groupedSkills.ungrouped.map((skill) => (
+                      <SelectItem key={skill.id} value={skill.id}>
+                        {skill.name}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                )}
+                {!hasGroups && groupedSkills.ungrouped.map((skill) => (
+                  <SelectItem key={skill.id} value={skill.id}>
+                    {skill.name}
+                  </SelectItem>
+                ))}
+              </>
+            )}
+          </>
+        )}
       </SelectField>
       {selectedSkillId && (
         <div className="text-xs text-blue-700 dark:text-blue-300">

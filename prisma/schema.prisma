@@ -197,10 +197,11 @@ model Spell {
   healModifier     String?
   diceCount        Int?
   diceType         String?
-  skills           Skill[]
-  skillsAsNewSpell Skill[]     @relation("SkillNewSpell")
-  campaign         Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  spellGroup       SpellGroup? @relation(fields: [groupId], references: [id])
+  skills              Skill[]
+  skillsAsNewSpell     Skill[]  @relation("SkillNewSpell")
+  skillsGrantingSpell Skill[]  @relation("SkillGrantedSpell")
+  campaign            Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  spellGroup          SpellGroup? @relation(fields: [groupId], references: [id])
 
   @@map("spells")
 }
@@ -343,8 +344,6 @@ model Skill {
   campaignId              String
   name                    String      @default("")
   description             String?
-  races                   Json        @default("[]")
-  isRacial                Boolean     @default(false)
   bonuses                 Json        @default("{}")
   damage                  Int?
   armor                   Int?
@@ -355,12 +354,14 @@ model Skill {
   spellGroupId            String?
   createdAt               DateTime    @default(now())
   icon                    String?
+  image                   String?
   mainSkillId             String?
   spellEnhancementTypes   Json        @default("[]")
   spellEffectIncrease     Int?
   spellTargetChange       Json?
   spellAdditionalModifier Json?
   spellNewSpellId         String?
+  grantedSpellId          String?     // скіл додає це заклинання персонажу
   skillTriggers           Json        @default("[]")
   basicInfo               Json        @default("{}")
   combatStats             Json        @default("{}")
@@ -372,6 +373,7 @@ model Skill {
   spellGroup              SpellGroup? @relation(fields: [spellGroupId], references: [id])
   spell                   Spell?      @relation(fields: [spellId], references: [id])
   spellNewSpell           Spell?      @relation("SkillNewSpell", fields: [spellNewSpellId], references: [id])
+  grantedSpell             Spell?      @relation("SkillGrantedSpell", fields: [grantedSpellId], references: [id])
 
   @@map("skills")
 }
@@ -392,15 +394,16 @@ model Race {
 }
 
 model MainSkill {
-  id         String   @id @default(cuid())
-  campaignId String
-  name       String
-  color      String
-  icon       String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  skills     Skill[]
+  id                  String   @id @default(cuid())
+  campaignId           String
+  name                 String
+  color                String
+  icon                 String?
+  isEnableInSkillTree  Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  campaign             Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  skills               Skill[]
 
   @@map("main_skills")
 }

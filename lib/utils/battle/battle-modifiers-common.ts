@@ -5,23 +5,30 @@
 import { AttackType } from "@/lib/constants/battle";
 
 /**
- * Перевіряє чи відповідає тип ефекту типу атаки
- * @param effectType - тип ефекту (наприклад, "melee_damage_percent")
+ * Перевіряє чи відповідає тип ефекту типу атаки.
+ * Підтримує два формати:
+ *  - новий: stat name ("melee_damage", "ranged_damage", "physical_damage")
+ *  - легасі: повне ім'я ("melee_damage_percent")
+ * @param effectStat - stat ефекту (або legacy type)
  * @param attackType - тип атаки (AttackType enum)
  * @returns true якщо ефект застосовується до цього типу атаки
  */
-export function matchesAttackType(effectType: string, attackType: AttackType): boolean {
-  const typeLower = effectType.toLowerCase();
+export function matchesAttackType(effectStat: string, attackType: AttackType): boolean {
+  const s = effectStat.toLowerCase();
 
   if (attackType === AttackType.MELEE) {
     return (
-      (typeLower.includes("melee") && typeLower.includes("damage")) ||
-      (typeLower.includes("physical") && typeLower.includes("damage"))
+      s === "melee_damage" ||
+      s === "physical_damage" ||
+      (s.includes("melee") && s.includes("damage")) ||
+      (s.includes("physical") && s.includes("damage"))
     );
   } else {
     return (
-      (typeLower.includes("ranged") && typeLower.includes("damage")) ||
-      (typeLower.includes("physical") && typeLower.includes("damage"))
+      s === "ranged_damage" ||
+      s === "physical_damage" ||
+      (s.includes("ranged") && s.includes("damage")) ||
+      (s.includes("physical") && s.includes("damage"))
     );
   }
 }

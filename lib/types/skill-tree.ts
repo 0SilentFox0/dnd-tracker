@@ -47,6 +47,8 @@ export interface MainSkill {
   name: string;
   color: string;
   icon?: string;
+  /** Якщо true — не виводити у колі дерева прокачки */
+  isEnableInSkillTree?: boolean;
   levelIcons?: {
     basic?: string;
     advanced?: string;

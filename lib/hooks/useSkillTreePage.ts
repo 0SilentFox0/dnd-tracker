@@ -11,7 +11,10 @@ import { clearSkillTree } from "@/lib/hooks/useSkillTreeClear";
 import { useSkillTreeEnrichment } from "@/lib/hooks/useSkillTreeEnrichment";
 import { useSkillTreeFilters } from "@/lib/hooks/useSkillTreeFilters";
 import { useSkillTreeSave } from "@/lib/hooks/useSkillTreeSave";
-import { createMockSkillTree } from "@/lib/utils/skills/skill-tree-mock";
+import {
+  createMainSkillFromApi,
+  createMockSkillTree,
+} from "@/lib/utils/skills/skill-tree-mock";
 import type { Race } from "@/types/races";
 import type {
   MainSkill,
@@ -169,8 +172,58 @@ export function useSkillTreePage({
     return null;
   }, [baseSkillTrees, selectedRace, campaignId, mainSkills]);
 
-  // Використовуємо editedSkillTree якщо він є, інакше baseSkillTree
-  const currentSkillTree = editedSkillTree || baseSkillTree;
+  const selectedRaceObject = useMemo(
+    () => races.find((r) => r.name === selectedRace) ?? null,
+    [races, selectedRace]
+  );
+
+  // Додаємо в дерево main skills з race.availableSkills, яких ще немає в дереві
+  // (наприклад «Захист», якщо дерево збережено до його додавання в расу)
+  const treeWithRaceMainSkills = useMemo(() => {
+    if (
+      !baseSkillTree ||
+      !selectedRaceObject?.availableSkills?.length ||
+      !mainSkills.length
+    ) {
+      return baseSkillTree;
+    }
+    const availableIds = Array.isArray(selectedRaceObject.availableSkills)
+      ? selectedRaceObject.availableSkills
+      : [];
+    const orderIds = availableIds.filter(
+      (id: string) => id !== "racial" && id !== "ultimate"
+    );
+    const existingById = new Map(
+      baseSkillTree.mainSkills.map((ms) => [ms.id, ms])
+    );
+    const mergedMainSkills: MainSkill[] = [];
+    for (const id of orderIds) {
+      const existing = existingById.get(id);
+      if (existing) {
+        mergedMainSkills.push(existing);
+      } else {
+        const apiMs = mainSkills.find((m) => m.id === id);
+        if (apiMs) {
+          mergedMainSkills.push(createMainSkillFromApi(apiMs));
+        }
+      }
+    }
+    // Зберігаємо також racial/ultimate з дерева, якщо їх ще немає
+    for (const ms of baseSkillTree.mainSkills) {
+      if (ms.id === "racial" || ms.id === "ultimate") {
+        if (!mergedMainSkills.some((m) => m.id === ms.id)) {
+          mergedMainSkills.push(ms);
+        }
+      }
+    }
+    return {
+      ...baseSkillTree,
+      mainSkills: mergedMainSkills,
+    };
+  }, [baseSkillTree, selectedRaceObject, mainSkills]);
+
+  // Використовуємо editedSkillTree якщо він є, інакше дерево з усіма секторами раси
+  const currentSkillTree = editedSkillTree || treeWithRaceMainSkills;
 
   // Перевіряємо чи є незбережені зміни
   const hasUnsavedChanges = editedSkillTree !== null;
@@ -248,11 +301,6 @@ export function useSkillTreePage({
     skillTree: currentSkillTree,
     skillsFromLibrary,
   });
-
-  // Знаходимо об'єкт раси для обраної раси
-  const selectedRaceObject = useMemo(() => {
-    return races.find((r) => r.name === selectedRace) || null;
-  }, [races, selectedRace]);
 
   // Хук для фільтрації та групування
   const { availableSkills, groupedSkills } = useSkillTreeFilters({

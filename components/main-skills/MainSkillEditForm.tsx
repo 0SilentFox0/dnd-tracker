@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 
 import { FormCard } from "@/components/common/FormCard";
 import { FormField } from "@/components/common/FormField";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useUpdateMainSkill } from "@/lib/hooks/useMainSkills";
 import type { MainSkill } from "@/types/main-skills";
 import type { MainSkillFormData } from "@/types/main-skills";
@@ -27,6 +29,7 @@ export function MainSkillEditForm({
     name: mainSkill.name,
     color: mainSkill.color,
     icon: mainSkill.icon || "",
+    isEnableInSkillTree: mainSkill.isEnableInSkillTree ?? false,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -102,6 +105,25 @@ export function MainSkillEditForm({
           placeholder="https://example.com/icon.png"
         />
       </FormField>
+
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="isEnableInSkillTree"
+          checked={formData.isEnableInSkillTree ?? false}
+          onCheckedChange={(checked) =>
+            setFormData((prev) => ({
+              ...prev,
+              isEnableInSkillTree: checked === true,
+            }))
+          }
+        />
+        <Label
+          htmlFor="isEnableInSkillTree"
+          className="text-sm font-normal cursor-pointer"
+        >
+          Не показувати в дереві прокачки
+        </Label>
+      </div>
     </FormCard>
   );
 }

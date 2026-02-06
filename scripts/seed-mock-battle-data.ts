@@ -218,8 +218,6 @@ async function seedMockData() {
       description: string;
       bonuses: Record<string, number>;
       mainSkillId: string;
-      races: string[];
-      isRacial: boolean;
       spellEffectIncrease?: number;
     }> = [
       {
@@ -229,8 +227,6 @@ async function seedMockData() {
           melee_damage_percent: 15,
         },
         mainSkillId: createdMainSkills[0].id,
-        races: ["human"],
-        isRacial: false,
       },
       {
         name: "Просунута Атака",
@@ -239,8 +235,6 @@ async function seedMockData() {
           melee_damage_percent: 10,
         },
         mainSkillId: createdMainSkills[0].id,
-        races: ["human"],
-        isRacial: false,
       },
       {
         name: "Базовий Захист",
@@ -249,8 +243,6 @@ async function seedMockData() {
           ac_bonus: 2,
         },
         mainSkillId: createdMainSkills[2].id,
-        races: ["human"],
-        isRacial: false,
       },
       {
         name: "Базове Заклинання",
@@ -258,8 +250,6 @@ async function seedMockData() {
         bonuses: {},
         spellEffectIncrease: 10,
         mainSkillId: createdMainSkills[1].id,
-        races: ["human"],
-        isRacial: false,
       },
     ];
 
@@ -286,8 +276,6 @@ async function seedMockData() {
           name: skillData.name,
           description: skillData.description,
           bonuses: skillData.bonuses as Prisma.InputJsonValue,
-          races: skillData.races as string[],
-          isRacial: skillData.isRacial,
           mainSkillId: skillData.mainSkillId,
           spellEffectIncrease: skillData.spellEffectIncrease || null,
         },
@@ -310,8 +298,6 @@ async function seedMockData() {
           ranged_attack_advantage: true,
         },
         mainSkillId: createdMainSkills[0].id,
-        races: ["elf"],
-        isRacial: true,
       },
       {
         name: "Магічна Стрільба",
@@ -320,16 +306,12 @@ async function seedMockData() {
           ranged_damage_percent: 20,
         },
         mainSkillId: createdMainSkills[0].id,
-        races: ["elf"],
-        isRacial: false,
       },
       {
         name: "Покращене Заклинання",
         description: "+25% до ефекту заклинань",
         spellEffectIncrease: 25,
         mainSkillId: createdMainSkills[1].id,
-        races: ["elf"],
-        isRacial: false,
       },
       {
         name: "Отруйна Стріла",
@@ -341,8 +323,6 @@ async function seedMockData() {
           duration: 3,
         },
         mainSkillId: createdMainSkills[1].id,
-        races: ["elf"],
-        isRacial: false,
       },
     ];
 
@@ -369,8 +349,6 @@ async function seedMockData() {
           name: skillData.name,
           description: skillData.description,
           bonuses: skillData.bonuses as Prisma.InputJsonValue,
-          races: skillData.races as string[],
-          isRacial: skillData.isRacial,
           mainSkillId: skillData.mainSkillId,
           spellId: skillData.spellId || null,
           spellAdditionalModifier: skillData.spellAdditionalModifier

@@ -3,6 +3,7 @@
  */
 
 import { calculatePercentBonus, formatFlatBonusBreakdown,formatPercentBonusBreakdown, matchesAttackType } from "./battle-modifiers-common";
+import { getParticipantExtras } from "./battle-participant";
 import { hasAnyAllyLowHp } from "./battle-participant-helpers";
 
 import { AttackType } from "@/lib/constants/battle";
@@ -42,7 +43,7 @@ export function calculateSkillDamagePercentBonus(
 
   for (const skill of attacker.battleData.activeSkills) {
     for (const effect of skill.effects) {
-      if (effect.isPercentage && matchesAttackType(effect.type, attackType)) {
+      if (effect.isPercentage && typeof effect.value === "number" && matchesAttackType(effect.stat, attackType)) {
         totalPercent += effect.value;
       }
     }
@@ -65,7 +66,7 @@ export function calculateSkillDamageFlatBonus(
 
   for (const skill of attacker.battleData.activeSkills) {
     for (const effect of skill.effects) {
-      if (!effect.isPercentage && matchesAttackType(effect.type, attackType)) {
+      if (!effect.isPercentage && typeof effect.value === "number" && matchesAttackType(effect.stat, attackType)) {
         totalFlat += effect.value;
       }
     }
@@ -222,8 +223,8 @@ export function calculateDamageWithModifiers(
   // Загальний flat бонус
   const totalFlat = skillFlat + artifactBonuses.flat + passiveBonuses.flat;
 
-  // Фінальний урон
-  const totalDamage = baseWithStat + percentBonusDamage + totalFlat;
+  // Фінальний урон (завжди ціле число)
+  const totalDamage = Math.floor(baseWithStat + percentBonusDamage + totalFlat);
 
   breakdown.push(`──────────`);
   breakdown.push(`Всього: ${totalDamage} урону`);
@@ -239,4 +240,36 @@ export function calculateDamageWithModifiers(
     totalDamage,
     breakdown,
   };
+}
+
+/**
+ * Застосовує резист до вхідного урону.
+ * @param damage - вхідний урон
+ * @param defender - захисник
+ * @param damageCategory - "physical" | "spell" (тип урону для вибору резисту)
+ * @returns об'єкт з фінальним уроном та інформацією про зменшення
+ */
+export function applyResistance(
+  damage: number,
+  defender: BattleParticipant,
+  damageCategory: "physical" | "spell" = "physical",
+): { finalDamage: number; resistPercent: number; resistMessage: string | null } {
+  const extras = getParticipantExtras(defender);
+  const resistances = extras.resistances;
+  if (!resistances) return { finalDamage: damage, resistPercent: 0, resistMessage: null };
+
+  let resistPercent = 0;
+  if (damageCategory === "physical") {
+    resistPercent = resistances.physical ?? 0;
+  } else if (damageCategory === "spell") {
+    resistPercent = resistances.spell ?? 0;
+  }
+
+  if (resistPercent <= 0) return { finalDamage: damage, resistPercent: 0, resistMessage: null };
+
+  const reduction = Math.floor(damage * (resistPercent / 100));
+  const finalDamage = Math.max(0, damage - reduction);
+  const resistMessage = `🛡 ${defender.basicInfo.name}: ${resistPercent}% резист (−${reduction} урону)`;
+
+  return { finalDamage, resistPercent, resistMessage };
 }

@@ -15,6 +15,7 @@
     "deploy:dev": "vercel --dev",
     "import-spells": "tsx scripts/import-spells.ts",
     "import-units": "tsx scripts/import-units.ts",
+    "import-skills-library": "tsx scripts/import-skills-library.ts",
     "seed-mock-battle": "tsx scripts/seed-mock-battle-data.ts",
     "delete-mock-battle": "tsx scripts/delete-mock-battle-data.ts",
     "reset-mock-battle": "tsx scripts/reset-mock-battle-data.ts",

@@ -16,7 +16,49 @@ export type SimpleSkillTrigger =
   | "afterOwnerSpellCast"
   | "beforeEnemySpellCast"
   | "afterEnemySpellCast"
-  | "bonusAction";
+  | "bonusAction"
+  // --- нові тригери для повного покриття SKILLS.md ---
+  | "passive" // завжди активний (пасивний ефект)
+  | "onBattleStart" // один раз на початку бою
+  | "onHit" // коли атака власника влучає
+  | "onAttack" // коли власник атакує
+  | "onKill" // коли власник вбиває ціль
+  | "onAllyDeath" // коли гине союзник
+  | "onLethalDamage" // коли власник отримує летальну шкоду
+  | "onCast" // коли власник кастує заклинання
+  | "onFirstHitTakenPerRound" // перший удар по власнику за раунд
+  | "onFirstRangedAttack" // перша дальня атака за бій
+  | "onMoraleSuccess" // при успішній перевірці моралі
+  | "allyMoraleCheck"; // при перевірці моралі союзника
+
+/**
+ * Усі допустимі тригери у вигляді масиву (для zod-валідації та імпорту)
+ */
+export const ALL_SIMPLE_TRIGGERS: readonly SimpleSkillTrigger[] = [
+  "startRound",
+  "endRound",
+  "beforeOwnerAttack",
+  "beforeEnemyAttack",
+  "afterOwnerAttack",
+  "afterEnemyAttack",
+  "beforeOwnerSpellCast",
+  "afterOwnerSpellCast",
+  "beforeEnemySpellCast",
+  "afterEnemySpellCast",
+  "bonusAction",
+  "passive",
+  "onBattleStart",
+  "onHit",
+  "onAttack",
+  "onKill",
+  "onAllyDeath",
+  "onLethalDamage",
+  "onCast",
+  "onFirstHitTakenPerRound",
+  "onFirstRangedAttack",
+  "onMoraleSuccess",
+  "allyMoraleCheck",
+] as const;
 
 /**
  * Оператори порівняння для складних тригерів
@@ -34,17 +76,29 @@ export type ValueType = "number" | "percent";
 export type StatType = "HP" | "Attack" | "AC" | "Speed" | "Morale" | "Level";
 
 /**
+ * Модифікатори тригера (умови спрацювання)
+ */
+export interface SkillTriggerModifiers {
+  probability?: number; // rand() < 0.4 → 0.4
+  oncePerBattle?: boolean; // може спрацювати лише раз за бій
+  twicePerBattle?: boolean; // може спрацювати двічі за бій
+  stackable?: boolean; // ефект стакується
+  condition?: string; // додаткова умова ("onConsumeDead", "allyHP <= 0.15", тощо)
+}
+
+/**
  * Складний тригер (умовний)
  * Формат: if {target} {operator} {value} {stat}
  * Приклад: if ally <= 15% HP
  */
 export interface ComplexSkillTrigger {
   type: "complex";
-  target: "ally" | "enemy"; // a
-  operator: ComparisonOperator; // b
-  value: number; // c (число або відсоток)
-  valueType: ValueType; // c (тип значення)
-  stat: StatType; // d
+  target: "ally" | "enemy" | "self";
+  operator: ComparisonOperator;
+  value: number;
+  valueType: ValueType;
+  stat: StatType;
+  modifiers?: SkillTriggerModifiers;
 }
 
 /**
@@ -53,6 +107,7 @@ export interface ComplexSkillTrigger {
 export interface SimpleSkillTriggerConfig {
   type: "simple";
   trigger: SimpleSkillTrigger;
+  modifiers?: SkillTriggerModifiers;
 }
 
 /**

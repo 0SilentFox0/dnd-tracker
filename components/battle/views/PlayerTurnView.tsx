@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 
 import { RollResultOverlay } from "@/components/battle/RollResultOverlay";
@@ -11,11 +10,11 @@ import { DamageRollDialog } from "@/components/battle/dialogs/DamageRollDialog";
 import { MoraleCheckDialog } from "@/components/battle/dialogs/MoraleCheckDialog";
 import { SpellDialog } from "@/components/battle/dialogs/SpellDialog";
 import { TargetSelectionDialog } from "@/components/battle/dialogs/TargetSelectionDialog";
-import { Button } from "@/components/ui/button";
-import { AttackType } from "@/lib/constants/battle";
+import { TurnStartScreen } from "@/components/battle/views/TurnStartScreen";
+import { AttackType, BATTLE_RACE, CombatStatus } from "@/lib/constants/battle";
 import { getSkillsByTrigger } from "@/lib/utils/skills/skill-triggers";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
-import type { PlayerTurnViewProps, Spell } from "@/types/battle-ui";
+import type { PlayerTurnViewProps } from "@/types/battle-ui";
 
 /**
  * Компонент для екрану ходу гравця
@@ -133,11 +132,11 @@ export function PlayerTurnView({
       // Перевіряємо расові модифікатори
       let currentMorale = participant.combatStats.morale;
 
-      if (participant.abilities.race === "human" && currentMorale < 0) {
+      if (participant.abilities.race === BATTLE_RACE.HUMAN && currentMorale < 0) {
         currentMorale = 0;
       }
 
-      if (participant.abilities.race === "necromancer") {
+      if (participant.abilities.race === BATTLE_RACE.NECROMANCER) {
         // Некроманти пропускають перевірку
         return;
       }
@@ -303,43 +302,10 @@ export function PlayerTurnView({
 
   if (!turnStarted) {
     return (
-      <div className="flex flex-col items-center justify-center h-full space-y-8 p-6 bg-black/40 backdrop-blur-xl animate-in fade-in duration-700">
-        {/* Header Stats for context (optional, but requested during turn) */}
-        <div className="absolute top-4 w-full flex justify-center opacity-50 hover:opacity-100 transition-opacity">
-          <ParticipantStats
-            participant={participant}
-            className="px-4 py-2 bg-black/60 rounded-full border border-white/10"
-          />
-        </div>
-
-        <motion.div
-          // ...
-          // Wait, replacing the whole block is risky.
-          // I will just perform smaller edits.
-
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="text-center space-y-4"
-        >
-          <div className="inline-block px-4 py-1 rounded-full bg-primary/20 text-primary text-xs font-black uppercase tracking-[0.3em] mb-2 animate-pulse">
-            Приготуватись
-          </div>
-          <h2 className="text-3xl sm:text-7xl font-black italic uppercase tracking-tighter text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]">
-            ТВІЙ ХІД
-          </h2>
-          <p className="text-xl sm:text-2xl text-white/60 font-medium italic">
-            — {participant.basicInfo.name} —
-          </p>
-        </motion.div>
-
-        <Button
-          size="lg"
-          onClick={handleStartTurn}
-          className="text-xl px-12 py-8 rounded-full bg-primary hover:bg-primary/90 shadow-[0_0_30px_rgba(var(--primary),0.5)] transition-all duration-300 transform hover:scale-110 active:scale-95 font-black uppercase tracking-widest"
-        >
-          ПОЧАТИ БІЙ
-        </Button>
-      </div>
+      <TurnStartScreen
+        participant={participant}
+        onStartTurn={handleStartTurn}
+      />
     );
   }
 
@@ -391,14 +357,14 @@ export function PlayerTurnView({
             return battle.initiativeOrder.filter(
               (p) =>
                 p.basicInfo.id !== participant.basicInfo.id &&
-                p.combatStats.status === "active",
+                p.combatStats.status === CombatStatus.ACTIVE,
             );
           } else {
             return battle.initiativeOrder.filter(
               (p) =>
                 p.basicInfo.side !== participantSide &&
                 p.basicInfo.id !== participant.basicInfo.id &&
-                p.combatStats.status === "active",
+                p.combatStats.status === CombatStatus.ACTIVE,
             );
           }
         })()}

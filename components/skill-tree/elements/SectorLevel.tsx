@@ -17,7 +17,7 @@ export function SectorLevel({
   levelName,
   darkenPercent,
 }: SectorLevelProps) {
-  const skewY = -60 + 360 / mainSkills.length;
+  const skewY = -60 + 300 / mainSkills.length;
 
   return (
     <div
@@ -60,7 +60,7 @@ export function SectorLevel({
                 height: "50%",
                 transformOrigin: "0 100%",
                 transform: `rotate(${(startAngle * 180) / Math.PI}deg) skewY(${
-                  index === mainSkills.length - 1 ? -37 : skewY
+                  index === mainSkills.length - 1 ? -30 : skewY
                 }deg)`,
                 borderLeft: "1px solid rgba(0,0,0,0.15)",
                 overflow: "hidden",

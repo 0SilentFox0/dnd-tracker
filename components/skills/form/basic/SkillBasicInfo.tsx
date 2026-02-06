@@ -1,37 +1,27 @@
 "use client";
 
 import { OptimizedImage } from "@/components/common/OptimizedImage";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { Textarea } from "@/components/ui/textarea";
-import type { Race } from "@/types/races";
 
 interface SkillBasicInfoProps {
   basicInfo: {
     name: string;
     description: string;
     icon: string;
-    selectedRaces: string[];
-    isRacial: boolean;
     setters: {
       setName: (value: string) => void;
       setDescription: (value: string) => void;
       setIcon: (value: string) => void;
-      setIsRacial: (checked: boolean) => void;
-    };
-    handlers: {
-      handleRaceToggle: (raceId: string) => void;
     };
   };
-  races: Race[];
 }
 
 export function SkillBasicInfo({
   basicInfo,
-  races,
 }: SkillBasicInfoProps) {
-  const { name, description, icon, selectedRaces, isRacial, setters, handlers } = basicInfo;
+  const { name, description, icon, setters } = basicInfo;
 
   return (
     <div className="rounded-md border p-4 space-y-3">
@@ -84,41 +74,6 @@ export function SkillBasicInfo({
             </div>
           </div>
         )}
-      </div>
-
-      <div className="space-y-3">
-        <Label>Раси (для яких підходить скіл)</Label>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-          {races.map((race) => (
-            <div key={race.id} className="flex items-center space-x-2">
-              <Checkbox
-                id={`race-${race.id}`}
-                checked={selectedRaces.includes(race.id)}
-                onCheckedChange={() => handlers.handleRaceToggle(race.id)}
-              />
-              <Label
-                htmlFor={`race-${race.id}`}
-                className="text-sm font-normal cursor-pointer"
-              >
-                {race.name}
-              </Label>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="flex items-center space-x-2">
-        <Checkbox
-          id="is-racial"
-          checked={isRacial}
-          onCheckedChange={(checked) => setters.setIsRacial(checked === true)}
-        />
-        <Label
-          htmlFor="is-racial"
-          className="text-sm font-normal cursor-pointer"
-        >
-          Рассовий навик
-        </Label>
       </div>
     </div>
   );

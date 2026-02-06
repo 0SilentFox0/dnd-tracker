@@ -87,17 +87,25 @@ export function MainSkillCard({
           {mainSkill.icon && (
             <div>
               <span className="text-sm font-semibold">Іконка:</span>
-              <div className="mt-1">
-                <Image
-                  src={mainSkill.icon}
-                  alt={mainSkill.name}
-                  width={32}
-                  height={32}
-                  className="w-8 h-8 object-cover rounded"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = "none";
-                  }}
-                />
+              <div className="mt-1 flex items-center justify-center w-8 h-8 rounded bg-muted">
+                {mainSkill.icon.startsWith("http://") ||
+                mainSkill.icon.startsWith("https://") ||
+                mainSkill.icon.startsWith("/") ? (
+                  <Image
+                    src={mainSkill.icon}
+                    alt={mainSkill.name}
+                    width={32}
+                    height={32}
+                    className="w-8 h-8 object-cover rounded"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = "none";
+                    }}
+                  />
+                ) : (
+                  <span className="text-xl" title={mainSkill.name}>
+                    {mainSkill.icon}
+                  </span>
+                )}
               </div>
             </div>
           )}

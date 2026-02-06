@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ParticipantSide } from "@/lib/constants/battle";
 import {
   useAttack,
@@ -13,8 +13,10 @@ import {
   useStartBattle,
 } from "@/lib/hooks/useBattles";
 import { createClient } from "@/lib/supabase/client";
+import type { CounterAttackResultInfo } from "@/components/battle/dialogs/CounterAttackResultDialog";
 import type { BattleScene } from "@/types/api";
 import type { BattleParticipant } from "@/types/battle";
+import type { AttackData } from "@/types/api";
 
 export function useBattleSceneLogic(id: string, battleId: string) {
   const queryClient = useQueryClient();
@@ -28,6 +30,9 @@ export function useBattleSceneLogic(id: string, battleId: string) {
     string | null
   >(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [counterAttackInfo, setCounterAttackInfo] =
+    useState<CounterAttackResultInfo | null>(null);
+  const [counterAttackDialogOpen, setCounterAttackDialogOpen] = useState(false);
 
   const { data: battle, isLoading: loading } = useBattle(id, battleId);
 
@@ -108,6 +113,28 @@ export function useBattleSceneLogic(id: string, battleId: string) {
 
   const handleStartBattle = () => startBattleMutation.mutate();
 
+  const handleAttack = useCallback(
+    (data: AttackData, onSuccess?: () => void) => {
+      attackMutation.mutate(data, {
+        onSuccess: (updatedBattle: BattleScene) => {
+          const log = updatedBattle?.battleLog ?? [];
+          const lastAction = log[log.length - 1];
+          const hpChanges = lastAction?.hpChanges ?? [];
+          if (hpChanges.length >= 2) {
+            setCounterAttackInfo({
+              defenderName: hpChanges[0].participantName,
+              attackerName: hpChanges[1].participantName,
+              damage: hpChanges[1].change ?? 0,
+            });
+            setCounterAttackDialogOpen(true);
+          }
+          onSuccess?.();
+        },
+      });
+    },
+    [attackMutation]
+  );
+
   const allies = useMemo(() => {
     if (!battle) return [];
     return battle.initiativeOrder.filter(
@@ -127,13 +154,14 @@ export function useBattleSceneLogic(id: string, battleId: string) {
   const canSeeEnemyHp = useMemo(() => {
     if (!battle || isDM) return isDM;
     if (!currentParticipant) return false;
+    const skills = currentParticipant.battleData?.activeSkills ?? [];
     return (
-      currentParticipant.battleData?.activeSkills?.some(
-        (skill: any) =>
+      skills.some(
+        (skill: { name?: string; effects?: Array<{ type?: string }> }) =>
           skill.name?.toLowerCase().includes("enemy hp") ||
           skill.name?.toLowerCase().includes("detect") ||
-          skill.effects?.some((e: any) => e.type === "see_enemy_hp"),
-      ) || false
+          skill.effects?.some((e) => e.type === "see_enemy_hp"),
+      ) ?? false
     );
   }, [battle, isDM, currentParticipant]);
 
@@ -159,6 +187,11 @@ export function useBattleSceneLogic(id: string, battleId: string) {
       attack: { open: attackDialogOpen, setOpen: setAttackDialogOpen },
       spell: { open: spellDialogOpen, setOpen: setSpellDialogOpen },
       morale: { open: moraleDialogOpen, setOpen: setMoraleDialogOpen },
+      counterAttack: {
+        open: counterAttackDialogOpen,
+        setOpen: setCounterAttackDialogOpen,
+        info: counterAttackInfo,
+      },
     },
     mutations: {
       nextTurn: nextTurnMutation,
@@ -171,6 +204,7 @@ export function useBattleSceneLogic(id: string, battleId: string) {
     handlers: {
       handleNextTurn,
       handleStartBattle,
+      handleAttack,
       setParticipantForMorale,
     },
   };

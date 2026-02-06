@@ -17,6 +17,7 @@ import {
   BattleParticipant,
   EquippedArtifact,
   RacialAbility,
+  SkillEffect,
 } from "@/types/battle";
 import type { SkillTriggers } from "@/types/skill-triggers";
 
@@ -187,10 +188,11 @@ export async function createBattleParticipantFromCharacter(
     battleData: {
       attacks,
       activeEffects: [],
-      passiveAbilities: [], // TODO: Розпакувати з артефактів, скілів
+      passiveAbilities: [],
       racialAbilities,
       activeSkills,
       equippedArtifacts,
+      skillUsageCounts: {},
     },
     actionFlags: {
       hasUsedAction: false,
@@ -209,17 +211,17 @@ export async function createBattleParticipantFromCharacter(
   for (const skill of participant.battleData.activeSkills) {
     for (const effect of skill.effects) {
       if (
-        effect.type === "min_targets" ||
-        effect.type === "min_targets_bonus"
+        effect.stat === "min_targets" ||
+        effect.stat === "min_targets_bonus"
       ) {
-        minTargetsBonus += effect.value;
+        minTargetsBonus += typeof effect.value === "number" ? effect.value : 0;
       }
 
       if (
-        effect.type === "max_targets" ||
-        effect.type === "max_targets_bonus"
+        effect.stat === "max_targets" ||
+        effect.stat === "max_targets_bonus"
       ) {
-        maxTargetsBonus += effect.value;
+        maxTargetsBonus += typeof effect.value === "number" ? effect.value : 0;
       }
     }
   }
@@ -252,7 +254,252 @@ export async function createBattleParticipantFromCharacter(
   participant.combatStats.minTargets += minTargetsBonus;
   participant.combatStats.maxTargets += maxTargetsBonus;
 
+  // Застосовуємо пасивні ефекти скілів (resistance, hp_bonus, morale, crit_threshold, тощо)
+  applyPassiveSkillEffects(participant);
+
   return participant;
+}
+
+/**
+ * Застосовує пасивні (trigger: "passive") ефекти скілів до учасника бою при ініціалізації.
+ * Змінює combatStats та зберігає дані у battleData для подальшого використання.
+ */
+export function applyPassiveSkillEffects(participant: BattleParticipant): void {
+  for (const skill of participant.battleData.activeSkills) {
+    // Тільки пасивні скіли
+    const isPassive = skill.skillTriggers?.some(
+      t => t.type === "simple" && t.trigger === "passive"
+    );
+    if (!isPassive) continue;
+
+    for (const effect of skill.effects) {
+      const numValue = typeof effect.value === "number" ? effect.value : 0;
+
+      switch (effect.stat) {
+        // --- HP бонус (формула або flat) ---
+        case "hp_bonus": {
+          let bonus = 0;
+          if (effect.type === "formula" && typeof effect.value === "string") {
+            bonus = evaluateFormula(effect.value, participant);
+          } else {
+            bonus = numValue;
+          }
+          participant.combatStats.maxHp += bonus;
+          participant.combatStats.currentHp += bonus;
+          break;
+        }
+
+        // --- Резисти (зберігаються в окремих полях для damage calc) ---
+        case "physical_resistance":
+        case "spell_resistance":
+        case "all_resistance": {
+          // Зберігаємо в розширених даних учасника
+          const resistances = getParticipantResistances(participant);
+          if (effect.stat === "physical_resistance") {
+            resistances.physical = Math.min(100, (resistances.physical ?? 0) + numValue);
+          } else if (effect.stat === "spell_resistance") {
+            resistances.spell = Math.min(100, (resistances.spell ?? 0) + numValue);
+          } else if (effect.stat === "all_resistance") {
+            resistances.physical = Math.min(100, (resistances.physical ?? 0) + numValue);
+            resistances.spell = Math.min(100, (resistances.spell ?? 0) + numValue);
+          }
+          setParticipantResistances(participant, resistances);
+          break;
+        }
+
+        // --- Мораль ---
+        case "morale": {
+          if (effect.type === "min") {
+            // Встановлюємо мінімум моралі
+            const minMorale = numValue;
+            if (participant.combatStats.morale < minMorale) {
+              participant.combatStats.morale = minMorale;
+            }
+            // Зберігаємо мінімум для подальшого використання
+            const ext = getParticipantExtras(participant);
+            ext.minMorale = Math.max(ext.minMorale ?? -Infinity, minMorale);
+            setParticipantExtras(participant, ext);
+          } else {
+            participant.combatStats.morale += numValue;
+          }
+          break;
+        }
+
+        // --- Крит-поріг ---
+        case "crit_threshold": {
+          const ext = getParticipantExtras(participant);
+          ext.critThreshold = Math.min(ext.critThreshold ?? 20, numValue);
+          setParticipantExtras(participant, ext);
+          break;
+        }
+
+        // --- Рівень заклинань ---
+        case "spell_levels": {
+          const ext = getParticipantExtras(participant);
+          ext.maxSpellLevel = Math.max(ext.maxSpellLevel ?? 0, numValue);
+          setParticipantExtras(participant, ext);
+          break;
+        }
+
+        // --- Додаткові слоти ---
+        case "spell_slots_lvl4_5": {
+          // Додаємо слоти 4 та 5 рівня
+          for (const lvl of ["4", "5"]) {
+            const slot = participant.spellcasting.spellSlots[lvl];
+            if (slot) {
+              slot.max += numValue;
+              slot.current += numValue;
+            } else {
+              participant.spellcasting.spellSlots[lvl] = { max: numValue, current: numValue };
+            }
+          }
+          break;
+        }
+
+        // --- Disadvantage на ворожі атаки ---
+        case "enemy_attack_disadvantage": {
+          const ext = getParticipantExtras(participant);
+          ext.enemyAttackDisadvantage = true;
+          setParticipantExtras(participant, ext);
+          break;
+        }
+
+        // --- Advantage на всі кидки ---
+        case "advantage": {
+          const ext = getParticipantExtras(participant);
+          ext.advantageOnAllRolls = true;
+          setParticipantExtras(participant, ext);
+          break;
+        }
+
+        // --- Цілі для заклинань 4-5 рівня ---
+        case "spell_targets_lvl4_5": {
+          const ext = getParticipantExtras(participant);
+          ext.spellTargetsLvl45 = (ext.spellTargetsLvl45 ?? 1) + numValue;
+          setParticipantExtras(participant, ext);
+          break;
+        }
+
+        // --- Заклинання світла на всіх союзників ---
+        case "light_spells_target_all_allies": {
+          const ext = getParticipantExtras(participant);
+          ext.lightSpellsTargetAllAllies = true;
+          setParticipantExtras(participant, ext);
+          break;
+        }
+
+        // --- Контроль юнітів ---
+        case "control_units": {
+          const ext = getParticipantExtras(participant);
+          ext.controlUnits = (ext.controlUnits ?? 0) + numValue;
+          setParticipantExtras(participant, ext);
+          break;
+        }
+
+        // --- Пасивні % бонуси до урону (melee, ranged, counter, spell-тип) ---
+        // Ці не змінюють combatStats, вони зберігаються в effects і застосовуються при розрахунку
+        case "melee_damage":
+        case "ranged_damage":
+        case "counter_damage":
+        case "dark_spell_damage":
+        case "chaos_spell_damage":
+        case "spell_damage":
+        case "physical_damage":
+        case "damage":
+          // Вже зберігається в skill.effects, розрахунок робиться в damage-calculations
+          break;
+
+        // --- Мораль per kill/death ---
+        case "morale_per_kill":
+        case "morale_per_ally_death": {
+          const ext = getParticipantExtras(participant);
+          if (effect.stat === "morale_per_kill") {
+            ext.moralePerKill = (ext.moralePerKill ?? 0) + numValue;
+          } else {
+            ext.moralePerAllyDeath = (ext.moralePerAllyDeath ?? 0) + numValue;
+          }
+          setParticipantExtras(participant, ext);
+          break;
+        }
+
+        // --- Інші пасивні ефекти — зберігаються для подальшого використання ---
+        default:
+          break;
+      }
+    }
+  }
+}
+
+/**
+ * Обчислює формулу для ефекту скіла.
+ * Підтримує: hero_level, lost_hp_percent, morale, floor()
+ */
+function evaluateFormula(formula: string, participant: BattleParticipant): number {
+  try {
+    const level = participant.abilities.level;
+    const maxHp = participant.combatStats.maxHp;
+    const currentHp = participant.combatStats.currentHp;
+    const lostHpPercent = maxHp > 0 ? ((maxHp - currentHp) / maxHp) * 100 : 0;
+    const morale = participant.combatStats.morale;
+
+    // Замінюємо змінні на значення
+    let expr = formula
+      .replace(/hero_level/gi, String(level))
+      .replace(/lost_hp_percent/gi, String(lostHpPercent))
+      .replace(/morale/gi, String(morale));
+
+    // Замінюємо floor(...) на Math.floor(...)
+    expr = expr.replace(/floor\(/gi, "Math.floor(");
+
+    // Обчислюємо (безпечно — тільки числа і математичні оператори)
+    // eslint-disable-next-line no-new-func
+    const result = new Function(`"use strict"; return (${expr});`)();
+    return typeof result === "number" && !isNaN(result) ? Math.floor(result) : 0;
+  } catch {
+    return 0;
+  }
+}
+
+// ---------- Розширені дані учасника (extras) ----------
+
+interface ParticipantResistances {
+  physical?: number;  // % зменшення фізичного урону
+  spell?: number;     // % зменшення магічного урону
+}
+
+export interface ParticipantExtras {
+  critThreshold?: number;
+  maxSpellLevel?: number;
+  minMorale?: number;
+  enemyAttackDisadvantage?: boolean;
+  advantageOnAllRolls?: boolean;
+  spellTargetsLvl45?: number;
+  lightSpellsTargetAllAllies?: boolean;
+  controlUnits?: number;
+  moralePerKill?: number;
+  moralePerAllyDeath?: number;
+  resistances?: ParticipantResistances;
+  skillUsageCounts?: Record<string, number>;
+}
+
+/** Отримує розширені дані з battleData (зберігаються як додаткове JSON-поле) */
+export function getParticipantExtras(participant: BattleParticipant): ParticipantExtras {
+  return ((participant.battleData as unknown as Record<string, unknown>).extras as ParticipantExtras) ?? {};
+}
+
+export function setParticipantExtras(participant: BattleParticipant, extras: ParticipantExtras): void {
+  (participant.battleData as unknown as Record<string, unknown>).extras = extras;
+}
+
+function getParticipantResistances(participant: BattleParticipant): ParticipantResistances {
+  const extras = getParticipantExtras(participant);
+  return extras.resistances ?? {};
+}
+
+function setParticipantResistances(participant: BattleParticipant, res: ParticipantResistances): void {
+  const extras = getParticipantExtras(participant);
+  extras.resistances = res;
+  setParticipantExtras(participant, extras);
 }
 
 /**
@@ -360,10 +607,11 @@ export async function createBattleParticipantFromUnit(
     battleData: {
       attacks: battleAttacks,
       activeEffects: [],
-      passiveAbilities: [], // TODO: Розпакувати з specialAbilities
+      passiveAbilities: [],
       racialAbilities,
-      activeSkills: [], // Units не мають скілів з дерева прокачки
+      activeSkills: [],
       equippedArtifacts: [],
+      skillUsageCounts: {},
     },
     actionFlags: {
       hasUsedAction: false,
@@ -474,14 +722,38 @@ async function extractActiveSkillsFromCharacter(
       continue;
     }
 
-    // Розпаковуємо bonuses в effects
-    const bonuses = (skill.bonuses as Record<string, number>) || {};
+    // Розпаковуємо effects: спочатку з combatStats.effects (повна інформація stat/type/value/duration),
+    // інакше з bonuses (легасі)
+    type RawEffect = { stat: string; type: string; value?: number | string | boolean; duration?: number };
+    type CombatStatsEffects = { effects?: RawEffect[] };
+    const combatStats = (skill.combatStats as CombatStatsEffects) ?? {};
+    const rawEffects = Array.isArray(combatStats.effects) ? combatStats.effects : [];
 
-    const effects = Object.entries(bonuses).map(([type, value]) => ({
-      type,
-      value,
-      isPercentage: type.includes("percent") || type.includes("_percent"),
-    }));
+    let effects: SkillEffect[];
+
+    if (rawEffects.length > 0) {
+      effects = rawEffects
+        .filter((e) => e.stat)
+        .map((e) => ({
+          stat: e.stat,
+          type: e.type,
+          value: e.value ?? 0,
+          isPercentage: e.type === "percent",
+          duration: e.duration,
+        }));
+    } else {
+      const bonuses = (skill.bonuses as Record<string, number>) || {};
+      const percentKeys = ["melee_damage", "ranged_damage", "counter_damage"];
+      effects = Object.entries(bonuses).map(([key, value]) => ({
+        stat: key,
+        type: percentKeys.includes(key) || key.includes("percent") ? "percent" : "flat",
+        value,
+        isPercentage:
+          key.includes("percent") ||
+          key.includes("_percent") ||
+          percentKeys.includes(key),
+      }));
+    }
 
     // Формуємо spellEnhancements якщо є покращення заклинання
     let spellEnhancements: ActiveSkill["spellEnhancements"] | undefined;

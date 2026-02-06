@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { prisma } from "@/lib/db";
-import { requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
+import { requireCampaignAccess, requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
 
 // Схема для згрупованої структури (всі поля опціональні для оновлення)
 const updateSkillSchema = z.object({
@@ -15,8 +15,6 @@ const updateSkillSchema = z.object({
         (val) => (val === "" ? null : val),
         z.string().url().nullable().optional(),
       ),
-      races: z.array(z.string()).optional(),
-      isRacial: z.boolean().optional(),
     })
     .optional(),
   bonuses: z.record(z.string(), z.number()).optional(),
@@ -27,12 +25,30 @@ const updateSkillSchema = z.object({
       speed: z.number().optional(),
       physicalResistance: z.number().optional(),
       magicalResistance: z.number().optional(),
+      min_targets: z.number().optional(),
+      max_targets: z.number().optional(),
+      effects: z
+        .array(
+          z.object({
+            stat: z.string(),
+            type: z.string(),
+            value: z.union([z.number(), z.string(), z.boolean()]),
+            isPercentage: z.boolean().optional(),
+            duration: z.number().optional(),
+            target: z
+              .enum(["self", "enemy", "all_enemies", "all_allies"])
+              .optional(),
+            maxTriggers: z.number().min(1).max(100).nullable().optional(),
+          }),
+        )
+        .optional(),
     })
     .optional(),
   spellData: z
     .object({
       spellId: z.string().nullable().optional(),
       spellGroupId: z.string().nullable().optional(),
+      grantedSpellId: z.string().nullable().optional(),
     })
     .optional(),
   spellEnhancementData: z
@@ -70,6 +86,7 @@ const updateSkillSchema = z.object({
       mainSkillId: z.string().nullable().optional(),
     })
     .optional(),
+  image: z.string().nullable().optional(),
   skillTriggers: z
     .array(
       z.union([
@@ -88,7 +105,26 @@ const updateSkillSchema = z.object({
             "beforeEnemySpellCast",
             "afterEnemySpellCast",
             "bonusAction",
+            "passive",
+            "onBattleStart",
+            "onHit",
+            "onAttack",
+            "onKill",
+            "onAllyDeath",
+            "onLethalDamage",
+            "onCast",
+            "onFirstHitTakenPerRound",
+            "onFirstRangedAttack",
+            "onMoraleSuccess",
+            "allyMoraleCheck",
           ]),
+          modifiers: z.object({
+            probability: z.number().optional(),
+            oncePerBattle: z.boolean().optional(),
+            twicePerBattle: z.boolean().optional(),
+            stackable: z.boolean().optional(),
+            condition: z.string().optional(),
+          }).optional(),
         }),
         // Складний тригер
         z.object({
@@ -98,11 +134,172 @@ const updateSkillSchema = z.object({
           value: z.number(),
           valueType: z.enum(["number", "percent"]),
           stat: z.enum(["HP", "Attack", "AC", "Speed", "Morale", "Level"]),
+          modifiers: z.object({
+            probability: z.number().optional(),
+            oncePerBattle: z.boolean().optional(),
+            twicePerBattle: z.boolean().optional(),
+            stackable: z.boolean().optional(),
+            condition: z.string().optional(),
+          }).optional(),
         }),
       ]),
     )
     .optional(),
 });
+
+/** Форматує один скіл з Prisma у згруповану структуру для фронтенду */
+function formatSkillResponse(skill: {
+  id: string;
+  campaignId: string;
+  name: string;
+  description: string | null;
+  icon: string | null;
+  bonuses: unknown;
+  damage: number | null;
+  armor: number | null;
+  speed: number | null;
+  physicalResistance: number | null;
+  magicalResistance: number | null;
+  spellId: string | null;
+  spellGroupId: string | null;
+  mainSkillId: string | null;
+  spellEnhancementTypes: unknown;
+  spellEffectIncrease: number | null;
+  spellTargetChange: unknown;
+  spellAdditionalModifier: unknown;
+  spellNewSpellId: string | null;
+  grantedSpellId?: string | null;
+  basicInfo: unknown;
+  combatStats: unknown;
+  mainSkillData: unknown;
+  spellData: unknown;
+  spellEnhancementData: unknown;
+  skillTriggers: unknown;
+  image: string | null;
+  createdAt: Date;
+  spell?: { id: string; name: string } | null;
+  spellGroup?: { id: string; name: string } | null;
+  grantedSpell?: { id: string; name: string } | null;
+}) {
+  let basicInfo: Record<string, unknown>;
+  if (
+    skill.basicInfo &&
+    typeof skill.basicInfo === "object" &&
+    !Array.isArray(skill.basicInfo)
+  ) {
+    basicInfo = { ...(skill.basicInfo as Record<string, unknown>) };
+    if (basicInfo.name === undefined || basicInfo.name === "")
+      basicInfo.name = skill.name || "";
+    if (basicInfo.description === undefined)
+      basicInfo.description = skill.description ?? "";
+    if (basicInfo.icon === undefined) basicInfo.icon = skill.icon ?? "";
+  } else {
+    basicInfo = {
+      name: skill.name || "",
+      description: skill.description || "",
+      icon: skill.icon || "",
+    };
+  }
+  const combatStats =
+    skill.combatStats &&
+    typeof skill.combatStats === "object" &&
+    !Array.isArray(skill.combatStats)
+      ? (skill.combatStats as Record<string, unknown>)
+      : {
+          damage: skill.damage || undefined,
+          armor: skill.armor || undefined,
+          speed: skill.speed || undefined,
+          physicalResistance: skill.physicalResistance || undefined,
+          magicalResistance: skill.magicalResistance || undefined,
+        };
+  const spellDataRaw =
+    skill.spellData &&
+    typeof skill.spellData === "object" &&
+    !Array.isArray(skill.spellData)
+      ? (skill.spellData as Record<string, unknown>)
+      : {};
+  const spellData = {
+    spellId: skill.spellId || (spellDataRaw.spellId as string) || undefined,
+    spellGroupId:
+      skill.spellGroupId || (spellDataRaw.spellGroupId as string) || undefined,
+    grantedSpellId:
+      skill.grantedSpellId ||
+      (spellDataRaw.grantedSpellId as string) ||
+      undefined,
+  };
+  const spellEnhancementData =
+    skill.spellEnhancementData &&
+    typeof skill.spellEnhancementData === "object" &&
+    !Array.isArray(skill.spellEnhancementData)
+      ? (skill.spellEnhancementData as Record<string, unknown>)
+      : {
+          spellEnhancementTypes: Array.isArray(skill.spellEnhancementTypes)
+            ? skill.spellEnhancementTypes
+            : [],
+          spellEffectIncrease: skill.spellEffectIncrease || undefined,
+          spellTargetChange: skill.spellTargetChange || undefined,
+          spellAdditionalModifier: skill.spellAdditionalModifier || undefined,
+          spellNewSpellId: skill.spellNewSpellId || undefined,
+        };
+  const mainSkillData =
+    skill.mainSkillData &&
+    typeof skill.mainSkillData === "object" &&
+    !Array.isArray(skill.mainSkillData)
+      ? (skill.mainSkillData as Record<string, unknown>)
+      : { mainSkillId: skill.mainSkillId || undefined };
+
+  return {
+    id: skill.id,
+    campaignId: skill.campaignId,
+    basicInfo,
+    image: skill.image ?? null,
+    bonuses: (skill.bonuses as Record<string, number>) || {},
+    combatStats,
+    spellData,
+    spellEnhancementData,
+    mainSkillData,
+    skillTriggers: Array.isArray(skill.skillTriggers) ? skill.skillTriggers : [],
+    createdAt: skill.createdAt,
+    spell: skill.spell
+      ? { id: skill.spell.id, name: skill.spell.name }
+      : null,
+    spellGroup: skill.spellGroup
+      ? { id: skill.spellGroup.id, name: skill.spellGroup.name }
+      : null,
+    grantedSpell: skill.grantedSpell
+      ? { id: skill.grantedSpell.id, name: skill.grantedSpell.name }
+      : null,
+  };
+}
+
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string; skillId: string }> },
+) {
+  try {
+    const { id, skillId } = await params;
+
+    const accessResult = await requireCampaignAccess(id, false);
+    if (accessResult instanceof NextResponse) return accessResult;
+
+    const skill = await prisma.skill.findUnique({
+      where: { id: skillId },
+      include: { spell: true, spellGroup: true, grantedSpell: true },
+    });
+
+    if (!skill || skill.campaignId !== id) {
+      return NextResponse.json({ error: "Skill not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(formatSkillResponse(skill));
+  } catch (error) {
+    console.error("Error fetching skill:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
+  }
+}
 
 export async function PATCH(
   request: Request,
@@ -134,6 +331,8 @@ export async function PATCH(
 
     const updateData: Prisma.SkillUpdateInput = {};
 
+    if (data.image !== undefined) updateData.image = data.image;
+
     // Оновлюємо згруповані дані
     if (data.basicInfo !== undefined) {
       updateData.basicInfo = data.basicInfo as Prisma.InputJsonValue;
@@ -149,12 +348,6 @@ export async function PATCH(
 
       if (basicInfo.icon !== undefined)
         updateData.icon = basicInfo.icon as string | null;
-
-      if (basicInfo.races !== undefined)
-        updateData.races = basicInfo.races as Prisma.InputJsonValue;
-
-      if (basicInfo.isRacial !== undefined)
-        updateData.isRacial = basicInfo.isRacial as boolean;
     }
 
     if (data.bonuses !== undefined) {
@@ -200,6 +393,15 @@ export async function PATCH(
         } else {
           updateData.spellGroup = {
             connect: { id: spellData.spellGroupId as string },
+          };
+        }
+      }
+      if (spellData.grantedSpellId !== undefined) {
+        if (spellData.grantedSpellId === null) {
+          updateData.grantedSpell = { disconnect: true };
+        } else {
+          updateData.grantedSpell = {
+            connect: { id: spellData.grantedSpellId as string },
           };
         }
       }
@@ -279,6 +481,7 @@ export async function PATCH(
       include: {
         spell: true,
         spellGroup: true,
+        grantedSpell: true,
         mainSkill: true,
       },
     });
@@ -293,10 +496,6 @@ export async function PATCH(
             name: updatedSkill.name || "",
             description: updatedSkill.description || "",
             icon: updatedSkill.icon || "",
-            races: Array.isArray(updatedSkill.races)
-              ? updatedSkill.races
-              : (updatedSkill.races as unknown as string[]) || [],
-            isRacial: updatedSkill.isRacial || false,
           };
 
     const combatStats =
@@ -312,15 +511,19 @@ export async function PATCH(
             magicalResistance: updatedSkill.magicalResistance || undefined,
           };
 
-    const spellData =
+    const patchSpellDataRaw =
       updatedSkill.spellData &&
       typeof updatedSkill.spellData === "object" &&
       !Array.isArray(updatedSkill.spellData)
         ? (updatedSkill.spellData as Record<string, unknown>)
-        : {
-            spellId: updatedSkill.spellId || undefined,
-            spellGroupId: updatedSkill.spellGroupId || undefined,
-          };
+        : {};
+    const spellData = {
+      spellId: updatedSkill.spellId || (patchSpellDataRaw.spellId as string) || undefined,
+      spellGroupId:
+        updatedSkill.spellGroupId || (patchSpellDataRaw.spellGroupId as string) || undefined,
+      grantedSpellId:
+        updatedSkill.grantedSpellId || (patchSpellDataRaw.grantedSpellId as string) || undefined,
+    };
 
     const spellEnhancementData =
       updatedSkill.spellEnhancementData &&
@@ -353,6 +556,7 @@ export async function PATCH(
       id: updatedSkill.id,
       campaignId: updatedSkill.campaignId,
       basicInfo,
+      image: updatedSkill.image ?? null,
       bonuses: (updatedSkill.bonuses as Record<string, number>) || {},
       combatStats,
       spellData,
@@ -372,6 +576,12 @@ export async function PATCH(
         ? {
             id: updatedSkill.spellGroup.id,
             name: updatedSkill.spellGroup.name,
+          }
+        : null,
+      grantedSpell: updatedSkill.grantedSpell
+        ? {
+            id: updatedSkill.grantedSpell.id,
+            name: updatedSkill.grantedSpell.name,
           }
         : null,
     };

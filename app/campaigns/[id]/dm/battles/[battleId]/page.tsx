@@ -22,6 +22,8 @@ import {
   useDeleteBattle,
   useUpdateBattle,
 } from "@/lib/hooks/useBattles";
+import { ParticipantSide } from "@/lib/constants/battle";
+import type { BattlePreparationParticipant } from "@/types/battle";
 
 interface Character {
   id: string;
@@ -36,13 +38,6 @@ interface Unit {
   name: string;
   groupId: string | null;
   avatar: string | null;
-}
-
-interface Participant {
-  id: string;
-  type: "character" | "unit";
-  side: "ally" | "enemy";
-  quantity?: number;
 }
 
 export default function EditBattlePage({
@@ -66,7 +61,9 @@ export default function EditBattlePage({
     description: "",
   });
 
-  const [participants, setParticipants] = useState<Participant[]>([]);
+  const [participants, setParticipants] = useState<
+    BattlePreparationParticipant[]
+  >([]);
 
   // Завантажуємо персонажів та юнітів
   useEffect(() => {
@@ -103,7 +100,7 @@ export default function EditBattlePage({
         name: battle.name || "",
         description: (battle.description as string) || "",
       });
-      setParticipants((battle.participants as Participant[]) || []);
+      setParticipants(battle.participants ?? []);
     }
   }, [battle]);
 
@@ -115,14 +112,17 @@ export default function EditBattlePage({
     if (checked) {
       setParticipants([
         ...participants,
-        { id: participantId, type, side: "ally" },
+        { id: participantId, type, side: ParticipantSide.ALLY },
       ]);
     } else {
       setParticipants(participants.filter((p) => p.id !== participantId));
     }
   };
 
-  const handleSideChange = (participantId: string, side: "ally" | "enemy") => {
+  const handleSideChange = (
+    participantId: string,
+    side: BattlePreparationParticipant["side"],
+  ) => {
     setParticipants(
       participants.map((p) => (p.id === participantId ? { ...p, side } : p)),
     );
@@ -148,7 +148,7 @@ export default function EditBattlePage({
       {
         name: formData.name,
         description: formData.description,
-        participants: participants as any,
+        participants,
       },
       {
         onSuccess: () => {
@@ -277,7 +277,7 @@ export default function EditBattlePage({
                 </h4>
                 <div className="space-y-2">
                   {participants
-                    .filter((p) => p.side === "ally" && p.type === "character")
+                    .filter((p) => p.side === ParticipantSide.ALLY && p.type === "character")
                     .map((participant) => {
                       const entity = characters.find(
                         (c) => c.id === participant.id,
@@ -307,7 +307,7 @@ export default function EditBattlePage({
                             variant="ghost"
                             size="sm"
                             onClick={() =>
-                              handleSideChange(participant.id, "enemy")
+                              handleSideChange(participant.id, ParticipantSide.ENEMY)
                             }
                           >
                             →
@@ -324,7 +324,7 @@ export default function EditBattlePage({
                 </h4>
                 <div className="space-y-2">
                   {participants
-                    .filter((p) => p.side === "ally" && p.type === "unit")
+                    .filter((p) => p.side === ParticipantSide.ALLY && p.type === "unit")
                     .map((participant) => {
                       const entity = units.find((u) => u.id === participant.id);
                       if (!entity) return null;
@@ -355,7 +355,7 @@ export default function EditBattlePage({
                             variant="ghost"
                             size="sm"
                             onClick={() =>
-                              handleSideChange(participant.id, "enemy")
+                              handleSideChange(participant.id, ParticipantSide.ENEMY)
                             }
                           >
                             →
@@ -366,7 +366,7 @@ export default function EditBattlePage({
                 </div>
               </div>
 
-              {participants.filter((p) => p.side === "ally").length === 0 && (
+              {participants.filter((p) => p.side === ParticipantSide.ALLY).length === 0 && (
                 <p className="text-sm text-muted-foreground text-center py-8">
                   Немає обраних союзників
                 </p>
@@ -389,7 +389,7 @@ export default function EditBattlePage({
                 </h4>
                 <div className="space-y-2">
                   {participants
-                    .filter((p) => p.side === "enemy" && p.type === "character")
+                    .filter((p) => p.side === ParticipantSide.ENEMY && p.type === "character")
                     .map((participant) => {
                       const entity = characters.find(
                         (c) => c.id === participant.id,
@@ -419,7 +419,7 @@ export default function EditBattlePage({
                             variant="ghost"
                             size="sm"
                             onClick={() =>
-                              handleSideChange(participant.id, "ally")
+                              handleSideChange(participant.id, ParticipantSide.ALLY)
                             }
                           >
                             ←
@@ -436,7 +436,7 @@ export default function EditBattlePage({
                 </h4>
                 <div className="space-y-2">
                   {participants
-                    .filter((p) => p.side === "enemy" && p.type === "unit")
+                    .filter((p) => p.side === ParticipantSide.ENEMY && p.type === "unit")
                     .map((participant) => {
                       const entity = units.find((u) => u.id === participant.id);
                       if (!entity) return null;
@@ -467,7 +467,7 @@ export default function EditBattlePage({
                             variant="ghost"
                             size="sm"
                             onClick={() =>
-                              handleSideChange(participant.id, "ally")
+                              handleSideChange(participant.id, ParticipantSide.ALLY)
                             }
                           >
                             ←
@@ -478,7 +478,7 @@ export default function EditBattlePage({
                 </div>
               </div>
 
-              {participants.filter((p) => p.side === "enemy").length === 0 && (
+              {participants.filter((p) => p.side === ParticipantSide.ENEMY).length === 0 && (
                 <p className="text-sm text-muted-foreground text-center py-8">
                   Немає обраних ворогів
                 </p>
