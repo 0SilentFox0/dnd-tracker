@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/db";
-import { createClient } from "@/lib/supabase/server";
+import {
+  requireCampaignAccess,
+  requireDM,
+} from "@/lib/utils/api/api-auth";
 
 export async function GET(
   request: Request,
@@ -10,45 +13,24 @@ export async function GET(
   try {
     const { id, battleId } = await params;
 
-    const supabase = await createClient();
+    const accessResult = await requireCampaignAccess(id, false);
 
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
     }
-
-    const userId = authUser.id;
 
     const battle = await prisma.battleScene.findUnique({
       where: { id: battleId },
-      include: {
-        campaign: {
-          include: {
-            members: {
-              where: { userId },
-            },
-          },
-        },
-      },
+      include: { campaign: true },
     });
 
     if (!battle || battle.campaignId !== id) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    // Перевіряємо права доступу
-    if (battle.campaign.members.length === 0) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
-    const userRole = battle.campaign.members[0]?.role || "player";
-
+    const userRole = accessResult.campaign.members[0]?.role || "player";
     const isDM = userRole === "dm";
 
-    // Повертаємо битву з додатковою інформацією про кампанію та роль користувача
     return NextResponse.json({
       ...battle,
       campaign: {
@@ -75,30 +57,10 @@ export async function PATCH(
   try {
     const { id, battleId } = await params;
 
-    const supabase = await createClient();
+    const accessResult = await requireDM(id);
 
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = authUser.id;
-
-    // Перевіряємо права DM
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
-      include: {
-        members: {
-          where: { userId },
-        },
-      },
-    });
-
-    if (!campaign || campaign.members[0]?.role !== "dm") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
     }
 
     const battle = await prisma.battleScene.findUnique({
@@ -134,30 +96,10 @@ export async function DELETE(
   try {
     const { id, battleId } = await params;
 
-    const supabase = await createClient();
+    const accessResult = await requireDM(id);
 
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = authUser.id;
-
-    // Перевіряємо права DM
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
-      include: {
-        members: {
-          where: { userId },
-        },
-      },
-    });
-
-    if (!campaign || campaign.members[0]?.role !== "dm") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
     }
 
     const battle = await prisma.battleScene.findUnique({

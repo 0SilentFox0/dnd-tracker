@@ -100,14 +100,20 @@ export function processStartOfTurn(
     }
   }
 
-  // 5. Скидаємо флаги дій
+  // 5. Скидаємо флаги дій; ефекти no_bonus_action / no_reaction блокують відповідні дії
+  const hasNoBonusAction = updatedParticipant.battleData.activeEffects.some(
+    (e) => e.effects.some((d) => d.type === "no_bonus_action"),
+  );
+  const hasNoReaction = updatedParticipant.battleData.activeEffects.some(
+    (e) => e.effects.some((d) => d.type === "no_reaction"),
+  );
   updatedParticipant = {
     ...updatedParticipant,
     actionFlags: {
       ...updatedParticipant.actionFlags,
       hasUsedAction: false,
-      hasUsedBonusAction: false,
-      hasUsedReaction: false,
+      hasUsedBonusAction: hasNoBonusAction,
+      hasUsedReaction: hasNoReaction,
     },
   };
 

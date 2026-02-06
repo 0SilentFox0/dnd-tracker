@@ -16,6 +16,21 @@ export const getParticipantLevel = (p: BattleParticipant) => p.abilities.level;
 export const getParticipantCurrentHp = (p: BattleParticipant) => p.combatStats.currentHp;
 export const getParticipantMaxHp = (p: BattleParticipant) => p.combatStats.maxHp;
 export const getParticipantArmorClass = (p: BattleParticipant) => p.combatStats.armorClass;
+
+/**
+ * Ефективний AC з урахуванням активних ефектів (наприклад ac_bonus від критичних ефектів)
+ */
+export function getEffectiveArmorClass(p: BattleParticipant): number {
+  let ac = p.combatStats.armorClass;
+  for (const effect of p.battleData.activeEffects) {
+    for (const d of effect.effects) {
+      if (d.type === "ac_bonus") {
+        ac += d.value ?? 0;
+      }
+    }
+  }
+  return ac;
+}
 export const getParticipantSpeed = (p: BattleParticipant) => p.combatStats.speed;
 export const getParticipantMorale = (p: BattleParticipant) => p.combatStats.morale;
 export const getParticipantStatus = (p: BattleParticipant) => p.combatStats.status;

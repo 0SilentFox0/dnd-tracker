@@ -77,6 +77,9 @@ const updateCharacterSchema = z.object({
 
   // Прокачка
   controlledBy: z.string().optional(),
+
+  // Уміння (персональний скіл)
+  personalSkillId: z.string().optional().nullable(),
 });
 
 export async function GET(

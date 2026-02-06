@@ -3,8 +3,9 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { prisma } from "@/lib/db";
-import { createClient } from "@/lib/supabase/server";
+import { requireDM } from "@/lib/utils/api/api-auth";
 import { processAttack } from "@/lib/utils/battle/battle-attack-process";
+import { updateMoraleOnEvent } from "@/lib/utils/skills/skill-triggers-execution";
 import { BattleAction, BattleParticipant } from "@/types/battle";
 
 const attackSchema = z
@@ -42,30 +43,10 @@ export async function POST(
   try {
     const { id, battleId } = await params;
 
-    const supabase = await createClient();
+    const accessResult = await requireDM(id);
 
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = authUser.id;
-
-    // Перевіряємо права DM
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
-      include: {
-        members: {
-          where: { userId },
-        },
-      },
-    });
-
-    if (!campaign || campaign.members[0]?.role !== "dm") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
     }
 
     const battle = await prisma.battleScene.findUnique({
@@ -189,11 +170,26 @@ export async function POST(
 
     let currentAttacker = { ...attacker };
 
-    let currentInitiativeOrder = [...initiativeOrder];
+    let currentInitiativeOrder: BattleParticipant[] = initiativeOrder.map((p) => ({
+      ...p,
+      battleData: p.battleData
+        ? { ...p.battleData, skillUsageCounts: { ...(p.battleData.skillUsageCounts ?? {}) } }
+        : p.battleData,
+    }));
 
     const allBattleActions: BattleAction[] = [];
 
     const battleLog = (battle.battleLog as unknown as BattleAction[]) || [];
+
+    const snapshotState = () => ({
+      initiativeOrder: JSON.parse(
+        JSON.stringify(currentInitiativeOrder),
+      ) as BattleParticipant[],
+      currentTurnIndex: battle.currentTurnIndex,
+      currentRound: battle.currentRound,
+    });
+
+    let stateBefore = snapshotState();
 
     // Обробляємо атаку для кожної цілі
     for (const target of targets) {
@@ -225,21 +221,49 @@ export async function POST(
         return p;
       });
 
-      // Створюємо BattleAction з правильним індексом
+      // Створюємо BattleAction з правильним індексом та stateBefore для rollback
       const battleAction: BattleAction = {
         ...attackResult.battleAction,
         actionIndex: battleLog.length + allBattleActions.length,
+        stateBefore: { ...stateBefore },
       };
 
       allBattleActions.push(battleAction);
+      stateBefore = snapshotState();
     }
+
+    // Оновлення моралі: onAllyDeath для кожного загиблого, onKill для атакуючого
+    let finalInitiativeOrder = currentInitiativeOrder;
+    for (const target of targets) {
+      const currentTarget = finalInitiativeOrder.find(
+        (p) => p.basicInfo.id === target.basicInfo.id,
+      );
+      if (
+        currentTarget &&
+        (currentTarget.combatStats.status === "dead" ||
+          currentTarget.combatStats.status === "unconscious")
+      ) {
+        const allyResult = updateMoraleOnEvent(
+          finalInitiativeOrder,
+          "allyDeath",
+          target.basicInfo.id,
+        );
+        finalInitiativeOrder = allyResult.updatedParticipants;
+      }
+    }
+    const killResult = updateMoraleOnEvent(
+      finalInitiativeOrder,
+      "kill",
+      currentAttacker.basicInfo.id,
+    );
+    finalInitiativeOrder = killResult.updatedParticipants;
 
     // Оновлюємо бій
     const updatedBattle = await prisma.battleScene.update({
       where: { id: battleId },
       data: {
         initiativeOrder:
-          currentInitiativeOrder as unknown as Prisma.InputJsonValue,
+          finalInitiativeOrder as unknown as Prisma.InputJsonValue,
         battleLog: [
           ...battleLog,
           ...allBattleActions,

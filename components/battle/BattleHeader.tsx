@@ -1,14 +1,27 @@
 "use client";
 
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { BattleScene } from "@/types/api";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Trophy } from "lucide-react";
 
 interface BattleHeaderProps {
   battle: BattleScene;
   onNextTurn: () => void;
   onReset: () => void;
+  onCompleteBattle?: (result?: "victory" | "defeat") => void;
   isDM: boolean;
 }
 
@@ -16,8 +29,11 @@ export function BattleHeader({
   battle,
   onNextTurn,
   onReset,
+  onCompleteBattle,
   isDM,
 }: BattleHeaderProps) {
+  const [completeDialogOpen, setCompleteDialogOpen] = useState(false);
+
   return (
     <div className="shrink-0 border-b border-white/10 bg-black/40 backdrop-blur-xl z-40 shadow-2xl">
       <div className="container mx-auto px-4 py-3 sm:py-4">
@@ -51,6 +67,17 @@ export function BattleHeader({
             </div>
           </div>
           <div className="flex items-center gap-3">
+            {isDM && battle.status === "active" && onCompleteBattle && (
+              <Button
+                onClick={() => setCompleteDialogOpen(true)}
+                variant="outline"
+                className="rounded-full px-2 md:px-6 font-bold uppercase tracking-wider border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/20 transition-all duration-300"
+                size="sm"
+              >
+                <Trophy className="h-4 w-4 mr-1.5" />
+                Завершити бій
+              </Button>
+            )}
             {isDM && (
               <Button
                 onClick={onReset}
@@ -73,6 +100,51 @@ export function BattleHeader({
           </div>
         </div>
       </div>
+
+      <AlertDialog open={completeDialogOpen} onOpenChange={setCompleteDialogOpen}>
+        <AlertDialogContent className="bg-slate-900 border-slate-700 text-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Завершити бій?</AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-300">
+              Оберіть результат завершення або визначте автоматично за умовами перемоги.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2 sm:gap-0">
+            <AlertDialogCancel className="border-slate-600 text-slate-300">
+              Скасувати
+            </AlertDialogCancel>
+            <Button
+              variant="outline"
+              className="border-red-500/50 text-red-400 hover:bg-red-500/20"
+              onClick={() => {
+                onCompleteBattle?.("defeat");
+                setCompleteDialogOpen(false);
+              }}
+            >
+              Поразка
+            </Button>
+            <Button
+              variant="outline"
+              className="border-amber-500/50 text-amber-400 hover:bg-amber-500/20"
+              onClick={() => {
+                onCompleteBattle?.();
+                setCompleteDialogOpen(false);
+              }}
+            >
+              Авто
+            </Button>
+            <AlertDialogAction
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              onClick={() => {
+                onCompleteBattle?.("victory");
+                setCompleteDialogOpen(false);
+              }}
+            >
+              Перемога
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

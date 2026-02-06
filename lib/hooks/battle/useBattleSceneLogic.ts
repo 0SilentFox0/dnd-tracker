@@ -4,19 +4,25 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ParticipantSide } from "@/lib/constants/battle";
 import {
+  useAddBattleParticipant,
   useAttack,
   useBattle,
   useCastSpell,
+  useCompleteBattle,
   useMoraleCheck,
   useNextTurn,
   useResetBattle,
+  useRollbackBattleAction,
   useStartBattle,
+  useUpdateBattleParticipant,
 } from "@/lib/hooks/useBattles";
 import { createClient } from "@/lib/supabase/client";
 import type { CounterAttackResultInfo } from "@/components/battle/dialogs/CounterAttackResultDialog";
 import type { BattleScene } from "@/types/api";
 import type { BattleParticipant } from "@/types/battle";
 import type { AttackData } from "@/types/api";
+
+import { usePusherBattleSync } from "./usePusherBattleSync";
 
 export function useBattleSceneLogic(id: string, battleId: string) {
   const queryClient = useQueryClient();
@@ -33,8 +39,41 @@ export function useBattleSceneLogic(id: string, battleId: string) {
   const [counterAttackInfo, setCounterAttackInfo] =
     useState<CounterAttackResultInfo | null>(null);
   const [counterAttackDialogOpen, setCounterAttackDialogOpen] = useState(false);
+  const [globalDamageFlash, setGlobalDamageFlash] = useState<{
+    value: number;
+    isHealing: boolean;
+  } | null>(null);
+  const [turnStartedNotification, setTurnStartedNotification] = useState<
+    string | null
+  >(null);
+  const [dmControlledParticipantId, setDmControlledParticipantId] = useState<
+    string | null
+  >(null);
 
   const { data: battle, isLoading: loading } = useBattle(id, battleId);
+
+  const triggerGlobalDamageFromBattle = useCallback(
+    (updatedBattle: BattleScene) => {
+      const log = updatedBattle?.battleLog ?? [];
+      const lastAction = log[log.length - 1];
+      const hpChanges = lastAction?.hpChanges ?? [];
+      if (hpChanges.length > 0) {
+        const first = hpChanges[0];
+        const change = first?.change ?? 0;
+        if (change !== 0) {
+          setGlobalDamageFlash({
+            value: Math.abs(change),
+            isHealing: change < 0,
+          });
+          setTimeout(
+            () => setGlobalDamageFlash(null),
+            2000,
+          );
+        }
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     const supabase = createClient();
@@ -45,36 +84,21 @@ export function useBattleSceneLogic(id: string, battleId: string) {
 
   const nextTurnMutation = useNextTurn(id, battleId);
   const resetBattleMutation = useResetBattle(id, battleId);
+  const completeBattleMutation = useCompleteBattle(id, battleId);
+  const rollbackMutation = useRollbackBattleAction(id, battleId);
   const attackMutation = useAttack(id, battleId);
   const spellMutation = useCastSpell(id, battleId);
   const moraleCheckMutation = useMoraleCheck(id, battleId);
   const startBattleMutation = useStartBattle(id, battleId);
+  const addParticipantMutation = useAddBattleParticipant(id, battleId);
+  const updateParticipantMutation = useUpdateBattleParticipant(id, battleId);
 
-  useEffect(() => {
-    if (typeof window !== "undefined" && process.env.NEXT_PUBLIC_PUSHER_KEY) {
-      let pusher: ReturnType<typeof import("@/lib/pusher").getPusherClient> =
-        null;
-      import("@/lib/pusher").then(({ getPusherClient }) => {
-        pusher = getPusherClient();
-        if (pusher) {
-          const channel = pusher.subscribe(`battle-${battleId}`);
-          channel.bind("battle-updated", () => {
-            queryClient.invalidateQueries({
-              queryKey: ["battle", id, battleId],
-            });
-          });
-          channel.bind("battle-started", () => {
-            queryClient.invalidateQueries({
-              queryKey: ["battle", id, battleId],
-            });
-          });
-        }
-      });
-      return () => {
-        if (pusher) pusher.unsubscribe(`battle-${battleId}`);
-      };
-    }
-  }, [battleId, id, queryClient]);
+  const handleTurnStarted = useCallback((message: string) => {
+    setTurnStartedNotification(message);
+    setTimeout(() => setTurnStartedNotification(null), 4000);
+  }, []);
+
+  usePusherBattleSync(id, battleId, currentUserId, handleTurnStarted);
 
   const isDM = useMemo(() => battle?.isDM || false, [battle]);
 
@@ -92,16 +116,18 @@ export function useBattleSceneLogic(id: string, battleId: string) {
 
     // Якщо я DM
     if (isDM) {
+      // DM взяв керування за цим учасником
+      if (currentParticipant.basicInfo.id === dmControlledParticipantId)
+        return true;
       // І це хід персонажа під контролем DM
       if (currentParticipant.basicInfo.controlledBy === "dm") return true;
-
       // Або це хід ворога (для сумісності)
       if (currentParticipant.basicInfo.side === ParticipantSide.ENEMY)
         return true;
     }
 
     return false;
-  }, [currentParticipant, currentUserId, isDM]);
+  }, [currentParticipant, currentUserId, isDM, dmControlledParticipantId]);
 
   const handleNextTurn = async () => {
     if (!battle) return;
@@ -113,6 +139,13 @@ export function useBattleSceneLogic(id: string, battleId: string) {
 
   const handleStartBattle = () => startBattleMutation.mutate();
 
+  const handleCompleteBattle = useCallback(
+    (result?: "victory" | "defeat") => {
+      completeBattleMutation.mutate(result ? { result } : undefined);
+    },
+    [completeBattleMutation],
+  );
+
   const handleAttack = useCallback(
     (data: AttackData, onSuccess?: () => void) => {
       attackMutation.mutate(data, {
@@ -120,6 +153,7 @@ export function useBattleSceneLogic(id: string, battleId: string) {
           const log = updatedBattle?.battleLog ?? [];
           const lastAction = log[log.length - 1];
           const hpChanges = lastAction?.hpChanges ?? [];
+          triggerGlobalDamageFromBattle(updatedBattle);
           if (hpChanges.length >= 2) {
             setCounterAttackInfo({
               defenderName: hpChanges[0].participantName,
@@ -132,7 +166,7 @@ export function useBattleSceneLogic(id: string, battleId: string) {
         },
       });
     },
-    [attackMutation]
+    [attackMutation, triggerGlobalDamageFromBattle],
   );
 
   const allies = useMemo(() => {
@@ -196,6 +230,8 @@ export function useBattleSceneLogic(id: string, battleId: string) {
     mutations: {
       nextTurn: nextTurnMutation,
       resetBattle: resetBattleMutation,
+      completeBattle: completeBattleMutation,
+      rollback: rollbackMutation,
       attack: attackMutation,
       spell: spellMutation,
       moraleCheck: moraleCheckMutation,
@@ -204,8 +240,18 @@ export function useBattleSceneLogic(id: string, battleId: string) {
     handlers: {
       handleNextTurn,
       handleStartBattle,
+      handleCompleteBattle,
+      handleRollback: (actionIndex: number) =>
+        rollbackMutation.mutate(actionIndex),
       handleAttack,
       setParticipantForMorale,
+      triggerGlobalDamageFromBattle,
     },
+    dmControlledParticipantId,
+    setDmControlledParticipantId,
+    addParticipantMutation,
+    updateParticipantMutation,
+    globalDamageFlash,
+    turnStartedNotification,
   };
 }

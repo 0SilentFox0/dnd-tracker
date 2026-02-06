@@ -140,10 +140,25 @@ export function createMockSkillTree(
   ];
   
   const skillsToUse = mainSkillsData || defaultMainSkills;
-  
+  // Завжди додаємо расовий навик, якщо його немає в списку (для 3 кіл на сторінці skill tree)
+  const skillsWithRacial =
+    skillsToUse.some((ms) => ms.id === "racial")
+      ? skillsToUse
+      : [
+          ...skillsToUse,
+          {
+            id: "racial",
+            name: "Раса",
+            color: "gainsboro",
+            campaignId,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          } as MainSkillType,
+        ];
+
   // Зберігаємо порядок з mainSkillsData (якщо передано), інакше використовуємо порядок defaultMainSkills
   // Це важливо для правильного відображення кольорів секторів
-  const mainSkills: MainSkill[] = skillsToUse.map((ms) => {
+  const mainSkills: MainSkill[] = skillsWithRacial.map((ms) => {
     const skills = generateSkillsForMainSkill(ms.id, ms.name);
 
     const skillsWithPrerequisites = addPrerequisites(skills);

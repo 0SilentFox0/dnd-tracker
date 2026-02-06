@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { prisma } from "@/lib/db";
-import { createClient } from "@/lib/supabase/server";
+import { requireDM } from "@/lib/utils/api/api-auth";
 import { BattleSpell,processSpell } from "@/lib/utils/battle/battle-spell-process";
 import { BattleAction,BattleParticipant } from "@/types/battle";
 
@@ -31,30 +31,10 @@ export async function POST(
   try {
     const { id, battleId } = await params;
 
-    const supabase = await createClient();
+    const accessResult = await requireDM(id);
 
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = authUser.id;
-
-    // Перевіряємо права DM
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
-      include: {
-        members: {
-          where: { userId },
-        },
-      },
-    });
-
-    if (!campaign || campaign.members[0]?.role !== "dm") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
     }
 
     const battle = await prisma.battleScene.findUnique({
@@ -174,14 +154,23 @@ export async function POST(
       return p;
     });
 
-    // Отримуємо поточний battleLog та додаємо нову дію
+    // Отримуємо поточний battleLog та додаємо нову дію з stateBefore для rollback
     const battleLog = (battle.battleLog as unknown as BattleAction[]) || [];
 
     const actionIndex = battleLog.length;
 
+    const stateBefore = {
+      initiativeOrder: JSON.parse(
+        JSON.stringify(initiativeOrder),
+      ) as BattleParticipant[],
+      currentTurnIndex: battle.currentTurnIndex,
+      currentRound: battle.currentRound,
+    };
+
     const battleAction: BattleAction = {
       ...spellResult.battleAction,
       actionIndex,
+      stateBefore,
     };
 
     // Оновлюємо бій

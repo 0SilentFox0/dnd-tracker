@@ -68,6 +68,9 @@ const defaultFormData: CharacterFormData = {
     bonds: "",
     flaws: "",
   },
+  abilities: {
+    personalSkillId: "",
+  },
 };
 
 export function useCharacterForm(options: UseCharacterFormOptions) {
@@ -404,6 +407,17 @@ export function useCharacterForm(options: UseCharacterFormOptions) {
     },
   };
 
+  const abilities = {
+    ...formData.abilities,
+    setters: {
+      setPersonalSkillId: (value: string) =>
+        setFormData((prev) => ({
+          ...prev,
+          abilities: { ...prev.abilities, personalSkillId: value },
+        })),
+    },
+  };
+
   const roleplay = {
     ...formData.roleplay,
     setters: {
@@ -463,6 +477,7 @@ export function useCharacterForm(options: UseCharacterFormOptions) {
     combatStats,
     skills,
     spellcasting,
+    abilities,
     roleplay,
     updateField,
     updateFields,

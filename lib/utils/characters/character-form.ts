@@ -67,6 +67,9 @@ export function characterToFormData(
       bonds: character.bonds,
       flaws: character.flaws,
     },
+    abilities: {
+      personalSkillId: (character as { personalSkillId?: string | null }).personalSkillId ?? "",
+    },
   };
 }
 
@@ -122,5 +125,6 @@ export function formDataToCharacter(
     ideals: formData.roleplay.ideals,
     bonds: formData.roleplay.bonds,
     flaws: formData.roleplay.flaws,
+    personalSkillId: formData.abilities.personalSkillId?.trim() || null,
   };
 }

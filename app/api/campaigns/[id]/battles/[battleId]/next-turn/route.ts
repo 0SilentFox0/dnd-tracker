@@ -3,12 +3,13 @@ import { Prisma } from "@prisma/client";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
-import { createClient } from "@/lib/supabase/server";
+import { requireDM } from "@/lib/utils/api/api-auth";
 import {
   processEndOfTurn,
   processStartOfRound,
   processStartOfTurn,
 } from "@/lib/utils/battle/battle-turn";
+import { executeSkillsByTrigger } from "@/lib/utils/skills/skill-triggers-execution";
 import {
   calculateAllyHpChangesOnVictory,
   checkVictoryConditions,
@@ -22,30 +23,10 @@ export async function POST(
   try {
     const { id, battleId } = await params;
 
-    const supabase = await createClient();
+    const accessResult = await requireDM(id);
 
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = authUser.id;
-
-    // Перевіряємо права DM
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
-      include: {
-        members: {
-          where: { userId },
-        },
-      },
-    });
-
-    if (!campaign || campaign.members[0]?.role !== "dm") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
     }
 
     const battle = await prisma.battleScene.findUnique({
@@ -89,6 +70,14 @@ export async function POST(
 
     let nextRound = battle.currentRound;
 
+    const stateBeforeNextTurn = {
+      initiativeOrder: JSON.parse(
+        JSON.stringify(initiativeOrder),
+      ) as BattleParticipant[],
+      currentTurnIndex: battle.currentTurnIndex,
+      currentRound: battle.currentRound,
+    };
+
     // Масив для накопичення логів з усіх пропущених ходів
     const newLogEntries: BattleAction[] = [];
 
@@ -96,6 +85,8 @@ export async function POST(
     const currentBattleLogLength = (
       battle.battleLog as unknown as BattleAction[]
     ).length;
+
+    let clearedPendingSummons = false;
 
     while (!activeParticipantFound && attempts < maxAttempts) {
       attempts++;
@@ -112,10 +103,24 @@ export async function POST(
       nextTurnIndex = turnTransition.nextTurnIndex;
       nextRound = turnTransition.nextRound;
 
-      // 2. Якщо почався новий раунд, обробляємо start of round
+      // 2. Якщо почався новий раунд — спочатку endRound тригери, потім start of round
       if (nextRound > previousRound) {
-        // TODO: Додати pendingSummons в схему BattleScene
-        const pendingSummons: BattleParticipant[] = [];
+        // Тригери endRound для всіх учасників (раунд що завершився = previousRound)
+        const afterEndRound = updatedInitiativeOrder.map((participant) => {
+          const result = executeSkillsByTrigger(
+            participant,
+            "endRound",
+            updatedInitiativeOrder,
+            { currentRound: previousRound },
+          );
+          return result.participant;
+        });
+        updatedInitiativeOrder = afterEndRound;
+
+        const pendingSummons =
+          (battle.pendingSummons as unknown as BattleParticipant[]) ?? [];
+
+        clearedPendingSummons = true;
 
         const roundResult = processStartOfRound(
           updatedInitiativeOrder,
@@ -124,8 +129,6 @@ export async function POST(
         );
 
         updatedInitiativeOrder = roundResult.updatedInitiativeOrder;
-
-        // Тут можна додати логи про початок раунду, якщо потрібно
       }
 
       // 3. Обробляємо початок ходу кандидата
@@ -178,6 +181,7 @@ export async function POST(
             },
           ],
           isCancelled: false,
+          stateBefore: stateBeforeNextTurn,
         });
       }
 
@@ -203,6 +207,7 @@ export async function POST(
           resultText: `Ефекти завершилися: ${turnResult.expiredEffects.join(", ")}`,
           hpChanges: [],
           isCancelled: false,
+          stateBefore: stateBeforeNextTurn,
         });
       }
 
@@ -284,12 +289,13 @@ export async function POST(
           victoryCheck,
         ),
         isCancelled: false,
+        stateBefore: stateBeforeNextTurn,
       };
 
       newLogEntries.push(completionAction);
     }
 
-    // Оновлюємо бій
+    // Оновлюємо бій (очищаємо pendingSummons після обробки початку раунду)
     const updatedBattle = await prisma.battleScene.update({
       where: { id: battleId },
       data: {
@@ -299,6 +305,9 @@ export async function POST(
         completedAt: completedAt || undefined,
         initiativeOrder:
           updatedInitiativeOrder as unknown as Prisma.InputJsonValue,
+        pendingSummons: clearedPendingSummons
+          ? ([] as unknown as Prisma.InputJsonValue)
+          : (battle.pendingSummons as Prisma.InputJsonValue) ?? [],
         battleLog: [
           ...battleLog,
           ...newLogEntries,

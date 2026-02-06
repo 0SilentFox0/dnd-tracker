@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
-import { createClient } from "@/lib/supabase/server";
+import { requireDM } from "@/lib/utils/api/api-auth";
 import {
   createBattleParticipantFromCharacter,
   createBattleParticipantFromUnit,
@@ -13,6 +13,7 @@ import {
   calculateInitiative,
   sortByInitiative,
 } from "@/lib/utils/battle/battle-start";
+import { executeOnBattleStartEffects } from "@/lib/utils/skills/skill-triggers-execution";
 import { BattleParticipant } from "@/types/battle";
 
 export async function POST(
@@ -22,30 +23,10 @@ export async function POST(
   try {
     const { id, battleId } = await params;
 
-    const supabase = await createClient();
+    const accessResult = await requireDM(id);
 
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = authUser.id;
-
-    // Перевіряємо права DM
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
-      include: {
-        members: {
-          where: { userId },
-        },
-      },
-    });
-
-    if (!campaign || campaign.members[0]?.role !== "dm") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
     }
 
     const battle = await prisma.battleScene.findUnique({
@@ -122,8 +103,14 @@ export async function POST(
       return applyStartOfBattleEffects(participant, 1, initiativeOrder);
     });
 
+    // Скіли з тригером onBattleStart (наприклад +2 ініціатива, бонус на перший удар)
+    const afterOnBattleStart = updatedInitiativeOrder.map((participant) => {
+      const result = executeOnBattleStartEffects(participant, 1);
+      return result.updatedParticipant;
+    });
+
     // Розраховуємо ініціативу з урахуванням спеціальних правил та ефектів
-    const initiativeOrderWithCalculatedInitiative = updatedInitiativeOrder.map(
+    const initiativeOrderWithCalculatedInitiative = afterOnBattleStart.map(
       (participant) => {
         const calculatedInitiative = calculateInitiative(participant);
 

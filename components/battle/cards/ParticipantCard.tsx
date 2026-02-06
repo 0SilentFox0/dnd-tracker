@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Skull } from "lucide-react";
+import { HelpCircle, Skull, TrendingDown, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { ParticipantStats } from "@/components/battle/ParticipantStats";
@@ -214,16 +214,40 @@ export function ParticipantCard({
               )}
 
               {participant.battleData.activeEffects
-                .slice(0, 3)
-                .map((effect, idx) => (
-                  <Badge
-                    key={idx}
-                    variant="outline"
-                    className="text-[9px] border-white/10 text-white/60"
-                  >
-                    {effect.name}
-                  </Badge>
-                ))}
+                .slice(0, 5)
+                .map((effect, idx) => {
+                  const isBuff = effect.type === "buff";
+                  const isDebuff = effect.type === "debuff";
+                  const durationText =
+                    effect.duration != null
+                      ? `${effect.duration} раундів`
+                      : "";
+                  const tooltip = [effect.name, durationText]
+                    .filter(Boolean)
+                    .join(" · ");
+                  const Icon =
+                    isBuff ? TrendingUp : isDebuff ? TrendingDown : HelpCircle;
+                  return (
+                    <Badge
+                      key={effect.id ?? idx}
+                      variant="outline"
+                      title={tooltip}
+                      className={cn(
+                        "text-[9px] cursor-help gap-0.5 border",
+                        isBuff &&
+                          "border-emerald-500/50 text-emerald-400 bg-emerald-500/10",
+                        isDebuff &&
+                          "border-red-500/50 text-red-400 bg-red-500/10",
+                        !isBuff &&
+                          !isDebuff &&
+                          "border-white/20 text-white/70 bg-white/5",
+                      )}
+                    >
+                      <Icon className="h-2.5 w-2.5 shrink-0" />
+                      <span className="truncate max-w-[80px]">{effect.name}</span>
+                    </Badge>
+                  );
+                })}
 
               {(isDM || !isEnemy) && (
                 <ParticipantStats

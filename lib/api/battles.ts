@@ -172,3 +172,104 @@ export async function resetBattle(
 
   return response.json();
 }
+
+export async function completeBattle(
+  campaignId: string,
+  battleId: string,
+  data?: { result?: "victory" | "defeat" },
+): Promise<BattleScene> {
+  const response = await fetch(
+    `/api/campaigns/${campaignId}/battles/${battleId}/complete`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data ?? {}),
+    },
+  );
+
+  if (!response.ok) {
+    const err = await response.json();
+
+    throw new Error(err.error || "Failed to complete battle");
+  }
+
+  return response.json();
+}
+
+export async function rollbackBattleAction(
+  campaignId: string,
+  battleId: string,
+  actionIndex: number,
+): Promise<BattleScene> {
+  const response = await fetch(
+    `/api/campaigns/${campaignId}/battles/${battleId}/rollback`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ actionIndex }),
+    },
+  );
+
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || "Failed to rollback action");
+  }
+
+  return response.json();
+}
+
+export type AddParticipantData = {
+  sourceId: string;
+  type: "character" | "unit";
+  side: "ally" | "enemy";
+  quantity?: number;
+};
+
+export async function addBattleParticipant(
+  campaignId: string,
+  battleId: string,
+  data: AddParticipantData,
+): Promise<BattleScene> {
+  const response = await fetch(
+    `/api/campaigns/${campaignId}/battles/${battleId}/add-participant`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    },
+  );
+
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || "Failed to add participant");
+  }
+
+  return response.json();
+}
+
+export async function updateBattleParticipant(
+  campaignId: string,
+  battleId: string,
+  participantId: string,
+  data: { currentHp?: number; removeFromBattle?: boolean },
+): Promise<BattleScene> {
+  const response = await fetch(
+    `/api/campaigns/${campaignId}/battles/${battleId}/participants/${participantId}`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    },
+  );
+
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || "Failed to update participant");
+  }
+
+  return response.json();
+}

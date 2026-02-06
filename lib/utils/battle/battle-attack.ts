@@ -215,7 +215,6 @@ export function applyCriticalEffect(
 
   switch (effect.effect.type) {
     case "stun":
-      // Додаємо ефект stun
       updated = {
         ...updated,
         battleData: {
@@ -228,12 +227,7 @@ export function applyCriticalEffect(
               type: "debuff",
               description: effect.description,
               duration: effect.effect.duration || 1,
-              effects: [
-                {
-                  type: "stun",
-                  value: 1,
-                },
-              ],
+              effects: [{ type: "stun", value: 1 }],
             },
             currentRound,
           ),
@@ -246,11 +240,17 @@ export function applyCriticalEffect(
       break;
 
     case "extra_damage":
-      // Додатковий урон буде застосований в основній функції атаки
+    case "double_damage":
+    case "max_damage":
+    case "additional_damage":
+    case "ignore_reactions":
+    case "simple_miss":
+    case "half_damage":
+    case "provoke_opportunity_attack":
+      // Обробляються в processAttack (урон або реакція)
       break;
 
     case "advantage_next_attack":
-      // Додаємо ефект Advantage
       updated = {
         ...updated,
         battleData: {
@@ -259,14 +259,38 @@ export function applyCriticalEffect(
             updated,
             {
               id: `critical-advantage-${Date.now()}`,
-              name: "Advantage на наступну атаку",
+              name: effect.name,
               type: "buff",
               description: effect.description,
               duration: effect.effect.duration || 1,
+              effects: [{ type: "advantage_attack", value: 1 }],
+            },
+            currentRound,
+          ),
+        },
+      };
+      break;
+
+    case "ac_debuff":
+      updated = {
+        ...updated,
+        battleData: {
+          ...updated.battleData,
+          activeEffects: addActiveEffect(
+            updated,
+            {
+              id: `critical-ac-debuff-${Date.now()}`,
+              name: effect.name,
+              type: "debuff",
+              description: effect.description,
+              duration: effect.effect.duration ?? 1,
               effects: [
                 {
-                  type: "advantage_attack",
-                  value: 1,
+                  type: "ac_bonus",
+                  value:
+                    typeof effect.effect.value === "number"
+                      ? effect.effect.value
+                      : -2,
                 },
               ],
             },
@@ -276,7 +300,195 @@ export function applyCriticalEffect(
       };
       break;
 
-    // Інші типи ефектів...
+    case "free_attack":
+      updated = {
+        ...updated,
+        battleData: {
+          ...updated.battleData,
+          activeEffects: addActiveEffect(
+            updated,
+            {
+              id: `critical-free-attack-${Date.now()}`,
+              name: effect.name,
+              type: "buff",
+              description: effect.description,
+              duration: effect.effect.duration ?? 1,
+              effects: [{ type: "extra_attack", value: 1 }],
+            },
+            currentRound,
+          ),
+        },
+      };
+      break;
+
+    case "block_bonus_action":
+      updated = {
+        ...updated,
+        battleData: {
+          ...updated.battleData,
+          activeEffects: addActiveEffect(
+            updated,
+            {
+              id: `critical-block-bonus-${Date.now()}`,
+              name: effect.name,
+              type: "debuff",
+              description: effect.description,
+              duration: effect.effect.duration ?? 1,
+              effects: [{ type: "no_bonus_action", value: 1 }],
+            },
+            currentRound,
+          ),
+        },
+      };
+      break;
+
+    case "advantage_on_target":
+      updated = {
+        ...updated,
+        battleData: {
+          ...updated.battleData,
+          activeEffects: addActiveEffect(
+            updated,
+            {
+              id: `critical-advantage-on-target-${Date.now()}`,
+              name: effect.name,
+              type: "debuff",
+              description: effect.description,
+              duration: effect.effect.duration ?? 1,
+              effects: [{ type: "advantage_against_me", value: 1 }],
+            },
+            currentRound,
+          ),
+        },
+      };
+      break;
+
+    case "combo_attack":
+      updated = {
+        ...updated,
+        battleData: {
+          ...updated.battleData,
+          activeEffects: addActiveEffect(
+            updated,
+            {
+              id: `critical-combo-${Date.now()}`,
+              name: effect.name,
+              type: "buff",
+              description: effect.description,
+              duration: effect.effect.duration ?? 1,
+              effects: [{ type: "combo_attack_disadvantage", value: 1 }],
+            },
+            currentRound,
+          ),
+        },
+      };
+      break;
+
+    // --- Критична невдача (fail) ---
+    case "prone":
+      updated = {
+        ...updated,
+        battleData: {
+          ...updated.battleData,
+          activeEffects: addActiveEffect(
+            updated,
+            {
+              id: `critical-prone-${Date.now()}`,
+              name: effect.name,
+              type: "condition",
+              description: effect.description,
+              duration: effect.effect.duration ?? 1,
+              effects: [{ type: "prone", value: 1 }],
+            },
+            currentRound,
+          ),
+        },
+      };
+      break;
+
+    case "disadvantage_next_attack":
+      updated = {
+        ...updated,
+        battleData: {
+          ...updated.battleData,
+          activeEffects: addActiveEffect(
+            updated,
+            {
+              id: `critical-disadvantage-${Date.now()}`,
+              name: effect.name,
+              type: "debuff",
+              description: effect.description,
+              duration: effect.effect.duration ?? 1,
+              effects: [{ type: "disadvantage_attack", value: 1 }],
+            },
+            currentRound,
+          ),
+        },
+      };
+      break;
+
+    case "lose_bonus_action":
+      updated = {
+        ...updated,
+        actionFlags: {
+          ...updated.actionFlags,
+          hasUsedBonusAction: true,
+        },
+      };
+      break;
+
+    case "lose_reaction":
+      updated = {
+        ...updated,
+        battleData: {
+          ...updated.battleData,
+          activeEffects: addActiveEffect(
+            updated,
+            {
+              id: `critical-no-reaction-${Date.now()}`,
+              name: effect.name,
+              type: "debuff",
+              description: effect.description,
+              duration: effect.effect.duration ?? 1,
+              effects: [{ type: "no_reaction", value: 1 }],
+            },
+            currentRound,
+          ),
+        },
+      };
+      break;
+
+    case "advantage_on_self":
+      updated = {
+        ...updated,
+        battleData: {
+          ...updated.battleData,
+          activeEffects: addActiveEffect(
+            updated,
+            {
+              id: `critical-advantage-on-self-${Date.now()}`,
+              name: effect.name,
+              type: "debuff",
+              description: effect.description,
+              duration: effect.effect.duration ?? 1,
+              effects: [{ type: "advantage_against_me", value: 1 }],
+            },
+            currentRound,
+          ),
+        },
+      };
+      break;
+
+    case "lose_action":
+      // Дія вже витрачена (промах)
+      updated = {
+        ...updated,
+        actionFlags: {
+          ...updated.actionFlags,
+          hasUsedAction: true,
+        },
+      };
+      break;
   }
 
   return updated;
@@ -293,6 +505,7 @@ export function applyCriticalEffect(
 /** Сумарний відсоток counter_damage зі скілів цілі (для контр-атаки) */
 export function getCounterDamagePercent(defender: BattleParticipant): number {
   let total = 0;
+
   for (const skill of defender.battleData.activeSkills) {
     for (const effect of skill.effects) {
       if (
@@ -304,6 +517,7 @@ export function getCounterDamagePercent(defender: BattleParticipant): number {
       }
     }
   }
+
   return total;
 }
 
@@ -311,15 +525,19 @@ export function canPerformReaction(defender: BattleParticipant): boolean {
   if (defender.actionFlags.hasUsedReaction) {
     return false;
   }
+
   const counterPercent = getCounterDamagePercent(defender);
+
   if (counterPercent <= 0) {
     return false;
   }
+
   const hasCounterSkill = defender.battleData.activeSkills.some((skill) =>
     skill.effects.some(
       (e) => e.stat === "counter_damage" && e.isPercentage && typeof e.value === "number" && e.value > 0
     )
   );
+
   return hasCounterSkill;
 }
 
@@ -375,10 +593,13 @@ export function performReaction(
   baseDamage += statModifier;
 
   const counterPercent = getCounterDamagePercent(defender);
+
   const multiplier = counterPercent > 0 ? 1 + counterPercent / 100 : 1.15;
+
   const reactionDamage = Math.floor(baseDamage * multiplier);
 
   // Оновлюємо defender (іммутабельно)
+
   const updatedDefender: BattleParticipant = {
     ...defender,
     actionFlags: {

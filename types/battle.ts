@@ -354,6 +354,13 @@ export interface BattleAction {
     // Для перевірки моралі:
     d10Roll?: number;
     morale?: number;
+    // Критичний ефект (Natural 20/1):
+    criticalEffect?: {
+      id: number;
+      name: string;
+      description: string;
+      type: "success" | "fail";
+    };
   };
   resultText: string; // текстовий опис для лога
   hpChanges: Array<{
@@ -365,4 +372,10 @@ export interface BattleAction {
   }>;
   isCancelled: boolean; // чи була відмінена дія
   cancelledAt?: Date; // коли відмінена
+  /** Стан бою перед цією дією (для rollback) */
+  stateBefore?: {
+    initiativeOrder: BattleParticipant[];
+    currentTurnIndex: number;
+    currentRound: number;
+  };
 }

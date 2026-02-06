@@ -19,9 +19,13 @@ import {
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
+import { getEffectiveArmorClass } from "@/lib/utils/battle/battle-participant-helpers";
 import {
+  checkSurviveLethal,
   executeAfterAttackTriggers,
   executeBeforeAttackTriggers,
+  executeOnHitEffects,
+  executeOnKillEffects,
 } from "@/lib/utils/skills/skill-triggers-execution";
 import { BattleAction, BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -104,13 +108,13 @@ export function processAttack(
     advantageRoll,
   );
 
-  // 2. Перевіряємо попадання (з урахуванням AC цілі)
+  // 2. Перевіряємо попадання (з урахуванням ефективного AC цілі, включно з дебафами −2 AC)
   // Критичний промах (Natural 1) = автоматичний промах
   // Критичне попадання (Natural 20) = автоматичне попадання
+  const targetAC = getEffectiveArmorClass(updatedTarget);
   const isHit =
     !attackRoll.isCriticalFail &&
-    (attackRoll.isCritical ||
-      attackRoll.totalAttackValue >= updatedTarget.combatStats.armorClass);
+    (attackRoll.isCritical || attackRoll.totalAttackValue >= targetAC);
 
   // Якщо критичний промах, застосовуємо негативний ефект та завершуємо
   if (attackRoll.isCriticalFail && attackRoll.criticalEffect) {
@@ -143,12 +147,20 @@ export function processAttack(
         attackRoll: d20Roll,
         attackBonus: attackRoll.attackBonus,
         totalAttackValue: attackRoll.totalAttackValue,
-        targetAC: updatedTarget.combatStats.armorClass,
+        targetAC,
         isHit: false,
         isCritical: false,
         isCriticalFail: true,
+        criticalEffect: criticalEffectApplied
+          ? {
+              id: criticalEffectApplied.id,
+              name: criticalEffectApplied.name,
+              description: criticalEffectApplied.description,
+              type: criticalEffectApplied.type,
+            }
+          : undefined,
       },
-      resultText: `${attacker.basicInfo.name} критично промахнувся! ${criticalEffectApplied.description}`,
+      resultText: `${attacker.basicInfo.name} критично промахнувся! [d10: ${criticalEffectApplied.id}] ${criticalEffectApplied.name}: ${criticalEffectApplied.description}`,
       hpChanges: [],
       isCancelled: false,
     };
@@ -200,7 +212,7 @@ export function processAttack(
         attackRoll: d20Roll,
         attackBonus: attackRoll.attackBonus,
         totalAttackValue: attackRoll.totalAttackValue,
-        targetAC: updatedTarget.combatStats.armorClass,
+        targetAC,
         isHit: false,
         isCritical: false,
         isCriticalFail: attackRoll.isCriticalFail,
@@ -304,18 +316,29 @@ export function processAttack(
         currentRound,
       );
     }
+  }
 
-    // Для критичного попадання подвоюємо кількість кубиків
-    // (це має бути зроблено в UI, але перевіряємо базовий урон)
-    if (criticalEffectApplied.effect.type === "double_damage") {
-      // Урон вже подвоєний через подвоєння кубиків в UI
-    }
+  // 4b. Модифікатори урону від критичного ефекту (Natural 20)
+  let physicalDamage = damageCalculation.totalDamage;
+  if (criticalEffectApplied?.effect.type === "double_damage") {
+    physicalDamage *= 2;
+  }
+  if (criticalEffectApplied?.effect.type === "max_damage") {
+    const diceMatch = attack.damageDice.match(/(\d+)d(\d+)([+-]\d+)?/);
+    const count = diceMatch ? parseInt(diceMatch[1], 10) : 1;
+    const size = diceMatch ? parseInt(diceMatch[2], 10) : 6;
+    const diceMod = diceMatch?.[3] ? parseInt(diceMatch[3], 10) : 0;
+    physicalDamage = count * size + diceMod + statModifier;
+  }
+  if (criticalEffectApplied?.effect.type === "additional_damage") {
+    const extraD6 = Math.floor(Math.random() * 6) + 1;
+    physicalDamage += extraD6;
   }
 
   // 5. Застосовуємо опір/імунітет цілі для фізичного урону
   const resistanceResult = applyResistance(
     updatedTarget,
-    damageCalculation.totalDamage,
+    physicalDamage,
     attack.damageType,
   );
 
@@ -359,11 +382,83 @@ export function processAttack(
     updatedTarget.combatStats.currentHp - remainingDamage,
   );
 
-  // Оновлюємо статус
+  // Мутовані лічильники скілів (oncePerBattle / twicePerBattle)
+  const attackerSkillUsageCounts: Record<string, number> = {
+    ...(updatedAttacker.battleData.skillUsageCounts ?? {}),
+  };
+  const targetSkillUsageCounts: Record<string, number> = {
+    ...(updatedTarget.battleData.skillUsageCounts ?? {}),
+  };
+
+  // 7b. SurviveLethal (onLethalDamage): якщо ціль мала б померти — залишити 1 HP
   if (updatedTarget.combatStats.currentHp <= 0) {
-    updatedTarget.combatStats.status =
-      updatedTarget.combatStats.currentHp < 0 ? "dead" : "unconscious";
+    const surviveResult = checkSurviveLethal(
+      updatedTarget,
+      targetSkillUsageCounts,
+    );
+    if (surviveResult.survived) {
+      updatedTarget = {
+        ...updatedTarget,
+        combatStats: {
+          ...updatedTarget.combatStats,
+          currentHp: 1,
+          status: "active",
+        },
+      };
+    }
   }
+
+  // Оновлюємо статус цілі (dead/unconscious), якщо не вижила
+  if (updatedTarget.combatStats.currentHp <= 0) {
+    updatedTarget = {
+      ...updatedTarget,
+      combatStats: {
+        ...updatedTarget.combatStats,
+        status:
+          updatedTarget.combatStats.currentHp < 0 ? "dead" : "unconscious",
+      },
+    };
+  }
+
+  // 7c. OnKill: якщо ціль мертва — ефекти атакуючого (наприклад +1 дія)
+  const targetIsDead =
+    updatedTarget.combatStats.status === "dead" ||
+    updatedTarget.combatStats.status === "unconscious";
+  if (targetIsDead) {
+    const onKillResult = executeOnKillEffects(
+      updatedAttacker,
+      attackerSkillUsageCounts,
+    );
+    updatedAttacker = onKillResult.updatedKiller;
+  }
+
+  // 7d. OnHit: при попаданні — ефекти атакуючого на ціль (DOT, дебафи)
+  if (isHit) {
+    const onHitResult = executeOnHitEffects(
+      updatedAttacker,
+      updatedTarget,
+      currentRound,
+      attackerSkillUsageCounts,
+    );
+    updatedTarget = onHitResult.updatedTarget;
+    updatedAttacker = onHitResult.updatedAttacker;
+  }
+
+  // Зливаємо оновлені skillUsageCounts назад у учасників
+  updatedAttacker = {
+    ...updatedAttacker,
+    battleData: {
+      ...updatedAttacker.battleData,
+      skillUsageCounts: attackerSkillUsageCounts,
+    },
+  };
+  updatedTarget = {
+    ...updatedTarget,
+    battleData: {
+      ...updatedTarget.battleData,
+      skillUsageCounts: targetSkillUsageCounts,
+    },
+  };
 
   // 8. Перевіряємо пасивки з тригером "on_hit" (після попадання)
   const onHitAbilities = getPassiveAbilitiesByTrigger(
@@ -394,7 +489,7 @@ export function processAttack(
 
   updatedAttacker = afterAttackResult.updatedAttacker;
 
-  // 10. Перевіряємо контр-удар (Reaction)
+  // 10. Перевіряємо контр-удар (Reaction); не виконуємо, якщо критичний ефект "ігнорує реакції"
   let reactionTriggered = false;
 
   let reactionDamage = 0;
@@ -404,7 +499,10 @@ export function processAttack(
     newHp: number;
   } | null = null;
 
-  if (canPerformReaction(updatedTarget)) {
+  const ignoreReactions =
+    criticalEffectApplied?.effect.type === "ignore_reactions";
+
+  if (!ignoreReactions && canPerformReaction(updatedTarget)) {
     const reactionResult = performReaction(updatedTarget, updatedAttacker);
 
     reactionTriggered = true;
@@ -471,20 +569,28 @@ export function processAttack(
       attackRoll: d20Roll,
       attackBonus: attackRoll.attackBonus,
       totalAttackValue: attackRoll.totalAttackValue,
-      targetAC: updatedTarget.combatStats.armorClass,
+      targetAC,
       isHit: true,
       isCritical: attackRoll.isCritical,
       isCriticalFail: false,
+      criticalEffect: criticalEffectApplied
+        ? {
+            id: criticalEffectApplied.id,
+            name: criticalEffectApplied.name,
+            description: criticalEffectApplied.description,
+            type: criticalEffectApplied.type,
+          }
+        : undefined,
       damageRolls: damageRolls.map((roll) => ({
         dice: attack.damageDice,
         results: [roll],
         total: roll,
         damageType: attack.damageType,
       })),
-      totalDamage: damageCalculation.totalDamage,
+      totalDamage: physicalDamage,
       damageBreakdown: damageCalculation.breakdown.join("; "),
     },
-    resultText: `${attacker.basicInfo.name} завдав ${totalFinalDamage} урону ${target.basicInfo.name}${attackRoll.isCritical ? " (КРИТИЧНЕ ПОПАДАННЯ!)" : ""}${criticalEffectApplied ? ` - ${criticalEffectApplied.name}` : ""}${reactionTriggered ? ` | ${target.basicInfo.name} виконав контр-удар на ${reactionDamage} урону` : ""}`,
+    resultText: `${attacker.basicInfo.name} завдав ${totalFinalDamage} урону ${target.basicInfo.name}${attackRoll.isCritical ? " (КРИТИЧНЕ ПОПАДАННЯ!)" : ""}${criticalEffectApplied ? ` [d10: ${criticalEffectApplied.id}] ${criticalEffectApplied.name}` : ""}${reactionTriggered ? ` | ${target.basicInfo.name} виконав контр-удар на ${reactionDamage} урону` : ""}`,
     hpChanges: [
       {
         participantId: target.basicInfo.id,

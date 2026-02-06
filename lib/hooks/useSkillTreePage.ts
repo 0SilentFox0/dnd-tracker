@@ -216,6 +216,19 @@ export function useSkillTreePage({
         }
       }
     }
+    // Якщо в дереві немає расового навику — додаємо дефолтний (щоб завжди були 3 кола для раси)
+    if (!mergedMainSkills.some((m) => m.id === "racial")) {
+      mergedMainSkills.push(
+        createMainSkillFromApi({
+          id: "racial",
+          name: "Раса",
+          color: "gainsboro",
+          campaignId: baseSkillTree.campaignId,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        })
+      );
+    }
     return {
       ...baseSkillTree,
       mainSkills: mergedMainSkills,
@@ -302,13 +315,48 @@ export function useSkillTreePage({
     skillsFromLibrary,
   });
 
+  // Список main skills з підставними «Раса»/«Ультимат» для селектора (щоб групи та назви відображались)
+  const mainSkillsForSelector = useMemo(() => {
+    const hasRacial = mainSkills.some((m: { id: string }) => m.id === "racial");
+    const hasUltimate = mainSkills.some((m: { id: string }) => m.id === "ultimate");
+    if (hasRacial && hasUltimate) return mainSkills;
+    return [
+      ...mainSkills,
+      ...(!hasRacial
+        ? [
+            {
+              id: "racial",
+              name: "Раса",
+              color: "gainsboro",
+              campaignId,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            },
+          ]
+        : []),
+      ...(!hasUltimate
+        ? [
+            {
+              id: "ultimate",
+              name: "Ультимат",
+              color: "gainsboro",
+              campaignId,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            },
+          ]
+        : []),
+    ];
+  }, [mainSkills, campaignId]);
+
   // Хук для фільтрації та групування
   const { availableSkills, groupedSkills } = useSkillTreeFilters({
     skillTree: enrichedSkillTree,
     skillsFromLibrary,
     selectedRace,
     race: selectedRaceObject,
-    mainSkills,
+    mainSkills: mainSkillsForSelector,
+    skipRaceCheckForSelector: isDMMode,
   });
 
   const handleSkillClick = (skill: Skill) => {
@@ -469,7 +517,7 @@ export function useSkillTreePage({
     enrichedSkillTree,
     availableSkills,
     groupedSkills,
-    mainSkills,
+    mainSkills: mainSkillsForSelector,
     hasUnsavedChanges,
     isSaving,
 

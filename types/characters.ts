@@ -61,6 +61,10 @@ export interface CharacterFormData {
     bonds?: string;
     flaws?: string;
   };
+  /** Уміння: скіл з групи «Персональні» */
+  abilities: {
+    personalSkillId: string;
+  };
 }
 
 /**
@@ -110,6 +114,7 @@ export interface Character {
   flaws?: string;
   minTargets: number;
   maxTargets: number;
+  personalSkillId?: string | null;
   createdAt: string;
   updatedAt: string;
   user?: {

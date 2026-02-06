@@ -9,6 +9,20 @@ import { SelectField } from "@/components/ui/select-field";
 import type { SkillFromLibrary } from "@/lib/hooks/useSkills";
 import type { MainSkill } from "@/types/main-skills";
 
+/** Назва скіла: API повертає basicInfo.name, тип може мати name в корені */
+function getSkillDisplayName(skill: SkillFromLibrary): string {
+  if (
+    "basicInfo" in skill &&
+    skill.basicInfo &&
+    typeof skill.basicInfo === "object" &&
+    "name" in skill.basicInfo
+  ) {
+    return String((skill.basicInfo as { name?: string }).name ?? "");
+  }
+
+  return (skill as { name?: string }).name ?? skill.id;
+}
+
 interface SkillLibrarySelectorProps {
   skills: SkillFromLibrary[];
   groupedSkills: {
@@ -55,14 +69,16 @@ export function SkillLibrarySelector({
               Object.entries(groupedSkills.groups).map(([mainSkillId, groupSkills]) => {
                 const mainSkill = mainSkills.find((ms) => ms.id === mainSkillId);
 
-                const groupName = mainSkill?.name || `Група ${mainSkillId}`;
+                const groupName =
+                  mainSkill?.name ||
+                  (mainSkillId === "racial" ? "Раса" : mainSkillId === "ultimate" ? "Ультимат" : `Група ${mainSkillId}`);
 
                 return (
                   <SelectGroup key={mainSkillId}>
                     <SelectLabel>{groupName}</SelectLabel>
                     {groupSkills.map((skill) => (
                       <SelectItem key={skill.id} value={skill.id}>
-                        {skill.name}
+                        {getSkillDisplayName(skill) || skill.id}
                       </SelectItem>
                     ))}
                   </SelectGroup>
@@ -77,14 +93,14 @@ export function SkillLibrarySelector({
                     <SelectLabel>Без групи</SelectLabel>
                     {groupedSkills.ungrouped.map((skill) => (
                       <SelectItem key={skill.id} value={skill.id}>
-                        {skill.name}
+                        {getSkillDisplayName(skill) || skill.id}
                       </SelectItem>
                     ))}
                   </SelectGroup>
                 )}
                 {!hasGroups && groupedSkills.ungrouped.map((skill) => (
                   <SelectItem key={skill.id} value={skill.id}>
-                    {skill.name}
+                    {getSkillDisplayName(skill) || skill.id}
                   </SelectItem>
                 ))}
               </>
@@ -94,7 +110,12 @@ export function SkillLibrarySelector({
       </SelectField>
       {selectedSkillId && (
         <div className="text-xs text-blue-700 dark:text-blue-300">
-          Вибрано: {skills.find((s) => s.id === selectedSkillId)?.name || "Невідомо"}
+          Вибрано:{" "}
+          {(() => {
+            const s = skills.find((s) => s.id === selectedSkillId);
+
+            return s ? getSkillDisplayName(s) || s.id : "Невідомо";
+          })()}
           <br />
           Клікніть на коло для призначення скіла
         </div>

@@ -118,6 +118,7 @@ model Character {
   morale               Int                 @default(0)
   maxTargets           Int                 @default(1)
   minTargets           Int                 @default(1)
+  personalSkillId      String?
   inventory            CharacterInventory?
   characterSkills      CharacterSkills[]
   campaign             Campaign            @relation(fields: [campaignId], references: [id], onDelete: Cascade)
@@ -301,6 +302,7 @@ model BattleScene {
   currentRound     Int       @default(1)
   currentTurnIndex Int       @default(0)
   initiativeOrder  Json      @default("[]")
+  pendingSummons   Json      @default("[]")
   battleLog        Json      @default("[]")
   createdAt        DateTime  @default(now())
   startedAt        DateTime?

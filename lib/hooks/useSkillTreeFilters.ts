@@ -15,6 +15,8 @@ interface UseSkillTreeFiltersOptions {
   selectedRace: string;
   race?: Race | null;
   mainSkills?: MainSkill[];
+  /** У режимі DM не фільтрувати за skill.races — показувати всі скіли для призначення */
+  skipRaceCheckForSelector?: boolean;
 }
 
 export function useSkillTreeFilters({
@@ -23,6 +25,7 @@ export function useSkillTreeFilters({
   selectedRace,
   race,
   mainSkills = [],
+  skipRaceCheckForSelector = false,
 }: UseSkillTreeFiltersOptions) {
   // Отримуємо список вже присвоєних скілів для цієї раси
   const assignedSkillIds = useMemo(() => {
@@ -100,23 +103,23 @@ export function useSkillTreeFilters({
       }
 
       // Перевіряємо чи скіл підходить для цієї раси (через skill.races)
-      // skill.races може містити як ID рас, так і назви рас
-      const skillRaces = getSkillRaces(skill);
+      // У режимі DM (skipRaceCheckForSelector) пропускаємо — показуємо всі скіли для призначення
+      if (!skipRaceCheckForSelector) {
+        const skillRaces = getSkillRaces(skill);
 
-      if (skillRaces && skillRaces.length > 0) {
-        // Знаходимо ID та назву обраної раси
-        const selectedRaceId = race?.id;
+        if (skillRaces && skillRaces.length > 0) {
+          const selectedRaceId = race?.id;
 
-        const selectedRaceName = race?.name || selectedRace;
+          const selectedRaceName = race?.name || selectedRace;
 
-        // Перевіряємо чи ID раси або назва раси є в списку доступних для скіла
-        const isAvailableForRace =
-          (selectedRaceId && skillRaces.includes(selectedRaceId)) ||
-          skillRaces.includes(selectedRaceName) ||
-          skillRaces.includes(selectedRace);
+          const isAvailableForRace =
+            (selectedRaceId && skillRaces.includes(selectedRaceId)) ||
+            skillRaces.includes(selectedRaceName) ||
+            skillRaces.includes(selectedRace);
 
-        if (!isAvailableForRace) {
-          return false;
+          if (!isAvailableForRace) {
+            return false;
+          }
         }
       }
 
@@ -125,7 +128,7 @@ export function useSkillTreeFilters({
     });
 
     return filtered;
-  }, [skillsFromLibrary, assignedSkillIds, selectedRace, race]);
+  }, [skillsFromLibrary, assignedSkillIds, selectedRace, race, skipRaceCheckForSelector]);
 
   // Групуємо скіли по основним навикам
   const groupedSkills = useMemo(() => {

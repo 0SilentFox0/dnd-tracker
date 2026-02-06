@@ -66,6 +66,9 @@ const createCharacterSchema = z.object({
   ideals: z.string().optional(),
   bonds: z.string().optional(),
   flaws: z.string().optional(),
+
+  // Уміння (персональний скіл з групи «Персональні»)
+  personalSkillId: z.string().optional().nullable(),
 });
 
 export async function POST(
@@ -187,7 +190,9 @@ export async function POST(
         ideals: data.ideals,
         bonds: data.bonds,
         flaws: data.flaws,
-        
+
+        personalSkillId: data.personalSkillId ?? null,
+
         skillTreeProgress: {},
       },
       include: {

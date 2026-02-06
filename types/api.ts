@@ -60,6 +60,8 @@ export interface BattleScene {
   currentRound: number;
   currentTurnIndex: number;
   initiativeOrder: BattleParticipant[];
+  /** Призвані істоти (з’являться на початку наступного раунду) */
+  pendingSummons?: BattleParticipant[];
   battleLog: BattleAction[];
   createdAt: string;
   startedAt?: string;

@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { prisma } from "@/lib/db";
-import { createClient } from "@/lib/supabase/server";
+import { requireDM } from "@/lib/utils/api/api-auth";
 import { checkVictoryConditions,completeBattle } from "@/lib/utils/battle/battle-victory";
 import { BattleAction,BattleParticipant } from "@/types/battle";
 
@@ -18,30 +18,10 @@ export async function POST(
   try {
     const { id, battleId } = await params;
 
-    const supabase = await createClient();
+    const accessResult = await requireDM(id);
 
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = authUser.id;
-
-    // Перевіряємо права DM
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
-      include: {
-        members: {
-          where: { userId },
-        },
-      },
-    });
-
-    if (!campaign || campaign.members[0]?.role !== "dm") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
     }
 
     const battle = await prisma.battleScene.findUnique({
@@ -99,6 +79,13 @@ export async function POST(
       ...battleAction,
       battleId,
       actionIndex,
+      stateBefore: {
+        initiativeOrder: JSON.parse(
+          JSON.stringify(initiativeOrder),
+        ) as BattleParticipant[],
+        currentTurnIndex: battle.currentTurnIndex,
+        currentRound: battle.currentRound,
+      },
     };
 
     // Оновлюємо бій

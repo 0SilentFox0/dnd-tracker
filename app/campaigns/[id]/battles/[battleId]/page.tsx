@@ -2,13 +2,21 @@
 
 import { use } from "react";
 import { BattleHeader } from "@/components/battle/BattleHeader";
+import { GlobalDamageOverlay } from "@/components/battle/overlays";
+import {
+  BattleLogPanel,
+  DmQuickActionsPanel,
+} from "@/components/battle/panels";
+import { AddParticipantDialog } from "@/components/battle/dialogs/AddParticipantDialog";
 import { AttackDialog } from "@/components/battle/dialogs/AttackDialog";
+import { ChangeHpDialog } from "@/components/battle/dialogs/ChangeHpDialog";
 import { CounterAttackResultDialog } from "@/components/battle/dialogs/CounterAttackResultDialog";
 import { MoraleCheckDialog } from "@/components/battle/dialogs/MoraleCheckDialog";
 import { SpellDialog } from "@/components/battle/dialogs/SpellDialog";
 import { BattleFieldView } from "@/components/battle/views/BattleFieldView";
 import { PlayerTurnView } from "@/components/battle/views/PlayerTurnView";
 import { BattlePreparationView } from "@/components/battle/views/BattlePreparationView";
+import { useBattlePageDialogs } from "@/lib/hooks/battle/useBattlePageDialogs";
 import { useBattleSceneLogic } from "@/lib/hooks/battle/useBattleSceneLogic";
 
 export default function BattlePage({
@@ -30,7 +38,15 @@ export default function BattlePage({
     dialogs,
     mutations,
     handlers,
+    dmControlledParticipantId,
+    setDmControlledParticipantId,
+    addParticipantMutation,
+    updateParticipantMutation,
+    globalDamageFlash,
+    turnStartedNotification,
   } = useBattleSceneLogic(id, battleId);
+
+  const dmDialogs = useBattlePageDialogs();
 
   if (loading) {
     return (
@@ -56,11 +72,17 @@ export default function BattlePage({
   }
 
   return (
-    <div className="flex flex-col h-[100dvh] overflow-hidden bg-black selection:bg-primary/30 text-white">
+    <div className="flex flex-col h-dvh overflow-hidden bg-black selection:bg-primary/30 text-white">
+      {turnStartedNotification && (
+        <div className="shrink-0 py-2 px-4 bg-primary/90 text-primary-foreground text-center font-bold text-sm animate-in fade-in slide-in-from-top-2 duration-300">
+          ⚔️ {turnStartedNotification}
+        </div>
+      )}
       <BattleHeader
         battle={battle}
         onNextTurn={handlers.handleNextTurn}
         onReset={() => mutations.resetBattle.mutate()}
+        onCompleteBattle={handlers.handleCompleteBattle}
         isDM={isDM}
       />
 
@@ -87,19 +109,84 @@ export default function BattlePage({
             onSpell={(data) => mutations.spell.mutate(data)}
             onBonusAction={(skill) => alert(`Бонусна дія: ${skill.name}`)}
             onSkipTurn={handlers.handleNextTurn}
-            onMoraleCheck={() => {}} // Handle properly inside PlayerTurnView if needed
+            onMoraleCheck={(d10Roll) => {
+              if (currentParticipant)
+                mutations.moraleCheck.mutate({
+                  participantId: currentParticipant.basicInfo.id,
+                  d10Roll,
+                });
+            }}
           />
         ) : (
           battle.status === "active" && (
-            <BattleFieldView
-              battle={battle}
-              allies={allies}
-              enemies={enemies}
-              isDM={isDM}
-            />
+            <>
+              <BattleFieldView
+                battle={battle}
+                allies={allies}
+                enemies={enemies}
+                isDM={isDM}
+              />
+            </>
           )
         )}
       </main>
+      {(battle.status === "active" ||
+        (battle.status === "completed" && isDM)) && (
+        <BattleLogPanel
+          battle={battle}
+          isDM={isDM}
+          onRollback={handlers.handleRollback}
+          open={dmDialogs.logPanelOpen}
+          onOpenChange={dmDialogs.setLogPanelOpen}
+        />
+      )}
+
+      {isDM && battle.status === "active" && (
+        <DmQuickActionsPanel
+          battle={battle}
+          isDM={isDM}
+          onOpenLog={dmDialogs.openLog}
+          onAddParticipant={dmDialogs.openAddParticipant}
+          onIncreaseHp={dmDialogs.openHpDialog}
+          onRemoveFromBattle={(p) => {
+            updateParticipantMutation.mutate({
+              participantId: p.basicInfo.id,
+              data: { removeFromBattle: true },
+            });
+          }}
+          onCompleteBattle={(result) => handlers.handleCompleteBattle(result)}
+          onTakeControl={(p) =>
+            setDmControlledParticipantId(p?.basicInfo.id ?? null)
+          }
+          dmControlledParticipantId={dmControlledParticipantId ?? null}
+        />
+      )}
+
+      <AddParticipantDialog
+        open={dmDialogs.addParticipantDialogOpen}
+        onOpenChange={dmDialogs.setAddParticipantDialogOpen}
+        campaignId={id}
+        onAdd={(data) =>
+          addParticipantMutation.mutate(data, {
+            onSuccess: () => dmDialogs.setAddParticipantDialogOpen(false),
+          })
+        }
+        isPending={addParticipantMutation.isPending}
+      />
+
+      <ChangeHpDialog
+        open={dmDialogs.hpDialogParticipant !== null}
+        onOpenChange={(open) => !open && dmDialogs.closeHpDialog()}
+        participant={dmDialogs.hpDialogParticipant}
+        onConfirm={(participantId, newHp) => {
+          updateParticipantMutation.mutate({
+            participantId,
+            data: { currentHp: newHp },
+          });
+          dmDialogs.closeHpDialog();
+        }}
+        isPending={updateParticipantMutation.isPending}
+      />
 
       {/* Діалоги */}
       <AttackDialog
@@ -115,12 +202,17 @@ export default function BattlePage({
         }
       />
 
-      {!isCurrentPlayerTurn && (
+      {!isCurrentPlayerTurn && currentParticipant && (
         <MoraleCheckDialog
           open={dialogs.morale.open}
           onOpenChange={dialogs.morale.setOpen}
-          participant={null} // Participant for morale should be handled in hook if needed for DM
-          onConfirm={(roll) => {}} // mutations.moraleCheck.mutate
+          participant={currentParticipant}
+          onConfirm={(d10Roll) =>
+            mutations.moraleCheck.mutate({
+              participantId: currentParticipant.basicInfo.id,
+              d10Roll,
+            })
+          }
         />
       )}
 
@@ -135,7 +227,11 @@ export default function BattlePage({
         canSeeEnemyHp={canSeeEnemyHp}
         onCast={(data) =>
           mutations.spell.mutate(data, {
-            onSuccess: () => dialogs.spell.setOpen(false),
+            onSuccess: (updatedBattle) => {
+              dialogs.spell.setOpen(false);
+              if (updatedBattle)
+                handlers.triggerGlobalDamageFromBattle(updatedBattle);
+            },
           })
         }
       />
@@ -145,6 +241,13 @@ export default function BattlePage({
         onOpenChange={dialogs.counterAttack.setOpen}
         info={dialogs.counterAttack.info}
       />
+
+      {globalDamageFlash && (
+        <GlobalDamageOverlay
+          value={globalDamageFlash.value}
+          isHealing={globalDamageFlash.isHealing}
+        />
+      )}
     </div>
   );
 }

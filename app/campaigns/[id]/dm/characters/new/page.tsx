@@ -4,6 +4,7 @@ import { use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { CharacterAbilitiesSection } from "@/components/characters/abilities/CharacterAbilitiesSection";
 import { CharacterBasicInfo } from "@/components/characters/basic/CharacterBasicInfo";
 import { CharacterArtifactsSection } from "@/components/characters/artifacts/CharacterArtifactsSection";
 import { CharacterSkillsSection } from "@/components/characters/skills/CharacterSkillsSection";
@@ -49,6 +50,7 @@ export default function NewCharacterPage({
     abilityScores,
     combatStats,
     skills,
+    abilities,
     spellcasting,
     handleSubmit,
   } = useCharacterForm({
@@ -118,9 +120,20 @@ export default function NewCharacterPage({
                 </AccordionContent>
               </AccordionItem>
 
-              {/* Етап 5: Магічна Книга */}
+              {/* Етап 5: Уміння */}
               <AccordionItem value="item-5">
-                <AccordionTrigger>5. Магічна Книга</AccordionTrigger>
+                <AccordionTrigger>5. Уміння</AccordionTrigger>
+                <AccordionContent>
+                  <CharacterAbilitiesSection
+                    campaignId={id}
+                    abilities={abilities}
+                  />
+                </AccordionContent>
+              </AccordionItem>
+
+              {/* Етап 6: Магічна Книга */}
+              <AccordionItem value="item-6">
+                <AccordionTrigger>6. Магічна Книга</AccordionTrigger>
                 <AccordionContent>
                   <CharacterSpellsSection
                     spellcasting={spellcasting}
@@ -129,9 +142,9 @@ export default function NewCharacterPage({
                 </AccordionContent>
               </AccordionItem>
 
-              {/* Етап 6: Артефакти */}
-              <AccordionItem value="item-6">
-                <AccordionTrigger>6. Артефакти</AccordionTrigger>
+              {/* Етап 7: Артефакти */}
+              <AccordionItem value="item-7">
+                <AccordionTrigger>7. Артефакти</AccordionTrigger>
                 <AccordionContent>
                   <CharacterArtifactsSection
                     knownSpellIds={spellcasting.knownSpells}

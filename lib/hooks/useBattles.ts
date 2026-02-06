@@ -1,16 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
+  addBattleParticipant,
   attack,
   castSpell,
+  completeBattle,
   deleteBattle,
   getBattle,
   moraleCheck,
   nextTurn,
   resetBattle,
+  rollbackBattleAction,
   startBattle,
   updateBattle,
+  updateBattleParticipant,
 } from "@/lib/api/battles";
+import type { AddParticipantData } from "@/lib/api/battles";
 import type {
   AttackData,
   BattleScene,
@@ -115,6 +120,68 @@ export function useResetBattle(campaignId: string, battleId: string) {
     onSuccess: (data) => {
       queryClient.setQueryData(["battle", campaignId, battleId], data);
       queryClient.invalidateQueries({ queryKey: ["battles", campaignId] });
+    },
+  });
+}
+
+export function useCompleteBattle(campaignId: string, battleId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data?: { result?: "victory" | "defeat" }) =>
+      completeBattle(campaignId, battleId, data),
+    onSuccess: (data) => {
+      queryClient.setQueryData(["battle", campaignId, battleId], data);
+      queryClient.invalidateQueries({ queryKey: ["battles", campaignId] });
+    },
+  });
+}
+
+export function useRollbackBattleAction(
+  campaignId: string,
+  battleId: string,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (actionIndex: number) =>
+      rollbackBattleAction(campaignId, battleId, actionIndex),
+    onSuccess: (data) => {
+      queryClient.setQueryData(["battle", campaignId, battleId], data);
+      queryClient.invalidateQueries({ queryKey: ["battles", campaignId] });
+    },
+  });
+}
+
+export function useAddBattleParticipant(campaignId: string, battleId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: AddParticipantData) =>
+      addBattleParticipant(campaignId, battleId, data),
+    onSuccess: (data) => {
+      queryClient.setQueryData(["battle", campaignId, battleId], data);
+    },
+  });
+}
+
+export function useUpdateBattleParticipant(
+  campaignId: string,
+  battleId: string,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      participantId,
+      data,
+    }: {
+      participantId: string;
+      data: { currentHp?: number; removeFromBattle?: boolean };
+    }) =>
+      updateBattleParticipant(campaignId, battleId, participantId, data),
+    onSuccess: (data) => {
+      queryClient.setQueryData(["battle", campaignId, battleId], data);
     },
   });
 }

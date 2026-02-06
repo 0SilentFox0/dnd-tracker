@@ -3,8 +3,9 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { prisma } from "@/lib/db";
-import { createClient } from "@/lib/supabase/server";
+import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { checkMorale } from "@/lib/utils/battle/battle-morale";
+import { executeSkillsByTrigger } from "@/lib/utils/skills/skill-triggers-execution";
 import { BattleAction, BattleParticipant } from "@/types/battle";
 
 const moraleCheckSchema = z.object({
@@ -19,30 +20,10 @@ export async function POST(
   try {
     const { id, battleId } = await params;
 
-    const supabase = await createClient();
+    const accessResult = await requireCampaignAccess(id, false);
 
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = authUser.id;
-
-    // Перевіряємо права DM
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
-      include: {
-        members: {
-          where: { userId },
-        },
-      },
-    });
-
-    if (!campaign || campaign.members[0]?.role !== "dm") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
     }
 
     const battle = await prisma.battleScene.findUnique({
@@ -79,6 +60,14 @@ export async function POST(
       );
     }
 
+    // Дозволяємо DM або гравцю, який контролює цього учасника
+    const isDM = accessResult.campaign.members[0]?.role === "dm";
+    const isController =
+      participant.basicInfo.controlledBy === accessResult.userId;
+    if (!isDM && !isController) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     // Перевіряємо мораль
     const moraleResult = checkMorale(participant, data.d10Roll);
 
@@ -106,6 +95,48 @@ export async function POST(
       updatedInitiativeOrder.push(extraParticipant);
     }
 
+    // Тригери скілів: onMoraleSuccess для учасника, allyMoraleCheck для союзників
+    const moraleSuccess =
+      moraleResult.hasExtraTurn || !moraleResult.shouldSkipTurn;
+    if (moraleSuccess) {
+      const participantIdx = updatedInitiativeOrder.findIndex(
+        (p) => p.basicInfo.id === participant.basicInfo.id,
+      );
+      if (participantIdx >= 0) {
+        const result = executeSkillsByTrigger(
+          updatedInitiativeOrder[participantIdx],
+          "onMoraleSuccess",
+          updatedInitiativeOrder,
+          { currentRound: battle.currentRound },
+        );
+        updatedInitiativeOrder = updatedInitiativeOrder.map((p, i) =>
+          i === participantIdx ? result.participant : p,
+        );
+      }
+    }
+    // allyMoraleCheck для союзників
+    const allies = updatedInitiativeOrder.filter(
+      (p) =>
+        p.basicInfo.side === participant.basicInfo.side &&
+        p.basicInfo.id !== participant.basicInfo.id,
+    );
+    for (const ally of allies) {
+      const allyIdx = updatedInitiativeOrder.findIndex(
+        (p) => p.basicInfo.id === ally.basicInfo.id,
+      );
+      if (allyIdx >= 0) {
+        const result = executeSkillsByTrigger(
+          updatedInitiativeOrder[allyIdx],
+          "allyMoraleCheck",
+          updatedInitiativeOrder,
+          { currentRound: battle.currentRound },
+        );
+        updatedInitiativeOrder = updatedInitiativeOrder.map((p, i) =>
+          i === allyIdx ? result.participant : p,
+        );
+      }
+    }
+
     // Створюємо BattleAction для логу
     const battleLog = (battle.battleLog as unknown as BattleAction[]) || [];
 
@@ -127,6 +158,13 @@ export async function POST(
       resultText: moraleResult.message,
       hpChanges: [],
       isCancelled: false,
+      stateBefore: {
+        initiativeOrder: JSON.parse(
+          JSON.stringify(initiativeOrder),
+        ) as BattleParticipant[],
+        currentTurnIndex: battle.currentTurnIndex,
+        currentRound: battle.currentRound,
+      },
     };
 
     // Оновлюємо бій

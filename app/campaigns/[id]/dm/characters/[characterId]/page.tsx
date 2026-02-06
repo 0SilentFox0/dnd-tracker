@@ -4,6 +4,7 @@ import { use, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { CharacterAbilitiesSection } from "@/components/characters/abilities/CharacterAbilitiesSection";
 import { CharacterBasicInfo } from "@/components/characters/basic/CharacterBasicInfo";
 import { CharacterArtifactsSection } from "@/components/characters/artifacts/CharacterArtifactsSection";
 import { CharacterSkillsSection } from "@/components/characters/skills/CharacterSkillsSection";
@@ -52,6 +53,7 @@ export default function EditCharacterPage({
     abilityScores,
     combatStats,
     skills,
+    abilities,
     spellcasting,
     handleSubmit,
     setFormData,
@@ -149,7 +151,17 @@ export default function EditCharacterPage({
               </AccordionItem>
 
               <AccordionItem value="item-5">
-                <AccordionTrigger>5. Заклинання</AccordionTrigger>
+                <AccordionTrigger>5. Уміння</AccordionTrigger>
+                <AccordionContent>
+                  <CharacterAbilitiesSection
+                    campaignId={id}
+                    abilities={abilities}
+                  />
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-6">
+                <AccordionTrigger>6. Заклинання</AccordionTrigger>
                 <AccordionContent>
                   <CharacterSpellsSection
                     spellcasting={spellcasting}
@@ -158,8 +170,8 @@ export default function EditCharacterPage({
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="item-6">
-                <AccordionTrigger>6. Артефакти</AccordionTrigger>
+              <AccordionItem value="item-7">
+                <AccordionTrigger>7. Артефакти</AccordionTrigger>
                 <AccordionContent>
                   <CharacterArtifactsSection
                     knownSpellIds={spellcasting.knownSpells}
