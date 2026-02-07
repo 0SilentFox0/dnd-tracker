@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useMainSkills } from "@/lib/hooks/useMainSkills";
-import { useDeleteAllSkills, useSkills } from "@/lib/hooks/useSkills";
+import { useDeleteAllSkills, useDeleteSkill, useDuplicateSkill, useSkills } from "@/lib/hooks/useSkills";
 import {
   convertGroupedSkillsToArray,
   groupSkillsByMainSkill,
@@ -43,8 +43,10 @@ export function DMSkillsPageClient({
 
   const { data: mainSkills = [] } = useMainSkills(campaignId);
 
-  // Мутація для видалення всіх скілів
+  // Мутації видалення
   const deleteAllSkillsMutation = useDeleteAllSkills(campaignId);
+  const deleteSkillMutation = useDeleteSkill(campaignId);
+  const duplicateSkillMutation = useDuplicateSkill(campaignId);
 
   // Групуємо скіли по основним навикам
   const groupedSkills = useMemo(() => {
@@ -60,6 +62,24 @@ export function DMSkillsPageClient({
     } catch (error) {
       console.error("Error deleting all skills:", error);
       alert("Не вдалося видалити всі скіли. Спробуйте ще раз.");
+    }
+  };
+
+  const handleDeleteSkill = async (skillId: string) => {
+    try {
+      await deleteSkillMutation.mutateAsync(skillId);
+    } catch (error) {
+      console.error("Error deleting skill:", error);
+      alert("Не вдалося видалити скіл. Спробуйте ще раз.");
+    }
+  };
+
+  const handleDuplicateSkill = async (skillId: string) => {
+    try {
+      await duplicateSkillMutation.mutateAsync(skillId);
+    } catch (error) {
+      console.error("Error duplicating skill:", error);
+      alert("Не вдалося дублювати скіл. Спробуйте ще раз.");
     }
   };
 
@@ -131,6 +151,8 @@ export function DMSkillsPageClient({
                 campaignId={campaignId}
                 spellGroups={[]}
                 mainSkillColor={mainSkill?.color}
+                onDeleteSkill={handleDeleteSkill}
+                onDuplicateSkill={handleDuplicateSkill}
               />
             );
           })}

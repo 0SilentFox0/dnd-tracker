@@ -86,6 +86,8 @@ export const EFFECT_STAT_OPTIONS: SelectOption[] = [
   { value: "restore_spell_slot", label: "Відновлення слоту" },
   { value: "field_damage", label: "Пекельна земля (AoE)" },
   { value: "revive_hp", label: "Воскресіння HP" },
+  { value: "runic_attack", label: "Рунічна атака" },
+  { value: "blood_sacrifice_heal", label: "Кровожертсво" },
   { value: "clear_negative_effects", label: "Зняття негативних ефектів" },
   { value: "morale_per_kill", label: "Мораль за вбивство" },
   { value: "morale_per_ally_death", label: "Мораль за смерть союзника" },

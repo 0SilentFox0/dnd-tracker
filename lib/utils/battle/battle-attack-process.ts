@@ -432,13 +432,15 @@ export function processAttack(
     updatedAttacker = onKillResult.updatedKiller;
   }
 
-  // 7d. OnHit: при попаданні — ефекти атакуючого на ціль (DOT, дебафи)
+  // 7d. OnHit: при попаданні — ефекти атакуючого на ціль (DOT, дебафи) або на себе (руни, лікування)
   if (isHit) {
+    const physicalDamageDealt = resistanceResult.finalDamage;
     const onHitResult = executeOnHitEffects(
       updatedAttacker,
       updatedTarget,
       currentRound,
       attackerSkillUsageCounts,
+      physicalDamageDealt,
     );
     updatedTarget = onHitResult.updatedTarget;
     updatedAttacker = onHitResult.updatedAttacker;

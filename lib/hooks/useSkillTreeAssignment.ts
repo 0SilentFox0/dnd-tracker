@@ -1,5 +1,10 @@
-import type { Skill, SkillCircle,SkillLevel, SkillTree } from "@/types/skill-tree";
-import type { Skill as SkillFromLibraryType } from "@/types/skills";
+import {
+  getSkillDescription,
+  getSkillIcon,
+  getSkillName,
+} from "@/lib/utils/skills/skill-helpers";
+import type { Skill, SkillCircle, SkillLevel, SkillTree } from "@/types/skill-tree";
+import type { GroupedSkill, Skill as SkillFromLibraryType } from "@/types/skills";
 
 interface SkillSlot {
   mainSkillId: string;
@@ -11,8 +16,12 @@ interface SkillSlot {
 export function assignSkillToSlot(
   skillTree: SkillTree,
   slot: SkillSlot,
-  selectedSkill: SkillFromLibraryType
+  selectedSkill: SkillFromLibraryType | GroupedSkill
 ): SkillTree {
+  const skillName = getSkillName(selectedSkill);
+  const skillDescription = getSkillDescription(selectedSkill) ?? "";
+  const skillIcon = getSkillIcon(selectedSkill);
+
   // Перевіряємо, чи це main-skill-level або racial слот (circle === 1 та index === 0)
   const isMainSkillLevelOrRacial = slot.circle === 1 && slot.index === 0;
 
@@ -33,7 +42,7 @@ export function assignSkillToSlot(
         levelIcons: {
           ...levelIcons,
           [slot.level]:
-            selectedSkill.icon ||
+            skillIcon ||
             levelIcons[slot.level as keyof typeof levelIcons],
         },
         levelSkillIds: {
@@ -82,11 +91,11 @@ export function assignSkillToSlot(
 
     const skillToAssign: Skill = {
       id: selectedSkill.id,
-      name: selectedSkill.name,
-      description: selectedSkill.description || "",
+      name: skillName,
+      description: skillDescription,
       circle: slot.circle as SkillCircle,
       level: slot.level as SkillLevel,
-      ...(selectedSkill.icon && { icon: selectedSkill.icon }),
+      ...(skillIcon && { icon: skillIcon }),
     };
 
     // Замінюємо скіл на позиції slot.index

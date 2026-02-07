@@ -689,6 +689,14 @@ async function extractActiveSkillsFromCharacter(
     }
   }
 
+  // Додаємо персональний унікальний скіл персонажа (з групи «Персональні»)
+  const personalSkillId = (character as { personalSkillId?: string | null }).personalSkillId;
+  if (personalSkillId?.trim() && !allSkillIds.includes(personalSkillId)) {
+    allSkillIds.push(personalSkillId);
+    skillIdToMainSkill[personalSkillId] = "";
+    skillIdToLevel[personalSkillId] = SkillLevel.BASIC;
+  }
+
   // Якщо немає скілів, повертаємо порожній масив
   if (allSkillIds.length === 0) {
     return activeSkills;
@@ -823,7 +831,7 @@ async function extractActiveSkillsFromCharacter(
     activeSkills.push({
       skillId: skill.id,
       name: skill.name,
-      mainSkillId: skillIdToMainSkill[skillId],
+      mainSkillId: skill.mainSkillId ?? skillIdToMainSkill[skillId] ?? "",
       level: skillIdToLevel[skillId],
       effects,
       spellEnhancements,

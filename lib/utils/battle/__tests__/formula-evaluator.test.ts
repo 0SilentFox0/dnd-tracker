@@ -1,7 +1,19 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { evaluateFormula } from "../formula-evaluator";
 
 describe("FormulaEvaluator", () => {
+  let consoleWarnSpy: ReturnType<typeof vi.spyOn>;
+  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    consoleWarnSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
+  });
   it("evaluates basic arithmetic", () => {
     expect(evaluateFormula("1 + 2", {})).toBe(3);
     expect(evaluateFormula("10 - 4", {})).toBe(6);

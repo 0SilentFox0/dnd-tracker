@@ -130,6 +130,7 @@ export function SkillEffectRow({
         size="icon"
         className="shrink-0 text-destructive hover:text-destructive/80"
         onClick={() => onRemove(index)}
+        data-testid="remove-effect"
       >
         <Trash2 className="h-4 w-4" />
       </Button>

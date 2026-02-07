@@ -28,6 +28,10 @@ export interface SkillGroupAccordionItemProps {
   groupId: string | undefined;
   onRenameClick: () => void;
   onRemoveAllClick: () => void;
+  /** Викликається при видаленні одного скіла (DM) */
+  onDeleteSkill?: (skillId: string) => void;
+  /** Викликається при дублюванні скіла (DM) */
+  onDuplicateSkill?: (skillId: string) => void;
   skills: (Skill | GroupedSkill)[];
   campaignId: string;
 }
@@ -40,6 +44,8 @@ export function SkillGroupAccordionItem({
   groupId,
   onRenameClick,
   onRemoveAllClick,
+  onDeleteSkill,
+  onDuplicateSkill,
   skills,
   campaignId,
 }: SkillGroupAccordionItemProps) {
@@ -108,6 +114,8 @@ export function SkillGroupAccordionItem({
               key={getSkillId(skill)}
               skill={skill}
               campaignId={campaignId}
+              onRemove={onDeleteSkill}
+              onDuplicate={onDuplicateSkill}
             />
           ))}
         </div>

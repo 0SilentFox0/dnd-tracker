@@ -91,3 +91,20 @@ export async function deleteSkill(
     throw new Error(error.error || "Failed to delete skill");
   }
 }
+
+export async function duplicateSkill(
+  campaignId: string,
+  skillId: string
+): Promise<Skill> {
+  const response = await fetch(
+    `/api/campaigns/${campaignId}/skills/${skillId}/duplicate`,
+    { method: "POST" }
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to duplicate skill");
+  }
+
+  return response.json();
+}

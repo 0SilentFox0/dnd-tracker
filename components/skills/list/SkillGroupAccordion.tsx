@@ -30,6 +30,10 @@ interface SkillGroupAccordionProps {
   spellGroups: SpellGroup[];
   /** Колір основного навику для підсвітки акордеону (40% opacity) */
   mainSkillColor?: string | null;
+  /** Викликається при видаленні одного скіла (DM) */
+  onDeleteSkill?: (skillId: string) => void;
+  /** Викликається при дублюванні скіла (DM) */
+  onDuplicateSkill?: (skillId: string) => void;
 }
 
 export function SkillGroupAccordion({
@@ -38,6 +42,8 @@ export function SkillGroupAccordion({
   campaignId,
   spellGroups,
   mainSkillColor,
+  onDeleteSkill,
+  onDuplicateSkill,
 }: SkillGroupAccordionProps) {
   const accordionBg =
     mainSkillColor != null && mainSkillColor
@@ -80,6 +86,8 @@ export function SkillGroupAccordion({
         groupId={groupId}
         onRenameClick={openRenameDialog}
         onRemoveAllClick={() => setRemoveAllDialogOpen(true)}
+        onDeleteSkill={onDeleteSkill}
+        onDuplicateSkill={onDuplicateSkill}
         skills={skills}
         campaignId={campaignId}
       />

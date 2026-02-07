@@ -11,6 +11,7 @@ import { clearSkillTree } from "@/lib/hooks/useSkillTreeClear";
 import { useSkillTreeEnrichment } from "@/lib/hooks/useSkillTreeEnrichment";
 import { useSkillTreeFilters } from "@/lib/hooks/useSkillTreeFilters";
 import { useSkillTreeSave } from "@/lib/hooks/useSkillTreeSave";
+import { getSkillName } from "@/lib/utils/skills/skill-helpers";
 import {
   createMainSkillFromApi,
   createMockSkillTree,
@@ -485,11 +486,12 @@ export function useSkillTreePage({
     setEditedSkillTree(updatedSkillTree);
 
     // Показуємо нотифікацію про успішне присвоєння
+    const skillDisplayName = getSkillName(selectedSkill);
     const isMainSkillLevelOrRacial = slot.circle === 1 && slot.index === 0;
 
     if (isMainSkillLevelOrRacial) {
       alert(
-        `Скіл "${selectedSkill.name}" успішно присвоєно до ${
+        `Скіл "${skillDisplayName}" успішно присвоєно до ${
           slot.mainSkillId === "racial"
             ? "расового навику"
             : `основного навику "${slot.mainSkillId}"`
@@ -497,7 +499,7 @@ export function useSkillTreePage({
       );
     } else {
       alert(
-        `Скіл "${selectedSkill.name}" успішно присвоєно колу ${slot.circle}`
+        `Скіл "${skillDisplayName}" успішно присвоєно колу ${slot.circle}`
       );
     }
 
