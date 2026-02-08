@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Copy, Trash2 } from "lucide-react";
+import { Check, Copy, MoreVertical, Tag, Trash2 } from "lucide-react";
 
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import {
@@ -22,11 +22,22 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   getStatLabel,
   getTypeLabel,
   isFlagValueType,
 } from "@/lib/constants/skill-effects";
 import { getSimpleTriggerLabel } from "@/lib/constants/skill-triggers";
+import { useMainSkills } from "@/lib/hooks/useMainSkills";
+import { useUpdateSkill } from "@/lib/hooks/useSkills";
 import {
   getSkillBonuses,
   getSkillCombatStats,
@@ -34,6 +45,7 @@ import {
   getSkillEffects,
   getSkillIcon,
   getSkillId,
+  getSkillMainSkillId,
   getSkillName,
   getSkillSpell,
   getSkillTriggers,
@@ -88,7 +100,13 @@ function formatTrigger(t: SkillTrigger): string {
 export function SkillCard({ skill, campaignId, onRemove, onDuplicate }: SkillCardProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
+  const { data: mainSkills = [] } = useMainSkills(campaignId);
+
+  const updateSkillMutation = useUpdateSkill(campaignId);
+
   const skillId = getSkillId(skill);
+
+  const currentMainSkillId = getSkillMainSkillId(skill) ?? null;
 
   const skillName = getSkillName(skill);
 
@@ -140,33 +158,91 @@ export function SkillCard({ skill, campaignId, onRemove, onDuplicate }: SkillCar
               </h3>
             </div>
           </div>
-          {(onRemove || onDuplicate) && (
-            <div className="flex items-center gap-0.5 shrink-0">
-              {onDuplicate && (
+          {(onRemove || onDuplicate || mainSkills.length > 0) && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                  onClick={() => onDuplicate(skillId)}
-                  aria-label="Дублювати скіл"
+                  className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground"
+                  aria-label="Меню дій"
                 >
-                  <Copy className="h-4 w-4" />
+                  <MoreVertical className="h-4 w-4" />
                 </Button>
-              )}
-              {onRemove && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-destructive hover:text-destructive/80"
-                  onClick={() => setShowDeleteDialog(true)}
-                  aria-label="Видалити скіл"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {mainSkills.length > 0 && (
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>
+                      <Tag className="h-4 w-4" />
+                      Обрати основний навик
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          updateSkillMutation.mutate({
+                            skillId,
+                            data: {
+                              mainSkillData: { mainSkillId: null },
+                            },
+                          });
+                        }}
+                      >
+                        <span className="inline-flex w-4 shrink-0 justify-center mr-2">
+                          {currentMainSkillId === null ? (
+                            <Check className="h-4 w-4" />
+                          ) : null}
+                        </span>
+                        Без основного навику
+                      </DropdownMenuItem>
+                      {mainSkills
+                        .filter((ms) => ms.id !== "racial" && ms.id !== "ultimate")
+                        .map((ms) => (
+                          <DropdownMenuItem
+                            key={ms.id}
+                            onClick={() => {
+                              updateSkillMutation.mutate({
+                                skillId,
+                                data: {
+                                  mainSkillData: { mainSkillId: ms.id },
+                                },
+                              });
+                            }}
+                          >
+                            <span className="inline-flex w-4 shrink-0 justify-center mr-2">
+                              {currentMainSkillId === ms.id ? (
+                                <Check className="h-4 w-4" />
+                              ) : null}
+                            </span>
+                            <span
+                              className="mr-2 size-3 shrink-0 rounded-full"
+                              style={{ backgroundColor: ms.color }}
+                              aria-hidden
+                            />
+                            {ms.name}
+                          </DropdownMenuItem>
+                        ))}
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                )}
+                {onDuplicate && (
+                  <DropdownMenuItem onClick={() => onDuplicate(skillId)}>
+                    <Copy className="h-4 w-4" />
+                    Копіювати
+                  </DropdownMenuItem>
+                )}
+                {onRemove && (
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onClick={() => setShowDeleteDialog(true)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Видалити
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
 

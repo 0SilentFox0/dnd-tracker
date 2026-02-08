@@ -345,6 +345,7 @@ export async function GET(
         campaignId: skill.campaignId,
         basicInfo,
         image: skill.image ?? null,
+        appearanceDescription: (skill as { appearanceDescription?: string | null }).appearanceDescription ?? null,
         bonuses: (skill.bonuses as Record<string, number>) || {},
         combatStats,
         spellData,

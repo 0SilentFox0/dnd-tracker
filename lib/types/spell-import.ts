@@ -37,6 +37,7 @@ export interface ImportSpell {
   savingThrowOnSuccess?: SpellSavingThrowOnSuccess;
   description: string;
   groupId?: string;
+  icon?: string | null;
 }
 
 export interface SpellImportResult {

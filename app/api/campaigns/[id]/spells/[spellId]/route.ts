@@ -10,7 +10,7 @@ const updateSpellSchema = z.object({
   level: z.number().min(0).max(9).optional(),
   type: z.enum(["target", "aoe"]).optional(),
   target: z.enum(["enemies", "allies", "all"]).optional().nullable(),
-  damageType: z.enum(["damage", "heal", "all"]).optional(),
+  damageType: z.enum(["damage", "heal", "all", "buff", "debuff"]).optional(),
   damageElement: z.preprocess(
     (val) => (val === "" ? null : val),
     z.string().nullable().optional()
@@ -19,9 +19,7 @@ const updateSpellSchema = z.object({
   healModifier: z.enum(["heal", "regeneration", "dispel", "shield", "vampirism"]).optional().nullable(),
   castingTime: z.string().optional().nullable(),
   range: z.string().optional().nullable(),
-  components: z.string().optional().nullable(),
   duration: z.string().optional().nullable(),
-  concentration: z.boolean().optional(),
   diceCount: z.number().min(0).max(10).optional().nullable(),
   diceType: z.enum(["d4", "d6", "d8", "d10", "d12", "d20", "d100"]).optional().nullable(),
   savingThrow: z
@@ -35,15 +33,18 @@ const updateSpellSchema = z.object({
         "charisma",
       ]),
       onSuccess: z.enum(["half", "none"]),
+      dc: z.number().min(1).max(30).optional().nullable(),
     })
     .optional()
     .nullable(),
-  description: z.string().min(1).optional(),
+  description: z.string().optional().nullable(),
+  effects: z.array(z.string()).optional().nullable(),
   groupId: z.string().optional().nullable(),
   icon: z.preprocess(
     (val) => (val === "" ? null : val),
     z.string().nullable().optional()
   ),
+  appearanceDescription: z.string().nullable().optional(),
 });
 
 export async function GET(
@@ -125,9 +126,7 @@ export async function PATCH(
         healModifier: data.healModifier !== undefined ? data.healModifier : undefined,
         castingTime: data.castingTime !== undefined ? data.castingTime : undefined,
         range: data.range !== undefined ? data.range : undefined,
-        components: data.components !== undefined ? data.components : undefined,
         duration: data.duration !== undefined ? data.duration : undefined,
-        concentration: data.concentration,
         diceCount: data.diceCount !== undefined ? data.diceCount : undefined,
         diceType: data.diceType !== undefined ? data.diceType : undefined,
         savingThrow:
@@ -136,9 +135,11 @@ export async function PATCH(
             : data.savingThrow
             ? (data.savingThrow as unknown as Prisma.InputJsonValue)
             : undefined,
-        description: data.description,
+        description: data.description !== undefined ? data.description : undefined,
+        effects: data.effects !== undefined ? (data.effects as unknown as Prisma.InputJsonValue) : undefined,
         groupId: data.groupId !== undefined ? data.groupId : undefined,
         icon: data.icon !== undefined ? (data.icon || null) : undefined,
+        appearanceDescription: data.appearanceDescription !== undefined ? data.appearanceDescription : undefined,
       },
       include: {
         spellGroup: true,

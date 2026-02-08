@@ -8,6 +8,14 @@ interface UltimateSkillProps {
   canLearnUltimateSkill: boolean;
   isDMMode?: boolean;
   onSkillClick?: (skill: UltimateSkill) => void;
+  /** У DM режимі: присвоїти вибраний скіл з бібліотеки у слот ультимату */
+  onSkillSlotClick?: (slot: {
+    mainSkillId: string;
+    circle: 1 | 2 | 3;
+    level: string;
+    index: number;
+    isUltimate?: boolean;
+  }) => void;
 }
 
 export function UltimateSkillComponent({
@@ -16,6 +24,7 @@ export function UltimateSkillComponent({
   canLearnUltimateSkill,
   isDMMode = false,
   onSkillClick,
+  onSkillSlotClick,
 }: UltimateSkillProps) {
   return (
     <div
@@ -45,7 +54,17 @@ export function UltimateSkillComponent({
         zIndex: Z_INDEX.ultimateSkill,
       }}
       onClick={() => {
-        if (isDMMode || canLearnUltimateSkill || unlockedUltimateSkill) {
+        if (isDMMode) {
+          if (onSkillSlotClick) {
+            onSkillSlotClick({
+              mainSkillId: "ultimate",
+              circle: 1,
+              level: "basic",
+              index: 0,
+              isUltimate: true,
+            });
+          }
+        } else if (canLearnUltimateSkill || unlockedUltimateSkill) {
           if (onSkillClick) {
             onSkillClick(ultimateSkill);
           }

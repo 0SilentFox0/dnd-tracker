@@ -60,11 +60,6 @@ export function SkillCircle({
 }: SkillCircleProps) {
   const position = getPositionPercent(angle - 1.83, radiusPercent);
 
-  // Округлюємо marginOffset для уникнення помилок гідрації
-  const marginOffsetValue = sizePercent / 2;
-
-  const marginOffset = `-${Math.round(marginOffsetValue * 100) / 100}%`;
-
   return (
     <div
       data-circle={circleNumber}
@@ -84,11 +79,11 @@ export function SkillCircle({
             : "cursor-not-allowed"
       }`}
       style={{
+        position: "absolute",
         ...position,
         width: `${Math.round(sizePercent * 100) / 100}%`,
         height: `${Math.round(sizePercent * 100) / 100}%`,
-        marginLeft: marginOffset,
-        marginTop: marginOffset,
+        transform: "translate(-50%, -50%)",
         backgroundColor: isSelectedForRemoval
           ? "#ef4444" // Червоний колір для вибраного для видалення
           : isUnlocked
@@ -101,7 +96,10 @@ export function SkillCircle({
             : "#6b7280",
         borderWidth: isSelectedForRemoval ? "3px" : undefined,
         opacity: isUnlocked ? 1 : 0.5,
-        zIndex: Z_INDEX.skills,
+        zIndex: isDMMode ? 10 : Z_INDEX.skills,
+        pointerEvents: "auto",
+        minWidth: 24,
+        minHeight: 24,
       }}
       onClick={() => {
         if (isDMMode) {
@@ -112,7 +110,14 @@ export function SkillCircle({
             index: skillIndex,
           };
 
-          // Перевіряємо чи скіл вже присвоєний (має icon або name, і не є placeholder)
+          // Якщо вибрано скіл з бібліотеки — завжди призначаємо/перезаписуємо слот (навіть якщо там уже мок)
+          if (selectedSkillFromLibrary && onSkillSlotClick) {
+            onSkillSlotClick(slotData);
+
+            return;
+          }
+
+          // Інакше: якщо скіл уже присвоєний — режим видалення
           const skillIcon = (skill as Skill & { icon?: string }).icon;
 
           const isPlaceholder =
@@ -120,20 +125,13 @@ export function SkillCircle({
 
           const isAssigned = !isPlaceholder && (skillIcon || skill.name);
 
-          if (isAssigned) {
-            // Якщо скіл присвоєний - активуємо стан видалення
-            if (onSelectSkillForRemoval) {
-              onSelectSkillForRemoval({
-                ...slotData,
-                skillName: skill.name,
-              });
-            }
-          } else {
-            // Якщо скіл не присвоєний (placeholder або порожній) - перевіряємо чи вибрано скіл з бібліотеки
-            if (onSkillSlotClick) {
-              // onSkillSlotClick перевірить чи вибрано скіл і покаже повідомлення якщо ні
-              onSkillSlotClick(slotData);
-            }
+          if (isAssigned && onSelectSkillForRemoval) {
+            onSelectSkillForRemoval({
+              ...slotData,
+              skillName: skill.name,
+            });
+          } else if (onSkillSlotClick) {
+            onSkillSlotClick(slotData);
           }
         } else if ((canLearn || isUnlocked) && onSkillClick) {
           // У режимі Player клік на скіл прокачує його

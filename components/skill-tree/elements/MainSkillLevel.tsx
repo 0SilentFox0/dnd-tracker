@@ -73,6 +73,7 @@ export function MainSkillLevel({
 
   return (
     <div
+      data-circle="1"
       data-skill-type="main-skill-level"
       data-skill-level={level}
       data-main-skill-id={mainSkill.id}

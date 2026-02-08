@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-} from "@/components/ui/select";
+import { SelectGroup, SelectItem, SelectLabel } from "@/components/ui/select";
 import { SelectField } from "@/components/ui/select-field";
 import type { SkillFromLibrary } from "@/lib/hooks/useSkills";
 import type { MainSkill } from "@/types/main-skills";
@@ -66,25 +62,39 @@ export function SkillLibrarySelector({
           <>
             {/* Групи скілів по основним навикам */}
             {hasGroups &&
-              Object.entries(groupedSkills.groups).map(([mainSkillId, groupSkills]) => {
-                const mainSkill = mainSkills.find((ms) => ms.id === mainSkillId);
+              Object.entries(groupedSkills.groups)
+                .map(([mainSkillId, groupSkills]) => {
+                  const mainSkill = mainSkills.find(
+                    (ms) => ms.id === mainSkillId,
+                  );
 
-                const groupName =
-                  mainSkill?.name ||
-                  (mainSkillId === "racial" ? "Раса" : mainSkillId === "ultimate" ? "Ультимат" : `Група ${mainSkillId}`);
+                  const groupName =
+                    mainSkill?.name ||
+                    (mainSkillId === "racial"
+                      ? "Раса"
+                      : mainSkillId === "ultimate"
+                        ? "Ультимат"
+                        : `Група ${mainSkillId}`);
 
-                return (
-                  <SelectGroup key={mainSkillId}>
-                    <SelectLabel>{groupName}</SelectLabel>
-                    {groupSkills.map((skill) => (
-                      <SelectItem key={skill.id} value={skill.id}>
-                        {getSkillDisplayName(skill) || skill.id}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                );
-              })}
-            
+                  return (
+                    <SelectGroup key={mainSkillId}>
+                      <SelectLabel className="text-white">
+                        {groupName}
+                      </SelectLabel>
+                      {groupSkills.map((skill) => (
+                        <SelectItem
+                          key={skill.id}
+                          value={skill.id}
+                          style={{ backgroundColor: mainSkill?.color }}
+                        >
+                          {getSkillDisplayName(skill) || skill.id}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  );
+                })
+                .reverse()}
+
             {/* Скіли без групи */}
             {hasUngrouped && (
               <>
@@ -98,11 +108,12 @@ export function SkillLibrarySelector({
                     ))}
                   </SelectGroup>
                 )}
-                {!hasGroups && groupedSkills.ungrouped.map((skill) => (
-                  <SelectItem key={skill.id} value={skill.id}>
-                    {getSkillDisplayName(skill) || skill.id}
-                  </SelectItem>
-                ))}
+                {!hasGroups &&
+                  groupedSkills.ungrouped.map((skill) => (
+                    <SelectItem key={skill.id} value={skill.id}>
+                      {getSkillDisplayName(skill) || skill.id}
+                    </SelectItem>
+                  ))}
               </>
             )}
           </>

@@ -14,6 +14,7 @@ import {
   executeAfterSpellCastTriggers,
   executeBeforeSpellCastTriggers,
 } from "@/lib/utils/skills/skill-triggers-execution";
+import { parseDurationToRounds } from "@/lib/utils/spells/duration-to-rounds";
 import { BattleAction, BattleParticipant } from "@/types/battle";
 
 /**
@@ -36,6 +37,8 @@ export interface BattleSpell {
     onSuccess: "half" | "none";
   } | null;
   description: string;
+  duration?: string | null;
+  castingTime?: string | null;
 }
 
 /**
@@ -150,6 +153,74 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
       casterUpdated: updatedCaster,
       targetsUpdated: updatedTargets,
       battleAction,
+    };
+  }
+
+  const isDispel =
+    spell.healModifier === "dispel" ||
+    spell.name === "Cleansing" ||
+    spell.name === "Очищення";
+
+  if (isDispel) {
+    for (let i = 0; i < updatedTargets.length; i++) {
+      updatedTargets[i] = {
+        ...updatedTargets[i],
+        battleData: {
+          ...updatedTargets[i].battleData,
+          activeEffects: updatedTargets[i].battleData.activeEffects.filter(
+            (e) => e.type === "buff"
+          ),
+        },
+      };
+    }
+    updatedCaster.spellcasting.spellSlots[spellLevel] = {
+      ...updatedCaster.spellcasting.spellSlots[spellLevel],
+      current: updatedCaster.spellcasting.spellSlots[spellLevel].current - 1,
+    };
+    const isBonusAction = spell.castingTime?.toLowerCase().includes("bonus") ?? false;
+    if (isBonusAction) {
+      updatedCaster.actionFlags.hasUsedBonusAction = true;
+    } else {
+      updatedCaster.actionFlags.hasUsedAction = true;
+    }
+    const targetNames = updatedTargets.map((t) => t.basicInfo.name).join(", ");
+    const dispelAction: BattleAction = {
+      id: `spell-${caster.basicInfo.id}-${Date.now()}`,
+      battleId,
+      round: currentRound,
+      actionIndex: 0,
+      timestamp: new Date(),
+      actorId: caster.basicInfo.id,
+      actorName: caster.basicInfo.name,
+      actorSide: caster.basicInfo.side,
+      actionType: "spell",
+      targets: targetIds.map((id) => {
+        const target = allParticipants.find((p) => p.basicInfo.id === id);
+        return {
+          participantId: id,
+          participantName: target?.basicInfo.name || "Unknown",
+        };
+      }),
+      actionDetails: {
+        spellId: spell.id,
+        spellName: spell.name,
+        spellLevel: spell.level,
+      },
+      resultText: `${caster.basicInfo.name} використав ${spell.name} і розвіяв ефекти на ${targetNames}`,
+      hpChanges: [],
+      isCancelled: false,
+    };
+    const afterDispel = executeAfterSpellCastTriggers(
+      updatedCaster,
+      firstTarget,
+      allParticipants,
+      isOwnerAction,
+    );
+    return {
+      success: true,
+      targetsUpdated: updatedTargets,
+      casterUpdated: afterDispel.updatedCaster,
+      battleAction: dispelAction,
     };
   }
 
@@ -370,14 +441,49 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
     }
   }
 
+  // 4b. Додаємо ефект з тривалістю в раундах (дебаф/стан)
+  const durationRounds = parseDurationToRounds(spell.duration);
+  if (durationRounds > 0) {
+    for (const target of updatedTargets) {
+      const targetIndex = updatedTargets.findIndex(
+        (t) => t.basicInfo.id === target.basicInfo.id,
+      );
+      if (targetIndex === -1) continue;
+      const updatedEffects = addActiveEffect(
+        updatedTargets[targetIndex],
+        {
+          id: `spell-effect-${spell.id}-${target.basicInfo.id}-${Date.now()}`,
+          name: spell.name,
+          type: "debuff",
+          description: spell.description,
+          duration: durationRounds,
+          effects: [],
+        },
+        currentRound,
+      );
+      updatedTargets[targetIndex] = {
+        ...updatedTargets[targetIndex],
+        battleData: {
+          ...updatedTargets[targetIndex].battleData,
+          activeEffects: updatedEffects,
+        },
+      };
+    }
+  }
+
   // 5. Витрачаємо spell slot
   updatedCaster.spellcasting.spellSlots[spellLevel] = {
     ...updatedCaster.spellcasting.spellSlots[spellLevel],
     current: updatedCaster.spellcasting.spellSlots[spellLevel].current - 1,
   };
 
-  // 6. Позначаємо що кастер використав дію
-  updatedCaster.actionFlags.hasUsedAction = true;
+  // 6. Позначаємо що кастер використав дію (action або bonus action)
+  const isBonusAction = spell.castingTime?.toLowerCase().includes("bonus") ?? false;
+  if (isBonusAction) {
+    updatedCaster.actionFlags.hasUsedBonusAction = true;
+  } else {
+    updatedCaster.actionFlags.hasUsedAction = true;
+  }
 
   // 7. Створюємо BattleAction
   const hpChanges = updatedTargets

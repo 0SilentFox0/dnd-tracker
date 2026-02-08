@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { Circle, Edit, MoreVertical, Plus, Shield,Trash2 } from "lucide-react";
+import { Circle, Edit, MoreVertical, Plus, Shield, Trash2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,8 +14,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ABILITY_SCORES } from "@/lib/constants/abilities";
+import { useMainSkills } from "@/lib/hooks/useMainSkills";
 import { useSkills } from "@/lib/hooks/useSkills";
-import { getSkillMainSkillId, getSkillRaces } from "@/lib/utils/skills/skill-helpers";
+import {
+  getSkillMainSkillId,
+  getSkillRaces,
+} from "@/lib/utils/skills/skill-helpers";
 import type { Race, StatModifier } from "@/types/races";
 
 interface RaceCardProps {
@@ -25,8 +29,8 @@ interface RaceCardProps {
 }
 
 export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
-  // Отримуємо всі скіли з бібліотеки для підрахунку
   const { data: allSkills = [] } = useSkills(campaignId);
+  const { data: mainSkills = [] } = useMainSkills(campaignId);
 
   // Підраховуємо реальну кількість доступних скілів для цієї раси
   const availableSkillsCount = useMemo(() => {
@@ -39,17 +43,14 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
       // Фільтруємо скіли, які доступні для цієї раси (через skill.races)
       return allSkills.filter((skill) => {
         const skillRaces = getSkillRaces(skill);
-        
+
         // Якщо скіл не має обмежень по расам, він доступний
         if (!skillRaces || skillRaces.length === 0) {
           return true;
         }
 
         // Перевіряємо чи ID раси або назва раси є в списку доступних для скіла
-        return (
-          skillRaces.includes(race.id) ||
-          skillRaces.includes(race.name)
-        );
+        return skillRaces.includes(race.id) || skillRaces.includes(race.name);
       }).length;
     }
 
@@ -65,9 +66,10 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
         : true; // Скіли без основного навику доступні, якщо немає обмежень
 
       // Перевіряємо чи скіл доступний для цієї раси
-      const isRaceAvailable = !skillRaces || skillRaces.length === 0
-        ? true
-        : skillRaces.includes(race.id) || skillRaces.includes(race.name);
+      const isRaceAvailable =
+        !skillRaces || skillRaces.length === 0
+          ? true
+          : skillRaces.includes(race.id) || skillRaces.includes(race.name);
 
       return isMainSkillAvailable && isRaceAvailable;
     }).length;
@@ -77,6 +79,21 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
     ? race.disabledSkills.length
     : 0;
 
+  // Доступні групи навиків (main skills) для відображення кольорами
+  const availableMainSkillsForDisplay = useMemo(() => {
+    const ids = Array.isArray(race.availableSkills) ? race.availableSkills : [];
+
+    if (ids.length === 0) {
+      return mainSkills.filter(
+        (ms) => ms.id !== "racial" && ms.id !== "ultimate",
+      );
+    }
+
+    return ids
+      .map((id) => mainSkills.find((ms) => ms.id === id))
+      .filter((ms): ms is NonNullable<typeof ms> => ms != null);
+  }, [race.availableSkills, mainSkills]);
+
   const passiveAbility = race.passiveAbility
     ? typeof race.passiveAbility === "string"
       ? {
@@ -85,24 +102,24 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
           statModifiers: undefined,
         }
       : typeof race.passiveAbility === "object" && race.passiveAbility !== null
-      ? {
-          description:
-            "description" in race.passiveAbility
-              ? String(race.passiveAbility.description)
-              : "",
-          statImprovements:
-            "statImprovements" in race.passiveAbility
-              ? String(race.passiveAbility.statImprovements || "")
-              : undefined,
-          statModifiers:
-            "statModifiers" in race.passiveAbility
-              ? (race.passiveAbility.statModifiers as Record<
-                  string,
-                  StatModifier
-                >)
-              : undefined,
-        }
-      : null
+        ? {
+            description:
+              "description" in race.passiveAbility
+                ? String(race.passiveAbility.description)
+                : "",
+            statImprovements:
+              "statImprovements" in race.passiveAbility
+                ? String(race.passiveAbility.statImprovements || "")
+                : undefined,
+            statModifiers:
+              "statModifiers" in race.passiveAbility
+                ? (race.passiveAbility.statModifiers as Record<
+                    string,
+                    StatModifier
+                  >)
+                : undefined,
+          }
+        : null
     : null;
 
   // Отримуємо всі характеристики з модифікаторами
@@ -149,14 +166,34 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
         </div>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col gap-3">
+        <div className="space-y-2">
+          <p className="text-sm font-medium">Доступні навики:</p>
+          <div className="flex flex-wrap gap-2">
+            {availableMainSkillsForDisplay.map((ms) => (
+              <span
+                key={ms.id}
+                className="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium border border-current/20"
+                style={{
+                  backgroundColor: `${ms.color}10/50`,
+                  color: `${ms.color}500`,
+                  borderColor: ms.color,
+                }}
+                title={ms.name}
+              >
+                {ms.name}
+              </span>
+            ))}
+            {availableMainSkillsForDisplay.length === 0 && (
+              <span className="text-sm text-muted-foreground italic">
+                Немає обмежень (усі групи)
+              </span>
+            )}
+          </div>
+        </div>
         <div className="flex flex-wrap gap-2">
-          <Badge variant="outline">
-            Доступні скіли: {availableSkillsCount}
-          </Badge>
+          <Badge variant="outline">Скілів: {availableSkillsCount}</Badge>
           {disabledSkillsCount > 0 && (
-            <Badge variant="outline">
-              Відключені скіли: {disabledSkillsCount}
-            </Badge>
+            <Badge variant="outline">Відключені: {disabledSkillsCount}</Badge>
           )}
         </div>
 
@@ -207,8 +244,8 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
                               iconToShow === "bonus"
                                 ? "Бонус"
                                 : iconToShow === "nonNegative"
-                                ? "Невід'ємне (мін. 0)"
-                                : "Завжди 0"
+                                  ? "Невід'ємне (мін. 0)"
+                                  : "Завжди 0"
                             }
                           >
                             {iconToShow === "bonus" && (

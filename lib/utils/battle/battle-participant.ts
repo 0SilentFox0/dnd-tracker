@@ -855,22 +855,37 @@ async function extractAttacksFromCharacter(
   }
 
   const equipped =
-    (character.inventory.equipped as Record<string, string>) || {};
+    (character.inventory.equipped as Record<string, string | Record<string, unknown>>) || {};
 
-  // Шукаємо ID зброї в різних можливих слотах
-  const weaponIds = [
-    equipped.mainHand,
-    equipped.offHand,
-    equipped.weapon,
-    equipped.weapon1,
-    equipped.weapon2,
-  ].filter(Boolean) as string[];
+  const slotKeys = ["mainHand", "offHand", "weapon", "weapon1", "weapon2"] as const;
+  const weaponIds: string[] = [];
+  for (const key of slotKeys) {
+    const val = equipped[key];
+    if (!val) continue;
+    if (typeof val === "string") {
+      weaponIds.push(val);
+    } else if (typeof val === "object" && val !== null && "damageDice" in val) {
+      const inv = val as { id?: string; name?: string; attackBonus?: number; damageDice?: string; damageType?: string; weaponType?: string };
+      attacks.push({
+        id: inv.id ?? `inline-${key}`,
+        name: (inv.name as string) ?? "Зброя",
+        type: (inv.weaponType === AttackType.RANGED ? AttackType.RANGED : AttackType.MELEE) as AttackType,
+        attackBonus: typeof inv.attackBonus === "number" ? inv.attackBonus : 0,
+        damageDice: (inv.damageDice as string) ?? "1d6",
+        damageType: (inv.damageType as string) ?? "bludgeoning",
+      });
+    }
+  }
+
+  if (weaponIds.length === 0 && attacks.length === 0) {
+    return attacks;
+  }
 
   if (weaponIds.length === 0) {
     return attacks;
   }
 
-  // Завантажуємо всі знайдені предмети з БД
+  // Завантажуємо всі знайдені предмети з БД (лише строкові ID)
   const potentialWeapons = await prisma.artifact.findMany({
     where: {
       id: { in: weaponIds },

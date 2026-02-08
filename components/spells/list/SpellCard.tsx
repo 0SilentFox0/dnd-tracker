@@ -167,9 +167,17 @@ export function SpellCard({
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col">
-        <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 flex-1">
-          {spell.description}
-        </p>
+        <div className="text-xs sm:text-sm text-muted-foreground flex-1 line-clamp-3">
+          {Array.isArray(spell.effects) && spell.effects.length > 0 ? (
+            <ul className="list-disc list-inside space-y-0.5">
+              {spell.effects.map((effect, i) => (
+                <li key={i}>{effect}</li>
+              ))}
+            </ul>
+          ) : spell.description ? (
+            <p>{spell.description}</p>
+          ) : null}
+        </div>
         <div className="flex gap-1 sm:gap-2 mt-2 sm:mt-3">
           <Link
             href={`/campaigns/${campaignId}/dm/spells/${spell.id}`}

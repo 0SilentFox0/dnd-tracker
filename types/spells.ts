@@ -23,12 +23,15 @@ export interface Spell {
     | {
         ability: string;
         onSuccess: string;
+        dc?: number | null;
       }
     | null
     | unknown;
-  description: string;
+  description: string | null;
+  effects: string[] | null; // список ефектів (окремо від опису)
   groupId: string | null;
   icon: string | null;
+  appearanceDescription?: string | null;
   spellGroup?: {
     id: string;
     name: string;

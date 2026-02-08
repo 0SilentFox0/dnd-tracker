@@ -87,6 +87,7 @@ const updateSkillSchema = z.object({
     })
     .optional(),
   image: z.string().nullable().optional(),
+  appearanceDescription: z.string().nullable().optional(),
   skillTriggers: z
     .array(
       z.union([
@@ -253,6 +254,7 @@ function formatSkillResponse(skill: {
     campaignId: skill.campaignId,
     basicInfo,
     image: skill.image ?? null,
+    appearanceDescription: (skill as { appearanceDescription?: string | null }).appearanceDescription ?? null,
     bonuses: (skill.bonuses as Record<string, number>) || {},
     combatStats,
     spellData,
@@ -473,6 +475,10 @@ export async function PATCH(
 
     if (data.skillTriggers !== undefined) {
       updateData.skillTriggers = data.skillTriggers as Prisma.InputJsonValue;
+    }
+
+    if (data.appearanceDescription !== undefined) {
+      updateData.appearanceDescription = data.appearanceDescription;
     }
 
     const updatedSkill = await prisma.skill.update({

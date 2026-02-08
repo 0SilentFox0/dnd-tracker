@@ -20,6 +20,7 @@ import { SelectField } from "@/components/ui/select-field";
 import { Textarea } from "@/components/ui/textarea";
 import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
 import { DICE_OPTIONS } from "@/lib/constants/dice";
+import { SPELL_EFFECT_OPTIONS } from "@/lib/constants/spell-effects";
 import {
   DAMAGE_MODIFIER_OPTIONS,
   HEAL_MODIFIER_OPTIONS,
@@ -37,7 +38,7 @@ export default function NewSpellPage({
 
   const router = useRouter();
 
-  const [formData, setFormData] = useState<Partial<Spell>>({
+  const [formData, setFormData] = useState<Partial<Spell> & { effects?: string[] }>({
     name: "",
     level: 0,
     type: "target",
@@ -46,15 +47,14 @@ export default function NewSpellPage({
     damageElement: null,
     damageModifier: null,
     healModifier: null,
-    castingTime: "",
+    castingTime: null,
     range: "",
-    components: "",
     duration: "",
-    concentration: false,
     diceCount: null,
     diceType: null,
     savingThrow: null,
-    description: "",
+    description: null,
+    effects: [],
     groupId: null,
     icon: null,
   });
@@ -66,8 +66,8 @@ export default function NewSpellPage({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.description) {
-      alert("Будь ласка, заповніть обов'язкові поля: назва та опис");
+    if (!formData.name) {
+      alert("Будь ласка, вкажіть назву заклинання");
 
       return;
     }
@@ -77,6 +77,7 @@ export default function NewSpellPage({
         ...formData,
         name: formData.name ?? "",
         description: formData.description ?? "",
+        effects: formData.effects ?? null,
         type: formData.type || "target",
         damageType: formData.damageType || "damage",
         target: formData.target || null,
@@ -85,7 +86,6 @@ export default function NewSpellPage({
         healModifier: formData.healModifier || null,
         castingTime: formData.castingTime || null,
         range: formData.range || null,
-        components: formData.components || null,
         duration: formData.duration || null,
         diceCount: formData.diceCount || null,
         diceType: formData.diceType || null,
@@ -222,7 +222,7 @@ export default function NewSpellPage({
                   id="damageType"
                   value={formData.damageType || "damage"}
                   onValueChange={(value: string) => {
-                    const newValue = value as "damage" | "heal" | "all";
+                    const newValue = value as "damage" | "heal" | "all" | "buff" | "debuff";
 
                     setFormData({
                       ...formData,
@@ -240,6 +240,8 @@ export default function NewSpellPage({
                     { value: "damage", label: "Шкода" },
                     { value: "heal", label: "Лікування" },
                     { value: "all", label: "Усі" },
+                    { value: "buff", label: "Баф (можна розвіяти)" },
+                    { value: "debuff", label: "Дебаф (можна розвіяти)" },
                   ]}
                 />
               </div>
@@ -312,13 +314,19 @@ export default function NewSpellPage({
 
               <div>
                 <Label htmlFor="castingTime">Час створення</Label>
-                <Input
+                <SelectField
                   id="castingTime"
                   value={formData.castingTime || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, castingTime: e.target.value })
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, castingTime: value || null })
                   }
-                  placeholder="1 action"
+                  placeholder="Виберіть"
+                  options={[
+                    { value: "1 action", label: "1 action" },
+                    { value: "1 bonus action", label: "1 bonus action" },
+                  ]}
+                  allowNone
+                  noneLabel="Не вказано"
                 />
               </div>
 
@@ -331,18 +339,6 @@ export default function NewSpellPage({
                     setFormData({ ...formData, range: e.target.value })
                   }
                   placeholder="60 feet"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="components">Компоненти</Label>
-                <Input
-                  id="components"
-                  value={formData.components || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, components: e.target.value })
-                  }
-                  placeholder="V, S, M"
                 />
               </div>
 
@@ -403,28 +399,11 @@ export default function NewSpellPage({
                 </div>
               </div>
 
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="concentration"
-                  checked={formData.concentration || false}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      concentration: e.target.checked,
-                    })
-                  }
-                  className="h-4 w-4 rounded border-gray-300"
-                />
-                <Label htmlFor="concentration" className="cursor-pointer">
-                  Концентрація
-                </Label>
-              </div>
             </div>
 
             <div>
-              <Label>Збереження</Label>
-              <div className="grid gap-4 md:grid-cols-2 mt-2">
+              <Label>Збереження (Save)</Label>
+              <div className="grid gap-4 md:grid-cols-3 mt-2">
                 <div>
                   <Label htmlFor="savingThrowAbility">Характеристика</Label>
                   <SelectField
@@ -447,6 +426,12 @@ export default function NewSpellPage({
                               "onSuccess" in formData.savingThrow &&
                               String(formData.savingThrow.onSuccess)) ||
                             "half",
+                          dc:
+                            (formData.savingThrow &&
+                              typeof formData.savingThrow === "object" &&
+                              "dc" in formData.savingThrow &&
+                              formData.savingThrow.dc) ??
+                            null,
                         },
                       })
                     }
@@ -459,6 +444,45 @@ export default function NewSpellPage({
                       { value: "wisdom", label: "Мудрість" },
                       { value: "charisma", label: "Харизма" },
                     ]}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="savingThrowDc">Складність (DC)</Label>
+                  <Input
+                    id="savingThrowDc"
+                    type="number"
+                    min={1}
+                    max={30}
+                    value={
+                      formData.savingThrow &&
+                      typeof formData.savingThrow === "object" &&
+                      "dc" in formData.savingThrow &&
+                      formData.savingThrow.dc != null
+                        ? Number(formData.savingThrow.dc)
+                        : ""
+                    }
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setFormData({
+                        ...formData,
+                        savingThrow: {
+                          ability:
+                            (formData.savingThrow &&
+                              typeof formData.savingThrow === "object" &&
+                              "ability" in formData.savingThrow &&
+                              String(formData.savingThrow.ability)) ||
+                            "strength",
+                          onSuccess:
+                            (formData.savingThrow &&
+                              typeof formData.savingThrow === "object" &&
+                              "onSuccess" in formData.savingThrow &&
+                              String(formData.savingThrow.onSuccess)) ||
+                            "half",
+                          dc: v === "" ? null : parseInt(v, 10) || null,
+                        },
+                      });
+                    }}
+                    placeholder="—"
                   />
                 </div>
                 <div>
@@ -483,6 +507,12 @@ export default function NewSpellPage({
                               String(formData.savingThrow.ability)) ||
                             "strength",
                           onSuccess: value as "half" | "none",
+                          dc:
+                            (formData.savingThrow &&
+                              typeof formData.savingThrow === "object" &&
+                              "dc" in formData.savingThrow &&
+                              formData.savingThrow.dc) ??
+                            null,
                         },
                       })
                     }
@@ -497,16 +527,72 @@ export default function NewSpellPage({
             </div>
 
             <div>
-              <Label htmlFor="description">Опис *</Label>
+              <Label>Ефекти</Label>
+              <p className="text-xs text-muted-foreground mb-2">
+                Виберіть ефекти зі списку. Кожен ефект зберігається окремо.
+              </p>
+              <div className="flex gap-2 mb-3">
+                {(() => {
+                  const available = SPELL_EFFECT_OPTIONS.filter(
+                    (opt) => !(formData.effects ?? []).includes(opt.value)
+                  );
+                  return available.length > 0 ? (
+                    <SelectField
+                      value=""
+                      onValueChange={(value) => {
+                        if (!value) return;
+                        const current = formData.effects ?? [];
+                        if (current.includes(value)) return;
+                        setFormData({ ...formData, effects: [...current, value] });
+                      }}
+                      placeholder="Додати ефект..."
+                      options={available}
+                      triggerClassName="flex-1"
+                    />
+                  ) : (
+                    <p className="text-sm text-muted-foreground py-2">
+                      Усі ефекти з бази вже додано
+                    </p>
+                  );
+                })()}
+              </div>
+              <ul className="space-y-2">
+                {(formData.effects ?? []).map((effect, idx) => (
+                  <li
+                    key={idx}
+                    className="flex items-center gap-2 rounded-md border bg-muted/50 px-3 py-2 text-sm"
+                  >
+                    <span className="flex-1 min-w-0">{effect}</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="shrink-0 h-8 w-8"
+                      onClick={() => {
+                        const next = (formData.effects ?? []).filter((_, i) => i !== idx);
+                        setFormData({ ...formData, effects: next });
+                      }}
+                    >
+                      ×
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+              {(formData.effects ?? []).length === 0 && (
+                <p className="text-sm text-muted-foreground italic">Ефекти не додано</p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="description">Опис (опційно)</Label>
               <Textarea
                 id="description"
-                value={formData.description}
+                value={formData.description ?? ""}
                 onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
+                  setFormData({ ...formData, description: e.target.value || null })
                 }
-                required
-                placeholder="Детальний опис заклинання"
-                rows={6}
+                placeholder="Додатковий опис за потреби"
+                rows={2}
               />
             </div>
 

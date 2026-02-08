@@ -68,14 +68,6 @@ export async function POST(
       );
     }
 
-    // Перевіряємо чи кастер може використати заклинання
-    if (caster.actionFlags.hasUsedAction) {
-      return NextResponse.json(
-        { error: "Caster has already used their action" },
-        { status: 400 }
-      );
-    }
-
     // Перевіряємо чи кастер активний
     if (caster.combatStats.status !== "active") {
       return NextResponse.json(
@@ -104,6 +96,25 @@ export async function POST(
       );
     }
 
+    // Перевіряємо чи кастер може використати заклинання (action або bonus action)
+    const isBonusActionSpell =
+      spellData.castingTime?.toLowerCase().includes("bonus") ?? false;
+    if (isBonusActionSpell) {
+      if (caster.actionFlags.hasUsedBonusAction) {
+        return NextResponse.json(
+          { error: "Caster has already used their bonus action" },
+          { status: 400 }
+        );
+      }
+    } else {
+      if (caster.actionFlags.hasUsedAction) {
+        return NextResponse.json(
+          { error: "Caster has already used their action" },
+          { status: 400 }
+        );
+      }
+    }
+
     // Конвертуємо Spell в BattleSpell
     const battleSpell: BattleSpell = {
       id: spellData.id,
@@ -123,7 +134,9 @@ export async function POST(
             onSuccess: "half" | "none";
           }
         | null,
-      description: spellData.description,
+      description: spellData.description ?? "",
+      duration: spellData.duration,
+      castingTime: spellData.castingTime,
     };
 
     // Обробляємо заклинання через нову функцію

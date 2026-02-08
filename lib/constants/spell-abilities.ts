@@ -52,6 +52,8 @@ export enum SpellDamageType {
   DAMAGE = "damage",
   HEAL = "heal",
   ALL = "all",
+  BUFF = "buff",
+  DEBUFF = "debuff",
 }
 
 /**
@@ -62,6 +64,8 @@ export const SPELL_DAMAGE_TYPE_VALUES = [
   SpellDamageType.DAMAGE,
   SpellDamageType.HEAL,
   SpellDamageType.ALL,
+  SpellDamageType.BUFF,
+  SpellDamageType.DEBUFF,
 ] as const;
 export const SPELL_SAVING_THROW_ABILITY_VALUES = [
   SpellSavingThrowAbility.STRENGTH,

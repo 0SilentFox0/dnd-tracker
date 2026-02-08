@@ -452,6 +452,9 @@ export function useSkillTreePage({
     circle: 1 | 2 | 3;
     level: string;
     index: number;
+    isMainSkillLevel?: boolean;
+    isRacial?: boolean;
+    isUltimate?: boolean;
   }) => {
     if (!selectedSkillFromLibrary) {
       alert("Спочатку виберіть скіл з бібліотеки");
@@ -476,6 +479,26 @@ export function useSkillTreePage({
       return;
     }
 
+    const skillDisplayName = getSkillName(selectedSkill);
+    const slotType = slot.isUltimate
+      ? "ultimate"
+      : slot.isMainSkillLevel
+        ? "main-skill-level"
+        : slot.isRacial
+          ? "racial"
+          : `circle-${slot.circle}`;
+    console.log("[SkillTree] Призначення скіла", {
+      skillId: selectedSkill.id,
+      skillName: skillDisplayName,
+      slotType,
+      slot: {
+        mainSkillId: slot.mainSkillId,
+        circle: slot.circle,
+        level: slot.level,
+        index: slot.index,
+      },
+    });
+
     // Використовуємо хук для присвоєння скіла
     const updatedSkillTree = assignSkillToSlot(
       currentSkillTree,
@@ -486,10 +509,12 @@ export function useSkillTreePage({
     setEditedSkillTree(updatedSkillTree);
 
     // Показуємо нотифікацію про успішне присвоєння
-    const skillDisplayName = getSkillName(selectedSkill);
-    const isMainSkillLevelOrRacial = slot.circle === 1 && slot.index === 0;
+    const isMainSkillLevelOrRacial =
+      slot.isMainSkillLevel === true || slot.isRacial === true;
 
-    if (isMainSkillLevelOrRacial) {
+    if (slot.isUltimate === true) {
+      alert(`Скіл "${skillDisplayName}" успішно присвоєно ультимативному навику`);
+    } else if (isMainSkillLevelOrRacial) {
       alert(
         `Скіл "${skillDisplayName}" успішно присвоєно до ${
           slot.mainSkillId === "racial"

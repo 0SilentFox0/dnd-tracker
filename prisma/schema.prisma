@@ -188,7 +188,8 @@ model Spell {
   duration         String?
   concentration    Boolean     @default(false)
   savingThrow      Json?
-  description      String
+  description      String?
+  effects          Json?    // array of effect strings (like skills)
   groupId          String?
   createdAt        DateTime    @default(now())
   damageElement    String?
@@ -198,6 +199,7 @@ model Spell {
   healModifier     String?
   diceCount        Int?
   diceType         String?
+  appearanceDescription String?  // опис вигляду для довідника гравців (редагує DM)
   skills              Skill[]
   skillsAsNewSpell     Skill[]  @relation("SkillNewSpell")
   skillsGrantingSpell Skill[]  @relation("SkillGrantedSpell")
@@ -370,6 +372,7 @@ model Skill {
   mainSkillData           Json        @default("{}")
   spellData               Json        @default("{}")
   spellEnhancementData    Json        @default("{}")
+  appearanceDescription   String?     // опис вигляду для довідника гравців (редагує DM)
   campaign                Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   mainSkill               MainSkill?  @relation(fields: [mainSkillId], references: [id])
   spellGroup              SpellGroup? @relation(fields: [spellGroupId], references: [id])

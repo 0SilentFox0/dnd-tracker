@@ -50,6 +50,7 @@ const importSpellSchema = z.object({
   savingThrowOnSuccess: z.enum(["half", "none"]).optional(),
   description: z.string().min(1),
   groupId: z.string().optional(),
+  icon: z.string().optional().nullable(),
 });
 
 // Схема для масового імпорту
@@ -84,9 +85,10 @@ export async function POST(
 
     for (const spell of data.spells) {
       const spellAny = spell as Record<string, unknown>;
+      const school = spell.school ?? spellAny.School;
 
-      if (spellAny.School) {
-        uniqueSchools.add(spellAny.School as string);
+      if (school && typeof school === "string") {
+        uniqueSchools.add(school);
       }
     }
 
@@ -122,38 +124,55 @@ export async function POST(
 
     const existingNamesSet = new Set(existingSpellNames.map((s) => s.name));
 
+    function parseDiceFromDamageDice(damageDice: string | undefined): {
+      diceCount: number | null;
+      diceType: string | null;
+    } {
+      if (!damageDice || !damageDice.trim()) {
+        return { diceCount: null, diceType: null };
+      }
+      const match = damageDice.trim().match(/^(\d+)\s*d(\d+)/i);
+      if (!match) return { diceCount: null, diceType: null };
+      const count = parseInt(match[1], 10);
+      const type = `d${match[2]}`;
+      return { diceCount: count, diceType: type };
+    }
+
     // Фільтруємо заклинання, які ще не існують
     const spellsToCreate = data.spells
       .filter((spell) => !existingNamesSet.has(spell.name))
-      .map((spell) => ({
-        campaignId: id,
-        name: spell.name,
-        level: spell.level,
-        school: spell.school || null,
-        type: spell.type,
-        damageType: spell.damageType,
-        damageElement: spell.damageElement || null,
-        castingTime: spell.castingTime || null,
-        range: spell.range || null,
-        components: spell.components || null,
-        duration: spell.duration || null,
-        concentration: spell.concentration ?? false,
-        damageDice: spell.damageDice || null,
-        savingThrow: spell.savingThrowAbility
-          ? ({
-              ability: spell.savingThrowAbility,
-              onSuccess: spell.savingThrowOnSuccess || "half",
-            } as unknown as Prisma.InputJsonValue)
-          : undefined,
-        description: spell.description,
-        groupId:
-          spell.groupId ||
-          ((spell as Record<string, unknown>).School
-            ? spellGroups[(spell as Record<string, unknown>).School as string]
-            : undefined) ||
-          data.groupId ||
-          null,
-      }));
+      .map((spell) => {
+        const schoolKey = spell.school ?? (spell as Record<string, unknown>).School as string | undefined;
+        const { diceCount, diceType } = parseDiceFromDamageDice(spell.damageDice);
+        return {
+          campaignId: id,
+          name: spell.name,
+          level: spell.level,
+          type: spell.type,
+          damageType: spell.damageType,
+          damageElement: spell.damageElement || null,
+          castingTime: spell.castingTime || null,
+          range: spell.range || null,
+          components: spell.components || null,
+          duration: spell.duration || null,
+          concentration: spell.concentration ?? false,
+          diceCount,
+          diceType,
+          savingThrow: spell.savingThrowAbility
+            ? ({
+                ability: spell.savingThrowAbility,
+                onSuccess: spell.savingThrowOnSuccess || "half",
+              } as unknown as Prisma.InputJsonValue)
+            : undefined,
+          description: spell.description,
+          icon: spell.icon ?? null,
+          groupId:
+            spell.groupId ||
+            (schoolKey ? spellGroups[schoolKey] : undefined) ||
+            data.groupId ||
+            null,
+        };
+      });
 
     // Створюємо тільки нові заклинання
     let result;

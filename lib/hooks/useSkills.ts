@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { deleteSkill, duplicateSkill } from "@/lib/api/skills";
+import { deleteSkill, duplicateSkill, updateSkill } from "@/lib/api/skills";
 import type { Skill } from "@/types/skills";
+import type { SkillUpdatePayload } from "@/types/api";
 
 export interface SkillFromLibrary {
   id: string;
@@ -61,6 +62,28 @@ export function useDuplicateSkill(campaignId: string) {
 
   return useMutation({
     mutationFn: (skillId: string) => duplicateSkill(campaignId, skillId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["skills", campaignId],
+      });
+    },
+  });
+}
+
+/**
+ * Оновлює скіл (частковий PATCH)
+ */
+export function useUpdateSkill(campaignId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      skillId,
+      data,
+    }: {
+      skillId: string;
+      data: SkillUpdatePayload;
+    }) => updateSkill(campaignId, skillId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["skills", campaignId],

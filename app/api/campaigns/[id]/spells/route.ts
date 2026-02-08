@@ -10,7 +10,7 @@ const createSpellSchema = z.object({
   level: z.number().min(0).max(9).default(0),
   type: z.enum(["target", "aoe"]),
   target: z.enum(["enemies", "allies", "all"]).optional(),
-  damageType: z.enum(["damage", "heal", "all"]),
+  damageType: z.enum(["damage", "heal", "all", "buff", "debuff"]),
   damageElement: z.preprocess(
     (val) => (val === "" ? null : val),
     z.string().nullable().optional()
@@ -19,16 +19,16 @@ const createSpellSchema = z.object({
   healModifier: z.enum(["heal", "regeneration", "dispel", "shield", "vampirism"]).optional().nullable(),
   castingTime: z.string().optional().nullable(),
   range: z.string().optional().nullable(),
-  components: z.string().optional().nullable(),
   duration: z.string().optional().nullable(),
-  concentration: z.boolean().default(false),
   diceCount: z.number().min(0).max(10).optional().nullable(),
   diceType: z.enum(["d4", "d6", "d8", "d10", "d12", "d20", "d100"]).optional().nullable(),
   savingThrow: z.object({
     ability: z.enum(["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"]),
     onSuccess: z.enum(["half", "none"]),
+    dc: z.number().min(1).max(30).optional().nullable(),
   }).optional().nullable(),
-  description: z.string().min(1),
+  description: z.string().optional().nullable(),
+  effects: z.array(z.string()).optional().nullable(),
   groupId: z.string().optional().nullable(),
   icon: z.preprocess(
     (val) => (val === "" ? null : val),
@@ -68,15 +68,14 @@ export async function POST(
         healModifier: data.healModifier || null,
         castingTime: data.castingTime || null,
         range: data.range || null,
-        components: data.components || null,
         duration: data.duration || null,
-        concentration: data.concentration,
         diceCount: data.diceCount || null,
         diceType: data.diceType || null,
         savingThrow: data.savingThrow
           ? (data.savingThrow as unknown as Prisma.InputJsonValue)
           : undefined,
-        description: data.description,
+        description: data.description ?? null,
+        effects: data.effects ? (data.effects as unknown as Prisma.InputJsonValue) : undefined,
         groupId: data.groupId || null,
         icon: data.icon || null,
       },

@@ -41,5 +41,12 @@ export default async function DMSpellsPage({
     },
   });
 
-  return <DMSpellsPageClient campaignId={id} initialSpells={spells} />;
+  const spellsForClient = spells.map((s) => ({
+    ...s,
+    effects: Array.isArray(s.effects) ? (s.effects as string[]) : null,
+  }));
+
+  return (
+    <DMSpellsPageClient campaignId={id} initialSpells={spellsForClient} />
+  );
 }

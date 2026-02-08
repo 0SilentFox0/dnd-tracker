@@ -7,6 +7,14 @@ import { render, screen, cleanup } from "@testing-library/react";
 import { SkillCard } from "@/components/skills/list/SkillCard";
 import type { GroupedSkill } from "@/types/skills";
 
+vi.mock("@/lib/hooks/useMainSkills", () => ({
+  useMainSkills: () => ({ data: [] }),
+}));
+
+vi.mock("@/lib/hooks/useSkills", () => ({
+  useUpdateSkill: () => ({ mutate: vi.fn(), isPending: false }),
+}));
+
 vi.mock("next/link", () => ({
   default: ({
     children,

@@ -126,9 +126,25 @@ export default async function CampaignDetailPage({
         </CardContent>
       </Card>
 
+      {/* Довідник для всіх учасників */}
+      <Link
+        href={`/campaigns/${id}/info`}
+        className="hover:shadow-lg transition-shadow cursor-pointer my-4"
+      >
+        <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          <CardHeader>
+            <CardTitle>Інформація — Довідник</CardTitle>
+            <CardDescription>
+              Скіли та заклинання: як діють, опис вигляду. Для ознайомлення з
+              механіками.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </Link>
+
       {/* Навігація для DM */}
       {isDM && (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
           <Link href={`/campaigns/${id}/dm/characters`}>
             <Card className="hover:shadow-lg transition-shadow cursor-pointer">
               <CardHeader>

@@ -11,6 +11,12 @@ interface SkillSlot {
   circle: 1 | 2 | 3;
   level: string;
   index: number;
+  /** true для слоту data-skill-type="main-skill-level" (присвоєння скіла рівню basic/advanced/expert) */
+  isMainSkillLevel?: boolean;
+  /** true для расового слоту */
+  isRacial?: boolean;
+  /** true для слоту data-skill-type="ultimate" */
+  isUltimate?: boolean;
 }
 
 export function assignSkillToSlot(
@@ -22,8 +28,22 @@ export function assignSkillToSlot(
   const skillDescription = getSkillDescription(selectedSkill) ?? "";
   const skillIcon = getSkillIcon(selectedSkill);
 
-  // Перевіряємо, чи це main-skill-level або racial слот (circle === 1 та index === 0)
-  const isMainSkillLevelOrRacial = slot.circle === 1 && slot.index === 0;
+  // Слот ультимату — оновлюємо skillTree.ultimateSkill
+  if (slot.isUltimate === true) {
+    return {
+      ...skillTree,
+      ultimateSkill: {
+        id: selectedSkill.id,
+        name: skillName,
+        description: skillDescription,
+        ...(skillIcon && { icon: skillIcon }),
+      },
+    };
+  }
+
+  // Розрізняємо main-skill-level/racial від звичайного кола 1 (INNER): тільки явний прапорець
+  const isMainSkillLevelOrRacial =
+    slot.isMainSkillLevel === true || slot.isRacial === true;
 
   // Для main-skill-level та racial оновлюємо icon для конкретного рівня
   if (isMainSkillLevelOrRacial) {

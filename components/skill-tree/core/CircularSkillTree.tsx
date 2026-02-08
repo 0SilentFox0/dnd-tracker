@@ -166,6 +166,19 @@ export function CircularSkillTree({
             canLearnUltimateSkill={canLearnUltimateSkill}
             isDMMode={isDMMode}
             onSkillClick={isDMMode ? undefined : handleUltimateSkillClick}
+            onSkillSlotClick={
+              isDMMode && onSkillSlotClick
+                ? (slot) =>
+                    onSkillSlotClick({
+                      mainSkillId: slot.mainSkillId,
+                      circle: slot.circle as unknown as SkillCircleEnum,
+                      level: slot.level as unknown as SkillLevel,
+                      index: slot.index,
+                      isMainSkillLevel: false,
+                      isRacial: false,
+                    })
+                : undefined
+            }
           />
 
           {/* Раса — окремо 3 слоти для скілів в один ряд (без сектора в колі) */}
@@ -201,7 +214,7 @@ export function CircularSkillTree({
             innerRadiusPercent={innerRadiusPercent}
           />
 
-          {/* Внутрішнє коло для створення порожнини (бублик) */}
+          {/* Внутрішнє коло для створення порожнини (бублик) — pointer-events: none, щоб не перехоплювати кліки по скілах */}
           <div
             className="absolute rounded-full bg-gray-50"
             style={{
@@ -223,9 +236,6 @@ export function CircularSkillTree({
 
             return (
               <div key={mainSkill.id}>
-                {/* Назва сектора */}
-                {/* <SectorLabel name={mainSkill.name} midAngle={midAngle} /> */}
-
                 {/* Основні навики ЗА колом */}
                 <MainSkillLevels
                   mainSkill={mainSkill}

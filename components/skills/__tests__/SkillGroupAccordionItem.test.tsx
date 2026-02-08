@@ -16,6 +16,14 @@ function renderItem(props: React.ComponentProps<typeof SkillGroupAccordionItem>)
   );
 }
 
+vi.mock("@/lib/hooks/useMainSkills", () => ({
+  useMainSkills: () => ({ data: [] }),
+}));
+
+vi.mock("@/lib/hooks/useSkills", () => ({
+  useUpdateSkill: () => ({ mutate: vi.fn(), isPending: false }),
+}));
+
 vi.mock("next/link", () => ({
   default: ({
     children,

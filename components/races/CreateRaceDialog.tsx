@@ -323,9 +323,9 @@ export function CreateRaceDialog({
                     </div>
                     <Input
                       type="number"
-                      value={progression?.slots || 0}
+                      value={progression?.slots}
                       onChange={(e) => {
-                        const slots = parseInt(e.target.value, 10) || 0;
+                        const slots = Number(e.target.value);
 
                         setFormData((prev) => {
                           const current = prev.spellSlotProgression || [];
