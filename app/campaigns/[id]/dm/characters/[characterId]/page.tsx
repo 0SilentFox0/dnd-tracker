@@ -1,14 +1,14 @@
 "use client";
 
-import { use, useEffect } from "react";
+import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { CharacterAbilitiesSection } from "@/components/characters/abilities/CharacterAbilitiesSection";
-import { CharacterBasicInfo } from "@/components/characters/basic/CharacterBasicInfo";
+import { CharacterSkillTreeView } from "@/components/characters/abilities/CharacterSkillTreeView";
 import { CharacterArtifactsSection } from "@/components/characters/artifacts/CharacterArtifactsSection";
+import { CharacterBasicInfo } from "@/components/characters/basic/CharacterBasicInfo";
 import { CharacterSkillsSection } from "@/components/characters/skills/CharacterSkillsSection";
-import { CharacterSpellsSection } from "@/components/characters/spells/CharacterSpellsSection";
 import { CharacterAbilityScores } from "@/components/characters/stats/CharacterAbilityScores";
 import { CharacterCombatParams } from "@/components/characters/stats/CharacterCombatParams";
 import {
@@ -45,6 +45,8 @@ export default function EditCharacterPage({
 
   const { data: races = [] } = useRaces(id);
 
+  const [characterLoaded, setCharacterLoaded] = useState(false);
+
   const {
     formData,
     loading,
@@ -65,22 +67,34 @@ export default function EditCharacterPage({
   });
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchCharacter = async () => {
       try {
         const character: Character = await getCharacter(id, characterId);
 
+        if (cancelled) return;
+
         const formDataFromCharacter = characterToFormData(character);
 
         setFormData(formDataFromCharacter);
+        setCharacterLoaded(true);
       } catch (err) {
-        console.error("Error fetching character:", err);
+        if (!cancelled) {
+          console.error("Error fetching character:", err);
+          setCharacterLoaded(true);
+        }
       }
     };
 
     fetchCharacter();
+
+    return () => {
+      cancelled = true;
+    };
   }, [id, characterId, setFormData]);
 
-  if (loading && !formData.basicInfo.name) {
+  if (!characterLoaded || (loading && !formData.basicInfo.name)) {
     return (
       <div className="container mx-auto p-4 max-w-4xl">
         <Card>
@@ -93,7 +107,7 @@ export default function EditCharacterPage({
   }
 
   return (
-    <div className="container mx-auto p-4 max-w-4xl">
+    <div className="container mx-auto p-4 max-w-5xl">
       <Card>
         <CardHeader>
           <CardTitle>
@@ -157,25 +171,52 @@ export default function EditCharacterPage({
                     campaignId={id}
                     abilities={abilities}
                   />
-                </AccordionContent>
-              </AccordionItem>
+                  <div className="mt-4 flex flex-wrap items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const hasProgress =
+                          formData.skillTreeProgress &&
+                          Object.keys(formData.skillTreeProgress).length > 0;
 
-              <AccordionItem value="item-6">
-                <AccordionTrigger>6. Заклинання</AccordionTrigger>
-                <AccordionContent>
-                  <CharacterSpellsSection
-                    spellcasting={spellcasting}
+                        if (
+                          !hasProgress ||
+                          confirm(
+                            "Скинути всі прокачані уміння цього персонажа? Зміни збережаться після натискання «Зберегти зміни»."
+                          )
+                        ) {
+                          setFormData((prev) => ({
+                            ...prev,
+                            skillTreeProgress: {},
+                          }));
+                        }
+                      }}
+                    >
+                      Скинути прокачані уміння
+                    </Button>
+                  </div>
+                  <CharacterSkillTreeView
                     campaignId={id}
+                    characterRace={basicInfo.race}
+                    characterLevel={basicInfo.level}
+                    skillTreeProgress={formData.skillTreeProgress ?? {}}
+                    onSkillTreeProgressChange={(next) =>
+                      setFormData((prev) => ({ ...prev, skillTreeProgress: next }))
+                    }
                   />
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="item-7">
-                <AccordionTrigger>7. Артефакти</AccordionTrigger>
+              <AccordionItem value="item-6">
+                <AccordionTrigger>6. Артефакти</AccordionTrigger>
                 <AccordionContent>
                   <CharacterArtifactsSection
                     knownSpellIds={spellcasting.knownSpells}
                     campaignId={id}
+                    characterRace={basicInfo.race}
+                    skillTreeProgress={formData.skillTreeProgress ?? {}}
                   />
                 </AccordionContent>
               </AccordionItem>

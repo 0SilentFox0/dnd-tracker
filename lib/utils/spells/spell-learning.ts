@@ -1,16 +1,73 @@
 /**
- * Утиліти для автоматичного додавання заклинань при вивченні скілів
+ * Утиліти для автоматичного додавання заклинань при вивченні скілів.
+ *
+ * Основна логіка:
+ * - Герой вивчає рівні основних навичок (MainSkill) у дереві прокачки.
+ * - Кожна основна навичка може мати прив'язану групу заклинань (spellGroupId).
+ * - При вивченні рівня:
+ *     Основи (basic)    → заклинання 1–2 рівня цієї групи
+ *     Просунутий (advanced) → заклинання 1–4 рівня (кумулятивно)
+ *     Експертний (expert)   → заклинання 1–5 рівня (кумулятивно)
  */
 
-import { SkillLevel, type SkillLevelType } from "@/types/skill-tree";
+import {
+  SkillLevel,
+  type SkillLevelType,
+  type SkillTree,
+} from "@/types/skill-tree";
 import type { Skill } from "@/types/skills";
 import type { Spell } from "@/types/spells";
 
+// ---------------------------------------------------------------------------
+//  Допоміжні типи і функції для роботи зі скілами з API
+// ---------------------------------------------------------------------------
+
+/** Скіл з API може мати spellGroupId у spellData, name у basicInfo */
+type SkillLike = Skill & {
+  spellData?: { spellGroupId?: string };
+  basicInfo?: { name?: string };
+  spellEnhancementData?: { spellNewSpellId?: string };
+  spellGroup?: { id: string; name?: string } | null;
+};
+
+function getSkillSpellGroupId(skill: SkillLike): string | null | undefined {
+  return (
+    skill.spellGroupId ??
+    skill.spellData?.spellGroupId ??
+    skill.spellGroup?.id
+  );
+}
+
+function getSkillName(skill: SkillLike): string {
+  return skill.name ?? skill.basicInfo?.name ?? "";
+}
+
+function getSkillSpellNewSpellId(skill: SkillLike): string | null | undefined {
+  return skill.spellNewSpellId ?? skill.spellEnhancementData?.spellNewSpellId;
+}
+
+// ---------------------------------------------------------------------------
+//  Константи
+// ---------------------------------------------------------------------------
+
+const SKILL_LEVEL_ORDER: Record<SkillLevelType, number> = {
+  [SkillLevel.BASIC]: 1,
+  [SkillLevel.ADVANCED]: 2,
+  [SkillLevel.EXPERT]: 3,
+};
+
+/** Формат ID рівня основної навички: ${mainSkillId}_${level}_level */
+const MAIN_SKILL_LEVEL_RE = /_(basic|advanced|expert)_level$/;
+
+// ---------------------------------------------------------------------------
+//  Публічні утиліти
+// ---------------------------------------------------------------------------
+
 /**
- * Визначає рівень магії на основі прокачки скілу
- * Базовий рівень -> 1-2 рівень магії
- * Просунутий рівень -> 3-4 рівень магії
- * Експертний рівень -> 5 рівень магії
+ * Визначає рівні магії (кумулятивно) на основі прокачки школи магії.
+ *   Базовий    → заклинання 1–2 рівня
+ *   Просунутий → заклинання 1–4 рівня
+ *   Експертний → заклинання 1–5 рівня
  */
 export function getSpellLevelsForSkillLevel(
   skillLevel: SkillLevelType
@@ -19,9 +76,9 @@ export function getSpellLevelsForSkillLevel(
     case SkillLevel.BASIC:
       return [1, 2];
     case SkillLevel.ADVANCED:
-      return [3, 4];
+      return [1, 2, 3, 4];
     case SkillLevel.EXPERT:
-      return [5];
+      return [1, 2, 3, 4, 5];
     default:
       return [];
   }
@@ -38,35 +95,35 @@ export function getSpellsForLevels(
 }
 
 /**
- * Отримує всі заклинання, які мають бути автоматично додані при вивченні скілу
- * 
- * Логіка:
- * 1. Якщо скіл має spellGroupId -> додаємо всі заклинання цієї групи з відповідних рівнів (Базовий/Просунутий/Експертний)
- * 2. Якщо скіл має spellNewSpellId -> додаємо це заклинання
+ * Отримує всі заклинання, які мають бути автоматично додані при вивченні скілу.
+ *
+ * 1. Якщо скіл має spellGroupId → заклинання цієї групи відповідних рівнів
+ * 2. Якщо скіл має spellNewSpellId → це окреме заклинання
  */
 export function getSpellsToAddForSkill(
-  skill: Skill,
+  skill: SkillLike,
   allSpells: Spell[],
   skillLevel?: SkillLevelType
 ): string[] {
   const spellIdsToAdd: string[] = [];
 
-  // Якщо скіл має групу заклинань та вказано рівень скілу
-  if (skill.spellGroupId && skillLevel) {
+  const spellGroupId = getSkillSpellGroupId(skill);
+
+  if (spellGroupId && skillLevel) {
     const levels = getSpellLevelsForSkillLevel(skillLevel);
 
     const groupSpells = allSpells.filter(
       (spell) =>
-        spell.spellGroup?.id === skill.spellGroupId &&
-        levels.includes(spell.level)
+        spell.spellGroup?.id === spellGroupId && levels.includes(spell.level)
     );
 
     spellIdsToAdd.push(...groupSpells.map((s) => s.id));
   }
 
-  // Якщо скіл додає нове заклинання
-  if (skill.spellNewSpellId) {
-    spellIdsToAdd.push(skill.spellNewSpellId);
+  const spellNewSpellId = getSkillSpellNewSpellId(skill);
+
+  if (spellNewSpellId) {
+    spellIdsToAdd.push(spellNewSpellId);
   }
 
   return spellIdsToAdd;
@@ -88,7 +145,6 @@ export function calculateSpellsToAdd(
 
     if (!skill) continue;
 
-    // Знаходимо рівень прокачки скілу (якщо він є в skillTreeProgress)
     let skillLevel: SkillLevelType | undefined;
 
     if (skillTreeProgress) {
@@ -98,6 +154,7 @@ export function calculateSpellsToAdd(
           progress.level
         ) {
           skillLevel = progress.level;
+
           break;
         }
       }
@@ -108,6 +165,235 @@ export function calculateSpellsToAdd(
     newSpellIds.push(...spellsToAdd);
   }
 
-  // Видаляємо дублікати
   return Array.from(new Set(newSpellIds));
+}
+
+// ---------------------------------------------------------------------------
+//  Внутрішні функції для getLearnedSpellIdsFromTree
+// ---------------------------------------------------------------------------
+
+/**
+ * Будує мапу: id скіла з бібліотеки (у слоті дерева) → рівень у дереві.
+ */
+function buildSkillIdToLevelMap(
+  skillTree: SkillTree | null,
+  librarySkillIds: Set<string>
+): Map<string, SkillLevelType> {
+  const map = new Map<string, SkillLevelType>();
+
+  if (!skillTree?.mainSkills) return map;
+
+  const levels: SkillLevelType[] = [
+    SkillLevel.BASIC,
+    SkillLevel.ADVANCED,
+    SkillLevel.EXPERT,
+  ];
+
+  for (const mainSkill of skillTree.mainSkills) {
+    for (const level of levels) {
+      const circles = mainSkill.levels[level] as {
+        circle1: { id: string }[];
+        circle2: { id: string }[];
+        circle3: { id: string }[];
+      };
+
+      for (const circle of [circles.circle1, circles.circle2, circles.circle3]) {
+        for (const slot of circle || []) {
+          if (librarySkillIds.has(slot.id)) {
+            const existing = map.get(slot.id);
+
+            const existingOrder = existing
+              ? SKILL_LEVEL_ORDER[existing]
+              : 0;
+
+            if (SKILL_LEVEL_ORDER[level] >= existingOrder) {
+              map.set(slot.id, level);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return map;
+}
+
+/**
+ * Парсить ID рівня основної навички.
+ * Формат: `${mainSkillId}_basic_level`, `${mainSkillId}_advanced_level`, `${mainSkillId}_expert_level`
+ */
+function parseMainSkillLevelId(
+  skillId: string
+): { mainSkillId: string; level: SkillLevelType } | null {
+  const match = skillId.match(MAIN_SKILL_LEVEL_RE);
+
+  if (!match) return null;
+
+  const level = match[1] as SkillLevelType;
+
+  const mainSkillId = skillId.slice(0, match.index);
+
+  return mainSkillId ? { mainSkillId, level } : null;
+}
+
+// ---------------------------------------------------------------------------
+//  Основна функція — обчислення заклинань з дерева прокачки
+// ---------------------------------------------------------------------------
+
+/**
+ * Обчислює список ID заклинань, вивчених героєм за прокачаними школами магії
+ * (з дерева прокачки).
+ *
+ * Алгоритм:
+ * 1. Проходимо по всіх unlockedSkills з progress.
+ * 2. Для main-skill-level ID (формат ${mainSkillId}_${level}_level):
+ *    - Знаходимо mainSkill у дереві.
+ *    - Беремо mainSkill.spellGroupId — пряма прив'язка до групи заклинань.
+ *    - Визначаємо рівень (basic/advanced/expert) з ID.
+ * 3. Для звичайних скілів з бібліотеки:
+ *    - Беремо spellGroupId з самого скіла.
+ *    - Визначаємо рівень за позицією у дереві.
+ * 4. Для кожної групи беремо максимальний рівень.
+ * 5. Збираємо заклинання цієї групи з відповідних рівнів (кумулятивно).
+ */
+export function getLearnedSpellIdsFromTree(
+  skillTree: SkillTree | null,
+  progress: Record<string, { unlockedSkills?: string[] }>,
+  allSkills: Skill[],
+  allSpells: Spell[]
+): string[] {
+  const librarySkillIds = new Set(allSkills.map((s) => s.id));
+
+  const skillIdToLevel = buildSkillIdToLevelMap(skillTree, librarySkillIds);
+
+  /** spellGroupId → максимальний досягнутий рівень */
+  const groupMaxLevel = new Map<string, SkillLevelType>();
+
+  /** Окремі заклинання, додані через spellNewSpellId */
+  const extraSpellIds = new Set<string>();
+
+  const mainSkills = skillTree?.mainSkills ?? [];
+
+  // Для логування
+  const learnedLog: { skillId: string; name: string; level?: SkillLevelType; spellGroupId?: string }[] = [];
+
+  const seen = new Set<string>();
+
+  for (const [, treeProgress] of Object.entries(progress)) {
+    const unlocked = treeProgress.unlockedSkills ?? [];
+
+    for (const skillId of unlocked) {
+      if (seen.has(skillId)) continue;
+
+      seen.add(skillId);
+
+      // ------ 1. Спробувати як main-skill-level ------
+      const parsed = parseMainSkillLevelId(skillId);
+
+      if (parsed) {
+        const mainSkill = mainSkills.find((m) => m.id === parsed.mainSkillId);
+
+        const spellGroupId = mainSkill?.spellGroupId;
+
+        const displayName = mainSkill?.name
+          ? `${mainSkill.name} (${parsed.level})`
+          : skillId;
+
+        learnedLog.push({
+          skillId,
+          name: displayName,
+          level: parsed.level,
+          spellGroupId: spellGroupId ?? undefined,
+        });
+
+        if (spellGroupId) {
+          const current = groupMaxLevel.get(spellGroupId);
+
+          const currentOrder = current ? SKILL_LEVEL_ORDER[current] : 0;
+
+          if (SKILL_LEVEL_ORDER[parsed.level] > currentOrder) {
+            groupMaxLevel.set(spellGroupId, parsed.level);
+          }
+        }
+
+        continue;
+      }
+
+      // ------ 2. Звичайний скіл з бібліотеки ------
+      const skill = allSkills.find((s) => s.id === skillId) as SkillLike | undefined;
+
+      if (!skill) continue;
+
+      const spellGroupId = getSkillSpellGroupId(skill);
+
+      const level = skillIdToLevel.get(skillId) ?? (spellGroupId ? SkillLevel.BASIC : undefined);
+
+      learnedLog.push({
+        skillId,
+        name: getSkillName(skill),
+        level,
+        spellGroupId: spellGroupId ?? undefined,
+      });
+
+      if (spellGroupId && level) {
+        const current = groupMaxLevel.get(spellGroupId);
+
+        const currentOrder = current ? SKILL_LEVEL_ORDER[current] : 0;
+
+        if (SKILL_LEVEL_ORDER[level] > currentOrder) {
+          groupMaxLevel.set(spellGroupId, level);
+        }
+      }
+
+      const newSpellId = getSkillSpellNewSpellId(skill);
+
+      if (newSpellId) {
+        extraSpellIds.add(newSpellId);
+      }
+    }
+  }
+
+  // ------ Збираємо результат ------
+  const result: string[] = [];
+
+  for (const [groupId, level] of groupMaxLevel) {
+    const spellLevels = getSpellLevelsForSkillLevel(level);
+
+    const groupSpells = allSpells.filter(
+      (s) => s.spellGroup?.id === groupId && spellLevels.includes(s.level)
+    );
+
+    result.push(...groupSpells.map((s) => s.id));
+  }
+
+  result.push(...extraSpellIds);
+
+  // ------ Логування ------
+  if (typeof window !== "undefined") {
+    console.info("[Книга заклинань] Вивчені скіли:", learnedLog);
+
+    const schoolsLog = Array.from(groupMaxLevel.entries()).map(
+      ([groupId, level]) => {
+        const groupName =
+          allSpells.find((s) => s.spellGroup?.id === groupId)?.spellGroup
+            ?.name ?? groupId;
+
+        return { groupId, groupName, level };
+      }
+    );
+
+    console.info("[Книга заклинань] Вивчені школи магії:", schoolsLog);
+
+    console.info(
+      "[Книга заклинань] Окремо додані заклинання (spellNewSpellId):",
+      Array.from(extraSpellIds)
+    );
+
+    console.info(
+      "[Книга заклинань] Всього ID заклинань у книзі:",
+      result.length
+    );
+  }
+
+  return Array.from(new Set(result));
 }

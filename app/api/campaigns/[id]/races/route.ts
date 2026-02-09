@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { prisma } from "@/lib/db";
-import { requireDM } from "@/lib/utils/api/api-auth";
+import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 
 const createRaceSchema = z.object({
   name: z.string().min(1).max(100),
@@ -41,9 +41,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    
-    // Перевіряємо права DM
-    const accessResult = await requireDM(id);
+
+    // Доступ для будь-якого учасника кампанії (гравці мають бачити раси при створенні/редагуванні персонажа)
+    const accessResult = await requireCampaignAccess(id, false);
 
     if (accessResult instanceof NextResponse) {
       return accessResult;

@@ -2,13 +2,23 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 
 import { FormCard } from "@/components/common/FormCard";
 import { FormField } from "@/components/common/FormField";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useUpdateMainSkill } from "@/lib/hooks/useMainSkills";
+import { getSpellGroups } from "@/lib/api/spells";
+import type { SpellGroup } from "@/types/spells";
 import type { MainSkill } from "@/types/main-skills";
 import type { MainSkillFormData } from "@/types/main-skills";
 
@@ -25,11 +35,17 @@ export function MainSkillEditForm({
 
   const updateMainSkillMutation = useUpdateMainSkill(campaignId);
 
+  const { data: spellGroups = [] } = useQuery<SpellGroup[]>({
+    queryKey: ["spell-groups", campaignId],
+    queryFn: () => getSpellGroups(campaignId),
+  });
+
   const [formData, setFormData] = useState<MainSkillFormData>({
     name: mainSkill.name,
     color: mainSkill.color,
     icon: mainSkill.icon || "",
     isEnableInSkillTree: mainSkill.isEnableInSkillTree ?? false,
+    spellGroupId: mainSkill.spellGroupId ?? null,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -105,6 +121,36 @@ export function MainSkillEditForm({
           placeholder="https://example.com/icon.png"
         />
       </FormField>
+
+      {spellGroups.length > 0 && (
+        <FormField
+          label="Група заклинань (школа магії)"
+          htmlFor="spellGroupId"
+          description="При вивченні рівня цієї навички герой отримає заклинання обраної групи"
+        >
+          <Select
+            value={formData.spellGroupId || "__none__"}
+            onValueChange={(value) =>
+              setFormData((prev) => ({
+                ...prev,
+                spellGroupId: value === "__none__" ? null : value,
+              }))
+            }
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Оберіть групу заклинань" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none__">— Без групи —</SelectItem>
+              {spellGroups.map((group) => (
+                <SelectItem key={group.id} value={group.id}>
+                  {group.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FormField>
+      )}
 
       <div className="flex items-center space-x-2">
         <Checkbox

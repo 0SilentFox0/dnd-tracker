@@ -43,6 +43,7 @@ export function characterToFormData(
       hitDice: character.hitDice || "1d8",
       minTargets: character.minTargets || 1,
       maxTargets: character.maxTargets || 1,
+      morale: (character as { morale?: number }).morale ?? 0,
     },
     skills: {
       savingThrows: (character.savingThrows as Record<string, boolean>) || {},
@@ -61,7 +62,6 @@ export function characterToFormData(
       proficiencies:
         (character.proficiencies as Record<string, string[]>) || {},
       immunities: (character.immunities as string[]) || [],
-      morale: character.morale,
       personalityTraits: character.personalityTraits,
       ideals: character.ideals,
       bonds: character.bonds,
@@ -70,6 +70,11 @@ export function characterToFormData(
     abilities: {
       personalSkillId: (character as { personalSkillId?: string | null }).personalSkillId ?? "",
     },
+    skillTreeProgress:
+      character.skillTreeProgress &&
+      typeof character.skillTreeProgress === "object"
+        ? character.skillTreeProgress
+        : undefined,
   };
 }
 
@@ -120,11 +125,14 @@ export function formDataToCharacter(
     languages: formData.roleplay.languages,
     proficiencies: formData.roleplay.proficiencies,
     immunities: formData.roleplay.immunities,
-    morale: formData.roleplay.morale,
+    morale: formData.combatStats.morale,
     personalityTraits: formData.roleplay.personalityTraits,
     ideals: formData.roleplay.ideals,
     bonds: formData.roleplay.bonds,
     flaws: formData.roleplay.flaws,
     personalSkillId: formData.abilities.personalSkillId?.trim() || null,
+    ...(formData.skillTreeProgress != null && {
+      skillTreeProgress: formData.skillTreeProgress,
+    }),
   };
 }

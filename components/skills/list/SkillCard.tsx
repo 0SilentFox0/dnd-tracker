@@ -97,7 +97,12 @@ function formatTrigger(t: SkillTrigger): string {
   return `якщо ${targetLabel} ${c.operator} ${c.value}${pct} ${c.stat}`;
 }
 
-export function SkillCard({ skill, campaignId, onRemove, onDuplicate }: SkillCardProps) {
+export function SkillCard({
+  skill,
+  campaignId,
+  onRemove,
+  onDuplicate,
+}: SkillCardProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const { data: mainSkills = [] } = useMainSkills(campaignId);
@@ -197,7 +202,9 @@ export function SkillCard({ skill, campaignId, onRemove, onDuplicate }: SkillCar
                         Без основного навику
                       </DropdownMenuItem>
                       {mainSkills
-                        .filter((ms) => ms.id !== "racial" && ms.id !== "ultimate")
+                        .filter(
+                          (ms) => ms.id !== "racial" && ms.id !== "ultimate",
+                        )
                         .map((ms) => (
                           <DropdownMenuItem
                             key={ms.id}
@@ -350,7 +357,8 @@ export function SkillCard({ skill, campaignId, onRemove, onDuplicate }: SkillCar
           <AlertDialogHeader>
             <AlertDialogTitle>Видалити скіл?</AlertDialogTitle>
             <AlertDialogDescription>
-              Скіл &quot;{skillName}&quot; буде видалено. Цю дію неможливо скасувати.
+              Скіл &quot;{skillName}&quot; буде видалено. Цю дію неможливо
+              скасувати.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -2,17 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { MoreVertical, Package, Pencil, Trash2 } from "lucide-react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { OptimizedImage } from "@/components/common/OptimizedImage";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,13 +15,23 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   useCharacters,
   useDeleteAllCharacters,
   useDeleteCharacter,
 } from "@/lib/hooks/useCharacters";
+import { normalizeImageUrl } from "@/lib/utils/common/image-url";
 import type { Character } from "@/types/characters";
-import { Trash2 } from "lucide-react";
 
 interface DMCharactersClientProps {
   campaignId: string;
@@ -37,12 +39,15 @@ interface DMCharactersClientProps {
 
 export function DMCharactersClient({ campaignId }: DMCharactersClientProps) {
   const [deleteAllOpen, setDeleteAllOpen] = useState(false);
+
   const [characterToDelete, setCharacterToDelete] = useState<Character | null>(
-    null
+    null,
   );
 
   const { data: characters = [], isLoading } = useCharacters(campaignId);
+
   const deleteAllMutation = useDeleteAllCharacters(campaignId);
+
   const deleteOneMutation = useDeleteCharacter(campaignId);
 
   const handleDeleteAll = async () => {
@@ -57,6 +62,7 @@ export function DMCharactersClient({ campaignId }: DMCharactersClientProps) {
 
   const handleDeleteOne = async () => {
     if (!characterToDelete) return;
+
     try {
       await deleteOneMutation.mutateAsync(characterToDelete.id);
       setCharacterToDelete(null);
@@ -102,83 +108,97 @@ export function DMCharactersClient({ campaignId }: DMCharactersClientProps) {
           {characters.map((character) => (
             <Card
               key={character.id}
-              className="hover:shadow-lg transition-shadow"
+              className="overflow-hidden hover:shadow-lg transition-shadow pt-0"
             >
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <Avatar>
-                      <AvatarImage src={character.avatar || undefined} />
-                      <AvatarFallback>
-                        {character.name.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <CardTitle className="text-lg">{character.name}</CardTitle>
-                      <CardDescription>
-                        {character.user?.displayName || "Не призначено"}
-                      </CardDescription>
-                    </div>
+              <div className="relative aspect-square h-full w-full bg-muted">
+                {character.avatar ? (
+                  <>
+                    <OptimizedImage
+                      src={character.avatar}
+                      alt=""
+                      className="absolute inset-0 h-full w-full object-cover"
+                      width={100}
+                      height={100}
+                    />
+                    <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/30 to-transparent" />
+                  </>
+                ) : (
+                  <div className="absolute inset-0 bg-muted flex items-center justify-center text-4xl font-bold text-muted-foreground">
+                    {character.name.charAt(0).toUpperCase()}
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
-                    onClick={() => setCharacterToDelete(character)}
-                    disabled={deleteOneMutation.isPending}
-                    title="Видалити персонажа"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                )}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      className="absolute top-2 right-2 h-8 w-8 rounded-full shadow-md bg-black/40 hover:bg-black/60 text-white border-0"
+                      onClick={(e) => e.preventDefault()}
+                    >
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href={`/campaigns/${campaignId}/dm/characters/${character.id}`}
+                      >
+                        <Pencil className="mr-2 h-4 w-4" />
+                        Редагувати
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href={`/campaigns/${campaignId}/dm/characters/${character.id}/inventory`}
+                      >
+                        <Package className="mr-2 h-4 w-4" />
+                        Інвентар
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onClick={() => setCharacterToDelete(character)}
+                      disabled={deleteOneMutation.isPending}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Видалити
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+              <CardContent className="p-3 space-y-2">
+                <div>
+                  <p className="font-semibold text-lg leading-tight truncate">
+                    {character.name}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {character.user?.displayName || "Не призначено"}
+                  </p>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline">
-                    {character.race} {character.subrace || ""}
+                <div className="flex flex-wrap gap-1.5">
+                  <Badge variant="outline" className="text-xs">
+                    {character.race}
+                    {character.subrace ? ` (${character.subrace})` : ""}
                   </Badge>
-                  <Badge variant="outline">{character.class}</Badge>
-                  <Badge variant="default">Рівень {character.level}</Badge>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div>
-                    <span className="text-muted-foreground">HP:</span>{" "}
-                    <span className="font-semibold">
-                      {character.currentHp}/{character.maxHp}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">XP:</span>{" "}
-                    <span className="font-semibold">{character.experience}</span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">AC:</span>{" "}
-                    <span className="font-semibold">{character.armorClass}</span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Initiative:</span>{" "}
-                    <span className="font-semibold">{character.initiative}</span>
-                  </div>
-                </div>
-
-                <div className="flex gap-2 pt-2">
-                  <Link
-                    href={`/campaigns/${campaignId}/dm/characters/${character.id}`}
-                    className="flex-1"
-                  >
-                    <Button variant="outline" className="w-full" size="sm">
-                      Редагувати
-                    </Button>
-                  </Link>
-                  <Link
-                    href={`/campaigns/${campaignId}/dm/characters/${character.id}/inventory`}
-                    className="flex-1"
-                  >
-                    <Button variant="outline" className="w-full" size="sm">
-                      Інвентар
-                    </Button>
-                  </Link>
+                  <Badge variant="outline" className="text-xs">
+                    {character.class}
+                  </Badge>
+                  <Badge variant="default" className="text-xs">
+                    Рівень {character.level}
+                  </Badge>
+                  <Badge variant="secondary" className="text-xs">
+                    HP {character.currentHp}/{character.maxHp}
+                  </Badge>
+                  <Badge variant="secondary" className="text-xs">
+                    AC {character.armorClass}
+                  </Badge>
+                  <Badge variant="secondary" className="text-xs">
+                    Init {character.initiative}
+                  </Badge>
+                  <Badge variant="secondary" className="text-xs">
+                    XP {character.experience}
+                  </Badge>
                 </div>
               </CardContent>
             </Card>

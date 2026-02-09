@@ -49,6 +49,8 @@ export interface MainSkill {
   icon?: string;
   /** Якщо true — не виводити у колі дерева прокачки */
   isEnableInSkillTree?: boolean;
+  /** ID групи заклинань, пов'язаної з цією основною навичкою (школа магії) */
+  spellGroupId?: string;
   levelIcons?: {
     basic?: string;
     advanced?: string;

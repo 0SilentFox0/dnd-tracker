@@ -40,6 +40,7 @@ export interface CharacterFormData {
     hitDice: string;
     minTargets: number;
     maxTargets: number;
+    morale: number;
   };
   skills: {
     savingThrows: Record<string, boolean>;
@@ -55,7 +56,6 @@ export interface CharacterFormData {
     languages: string[];
     proficiencies: Record<string, string[]>;
     immunities?: string[];
-    morale?: number;
     personalityTraits?: string;
     ideals?: string;
     bonds?: string;
@@ -65,6 +65,11 @@ export interface CharacterFormData {
   abilities: {
     personalSkillId: string;
   };
+  /** Прогрес по деревах прокачки: skillTreeId → { unlockedSkills } */
+  skillTreeProgress?: Record<
+    string,
+    { level?: string; unlockedSkills?: string[] }
+  >;
 }
 
 /**
@@ -115,6 +120,11 @@ export interface Character {
   minTargets: number;
   maxTargets: number;
   personalSkillId?: string | null;
+  /** Прогрес по деревах прокачки: skillTreeId → { unlockedSkills } */
+  skillTreeProgress?: Record<
+    string,
+    { level?: string; unlockedSkills?: string[] }
+  >;
   createdAt: string;
   updatedAt: string;
   user?: {

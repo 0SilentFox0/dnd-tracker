@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useMemo, useState } from "react";
+import { use, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -47,9 +47,14 @@ export default function EditUnitPage({
   // Використовуємо useMemo для обчислення початкових даних форми
   const initialFormData = useMemo<Partial<Unit>>(() => {
     if (unit) {
+      const raceValue =
+        unit.race ??
+        (unit.unitGroup?.name as string | undefined) ??
+        null;
+
       return {
         name: unit.name,
-        race: unit.race || null,
+        race: raceValue,
         level: unit.level,
         strength: unit.strength,
         dexterity: unit.dexterity,
@@ -102,19 +107,30 @@ export default function EditUnitPage({
     };
   }, [unit]);
 
-  // Використовуємо lazy initialization для useState
-  const [formData, setFormData] = useState<Partial<Unit>>(
-    () => initialFormData,
-  );
+  const [formData, setFormData] = useState<Partial<Unit>>(initialFormData);
+
+  const hasSyncedUnitRef = useRef<string | null>(null);
 
   useEffect(() => {
     getSpells(id).then(setSpells).catch(console.error);
   }, [id]);
 
-  // Оновлюємо formData коли initialFormData змінюється (через key prop форма автоматично скидається)
+  // Підтягуємо дані юніта в форму при першому завантаженні (включно з расою)
   useEffect(() => {
-    setFormData(initialFormData);
-  }, [initialFormData]);
+    if (!unit) return;
+
+    if (hasSyncedUnitRef.current !== unit.id) {
+      hasSyncedUnitRef.current = unit.id;
+      const raceValue =
+        unit.race ??
+        (unit.unitGroup?.name as string | undefined) ??
+        null;
+      setFormData({
+        ...initialFormData,
+        race: raceValue,
+      });
+    }
+  }, [unit, initialFormData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -145,7 +145,7 @@ export function CircularSkillTree({
   const { containerSizeMobile } = SKILL_TREE_CONSTANTS;
 
   return (
-    <div className="flex flex-col items-center gap-2 sm:gap-4 p-0 sm:p-4 w-full">
+    <div className="flex flex-col items-center gap-2 sm:gap-4 p-0 sm:p-4 w-full mt-2">
       {/* Кругове дерево */}
       <div className="w-full max-w-full overflow-visible pb-4 touch-pan-x touch-pan-y mt-24 md:mt-24 -mx-2 sm:mx-0">
         <div

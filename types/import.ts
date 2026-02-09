@@ -59,6 +59,11 @@ export interface CSVUnitRow {
   Група?: string;
   group?: string;
   Group?: string;
+  Initiative?: string;
+  initiative?: string;
+  Image?: string;
+  image?: string;
+  URL?: string;
 }
 
 export interface UnitAttack {

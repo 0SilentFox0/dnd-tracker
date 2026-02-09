@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { ArtifactDeleteButton } from "@/components/artifacts/ArtifactDeleteButton";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -191,7 +192,7 @@ export default async function DMArtifactsPage({
                                   </span>
                                 )}
                               </div>
-                              <div className="min-w-0">
+                              <div className="min-w-0 flex-1">
                                 <p className="font-semibold text-sm truncate">
                                   {artifact.name}
                                 </p>
@@ -205,6 +206,17 @@ export default async function DMArtifactsPage({
                                     {artifact.slot}
                                   </Badge>
                                 </div>
+                              </div>
+                              <div className="flex items-center gap-1 shrink-0">
+                                <Link href={`/campaigns/${id}/dm/artifacts/${artifact.id}`}>
+                                  <Button variant="ghost" size="sm">
+                                    Редагувати
+                                  </Button>
+                                </Link>
+                                <ArtifactDeleteButton
+                                  campaignId={id}
+                                  artifactId={artifact.id}
+                                />
                               </div>
                             </div>
                             {artifact.description && (
@@ -311,11 +323,17 @@ export default async function DMArtifactsPage({
                     {passive.description}
                   </p>
                 )}
-                <Link href={`/campaigns/${id}/dm/artifacts/${artifact.id}`}>
-                  <Button variant="outline" size="sm" className="w-full">
-                    Редагувати
-                  </Button>
-                </Link>
+                <div className="flex gap-2">
+                  <Link href={`/campaigns/${id}/dm/artifacts/${artifact.id}`} className="flex-1">
+                    <Button variant="outline" size="sm" className="w-full">
+                      Редагувати
+                    </Button>
+                  </Link>
+                  <ArtifactDeleteButton
+                    campaignId={id}
+                    artifactId={artifact.id}
+                  />
+                </div>
               </CardContent>
             </Card>
           );

@@ -13,6 +13,7 @@ const updateMainSkillSchema = z.object({
     .nullable()
     .transform((val) => (val === "" ? null : val)),
   isEnableInSkillTree: z.boolean().optional(),
+  spellGroupId: z.string().nullable().optional(),
 });
 
 export async function GET(
@@ -85,6 +86,7 @@ export async function PATCH(
         color: data.color,
         icon: data.icon !== undefined ? data.icon : undefined,
         isEnableInSkillTree: data.isEnableInSkillTree !== undefined ? data.isEnableInSkillTree : undefined,
+        spellGroupId: data.spellGroupId !== undefined ? (data.spellGroupId || null) : undefined,
       },
     });
 

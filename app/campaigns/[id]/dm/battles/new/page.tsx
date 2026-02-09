@@ -34,6 +34,29 @@ interface Unit {
   avatar: string | null;
 }
 
+interface AllyStats {
+  dpr: number;
+  totalHp: number;
+  kpi: number;
+  allyCount: number;
+}
+
+interface SuggestedEnemy {
+  unitId: string;
+  name: string;
+  quantity: number;
+  dpr: number;
+  hp: number;
+  totalDpr: number;
+  totalHp: number;
+}
+
+interface UnitGroup {
+  id: string;
+  name: string;
+  color: string;
+}
+
 interface Participant {
   id: string;
   type: "character" | "unit";
@@ -65,26 +88,31 @@ export default function NewBattlePage({
 
   const [participants, setParticipants] = useState<Participant[]>([]);
 
-  // Завантажуємо персонажів та юнітів
+  const [unitGroups, setUnitGroups] = useState<UnitGroup[]>([]);
+  const [allyStats, setAllyStats] = useState<AllyStats | null>(null);
+  const [balanceLoading, setBalanceLoading] = useState(false);
+  const [suggestedEnemies, setSuggestedEnemies] = useState<SuggestedEnemy[]>([]);
+  const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("medium");
+  const [minTier, setMinTier] = useState<number>(1);
+  const [maxTier, setMaxTier] = useState<number>(10);
+  const [balanceGroupId, setBalanceGroupId] = useState<string>("");
+  const [balanceRace, setBalanceRace] = useState<string>("");
+
+  // Завантажуємо персонажів, юнітів та групи юнітів
   useEffect(() => {
     async function loadData() {
       try {
-        // Завантажуємо персонажів
-        const charactersRes = await fetch(`/api/campaigns/${id}/characters`);
+        const [charactersRes, unitsRes, groupsRes] = await Promise.all([
+          fetch(`/api/campaigns/${id}/characters`),
+          fetch(`/api/campaigns/${id}/units`),
+          fetch(`/api/campaigns/${id}/units/groups`),
+        ]);
 
-        if (charactersRes.ok) {
-          const chars = await charactersRes.json();
-
-          setCharacters(chars);
-        }
-
-        // Завантажуємо юнітів
-        const unitsRes = await fetch(`/api/campaigns/${id}/units`);
-
-        if (unitsRes.ok) {
-          const unitsData = await unitsRes.json();
-
-          setUnits(unitsData);
+        if (charactersRes.ok) setCharacters(await charactersRes.json());
+        if (unitsRes.ok) setUnits(await unitsRes.json());
+        if (groupsRes.ok) {
+          const gr = await groupsRes.json();
+          setUnitGroups(Array.isArray(gr) ? gr : []);
         }
       } catch (error) {
         console.error("Error loading data:", error);
@@ -178,6 +206,75 @@ export default function NewBattlePage({
     const participant = participants.find((p) => p.id === id);
 
     return participant?.quantity || 1;
+  };
+
+  const allyParticipants = {
+    characterIds: participants.filter((p) => p.side === "ally" && p.type === "character").map((p) => p.id),
+    units: participants
+      .filter((p) => p.side === "ally" && p.type === "unit")
+      .map((p) => ({ id: p.id, quantity: p.quantity || 1 })),
+  };
+  const hasAllies = allyParticipants.characterIds.length > 0 || allyParticipants.units.length > 0;
+
+  const fetchAllyStats = async () => {
+    if (!hasAllies) return;
+    setBalanceLoading(true);
+    try {
+      const res = await fetch(`/api/campaigns/${id}/battles/balance`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ allyParticipants }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAllyStats(data.allyStats ?? null);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setBalanceLoading(false);
+    }
+  };
+
+  const suggestEnemies = async () => {
+    if (!hasAllies) return;
+    setBalanceLoading(true);
+    setSuggestedEnemies([]);
+    try {
+      const res = await fetch(`/api/campaigns/${id}/battles/balance`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          allyParticipants,
+          difficulty,
+          minTier,
+          maxTier,
+          groupId: balanceGroupId || undefined,
+          race: balanceRace || undefined,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAllyStats(data.allyStats ?? null);
+        setSuggestedEnemies(data.suggestedEnemies ?? []);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setBalanceLoading(false);
+    }
+  };
+
+  const applySuggestedEnemies = () => {
+    const allies = participants.filter((p) => p.side === "ally");
+    const newEnemies: Participant[] = suggestedEnemies.map((s) => ({
+      id: s.unitId,
+      type: "unit",
+      side: "enemy",
+      quantity: s.quantity,
+    }));
+    setParticipants([...allies, ...newEnemies]);
+    setSuggestedEnemies([]);
   };
 
   // Розділяємо персонажів на Player Characters та NPC Heroes
@@ -506,6 +603,133 @@ export default function NewBattlePage({
             </CardContent>
           </Card>
         </div>
+
+        {/* Автопідбір ворогів за KPI */}
+        <Card>
+          <CardHeader>
+            <CardTitle>⚖️ Автопідбір ворогів</CardTitle>
+            <CardDescription>
+              DPR та Total HP союзників → KPI. Оберіть складність і фільтри, підберіть юнітів під цільовий KPI.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {hasAllies ? (
+              <>
+                <div className="flex flex-wrap items-center gap-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={fetchAllyStats}
+                    disabled={balanceLoading}
+                  >
+                    {balanceLoading ? "Завантаження…" : "Оновити статистику союзників"}
+                  </Button>
+                  {allyStats && (
+                    <span className="text-sm text-muted-foreground">
+                      DPR: <strong>{allyStats.dpr}</strong>, Total HP: <strong>{allyStats.totalHp}</strong>, KPI: <strong>{allyStats.kpi}</strong>
+                    </span>
+                  )}
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  <div>
+                    <Label htmlFor="difficulty">Складність</Label>
+                    <select
+                      id="difficulty"
+                      className="mt-1 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
+                      value={difficulty}
+                      onChange={(e) => setDifficulty(e.target.value as "easy" | "medium" | "hard")}
+                    >
+                      <option value="easy">Легкий (×2)</option>
+                      <option value="medium">Середній (×1)</option>
+                      <option value="hard">Важкий (×0.5)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label htmlFor="minTier">Мін. рівень (tier)</Label>
+                    <Input
+                      id="minTier"
+                      type="number"
+                      min={1}
+                      max={30}
+                      value={minTier}
+                      onChange={(e) => setMinTier(parseInt(e.target.value, 10) || 1)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="maxTier">Макс. рівень (tier)</Label>
+                    <Input
+                      id="maxTier"
+                      type="number"
+                      min={1}
+                      max={30}
+                      value={maxTier}
+                      onChange={(e) => setMaxTier(parseInt(e.target.value, 10) || 10)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="balanceGroup">Група юнітів</Label>
+                    <select
+                      id="balanceGroup"
+                      className="mt-1 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
+                      value={balanceGroupId}
+                      onChange={(e) => setBalanceGroupId(e.target.value)}
+                    >
+                      <option value="">Будь-яка</option>
+                      {unitGroups.map((g) => (
+                        <option key={g.id} value={g.id}>{g.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="balanceRace">Раса юнітів</Label>
+                  <Input
+                    id="balanceRace"
+                    placeholder="Опціонально"
+                    value={balanceRace}
+                    onChange={(e) => setBalanceRace(e.target.value)}
+                    className="mt-1 max-w-xs"
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    onClick={suggestEnemies}
+                    disabled={balanceLoading}
+                  >
+                    {balanceLoading ? "Підбір…" : "Підібрати ворогів"}
+                  </Button>
+                  {suggestedEnemies.length > 0 && (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={applySuggestedEnemies}
+                    >
+                      Застосувати рекомендацію
+                    </Button>
+                  )}
+                </div>
+                {suggestedEnemies.length > 0 && (
+                  <div className="rounded-md border p-3 text-sm">
+                    <p className="font-medium mb-2">Рекомендовані вороги:</p>
+                    <ul className="space-y-1">
+                      {suggestedEnemies.map((s) => (
+                        <li key={s.unitId}>
+                          {s.name} ×{s.quantity} (DPR: {s.totalDpr}, HP: {s.totalHp})
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Додайте союзників зліва, щоб розрахувати KPI і підібрати ворогів.
+              </p>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Список доступних учасників */}
         <div className="grid gap-6 md:grid-cols-2">

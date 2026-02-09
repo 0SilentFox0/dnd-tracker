@@ -131,3 +131,24 @@ export function useUpdateUnit(campaignId: string, unitId: string) {
     },
   });
 }
+
+/** Оновлення будь-якого юніта за id (для drag-and-drop між групами/рівнями) */
+export function useUpdateUnitAny(campaignId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      unitId,
+      data,
+    }: {
+      unitId: string;
+      data: Partial<Unit>;
+    }) => updateUnit(campaignId, unitId, data),
+    onSuccess: (_, { unitId }) => {
+      queryClient.invalidateQueries({ queryKey: ["units", campaignId] });
+      queryClient.invalidateQueries({
+        queryKey: ["unit", campaignId, unitId],
+      });
+    },
+  });
+}

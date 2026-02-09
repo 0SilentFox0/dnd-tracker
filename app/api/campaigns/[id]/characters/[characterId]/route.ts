@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { prisma } from "@/lib/db";
-import { requireAuth, requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
+import { requireAuth, requireCampaignAccess, requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
 import {
   calculateHPGain,
   getAbilityModifier,
@@ -19,7 +19,10 @@ const updateCharacterSchema = z.object({
   level: z.number().min(1).max(30).optional(),
   class: z.string().min(1).optional(),
   subclass: z.string().optional(),
-  race: z.string().min(1).optional(),
+  race: z.preprocess(
+    (v) => (v === "" || v === null ? undefined : v),
+    z.string().min(1).optional()
+  ),
   subrace: z.string().optional(),
   alignment: z.string().optional(),
   background: z.string().optional(),
@@ -49,9 +52,10 @@ const updateCharacterSchema = z.object({
 
   // Заклинання
   spellcastingClass: z.string().optional(),
-  spellcastingAbility: z
-    .enum(["intelligence", "wisdom", "charisma"])
-    .optional(),
+  spellcastingAbility: z.preprocess(
+    (v) => (v === "" || v === null ? undefined : v),
+    z.enum(["intelligence", "wisdom", "charisma"]).optional()
+  ),
   spellSlots: z
     .record(
       z.string(),
@@ -80,6 +84,17 @@ const updateCharacterSchema = z.object({
 
   // Уміння (персональний скіл)
   personalSkillId: z.string().optional().nullable(),
+
+  // Прогрес по деревах прокачки
+  skillTreeProgress: z
+    .record(
+      z.string(),
+      z.object({
+        level: z.string().optional(),
+        unlockedSkills: z.array(z.string()).optional(),
+      })
+    )
+    .optional(),
 });
 
 export async function GET(
@@ -126,7 +141,15 @@ export async function GET(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    return NextResponse.json(character);
+    // Нормалізуємо knownSpells до масиву для коректного відображення у формі
+    const knownSpells = Array.isArray(character.knownSpells)
+      ? character.knownSpells
+      : [];
+
+    return NextResponse.json({
+      ...character,
+      knownSpells,
+    });
   } catch (error) {
     console.error("Error fetching character:", error);
 
@@ -143,15 +166,14 @@ export async function PATCH(
 ) {
   try {
     const { id, characterId } = await params;
-    
-    // Перевіряємо права DM
-    const accessResult = await requireDM(id);
+
+    const accessResult = await requireCampaignAccess(id, false);
 
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
 
-    const { campaign } = accessResult;
+    const { userId, campaign } = accessResult;
 
     const character = await prisma.character.findUnique({
       where: { id: characterId },
@@ -163,14 +185,35 @@ export async function PATCH(
       return validationError;
     }
 
-    // Після перевірки character гарантовано не null
     if (!character) {
       return NextResponse.json({ error: "Character not found" }, { status: 404 });
     }
 
+    const isDM = campaign.members[0]?.role === "dm";
+    const isOwner = character.controlledBy === userId;
+    const campaignWithAllow = await prisma.campaign.findUnique({
+      where: { id },
+      select: { allowPlayerEdit: true },
+    });
+    const allowPlayerEdit = campaignWithAllow?.allowPlayerEdit ?? false;
+
+    // Дозволити оновлення: DM завжди, або власник персонажа якщо allowPlayerEdit
+    if (!isDM && !(isOwner && allowPlayerEdit)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const body = await request.json();
 
-    const data = updateCharacterSchema.parse(body);
+    let data = updateCharacterSchema.parse(body);
+
+    // Гравці не можуть змінювати власника або тип персонажа — залишаємо поточні значення
+    if (!isDM) {
+      data = {
+        ...data,
+        controlledBy: character.controlledBy,
+        type: character.type,
+      } as typeof data;
+    }
 
     // Отримуємо поточні значення або нові
     const level = data.level ?? character.level;
@@ -262,6 +305,16 @@ export async function PATCH(
       }
     }
 
+    // При зменшенні рівня — скидаємо всі прокачані скіли; при підвищенні — зберігаємо як було
+    const levelDecreased = finalLevel < character.level;
+
+    const skillTreeProgressUpdate =
+      levelDecreased
+        ? ({} as Prisma.InputJsonValue)
+        : data.skillTreeProgress !== undefined
+          ? (data.skillTreeProgress as Prisma.InputJsonValue)
+          : undefined;
+
     // Оновлюємо персонажа
     const updatedCharacter = await prisma.character.update({
       where: { id: characterId },
@@ -279,6 +332,9 @@ export async function PATCH(
         immunities: data.immunities !== undefined 
           ? (data.immunities as Prisma.InputJsonValue)
           : (character.immunities as Prisma.InputJsonValue | undefined),
+        ...(skillTreeProgressUpdate !== undefined && {
+          skillTreeProgress: skillTreeProgressUpdate,
+        }),
       },
       include: {
         user: true,

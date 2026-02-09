@@ -30,6 +30,7 @@ interface RaceCardProps {
 
 export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
   const { data: allSkills = [] } = useSkills(campaignId);
+
   const { data: mainSkills = [] } = useMainSkills(campaignId);
 
   // Підраховуємо реальну кількість доступних скілів для цієї раси

@@ -115,6 +115,7 @@ export function createMainSkillFromApi(ms: MainSkillType): MainSkill {
     color: ms.color,
     levels: skillsWithPrerequisites,
     ...(ms.isEnableInSkillTree !== undefined && { isEnableInSkillTree: ms.isEnableInSkillTree }),
+    ...(ms.spellGroupId && { spellGroupId: ms.spellGroupId }),
   };
 }
 
@@ -169,6 +170,7 @@ export function createMockSkillTree(
       color: ms.color,
       levels: skillsWithPrerequisites,
       ...(ms.isEnableInSkillTree !== undefined && { isEnableInSkillTree: ms.isEnableInSkillTree }),
+      ...(ms.spellGroupId && { spellGroupId: ms.spellGroupId }),
     };
   });
 
@@ -188,4 +190,48 @@ export function createMockSkillTree(
     ultimateSkill,
     createdAt: new Date(),
   };
+}
+
+/** Конвертує дерево з Prisma (skills: Json) у тип SkillTree. */
+export function convertPrismaToSkillTree(prismaTree: {
+  id: string;
+  campaignId: string;
+  race: string;
+  skills: unknown;
+  createdAt: Date;
+}): SkillTree | null {
+  try {
+    const skillsData = prismaTree.skills as
+      | SkillTree
+      | { mainSkills?: SkillTree["mainSkills"] };
+
+    if ((skillsData as SkillTree).mainSkills) {
+      return skillsData as SkillTree;
+    }
+    const data = skillsData as {
+      mainSkills?: SkillTree["mainSkills"];
+      ultimateSkill?: SkillTree["ultimateSkill"];
+    };
+    if (data.mainSkills) {
+      return {
+        id: prismaTree.id,
+        campaignId: prismaTree.campaignId,
+        race: prismaTree.race,
+        mainSkills: data.mainSkills,
+        centralSkills: [],
+        ultimateSkill:
+          data.ultimateSkill ||
+          ({
+            id: `${prismaTree.race}_ultimate`,
+            name: "Ультимативний навик",
+            description:
+              "Могутній навик, доступний після вивчення 3 навиків з кола 2",
+          } as UltimateSkill),
+        createdAt: prismaTree.createdAt,
+      };
+    }
+  } catch (error) {
+    console.error("Error converting skill tree:", error);
+  }
+  return null;
 }

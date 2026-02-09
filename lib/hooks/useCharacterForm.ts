@@ -47,6 +47,7 @@ const defaultFormData: CharacterFormData = {
     hitDice: "1d8",
     minTargets: 1,
     maxTargets: 1,
+    morale: 0,
   },
   skills: {
     savingThrows: {},
@@ -62,7 +63,6 @@ const defaultFormData: CharacterFormData = {
     languages: [],
     proficiencies: {},
     immunities: [],
-    morale: undefined,
     personalityTraits: "",
     ideals: "",
     bonds: "",
@@ -361,6 +361,11 @@ export function useCharacterForm(options: UseCharacterFormOptions) {
         setFormData((prev) => ({
           ...prev,
           combatStats: { ...prev.combatStats, maxTargets: value },
+        })),
+      setMorale: (value: number) =>
+        setFormData((prev) => ({
+          ...prev,
+          combatStats: { ...prev.combatStats, morale: value },
         })),
     },
   };

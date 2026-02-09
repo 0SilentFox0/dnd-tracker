@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { prisma } from "@/lib/db";
-import { requireDM } from "@/lib/utils/api/api-auth";
+import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 
 const createMainSkillSchema = z.object({
   name: z.string().min(1).max(100),
@@ -13,6 +13,7 @@ const createMainSkillSchema = z.object({
     .nullable()
     .transform((val) => (val === "" ? null : val)),
   isEnableInSkillTree: z.boolean().optional(),
+  spellGroupId: z.string().nullable().optional(),
 });
 
 export async function GET(
@@ -21,9 +22,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    
-    // Перевіряємо права DM
-    const accessResult = await requireDM(id);
+
+    // Доступ для будь-якого учасника кампанії (гравці мають бачити персональні скіли при створенні/редагуванні персонажа)
+    const accessResult = await requireCampaignAccess(id, false);
 
     if (accessResult instanceof NextResponse) {
       return accessResult;
@@ -70,6 +71,7 @@ export async function POST(
         color: data.color,
         icon: data.icon || null,
         isEnableInSkillTree: data.isEnableInSkillTree ?? false,
+        spellGroupId: data.spellGroupId || null,
       },
     });
 

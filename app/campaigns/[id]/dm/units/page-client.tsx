@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo,useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Accordion } from "@/components/ui/accordion";
 import { DeleteAllUnitsDialog } from "@/components/units/dialogs/DeleteAllUnitsDialog";
@@ -10,7 +10,9 @@ import { useRaces } from "@/lib/hooks/useRaces";
 import {
   useDeleteAllUnits,
   useDeleteUnit,
+  useUnitGroups,
   useUnits,
+  useUpdateUnitAny,
 } from "@/lib/hooks/useUnits";
 import type { Unit } from "@/types/units";
 
@@ -32,13 +34,17 @@ export function DMUnitsPageClient({
     initialUnits
   );
 
-  // Запити для рас
+  // Запити для рас та груп
   const { data: races = [] } = useRaces(campaignId);
+
+  const { data: unitGroups = [] } = useUnitGroups(campaignId);
 
   // Мутації
   const deleteAllUnitsMutation = useDeleteAllUnits(campaignId);
 
   const deleteUnitMutation = useDeleteUnit(campaignId);
+
+  const updateUnitAnyMutation = useUpdateUnitAny(campaignId);
 
   const handleDeleteUnit = (unitId: string) => {
     deleteUnitMutation.mutate(unitId);
@@ -49,6 +55,25 @@ export function DMUnitsPageClient({
       onSuccess: () => {
         setDeleteAllUnitsDialogOpen(false);
       },
+    });
+  };
+
+  const handleDropOnGroup = (unitId: string, targetRaceName: string) => {
+    const group = unitGroups.find((g) => g.name === targetRaceName);
+
+    updateUnitAnyMutation.mutate({
+      unitId,
+      data: {
+        race: targetRaceName,
+        groupId: group?.id ?? null,
+      },
+    });
+  };
+
+  const handleDropOnLevel = (unitId: string, targetLevel: number) => {
+    updateUnitAnyMutation.mutate({
+      unitId,
+      data: { level: targetLevel },
     });
   };
 
@@ -111,6 +136,8 @@ export function DMUnitsPageClient({
               campaignId={campaignId}
               races={races}
               onDeleteUnit={handleDeleteUnit}
+              onDropOnGroup={handleDropOnGroup}
+              onDropOnLevel={handleDropOnLevel}
             />
           ))}
         </Accordion>

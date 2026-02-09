@@ -15,6 +15,7 @@ interface CharacterCombatParamsProps {
     hitDice: string;
     minTargets: number;
     maxTargets: number;
+    morale: number;
     setters: {
       setArmorClass: (value: number) => void;
       setInitiative: (value: number) => void;
@@ -25,6 +26,7 @@ interface CharacterCombatParamsProps {
       setHitDice: (value: string) => void;
       setMinTargets: (value: number) => void;
       setMaxTargets: (value: number) => void;
+      setMorale: (value: number) => void;
     };
   };
 }
@@ -42,6 +44,7 @@ export function CharacterCombatParams({
     hitDice,
     minTargets,
     maxTargets,
+    morale,
     setters,
   } = combatStats;
 
@@ -132,6 +135,17 @@ export function CharacterCombatParams({
         min="1"
         value={maxTargets}
         onChange={(e) => setters.setMaxTargets(parseInt(e.target.value) || 1)}
+        containerClassName="w-full min-w-0"
+        className="w-full"
+      />
+      <LabeledInput
+        id="morale"
+        label="Мораль"
+        type="number"
+        min="-3"
+        max="3"
+        value={morale}
+        onChange={(e) => setters.setMorale(parseInt(e.target.value) || 0)}
         containerClassName="w-full min-w-0"
         className="w-full"
       />

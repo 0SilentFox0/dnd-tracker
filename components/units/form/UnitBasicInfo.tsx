@@ -37,10 +37,14 @@ export function UnitBasicInfo({
             value={formData.race || ""}
             onValueChange={(value) => onChange({ race: value || null })}
             placeholder="Виберіть расу"
-            options={races.map((race) => ({
-              value: race.name,
-              label: race.name,
-            }))}
+            options={(() => {
+              const fromRaces = races.map((r) => ({ value: r.name, label: r.name }));
+              const current = formData.race?.trim();
+              if (current && !fromRaces.some((o) => o.value === current)) {
+                return [{ value: current, label: current }, ...fromRaces];
+              }
+              return fromRaces;
+            })()}
             allowNone
             noneLabel="Без раси"
           />

@@ -13,6 +13,7 @@ import { useSkillTreeFilters } from "@/lib/hooks/useSkillTreeFilters";
 import { useSkillTreeSave } from "@/lib/hooks/useSkillTreeSave";
 import { getSkillName } from "@/lib/utils/skills/skill-helpers";
 import {
+  convertPrismaToSkillTree,
   createMainSkillFromApi,
   createMockSkillTree,
 } from "@/lib/utils/skills/skill-tree-mock";
@@ -39,55 +40,6 @@ interface UseSkillTreePageOptions {
   )[];
   races?: Race[];
   defaultRace?: string;
-}
-
-// Конвертуємо Prisma формат в наш формат
-function convertPrismaToSkillTree(prismaTree: {
-  id: string;
-  campaignId: string;
-  race: string;
-  skills: unknown;
-  createdAt: Date;
-}): SkillTree | null {
-  try {
-    const skillsData = prismaTree.skills as
-      | SkillTree
-      | { mainSkills?: SkillTree["mainSkills"] };
-
-    if ((skillsData as SkillTree).mainSkills) {
-      // Вже правильний формат
-      return skillsData as SkillTree;
-    } else if (
-      (skillsData as { mainSkills?: SkillTree["mainSkills"] }).mainSkills
-    ) {
-      // Prisma формат з mainSkills
-      const data = skillsData as {
-        mainSkills: SkillTree["mainSkills"];
-        ultimateSkill?: SkillTree["ultimateSkill"];
-      };
-
-      return {
-        id: prismaTree.id,
-        campaignId: prismaTree.campaignId,
-        race: prismaTree.race,
-        mainSkills: data.mainSkills,
-        centralSkills: [],
-        ultimateSkill:
-          data.ultimateSkill ||
-          ({
-            id: `${prismaTree.race}_ultimate`,
-            name: "Ультимативний навик",
-            description:
-              "Могутній навик, доступний після вивчення 3 навиків з кола 2",
-          } as UltimateSkill),
-        createdAt: prismaTree.createdAt,
-      };
-    }
-  } catch (error) {
-    console.error("Error converting skill tree:", error);
-  }
-
-  return null;
 }
 
 export function useSkillTreePage({
@@ -201,7 +153,13 @@ export function useSkillTreePage({
     for (const id of orderIds) {
       const existing = existingById.get(id);
       if (existing) {
-        mergedMainSkills.push(existing);
+        // Завжди оновлюємо spellGroupId з API (може бути змінено DM)
+        const apiMs = mainSkills.find((m) => m.id === id);
+
+        mergedMainSkills.push({
+          ...existing,
+          ...(apiMs?.spellGroupId !== undefined && { spellGroupId: apiMs.spellGroupId ?? undefined }),
+        });
       } else {
         const apiMs = mainSkills.find((m) => m.id === id);
         if (apiMs) {

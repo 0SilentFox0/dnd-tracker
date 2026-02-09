@@ -1,18 +1,31 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 
 import { getSpells } from "@/lib/api/spells";
+import { useSkills } from "@/lib/hooks/useSkills";
+import { useMainSkills } from "@/lib/hooks/useMainSkills";
+import { getLearnedSpellIdsFromTree } from "@/lib/utils/spells/spell-learning";
+import { convertPrismaToSkillTree } from "@/lib/utils/skills/skill-tree-mock";
 import type { Spell } from "@/types/spells";
+import type { SkillTree } from "@/types/skill-tree";
 import { BookOpen } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
 import { CharacterSpellbookDialog } from "./CharacterSpellbookDialog";
 
+type SkillTreeProgress = Record<
+  string,
+  { level?: string; unlockedSkills?: string[] }
+>;
+
 interface CharacterArtifactsSectionProps {
   knownSpellIds: string[];
   campaignId: string;
+  /** Якщо передано — заклинання обчислюються з дерева прокачки (школи магії). */
+  characterRace?: string;
+  skillTreeProgress?: SkillTreeProgress;
 }
 
 const SLOTS_COUNT = 9;
@@ -20,6 +33,8 @@ const SLOTS_COUNT = 9;
 export function CharacterArtifactsSection({
   knownSpellIds,
   campaignId,
+  characterRace,
+  skillTreeProgress = {},
 }: CharacterArtifactsSectionProps) {
   const [spellbookOpen, setSpellbookOpen] = useState(false);
 
@@ -29,12 +44,100 @@ export function CharacterArtifactsSection({
     enabled: spellbookOpen && !!campaignId,
   });
 
+  const { data: allSkills = [] } = useSkills(campaignId);
+
+  const { data: apiMainSkills = [] } = useMainSkills(campaignId);
+
+  const { data: rawTrees = [] } = useQuery({
+    queryKey: ["skill-trees", campaignId],
+    queryFn: async () => {
+      const res = await fetch(`/api/campaigns/${campaignId}/skill-trees`);
+      if (!res.ok) return [];
+      const data = await res.json();
+      return Array.isArray(data) ? data : [];
+    },
+    enabled: spellbookOpen && !!campaignId && !!characterRace,
+  });
+
+  const skillTree = useMemo((): SkillTree | null => {
+    if (!characterRace || !rawTrees.length) return null;
+
+    const raw = rawTrees.find((t: { race: string }) => t.race === characterRace);
+
+    if (!raw) return null;
+
+    const tree = convertPrismaToSkillTree({
+      ...raw,
+      createdAt: new Date(raw.createdAt),
+    });
+
+    // Збагачуємо mainSkills у дереві spellGroupId з API (для старих збережених дерев без цього поля)
+    if (tree && apiMainSkills.length > 0) {
+      if (typeof window !== "undefined") {
+        console.info(
+          "[Книга заклинань] apiMainSkills:",
+          apiMainSkills.map((m) => ({ id: m.id, name: m.name, spellGroupId: m.spellGroupId }))
+        );
+
+        console.info(
+          "[Книга заклинань] tree.mainSkills (до збагачення):",
+          tree.mainSkills.map((m) => ({ id: m.id, name: m.name, spellGroupId: m.spellGroupId }))
+        );
+      }
+
+      tree.mainSkills = tree.mainSkills.map((ms) => {
+        const apiMs = apiMainSkills.find((m) => m.id === ms.id);
+
+        return apiMs?.spellGroupId
+          ? { ...ms, spellGroupId: apiMs.spellGroupId }
+          : ms;
+      });
+    }
+
+    return tree;
+  }, [characterRace, rawTrees, apiMainSkills]);
+
+  const learnedSpellIds = useMemo(() => {
+    if (
+      characterRace &&
+      skillTreeProgress &&
+      Object.keys(skillTreeProgress).length > 0 &&
+      skillTree &&
+      allSkills.length > 0 &&
+      allSpells.length > 0
+    ) {
+      return getLearnedSpellIdsFromTree(
+        skillTree,
+        skillTreeProgress,
+        allSkills,
+        allSpells
+      );
+    }
+    return knownSpellIds;
+  }, [
+    characterRace,
+    skillTreeProgress,
+    skillTree,
+    allSkills,
+    allSpells,
+    knownSpellIds,
+  ]);
+
   const knownSpells = useMemo(() => {
     if (!allSpells.length) return [];
-    return knownSpellIds
+    return learnedSpellIds
       .map((id) => allSpells.find((s) => s.id === id))
       .filter((s): s is Spell => !!s);
-  }, [allSpells, knownSpellIds]);
+  }, [allSpells, learnedSpellIds]);
+
+  useEffect(() => {
+    if (spellbookOpen && typeof window !== "undefined") {
+      console.info(
+        "[Книга заклинань] Доступні заклинання героя:",
+        knownSpells.map((s) => ({ id: s.id, name: s.name, level: s.level }))
+      );
+    }
+  }, [spellbookOpen, knownSpells]);
 
   return (
     <div className="w-full">

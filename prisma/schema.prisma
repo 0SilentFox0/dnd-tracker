@@ -210,13 +210,14 @@ model Spell {
 }
 
 model SpellGroup {
-  id         String   @id @default(cuid())
+  id         String      @id @default(cuid())
   campaignId String
   name       String
-  createdAt  DateTime @default(now())
+  createdAt  DateTime    @default(now())
   skills     Skill[]
-  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  campaign   Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   spells     Spell[]
+  mainSkills MainSkill[]
 
   @@map("spell_groups")
 }
@@ -399,16 +400,18 @@ model Race {
 }
 
 model MainSkill {
-  id                  String   @id @default(cuid())
-  campaignId           String
-  name                 String
-  color                String
-  icon                 String?
-  isEnableInSkillTree  Boolean  @default(false)
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
-  campaign             Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  skills               Skill[]
+  id                  String      @id @default(cuid())
+  campaignId          String
+  name                String
+  color               String
+  icon                String?
+  isEnableInSkillTree Boolean     @default(false)
+  spellGroupId        String?
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+  campaign            Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  spellGroup          SpellGroup? @relation(fields: [spellGroupId], references: [id], onDelete: SetNull)
+  skills              Skill[]
 
   @@map("main_skills")
 }

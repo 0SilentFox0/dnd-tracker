@@ -8,7 +8,6 @@ import { CharacterAbilitiesSection } from "@/components/characters/abilities/Cha
 import { CharacterBasicInfo } from "@/components/characters/basic/CharacterBasicInfo";
 import { CharacterArtifactsSection } from "@/components/characters/artifacts/CharacterArtifactsSection";
 import { CharacterSkillsSection } from "@/components/characters/skills/CharacterSkillsSection";
-import { CharacterSpellsSection } from "@/components/characters/spells/CharacterSpellsSection";
 import { CharacterAbilityScores } from "@/components/characters/stats/CharacterAbilityScores";
 import { CharacterCombatParams } from "@/components/characters/stats/CharacterCombatParams";
 import {
@@ -44,6 +43,7 @@ export default function NewCharacterPage({
   const { data: races = [] } = useRaces(id);
 
   const {
+    formData,
     loading,
     error,
     basicInfo,
@@ -131,24 +131,15 @@ export default function NewCharacterPage({
                 </AccordionContent>
               </AccordionItem>
 
-              {/* Етап 6: Магічна Книга */}
+              {/* Етап 6: Артефакти */}
               <AccordionItem value="item-6">
-                <AccordionTrigger>6. Магічна Книга</AccordionTrigger>
-                <AccordionContent>
-                  <CharacterSpellsSection
-                    spellcasting={spellcasting}
-                    campaignId={id}
-                  />
-                </AccordionContent>
-              </AccordionItem>
-
-              {/* Етап 7: Артефакти */}
-              <AccordionItem value="item-7">
-                <AccordionTrigger>7. Артефакти</AccordionTrigger>
+                <AccordionTrigger>6. Артефакти</AccordionTrigger>
                 <AccordionContent>
                   <CharacterArtifactsSection
                     knownSpellIds={spellcasting.knownSpells}
                     campaignId={id}
+                    characterRace={basicInfo.race}
+                    skillTreeProgress={formData.skillTreeProgress ?? {}}
                   />
                 </AccordionContent>
               </AccordionItem>

@@ -1,7 +1,10 @@
+"use client";
+
 /**
  * Компонент для базової інформації про персонажа
  */
 
+import { ImageUpload } from "@/components/ui/image-upload";
 import { Label } from "@/components/ui/label";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { SelectField } from "@/components/ui/select-field";
@@ -197,16 +200,15 @@ export function CharacterBasicInfo({
         containerClassName="w-full min-w-0"
         className="w-full"
       />
-      <LabeledInput
-        id="avatar"
-        label="Аватар (URL)"
-        type="url"
-        value={avatar || ""}
-        onChange={(e) => setters.setAvatar(e.target.value)}
-        placeholder="https://example.com/avatar.png"
-        containerClassName="w-full min-w-0"
-        className="w-full"
-      />
+      <div className="w-full min-w-0 md:col-span-2">
+        <ImageUpload
+          label="Картинка персонажа"
+          value={avatar || ""}
+          onChange={setters.setAvatar}
+          placeholder="Посилання на картинку (URL)"
+          previewAlt="Аватар"
+        />
+      </div>
     </div>
   );
 }

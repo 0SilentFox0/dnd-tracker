@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { Race, RaceFormData } from "@/types/races";
 
-export function useRaces(campaignId: string, initialRaces: Race[] = []) {
+export function useRaces(campaignId: string, initialRaces?: Race[]) {
   return useQuery<Race[]>({
     queryKey: ["races", campaignId],
     queryFn: async () => {
@@ -14,7 +14,7 @@ export function useRaces(campaignId: string, initialRaces: Race[] = []) {
 
       return response.json();
     },
-    initialData: initialRaces,
+    ...(initialRaces && initialRaces.length > 0 ? { initialData: initialRaces } : {}),
   });
 }
 
