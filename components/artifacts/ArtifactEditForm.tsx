@@ -16,6 +16,11 @@ import { Label } from "@/components/ui/label";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { SelectField } from "@/components/ui/select-field";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  ARTIFACT_RARITY_OPTIONS,
+  ARTIFACT_SLOT_OPTIONS,
+  ArtifactRarity,
+} from "@/lib/constants/artifacts";
 
 interface ArtifactSetOption {
   id: string;
@@ -40,24 +45,6 @@ interface ArtifactEditFormProps {
   artifactSets: ArtifactSetOption[];
 }
 
-const RARITY_OPTIONS = [
-  { value: "common", label: "Звичайний" },
-  { value: "uncommon", label: "Незвичайний" },
-  { value: "rare", label: "Рідкісний" },
-  { value: "epic", label: "Епічний" },
-  { value: "legendary", label: "Легендарний" },
-] as const;
-
-const SLOT_OPTIONS = [
-  { value: "weapon", label: "Зброя" },
-  { value: "shield", label: "Щит" },
-  { value: "cloak", label: "Плащ" },
-  { value: "ring", label: "Кільце" },
-  { value: "helmet", label: "Шолом" },
-  { value: "amulet", label: "Амулет" },
-  { value: "item", label: "Предмет" },
-] as const;
-
 export function ArtifactEditForm({
   campaignId,
   artifact,
@@ -75,7 +62,9 @@ export function ArtifactEditForm({
 
   const [description, setDescription] = useState(artifact.description || "");
 
-  const [rarity, setRarity] = useState<string>(artifact.rarity || "common");
+  const [rarity, setRarity] = useState<string>(
+    artifact.rarity || ArtifactRarity.COMMON,
+  );
 
   const [slot, setSlot] = useState<string>(artifact.slot);
 
@@ -83,11 +72,16 @@ export function ArtifactEditForm({
 
   const [setId, setSetId] = useState<string | null>(artifact.setId);
 
-  const passive = artifact.passiveAbility as { name?: string; description?: string } | null;
+  const passive = artifact.passiveAbility as {
+    name?: string;
+    description?: string;
+  } | null;
 
   const [effectName, setEffectName] = useState(passive?.name || "");
 
-  const [effectDescription, setEffectDescription] = useState(passive?.description || "");
+  const [effectDescription, setEffectDescription] = useState(
+    passive?.description || "",
+  );
 
   const bonuses = artifact.bonuses || {};
 
@@ -131,7 +125,7 @@ export function ArtifactEditForm({
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -160,7 +154,7 @@ export function ArtifactEditForm({
     try {
       const response = await fetch(
         `/api/campaigns/${campaignId}/artifacts/${artifact.id}`,
-        { method: "DELETE" }
+        { method: "DELETE" },
       );
 
       if (!response.ok) {
@@ -184,7 +178,9 @@ export function ArtifactEditForm({
     <Card>
       <CardHeader>
         <CardTitle>Редагувати артефакт</CardTitle>
-        <CardDescription>Зміни зберігаються при натисканні кнопки</CardDescription>
+        <CardDescription>
+          Зміни зберігаються при натисканні кнопки
+        </CardDescription>
       </CardHeader>
       <CardContent>
         {error && <p className="text-sm text-destructive mb-4">{error}</p>}
@@ -205,7 +201,7 @@ export function ArtifactEditForm({
                 value={rarity}
                 onValueChange={setRarity}
                 placeholder="Виберіть рідкість"
-                options={RARITY_OPTIONS.map((opt) => ({
+                options={ARTIFACT_RARITY_OPTIONS.map((opt) => ({
                   value: opt.value,
                   label: opt.label,
                 }))}
@@ -218,7 +214,7 @@ export function ArtifactEditForm({
                 value={slot}
                 onValueChange={setSlot}
                 placeholder="Виберіть слот"
-                options={SLOT_OPTIONS.map((opt) => ({
+                options={ARTIFACT_SLOT_OPTIONS.map((opt) => ({
                   value: opt.value,
                   label: opt.label,
                 }))}

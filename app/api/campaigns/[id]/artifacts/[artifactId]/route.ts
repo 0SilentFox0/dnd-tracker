@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
+import { ARTIFACT_RARITY_VALUES, ARTIFACT_SLOT_VALUES } from "@/lib/constants/artifacts";
 import { prisma } from "@/lib/db";
 import { requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
 
@@ -9,12 +10,10 @@ const updateArtifactSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   description: z.string().nullable().optional(),
   rarity: z
-    .enum(["common", "uncommon", "rare", "epic", "legendary"])
+    .enum(ARTIFACT_RARITY_VALUES)
     .nullable()
     .optional(),
-  slot: z
-    .enum(["weapon", "shield", "cloak", "ring", "helmet", "amulet", "item"])
-    .optional(),
+  slot: z.enum(ARTIFACT_SLOT_VALUES).optional(),
   bonuses: z.record(z.string(), z.number()).optional(),
   modifiers: z
     .array(

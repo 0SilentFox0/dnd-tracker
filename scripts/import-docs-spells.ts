@@ -14,8 +14,8 @@ import * as path from "path";
 
 import { DEFAULT_CAMPAIGN_ID } from "../lib/constants/campaigns";
 import {
-  parseDocsSpellRow,
   type DocsSpellRow,
+  parseDocsSpellRow,
 } from "../lib/utils/spells/spell-csv-docs-parser";
 
 const prisma = new PrismaClient();
@@ -27,29 +27,38 @@ function parseDiceFromDamageDice(damageDice: string | undefined): {
   if (!damageDice || !damageDice.trim()) {
     return { diceCount: null, diceType: null };
   }
+
   const match = damageDice.trim().match(/^(\d+)\s*d(\d+)/i);
+
   if (!match) return { diceCount: null, diceType: null };
+
   const count = parseInt(match[1], 10);
+
   const type = `d${match[2]}`;
+
   return { diceCount: count, diceType: type };
 }
 
 async function getOrCreateSpellGroup(
   campaignId: string,
-  schoolName: string
+  schoolName: string,
 ): Promise<string> {
   const existing = await prisma.spellGroup.findFirst({
     where: { campaignId, name: schoolName },
   });
+
   if (existing) return existing.id;
+
   const group = await prisma.spellGroup.create({
     data: { campaignId, name: schoolName },
   });
+
   return group.id;
 }
 
 async function main() {
   const campaignId = process.argv[2] || DEFAULT_CAMPAIGN_ID;
+
   const csvPath = path.join(process.cwd(), "docs", "SPELLS.csv");
 
   if (!fs.existsSync(csvPath)) {
@@ -58,6 +67,7 @@ async function main() {
   }
 
   const csvContent = fs.readFileSync(csvPath, "utf-8");
+
   const records = parse(csvContent, {
     columns: true,
     skip_empty_lines: true,
@@ -66,7 +76,11 @@ async function main() {
   }) as DocsSpellRow[];
 
   const spells = records.map((row) => parseDocsSpellRow(row));
-  const uniqueSchools = [...new Set(spells.map((s) => s.school).filter(Boolean))] as string[];
+
+  const uniqueSchools = [
+    ...new Set(spells.map((s) => s.school).filter(Boolean)),
+  ] as string[];
+
   const spellGroups: Record<string, string> = {};
 
   for (const school of uniqueSchools) {
@@ -80,12 +94,14 @@ async function main() {
     },
     select: { name: true },
   });
+
   const existingSet = new Set(existingNames.map((s) => s.name));
 
   const toCreate = spells
     .filter((s) => !existingSet.has(s.name))
     .map((s) => {
       const { diceCount, diceType } = parseDiceFromDamageDice(s.damageDice);
+
       return {
         campaignId,
         name: s.name,
@@ -102,7 +118,10 @@ async function main() {
         diceType,
         savingThrow:
           s.savingThrowAbility != null
-            ? { ability: s.savingThrowAbility, onSuccess: s.savingThrowOnSuccess ?? "half" }
+            ? {
+                ability: s.savingThrowAbility,
+                onSuccess: s.savingThrowOnSuccess ?? "half",
+              }
             : undefined,
         description: s.description,
         icon: s.icon ?? null,
@@ -111,8 +130,11 @@ async function main() {
     });
 
   if (toCreate.length === 0) {
-    console.log(`No new spells to import (all ${spells.length} already exist).`);
+    console.log(
+      `No new spells to import (all ${spells.length} already exist).`,
+    );
     await prisma.$disconnect();
+
     return;
   }
 
@@ -122,7 +144,7 @@ async function main() {
   });
 
   console.log(
-    `Imported ${result.count} spells from docs/SPELLS.csv (campaign: ${campaignId}). Skipped ${spells.length - toCreate.length} duplicates.`
+    `Imported ${result.count} spells from docs/SPELLS.csv (campaign: ${campaignId}). Skipped ${spells.length - toCreate.length} duplicates.`,
   );
   await prisma.$disconnect();
 }

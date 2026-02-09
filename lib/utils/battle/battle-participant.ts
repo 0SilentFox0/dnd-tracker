@@ -8,7 +8,8 @@ import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import {
   ArtifactModifierType,
   DEFAULT_ARTIFACT_MODIFIERS,
-} from "@/lib/constants/equipment";
+} from "@/lib/constants/artifacts";
+import { getHeroMaxHp } from "@/lib/constants/hero-scaling";
 import { prisma } from "@/lib/db";
 import { SkillLevel } from "@/lib/types/skill-tree";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
@@ -158,17 +159,21 @@ export async function createBattleParticipantFromCharacter(
       proficiencyBonus: character.proficiencyBonus,
       race: character.race,
     },
-    combatStats: {
-      maxHp: character.maxHp,
-      currentHp: character.currentHp,
-      tempHp: character.tempHp || 0,
+    combatStats: (() => {
+      const computedMaxHp = getHeroMaxHp(character.level, character.strength);
+      // На початку бою завжди повне здоровʼя; під час бою maxHp може тимчасово знижуватись (наприклад, лікування -10% maxHP)
+      return {
+        maxHp: computedMaxHp,
+        currentHp: computedMaxHp,
+        tempHp: 0,
       armorClass: character.armorClass,
       speed: character.speed,
       morale: (character as { morale?: number }).morale || 0,
-      status: character.currentHp <= 0 ? "dead" : "active",
-      minTargets: character.minTargets ?? 1,
-      maxTargets: character.maxTargets ?? 1,
-    },
+      status: computedMaxHp <= 0 ? "dead" : "active",
+        minTargets: character.minTargets ?? 1,
+        maxTargets: character.maxTargets ?? 1,
+      };
+    })(),
     spellcasting: {
       spellcastingClass: character.spellcastingClass || undefined,
       spellcastingAbility: character.spellcastingAbility as
@@ -911,11 +916,10 @@ async function extractAttacksFromCharacter(
     // Базові значення (можна налаштувати пізніше)
     const attackBonus = bonuses.attackBonus || bonuses.attack || 0;
 
-    const damageDice = getModifierValue(
-      modifiers,
-      ArtifactModifierType.DAMAGE_DICE,
-      DEFAULT_ARTIFACT_MODIFIERS.DAMAGE_DICE,
-    );
+    // Якщо у артефакту немає модифікатора damage_dice — не додаємо урон з кубиків (0), а не 1d6
+    const damageDice =
+      getOptionalModifierValue(modifiers, ArtifactModifierType.DAMAGE_DICE) ??
+      "";
 
     const damageType = getModifierValue(
       modifiers,

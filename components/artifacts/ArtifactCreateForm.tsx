@@ -16,6 +16,12 @@ import { Label } from "@/components/ui/label";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { SelectField } from "@/components/ui/select-field";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  ARTIFACT_RARITY_OPTIONS,
+  ARTIFACT_SLOT_OPTIONS,
+  ArtifactRarity,
+  ArtifactSlot,
+} from "@/lib/constants/artifacts";
 
 interface ArtifactSetOption {
   id: string;
@@ -26,24 +32,6 @@ interface ArtifactCreateFormProps {
   campaignId: string;
   artifactSets: ArtifactSetOption[];
 }
-
-const RARITY_OPTIONS = [
-  { value: "common", label: "Звичайний" },
-  { value: "uncommon", label: "Незвичайний" },
-  { value: "rare", label: "Рідкісний" },
-  { value: "epic", label: "Епічний" },
-  { value: "legendary", label: "Легендарний" },
-] as const;
-
-const SLOT_OPTIONS = [
-  { value: "weapon", label: "Зброя" },
-  { value: "shield", label: "Щит" },
-  { value: "cloak", label: "Плащ" },
-  { value: "ring", label: "Кільце" },
-  { value: "helmet", label: "Шолом" },
-  { value: "amulet", label: "Амулет" },
-  { value: "item", label: "Предмет" },
-] as const;
 
 export function ArtifactCreateForm({
   campaignId,
@@ -59,9 +47,9 @@ export function ArtifactCreateForm({
 
   const [description, setDescription] = useState("");
 
-  const [rarity, setRarity] = useState<string>("common");
+  const [rarity, setRarity] = useState<string>(ArtifactRarity.COMMON);
 
-  const [slot, setSlot] = useState<string>("item");
+  const [slot, setSlot] = useState<string>(ArtifactSlot.ITEM);
 
   const [icon, setIcon] = useState("");
 
@@ -157,7 +145,7 @@ export function ArtifactCreateForm({
                 value={rarity}
                 onValueChange={setRarity}
                 placeholder="Виберіть рідкість"
-                options={RARITY_OPTIONS.map((opt) => ({
+                options={ARTIFACT_RARITY_OPTIONS.map((opt) => ({
                   value: opt.value,
                   label: opt.label,
                 }))}
@@ -170,7 +158,7 @@ export function ArtifactCreateForm({
                 value={slot}
                 onValueChange={setSlot}
                 placeholder="Виберіть слот"
-                options={SLOT_OPTIONS.map((opt) => ({
+                options={ARTIFACT_SLOT_OPTIONS.map((opt) => ({
                   value: opt.value,
                   label: opt.label,
                 }))}

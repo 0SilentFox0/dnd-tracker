@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { MoreVertical, Package, Pencil, Trash2 } from "lucide-react";
+import { MoreVertical, Pencil, Trash2 } from "lucide-react";
 
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import {
@@ -32,6 +32,7 @@ import {
 } from "@/lib/hooks/useCharacters";
 import { normalizeImageUrl } from "@/lib/utils/common/image-url";
 import type { Character } from "@/types/characters";
+import { getHeroMaxHp } from "@/lib/constants/hero-scaling";
 
 interface DMCharactersClientProps {
   campaignId: string;
@@ -147,14 +148,6 @@ export function DMCharactersClient({ campaignId }: DMCharactersClientProps) {
                         Редагувати
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href={`/campaigns/${campaignId}/dm/characters/${character.id}/inventory`}
-                      >
-                        <Package className="mr-2 h-4 w-4" />
-                        Інвентар
-                      </Link>
-                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       variant="destructive"
@@ -188,7 +181,7 @@ export function DMCharactersClient({ campaignId }: DMCharactersClientProps) {
                     Рівень {character.level}
                   </Badge>
                   <Badge variant="secondary" className="text-xs">
-                    HP {character.currentHp}/{character.maxHp}
+                    HP {character.currentHp ?? getHeroMaxHp(character.level, character.strength)}/{getHeroMaxHp(character.level, character.strength)}
                   </Badge>
                   <Badge variant="secondary" className="text-xs">
                     AC {character.armorClass}

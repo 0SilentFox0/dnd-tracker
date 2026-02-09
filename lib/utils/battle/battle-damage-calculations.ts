@@ -158,7 +158,7 @@ export function calculatePassiveAbilityDamageBonus(
  * @param baseDamage - базовий урон з кубиків (без модифікатора характеристики)
  * @param statModifier - модифікатор характеристики (STR для melee, DEX для ranged)
  * @param attackType - тип атаки
- * @param context - контекст для пасивних здібностей
+ * @param context - контекст для пасивних здібностей та опційно hero: level + кубики за рівнем (d6/d8)
  * @returns детальний результат розрахунку
  */
 export function calculateDamageWithModifiers(
@@ -169,14 +169,38 @@ export function calculateDamageWithModifiers(
   context?: {
     allParticipants?: BattleParticipant[];
     additionalDamage?: Array<{ type: string; value: number }>;
+    /** Рівень героя (додається до бази) */
+    heroLevelPart?: number;
+    /** Середній урон з кубиків за рівнем (d6/d8) */
+    heroDicePart?: number;
+    /** Нотація кубиків для breakdown, напр. "3d8" */
+    heroDiceNotation?: string;
   }
 ): DamageCalculationResult {
   const breakdown: string[] = [];
+  const heroLevelPart = context?.heroLevelPart ?? 0;
+  const heroDicePart = context?.heroDicePart ?? 0;
+  const heroDiceNotation = context?.heroDiceNotation;
 
-  // Базовий урон + модифікатор характеристики (не може бути менше мінімуму)
-  const baseWithStat = Math.max(BATTLE_CONSTANTS.MIN_DAMAGE, baseDamage + statModifier);
+  // Базовий урон: зброя + рівень + кубики за рівнем + модифікатор характеристики
+  const baseWithStat = Math.max(
+    BATTLE_CONSTANTS.MIN_DAMAGE,
+    baseDamage + heroLevelPart + heroDicePart + statModifier
+  );
 
-  breakdown.push(`${baseDamage} (кубики) + ${statModifier} (${attackType === AttackType.MELEE ? "STR" : "DEX"}) = ${baseWithStat}`);
+  if (heroLevelPart > 0 || heroDicePart > 0) {
+    const parts: string[] = [];
+    parts.push(`${baseDamage} (зброя)`);
+    parts.push(`${heroLevelPart} (рівень)`);
+    if (heroDiceNotation) parts.push(`${heroDicePart} (${heroDiceNotation})`);
+    else if (heroDicePart > 0) parts.push(`${heroDicePart} (кубики за рівнем)`);
+    parts.push(`${statModifier} (${attackType === AttackType.MELEE ? "STR" : "DEX"})`);
+    breakdown.push(`${parts.join(" + ")} = ${baseWithStat}`);
+  } else {
+    breakdown.push(
+      `${baseDamage} (кубики) + ${statModifier} (${attackType === AttackType.MELEE ? "STR" : "DEX"}) = ${baseWithStat}`
+    );
+  }
 
   // Процентні бонуси зі скілів
   const skillPercent = calculateSkillDamagePercentBonus(attacker, attackType);
@@ -192,16 +216,18 @@ export function calculateDamageWithModifiers(
 
   if (skillFlatBreakdown) breakdown.push(skillFlatBreakdown);
 
-  // Бонуси з артефактів
+  // Бонуси з артефактів (зброя) — завжди виводимо, навіть якщо 0
   const artifactBonuses = calculateArtifactDamageBonus(attacker, attackType);
 
   const artifactPercentBreakdown = formatPercentBonusBreakdown("Бонус з артефактів", artifactBonuses.percent);
-
   if (artifactPercentBreakdown) breakdown.push(artifactPercentBreakdown);
 
   const artifactFlatBreakdown = formatFlatBonusBreakdown("Flat бонус з артефактів", artifactBonuses.flat);
-
   if (artifactFlatBreakdown) breakdown.push(artifactFlatBreakdown);
+
+  if (!artifactPercentBreakdown && !artifactFlatBreakdown) {
+    breakdown.push("Бонус зброї (артефакт): 0");
+  }
 
   // Бонуси з пасивних здібностей
   const passiveBonuses = calculatePassiveAbilityDamageBonus(attacker, context);

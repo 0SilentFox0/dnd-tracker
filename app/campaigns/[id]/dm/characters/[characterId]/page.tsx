@@ -3,6 +3,7 @@
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 
 import { CharacterAbilitiesSection } from "@/components/characters/abilities/CharacterAbilitiesSection";
 import { CharacterSkillTreeView } from "@/components/characters/abilities/CharacterSkillTreeView";
@@ -11,6 +12,8 @@ import { CharacterBasicInfo } from "@/components/characters/basic/CharacterBasic
 import { CharacterSkillsSection } from "@/components/characters/skills/CharacterSkillsSection";
 import { CharacterAbilityScores } from "@/components/characters/stats/CharacterAbilityScores";
 import { CharacterCombatParams } from "@/components/characters/stats/CharacterCombatParams";
+import { CharacterDamagePreview } from "@/components/characters/stats/CharacterDamagePreview";
+import { CharacterHpPreview } from "@/components/characters/stats/CharacterHpPreview";
 import {
   Accordion,
   AccordionContent,
@@ -28,9 +31,11 @@ import {
 import { getCharacter, updateCharacter } from "@/lib/api/characters";
 import { useCampaignMembers } from "@/lib/hooks/useCampaignMembers";
 import { useCharacterForm } from "@/lib/hooks/useCharacterForm";
+import { useHeroScalingCoefficients } from "@/lib/hooks/useHeroScalingCoefficients";
 import { useRaces } from "@/lib/hooks/useRaces";
 import { characterToFormData } from "@/lib/utils/characters/character-form";
 import type { Character } from "@/types/characters";
+import type { EquippedItems } from "@/types/inventory";
 
 export default function EditCharacterPage({
   params,
@@ -45,7 +50,22 @@ export default function EditCharacterPage({
 
   const { data: races = [] } = useRaces(id);
 
+  const { coefficients, setCoefficients } = useHeroScalingCoefficients(id);
+
   const [characterLoaded, setCharacterLoaded] = useState(false);
+
+  const [equipped, setEquipped] = useState<EquippedItems>({});
+
+  const { data: artifacts = [] } = useQuery({
+    queryKey: ["artifacts", id],
+    queryFn: async () => {
+      const res = await fetch(`/api/campaigns/${id}/artifacts`);
+      if (!res.ok) return [];
+      const data = await res.json();
+      return Array.isArray(data) ? data : [];
+    },
+    enabled: !!id && characterLoaded,
+  });
 
   const {
     formData,
@@ -78,6 +98,9 @@ export default function EditCharacterPage({
         const formDataFromCharacter = characterToFormData(character);
 
         setFormData(formDataFromCharacter);
+        setEquipped(
+          (character.inventory?.equipped as EquippedItems) ?? {}
+        );
         setCharacterLoaded(true);
       } catch (err) {
         if (!cancelled) {
@@ -152,7 +175,23 @@ export default function EditCharacterPage({
 
               <AccordionItem value="item-3">
                 <AccordionTrigger>3. Бойові параметри</AccordionTrigger>
-                <AccordionContent>
+                <AccordionContent className="space-y-6">
+                  <CharacterHpPreview
+                    level={basicInfo.level}
+                    strength={abilityScores.strength}
+                    coefficient={coefficients.hpMultiplier}
+                    onCoefficientChange={(v) => setCoefficients({ hpMultiplier: v })}
+                    isDm
+                  />
+                  <CharacterDamagePreview
+                    campaignId={id}
+                    characterId={characterId}
+                    meleeCoefficient={coefficients.meleeMultiplier}
+                    rangedCoefficient={coefficients.rangedMultiplier}
+                    onMeleeCoefficientChange={(v) => setCoefficients({ meleeMultiplier: v })}
+                    onRangedCoefficientChange={(v) => setCoefficients({ rangedMultiplier: v })}
+                    isDm
+                  />
                   <CharacterCombatParams combatStats={combatStats} />
                 </AccordionContent>
               </AccordionItem>
@@ -217,6 +256,15 @@ export default function EditCharacterPage({
                     campaignId={id}
                     characterRace={basicInfo.race}
                     skillTreeProgress={formData.skillTreeProgress ?? {}}
+                    characterId={characterId}
+                    equipped={equipped}
+                    artifacts={artifacts.map((a: { id: string; name: string; slot: string; icon?: string | null }) => ({
+                      id: a.id,
+                      name: a.name,
+                      slot: a.slot ?? "item",
+                      icon: a.icon ?? null,
+                    }))}
+                    onEquippedChange={setEquipped}
                   />
                 </AccordionContent>
               </AccordionItem>

@@ -1,148 +1,95 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 
-import { getSpells } from "@/lib/api/spells";
-import { useSkills } from "@/lib/hooks/useSkills";
-import { useMainSkills } from "@/lib/hooks/useMainSkills";
-import { getLearnedSpellIdsFromTree } from "@/lib/utils/spells/spell-learning";
-import { convertPrismaToSkillTree } from "@/lib/utils/skills/skill-tree-mock";
-import type { Spell } from "@/types/spells";
-import type { SkillTree } from "@/types/skill-tree";
-import { BookOpen } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { CharacterSpellbook } from "./CharacterSpellbook";
 
-import { CharacterSpellbookDialog } from "./CharacterSpellbookDialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { updateInventory } from "@/lib/api/inventory";
+import { ARTIFACT_GRID_9, ArtifactSlot } from "@/lib/constants/artifacts";
+import type { EquippedItems } from "@/types/inventory";
 
 type SkillTreeProgress = Record<
   string,
   { level?: string; unlockedSkills?: string[] }
 >;
 
+export interface ArtifactOption {
+  id: string;
+  name: string;
+  slot: string;
+  icon?: string | null;
+}
+
 interface CharacterArtifactsSectionProps {
   knownSpellIds: string[];
   campaignId: string;
-  /** Якщо передано — заклинання обчислюються з дерева прокачки (школи магії). */
   characterRace?: string;
   skillTreeProgress?: SkillTreeProgress;
+  /** Режим редагування слотів: якщо передано — клік по комірці відкриває меню вибору артефакта */
+  characterId?: string;
+  equipped?: EquippedItems;
+  artifacts?: ArtifactOption[];
+  onEquippedChange?: (equipped: EquippedItems) => void;
 }
-
-const SLOTS_COUNT = 9;
 
 export function CharacterArtifactsSection({
   knownSpellIds,
   campaignId,
   characterRace,
   skillTreeProgress = {},
+  characterId,
+  equipped = {},
+  artifacts = [],
+  onEquippedChange,
 }: CharacterArtifactsSectionProps) {
-  const [spellbookOpen, setSpellbookOpen] = useState(false);
+  const [updatingSlot, setUpdatingSlot] = useState<string | null>(null);
 
-  const { data: allSpells = [] } = useQuery<Spell[]>({
-    queryKey: ["spells", campaignId],
-    queryFn: () => getSpells(campaignId),
-    enabled: spellbookOpen && !!campaignId,
-  });
+  const isEditMode =
+    characterId != null && artifacts.length >= 0 && onEquippedChange != null;
 
-  const { data: allSkills = [] } = useSkills(campaignId);
+  const handleSlotChange = async (
+    slotKey: string,
+    artifactId: string | null,
+  ) => {
+    if (!characterId || !onEquippedChange) return;
 
-  const { data: apiMainSkills = [] } = useMainSkills(campaignId);
+    const newEquipped: EquippedItems = {};
 
-  const { data: rawTrees = [] } = useQuery({
-    queryKey: ["skill-trees", campaignId],
-    queryFn: async () => {
-      const res = await fetch(`/api/campaigns/${campaignId}/skill-trees`);
-      if (!res.ok) return [];
-      const data = await res.json();
-      return Array.isArray(data) ? data : [];
-    },
-    enabled: spellbookOpen && !!campaignId && !!characterRace,
-  });
+    for (const cell of ARTIFACT_GRID_9) {
+      const id =
+        cell.key === slotKey
+          ? (artifactId ?? undefined)
+          : (equipped[cell.key] as string | undefined);
 
-  const skillTree = useMemo((): SkillTree | null => {
-    if (!characterRace || !rawTrees.length) return null;
-
-    const raw = rawTrees.find((t: { race: string }) => t.race === characterRace);
-
-    if (!raw) return null;
-
-    const tree = convertPrismaToSkillTree({
-      ...raw,
-      createdAt: new Date(raw.createdAt),
-    });
-
-    // Збагачуємо mainSkills у дереві spellGroupId з API (для старих збережених дерев без цього поля)
-    if (tree && apiMainSkills.length > 0) {
-      if (typeof window !== "undefined") {
-        console.info(
-          "[Книга заклинань] apiMainSkills:",
-          apiMainSkills.map((m) => ({ id: m.id, name: m.name, spellGroupId: m.spellGroupId }))
-        );
-
-        console.info(
-          "[Книга заклинань] tree.mainSkills (до збагачення):",
-          tree.mainSkills.map((m) => ({ id: m.id, name: m.name, spellGroupId: m.spellGroupId }))
-        );
-      }
-
-      tree.mainSkills = tree.mainSkills.map((ms) => {
-        const apiMs = apiMainSkills.find((m) => m.id === ms.id);
-
-        return apiMs?.spellGroupId
-          ? { ...ms, spellGroupId: apiMs.spellGroupId }
-          : ms;
-      });
+      if (id) newEquipped[cell.key] = id;
     }
-
-    return tree;
-  }, [characterRace, rawTrees, apiMainSkills]);
-
-  const learnedSpellIds = useMemo(() => {
-    if (
-      characterRace &&
-      skillTreeProgress &&
-      Object.keys(skillTreeProgress).length > 0 &&
-      skillTree &&
-      allSkills.length > 0 &&
-      allSpells.length > 0
-    ) {
-      return getLearnedSpellIdsFromTree(
-        skillTree,
-        skillTreeProgress,
-        allSkills,
-        allSpells
-      );
+    setUpdatingSlot(slotKey);
+    try {
+      await updateInventory(campaignId, characterId, { equipped: newEquipped });
+      onEquippedChange(newEquipped);
+    } catch (err) {
+      console.error("Failed to update equipped artifact:", err);
+    } finally {
+      setUpdatingSlot(null);
     }
-    return knownSpellIds;
-  }, [
-    characterRace,
-    skillTreeProgress,
-    skillTree,
-    allSkills,
-    allSpells,
-    knownSpellIds,
-  ]);
+  };
 
-  const knownSpells = useMemo(() => {
-    if (!allSpells.length) return [];
-    return learnedSpellIds
-      .map((id) => allSpells.find((s) => s.id === id))
-      .filter((s): s is Spell => !!s);
-  }, [allSpells, learnedSpellIds]);
-
-  useEffect(() => {
-    if (spellbookOpen && typeof window !== "undefined") {
-      console.info(
-        "[Книга заклинань] Доступні заклинання героя:",
-        knownSpells.map((s) => ({ id: s.id, name: s.name, level: s.level }))
-      );
-    }
-  }, [spellbookOpen, knownSpells]);
+  const cellClassName =
+    "aspect-square rounded border-2 border-amber-700/80 bg-stone-900/60 shadow-inner flex flex-col items-center justify-center text-center p-1 overflow-hidden " +
+    (isEditMode
+      ? "cursor-pointer hover:bg-stone-800/80 hover:border-amber-600/90 transition-colors"
+      : "");
 
   return (
     <div className="w-full">
       <div className="relative w-full max-w-md mx-auto aspect-square rounded-lg overflow-hidden bg-[#2a2520] border border-amber-900/50 shadow-xl">
-        {/* Фон лицаря / артефактів */}
         <div className="absolute inset-0">
           <Image
             src="/screen-bg/artefacts-bg.jpg"
@@ -155,35 +102,131 @@ export function CharacterArtifactsSection({
           <div className="absolute inset-0 bg-gradient-to-b from-stone-900/30 to-stone-950/50" />
         </div>
 
-        {/* Сітка 3x3 слотів */}
         <div className="absolute inset-0 flex items-center justify-center p-4">
           <div className="grid grid-cols-3 grid-rows-3 gap-2 w-full h-full max-w-[280px] max-h-[280px]">
-            {Array.from({ length: SLOTS_COUNT }).map((_, i) => (
-              <div
-                key={i}
-                className="aspect-square rounded border-2 border-amber-700/80 bg-stone-900/60 shadow-inner"
-                title={`Слот артефакту ${i + 1}`}
-              />
-            ))}
+            {ARTIFACT_GRID_9.map((cell) => {
+              const equippedId = equipped[cell.key] as string | undefined;
+
+              const equippedArtifact = equippedId
+                ? artifacts.find((a) => a.id === equippedId)
+                : null;
+
+              const available = artifacts.filter(
+                (a) =>
+                  a.slot === cell.slotType ||
+                  (cell.slotType === ArtifactSlot.WEAPON &&
+                    a.slot === ArtifactSlot.RANGE_WEAPON),
+              );
+
+              const isUpdating = updatingSlot === cell.key;
+
+              const content = equippedArtifact ? (
+                <div className="absolute inset-0 flex flex-col overflow-hidden rounded">
+                  {equippedArtifact.icon ? (
+                    <img
+                      src={equippedArtifact.icon}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-muted/80 text-lg font-medium text-amber-200">
+                      {equippedArtifact.name[0]?.toUpperCase() ?? "?"}
+                    </div>
+                  )}
+                  <span className="absolute bottom-0 left-0 right-0 bg-black/60 py-0.5 text-center text-[9px] uppercase text-amber-200/90">
+                    {cell.label}
+                  </span>
+                </div>
+              ) : (
+                <>
+                  <span className="text-[10px] uppercase text-amber-200/80 leading-tight">
+                    {cell.label}
+                  </span>
+                  <span className="text-xs font-medium text-amber-100 truncate w-full mt-0.5">
+                    —
+                  </span>
+                </>
+              );
+
+              const slotTitle = equippedArtifact
+                ? `${cell.label}: ${equippedArtifact.name}`
+                : cell.label;
+
+              if (isEditMode) {
+                return (
+                  <DropdownMenu key={cell.key}>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        type="button"
+                        disabled={isUpdating}
+                        className={
+                          cellClassName + " relative disabled:opacity-50"
+                        }
+                        title={slotTitle}
+                      >
+                        {content}
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="center"
+                      className="min-w-[180px]"
+                    >
+                      <DropdownMenuItem
+                        onClick={() => handleSlotChange(cell.key, null)}
+                      >
+                        Не обрано
+                      </DropdownMenuItem>
+                      {available.length === 0 ? (
+                        <DropdownMenuItem disabled>
+                          Немає артефактів для цього слоту
+                        </DropdownMenuItem>
+                      ) : (
+                        available.map((a) => (
+                          <DropdownMenuItem
+                            key={a.id}
+                            onClick={() => handleSlotChange(cell.key, a.id)}
+                            className="flex items-center gap-2"
+                          >
+                            {a.icon ? (
+                              <img
+                                src={a.icon}
+                                alt=""
+                                className="h-5 w-5 shrink-0 rounded object-cover"
+                              />
+                            ) : (
+                              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-muted text-[10px] font-medium">
+                                {a.name[0]?.toUpperCase() ?? "?"}
+                              </span>
+                            )}
+                            <span className="truncate">{a.name}</span>
+                          </DropdownMenuItem>
+                        ))
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                );
+              }
+
+              return (
+                <div
+                  key={cell.key}
+                  className={cellClassName + " relative"}
+                  title={slotTitle}
+                >
+                  {content}
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        {/* Книжка заклинань — правий верхній кут */}
-        <button
-          type="button"
-          onClick={() => setSpellbookOpen(true)}
-          className="absolute top-3 right-3 z-10 flex items-center justify-center w-12 h-12 rounded-lg border-2 border-amber-500/90 bg-amber-950/80 text-amber-200 shadow-lg hover:bg-amber-900/80 hover:border-amber-400 transition-colors"
-          title="Заклинання героя"
-        >
-          <BookOpen className="h-6 w-6" />
-        </button>
+        <CharacterSpellbook
+          knownSpellIds={knownSpellIds}
+          campaignId={campaignId}
+          characterRace={characterRace}
+          skillTreeProgress={skillTreeProgress}
+        />
       </div>
-
-      <CharacterSpellbookDialog
-        open={spellbookOpen}
-        onOpenChange={setSpellbookOpen}
-        spells={knownSpells}
-      />
     </div>
   );
 }

@@ -9,9 +9,6 @@ interface CharacterCombatParamsProps {
     armorClass: number;
     initiative: number;
     speed: number;
-    maxHp: number;
-    currentHp: number;
-    tempHp: number;
     hitDice: string;
     minTargets: number;
     maxTargets: number;
@@ -20,9 +17,6 @@ interface CharacterCombatParamsProps {
       setArmorClass: (value: number) => void;
       setInitiative: (value: number) => void;
       setSpeed: (value: number) => void;
-      setMaxHp: (value: number) => void;
-      setCurrentHp: (value: number) => void;
-      setTempHp: (value: number) => void;
       setHitDice: (value: string) => void;
       setMinTargets: (value: number) => void;
       setMaxTargets: (value: number) => void;
@@ -38,9 +32,6 @@ export function CharacterCombatParams({
     armorClass,
     initiative,
     speed,
-    maxHp,
-    currentHp,
-    tempHp,
     hitDice,
     minTargets,
     maxTargets,
@@ -85,36 +76,6 @@ export function CharacterCombatParams({
         value={hitDice}
         onChange={(e) => setters.setHitDice(e.target.value)}
         placeholder="1d8"
-        containerClassName="w-full min-w-0"
-        className="w-full"
-      />
-      <LabeledInput
-        id="maxHp"
-        label="Макс. HP"
-        type="number"
-        min="1"
-        value={maxHp}
-        onChange={(e) => setters.setMaxHp(parseInt(e.target.value) || 10)}
-        containerClassName="w-full min-w-0"
-        className="w-full"
-      />
-      <LabeledInput
-        id="currentHp"
-        label="Поточне HP"
-        type="number"
-        min="0"
-        value={currentHp}
-        onChange={(e) => setters.setCurrentHp(parseInt(e.target.value) || 10)}
-        containerClassName="w-full min-w-0"
-        className="w-full"
-      />
-      <LabeledInput
-        id="tempHp"
-        label="Тимчасове HP"
-        type="number"
-        min="0"
-        value={tempHp}
-        onChange={(e) => setters.setTempHp(parseInt(e.target.value) || 0)}
         containerClassName="w-full min-w-0"
         className="w-full"
       />

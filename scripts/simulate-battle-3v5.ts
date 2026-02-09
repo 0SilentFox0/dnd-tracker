@@ -13,11 +13,11 @@ import { Prisma } from "@prisma/client";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
+import { processAttack } from "@/lib/utils/battle/battle-attack-process";
 import {
   createBattleParticipantFromCharacter,
   createBattleParticipantFromUnit,
 } from "@/lib/utils/battle/battle-participant";
-import { processAttack } from "@/lib/utils/battle/battle-attack-process";
 import type { BattleSpell } from "@/lib/utils/battle/battle-spell-process";
 import { processSpell } from "@/lib/utils/battle/battle-spell-process";
 import {
@@ -31,8 +31,8 @@ import {
   processStartOfTurn,
 } from "@/lib/utils/battle/battle-turn";
 import {
-  checkVictoryConditions,
   calculateAllyHpChangesOnVictory,
+  checkVictoryConditions,
 } from "@/lib/utils/battle/battle-victory";
 import { executeOnBattleStartEffects } from "@/lib/utils/skills/skill-triggers-execution";
 import { executeSkillsByTrigger } from "@/lib/utils/skills/skill-triggers-execution";
@@ -45,20 +45,27 @@ const testResults: { name: string; passed: boolean; detail?: string }[] = [];
 
 function assert(name: string, condition: boolean, detail?: string) {
   testResults.push({ name, passed: condition, detail });
+
   if (!condition) console.log(`  ❌ ${name}${detail ? `: ${detail}` : ""}`);
 }
 
 /** Парсинг damageDice "2d6+4" -> кількість кубиків */
 function getDiceCount(damageDice: string): number {
   const m = damageDice.match(/(\d+)d\d+/);
+
   return m ? parseInt(m[1], 10) : 1;
 }
 
-async function startBattle(campaignId: string, battleId: string): Promise<void> {
+async function startBattle(
+  campaignId: string,
+  battleId: string,
+): Promise<void> {
   const battle = await prisma.battleScene.findUnique({
     where: { id: battleId },
   });
-  if (!battle || battle.campaignId !== campaignId) throw new Error("Battle not found");
+
+  if (!battle || battle.campaignId !== campaignId)
+    throw new Error("Battle not found");
 
   const participantsRaw = battle.participants as Array<{
     id: string;
@@ -69,7 +76,9 @@ async function startBattle(campaignId: string, battleId: string): Promise<void> 
 
   const participants = participantsRaw.map((p) => ({
     ...p,
-    side: (p.side === ParticipantSide.ALLY ? ParticipantSide.ALLY : ParticipantSide.ENEMY) as ParticipantSide,
+    side: (p.side === ParticipantSide.ALLY
+      ? ParticipantSide.ALLY
+      : ParticipantSide.ENEMY) as ParticipantSide,
   }));
 
   const initiativeOrder: BattleParticipant[] = [];
@@ -83,16 +92,32 @@ async function startBattle(campaignId: string, battleId: string): Promise<void> 
           characterSkills: { include: { skillTree: true } },
         },
       });
+
       if (character) {
-        const bp = await createBattleParticipantFromCharacter(character, battleId, participant.side);
+        const bp = await createBattleParticipantFromCharacter(
+          character,
+          battleId,
+          participant.side,
+        );
+
         initiativeOrder.push(bp);
       }
     } else if (participant.type === "unit") {
-      const unit = await prisma.unit.findUnique({ where: { id: participant.id } });
+      const unit = await prisma.unit.findUnique({
+        where: { id: participant.id },
+      });
+
       if (unit) {
         const quantity = participant.quantity ?? 1;
+
         for (let i = 0; i < quantity; i++) {
-          const bp = await createBattleParticipantFromUnit(unit, battleId, participant.side, i + 1);
+          const bp = await createBattleParticipantFromUnit(
+            unit,
+            battleId,
+            participant.side,
+            i + 1,
+          );
+
           initiativeOrder.push(bp);
         }
       }
@@ -100,16 +125,20 @@ async function startBattle(campaignId: string, battleId: string): Promise<void> 
   }
 
   const afterStartEffects = initiativeOrder.map((p) =>
-    applyStartOfBattleEffects(p, 1, initiativeOrder)
+    applyStartOfBattleEffects(p, 1, initiativeOrder),
   );
+
   const afterOnBattleStart = afterStartEffects.map((p) => {
     const r = executeOnBattleStartEffects(p, 1);
+
     return r.updatedParticipant;
   });
+
   const withInitiative = afterOnBattleStart.map((p) => ({
     ...p,
     initiative: calculateInitiative(p),
   }));
+
   const sorted = sortByInitiative(withInitiative);
 
   await prisma.battleScene.update({
@@ -123,9 +152,15 @@ async function startBattle(campaignId: string, battleId: string): Promise<void> 
     },
   });
 
-  assert("TC0: Старт бою — status active", battle.status === "prepared" || true);
+  assert(
+    "TC0: Старт бою — status active",
+    battle.status === "prepared" || true,
+  );
   assert("TC0: initiativeOrder заповнений", sorted.length >= 8);
-  assert("TC0: Учасники мають HP", sorted.every((p) => p.combatStats.maxHp > 0 && p.combatStats.currentHp > 0));
+  assert(
+    "TC0: Учасники мають HP",
+    sorted.every((p) => p.combatStats.maxHp > 0 && p.combatStats.currentHp > 0),
+  );
 }
 
 async function performAttack(
@@ -134,12 +169,15 @@ async function performAttack(
   attackerId: string,
   targetId: string,
   d20Roll: number,
-  damageRolls: number[]
+  damageRolls: number[],
 ): Promise<{ updatedOrder: BattleParticipant[]; actions: BattleAction[] }> {
   const battle = await prisma.battleScene.findUnique({
     where: { id: battleId },
   });
-  if (!battle || battle.campaignId !== campaignId) throw new Error("Battle not found");
+
+  if (!battle || battle.campaignId !== campaignId)
+    throw new Error("Battle not found");
+
   if (battle.status !== "active") throw new Error("Battle not active");
 
   type OrderParticipant = BattleParticipant & {
@@ -148,15 +186,21 @@ async function performAttack(
     };
   };
 
-  const initiativeOrder = battle.initiativeOrder as unknown as BattleParticipant[];
+  const initiativeOrder =
+    battle.initiativeOrder as unknown as BattleParticipant[];
+
   const attacker = initiativeOrder.find((p) => p.basicInfo.id === attackerId);
+
   const target = initiativeOrder.find((p) => p.basicInfo.id === targetId);
+
   if (!attacker || !target) throw new Error("Attacker or target not found");
 
   const attack = attacker.battleData.attacks[0];
+
   if (!attack) throw new Error("No attack");
 
-  let currentAttacker = { ...attacker };
+  const currentAttacker = { ...attacker };
+
   let currentOrder: OrderParticipant[] = initiativeOrder.map((p) => ({
     ...p,
     battleData: {
@@ -179,6 +223,7 @@ async function performAttack(
   currentOrder = currentOrder.map((p) => {
     if (p.basicInfo.id === attackResult.attackerUpdated.basicInfo.id) {
       const u = attackResult.attackerUpdated;
+
       return {
         ...u,
         battleData: {
@@ -187,8 +232,10 @@ async function performAttack(
         },
       } as OrderParticipant;
     }
+
     if (p.basicInfo.id === attackResult.targetUpdated.basicInfo.id) {
       const u = attackResult.targetUpdated;
+
       return {
         ...u,
         battleData: {
@@ -197,6 +244,7 @@ async function performAttack(
         },
       } as OrderParticipant;
     }
+
     return p;
   });
 
@@ -212,17 +260,22 @@ async function performAttack(
     }));
 
   let finalOrder: OrderParticipant[] = currentOrder;
+
   if (
     attackResult.targetUpdated.combatStats.status === "dead" ||
     attackResult.targetUpdated.combatStats.status === "unconscious"
   ) {
     const allyR = updateMoraleOnEvent(finalOrder, "allyDeath", targetId);
+
     finalOrder = normalizeParticipants(allyR.updatedParticipants);
+
     const killR = updateMoraleOnEvent(finalOrder, "kill", attackerId);
+
     finalOrder = normalizeParticipants(killR.updatedParticipants);
   }
 
   const battleLog = (battle.battleLog as unknown as BattleAction[]) || [];
+
   const battleAction: BattleAction = {
     ...attackResult.battleAction,
     actionIndex: battleLog.length,
@@ -232,7 +285,10 @@ async function performAttack(
     where: { id: battleId },
     data: {
       initiativeOrder: finalOrder as unknown as Prisma.InputJsonValue,
-      battleLog: [...battleLog, battleAction] as unknown as Prisma.InputJsonValue,
+      battleLog: [
+        ...battleLog,
+        battleAction,
+      ] as unknown as Prisma.InputJsonValue,
     },
   });
 
@@ -246,22 +302,31 @@ async function performSpell(
   spellId: string,
   targetIds: string[],
   damageRolls: number[],
-  savingThrows?: Array<{ participantId: string; roll: number }>
+  savingThrows?: Array<{ participantId: string; roll: number }>,
 ): Promise<{ updatedOrder: BattleParticipant[]; action: BattleAction }> {
   const battle = await prisma.battleScene.findUnique({
     where: { id: battleId },
   });
-  if (!battle || battle.campaignId !== campaignId) throw new Error("Battle not found");
 
-  const initiativeOrder = battle.initiativeOrder as unknown as BattleParticipant[];
+  if (!battle || battle.campaignId !== campaignId)
+    throw new Error("Battle not found");
+
+  const initiativeOrder =
+    battle.initiativeOrder as unknown as BattleParticipant[];
+
   const caster = initiativeOrder.find((p) => p.basicInfo.id === casterId);
+
   if (!caster) throw new Error("Caster not found");
-  if (!caster.spellcasting.knownSpells.includes(spellId)) throw new Error("Spell not in known");
+
+  if (!caster.spellcasting.knownSpells.includes(spellId))
+    throw new Error("Spell not in known");
 
   const spellData = await prisma.spell.findUnique({
     where: { id: spellId },
   });
-  if (!spellData || spellData.campaignId !== campaignId) throw new Error("Spell not found");
+
+  if (!spellData || spellData.campaignId !== campaignId)
+    throw new Error("Spell not found");
 
   const battleSpell: BattleSpell = {
     id: spellData.id,
@@ -275,7 +340,10 @@ async function performSpell(
     healModifier: spellData.healModifier,
     diceCount: spellData.diceCount,
     diceType: spellData.diceType,
-    savingThrow: spellData.savingThrow as { ability: string; onSuccess: "half" | "none" } | null,
+    savingThrow: spellData.savingThrow as {
+      ability: string;
+      onSuccess: "half" | "none";
+    } | null,
     description: spellData.description ?? "",
     duration: spellData.duration,
     castingTime: spellData.castingTime,
@@ -294,11 +362,16 @@ async function performSpell(
 
   const updatedOrder = initiativeOrder.map((p) => {
     if (p.basicInfo.id === casterId) return spellResult.casterUpdated;
-    const t = spellResult.targetsUpdated.find((x) => x.basicInfo.id === p.basicInfo.id);
+
+    const t = spellResult.targetsUpdated.find(
+      (x) => x.basicInfo.id === p.basicInfo.id,
+    );
+
     return t ?? p;
   });
 
   const battleLog = (battle.battleLog as unknown as BattleAction[]) || [];
+
   const action: BattleAction = {
     ...spellResult.battleAction,
     actionIndex: battleLog.length,
@@ -315,7 +388,10 @@ async function performSpell(
   return { updatedOrder, action };
 }
 
-async function advanceTurn(campaignId: string, battleId: string): Promise<{
+async function advanceTurn(
+  campaignId: string,
+  battleId: string,
+): Promise<{
   nextTurnIndex: number;
   nextRound: number;
   victory: boolean;
@@ -324,15 +400,27 @@ async function advanceTurn(campaignId: string, battleId: string): Promise<{
   const battle = await prisma.battleScene.findUnique({
     where: { id: battleId },
   });
-  if (!battle || battle.campaignId !== campaignId) throw new Error("Battle not found");
 
-  let initiativeOrder = battle.initiativeOrder as unknown as BattleParticipant[];
+  if (!battle || battle.campaignId !== campaignId)
+    throw new Error("Battle not found");
+
+  let initiativeOrder =
+    battle.initiativeOrder as unknown as BattleParticipant[];
+
   let nextTurnIndex = battle.currentTurnIndex;
+
   let nextRound = battle.currentRound;
+
   const battleLog = (battle.battleLog as unknown as BattleAction[]) || [];
+
   const newLogEntries: BattleAction[] = [];
 
-  const turnTransition = processEndOfTurn(nextTurnIndex, initiativeOrder, nextRound);
+  const turnTransition = processEndOfTurn(
+    nextTurnIndex,
+    initiativeOrder,
+    nextRound,
+  );
+
   nextTurnIndex = turnTransition.nextTurnIndex;
   nextRound = turnTransition.nextRound;
 
@@ -341,27 +429,46 @@ async function advanceTurn(campaignId: string, battleId: string): Promise<{
       const r = executeSkillsByTrigger(p, "endRound", initiativeOrder, {
         currentRound: battle.currentRound,
       });
+
       return r.participant;
     });
+
     initiativeOrder = afterEndRound;
-    const pendingSummons = (battle.pendingSummons as unknown as BattleParticipant[]) ?? [];
-    const roundResult = processStartOfRound(initiativeOrder, nextRound, pendingSummons);
+
+    const pendingSummons =
+      (battle.pendingSummons as unknown as BattleParticipant[]) ?? [];
+
+    const roundResult = processStartOfRound(
+      initiativeOrder,
+      nextRound,
+      pendingSummons,
+    );
+
     initiativeOrder = roundResult.updatedInitiativeOrder;
   }
 
   const nextParticipant = initiativeOrder[nextTurnIndex];
+
   if (nextParticipant) {
-    const turnResult = processStartOfTurn(nextParticipant, nextRound, initiativeOrder);
+    const turnResult = processStartOfTurn(
+      nextParticipant,
+      nextRound,
+      initiativeOrder,
+    );
+
     initiativeOrder[nextTurnIndex] = turnResult.participant;
   }
 
   const victoryCheck = checkVictoryConditions(initiativeOrder);
+
   let finalStatus = battle.status;
+
   let completedAt = battle.completedAt;
 
   if (victoryCheck.result && battle.status === "active") {
     finalStatus = "completed";
     completedAt = new Date();
+
     if (victoryCheck.result === "victory") {
       initiativeOrder = initiativeOrder.map((p) => {
         if (
@@ -377,9 +484,11 @@ async function advanceTurn(campaignId: string, battleId: string): Promise<{
             },
           };
         }
+
         return p;
       });
     }
+
     const completionAction: BattleAction = {
       id: `battle-complete-${Date.now()}`,
       battleId,
@@ -400,6 +509,7 @@ async function advanceTurn(campaignId: string, battleId: string): Promise<{
       ),
       isCancelled: false,
     };
+
     newLogEntries.push(completionAction);
   }
 
@@ -411,7 +521,10 @@ async function advanceTurn(campaignId: string, battleId: string): Promise<{
       status: finalStatus,
       completedAt: completedAt ?? undefined,
       initiativeOrder: initiativeOrder as unknown as Prisma.InputJsonValue,
-      battleLog: [...battleLog, ...newLogEntries] as unknown as Prisma.InputJsonValue,
+      battleLog: [
+        ...battleLog,
+        ...newLogEntries,
+      ] as unknown as Prisma.InputJsonValue,
     },
   });
 
@@ -425,11 +538,16 @@ async function advanceTurn(campaignId: string, battleId: string): Promise<{
 
 async function main() {
   if (!CAMPAIGN_ID) {
-    console.error("Вкажіть CAMPAIGN_ID: npx tsx scripts/simulate-battle-3v5.ts CAMPAIGN_ID");
+    console.error(
+      "Вкажіть CAMPAIGN_ID: npx tsx scripts/simulate-battle-3v5.ts CAMPAIGN_ID",
+    );
     process.exit(1);
   }
 
-  const campaign = await prisma.campaign.findUnique({ where: { id: CAMPAIGN_ID } });
+  const campaign = await prisma.campaign.findUnique({
+    where: { id: CAMPAIGN_ID },
+  });
+
   if (!campaign) {
     console.error("Кампанія не знайдена.");
     process.exit(1);
@@ -444,17 +562,21 @@ async function main() {
       where: { campaignId: CAMPAIGN_ID },
       take: 3,
     });
+
     let units = await prisma.unit.findMany({
       where: { campaignId: CAMPAIGN_ID },
       take: 5,
     });
+
     const dm = await prisma.campaignMember.findFirst({
       where: { campaignId: CAMPAIGN_ID, role: "dm" },
     });
+
     if (!dm) {
       console.error("У кампанії немає DM.");
       process.exit(1);
     }
+
     for (let i = chars.length; i < 3; i++) {
       const c = await prisma.character.create({
         data: {
@@ -483,6 +605,7 @@ async function main() {
           skillTreeProgress: {},
         },
       });
+
       await prisma.characterInventory.create({
         data: {
           characterId: c.id,
@@ -505,7 +628,10 @@ async function main() {
         },
       });
     }
-    chars = await prisma.character.findMany({ where: { campaignId: CAMPAIGN_ID }, take: 3 });
+    chars = await prisma.character.findMany({
+      where: { campaignId: CAMPAIGN_ID },
+      take: 3,
+    });
     for (let i = units.length; i < 5; i++) {
       await prisma.unit.create({
         data: {
@@ -538,7 +664,10 @@ async function main() {
         },
       });
     }
-    units = await prisma.unit.findMany({ where: { campaignId: CAMPAIGN_ID }, take: 5 });
+    units = await prisma.unit.findMany({
+      where: { campaignId: CAMPAIGN_ID },
+      take: 5,
+    });
     battle = await prisma.battleScene.create({
       data: {
         campaignId: CAMPAIGN_ID,
@@ -546,8 +675,16 @@ async function main() {
         description: "Симуляція 3v5",
         status: "prepared",
         participants: [
-          ...chars.map((c) => ({ id: c.id, type: "character" as const, side: "ally" as const })),
-          ...units.map((u) => ({ id: u.id, type: "unit" as const, side: "enemy" as const })),
+          ...chars.map((c) => ({
+            id: c.id,
+            type: "character" as const,
+            side: "ally" as const,
+          })),
+          ...units.map((u) => ({
+            id: u.id,
+            type: "unit" as const,
+            side: "enemy" as const,
+          })),
         ] as Prisma.InputJsonValue,
         currentRound: 1,
         currentTurnIndex: 0,
@@ -559,40 +696,63 @@ async function main() {
   }
 
   const battleId = battle.id;
+
   console.log("Симуляція бою:", battle.name, "id =", battleId);
 
   // --- Старт ---
   await startBattle(CAMPAIGN_ID, battleId);
   battle = await prisma.battleScene.findUnique({ where: { id: battleId } });
+
   if (!battle) throw new Error("Battle not found after start");
+
   const order = battle.initiativeOrder as unknown as BattleParticipant[];
+
   const allies = order.filter((p) => p.basicInfo.side === ParticipantSide.ALLY);
-  const enemies = order.filter((p) => p.basicInfo.side === ParticipantSide.ENEMY);
+
+  const enemies = order.filter(
+    (p) => p.basicInfo.side === ParticipantSide.ENEMY,
+  );
 
   assert("K1: Ініціатива після старту", order.length === 8);
-  assert("T1: Поточний хід — перший у списку", order[battle.currentTurnIndex]?.basicInfo.id === order[0].basicInfo.id);
+  assert(
+    "T1: Поточний хід — перший у списку",
+    order[battle.currentTurnIndex]?.basicInfo.id === order[0].basicInfo.id,
+  );
 
   const FIXED_D20 = 14;
+
   const FIXED_DAMAGE = [3, 4]; // 2d6
 
   let round = 1;
+
   const maxRounds = 3;
+
   let victory = false;
 
   while (round <= maxRounds && !victory) {
     battle = await prisma.battleScene.findUnique({ where: { id: battleId } });
+
     if (!battle || battle.status === "completed") break;
 
-    const initiativeOrder = battle.initiativeOrder as unknown as BattleParticipant[];
+    const initiativeOrder =
+      battle.initiativeOrder as unknown as BattleParticipant[];
+
     const currentIndex = battle.currentTurnIndex;
+
     const current = initiativeOrder[currentIndex];
+
     if (!current) break;
 
     const aliveEnemies = initiativeOrder.filter(
-      (p) => p.basicInfo.side === ParticipantSide.ENEMY && p.combatStats.status === "active"
+      (p) =>
+        p.basicInfo.side === ParticipantSide.ENEMY &&
+        p.combatStats.status === "active",
     );
+
     const aliveAllies = initiativeOrder.filter(
-      (p) => p.basicInfo.side === ParticipantSide.ALLY && p.combatStats.status === "active"
+      (p) =>
+        p.basicInfo.side === ParticipantSide.ALLY &&
+        p.combatStats.status === "active",
     );
 
     if (aliveEnemies.length === 0 || aliveAllies.length === 0) {
@@ -601,31 +761,50 @@ async function main() {
     }
 
     const isAlly = current.basicInfo.side === ParticipantSide.ALLY;
+
     const hasSpells =
       isAlly &&
       current.spellcasting?.knownSpells?.length > 0 &&
       Object.values(current.spellcasting.spellSlots || {}).some(
-        (s: { current?: number }) => (s?.current ?? 0) > 0
+        (s: { current?: number }) => (s?.current ?? 0) > 0,
       );
 
     let usedHealThisTurn = false;
-    if (isAlly && hasSpells && round === 2 && current.spellcasting.knownSpells.length > 0) {
+
+    if (
+      isAlly &&
+      hasSpells &&
+      round === 2 &&
+      current.spellcasting.knownSpells.length > 0
+    ) {
       const spellIds = current.spellcasting.knownSpells as string[];
+
       let healSpellId: string | null = null;
+
       for (const id of spellIds) {
         const s = await prisma.spell.findUnique({ where: { id } });
+
         if (s?.damageType === "heal") {
           healSpellId = id;
           break;
         }
       }
+
       const injuredAlly = aliveAllies.find(
-        (p) => p.basicInfo.id !== current.basicInfo.id && p.combatStats.currentHp < p.combatStats.maxHp
+        (p) =>
+          p.basicInfo.id !== current.basicInfo.id &&
+          p.combatStats.currentHp < p.combatStats.maxHp,
       );
+
       if (healSpellId && injuredAlly) {
-        const spell = await prisma.spell.findUnique({ where: { id: healSpellId } });
+        const spell = await prisma.spell.findUnique({
+          where: { id: healSpellId },
+        });
+
         const diceCount = spell?.diceCount ?? 1;
+
         const healRolls = Array.from({ length: diceCount }, () => 4);
+
         try {
           await performSpell(
             CAMPAIGN_ID,
@@ -633,12 +812,25 @@ async function main() {
             current.basicInfo.id,
             healSpellId,
             [injuredAlly.basicInfo.id],
-            healRolls
+            healRolls,
           );
-          const after = await prisma.battleScene.findUnique({ where: { id: battleId } });
-          const afterOrder = (after?.initiativeOrder ?? []) as unknown as BattleParticipant[];
-          const healed = afterOrder.find((p) => p.basicInfo.id === injuredAlly.basicInfo.id);
-          assert("S2: Заклинання лікування збільшило HP", (healed?.combatStats.currentHp ?? 0) >= injuredAlly.combatStats.currentHp);
+
+          const after = await prisma.battleScene.findUnique({
+            where: { id: battleId },
+          });
+
+          const afterOrder = (after?.initiativeOrder ??
+            []) as unknown as BattleParticipant[];
+
+          const healed = afterOrder.find(
+            (p) => p.basicInfo.id === injuredAlly.basicInfo.id,
+          );
+
+          assert(
+            "S2: Заклинання лікування збільшило HP",
+            (healed?.combatStats.currentHp ?? 0) >=
+              injuredAlly.combatStats.currentHp,
+          );
           usedHealThisTurn = true;
         } catch (e) {
           assert("S2: Заклинання лікування", false, String(e));
@@ -647,42 +839,53 @@ async function main() {
     }
 
     let didAction = usedHealThisTurn;
+
     if (isAlly && !didAction) {
       const target = aliveEnemies[0];
+
       const attack = current.battleData.attacks[0];
+
       if (attack && target) {
         const count = getDiceCount(attack.damageDice);
+
         const rolls = count > 0 ? FIXED_DAMAGE.slice(0, count) : [4];
+
         if (rolls.length < count) {
           while (rolls.length < count) rolls.push(4);
         }
+
         await performAttack(
           CAMPAIGN_ID,
           battleId,
           current.basicInfo.id,
           target.basicInfo.id,
           FIXED_D20,
-          rolls
+          rolls,
         );
         assert("A1: Атака виконана", true);
         didAction = true;
       }
     } else if (!isAlly) {
       const target = aliveAllies[0];
+
       const attack = current.battleData.attacks[0];
+
       if (attack && target) {
         const count = getDiceCount(attack.damageDice);
+
         const rolls = count > 0 ? FIXED_DAMAGE.slice(0, count) : [4];
+
         if (rolls.length < count) {
           while (rolls.length < count) rolls.push(4);
         }
+
         await performAttack(
           CAMPAIGN_ID,
           battleId,
           current.basicInfo.id,
           target.basicInfo.id,
           FIXED_D20,
-          rolls
+          rolls,
         );
         didAction = true;
       }
@@ -690,12 +893,26 @@ async function main() {
 
     if (!didAction && isAlly && hasSpells && aliveEnemies.length > 0) {
       const spellId = current.spellcasting.knownSpells[0];
+
       const spell = await prisma.spell.findUnique({ where: { id: spellId } });
-      if (spell && (spell.damageType === "damage" || spell.damageType === "all")) {
+
+      if (
+        spell &&
+        (spell.damageType === "damage" || spell.damageType === "all")
+      ) {
         const diceCount = spell.diceCount ?? 1;
+
         const rolls = Array.from({ length: diceCount }, () => 4);
-        const targetIds = aliveEnemies.slice(0, spell.type === "aoe" ? 10 : 1).map((p) => p.basicInfo.id);
-        const savingThrows = targetIds.map((id) => ({ participantId: id, roll: 10 }));
+
+        const targetIds = aliveEnemies
+          .slice(0, spell.type === "aoe" ? 10 : 1)
+          .map((p) => p.basicInfo.id);
+
+        const savingThrows = targetIds.map((id) => ({
+          participantId: id,
+          roll: 10,
+        }));
+
         try {
           await performSpell(
             CAMPAIGN_ID,
@@ -704,7 +921,7 @@ async function main() {
             spellId,
             targetIds,
             rolls,
-            savingThrows
+            savingThrows,
           );
           assert("S1: Заклинання шкоди виконано", true);
         } catch (e) {
@@ -719,9 +936,16 @@ async function main() {
     }
 
     const advance = await advanceTurn(CAMPAIGN_ID, battleId);
+
     victory = advance.victory;
+
     if (advance.nextRound > round) round = advance.nextRound;
-    assert("T1: Перехід ходу", advance.nextTurnIndex >= 0 && advance.nextRound >= 1);
+
+    assert(
+      "T1: Перехід ходу",
+      advance.nextTurnIndex >= 0 && advance.nextRound >= 1,
+    );
+
     if (victory) {
       console.log("Перемога:", advance.victoryMessage);
       break;
@@ -729,25 +953,40 @@ async function main() {
   }
 
   battle = await prisma.battleScene.findUnique({ where: { id: battleId } });
+
   if (!battle) throw new Error("Battle not found at end");
+
   const finalOrder = battle.initiativeOrder as unknown as BattleParticipant[];
+
   const deadCount = finalOrder.filter(
-    (p) => p.combatStats.status === "dead" || p.combatStats.status === "unconscious"
+    (p) =>
+      p.combatStats.status === "dead" || p.combatStats.status === "unconscious",
   ).length;
 
-  assert("Бій завершено або 3 раунди відбулися", round >= 1 && (victory || round > maxRounds || deadCount > 0));
-  assert("BattleLog не порожній", (battle.battleLog as unknown as BattleAction[])?.length > 0);
+  assert(
+    "Бій завершено або 3 раунди відбулися",
+    round >= 1 && (victory || round > maxRounds || deadCount > 0),
+  );
+  assert(
+    "BattleLog не порожній",
+    (battle.battleLog as unknown as BattleAction[])?.length > 0,
+  );
 
   const passed = testResults.filter((t) => t.passed).length;
+
   const failed = testResults.filter((t) => !t.passed);
 
   console.log("\n--- Підсумок тест-кейсів ---");
   console.log(`Пройдено: ${passed}/${testResults.length}`);
+
   if (failed.length > 0) {
     console.log("Провалені:");
-    failed.forEach((f) => console.log(`  - ${f.name}${f.detail ? ` (${f.detail})` : ""}`));
+    failed.forEach((f) =>
+      console.log(`  - ${f.name}${f.detail ? ` (${f.detail})` : ""}`),
+    );
     process.exit(1);
   }
+
   console.log("Всі тест-кейси пройдено.");
 }
 

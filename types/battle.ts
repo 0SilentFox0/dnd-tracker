@@ -199,7 +199,9 @@ export interface BattleParticipantAbilities {
 }
 
 /**
- * Бойові параметри учасника
+ * Бойові параметри учасника.
+ * На початку бою currentHp = maxHp. Під час бою maxHp може тимчасово знижуватись
+ * (наприклад, лікування -10% maxHP на час бою); після завершення бою стан не зберігається.
  */
 export interface BattleParticipantCombatStats {
   maxHp: number;

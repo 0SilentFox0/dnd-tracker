@@ -19,6 +19,10 @@ import {
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
+import {
+  getHeroDamageDiceForLevel,
+} from "@/lib/constants/hero-scaling";
+import { getDiceAverage } from "@/lib/utils/battle/balance-calculations";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/battle-participant-helpers";
 import {
   checkSurviveLethal,
@@ -246,12 +250,20 @@ export function processAttack(
   }
 
   // 3. Розраховуємо урон
-  const baseDamage = damageRolls.reduce((sum, roll) => sum + roll, 0);
+  let baseDamage = damageRolls.reduce((sum, roll) => sum + roll, 0);
 
   const statModifier =
     attack.type === AttackType.MELEE
       ? Math.floor((updatedAttacker.abilities.strength - 10) / 2)
       : Math.floor((updatedAttacker.abilities.dexterity - 10) / 2);
+
+  // Герой: рівень + кубики за рівнем (d6/d8)
+  const isHero = updatedAttacker.basicInfo.sourceType === "character";
+  const heroLevelPart = isHero ? updatedAttacker.abilities.level : 0;
+  const heroDiceNotation = isHero
+    ? getHeroDamageDiceForLevel(updatedAttacker.abilities.level, attack.type as AttackType)
+    : "";
+  const heroDicePart = heroDiceNotation ? getDiceAverage(heroDiceNotation) : 0;
 
   // Перевіряємо пасивки з тригером "on_attack" (до розрахунку урону)
   const onAttackAbilities = getPassiveAbilitiesByTrigger(
@@ -292,6 +304,9 @@ export function processAttack(
     {
       allParticipants,
       additionalDamage: additionalDamageModifiers,
+      heroLevelPart,
+      heroDicePart,
+      heroDiceNotation,
     },
   );
 

@@ -2,24 +2,15 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
+import { ARTIFACT_RARITY_VALUES, ARTIFACT_SLOT_VALUES } from "@/lib/constants/artifacts";
 import { prisma } from "@/lib/db";
-import { requireCampaignAccess,requireDM } from "@/lib/utils/api/api-auth";
+import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 
 const createArtifactSchema = z.object({
   name: z.string().min(1).max(100),
   description: z.string().optional(),
-  rarity: z
-    .enum(["common", "uncommon", "rare", "epic", "legendary"])
-    .optional(),
-  slot: z.enum([
-    "weapon",
-    "shield",
-    "cloak",
-    "ring",
-    "helmet",
-    "amulet",
-    "item",
-  ]),
+  rarity: z.enum(ARTIFACT_RARITY_VALUES).optional(),
+  slot: z.enum(ARTIFACT_SLOT_VALUES),
   bonuses: z.record(z.string(), z.number()).default({}),
   modifiers: z
     .array(
@@ -127,6 +118,34 @@ export async function GET(
     return NextResponse.json(artifacts);
   } catch (error) {
     console.error("Error fetching artifacts:", error);
+
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+
+    const accessResult = await requireDM(id);
+
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
+    }
+
+    const result = await prisma.artifact.deleteMany({
+      where: { campaignId: id },
+    });
+
+    return NextResponse.json({ deleted: result.count });
+  } catch (error) {
+    console.error("Error deleting all artifacts:", error);
 
     return NextResponse.json(
       { error: "Internal server error" },
