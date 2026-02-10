@@ -48,7 +48,17 @@ export async function POST(
       );
     }
 
-    if (!action.stateBefore) {
+    // Якщо у дії немає stateBefore (економія місця в next-turn), беремо з останньої попередньої дії
+    let stateBefore = action.stateBefore;
+    if (!stateBefore) {
+      for (let i = data.actionIndex - 1; i >= 0; i--) {
+        if (battleLog[i].stateBefore) {
+          stateBefore = battleLog[i].stateBefore;
+          break;
+        }
+      }
+    }
+    if (!stateBefore) {
       return NextResponse.json(
         { error: "Cannot rollback: action has no saved state" },
         { status: 400 },
@@ -68,9 +78,9 @@ export async function POST(
       completedAt?: Date | null;
     } = {
       initiativeOrder:
-        action.stateBefore.initiativeOrder as unknown as Prisma.InputJsonValue,
-      currentTurnIndex: action.stateBefore.currentTurnIndex,
-      currentRound: action.stateBefore.currentRound,
+        stateBefore.initiativeOrder as unknown as Prisma.InputJsonValue,
+      currentTurnIndex: stateBefore.currentTurnIndex,
+      currentRound: stateBefore.currentRound,
       battleLog: newBattleLog as unknown as Prisma.InputJsonValue,
     };
     if (battle.status === "completed") {

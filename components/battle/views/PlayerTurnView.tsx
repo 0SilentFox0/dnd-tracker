@@ -12,6 +12,8 @@ import { SpellDialog } from "@/components/battle/dialogs/SpellDialog";
 import { TargetSelectionDialog } from "@/components/battle/dialogs/TargetSelectionDialog";
 import { TurnStartScreen } from "@/components/battle/views/TurnStartScreen";
 import { AttackType, BATTLE_RACE, CombatStatus } from "@/lib/constants/battle";
+import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
+import { mergeDiceFormulas } from "@/lib/utils/battle/balance-calculations";
 import { getSkillsByTrigger } from "@/lib/utils/skills/skill-triggers";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 import type { PlayerTurnViewProps } from "@/types/battle-ui";
@@ -129,14 +131,14 @@ export function PlayerTurnView({
 
     // Перевіряємо чи потрібна перевірка моралі
     if (participant.combatStats.morale !== 0) {
-      // Перевіряємо расові модифікатори
+      const race = participant.abilities.race?.toLowerCase() ?? "";
       let currentMorale = participant.combatStats.morale;
 
-      if (participant.abilities.race === BATTLE_RACE.HUMAN && currentMorale < 0) {
+      if (race === BATTLE_RACE.HUMAN && currentMorale < 0) {
         currentMorale = 0;
       }
 
-      if (participant.abilities.race === BATTLE_RACE.NECROMANCER) {
+      if (race === BATTLE_RACE.NECROMANCER) {
         // Некроманти пропускають перевірку
         return;
       }
@@ -390,11 +392,22 @@ export function PlayerTurnView({
           open={damageRollDialogOpen}
           onOpenChange={setDamageRollDialogOpen}
           attack={selectedAttack}
+          damageDiceFormula={
+            participant.basicInfo.sourceType === "character"
+              ? mergeDiceFormulas(
+                  selectedAttack.damageDice ?? "",
+                  getHeroDamageDiceForLevel(
+                    participant.abilities.level,
+                    selectedAttack.type as AttackType,
+                  ),
+                )
+              : undefined
+          }
           onConfirm={handleDamageRollConfirm}
         />
       )}
 
-      {/* Панель дій */}
+      {/* Панель дій; кнопка «Мораль» — fallback, якщо модалка не з’явилась після «Почати хід» */}
       <div className="flex-1 flex items-center justify-center p-6 sm:p-12">
         <ActionButtonsPanel
           participant={effectiveParticipant}
@@ -404,6 +417,20 @@ export function PlayerTurnView({
           onSpell={() => setSpellSelectionDialogOpen(true)}
           onBonusAction={onBonusAction}
           onSkipTurn={onSkipTurn}
+          showMoraleButton={
+            turnStarted &&
+            (() => {
+              const race = participant.abilities.race?.toLowerCase() ?? "";
+              let currentMorale = participant.combatStats.morale;
+              if (race === BATTLE_RACE.HUMAN && currentMorale < 0) currentMorale = 0;
+              return (
+                participant.combatStats.morale !== 0 &&
+                race !== BATTLE_RACE.NECROMANCER &&
+                currentMorale !== 0
+              );
+            })()
+          }
+          onOpenMorale={() => setShowMoraleCheck(true)}
         />
       </div>
 

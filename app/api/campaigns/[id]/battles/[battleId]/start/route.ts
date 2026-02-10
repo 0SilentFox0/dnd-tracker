@@ -13,8 +13,11 @@ import {
   calculateInitiative,
   sortByInitiative,
 } from "@/lib/utils/battle/battle-start";
-import { executeOnBattleStartEffects } from "@/lib/utils/skills/skill-triggers-execution";
-import { BattleParticipant } from "@/types/battle";
+import {
+  executeOnBattleStartEffects,
+  executeStartOfRoundTriggers,
+} from "@/lib/utils/skills/skill-triggers-execution";
+import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 export async function POST(
   request: Request,
@@ -104,25 +107,62 @@ export async function POST(
     });
 
     // Скіли з тригером onBattleStart (наприклад +2 ініціатива, бонус на перший удар)
+    const onBattleStartMessages: string[] = [];
     const afterOnBattleStart = updatedInitiativeOrder.map((participant) => {
       const result = executeOnBattleStartEffects(participant, 1);
+      onBattleStartMessages.push(...result.messages);
       return result.updatedParticipant;
     });
 
+    // Тригери початку раунду (раунд 1) — щоб бонуси ініціативи з startRound скілів потрапили до розрахунку
+    const { updatedParticipants: afterStartOfRound, messages: startOfRoundMessages } =
+      executeStartOfRoundTriggers(afterOnBattleStart, 1);
+
+    // Збираємо всі повідомлення тригерів для логу бою
+    const allTriggerMessages = [
+      ...onBattleStartMessages,
+      ...startOfRoundMessages,
+    ].filter(Boolean);
+
     // Розраховуємо ініціативу з урахуванням спеціальних правил та ефектів
-    const initiativeOrderWithCalculatedInitiative = afterOnBattleStart.map(
+    const initiativeOrderWithCalculatedInitiative = afterStartOfRound.map(
       (participant) => {
         const calculatedInitiative = calculateInitiative(participant);
 
         return {
           ...participant,
-          initiative: calculatedInitiative,
+          abilities: {
+            ...participant.abilities,
+            initiative: calculatedInitiative,
+          },
         };
       }
     );
 
     // Сортуємо за ініціативою (initiative → baseInitiative → dexterity)
     const sortedInitiativeOrder = sortByInitiative(initiativeOrderWithCalculatedInitiative);
+
+    // Записи логу бою: спрацювання тригерів на початку бою
+    const triggerLogEntries: BattleAction[] = [];
+    if (allTriggerMessages.length > 0) {
+      triggerLogEntries.push({
+        id: `triggers-start-${Date.now()}`,
+        battleId,
+        round: 1,
+        actionIndex: 0,
+        timestamp: new Date(),
+        actorId: "system",
+        actorName: "Система",
+        actorSide: "ally",
+        actionType: "ability",
+        targets: [],
+        actionDetails: { triggeredAbilities: [] },
+        resultText: `Тригери початку бою: ${allTriggerMessages.join("; ")}`,
+        hpChanges: [],
+        isCancelled: false,
+        stateBefore: undefined,
+      });
+    }
 
     // Оновлюємо бій
     const updatedBattle = await prisma.battleScene.update({
@@ -133,6 +173,7 @@ export async function POST(
         initiativeOrder: sortedInitiativeOrder as unknown as Prisma.InputJsonValue,
         currentRound: 1,
         currentTurnIndex: 0,
+        battleLog: triggerLogEntries as unknown as Prisma.InputJsonValue,
       },
     });
 

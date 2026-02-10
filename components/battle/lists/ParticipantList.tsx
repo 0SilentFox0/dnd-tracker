@@ -62,7 +62,7 @@ export function ParticipantList({
             transition={{ duration: 0.3 }}
             className="overflow-hidden"
           >
-            <div className="grid grid-cols-1 gap-3 p-1">
+            <div className="grid grid-cols-1 gap-3 p-4">
               {participants.length === 0 ? (
                 <Card className={`glass-card ${emptyCardBorderColor}`}>
                   <CardContent className="py-12 text-center text-muted-foreground italic">

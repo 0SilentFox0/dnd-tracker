@@ -96,6 +96,7 @@ export async function POST(
     }
 
     // Тригери скілів: onMoraleSuccess для учасника, allyMoraleCheck для союзників
+    const triggerMessages: string[] = [];
     const moraleSuccess =
       moraleResult.hasExtraTurn || !moraleResult.shouldSkipTurn;
     if (moraleSuccess) {
@@ -109,6 +110,7 @@ export async function POST(
           updatedInitiativeOrder,
           { currentRound: battle.currentRound },
         );
+        triggerMessages.push(...result.messages);
         updatedInitiativeOrder = updatedInitiativeOrder.map((p, i) =>
           i === participantIdx ? result.participant : p,
         );
@@ -131,6 +133,7 @@ export async function POST(
           updatedInitiativeOrder,
           { currentRound: battle.currentRound },
         );
+        triggerMessages.push(...result.messages);
         updatedInitiativeOrder = updatedInitiativeOrder.map((p, i) =>
           i === allyIdx ? result.participant : p,
         );
@@ -155,7 +158,10 @@ export async function POST(
         d10Roll: data.d10Roll,
         morale: participant.combatStats.morale,
       },
-      resultText: moraleResult.message,
+      resultText: [
+        moraleResult.message,
+        ...triggerMessages,
+      ].filter(Boolean).join(" | "),
       hpChanges: [],
       isCancelled: false,
       stateBefore: {

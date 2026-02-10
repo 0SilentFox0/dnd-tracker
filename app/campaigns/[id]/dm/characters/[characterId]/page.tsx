@@ -28,7 +28,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { getCharacter, updateCharacter } from "@/lib/api/characters";
+import { CharacterViewClient } from "../../../character/character-view-client";
 import { useCampaignMembers } from "@/lib/hooks/useCampaignMembers";
 import { useCharacterForm } from "@/lib/hooks/useCharacterForm";
 import { useHeroScalingCoefficients } from "@/lib/hooks/useHeroScalingCoefficients";
@@ -55,6 +58,9 @@ export default function EditCharacterPage({
   const [characterLoaded, setCharacterLoaded] = useState(false);
 
   const [equipped, setEquipped] = useState<EquippedItems>({});
+
+  /** Перемикач: показувати сторінку як для гравця (read-only + дерево скілів) */
+  const [viewAsPlayer, setViewAsPlayer] = useState(false);
 
   const { data: artifacts = [] } = useQuery({
     queryKey: ["artifacts", id],
@@ -130,7 +136,30 @@ export default function EditCharacterPage({
   }
 
   return (
-    <div className="container mx-auto p-4 max-w-5xl">
+    <div className="container mx-auto p-4 max-w-5xl space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border bg-muted/40 px-4 py-3">
+        <div className="flex items-center gap-2">
+          <Switch
+            id="view-as-player"
+            checked={viewAsPlayer}
+            onCheckedChange={setViewAsPlayer}
+          />
+          <Label htmlFor="view-as-player" className="cursor-pointer">
+            Перегляд як гравець
+          </Label>
+        </div>
+        <span className="text-sm text-muted-foreground">
+          {viewAsPlayer ? "Вигляд для гравця (isPlayer)" : "Редагування (DM)"}
+        </span>
+      </div>
+
+      {viewAsPlayer ? (
+        <CharacterViewClient
+          campaignId={id}
+          characterId={characterId}
+          allowPlayerEdit={false}
+        />
+      ) : (
       <Card>
         <CardHeader>
           <CardTitle>
@@ -335,6 +364,7 @@ export default function EditCharacterPage({
           </form>
         </CardContent>
       </Card>
+      )}
     </div>
   );
 }

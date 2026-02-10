@@ -120,7 +120,7 @@ export async function POST(
       id: spellData.id,
       name: spellData.name,
       level: spellData.level,
-      type: spellData.type as "target" | "aoe",
+      type: spellData.type as "target" | "aoe" | "no_target",
       target: spellData.target as "enemies" | "allies" | "all" | undefined,
       damageType: spellData.damageType as "damage" | "heal" | "all",
       damageElement: spellData.damageElement,

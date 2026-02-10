@@ -40,7 +40,10 @@ export function InitiativeParticipantCard({
     >
       <div className="relative">
         <Avatar className={cn(avatarSize, "border", isActive ? "border-2 border-primary shadow-lg" : "border-border")}>
-          <AvatarImage src={participant.basicInfo.avatar} />
+          <AvatarImage
+            src={participant.basicInfo.avatar || undefined}
+            referrerPolicy="no-referrer"
+          />
           <AvatarFallback className={isLarge ? "text-lg sm:text-xl" : "text-sm"}>
             {participant.basicInfo.name.charAt(0).toUpperCase()}
           </AvatarFallback>

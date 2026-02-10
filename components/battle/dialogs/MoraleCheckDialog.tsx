@@ -52,7 +52,7 @@ export function MoraleCheckDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto z-[100]">
         <DialogHeader>
           <DialogTitle>🎲 Перевірка Моралі</DialogTitle>
           <DialogDescription>
@@ -90,7 +90,7 @@ export function MoraleCheckDialog({
             <Button
               onClick={handleConfirm}
               disabled={!d10Roll || parseInt(d10Roll) < 1 || parseInt(d10Roll) > 10}
-              className="flex-1"
+              className="flex-1 min-h-[44px] touch-manipulation"
             >
               Підтвердити
             </Button>
@@ -100,6 +100,7 @@ export function MoraleCheckDialog({
                 setD10Roll("");
                 onOpenChange(false);
               }}
+              className="min-h-[44px] touch-manipulation"
             >
               Скасувати
             </Button>

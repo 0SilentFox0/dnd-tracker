@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -47,13 +48,8 @@ export function BattlePreparationView({
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           {[
-            {
-              label: "Учасники",
-              value: battle.participants.length,
-              color: "text-white",
-            },
             {
               label: "Союзники",
               value: alliesCount,

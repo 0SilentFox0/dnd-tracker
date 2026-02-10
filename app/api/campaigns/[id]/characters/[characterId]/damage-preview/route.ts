@@ -96,6 +96,7 @@ export async function GET(
         heroLevelPart: meleeHero.levelPart,
         heroDicePart: meleeDiceAvg,
         heroDiceNotation: meleeHero.diceNotation,
+        weaponDiceNotation: meleeAttack?.damageDice ?? undefined,
       }
     );
     const rangedResult = calculateDamageWithModifiers(
@@ -107,6 +108,7 @@ export async function GET(
         heroLevelPart: rangedHero.levelPart,
         heroDicePart: rangedDiceAvg,
         heroDiceNotation: rangedHero.diceNotation,
+        weaponDiceNotation: rangedAttack?.damageDice ?? undefined,
       }
     );
 

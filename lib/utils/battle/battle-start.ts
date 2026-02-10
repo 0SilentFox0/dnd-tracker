@@ -111,11 +111,17 @@ export function applyStartOfBattleEffects(
  * @returns розрахована ініціатива
  */
 export function calculateInitiative(participant: BattleParticipant): number {
-  // Спеціальні правила
-  // Файдаен завжди перший (initiative 999)
-  if (participant.basicInfo.name.toLowerCase().includes("фајдаен") || 
-      participant.basicInfo.name.toLowerCase().includes("файдаен") ||
-      participant.abilities.race?.toLowerCase() === "фајдаен") {
+  // Спеціальні правила: певні персонажі завжди перші в черзі (initiative 999)
+  const nameLower = participant.basicInfo.name.toLowerCase();
+  const raceLower = participant.abilities.race?.toLowerCase() ?? "";
+  if (
+    nameLower.includes("фајдаен") ||
+    nameLower.includes("файдаен") ||
+    raceLower === "фајдаен"
+  ) {
+    return 999;
+  }
+  if (nameLower.includes("айвен") || nameLower.includes("iven")) {
     return 999;
   }
 

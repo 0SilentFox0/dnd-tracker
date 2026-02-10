@@ -4,15 +4,21 @@
 
 import type { Prisma } from "@prisma/client";
 
-import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import {
   ArtifactModifierType,
   DEFAULT_ARTIFACT_MODIFIERS,
 } from "@/lib/constants/artifacts";
+import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { getHeroMaxHp } from "@/lib/constants/hero-scaling";
 import { prisma } from "@/lib/db";
 import { SkillLevel } from "@/lib/types/skill-tree";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
+import { convertPrismaToSkillTree } from "@/lib/utils/skills/skill-tree-mock";
+import {
+  getLearnedSpellIdsFromProgress,
+  getLearnedSpellIdsFromTree,
+} from "@/lib/utils/spells/spell-learning";
+import { calculateSpellSlotsForLevel } from "@/lib/utils/spells/spell-slots";
 import {
   ActiveSkill,
   BattleParticipant,
@@ -20,7 +26,10 @@ import {
   RacialAbility,
   SkillEffect,
 } from "@/types/battle";
+import type { SpellSlotProgression } from "@/types/races";
 import type { SkillTriggers } from "@/types/skill-triggers";
+import type { Skill } from "@/types/skills";
+import type { Spell } from "@/types/spells";
 
 /**
  * Тип для модифікатора артефакта
@@ -130,6 +139,154 @@ export async function createBattleParticipantFromCharacter(
     character.campaignId,
   );
 
+  // Заклинання: character.knownSpells (нормалізовані до string[]) + з дерева скілів
+  const rawKnown = character.knownSpells;
+
+  const baseKnownSpells = Array.isArray(rawKnown)
+    ? (rawKnown as unknown[]).map((id) => String(id)).filter(Boolean)
+    : [];
+
+  let knownSpells = baseKnownSpells;
+
+  try {
+    const progress =
+      (character.skillTreeProgress as Record<
+        string,
+        { unlockedSkills?: string[] }
+      >) ?? {};
+
+    const [rawSkillTree, mainSkills, spells, allSkills] = await Promise.all([
+      prisma.skillTree.findFirst({
+        where: {
+          campaignId: character.campaignId,
+          race: character.race,
+        },
+      }),
+      prisma.mainSkill.findMany({
+        where: { campaignId: character.campaignId },
+        select: { id: true, spellGroupId: true, name: true },
+      }),
+      prisma.spell.findMany({
+        where: { campaignId: character.campaignId },
+        include: { spellGroup: { select: { id: true } } },
+      }),
+      prisma.skill.findMany({
+        where: { campaignId: character.campaignId },
+        include: { spellGroup: { select: { id: true } } },
+      }),
+    ]);
+
+    const spellsForLearning = spells as unknown as Spell[];
+
+    const skillsForLearning = allSkills as unknown as Skill[];
+
+    let learnedFromTree: string[] = [];
+
+    if (rawSkillTree && Object.keys(progress).length > 0) {
+
+      const skillTree = convertPrismaToSkillTree({
+        ...rawSkillTree,
+        createdAt:
+          rawSkillTree.createdAt instanceof Date
+            ? rawSkillTree.createdAt
+            : new Date(rawSkillTree.createdAt),
+      });
+
+      if (skillTree && mainSkills.length > 0 && skillsForLearning.length > 0 && spellsForLearning.length > 0) {
+        const treeWithSpellGroups = {
+          ...skillTree,
+          mainSkills: skillTree.mainSkills.map((ms) => {
+            const apiMs = mainSkills.find((m) => m.id === ms.id);
+
+            return apiMs?.spellGroupId
+              ? { ...ms, spellGroupId: apiMs.spellGroupId }
+              : ms;
+          }),
+        };
+
+        learnedFromTree = getLearnedSpellIdsFromTree(
+          treeWithSpellGroups,
+          progress,
+          skillsForLearning,
+          spellsForLearning,
+        );
+      }
+    }
+
+    if (learnedFromTree.length === 0) {
+      const librarySkills = skillsForLearning.filter(
+        (s) => s.spellGroupId != null,
+      );
+
+      learnedFromTree = getLearnedSpellIdsFromProgress(
+        progress,
+        mainSkills,
+        spellsForLearning,
+        librarySkills,
+      );
+    }
+
+    if (learnedFromTree.length > 0) {
+      knownSpells = Array.from(
+        new Set([...baseKnownSpells, ...learnedFromTree]),
+      );
+    }
+  } catch (e) {
+    console.error("Error loading learned spells from tree:", e);
+  }
+
+  // Магічні слоти: з персонажа або з раси (spellSlotProgression)
+  const existingSlots = (character.spellSlots as Record<
+    string,
+    { max: number; current: number }
+  >) || {};
+
+  let resolvedSpellSlots: Record<string, { max: number; current: number }> = {};
+
+  if (Object.keys(existingSlots).length > 0) {
+
+    resolvedSpellSlots = Object.fromEntries(
+      Object.entries(existingSlots).map(([k, v]) => [
+        k,
+        { max: v.max, current: v.current ?? v.max },
+      ]),
+    );
+  } else {
+    const [race, campaign] = await Promise.all([
+      prisma.race.findFirst({
+        where: {
+          campaignId: character.campaignId,
+          name: character.race,
+        },
+      }),
+      prisma.campaign.findUnique({
+        where: { id: character.campaignId },
+        select: { maxLevel: true },
+      }),
+    ]);
+
+    const progression = (race?.spellSlotProgression
+      ? (Array.isArray(race.spellSlotProgression)
+          ? (race.spellSlotProgression as unknown as SpellSlotProgression[])
+          : [])
+      : []) as SpellSlotProgression[];
+
+    const maxLevel = campaign?.maxLevel ?? 20;
+
+    const computed = calculateSpellSlotsForLevel(
+      character.level,
+      maxLevel,
+      progression,
+    );
+
+    resolvedSpellSlots = Object.fromEntries(
+      Object.entries(computed).map(([k, v]) => [
+        k,
+        { max: v.max, current: v.max },
+      ]),
+    );
+  }
+
   const participant: BattleParticipant = {
     basicInfo: {
       id: `${character.id}-${instanceNumber || 0}-${Date.now()}`,
@@ -161,15 +318,16 @@ export async function createBattleParticipantFromCharacter(
     },
     combatStats: (() => {
       const computedMaxHp = getHeroMaxHp(character.level, character.strength);
+
       // На початку бою завжди повне здоровʼя; під час бою maxHp може тимчасово знижуватись (наприклад, лікування -10% maxHP)
       return {
         maxHp: computedMaxHp,
         currentHp: computedMaxHp,
         tempHp: 0,
-      armorClass: character.armorClass,
-      speed: character.speed,
-      morale: (character as { morale?: number }).morale || 0,
-      status: computedMaxHp <= 0 ? "dead" : "active",
+        armorClass: character.armorClass,
+        speed: character.speed,
+        morale: (character as { morale?: number }).morale || 0,
+        status: computedMaxHp <= 0 ? "dead" : "active",
         minTargets: character.minTargets ?? 1,
         maxTargets: character.maxTargets ?? 1,
       };
@@ -183,12 +341,8 @@ export async function createBattleParticipantFromCharacter(
         | undefined,
       spellSaveDC: character.spellSaveDC || undefined,
       spellAttackBonus: character.spellAttackBonus || undefined,
-      spellSlots:
-        (character.spellSlots as Record<
-          string,
-          { max: number; current: number }
-        >) || {},
-      knownSpells: (character.knownSpells as string[]) || [],
+      spellSlots: resolvedSpellSlots,
+      knownSpells,
     },
     battleData: {
       attacks,
@@ -273,8 +427,9 @@ export function applyPassiveSkillEffects(participant: BattleParticipant): void {
   for (const skill of participant.battleData.activeSkills) {
     // Тільки пасивні скіли
     const isPassive = skill.skillTriggers?.some(
-      t => t.type === "simple" && t.trigger === "passive"
+      (t) => t.type === "simple" && t.trigger === "passive",
     );
+
     if (!isPassive) continue;
 
     for (const effect of skill.effects) {
@@ -284,11 +439,13 @@ export function applyPassiveSkillEffects(participant: BattleParticipant): void {
         // --- HP бонус (формула або flat) ---
         case "hp_bonus": {
           let bonus = 0;
+
           if (effect.type === "formula" && typeof effect.value === "string") {
             bonus = evaluateFormula(effect.value, participant);
           } else {
             bonus = numValue;
           }
+
           participant.combatStats.maxHp += bonus;
           participant.combatStats.currentHp += bonus;
           break;
@@ -300,14 +457,28 @@ export function applyPassiveSkillEffects(participant: BattleParticipant): void {
         case "all_resistance": {
           // Зберігаємо в розширених даних учасника
           const resistances = getParticipantResistances(participant);
+
           if (effect.stat === "physical_resistance") {
-            resistances.physical = Math.min(100, (resistances.physical ?? 0) + numValue);
+            resistances.physical = Math.min(
+              100,
+              (resistances.physical ?? 0) + numValue,
+            );
           } else if (effect.stat === "spell_resistance") {
-            resistances.spell = Math.min(100, (resistances.spell ?? 0) + numValue);
+            resistances.spell = Math.min(
+              100,
+              (resistances.spell ?? 0) + numValue,
+            );
           } else if (effect.stat === "all_resistance") {
-            resistances.physical = Math.min(100, (resistances.physical ?? 0) + numValue);
-            resistances.spell = Math.min(100, (resistances.spell ?? 0) + numValue);
+            resistances.physical = Math.min(
+              100,
+              (resistances.physical ?? 0) + numValue,
+            );
+            resistances.spell = Math.min(
+              100,
+              (resistances.spell ?? 0) + numValue,
+            );
           }
+
           setParticipantResistances(participant, resistances);
           break;
         }
@@ -317,22 +488,27 @@ export function applyPassiveSkillEffects(participant: BattleParticipant): void {
           if (effect.type === "min") {
             // Встановлюємо мінімум моралі
             const minMorale = numValue;
+
             if (participant.combatStats.morale < minMorale) {
               participant.combatStats.morale = minMorale;
             }
+
             // Зберігаємо мінімум для подальшого використання
             const ext = getParticipantExtras(participant);
+
             ext.minMorale = Math.max(ext.minMorale ?? -Infinity, minMorale);
             setParticipantExtras(participant, ext);
           } else {
             participant.combatStats.morale += numValue;
           }
+
           break;
         }
 
         // --- Крит-поріг ---
         case "crit_threshold": {
           const ext = getParticipantExtras(participant);
+
           ext.critThreshold = Math.min(ext.critThreshold ?? 20, numValue);
           setParticipantExtras(participant, ext);
           break;
@@ -341,6 +517,7 @@ export function applyPassiveSkillEffects(participant: BattleParticipant): void {
         // --- Рівень заклинань ---
         case "spell_levels": {
           const ext = getParticipantExtras(participant);
+
           ext.maxSpellLevel = Math.max(ext.maxSpellLevel ?? 0, numValue);
           setParticipantExtras(participant, ext);
           break;
@@ -351,11 +528,15 @@ export function applyPassiveSkillEffects(participant: BattleParticipant): void {
           // Додаємо слоти 4 та 5 рівня
           for (const lvl of ["4", "5"]) {
             const slot = participant.spellcasting.spellSlots[lvl];
+
             if (slot) {
               slot.max += numValue;
               slot.current += numValue;
             } else {
-              participant.spellcasting.spellSlots[lvl] = { max: numValue, current: numValue };
+              participant.spellcasting.spellSlots[lvl] = {
+                max: numValue,
+                current: numValue,
+              };
             }
           }
           break;
@@ -364,6 +545,7 @@ export function applyPassiveSkillEffects(participant: BattleParticipant): void {
         // --- Disadvantage на ворожі атаки ---
         case "enemy_attack_disadvantage": {
           const ext = getParticipantExtras(participant);
+
           ext.enemyAttackDisadvantage = true;
           setParticipantExtras(participant, ext);
           break;
@@ -372,6 +554,7 @@ export function applyPassiveSkillEffects(participant: BattleParticipant): void {
         // --- Advantage на всі кидки ---
         case "advantage": {
           const ext = getParticipantExtras(participant);
+
           ext.advantageOnAllRolls = true;
           setParticipantExtras(participant, ext);
           break;
@@ -380,6 +563,7 @@ export function applyPassiveSkillEffects(participant: BattleParticipant): void {
         // --- Цілі для заклинань 4-5 рівня ---
         case "spell_targets_lvl4_5": {
           const ext = getParticipantExtras(participant);
+
           ext.spellTargetsLvl45 = (ext.spellTargetsLvl45 ?? 1) + numValue;
           setParticipantExtras(participant, ext);
           break;
@@ -388,6 +572,7 @@ export function applyPassiveSkillEffects(participant: BattleParticipant): void {
         // --- Заклинання світла на всіх союзників ---
         case "light_spells_target_all_allies": {
           const ext = getParticipantExtras(participant);
+
           ext.lightSpellsTargetAllAllies = true;
           setParticipantExtras(participant, ext);
           break;
@@ -396,6 +581,7 @@ export function applyPassiveSkillEffects(participant: BattleParticipant): void {
         // --- Контроль юнітів ---
         case "control_units": {
           const ext = getParticipantExtras(participant);
+
           ext.controlUnits = (ext.controlUnits ?? 0) + numValue;
           setParticipantExtras(participant, ext);
           break;
@@ -418,11 +604,13 @@ export function applyPassiveSkillEffects(participant: BattleParticipant): void {
         case "morale_per_kill":
         case "morale_per_ally_death": {
           const ext = getParticipantExtras(participant);
+
           if (effect.stat === "morale_per_kill") {
             ext.moralePerKill = (ext.moralePerKill ?? 0) + numValue;
           } else {
             ext.moralePerAllyDeath = (ext.moralePerAllyDeath ?? 0) + numValue;
           }
+
           setParticipantExtras(participant, ext);
           break;
         }
@@ -439,12 +627,19 @@ export function applyPassiveSkillEffects(participant: BattleParticipant): void {
  * Обчислює формулу для ефекту скіла.
  * Підтримує: hero_level, lost_hp_percent, morale, floor()
  */
-function evaluateFormula(formula: string, participant: BattleParticipant): number {
+function evaluateFormula(
+  formula: string,
+  participant: BattleParticipant,
+): number {
   try {
     const level = participant.abilities.level;
+
     const maxHp = participant.combatStats.maxHp;
+
     const currentHp = participant.combatStats.currentHp;
+
     const lostHpPercent = maxHp > 0 ? ((maxHp - currentHp) / maxHp) * 100 : 0;
+
     const morale = participant.combatStats.morale;
 
     // Замінюємо змінні на значення
@@ -457,9 +652,12 @@ function evaluateFormula(formula: string, participant: BattleParticipant): numbe
     expr = expr.replace(/floor\(/gi, "Math.floor(");
 
     // Обчислюємо (безпечно — тільки числа і математичні оператори)
-    // eslint-disable-next-line no-new-func
+
     const result = new Function(`"use strict"; return (${expr});`)();
-    return typeof result === "number" && !isNaN(result) ? Math.floor(result) : 0;
+
+    return typeof result === "number" && !isNaN(result)
+      ? Math.floor(result)
+      : 0;
   } catch {
     return 0;
   }
@@ -468,8 +666,8 @@ function evaluateFormula(formula: string, participant: BattleParticipant): numbe
 // ---------- Розширені дані учасника (extras) ----------
 
 interface ParticipantResistances {
-  physical?: number;  // % зменшення фізичного урону
-  spell?: number;     // % зменшення магічного урону
+  physical?: number; // % зменшення фізичного урону
+  spell?: number; // % зменшення магічного урону
 }
 
 export interface ParticipantExtras {
@@ -488,21 +686,37 @@ export interface ParticipantExtras {
 }
 
 /** Отримує розширені дані з battleData (зберігаються як додаткове JSON-поле) */
-export function getParticipantExtras(participant: BattleParticipant): ParticipantExtras {
-  return ((participant.battleData as unknown as Record<string, unknown>).extras as ParticipantExtras) ?? {};
+export function getParticipantExtras(
+  participant: BattleParticipant,
+): ParticipantExtras {
+  return (
+    ((participant.battleData as unknown as Record<string, unknown>)
+      .extras as ParticipantExtras) ?? {}
+  );
 }
 
-export function setParticipantExtras(participant: BattleParticipant, extras: ParticipantExtras): void {
-  (participant.battleData as unknown as Record<string, unknown>).extras = extras;
+export function setParticipantExtras(
+  participant: BattleParticipant,
+  extras: ParticipantExtras,
+): void {
+  (participant.battleData as unknown as Record<string, unknown>).extras =
+    extras;
 }
 
-function getParticipantResistances(participant: BattleParticipant): ParticipantResistances {
+function getParticipantResistances(
+  participant: BattleParticipant,
+): ParticipantResistances {
   const extras = getParticipantExtras(participant);
+
   return extras.resistances ?? {};
 }
 
-function setParticipantResistances(participant: BattleParticipant, res: ParticipantResistances): void {
+function setParticipantResistances(
+  participant: BattleParticipant,
+  res: ParticipantResistances,
+): void {
   const extras = getParticipantExtras(participant);
+
   extras.resistances = res;
   setParticipantExtras(participant, extras);
 }
@@ -695,7 +909,9 @@ async function extractActiveSkillsFromCharacter(
   }
 
   // Додаємо персональний унікальний скіл персонажа (з групи «Персональні»)
-  const personalSkillId = (character as { personalSkillId?: string | null }).personalSkillId;
+  const personalSkillId = (character as { personalSkillId?: string | null })
+    .personalSkillId;
+
   if (personalSkillId?.trim() && !allSkillIds.includes(personalSkillId)) {
     allSkillIds.push(personalSkillId);
     skillIdToMainSkill[personalSkillId] = "";
@@ -737,10 +953,19 @@ async function extractActiveSkillsFromCharacter(
 
     // Розпаковуємо effects: спочатку з combatStats.effects (повна інформація stat/type/value/duration),
     // інакше з bonuses (легасі)
-    type RawEffect = { stat: string; type: string; value?: number | string | boolean; duration?: number };
+    type RawEffect = {
+      stat: string;
+      type: string;
+      value?: number | string | boolean;
+      duration?: number;
+    };
     type CombatStatsEffects = { effects?: RawEffect[] };
+
     const combatStats = (skill.combatStats as CombatStatsEffects) ?? {};
-    const rawEffects = Array.isArray(combatStats.effects) ? combatStats.effects : [];
+
+    const rawEffects = Array.isArray(combatStats.effects)
+      ? combatStats.effects
+      : [];
 
     let effects: SkillEffect[];
 
@@ -756,10 +981,15 @@ async function extractActiveSkillsFromCharacter(
         }));
     } else {
       const bonuses = (skill.bonuses as Record<string, number>) || {};
+
       const percentKeys = ["melee_damage", "ranged_damage", "counter_damage"];
+
       effects = Object.entries(bonuses).map(([key, value]) => ({
         stat: key,
-        type: percentKeys.includes(key) || key.includes("percent") ? "percent" : "flat",
+        type:
+          percentKeys.includes(key) || key.includes("percent")
+            ? "percent"
+            : "flat",
         value,
         isPercentage:
           key.includes("percent") ||
@@ -860,24 +1090,55 @@ async function extractAttacksFromCharacter(
   }
 
   const equipped =
-    (character.inventory.equipped as Record<string, string | Record<string, unknown>>) || {};
+    (character.inventory.equipped as Record<
+      string,
+      string | Record<string, unknown>
+    >) || {};
 
-  const slotKeys = ["mainHand", "offHand", "weapon", "weapon1", "weapon2"] as const;
+  const slotKeys = [
+    "mainHand",
+    "offHand",
+    "weapon",
+    "weapon1",
+    "weapon2",
+    "range_weapon",
+  ] as const;
+
   const weaponIds: string[] = [];
+
   for (const key of slotKeys) {
     const val = equipped[key];
+
     if (!val) continue;
+
     if (typeof val === "string") {
       weaponIds.push(val);
     } else if (typeof val === "object" && val !== null && "damageDice" in val) {
-      const inv = val as { id?: string; name?: string; attackBonus?: number; damageDice?: string; damageType?: string; weaponType?: string };
+      const inv = val as {
+        id?: string;
+        name?: string;
+        attackBonus?: number;
+        damageDice?: string;
+        damageType?: string;
+        weaponType?: string;
+        range?: string;
+      };
+
+      const isRanged =
+        inv.weaponType?.toLowerCase() === AttackType.RANGED ||
+        /лук|bow|арбалет|crossbow/i.test((inv.name as string) ?? "") ||
+        (typeof inv.range === "string" &&
+          inv.range.trim() !== "" &&
+          inv.range !== "5 ft");
+
       attacks.push({
         id: inv.id ?? `inline-${key}`,
         name: (inv.name as string) ?? "Зброя",
-        type: (inv.weaponType === AttackType.RANGED ? AttackType.RANGED : AttackType.MELEE) as AttackType,
+        type: (isRanged ? AttackType.RANGED : AttackType.MELEE) as AttackType,
         attackBonus: typeof inv.attackBonus === "number" ? inv.attackBonus : 0,
         damageDice: (inv.damageDice as string) ?? "1d6",
         damageType: (inv.damageType as string) ?? "bludgeoning",
+        range: typeof inv.range === "string" ? inv.range : undefined,
       });
     }
   }
@@ -902,7 +1163,8 @@ async function extractAttacksFromCharacter(
     if (
       weapon.slot !== "weapon" &&
       weapon.slot !== "mainHand" &&
-      weapon.slot !== "offHand"
+      weapon.slot !== "offHand" &&
+      weapon.slot !== "range_weapon"
     ) {
       continue;
     }
@@ -916,10 +1178,10 @@ async function extractAttacksFromCharacter(
     // Базові значення (можна налаштувати пізніше)
     const attackBonus = bonuses.attackBonus || bonuses.attack || 0;
 
-    // Якщо у артефакту немає модифікатора damage_dice — не додаємо урон з кубиків (0), а не 1d6
+    // Якщо у артефакту немає модифікатора damage_dice — використовуємо 1d6 щоб діалог урону показував коректні кубики
     const damageDice =
       getOptionalModifierValue(modifiers, ArtifactModifierType.DAMAGE_DICE) ??
-      "";
+      "1d6";
 
     const damageType = getModifierValue(
       modifiers,
@@ -927,11 +1189,25 @@ async function extractAttacksFromCharacter(
       DEFAULT_ARTIFACT_MODIFIERS.DAMAGE_TYPE,
     );
 
-    const attackType = getModifierValue(
+    let attackType = getModifierValue(
       modifiers,
       ArtifactModifierType.ATTACK_TYPE,
       AttackType.MELEE,
     );
+
+    const rangeVal = getOptionalModifierValue(
+      modifiers,
+      ArtifactModifierType.RANGE,
+    );
+
+    if (
+      attackType !== AttackType.RANGED &&
+      (attackType?.toLowerCase() === "ranged" ||
+        /лук|bow|арбалет|crossbow/i.test(weapon.name) ||
+        (rangeVal && rangeVal.trim() !== "" && rangeVal !== "5 ft"))
+    ) {
+      attackType = AttackType.RANGED;
+    }
 
     // Створюємо атаку з ID
     attacks.push({
@@ -943,7 +1219,7 @@ async function extractAttacksFromCharacter(
       attackBonus,
       damageDice,
       damageType,
-      range: getOptionalModifierValue(modifiers, ArtifactModifierType.RANGE),
+      range: rangeVal,
       properties: getOptionalModifierValue(
         modifiers,
         ArtifactModifierType.PROPERTIES,

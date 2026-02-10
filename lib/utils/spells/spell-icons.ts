@@ -27,6 +27,7 @@ export function getSpellTypeIcon(type: string): LucideIcon {
   const iconMap: Record<string, LucideIcon> = {
     target: Crosshair,
     aoe: Circle,
+    no_target: Sparkles,
   };
 
   return iconMap[type] || Crosshair;

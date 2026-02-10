@@ -163,6 +163,65 @@ export function getDiceAverage(diceNotation: string): number {
   }, 0);
 }
 
+/** Один блок кубиків: count × d(sides). Модифікатори (+N/-N) не включаються. */
+export interface DiceGroup {
+  count: number;
+  sides: number;
+}
+
+/**
+ * Парсить нотацію кубиків у групи (без flat-модифікаторів).
+ * "2d6+3d8" → [{ count: 2, sides: 6 }, { count: 3, sides: 8 }].
+ * "1d6+3d8+1d6" → однакові типи об'єднуються → [{ count: 2, sides: 6 }, { count: 3, sides: 8 }].
+ */
+export function parseDiceNotationToGroups(diceNotation: string): DiceGroup[] {
+  if (!diceNotation || !diceNotation.trim()) return [];
+  const bySides: Record<number, number> = {};
+  const parts = diceNotation.split(/\s*\+\s*/);
+  for (const part of parts) {
+    const p = part.trim();
+    const match = p.match(/^(\d+)d(\d+)([+-]\d+)?$/);
+    if (match) {
+      const count = parseInt(match[1], 10);
+      const sides = parseInt(match[2], 10);
+      bySides[sides] = (bySides[sides] ?? 0) + count;
+    }
+  }
+  return Object.entries(bySides)
+    .map(([sides, count]) => ({ count, sides: parseInt(sides, 10) }))
+    .sort((a, b) => a.sides - b.sides);
+}
+
+/** Загальна кількість кубиків у нотації (для перевірки, що клієнт передав усі кидки). */
+export function getTotalDiceCount(diceNotation: string): number {
+  return parseDiceNotationToGroups(diceNotation).reduce(
+    (sum, g) => sum + g.count,
+    0,
+  );
+}
+
+/**
+ * Об'єднує дві формули кубиків (лише dice, без flat-модифікаторів).
+ * "1d6" + "3d8+1d6" → "2d6+3d8".
+ */
+export function mergeDiceFormulas(weaponNotation: string, heroNotation: string): string {
+  const weapon = weaponNotation?.trim() || "";
+  const hero = heroNotation?.trim() || "";
+  if (!weapon && !hero) return "";
+  const groups = [
+    ...parseDiceNotationToGroups(weapon),
+    ...parseDiceNotationToGroups(hero),
+  ];
+  const bySides: Record<number, number> = {};
+  for (const g of groups) {
+    bySides[g.sides] = (bySides[g.sides] ?? 0) + g.count;
+  }
+  return Object.entries(bySides)
+    .sort(([a], [b]) => parseInt(a, 10) - parseInt(b, 10))
+    .map(([sides, count]) => `${count}d${sides}`)
+    .join("+");
+}
+
 export type DifficultyRatio = "easy" | "medium" | "hard";
 
 /**

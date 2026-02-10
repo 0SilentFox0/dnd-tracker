@@ -236,6 +236,59 @@ function parseMainSkillLevelId(
   return mainSkillId ? { mainSkillId, level } : null;
 }
 
+/**
+ * Обчислює ID заклинань з progress: main-skill-level (школи магії) та звичайні скіли з spellGroupId.
+ * Для використання в бою, коли немає повного дерева скілів.
+ */
+export function getLearnedSpellIdsFromProgress(
+  progress: Record<string, { unlockedSkills?: string[] }>,
+  mainSkills: Array<{ id: string; spellGroupId?: string | null }>,
+  spells: Array<{ id: string; level: number; spellGroup?: { id: string } | null }>,
+  librarySkills?: Array<{ id: string; spellGroupId?: string | null }>,
+): string[] {
+  const groupMaxLevel = new Map<string, SkillLevelType>();
+
+  for (const treeProgress of Object.values(progress)) {
+    const unlocked = treeProgress.unlockedSkills ?? [];
+    for (const skillId of unlocked) {
+      const parsed = parseMainSkillLevelId(skillId);
+      if (parsed) {
+        const mainSkill = mainSkills.find((m) => m.id === parsed.mainSkillId);
+        const spellGroupId = mainSkill?.spellGroupId;
+        if (!spellGroupId) continue;
+        const current = groupMaxLevel.get(spellGroupId);
+        const currentOrder = current ? SKILL_LEVEL_ORDER[current] : 0;
+        if (SKILL_LEVEL_ORDER[parsed.level] > currentOrder) {
+          groupMaxLevel.set(spellGroupId, parsed.level);
+        }
+        continue;
+      }
+      // Звичайний скіл з бібліотеки (id скіла): якщо має spellGroupId — вважаємо базовий рівень школи
+      if (librarySkills?.length) {
+        const skill = librarySkills.find((s) => s.id === skillId);
+        const spellGroupId = skill?.spellGroupId;
+        if (spellGroupId) {
+          const current = groupMaxLevel.get(spellGroupId);
+          const currentOrder = current ? SKILL_LEVEL_ORDER[current] : 0;
+          if (SKILL_LEVEL_ORDER[SkillLevel.BASIC] > currentOrder) {
+            groupMaxLevel.set(spellGroupId, SkillLevel.BASIC);
+          }
+        }
+      }
+    }
+  }
+
+  const result: string[] = [];
+  for (const [groupId, level] of groupMaxLevel) {
+    const spellLevels = getSpellLevelsForSkillLevel(level);
+    const groupSpells = spells.filter(
+      (s) => s.spellGroup?.id === groupId && spellLevels.includes(s.level),
+    );
+    result.push(...groupSpells.map((s) => s.id));
+  }
+  return Array.from(new Set(result));
+}
+
 // ---------------------------------------------------------------------------
 //  Основна функція — обчислення заклинань з дерева прокачки
 // ---------------------------------------------------------------------------

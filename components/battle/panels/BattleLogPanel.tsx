@@ -25,6 +25,8 @@ interface BattleLogPanelProps {
   /** Контроль відкриття ззовні (наприклад з панелі швидких дій DM) */
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  /** Відображати лише вміст логу в сайдбарі DM (без нижньої панелі з кнопкою) */
+  embedInSidebar?: boolean;
 }
 
 export function BattleLogPanel({
@@ -34,6 +36,7 @@ export function BattleLogPanel({
   onRollback,
   open: controlledOpen,
   onOpenChange,
+  embedInSidebar = false,
 }: BattleLogPanelProps) {
   const [internalOpen, setInternalOpen] = useState(false);
 
@@ -51,34 +54,13 @@ export function BattleLogPanel({
     }
   };
 
-  return (
+  const logContent = (
     <div
       className={cn(
-        "shrink-0 border-t border-white/10 bg-black/40 backdrop-blur-md z-30 overflow-hidden",
-        className,
+        "overflow-y-auto custom-scrollbar",
+        embedInSidebar ? "h-[min(50vh,400px)] border border-white/10 rounded-md" : "max-h-48 border-t border-white/10",
       )}
     >
-      <Button
-        variant="ghost"
-        size="sm"
-        className="w-full justify-between rounded-none h-10 px-4 text-white/80 hover:text-white hover:bg-white/10"
-        onClick={handleToggle}
-      >
-        <span className="flex items-center gap-2 font-medium">
-          <ScrollText className="h-4 w-4" />
-          Лог бою
-          {log.length > 0 && (
-            <span className="text-xs text-white/50">({log.length})</span>
-          )}
-        </span>
-        {open ? (
-          <ChevronUp className="h-4 w-4" />
-        ) : (
-          <ChevronDown className="h-4 w-4" />
-        )}
-      </Button>
-      {open && (
-        <div className="max-h-48 overflow-y-auto border-t border-white/10 custom-scrollbar">
           <ul className="p-3 space-y-1.5 text-sm">
             {log.length === 0 ? (
               <li className="text-white/50 italic py-2">Записів поки немає.</li>
@@ -134,7 +116,7 @@ export function BattleLogPanel({
                           {formatLogEntry(entry)}
                         </span>
                       </button>
-                      {isDM && onRollback && entry.stateBefore && (
+                      {isDM && onRollback && (
                         <Button
                           type="button"
                           variant="ghost"
@@ -166,8 +148,63 @@ export function BattleLogPanel({
               })
             )}
           </ul>
+    </div>
+  );
+
+  if (embedInSidebar) {
+    return (
+      <div className={cn("flex flex-col gap-2", className)}>
+        <div className="flex items-center justify-between gap-2 shrink-0">
+          <span className="flex items-center gap-2 font-medium text-sm text-white/90">
+            <ScrollText className="h-4 w-4" />
+            Лог бою
+            {log.length > 0 && (
+              <span className="text-xs text-white/50">({log.length})</span>
+            )}
+          </span>
+          {onOpenChange && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-white/70 hover:text-white h-8 px-2"
+              onClick={() => onOpenChange(false)}
+            >
+              Закрити
+            </Button>
+          )}
         </div>
+        {logContent}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        "shrink-0 border-t border-white/10 bg-black/40 backdrop-blur-md z-30 overflow-hidden",
+        className,
       )}
+    >
+      <Button
+        variant="ghost"
+        size="sm"
+        className="w-full justify-between rounded-none h-10 px-4 text-white/80 hover:text-white hover:bg-white/10"
+        onClick={handleToggle}
+      >
+        <span className="flex items-center gap-2 font-medium">
+          <ScrollText className="h-4 w-4" />
+          Лог бою
+          {log.length > 0 && (
+            <span className="text-xs text-white/50">({log.length})</span>
+          )}
+        </span>
+        {open ? (
+          <ChevronUp className="h-4 w-4" />
+        ) : (
+          <ChevronDown className="h-4 w-4" />
+        )}
+      </Button>
+      {open && logContent}
     </div>
   );
 }

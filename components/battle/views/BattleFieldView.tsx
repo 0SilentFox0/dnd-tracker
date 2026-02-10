@@ -44,7 +44,7 @@ export function BattleFieldView({
         <div className="h-full grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 p-4 sm:p-6 overflow-y-auto custom-scrollbar relative z-0">
           {/* Союзники */}
           <div className="space-y-4 min-w-0">
-            <div className="flex items-center justify-between sticky top-0 bg-black/20 backdrop-blur-md rounded-lg p-2 z-20 border border-white/5">
+            <div className="flex items-center justify-between bg-black/20 rounded-lg p-2 z-20 border border-white/5">
               <h2 className="text-xl sm:text-2xl font-black italic uppercase tracking-tighter text-blue-400 drop-shadow-[0_0_10px_rgba(96,165,250,0.5)] bg-clip-text">
                 🛡️ СОЮЗНИКИ{" "}
                 <span className="text-sm font-normal opacity-70 ml-2">
@@ -74,7 +74,7 @@ export function BattleFieldView({
                   transition={{ duration: 0.3 }}
                   className="overflow-hidden"
                 >
-                  <div className="grid grid-cols-1 gap-3 p-1">
+                  <div className="grid grid-cols-1 gap-3 p-4">
                     {allies.length === 0 ? (
                       <Card className="glass-card border-blue-500/20">
                         <CardContent className="py-12 text-center text-muted-foreground italic">
@@ -108,7 +108,7 @@ export function BattleFieldView({
 
           {/* Вороги */}
           <div className="space-y-4 min-w-0">
-            <div className="flex items-center justify-between sticky top-0 bg-black/20 backdrop-blur-md rounded-lg p-2 z-20 border border-white/5">
+            <div className="flex items-center justify-between  bg-black/20  rounded-lg p-2 z-20 border border-white/5">
               <h2 className="text-xl sm:text-2xl font-black italic uppercase tracking-tighter text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]">
                 ⚔️ ВОРОГИ{" "}
                 <span className="text-sm font-normal opacity-70 ml-2">
@@ -138,7 +138,7 @@ export function BattleFieldView({
                   transition={{ duration: 0.3 }}
                   className="overflow-hidden"
                 >
-                  <div className="grid grid-cols-1 gap-3 p-1">
+                  <div className="grid grid-cols-1 gap-3 p-4">
                     {enemies.length === 0 ? (
                       <Card className="glass-card border-red-500/20">
                         <CardContent className="py-12 text-center text-muted-foreground italic">

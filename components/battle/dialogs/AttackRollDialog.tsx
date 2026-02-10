@@ -71,7 +71,7 @@ export function AttackRollDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto z-[100]">
         <DialogHeader>
           <DialogTitle>🎲 Кидок Попадання</DialogTitle>
           <DialogDescription>
@@ -112,20 +112,22 @@ export function AttackRollDialog({
           </div>
           <div className="flex gap-2">
             <Button
+              type="button"
               variant="outline"
               onClick={() => {
                 setAttackRoll("");
                 setAdvantageRoll("");
                 onOpenChange(false);
               }}
-              className="flex-1"
+              className="flex-1 min-h-[44px] touch-manipulation"
             >
               Скасувати
             </Button>
             <Button
+              type="button"
               onClick={handleConfirm}
               disabled={!attackRoll || parseInt(attackRoll) < 1 || parseInt(attackRoll) > 20}
-              className="flex-1"
+              className="flex-1 min-h-[44px] touch-manipulation"
             >
               Підтвердити
             </Button>

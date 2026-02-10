@@ -8,6 +8,11 @@ const nextConfig: NextConfig = {
         hostname: "static.wikia.nocookie.net",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "**.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
     ],
   },
 };

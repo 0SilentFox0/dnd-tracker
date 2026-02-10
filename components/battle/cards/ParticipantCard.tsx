@@ -1,8 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { HelpCircle, Skull, TrendingDown, TrendingUp } from "lucide-react";
-import { useEffect, useState } from "react";
 
 import { ParticipantStats } from "@/components/battle/ParticipantStats";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -52,6 +52,7 @@ export function ParticipantCard({
 
       setDamageAmount(diff);
       setShowDamage(true);
+
       const timer = setTimeout(() => setShowDamage(false), 2000);
 
       setLastHp(participant.combatStats.currentHp);
@@ -63,13 +64,12 @@ export function ParticipantCard({
   return (
     <div
       className={cn(
-        "relative border rounded-xl p-3 sm:p-4 transition-all cursor-pointer hover:shadow-xl glass-card group",
-        isCurrentTurn &&
-          "ring-2 ring-primary shadow-[0_0_20px_rgba(var(--primary),0.3)] scale-[1.02] z-10",
+        "relative border rounded-xl p-3 sm:p-4 transition-all cursor-pointer glass-card group",
+        isCurrentTurn && "ring-2 ring-primary z-10",
         isDead
           ? "dead-state"
           : isEnemy
-            ? "border-red-500/30 bg-red-500/5"
+            ? "border-red-500/30 bg-red-300/10"
             : "border-blue-500/30 bg-blue-500/5",
         className,
       )}
@@ -77,7 +77,7 @@ export function ParticipantCard({
     >
       {/* Background Glow */}
       {isCurrentTurn && !isDead && (
-        <div className="absolute inset-0 bg-primary/5 animate-pulse-glow pointer-events-none" />
+        <div className="absolute inset-0 bg-primary/10 animate-pulse-glow pointer-events-none" />
       )}
 
       {/* Анімація шкоди/лікування */}
@@ -102,7 +102,10 @@ export function ParticipantCard({
       {isDead ? (
         <div className="relative flex items-center gap-4 py-2 animate-in fade-in zoom-in duration-700">
           <Avatar className="w-16 h-16 grayscale opacity-40 border-2 border-red-900/50 shadow-inner">
-            <AvatarImage src={participant.basicInfo.avatar} />
+            <AvatarImage
+              src={participant.basicInfo.avatar || undefined}
+              referrerPolicy="no-referrer"
+            />
             <AvatarFallback className="bg-red-950/40 text-red-500/50">
               {participant.basicInfo.name.charAt(0)}
             </AvatarFallback>
@@ -135,7 +138,10 @@ export function ParticipantCard({
       ) : (
         <div className="flex items-start gap-3 relative z-10">
           <Avatar className="w-12 h-12 sm:w-14 sm:h-14 shrink-0 border-2 border-border shadow-sm">
-            <AvatarImage src={participant.basicInfo.avatar} />
+            <AvatarImage
+              src={participant.basicInfo.avatar || undefined}
+              referrerPolicy="no-referrer"
+            />
             <AvatarFallback>
               {participant.basicInfo.name.charAt(0).toUpperCase()}
             </AvatarFallback>
@@ -217,16 +223,22 @@ export function ParticipantCard({
                 .slice(0, 5)
                 .map((effect, idx) => {
                   const isBuff = effect.type === "buff";
+
                   const isDebuff = effect.type === "debuff";
+
                   const durationText =
-                    effect.duration != null
-                      ? `${effect.duration} раундів`
-                      : "";
+                    effect.duration != null ? `${effect.duration} раундів` : "";
+
                   const tooltip = [effect.name, durationText]
                     .filter(Boolean)
                     .join(" · ");
-                  const Icon =
-                    isBuff ? TrendingUp : isDebuff ? TrendingDown : HelpCircle;
+
+                  const Icon = isBuff
+                    ? TrendingUp
+                    : isDebuff
+                      ? TrendingDown
+                      : HelpCircle;
+
                   return (
                     <Badge
                       key={effect.id ?? idx}
@@ -244,7 +256,9 @@ export function ParticipantCard({
                       )}
                     >
                       <Icon className="h-2.5 w-2.5 shrink-0" />
-                      <span className="truncate max-w-[80px]">{effect.name}</span>
+                      <span className="truncate max-w-[80px]">
+                        {effect.name}
+                      </span>
                     </Badge>
                   );
                 })}

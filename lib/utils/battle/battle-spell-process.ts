@@ -24,7 +24,7 @@ export interface BattleSpell {
   id: string;
   name: string;
   level: number;
-  type: "target" | "aoe";
+  type: "target" | "aoe" | "no_target";
   target?: "enemies" | "allies" | "all";
   damageType: "damage" | "heal" | "all";
   damageElement?: string | null;
@@ -153,6 +153,52 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
       casterUpdated: updatedCaster,
       targetsUpdated: updatedTargets,
       battleAction,
+    };
+  }
+
+  // No Target — лише витрата слота та дія, без цілей
+  if (spell.type === "no_target") {
+    updatedCaster.spellcasting.spellSlots[spellLevel] = {
+      ...updatedCaster.spellcasting.spellSlots[spellLevel],
+      current: updatedCaster.spellcasting.spellSlots[spellLevel].current - 1,
+    };
+    const isBonusAction = spell.castingTime?.toLowerCase().includes("bonus") ?? false;
+    if (isBonusAction) {
+      updatedCaster.actionFlags.hasUsedBonusAction = true;
+    } else {
+      updatedCaster.actionFlags.hasUsedAction = true;
+    }
+    const noTargetAction: BattleAction = {
+      id: `spell-${caster.basicInfo.id}-${Date.now()}`,
+      battleId,
+      round: currentRound,
+      actionIndex: 0,
+      timestamp: new Date(),
+      actorId: caster.basicInfo.id,
+      actorName: caster.basicInfo.name,
+      actorSide: caster.basicInfo.side,
+      actionType: "spell",
+      targets: [],
+      actionDetails: {
+        spellId: spell.id,
+        spellName: spell.name,
+        spellLevel: spell.level,
+      },
+      resultText: `${caster.basicInfo.name} використав ${spell.name} (без цілі)`,
+      hpChanges: [],
+      isCancelled: false,
+    };
+    const afterNoTarget = executeAfterSpellCastTriggers(
+      updatedCaster,
+      undefined,
+      allParticipants,
+      isOwnerAction,
+    );
+    return {
+      success: true,
+      targetsUpdated: [],
+      casterUpdated: afterNoTarget.updatedCaster,
+      battleAction: noTargetAction,
     };
   }
 

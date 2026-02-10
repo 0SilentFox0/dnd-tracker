@@ -940,18 +940,27 @@ export function executeOnBattleStartEffects(
       const numValue = typeof effect.value === "number" ? effect.value : 0;
 
       switch (effect.stat) {
-        case "initiative":
+        case "initiative": {
+          const ne = addActiveEffect(
+            updatedParticipant,
+            {
+              id: `skill-${skill.skillId}-battle-start-initiative`,
+              name: `${skill.name} — ініціатива`,
+              type: "buff",
+              duration: 999,
+              effects: [{ type: "initiative_bonus", value: numValue }],
+            },
+            currentRound,
+          );
           updatedParticipant = {
             ...updatedParticipant,
-            abilities: {
-              ...updatedParticipant.abilities,
-              initiative: updatedParticipant.abilities.initiative + numValue,
-            },
+            battleData: { ...updatedParticipant.battleData, activeEffects: ne },
           };
           messages.push(
             `🏃 ${skill.name}: ${participant.basicInfo.name} +${numValue} ініціатива`,
           );
           break;
+        }
         case "damage": {
           // Бонус до першої атаки — зберігаємо як тимчасовий ефект
           const ne = addActiveEffect(

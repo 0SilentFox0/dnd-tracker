@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import { ChevronLeft, ScrollText, Trophy, UserPlus } from "lucide-react";
+
+import { BattleLogPanel } from "./BattleLogPanel";
+import { DmParticipantRow } from "./DmParticipantRow";
+
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { BattleScene } from "@/types/api";
 import type { BattleParticipant } from "@/types/battle";
-
-import { DmParticipantRow } from "./DmParticipantRow";
 
 const PANEL_WIDTH = 320;
 
@@ -21,6 +23,10 @@ export interface DmQuickActionsPanelProps {
   onCompleteBattle: (result?: "victory" | "defeat") => void;
   onTakeControl: (participant: BattleParticipant | null) => void;
   dmControlledParticipantId: string | null;
+  /** Лог бою в сайдбарі: показувати вміст логу тут */
+  logPanelOpen?: boolean;
+  setLogPanelOpen?: (open: boolean) => void;
+  onRollback?: (actionIndex: number) => void;
 }
 
 export function DmQuickActionsPanel({
@@ -33,6 +39,9 @@ export function DmQuickActionsPanel({
   onCompleteBattle,
   onTakeControl,
   dmControlledParticipantId,
+  logPanelOpen,
+  setLogPanelOpen,
+  onRollback,
 }: DmQuickActionsPanelProps) {
   const [open, setOpen] = useState(false);
 
@@ -60,7 +69,7 @@ export function DmQuickActionsPanel({
 
       <div
         className={cn(
-          "fixed top-0 bottom-0 z-40 flex flex-col",
+          "fixed top-0 bottom-0 z-50 flex flex-col",
           "bg-slate-900/98 backdrop-blur-xl border-l border-white/10 shadow-2xl",
           "transition-transform duration-300 ease-out",
         )}
@@ -91,12 +100,22 @@ export function DmQuickActionsPanel({
             className="w-full justify-start gap-2 border-white/20 text-white hover:bg-white/10"
             onClick={() => {
               onOpenLog();
-              closePanel();
             }}
           >
             <ScrollText className="h-4 w-4" />
-            Відкрити лог битви
+            {logPanelOpen ? "Лог битви відкрито нижче" : "Відкрити лог битви"}
           </Button>
+
+          {logPanelOpen && setLogPanelOpen && (
+            <BattleLogPanel
+              battle={battle}
+              isDM={isDM}
+              onRollback={onRollback}
+              open={true}
+              onOpenChange={setLogPanelOpen}
+              embedInSidebar
+            />
+          )}
 
           <Button
             variant="outline"

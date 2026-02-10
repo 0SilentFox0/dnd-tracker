@@ -1,12 +1,9 @@
 "use client";
 
-import { use } from "react";
+import { use, useMemo } from "react";
 import { BattleHeader } from "@/components/battle/BattleHeader";
 import { GlobalDamageOverlay } from "@/components/battle/overlays";
-import {
-  BattleLogPanel,
-  DmQuickActionsPanel,
-} from "@/components/battle/panels";
+import { DmQuickActionsPanel } from "@/components/battle/panels";
 import { AddParticipantDialog } from "@/components/battle/dialogs/AddParticipantDialog";
 import { AttackDialog } from "@/components/battle/dialogs/AttackDialog";
 import { ChangeHpDialog } from "@/components/battle/dialogs/ChangeHpDialog";
@@ -47,6 +44,22 @@ export default function BattlePage({
   } = useBattleSceneLogic(id, battleId);
 
   const dmDialogs = useBattlePageDialogs();
+
+  const preparationCounts = useMemo(() => {
+    if (!battle || battle.status !== "prepared") return { allies: 0, enemies: 0 };
+    const participants = (battle.participants ?? []) as Array<{
+      side?: string;
+      quantity?: number;
+    }>;
+    return {
+      allies: participants
+        .filter((p) => p.side === "ally")
+        .reduce((sum, p) => sum + (p.quantity ?? 1), 0),
+      enemies: participants
+        .filter((p) => p.side === "enemy")
+        .reduce((sum, p) => sum + (p.quantity ?? 1), 0),
+    };
+  }, [battle]);
 
   if (loading) {
     return (
@@ -91,8 +104,8 @@ export default function BattlePage({
         {battle.status === "prepared" ? (
           <BattlePreparationView
             battle={battle}
-            alliesCount={allies.length}
-            enemiesCount={enemies.length}
+            alliesCount={preparationCounts.allies}
+            enemiesCount={preparationCounts.enemies}
             isDM={isDM}
             onStartBattle={handlers.handleStartBattle}
             isStarting={mutations.startBattle.isPending}
@@ -130,16 +143,6 @@ export default function BattlePage({
           )
         )}
       </main>
-      {(battle.status === "active" ||
-        (battle.status === "completed" && isDM)) && (
-        <BattleLogPanel
-          battle={battle}
-          isDM={isDM}
-          onRollback={handlers.handleRollback}
-          open={dmDialogs.logPanelOpen}
-          onOpenChange={dmDialogs.setLogPanelOpen}
-        />
-      )}
 
       {isDM && battle.status === "active" && (
         <DmQuickActionsPanel
@@ -159,6 +162,9 @@ export default function BattlePage({
             setDmControlledParticipantId(p?.basicInfo.id ?? null)
           }
           dmControlledParticipantId={dmControlledParticipantId ?? null}
+          logPanelOpen={dmDialogs.logPanelOpen}
+          setLogPanelOpen={dmDialogs.setLogPanelOpen}
+          onRollback={handlers.handleRollback}
         />
       )}
 

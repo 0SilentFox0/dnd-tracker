@@ -175,14 +175,18 @@ export function calculateDamageWithModifiers(
     heroDicePart?: number;
     /** Нотація кубиків для breakdown, напр. "3d8" */
     heroDiceNotation?: string;
+    /** Нотація кубиків зброї для breakdown, напр. "1d6" (щоб не плутати з "Бонус зброї (артефакт)") */
+    weaponDiceNotation?: string;
   }
 ): DamageCalculationResult {
   const breakdown: string[] = [];
   const heroLevelPart = context?.heroLevelPart ?? 0;
   const heroDicePart = context?.heroDicePart ?? 0;
   const heroDiceNotation = context?.heroDiceNotation;
+  const weaponDiceNotation = context?.weaponDiceNotation;
+  const statLabel = attackType === AttackType.MELEE ? "STR" : "DEX";
 
-  // Базовий урон: зброя + рівень + кубики за рівнем + модифікатор характеристики
+  // Базовий урон: кубики зброї + рівень + кубики за рівнем + модифікатор характеристики
   const baseWithStat = Math.max(
     BATTLE_CONSTANTS.MIN_DAMAGE,
     baseDamage + heroLevelPart + heroDicePart + statModifier
@@ -190,15 +194,20 @@ export function calculateDamageWithModifiers(
 
   if (heroLevelPart > 0 || heroDicePart > 0) {
     const parts: string[] = [];
-    parts.push(`${baseDamage} (зброя)`);
+    // Чітко: це середній урон кубиків зброї (напр. 1d6), не "бонус артефакта"
+    parts.push(
+      weaponDiceNotation
+        ? `${baseDamage} (${weaponDiceNotation})`
+        : `${baseDamage} (кубики зброї)`
+    );
     parts.push(`${heroLevelPart} (рівень)`);
     if (heroDiceNotation) parts.push(`${heroDicePart} (${heroDiceNotation})`);
     else if (heroDicePart > 0) parts.push(`${heroDicePart} (кубики за рівнем)`);
-    parts.push(`${statModifier} (${attackType === AttackType.MELEE ? "STR" : "DEX"})`);
+    parts.push(`${statModifier} (${statLabel})`);
     breakdown.push(`${parts.join(" + ")} = ${baseWithStat}`);
   } else {
     breakdown.push(
-      `${baseDamage} (кубики) + ${statModifier} (${attackType === AttackType.MELEE ? "STR" : "DEX"}) = ${baseWithStat}`
+      `${baseDamage} (кубики) + ${statModifier} (${statLabel}) = ${baseWithStat}`
     );
   }
 
@@ -226,7 +235,7 @@ export function calculateDamageWithModifiers(
   if (artifactFlatBreakdown) breakdown.push(artifactFlatBreakdown);
 
   if (!artifactPercentBreakdown && !artifactFlatBreakdown) {
-    breakdown.push("Бонус зброї (артефакт): 0");
+    breakdown.push("Додатковий бонус зброї (артефакт): 0");
   }
 
   // Бонуси з пасивних здібностей

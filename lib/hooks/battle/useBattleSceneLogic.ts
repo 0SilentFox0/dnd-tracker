@@ -169,6 +169,31 @@ export function useBattleSceneLogic(id: string, battleId: string) {
     [attackMutation, triggerGlobalDamageFromBattle],
   );
 
+  // Діагностика в консолі браузера: що бачить UI для магії учасників (knownSpells)
+  useEffect(() => {
+    if (
+      typeof window !== "undefined" &&
+      process.env.NODE_ENV === "development" &&
+      battle?.status === "active" &&
+      battle?.initiativeOrder?.length
+    ) {
+      const participants = battle.initiativeOrder as BattleParticipant[];
+      console.log("[Battle Spells] Учасники в initiativeOrder (що бачить UI):", {
+        isDM: battle.isDM,
+        participants: participants.map((p) => ({
+          name: p.basicInfo?.name,
+          id: p.basicInfo?.id,
+          knownSpells_count: p.spellcasting?.knownSpells?.length ?? 0,
+          knownSpells_sample: (p.spellcasting?.knownSpells ?? []).slice(0, 5),
+          attacks_count: p.battleData?.attacks?.length ?? 0,
+          hasRanged: p.battleData?.attacks?.some(
+            (a) => a.type === "ranged" || (a.range && a.range !== "5 ft"),
+          ),
+        })),
+      });
+    }
+  }, [battle]);
+
   const allies = useMemo(() => {
     if (!battle) return [];
     return battle.initiativeOrder.filter(

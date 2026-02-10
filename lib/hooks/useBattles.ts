@@ -23,6 +23,26 @@ import type {
   SpellCastData,
 } from "@/types/api";
 
+/** Зберігає isDM та campaign з попереднього кешу, щоб панель DM не зникала після мутацій */
+function mergeBattleCache(
+  queryClient: ReturnType<typeof useQueryClient>,
+  campaignId: string,
+  battleId: string,
+  data: BattleScene,
+): BattleScene {
+  const previous = queryClient.getQueryData<BattleScene>([
+    "battle",
+    campaignId,
+    battleId,
+  ]);
+  return {
+    ...data,
+    isDM: data.isDM ?? previous?.isDM,
+    campaign: data.campaign ?? previous?.campaign,
+    userRole: data.userRole ?? previous?.userRole,
+  };
+}
+
 export function useBattle(campaignId: string, battleId: string) {
   return useQuery<BattleScene>({
     queryKey: ["battle", campaignId, battleId],
@@ -37,7 +57,10 @@ export function useUpdateBattle(campaignId: string, battleId: string) {
     mutationFn: (data: Partial<BattleScene>) =>
       updateBattle(campaignId, battleId, data),
     onSuccess: (data) => {
-      queryClient.setQueryData(["battle", campaignId, battleId], data);
+      queryClient.setQueryData(
+        ["battle", campaignId, battleId],
+        mergeBattleCache(queryClient, campaignId, battleId, data as BattleScene),
+      );
       queryClient.invalidateQueries({ queryKey: ["battles", campaignId] });
     },
   });
@@ -59,9 +82,11 @@ export function useNextTurn(campaignId: string, battleId: string) {
 
   return useMutation({
     mutationFn: () => nextTurn(campaignId, battleId),
-    onSuccess: (data) => {
-      // Оновлюємо дані бою
-      queryClient.setQueryData(["battle", campaignId, battleId], data);
+    onSuccess: (_data) => {
+      // Інвалідуємо щоб клієнт перезапитав GET і отримав повний формат (campaign, isDM, currentRound)
+      queryClient.invalidateQueries({
+        queryKey: ["battle", campaignId, battleId],
+      });
     },
   });
 }
@@ -72,7 +97,10 @@ export function useAttack(campaignId: string, battleId: string) {
   return useMutation({
     mutationFn: (data: AttackData) => attack(campaignId, battleId, data),
     onSuccess: (data) => {
-      queryClient.setQueryData(["battle", campaignId, battleId], data);
+      queryClient.setQueryData(
+        ["battle", campaignId, battleId],
+        mergeBattleCache(queryClient, campaignId, battleId, data),
+      );
     },
   });
 }
@@ -84,7 +112,10 @@ export function useMoraleCheck(campaignId: string, battleId: string) {
     mutationFn: (data: MoraleCheckData) =>
       moraleCheck(campaignId, battleId, data),
     onSuccess: (result) => {
-      queryClient.setQueryData(["battle", campaignId, battleId], result.battle);
+      queryClient.setQueryData(
+        ["battle", campaignId, battleId],
+        mergeBattleCache(queryClient, campaignId, battleId, result.battle),
+      );
     },
   });
 }
@@ -95,7 +126,10 @@ export function useCastSpell(campaignId: string, battleId: string) {
   return useMutation({
     mutationFn: (data: SpellCastData) => castSpell(campaignId, battleId, data),
     onSuccess: (data) => {
-      queryClient.setQueryData(["battle", campaignId, battleId], data);
+      queryClient.setQueryData(
+        ["battle", campaignId, battleId],
+        mergeBattleCache(queryClient, campaignId, battleId, data),
+      );
     },
   });
 }
@@ -106,7 +140,10 @@ export function useStartBattle(campaignId: string, battleId: string) {
   return useMutation({
     mutationFn: () => startBattle(campaignId, battleId),
     onSuccess: (data) => {
-      queryClient.setQueryData(["battle", campaignId, battleId], data);
+      queryClient.setQueryData(
+        ["battle", campaignId, battleId],
+        mergeBattleCache(queryClient, campaignId, battleId, data),
+      );
       queryClient.invalidateQueries({ queryKey: ["battles", campaignId] });
     },
   });
@@ -118,7 +155,10 @@ export function useResetBattle(campaignId: string, battleId: string) {
   return useMutation({
     mutationFn: () => resetBattle(campaignId, battleId),
     onSuccess: (data) => {
-      queryClient.setQueryData(["battle", campaignId, battleId], data);
+      queryClient.setQueryData(
+        ["battle", campaignId, battleId],
+        mergeBattleCache(queryClient, campaignId, battleId, data),
+      );
       queryClient.invalidateQueries({ queryKey: ["battles", campaignId] });
     },
   });
@@ -131,7 +171,10 @@ export function useCompleteBattle(campaignId: string, battleId: string) {
     mutationFn: (data?: { result?: "victory" | "defeat" }) =>
       completeBattle(campaignId, battleId, data),
     onSuccess: (data) => {
-      queryClient.setQueryData(["battle", campaignId, battleId], data);
+      queryClient.setQueryData(
+        ["battle", campaignId, battleId],
+        mergeBattleCache(queryClient, campaignId, battleId, data),
+      );
       queryClient.invalidateQueries({ queryKey: ["battles", campaignId] });
     },
   });
@@ -147,7 +190,10 @@ export function useRollbackBattleAction(
     mutationFn: (actionIndex: number) =>
       rollbackBattleAction(campaignId, battleId, actionIndex),
     onSuccess: (data) => {
-      queryClient.setQueryData(["battle", campaignId, battleId], data);
+      queryClient.setQueryData(
+        ["battle", campaignId, battleId],
+        mergeBattleCache(queryClient, campaignId, battleId, data),
+      );
       queryClient.invalidateQueries({ queryKey: ["battles", campaignId] });
     },
   });
@@ -160,7 +206,10 @@ export function useAddBattleParticipant(campaignId: string, battleId: string) {
     mutationFn: (data: AddParticipantData) =>
       addBattleParticipant(campaignId, battleId, data),
     onSuccess: (data) => {
-      queryClient.setQueryData(["battle", campaignId, battleId], data);
+      queryClient.setQueryData(
+        ["battle", campaignId, battleId],
+        mergeBattleCache(queryClient, campaignId, battleId, data),
+      );
     },
   });
 }
@@ -181,7 +230,10 @@ export function useUpdateBattleParticipant(
     }) =>
       updateBattleParticipant(campaignId, battleId, participantId, data),
     onSuccess: (data) => {
-      queryClient.setQueryData(["battle", campaignId, battleId], data);
+      queryClient.setQueryData(
+        ["battle", campaignId, battleId],
+        mergeBattleCache(queryClient, campaignId, battleId, data),
+      );
     },
   });
 }

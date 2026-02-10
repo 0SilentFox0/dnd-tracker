@@ -81,6 +81,14 @@ export async function POST(
     // Масив для накопичення логів з усіх пропущених ходів
     const newLogEntries: BattleAction[] = [];
 
+    // Зберігаємо stateBefore лише в першому записі батча, щоб не дублювати великий JSON
+    let stateBeforeAddedToBatch = false;
+    const getStateBeforeForEntry = () => {
+      if (stateBeforeAddedToBatch) return undefined;
+      stateBeforeAddedToBatch = true;
+      return stateBeforeNextTurn;
+    };
+
     // BattleLog для розрахунку індексів
     const currentBattleLogLength = (
       battle.battleLog as unknown as BattleAction[]
@@ -129,6 +137,27 @@ export async function POST(
         );
 
         updatedInitiativeOrder = roundResult.updatedInitiativeOrder;
+
+        // Запис у лог бою: спрацювання тригерів початку раунду
+        if (roundResult.triggerMessages.length > 0) {
+          newLogEntries.push({
+            id: `triggers-round-${nextRound}-${Date.now()}-${attempts}`,
+            battleId,
+            round: nextRound,
+            actionIndex: currentBattleLogLength + newLogEntries.length,
+            timestamp: new Date(),
+            actorId: "system",
+            actorName: "Система",
+            actorSide: "ally",
+            actionType: "ability",
+            targets: [],
+            actionDetails: {},
+            resultText: `Тригери початку раунду ${nextRound}: ${roundResult.triggerMessages.join("; ")}`,
+            hpChanges: [],
+            isCancelled: false,
+            stateBefore: getStateBeforeForEntry(),
+          });
+        }
       }
 
       // 3. Обробляємо початок ходу кандидата
@@ -181,7 +210,7 @@ export async function POST(
             },
           ],
           isCancelled: false,
-          stateBefore: stateBeforeNextTurn,
+          stateBefore: getStateBeforeForEntry(),
         });
       }
 
@@ -207,7 +236,32 @@ export async function POST(
           resultText: `Ефекти завершилися: ${turnResult.expiredEffects.join(", ")}`,
           hpChanges: [],
           isCancelled: false,
-          stateBefore: stateBeforeNextTurn,
+          stateBefore: getStateBeforeForEntry(),
+        });
+      }
+
+      if (turnResult.triggeredAbilities.length > 0) {
+        newLogEntries.push({
+          id: `triggers-turn-${nextTurnIndex}-${Date.now()}-${attempts}`,
+          battleId,
+          round: nextRound,
+          actionIndex: currentBattleLogLength + newLogEntries.length,
+          timestamp: new Date(),
+          actorId: turnResult.participant.basicInfo.id,
+          actorName: turnResult.participant.basicInfo.name,
+          actorSide: turnResult.participant.basicInfo.side,
+          actionType: "ability",
+          targets: [],
+          actionDetails: {
+            triggeredAbilities: turnResult.triggeredAbilities.map((name) => ({
+              id: name,
+              name,
+            })),
+          },
+          resultText: `Тригери початку ходу: ${turnResult.triggeredAbilities.join(", ")}`,
+          hpChanges: [],
+          isCancelled: false,
+          stateBefore: getStateBeforeForEntry(),
         });
       }
 
@@ -289,7 +343,7 @@ export async function POST(
           victoryCheck,
         ),
         isCancelled: false,
-        stateBefore: stateBeforeNextTurn,
+        stateBefore: getStateBeforeForEntry(),
       };
 
       newLogEntries.push(completionAction);

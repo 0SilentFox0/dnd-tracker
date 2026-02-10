@@ -87,7 +87,10 @@ export function TargetSelectionDialog({
                     >
                       <div className="flex items-center gap-3 w-full">
                         <Avatar className="w-10 h-10">
-                          <AvatarImage src={target.basicInfo.avatar} />
+                          <AvatarImage
+                            src={target.basicInfo.avatar || undefined}
+                            referrerPolicy="no-referrer"
+                          />
                           <AvatarFallback>
                             {target.basicInfo.name.charAt(0).toUpperCase()}
                           </AvatarFallback>

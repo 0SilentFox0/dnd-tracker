@@ -39,15 +39,24 @@ async function fetchDamagePreview(
   campaignId: string,
   characterId: string,
   meleeMultiplier: number,
-  rangedMultiplier: number
+  rangedMultiplier: number,
 ): Promise<DamagePreviewResponse> {
   const params = new URLSearchParams();
-  if (meleeMultiplier !== 1) params.set("meleeMultiplier", String(meleeMultiplier));
-  if (rangedMultiplier !== 1) params.set("rangedMultiplier", String(rangedMultiplier));
+
+  if (meleeMultiplier !== 1)
+    params.set("meleeMultiplier", String(meleeMultiplier));
+
+  if (rangedMultiplier !== 1)
+    params.set("rangedMultiplier", String(rangedMultiplier));
+
   const qs = params.toString();
+
   const url = `/api/campaigns/${campaignId}/characters/${characterId}/damage-preview${qs ? `?${qs}` : ""}`;
+
   const res = await fetch(url);
+
   if (!res.ok) throw new Error("Failed to load damage preview");
+
   return res.json();
 }
 
@@ -69,7 +78,7 @@ function DamageBlock({
   return (
     <Card>
       <CardHeader className="pb-2">
-        <div className="flex items-start justify-between gap-2">
+        <div className="flex items-start justify-between">
           <div className="space-y-1.5">
             <CardTitle className="text-base">{title}</CardTitle>
             <CardDescription>
@@ -87,17 +96,21 @@ function DamageBlock({
           </div>
           {isDm && (
             <div className="flex items-center gap-1.5 shrink-0">
-              <span className="text-xs text-muted-foreground whitespace-nowrap">×</span>
+              <span className="text-xs text-muted-foreground whitespace-nowrap">
+                ×
+              </span>
               <Input
                 type="number"
                 min={0.1}
                 max={3}
                 step={0.1}
-                className="h-8 w-14 text-right tabular-nums"
+                className="h-8 w-20 tabular-nums text-left"
                 value={coefficient}
                 onChange={(e) => {
                   const v = parseFloat(e.target.value);
-                  if (!Number.isNaN(v) && v >= 0.1 && v <= 3) onCoefficientChange?.(v);
+
+                  if (!Number.isNaN(v) && v >= 0.1 && v <= 3)
+                    onCoefficientChange?.(v);
                 }}
               />
             </div>
@@ -128,8 +141,20 @@ export function CharacterDamagePreview({
   isDm,
 }: CharacterDamagePreviewProps) {
   const { data, isLoading, error } = useQuery({
-    queryKey: ["character-damage-preview", campaignId, characterId, meleeCoefficient, rangedCoefficient],
-    queryFn: () => fetchDamagePreview(campaignId, characterId, meleeCoefficient, rangedCoefficient),
+    queryKey: [
+      "character-damage-preview",
+      campaignId,
+      characterId,
+      meleeCoefficient,
+      rangedCoefficient,
+    ],
+    queryFn: () =>
+      fetchDamagePreview(
+        campaignId,
+        characterId,
+        meleeCoefficient,
+        rangedCoefficient,
+      ),
     enabled: !!campaignId && !!characterId,
   });
 
@@ -158,6 +183,9 @@ export function CharacterDamagePreview({
       <h4 className="text-sm font-medium text-muted-foreground">
         Поточна шкода (середній урон за удар)
       </h4>
+      <p className="text-xs text-muted-foreground">
+        Модифікатор STR/DEX: (характеристика − 10) ÷ 2, округлення вниз. Ближній бій використовує STR, дальній — DEX.
+      </p>
       <div className="grid gap-4 sm:grid-cols-2">
         <DamageBlock
           title="Ближній бій (melee)"

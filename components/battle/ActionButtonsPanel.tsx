@@ -15,6 +15,9 @@ interface ActionButtonsPanelProps {
   onSpell: () => void;
   onBonusAction: (skill: ActiveSkill) => void;
   onSkipTurn: () => void;
+  /** Показати кнопку «Мораль» (fallback, якщо модалка не з’явилась після «Почати хід») */
+  showMoraleButton?: boolean;
+  onOpenMorale?: () => void;
 }
 
 /**
@@ -30,6 +33,8 @@ export function ActionButtonsPanel({
   onSpell,
   onBonusAction,
   onSkipTurn,
+  showMoraleButton,
+  onOpenMorale,
 }: ActionButtonsPanelProps) {
   const hasMeleeAttacks =
     participant.battleData.attacks?.some(
@@ -136,16 +141,29 @@ export function ActionButtonsPanel({
           </div>
         )}
 
+        {showMoraleButton && onOpenMorale && (
+          <Button
+            size="lg"
+            variant="outline"
+            onClick={onOpenMorale}
+            className="h-20 sm:h-32 min-h-[44px] flex flex-col items-center justify-center gap-1 sm:gap-2 rounded-2xl border-amber-500/50 bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20"
+          >
+            <span className="text-[10px] sm:text-lg font-black uppercase tracking-widest italic">
+              Мораль
+            </span>
+          </Button>
+        )}
+
         {/* Пропуск ходу */}
         <div className="col-span-1 sm:col-start-3">
           <Button
             size="lg"
-            variant="outline"
+            variant="secondary"
             onClick={onSkipTurn}
-            className="w-full h-20 sm:h-32 flex flex-col items-center justify-center gap-1 sm:gap-2 rounded-2xl border-white/10 hover:bg-white/5 transition-all duration-300 group"
+            className="w-full h-20 sm:h-32 flex flex-col items-center justify-center gap-1 sm:gap-2 rounded-2xl border-primary/40 bg-primary/10 text-primary hover:bg-primary/20 hover:border-primary/60 transition-all duration-300 group"
           >
-            <SkipForward className="w-6 h-6 sm:w-10 sm:h-10 opacity-40 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-            <span className="text-[10px] sm:text-lg font-black uppercase tracking-widest italic opacity-40 group-hover:opacity-100">
+            <SkipForward className="w-6 h-6 sm:w-10 sm:h-10 group-hover:translate-x-1 transition-transform" />
+            <span className="text-[10px] sm:text-lg font-black uppercase tracking-widest italic">
               Pass
             </span>
           </Button>

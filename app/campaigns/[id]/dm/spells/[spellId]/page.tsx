@@ -252,13 +252,14 @@ export default function EditSpellPage({
                   onValueChange={(value) =>
                     setFormData({
                       ...formData,
-                      type: value as "target" | "aoe",
+                      type: value as "target" | "aoe" | "no_target",
                     })
                   }
                   placeholder="Виберіть тип"
                   options={[
                     { value: "target", label: "Цільове" },
                     { value: "aoe", label: "Область дії" },
+                    { value: "no_target", label: "Без цілі" },
                   ]}
                 />
               </div>

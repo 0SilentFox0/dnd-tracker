@@ -22,7 +22,11 @@ import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import {
   getHeroDamageDiceForLevel,
 } from "@/lib/constants/hero-scaling";
-import { getDiceAverage } from "@/lib/utils/battle/balance-calculations";
+import {
+  getDiceAverage,
+  getTotalDiceCount,
+  mergeDiceFormulas,
+} from "@/lib/utils/battle/balance-calculations";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/battle-participant-helpers";
 import {
   checkSurviveLethal,
@@ -164,7 +168,10 @@ export function processAttack(
             }
           : undefined,
       },
-      resultText: `${attacker.basicInfo.name} критично промахнувся! [d10: ${criticalEffectApplied.id}] ${criticalEffectApplied.name}: ${criticalEffectApplied.description}`,
+      resultText: [
+        `${attacker.basicInfo.name} критично промахнувся! [d10: ${criticalEffectApplied.id}] ${criticalEffectApplied.name}: ${criticalEffectApplied.description}`,
+        ...beforeAttackResult.messages,
+      ].filter(Boolean).join(" | "),
       hpChanges: [],
       isCancelled: false,
     };
@@ -178,6 +185,10 @@ export function processAttack(
     );
 
     updatedAttacker = afterAttackResultFail.updatedAttacker;
+    battleAction.resultText = [
+      battleAction.resultText,
+      ...afterAttackResultFail.messages,
+    ].filter(Boolean).join(" | ");
 
     // Позначаємо що атакуючий використав дію
     updatedAttacker.actionFlags.hasUsedAction = true;
@@ -221,7 +232,10 @@ export function processAttack(
         isCritical: false,
         isCriticalFail: attackRoll.isCriticalFail,
       },
-      resultText: `${attacker.basicInfo.name} промахнувся по ${target.basicInfo.name}`,
+      resultText: [
+        `${attacker.basicInfo.name} промахнувся по ${target.basicInfo.name}`,
+        ...beforeAttackResult.messages,
+      ].filter(Boolean).join(" | "),
       hpChanges: [],
       isCancelled: false,
     };
@@ -235,6 +249,10 @@ export function processAttack(
     );
 
     updatedAttacker = afterAttackResultMiss.updatedAttacker;
+    battleAction.resultText = [
+      battleAction.resultText,
+      ...afterAttackResultMiss.messages,
+    ].filter(Boolean).join(" | ");
 
     // Позначаємо що атакуючий використав дію
     updatedAttacker.actionFlags.hasUsedAction = true;
@@ -263,7 +281,12 @@ export function processAttack(
   const heroDiceNotation = isHero
     ? getHeroDamageDiceForLevel(updatedAttacker.abilities.level, attack.type as AttackType)
     : "";
-  const heroDicePart = heroDiceNotation ? getDiceAverage(heroDiceNotation) : 0;
+  const weaponDiceCount = getTotalDiceCount(attack.damageDice ?? "");
+  const heroDiceCount = getTotalDiceCount(heroDiceNotation);
+  const fullDiceCount = weaponDiceCount + heroDiceCount;
+  const clientSentFullRolls = isHero && fullDiceCount > 0 && damageRolls.length === fullDiceCount;
+  const heroDicePart =
+    heroDiceNotation && !clientSentFullRolls ? getDiceAverage(heroDiceNotation) : 0;
 
   // Перевіряємо пасивки з тригером "on_attack" (до розрахунку урону)
   const onAttackAbilities = getPassiveAbilitiesByTrigger(
@@ -295,7 +318,14 @@ export function processAttack(
     }
   }
 
-  // Використовуємо нову функцію розрахунку урону
+  // Якщо клієнт передав усі кидки (зброя + герой), breakdown показує одну формулу кубиків
+  const weaponDiceNotationForBreakdown = clientSentFullRolls
+    ? mergeDiceFormulas(attack.damageDice ?? "", heroDiceNotation)
+    : undefined;
+  const heroDiceNotationForBreakdown = clientSentFullRolls
+    ? ""
+    : heroDiceNotation;
+
   const damageCalculation = calculateDamageWithModifiers(
     updatedAttacker,
     baseDamage,
@@ -306,7 +336,9 @@ export function processAttack(
       additionalDamage: additionalDamageModifiers,
       heroLevelPart,
       heroDicePart,
-      heroDiceNotation,
+      heroDiceNotation: heroDiceNotationForBreakdown,
+      weaponDiceNotation:
+        weaponDiceNotationForBreakdown || attack.damageDice || undefined,
     },
   );
 
@@ -607,7 +639,11 @@ export function processAttack(
       totalDamage: physicalDamage,
       damageBreakdown: damageCalculation.breakdown.join("; "),
     },
-    resultText: `${attacker.basicInfo.name} завдав ${totalFinalDamage} урону ${target.basicInfo.name}${attackRoll.isCritical ? " (КРИТИЧНЕ ПОПАДАННЯ!)" : ""}${criticalEffectApplied ? ` [d10: ${criticalEffectApplied.id}] ${criticalEffectApplied.name}` : ""}${reactionTriggered ? ` | ${target.basicInfo.name} виконав контр-удар на ${reactionDamage} урону` : ""}`,
+    resultText: [
+      `${attacker.basicInfo.name} завдав ${totalFinalDamage} урону ${target.basicInfo.name}${attackRoll.isCritical ? " (КРИТИЧНЕ ПОПАДАННЯ!)" : ""}${criticalEffectApplied ? ` [d10: ${criticalEffectApplied.id}] ${criticalEffectApplied.name}` : ""}${reactionTriggered ? ` | ${target.basicInfo.name} виконав контр-удар на ${reactionDamage} урону` : ""}`,
+      ...beforeAttackResult.messages,
+      ...afterAttackResult.messages,
+    ].filter(Boolean).join(" | "),
     hpChanges: [
       {
         participantId: target.basicInfo.id,
