@@ -17,12 +17,16 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Trophy } from "lucide-react";
 
+import type { PusherConnectionState } from "@/lib/hooks/battle/usePusherBattleSync";
+
 interface BattleHeaderProps {
   battle: BattleScene;
   onNextTurn: () => void;
   onReset: () => void;
   onCompleteBattle?: (result?: "victory" | "defeat") => void;
   isDM: boolean;
+  /** Стан з'єднання Pusher для індикатора (опційно) */
+  connectionState?: PusherConnectionState;
 }
 
 export function BattleHeader({
@@ -31,6 +35,7 @@ export function BattleHeader({
   onReset,
   onCompleteBattle,
   isDM,
+  connectionState = null,
 }: BattleHeaderProps) {
   const [completeDialogOpen, setCompleteDialogOpen] = useState(false);
 
@@ -64,6 +69,37 @@ export function BattleHeader({
                   {battle.currentRound}
                 </span>
               </span>
+              {connectionState != null && (
+                <span
+                  className={cn(
+                    "flex items-center gap-1.5 font-medium",
+                    connectionState === "connected" && "text-emerald-400/90",
+                    (connectionState === "disconnected" || connectionState === "unavailable") && "text-amber-400/90",
+                    connectionState === "connecting" && "text-white/60",
+                  )}
+                  title={
+                    connectionState === "connected"
+                      ? "Онлайн"
+                      : connectionState === "connecting"
+                        ? "Підключення..."
+                        : "Офлайн — оновлення після відновлення"
+                  }
+                >
+                  <span
+                    className={cn(
+                      "inline-block h-2 w-2 rounded-full",
+                      connectionState === "connected" && "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]",
+                      (connectionState === "disconnected" || connectionState === "unavailable") && "bg-amber-400 animate-pulse",
+                      connectionState === "connecting" && "bg-white/50 animate-pulse",
+                    )}
+                  />
+                  {connectionState === "connected"
+                    ? "Онлайн"
+                    : connectionState === "connecting"
+                      ? "Підключення..."
+                      : "Офлайн"}
+                </span>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-3">

@@ -1,23 +1,35 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { mergeBattleCache } from "@/lib/hooks/useBattles";
+import type { BattleScene } from "@/types/api";
+
+export type PusherConnectionState = "connected" | "disconnected" | "connecting" | "unavailable" | null;
 
 /**
  * Підписка на Pusher-канали бою: оновлення битви, старт, завершення, turn-started для поточного юзера.
- * Інвалідує battle query та показує сповіщення про хід.
+ * Оновлює кеш з payload події (setQueryData), щоб UI реагував миттєво без refetch.
+ * При reconnect робить refetch битви. Повертає connectionState для індикатора з'єднання.
  */
 export function usePusherBattleSync(
   campaignId: string,
   battleId: string,
   currentUserId: string | null,
   onTurnStarted: (message: string) => void,
-) {
+): { connectionState: PusherConnectionState } {
   const queryClient = useQueryClient();
+  const [connectionState, setConnectionState] = useState<PusherConnectionState>(null);
   const pusherRef = useRef<ReturnType<
     typeof import("@/lib/pusher").getPusherClient
   > | null>(null);
   const userChannelRef = useRef<string | null>(null);
+  const wasDisconnectedRef = useRef(false);
+
+  const queryKey = useCallback(
+    () => ["battle", campaignId, battleId] as const,
+    [campaignId, battleId],
+  );
 
   useEffect(() => {
     if (typeof window === "undefined" || !process.env.NEXT_PUBLIC_PUSHER_KEY) {
@@ -29,22 +41,43 @@ export function usePusherBattleSync(
       pusherRef.current = pusher;
       if (!pusher) return;
 
+      const applyBattlePayload = (data: unknown) => {
+        if (data && typeof data === "object" && "id" in data) {
+          const merged = mergeBattleCache(
+            queryClient,
+            campaignId,
+            battleId,
+            data as BattleScene,
+          );
+          queryClient.setQueryData(queryKey(), merged);
+        } else {
+          queryClient.invalidateQueries({ queryKey: queryKey() });
+        }
+      };
+
+      const updateConnectionState = () => {
+        const state = pusher.connection.state;
+        if (state === "connected" || state === "connecting" || state === "disconnected" || state === "unavailable") {
+          setConnectionState(state);
+        }
+      };
+
+      pusher.connection.bind("state_change", (states: { previous: string; current: string }) => {
+        updateConnectionState();
+        if (states.previous !== "connected" && (states.current === "disconnected" || states.current === "unavailable")) {
+          wasDisconnectedRef.current = true;
+        }
+        if (states.current === "connected" && wasDisconnectedRef.current) {
+          wasDisconnectedRef.current = false;
+          queryClient.invalidateQueries({ queryKey: queryKey() });
+        }
+      });
+      updateConnectionState();
+
       const battleChannel = pusher.subscribe("battle-" + battleId);
-      battleChannel.bind("battle-updated", () => {
-        queryClient.invalidateQueries({
-          queryKey: ["battle", campaignId, battleId],
-        });
-      });
-      battleChannel.bind("battle-started", () => {
-        queryClient.invalidateQueries({
-          queryKey: ["battle", campaignId, battleId],
-        });
-      });
-      battleChannel.bind("battle-completed", () => {
-        queryClient.invalidateQueries({
-          queryKey: ["battle", campaignId, battleId],
-        });
-      });
+      battleChannel.bind("battle-updated", applyBattlePayload);
+      battleChannel.bind("battle-started", applyBattlePayload);
+      battleChannel.bind("battle-completed", applyBattlePayload);
 
       if (currentUserId) {
         const userChannelName = "user-" + currentUserId;
@@ -53,9 +86,6 @@ export function usePusherBattleSync(
         userChannel.bind(
           "turn-started",
           (data: { participantName?: string }) => {
-            queryClient.invalidateQueries({
-              queryKey: ["battle", campaignId, battleId],
-            });
             onTurnStarted(
               data?.participantName
                 ? "Твій хід: " + data.participantName
@@ -82,5 +112,8 @@ export function usePusherBattleSync(
     currentUserId,
     onTurnStarted,
     queryClient,
+    queryKey,
   ]);
+
+  return { connectionState };
 }

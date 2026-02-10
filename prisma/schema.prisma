@@ -124,6 +124,7 @@ model Character {
   campaign             Campaign            @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   user                 User                @relation(fields: [controlledBy], references: [id], onDelete: SetNull)
 
+  @@index([campaignId])
   @@map("characters")
 }
 
@@ -159,6 +160,7 @@ model Unit {
   campaign         Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   unitGroup        UnitGroup? @relation(fields: [groupId], references: [id])
 
+  @@index([campaignId])
   @@map("units")
 }
 
@@ -208,6 +210,7 @@ model Spell {
   campaign            Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   spellGroup          SpellGroup? @relation(fields: [groupId], references: [id])
 
+  @@index([campaignId])
   @@map("spells")
 }
 
@@ -240,6 +243,7 @@ model Artifact {
   campaign       Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   artifactSet    ArtifactSet? @relation(fields: [setId], references: [id])
 
+  @@index([campaignId])
   @@map("artifacts")
 }
 
@@ -281,6 +285,7 @@ model SkillTree {
   characterSkills CharacterSkills[]
   campaign        Campaign          @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
+  @@index([campaignId, race])
   @@map("skill_trees")
 }
 
@@ -383,6 +388,8 @@ model Skill {
   spellNewSpell           Spell?      @relation("SkillNewSpell", fields: [spellNewSpellId], references: [id])
   grantedSpell             Spell?      @relation("SkillGrantedSpell", fields: [grantedSpellId], references: [id])
 
+  @@index([campaignId])
+  @@index([campaignId, id])
   @@map("skills")
 }
 
@@ -398,6 +405,7 @@ model Race {
   spellSlotProgression Json     @default("[]")
   campaign             Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
+  @@index([campaignId, name])
   @@map("races")
 }
 
@@ -415,5 +423,6 @@ model MainSkill {
   spellGroup          SpellGroup? @relation(fields: [spellGroupId], references: [id], onDelete: SetNull)
   skills              Skill[]
 
+  @@index([campaignId])
   @@map("main_skills")
 }

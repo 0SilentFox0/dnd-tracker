@@ -96,11 +96,9 @@ export async function POST(
     if (process.env.PUSHER_APP_ID) {
       const { pusherServer } = await import("@/lib/pusher");
 
-      await pusherServer.trigger(
-        `battle-${battleId}`,
-        "battle-updated",
-        updatedBattle,
-      );
+      void pusherServer
+        .trigger(`battle-${battleId}`, "battle-updated", updatedBattle)
+        .catch((err) => console.error("Pusher trigger failed:", err));
     }
 
     return NextResponse.json(updatedBattle);

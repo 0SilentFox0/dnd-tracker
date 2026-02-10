@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 
+import { ReadOnlyProvider } from "@/components/ui/read-only-context";
 import { CharacterAbilitiesSection } from "@/components/characters/abilities/CharacterAbilitiesSection";
 import { CharacterSkillTreeView } from "@/components/characters/abilities/CharacterSkillTreeView";
 import { CharacterArtifactsSection } from "@/components/characters/artifacts/CharacterArtifactsSection";
@@ -178,20 +179,21 @@ export function CharacterViewClient({
   );
 
   return (
-    <div className="container mx-auto p-4 max-w-5xl space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <CardTitle className="text-2xl">{formData.basicInfo.name}</CardTitle>
-        <div className="flex flex-wrap gap-2">
-          {allowPlayerEdit && (
-            <Link href={`/campaigns/${campaignId}/character/edit`}>
-              <Button variant="outline">Редагувати повністю</Button>
-            </Link>
-          )}
+    <ReadOnlyProvider value={!allowPlayerEdit}>
+      <div className="container mx-auto p-4 max-w-5xl space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <CardTitle className="text-2xl">{formData.basicInfo.name}</CardTitle>
+          <div className="flex flex-wrap gap-2">
+            {allowPlayerEdit && (
+              <Link href={`/campaigns/${campaignId}/character/edit`}>
+                <Button variant="outline">Редагувати повністю</Button>
+              </Link>
+            )}
+          </div>
         </div>
-      </div>
 
-      <Card>
-        <CardContent className="w-full overflow-hidden pt-6">
+        <Card>
+          <CardContent className="w-full overflow-hidden pt-6">
           {(error || saveError) && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
               <strong className="font-bold">Помилка:</strong>
@@ -301,5 +303,6 @@ export function CharacterViewClient({
         </CardContent>
       </Card>
     </div>
+    </ReadOnlyProvider>
   );
 }

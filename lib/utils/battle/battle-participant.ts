@@ -13,6 +13,7 @@ import { getHeroMaxHp } from "@/lib/constants/hero-scaling";
 import { prisma } from "@/lib/db";
 import { SkillLevel } from "@/lib/types/skill-tree";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
+import { evaluateFormula as evaluateFormulaSafe } from "@/lib/utils/battle/formula-evaluator";
 import { convertPrismaToSkillTree } from "@/lib/utils/skills/skill-tree-mock";
 import {
   getLearnedSpellIdsFromProgress,
@@ -101,15 +102,31 @@ type CharacterFromPrisma = Prisma.CharacterGetPayload<{
 
 type UnitFromPrisma = Prisma.UnitGetPayload<Record<string, never>>;
 
+/** Опціональний контекст для batch-завантаження: спільні дані кампанії (скіли, заклинання, раси, артефакти) */
+export interface CampaignSpellContext {
+  skillTreeByRace: Record<string, Prisma.SkillTreeGetPayload<object> | null>;
+  mainSkills: Array<{ id: string; spellGroupId: string | null; name: string }>;
+  spells: Array<Prisma.SpellGetPayload<{ include: { spellGroup: { select: { id: true } } } }>>;
+  allSkills: Array<Prisma.SkillGetPayload<{ include: { spellGroup: { select: { id: true } } } }>>;
+  racesByName: Record<string, Prisma.RaceGetPayload<object> | null>;
+  campaign: { maxLevel: number };
+  /** Pre-loaded скіли по id (для batch start) */
+  skillsById?: Record<string, Prisma.SkillGetPayload<object>>;
+  /** Pre-loaded артефакти по id (для batch start) */
+  artifactsById?: Record<string, Prisma.ArtifactGetPayload<object>>;
+}
+
 /**
  * Створює BattleParticipant з Character
  * Завантажує всі необхідні дані: скіли, артефакти, заклинання
+ * @param context - опціональний контекст з pre-loaded даними кампанії (для batch start battle)
  */
 export async function createBattleParticipantFromCharacter(
   character: CharacterFromPrisma,
   battleId: string,
   side: ParticipantSide,
   instanceNumber?: number,
+  context?: CampaignSpellContext,
 ): Promise<BattleParticipant> {
   const modifiers = {
     strength: getAbilityModifier(character.strength),
@@ -120,23 +137,30 @@ export async function createBattleParticipantFromCharacter(
     charisma: getAbilityModifier(character.charisma),
   };
 
-  // Розбираємо skillTreeProgress для активних скілів
+  // Розбираємо skillTreeProgress для активних скілів (з контексту якщо передано)
   const activeSkills = await extractActiveSkillsFromCharacter(
     character,
     character.campaignId,
+    context?.skillsById,
   );
 
   // Розбираємо inventory для екіпірованих артефактів
-  const equippedArtifacts =
-    await extractEquippedArtifactsFromCharacter(character);
+  const equippedArtifacts = await extractEquippedArtifactsFromCharacter(
+    character,
+    context?.artifactsById,
+  );
 
   // Витягуємо атаки з екіпірованої зброї
-  const attacks = await extractAttacksFromCharacter(character);
+  const attacks = await extractAttacksFromCharacter(
+    character,
+    context?.artifactsById,
+  );
 
-  // Завантажуємо расові здібності
+  // Завантажуємо расові здібності (з контексту якщо передано)
   const racialAbilities = await extractRacialAbilities(
     character.race,
     character.campaignId,
+    context?.racesByName[character.race] ?? undefined,
   );
 
   // Заклинання: character.knownSpells (нормалізовані до string[]) + з дерева скілів
@@ -155,26 +179,35 @@ export async function createBattleParticipantFromCharacter(
         { unlockedSkills?: string[] }
       >) ?? {};
 
-    const [rawSkillTree, mainSkills, spells, allSkills] = await Promise.all([
-      prisma.skillTree.findFirst({
-        where: {
-          campaignId: character.campaignId,
-          race: character.race,
-        },
-      }),
-      prisma.mainSkill.findMany({
-        where: { campaignId: character.campaignId },
-        select: { id: true, spellGroupId: true, name: true },
-      }),
-      prisma.spell.findMany({
-        where: { campaignId: character.campaignId },
-        include: { spellGroup: { select: { id: true } } },
-      }),
-      prisma.skill.findMany({
-        where: { campaignId: character.campaignId },
-        include: { spellGroup: { select: { id: true } } },
-      }),
-    ]);
+    const rawSkillTree = context
+      ? context.skillTreeByRace[character.race] ?? null
+      : await prisma.skillTree.findFirst({
+          where: {
+            campaignId: character.campaignId,
+            race: character.race,
+          },
+        });
+
+    const mainSkills = context
+      ? context.mainSkills
+      : await prisma.mainSkill.findMany({
+          where: { campaignId: character.campaignId },
+          select: { id: true, spellGroupId: true, name: true },
+        });
+
+    const spells = context
+      ? context.spells
+      : await prisma.spell.findMany({
+          where: { campaignId: character.campaignId },
+          include: { spellGroup: { select: { id: true } } },
+        });
+
+    const allSkills = context
+      ? context.allSkills
+      : await prisma.skill.findMany({
+          where: { campaignId: character.campaignId },
+          include: { spellGroup: { select: { id: true } } },
+        });
 
     const spellsForLearning = spells as unknown as Spell[];
 
@@ -252,18 +285,21 @@ export async function createBattleParticipantFromCharacter(
       ]),
     );
   } else {
-    const [race, campaign] = await Promise.all([
-      prisma.race.findFirst({
-        where: {
-          campaignId: character.campaignId,
-          name: character.race,
-        },
-      }),
-      prisma.campaign.findUnique({
-        where: { id: character.campaignId },
-        select: { maxLevel: true },
-      }),
-    ]);
+    const race = context
+      ? context.racesByName[character.race]
+      : await prisma.race.findFirst({
+          where: {
+            campaignId: character.campaignId,
+            name: character.race,
+          },
+        });
+
+    const campaign = context
+      ? context.campaign
+      : await prisma.campaign.findUnique({
+          where: { id: character.campaignId },
+          select: { maxLevel: true },
+        });
 
     const progression = (race?.spellSlotProgression
       ? (Array.isArray(race.spellSlotProgression)
@@ -624,43 +660,25 @@ export function applyPassiveSkillEffects(participant: BattleParticipant): void {
 }
 
 /**
- * Обчислює формулу для ефекту скіла.
- * Підтримує: hero_level, lost_hp_percent, morale, floor()
+ * Обчислює формулу для ефекту скіла через безпечний парсер (formula-evaluator).
+ * Підтримує: hero_level, lost_hp_percent, morale, floor(), ceil(), max(), min()
  */
 function evaluateFormula(
   formula: string,
   participant: BattleParticipant,
 ): number {
-  try {
-    const level = participant.abilities.level;
+  const maxHp = participant.combatStats.maxHp;
+  const currentHp = participant.combatStats.currentHp;
+  const lostHpPercent = maxHp > 0 ? ((maxHp - currentHp) / maxHp) * 100 : 0;
 
-    const maxHp = participant.combatStats.maxHp;
+  const context: Record<string, number> = {
+    hero_level: participant.abilities.level,
+    lost_hp_percent: lostHpPercent,
+    morale: participant.combatStats.morale,
+  };
 
-    const currentHp = participant.combatStats.currentHp;
-
-    const lostHpPercent = maxHp > 0 ? ((maxHp - currentHp) / maxHp) * 100 : 0;
-
-    const morale = participant.combatStats.morale;
-
-    // Замінюємо змінні на значення
-    let expr = formula
-      .replace(/hero_level/gi, String(level))
-      .replace(/lost_hp_percent/gi, String(lostHpPercent))
-      .replace(/morale/gi, String(morale));
-
-    // Замінюємо floor(...) на Math.floor(...)
-    expr = expr.replace(/floor\(/gi, "Math.floor(");
-
-    // Обчислюємо (безпечно — тільки числа і математичні оператори)
-
-    const result = new Function(`"use strict"; return (${expr});`)();
-
-    return typeof result === "number" && !isNaN(result)
-      ? Math.floor(result)
-      : 0;
-  } catch {
-    return 0;
-  }
+  const result = evaluateFormulaSafe(formula, context);
+  return Math.floor(result);
 }
 
 // ---------- Розширені дані учасника (extras) ----------
@@ -723,12 +741,14 @@ function setParticipantResistances(
 
 /**
  * Створює BattleParticipant з Unit
+ * @param racesByName - опціонально pre-loaded раси для batch start (ключ — назва раси)
  */
 export async function createBattleParticipantFromUnit(
   unit: UnitFromPrisma,
   battleId: string,
   side: ParticipantSide,
   instanceNumber: number,
+  racesByName?: Record<string, Prisma.RaceGetPayload<object> | null>,
 ): Promise<BattleParticipant> {
   const modifiers = {
     strength: getAbilityModifier(unit.strength),
@@ -762,7 +782,7 @@ export async function createBattleParticipantFromUnit(
     properties: attack.properties,
   }));
 
-  // Завантажуємо расові здібності (синхронно, бо функція не async)
+  // Завантажуємо расові здібності
   let racialAbilities: RacialAbility[] = [];
 
   if (unit.race) {
@@ -770,6 +790,7 @@ export async function createBattleParticipantFromUnit(
       racialAbilities = await extractRacialAbilities(
         unit.race,
         unit.campaignId,
+        racesByName?.[unit.race] ?? undefined,
       );
     } catch (error) {
       console.error("Error extracting racial abilities:", error);
@@ -871,11 +892,12 @@ export async function createBattleParticipantFromUnit(
 
 /**
  * Витягує активні скіли з character.skillTreeProgress та characterSkills
- * Завантажує деталі скілів з БД
+ * Завантажує деталі скілів з БД (або використовує preloadedSkillsById)
  */
 async function extractActiveSkillsFromCharacter(
   character: CharacterFromPrisma,
   campaignId: string,
+  preloadedSkillsById?: Record<string, Prisma.SkillGetPayload<object>>,
 ): Promise<ActiveSkill[]> {
   const activeSkills: ActiveSkill[] = [];
 
@@ -918,21 +940,19 @@ async function extractActiveSkillsFromCharacter(
     skillIdToLevel[personalSkillId] = SkillLevel.BASIC;
   }
 
-  // Якщо немає скілів, повертаємо порожній масив
   if (allSkillIds.length === 0) {
     return activeSkills;
   }
 
-  // Завантажуємо всі скіли одним запитом
-  const skills = await prisma.skill.findMany({
-    where: {
-      id: { in: allSkillIds },
-      campaignId: campaignId,
-    },
-  });
-
-  // Створюємо мапу для швидкого пошуку
-  const skillsMap = new Map(skills.map((s) => [s.id, s]));
+  const skillsMap = preloadedSkillsById
+    ? new Map(Object.entries(preloadedSkillsById))
+    : new Map(
+        (
+          await prisma.skill.findMany({
+            where: { id: { in: allSkillIds }, campaignId },
+          })
+        ).map((s) => [s.id, s]),
+      );
 
   // Створюємо ActiveSkill для кожного скілу
   for (const skillId of allSkillIds) {
@@ -1079,9 +1099,11 @@ async function extractActiveSkillsFromCharacter(
 
 /**
  * Витягує атаки з екіпірованої зброї (артефактів зі слота "weapon")
+ * @param preloadedArtifactsById - опціонально pre-loaded артефакти (для batch start)
  */
 async function extractAttacksFromCharacter(
   character: CharacterFromPrisma,
+  preloadedArtifactsById?: Record<string, Prisma.ArtifactGetPayload<object>>,
 ): Promise<ExtractedAttack[]> {
   const attacks: ExtractedAttack[] = [];
 
@@ -1151,13 +1173,16 @@ async function extractAttacksFromCharacter(
     return attacks;
   }
 
-  // Завантажуємо всі знайдені предмети з БД (лише строкові ID)
-  const potentialWeapons = await prisma.artifact.findMany({
-    where: {
-      id: { in: weaponIds },
-      campaignId: character.campaignId,
-    },
-  });
+  const potentialWeapons = preloadedArtifactsById
+    ? weaponIds
+        .map((id) => preloadedArtifactsById[id])
+        .filter((w): w is NonNullable<typeof w> => w != null)
+    : await prisma.artifact.findMany({
+        where: {
+          id: { in: weaponIds },
+          campaignId: character.campaignId,
+        },
+      });
 
   for (const weapon of potentialWeapons) {
     if (
@@ -1240,10 +1265,11 @@ async function extractAttacksFromCharacter(
 
 /**
  * Витягує екіпіровані артефакти з character.inventory
- * Завантажує деталі артефактів з БД
+ * Завантажує деталі артефактів з БД (або використовує preloadedArtifactsById)
  */
 async function extractEquippedArtifactsFromCharacter(
   character: CharacterFromPrisma,
+  preloadedArtifactsById?: Record<string, Prisma.ArtifactGetPayload<object>>,
 ): Promise<EquippedArtifact[]> {
   const equippedArtifacts: EquippedArtifact[] = [];
 
@@ -1266,20 +1292,21 @@ async function extractEquippedArtifactsFromCharacter(
     }
   }
 
-  // Якщо немає артефактів, повертаємо порожній масив
   if (artifactIds.length === 0) {
     return equippedArtifacts;
   }
 
-  // Завантажуємо всі артефакти одним запитом
-  const artifacts = await prisma.artifact.findMany({
-    where: {
-      id: { in: artifactIds },
-      campaignId: character.campaignId,
-    },
-  });
+  const artifacts = preloadedArtifactsById
+    ? artifactIds
+        .map((id) => preloadedArtifactsById[id])
+        .filter((a): a is NonNullable<typeof a> => a != null)
+    : await prisma.artifact.findMany({
+        where: {
+          id: { in: artifactIds },
+          campaignId: character.campaignId,
+        },
+      });
 
-  // Створюємо EquippedArtifact для кожного артефакту
   for (const artifact of artifacts) {
     const bonuses = (artifact.bonuses as Record<string, number>) || {};
 
@@ -1309,21 +1336,24 @@ async function extractEquippedArtifactsFromCharacter(
  * Витягує расові здібності з Race
  * @param raceName - назва раси
  * @param campaignId - ID кампанії
+ * @param preloadedRace - опціонально pre-loaded Race (для batch start)
  * @returns масив расових здібностей
  */
 async function extractRacialAbilities(
   raceName: string,
   campaignId: string,
+  preloadedRace?: Prisma.RaceGetPayload<object> | null,
 ): Promise<RacialAbility[]> {
   const racialAbilities: RacialAbility[] = [];
 
-  // Завантажуємо Race з БД
-  const race = await prisma.race.findFirst({
-    where: {
-      campaignId,
-      name: raceName,
-    },
-  });
+  const race =
+    preloadedRace ??
+    (await prisma.race.findFirst({
+      where: {
+        campaignId,
+        name: raceName,
+      },
+    }));
 
   if (!race || !race.passiveAbility) {
     return racialAbilities;

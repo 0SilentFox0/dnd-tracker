@@ -98,7 +98,7 @@ export function useBattleSceneLogic(id: string, battleId: string) {
     setTimeout(() => setTurnStartedNotification(null), 4000);
   }, []);
 
-  usePusherBattleSync(id, battleId, currentUserId, handleTurnStarted);
+  const { connectionState } = usePusherBattleSync(id, battleId, currentUserId, handleTurnStarted);
 
   const isDM = useMemo(() => battle?.isDM || false, [battle]);
 
@@ -278,5 +278,6 @@ export function useBattleSceneLogic(id: string, battleId: string) {
     updateParticipantMutation,
     globalDamageFlash,
     turnStartedNotification,
+    pusherConnectionState: connectionState,
   };
 }

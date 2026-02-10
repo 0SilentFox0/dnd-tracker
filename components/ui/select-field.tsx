@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useReadOnly } from "@/components/ui/read-only-context";
 import { cn } from "@/lib/utils";
 
 export interface SelectOption {
@@ -38,7 +39,21 @@ interface SelectFieldProps {
   allowNone?: boolean;
   noneLabel?: string;
   noneValue?: string;
-  children?: React.ReactNode; // Для кастомного контенту (наприклад, групи)
+  children?: React.ReactNode;
+}
+
+function findOptionLabel(
+  value: string,
+  options: SelectOption[],
+  groups: SelectOptionGroup[] | undefined,
+  allowNone: boolean,
+  noneValue: string,
+  noneLabel: string
+): string {
+  if (allowNone && (value === noneValue || !value)) return noneLabel;
+  const allOptions = groups?.flatMap((g) => g.options) ?? options;
+  const opt = allOptions.find((o) => o.value === value);
+  return opt?.label ?? value ?? "";
 }
 
 export function SelectField({
@@ -57,6 +72,34 @@ export function SelectField({
   noneValue = "none",
   children,
 }: SelectFieldProps) {
+  const readOnly = useReadOnly();
+
+  const displayValue = value || (allowNone ? noneValue : "");
+  const labelText = findOptionLabel(
+    displayValue,
+    options,
+    groups,
+    allowNone,
+    noneValue,
+    noneLabel
+  );
+
+  if (readOnly) {
+    return (
+      <span
+        id={id}
+        data-slot="select-field"
+        className={cn(
+          "text-foreground block min-h-9 w-full min-w-0 py-2 text-base md:text-sm",
+          triggerClassName,
+          className
+        )}
+      >
+        {labelText || placeholder || "\u00A0"}
+      </span>
+    );
+  }
+
   const handleValueChange = (newValue: string) => {
     if (allowNone && newValue === noneValue) {
       onValueChange("");
@@ -64,8 +107,6 @@ export function SelectField({
       onValueChange(newValue);
     }
   };
-
-  const displayValue = value || (allowNone ? noneValue : "");
 
   return (
     <Select

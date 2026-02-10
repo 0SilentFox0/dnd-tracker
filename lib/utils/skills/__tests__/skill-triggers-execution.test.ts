@@ -724,7 +724,13 @@ describe("skill-triggers-execution", () => {
 
       const result = executeOnBattleStartEffects(participant, 1);
 
-      expect(result.updatedParticipant.abilities.initiative).toBe(12);
+      // initiative_bonus зберігається в activeEffects, застосовується в calculateInitiative
+      const initiativeEffect = result.updatedParticipant.battleData.activeEffects.find(
+        (e) => e.effects?.some((d) => d.type === "initiative_bonus"),
+      );
+      expect(initiativeEffect).toBeDefined();
+      const bonus = initiativeEffect?.effects?.find((d) => d.type === "initiative_bonus");
+      expect(bonus?.value).toBe(2);
       expect(result.messages.some((m) => m.includes("ініціатива"))).toBe(true);
     });
 

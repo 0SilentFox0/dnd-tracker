@@ -1,12 +1,43 @@
-import * as React from "react"
+"use client";
 
-import { cn } from "@/lib/utils"
+import * as React from "react";
 
-function Input({ className, type, ...props }: React.ComponentProps<"input">) {
+import { useReadOnly } from "@/components/ui/read-only-context";
+import { cn } from "@/lib/utils";
+
+function Input({
+  className,
+  type,
+  value,
+  readOnly: readOnlyProp,
+  ...props
+}: React.ComponentProps<"input">) {
+  const readOnlyContext = useReadOnly();
+  const readOnly = readOnlyProp ?? readOnlyContext;
+
+  if (readOnly) {
+    const displayValue =
+      value !== undefined && value !== null
+        ? String(value)
+        : (props.defaultValue != null ? String(props.defaultValue) : "");
+    return (
+      <span
+        data-slot="input"
+        className={cn(
+          "text-foreground block min-h-9 w-full min-w-0 py-2 text-base md:text-sm",
+          className
+        )}
+      >
+        {displayValue || "\u00A0"}
+      </span>
+    );
+  }
+
   return (
     <input
       type={type}
       data-slot="input"
+      value={value}
       className={cn(
         "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
         "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
@@ -15,7 +46,7 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
       )}
       {...props}
     />
-  )
+  );
 }
 
-export { Input }
+export { Input };

@@ -5,6 +5,7 @@
 import { getSkillsByTrigger } from "./skill-triggers";
 
 import { addActiveEffect } from "@/lib/utils/battle/battle-effects";
+import { evaluateFormula } from "@/lib/utils/battle/formula-evaluator";
 import type { SkillTriggerContext } from "@/lib/utils/battle/trigger-context";
 import type { BattleParticipant } from "@/types/battle";
 import type { ActiveSkill } from "@/types/battle";
@@ -1401,19 +1402,16 @@ function evaluateFormulaSimple(
   formula: string,
   participant: BattleParticipant,
 ): number {
-  try {
-    const level = participant.abilities.level;
+  const maxHp = participant.combatStats.maxHp;
+  const currentHp = participant.combatStats.currentHp;
+  const lostHpPercent = maxHp > 0 ? ((maxHp - currentHp) / maxHp) * 100 : 0;
 
-    let expr = formula.replace(/hero_level/gi, String(level));
+  const context: Record<string, number> = {
+    hero_level: participant.abilities.level,
+    lost_hp_percent: lostHpPercent,
+    morale: participant.combatStats.morale,
+  };
 
-    expr = expr.replace(/floor\(/gi, "Math.floor(");
-
-    const result = new Function(`"use strict"; return (${expr});`)();
-
-    return typeof result === "number" && !isNaN(result)
-      ? Math.floor(result)
-      : 0;
-  } catch {
-    return 0;
-  }
+  const result = evaluateFormula(formula, context);
+  return Math.floor(result);
 }

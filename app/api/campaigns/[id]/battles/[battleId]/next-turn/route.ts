@@ -373,37 +373,32 @@ export async function POST(
     if (process.env.PUSHER_APP_ID) {
       const { pusherServer } = await import("@/lib/pusher");
 
-      await pusherServer.trigger(
-        `battle-${battleId}`,
-        "battle-updated",
-        updatedBattle,
-      );
+      void pusherServer
+        .trigger(`battle-${battleId}`, "battle-updated", updatedBattle)
+        .catch((err) => console.error("Pusher trigger failed:", err));
 
-      // Якщо бій завершено
       if (finalStatus === "completed") {
-        await pusherServer.trigger(
-          `battle-${battleId}`,
-          "battle-completed",
-          updatedBattle,
-        );
+        void pusherServer
+          .trigger(`battle-${battleId}`, "battle-completed", updatedBattle)
+          .catch((err) => console.error("Pusher trigger failed:", err));
       }
 
-      // Відправляємо notification активному гравцю про початок ходу
       const activeParticipant = updatedInitiativeOrder[nextTurnIndex];
-
       if (
         activeParticipant &&
         activeParticipant.basicInfo.controlledBy !== "dm"
       ) {
-        await pusherServer.trigger(
-          `user-${activeParticipant.basicInfo.controlledBy}`,
-          "turn-started",
-          {
-            battleId,
-            participantId: activeParticipant.basicInfo.id,
-            participantName: activeParticipant.basicInfo.name,
-          },
-        );
+        void pusherServer
+          .trigger(
+            `user-${activeParticipant.basicInfo.controlledBy}`,
+            "turn-started",
+            {
+              battleId,
+              participantId: activeParticipant.basicInfo.id,
+              participantName: activeParticipant.basicInfo.name,
+            },
+          )
+          .catch((err) => console.error("Pusher trigger failed:", err));
       }
     }
 

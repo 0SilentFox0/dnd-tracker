@@ -10,11 +10,19 @@ export const pusherServer = new Pusher({
   useTLS: true,
 });
 
-// Client-side Pusher instance
-export function getPusherClient() {
+let clientInstance: PusherClient | null = null;
+
+/**
+ * Client-side Pusher — один інстанс на вкладку (singleton), щоб не створювати кілька з'єднань.
+ */
+export function getPusherClient(): PusherClient | null {
   if (typeof window === "undefined") return null;
-  
-  return new PusherClient(process.env.NEXT_PUBLIC_PUSHER_KEY || "", {
-    cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER || "mt1",
-  });
+  const key = process.env.NEXT_PUBLIC_PUSHER_KEY;
+  if (!key) return null;
+  if (!clientInstance) {
+    clientInstance = new PusherClient(key, {
+      cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER || "mt1",
+    });
+  }
+  return clientInstance;
 }

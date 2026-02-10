@@ -21,7 +21,11 @@ export async function GET(
 
     const battle = await prisma.battleScene.findUnique({
       where: { id: battleId },
-      include: { campaign: true },
+      include: {
+        campaign: {
+          select: { id: true, friendlyFire: true },
+        },
+      },
     });
 
     if (!battle || battle.campaignId !== id) {

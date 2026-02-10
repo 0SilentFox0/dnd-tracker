@@ -23,8 +23,8 @@ import type {
   SpellCastData,
 } from "@/types/api";
 
-/** Зберігає isDM та campaign з попереднього кешу, щоб панель DM не зникала після мутацій */
-function mergeBattleCache(
+/** Зберігає isDM та campaign з попереднього кешу, щоб панель DM не зникала після мутацій. Експортується для usePusherBattleSync. */
+export function mergeBattleCache(
   queryClient: ReturnType<typeof useQueryClient>,
   campaignId: string,
   battleId: string,
@@ -82,11 +82,12 @@ export function useNextTurn(campaignId: string, battleId: string) {
 
   return useMutation({
     mutationFn: () => nextTurn(campaignId, battleId),
-    onSuccess: (_data) => {
-      // Інвалідуємо щоб клієнт перезапитав GET і отримав повний формат (campaign, isDM, currentRound)
-      queryClient.invalidateQueries({
-        queryKey: ["battle", campaignId, battleId],
-      });
+    onSuccess: (data) => {
+      queryClient.setQueryData(
+        ["battle", campaignId, battleId],
+        mergeBattleCache(queryClient, campaignId, battleId, data),
+      );
+      queryClient.invalidateQueries({ queryKey: ["battles", campaignId] });
     },
   });
 }

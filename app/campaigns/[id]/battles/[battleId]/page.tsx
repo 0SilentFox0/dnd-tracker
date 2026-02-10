@@ -41,6 +41,7 @@ export default function BattlePage({
     updateParticipantMutation,
     globalDamageFlash,
     turnStartedNotification,
+    pusherConnectionState,
   } = useBattleSceneLogic(id, battleId);
 
   const dmDialogs = useBattlePageDialogs();
@@ -97,6 +98,7 @@ export default function BattlePage({
         onReset={() => mutations.resetBattle.mutate()}
         onCompleteBattle={handlers.handleCompleteBattle}
         isDM={isDM}
+        connectionState={pusherConnectionState}
       />
 
       {/* Основний контент */}
