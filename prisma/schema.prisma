@@ -188,8 +188,10 @@ model Spell {
   duration         String?
   concentration    Boolean     @default(false)
   savingThrow      Json?
+  hitCheck         Json?   // spell attack: { ability, dc } — заклинання застосовується якщо (кидок + мод. кастера) >= dc
   description      String?
   effects          Json?    // array of effect strings (like skills)
+  effectDetails    Json?    // { duration, effects: [{ type, value, isPercentage? }] } from test assertions
   groupId          String?
   createdAt        DateTime    @default(now())
   damageElement    String?

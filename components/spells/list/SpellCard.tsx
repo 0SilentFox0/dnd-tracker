@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Move, Sparkles, X, Zap } from "lucide-react";
+import { Copy, Move, Sparkles, X, Zap } from "lucide-react";
+import { useState } from "react";
 
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { Badge } from "@/components/ui/badge";
@@ -53,6 +54,13 @@ export function SpellCard({
 
    
   const DamageTypeIcon = getSpellDamageTypeIcon(spell.damageType);
+
+  const [copied, setCopied] = useState(false);
+  const handleCopyId = async () => {
+    await navigator.clipboard.writeText(spell.id);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <Card className="hover:shadow-md transition-shadow h-full flex flex-col">
@@ -165,6 +173,24 @@ export function SpellCard({
             </>
           )}
         </CardDescription>
+        {/* Тимчасово: ID заклинання та копіювання */}
+        <div className="mt-2 flex items-center gap-2">
+          <code className="text-[10px] sm:text-xs text-muted-foreground font-mono truncate max-w-[180px] sm:max-w-none" title={spell.id}>
+            {spell.id}
+          </code>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 shrink-0"
+            onClick={handleCopyId}
+            title={copied ? "Скопійовано" : "Копіювати ID"}
+          >
+            <Copy className="h-3 w-3" />
+          </Button>
+          {copied && (
+            <span className="text-[10px] text-muted-foreground">Скопійовано</span>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col">
         <div className="text-xs sm:text-sm text-muted-foreground flex-1 line-clamp-3">

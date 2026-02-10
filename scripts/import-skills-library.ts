@@ -24,14 +24,14 @@ const prisma = new PrismaClient();
 
 // ---------- Типи ----------
 
-interface LibraryEffect {
+export interface LibraryEffect {
   stat: string;
   type: string;
   value?: number | boolean | string;
   duration?: number;
 }
 
-interface LibrarySkill {
+export interface LibrarySkill {
   id: string;
   category: string;
   mainSkill?: string;
@@ -76,13 +76,13 @@ type ParsedTrigger = SimpleTrigger | ComplexTrigger;
 
 // ---------- Парсинг JSON ----------
 
-function stripJsonComments(raw: string): string {
+export function stripJsonComments(raw: string): string {
   return raw
     .replace(/\/\*[\s\S]*?\*\//g, "")
     .replace(/\s*\/\/[^\n]*/g, "");
 }
 
-function loadSkillsFromDoc(docPath: string): LibrarySkill[] {
+export function loadSkillsFromDoc(docPath: string): LibrarySkill[] {
   const fullPath = path.isAbsolute(docPath)
     ? docPath
     : path.join(process.cwd(), docPath);
@@ -265,7 +265,7 @@ function tryParseComplexCondition(token: string): ComplexTrigger | null {
  *  - "action && oncePerBattle"
  *  - "oncePerBattle" (без тригера — вважаємо bonusAction)
  */
-function triggerStringToSkillTriggers(triggerStr: string): ParsedTrigger[] {
+export function triggerStringToSkillTriggers(triggerStr: string): ParsedTrigger[] {
   const normalized = triggerStr.trim();
   if (!normalized) return [];
 
@@ -620,9 +620,17 @@ async function main() {
   console.log("\nDone.");
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(() => prisma.$disconnect());
+// Запускати main лише коли скрипт викликають напряму (не при імпорті)
+const isEntryPoint =
+  typeof process !== "undefined" &&
+  process.argv[1] != null &&
+  process.argv[1].includes("import-skills-library");
+
+if (isEntryPoint) {
+  main()
+    .catch((e) => {
+      console.error(e);
+      process.exit(1);
+    })
+    .finally(() => prisma.$disconnect());
+}

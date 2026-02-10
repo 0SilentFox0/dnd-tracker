@@ -30,6 +30,50 @@ import { characterToFormData } from "@/lib/utils/characters/character-form";
 import type { Character } from "@/types/characters";
 import type { EquippedItems } from "@/types/inventory";
 
+/** No-op setters for read-only view (satisfies required prop types). */
+const noopBasicInfoSetters = {
+  setName: () => {},
+  setType: () => {},
+  setControlledBy: () => {},
+  setLevel: () => {},
+  setClass: () => {},
+  setSubclass: () => {},
+  setRace: () => {},
+  setSubrace: () => {},
+  setAlignment: () => {},
+  setBackground: () => {},
+  setExperience: () => {},
+  setAvatar: () => {},
+};
+
+const noopAbilitySetters = {
+  setStrength: () => {},
+  setDexterity: () => {},
+  setConstitution: () => {},
+  setIntelligence: () => {},
+  setWisdom: () => {},
+  setCharisma: () => {},
+};
+
+const noopCombatSetters = {
+  setArmorClass: () => {},
+  setInitiative: () => {},
+  setSpeed: () => {},
+  setHitDice: () => {},
+  setMinTargets: () => {},
+  setMaxTargets: () => {},
+  setMorale: () => {},
+};
+
+const noopSkillHandlers = {
+  toggleSavingThrow: () => {},
+  toggleSkill: () => {},
+};
+
+const noopAbilitiesSetters = {
+  setPersonalSkillId: () => {},
+};
+
 export function CharacterViewClient({
   campaignId,
   characterId,
@@ -165,10 +209,9 @@ export function CharacterViewClient({
               <AccordionTrigger>1. Загальна інформація</AccordionTrigger>
               <AccordionContent>
                 <CharacterBasicInfo
-                  basicInfo={{ ...basicInfo, setters: undefined }}
+                  basicInfo={{ ...basicInfo, setters: noopBasicInfoSetters }}
                   campaignMembers={members}
                   races={races}
-                  readOnly
                 />
               </AccordionContent>
             </AccordionItem>
@@ -177,8 +220,7 @@ export function CharacterViewClient({
               <AccordionTrigger>2. Основні характеристики</AccordionTrigger>
               <AccordionContent>
                 <CharacterAbilityScores
-                  abilityScores={{ ...abilityScores, setters: undefined }}
-                  readOnly
+                  abilityScores={{ ...abilityScores, setters: noopAbilitySetters }}
                 />
               </AccordionContent>
             </AccordionItem>
@@ -200,8 +242,7 @@ export function CharacterViewClient({
                   isDm={false}
                 />
                 <CharacterCombatParams
-                  combatStats={{ ...combatStats, setters: undefined }}
-                  readOnly
+                  combatStats={{ ...combatStats, setters: noopCombatSetters }}
                 />
               </AccordionContent>
             </AccordionItem>
@@ -210,8 +251,7 @@ export function CharacterViewClient({
               <AccordionTrigger>4. Навички та Збереження</AccordionTrigger>
               <AccordionContent>
                 <CharacterSkillsSection
-                  skills={{ ...skills, handlers: undefined }}
-                  readOnly
+                  skills={{ ...skills, handlers: noopSkillHandlers }}
                 />
               </AccordionContent>
             </AccordionItem>
@@ -221,8 +261,7 @@ export function CharacterViewClient({
               <AccordionContent>
                 <CharacterAbilitiesSection
                   campaignId={campaignId}
-                  abilities={{ ...abilities, setters: undefined }}
-                  readOnly
+                  abilities={{ ...abilities, setters: noopAbilitiesSetters }}
                 />
                 <CharacterSkillTreeView
                   campaignId={campaignId}

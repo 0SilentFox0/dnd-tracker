@@ -22,6 +22,7 @@ const spellSchema = z.object({
     )
     .optional(), // результати saving throws
   additionalRollResult: z.number().optional(), // результат додаткових кубиків
+  hitRoll: z.number().min(1).max(20).optional(), // кидок попадання для заклинань з hitCheck
 });
 
 export async function POST(
@@ -132,11 +133,14 @@ export async function POST(
         | {
             ability: string;
             onSuccess: "half" | "none";
+            dc?: number;
           }
         | null,
+      hitCheck: spellData.hitCheck as { ability: string; dc: number } | null ?? undefined,
       description: spellData.description ?? "",
       duration: spellData.duration,
       castingTime: spellData.castingTime,
+      effectDetails: spellData.effectDetails as BattleSpell["effectDetails"] ?? undefined,
     };
 
     // Обробляємо заклинання через нову функцію
@@ -150,6 +154,7 @@ export async function POST(
       damageRolls: data.damageRolls,
       savingThrows: data.savingThrows,
       additionalRollResult: data.additionalRollResult,
+      hitRoll: data.hitRoll,
     });
 
     // Оновлюємо учасників в initiativeOrder

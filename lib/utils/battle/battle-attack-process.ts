@@ -493,6 +493,37 @@ export function processAttack(
     updatedAttacker = onHitResult.updatedAttacker;
   }
 
+  // 7e. Вампіризм: атакуючий відновлює HP при melee/ranged уроні
+  let vampirismHeal = 0;
+  const isMeleeOrRanged =
+    attack.type === AttackType.MELEE || attack.type === AttackType.RANGED;
+  if (isHit && totalFinalDamage > 0 && isMeleeOrRanged) {
+    let vampirismPercent = 0;
+    for (const ae of updatedAttacker.battleData.activeEffects) {
+      for (const d of ae.effects) {
+        if (d.type === "vampirism" && typeof d.value === "number") {
+          vampirismPercent += d.isPercentage ? d.value : 0;
+        }
+      }
+    }
+    if (vampirismPercent > 0) {
+      vampirismHeal = Math.floor((totalFinalDamage * vampirismPercent) / 100);
+      if (vampirismHeal > 0) {
+        const oldHp = updatedAttacker.combatStats.currentHp;
+        updatedAttacker = {
+          ...updatedAttacker,
+          combatStats: {
+            ...updatedAttacker.combatStats,
+            currentHp: Math.min(
+              updatedAttacker.combatStats.maxHp,
+              oldHp + vampirismHeal,
+            ),
+          },
+        };
+      }
+    }
+  }
+
   // Зливаємо оновлені skillUsageCounts назад у учасників
   updatedAttacker = {
     ...updatedAttacker,
@@ -640,7 +671,7 @@ export function processAttack(
       damageBreakdown: damageCalculation.breakdown.join("; "),
     },
     resultText: [
-      `${attacker.basicInfo.name} завдав ${totalFinalDamage} урону ${target.basicInfo.name}${attackRoll.isCritical ? " (КРИТИЧНЕ ПОПАДАННЯ!)" : ""}${criticalEffectApplied ? ` [d10: ${criticalEffectApplied.id}] ${criticalEffectApplied.name}` : ""}${reactionTriggered ? ` | ${target.basicInfo.name} виконав контр-удар на ${reactionDamage} урону` : ""}`,
+      `${attacker.basicInfo.name} завдав ${totalFinalDamage} урону ${target.basicInfo.name}${attackRoll.isCritical ? " (КРИТИЧНЕ ПОПАДАННЯ!)" : ""}${criticalEffectApplied ? ` [d10: ${criticalEffectApplied.id}] ${criticalEffectApplied.name}` : ""}${vampirismHeal > 0 ? ` | Вампіризм: ${attacker.basicInfo.name} відновив ${vampirismHeal} HP` : ""}${reactionTriggered ? ` | ${target.basicInfo.name} виконав контр-удар на ${reactionDamage} урону` : ""}`,
       ...beforeAttackResult.messages,
       ...afterAttackResult.messages,
     ].filter(Boolean).join(" | "),
@@ -652,6 +683,17 @@ export function processAttack(
         newHp: updatedTarget.combatStats.currentHp,
         change: totalFinalDamage,
       },
+      ...(vampirismHeal > 0
+        ? [
+            {
+              participantId: attacker.basicInfo.id,
+              participantName: attacker.basicInfo.name,
+              oldHp: updatedAttacker.combatStats.currentHp - vampirismHeal,
+              newHp: updatedAttacker.combatStats.currentHp,
+              change: -vampirismHeal,
+            },
+          ]
+        : []),
       ...(reactionTriggered && reactionAttackerHpChange
         ? [
             {

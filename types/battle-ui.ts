@@ -31,6 +31,7 @@ export interface SpellCastData {
   damageRolls: number[];
   savingThrows?: Array<{ participantId: string; roll: number }>;
   additionalRollResult?: number;
+  hitRoll?: number;
 }
 
 /**

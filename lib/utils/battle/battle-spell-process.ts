@@ -35,10 +35,18 @@ export interface BattleSpell {
   savingThrow?: {
     ability: string;
     onSuccess: "half" | "none";
+    dc?: number;
   } | null;
+  /** Spell attack: заклинання застосовується лише якщо (hitRoll + мод. кастера) >= dc */
+  hitCheck?: { ability: string; dc: number } | null;
   description: string;
   duration?: string | null;
   castingTime?: string | null;
+  /** Структуровані ефекти з тест-кейсів: { duration, effects: [{ type, value, isPercentage? }] } */
+  effectDetails?: {
+    duration?: number;
+    effects?: Array<{ type: string; value: number; isPercentage?: boolean }>;
+  } | null;
 }
 
 /**
@@ -57,6 +65,8 @@ export interface ProcessSpellParams {
     roll: number; // результат d20
   }>; // результати saving throws для кожної цілі
   additionalRollResult?: number; // результат додаткових кубиків (для spellAdditionalModifier)
+  /** Кидок попадання (d20) для заклинань з hitCheck — застосовується лише якщо (hitRoll + мод.) >= hitCheck.dc */
+  hitRoll?: number;
 }
 
 /**
@@ -89,6 +99,7 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
     damageRolls,
     savingThrows = [],
     additionalRollResult,
+    hitRoll,
   } = params;
 
   let updatedCaster = { ...caster };
@@ -270,6 +281,60 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
     };
   }
 
+  // 1b. Перевірка попадання (spell attack): якщо hitCheck задано і (hitRoll + мод.) < dc — промах
+  if (spell.hitCheck) {
+    const ability = spell.hitCheck.ability.toLowerCase();
+    const modifier =
+      updatedCaster.abilities.modifiers[
+        ability as keyof typeof updatedCaster.abilities.modifiers
+      ] ?? 0;
+    const totalHit = (hitRoll ?? 0) + modifier;
+    if (hitRoll === undefined || totalHit < spell.hitCheck.dc) {
+      updatedCaster.spellcasting.spellSlots[spellLevel] = {
+        ...updatedCaster.spellcasting.spellSlots[spellLevel],
+        current: updatedCaster.spellcasting.spellSlots[spellLevel].current - 1,
+      };
+      const isBonusAction = spell.castingTime?.toLowerCase().includes("bonus") ?? false;
+      if (isBonusAction) {
+        updatedCaster.actionFlags.hasUsedBonusAction = true;
+      } else {
+        updatedCaster.actionFlags.hasUsedAction = true;
+      }
+      const missAction: BattleAction = {
+        id: `spell-${caster.basicInfo.id}-${Date.now()}`,
+        battleId,
+        round: currentRound,
+        actionIndex: 0,
+        timestamp: new Date(),
+        actorId: caster.basicInfo.id,
+        actorName: caster.basicInfo.name,
+        actorSide: caster.basicInfo.side,
+        actionType: "spell",
+        targets: targetIds.map((id) => {
+          const target = allParticipants.find((p) => p.basicInfo.id === id);
+          return {
+            participantId: id,
+            participantName: target?.basicInfo.name || "Unknown",
+          };
+        }),
+        actionDetails: {
+          spellId: spell.id,
+          spellName: spell.name,
+          spellLevel: spell.level,
+        },
+        resultText: `${caster.basicInfo.name} використав ${spell.name}, але не влучив (перевірка попадання)`,
+        hpChanges: [],
+        isCancelled: false,
+      };
+      return {
+        success: true,
+        targetsUpdated: updatedTargets,
+        casterUpdated: updatedCaster,
+        battleAction: missAction,
+      };
+    }
+  }
+
   // 2. Розраховуємо базовий урон/лікування
   const baseValue = damageRolls.reduce((sum, roll) => sum + roll, 0);
 
@@ -318,8 +383,11 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
 
         const totalSave = savingThrow.roll + statModifier;
 
-        // Перевіряємо чи успішний save
-        const spellSaveDC = updatedCaster.spellcasting.spellSaveDC || 10;
+        // DC з запису заклинання має пріоритет над DC кастера
+        const spellSaveDC =
+          typeof spell.savingThrow.dc === "number"
+            ? spell.savingThrow.dc
+            : updatedCaster.spellcasting.spellSaveDC || 10;
 
         if (totalSave >= spellSaveDC) {
           // Успішний save
@@ -350,13 +418,14 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
       resistanceBreakdown: allResistanceBreakdown,
     };
 
-    // Застосовуємо урон до цілей
+    // Застосовуємо урон до цілей (лише до ворогів — бафи на союзників не завдають шкоди)
     for (const { target, finalDamage } of targetDamages) {
       const targetIndex = updatedTargets.findIndex(
         (t) => t.basicInfo.id === target.basicInfo.id,
       );
 
       if (targetIndex === -1) continue;
+      if (target.basicInfo.side === updatedCaster.basicInfo.side) continue; // союзники — без урону
 
       let remainingDamage = finalDamage;
 
@@ -488,8 +557,31 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
   }
 
   // 4b. Додаємо ефект з тривалістю в раундах (дебаф/стан)
-  const durationRounds = parseDurationToRounds(spell.duration);
-  if (durationRounds > 0) {
+  const durationRounds =
+    spell.effectDetails?.duration ?? parseDurationToRounds(spell.duration ?? "");
+  let spellEffectDetails =
+    spell.effectDetails?.effects?.map((e) => ({
+      type: e.type,
+      value: e.value,
+      ...(e.isPercentage != null && { isPercentage: e.isPercentage }),
+    })) ?? [];
+  if (
+    spell.healModifier === "vampirism" &&
+    !spellEffectDetails.some((e) => e.type === "vampirism")
+  ) {
+    spellEffectDetails = [
+      ...spellEffectDetails,
+      { type: "vampirism", value: 50, isPercentage: true },
+    ];
+  }
+  if (durationRounds > 0 || spellEffectDetails.length > 0) {
+    const actualDuration = durationRounds > 0 ? durationRounds : 1;
+    const isBeneficial = spellEffectDetails.every((e) => {
+      if (e.type === "vampirism" || e.type === "ranged_damage_reduction")
+        return true;
+      return e.value >= 0;
+    });
+    const effectType = isBeneficial ? "buff" : "debuff";
     for (const target of updatedTargets) {
       const targetIndex = updatedTargets.findIndex(
         (t) => t.basicInfo.id === target.basicInfo.id,
@@ -500,10 +592,10 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
         {
           id: `spell-effect-${spell.id}-${target.basicInfo.id}-${Date.now()}`,
           name: spell.name,
-          type: "debuff",
+          type: effectType,
           description: spell.description,
-          duration: durationRounds,
-          effects: [],
+          duration: actualDuration,
+          effects: spellEffectDetails,
         },
         currentRound,
       );
@@ -568,7 +660,10 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
 
     const totalSave = st.roll + statModifier;
 
-    const spellSaveDC = updatedCaster.spellcasting.spellSaveDC || 10;
+    const spellSaveDC =
+      spell.savingThrow && typeof spell.savingThrow.dc === "number"
+        ? spell.savingThrow.dc
+        : updatedCaster.spellcasting.spellSaveDC || 10;
 
     const result = totalSave >= spellSaveDC ? "success" : "fail";
 

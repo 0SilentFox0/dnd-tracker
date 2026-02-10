@@ -49,6 +49,17 @@ export function calculateSkillDamagePercentBonus(
     }
   }
 
+  // Бонуси/дебафи з активних ефектів (заклинання: Weakness -40%, Righteous Might +40%)
+  for (const ae of attacker.battleData.activeEffects) {
+    for (const d of ae.effects) {
+      const val = typeof d.value === "number" ? d.value : 0;
+      const isPct = d.isPercentage === true;
+      if (isPct && matchesAttackType(d.type ?? "", attackType)) {
+        totalPercent += val;
+      }
+    }
+  }
+
   return totalPercent;
 }
 
@@ -68,6 +79,15 @@ export function calculateSkillDamageFlatBonus(
     for (const effect of skill.effects) {
       if (!effect.isPercentage && typeof effect.value === "number" && matchesAttackType(effect.stat, attackType)) {
         totalFlat += effect.value;
+      }
+    }
+  }
+
+  for (const ae of attacker.battleData.activeEffects) {
+    for (const d of ae.effects) {
+      const val = typeof d.value === "number" ? d.value : 0;
+      if (d.isPercentage !== true && matchesAttackType(d.type ?? "", attackType)) {
+        totalFlat += val;
       }
     }
   }

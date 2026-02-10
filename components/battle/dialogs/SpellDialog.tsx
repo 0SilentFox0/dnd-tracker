@@ -30,7 +30,9 @@ interface Spell {
   savingThrow?: {
     ability: string;
     onSuccess: "half" | "none";
+    dc?: number;
   } | null;
+  hitCheck?: { ability: string; dc: number } | null;
   description?: string;
   spellGroup?: { id: string; name: string } | null;
   icon?: string | null;
@@ -53,6 +55,7 @@ interface SpellDialogProps {
     damageRolls: number[];
     savingThrows?: Array<{ participantId: string; roll: number }>;
     additionalRollResult?: number;
+    hitRoll?: number;
   }) => void;
 }
 
@@ -80,6 +83,8 @@ export function SpellDialog({
   const [damageRolls, setDamageRolls] = useState<string[]>([]);
 
   const [additionalRoll, setAdditionalRoll] = useState("");
+
+  const [hitRoll, setHitRoll] = useState("");
 
   const [spells, setSpells] = useState<Spell[]>([]);
 
@@ -215,6 +220,8 @@ export function SpellDialog({
         roll: data.roll,
       }));
 
+    const hitRollNum = hitRoll ? parseInt(hitRoll, 10) : undefined;
+
     onCast({
       casterId: caster.basicInfo.id,
       casterType: caster.basicInfo.sourceType,
@@ -226,6 +233,10 @@ export function SpellDialog({
       additionalRollResult: additionalRoll
         ? parseInt(additionalRoll)
         : undefined,
+      hitRoll:
+        hitRollNum !== undefined && hitRollNum >= 1 && hitRollNum <= 20
+          ? hitRollNum
+          : undefined,
     });
 
     // Скидаємо форму
@@ -234,6 +245,7 @@ export function SpellDialog({
     setSavingThrows({});
     setDamageRolls([]);
     setAdditionalRoll("");
+    setHitRoll("");
   };
 
   const handleOpenChange = (open: boolean) => {
@@ -243,6 +255,7 @@ export function SpellDialog({
       setSavingThrows({});
       setDamageRolls([]);
       setAdditionalRoll("");
+      setHitRoll("");
     }
 
     onOpenChange(open);
@@ -488,6 +501,23 @@ export function SpellDialog({
               </div>
             )}
 
+          {/* Перевірка попадання (HT) — один кидок для заклинання */}
+          {selectedSpell?.hitCheck && (
+            <div>
+              <Label>
+                Кидок попадання ({selectedSpell.hitCheck.ability.toUpperCase()}) — потрібно &gt;= {selectedSpell.hitCheck.dc}
+              </Label>
+              <Input
+                type="number"
+                min={1}
+                max={20}
+                value={hitRoll}
+                onChange={(e) => setHitRoll(e.target.value)}
+                placeholder="1d20"
+              />
+            </div>
+          )}
+
           {/* Saving Throws (якщо заклинання вимагає) */}
           {selectedTargets.length > 0 && selectedSpell?.savingThrow && (
             <div>
@@ -539,7 +569,13 @@ export function SpellDialog({
                 ? false
                 : selectedSpell.type === "target"
                   ? selectedTargets.length !== 1
-                  : selectedTargets.length === 0)
+                  : selectedTargets.length === 0) ||
+              (selectedSpell.hitCheck != null &&
+                (() => {
+                  const n = hitRoll ? parseInt(hitRoll, 10) : NaN;
+
+                  return !(n >= 1 && n <= 20);
+                })())
             }
             className="w-full"
           >

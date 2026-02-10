@@ -37,6 +37,20 @@ const updateSpellSchema = z.object({
     })
     .optional()
     .nullable(),
+  hitCheck: z
+    .object({
+      ability: z.enum([
+        "strength",
+        "dexterity",
+        "constitution",
+        "intelligence",
+        "wisdom",
+        "charisma",
+      ]),
+      dc: z.number().min(1).max(30),
+    })
+    .optional()
+    .nullable(),
   description: z.string().optional().nullable(),
   effects: z.array(z.string()).optional().nullable(),
   groupId: z.string().optional().nullable(),
@@ -134,6 +148,12 @@ export async function PATCH(
             ? Prisma.JsonNull
             : data.savingThrow
             ? (data.savingThrow as unknown as Prisma.InputJsonValue)
+            : undefined,
+        hitCheck:
+          data.hitCheck !== undefined
+            ? data.hitCheck === null
+              ? Prisma.JsonNull
+              : (data.hitCheck as unknown as Prisma.InputJsonValue)
             : undefined,
         description: data.description !== undefined ? data.description : undefined,
         effects: data.effects !== undefined ? (data.effects as unknown as Prisma.InputJsonValue) : undefined,
