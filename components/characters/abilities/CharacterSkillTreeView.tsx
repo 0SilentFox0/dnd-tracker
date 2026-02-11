@@ -103,7 +103,7 @@ export function CharacterSkillTreeView({
 
   const race = useMemo(
     () => races.find((r) => r.name === characterRace) ?? null,
-    [races, characterRace]
+    [races, characterRace],
   );
 
   const maxSkills = characterLevel;
@@ -123,7 +123,7 @@ export function CharacterSkillTreeView({
         },
       });
     },
-    [baseSkillTree, onSkillTreeProgressChange, skillTreeProgress]
+    [baseSkillTree, onSkillTreeProgressChange, skillTreeProgress],
   );
 
   const handleSkillClick = useCallback(
@@ -139,7 +139,7 @@ export function CharacterSkillTreeView({
       }
       applyNewUnlocked([...unlockedSkills, skill.id]);
     },
-    [canLevel, unlockedSkills, maxSkills, applyNewUnlocked]
+    [canLevel, unlockedSkills, maxSkills, applyNewUnlocked],
   );
 
   const handleUltimateSkillClick = useCallback(
@@ -155,7 +155,7 @@ export function CharacterSkillTreeView({
       }
       applyNewUnlocked([...unlockedSkills, skill.id]);
     },
-    [canLevel, unlockedSkills, maxSkills, applyNewUnlocked]
+    [canLevel, unlockedSkills, maxSkills, applyNewUnlocked],
   );
 
   const handleRacialSkillClick = useCallback(
@@ -164,13 +164,13 @@ export function CharacterSkillTreeView({
       const canLearn = canLearnRacialSkillLevel(
         level,
         mainSkill.id,
-        unlockedSkills
+        unlockedSkills,
       );
       if (!canLearn) return;
       const racialSkillLevelId = getRacialSkillLevelId(mainSkill.id, level);
       if (unlockedSkills.includes(racialSkillLevelId)) {
         applyNewUnlocked(
-          unlockedSkills.filter((id) => id !== racialSkillLevelId)
+          unlockedSkills.filter((id) => id !== racialSkillLevelId),
         );
         return;
       }
@@ -180,7 +180,7 @@ export function CharacterSkillTreeView({
       }
       applyNewUnlocked([...unlockedSkills, racialSkillLevelId]);
     },
-    [canLevel, unlockedSkills, maxSkills, applyNewUnlocked]
+    [canLevel, unlockedSkills, maxSkills, applyNewUnlocked],
   );
 
   if (!characterRace) {
@@ -200,11 +200,11 @@ export function CharacterSkillTreeView({
   }
 
   return (
-    <div className="mt-4 border rounded-lg p-4 bg-muted/30">
-      <h4 className="text-sm font-medium mb-2">Дерево прокачки</h4>
-      <p className="text-sm text-muted-foreground mb-2">
-        Рівень героя: {characterLevel}. Прокачано скілів: {unlockedSkills.length}{" "}
-        / {characterLevel}
+    <div className="mt-4 border rounded-lg md:p-4 bg-muted/30">
+      <h4 className="text-sm font-medium mb-2 p-1">Дерево прокачки</h4>
+      <p className="text-sm text-muted-foreground mb-2 p-1">
+        Рівень героя: {characterLevel}. Прокачано скілів:{" "}
+        {unlockedSkills.length} / {characterLevel}
         {canLevel &&
           " — можна вивчати навики (клікайте по навиках для додавання/зняття)."}
       </p>

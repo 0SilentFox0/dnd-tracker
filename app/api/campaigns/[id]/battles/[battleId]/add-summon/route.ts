@@ -104,7 +104,7 @@ export async function POST(
         spellcastingAbility: undefined,
         spellSaveDC: undefined,
         spellAttackBonus: undefined,
-        spellSlots: {},
+        spellSlots: { universal: { max: 3, current: 3 } },
         knownSpells: [],
       },
       battleData: {

@@ -2,6 +2,7 @@
  * Утиліти для виконання ефектів скілів з тригерів
  */
 
+import { ParticipantSide } from "@/lib/constants/battle";
 import { getSkillsByTrigger } from "./skill-triggers";
 
 import { addActiveEffect } from "@/lib/utils/battle/battle-effects";
@@ -918,13 +919,44 @@ export function executeOnKillEffects(
 }
 
 /**
- * Виконує onBattleStart ефекти (Перший удар: ініціатива +2, тощо).
+ * Визначає цілі для ефекту onBattleStart на основі effect.target
+ */
+function getEffectTargets(
+  caster: BattleParticipant,
+  target: string | undefined,
+  allParticipants: BattleParticipant[],
+): BattleParticipant[] {
+  switch (target) {
+    case "all_allies":
+      return allParticipants.filter(
+        (p) => p.basicInfo.side === ParticipantSide.ALLY,
+      );
+    case "all_enemies":
+      return allParticipants.filter(
+        (p) => p.basicInfo.side === ParticipantSide.ENEMY,
+      );
+    case "all":
+      return allParticipants;
+    case "self":
+    case "enemy":
+    default:
+      return [caster];
+  }
+}
+
+/**
+ * Виконує onBattleStart ефекти з підтримкою цілей (Союзники/Вороги/Усі).
+ * Для effect.target: all_allies — всім союзникам, all_enemies — всім ворогам, all — усім.
  */
 export function executeOnBattleStartEffects(
   participant: BattleParticipant,
   currentRound: number,
+  allParticipants?: BattleParticipant[],
 ): { updatedParticipant: BattleParticipant; messages: string[] } {
-  let updatedParticipant = { ...participant };
+  const participants = allParticipants ?? [participant];
+  const byId = new Map(participants.map((p) => [p.basicInfo.id, { ...p }]));
+  const get = (id: string) => byId.get(id)!;
+  const set = (p: BattleParticipant) => byId.set(p.basicInfo.id, p);
 
   const messages: string[] = [];
 
@@ -939,71 +971,72 @@ export function executeOnBattleStartEffects(
 
     for (const effect of skill.effects) {
       const numValue = typeof effect.value === "number" ? effect.value : 0;
+      const targets = getEffectTargets(
+        participant,
+        effect.target,
+        Array.from(byId.values()),
+      );
+
+      const applyEffect = (target: BattleParticipant, effectConfig: {
+        id: string;
+        name: string;
+        type: "buff";
+        duration: number;
+        effects: Array<{ type: string; value: number }>;
+      }) => {
+        const ne = addActiveEffect(target, effectConfig, currentRound);
+        set({
+          ...target,
+          battleData: { ...target.battleData, activeEffects: ne },
+        });
+      };
 
       switch (effect.stat) {
         case "initiative": {
-          const ne = addActiveEffect(
-            updatedParticipant,
-            {
+          for (const target of targets) {
+            applyEffect(target, {
               id: `skill-${skill.skillId}-battle-start-initiative`,
               name: `${skill.name} — ініціатива`,
               type: "buff",
               duration: 999,
               effects: [{ type: "initiative_bonus", value: numValue }],
-            },
-            currentRound,
-          );
-          updatedParticipant = {
-            ...updatedParticipant,
-            battleData: { ...updatedParticipant.battleData, activeEffects: ne },
-          };
+            });
+          }
+          const targetNames = targets.map((t) => t.basicInfo.name).join(", ");
           messages.push(
-            `🏃 ${skill.name}: ${participant.basicInfo.name} +${numValue} ініціатива`,
+            `🏃 ${skill.name}: ${participant.basicInfo.name} → ${targetNames} +${numValue} ініціатива`,
           );
           break;
         }
         case "damage": {
-          // Бонус до першої атаки — зберігаємо як тимчасовий ефект
-          const ne = addActiveEffect(
-            updatedParticipant,
-            {
+          for (const target of targets) {
+            applyEffect(target, {
               id: `skill-${skill.skillId}-battle-start-dmg`,
               name: `${skill.name} — бонус урону`,
               type: "buff",
               duration: 1,
               effects: [{ type: "damage_bonus", value: numValue }],
-            },
-            currentRound,
-          );
-
-          updatedParticipant = {
-            ...updatedParticipant,
-            battleData: { ...updatedParticipant.battleData, activeEffects: ne },
-          };
+            });
+          }
+          const targetNames = targets.map((t) => t.basicInfo.name).join(", ");
           messages.push(
-            `⚔️ ${skill.name}: ${participant.basicInfo.name} +${effect.value} урону на першу атаку`,
+            `⚔️ ${skill.name}: ${participant.basicInfo.name} → ${targetNames} +${effect.value} урону на першу атаку`,
           );
           break;
         }
         case "advantage": {
-          const ne = addActiveEffect(
-            updatedParticipant,
-            {
+          for (const target of targets) {
+            applyEffect(target, {
               id: `skill-${skill.skillId}-battle-start-adv`,
               name: `${skill.name} — advantage`,
               type: "buff",
               duration: 1,
               effects: [{ type: "advantage_attack", value: 1 }],
-            },
-            currentRound,
-          );
-
-          updatedParticipant = {
-            ...updatedParticipant,
-            battleData: { ...updatedParticipant.battleData, activeEffects: ne },
-          };
+            });
+          }
+          const targetNames = targets.map((t) => t.basicInfo.name).join(", ");
           messages.push(
-            `🎲 ${skill.name}: ${participant.basicInfo.name} advantage на першу атаку`,
+            `🎲 ${skill.name}: ${participant.basicInfo.name} → ${targetNames} advantage на першу атаку`,
           );
           break;
         }
@@ -1013,7 +1046,120 @@ export function executeOnBattleStartEffects(
     }
   }
 
+  const updatedParticipant = get(participant.basicInfo.id);
+
   return { updatedParticipant, messages };
+}
+
+/**
+ * Застосовує onBattleStart ефекти для всіх учасників з підтримкою цілей.
+ * Повертає оновлений initiativeOrder.
+ */
+export function executeOnBattleStartEffectsForAll(
+  initiativeOrder: BattleParticipant[],
+  currentRound: number,
+): { updatedParticipants: BattleParticipant[]; messages: string[] } {
+  const byId = new Map(
+    initiativeOrder.map((p) => [p.basicInfo.id, { ...p }]),
+  );
+  const get = (id: string) => byId.get(id)!;
+  const set = (p: BattleParticipant) => byId.set(p.basicInfo.id, p);
+  const all = () => initiativeOrder.map((p) => get(p.basicInfo.id));
+
+  const messages: string[] = [];
+
+  for (const participant of initiativeOrder) {
+    const current = get(participant.basicInfo.id);
+
+    for (const skill of current.battleData.activeSkills) {
+      if (!skill.skillTriggers) continue;
+
+      const trigger = skill.skillTriggers.find(
+        (t) => t.type === "simple" && t.trigger === "onBattleStart",
+      );
+
+      if (!trigger) continue;
+
+      for (const effect of skill.effects) {
+        const numValue = typeof effect.value === "number" ? effect.value : 0;
+        const targets = getEffectTargets(current, effect.target, all());
+
+        const applyEffect = (target: BattleParticipant, effectConfig: {
+          id: string;
+          name: string;
+          type: "buff";
+          duration: number;
+          effects: Array<{ type: string; value: number }>;
+        }) => {
+          const ne = addActiveEffect(target, effectConfig, currentRound);
+          set({
+            ...target,
+            battleData: { ...target.battleData, activeEffects: ne },
+          });
+        };
+
+        switch (effect.stat) {
+          case "initiative":
+            for (const target of targets) {
+              applyEffect(target, {
+                id: `skill-${skill.skillId}-battle-start-initiative`,
+                name: `${skill.name} — ініціатива`,
+                type: "buff",
+                duration: 999,
+                effects: [{ type: "initiative_bonus", value: numValue }],
+              });
+            }
+            if (targets.length > 0) {
+              const targetNames = targets.map((t) => t.basicInfo.name).join(", ");
+              messages.push(
+                `🏃 ${skill.name}: ${current.basicInfo.name} → ${targetNames} +${numValue} ініціатива`,
+              );
+            }
+            break;
+          case "damage":
+            for (const target of targets) {
+              applyEffect(target, {
+                id: `skill-${skill.skillId}-battle-start-dmg`,
+                name: `${skill.name} — бонус урону`,
+                type: "buff",
+                duration: 1,
+                effects: [{ type: "damage_bonus", value: numValue }],
+              });
+            }
+            if (targets.length > 0) {
+              const targetNames = targets.map((t) => t.basicInfo.name).join(", ");
+              messages.push(
+                `⚔️ ${skill.name}: ${current.basicInfo.name} → ${targetNames} +${effect.value} урону на першу атаку`,
+              );
+            }
+            break;
+          case "advantage":
+            for (const target of targets) {
+              applyEffect(target, {
+                id: `skill-${skill.skillId}-battle-start-adv`,
+                name: `${skill.name} — advantage`,
+                type: "buff",
+                duration: 1,
+                effects: [{ type: "advantage_attack", value: 1 }],
+              });
+            }
+            if (targets.length > 0) {
+              const targetNames = targets.map((t) => t.basicInfo.name).join(", ");
+              messages.push(
+                `🎲 ${skill.name}: ${current.basicInfo.name} → ${targetNames} advantage на першу атаку`,
+              );
+            }
+            break;
+          default:
+            break;
+        }
+      }
+    }
+  }
+
+  const updatedParticipants = initiativeOrder.map((p) => get(p.basicInfo.id));
+
+  return { updatedParticipants, messages };
 }
 
 // ============================================================================

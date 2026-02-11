@@ -15,7 +15,7 @@ import {
   sortByInitiative,
 } from "@/lib/utils/battle/battle-start";
 import {
-  executeOnBattleStartEffects,
+  executeOnBattleStartEffectsForAll,
   executeStartOfRoundTriggers,
 } from "@/lib/utils/skills/skill-triggers-execution";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
@@ -271,12 +271,8 @@ export async function POST(
     });
 
     // Скіли з тригером onBattleStart (наприклад +2 ініціатива, бонус на перший удар)
-    const onBattleStartMessages: string[] = [];
-    const afterOnBattleStart = updatedInitiativeOrder.map((participant) => {
-      const result = executeOnBattleStartEffects(participant, 1);
-      onBattleStartMessages.push(...result.messages);
-      return result.updatedParticipant;
-    });
+    const { updatedParticipants: afterOnBattleStart, messages: onBattleStartMessages } =
+      executeOnBattleStartEffectsForAll(updatedInitiativeOrder, 1);
 
     // Тригери початку раунду (раунд 1) — щоб бонуси ініціативи з startRound скілів потрапили до розрахунку
     const { updatedParticipants: afterStartOfRound, messages: startOfRoundMessages } =

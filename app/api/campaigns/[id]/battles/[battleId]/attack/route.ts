@@ -155,9 +155,11 @@ export async function POST(
       );
     }
 
-    // Обмеження кількості цілей (якщо потрібно)
-    const maxPossibleTargets =
-      attack.maxTargets || attacker.combatStats.maxTargets || 1;
+    // Обмеження кількості цілей
+    const isAoe = attack.targetType === "aoe";
+    const maxPossibleTargets = isAoe
+      ? attack.maxTargets || attacker.combatStats.maxTargets || 1
+      : 1;
 
     if (targets.length > maxPossibleTargets) {
       return NextResponse.json(
@@ -167,6 +169,25 @@ export async function POST(
         { status: 400 },
       );
     }
+
+    if (!isAoe && targets.length > 1) {
+      return NextResponse.json(
+        { error: "Single-target attack allows only one target" },
+        { status: 400 },
+      );
+    }
+
+    // Розподіл шкоди для AOE: нормалізуємо суму (кожна ціль макс. 100%)
+    const dist = attack.damageDistribution;
+    const damageFractions: number[] =
+      dist &&
+      dist.length === targets.length &&
+      dist.every((n) => typeof n === "number" && n >= 0 && n <= 100)
+        ? (() => {
+            const sum = dist.reduce((a, b) => a + b, 0);
+            return sum > 0 ? dist.map((p) => p / sum) : targets.map(() => 1 / targets.length);
+          })()
+        : targets.map(() => 1 / targets.length);
 
     let currentAttacker = { ...attacker };
 
@@ -192,7 +213,11 @@ export async function POST(
     let stateBefore = snapshotState();
 
     // Обробляємо атаку для кожної цілі
-    for (const target of targets) {
+    for (let i = 0; i < targets.length; i++) {
+      const target = targets[i];
+      const damageMultiplier =
+        targets.length > 1 ? damageFractions[i] : undefined;
+
       const attackResult = processAttack({
         attacker: currentAttacker,
         target,
@@ -203,6 +228,7 @@ export async function POST(
         allParticipants: currentInitiativeOrder,
         currentRound: battle.currentRound,
         battleId,
+        damageMultiplier,
       });
 
       // Оновлюємо атакуючого для наступної ітерації (якщо були зміни)

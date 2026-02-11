@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 
-import { ReadOnlyProvider } from "@/components/ui/read-only-context";
 import { CharacterAbilitiesSection } from "@/components/characters/abilities/CharacterAbilitiesSection";
 import { CharacterSkillTreeView } from "@/components/characters/abilities/CharacterSkillTreeView";
 import { CharacterArtifactsSection } from "@/components/characters/artifacts/CharacterArtifactsSection";
@@ -22,10 +21,11 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { ReadOnlyProvider } from "@/components/ui/read-only-context";
 import { getCharacter, updateCharacter } from "@/lib/api/characters";
+import { getHeroMaxHpBreakdown } from "@/lib/constants/hero-scaling";
 import { useCampaignMembers } from "@/lib/hooks/useCampaignMembers";
 import { useCharacterForm } from "@/lib/hooks/useCharacterForm";
-import { useHeroScalingCoefficients } from "@/lib/hooks/useHeroScalingCoefficients";
 import { useRaces } from "@/lib/hooks/useRaces";
 import { characterToFormData } from "@/lib/utils/characters/character-form";
 import type { Character } from "@/types/characters";
@@ -85,13 +85,15 @@ export function CharacterViewClient({
   allowPlayerEdit: boolean;
 }) {
   const { members } = useCampaignMembers(campaignId);
+
   const { data: races = [] } = useRaces(campaignId);
-  const { coefficients } = useHeroScalingCoefficients(campaignId);
 
   const [characterLoaded, setCharacterLoaded] = useState(false);
+
   const [equipped, setEquipped] = useState<EquippedItems>({});
 
   const [savingTree, setSavingTree] = useState(false);
+
   const [saveError, setSaveError] = useState<string | null>(null);
 
   const {
@@ -112,8 +114,11 @@ export function CharacterViewClient({
     queryKey: ["artifacts", campaignId],
     queryFn: async () => {
       const res = await fetch(`/api/campaigns/${campaignId}/artifacts`);
+
       if (!res.ok) return [];
+
       const data = await res.json();
+
       return Array.isArray(data) ? data : [];
     },
     enabled: !!campaignId && characterLoaded,
@@ -124,8 +129,13 @@ export function CharacterViewClient({
 
     const fetchCharacter = async () => {
       try {
-        const character: Character = await getCharacter(campaignId, characterId);
+        const character: Character = await getCharacter(
+          campaignId,
+          characterId,
+        );
+
         if (cancelled) return;
+
         setFormData(characterToFormData(character));
         setEquipped((character.inventory?.equipped as EquippedItems) ?? {});
         setCharacterLoaded(true);
@@ -138,6 +148,7 @@ export function CharacterViewClient({
     };
 
     fetchCharacter();
+
     return () => {
       cancelled = true;
     };
@@ -175,134 +186,253 @@ export function CharacterViewClient({
       name: a.name,
       slot: a.slot ?? "item",
       icon: a.icon ?? null,
-    })
+    }),
   );
+
+  const isPlayerView = !allowPlayerEdit;
+
+  const hpMult = formData.scalingCoefficients?.hpMultiplier ?? 1;
+
+  const heroHp = getHeroMaxHpBreakdown(basicInfo.level, abilityScores.strength, {
+    hpMultiplier: hpMult,
+  });
 
   return (
     <ReadOnlyProvider value={!allowPlayerEdit}>
-      <div className="container mx-auto p-4 max-w-5xl space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <CardTitle className="text-2xl">{formData.basicInfo.name}</CardTitle>
-          <div className="flex flex-wrap gap-2">
-            {allowPlayerEdit && (
+      <div className="min-h-screen pb-8 container mx-auto max-w-3xl md:px-4 py-4 sm:px-6 sm:py-6 md:max-w-4xl">
+        {/* Player view: hero block with quick stats */}
+        {isPlayerView && (
+          <Card className="mb-6 overflow-hidden border-primary/20 bg-linear-to-br from-card to-card/80 shadow-lg">
+            <CardContent className="p-0">
+              <div className="flex flex-col sm:flex-row sm:items-stretch gap-4 p-4 sm:p-5">
+                <div className="flex items-center gap-4 sm:flex-col sm:items-center sm:shrink-0">
+                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border-2 border-primary/30 bg-muted sm:h-24 sm:w-24">
+                    {basicInfo.avatar ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={basicInfo.avatar}
+                        alt={basicInfo.name}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-2xl font-bold text-muted-foreground">
+                        {basicInfo.name.charAt(0)}
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1 sm:text-center">
+                    <h1 className="truncate text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+                      {basicInfo.name}
+                    </h1>
+                    <p className="mt-0.5 text-sm text-muted-foreground">
+                      {[
+                        basicInfo.class && `рівень ${basicInfo.level}`,
+                        basicInfo.class,
+                        basicInfo.race,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 sm:ml-auto sm:justify-end sm:gap-3">
+                  <QuickStat label="AC" value={combatStats.armorClass} />
+                  <QuickStat label="HP" value={heroHp.total} />
+                  <QuickStat label="Ініц." value={combatStats.initiative} />
+                  <QuickStat label="Швидк." value={`${combatStats.speed} фт`} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Header row when editing or as secondary actions */}
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          {allowPlayerEdit && (
+            <>
+              <CardTitle className="text-xl sm:text-2xl">
+                {formData.basicInfo.name}
+              </CardTitle>
               <Link href={`/campaigns/${campaignId}/character/edit`}>
-                <Button variant="outline">Редагувати повністю</Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="touch-manipulation"
+                >
+                  Редагувати повністю
+                </Button>
               </Link>
-            )}
-          </div>
+            </>
+          )}
         </div>
 
-        <Card>
-          <CardContent className="w-full overflow-hidden pt-6">
-          {(error || saveError) && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-              <strong className="font-bold">Помилка:</strong>
-              <span className="block sm:inline"> {error ?? saveError}</span>
-            </div>
-          )}
+        <Card className="overflow-hidden">
+          <CardContent className="w-full overflow-x-auto pt-4 sm:pt-6">
+            {(error || saveError) && (
+              <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                <strong>Помилка:</strong> {error ?? saveError}
+              </div>
+            )}
 
-          <Accordion
-            type="single"
-            defaultValue="item-1"
-            collapsible
-            className="space-y-4"
-          >
-            <AccordionItem value="item-1">
-              <AccordionTrigger>1. Загальна інформація</AccordionTrigger>
-              <AccordionContent>
-                <CharacterBasicInfo
-                  basicInfo={{ ...basicInfo, setters: noopBasicInfoSetters }}
-                  campaignMembers={members}
-                  races={races}
-                />
-              </AccordionContent>
-            </AccordionItem>
+            <Accordion
+              type="single"
+              defaultValue="item-1"
+              collapsible
+              className="space-y-2 sm:space-y-3"
+            >
+              <AccordionItem
+                value="item-1"
+                className="rounded-xl border bg-card/75"
+              >
+                <AccordionTrigger className="min-h-[44px] px-4 py-3 text-left font-medium hover:no-underline [.border-b]:border-0">
+                  1. Загальна інформація
+                </AccordionTrigger>
+                <AccordionContent className="px-4 pb-4 pt-1">
+                  <CharacterBasicInfo
+                    basicInfo={{ ...basicInfo, setters: noopBasicInfoSetters }}
+                    campaignMembers={members}
+                    races={races}
+                    isPlayerView={isPlayerView}
+                  />
+                </AccordionContent>
+              </AccordionItem>
 
-            <AccordionItem value="item-2">
-              <AccordionTrigger>2. Основні характеристики</AccordionTrigger>
-              <AccordionContent>
-                <CharacterAbilityScores
-                  abilityScores={{ ...abilityScores, setters: noopAbilitySetters }}
-                />
-              </AccordionContent>
-            </AccordionItem>
+              <AccordionItem
+                value="item-2"
+                className="rounded-xl border bg-card/75"
+              >
+                <AccordionTrigger className="min-h-[44px] px-4 py-3 text-left font-medium hover:no-underline [.border-b]:border-0">
+                  2. Основні характеристики
+                </AccordionTrigger>
+                <AccordionContent className="px-4 pb-4 pt-1">
+                  <CharacterAbilityScores
+                    abilityScores={{
+                      ...abilityScores,
+                      setters: noopAbilitySetters,
+                    }}
+                  />
+                </AccordionContent>
+              </AccordionItem>
 
-            <AccordionItem value="item-3">
-              <AccordionTrigger>3. Бойові параметри</AccordionTrigger>
-              <AccordionContent className="space-y-6">
+              <AccordionItem
+                value="item-3"
+                className="rounded-xl border bg-card/75"
+              >
+                <AccordionTrigger className="min-h-[44px] px-4 py-3 text-left font-medium hover:no-underline [.border-b]:border-0">
+                  3. Бойові параметри
+                </AccordionTrigger>
+                <AccordionContent className="space-y-6 px-4 pb-4 pt-1">
                 <CharacterHpPreview
                   level={basicInfo.level}
                   strength={abilityScores.strength}
-                  coefficient={coefficients.hpMultiplier}
+                  coefficient={formData.scalingCoefficients?.hpMultiplier ?? 1}
                   isDm={false}
                 />
                 <CharacterDamagePreview
                   campaignId={campaignId}
                   characterId={characterId}
-                  meleeCoefficient={coefficients.meleeMultiplier}
-                  rangedCoefficient={coefficients.rangedMultiplier}
+                  meleeCoefficient={formData.scalingCoefficients?.meleeMultiplier ?? 1}
+                  rangedCoefficient={formData.scalingCoefficients?.rangedMultiplier ?? 1}
                   isDm={false}
                 />
-                <CharacterCombatParams
-                  combatStats={{ ...combatStats, setters: noopCombatSetters }}
-                />
-              </AccordionContent>
-            </AccordionItem>
+                  <CharacterCombatParams
+                    combatStats={{ ...combatStats, setters: noopCombatSetters }}
+                  />
+                </AccordionContent>
+              </AccordionItem>
 
-            <AccordionItem value="item-4">
-              <AccordionTrigger>4. Навички та Збереження</AccordionTrigger>
-              <AccordionContent>
-                <CharacterSkillsSection
-                  skills={{ ...skills, handlers: noopSkillHandlers }}
-                />
-              </AccordionContent>
-            </AccordionItem>
+              <AccordionItem
+                value="item-4"
+                className="rounded-xl border bg-card/75"
+              >
+                <AccordionTrigger className="min-h-[44px] px-4 py-3 text-left font-medium hover:no-underline [.border-b]:border-0">
+                  4. Навички та збереження
+                </AccordionTrigger>
+                <AccordionContent className="px-4 pb-4 pt-1">
+                  <CharacterSkillsSection
+                    skills={{ ...skills, handlers: noopSkillHandlers }}
+                  />
+                </AccordionContent>
+              </AccordionItem>
 
-            <AccordionItem value="item-5">
-              <AccordionTrigger>5. Уміння</AccordionTrigger>
-              <AccordionContent>
-                <CharacterAbilitiesSection
-                  campaignId={campaignId}
-                  abilities={{ ...abilities, setters: noopAbilitiesSetters }}
-                />
-                <CharacterSkillTreeView
-                  campaignId={campaignId}
-                  characterRace={basicInfo.race}
-                  characterLevel={basicInfo.level}
-                  skillTreeProgress={formData.skillTreeProgress ?? {}}
-                  onSkillTreeProgressChange={(next) =>
-                    setFormData((prev) => ({ ...prev, skillTreeProgress: next }))
-                  }
-                />
-                <div className="mt-4">
-                  <Button
-                    type="button"
-                    onClick={handleSaveSkillTree}
-                    disabled={savingTree}
-                  >
-                    {savingTree ? "Збереження..." : "Зберегти дерево скілів"}
-                  </Button>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
+              <AccordionItem
+                value="item-5"
+                className="rounded-xl border bg-card/75"
+              >
+                <AccordionTrigger className="min-h-[44px] px-4 py-3 text-left font-medium hover:no-underline [.border-b]:border-0">
+                  5. Уміння
+                </AccordionTrigger>
+                <AccordionContent className="px-4 pb-4 pt-1">
+                  <CharacterAbilitiesSection
+                    campaignId={campaignId}
+                    abilities={{ ...abilities, setters: noopAbilitiesSetters }}
+                  />
+                  <CharacterSkillTreeView
+                    campaignId={campaignId}
+                    characterRace={basicInfo.race}
+                    characterLevel={basicInfo.level}
+                    skillTreeProgress={formData.skillTreeProgress ?? {}}
+                    onSkillTreeProgressChange={(next) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        skillTreeProgress: next,
+                      }))
+                    }
+                  />
+                  <div className="mt-4">
+                    <Button
+                      type="button"
+                      onClick={handleSaveSkillTree}
+                      disabled={savingTree}
+                      className="touch-manipulation"
+                    >
+                      {savingTree ? "Збереження…" : "Зберегти дерево скілів"}
+                    </Button>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
 
-            <AccordionItem value="item-6">
-              <AccordionTrigger>6. Артефакти</AccordionTrigger>
-              <AccordionContent>
-                <CharacterArtifactsSection
-                  knownSpellIds={spellcasting.knownSpells}
-                  campaignId={campaignId}
-                  characterRace={basicInfo.race}
-                  skillTreeProgress={formData.skillTreeProgress ?? {}}
-                  equipped={equipped}
-                  artifacts={artifactOptions}
-                />
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </CardContent>
-      </Card>
-    </div>
+              <AccordionItem
+                value="item-6"
+                className="rounded-xl border bg-card/75"
+              >
+                <AccordionTrigger className="min-h-[44px] px-4 py-3 text-left font-medium hover:no-underline [.border-b]:border-0">
+                  6. Артефакти
+                </AccordionTrigger>
+                <AccordionContent className="px-4 pb-4 pt-1">
+                  <CharacterArtifactsSection
+                    knownSpellIds={spellcasting.knownSpells}
+                    campaignId={campaignId}
+                    characterRace={basicInfo.race}
+                    skillTreeProgress={formData.skillTreeProgress ?? {}}
+                    equipped={equipped}
+                    artifacts={artifactOptions}
+                  />
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </CardContent>
+        </Card>
+      </div>
     </ReadOnlyProvider>
+  );
+}
+
+function QuickStat({
+  label,
+  value,
+}: {
+  label: string;
+  value: number | string;
+}) {
+  return (
+    <div className="flex items-center gap-1.5 rounded-lg border border-border/80 bg-muted/50 px-3 py-2 tabular-nums sm:px-4">
+      <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        {label}
+      </span>
+      <span className="text-base font-semibold text-foreground sm:text-lg">
+        {value}
+      </span>
+    </div>
   );
 }

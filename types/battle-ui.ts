@@ -13,7 +13,8 @@ import { SpellDamageType, SpellType } from "@/lib/constants/spell-abilities";
  */
 export interface AttackData {
   attackerId: string;
-  targetId: string;
+  targetId?: string; // для однієї цілі (зворотна сумісність)
+  targetIds?: string[]; // для AOE — масив цілей
   attackId?: string;
   attackRoll: number;
   advantageRoll?: number;

@@ -31,11 +31,16 @@ const createUnitSchema = z.object({
   // Атаки та здібності
   attacks: z.array(z.object({
     name: z.string(),
+    type: z.enum(["melee", "ranged"]).optional(),
+    targetType: z.enum(["target", "aoe"]).optional(),
     attackBonus: z.number(),
     damageType: z.string(),
     damageDice: z.string(),
     range: z.string().optional(),
     properties: z.string().optional(),
+    maxTargets: z.number().min(1).max(20).optional(),
+    damageDistribution: z.array(z.number().min(0).max(100)).optional(),
+    guaranteedDamage: z.number().min(0).optional(),
   })).default([]),
   
   specialAbilities: z.array(z.object({

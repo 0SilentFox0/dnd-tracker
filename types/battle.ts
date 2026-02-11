@@ -96,7 +96,7 @@ export interface SkillEffect {
   value: number | string | boolean;  // 25, "2*hero_level", "1d4", true
   isPercentage: boolean;  // зручний прапорець (type === "percent")
   duration?: number;      // тривалість у раундах
-  target?: "self" | "enemy" | "all_enemies" | "all_allies";
+  target?: "self" | "enemy" | "all_enemies" | "all_allies" | "all";
   /** Скільки разів може спрацювати: undefined/null = постійно, 1–100 = обмеження */
   maxTriggers?: number | null;
 }
@@ -148,8 +148,14 @@ export interface BattleAttack {
   damageType: string; // slashing, piercing, fire, тощо
   range?: string; // для ranged
   properties?: string; // спеціальні властивості
+  /** Тип цілі: одна ціль або AOE (область) */
+  targetType?: "target" | "aoe";
   minTargets?: number;
   maxTargets?: number;
+  /** Розподіл шкоди по цілях (%): [50, 30, 20] — перша 50%, друга 30%, третя 20%. Сума = 100. */
+  damageDistribution?: number[];
+  /** Гарантована шкода — застосовується навіть при промаху. */
+  guaranteedDamage?: number;
 }
 
 /**

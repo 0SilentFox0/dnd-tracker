@@ -65,6 +65,12 @@ export interface CharacterFormData {
   abilities: {
     personalSkillId: string;
   };
+  /** Коефіцієнти масштабування (HP, melee, ranged) — окремі для кожного героя */
+  scalingCoefficients?: {
+    hpMultiplier: number;
+    meleeMultiplier: number;
+    rangedMultiplier: number;
+  };
   /** Прогрес по деревах прокачки: skillTreeId → { unlockedSkills } */
   skillTreeProgress?: Record<
     string,
@@ -120,6 +126,12 @@ export interface Character {
   minTargets: number;
   maxTargets: number;
   personalSkillId?: string | null;
+  /** Коефіцієнт HP (×). За замовчуванням 1. */
+  hpMultiplier?: number | null;
+  /** Коефіцієнт урону ближнього бою (×). За замовчуванням 1. */
+  meleeMultiplier?: number | null;
+  /** Коефіцієнт урону дальнього бою (×). За замовчуванням 1. */
+  rangedMultiplier?: number | null;
   /** Прогрес по деревах прокачки: skillTreeId → { unlockedSkills } */
   skillTreeProgress?: Record<
     string,

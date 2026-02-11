@@ -14,6 +14,7 @@ interface TargetSelectionDialogProps {
   onOpenChange: (open: boolean) => void;
   availableTargets: BattleParticipant[];
   isAOE?: boolean; // Чи можна вибрати кілька цілей
+  maxTargets?: number; // Макс. цілей для AOE (напр. 3)
   onSelect: (targetIds: string[]) => void;
   title?: string;
   description?: string;
@@ -27,6 +28,7 @@ export function TargetSelectionDialog({
   onOpenChange,
   availableTargets,
   isAOE = false,
+  maxTargets,
   onSelect,
   title = "🎯 Вибір Цілі",
   description = "Оберіть ціль для атаки",
@@ -35,12 +37,14 @@ export function TargetSelectionDialog({
 
   const handleToggleTarget = (targetId: string) => {
     if (isAOE) {
-      // Для AOE можна вибрати кілька цілей
-      setSelectedTargets((prev) =>
-        prev.includes(targetId)
-          ? prev.filter((id) => id !== targetId)
-          : [...prev, targetId]
-      );
+      setSelectedTargets((prev) => {
+        if (prev.includes(targetId)) {
+          return prev.filter((id) => id !== targetId);
+        }
+        const cap = maxTargets ?? 99;
+        if (prev.length >= cap) return prev;
+        return [...prev, targetId];
+      });
     } else {
       // Для звичайної атаки тільки одна ціль
       setSelectedTargets([targetId]);
@@ -62,7 +66,7 @@ export function TargetSelectionDialog({
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
             {description}
-            {isAOE && " (можна вибрати кілька)"}
+            {isAOE && (maxTargets ? ` (макс. ${maxTargets})` : " (можна вибрати кілька)")}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">

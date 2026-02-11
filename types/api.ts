@@ -77,7 +77,8 @@ export interface BattleScene {
 export interface AttackData {
   attackerId: string;
   attackerType?: "character" | "unit";
-  targetId: string;
+  targetId?: string;
+  targetIds?: string[];
   targetType?: "character" | "unit";
   attackRoll: number;
   advantageRoll?: number;

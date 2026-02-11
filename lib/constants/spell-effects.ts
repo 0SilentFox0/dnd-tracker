@@ -80,6 +80,9 @@ export const SPELL_EFFECT_OPTIONS: SelectOption[] = [
   { value: "Target gains undead traits. Max starting HP", label: "Target gains undead traits. Max starting HP" },
   { value: "Remove all spells (from target)", label: "Remove all spells (from target)" },
   { value: "Cannot be dispelled", label: "Cannot be dispelled" },
+
+  // Мана
+  { value: "Крадіжка мани", label: "Крадіжка мани — у ворога зникає 1 слот магії 1 рівня (якщо є)" },
 ];
 
 /** Чи є рядок ефектом з бази (для відображення кастомних) */

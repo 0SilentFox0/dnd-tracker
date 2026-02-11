@@ -2,6 +2,7 @@
 
 import * as React from "react";
 
+import { useReadOnly } from "@/components/ui/read-only-context";
 import {
   Select,
   SelectContent,
@@ -11,7 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useReadOnly } from "@/components/ui/read-only-context";
 import { cn } from "@/lib/utils";
 
 export interface SelectOption {
@@ -48,11 +48,14 @@ function findOptionLabel(
   groups: SelectOptionGroup[] | undefined,
   allowNone: boolean,
   noneValue: string,
-  noneLabel: string
+  noneLabel: string,
 ): string {
   if (allowNone && (value === noneValue || !value)) return noneLabel;
+
   const allOptions = groups?.flatMap((g) => g.options) ?? options;
+
   const opt = allOptions.find((o) => o.value === value);
+
   return opt?.label ?? value ?? "";
 }
 
@@ -75,13 +78,14 @@ export function SelectField({
   const readOnly = useReadOnly();
 
   const displayValue = value || (allowNone ? noneValue : "");
+
   const labelText = findOptionLabel(
     displayValue,
     options,
     groups,
     allowNone,
     noneValue,
-    noneLabel
+    noneLabel,
   );
 
   if (readOnly) {
@@ -90,9 +94,9 @@ export function SelectField({
         id={id}
         data-slot="select-field"
         className={cn(
-          "text-foreground block min-h-9 w-full min-w-0 py-2 text-base md:text-sm",
+          "text-foreground block min-h-9 w-full min-w-0 py-2 text-base md:text-sm ellipsis",
           triggerClassName,
-          className
+          className,
         )}
       >
         {labelText || placeholder || "\u00A0"}
@@ -126,32 +130,30 @@ export function SelectField({
             {allowNone && (
               <SelectItem value={noneValue}>{noneLabel}</SelectItem>
             )}
-            {groups && groups.length > 0 ? (
-              groups.map((group, groupIndex) => (
-                <SelectGroup key={groupIndex}>
-                  <SelectLabel>{group.label}</SelectLabel>
-                  {group.options.map((option) => (
-                    <SelectItem
-                      key={option.value}
-                      value={option.value}
-                      disabled={option.disabled}
-                    >
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              ))
-            ) : (
-              options.map((option) => (
-                <SelectItem
-                  key={option.value}
-                  value={option.value}
-                  disabled={option.disabled}
-                >
-                  {option.label}
-                </SelectItem>
-              ))
-            )}
+            {groups && groups.length > 0
+              ? groups.map((group, groupIndex) => (
+                  <SelectGroup key={groupIndex}>
+                    <SelectLabel>{group.label}</SelectLabel>
+                    {group.options.map((option) => (
+                      <SelectItem
+                        key={option.value}
+                        value={option.value}
+                        disabled={option.disabled}
+                      >
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                ))
+              : options.map((option) => (
+                  <SelectItem
+                    key={option.value}
+                    value={option.value}
+                    disabled={option.disabled}
+                  >
+                    {option.label}
+                  </SelectItem>
+                ))}
           </>
         )}
       </SelectContent>

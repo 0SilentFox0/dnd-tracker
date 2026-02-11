@@ -140,6 +140,9 @@ export async function POST(
       description: spellData.description ?? "",
       duration: spellData.duration,
       castingTime: spellData.castingTime,
+      effects: Array.isArray(spellData.effects)
+        ? (spellData.effects as string[])
+        : undefined,
       effectDetails: spellData.effectDetails as BattleSpell["effectDetails"] ?? undefined,
     };
 

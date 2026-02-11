@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { UnitAbilityScores } from "@/components/units/form/UnitAbilityScores";
+import { UnitAttacks } from "@/components/units/form/UnitAttacks";
 import { UnitAvatarInput } from "@/components/units/form/UnitAvatarInput";
 import { UnitBasicInfo } from "@/components/units/form/UnitBasicInfo";
 import { UnitDamageModifier } from "@/components/units/form/UnitDamageModifier";
@@ -48,8 +49,8 @@ export default function EditUnitPage({
   const initialFormData = useMemo<Partial<Unit>>(() => {
     if (unit) {
       const raceValue =
-        unit.race ??
-        (unit.unitGroup?.name as string | undefined) ??
+        (unit.race && unit.race.trim()) ||
+        (unit.unitGroup?.name as string | undefined) ||
         null;
 
       return {
@@ -115,20 +116,13 @@ export default function EditUnitPage({
     getSpells(id).then(setSpells).catch(console.error);
   }, [id]);
 
-  // Підтягуємо дані юніта в форму при першому завантаженні (включно з расою)
+  // Підтягуємо дані юніта в форму при першому завантаженні (включно з расою з групи)
   useEffect(() => {
     if (!unit) return;
 
     if (hasSyncedUnitRef.current !== unit.id) {
       hasSyncedUnitRef.current = unit.id;
-      const raceValue =
-        unit.race ??
-        (unit.unitGroup?.name as string | undefined) ??
-        null;
-      setFormData({
-        ...initialFormData,
-        race: raceValue,
-      });
+      setFormData(initialFormData);
     }
   }, [unit, initialFormData]);
 
@@ -138,6 +132,12 @@ export default function EditUnitPage({
     updateUnitMutation.mutate(
       {
         ...formData,
+        knownSpells:
+          formData.knownSpells !== undefined
+            ? formData.knownSpells
+            : unit?.knownSpells ?? [],
+        race:
+          formData.race !== undefined ? formData.race : unit?.race ?? null,
         avatar:
           formData.avatar === undefined ? undefined : formData.avatar || null,
         damageModifier:
@@ -214,6 +214,11 @@ export default function EditUnitPage({
             />
 
             <UnitAbilityScores
+              formData={formData}
+              onChange={handleFormDataChange}
+            />
+
+            <UnitAttacks
               formData={formData}
               onChange={handleFormDataChange}
             />

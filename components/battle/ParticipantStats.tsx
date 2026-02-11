@@ -19,8 +19,6 @@ export function ParticipantStats({
 
   const morale = combatStats.morale ?? 0;
 
-  console.log("spellSlots", spellSlots);
-
   const stats = [
     { label: "STR", value: abilities.strength },
     { label: "DEX", value: abilities.dexterity },
@@ -77,17 +75,20 @@ export function ParticipantStats({
         >
           <Sparkles className="w-3 h-3 text-amber-400/80 shrink-0" />
           {Object.entries(spellSlots)
-            .sort(([a], [b]) => Number(a) - Number(b))
+            .sort(([a], [b]) =>
+              a === "universal" ? -1 : b === "universal" ? 1 : Number(a) - Number(b),
+            )
             .map(([level, slot]) => {
               const filled = slot.current;
-
               const empty = Math.max(0, slot.max - slot.current);
+              const label = level === "universal" ? "Унів." : `Рів.${level}`;
 
               return (
                 <div
                   key={level}
                   className="flex items-center gap-0.5"
-                  aria-label={`Рівень ${level}: ${filled}/${slot.max}`}
+                  aria-label={`${label}: ${filled}/${slot.max}`}
+                  title={level === "universal" ? "Універсальні слоти (будь-яке заклинання)" : `Рівень ${level}`}
                 >
                   {Array.from({ length: filled }).map((_, i) => (
                     <span

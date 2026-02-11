@@ -73,15 +73,16 @@ export function UnitBasicInfo({
       </div>
 
       <div>
-        <Label htmlFor="armorClass">Клас броні *</Label>
+        <Label htmlFor="armorClass">Клас броні (AC) *</Label>
         <Input
           id="armorClass"
           type="number"
           min="0"
-          value={formData.armorClass || 10}
-          onChange={(e) =>
-            onChange({ armorClass: parseInt(e.target.value) || 10 })
-          }
+          value={formData.armorClass ?? 10}
+          onChange={(e) => {
+            const v = parseInt(e.target.value, 10);
+            onChange({ armorClass: Number.isNaN(v) ? 10 : v });
+          }}
           required
         />
       </div>

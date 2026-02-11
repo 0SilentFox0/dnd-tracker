@@ -26,11 +26,18 @@ export interface Unit {
   maxTargets: number;
   attacks: Array<{
     name: string;
+    type?: "melee" | "ranged"; // вид атаки: ближня / дальня
+    targetType?: "target" | "aoe"; // одна ціль або область
     attackBonus: number;
     damageType: string;
     damageDice: string;
     range?: string;
     properties?: string;
+    maxTargets?: number; // для AOE: макс. кількість цілей
+    /** Розподіл шкоди по цілях (%): [50, 30, 20] — перша 50%, друга 30%, третя 20% */
+    damageDistribution?: number[];
+    /** Гарантована шкода — застосовується навіть при промаху */
+    guaranteedDamage?: number;
   }>;
   specialAbilities: Array<{
     name: string;

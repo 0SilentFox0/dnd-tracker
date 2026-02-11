@@ -156,15 +156,6 @@ export default async function CampaignDetailPage({
             </Card>
           </Link>
 
-          <Link href={`/campaigns/${id}/dm/npc-heroes`}>
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardHeader>
-                <CardTitle>NPC Герої</CardTitle>
-                <CardDescription>Управління NPC героями</CardDescription>
-              </CardHeader>
-            </Card>
-          </Link>
-
           <Link href={`/campaigns/${id}/dm/units`}>
             <Card className="hover:shadow-lg transition-shadow cursor-pointer">
               <CardHeader>

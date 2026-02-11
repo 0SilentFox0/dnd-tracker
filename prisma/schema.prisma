@@ -119,6 +119,9 @@ model Character {
   maxTargets           Int                 @default(1)
   minTargets           Int                 @default(1)
   personalSkillId      String?
+  hpMultiplier         Float?
+  meleeMultiplier      Float?
+  rangedMultiplier     Float?
   inventory            CharacterInventory?
   characterSkills      CharacterSkills[]
   campaign             Campaign            @relation(fields: [campaignId], references: [id], onDelete: Cascade)

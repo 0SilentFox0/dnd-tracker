@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
 import {
   EFFECT_STAT_OPTIONS,
+  EFFECT_TARGET_OPTIONS,
   EFFECT_TYPE_OPTIONS,
   isFlagValueType,
   isTextValueType,
@@ -33,7 +34,7 @@ export function SkillEffectRow({
 
   return (
     <div className="flex items-center gap-2 rounded-md border bg-muted/30 p-2">
-      <div className="grid flex-1 grid-cols-2 gap-2 md:grid-cols-5">
+      <div className="grid flex-1 grid-cols-2 gap-2 md:grid-cols-6">
         <div className="space-y-1">
           <Label className="text-xs text-muted-foreground">Стат</Label>
           <SelectField
@@ -91,6 +92,19 @@ export function SkillEffectRow({
               )
             }
             placeholder="—"
+          />
+        </div>
+
+        <div className="space-y-1">
+          <Label className="text-xs text-muted-foreground">Ціль</Label>
+          <SelectField
+            value={effect.target ?? ""}
+            onValueChange={(v) =>
+              onUpdate(index, "target", v === "" ? undefined : v)
+            }
+            placeholder="—"
+            options={EFFECT_TARGET_OPTIONS}
+            triggerClassName="min-w-0"
           />
         </div>
 

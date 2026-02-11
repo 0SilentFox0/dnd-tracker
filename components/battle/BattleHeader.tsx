@@ -39,9 +39,17 @@ export function BattleHeader({
 }: BattleHeaderProps) {
   const [completeDialogOpen, setCompleteDialogOpen] = useState(false);
 
+  const currentParticipant = battle.initiativeOrder?.[battle.currentTurnIndex];
+  const currentTurnName = currentParticipant?.basicInfo?.name;
+
   return (
     <div className="shrink-0 border-b border-white/10 bg-black/40 backdrop-blur-xl z-40 shadow-2xl">
       <div className="container mx-auto px-4 py-3 sm:py-4">
+        {battle.status === "active" && currentTurnName && (
+          <div className="text-sm sm:text-base font-bold text-primary mb-2">
+            Хід: {currentTurnName}
+          </div>
+        )}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-col min-w-0">
             <h1 className="text-xl sm:text-3xl font-black italic uppercase tracking-tighter text-white drop-shadow-lg">

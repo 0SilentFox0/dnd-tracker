@@ -29,11 +29,16 @@ const updateUnitSchema = z.object({
     .array(
       z.object({
         name: z.string(),
+        type: z.enum(["melee", "ranged"]).optional(),
+        targetType: z.enum(["target", "aoe"]).optional(),
         attackBonus: z.number(),
         damageType: z.string(),
         damageDice: z.string(),
         range: z.string().optional(),
         properties: z.string().optional(),
+        maxTargets: z.number().min(1).max(20).optional(),
+        damageDistribution: z.array(z.number().min(0).max(100)).optional(),
+        guaranteedDamage: z.number().min(0).optional(),
       })
     )
     .optional(),
@@ -51,6 +56,8 @@ const updateUnitSchema = z.object({
     .optional(),
   immunities: z.array(z.string()).optional(),
   knownSpells: z.array(z.string()).optional(),
+  minTargets: z.number().min(1).optional(),
+  maxTargets: z.number().min(1).optional(),
   morale: z.number().min(-3).max(3).optional(),
   avatar: z.preprocess(
     (val) => (val === "" ? null : val),
@@ -215,6 +222,8 @@ export async function PATCH(
           data.knownSpells !== undefined
             ? (data.knownSpells as Prisma.InputJsonValue)
             : undefined,
+        minTargets: data.minTargets !== undefined ? data.minTargets : undefined,
+        maxTargets: data.maxTargets !== undefined ? data.maxTargets : undefined,
         avatar: data.avatar !== undefined ? (data.avatar || null) : undefined,
       },
       include: {

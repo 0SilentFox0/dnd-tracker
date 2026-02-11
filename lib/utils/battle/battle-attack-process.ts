@@ -50,6 +50,8 @@ export interface ProcessAttackParams {
   allParticipants: BattleParticipant[];
   currentRound: number;
   battleId: string;
+  /** Множник урону (0–1) для AOE: кожна ціль отримує свою частку. */
+  damageMultiplier?: number;
 }
 
 /**
@@ -89,6 +91,7 @@ export function processAttack(
     allParticipants,
     currentRound,
     battleId,
+    damageMultiplier,
   } = params;
 
   let updatedAttacker = { ...attacker };
@@ -205,7 +208,44 @@ export function processAttack(
   }
 
   if (!isHit) {
-    // Промах - створюємо BattleAction та повертаємо
+    // Промах - але можлива гарантована шкода
+    let updatedTargetOnMiss = updatedTarget;
+    const guaranteedDamage = attack.guaranteedDamage ?? 0;
+    let actualGuaranteedDamage = 0;
+
+    if (guaranteedDamage > 0) {
+      const resistResult = applyResistance(
+        updatedTarget,
+        guaranteedDamage,
+        attack.damageType,
+      );
+      actualGuaranteedDamage = resistResult.finalDamage;
+      let remaining = actualGuaranteedDamage;
+      if (updatedTarget.combatStats.tempHp > 0 && remaining > 0) {
+        const tempDmg = Math.min(updatedTarget.combatStats.tempHp, remaining);
+        updatedTargetOnMiss = {
+          ...updatedTargetOnMiss,
+          combatStats: {
+            ...updatedTargetOnMiss.combatStats,
+            tempHp: updatedTargetOnMiss.combatStats.tempHp - tempDmg,
+          },
+        };
+        remaining -= tempDmg;
+      }
+      if (remaining > 0) {
+        updatedTargetOnMiss = {
+          ...updatedTargetOnMiss,
+          combatStats: {
+            ...updatedTargetOnMiss.combatStats,
+            currentHp: Math.max(
+              BATTLE_CONSTANTS.MIN_DAMAGE,
+              updatedTargetOnMiss.combatStats.currentHp - remaining,
+            ),
+          },
+        };
+      }
+    }
+
     const battleAction: BattleAction = {
       id: `attack-${attacker.basicInfo.id}-${Date.now()}`,
       battleId,
@@ -234,16 +274,30 @@ export function processAttack(
       },
       resultText: [
         `${attacker.basicInfo.name} промахнувся по ${target.basicInfo.name}`,
+        ...(guaranteedDamage > 0
+          ? [`але завдав ${actualGuaranteedDamage} гарантованої шкоди`]
+          : []),
         ...beforeAttackResult.messages,
       ].filter(Boolean).join(" | "),
-      hpChanges: [],
+      hpChanges:
+        actualGuaranteedDamage > 0
+          ? [
+              {
+                participantId: target.basicInfo.id,
+                participantName: target.basicInfo.name,
+                oldHp: updatedTarget.combatStats.currentHp,
+                newHp: updatedTargetOnMiss.combatStats.currentHp,
+                change: actualGuaranteedDamage,
+              },
+            ]
+          : [],
       isCancelled: false,
     };
 
     // Виконуємо тригери після атаки (навіть якщо промах)
     const afterAttackResultMiss = executeAfterAttackTriggers(
       updatedAttacker,
-      updatedTarget,
+      updatedTargetOnMiss,
       allParticipants,
       isOwnerAction,
     );
@@ -260,7 +314,7 @@ export function processAttack(
     return {
       success: false,
       attackRoll,
-      targetUpdated: updatedTarget,
+      targetUpdated: updatedTargetOnMiss,
       attackerUpdated: updatedAttacker,
       reactionTriggered: false,
       battleAction,
@@ -382,10 +436,15 @@ export function processAttack(
     physicalDamage += extraD6;
   }
 
+  // Множник для AOE: ціль отримує свою частку (до опору)
+  const dmgMult =
+    damageMultiplier !== undefined && damageMultiplier >= 0 ? damageMultiplier : 1;
+  const physicalDamageForTarget = Math.floor(physicalDamage * dmgMult);
+
   // 5. Застосовуємо опір/імунітет цілі для фізичного урону
   const resistanceResult = applyResistance(
     updatedTarget,
-    physicalDamage,
+    physicalDamageForTarget,
     attack.damageType,
   );
 
@@ -395,9 +454,10 @@ export function processAttack(
   const additionalDamageBreakdown: string[] = [];
 
   for (const additionalDamage of damageCalculation.additionalDamage) {
+    const additionalValue = Math.floor(additionalDamage.value * dmgMult);
     const additionalResistance = applyResistance(
       updatedTarget,
-      additionalDamage.value,
+      additionalValue,
       additionalDamage.type,
     );
 

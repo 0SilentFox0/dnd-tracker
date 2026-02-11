@@ -94,6 +94,16 @@ export const EFFECT_STAT_OPTIONS: SelectOption[] = [
   { value: "light_spells_target_all_allies", label: "Заклинання світла на всіх" },
 ];
 
+// ---------- Effect target ----------
+
+export const EFFECT_TARGET_OPTIONS: SelectOption[] = [
+  { value: "self", label: "Сам" },
+  { value: "enemy", label: "Ворог" },
+  { value: "all_allies", label: "Союзники" },
+  { value: "all_enemies", label: "Вороги" },
+  { value: "all", label: "Усі" },
+];
+
 // ---------- Lookup helpers ----------
 
 const _statLabelMap = new Map(EFFECT_STAT_OPTIONS.map((o) => [o.value, o.label]));

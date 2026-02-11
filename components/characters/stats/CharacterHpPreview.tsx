@@ -47,17 +47,21 @@ export function CharacterHpPreview({
           </div>
           {isDm && (
             <div className="flex items-center gap-1.5 shrink-0">
-              <span className="text-xs text-muted-foreground whitespace-nowrap">×</span>
+              <span className="text-xs text-muted-foreground whitespace-nowrap">
+                ×
+              </span>
               <Input
                 type="number"
                 min={0.1}
                 max={3}
                 step={0.1}
-                className="h-8 w-14 text-right tabular-nums"
+                className="h-8 w-24 text-left tabular-nums"
                 value={coefficient}
                 onChange={(e) => {
                   const v = parseFloat(e.target.value);
-                  if (!Number.isNaN(v) && v >= 0.1 && v <= 3) onCoefficientChange?.(v);
+
+                  if (!Number.isNaN(v) && v >= 0.1 && v <= 3)
+                    onCoefficientChange?.(v);
                 }}
               />
             </div>

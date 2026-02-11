@@ -7,6 +7,7 @@ import { ParticipantStats } from "@/components/battle/ParticipantStats";
 import { ActionButtonsPanel } from "@/components/battle/ActionButtonsPanel";
 import { AttackRollDialog } from "@/components/battle/dialogs/AttackRollDialog";
 import { DamageRollDialog } from "@/components/battle/dialogs/DamageRollDialog";
+import { DamageSummaryModal } from "@/components/battle/dialogs/DamageSummaryModal";
 import { MoraleCheckDialog } from "@/components/battle/dialogs/MoraleCheckDialog";
 import { SpellDialog } from "@/components/battle/dialogs/SpellDialog";
 import { TargetSelectionDialog } from "@/components/battle/dialogs/TargetSelectionDialog";
@@ -48,12 +49,25 @@ export function PlayerTurnView({
 
   const [damageRollDialogOpen, setDamageRollDialogOpen] = useState(false);
 
+  const [damageSummaryOpen, setDamageSummaryOpen] = useState(false);
+
+  const [damageFromCrit, setDamageFromCrit] = useState(false);
+
+  const [pendingAttackData, setPendingAttackData] = useState<{
+    damageRolls: number[];
+    attackRollData: { attackRoll: number; advantageRoll?: number };
+  } | null>(null);
+
   const [selectedAttack, setSelectedAttack] = useState<BattleAttack | null>(
     null,
   );
 
   const [selectedTarget, setSelectedTarget] =
     useState<BattleParticipant | null>(null);
+
+  const [selectedTargets, setSelectedTargets] = useState<BattleParticipant[]>(
+    [],
+  );
 
   const [attackRollData, setAttackRollData] = useState<{
     attackRoll: number;
@@ -185,13 +199,14 @@ export function PlayerTurnView({
   const handleTargetSelect = (targetIds: string[]) => {
     if (targetIds.length === 0) return;
 
-    const target = battle.initiativeOrder.find(
-      (p) => p.basicInfo.id === targetIds[0],
-    );
+    const targets = targetIds
+      .map((id) => battle.initiativeOrder.find((p) => p.basicInfo.id === id))
+      .filter((p): p is BattleParticipant => !!p);
 
-    if (!target) return;
+    if (targets.length === 0) return;
 
-    setSelectedTarget(target);
+    setSelectedTargets(targets);
+    setSelectedTarget(targets[0]);
     setTargetSelectionDialogOpen(false);
     setAttackRollDialogOpen(true);
   };
@@ -243,54 +258,64 @@ export function PlayerTurnView({
     if (!rollResult) return;
 
     const isHit = rollResult === "hit" || rollResult === "crit";
+    const wasCrit = rollResult === "crit";
 
     // Скидаємо результат
     setRollResult(null);
 
     // Якщо це хіт -> відкриваємо діалог урону
     if (isHit) {
+      setDamageFromCrit(wasCrit);
       setDamageRollDialogOpen(true);
     } else {
-      // Якщо промах -> завершуємо дію без урону (але з записом в лог)
-      if (!selectedAttack || !selectedTarget || !attackRollData) return;
+      if (!selectedAttack || selectedTargets.length === 0 || !attackRollData) return;
 
-      setHasPerformedAction(true); // Блокуємо дії миттєво
+      setHasPerformedAction(true);
 
       onAttack({
         attackerId: participant.basicInfo.id,
-        targetId: selectedTarget.basicInfo.id,
+        targetIds: selectedTargets.map((t) => t.basicInfo.id),
         attackId: selectedAttack.id || selectedAttack.name,
         attackRoll: attackRollData.attackRoll,
         advantageRoll: attackRollData.advantageRoll,
         damageRolls: [], // Empty damage for miss
       });
 
-      // Скидаємо стан
       setSelectedAttack(null);
       setSelectedTarget(null);
+      setSelectedTargets([]);
       setAttackRollData(null);
     }
   };
 
   const handleDamageRollConfirm = (damageRolls: number[]) => {
-    if (!selectedAttack || !selectedTarget || !attackRollData) return;
+    if (!selectedAttack || selectedTargets.length === 0 || !attackRollData) return;
 
-    setHasPerformedAction(true); // Блокуємо дії миттєво
+    setPendingAttackData({ damageRolls, attackRollData });
+    setDamageRollDialogOpen(false);
+    setDamageSummaryOpen(true);
+  };
+
+  const handleDamageSummaryApply = () => {
+    if (!selectedAttack || selectedTargets.length === 0 || !attackRollData || !pendingAttackData) return;
+
+    setHasPerformedAction(true);
 
     onAttack({
       attackerId: participant.basicInfo.id,
-      targetId: selectedTarget.basicInfo.id,
+      targetIds: selectedTargets.map((t) => t.basicInfo.id),
       attackId: selectedAttack.id || selectedAttack.name,
       attackRoll: attackRollData.attackRoll,
       advantageRoll: attackRollData.advantageRoll,
-      damageRolls,
+      damageRolls: pendingAttackData.damageRolls,
     });
 
-    // Скидаємо стан
     setSelectedAttack(null);
     setSelectedTarget(null);
+    setSelectedTargets([]);
     setAttackRollData(null);
-    setDamageRollDialogOpen(false);
+    setPendingAttackData(null);
+    setDamageSummaryOpen(false);
   };
 
   const effectiveParticipant = {
@@ -347,10 +372,11 @@ export function PlayerTurnView({
         }}
       />
 
-      {/* ... TargetSelectionDialog ... */}
       <TargetSelectionDialog
         open={targetSelectionDialogOpen}
         onOpenChange={setTargetSelectionDialogOpen}
+        isAOE={selectedAttack?.targetType === "aoe"}
+        maxTargets={selectedAttack?.targetType === "aoe" ? selectedAttack.maxTargets : undefined}
         availableTargets={(() => {
           const friendlyFire = battle.campaign?.friendlyFire || false;
           const participantSide = participant.basicInfo.side;
@@ -370,7 +396,6 @@ export function PlayerTurnView({
             );
           }
         })()}
-        isAOE={false}
         onSelect={handleTargetSelect}
         title="🎯 ОБЕРІТЬ ЦІЛЬ"
         description="Оберіть ворога для нанесення удару"
@@ -404,6 +429,31 @@ export function PlayerTurnView({
               : undefined
           }
           onConfirm={handleDamageRollConfirm}
+        />
+      )}
+
+      {selectedAttack && selectedTarget && pendingAttackData && (
+        <DamageSummaryModal
+          open={damageSummaryOpen}
+          onOpenChange={(open) => {
+            if (!open) {
+              setDamageSummaryOpen(false);
+              setPendingAttackData(null);
+              setSelectedAttack(null);
+              setSelectedTarget(null);
+              setSelectedTargets([]);
+              setAttackRollData(null);
+            }
+          }}
+          attacker={participant}
+          target={selectedTarget}
+          attack={selectedAttack}
+          damageRolls={pendingAttackData.damageRolls}
+          allParticipants={battle.initiativeOrder}
+          isCritical={damageFromCrit}
+          campaignId={campaignId}
+          battleId={battle.id}
+          onApply={handleDamageSummaryApply}
         />
       )}
 

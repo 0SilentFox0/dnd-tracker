@@ -93,18 +93,23 @@ export function SpellSelectionDialog({
   }, [caster, campaignId, open]);
 
   const spellSlots = caster.spellcasting.spellSlots || {};
+  const universalSlot = spellSlots.universal;
+  const isUnit = caster.basicInfo.sourceType === "unit";
 
   const getAvailableSlots = (level: number): number => {
+    if (universalSlot) return universalSlot.current ?? 0;
     const slot = spellSlots[level.toString()];
-
     return slot ? slot.current : 0;
   };
+
+  const getSlotKey = (level: number) =>
+    universalSlot ? "universal" : level.toString();
 
   const handleSelectSpell = (spell: Spell) => {
     const availableSlots = getAvailableSlots(spell.level);
 
     if (availableSlots <= 0) {
-      alert(`Немає доступних spell slots рівня ${spell.level}`);
+      alert(isUnit ? "Немає доступних spell slots" : `Немає доступних spell slots рівня ${spell.level}`);
 
       return;
     }
@@ -162,7 +167,7 @@ export function SpellSelectionDialog({
                       <div className="text-right">
                         <div className="text-sm">
                           <span className={canCast ? "text-foreground" : "text-muted-foreground"}>
-                            {availableSlots} / {spellSlots[spell.level.toString()]?.max || 0}
+                            {availableSlots} / {spellSlots[getSlotKey(spell.level)]?.max || 0}
                           </span>
                         </div>
                         {!canCast && (

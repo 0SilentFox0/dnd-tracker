@@ -7,6 +7,8 @@ import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getDamageElementLabel } from "@/lib/constants/damage";
+import { getDiceAverage } from "@/lib/utils/battle/balance-calculations";
+import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import {
   getUnitDamageModifiers,
   getUnitImmunities,
@@ -89,6 +91,20 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
   // Отримуємо імунітети з раси та юніта
   const allImmunities = getUnitImmunities(unit, race);
 
+  // Середній урон: max серед атак (dice avg + мод. сили для melee)
+  const strMod = getAbilityModifier(unit.strength);
+
+  const avgDamage =
+    attacks.length > 0
+      ? Math.round(
+          Math.max(
+            ...attacks.map(
+              (a) => getDiceAverage(a.damageDice || "1d6") + strMod,
+            ),
+          ),
+        )
+      : null;
+
   return (
     <div className="border rounded-lg p-4 hover:shadow-md transition-shadow space-y-3 flex flex-col justify-between relative group/card">
       <div
@@ -138,58 +154,22 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
             )}
             <div className="text-sm text-muted-foreground space-y-1">
               <div>
-                Рівень {unit.level} • AC {unit.armorClass} • HP {unit.maxHp}
-              </div>
-              <div className="text-xs">
-                Швидкість: {unit.speed} фт. • Ініціатива: {unit.initiative}
+                Рівень {unit.level} • AC {unit.armorClass} • HP {unit.maxHp} •
+                Init {unit.initiative}
+                {avgDamage !== null && ` • Урон ~${avgDamage}`}
               </div>
             </div>
           </div>
         </div>
-
-        <div className="space-y-2 mt-4">
-          <div className="text-xs grid grid-cols-3 gap-1">
-            <div>СИЛ: {unit.strength}</div>
-            <div>ЛОВ: {unit.dexterity}</div>
-            <div>ТІЛ: {unit.constitution}</div>
-            <div>ІНТ: {unit.intelligence}</div>
-            <div>МДР: {unit.wisdom}</div>
-            <div>ХАР: {unit.charisma}</div>
-          </div>
-        </div>
-
-        {attacks.length > 0 && (
-          <div className="space-y-1">
-            <div className="text-xs font-semibold">Атаки:</div>
-            <div className="text-xs space-y-0.5">
-              {attacks.slice(0, 2).map((attack, idx: number) => (
-                <div key={idx}>
-                  {attack.name}: +{attack.attackBonus}, {attack.damageDice}{" "}
-                  {attack.damageType}
-                </div>
-              ))}
-              {attacks.length > 2 && (
-                <div className="text-muted-foreground">
-                  +{attacks.length - 2} інших...
-                </div>
-              )}
-            </div>
-          </div>
-        )}
 
         {specialAbilities.length > 0 && (
-          <div className="space-y-1">
+          <div className="space-y-1 mt-4">
             <div className="text-xs font-semibold">Здібності:</div>
-            <div className="text-xs text-muted-foreground line-clamp-2">
-              {specialAbilities[0]?.name ||
-                specialAbilities[0]?.description ||
-                ""}
+            <div className="text-xs text-muted-foreground">
+              {specialAbilities.map((ability) => (
+                <div key={ability.name}>{ability.name}</div>
+              ))}
             </div>
-            {specialAbilities.length > 1 && (
-              <div className="text-xs text-muted-foreground">
-                +{specialAbilities.length - 1} інших...
-              </div>
-            )}
           </div>
         )}
 

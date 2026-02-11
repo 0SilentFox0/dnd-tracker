@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { useReadOnly } from "@/components/ui/read-only-context";
 import { normalizeImageUrl } from "@/lib/utils/common/image-url";
 
-const DEFAULT_MAX_SIZE_BYTES = 2 * 1024 * 1024; // 2 MB
+const DEFAULT_MAX_SIZE_BYTES = 3 * 1024 * 1024; // 3 MB
+
 const DEFAULT_ACCEPT = "image/jpeg,image/png,image/webp,image/gif";
 
 export interface ImageUploadProps {
@@ -33,6 +34,7 @@ export function ImageUpload({
   className,
 }: ImageUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+
   const readOnly = useReadOnly();
 
   const previewSrc = value?.startsWith("data:")
@@ -73,9 +75,7 @@ export function ImageUpload({
     if (!file) return;
 
     if (file.size > maxSizeBytes) {
-      alert(
-        `Файл завеликий. Максимум ${maxSizeBytes / 1024 / 1024} МБ.`
-      );
+      alert(`Файл завеликий. Максимум ${maxSizeBytes / 1024 / 1024} МБ.`);
       e.target.value = "";
 
       return;

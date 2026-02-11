@@ -43,12 +43,14 @@ interface CharacterBasicInfoProps {
   };
   campaignMembers?: CampaignMember[];
   races?: Race[];
+  isPlayerView?: boolean;
 }
 
 export function CharacterBasicInfo({
   basicInfo,
   campaignMembers = [],
   races = [],
+  isPlayerView = false,
 }: CharacterBasicInfoProps) {
   const {
     name,
@@ -67,7 +69,7 @@ export function CharacterBasicInfo({
   } = basicInfo;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+    <div className="grid grid-cols-2 gap-4 w-full">
       <LabeledInput
         id="name"
         label="Ім'я"
@@ -200,15 +202,17 @@ export function CharacterBasicInfo({
         containerClassName="w-full min-w-0"
         className="w-full"
       />
-      <div className="w-full min-w-0 md:col-span-2">
-        <ImageUpload
-          label="Картинка персонажа"
-          value={avatar || ""}
-          onChange={setters.setAvatar}
-          placeholder="Посилання на картинку (URL)"
-          previewAlt="Аватар"
-        />
-      </div>
+      {!isPlayerView && (
+        <div className="w-full min-w-0 md:col-span-2">
+          <ImageUpload
+            label="Картинка персонажа"
+            value={avatar || ""}
+            onChange={setters.setAvatar}
+            placeholder="Посилання на картинку (URL)"
+            previewAlt="Аватар"
+          />
+        </div>
+      )}
     </div>
   );
 }

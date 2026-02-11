@@ -42,6 +42,8 @@ export interface BattleSpell {
   description: string;
   duration?: string | null;
   castingTime?: string | null;
+  /** Текстові ефекти з spell.effects (для Крадіжка мани тощо) */
+  effects?: string[] | null;
   /** Структуровані ефекти з тест-кейсів: { duration, effects: [{ type, value, isPercentage? }] } */
   effectDetails?: {
     duration?: number;
@@ -125,10 +127,11 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
 
   updatedCaster = beforeSpellResult.updatedCaster;
 
-  // 1. Перевіряємо чи є spell slot
+  // 1. Перевіряємо чи є spell slot (юніти: універсальний слот "universal" для будь-якого рівня)
   const spellLevel = spell.level.toString();
-
-  const spellSlot = updatedCaster.spellcasting.spellSlots[spellLevel];
+  const isUnit = updatedCaster.basicInfo.sourceType === "unit";
+  const slotKey = isUnit ? "universal" : spellLevel;
+  const spellSlot = updatedCaster.spellcasting.spellSlots[slotKey];
 
   if (!spellSlot || spellSlot.current <= 0) {
     const battleAction: BattleAction = {
@@ -169,9 +172,9 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
 
   // No Target — лише витрата слота та дія, без цілей
   if (spell.type === "no_target") {
-    updatedCaster.spellcasting.spellSlots[spellLevel] = {
-      ...updatedCaster.spellcasting.spellSlots[spellLevel],
-      current: updatedCaster.spellcasting.spellSlots[spellLevel].current - 1,
+    updatedCaster.spellcasting.spellSlots[slotKey] = {
+      ...updatedCaster.spellcasting.spellSlots[slotKey],
+      current: updatedCaster.spellcasting.spellSlots[slotKey].current - 1,
     };
     const isBonusAction = spell.castingTime?.toLowerCase().includes("bonus") ?? false;
     if (isBonusAction) {
@@ -230,9 +233,9 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
         },
       };
     }
-    updatedCaster.spellcasting.spellSlots[spellLevel] = {
-      ...updatedCaster.spellcasting.spellSlots[spellLevel],
-      current: updatedCaster.spellcasting.spellSlots[spellLevel].current - 1,
+    updatedCaster.spellcasting.spellSlots[slotKey] = {
+      ...updatedCaster.spellcasting.spellSlots[slotKey],
+      current: updatedCaster.spellcasting.spellSlots[slotKey].current - 1,
     };
     const isBonusAction = spell.castingTime?.toLowerCase().includes("bonus") ?? false;
     if (isBonusAction) {
@@ -290,9 +293,9 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
       ] ?? 0;
     const totalHit = (hitRoll ?? 0) + modifier;
     if (hitRoll === undefined || totalHit < spell.hitCheck.dc) {
-      updatedCaster.spellcasting.spellSlots[spellLevel] = {
-        ...updatedCaster.spellcasting.spellSlots[spellLevel],
-        current: updatedCaster.spellcasting.spellSlots[spellLevel].current - 1,
+      updatedCaster.spellcasting.spellSlots[slotKey] = {
+        ...updatedCaster.spellcasting.spellSlots[slotKey],
+        current: updatedCaster.spellcasting.spellSlots[slotKey].current - 1,
       };
       const isBonusAction = spell.castingTime?.toLowerCase().includes("bonus") ?? false;
       if (isBonusAction) {
@@ -609,10 +612,36 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
     }
   }
 
+  // 4c. Крадіжка мани — у кожної цілі зникає 1 слот магії 1 рівня (якщо є)
+  const hasManaSteal = Array.isArray(spell.effects) && spell.effects.includes("Крадіжка мани");
+
+  if (hasManaSteal) {
+    for (let i = 0; i < updatedTargets.length; i++) {
+      const target = updatedTargets[i];
+      const slot1 = target.spellcasting?.spellSlots?.["1"];
+
+      if (slot1 && typeof slot1.current === "number" && slot1.current > 0) {
+        updatedTargets[i] = {
+          ...target,
+          spellcasting: {
+            ...target.spellcasting,
+            spellSlots: {
+              ...target.spellcasting.spellSlots,
+              "1": {
+                ...slot1,
+                current: Math.max(0, slot1.current - 1),
+              },
+            },
+          },
+        };
+      }
+    }
+  }
+
   // 5. Витрачаємо spell slot
-  updatedCaster.spellcasting.spellSlots[spellLevel] = {
-    ...updatedCaster.spellcasting.spellSlots[spellLevel],
-    current: updatedCaster.spellcasting.spellSlots[spellLevel].current - 1,
+  updatedCaster.spellcasting.spellSlots[slotKey] = {
+    ...updatedCaster.spellcasting.spellSlots[slotKey],
+    current: updatedCaster.spellcasting.spellSlots[slotKey].current - 1,
   };
 
   // 6. Позначаємо що кастер використав дію (action або bonus action)

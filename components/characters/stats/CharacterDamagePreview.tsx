@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -63,59 +65,67 @@ async function fetchDamagePreview(
 function DamageBlock({
   title,
   data,
-  typeLabel,
   coefficient = 1,
   onCoefficientChange,
   isDm,
 }: {
   title: string;
   data: DamagePreviewItem;
-  typeLabel: string;
   coefficient?: number;
   onCoefficientChange?: (value: number) => void;
   isDm?: boolean;
 }) {
+  const [localValue, setLocalValue] = useState(String(coefficient));
+
+  useEffect(() => {
+    setLocalValue(String(coefficient));
+  }, [coefficient]);
+
+  const handleSave = () => {
+    const v = parseFloat(localValue);
+
+    if (!Number.isNaN(v) && v >= 0.1 && v <= 3) {
+      onCoefficientChange?.(v);
+    }
+  };
+
   return (
     <Card>
       <CardHeader className="pb-2">
-        <div className="flex items-start justify-between">
-          <div className="space-y-1.5">
-            <CardTitle className="text-base">{title}</CardTitle>
-            <CardDescription>
-              {data.hasWeapon && data.diceFormula ? (
-                <>
-                  <span className="font-mono text-foreground/80">
-                    {data.diceFormula}
-                  </span>{" "}
-                  + база за рівнем → середній урон
-                </>
-              ) : (
-                <>З руки (база за рівнем та характеристикою)</>
-              )}
-            </CardDescription>
-          </div>
-          {isDm && (
-            <div className="flex items-center gap-1.5 shrink-0">
-              <span className="text-xs text-muted-foreground whitespace-nowrap">
-                ×
-              </span>
-              <Input
-                type="number"
-                min={0.1}
-                max={3}
-                step={0.1}
-                className="h-8 w-20 tabular-nums text-left"
-                value={coefficient}
-                onChange={(e) => {
-                  const v = parseFloat(e.target.value);
-
-                  if (!Number.isNaN(v) && v >= 0.1 && v <= 3)
-                    onCoefficientChange?.(v);
-                }}
-              />
-            </div>
-          )}
+        <div className="space-y-1.5">
+          <CardTitle className="text-base">{title}</CardTitle>
+          <CardDescription>
+            {data.hasWeapon && data.diceFormula ? (
+              <>
+                <span className="font-mono text-foreground/80">
+                  {data.diceFormula}
+                </span>{" "}
+                + база за рівнем → середній урон
+              </>
+            ) : (
+              <>З руки (база за рівнем та характеристикою)</>
+            )}
+          </CardDescription>
         </div>
+        {isDm && (
+          <div className="flex items-center gap-2 pt-2">
+            <span className="text-xs text-muted-foreground whitespace-nowrap">
+              Коеф. ×
+            </span>
+            <Input
+              type="number"
+              min={0.1}
+              max={3}
+              step={0.1}
+              className="h-8 w-20 tabular-nums text-left"
+              value={localValue}
+              onChange={(e) => setLocalValue(e.target.value)}
+            />
+            <Button type="button" size="sm" variant="secondary" onClick={handleSave}>
+              Зберегти
+            </Button>
+          </div>
+        )}
       </CardHeader>
       <CardContent className="space-y-2">
         <p className="text-2xl font-semibold tabular-nums">{data.total}</p>
@@ -160,11 +170,42 @@ export function CharacterDamagePreview({
 
   if (isLoading) {
     return (
-      <Card>
-        <CardContent className="py-6 text-center text-muted-foreground text-sm">
-          Завантаження урону…
-        </CardContent>
-      </Card>
+      <div className="space-y-4">
+        <div>
+          <div className="h-4 w-48 rounded bg-muted animate-pulse" />
+          <div className="mt-2 h-3 w-full max-w-md rounded bg-muted animate-pulse" />
+        </div>
+        <div className="space-y-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="h-4 w-32 rounded bg-muted animate-pulse" />
+              <div className="h-3 w-56 rounded bg-muted animate-pulse mt-2" />
+              <div className="h-8 w-20 rounded bg-muted animate-pulse mt-3" />
+            </CardHeader>
+            <CardContent>
+              <div className="h-8 w-16 rounded bg-muted animate-pulse" />
+              <div className="mt-2 space-y-1">
+                <div className="h-3 w-full rounded bg-muted animate-pulse" />
+                <div className="h-3 w-[80%] rounded bg-muted animate-pulse" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="h-4 w-32 rounded bg-muted animate-pulse" />
+              <div className="h-3 w-56 rounded bg-muted animate-pulse mt-2" />
+              <div className="h-8 w-20 rounded bg-muted animate-pulse mt-3" />
+            </CardHeader>
+            <CardContent>
+              <div className="h-8 w-16 rounded bg-muted animate-pulse" />
+              <div className="mt-2 space-y-1">
+                <div className="h-3 w-full rounded bg-muted animate-pulse" />
+                <div className="h-3 w-[80%] rounded bg-muted animate-pulse" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     );
   }
 
@@ -186,11 +227,10 @@ export function CharacterDamagePreview({
       <p className="text-xs text-muted-foreground">
         Модифікатор STR/DEX: (характеристика − 10) ÷ 2, округлення вниз. Ближній бій використовує STR, дальній — DEX.
       </p>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="space-y-4">
         <DamageBlock
           title="Ближній бій (melee)"
           data={data.melee}
-          typeLabel="ближнього бою"
           coefficient={meleeCoefficient}
           onCoefficientChange={onMeleeCoefficientChange}
           isDm={isDm}
@@ -198,7 +238,6 @@ export function CharacterDamagePreview({
         <DamageBlock
           title="Дальній бій (ranged)"
           data={data.ranged}
-          typeLabel="дальнього бою"
           coefficient={rangedCoefficient}
           onCoefficientChange={onRangedCoefficientChange}
           isDm={isDm}

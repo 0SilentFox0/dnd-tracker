@@ -83,6 +83,42 @@
   }
 }
 
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes pulse-slow {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 5px var(--primary),
+      0 0 10px var(--primary);
+  }
+  50% {
+    box-shadow:
+      0 0 10px var(--primary),
+      0 0 20px var(--primary),
+      0 0 30px var(--primary);
+  }
+}
+
 .glass-card {
   @apply bg-card/60 backdrop-blur-md border border-white/10 shadow-xl;
 }
@@ -286,5 +322,40 @@
   .skill-tree-container [style*="width: 7.5%"] {
     min-width: 16px;
     min-height: 16px;
+  }
+}
+
+/* Enhanced Character View Mobile Optimizations */
+@media (max-width: 640px) {
+  /* Improve touch targets */
+  .touch-manipulation {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Optimize animations for mobile */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Smooth scrolling for mobile */
+@supports (-webkit-overflow-scrolling: touch) {
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Prevent text size adjustment on mobile */
+@media (max-width: 768px) {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 }

@@ -95,6 +95,11 @@ const updateCharacterSchema = z.object({
       })
     )
     .optional(),
+
+  // Коефіцієнти масштабування (HP, melee, ranged) — окремі для кожного героя
+  hpMultiplier: z.number().min(0.1).max(3).optional(),
+  meleeMultiplier: z.number().min(0.1).max(3).optional(),
+  rangedMultiplier: z.number().min(0.1).max(3).optional(),
 });
 
 export async function GET(

@@ -353,7 +353,10 @@ export async function createBattleParticipantFromCharacter(
       race: character.race,
     },
     combatStats: (() => {
-      const computedMaxHp = getHeroMaxHp(character.level, character.strength);
+      const hpMult = (character as { hpMultiplier?: number | null }).hpMultiplier ?? 1;
+      const computedMaxHp = getHeroMaxHp(character.level, character.strength, {
+        hpMultiplier: hpMult,
+      });
 
       // На початку бою завжди повне здоровʼя; під час бою maxHp може тимчасово знижуватись (наприклад, лікування -10% maxHP)
       return {
@@ -771,16 +774,39 @@ export async function createBattleParticipantFromUnit(
       properties?: string;
     }>) || [];
 
-  const battleAttacks = attacks.map((attack, index) => ({
-    id: (attack as { id?: string }).id || `${unit.id}-attack-${index}`,
-    name: attack.name,
-    type: (attack.type || AttackType.MELEE) as AttackType,
-    attackBonus: attack.attackBonus,
-    damageDice: attack.damageDice,
-    damageType: attack.damageType,
-    range: attack.range,
-    properties: attack.properties,
-  }));
+  const battleAttacks = attacks.map((attack, index) => {
+    // Визначаємо тип атаки: явно заданий, або з range (5 фт = melee, інакше ranged)
+    const rawType = (attack as { type?: string }).type;
+    let attackType: AttackType =
+      rawType === "ranged"
+        ? AttackType.RANGED
+        : rawType === "melee"
+          ? AttackType.MELEE
+          : attack.range && !/^5\s*(фт|ft)/i.test(attack.range)
+            ? AttackType.RANGED
+            : AttackType.MELEE;
+
+    const a = attack as { targetType?: string; maxTargets?: number; damageDistribution?: number[]; guaranteedDamage?: number };
+    return {
+      id: (attack as { id?: string }).id || `${unit.id}-attack-${index}`,
+      name: attack.name,
+      type: attackType,
+      attackBonus: attack.attackBonus,
+      damageDice: attack.damageDice,
+      damageType: attack.damageType,
+      range: attack.range,
+      properties: attack.properties,
+      targetType:
+        a.targetType === "aoe"
+          ? ("aoe" as const)
+          : a.targetType === "target"
+            ? ("target" as const)
+            : undefined,
+      maxTargets: a.maxTargets,
+      damageDistribution: a.damageDistribution,
+      guaranteedDamage: a.guaranteedDamage,
+    };
+  });
 
   // Завантажуємо расові здібності
   let racialAbilities: RacialAbility[] = [];
@@ -841,7 +867,7 @@ export async function createBattleParticipantFromUnit(
       spellcastingAbility: undefined,
       spellSaveDC: undefined,
       spellAttackBonus: undefined,
-      spellSlots: {},
+      spellSlots: { universal: { max: 3, current: 3 } }, // 3 універсальні слоти для будь-якого заклинання
       knownSpells: (unit.knownSpells as string[]) || [],
     },
     battleData: {

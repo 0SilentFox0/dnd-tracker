@@ -70,6 +70,11 @@ export function characterToFormData(
     abilities: {
       personalSkillId: (character as { personalSkillId?: string | null }).personalSkillId ?? "",
     },
+    scalingCoefficients: {
+      hpMultiplier: (character as { hpMultiplier?: number | null }).hpMultiplier ?? 1,
+      meleeMultiplier: (character as { meleeMultiplier?: number | null }).meleeMultiplier ?? 1,
+      rangedMultiplier: (character as { rangedMultiplier?: number | null }).rangedMultiplier ?? 1,
+    },
     skillTreeProgress:
       character.skillTreeProgress &&
       typeof character.skillTreeProgress === "object"
@@ -131,6 +136,11 @@ export function formDataToCharacter(
     bonds: formData.roleplay.bonds,
     flaws: formData.roleplay.flaws,
     personalSkillId: formData.abilities.personalSkillId?.trim() || null,
+    ...(formData.scalingCoefficients != null && {
+      hpMultiplier: formData.scalingCoefficients.hpMultiplier,
+      meleeMultiplier: formData.scalingCoefficients.meleeMultiplier,
+      rangedMultiplier: formData.scalingCoefficients.rangedMultiplier,
+    }),
     ...(formData.skillTreeProgress != null && {
       skillTreeProgress: formData.skillTreeProgress,
     }),

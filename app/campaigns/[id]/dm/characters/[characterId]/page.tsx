@@ -34,7 +34,6 @@ import { getCharacter, updateCharacter } from "@/lib/api/characters";
 import { CharacterViewClient } from "../../../character/character-view-client";
 import { useCampaignMembers } from "@/lib/hooks/useCampaignMembers";
 import { useCharacterForm } from "@/lib/hooks/useCharacterForm";
-import { useHeroScalingCoefficients } from "@/lib/hooks/useHeroScalingCoefficients";
 import { useRaces } from "@/lib/hooks/useRaces";
 import { characterToFormData } from "@/lib/utils/characters/character-form";
 import type { Character } from "@/types/characters";
@@ -52,8 +51,6 @@ export default function EditCharacterPage({
   const { members, loading: membersLoading } = useCampaignMembers(id);
 
   const { data: races = [] } = useRaces(id);
-
-  const { coefficients, setCoefficients } = useHeroScalingCoefficients(id);
 
   const [characterLoaded, setCharacterLoaded] = useState(false);
 
@@ -208,17 +205,47 @@ export default function EditCharacterPage({
                   <CharacterHpPreview
                     level={basicInfo.level}
                     strength={abilityScores.strength}
-                    coefficient={coefficients.hpMultiplier}
-                    onCoefficientChange={(v) => setCoefficients({ hpMultiplier: v })}
+                    coefficient={formData.scalingCoefficients?.hpMultiplier ?? 1}
+                    onCoefficientChange={(v) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        scalingCoefficients: {
+                          ...prev.scalingCoefficients,
+                          hpMultiplier: v,
+                          meleeMultiplier: prev.scalingCoefficients?.meleeMultiplier ?? 1,
+                          rangedMultiplier: prev.scalingCoefficients?.rangedMultiplier ?? 1,
+                        },
+                      }))
+                    }
                     isDm
                   />
                   <CharacterDamagePreview
                     campaignId={id}
                     characterId={characterId}
-                    meleeCoefficient={coefficients.meleeMultiplier}
-                    rangedCoefficient={coefficients.rangedMultiplier}
-                    onMeleeCoefficientChange={(v) => setCoefficients({ meleeMultiplier: v })}
-                    onRangedCoefficientChange={(v) => setCoefficients({ rangedMultiplier: v })}
+                    meleeCoefficient={formData.scalingCoefficients?.meleeMultiplier ?? 1}
+                    rangedCoefficient={formData.scalingCoefficients?.rangedMultiplier ?? 1}
+                    onMeleeCoefficientChange={(v) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        scalingCoefficients: {
+                          ...prev.scalingCoefficients,
+                          hpMultiplier: prev.scalingCoefficients?.hpMultiplier ?? 1,
+                          meleeMultiplier: v,
+                          rangedMultiplier: prev.scalingCoefficients?.rangedMultiplier ?? 1,
+                        },
+                      }))
+                    }
+                    onRangedCoefficientChange={(v) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        scalingCoefficients: {
+                          ...prev.scalingCoefficients,
+                          hpMultiplier: prev.scalingCoefficients?.hpMultiplier ?? 1,
+                          meleeMultiplier: prev.scalingCoefficients?.meleeMultiplier ?? 1,
+                          rangedMultiplier: v,
+                        },
+                      }))
+                    }
                     isDm
                   />
                   <CharacterCombatParams combatStats={combatStats} />

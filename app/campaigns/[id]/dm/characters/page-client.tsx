@@ -181,7 +181,9 @@ export function DMCharactersClient({ campaignId }: DMCharactersClientProps) {
                     Рівень {character.level}
                   </Badge>
                   <Badge variant="secondary" className="text-xs">
-                    HP {getHeroMaxHp(character.level, character.strength)}
+                    HP {getHeroMaxHp(character.level, character.strength, {
+                    hpMultiplier: (character as { hpMultiplier?: number | null }).hpMultiplier ?? 1,
+                  })}
                   </Badge>
                   <Badge variant="secondary" className="text-xs">
                     AC {character.armorClass}
