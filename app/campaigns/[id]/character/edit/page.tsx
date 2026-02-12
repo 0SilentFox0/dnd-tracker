@@ -25,7 +25,8 @@ export default async function PlayerCharacterEditPage({
     redirect("/campaigns");
   }
 
-  if (!campaign.allowPlayerEdit) {
+  const isDM = campaign.members[0]?.role === "dm";
+  if (!isDM) {
     redirect(`/campaigns/${id}/character`);
   }
 

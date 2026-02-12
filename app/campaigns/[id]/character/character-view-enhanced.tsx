@@ -4,19 +4,18 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import {
-  Sword,
-  Shield,
-  Heart,
-  Zap,
-  TrendingUp,
-  Sparkles,
   Book,
-  Scroll,
   Crown,
+  Heart,
+  Scroll,
+  Shield,
+  Sparkles,
   Star,
+  Sword,
+  TrendingUp,
+  Zap,
 } from "lucide-react";
 
-import { ReadOnlyProvider } from "@/components/ui/read-only-context";
 import { CharacterAbilitiesSection } from "@/components/characters/abilities/CharacterAbilitiesSection";
 import { CharacterSkillTreeView } from "@/components/characters/abilities/CharacterSkillTreeView";
 import { CharacterArtifactsSection } from "@/components/characters/artifacts/CharacterArtifactsSection";
@@ -34,6 +33,7 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { ReadOnlyProvider } from "@/components/ui/read-only-context";
 import { getCharacter, updateCharacter } from "@/lib/api/characters";
 import { getHeroMaxHpBreakdown } from "@/lib/constants/hero-scaling";
 import { useCampaignMembers } from "@/lib/hooks/useCampaignMembers";
@@ -97,11 +97,15 @@ export function CharacterViewEnhanced({
   allowPlayerEdit: boolean;
 }) {
   const { members } = useCampaignMembers(campaignId);
+
   const { data: races = [] } = useRaces(campaignId);
 
   const [characterLoaded, setCharacterLoaded] = useState(false);
+
   const [equipped, setEquipped] = useState<EquippedItems>({});
+
   const [savingTree, setSavingTree] = useState(false);
+
   const [saveError, setSaveError] = useState<string | null>(null);
 
   const {
@@ -122,8 +126,11 @@ export function CharacterViewEnhanced({
     queryKey: ["artifacts", campaignId],
     queryFn: async () => {
       const res = await fetch(`/api/campaigns/${campaignId}/artifacts`);
+
       if (!res.ok) return [];
+
       const data = await res.json();
+
       return Array.isArray(data) ? data : [];
     },
     enabled: !!campaignId && characterLoaded,
@@ -138,7 +145,9 @@ export function CharacterViewEnhanced({
           campaignId,
           characterId,
         );
+
         if (cancelled) return;
+
         setFormData(characterToFormData(character));
         setEquipped((character.inventory?.equipped as EquippedItems) ?? {});
         setCharacterLoaded(true);
@@ -151,6 +160,7 @@ export function CharacterViewEnhanced({
     };
 
     fetchCharacter();
+
     return () => {
       cancelled = true;
     };
@@ -197,13 +207,20 @@ export function CharacterViewEnhanced({
   );
 
   const isPlayerView = !allowPlayerEdit;
+
   const hpMult = formData.scalingCoefficients?.hpMultiplier ?? 1;
-  const heroHp = getHeroMaxHpBreakdown(basicInfo.level, abilityScores.strength, {
-    hpMultiplier: hpMult,
-  });
+
+  const heroHp = getHeroMaxHpBreakdown(
+    basicInfo.level,
+    abilityScores.strength,
+    {
+      hpMultiplier: hpMult,
+    },
+  );
 
   // Calculate ability modifiers for display
   const getModifier = (score: number) => Math.floor((score - 10) / 2);
+
   const abilityMods = {
     strength: getModifier(abilityScores.strength),
     dexterity: getModifier(abilityScores.dexterity),
@@ -451,8 +468,12 @@ export function CharacterViewEnhanced({
                 <CharacterDamagePreview
                   campaignId={campaignId}
                   characterId={characterId}
-                  meleeCoefficient={formData.scalingCoefficients?.meleeMultiplier ?? 1}
-                  rangedCoefficient={formData.scalingCoefficients?.rangedMultiplier ?? 1}
+                  meleeCoefficient={
+                    formData.scalingCoefficients?.meleeMultiplier ?? 1
+                  }
+                  rangedCoefficient={
+                    formData.scalingCoefficients?.rangedMultiplier ?? 1
+                  }
                   isDm={false}
                 />
                 <CharacterCombatParams

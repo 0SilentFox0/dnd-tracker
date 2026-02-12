@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation";
 
+import { CharacterViewClient } from "./character-view-client";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { getAuthUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { CharacterViewClient } from "./character-view-client";
 
 export default async function CharacterPage({
   params,
@@ -34,6 +35,8 @@ export default async function CharacterPage({
   if (!userMember) {
     redirect("/campaigns");
   }
+
+  const isDM = userMember.role === "dm";
 
   // Знаходимо персонажа гравця
   const character = await prisma.character.findFirst({
@@ -66,6 +69,7 @@ export default async function CharacterPage({
       campaignId={id}
       characterId={character.id}
       allowPlayerEdit={campaign.allowPlayerEdit ?? false}
+      isDM={isDM}
     />
   );
 }

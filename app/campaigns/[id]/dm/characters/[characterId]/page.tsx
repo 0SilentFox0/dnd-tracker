@@ -289,7 +289,7 @@ export default function EditCharacterPage({
                         }
                       }}
                     >
-                      Скинути прокачані уміння
+                      Скинути дерево прокачки
                     </Button>
                   </div>
                   <CharacterSkillTreeView

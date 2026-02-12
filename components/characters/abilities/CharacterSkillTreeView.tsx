@@ -41,6 +41,8 @@ interface CharacterSkillTreeViewProps {
   characterRace: string;
   characterLevel: number;
   skillTreeProgress: SkillTreeProgress;
+  /** Збережений прогрес — у режимі гравця скіли з цього списку не можна зняти повторним кліком */
+  savedSkillTreeProgress?: SkillTreeProgress;
   onSkillTreeProgressChange?: (next: SkillTreeProgress) => void;
 }
 
@@ -49,6 +51,7 @@ export function CharacterSkillTreeView({
   characterRace,
   characterLevel,
   skillTreeProgress,
+  savedSkillTreeProgress,
   onSkillTreeProgressChange,
 }: CharacterSkillTreeViewProps) {
   const [trees, setTrees] = useState<PrismaSkillTree[]>([]);
@@ -96,6 +99,12 @@ export function CharacterSkillTreeView({
     return progress?.unlockedSkills ?? [];
   }, [baseSkillTree, skillTreeProgress]);
 
+  const savedUnlockedSkills = useMemo(() => {
+    if (!baseSkillTree || !savedSkillTreeProgress) return [];
+    const progress = savedSkillTreeProgress[baseSkillTree.id];
+    return progress?.unlockedSkills ?? [];
+  }, [baseSkillTree, savedSkillTreeProgress]);
+
   const enrichedSkillTree = useSkillTreeEnrichment({
     skillTree: baseSkillTree,
     skillsFromLibrary,
@@ -130,6 +139,9 @@ export function CharacterSkillTreeView({
     (skill: Skill) => {
       if (!canLevel) return;
       if (unlockedSkills.includes(skill.id)) {
+        if (savedUnlockedSkills.includes(skill.id)) {
+          return;
+        }
         applyNewUnlocked(unlockedSkills.filter((id) => id !== skill.id));
         return;
       }
@@ -139,13 +151,16 @@ export function CharacterSkillTreeView({
       }
       applyNewUnlocked([...unlockedSkills, skill.id]);
     },
-    [canLevel, unlockedSkills, maxSkills, applyNewUnlocked],
+    [canLevel, unlockedSkills, savedUnlockedSkills, maxSkills, applyNewUnlocked],
   );
 
   const handleUltimateSkillClick = useCallback(
     (skill: UltimateSkill) => {
       if (!canLevel) return;
       if (unlockedSkills.includes(skill.id)) {
+        if (savedUnlockedSkills.includes(skill.id)) {
+          return;
+        }
         applyNewUnlocked(unlockedSkills.filter((id) => id !== skill.id));
         return;
       }
@@ -155,7 +170,7 @@ export function CharacterSkillTreeView({
       }
       applyNewUnlocked([...unlockedSkills, skill.id]);
     },
-    [canLevel, unlockedSkills, maxSkills, applyNewUnlocked],
+    [canLevel, unlockedSkills, savedUnlockedSkills, maxSkills, applyNewUnlocked],
   );
 
   const handleRacialSkillClick = useCallback(
@@ -169,6 +184,9 @@ export function CharacterSkillTreeView({
       if (!canLearn) return;
       const racialSkillLevelId = getRacialSkillLevelId(mainSkill.id, level);
       if (unlockedSkills.includes(racialSkillLevelId)) {
+        if (savedUnlockedSkills.includes(racialSkillLevelId)) {
+          return;
+        }
         applyNewUnlocked(
           unlockedSkills.filter((id) => id !== racialSkillLevelId),
         );
@@ -180,7 +198,7 @@ export function CharacterSkillTreeView({
       }
       applyNewUnlocked([...unlockedSkills, racialSkillLevelId]);
     },
-    [canLevel, unlockedSkills, maxSkills, applyNewUnlocked],
+    [canLevel, unlockedSkills, savedUnlockedSkills, maxSkills, applyNewUnlocked],
   );
 
   if (!characterRace) {
@@ -206,7 +224,9 @@ export function CharacterSkillTreeView({
         Рівень героя: {characterLevel}. Прокачано скілів:{" "}
         {unlockedSkills.length} / {characterLevel}
         {canLevel &&
-          " — можна вивчати навики (клікайте по навиках для додавання/зняття)."}
+          (savedSkillTreeProgress
+            ? " — клік додає скіл, повторний клік знімає (лише незбережені)."
+            : " — можна вивчати навики (клікайте по навиках для додавання/зняття).")}
       </p>
       <div className="flex justify-center overflow-auto">
         <CircularSkillTree
