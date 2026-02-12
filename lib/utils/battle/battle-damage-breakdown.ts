@@ -45,17 +45,21 @@ export function computeDamageBreakdown(
   } = params;
 
   const baseDamage = damageRolls.reduce((sum, roll) => sum + roll, 0);
-  const statModifier =
-    attack.type === AttackType.MELEE
-      ? Math.floor((attacker.abilities.strength - 10) / 2)
-      : Math.floor((attacker.abilities.dexterity - 10) / 2);
+  const typeStr = String(attack.type ?? "").toLowerCase();
+  const isMelee = typeStr === "melee";
+  const attackTypeSafe: AttackType = isMelee
+    ? AttackType.MELEE
+    : AttackType.RANGED;
+  const statModifier = isMelee
+    ? Math.floor((attacker.abilities.strength - 10) / 2)
+    : Math.floor((attacker.abilities.dexterity - 10) / 2);
 
   const isHero = attacker.basicInfo.sourceType === "character";
   const heroLevelPart = isHero ? attacker.abilities.level : 0;
   const heroDiceNotation = isHero
     ? getHeroDamageDiceForLevel(
         attacker.abilities.level,
-        attack.type as AttackType,
+        attackTypeSafe,
       )
     : "";
   const weaponDiceCount = getTotalDiceCount(attack.damageDice ?? "");
@@ -100,7 +104,7 @@ export function computeDamageBreakdown(
     attacker,
     baseDamage,
     statModifier,
-    attack.type as AttackType,
+    attackTypeSafe,
     {
       allParticipants,
       additionalDamage: additionalDamageModifiers,

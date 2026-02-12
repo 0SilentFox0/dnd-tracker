@@ -49,7 +49,8 @@ export function usePusherBattleSync(
             battleId,
             data as BattleScene,
           );
-          queryClient.setQueryData(queryKey(), merged);
+          queryClient.setQueryData(queryKey(), { ...merged });
+          queryClient.invalidateQueries({ queryKey: queryKey() });
         } else {
           queryClient.invalidateQueries({ queryKey: queryKey() });
         }

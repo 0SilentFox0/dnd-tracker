@@ -75,9 +75,14 @@ export function DamageSummaryModal({
         }),
       },
     )
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to load breakdown");
-        return res.json();
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(
+            (data as { error?: string })?.error ?? `Помилка (${res.status})`,
+          );
+        }
+        return data;
       })
       .then((data) => {
         if (!cancelled) {

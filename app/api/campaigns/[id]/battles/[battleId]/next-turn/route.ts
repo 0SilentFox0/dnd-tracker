@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
-import { requireDM } from "@/lib/utils/api/api-auth";
+import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import {
   processEndOfTurn,
   processStartOfRound,
@@ -23,11 +23,14 @@ export async function POST(
   try {
     const { id, battleId } = await params;
 
-    const accessResult = await requireDM(id);
+    const accessResult = await requireCampaignAccess(id, false);
 
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
+
+    const { userId } = accessResult;
+    const isDM = accessResult.campaign.members[0]?.role === "dm";
 
     const battle = await prisma.battleScene.findUnique({
       where: { id: battleId },
@@ -53,6 +56,17 @@ export async function POST(
       return NextResponse.json(
         { error: "Current participant not found" },
         { status: 404 },
+      );
+    }
+
+    const canAdvanceTurn =
+      isDM ||
+      currentParticipant.basicInfo.controlledBy === userId;
+
+    if (!canAdvanceTurn) {
+      return NextResponse.json(
+        { error: "Forbidden: only DM or current turn controller can advance" },
+        { status: 403 },
       );
     }
 

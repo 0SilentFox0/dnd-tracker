@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { prisma } from "@/lib/db";
-import { requireDM } from "@/lib/utils/api/api-auth";
+import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { processAttack } from "@/lib/utils/battle/battle-attack-process";
 import { updateMoraleOnEvent } from "@/lib/utils/skills/skill-triggers-execution";
 import { BattleAction, BattleParticipant } from "@/types/battle";
@@ -43,11 +43,14 @@ export async function POST(
   try {
     const { id, battleId } = await params;
 
-    const accessResult = await requireDM(id);
+    const accessResult = await requireCampaignAccess(id, false);
 
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
+
+    const { userId } = accessResult;
+    const isDM = accessResult.campaign.members[0]?.role === "dm";
 
     const battle = await prisma.battleScene.findUnique({
       where: { id: battleId },
@@ -93,6 +96,19 @@ export async function POST(
       );
     }
 
+    const currentParticipant = initiativeOrder[battle.currentTurnIndex];
+    const canAttack =
+      isDM ||
+      (currentParticipant?.basicInfo.id === attacker.basicInfo.id &&
+        attacker.basicInfo.controlledBy === userId);
+
+    if (!canAttack) {
+      return NextResponse.json(
+        { error: "Forbidden: only DM or current turn controller can attack" },
+        { status: 403 },
+      );
+    }
+
     // Отримуємо цілі
     const targetIds = data.targetIds || (data.targetId ? [data.targetId] : []);
 
@@ -108,8 +124,6 @@ export async function POST(
     }
 
     // Перевіряємо чи це поточний хід атакуючого
-    const currentParticipant = initiativeOrder[battle.currentTurnIndex];
-
     if (
       !currentParticipant ||
       currentParticipant.basicInfo.id !== attacker.basicInfo.id

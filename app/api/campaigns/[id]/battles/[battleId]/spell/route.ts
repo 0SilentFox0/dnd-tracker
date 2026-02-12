@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { prisma } from "@/lib/db";
-import { requireDM } from "@/lib/utils/api/api-auth";
+import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { BattleSpell,processSpell } from "@/lib/utils/battle/battle-spell-process";
 import { BattleAction,BattleParticipant } from "@/types/battle";
 
@@ -32,11 +32,14 @@ export async function POST(
   try {
     const { id, battleId } = await params;
 
-    const accessResult = await requireDM(id);
+    const accessResult = await requireCampaignAccess(id, false);
 
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
+
+    const { userId } = accessResult;
+    const isDM = accessResult.campaign.members[0]?.role === "dm";
 
     const battle = await prisma.battleScene.findUnique({
       where: { id: battleId },
@@ -66,6 +69,19 @@ export async function POST(
       return NextResponse.json(
         { error: "Caster not found in battle" },
         { status: 404 }
+      );
+    }
+
+    const currentParticipant = initiativeOrder[battle.currentTurnIndex];
+    const canCast =
+      isDM ||
+      (currentParticipant?.basicInfo.id === caster.basicInfo.id &&
+        caster.basicInfo.controlledBy === userId);
+
+    if (!canCast) {
+      return NextResponse.json(
+        { error: "Forbidden: only DM or current turn controller can cast spells" },
+        { status: 403 }
       );
     }
 

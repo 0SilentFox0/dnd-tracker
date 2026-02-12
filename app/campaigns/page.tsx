@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { JoinBattleButton } from "@/components/campaigns/JoinBattleButton";
 import { JoinCampaignDialog } from "@/components/campaigns/join/JoinCampaignDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -93,34 +94,6 @@ export default async function CampaignsPage() {
     throw error; // Якщо інша помилка - пробрасываем далі
   }
 
-  // Перевіряємо чи є активні бої
-  let activeBattles: Array<{ id: string; campaignId: string }> = [];
-
-  try {
-    activeBattles = await prisma.battleScene.findMany({
-      where: {
-        campaign: {
-          members: {
-            some: {
-              userId: userId,
-            },
-          },
-        },
-        status: "active",
-      },
-      select: {
-        id: true,
-        campaignId: true,
-      },
-    });
-  } catch (error) {
-    console.error("Error fetching active battles:", error);
-    // Продовжуємо навіть якщо є помилка
-    activeBattles = [];
-  }
-
-  const hasActiveBattle = activeBattles.length > 0;
-
   return (
     <div className="container mx-auto p-4 space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -135,30 +108,8 @@ export default async function CampaignsPage() {
         </div>
       </div>
 
-      {/* Кнопка JOIN BATTLE */}
-      <div className="flex justify-center">
-        <Link
-          href={
-            hasActiveBattle
-              ? `/campaigns/${activeBattles[0].campaignId}/battles/${activeBattles[0].id}`
-              : "#"
-          }
-        >
-          <Button
-            size="lg"
-            className={
-              hasActiveBattle
-                ? "animate-pulse bg-green-600 hover:bg-green-700"
-                : "bg-gray-400 cursor-not-allowed"
-            }
-            disabled={!hasActiveBattle}
-          >
-            {hasActiveBattle
-              ? "⚔️ JOIN BATTLE"
-              : "⚔️ JOIN BATTLE (Немає активних боїв)"}
-          </Button>
-        </Link>
-      </div>
+      {/* Кнопка JOIN BATTLE — оновлюється автоматично без перезавантаження */}
+      <JoinBattleButton />
 
       {/* Список кампаній */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

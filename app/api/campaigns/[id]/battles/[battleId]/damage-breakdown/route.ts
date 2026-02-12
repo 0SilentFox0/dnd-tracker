@@ -38,9 +38,10 @@ export async function POST(
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error("Damage breakdown error:", error);
+    const err = error instanceof Error ? error : new Error(String(error));
+    console.error("Damage breakdown error:", err.message, err.stack);
     return NextResponse.json(
-      { error: "Failed to compute damage breakdown" },
+      { error: err.message || "Failed to compute damage breakdown" },
       { status: 500 },
     );
   }

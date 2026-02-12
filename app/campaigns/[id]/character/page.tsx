@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { getAuthUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { CharacterViewEnhanced } from "./character-view-enhanced";
+import { CharacterViewClient } from "./character-view-client";
 
 export default async function CharacterPage({
   params,
@@ -62,7 +62,7 @@ export default async function CharacterPage({
   }
 
   return (
-    <CharacterViewEnhanced
+    <CharacterViewClient
       campaignId={id}
       characterId={character.id}
       allowPlayerEdit={campaign.allowPlayerEdit ?? false}

@@ -4,6 +4,19 @@
 
 import type { Campaign, CampaignMember } from "@/types/campaigns";
 
+export type ActiveBattle = { id: string; campaignId: string };
+
+/**
+ * Отримує активні бої в кампаніях, де користувач є учасником.
+ */
+export async function getActiveBattles(): Promise<ActiveBattle[]> {
+  const response = await fetch("/api/campaigns/active-battles");
+  if (!response.ok) {
+    throw new Error("Failed to fetch active battles");
+  }
+  return response.json();
+}
+
 export async function updateCampaign(
   campaignId: string,
   data: Partial<{

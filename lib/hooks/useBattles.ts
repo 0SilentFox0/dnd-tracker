@@ -146,6 +146,7 @@ export function useStartBattle(campaignId: string, battleId: string) {
         mergeBattleCache(queryClient, campaignId, battleId, data),
       );
       queryClient.invalidateQueries({ queryKey: ["battles", campaignId] });
+      queryClient.invalidateQueries({ queryKey: ["active-battles"] });
     },
   });
 }
@@ -177,6 +178,7 @@ export function useCompleteBattle(campaignId: string, battleId: string) {
         mergeBattleCache(queryClient, campaignId, battleId, data),
       );
       queryClient.invalidateQueries({ queryKey: ["battles", campaignId] });
+      queryClient.invalidateQueries({ queryKey: ["active-battles"] });
     },
   });
 }
