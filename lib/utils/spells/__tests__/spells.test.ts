@@ -1,10 +1,12 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect,it } from "vitest";
+
 import {
+  calculateTotalSpellsInGroup,
   formatSpellLevel,
   groupSpellsByGroup,
-  calculateTotalSpellsInGroup,
   sortSpellLevels,
 } from "../spells";
+
 import type { Spell } from "@/types/spells";
 
 function makeSpell(overrides: Partial<Spell> = {}): Spell {
@@ -39,14 +41,18 @@ describe("spells", () => {
         makeSpell({ id: "b", name: "B", spellGroup: { id: "g1", name: "Dark" } }),
         makeSpell({ id: "c", name: "C", spellGroup: { id: "g2", name: "Light" } }),
       ];
+
       const grouped = groupSpellsByGroup(spells);
+
       expect(grouped.get("Dark")).toHaveLength(2);
       expect(grouped.get("Light")).toHaveLength(1);
     });
 
     it("використовує Без групи якщо spellGroup відсутній", () => {
       const spells: Spell[] = [makeSpell({ spellGroup: null })];
+
       const grouped = groupSpellsByGroup(spells);
+
       expect(grouped.get("Без групи")).toHaveLength(1);
     });
   });
@@ -57,6 +63,7 @@ describe("spells", () => {
         ["Рівень 1", [makeSpell(), makeSpell()]],
         ["Рівень 2", [makeSpell()]],
       ];
+
       expect(calculateTotalSpellsInGroup(levels)).toBe(3);
     });
   });
@@ -67,7 +74,9 @@ describe("spells", () => {
         ["Рівень 1", []],
         ["Cantrip", []],
       ];
+
       const sorted = sortSpellLevels(levels);
+
       expect(sorted[0][0]).toBe("Cantrip");
     });
 
@@ -77,7 +86,9 @@ describe("spells", () => {
         ["Рівень 1", []],
         ["Рівень 2", []],
       ];
+
       const sorted = sortSpellLevels(levels);
+
       expect(sorted.map(([l]) => l)).toEqual(["Рівень 1", "Рівень 2", "Рівень 3"]);
     });
   });

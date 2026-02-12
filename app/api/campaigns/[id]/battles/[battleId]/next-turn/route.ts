@@ -9,32 +9,99 @@ import {
   processStartOfRound,
   processStartOfTurn,
 } from "@/lib/utils/battle/battle-turn";
-import { executeSkillsByTrigger } from "@/lib/utils/skills/skill-triggers-execution";
 import {
   calculateAllyHpChangesOnVictory,
   checkVictoryConditions,
 } from "@/lib/utils/battle/battle-victory";
+import {
+  preparePusherPayload,
+  stripStateBeforeForClient,
+} from "@/lib/utils/battle/strip-battle-payload";
+import { executeSkillsByTrigger } from "@/lib/utils/skills/skill-triggers-execution";
 import { BattleAction, BattleParticipant } from "@/types/battle";
+
+const isBattleSyncDebugEnabled =
+  process.env.BATTLE_SYNC_DEBUG === "1" ||
+  process.env.BATTLE_SYNC_DEBUG === "true";
+
+const isTurnTimingEnabled =
+  process.env.NODE_ENV === "development" ||
+  process.env.BATTLE_TURN_TIMING === "1";
+
+function logTurnTiming(label: string, startMs: number, extra?: Record<string, number>) {
+  if (!isTurnTimingEnabled) return;
+  const elapsed = Date.now() - startMs;
+  console.info("[turn-timing][server]", label, { elapsedMs: elapsed, ...extra });
+}
+
+function battleStateSnapshot(
+  initiativeOrder: BattleParticipant[],
+  currentTurnIndex: number,
+  currentRound: number,
+  status?: string,
+) {
+  const current = initiativeOrder[currentTurnIndex]?.basicInfo;
+
+  return {
+    status: status ?? null,
+    round: currentRound,
+    turnIndex: currentTurnIndex,
+    initiativeCount: initiativeOrder.length,
+    currentParticipantId: current?.id ?? null,
+    currentParticipantName: current?.name ?? null,
+    currentParticipantSide: current?.side ?? null,
+  };
+}
+
+function debugBattleSync(message: string, payload?: unknown) {
+  if (!isBattleSyncDebugEnabled) return;
+
+  if (payload === undefined) {
+    console.info("[battle-sync][next-turn]", message);
+
+    return;
+  }
+
+  console.info("[battle-sync][next-turn]", message, payload);
+}
 
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string; battleId: string }> },
 ) {
+  const t0 = Date.now();
+
   try {
     const { id, battleId } = await params;
 
+    debugBattleSync("request received", { campaignId: id, battleId });
+
     const accessResult = await requireCampaignAccess(id, false);
+    logTurnTiming("auth + requireCampaignAccess", t0);
 
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
 
     const { userId } = accessResult;
+
     const isDM = accessResult.campaign.members[0]?.role === "dm";
 
     const battle = await prisma.battleScene.findUnique({
       where: { id: battleId },
+      select: {
+        id: true,
+        campaignId: true,
+        status: true,
+        currentTurnIndex: true,
+        currentRound: true,
+        initiativeOrder: true,
+        pendingSummons: true,
+        battleLog: true,
+        completedAt: true,
+      },
     });
+    logTurnTiming("battle fetch", t0);
 
     if (!battle || battle.campaignId !== id) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -49,6 +116,19 @@ export async function POST(
 
     const initiativeOrder =
       battle.initiativeOrder as unknown as BattleParticipant[];
+
+    debugBattleSync("loaded battle", {
+      campaignId: id,
+      battleId,
+      snapshot: battleStateSnapshot(
+        initiativeOrder,
+        battle.currentTurnIndex,
+        battle.currentRound,
+        battle.status,
+      ),
+      battleLogCount:
+        (battle.battleLog as unknown as BattleAction[] | undefined)?.length ?? 0,
+    });
 
     const currentParticipant = initiativeOrder[battle.currentTurnIndex];
 
@@ -97,9 +177,12 @@ export async function POST(
 
     // Зберігаємо stateBefore лише в першому записі батча, щоб не дублювати великий JSON
     let stateBeforeAddedToBatch = false;
+
     const getStateBeforeForEntry = () => {
       if (stateBeforeAddedToBatch) return undefined;
+
       stateBeforeAddedToBatch = true;
+
       return stateBeforeNextTurn;
     };
 
@@ -135,8 +218,10 @@ export async function POST(
             updatedInitiativeOrder,
             { currentRound: previousRound },
           );
+
           return result.participant;
         });
+
         updatedInitiativeOrder = afterEndRound;
 
         const pendingSummons =
@@ -301,6 +386,8 @@ export async function POST(
       }
     }
 
+    logTurnTiming("while loop (triggers, startOfTurn)", t0, { attempts });
+
     // Після циклу формуємо фінальний апдейт
     const battleLog = (battle.battleLog as unknown as BattleAction[]) || [];
 
@@ -363,6 +450,8 @@ export async function POST(
       newLogEntries.push(completionAction);
     }
 
+    const tBeforeUpdate = Date.now();
+
     // Оновлюємо бій (очищаємо pendingSummons після обробки початку раунду)
     const updatedBattle = await prisma.battleScene.update({
       where: { id: battleId },
@@ -383,25 +472,60 @@ export async function POST(
       },
     });
 
+    logTurnTiming("prisma.update", t0, {
+      updateMs: Date.now() - tBeforeUpdate,
+      battleLogSize: battleLog.length + newLogEntries.length,
+    });
+
+    debugBattleSync("battle updated", {
+      campaignId: id,
+      battleId,
+      snapshot: battleStateSnapshot(
+        updatedInitiativeOrder,
+        nextTurnIndex,
+        nextRound,
+        finalStatus,
+      ),
+      newLogEntries: newLogEntries.length,
+      totalBattleLogCount: battleLog.length + newLogEntries.length,
+    });
+
     // Відправляємо real-time оновлення через Pusher
     if (process.env.PUSHER_APP_ID) {
       const { pusherServer } = await import("@/lib/pusher");
 
+      const pusherPayload = preparePusherPayload(updatedBattle);
+
+      debugBattleSync("trigger battle-updated", {
+        channel: `battle-${battleId}`,
+        event: "battle-updated",
+      });
       void pusherServer
-        .trigger(`battle-${battleId}`, "battle-updated", updatedBattle)
+        .trigger(`battle-${battleId}`, "battle-updated", pusherPayload)
         .catch((err) => console.error("Pusher trigger failed:", err));
 
       if (finalStatus === "completed") {
+        debugBattleSync("trigger battle-completed", {
+          channel: `battle-${battleId}`,
+          event: "battle-completed",
+        });
         void pusherServer
-          .trigger(`battle-${battleId}`, "battle-completed", updatedBattle)
+          .trigger(`battle-${battleId}`, "battle-completed", pusherPayload)
           .catch((err) => console.error("Pusher trigger failed:", err));
       }
 
       const activeParticipant = updatedInitiativeOrder[nextTurnIndex];
+
       if (
         activeParticipant &&
         activeParticipant.basicInfo.controlledBy !== "dm"
       ) {
+        debugBattleSync("trigger turn-started", {
+          channel: `user-${activeParticipant.basicInfo.controlledBy}`,
+          event: "turn-started",
+          participantId: activeParticipant.basicInfo.id,
+          participantName: activeParticipant.basicInfo.name,
+        });
         void pusherServer
           .trigger(
             `user-${activeParticipant.basicInfo.controlledBy}`,
@@ -416,7 +540,9 @@ export async function POST(
       }
     }
 
-    return NextResponse.json(updatedBattle);
+    logTurnTiming("total (before response)", t0);
+
+    return NextResponse.json(stripStateBeforeForClient(updatedBattle));
   } catch (error) {
     console.error("Error advancing turn:", error);
 

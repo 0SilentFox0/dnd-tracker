@@ -14,6 +14,7 @@ import {
   renameSpellGroup,
   updateSpell,
 } from "@/lib/api/spells";
+import { REFERENCE_STALE_MS } from "@/lib/providers/query-provider";
 import type { Spell, SpellGroup } from "@/types/spells";
 
 export type { Spell, SpellGroup };
@@ -22,6 +23,7 @@ export function useSpells(campaignId: string, initialSpells?: Spell[]) {
   return useQuery<Spell[]>({
     queryKey: ["spells", campaignId],
     queryFn: () => getSpells(campaignId),
+    staleTime: REFERENCE_STALE_MS,
     ...(initialSpells !== undefined && { initialData: initialSpells }),
     enabled: !!campaignId,
   });
@@ -31,6 +33,7 @@ export function useSpellGroups(campaignId: string) {
   return useQuery<SpellGroup[]>({
     queryKey: ["spellGroups", campaignId],
     queryFn: () => getSpellGroups(campaignId),
+    staleTime: REFERENCE_STALE_MS,
   });
 }
 

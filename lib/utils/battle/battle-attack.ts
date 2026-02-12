@@ -5,12 +5,12 @@
 import { addActiveEffect } from "./battle-effects";
 
 import { AttackType } from "@/lib/constants/battle";
+import type { CriticalEffect } from "@/lib/constants/critical-effects";
+import { getRandomCriticalEffect } from "@/lib/constants/critical-effects";
 import {
   getHeroDamageDiceForLevel,
 } from "@/lib/constants/hero-scaling";
 import { getDiceAverage } from "@/lib/utils/battle/balance-calculations";
-import type { CriticalEffect } from "@/lib/constants/critical-effects";
-import { getRandomCriticalEffect } from "@/lib/constants/critical-effects";
 import { BattleAttack, BattleParticipant } from "@/types/battle";
 
 /**
@@ -598,10 +598,12 @@ export function performReaction(
 
   if (defender.basicInfo.sourceType === "character") {
     baseDamage += defender.abilities.level;
+
     const heroDice = getHeroDamageDiceForLevel(
       defender.abilities.level,
       reactionAttack.type as AttackType
     );
+
     baseDamage += getDiceAverage(heroDice);
   }
 

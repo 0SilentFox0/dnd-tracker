@@ -3,12 +3,12 @@ import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { useMainSkills } from "./useMainSkills";
-import type { MainSkill } from "@/types/main-skills";
 
 import { createSkill, updateSkill } from "@/lib/api/skills";
 import { SpellEnhancementType } from "@/lib/constants/spell-enhancement";
 import type { SkillEffect } from "@/types/battle";
 import type { GroupedSkillPayload } from "@/types/hooks";
+import type { MainSkill } from "@/types/main-skills";
 import type { SkillTriggers } from "@/types/skill-triggers";
 import type { GroupedSkill, Skill } from "@/types/skills";
 
@@ -111,6 +111,7 @@ const parseInitialSpellEnhancementTypes = (
   if (Array.isArray(types)) {
     return types as SpellEnhancementType[];
   }
+
   return [];
 };
 
@@ -125,6 +126,7 @@ const parseInitialSpellTargetChange = (
   ) {
     return (targetChange as { target: string }).target;
   }
+
   return null;
 };
 
@@ -142,6 +144,7 @@ const parseInitialSpellAdditionalModifier = (
       duration?: number;
     };
   }
+
   return {
     modifier: undefined,
     damageDice: "",
@@ -159,11 +162,13 @@ export function useSkillForm(
   initialMainSkills?: MainSkill[],
 ) {
   const router = useRouter();
+
   const queryClient = useQueryClient();
 
   const { data: mainSkillsFromApi = [] } = useMainSkills(campaignId, {
     enabled: initialMainSkills === undefined,
   });
+
   const mainSkills = initialMainSkills ?? mainSkillsFromApi;
 
   const isEdit = !!initialData;
@@ -172,22 +177,27 @@ export function useSkillForm(
   const normalizedData = normalizeInitialData(initialData);
 
   const [isSaving, setIsSaving] = useState(false);
+
   const [error, setError] = useState<string | null>(null);
 
   // Basic info
   const [name, setName] = useState(normalizedData?.name || "");
+
   const [description, setDescription] = useState(
     normalizedData?.description || "",
   );
+
   const [icon, setIcon] = useState(normalizedData?.icon || "");
 
   // Effects & targeting
   const [effects, setEffects] = useState<SkillEffect[]>(
     normalizedData?.effects || [],
   );
+
   const [minTargets, setMinTargets] = useState(
     normalizedData?.min_targets?.toString() || "",
   );
+
   const [maxTargets, setMaxTargets] = useState(
     normalizedData?.max_targets?.toString() || "",
   );
@@ -196,12 +206,15 @@ export function useSkillForm(
   const [spellId, setSpellId] = useState<string | null>(
     normalizedData?.spellId || null,
   );
+
   const [spellGroupId, setSpellGroupId] = useState<string | null>(
     normalizedData?.spellGroupId || null,
   );
+
   const [grantedSpellId, setGrantedSpellId] = useState<string | null>(
     normalizedData?.grantedSpellId ?? null,
   );
+
   const [mainSkillId, setMainSkillId] = useState<string | null>(
     normalizedData?.mainSkillId || null,
   );
@@ -212,12 +225,15 @@ export function useSkillForm(
   >(() =>
     parseInitialSpellEnhancementTypes(normalizedData?.spellEnhancementTypes),
   );
+
   const [spellEffectIncrease, setSpellEffectIncrease] = useState(
     normalizedData?.spellEffectIncrease?.toString() || "",
   );
+
   const [spellTargetChange, setSpellTargetChange] = useState<string | null>(
     () => parseInitialSpellTargetChange(normalizedData?.spellTargetChange),
   );
+
   const [spellAdditionalModifier, setSpellAdditionalModifier] = useState<{
     modifier?: string;
     damageDice?: string;
@@ -227,6 +243,7 @@ export function useSkillForm(
       normalizedData?.spellAdditionalModifier,
     ),
   );
+
   const [spellNewSpellId, setSpellNewSpellId] = useState<string | null>(
     normalizedData?.spellNewSpellId || null,
   );
@@ -345,6 +362,7 @@ export function useSkillForm(
       } catch (err) {
         const message =
           err instanceof Error ? err.message : "Помилка створення";
+
         setError(message);
       } finally {
         setIsSaving(false);

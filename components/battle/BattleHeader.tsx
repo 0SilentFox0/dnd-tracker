@@ -1,10 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import type { BattleScene } from "@/types/api";
+import { Trophy } from "lucide-react";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,9 +13,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Trophy } from "lucide-react";
-
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import type { PusherConnectionState } from "@/lib/hooks/battle/usePusherBattleSync";
+import { cn } from "@/lib/utils";
+import type { BattleScene } from "@/types/api";
 
 interface BattleHeaderProps {
   battle: BattleScene;
@@ -27,6 +27,8 @@ interface BattleHeaderProps {
   isDM: boolean;
   /** Стан з'єднання Pusher для індикатора (опційно) */
   connectionState?: PusherConnectionState;
+  /** Блокує кнопку "Наступний хід" — запобігає спаму при повільному API */
+  isNextTurnPending?: boolean;
 }
 
 export function BattleHeader({
@@ -36,10 +38,12 @@ export function BattleHeader({
   onCompleteBattle,
   isDM,
   connectionState = null,
+  isNextTurnPending = false,
 }: BattleHeaderProps) {
   const [completeDialogOpen, setCompleteDialogOpen] = useState(false);
 
   const currentParticipant = battle.initiativeOrder?.[battle.currentTurnIndex];
+
   const currentTurnName = currentParticipant?.basicInfo?.name;
 
   return (
@@ -82,7 +86,9 @@ export function BattleHeader({
                   className={cn(
                     "flex items-center gap-1.5 font-medium",
                     connectionState === "connected" && "text-emerald-400/90",
-                    (connectionState === "disconnected" || connectionState === "unavailable") && "text-amber-400/90",
+                    (connectionState === "disconnected" ||
+                      connectionState === "unavailable") &&
+                      "text-amber-400/90",
                     connectionState === "connecting" && "text-white/60",
                   )}
                   title={
@@ -96,9 +102,13 @@ export function BattleHeader({
                   <span
                     className={cn(
                       "inline-block h-2 w-2 rounded-full",
-                      connectionState === "connected" && "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]",
-                      (connectionState === "disconnected" || connectionState === "unavailable") && "bg-amber-400 animate-pulse",
-                      connectionState === "connecting" && "bg-white/50 animate-pulse",
+                      connectionState === "connected" &&
+                        "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]",
+                      (connectionState === "disconnected" ||
+                        connectionState === "unavailable") &&
+                        "bg-amber-400 animate-pulse",
+                      connectionState === "connecting" &&
+                        "bg-white/50 animate-pulse",
                     )}
                   />
                   {connectionState === "connected"
@@ -110,7 +120,7 @@ export function BattleHeader({
               )}
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
             {isDM && battle.status === "active" && onCompleteBattle && (
               <Button
                 onClick={() => setCompleteDialogOpen(true)}
@@ -135,22 +145,27 @@ export function BattleHeader({
             {battle.status === "active" && (
               <Button
                 onClick={onNextTurn}
-                className="rounded-full px-2 md:px-8 font-black uppercase tracking-widest bg-primary hover:bg-primary/90 shadow-[0_0_20px_rgba(var(--primary),0.4)] transition-all duration-300 transform hover:scale-105 active:scale-95"
+                disabled={isNextTurnPending}
+                className="rounded-full px-2 md:px-8 font-black uppercase tracking-widest bg-primary hover:bg-primary/90 shadow-[0_0_20px_rgba(var(--primary),0.4)] transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:opacity-60 disabled:pointer-events-none disabled:transform-none"
                 size="sm"
               >
-                Наступний хід
+                {isNextTurnPending ? "Завантаження…" : "Наступний хід"}
               </Button>
             )}
           </div>
         </div>
       </div>
 
-      <AlertDialog open={completeDialogOpen} onOpenChange={setCompleteDialogOpen}>
+      <AlertDialog
+        open={completeDialogOpen}
+        onOpenChange={setCompleteDialogOpen}
+      >
         <AlertDialogContent className="bg-slate-900 border-slate-700 text-white">
           <AlertDialogHeader>
             <AlertDialogTitle>Завершити бій?</AlertDialogTitle>
             <AlertDialogDescription className="text-slate-300">
-              Оберіть результат завершення або визначте автоматично за умовами перемоги.
+              Оберіть результат завершення або визначте автоматично за умовами
+              перемоги.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2 sm:gap-0">

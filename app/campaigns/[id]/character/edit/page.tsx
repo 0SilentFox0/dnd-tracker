@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
 
+import { PlayerCharacterEditClient } from "./edit-client";
+
 import { getAuthUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-
-import { PlayerCharacterEditClient } from "./edit-client";
 
 export default async function PlayerCharacterEditPage({
   params,
@@ -26,6 +26,7 @@ export default async function PlayerCharacterEditPage({
   }
 
   const isDM = campaign.members[0]?.role === "dm";
+
   if (!isDM) {
     redirect(`/campaigns/${id}/character`);
   }

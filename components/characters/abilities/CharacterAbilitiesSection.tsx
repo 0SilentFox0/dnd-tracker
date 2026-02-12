@@ -4,10 +4,10 @@ import { useMemo } from "react";
 
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
+import { MAIN_SKILL_BY_CATEGORY } from "@/lib/constants/main-skills";
 import { useMainSkills } from "@/lib/hooks/useMainSkills";
 import { useSkills } from "@/lib/hooks/useSkills";
 import { getSkillMainSkillId } from "@/lib/utils/skills/skill-helpers";
-import { MAIN_SKILL_BY_CATEGORY } from "@/lib/constants/main-skills";
 
 /** Назва скіла: підтримка basicInfo.name та name в корені */
 function getSkillDisplayName(skill: { id: string; basicInfo?: { name?: string }; name?: string }): string {
@@ -37,6 +37,7 @@ export function CharacterAbilitiesSection({
   abilities,
 }: CharacterAbilitiesSectionProps) {
   const { data: skills = [] } = useSkills(campaignId);
+
   const { data: mainSkills = [] } = useMainSkills(campaignId);
 
   const personalMainSkill = useMemo(() => {

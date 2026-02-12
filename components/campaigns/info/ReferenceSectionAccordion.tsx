@@ -1,6 +1,10 @@
 "use client";
 
 import { Sparkles } from "lucide-react";
+
+import { SkillReferenceCard } from "./SkillReferenceCard";
+import { SpellReferenceCard } from "./SpellReferenceCard";
+
 import {
   Accordion,
   AccordionContent,
@@ -9,8 +13,6 @@ import {
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import type { SkillForReference, SpellForReference } from "@/lib/types/info-reference";
-import { SkillReferenceCard } from "./SkillReferenceCard";
-import { SpellReferenceCard } from "./SpellReferenceCard";
 
 interface ReferenceSectionAccordionProps {
   campaignId: string;

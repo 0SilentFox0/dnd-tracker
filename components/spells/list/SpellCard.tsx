@@ -1,8 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Copy, Move, Sparkles, X, Zap } from "lucide-react";
-import { useState } from "react";
 
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { Badge } from "@/components/ui/badge";
@@ -56,6 +56,7 @@ export function SpellCard({
   const DamageTypeIcon = getSpellDamageTypeIcon(spell.damageType);
 
   const [copied, setCopied] = useState(false);
+
   const handleCopyId = async () => {
     await navigator.clipboard.writeText(spell.id);
     setCopied(true);

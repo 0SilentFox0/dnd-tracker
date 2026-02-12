@@ -5,6 +5,10 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { processAttack } from "@/lib/utils/battle/battle-attack-process";
+import {
+  preparePusherPayload,
+  stripStateBeforeForClient,
+} from "@/lib/utils/battle/strip-battle-payload";
 import { updateMoraleOnEvent } from "@/lib/utils/skills/skill-triggers-execution";
 import { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -50,6 +54,7 @@ export async function POST(
     }
 
     const { userId } = accessResult;
+
     const isDM = accessResult.campaign.members[0]?.role === "dm";
 
     const battle = await prisma.battleScene.findUnique({
@@ -97,6 +102,7 @@ export async function POST(
     }
 
     const currentParticipant = initiativeOrder[battle.currentTurnIndex];
+
     const canAttack =
       isDM ||
       (currentParticipant?.basicInfo.id === attacker.basicInfo.id &&
@@ -171,6 +177,7 @@ export async function POST(
 
     // Обмеження кількості цілей
     const isAoe = attack.targetType === "aoe";
+
     const maxPossibleTargets = isAoe
       ? attack.maxTargets || attacker.combatStats.maxTargets || 1
       : 1;
@@ -193,12 +200,14 @@ export async function POST(
 
     // Розподіл шкоди для AOE: нормалізуємо суму (кожна ціль макс. 100%)
     const dist = attack.damageDistribution;
+
     const damageFractions: number[] =
       dist &&
       dist.length === targets.length &&
       dist.every((n) => typeof n === "number" && n >= 0 && n <= 100)
         ? (() => {
             const sum = dist.reduce((a, b) => a + b, 0);
+
             return sum > 0 ? dist.map((p) => p / sum) : targets.map(() => 1 / targets.length);
           })()
         : targets.map(() => 1 / targets.length);
@@ -229,6 +238,7 @@ export async function POST(
     // Обробляємо атаку для кожної цілі
     for (let i = 0; i < targets.length; i++) {
       const target = targets[i];
+
       const damageMultiplier =
         targets.length > 1 ? damageFractions[i] : undefined;
 
@@ -274,10 +284,12 @@ export async function POST(
 
     // Оновлення моралі: onAllyDeath для кожного загиблого, onKill для атакуючого
     let finalInitiativeOrder = currentInitiativeOrder;
+
     for (const target of targets) {
       const currentTarget = finalInitiativeOrder.find(
         (p) => p.basicInfo.id === target.basicInfo.id,
       );
+
       if (
         currentTarget &&
         (currentTarget.combatStats.status === "dead" ||
@@ -288,14 +300,17 @@ export async function POST(
           "allyDeath",
           target.basicInfo.id,
         );
+
         finalInitiativeOrder = allyResult.updatedParticipants;
       }
     }
+
     const killResult = updateMoraleOnEvent(
       finalInitiativeOrder,
       "kill",
       currentAttacker.basicInfo.id,
     );
+
     finalInitiativeOrder = killResult.updatedParticipants;
 
     // Оновлюємо бій
@@ -316,11 +331,15 @@ export async function POST(
       const { pusherServer } = await import("@/lib/pusher");
 
       void pusherServer
-        .trigger(`battle-${battleId}`, "battle-updated", updatedBattle)
+        .trigger(
+          `battle-${battleId}`,
+          "battle-updated",
+          preparePusherPayload(updatedBattle),
+        )
         .catch((err) => console.error("Pusher trigger failed:", err));
     }
 
-    return NextResponse.json(updatedBattle);
+    return NextResponse.json(stripStateBeforeForClient(updatedBattle));
   } catch (error) {
     console.error("Error processing attack:", error);
 

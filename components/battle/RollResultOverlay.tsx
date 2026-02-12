@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, XCircle, Sword, Shield } from "lucide-react";
+import { AnimatePresence,motion } from "framer-motion";
+import { CheckCircle2, Shield,Sword, XCircle } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 
 export type RollResultType =
@@ -80,6 +81,7 @@ export function RollResultOverlay({
   React.useEffect(() => {
     if (type) {
       const timer = setTimeout(onComplete, 2000);
+
       return () => clearTimeout(timer);
     }
   }, [type, onComplete]);

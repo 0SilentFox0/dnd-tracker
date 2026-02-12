@@ -4,9 +4,9 @@ import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { getHeroDamageComponents } from "@/lib/constants/hero-scaling";
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
-import { createBattleParticipantFromCharacter } from "@/lib/utils/battle/battle-participant";
-import { calculateDamageWithModifiers } from "@/lib/utils/battle/battle-damage-calculations";
 import { getDiceAverage } from "@/lib/utils/battle/balance-calculations";
+import { calculateDamageWithModifiers } from "@/lib/utils/battle/battle-damage-calculations";
+import { createBattleParticipantFromCharacter } from "@/lib/utils/battle/battle-participant";
 
 export interface DamagePreviewItem {
   total: number;
@@ -30,10 +30,13 @@ export async function GET(
     const { id: campaignId, characterId } = await params;
 
     const { searchParams } = new URL(request.url);
+
     const meleeMultiplier = Math.max(0.1, Math.min(3, parseFloat(searchParams.get("meleeMultiplier") ?? "1") || 1));
+
     const rangedMultiplier = Math.max(0.1, Math.min(3, parseFloat(searchParams.get("rangedMultiplier") ?? "1") || 1));
 
     const accessResult = await requireCampaignAccess(campaignId, false);
+
     if (accessResult instanceof NextResponse) return accessResult;
 
     const character = await prisma.character.findUnique({
@@ -62,16 +65,19 @@ export async function GET(
     const meleeAttack = participant.battleData.attacks?.find(
       (a) => a.type === AttackType.MELEE
     );
+
     const rangedAttack = participant.battleData.attacks?.find(
       (a) => a.type === AttackType.RANGED
     );
 
     const strMod = Math.floor((participant.abilities.strength - 10) / 2);
+
     const dexMod = Math.floor((participant.abilities.dexterity - 10) / 2);
 
     const meleeBase = meleeAttack
       ? getDiceAverage(meleeAttack.damageDice)
       : 0;
+
     const rangedBase = rangedAttack
       ? getDiceAverage(rangedAttack.damageDice)
       : 0;
@@ -80,11 +86,14 @@ export async function GET(
       participant.abilities.level,
       AttackType.MELEE
     );
+
     const rangedHero = getHeroDamageComponents(
       participant.abilities.level,
       AttackType.RANGED
     );
+
     const meleeDiceAvg = getDiceAverage(meleeHero.diceNotation);
+
     const rangedDiceAvg = getDiceAverage(rangedHero.diceNotation);
 
     const meleeResult = calculateDamageWithModifiers(
@@ -99,6 +108,7 @@ export async function GET(
         weaponDiceNotation: meleeAttack?.damageDice ?? undefined,
       }
     );
+
     const rangedResult = calculateDamageWithModifiers(
       participant,
       rangedBase,
@@ -136,6 +146,7 @@ export async function GET(
     return NextResponse.json(response);
   } catch (error) {
     console.error("Error computing damage preview:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -1,12 +1,16 @@
 "use client";
 
 import Image from "next/image";
+
+import type { EntityStats, Unit } from "./types";
+
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -15,9 +19,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-
-import type { EntityStats, Unit } from "./types";
 
 interface UnitsListCardProps {
   units: Unit[];
@@ -35,14 +36,18 @@ interface UnitsListCardProps {
 
 function groupUnitsByRace(units: Unit[]): Map<string, Unit[]> {
   const byRace = new Map<string, Unit[]>();
+
   for (const u of units) {
     const raceKey = u.race?.trim() || "Без раси";
+
     if (!byRace.has(raceKey)) byRace.set(raceKey, []);
+
     byRace.get(raceKey)?.push(u);
   }
   for (const arr of byRace.values()) {
     arr.sort((a, b) => (a.level ?? 0) - (b.level ?? 0));
   }
+
   return byRace;
 }
 
@@ -66,6 +71,7 @@ function UnitRow({
   onQuantityChange: (value: number) => void;
 }) {
   const isAlly = side === "ally";
+
   const isEnemy = side === "enemy";
 
   return (
@@ -209,6 +215,7 @@ export function UnitsListCard({
   }
 
   const byRace = groupUnitsByRace(units);
+
   const raceOrder = [...byRace.keys()].sort((a, b) =>
     a.localeCompare(b, "uk"),
   );
@@ -238,8 +245,11 @@ export function UnitsListCard({
                 <AccordionContent className="space-y-3">
                   {raceUnits.map((unit) => {
                     const isSelected = isParticipantSelected(unit.id);
+
                     const side = getParticipantSide(unit.id);
+
                     const quantity = getParticipantQuantity(unit.id);
+
                     const unitStats = entityStats?.[unit.id];
 
                     return (

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { EditSkillClient } from "./edit-skill-client";
+
 import { getAuthUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import type { MainSkill } from "@/types/main-skills";
@@ -13,6 +14,7 @@ export default async function EditSkillPage({
   const { id: campaignId, skillId } = await params;
 
   const user = await getAuthUser();
+
   const userId = user.id;
 
   const campaign = await prisma.campaign.findUnique({

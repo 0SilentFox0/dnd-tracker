@@ -15,10 +15,49 @@ import {
   sortByInitiative,
 } from "@/lib/utils/battle/battle-start";
 import {
+  preparePusherPayload,
+  stripStateBeforeForClient,
+} from "@/lib/utils/battle/strip-battle-payload";
+import {
   executeOnBattleStartEffectsForAll,
   executeStartOfRoundTriggers,
 } from "@/lib/utils/skills/skill-triggers-execution";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
+
+const isBattleSyncDebugEnabled =
+  process.env.BATTLE_SYNC_DEBUG === "1" ||
+  process.env.BATTLE_SYNC_DEBUG === "true";
+
+function battleStateSnapshot(
+  initiativeOrder: BattleParticipant[],
+  currentTurnIndex: number,
+  currentRound: number,
+  status?: string,
+) {
+  const current = initiativeOrder[currentTurnIndex]?.basicInfo;
+
+  return {
+    status: status ?? null,
+    round: currentRound,
+    turnIndex: currentTurnIndex,
+    initiativeCount: initiativeOrder.length,
+    currentParticipantId: current?.id ?? null,
+    currentParticipantName: current?.name ?? null,
+    currentParticipantSide: current?.side ?? null,
+  };
+}
+
+function debugBattleSync(message: string, payload?: unknown) {
+  if (!isBattleSyncDebugEnabled) return;
+
+  if (payload === undefined) {
+    console.info("[battle-sync][start-battle]", message);
+
+    return;
+  }
+
+  console.info("[battle-sync][start-battle]", message, payload);
+}
 
 export async function POST(
   request: Request,
@@ -26,6 +65,8 @@ export async function POST(
 ) {
   try {
     const { id, battleId } = await params;
+
+    debugBattleSync("request received", { campaignId: id, battleId });
 
     const accessResult = await requireDM(id);
 
@@ -40,6 +81,14 @@ export async function POST(
     if (!battle || battle.campaignId !== id) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
+
+    debugBattleSync("loaded battle to start", {
+      campaignId: id,
+      battleId,
+      status: battle.status,
+      participantsRawCount:
+        ((battle.participants as unknown as Array<unknown>) ?? []).length,
+    });
 
     const participantsRaw = battle.participants as Array<{
       id: string;
@@ -57,6 +106,7 @@ export async function POST(
       (acc, p) => {
         if (p.type === "character") acc.charIds.push(p.id);
         else acc.unitIds.push(p.id);
+
         return acc;
       },
       { charIds: [] as string[], unitIds: [] as string[] },
@@ -83,24 +133,32 @@ export async function POST(
     ]);
 
     const characterMap = new Map(characters.map((c) => [c.id, c]));
+
     const unitMap = new Map(units.map((u) => [u.id, u]));
 
     // Collect all skill IDs and artifact IDs from characters (for batch load)
     const allSkillIds = new Set<string>();
+
     const allArtifactIds = new Set<string>();
+
     for (const c of characters) {
       const progress =
         (c.skillTreeProgress as Record<string, { unlockedSkills?: string[] }>) ??
         {};
+
       for (const prog of Object.values(progress)) {
         for (const sid of prog.unlockedSkills ?? []) {
           allSkillIds.add(sid);
         }
       }
+
       const personalId = (c as { personalSkillId?: string | null }).personalSkillId;
+
       if (personalId?.trim()) allSkillIds.add(personalId);
+
       const equipped =
         (c.inventory?.equipped as Record<string, string | unknown>) ?? {};
+
       for (const val of Object.values(equipped)) {
         if (typeof val === "string" && val) allArtifactIds.add(val);
       }
@@ -108,6 +166,7 @@ export async function POST(
 
     // Collect unique races from characters and units
     const uniqueRaces = new Set<string>();
+
     for (const c of characters) {
       if (c.race) uniqueRaces.add(c.race);
     }
@@ -117,6 +176,7 @@ export async function POST(
 
     // Batch load campaign context (races for all; spell tree data only for characters)
     const uniqueRaceNames = Array.from(uniqueRaces);
+
     const [races, campaign, ...characterContext] = await Promise.all([
       uniqueRaceNames.length > 0
         ? prisma.race.findMany({
@@ -173,6 +233,7 @@ export async function POST(
     ]);
 
     const racesByName: Record<string, (typeof races)[0] | null> = {};
+
     for (const r of races) {
       racesByName[r.name] = r;
     }
@@ -181,26 +242,36 @@ export async function POST(
     }
 
     let campaignContext: CampaignSpellContext | undefined;
+
     if (characters.length > 0 && characterContext.length >= 4) {
       const [skillTrees, mainSkills, spells, allSkills, batchSkills, batchArtifacts] =
         characterContext;
+
       const skillTreeByRace: Record<string, NonNullable<(typeof skillTrees)[number]> | null> = {};
+
       const treesArr = (Array.isArray(skillTrees) ? skillTrees : []) as Array<{ race: string }>;
+
       for (const st of treesArr) {
         if (st?.race) skillTreeByRace[st.race] = st as NonNullable<(typeof skillTrees)[number]>;
       }
       for (const rn of uniqueRaceNames) {
         if (!(rn in skillTreeByRace)) skillTreeByRace[rn] = null;
       }
+
       const skillsById: Record<string, Prisma.SkillGetPayload<object>> = {};
+
       const skillsArr = Array.isArray(batchSkills) ? batchSkills : [];
+
       for (const s of skillsArr) {
         if (s && typeof s === "object" && "id" in s) {
           skillsById[(s as { id: string }).id] = s as Prisma.SkillGetPayload<object>;
         }
       }
+
       const artifactsById: Record<string, Prisma.ArtifactGetPayload<object>> = {};
+
       const artifactsArr = Array.isArray(batchArtifacts) ? batchArtifacts : [];
+
       for (const a of artifactsArr) {
         if (a && typeof a === "object" && "id" in a) {
           artifactsById[(a as { id: string }).id] = a as Prisma.ArtifactGetPayload<object>;
@@ -222,17 +293,22 @@ export async function POST(
     type ParticipantSlot =
       | { type: "character"; character: (typeof characters)[number]; side: ParticipantSide }
       | { type: "unit"; unit: (typeof units)[number]; side: ParticipantSide; instanceNumber: number };
+
     const slots: ParticipantSlot[] = [];
+
     for (const participant of participants) {
       if (participant.type === "character") {
         const character = characterMap.get(participant.id);
+
         if (character) {
           slots.push({ type: "character", character, side: participant.side });
         }
       } else if (participant.type === "unit") {
         const unit = unitMap.get(participant.id);
+
         if (unit) {
           const quantity = participant.quantity || 1;
+
           for (let i = 0; i < quantity; i++) {
             slots.push({
               type: "unit",
@@ -304,6 +380,7 @@ export async function POST(
 
     // Записи логу бою: спрацювання тригерів на початку бою
     const triggerLogEntries: BattleAction[] = [];
+
     if (allTriggerMessages.length > 0) {
       triggerLogEntries.push({
         id: `triggers-start-${Date.now()}`,
@@ -337,16 +414,32 @@ export async function POST(
       },
     });
 
+    debugBattleSync("battle started and saved", {
+      campaignId: id,
+      battleId,
+      snapshot: battleStateSnapshot(sortedInitiativeOrder, 0, 1, "active"),
+      triggerLogEntries: triggerLogEntries.length,
+      battleLogCount: triggerLogEntries.length,
+    });
+
     // Відправляємо real-time оновлення через Pusher
     if (process.env.PUSHER_APP_ID) {
       const { pusherServer } = await import("@/lib/pusher");
 
+      debugBattleSync("trigger battle-started", {
+        channel: `battle-${battleId}`,
+        event: "battle-started",
+      });
       void pusherServer
-        .trigger(`battle-${battleId}`, "battle-started", updatedBattle)
+        .trigger(
+          `battle-${battleId}`,
+          "battle-started",
+          preparePusherPayload(updatedBattle),
+        )
         .catch((err) => console.error("Pusher trigger failed:", err));
     }
 
-    return NextResponse.json(updatedBattle);
+    return NextResponse.json(stripStateBeforeForClient(updatedBattle));
   } catch (error) {
     console.error("Error starting battle:", error);
 

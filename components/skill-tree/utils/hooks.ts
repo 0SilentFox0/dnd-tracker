@@ -29,10 +29,12 @@ export function useAvailableMainSkills(
         if (ms.isEnableInSkillTree === true) {
           return false;
         }
+
         // Виключаємо расовий навик (не сектор у колі)
         if (ms.id === "racial") {
           return false;
         }
+
         // Виключаємо ультимативний навик (в центрі кола, не сектор)
         if (ms.id === "ultimate") {
           return false;

@@ -38,6 +38,7 @@ async function main() {
   }
 
   const campaign = await prisma.campaign.findUnique({ where: { id: CAMPAIGN_ID } });
+
   if (!campaign) {
     console.error(`Кампанія ${CAMPAIGN_ID} не знайдена.`);
     process.exit(1);
@@ -46,6 +47,7 @@ async function main() {
   const dm = await prisma.campaignMember.findFirst({
     where: { campaignId: CAMPAIGN_ID, role: "dm" },
   });
+
   if (!dm) {
     console.error("У кампанії немає DM.");
     process.exit(1);
@@ -57,6 +59,7 @@ async function main() {
   const humanRace = await prisma.race.findFirst({
     where: { campaignId: CAMPAIGN_ID, name: "human" },
   });
+
   const elfRace = await prisma.race.findFirst({
     where: { campaignId: CAMPAIGN_ID, name: "elf" },
   });
@@ -69,12 +72,15 @@ async function main() {
     where: { campaignId: CAMPAIGN_ID },
     take: 4,
   });
+
   const humanSkills = await prisma.skill.findMany({
     where: { campaignId: CAMPAIGN_ID },
   });
+
   const humanSkillTree = await prisma.skillTree.findFirst({
     where: { campaignId: CAMPAIGN_ID, race: "human" },
   });
+
   const elfSkillTree = await prisma.skillTree.findFirst({
     where: { campaignId: CAMPAIGN_ID, race: "elf" },
   });
@@ -90,6 +96,7 @@ async function main() {
   // Dwarf: раса + один скіл + дерево
   if (!dwarfRace) {
     const dwarfMainSkill = mainSkills[0];
+
     const dwarfSkill = await prisma.skill.create({
       data: {
         campaignId: CAMPAIGN_ID,
@@ -99,6 +106,7 @@ async function main() {
         mainSkillId: dwarfMainSkill.id,
       },
     });
+
     dwarfRace = await prisma.race.create({
       data: {
         campaignId: CAMPAIGN_ID,
@@ -107,6 +115,7 @@ async function main() {
         disabledSkills: [] as Prisma.InputJsonValue,
       },
     });
+
     const dwarfTree = await prisma.skillTree.create({
       data: {
         campaignId: CAMPAIGN_ID,
@@ -119,12 +128,14 @@ async function main() {
         ] as Prisma.InputJsonValue,
       },
     });
+
     console.log("Створено расу dwarf та дерево скілів.");
   }
 
   const dwarfSkillTree = await prisma.skillTree.findFirst({
     where: { campaignId: CAMPAIGN_ID, race: "dwarf" },
   });
+
   if (!dwarfSkillTree) {
     console.error("Дерево для dwarf не знайдено.");
     process.exit(1);
@@ -132,15 +143,19 @@ async function main() {
 
   // ID скілів для розблокування (перші з кампанії по расам)
   const humanSkillIds = humanSkills.filter((s) => s.mainSkillId === mainSkills[0].id).map((s) => s.id);
+
   const elfSkills = await prisma.skill.findMany({
     where: { campaignId: CAMPAIGN_ID },
   });
+
   const elfSkillIds = elfSkills.slice(0, 2).map((s) => s.id);
+
   const dwarfSkillIds = await prisma.skill
     .findMany({
       where: { campaignId: CAMPAIGN_ID },
     })
     .then((skills) => skills.filter((s) => s.name.includes("Дворф") || s.name.includes("dwarf")).map((s) => s.id));
+
   const dwarfUnlockIds =
     dwarfSkillIds.length > 0 ? dwarfSkillIds : (await prisma.skill.findMany({ where: { campaignId: CAMPAIGN_ID }, take: 1 })).map((s) => s.id);
 
@@ -149,12 +164,17 @@ async function main() {
     where: { campaignId: CAMPAIGN_ID },
     take: 5,
   });
+
   const healSpell = spells.find((s) => s.damageType === "heal") || spells[0];
+
   const knownSpellIds = spells.slice(0, 3).map((s) => s.id);
+
   if (healSpell && !knownSpellIds.includes(healSpell.id)) knownSpellIds.push(healSpell.id);
 
   const wisMod = getAbilityModifier(18);
+
   const spellSaveDC = getSpellSaveDC(pb20, wisMod);
+
   const spellAttackBonus = getSpellAttackBonus(pb20, wisMod);
 
   // --- Створення 3 персонажів 20 рівня ---
@@ -248,9 +268,11 @@ async function main() {
           skillTreeProgress: baseStats.skillTreeProgress,
         },
       });
+
       const existingCs = await prisma.characterSkills.findUnique({
         where: { characterId_skillTreeId: { characterId: char.id, skillTreeId: payload.skillTreeId } },
       });
+
       if (existingCs) {
         await prisma.characterSkills.update({
           where: { id: existingCs.id },
@@ -265,6 +287,7 @@ async function main() {
           },
         });
       }
+
       characterIds.push(char.id);
       console.log("Оновлено персонажа:", payload.name);
     } else {
@@ -278,7 +301,9 @@ async function main() {
           unlockedSkills: payload.unlockedSkills as Prisma.InputJsonValue,
         },
       });
+
       const weaponType = payload.class === "Fighter" ? AttackType.MELEE : payload.class === "Ranger" ? AttackType.RANGED : AttackType.MELEE;
+
       await prisma.characterInventory.create({
         data: {
           characterId: char.id,
@@ -307,12 +332,14 @@ async function main() {
 
   // --- 5 юнітів ---
   const unitNames = ["Ворог-1", "Ворог-2", "Ворог-3", "Ворог-4", "Ворог-5"];
+
   const unitIds: string[] = [];
 
   for (const name of unitNames) {
     let unit = await prisma.unit.findFirst({
       where: { campaignId: CAMPAIGN_ID, name },
     });
+
     if (!unit) {
       unit = await prisma.unit.create({
         data: {
@@ -346,6 +373,7 @@ async function main() {
       });
       console.log("Створено юніта:", name);
     }
+
     unitIds.push(unit.id);
   }
 
@@ -386,6 +414,7 @@ async function main() {
         battleLog: [],
       },
     });
+
     console.log("\nСтворено сцену бою: Тест 3v5, id =", battle.id);
   }
 

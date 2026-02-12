@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -37,8 +38,11 @@ export function ChangeHpDialog({
 
   const handleSubmit = () => {
     if (!participant) return;
+
     const num = parseInt(value, 10);
+
     if (Number.isNaN(num) || num < 0) return;
+
     onConfirm(participant.basicInfo.id, Math.min(num, participant.combatStats.maxHp));
     onOpenChange(false);
   };

@@ -12,8 +12,8 @@ import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { getHeroMaxHp } from "@/lib/constants/hero-scaling";
 import { prisma } from "@/lib/db";
 import { SkillLevel } from "@/lib/types/skill-tree";
-import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { evaluateFormula as evaluateFormulaSafe } from "@/lib/utils/battle/formula-evaluator";
+import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { convertPrismaToSkillTree } from "@/lib/utils/skills/skill-tree-mock";
 import {
   getLearnedSpellIdsFromProgress,
@@ -354,6 +354,7 @@ export async function createBattleParticipantFromCharacter(
     },
     combatStats: (() => {
       const hpMult = (character as { hpMultiplier?: number | null }).hpMultiplier ?? 1;
+
       const computedMaxHp = getHeroMaxHp(character.level, character.strength, {
         hpMultiplier: hpMult,
       });
@@ -671,7 +672,9 @@ function evaluateFormula(
   participant: BattleParticipant,
 ): number {
   const maxHp = participant.combatStats.maxHp;
+
   const currentHp = participant.combatStats.currentHp;
+
   const lostHpPercent = maxHp > 0 ? ((maxHp - currentHp) / maxHp) * 100 : 0;
 
   const context: Record<string, number> = {
@@ -681,6 +684,7 @@ function evaluateFormula(
   };
 
   const result = evaluateFormulaSafe(formula, context);
+
   return Math.floor(result);
 }
 
@@ -777,7 +781,8 @@ export async function createBattleParticipantFromUnit(
   const battleAttacks = attacks.map((attack, index) => {
     // Визначаємо тип атаки: явно заданий, або з range (5 фт = melee, інакше ranged)
     const rawType = (attack as { type?: string }).type;
-    let attackType: AttackType =
+
+    const attackType: AttackType =
       rawType === "ranged"
         ? AttackType.RANGED
         : rawType === "melee"
@@ -787,6 +792,7 @@ export async function createBattleParticipantFromUnit(
             : AttackType.MELEE;
 
     const a = attack as { targetType?: string; maxTargets?: number; damageDistribution?: number[]; guaranteedDamage?: number };
+
     return {
       id: (attack as { id?: string }).id || `${unit.id}-attack-${index}`,
       name: attack.name,

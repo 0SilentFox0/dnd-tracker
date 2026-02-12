@@ -95,6 +95,7 @@ export default function EditSpellPage({
           description: spell.description ?? null,
           effects: (() => {
             const raw = Array.isArray(spell.effects) ? spell.effects : spell.description ? [spell.description] : [];
+
             return raw.flatMap((e) =>
               String(e)
                 .split(/\s*,\s*/)
@@ -530,6 +531,7 @@ export default function EditSpellPage({
                     }
                     onChange={(e) => {
                       const v = e.target.value;
+
                       setFormData({
                         ...formData,
                         savingThrow: {
@@ -603,13 +605,17 @@ export default function EditSpellPage({
                   const available = SPELL_EFFECT_OPTIONS.filter(
                     (opt) => !(formData.effects ?? []).includes(opt.value)
                   );
+
                   return available.length > 0 ? (
                     <SelectField
                       value=""
                       onValueChange={(value) => {
                         if (!value) return;
+
                         const current = formData.effects ?? [];
+
                         if (current.includes(value)) return;
+
                         setFormData({ ...formData, effects: [...current, value] });
                       }}
                       placeholder="Додати ефект..."
@@ -637,6 +643,7 @@ export default function EditSpellPage({
                       className="shrink-0 h-8 w-8"
                       onClick={() => {
                         const next = (formData.effects ?? []).filter((_, i) => i !== idx);
+
                         setFormData({ ...formData, effects: next });
                       }}
                     >

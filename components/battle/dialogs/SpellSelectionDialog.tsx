@@ -93,12 +93,16 @@ export function SpellSelectionDialog({
   }, [caster, campaignId, open]);
 
   const spellSlots = caster.spellcasting.spellSlots || {};
+
   const universalSlot = spellSlots.universal;
+
   const isUnit = caster.basicInfo.sourceType === "unit";
 
   const getAvailableSlots = (level: number): number => {
     if (universalSlot) return universalSlot.current ?? 0;
+
     const slot = spellSlots[level.toString()];
+
     return slot ? slot.current : 0;
   };
 

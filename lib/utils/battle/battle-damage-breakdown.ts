@@ -8,6 +8,7 @@ import {
   checkTriggerCondition,
   getPassiveAbilitiesByTrigger,
 } from "./battle-triggers";
+
 import { AttackType } from "@/lib/constants/battle";
 import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
 import {
@@ -45,28 +46,39 @@ export function computeDamageBreakdown(
   } = params;
 
   const baseDamage = damageRolls.reduce((sum, roll) => sum + roll, 0);
+
   const typeStr = String(attack.type ?? "").toLowerCase();
+
   const isMelee = typeStr === "melee";
+
   const attackTypeSafe: AttackType = isMelee
     ? AttackType.MELEE
     : AttackType.RANGED;
+
   const statModifier = isMelee
     ? Math.floor((attacker.abilities.strength - 10) / 2)
     : Math.floor((attacker.abilities.dexterity - 10) / 2);
 
   const isHero = attacker.basicInfo.sourceType === "character";
+
   const heroLevelPart = isHero ? attacker.abilities.level : 0;
+
   const heroDiceNotation = isHero
     ? getHeroDamageDiceForLevel(
         attacker.abilities.level,
         attackTypeSafe,
       )
     : "";
+
   const weaponDiceCount = getTotalDiceCount(attack.damageDice ?? "");
+
   const heroDiceCount = getTotalDiceCount(heroDiceNotation);
+
   const fullDiceCount = weaponDiceCount + heroDiceCount;
+
   const clientSentFullRolls =
     isHero && fullDiceCount > 0 && damageRolls.length === fullDiceCount;
+
   const heroDicePart =
     heroDiceNotation && !clientSentFullRolls
       ? getDiceAverage(heroDiceNotation)
@@ -76,7 +88,9 @@ export function computeDamageBreakdown(
     attacker,
     "on_attack",
   );
+
   const additionalDamageModifiers: Array<{ type: string; value: number }> = [];
+
   for (const ability of onAttackAbilities) {
     if (
       checkTriggerCondition(ability.trigger, attacker, {
@@ -87,7 +101,9 @@ export function computeDamageBreakdown(
       if (ability.effect.type === "additional_damage") {
         const modifierType =
           (ability.effect as { damageType?: string }).damageType || "fire";
+
         const modifierValue = ability.effect.value || 0;
+
         additionalDamageModifiers.push({ type: modifierType, value: modifierValue });
       }
     }
@@ -96,6 +112,7 @@ export function computeDamageBreakdown(
   const weaponDiceNotationForBreakdown = clientSentFullRolls
     ? mergeDiceFormulas(attack.damageDice ?? "", heroDiceNotation)
     : undefined;
+
   const heroDiceNotationForBreakdown = clientSentFullRolls
     ? ""
     : heroDiceNotation;
@@ -117,6 +134,7 @@ export function computeDamageBreakdown(
   );
 
   let totalDamage = damageCalculation.totalDamage;
+
   const breakdown = [...damageCalculation.breakdown];
 
   if (isCritical) {

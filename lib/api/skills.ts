@@ -9,10 +9,13 @@ export async function getSkill(
     `/api/campaigns/${campaignId}/skills/${skillId}`,
     { cache: "no-store" }
   );
+
   if (!response.ok) {
     if (response.status === 404) throw new Error("Skill not found");
+
     throw new Error("Failed to fetch skill");
   }
+
   return response.json();
 }
 
@@ -103,6 +106,7 @@ export async function duplicateSkill(
 
   if (!response.ok) {
     const error = await response.json();
+
     throw new Error(error.error || "Failed to duplicate skill");
   }
 

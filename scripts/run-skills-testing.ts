@@ -10,10 +10,10 @@
  * --filter — перевіряти лише скіли з цим тригером.
  */
 
-import type { SimpleSkillTrigger } from "@/types/skill-triggers";
-import { ParticipantSide } from "@/lib/constants/battle";
 import { DEFAULT_CAMPAIGN_ID } from "@/lib/constants";
+import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
+import { SkillLevel } from "@/lib/types/skill-tree";
 import {
   checkSurviveLethal,
   executeBonusActionSkill,
@@ -22,11 +22,13 @@ import {
   executeOnKillEffects,
   executeSkillsByTrigger,
 } from "@/lib/utils/skills/skill-triggers-execution";
-import { SkillLevel } from "@/lib/types/skill-tree";
 import type { ActiveSkill, BattleParticipant, SkillEffect } from "@/types/battle";
+import type { SimpleSkillTrigger } from "@/types/skill-triggers";
 
 const ARGS = process.argv.slice(2).filter((a) => !a.startsWith("--"));
+
 const CAMPAIGN_ID = ARGS[0] || DEFAULT_CAMPAIGN_ID;
+
 const FILTER_TRIGGER = process.argv.includes("--filter")
   ? process.argv[process.argv.indexOf("--filter") + 1]
   : undefined;
@@ -54,6 +56,7 @@ function dbSkillToActiveSkill(skill: DbSkill): ActiveSkill {
   type CombatStatsEffects = { effects?: RawEffect[] };
 
   const combatStats = (skill.combatStats as CombatStatsEffects) ?? {};
+
   const rawEffects = Array.isArray(combatStats.effects) ? combatStats.effects : [];
 
   let effects: SkillEffect[];
@@ -70,7 +73,9 @@ function dbSkillToActiveSkill(skill: DbSkill): ActiveSkill {
       }));
   } else {
     const bonuses = (skill.bonuses as Record<string, number>) || {};
+
     const percentKeys = ["melee_damage", "ranged_damage", "counter_damage"];
+
     effects = Object.entries(bonuses).map(([key, value]) => ({
       stat: key,
       type: percentKeys.includes(key) || key.includes("percent") ? "percent" : "flat",
@@ -81,6 +86,7 @@ function dbSkillToActiveSkill(skill: DbSkill): ActiveSkill {
   }
 
   let skillTriggers: ActiveSkill["skillTriggers"];
+
   if (skill.skillTriggers && Array.isArray(skill.skillTriggers)) {
     skillTriggers = skill.skillTriggers as ActiveSkill["skillTriggers"];
   }
@@ -98,11 +104,13 @@ function dbSkillToActiveSkill(skill: DbSkill): ActiveSkill {
 /** Повертає перший простий тригер скіла для вибору тесту */
 function getPrimaryTrigger(skill: ActiveSkill): SimpleSkillTrigger | null {
   const triggers = skill.skillTriggers ?? [];
+
   for (const t of triggers) {
     if (t.type === "simple" && t.trigger) {
       return t.trigger as SimpleSkillTrigger;
     }
   }
+
   return null;
 }
 
@@ -218,9 +226,11 @@ function createMockTarget(overrides?: Partial<BattleParticipant>): BattlePartici
       hasExtraTurn: false,
     },
   };
+
   if (overrides) {
     return { ...base, ...overrides } as BattleParticipant;
   }
+
   return base;
 }
 
@@ -233,18 +243,25 @@ function runOnHitTest(
   mockRandom: boolean,
 ): { passed: boolean; detail: string } {
   const attacker = createMockAttacker([skill]);
+
   const target = createMockTarget();
+
   let randomRestore: (() => void) | undefined;
+
   if (mockRandom) {
     const orig = Math.random;
+
     (global as unknown as { Math: { random: () => number } }).Math.random = () => 0;
     randomRestore = () => {
       (global as unknown as { Math: { random: () => number } }).Math.random = orig;
     };
   }
+
   try {
     const result = executeOnHitEffects(attacker, target, 1, {}, 10);
+
     const targetEffects = result.updatedTarget.battleData.activeEffects ?? [];
+
     const hasDebuff = targetEffects.some(
       (e) =>
         e.dotDamage ||
@@ -255,12 +272,16 @@ function runOnHitTest(
             (d.type === "initiative_bonus" && typeof d.value === "number" && d.value < 0),
         ),
     );
+
     const hasAnyEffect =
       targetEffects.length > 0 || (result.updatedAttacker.battleData.activeEffects?.length ?? 0) > 0;
+
     const hasMessage = result.messages.length > 0;
+
     if (hasDebuff || (hasAnyEffect && hasMessage)) {
       return { passed: true, detail: result.messages.join("; ") || "effect applied" };
     }
+
     if (
       skill.effects.some((e) =>
         ["damage_resistance", "guaranteed_hit", "damage", "area_damage", "area_cells"].includes(e.stat),
@@ -268,6 +289,7 @@ function runOnHitTest(
     ) {
       return { passed: true, detail: result.messages.join("; ") || `stat ${skill.effects.map((e) => e.stat).join(",")} (no debuff expected)` };
     }
+
     return { passed: false, detail: `no effect on target; messages: ${result.messages.join("; ") || "none"}` };
   } finally {
     randomRestore?.();
@@ -276,61 +298,89 @@ function runOnHitTest(
 
 function runOnKillTest(skill: ActiveSkill): { passed: boolean; detail: string } {
   const killer = createMockAttacker([skill]);
+
   const usage: Record<string, number> = {};
+
   const result = executeOnKillEffects(killer, usage);
+
   const hasExtraTurn = result.updatedKiller.actionFlags?.hasExtraTurn === true;
+
   const hasMessage = result.messages.length > 0;
+
   const expectsAction = skill.effects.some((e) => e.stat === "actions");
+
   if (expectsAction && (hasExtraTurn || hasMessage)) {
     return { passed: true, detail: result.messages.join("; ") || "onKill executed" };
   }
+
   if (!expectsAction) {
     return { passed: true, detail: "onKill trigger ran (no actions effect)" };
   }
+
   return { passed: false, detail: `expected +1 action; messages: ${result.messages.join("; ") || "none"}` };
 }
 
 function runPassiveTest(skill: ActiveSkill): { passed: boolean; detail: string } {
   const participant = createMockAttacker([skill]);
+
   const allParticipants = [participant, createMockTarget()];
+
   const result = executeSkillsByTrigger(participant, "passive", allParticipants, { currentRound: 1 });
+
   const executed = result.executedSkills.length > 0;
+
   const hasMessages = result.messages.length > 0;
+
   if (executed || hasMessages) {
     return { passed: true, detail: result.messages.join("; ") || "passive executed" };
   }
+
   return { passed: true, detail: "passive (effects used in damage/AC calc, not here)" };
 }
 
 function runBonusActionTest(skill: ActiveSkill): { passed: boolean; detail: string } {
   const participant = createMockAttacker([skill]);
+
   const allParticipants = [participant, createMockTarget()];
+
   const result = executeBonusActionSkill(participant, skill, allParticipants, 1, undefined, {});
+
   const hasMessages = result.messages.length > 0;
+
   const participantsUpdated = result.updatedParticipants !== allParticipants;
+
   if (hasMessages || participantsUpdated) {
     return { passed: true, detail: result.messages.join("; ") || "bonus action executed" };
   }
+
   return { passed: false, detail: "no messages and no participant updates" };
 }
 
 function runOnLethalDamageTest(skill: ActiveSkill): { passed: boolean; detail: string } {
   const participant = createMockAttacker([skill]);
+
   const usage: Record<string, number> = {};
+
   const result = checkSurviveLethal(participant, usage);
+
   if (result.survived && result.message) {
     return { passed: true, detail: result.message };
   }
+
   return { passed: false, detail: result.message ?? "survive_lethal did not trigger" };
 }
 
 function runOnBattleStartTest(skill: ActiveSkill): { passed: boolean; detail: string } {
   const participant = createMockAttacker([skill]);
+
   const result = executeOnBattleStartEffects(participant, 1);
+
   const hasMessages = result.messages.length > 0;
+
   if (hasMessages) {
     return { passed: true, detail: result.messages.join("; ") || "onBattleStart executed" };
   }
+
   return { passed: true, detail: "onBattleStart (no effect or already applied)" };
 }
 
@@ -340,18 +390,25 @@ function runGenericTriggerTest(
   trigger: SimpleSkillTrigger,
 ): { passed: boolean; detail: string } {
   const participant = createMockAttacker([skill]);
+
   const allParticipants = [participant, createMockTarget()];
+
   const context: { currentRound?: number; isOwnerAction?: boolean; target?: BattleParticipant } = {
     currentRound: 1,
     isOwnerAction: true,
     target: allParticipants[1],
   };
+
   const result = executeSkillsByTrigger(participant, trigger, allParticipants, context);
+
   const executed = result.executedSkills.length > 0;
+
   const hasMessages = result.messages.length > 0;
+
   if (executed || hasMessages) {
     return { passed: true, detail: result.messages.join("; ") || `${trigger} executed` };
   }
+
   return { passed: true, detail: `${trigger} (no effect or condition not met)` };
 }
 
@@ -379,16 +436,20 @@ async function main(): Promise<void> {
   }
 
   console.log(`Перевірка механік скілів (кампанія ${CAMPAIGN_ID}, ${skills.length} скілів)\n`);
+
   if (FILTER_TRIGGER) {
     console.log(`Фільтр тригера: ${FILTER_TRIGGER}\n`);
   }
 
   let passed = 0;
+
   let failed = 0;
+
   let skipped = 0;
 
   for (const row of skills) {
     const skill = dbSkillToActiveSkill(row as DbSkill);
+
     const trigger = getPrimaryTrigger(skill);
 
     if (FILTER_TRIGGER && trigger !== FILTER_TRIGGER) {
@@ -404,6 +465,7 @@ async function main(): Promise<void> {
     const hasProbability = skill.skillTriggers?.some(
       (t) => t.type === "simple" && t.modifiers?.probability != null,
     );
+
     const mockRandom = trigger === "onHit" && !!hasProbability;
 
     let result: { passed: boolean; detail: string };
@@ -455,6 +517,7 @@ async function main(): Promise<void> {
     if (result.passed) {
       passed++;
       console.log(`  [✓] ${skill.name} (${skill.skillId}) — ${trigger}`);
+
       if (result.detail) console.log(`      ${result.detail}`);
     } else {
       failed++;

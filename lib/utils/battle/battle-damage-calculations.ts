@@ -53,7 +53,9 @@ export function calculateSkillDamagePercentBonus(
   for (const ae of attacker.battleData.activeEffects) {
     for (const d of ae.effects) {
       const val = typeof d.value === "number" ? d.value : 0;
+
       const isPct = d.isPercentage === true;
+
       if (isPct && matchesAttackType(d.type ?? "", attackType)) {
         totalPercent += val;
       }
@@ -86,6 +88,7 @@ export function calculateSkillDamageFlatBonus(
   for (const ae of attacker.battleData.activeEffects) {
     for (const d of ae.effects) {
       const val = typeof d.value === "number" ? d.value : 0;
+
       if (d.isPercentage !== true && matchesAttackType(d.type ?? "", attackType)) {
         totalFlat += val;
       }
@@ -200,10 +203,15 @@ export function calculateDamageWithModifiers(
   }
 ): DamageCalculationResult {
   const breakdown: string[] = [];
+
   const heroLevelPart = context?.heroLevelPart ?? 0;
+
   const heroDicePart = context?.heroDicePart ?? 0;
+
   const heroDiceNotation = context?.heroDiceNotation;
+
   const weaponDiceNotation = context?.weaponDiceNotation;
+
   const statLabel = attackType === AttackType.MELEE ? "STR" : "DEX";
 
   // Базовий урон: кубики зброї + рівень + кубики за рівнем + модифікатор характеристики
@@ -214,6 +222,7 @@ export function calculateDamageWithModifiers(
 
   if (heroLevelPart > 0 || heroDicePart > 0) {
     const parts: string[] = [];
+
     // Чітко: це середній урон кубиків зброї (напр. 1d6), не "бонус артефакта"
     parts.push(
       weaponDiceNotation
@@ -221,8 +230,10 @@ export function calculateDamageWithModifiers(
         : `${baseDamage} (кубики зброї)`
     );
     parts.push(`${heroLevelPart} (рівень)`);
+
     if (heroDiceNotation) parts.push(`${heroDicePart} (${heroDiceNotation})`);
     else if (heroDicePart > 0) parts.push(`${heroDicePart} (кубики за рівнем)`);
+
     parts.push(`${statModifier} (${statLabel})`);
     breakdown.push(`${parts.join(" + ")} = ${baseWithStat}`);
   } else {
@@ -249,9 +260,11 @@ export function calculateDamageWithModifiers(
   const artifactBonuses = calculateArtifactDamageBonus(attacker, attackType);
 
   const artifactPercentBreakdown = formatPercentBonusBreakdown("Бонус з артефактів", artifactBonuses.percent);
+
   if (artifactPercentBreakdown) breakdown.push(artifactPercentBreakdown);
 
   const artifactFlatBreakdown = formatFlatBonusBreakdown("Flat бонус з артефактів", artifactBonuses.flat);
+
   if (artifactFlatBreakdown) breakdown.push(artifactFlatBreakdown);
 
   if (!artifactPercentBreakdown && !artifactFlatBreakdown) {
@@ -310,10 +323,13 @@ export function applyResistance(
   damageCategory: "physical" | "spell" = "physical",
 ): { finalDamage: number; resistPercent: number; resistMessage: string | null } {
   const extras = getParticipantExtras(defender);
+
   const resistances = extras.resistances;
+
   if (!resistances) return { finalDamage: damage, resistPercent: 0, resistMessage: null };
 
   let resistPercent = 0;
+
   if (damageCategory === "physical") {
     resistPercent = resistances.physical ?? 0;
   } else if (damageCategory === "spell") {
@@ -323,7 +339,9 @@ export function applyResistance(
   if (resistPercent <= 0) return { finalDamage: damage, resistPercent: 0, resistMessage: null };
 
   const reduction = Math.floor(damage * (resistPercent / 100));
+
   const finalDamage = Math.max(0, damage - reduction);
+
   const resistMessage = `🛡 ${defender.basicInfo.name}: ${resistPercent}% резист (−${reduction} урону)`;
 
   return { finalDamage, resistPercent, resistMessage };

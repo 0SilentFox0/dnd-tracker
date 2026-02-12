@@ -113,7 +113,9 @@ export function applyStartOfBattleEffects(
 export function calculateInitiative(participant: BattleParticipant): number {
   // Спеціальні правила: певні персонажі завжди перші в черзі (initiative 999)
   const nameLower = participant.basicInfo.name.toLowerCase();
+
   const raceLower = participant.abilities.race?.toLowerCase() ?? "";
+
   if (
     nameLower.includes("фајдаен") ||
     nameLower.includes("файдаен") ||
@@ -121,6 +123,7 @@ export function calculateInitiative(participant: BattleParticipant): number {
   ) {
     return 999;
   }
+
   if (nameLower.includes("айвен") || nameLower.includes("iven")) {
     return 999;
   }

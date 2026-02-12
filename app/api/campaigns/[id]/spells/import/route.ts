@@ -85,6 +85,7 @@ export async function POST(
 
     for (const spell of data.spells) {
       const spellAny = spell as Record<string, unknown>;
+
       const school = spell.school ?? spellAny.School;
 
       if (school && typeof school === "string") {
@@ -131,10 +132,15 @@ export async function POST(
       if (!damageDice || !damageDice.trim()) {
         return { diceCount: null, diceType: null };
       }
+
       const match = damageDice.trim().match(/^(\d+)\s*d(\d+)/i);
+
       if (!match) return { diceCount: null, diceType: null };
+
       const count = parseInt(match[1], 10);
+
       const type = `d${match[2]}`;
+
       return { diceCount: count, diceType: type };
     }
 
@@ -143,7 +149,9 @@ export async function POST(
       .filter((spell) => !existingNamesSet.has(spell.name))
       .map((spell) => {
         const schoolKey = spell.school ?? (spell as Record<string, unknown>).School as string | undefined;
+
         const { diceCount, diceType } = parseDiceFromDamageDice(spell.damageDice);
+
         return {
           campaignId: id,
           name: spell.name,

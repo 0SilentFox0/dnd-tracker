@@ -16,9 +16,13 @@ export type SkillTreeProgress = Record<
 
 export function useCharacterView(campaignId: string, characterId: string) {
   const [characterLoaded, setCharacterLoaded] = useState(false);
+
   const [equipped, setEquipped] = useState<EquippedItems>({});
+
   const [savingTree, setSavingTree] = useState(false);
+
   const [saveError, setSaveError] = useState<string | null>(null);
+
   const [lastSavedSkillTreeProgress, setLastSavedSkillTreeProgress] =
     useState<SkillTreeProgress>({});
 
@@ -47,6 +51,7 @@ export function useCharacterView(campaignId: string, characterId: string) {
         if (cancelled) return;
 
         const form = characterToFormData(character);
+
         setFormData(form);
         setLastSavedSkillTreeProgress(
           (form.skillTreeProgress as SkillTreeProgress) ?? {},
@@ -72,14 +77,18 @@ export function useCharacterView(campaignId: string, characterId: string) {
     queryKey: ["artifacts", campaignId],
     queryFn: async () => {
       const res = await fetch(`/api/campaigns/${campaignId}/artifacts`);
+
       if (!res.ok) return [];
+
       const data = await res.json();
+
       return Array.isArray(data) ? data : [];
     },
     enabled: !!campaignId && characterLoaded,
   });
 
   const meleeMult = formData.scalingCoefficients?.meleeMultiplier ?? 1;
+
   const rangedMult = formData.scalingCoefficients?.rangedMultiplier ?? 1;
 
   const { data: damagePreview } = useQuery({
@@ -92,12 +101,19 @@ export function useCharacterView(campaignId: string, characterId: string) {
     ],
     queryFn: async () => {
       const params = new URLSearchParams();
+
       if (meleeMult !== 1) params.set("meleeMultiplier", String(meleeMult));
+
       if (rangedMult !== 1) params.set("rangedMultiplier", String(rangedMult));
+
       const qs = params.toString();
+
       const url = `/api/campaigns/${campaignId}/characters/${characterId}/damage-preview${qs ? `?${qs}` : ""}`;
+
       const res = await fetch(url);
+
       if (!res.ok) return null;
+
       return res.json() as Promise<{
         melee: { total: number };
         ranged: { total: number };
@@ -110,8 +126,11 @@ export function useCharacterView(campaignId: string, characterId: string) {
     queryKey: ["spells", campaignId],
     queryFn: async () => {
       const res = await fetch(`/api/campaigns/${campaignId}/spells`);
+
       if (!res.ok) return [];
+
       const data = await res.json();
+
       return Array.isArray(data) ? data : [];
     },
     enabled:
@@ -123,7 +142,9 @@ export function useCharacterView(campaignId: string, characterId: string) {
     .reduce<Record<string, number>>(
       (acc, s: { spellGroup?: { name: string } | null }) => {
         const name = s.spellGroup?.name ?? "Без школи";
+
         acc[name] = (acc[name] ?? 0) + 1;
+
         return acc;
       },
       {},

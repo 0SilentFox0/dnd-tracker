@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { kvDel, kvGet, kvSet } from "@/lib/cache/kv";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/utils/api/api-auth";
 
@@ -70,6 +71,8 @@ export async function POST(request: Request) {
       },
     });
 
+    await kvDel(`campaigns:${userId}`);
+
     return NextResponse.json(campaign);
   } catch (error) {
     console.error("Error creating campaign:", error);
@@ -96,6 +99,18 @@ export async function GET() {
 
     const { userId } = authResult;
 
+    const cacheKey = `campaigns:${userId}`;
+
+    const cached = await kvGet<unknown[]>(cacheKey);
+
+    if (cached) {
+      return NextResponse.json(cached, {
+        headers: {
+          "Cache-Control": "private, s-maxage=30, stale-while-revalidate=60",
+        },
+      });
+    }
+
     const campaigns = await prisma.campaign.findMany({
       where: {
         members: {
@@ -116,7 +131,13 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json(campaigns);
+    await kvSet(cacheKey, campaigns);
+
+    return NextResponse.json(campaigns, {
+      headers: {
+        "Cache-Control": "private, s-maxage=30, stale-while-revalidate=60",
+      },
+    });
   } catch (error) {
     console.error("Error fetching campaigns:", error);
 

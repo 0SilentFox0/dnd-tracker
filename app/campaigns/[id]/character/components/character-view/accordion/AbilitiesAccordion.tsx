@@ -1,5 +1,7 @@
 "use client";
 
+import { noopAbilitiesSetters } from "../constants";
+
 import { CharacterAbilitiesSection } from "@/components/characters/abilities/CharacterAbilitiesSection";
 import { CharacterSkillTreeView } from "@/components/characters/abilities/CharacterSkillTreeView";
 import {
@@ -9,8 +11,6 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import type { SkillTreeProgress } from "@/lib/hooks/useCharacterView";
-
-import { noopAbilitiesSetters } from "../constants";
 
 export interface AbilitiesAccordionProps {
   campaignId: string;

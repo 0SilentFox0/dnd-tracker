@@ -173,10 +173,13 @@ describe("skill-triggers-execution", () => {
           equippedArtifacts: [],
         },
       });
+
       const target = createMockParticipant({
         basicInfo: { id: "t1", name: "Ціль" } as any,
       });
+
       const result = executeOnHitEffects(attacker, target, 1);
+
       expect(result.updatedTarget.battleData.activeEffects).toHaveLength(1);
     });
 
@@ -203,10 +206,13 @@ describe("skill-triggers-execution", () => {
           equippedArtifacts: [],
         },
       });
+
       const target = createMockParticipant({
         basicInfo: { id: "t1", name: "Ціль" } as any,
       });
+
       const result = executeOnHitEffects(attacker, target, 1);
+
       expect(result.updatedTarget.battleData.activeEffects).toHaveLength(1);
     });
 
@@ -510,6 +516,7 @@ describe("skill-triggers-execution", () => {
           equippedArtifacts: [],
         },
       });
+
       expect(checkSurviveLethal(participant).survived).toBe(false);
     });
 
@@ -533,6 +540,7 @@ describe("skill-triggers-execution", () => {
           equippedArtifacts: [],
         },
       });
+
       expect(checkSurviveLethal(participant).survived).toBe(false);
     });
 
@@ -556,6 +564,7 @@ describe("skill-triggers-execution", () => {
           equippedArtifacts: [],
         },
       });
+
       expect(checkSurviveLethal(participant).survived).toBe(false);
     });
   });
@@ -636,7 +645,9 @@ describe("skill-triggers-execution", () => {
           equippedArtifacts: [],
         },
       });
+
       const result = executeOnKillEffects(killer);
+
       expect(result.messages).toHaveLength(0);
     });
 
@@ -660,7 +671,9 @@ describe("skill-triggers-execution", () => {
           equippedArtifacts: [],
         },
       });
+
       const result = executeOnKillEffects(killer);
+
       expect(result.messages).toHaveLength(0);
     });
 
@@ -686,8 +699,11 @@ describe("skill-triggers-execution", () => {
           equippedArtifacts: [],
         },
       });
+
       vi.spyOn(Math, "random").mockReturnValue(0);
+
       const result = executeOnKillEffects(killer, { s1: 1 });
+
       expect(result.messages).toHaveLength(0);
     });
   });
@@ -728,8 +744,11 @@ describe("skill-triggers-execution", () => {
       const initiativeEffect = result.updatedParticipant.battleData.activeEffects.find(
         (e) => e.effects?.some((d) => d.type === "initiative_bonus"),
       );
+
       expect(initiativeEffect).toBeDefined();
+
       const bonus = initiativeEffect?.effects?.find((d) => d.type === "initiative_bonus");
+
       expect(bonus?.value).toBe(2);
       expect(result.messages.some((m) => m.includes("ініціатива"))).toBe(true);
     });
@@ -870,7 +889,9 @@ describe("skill-triggers-execution", () => {
           equippedArtifacts: [],
         },
       });
+
       const result = executeOnBattleStartEffects(participant, 1);
+
       expect(result.updatedParticipant.battleData.activeEffects).toHaveLength(0);
       expect(result.messages).toHaveLength(0);
     });
@@ -2277,6 +2298,7 @@ describe("skill-triggers-execution", () => {
 
     it("інкрементує skillUsageCounts при успішному виконанні", () => {
       const participant = createMockParticipant();
+
       const counts: Record<string, number> = {};
 
       executeBonusActionSkill(
@@ -2295,6 +2317,7 @@ describe("skill-triggers-execution", () => {
 
     it("field_damage з невалідною формулою повертає 0 урону (catch evaluateFormulaSimple)", () => {
       const participant = createMockParticipant();
+
       const enemy = createMockParticipant({
         basicInfo: { id: "e1", side: ParticipantSide.ENEMY } as any,
         combatStats: { status: "active" } as any,
@@ -2317,6 +2340,7 @@ describe("skill-triggers-execution", () => {
       const updatedEnemy = result.updatedParticipants.find(
         (p) => p.basicInfo.id === "e1",
       );
+
       expect(updatedEnemy?.battleData.activeEffects).toHaveLength(1);
       expect(updatedEnemy?.battleData.activeEffects[0].dotDamage?.damagePerRound).toBe(0);
     });
@@ -2382,11 +2406,13 @@ describe("skill-triggers-execution", () => {
       const updatedKiller = result.updatedParticipants.find(
         (p) => p.basicInfo.id === "k1",
       );
+
       expect(updatedKiller?.combatStats.morale).toBe(1);
 
       const unchangedEnemy = result.updatedParticipants.find(
         (p) => p.basicInfo.id === "e1",
       );
+
       expect(unchangedEnemy?.combatStats.morale).toBe(0);
     });
 
@@ -2446,6 +2472,7 @@ describe("skill-triggers-execution", () => {
       const updatedLiving = result.updatedParticipants.find(
         (p) => p.basicInfo.id === "a1",
       );
+
       expect(updatedLiving?.combatStats.morale).toBe(-1);
     });
 

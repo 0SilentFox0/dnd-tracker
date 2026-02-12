@@ -9,6 +9,7 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,8 +21,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
 import type { SectionTab } from "@/lib/types/info-reference";
+import { cn } from "@/lib/utils";
 
 interface ReferenceSearchBarProps {
   searchQuery: string;

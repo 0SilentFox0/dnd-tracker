@@ -1,3 +1,4 @@
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
@@ -166,6 +167,8 @@ export async function PATCH(
       },
     });
 
+    revalidateTag(`spells-${id}`, "max");
+
     return NextResponse.json(updatedSpell);
   } catch (error) {
     console.error("Error updating spell:", error);
@@ -208,6 +211,8 @@ export async function DELETE(
     await prisma.spell.delete({
       where: { id: spellId },
     });
+
+    revalidateTag(`spells-${id}`, "max");
 
     return NextResponse.json({ success: true });
   } catch (error) {

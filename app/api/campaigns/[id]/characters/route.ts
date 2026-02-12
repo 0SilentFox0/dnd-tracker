@@ -234,7 +234,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+
     const { searchParams } = new URL(request.url);
+
     const type = searchParams.get("type"); // "player" | "npc_hero" | null = all
 
     // Перевіряємо доступ до кампанії (не обов'язково DM)
@@ -247,6 +249,7 @@ export async function GET(
     const where: { campaignId: string; type?: "player" | "npc_hero" } = {
       campaignId: id,
     };
+
     if (type === "player" || type === "npc_hero") {
       where.type = type;
     }

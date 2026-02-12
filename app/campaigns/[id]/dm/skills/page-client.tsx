@@ -45,7 +45,9 @@ export function DMSkillsPageClient({
 
   // Мутації видалення
   const deleteAllSkillsMutation = useDeleteAllSkills(campaignId);
+
   const deleteSkillMutation = useDeleteSkill(campaignId);
+
   const duplicateSkillMutation = useDuplicateSkill(campaignId);
 
   // Групуємо скіли по основним навикам
@@ -143,6 +145,7 @@ export function DMSkillsPageClient({
         >
           {groupedSkills.map(([groupName, groupSkills]) => {
             const mainSkill = mainSkills.find((ms) => ms.name === groupName);
+
             return (
               <SkillGroupAccordion
                 key={groupName}

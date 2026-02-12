@@ -1,8 +1,8 @@
 /**
  * @vitest-environment happy-dom
  */
-import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup, fireEvent } from "@testing-library/react";
+import { cleanup, fireEvent,render, screen } from "@testing-library/react";
+import { afterEach,describe, expect, it, vi } from "vitest";
 
 import { SkillGroupAccordionItem } from "@/components/skills/list/SkillGroupAccordionItem";
 import { Accordion } from "@/components/ui/accordion";
@@ -68,7 +68,9 @@ describe("SkillGroupAccordionItem", () => {
 
   it("рендерить назву групи та кількість скілів", () => {
     const onRenameClick = vi.fn();
+
     const onRemoveAllClick = vi.fn();
+
     renderItem({
       groupName: "Бойові скіли",
       totalSkills: 2,
@@ -126,10 +128,15 @@ describe("SkillGroupAccordionItem", () => {
         skills: [],
         campaignId: "c1",
       });
+
     const buttons = screen.getAllByRole("button");
+
     const accordionTrigger = screen.getByRole("button", { name: /Група з меню/i });
+
     expect(accordionTrigger).toBeInTheDocument();
+
     const menuTrigger = buttons.find((b) => b !== accordionTrigger);
+
     expect(menuTrigger).toBeDefined();
     expect(menuTrigger).toBeInTheDocument();
   });

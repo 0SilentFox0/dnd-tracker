@@ -95,10 +95,12 @@ export function CircularSkillTree({
 
   // Расовий навик та основні навики для секторів (расові й ультимативні не входять у сектори)
   const racialSkill = useRacialSkill(skillTree);
+
   const availableMainSkills = useAvailableMainSkills(skillTree, race); // уже без "racial"
 
   // Раса та Ультимат не мають секторів у колі — тільки основні навики
   const sectors = availableMainSkills.length;
+
   const sectorAngle = (360 / sectors) * (Math.PI / 180); // Конвертуємо в радіани
 
   const { containerSize, outerRadiusPercent, innerRadiusPercent } =

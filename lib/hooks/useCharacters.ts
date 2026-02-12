@@ -5,6 +5,7 @@ import {
   deleteCharacter,
   getCharacters,
 } from "@/lib/api/characters";
+import { ENTITY_STALE_MS } from "@/lib/providers/query-provider";
 import type { Character } from "@/types/characters";
 
 export type { Character };
@@ -13,6 +14,7 @@ export function useCharacters(campaignId: string) {
   return useQuery<Character[]>({
     queryKey: ["characters", campaignId],
     queryFn: () => getCharacters(campaignId, { type: "player" }),
+    staleTime: ENTITY_STALE_MS,
     enabled: !!campaignId,
   });
 }

@@ -1,6 +1,6 @@
+import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { useState } from "react";
 
 import { ParticipantCard } from "@/components/battle/cards/ParticipantCard";
 import { InitiativeTimeline } from "@/components/battle/InitiativeTimeline";
@@ -28,6 +28,7 @@ export function BattleFieldView({
   isDM,
 }: BattleFieldViewProps) {
   const [alliesOpen, setAlliesOpen] = useState(true);
+
   const [enemiesOpen, setEnemiesOpen] = useState(true);
 
   return (

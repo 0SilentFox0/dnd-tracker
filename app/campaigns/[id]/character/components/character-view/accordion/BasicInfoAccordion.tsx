@@ -1,5 +1,7 @@
 "use client";
 
+import { noopBasicInfoSetters } from "../constants";
+
 import { CharacterBasicInfo } from "@/components/characters/basic/CharacterBasicInfo";
 import {
   AccordionContent,
@@ -8,8 +10,6 @@ import {
 } from "@/components/ui/accordion";
 import type { CampaignMember } from "@/types/campaigns";
 import type { Race } from "@/types/races";
-
-import { noopBasicInfoSetters } from "../constants";
 
 export interface BasicInfoAccordionProps {
   basicInfo: Record<string, unknown>;

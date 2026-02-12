@@ -2,9 +2,9 @@
  * Утиліти для виконання ефектів скілів з тригерів
  */
 
-import { ParticipantSide } from "@/lib/constants/battle";
 import { getSkillsByTrigger } from "./skill-triggers";
 
+import { ParticipantSide } from "@/lib/constants/battle";
 import { addActiveEffect } from "@/lib/utils/battle/battle-effects";
 import { evaluateFormula } from "@/lib/utils/battle/formula-evaluator";
 import type { SkillTriggerContext } from "@/lib/utils/battle/trigger-context";
@@ -954,8 +954,11 @@ export function executeOnBattleStartEffects(
   allParticipants?: BattleParticipant[],
 ): { updatedParticipant: BattleParticipant; messages: string[] } {
   const participants = allParticipants ?? [participant];
+
   const byId = new Map(participants.map((p) => [p.basicInfo.id, { ...p }]));
+
   const get = (id: string) => byId.get(id)!;
+
   const set = (p: BattleParticipant) => byId.set(p.basicInfo.id, p);
 
   const messages: string[] = [];
@@ -971,6 +974,7 @@ export function executeOnBattleStartEffects(
 
     for (const effect of skill.effects) {
       const numValue = typeof effect.value === "number" ? effect.value : 0;
+
       const targets = getEffectTargets(
         participant,
         effect.target,
@@ -985,6 +989,7 @@ export function executeOnBattleStartEffects(
         effects: Array<{ type: string; value: number }>;
       }) => {
         const ne = addActiveEffect(target, effectConfig, currentRound);
+
         set({
           ...target,
           battleData: { ...target.battleData, activeEffects: ne },
@@ -1002,7 +1007,9 @@ export function executeOnBattleStartEffects(
               effects: [{ type: "initiative_bonus", value: numValue }],
             });
           }
+
           const targetNames = targets.map((t) => t.basicInfo.name).join(", ");
+
           messages.push(
             `🏃 ${skill.name}: ${participant.basicInfo.name} → ${targetNames} +${numValue} ініціатива`,
           );
@@ -1018,7 +1025,9 @@ export function executeOnBattleStartEffects(
               effects: [{ type: "damage_bonus", value: numValue }],
             });
           }
+
           const targetNames = targets.map((t) => t.basicInfo.name).join(", ");
+
           messages.push(
             `⚔️ ${skill.name}: ${participant.basicInfo.name} → ${targetNames} +${effect.value} урону на першу атаку`,
           );
@@ -1034,7 +1043,9 @@ export function executeOnBattleStartEffects(
               effects: [{ type: "advantage_attack", value: 1 }],
             });
           }
+
           const targetNames = targets.map((t) => t.basicInfo.name).join(", ");
+
           messages.push(
             `🎲 ${skill.name}: ${participant.basicInfo.name} → ${targetNames} advantage на першу атаку`,
           );
@@ -1062,8 +1073,11 @@ export function executeOnBattleStartEffectsForAll(
   const byId = new Map(
     initiativeOrder.map((p) => [p.basicInfo.id, { ...p }]),
   );
+
   const get = (id: string) => byId.get(id)!;
+
   const set = (p: BattleParticipant) => byId.set(p.basicInfo.id, p);
+
   const all = () => initiativeOrder.map((p) => get(p.basicInfo.id));
 
   const messages: string[] = [];
@@ -1082,6 +1096,7 @@ export function executeOnBattleStartEffectsForAll(
 
       for (const effect of skill.effects) {
         const numValue = typeof effect.value === "number" ? effect.value : 0;
+
         const targets = getEffectTargets(current, effect.target, all());
 
         const applyEffect = (target: BattleParticipant, effectConfig: {
@@ -1092,6 +1107,7 @@ export function executeOnBattleStartEffectsForAll(
           effects: Array<{ type: string; value: number }>;
         }) => {
           const ne = addActiveEffect(target, effectConfig, currentRound);
+
           set({
             ...target,
             battleData: { ...target.battleData, activeEffects: ne },
@@ -1109,12 +1125,15 @@ export function executeOnBattleStartEffectsForAll(
                 effects: [{ type: "initiative_bonus", value: numValue }],
               });
             }
+
             if (targets.length > 0) {
               const targetNames = targets.map((t) => t.basicInfo.name).join(", ");
+
               messages.push(
                 `🏃 ${skill.name}: ${current.basicInfo.name} → ${targetNames} +${numValue} ініціатива`,
               );
             }
+
             break;
           case "damage":
             for (const target of targets) {
@@ -1126,12 +1145,15 @@ export function executeOnBattleStartEffectsForAll(
                 effects: [{ type: "damage_bonus", value: numValue }],
               });
             }
+
             if (targets.length > 0) {
               const targetNames = targets.map((t) => t.basicInfo.name).join(", ");
+
               messages.push(
                 `⚔️ ${skill.name}: ${current.basicInfo.name} → ${targetNames} +${effect.value} урону на першу атаку`,
               );
             }
+
             break;
           case "advantage":
             for (const target of targets) {
@@ -1143,12 +1165,15 @@ export function executeOnBattleStartEffectsForAll(
                 effects: [{ type: "advantage_attack", value: 1 }],
               });
             }
+
             if (targets.length > 0) {
               const targetNames = targets.map((t) => t.basicInfo.name).join(", ");
+
               messages.push(
                 `🎲 ${skill.name}: ${current.basicInfo.name} → ${targetNames} advantage на першу атаку`,
               );
             }
+
             break;
           default:
             break;
@@ -1549,7 +1574,9 @@ function evaluateFormulaSimple(
   participant: BattleParticipant,
 ): number {
   const maxHp = participant.combatStats.maxHp;
+
   const currentHp = participant.combatStats.currentHp;
+
   const lostHpPercent = maxHp > 0 ? ((maxHp - currentHp) / maxHp) * 100 : 0;
 
   const context: Record<string, number> = {
@@ -1559,5 +1586,6 @@ function evaluateFormulaSimple(
   };
 
   const result = evaluateFormula(formula, context);
+
   return Math.floor(result);
 }

@@ -38,6 +38,7 @@ export async function GET() {
     return NextResponse.json(activeBattles);
   } catch (error) {
     console.error("Error fetching active battles:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

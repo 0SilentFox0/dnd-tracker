@@ -39,16 +39,20 @@ function formatPassiveAbility(
   passiveAbility: unknown
 ): { title?: string; description: string } | null {
   if (!passiveAbility) return null;
+
   if (typeof passiveAbility === "string") {
     return { description: passiveAbility };
   }
+
   if (typeof passiveAbility === "object") {
     const value = passiveAbility as { name?: string; description?: string };
+
     return {
       title: value.name,
       description: value.description || JSON.stringify(passiveAbility),
     };
   }
+
   return { description: String(passiveAbility) };
 }
 
@@ -64,13 +68,16 @@ export function ArtifactCard({
   variant = "full",
 }: ArtifactCardProps) {
   const router = useRouter();
+
   const [slot, setSlot] = useState(artifact.slot);
+
   const [updating, setUpdating] = useState(false);
 
   const passive = formatPassiveAbility(artifact.passiveAbility);
 
   const handleSlotChange = async (newSlot: string) => {
     if (newSlot === slot) return;
+
     setUpdating(true);
     try {
       const res = await fetch(
@@ -81,10 +88,13 @@ export function ArtifactCard({
           body: JSON.stringify({ slot: newSlot }),
         }
       );
+
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
+
         throw new Error(data.error || "Не вдалося оновити слот");
       }
+
       setSlot(newSlot);
       router.refresh();
     } catch (err) {

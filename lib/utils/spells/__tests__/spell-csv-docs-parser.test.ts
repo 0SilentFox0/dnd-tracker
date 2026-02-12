@@ -1,7 +1,8 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect,it } from "vitest";
+
 import {
-  parseDocsSpellRow,
   type DocsSpellRow,
+  parseDocsSpellRow,
 } from "../spell-csv-docs-parser";
 
 describe("parseDocsSpellRow", () => {
@@ -19,7 +20,9 @@ describe("parseDocsSpellRow", () => {
       Additional_Effects: "Target deals half damage on all weapon attacks",
       Image: "https://example.com/weakness.png",
     };
+
     const spell = parseDocsSpellRow(row);
+
     expect(spell.name).toBe("Weakness");
     expect(spell.level).toBe(1);
     expect(spell.school).toBe("Dark Magic");
@@ -51,7 +54,9 @@ describe("parseDocsSpellRow", () => {
       Additional_Effects: "Damage at start of each target's turn",
       Image: "https://example.com/decay.png",
     };
+
     const spell = parseDocsSpellRow(row);
+
     expect(spell.name).toBe("Decay");
     expect(spell.level).toBe(2);
     expect(spell.damageType).toBe("damage");
@@ -70,7 +75,9 @@ describe("parseDocsSpellRow", () => {
       Save_Type: "Constitution",
       Duration: "Instantaneous",
     };
+
     const spell = parseDocsSpellRow(row);
+
     expect(spell.name).toBe("Curse_of_Netherworld");
     expect(spell.type).toBe("aoe");
     expect(spell.level).toBe(5);
@@ -87,7 +94,9 @@ describe("parseDocsSpellRow", () => {
       Target_AoE: "Single ally",
       Save_Type: "None",
     };
+
     const spell = parseDocsSpellRow(row);
+
     expect(spell.name).toBe("Regeneration");
     expect(spell.damageType).toBe("heal");
     expect(spell.type).toBe("target");
@@ -102,7 +111,9 @@ describe("parseDocsSpellRow", () => {
       Casting_Time: "1 bonus action",
       Target_AoE: "Single ally",
     };
+
     const spell = parseDocsSpellRow(row);
+
     expect(spell.castingTime).toBe("1 bonus action");
   });
 
@@ -114,12 +125,15 @@ describe("parseDocsSpellRow", () => {
       Target_AoE: "20-foot radius",
       Damage_Heal: "8d6 fire",
     };
+
     const spell = parseDocsSpellRow(row);
+
     expect(spell.school).toBe("Chaos Magic");
   });
 
   it("обробляє порожні/відсутні поля", () => {
     const spell = parseDocsSpellRow({});
+
     expect(spell.name).toBe("");
     expect(spell.level).toBe(0);
     expect(spell.school).toBeUndefined();

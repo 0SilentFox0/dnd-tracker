@@ -1,20 +1,22 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect,it } from "vitest";
+
 import {
-  getAbilityModifier,
-  getProficiencyBonus,
-  getPassiveScore,
-  getSpellSaveDC,
-  getSpellAttackBonus,
-  getXPForLevel,
-  getLevelFromXP,
   calculateHPGain,
-  rollDamage,
+  getAbilityModifier,
+  getLevelFromXP,
+  getPassiveScore,
+  getProficiencyBonus,
+  getSpellAttackBonus,
+  getSpellSaveDC,
+  getXPForLevel,
   isCriticalHit,
   isCriticalMiss,
   isHit,
+  rollDamage,
 } from "../calculations";
-import { AttackType } from "@/lib/constants/battle";
 import { getAttackDamageModifier } from "../calculations";
+
+import { AttackType } from "@/lib/constants/battle";
 
 describe("calculations", () => {
   describe("getAbilityModifier", () => {
@@ -80,6 +82,7 @@ describe("calculations", () => {
   describe("calculateHPGain", () => {
     it("парсить 1d8 і повертає середнє + CON modifier", () => {
       const gain = calculateHPGain("1d8", 1);
+
       expect(gain).toBeGreaterThan(0);
     });
     it("повертає 0 для невалідного hitDice", () => {
@@ -90,6 +93,7 @@ describe("calculations", () => {
   describe("rollDamage", () => {
     it("парсить 2d6 і повертає число", () => {
       const dmg = rollDamage("2d6");
+
       expect(typeof dmg).toBe("number");
       expect(dmg).toBeGreaterThan(0);
     });

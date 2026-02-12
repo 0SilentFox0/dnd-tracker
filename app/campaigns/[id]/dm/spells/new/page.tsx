@@ -464,6 +464,7 @@ export default function NewSpellPage({
                     }
                     onChange={(e) => {
                       const v = e.target.value;
+
                       setFormData({
                         ...formData,
                         savingThrow: {
@@ -537,13 +538,17 @@ export default function NewSpellPage({
                   const available = SPELL_EFFECT_OPTIONS.filter(
                     (opt) => !(formData.effects ?? []).includes(opt.value)
                   );
+
                   return available.length > 0 ? (
                     <SelectField
                       value=""
                       onValueChange={(value) => {
                         if (!value) return;
+
                         const current = formData.effects ?? [];
+
                         if (current.includes(value)) return;
+
                         setFormData({ ...formData, effects: [...current, value] });
                       }}
                       placeholder="Додати ефект..."
@@ -571,6 +576,7 @@ export default function NewSpellPage({
                       className="shrink-0 h-8 w-8"
                       onClick={() => {
                         const next = (formData.effects ?? []).filter((_, i) => i !== idx);
+
                         setFormData({ ...formData, effects: next });
                       }}
                     >

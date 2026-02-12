@@ -41,8 +41,11 @@ export function TargetSelectionDialog({
         if (prev.includes(targetId)) {
           return prev.filter((id) => id !== targetId);
         }
+
         const cap = maxTargets ?? 99;
+
         if (prev.length >= cap) return prev;
+
         return [...prev, targetId];
       });
     } else {

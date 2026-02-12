@@ -1,10 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { REFERENCE_STALE_MS } from "@/lib/providers/query-provider";
 import type { Race, RaceFormData } from "@/types/races";
 
 export function useRaces(campaignId: string, initialRaces?: Race[]) {
   return useQuery<Race[]>({
     queryKey: ["races", campaignId],
+    staleTime: REFERENCE_STALE_MS,
     queryFn: async () => {
       const response = await fetch(`/api/campaigns/${campaignId}/races`);
 

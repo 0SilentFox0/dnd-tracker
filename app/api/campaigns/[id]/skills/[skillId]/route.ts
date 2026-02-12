@@ -183,16 +183,20 @@ function formatSkillResponse(skill: {
   grantedSpell?: { id: string; name: string } | null;
 }) {
   let basicInfo: Record<string, unknown>;
+
   if (
     skill.basicInfo &&
     typeof skill.basicInfo === "object" &&
     !Array.isArray(skill.basicInfo)
   ) {
     basicInfo = { ...(skill.basicInfo as Record<string, unknown>) };
+
     if (basicInfo.name === undefined || basicInfo.name === "")
       basicInfo.name = skill.name || "";
+
     if (basicInfo.description === undefined)
       basicInfo.description = skill.description ?? "";
+
     if (basicInfo.icon === undefined) basicInfo.icon = skill.icon ?? "";
   } else {
     basicInfo = {
@@ -201,6 +205,7 @@ function formatSkillResponse(skill: {
       icon: skill.icon || "",
     };
   }
+
   const combatStats =
     skill.combatStats &&
     typeof skill.combatStats === "object" &&
@@ -213,12 +218,14 @@ function formatSkillResponse(skill: {
           physicalResistance: skill.physicalResistance || undefined,
           magicalResistance: skill.magicalResistance || undefined,
         };
+
   const spellDataRaw =
     skill.spellData &&
     typeof skill.spellData === "object" &&
     !Array.isArray(skill.spellData)
       ? (skill.spellData as Record<string, unknown>)
       : {};
+
   const spellData = {
     spellId: skill.spellId || (spellDataRaw.spellId as string) || undefined,
     spellGroupId:
@@ -228,6 +235,7 @@ function formatSkillResponse(skill: {
       (spellDataRaw.grantedSpellId as string) ||
       undefined,
   };
+
   const spellEnhancementData =
     skill.spellEnhancementData &&
     typeof skill.spellEnhancementData === "object" &&
@@ -242,6 +250,7 @@ function formatSkillResponse(skill: {
           spellAdditionalModifier: skill.spellAdditionalModifier || undefined,
           spellNewSpellId: skill.spellNewSpellId || undefined,
         };
+
   const mainSkillData =
     skill.mainSkillData &&
     typeof skill.mainSkillData === "object" &&
@@ -282,6 +291,7 @@ export async function GET(
     const { id, skillId } = await params;
 
     const accessResult = await requireCampaignAccess(id, false);
+
     if (accessResult instanceof NextResponse) return accessResult;
 
     const skill = await prisma.skill.findUnique({
@@ -296,6 +306,7 @@ export async function GET(
     return NextResponse.json(formatSkillResponse(skill));
   } catch (error) {
     console.error("Error fetching skill:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -398,6 +409,7 @@ export async function PATCH(
           };
         }
       }
+
       if (spellData.grantedSpellId !== undefined) {
         if (spellData.grantedSpellId === null) {
           updateData.grantedSpell = { disconnect: true };
@@ -523,6 +535,7 @@ export async function PATCH(
       !Array.isArray(updatedSkill.spellData)
         ? (updatedSkill.spellData as Record<string, unknown>)
         : {};
+
     const spellData = {
       spellId: updatedSkill.spellId || (patchSpellDataRaw.spellId as string) || undefined,
       spellGroupId:

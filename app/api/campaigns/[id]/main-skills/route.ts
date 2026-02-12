@@ -1,6 +1,8 @@
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { getCachedMainSkills } from "@/lib/cache/reference-data";
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 
@@ -30,12 +32,14 @@ export async function GET(
       return accessResult;
     }
 
-    const mainSkills = await prisma.mainSkill.findMany({
-      where: { campaignId: id },
-      orderBy: { createdAt: "asc" },
-    });
+    const mainSkills = await getCachedMainSkills(id);
 
-    return NextResponse.json(mainSkills);
+    return NextResponse.json(mainSkills, {
+      headers: {
+        "Cache-Control":
+          "public, s-maxage=60, stale-while-revalidate=300",
+      },
+    });
   } catch (error) {
     console.error("Error fetching main skills:", error);
 
@@ -74,6 +78,8 @@ export async function POST(
         spellGroupId: data.spellGroupId || null,
       },
     });
+
+    revalidateTag(`main-skills-${id}`, "max");
 
     return NextResponse.json(mainSkill);
   } catch (error) {

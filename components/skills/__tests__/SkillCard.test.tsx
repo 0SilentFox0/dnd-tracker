@@ -1,8 +1,8 @@
 /**
  * @vitest-environment happy-dom
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { cleanup,render, screen } from "@testing-library/react";
+import { afterEach,beforeEach, describe, expect, it, vi } from "vitest";
 
 import { SkillCard } from "@/components/skills/list/SkillCard";
 import type { GroupedSkill } from "@/types/skills";
@@ -65,6 +65,7 @@ describe("SkillCard", () => {
 
   it("рендерить назву скіла", () => {
     const skill = minimalGroupedSkill({ basicInfo: { name: "Вогняна куля" } });
+
     render(<SkillCard skill={skill} campaignId="c1" />);
     expect(screen.getByText("Вогняна куля")).toBeInTheDocument();
   });
@@ -73,15 +74,20 @@ describe("SkillCard", () => {
     const skill = minimalGroupedSkill({
       basicInfo: { name: "Скіл", description: "Короткий опис скіла" },
     });
+
     render(<SkillCard skill={skill} campaignId="c1" />);
     expect(screen.getByText("Короткий опис скіла")).toBeInTheDocument();
   });
 
   it("рендерить кнопку Редагувати з посиланням на сторінку скіла", () => {
     const skill = minimalGroupedSkill();
+
     render(<SkillCard skill={skill} campaignId="camp-123" />);
+
     const links = screen.getAllByRole("link", { name: /редагувати/i });
+
     const link = links.find((el) => el.getAttribute("href") === "/campaigns/camp-123/dm/skills/skill-1");
+
     expect(link).toBeDefined();
     expect(link).toHaveAttribute("href", "/campaigns/camp-123/dm/skills/skill-1");
   });
@@ -90,6 +96,7 @@ describe("SkillCard", () => {
     const skill = minimalGroupedSkill({
       basicInfo: { name: "СкілБезОпису", description: "" },
     });
+
     render(<SkillCard skill={skill} campaignId="c1" />);
     expect(screen.getByText("СкілБезОпису")).toBeInTheDocument();
     expect(screen.queryByText("Опис скіла")).not.toBeInTheDocument();
@@ -102,6 +109,7 @@ describe("SkillCard", () => {
         { type: "simple", trigger: "onHit", modifiers: undefined },
       ],
     });
+
     render(<SkillCard skill={skill} campaignId="c1" />);
     expect(screen.getByText("СкілЗТригером")).toBeInTheDocument();
     expect(screen.getByText(/Тригери/)).toBeInTheDocument();
@@ -112,6 +120,7 @@ describe("SkillCard", () => {
     const skill = minimalGroupedSkill({
       bonuses: { strength: 2 },
     });
+
     render(<SkillCard skill={skill} campaignId="c1" />);
     expect(screen.getByText("Бонуси:")).toBeInTheDocument();
   });

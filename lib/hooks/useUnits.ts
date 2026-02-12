@@ -12,6 +12,7 @@ import {
   renameUnitGroup,
   updateUnit,
 } from "@/lib/api/units";
+import { REFERENCE_STALE_MS } from "@/lib/providers/query-provider";
 import type { Unit, UnitGroup } from "@/types/units";
 
 export type { Unit, UnitGroup };
@@ -20,6 +21,7 @@ export function useUnits(campaignId: string, initialUnits?: Unit[]) {
   return useQuery<Unit[]>({
     queryKey: ["units", campaignId],
     queryFn: () => getUnits(campaignId),
+    staleTime: REFERENCE_STALE_MS,
     ...(initialUnits !== undefined && { initialData: initialUnits }),
     enabled: !!campaignId,
   });
@@ -29,6 +31,7 @@ export function useUnitGroups(campaignId: string) {
   return useQuery<UnitGroup[]>({
     queryKey: ["unitGroups", campaignId],
     queryFn: () => getUnitGroups(campaignId),
+    staleTime: REFERENCE_STALE_MS,
   });
 }
 
@@ -48,6 +51,7 @@ export function useUnit(campaignId: string, unitId: string) {
   return useQuery<Unit>({
     queryKey: ["unit", campaignId, unitId],
     queryFn: () => getUnit(campaignId, unitId),
+    staleTime: REFERENCE_STALE_MS,
   });
 }
 

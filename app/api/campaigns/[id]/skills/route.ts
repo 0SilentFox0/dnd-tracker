@@ -264,17 +264,21 @@ export async function GET(
     const formattedSkills = skills.map((skill) => {
       // Використовуємо згруповані дані, якщо вони є, інакше формуємо з старих полів
       let basicInfo: Record<string, unknown>;
+
       if (
         skill.basicInfo &&
         typeof skill.basicInfo === "object" &&
         !Array.isArray(skill.basicInfo)
       ) {
         basicInfo = { ...(skill.basicInfo as Record<string, unknown>) };
+
         // Заповнюємо name/description з кореня, якщо в basicInfo їх нема (старі записи або імпорт)
         if (basicInfo.name === undefined || basicInfo.name === "")
           basicInfo.name = skill.name || "";
+
         if (basicInfo.description === undefined)
           basicInfo.description = skill.description ?? "";
+
         if (basicInfo.icon === undefined) basicInfo.icon = skill.icon ?? "";
       } else {
         basicInfo = {
@@ -303,6 +307,7 @@ export async function GET(
         !Array.isArray(skill.spellData)
           ? (skill.spellData as Record<string, unknown>)
           : {};
+
       const spellData = {
         spellId: skill.spellId || (baseSpellData.spellId as string) || undefined,
         spellGroupId:

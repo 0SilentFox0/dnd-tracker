@@ -1,8 +1,10 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { afterEach,beforeEach, describe, expect, it, vi } from "vitest";
+
 import { evaluateFormula } from "../formula-evaluator";
 
 describe("FormulaEvaluator", () => {
   let consoleWarnSpy: ReturnType<typeof vi.spyOn>;
+
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
@@ -27,6 +29,7 @@ describe("FormulaEvaluator", () => {
       hero_level: 5,
       strength: 10,
     };
+
     expect(evaluateFormula("hero_level * 2", context)).toBe(10);
     expect(evaluateFormula("strength + 5", context)).toBe(15);
     // Test variable replacement safety (variable being part of another Name)
@@ -47,6 +50,7 @@ describe("FormulaEvaluator", () => {
     const context = {
       lost_hp_percent: 45,
     };
+
     // 3 * floor(45 / 10) = 3 * 4 = 12
     expect(evaluateFormula("3 * floor(lost_hp_percent / 10)", context)).toBe(
       12,

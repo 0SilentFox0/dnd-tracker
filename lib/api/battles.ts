@@ -216,6 +216,7 @@ export async function rollbackBattleAction(
 
   if (!response.ok) {
     const err = await response.json();
+
     throw new Error(err.error || "Failed to rollback action");
   }
 
@@ -245,6 +246,7 @@ export async function addBattleParticipant(
 
   if (!response.ok) {
     const err = await response.json();
+
     throw new Error(err.error || "Failed to add participant");
   }
 
@@ -268,6 +270,7 @@ export async function updateBattleParticipant(
 
   if (!response.ok) {
     const err = await response.json();
+
     throw new Error(err.error || "Failed to update participant");
   }
 

@@ -14,8 +14,8 @@ import {
   getHeroDamageDiceForLevel,
   getHeroMaxHp,
 } from "@/lib/constants/hero-scaling";
-import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { SkillLevel } from "@/lib/types/skill-tree";
+import { getAbilityModifier } from "@/lib/utils/common/calculations";
 
 export { MAGIC_MAIN_SKILL_IDS, type MagicMainSkillId } from "@/lib/constants/dpr-by-main-skill";
 
@@ -36,8 +36,10 @@ function normalizeSkillLevel(
 ): SkillLevel {
   if (level === SkillLevel.EXPERT || level === "expert" || level === 3 || level === "3")
     return SkillLevel.EXPERT;
+
   if (level === SkillLevel.ADVANCED || level === "advanced" || level === 2 || level === "2")
     return SkillLevel.ADVANCED;
+
   return SkillLevel.BASIC;
 }
 
@@ -46,7 +48,9 @@ function hasMagicSchoolInUnlockedSkills(
   unlockedSkills: string[] | undefined,
 ): boolean {
   if (!unlockedSkills?.length) return false;
+
   const lower = unlockedSkills.join(" ").toLowerCase();
+
   return MAGIC_MAIN_SKILL_IDS.some((id) => lower.includes(id));
 }
 
@@ -76,16 +80,23 @@ export function getSpellDprFromProgress(
 
   for (const [key, progress] of Object.entries(skillTreeProgress)) {
     const hasProgress = progress?.unlockedSkills?.length || progress?.level;
+
     if (!hasProgress) continue;
+
     const level = normalizeSkillLevel(progress.level as string | number | undefined);
+
     const dpr = DPR_BY_LEVEL_MAGIC[level] ?? DPR_BY_LEVEL_MAGIC[SkillLevel.BASIC];
+
     if (dpr <= bestDpr) continue;
 
     const isMagicByMainSkillId = isMagicMainSkill(key, magicMainSkillIds);
+
     const mainSkillIdsInTree = treeIdToMainSkillIds?.[key];
+
     const treeHasMagic =
       mainSkillIdsInTree?.some((id) => isMagicMainSkill(id, magicMainSkillIds)) ??
       false;
+
     const inferredMagicFromSkills =
       !isMagicByMainSkillId && !treeHasMagic && mainSkillIdsInTree === undefined
         ? hasMagicSchoolInUnlockedSkills(progress?.unlockedSkills)
@@ -94,6 +105,7 @@ export function getSpellDprFromProgress(
     if (isMagicByMainSkillId || treeHasMagic || inferredMagicFromSkills)
       bestDpr = dpr;
   }
+
   return bestDpr;
 }
 
@@ -113,10 +125,13 @@ export function getNonMagicMainSkillDprFromProgress(
 
   for (const [key, progress] of Object.entries(skillTreeProgress)) {
     const hasProgress = progress?.unlockedSkills?.length || progress?.level;
+
     if (!hasProgress) continue;
 
     const isMagicByMainSkillId = isMagicMainSkill(key, magicMainSkillIds);
+
     const mainSkillIdsInTree = treeIdToMainSkillIds?.[key];
+
     const treeHasMagic =
       mainSkillIdsInTree?.some((id) =>
         isMagicMainSkill(id, magicMainSkillIds),
@@ -125,25 +140,35 @@ export function getNonMagicMainSkillDprFromProgress(
     // Невідоме дерево або дерево без розпарсених mainSkills: не рахуємо як немагічне
     if (!Array.isArray(mainSkillIdsInTree) || mainSkillIdsInTree.length === 0)
       continue;
+
     // Магічна школа (ключ або дерево з магією): не додаємо
     if (isMagicByMainSkillId || treeHasMagic) continue;
 
     const level = normalizeSkillLevel(progress.level as string | number | undefined);
+
     const dpr =
       DPR_BY_LEVEL_NON_MAGIC[level] ?? DPR_BY_LEVEL_NON_MAGIC[SkillLevel.BASIC];
+
     total += dpr;
   }
+
   return total;
 }
 
 /** Середнє одного блоку кубиків: 1d6 = 3.5, 2d6+3 = 10 */
 function getDiceAverageSingle(notation: string): number {
   const match = notation.trim().match(/^(\d+)d(\d+)([+-]\d+)?$/);
+
   if (!match) return 0;
+
   const count = parseInt(match[1], 10);
+
   const sides = parseInt(match[2], 10);
+
   const mod = match[3] ? parseInt(match[3], 10) : 0;
+
   const avgDice = (count * (sides + 1)) / 2;
+
   return avgDice + mod;
 }
 
@@ -153,12 +178,18 @@ function getDiceAverageSingle(notation: string): number {
  */
 export function getDiceAverage(diceNotation: string): number {
   if (!diceNotation || !diceNotation.trim()) return 0;
+
   const parts = diceNotation.split(/\s*\+\s*/);
+
   return parts.reduce((sum, part) => {
     const p = part.trim();
+
     const single = getDiceAverageSingle(p);
+
     if (single !== 0) return sum + single;
+
     const modMatch = p.match(/^([+-]?\d+)$/);
+
     return sum + (modMatch ? parseInt(modMatch[1], 10) : 0);
   }, 0);
 }
@@ -176,17 +207,25 @@ export interface DiceGroup {
  */
 export function parseDiceNotationToGroups(diceNotation: string): DiceGroup[] {
   if (!diceNotation || !diceNotation.trim()) return [];
+
   const bySides: Record<number, number> = {};
+
   const parts = diceNotation.split(/\s*\+\s*/);
+
   for (const part of parts) {
     const p = part.trim();
+
     const match = p.match(/^(\d+)d(\d+)([+-]\d+)?$/);
+
     if (match) {
       const count = parseInt(match[1], 10);
+
       const sides = parseInt(match[2], 10);
+
       bySides[sides] = (bySides[sides] ?? 0) + count;
     }
   }
+
   return Object.entries(bySides)
     .map(([sides, count]) => ({ count, sides: parseInt(sides, 10) }))
     .sort((a, b) => a.sides - b.sides);
@@ -206,16 +245,22 @@ export function getTotalDiceCount(diceNotation: string): number {
  */
 export function mergeDiceFormulas(weaponNotation: string, heroNotation: string): string {
   const weapon = weaponNotation?.trim() || "";
+
   const hero = heroNotation?.trim() || "";
+
   if (!weapon && !hero) return "";
+
   const groups = [
     ...parseDiceNotationToGroups(weapon),
     ...parseDiceNotationToGroups(hero),
   ];
+
   const bySides: Record<number, number> = {};
+
   for (const g of groups) {
     bySides[g.sides] = (bySides[g.sides] ?? 0) + g.count;
   }
+
   return Object.entries(bySides)
     .sort(([a], [b]) => parseInt(a, 10) - parseInt(b, 10))
     .map(([sides, count]) => `${count}d${sides}`)
@@ -283,25 +328,35 @@ export function getUnitStats(unit: {
   }>;
 }): UnitStats {
   const strMod = getAbilityModifier(unit.strength ?? 10);
+
   const dexMod = getAbilityModifier(unit.dexterity ?? 10);
 
   let meleeAvg = 0;
+
   let rangedAvg = 0;
 
   const attacks = Array.isArray(unit.attacks) ? unit.attacks : [];
+
   for (const a of attacks) {
     const dice = (a.damageDice as string) || "1d6";
+
     const avg = getDiceAverage(dice);
+
     const isRanged = (a.type as string) === AttackType.RANGED;
+
     const mod = isRanged ? dexMod : strMod;
+
     const total = avg + mod;
+
     if (isRanged) rangedAvg += total;
     else meleeAvg += total;
   }
 
   const dpr =
     Math.max(meleeAvg, rangedAvg) || getDiceAverage("1d6"); // лише більший з melee/ranged; fallback одна атака
+
   const hp = unit.maxHp;
+
   const kpi = hp > 0 ? dpr / hp : 0;
 
   return {
@@ -357,13 +412,19 @@ export function getCharacterStats(character: GetCharacterStatsParams): {
   dprBreakdown: CharacterDprBreakdown;
 } {
   const level = character.level;
+
   const strMod = getAbilityModifier(character.strength);
+
   const dexMod = getAbilityModifier(character.dexterity);
+
   const logLines: string[] = [];
 
   const meleeDice = getHeroDamageDiceForLevel(level, AttackType.MELEE);
+
   const rangedDice = getHeroDamageDiceForLevel(level, AttackType.RANGED);
+
   const heroMeleeBase = level + strMod + getDiceAverage(meleeDice);
+
   const heroRangedBase = level + dexMod + getDiceAverage(rangedDice);
 
   logLines.push(
@@ -374,13 +435,18 @@ export function getCharacterStats(character: GetCharacterStatsParams): {
   );
 
   let meleeWeapon = 0;
+
   let rangedWeapon = 0;
 
   const attacks = character.attacks ?? [];
+
   for (const a of attacks) {
     const dice = (a.damageDice as string) || "";
+
     const avg = dice ? getDiceAverage(dice) : 0;
+
     const isRanged = (a.type as string) === AttackType.RANGED;
+
     if (isRanged) {
       rangedWeapon += avg;
     } else {
@@ -395,7 +461,9 @@ export function getCharacterStats(character: GetCharacterStatsParams): {
   }
 
   const meleeAvg = heroMeleeBase + meleeWeapon;
+
   const rangedAvg = heroRangedBase + rangedWeapon;
+
   const physicalDpr = Math.max(meleeAvg, rangedAvg);
 
   logLines.push(
@@ -407,6 +475,7 @@ export function getCharacterStats(character: GetCharacterStatsParams): {
     character.treeIdToMainSkillIds,
     character.magicMainSkillIds,
   );
+
   const nonMagicDpr = getNonMagicMainSkillDprFromProgress(
     character.skillTreeProgress,
     character.treeIdToMainSkillIds,
@@ -417,11 +486,13 @@ export function getCharacterStats(character: GetCharacterStatsParams): {
   logLines.push(`Немагічні основні навички (сума): +${nonMagicDpr} DPR`);
 
   const dpr = physicalDpr + spellDpr + nonMagicDpr;
+
   logLines.push(
     `Разом DPR = ${Math.round(physicalDpr * 10) / 10} + ${spellDpr} + ${nonMagicDpr} = ${Math.round(dpr * 10) / 10}`,
   );
 
   const hp = getHeroMaxHp(level, character.strength);
+
   const kpi = hp > 0 ? dpr / hp : 0;
 
   return {
@@ -453,28 +524,39 @@ export function suggestEnemyUnits(
   if (unitsWithStats.length === 0) return [];
 
   const byTier = new Map<number, UnitStats[]>();
+
   for (const u of unitsWithStats) {
     const tier = u.level;
+
     if (!byTier.has(tier)) byTier.set(tier, []);
+
     byTier.get(tier)?.push(u);
   }
 
   const tiersDesc = [...byTier.keys()].sort((a, b) => b - a);
+
   const targetRatio = targetHp > 0 ? targetDpr / targetHp : 0;
 
   const result: SuggestedEnemy[] = [];
+
   let totalDpr = 0;
+
   let totalHp = 0;
 
   // Фаза 1: по одному юніту з кожного tier (найближчий за співвідношенням DPR/HP до цільового)
   for (const tier of tiersDesc) {
     const units = byTier.get(tier) ?? [];
+
     if (units.length === 0) continue;
+
     const best = units.reduce((a, b) => {
       const ar = a.hp > 0 ? a.dpr / a.hp : 0;
+
       const br = b.hp > 0 ? b.dpr / b.hp : 0;
+
       return Math.abs(ar - targetRatio) <= Math.abs(br - targetRatio) ? a : b;
     });
+
     result.push({
       unitId: best.unitId,
       name: best.name,
@@ -490,7 +572,9 @@ export function suggestEnemyUnits(
 
   // Фаза 2: збільшуємо кількість (від найвищого tier), поки не досягнемо цілі
   const targetDprMin = targetDpr * 0.9;
+
   const targetHpMin = targetHp * 0.9;
+
   let index = 0;
 
   while (
@@ -498,11 +582,14 @@ export function suggestEnemyUnits(
     (totalDpr < targetDprMin || totalHp < targetHpMin)
   ) {
     if (result.every((e) => e.quantity >= 10)) break;
+
     const entry = result[index % result.length];
+
     if (entry.quantity >= 10) {
       index++;
       continue;
     }
+
     entry.quantity += 1;
     entry.totalDpr = entry.dpr * entry.quantity;
     entry.totalHp = entry.hp * entry.quantity;

@@ -1,7 +1,7 @@
 "use client";
 
+import { useEffect,useRef } from "react";
 import { usePathname } from "next/navigation";
-import { useRef, useEffect } from "react";
 
 interface PageTransitionProps {
   children: React.ReactNode;
@@ -15,14 +15,17 @@ interface PageTransitionProps {
  */
 export function PageTransition({ children }: PageTransitionProps) {
   const pathname = usePathname();
+
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const el = ref.current;
+
     if (!el) return;
 
     const observer = new MutationObserver(() => {
       const active = document.activeElement;
+
       if (
         el.getAttribute("aria-hidden") === "true" &&
         active &&

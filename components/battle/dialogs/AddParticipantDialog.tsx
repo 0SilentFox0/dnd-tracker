@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,9 +18,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { AddParticipantData } from "@/lib/api/battles";
 import { useCharacters } from "@/lib/hooks/useCharacters";
 import { useUnits } from "@/lib/hooks/useUnits";
-import type { AddParticipantData } from "@/lib/api/battles";
 
 interface AddParticipantDialogProps {
   open: boolean;
@@ -37,12 +38,17 @@ export function AddParticipantDialog({
   isPending,
 }: AddParticipantDialogProps) {
   const [type, setType] = useState<"character" | "unit">("character");
+
   const [side, setSide] = useState<"ally" | "enemy">("ally");
+
   const [characterId, setCharacterId] = useState<string>("");
+
   const [unitId, setUnitId] = useState<string>("");
+
   const [quantity, setQuantity] = useState(1);
 
   const { data: characters = [] } = useCharacters(campaignId);
+
   const { data: units = [] } = useUnits(campaignId);
 
   const handleSubmit = () => {

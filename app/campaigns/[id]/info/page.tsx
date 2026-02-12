@@ -14,6 +14,7 @@ export default async function CampaignInfoPage({
   const { id: campaignId } = await params;
 
   const user = await getAuthUser();
+
   const campaign = await prisma.campaign.findUnique({
     where: { id: campaignId },
     include: {
@@ -49,6 +50,7 @@ export default async function CampaignInfoPage({
       s.basicInfo && typeof s.basicInfo === "object" && !Array.isArray(s.basicInfo)
         ? (s.basicInfo as Record<string, unknown>)
         : {};
+
     return {
       id: s.id,
       name: (basicInfo.name as string) || s.name,

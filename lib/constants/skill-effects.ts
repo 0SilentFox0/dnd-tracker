@@ -107,6 +107,7 @@ export const EFFECT_TARGET_OPTIONS: SelectOption[] = [
 // ---------- Lookup helpers ----------
 
 const _statLabelMap = new Map(EFFECT_STAT_OPTIONS.map((o) => [o.value, o.label]));
+
 const _typeLabelMap = new Map(EFFECT_TYPE_OPTIONS.map((o) => [o.value, o.label]));
 
 /** Повертає людино-читабельну назву stat */

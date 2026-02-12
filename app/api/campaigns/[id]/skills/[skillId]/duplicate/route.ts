@@ -16,6 +16,7 @@ export async function POST(
     const { id, skillId } = await params;
 
     const accessResult = await requireDM(id);
+
     if (accessResult instanceof NextResponse) return accessResult;
 
     const source = await prisma.skill.findUnique({
@@ -39,6 +40,7 @@ export async function POST(
           };
 
     const name = (basicInfo.name as string) || source.name || "";
+
     const copyBasicInfo = {
       ...basicInfo,
       name: name.trim() ? `${name} (копія)` : "Скіл (копія)",
@@ -50,12 +52,14 @@ export async function POST(
       !Array.isArray(source.spellData)
         ? (source.spellData as Record<string, unknown>)
         : {};
+
     const mainSkillData =
       source.mainSkillData &&
       typeof source.mainSkillData === "object" &&
       !Array.isArray(source.mainSkillData)
         ? (source.mainSkillData as Record<string, unknown>)
         : {};
+
     const spellEnhancementData =
       source.spellEnhancementData &&
       typeof source.spellEnhancementData === "object" &&
@@ -117,6 +121,7 @@ export async function POST(
     return NextResponse.json(skill);
   } catch (error) {
     console.error("Error duplicating skill:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

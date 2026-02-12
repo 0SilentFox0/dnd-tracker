@@ -104,9 +104,11 @@ export function processStartOfTurn(
   const hasNoBonusAction = updatedParticipant.battleData.activeEffects.some(
     (e) => e.effects.some((d) => d.type === "no_bonus_action"),
   );
+
   const hasNoReaction = updatedParticipant.battleData.activeEffects.some(
     (e) => e.effects.some((d) => d.type === "no_reaction"),
   );
+
   updatedParticipant = {
     ...updatedParticipant,
     actionFlags: {
@@ -139,8 +141,11 @@ export function processEndOfTurn(
   currentRound: number,
 ): { nextTurnIndex: number; nextRound: number } {
   let nextTurnIndex = currentTurnIndex;
+
   let nextRound = currentRound;
+
   let attempts = 0;
+
   const maxAttempts = initiativeOrder.length;
 
   do {
@@ -155,6 +160,7 @@ export function processEndOfTurn(
 
     // Перевіряємо, чи може наступний учасник ходити (не мертвий і не непритомний)
     const nextParticipant = initiativeOrder[nextTurnIndex];
+
     if (
       nextParticipant &&
       nextParticipant.combatStats.status !== "dead" &&

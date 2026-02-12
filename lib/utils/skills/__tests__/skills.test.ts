@@ -1,11 +1,13 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect,it } from "vitest";
+
 import {
-  groupSkillsByMainSkill,
-  convertGroupedSkillsToArray,
   calculateTotalSkillsInGroup,
+  convertGroupedSkillsToArray,
+  groupSkillsByMainSkill,
 } from "../skills";
-import type { GroupedSkill, Skill } from "@/types/skills";
+
 import type { MainSkill } from "@/types/main-skills";
+import type { GroupedSkill, Skill } from "@/types/skills";
 
 describe("skills utils", () => {
   const mainSkills: MainSkill[] = [
@@ -38,14 +40,18 @@ describe("skills utils", () => {
         grouped("s2", "Блок", "ms1"),
         grouped("s3", "Вогняна куля", "ms2"),
       ];
+
       const result = groupSkillsByMainSkill(skills, mainSkills);
+
       expect(result.get("Бойові")).toHaveLength(2);
       expect(result.get("Магія")).toHaveLength(1);
     });
 
     it("відносить скіли без mainSkillId до «Без основного навику»", () => {
       const skills = [grouped("s1", "Без навику")];
+
       const result = groupSkillsByMainSkill(skills, mainSkills);
+
       expect(result.get("Без основного навику")).toHaveLength(1);
     });
   });
@@ -53,6 +59,7 @@ describe("skills utils", () => {
   describe("calculateTotalSkillsInGroup", () => {
     it("повертає кількість скілів у масиві", () => {
       const skills = [grouped("s1", "A"), grouped("s2", "B")];
+
       expect(calculateTotalSkillsInGroup(skills)).toBe(2);
     });
     it("повертає 0 для порожнього масиву", () => {
@@ -63,18 +70,24 @@ describe("skills utils", () => {
   describe("convertGroupedSkillsToArray", () => {
     it("перетворює Map у відсортований масив пар [назва, скіли]", () => {
       const map = new Map<string, (Skill | GroupedSkill)[]>();
+
       map.set("Бойові", [grouped("s1", "Удар")]);
       map.set("Магія", [grouped("s2", "Вогняна куля")]);
+
       const arr = convertGroupedSkillsToArray(map);
+
       expect(arr).toHaveLength(2);
       expect(arr[0][0]).toBe("Бойові");
       expect(arr[1][0]).toBe("Магія");
     });
     it("ставить «Без основного навику» в кінець", () => {
       const map = new Map<string, (Skill | GroupedSkill)[]>();
+
       map.set("Без основного навику", [grouped("s1", "X")]);
       map.set("А", [grouped("s2", "Y")]);
+
       const arr = convertGroupedSkillsToArray(map);
+
       expect(arr[arr.length - 1][0]).toBe("Без основного навику");
     });
   });

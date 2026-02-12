@@ -1,5 +1,8 @@
 "use client";
 
+import { ParticipantRow } from "./ParticipantRow";
+import type { Character, Participant, Unit } from "./types";
+
 import {
   Card,
   CardContent,
@@ -7,9 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-import type { Character, Participant, Unit } from "./types";
-import { ParticipantRow } from "./ParticipantRow";
 
 interface SidePanelCardProps {
   side: "ally" | "enemy";
@@ -42,14 +42,17 @@ export function SidePanelCard({
   onRemove,
 }: SidePanelCardProps) {
   const config = SIDE_CONFIG[side];
+
   const otherSide = side === "ally" ? "enemy" : "ally";
 
   const characterParticipants = participants.filter(
     (p) => p.side === side && p.type === "character",
   );
+
   const unitParticipants = participants.filter(
     (p) => p.side === side && p.type === "unit",
   );
+
   const isEmpty = participants.filter((p) => p.side === side).length === 0;
 
   return (
@@ -67,7 +70,9 @@ export function SidePanelCard({
             <div className="space-y-2">
               {characterParticipants.map((participant) => {
                 const entity = characters.find((c) => c.id === participant.id);
+
                 if (!entity) return null;
+
                 return (
                   <ParticipantRow
                     key={participant.id}
@@ -90,7 +95,9 @@ export function SidePanelCard({
             <div className="space-y-2">
               {unitParticipants.map((participant) => {
                 const entity = units.find((u) => u.id === participant.id);
+
                 if (!entity) return null;
+
                 return (
                   <ParticipantRow
                     key={participant.id}

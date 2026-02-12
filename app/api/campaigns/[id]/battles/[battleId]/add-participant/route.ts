@@ -10,6 +10,10 @@ import {
   createBattleParticipantFromUnit,
 } from "@/lib/utils/battle/battle-participant";
 import { calculateInitiative } from "@/lib/utils/battle/battle-start";
+import {
+  preparePusherPayload,
+  stripStateBeforeForClient,
+} from "@/lib/utils/battle/strip-battle-payload";
 import { BattleAction, BattleParticipant } from "@/types/battle";
 
 const addParticipantSchema = z.object({
@@ -52,6 +56,7 @@ export async function POST(
     }
 
     const body = await request.json();
+
     const data = addParticipantSchema.parse(body);
 
     const side =
@@ -59,7 +64,9 @@ export async function POST(
 
     const initiativeOrder =
       (battle.initiativeOrder as unknown as BattleParticipant[]) ?? [];
+
     const currentTurnIndex = battle.currentTurnIndex;
+
     const insertAt = currentTurnIndex + 1;
 
     const newParticipants: BattleParticipant[] = [];
@@ -85,6 +92,7 @@ export async function POST(
         battleId,
         side,
       );
+
       const withInitiative = {
         ...participant,
         abilities: {
@@ -93,6 +101,7 @@ export async function POST(
           baseInitiative: calculateInitiative(participant),
         },
       };
+
       newParticipants.push(withInitiative);
     } else {
       const unit = await prisma.unit.findUnique({
@@ -115,6 +124,7 @@ export async function POST(
           side,
           i + 1,
         );
+
         const withInitiative = {
           ...participant,
           abilities: {
@@ -123,6 +133,7 @@ export async function POST(
             baseInitiative: calculateInitiative(participant),
           },
         };
+
         newParticipants.push(withInitiative);
       }
     }
@@ -134,6 +145,7 @@ export async function POST(
     ];
 
     const battleLog = (battle.battleLog as unknown as BattleAction[]) ?? [];
+
     const logEntry: BattleAction = {
       id: `add-participant-${Date.now()}`,
       battleId,
@@ -168,17 +180,24 @@ export async function POST(
 
     if (process.env.PUSHER_APP_ID) {
       const { pusherServer } = await import("@/lib/pusher");
+
       void pusherServer
-        .trigger(`battle-${battleId}`, "battle-updated", updatedBattle)
+        .trigger(
+          `battle-${battleId}`,
+          "battle-updated",
+          preparePusherPayload(updatedBattle),
+        )
         .catch((err) => console.error("Pusher trigger failed:", err));
     }
 
-    return NextResponse.json(updatedBattle);
+    return NextResponse.json(stripStateBeforeForClient(updatedBattle));
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
+
     console.error("Add participant error:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

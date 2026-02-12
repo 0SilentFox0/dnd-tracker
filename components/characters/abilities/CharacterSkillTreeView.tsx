@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { CircularSkillTree } from "@/components/skill-tree/core/CircularSkillTree";
 import {
@@ -57,7 +57,9 @@ export function CharacterSkillTreeView({
   const [trees, setTrees] = useState<PrismaSkillTree[]>([]);
 
   const { data: skillsFromLibrary = [] } = useSkills(campaignId);
+
   const { data: races = [] } = useRaces(campaignId);
+
   const { data: mainSkills = [] } = useMainSkills(campaignId);
 
   useEffect(() => {
@@ -87,6 +89,7 @@ export function CharacterSkillTreeView({
         ...raw,
         createdAt: new Date(raw.createdAt),
       });
+
       if (converted) return converted;
     }
 
@@ -95,13 +98,17 @@ export function CharacterSkillTreeView({
 
   const unlockedSkills = useMemo(() => {
     if (!baseSkillTree) return [];
+
     const progress = skillTreeProgress[baseSkillTree.id];
+
     return progress?.unlockedSkills ?? [];
   }, [baseSkillTree, skillTreeProgress]);
 
   const savedUnlockedSkills = useMemo(() => {
     if (!baseSkillTree || !savedSkillTreeProgress) return [];
+
     const progress = savedSkillTreeProgress[baseSkillTree.id];
+
     return progress?.unlockedSkills ?? [];
   }, [baseSkillTree, savedSkillTreeProgress]);
 
@@ -116,6 +123,7 @@ export function CharacterSkillTreeView({
   );
 
   const maxSkills = characterLevel;
+
   const canLevel =
     baseSkillTree &&
     onSkillTreeProgressChange &&
@@ -124,6 +132,7 @@ export function CharacterSkillTreeView({
   const applyNewUnlocked = useCallback(
     (newUnlocked: string[]) => {
       if (!baseSkillTree || !onSkillTreeProgressChange) return;
+
       onSkillTreeProgressChange({
         ...skillTreeProgress,
         [baseSkillTree.id]: {
@@ -138,17 +147,23 @@ export function CharacterSkillTreeView({
   const handleSkillClick = useCallback(
     (skill: Skill) => {
       if (!canLevel) return;
+
       if (unlockedSkills.includes(skill.id)) {
         if (savedUnlockedSkills.includes(skill.id)) {
           return;
         }
+
         applyNewUnlocked(unlockedSkills.filter((id) => id !== skill.id));
+
         return;
       }
+
       if (unlockedSkills.length >= maxSkills) {
         alert(`Досягнуто максимальну кількість навиків (${maxSkills})`);
+
         return;
       }
+
       applyNewUnlocked([...unlockedSkills, skill.id]);
     },
     [canLevel, unlockedSkills, savedUnlockedSkills, maxSkills, applyNewUnlocked],
@@ -157,17 +172,23 @@ export function CharacterSkillTreeView({
   const handleUltimateSkillClick = useCallback(
     (skill: UltimateSkill) => {
       if (!canLevel) return;
+
       if (unlockedSkills.includes(skill.id)) {
         if (savedUnlockedSkills.includes(skill.id)) {
           return;
         }
+
         applyNewUnlocked(unlockedSkills.filter((id) => id !== skill.id));
+
         return;
       }
+
       if (unlockedSkills.length >= maxSkills) {
         alert(`Досягнуто максимальну кількість навиків (${maxSkills})`);
+
         return;
       }
+
       applyNewUnlocked([...unlockedSkills, skill.id]);
     },
     [canLevel, unlockedSkills, savedUnlockedSkills, maxSkills, applyNewUnlocked],
@@ -176,26 +197,35 @@ export function CharacterSkillTreeView({
   const handleRacialSkillClick = useCallback(
     (mainSkill: MainSkill, level: SkillLevel) => {
       if (!canLevel) return;
+
       const canLearn = canLearnRacialSkillLevel(
         level,
         mainSkill.id,
         unlockedSkills,
       );
+
       if (!canLearn) return;
+
       const racialSkillLevelId = getRacialSkillLevelId(mainSkill.id, level);
+
       if (unlockedSkills.includes(racialSkillLevelId)) {
         if (savedUnlockedSkills.includes(racialSkillLevelId)) {
           return;
         }
+
         applyNewUnlocked(
           unlockedSkills.filter((id) => id !== racialSkillLevelId),
         );
+
         return;
       }
+
       if (unlockedSkills.length >= maxSkills) {
         alert(`Досягнуто максимальну кількість навиків (${maxSkills})`);
+
         return;
       }
+
       applyNewUnlocked([...unlockedSkills, racialSkillLevelId]);
     },
     [canLevel, unlockedSkills, savedUnlockedSkills, maxSkills, applyNewUnlocked],

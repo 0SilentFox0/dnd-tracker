@@ -59,13 +59,17 @@ const DEFAULT_DICE_BY_LEVEL: Record<number, string> = {
 
 function getDiceForLevel(level: number, attackType: AttackType, opts?: HeroScalingOptions | null): string {
   const table = attackType === AttackType.MELEE ? opts?.meleeDiceByLevel : opts?.rangedDiceByLevel;
+
   const resolved = table ?? DEFAULT_DICE_BY_LEVEL;
+
   const clamped = Math.max(1, Math.min(20, level));
+
   return resolved[clamped] ?? resolved[20] ?? "1d4";
 }
 
 function withDefaults(opts?: HeroScalingOptions | null) {
   if (!opts) return DEFAULTS;
+
   return {
     hpBasePerLevel: opts.hpBasePerLevel ?? DEFAULTS.hpBasePerLevel,
     hpStrCoefficient: opts.hpStrCoefficient ?? DEFAULTS.hpStrCoefficient,
@@ -83,8 +87,11 @@ export function getHeroMaxHp(
   options?: HeroScalingOptions | null
 ): number {
   const o = withDefaults(options);
+
   const strMod = getAbilityModifier(strength);
+
   const perLevel = o.hpBasePerLevel + strMod * o.hpStrCoefficient;
+
   return Math.max(1, Math.floor(level * perLevel * o.hpMultiplier));
 }
 
@@ -97,14 +104,20 @@ export function getHeroMaxHpBreakdown(
   options?: HeroScalingOptions | null
 ): { total: number; breakdown: string[] } {
   const o = withDefaults(options);
+
   const strMod = getAbilityModifier(strength);
+
   const perLevel = o.hpBasePerLevel + strMod * o.hpStrCoefficient;
+
   const total = Math.max(1, Math.floor(level * perLevel * o.hpMultiplier));
+
   const breakdown: string[] = [];
+
   breakdown.push(
     `рівень × (база за рівень + мод. сили × коеф.) × множ. = ${level} × (${o.hpBasePerLevel} + ${strMod} × ${o.hpStrCoefficient}) × ${o.hpMultiplier}`
   );
   breakdown.push(`= ${level} × ${perLevel} × ${o.hpMultiplier} = ${total}`);
+
   return { total, breakdown };
 }
 
@@ -131,6 +144,7 @@ export function getHeroDamageComponents(
   options?: HeroScalingOptions | null
 ): { levelPart: number; diceNotation: string } {
   const diceNotation = getHeroDamageDiceForLevel(level, attackType, options);
+
   return { levelPart: level, diceNotation };
 }
 

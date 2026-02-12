@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
 
+import { DMCharactersClient } from "./page-client";
+
 import { getAuthUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-
-import { DMCharactersClient } from "./page-client";
 
 export default async function DMCharactersPage({
   params,
@@ -13,6 +13,7 @@ export default async function DMCharactersPage({
   const { id } = await params;
 
   const user = await getAuthUser();
+
   const userId = user.id;
 
   const campaign = await prisma.campaign.findUnique({

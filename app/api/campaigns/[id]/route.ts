@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { kvDel } from "@/lib/cache/kv";
 import { prisma } from "@/lib/db";
 import { requireAuth, requireDM } from "@/lib/utils/api/api-auth";
 
@@ -118,6 +119,10 @@ export async function PATCH(
         dm: true,
       },
     });
+
+    for (const m of updatedCampaign.members) {
+      await kvDel(`campaigns:${m.userId}`);
+    }
 
     return NextResponse.json(updatedCampaign);
   } catch (error) {

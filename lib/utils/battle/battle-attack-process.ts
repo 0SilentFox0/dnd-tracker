@@ -123,6 +123,7 @@ export function processAttack(
   // Критичний промах (Natural 1) = автоматичний промах
   // Критичне попадання (Natural 20) = автоматичне попадання
   const targetAC = getEffectiveArmorClass(updatedTarget);
+
   const isHit =
     !attackRoll.isCriticalFail &&
     (attackRoll.isCritical || attackRoll.totalAttackValue >= targetAC);
@@ -210,7 +211,9 @@ export function processAttack(
   if (!isHit) {
     // Промах - але можлива гарантована шкода
     let updatedTargetOnMiss = updatedTarget;
+
     const guaranteedDamage = attack.guaranteedDamage ?? 0;
+
     let actualGuaranteedDamage = 0;
 
     if (guaranteedDamage > 0) {
@@ -219,10 +222,14 @@ export function processAttack(
         guaranteedDamage,
         attack.damageType,
       );
+
       actualGuaranteedDamage = resistResult.finalDamage;
+
       let remaining = actualGuaranteedDamage;
+
       if (updatedTarget.combatStats.tempHp > 0 && remaining > 0) {
         const tempDmg = Math.min(updatedTarget.combatStats.tempHp, remaining);
+
         updatedTargetOnMiss = {
           ...updatedTargetOnMiss,
           combatStats: {
@@ -232,6 +239,7 @@ export function processAttack(
         };
         remaining -= tempDmg;
       }
+
       if (remaining > 0) {
         updatedTargetOnMiss = {
           ...updatedTargetOnMiss,
@@ -322,7 +330,7 @@ export function processAttack(
   }
 
   // 3. Розраховуємо урон
-  let baseDamage = damageRolls.reduce((sum, roll) => sum + roll, 0);
+  const baseDamage = damageRolls.reduce((sum, roll) => sum + roll, 0);
 
   const statModifier =
     attack.type === AttackType.MELEE
@@ -331,14 +339,21 @@ export function processAttack(
 
   // Герой: рівень + кубики за рівнем (d6/d8)
   const isHero = updatedAttacker.basicInfo.sourceType === "character";
+
   const heroLevelPart = isHero ? updatedAttacker.abilities.level : 0;
+
   const heroDiceNotation = isHero
     ? getHeroDamageDiceForLevel(updatedAttacker.abilities.level, attack.type as AttackType)
     : "";
+
   const weaponDiceCount = getTotalDiceCount(attack.damageDice ?? "");
+
   const heroDiceCount = getTotalDiceCount(heroDiceNotation);
+
   const fullDiceCount = weaponDiceCount + heroDiceCount;
+
   const clientSentFullRolls = isHero && fullDiceCount > 0 && damageRolls.length === fullDiceCount;
+
   const heroDicePart =
     heroDiceNotation && !clientSentFullRolls ? getDiceAverage(heroDiceNotation) : 0;
 
@@ -376,6 +391,7 @@ export function processAttack(
   const weaponDiceNotationForBreakdown = clientSentFullRolls
     ? mergeDiceFormulas(attack.damageDice ?? "", heroDiceNotation)
     : undefined;
+
   const heroDiceNotationForBreakdown = clientSentFullRolls
     ? ""
     : heroDiceNotation;
@@ -421,24 +437,33 @@ export function processAttack(
 
   // 4b. Модифікатори урону від критичного ефекту (Natural 20)
   let physicalDamage = damageCalculation.totalDamage;
+
   if (criticalEffectApplied?.effect.type === "double_damage") {
     physicalDamage *= 2;
   }
+
   if (criticalEffectApplied?.effect.type === "max_damage") {
     const diceMatch = attack.damageDice.match(/(\d+)d(\d+)([+-]\d+)?/);
+
     const count = diceMatch ? parseInt(diceMatch[1], 10) : 1;
+
     const size = diceMatch ? parseInt(diceMatch[2], 10) : 6;
+
     const diceMod = diceMatch?.[3] ? parseInt(diceMatch[3], 10) : 0;
+
     physicalDamage = count * size + diceMod + statModifier;
   }
+
   if (criticalEffectApplied?.effect.type === "additional_damage") {
     const extraD6 = Math.floor(Math.random() * 6) + 1;
+
     physicalDamage += extraD6;
   }
 
   // Множник для AOE: ціль отримує свою частку (до опору)
   const dmgMult =
     damageMultiplier !== undefined && damageMultiplier >= 0 ? damageMultiplier : 1;
+
   const physicalDamageForTarget = Math.floor(physicalDamage * dmgMult);
 
   // 5. Застосовуємо опір/імунітет цілі для фізичного урону
@@ -455,6 +480,7 @@ export function processAttack(
 
   for (const additionalDamage of damageCalculation.additionalDamage) {
     const additionalValue = Math.floor(additionalDamage.value * dmgMult);
+
     const additionalResistance = applyResistance(
       updatedTarget,
       additionalValue,
@@ -493,6 +519,7 @@ export function processAttack(
   const attackerSkillUsageCounts: Record<string, number> = {
     ...(updatedAttacker.battleData.skillUsageCounts ?? {}),
   };
+
   const targetSkillUsageCounts: Record<string, number> = {
     ...(updatedTarget.battleData.skillUsageCounts ?? {}),
   };
@@ -503,6 +530,7 @@ export function processAttack(
       updatedTarget,
       targetSkillUsageCounts,
     );
+
     if (surviveResult.survived) {
       updatedTarget = {
         ...updatedTarget,
@@ -531,17 +559,20 @@ export function processAttack(
   const targetIsDead =
     updatedTarget.combatStats.status === "dead" ||
     updatedTarget.combatStats.status === "unconscious";
+
   if (targetIsDead) {
     const onKillResult = executeOnKillEffects(
       updatedAttacker,
       attackerSkillUsageCounts,
     );
+
     updatedAttacker = onKillResult.updatedKiller;
   }
 
   // 7d. OnHit: при попаданні — ефекти атакуючого на ціль (DOT, дебафи) або на себе (руни, лікування)
   if (isHit) {
     const physicalDamageDealt = resistanceResult.finalDamage;
+
     const onHitResult = executeOnHitEffects(
       updatedAttacker,
       updatedTarget,
@@ -549,16 +580,20 @@ export function processAttack(
       attackerSkillUsageCounts,
       physicalDamageDealt,
     );
+
     updatedTarget = onHitResult.updatedTarget;
     updatedAttacker = onHitResult.updatedAttacker;
   }
 
   // 7e. Вампіризм: атакуючий відновлює HP при melee/ranged уроні
   let vampirismHeal = 0;
+
   const isMeleeOrRanged =
     attack.type === AttackType.MELEE || attack.type === AttackType.RANGED;
+
   if (isHit && totalFinalDamage > 0 && isMeleeOrRanged) {
     let vampirismPercent = 0;
+
     for (const ae of updatedAttacker.battleData.activeEffects) {
       for (const d of ae.effects) {
         if (d.type === "vampirism" && typeof d.value === "number") {
@@ -566,10 +601,13 @@ export function processAttack(
         }
       }
     }
+
     if (vampirismPercent > 0) {
       vampirismHeal = Math.floor((totalFinalDamage * vampirismPercent) / 100);
+
       if (vampirismHeal > 0) {
         const oldHp = updatedAttacker.combatStats.currentHp;
+
         updatedAttacker = {
           ...updatedAttacker,
           combatStats: {

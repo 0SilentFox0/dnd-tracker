@@ -140,18 +140,24 @@ export function useSkillTreePage({
     ) {
       return baseSkillTree;
     }
+
     const availableIds = Array.isArray(selectedRaceObject.availableSkills)
       ? selectedRaceObject.availableSkills
       : [];
+
     const orderIds = availableIds.filter(
       (id: string) => id !== "racial" && id !== "ultimate"
     );
+
     const existingById = new Map(
       baseSkillTree.mainSkills.map((ms) => [ms.id, ms])
     );
+
     const mergedMainSkills: MainSkill[] = [];
+
     for (const id of orderIds) {
       const existing = existingById.get(id);
+
       if (existing) {
         // Завжди оновлюємо spellGroupId з API (може бути змінено DM)
         const apiMs = mainSkills.find((m) => m.id === id);
@@ -162,6 +168,7 @@ export function useSkillTreePage({
         });
       } else {
         const apiMs = mainSkills.find((m) => m.id === id);
+
         if (apiMs) {
           mergedMainSkills.push(createMainSkillFromApi(apiMs));
         }
@@ -175,6 +182,7 @@ export function useSkillTreePage({
         }
       }
     }
+
     // Якщо в дереві немає расового навику — додаємо дефолтний (щоб завжди були 3 кола для раси)
     if (!mergedMainSkills.some((m) => m.id === "racial")) {
       mergedMainSkills.push(
@@ -188,6 +196,7 @@ export function useSkillTreePage({
         })
       );
     }
+
     return {
       ...baseSkillTree,
       mainSkills: mergedMainSkills,
@@ -277,8 +286,11 @@ export function useSkillTreePage({
   // Список main skills з підставними «Раса»/«Ультимат» для селектора (щоб групи та назви відображались)
   const mainSkillsForSelector = useMemo(() => {
     const hasRacial = mainSkills.some((m: { id: string }) => m.id === "racial");
+
     const hasUltimate = mainSkills.some((m: { id: string }) => m.id === "ultimate");
+
     if (hasRacial && hasUltimate) return mainSkills;
+
     return [
       ...mainSkills,
       ...(!hasRacial
@@ -438,6 +450,7 @@ export function useSkillTreePage({
     }
 
     const skillDisplayName = getSkillName(selectedSkill);
+
     const slotType = slot.isUltimate
       ? "ultimate"
       : slot.isMainSkillLevel
@@ -445,6 +458,7 @@ export function useSkillTreePage({
         : slot.isRacial
           ? "racial"
           : `circle-${slot.circle}`;
+
     console.log("[SkillTree] Призначення скіла", {
       skillId: selectedSkill.id,
       skillName: skillDisplayName,

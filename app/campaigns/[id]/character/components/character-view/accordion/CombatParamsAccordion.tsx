@@ -1,5 +1,7 @@
 "use client";
 
+import { noopCombatSetters } from "../constants";
+
 import { CharacterCombatParams } from "@/components/characters/stats/CharacterCombatParams";
 import { CharacterDamagePreview } from "@/components/characters/stats/CharacterDamagePreview";
 import { CharacterHpPreview } from "@/components/characters/stats/CharacterHpPreview";
@@ -8,8 +10,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-
-import { noopCombatSetters } from "../constants";
 
 export interface CombatParamsAccordionProps {
   campaignId: string;

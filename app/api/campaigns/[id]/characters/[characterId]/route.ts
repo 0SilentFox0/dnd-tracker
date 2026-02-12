@@ -195,11 +195,14 @@ export async function PATCH(
     }
 
     const isDM = campaign.members[0]?.role === "dm";
+
     const isOwner = character.controlledBy === userId;
+
     const campaignWithAllow = await prisma.campaign.findUnique({
       where: { id },
       select: { allowPlayerEdit: true },
     });
+
     const allowPlayerEdit = campaignWithAllow?.allowPlayerEdit ?? false;
 
     // Дозволити оновлення: DM завжди, або власник персонажа якщо allowPlayerEdit

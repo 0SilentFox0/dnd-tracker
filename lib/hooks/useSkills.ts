@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { deleteSkill, duplicateSkill, updateSkill } from "@/lib/api/skills";
-import type { Skill } from "@/types/skills";
 import type { SkillUpdatePayload } from "@/types/api";
+import type { Skill } from "@/types/skills";
 
 export interface SkillFromLibrary {
   id: string;

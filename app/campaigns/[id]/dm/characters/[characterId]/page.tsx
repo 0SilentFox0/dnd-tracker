@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 
+import { CharacterViewClient } from "../../../character/character-view-client";
+
 import { CharacterAbilitiesSection } from "@/components/characters/abilities/CharacterAbilitiesSection";
 import { CharacterSkillTreeView } from "@/components/characters/abilities/CharacterSkillTreeView";
 import { CharacterArtifactsSection } from "@/components/characters/artifacts/CharacterArtifactsSection";
@@ -31,7 +33,6 @@ import {
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { getCharacter, updateCharacter } from "@/lib/api/characters";
-import { CharacterViewClient } from "../../../character/character-view-client";
 import { useCampaignMembers } from "@/lib/hooks/useCampaignMembers";
 import { useCharacterForm } from "@/lib/hooks/useCharacterForm";
 import { useRaces } from "@/lib/hooks/useRaces";
@@ -63,8 +64,11 @@ export default function EditCharacterPage({
     queryKey: ["artifacts", id],
     queryFn: async () => {
       const res = await fetch(`/api/campaigns/${id}/artifacts`);
+
       if (!res.ok) return [];
+
       const data = await res.json();
+
       return Array.isArray(data) ? data : [];
     },
     enabled: !!id && characterLoaded,

@@ -1,13 +1,13 @@
 "use client";
 
+import { noopSkillHandlers } from "../constants";
+
 import { CharacterSkillsSection } from "@/components/characters/skills/CharacterSkillsSection";
 import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-
-import { noopSkillHandlers } from "../constants";
 
 export interface SkillsAccordionProps {
   skills: Record<string, unknown>;

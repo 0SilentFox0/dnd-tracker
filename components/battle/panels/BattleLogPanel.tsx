@@ -9,13 +9,13 @@ import {
   Trash2,
 } from "lucide-react";
 
+import { LogEntryDetails } from "./LogEntryDetails";
+
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { formatLogEntry } from "@/lib/utils/battle/battle-log-format";
 import type { BattleScene } from "@/types/api";
 import type { BattleAction } from "@/types/battle";
-
-import { LogEntryDetails } from "./LogEntryDetails";
 
 interface BattleLogPanelProps {
   battle: BattleScene;

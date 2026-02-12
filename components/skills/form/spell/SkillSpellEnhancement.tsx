@@ -108,6 +108,7 @@ function SkillSpellEnhancementComponent({
 
   const diceType = useMemo(() => {
     const match = spellAdditionalModifier.damageDice?.match(/d(\d+)/);
+
     return match?.[1] || "6";
   }, [spellAdditionalModifier.damageDice]);
 
@@ -204,6 +205,7 @@ function SkillSpellEnhancementComponent({
                         value={diceCount}
                         onChange={(e) => {
                           const count = e.target.value;
+
                           onAdditionalModifierChange({
                             ...spellAdditionalModifier,
                             damageDice: count ? `${count}d${diceType}` : "",
@@ -214,6 +216,7 @@ function SkillSpellEnhancementComponent({
                         value={diceType}
                         onValueChange={(diceTypeNum) => {
                           const count = diceCount || "1";
+
                           onAdditionalModifierChange({
                             ...spellAdditionalModifier,
                             damageDice: `${count}d${diceTypeNum}`,

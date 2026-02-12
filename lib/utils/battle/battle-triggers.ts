@@ -5,9 +5,9 @@
  */
 
 import { hasAnyAllyLowHp } from "./battle-participant-helpers";
+import type { TriggerContextBase } from "./trigger-context";
 
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
-import type { TriggerContextBase } from "./trigger-context";
 import { BattleParticipant, PassiveAbility } from "@/types/battle";
 
 /**

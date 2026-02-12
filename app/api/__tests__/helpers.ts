@@ -11,7 +11,9 @@ export async function getResponseJson<T = unknown>(
   response: NextResponse,
 ): Promise<T> {
   const text = await response.text();
+
   if (!text) return undefined as T;
+
   return JSON.parse(text) as T;
 }
 

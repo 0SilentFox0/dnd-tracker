@@ -1,7 +1,9 @@
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
+import { getCachedSpells } from "@/lib/cache/reference-data";
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess,requireDM } from "@/lib/utils/api/api-auth";
 
@@ -84,6 +86,8 @@ export async function POST(
       },
     });
 
+    revalidateTag(`spells-${id}`, "max");
+
     return NextResponse.json(spell);
   } catch (error) {
     console.error("Error creating spell:", error);
@@ -113,19 +117,14 @@ export async function GET(
       return accessResult;
     }
 
-    const spells = await prisma.spell.findMany({
-      where: {
-        campaignId: id,
-      },
-      include: {
-        spellGroup: true,
-      },
-      orderBy: {
-        level: "asc",
+    const spells = await getCachedSpells(id);
+
+    return NextResponse.json(spells, {
+      headers: {
+        "Cache-Control":
+          "public, s-maxage=60, stale-while-revalidate=300",
       },
     });
-
-    return NextResponse.json(spells);
   } catch (error) {
     console.error("Error fetching spells:", error);
 

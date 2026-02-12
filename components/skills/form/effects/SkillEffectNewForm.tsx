@@ -30,10 +30,12 @@ export function SkillEffectNewForm({ onAdd, onCancel }: SkillEffectNewFormProps)
   const [draft, setDraft] = useState<SkillEffect>({ ...EMPTY_EFFECT });
 
   const isText = isTextValueType(draft.type);
+
   const isFlag = isFlagValueType(draft.type);
 
   const handleAdd = () => {
     if (!draft.stat) return;
+
     onAdd({ ...draft });
     setDraft({ ...EMPTY_EFFECT });
   };
@@ -80,6 +82,7 @@ export function SkillEffectNewForm({ onAdd, onCancel }: SkillEffectNewFormProps)
                   : e.target.value === ""
                     ? 0
                     : parseFloat(e.target.value);
+
                 setDraft((p) => ({ ...p, value: val }));
               }}
               placeholder={isText ? "1d4" : "0"}

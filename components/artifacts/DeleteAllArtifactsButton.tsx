@@ -27,7 +27,9 @@ export function DeleteAllArtifactsButton({
   artifactsCount,
 }: DeleteAllArtifactsButtonProps) {
   const router = useRouter();
+
   const [isDeleting, setIsDeleting] = useState(false);
+
   const [open, setOpen] = useState(false);
 
   const handleDelete = async () => {
@@ -40,6 +42,7 @@ export function DeleteAllArtifactsButton({
 
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
+
         throw new Error(data.error || "Не вдалося видалити артефакти");
       }
 

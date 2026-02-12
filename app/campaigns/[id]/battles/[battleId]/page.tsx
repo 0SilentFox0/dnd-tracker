@@ -1,18 +1,19 @@
 "use client";
 
 import { use, useMemo } from "react";
+
 import { BattleHeader } from "@/components/battle/BattleHeader";
-import { GlobalDamageOverlay } from "@/components/battle/overlays";
-import { DmQuickActionsPanel } from "@/components/battle/panels";
 import { AddParticipantDialog } from "@/components/battle/dialogs/AddParticipantDialog";
 import { AttackDialog } from "@/components/battle/dialogs/AttackDialog";
 import { ChangeHpDialog } from "@/components/battle/dialogs/ChangeHpDialog";
 import { CounterAttackResultDialog } from "@/components/battle/dialogs/CounterAttackResultDialog";
 import { MoraleCheckDialog } from "@/components/battle/dialogs/MoraleCheckDialog";
 import { SpellDialog } from "@/components/battle/dialogs/SpellDialog";
+import { GlobalDamageOverlay } from "@/components/battle/overlays";
+import { DmQuickActionsPanel } from "@/components/battle/panels";
 import { BattleFieldView } from "@/components/battle/views/BattleFieldView";
-import { PlayerTurnView } from "@/components/battle/views/PlayerTurnView";
 import { BattlePreparationView } from "@/components/battle/views/BattlePreparationView";
+import { PlayerTurnView } from "@/components/battle/views/PlayerTurnView";
 import { useBattlePageDialogs } from "@/lib/hooks/battle/useBattlePageDialogs";
 import { useBattleSceneLogic } from "@/lib/hooks/battle/useBattleSceneLogic";
 
@@ -22,6 +23,7 @@ export default function BattlePage({
   params: Promise<{ id: string; battleId: string }>;
 }) {
   const { id, battleId } = use(params);
+
   const {
     battle,
     loading,
@@ -48,10 +50,12 @@ export default function BattlePage({
 
   const preparationCounts = useMemo(() => {
     if (!battle || battle.status !== "prepared") return { allies: 0, enemies: 0 };
+
     const participants = (battle.participants ?? []) as Array<{
       side?: string;
       quantity?: number;
     }>;
+
     return {
       allies: participants
         .filter((p) => p.side === "ally")
@@ -99,6 +103,7 @@ export default function BattlePage({
         onCompleteBattle={handlers.handleCompleteBattle}
         isDM={isDM}
         connectionState={pusherConnectionState}
+        isNextTurnPending={mutations.nextTurn.isPending}
       />
 
       {/* Основний контент */}
@@ -124,6 +129,7 @@ export default function BattlePage({
             onSpell={(data) => mutations.spell.mutate(data)}
             onBonusAction={(skill) => alert(`Бонусна дія: ${skill.name}`)}
             onSkipTurn={handlers.handleNextTurn}
+            isNextTurnPending={mutations.nextTurn.isPending}
             onMoraleCheck={(d10Roll) => {
               if (currentParticipant)
                 mutations.moraleCheck.mutate({
@@ -237,6 +243,7 @@ export default function BattlePage({
           mutations.spell.mutate(data, {
             onSuccess: (updatedBattle) => {
               dialogs.spell.setOpen(false);
+
               if (updatedBattle)
                 handlers.triggerGlobalDamageFromBattle(updatedBattle);
             },

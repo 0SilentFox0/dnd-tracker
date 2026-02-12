@@ -1,11 +1,10 @@
 "use client";
 
 import Link from "next/link";
-
 import { useQuery } from "@tanstack/react-query";
 
-import { getActiveBattles } from "@/lib/api/campaigns";
 import { Button } from "@/components/ui/button";
+import { getActiveBattles } from "@/lib/api/campaigns";
 
 /**
  * Кнопка Join Battle з автоматичним оновленням при зміні активних боїв.
@@ -21,6 +20,7 @@ export function JoinBattleButton() {
   });
 
   const hasActiveBattle = activeBattles.length > 0;
+
   const firstBattle = activeBattles[0];
 
   return (
@@ -41,11 +41,7 @@ export function JoinBattleButton() {
           }
           disabled={!hasActiveBattle || isLoading}
         >
-          {isLoading
-            ? "⚔️ Завантаження..."
-            : hasActiveBattle
-              ? "⚔️ JOIN BATTLE"
-              : "⚔️ JOIN BATTLE (Немає активних боїв)"}
+          {isLoading ? "⚔️ Завантаження..." : "⚔️ JOIN BATTLE"}
         </Button>
       </Link>
     </div>

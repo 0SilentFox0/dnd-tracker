@@ -18,10 +18,14 @@ const DEFAULTS: HeroScalingCoefficients = {
 
 function loadFromStorage(campaignId: string): HeroScalingCoefficients {
   if (typeof window === "undefined") return DEFAULTS;
+
   try {
     const raw = localStorage.getItem(STORAGE_KEY_PREFIX + campaignId);
+
     if (!raw) return DEFAULTS;
+
     const parsed = JSON.parse(raw) as Partial<HeroScalingCoefficients>;
+
     return {
       hpMultiplier: typeof parsed.hpMultiplier === "number" ? parsed.hpMultiplier : DEFAULTS.hpMultiplier,
       meleeMultiplier: typeof parsed.meleeMultiplier === "number" ? parsed.meleeMultiplier : DEFAULTS.meleeMultiplier,
@@ -34,6 +38,7 @@ function loadFromStorage(campaignId: string): HeroScalingCoefficients {
 
 function saveToStorage(campaignId: string, value: HeroScalingCoefficients) {
   if (typeof window === "undefined") return;
+
   try {
     localStorage.setItem(STORAGE_KEY_PREFIX + campaignId, JSON.stringify(value));
   } catch {
@@ -48,6 +53,7 @@ export function useHeroScalingCoefficients(campaignId: string | undefined) {
 
   useEffect(() => {
     if (!campaignId) return;
+
     setCoefficientsState(loadFromStorage(campaignId));
   }, [campaignId]);
 
@@ -55,7 +61,9 @@ export function useHeroScalingCoefficients(campaignId: string | undefined) {
     (update: Partial<HeroScalingCoefficients>) => {
       setCoefficientsState((prev) => {
         const next = { ...prev, ...update };
+
         if (campaignId) saveToStorage(campaignId, next);
+
         return next;
       });
     },

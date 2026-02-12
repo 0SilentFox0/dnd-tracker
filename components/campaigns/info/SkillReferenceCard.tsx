@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2, Sparkles } from "lucide-react";
+
 import {
   AccordionContent,
   AccordionItem,
@@ -31,6 +32,7 @@ export function SkillReferenceCard({
     "skill",
     skill.appearanceDescription ?? ""
   );
+
   const imageUrl = skill.image || skill.icon || null;
 
   return (

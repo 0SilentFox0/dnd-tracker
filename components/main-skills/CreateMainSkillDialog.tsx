@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +13,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -22,10 +22,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useCreateMainSkill } from "@/lib/hooks/useMainSkills";
 import { getSpellGroups } from "@/lib/api/spells";
-import type { SpellGroup } from "@/types/spells";
+import { useCreateMainSkill } from "@/lib/hooks/useMainSkills";
 import type { MainSkillFormData } from "@/types/main-skills";
+import type { SpellGroup } from "@/types/spells";
 
 interface CreateMainSkillDialogProps {
   open: boolean;

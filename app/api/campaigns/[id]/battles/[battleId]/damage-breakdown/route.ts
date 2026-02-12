@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { computeDamageBreakdown } from "@/lib/utils/battle/battle-damage-breakdown";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
+import { computeDamageBreakdown } from "@/lib/utils/battle/battle-damage-breakdown";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const schema = z.object({
@@ -22,9 +22,11 @@ export async function POST(
     const { id: campaignId } = await params;
 
     const accessResult = await requireCampaignAccess(campaignId, false);
+
     if (accessResult instanceof NextResponse) return accessResult;
 
     const body = await request.json();
+
     const data = schema.parse(body);
 
     const result = computeDamageBreakdown({
@@ -39,7 +41,9 @@ export async function POST(
     return NextResponse.json(result);
   } catch (error) {
     const err = error instanceof Error ? error : new Error(String(error));
+
     console.error("Damage breakdown error:", err.message, err.stack);
+
     return NextResponse.json(
       { error: err.message || "Failed to compute damage breakdown" },
       { status: 500 },

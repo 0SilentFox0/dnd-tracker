@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+
 import { Button } from "@/components/ui/button";
 
 interface ParticipantRowProps {
@@ -21,6 +22,7 @@ export function ParticipantRow({
   onRemove,
 }: ParticipantRowProps) {
   const isAlly = side === "ally";
+
   const bgClass = isAlly
     ? "bg-green-50 dark:bg-green-950/20"
     : "bg-red-50 dark:bg-red-950/20";

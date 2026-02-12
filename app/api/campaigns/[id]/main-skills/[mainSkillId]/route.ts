@@ -1,3 +1,4 @@
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -18,11 +19,11 @@ const updateMainSkillSchema = z.object({
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string; mainSkillId: string }> }
+  { params }: { params: Promise<{ id: string; mainSkillId: string }> },
 ) {
   try {
     const { id, mainSkillId } = await params;
-    
+
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
 
@@ -46,18 +47,18 @@ export async function GET(
 
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function PATCH(
   request: Request,
-  { params }: { params: Promise<{ id: string; mainSkillId: string }> }
+  { params }: { params: Promise<{ id: string; mainSkillId: string }> },
 ) {
   try {
     const { id, mainSkillId } = await params;
-    
+
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
 
@@ -85,10 +86,18 @@ export async function PATCH(
         name: data.name,
         color: data.color,
         icon: data.icon !== undefined ? data.icon : undefined,
-        isEnableInSkillTree: data.isEnableInSkillTree !== undefined ? data.isEnableInSkillTree : undefined,
-        spellGroupId: data.spellGroupId !== undefined ? (data.spellGroupId || null) : undefined,
+        isEnableInSkillTree:
+          data.isEnableInSkillTree !== undefined
+            ? data.isEnableInSkillTree
+            : undefined,
+        spellGroupId:
+          data.spellGroupId !== undefined
+            ? data.spellGroupId || null
+            : undefined,
       },
     });
+
+    revalidateTag(`main-skills-${id}`, "max");
 
     return NextResponse.json(updatedMainSkill);
   } catch (error) {
@@ -100,18 +109,18 @@ export async function PATCH(
 
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function DELETE(
   request: Request,
-  { params }: { params: Promise<{ id: string; mainSkillId: string }> }
+  { params }: { params: Promise<{ id: string; mainSkillId: string }> },
 ) {
   try {
     const { id, mainSkillId } = await params;
-    
+
     // Перевіряємо права DM
     const accessResult = await requireDM(id);
 
@@ -133,13 +142,15 @@ export async function DELETE(
       where: { id: mainSkillId },
     });
 
+    revalidateTag(`main-skills-${id}`, "max");
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting main skill:", error);
 
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

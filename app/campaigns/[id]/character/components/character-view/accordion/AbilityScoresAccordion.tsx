@@ -1,13 +1,13 @@
 "use client";
 
+import { noopAbilitySetters } from "../constants";
+
 import { CharacterAbilityScores } from "@/components/characters/stats/CharacterAbilityScores";
 import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-
-import { noopAbilitySetters } from "../constants";
 
 export interface AbilityScoresAccordionProps {
   abilityScores: Record<string, unknown>;

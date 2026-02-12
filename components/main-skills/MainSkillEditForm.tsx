@@ -16,11 +16,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useUpdateMainSkill } from "@/lib/hooks/useMainSkills";
 import { getSpellGroups } from "@/lib/api/spells";
-import type { SpellGroup } from "@/types/spells";
+import { useUpdateMainSkill } from "@/lib/hooks/useMainSkills";
 import type { MainSkill } from "@/types/main-skills";
 import type { MainSkillFormData } from "@/types/main-skills";
+import type { SpellGroup } from "@/types/spells";
 
 interface MainSkillEditFormProps {
   campaignId: string;

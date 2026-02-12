@@ -108,7 +108,9 @@ function addPrerequisites(skills: MainSkill["levels"]): MainSkill["levels"] {
 /** Створює один MainSkill у форматі дерева з даних API (для додавання відсутніх секторів раси). */
 export function createMainSkillFromApi(ms: MainSkillType): MainSkill {
   const skills = generateSkillsForMainSkill(ms.id, ms.name);
+
   const skillsWithPrerequisites = addPrerequisites(skills);
+
   return {
     id: ms.id,
     name: ms.name,
@@ -141,6 +143,7 @@ export function createMockSkillTree(
   ];
   
   const skillsToUse = mainSkillsData || defaultMainSkills;
+
   // Завжди додаємо расовий навик, якщо його немає в списку (для 3 кіл на сторінці skill tree)
   const skillsWithRacial =
     skillsToUse.some((ms) => ms.id === "racial")
@@ -208,10 +211,12 @@ export function convertPrismaToSkillTree(prismaTree: {
     if ((skillsData as SkillTree).mainSkills) {
       return skillsData as SkillTree;
     }
+
     const data = skillsData as {
       mainSkills?: SkillTree["mainSkills"];
       ultimateSkill?: SkillTree["ultimateSkill"];
     };
+
     if (data.mainSkills) {
       return {
         id: prismaTree.id,
@@ -233,5 +238,6 @@ export function convertPrismaToSkillTree(prismaTree: {
   } catch (error) {
     console.error("Error converting skill tree:", error);
   }
+
   return null;
 }

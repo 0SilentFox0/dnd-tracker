@@ -11,6 +11,7 @@ export function useAppearanceSave(
   initialValue: string
 ) {
   const [value, setValue] = useState(initialValue);
+
   const [saving, setSaving] = useState(false);
 
   const save = async () => {
@@ -20,11 +21,13 @@ export function useAppearanceSave(
         type === "skill"
           ? `/api/campaigns/${campaignId}/skills/${entityId}`
           : `/api/campaigns/${campaignId}/spells/${entityId}`;
+
       const res = await fetch(path, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ appearanceDescription: value || null }),
       });
+
       if (!res.ok) throw new Error("Не вдалося зберегти");
     } finally {
       setSaving(false);

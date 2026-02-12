@@ -80,7 +80,9 @@ export function ParticipantStats({
             )
             .map(([level, slot]) => {
               const filled = slot.current;
+
               const empty = Math.max(0, slot.max - slot.current);
+
               const label = level === "universal" ? "Унів." : `Рів.${level}`;
 
               return (

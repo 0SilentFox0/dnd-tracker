@@ -26,6 +26,7 @@ export function LabeledInput({
   ...inputProps
 }: LabeledInputProps) {
   const inputId = id || `input-${label.toLowerCase().replace(/\s+/g, "-")}`;
+
   const readOnly = useReadOnly();
 
   return (

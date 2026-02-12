@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+
 import type { BattleParticipant } from "@/types/battle";
 
 /**
@@ -9,7 +10,9 @@ import type { BattleParticipant } from "@/types/battle";
  */
 export function useBattlePageDialogs() {
   const [logPanelOpen, setLogPanelOpen] = useState(false);
+
   const [addParticipantDialogOpen, setAddParticipantDialogOpen] = useState(false);
+
   const [hpDialogParticipant, setHpDialogParticipant] =
     useState<BattleParticipant | null>(null);
 

@@ -156,6 +156,10 @@ export function SpellDialog({
 
   const spellSlots = caster.spellcasting.spellSlots || {};
 
+  const universalSlot = spellSlots.universal;
+
+  const isUnit = caster.basicInfo.sourceType === "unit";
+
   const selectedSpell = spells.find((s) => s.id === selectedSpellId);
 
   // Для "target" — лише одна ціль; при зміні типу заклинання обмежуємо вибір
@@ -276,11 +280,16 @@ export function SpellDialog({
             <Label>Магічні слоти</Label>
             <div className="mt-2 space-y-2">
               {Object.entries(spellSlots)
-                .sort(([a], [b]) => Number(a) - Number(b))
+                .sort(([a], [b]) =>
+                  a === "universal" ? -1 : b === "universal" ? 1 : Number(a) - Number(b),
+                )
                 .map(([level, slot]) => {
                   const filled = slot.current;
 
                   const empty = Math.max(0, slot.max - slot.current);
+
+                  const levelLabel =
+                    level === "universal" ? "Універсальні" : `Рівень ${level}`;
 
                   return (
                     <div
@@ -288,11 +297,11 @@ export function SpellDialog({
                       className="flex flex-wrap items-center gap-2 text-sm"
                     >
                       <span className="text-muted-foreground w-16 shrink-0">
-                        Рівень {level}:
+                        {levelLabel}:
                       </span>
                       <div
                         className="flex gap-1"
-                        aria-label={`Рівень ${level}: ${filled} доступних, ${empty} використаних`}
+                        aria-label={`${levelLabel}: ${filled} доступних, ${empty} використаних`}
                       >
                         {Array.from({ length: filled }).map((_, i) => (
                           <span
@@ -357,7 +366,9 @@ export function SpellDialog({
                     {groupSpells.map((spell) => {
                       const slot = spellSlots[spell.level.toString()];
 
-                      const isAvailable = slot && slot.current > 0;
+                      const isAvailable = isUnit
+                        ? (universalSlot?.current ?? 0) > 0
+                        : Boolean(slot && slot.current > 0);
 
                       const typeLabel =
                         spell.type === "aoe"

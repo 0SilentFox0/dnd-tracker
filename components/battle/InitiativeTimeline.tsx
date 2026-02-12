@@ -1,8 +1,8 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, ChevronUp, Skull } from "lucide-react";
-import { useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import type { BattleScene } from "@/types/api";
@@ -32,6 +32,7 @@ export function InitiativeTimeline({
     }> = [];
 
     const currentRound = battle.currentRound;
+
     const livingInitiativeOrder = battle.initiativeOrder.filter(
       (p) =>
         p.combatStats?.status !== "dead" &&
@@ -40,6 +41,7 @@ export function InitiativeTimeline({
 
     const currentParticipantId =
       battle.initiativeOrder[battle.currentTurnIndex]?.basicInfo?.id;
+
     const livingCurrentTurnIndex = Math.max(
       0,
       livingInitiativeOrder.findIndex(
@@ -50,6 +52,7 @@ export function InitiativeTimeline({
     // Генеруємо дані для наступних roundsToShow раундів
     for (let roundOffset = 0; roundOffset < roundsToShow; roundOffset++) {
       const round = currentRound + roundOffset;
+
       const participants: Array<{
         participant: BattleParticipant;
         index: number;
@@ -149,8 +152,10 @@ export function InitiativeTimeline({
                               participant.basicInfo?.id ===
                                 currentParticipantId &&
                               roundData.round === battle.currentRound;
+
                             const isDead =
                               participant.combatStats?.status === "dead";
+
                             const isUnconscious =
                               participant.combatStats?.status === "unconscious";
 

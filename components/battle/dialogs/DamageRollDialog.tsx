@@ -29,10 +29,13 @@ interface DamageRollDialogProps {
  */
 function getDiceSlots(formula: string): number[] {
   const groups = parseDiceNotationToGroups(formula);
+
   const slots: number[] = [];
+
   for (const g of groups) {
     for (let i = 0; i < g.count; i++) slots.push(g.sides);
   }
+
   return slots;
 }
 
@@ -49,12 +52,15 @@ export function DamageRollDialog({
 }: DamageRollDialogProps) {
   const diceSlots = useMemo(() => {
     const formula = damageDiceFormula?.trim() || attack.damageDice?.trim();
+
     if (!formula) return [6];
+
     return getDiceSlots(formula);
   }, [damageDiceFormula, attack.damageDice]);
 
   const displayFormula =
     damageDiceFormula?.trim() || attack.damageDice?.trim() || "1d6";
+
   const diceCount = diceSlots.length;
 
   const [damageRolls, setDamageRolls] = useState<string[]>(
@@ -63,6 +69,7 @@ export function DamageRollDialog({
 
   const handleRollChange = (index: number, value: string) => {
     const newRolls = [...damageRolls];
+
     newRolls[index] = value;
     setDamageRolls(newRolls);
   };
@@ -98,6 +105,7 @@ export function DamageRollDialog({
           <div className="space-y-2">
             {damageRolls.map((roll, index) => {
               const sides = diceSlots[index];
+
               return (
                 <div key={index}>
                   <Label>
@@ -134,7 +142,9 @@ export function DamageRollDialog({
                 damageRolls.length !== diceCount ||
                 damageRolls.some((roll, i) => {
                   const n = parseInt(roll, 10);
+
                   const max = diceSlots[i];
+
                   return !roll || Number.isNaN(n) || n < 1 || n > max;
                 })
               }

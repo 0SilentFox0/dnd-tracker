@@ -5,6 +5,10 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { BattleSpell,processSpell } from "@/lib/utils/battle/battle-spell-process";
+import {
+  preparePusherPayload,
+  stripStateBeforeForClient,
+} from "@/lib/utils/battle/strip-battle-payload";
 import { BattleAction,BattleParticipant } from "@/types/battle";
 
 const spellSchema = z.object({
@@ -39,6 +43,7 @@ export async function POST(
     }
 
     const { userId } = accessResult;
+
     const isDM = accessResult.campaign.members[0]?.role === "dm";
 
     const battle = await prisma.battleScene.findUnique({
@@ -73,6 +78,7 @@ export async function POST(
     }
 
     const currentParticipant = initiativeOrder[battle.currentTurnIndex];
+
     const canCast =
       isDM ||
       (currentParticipant?.basicInfo.id === caster.basicInfo.id &&
@@ -116,6 +122,7 @@ export async function POST(
     // Перевіряємо чи кастер може використати заклинання (action або bonus action)
     const isBonusActionSpell =
       spellData.castingTime?.toLowerCase().includes("bonus") ?? false;
+
     if (isBonusActionSpell) {
       if (caster.actionFlags.hasUsedBonusAction) {
         return NextResponse.json(
@@ -227,11 +234,15 @@ export async function POST(
       const { pusherServer } = await import("@/lib/pusher");
 
       void pusherServer
-        .trigger(`battle-${battleId}`, "battle-updated", updatedBattle)
+        .trigger(
+          `battle-${battleId}`,
+          "battle-updated",
+          preparePusherPayload(updatedBattle),
+        )
         .catch((err) => console.error("Pusher trigger failed:", err));
     }
 
-    return NextResponse.json(updatedBattle);
+    return NextResponse.json(stripStateBeforeForClient(updatedBattle));
   } catch (error) {
     console.error("Error processing spell:", error);
 

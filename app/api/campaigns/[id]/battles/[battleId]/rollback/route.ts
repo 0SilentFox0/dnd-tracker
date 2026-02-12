@@ -4,6 +4,10 @@ import { z } from "zod";
 
 import { prisma } from "@/lib/db";
 import { requireDM } from "@/lib/utils/api/api-auth";
+import {
+  preparePusherPayload,
+  stripStateBeforeForClient,
+} from "@/lib/utils/battle/strip-battle-payload";
 import { BattleAction } from "@/types/battle";
 
 const rollbackSchema = z.object({
@@ -36,9 +40,11 @@ export async function POST(
     }
 
     const body = await request.json();
+
     const data = rollbackSchema.parse(body);
 
     const battleLog = (battle.battleLog as unknown as BattleAction[]) || [];
+
     const action = battleLog[data.actionIndex];
 
     if (!action) {
@@ -50,6 +56,7 @@ export async function POST(
 
     // Якщо у дії немає stateBefore (економія місця в next-turn), беремо з останньої попередньої дії
     let stateBefore = action.stateBefore;
+
     if (!stateBefore) {
       for (let i = data.actionIndex - 1; i >= 0; i--) {
         if (battleLog[i].stateBefore) {
@@ -58,6 +65,7 @@ export async function POST(
         }
       }
     }
+
     if (!stateBefore) {
       return NextResponse.json(
         { error: "Cannot rollback: action has no saved state" },
@@ -83,6 +91,7 @@ export async function POST(
       currentRound: stateBefore.currentRound,
       battleLog: newBattleLog as unknown as Prisma.InputJsonValue,
     };
+
     if (battle.status === "completed") {
       updateData.status = "active";
       updateData.completedAt = null;
@@ -97,11 +106,15 @@ export async function POST(
       const { pusherServer } = await import("@/lib/pusher");
 
       void pusherServer
-        .trigger(`battle-${battleId}`, "battle-updated", updatedBattle)
+        .trigger(
+          `battle-${battleId}`,
+          "battle-updated",
+          preparePusherPayload(updatedBattle),
+        )
         .catch((err) => console.error("Pusher trigger failed:", err));
     }
 
-    return NextResponse.json(updatedBattle);
+    return NextResponse.json(stripStateBeforeForClient(updatedBattle));
   } catch (error) {
     console.error("Error rolling back battle action:", error);
 

@@ -42,14 +42,21 @@ export function getCanonicalMainSkillName(
 ): string {
   if (mainSkillFromSkill?.trim()) {
     const alias = MAIN_SKILL_ALIASES[mainSkillFromSkill.trim()];
+
     if (alias) return alias;
+
     if (MAIN_SKILL_NAMES.has(mainSkillFromSkill.trim()))
       return mainSkillFromSkill.trim();
   }
+
   const byCategory = MAIN_SKILL_BY_CATEGORY[categoryOrAlias];
+
   if (byCategory) return byCategory;
+
   const byAlias = MAIN_SKILL_ALIASES[categoryOrAlias];
+
   if (byAlias) return byAlias;
+
   return categoryOrAlias;
 }
 
@@ -58,5 +65,6 @@ export function getMainSkillNameVariants(canonicalName: string): string[] {
   const aliases = Object.entries(MAIN_SKILL_ALIASES)
     .filter(([, v]) => v === canonicalName)
     .map(([k]) => k);
+
   return [canonicalName, ...aliases];
 }

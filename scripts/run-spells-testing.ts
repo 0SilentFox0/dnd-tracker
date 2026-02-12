@@ -475,8 +475,10 @@ interface RunResult {
 
 /** Ефективна швидкість з урахуванням activeEffects (speed ±X%) */
 function getEffectiveSpeed(p: BattleParticipant): number {
-  let speed = p.combatStats.speed;
+  const speed = p.combatStats.speed;
+
   let percentMod = 0;
+
   for (const ae of p.battleData?.activeEffects ?? []) {
     for (const d of ae.effects ?? []) {
       if (d.type === "speed" && typeof d.value === "number" && d.isPercentage) {
@@ -484,12 +486,14 @@ function getEffectiveSpeed(p: BattleParticipant): number {
       }
     }
   }
+
   return Math.max(0, Math.floor(speed * (1 + percentMod / 100)));
 }
 
 /** Ефективна мораль з урахуванням activeEffects */
 function getEffectiveMorale(p: BattleParticipant): number {
   let morale = p.combatStats.morale ?? 0;
+
   for (const ae of p.battleData?.activeEffects ?? []) {
     for (const d of ae.effects ?? []) {
       if (d.type === "morale" && typeof d.value === "number") {
@@ -497,19 +501,26 @@ function getEffectiveMorale(p: BattleParticipant): number {
       }
     }
   }
+
   return morale;
 }
 
 function getParticipantStats(p: BattleParticipant): ParticipantFullStats {
   const buffs: string[] = [];
+
   const debuffs: string[] = [];
+
   const effects: string[] = [];
+
   for (const e of p.battleData?.activeEffects ?? []) {
     const label = e.name;
+
     if (e.type === "buff") buffs.push(label);
     else debuffs.push(label);
+
     effects.push(`${label}(${e.type},D${e.duration ?? 0})`);
   }
+
   return {
     hp: p.combatStats.currentHp,
     maxHp: p.combatStats.maxHp,
@@ -989,12 +1000,16 @@ async function main() {
 
         for (const ts of r.targetStats ?? []) {
           const b = ts.before;
+
           const d = ts.after;
 
           const fmt = (val: number, prev: number, pct = false) => {
             const dlt = val - prev;
+
             if (dlt === 0) return `${val}`;
+
             const sign = dlt > 0 ? "+" : "";
+
             return pct ? `${val} (${sign}${dlt}%)` : `${val} (${sign}${dlt})`;
           };
 
@@ -1005,6 +1020,7 @@ async function main() {
           console.log(`        ПІСЛЯ: HP ${fmt(d.hp, b.hp)}/${d.maxHp} | Speed ${fmt(d.speed, b.speed)} | Init ${fmt(d.initiative, b.initiative)} | AC ${fmt(d.ac, b.ac)} | Bonus action: ${d.bonusAction}${d.bonusAction !== b.bonusAction ? ` (${b.bonusAction})` : ""} | Morale: ${fmt(d.morale, b.morale)}`);
           console.log(`        Buff: [${d.buffs.join(", ") || "—"}]`);
           console.log(`        Debuff: [${d.debuffs.join(", ") || "—"}]`);
+
           if (ts.effectsRemoved?.length) {
             console.log(`        Знято: [${ts.effectsRemoved.join(", ")}]`);
           }

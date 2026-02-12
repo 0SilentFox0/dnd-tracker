@@ -5,6 +5,10 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { checkVictoryConditions,completeBattle } from "@/lib/utils/battle/battle-victory";
+import {
+  preparePusherPayload,
+  stripStateBeforeForClient,
+} from "@/lib/utils/battle/strip-battle-payload";
 import { BattleAction,BattleParticipant } from "@/types/battle";
 
 const completeBattleSchema = z.object({
@@ -106,15 +110,17 @@ export async function POST(
     if (process.env.PUSHER_APP_ID) {
       const { pusherServer } = await import("@/lib/pusher");
 
+      const pusherPayload = preparePusherPayload(updatedBattle);
+
       void pusherServer
-        .trigger(`battle-${battleId}`, "battle-completed", updatedBattle)
+        .trigger(`battle-${battleId}`, "battle-completed", pusherPayload)
         .catch((err) => console.error("Pusher trigger failed:", err));
       void pusherServer
-        .trigger(`battle-${battleId}`, "battle-updated", updatedBattle)
+        .trigger(`battle-${battleId}`, "battle-updated", pusherPayload)
         .catch((err) => console.error("Pusher trigger failed:", err));
     }
 
-    return NextResponse.json(updatedBattle);
+    return NextResponse.json(stripStateBeforeForClient(updatedBattle));
   } catch (error) {
     console.error("Error completing battle:", error);
 

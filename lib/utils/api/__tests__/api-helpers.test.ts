@@ -1,5 +1,6 @@
-import { describe, it, expect, vi } from "vitest";
-import { getCampaignId, getCampaignApiUrl } from "../api-helpers";
+import { describe, expect, it, vi } from "vitest";
+
+import { getCampaignApiUrl,getCampaignId } from "../api-helpers";
 
 vi.mock("@/lib/constants/campaigns", () => ({
   DEFAULT_CAMPAIGN_ID: "default-campaign-id",

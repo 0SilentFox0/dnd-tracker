@@ -38,6 +38,7 @@ export function CharacterSpellbookDialog({
 
     for (const spell of spells) {
       const groupId = spell.spellGroup?.id ?? "__none__";
+
       const groupName = spell.spellGroup?.name ?? "Інші заклинання";
 
       if (!groups.has(groupId)) {
@@ -59,6 +60,7 @@ export function CharacterSpellbookDialog({
       .map((g) => ({ groupName: g.name, spells: g.spells }))
       .sort((a, b) => {
         if (a.groupName === "Інші заклинання") return 1;
+
         if (b.groupName === "Інші заклинання") return -1;
 
         return a.groupName.localeCompare(b.groupName);

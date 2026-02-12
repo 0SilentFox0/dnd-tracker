@@ -1,5 +1,7 @@
 "use client";
 
+import type { AllyStats, Difficulty, SuggestedEnemy } from "./types";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,8 +12,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-import type { AllyStats, Difficulty, SuggestedEnemy } from "./types";
 
 interface AutopickCardProps {
   hasAllies: boolean;
@@ -53,6 +53,7 @@ export function AutopickCard({
   const totalSuggestedDpr = Math.round(
     suggestedEnemies.reduce((sum, s) => sum + s.totalDpr, 0) * 10,
   ) / 10;
+
   const totalSuggestedHp = suggestedEnemies.reduce(
     (sum, s) => sum + s.totalHp,
     0,

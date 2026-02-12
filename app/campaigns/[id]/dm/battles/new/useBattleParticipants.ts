@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useCallback,useState } from "react";
 
 import type { Participant } from "./types";
 
@@ -17,6 +17,7 @@ export function useBattleParticipants() {
         if (checked) {
           return [...prev, { id: participantId, type, side: "ally" as const }];
         }
+
         return prev.filter((p) => p.id !== participantId);
       });
     },
@@ -42,6 +43,7 @@ export function useBattleParticipants() {
     ) => {
       setParticipants((prev) => {
         const existing = prev.find((p) => p.id === participantId);
+
         if (existing) {
           return prev.map((p) =>
             p.id === participantId
@@ -55,6 +57,7 @@ export function useBattleParticipants() {
               : p,
           );
         }
+
         return [
           ...prev,
           {

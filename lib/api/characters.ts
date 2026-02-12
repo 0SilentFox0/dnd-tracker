@@ -29,6 +29,7 @@ export async function getCharacters(
   opts?: { type?: "player" | "npc_hero" }
 ): Promise<Character[]> {
   const params = opts?.type ? `?type=${opts.type}` : "";
+
   const response = await fetch(
     `/api/campaigns/${campaignId}/characters${params}`
   );

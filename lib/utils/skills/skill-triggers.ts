@@ -152,6 +152,7 @@ function evaluateComplexTrigger(
 
     // Перевіряємо умову
     let conditionMet = false;
+
     const compareValue = value;
 
     switch (operator) {
@@ -190,17 +191,20 @@ export function checkTriggerModifiers(
   skillUsageCounts?: Record<string, number>,
 ): boolean {
   const modifiers = trigger.modifiers;
+
   if (!modifiers) return true;
 
   // Перевірка oncePerBattle
   if (modifiers.oncePerBattle && skillUsageCounts) {
     const used = skillUsageCounts[skillId] ?? 0;
+
     if (used >= 1) return false;
   }
 
   // Перевірка twicePerBattle
   if (modifiers.twicePerBattle && skillUsageCounts) {
     const used = skillUsageCounts[skillId] ?? 0;
+
     if (used >= 2) return false;
   }
 
@@ -251,7 +255,9 @@ export function getSkillsByTrigger(
           ...context,
           allParticipants,
         });
+
         if (!triggerOk) return false;
+
         // Перевіряємо модифікатори
         return checkTriggerModifiers(trigger, skill.skillId, skillUsageCounts);
       } else if (trigger.type === "complex") {
@@ -260,7 +266,9 @@ export function getSkillsByTrigger(
           ...context,
           allParticipants,
         });
+
         if (!triggerOk) return false;
+
         return checkTriggerModifiers(trigger, skill.skillId, skillUsageCounts);
       }
 

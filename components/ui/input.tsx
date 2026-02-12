@@ -13,6 +13,7 @@ function Input({
   ...props
 }: React.ComponentProps<"input">) {
   const readOnlyContext = useReadOnly();
+
   const readOnly = readOnlyProp ?? readOnlyContext;
 
   if (readOnly) {
@@ -20,6 +21,7 @@ function Input({
       value !== undefined && value !== null
         ? String(value)
         : (props.defaultValue != null ? String(props.defaultValue) : "");
+
     return (
       <span
         data-slot="input"

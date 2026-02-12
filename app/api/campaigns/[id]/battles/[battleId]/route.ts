@@ -5,6 +5,7 @@ import {
   requireCampaignAccess,
   requireDM,
 } from "@/lib/utils/api/api-auth";
+import { stripStateBeforeForClient } from "@/lib/utils/battle/strip-battle-payload";
 
 export async function GET(
   request: Request,
@@ -33,9 +34,10 @@ export async function GET(
     }
 
     const userRole = accessResult.campaign.members[0]?.role || "player";
+
     const isDM = userRole === "dm";
 
-    return NextResponse.json({
+    const payload = stripStateBeforeForClient({
       ...battle,
       campaign: {
         id: battle.campaign.id,
@@ -44,6 +46,8 @@ export async function GET(
       userRole,
       isDM,
     });
+
+    return NextResponse.json(payload);
   } catch (error) {
     console.error("Error fetching battle:", error);
 
@@ -82,7 +86,7 @@ export async function PATCH(
       data: body,
     });
 
-    return NextResponse.json(updatedBattle);
+    return NextResponse.json(stripStateBeforeForClient(updatedBattle));
   } catch (error) {
     console.error("Error updating battle:", error);
 

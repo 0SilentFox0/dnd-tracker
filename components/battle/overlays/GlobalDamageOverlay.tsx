@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+
 import { cn } from "@/lib/utils";
 
 interface GlobalDamageOverlayProps {
@@ -27,6 +28,7 @@ export function GlobalDamageOverlay({
       setVisible(false);
       onDone?.();
     }, durationMs);
+
     return () => clearTimeout(t);
   }, [durationMs, onDone]);
 

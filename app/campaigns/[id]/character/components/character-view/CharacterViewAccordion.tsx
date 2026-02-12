@@ -8,6 +8,7 @@ import {
   CombatParamsAccordion,
   SkillsAccordion,
 } from "./accordion";
+
 import { Accordion } from "@/components/ui/accordion";
 import { Card, CardContent } from "@/components/ui/card";
 import type { SkillTreeProgress } from "@/lib/hooks/useCharacterView";

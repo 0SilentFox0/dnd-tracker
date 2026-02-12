@@ -1,3 +1,4 @@
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
@@ -123,6 +124,8 @@ export async function PATCH(
       },
     });
 
+    revalidateTag(`races-${id}`, "max");
+
     return NextResponse.json(updatedRace);
   } catch (error) {
     console.error("Error updating race:", error);
@@ -171,6 +174,8 @@ export async function DELETE(
         id: raceId,
       },
     });
+
+    revalidateTag(`races-${id}`, "max");
 
     return NextResponse.json({ success: true });
   } catch (error) {

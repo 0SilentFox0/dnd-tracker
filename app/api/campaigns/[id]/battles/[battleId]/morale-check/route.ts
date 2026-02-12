@@ -5,6 +5,10 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { checkMorale } from "@/lib/utils/battle/battle-morale";
+import {
+  preparePusherPayload,
+  stripStateBeforeForClient,
+} from "@/lib/utils/battle/strip-battle-payload";
 import { executeSkillsByTrigger } from "@/lib/utils/skills/skill-triggers-execution";
 import { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -62,8 +66,10 @@ export async function POST(
 
     // Дозволяємо DM або гравцю, який контролює цього учасника
     const isDM = accessResult.campaign.members[0]?.role === "dm";
+
     const isController =
       participant.basicInfo.controlledBy === accessResult.userId;
+
     if (!isDM && !isController) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
@@ -97,12 +103,15 @@ export async function POST(
 
     // Тригери скілів: onMoraleSuccess для учасника, allyMoraleCheck для союзників
     const triggerMessages: string[] = [];
+
     const moraleSuccess =
       moraleResult.hasExtraTurn || !moraleResult.shouldSkipTurn;
+
     if (moraleSuccess) {
       const participantIdx = updatedInitiativeOrder.findIndex(
         (p) => p.basicInfo.id === participant.basicInfo.id,
       );
+
       if (participantIdx >= 0) {
         const result = executeSkillsByTrigger(
           updatedInitiativeOrder[participantIdx],
@@ -110,22 +119,26 @@ export async function POST(
           updatedInitiativeOrder,
           { currentRound: battle.currentRound },
         );
+
         triggerMessages.push(...result.messages);
         updatedInitiativeOrder = updatedInitiativeOrder.map((p, i) =>
           i === participantIdx ? result.participant : p,
         );
       }
     }
+
     // allyMoraleCheck для союзників
     const allies = updatedInitiativeOrder.filter(
       (p) =>
         p.basicInfo.side === participant.basicInfo.side &&
         p.basicInfo.id !== participant.basicInfo.id,
     );
+
     for (const ally of allies) {
       const allyIdx = updatedInitiativeOrder.findIndex(
         (p) => p.basicInfo.id === ally.basicInfo.id,
       );
+
       if (allyIdx >= 0) {
         const result = executeSkillsByTrigger(
           updatedInitiativeOrder[allyIdx],
@@ -133,6 +146,7 @@ export async function POST(
           updatedInitiativeOrder,
           { currentRound: battle.currentRound },
         );
+
         triggerMessages.push(...result.messages);
         updatedInitiativeOrder = updatedInitiativeOrder.map((p, i) =>
           i === allyIdx ? result.participant : p,
@@ -191,12 +205,16 @@ export async function POST(
       const { pusherServer } = await import("@/lib/pusher");
 
       void pusherServer
-        .trigger(`battle-${battleId}`, "battle-updated", updatedBattle)
+        .trigger(
+          `battle-${battleId}`,
+          "battle-updated",
+          preparePusherPayload(updatedBattle),
+        )
         .catch((err) => console.error("Pusher trigger failed:", err));
     }
 
     return NextResponse.json({
-      battle: updatedBattle,
+      battle: stripStateBeforeForClient(updatedBattle),
       moraleResult,
     });
   } catch (error) {

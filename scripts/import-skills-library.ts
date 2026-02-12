@@ -86,27 +86,39 @@ export function loadSkillsFromDoc(docPath: string): LibrarySkill[] {
   const fullPath = path.isAbsolute(docPath)
     ? docPath
     : path.join(process.cwd(), docPath);
+
   const raw = fs.readFileSync(fullPath, "utf-8");
+
   const jsonStart = raw.indexOf("{");
+
   if (jsonStart === -1) throw new Error("No JSON object in file");
+
   let depth = 0;
+
   let end = jsonStart;
+
   for (let i = jsonStart; i < raw.length; i++) {
     if (raw[i] === "{") depth++;
     else if (raw[i] === "}") {
       depth--;
+
       if (depth === 0) {
         end = i + 1;
         break;
       }
     }
   }
+
   const jsonOnly = raw.slice(jsonStart, end);
+
   const jsonStr = stripJsonComments(jsonOnly);
+
   const data = JSON.parse(jsonStr) as SkillsDoc;
+
   if (!Array.isArray(data.skills)) {
     throw new Error("Invalid SKILLS.md: missing or invalid skills array");
   }
+
   return data.skills;
 }
 
@@ -114,14 +126,17 @@ export function loadSkillsFromDoc(docPath: string): LibrarySkill[] {
 
 function effectsToBonuses(effects: LibraryEffect[]): Record<string, number> {
   const bonuses: Record<string, number> = {};
+
   for (const e of effects) {
     if (e.type === "percent" && typeof e.value === "number") {
       bonuses[e.stat] = e.value;
     }
+
     if (e.type === "flat" && typeof e.value === "number") {
       bonuses[`${e.stat}_flat`] = e.value;
     }
   }
+
   return bonuses;
 }
 
@@ -171,10 +186,13 @@ const TRIGGER_ALIASES: Record<string, string> = {
 
 function resolveSimpleTrigger(token: string): string | null {
   const lower = token.toLowerCase().trim();
+
   // Прямий маппінг
   if (TRIGGER_ALIASES[lower]) return TRIGGER_ALIASES[lower];
+
   // Пошук серед усіх тригерів (case-insensitive)
   const found = ALL_SIMPLE_TRIGGERS.find(t => t.toLowerCase() === lower);
+
   return found ?? null;
 }
 
@@ -185,6 +203,7 @@ function resolveSimpleTrigger(token: string): string | null {
  */
 function parseModifiers(tokens: string[]): SkillTriggerModifiers | undefined {
   const mods: SkillTriggerModifiers = {};
+
   let hasAny = false;
 
   for (const token of tokens) {
@@ -192,6 +211,7 @@ function parseModifiers(tokens: string[]): SkillTriggerModifiers | undefined {
 
     // rand() < 0.4 або rand()<0.5
     const randMatch = token.match(/rand\(\)\s*<\s*([\d.]+)/i);
+
     if (randMatch) {
       mods.probability = parseFloat(randMatch[1]);
       hasAny = true;
@@ -234,12 +254,17 @@ function parseModifiers(tokens: string[]): SkillTriggerModifiers | undefined {
 function tryParseComplexCondition(token: string): ComplexTrigger | null {
   // "allyHP <= 0.15" або "allyHP <= 0.15 * maxHP"
   const match = token.match(/^(ally|enemy)(HP|Morale|AC|Speed|Attack|Level)\s*(<=|>=|<|>|=)\s*([\d.]+)\s*(\*\s*\w+)?$/i);
+
   if (!match) return null;
 
   const targetStr = match[1].toLowerCase();
+
   const stat = match[2];
+
   const operator = match[3];
+
   const value = parseFloat(match[4]);
+
   const hasMultiplier = !!match[5]; // "* maxHP" means it's percent
 
   return {
@@ -267,30 +292,38 @@ function tryParseComplexCondition(token: string): ComplexTrigger | null {
  */
 export function triggerStringToSkillTriggers(triggerStr: string): ParsedTrigger[] {
   const normalized = triggerStr.trim();
+
   if (!normalized) return [];
 
   // Спочатку перевіряємо OR (||) — створюємо кілька тригерів
   if (normalized.includes("||")) {
     const parts = normalized.split(/\s*\|\|\s*/);
+
     const results: ParsedTrigger[] = [];
+
     for (const part of parts) {
       results.push(...triggerStringToSkillTriggers(part.trim()));
     }
+
     return results;
   }
 
   // Розбиваємо по && на токени
   const tokens = normalized.split(/\s*&&\s*/).map(t => t.trim()).filter(Boolean);
+
   if (tokens.length === 0) return [];
 
   // Шукаємо основний тригер (перший відомий)
   let mainTrigger: string | null = null;
+
   const modifierTokens: string[] = [];
+
   let complexTrigger: ComplexTrigger | null = null;
 
   for (const token of tokens) {
     // Спробувати як простий тригер
     const simple = resolveSimpleTrigger(token);
+
     if (simple && !mainTrigger) {
       mainTrigger = simple;
       continue;
@@ -304,6 +337,7 @@ export function triggerStringToSkillTriggers(triggerStr: string): ParsedTrigger[
 
     // Спробувати як складну умову
     const complex = tryParseComplexCondition(token);
+
     if (complex) {
       complexTrigger = complex;
       continue;
@@ -320,10 +354,13 @@ export function triggerStringToSkillTriggers(triggerStr: string): ParsedTrigger[
     // Якщо є основний тригер passive — значить умова є додатковою
     if (mainTrigger === "passive") {
       complexTrigger.modifiers = modifiers;
+
       return [complexTrigger];
     }
+
     // Інакше складний тригер
     complexTrigger.modifiers = modifiers;
+
     return [complexTrigger];
   }
 
@@ -363,18 +400,23 @@ async function ensureMainSkill(
   mainSkillFromSkill?: string
 ): Promise<string | null> {
   const canonicalName = getCanonicalMainSkillName(category, mainSkillFromSkill);
+
   const nameVariants = getMainSkillNameVariants(canonicalName);
+
   let main = await prisma.mainSkill.findFirst({
     where: { campaignId, name: { in: nameVariants } },
   });
+
   if (main && main.name !== canonicalName) {
     const oldName = main.name;
+
     main = await prisma.mainSkill.update({
       where: { id: main.id },
       data: { name: canonicalName },
     });
     console.log(`  MainSkill: "${oldName}" → "${canonicalName}"`);
   }
+
   if (!main) {
     main = await prisma.mainSkill.create({
       data: {
@@ -385,6 +427,7 @@ async function ensureMainSkill(
     });
     console.log(`  MainSkill: ${canonicalName}`);
   }
+
   return main.id;
 }
 
@@ -439,6 +482,7 @@ function effectToHumanDescription(e: LibraryEffect): string {
   }
 
   let valueStr = "";
+
   if (e.type === "percent" && typeof e.value === "number") {
     valueStr = `+${e.value}%`;
   } else if (e.type === "flat" && typeof e.value === "number") {
@@ -489,6 +533,7 @@ async function upsertSkill(
   };
 
   const bonuses = effectsToBonuses(lib.effects);
+
   const skillTriggers = triggerStringToSkillTriggers(lib.trigger);
 
   // Логуємо тригери для дебагу
@@ -547,17 +592,20 @@ async function upsertSkill(
 
 async function main() {
   const campaignId = process.argv[2] || DEFAULT_CAMPAIGN_ID;
+
   const docPath = process.argv[3] || "docs/SKILLS.md";
 
   console.log("Campaign ID:", campaignId);
   console.log("Reading:", docPath);
 
   const skills = loadSkillsFromDoc(docPath);
+
   console.log(`Loaded ${skills.length} skills\n`);
 
   const campaign = await prisma.campaign.findUnique({
     where: { id: campaignId },
   });
+
   if (!campaign) {
     console.error("Campaign not found:", campaignId);
     process.exit(1);
@@ -572,12 +620,15 @@ async function main() {
       lib.category,
       lib.mainSkill
     );
+
     await upsertSkill(campaignId, mainSkillId, lib);
 
     // Збираємо статистику
     const triggers = triggerStringToSkillTriggers(lib.trigger);
+
     for (const t of triggers) {
       const key = t.type === "simple" ? t.trigger : "complex";
+
       triggerStats.set(key, (triggerStats.get(key) ?? 0) + 1);
     }
   }
@@ -588,31 +639,41 @@ async function main() {
     where: { campaignId },
     _count: { id: true },
   });
+
   const mainSkills = await prisma.mainSkill.findMany({
     where: { campaignId },
     select: { id: true, name: true },
   });
+
   const nameById = new Map(mainSkills.map((m) => [m.id, m.name]));
+
   console.log("\n--- Групування по базовим навикам ---");
+
   let total = 0;
+
   const sorted = byMain.sort((a, b) =>
     (a.mainSkillId ?? "").localeCompare(b.mainSkillId ?? "")
   );
+
   for (const g of sorted) {
     const name = g.mainSkillId
       ? nameById.get(g.mainSkillId) ?? "(невідомий id)"
       : "(без базового навику)";
+
     console.log(`  ${name}: ${g._count.id} скілів`);
     total += g._count.id;
   }
   console.log(`  Всього скілів у кампанії: ${total}`);
+
   if (total !== skills.length) {
     console.warn(`  Очікувалось з файлу: ${skills.length}`);
   }
 
   // Виводимо статистику тригерів
   console.log("\n--- Статистика тригерів ---");
+
   const sortedTriggers = [...triggerStats.entries()].sort((a, b) => b[1] - a[1]);
+
   for (const [trigger, count] of sortedTriggers) {
     console.log(`  ${trigger}: ${count} скілів`);
   }

@@ -1,7 +1,9 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect,it } from "vitest";
+
+import { evaluateSkillTrigger, getSkillsByTrigger } from "../skill-triggers";
+
 import { ParticipantSide } from "@/lib/constants/battle";
 import { SkillLevel } from "@/lib/types/skill-tree";
-import { evaluateSkillTrigger, getSkillsByTrigger } from "../skill-triggers";
 import type { ActiveSkill, BattleParticipant } from "@/types/battle";
 import type { SkillTrigger } from "@/types/skill-triggers";
 
@@ -64,7 +66,9 @@ describe("skill-triggers", () => {
   describe("evaluateSkillTrigger", () => {
     it("simple trigger startRound with currentRound in context", () => {
       const participant = createMockParticipant();
+
       const trigger: SkillTrigger = { type: "simple", trigger: "startRound" };
+
       expect(
         evaluateSkillTrigger(trigger, participant, { currentRound: 1 }),
       ).toBe(true);
@@ -75,7 +79,9 @@ describe("skill-triggers", () => {
 
     it("simple trigger bonusAction when not used", () => {
       const participant = createMockParticipant();
+
       const trigger: SkillTrigger = { type: "simple", trigger: "bonusAction" };
+
       expect(
         evaluateSkillTrigger(trigger, participant),
       ).toBe(true);
@@ -90,7 +96,9 @@ describe("skill-triggers", () => {
           hasExtraTurn: false,
         },
       });
+
       const trigger: SkillTrigger = { type: "simple", trigger: "bonusAction" };
+
       expect(
         evaluateSkillTrigger(trigger, participant),
       ).toBe(false);
@@ -98,7 +106,9 @@ describe("skill-triggers", () => {
 
     it("simple trigger afterOwnerAttack with isOwnerAction", () => {
       const participant = createMockParticipant();
+
       const trigger: SkillTrigger = { type: "simple", trigger: "afterOwnerAttack" };
+
       expect(
         evaluateSkillTrigger(trigger, participant, { isOwnerAction: true }),
       ).toBe(true);
@@ -117,6 +127,7 @@ describe("skill-triggers", () => {
       effects: [],
       skillTriggers: [{ type: "simple", trigger: "bonusAction" }],
     };
+
     const skillWithStartRound: ActiveSkill = {
       skillId: "s2",
       mainSkillId: "",
@@ -125,6 +136,7 @@ describe("skill-triggers", () => {
       effects: [],
       skillTriggers: [{ type: "simple", trigger: "startRound" }],
     };
+
     const skillNoTriggers: ActiveSkill = {
       skillId: "s3",
       mainSkillId: "",
@@ -144,6 +156,7 @@ describe("skill-triggers", () => {
           equippedArtifacts: [],
         },
       });
+
       const result = getSkillsByTrigger(
         participant.battleData.activeSkills,
         "bonusAction",
@@ -151,6 +164,7 @@ describe("skill-triggers", () => {
         [participant],
         { currentRound: 1 },
       );
+
       expect(result).toHaveLength(1);
       expect(result[0].skillId).toBe("s1");
     });
@@ -166,12 +180,14 @@ describe("skill-triggers", () => {
           equippedArtifacts: [],
         },
       });
+
       const result = getSkillsByTrigger(
         participant.battleData.activeSkills,
         "bonusAction",
         participant,
         [participant],
       );
+
       expect(result).toHaveLength(0);
     });
   });

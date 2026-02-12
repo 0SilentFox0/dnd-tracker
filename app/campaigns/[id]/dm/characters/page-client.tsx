@@ -25,6 +25,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { getHeroMaxHp } from "@/lib/constants/hero-scaling";
 import {
   useCharacters,
   useDeleteAllCharacters,
@@ -32,7 +33,6 @@ import {
 } from "@/lib/hooks/useCharacters";
 import { normalizeImageUrl } from "@/lib/utils/common/image-url";
 import type { Character } from "@/types/characters";
-import { getHeroMaxHp } from "@/lib/constants/hero-scaling";
 
 interface DMCharactersClientProps {
   campaignId: string;

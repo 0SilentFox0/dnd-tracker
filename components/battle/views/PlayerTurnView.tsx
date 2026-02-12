@@ -2,8 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { RollResultOverlay } from "@/components/battle/RollResultOverlay";
-import { ParticipantStats } from "@/components/battle/ParticipantStats";
 import { ActionButtonsPanel } from "@/components/battle/ActionButtonsPanel";
 import { AttackRollDialog } from "@/components/battle/dialogs/AttackRollDialog";
 import { DamageRollDialog } from "@/components/battle/dialogs/DamageRollDialog";
@@ -11,6 +9,8 @@ import { DamageSummaryModal } from "@/components/battle/dialogs/DamageSummaryMod
 import { MoraleCheckDialog } from "@/components/battle/dialogs/MoraleCheckDialog";
 import { SpellDialog } from "@/components/battle/dialogs/SpellDialog";
 import { TargetSelectionDialog } from "@/components/battle/dialogs/TargetSelectionDialog";
+import { ParticipantStats } from "@/components/battle/ParticipantStats";
+import { RollResultOverlay } from "@/components/battle/RollResultOverlay";
 import { TurnStartScreen } from "@/components/battle/views/TurnStartScreen";
 import { AttackType, BATTLE_RACE, CombatStatus } from "@/lib/constants/battle";
 import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
@@ -32,6 +32,7 @@ export function PlayerTurnView({
   onBonusAction,
   onSkipTurn,
   onMoraleCheck,
+  isNextTurnPending = false,
 }: PlayerTurnViewProps) {
   const [turnStarted, setTurnStarted] = useState(false);
 
@@ -104,20 +105,18 @@ export function PlayerTurnView({
     );
   }, [participant, battle.initiativeOrder, battle.currentRound]);
 
-  // Автоматичне завершення ходу, якщо не залишилося дій
+  // Автоматичне завершення ходу, якщо не залишилося дій (не запускати під час pending next-turn)
   useEffect(() => {
     if (
-      turnStarted &&
-      (participant.actionFlags.hasUsedAction || hasPerformedAction) &&
-      (participant.actionFlags.hasUsedBonusAction || bonusActions.length === 0)
+      isNextTurnPending ||
+      !turnStarted ||
+      (!participant.actionFlags.hasUsedAction && !hasPerformedAction) ||
+      (!participant.actionFlags.hasUsedBonusAction && bonusActions.length > 0)
     ) {
-      // Використовуємо setTimeout, щоб дати час на закриття останнього діалогу
-      const timer = setTimeout(() => {
-        onSkipTurn();
-      }, 1500);
-
-      return () => clearTimeout(timer);
+      return;
     }
+    const timer = setTimeout(() => onSkipTurn(), 1500);
+    return () => clearTimeout(timer);
   }, [
     participant.actionFlags.hasUsedAction,
     participant.actionFlags.hasUsedBonusAction,
@@ -125,6 +124,7 @@ export function PlayerTurnView({
     bonusActions.length,
     turnStarted,
     onSkipTurn,
+    isNextTurnPending,
   ]);
 
   // ... (handleStartTurn, handleMoraleCheckConfirm, etc. - keep unchanged)
@@ -146,6 +146,7 @@ export function PlayerTurnView({
     // Перевіряємо чи потрібна перевірка моралі
     if (participant.combatStats.morale !== 0) {
       const race = participant.abilities.race?.toLowerCase() ?? "";
+
       let currentMorale = participant.combatStats.morale;
 
       if (race === BATTLE_RACE.HUMAN && currentMorale < 0) {
@@ -228,19 +229,24 @@ export function PlayerTurnView({
     const d20 = data.advantageRoll
       ? Math.max(data.attackRoll, data.advantageRoll)
       : data.attackRoll;
+
     const isCrit = d20 === 20;
+
     const isCritFail = d20 === 1;
 
     // Розрахунок бонусу (дублюється з діалогу, варто винести в утиліту)
     const attackBonus = selectedAttack.attackBonus || 0;
+
     const statModifier =
       selectedAttack.type === AttackType.MELEE
         ? Math.floor((participant.abilities.strength - 10) / 2)
         : Math.floor((participant.abilities.dexterity - 10) / 2);
+
     const totalBonus =
       attackBonus + statModifier + participant.abilities.proficiencyBonus;
 
     const totalRoll = d20 + totalBonus;
+
     const targetAC = selectedTarget.combatStats.armorClass;
 
     if (isCrit) {
@@ -258,6 +264,7 @@ export function PlayerTurnView({
     if (!rollResult) return;
 
     const isHit = rollResult === "hit" || rollResult === "crit";
+
     const wasCrit = rollResult === "crit";
 
     // Скидаємо результат
@@ -379,6 +386,7 @@ export function PlayerTurnView({
         maxTargets={selectedAttack?.targetType === "aoe" ? selectedAttack.maxTargets : undefined}
         availableTargets={(() => {
           const friendlyFire = battle.campaign?.friendlyFire || false;
+
           const participantSide = participant.basicInfo.side;
 
           if (friendlyFire) {
@@ -471,8 +479,11 @@ export function PlayerTurnView({
             turnStarted &&
             (() => {
               const race = participant.abilities.race?.toLowerCase() ?? "";
+
               let currentMorale = participant.combatStats.morale;
+
               if (race === BATTLE_RACE.HUMAN && currentMorale < 0) currentMorale = 0;
+
               return (
                 participant.combatStats.morale !== 0 &&
                 race !== BATTLE_RACE.NECROMANCER &&

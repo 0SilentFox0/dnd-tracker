@@ -20,8 +20,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ARTIFACT_SLOT_OPTIONS } from "@/lib/constants/artifacts";
 import { getAuthUser } from "@/lib/auth";
+import { ARTIFACT_SLOT_OPTIONS } from "@/lib/constants/artifacts";
 import { prisma } from "@/lib/db";
 
 function formatSetBonus(setBonus: unknown): { title?: string; description: string } | null {
@@ -99,6 +99,7 @@ export default async function DMArtifactsPage({
   const artifactsBySlot = ARTIFACT_SLOT_OPTIONS.reduce(
     (acc, { value }) => {
       acc[value] = ungroupedArtifacts.filter((a) => a.slot === value);
+
       return acc;
     },
     {} as Record<string, typeof ungroupedArtifacts>,

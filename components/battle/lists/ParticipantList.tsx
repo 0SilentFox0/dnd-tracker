@@ -1,8 +1,8 @@
 "use client";
 
+import { ReactNode, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { ReactNode, useState } from "react";
 
 import { ParticipantCard } from "@/components/battle/cards/ParticipantCard";
 import { Button } from "@/components/ui/button";

@@ -1,8 +1,8 @@
 /**
  * @vitest-environment happy-dom
  */
-import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup, fireEvent } from "@testing-library/react";
+import { cleanup, fireEvent,render, screen } from "@testing-library/react";
+import { afterEach,describe, expect, it, vi } from "vitest";
 
 import { SkillEffectRow } from "@/components/skills/form/effects/SkillEffectRow";
 import type { SkillEffect } from "@/types/battle";
@@ -24,7 +24,9 @@ describe("SkillEffectRow", () => {
 
   it("рендерить лейбли Стат, Тип, Значення, Раунди, Разів", () => {
     const onUpdate = vi.fn();
+
     const onRemove = vi.fn();
+
     render(
       <SkillEffectRow
         effect={minimalEffect()}
@@ -42,7 +44,9 @@ describe("SkillEffectRow", () => {
 
   it("викликає onRemove з індексом при кліку на кнопку видалення", () => {
     const onUpdate = vi.fn();
+
     const onRemove = vi.fn();
+
     render(
       <SkillEffectRow
         effect={minimalEffect()}
@@ -51,7 +55,9 @@ describe("SkillEffectRow", () => {
         onRemove={onRemove}
       />,
     );
+
     const removeButton = screen.getByTestId("remove-effect");
+
     fireEvent.click(removeButton);
     expect(onRemove).toHaveBeenCalledWith(2);
   });
@@ -65,7 +71,9 @@ describe("SkillEffectRow", () => {
         onRemove={vi.fn()}
       />,
     );
+
     const valueInput = screen.getByPlaceholderText("0");
+
     expect((valueInput as HTMLInputElement).value).toBe("5");
   });
 
@@ -78,7 +86,9 @@ describe("SkillEffectRow", () => {
         onRemove={vi.fn()}
       />,
     );
+
     const valueInput = screen.getByDisplayValue("✓");
+
     expect(valueInput).toBeDisabled();
   });
 });

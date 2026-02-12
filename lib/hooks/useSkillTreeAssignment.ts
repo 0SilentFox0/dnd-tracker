@@ -25,7 +25,9 @@ export function assignSkillToSlot(
   selectedSkill: SkillFromLibraryType | GroupedSkill
 ): SkillTree {
   const skillName = getSkillName(selectedSkill);
+
   const skillDescription = getSkillDescription(selectedSkill) ?? "";
+
   const skillIcon = getSkillIcon(selectedSkill);
 
   // Слот ультимату — оновлюємо skillTree.ultimateSkill

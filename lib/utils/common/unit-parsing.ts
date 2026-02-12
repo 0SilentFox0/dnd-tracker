@@ -258,7 +258,9 @@ export function convertCSVRowToUnit(row: CSVUnitRow): {
   const groupName = (row.Група || row.group || row.Group || "").trim() || undefined;
 
   const initiativeRaw = (row.Initiative ?? row.initiative ?? "").trim();
+
   const initiative = initiativeRaw ? parseInt(initiativeRaw, 10) : 10;
+
   const initiativeValue = Number.isNaN(initiative) ? 10 : initiative;
 
   const avatar = (row.Image ?? row.image ?? row.URL ?? "").trim() || undefined;

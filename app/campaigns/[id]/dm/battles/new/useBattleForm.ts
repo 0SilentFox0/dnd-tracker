@@ -1,7 +1,7 @@
 "use client";
 
+import { useCallback,useState } from "react";
 import { useRouter } from "next/navigation";
-import { useState, useCallback } from "react";
 
 import type { Participant } from "./types";
 
@@ -21,15 +21,19 @@ export function useBattleForm({
   participants,
 }: UseBattleFormParams) {
   const router = useRouter();
+
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
+
       if (participants.length === 0) {
         alert("Оберіть хоча б одного учасника");
+
         return;
       }
+
       setLoading(true);
       try {
         const response = await fetch(`/api/campaigns/${campaignId}/battles`, {
@@ -41,11 +45,15 @@ export function useBattleForm({
             participants,
           }),
         });
+
         if (!response.ok) {
           const error = await response.json();
+
           throw new Error(error.error || "Помилка при створенні бою");
         }
+
         const battle = await response.json();
+
         router.push(`/campaigns/${campaignId}/dm/battles/${battle.id}`);
       } catch (error) {
         console.error("Error creating battle:", error);

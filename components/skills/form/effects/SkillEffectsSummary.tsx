@@ -13,7 +13,9 @@ export interface SkillEffectsSummaryProps {
 
 function formatEffectValue(e: SkillEffect): string {
   if (isFlagValueType(e.type)) return "✓";
+
   if (e.type === "percent") return `${e.value}%`;
+
   return String(e.value);
 }
 

@@ -1,9 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextResponse } from "next/server";
+import { beforeEach,describe, expect, it, vi } from "vitest";
 
-import { getResponseJson, getResponseStatus, createRequest } from "./helpers";
-import * as apiAuth from "@/lib/utils/api/api-auth";
+import { createRequest,getResponseJson, getResponseStatus } from "./helpers";
+
 import { prisma } from "@/lib/db";
+import * as apiAuth from "@/lib/utils/api/api-auth";
 
 vi.mock("@/lib/utils/api/api-auth", () => ({
   requireAuth: vi.fn(),
@@ -36,7 +37,9 @@ describe("GET /api/campaigns/[id]/skills", () => {
     );
 
     const { GET } = await import("@/app/api/campaigns/[id]/skills/route");
+
     const request = createRequest("http://localhost/api/campaigns/c1/skills");
+
     const response = await GET(request, {
       params: Promise.resolve({ id: "c1" }),
     });
@@ -93,16 +96,21 @@ describe("GET /api/campaigns/[id]/skills", () => {
         updatedAt: new Date(),
       },
     ];
+
     vi.mocked(prisma.skill.findMany).mockResolvedValue(mockSkills as never);
 
     const { GET } = await import("@/app/api/campaigns/[id]/skills/route");
+
     const request = createRequest("http://localhost/api/campaigns/c1/skills");
+
     const response = await GET(request, {
       params: Promise.resolve({ id: "c1" }),
     });
 
     expect(await getResponseStatus(response)).toBe(200);
+
     const data = await getResponseJson(response);
+
     expect(Array.isArray(data)).toBe(true);
     expect((data as unknown[]).length).toBe(1);
   });
@@ -121,13 +129,17 @@ describe("GET /api/campaigns/[id]/skills", () => {
     vi.mocked(prisma.skill.findMany).mockResolvedValue([]);
 
     const { GET } = await import("@/app/api/campaigns/[id]/skills/route");
+
     const request = createRequest("http://localhost/api/campaigns/c1/skills");
+
     const response = await GET(request, {
       params: Promise.resolve({ id: "c1" }),
     });
 
     expect(await getResponseStatus(response)).toBe(200);
+
     const data = await getResponseJson(response);
+
     expect(Array.isArray(data)).toBe(true);
     expect((data as unknown[]).length).toBe(0);
   });
@@ -144,6 +156,7 @@ describe("POST /api/campaigns/[id]/skills", () => {
     );
 
     const { POST } = await import("@/app/api/campaigns/[id]/skills/route");
+
     const request = createRequest("http://localhost/api/campaigns/c1/skills", {
       method: "POST",
       body: JSON.stringify({
@@ -152,6 +165,7 @@ describe("POST /api/campaigns/[id]/skills", () => {
       }),
       headers: { "Content-Type": "application/json" },
     });
+
     const response = await POST(request, {
       params: Promise.resolve({ id: "c1" }),
     });
@@ -174,11 +188,13 @@ describe("POST /api/campaigns/[id]/skills", () => {
     });
 
     const { POST } = await import("@/app/api/campaigns/[id]/skills/route");
+
     const request = createRequest("http://localhost/api/campaigns/c1/skills", {
       method: "POST",
       body: JSON.stringify({ basicInfo: {}, combatStats: {} }),
       headers: { "Content-Type": "application/json" },
     });
+
     const response = await POST(request, {
       params: Promise.resolve({ id: "c1" }),
     });
@@ -198,6 +214,7 @@ describe("POST /api/campaigns/[id]/skills", () => {
         members: [{ userId: "dm-1", role: "dm" }],
       },
     });
+
     const created = {
       id: "skill-new",
       campaignId: "c1",
@@ -233,9 +250,11 @@ describe("POST /api/campaigns/[id]/skills", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     };
+
     vi.mocked(prisma.skill.create).mockResolvedValue(created as never);
 
     const { POST } = await import("@/app/api/campaigns/[id]/skills/route");
+
     const request = createRequest("http://localhost/api/campaigns/c1/skills", {
       method: "POST",
       body: JSON.stringify({
@@ -247,12 +266,15 @@ describe("POST /api/campaigns/[id]/skills", () => {
       }),
       headers: { "Content-Type": "application/json" },
     });
+
     const response = await POST(request, {
       params: Promise.resolve({ id: "c1" }),
     });
 
     expect(await getResponseStatus(response)).toBe(200);
+
     const data = await getResponseJson(response) as { id: string; name: string };
+
     expect(data.id).toBe("skill-new");
     expect(data.name).toBe("New Skill");
   });
@@ -269,9 +291,11 @@ describe("DELETE /api/campaigns/[id]/skills (delete all)", () => {
     );
 
     const { DELETE } = await import("@/app/api/campaigns/[id]/skills/route");
+
     const request = createRequest("http://localhost/api/campaigns/c1/skills", {
       method: "DELETE",
     });
+
     const response = await DELETE(request, {
       params: Promise.resolve({ id: "c1" }),
     });
@@ -293,15 +317,19 @@ describe("DELETE /api/campaigns/[id]/skills (delete all)", () => {
     vi.mocked(prisma.skill.deleteMany).mockResolvedValue({ count: 5 });
 
     const { DELETE } = await import("@/app/api/campaigns/[id]/skills/route");
+
     const request = createRequest("http://localhost/api/campaigns/c1/skills", {
       method: "DELETE",
     });
+
     const response = await DELETE(request, {
       params: Promise.resolve({ id: "c1" }),
     });
 
     expect(await getResponseStatus(response)).toBe(200);
+
     const data = await getResponseJson(response) as { success: boolean; deletedCount: number };
+
     expect(data.success).toBe(true);
     expect(data.deletedCount).toBe(5);
   });
@@ -318,7 +346,9 @@ describe("GET /api/campaigns/[id]/skills/[skillId]", () => {
     );
 
     const { GET } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
+
     const request = createRequest("http://localhost/api/campaigns/c1/skills/skill-1");
+
     const response = await GET(request, {
       params: Promise.resolve({ id: "c1", skillId: "skill-1" }),
     });
@@ -340,13 +370,17 @@ describe("GET /api/campaigns/[id]/skills/[skillId]", () => {
     vi.mocked(prisma.skill.findUnique).mockResolvedValue(null);
 
     const { GET } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
+
     const request = createRequest("http://localhost/api/campaigns/c1/skills/skill-1");
+
     const response = await GET(request, {
       params: Promise.resolve({ id: "c1", skillId: "skill-1" }),
     });
 
     expect(await getResponseStatus(response)).toBe(404);
+
     const data = await getResponseJson<{ error: string }>(response);
+
     expect(data.error).toBe("Skill not found");
   });
 
@@ -397,7 +431,9 @@ describe("GET /api/campaigns/[id]/skills/[skillId]", () => {
     } as never);
 
     const { GET } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
+
     const request = createRequest("http://localhost/api/campaigns/c1/skills/skill-1");
+
     const response = await GET(request, {
       params: Promise.resolve({ id: "c1", skillId: "skill-1" }),
     });
@@ -416,6 +452,7 @@ describe("GET /api/campaigns/[id]/skills/[skillId]", () => {
         members: [{ userId: "user-1", role: "player" }],
       },
     });
+
     const mockSkill = {
       id: "skill-1",
       campaignId: "c1",
@@ -450,16 +487,21 @@ describe("GET /api/campaigns/[id]/skills/[skillId]", () => {
       spellGroup: null,
       grantedSpell: null,
     };
+
     vi.mocked(prisma.skill.findUnique).mockResolvedValue(mockSkill as never);
 
     const { GET } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
+
     const request = createRequest("http://localhost/api/campaigns/c1/skills/skill-1");
+
     const response = await GET(request, {
       params: Promise.resolve({ id: "c1", skillId: "skill-1" }),
     });
 
     expect(await getResponseStatus(response)).toBe(200);
+
     const data = await getResponseJson(response) as { id: string; basicInfo: { name: string } };
+
     expect(data.id).toBe("skill-1");
     expect(data.basicInfo.name).toBe("Fireball");
   });
@@ -476,11 +518,13 @@ describe("PATCH /api/campaigns/[id]/skills/[skillId]", () => {
     );
 
     const { PATCH } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
+
     const request = createRequest("http://localhost/api/campaigns/c1/skills/skill-1", {
       method: "PATCH",
       body: JSON.stringify({ basicInfo: { name: "Updated" } }),
       headers: { "Content-Type": "application/json" },
     });
+
     const response = await PATCH(request, {
       params: Promise.resolve({ id: "c1", skillId: "skill-1" }),
     });
@@ -505,11 +549,13 @@ describe("PATCH /api/campaigns/[id]/skills/[skillId]", () => {
     );
 
     const { PATCH } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
+
     const request = createRequest("http://localhost/api/campaigns/c1/skills/skill-1", {
       method: "PATCH",
       body: JSON.stringify({ basicInfo: { name: "Updated" } }),
       headers: { "Content-Type": "application/json" },
     });
+
     const response = await PATCH(request, {
       params: Promise.resolve({ id: "c1", skillId: "skill-1" }),
     });
@@ -528,6 +574,7 @@ describe("PATCH /api/campaigns/[id]/skills/[skillId]", () => {
         members: [{ userId: "dm-1", role: "dm" }],
       },
     });
+
     const existingSkill = {
       id: "skill-1",
       campaignId: "c1",
@@ -559,6 +606,7 @@ describe("PATCH /api/campaigns/[id]/skills/[skillId]", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     };
+
     vi.mocked(prisma.skill.findUnique).mockResolvedValue(existingSkill as never);
     vi.mocked(apiAuth.validateCampaignOwnership).mockReturnValue(null);
 
@@ -567,6 +615,7 @@ describe("PATCH /api/campaigns/[id]/skills/[skillId]", () => {
       name: "Updated Name",
       basicInfo: { name: "Updated Name" },
     };
+
     vi.mocked(prisma.skill.update).mockResolvedValue({
       ...updatedSkill,
       spell: null,
@@ -576,17 +625,21 @@ describe("PATCH /api/campaigns/[id]/skills/[skillId]", () => {
     } as never);
 
     const { PATCH } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
+
     const request = createRequest("http://localhost/api/campaigns/c1/skills/skill-1", {
       method: "PATCH",
       body: JSON.stringify({ basicInfo: { name: "Updated Name" } }),
       headers: { "Content-Type": "application/json" },
     });
+
     const response = await PATCH(request, {
       params: Promise.resolve({ id: "c1", skillId: "skill-1" }),
     });
 
     expect(await getResponseStatus(response)).toBe(200);
+
     const data = await getResponseJson(response) as { id: string; basicInfo: { name: string } };
+
     expect(data.id).toBe("skill-1");
     expect(data.basicInfo.name).toBe("Updated Name");
   });
@@ -603,9 +656,11 @@ describe("DELETE /api/campaigns/[id]/skills/[skillId]", () => {
     );
 
     const { DELETE } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
+
     const request = createRequest("http://localhost/api/campaigns/c1/skills/skill-1", {
       method: "DELETE",
     });
+
     const response = await DELETE(request, {
       params: Promise.resolve({ id: "c1", skillId: "skill-1" }),
     });
@@ -630,9 +685,11 @@ describe("DELETE /api/campaigns/[id]/skills/[skillId]", () => {
     );
 
     const { DELETE } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
+
     const request = createRequest("http://localhost/api/campaigns/c1/skills/skill-1", {
       method: "DELETE",
     });
+
     const response = await DELETE(request, {
       params: Promise.resolve({ id: "c1", skillId: "skill-1" }),
     });
@@ -659,15 +716,19 @@ describe("DELETE /api/campaigns/[id]/skills/[skillId]", () => {
     vi.mocked(prisma.skill.delete).mockResolvedValue({} as never);
 
     const { DELETE } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
+
     const request = createRequest("http://localhost/api/campaigns/c1/skills/skill-1", {
       method: "DELETE",
     });
+
     const response = await DELETE(request, {
       params: Promise.resolve({ id: "c1", skillId: "skill-1" }),
     });
 
     expect(await getResponseStatus(response)).toBe(200);
+
     const data = await getResponseJson(response) as { success: boolean };
+
     expect(data.success).toBe(true);
   });
 });

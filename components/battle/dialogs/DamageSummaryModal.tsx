@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence,motion } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -44,8 +44,11 @@ export function DamageSummaryModal({
   onApply,
 }: DamageSummaryModalProps) {
   const [breakdown, setBreakdown] = useState<string[] | null>(null);
+
   const [totalDamage, setTotalDamage] = useState<number | null>(null);
+
   const [loading, setLoading] = useState(false);
+
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -53,10 +56,12 @@ export function DamageSummaryModal({
       setBreakdown(null);
       setTotalDamage(null);
       setError(null);
+
       return;
     }
 
     let cancelled = false;
+
     setLoading(true);
     setError(null);
 
@@ -77,11 +82,13 @@ export function DamageSummaryModal({
     )
       .then(async (res) => {
         const data = await res.json();
+
         if (!res.ok) {
           throw new Error(
             (data as { error?: string })?.error ?? `Помилка (${res.status})`,
           );
         }
+
         return data;
       })
       .then((data) => {

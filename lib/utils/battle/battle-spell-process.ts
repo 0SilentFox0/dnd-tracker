@@ -129,8 +129,11 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
 
   // 1. Перевіряємо чи є spell slot (юніти: універсальний слот "universal" для будь-якого рівня)
   const spellLevel = spell.level.toString();
+
   const isUnit = updatedCaster.basicInfo.sourceType === "unit";
+
   const slotKey = isUnit ? "universal" : spellLevel;
+
   const spellSlot = updatedCaster.spellcasting.spellSlots[slotKey];
 
   if (!spellSlot || spellSlot.current <= 0) {
@@ -176,12 +179,15 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
       ...updatedCaster.spellcasting.spellSlots[slotKey],
       current: updatedCaster.spellcasting.spellSlots[slotKey].current - 1,
     };
+
     const isBonusAction = spell.castingTime?.toLowerCase().includes("bonus") ?? false;
+
     if (isBonusAction) {
       updatedCaster.actionFlags.hasUsedBonusAction = true;
     } else {
       updatedCaster.actionFlags.hasUsedAction = true;
     }
+
     const noTargetAction: BattleAction = {
       id: `spell-${caster.basicInfo.id}-${Date.now()}`,
       battleId,
@@ -202,12 +208,14 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
       hpChanges: [],
       isCancelled: false,
     };
+
     const afterNoTarget = executeAfterSpellCastTriggers(
       updatedCaster,
       undefined,
       allParticipants,
       isOwnerAction,
     );
+
     return {
       success: true,
       targetsUpdated: [],
@@ -237,13 +245,17 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
       ...updatedCaster.spellcasting.spellSlots[slotKey],
       current: updatedCaster.spellcasting.spellSlots[slotKey].current - 1,
     };
+
     const isBonusAction = spell.castingTime?.toLowerCase().includes("bonus") ?? false;
+
     if (isBonusAction) {
       updatedCaster.actionFlags.hasUsedBonusAction = true;
     } else {
       updatedCaster.actionFlags.hasUsedAction = true;
     }
+
     const targetNames = updatedTargets.map((t) => t.basicInfo.name).join(", ");
+
     const dispelAction: BattleAction = {
       id: `spell-${caster.basicInfo.id}-${Date.now()}`,
       battleId,
@@ -256,6 +268,7 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
       actionType: "spell",
       targets: targetIds.map((id) => {
         const target = allParticipants.find((p) => p.basicInfo.id === id);
+
         return {
           participantId: id,
           participantName: target?.basicInfo.name || "Unknown",
@@ -270,12 +283,14 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
       hpChanges: [],
       isCancelled: false,
     };
+
     const afterDispel = executeAfterSpellCastTriggers(
       updatedCaster,
       firstTarget,
       allParticipants,
       isOwnerAction,
     );
+
     return {
       success: true,
       targetsUpdated: updatedTargets,
@@ -287,22 +302,28 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
   // 1b. Перевірка попадання (spell attack): якщо hitCheck задано і (hitRoll + мод.) < dc — промах
   if (spell.hitCheck) {
     const ability = spell.hitCheck.ability.toLowerCase();
+
     const modifier =
       updatedCaster.abilities.modifiers[
         ability as keyof typeof updatedCaster.abilities.modifiers
       ] ?? 0;
+
     const totalHit = (hitRoll ?? 0) + modifier;
+
     if (hitRoll === undefined || totalHit < spell.hitCheck.dc) {
       updatedCaster.spellcasting.spellSlots[slotKey] = {
         ...updatedCaster.spellcasting.spellSlots[slotKey],
         current: updatedCaster.spellcasting.spellSlots[slotKey].current - 1,
       };
+
       const isBonusAction = spell.castingTime?.toLowerCase().includes("bonus") ?? false;
+
       if (isBonusAction) {
         updatedCaster.actionFlags.hasUsedBonusAction = true;
       } else {
         updatedCaster.actionFlags.hasUsedAction = true;
       }
+
       const missAction: BattleAction = {
         id: `spell-${caster.basicInfo.id}-${Date.now()}`,
         battleId,
@@ -315,6 +336,7 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
         actionType: "spell",
         targets: targetIds.map((id) => {
           const target = allParticipants.find((p) => p.basicInfo.id === id);
+
           return {
             participantId: id,
             participantName: target?.basicInfo.name || "Unknown",
@@ -329,6 +351,7 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
         hpChanges: [],
         isCancelled: false,
       };
+
       return {
         success: true,
         targetsUpdated: updatedTargets,
@@ -428,6 +451,7 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
       );
 
       if (targetIndex === -1) continue;
+
       if (target.basicInfo.side === updatedCaster.basicInfo.side) continue; // союзники — без урону
 
       let remainingDamage = finalDamage;
@@ -562,12 +586,14 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
   // 4b. Додаємо ефект з тривалістю в раундах (дебаф/стан)
   const durationRounds =
     spell.effectDetails?.duration ?? parseDurationToRounds(spell.duration ?? "");
+
   let spellEffectDetails =
     spell.effectDetails?.effects?.map((e) => ({
       type: e.type,
       value: e.value,
       ...(e.isPercentage != null && { isPercentage: e.isPercentage }),
     })) ?? [];
+
   if (
     spell.healModifier === "vampirism" &&
     !spellEffectDetails.some((e) => e.type === "vampirism")
@@ -577,19 +603,26 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
       { type: "vampirism", value: 50, isPercentage: true },
     ];
   }
+
   if (durationRounds > 0 || spellEffectDetails.length > 0) {
     const actualDuration = durationRounds > 0 ? durationRounds : 1;
+
     const isBeneficial = spellEffectDetails.every((e) => {
       if (e.type === "vampirism" || e.type === "ranged_damage_reduction")
         return true;
+
       return e.value >= 0;
     });
+
     const effectType = isBeneficial ? "buff" : "debuff";
+
     for (const target of updatedTargets) {
       const targetIndex = updatedTargets.findIndex(
         (t) => t.basicInfo.id === target.basicInfo.id,
       );
+
       if (targetIndex === -1) continue;
+
       const updatedEffects = addActiveEffect(
         updatedTargets[targetIndex],
         {
@@ -602,6 +635,7 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
         },
         currentRound,
       );
+
       updatedTargets[targetIndex] = {
         ...updatedTargets[targetIndex],
         battleData: {
@@ -618,6 +652,7 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
   if (hasManaSteal) {
     for (let i = 0; i < updatedTargets.length; i++) {
       const target = updatedTargets[i];
+
       const slot1 = target.spellcasting?.spellSlots?.["1"];
 
       if (slot1 && typeof slot1.current === "number" && slot1.current > 0) {
@@ -646,6 +681,7 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
 
   // 6. Позначаємо що кастер використав дію (action або bonus action)
   const isBonusAction = spell.castingTime?.toLowerCase().includes("bonus") ?? false;
+
   if (isBonusAction) {
     updatedCaster.actionFlags.hasUsedBonusAction = true;
   } else {

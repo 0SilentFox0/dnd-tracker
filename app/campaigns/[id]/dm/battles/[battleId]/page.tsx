@@ -17,12 +17,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ParticipantSide } from "@/lib/constants/battle";
 import {
   useBattle,
   useDeleteBattle,
   useUpdateBattle,
 } from "@/lib/hooks/useBattles";
-import { ParticipantSide } from "@/lib/constants/battle";
 import type { BattlePreparationParticipant } from "@/types/battle";
 
 interface Character {
@@ -46,14 +46,19 @@ export default function EditBattlePage({
   params: Promise<{ id: string; battleId: string }>;
 }) {
   const { id, battleId } = use(params);
+
   const router = useRouter();
 
   const { data: battle, isLoading: loadingBattle } = useBattle(id, battleId);
+
   const updateBattleMutation = useUpdateBattle(id, battleId);
+
   const deleteBattleMutation = useDeleteBattle(id);
 
   const [characters, setCharacters] = useState<Character[]>([]);
+
   const [units, setUnits] = useState<Unit[]>([]);
+
   const [loadingData, setLoadingData] = useState(true);
 
   const [formData, setFormData] = useState({
@@ -76,11 +81,13 @@ export default function EditBattlePage({
 
         if (charactersRes.ok) {
           const chars = await charactersRes.json();
+
           setCharacters(chars);
         }
 
         if (unitsRes.ok) {
           const unitsData = await unitsRes.json();
+
           setUnits(unitsData);
         }
       } catch (error) {
@@ -141,6 +148,7 @@ export default function EditBattlePage({
 
     if (participants.length === 0) {
       alert("Оберіть хоча б одного учасника");
+
       return;
     }
 
@@ -186,12 +194,14 @@ export default function EditBattlePage({
 
   const getParticipantQuantity = (id: string): number => {
     const participant = participants.find((p) => p.id === id);
+
     return participant?.quantity || 1;
   };
 
   const playerCharacters = characters.filter(
     (c) => c.type === "player" && c.controlledBy !== null,
   );
+
   const npcCharacters = characters.filter((c) => c.type === "npc");
 
   if (loadingData || loadingBattle) {
@@ -282,7 +292,9 @@ export default function EditBattlePage({
                       const entity = characters.find(
                         (c) => c.id === participant.id,
                       );
+
                       if (!entity) return null;
+
                       return (
                         <div
                           key={participant.id}
@@ -327,7 +339,9 @@ export default function EditBattlePage({
                     .filter((p) => p.side === ParticipantSide.ALLY && p.type === "unit")
                     .map((participant) => {
                       const entity = units.find((u) => u.id === participant.id);
+
                       if (!entity) return null;
+
                       return (
                         <div
                           key={participant.id}
@@ -394,7 +408,9 @@ export default function EditBattlePage({
                       const entity = characters.find(
                         (c) => c.id === participant.id,
                       );
+
                       if (!entity) return null;
+
                       return (
                         <div
                           key={participant.id}
@@ -439,7 +455,9 @@ export default function EditBattlePage({
                     .filter((p) => p.side === ParticipantSide.ENEMY && p.type === "unit")
                     .map((participant) => {
                       const entity = units.find((u) => u.id === participant.id);
+
                       if (!entity) return null;
+
                       return (
                         <div
                           key={participant.id}
@@ -593,6 +611,7 @@ export default function EditBattlePage({
                 <div className="space-y-2">
                   {units.map((unit) => {
                     const isSelected = isParticipantSelected(unit.id);
+
                     const quantity = getParticipantQuantity(unit.id);
 
                     return (

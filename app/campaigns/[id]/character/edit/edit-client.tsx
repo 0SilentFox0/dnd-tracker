@@ -5,8 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { CharacterAbilitiesSection } from "@/components/characters/abilities/CharacterAbilitiesSection";
-import { CharacterBasicInfo } from "@/components/characters/basic/CharacterBasicInfo";
 import { CharacterArtifactsSection } from "@/components/characters/artifacts/CharacterArtifactsSection";
+import { CharacterBasicInfo } from "@/components/characters/basic/CharacterBasicInfo";
 import { CharacterSkillsSection } from "@/components/characters/skills/CharacterSkillsSection";
 import { CharacterAbilityScores } from "@/components/characters/stats/CharacterAbilityScores";
 import { CharacterCombatParams } from "@/components/characters/stats/CharacterCombatParams";
@@ -75,6 +75,7 @@ export function PlayerCharacterEditClient({
         if (cancelled) return;
 
         const formDataFromCharacter = characterToFormData(character);
+
         setFormData(formDataFromCharacter);
         setCharacterLoaded(true);
       } catch (err) {

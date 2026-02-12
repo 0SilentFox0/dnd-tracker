@@ -1,7 +1,9 @@
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
+import { getCachedUnits } from "@/lib/cache/reference-data";
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess,requireDM } from "@/lib/utils/api/api-auth";
 import { getProficiencyBonus } from "@/lib/utils/common/calculations";
@@ -122,6 +124,8 @@ export async function POST(
       },
     });
 
+    revalidateTag(`units-${id}`, "max");
+
     return NextResponse.json(unit);
   } catch (error) {
     console.error("Error creating unit:", error);
@@ -151,19 +155,14 @@ export async function GET(
       return accessResult;
     }
 
-    const units = await prisma.unit.findMany({
-      where: {
-        campaignId: id,
-      },
-      include: {
-        unitGroup: true,
-      },
-      orderBy: {
-        createdAt: "desc",
+    const units = await getCachedUnits(id);
+
+    return NextResponse.json(units, {
+      headers: {
+        "Cache-Control":
+          "public, s-maxage=60, stale-while-revalidate=300",
       },
     });
-
-    return NextResponse.json(units);
   } catch (error) {
     console.error("Error fetching units:", error);
 

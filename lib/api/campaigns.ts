@@ -11,9 +11,11 @@ export type ActiveBattle = { id: string; campaignId: string };
  */
 export async function getActiveBattles(): Promise<ActiveBattle[]> {
   const response = await fetch("/api/campaigns/active-battles");
+
   if (!response.ok) {
     throw new Error("Failed to fetch active battles");
   }
+
   return response.json();
 }
 

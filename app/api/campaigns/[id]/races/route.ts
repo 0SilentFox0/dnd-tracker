@@ -1,7 +1,9 @@
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
+import { getCachedRaces } from "@/lib/cache/reference-data";
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 
@@ -49,16 +51,14 @@ export async function GET(
       return accessResult;
     }
 
-    const races = await prisma.race.findMany({
-      where: {
-        campaignId: id,
-      },
-      orderBy: {
-        createdAt: "desc",
+    const races = await getCachedRaces(id);
+
+    return NextResponse.json(races, {
+      headers: {
+        "Cache-Control":
+          "public, s-maxage=60, stale-while-revalidate=300",
       },
     });
-
-    return NextResponse.json(races);
   } catch (error) {
     console.error("Error fetching races:", error);
 
@@ -101,6 +101,8 @@ export async function POST(
           : [],
       },
     });
+
+    revalidateTag(`races-${id}`, "max");
 
     return NextResponse.json(race, { status: 201 });
   } catch (error) {

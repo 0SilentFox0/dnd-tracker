@@ -22,6 +22,7 @@ export const getParticipantArmorClass = (p: BattleParticipant) => p.combatStats.
  */
 export function getEffectiveArmorClass(p: BattleParticipant): number {
   let ac = p.combatStats.armorClass;
+
   for (const effect of p.battleData.activeEffects) {
     for (const d of effect.effects) {
       if (d.type === "ac_bonus") {
@@ -29,6 +30,7 @@ export function getEffectiveArmorClass(p: BattleParticipant): number {
       }
     }
   }
+
   return ac;
 }
 export const getParticipantSpeed = (p: BattleParticipant) => p.combatStats.speed;

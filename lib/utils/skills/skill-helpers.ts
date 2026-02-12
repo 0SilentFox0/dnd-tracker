@@ -87,6 +87,7 @@ export function getSkillCombatStats(skill: Skill | GroupedSkill): {
   }
 
   const skillData = skill as Skill;
+
   return {
     damage: skillData.damage || undefined,
     armor: skillData.armor || undefined,
@@ -103,6 +104,7 @@ export function getSkillEffects(skill: Skill | GroupedSkill): SkillEffect[] {
   if ("combatStats" in skill && skill.combatStats?.effects) {
     return skill.combatStats.effects;
   }
+
   return [];
 }
 

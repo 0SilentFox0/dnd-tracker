@@ -1,8 +1,8 @@
 /**
  * @vitest-environment happy-dom
  */
-import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { cleanup,render, screen } from "@testing-library/react";
+import { afterEach,describe, expect, it, vi } from "vitest";
 
 import { SkillBasicInfo } from "@/components/skills/form/basic/SkillBasicInfo";
 
@@ -19,6 +19,7 @@ describe("SkillBasicInfo", () => {
       setDescription: vi.fn(),
       setIcon: vi.fn(),
     };
+
     render(
       <SkillBasicInfo
         basicInfo={{

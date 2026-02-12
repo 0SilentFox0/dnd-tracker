@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { kvDel } from "@/lib/cache/kv";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/utils/api/api-auth";
 
@@ -87,6 +88,8 @@ export async function POST(request: Request) {
         user: true,
       },
     });
+
+    await kvDel(`campaigns:${userId}`);
 
     return NextResponse.json(member);
   } catch (error) {

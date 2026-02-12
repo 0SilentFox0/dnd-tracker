@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import type { AddParticipantData } from "@/lib/api/battles";
 import {
   addBattleParticipant,
   attack,
@@ -15,7 +16,6 @@ import {
   updateBattle,
   updateBattleParticipant,
 } from "@/lib/api/battles";
-import type { AddParticipantData } from "@/lib/api/battles";
 import type {
   AttackData,
   BattleScene,
@@ -35,6 +35,7 @@ export function mergeBattleCache(
     campaignId,
     battleId,
   ]);
+
   return {
     ...data,
     isDM: data.isDM ?? previous?.isDM,
@@ -43,10 +44,26 @@ export function mergeBattleCache(
   };
 }
 
-export function useBattle(campaignId: string, battleId: string) {
+/** Fallback-polling для активного бою. 5s — баланс: не перевантажує pool. */
+const BATTLE_ACTIVE_REFETCH_INTERVAL_MS = 5_000;
+
+export function useBattle(
+  campaignId: string,
+  battleId: string,
+  options?: { pauseRefetchWhen?: boolean },
+) {
   return useQuery<BattleScene>({
     queryKey: ["battle", campaignId, battleId],
     queryFn: () => getBattle(campaignId, battleId),
+    refetchInterval: (query) => {
+      if (options?.pauseRefetchWhen) return false;
+
+      const data = query.state.data as BattleScene | undefined;
+
+      if (data?.status === "active") return BATTLE_ACTIVE_REFETCH_INTERVAL_MS;
+
+      return false;
+    },
   });
 }
 
@@ -59,7 +76,12 @@ export function useUpdateBattle(campaignId: string, battleId: string) {
     onSuccess: (data) => {
       queryClient.setQueryData(
         ["battle", campaignId, battleId],
-        mergeBattleCache(queryClient, campaignId, battleId, data as BattleScene),
+        mergeBattleCache(
+          queryClient,
+          campaignId,
+          battleId,
+          data as BattleScene,
+        ),
       );
       queryClient.invalidateQueries({ queryKey: ["battles", campaignId] });
     },
@@ -183,10 +205,7 @@ export function useCompleteBattle(campaignId: string, battleId: string) {
   });
 }
 
-export function useRollbackBattleAction(
-  campaignId: string,
-  battleId: string,
-) {
+export function useRollbackBattleAction(campaignId: string, battleId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -230,8 +249,7 @@ export function useUpdateBattleParticipant(
     }: {
       participantId: string;
       data: { currentHp?: number; removeFromBattle?: boolean };
-    }) =>
-      updateBattleParticipant(campaignId, battleId, participantId, data),
+    }) => updateBattleParticipant(campaignId, battleId, participantId, data),
     onSuccess: (data) => {
       queryClient.setQueryData(
         ["battle", campaignId, battleId],

@@ -1,8 +1,8 @@
 /**
  * @vitest-environment happy-dom
  */
-import { describe, it, expect, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { cleanup,render, screen } from "@testing-library/react";
+import { afterEach,describe, expect, it } from "vitest";
 
 import { AbilityBonusIcons } from "@/components/skills/icons/AbilityBonusIcons";
 
@@ -11,6 +11,7 @@ describe("AbilityBonusIcons", () => {
 
   it("повертає null при порожніх бонусах", () => {
     const { container } = render(<AbilityBonusIcons bonuses={{}} />);
+
     expect(container.firstChild).toBeNull();
   });
 
@@ -18,6 +19,7 @@ describe("AbilityBonusIcons", () => {
     const { container } = render(
       <AbilityBonusIcons bonuses={{ strength: 0, dexterity: 1 }} />,
     );
+
     expect(container.firstChild).not.toBeNull();
     expect(screen.getByText("+1")).toBeInTheDocument();
     expect(screen.queryByText("0")).not.toBeInTheDocument();
@@ -40,7 +42,9 @@ describe("AbilityBonusIcons", () => {
     const { container } = render(
       <AbilityBonusIcons bonuses={{ strength: 1 }} className="custom-class" />,
     );
+
     const wrapper = container.firstChild as HTMLElement;
+
     expect(wrapper).toHaveClass("custom-class");
   });
 });

@@ -61,6 +61,8 @@ export interface PlayerTurnViewProps {
   onBonusAction: (skill: ActiveSkill) => void;
   onSkipTurn: () => void;
   onMoraleCheck: (d10Roll: number) => void;
+  /** Не запускати авто-таймер завершення ходу, поки next-turn виконується */
+  isNextTurnPending?: boolean;
 }
 
 /**

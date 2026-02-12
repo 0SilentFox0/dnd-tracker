@@ -1,9 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextResponse } from "next/server";
+import { beforeEach,describe, expect, it, vi } from "vitest";
 
-import { getResponseJson, getResponseStatus, createRequest } from "./helpers";
-import * as apiAuth from "@/lib/utils/api/api-auth";
+import { createRequest,getResponseJson, getResponseStatus } from "./helpers";
+
 import { prisma } from "@/lib/db";
+import * as apiAuth from "@/lib/utils/api/api-auth";
 
 vi.mock("@/lib/utils/api/api-auth", () => ({
   requireAuth: vi.fn(),
@@ -35,7 +36,9 @@ describe("GET /api/campaigns/[id]/battles", () => {
     );
 
     const { GET } = await import("@/app/api/campaigns/[id]/battles/route");
+
     const request = createRequest("http://localhost/api/campaigns/c1/battles");
+
     const response = await GET(request, {
       params: Promise.resolve({ id: "c1" }),
     });
@@ -72,16 +75,21 @@ describe("GET /api/campaigns/[id]/battles", () => {
         completedAt: null,
       },
     ];
+
     vi.mocked(prisma.battleScene.findMany).mockResolvedValue(mockBattles as never);
 
     const { GET } = await import("@/app/api/campaigns/[id]/battles/route");
+
     const request = createRequest("http://localhost/api/campaigns/c1/battles");
+
     const response = await GET(request, {
       params: Promise.resolve({ id: "c1" }),
     });
 
     expect(await getResponseStatus(response)).toBe(200);
+
     const data = await getResponseJson(response);
+
     expect(Array.isArray(data)).toBe(true);
     expect((data as { id: string }[])[0].id).toBe("battle-1");
   });
@@ -98,7 +106,9 @@ describe("GET /api/campaigns/[id]/battles/[battleId]", () => {
     );
 
     const { GET } = await import("@/app/api/campaigns/[id]/battles/[battleId]/route");
+
     const request = createRequest("http://localhost/api/campaigns/c1/battles/b1");
+
     const response = await GET(request, {
       params: Promise.resolve({ id: "c1", battleId: "b1" }),
     });
@@ -120,13 +130,17 @@ describe("GET /api/campaigns/[id]/battles/[battleId]", () => {
     vi.mocked(prisma.battleScene.findUnique).mockResolvedValue(null);
 
     const { GET } = await import("@/app/api/campaigns/[id]/battles/[battleId]/route");
+
     const request = createRequest("http://localhost/api/campaigns/c1/battles/b1");
+
     const response = await GET(request, {
       params: Promise.resolve({ id: "c1", battleId: "b1" }),
     });
 
     expect(await getResponseStatus(response)).toBe(404);
+
     const data = await getResponseJson<{ error: string }>(response);
+
     expect(data.error).toBe("Not found");
   });
 
@@ -141,6 +155,7 @@ describe("GET /api/campaigns/[id]/battles/[battleId]", () => {
         members: [{ userId: "user-1", role: "dm" }],
       },
     });
+
     const mockBattle = {
       id: "b1",
       campaignId: "c1",
@@ -160,16 +175,21 @@ describe("GET /api/campaigns/[id]/battles/[battleId]", () => {
         friendlyFire: false,
       },
     };
+
     vi.mocked(prisma.battleScene.findUnique).mockResolvedValue(mockBattle as never);
 
     const { GET } = await import("@/app/api/campaigns/[id]/battles/[battleId]/route");
+
     const request = createRequest("http://localhost/api/campaigns/c1/battles/b1");
+
     const response = await GET(request, {
       params: Promise.resolve({ id: "c1", battleId: "b1" }),
     });
 
     expect(await getResponseStatus(response)).toBe(200);
+
     const data = await getResponseJson(response) as { id: string; userRole: string; isDM: boolean };
+
     expect(data.id).toBe("b1");
     expect(data.userRole).toBe("dm");
     expect(data.isDM).toBe(true);
@@ -187,6 +207,7 @@ describe("POST /api/campaigns/[id]/battles", () => {
     );
 
     const { POST } = await import("@/app/api/campaigns/[id]/battles/route");
+
     const request = createRequest("http://localhost/api/campaigns/c1/battles", {
       method: "POST",
       body: JSON.stringify({
@@ -195,6 +216,7 @@ describe("POST /api/campaigns/[id]/battles", () => {
       }),
       headers: { "Content-Type": "application/json" },
     });
+
     const response = await POST(request, {
       params: Promise.resolve({ id: "c1" }),
     });
@@ -217,11 +239,13 @@ describe("POST /api/campaigns/[id]/battles", () => {
     });
 
     const { POST } = await import("@/app/api/campaigns/[id]/battles/route");
+
     const request = createRequest("http://localhost/api/campaigns/c1/battles", {
       method: "POST",
       body: JSON.stringify({ name: "Battle" }), // participants missing
       headers: { "Content-Type": "application/json" },
     });
+
     const response = await POST(request, {
       params: Promise.resolve({ id: "c1" }),
     });
@@ -241,6 +265,7 @@ describe("POST /api/campaigns/[id]/battles", () => {
         members: [{ userId: "dm-1", role: "dm" }],
       },
     });
+
     const created = {
       id: "b-new",
       campaignId: "c1",
@@ -256,9 +281,11 @@ describe("POST /api/campaigns/[id]/battles", () => {
       updatedAt: new Date(),
       completedAt: null,
     };
+
     vi.mocked(prisma.battleScene.create).mockResolvedValue(created as never);
 
     const { POST } = await import("@/app/api/campaigns/[id]/battles/route");
+
     const request = createRequest("http://localhost/api/campaigns/c1/battles", {
       method: "POST",
       body: JSON.stringify({
@@ -267,12 +294,15 @@ describe("POST /api/campaigns/[id]/battles", () => {
       }),
       headers: { "Content-Type": "application/json" },
     });
+
     const response = await POST(request, {
       params: Promise.resolve({ id: "c1" }),
     });
 
     expect(await getResponseStatus(response)).toBe(200);
+
     const data = await getResponseJson(response) as { id: string; name: string };
+
     expect(data.id).toBe("b-new");
     expect(data.name).toBe("New Battle");
   });

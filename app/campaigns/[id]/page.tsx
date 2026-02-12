@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { JoinBattleButton } from "@/components/campaigns/JoinBattleButton";
 import { CampaignMembersList } from "@/components/campaigns/members/CampaignMembersList";
 import { CampaignSettingsButton } from "@/components/campaigns/settings/CampaignSettingsButton";
 import { InviteCodeDisplay } from "@/components/campaigns/settings/InviteCodeDisplay";
@@ -70,6 +71,7 @@ export default async function CampaignDetailPage({
         <CardHeader>
           <div className="flex items-center justify-between gap-2">
             <CardTitle>Налаштування кампанії</CardTitle>
+            <JoinBattleButton />
             {isDM && (
               <CampaignSettingsButton
                 campaignId={id}

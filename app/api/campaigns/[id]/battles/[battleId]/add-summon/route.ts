@@ -5,6 +5,10 @@ import { z } from "zod";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { requireDM } from "@/lib/utils/api/api-auth";
+import {
+  preparePusherPayload,
+  stripStateBeforeForClient,
+} from "@/lib/utils/battle/strip-battle-payload";
 import { BattleAction, BattleParticipant } from "@/types/battle";
 
 const summonSchema = z.object({
@@ -50,6 +54,7 @@ export async function POST(
     }
 
     const body = await request.json();
+
     const data = summonSchema.parse(body);
 
     const side =
@@ -126,10 +131,13 @@ export async function POST(
 
     const pendingSummons =
       (battle.pendingSummons as unknown as BattleParticipant[]) ?? [];
+
     const newPending = [...pendingSummons, summoned];
 
     const battleLog = (battle.battleLog as unknown as BattleAction[]) ?? [];
+
     const who = data.casterName || "Хтось";
+
     const logEntry: BattleAction = {
       id: `summon-${Date.now()}`,
       battleId,
@@ -165,17 +173,24 @@ export async function POST(
 
     if (process.env.PUSHER_APP_ID) {
       const { pusherServer } = await import("@/lib/pusher");
+
       void pusherServer
-        .trigger(`battle-${battleId}`, "battle-updated", updatedBattle)
+        .trigger(
+          `battle-${battleId}`,
+          "battle-updated",
+          preparePusherPayload(updatedBattle),
+        )
         .catch((err) => console.error("Pusher trigger failed:", err));
     }
 
-    return NextResponse.json(updatedBattle);
+    return NextResponse.json(stripStateBeforeForClient(updatedBattle));
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
+
     console.error("Add summon error:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

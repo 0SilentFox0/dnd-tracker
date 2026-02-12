@@ -3,6 +3,10 @@ import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
 import { requireDM } from "@/lib/utils/api/api-auth";
+import {
+  preparePusherPayload,
+  stripStateBeforeForClient,
+} from "@/lib/utils/battle/strip-battle-payload";
 
 export async function POST(
   request: Request,
@@ -42,11 +46,15 @@ export async function POST(
       const { pusherServer } = await import("@/lib/pusher");
 
       void pusherServer
-        .trigger(`battle-${battleId}`, "battle-updated", updatedBattle)
+        .trigger(
+          `battle-${battleId}`,
+          "battle-updated",
+          preparePusherPayload(updatedBattle),
+        )
         .catch((err) => console.error("Pusher trigger failed:", err));
     }
 
-    return NextResponse.json(updatedBattle);
+    return NextResponse.json(stripStateBeforeForClient(updatedBattle));
   } catch (error) {
     console.error("Error resetting battle:", error);
 

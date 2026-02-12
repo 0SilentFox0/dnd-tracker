@@ -1,3 +1,4 @@
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
@@ -131,6 +132,8 @@ export async function DELETE(
       where: { id: unitId },
     });
 
+    revalidateTag(`units-${id}`, "max");
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting unit:", error);
@@ -230,6 +233,8 @@ export async function PATCH(
         unitGroup: true,
       },
     });
+
+    revalidateTag(`units-${id}`, "max");
 
     return NextResponse.json(updatedUnit);
   } catch (error) {

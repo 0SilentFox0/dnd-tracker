@@ -10,6 +10,7 @@ import {
   getMainSkills,
   updateMainSkill,
 } from "@/lib/api/main-skills";
+import { REFERENCE_STALE_MS } from "@/lib/providers/query-provider";
 import type { MainSkillFormData } from "@/types/main-skills";
 
 /**
@@ -23,6 +24,7 @@ export function useMainSkills(
   return useQuery({
     queryKey: ["main-skills", campaignId],
     queryFn: () => getMainSkills(campaignId),
+    staleTime: REFERENCE_STALE_MS,
     enabled: options?.enabled !== false,
   });
 }

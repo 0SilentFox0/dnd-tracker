@@ -125,6 +125,7 @@ export function UnitAttack({
             value={attack.guaranteedDamage ?? ""}
             onChange={(e) => {
               const v = parseInt(e.target.value, 10);
+
               onChange({
                 ...attack,
                 guaranteedDamage: e.target.value === "" ? undefined : Math.max(0, v),
@@ -182,8 +183,11 @@ export function UnitAttack({
                       }
                       onChange={(e) => {
                         const val = Math.min(100, Math.max(0, parseInt(e.target.value, 10) || 0));
+
                         const prev = attack.damageDistribution ?? [];
+
                         const next = [...prev];
+
                         next[i] = val;
                         while (next.length > (attack.maxTargets ?? 3)) next.pop();
                         onChange({ ...attack, damageDistribution: next });

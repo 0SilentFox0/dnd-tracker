@@ -4,6 +4,10 @@ import { z } from "zod";
 
 import { prisma } from "@/lib/db";
 import { requireDM } from "@/lib/utils/api/api-auth";
+import {
+  preparePusherPayload,
+  stripStateBeforeForClient,
+} from "@/lib/utils/battle/strip-battle-payload";
 import { BattleAction, BattleParticipant } from "@/types/battle";
 
 const patchSchema = z.object({
@@ -45,16 +49,19 @@ export async function PATCH(
     }
 
     const body = await request.json().catch(() => ({}));
+
     const data = patchSchema.parse(body);
 
     let initiativeOrder =
       (battle.initiativeOrder as unknown as BattleParticipant[]) ?? [];
+
     const battleLog = (battle.battleLog as unknown as BattleAction[]) ?? [];
 
     if (data.removeFromBattle === true) {
       const participant = initiativeOrder.find(
         (p) => p.basicInfo.id === participantId,
       );
+
       if (!participant) {
         return NextResponse.json(
           { error: "Participant not found" },
@@ -71,6 +78,7 @@ export async function PATCH(
       );
 
       let newTurnIndex = battle.currentTurnIndex;
+
       if (initiativeOrder.length === 0) {
         newTurnIndex = 0;
       } else if (removedIndex <= battle.currentTurnIndex) {
@@ -78,6 +86,7 @@ export async function PATCH(
           0,
           battle.currentTurnIndex - (removedIndex < battle.currentTurnIndex ? 1 : 0),
         );
+
         if (newTurnIndex >= initiativeOrder.length) {
           newTurnIndex = initiativeOrder.length - 1;
         }
@@ -118,18 +127,24 @@ export async function PATCH(
 
       if (process.env.PUSHER_APP_ID) {
         const { pusherServer } = await import("@/lib/pusher");
+
         void pusherServer
-          .trigger(`battle-${battleId}`, "battle-updated", updatedBattle)
+          .trigger(
+            `battle-${battleId}`,
+            "battle-updated",
+            preparePusherPayload(updatedBattle),
+          )
           .catch((err) => console.error("Pusher trigger failed:", err));
       }
 
-      return NextResponse.json(updatedBattle);
+      return NextResponse.json(stripStateBeforeForClient(updatedBattle));
     }
 
     if (data.currentHp !== undefined) {
       const idx = initiativeOrder.findIndex(
         (p) => p.basicInfo.id === participantId,
       );
+
       if (idx === -1) {
         return NextResponse.json(
           { error: "Participant not found" },
@@ -138,11 +153,14 @@ export async function PATCH(
       }
 
       const participant = initiativeOrder[idx];
+
       const oldHp = participant.combatStats.currentHp;
+
       const newHp = Math.min(
         data.currentHp,
         participant.combatStats.maxHp,
       );
+
       const updatedParticipant: BattleParticipant = {
         ...participant,
         combatStats: {
@@ -158,6 +176,7 @@ export async function PATCH(
       };
 
       const updatedOrder = [...initiativeOrder];
+
       updatedOrder[idx] = updatedParticipant;
 
       const logEntry: BattleAction = {
@@ -204,12 +223,17 @@ export async function PATCH(
 
       if (process.env.PUSHER_APP_ID) {
         const { pusherServer } = await import("@/lib/pusher");
+
         void pusherServer
-          .trigger(`battle-${battleId}`, "battle-updated", updatedBattle)
+          .trigger(
+            `battle-${battleId}`,
+            "battle-updated",
+            preparePusherPayload(updatedBattle),
+          )
           .catch((err) => console.error("Pusher trigger failed:", err));
       }
 
-      return NextResponse.json(updatedBattle);
+      return NextResponse.json(stripStateBeforeForClient(updatedBattle));
     }
 
     return NextResponse.json(
@@ -220,7 +244,9 @@ export async function PATCH(
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
+
     console.error("Patch participant error:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
