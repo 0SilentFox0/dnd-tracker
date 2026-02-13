@@ -24,7 +24,10 @@ export interface CharacterViewAccordionProps {
   combatStats: Record<string, unknown>;
   skills: Record<string, unknown>;
   abilities: Record<string, unknown>;
-  spellcasting: { knownSpells: string[] };
+  spellcasting: {
+    knownSpells: string[];
+    spellSlots?: Record<string, { max: number; current: number }>;
+  };
   formData: {
     skillTreeProgress?: SkillTreeProgress;
     scalingCoefficients?: {

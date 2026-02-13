@@ -91,6 +91,12 @@ export interface MoraleCheckData {
   d10Roll: number;
 }
 
+export interface BonusActionData {
+  participantId: string;
+  skillId: string;
+  targetParticipantId?: string;
+}
+
 export interface SpellCastData {
   casterId: string;
   casterType: string;

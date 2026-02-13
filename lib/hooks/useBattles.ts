@@ -4,6 +4,7 @@ import type { AddParticipantData } from "@/lib/api/battles";
 import {
   addBattleParticipant,
   attack,
+  bonusAction,
   castSpell,
   completeBattle,
   deleteBattle,
@@ -19,6 +20,7 @@ import {
 import type {
   AttackData,
   BattleScene,
+  BonusActionData,
   MoraleCheckData,
   SpellCastData,
 } from "@/types/api";
@@ -138,6 +140,21 @@ export function useMoraleCheck(campaignId: string, battleId: string) {
       queryClient.setQueryData(
         ["battle", campaignId, battleId],
         mergeBattleCache(queryClient, campaignId, battleId, result.battle),
+      );
+    },
+  });
+}
+
+export function useBonusAction(campaignId: string, battleId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: BonusActionData) =>
+      bonusAction(campaignId, battleId, data),
+    onSuccess: (battle) => {
+      queryClient.setQueryData(
+        ["battle", campaignId, battleId],
+        mergeBattleCache(queryClient, campaignId, battleId, battle),
       );
     },
   });

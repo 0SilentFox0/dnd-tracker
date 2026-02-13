@@ -134,7 +134,7 @@ export function CharacterSpellbook({
       <button
         type="button"
         onClick={() => setSpellbookOpen(true)}
-        className="absolute top-3 right-3 z-10 flex items-center justify-center w-12 h-12 rounded-lg border-2 border-amber-500/90 bg-amber-950/80 text-amber-200 shadow-lg hover:bg-amber-900/80 hover:border-amber-400 transition-colors"
+        className="flex shrink-0 items-center justify-center w-12 h-12 rounded-lg border-2 border-amber-500/90 bg-amber-950/80 text-amber-200 shadow-lg hover:bg-amber-900/80 hover:border-amber-400 transition-colors"
         title="Заклинання героя"
       >
         <BookOpen className="h-6 w-6" />

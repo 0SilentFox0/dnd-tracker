@@ -13,6 +13,7 @@ import {
   getSpellAttackBonus,
   getSpellSaveDC,
 } from "@/lib/utils/common/calculations";
+import { calculateCharacterSpellSlots } from "@/lib/utils/spells/spell-slots";
 
 const updateCharacterSchema = z.object({
   name: z.string().min(1).max(100).optional(),
@@ -313,6 +314,32 @@ export async function PATCH(
       }
     }
 
+    // Завжди перераховуємо магічні слоти за поточним рівнем (при зменшенні рівня — слоти зменшаться)
+    const computedSlots = calculateCharacterSpellSlots(finalLevel);
+    const existingSlots = (data.spellSlots ?? character.spellSlots) as
+      | Record<string, { max: number; current: number }>
+      | null
+      | undefined;
+    const spellSlotsToSave: Record<string, { max: number; current: number }> =
+      Object.fromEntries(
+        Object.entries(computedSlots).map(([k, v]) => {
+          const existing = existingSlots?.[k]?.current;
+          const current =
+            existing !== undefined
+              ? Math.min(existing, v.max)
+              : v.max;
+          return [k, { max: v.max, current }];
+        }),
+      );
+    // Зберігаємо універсальні слоти, якщо були (їх не повертає calculateCharacterSpellSlots)
+    if (
+      existingSlots?.universal &&
+      typeof existingSlots.universal === "object" &&
+      existingSlots.universal.max !== undefined
+    ) {
+      spellSlotsToSave.universal = existingSlots.universal;
+    }
+
     // При зменшенні рівня — скидаємо всі прокачані скіли; при підвищенні — зберігаємо як було
     const levelDecreased = finalLevel < character.level;
 
@@ -335,9 +362,10 @@ export async function PATCH(
         passiveInsight,
         spellSaveDC,
         spellAttackBonus,
+        spellSlots: spellSlotsToSave as Prisma.InputJsonValue,
         maxHp,
         currentHp,
-        immunities: data.immunities !== undefined 
+        immunities: data.immunities !== undefined
           ? (data.immunities as Prisma.InputJsonValue)
           : (character.immunities as Prisma.InputJsonValue | undefined),
         ...(skillTreeProgressUpdate !== undefined && {

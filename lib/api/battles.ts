@@ -1,6 +1,7 @@
 import type {
   AttackData,
   BattleScene,
+  BonusActionData,
   MoraleCheckData,
   SpellCastData,
 } from "@/types/api";
@@ -53,6 +54,28 @@ export async function attack(
   if (!response.ok) throw new Error("Failed to process attack");
 
   return response.json();
+}
+
+export async function bonusAction(
+  campaignId: string,
+  battleId: string,
+  data: BonusActionData,
+): Promise<BattleScene> {
+  const response = await fetch(
+    `/api/campaigns/${campaignId}/battles/${battleId}/bonus-action`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    },
+  );
+
+  if (!response.ok) throw new Error("Failed to process bonus action");
+
+  const result = await response.json();
+  return result.battle;
 }
 
 export async function moraleCheck(

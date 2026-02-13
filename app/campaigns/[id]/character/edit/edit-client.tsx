@@ -181,6 +181,7 @@ export function PlayerCharacterEditClient({
                     campaignId={id}
                     characterRace={basicInfo.race}
                     skillTreeProgress={formData.skillTreeProgress ?? {}}
+                    spellSlots={formData.spellcasting.spellSlots}
                   />
                 </AccordionContent>
               </AccordionItem>

@@ -362,6 +362,9 @@ export interface BattleAction {
     // Для перевірки моралі:
     d10Roll?: number;
     morale?: number;
+    // Для бонусної дії (скіл):
+    skillId?: string;
+    skillName?: string;
     // Критичний ефект (Natural 20/1):
     criticalEffect?: {
       id: number;

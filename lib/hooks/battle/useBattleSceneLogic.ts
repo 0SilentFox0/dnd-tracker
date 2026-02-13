@@ -11,6 +11,7 @@ import {
   useAddBattleParticipant,
   useAttack,
   useBattle,
+  useBonusAction,
   useCastSpell,
   useCompleteBattle,
   useMoraleCheck,
@@ -87,10 +88,6 @@ export function useBattleSceneLogic(id: string, battleId: string) {
             value: Math.abs(change),
             isHealing: change < 0,
           });
-          setTimeout(
-            () => setGlobalDamageFlash(null),
-            2000,
-          );
         }
       }
     },
@@ -116,6 +113,8 @@ export function useBattleSceneLogic(id: string, battleId: string) {
   const spellMutation = useCastSpell(id, battleId);
 
   const moraleCheckMutation = useMoraleCheck(id, battleId);
+
+  const bonusActionMutation = useBonusAction(id, battleId);
 
   const startBattleMutation = useStartBattle(id, battleId);
 
@@ -352,6 +351,7 @@ export function useBattleSceneLogic(id: string, battleId: string) {
       attack: attackMutation,
       spell: spellMutation,
       moraleCheck: moraleCheckMutation,
+      bonusAction: bonusActionMutation,
       startBattle: startBattleMutation,
     },
     handlers: {
@@ -361,8 +361,15 @@ export function useBattleSceneLogic(id: string, battleId: string) {
       handleRollback: (actionIndex: number) =>
         rollbackMutation.mutate(actionIndex),
       handleAttack,
+      handleBonusAction: (participantId: string, skillId: string, targetParticipantId?: string) =>
+        bonusActionMutation.mutate({
+          participantId,
+          skillId,
+          targetParticipantId,
+        }),
       setParticipantForMorale,
       triggerGlobalDamageFromBattle,
+      clearGlobalDamageFlash: () => setGlobalDamageFlash(null),
     },
     dmControlledParticipantId,
     setDmControlledParticipantId,

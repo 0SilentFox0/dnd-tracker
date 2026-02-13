@@ -35,6 +35,9 @@ export function ParticipantCard({
 
   const showHp = isDM || !isEnemy || canSeeEnemyHp;
 
+  /** Союзники не бачать стати ворогів (AC, HP, ефекти) і навпаки. DM бачить усе. */
+  const canSeeStats = isDM || !isEnemy || canSeeEnemyHp;
+
   const isDead = participant.combatStats.status === "dead";
 
   const hpPercent =
@@ -202,9 +205,9 @@ export function ParticipantCard({
               )}
             </div>
 
-            {/* Temp HP & Effects */}
+            {/* Temp HP & Effects — приховані для ворогів (крім DM) */}
             <div className="flex flex-wrap items-center gap-2 mt-2">
-              {participant.combatStats.tempHp > 0 && (
+              {canSeeStats && participant.combatStats.tempHp > 0 && (
                 <Badge
                   variant="outline"
                   className="text-[9px] border-yellow-500/50 text-yellow-500 bg-yellow-500/5"
@@ -213,15 +216,17 @@ export function ParticipantCard({
                 </Badge>
               )}
 
-              {participant.combatStats.status === "unconscious" && (
-                <Badge className="text-[9px] bg-indigo-500 text-white border-none shadow-[0_0_10px_rgba(99,102,241,0.3)] animate-pulse">
-                  💤 Непритомний
-                </Badge>
-              )}
+              {canSeeStats &&
+                participant.combatStats.status === "unconscious" && (
+                  <Badge className="text-[9px] bg-indigo-500 text-white border-none shadow-[0_0_10px_rgba(99,102,241,0.3)] animate-pulse">
+                    💤 Непритомний
+                  </Badge>
+                )}
 
-              {participant.battleData.activeEffects
-                .slice(0, 5)
-                .map((effect, idx) => {
+              {canSeeStats &&
+                participant.battleData.activeEffects
+                  .slice(0, 5)
+                  .map((effect, idx) => {
                   const isBuff = effect.type === "buff";
 
                   const isDebuff = effect.type === "debuff";
@@ -263,7 +268,7 @@ export function ParticipantCard({
                   );
                 })}
 
-              {(isDM || !isEnemy) && (
+              {canSeeStats && (
                 <ParticipantStats
                   participant={participant}
                   className="w-full mt-1 pt-2 border-t border-white/5"

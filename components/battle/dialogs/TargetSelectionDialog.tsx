@@ -18,6 +18,8 @@ interface TargetSelectionDialogProps {
   onSelect: (targetIds: string[]) => void;
   title?: string;
   description?: string;
+  /** DM або скіл бачить HP ворогів */
+  canSeeEnemyHp?: boolean;
 }
 
 /**
@@ -32,6 +34,7 @@ export function TargetSelectionDialog({
   onSelect,
   title = "🎯 Вибір Цілі",
   description = "Оберіть ціль для атаки",
+  canSeeEnemyHp = false,
 }: TargetSelectionDialogProps) {
   const [selectedTargets, setSelectedTargets] = useState<string[]>([]);
 
@@ -110,7 +113,11 @@ export function TargetSelectionDialog({
                             </Badge>
                           </div>
                           <div className="text-xs text-muted-foreground">
-                            HP: {target.combatStats.currentHp}/{target.combatStats.maxHp} ({Math.round(hpPercent)}%)
+                            {canSeeEnemyHp || target.basicInfo.side === ParticipantSide.ALLY ? (
+                              <>HP: {target.combatStats.currentHp}/{target.combatStats.maxHp} ({Math.round(hpPercent)}%)</>
+                            ) : (
+                              <>HP: ???</>
+                            )}
                             {target.combatStats.status !== "active" && (
                               <span className="ml-2 text-destructive">
                                 {target.combatStats.status === "unconscious" ? "Непритомний" : "Мертвий"}

@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 import { cn } from "@/lib/utils";
+
+const EXIT_DURATION = 0.4;
 
 interface GlobalDamageOverlayProps {
   value: number;
@@ -14,6 +16,7 @@ interface GlobalDamageOverlayProps {
 
 /**
  * Анімація урону/лікування по центру екрану (глобальний оверлей).
+ * onDone викликається після завершення exit-анімації, щоб ефект не «зависав».
  */
 export function GlobalDamageOverlay({
   value,
@@ -24,24 +27,27 @@ export function GlobalDamageOverlay({
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    const t = setTimeout(() => {
-      setVisible(false);
-      onDone?.();
-    }, durationMs);
-
+    const t = setTimeout(() => setVisible(false), durationMs);
     return () => clearTimeout(t);
-  }, [durationMs, onDone]);
+  }, [durationMs]);
+
+  const handleExitComplete = useCallback(() => {
+    onDone?.();
+  }, [onDone]);
 
   const text = isHealing ? "+" + value : "-" + value;
 
   return (
-    <AnimatePresence>
+    <AnimatePresence onExitComplete={handleExitComplete}>
       {visible && (
         <motion.div
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1.2 }}
           exit={{ opacity: 0, scale: 1.5 }}
-          transition={{ duration: 0.2 }}
+          transition={{
+            duration: 0.2,
+            exit: { duration: EXIT_DURATION },
+          }}
           className="fixed inset-0 z-[100] pointer-events-none flex items-center justify-center"
         >
           <span

@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AttackType } from "@/lib/constants/battle";
-import type { BattleAttack,BattleParticipant } from "@/types/battle";
+import { AttackType, ParticipantSide } from "@/lib/constants/battle";
+import { hasAdvantage } from "@/lib/utils/battle/battle-attack";
+import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 interface AttackRollDialogProps {
   open: boolean;
@@ -15,6 +16,8 @@ interface AttackRollDialogProps {
   attacker: BattleParticipant;
   attack: BattleAttack;
   target: BattleParticipant;
+  /** DM або скіл бачить AC цілі */
+  canSeeEnemyHp?: boolean;
   onConfirm: (data: {
     attackRoll: number;
     advantageRoll?: number;
@@ -30,6 +33,7 @@ export function AttackRollDialog({
   attacker,
   attack,
   target,
+  canSeeEnemyHp = false,
   onConfirm,
 }: AttackRollDialogProps) {
   const [attackRoll, setAttackRoll] = useState("");
@@ -44,6 +48,8 @@ export function AttackRollDialog({
     : Math.floor((attacker.abilities.dexterity - 10) / 2);
 
   const totalBonus = attackBonus + statModifier + attacker.abilities.proficiencyBonus;
+
+  const hasAdvantageOnAttack = hasAdvantage(attacker, attack);
 
   const handleConfirm = () => {
     const roll = parseInt(attackRoll);
@@ -93,23 +99,25 @@ export function AttackRollDialog({
               Бонус до атаки: +{totalBonus} (базовий: +{attackBonus}, модифікатор: {statModifier >= 0 ? "+" : ""}{statModifier}, proficiency: +{attacker.abilities.proficiencyBonus})
             </p>
             <p className="text-xs text-muted-foreground">
-              Загальне значення: {attackRoll ? `${parseInt(attackRoll) + totalBonus}` : "?"} vs AC {target.combatStats.armorClass}
+              Загальне значення: {attackRoll ? `${parseInt(attackRoll) + totalBonus}` : "?"} vs AC {canSeeEnemyHp || target.basicInfo.side === ParticipantSide.ALLY ? target.combatStats.armorClass : "?"}
             </p>
           </div>
-          <div>
-            <Label>Кидок переваги (опціонально)</Label>
-            <Input
-              type="number"
-              min="1"
-              max="20"
-              value={advantageRoll}
-              onChange={(e) => setAdvantageRoll(e.target.value)}
-              placeholder="Введіть результат (1-20) або залиште порожнім"
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              Використовується найкращий результат з двох кидків
-            </p>
-          </div>
+          {hasAdvantageOnAttack && (
+            <div>
+              <Label>Кидок переваги (опціонально)</Label>
+              <Input
+                type="number"
+                min="1"
+                max="20"
+                value={advantageRoll}
+                onChange={(e) => setAdvantageRoll(e.target.value)}
+                placeholder="Введіть результат (1-20) або залиште порожнім"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Використовується найкращий результат з двох кидків
+              </p>
+            </div>
+          )}
           <div className="flex gap-2">
             <Button
               type="button"

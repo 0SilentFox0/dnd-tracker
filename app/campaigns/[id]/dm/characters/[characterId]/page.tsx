@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { CharacterViewClient } from "../../../character/character-view-client";
 
@@ -48,6 +48,8 @@ export default function EditCharacterPage({
   const { id, characterId } = use(params);
 
   const router = useRouter();
+
+  const queryClient = useQueryClient();
 
   const { members, loading: membersLoading } = useCampaignMembers(id);
 
@@ -325,6 +327,7 @@ export default function EditCharacterPage({
                       icon: a.icon ?? null,
                     }))}
                     onEquippedChange={setEquipped}
+                    spellSlots={formData.spellcasting.spellSlots}
                   />
                 </AccordionContent>
               </AccordionItem>
@@ -375,6 +378,10 @@ export default function EditCharacterPage({
                           `Рівень піднято! ${details.abilityIncreased}: +1, HP: +${details.hpGain}, Додано магічні слоти.`,
                         );
                       }
+
+                      await queryClient.invalidateQueries({
+                        queryKey: ["character-damage-preview", id, characterId],
+                      });
 
                       router.refresh();
                     } catch (err) {

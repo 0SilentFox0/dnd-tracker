@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 
 import { CharacterSpellbook } from "./CharacterSpellbook";
+import { SpellSlotsBadge } from "./SpellSlotsBadge";
 
 import {
   DropdownMenu,
@@ -27,6 +28,9 @@ export interface ArtifactOption {
   icon?: string | null;
 }
 
+/** Магічні слоти: рівень → { max, current } */
+type SpellSlotsData = Record<string, { max: number; current: number }>;
+
 interface CharacterArtifactsSectionProps {
   knownSpellIds: string[];
   campaignId: string;
@@ -37,6 +41,8 @@ interface CharacterArtifactsSectionProps {
   equipped?: EquippedItems;
   artifacts?: ArtifactOption[];
   onEquippedChange?: (equipped: EquippedItems) => void;
+  /** Магічні слоти для відображення під іконкою книги */
+  spellSlots?: SpellSlotsData;
 }
 
 export function CharacterArtifactsSection({
@@ -48,6 +54,7 @@ export function CharacterArtifactsSection({
   equipped = {},
   artifacts = [],
   onEquippedChange,
+  spellSlots = {},
 }: CharacterArtifactsSectionProps) {
   const [updatingSlot, setUpdatingSlot] = useState<string | null>(null);
 
@@ -220,12 +227,15 @@ export function CharacterArtifactsSection({
           </div>
         </div>
 
-        <CharacterSpellbook
-          knownSpellIds={knownSpellIds}
-          campaignId={campaignId}
-          characterRace={characterRace}
-          skillTreeProgress={skillTreeProgress}
-        />
+        <div className="absolute top-3 right-3 z-10 flex flex-col items-end gap-1.5">
+          <SpellSlotsBadge spellSlots={spellSlots} />
+          <CharacterSpellbook
+            knownSpellIds={knownSpellIds}
+            campaignId={campaignId}
+            characterRace={characterRace}
+            skillTreeProgress={skillTreeProgress}
+          />
+        </div>
       </div>
     </div>
   );

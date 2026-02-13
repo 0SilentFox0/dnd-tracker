@@ -125,9 +125,15 @@ export default function BattlePage({
             participant={currentParticipant}
             isDM={isDM}
             campaignId={id}
+            canSeeEnemyHp={canSeeEnemyHp}
             onAttack={(data) => handlers.handleAttack(data)}
             onSpell={(data) => mutations.spell.mutate(data)}
-            onBonusAction={(skill) => alert(`Бонусна дія: ${skill.name}`)}
+            onBonusAction={(skill) =>
+              handlers.handleBonusAction(
+                currentParticipant.basicInfo.id,
+                skill.skillId,
+              )
+            }
             onSkipTurn={handlers.handleNextTurn}
             isNextTurnPending={mutations.nextTurn.isPending}
             onMoraleCheck={(d10Roll) => {
@@ -261,6 +267,7 @@ export default function BattlePage({
         <GlobalDamageOverlay
           value={globalDamageFlash.value}
           isHealing={globalDamageFlash.isHealing}
+          onDone={handlers.clearGlobalDamageFlash}
         />
       )}
     </div>

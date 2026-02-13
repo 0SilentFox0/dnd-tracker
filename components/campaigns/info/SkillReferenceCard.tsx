@@ -26,14 +26,17 @@ export function SkillReferenceCard({
   skill,
   isDM,
 }: SkillReferenceCardProps) {
-  const { value: appearance, setValue: setAppearance, saving, save } = useAppearanceSave(
+  const {
+    value: appearance,
+    setValue: setAppearance,
+    saving,
+    save,
+  } = useAppearanceSave(
     campaignId,
     skill.id,
     "skill",
-    skill.appearanceDescription ?? ""
+    skill.appearanceDescription ?? "",
   );
-
-  const imageUrl = skill.image || skill.icon || null;
 
   return (
     <AccordionItem
@@ -41,19 +44,6 @@ export function SkillReferenceCard({
       className="rounded-lg border bg-card overflow-hidden"
     >
       <AccordionTrigger className="p-0 flex-col items-stretch hover:no-underline">
-        <div className="aspect-square w-full relative bg-muted/50 overflow-hidden">
-          {imageUrl ? (
-            <img
-              src={imageUrl}
-              alt=""
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-              <Sparkles className="h-12 w-12 sm:h-16 sm:w-16 opacity-50" />
-            </div>
-          )}
-        </div>
         <div className="p-3 text-left flex flex-wrap items-center gap-2">
           <span className="font-medium text-sm leading-tight flex-1">
             {skill.name}

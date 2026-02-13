@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { prisma } from "@/lib/db";
-import { requireCampaignAccess,requireDM } from "@/lib/utils/api/api-auth";
+import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import {
   getAbilityModifier,
   getPassiveScore,
@@ -10,6 +10,7 @@ import {
   getSpellAttackBonus,
   getSpellSaveDC,
 } from "@/lib/utils/common/calculations";
+import { calculateCharacterSpellSlots } from "@/lib/utils/spells/spell-slots";
 
 const createCharacterSchema = z.object({
   name: z.string().min(1).max(100),
@@ -125,14 +126,33 @@ export async function POST(
     let spellSaveDC: number | null = null;
 
     let spellAttackBonus: number | null = null;
-    
+
     if (data.spellcastingAbility) {
-      const abilityMod = 
-        data.spellcastingAbility === "intelligence" ? intMod :
-        data.spellcastingAbility === "wisdom" ? wisMod : chaMod;
-      
+      const abilityMod =
+        data.spellcastingAbility === "intelligence"
+          ? intMod
+          : data.spellcastingAbility === "wisdom"
+            ? wisMod
+            : chaMod;
+
       spellSaveDC = getSpellSaveDC(proficiencyBonus, abilityMod);
       spellAttackBonus = getSpellAttackBonus(proficiencyBonus, abilityMod);
+    }
+
+    // Якщо магічні слоти порожні — обчислюємо за рівнем
+    let spellSlotsToCreate = data.spellSlots;
+    if (
+      !spellSlotsToCreate ||
+      typeof spellSlotsToCreate !== "object" ||
+      Object.keys(spellSlotsToCreate).length === 0
+    ) {
+      const computed = calculateCharacterSpellSlots(data.level);
+      spellSlotsToCreate = Object.fromEntries(
+        Object.entries(computed).map(([k, v]) => [
+          k,
+          { max: v.max, current: v.max },
+        ]),
+      );
     }
 
     // Створюємо персонажа
@@ -179,7 +199,7 @@ export async function POST(
         spellcastingAbility: data.spellcastingAbility,
         spellSaveDC,
         spellAttackBonus,
-        spellSlots: data.spellSlots,
+        spellSlots: spellSlotsToCreate,
         knownSpells: data.knownSpells,
         
         languages: data.languages,

@@ -3,12 +3,16 @@
  */
 
 import { applyDOTEffects, decreaseEffectDurations } from "./battle-effects";
+import { calculateInitiative } from "./battle-start";
 import {
   checkTriggerCondition,
   getPassiveAbilitiesByTrigger,
 } from "./battle-triggers";
 
-import { executeStartOfRoundTriggers } from "@/lib/utils/skills/skill-triggers-execution";
+import {
+  applyOnBattleStartEffectsToNewAllies,
+  executeStartOfRoundTriggers,
+} from "@/lib/utils/skills/skill-triggers-execution";
 import { BattleParticipant } from "@/types/battle";
 
 /**
@@ -203,8 +207,28 @@ export function processStartOfRound(
   // Додаємо призваних істот до baseOrder
   const updatedOrder = [...baseOrder, ...pendingSummons];
 
+  // Застосовуємо onBattleStart (all_allies) від союзників до нових призваних — щоб скіли типу Ізабель діяли на союзників
+  const newSummonIds = new Set(pendingSummons.map((p) => p.basicInfo.id));
+  const orderWithAllyBuffs = applyOnBattleStartEffectsToNewAllies(
+    updatedOrder,
+    newSummonIds,
+    currentRound,
+  );
+
+  // Оновлюємо abilities.initiative з activeEffects (бо бонуси Ізабель тощо змінюють ініціативу)
+  const orderWithInitiative = orderWithAllyBuffs.map((p) => ({
+    ...p,
+    abilities: {
+      ...p.abilities,
+      initiative: calculateInitiative(p),
+    },
+  }));
+
   // Виконуємо тригери startRound для всіх учасників
-  const triggerResult = executeStartOfRoundTriggers(updatedOrder, currentRound);
+  const triggerResult = executeStartOfRoundTriggers(
+    orderWithInitiative,
+    currentRound,
+  );
 
   // Пересортуємо з урахуванням можливих змін ініціативи
   // (якщо ефекти змінили initiative, треба пересортувати)

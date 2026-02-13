@@ -56,6 +56,8 @@ export interface PlayerTurnViewProps {
   participant: BattleParticipant;
   isDM: boolean;
   campaignId: string;
+  /** DM або скіл бачить HP/AC ворогів */
+  canSeeEnemyHp?: boolean;
   onAttack: (data: AttackData) => void;
   onSpell: (data: SpellCastData) => void;
   onBonusAction: (skill: ActiveSkill) => void;

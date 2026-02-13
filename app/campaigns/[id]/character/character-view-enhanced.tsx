@@ -560,6 +560,7 @@ export function CharacterViewEnhanced({
                   skillTreeProgress={formData.skillTreeProgress ?? {}}
                   equipped={equipped}
                   artifacts={artifactOptions}
+                  spellSlots={formData.spellcasting.spellSlots}
                 />
               </AccordionContent>
             </AccordionItem>

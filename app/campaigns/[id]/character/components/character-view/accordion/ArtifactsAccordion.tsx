@@ -12,7 +12,10 @@ import type { EquippedItems } from "@/types/inventory";
 export interface ArtifactsAccordionProps {
   campaignId: string;
   basicInfo: Record<string, unknown>;
-  spellcasting: { knownSpells: string[] };
+  spellcasting: {
+    knownSpells: string[];
+    spellSlots?: Record<string, { max: number; current: number }>;
+  };
   skillTreeProgress: SkillTreeProgress;
   equipped: EquippedItems;
   artifactOptions: Array<{
@@ -44,6 +47,7 @@ export function ArtifactsAccordion({
           skillTreeProgress={skillTreeProgress}
           equipped={equipped}
           artifacts={artifactOptions}
+          spellSlots={spellcasting.spellSlots}
         />
       </AccordionContent>
     </AccordionItem>

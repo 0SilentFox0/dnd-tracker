@@ -919,7 +919,9 @@ export function executeOnKillEffects(
 }
 
 /**
- * Визначає цілі для ефекту onBattleStart на основі effect.target
+ * Визначає цілі для ефекту на основі effect.target
+ * all_allies — усі на стороні кастера (включно з ним)
+ * all_enemies — усі на протилежній стороні
  */
 function getEffectTargets(
   caster: BattleParticipant,
@@ -929,11 +931,11 @@ function getEffectTargets(
   switch (target) {
     case "all_allies":
       return allParticipants.filter(
-        (p) => p.basicInfo.side === ParticipantSide.ALLY,
+        (p) => p.basicInfo.side === caster.basicInfo.side,
       );
     case "all_enemies":
       return allParticipants.filter(
-        (p) => p.basicInfo.side === ParticipantSide.ENEMY,
+        (p) => p.basicInfo.side !== caster.basicInfo.side,
       );
     case "all":
       return allParticipants;
@@ -981,13 +983,16 @@ export function executeOnBattleStartEffects(
         Array.from(byId.values()),
       );
 
-      const applyEffect = (target: BattleParticipant, effectConfig: {
-        id: string;
-        name: string;
-        type: "buff";
-        duration: number;
-        effects: Array<{ type: string; value: number }>;
-      }) => {
+      const applyEffect = (
+        target: BattleParticipant,
+        effectConfig: {
+          id: string;
+          name: string;
+          type: "buff";
+          duration: number;
+          effects: Array<{ type: string; value: number }>;
+        },
+      ) => {
         const ne = addActiveEffect(target, effectConfig, currentRound);
 
         set({
@@ -1070,9 +1075,7 @@ export function executeOnBattleStartEffectsForAll(
   initiativeOrder: BattleParticipant[],
   currentRound: number,
 ): { updatedParticipants: BattleParticipant[]; messages: string[] } {
-  const byId = new Map(
-    initiativeOrder.map((p) => [p.basicInfo.id, { ...p }]),
-  );
+  const byId = new Map(initiativeOrder.map((p) => [p.basicInfo.id, { ...p }]));
 
   const get = (id: string) => byId.get(id)!;
 
@@ -1099,13 +1102,16 @@ export function executeOnBattleStartEffectsForAll(
 
         const targets = getEffectTargets(current, effect.target, all());
 
-        const applyEffect = (target: BattleParticipant, effectConfig: {
-          id: string;
-          name: string;
-          type: "buff";
-          duration: number;
-          effects: Array<{ type: string; value: number }>;
-        }) => {
+        const applyEffect = (
+          target: BattleParticipant,
+          effectConfig: {
+            id: string;
+            name: string;
+            type: "buff";
+            duration: number;
+            effects: Array<{ type: string; value: number }>;
+          },
+        ) => {
           const ne = addActiveEffect(target, effectConfig, currentRound);
 
           set({
@@ -1127,7 +1133,9 @@ export function executeOnBattleStartEffectsForAll(
             }
 
             if (targets.length > 0) {
-              const targetNames = targets.map((t) => t.basicInfo.name).join(", ");
+              const targetNames = targets
+                .map((t) => t.basicInfo.name)
+                .join(", ");
 
               messages.push(
                 `🏃 ${skill.name}: ${current.basicInfo.name} → ${targetNames} +${numValue} ініціатива`,
@@ -1147,7 +1155,9 @@ export function executeOnBattleStartEffectsForAll(
             }
 
             if (targets.length > 0) {
-              const targetNames = targets.map((t) => t.basicInfo.name).join(", ");
+              const targetNames = targets
+                .map((t) => t.basicInfo.name)
+                .join(", ");
 
               messages.push(
                 `⚔️ ${skill.name}: ${current.basicInfo.name} → ${targetNames} +${effect.value} урону на першу атаку`,
@@ -1167,7 +1177,9 @@ export function executeOnBattleStartEffectsForAll(
             }
 
             if (targets.length > 0) {
-              const targetNames = targets.map((t) => t.basicInfo.name).join(", ");
+              const targetNames = targets
+                .map((t) => t.basicInfo.name)
+                .join(", ");
 
               messages.push(
                 `🎲 ${skill.name}: ${current.basicInfo.name} → ${targetNames} advantage на першу атаку`,
@@ -1187,9 +1199,104 @@ export function executeOnBattleStartEffectsForAll(
   return { updatedParticipants, messages };
 }
 
-// ============================================================================
-// Bonus Action Skills
-// ============================================================================
+/**
+ * Застосовує onBattleStart ефекти (all_allies) від усіх союзників до нових учасників
+ * (наприклад призваних істот). Щоб скіли типу Ізабель діяли на союзників, що з'явились під час бою.
+ */
+export function applyOnBattleStartEffectsToNewAllies(
+  initiativeOrder: BattleParticipant[],
+  newParticipantIds: Set<string>,
+  currentRound: number,
+): BattleParticipant[] {
+  if (newParticipantIds.size === 0) return initiativeOrder;
+
+  const byId = new Map(initiativeOrder.map((p) => [p.basicInfo.id, { ...p }]));
+
+  const get = (id: string) => byId.get(id)!;
+
+  const set = (p: BattleParticipant) => byId.set(p.basicInfo.id, p);
+
+  const all = () => Array.from(byId.values());
+
+  for (const newId of newParticipantIds) {
+    const targetParticipant = get(newId);
+
+    const allies = all().filter(
+      (p) =>
+        p.basicInfo.side === targetParticipant.basicInfo.side &&
+        p.basicInfo.id !== newId,
+    );
+
+    for (const ally of allies) {
+      for (const skill of ally.battleData.activeSkills) {
+        if (
+          !skill.skillTriggers?.some(
+            (t) => t.type === "simple" && t.trigger === "onBattleStart",
+          )
+        )
+          continue;
+
+        for (const effect of skill.effects) {
+          if (effect.target !== "all_allies") continue;
+
+          const numValue = typeof effect.value === "number" ? effect.value : 0;
+
+          const applyEffect = (
+            target: BattleParticipant,
+            effectConfig: {
+              id: string;
+              name: string;
+              type: "buff";
+              duration: number;
+              effects: Array<{ type: string; value: number }>;
+            },
+          ) => {
+            const ne = addActiveEffect(target, effectConfig, currentRound);
+
+            set({
+              ...target,
+              battleData: { ...target.battleData, activeEffects: ne },
+            });
+          };
+
+          switch (effect.stat) {
+            case "initiative":
+              applyEffect(get(newId), {
+                id: `skill-${skill.skillId}-battle-start-initiative`,
+                name: `${skill.name} — ініціатива`,
+                type: "buff",
+                duration: 999,
+                effects: [{ type: "initiative_bonus", value: numValue }],
+              });
+              break;
+            case "damage":
+              applyEffect(get(newId), {
+                id: `skill-${skill.skillId}-battle-start-dmg`,
+                name: `${skill.name} — бонус урону`,
+                type: "buff",
+                duration: 1,
+                effects: [{ type: "damage_bonus", value: numValue }],
+              });
+              break;
+            case "advantage":
+              applyEffect(get(newId), {
+                id: `skill-${skill.skillId}-battle-start-adv`,
+                name: `${skill.name} — advantage`,
+                type: "buff",
+                duration: 1,
+                effects: [{ type: "advantage_attack", value: 1 }],
+              });
+              break;
+            default:
+              break;
+          }
+        }
+      }
+    }
+  }
+
+  return initiativeOrder.map((p) => get(p.basicInfo.id));
+}
 
 /**
  * Виконує ефект бонусної дії для конкретного скіла.
@@ -1255,8 +1362,26 @@ export function executeBonusActionSkill(
       (skillUsageCounts[skill.skillId] ?? 0) + 1;
   }
 
+  const byId = new Map(
+    updatedParticipants.map((p) => [p.basicInfo.id, { ...p }]),
+  );
+
+  const get = (id: string) => byId.get(id)!;
+
+  const set = (p: BattleParticipant) => byId.set(p.basicInfo.id, p);
+
+  const all = () => updatedParticipants.map((p) => get(p.basicInfo.id));
+
   for (const effect of skill.effects) {
     const numValue = typeof effect.value === "number" ? effect.value : 0;
+
+    // Визначаємо цілі для ефектів з target (all_allies, all_enemies, targetParticipantId)
+    const targets =
+      effect.target === "all_allies" || effect.target === "all_enemies"
+        ? getEffectTargets(updatedParticipant, effect.target, all())
+        : targetParticipantId
+          ? [get(targetParticipantId)].filter(Boolean)
+          : [get(updatedParticipant.basicInfo.id)];
 
     switch (effect.stat) {
       // Перенаправлення фізичного урону
@@ -1291,61 +1416,177 @@ export function executeBonusActionSkill(
         messages.push(
           `✨ ${skill.name}: ${participant.basicInfo.name} отримує ${numValue} додаткових кастів`,
         );
-        // Скидаємо hasUsedAction щоб можна було кастувати
-        updatedParticipant = {
-          ...updatedParticipant,
-          actionFlags: {
-            ...updatedParticipant.actionFlags,
-            hasUsedAction: false,
-          },
-        };
+
+        const p = get(updatedParticipant.basicInfo.id);
+
+        set({
+          ...p,
+          actionFlags: { ...p.actionFlags, hasUsedAction: false },
+        });
         break;
       }
 
-      // Відновлення моралі (Натхнення/Заохочення)
+      // Відновлення моралі (Натхнення/Заохочення) — підтримка effect.target all_allies
       case "morale": {
-        if (targetParticipantId) {
-          updatedParticipants = updatedParticipants.map((p) => {
-            if (p.basicInfo.id === targetParticipantId) {
-              return {
-                ...p,
-                combatStats: {
-                  ...p.combatStats,
-                  morale: Math.min(3, p.combatStats.morale + numValue),
-                },
-              };
-            }
+        for (const t of targets) {
+          if (!t) continue;
 
-            return p;
-          });
-          messages.push(`📢 ${skill.name}: мораль союзника +${numValue}`);
-        } else {
-          updatedParticipant = {
-            ...updatedParticipant,
+          set({
+            ...t,
             combatStats: {
-              ...updatedParticipant.combatStats,
-              morale: Math.min(
-                3,
-                updatedParticipant.combatStats.morale + numValue,
-              ),
+              ...t.combatStats,
+              morale: Math.min(3, t.combatStats.morale + numValue),
             },
-          };
-          messages.push(
-            `📢 ${skill.name}: ${participant.basicInfo.name} мораль +${numValue}`,
-          );
+          });
         }
 
+        const targetNames = targets
+          .filter(Boolean)
+          .map((t) => t!.basicInfo.name)
+          .join(", ");
+
+        messages.push(
+          `📢 ${skill.name}: ${participant.basicInfo.name} → ${targetNames} мораль +${numValue}`,
+        );
+        break;
+      }
+
+      // Ініціатива — підтримка effect.target all_allies
+      case "initiative": {
+        for (const t of targets) {
+          if (!t) continue;
+
+          const ne = addActiveEffect(
+            t,
+            {
+              id: `skill-${skill.skillId}-bonus-init-${t.basicInfo.id}`,
+              name: `${skill.name} — ініціатива`,
+              type: "buff",
+              duration: 999,
+              effects: [{ type: "initiative_bonus", value: numValue }],
+            },
+            currentRound,
+          );
+
+          set({ ...t, battleData: { ...t.battleData, activeEffects: ne } });
+        }
+
+        const targetNames = targets
+          .filter(Boolean)
+          .map((t) => t!.basicInfo.name)
+          .join(", ");
+
+        messages.push(
+          `🏃 ${skill.name}: ${participant.basicInfo.name} → ${targetNames} +${numValue} ініціатива`,
+        );
+        break;
+      }
+
+      // Броня — підтримка effect.target all_allies
+      case "armor": {
+        for (const t of targets) {
+          if (!t) continue;
+
+          const ne = addActiveEffect(
+            t,
+            {
+              id: `skill-${skill.skillId}-bonus-ac-${t.basicInfo.id}`,
+              name: `${skill.name} — AC`,
+              type: "buff",
+              duration: 999,
+              effects: [{ type: "armor_bonus", value: numValue }],
+            },
+            currentRound,
+          );
+
+          set({ ...t, battleData: { ...t.battleData, activeEffects: ne } });
+        }
+
+        const targetNames = targets
+          .filter(Boolean)
+          .map((t) => t!.basicInfo.name)
+          .join(", ");
+
+        messages.push(
+          `🛡 ${skill.name}: ${participant.basicInfo.name} → ${targetNames} +${numValue} AC`,
+        );
+        break;
+      }
+
+      // Бонус урону / advantage — підтримка effect.target all_allies
+      case "advantage": {
+        for (const t of targets) {
+          if (!t) continue;
+
+          const ne = addActiveEffect(
+            t,
+            {
+              id: `skill-${skill.skillId}-bonus-adv-${t.basicInfo.id}`,
+              name: `${skill.name} — advantage`,
+              type: "buff",
+              duration: 1,
+              effects: [{ type: "advantage_attack", value: 1 }],
+            },
+            currentRound,
+          );
+
+          set({ ...t, battleData: { ...t.battleData, activeEffects: ne } });
+        }
+
+        const targetNames = targets
+          .filter(Boolean)
+          .map((t) => t!.basicInfo.name)
+          .join(", ");
+
+        messages.push(
+          `🎲 ${skill.name}: ${participant.basicInfo.name} → ${targetNames} advantage на першу атаку`,
+        );
+        break;
+      }
+
+      case "damage":
+      case "melee_damage":
+      case "ranged_damage":
+      case "all_damage": {
+        for (const t of targets) {
+          if (!t) continue;
+
+          const ne = addActiveEffect(
+            t,
+            {
+              id: `skill-${skill.skillId}-bonus-dmg-${t.basicInfo.id}`,
+              name: `${skill.name} — бонус урону`,
+              type: "buff",
+              duration: 1,
+              effects: [{ type: "damage_bonus", value: numValue }],
+            },
+            currentRound,
+          );
+
+          set({ ...t, battleData: { ...t.battleData, activeEffects: ne } });
+        }
+
+        const targetNames = targets
+          .filter(Boolean)
+          .map((t) => t!.basicInfo.name)
+          .join(", ");
+
+        messages.push(
+          `⚔️ ${skill.name}: ${participant.basicInfo.name} → ${targetNames} +${numValue} урону на першу атаку`,
+        );
         break;
       }
 
       // Відновлення слоту (Пожирач - onConsumeDead)
       case "restore_spell_slot": {
-        // Знаходимо найнижчий використаний слот і відновлюємо
+        const p = get(updatedParticipant.basicInfo.id);
+
         for (const lvl of ["1", "2", "3", "4", "5"]) {
-          const slot = updatedParticipant.spellcasting.spellSlots[lvl];
+          const slot = p.spellcasting.spellSlots[lvl];
 
           if (slot && slot.current < slot.max) {
             slot.current = Math.min(slot.max, slot.current + numValue);
+            set(p);
             messages.push(
               `🔮 ${skill.name}: відновлено ${numValue} слот рівня ${lvl}`,
             );
@@ -1390,6 +1631,7 @@ export function executeBonusActionSkill(
 
           return p;
         });
+        updatedParticipants.forEach((p) => set(p));
         messages.push(
           `🔥 ${skill.name}: поле бою — ${dmgValue} урону/раунд на ${duration} раундів`,
         );
@@ -1423,6 +1665,7 @@ export function executeBonusActionSkill(
           messages.push(
             `✝️ ${skill.name}: союзник воскрешений з ${numValue}${effect.isPercentage ? "%" : ""} HP`,
           );
+          updatedParticipants.forEach((p) => set(p));
         }
 
         break;
@@ -1450,6 +1693,7 @@ export function executeBonusActionSkill(
 
           return p;
         });
+        updatedParticipants.forEach((p) => set(p));
         messages.push(`😱 ${skill.name}: мораль ворогів ${numValue}`);
         break;
       }
@@ -1472,6 +1716,7 @@ export function executeBonusActionSkill(
 
             return p;
           });
+          updatedParticipants.forEach((p) => set(p));
           messages.push(`✨ ${skill.name}: знято дебафи з союзника`);
         }
 
@@ -1484,7 +1729,9 @@ export function executeBonusActionSkill(
     }
   }
 
-  // Позначаємо бонусну дію як використану
+  // Синхронізуємо з byId та позначаємо бонусну дію як використану
+  updatedParticipants = all();
+  updatedParticipant = get(participant.basicInfo.id);
   updatedParticipant = {
     ...updatedParticipant,
     actionFlags: {
@@ -1492,8 +1739,13 @@ export function executeBonusActionSkill(
       hasUsedBonusAction: true,
     },
   };
+  set(updatedParticipant);
 
-  return { updatedParticipant, updatedParticipants, messages };
+  return {
+    updatedParticipant,
+    updatedParticipants: all(),
+    messages,
+  };
 }
 
 // ============================================================================

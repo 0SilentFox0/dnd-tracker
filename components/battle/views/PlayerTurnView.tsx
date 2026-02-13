@@ -26,7 +26,9 @@ import type { PlayerTurnViewProps } from "@/types/battle-ui";
 export function PlayerTurnView({
   battle,
   participant,
+  isDM,
   campaignId,
+  canSeeEnemyHp = false,
   onAttack,
   onSpell,
   onBonusAction,
@@ -370,8 +372,8 @@ export function PlayerTurnView({
         battle={battle}
         campaignId={campaignId}
         availableTargets={battle.initiativeOrder}
-        isDM={true}
-        canSeeEnemyHp={true}
+        isDM={isDM}
+        canSeeEnemyHp={canSeeEnemyHp}
         onCast={(data) => {
           setHasPerformedAction(true);
           onSpell(data);
@@ -384,6 +386,7 @@ export function PlayerTurnView({
         onOpenChange={setTargetSelectionDialogOpen}
         isAOE={selectedAttack?.targetType === "aoe"}
         maxTargets={selectedAttack?.targetType === "aoe" ? selectedAttack.maxTargets : undefined}
+        canSeeEnemyHp={canSeeEnemyHp}
         availableTargets={(() => {
           const friendlyFire = battle.campaign?.friendlyFire || false;
 
@@ -416,6 +419,7 @@ export function PlayerTurnView({
           attacker={participant}
           attack={selectedAttack}
           target={selectedTarget}
+          canSeeEnemyHp={canSeeEnemyHp}
           onConfirm={handleAttackRollConfirm}
         />
       )}

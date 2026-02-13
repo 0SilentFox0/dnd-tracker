@@ -2,7 +2,17 @@
  * Утиліти для конвертації між CharacterFormData (згрупована) та Character (плоска)
  */
 
+import { calculateCharacterSpellSlots } from "@/lib/utils/spells/spell-slots";
 import type { Character, CharacterFormData } from "@/types/characters";
+
+function getDefaultSpellSlotsForLevel(
+  level: number,
+): Record<string, { max: number; current: number }> {
+  const slots = calculateCharacterSpellSlots(level);
+  return Object.fromEntries(
+    Object.entries(slots).map(([k, v]) => [k, { max: v.max, current: v.max }]),
+  );
+}
 
 /**
  * Конвертує плоску структуру Character в згруповану CharacterFormData
@@ -52,9 +62,13 @@ export function characterToFormData(
     spellcasting: {
       spellcastingClass: character.spellcastingClass,
       spellcastingAbility: character.spellcastingAbility,
-      spellSlots: character.spellSlots as
-        | Record<string, { max: number; current: number }>
-        | undefined,
+      spellSlots: (() => {
+        const raw = character.spellSlots as
+          | Record<string, { max: number; current: number }>
+          | undefined;
+        if (raw && Object.keys(raw).length > 0) return raw;
+        return getDefaultSpellSlotsForLevel(character.level || 1);
+      })(),
       knownSpells: (character.knownSpells as string[]) || [],
     },
     roleplay: {

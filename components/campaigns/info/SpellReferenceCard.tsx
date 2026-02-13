@@ -25,14 +25,17 @@ export function SpellReferenceCard({
   spell,
   isDM,
 }: SpellReferenceCardProps) {
-  const { value: appearance, setValue: setAppearance, saving, save } = useAppearanceSave(
+  const {
+    value: appearance,
+    setValue: setAppearance,
+    saving,
+    save,
+  } = useAppearanceSave(
     campaignId,
     spell.id,
     "spell",
-    spell.appearanceDescription ?? ""
+    spell.appearanceDescription ?? "",
   );
-
-  const imageUrl = spell.icon || null;
 
   return (
     <AccordionItem
@@ -40,19 +43,6 @@ export function SpellReferenceCard({
       className="rounded-lg border bg-card overflow-hidden"
     >
       <AccordionTrigger className="p-0 flex-col items-stretch hover:no-underline">
-        <div className="aspect-square w-full relative bg-muted/50 overflow-hidden">
-          {imageUrl ? (
-            <img
-              src={imageUrl}
-              alt=""
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-              <Sparkles className="h-12 w-12 sm:h-16 sm:w-16 opacity-50" />
-            </div>
-          )}
-        </div>
         <div className="p-3 text-left">
           <span className="font-medium text-sm leading-tight block">
             {spell.name}
