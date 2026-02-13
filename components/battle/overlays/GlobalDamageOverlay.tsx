@@ -5,8 +5,6 @@ import { AnimatePresence, motion } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 
-const EXIT_DURATION = 0.4;
-
 interface GlobalDamageOverlayProps {
   value: number;
   isHealing: boolean;
@@ -44,10 +42,7 @@ export function GlobalDamageOverlay({
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1.2 }}
           exit={{ opacity: 0, scale: 1.5 }}
-          transition={{
-            duration: 0.2,
-            exit: { duration: EXIT_DURATION },
-          }}
+          transition={{ duration: 0.2 }}
           className="fixed inset-0 z-[100] pointer-events-none flex items-center justify-center"
         >
           <span
