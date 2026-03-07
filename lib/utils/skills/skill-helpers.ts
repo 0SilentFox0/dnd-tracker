@@ -81,6 +81,8 @@ export function getSkillCombatStats(skill: Skill | GroupedSkill): {
   physicalResistance?: number;
   magicalResistance?: number;
   effects?: SkillEffect[];
+  affectsDamage?: boolean;
+  damageType?: "melee" | "ranged" | "magic" | null;
 } {
   if ("combatStats" in skill) {
     return skill.combatStats || {};

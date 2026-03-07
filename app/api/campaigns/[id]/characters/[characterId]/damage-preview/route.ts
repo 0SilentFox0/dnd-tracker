@@ -35,6 +35,11 @@ export async function GET(
 
     const rangedMultiplier = Math.max(0.1, Math.min(3, parseFloat(searchParams.get("rangedMultiplier") ?? "1") || 1));
 
+    const meleeDiceSumParam = searchParams.get("meleeDiceSum");
+    const rangedDiceSumParam = searchParams.get("rangedDiceSum");
+    const meleeDiceSum = meleeDiceSumParam != null ? parseInt(meleeDiceSumParam, 10) : null;
+    const rangedDiceSum = rangedDiceSumParam != null ? parseInt(rangedDiceSumParam, 10) : null;
+
     const accessResult = await requireCampaignAccess(campaignId, false);
 
     if (accessResult instanceof NextResponse) return accessResult;
@@ -74,14 +79,6 @@ export async function GET(
 
     const dexMod = Math.floor((participant.abilities.dexterity - 10) / 2);
 
-    const meleeBase = meleeAttack
-      ? getDiceAverage(meleeAttack.damageDice)
-      : 0;
-
-    const rangedBase = rangedAttack
-      ? getDiceAverage(rangedAttack.damageDice)
-      : 0;
-
     const meleeHero = getHeroDamageComponents(
       participant.abilities.level,
       AttackType.MELEE
@@ -92,9 +89,21 @@ export async function GET(
       AttackType.RANGED
     );
 
-    const meleeDiceAvg = getDiceAverage(meleeHero.diceNotation);
+    const useMeleeUserSum = meleeDiceSum != null && !Number.isNaN(meleeDiceSum);
+    const useRangedUserSum = rangedDiceSum != null && !Number.isNaN(rangedDiceSum);
 
-    const rangedDiceAvg = getDiceAverage(rangedHero.diceNotation);
+    const meleeBase = useMeleeUserSum
+      ? meleeDiceSum!
+      : (meleeAttack ? getDiceAverage(meleeAttack.damageDice) : 0);
+    const meleeDiceAvg = useMeleeUserSum
+      ? 0
+      : getDiceAverage(meleeHero.diceNotation);
+    const rangedBase = useRangedUserSum
+      ? rangedDiceSum!
+      : (rangedAttack ? getDiceAverage(rangedAttack.damageDice) : 0);
+    const rangedDiceAvg = useRangedUserSum
+      ? 0
+      : getDiceAverage(rangedHero.diceNotation);
 
     const meleeResult = calculateDamageWithModifiers(
       participant,
@@ -104,8 +113,10 @@ export async function GET(
       {
         heroLevelPart: meleeHero.levelPart,
         heroDicePart: meleeDiceAvg,
-        heroDiceNotation: meleeHero.diceNotation,
-        weaponDiceNotation: meleeAttack?.damageDice ?? undefined,
+        heroDiceNotation: useMeleeUserSum ? undefined : meleeHero.diceNotation,
+        weaponDiceNotation: useMeleeUserSum
+          ? "кидки"
+          : (meleeAttack?.damageDice ?? undefined),
       }
     );
 
@@ -117,8 +128,10 @@ export async function GET(
       {
         heroLevelPart: rangedHero.levelPart,
         heroDicePart: rangedDiceAvg,
-        heroDiceNotation: rangedHero.diceNotation,
-        weaponDiceNotation: rangedAttack?.damageDice ?? undefined,
+        heroDiceNotation: useRangedUserSum ? undefined : rangedHero.diceNotation,
+        weaponDiceNotation: useRangedUserSum
+          ? "кидки"
+          : (rangedAttack?.damageDice ?? undefined),
       }
     );
 

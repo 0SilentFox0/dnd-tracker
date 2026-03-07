@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { MoreVertical, Pencil, Trash2, TrendingUp } from "lucide-react";
 
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import {
@@ -30,6 +30,7 @@ import {
   useCharacters,
   useDeleteAllCharacters,
   useDeleteCharacter,
+  useLevelUpCharacter,
 } from "@/lib/hooks/useCharacters";
 import { normalizeImageUrl } from "@/lib/utils/common/image-url";
 import type { Character } from "@/types/characters";
@@ -50,6 +51,17 @@ export function DMCharactersClient({ campaignId }: DMCharactersClientProps) {
   const deleteAllMutation = useDeleteAllCharacters(campaignId);
 
   const deleteOneMutation = useDeleteCharacter(campaignId);
+
+  const levelUpMutation = useLevelUpCharacter(campaignId);
+
+  const handleLevelUp = async (character: Character) => {
+    try {
+      await levelUpMutation.mutateAsync(character.id);
+    } catch (error) {
+      console.error("Error leveling up:", error);
+      alert("Не вдалося підняти рівень. Спробуйте ще раз.");
+    }
+  };
 
   const handleDeleteAll = async () => {
     try {
@@ -147,6 +159,13 @@ export function DMCharactersClient({ campaignId }: DMCharactersClientProps) {
                         <Pencil className="mr-2 h-4 w-4" />
                         Редагувати
                       </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => handleLevelUp(character)}
+                      disabled={levelUpMutation.isPending}
+                    >
+                      <TrendingUp className="mr-2 h-4 w-4" />
+                      Підняти рівень
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem

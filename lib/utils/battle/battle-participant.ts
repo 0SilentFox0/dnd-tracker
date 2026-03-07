@@ -922,9 +922,32 @@ export async function createBattleParticipantFromUnit(
   return participant;
 }
 
+/** Формат ID рівня основної навички: ${mainSkillId}_basic_level, _advanced_level, _expert_level */
+const MAIN_SKILL_LEVEL_RE = /_(basic|advanced|expert)_level$/;
+
+function parseMainSkillLevelId(
+  id: string,
+): { mainSkillId: string; level: string } | null {
+  const match = id.match(MAIN_SKILL_LEVEL_RE);
+  if (!match) return null;
+  const level = match[1];
+  const mainSkillId = id.slice(0, match.index);
+  return mainSkillId ? { mainSkillId, level } : null;
+}
+
+/** Визначає рівень скіла за назвою (Напад — Експерт → expert) */
+function inferLevelFromSkillName(name: string | null): string | null {
+  const n = (name ?? "").toLowerCase();
+  if (n.includes("експерт") || n.includes("expert")) return "expert";
+  if (n.includes("просунут") || n.includes("advanced")) return "advanced";
+  if (n.includes("базов") || n.includes("основ") || n.includes("basic")) return "basic";
+  return null;
+}
+
 /**
  * Витягує активні скіли з character.skillTreeProgress та characterSkills
- * Завантажує деталі скілів з БД (або використовує preloadedSkillsById)
+ * Завантажує деталі скілів з БД (або використовує preloadedSkillsById).
+ * Розв'язує id рівнів (mainSkillId_expert_level) у реальні скіли з бібліотеки.
  */
 async function extractActiveSkillsFromCharacter(
   character: CharacterFromPrisma,
@@ -976,15 +999,56 @@ async function extractActiveSkillsFromCharacter(
     return activeSkills;
   }
 
-  const skillsMap = preloadedSkillsById
-    ? new Map(Object.entries(preloadedSkillsById))
-    : new Map(
-        (
-          await prisma.skill.findMany({
-            where: { id: { in: allSkillIds }, campaignId },
-          })
-        ).map((s) => [s.id, s]),
-      );
+  // Розділяємо прямі id скілів та id рівнів (mainSkillId_expert_level)
+  const directIds = allSkillIds.filter((id) => !parseMainSkillLevelId(id));
+  const levelIds = allSkillIds.filter((id) => parseMainSkillLevelId(id));
+  const mainSkillIdsFromLevels = new Set(
+    levelIds
+      .map(parseMainSkillLevelId)
+      .filter((p): p is { mainSkillId: string; level: string } => p != null)
+      .map((p) => p.mainSkillId),
+  );
+
+  let fetchedSkills: Prisma.SkillGetPayload<object>[];
+
+  if (preloadedSkillsById) {
+    const byDirect = directIds
+      .map((id) => preloadedSkillsById[id])
+      .filter(Boolean);
+    const byMainSkill = Object.values(preloadedSkillsById).filter(
+      (s) =>
+        mainSkillIdsFromLevels.size > 0 &&
+        (s.mainSkillId && mainSkillIdsFromLevels.has(s.mainSkillId)),
+    );
+    fetchedSkills = [...new Map([...byDirect, ...byMainSkill].map((s) => [s.id, s])).values()];
+  } else {
+    const orConditions: Array<{ id: { in: string[] } } | { mainSkillId: { in: string[] } }> = [];
+    if (directIds.length > 0) orConditions.push({ id: { in: directIds } });
+    if (mainSkillIdsFromLevels.size > 0) {
+      orConditions.push({ mainSkillId: { in: Array.from(mainSkillIdsFromLevels) } });
+    }
+    fetchedSkills = orConditions.length
+      ? await prisma.skill.findMany({
+          where: { campaignId, OR: orConditions },
+        })
+      : [];
+  }
+
+  const skillsMap = new Map<string, Prisma.SkillGetPayload<object>>();
+  for (const s of fetchedSkills) {
+    skillsMap.set(s.id, s);
+  }
+  // Розв'язуємо id рівнів → реальний скіл (щоб Напад — Експерт потрапляв у participant.activeSkills)
+  for (const levelId of levelIds) {
+    const parsed = parseMainSkillLevelId(levelId);
+    if (!parsed) continue;
+    const match = fetchedSkills.find((s) => {
+      const msId = s.mainSkillId ?? (s.mainSkillData as { mainSkillId?: string } | undefined)?.mainSkillId;
+      if (msId !== parsed.mainSkillId) return false;
+      return inferLevelFromSkillName(s.name) === parsed.level;
+    });
+    if (match) skillsMap.set(levelId, match);
+  }
 
   // Створюємо ActiveSkill для кожного скілу
   for (const skillId of allSkillIds) {
@@ -1011,7 +1075,11 @@ async function extractActiveSkillsFromCharacter(
       value?: number | string | boolean;
       duration?: number;
     };
-    type CombatStatsEffects = { effects?: RawEffect[] };
+    type CombatStatsEffects = {
+      effects?: RawEffect[];
+      affectsDamage?: boolean;
+      damageType?: "melee" | "ranged" | "magic" | null;
+    };
 
     const combatStats = (skill.combatStats as CombatStatsEffects) ?? {};
 
@@ -1121,6 +1189,8 @@ async function extractActiveSkillsFromCharacter(
       mainSkillId: skill.mainSkillId ?? skillIdToMainSkill[skillId] ?? "",
       level: skillIdToLevel[skillId],
       effects,
+      affectsDamage: combatStats.affectsDamage,
+      damageType: combatStats.damageType ?? null,
       spellEnhancements,
       skillTriggers,
     });

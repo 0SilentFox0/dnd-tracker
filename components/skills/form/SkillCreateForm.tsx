@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 
 import { SkillBasicInfo } from "@/components/skills/form/basic";
+import { SkillDamageAffinity } from "@/components/skills/form/effects/SkillDamageAffinity";
 import { SkillEffectsEditor } from "@/components/skills/form/effects";
 import { SkillMainSkillSection } from "@/components/skills/form/main-skill";
 import { SkillSpellSection } from "@/components/skills/form/spell";
@@ -75,6 +76,7 @@ export function SkillCreateForm({
     mainSkills,
     basicInfo,
     effectsGroup,
+    damageGroup,
     spell,
     spellEnhancement,
     mainSkill,
@@ -109,6 +111,13 @@ export function SkillCreateForm({
             onEffectsChange={effectsGroup.setters.setEffects}
             onMinTargetsChange={effectsGroup.setters.setMinTargets}
             onMaxTargetsChange={effectsGroup.setters.setMaxTargets}
+          />
+
+          <SkillDamageAffinity
+            affectsDamage={damageGroup.affectsDamage}
+            damageType={damageGroup.damageType}
+            onAffectsDamageChange={damageGroup.setters.setAffectsDamage}
+            onDamageTypeChange={damageGroup.setters.setDamageType}
           />
 
           <SkillSpellSection

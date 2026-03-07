@@ -166,7 +166,13 @@ export function CharacterSkillTreeView({
 
       applyNewUnlocked([...unlockedSkills, skill.id]);
     },
-    [canLevel, unlockedSkills, savedUnlockedSkills, maxSkills, applyNewUnlocked],
+    [
+      canLevel,
+      unlockedSkills,
+      savedUnlockedSkills,
+      maxSkills,
+      applyNewUnlocked,
+    ],
   );
 
   const handleUltimateSkillClick = useCallback(
@@ -191,7 +197,13 @@ export function CharacterSkillTreeView({
 
       applyNewUnlocked([...unlockedSkills, skill.id]);
     },
-    [canLevel, unlockedSkills, savedUnlockedSkills, maxSkills, applyNewUnlocked],
+    [
+      canLevel,
+      unlockedSkills,
+      savedUnlockedSkills,
+      maxSkills,
+      applyNewUnlocked,
+    ],
   );
 
   const handleRacialSkillClick = useCallback(
@@ -228,7 +240,13 @@ export function CharacterSkillTreeView({
 
       applyNewUnlocked([...unlockedSkills, racialSkillLevelId]);
     },
-    [canLevel, unlockedSkills, savedUnlockedSkills, maxSkills, applyNewUnlocked],
+    [
+      canLevel,
+      unlockedSkills,
+      savedUnlockedSkills,
+      maxSkills,
+      applyNewUnlocked,
+    ],
   );
 
   if (!characterRace) {
@@ -248,7 +266,7 @@ export function CharacterSkillTreeView({
   }
 
   return (
-    <div className="mt-4 border rounded-lg md:p-4 bg-muted/30">
+    <div className="mt-4">
       <h4 className="text-sm font-medium mb-2 p-1">Дерево прокачки</h4>
       <p className="text-sm text-muted-foreground mb-2 p-1">
         Рівень героя: {characterLevel}. Прокачано скілів:{" "}

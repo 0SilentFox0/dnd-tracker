@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -294,6 +295,43 @@ export function SkillCard({
               )}
             </div>
           )}
+
+          <div className="flex flex-wrap gap-2 items-center">
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <Checkbox
+                checked={combatStats.affectsDamage ?? false}
+                onCheckedChange={(checked) => {
+                  const next = !!checked;
+                  const baseStats =
+                    "combatStats" in skill ? (skill.combatStats as Record<string, unknown>) ?? {} : {};
+                  updateSkillMutation.mutate({
+                    skillId,
+                    data: {
+                      combatStats: {
+                        ...baseStats,
+                        affectsDamage: next,
+                        damageType:
+                          next && !combatStats.damageType
+                            ? "melee"
+                            : combatStats.damageType ?? undefined,
+                      },
+                    },
+                  });
+                }}
+                disabled={updateSkillMutation.isPending}
+              />
+              <span className="text-xs font-medium">Впливає на шкоду</span>
+            </label>
+            {combatStats.affectsDamage && combatStats.damageType && (
+              <Badge variant="secondary" className="text-xs font-normal">
+                {combatStats.damageType === "melee"
+                  ? "ближній бій"
+                  : combatStats.damageType === "ranged"
+                    ? "дальній бій"
+                    : "магія"}
+              </Badge>
+            )}
+          </div>
 
           {effects.length > 0 && (
             <div className="flex flex-col gap-1">

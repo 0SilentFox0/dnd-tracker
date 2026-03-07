@@ -4,6 +4,42 @@
 
 ---
 
+## Швидкий старт (автоматичний скрипт)
+
+Якщо новий Supabase проект вже створений:
+
+1. **Створи `.env.migration`** (скопіюй з `scripts/migration.env.example`):
+   ```bash
+   cp scripts/migration.env.example .env.migration
+   ```
+
+2. **Заповни connection strings** — візьми з Supabase Dashboard:
+   - Старий проект: **Project Settings** → **Database** → **Connection string** → **Direct connection**
+   - Новий проект: те саме
+   - Підстав пароль замість `[PASSWORD]`
+
+3. **Запусти скрипт**:
+   ```bash
+   chmod +x scripts/migrate-to-new-supabase.sh
+   ./scripts/migrate-to-new-supabase.sh
+   ```
+
+4. **Вручну: JWT Secret** — скопіюй зі старого проекту (Settings → API) у новий.
+
+5. **Онови env** — `DATABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` на значення нового проекту.
+
+### Що потрібно мати під рукою
+
+| Що | Де взяти |
+|----|----------|
+| `OLD_DB_URL` | Старий проект → Settings → Database → Connection string (Direct) |
+| `NEW_DB_URL` | Новий проект → Settings → Database → Connection string (Direct) |
+| Database password | Settings → Database → Reset password (якщо забув) |
+| JWT Secret | Старий проект → Settings → API → JWT Secret |
+| Anon key (новий) | Новий проект → Settings → API (після вставки JWT Secret) |
+
+---
+
 ## Що переносимо
 
 | Компонент | Де зараз | Куди |

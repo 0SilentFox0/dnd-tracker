@@ -16,6 +16,9 @@ import { AttackType } from "@/lib/constants/battle";
 export function matchesAttackType(effectStat: string, attackType: AttackType): boolean {
   const s = effectStat.toLowerCase();
 
+  // all_damage застосовується до обох типів атаки (melee і ranged)
+  if (s === "all_damage") return true;
+
   if (attackType === AttackType.MELEE) {
     return (
       s === "melee_damage" ||

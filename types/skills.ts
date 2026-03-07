@@ -64,6 +64,10 @@ export interface GroupedSkill {
     min_targets?: number;
     max_targets?: number;
     effects?: SkillEffect[];
+    /** Чекбокс: скіл впливає на розрахунок шкоди */
+    affectsDamage?: boolean;
+    /** Тип шкоди: melee / ranged / magic */
+    damageType?: "melee" | "ranged" | "magic" | null;
   };
   spellData: {
     spellId?: string;

@@ -31,11 +31,10 @@ export function getSpellEnhancementSkills(
 ): ActiveSkill[] {
   return participant.battleData.activeSkills.filter((skill) => {
     if (!skill.spellEnhancements) return false;
-
-    // Перевіряємо чи скіл покращує це заклинання
-    // Це може бути через spellNewSpellId або через spellGroupId
-    // Поки що перевіряємо базову структуру
-    return true; // TODO: Додати логіку перевірки конкретного spellId
+    // Якщо скіл позначено «впливає на шкоду», враховуємо лише для типу magic
+    if (skill.affectsDamage === true && skill.damageType !== "magic")
+      return false;
+    return true;
   });
 }
 

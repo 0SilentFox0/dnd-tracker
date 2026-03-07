@@ -27,6 +27,8 @@ const updateSkillSchema = z.object({
       magicalResistance: z.number().optional(),
       min_targets: z.number().optional(),
       max_targets: z.number().optional(),
+      affectsDamage: z.boolean().optional(),
+      damageType: z.enum(["melee", "ranged", "magic"]).nullable().optional(),
       effects: z
         .array(
           z.object({

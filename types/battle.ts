@@ -101,12 +101,19 @@ export interface SkillEffect {
   maxTriggers?: number | null;
 }
 
+/** Тип шкоди для фільтрації скілів при розрахунку урону */
+export type SkillDamageType = "melee" | "ranged" | "magic";
+
 export interface ActiveSkill {
   skillId: string;
   name: string;
   mainSkillId: string;
   level: SkillLevel;
   effects: SkillEffect[];
+  /** Чи враховувати скіл лише коли він позначений як такий, що впливає на шкоду */
+  affectsDamage?: boolean;
+  /** Тип шкоди: melee / ranged / magic — скіл враховується лише для цього типу */
+  damageType?: SkillDamageType | null;
   spellEnhancements?: {
     spellEffectIncrease?: number; // +25% ефекту
     spellTargetChange?: { target: string }; // зміна цілі

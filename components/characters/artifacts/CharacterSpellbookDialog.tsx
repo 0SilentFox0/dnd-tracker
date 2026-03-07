@@ -87,37 +87,65 @@ export function CharacterSpellbookDialog({
                     <h3 className="text-sm font-semibold text-amber-400 mb-2">
                       {group.groupName}
                     </h3>
-                    <div className="grid grid-cols-5 gap-2">
-                      {group.spells.map((spell) => (
-                        <Tooltip key={spell.id}>
-                          <TooltipTrigger asChild>
-                            <div className="relative aspect-square rounded-lg overflow-hidden border border-amber-900/40 bg-[#2a2520] cursor-pointer hover:border-amber-500/60 transition-colors">
-                              {spell.icon ? (
-                                <Image
-                                  src={spell.icon}
-                                  alt={spell.name}
-                                  fill
-                                  className="object-cover"
-                                  sizes="64px"
-                                />
-                              ) : (
-                                <div className="flex items-center justify-center h-full text-amber-600/60 text-xs text-center p-1 leading-tight">
-                                  {spell.name}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                      {group.spells.map((spell) => {
+                        const shortDescription =
+                          spell.description != null
+                            ? spell.description.length > 120
+                              ? `${spell.description.slice(0, 117).trim()}…`
+                              : spell.description
+                            : null;
+                        return (
+                          <Tooltip key={spell.id}>
+                            <TooltipTrigger asChild>
+                              <div className="rounded-lg overflow-hidden border border-amber-900/40 bg-[#2a2520] cursor-pointer hover:border-amber-500/60 transition-colors flex flex-col">
+                                <div className="relative aspect-square shrink-0">
+                                  {spell.icon ? (
+                                    <Image
+                                      src={spell.icon}
+                                      alt={spell.name}
+                                      fill
+                                      className="object-cover"
+                                      sizes="120px"
+                                    />
+                                  ) : (
+                                    <div className="flex items-center justify-center h-full text-amber-600/60 text-xs text-center p-1 leading-tight">
+                                      {spell.name}
+                                    </div>
+                                  )}
+                                  <div className="absolute bottom-0 right-0 bg-black/70 text-amber-400 text-[10px] px-1 rounded-tl">
+                                    {spell.level}
+                                  </div>
                                 </div>
-                              )}
-                              <div className="absolute bottom-0 right-0 bg-black/70 text-amber-400 text-[10px] px-1 rounded-tl">
-                                {spell.level}
+                                <div className="p-2 min-h-0 flex flex-col gap-0.5">
+                                  <p className="font-medium text-sm text-amber-100 truncate">
+                                    {spell.name}
+                                  </p>
+                                  {shortDescription && (
+                                    <p className="text-xs text-muted-foreground line-clamp-2">
+                                      {shortDescription}
+                                    </p>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent side="top" className="max-w-[200px]">
-                            <p className="font-medium">{spell.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              Рівень {spell.level}
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      ))}
+                            </TooltipTrigger>
+                            <TooltipContent
+                              side="top"
+                              className="max-w-[280px] whitespace-pre-wrap"
+                            >
+                              <p className="font-medium">{spell.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                Рівень {spell.level}
+                              </p>
+                              {spell.description && (
+                                <p className="text-xs mt-1">
+                                  {spell.description}
+                                </p>
+                              )}
+                            </TooltipContent>
+                          </Tooltip>
+                        );
+                      })}
                     </div>
                   </div>
                 ))}

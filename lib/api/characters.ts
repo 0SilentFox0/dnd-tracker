@@ -99,6 +99,26 @@ export async function updateCharacter(
 }
 
 /**
+ * Підняти рівень персонажа (лише DM)
+ */
+export async function levelUpCharacter(
+  campaignId: string,
+  characterId: string
+): Promise<Character & { levelUpDetails?: unknown }> {
+  const response = await fetch(
+    `/api/campaigns/${campaignId}/characters/${characterId}/level-up`,
+    { method: "POST" }
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to level up character");
+  }
+
+  return response.json();
+}
+
+/**
  * Видаляє персонажа
  */
 export async function deleteCharacter(

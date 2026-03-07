@@ -2,7 +2,12 @@
  * Утиліти для розрахунку урону з урахуванням всіх модифікаторів
  */
 
-import { calculatePercentBonus, formatFlatBonusBreakdown,formatPercentBonusBreakdown, matchesAttackType } from "./battle-modifiers-common";
+import {
+  calculatePercentBonus,
+  formatFlatBonusBreakdown,
+  formatPercentBonusBreakdown,
+  matchesAttackType,
+} from "./battle-modifiers-common";
 import { getParticipantExtras } from "./battle-participant";
 import { hasAnyAllyLowHp } from "./battle-participant-helpers";
 
@@ -35,15 +40,35 @@ export interface DamageCalculationResult {
  * @param attackType - тип атаки (AttackType enum)
  * @returns сумарний процентний бонус
  */
+/** Враховувати скіл для цього типу шкоди (melee/ranged): якщо позначено «впливає на шкоду», перевіряємо damageType */
+function skillAppliesToDamageType(
+  skill: { affectsDamage?: boolean; damageType?: string | null },
+  attackType: AttackType,
+): boolean {
+  if (!skill.affectsDamage) return true;
+
+  if (skill.damageType == null || skill.damageType === "") return true;
+
+  const damageKind = attackType === AttackType.MELEE ? "melee" : "ranged";
+
+  return skill.damageType === damageKind;
+}
+
 export function calculateSkillDamagePercentBonus(
   attacker: BattleParticipant,
-  attackType: AttackType
+  attackType: AttackType,
 ): number {
   let totalPercent = 0;
 
   for (const skill of attacker.battleData.activeSkills) {
+    if (!skillAppliesToDamageType(skill, attackType)) continue;
+
     for (const effect of skill.effects) {
-      if (effect.isPercentage && typeof effect.value === "number" && matchesAttackType(effect.stat, attackType)) {
+      if (
+        effect.isPercentage &&
+        typeof effect.value === "number" &&
+        matchesAttackType(effect.stat, attackType)
+      ) {
         totalPercent += effect.value;
       }
     }
@@ -73,13 +98,19 @@ export function calculateSkillDamagePercentBonus(
  */
 export function calculateSkillDamageFlatBonus(
   attacker: BattleParticipant,
-  attackType: AttackType
+  attackType: AttackType,
 ): number {
   let totalFlat = 0;
 
   for (const skill of attacker.battleData.activeSkills) {
+    if (!skillAppliesToDamageType(skill, attackType)) continue;
+
     for (const effect of skill.effects) {
-      if (!effect.isPercentage && typeof effect.value === "number" && matchesAttackType(effect.stat, attackType)) {
+      if (
+        !effect.isPercentage &&
+        typeof effect.value === "number" &&
+        matchesAttackType(effect.stat, attackType)
+      ) {
         totalFlat += effect.value;
       }
     }
@@ -89,7 +120,10 @@ export function calculateSkillDamageFlatBonus(
     for (const d of ae.effects) {
       const val = typeof d.value === "number" ? d.value : 0;
 
-      if (d.isPercentage !== true && matchesAttackType(d.type ?? "", attackType)) {
+      if (
+        d.isPercentage !== true &&
+        matchesAttackType(d.type ?? "", attackType)
+      ) {
         totalFlat += val;
       }
     }
@@ -106,7 +140,7 @@ export function calculateSkillDamageFlatBonus(
  */
 export function calculateArtifactDamageBonus(
   attacker: BattleParticipant,
-  attackType: AttackType
+  attackType: AttackType,
 ): { percent: number; flat: number } {
   let percent = 0;
 
@@ -115,7 +149,10 @@ export function calculateArtifactDamageBonus(
   for (const artifact of attacker.battleData.equippedArtifacts) {
     for (const modifier of artifact.modifiers) {
       // Перевіряємо чи це модифікатор урону та чи відповідає типу атаки
-      if (modifier.type.toLowerCase().includes("damage") && matchesAttackType(modifier.type, attackType)) {
+      if (
+        modifier.type.toLowerCase().includes("damage") &&
+        matchesAttackType(modifier.type, attackType)
+      ) {
         if (modifier.isPercentage) {
           percent += modifier.value;
         } else {
@@ -139,7 +176,7 @@ export function calculatePassiveAbilityDamageBonus(
   context?: {
     allParticipants?: BattleParticipant[];
     damage?: number;
-  }
+  },
 ): { percent: number; flat: number } {
   let percent = 0;
 
@@ -147,11 +184,16 @@ export function calculatePassiveAbilityDamageBonus(
 
   for (const passive of attacker.battleData.passiveAbilities) {
     // Перевіряємо чи це модифікатор урону
-    if (passive.effect.type === "modify_damage" || passive.effect.type === "damage_bonus") {
+    if (
+      passive.effect.type === "modify_damage" ||
+      passive.effect.type === "damage_bonus"
+    ) {
       // Перевіряємо тригер (наприклад, ally_low_hp)
       // Використовуємо налаштовуваний поріг з тригера або константу за замовчуванням
       if (passive.trigger.type === "ally_low_hp" && context?.allParticipants) {
-        const threshold = passive.trigger.lowHpThresholdPercent ?? BATTLE_CONSTANTS.DEFAULT_LOW_HP_THRESHOLD_PERCENT;
+        const threshold =
+          passive.trigger.lowHpThresholdPercent ??
+          BATTLE_CONSTANTS.DEFAULT_LOW_HP_THRESHOLD_PERCENT;
 
         if (hasAnyAllyLowHp(attacker, context.allParticipants, threshold)) {
           // Умова виконана, застосовуємо бонус
@@ -200,7 +242,7 @@ export function calculateDamageWithModifiers(
     heroDiceNotation?: string;
     /** Нотація кубиків зброї для breakdown, напр. "1d6" (щоб не плутати з "Бонус зброї (артефакт)") */
     weaponDiceNotation?: string;
-  }
+  },
 ): DamageCalculationResult {
   const breakdown: string[] = [];
 
@@ -217,53 +259,78 @@ export function calculateDamageWithModifiers(
   // Базовий урон: кубики зброї + рівень + кубики за рівнем + модифікатор характеристики
   const baseWithStat = Math.max(
     BATTLE_CONSTANTS.MIN_DAMAGE,
-    baseDamage + heroLevelPart + heroDicePart + statModifier
+    baseDamage + heroLevelPart + heroDicePart + statModifier,
   );
 
   if (heroLevelPart > 0 || heroDicePart > 0) {
     const parts: string[] = [];
 
-    // Чітко: це середній урон кубиків зброї (напр. 1d6), не "бонус артефакта"
+    // Кубики зброї
     parts.push(
       weaponDiceNotation
         ? `${baseDamage} (${weaponDiceNotation})`
-        : `${baseDamage} (кубики зброї)`
+        : `${baseDamage} (кубики зброї)`,
     );
-    parts.push(`${heroLevelPart} (рівень)`);
 
-    if (heroDiceNotation) parts.push(`${heroDicePart} (${heroDiceNotation})`);
-    else if (heroDicePart > 0) parts.push(`${heroDicePart} (кубики за рівнем)`);
+    // Рівень + кубики за рівнем одним блоком (або лише рівень, якщо кубики вже в baseDamage — напр. кидки юзера)
+    const levelAndDice = heroLevelPart + heroDicePart;
 
+    const levelLabel =
+      heroDicePart > 0 && heroDiceNotation
+        ? `рівень + кубики за рівнем (${heroDiceNotation})`
+        : heroDicePart > 0
+          ? "рівень + кубики за рівнем"
+          : "рівень";
+
+    parts.push(`${levelAndDice} (${levelLabel})`);
     parts.push(`${statModifier} (${statLabel})`);
     breakdown.push(`${parts.join(" + ")} = ${baseWithStat}`);
   } else {
     breakdown.push(
-      `${baseDamage} (кубики) + ${statModifier} (${statLabel}) = ${baseWithStat}`
+      `${baseDamage} (кубики) + ${statModifier} (${statLabel}) = ${baseWithStat}`,
     );
   }
 
-  // Процентні бонуси зі скілів
+  // Процентні бонуси зі скілів — завжди виводимо рядок, якщо є скіли що впливають на цей тип шкоди
   const skillPercent = calculateSkillDamagePercentBonus(attacker, attackType);
 
-  const skillPercentBreakdown = formatPercentBonusBreakdown("Бонуси зі скілів", skillPercent);
+  const hasApplicableSkills = attacker.battleData.activeSkills.some((s) =>
+    skillAppliesToDamageType(s, attackType),
+  );
+
+  const skillPercentBreakdown = formatPercentBonusBreakdown(
+    "Бонуси зі скілів",
+    skillPercent,
+  );
 
   if (skillPercentBreakdown) breakdown.push(skillPercentBreakdown);
+  else if (hasApplicableSkills) breakdown.push("Бонуси зі скілів: +0%");
 
   // Flat бонуси зі скілів
   const skillFlat = calculateSkillDamageFlatBonus(attacker, attackType);
 
-  const skillFlatBreakdown = formatFlatBonusBreakdown("Flat бонус зі скілів", skillFlat);
+  const skillFlatBreakdown = formatFlatBonusBreakdown(
+    "Flat бонус зі скілів",
+    skillFlat,
+  );
 
   if (skillFlatBreakdown) breakdown.push(skillFlatBreakdown);
+  else if (hasApplicableSkills) breakdown.push("Flat бонус зі скілів: +0");
 
   // Бонуси з артефактів (зброя) — завжди виводимо, навіть якщо 0
   const artifactBonuses = calculateArtifactDamageBonus(attacker, attackType);
 
-  const artifactPercentBreakdown = formatPercentBonusBreakdown("Бонус з артефактів", artifactBonuses.percent);
+  const artifactPercentBreakdown = formatPercentBonusBreakdown(
+    "Бонус з артефактів",
+    artifactBonuses.percent,
+  );
 
   if (artifactPercentBreakdown) breakdown.push(artifactPercentBreakdown);
 
-  const artifactFlatBreakdown = formatFlatBonusBreakdown("Flat бонус з артефактів", artifactBonuses.flat);
+  const artifactFlatBreakdown = formatFlatBonusBreakdown(
+    "Flat бонус з артефактів",
+    artifactBonuses.flat,
+  );
 
   if (artifactFlatBreakdown) breakdown.push(artifactFlatBreakdown);
 
@@ -274,20 +341,27 @@ export function calculateDamageWithModifiers(
   // Бонуси з пасивних здібностей
   const passiveBonuses = calculatePassiveAbilityDamageBonus(attacker, context);
 
-  const passivePercentBreakdown = formatPercentBonusBreakdown("Бонус з пасивних здібностей", passiveBonuses.percent);
+  const passivePercentBreakdown = formatPercentBonusBreakdown(
+    "Бонус з пасивних здібностей",
+    passiveBonuses.percent,
+  );
 
   if (passivePercentBreakdown) breakdown.push(passivePercentBreakdown);
 
-  const passiveFlatBreakdown = formatFlatBonusBreakdown("Flat бонус з пасивок", passiveBonuses.flat);
+  const passiveFlatBreakdown = formatFlatBonusBreakdown(
+    "Flat бонус з пасивок",
+    passiveBonuses.flat,
+  );
 
   if (passiveFlatBreakdown) breakdown.push(passiveFlatBreakdown);
 
   // Загальний процентний бонус (стакується адитивно)
-  const totalPercent = skillPercent + artifactBonuses.percent + passiveBonuses.percent;
-  
+  const totalPercent =
+    skillPercent + artifactBonuses.percent + passiveBonuses.percent;
+
   // Розраховуємо процентний бонус як додаток до baseWithStat
   const percentBonusDamage = calculatePercentBonus(baseWithStat, totalPercent);
-  
+
   // Загальний flat бонус
   const totalFlat = skillFlat + artifactBonuses.flat + passiveBonuses.flat;
 
@@ -321,12 +395,17 @@ export function applyResistance(
   damage: number,
   defender: BattleParticipant,
   damageCategory: "physical" | "spell" = "physical",
-): { finalDamage: number; resistPercent: number; resistMessage: string | null } {
+): {
+  finalDamage: number;
+  resistPercent: number;
+  resistMessage: string | null;
+} {
   const extras = getParticipantExtras(defender);
 
   const resistances = extras.resistances;
 
-  if (!resistances) return { finalDamage: damage, resistPercent: 0, resistMessage: null };
+  if (!resistances)
+    return { finalDamage: damage, resistPercent: 0, resistMessage: null };
 
   let resistPercent = 0;
 
@@ -336,7 +415,8 @@ export function applyResistance(
     resistPercent = resistances.spell ?? 0;
   }
 
-  if (resistPercent <= 0) return { finalDamage: damage, resistPercent: 0, resistMessage: null };
+  if (resistPercent <= 0)
+    return { finalDamage: damage, resistPercent: 0, resistMessage: null };
 
   const reduction = Math.floor(damage * (resistPercent / 100));
 

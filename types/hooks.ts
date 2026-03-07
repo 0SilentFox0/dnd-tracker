@@ -24,6 +24,8 @@ export interface GroupedSkillPayload {
     min_targets?: number;
     max_targets?: number;
     effects?: SkillEffect[];
+    affectsDamage?: boolean;
+    damageType?: "melee" | "ranged" | "magic" | null;
   };
   spellData: {
     spellId?: string;

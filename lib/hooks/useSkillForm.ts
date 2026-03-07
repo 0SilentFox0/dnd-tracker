@@ -54,6 +54,8 @@ interface NormalizedData {
   min_targets?: number | null;
   max_targets?: number | null;
   effects?: SkillEffect[];
+  affectsDamage?: boolean;
+  damageType?: "melee" | "ranged" | "magic" | null;
   spellId: string | null;
   spellGroupId: string | null;
   grantedSpellId?: string | null;
@@ -84,6 +86,8 @@ function normalizeInitialData(data: InitialData | undefined): NormalizedData | u
       min_targets: grouped.combatStats.min_targets || null,
       max_targets: grouped.combatStats.max_targets || null,
       effects: grouped.combatStats.effects || [],
+      affectsDamage: grouped.combatStats.affectsDamage ?? false,
+      damageType: grouped.combatStats.damageType ?? null,
       spellId: grouped.spellData.spellId || null,
       spellGroupId: grouped.spellData.spellGroupId || null,
       grantedSpellId: grouped.spellData.grantedSpellId ?? null,
@@ -202,6 +206,14 @@ export function useSkillForm(
     normalizedData?.max_targets?.toString() || "",
   );
 
+  const [affectsDamage, setAffectsDamage] = useState(
+    normalizedData?.affectsDamage ?? false,
+  );
+
+  const [damageType, setDamageType] = useState<
+    "melee" | "ranged" | "magic" | null
+  >(normalizedData?.damageType ?? null);
+
   // Spell and main skill
   const [spellId, setSpellId] = useState<string | null>(
     normalizedData?.spellId || null,
@@ -280,6 +292,8 @@ export function useSkillForm(
         min_targets: parseNumber(minTargets),
         max_targets: parseNumber(maxTargets),
         effects: effects.length > 0 ? effects : undefined,
+        affectsDamage: affectsDamage || undefined,
+        damageType: damageType ?? undefined,
       },
       spellData: {
         spellId: spellId || undefined,
@@ -321,6 +335,8 @@ export function useSkillForm(
     minTargets,
     maxTargets,
     effects,
+    affectsDamage,
+    damageType,
     spellId,
     spellGroupId,
     grantedSpellId,
@@ -405,6 +421,15 @@ export function useSkillForm(
         setEffects,
         setMinTargets,
         setMaxTargets,
+      },
+    },
+    // Вплив на шкоду (для розрахунку урону)
+    damageGroup: {
+      affectsDamage,
+      damageType,
+      setters: {
+        setAffectsDamage,
+        setDamageType,
       },
     },
     // Spell group

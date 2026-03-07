@@ -3,6 +3,7 @@
 import {
   CharacterHeroBlock,
   CharacterViewAccordion,
+  CharacterViewSingleCard,
 } from "./components/character-view";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -84,50 +85,80 @@ export function CharacterViewClient({
           />
         )}
 
-        <CharacterViewAccordion
-          campaignId={campaignId}
-          characterId={characterId}
-          basicInfo={basicInfo}
-          abilityScores={abilityScores}
-          combatStats={combatStats}
-          skills={skills}
-          abilities={abilities}
-          spellcasting={spellcasting}
-          formData={formData}
-          equipped={equipped}
-          artifactOptions={artifacts}
-          members={members}
-          races={races}
-          isPlayerView={isPlayerView}
-          lastSavedSkillTreeProgress={lastSavedSkillTreeProgress}
-          onSkillTreeProgressChange={(next) =>
-            setFormData((prev) => ({
-              ...prev,
-              skillTreeProgress: next,
-            }))
-          }
-          onResetSkillTree={() => {
-            const hasProgress =
-              formData.skillTreeProgress &&
-              Object.keys(formData.skillTreeProgress).length > 0;
-
-            if (
-              !hasProgress ||
-              confirm(
-                "Скинути всі прокачані уміння цього персонажа? Натисніть «Зберегти дерево скілів» щоб зберегти зміни.",
-              )
-            ) {
+        {isPlayerView ? (
+          <CharacterViewSingleCard
+            campaignId={campaignId}
+            characterId={characterId}
+            basicInfo={basicInfo}
+            abilityScores={abilityScores}
+            combatStats={combatStats}
+            abilities={abilities}
+            spellcasting={spellcasting}
+            formData={formData}
+            equipped={equipped}
+            artifactOptions={artifacts}
+            members={members}
+            races={races}
+            isPlayerView={isPlayerView}
+            lastSavedSkillTreeProgress={lastSavedSkillTreeProgress}
+            onSkillTreeProgressChange={(next) =>
               setFormData((prev) => ({
                 ...prev,
-                skillTreeProgress: {},
-              }));
+                skillTreeProgress: next,
+              }))
             }
-          }}
-          savingTree={savingTree}
-          handleSaveSkillTree={handleSaveSkillTree}
-          error={error}
-          saveError={saveError}
-        />
+            onResetSkillTree={() => {}}
+            savingTree={savingTree}
+            handleSaveSkillTree={handleSaveSkillTree}
+            error={error}
+            saveError={saveError}
+          />
+        ) : (
+          <CharacterViewAccordion
+            campaignId={campaignId}
+            characterId={characterId}
+            basicInfo={basicInfo}
+            abilityScores={abilityScores}
+            combatStats={combatStats}
+            skills={skills}
+            abilities={abilities}
+            spellcasting={spellcasting}
+            formData={formData}
+            equipped={equipped}
+            artifactOptions={artifacts}
+            members={members}
+            races={races}
+            isPlayerView={isPlayerView}
+            lastSavedSkillTreeProgress={lastSavedSkillTreeProgress}
+            onSkillTreeProgressChange={(next) =>
+              setFormData((prev) => ({
+                ...prev,
+                skillTreeProgress: next,
+              }))
+            }
+            onResetSkillTree={() => {
+              const hasProgress =
+                formData.skillTreeProgress &&
+                Object.keys(formData.skillTreeProgress).length > 0;
+
+              if (
+                !hasProgress ||
+                confirm(
+                  "Скинути всі прокачані уміння цього персонажа? Натисніть «Зберегти дерево скілів» щоб зберегти зміни.",
+                )
+              ) {
+                setFormData((prev) => ({
+                  ...prev,
+                  skillTreeProgress: {},
+                }));
+              }
+            }}
+            savingTree={savingTree}
+            handleSaveSkillTree={handleSaveSkillTree}
+            error={error}
+            saveError={saveError}
+          />
+        )}
       </div>
     </ReadOnlyProvider>
   );
