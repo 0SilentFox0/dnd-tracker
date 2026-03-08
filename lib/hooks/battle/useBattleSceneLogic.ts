@@ -137,6 +137,10 @@ export function useBattleSceneLogic(id: string, battleId: string) {
     return battle.initiativeOrder[battle.currentTurnIndex] || null;
   }, [battle]);
 
+  const isTurnTimingEnabled =
+    process.env.NODE_ENV === "development" ||
+    process.env.NEXT_PUBLIC_BATTLE_TURN_TIMING === "1";
+
   // Лог коли відрендерився наступний хід (після натискання кнопки)
   const prevTurnIndexRef = useRef<number | null>(null);
   useEffect(() => {
@@ -148,8 +152,8 @@ export function useBattleSceneLogic(id: string, battleId: string) {
     if (prev !== null && prev !== turnIndex && nextTurnClickedAtRef.current !== null) {
       const elapsed = Date.now() - nextTurnClickedAtRef.current;
       const participant = battle.initiativeOrder?.[turnIndex]?.basicInfo?.name;
-      if (process.env.NODE_ENV === "development") {
-        console.info("[turn-timing] Наступний хід: відрендерено в UI", {
+      if (isTurnTimingEnabled) {
+        console.info("[battle-timing] next-turn (client): відрендерено в UI", {
           elapsedMs: elapsed,
           elapsedSec: (elapsed / 1000).toFixed(1),
           participant,
@@ -159,7 +163,7 @@ export function useBattleSceneLogic(id: string, battleId: string) {
     }
 
     prevTurnIndexRef.current = turnIndex;
-  }, [battle]);
+  }, [battle, isTurnTimingEnabled]);
 
   const isCurrentPlayerTurn = useMemo(() => {
     if (!currentParticipant?.basicInfo || !currentUserId) return false;
@@ -190,8 +194,8 @@ export function useBattleSceneLogic(id: string, battleId: string) {
 
     const clickedAt = Date.now();
     nextTurnClickedAtRef.current = clickedAt;
-    if (process.env.NODE_ENV === "development") {
-      console.info("[turn-timing] Наступний хід: кнопка натиснута", {
+    if (isTurnTimingEnabled) {
+      console.info("[battle-timing] next-turn (client): кнопка натиснута", {
         at: new Date(clickedAt).toISOString(),
         turnIndex: battle.currentTurnIndex,
         participant: battle.initiativeOrder?.[battle.currentTurnIndex]?.basicInfo?.name,
@@ -205,8 +209,8 @@ export function useBattleSceneLogic(id: string, battleId: string) {
       onSuccess: (updatedBattle) => {
         const elapsed = Date.now() - clickedAt;
         const nextParticipant = updatedBattle?.initiativeOrder?.[updatedBattle.currentTurnIndex]?.basicInfo?.name;
-        if (process.env.NODE_ENV === "development") {
-          console.info("[turn-timing] Наступний хід: відповідь API отримана", {
+        if (isTurnTimingEnabled) {
+          console.info("[battle-timing] next-turn (client): відповідь API отримана", {
             elapsedMs: elapsed,
             elapsedSec: (elapsed / 1000).toFixed(1),
             nextParticipant,

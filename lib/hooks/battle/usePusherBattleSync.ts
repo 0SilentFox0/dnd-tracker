@@ -140,10 +140,22 @@ export function usePusherBattleSync(
           "battleId" in data &&
           "type" in data
         ) {
-          debugLog(`event light payload (refetch): ${eventName}`, {
-            battleId: (data as { battleId: string }).battleId,
-          });
-          queryClient.invalidateQueries({ queryKey: queryKey() });
+          const state = queryClient.getQueryState(queryKey());
+          const dataUpdatedAt = state?.dataUpdatedAt ?? 0;
+          const now = Date.now();
+          const skipRefetch = now - dataUpdatedAt < 2000;
+
+          if (skipRefetch) {
+            debugLog(`event light payload (skip refetch, cache fresh): ${eventName}`, {
+              battleId: (data as { battleId: string }).battleId,
+              dataUpdatedAt,
+            });
+          } else {
+            debugLog(`event light payload (refetch): ${eventName}`, {
+              battleId: (data as { battleId: string }).battleId,
+            });
+            queryClient.invalidateQueries({ queryKey: queryKey() });
+          }
         } else {
           debugLog(`event invalid payload: ${eventName}`, {
             payloadType: typeof data,

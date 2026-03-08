@@ -12,6 +12,14 @@
 
 set -e
 
+# PostgreSQL 17+ потрібен для Supabase (сервер 17.x)
+for dir in /opt/homebrew/opt/postgresql@17/bin /usr/local/opt/postgresql@17/bin; do
+  if [ -x "$dir/pg_dump" ]; then
+    export PATH="$dir:$PATH"
+    break
+  fi
+done
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 BACKUP_DIR="$PROJECT_ROOT/.migration-backup"
@@ -45,6 +53,15 @@ echo ""
 
 mkdir -p "$BACKUP_DIR"
 
+# Перевірка версії pg_dump (Supabase = PostgreSQL 17)
+PG_DUMP_VER=$(pg_dump --version 2>/dev/null | grep -oE '[0-9]+' | head -1)
+if [ -n "$PG_DUMP_VER" ] && [ "$PG_DUMP_VER" -lt 17 ]; then
+  echo "❌ pg_dump $PG_DUMP_VER застарілий. Supabase потребує 17+."
+  echo "   Встанови: brew install postgresql@17"
+  echo "   Потім перезапусти скрипт."
+  exit 1
+fi
+
 # --- Крок 1: Експорт зі старого проекту ---
 echo "1️⃣  Експорт даних зі старого проекту..."
 pg_dump "$OLD_DB_URL" \
@@ -70,10 +87,10 @@ fi
 echo "   ✅ Експортовано: $DATA_FILE"
 echo ""
 
-# --- Крок 2: Застосувати Prisma migrations на нову БД ---
-echo "2️⃣  Застосування Prisma migrations на нову БД..."
+# --- Крок 2: Створити схему на новій БД ---
+echo "2️⃣  Створення схеми на новій БД (db push)..."
 cd "$PROJECT_ROOT"
-DATABASE_URL="$NEW_DB_URL" pnpm prisma migrate deploy
+DATABASE_URL="$NEW_DB_URL" pnpm prisma db push --accept-data-loss
 echo "   ✅ Схема створена"
 echo ""
 

@@ -13,9 +13,12 @@ import {
   calculateAllyHpChangesOnVictory,
   checkVictoryConditions,
 } from "@/lib/utils/battle/battle-victory";
+import { pusherServer } from "@/lib/pusher";
 import {
   preparePusherPayload,
+  slimInitiativeOrderForStorage,
   stripStateBeforeForClient,
+  stripStateBeforeForStorage,
 } from "@/lib/utils/battle/strip-battle-payload";
 import { executeSkillsByTrigger } from "@/lib/utils/skills/skill-triggers-execution";
 import { BattleAction, BattleParticipant } from "@/types/battle";
@@ -28,10 +31,14 @@ const isTurnTimingEnabled =
   process.env.NODE_ENV === "development" ||
   process.env.BATTLE_TURN_TIMING === "1";
 
-function logTurnTiming(label: string, startMs: number, extra?: Record<string, number>) {
+function logTurnTiming(
+  label: string,
+  startMs: number,
+  extra?: Record<string, number | string>,
+) {
   if (!isTurnTimingEnabled) return;
   const elapsed = Date.now() - startMs;
-  console.info("[turn-timing][server]", label, { elapsedMs: elapsed, ...extra });
+  console.info("[battle-timing] next-turn:", label, { elapsedMs: elapsed, ...extra });
 }
 
 function battleStateSnapshot(
@@ -165,9 +172,7 @@ export async function POST(
     let nextRound = battle.currentRound;
 
     const stateBeforeNextTurn = {
-      initiativeOrder: JSON.parse(
-        JSON.stringify(initiativeOrder),
-      ) as BattleParticipant[],
+      initiativeOrder: structuredClone(initiativeOrder) as BattleParticipant[],
       currentTurnIndex: battle.currentTurnIndex,
       currentRound: battle.currentRound,
     };
@@ -195,6 +200,7 @@ export async function POST(
 
     while (!activeParticipantFound && attempts < maxAttempts) {
       attempts++;
+      const tStep = Date.now();
 
       // 1. Знаходимо наступного кандидата
       const turnTransition = processEndOfTurn(
@@ -207,6 +213,11 @@ export async function POST(
 
       nextTurnIndex = turnTransition.nextTurnIndex;
       nextRound = turnTransition.nextRound;
+      logTurnTiming("processEndOfTurn (переключення на наступного гравця)", tStep, {
+        attempt: attempts,
+        nextTurnIndex,
+        nextRound,
+      });
 
       // 2. Якщо почався новий раунд — спочатку endRound тригери, потім start of round
       if (nextRound > previousRound) {
@@ -266,11 +277,16 @@ export async function POST(
         break; // Щось пішло не так
       }
 
+      const tStartTurn = Date.now();
       const turnResult = processStartOfTurn(
         nextParticipant,
         nextRound,
         updatedInitiativeOrder,
       );
+      logTurnTiming("processStartOfTurn (початок ходу)", tStartTurn, {
+        participantId: nextParticipant.basicInfo.id,
+        participantName: nextParticipant.basicInfo.name,
+      });
 
       // Оновлюємо учасника в масиві
       updatedInitiativeOrder[nextTurnIndex] = turnResult.participant;
@@ -460,15 +476,16 @@ export async function POST(
         currentRound: nextRound,
         status: finalStatus,
         completedAt: completedAt || undefined,
-        initiativeOrder:
-          updatedInitiativeOrder as unknown as Prisma.InputJsonValue,
+        initiativeOrder: slimInitiativeOrderForStorage(
+          updatedInitiativeOrder,
+        ) as unknown as Prisma.InputJsonValue,
         pendingSummons: clearedPendingSummons
           ? ([] as unknown as Prisma.InputJsonValue)
           : (battle.pendingSummons as Prisma.InputJsonValue) ?? [],
-        battleLog: [
+        battleLog: stripStateBeforeForStorage([
           ...battleLog,
           ...newLogEntries,
-        ] as unknown as Prisma.InputJsonValue,
+        ]) as unknown as Prisma.InputJsonValue,
       },
     });
 
@@ -492,8 +509,6 @@ export async function POST(
 
     // Відправляємо real-time оновлення через Pusher
     if (process.env.PUSHER_APP_ID) {
-      const { pusherServer } = await import("@/lib/pusher");
-
       const pusherPayload = preparePusherPayload(updatedBattle);
 
       debugBattleSync("trigger battle-updated", {

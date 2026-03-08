@@ -16,6 +16,7 @@ import {
 } from "@/lib/utils/battle/battle-start";
 import {
   preparePusherPayload,
+  slimInitiativeOrderForStorage,
   stripStateBeforeForClient,
 } from "@/lib/utils/battle/strip-battle-payload";
 import {
@@ -407,7 +408,9 @@ export async function POST(
       data: {
         status: "active",
         startedAt: new Date(),
-        initiativeOrder: sortedInitiativeOrder as unknown as Prisma.InputJsonValue,
+        initiativeOrder: slimInitiativeOrderForStorage(
+          sortedInitiativeOrder,
+        ) as unknown as Prisma.InputJsonValue,
         currentRound: 1,
         currentTurnIndex: 0,
         battleLog: triggerLogEntries as unknown as Prisma.InputJsonValue,

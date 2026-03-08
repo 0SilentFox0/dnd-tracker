@@ -4,10 +4,13 @@ import { z } from "zod";
 
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
-import { BattleSpell,processSpell } from "@/lib/utils/battle/battle-spell-process";
+import { BattleSpell, processSpell } from "@/lib/utils/battle/battle-spell-process";
+import { logBattleTiming } from "@/lib/utils/battle/battle-timing";
 import {
   preparePusherPayload,
+  slimInitiativeOrderForStorage,
   stripStateBeforeForClient,
+  stripStateBeforeForStorage,
 } from "@/lib/utils/battle/strip-battle-payload";
 import { BattleAction,BattleParticipant } from "@/types/battle";
 
@@ -33,10 +36,12 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string; battleId: string }> }
 ) {
+  const t0 = Date.now();
   try {
     const { id, battleId } = await params;
 
     const accessResult = await requireCampaignAccess(id, false);
+    logBattleTiming("spell: auth", t0);
 
     if (accessResult instanceof NextResponse) {
       return accessResult;
@@ -169,7 +174,8 @@ export async function POST(
       effectDetails: spellData.effectDetails as BattleSpell["effectDetails"] ?? undefined,
     };
 
-    // Обробляємо заклинання через нову функцію
+    // Обробляємо заклинання через нову функцію (перерахунок шкоди)
+    const tSpell = Date.now();
     const spellResult = processSpell({
       caster,
       spell: battleSpell,
@@ -181,6 +187,10 @@ export async function POST(
       savingThrows: data.savingThrows,
       additionalRollResult: data.additionalRollResult,
       hitRoll: data.hitRoll,
+    });
+    logBattleTiming("spell: processSpell (перерахунок шкоди)", tSpell, {
+      spellId: data.spellId,
+      targetCount: data.targetIds.length,
     });
 
     // Оновлюємо учасників в initiativeOrder
@@ -221,11 +231,13 @@ export async function POST(
     const updatedBattle = await prisma.battleScene.update({
       where: { id: battleId },
       data: {
-        initiativeOrder: updatedInitiativeOrder as unknown as Prisma.InputJsonValue,
-        battleLog: [
+        initiativeOrder: slimInitiativeOrderForStorage(
+          updatedInitiativeOrder,
+        ) as unknown as Prisma.InputJsonValue,
+        battleLog: stripStateBeforeForStorage([
           ...battleLog,
           battleAction,
-        ] as unknown as Prisma.InputJsonValue,
+        ]) as unknown as Prisma.InputJsonValue,
       },
     });
 
@@ -242,6 +254,7 @@ export async function POST(
         .catch((err) => console.error("Pusher trigger failed:", err));
     }
 
+    logBattleTiming("spell: total", t0, { targetCount: data.targetIds.length });
     return NextResponse.json(stripStateBeforeForClient(updatedBattle));
   } catch (error) {
     console.error("Error processing spell:", error);

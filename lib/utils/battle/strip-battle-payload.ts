@@ -4,9 +4,72 @@
  */
 
 import type { BattleScene } from "@/types/api";
-import type { BattleAction } from "@/types/battle";
+import type { ActiveEffect, BattleAction, BattleParticipant } from "@/types/battle";
 
-const PUSHER_SIZE_LIMIT_BYTES = 10_240;
+const PUSHER_SIZE_LIMIT_BYTES = 32_768; // 32KB — збільшено для зменшення light payload refetch
+
+/** Кількість останніх записів battleLog, для яких зберігаємо stateBefore (для rollback) */
+const STATE_BEFORE_KEEP_LAST_N = 5;
+
+/**
+ * Зменшує розмір initiativeOrder перед записом у БД.
+ * - activeEffects: appliedAt зберігає лише round (без timestamp)
+ * - activeEffects: видаляє description, icon (не потрібні для battle logic)
+ */
+export function slimInitiativeOrderForStorage(
+  initiativeOrder: BattleParticipant[],
+): BattleParticipant[] {
+  if (!Array.isArray(initiativeOrder) || initiativeOrder.length === 0) {
+    return initiativeOrder;
+  }
+
+  return initiativeOrder.map((p) => {
+    const effects = p.battleData?.activeEffects;
+    if (!effects || effects.length === 0) {
+      return p;
+    }
+
+    const slimEffects = effects.map((e) => {
+      const { appliedAt, description, icon, ...rest } = e;
+      const round = appliedAt && typeof appliedAt === "object" && "round" in appliedAt
+        ? (appliedAt as { round: number }).round
+        : 1;
+      return {
+        ...rest,
+        appliedAt: { round },
+      } as ActiveEffect;
+    });
+
+    return {
+      ...p,
+      battleData: {
+        ...p.battleData,
+        activeEffects: slimEffects,
+      },
+    };
+  });
+}
+
+/**
+ * Видаляє stateBefore з усіх записів battleLog, крім останніх N (для rollback).
+ * Зменшує розмір JSONB в БД.
+ */
+export function stripStateBeforeForStorage(
+  battleLog: BattleAction[],
+  keepLastN: number = STATE_BEFORE_KEEP_LAST_N,
+): BattleAction[] {
+  if (!Array.isArray(battleLog) || battleLog.length === 0) return battleLog;
+
+  const cutoff = Math.max(0, battleLog.length - keepLastN);
+
+  return battleLog.map((entry, i) => {
+    if (i < cutoff && entry && typeof entry === "object" && "stateBefore" in entry) {
+      const { stateBefore: _, ...rest } = entry as BattleAction & { stateBefore?: unknown };
+      return rest;
+    }
+    return entry;
+  });
+}
 
 /**
  * Видаляє stateBefore з кожного запису battleLog.

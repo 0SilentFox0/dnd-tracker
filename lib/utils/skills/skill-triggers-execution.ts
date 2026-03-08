@@ -98,7 +98,7 @@ function executeSkillEffects(
         const newEffects = addActiveEffect(
           updatedParticipant,
           {
-            id: `skill-${skill.skillId}-${effect.stat}`,
+            id: `skill-${skill.skillId}-${effect.stat}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
             name: effectName,
             type: numValue > 0 ? "buff" : "debuff",
             duration: dur,
@@ -1005,7 +1005,7 @@ export function executeOnBattleStartEffects(
         case "initiative": {
           for (const target of targets) {
             applyEffect(target, {
-              id: `skill-${skill.skillId}-battle-start-initiative`,
+              id: `skill-${skill.skillId}-battle-start-initiative-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
               name: `${skill.name} — ініціатива`,
               type: "buff",
               duration: 999,
@@ -1023,7 +1023,7 @@ export function executeOnBattleStartEffects(
         case "damage": {
           for (const target of targets) {
             applyEffect(target, {
-              id: `skill-${skill.skillId}-battle-start-dmg`,
+              id: `skill-${skill.skillId}-battle-start-dmg-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
               name: `${skill.name} — бонус урону`,
               type: "buff",
               duration: 1,
@@ -1041,7 +1041,7 @@ export function executeOnBattleStartEffects(
         case "advantage": {
           for (const target of targets) {
             applyEffect(target, {
-              id: `skill-${skill.skillId}-battle-start-adv`,
+              id: `skill-${skill.skillId}-battle-start-adv-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
               name: `${skill.name} — advantage`,
               type: "buff",
               duration: 1,
@@ -1124,7 +1124,7 @@ export function executeOnBattleStartEffectsForAll(
           case "initiative":
             for (const target of targets) {
               applyEffect(target, {
-                id: `skill-${skill.skillId}-battle-start-initiative`,
+                id: `skill-${skill.skillId}-battle-start-initiative-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
                 name: `${skill.name} — ініціатива`,
                 type: "buff",
                 duration: 999,
@@ -1146,7 +1146,7 @@ export function executeOnBattleStartEffectsForAll(
           case "damage":
             for (const target of targets) {
               applyEffect(target, {
-                id: `skill-${skill.skillId}-battle-start-dmg`,
+                id: `skill-${skill.skillId}-battle-start-dmg-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
                 name: `${skill.name} — бонус урону`,
                 type: "buff",
                 duration: 1,
@@ -1168,7 +1168,7 @@ export function executeOnBattleStartEffectsForAll(
           case "advantage":
             for (const target of targets) {
               applyEffect(target, {
-                id: `skill-${skill.skillId}-battle-start-adv`,
+                id: `skill-${skill.skillId}-battle-start-adv-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
                 name: `${skill.name} — advantage`,
                 type: "buff",
                 duration: 1,
@@ -1262,7 +1262,7 @@ export function applyOnBattleStartEffectsToNewAllies(
           switch (effect.stat) {
             case "initiative":
               applyEffect(get(newId), {
-                id: `skill-${skill.skillId}-battle-start-initiative`,
+                id: `skill-${skill.skillId}-battle-start-initiative-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
                 name: `${skill.name} — ініціатива`,
                 type: "buff",
                 duration: 999,
@@ -1271,7 +1271,7 @@ export function applyOnBattleStartEffectsToNewAllies(
               break;
             case "damage":
               applyEffect(get(newId), {
-                id: `skill-${skill.skillId}-battle-start-dmg`,
+                id: `skill-${skill.skillId}-battle-start-dmg-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
                 name: `${skill.name} — бонус урону`,
                 type: "buff",
                 duration: 1,
@@ -1280,7 +1280,7 @@ export function applyOnBattleStartEffectsToNewAllies(
               break;
             case "advantage":
               applyEffect(get(newId), {
-                id: `skill-${skill.skillId}-battle-start-adv`,
+                id: `skill-${skill.skillId}-battle-start-adv-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
                 name: `${skill.name} — advantage`,
                 type: "buff",
                 duration: 1,

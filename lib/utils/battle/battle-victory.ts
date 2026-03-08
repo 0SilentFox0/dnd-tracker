@@ -152,19 +152,17 @@ export function calculateAllyHpChangesOnVictory(
   newHp: number;
   change: number;
 }> {
+  const originalById = new Map(
+    originalInitiativeOrder.map((p) => [p.basicInfo.id, p])
+  );
+
   return updatedInitiativeOrder
     .filter((p) => p.basicInfo.side === ParticipantSide.ALLY)
     .map((p) => {
-      // Знаходимо оригінального учасника для отримання oldHp
-      const original = originalInitiativeOrder.find(
-        (orig) => orig.basicInfo.id === p.basicInfo.id
-      );
-
-      const oldHp = original?.combatStats.currentHp || p.combatStats.currentHp;
-
+      const original = originalById.get(p.basicInfo.id);
+      const oldHp = original?.combatStats.currentHp ?? p.combatStats.currentHp;
       const newHp = p.combatStats.currentHp;
 
-      // Додаємо тільки якщо була зміна HP
       if (oldHp !== newHp && victoryResult.result === "victory") {
         return {
           participantId: p.basicInfo.id,

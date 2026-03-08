@@ -25,6 +25,8 @@ export interface SkillUpdatePayload {
     speed?: number;
     physicalResistance?: number;
     magicalResistance?: number;
+    affectsDamage?: boolean;
+    damageType?: "melee" | "ranged" | "magic" | null;
   };
   spellData?: {
     spellId?: string | null;

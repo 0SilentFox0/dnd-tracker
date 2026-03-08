@@ -7,7 +7,9 @@ import { requireDM } from "@/lib/utils/api/api-auth";
 import { checkVictoryConditions,completeBattle } from "@/lib/utils/battle/battle-victory";
 import {
   preparePusherPayload,
+  slimInitiativeOrderForStorage,
   stripStateBeforeForClient,
+  stripStateBeforeForStorage,
 } from "@/lib/utils/battle/strip-battle-payload";
 import { BattleAction,BattleParticipant } from "@/types/battle";
 
@@ -98,11 +100,13 @@ export async function POST(
       data: {
         status: "completed",
         completedAt: new Date(),
-        initiativeOrder: updatedParticipants as unknown as Prisma.InputJsonValue,
-        battleLog: [
+        initiativeOrder: slimInitiativeOrderForStorage(
+          updatedParticipants,
+        ) as unknown as Prisma.InputJsonValue,
+        battleLog: stripStateBeforeForStorage([
           ...battleLog,
           finalBattleAction,
-        ] as unknown as Prisma.InputJsonValue,
+        ]) as unknown as Prisma.InputJsonValue,
       },
     });
 

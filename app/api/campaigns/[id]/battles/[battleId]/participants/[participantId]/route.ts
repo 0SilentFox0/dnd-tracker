@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import {
   preparePusherPayload,
+  slimInitiativeOrderForStorage,
   stripStateBeforeForClient,
 } from "@/lib/utils/battle/strip-battle-payload";
 import { BattleAction, BattleParticipant } from "@/types/battle";
@@ -112,8 +113,9 @@ export async function PATCH(
       const updatedBattle = await prisma.battleScene.update({
         where: { id: battleId },
         data: {
-          initiativeOrder:
-            initiativeOrder as unknown as Prisma.InputJsonValue,
+          initiativeOrder: slimInitiativeOrderForStorage(
+            initiativeOrder,
+          ) as unknown as Prisma.InputJsonValue,
           currentTurnIndex: Math.min(
             newTurnIndex,
             Math.max(0, initiativeOrder.length - 1),
@@ -212,8 +214,9 @@ export async function PATCH(
       const updatedBattle = await prisma.battleScene.update({
         where: { id: battleId },
         data: {
-          initiativeOrder:
-            updatedOrder as unknown as Prisma.InputJsonValue,
+          initiativeOrder: slimInitiativeOrderForStorage(
+            updatedOrder,
+          ) as unknown as Prisma.InputJsonValue,
           battleLog: [
             ...battleLog,
             logEntry,

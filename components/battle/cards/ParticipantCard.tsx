@@ -246,7 +246,7 @@ export function ParticipantCard({
 
                   return (
                     <Badge
-                      key={effect.id ?? idx}
+                      key={`effect-${participant.basicInfo.id}-${idx}`}
                       variant="outline"
                       title={tooltip}
                       className={cn(

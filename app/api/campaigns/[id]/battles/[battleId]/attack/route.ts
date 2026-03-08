@@ -5,9 +5,12 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { processAttack } from "@/lib/utils/battle/battle-attack-process";
+import { logBattleTiming } from "@/lib/utils/battle/battle-timing";
 import {
   preparePusherPayload,
+  slimInitiativeOrderForStorage,
   stripStateBeforeForClient,
+  stripStateBeforeForStorage,
 } from "@/lib/utils/battle/strip-battle-payload";
 import { updateMoraleOnEvent } from "@/lib/utils/skills/skill-triggers-execution";
 import { BattleAction, BattleParticipant } from "@/types/battle";
@@ -44,10 +47,12 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string; battleId: string }> },
 ) {
+  const t0 = Date.now();
   try {
     const { id, battleId } = await params;
 
     const accessResult = await requireCampaignAccess(id, false);
+    logBattleTiming("attack: auth", t0);
 
     if (accessResult instanceof NextResponse) {
       return accessResult;
@@ -64,6 +69,7 @@ export async function POST(
     if (!battle || battle.campaignId !== id) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
+    logBattleTiming("attack: battle fetch", t0);
 
     if (battle.status !== "active") {
       return NextResponse.json(
@@ -238,6 +244,7 @@ export async function POST(
     // Обробляємо атаку для кожної цілі
     for (let i = 0; i < targets.length; i++) {
       const target = targets[i];
+      const tAttack = Date.now();
 
       const damageMultiplier =
         targets.length > 1 ? damageFractions[i] : undefined;
@@ -253,6 +260,10 @@ export async function POST(
         currentRound: battle.currentRound,
         battleId,
         damageMultiplier,
+      });
+      logBattleTiming("attack: processAttack (перерахунок шкоди)", tAttack, {
+        targetIndex: i,
+        targetCount: targets.length,
       });
 
       // Оновлюємо атакуючого для наступної ітерації (якщо були зміни)
@@ -317,12 +328,13 @@ export async function POST(
     const updatedBattle = await prisma.battleScene.update({
       where: { id: battleId },
       data: {
-        initiativeOrder:
-          finalInitiativeOrder as unknown as Prisma.InputJsonValue,
-        battleLog: [
+        initiativeOrder: slimInitiativeOrderForStorage(
+          finalInitiativeOrder,
+        ) as unknown as Prisma.InputJsonValue,
+        battleLog: stripStateBeforeForStorage([
           ...battleLog,
           ...allBattleActions,
-        ] as unknown as Prisma.InputJsonValue,
+        ]) as unknown as Prisma.InputJsonValue,
       },
     });
 
@@ -339,6 +351,7 @@ export async function POST(
         .catch((err) => console.error("Pusher trigger failed:", err));
     }
 
+    logBattleTiming("attack: total", t0, { targetCount: targets.length });
     return NextResponse.json(stripStateBeforeForClient(updatedBattle));
   } catch (error) {
     console.error("Error processing attack:", error);

@@ -10,6 +10,7 @@ import {
 } from "./battle-modifiers-common";
 import { getParticipantExtras } from "./battle-participant";
 import { hasAnyAllyLowHp } from "./battle-participant-helpers";
+import { measureTiming } from "./battle-timing";
 
 import { AttackType } from "@/lib/constants/battle";
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
@@ -241,6 +242,27 @@ export function calculateDamageWithModifiers(
     /** Нотація кубиків для breakdown, напр. "3d8" */
     heroDiceNotation?: string;
     /** Нотація кубиків зброї для breakdown, напр. "1d6" (щоб не плутати з "Бонус зброї (артефакт)") */
+    weaponDiceNotation?: string;
+  },
+): DamageCalculationResult {
+  return measureTiming(
+    "calculateDamageWithModifiers",
+    () => calculateDamageWithModifiersImpl(attacker, baseDamage, statModifier, attackType, context),
+    { attackType },
+  );
+}
+
+function calculateDamageWithModifiersImpl(
+  attacker: BattleParticipant,
+  baseDamage: number,
+  statModifier: number,
+  attackType: AttackType,
+  context?: {
+    allParticipants?: BattleParticipant[];
+    additionalDamage?: Array<{ type: string; value: number }>;
+    heroLevelPart?: number;
+    heroDicePart?: number;
+    heroDiceNotation?: string;
     weaponDiceNotation?: string;
   },
 ): DamageCalculationResult {

@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { getDiceAverage } from "@/lib/utils/battle/balance-calculations";
 import { calculateDamageWithModifiers } from "@/lib/utils/battle/battle-damage-calculations";
+import { logBattleTiming } from "@/lib/utils/battle/battle-timing";
 import { createBattleParticipantFromCharacter } from "@/lib/utils/battle/battle-participant";
 
 export interface DamagePreviewItem {
@@ -26,6 +27,7 @@ export async function GET(
     params,
   }: { params: Promise<{ id: string; characterId: string }> }
 ) {
+  const t0 = Date.now();
   try {
     const { id: campaignId, characterId } = await params;
 
@@ -134,6 +136,10 @@ export async function GET(
           : (rangedAttack?.damageDice ?? undefined),
       }
     );
+
+    logBattleTiming("damage-preview: total (перерахунок шкоди)", t0, {
+      characterId,
+    });
 
     const response: DamagePreviewResponse = {
       melee: {

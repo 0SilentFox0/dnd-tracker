@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "NEXT_PUBLIC_BATTLE_TURN_TIMING=1 BATTLE_TURN_TIMING=1 next dev",
     "build": "prisma generate && next build",
     "build:with-migrations": "prisma generate && prisma migrate deploy && next build",
     "build:local": "prisma generate && next build",
