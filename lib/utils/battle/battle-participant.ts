@@ -1092,13 +1092,20 @@ async function extractActiveSkillsFromCharacter(
     if (rawEffects.length > 0) {
       effects = rawEffects
         .filter((e) => e.stat)
-        .map((e) => ({
-          stat: e.stat,
-          type: e.type,
-          value: e.value ?? 0,
-          isPercentage: e.type === "percent",
-          duration: e.duration,
-        }));
+        .map((e) => {
+          const raw = e as RawEffect & { isPercentage?: boolean };
+          const isPct =
+            raw.isPercentage === true ||
+            e.type === "percent" ||
+            e.type === "percentage";
+          return {
+            stat: e.stat,
+            type: e.type,
+            value: e.value ?? 0,
+            isPercentage: isPct,
+            duration: e.duration,
+          };
+        });
     } else {
       const bonuses = (skill.bonuses as Record<string, number>) || {};
 

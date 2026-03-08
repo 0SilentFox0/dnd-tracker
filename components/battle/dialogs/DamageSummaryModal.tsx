@@ -21,7 +21,8 @@ interface DamageSummaryModalProps {
   target: BattleParticipant;
   attack: BattleAttack;
   damageRolls: number[];
-  allParticipants: BattleParticipant[];
+  /** @deprecated API fetches battle from DB; kept for backward compat with callers */
+  allParticipants?: BattleParticipant[];
   isCritical?: boolean;
   campaignId: string;
   battleId: string;
@@ -71,11 +72,10 @@ export function DamageSummaryModal({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          attacker,
-          target,
-          attack,
+          attackerId: attacker.basicInfo.id,
+          targetId: target.basicInfo.id,
+          attackId: attack.id ?? attack.name ?? undefined,
           damageRolls,
-          allParticipants,
           isCritical,
         }),
       },

@@ -12,6 +12,7 @@ export async function getBattle(
 ): Promise<BattleScene> {
   const response = await fetch(
     `/api/campaigns/${campaignId}/battles/${battleId}`,
+    { cache: "no-store" },
   );
 
   if (!response.ok) throw new Error("Failed to fetch battle");
@@ -52,6 +53,28 @@ export async function attack(
   );
 
   if (!response.ok) throw new Error("Failed to process attack");
+
+  return response.json();
+}
+
+/** Attack and advance to next turn in one request (one fetch, one write). */
+export async function attackAndNextTurn(
+  campaignId: string,
+  battleId: string,
+  data: AttackData,
+): Promise<BattleScene> {
+  const response = await fetch(
+    `/api/campaigns/${campaignId}/battles/${battleId}/attack-and-next-turn`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    },
+  );
+
+  if (!response.ok) throw new Error("Failed to process attack and advance turn");
 
   return response.json();
 }

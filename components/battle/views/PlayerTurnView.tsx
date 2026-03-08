@@ -35,6 +35,7 @@ export function PlayerTurnView({
   onSkipTurn,
   onMoraleCheck,
   isNextTurnPending = false,
+  isAttackPending = false,
 }: PlayerTurnViewProps) {
   const [turnStarted, setTurnStarted] = useState(false);
 
@@ -107,10 +108,11 @@ export function PlayerTurnView({
     );
   }, [participant, battle.initiativeOrder, battle.currentRound]);
 
-  // Автоматичне завершення ходу, якщо не залишилося дій (не запускати під час pending next-turn)
+  // Автоматичне завершення ходу, якщо не залишилося дій (чекати завершення атаки та next-turn)
   useEffect(() => {
     if (
       isNextTurnPending ||
+      isAttackPending ||
       !turnStarted ||
       (!participant.actionFlags.hasUsedAction && !hasPerformedAction) ||
       (!participant.actionFlags.hasUsedBonusAction && bonusActions.length > 0)
@@ -127,6 +129,7 @@ export function PlayerTurnView({
     turnStarted,
     onSkipTurn,
     isNextTurnPending,
+    isAttackPending,
   ]);
 
   // ... (handleStartTurn, handleMoraleCheckConfirm, etc. - keep unchanged)

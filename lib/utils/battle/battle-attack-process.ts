@@ -156,6 +156,7 @@ export function processAttack(
       ],
       actionDetails: {
         weaponName: attack.name,
+        attackKind: (attack.type === AttackType.MELEE ? "melee" : "ranged") as "melee" | "ranged",
         attackRoll: d20Roll,
         attackBonus: attackRoll.attackBonus,
         totalAttackValue: attackRoll.totalAttackValue,
@@ -272,6 +273,7 @@ export function processAttack(
       ],
       actionDetails: {
         weaponName: attack.name,
+        attackKind: (attack.type === AttackType.MELEE ? "melee" : "ranged") as "melee" | "ranged",
         attackRoll: d20Roll,
         attackBonus: attackRoll.attackBonus,
         totalAttackValue: attackRoll.totalAttackValue,
@@ -499,21 +501,31 @@ export function processAttack(
   let remainingDamage = totalFinalDamage;
 
   // Спочатку віднімаємо з tempHp
-  if (updatedTarget.combatStats.tempHp > 0 && remainingDamage > 0) {
-    const tempDamage = Math.min(
-      updatedTarget.combatStats.tempHp,
-      remainingDamage,
-    );
+  let newTempHp = updatedTarget.combatStats.tempHp;
 
-    updatedTarget.combatStats.tempHp -= tempDamage;
+  let newCurrentHp = updatedTarget.combatStats.currentHp;
+
+  if (newTempHp > 0 && remainingDamage > 0) {
+    const tempDamage = Math.min(newTempHp, remainingDamage);
+
+    newTempHp -= tempDamage;
     remainingDamage -= tempDamage;
   }
 
   // Потім віднімаємо з currentHp
-  updatedTarget.combatStats.currentHp = Math.max(
+  newCurrentHp = Math.max(
     BATTLE_CONSTANTS.MIN_DAMAGE,
-    updatedTarget.combatStats.currentHp - remainingDamage,
+    newCurrentHp - remainingDamage,
   );
+
+  updatedTarget = {
+    ...updatedTarget,
+    combatStats: {
+      ...updatedTarget.combatStats,
+      tempHp: newTempHp,
+      currentHp: newCurrentHp,
+    },
+  };
 
   // Мутовані лічильники скілів (oncePerBattle / twicePerBattle)
   const attackerSkillUsageCounts: Record<string, number> = {
@@ -744,6 +756,7 @@ export function processAttack(
     ],
     actionDetails: {
       weaponName: attack.name,
+      attackKind: (attack.type === AttackType.MELEE ? "melee" : "ranged") as "melee" | "ranged",
       attackRoll: d20Roll,
       attackBonus: attackRoll.attackBonus,
       totalAttackValue: attackRoll.totalAttackValue,

@@ -9,7 +9,7 @@ import type { CounterAttackResultInfo } from "@/components/battle/dialogs/Counte
 import { ParticipantSide } from "@/lib/constants/battle";
 import {
   useAddBattleParticipant,
-  useAttack,
+  useAttackAndNextTurn,
   useBattle,
   useBonusAction,
   useCastSpell,
@@ -66,8 +66,11 @@ export function useBattleSceneLogic(id: string, battleId: string) {
 
   const nextTurnMutation = useNextTurn(id, battleId);
 
+  const attackAndNextTurnMutation = useAttackAndNextTurn(id, battleId);
+
   const { data: battle, isLoading: loading } = useBattle(id, battleId, {
-    pauseRefetchWhen: nextTurnMutation.isPending,
+    pauseRefetchWhen:
+      nextTurnMutation.isPending || attackAndNextTurnMutation.isPending,
   });
 
   const triggerGlobalDamageFromBattle = useCallback(
@@ -108,8 +111,6 @@ export function useBattleSceneLogic(id: string, battleId: string) {
 
   const rollbackMutation = useRollbackBattleAction(id, battleId);
 
-  const attackMutation = useAttack(id, battleId);
-
   const spellMutation = useCastSpell(id, battleId);
 
   const moraleCheckMutation = useMoraleCheck(id, battleId);
@@ -137,9 +138,29 @@ export function useBattleSceneLogic(id: string, battleId: string) {
     return battle.initiativeOrder[battle.currentTurnIndex] || null;
   }, [battle]);
 
-  const isTurnTimingEnabled =
-    process.env.NODE_ENV === "development" ||
-    process.env.NEXT_PUBLIC_BATTLE_TURN_TIMING === "1";
+  const attackFlowStartRef = useRef<number | null>(null);
+
+  // Лог HP усіх учасників на початку кожного ходу
+  const prevTurnKeyRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!battle || battle.status !== "active" || !battle.initiativeOrder?.length)
+      return;
+
+    const turnKey = `${battle.currentRound}-${battle.currentTurnIndex}`;
+    if (prevTurnKeyRef.current === turnKey) return;
+
+    prevTurnKeyRef.current = turnKey;
+    const current = battle.initiativeOrder[battle.currentTurnIndex]?.basicInfo?.name;
+    const hpSnapshot = (battle.initiativeOrder as BattleParticipant[]).map((p) => ({
+      name: p.basicInfo.name,
+      hp: `${p.combatStats.currentHp}/${p.combatStats.maxHp}`,
+    }));
+    const totalFromAttack = attackFlowStartRef.current != null
+      ? Date.now() - attackFlowStartRef.current
+      : null;
+    attackFlowStartRef.current = null;
+    console.info("[хід] Раунд", battle.currentRound, "| Хід:", current, "| HP:", hpSnapshot, totalFromAttack != null ? `| ⏱️ Всього від Apply: ${totalFromAttack}ms` : "");
+  }, [battle]);
 
   // Лог коли відрендерився наступний хід (після натискання кнопки)
   const prevTurnIndexRef = useRef<number | null>(null);
@@ -150,20 +171,11 @@ export function useBattleSceneLogic(id: string, battleId: string) {
     const prev = prevTurnIndexRef.current;
 
     if (prev !== null && prev !== turnIndex && nextTurnClickedAtRef.current !== null) {
-      const elapsed = Date.now() - nextTurnClickedAtRef.current;
-      const participant = battle.initiativeOrder?.[turnIndex]?.basicInfo?.name;
-      if (isTurnTimingEnabled) {
-        console.info("[battle-timing] next-turn (client): відрендерено в UI", {
-          elapsedMs: elapsed,
-          elapsedSec: (elapsed / 1000).toFixed(1),
-          participant,
-        });
-      }
       nextTurnClickedAtRef.current = null;
     }
 
     prevTurnIndexRef.current = turnIndex;
-  }, [battle, isTurnTimingEnabled]);
+  }, [battle]);
 
   const isCurrentPlayerTurn = useMemo(() => {
     if (!currentParticipant?.basicInfo || !currentUserId) return false;
@@ -194,28 +206,24 @@ export function useBattleSceneLogic(id: string, battleId: string) {
 
     const clickedAt = Date.now();
     nextTurnClickedAtRef.current = clickedAt;
-    if (isTurnTimingEnabled) {
-      console.info("[battle-timing] next-turn (client): кнопка натиснута", {
-        at: new Date(clickedAt).toISOString(),
-        turnIndex: battle.currentTurnIndex,
-        participant: battle.initiativeOrder?.[battle.currentTurnIndex]?.basicInfo?.name,
-      });
-    }
+
+    const flowStart = attackFlowStartRef.current;
+    console.info("[хід-таймінг] nextTurn: запит відправлено", {
+      elapsedFromAttackStart: flowStart != null ? `${clickedAt - flowStart}ms` : "—",
+    });
 
     setMoraleDialogDismissedFor(null);
     setParticipantForMorale(null);
     setMoraleDialogOpen(false);
     nextTurnMutation.mutate(undefined, {
-      onSuccess: (updatedBattle) => {
-        const elapsed = Date.now() - clickedAt;
-        const nextParticipant = updatedBattle?.initiativeOrder?.[updatedBattle.currentTurnIndex]?.basicInfo?.name;
-        if (isTurnTimingEnabled) {
-          console.info("[battle-timing] next-turn (client): відповідь API отримана", {
-            elapsedMs: elapsed,
-            elapsedSec: (elapsed / 1000).toFixed(1),
-            nextParticipant,
-          });
-        }
+      onSuccess: () => {
+        const done = Date.now();
+        const nextTurnElapsed = done - clickedAt;
+        const totalFromAttack = flowStart != null ? done - flowStart : null;
+        console.info("[хід-таймінг] nextTurn: відповідь отримано", {
+          nextTurnMs: nextTurnElapsed,
+          totalFromAttackStartMs: totalFromAttack,
+        });
       },
     });
   };
@@ -231,12 +239,10 @@ export function useBattleSceneLogic(id: string, battleId: string) {
 
   const handleAttack = useCallback(
     (data: AttackData, onSuccess?: () => void) => {
-      attackMutation.mutate(data, {
+      attackAndNextTurnMutation.mutate(data, {
         onSuccess: (updatedBattle: BattleScene) => {
           const log = updatedBattle?.battleLog ?? [];
-
           const lastAction = log[log.length - 1];
-
           const hpChanges = lastAction?.hpChanges ?? [];
 
           triggerGlobalDamageFromBattle(updatedBattle);
@@ -254,34 +260,8 @@ export function useBattleSceneLogic(id: string, battleId: string) {
         },
       });
     },
-    [attackMutation, triggerGlobalDamageFromBattle],
+    [attackAndNextTurnMutation, triggerGlobalDamageFromBattle],
   );
-
-  // Діагностика в консолі браузера: що бачить UI для магії учасників (knownSpells)
-  useEffect(() => {
-    if (
-      typeof window !== "undefined" &&
-      process.env.NODE_ENV === "development" &&
-      battle?.status === "active" &&
-      battle?.initiativeOrder?.length
-    ) {
-      const participants = battle.initiativeOrder as BattleParticipant[];
-
-      console.log("[Battle Spells] Учасники в initiativeOrder (що бачить UI):", {
-        isDM: battle.isDM,
-        participants: participants.map((p) => ({
-          name: p.basicInfo?.name,
-          id: p.basicInfo?.id,
-          knownSpells_count: p.spellcasting?.knownSpells?.length ?? 0,
-          knownSpells_sample: (p.spellcasting?.knownSpells ?? []).slice(0, 5),
-          attacks_count: p.battleData?.attacks?.length ?? 0,
-          hasRanged: p.battleData?.attacks?.some(
-            (a) => a.type === "ranged" || (a.range && a.range !== "5 ft"),
-          ),
-        })),
-      });
-    }
-  }, [battle]);
 
   const allies = useMemo(() => {
     if (!battle) return [];
@@ -352,7 +332,7 @@ export function useBattleSceneLogic(id: string, battleId: string) {
       resetBattle: resetBattleMutation,
       completeBattle: completeBattleMutation,
       rollback: rollbackMutation,
-      attack: attackMutation,
+      attack: attackAndNextTurnMutation,
       spell: spellMutation,
       moraleCheck: moraleCheckMutation,
       bonusAction: bonusActionMutation,

@@ -65,6 +65,8 @@ export interface PlayerTurnViewProps {
   onMoraleCheck: (d10Roll: number) => void;
   /** Не запускати авто-таймер завершення ходу, поки next-turn виконується */
   isNextTurnPending?: boolean;
+  /** Не запускати авто-таймер, поки атака (застосування шкоди) виконується */
+  isAttackPending?: boolean;
 }
 
 /**

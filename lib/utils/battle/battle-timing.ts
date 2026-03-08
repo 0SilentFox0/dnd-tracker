@@ -18,14 +18,11 @@ export function isBattleTimingEnabled(): boolean {
 }
 
 export function logBattleTiming(
-  label: string,
-  startMs: number,
-  extra?: Record<string, number | string | null>,
+  _label: string,
+  _startMs: number,
+  _extra?: Record<string, number | string | null>,
 ) {
-  if (!isBattleTimingEnabled()) return;
-  const elapsed = Date.now() - startMs;
-  const payload = { elapsedMs: elapsed, ...extra };
-  console.info("[battle-timing]", label, payload);
+  // Логування вимкнено
 }
 
 /** Вимірює виконання функції і логує час */

@@ -7,6 +7,8 @@ import {
 } from "@/lib/utils/api/api-auth";
 import { stripStateBeforeForClient } from "@/lib/utils/battle/strip-battle-payload";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string; battleId: string }> },

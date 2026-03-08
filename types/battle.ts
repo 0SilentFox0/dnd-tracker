@@ -314,6 +314,8 @@ export interface BattleAction {
   actionDetails: {
     // Для атак:
     weaponName?: string;
+    /** Тип атаки: melee / ranged */
+    attackKind?: "melee" | "ranged";
     attackRoll?: number;
     attackBonus?: number;
     totalAttackValue?: number;

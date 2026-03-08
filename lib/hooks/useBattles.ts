@@ -4,6 +4,7 @@ import type { AddParticipantData } from "@/lib/api/battles";
 import {
   addBattleParticipant,
   attack,
+  attackAndNextTurn,
   bonusAction,
   castSpell,
   completeBattle,
@@ -122,10 +123,35 @@ export function useAttack(campaignId: string, battleId: string) {
   return useMutation({
     mutationFn: (data: AttackData) => attack(campaignId, battleId, data),
     onSuccess: (data) => {
-      queryClient.setQueryData(
-        ["battle", campaignId, battleId],
-        mergeBattleCache(queryClient, campaignId, battleId, data),
+      const merged = mergeBattleCache(
+        queryClient,
+        campaignId,
+        battleId,
+        data,
       );
+
+      queryClient.setQueryData(["battle", campaignId, battleId], merged);
+    },
+  });
+}
+
+/** Attack and advance turn in one API call. */
+export function useAttackAndNextTurn(campaignId: string, battleId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: AttackData) =>
+      attackAndNextTurn(campaignId, battleId, data),
+    onSuccess: (data) => {
+      const merged = mergeBattleCache(
+        queryClient,
+        campaignId,
+        battleId,
+        data,
+      );
+
+      queryClient.setQueryData(["battle", campaignId, battleId], merged);
+      queryClient.invalidateQueries({ queryKey: ["battles", campaignId] });
     },
   });
 }

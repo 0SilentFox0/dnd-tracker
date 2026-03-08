@@ -8,9 +8,7 @@ import type { BattleScene } from "@/types/api";
 
 export type PusherConnectionState = "connected" | "disconnected" | "connecting" | "unavailable" | null;
 
-const isBattleSyncDebugEnabled =
-  process.env.NEXT_PUBLIC_BATTLE_SYNC_DEBUG === "1" ||
-  process.env.NEXT_PUBLIC_BATTLE_SYNC_DEBUG === "true";
+const isBattleSyncDebugEnabled = false;
 
 function battleSnapshot(battle: BattleScene | null | undefined) {
   if (!battle) return null;

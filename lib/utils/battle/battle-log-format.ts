@@ -14,25 +14,69 @@ export const BATTLE_ACTION_LABELS: Record<string, string> = {
   morale_skip: "Пропуск (мораль)",
 };
 
+const ATTACK_KIND_LABELS: Record<string, string> = {
+  melee: "Ближня",
+  ranged: "Дальня",
+};
+
+/**
+ * Отримує деталізований ярлик для атаки/заклинання
+ */
+function getActionSubLabel(action: BattleAction): string {
+  const d = action.actionDetails;
+  if (action.actionType === "attack" && d?.attackKind) {
+    return ATTACK_KIND_LABELS[d.attackKind] ?? d.attackKind;
+  }
+  if (action.actionType === "spell" && d?.spellName) {
+    return "Магія";
+  }
+  if (action.actionType === "bonus_action" && d?.skillName) {
+    return "Бонус";
+  }
+  return "";
+}
+
 /**
  * Форматує один запис логу в один рядок для превью
+ * Приклад: "Аграїл → Айвен: [Ближня] 23 урону"
  */
 export function formatLogEntry(action: BattleAction): string {
-  const label = BATTLE_ACTION_LABELS[action.actionType] ?? action.actionType;
-
   const targets =
     action.targets?.length > 0
       ? action.targets.map((t) => t.participantName).join(", ")
       : "";
 
-  const prefix = targets ? label + " → " + targets + ": " : label + ": ";
-
-  if (action.resultText) return prefix + action.resultText;
+  const subLabel = getActionSubLabel(action);
+  const subPrefix = subLabel ? `[${subLabel}] ` : "";
 
   const d = action.actionDetails;
 
-  if (d?.totalDamage != null) return prefix + d.totalDamage + " урону";
+  if (action.actionType === "attack") {
+    const damage = d?.totalDamage ?? action.hpChanges?.[0]?.change;
+    if (targets && damage != null && damage > 0) {
+      return `${action.actorName} → ${targets}: ${subPrefix}${damage} урону`;
+    }
+    if (action.resultText) {
+      return `${action.actorName} → ${targets}: ${action.resultText}`;
+    }
+  }
 
+  if (action.actionType === "spell") {
+    const damage = d?.totalDamage ?? action.hpChanges?.[0]?.change;
+    const healing = d?.totalHealing;
+    if (targets && damage != null && damage > 0) {
+      return `${action.actorName} → ${targets}: [Магія] ${damage} урону`;
+    }
+    if (targets && healing != null && healing > 0) {
+      return `${action.actorName} → ${targets}: [Магія] +${healing} HP`;
+    }
+  }
+
+  const label = BATTLE_ACTION_LABELS[action.actionType] ?? action.actionType;
+  const prefix = targets ? label + " → " + targets + ": " : label + ": ";
+
+  if (action.resultText) return prefix + action.resultText;
+  if (d?.totalDamage != null) return prefix + d.totalDamage + " урону";
   if (d?.totalHealing != null) return prefix + "+" + d.totalHealing + " HP";
 
   return targets ? label + " → " + targets : label;
@@ -45,6 +89,10 @@ export function getLogEntryDetailLines(action: BattleAction): string[] {
   const d = action.actionDetails;
 
   const lines: string[] = [];
+
+  if (action.actionType === "attack" && d?.attackKind) {
+    lines.push("Тип: " + (ATTACK_KIND_LABELS[d.attackKind] ?? d.attackKind) + " атака");
+  }
 
   if (d?.weaponName) lines.push("Зброя: " + d.weaponName);
 

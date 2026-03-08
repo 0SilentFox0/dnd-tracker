@@ -89,8 +89,11 @@ export default function BattlePage({
     );
   }
 
+  const isApplyingDamageOrTurn =
+    mutations.attack.isPending || mutations.nextTurn.isPending;
+
   return (
-    <div className="flex flex-col h-dvh overflow-hidden bg-black selection:bg-primary/30 text-white">
+    <div className="flex flex-col h-dvh overflow-hidden bg-black selection:bg-primary/30 text-white relative">
       {turnStartedNotification && (
         <div className="shrink-0 py-2 px-4 bg-primary/90 text-primary-foreground text-center font-bold text-sm animate-in fade-in slide-in-from-top-2 duration-300">
           ⚔️ {turnStartedNotification}
@@ -136,6 +139,7 @@ export default function BattlePage({
             }
             onSkipTurn={handlers.handleNextTurn}
             isNextTurnPending={mutations.nextTurn.isPending}
+            isAttackPending={mutations.attack.isPending}
             onMoraleCheck={(d10Roll) => {
               if (currentParticipant)
                 mutations.moraleCheck.mutate({
@@ -269,6 +273,20 @@ export default function BattlePage({
           isHealing={globalDamageFlash.isHealing}
           onDone={handlers.clearGlobalDamageFlash}
         />
+      )}
+
+      {/* Лоадер при застосуванні шкоди або переході ходу */}
+      {isApplyingDamageOrTurn && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+            <p className="text-lg font-medium text-white/90">
+              {mutations.attack.isPending
+                ? "Застосування шкоди…"
+                : "Перехід ходу…"}
+            </p>
+          </div>
+        </div>
       )}
     </div>
   );

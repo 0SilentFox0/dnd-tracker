@@ -1,5 +1,13 @@
 import { PrismaClient } from "@prisma/client";
 
+/**
+ * Supabase pooler (рекомендовано для serverless/Vercel):
+ * - Host: pooler.supabase.co (або aws-*-*.pooler.supabase.com)
+ * - Port: 6543 (Transaction mode)
+ * - Query: ?pgbouncer=true
+ * Приклад: postgresql://postgres.[REF]:[PWD]@aws-1-eu-central-1.pooler.supabase.com:6543/postgres?sslmode=require&pgbouncer=true
+ */
+
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };

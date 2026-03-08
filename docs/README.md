@@ -78,8 +78,9 @@ npm install
 Створіть файл `.env.local` в корені проекту:
 
 ```env
-# База даних Supabase (Session Mode для локальної розробки)
-DATABASE_URL="postgres://postgres.[PROJECT_REF]:[PASSWORD]@aws-1-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require"
+# База даних Supabase — Transaction pooler (порт 6543, рекомендовано для serverless і локально)
+# Замініть [PROJECT_REF] та [PASSWORD] на значення з Supabase → Connect → Transaction pooler
+DATABASE_URL="postgresql://postgres.[PROJECT_REF]:[PASSWORD]@aws-1-eu-central-1.pooler.supabase.com:6543/postgres?sslmode=require&pgbouncer=true"
 
 # Supabase Authentication
 NEXT_PUBLIC_SUPABASE_URL="https://[PROJECT_REF].supabase.co"
@@ -339,15 +340,21 @@ npx prisma studio        # Відкриття Prisma Studio
 
 ### Environment Variables на Vercel
 
-Додайте всі змінні з `.env.local` до Vercel Dashboard:
+У Vercel Dashboard (**Settings** → **Environment Variables**) додайте для **Production**, **Preview** та **Development**:
 
-- **Settings** → **Environment Variables**
-- Додайте для **Production**, **Preview** та **Development**
+| Змінна | Опис |
+|--------|------|
+| `DATABASE_URL` | **Обов'язково** — Transaction pooler (порт 6543). Формат: `postgresql://postgres.[PROJECT_REF]:[PASSWORD]@[REGION].pooler.supabase.com:6543/postgres?sslmode=require&pgbouncer=true` |
+| `NEXT_PUBLIC_SUPABASE_URL` | URL проекту Supabase |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Anon key з Supabase |
+| `SUPABASE_SERVICE_ROLE_KEY` | Service role key (серверні API) |
+| `SUPABASE_JWT_SECRET` | JWT secret (для перевірки сесій) |
+| `PUSHER_APP_ID` | Pusher App ID (real-time) |
+| `PUSHER_SECRET` | Pusher secret |
+| `NEXT_PUBLIC_PUSHER_KEY` | Pusher key (публічний) |
+| `NEXT_PUBLIC_PUSHER_CLUSTER` | Pusher cluster (наприклад `eu`) |
 
-**Важливо**:
-
-- Використовуйте **Transaction Mode** (порт 6543) для `DATABASE_URL` на Vercel для кращої продуктивності з connection pooling
-- Формат: `postgres://postgres.[PROJECT_REF]:[PASSWORD]@aws-1-us-east-1.pooler.supabase.com:6543/postgres?sslmode=require&pgbouncer=true`
+**Важливо**: для Vercel завжди використовуйте **Transaction pooler** (порт **6543**, `?pgbouncer=true`) у `DATABASE_URL` — це потрібно для serverless і стабільної продуктивності.
 
 ### Автоматичні міграції
 
@@ -373,7 +380,7 @@ npx prisma studio        # Відкриття Prisma Studio
 
 Переконайтеся що:
 
-- `DATABASE_URL` правильний (Session Mode для локальної розробки, Transaction Mode для production)
+- `DATABASE_URL` використовує Transaction pooler (порт 6543, `pgbouncer=true`)
 - Пароль не містить спецсимволів які потребують URL encoding
 - Supabase проект активний
 

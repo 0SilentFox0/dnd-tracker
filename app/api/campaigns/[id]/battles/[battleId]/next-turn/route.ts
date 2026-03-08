@@ -15,30 +15,22 @@ import {
 } from "@/lib/utils/battle/battle-victory";
 import { pusherServer } from "@/lib/pusher";
 import {
+  prepareBattleLogForStorage,
   preparePusherPayload,
   slimInitiativeOrderForStorage,
   stripStateBeforeForClient,
-  stripStateBeforeForStorage,
 } from "@/lib/utils/battle/strip-battle-payload";
 import { executeSkillsByTrigger } from "@/lib/utils/skills/skill-triggers-execution";
 import { BattleAction, BattleParticipant } from "@/types/battle";
 
-const isBattleSyncDebugEnabled =
-  process.env.BATTLE_SYNC_DEBUG === "1" ||
-  process.env.BATTLE_SYNC_DEBUG === "true";
-
-const isTurnTimingEnabled =
-  process.env.NODE_ENV === "development" ||
-  process.env.BATTLE_TURN_TIMING === "1";
+const isBattleSyncDebugEnabled = false;
 
 function logTurnTiming(
-  label: string,
-  startMs: number,
-  extra?: Record<string, number | string>,
+  _label: string,
+  _startMs: number,
+  _extra?: Record<string, number | string>,
 ) {
-  if (!isTurnTimingEnabled) return;
-  const elapsed = Date.now() - startMs;
-  console.info("[battle-timing] next-turn:", label, { elapsedMs: elapsed, ...extra });
+  // Логування вимкнено
 }
 
 function battleStateSnapshot(
@@ -77,6 +69,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string; battleId: string }> },
 ) {
   const t0 = Date.now();
+  console.info("[next-turn] Запит почато");
 
   try {
     const { id, battleId } = await params;
@@ -84,7 +77,7 @@ export async function POST(
     debugBattleSync("request received", { campaignId: id, battleId });
 
     const accessResult = await requireCampaignAccess(id, false);
-    logTurnTiming("auth + requireCampaignAccess", t0);
+    console.info("[next-turn] auth", { ms: Date.now() - t0 });
 
     if (accessResult instanceof NextResponse) {
       return accessResult;
@@ -108,7 +101,7 @@ export async function POST(
         completedAt: true,
       },
     });
-    logTurnTiming("battle fetch", t0);
+    console.info("[next-turn] battle fetch", { ms: Date.now() - t0 });
 
     if (!battle || battle.campaignId !== id) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -172,7 +165,9 @@ export async function POST(
     let nextRound = battle.currentRound;
 
     const stateBeforeNextTurn = {
-      initiativeOrder: structuredClone(initiativeOrder) as BattleParticipant[],
+      initiativeOrder: slimInitiativeOrderForStorage(
+        structuredClone(initiativeOrder) as BattleParticipant[],
+      ),
       currentTurnIndex: battle.currentTurnIndex,
       currentRound: battle.currentRound,
     };
@@ -482,15 +477,15 @@ export async function POST(
         pendingSummons: clearedPendingSummons
           ? ([] as unknown as Prisma.InputJsonValue)
           : (battle.pendingSummons as Prisma.InputJsonValue) ?? [],
-        battleLog: stripStateBeforeForStorage([
+        battleLog: prepareBattleLogForStorage([
           ...battleLog,
           ...newLogEntries,
         ]) as unknown as Prisma.InputJsonValue,
       },
     });
 
-    logTurnTiming("prisma.update", t0, {
-      updateMs: Date.now() - tBeforeUpdate,
+    console.info("[next-turn] prisma update", {
+      ms: Date.now() - tBeforeUpdate,
       battleLogSize: battleLog.length + newLogEntries.length,
     });
 
@@ -555,7 +550,8 @@ export async function POST(
       }
     }
 
-    logTurnTiming("total (before response)", t0);
+    const totalMs = Date.now() - t0;
+    console.info("[next-turn] Запит завершено", { totalMs });
 
     return NextResponse.json(stripStateBeforeForClient(updatedBattle));
   } catch (error) {

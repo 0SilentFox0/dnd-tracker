@@ -10,7 +10,7 @@ import {
   preparePusherPayload,
   slimInitiativeOrderForStorage,
   stripStateBeforeForClient,
-  stripStateBeforeForStorage,
+  prepareBattleLogForStorage,
 } from "@/lib/utils/battle/strip-battle-payload";
 import { BattleAction,BattleParticipant } from "@/types/battle";
 
@@ -234,7 +234,7 @@ export async function POST(
         initiativeOrder: slimInitiativeOrderForStorage(
           updatedInitiativeOrder,
         ) as unknown as Prisma.InputJsonValue,
-        battleLog: stripStateBeforeForStorage([
+        battleLog: prepareBattleLogForStorage([
           ...battleLog,
           battleAction,
         ]) as unknown as Prisma.InputJsonValue,

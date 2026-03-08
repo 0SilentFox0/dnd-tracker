@@ -25,9 +25,7 @@ import {
 } from "@/lib/utils/skills/skill-triggers-execution";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
-const isBattleSyncDebugEnabled =
-  process.env.BATTLE_SYNC_DEBUG === "1" ||
-  process.env.BATTLE_SYNC_DEBUG === "true";
+const isBattleSyncDebugEnabled = false;
 
 function battleStateSnapshot(
   initiativeOrder: BattleParticipant[],

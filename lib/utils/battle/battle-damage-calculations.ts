@@ -65,12 +65,19 @@ export function calculateSkillDamagePercentBonus(
     if (!skillAppliesToDamageType(skill, attackType)) continue;
 
     for (const effect of skill.effects) {
+      const isPct = effect.isPercentage === true;
+
+      const numVal =
+        typeof effect.value === "number"
+          ? effect.value
+          : parseInt(String(effect.value ?? 0), 10) || 0;
+
       if (
-        effect.isPercentage &&
-        typeof effect.value === "number" &&
+        isPct &&
+        numVal !== 0 &&
         matchesAttackType(effect.stat, attackType)
       ) {
-        totalPercent += effect.value;
+        totalPercent += numVal;
       }
     }
   }
@@ -107,12 +114,19 @@ export function calculateSkillDamageFlatBonus(
     if (!skillAppliesToDamageType(skill, attackType)) continue;
 
     for (const effect of skill.effects) {
+      const isPct = effect.isPercentage === true;
+
+      const numVal =
+        typeof effect.value === "number"
+          ? effect.value
+          : parseInt(String(effect.value ?? 0), 10) || 0;
+
       if (
-        !effect.isPercentage &&
-        typeof effect.value === "number" &&
+        !isPct &&
+        numVal !== 0 &&
         matchesAttackType(effect.stat, attackType)
       ) {
-        totalFlat += effect.value;
+        totalFlat += numVal;
       }
     }
   }
