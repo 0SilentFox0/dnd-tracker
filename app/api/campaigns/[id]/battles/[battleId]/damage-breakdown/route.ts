@@ -38,7 +38,8 @@ export async function POST(
       return NextResponse.json({ error: "Battle not found" }, { status: 404 });
     }
 
-    const initiativeOrder = (battle.initiativeOrder ?? []) as BattleParticipant[];
+    const initiativeOrder = (battle.initiativeOrder ??
+      []) as unknown as BattleParticipant[];
 
     const attacker = initiativeOrder.find(
       (p) => p.basicInfo.id === data.attackerId,
