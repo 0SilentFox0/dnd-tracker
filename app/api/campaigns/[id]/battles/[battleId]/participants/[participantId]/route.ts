@@ -9,6 +9,7 @@ import {
   slimInitiativeOrderForStorage,
   stripStateBeforeForClient,
 } from "@/lib/utils/battle/strip-battle-payload";
+import { executeComplexTriggersForChangedParticipant } from "@/lib/utils/skills/skill-triggers-execution";
 import { BattleAction, BattleParticipant } from "@/types/battle";
 
 const patchSchema = z.object({
@@ -181,6 +182,12 @@ export async function PATCH(
 
       updatedOrder[idx] = updatedParticipant;
 
+      const complexTriggerResult = executeComplexTriggersForChangedParticipant(
+        updatedOrder,
+        updatedParticipant.basicInfo.id,
+        battle.currentRound,
+      );
+
       const logEntry: BattleAction = {
         id: `hp-${participantId}-${Date.now()}`,
         battleId,
@@ -211,15 +218,36 @@ export async function PATCH(
         isCancelled: false,
       };
 
+      const triggerLogEntry =
+        complexTriggerResult.messages.length > 0
+          ? ({
+              id: `hp-triggers-${participantId}-${Date.now()}`,
+              battleId,
+              round: battle.currentRound,
+              actionIndex: battleLog.length + 1,
+              timestamp: new Date(),
+              actorId: "system",
+              actorName: "Система",
+              actorSide: "ally",
+              actionType: "ability",
+              targets: [],
+              actionDetails: {},
+              resultText: `Тригери після зміни HP: ${complexTriggerResult.messages.join("; ")}`,
+              hpChanges: [],
+              isCancelled: false,
+            } satisfies BattleAction)
+          : null;
+
       const updatedBattle = await prisma.battleScene.update({
         where: { id: battleId },
         data: {
           initiativeOrder: slimInitiativeOrderForStorage(
-            updatedOrder,
+            complexTriggerResult.updatedParticipants,
           ) as unknown as Prisma.InputJsonValue,
           battleLog: [
             ...battleLog,
             logEntry,
+            ...(triggerLogEntry ? [triggerLogEntry] : []),
           ] as unknown as Prisma.InputJsonValue,
         },
       });

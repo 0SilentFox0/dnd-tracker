@@ -7,10 +7,10 @@ import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { BattleSpell, processSpell } from "@/lib/utils/battle/battle-spell-process";
 import { logBattleTiming } from "@/lib/utils/battle/battle-timing";
 import {
+  prepareBattleLogForStorage,
   preparePusherPayload,
   slimInitiativeOrderForStorage,
   stripStateBeforeForClient,
-  prepareBattleLogForStorage,
 } from "@/lib/utils/battle/strip-battle-payload";
 import { BattleAction,BattleParticipant } from "@/types/battle";
 
@@ -37,10 +37,12 @@ export async function POST(
   { params }: { params: Promise<{ id: string; battleId: string }> }
 ) {
   const t0 = Date.now();
+
   try {
     const { id, battleId } = await params;
 
     const accessResult = await requireCampaignAccess(id, false);
+
     logBattleTiming("spell: auth", t0);
 
     if (accessResult instanceof NextResponse) {
@@ -176,6 +178,7 @@ export async function POST(
 
     // Обробляємо заклинання через нову функцію (перерахунок шкоди)
     const tSpell = Date.now();
+
     const spellResult = processSpell({
       caster,
       spell: battleSpell,
@@ -188,6 +191,7 @@ export async function POST(
       additionalRollResult: data.additionalRollResult,
       hitRoll: data.hitRoll,
     });
+
     logBattleTiming("spell: processSpell (перерахунок шкоди)", tSpell, {
       spellId: data.spellId,
       targetCount: data.targetIds.length,
@@ -255,6 +259,7 @@ export async function POST(
     }
 
     logBattleTiming("spell: total", t0, { targetCount: data.targetIds.length });
+
     return NextResponse.json(stripStateBeforeForClient(updatedBattle));
   } catch (error) {
     console.error("Error processing spell:", error);

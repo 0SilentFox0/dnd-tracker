@@ -26,6 +26,7 @@ export function GlobalDamageOverlay({
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(false), durationMs);
+
     return () => clearTimeout(t);
   }, [durationMs]);
 

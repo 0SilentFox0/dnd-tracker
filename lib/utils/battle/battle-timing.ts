@@ -6,6 +6,7 @@
 
 function getIsTimingEnabled(): boolean {
   if (typeof process === "undefined") return false;
+
   return (
     process.env.NODE_ENV === "development" ||
     process.env.BATTLE_TURN_TIMING === "1" ||
@@ -32,6 +33,7 @@ export function measureTiming<T>(
   extra?: Record<string, number | string | null>,
 ): T {
   const start = Date.now();
+
   try {
     return fn();
   } finally {

@@ -98,6 +98,7 @@ export async function bonusAction(
   if (!response.ok) throw new Error("Failed to process bonus action");
 
   const result = await response.json();
+
   return result.battle;
 }
 

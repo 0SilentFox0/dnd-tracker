@@ -46,6 +46,7 @@ export async function POST(
     }
 
     const body = await request.json();
+
     const data = bonusActionSchema.parse(body);
 
     const initiativeOrder =
@@ -63,6 +64,7 @@ export async function POST(
     }
 
     const isDM = accessResult.campaign.members[0]?.role === "dm";
+
     const isController =
       participant.basicInfo.controlledBy === accessResult.userId;
 
@@ -107,6 +109,7 @@ export async function POST(
 
     if (participantIdx >= 0) {
       const updated = result.updatedParticipants[participantIdx];
+
       updatedInitiativeOrder = result.updatedParticipants.map((p, i) =>
         i === participantIdx
           ? { ...updated, battleData: { ...updated.battleData, skillUsageCounts } }

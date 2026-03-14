@@ -19,6 +19,7 @@ export function SkillsAffectingDamageList({
 }: SkillsAffectingDamageListProps) {
   const filtered = skills.filter((s) => {
     if (s.damageType == null) return true;
+
     return s.damageType === mode;
   });
 

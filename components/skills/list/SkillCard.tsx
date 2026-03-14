@@ -302,8 +302,10 @@ export function SkillCard({
                 checked={combatStats.affectsDamage ?? false}
                 onCheckedChange={(checked) => {
                   const next = !!checked;
+
                   const baseStats =
                     "combatStats" in skill ? (skill.combatStats as Record<string, unknown>) ?? {} : {};
+
                   updateSkillMutation.mutate({
                     skillId,
                     data: {

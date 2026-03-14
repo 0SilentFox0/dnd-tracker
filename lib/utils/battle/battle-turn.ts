@@ -209,6 +209,7 @@ export function processStartOfRound(
 
   // Застосовуємо onBattleStart (all_allies) від союзників до нових призваних — щоб скіли типу Ізабель діяли на союзників
   const newSummonIds = new Set(pendingSummons.map((p) => p.basicInfo.id));
+
   const orderWithAllyBuffs = applyOnBattleStartEffectsToNewAllies(
     updatedOrder,
     newSummonIds,

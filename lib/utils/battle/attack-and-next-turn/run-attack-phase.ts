@@ -46,28 +46,34 @@ export class AttackPhaseError extends Error {
   }
 }
 
-export function runAttackPhase(
-  input: AttackPhaseInput,
-): AttackPhaseResult {
+export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
   const { battle, data, battleId, userId, isDM } = input;
+
   const initiativeOrder = battle.initiativeOrder as BattleParticipant[];
+
   const baseBattleLog = (battle.battleLog as BattleAction[]) || [];
 
   const d20Roll = data.d20Roll ?? data.attackRoll;
+
   if (!d20Roll) {
     throw new AttackPhaseError("d20Roll is required", 400);
   }
 
-  const attacker = initiativeOrder.find((p) => p.basicInfo.id === data.attackerId);
+  const attacker = initiativeOrder.find(
+    (p) => p.basicInfo.id === data.attackerId,
+  );
+
   if (!attacker) {
     throw new AttackPhaseError("Attacker not found in battle", 404);
   }
 
   const currentParticipant = initiativeOrder[battle.currentTurnIndex];
+
   const canAttack =
     isDM ||
     (currentParticipant?.basicInfo.id === attacker.basicInfo.id &&
       attacker.basicInfo.controlledBy === userId);
+
   if (!canAttack) {
     throw new AttackPhaseError(
       "Forbidden: only DM or current turn controller can attack",
@@ -76,9 +82,11 @@ export function runAttackPhase(
   }
 
   const targetIds = data.targetIds || (data.targetId ? [data.targetId] : []);
+
   const targets = initiativeOrder.filter((p) =>
     targetIds.includes(p.basicInfo.id),
   );
+
   if (targets.length === 0) {
     throw new AttackPhaseError("No targets found in battle", 404);
   }
@@ -91,10 +99,7 @@ export function runAttackPhase(
   }
 
   if (attacker.actionFlags.hasUsedAction) {
-    throw new AttackPhaseError(
-      "Attacker has already used their action",
-      400,
-    );
+    throw new AttackPhaseError("Attacker has already used their action", 400);
   }
 
   if (attacker.combatStats.status !== "active") {
@@ -109,21 +114,26 @@ export function runAttackPhase(
         (a) => a.id === data.attackId || a.name === data.attackId,
       )
     : null;
+
   if (!attack) attack = attacker.battleData.attacks[0];
+
   if (!attack) {
     throw new AttackPhaseError("No attack available", 400);
   }
 
   const isAoe = attack.targetType === "aoe";
+
   const maxPossibleTargets = isAoe
     ? attack.maxTargets || attacker.combatStats.maxTargets || 1
     : 1;
+
   if (targets.length > maxPossibleTargets) {
     throw new AttackPhaseError(
       `Too many targets. Max allowed: ${maxPossibleTargets}`,
       400,
     );
   }
+
   if (!isAoe && targets.length > 1) {
     throw new AttackPhaseError(
       "Single-target attack allows only one target",
@@ -132,12 +142,14 @@ export function runAttackPhase(
   }
 
   const dist = attack.damageDistribution;
+
   const damageFractions: number[] =
     dist &&
     dist.length === targets.length &&
     dist.every((n) => typeof n === "number" && n >= 0 && n <= 100)
       ? (() => {
           const sum = dist.reduce((a, b) => a + b, 0);
+
           return sum > 0
             ? dist.map((p) => p / sum)
             : targets.map(() => 1 / targets.length);
@@ -145,17 +157,21 @@ export function runAttackPhase(
       : targets.map(() => 1 / targets.length);
 
   let currentAttacker = { ...attacker };
-  let currentInitiativeOrder: BattleParticipant[] = initiativeOrder.map((p) => ({
-    ...p,
-    battleData: p.battleData
-      ? {
-          ...p.battleData,
-          skillUsageCounts: { ...(p.battleData.skillUsageCounts ?? {}) },
-        }
-      : p.battleData,
-  }));
+
+  let currentInitiativeOrder: BattleParticipant[] = initiativeOrder.map(
+    (p) => ({
+      ...p,
+      battleData: p.battleData
+        ? {
+            ...p.battleData,
+            skillUsageCounts: { ...(p.battleData.skillUsageCounts ?? {}) },
+          }
+        : p.battleData,
+    }),
+  );
 
   const allBattleActions: BattleAction[] = [];
+
   const snapshotState = () => ({
     initiativeOrder: slimInitiativeOrderForStorage(
       JSON.parse(JSON.stringify(currentInitiativeOrder)) as BattleParticipant[],
@@ -163,11 +179,15 @@ export function runAttackPhase(
     currentTurnIndex: battle.currentTurnIndex,
     currentRound: battle.currentRound,
   });
+
   let stateBefore = snapshotState();
 
   for (let i = 0; i < targets.length; i++) {
     const target = targets[i];
-    const damageMultiplier = targets.length > 1 ? damageFractions[i] : undefined;
+
+    const damageMultiplier =
+      targets.length > 1 ? damageFractions[i] : undefined;
+
     const attackResult = processAttack({
       attacker: currentAttacker,
       target,
@@ -180,14 +200,29 @@ export function runAttackPhase(
       battleId,
       damageMultiplier,
     });
+
     currentAttacker = attackResult.attackerUpdated;
-    currentInitiativeOrder = currentInitiativeOrder.map((p) => {
-      if (p.basicInfo.id === currentAttacker.basicInfo.id)
-        return currentAttacker as BattleParticipant;
-      if (p.basicInfo.id === target.basicInfo.id)
-        return attackResult.targetUpdated as BattleParticipant;
-      return p;
-    });
+
+    if (attackResult.allParticipantsUpdated?.length) {
+      const updatedMap = new Map(
+        attackResult.allParticipantsUpdated.map((p) => [p.basicInfo.id, p]),
+      );
+
+      currentInitiativeOrder = currentInitiativeOrder.map(
+        (p) => updatedMap.get(p.basicInfo.id) ?? p,
+      );
+    } else {
+      currentInitiativeOrder = currentInitiativeOrder.map((p) => {
+        if (p.basicInfo.id === currentAttacker.basicInfo.id)
+          return currentAttacker as BattleParticipant;
+
+        if (p.basicInfo.id === target.basicInfo.id)
+          return attackResult.targetUpdated as BattleParticipant;
+
+        return p;
+      });
+    }
+
     allBattleActions.push({
       ...attackResult.battleAction,
       actionIndex: baseBattleLog.length + allBattleActions.length,
@@ -202,6 +237,7 @@ export function runAttackPhase(
     const currentTarget = finalInitiativeOrder.find(
       (p) => p.basicInfo.id === target.basicInfo.id,
     );
+
     if (
       currentTarget &&
       (currentTarget.combatStats.status === "dead" ||
@@ -212,6 +248,7 @@ export function runAttackPhase(
         "allyDeath",
         target.basicInfo.id,
       );
+
       finalInitiativeOrder = allyResult.updatedParticipants;
     }
   }
@@ -221,6 +258,7 @@ export function runAttackPhase(
     "kill",
     currentAttacker.basicInfo.id,
   );
+
   finalInitiativeOrder = killResult.updatedParticipants;
 
   return {

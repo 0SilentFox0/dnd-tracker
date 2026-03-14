@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import type { SpellRichOptionData } from "@/components/spells/SpellRichOption";
+import { SpellSelectDropdown } from "@/components/spells/SpellSelectDropdown";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,7 +15,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { getSpellTypeIcon } from "@/lib/utils/spells/spell-icons";
 import type { BattleScene } from "@/types/api";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -74,8 +75,6 @@ export function SpellDialog({
 
   const [selectedTargets, setSelectedTargets] = useState<string[]>([]);
 
-  const [spellIconError, setSpellIconError] = useState(false);
-
   const [savingThrows, setSavingThrows] = useState<
     Record<string, { roll: number; ability: string }>
   >({});
@@ -127,7 +126,7 @@ export function SpellDialog({
   }, [caster, campaignId, open]);
 
   const spellsByGroup = useMemo(() => {
-    const map = new Map<string, Spell[]>();
+    const map = new Map<string, SpellRichOptionData[]>();
 
     spells.forEach((spell) => {
       const groupName = spell.spellGroup?.name ?? "Без групи";
@@ -136,7 +135,7 @@ export function SpellDialog({
 
       const group = map.get(groupName);
 
-      if (group) group.push(spell);
+      if (group) group.push(spell as SpellRichOptionData);
     });
 
     map.forEach((groupSpells) => {
@@ -267,7 +266,7 @@ export function SpellDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="fixed bottom-[10px] left-1/2 top-auto w-[calc(100vw-20px)] max-w-md -translate-x-1/2 translate-y-0 max-h-[calc(100vh-20px)] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>✨ Заклинання</DialogTitle>
           <DialogDescription>
@@ -336,86 +335,35 @@ export function SpellDialog({
             </div>
           </div>
 
-          {/* Вибір заклинання — групування по школах, іконка на початку */}
+          {/* Вибір заклинання — дропдаун з повним описом, картинкою та приблизною шкодою */}
           <div>
-            <Label htmlFor="spell-dialog-select">Заклинання</Label>
-            <select
-              id="spell-dialog-select"
+            <Label>Заклинання</Label>
+            <SpellSelectDropdown
+              groupedSpells={spellsByGroup}
               value={selectedSpellId}
-              onChange={(e) => {
-                const nextId = e.target.value;
-
+              onValueChange={(nextId, spell) => {
                 setSelectedSpellId(nextId);
-                setSpellIconError(false);
-
-                const spell = spells.find((s) => s.id === nextId);
 
                 if (spell?.type === "no_target") setSelectedTargets([]);
               }}
-              className={cn(
-                "flex h-9 w-full min-w-0 items-center justify-between gap-2 rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs",
-                "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:outline-none",
-                "disabled:cursor-not-allowed disabled:opacity-50",
-              )}
-              aria-label="Оберіть заклинання"
-            >
-              <option value="">Оберіть заклинання</option>
-              {Array.from(spellsByGroup.entries()).map(
-                ([groupName, groupSpells]) => (
-                  <optgroup key={groupName} label={groupName}>
-                    {groupSpells.map((spell) => {
-                      const slot = spellSlots[spell.level.toString()];
+              getIsDisabled={(spell) => {
+                const slot = spellSlots[spell.level.toString()];
 
-                      const isAvailable = isUnit
-                        ? (universalSlot?.current ?? 0) > 0
-                        : Boolean(slot && slot.current > 0);
+                return !(isUnit
+                  ? (universalSlot?.current ?? 0) > 0
+                  : Boolean(slot && slot.current > 0));
+              }}
+              getSlotLabel={(spell) => {
+                const slot = isUnit
+                  ? universalSlot
+                  : spellSlots[spell.level.toString()];
 
-                      const typeLabel =
-                        spell.type === "aoe"
-                          ? "AOE"
-                          : spell.type === "no_target"
-                            ? "No Target"
-                            : "Target";
+                if (!slot) return undefined;
 
-                      return (
-                        <option
-                          key={spell.id}
-                          value={spell.id}
-                          disabled={!isAvailable}
-                        >
-                          {spell.name} (Level {spell.level}) {typeLabel}
-                          {!isAvailable ? " — немає слотів" : ""}
-                        </option>
-                      );
-                    })}
-                  </optgroup>
-                ),
-              )}
-            </select>
-            {selectedSpell && (
-              <div className="mt-2 flex items-center gap-2">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded border bg-muted">
-                  {selectedSpell.icon && !spellIconError ? (
-                    // eslint-disable-next-line @next/next/no-img-element -- external spell icon URL, fallback on error
-                    <img
-                      src={selectedSpell.icon}
-                      alt=""
-                      className="h-5 w-5 object-contain"
-                      onError={() => setSpellIconError(true)}
-                    />
-                  ) : (
-                    (() => {
-                      const TypeIcon = getSpellTypeIcon(selectedSpell.type);
-
-                      return <TypeIcon className="h-5 w-5 text-muted-foreground" />;
-                    })()
-                  )}
-                </div>
-                <p className="text-xs text-muted-foreground flex-1">
-                  {selectedSpell.description}
-                </p>
-              </div>
-            )}
+                return `${slot.current}/${slot.max}`;
+              }}
+              placeholder="Оберіть заклинання"
+            />
           </div>
 
           {/* Вибір цілей: тільки для target та aoe; no_target — без цілей */}

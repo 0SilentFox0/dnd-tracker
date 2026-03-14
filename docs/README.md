@@ -302,6 +302,11 @@ npx prisma generate      # Генерація Prisma Client
 npx prisma migrate dev   # Створення нової міграції (тільки локально)
 npx prisma migrate deploy # Застосування міграцій (використовується на Vercel автоматично)
 npx prisma studio        # Відкриття Prisma Studio
+
+# Icons in Supabase Storage (потрібен SUPABASE_SERVICE_ROLE_KEY)
+pnpm run migrate-spell-icons-to-supabase [campaignId]   # Іконки заклинань → bucket spell-icons
+pnpm run migrate-skill-icons-to-supabase [campaignId] # Іконки скілів і main skills → bucket skill-icons
+pnpm run migrate-unit-icons-to-supabase [campaignId]  # Аватари юнітів → bucket unit-icons
 ```
 
 **Примітка**: На Vercel міграції застосовуються автоматично під час кожного деплою через `vercel.json`. Для локальної розробки використовуйте `npx prisma migrate dev`.
@@ -384,11 +389,11 @@ npx prisma studio        # Відкриття Prisma Studio
 - Пароль не містить спецсимволів які потребують URL encoding
 - Supabase проект активний
 
-### Помилка авторизації
+### Помилка авторизації / редірект на localhost після логіну з продакшену
 
-- Перевірте чи OAuth провайдер увімкнений в Supabase
-- Перевірте чи redirect URLs правильно налаштовані
-- Перевірте логи в Supabase Dashboard → Logs
+- **Supabase → Authentication → URL Configuration**: додайте production URL у **Redirect URLs**, наприклад `https://your-app.vercel.app/auth/callback`. Якщо там лише `http://localhost:3000/auth/callback`, після OAuth браузер перенаправить на localhost. Додайте обидва (localhost для розробки та production URL для проду).
+- Перевірте чи OAuth провайдер увімкнений в Supabase.
+- Перевірте логи в Supabase Dashboard → Logs.
 
 ### Prisma помилки
 

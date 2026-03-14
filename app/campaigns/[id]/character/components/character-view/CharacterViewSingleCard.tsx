@@ -1,22 +1,22 @@
 "use client";
 
 import {
-  noopAbilitySetters,
   noopAbilitiesSetters,
+  noopAbilitySetters,
   noopCombatSetters,
 } from "./constants";
 
 import { CharacterAbilitiesSection } from "@/components/characters/abilities/CharacterAbilitiesSection";
-import { CharacterSkillTreeView } from "@/components/characters/abilities/CharacterSkillTreeView";
 import { CharacterLeveledSkillsTable } from "@/components/characters/abilities/CharacterLeveledSkillsTable";
+import { CharacterSkillTreeView } from "@/components/characters/abilities/CharacterSkillTreeView";
 import { CharacterArtifactsSection } from "@/components/characters/artifacts/CharacterArtifactsSection";
 import { CharacterAbilityScores } from "@/components/characters/stats/CharacterAbilityScores";
 import { CharacterCombatParams } from "@/components/characters/stats/CharacterCombatParams";
 import { CharacterDamageCalculator } from "@/components/characters/stats/CharacterDamageCalculator";
 import { CharacterDamagePreview } from "@/components/characters/stats/CharacterDamagePreview";
 import { CharacterHpPreview } from "@/components/characters/stats/CharacterHpPreview";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import type { SkillTreeProgress } from "@/lib/hooks/useCharacterView";
 import type { CampaignMember } from "@/types/campaigns";
 import type { EquippedItems } from "@/types/inventory";

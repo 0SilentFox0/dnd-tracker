@@ -31,9 +31,11 @@ export function getSpellEnhancementSkills(
 ): ActiveSkill[] {
   return participant.battleData.activeSkills.filter((skill) => {
     if (!skill.spellEnhancements) return false;
+
     // Якщо скіл позначено «впливає на шкоду», враховуємо лише для типу magic
     if (skill.affectsDamage === true && skill.damageType !== "magic")
       return false;
+
     return true;
   });
 }

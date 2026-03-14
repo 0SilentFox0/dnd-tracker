@@ -141,12 +141,14 @@ export async function POST(
 
     // Якщо магічні слоти порожні — обчислюємо за рівнем
     let spellSlotsToCreate = data.spellSlots;
+
     if (
       !spellSlotsToCreate ||
       typeof spellSlotsToCreate !== "object" ||
       Object.keys(spellSlotsToCreate).length === 0
     ) {
       const computed = calculateCharacterSpellSlots(data.level);
+
       spellSlotsToCreate = Object.fromEntries(
         Object.entries(computed).map(([k, v]) => [
           k,

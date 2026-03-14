@@ -14,13 +14,17 @@ let cachedRedisClient: {
 
 async function getRedisClient() {
   if (cachedRedisClient) return cachedRedisClient;
+
   if (!process.env.REDIS_URL) return null;
 
   try {
     const { createClient } = await import("redis");
+
     const client = createClient({ url: process.env.REDIS_URL });
+
     await client.connect();
     cachedRedisClient = client;
+
     return cachedRedisClient;
   } catch {
     return null;
@@ -29,11 +33,14 @@ async function getRedisClient() {
 
 export async function kvGet<T>(key: string): Promise<T | null> {
   const redis = await getRedisClient();
+
   if (!redis) return null;
 
   try {
     const data = await redis.get(key);
+
     if (data == null) return null;
+
     return JSON.parse(data) as T;
   } catch {
     return null;
@@ -46,6 +53,7 @@ export async function kvSet(
   ttlSeconds = KV_TTL_SECONDS,
 ): Promise<void> {
   const redis = await getRedisClient();
+
   if (!redis) return;
 
   try {
@@ -57,6 +65,7 @@ export async function kvSet(
 
 export async function kvDel(key: string): Promise<void> {
   const redis = await getRedisClient();
+
   if (!redis) return;
 
   try {

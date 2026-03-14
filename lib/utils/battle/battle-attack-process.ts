@@ -69,6 +69,8 @@ export interface ProcessAttackResult {
   };
   targetUpdated: BattleParticipant;
   attackerUpdated: BattleParticipant;
+  /** Оновлений список усіх учасників (якщо onHit застосував ефекти до all_allies) */
+  allParticipantsUpdated?: BattleParticipant[];
   criticalEffectApplied?: CriticalEffect;
   reactionTriggered: boolean;
   reactionDamage?: number;
@@ -581,7 +583,9 @@ export function processAttack(
     updatedAttacker = onKillResult.updatedKiller;
   }
 
-  // 7d. OnHit: при попаданні — ефекти атакуючого на ціль (DOT, дебафи) або на себе (руни, лікування)
+  // 7d. OnHit: при попаданні — ефекти атакуючого на ціль (DOT, дебафи) або на всіх союзників (all_allies)
+  let allParticipantsUpdated: BattleParticipant[] | undefined;
+
   if (isHit) {
     const physicalDamageDealt = resistanceResult.finalDamage;
 
@@ -591,10 +595,12 @@ export function processAttack(
       currentRound,
       attackerSkillUsageCounts,
       physicalDamageDealt,
+      allParticipants,
     );
 
     updatedTarget = onHitResult.updatedTarget;
     updatedAttacker = onHitResult.updatedAttacker;
+    allParticipantsUpdated = onHitResult.updatedParticipants;
   }
 
   // 7e. Вампіризм: атакуючий відновлює HP при melee/ranged уроні
@@ -832,6 +838,7 @@ export function processAttack(
     },
     targetUpdated: updatedTarget,
     attackerUpdated: updatedAttacker,
+    allParticipantsUpdated,
     criticalEffectApplied,
     reactionTriggered,
     reactionDamage,

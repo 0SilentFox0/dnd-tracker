@@ -41,28 +41,35 @@ export function calculateCharacterSpellSlots(level: number): SpellSlots {
 
   // Регулярні рівні (кожен другий, крім 5,10,15,20): 2,4,6,8,12,14,16,18...
   const regularLevels = [2, 4, 6, 8, 12, 14, 16, 18];
+
   const regularGained = regularLevels.filter((l) => l <= level).length;
 
   // Слоти високого рівня на 5,10,15,20...
   const highLevels = Math.floor(level / 5);
+
   const highSlot = (n: number) => (n % 2 === 1 ? 4 : 5); // 5->4, 10->5, 15->4, 20->5
 
   // Додаємо високорівневі слоти
   for (let i = 1; i <= highLevels; i++) {
     const lvl = highSlot(i).toString();
+
     slots[lvl].max += 1;
   }
 
   // Регулярні слоти: розподіляємо на рівні 1, 2, 3 (пріоритет: 1 -> 2 -> 3)
-  let remaining = regularGained;
+  const remaining = regularGained;
+
   for (let i = 0; i < remaining; i++) {
     const r = i % 3;
+
     const key = (r + 1).toString();
+
     slots[key].max += 1;
   }
 
   // Повертаємо тільки рівні з хоча б одним слотом (рівень 1 не має слотів 2–5)
   const entries = Object.entries(slots).filter(([, v]) => v.max > 0);
+
   return Object.fromEntries(entries) as SpellSlots;
 }
 
@@ -102,6 +109,7 @@ export function calculateSpellSlotsForLevel(
   );
 
   const specialLevels = Math.floor(level / 5);
+
   const getSpecialSlotLevel = (specialCount: number): number =>
     specialCount % 2 === 1 ? 4 : 5;
 
@@ -113,7 +121,9 @@ export function calculateSpellSlotsForLevel(
 
   if (remainingSlots > 0) {
     const slotsPerLevel = Math.floor(remainingSlots / 3);
+
     const remainder = remainingSlots % 3;
+
     slots["1"].max = slotsPerLevel + (remainder >= 1 ? 1 : 0);
     slots["2"].max = slotsPerLevel + (remainder >= 2 ? 1 : 0);
     slots["3"].max = slotsPerLevel;

@@ -51,10 +51,15 @@ export function advanceTurnPhase(
   } = input;
 
   let activeParticipantFound = false;
+
   let attempts = 0;
+
   const maxAttempts = initiativeOrder.length * 2;
+
   let updatedInitiativeOrder = [...initiativeOrder];
+
   let nextTurnIndex = currentTurnIndex;
+
   let nextRound = currentRound;
 
   const stateBeforeNextTurn = {
@@ -64,11 +69,16 @@ export function advanceTurnPhase(
     currentTurnIndex,
     currentRound,
   };
+
   const newLogEntries: BattleAction[] = [];
+
   let stateBeforeAddedToBatch = false;
+
   const getStateBeforeForEntry = () => {
     if (stateBeforeAddedToBatch) return undefined;
+
     stateBeforeAddedToBatch = true;
+
     return stateBeforeNextTurn;
   };
 
@@ -82,7 +92,9 @@ export function advanceTurnPhase(
       updatedInitiativeOrder,
       nextRound,
     );
+
     const previousRound = nextRound;
+
     nextTurnIndex = turnTransition.nextTurnIndex;
     nextRound = turnTransition.nextRound;
 
@@ -94,8 +106,10 @@ export function advanceTurnPhase(
           updatedInitiativeOrder,
           { currentRound: previousRound },
         );
+
         return result.participant;
       });
+
       updatedInitiativeOrder = afterEndRound;
       clearedPendingSummons = true;
 
@@ -104,6 +118,7 @@ export function advanceTurnPhase(
         nextRound,
         pendingSummons,
       );
+
       updatedInitiativeOrder = roundResult.updatedInitiativeOrder;
 
       if (roundResult.triggerMessages.length > 0) {
@@ -128,6 +143,7 @@ export function advanceTurnPhase(
     }
 
     const nextParticipant = updatedInitiativeOrder[nextTurnIndex];
+
     if (!nextParticipant) break;
 
     const turnResult = processStartOfTurn(
@@ -135,6 +151,7 @@ export function advanceTurnPhase(
       nextRound,
       updatedInitiativeOrder,
     );
+
     updatedInitiativeOrder[nextTurnIndex] = turnResult.participant;
 
     if (turnResult.damageMessages.length > 0) {
@@ -228,14 +245,18 @@ export function advanceTurnPhase(
     const isAlive =
       turnResult.participant.combatStats.status !== "dead" &&
       turnResult.participant.combatStats.status !== "unconscious";
+
     if (isAlive) activeParticipantFound = true;
 
     const victoryCheck = checkVictoryConditions(updatedInitiativeOrder);
+
     if (victoryCheck.result && battleStatus === "active") break;
   }
 
   const victoryCheck = checkVictoryConditions(updatedInitiativeOrder);
+
   let finalStatus = battleStatus;
+
   let completedAt: Date | null = null;
 
   if (victoryCheck.result && battleStatus === "active") {
@@ -257,6 +278,7 @@ export function advanceTurnPhase(
             },
           };
         }
+
         return participant;
       });
     }

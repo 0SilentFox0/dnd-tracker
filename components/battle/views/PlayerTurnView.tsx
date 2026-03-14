@@ -119,7 +119,9 @@ export function PlayerTurnView({
     ) {
       return;
     }
+
     const timer = setTimeout(() => onSkipTurn(), 1500);
+
     return () => clearTimeout(timer);
   }, [
     participant.actionFlags.hasUsedAction,

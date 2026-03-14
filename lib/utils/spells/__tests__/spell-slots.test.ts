@@ -10,6 +10,7 @@ import type { SpellSlotProgression } from "@/types/races";
 describe("calculateCharacterSpellSlots", () => {
   it("рівень 1: завжди тільки 2 слоти 1 рівня (без слотів 2–5)", () => {
     const r = calculateCharacterSpellSlots(1);
+
     expect(r["1"].max).toBe(2);
     expect(r["1"].current).toBe(0);
     expect(Object.keys(r)).toEqual(["1"]);
@@ -17,22 +18,26 @@ describe("calculateCharacterSpellSlots", () => {
 
   it("рівень 2: +1 регулярний слот", () => {
     const r = calculateCharacterSpellSlots(2);
+
     expect(r["1"].max).toBe(3); // 2 + 1
   });
 
   it("рівень 5: слот високого рівня (4)", () => {
     const r = calculateCharacterSpellSlots(5);
+
     expect(r["4"].max).toBe(1);
     expect(r["1"].max).toBeGreaterThanOrEqual(2);
   });
 
   it("рівень 10: слот рівня 5", () => {
     const r = calculateCharacterSpellSlots(10);
+
     expect(r["5"].max).toBe(1);
   });
 
   it("повертає порожній об'єкт для рівня 0", () => {
     const r = calculateCharacterSpellSlots(0);
+
     expect(Object.keys(r).length).toBe(0);
   });
 });

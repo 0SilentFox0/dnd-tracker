@@ -5,7 +5,7 @@ export {
 } from "./advance-turn-phase";
 export {
   AttackPhaseError,
-  runAttackPhase,
   type AttackPhaseInput,
   type AttackPhaseResult,
+  runAttackPhase,
 } from "./run-attack-phase";

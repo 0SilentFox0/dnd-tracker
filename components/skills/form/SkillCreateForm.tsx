@@ -3,8 +3,8 @@
 import { useRouter } from "next/navigation";
 
 import { SkillBasicInfo } from "@/components/skills/form/basic";
-import { SkillDamageAffinity } from "@/components/skills/form/effects/SkillDamageAffinity";
 import { SkillEffectsEditor } from "@/components/skills/form/effects";
+import { SkillDamageAffinity } from "@/components/skills/form/effects/SkillDamageAffinity";
 import { SkillMainSkillSection } from "@/components/skills/form/main-skill";
 import { SkillSpellSection } from "@/components/skills/form/spell";
 import { SkillTriggersEditor } from "@/components/skills/form/triggers";

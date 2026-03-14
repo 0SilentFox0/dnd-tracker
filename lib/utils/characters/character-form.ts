@@ -9,6 +9,7 @@ function getDefaultSpellSlotsForLevel(
   level: number,
 ): Record<string, { max: number; current: number }> {
   const slots = calculateCharacterSpellSlots(level);
+
   return Object.fromEntries(
     Object.entries(slots).map(([k, v]) => [k, { max: v.max, current: v.max }]),
   );
@@ -66,7 +67,9 @@ export function characterToFormData(
         const raw = character.spellSlots as
           | Record<string, { max: number; current: number }>
           | undefined;
+
         if (raw && Object.keys(raw).length > 0) return raw;
+
         return getDefaultSpellSlotsForLevel(character.level || 1);
       })(),
       knownSpells: (character.knownSpells as string[]) || [],

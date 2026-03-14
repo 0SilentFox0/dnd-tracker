@@ -29,61 +29,74 @@ export function slimInitiativeOrderForStorage(
 
   return initiativeOrder.map((p) => {
     const bd = p.battleData;
+
     if (!bd) return p;
 
     const updates: Partial<typeof bd> = {};
 
     // activeEffects: slim appliedAt, remove description/icon
     const effects = bd.activeEffects;
+
     if (effects && effects.length > 0) {
       updates.activeEffects = effects.map((e) => {
         const { appliedAt, description, icon, ...rest } = e;
+
         const round =
           appliedAt && typeof appliedAt === "object" && "round" in appliedAt
             ? (appliedAt as { round: number }).round
             : 1;
+
         return { ...rest, appliedAt: { round } } as ActiveEffect;
       });
     }
 
     // activeSkills: remove description, icon (keep skillId, effects, affectsDamage, damageType, etc.)
     const skills = bd.activeSkills;
+
     if (skills && skills.length > 0) {
       updates.activeSkills = skills.map((s) => {
         const { description, icon, ...rest } = s as typeof s & {
           description?: string;
           icon?: string;
         };
+
         return rest;
       });
     }
 
     // passiveAbilities: remove description (keep empty string for type)
     const passives = bd.passiveAbilities;
+
     if (passives && passives.length > 0) {
       updates.passiveAbilities = passives.map((pa) => {
         const { description: _, ...rest } = pa;
+
         return { ...rest, description: "" };
       });
     }
 
     // racialAbilities: remove description/long text from effect if present
     const racials = bd.racialAbilities;
+
     if (racials && racials.length > 0) {
       updates.racialAbilities = racials.map((ra) => {
         const effect = ra.effect;
+
         if (effect && typeof effect === "object") {
           const { description, ...rest } = effect as Record<string, unknown> & {
             description?: string;
           };
+
           return { id: ra.id, name: ra.name, effect: rest };
         }
+
         return ra;
       });
     }
 
     // equippedArtifacts: keep artifactId, modifiers, bonuses; strip name, slot, passiveAbility
     const artifacts = bd.equippedArtifacts;
+
     if (artifacts && artifacts.length > 0) {
       updates.equippedArtifacts = artifacts.map((a) => ({
         artifactId: a.artifactId,
@@ -114,13 +127,17 @@ export function slimBattleLogForStorage(battleLog: BattleAction[]): BattleAction
     if (!entry || typeof entry !== "object" || !("actionDetails" in entry)) {
       return entry;
     }
+
     const details = (entry as BattleAction).actionDetails;
+
     if (!details || typeof details !== "object" || !("damageBreakdown" in details)) {
       return entry;
     }
+
     const { damageBreakdown: _, ...restDetails } = details as typeof details & {
       damageBreakdown?: string;
     };
+
     return { ...entry, actionDetails: restDetails };
   });
 }
@@ -140,8 +157,10 @@ export function stripStateBeforeForStorage(
   return battleLog.map((entry, i) => {
     if (i < cutoff && entry && typeof entry === "object" && "stateBefore" in entry) {
       const { stateBefore: _, ...rest } = entry as BattleAction & { stateBefore?: unknown };
+
       return rest;
     }
+
     return entry;
   });
 }

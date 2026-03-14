@@ -8,10 +8,13 @@ interface DamageCalculatorSkillsLogProps {
 
 function byMode(skills: SkillAffectingDamage[]) {
   const melee = skills.filter((s) => !s.damageType || s.damageType === "melee");
+
   const ranged = skills.filter(
     (s) => !s.damageType || s.damageType === "ranged",
   );
+
   const magic = skills.filter((s) => !s.damageType || s.damageType === "magic");
+
   return { melee, ranged, magic };
 }
 
@@ -19,6 +22,7 @@ export function DamageCalculatorSkillsLog({
   skills,
 }: DamageCalculatorSkillsLogProps) {
   const { melee, ranged, magic } = byMode(skills);
+
   const hasAny = melee.length > 0 || ranged.length > 0 || magic.length > 0;
 
   return (

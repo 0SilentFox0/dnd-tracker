@@ -21,6 +21,7 @@ import {
   slimInitiativeOrderForStorage,
   stripStateBeforeForClient,
 } from "@/lib/utils/battle/strip-battle-payload";
+import { executeComplexTriggersForChangedParticipant } from "@/lib/utils/skills/skill-triggers-execution";
 import type { BattleParticipant } from "@/types/battle";
 
 const attackSchema = z
@@ -106,12 +107,64 @@ export async function POST(
     const { finalInitiativeOrder, allBattleActions, baseBattleLog } =
       attackResult;
 
-    const battleLogAfterAttack = [...baseBattleLog, ...allBattleActions];
+    let initiativeOrderAfterComplexTriggers = finalInitiativeOrder;
+
+    const changedParticipantIds = Array.from(
+      new Set(
+        allBattleActions.flatMap((action) =>
+          (action.hpChanges ?? [])
+            .filter((change) => change.oldHp !== change.newHp)
+            .map((change) => change.participantId),
+        ),
+      ),
+    );
+
+    const complexTriggerMessages: string[] = [];
+
+    for (const changedParticipantId of changedParticipantIds) {
+      const complexTriggerResult = executeComplexTriggersForChangedParticipant(
+        initiativeOrderAfterComplexTriggers,
+        changedParticipantId,
+        battle.currentRound,
+      );
+
+      initiativeOrderAfterComplexTriggers =
+        complexTriggerResult.updatedParticipants;
+      complexTriggerMessages.push(...complexTriggerResult.messages);
+    }
+
+    const complexTriggerLogEntries =
+      complexTriggerMessages.length > 0
+        ? [
+            {
+              id: `attack-triggers-${Date.now()}`,
+              battleId,
+              round: battle.currentRound,
+              actionIndex: baseBattleLog.length + allBattleActions.length,
+              timestamp: new Date(),
+              actorId: "system",
+              actorName: "Система",
+              actorSide: "ally" as const,
+              actionType: "ability" as const,
+              targets: [],
+              actionDetails: {},
+              resultText: `Тригери після зміни HP: ${complexTriggerMessages.join("; ")}`,
+              hpChanges: [],
+              isCancelled: false,
+            },
+          ]
+        : [];
+
+    const battleLogAfterAttack = [
+      ...baseBattleLog,
+      ...allBattleActions,
+      ...complexTriggerLogEntries,
+    ];
 
     const currentBattleLogLength = battleLogAfterAttack.length;
 
     const advanceResult = advanceTurnPhase({
-      initiativeOrder: finalInitiativeOrder,
+      initiativeOrder: initiativeOrderAfterComplexTriggers,
       currentTurnIndex: battle.currentTurnIndex,
       currentRound: battle.currentRound,
       battleId,

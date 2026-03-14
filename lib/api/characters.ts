@@ -112,6 +112,7 @@ export async function levelUpCharacter(
 
   if (!response.ok) {
     const error = await response.json();
+
     throw new Error(error.error || "Failed to level up character");
   }
 

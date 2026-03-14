@@ -48,11 +48,13 @@ export async function POST(
   { params }: { params: Promise<{ id: string; battleId: string }> },
 ) {
   const t0 = Date.now();
+
   console.info("[attack] Запит почато");
   try {
     const { id, battleId } = await params;
 
     const accessResult = await requireCampaignAccess(id, false);
+
     console.info("[attack] auth", { ms: Date.now() - t0 });
 
     if (accessResult instanceof NextResponse) {
@@ -70,6 +72,7 @@ export async function POST(
     if (!battle || battle.campaignId !== id) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
+
     console.info("[attack] battle fetch", { ms: Date.now() - t0 });
 
     if (battle.status !== "active") {
@@ -245,6 +248,7 @@ export async function POST(
     // Обробляємо атаку для кожної цілі
     for (let i = 0; i < targets.length; i++) {
       const target = targets[i];
+
       const tAttack = Date.now();
 
       const damageMultiplier =
@@ -262,6 +266,7 @@ export async function POST(
         battleId,
         damageMultiplier,
       });
+
       console.info("[attack] processAttack", {
         targetIndex: i,
         ms: Date.now() - tAttack,
@@ -327,6 +332,7 @@ export async function POST(
 
     // Оновлюємо бій
     const tDb = Date.now();
+
     const updatedBattle = await prisma.battleScene.update({
       where: { id: battleId },
       data: {
@@ -339,6 +345,7 @@ export async function POST(
         ]) as unknown as Prisma.InputJsonValue,
       },
     });
+
     console.info("[attack] prisma update", { ms: Date.now() - tDb });
 
     // Відправляємо real-time оновлення через Pusher
@@ -355,7 +362,9 @@ export async function POST(
     }
 
     const totalMs = Date.now() - t0;
+
     console.info("[attack] Запит завершено", { totalMs, targetCount: targets.length });
+
     return NextResponse.json(stripStateBeforeForClient(updatedBattle));
   } catch (error) {
     console.error("Error processing attack:", error);

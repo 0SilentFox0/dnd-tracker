@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
+import { pusherServer } from "@/lib/pusher";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import {
   processEndOfTurn,
@@ -13,7 +14,6 @@ import {
   calculateAllyHpChangesOnVictory,
   checkVictoryConditions,
 } from "@/lib/utils/battle/battle-victory";
-import { pusherServer } from "@/lib/pusher";
 import {
   prepareBattleLogForStorage,
   preparePusherPayload,
@@ -69,6 +69,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string; battleId: string }> },
 ) {
   const t0 = Date.now();
+
   console.info("[next-turn] Запит почато");
 
   try {
@@ -77,6 +78,7 @@ export async function POST(
     debugBattleSync("request received", { campaignId: id, battleId });
 
     const accessResult = await requireCampaignAccess(id, false);
+
     console.info("[next-turn] auth", { ms: Date.now() - t0 });
 
     if (accessResult instanceof NextResponse) {
@@ -101,6 +103,7 @@ export async function POST(
         completedAt: true,
       },
     });
+
     console.info("[next-turn] battle fetch", { ms: Date.now() - t0 });
 
     if (!battle || battle.campaignId !== id) {
@@ -195,6 +198,7 @@ export async function POST(
 
     while (!activeParticipantFound && attempts < maxAttempts) {
       attempts++;
+
       const tStep = Date.now();
 
       // 1. Знаходимо наступного кандидата
@@ -273,11 +277,13 @@ export async function POST(
       }
 
       const tStartTurn = Date.now();
+
       const turnResult = processStartOfTurn(
         nextParticipant,
         nextRound,
         updatedInitiativeOrder,
       );
+
       logTurnTiming("processStartOfTurn (початок ходу)", tStartTurn, {
         participantId: nextParticipant.basicInfo.id,
         participantName: nextParticipant.basicInfo.name,
@@ -551,6 +557,7 @@ export async function POST(
     }
 
     const totalMs = Date.now() - t0;
+
     console.info("[next-turn] Запит завершено", { totalMs });
 
     return NextResponse.json(stripStateBeforeForClient(updatedBattle));

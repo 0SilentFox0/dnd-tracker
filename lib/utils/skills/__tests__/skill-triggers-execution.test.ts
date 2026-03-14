@@ -7,6 +7,7 @@ import {
   executeBeforeAttackTriggers,
   executeBeforeSpellCastTriggers,
   executeBonusActionSkill,
+  executeComplexTriggersForChangedParticipant,
   executeOnBattleStartEffects,
   executeOnHitEffects,
   executeOnKillEffects,
@@ -382,6 +383,203 @@ describe("skill-triggers-execution", () => {
 
       expect(result.updatedTarget.battleData.activeEffects).toHaveLength(0);
       expect(result.messages).toHaveLength(0);
+    });
+
+    it("застосовує initiative та melee_damage з target all_allies до всіх союзників і повертає updatedParticipants", () => {
+      const ally1 = createMockParticipant({
+        basicInfo: {
+          id: "ally1",
+          name: "Союзник1",
+          side: ParticipantSide.ALLY,
+        } as any,
+        abilities: { level: 5 } as any,
+      });
+
+      const ally2 = createMockParticipant({
+        basicInfo: {
+          id: "ally2",
+          name: "Союзник2",
+          side: ParticipantSide.ALLY,
+        } as any,
+        abilities: { level: 3 } as any,
+      });
+
+      const attacker = createMockParticipant({
+        basicInfo: {
+          id: "attacker",
+          name: "Атакуючий",
+          side: ParticipantSide.ALLY,
+        } as any,
+        battleData: {
+          attacks: [],
+          activeEffects: [],
+          passiveAbilities: [],
+          racialAbilities: [],
+          activeSkills: [
+            {
+              ...createOnHitSkill("s1", "Баф союзників", [
+                {
+                  stat: "initiative",
+                  type: "flat",
+                  value: 2,
+                  isPercentage: false,
+                  target: "all_allies",
+                  duration: 2,
+                },
+                {
+                  stat: "melee_damage",
+                  type: "formula",
+                  value: "1d4 + hero_level / 3",
+                  isPercentage: false,
+                  target: "all_allies",
+                  duration: 2,
+                },
+              ]),
+            },
+          ],
+          equippedArtifacts: [],
+        } as any,
+      });
+
+      const target = createMockParticipant({
+        basicInfo: {
+          id: "enemy1",
+          name: "Ворог",
+          side: ParticipantSide.ENEMY,
+        } as any,
+      });
+
+      const allParticipants = [attacker, ally1, ally2, target];
+
+      const result = executeOnHitEffects(
+        attacker,
+        target,
+        1,
+        undefined,
+        undefined,
+        allParticipants,
+      );
+
+      expect(result.updatedParticipants).toBeDefined();
+      expect(result.updatedParticipants).toHaveLength(4);
+
+      const ally1Updated = result.updatedParticipants!.find(
+        (p) => p.basicInfo.id === "ally1",
+      );
+
+      const ally2Updated = result.updatedParticipants!.find(
+        (p) => p.basicInfo.id === "ally2",
+      );
+
+      const attackerUpdated = result.updatedParticipants!.find(
+        (p) => p.basicInfo.id === "attacker",
+      );
+
+      expect(ally1Updated?.battleData.activeEffects.length).toBeGreaterThanOrEqual(
+        2,
+      );
+      expect(ally2Updated?.battleData.activeEffects.length).toBeGreaterThanOrEqual(
+        2,
+      );
+
+      const hasInitiative = (p: BattleParticipant) =>
+        p.battleData.activeEffects.some((e) =>
+          e.effects?.some((d) => d.type === "initiative_bonus"),
+        );
+
+      const hasMeleeDamage = (p: BattleParticipant) =>
+        p.battleData.activeEffects.some((e) =>
+          e.effects?.some((d) => d.type === "melee_damage"),
+        );
+
+      expect(hasInitiative(ally1Updated!)).toBe(true);
+      expect(hasInitiative(ally2Updated!)).toBe(true);
+      expect(hasMeleeDamage(ally1Updated!)).toBe(true);
+      expect(hasMeleeDamage(ally2Updated!)).toBe(true);
+
+      expect(result.messages.length).toBeGreaterThanOrEqual(1);
+      expect(attackerUpdated).toBeDefined();
+    });
+
+    it("не перетирає вже зменшений HP цілі під час onHit all_allies", () => {
+      const attacker = createMockParticipant({
+        basicInfo: {
+          id: "attacker",
+          name: "Атакуючий",
+          side: ParticipantSide.ALLY,
+        } as any,
+        battleData: {
+          attacks: [],
+          activeEffects: [],
+          passiveAbilities: [],
+          racialAbilities: [],
+          activeSkills: [
+            {
+              ...createOnHitSkill("s1", "Баф союзників", [
+                {
+                  stat: "initiative",
+                  type: "flat",
+                  value: 2,
+                  isPercentage: false,
+                  target: "all_allies",
+                  duration: 2,
+                },
+              ]),
+            },
+          ],
+          equippedArtifacts: [],
+        } as any,
+      });
+
+      const damagedTarget = createMockParticipant({
+        basicInfo: {
+          id: "enemy1",
+          name: "Ворог",
+          side: ParticipantSide.ENEMY,
+        } as any,
+        combatStats: {
+          ...createMockParticipant().combatStats,
+          maxHp: 78,
+          currentHp: 59,
+        },
+      });
+
+      const staleTargetFromOrder = createMockParticipant({
+        basicInfo: {
+          id: "enemy1",
+          name: "Ворог",
+          side: ParticipantSide.ENEMY,
+        } as any,
+        combatStats: {
+          ...createMockParticipant().combatStats,
+          maxHp: 78,
+          currentHp: 78,
+        },
+      });
+
+      const ally = createMockParticipant({
+        basicInfo: {
+          id: "ally1",
+          name: "Союзник1",
+          side: ParticipantSide.ALLY,
+        } as any,
+      });
+
+      const result = executeOnHitEffects(
+        attacker,
+        damagedTarget,
+        1,
+        undefined,
+        undefined,
+        [attacker, ally, staleTargetFromOrder],
+      );
+
+      const targetFromParticipants = result.updatedParticipants?.find(
+        (p) => p.basicInfo.id === "enemy1",
+      );
+
+      expect(result.updatedTarget.combatStats.currentHp).toBe(59);
+      expect(targetFromParticipants?.combatStats.currentHp).toBe(59);
     });
   });
 
@@ -1139,6 +1337,93 @@ describe("skill-triggers-execution", () => {
       ]);
 
       expect(result.executedSkills[0].effects).toContain("unknown_stat: 1");
+    });
+  });
+
+  describe("executeComplexTriggersForChangedParticipant", () => {
+    it("виконує complex-тригер після зниження HP союзника", () => {
+      const iven = createMockParticipant({
+        basicInfo: {
+          ...createMockParticipant().basicInfo,
+          id: "iven",
+          name: "Айвен",
+          side: ParticipantSide.ALLY,
+        },
+        combatStats: {
+          ...createMockParticipant().combatStats,
+          currentHp: 10,
+          maxHp: 82,
+        },
+      });
+
+      const godrick = withActiveSkills(
+        createMockParticipant({
+          basicInfo: {
+            ...createMockParticipant().basicInfo,
+            id: "godrick",
+            name: "Годрик",
+            side: ParticipantSide.ALLY,
+          },
+        }),
+        [
+          {
+            skillId: "godrick-skill",
+            mainSkillId: "",
+            level: SkillLevel.BASIC,
+            name: "Годрик",
+            effects: [
+              {
+                stat: "morale",
+                type: "min",
+                value: 1,
+                isPercentage: false,
+              },
+              {
+                stat: "damage",
+                type: "formula",
+                value: "1d4 + hero_level / 3",
+                isPercentage: false,
+              },
+            ],
+            skillTriggers: [
+              {
+                type: "complex",
+                stat: "HP",
+                target: "ally",
+                operator: "<=",
+                value: 15,
+                valueType: "percent",
+              },
+            ],
+          },
+        ],
+      );
+
+      const enemy = createMockParticipant({
+        basicInfo: {
+          ...createMockParticipant().basicInfo,
+          id: "enemy",
+          name: "Ворог",
+          side: ParticipantSide.ENEMY,
+        },
+      });
+
+      const result = executeComplexTriggersForChangedParticipant(
+        [godrick, iven, enemy],
+        "iven",
+        1,
+      );
+
+      const updatedGodrick = result.updatedParticipants.find(
+        (p) => p.basicInfo.id === "godrick",
+      );
+
+      expect(updatedGodrick).toBeDefined();
+      expect(updatedGodrick?.battleData.activeEffects).toHaveLength(1);
+      expect(updatedGodrick?.battleData.activeEffects[0].name).toBe(
+        "Годрик — morale",
+      );
+      expect(result.messages).toContain("✨ Годрик: morale +1");
     });
   });
 

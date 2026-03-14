@@ -139,8 +139,11 @@ export function usePusherBattleSync(
           "type" in data
         ) {
           const state = queryClient.getQueryState(queryKey());
+
           const dataUpdatedAt = state?.dataUpdatedAt ?? 0;
+
           const now = Date.now();
+
           const skipRefetch = now - dataUpdatedAt < 2000;
 
           if (skipRefetch) {

@@ -38,6 +38,7 @@ export function DamageCalculatorDiceInputs({
               readOnly={readOnly}
               onChange={(e) => {
                 const v = parseInt(e.target.value, 10);
+
                 if (!Number.isNaN(v)) onValueChange(i, Math.max(1, Math.min(sides, v)));
               }}
             />

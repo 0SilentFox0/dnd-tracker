@@ -929,18 +929,26 @@ function parseMainSkillLevelId(
   id: string,
 ): { mainSkillId: string; level: string } | null {
   const match = id.match(MAIN_SKILL_LEVEL_RE);
+
   if (!match) return null;
+
   const level = match[1];
+
   const mainSkillId = id.slice(0, match.index);
+
   return mainSkillId ? { mainSkillId, level } : null;
 }
 
 /** Визначає рівень скіла за назвою (Напад — Експерт → expert) */
 function inferLevelFromSkillName(name: string | null): string | null {
   const n = (name ?? "").toLowerCase();
+
   if (n.includes("експерт") || n.includes("expert")) return "expert";
+
   if (n.includes("просунут") || n.includes("advanced")) return "advanced";
+
   if (n.includes("базов") || n.includes("основ") || n.includes("basic")) return "basic";
+
   return null;
 }
 
@@ -1001,7 +1009,9 @@ async function extractActiveSkillsFromCharacter(
 
   // Розділяємо прямі id скілів та id рівнів (mainSkillId_expert_level)
   const directIds = allSkillIds.filter((id) => !parseMainSkillLevelId(id));
+
   const levelIds = allSkillIds.filter((id) => parseMainSkillLevelId(id));
+
   const mainSkillIdsFromLevels = new Set(
     levelIds
       .map(parseMainSkillLevelId)
@@ -1015,18 +1025,23 @@ async function extractActiveSkillsFromCharacter(
     const byDirect = directIds
       .map((id) => preloadedSkillsById[id])
       .filter(Boolean);
+
     const byMainSkill = Object.values(preloadedSkillsById).filter(
       (s) =>
         mainSkillIdsFromLevels.size > 0 &&
         (s.mainSkillId && mainSkillIdsFromLevels.has(s.mainSkillId)),
     );
+
     fetchedSkills = [...new Map([...byDirect, ...byMainSkill].map((s) => [s.id, s])).values()];
   } else {
     const orConditions: Array<{ id: { in: string[] } } | { mainSkillId: { in: string[] } }> = [];
+
     if (directIds.length > 0) orConditions.push({ id: { in: directIds } });
+
     if (mainSkillIdsFromLevels.size > 0) {
       orConditions.push({ mainSkillId: { in: Array.from(mainSkillIdsFromLevels) } });
     }
+
     fetchedSkills = orConditions.length
       ? await prisma.skill.findMany({
           where: { campaignId, OR: orConditions },
@@ -1035,18 +1050,24 @@ async function extractActiveSkillsFromCharacter(
   }
 
   const skillsMap = new Map<string, Prisma.SkillGetPayload<object>>();
+
   for (const s of fetchedSkills) {
     skillsMap.set(s.id, s);
   }
   // Розв'язуємо id рівнів → реальний скіл (щоб Напад — Експерт потрапляв у participant.activeSkills)
   for (const levelId of levelIds) {
     const parsed = parseMainSkillLevelId(levelId);
+
     if (!parsed) continue;
+
     const match = fetchedSkills.find((s) => {
       const msId = s.mainSkillId ?? (s.mainSkillData as { mainSkillId?: string } | undefined)?.mainSkillId;
+
       if (msId !== parsed.mainSkillId) return false;
+
       return inferLevelFromSkillName(s.name) === parsed.level;
     });
+
     if (match) skillsMap.set(levelId, match);
   }
 
@@ -1074,6 +1095,8 @@ async function extractActiveSkillsFromCharacter(
       type: string;
       value?: number | string | boolean;
       duration?: number;
+      target?: "self" | "enemy" | "all_enemies" | "all_allies" | "all";
+      maxTriggers?: number | null;
     };
     type CombatStatsEffects = {
       effects?: RawEffect[];
@@ -1094,16 +1117,20 @@ async function extractActiveSkillsFromCharacter(
         .filter((e) => e.stat)
         .map((e) => {
           const raw = e as RawEffect & { isPercentage?: boolean };
+
           const isPct =
             raw.isPercentage === true ||
             e.type === "percent" ||
             e.type === "percentage";
+
           return {
             stat: e.stat,
             type: e.type,
             value: e.value ?? 0,
             isPercentage: isPct,
             duration: e.duration,
+            ...(raw.target != null && { target: raw.target }),
+            ...(raw.maxTriggers != null && { maxTriggers: raw.maxTriggers }),
           };
         });
     } else {

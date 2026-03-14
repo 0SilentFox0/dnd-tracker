@@ -49,6 +49,63 @@ export function ParticipantCard({
 
   const [damageAmount, setDamageAmount] = useState(0);
 
+  const effectSourceParticipants = new Map(
+    (battle?.initiativeOrder ?? []).map((p) => [p.basicInfo.name, p]),
+  );
+
+  const groupedHeroEffects = new Map<
+    string,
+    {
+      sourceName: string;
+      sourceAvatar?: string | null;
+      effectNames: string[];
+      durations: string[];
+      hasBuff: boolean;
+      hasDebuff: boolean;
+    }
+  >();
+
+  const regularEffects = [];
+
+  for (const effect of participant.battleData.activeEffects) {
+    const sourceName = effect.name.split(" — ")[0]?.trim();
+
+    const sourceParticipant = sourceName
+      ? effectSourceParticipants.get(sourceName)
+      : undefined;
+
+    if (sourceParticipant) {
+      const existing = groupedHeroEffects.get(sourceParticipant.basicInfo.id);
+
+      const durationText =
+        effect.duration != null ? `${effect.duration} раундів` : "";
+
+      if (existing) {
+        existing.effectNames.push(effect.name);
+
+        if (durationText) existing.durations.push(durationText);
+
+        existing.hasBuff ||= effect.type === "buff";
+        existing.hasDebuff ||= effect.type === "debuff";
+      } else {
+        groupedHeroEffects.set(sourceParticipant.basicInfo.id, {
+          sourceName: sourceParticipant.basicInfo.name,
+          sourceAvatar: sourceParticipant.basicInfo.avatar,
+          effectNames: [effect.name],
+          durations: durationText ? [durationText] : [],
+          hasBuff: effect.type === "buff",
+          hasDebuff: effect.type === "debuff",
+        });
+      }
+
+      continue;
+    }
+
+    regularEffects.push(effect);
+  }
+
+  const displayedHeroEffects = Array.from(groupedHeroEffects.values());
+
   useEffect(() => {
     if (participant.combatStats.currentHp !== lastHp) {
       const diff = participant.combatStats.currentHp - lastHp;
@@ -224,8 +281,42 @@ export function ParticipantCard({
                 )}
 
               {canSeeStats &&
-                participant.battleData.activeEffects
-                  .slice(0, 5)
+                displayedHeroEffects.slice(0, 5).map((source, idx) => {
+                  const tooltip = [
+                    source.sourceName,
+                    ...source.effectNames,
+                    ...Array.from(new Set(source.durations)),
+                  ].join(" · ");
+
+                  const ringClass = source.hasBuff
+                    ? "ring-emerald-500/60"
+                    : source.hasDebuff
+                      ? "ring-red-500/60"
+                      : "ring-white/20";
+
+                  return (
+                    <Avatar
+                      key={`effect-source-${participant.basicInfo.id}-${source.sourceName}-${idx}`}
+                      title={tooltip}
+                      className={cn(
+                        "h-6 w-6 cursor-help ring-2 ring-offset-1 ring-offset-background/60",
+                        ringClass,
+                      )}
+                    >
+                      <AvatarImage
+                        src={source.sourceAvatar || undefined}
+                        referrerPolicy="no-referrer"
+                      />
+                      <AvatarFallback className="text-[9px]">
+                        {source.sourceName.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                  );
+                })}
+
+              {canSeeStats &&
+                regularEffects
+                  .slice(0, Math.max(0, 5 - displayedHeroEffects.length))
                   .map((effect, idx) => {
                   const isBuff = effect.type === "buff";
 

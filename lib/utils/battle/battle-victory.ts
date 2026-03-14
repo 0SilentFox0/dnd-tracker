@@ -160,7 +160,9 @@ export function calculateAllyHpChangesOnVictory(
     .filter((p) => p.basicInfo.side === ParticipantSide.ALLY)
     .map((p) => {
       const original = originalById.get(p.basicInfo.id);
+
       const oldHp = original?.combatStats.currentHp ?? p.combatStats.currentHp;
+
       const newHp = p.combatStats.currentHp;
 
       if (oldHp !== newHp && victoryResult.result === "victory") {

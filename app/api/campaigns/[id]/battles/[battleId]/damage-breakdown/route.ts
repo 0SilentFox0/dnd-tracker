@@ -44,6 +44,7 @@ export async function POST(
     const attacker = initiativeOrder.find(
       (p) => p.basicInfo.id === data.attackerId,
     );
+
     const target = initiativeOrder.find(
       (p) => p.basicInfo.id === data.targetId,
     );

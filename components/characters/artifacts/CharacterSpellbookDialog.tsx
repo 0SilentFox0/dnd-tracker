@@ -1,8 +1,11 @@
 "use client";
 
-import { useMemo } from "react";
-import Image from "next/image";
+import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 
+import type { SpellRichOptionData } from "@/components/spells/SpellRichOption";
+import { SpellRichOption } from "@/components/spells/SpellRichOption";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,11 +13,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { Spell } from "@/types/spells";
 
 interface CharacterSpellbookDialogProps {
@@ -23,136 +25,102 @@ interface CharacterSpellbookDialogProps {
   spells: Spell[];
 }
 
-interface SpellsByGroup {
-  groupName: string;
-  spells: Spell[];
-}
-
 export function CharacterSpellbookDialog({
   open,
   onOpenChange,
   spells,
 }: CharacterSpellbookDialogProps) {
-  const groupedSpells = useMemo((): SpellsByGroup[] => {
-    const groups = new Map<string, { name: string; spells: Spell[] }>();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const [iconErrors, setIconErrors] = useState<Set<string>>(new Set());
+
+  const groupedSpells = (() => {
+    const map = new Map<string, SpellRichOptionData[]>();
 
     for (const spell of spells) {
-      const groupId = spell.spellGroup?.id ?? "__none__";
-
       const groupName = spell.spellGroup?.name ?? "Інші заклинання";
 
-      if (!groups.has(groupId)) {
-        groups.set(groupId, { name: groupName, spells: [] });
-      }
+      if (!map.has(groupName)) map.set(groupName, []);
 
-      groups.get(groupId)!.spells.push(spell);
+      map.get(groupName)!.push(spell as SpellRichOptionData);
     }
 
-    // Сортуємо заклинання в кожній групі: за рівнем, потім за назвою
-    for (const group of groups.values()) {
-      group.spells.sort((a, b) =>
+    for (const groupSpells of map.values()) {
+      groupSpells.sort((a, b) =>
         a.level !== b.level ? a.level - b.level : a.name.localeCompare(b.name)
       );
     }
 
-    // Групи з назвою першими, «Інші» в кінці
-    return Array.from(groups.values())
-      .map((g) => ({ groupName: g.name, spells: g.spells }))
-      .sort((a, b) => {
-        if (a.groupName === "Інші заклинання") return 1;
+    // «Інші» в кінці
+    return new Map(
+      [...map.entries()].sort(([a], [b]) => {
+        if (a === "Інші заклинання") return 1;
 
-        if (b.groupName === "Інші заклинання") return -1;
+        if (b === "Інші заклинання") return -1;
 
-        return a.groupName.localeCompare(b.groupName);
-      });
-  }, [spells]);
+        return a.localeCompare(b);
+      })
+    );
+  })();
+
+  const handleIconError = (spellId: string) => {
+    setIconErrors((prev) => new Set(prev).add(spellId));
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[80vh] flex flex-col">
+      <DialogContent className="max-w-md flex flex-col">
         <DialogHeader>
           <DialogTitle>Заклинання героя</DialogTitle>
         </DialogHeader>
-        <div className="overflow-y-auto flex-1 min-h-0 pr-2">
-          {spells.length === 0 ? (
-            <p className="text-muted-foreground text-sm py-4">
-              Персонаж поки не знає жодного заклинання. Вивчіть школу магії в
-              дереві прокачки.
-            </p>
-          ) : (
-            <TooltipProvider delayDuration={200}>
-              <div className="space-y-4">
-                {groupedSpells.map((group) => (
-                  <div key={group.groupName}>
-                    <h3 className="text-sm font-semibold text-amber-400 mb-2">
-                      {group.groupName}
-                    </h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                      {group.spells.map((spell) => {
-                        const shortDescription =
-                          spell.description != null
-                            ? spell.description.length > 120
-                              ? `${spell.description.slice(0, 117).trim()}…`
-                              : spell.description
-                            : null;
-                        return (
-                          <Tooltip key={spell.id}>
-                            <TooltipTrigger asChild>
-                              <div className="rounded-lg overflow-hidden border border-amber-900/40 bg-[#2a2520] cursor-pointer hover:border-amber-500/60 transition-colors flex flex-col">
-                                <div className="relative aspect-square shrink-0">
-                                  {spell.icon ? (
-                                    <Image
-                                      src={spell.icon}
-                                      alt={spell.name}
-                                      fill
-                                      className="object-cover"
-                                      sizes="120px"
-                                    />
-                                  ) : (
-                                    <div className="flex items-center justify-center h-full text-amber-600/60 text-xs text-center p-1 leading-tight">
-                                      {spell.name}
-                                    </div>
-                                  )}
-                                  <div className="absolute bottom-0 right-0 bg-black/70 text-amber-400 text-[10px] px-1 rounded-tl">
-                                    {spell.level}
-                                  </div>
-                                </div>
-                                <div className="p-2 min-h-0 flex flex-col gap-0.5">
-                                  <p className="font-medium text-sm text-amber-100 truncate">
-                                    {spell.name}
-                                  </p>
-                                  {shortDescription && (
-                                    <p className="text-xs text-muted-foreground line-clamp-2">
-                                      {shortDescription}
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent
-                              side="top"
-                              className="max-w-[280px] whitespace-pre-wrap"
-                            >
-                              <p className="font-medium">{spell.name}</p>
-                              <p className="text-xs text-muted-foreground">
-                                Рівень {spell.level}
-                              </p>
-                              {spell.description && (
-                                <p className="text-xs mt-1">
-                                  {spell.description}
-                                </p>
-                              )}
-                            </TooltipContent>
-                          </Tooltip>
-                        );
-                      })}
+        {spells.length === 0 ? (
+          <p className="text-muted-foreground py-4 text-sm">
+            Персонаж поки не знає жодного заклинання. Вивчіть школу магії в
+            дереві прокачки.
+          </p>
+        ) : (
+          <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-between font-normal"
+              >
+                <span>Заклинання ({spells.length})</span>
+                <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              className="w-[min(420px,calc(100vw-2rem))] max-h-[60vh] overflow-y-auto p-1"
+            >
+              {Array.from(groupedSpells.entries()).map(
+                ([groupName, groupSpells]) => (
+                  <div key={groupName}>
+                    <div className="text-muted-foreground px-2 py-1.5 text-xs font-medium">
+                      {groupName}
                     </div>
+                    {groupSpells.map((spell) => (
+                      <div
+                        key={spell.id}
+                        className="rounded-md px-1 py-0.5"
+                      >
+                        <SpellRichOption
+                          spell={spell}
+                          iconError={iconErrors.has(spell.id)}
+                          onIconError={
+                            spell.icon
+                              ? () => handleIconError(spell.id)
+                              : undefined
+                          }
+                        />
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </TooltipProvider>
-          )}
-        </div>
+                )
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </DialogContent>
     </Dialog>
   );

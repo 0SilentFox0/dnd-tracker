@@ -6,8 +6,8 @@ import { prisma } from "@/lib/db";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { getDiceAverage } from "@/lib/utils/battle/balance-calculations";
 import { calculateDamageWithModifiers } from "@/lib/utils/battle/battle-damage-calculations";
-import { logBattleTiming } from "@/lib/utils/battle/battle-timing";
 import { createBattleParticipantFromCharacter } from "@/lib/utils/battle/battle-participant";
+import { logBattleTiming } from "@/lib/utils/battle/battle-timing";
 
 export interface DamagePreviewItem {
   total: number;
@@ -28,6 +28,7 @@ export async function GET(
   }: { params: Promise<{ id: string; characterId: string }> }
 ) {
   const t0 = Date.now();
+
   try {
     const { id: campaignId, characterId } = await params;
 
@@ -38,8 +39,11 @@ export async function GET(
     const rangedMultiplier = Math.max(0.1, Math.min(3, parseFloat(searchParams.get("rangedMultiplier") ?? "1") || 1));
 
     const meleeDiceSumParam = searchParams.get("meleeDiceSum");
+
     const rangedDiceSumParam = searchParams.get("rangedDiceSum");
+
     const meleeDiceSum = meleeDiceSumParam != null ? parseInt(meleeDiceSumParam, 10) : null;
+
     const rangedDiceSum = rangedDiceSumParam != null ? parseInt(rangedDiceSumParam, 10) : null;
 
     const accessResult = await requireCampaignAccess(campaignId, false);
@@ -92,17 +96,21 @@ export async function GET(
     );
 
     const useMeleeUserSum = meleeDiceSum != null && !Number.isNaN(meleeDiceSum);
+
     const useRangedUserSum = rangedDiceSum != null && !Number.isNaN(rangedDiceSum);
 
     const meleeBase = useMeleeUserSum
       ? meleeDiceSum!
       : (meleeAttack ? getDiceAverage(meleeAttack.damageDice) : 0);
+
     const meleeDiceAvg = useMeleeUserSum
       ? 0
       : getDiceAverage(meleeHero.diceNotation);
+
     const rangedBase = useRangedUserSum
       ? rangedDiceSum!
       : (rangedAttack ? getDiceAverage(rangedAttack.damageDice) : 0);
+
     const rangedDiceAvg = useRangedUserSum
       ? 0
       : getDiceAverage(rangedHero.diceNotation);

@@ -2,9 +2,8 @@
  * Утиліти для виконання ефектів скілів з тригерів
  */
 
-import { getSkillsByTrigger } from "./skill-triggers";
+import { evaluateSkillTrigger, getSkillsByTrigger } from "./skill-triggers";
 
-import { ParticipantSide } from "@/lib/constants/battle";
 import { addActiveEffect } from "@/lib/utils/battle/battle-effects";
 import { evaluateFormula } from "@/lib/utils/battle/formula-evaluator";
 import type { SkillTriggerContext } from "@/lib/utils/battle/trigger-context";
@@ -281,6 +280,12 @@ export function executeSkillsByTrigger(
 
   // Виконуємо кожен скіл
   for (const skill of skillsToExecute) {
+    console.info("[тригер]", triggerType, {
+      skill: skill.name,
+      skillId: skill.skillId,
+      participant: updatedParticipant.basicInfo.name,
+    });
+
     const executionResult = executeSkillEffects(
       skill,
       updatedParticipant,
@@ -300,6 +305,82 @@ export function executeSkillsByTrigger(
   return {
     participant: updatedParticipant,
     executedSkills,
+    messages,
+  };
+}
+
+/**
+ * Виконує лише complex-тригери, які стали істинними через зміну стану
+ * конкретного учасника (наприклад ручну зміну HP DM'ом).
+ */
+export function executeComplexTriggersForChangedParticipant(
+  allParticipants: BattleParticipant[],
+  changedParticipantId: string,
+  currentRound: number,
+): {
+  updatedParticipants: BattleParticipant[];
+  messages: string[];
+} {
+  const byId = new Map(allParticipants.map((p) => [p.basicInfo.id, { ...p }]));
+
+  const changedParticipant = byId.get(changedParticipantId);
+
+  if (!changedParticipant) {
+    return {
+      updatedParticipants: allParticipants,
+      messages: [],
+    };
+  }
+
+  const messages: string[] = [];
+
+  for (const participant of allParticipants) {
+    const existingParticipant = byId.get(participant.basicInfo.id);
+
+    if (!existingParticipant) continue;
+
+    let currentParticipant = existingParticipant;
+
+    const activeSkills = currentParticipant.battleData.activeSkills ?? [];
+
+    for (const skill of activeSkills) {
+      if (!skill.skillTriggers || skill.skillTriggers.length === 0) continue;
+
+      const shouldExecute = skill.skillTriggers.some(
+        (trigger) =>
+          trigger.type === "complex" &&
+          evaluateSkillTrigger(trigger, currentParticipant, {
+            currentRound,
+            allParticipants: [currentParticipant, changedParticipant],
+          }),
+      );
+
+      if (!shouldExecute) continue;
+
+      console.info("[тригер] complex", {
+        skill: skill.name,
+        skillId: skill.skillId,
+        participant: currentParticipant.basicInfo.name,
+        changedParticipant: changedParticipant.basicInfo.name,
+      });
+
+      const executionResult = executeSkillEffects(
+        skill,
+        currentParticipant,
+        Array.from(byId.values()),
+        currentRound,
+      );
+
+      currentParticipant = executionResult.updatedParticipant;
+      byId.set(currentParticipant.basicInfo.id, currentParticipant);
+      messages.push(...executionResult.messages);
+    }
+  }
+
+  return {
+    updatedParticipants: allParticipants.map(
+      (p) => byId.get(p.basicInfo.id) ?? p,
+    ),
     messages,
   };
 }
@@ -467,6 +548,7 @@ const RUNIC_ATTACK_RUNES = [
 /**
  * Виконує onHit ефекти (скіли з тригером "onHit") після влучання атакою.
  * Ефекти застосовуються до ЦІЛІ (дебафи/DOT) або до АТАКУЮЧОГО (руни, лікування).
+ * Для effect.target === "all_allies" застосовує ефекти до всіх союзників і повертає updatedParticipants.
  * Перевіряє ймовірність спрацювання (modifiers.probability).
  * @param physicalDamageDealt - фізична шкода завдана цілі (для blood_sacrifice_heal)
  */
@@ -476,14 +558,40 @@ export function executeOnHitEffects(
   currentRound: number,
   skillUsageCounts?: Record<string, number>,
   physicalDamageDealt?: number,
+  allParticipants?: BattleParticipant[],
 ): {
   updatedTarget: BattleParticipant;
   updatedAttacker: BattleParticipant;
+  updatedParticipants?: BattleParticipant[];
   messages: string[];
 } {
-  let updatedTarget = { ...target };
+  const participants = allParticipants
+    ? allParticipants.map((participant) => {
+        if (participant.basicInfo.id === attacker.basicInfo.id) return attacker;
 
-  let updatedAttacker = { ...attacker };
+        if (participant.basicInfo.id === target.basicInfo.id) return target;
+
+        return participant;
+      })
+    : [attacker, target];
+
+  const byId = new Map(
+    participants.map((p) => [p.basicInfo.id, { ...p }]),
+  );
+
+  const get = (id: string): BattleParticipant => {
+    const p = byId.get(id);
+
+    if (!p) throw new Error(`Participant ${id} not in map`);
+
+    return p;
+  };
+
+  const set = (p: BattleParticipant) => byId.set(p.basicInfo.id, p);
+
+  let updatedTarget = get(target.basicInfo.id);
+
+  let updatedAttacker = get(attacker.basicInfo.id);
 
   const messages: string[] = [];
 
@@ -491,7 +599,17 @@ export function executeOnHitEffects(
     !attacker.battleData.activeSkills ||
     attacker.battleData.activeSkills.length === 0
   ) {
-    return { updatedTarget, updatedAttacker, messages };
+    set(updatedTarget);
+    set(updatedAttacker);
+
+    const updatedParticipants = participants.map((p) => get(p.basicInfo.id));
+
+    return {
+      updatedTarget: get(target.basicInfo.id),
+      updatedAttacker: get(attacker.basicInfo.id),
+      updatedParticipants,
+      messages,
+    };
   }
 
   for (const skill of attacker.battleData.activeSkills) {
@@ -526,6 +644,12 @@ export function executeOnHitEffects(
       skillUsageCounts[skill.skillId] =
         (skillUsageCounts[skill.skillId] ?? 0) + 1;
     }
+
+    console.info("[тригер] onHit", {
+      skill: skill.name,
+      skillId: skill.skillId,
+      attacker: attacker.basicInfo.name,
+    });
 
     for (const effect of skill.effects) {
       const numValue = typeof effect.value === "number" ? effect.value : 0;
@@ -564,33 +688,122 @@ export function executeOnHitEffects(
               activeEffects: newEffects,
             },
           };
+          set(updatedTarget);
           messages.push(
             `🔥 ${skill.name}: ${dmgType} ${effect.value} на ${target.basicInfo.name} (${dotDur} р.)`,
           );
           break;
         }
         case "initiative": {
-          const dur = effect.duration ?? 1;
+          const dur = effect.duration ?? 2;
 
-          const ne = addActiveEffect(
-            updatedTarget,
-            {
-              id: `skill-${skill.skillId}-initiative-${Date.now()}`,
-              name: `${skill.name} — ініціатива`,
-              type: "debuff",
-              duration: dur,
-              effects: [{ type: "initiative_bonus", value: numValue }],
-            },
-            currentRound,
-          );
+          if (
+            effect.target === "all_allies" &&
+            allParticipants &&
+            allParticipants.length > 0
+          ) {
+            const targets = getEffectTargets(
+              updatedAttacker,
+              effect.target,
+              Array.from(byId.values()),
+            );
 
-          updatedTarget = {
-            ...updatedTarget,
-            battleData: { ...updatedTarget.battleData, activeEffects: ne },
-          };
-          messages.push(
-            `⚡ ${skill.name}: ${target.basicInfo.name} ${numValue} ініціатива (${dur} р.)`,
-          );
+            for (const t of targets) {
+              const val =
+                effect.type === "formula" && typeof effect.value === "string"
+                  ? evaluateFormulaSimple(effect.value, t)
+                  : numValue;
+
+              const ne = addActiveEffect(
+                t,
+                {
+                  id: `skill-${skill.skillId}-initiative-${t.basicInfo.id}-${Date.now()}`,
+                  name: `${skill.name} — ініціатива`,
+                  type: "buff",
+                  duration: dur,
+                  effects: [{ type: "initiative_bonus", value: val }],
+                },
+                currentRound,
+              );
+
+              set({ ...t, battleData: { ...t.battleData, activeEffects: ne } });
+            }
+
+            const targetNames = targets.map((t) => t.basicInfo.name).join(", ");
+
+            messages.push(
+              `🏃 ${skill.name}: ${updatedAttacker.basicInfo.name} → ${targetNames} +ініціатива (${dur} р.)`,
+            );
+          } else {
+            const ne = addActiveEffect(
+              updatedTarget,
+              {
+                id: `skill-${skill.skillId}-initiative-${Date.now()}`,
+                name: `${skill.name} — ініціатива`,
+                type: "debuff",
+                duration: dur,
+                effects: [{ type: "initiative_bonus", value: numValue }],
+              },
+              currentRound,
+            );
+
+            updatedTarget = {
+              ...updatedTarget,
+              battleData: { ...updatedTarget.battleData, activeEffects: ne },
+            };
+
+            set(updatedTarget);
+
+            messages.push(
+              `⚡ ${skill.name}: ${target.basicInfo.name} ${numValue} ініціатива (${dur} р.)`,
+            );
+          }
+
+          break;
+        }
+        case "melee_damage":
+        case "ranged_damage": {
+          if (
+            effect.target === "all_allies" &&
+            allParticipants &&
+            allParticipants.length > 0
+          ) {
+            const targets = getEffectTargets(
+              updatedAttacker,
+              effect.target,
+              Array.from(byId.values()),
+            );
+
+            const dur = effect.duration ?? 2;
+
+            for (const t of targets) {
+              const val =
+                effect.type === "formula" && typeof effect.value === "string"
+                  ? evaluateFormulaSimple(effect.value, t)
+                  : numValue;
+
+              const ne = addActiveEffect(
+                t,
+                {
+                  id: `skill-${skill.skillId}-${effect.stat}-${t.basicInfo.id}-${Date.now()}`,
+                  name: `${skill.name} — бонус урону`,
+                  type: "buff",
+                  duration: dur,
+                  effects: [{ type: effect.stat, value: val }],
+                },
+                currentRound,
+              );
+
+              set({ ...t, battleData: { ...t.battleData, activeEffects: ne } });
+            }
+
+            const targetNames = targets.map((t) => t.basicInfo.name).join(", ");
+
+            messages.push(
+              `⚔️ ${skill.name}: ${updatedAttacker.basicInfo.name} → ${targetNames} +${effect.stat} (${dur} р.)`,
+            );
+          }
+
           break;
         }
         case "armor": {
@@ -616,6 +829,7 @@ export function executeOnHitEffects(
               armorClass: updatedTarget.combatStats.armorClass + numValue,
             },
           };
+          set(updatedTarget);
           messages.push(
             `🛡 ${skill.name}: ${target.basicInfo.name} ${numValue} AC (${dur} р.)`,
           );
@@ -650,6 +864,7 @@ export function executeOnHitEffects(
               speed: Math.max(0, updatedTarget.combatStats.speed - speedRed),
             },
           };
+          set(updatedTarget);
           messages.push(
             `🐌 ${skill.name}: ${target.basicInfo.name} −${speedRed} швидкість (${dur} р.)`,
           );
@@ -706,6 +921,7 @@ export function executeOnHitEffects(
               ),
             },
           };
+          set(updatedTarget);
           messages.push(
             `🔨 ${skill.name}: ${target.basicInfo.name} −${numValue}% AC (${dur} р.)`,
           );
@@ -736,6 +952,7 @@ export function executeOnHitEffects(
               ...updatedAttacker,
               battleData: { ...updatedAttacker.battleData, activeEffects: ne },
             };
+            set(updatedAttacker);
           } else if (rune.type === "armor") {
             const ne = addActiveEffect(
               updatedAttacker,
@@ -753,6 +970,7 @@ export function executeOnHitEffects(
               ...updatedAttacker,
               battleData: { ...updatedAttacker.battleData, activeEffects: ne },
             };
+            set(updatedAttacker);
           } else if (rune.type === "heal") {
             const newHp = Math.min(
               updatedAttacker.combatStats.maxHp,
@@ -763,6 +981,7 @@ export function executeOnHitEffects(
               ...updatedAttacker,
               combatStats: { ...updatedAttacker.combatStats, currentHp: newHp },
             };
+            set(updatedAttacker);
           } else {
             updatedAttacker = {
               ...updatedAttacker,
@@ -771,6 +990,7 @@ export function executeOnHitEffects(
                 morale: updatedAttacker.combatStats.morale + rune.value,
               },
             };
+            set(updatedAttacker);
           }
 
           messages.push(
@@ -804,6 +1024,7 @@ export function executeOnHitEffects(
                   currentHp: newHp,
                 },
               };
+              set(updatedAttacker);
               messages.push(
                 `🩸 ${skill.name}: ${attacker.basicInfo.name} лікується на ${healAmount} HP (${percent}% від шкоди)`,
               );
@@ -815,10 +1036,19 @@ export function executeOnHitEffects(
         default:
           break;
       }
+      updatedTarget = get(target.basicInfo.id);
+      updatedAttacker = get(attacker.basicInfo.id);
     }
   }
 
-  return { updatedTarget, updatedAttacker, messages };
+  const updatedParticipants = participants.map((p) => get(p.basicInfo.id));
+
+  return {
+    updatedTarget: get(target.basicInfo.id),
+    updatedAttacker: get(attacker.basicInfo.id),
+    updatedParticipants,
+    messages,
+  };
 }
 
 /**
@@ -882,6 +1112,12 @@ export function executeOnKillEffects(
     );
 
     if (!trigger) continue;
+
+    console.info("[тригер] onKill", {
+      skill: skill.name,
+      skillId: skill.skillId,
+      killer: killer.basicInfo.name,
+    });
 
     if (
       trigger.modifiers?.oncePerBattle &&
@@ -973,6 +1209,12 @@ export function executeOnBattleStartEffects(
     );
 
     if (!trigger) continue;
+
+    console.info("[тригер] onBattleStart", {
+      skill: skill.name,
+      skillId: skill.skillId,
+      participant: participant.basicInfo.name,
+    });
 
     for (const effect of skill.effects) {
       const numValue = typeof effect.value === "number" ? effect.value : 0;
@@ -1097,10 +1339,30 @@ export function executeOnBattleStartEffectsForAll(
 
       if (!trigger) continue;
 
+      console.info("[тригер] onBattleStart (ForAll)", {
+        skill: skill.name,
+        skillId: skill.skillId,
+        participant: current.basicInfo.name,
+      });
+
+      // Якщо в БД/мапінгу немає target, для бафів onBattleStart вважаємо all_allies
+      const buffStats = [
+        "initiative",
+        "damage",
+        "melee_damage",
+        "ranged_damage",
+        "all_damage",
+        "advantage",
+      ];
+
       for (const effect of skill.effects) {
         const numValue = typeof effect.value === "number" ? effect.value : 0;
 
-        const targets = getEffectTargets(current, effect.target, all());
+        const effectiveTarget =
+          effect.target ??
+          (buffStats.includes(effect.stat) ? "all_allies" : undefined);
+
+        const targets = getEffectTargets(current, effectiveTarget, all());
 
         const applyEffect = (
           target: BattleParticipant,
@@ -1187,6 +1449,41 @@ export function executeOnBattleStartEffectsForAll(
             }
 
             break;
+          case "melee_damage":
+          case "ranged_damage":
+          case "all_damage": {
+            const dur = effect.duration ?? 2;
+
+            const effectType =
+              effect.stat === "all_damage" ? "all_damage" : effect.stat;
+
+            for (const target of targets) {
+              const val =
+                effect.type === "formula" && typeof effect.value === "string"
+                  ? evaluateFormulaSimple(effect.value, target)
+                  : numValue;
+
+              applyEffect(target, {
+                id: `skill-${skill.skillId}-battle-start-${effectType}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+                name: `${skill.name} — бонус урону`,
+                type: "buff",
+                duration: dur,
+                effects: [{ type: effectType, value: val }],
+              });
+            }
+
+            if (targets.length > 0) {
+              const targetNames = targets
+                .map((t) => t.basicInfo.name)
+                .join(", ");
+
+              messages.push(
+                `⚔️ ${skill.name}: ${current.basicInfo.name} → ${targetNames} +${effectType} (${dur} р.)`,
+              );
+            }
+
+            break;
+          }
           default:
             break;
         }
@@ -1326,6 +1623,12 @@ export function executeBonusActionSkill(
 
   if (!trigger) return { updatedParticipant, updatedParticipants, messages };
 
+  console.info("[тригер] bonusAction", {
+    skill: skill.name,
+    skillId: skill.skillId,
+    participant: participant.basicInfo.name,
+  });
+
   // Перевірка модифікаторів
   const mods = trigger.modifiers;
 
@@ -1451,10 +1754,15 @@ export function executeBonusActionSkill(
         break;
       }
 
-      // Ініціатива — підтримка effect.target all_allies
+      // Ініціатива — підтримка effect.target all_allies та formula
       case "initiative": {
         for (const t of targets) {
           if (!t) continue;
+
+          const val =
+            effect.type === "formula" && typeof effect.value === "string"
+              ? evaluateFormulaSimple(effect.value, t)
+              : numValue;
 
           const ne = addActiveEffect(
             t,
@@ -1462,8 +1770,8 @@ export function executeBonusActionSkill(
               id: `skill-${skill.skillId}-bonus-init-${t.basicInfo.id}`,
               name: `${skill.name} — ініціатива`,
               type: "buff",
-              duration: 999,
-              effects: [{ type: "initiative_bonus", value: numValue }],
+              duration: effect.duration ?? 999,
+              effects: [{ type: "initiative_bonus", value: val }],
             },
             currentRound,
           );
@@ -1477,7 +1785,7 @@ export function executeBonusActionSkill(
           .join(", ");
 
         messages.push(
-          `🏃 ${skill.name}: ${participant.basicInfo.name} → ${targetNames} +${numValue} ініціатива`,
+          `🏃 ${skill.name}: ${participant.basicInfo.name} → ${targetNames} +ініціатива`,
         );
         break;
       }
@@ -1548,8 +1856,24 @@ export function executeBonusActionSkill(
       case "melee_damage":
       case "ranged_damage":
       case "all_damage": {
+        const dmgDuration = effect.duration ?? 1;
+
+        const effectType =
+          effect.stat === "melee_damage" ||
+          effect.stat === "ranged_damage" ||
+          effect.stat === "all_damage"
+            ? effect.stat
+            : effect.stat === "damage"
+              ? "all_damage"
+              : "damage_bonus";
+
         for (const t of targets) {
           if (!t) continue;
+
+          const val =
+            effect.type === "formula" && typeof effect.value === "string"
+              ? evaluateFormulaSimple(effect.value, t)
+              : numValue;
 
           const ne = addActiveEffect(
             t,
@@ -1557,8 +1881,8 @@ export function executeBonusActionSkill(
               id: `skill-${skill.skillId}-bonus-dmg-${t.basicInfo.id}`,
               name: `${skill.name} — бонус урону`,
               type: "buff",
-              duration: 1,
-              effects: [{ type: "damage_bonus", value: numValue }],
+              duration: dmgDuration,
+              effects: [{ type: effectType, value: val }],
             },
             currentRound,
           );
@@ -1572,7 +1896,7 @@ export function executeBonusActionSkill(
           .join(", ");
 
         messages.push(
-          `⚔️ ${skill.name}: ${participant.basicInfo.name} → ${targetNames} +${numValue} урону на першу атаку`,
+          `⚔️ ${skill.name}: ${participant.basicInfo.name} → ${targetNames} бонус урону (${dmgDuration} р.)`,
         );
         break;
       }
