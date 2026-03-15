@@ -68,10 +68,14 @@ export function ReferenceGroupSection({
   className,
   accordionValue,
 }: ReferenceGroupSectionProps) {
-  const hasAccent = accentColor && /^#?[0-9A-Fa-f]{3,8}$/.test(accentColor);
+  const accent =
+    accentColor && /^#?[0-9A-Fa-f]{3,8}$/.test(accentColor)
+      ? accentColor
+      : undefined;
+  const hasAccent = Boolean(accent);
 
-  const bgStyle = hasAccent
-    ? { backgroundColor: `${accentColor}18`, borderLeftColor: accentColor }
+  const bgStyle = accent
+    ? { backgroundColor: `${accent}18`, borderLeftColor: accent }
     : undefined;
 
   const headerClass = "px-4 py-3 border-b border-border/60 bg-transparent";
