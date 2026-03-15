@@ -49,7 +49,11 @@ interface ReferenceSearchBarProps {
   showSpellsFilter: boolean;
 }
 
-const SECTION_TABS: { value: SectionTab; label: string; icon: typeof BookOpen }[] = [
+const SECTION_TABS: {
+  value: SectionTab;
+  label: string;
+  icon: typeof BookOpen;
+}[] = [
   { value: "all", label: "Усі", icon: BookOpen },
   { value: "skills", label: "Скіли", icon: Sparkles },
   { value: "spells", label: "Заклинання", icon: Sparkles },
@@ -113,8 +117,8 @@ export function ReferenceSearchBar({
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium transition-colors min-h-11 touch-manipulation md:min-h-9",
                 section === value
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-background hover:bg-muted/50 border-input"
+                  ? "text-primary-foreground border-primary"
+                  : "border-input",
               )}
             >
               <Icon className="h-4 w-4 shrink-0" />
@@ -159,20 +163,24 @@ export function ReferenceSearchBar({
         <div
           className={cn(
             "grid gap-4 overflow-hidden transition-[grid-template-rows] duration-200 md:grid-rows-[1fr]",
-            filtersOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr] md:grid-rows-[1fr]"
+            filtersOpen
+              ? "grid-rows-[1fr]"
+              : "grid-rows-[0fr] md:grid-rows-[1fr]",
           )}
         >
-          <div className="min-h-0 space-y-4 md:flex md:flex-wrap md:items-end md:gap-4 items-start">
+          <div className="min-h-0 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-4 items-end">
             {showSkillsFilter && mainSkillOptions.length > 0 && (
-              <div className="space-y-1.5 w-full md:w-auto md:min-w-[180px]">
+              <div className="space-y-1.5 w-full min-w-0">
                 <Label className="text-xs text-muted-foreground">
                   Гілка скілу
                 </Label>
                 <Select
                   value={mainSkillFilter ?? "all"}
-                  onValueChange={(v) => setMainSkillFilter(v === "all" ? null : v)}
+                  onValueChange={(v) =>
+                    setMainSkillFilter(v === "all" ? null : v)
+                  }
                 >
-                  <SelectTrigger className="w-full min-h-11 md:min-h-9">
+                  <SelectTrigger className="w-full h-10">
                     <SelectValue placeholder="Усі гілки" />
                   </SelectTrigger>
                   <SelectContent>
@@ -186,88 +194,82 @@ export function ReferenceSearchBar({
                 </Select>
               </div>
             )}
-            {showSpellsFilter && (
-              <>
-                {spellLevelOptions.length > 0 && (
-                  <div className="space-y-1.5 w-full md:w-auto md:min-w-[120px]">
-                    <Label className="text-xs text-muted-foreground">
-                      Рівень заклинання
-                    </Label>
-                    <Select
-                      value={
-                        spellLevelFilter != null
-                          ? String(spellLevelFilter)
-                          : "all"
-                      }
-                      onValueChange={(v) =>
-                        setSpellLevelFilter(v === "all" ? null : Number(v))
-                      }
-                    >
-                      <SelectTrigger className="w-full min-h-11 md:min-h-9">
-                        <SelectValue placeholder="Будь-який" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Будь-який</SelectItem>
-                        {spellLevelOptions.map((lvl) => (
-                          <SelectItem key={lvl} value={String(lvl)}>
-                            {lvl}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-                {spellGroupOptions.length > 0 && (
-                  <div className="space-y-1.5 w-full md:w-auto md:min-w-[180px]">
-                    <Label className="text-xs text-muted-foreground">
-                      Група заклинань
-                    </Label>
-                    <Select
-                      value={spellGroupFilter ?? "all"}
-                      onValueChange={(v) =>
-                        setSpellGroupFilter(v === "all" ? null : v)
-                      }
-                    >
-                      <SelectTrigger className="w-full min-h-11 md:min-h-9">
-                        <SelectValue placeholder="Усі групи" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Усі групи</SelectItem>
-                        {spellGroupOptions.map((name) => (
-                          <SelectItem key={name} value={name}>
-                            {name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-                {spellTypeOptions.length > 0 && (
-                  <div className="space-y-1.5 w-full md:w-auto md:min-w-[160px]">
-                    <Label className="text-xs text-muted-foreground">
-                      Тип заклинання
-                    </Label>
-                    <Select
-                      value={spellTypeFilter ?? "all"}
-                      onValueChange={(v) =>
-                        setSpellTypeFilter(v === "all" ? null : v)
-                      }
-                    >
-                      <SelectTrigger className="w-full min-h-11 md:min-h-9">
-                        <SelectValue placeholder="Усі типи" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Усі типи</SelectItem>
-                        {spellTypeOptions.map((name) => (
-                          <SelectItem key={name} value={name}>
-                            {name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-              </>
+            {showSpellsFilter && spellLevelOptions.length > 0 && (
+              <div className="space-y-1.5 w-full min-w-0">
+                <Label className="text-xs text-muted-foreground">
+                  Рівень заклинання
+                </Label>
+                <Select
+                  value={
+                    spellLevelFilter != null ? String(spellLevelFilter) : "all"
+                  }
+                  onValueChange={(v) =>
+                    setSpellLevelFilter(v === "all" ? null : Number(v))
+                  }
+                >
+                  <SelectTrigger className="w-full h-10">
+                    <SelectValue placeholder="Будь-який" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Будь-який</SelectItem>
+                    {spellLevelOptions.map((lvl) => (
+                      <SelectItem key={lvl} value={String(lvl)}>
+                        {lvl}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            {showSpellsFilter && spellGroupOptions.length > 0 && (
+              <div className="space-y-1.5 w-full min-w-0">
+                <Label className="text-xs text-muted-foreground">
+                  Група заклинань
+                </Label>
+                <Select
+                  value={spellGroupFilter ?? "all"}
+                  onValueChange={(v) =>
+                    setSpellGroupFilter(v === "all" ? null : v)
+                  }
+                >
+                  <SelectTrigger className="w-full h-10">
+                    <SelectValue placeholder="Усі групи" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Усі групи</SelectItem>
+                    {spellGroupOptions.map((name) => (
+                      <SelectItem key={name} value={name}>
+                        {name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            {showSpellsFilter && spellTypeOptions.length > 0 && (
+              <div className="space-y-1.5 w-full min-w-0">
+                <Label className="text-xs text-muted-foreground">
+                  Тип заклинання
+                </Label>
+                <Select
+                  value={spellTypeFilter ?? "all"}
+                  onValueChange={(v) =>
+                    setSpellTypeFilter(v === "all" ? null : v)
+                  }
+                >
+                  <SelectTrigger className="w-full h-10">
+                    <SelectValue placeholder="Усі типи" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Усі типи</SelectItem>
+                    {spellTypeOptions.map((name) => (
+                      <SelectItem key={name} value={name}>
+                        {name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             )}
           </div>
         </div>

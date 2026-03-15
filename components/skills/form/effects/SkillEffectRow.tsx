@@ -33,7 +33,7 @@ export function SkillEffectRow({
   const isFlag = isFlagValueType(effect.type);
 
   return (
-    <div className="flex items-center gap-2 rounded-md border bg-muted/30 p-2">
+    <div className="flex items-center gap-2 rounded-md border bg-transparent p-2">
       <div className="grid flex-1 grid-cols-2 gap-2 md:grid-cols-6">
         <div className="space-y-1">
           <Label className="text-xs text-muted-foreground">Стат</Label>
@@ -120,9 +120,7 @@ export function SkillEffectRow({
               onUpdate(
                 index,
                 "maxTriggers",
-                v === "unlimited" || v === ""
-                  ? null
-                  : parseInt(v, 10),
+                v === "unlimited" || v === "" ? null : parseInt(v, 10),
               )
             }
             placeholder="Постійно"

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { Loader2, Sparkles } from "lucide-react";
 
+import { isValidImageSrc } from "@/components/campaigns/info/image-url";
 import {
   AccordionContent,
   AccordionItem,
@@ -48,10 +49,10 @@ export function SpellReferenceCard({
       value={spell.id}
       className="rounded-lg border bg-card overflow-hidden"
     >
-      <AccordionTrigger className="p-0 flex-col items-stretch hover:no-underline [&[data-state=open]>div]:border-b">
-        <div className="p-3 text-left flex flex-wrap items-start gap-3 w-full">
+      <AccordionTrigger className="p-0 hover:no-underline [&[data-state=open]>div]:border-b flex items-center gap-3">
+        <div className="p-3 text-left flex flex-1 min-w-0 items-start gap-3 w-full">
           <div className="flex shrink-0 size-10 rounded-lg overflow-hidden bg-muted items-center justify-center">
-            {spell.icon ? (
+            {isValidImageSrc(spell.icon) ? (
               <Image
                 src={spell.icon}
                 alt=""
@@ -72,7 +73,7 @@ export function SpellReferenceCard({
               {spell.groupName ? ` · ${spell.groupName}` : ""}
             </span>
             <p className="text-muted-foreground text-xs mt-1.5 line-clamp-2">
-              {shortSummary}
+              {appearance.trim() ? appearance : shortSummary}
             </p>
           </div>
         </div>

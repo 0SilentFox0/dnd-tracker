@@ -87,7 +87,11 @@ export function ReferenceSectionAccordion({
             Як діють скіли та як вони виглядають у грі. Опис вигляду може
             редагувати лише DM.
           </p>
-          <div className="grid grid-cols-1 gap-4">
+          <Accordion
+            type="multiple"
+            defaultValue={[]}
+            className="grid grid-cols-1 gap-3 w-full"
+          >
             {Array.from(skillsByMain.entries())
               .sort(([a], [b]) => {
                 if (a === NO_MAIN_SKILL_LABEL) return 1;
@@ -102,6 +106,7 @@ export function ReferenceSectionAccordion({
                 return (
                   <ReferenceGroupSection
                     key={mainName}
+                    accordionValue={mainName}
                     title={mainName}
                     icon={first?.mainSkillIcon ?? null}
                     accentColor={first?.mainSkillColor ?? null}
@@ -123,7 +128,7 @@ export function ReferenceSectionAccordion({
                   </ReferenceGroupSection>
                 );
               })}
-          </div>
+          </Accordion>
         </div>
       )}
 
@@ -138,7 +143,11 @@ export function ReferenceSectionAccordion({
             Як діють заклинання та як вони виглядають. Опис вигляду може
             редагувати лише DM.
           </p>
-          <div className="grid grid-cols-1 gap-4">
+          <Accordion
+            type="multiple"
+            defaultValue={[]}
+            className="grid grid-cols-1 gap-3 w-full"
+          >
             {Array.from(spellsByGroup.entries())
               .sort(([a], [b]) => {
                 if (a === NO_SPELL_GROUP_LABEL) return 1;
@@ -150,6 +159,7 @@ export function ReferenceSectionAccordion({
               .map(([groupName, list]) => (
                 <ReferenceGroupSection
                   key={groupName}
+                  accordionValue={groupName}
                   title={groupName}
                   count={list.length}
                 >
@@ -168,7 +178,7 @@ export function ReferenceSectionAccordion({
                   </Accordion>
                 </ReferenceGroupSection>
               ))}
-          </div>
+          </Accordion>
         </div>
       )}
     </div>
