@@ -13,6 +13,7 @@ import { BATTLE_CONSTANTS, ParticipantSide } from "@/lib/constants/battle";
 import {
   executeAfterSpellCastTriggers,
   executeBeforeSpellCastTriggers,
+  executeOnKillEffects,
 } from "@/lib/utils/skills/skill-triggers-execution";
 import { parseDurationToRounds } from "@/lib/utils/spells/duration-to-rounds";
 import { BattleAction, BattleParticipant } from "@/types/battle";
@@ -733,6 +734,47 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
     updatedCaster.actionFlags.hasUsedBonusAction = true;
   } else {
     updatedCaster.actionFlags.hasUsedAction = true;
+  }
+
+  // 6b. OnKill: якщо заклинання вбило ворога — ефекти кастера (наприклад +1 дія)
+  if (spell.damageType === "damage" || spell.damageType === "all") {
+    const casterSkillUsageCounts: Record<string, number> = {
+      ...(updatedCaster.battleData.skillUsageCounts ?? {}),
+    };
+
+    let killedCount = 0;
+
+    for (let i = 0; i < updatedTargets.length; i++) {
+      const orig = targets[i];
+      const after = updatedTargets[i];
+
+      if (
+        orig &&
+        after &&
+        orig.basicInfo.side !== updatedCaster.basicInfo.side &&
+        orig.combatStats.currentHp > 0 &&
+        after.combatStats.currentHp <= 0
+      ) {
+        killedCount += 1;
+      }
+    }
+
+    for (let k = 0; k < killedCount; k++) {
+      const onKillResult = executeOnKillEffects(
+        updatedCaster,
+        casterSkillUsageCounts,
+      );
+
+      updatedCaster = onKillResult.updatedKiller;
+    }
+
+    updatedCaster = {
+      ...updatedCaster,
+      battleData: {
+        ...updatedCaster.battleData,
+        skillUsageCounts: casterSkillUsageCounts,
+      },
+    };
   }
 
   // 7. Створюємо BattleAction

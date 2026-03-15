@@ -569,12 +569,13 @@ export function processAttack(
     };
   }
 
-  // 7c. OnKill: якщо ціль мертва — ефекти атакуючого (наприклад +1 дія)
+  // 7c. OnKill: якщо ціль була жива і атака довела її HP до 0 — ефекти атакуючого (наприклад +1 дія)
+  const targetWasAlive = target.combatStats.currentHp > 0;
   const targetIsDead =
     updatedTarget.combatStats.status === "dead" ||
     updatedTarget.combatStats.status === "unconscious";
 
-  if (targetIsDead) {
+  if (targetWasAlive && targetIsDead) {
     const onKillResult = executeOnKillEffects(
       updatedAttacker,
       attackerSkillUsageCounts,

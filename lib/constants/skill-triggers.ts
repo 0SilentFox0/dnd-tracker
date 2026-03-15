@@ -51,6 +51,18 @@ export const SIMPLE_TRIGGER_OPTIONS: readonly {
   { value: "beforeEnemySpellCast", label: "Перед кастом заклинання ворога" },
   { value: "afterEnemySpellCast", label: "Після касту заклинання ворога" },
   { value: "bonusAction", label: "Бонусна дія" },
+  { value: "passive", label: "Пасивний" },
+  { value: "onBattleStart", label: "На початку бою" },
+  { value: "onHit", label: "При влучанні" },
+  { value: "onAttack", label: "При атаці" },
+  { value: "onKill", label: "При вбивстві (дія/бонус-дія доводить HP ворога до 0)" },
+  { value: "onAllyDeath", label: "При смерті союзника" },
+  { value: "onLethalDamage", label: "При летальній шкоді" },
+  { value: "onCast", label: "При касті" },
+  { value: "onFirstHitTakenPerRound", label: "Перший удар за раунд" },
+  { value: "onFirstRangedAttack", label: "Перша дальня атака" },
+  { value: "onMoraleSuccess", label: "При успішній моралі" },
+  { value: "allyMoraleCheck", label: "Перевірка моралі союзника" },
 ] as const;
 
 /** Лейбли для всіх простих тригерів (опції + додаткові для списку) */
@@ -70,7 +82,7 @@ const SIMPLE_TRIGGER_LABELS: Record<string, string> = {
   onBattleStart: "На початку бою",
   onHit: "При влучанні",
   onAttack: "При атаці",
-  onKill: "При вбивстві",
+  onKill: "При вбивстві (дія/бонус-дія доводить HP ворога до 0)",
   onAllyDeath: "При смерті союзника",
   onLethalDamage: "При летальній шкоді",
   onCast: "При касті",

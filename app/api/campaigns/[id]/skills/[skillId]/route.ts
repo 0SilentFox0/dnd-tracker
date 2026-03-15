@@ -132,7 +132,7 @@ const updateSkillSchema = z.object({
         // Складний тригер
         z.object({
           type: z.literal("complex"),
-          target: z.enum(["ally", "enemy"]),
+          target: z.enum(["ally", "enemy", "self"]),
           operator: z.enum([">", "<", "=", "<=", ">="]),
           value: z.number(),
           valueType: z.enum(["number", "percent"]),
