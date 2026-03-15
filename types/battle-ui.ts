@@ -60,6 +60,8 @@ export interface PlayerTurnViewProps {
   canSeeEnemyHp?: boolean;
   onAttack: (data: AttackData) => void;
   onSpell: (data: SpellCastData) => void;
+  /** Показати модалку підрахунку шкоди перед застосуванням; після підтвердження викликається onSpell */
+  onSpellPreview?: (data: SpellCastData) => void;
   onBonusAction: (skill: ActiveSkill) => void;
   onSkipTurn: () => void;
   onMoraleCheck: (d10Roll: number) => void;

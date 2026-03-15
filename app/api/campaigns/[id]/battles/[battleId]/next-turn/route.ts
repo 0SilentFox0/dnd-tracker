@@ -26,10 +26,13 @@ import { BattleAction, BattleParticipant } from "@/types/battle";
 const isBattleSyncDebugEnabled = false;
 
 function logTurnTiming(
-  _label: string,
-  _startMs: number,
+  _label?: string,
+  _startMs?: number,
   _extra?: Record<string, number | string>,
 ) {
+  void _label;
+  void _startMs;
+  void _extra;
   // Логування вимкнено
 }
 

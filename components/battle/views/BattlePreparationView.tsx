@@ -17,13 +17,15 @@ interface BattlePreparationViewProps {
 }
 
 export function BattlePreparationView({
-  battle,
+  battle: _battle,
   alliesCount,
   enemiesCount,
   isDM,
   onStartBattle,
   isStarting,
 }: BattlePreparationViewProps) {
+  void _battle;
+
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-12 backdrop-blur-md animate-in fade-in duration-1000 relative">
       <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)]" />

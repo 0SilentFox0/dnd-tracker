@@ -50,18 +50,37 @@ export function InfoReferenceClient({
         showSpellsFilter={filters.section === "all" || filters.section === "spells"}
       />
 
-      <div className="text-sm text-muted-foreground">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
         {filters.showSkills && filters.showSpells && (
           <>
-            Скілів:{" "}
-            <strong className="text-foreground">
-              {filters.filteredSkills.length}
-            </strong>
-            {" · "}
-            Заклинань:{" "}
-            <strong className="text-foreground">
-              {filters.filteredSpells.length}
-            </strong>
+            <span>
+              Скілів:{" "}
+              <strong className="text-foreground">
+                {filters.filteredSkills.length}
+              </strong>
+            </span>
+            <span>
+              Заклинань:{" "}
+              <strong className="text-foreground">
+                {filters.filteredSpells.length}
+              </strong>
+            </span>
+            {!filters.skillsEmpty && (
+              <a
+                href="#ref-skills"
+                className="text-primary underline-offset-2 hover:underline touch-manipulation"
+              >
+                До скілів
+              </a>
+            )}
+            {!filters.spellsEmpty && (
+              <a
+                href="#ref-spells"
+                className="text-primary underline-offset-2 hover:underline touch-manipulation"
+              >
+                До заклинань
+              </a>
+            )}
           </>
         )}
         {filters.section === "skills" && (

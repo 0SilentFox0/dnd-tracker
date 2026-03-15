@@ -2,9 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { ArtifactCard } from "@/components/artifacts/ArtifactCard";
-import { ArtifactDeleteButton } from "@/components/artifacts/ArtifactDeleteButton";
 import { DeleteAllArtifactsButton } from "@/components/artifacts/DeleteAllArtifactsButton";
-import { OptimizedImage } from "@/components/common/OptimizedImage";
 import {
   Accordion,
   AccordionContent,

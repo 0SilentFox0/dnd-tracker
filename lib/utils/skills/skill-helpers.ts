@@ -41,14 +41,18 @@ export function getSkillIcon(skill: Skill | GroupedSkill): string | null {
 /**
  * Раси скіла (прибрано з моделі — завжди порожній масив для сумісності)
  */
-export function getSkillRaces(_skill: Skill | GroupedSkill): string[] {
+export function getSkillRaces(skill: Skill | GroupedSkill): string[] {
+  void skill;
+
   return [];
 }
 
 /**
  * Чи скіл расовий (прибрано з моделі — завжди false для сумісності)
  */
-export function getSkillIsRacial(_skill: Skill | GroupedSkill): boolean {
+export function getSkillIsRacial(skill: Skill | GroupedSkill): boolean {
+  void skill;
+
   return false;
 }
 

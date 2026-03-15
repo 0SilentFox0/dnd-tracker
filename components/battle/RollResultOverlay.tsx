@@ -23,6 +23,14 @@ export function RollResultOverlay({
   type,
   onComplete,
 }: RollResultOverlayProps) {
+  React.useEffect(() => {
+    if (type) {
+      const timer = setTimeout(onComplete, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [type, onComplete]);
+
   if (!type) return null;
 
   const config = {
@@ -77,14 +85,6 @@ export function RollResultOverlay({
   }[type];
 
   const Icon = config.icon;
-
-  React.useEffect(() => {
-    if (type) {
-      const timer = setTimeout(onComplete, 2000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [type, onComplete]);
 
   return (
     <AnimatePresence onExitComplete={onComplete}>

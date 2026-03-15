@@ -65,7 +65,7 @@ function extractDamageDice(damageHeal: string): string | undefined {
 
   if (!match) return undefined;
 
-  const rest = damageHeal.slice(damageHeal.indexOf(match[0]) + match[0].length);
+  void damageHeal.slice(damageHeal.indexOf(match[0]) + match[0].length);
 
   const plus = damageHeal.includes("+") ? damageHeal.match(/\+\s*(\d+)/)?.[1] : null;
 

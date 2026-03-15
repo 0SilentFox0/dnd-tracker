@@ -17,9 +17,11 @@ interface UseBattleFormParams {
 export function useBattleForm({
   campaignId,
   formData,
-  setFormData,
+  setFormData: _setFormData,
   participants,
 }: UseBattleFormParams) {
+  void _setFormData;
+
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);

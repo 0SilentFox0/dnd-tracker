@@ -459,7 +459,7 @@ export function useSkillTreePage({
           ? "racial"
           : `circle-${slot.circle}`;
 
-    console.log("[SkillTree] Призначення скіла", {
+    console.info("[SkillTree] Призначення скіла", {
       skillId: selectedSkill.id,
       skillName: skillDisplayName,
       slotType,

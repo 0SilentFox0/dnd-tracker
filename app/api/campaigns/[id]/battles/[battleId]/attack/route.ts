@@ -5,7 +5,6 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { processAttack } from "@/lib/utils/battle/battle-attack-process";
-import { logBattleTiming } from "@/lib/utils/battle/battle-timing";
 import {
   prepareBattleLogForStorage,
   preparePusherPayload,

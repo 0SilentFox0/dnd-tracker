@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  BattleDialog,
+  ConfirmCancelFooter,
+} from "@/components/battle/dialogs/shared";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
@@ -16,7 +18,6 @@ interface AttackRollDialogProps {
   attacker: BattleParticipant;
   attack: BattleAttack;
   target: BattleParticipant;
-  /** DM або скіл бачить AC цілі */
   canSeeEnemyHp?: boolean;
   onConfirm: (data: {
     attackRoll: number;
@@ -24,9 +25,6 @@ interface AttackRollDialogProps {
   }) => void;
 }
 
-/**
- * Діалог для введення кидка попадання (1d20 + бонуси)
- */
 export function AttackRollDialog({
   open,
   onOpenChange,
@@ -40,108 +38,101 @@ export function AttackRollDialog({
 
   const [advantageRoll, setAdvantageRoll] = useState("");
 
-  // Розраховуємо бонус до атаки (спрощено, без урахування всіх модифікаторів)
   const attackBonus = attack.attackBonus || 0;
 
-  const statModifier = attack.type === AttackType.MELEE
-    ? Math.floor((attacker.abilities.strength - 10) / 2)
-    : Math.floor((attacker.abilities.dexterity - 10) / 2);
+  const statModifier =
+    attack.type === AttackType.MELEE
+      ? Math.floor((attacker.abilities.strength - 10) / 2)
+      : Math.floor((attacker.abilities.dexterity - 10) / 2);
 
-  const totalBonus = attackBonus + statModifier + attacker.abilities.proficiencyBonus;
+  const totalBonus =
+    attackBonus + statModifier + attacker.abilities.proficiencyBonus;
 
   const hasAdvantageOnAttack = hasAdvantage(attacker, attack);
 
+  const handleCancel = () => {
+    setAttackRoll("");
+    setAdvantageRoll("");
+    onOpenChange(false);
+  };
+
   const handleConfirm = () => {
-    const roll = parseInt(attackRoll);
+    const roll = parseInt(attackRoll, 10);
 
     if (roll >= 1 && roll <= 20) {
-      const advantage = advantageRoll ? parseInt(advantageRoll) : undefined;
+      const advantage = advantageRoll ? parseInt(advantageRoll, 10) : undefined;
 
-      if (advantage && (advantage < 1 || advantage > 20)) {
+      if (advantage != null && (advantage < 1 || advantage > 20)) {
         alert("Кидок переваги має бути від 1 до 20");
 
         return;
       }
 
-      onConfirm({
-        attackRoll: roll,
-        advantageRoll: advantage,
-      });
-      setAttackRoll("");
-      setAdvantageRoll("");
-      onOpenChange(false);
+      onConfirm({ attackRoll: roll, advantageRoll: advantage });
+      handleCancel();
     } else {
       alert("Кидок має бути від 1 до 20");
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto z-[100]">
-        <DialogHeader>
-          <DialogTitle>🎲 Кидок Попадання</DialogTitle>
-          <DialogDescription>
-            {attacker.basicInfo.name} атакує {target.basicInfo.name} зброєю {attack.name}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4">
+    <BattleDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="🎲 Кидок Попадання"
+      description={`${attacker.basicInfo.name} атакує ${target.basicInfo.name} зброєю ${attack.name}`}
+    >
+      <div className="space-y-4">
+        <div>
+          <Label>Результат кидка 1d20</Label>
+          <Input
+            type="number"
+            min={1}
+            max={20}
+            value={attackRoll}
+            onChange={(e) => setAttackRoll(e.target.value)}
+            placeholder="Введіть результат (1-20)"
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            Бонус до атаки: +{totalBonus} (базовий: +{attackBonus}, модифікатор:{" "}
+            {statModifier >= 0 ? "+" : ""}
+            {statModifier}, proficiency: +{attacker.abilities.proficiencyBonus})
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Загальне значення:{" "}
+            {attackRoll ? `${parseInt(attackRoll, 10) + totalBonus}` : "?"} vs AC{" "}
+            {canSeeEnemyHp || target.basicInfo.side === ParticipantSide.ALLY
+              ? target.combatStats.armorClass
+              : "?"}
+          </p>
+        </div>
+        {hasAdvantageOnAttack && (
           <div>
-            <Label>Результат кидка 1d20</Label>
+            <Label>Кидок переваги (опціонально)</Label>
             <Input
               type="number"
-              min="1"
-              max="20"
-              value={attackRoll}
-              onChange={(e) => setAttackRoll(e.target.value)}
-              placeholder="Введіть результат (1-20)"
+              min={1}
+              max={20}
+              value={advantageRoll}
+              onChange={(e) => setAdvantageRoll(e.target.value)}
+              placeholder="Введіть результат (1-20) або залиште порожнім"
             />
             <p className="text-xs text-muted-foreground mt-1">
-              Бонус до атаки: +{totalBonus} (базовий: +{attackBonus}, модифікатор: {statModifier >= 0 ? "+" : ""}{statModifier}, proficiency: +{attacker.abilities.proficiencyBonus})
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Загальне значення: {attackRoll ? `${parseInt(attackRoll) + totalBonus}` : "?"} vs AC {canSeeEnemyHp || target.basicInfo.side === ParticipantSide.ALLY ? target.combatStats.armorClass : "?"}
+              Використовується найкращий результат з двох кидків
             </p>
           </div>
-          {hasAdvantageOnAttack && (
-            <div>
-              <Label>Кидок переваги (опціонально)</Label>
-              <Input
-                type="number"
-                min="1"
-                max="20"
-                value={advantageRoll}
-                onChange={(e) => setAdvantageRoll(e.target.value)}
-                placeholder="Введіть результат (1-20) або залиште порожнім"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Використовується найкращий результат з двох кидків
-              </p>
-            </div>
-          )}
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setAttackRoll("");
-                setAdvantageRoll("");
-                onOpenChange(false);
-              }}
-              className="flex-1 min-h-[44px] touch-manipulation"
-            >
-              Скасувати
-            </Button>
-            <Button
-              type="button"
-              onClick={handleConfirm}
-              disabled={!attackRoll || parseInt(attackRoll) < 1 || parseInt(attackRoll) > 20}
-              className="flex-1 min-h-[44px] touch-manipulation"
-            >
-              Підтвердити
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+        )}
+        <ConfirmCancelFooter
+          onCancel={handleCancel}
+          confirmLabel="Підтвердити"
+          onConfirm={handleConfirm}
+          confirmDisabled={
+            !attackRoll ||
+            parseInt(attackRoll, 10) < 1 ||
+            parseInt(attackRoll, 10) > 20
+          }
+        />
+      </div>
+    </BattleDialog>
   );
 }

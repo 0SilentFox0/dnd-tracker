@@ -62,7 +62,7 @@ export function SpellRichOption({
         {showIcon ? (
           // eslint-disable-next-line @next/next/no-img-element -- external spell icon URL
           <img
-            src={spell.icon}
+            src={spell.icon ?? ""}
             alt=""
             className="h-full w-full object-cover"
             onError={onIconError}

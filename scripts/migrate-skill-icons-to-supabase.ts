@@ -133,7 +133,9 @@ async function main() {
   if (mainToMigrate.length > 0) {
     console.log(`Migrating ${mainToMigrate.length} MainSkill icons...`);
     for (const ms of mainToMigrate) {
-      const url = ms.icon!;
+      const url = ms.icon;
+
+      if (!url) continue;
 
       try {
         const publicUrl = await downloadAndUpload(

@@ -54,7 +54,7 @@ export function useHeroScalingCoefficients(campaignId: string | undefined) {
   useEffect(() => {
     if (!campaignId) return;
 
-    setCoefficientsState(loadFromStorage(campaignId));
+    setCoefficientsState(loadFromStorage(campaignId)); // eslint-disable-line react-hooks/set-state-in-effect -- rehydrate from storage when campaign changes
   }, [campaignId]);
 
   const setCoefficients = useCallback(

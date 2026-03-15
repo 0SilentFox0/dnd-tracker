@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Loader2, Sparkles } from "lucide-react";
 
 import {
@@ -13,7 +14,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAppearanceSave } from "@/lib/hooks/useAppearanceSave";
 import type { SkillForReference } from "@/lib/types/info-reference";
-import { formatMechanicsSkill } from "@/lib/utils/info-reference";
+import {
+  formatMechanicsSkill,
+  getShortSkillSummary,
+} from "@/lib/utils/info-reference";
 
 interface SkillReferenceCardProps {
   campaignId: string;
@@ -38,21 +42,41 @@ export function SkillReferenceCard({
     skill.appearanceDescription ?? "",
   );
 
+  const shortSummary = getShortSkillSummary(skill);
+
   return (
     <AccordionItem
       value={skill.id}
       className="rounded-lg border bg-card overflow-hidden"
     >
-      <AccordionTrigger className="p-0 flex-col items-stretch hover:no-underline">
-        <div className="p-3 text-left flex flex-wrap items-center gap-2">
-          <span className="font-medium text-sm leading-tight flex-1">
-            {skill.name}
-          </span>
-          {skill.mainSkillName && (
-            <Badge variant="secondary" className="text-xs shrink-0">
-              {skill.mainSkillName}
-            </Badge>
-          )}
+      <AccordionTrigger className="p-0 flex-col items-stretch hover:no-underline [&[data-state=open]>div]:border-b">
+        <div className="p-3 text-left flex flex-wrap items-start gap-3 w-full">
+          <div className="flex shrink-0 size-10 rounded-lg overflow-hidden bg-muted items-center justify-center">
+            {skill.icon ? (
+              <Image
+                src={skill.icon}
+                alt=""
+                width={40}
+                height={40}
+                className="object-cover size-full"
+              />
+            ) : (
+              <Sparkles className="size-5 text-muted-foreground" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <span className="font-medium text-sm leading-tight block">
+              {skill.name}
+            </span>
+            {skill.mainSkillName && (
+              <Badge variant="secondary" className="text-xs shrink-0 mt-1">
+                {skill.mainSkillName}
+              </Badge>
+            )}
+            <p className="text-muted-foreground text-xs mt-1.5 line-clamp-2">
+              {shortSummary}
+            </p>
+          </div>
         </div>
       </AccordionTrigger>
       <AccordionContent>

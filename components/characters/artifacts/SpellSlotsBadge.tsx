@@ -14,25 +14,32 @@ export function SpellSlotsBadge({ spellSlots }: SpellSlotsBadgeProps) {
 
   return (
     <div
-      className="flex flex-wrap items-center gap-x-2 gap-y-0.5 rounded-md border border-amber-500/50 bg-amber-950/90 px-2 py-1 text-[10px] text-amber-200/90"
-      title="Магічні слоти за рівнями"
+      className="flex flex-wrap items-center gap-x-2 gap-y-0.5 rounded-md border border-amber-500/50 bg-amber-950/90 px-2 py-1 text-[10px] text-amber-200/90 tabular-nums"
+      title="Магічні слоти: рівень(● доступні, ○ використані)"
     >
       {Object.entries(spellSlots)
         .filter(([k]) => k !== "universal" && spellSlots[k].max > 0)
         .sort(([a], [b]) => Number(a) - Number(b))
-        .map(([level, slot]) => (
-          <span key={level} className="flex items-center gap-0.5">
-            <span className="font-bold text-amber-400/90">Рів.{level}</span>
-            <span>{slot.max}</span>
-          </span>
-        ))}
+        .map(([level, slot]) => {
+          const filled = "●".repeat(slot.current);
+
+          const empty = "○".repeat(Math.max(0, slot.max - slot.current));
+
+          return (
+            <span key={level} className="font-medium text-amber-200/90">
+              {level}({filled}{empty})
+            </span>
+          );
+        })}
       {spellSlots.universal && (
         <span
           key="universal"
-          className="flex items-center gap-0.5 border-l border-amber-500/40 pl-1.5"
+          className="border-l border-amber-500/40 pl-1.5 font-medium text-amber-200/90"
         >
-          <span className="font-bold text-amber-400/90">Унів.</span>
-          <span>{spellSlots.universal.max}</span>
+          У(
+          {"●".repeat(spellSlots.universal.current)}
+          {"○".repeat(Math.max(0, spellSlots.universal.max - spellSlots.universal.current))}
+          )
         </span>
       )}
     </div>

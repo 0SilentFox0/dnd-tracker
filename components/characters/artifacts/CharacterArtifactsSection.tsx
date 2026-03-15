@@ -130,6 +130,7 @@ export function CharacterArtifactsSection({
               const content = equippedArtifact ? (
                 <div className="absolute inset-0 flex flex-col overflow-hidden rounded">
                   {equippedArtifact.icon ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- artifact icons can be external URLs
                     <img
                       src={equippedArtifact.icon}
                       alt=""
@@ -195,6 +196,7 @@ export function CharacterArtifactsSection({
                             className="flex items-center gap-2"
                           >
                             {a.icon ? (
+                              // eslint-disable-next-line @next/next/no-img-element -- artifact icons can be external URLs
                               <img
                                 src={a.icon}
                                 alt=""

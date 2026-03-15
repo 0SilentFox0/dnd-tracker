@@ -15,12 +15,7 @@ import {
   convertPrismaToSkillTree,
   createMockSkillTree,
 } from "@/lib/utils/skills/skill-tree-mock";
-import type {
-  MainSkill,
-  Skill,
-  SkillTree,
-  UltimateSkill,
-} from "@/types/skill-tree";
+import type { MainSkill, Skill, UltimateSkill } from "@/types/skill-tree";
 import { SkillLevel } from "@/types/skill-tree";
 
 type PrismaSkillTree = {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { Heart, TrendingDown, TrendingUp } from "lucide-react";
 
 import { ActionButtonsPanel } from "@/components/battle/ActionButtonsPanel";
 import { AttackRollDialog } from "@/components/battle/dialogs/AttackRollDialog";
@@ -14,6 +15,7 @@ import { RollResultOverlay } from "@/components/battle/RollResultOverlay";
 import { TurnStartScreen } from "@/components/battle/views/TurnStartScreen";
 import { AttackType, BATTLE_RACE, CombatStatus } from "@/lib/constants/battle";
 import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
+import { cn } from "@/lib/utils";
 import { mergeDiceFormulas } from "@/lib/utils/battle/balance-calculations";
 import { getSkillsByTrigger } from "@/lib/utils/skills/skill-triggers";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
@@ -31,6 +33,7 @@ export function PlayerTurnView({
   canSeeEnemyHp = false,
   onAttack,
   onSpell,
+  onSpellPreview,
   onBonusAction,
   onSkipTurn,
   onMoraleCheck,
@@ -86,7 +89,8 @@ export function PlayerTurnView({
 
   // Скидаємо локальний стан коли змінюється учасник або починається новий хід
   useEffect(() => {
-    setHasPerformedAction(false);
+    // Reset when turn or participant changes; key-based remount would require large refactor
+    setHasPerformedAction(false); // eslint-disable-line react-hooks/set-state-in-effect
   }, [participant.basicInfo.id, turnStarted]);
 
   // Отримуємо бонусні дії з тригерів
@@ -350,11 +354,98 @@ export function PlayerTurnView({
     );
   }
 
+  const { currentHp, maxHp } = participant.combatStats;
+
+  const activeEffects = participant.battleData?.activeEffects ?? [];
+
+  const buffs = activeEffects.filter((e) => e.type === "buff");
+
+  const debuffs = activeEffects.filter((e) => e.type === "debuff");
+
+  const conditions = activeEffects.filter((e) => e.type === "condition");
+
+  const hpPercent = maxHp > 0 ? (currentHp / maxHp) * 100 : 0;
+
   return (
     <div className="flex flex-col h-full bg-gradient-to-b from-black/60 to-transparent animate-in fade-in duration-500">
-      {/* Stats Header */}
-      <div className="shrink-0 flex justify-center bg-black/40 backdrop-blur-md border-b border-white/10 p-2">
-        <ParticipantStats participant={participant} className="text-white/90" />
+      {/* HUD: HP + бафи/дебафи */}
+      <div className="shrink-0 bg-black/50 backdrop-blur-md border-b border-white/10 px-3 py-2 space-y-2">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          {/* Поточне здоров'я */}
+          <div
+            className="flex items-center gap-2 min-w-0"
+            title="Здоров'я"
+          >
+            <Heart className="h-4 w-4 shrink-0 text-red-400/90" />
+            <span className="tabular-nums font-bold text-white">
+              {currentHp}/{maxHp}
+            </span>
+            <div className="h-1.5 w-16 rounded-full bg-white/20 overflow-hidden">
+              <div
+                className={cn(
+                  "h-full rounded-full transition-all",
+                  hpPercent <= 25
+                    ? "bg-red-500"
+                    : hpPercent <= 50
+                      ? "bg-amber-500"
+                      : "bg-green-500",
+                )}
+                style={{ width: `${Math.max(0, Math.min(100, hpPercent))}%` }}
+              />
+            </div>
+          </div>
+          {/* Бафи */}
+          {buffs.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <TrendingUp className="h-3.5 w-3 shrink-0 text-green-400/80" />
+              {buffs.map((e) => (
+                <span
+                  key={e.id}
+                  className="rounded px-1.5 py-0.5 text-[10px] font-medium bg-green-500/25 text-green-200 border border-green-500/40"
+                  title={e.description ?? `${e.name}${e.duration > 0 ? ` (${e.duration} раундів)` : ""}`}
+                >
+                  {e.name}
+                  {e.duration > 0 ? ` (${e.duration})` : ""}
+                </span>
+              ))}
+            </div>
+          )}
+          {/* Дебафи */}
+          {debuffs.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <TrendingDown className="h-3.5 w-3 shrink-0 text-red-400/80" />
+              {debuffs.map((e) => (
+                <span
+                  key={e.id}
+                  className="rounded px-1.5 py-0.5 text-[10px] font-medium bg-red-500/25 text-red-200 border border-red-500/40"
+                  title={e.description ?? `${e.name}${e.duration > 0 ? ` (${e.duration} раундів)` : ""}`}
+                >
+                  {e.name}
+                  {e.duration > 0 ? ` (${e.duration})` : ""}
+                </span>
+              ))}
+            </div>
+          )}
+          {/* Умови (condition) */}
+          {conditions.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              {conditions.map((e) => (
+                <span
+                  key={e.id}
+                  className="rounded px-1.5 py-0.5 text-[10px] font-medium bg-amber-500/25 text-amber-200 border border-amber-500/40"
+                  title={e.description ?? `${e.name}${e.duration > 0 ? ` (${e.duration} раундів)` : ""}`}
+                >
+                  {e.name}
+                  {e.duration > 0 ? ` (${e.duration})` : ""}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+        {/* Stats: AC, характеристики, мораль, слоти */}
+        <div className="flex justify-center">
+          <ParticipantStats participant={participant} className="text-white/90" />
+        </div>
       </div>
 
       {/* Перевірка моралі */}
@@ -379,6 +470,14 @@ export function PlayerTurnView({
         availableTargets={battle.initiativeOrder}
         isDM={isDM}
         canSeeEnemyHp={canSeeEnemyHp}
+        onPreview={
+          onSpellPreview
+            ? (data) => {
+                onSpellPreview(data);
+                setSpellSelectionDialogOpen(false);
+              }
+            : undefined
+        }
         onCast={(data) => {
           setHasPerformedAction(true);
           onSpell(data);

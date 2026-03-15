@@ -116,7 +116,7 @@ async function main() {
       },
     });
 
-    const dwarfTree = await prisma.skillTree.create({
+    await prisma.skillTree.create({
       data: {
         campaignId: CAMPAIGN_ID,
         race: "dwarf",

@@ -100,7 +100,7 @@ export async function GET(
     const useRangedUserSum = rangedDiceSum != null && !Number.isNaN(rangedDiceSum);
 
     const meleeBase = useMeleeUserSum
-      ? meleeDiceSum!
+      ? (meleeDiceSum ?? 0)
       : (meleeAttack ? getDiceAverage(meleeAttack.damageDice) : 0);
 
     const meleeDiceAvg = useMeleeUserSum
@@ -108,7 +108,7 @@ export async function GET(
       : getDiceAverage(meleeHero.diceNotation);
 
     const rangedBase = useRangedUserSum
-      ? rangedDiceSum!
+      ? (rangedDiceSum ?? 0)
       : (rangedAttack ? getDiceAverage(rangedAttack.damageDice) : 0);
 
     const rangedDiceAvg = useRangedUserSum

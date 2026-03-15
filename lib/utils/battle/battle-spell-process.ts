@@ -87,6 +87,27 @@ export interface ProcessSpellResult {
   battleAction: BattleAction;
 }
 
+/** Повертає максимальне значення кубика з diceType (d6 → 6, d8 → 8). */
+function getDiceSize(diceType: string | null | undefined): number {
+  if (!diceType) return 6;
+
+  const match = String(diceType).match(/d(\d+)/i);
+
+  return match ? Math.max(1, parseInt(match[1], 10)) : 6;
+}
+
+/** Генерує масив випадкових кидків для заклинання (1..diceSize, length diceCount). */
+function generateSpellDamageRolls(
+  diceCount: number,
+  diceType: string | null | undefined,
+): number[] {
+  const size = getDiceSize(diceType);
+
+  return Array.from({ length: diceCount }, () =>
+    Math.floor(Math.random() * size) + 1,
+  );
+}
+
 /**
  * Повна обробка заклинання
  */
@@ -98,11 +119,37 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
     allParticipants,
     currentRound,
     battleId,
-    damageRolls,
+    damageRolls: rawDamageRolls,
     savingThrows = [],
     additionalRollResult,
     hitRoll,
   } = params;
+
+  // Якщо клієнт не передав кидки урону/лікування, а заклинання має кубики — генеруємо на сервері
+  const needsRolls =
+    (spell.damageType === "damage" ||
+      spell.damageType === "heal" ||
+      spell.damageType === "all") &&
+    (spell.diceCount ?? 0) > 0;
+
+  const expectedCount = spell.diceCount ?? 0;
+
+  const validRolls = rawDamageRolls.filter(
+    (r) => Number.isFinite(r) && r > 0,
+  );
+
+  const damageRolls =
+    needsRolls && validRolls.length < expectedCount
+      ? [
+          ...validRolls,
+          ...generateSpellDamageRolls(
+            Math.max(0, expectedCount - validRolls.length),
+            spell.diceType,
+          ),
+        ].slice(0, expectedCount)
+      : validRolls.length > 0
+        ? validRolls
+        : rawDamageRolls.filter((r) => Number.isFinite(r));
 
   let updatedCaster = { ...caster };
 

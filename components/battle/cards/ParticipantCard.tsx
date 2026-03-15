@@ -219,7 +219,7 @@ export function ParticipantCard({
               {showHp ? (
                 <>
                   <div className="flex items-center justify-between text-[10px] uppercase tracking-wider font-extrabold">
-                    <span className="text-muted-foreground/80">Здоров'я</span>
+                    <span className="text-muted-foreground/80">Здоров&apos;я</span>
                     <span
                       className={cn(
                         "font-black",
@@ -252,7 +252,7 @@ export function ParticipantCard({
               ) : (
                 <>
                   <div className="flex items-center justify-between text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">
-                    <span>Здоров'я</span>
+                    <span>Здоров&apos;я</span>
                     <span>???</span>
                   </div>
                   <div className="h-1.5 w-full bg-black/20 rounded-full overflow-hidden">

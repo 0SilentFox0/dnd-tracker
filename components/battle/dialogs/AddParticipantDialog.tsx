@@ -2,14 +2,10 @@
 
 import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  BattleDialog,
+  ConfirmCancelFooter,
+} from "@/components/battle/dialogs/shared";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -41,9 +37,9 @@ export function AddParticipantDialog({
 
   const [side, setSide] = useState<"ally" | "enemy">("ally");
 
-  const [characterId, setCharacterId] = useState<string>("");
+  const [characterId, setCharacterId] = useState("");
 
-  const [unitId, setUnitId] = useState<string>("");
+  const [unitId, setUnitId] = useState("");
 
   const [quantity, setQuantity] = useState(1);
 
@@ -69,119 +65,108 @@ export function AddParticipantDialog({
     }
   };
 
+  const canSubmit =
+    type === "character" ? Boolean(characterId) : Boolean(unitId);
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-md">
-        <DialogHeader>
-          <DialogTitle>Додати учасника на поле</DialogTitle>
-          <DialogDescription className="text-slate-300">
-            Обраний герой або юніт з&apos;явиться одразу після завершення ходу
-            поточного активного гравця.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4 py-2">
+    <BattleDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Додати учасника на поле"
+      description="Обраний герой або юніт з'явиться одразу після завершення ходу поточного активного гравця."
+      contentClassName="bg-slate-900 border-slate-700 text-white max-w-md"
+    >
+      <div className="space-y-4 py-2">
+        <div className="space-y-2">
+          <Label className="text-slate-200">Сторона</Label>
+          <Select
+            value={side}
+            onValueChange={(v) => setSide(v as "ally" | "enemy")}
+          >
+            <SelectTrigger className="bg-slate-800 border-slate-600">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ally">Союзник</SelectItem>
+              <SelectItem value="enemy">Ворог</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label className="text-slate-200">Тип</Label>
+          <Select
+            value={type}
+            onValueChange={(v) => setType(v as "character" | "unit")}
+          >
+            <SelectTrigger className="bg-slate-800 border-slate-600">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="character">Герой</SelectItem>
+              <SelectItem value="unit">Юніт</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        {type === "character" && (
           <div className="space-y-2">
-            <Label>Сторона</Label>
-            <Select
-              value={side}
-              onValueChange={(v) => setSide(v as "ally" | "enemy")}
-            >
+            <Label className="text-slate-200">Герой</Label>
+            <Select value={characterId} onValueChange={setCharacterId}>
               <SelectTrigger className="bg-slate-800 border-slate-600">
-                <SelectValue />
+                <SelectValue placeholder="Оберіть героя" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ally">Союзник</SelectItem>
-                <SelectItem value="enemy">Ворог</SelectItem>
+                {characters.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-2">
-            <Label>Тип</Label>
-            <Select
-              value={type}
-              onValueChange={(v) => setType(v as "character" | "unit")}
-            >
-              <SelectTrigger className="bg-slate-800 border-slate-600">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="character">Герой</SelectItem>
-                <SelectItem value="unit">Юніт</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          {type === "character" && (
+        )}
+        {type === "unit" && (
+          <>
             <div className="space-y-2">
-              <Label>Герой</Label>
-              <Select
-                value={characterId}
-                onValueChange={setCharacterId}
-              >
+              <Label className="text-slate-200">Юніт</Label>
+              <Select value={unitId} onValueChange={setUnitId}>
                 <SelectTrigger className="bg-slate-800 border-slate-600">
-                  <SelectValue placeholder="Оберіть героя" />
+                  <SelectValue placeholder="Оберіть юніта" />
                 </SelectTrigger>
                 <SelectContent>
-                  {characters.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.name}
+                  {units.map((u) => (
+                    <SelectItem key={u.id} value={u.id}>
+                      {u.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-          )}
-          {type === "unit" && (
-            <>
-              <div className="space-y-2">
-                <Label>Юніт</Label>
-                <Select value={unitId} onValueChange={setUnitId}>
-                  <SelectTrigger className="bg-slate-800 border-slate-600">
-                    <SelectValue placeholder="Оберіть юніта" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {units.map((u) => (
-                      <SelectItem key={u.id} value={u.id}>
-                        {u.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Кількість</Label>
-                <input
-                  type="number"
-                  min={1}
-                  max={10}
-                  value={quantity}
-                  onChange={(e) =>
-                    setQuantity(Math.max(1, Math.min(10, +e.target.value || 1)))
-                  }
-                  className="flex h-9 w-full rounded-md border border-slate-600 bg-slate-800 px-3 py-1 text-sm text-white"
-                />
-              </div>
-            </>
-          )}
-        </div>
-        <div className="flex justify-end gap-2 pt-2">
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            className="border-slate-600 text-slate-300"
-          >
-            Скасувати
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={
-              isPending ||
-              (type === "character" ? !characterId : !unitId)
-            }
-          >
-            {isPending ? "Додаємо…" : "Додати"}
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+            <div className="space-y-2">
+              <Label className="text-slate-200">Кількість</Label>
+              <input
+                type="number"
+                min={1}
+                max={10}
+                value={quantity}
+                onChange={(e) =>
+                  setQuantity(
+                    Math.max(1, Math.min(10, Number(e.target.value) || 1)),
+                  )
+                }
+                className="flex h-9 w-full rounded-md border border-slate-600 bg-slate-800 px-3 py-1 text-sm text-white"
+              />
+            </div>
+          </>
+        )}
+        <ConfirmCancelFooter
+          onCancel={() => onOpenChange(false)}
+          confirmLabel="Додати"
+          onConfirm={handleSubmit}
+          confirmDisabled={!canSubmit || isPending}
+          confirmLoading={isPending}
+          confirmLoadingLabel="Додаємо…"
+        />
+      </div>
+    </BattleDialog>
   );
 }

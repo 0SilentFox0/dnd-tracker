@@ -7,7 +7,6 @@ import {
 } from "./constants";
 
 import { CharacterAbilitiesSection } from "@/components/characters/abilities/CharacterAbilitiesSection";
-import { CharacterLeveledSkillsTable } from "@/components/characters/abilities/CharacterLeveledSkillsTable";
 import { CharacterSkillTreeView } from "@/components/characters/abilities/CharacterSkillTreeView";
 import { CharacterArtifactsSection } from "@/components/characters/artifacts/CharacterArtifactsSection";
 import { CharacterAbilityScores } from "@/components/characters/stats/CharacterAbilityScores";

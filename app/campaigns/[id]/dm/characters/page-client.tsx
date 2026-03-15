@@ -32,7 +32,6 @@ import {
   useDeleteCharacter,
   useLevelUpCharacter,
 } from "@/lib/hooks/useCharacters";
-import { normalizeImageUrl } from "@/lib/utils/common/image-url";
 import type { Character } from "@/types/characters";
 
 interface DMCharactersClientProps {

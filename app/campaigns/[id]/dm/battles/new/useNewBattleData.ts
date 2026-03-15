@@ -44,8 +44,8 @@ export function useNewBattleData(campaignId: string) {
           }
 
           if (data._debug != null) {
-            console.log("[Balance] Основні навички кампанії (id, name):", data._debug.mainSkills);
-            console.log("[Balance] Прогрес основних навичок по персонажах:", data._debug.characterSkillProgress);
+            console.info("[Balance] Основні навички кампанії (id, name):", data._debug.mainSkills);
+            console.info("[Balance] Прогрес основних навичок по персонажах:", data._debug.characterSkillProgress);
           }
         }
       } catch (error) {

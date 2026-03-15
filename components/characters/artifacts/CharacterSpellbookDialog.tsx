@@ -40,9 +40,11 @@ export function CharacterSpellbookDialog({
     for (const spell of spells) {
       const groupName = spell.spellGroup?.name ?? "Інші заклинання";
 
-      if (!map.has(groupName)) map.set(groupName, []);
+      const list = map.get(groupName) ?? [];
 
-      map.get(groupName)!.push(spell as SpellRichOptionData);
+      if (!map.has(groupName)) map.set(groupName, list);
+
+      list.push(spell as SpellRichOptionData);
     }
 
     for (const groupSpells of map.values()) {

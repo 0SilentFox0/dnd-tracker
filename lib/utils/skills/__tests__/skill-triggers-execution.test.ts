@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion -- test file with many mocks and assertions */
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {

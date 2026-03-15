@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useMemo } from "react";
+import { use, useMemo, useState } from "react";
 
 import { BattleHeader } from "@/components/battle/BattleHeader";
 import { AddParticipantDialog } from "@/components/battle/dialogs/AddParticipantDialog";
@@ -9,6 +9,7 @@ import { ChangeHpDialog } from "@/components/battle/dialogs/ChangeHpDialog";
 import { CounterAttackResultDialog } from "@/components/battle/dialogs/CounterAttackResultDialog";
 import { MoraleCheckDialog } from "@/components/battle/dialogs/MoraleCheckDialog";
 import { SpellDialog } from "@/components/battle/dialogs/SpellDialog";
+import { SpellResultModal } from "@/components/battle/dialogs/SpellResultModal";
 import { GlobalDamageOverlay } from "@/components/battle/overlays";
 import { DmQuickActionsPanel } from "@/components/battle/panels";
 import { BattleFieldView } from "@/components/battle/views/BattleFieldView";
@@ -16,6 +17,8 @@ import { BattlePreparationView } from "@/components/battle/views/BattlePreparati
 import { PlayerTurnView } from "@/components/battle/views/PlayerTurnView";
 import { useBattlePageDialogs } from "@/lib/hooks/battle/useBattlePageDialogs";
 import { useBattleSceneLogic } from "@/lib/hooks/battle/useBattleSceneLogic";
+import type { BattleScene } from "@/types/api";
+import type { BattleAction } from "@/types/battle";
 
 export default function BattlePage({
   params,
@@ -47,6 +50,84 @@ export default function BattlePage({
   } = useBattleSceneLogic(id, battleId);
 
   const dmDialogs = useBattlePageDialogs();
+
+  const [spellResultAction, setSpellResultAction] =
+    useState<BattleAction | null>(null);
+
+  const [spellResultModalOpen, setSpellResultModalOpen] = useState(false);
+
+  const [spellPreviewAction, setSpellPreviewAction] =
+    useState<BattleAction | null>(null);
+
+  const [pendingSpellData, setPendingSpellData] = useState<{
+    casterId: string;
+    casterType: string;
+    spellId: string;
+    targetIds: string[];
+    damageRolls: number[];
+    savingThrows?: Array<{ participantId: string; roll: number }>;
+    additionalRollResult?: number;
+    hitRoll?: number;
+  } | null>(null);
+
+  const [, setSpellPreviewLoading] = useState(false);
+
+  const handleSpellPreview = useMemo(
+    () =>
+      async (data: {
+        casterId: string;
+        casterType: string;
+        spellId: string;
+        targetIds: string[];
+        damageRolls: number[];
+        savingThrows?: Array<{ participantId: string; roll: number }>;
+        additionalRollResult?: number;
+        hitRoll?: number;
+      }) => {
+        setSpellPreviewLoading(true);
+        try {
+          const res = await fetch(
+            `/api/campaigns/${id}/battles/${battleId}/spell`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ ...data, preview: true }),
+            },
+          );
+
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+
+            throw new Error(err?.error ?? "Preview failed");
+          }
+
+          const json = await res.json();
+
+          if (json.preview && json.battleAction) {
+            setSpellPreviewAction(json.battleAction);
+            setPendingSpellData(data);
+            setSpellResultModalOpen(true);
+          }
+        } finally {
+          setSpellPreviewLoading(false);
+        }
+      },
+    [id, battleId],
+  );
+
+  const handleSpellApplyFromModal = () => {
+    if (!pendingSpellData) return;
+
+    mutations.spell.mutate(pendingSpellData, {
+      onSuccess: (updatedBattle: BattleScene | undefined) => {
+        setSpellResultModalOpen(false);
+        setSpellPreviewAction(null);
+        setPendingSpellData(null);
+
+        if (updatedBattle) handlers.triggerGlobalDamageFromBattle(updatedBattle);
+      },
+    });
+  };
 
   const preparationCounts = useMemo(() => {
     if (!battle || battle.status !== "prepared") return { allies: 0, enemies: 0 };
@@ -130,7 +211,23 @@ export default function BattlePage({
             campaignId={id}
             canSeeEnemyHp={canSeeEnemyHp}
             onAttack={(data) => handlers.handleAttack(data)}
-            onSpell={(data) => mutations.spell.mutate(data)}
+            onSpellPreview={handleSpellPreview}
+            onSpell={(data) =>
+              mutations.spell.mutate(data, {
+                onSuccess: (updatedBattle: BattleScene | undefined) => {
+                  const log = updatedBattle?.battleLog;
+
+                  if (!log || log.length === 0) return;
+
+                  const last = log[log.length - 1] as BattleAction;
+
+                  if (last.actionType === "spell") {
+                    setSpellResultAction(last);
+                    setSpellResultModalOpen(true);
+                  }
+                },
+              })
+            }
             onBonusAction={(skill) =>
               handlers.handleBonusAction(
                 currentParticipant.basicInfo.id,
@@ -249,13 +346,29 @@ export default function BattlePage({
         availableTargets={availableTargets}
         isDM={isDM}
         canSeeEnemyHp={canSeeEnemyHp}
+        onPreview={async (data) => {
+          dialogs.spell.setOpen(false);
+          await handleSpellPreview(data);
+        }}
         onCast={(data) =>
           mutations.spell.mutate(data, {
-            onSuccess: (updatedBattle) => {
+            onSuccess: (updatedBattle: BattleScene | undefined) => {
               dialogs.spell.setOpen(false);
 
-              if (updatedBattle)
+              if (updatedBattle) {
                 handlers.triggerGlobalDamageFromBattle(updatedBattle);
+
+                const log = updatedBattle.battleLog;
+
+                if (log?.length) {
+                  const last = log[log.length - 1] as BattleAction;
+
+                  if (last.actionType === "spell") {
+                    setSpellResultAction(last);
+                    setSpellResultModalOpen(true);
+                  }
+                }
+              }
             },
           })
         }
@@ -265,6 +378,24 @@ export default function BattlePage({
         open={dialogs.counterAttack.open}
         onOpenChange={dialogs.counterAttack.setOpen}
         info={dialogs.counterAttack.info}
+      />
+
+      <SpellResultModal
+        open={spellResultModalOpen}
+        onOpenChange={(open) => {
+          setSpellResultModalOpen(open);
+
+          if (!open) {
+            setPendingSpellData(null);
+            setSpellPreviewAction(null);
+          }
+        }}
+        lastSpellAction={
+          pendingSpellData ? spellPreviewAction : spellResultAction
+        }
+        onApply={
+          pendingSpellData ? handleSpellApplyFromModal : undefined
+        }
       />
 
       {globalDamageFlash && (

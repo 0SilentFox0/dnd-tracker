@@ -17,9 +17,9 @@ export interface SpellSlots {
  * Логіка:
  * - Рівень 1: завжди 2 слоти 1 рівня
  * - Рівні 5, 10, 15, 20...: слот високого рівня (4 або 5, чергується)
- * - Кожен другий рівень (2, 4, 6, 8, 12, 14, 16, 18...): +1 регулярний слот (рівні 1–3)
- *
- * Регулярні рівні (без 5,10,15,20): 2, 4, 6, 8, 12, 14, 16, 18
+ * - Кожен другий рівень (2, 4, 6, 8, 12, 14, 16, 18...): +1 регулярний слот
+ * - Регулярні слоти розподіляються рівномірніше: рівень 1 обмежено (макс +1),
+ *   решта йде на рівні 2 і 3 порівну, щоб уникнути 4+ слотів лише на 1 рівні.
  */
 export function calculateCharacterSpellSlots(level: number): SpellSlots {
   const slots: SpellSlots = {
@@ -49,25 +49,22 @@ export function calculateCharacterSpellSlots(level: number): SpellSlots {
 
   const highSlot = (n: number) => (n % 2 === 1 ? 4 : 5); // 5->4, 10->5, 15->4, 20->5
 
-  // Додаємо високорівневі слоти
   for (let i = 1; i <= highLevels; i++) {
     const lvl = highSlot(i).toString();
 
     slots[lvl].max += 1;
   }
 
-  // Регулярні слоти: розподіляємо на рівні 1, 2, 3 (пріоритет: 1 -> 2 -> 3)
-  const remaining = regularGained;
+  // Рівномірніший розподіл регулярних слотів: рівень 1 отримує щонайбільше +1,
+  // решта йде на рівні 2 і 3 (приблизно порівну)
+  const toLevel1 = Math.min(regularGained, 1);
 
-  for (let i = 0; i < remaining; i++) {
-    const r = i % 3;
+  const forLevel2And3 = regularGained - toLevel1;
 
-    const key = (r + 1).toString();
+  slots["1"].max += toLevel1;
+  slots["2"].max += Math.ceil(forLevel2And3 / 2);
+  slots["3"].max += Math.floor(forLevel2And3 / 2);
 
-    slots[key].max += 1;
-  }
-
-  // Повертаємо тільки рівні з хоча б одним слотом (рівень 1 не має слотів 2–5)
   const entries = Object.entries(slots).filter(([, v]) => v.max > 0);
 
   return Object.fromEntries(entries) as SpellSlots;

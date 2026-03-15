@@ -144,8 +144,10 @@ function mod(ability: number): number {
 function createMockCaster(
   spellId: string,
   level: number,
-  spellLevel: number,
+  _spellLevel: number,
 ): BattleParticipant {
+  void _spellLevel;
+
   const wisdom = 14;
 
   const intelligence = 16;
@@ -950,7 +952,9 @@ async function main() {
     }
 
     for (const spellId of toRun) {
-      const tc = caseBySpellId.get(spellId)!;
+      const tc = caseBySpellId.get(spellId);
+
+      if (!tc) continue;
 
       const row = spellById.get(spellId) ?? null;
 
@@ -965,7 +969,9 @@ async function main() {
 
     console.log("SPELL — тест-кейс — працює коректно\n");
     for (const r of results) {
-      const tc = caseBySpellId.get(r.spellId)!;
+      const tc = caseBySpellId.get(r.spellId);
+
+      if (!tc) continue;
 
       const testCaseStr = formatTestCase(tc);
 
@@ -1052,7 +1058,9 @@ async function main() {
     );
 
     for (const r of toFix) {
-      const tc = caseBySpellId.get(r.spellId)!;
+      const tc = caseBySpellId.get(r.spellId);
+
+      if (!tc) continue;
 
       const savingThrow =
         tc.savingThrow === "no"

@@ -17,6 +17,7 @@
     "import-docs-spells": "tsx scripts/import-docs-spells.ts",
     "migrate-spell-icons-to-supabase": "tsx scripts/migrate-spell-icons-to-supabase.ts",
     "migrate-skill-icons-to-supabase": "tsx scripts/migrate-skill-icons-to-supabase.ts",
+    "redistribute-character-spell-slots": "tsx scripts/redistribute-character-spell-slots.ts",
     "migrate-unit-icons-to-supabase": "tsx scripts/migrate-unit-icons-to-supabase.ts",
     "import-units": "tsx scripts/import-units.ts",
     "seed-artifacts": "tsx scripts/seed-artifacts.ts",

@@ -122,7 +122,7 @@ export default function EditUnitPage({
 
     if (hasSyncedUnitRef.current !== unit.id) {
       hasSyncedUnitRef.current = unit.id;
-      setFormData(initialFormData);
+      setFormData(initialFormData); // eslint-disable-line react-hooks/set-state-in-effect -- sync form when unit loads/changes
     }
   }, [unit, initialFormData]);
 

@@ -707,11 +707,14 @@ async function main() {
 
   const order = battle.initiativeOrder as unknown as BattleParticipant[];
 
-  const allies = order.filter((p) => p.basicInfo.side === ParticipantSide.ALLY);
+  const _allies = order.filter((p) => p.basicInfo.side === ParticipantSide.ALLY);
 
-  const enemies = order.filter(
+  const _enemies = order.filter(
     (p) => p.basicInfo.side === ParticipantSide.ENEMY,
   );
+
+  void _allies;
+  void _enemies;
 
   assert("K1: Ініціатива після старту", order.length === 8);
   assert(

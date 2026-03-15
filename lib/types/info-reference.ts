@@ -6,7 +6,10 @@ export interface SkillForReference {
   combatStats: unknown;
   bonuses: unknown;
   skillTriggers: unknown;
+  mainSkillId: string | null;
   mainSkillName: string | null;
+  mainSkillIcon: string | null;
+  mainSkillColor: string | null;
   grantedSpellName: string | null;
   icon: string | null;
   image: string | null;

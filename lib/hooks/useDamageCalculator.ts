@@ -256,7 +256,7 @@ export function useDamageCalculator({
     const ids = Array.from(unlockedSkillIds);
 
     if (ids.length === 0) {
-      console.log("[Калькулятор шкоди] Прокачані скіли героя: немає (unlockedSkillIds порожні)");
+      console.info("[Калькулятор шкоди] Прокачані скіли героя: немає (unlockedSkillIds порожні)");
 
       return;
     }
@@ -316,7 +316,7 @@ export function useDamageCalculator({
     });
 
     list.sort((a, b) => a.name.localeCompare(b.name));
-    console.log("[Калькулятор шкоди] Всі прокачані скіли героя:", list);
+    console.info("[Калькулятор шкоди] Всі прокачані скіли героя:", list);
   }, [unlockedSkillIds, skillsList]);
 
   useEffect(() => {
@@ -334,7 +334,7 @@ export function useDamageCalculator({
       ),
     };
 
-    console.log(
+    console.info(
       "[Калькулятор шкоди] Навички, що враховуються для героя при розрахунку:",
       {
         всі_з_приміткою_affectsDamage: skillsAffectingDamage.map((s) => ({
@@ -408,30 +408,39 @@ export function useDamageCalculator({
     const sides = t ? parseInt(String(t).replace(/\D/g, "") || "6", 10) : 6;
 
     return Array.from({ length: c }, () => sides);
-  }, [selectedSpell?.id, selectedSpell?.diceCount, selectedSpell?.diceType]);
+  }, [selectedSpell]);
+
+  const meleeDiceKey = meleeDiceSides.join(",");
 
   useEffect(() => {
     if (meleeDiceSides.length === 0) return;
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sync form state to derived dice sides
     setMeleeDiceValues((prev) =>
       meleeDiceSides.map((s, i) =>
         prev[i] !== undefined && prev[i] >= 1 && prev[i] <= s ? prev[i] : 1,
       ),
     );
-  }, [meleeDiceSides.join(",")]);
+  }, [meleeDiceSides, meleeDiceKey]);
+
+  const rangedDiceKey = rangedDiceSides.join(",");
 
   useEffect(() => {
     if (rangedDiceSides.length === 0) return;
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sync form state to derived dice sides
     setRangedDiceValues((prev) =>
       rangedDiceSides.map((s, i) =>
         prev[i] !== undefined && prev[i] >= 1 && prev[i] <= s ? prev[i] : 1,
       ),
     );
-  }, [rangedDiceSides.join(",")]);
+  }, [rangedDiceSides, rangedDiceKey]);
+
+  const magicDiceKey = magicDiceSides.join(",");
 
   useEffect(() => {
     if (magicDiceSides.length === 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- clear when no dice
       setMagicDiceValues([]);
 
       return;
@@ -442,7 +451,7 @@ export function useDamageCalculator({
         prev[i] !== undefined && prev[i] >= 1 && prev[i] <= s ? prev[i] : 1,
       ),
     );
-  }, [magicDiceSides.join(",")]);
+  }, [magicDiceSides, magicDiceKey]);
 
   const setMeleeDiceAt = (index: number, value: number) => {
     setMeleeDiceValues((prev) =>

@@ -109,8 +109,8 @@ export function CharacterHeroBlock({
             <div className="flex flex-wrap items-center gap-3">
               {Object.keys(spellcasting.spellSlots ?? {}).length > 0 && (
                 <div
-                  className="flex items-center gap-2"
-                  title="Магічні слоти за рівнями"
+                  className="flex items-center gap-2 tabular-nums"
+                  title="Магічні слоти: рівень(● доступні, ○ використані)"
                 >
                   <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                     Слоти:
@@ -124,29 +124,20 @@ export function CharacterHeroBlock({
                           : Number(a) - Number(b),
                     )
                     .map(([level, slot]) => {
-                      const label =
-                        level === "universal" ? "Унів." : `Рів.${level}`;
+                      const x = level === "universal" ? "У" : level;
+
+                      const filled = "●".repeat(slot.current);
+
+                      const empty = "○".repeat(Math.max(0, slot.max - slot.current));
 
                       return (
-                        <div
+                        <span
                           key={level}
-                          className="flex items-center gap-0.5"
-                          title={`${label}: ${slot.current}/${slot.max}`}
+                          className="text-xs text-muted-foreground"
+                          title={`Рівень ${level}: ${slot.current}/${slot.max}`}
                         >
-                          <span className="text-xs text-muted-foreground tabular-nums">
-                            {label}
-                          </span>
-                          {Array.from({ length: slot.max }).map((_, i) => (
-                            <span
-                              key={i}
-                              className={`inline-block h-2 w-2 rounded-full ${
-                                i < slot.current
-                                  ? "bg-amber-400"
-                                  : "border border-amber-400/50 bg-transparent"
-                              }`}
-                            />
-                          ))}
-                        </div>
+                          {x}({filled}{empty})
+                        </span>
                       );
                     })}
                 </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { usePusherBattleSync } from "./usePusherBattleSync";
 
@@ -27,7 +27,7 @@ import type { AttackData } from "@/types/api";
 import type { BattleParticipant } from "@/types/battle";
 
 export function useBattleSceneLogic(id: string, battleId: string) {
-  const queryClient = useQueryClient();
+  useQueryClient(); // kept for cache invalidation in future
 
   const [attackDialogOpen, setAttackDialogOpen] = useState(false);
 
@@ -35,12 +35,10 @@ export function useBattleSceneLogic(id: string, battleId: string) {
 
   const [moraleDialogOpen, setMoraleDialogOpen] = useState(false);
 
-  const [participantForMorale, setParticipantForMorale] =
+  const [, setParticipantForMorale] =
     useState<BattleParticipant | null>(null);
 
-  const [moraleDialogDismissedFor, setMoraleDialogDismissedFor] = useState<
-    string | null
-  >(null);
+  const [, setMoraleDialogDismissedFor] = useState<string | null>(null);
 
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 

@@ -5,7 +5,6 @@ import {
   getSkillCombatStats,
   getSkillDescription,
   getSkillEffects,
-  getSkillIcon,
   getSkillId,
   getSkillMainSkillId,
   getSkillName,

@@ -60,13 +60,6 @@ export async function POST(
         ? (source.mainSkillData as Record<string, unknown>)
         : {};
 
-    const spellEnhancementData =
-      source.spellEnhancementData &&
-      typeof source.spellEnhancementData === "object" &&
-      !Array.isArray(source.spellEnhancementData)
-        ? (source.spellEnhancementData as Record<string, unknown>)
-        : {};
-
     const skill = await prisma.skill.create({
       data: {
         campaignId: id,

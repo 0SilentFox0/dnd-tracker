@@ -277,11 +277,11 @@ export async function createBattleParticipantFromCharacter(
   let resolvedSpellSlots: Record<string, { max: number; current: number }> = {};
 
   if (Object.keys(existingSlots).length > 0) {
-
+    // На початку бою всі слоти повні — ігноруємо збережене current з персонажа
     resolvedSpellSlots = Object.fromEntries(
       Object.entries(existingSlots).map(([k, v]) => [
         k,
-        { max: v.max, current: v.current ?? v.max },
+        { max: v.max, current: v.max },
       ]),
     );
   } else {

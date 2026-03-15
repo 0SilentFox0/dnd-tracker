@@ -67,10 +67,10 @@ export function ParticipantStats({
         </span>
       </div>
 
-      {/* Магічні слоти: заповнені (доступні) і пусті (використані) */}
+      {/* Магічні слоти: рівень(●●○) — заповнені = доступні, пусті = використані */}
       {Object.keys(spellSlots).length > 0 && (
         <div
-          className="flex flex-wrap items-center gap-1.5"
+          className="flex flex-wrap items-center gap-1.5 tabular-nums"
           title="Магічні слоти"
         >
           <Sparkles className="w-3 h-3 text-amber-400/80 shrink-0" />
@@ -79,32 +79,25 @@ export function ParticipantStats({
               a === "universal" ? -1 : b === "universal" ? 1 : Number(a) - Number(b),
             )
             .map(([level, slot]) => {
-              const filled = slot.current;
+              const x = level === "universal" ? "У" : level;
 
-              const empty = Math.max(0, slot.max - slot.current);
+              const filled = "●".repeat(slot.current);
 
-              const label = level === "universal" ? "Унів." : `Рів.${level}`;
+              const empty = "○".repeat(Math.max(0, slot.max - slot.current));
 
               return (
-                <div
+                <span
                   key={level}
-                  className="flex items-center gap-0.5"
-                  aria-label={`${label}: ${filled}/${slot.max}`}
-                  title={level === "universal" ? "Універсальні слоти (будь-яке заклинання)" : `Рівень ${level}`}
+                  className="text-amber-200/90"
+                  aria-label={`Рівень ${level}: ${slot.current}/${slot.max}`}
+                  title={
+                    level === "universal"
+                      ? `Універсальні: ${slot.current}/${slot.max}`
+                      : `Рівень ${level}: ${slot.current}/${slot.max}`
+                  }
                 >
-                  {Array.from({ length: filled }).map((_, i) => (
-                    <span
-                      key={`f-${level}-${i}`}
-                      className="inline-block h-1.5 w-1.5 rounded-full bg-amber-400"
-                    />
-                  ))}
-                  {Array.from({ length: empty }).map((_, i) => (
-                    <span
-                      key={`e-${level}-${i}`}
-                      className="inline-block h-1.5 w-1.5 rounded-full border border-amber-400/50 bg-transparent"
-                    />
-                  ))}
-                </div>
+                  {x}({filled}{empty})
+                </span>
               );
             })}
         </div>

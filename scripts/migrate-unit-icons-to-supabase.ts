@@ -98,7 +98,9 @@ async function main() {
   let fail = 0;
 
   for (const unit of toMigrate) {
-    const url = unit.avatar!;
+    const url = unit.avatar;
+
+    if (!url) continue;
 
     try {
       const res = await fetch(url, {

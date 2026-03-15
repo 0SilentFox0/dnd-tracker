@@ -1195,7 +1195,13 @@ export function executeOnBattleStartEffects(
 
   const byId = new Map(participants.map((p) => [p.basicInfo.id, { ...p }]));
 
-  const get = (id: string) => byId.get(id)!;
+  const get = (id: string): BattleParticipant => {
+    const p = byId.get(id);
+
+    if (!p) throw new Error(`Participant not found: ${id}`);
+
+    return p;
+  };
 
   const set = (p: BattleParticipant) => byId.set(p.basicInfo.id, p);
 
@@ -1319,7 +1325,13 @@ export function executeOnBattleStartEffectsForAll(
 ): { updatedParticipants: BattleParticipant[]; messages: string[] } {
   const byId = new Map(initiativeOrder.map((p) => [p.basicInfo.id, { ...p }]));
 
-  const get = (id: string) => byId.get(id)!;
+  const get = (id: string): BattleParticipant => {
+    const p = byId.get(id);
+
+    if (!p) throw new Error(`Participant not found: ${id}`);
+
+    return p;
+  };
 
   const set = (p: BattleParticipant) => byId.set(p.basicInfo.id, p);
 
@@ -1509,7 +1521,13 @@ export function applyOnBattleStartEffectsToNewAllies(
 
   const byId = new Map(initiativeOrder.map((p) => [p.basicInfo.id, { ...p }]));
 
-  const get = (id: string) => byId.get(id)!;
+  const get = (id: string): BattleParticipant => {
+    const p = byId.get(id);
+
+    if (!p) throw new Error(`Participant not found: ${id}`);
+
+    return p;
+  };
 
   const set = (p: BattleParticipant) => byId.set(p.basicInfo.id, p);
 
@@ -1669,7 +1687,13 @@ export function executeBonusActionSkill(
     updatedParticipants.map((p) => [p.basicInfo.id, { ...p }]),
   );
 
-  const get = (id: string) => byId.get(id)!;
+  const get = (id: string): BattleParticipant => {
+    const p = byId.get(id);
+
+    if (!p) throw new Error(`Participant not found: ${id}`);
+
+    return p;
+  };
 
   const set = (p: BattleParticipant) => byId.set(p.basicInfo.id, p);
 
@@ -1745,7 +1769,7 @@ export function executeBonusActionSkill(
 
         const targetNames = targets
           .filter(Boolean)
-          .map((t) => t!.basicInfo.name)
+          .map((t) => (t ? t.basicInfo.name : ""))
           .join(", ");
 
         messages.push(
@@ -1781,7 +1805,7 @@ export function executeBonusActionSkill(
 
         const targetNames = targets
           .filter(Boolean)
-          .map((t) => t!.basicInfo.name)
+          .map((t) => (t ? t.basicInfo.name : ""))
           .join(", ");
 
         messages.push(
@@ -1812,7 +1836,7 @@ export function executeBonusActionSkill(
 
         const targetNames = targets
           .filter(Boolean)
-          .map((t) => t!.basicInfo.name)
+          .map((t) => (t ? t.basicInfo.name : ""))
           .join(", ");
 
         messages.push(
@@ -1843,7 +1867,7 @@ export function executeBonusActionSkill(
 
         const targetNames = targets
           .filter(Boolean)
-          .map((t) => t!.basicInfo.name)
+          .map((t) => (t ? t.basicInfo.name : ""))
           .join(", ");
 
         messages.push(
@@ -1892,7 +1916,7 @@ export function executeBonusActionSkill(
 
         const targetNames = targets
           .filter(Boolean)
-          .map((t) => t!.basicInfo.name)
+          .map((t) => (t ? t.basicInfo.name : ""))
           .join(", ");
 
         messages.push(

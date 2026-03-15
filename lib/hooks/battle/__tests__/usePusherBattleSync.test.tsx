@@ -19,7 +19,11 @@ function getOrCreateChannel(channelName: string) {
     channelBindings.set(channelName, new Map());
   }
 
-  return channelBindings.get(channelName)!;
+  const ch = channelBindings.get(channelName);
+
+  if (!ch) throw new Error("Channel not found");
+
+  return ch;
 }
 
 function subscribeToChannel(channelName: string) {
@@ -27,9 +31,14 @@ function subscribeToChannel(channelName: string) {
 
   return {
     bind: (eventName: string, callback: (data: unknown) => void) => {
-      if (!events.has(eventName)) events.set(eventName, new Set());
+      let set = events.get(eventName);
 
-      events.get(eventName)!.add(callback);
+      if (!set) {
+        set = new Set();
+        events.set(eventName, set);
+      }
+
+      set.add(callback);
     },
   };
 }

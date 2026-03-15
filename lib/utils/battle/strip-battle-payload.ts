@@ -39,7 +39,10 @@ export function slimInitiativeOrderForStorage(
 
     if (effects && effects.length > 0) {
       updates.activeEffects = effects.map((e) => {
-        const { appliedAt, description, icon, ...rest } = e;
+        const { appliedAt, description: _description, icon: _icon, ...rest } = e;
+
+        void _description;
+        void _icon;
 
         const round =
           appliedAt && typeof appliedAt === "object" && "round" in appliedAt
@@ -55,10 +58,13 @@ export function slimInitiativeOrderForStorage(
 
     if (skills && skills.length > 0) {
       updates.activeSkills = skills.map((s) => {
-        const { description, icon, ...rest } = s as typeof s & {
+        const { description: _d, icon: _i, ...rest } = s as typeof s & {
           description?: string;
           icon?: string;
         };
+
+        void _d;
+        void _i;
 
         return rest;
       });
@@ -69,7 +75,9 @@ export function slimInitiativeOrderForStorage(
 
     if (passives && passives.length > 0) {
       updates.passiveAbilities = passives.map((pa) => {
-        const { description: _, ...rest } = pa;
+        const { description: _desc, ...rest } = pa;
+
+        void _desc;
 
         return { ...rest, description: "" };
       });
@@ -83,9 +91,11 @@ export function slimInitiativeOrderForStorage(
         const effect = ra.effect;
 
         if (effect && typeof effect === "object") {
-          const { description, ...rest } = effect as Record<string, unknown> & {
+          const { description: _desc, ...rest } = effect as Record<string, unknown> & {
             description?: string;
           };
+
+          void _desc;
 
           return { id: ra.id, name: ra.name, effect: rest };
         }
@@ -134,9 +144,11 @@ export function slimBattleLogForStorage(battleLog: BattleAction[]): BattleAction
       return entry;
     }
 
-    const { damageBreakdown: _, ...restDetails } = details as typeof details & {
+    const { damageBreakdown: _db, ...restDetails } = details as typeof details & {
       damageBreakdown?: string;
     };
+
+    void _db;
 
     return { ...entry, actionDetails: restDetails };
   });
@@ -156,7 +168,9 @@ export function stripStateBeforeForStorage(
 
   return battleLog.map((entry, i) => {
     if (i < cutoff && entry && typeof entry === "object" && "stateBefore" in entry) {
-      const { stateBefore: _, ...rest } = entry as BattleAction & { stateBefore?: unknown };
+      const { stateBefore: _sb, ...rest } = entry as BattleAction & { stateBefore?: unknown };
+
+      void _sb;
 
       return rest;
     }
@@ -189,9 +203,11 @@ export function stripStateBeforeForClient<
     log && Array.isArray(log)
       ? log.map((entry) => {
           if (entry && typeof entry === "object" && "stateBefore" in entry) {
-            const { stateBefore: _, ...rest } = entry as BattleAction & {
+            const { stateBefore: _sb2, ...rest } = entry as BattleAction & {
               stateBefore?: unknown;
             };
+
+            void _sb2;
 
             return rest;
           }

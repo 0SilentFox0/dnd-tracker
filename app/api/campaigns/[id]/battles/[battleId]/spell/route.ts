@@ -19,7 +19,14 @@ const spellSchema = z.object({
   casterType: z.string().optional(), // опціонально для сумісності
   spellId: z.string(), // ID заклинання з бази даних
   targetIds: z.array(z.string()), // масив ID цілей
-  damageRolls: z.array(z.number()).default([]), // результати кубиків урону/лікування
+  damageRolls: z
+    .array(z.union([z.number(), z.string()]))
+    .default([])
+    .transform((arr) =>
+      arr
+        .map((v) => (typeof v === "string" ? parseInt(v, 10) : v))
+        .filter((n): n is number => Number.isFinite(n)),
+    ), // результати кубиків (number або string → number[])
   savingThrows: z
     .array(
       z.object({
@@ -30,6 +37,7 @@ const spellSchema = z.object({
     .optional(), // результати saving throws
   additionalRollResult: z.number().optional(), // результат додаткових кубиків
   hitRoll: z.number().min(1).max(20).optional(), // кидок попадання для заклинань з hitCheck
+  preview: z.boolean().optional(), // true = повернути підрахунок без збереження в БД
 });
 
 export async function POST(
@@ -230,6 +238,16 @@ export async function POST(
       actionIndex,
       stateBefore,
     };
+
+    if (data.preview) {
+      return NextResponse.json({
+        preview: true,
+        battleAction: {
+          ...battleAction,
+          stateBefore: undefined,
+        },
+      });
+    }
 
     // Оновлюємо бій
     const updatedBattle = await prisma.battleScene.update({

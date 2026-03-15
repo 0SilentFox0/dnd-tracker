@@ -19,10 +19,13 @@ export function isBattleTimingEnabled(): boolean {
 }
 
 export function logBattleTiming(
-  _label: string,
-  _startMs: number,
+  _label?: string,
+  _startMs?: number,
   _extra?: Record<string, number | string | null>,
 ) {
+  void _label;
+  void _startMs;
+  void _extra;
   // Логування вимкнено
 }
 

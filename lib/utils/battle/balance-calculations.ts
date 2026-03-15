@@ -8,7 +8,6 @@ import {
   DPR_BY_LEVEL_MAGIC,
   DPR_BY_LEVEL_NON_MAGIC,
   MAGIC_MAIN_SKILL_IDS,
-  type MagicMainSkillId,
 } from "@/lib/constants/dpr-by-main-skill";
 import {
   getHeroDamageDiceForLevel,

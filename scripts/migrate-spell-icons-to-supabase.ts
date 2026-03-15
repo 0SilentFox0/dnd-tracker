@@ -98,7 +98,9 @@ async function main() {
   let fail = 0;
 
   for (const spell of toMigrate) {
-    const url = spell.icon!;
+    const url = spell.icon;
+
+    if (!url) continue;
 
     try {
       const res = await fetch(url, {

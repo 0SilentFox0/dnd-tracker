@@ -109,3 +109,39 @@ export function matchSearch(text: string, query: string): boolean {
 
   return terms.every((term) => text.includes(term));
 }
+
+const SHORT_SUMMARY_LENGTH = 72;
+
+/** One-line summary for skill (list/preview). */
+export function getShortSkillSummary(s: SkillForReference): string {
+  if (s.description?.trim()) {
+    const first = s.description.split(/\n/)[0]?.trim() ?? "";
+
+    if (first.length <= SHORT_SUMMARY_LENGTH) return first;
+
+    return first.slice(0, SHORT_SUMMARY_LENGTH - 2) + "…";
+  }
+
+  const mechanics = formatMechanicsSkill(s);
+
+  if (mechanics.length <= SHORT_SUMMARY_LENGTH) return mechanics;
+
+  return mechanics.slice(0, SHORT_SUMMARY_LENGTH - 2) + "…";
+}
+
+/** One-line summary for spell (list/preview). */
+export function getShortSpellSummary(s: SpellForReference): string {
+  if (s.description?.trim()) {
+    const first = s.description.split(/\n/)[0]?.trim() ?? "";
+
+    if (first.length <= SHORT_SUMMARY_LENGTH) return first;
+
+    return first.slice(0, SHORT_SUMMARY_LENGTH - 2) + "…";
+  }
+
+  const mechanics = formatMechanicsSpell(s);
+
+  if (mechanics.length <= SHORT_SUMMARY_LENGTH) return mechanics;
+
+  return mechanics.slice(0, SHORT_SUMMARY_LENGTH - 2) + "…";
+}
