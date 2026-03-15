@@ -51,13 +51,14 @@ export function SpellResultModal({
           <DialogTitle>
             {allPassed && savingThrows.length > 0
               ? "Перевірка пройдена"
-              : details?.spellName ?? "Результат заклинання"}
+              : (details?.spellName ?? "Результат заклинання")}
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
           {allPassed && savingThrows.length > 0 ? (
             <p className="text-muted-foreground text-sm">
-              Ціль(і) пройшли перевірку рятунку ({details?.savingThrows?.[0]?.ability ?? ""}
+              Ціль(і) пройшли перевірку рятунку (
+              {details?.savingThrows?.[0]?.ability ?? ""}
               ). Заклинання не завдало ефекту (промах).
             </p>
           ) : (
@@ -69,9 +70,16 @@ export function SpellResultModal({
                     {details.totalDamage} урону
                   </p>
                   {details.damageBreakdown && (
-                    <p className="text-muted-foreground mt-1 text-xs">
-                      {details.damageBreakdown}
-                    </p>
+                    <ul className="text-muted-foreground mt-1 list-none space-y-0.5 text-xs">
+                      {details.damageBreakdown
+                        .split("; ")
+                        .filter(
+                          (s) => s.trim() !== "" && !/^─+$/.test(s.trim()),
+                        )
+                        .map((line, i) => (
+                          <li key={i}>{line.trim()}</li>
+                        ))}
+                    </ul>
                   )}
                 </div>
               )}
@@ -82,37 +90,20 @@ export function SpellResultModal({
                     {details.totalHealing} HP
                   </p>
                   {details.damageBreakdown && (
-                    <p className="text-muted-foreground mt-1 text-xs">
-                      {details.damageBreakdown}
-                    </p>
+                    <ul className="text-muted-foreground mt-1 list-none space-y-0.5 text-xs">
+                      {details.damageBreakdown
+                        .split("; ")
+                        .filter(
+                          (s) => s.trim() !== "" && !/^─+$/.test(s.trim()),
+                        )
+                        .map((line, i) => (
+                          <li key={i}>{line.trim()}</li>
+                        ))}
+                    </ul>
                   )}
                 </div>
               )}
-              {lastSpellAction.hpChanges && lastSpellAction.hpChanges.length > 0 && (
-                <div className="border-t pt-2">
-                  <p className="text-muted-foreground mb-1 text-xs font-medium">
-                    Зміна HP по цілях
-                  </p>
-                  <ul className="text-muted-foreground space-y-0.5 text-xs">
-                    {lastSpellAction.hpChanges.map((h) => (
-                      <li key={h.participantId}>
-                        {h.participantName}: {h.oldHp} → {h.newHp}
-                        {h.change !== 0 && (
-                          <span
-                            className={
-                              h.change > 0 ? "text-destructive" : "text-green-600 dark:text-green-400"
-                            }
-                          >
-                            {" "}
-                            ({h.change > 0 ? "-" : "+"}
-                            {Math.abs(h.change)})
-                          </span>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+
               {savingThrows.some((st) => st.result === "fail") && (
                 <p className="text-muted-foreground text-xs">
                   Перевірка рятунку не пройдена — застосовано повний ефект.
