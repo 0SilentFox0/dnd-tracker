@@ -33,6 +33,7 @@ export function SpellDialog({
   canSeeEnemyHp,
   onCast,
   onPreview,
+  allowAllSpellsForDM = false,
 }: SpellDialogProps) {
   const {
     spellsByGroup,
@@ -56,7 +57,14 @@ export function SpellDialog({
     handleTargetToggle,
     isSubmitDisabled,
     submitLabel,
-  } = useSpellDialog(campaignId, open, caster, onCast, onPreview);
+  } = useSpellDialog(
+    campaignId,
+    open,
+    caster,
+    onCast,
+    onPreview,
+    allowAllSpellsForDM,
+  );
 
   if (!caster || !battle) {
     return null;

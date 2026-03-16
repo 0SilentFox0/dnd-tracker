@@ -44,4 +44,6 @@ export interface SpellDialogProps {
   canSeeEnemyHp: boolean;
   onCast: (data: SpellCastPayload) => void;
   onPreview?: (data: SpellCastPayload) => void;
+  /** DM може накласти будь-яке заклинання з кампанії (не лише knownSpells кастера) */
+  allowAllSpellsForDM?: boolean;
 }

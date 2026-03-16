@@ -79,6 +79,7 @@ export const EFFECT_STAT_OPTIONS: SelectOption[] = [
   { value: "control_units", label: "Контроль юнітів" },
 
   // Бойові дії
+  { value: "actions", label: "Додаткова дія" },
   { value: "summon_tier", label: "Виклик істоти (tier)" },
   { value: "redirect_physical_damage", label: "Перенаправлення шкоди" },
   { value: "marked_targets", label: "Позначені цілі" },

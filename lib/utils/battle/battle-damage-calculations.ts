@@ -35,9 +35,10 @@ export interface DamageCalculationResult {
 }
 
 /**
- * Розраховує процентні модифікатори урону зі скілів
- * Стакує процентні бонуси адитивно
- * @param attacker - атакуючий учасник
+ * Розраховує процентні модифікатори урону зі скілів (вкачані скіли з дерева скілів).
+ * Використовує attacker.battleData.activeSkills — скіли з ефектами melee_damage/ranged_damage.
+ * Стакує процентні бонуси адитивно.
+ * @param attacker - атакуючий учасник (має містити activeSkills з effects)
  * @param attackType - тип атаки (AttackType enum)
  * @returns сумарний процентний бонус
  */

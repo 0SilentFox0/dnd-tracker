@@ -6,7 +6,7 @@ import type {
   ComparisonOperator,
   SimpleSkillTrigger,
   StatType,
-} from "@/types/skill-triggers";
+} from "../../types/skill-triggers";
 
 /**
  * Enum для типів тригерів
@@ -55,7 +55,10 @@ export const SIMPLE_TRIGGER_OPTIONS: readonly {
   { value: "onBattleStart", label: "На початку бою" },
   { value: "onHit", label: "При влучанні" },
   { value: "onAttack", label: "При атаці" },
-  { value: "onKill", label: "При вбивстві (дія/бонус-дія доводить HP ворога до 0)" },
+  {
+    value: "onKill",
+    label: "При вбивстві (дія/бонус-дія доводить HP ворога до 0)",
+  },
   { value: "onAllyDeath", label: "При смерті союзника" },
   { value: "onLethalDamage", label: "При летальній шкоді" },
   { value: "onCast", label: "При касті" },

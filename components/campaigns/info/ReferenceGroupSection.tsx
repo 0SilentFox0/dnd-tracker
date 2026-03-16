@@ -17,7 +17,6 @@ interface ReferenceGroupSectionProps {
   count?: number;
   children: React.ReactNode;
   className?: string;
-  /** Якщо задано — секція рендериться як пункт акордеону (згортається/розгортається). */
   accordionValue?: string;
 }
 
@@ -26,7 +25,6 @@ function GroupHeader({
   icon,
   count,
   hasAccent,
-  bgStyle,
   className,
 }: {
   title: string;
@@ -72,6 +70,7 @@ export function ReferenceGroupSection({
     accentColor && /^#?[0-9A-Fa-f]{3,8}$/.test(accentColor)
       ? accentColor
       : undefined;
+
   const hasAccent = Boolean(accent);
 
   const bgStyle = accent

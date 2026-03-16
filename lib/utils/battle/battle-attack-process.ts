@@ -27,7 +27,10 @@ import {
   getTotalDiceCount,
   mergeDiceFormulas,
 } from "@/lib/utils/battle/balance-calculations";
-import { getEffectiveArmorClass } from "@/lib/utils/battle/battle-participant-helpers";
+import {
+  applyMainActionUsed,
+  getEffectiveArmorClass,
+} from "@/lib/utils/battle/battle-participant-helpers";
 import {
   checkSurviveLethal,
   executeAfterAttackTriggers,
@@ -197,8 +200,8 @@ export function processAttack(
       ...afterAttackResultFail.messages,
     ].filter(Boolean).join(" | ");
 
-    // Позначаємо що атакуючий використав дію
-    updatedAttacker.actionFlags.hasUsedAction = true;
+    // Позначаємо що атакуючий використав дію (або споживаємо з пулу додаткових дій)
+    updatedAttacker = applyMainActionUsed(updatedAttacker);
 
     return {
       success: false,
@@ -320,8 +323,8 @@ export function processAttack(
       ...afterAttackResultMiss.messages,
     ].filter(Boolean).join(" | ");
 
-    // Позначаємо що атакуючий використав дію
-    updatedAttacker.actionFlags.hasUsedAction = true;
+    // Позначаємо що атакуючий використав дію (або споживаємо з пулу додаткових дій)
+    updatedAttacker = applyMainActionUsed(updatedAttacker);
 
     return {
       success: false,
@@ -571,6 +574,7 @@ export function processAttack(
 
   // 7c. OnKill: якщо ціль була жива і атака довела її HP до 0 — ефекти атакуючого (наприклад +1 дія)
   const targetWasAlive = target.combatStats.currentHp > 0;
+
   const targetIsDead =
     updatedTarget.combatStats.status === "dead" ||
     updatedTarget.combatStats.status === "unconscious";
@@ -741,8 +745,8 @@ export function processAttack(
     };
   }
 
-  // 10. Позначаємо що атакуючий використав дію
-  updatedAttacker.actionFlags.hasUsedAction = true;
+  // 10. Позначаємо що атакуючий використав дію (або споживаємо з пулу додаткових дій)
+  updatedAttacker = applyMainActionUsed(updatedAttacker);
 
   // 11. Створюємо BattleAction
   const battleAction: BattleAction = {

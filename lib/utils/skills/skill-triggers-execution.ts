@@ -1094,7 +1094,8 @@ export function checkSurviveLethal(
 }
 
 /**
- * Перевіряє onKill ефекти після вбивства (Нагорода: +1 дія).
+ * Перевіряє onKill ефекти після вбивства (ефект «Додаткова дія»).
+ * Ефект actions накопичувальний: value — кількість додаткових дій за спрацювання, пул діє до кінця бою.
  */
 export function executeOnKillEffects(
   killer: BattleParticipant,
@@ -1139,13 +1140,22 @@ export function executeOnKillEffects(
 
     for (const effect of skill.effects) {
       if (effect.stat === "actions" && typeof effect.value === "number") {
-        // +1 дія: скидаємо hasUsedAction
+        const addActions = Math.max(0, Math.floor(effect.value));
+
+        if (addActions <= 0) continue;
+
+        const prev = updatedKiller.battleData.pendingExtraActions ?? 0;
+
         updatedKiller = {
           ...updatedKiller,
+          battleData: {
+            ...updatedKiller.battleData,
+            pendingExtraActions: prev + addActions,
+          },
           actionFlags: { ...updatedKiller.actionFlags, hasUsedAction: false },
         };
         messages.push(
-          `⚔️ ${skill.name}: ${killer.basicInfo.name} отримує додаткову дію!`,
+          `⚔️ ${skill.name}: ${killer.basicInfo.name} отримує +${addActions} додаткових дій!`,
         );
       }
     }

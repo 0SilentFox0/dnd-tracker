@@ -19,6 +19,7 @@ import {
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { SkillLevel } from "@/lib/types/skill-tree";
+import { applyMainActionUsed } from "@/lib/utils/battle/battle-participant-helpers";
 import type {
   ActiveSkill,
   BattleParticipant,
@@ -769,7 +770,7 @@ describe("skill-triggers-execution", () => {
   });
 
   describe("executeOnKillEffects", () => {
-    it("скидає hasUsedAction при onKill + actions effect", () => {
+    it("додає pendingExtraActions і скидає hasUsedAction при onKill + actions effect", () => {
       const killer = createMockParticipant({
         actionFlags: {
           hasUsedAction: true,
@@ -808,9 +809,44 @@ describe("skill-triggers-execution", () => {
       const result = executeOnKillEffects(killer);
 
       expect(result.updatedKiller.actionFlags.hasUsedAction).toBe(false);
-      expect(result.messages.some((m) => m.includes("додаткову дію"))).toBe(
-        true,
-      );
+      expect(result.updatedKiller.battleData.pendingExtraActions).toBe(1);
+      expect(result.messages.some((m) => m.includes("додатков"))).toBe(true);
+    });
+
+    it("onKill з effect value 2 додає 2 до pendingExtraActions", () => {
+      const killer = createMockParticipant({
+        battleData: {
+          attacks: [],
+          activeEffects: [],
+          passiveAbilities: [],
+          racialAbilities: [],
+          activeSkills: [
+            {
+              skillId: "s1",
+              mainSkillId: "",
+              level: SkillLevel.BASIC,
+              name: "Нагорода x2",
+              effects: [
+                {
+                  stat: "actions",
+                  type: "flat",
+                  value: 2,
+                  isPercentage: false,
+                },
+              ],
+              skillTriggers: [{ type: "simple", trigger: "onKill" }],
+            },
+          ],
+          equippedArtifacts: [],
+        },
+      });
+
+      vi.spyOn(Math, "random").mockReturnValue(0);
+
+      const result = executeOnKillEffects(killer);
+
+      expect(result.updatedKiller.battleData.pendingExtraActions).toBe(2);
+      expect(result.updatedKiller.actionFlags.hasUsedAction).toBe(false);
     });
 
     it("не змінює учасника без onKill скілів", () => {
@@ -904,6 +940,74 @@ describe("skill-triggers-execution", () => {
       const result = executeOnKillEffects(killer, { s1: 1 });
 
       expect(result.messages).toHaveLength(0);
+    });
+  });
+
+  describe("applyMainActionUsed", () => {
+    it("зменшує pendingExtraActions і залишає hasUsedAction false коли пул > 0", () => {
+      const participant = createMockParticipant({
+        battleData: {
+          attacks: [],
+          activeEffects: [],
+          passiveAbilities: [],
+          racialAbilities: [],
+          activeSkills: [],
+          equippedArtifacts: [],
+          pendingExtraActions: 2,
+        },
+        actionFlags: {
+          hasUsedAction: false,
+          hasUsedBonusAction: false,
+          hasUsedReaction: false,
+          hasExtraTurn: false,
+        },
+      });
+
+      const result = applyMainActionUsed(participant);
+
+      expect(result.battleData.pendingExtraActions).toBe(1);
+      expect(result.actionFlags.hasUsedAction).toBe(false);
+    });
+
+    it("виставляє hasUsedAction true коли пул 0", () => {
+      const participant = createMockParticipant({
+        battleData: {
+          attacks: [],
+          activeEffects: [],
+          passiveAbilities: [],
+          racialAbilities: [],
+          activeSkills: [],
+          equippedArtifacts: [],
+          pendingExtraActions: 0,
+        },
+        actionFlags: {
+          hasUsedAction: false,
+          hasUsedBonusAction: false,
+          hasUsedReaction: false,
+          hasExtraTurn: false,
+        },
+      });
+
+      const result = applyMainActionUsed(participant);
+
+      expect(result.actionFlags.hasUsedAction).toBe(true);
+    });
+
+    it("трактує відсутній pendingExtraActions як 0", () => {
+      const participant = createMockParticipant({
+        battleData: {
+          attacks: [],
+          activeEffects: [],
+          passiveAbilities: [],
+          racialAbilities: [],
+          activeSkills: [],
+          equippedArtifacts: [],
+        },
+      });
+
+      const result = applyMainActionUsed(participant);
+
+      expect(result.actionFlags.hasUsedAction).toBe(true);
     });
   });
 

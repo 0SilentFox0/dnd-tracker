@@ -89,3 +89,30 @@ export function hasAnyAllyLowHp(
 
   return allies.some((ally) => hasLowHp(ally, thresholdPercent));
 }
+
+/**
+ * Застосовує використання основної дії: якщо є пул додаткових дій (pendingExtraActions),
+ * споживає одну й залишає hasUsedAction = false; інакше виставляє hasUsedAction = true.
+ * Ефект «Додаткова дія» накопичувальний до кінця бою.
+ */
+export function applyMainActionUsed(
+  participant: BattleParticipant,
+): BattleParticipant {
+  const pending = participant.battleData.pendingExtraActions ?? 0;
+
+  if (pending > 0) {
+    return {
+      ...participant,
+      battleData: {
+        ...participant.battleData,
+        pendingExtraActions: pending - 1,
+      },
+      actionFlags: { ...participant.actionFlags, hasUsedAction: false },
+    };
+  }
+
+  return {
+    ...participant,
+    actionFlags: { ...participant.actionFlags, hasUsedAction: true },
+  };
+}

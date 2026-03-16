@@ -392,6 +392,7 @@ export async function createBattleParticipantFromCharacter(
       activeSkills,
       equippedArtifacts,
       skillUsageCounts: {},
+      pendingExtraActions: 0,
     },
     actionFlags: {
       hasUsedAction: false,
@@ -884,6 +885,7 @@ export async function createBattleParticipantFromUnit(
       activeSkills: [],
       equippedArtifacts: [],
       skillUsageCounts: {},
+      pendingExtraActions: 0,
     },
     actionFlags: {
       hasUsedAction: false,
@@ -1114,7 +1116,7 @@ async function extractActiveSkillsFromCharacter(
 
     if (rawEffects.length > 0) {
       effects = rawEffects
-        .filter((e) => e.stat)
+        .filter((e) => e.stat || (e as { type?: string }).type)
         .map((e) => {
           const raw = e as RawEffect & { isPercentage?: boolean };
 
@@ -1123,9 +1125,11 @@ async function extractActiveSkillsFromCharacter(
             e.type === "percent" ||
             e.type === "percentage";
 
+          const stat = e.stat || (e as { type?: string }).type || "";
+
           return {
-            stat: e.stat,
-            type: e.type,
+            stat,
+            type: e.type || "flat",
             value: e.value ?? 0,
             isPercentage: isPct,
             duration: e.duration,

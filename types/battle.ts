@@ -252,6 +252,8 @@ export interface BattleParticipantBattleData {
   equippedArtifacts: EquippedArtifact[];
   /** Лічильник використань скілів за бій (skillId → count). Для oncePerBattle/twicePerBattle */
   skillUsageCounts?: Record<string, number>;
+  /** Пул додаткових дій (ефект «actions»): накопичується при спрацюванні, споживається при використанні основної дії, діє до кінця бою */
+  pendingExtraActions?: number;
 }
 
 /**

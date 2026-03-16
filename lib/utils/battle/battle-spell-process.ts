@@ -3,6 +3,7 @@
  */
 
 import { addActiveEffect } from "./battle-effects";
+import { applyMainActionUsed } from "./battle-participant-helpers";
 import { applyResistance } from "./battle-resistance";
 import {
   calculateSpellAdditionalModifier,
@@ -233,7 +234,7 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
     if (isBonusAction) {
       updatedCaster.actionFlags.hasUsedBonusAction = true;
     } else {
-      updatedCaster.actionFlags.hasUsedAction = true;
+      updatedCaster = applyMainActionUsed(updatedCaster);
     }
 
     const noTargetAction: BattleAction = {
@@ -299,7 +300,7 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
     if (isBonusAction) {
       updatedCaster.actionFlags.hasUsedBonusAction = true;
     } else {
-      updatedCaster.actionFlags.hasUsedAction = true;
+      updatedCaster = applyMainActionUsed(updatedCaster);
     }
 
     const targetNames = updatedTargets.map((t) => t.basicInfo.name).join(", ");
@@ -369,7 +370,7 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
       if (isBonusAction) {
         updatedCaster.actionFlags.hasUsedBonusAction = true;
       } else {
-        updatedCaster.actionFlags.hasUsedAction = true;
+        updatedCaster = applyMainActionUsed(updatedCaster);
       }
 
       const missAction: BattleAction = {
@@ -727,13 +728,13 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
     current: updatedCaster.spellcasting.spellSlots[slotKey].current - 1,
   };
 
-  // 6. Позначаємо що кастер використав дію (action або bonus action)
+  // 6. Позначаємо що кастер використав дію (action або bonus action; або споживаємо з пулу додаткових дій)
   const isBonusAction = spell.castingTime?.toLowerCase().includes("bonus") ?? false;
 
   if (isBonusAction) {
     updatedCaster.actionFlags.hasUsedBonusAction = true;
   } else {
-    updatedCaster.actionFlags.hasUsedAction = true;
+    updatedCaster = applyMainActionUsed(updatedCaster);
   }
 
   // 6b. OnKill: якщо заклинання вбило ворога — ефекти кастера (наприклад +1 дія)
@@ -746,6 +747,7 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
 
     for (let i = 0; i < updatedTargets.length; i++) {
       const orig = targets[i];
+
       const after = updatedTargets[i];
 
       if (

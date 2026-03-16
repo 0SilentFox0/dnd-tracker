@@ -24,6 +24,7 @@ export function useSpellDialog(
   caster: BattleParticipant | null,
   onCast: (data: SpellCastPayload) => void,
   onPreview?: (data: SpellCastPayload) => void,
+  allowAllSpells = false,
 ) {
   const [selectedSpellId, setSelectedSpellId] = useState("");
 
@@ -48,14 +49,6 @@ export function useSpellDialog(
 
     const load = async () => {
       try {
-        const knownIds = caster.spellcasting.knownSpells ?? [];
-
-        if (knownIds.length === 0) {
-          setSpells([]);
-
-          return;
-        }
-
         const res = await fetch(SPELLS_API(campaignId));
 
         if (!res.ok) {
@@ -66,7 +59,19 @@ export function useSpellDialog(
 
         const all: SpellDialogSpell[] = await res.json();
 
-        setSpells(all.filter((s) => knownIds.includes(s.id)));
+        if (allowAllSpells) {
+          setSpells(all);
+        } else {
+          const knownIds = caster.spellcasting.knownSpells ?? [];
+
+          if (knownIds.length === 0) {
+            setSpells([]);
+
+            return;
+          }
+
+          setSpells(all.filter((s) => knownIds.includes(s.id)));
+        }
       } catch (err) {
         console.error("Error loading spells:", err);
         setSpells([]);
@@ -74,7 +79,7 @@ export function useSpellDialog(
     };
 
     load();
-  }, [caster, campaignId, open]);
+  }, [caster, campaignId, open, allowAllSpells]);
 
   const spellsByGroup = useMemo(() => {
     const map = new Map<string, SpellRichOptionData[]>();

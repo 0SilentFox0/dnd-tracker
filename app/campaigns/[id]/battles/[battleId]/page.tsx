@@ -7,6 +7,7 @@ import { AddParticipantDialog } from "@/components/battle/dialogs/AddParticipant
 import { AttackDialog } from "@/components/battle/dialogs/AttackDialog";
 import { ChangeHpDialog } from "@/components/battle/dialogs/ChangeHpDialog";
 import { CounterAttackResultDialog } from "@/components/battle/dialogs/CounterAttackResultDialog";
+import { DmCasterPickerDialog } from "@/components/battle/dialogs/DmCasterPickerDialog";
 import { MoraleCheckDialog } from "@/components/battle/dialogs/MoraleCheckDialog";
 import { SpellDialog } from "@/components/battle/dialogs/SpellDialog";
 import { SpellResultModal } from "@/components/battle/dialogs/SpellResultModal";
@@ -42,6 +43,8 @@ export default function BattlePage({
     handlers,
     dmControlledParticipantId,
     setDmControlledParticipantId,
+    dmSpellCasterId,
+    setDmSpellCasterId,
     addParticipantMutation,
     updateParticipantMutation,
     globalDamageFlash,
@@ -280,6 +283,10 @@ export default function BattlePage({
           logPanelOpen={dmDialogs.logPanelOpen}
           setLogPanelOpen={dmDialogs.setLogPanelOpen}
           onRollback={handlers.handleRollback}
+          onOpenCastSpell={() => {
+            setDmSpellCasterId(null);
+            dialogs.spell.setOpen(true);
+          }}
         />
       )}
 
@@ -337,42 +344,72 @@ export default function BattlePage({
         />
       )}
 
-      <SpellDialog
-        open={dialogs.spell.open}
-        onOpenChange={dialogs.spell.setOpen}
-        caster={null}
-        battle={battle}
-        campaignId={id}
-        availableTargets={availableTargets}
-        isDM={isDM}
-        canSeeEnemyHp={canSeeEnemyHp}
-        onPreview={async (data) => {
-          dialogs.spell.setOpen(false);
-          await handleSpellPreview(data);
-        }}
-        onCast={(data) =>
-          mutations.spell.mutate(data, {
-            onSuccess: (updatedBattle: BattleScene | undefined) => {
+      {dialogs.spell.open && isDM && !dmSpellCasterId && (
+        <DmCasterPickerDialog
+          open={dialogs.spell.open}
+          onOpenChange={(open) => {
+            if (!open) {
               dialogs.spell.setOpen(false);
+              setDmSpellCasterId(null);
+            }
+          }}
+          participants={battle.initiativeOrder ?? []}
+          onSelectCaster={(p) => setDmSpellCasterId(p.basicInfo.id)}
+        />
+      )}
 
-              if (updatedBattle) {
-                handlers.triggerGlobalDamageFromBattle(updatedBattle);
+      {dialogs.spell.open && (!isDM || dmSpellCasterId) && (
+        <SpellDialog
+          open={dialogs.spell.open}
+          onOpenChange={(open) => {
+            if (!open && isDM) setDmSpellCasterId(null);
 
-                const log = updatedBattle.battleLog;
+            dialogs.spell.setOpen(open);
+          }}
+          caster={
+            isDM && dmSpellCasterId
+              ? (battle.initiativeOrder ?? []).find(
+                  (p: { basicInfo: { id: string } }) =>
+                    p.basicInfo.id === dmSpellCasterId,
+                ) ?? null
+              : null
+          }
+          battle={battle}
+          campaignId={id}
+          availableTargets={availableTargets}
+          isDM={isDM}
+          canSeeEnemyHp={canSeeEnemyHp}
+          allowAllSpellsForDM={Boolean(isDM && dmSpellCasterId)}
+          onPreview={async (data) => {
+            dialogs.spell.setOpen(false);
+            await handleSpellPreview(data);
+          }}
+          onCast={(data) =>
+            mutations.spell.mutate(data, {
+              onSuccess: (updatedBattle: BattleScene | undefined) => {
+                dialogs.spell.setOpen(false);
 
-                if (log?.length) {
-                  const last = log[log.length - 1] as BattleAction;
+                if (isDM) setDmSpellCasterId(null);
 
-                  if (last.actionType === "spell") {
-                    setSpellResultAction(last);
-                    setSpellResultModalOpen(true);
+                if (updatedBattle) {
+                  handlers.triggerGlobalDamageFromBattle(updatedBattle);
+
+                  const log = updatedBattle.battleLog;
+
+                  if (log?.length) {
+                    const last = log[log.length - 1] as BattleAction;
+
+                    if (last.actionType === "spell") {
+                      setSpellResultAction(last);
+                      setSpellResultModalOpen(true);
+                    }
                   }
                 }
-              }
-            },
-          })
-        }
-      />
+              },
+            })
+          }
+        />
+      )}
 
       <CounterAttackResultDialog
         open={dialogs.counterAttack.open}

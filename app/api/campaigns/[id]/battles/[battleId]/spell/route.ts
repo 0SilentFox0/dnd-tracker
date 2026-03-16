@@ -114,8 +114,11 @@ export async function POST(
       );
     }
 
-    // Перевіряємо чи заклинання є в knownSpells
-    if (!caster.spellcasting.knownSpells.includes(data.spellId)) {
+    // Перевіряємо чи заклинання є в knownSpells (DM може накласти будь-яке заклинання)
+    if (
+      !isDM &&
+      !caster.spellcasting.knownSpells.includes(data.spellId)
+    ) {
       return NextResponse.json(
         { error: "Spell is not in caster's known spells" },
         { status: 400 }

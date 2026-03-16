@@ -60,6 +60,8 @@ export function useBattleSceneLogic(id: string, battleId: string) {
     string | null
   >(null);
 
+  const [dmSpellCasterId, setDmSpellCasterId] = useState<string | null>(null);
+
   const nextTurnClickedAtRef = useRef<number | null>(null);
 
   const nextTurnMutation = useNextTurn(id, battleId);
@@ -291,7 +293,7 @@ export function useBattleSceneLogic(id: string, battleId: string) {
 
   const handleCompleteBattle = useCallback(
     (result?: "victory" | "defeat") => {
-      completeBattleMutation.mutate(result ? { result } : undefined);
+      completeBattleMutation.mutate(result != null ? { result } : {});
     },
     [completeBattleMutation],
   );
@@ -422,6 +424,8 @@ export function useBattleSceneLogic(id: string, battleId: string) {
     },
     dmControlledParticipantId,
     setDmControlledParticipantId,
+    dmSpellCasterId,
+    setDmSpellCasterId,
     addParticipantMutation,
     updateParticipantMutation,
     globalDamageFlash,

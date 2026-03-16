@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronLeft, ScrollText, Trophy, UserPlus } from "lucide-react";
+import { ChevronLeft, ScrollText, Sparkles, Trophy, UserPlus } from "lucide-react";
 
 import { BattleLogPanel } from "./BattleLogPanel";
 import { DmParticipantRow } from "./DmParticipantRow";
@@ -27,6 +27,8 @@ export interface DmQuickActionsPanelProps {
   logPanelOpen?: boolean;
   setLogPanelOpen?: (open: boolean) => void;
   onRollback?: (actionIndex: number) => void;
+  /** Відкрити діалог накладання заклинання (будь-яке заклинання на будь-кого) */
+  onOpenCastSpell?: () => void;
 }
 
 export function DmQuickActionsPanel({
@@ -42,6 +44,7 @@ export function DmQuickActionsPanel({
   logPanelOpen,
   setLogPanelOpen,
   onRollback,
+  onOpenCastSpell,
 }: DmQuickActionsPanelProps) {
   const [open, setOpen] = useState(false);
 
@@ -129,6 +132,21 @@ export function DmQuickActionsPanel({
             <UserPlus className="h-4 w-4" />
             Додати героя / юніта
           </Button>
+
+          {onOpenCastSpell && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full justify-start gap-2 border-violet-500/50 text-violet-300 hover:bg-violet-500/20"
+              onClick={() => {
+                onOpenCastSpell();
+                closePanel();
+              }}
+            >
+              <Sparkles className="h-4 w-4" />
+              Накласти заклинання
+            </Button>
+          )}
 
           <div className="pt-2 border-t border-white/10">
             <p className="text-xs text-white/50 uppercase tracking-wider mb-2 px-1">
