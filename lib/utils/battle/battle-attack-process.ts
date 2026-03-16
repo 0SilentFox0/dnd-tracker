@@ -601,6 +601,8 @@ export function processAttack(
       attackerSkillUsageCounts,
       physicalDamageDealt,
       allParticipants,
+      attack.id,
+      attack.name,
     );
 
     updatedTarget = onHitResult.updatedTarget;

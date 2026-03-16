@@ -8,6 +8,7 @@ import {
   type CampaignSpellContext,
   createBattleParticipantFromCharacter,
   createBattleParticipantFromUnit,
+  parseMainSkillLevelId,
 } from "@/lib/utils/battle/battle-participant";
 import {
   applyStartOfBattleEffects,
@@ -163,6 +164,15 @@ export async function POST(
       }
     }
 
+    // Level IDs (e.g. mainSkillId_expert_level) are in allSkillIds but not in Skill.id; fetch by mainSkillId so extractActiveSkillsFromCharacter can resolve them
+    const mainSkillIdsFromLevels = new Set<string>();
+
+    for (const sid of allSkillIds) {
+      const parsed = parseMainSkillLevelId(sid);
+
+      if (parsed) mainSkillIdsFromLevels.add(parsed.mainSkillId);
+    }
+
     // Collect unique races from characters and units
     const uniqueRaces = new Set<string>();
 
@@ -219,6 +229,14 @@ export async function POST(
                   },
                 })
               : [],
+            mainSkillIdsFromLevels.size > 0
+              ? prisma.skill.findMany({
+                  where: {
+                    mainSkillId: { in: Array.from(mainSkillIdsFromLevels) },
+                    campaignId: id,
+                  },
+                })
+              : [],
             allArtifactIds.size > 0
               ? prisma.artifact.findMany({
                   where: {
@@ -243,8 +261,15 @@ export async function POST(
     let campaignContext: CampaignSpellContext | undefined;
 
     if (characters.length > 0 && characterContext.length >= 4) {
-      const [skillTrees, mainSkills, spells, allSkills, batchSkills, batchArtifacts] =
-        characterContext;
+      const [
+        skillTrees,
+        mainSkills,
+        spells,
+        allSkills,
+        batchSkills,
+        batchSkillsByMainSkill,
+        batchArtifacts,
+      ] = characterContext;
 
       const skillTreeByRace: Record<string, NonNullable<(typeof skillTrees)[number]> | null> = {};
 
@@ -259,9 +284,12 @@ export async function POST(
 
       const skillsById: Record<string, Prisma.SkillGetPayload<object>> = {};
 
-      const skillsArr = Array.isArray(batchSkills) ? batchSkills : [];
+      const skillsByIdArr = [
+        ...(Array.isArray(batchSkills) ? batchSkills : []),
+        ...(Array.isArray(batchSkillsByMainSkill) ? batchSkillsByMainSkill : []),
+      ];
 
-      for (const s of skillsArr) {
+      for (const s of skillsByIdArr) {
         if (s && typeof s === "object" && "id" in s) {
           skillsById[(s as { id: string }).id] = s as Prisma.SkillGetPayload<object>;
         }

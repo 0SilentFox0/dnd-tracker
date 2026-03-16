@@ -3,12 +3,16 @@ import { z } from "zod";
 
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
-import { computeDamageBreakdown } from "@/lib/utils/battle/battle-damage-breakdown";
+import {
+  computeDamageBreakdown,
+  computeDamageBreakdownMultiTarget,
+} from "@/lib/utils/battle/battle-damage-breakdown";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const schema = z.object({
   attackerId: z.string(),
-  targetId: z.string(),
+  targetId: z.string().optional(),
+  targetIds: z.array(z.string()).optional(),
   attackId: z.string().optional(),
   damageRolls: z.array(z.number()),
   isCritical: z.boolean().optional(),
@@ -45,13 +49,34 @@ export async function POST(
       (p) => p.basicInfo.id === data.attackerId,
     );
 
-    const target = initiativeOrder.find(
-      (p) => p.basicInfo.id === data.targetId,
-    );
-
-    if (!attacker || !target) {
+    if (!attacker) {
       return NextResponse.json(
-        { error: "Attacker or target not found" },
+        { error: "Attacker not found" },
+        { status: 404 },
+      );
+    }
+
+    const targetIdList =
+      data.targetIds && data.targetIds.length > 0
+        ? data.targetIds
+        : data.targetId
+          ? [data.targetId]
+          : [];
+
+    if (targetIdList.length === 0) {
+      return NextResponse.json(
+        { error: "At least one target required" },
+        { status: 400 },
+      );
+    }
+
+    const targets = targetIdList
+      .map((id) => initiativeOrder.find((p) => p.basicInfo.id === id))
+      .filter((p): p is BattleParticipant => !!p);
+
+    if (targets.length !== targetIdList.length) {
+      return NextResponse.json(
+        { error: "One or more targets not found" },
         { status: 404 },
       );
     }
@@ -69,9 +94,21 @@ export async function POST(
       );
     }
 
+    if (targets.length > 1) {
+      const result = computeDamageBreakdownMultiTarget({
+        attacker,
+        targets,
+        attack,
+        damageRolls: data.damageRolls,
+        allParticipants: initiativeOrder,
+        isCritical: data.isCritical,
+      });
+      return NextResponse.json(result);
+    }
+
     const result = computeDamageBreakdown({
       attacker,
-      target,
+      target: targets[0],
       attack,
       damageRolls: data.damageRolls,
       allParticipants: initiativeOrder,

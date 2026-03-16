@@ -44,30 +44,9 @@ export function processStartOfTurn(
 
   const triggeredAbilities: string[] = [];
 
-  // 1. Застосовуємо DOT ефекти
-  const dotResult = applyDOTEffects(updatedParticipant);
+  // DoT і зменшення тривалості ефектів відбуваються на початку раунду (processStartOfRound), не тут
 
-  updatedParticipant = {
-    ...updatedParticipant,
-    combatStats: {
-      ...updatedParticipant.combatStats,
-      currentHp: dotResult.newHp,
-    },
-  };
-  damageMessages.push(...dotResult.damageMessages);
-
-  // 2. Зменшуємо тривалість всіх ефектів
-  const durationResult = decreaseEffectDurations(updatedParticipant);
-
-  updatedParticipant = {
-    ...updatedParticipant,
-    battleData: {
-      ...updatedParticipant.battleData,
-      activeEffects: durationResult.updatedEffects,
-    },
-  };
-
-  // 3. Перевіряємо чи учасник впав в непритомність або помер
+  // 1. Перевіряємо чи учасник впав в непритомність або помер (після DoT на початку раунду)
   let statusChanged = false;
 
   if (
@@ -126,7 +105,7 @@ export function processStartOfTurn(
   return {
     participant: updatedParticipant,
     damageMessages,
-    expiredEffects: durationResult.expiredEffects,
+    expiredEffects: [],
     triggeredAbilities,
     statusChanged,
   };
@@ -232,7 +211,6 @@ export function processStartOfRound(
   );
 
   // Пересортуємо з урахуванням можливих змін ініціативи
-  // (якщо ефекти змінили initiative, треба пересортувати)
   const sortedOrder = triggerResult.updatedParticipants.sort((a, b) => {
     if (b.abilities.initiative !== a.abilities.initiative) {
       return b.abilities.initiative - a.abilities.initiative;
@@ -245,9 +223,46 @@ export function processStartOfRound(
     return b.abilities.dexterity - a.abilities.dexterity;
   });
 
+  // На початку раунду: DoT (кровотеча, отрута, вогонь тощо) та зменшення тривалості ефектів
+  const dotMessages: string[] = [];
+  const updatedOrderWithDot = sortedOrder.map((participant) => {
+    if (
+      participant.combatStats.status === "dead" ||
+      participant.combatStats.status === "unconscious"
+    ) {
+      return participant;
+    }
+
+    const dotResult = applyDOTEffects(participant);
+    let p: BattleParticipant = {
+      ...participant,
+      combatStats: {
+        ...participant.combatStats,
+        currentHp: dotResult.newHp,
+      },
+    };
+    dotMessages.push(...dotResult.damageMessages);
+
+    const durationResult = decreaseEffectDurations(p);
+    p = {
+      ...p,
+      battleData: {
+        ...p.battleData,
+        activeEffects: durationResult.updatedEffects,
+      },
+    };
+
+    return p;
+  });
+
+  const allRoundMessages = [
+    ...triggerResult.messages,
+    ...dotMessages,
+  ];
+
   return {
-    updatedInitiativeOrder: sortedOrder,
+    updatedInitiativeOrder: updatedOrderWithDot,
     message: `🔁 Початок Раунду ${currentRound}`,
-    triggerMessages: triggerResult.messages,
+    triggerMessages: allRoundMessages,
   };
 }

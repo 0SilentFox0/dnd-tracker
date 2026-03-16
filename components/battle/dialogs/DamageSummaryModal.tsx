@@ -19,6 +19,8 @@ interface DamageSummaryModalProps {
   onOpenChange: (open: boolean) => void;
   attacker: BattleParticipant;
   target: BattleParticipant;
+  /** При кількох цілях передати масив; тоді API викликається з targetIds і показується блок на ціль */
+  targets?: BattleParticipant[];
   attack: BattleAttack;
   damageRolls: number[];
   /** @deprecated API fetches battle from DB; kept for backward compat with callers */
@@ -33,19 +35,20 @@ const STAGGER_DELAY = 0.12;
 
 const requestKey = (
   attackerId: string,
-  targetId: string,
+  targetIds: string[],
   attackId: string | undefined,
   attackName: string,
   isCritical: boolean,
   damageRolls: number[],
 ) =>
-  `${attackerId}-${targetId}-${attackId ?? attackName}-${isCritical}-${damageRolls.join(",")}`;
+  `${attackerId}-${targetIds.join(",")}-${attackId ?? attackName}-${isCritical}-${damageRolls.join(",")}`;
 
 function DamageSummaryContent({
   campaignId,
   battleId,
   attacker,
   target,
+  targets: targetsProp,
   attack,
   damageRolls,
   isCritical,
@@ -56,6 +59,7 @@ function DamageSummaryContent({
   battleId: string;
   attacker: BattleParticipant;
   target: BattleParticipant;
+  targets?: BattleParticipant[];
   attack: BattleAttack;
   damageRolls: number[];
   isCritical: boolean;
@@ -66,13 +70,23 @@ function DamageSummaryContent({
 
   const [totalDamage, setTotalDamage] = useState<number | null>(null);
 
+  const [targetBreakdown, setTargetBreakdown] = useState<string[] | null>(null);
+
+  const [finalDamage, setFinalDamage] = useState<number | null>(null);
+
+  const [targetsResult, setTargetsResult] = useState<
+    Array<{ targetId: string; targetName: string; targetBreakdown: string[]; finalDamage: number }> | null
+  >(null);
+
   const [loading, setLoading] = useState(true);
 
   const [error, setError] = useState<string | null>(null);
 
   const attackerId = attacker.basicInfo.id;
 
-  const targetId = target.basicInfo.id;
+  const targets = targetsProp && targetsProp.length > 0 ? targetsProp : [target];
+  const targetIds = targets.map((t) => t.basicInfo.id);
+  const isMultiTarget = targets.length > 1;
 
   const attackId = attack.id ?? undefined;
 
@@ -88,7 +102,7 @@ function DamageSummaryContent({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           attackerId,
-          targetId,
+          ...(isMultiTarget ? { targetIds } : { targetId: targetIds[0] }),
           attackId: attackId ?? (attackName || undefined),
           damageRolls,
           isCritical,
@@ -110,6 +124,21 @@ function DamageSummaryContent({
         if (!cancelled) {
           setBreakdown(data.breakdown ?? []);
           setTotalDamage(data.totalDamage ?? 0);
+          if (Array.isArray(data.targets) && data.targets.length > 0) {
+            setTargetsResult(data.targets);
+            setTargetBreakdown(null);
+            const sumFinal = (data.targets as Array<{ finalDamage?: number }>).reduce(
+              (s, t) => s + (t.finalDamage ?? 0),
+              0,
+            );
+            setFinalDamage(sumFinal);
+          } else {
+            setTargetsResult(null);
+            setTargetBreakdown(Array.isArray(data.targetBreakdown) ? data.targetBreakdown : null);
+            setFinalDamage(
+              typeof data.finalDamage === "number" ? data.finalDamage : data.totalDamage ?? 0,
+            );
+          }
         }
       })
       .catch((err) => {
@@ -129,10 +158,11 @@ function DamageSummaryContent({
     battleId,
     damageRolls,
     attackerId,
-    targetId,
+    targetIds.join(","),
     attackId,
     attackName,
     isCritical,
+    isMultiTarget,
   ]);
 
   const handleApply = () => {
@@ -166,7 +196,7 @@ function DamageSummaryContent({
             >
               {breakdown.map((line, index) => (
                 <motion.div
-                  key={`${index}-${line}`}
+                  key={`b-${index}-${line}`}
                   variants={{
                     hidden: {
                       opacity: 0,
@@ -184,7 +214,7 @@ function DamageSummaryContent({
                   className={
                     line.startsWith("────")
                       ? "border-t border-border/60 pt-2 mt-2"
-                      : line.startsWith("Всього") || line.includes("(крит)")
+                      : line.includes("шкоди") || line.includes("(крит)")
                         ? "font-semibold text-foreground"
                         : "text-muted-foreground"
                   }
@@ -192,6 +222,68 @@ function DamageSummaryContent({
                   {line}
                 </motion.div>
               ))}
+              {targetsResult && targetsResult.length > 0 ? (
+                targetsResult.map((tr) => (
+                  <motion.div
+                    key={tr.targetId}
+                    className="border-t border-border/60 pt-2 mt-2"
+                    variants={{
+                      hidden: { opacity: 0, y: -8 },
+                      visible: {
+                        opacity: 1,
+                        y: 0,
+                        transition: { duration: 0.3, ease: "easeOut" },
+                      },
+                    }}
+                  >
+                    <span className="font-medium text-foreground">
+                      Ціль: {tr.targetName}
+                    </span>
+                    {tr.targetBreakdown.map((line, index) => (
+                      <div key={`${tr.targetId}-${index}`} className="text-muted-foreground pl-2">
+                        {line}
+                      </div>
+                    ))}
+                  </motion.div>
+                ))
+              ) : (
+                targetBreakdown &&
+                targetBreakdown.length > 0 && (
+                  <>
+                    <motion.div
+                      className="border-t border-border/60 pt-2 mt-2"
+                      variants={{
+                        hidden: { opacity: 0, y: -8 },
+                        visible: {
+                          opacity: 1,
+                          y: 0,
+                          transition: { duration: 0.3, ease: "easeOut" },
+                        },
+                      }}
+                    >
+                      <span className="font-medium text-foreground">
+                        Ціль: {target.basicInfo.name}
+                      </span>
+                    </motion.div>
+                    {targetBreakdown.map((line, index) => (
+                      <motion.div
+                        key={`t-${index}-${line}`}
+                        variants={{
+                          hidden: { opacity: 0, y: -8 },
+                          visible: {
+                            opacity: 1,
+                            y: 0,
+                            transition: { duration: 0.3, ease: "easeOut" },
+                          },
+                        }}
+                        className="text-muted-foreground pl-2"
+                      >
+                        {line}
+                      </motion.div>
+                    ))}
+                  </>
+                )
+              )}
             </motion.div>
           )}
         </AnimatePresence>
@@ -205,7 +297,12 @@ function DamageSummaryContent({
           onClick={handleApply}
           disabled={loading || !!error}
         >
-          Застосувати {totalDamage != null ? `(${totalDamage} урону)` : ""}
+          Застосувати{" "}
+          {finalDamage != null
+            ? `(${finalDamage} урону)`
+            : totalDamage != null
+              ? `(${totalDamage} урону)`
+              : ""}
         </Button>
       </DialogFooter>
     </>
@@ -217,6 +314,7 @@ export function DamageSummaryModal({
   onOpenChange,
   attacker,
   target,
+  targets: targetsProp,
   attack,
   damageRolls,
   isCritical = false,
@@ -224,11 +322,13 @@ export function DamageSummaryModal({
   battleId,
   onApply,
 }: DamageSummaryModalProps) {
+  const targets = targetsProp && targetsProp.length > 0 ? targetsProp : [target];
+  const targetIds = targets.map((t) => t.basicInfo.id);
   const contentKey =
     open && damageRolls.length > 0
       ? requestKey(
           attacker.basicInfo.id,
-          target.basicInfo.id,
+          targetIds,
           attack.id ?? undefined,
           attack.name ?? "",
           isCritical,
@@ -242,7 +342,7 @@ export function DamageSummaryModal({
         <DialogHeader>
           <DialogTitle>💥 Підсумок урону</DialogTitle>
           <DialogDescription>
-            {attacker.basicInfo.name} → {target.basicInfo.name}
+            {attacker.basicInfo.name} → {targets.map((t) => t.basicInfo.name).join(", ")}
             {isCritical && " (крит!)"}
           </DialogDescription>
         </DialogHeader>
@@ -254,6 +354,7 @@ export function DamageSummaryModal({
             battleId={battleId}
             attacker={attacker}
             target={target}
+            targets={targets.length > 1 ? targets : undefined}
             attack={attack}
             damageRolls={damageRolls}
             isCritical={isCritical}

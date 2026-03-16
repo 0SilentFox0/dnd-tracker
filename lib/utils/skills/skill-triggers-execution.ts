@@ -547,10 +547,13 @@ const RUNIC_ATTACK_RUNES = [
 
 /**
  * Виконує onHit ефекти (скіли з тригером "onHit") після влучання атакою.
- * Ефекти застосовуються до ЦІЛІ (дебафи/DOT) або до АТАКУЮЧОГО (руни, лікування).
+ * Ефекти застосовуються до ЦІЛІ (дебафи/DOT, напр. кровотеча) або до АТАКУЮЧОГО (руни, лікування).
  * Для effect.target === "all_allies" застосовує ефекти до всіх союзників і повертає updatedParticipants.
  * Перевіряє ймовірність спрацювання (modifiers.probability).
+ * Якщо у тригера вказано modifiers.attackId — скіл спрацьовує лише при атаці з таким id/назвою.
  * @param physicalDamageDealt - фізична шкода завдана цілі (для blood_sacrifice_heal)
+ * @param currentAttackId - id атаки, якою влучили (для прив'язки onHit до конкретної атаки)
+ * @param currentAttackName - назва атаки
  */
 export function executeOnHitEffects(
   attacker: BattleParticipant,
@@ -559,6 +562,8 @@ export function executeOnHitEffects(
   skillUsageCounts?: Record<string, number>,
   physicalDamageDealt?: number,
   allParticipants?: BattleParticipant[],
+  currentAttackId?: string,
+  currentAttackName?: string,
 ): {
   updatedTarget: BattleParticipant;
   updatedAttacker: BattleParticipant;
@@ -638,6 +643,14 @@ export function executeOnHitEffects(
       continue;
 
     if (mods?.probability !== undefined && Math.random() >= mods.probability)
+      continue;
+
+    if (
+      mods?.attackId != null &&
+      mods.attackId !== "" &&
+      currentAttackId !== mods.attackId &&
+      currentAttackName !== mods.attackId
+    )
       continue;
 
     if (skillUsageCounts) {

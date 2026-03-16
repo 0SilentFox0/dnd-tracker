@@ -414,16 +414,26 @@ export function PlayerTurnView({
           {debuffs.length > 0 && (
             <div className="flex flex-wrap items-center gap-1.5">
               <TrendingDown className="h-3.5 w-3 shrink-0 text-red-400/80" />
-              {debuffs.map((e) => (
-                <span
-                  key={e.id}
-                  className="rounded px-1.5 py-0.5 text-[10px] font-medium bg-red-500/25 text-red-200 border border-red-500/40"
-                  title={e.description ?? `${e.name}${e.duration > 0 ? ` (${e.duration} раундів)` : ""}`}
-                >
-                  {e.name}
-                  {e.duration > 0 ? ` (${e.duration})` : ""}
-                </span>
-              ))}
+              {debuffs.map((e) => {
+                const dotInfo =
+                  e.dotDamage &&
+                  `${e.dotDamage.damagePerRound} ${e.dotDamage.damageType} урону/раунд`;
+                const title =
+                  e.description ??
+                  [e.name, e.duration > 0 ? `(${e.duration} р.)` : "", dotInfo]
+                    .filter(Boolean)
+                    .join(" ");
+                return (
+                  <span
+                    key={e.id}
+                    className="rounded px-1.5 py-0.5 text-[10px] font-medium bg-red-500/25 text-red-200 border border-red-500/40"
+                    title={title}
+                  >
+                    {e.name}
+                    {e.duration > 0 ? ` (${e.duration})` : ""}
+                  </span>
+                );
+              })}
             </div>
           )}
           {/* Умови (condition) */}
@@ -563,6 +573,9 @@ export function PlayerTurnView({
           }}
           attacker={participant}
           target={selectedTarget}
+          targets={
+            selectedTargets.length > 1 ? selectedTargets : undefined
+          }
           attack={selectedAttack}
           damageRolls={pendingAttackData.damageRolls}
           allParticipants={battle.initiativeOrder}

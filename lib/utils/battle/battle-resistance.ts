@@ -1,10 +1,18 @@
 /**
- * Утиліти для роботи з імунітетами та опором в бою
+ * Утиліти для роботи з імунітетами та опором в бою.
+ * Враховує опір з расових здібностей та зі скілів (extras.resistances.physical / spell).
  */
 
-import { extractResistanceValue,findRacialAbilityByPattern } from "./battle-resistance-helpers";
+import { getParticipantExtras } from "./battle-participant";
+import { extractResistanceValue, findRacialAbilityByPattern } from "./battle-resistance-helpers";
 
 import { BattleParticipant } from "@/types/battle";
+
+const PHYSICAL_DAMAGE_TYPES = ["slashing", "piercing", "bludgeoning", "physical"];
+
+function isPhysicalDamageType(damageType: string): boolean {
+  return PHYSICAL_DAMAGE_TYPES.includes(damageType.toLowerCase());
+}
 
 /**
  * Результат застосування імунітетів/опору
@@ -30,7 +38,7 @@ export function hasImmunity(
 }
 
 /**
- * Отримує значення опору (resistance) до типу урону (від 0 до 1)
+ * Отримує значення опору (resistance) до типу урону з расових здібностей (від 0 до 1).
  * Наприклад, 0.5 = 50% опір (урон зменшується вдвічі)
  * @param target - ціль атаки
  * @param damageType - тип урону
@@ -41,7 +49,7 @@ export function getResistance(
   damageType: string
 ): number {
   const racial = findRacialAbilityByPattern(target, damageType, "resistance");
-  
+
   if (!racial) {
     return 0; // Немає опору
   }
@@ -50,7 +58,35 @@ export function getResistance(
 }
 
 /**
- * Застосовує імунітети та опір до урону
+ * Повертає сумарний відсоток опору (0–100): скіли (extras.resistances) + расовий опір, кеп 100%.
+ * Для фізичних типів урону використовується extras.resistances.physical, для spell — .spell.
+ */
+export function getCombinedResistancePercent(
+  target: BattleParticipant,
+  damageType: string,
+): number {
+  const extras = getParticipantExtras(target);
+  const resistances = extras.resistances ?? {};
+
+  let skillPercent = 0;
+
+  if (damageType.toLowerCase() === "spell") {
+    skillPercent = resistances.spell ?? 0;
+  } else if (isPhysicalDamageType(damageType)) {
+    skillPercent = resistances.physical ?? 0;
+  }
+
+  const racialResistance = getResistance(target, damageType);
+  const racialPercent = Math.round(racialResistance * 100);
+  const total = Math.min(100, skillPercent + racialPercent);
+
+  return total;
+}
+
+/**
+ * Застосовує імунітети та опір до урону (расовий + скіловий з extras.resistances).
+ * Для фізичних типів (slashing, piercing, bludgeoning, physical) враховується extras.resistances.physical,
+ * для spell — extras.resistances.spell; потім додається расовий опір за damageType (кеп 100%).
  * @param target - ціль атаки
  * @param damage - початковий урон
  * @param damageType - тип урону
@@ -78,17 +114,13 @@ export function applyResistance(
     };
   }
 
-  // Перевіряємо опір
-  const resistance = getResistance(target, damageType);
+  const resistancePercent = getCombinedResistancePercent(target, damageType);
 
-  if (resistance > 0) {
-    const resistancePercent = Math.round(resistance * 100);
-
-    const reducedDamage = Math.floor(damage * (1 - resistance));
-
-    finalDamage = reducedDamage;
+  if (resistancePercent > 0) {
+    const factor = 1 - resistancePercent / 100;
+    finalDamage = Math.floor(damage * factor);
     breakdown.push(
-      `${damage} ${damageType} → -${resistancePercent}% опір (${finalDamage} урону)`
+      `${damage} ${damageType} → -${resistancePercent}% опір (${finalDamage} урону)`,
     );
 
     return {

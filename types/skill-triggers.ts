@@ -84,6 +84,8 @@ export interface SkillTriggerModifiers {
   twicePerBattle?: boolean; // може спрацювати двічі за бій
   stackable?: boolean; // ефект стакується
   condition?: string; // додаткова умова ("onConsumeDead", "allyHP <= 0.15", тощо)
+  /** Для onHit: скіл спрацьовує лише при атаці з цим id або назвою (напр. "Рублячий удар") */
+  attackId?: string;
 }
 
 /**

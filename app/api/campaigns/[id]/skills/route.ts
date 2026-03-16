@@ -114,6 +114,7 @@ const createSkillSchema = z.object({
             twicePerBattle: z.boolean().optional(),
             stackable: z.boolean().optional(),
             condition: z.string().optional(),
+            attackId: z.string().optional(),
           }).optional(),
         }),
         // Складний тригер
@@ -130,6 +131,7 @@ const createSkillSchema = z.object({
             twicePerBattle: z.boolean().optional(),
             stackable: z.boolean().optional(),
             condition: z.string().optional(),
+            attackId: z.string().optional(),
           }).optional(),
         }),
       ]),

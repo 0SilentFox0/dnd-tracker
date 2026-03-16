@@ -927,7 +927,8 @@ export async function createBattleParticipantFromUnit(
 /** Формат ID рівня основної навички: ${mainSkillId}_basic_level, _advanced_level, _expert_level */
 const MAIN_SKILL_LEVEL_RE = /_(basic|advanced|expert)_level$/;
 
-function parseMainSkillLevelId(
+/** Парсить level ID (mainSkillId_expert_level) у mainSkillId та level. Експорт для start/add-participant route. */
+export function parseMainSkillLevelId(
   id: string,
 ): { mainSkillId: string; level: string } | null {
   const match = id.match(MAIN_SKILL_LEVEL_RE);
