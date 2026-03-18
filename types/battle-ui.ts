@@ -18,6 +18,7 @@ export interface AttackData {
   attackId?: string;
   attackRoll: number;
   advantageRoll?: number;
+  disadvantageRoll?: number;
   damageRolls: number[];
 }
 
@@ -69,6 +70,8 @@ export interface PlayerTurnViewProps {
   isNextTurnPending?: boolean;
   /** Не запускати авто-таймер, поки атака (застосування шкоди) виконується */
   isAttackPending?: boolean;
+  /** Показувати лоадер під час обробки моралі */
+  isMoraleCheckPending?: boolean;
 }
 
 /**

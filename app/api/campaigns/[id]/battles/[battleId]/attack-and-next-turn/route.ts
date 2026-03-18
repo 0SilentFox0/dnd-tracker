@@ -32,12 +32,17 @@ const attackSchema = z
     attackId: z.string().optional(),
     d20Roll: z.number().min(1).max(20).optional(),
     attackRoll: z.number().min(1).max(20).optional(),
+    attackRolls: z.array(z.number().min(1).max(20)).optional(),
     advantageRoll: z.number().min(1).max(20).optional(),
+    disadvantageRoll: z.number().min(1).max(20).optional(),
     damageRolls: z.array(z.number()).default([]),
   })
   .refine(
-    (data) => data.d20Roll !== undefined || data.attackRoll !== undefined,
-    { message: "d20Roll або attackRoll обов'язковий", path: ["d20Roll"] },
+    (data) =>
+      data.d20Roll !== undefined ||
+      data.attackRoll !== undefined ||
+      (Array.isArray(data.attackRolls) && data.attackRolls.length > 0),
+    { message: "d20Roll, attackRoll або attackRolls обов'язковий", path: ["d20Roll"] },
   )
   .refine(
     (data) =>
@@ -96,7 +101,9 @@ export async function POST(
         attackId: data.attackId,
         d20Roll: data.d20Roll,
         attackRoll: data.attackRoll,
+        attackRolls: data.attackRolls,
         advantageRoll: data.advantageRoll,
+        disadvantageRoll: data.disadvantageRoll,
         damageRolls: data.damageRolls,
       },
       battleId,

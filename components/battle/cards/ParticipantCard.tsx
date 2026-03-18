@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { HelpCircle, Skull, TrendingDown, TrendingUp } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
-import { ParticipantStats } from "@/components/battle/ParticipantStats";
+import {
+  groupEffectsBySource,
+  ParticipantCardDeadView,
+  ParticipantEffectsRow,
+  ParticipantHpBar,
+} from "@/components/battle/cards/participant-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { cn } from "@/lib/utils";
 import type { BattleScene } from "@/types/api";
@@ -17,7 +19,7 @@ interface ParticipantCardProps {
   participant: BattleParticipant;
   isCurrentTurn: boolean;
   isDM: boolean;
-  canSeeEnemyHp: boolean; // DM mode або спеціальний скіл
+  canSeeEnemyHp: boolean;
   onSelect?: () => void;
   className?: string;
 }
@@ -35,13 +37,9 @@ export function ParticipantCard({
 
   const showHp = isDM || !isEnemy || canSeeEnemyHp;
 
-  /** Союзники не бачать стати ворогів (AC, HP, ефекти) і навпаки. DM бачить усе. */
   const canSeeStats = isDM || !isEnemy || canSeeEnemyHp;
 
   const isDead = participant.combatStats.status === "dead";
-
-  const hpPercent =
-    (participant.combatStats.currentHp / participant.combatStats.maxHp) * 100;
 
   const [lastHp, setLastHp] = useState(participant.combatStats.currentHp);
 
@@ -49,83 +47,39 @@ export function ParticipantCard({
 
   const [damageAmount, setDamageAmount] = useState(0);
 
-  const effectSourceParticipants = new Map(
-    (battle?.initiativeOrder ?? []).map((p) => [p.basicInfo.name, p]),
-  );
+  const { groupedHeroEffects, regularEffects } = useMemo(() => {
+    const order = (battle?.initiativeOrder ?? []) as BattleParticipant[];
 
-  const groupedHeroEffects = new Map<
-    string,
-    {
-      sourceName: string;
-      sourceAvatar?: string | null;
-      effectNames: string[];
-      durations: string[];
-      hasBuff: boolean;
-      hasDebuff: boolean;
-    }
-  >();
-
-  const regularEffects = [];
-
-  for (const effect of participant.battleData.activeEffects) {
-    const sourceName = effect.name.split(" — ")[0]?.trim();
-
-    const sourceParticipant = sourceName
-      ? effectSourceParticipants.get(sourceName)
-      : undefined;
-
-    if (sourceParticipant) {
-      const existing = groupedHeroEffects.get(sourceParticipant.basicInfo.id);
-
-      const durationText =
-        effect.duration != null ? `${effect.duration} раундів` : "";
-
-      if (existing) {
-        existing.effectNames.push(effect.name);
-
-        if (durationText) existing.durations.push(durationText);
-
-        existing.hasBuff ||= effect.type === "buff";
-        existing.hasDebuff ||= effect.type === "debuff";
-      } else {
-        groupedHeroEffects.set(sourceParticipant.basicInfo.id, {
-          sourceName: sourceParticipant.basicInfo.name,
-          sourceAvatar: sourceParticipant.basicInfo.avatar,
-          effectNames: [effect.name],
-          durations: durationText ? [durationText] : [],
-          hasBuff: effect.type === "buff",
-          hasDebuff: effect.type === "debuff",
-        });
-      }
-
-      continue;
-    }
-
-    regularEffects.push(effect);
-  }
-
-  const displayedHeroEffects = Array.from(groupedHeroEffects.values());
+    return groupEffectsBySource(participant.battleData.activeEffects, order);
+  }, [battle?.initiativeOrder, participant.battleData.activeEffects]);
 
   useEffect(() => {
-    if (participant.combatStats.currentHp !== lastHp) {
-      const diff = participant.combatStats.currentHp - lastHp;
+    const currentHp = participant.combatStats.currentHp;
 
+    if (currentHp === lastHp) return;
+
+    const diff = currentHp - lastHp;
+
+    const id = setTimeout(() => {
+      setShowDamage(false);
+    }, 2000);
+
+    queueMicrotask(() => {
+      setLastHp(currentHp);
       setDamageAmount(diff);
       setShowDamage(true);
+    });
 
-      const timer = setTimeout(() => setShowDamage(false), 2000);
-
-      setLastHp(participant.combatStats.currentHp);
-
-      return () => clearTimeout(timer);
-    }
+    return () => clearTimeout(id);
   }, [participant.combatStats.currentHp, lastHp]);
+
+  const { currentHp, maxHp } = participant.combatStats;
 
   return (
     <div
       className={cn(
         "relative border rounded-xl p-3 sm:p-4 transition-all cursor-pointer glass-card group",
-        isCurrentTurn && "ring-2 ring-primary z-10",
+        isCurrentTurn && "z-10",
         isDead
           ? "dead-state"
           : isEnemy
@@ -135,12 +89,10 @@ export function ParticipantCard({
       )}
       onClick={onSelect}
     >
-      {/* Background Glow */}
       {isCurrentTurn && !isDead && (
         <div className="absolute inset-0 bg-primary/10 animate-pulse-glow pointer-events-none" />
       )}
 
-      {/* Анімація шкоди/лікування */}
       {showDamage && (
         <div
           className={cn(
@@ -152,7 +104,6 @@ export function ParticipantCard({
         </div>
       )}
 
-      {/* Індикатор активного ходу */}
       {isCurrentTurn && !isDead && (
         <div className="absolute -top-1 -right-1 bg-primary text-primary-foreground rounded-full p-1.5 shadow-lg z-20 flex justify-center items-center min-w-8 min-h-8 animate-[float_2s_infinite]">
           <span className="text-sm">⚔️</span>
@@ -160,41 +111,10 @@ export function ParticipantCard({
       )}
 
       {isDead ? (
-        <div className="relative flex items-center gap-4 py-2 animate-in fade-in zoom-in duration-700">
-          <Avatar className="w-16 h-16 grayscale opacity-40 border-2 border-red-900/50 shadow-inner">
-            <AvatarImage
-              src={participant.basicInfo.avatar || undefined}
-              referrerPolicy="no-referrer"
-            />
-            <AvatarFallback className="bg-red-950/40 text-red-500/50">
-              {participant.basicInfo.name.charAt(0)}
-            </AvatarFallback>
-          </Avatar>
-
-          <div className="flex-1 space-y-1">
-            <div className="flex items-center gap-2">
-              <h3 className="font-black italic uppercase text-red-500/60 line-through tracking-tighter text-xl">
-                {participant.basicInfo.name}
-              </h3>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5 text-red-600/80">
-                <Skull className="w-5 h-5 animate-pulse" />
-                <span className="text-xs font-black uppercase tracking-[0.2em]">
-                  Загинув у бою
-                </span>
-              </div>
-              <Badge
-                variant="outline"
-                className="text-[9px] border-red-900/50 text-red-950 bg-red-500/10"
-              >
-                Раунд {battle?.currentRound || "?"}
-              </Badge>
-            </div>
-          </div>
-
-          <div className="absolute inset-0 bg-red-950/10 pointer-events-none" />
-        </div>
+        <ParticipantCardDeadView
+          participant={participant}
+          currentRound={battle?.currentRound}
+        />
       ) : (
         <div className="flex items-start gap-3 relative z-10">
           <Avatar className="w-12 h-12 sm:w-14 sm:h-14 shrink-0 border-2 border-border shadow-sm">
@@ -208,164 +128,22 @@ export function ParticipantCard({
           </Avatar>
 
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <h3 className="font-semibold text-sm sm:text-base truncate">
-                {participant.basicInfo.name}
-              </h3>
-            </div>
+            <h3 className="font-semibold text-sm sm:text-base truncate mb-1">
+              {participant.basicInfo.name}
+            </h3>
 
-            {/* HP Bar */}
-            <div className="space-y-1.5">
-              {showHp ? (
-                <>
-                  <div className="flex items-center justify-between text-[10px] uppercase tracking-wider font-extrabold">
-                    <span className="text-muted-foreground/80">Здоров&apos;я</span>
-                    <span
-                      className={cn(
-                        "font-black",
-                        hpPercent < 25
-                          ? "text-red-500 animate-pulse"
-                          : hpPercent < 50
-                            ? "text-yellow-500"
-                            : "text-green-500",
-                      )}
-                    >
-                      {participant.combatStats.currentHp} /{" "}
-                      {participant.combatStats.maxHp}
-                    </span>
-                  </div>
-                  <div className="h-2 w-full bg-black/30 rounded-full overflow-hidden border border-white/5 ring-1 ring-white/5">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${hpPercent}%` }}
-                      className={cn(
-                        "h-full transition-all duration-700 ease-out",
-                        hpPercent < 25
-                          ? "bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.6)]"
-                          : hpPercent < 50
-                            ? "bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.4)]"
-                            : "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.4)]",
-                      )}
-                    />
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="flex items-center justify-between text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">
-                    <span>Здоров&apos;я</span>
-                    <span>???</span>
-                  </div>
-                  <div className="h-1.5 w-full bg-black/20 rounded-full overflow-hidden">
-                    <div className="h-full w-full bg-muted/20" />
-                  </div>
-                </>
-              )}
-            </div>
+            <ParticipantHpBar
+              currentHp={currentHp}
+              maxHp={maxHp}
+              showHp={showHp}
+            />
 
-            {/* Temp HP & Effects — приховані для ворогів (крім DM) */}
-            <div className="flex flex-wrap items-center gap-2 mt-2">
-              {canSeeStats && participant.combatStats.tempHp > 0 && (
-                <Badge
-                  variant="outline"
-                  className="text-[9px] border-yellow-500/50 text-yellow-500 bg-yellow-500/5"
-                >
-                  🛡️ {participant.combatStats.tempHp} заст.
-                </Badge>
-              )}
-
-              {canSeeStats &&
-                participant.combatStats.status === "unconscious" && (
-                  <Badge className="text-[9px] bg-indigo-500 text-white border-none shadow-[0_0_10px_rgba(99,102,241,0.3)] animate-pulse">
-                    💤 Непритомний
-                  </Badge>
-                )}
-
-              {canSeeStats &&
-                displayedHeroEffects.slice(0, 5).map((source, idx) => {
-                  const tooltip = [
-                    source.sourceName,
-                    ...source.effectNames,
-                    ...Array.from(new Set(source.durations)),
-                  ].join(" · ");
-
-                  const ringClass = source.hasBuff
-                    ? "ring-emerald-500/60"
-                    : source.hasDebuff
-                      ? "ring-red-500/60"
-                      : "ring-white/20";
-
-                  return (
-                    <Avatar
-                      key={`effect-source-${participant.basicInfo.id}-${source.sourceName}-${idx}`}
-                      title={tooltip}
-                      className={cn(
-                        "h-6 w-6 cursor-help ring-2 ring-offset-1 ring-offset-background/60",
-                        ringClass,
-                      )}
-                    >
-                      <AvatarImage
-                        src={source.sourceAvatar || undefined}
-                        referrerPolicy="no-referrer"
-                      />
-                      <AvatarFallback className="text-[9px]">
-                        {source.sourceName.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                  );
-                })}
-
-              {canSeeStats &&
-                regularEffects
-                  .slice(0, Math.max(0, 5 - displayedHeroEffects.length))
-                  .map((effect, idx) => {
-                  const isBuff = effect.type === "buff";
-
-                  const isDebuff = effect.type === "debuff";
-
-                  const durationText =
-                    effect.duration != null ? `${effect.duration} раундів` : "";
-
-                  const tooltip = [effect.name, durationText]
-                    .filter(Boolean)
-                    .join(" · ");
-
-                  const Icon = isBuff
-                    ? TrendingUp
-                    : isDebuff
-                      ? TrendingDown
-                      : HelpCircle;
-
-                  return (
-                    <Badge
-                      key={`effect-${participant.basicInfo.id}-${idx}`}
-                      variant="outline"
-                      title={tooltip}
-                      className={cn(
-                        "text-[9px] cursor-help gap-0.5 border",
-                        isBuff &&
-                          "border-emerald-500/50 text-emerald-400 bg-emerald-500/10",
-                        isDebuff &&
-                          "border-red-500/50 text-red-400 bg-red-500/10",
-                        !isBuff &&
-                          !isDebuff &&
-                          "border-white/20 text-white/70 bg-white/5",
-                      )}
-                    >
-                      <Icon className="h-2.5 w-2.5 shrink-0" />
-                      <span className="truncate max-w-[80px]">
-                        {effect.name}
-                      </span>
-                    </Badge>
-                  );
-                })}
-
-              {canSeeStats && (
-                <ParticipantStats
-                  participant={participant}
-                  className="w-full mt-1 pt-2 border-t border-white/5"
-                />
-              )}
-            </div>
+            <ParticipantEffectsRow
+              participant={participant}
+              canSeeStats={canSeeStats}
+              displayedHeroEffects={groupedHeroEffects}
+              regularEffects={regularEffects}
+            />
           </div>
         </div>
       )}

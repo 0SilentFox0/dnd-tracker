@@ -3,6 +3,7 @@
  */
 
 import { addActiveEffect } from "./battle-effects";
+import { getParticipantExtras } from "./battle-participant";
 
 import { AttackType } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
@@ -108,6 +109,10 @@ export function hasAdvantage(
   attacker: BattleParticipant,
   attack: BattleAttack,
 ): boolean {
+  // advantageOnAllRolls з extras (скіли)
+  const extras = getParticipantExtras(attacker);
+  if (extras.advantageOnAllRolls) return true;
+
   // Ельфи мають Advantage на ranged атаки
   if (
     attacker.abilities.race?.toLowerCase().includes("elf") &&
@@ -132,11 +137,30 @@ export function hasAdvantage(
 }
 
 /**
+ * Перевіряє чи атакуючий має Disadvantage для цієї атаки
+ * (наприклад, ефект disadvantage_attack)
+ */
+export function hasDisadvantage(
+  attacker: BattleParticipant,
+  _attack: BattleAttack,
+): boolean {
+  for (const effect of attacker.battleData.activeEffects) {
+    for (const effectDetail of effect.effects) {
+      if (effectDetail.type === "disadvantage_attack") {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+/**
  * Розраховує Attack Roll з усіма бонусами
  * @param attacker - атакуючий учасник
  * @param attack - атака
  * @param d20Roll - результат кидка d20
  * @param advantageRoll - другий кидок для Advantage (опціонально)
+ * @param disadvantageRoll - другий кидок для Disadvantage (опціонально)
  * @returns результат Attack Roll
  */
 export function calculateAttackRoll(
@@ -144,27 +168,27 @@ export function calculateAttackRoll(
   attack: BattleAttack,
   d20Roll: number,
   advantageRoll?: number,
+  disadvantageRoll?: number,
 ): AttackRollResult {
   const attackBonus = calculateAttackBonus(attacker, attack);
 
   const hasAdv = hasAdvantage(attacker, attack);
+  const hasDisadv = hasDisadvantage(attacker, attack);
 
-  // Якщо є Advantage, використовуємо кращий результат
+  // Advantage і Disadvantage скасовують одне одного (D&D rules)
   let finalRoll = d20Roll;
-
   let advantageUsed = false;
 
-  // Якщо є Advantage, але advantageRoll не надано, використовуємо тільки d20Roll
-  // (в UI має бути два кидки, але якщо не надано - використовуємо один)
-  if (hasAdv) {
+  if (hasAdv && hasDisadv) {
+    // Нормальний кидок
+  } else if (hasAdv) {
     if (advantageRoll !== undefined) {
       finalRoll = Math.max(d20Roll, advantageRoll);
       advantageUsed = true;
-    } else {
-      // Якщо Advantage є, але другий кидок не надано, використовуємо перший
-      // (в реальному застосунку UI має завжди надавати обидва кидки)
-      finalRoll = d20Roll;
-      advantageUsed = false; // не використано, бо немає другого кидка
+    }
+  } else if (hasDisadv) {
+    if (disadvantageRoll !== undefined) {
+      finalRoll = Math.min(d20Roll, disadvantageRoll);
     }
   }
 
@@ -558,6 +582,8 @@ export function performReaction(
   attacker: BattleParticipant,
 ): {
   damage: number;
+  baseDamage: number;
+  bonusPercent: number;
   message: string;
   updatedDefender: BattleParticipant;
 } {
@@ -567,6 +593,8 @@ export function performReaction(
   if (!reactionAttack) {
     return {
       damage: 0,
+      baseDamage: 0,
+      bonusPercent: 0,
       message: "Немає доступної атаки для контр-удару",
       updatedDefender: defender,
     };
@@ -625,6 +653,8 @@ export function performReaction(
 
   return {
     damage: reactionDamage,
+    baseDamage,
+    bonusPercent: counterPercent,
     message: `${defender.basicInfo.name} виконує контр-удар на ${attacker.basicInfo.name}!`,
     updatedDefender,
   };

@@ -106,8 +106,16 @@ type UnitFromPrisma = Prisma.UnitGetPayload<Record<string, never>>;
 export interface CampaignSpellContext {
   skillTreeByRace: Record<string, Prisma.SkillTreeGetPayload<object> | null>;
   mainSkills: Array<{ id: string; spellGroupId: string | null; name: string }>;
-  spells: Array<Prisma.SpellGetPayload<{ include: { spellGroup: { select: { id: true } } } }>>;
-  allSkills: Array<Prisma.SkillGetPayload<{ include: { spellGroup: { select: { id: true } } } }>>;
+  spells: Array<
+    Prisma.SpellGetPayload<{
+      include: { spellGroup: { select: { id: true } } };
+    }>
+  >;
+  allSkills: Array<
+    Prisma.SkillGetPayload<{
+      include: { spellGroup: { select: { id: true } } };
+    }>
+  >;
   racesByName: Record<string, Prisma.RaceGetPayload<object> | null>;
   campaign: { maxLevel: number };
   /** Pre-loaded скіли по id (для batch start) */
@@ -180,7 +188,7 @@ export async function createBattleParticipantFromCharacter(
       >) ?? {};
 
     const rawSkillTree = context
-      ? context.skillTreeByRace[character.race] ?? null
+      ? (context.skillTreeByRace[character.race] ?? null)
       : await prisma.skillTree.findFirst({
           where: {
             campaignId: character.campaignId,
@@ -216,7 +224,6 @@ export async function createBattleParticipantFromCharacter(
     let learnedFromTree: string[] = [];
 
     if (rawSkillTree && Object.keys(progress).length > 0) {
-
       const skillTree = convertPrismaToSkillTree({
         ...rawSkillTree,
         createdAt:
@@ -225,7 +232,12 @@ export async function createBattleParticipantFromCharacter(
             : new Date(rawSkillTree.createdAt),
       });
 
-      if (skillTree && mainSkills.length > 0 && skillsForLearning.length > 0 && spellsForLearning.length > 0) {
+      if (
+        skillTree &&
+        mainSkills.length > 0 &&
+        skillsForLearning.length > 0 &&
+        spellsForLearning.length > 0
+      ) {
         const treeWithSpellGroups = {
           ...skillTree,
           mainSkills: skillTree.mainSkills.map((ms) => {
@@ -269,10 +281,11 @@ export async function createBattleParticipantFromCharacter(
   }
 
   // Магічні слоти: з персонажа або з раси (spellSlotProgression)
-  const existingSlots = (character.spellSlots as Record<
-    string,
-    { max: number; current: number }
-  >) || {};
+  const existingSlots =
+    (character.spellSlots as Record<
+      string,
+      { max: number; current: number }
+    >) || {};
 
   let resolvedSpellSlots: Record<string, { max: number; current: number }> = {};
 
@@ -301,11 +314,13 @@ export async function createBattleParticipantFromCharacter(
           select: { maxLevel: true },
         });
 
-    const progression = (race?.spellSlotProgression
-      ? (Array.isArray(race.spellSlotProgression)
+    const progression = (
+      race?.spellSlotProgression
+        ? Array.isArray(race.spellSlotProgression)
           ? (race.spellSlotProgression as unknown as SpellSlotProgression[])
-          : [])
-      : []) as SpellSlotProgression[];
+          : []
+        : []
+    ) as SpellSlotProgression[];
 
     const maxLevel = campaign?.maxLevel ?? 20;
 
@@ -353,7 +368,8 @@ export async function createBattleParticipantFromCharacter(
       race: character.race,
     },
     combatStats: (() => {
-      const hpMult = (character as { hpMultiplier?: number | null }).hpMultiplier ?? 1;
+      const hpMult =
+        (character as { hpMultiplier?: number | null }).hpMultiplier ?? 1;
 
       const computedMaxHp = getHeroMaxHp(character.level, character.strength, {
         hpMultiplier: hpMult,
@@ -460,11 +476,52 @@ export async function createBattleParticipantFromCharacter(
   return participant;
 }
 
+const SKILL_LEVEL_RANK: Record<string, number> = {
+  [SkillLevel.BASIC]: 1,
+  [SkillLevel.ADVANCED]: 2,
+  [SkillLevel.EXPERT]: 3,
+};
+
+/** Скіли з резистом — лише найвищий рівень на лінію (mainSkillId), щоб не стакувати Базовий+Просунутий+Експерт. */
+function getResistanceSkillIdsHighestOnly(
+  activeSkills: ActiveSkill[],
+): Set<string> {
+  const byMainSkill = new Map<string, { skill: ActiveSkill; rank: number }>();
+
+  for (const skill of activeSkills) {
+    const hasResistance = (skill.effects ?? []).some(
+      (e) =>
+        e.stat === "physical_resistance" ||
+        e.stat === "spell_resistance" ||
+        e.stat === "all_resistance",
+    );
+
+    if (!hasResistance) continue;
+
+    const key = skill.mainSkillId || skill.skillId;
+
+    const rank = SKILL_LEVEL_RANK[skill.level ?? SkillLevel.BASIC] ?? 1;
+
+    const existing = byMainSkill.get(key);
+
+    if (!existing || rank > existing.rank) {
+      byMainSkill.set(key, { skill, rank });
+    }
+  }
+
+  return new Set([...byMainSkill.values()].map((v) => v.skill.skillId));
+}
+
 /**
  * Застосовує пасивні (trigger: "passive") ефекти скілів до учасника бою при ініціалізації.
  * Змінює combatStats та зберігає дані у battleData для подальшого використання.
+ * Резисти (physical/spell/all) враховуються лише з найвищого рівня скіла на лінію (наприклад, лише Захист — Експерт).
  */
 export function applyPassiveSkillEffects(participant: BattleParticipant): void {
+  const resistanceSkillIds = getResistanceSkillIdsHighestOnly(
+    participant.battleData.activeSkills,
+  );
+
   for (const skill of participant.battleData.activeSkills) {
     // Тільки пасивні скіли
     const isPassive = skill.skillTriggers?.some(
@@ -492,11 +549,12 @@ export function applyPassiveSkillEffects(participant: BattleParticipant): void {
           break;
         }
 
-        // --- Резисти (зберігаються в окремих полях для damage calc) ---
+        // --- Резисти (лише з найвищого рівня на лінію, напр. лише Захист — Експерт) ---
         case "physical_resistance":
         case "spell_resistance":
         case "all_resistance": {
-          // Зберігаємо в розширених даних учасника
+          if (!resistanceSkillIds.has(skill.skillId)) break;
+
           const resistances = getParticipantResistances(participant);
 
           if (effect.stat === "physical_resistance") {
@@ -792,7 +850,12 @@ export async function createBattleParticipantFromUnit(
             ? AttackType.RANGED
             : AttackType.MELEE;
 
-    const a = attack as { targetType?: string; maxTargets?: number; damageDistribution?: number[]; guaranteedDamage?: number };
+    const a = attack as {
+      targetType?: string;
+      maxTargets?: number;
+      damageDistribution?: number[];
+      guaranteedDamage?: number;
+    };
 
     return {
       id: (attack as { id?: string }).id || `${unit.id}-attack-${index}`,
@@ -950,7 +1013,8 @@ function inferLevelFromSkillName(name: string | null): string | null {
 
   if (n.includes("просунут") || n.includes("advanced")) return "advanced";
 
-  if (n.includes("базов") || n.includes("основ") || n.includes("basic")) return "basic";
+  if (n.includes("базов") || n.includes("основ") || n.includes("basic"))
+    return "basic";
 
   return null;
 }
@@ -1032,17 +1096,24 @@ async function extractActiveSkillsFromCharacter(
     const byMainSkill = Object.values(preloadedSkillsById).filter(
       (s) =>
         mainSkillIdsFromLevels.size > 0 &&
-        (s.mainSkillId && mainSkillIdsFromLevels.has(s.mainSkillId)),
+        s.mainSkillId &&
+        mainSkillIdsFromLevels.has(s.mainSkillId),
     );
 
-    fetchedSkills = [...new Map([...byDirect, ...byMainSkill].map((s) => [s.id, s])).values()];
+    fetchedSkills = [
+      ...new Map([...byDirect, ...byMainSkill].map((s) => [s.id, s])).values(),
+    ];
   } else {
-    const orConditions: Array<{ id: { in: string[] } } | { mainSkillId: { in: string[] } }> = [];
+    const orConditions: Array<
+      { id: { in: string[] } } | { mainSkillId: { in: string[] } }
+    > = [];
 
     if (directIds.length > 0) orConditions.push({ id: { in: directIds } });
 
     if (mainSkillIdsFromLevels.size > 0) {
-      orConditions.push({ mainSkillId: { in: Array.from(mainSkillIdsFromLevels) } });
+      orConditions.push({
+        mainSkillId: { in: Array.from(mainSkillIdsFromLevels) },
+      });
     }
 
     fetchedSkills = orConditions.length
@@ -1064,7 +1135,9 @@ async function extractActiveSkillsFromCharacter(
     if (!parsed) continue;
 
     const match = fetchedSkills.find((s) => {
-      const msId = s.mainSkillId ?? (s.mainSkillData as { mainSkillId?: string } | undefined)?.mainSkillId;
+      const msId =
+        s.mainSkillId ??
+        (s.mainSkillData as { mainSkillId?: string } | undefined)?.mainSkillId;
 
       if (msId !== parsed.mainSkillId) return false;
 
@@ -1222,14 +1295,41 @@ async function extractActiveSkillsFromCharacter(
       skillTriggers = skillTriggersValue as SkillTriggers;
     }
 
+    // damageType для фільтра «впливає на шкоду»: з combatStats або виводимо з ефектів (ranged_damage → ranged, melee_damage → melee)
+    let resolvedDamageType: "melee" | "ranged" | "magic" | null =
+      (combatStats.damageType as "melee" | "ranged" | "magic" | null) ?? null;
+
+    const hasRanged = effects.some((e) => e.stat === "ranged_damage");
+
+    const hasMelee = effects.some((e) => e.stat === "melee_damage");
+
+    if (resolvedDamageType == null || !resolvedDamageType.length) {
+      if (hasRanged && !hasMelee) resolvedDamageType = "ranged";
+      else if (hasMelee && !hasRanged) resolvedDamageType = "melee";
+      else if (hasRanged) resolvedDamageType = "ranged";
+      else if (hasMelee) resolvedDamageType = "melee";
+    } else if (hasRanged && !hasMelee && resolvedDamageType === "melee") {
+      // У БД збережено melee, але ефекти лише ranged_damage — коригуємо
+      resolvedDamageType = "ranged";
+    } else if (hasMelee && !hasRanged && resolvedDamageType === "ranged") {
+      resolvedDamageType = "melee";
+    }
+
+    const resolvedLevel =
+      (inferLevelFromSkillName(skill.name) as SkillLevel | null) ??
+      skillIdToLevel[skillId] ??
+      SkillLevel.BASIC;
+
     activeSkills.push({
       skillId: skill.id,
       name: skill.name,
       mainSkillId: skill.mainSkillId ?? skillIdToMainSkill[skillId] ?? "",
-      level: skillIdToLevel[skillId],
+      level: resolvedLevel,
+      icon: skill.icon ?? undefined,
+      description: skill.description ?? undefined,
       effects,
       affectsDamage: combatStats.affectsDamage,
-      damageType: combatStats.damageType ?? null,
+      damageType: resolvedDamageType,
       spellEnhancements,
       skillTriggers,
     });

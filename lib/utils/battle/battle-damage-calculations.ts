@@ -14,7 +14,8 @@ import { measureTiming } from "./battle-timing";
 
 import { AttackType } from "@/lib/constants/battle";
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
-import { BattleParticipant } from "@/types/battle";
+import { SkillLevel } from "@/lib/types/skill-tree";
+import type { ActiveSkill, BattleParticipant } from "@/types/battle";
 
 /**
  * Результат розрахунку урону
@@ -56,15 +57,55 @@ function skillAppliesToDamageType(
   return skill.damageType === damageKind;
 }
 
+/** Ранг рівня скіла для порівняння (більший = вищий рівень) */
+const SKILL_LEVEL_RANK: Record<string, number> = {
+  [SkillLevel.BASIC]: 1,
+  [SkillLevel.ADVANCED]: 2,
+  [SkillLevel.EXPERT]: 3,
+};
+
+/**
+ * Повертає скіли, що впливають на урон для даного типу атаки, по одному на лінію (mainSkillId) — лише найвищий рівень.
+ * Наприклад, Стрільба Базовий/Просунутий/Експерт → лише Стрільба — Експерт.
+ */
+function getSkillsForDamageBonus(
+  attacker: BattleParticipant,
+  attackType: AttackType,
+): ActiveSkill[] {
+  const applicable = attacker.battleData.activeSkills.filter((s) =>
+    skillAppliesToDamageType(s, attackType),
+  );
+
+  const byMainSkill = new Map<string, ActiveSkill>();
+
+  for (const skill of applicable) {
+    const key = skill.mainSkillId || skill.skillId;
+
+    const existing = byMainSkill.get(key);
+
+    const rankNew = SKILL_LEVEL_RANK[skill.level ?? SkillLevel.BASIC] ?? 1;
+
+    const rankExisting = existing
+      ? (SKILL_LEVEL_RANK[existing.level ?? SkillLevel.BASIC] ?? 1)
+      : 0;
+
+    if (!existing || rankNew > rankExisting) {
+      byMainSkill.set(key, skill);
+    }
+  }
+
+  return Array.from(byMainSkill.values());
+}
+
 export function calculateSkillDamagePercentBonus(
   attacker: BattleParticipant,
   attackType: AttackType,
 ): number {
   let totalPercent = 0;
 
-  for (const skill of attacker.battleData.activeSkills) {
-    if (!skillAppliesToDamageType(skill, attackType)) continue;
+  const skills = getSkillsForDamageBonus(attacker, attackType);
 
+  for (const skill of skills) {
     for (const effect of skill.effects) {
       const isPct = effect.isPercentage === true;
 
@@ -73,11 +114,7 @@ export function calculateSkillDamagePercentBonus(
           ? effect.value
           : parseInt(String(effect.value ?? 0), 10) || 0;
 
-      if (
-        isPct &&
-        numVal !== 0 &&
-        matchesAttackType(effect.stat, attackType)
-      ) {
+      if (isPct && numVal !== 0 && matchesAttackType(effect.stat, attackType)) {
         totalPercent += numVal;
       }
     }
@@ -111,9 +148,9 @@ export function calculateSkillDamageFlatBonus(
 ): number {
   let totalFlat = 0;
 
-  for (const skill of attacker.battleData.activeSkills) {
-    if (!skillAppliesToDamageType(skill, attackType)) continue;
+  const skills = getSkillsForDamageBonus(attacker, attackType);
 
+  for (const skill of skills) {
     for (const effect of skill.effects) {
       const isPct = effect.isPercentage === true;
 
@@ -148,29 +185,27 @@ export function calculateSkillDamageFlatBonus(
   return totalFlat;
 }
 
-/** Елемент breakdown для процентного бонусу зі скіла (назва + відсоток) */
+/** Елемент breakdown для процентного бонусу зі скіла (назва + відсоток); лише найвищий рівень на лінію. */
 export function getSkillDamagePercentBreakdownEntries(
   attacker: BattleParticipant,
   attackType: AttackType,
 ): Array<{ name: string; percent: number }> {
   const entries: Array<{ name: string; percent: number }> = [];
 
-  for (const skill of attacker.battleData.activeSkills) {
-    if (!skillAppliesToDamageType(skill, attackType)) continue;
+  const skills = getSkillsForDamageBonus(attacker, attackType);
 
+  for (const skill of skills) {
     let percent = 0;
 
     for (const effect of skill.effects) {
       const isPct = effect.isPercentage === true;
+
       const numVal =
         typeof effect.value === "number"
           ? effect.value
           : parseInt(String(effect.value ?? 0), 10) || 0;
-      if (
-        isPct &&
-        numVal !== 0 &&
-        matchesAttackType(effect.stat, attackType)
-      ) {
+
+      if (isPct && numVal !== 0 && matchesAttackType(effect.stat, attackType)) {
         percent += numVal;
       }
     }
@@ -183,24 +218,26 @@ export function getSkillDamagePercentBreakdownEntries(
   return entries;
 }
 
-/** Елемент breakdown для flat бонусу зі скіла (назва + значення) */
+/** Елемент breakdown для flat бонусу зі скіла (назва + значення); лише найвищий рівень на лінію. */
 export function getSkillDamageFlatBreakdownEntries(
   attacker: BattleParticipant,
   attackType: AttackType,
 ): Array<{ name: string; flat: number }> {
   const entries: Array<{ name: string; flat: number }> = [];
 
-  for (const skill of attacker.battleData.activeSkills) {
-    if (!skillAppliesToDamageType(skill, attackType)) continue;
+  const skills = getSkillsForDamageBonus(attacker, attackType);
 
+  for (const skill of skills) {
     let flat = 0;
 
     for (const effect of skill.effects) {
       const isPct = effect.isPercentage === true;
+
       const numVal =
         typeof effect.value === "number"
           ? effect.value
           : parseInt(String(effect.value ?? 0), 10) || 0;
+
       if (
         !isPct &&
         numVal !== 0 &&
@@ -332,7 +369,14 @@ export function calculateDamageWithModifiers(
 ): DamageCalculationResult {
   return measureTiming(
     "calculateDamageWithModifiers",
-    () => calculateDamageWithModifiersImpl(attacker, baseDamage, statModifier, attackType, context),
+    () =>
+      calculateDamageWithModifiersImpl(
+        attacker,
+        baseDamage,
+        statModifier,
+        attackType,
+        context,
+      ),
     { attackType },
   );
 }
@@ -373,13 +417,16 @@ function calculateDamageWithModifiersImpl(
 
   if (heroLevelPart > 0 || heroDicePart > 0) {
     breakdown.push(`+ бонус ${statModifier} (${statLabel})`);
+
     const levelAndDice = heroLevelPart + heroDicePart;
+
     const levelLabel =
       heroDicePart > 0 && heroDiceNotation
         ? `рівень + кубики за рівнем (${heroDiceNotation})`
         : heroDicePart > 0
           ? "рівень + кубики за рівнем"
           : "рівень";
+
     breakdown.push(`+ ${levelAndDice} (${levelLabel})`);
     breakdown.push(`= ${baseWithStat} (база)`);
   } else {
@@ -388,9 +435,45 @@ function calculateDamageWithModifiersImpl(
   }
 
   const skillPercent = calculateSkillDamagePercentBonus(attacker, attackType);
-  const hasApplicableSkills = attacker.battleData.activeSkills.some((s) =>
-    skillAppliesToDamageType(s, attackType),
-  );
+
+  const hasApplicableSkills =
+    getSkillsForDamageBonus(attacker, attackType).length > 0;
+
+  // Логування для діагностики: які скіли вкачано та чому бонус може бути 0
+  const activeSkills = attacker.battleData?.activeSkills ?? [];
+
+  if (activeSkills.length > 0) {
+    const attackTypeStr = attackType === AttackType.MELEE ? "melee" : "ranged";
+
+    console.info(
+      "[calculateDamageWithModifiers] Атакуючий:",
+      attacker.basicInfo.name,
+      "тип атаки:",
+      attackTypeStr,
+    );
+
+    for (const s of activeSkills) {
+      const applies = skillAppliesToDamageType(s, attackType);
+
+      const effectsSummary = (s.effects ?? []).map((e) => ({
+        stat: e.stat,
+        value: e.value,
+        isPercentage: e.isPercentage,
+        matchesType: matchesAttackType(e.stat, attackType),
+      }));
+
+      console.info(
+        "  скіл:",
+        s.name,
+        "| appliesToDamageType:",
+        applies,
+        "| damageType скіла:",
+        s.damageType ?? "—",
+        "| ефекти:",
+        effectsSummary,
+      );
+    }
+  }
 
   const skillPercentEntries = getSkillDamagePercentBreakdownEntries(
     attacker,
@@ -399,15 +482,14 @@ function calculateDamageWithModifiersImpl(
 
   if (skillPercentEntries.length > 0) {
     for (const e of skillPercentEntries) {
-      breakdown.push(
-        `Бонус зі скілів: +${e.percent}% (${e.name})`,
-      );
+      breakdown.push(`Бонус зі скілів: +${e.percent}% (${e.name})`);
     }
   } else if (hasApplicableSkills) {
     breakdown.push("Бонус зі скілів: +0%");
   }
 
   const skillFlat = calculateSkillDamageFlatBonus(attacker, attackType);
+
   const skillFlatEntries = getSkillDamageFlatBreakdownEntries(
     attacker,
     attackType,
@@ -463,12 +545,11 @@ function calculateDamageWithModifiersImpl(
   const totalFlat = skillFlat + artifactBonuses.flat + passiveBonuses.flat;
 
   const totalBeforeFloor = baseWithStat + percentBonusDamage + totalFlat;
+
   const totalDamage = Math.floor(totalBeforeFloor);
 
   breakdown.push(`──────────`);
-  breakdown.push(
-    `Сума ${totalBeforeFloor.toFixed(1)} = ${totalDamage} шкоди`,
-  );
+  breakdown.push(`Сума ${totalBeforeFloor.toFixed(1)} = ${totalDamage} шкоди`);
 
   return {
     baseDamage: baseWithStat,

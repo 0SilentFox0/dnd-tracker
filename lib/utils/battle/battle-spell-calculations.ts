@@ -4,7 +4,15 @@
 
 import { calculatePercentBonus } from "./battle-modifiers-common";
 
-import { ActiveSkill, BattleParticipant } from "@/types/battle";
+import { SkillLevel } from "@/lib/types/skill-tree";
+import type { ActiveSkill, BattleParticipant } from "@/types/battle";
+
+/** Ранг рівня скіла для порівняння (більший = вищий рівень) */
+const SKILL_LEVEL_RANK: Record<string, number> = {
+  [SkillLevel.BASIC]: 1,
+  [SkillLevel.ADVANCED]: 2,
+  [SkillLevel.EXPERT]: 3,
+};
 
 /**
  * Результат розрахунку урону/ефекту заклинання
@@ -20,12 +28,10 @@ export interface SpellCalculationResult {
 }
 
 /**
- * Знаходить всі активні скіли з покращеннями заклинання
+ * Знаходить активні скіли з покращеннями заклинання (magic/spell).
  * @param participant - учасник бою (кастер)
- * @param spellId - ID заклинання
- * @returns масив скілів з покращеннями для цього заклинання
+ * @returns масив скілів з spellEnhancements, що підходять для магії
  */
-
 export function getSpellEnhancementSkills(
   participant: BattleParticipant,
 ): ActiveSkill[] {
@@ -41,10 +47,39 @@ export function getSpellEnhancementSkills(
 }
 
 /**
- * Розраховує процентне збільшення ефекту заклинання
- * Стакує всі spellEffectIncrease адитивно
+ * Скіли з покращеннями заклинання — по одному на лінію (mainSkillId), лише найвищий рівень.
+ * Аналогічно до melee/ranged: Магія Вогню Базовий/Просунутий/Експерт → лише Експерт.
+ */
+function getSpellEnhancementSkillsHighestOnly(
+  participant: BattleParticipant,
+): ActiveSkill[] {
+  const applicable = getSpellEnhancementSkills(participant);
+
+  const byMainSkill = new Map<string, ActiveSkill>();
+
+  for (const skill of applicable) {
+    const key = skill.mainSkillId || skill.skillId;
+
+    const existing = byMainSkill.get(key);
+
+    const rankNew = SKILL_LEVEL_RANK[skill.level ?? SkillLevel.BASIC] ?? 1;
+
+    const rankExisting = existing
+      ? (SKILL_LEVEL_RANK[existing.level ?? SkillLevel.BASIC] ?? 1)
+      : 0;
+
+    if (!existing || rankNew > rankExisting) {
+      byMainSkill.set(key, skill);
+    }
+  }
+
+  return Array.from(byMainSkill.values());
+}
+
+/**
+ * Розраховує процентне збільшення ефекту заклинання.
+ * Враховує лише найвищий рівень скіла на лінію (наприклад, лише Магія Вогню — Експерт).
  * @param participant - кастер
- * @param spellId - ID заклинання
  * @returns сумарний процентний бонус
  */
 export function calculateSpellEffectIncrease(
@@ -52,7 +87,7 @@ export function calculateSpellEffectIncrease(
 ): number {
   let totalIncrease = 0;
 
-  const enhancementSkills = getSpellEnhancementSkills(participant);
+  const enhancementSkills = getSpellEnhancementSkillsHighestOnly(participant);
 
   for (const skill of enhancementSkills) {
     if (skill.spellEnhancements?.spellEffectIncrease) {
@@ -64,15 +99,14 @@ export function calculateSpellEffectIncrease(
 }
 
 /**
- * Перевіряє чи є зміна цілі для заклинання
+ * Перевіряє чи є зміна цілі для заклинання (з найвищого скіла на лінію).
  * @param participant - кастер
- * @param spellId - ID заклинання
  * @returns зміна цілі або undefined
  */
 export function getSpellTargetChange(
   participant: BattleParticipant,
 ): { target: string } | undefined {
-  const enhancementSkills = getSpellEnhancementSkills(participant);
+  const enhancementSkills = getSpellEnhancementSkillsHighestOnly(participant);
 
   for (const skill of enhancementSkills) {
     if (skill.spellEnhancements?.spellTargetChange) {
@@ -84,9 +118,8 @@ export function getSpellTargetChange(
 }
 
 /**
- * Розраховує додатковий урон з spellAdditionalModifier
+ * Розраховує додатковий урон з spellAdditionalModifier (лише з найвищого скіла на лінію).
  * @param participant - кастер
- * @param spellId - ID заклинання
  * @param rollResult - результат кидка додаткових кубиків (якщо є)
  * @returns додатковий урон та інформація про модифікатор
  */
@@ -99,7 +132,7 @@ export function calculateSpellAdditionalModifier(
   damageDice?: string;
   duration?: number;
 } {
-  const enhancementSkills = getSpellEnhancementSkills(participant);
+  const enhancementSkills = getSpellEnhancementSkillsHighestOnly(participant);
 
   for (const skill of enhancementSkills) {
     if (skill.spellEnhancements?.spellAdditionalModifier) {

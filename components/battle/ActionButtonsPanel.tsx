@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { Crosshair, SkipForward, Sparkles, Sword, Zap } from "lucide-react";
 
+import { BonusActionPickerDialog } from "@/components/battle/dialogs/BonusActionPickerDialog";
 import { Button } from "@/components/ui/button";
 import { AttackType } from "@/lib/constants/battle";
 import { cn } from "@/lib/utils";
@@ -36,6 +38,8 @@ export function ActionButtonsPanel({
   showMoraleButton,
   onOpenMorale,
 }: ActionButtonsPanelProps) {
+  const [bonusActionPickerOpen, setBonusActionPickerOpen] = useState(false);
+
   const hasMeleeAttacks =
     participant.battleData.attacks?.some(
       (attack) => attack.type === AttackType.MELEE || attack.range === "5 ft",
@@ -118,23 +122,28 @@ export function ActionButtonsPanel({
 
       {/* Ряд 2: Бонусні дії та пропуск */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-6">
-        {/* Бонусні дії з тригерів */}
+        {/* Бонусна дія — одна кнопка, відкриває діалог зі списком скілів */}
         {bonusActions.length > 0 && canUseBonusAction ? (
-          bonusActions.map((skill) => (
+          <>
             <Button
-              key={skill.skillId}
               size="lg"
               variant="secondary"
-              onClick={() => onBonusAction(skill)}
+              onClick={() => setBonusActionPickerOpen(true)}
               className="h-20 sm:h-32 flex flex-col items-center justify-center gap-1 sm:gap-2 rounded-2xl bg-gradient-to-br from-yellow-500 to-orange-600 hover:scale-105 hover:shadow-[0_0_20px_rgba(245,158,11,0.5)] border-none group relative overflow-hidden"
             >
               <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
               <Zap className="w-6 h-6 sm:w-10 sm:h-10 drop-shadow-lg group-hover:animate-bounce transition-transform" />
-              <span className="text-[10px] sm:text-lg font-black uppercase tracking-widest italic drop-shadow-md truncate w-full px-2">
-                {skill.name}
+              <span className="text-[10px] sm:text-lg font-black uppercase tracking-widest italic drop-shadow-md">
+                Бонусна дія
               </span>
             </Button>
-          ))
+            <BonusActionPickerDialog
+              open={bonusActionPickerOpen}
+              onOpenChange={setBonusActionPickerOpen}
+              skills={bonusActions}
+              onSelect={(skill) => onBonusAction(skill)}
+            />
+          </>
         ) : (
           <div className="h-20 sm:h-32 flex items-center justify-center glass-card rounded-2xl text-muted-foreground text-[10px] sm:text-sm font-bold uppercase tracking-widest italic px-4 text-center">
             {canUseBonusAction ? "No Bonus" : "Used"}

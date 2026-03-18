@@ -49,6 +49,7 @@ export interface ProcessAttackParams {
   attack: BattleAttack;
   d20Roll: number;
   advantageRoll?: number; // для Advantage
+  disadvantageRoll?: number; // для Disadvantage
   damageRolls: number[]; // результати кубиків урону
   allParticipants: BattleParticipant[];
   currentRound: number;
@@ -92,6 +93,7 @@ export function processAttack(
     attack,
     d20Roll,
     advantageRoll,
+    disadvantageRoll,
     damageRolls,
     allParticipants,
     currentRound,
@@ -122,6 +124,7 @@ export function processAttack(
     attack,
     d20Roll,
     advantageRoll,
+    disadvantageRoll,
   );
 
   // 2. Перевіряємо попадання (з урахуванням ефективного AC цілі, включно з дебафами −2 AC)
@@ -697,6 +700,10 @@ export function processAttack(
 
   let reactionDamage = 0;
 
+  let reactionBaseDamage = 0;
+
+  let reactionBonusPercent = 0;
+
   let reactionAttackerHpChange: {
     oldHp: number;
     newHp: number;
@@ -710,6 +717,8 @@ export function processAttack(
 
     reactionTriggered = true;
     reactionDamage = reactionResult.damage;
+    reactionBaseDamage = reactionResult.baseDamage;
+    reactionBonusPercent = reactionResult.bonusPercent;
     // Оновлюємо defender (щоб позначити що реакцію використано)
     updatedTarget = reactionResult.updatedDefender;
 
@@ -793,6 +802,11 @@ export function processAttack(
       })),
       totalDamage: physicalDamage,
       damageBreakdown: damageCalculation.breakdown.join("; "),
+      ...(reactionTriggered && {
+        counterReactionDamage: reactionDamage,
+        counterReactionBaseDamage: reactionBaseDamage,
+        counterReactionBonusPercent: reactionBonusPercent,
+      }),
     },
     resultText: [
       `${attacker.basicInfo.name} завдав ${totalFinalDamage} урону ${target.basicInfo.name}${attackRoll.isCritical ? " (КРИТИЧНЕ ПОПАДАННЯ!)" : ""}${criticalEffectApplied ? ` [d10: ${criticalEffectApplied.id}] ${criticalEffectApplied.name}` : ""}${vampirismHeal > 0 ? ` | Вампіризм: ${attacker.basicInfo.name} відновив ${vampirismHeal} HP` : ""}${reactionTriggered ? ` | ${target.basicInfo.name} виконав контр-удар на ${reactionDamage} урону` : ""}`,

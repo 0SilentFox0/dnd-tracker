@@ -14,6 +14,10 @@ export interface CounterAttackResultInfo {
   defenderName: string;
   attackerName: string;
   damage: number;
+  /** Базовий урон до бонусу (для breakdown) */
+  baseDamage?: number;
+  /** Бонус у % (counter_damage з ефектів) */
+  bonusPercent?: number;
 }
 
 interface CounterAttackResultDialogProps {
@@ -37,6 +41,12 @@ export function CounterAttackResultDialog({
           <AlertDialogDescription>
             {info.defenderName} виконав(ла) контр-атаку та завдав(ла){" "}
             <strong>{info.damage}</strong> урону {info.attackerName}.
+            {info.baseDamage != null && info.bonusPercent != null && (
+              <span className="mt-2 block text-sm text-muted-foreground">
+                Базовий урон {info.baseDamage} + бонус {info.bonusPercent}% ={" "}
+                {info.damage} урону
+              </span>
+            )}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

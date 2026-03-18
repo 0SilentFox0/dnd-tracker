@@ -1,5 +1,6 @@
 import { Shield, Sparkles } from "lucide-react";
 
+import { getEffectiveArmorClass } from "@/lib/utils/battle/battle-participant-helpers";
 import { cn } from "@/lib/utils";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -14,6 +15,12 @@ export function ParticipantStats({
   className,
 }: ParticipantStatsProps) {
   const { combatStats, abilities, spellcasting } = participant;
+
+  const baseAC = combatStats.armorClass;
+
+  const effectiveAC = getEffectiveArmorClass(participant);
+
+  const acChanged = effectiveAC !== baseAC;
 
   const spellSlots = spellcasting?.spellSlots ?? {};
 
@@ -36,9 +43,20 @@ export function ParticipantStats({
       )}
     >
       {/* AC */}
-      <div className="flex items-center gap-1 font-bold text-white bg-white/10 px-1.5 py-0.5 rounded">
+      <div
+        className={cn(
+          "flex items-center gap-1 font-bold bg-white/10 px-1.5 py-0.5 rounded",
+          acChanged
+            ? effectiveAC < baseAC
+              ? "text-red-400"
+              : "text-green-400"
+            : "text-white",
+        )}
+      >
         <Shield className="w-3 h-3" />
-        <span>{combatStats.armorClass}</span>
+        <span>
+          {acChanged ? `${effectiveAC} (${baseAC})` : effectiveAC}
+        </span>
       </div>
 
       {/* Ability Scores */}

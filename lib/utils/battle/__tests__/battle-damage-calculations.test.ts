@@ -5,12 +5,6 @@
 
 import { describe, expect, it } from "vitest";
 
-import { AttackType, ParticipantSide } from "@/lib/constants/battle";
-import type {
-  BattleParticipant,
-  EquippedArtifact,
-  SkillEffect,
-} from "@/types/battle";
 import {
   applyResistance,
   calculateArtifactDamageBonus,
@@ -19,6 +13,13 @@ import {
   calculateSkillDamageFlatBonus,
   calculateSkillDamagePercentBonus,
 } from "../battle-damage-calculations";
+
+import { AttackType, ParticipantSide } from "@/lib/constants/battle";
+import type {
+  BattleParticipant,
+  EquippedArtifact,
+  SkillEffect,
+} from "@/types/battle";
 
 function createBaseParticipant(
   overrides?: Partial<BattleParticipant>,
@@ -97,8 +98,12 @@ describe("battle-damage-calculations", () => {
     it("returns 0 when attacker has no active skills", () => {
       const attacker = createBaseParticipant();
 
-      expect(calculateSkillDamagePercentBonus(attacker, AttackType.MELEE)).toBe(0);
-      expect(calculateSkillDamagePercentBonus(attacker, AttackType.RANGED)).toBe(0);
+      expect(calculateSkillDamagePercentBonus(attacker, AttackType.MELEE)).toBe(
+        0,
+      );
+      expect(
+        calculateSkillDamagePercentBonus(attacker, AttackType.RANGED),
+      ).toBe(0);
     });
 
     it("returns percent bonus from one skill with melee_damage and isPercentage", () => {
@@ -111,17 +116,19 @@ describe("battle-damage-calculations", () => {
               name: "Напад",
               mainSkillId: "ms1",
               level: "expert",
-              effects: [
-                createSkillEffect("melee_damage", 30, true),
-              ],
+              effects: [createSkillEffect("melee_damage", 30, true)],
               affectsDamage: true,
             },
           ],
         },
       });
 
-      expect(calculateSkillDamagePercentBonus(attacker, AttackType.MELEE)).toBe(30);
-      expect(calculateSkillDamagePercentBonus(attacker, AttackType.RANGED)).toBe(0);
+      expect(calculateSkillDamagePercentBonus(attacker, AttackType.MELEE)).toBe(
+        30,
+      );
+      expect(
+        calculateSkillDamagePercentBonus(attacker, AttackType.RANGED),
+      ).toBe(0);
     });
 
     it("returns percent bonus for ranged_damage when attackType is RANGED", () => {
@@ -134,20 +141,22 @@ describe("battle-damage-calculations", () => {
               name: "Експертна стрільба",
               mainSkillId: "ms2",
               level: "expert",
-              effects: [
-                createSkillEffect("ranged_damage", 30, true),
-              ],
+              effects: [createSkillEffect("ranged_damage", 30, true)],
               affectsDamage: true,
             },
           ],
         },
       });
 
-      expect(calculateSkillDamagePercentBonus(attacker, AttackType.RANGED)).toBe(30);
-      expect(calculateSkillDamagePercentBonus(attacker, AttackType.MELEE)).toBe(0);
+      expect(
+        calculateSkillDamagePercentBonus(attacker, AttackType.RANGED),
+      ).toBe(30);
+      expect(calculateSkillDamagePercentBonus(attacker, AttackType.MELEE)).toBe(
+        0,
+      );
     });
 
-    it("stacks multiple percent bonuses additively", () => {
+    it("uses only highest-level skill per mainSkillId (one line = one bonus)", () => {
       const attacker = createBaseParticipant({
         battleData: {
           ...createBaseParticipant().battleData,
@@ -170,7 +179,9 @@ describe("battle-damage-calculations", () => {
         },
       });
 
-      expect(calculateSkillDamagePercentBonus(attacker, AttackType.MELEE)).toBe(25);
+      expect(calculateSkillDamagePercentBonus(attacker, AttackType.MELEE)).toBe(
+        15,
+      );
     });
 
     it("physical_damage applies to both MELEE and RANGED", () => {
@@ -189,8 +200,12 @@ describe("battle-damage-calculations", () => {
         },
       });
 
-      expect(calculateSkillDamagePercentBonus(attacker, AttackType.MELEE)).toBe(20);
-      expect(calculateSkillDamagePercentBonus(attacker, AttackType.RANGED)).toBe(20);
+      expect(calculateSkillDamagePercentBonus(attacker, AttackType.MELEE)).toBe(
+        20,
+      );
+      expect(
+        calculateSkillDamagePercentBonus(attacker, AttackType.RANGED),
+      ).toBe(20);
     });
 
     it("includes percent from activeEffects (buffs/debuffs)", () => {
@@ -212,13 +227,16 @@ describe("battle-damage-calculations", () => {
         },
       });
 
-      expect(calculateSkillDamagePercentBonus(attacker, AttackType.MELEE)).toBe(40);
+      expect(calculateSkillDamagePercentBonus(attacker, AttackType.MELEE)).toBe(
+        40,
+      );
     });
   });
 
   describe("calculateSkillDamageFlatBonus", () => {
     it("returns 0 when attacker has no active skills", () => {
       const attacker = createBaseParticipant();
+
       expect(calculateSkillDamageFlatBonus(attacker, AttackType.MELEE)).toBe(0);
     });
 
@@ -239,13 +257,16 @@ describe("battle-damage-calculations", () => {
       });
 
       expect(calculateSkillDamageFlatBonus(attacker, AttackType.MELEE)).toBe(3);
-      expect(calculateSkillDamageFlatBonus(attacker, AttackType.RANGED)).toBe(0);
+      expect(calculateSkillDamageFlatBonus(attacker, AttackType.RANGED)).toBe(
+        0,
+      );
     });
   });
 
   describe("calculateArtifactDamageBonus", () => {
     it("returns { percent: 0, flat: 0 } when no equipped artifacts", () => {
       const attacker = createBaseParticipant();
+
       expect(calculateArtifactDamageBonus(attacker, AttackType.MELEE)).toEqual({
         percent: 0,
         flat: 0,
@@ -258,9 +279,7 @@ describe("battle-damage-calculations", () => {
         name: "Меч",
         slot: "weapon",
         bonuses: {},
-        modifiers: [
-          { type: "melee_damage", value: 20, isPercentage: true },
-        ],
+        modifiers: [{ type: "melee_damage", value: 20, isPercentage: true }],
       };
 
       const attacker = createBaseParticipant({
@@ -282,9 +301,7 @@ describe("battle-damage-calculations", () => {
         name: "Кинджал",
         slot: "weapon",
         bonuses: {},
-        modifiers: [
-          { type: "melee_damage", value: 5, isPercentage: false },
-        ],
+        modifiers: [{ type: "melee_damage", value: 5, isPercentage: false }],
       };
 
       const attacker = createBaseParticipant({
@@ -306,9 +323,7 @@ describe("battle-damage-calculations", () => {
         name: "Лук",
         slot: "weapon",
         bonuses: {},
-        modifiers: [
-          { type: "ranged_damage", value: 15, isPercentage: true },
-        ],
+        modifiers: [{ type: "ranged_damage", value: 15, isPercentage: true }],
       };
 
       const attacker = createBaseParticipant({
@@ -322,25 +337,37 @@ describe("battle-damage-calculations", () => {
         percent: 0,
         flat: 0,
       });
-      expect(calculateArtifactDamageBonus(attacker, AttackType.RANGED)).toEqual({
-        percent: 15,
-        flat: 0,
-      });
+      expect(calculateArtifactDamageBonus(attacker, AttackType.RANGED)).toEqual(
+        {
+          percent: 15,
+          flat: 0,
+        },
+      );
     });
   });
 
   describe("calculatePassiveAbilityDamageBonus", () => {
     it("returns { percent: 0, flat: 0 } when no passive abilities", () => {
       const attacker = createBaseParticipant();
-      expect(
-        calculatePassiveAbilityDamageBonus(attacker, {}),
-      ).toEqual({ percent: 0, flat: 0 });
+
+      expect(calculatePassiveAbilityDamageBonus(attacker, {})).toEqual({
+        percent: 0,
+        flat: 0,
+      });
     });
 
     it("returns bonus when ally_low_hp trigger is satisfied and context has allParticipants", () => {
       const lowHpAlly = createBaseParticipant({
-        basicInfo: { ...createBaseParticipant().basicInfo, id: "ally1", name: "Ally" },
-        combatStats: { ...createBaseParticipant().combatStats, maxHp: 100, currentHp: 10 },
+        basicInfo: {
+          ...createBaseParticipant().basicInfo,
+          id: "ally1",
+          name: "Ally",
+        },
+        combatStats: {
+          ...createBaseParticipant().combatStats,
+          maxHp: 100,
+          currentHp: 10,
+        },
       });
 
       const attacker = createBaseParticipant({
@@ -371,8 +398,16 @@ describe("battle-damage-calculations", () => {
 
     it("returns 0 when ally_low_hp trigger not satisfied (no low-HP ally)", () => {
       const healthyAlly = createBaseParticipant({
-        basicInfo: { ...createBaseParticipant().basicInfo, id: "ally1", name: "Ally" },
-        combatStats: { ...createBaseParticipant().combatStats, maxHp: 100, currentHp: 80 },
+        basicInfo: {
+          ...createBaseParticipant().basicInfo,
+          id: "ally1",
+          name: "Ally",
+        },
+        combatStats: {
+          ...createBaseParticipant().combatStats,
+          maxHp: 100,
+          currentHp: 80,
+        },
       });
 
       const attacker = createBaseParticipant({
@@ -401,7 +436,9 @@ describe("battle-damage-calculations", () => {
   describe("calculateDamageWithModifiers", () => {
     it("computes baseWithStat as baseDamage + statModifier when no hero parts", () => {
       const attacker = createBaseParticipant();
+
       const baseDamage = 7;
+
       const statModifier = 2; // STR 14
 
       const result = calculateDamageWithModifiers(
@@ -488,13 +525,18 @@ describe("battle-damage-calculations", () => {
       );
 
       const hasSkillLine = result.breakdown.some(
-        (s) => s.includes("Бонус зі скілів") && s.includes("30") && s.includes("Експертна стрільба"),
+        (s) =>
+          s.includes("Бонус зі скілів") &&
+          s.includes("30") &&
+          s.includes("Експертна стрільба"),
       );
+
       expect(hasSkillLine).toBe(true);
     });
 
     it("breakdown ends with total line", () => {
       const attacker = createBaseParticipant();
+
       const result = calculateDamageWithModifiers(
         attacker,
         5,
@@ -503,21 +545,25 @@ describe("battle-damage-calculations", () => {
       );
 
       const totalLine = result.breakdown.find((s) => s.includes("шкоди"));
+
       expect(totalLine).toBeDefined();
       expect(totalLine).toContain("5");
     });
 
     it("breakdown starts with sum of dice line", () => {
       const attacker = createBaseParticipant();
+
       const result = calculateDamageWithModifiers(
         attacker,
         10,
         2,
         AttackType.MELEE,
       );
+
       const diceLine = result.breakdown.find((s) =>
         s.startsWith("Сума кубиків:"),
       );
+
       expect(diceLine).toBeDefined();
       expect(diceLine).toContain("10");
     });
@@ -528,6 +574,7 @@ describe("battle-damage-calculations", () => {
       const defender = createBaseParticipant();
 
       const r = applyResistance(100, defender, "physical");
+
       expect(r.finalDamage).toBe(100);
       expect(r.resistPercent).toBe(0);
       expect(r.resistMessage).toBeNull();
@@ -535,11 +582,13 @@ describe("battle-damage-calculations", () => {
 
     it("reduces damage by physical resistance percent when extras.resistances.physical is set", () => {
       const defender = createBaseParticipant();
+
       (defender.battleData as Record<string, unknown>).extras = {
         resistances: { physical: 25 },
       };
 
       const r = applyResistance(100, defender, "physical");
+
       expect(r.resistPercent).toBe(25);
       expect(r.finalDamage).toBe(75);
       expect(r.resistMessage).toContain("25%");
@@ -547,22 +596,26 @@ describe("battle-damage-calculations", () => {
 
     it("uses spell resistance when damageCategory is spell", () => {
       const defender = createBaseParticipant();
+
       (defender.battleData as Record<string, unknown>).extras = {
         resistances: { spell: 50 },
       };
 
       const r = applyResistance(100, defender, "spell");
+
       expect(r.resistPercent).toBe(50);
       expect(r.finalDamage).toBe(50);
     });
 
     it("returns finalDamage at least 0 when resistance is high", () => {
       const defender = createBaseParticipant();
+
       (defender.battleData as Record<string, unknown>).extras = {
         resistances: { physical: 100 },
       };
 
       const r = applyResistance(10, defender, "physical");
+
       expect(r.finalDamage).toBe(0);
     });
   });

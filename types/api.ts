@@ -82,8 +82,11 @@ export interface AttackData {
   targetId?: string;
   targetIds?: string[];
   targetType?: "character" | "unit";
-  attackRoll: number;
+  attackRoll?: number;
+  /** Один кидок на ціль (multi-target); якщо передано, використовується замість attackRoll */
+  attackRolls?: number[];
   advantageRoll?: number;
+  disadvantageRoll?: number;
   damageRolls: number[];
   attackId?: string;
 }

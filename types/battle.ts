@@ -109,6 +109,8 @@ export interface ActiveSkill {
   name: string;
   mainSkillId: string;
   level: SkillLevel;
+  icon?: string | null;
+  description?: string | null;
   effects: SkillEffect[];
   /** Чи враховувати скіл лише коли він позначений як такий, що впливає на шкоду */
   affectsDamage?: boolean;
@@ -383,6 +385,10 @@ export interface BattleAction {
       description: string;
       type: "success" | "fail";
     };
+    // Контр-атака (reaction):
+    counterReactionDamage?: number;
+    counterReactionBaseDamage?: number;
+    counterReactionBonusPercent?: number;
   };
   resultText: string; // текстовий опис для лога
   hpChanges: Array<{

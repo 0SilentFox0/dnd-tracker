@@ -13,6 +13,7 @@ export { CounterAttackResultDialog } from "./CounterAttackResultDialog";
 export { DamageRollDialog } from "./DamageRollDialog";
 export { DamageSummaryModal } from "./DamageSummaryModal";
 export { MoraleCheckDialog } from "./MoraleCheckDialog";
+export { MoraleResultModal } from "./MoraleResultModal";
 export type {
   BattleDialogBaseProps,
   BattleDialogFooterProps,

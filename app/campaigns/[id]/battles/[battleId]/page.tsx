@@ -11,6 +11,7 @@ import { DmCasterPickerDialog } from "@/components/battle/dialogs/DmCasterPicker
 import { MoraleCheckDialog } from "@/components/battle/dialogs/MoraleCheckDialog";
 import { SpellDialog } from "@/components/battle/dialogs/SpellDialog";
 import { SpellResultModal } from "@/components/battle/dialogs/SpellResultModal";
+import { RollResultOverlay } from "@/components/battle/RollResultOverlay";
 import { GlobalDamageOverlay } from "@/components/battle/overlays";
 import { DmQuickActionsPanel } from "@/components/battle/panels";
 import { BattleFieldView } from "@/components/battle/views/BattleFieldView";
@@ -18,6 +19,10 @@ import { BattlePreparationView } from "@/components/battle/views/BattlePreparati
 import { PlayerTurnView } from "@/components/battle/views/PlayerTurnView";
 import { useBattlePageDialogs } from "@/lib/hooks/battle/useBattlePageDialogs";
 import { useBattleSceneLogic } from "@/lib/hooks/battle/useBattleSceneLogic";
+import {
+  getMoraleOverlayText,
+  type MoraleCheckResult,
+} from "@/lib/utils/battle/battle-morale";
 import type { BattleScene } from "@/types/api";
 import type { BattleAction } from "@/types/battle";
 
@@ -58,6 +63,11 @@ export default function BattlePage({
     useState<BattleAction | null>(null);
 
   const [spellResultModalOpen, setSpellResultModalOpen] = useState(false);
+
+  const [moraleResultModal, setMoraleResultModal] = useState<{
+    open: boolean;
+    result: MoraleCheckResult | null;
+  }>({ open: false, result: null });
 
   const [spellPreviewAction, setSpellPreviewAction] =
     useState<BattleAction | null>(null);
@@ -240,12 +250,23 @@ export default function BattlePage({
             onSkipTurn={handlers.handleNextTurn}
             isNextTurnPending={mutations.nextTurn.isPending}
             isAttackPending={mutations.attack.isPending}
+            isMoraleCheckPending={mutations.moraleCheck.isPending}
             onMoraleCheck={(d10Roll) => {
               if (currentParticipant)
-                mutations.moraleCheck.mutate({
-                  participantId: currentParticipant.basicInfo.id,
-                  d10Roll,
-                });
+                mutations.moraleCheck.mutate(
+                  {
+                    participantId: currentParticipant.basicInfo.id,
+                    d10Roll,
+                  },
+                  {
+                    onSuccess: (data) => {
+                      setMoraleResultModal({
+                        open: true,
+                        result: data.moraleResult,
+                      });
+                    },
+                  },
+                );
             }}
           />
         ) : (
@@ -336,13 +357,44 @@ export default function BattlePage({
           onOpenChange={dialogs.morale.setOpen}
           participant={currentParticipant}
           onConfirm={(d10Roll) =>
-            mutations.moraleCheck.mutate({
-              participantId: currentParticipant.basicInfo.id,
-              d10Roll,
-            })
+            mutations.moraleCheck.mutate(
+              {
+                participantId: currentParticipant.basicInfo.id,
+                d10Roll,
+              },
+              {
+                onSuccess: (data) => {
+                  setMoraleResultModal({
+                    open: true,
+                    result: data.moraleResult,
+                  });
+                },
+              },
+            )
           }
         />
       )}
+
+      <RollResultOverlay
+        type={
+          moraleResultModal.open && moraleResultModal.result
+            ? moraleResultModal.result.hasExtraTurn ||
+                !moraleResultModal.result.shouldSkipTurn
+              ? "success"
+              : "fail"
+            : null
+        }
+        customText={
+          moraleResultModal.open && moraleResultModal.result
+            ? getMoraleOverlayText(moraleResultModal.result)
+            : null
+        }
+        onComplete={() => {
+          const shouldSkip = moraleResultModal.result?.shouldSkipTurn;
+          setMoraleResultModal((prev) => ({ ...prev, open: false }));
+          if (shouldSkip) handlers.handleNextTurn();
+        }}
+      />
 
       {dialogs.spell.open && isDM && !dmSpellCasterId && (
         <DmCasterPickerDialog

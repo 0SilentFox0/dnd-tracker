@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
+import { getTotalDiceCount } from "@/lib/utils/battle/balance-calculations";
 import { processAttack } from "@/lib/utils/battle/battle-attack-process";
 import {
   prepareBattleLogForStorage,
@@ -23,6 +24,7 @@ const attackSchema = z
     d20Roll: z.number().min(1).max(20).optional(), // результат кидка d20 (опціонально, якщо передається attackRoll)
     attackRoll: z.number().min(1).max(20).optional(), // альтернативна назва для d20Roll (для сумісності)
     advantageRoll: z.number().min(1).max(20).optional(), // другий кидок для Advantage
+    disadvantageRoll: z.number().min(1).max(20).optional(), // другий кидок для Disadvantage
     damageRolls: z.array(z.number()).default([]), // результати кубиків урону
   })
   .refine(
@@ -187,9 +189,16 @@ export async function POST(
     // Обмеження кількості цілей
     const isAoe = attack.targetType === "aoe";
 
+    const isMultiTargetRanged =
+      !isAoe &&
+      attack.type === "ranged" &&
+      (attacker.combatStats.maxTargets ?? 1) > 1;
+
     const maxPossibleTargets = isAoe
       ? attack.maxTargets || attacker.combatStats.maxTargets || 1
-      : 1;
+      : isMultiTargetRanged
+        ? attacker.combatStats.maxTargets || 1
+        : 1;
 
     if (targets.length > maxPossibleTargets) {
       return NextResponse.json(
@@ -200,20 +209,15 @@ export async function POST(
       );
     }
 
-    if (!isAoe && targets.length > 1) {
-      return NextResponse.json(
-        { error: "Single-target attack allows only one target" },
-        { status: 400 },
-      );
-    }
-
-    // Розподіл шкоди для AOE: нормалізуємо суму (кожна ціль макс. 100%)
+    // Розподіл шкоди для AOE або multi-target ranged
     const dist = attack.damageDistribution;
 
     const damageFractions: number[] =
-      dist &&
-      dist.length === targets.length &&
-      dist.every((n) => typeof n === "number" && n >= 0 && n <= 100)
+      isMultiTargetRanged
+        ? targets.map(() => 1)
+        : dist &&
+            dist.length === targets.length &&
+            dist.every((n) => typeof n === "number" && n >= 0 && n <= 100)
         ? (() => {
             const sum = dist.reduce((a, b) => a + b, 0);
 
@@ -244,6 +248,11 @@ export async function POST(
 
     let stateBefore = snapshotState();
 
+    const dicePerTarget =
+      isMultiTargetRanged && targets.length > 1
+        ? getTotalDiceCount(attack.damageDice ?? "")
+        : 0;
+
     // Обробляємо атаку для кожної цілі
     for (let i = 0; i < targets.length; i++) {
       const target = targets[i];
@@ -253,13 +262,22 @@ export async function POST(
       const damageMultiplier =
         targets.length > 1 ? damageFractions[i] : undefined;
 
+      const damageRollsForTarget =
+        isMultiTargetRanged &&
+        targets.length > 1 &&
+        dicePerTarget > 0 &&
+        data.damageRolls.length >= (i + 1) * dicePerTarget
+          ? data.damageRolls.slice(i * dicePerTarget, (i + 1) * dicePerTarget)
+          : data.damageRolls;
+
       const attackResult = processAttack({
         attacker: currentAttacker,
         target,
         attack,
         d20Roll: d20Roll,
         advantageRoll: data.advantageRoll,
-        damageRolls: data.damageRolls,
+        disadvantageRoll: data.disadvantageRoll,
+        damageRolls: damageRollsForTarget,
         allParticipants: currentInitiativeOrder,
         currentRound: battle.currentRound,
         battleId,

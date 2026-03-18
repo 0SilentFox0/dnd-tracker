@@ -51,6 +51,7 @@ export interface BattleSpell {
     duration?: number;
     effects?: Array<{ type: string; value: number; isPercentage?: boolean }>;
   } | null;
+  icon?: string | null;
 }
 
 /**
@@ -605,6 +606,7 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
             name: `${spell.name} - ${modifierType}`,
             type: "debuff",
             description: spell.description,
+            icon: spell.icon ?? undefined,
             duration: additionalModifier.duration,
             effects: [
               {
@@ -679,6 +681,7 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
           name: spell.name,
           type: effectType,
           description: spell.description,
+          icon: spell.icon ?? undefined,
           duration: actualDuration,
           effects: spellEffectDetails,
         },

@@ -17,11 +17,14 @@ export type RollResultType =
 interface RollResultOverlayProps {
   type: RollResultType | null;
   onComplete: () => void;
+  /** Додатковий текст під заголовком (наприклад, для моралі) */
+  customText?: string | null;
 }
 
 export function RollResultOverlay({
   type,
   onComplete,
+  customText,
 }: RollResultOverlayProps) {
   React.useEffect(() => {
     if (type) {
@@ -120,11 +123,11 @@ export function RollResultOverlay({
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
               className={cn(
-                "text-3xl sm:text-7xl font-black italic uppercase tracking-tighter drop-shadow-2xl text-center",
+                "text-2xl sm:text-5xl font-black italic tracking-tighter drop-shadow-2xl text-center max-w-lg",
                 config.color,
               )}
             >
-              {config.text}
+              {customText ?? config.text}
             </motion.h2>
           </motion.div>
 

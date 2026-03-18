@@ -89,15 +89,15 @@ export function MoraleCheckDialog({
           />
         </div>
         <BattleDialogFooter>
+          <Button variant="outline" onClick={handleCancel} className="flex-1">
+            Скасувати
+          </Button>
           <Button
             onClick={handleConfirm}
             disabled={!valid}
             className="flex-1"
           >
             Підтвердити
-          </Button>
-          <Button variant="outline" onClick={handleCancel} className="flex-1">
-            Скасувати
           </Button>
         </BattleDialogFooter>
       </div>

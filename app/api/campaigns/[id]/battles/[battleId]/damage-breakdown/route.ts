@@ -87,11 +87,31 @@ export async function POST(
         )
       : attacker.battleData.attacks?.[0];
 
+    // Логування скілів атакуючого для діагностики бонусу урону
+    const activeSkills = attacker.battleData?.activeSkills ?? [];
+
+    console.info("[damage-breakdown] Атакуючий:", {
+      name: attacker.basicInfo.name,
+      id: attacker.basicInfo.id,
+      attackType: attack?.type,
+      attackName: attack?.name,
+      activeSkillsCount: activeSkills.length,
+      activeSkills: activeSkills.map((s) => ({
+        name: s.name,
+        skillId: s.skillId,
+        affectsDamage: s.affectsDamage,
+        damageType: s.damageType ?? null,
+        effects: (s.effects ?? []).map((e) => ({
+          stat: e.stat,
+          type: e.type,
+          value: e.value,
+          isPercentage: e.isPercentage,
+        })),
+      })),
+    });
+
     if (!attack) {
-      return NextResponse.json(
-        { error: "Attack not found" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "Attack not found" }, { status: 404 });
     }
 
     if (targets.length > 1) {
@@ -103,6 +123,7 @@ export async function POST(
         allParticipants: initiativeOrder,
         isCritical: data.isCritical,
       });
+
       return NextResponse.json(result);
     }
 

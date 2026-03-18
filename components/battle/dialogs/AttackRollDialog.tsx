@@ -9,7 +9,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
-import { hasAdvantage } from "@/lib/utils/battle/battle-attack";
+import { hasAdvantage, hasDisadvantage } from "@/lib/utils/battle/battle-attack";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 interface AttackRollDialogProps {
@@ -22,6 +22,7 @@ interface AttackRollDialogProps {
   onConfirm: (data: {
     attackRoll: number;
     advantageRoll?: number;
+    disadvantageRoll?: number;
   }) => void;
 }
 
@@ -38,6 +39,8 @@ export function AttackRollDialog({
 
   const [advantageRoll, setAdvantageRoll] = useState("");
 
+  const [disadvantageRoll, setDisadvantageRoll] = useState("");
+
   const attackBonus = attack.attackBonus || 0;
 
   const statModifier =
@@ -49,10 +52,12 @@ export function AttackRollDialog({
     attackBonus + statModifier + attacker.abilities.proficiencyBonus;
 
   const hasAdvantageOnAttack = hasAdvantage(attacker, attack);
+  const hasDisadvantageOnAttack = hasDisadvantage(attacker, attack);
 
   const handleCancel = () => {
     setAttackRoll("");
     setAdvantageRoll("");
+    setDisadvantageRoll("");
     onOpenChange(false);
   };
 
@@ -61,14 +66,18 @@ export function AttackRollDialog({
 
     if (roll >= 1 && roll <= 20) {
       const advantage = advantageRoll ? parseInt(advantageRoll, 10) : undefined;
+      const disadvantage = disadvantageRoll ? parseInt(disadvantageRoll, 10) : undefined;
 
       if (advantage != null && (advantage < 1 || advantage > 20)) {
         alert("Кидок переваги має бути від 1 до 20");
-
+        return;
+      }
+      if (disadvantage != null && (disadvantage < 1 || disadvantage > 20)) {
+        alert("Кидок недоліку має бути від 1 до 20");
         return;
       }
 
-      onConfirm({ attackRoll: roll, advantageRoll: advantage });
+      onConfirm({ attackRoll: roll, advantageRoll: advantage, disadvantageRoll: disadvantage });
       handleCancel();
     } else {
       alert("Кидок має бути від 1 до 20");
@@ -106,21 +115,42 @@ export function AttackRollDialog({
               : "?"}
           </p>
         </div>
-        {hasAdvantageOnAttack && (
+        {hasAdvantageOnAttack && !hasDisadvantageOnAttack && (
           <div>
-            <Label>Кидок переваги (опціонально)</Label>
+            <Label>Advantage — другий кидок d20</Label>
             <Input
               type="number"
               min={1}
               max={20}
               value={advantageRoll}
               onChange={(e) => setAdvantageRoll(e.target.value)}
-              placeholder="Введіть результат (1-20) або залиште порожнім"
+              placeholder="Введіть результат (1-20)"
             />
             <p className="text-xs text-muted-foreground mt-1">
               Використовується найкращий результат з двох кидків
             </p>
           </div>
+        )}
+        {hasDisadvantageOnAttack && !hasAdvantageOnAttack && (
+          <div>
+            <Label>Disadvantage — другий кидок d20</Label>
+            <Input
+              type="number"
+              min={1}
+              max={20}
+              value={disadvantageRoll}
+              onChange={(e) => setDisadvantageRoll(e.target.value)}
+              placeholder="Введіть результат (1-20)"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Використовується найменший результат з двох кидків
+            </p>
+          </div>
+        )}
+        {hasAdvantageOnAttack && hasDisadvantageOnAttack && (
+          <p className="text-sm text-amber-500">
+            Advantage і Disadvantage скасовують одне одного — звичайний кидок
+          </p>
         )}
         <ConfirmCancelFooter
           onCancel={handleCancel}

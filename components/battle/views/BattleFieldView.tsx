@@ -75,7 +75,7 @@ export function BattleFieldView({
                   transition={{ duration: 0.3 }}
                   className="overflow-hidden"
                 >
-                  <div className="grid grid-cols-1 gap-3 p-4">
+                  <div className="grid grid-cols-1 gap-3">
                     {allies.length === 0 ? (
                       <Card className="glass-card border-blue-500/20">
                         <CardContent className="py-12 text-center text-muted-foreground italic">
@@ -139,7 +139,7 @@ export function BattleFieldView({
                   transition={{ duration: 0.3 }}
                   className="overflow-hidden"
                 >
-                  <div className="grid grid-cols-1 gap-3 p-4">
+                  <div className="grid grid-cols-1 gap-3">
                     {enemies.length === 0 ? (
                       <Card className="glass-card border-red-500/20">
                         <CardContent className="py-12 text-center text-muted-foreground italic">

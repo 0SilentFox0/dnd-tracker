@@ -14,7 +14,7 @@ const STATE_BEFORE_KEEP_LAST_N = 1;
 /**
  * Зменшує розмір initiativeOrder перед записом у БД.
  * - activeEffects: appliedAt зберігає лише round (без timestamp)
- * - activeEffects: видаляє description, icon (не потрібні для battle logic)
+ * - activeEffects: видаляє description (icon зберігаємо для UI)
  * - activeSkills: видаляє description, icon
  * - passiveAbilities: видаляє description
  * - racialAbilities: залишає мінімальний effect
@@ -34,15 +34,14 @@ export function slimInitiativeOrderForStorage(
 
     const updates: Partial<typeof bd> = {};
 
-    // activeEffects: slim appliedAt, remove description/icon
+    // activeEffects: slim appliedAt, remove description (keep icon for UI)
     const effects = bd.activeEffects;
 
     if (effects && effects.length > 0) {
       updates.activeEffects = effects.map((e) => {
-        const { appliedAt, description: _description, icon: _icon, ...rest } = e;
+        const { appliedAt, description: _description, ...rest } = e;
 
         void _description;
-        void _icon;
 
         const round =
           appliedAt && typeof appliedAt === "object" && "round" in appliedAt
@@ -53,22 +52,7 @@ export function slimInitiativeOrderForStorage(
       });
     }
 
-    // activeSkills: remove description, icon (keep skillId, effects, affectsDamage, damageType, etc.)
-    const skills = bd.activeSkills;
-
-    if (skills && skills.length > 0) {
-      updates.activeSkills = skills.map((s) => {
-        const { description: _d, icon: _i, ...rest } = s as typeof s & {
-          description?: string;
-          icon?: string;
-        };
-
-        void _d;
-        void _i;
-
-        return rest;
-      });
-    }
+    // activeSkills: keep icon and description for UI (bonus action picker, effect display)
 
     // passiveAbilities: remove description (keep empty string for type)
     const passives = bd.passiveAbilities;

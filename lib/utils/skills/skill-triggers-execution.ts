@@ -100,6 +100,7 @@ function executeSkillEffects(
             id: `skill-${skill.skillId}-${effect.stat}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
             name: effectName,
             type: numValue > 0 ? "buff" : "debuff",
+            icon: skill.icon ?? undefined,
             duration: dur,
             effects: [
               {
@@ -148,6 +149,7 @@ function executeSkillEffects(
             id: `skill-${skill.skillId}-${effect.stat}-${Date.now()}`,
             name: `${skill.name} — ${dmgType}`,
             type: "debuff",
+            icon: skill.icon ?? undefined,
             duration: dotDur,
             effects: [],
             dotDamage: {
@@ -687,6 +689,7 @@ export function executeOnHitEffects(
               id: `skill-${skill.skillId}-${effect.stat}-${Date.now()}`,
               name: `${skill.name} — ${dmgType}`,
               type: "debuff",
+              icon: skill.icon ?? undefined,
               duration: dotDur,
               effects: [],
               dotDamage: { damagePerRound: dotDmg, damageType: dmgType },
@@ -733,6 +736,7 @@ export function executeOnHitEffects(
                   id: `skill-${skill.skillId}-initiative-${t.basicInfo.id}-${Date.now()}`,
                   name: `${skill.name} — ініціатива`,
                   type: "buff",
+                  icon: skill.icon ?? undefined,
                   duration: dur,
                   effects: [{ type: "initiative_bonus", value: val }],
                 },
@@ -754,6 +758,7 @@ export function executeOnHitEffects(
                 id: `skill-${skill.skillId}-initiative-${Date.now()}`,
                 name: `${skill.name} — ініціатива`,
                 type: "debuff",
+                icon: skill.icon ?? undefined,
                 duration: dur,
                 effects: [{ type: "initiative_bonus", value: numValue }],
               },
@@ -801,6 +806,7 @@ export function executeOnHitEffects(
                   id: `skill-${skill.skillId}-${effect.stat}-${t.basicInfo.id}-${Date.now()}`,
                   name: `${skill.name} — бонус урону`,
                   type: "buff",
+                  icon: skill.icon ?? undefined,
                   duration: dur,
                   effects: [{ type: effect.stat, value: val }],
                 },
@@ -828,6 +834,7 @@ export function executeOnHitEffects(
               id: `skill-${skill.skillId}-armor-${Date.now()}`,
               name: `${skill.name} — AC`,
               type: "debuff",
+              icon: skill.icon ?? undefined,
               duration: dur,
               effects: [{ type: "ac_bonus", value: numValue }],
             },
@@ -863,6 +870,7 @@ export function executeOnHitEffects(
               id: `skill-${skill.skillId}-speed-${Date.now()}`,
               name: `${skill.name} — швидкість`,
               type: "debuff",
+              icon: skill.icon ?? undefined,
               duration: dur,
               effects: [{ type: "speed_bonus", value: -speedRed }],
             },
@@ -917,6 +925,7 @@ export function executeOnHitEffects(
               id: `skill-${skill.skillId}-armor-red-${Date.now()}`,
               name: `${skill.name} — −AC`,
               type: "debuff",
+              icon: skill.icon ?? undefined,
               duration: dur,
               effects: [{ type: "ac_bonus", value: -armorRed }],
             },
@@ -955,6 +964,7 @@ export function executeOnHitEffects(
                 id: `skill-${skill.skillId}-runic-init-${Date.now()}`,
                 name: `${skill.name} — ${rune.label}`,
                 type: "buff",
+                icon: skill.icon ?? undefined,
                 duration: dur,
                 effects: [{ type: "initiative_bonus", value: rune.value }],
               },
@@ -973,6 +983,7 @@ export function executeOnHitEffects(
                 id: `skill-${skill.skillId}-runic-ac-${Date.now()}`,
                 name: `${skill.name} — ${rune.label}`,
                 type: "buff",
+                icon: skill.icon ?? undefined,
                 duration: dur,
                 effects: [{ type: "ac_bonus", value: rune.value }],
               },
@@ -1261,6 +1272,7 @@ export function executeOnBattleStartEffects(
           name: string;
           type: "buff";
           duration: number;
+          icon?: string;
           effects: Array<{ type: string; value: number }>;
         },
       ) => {
@@ -1279,6 +1291,7 @@ export function executeOnBattleStartEffects(
               id: `skill-${skill.skillId}-battle-start-initiative-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
               name: `${skill.name} — ініціатива`,
               type: "buff",
+              icon: skill.icon ?? undefined,
               duration: 999,
               effects: [{ type: "initiative_bonus", value: numValue }],
             });
@@ -1297,6 +1310,7 @@ export function executeOnBattleStartEffects(
               id: `skill-${skill.skillId}-battle-start-dmg-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
               name: `${skill.name} — бонус урону`,
               type: "buff",
+              icon: skill.icon ?? undefined,
               duration: 1,
               effects: [{ type: "damage_bonus", value: numValue }],
             });
@@ -1315,6 +1329,7 @@ export function executeOnBattleStartEffects(
               id: `skill-${skill.skillId}-battle-start-adv-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
               name: `${skill.name} — advantage`,
               type: "buff",
+              icon: skill.icon ?? undefined,
               duration: 1,
               effects: [{ type: "advantage_attack", value: 1 }],
             });
@@ -1406,6 +1421,7 @@ export function executeOnBattleStartEffectsForAll(
             name: string;
             type: "buff";
             duration: number;
+            icon?: string;
             effects: Array<{ type: string; value: number }>;
           },
         ) => {
@@ -1424,6 +1440,7 @@ export function executeOnBattleStartEffectsForAll(
                 id: `skill-${skill.skillId}-battle-start-initiative-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
                 name: `${skill.name} — ініціатива`,
                 type: "buff",
+                icon: skill.icon ?? undefined,
                 duration: 999,
                 effects: [{ type: "initiative_bonus", value: numValue }],
               });
@@ -1446,6 +1463,7 @@ export function executeOnBattleStartEffectsForAll(
                 id: `skill-${skill.skillId}-battle-start-dmg-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
                 name: `${skill.name} — бонус урону`,
                 type: "buff",
+                icon: skill.icon ?? undefined,
                 duration: 1,
                 effects: [{ type: "damage_bonus", value: numValue }],
               });
@@ -1468,6 +1486,7 @@ export function executeOnBattleStartEffectsForAll(
                 id: `skill-${skill.skillId}-battle-start-adv-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
                 name: `${skill.name} — advantage`,
                 type: "buff",
+                icon: skill.icon ?? undefined,
                 duration: 1,
                 effects: [{ type: "advantage_attack", value: 1 }],
               });
@@ -1586,6 +1605,7 @@ export function applyOnBattleStartEffectsToNewAllies(
               name: string;
               type: "buff";
               duration: number;
+              icon?: string;
               effects: Array<{ type: string; value: number }>;
             },
           ) => {
@@ -1603,6 +1623,7 @@ export function applyOnBattleStartEffectsToNewAllies(
                 id: `skill-${skill.skillId}-battle-start-initiative-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
                 name: `${skill.name} — ініціатива`,
                 type: "buff",
+                icon: skill.icon ?? undefined,
                 duration: 999,
                 effects: [{ type: "initiative_bonus", value: numValue }],
               });
@@ -1612,6 +1633,7 @@ export function applyOnBattleStartEffectsToNewAllies(
                 id: `skill-${skill.skillId}-battle-start-dmg-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
                 name: `${skill.name} — бонус урону`,
                 type: "buff",
+                icon: skill.icon ?? undefined,
                 duration: 1,
                 effects: [{ type: "damage_bonus", value: numValue }],
               });
@@ -1621,6 +1643,7 @@ export function applyOnBattleStartEffectsToNewAllies(
                 id: `skill-${skill.skillId}-battle-start-adv-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
                 name: `${skill.name} — advantage`,
                 type: "buff",
+                icon: skill.icon ?? undefined,
                 duration: 1,
                 effects: [{ type: "advantage_attack", value: 1 }],
               });
@@ -1817,6 +1840,7 @@ export function executeBonusActionSkill(
               id: `skill-${skill.skillId}-bonus-init-${t.basicInfo.id}`,
               name: `${skill.name} — ініціатива`,
               type: "buff",
+              icon: skill.icon ?? undefined,
               duration: effect.duration ?? 999,
               effects: [{ type: "initiative_bonus", value: val }],
             },
@@ -1848,6 +1872,7 @@ export function executeBonusActionSkill(
               id: `skill-${skill.skillId}-bonus-ac-${t.basicInfo.id}`,
               name: `${skill.name} — AC`,
               type: "buff",
+              icon: skill.icon ?? undefined,
               duration: 999,
               effects: [{ type: "armor_bonus", value: numValue }],
             },
@@ -1879,6 +1904,7 @@ export function executeBonusActionSkill(
               id: `skill-${skill.skillId}-bonus-adv-${t.basicInfo.id}`,
               name: `${skill.name} — advantage`,
               type: "buff",
+              icon: skill.icon ?? undefined,
               duration: 1,
               effects: [{ type: "advantage_attack", value: 1 }],
             },

@@ -3,6 +3,7 @@
  * Used by attack-and-next-turn route (and can be reused by attack route).
  */
 
+import { getTotalDiceCount } from "@/lib/utils/battle/balance-calculations";
 import { processAttack } from "@/lib/utils/battle/battle-attack-process";
 import { slimInitiativeOrderForStorage } from "@/lib/utils/battle/strip-battle-payload";
 import { updateMoraleOnEvent } from "@/lib/utils/skills/skill-triggers-execution";
@@ -22,7 +23,10 @@ export type AttackPhaseInput = {
     attackId?: string;
     d20Roll?: number;
     attackRoll?: number;
+    /** Один кидок на ціль (для multi-target); якщо length === targets.length, використовується для кожної цілі */
+    attackRolls?: number[];
     advantageRoll?: number;
+    disadvantageRoll?: number;
     damageRolls: number[];
   };
   battleId: string;
@@ -53,10 +57,20 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const baseBattleLog = (battle.battleLog as BattleAction[]) || [];
 
-  const d20Roll = data.d20Roll ?? data.attackRoll;
+  const singleRoll = data.d20Roll ?? data.attackRoll;
 
-  if (!d20Roll) {
-    throw new AttackPhaseError("d20Roll is required", 400);
+  const targetIds = data.targetIds || (data.targetId ? [data.targetId] : []);
+
+  const targets = initiativeOrder.filter((p) =>
+    targetIds.includes(p.basicInfo.id),
+  );
+
+  const usePerTargetRolls =
+    Array.isArray(data.attackRolls) &&
+    data.attackRolls.length === targets.length;
+
+  if (!singleRoll && !usePerTargetRolls) {
+    throw new AttackPhaseError("d20Roll, attackRoll or attackRolls required", 400);
   }
 
   const attacker = initiativeOrder.find(
@@ -80,12 +94,6 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       403,
     );
   }
-
-  const targetIds = data.targetIds || (data.targetId ? [data.targetId] : []);
-
-  const targets = initiativeOrder.filter((p) =>
-    targetIds.includes(p.basicInfo.id),
-  );
 
   if (targets.length === 0) {
     throw new AttackPhaseError("No targets found in battle", 404);
@@ -123,9 +131,16 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const isAoe = attack.targetType === "aoe";
 
+  const isMultiTargetRanged =
+    !isAoe &&
+    attack.type === "ranged" &&
+    (attacker.combatStats.maxTargets ?? 1) > 1;
+
   const maxPossibleTargets = isAoe
     ? attack.maxTargets || attacker.combatStats.maxTargets || 1
-    : 1;
+    : isMultiTargetRanged
+      ? attacker.combatStats.maxTargets || 1
+      : 1;
 
   if (targets.length > maxPossibleTargets) {
     throw new AttackPhaseError(
@@ -134,27 +149,23 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
     );
   }
 
-  if (!isAoe && targets.length > 1) {
-    throw new AttackPhaseError(
-      "Single-target attack allows only one target",
-      400,
-    );
-  }
-
   const dist = attack.damageDistribution;
 
+  // Для multi-target ranged: кожна ціль отримує повний урон (окремий кидок на ціль)
   const damageFractions: number[] =
-    dist &&
-    dist.length === targets.length &&
-    dist.every((n) => typeof n === "number" && n >= 0 && n <= 100)
-      ? (() => {
-          const sum = dist.reduce((a, b) => a + b, 0);
+    isMultiTargetRanged
+      ? targets.map(() => 1)
+      : dist &&
+          dist.length === targets.length &&
+          dist.every((n) => typeof n === "number" && n >= 0 && n <= 100)
+        ? (() => {
+            const sum = dist.reduce((a, b) => a + b, 0);
 
-          return sum > 0
-            ? dist.map((p) => p / sum)
-            : targets.map(() => 1 / targets.length);
-        })()
-      : targets.map(() => 1 / targets.length);
+            return sum > 0
+              ? dist.map((p) => p / sum)
+              : targets.map(() => 1 / targets.length);
+          })()
+        : targets.map(() => 1 / targets.length);
 
   let currentAttacker = { ...attacker };
 
@@ -182,11 +193,36 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   let stateBefore = snapshotState();
 
+  const dicePerTarget =
+    isMultiTargetRanged && targets.length > 1
+      ? getTotalDiceCount(attack.damageDice ?? "")
+      : 0;
+
   for (let i = 0; i < targets.length; i++) {
     const target = targets[i];
 
+    const d20Roll =
+      usePerTargetRolls && data.attackRolls
+        ? data.attackRolls[i]
+        : singleRoll;
+
+    if (d20Roll == null || d20Roll < 1 || d20Roll > 20) {
+      throw new AttackPhaseError(
+        `Invalid attack roll for target ${i + 1}`,
+        400,
+      );
+    }
+
     const damageMultiplier =
       targets.length > 1 ? damageFractions[i] : undefined;
+
+    const damageRollsForTarget =
+      isMultiTargetRanged &&
+      targets.length > 1 &&
+      dicePerTarget > 0 &&
+      data.damageRolls.length >= (i + 1) * dicePerTarget
+        ? data.damageRolls.slice(i * dicePerTarget, (i + 1) * dicePerTarget)
+        : data.damageRolls;
 
     const attackResult = processAttack({
       attacker: currentAttacker,
@@ -194,7 +230,8 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       attack,
       d20Roll,
       advantageRoll: data.advantageRoll,
-      damageRolls: data.damageRolls,
+      disadvantageRoll: data.disadvantageRoll,
+      damageRolls: damageRollsForTarget,
       allParticipants: currentInitiativeOrder,
       currentRound: battle.currentRound,
       battleId,

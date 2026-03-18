@@ -11,6 +11,8 @@ export interface MoraleCheckResult {
   shouldSkipTurn: boolean;
   hasExtraTurn: boolean;
   message: string;
+  /** true = перевірка на додатковий хід (+мораль), false = перевірка на пропуск (-мораль) */
+  moralePositive: boolean;
 }
 
 /**
@@ -23,14 +25,17 @@ export function checkMorale(
   participant: BattleParticipant,
   d10Roll: number
 ): MoraleCheckResult {
+  const rawMorale = participant.combatStats.morale;
+
   const result: MoraleCheckResult = {
     shouldSkipTurn: false,
     hasExtraTurn: false,
     message: "",
+    moralePositive: rawMorale > 0,
   };
 
   // Расові модифікатори
-  let currentMorale = participant.combatStats.morale;
+  let currentMorale = rawMorale;
 
   // Люди: негативна мораль завжди = 0
   if (participant.abilities.race === "human" && currentMorale < 0) {
@@ -85,6 +90,25 @@ export function checkMorale(
   }
 
   return result;
+}
+
+/** Тексти для overlay результату моралі (4 варіанти) */
+export function getMoraleOverlayText(result: MoraleCheckResult): string {
+  const positive = result.moralePositive;
+
+  if (positive && result.hasExtraTurn) {
+    return "Ти відчуваєш натхнення і робиш ще один хід в раунді";
+  }
+
+  if (positive && !result.hasExtraTurn) {
+    return "Бій іде! Надихай своєю хоробрістю";
+  }
+
+  if (!positive && !result.shouldSkipTurn) {
+    return "Ти відчуваєш що бій нерівний і втрачаєш віру";
+  }
+
+  return "Бій іде! Надихай своєю хоробрістю";
 }
 
 /**

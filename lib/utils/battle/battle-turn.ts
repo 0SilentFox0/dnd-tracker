@@ -42,11 +42,37 @@ export function processStartOfTurn(
 
   const damageMessages: string[] = [];
 
+  let expiredEffects: string[] = [];
+
   const triggeredAbilities: string[] = [];
 
-  // DoT і зменшення тривалості ефектів відбуваються на початку раунду (processStartOfRound), не тут
+  // DoT і зменшення тривалості ефектів — на початку ходу цієї цілі (Decay тощо)
+  if (
+    updatedParticipant.combatStats.status !== "dead" &&
+    updatedParticipant.combatStats.status !== "unconscious"
+  ) {
+    const dotResult = applyDOTEffects(updatedParticipant);
+    updatedParticipant = {
+      ...updatedParticipant,
+      combatStats: {
+        ...updatedParticipant.combatStats,
+        currentHp: dotResult.newHp,
+      },
+    };
+    damageMessages.push(...dotResult.damageMessages);
 
-  // 1. Перевіряємо чи учасник впав в непритомність або помер (після DoT на початку раунду)
+    const durationResult = decreaseEffectDurations(updatedParticipant);
+    expiredEffects = durationResult.expiredEffects;
+    updatedParticipant = {
+      ...updatedParticipant,
+      battleData: {
+        ...updatedParticipant.battleData,
+        activeEffects: durationResult.updatedEffects,
+      },
+    };
+  }
+
+  // 1. Перевіряємо чи учасник впав в непритомність або помер (після DoT)
   let statusChanged = false;
 
   if (
@@ -105,7 +131,7 @@ export function processStartOfTurn(
   return {
     participant: updatedParticipant,
     damageMessages,
-    expiredEffects: [],
+    expiredEffects,
     triggeredAbilities,
     statusChanged,
   };
@@ -223,45 +249,11 @@ export function processStartOfRound(
     return b.abilities.dexterity - a.abilities.dexterity;
   });
 
-  // На початку раунду: DoT (кровотеча, отрута, вогонь тощо) та зменшення тривалості ефектів
-  const dotMessages: string[] = [];
-  const updatedOrderWithDot = sortedOrder.map((participant) => {
-    if (
-      participant.combatStats.status === "dead" ||
-      participant.combatStats.status === "unconscious"
-    ) {
-      return participant;
-    }
-
-    const dotResult = applyDOTEffects(participant);
-    let p: BattleParticipant = {
-      ...participant,
-      combatStats: {
-        ...participant.combatStats,
-        currentHp: dotResult.newHp,
-      },
-    };
-    dotMessages.push(...dotResult.damageMessages);
-
-    const durationResult = decreaseEffectDurations(p);
-    p = {
-      ...p,
-      battleData: {
-        ...p.battleData,
-        activeEffects: durationResult.updatedEffects,
-      },
-    };
-
-    return p;
-  });
-
-  const allRoundMessages = [
-    ...triggerResult.messages,
-    ...dotMessages,
-  ];
+  // DoT і зменшення тривалості ефектів тепер на початку ходу кожного учасника (processStartOfTurn)
+  const allRoundMessages = [...triggerResult.messages];
 
   return {
-    updatedInitiativeOrder: updatedOrderWithDot,
+    updatedInitiativeOrder: sortedOrder,
     message: `🔁 Початок Раунду ${currentRound}`,
     triggerMessages: allRoundMessages,
   };

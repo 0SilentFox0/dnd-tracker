@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Heart, TrendingDown, TrendingUp } from "lucide-react";
+import { Heart, Loader2, TrendingDown, TrendingUp } from "lucide-react";
 
 import { ActionButtonsPanel } from "@/components/battle/ActionButtonsPanel";
 import { AttackRollDialog } from "@/components/battle/dialogs/AttackRollDialog";
@@ -39,6 +39,7 @@ export function PlayerTurnView({
   onMoraleCheck,
   isNextTurnPending = false,
   isAttackPending = false,
+  isMoraleCheckPending = false,
 }: PlayerTurnViewProps) {
   const [turnStarted, setTurnStarted] = useState(false);
 
@@ -62,8 +63,22 @@ export function PlayerTurnView({
 
   const [pendingAttackData, setPendingAttackData] = useState<{
     damageRolls: number[];
-    attackRollData: { attackRoll: number; advantageRoll?: number };
+    attackRollData: { attackRoll: number; advantageRoll?: number; disadvantageRoll?: number };
+    attackRollsData?: Array<{
+      attackRoll: number;
+      advantageRoll?: number;
+      disadvantageRoll?: number;
+    }>;
   } | null>(null);
+
+  /** Для multi-target: зібрані кидки по попаданню (один на ціль) */
+  const [attackRollsData, setAttackRollsData] = useState<
+    Array<{
+      attackRoll: number;
+      advantageRoll?: number;
+      disadvantageRoll?: number;
+    }>
+  >([]);
 
   const [selectedAttack, setSelectedAttack] = useState<BattleAttack | null>(
     null,
@@ -79,6 +94,7 @@ export function PlayerTurnView({
   const [attackRollData, setAttackRollData] = useState<{
     attackRoll: number;
     advantageRoll?: number;
+    disadvantageRoll?: number;
   } | null>(null);
 
   const [spellSelectionDialogOpen, setSpellSelectionDialogOpen] =
@@ -219,6 +235,7 @@ export function PlayerTurnView({
 
     setSelectedTargets(targets);
     setSelectedTarget(targets[0]);
+    setAttackRollsData([]);
     setTargetSelectionDialogOpen(false);
     setAttackRollDialogOpen(true);
   };
@@ -230,35 +247,36 @@ export function PlayerTurnView({
   const handleAttackRollConfirm = (data: {
     attackRoll: number;
     advantageRoll?: number;
+    disadvantageRoll?: number;
   }) => {
-    setAttackRollData(data);
-    setAttackRollDialogOpen(false);
-
     if (!selectedAttack || !selectedTarget) return;
 
-    // Розраховуємо результат
-    const d20 = data.advantageRoll
-      ? Math.max(data.attackRoll, data.advantageRoll)
-      : data.attackRoll;
+    const d20 =
+      data.advantageRoll != null
+        ? Math.max(data.attackRoll, data.advantageRoll)
+        : data.disadvantageRoll != null
+          ? Math.min(data.attackRoll, data.disadvantageRoll)
+          : data.attackRoll;
 
     const isCrit = d20 === 20;
-
     const isCritFail = d20 === 1;
-
-    // Розрахунок бонусу (дублюється з діалогу, варто винести в утиліту)
     const attackBonus = selectedAttack.attackBonus || 0;
-
     const statModifier =
       selectedAttack.type === AttackType.MELEE
         ? Math.floor((participant.abilities.strength - 10) / 2)
         : Math.floor((participant.abilities.dexterity - 10) / 2);
-
     const totalBonus =
       attackBonus + statModifier + participant.abilities.proficiencyBonus;
-
     const totalRoll = d20 + totalBonus;
-
     const targetAC = selectedTarget.combatStats.armorClass;
+
+    if (selectedTargets.length > 1) {
+      setAttackRollsData((prev) => [...prev, data]);
+      setAttackRollDialogOpen(false);
+    } else {
+      setAttackRollData(data);
+      setAttackRollDialogOpen(false);
+    }
 
     if (isCrit) {
       setRollResult("crit");
@@ -271,17 +289,85 @@ export function PlayerTurnView({
     }
   };
 
+  const currentRollTarget =
+    selectedTargets.length > 1
+      ? selectedTargets[attackRollsData.length]
+      : selectedTarget;
+
   const handleRollResultComplete = () => {
     if (!rollResult) return;
 
     const isHit = rollResult === "hit" || rollResult === "crit";
-
     const wasCrit = rollResult === "crit";
 
-    // Скидаємо результат
     setRollResult(null);
 
-    // Якщо це хіт -> відкриваємо діалог урону
+    const multiTarget = selectedTargets.length > 1;
+
+    if (multiTarget) {
+      const allRollsDone = attackRollsData.length >= selectedTargets.length;
+
+      if (!allRollsDone) {
+        setSelectedTarget(selectedTargets[attackRollsData.length]);
+        setAttackRollDialogOpen(true);
+        return;
+      }
+
+      const anyHit = attackRollsData.some((data, i) => {
+        const d20 =
+          data.advantageRoll != null
+            ? Math.max(data.attackRoll, data.advantageRoll)
+            : data.disadvantageRoll != null
+              ? Math.min(data.attackRoll, data.disadvantageRoll)
+              : data.attackRoll;
+        const attackBonus = selectedAttack?.attackBonus || 0;
+        const statModifier =
+          selectedAttack?.type === AttackType.MELEE
+            ? Math.floor((participant.abilities.strength - 10) / 2)
+            : Math.floor((participant.abilities.dexterity - 10) / 2);
+        const totalRoll =
+          d20 + attackBonus + statModifier + participant.abilities.proficiencyBonus;
+
+        return totalRoll >= selectedTargets[i].combatStats.armorClass;
+      });
+
+      if (anyHit) {
+        setDamageFromCrit(false);
+        setPendingAttackData({
+          damageRolls: [],
+          attackRollData: attackRollsData[0],
+          attackRollsData,
+        });
+        setDamageRollDialogOpen(true);
+      } else {
+        if (!selectedAttack) return;
+
+        setHasPerformedAction(true);
+        const effectiveRolls = attackRollsData.map((d) =>
+          d.advantageRoll != null
+            ? Math.max(d.attackRoll, d.advantageRoll)
+            : d.disadvantageRoll != null
+              ? Math.min(d.attackRoll, d.disadvantageRoll)
+              : d.attackRoll,
+        );
+
+        onAttack({
+          attackerId: participant.basicInfo.id,
+          targetIds: selectedTargets.map((t) => t.basicInfo.id),
+          attackId: selectedAttack.id || selectedAttack.name,
+          attackRolls: effectiveRolls,
+          damageRolls: [],
+        });
+
+        setSelectedAttack(null);
+        setSelectedTarget(null);
+        setSelectedTargets([]);
+        setAttackRollsData([]);
+      }
+
+      return;
+    }
+
     if (isHit) {
       setDamageFromCrit(wasCrit);
       setDamageRollDialogOpen(true);
@@ -296,7 +382,8 @@ export function PlayerTurnView({
         attackId: selectedAttack.id || selectedAttack.name,
         attackRoll: attackRollData.attackRoll,
         advantageRoll: attackRollData.advantageRoll,
-        damageRolls: [], // Empty damage for miss
+        disadvantageRoll: attackRollData.disadvantageRoll,
+        damageRolls: [],
       });
 
       setSelectedAttack(null);
@@ -307,24 +394,50 @@ export function PlayerTurnView({
   };
 
   const handleDamageRollConfirm = (damageRolls: number[]) => {
-    if (!selectedAttack || selectedTargets.length === 0 || !attackRollData) return;
+    if (!selectedAttack || selectedTargets.length === 0) return;
 
-    setPendingAttackData({ damageRolls, attackRollData });
+    const rollData =
+      selectedTargets.length > 1 && attackRollsData.length > 0
+        ? { damageRolls, attackRollData: attackRollsData[0], attackRollsData }
+        : { damageRolls, attackRollData: attackRollData! };
+
+    if (selectedTargets.length === 1 && !attackRollData) return;
+
+    setPendingAttackData(rollData);
     setDamageRollDialogOpen(false);
     setDamageSummaryOpen(true);
   };
 
   const handleDamageSummaryApply = () => {
-    if (!selectedAttack || selectedTargets.length === 0 || !attackRollData || !pendingAttackData) return;
+    if (!selectedAttack || selectedTargets.length === 0 || !pendingAttackData) return;
+
+    const multi = pendingAttackData.attackRollsData != null;
+
+    if (!multi && !attackRollData) return;
 
     setHasPerformedAction(true);
+
+    const effectiveRolls = multi
+      ? pendingAttackData.attackRollsData!.map((d) =>
+          d.advantageRoll != null
+            ? Math.max(d.attackRoll, d.advantageRoll)
+            : d.disadvantageRoll != null
+              ? Math.min(d.attackRoll, d.disadvantageRoll)
+              : d.attackRoll,
+        )
+      : undefined;
 
     onAttack({
       attackerId: participant.basicInfo.id,
       targetIds: selectedTargets.map((t) => t.basicInfo.id),
       attackId: selectedAttack.id || selectedAttack.name,
-      attackRoll: attackRollData.attackRoll,
-      advantageRoll: attackRollData.advantageRoll,
+      ...(multi && effectiveRolls
+        ? { attackRolls: effectiveRolls }
+        : {
+            attackRoll: attackRollData!.attackRoll,
+            advantageRoll: attackRollData!.advantageRoll,
+            disadvantageRoll: attackRollData!.disadvantageRoll,
+          }),
       damageRolls: pendingAttackData.damageRolls,
     });
 
@@ -332,6 +445,7 @@ export function PlayerTurnView({
     setSelectedTarget(null);
     setSelectedTargets([]);
     setAttackRollData(null);
+    setAttackRollsData([]);
     setPendingAttackData(null);
     setDamageSummaryOpen(false);
   };
@@ -344,6 +458,8 @@ export function PlayerTurnView({
         participant.actionFlags.hasUsedAction || hasPerformedAction,
     },
   };
+
+  const isProcessing = isNextTurnPending || isMoraleCheckPending;
 
   if (!turnStarted) {
     return (
@@ -401,10 +517,18 @@ export function PlayerTurnView({
               {buffs.map((e) => (
                 <span
                   key={e.id}
-                  className="rounded px-1.5 py-0.5 text-[10px] font-medium bg-green-500/25 text-green-200 border border-green-500/40"
+                  className="flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium bg-green-500/25 text-green-200 border border-green-500/40"
                   title={e.description ?? `${e.name}${e.duration > 0 ? ` (${e.duration} раундів)` : ""}`}
                 >
-                  {e.name}
+                  {e.icon ? (
+                    <img
+                      src={e.icon}
+                      alt={e.name}
+                      className="h-4 w-4 rounded object-cover shrink-0 border-2 border-green-500"
+                    />
+                  ) : (
+                    <span>{e.name}</span>
+                  )}
                   {e.duration > 0 ? ` (${e.duration})` : ""}
                 </span>
               ))}
@@ -426,10 +550,18 @@ export function PlayerTurnView({
                 return (
                   <span
                     key={e.id}
-                    className="rounded px-1.5 py-0.5 text-[10px] font-medium bg-red-500/25 text-red-200 border border-red-500/40"
+                    className="flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium bg-red-500/25 text-red-200 border border-red-500/40"
                     title={title}
                   >
-                    {e.name}
+                    {e.icon ? (
+                      <img
+                        src={e.icon}
+                        alt={e.name}
+                        className="h-4 w-4 rounded object-cover shrink-0 border-2 border-red-500"
+                      />
+                    ) : (
+                      <span>{e.name}</span>
+                    )}
                     {e.duration > 0 ? ` (${e.duration})` : ""}
                   </span>
                 );
@@ -442,10 +574,18 @@ export function PlayerTurnView({
               {conditions.map((e) => (
                 <span
                   key={e.id}
-                  className="rounded px-1.5 py-0.5 text-[10px] font-medium bg-amber-500/25 text-amber-200 border border-amber-500/40"
+                  className="flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium bg-amber-500/25 text-amber-200 border border-amber-500/40"
                   title={e.description ?? `${e.name}${e.duration > 0 ? ` (${e.duration} раундів)` : ""}`}
                 >
-                  {e.name}
+                  {e.icon ? (
+                    <img
+                      src={e.icon}
+                      alt={e.name}
+                      className="h-4 w-4 rounded object-cover shrink-0"
+                    />
+                  ) : (
+                    <span>{e.name}</span>
+                  )}
                   {e.duration > 0 ? ` (${e.duration})` : ""}
                 </span>
               ))}
@@ -498,8 +638,19 @@ export function PlayerTurnView({
       <TargetSelectionDialog
         open={targetSelectionDialogOpen}
         onOpenChange={setTargetSelectionDialogOpen}
-        isAOE={selectedAttack?.targetType === "aoe"}
-        maxTargets={selectedAttack?.targetType === "aoe" ? selectedAttack.maxTargets : undefined}
+        isAOE={
+          selectedAttack?.targetType === "aoe" ||
+          (selectedAttack?.type === AttackType.RANGED &&
+            (participant.combatStats.maxTargets ?? 1) > 1)
+        }
+        maxTargets={
+          selectedAttack?.targetType === "aoe"
+            ? selectedAttack.maxTargets
+            : selectedAttack?.type === AttackType.RANGED &&
+                (participant.combatStats.maxTargets ?? 1) > 1
+              ? participant.combatStats.maxTargets
+              : undefined
+        }
         canSeeEnemyHp={canSeeEnemyHp}
         availableTargets={(() => {
           const friendlyFire = battle.campaign?.friendlyFire || false;
@@ -526,13 +677,13 @@ export function PlayerTurnView({
         description="Оберіть ворога для нанесення удару"
       />
 
-      {selectedAttack && selectedTarget && (
+      {selectedAttack && currentRollTarget && (
         <AttackRollDialog
           open={attackRollDialogOpen}
           onOpenChange={setAttackRollDialogOpen}
           attacker={participant}
           attack={selectedAttack}
-          target={selectedTarget}
+          target={currentRollTarget}
           canSeeEnemyHp={canSeeEnemyHp}
           onConfirm={handleAttackRollConfirm}
         />
@@ -543,6 +694,8 @@ export function PlayerTurnView({
           open={damageRollDialogOpen}
           onOpenChange={setDamageRollDialogOpen}
           attack={selectedAttack}
+          attacker={participant}
+          targetsCount={selectedTargets.length}
           damageDiceFormula={
             participant.basicInfo.sourceType === "character"
               ? mergeDiceFormulas(
@@ -587,7 +740,12 @@ export function PlayerTurnView({
       )}
 
       {/* Панель дій; кнопка «Мораль» — fallback, якщо модалка не з’явилась після «Почати хід» */}
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-12">
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-12 relative">
+        {isProcessing && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-2xl">
+            <Loader2 className="w-12 h-12 animate-spin text-primary" />
+          </div>
+        )}
         <ActionButtonsPanel
           participant={effectiveParticipant}
           bonusActions={bonusActions}
@@ -596,23 +754,6 @@ export function PlayerTurnView({
           onSpell={() => setSpellSelectionDialogOpen(true)}
           onBonusAction={onBonusAction}
           onSkipTurn={onSkipTurn}
-          showMoraleButton={
-            turnStarted &&
-            (() => {
-              const race = participant.abilities.race?.toLowerCase() ?? "";
-
-              let currentMorale = participant.combatStats.morale;
-
-              if (race === BATTLE_RACE.HUMAN && currentMorale < 0) currentMorale = 0;
-
-              return (
-                participant.combatStats.morale !== 0 &&
-                race !== BATTLE_RACE.NECROMANCER &&
-                currentMorale !== 0
-              );
-            })()
-          }
-          onOpenMorale={() => setShowMoraleCheck(true)}
         />
       </div>
 

@@ -60,6 +60,7 @@ export interface MoraleCheckResult {
   shouldSkipTurn: boolean;
   hasExtraTurn: boolean;
   message: string;
+  moralePositive?: boolean;
 }
 
 export interface DamageCalculationResult {

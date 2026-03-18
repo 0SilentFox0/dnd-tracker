@@ -185,6 +185,7 @@ export async function POST(
         ? (spellData.effects as string[])
         : undefined,
       effectDetails: spellData.effectDetails as BattleSpell["effectDetails"] ?? undefined,
+      icon: spellData.icon ?? undefined,
     };
 
     // Обробляємо заклинання через нову функцію (перерахунок шкоди)

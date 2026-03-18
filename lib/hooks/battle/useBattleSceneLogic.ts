@@ -311,12 +311,28 @@ export function useBattleSceneLogic(id: string, battleId: string) {
           triggerGlobalDamageFromBattle(updatedBattle);
 
           if (hpChanges.length >= 2) {
-            setCounterAttackInfo({
-              defenderName: hpChanges[0].participantName,
-              attackerName: hpChanges[1].participantName,
-              damage: hpChanges[1].change ?? 0,
-            });
-            setCounterAttackDialogOpen(true);
+            const details = lastAction?.actionDetails as
+              | {
+                  counterReactionDamage?: number;
+                  counterReactionBaseDamage?: number;
+                  counterReactionBonusPercent?: number;
+                }
+              | undefined;
+
+            const counterChange = hpChanges.find(
+              (h) => h.participantId !== hpChanges[0].participantId && (h.change ?? 0) > 0,
+            );
+
+            if (counterChange) {
+              setCounterAttackInfo({
+                defenderName: hpChanges[0].participantName,
+                attackerName: counterChange.participantName,
+                damage: counterChange.change ?? 0,
+                baseDamage: details?.counterReactionBaseDamage,
+                bonusPercent: details?.counterReactionBonusPercent,
+              });
+              setCounterAttackDialogOpen(true);
+            }
           }
 
           onSuccess?.();
