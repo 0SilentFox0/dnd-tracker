@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { PusherConnectionState } from "@/lib/hooks/battle/usePusherBattleSync";
+import type { PusherConnectionState } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import type { BattleScene } from "@/types/api";
 

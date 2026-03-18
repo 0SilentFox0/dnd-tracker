@@ -9,9 +9,9 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { ReadOnlyProvider } from "@/components/ui/read-only-context";
 import { getHeroMaxHpBreakdown } from "@/lib/constants/hero-scaling";
-import { useCampaignMembers } from "@/lib/hooks/useCampaignMembers";
-import { useCharacterView } from "@/lib/hooks/useCharacterView";
-import { useRaces } from "@/lib/hooks/useRaces";
+import { useCampaignMembers } from "@/lib/hooks/campaigns";
+import { useCharacterView } from "@/lib/hooks/characters";
+import { useRaces } from "@/lib/hooks/races";
 
 export function CharacterViewClient({
   campaignId,

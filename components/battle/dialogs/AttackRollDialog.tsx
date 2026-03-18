@@ -9,7 +9,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
-import { hasAdvantage, hasDisadvantage } from "@/lib/utils/battle/battle-attack";
+import { hasAdvantage, hasDisadvantage } from "@/lib/utils/battle/attack";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 interface AttackRollDialogProps {
@@ -52,6 +52,7 @@ export function AttackRollDialog({
     attackBonus + statModifier + attacker.abilities.proficiencyBonus;
 
   const hasAdvantageOnAttack = hasAdvantage(attacker, attack);
+
   const hasDisadvantageOnAttack = hasDisadvantage(attacker, attack);
 
   const handleCancel = () => {
@@ -66,14 +67,18 @@ export function AttackRollDialog({
 
     if (roll >= 1 && roll <= 20) {
       const advantage = advantageRoll ? parseInt(advantageRoll, 10) : undefined;
+
       const disadvantage = disadvantageRoll ? parseInt(disadvantageRoll, 10) : undefined;
 
       if (advantage != null && (advantage < 1 || advantage > 20)) {
         alert("Кидок переваги має бути від 1 до 20");
+
         return;
       }
+
       if (disadvantage != null && (disadvantage < 1 || disadvantage > 20)) {
         alert("Кидок недоліку має бути від 1 до 20");
+
         return;
       }
 

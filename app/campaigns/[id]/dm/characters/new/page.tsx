@@ -25,9 +25,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { createCharacter } from "@/lib/api/characters";
-import { useCampaignMembers } from "@/lib/hooks/useCampaignMembers";
-import { useCharacterForm } from "@/lib/hooks/useCharacterForm";
-import { useRaces } from "@/lib/hooks/useRaces";
+import { useCampaignMembers } from "@/lib/hooks/campaigns";
+import { useCharacterForm } from "@/lib/hooks/characters";
+import { useRaces } from "@/lib/hooks/races";
 
 export default function NewCharacterPage({
   params,

@@ -4,10 +4,10 @@ import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { getHeroDamageComponents } from "@/lib/constants/hero-scaling";
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
-import { getDiceAverage } from "@/lib/utils/battle/balance-calculations";
-import { calculateDamageWithModifiers } from "@/lib/utils/battle/battle-damage-calculations";
-import { createBattleParticipantFromCharacter } from "@/lib/utils/battle/battle-participant";
+import { getDiceAverage } from "@/lib/utils/battle/balance";
 import { logBattleTiming } from "@/lib/utils/battle/battle-timing";
+import { calculateDamageWithModifiers } from "@/lib/utils/battle/damage";
+import { createBattleParticipantFromCharacter } from "@/lib/utils/battle/participant";
 
 export interface DamagePreviewItem {
   total: number;

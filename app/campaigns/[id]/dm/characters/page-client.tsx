@@ -31,7 +31,7 @@ import {
   useDeleteAllCharacters,
   useDeleteCharacter,
   useLevelUpCharacter,
-} from "@/lib/hooks/useCharacters";
+} from "@/lib/hooks/characters";
 import type { Character } from "@/types/characters";
 
 interface DMCharactersClientProps {

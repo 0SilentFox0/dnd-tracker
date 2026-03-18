@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useAppearanceSave } from "@/lib/hooks/useAppearanceSave";
+import { useAppearanceSave } from "@/lib/hooks/common";
 import type { SkillForReference } from "@/lib/types/info-reference";
 import {
   formatMechanicsSkill,

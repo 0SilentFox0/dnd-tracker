@@ -12,7 +12,7 @@ import {
   useRemoveSpellFromGroup,
   useSpellGroups,
   useSpells,
-} from "@/lib/hooks/useSpells";
+} from "@/lib/hooks/spells";
 import {
   convertGroupedSpellsToArray,
   groupSpellsByGroupAndLevel,

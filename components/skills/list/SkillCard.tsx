@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Check, Copy, MoreVertical, Tag, Trash2 } from "lucide-react";
+
+import { SkillCardActionsMenu } from "./SkillCardActionsMenu";
+import { SkillCardDeleteDialog } from "./SkillCardDeleteDialog";
 
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import {
@@ -10,35 +12,13 @@ import {
   SkillStatsIcons,
 } from "@/components/skills/icons/AbilityBonusIcons";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+  SkillCardEffectsList,
+  SkillCardTriggersList,
+} from "@/components/skills/list/ui";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  getStatLabel,
-  getTypeLabel,
-  isFlagValueType,
-} from "@/lib/constants/skill-effects";
-import { getSimpleTriggerLabel } from "@/lib/constants/skill-triggers";
-import { useMainSkills } from "@/lib/hooks/useMainSkills";
-import { useUpdateSkill } from "@/lib/hooks/useSkills";
+import { useMainSkills, useUpdateSkill } from "@/lib/hooks/skills";
 import {
   getSkillBonuses,
   getSkillCombatStats,
@@ -51,8 +31,6 @@ import {
   getSkillSpell,
   getSkillTriggers,
 } from "@/lib/utils/skills/skill-helpers";
-import type { SkillEffect } from "@/types/battle";
-import type { ComplexSkillTrigger, SkillTrigger } from "@/types/skill-triggers";
 import type { GroupedSkill, Skill } from "@/types/skills";
 
 export interface SkillCardProps {
@@ -62,40 +40,6 @@ export interface SkillCardProps {
   onRemove?: (skillId: string) => void;
   /** Викликається при дублюванні скіла (створює копію з новим id) */
   onDuplicate?: (skillId: string) => void;
-}
-
-function formatEffectValue(e: SkillEffect): string {
-  if (isFlagValueType(e.type)) return "✓";
-
-  if (e.type === "percent") return `${e.value}%`;
-
-  return String(e.value);
-}
-
-function formatTrigger(t: SkillTrigger): string {
-  if (t.type === "simple") {
-    const label = getSimpleTriggerLabel(t.trigger);
-
-    const mods: string[] = [];
-
-    if (t.modifiers?.probability != null)
-      mods.push(`${Math.round(t.modifiers.probability * 100)}%`);
-
-    if (t.modifiers?.oncePerBattle) mods.push("1/бій");
-
-    if (t.modifiers?.twicePerBattle) mods.push("2/бій");
-
-    return mods.length > 0 ? `${label} (${mods.join(", ")})` : label;
-  }
-
-  const c = t as ComplexSkillTrigger;
-
-  const pct = c.valueType === "percent" ? "%" : "";
-
-  const targetLabel =
-    c.target === "ally" ? "союзник" : c.target === "enemy" ? "ворог" : "герой";
-
-  return `якщо ${targetLabel} ${c.operator} ${c.value}${pct} ${c.stat}`;
 }
 
 export function SkillCard({
@@ -164,94 +108,20 @@ export function SkillCard({
               </h3>
             </div>
           </div>
-          {(onRemove || onDuplicate || mainSkills.length > 0) && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground"
-                  aria-label="Меню дій"
-                >
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {mainSkills.length > 0 && (
-                  <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>
-                      <Tag className="h-4 w-4" />
-                      Обрати основний навик
-                    </DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent>
-                      <DropdownMenuItem
-                        onClick={() => {
-                          updateSkillMutation.mutate({
-                            skillId,
-                            data: {
-                              mainSkillData: { mainSkillId: null },
-                            },
-                          });
-                        }}
-                      >
-                        <span className="inline-flex w-4 shrink-0 justify-center mr-2">
-                          {currentMainSkillId === null ? (
-                            <Check className="h-4 w-4" />
-                          ) : null}
-                        </span>
-                        Без основного навику
-                      </DropdownMenuItem>
-                      {mainSkills
-                        .filter(
-                          (ms) => ms.id !== "racial" && ms.id !== "ultimate",
-                        )
-                        .map((ms) => (
-                          <DropdownMenuItem
-                            key={ms.id}
-                            onClick={() => {
-                              updateSkillMutation.mutate({
-                                skillId,
-                                data: {
-                                  mainSkillData: { mainSkillId: ms.id },
-                                },
-                              });
-                            }}
-                          >
-                            <span className="inline-flex w-4 shrink-0 justify-center mr-2">
-                              {currentMainSkillId === ms.id ? (
-                                <Check className="h-4 w-4" />
-                              ) : null}
-                            </span>
-                            <span
-                              className="mr-2 size-3 shrink-0 rounded-full"
-                              style={{ backgroundColor: ms.color }}
-                              aria-hidden
-                            />
-                            {ms.name}
-                          </DropdownMenuItem>
-                        ))}
-                    </DropdownMenuSubContent>
-                  </DropdownMenuSub>
-                )}
-                {onDuplicate && (
-                  <DropdownMenuItem onClick={() => onDuplicate(skillId)}>
-                    <Copy className="h-4 w-4" />
-                    Копіювати
-                  </DropdownMenuItem>
-                )}
-                {onRemove && (
-                  <DropdownMenuItem
-                    variant="destructive"
-                    onClick={() => setShowDeleteDialog(true)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    Видалити
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
+          <SkillCardActionsMenu
+            skillId={skillId}
+            currentMainSkillId={currentMainSkillId}
+            mainSkills={mainSkills}
+            onRemove={onRemove}
+            onDuplicate={onDuplicate}
+            onOpenDeleteDialog={() => setShowDeleteDialog(true)}
+            onUpdateMainSkill={(mainSkillId) => {
+              updateSkillMutation.mutate({
+                skillId,
+                data: { mainSkillData: { mainSkillId } },
+              });
+            }}
+          />
         </div>
 
         {skillDescription && (
@@ -335,44 +205,8 @@ export function SkillCard({
             )}
           </div>
 
-          {effects.length > 0 && (
-            <div className="flex flex-col gap-1">
-              <span className="text-xs font-semibold text-muted-foreground">
-                Ефекти:
-              </span>
-              <div className="flex flex-wrap gap-1">
-                {effects.map((e, i) => (
-                  <span
-                    key={i}
-                    className="inline-flex items-center rounded bg-muted px-1.5 py-0.5 text-xs"
-                  >
-                    {getStatLabel(e.stat)}: {getTypeLabel(e.type)}{" "}
-                    {formatEffectValue(e)}
-                    {e.duration != null ? ` (${e.duration} р.)` : ""}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {triggers.length > 0 && (
-            <div className="flex flex-col gap-1">
-              <span className="text-xs font-semibold text-muted-foreground">
-                Тригери:
-              </span>
-              <div className="flex flex-wrap gap-1">
-                {triggers.map((t, i) => (
-                  <Badge
-                    key={i}
-                    variant="outline"
-                    className="text-xs font-normal"
-                  >
-                    {formatTrigger(t)}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
+          <SkillCardEffectsList effects={effects} />
+          <SkillCardTriggersList triggers={triggers} />
 
           {skillSpell && (
             <div className="text-xs text-muted-foreground">
@@ -392,26 +226,12 @@ export function SkillCard({
         </Button>
       </Link>
 
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Видалити скіл?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Скіл &quot;{skillName}&quot; буде видалено. Цю дію неможливо
-              скасувати.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Скасувати</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmRemove}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Видалити
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <SkillCardDeleteDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        skillName={skillName}
+        onConfirm={handleConfirmRemove}
+      />
     </div>
   );
 }

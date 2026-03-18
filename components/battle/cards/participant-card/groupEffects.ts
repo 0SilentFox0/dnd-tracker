@@ -40,16 +40,20 @@ export function groupEffectsBySource(
 
   for (const effect of activeEffects) {
     const sourceName = effect.name.split(" — ")[0]?.trim();
+
     const source = sourceName ? sourceByName.get(sourceName) : undefined;
 
     if (source) {
       const existing = grouped.get(source.basicInfo.id);
+
       const durationText =
         effect.duration != null ? `${effect.duration} раундів` : "";
 
       if (existing) {
         existing.effectNames.push(effect.name);
+
         if (durationText) existing.durations.push(durationText);
+
         existing.hasBuff ||= effect.type === "buff";
         existing.hasDebuff ||= effect.type === "debuff";
       } else {
@@ -62,6 +66,7 @@ export function groupEffectsBySource(
           hasDebuff: effect.type === "debuff",
         });
       }
+
       continue;
     }
 

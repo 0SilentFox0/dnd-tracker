@@ -1,6 +1,6 @@
 import { describe, expect,it } from "vitest";
 
-import { evaluateSkillTrigger, getSkillsByTrigger } from "../skill-triggers";
+import { evaluateSkillTrigger, getSkillsByTrigger } from "../triggers";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { SkillLevel } from "@/lib/types/skill-tree";

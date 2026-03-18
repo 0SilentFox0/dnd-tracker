@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
+import { useBattleSceneTurnLog } from "./useBattleSceneLogic-effects";
+import { useBattleSceneHandlers } from "./useBattleSceneLogic-handlers";
 import { usePusherBattleSync } from "./usePusherBattleSync";
 
 import type { CounterAttackResultInfo } from "@/components/battle/dialogs/CounterAttackResultDialog";
@@ -20,10 +22,9 @@ import {
   useRollbackBattleAction,
   useStartBattle,
   useUpdateBattleParticipant,
-} from "@/lib/hooks/useBattles";
+} from "@/lib/hooks/battles";
 import { createClient } from "@/lib/supabase/client";
 import type { BattleScene } from "@/types/api";
-import type { AttackData } from "@/types/api";
 import type { BattleParticipant } from "@/types/battle";
 
 export function useBattleSceneLogic(id: string, battleId: string) {
@@ -145,92 +146,32 @@ export function useBattleSceneLogic(id: string, battleId: string) {
 
   const attackFlowStartRef = useRef<number | null>(null);
 
-  // Лог HP усіх учасників на початку кожного ходу
-  const prevTurnKeyRef = useRef<string | null>(null);
+  useBattleSceneTurnLog(battle, attackFlowStartRef, nextTurnClickedAtRef);
 
-  useEffect(() => {
-    if (
-      !battle ||
-      battle.status !== "active" ||
-      !battle.initiativeOrder?.length
-    )
-      return;
-
-    const turnKey = `${battle.currentRound}-${battle.currentTurnIndex}`;
-
-    if (prevTurnKeyRef.current === turnKey) return;
-
-    prevTurnKeyRef.current = turnKey;
-
-    const current =
-      battle.initiativeOrder[battle.currentTurnIndex]?.basicInfo?.name;
-
-    const order = battle.initiativeOrder as BattleParticipant[];
-
-    const hpSnapshot = order.map((p) => ({
-      name: p.basicInfo.name,
-      hp: `${p.combatStats.currentHp}/${p.combatStats.maxHp}`,
-    }));
-
-    const totalFromAttack =
-      attackFlowStartRef.current != null
-        ? Date.now() - attackFlowStartRef.current
-        : null;
-
-    attackFlowStartRef.current = null;
-    console.info(
-      "[хід] Раунд",
-      battle.currentRound,
-      "| Хід:",
-      current,
-      "| HP:",
-      hpSnapshot,
-      totalFromAttack != null
-        ? `| ⏱️ Всього від Apply: ${totalFromAttack}ms`
-        : "",
-    );
-
-    const activeEffectsSnapshot = order.map((p) => ({
-      name: p.basicInfo.name,
-      side: p.basicInfo.side,
-      activeEffects: (p.battleData?.activeEffects ?? []).map((e) => ({
-        name: e.name,
-        duration: e.duration,
-        type: e.type,
-        appliesTo: {
-          id: p.basicInfo.id,
-          name: p.basicInfo.name,
-          side: p.basicInfo.side,
-        },
-      })),
-    }));
-
-    console.info(
-      "[ефекти] Усі учасники — активні ефекти:",
-      activeEffectsSnapshot,
-    );
-  }, [battle]);
-
-  // Лог коли відрендерився наступний хід (після натискання кнопки)
-  const prevTurnIndexRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    if (!battle || battle.status !== "active") return;
-
-    const turnIndex = battle.currentTurnIndex;
-
-    const prev = prevTurnIndexRef.current;
-
-    if (
-      prev !== null &&
-      prev !== turnIndex &&
-      nextTurnClickedAtRef.current !== null
-    ) {
-      nextTurnClickedAtRef.current = null;
-    }
-
-    prevTurnIndexRef.current = turnIndex;
-  }, [battle]);
+  const {
+    handleNextTurn,
+    handleStartBattle,
+    handleCompleteBattle,
+    handleAttack,
+    handleRollback,
+    handleBonusAction,
+  } = useBattleSceneHandlers({
+    battle,
+    nextTurnMutation,
+    nextTurnClickedAtRef,
+    attackFlowStartRef,
+    setMoraleDialogDismissedFor,
+    setParticipantForMorale,
+    setMoraleDialogOpen,
+    attackAndNextTurnMutation,
+    triggerGlobalDamageFromBattle,
+    setCounterAttackInfo,
+    setCounterAttackDialogOpen,
+    completeBattleMutation,
+    startBattleMutation,
+    rollbackMutation,
+    bonusActionMutation,
+  });
 
   const isCurrentPlayerTurn = useMemo(() => {
     if (!currentParticipant?.basicInfo || !currentUserId) return false;
@@ -255,92 +196,6 @@ export function useBattleSceneLogic(id: string, battleId: string) {
 
     return false;
   }, [currentParticipant, currentUserId, isDM, dmControlledParticipantId]);
-
-  const handleNextTurn = async () => {
-    if (!battle) return;
-
-    const clickedAt = Date.now();
-
-    nextTurnClickedAtRef.current = clickedAt;
-
-    const flowStart = attackFlowStartRef.current;
-
-    console.info("[хід-таймінг] nextTurn: запит відправлено", {
-      elapsedFromAttackStart:
-        flowStart != null ? `${clickedAt - flowStart}ms` : "—",
-    });
-
-    setMoraleDialogDismissedFor(null);
-    setParticipantForMorale(null);
-    setMoraleDialogOpen(false);
-    nextTurnMutation.mutate(undefined, {
-      onSuccess: () => {
-        const done = Date.now();
-
-        const nextTurnElapsed = done - clickedAt;
-
-        const totalFromAttack = flowStart != null ? done - flowStart : null;
-
-        console.info("[хід-таймінг] nextTurn: відповідь отримано", {
-          nextTurnMs: nextTurnElapsed,
-          totalFromAttackStartMs: totalFromAttack,
-        });
-      },
-    });
-  };
-
-  const handleStartBattle = () => startBattleMutation.mutate();
-
-  const handleCompleteBattle = useCallback(
-    (result?: "victory" | "defeat") => {
-      completeBattleMutation.mutate(result != null ? { result } : {});
-    },
-    [completeBattleMutation],
-  );
-
-  const handleAttack = useCallback(
-    (data: AttackData, onSuccess?: () => void) => {
-      attackAndNextTurnMutation.mutate(data, {
-        onSuccess: (updatedBattle: BattleScene) => {
-          const log = updatedBattle?.battleLog ?? [];
-
-          const lastAction = log[log.length - 1];
-
-          const hpChanges = lastAction?.hpChanges ?? [];
-
-          triggerGlobalDamageFromBattle(updatedBattle);
-
-          if (hpChanges.length >= 2) {
-            const details = lastAction?.actionDetails as
-              | {
-                  counterReactionDamage?: number;
-                  counterReactionBaseDamage?: number;
-                  counterReactionBonusPercent?: number;
-                }
-              | undefined;
-
-            const counterChange = hpChanges.find(
-              (h) => h.participantId !== hpChanges[0].participantId && (h.change ?? 0) > 0,
-            );
-
-            if (counterChange) {
-              setCounterAttackInfo({
-                defenderName: hpChanges[0].participantName,
-                attackerName: counterChange.participantName,
-                damage: counterChange.change ?? 0,
-                baseDamage: details?.counterReactionBaseDamage,
-                bonusPercent: details?.counterReactionBonusPercent,
-              });
-              setCounterAttackDialogOpen(true);
-            }
-          }
-
-          onSuccess?.();
-        },
-      });
-    },
-    [attackAndNextTurnMutation, triggerGlobalDamageFromBattle],
-  );
 
   const allies = useMemo(() => {
     if (!battle) return [];
@@ -421,19 +276,9 @@ export function useBattleSceneLogic(id: string, battleId: string) {
       handleNextTurn,
       handleStartBattle,
       handleCompleteBattle,
-      handleRollback: (actionIndex: number) =>
-        rollbackMutation.mutate(actionIndex),
+      handleRollback,
       handleAttack,
-      handleBonusAction: (
-        participantId: string,
-        skillId: string,
-        targetParticipantId?: string,
-      ) =>
-        bonusActionMutation.mutate({
-          participantId,
-          skillId,
-          targetParticipantId,
-        }),
+      handleBonusAction,
       setParticipantForMorale,
       triggerGlobalDamageFromBattle,
       clearGlobalDamageFlash: () => setGlobalDamageFlash(null),

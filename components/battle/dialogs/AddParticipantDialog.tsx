@@ -15,8 +15,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { AddParticipantData } from "@/lib/api/battles";
-import { useCharacters } from "@/lib/hooks/useCharacters";
-import { useUnits } from "@/lib/hooks/useUnits";
+import { useCharacters } from "@/lib/hooks/characters";
+import { useUnits } from "@/lib/hooks/units";
 
 interface AddParticipantDialogProps {
   open: boolean;

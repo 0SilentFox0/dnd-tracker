@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 
+import type { CircularSkillTreeProps } from "./CircularSkillTree-types";
+
 import { MainSkillLevels } from "@/components/skill-tree/elements/MainSkillLevels";
 import { RacialSkill } from "@/components/skill-tree/elements/RacialSkill";
 import { SectorLevels } from "@/components/skill-tree/elements/SectorLevels";
@@ -22,56 +24,8 @@ import {
   getCircle4UnlockedCount,
 } from "@/components/skill-tree/utils/hooks";
 import { SKILL_TREE_CONSTANTS } from "@/components/skill-tree/utils/utils";
-import type { Race } from "@/types/races";
-import type {
-  MainSkill,
-  Skill,
-  SkillTree,
-  UltimateSkill,
-} from "@/types/skill-tree";
+import type { Skill, UltimateSkill } from "@/types/skill-tree";
 import { SkillCircle as SkillCircleEnum, SkillLevel } from "@/types/skill-tree";
-
-interface CircularSkillTreeProps {
-  skillTree: SkillTree;
-  race?: Race | null;
-  unlockedSkills?: string[];
-  playerLevel?: number;
-  isDMMode?: boolean;
-  isTrainingCompleted?: boolean;
-  onSkillClick?: (skill: Skill) => void;
-  onUltimateSkillClick?: (skill: UltimateSkill) => void;
-  onRacialSkillClick?: (mainSkill: MainSkill, level: SkillLevel) => void;
-  onSkillSlotClick?: (slot: {
-    mainSkillId: string;
-    circle: SkillCircleEnum;
-    level: SkillLevel;
-    index: number;
-    isMainSkillLevel?: boolean; // true для main-skill-level, false/null для звичайного кола
-    isRacial?: boolean; // true для racial skill
-  }) => void;
-  onRemoveSkill?: (slot: {
-    mainSkillId: string;
-    circle: SkillCircleEnum;
-    level: SkillLevel;
-    index: number;
-  }) => void;
-  onSelectSkillForRemoval?: (slot: {
-    mainSkillId: string;
-    circle: SkillCircleEnum;
-    level: SkillLevel;
-    index: number;
-    skillName: string;
-  }) => void;
-  selectedSkillForRemoval?: {
-    mainSkillId: string;
-    circle: SkillCircleEnum;
-    level: SkillLevel;
-    index: number;
-    isMainSkillLevel?: boolean;
-    isRacial?: boolean;
-  } | null;
-  selectedSkillFromLibrary?: string | null;
-}
 
 export function CircularSkillTree({
   skillTree,

@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { getDamagePreview } from "@/lib/api/characters";
 
 export interface DamagePreviewItem {
   total: number;
@@ -43,23 +44,14 @@ async function fetchDamagePreview(
   meleeMultiplier: number,
   rangedMultiplier: number,
 ): Promise<DamagePreviewResponse> {
-  const params = new URLSearchParams();
+  const result = await getDamagePreview(campaignId, characterId, {
+    meleeMultiplier,
+    rangedMultiplier,
+  });
 
-  if (meleeMultiplier !== 1)
-    params.set("meleeMultiplier", String(meleeMultiplier));
+  if (!result) throw new Error("Failed to load damage preview");
 
-  if (rangedMultiplier !== 1)
-    params.set("rangedMultiplier", String(rangedMultiplier));
-
-  const qs = params.toString();
-
-  const url = `/api/campaigns/${campaignId}/characters/${characterId}/damage-preview${qs ? `?${qs}` : ""}`;
-
-  const res = await fetch(url);
-
-  if (!res.ok) throw new Error("Failed to load damage preview");
-
-  return res.json();
+  return result as unknown as DamagePreviewResponse;
 }
 
 function DamageBlock({

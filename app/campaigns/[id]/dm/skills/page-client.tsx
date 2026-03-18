@@ -16,8 +16,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { useMainSkills } from "@/lib/hooks/useMainSkills";
-import { useDeleteAllSkills, useDeleteSkill, useDuplicateSkill, useSkills } from "@/lib/hooks/useSkills";
+import {
+  useDeleteAllSkills,
+  useDeleteSkill,
+  useDuplicateSkill,
+  useMainSkills,
+  useSkills,
+} from "@/lib/hooks/skills";
 import {
   convertGroupedSkillsToArray,
   groupSkillsByMainSkill,

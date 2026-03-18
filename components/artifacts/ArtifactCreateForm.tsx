@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { SelectField } from "@/components/ui/select-field";
 import { Textarea } from "@/components/ui/textarea";
+import { createArtifact } from "@/lib/api/artifacts";
 import {
   ARTIFACT_RARITY_OPTIONS,
   ARTIFACT_SLOT_OPTIONS,
@@ -93,19 +94,7 @@ export function ArtifactCreateForm({
             : undefined,
       };
 
-      const response = await fetch(`/api/campaigns/${campaignId}/artifacts`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-
-        throw new Error(data.error || "Не вдалося створити артефакт");
-      }
+      await createArtifact(campaignId, payload);
 
       router.push(`/campaigns/${campaignId}/dm/artifacts`);
       router.refresh();

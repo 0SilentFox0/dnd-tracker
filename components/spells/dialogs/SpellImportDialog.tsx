@@ -3,8 +3,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { ImportDialog } from "@/components/common/ImportDialog";
+import { importSpells } from "@/lib/api/spells";
 import { SpellType } from "@/lib/constants/spell-abilities";
-import { useFileImport } from "@/lib/hooks/useFileImport";
+import { useFileImport } from "@/lib/hooks/common";
 import { parseCSVFile, parseJSONFile } from "@/lib/utils/common/file-import";
 import {
   determineConcentration,
@@ -30,24 +31,7 @@ export function SpellImportDialog({ campaignId }: SpellImportDialogProps) {
 
   const importMutation = useMutation({
     mutationFn: async (spells: ImportSpell[]): Promise<SpellImportResult> => {
-      const response = await fetch(
-        `/api/campaigns/${campaignId}/spells/import`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ spells }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-
-        throw new Error(errorData.error || "Помилка при імпорті заклинань");
-      }
-
-      return response.json();
+      return importSpells(campaignId, { spells }) as Promise<SpellImportResult>;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["spells", campaignId] });

@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { removeCampaignMember } from "@/lib/api/campaigns";
 
 interface CampaignMember {
   id: string;
@@ -38,20 +39,8 @@ export function CampaignMembersList({
 
     setRemovingMemberId(memberId);
     try {
-      const response = await fetch(
-        `/api/campaigns/${campaignId}/members/${memberId}`,
-        {
-          method: "DELETE",
-        }
-      );
+      await removeCampaignMember(campaignId, memberId);
 
-      if (!response.ok) {
-        const error = await response.json();
-
-        throw new Error(error.error || "Помилка при видаленні учасника");
-      }
-
-      // Оновлюємо сторінку після успішного видалення
       router.refresh();
     } catch (error) {
       console.error("Error removing member:", error);

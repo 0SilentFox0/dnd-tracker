@@ -7,11 +7,8 @@ import { afterEach,beforeEach, describe, expect, it, vi } from "vitest";
 import { SkillCard } from "@/components/skills/list/SkillCard";
 import type { GroupedSkill } from "@/types/skills";
 
-vi.mock("@/lib/hooks/useMainSkills", () => ({
+vi.mock("@/lib/hooks/skills", () => ({
   useMainSkills: () => ({ data: [] }),
-}));
-
-vi.mock("@/lib/hooks/useSkills", () => ({
   useUpdateSkill: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 

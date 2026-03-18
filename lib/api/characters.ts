@@ -2,23 +2,74 @@
  * API сервіс для роботи з персонажами
  */
 
+import {
+  campaignDelete,
+  campaignGet,
+  campaignPatch,
+  campaignPost,
+  campaignRequest,
+} from "@/lib/api/client";
 import { formDataToCharacter } from "@/lib/utils/characters/character-form";
-import type { Character,CharacterFormData } from "@/types/characters";
+import type { Character, CharacterFormData } from "@/types/characters";
+
+export interface DamagePreviewResponse {
+  melee: { total: number; [key: string]: unknown };
+  ranged: { total: number; [key: string]: unknown };
+}
 
 /**
  * Отримує персонажа за ID
  */
 export async function getCharacter(
   campaignId: string,
-  characterId: string
+  characterId: string,
 ): Promise<Character> {
-  const response = await fetch(`/api/campaigns/${campaignId}/characters/${characterId}`);
+  return campaignGet<Character>(
+    campaignId,
+    `/characters/${characterId}`,
+  );
+}
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch character");
+/**
+ * Отримує превʼю шкоди персонажа (melee/ranged total).
+ */
+export async function getDamagePreview(
+  campaignId: string,
+  characterId: string,
+  params?: {
+    meleeMultiplier?: number;
+    rangedMultiplier?: number;
+    meleeDiceSum?: number | null;
+    rangedDiceSum?: number | null;
+  },
+): Promise<DamagePreviewResponse | null> {
+  const search = new URLSearchParams();
+
+  if (params?.meleeMultiplier != null && params.meleeMultiplier !== 1) {
+    search.set("meleeMultiplier", String(params.meleeMultiplier));
   }
 
-  return response.json();
+  if (params?.rangedMultiplier != null && params.rangedMultiplier !== 1) {
+    search.set("rangedMultiplier", String(params.rangedMultiplier));
+  }
+
+  if (params?.meleeDiceSum != null) {
+    search.set("meleeDiceSum", String(params.meleeDiceSum));
+  }
+
+  if (params?.rangedDiceSum != null) {
+    search.set("rangedDiceSum", String(params.rangedDiceSum));
+  }
+
+  const qs = search.toString();
+
+  const path = `/characters/${characterId}/damage-preview${qs ? `?${qs}` : ""}`;
+
+  try {
+    return await campaignRequest<DamagePreviewResponse>(campaignId, path);
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -26,19 +77,12 @@ export async function getCharacter(
  */
 export async function getCharacters(
   campaignId: string,
-  opts?: { type?: "player" | "npc_hero" }
+  opts?: { type?: "player" | "npc_hero" },
 ): Promise<Character[]> {
-  const params = opts?.type ? `?type=${opts.type}` : "";
+  const path =
+    opts?.type ? `/characters?type=${opts.type}` : "/characters";
 
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/characters${params}`
-  );
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch characters");
-  }
-
-  return response.json();
+  return campaignGet<Character[]>(campaignId, path);
 }
 
 /**
@@ -46,25 +90,11 @@ export async function getCharacters(
  */
 export async function createCharacter(
   campaignId: string,
-  data: CharacterFormData
+  data: CharacterFormData,
 ): Promise<Character> {
   const flatData = formDataToCharacter(data);
 
-  const response = await fetch(`/api/campaigns/${campaignId}/characters`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(flatData),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-
-    throw new Error(error.error || "Failed to create character");
-  }
-
-  return response.json();
+  return campaignPost<Character>(campaignId, "/characters", flatData);
 }
 
 /**
@@ -73,29 +103,18 @@ export async function createCharacter(
 export async function updateCharacter(
   campaignId: string,
   characterId: string,
-  data: Partial<CharacterFormData>
+  data: Partial<CharacterFormData>,
 ): Promise<Character> {
-  // Якщо це повна CharacterFormData, конвертуємо в плоску структуру
-  // Якщо це Partial<CharacterFormData>, конвертуємо тільки заповнені групи
-  const flatData = "basicInfo" in data && data.basicInfo
-    ? formDataToCharacter(data as CharacterFormData)
-    : data;
+  const flatData =
+    "basicInfo" in data && data.basicInfo
+      ? formDataToCharacter(data as CharacterFormData)
+      : data;
 
-  const response = await fetch(`/api/campaigns/${campaignId}/characters/${characterId}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(flatData),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-
-    throw new Error(error.error || "Failed to update character");
-  }
-
-  return response.json();
+  return campaignPatch<Character>(
+    campaignId,
+    `/characters/${characterId}`,
+    flatData,
+  );
 }
 
 /**
@@ -103,20 +122,13 @@ export async function updateCharacter(
  */
 export async function levelUpCharacter(
   campaignId: string,
-  characterId: string
+  characterId: string,
 ): Promise<Character & { levelUpDetails?: unknown }> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/characters/${characterId}/level-up`,
-    { method: "POST" }
+  return campaignPost<Character & { levelUpDetails?: unknown }>(
+    campaignId,
+    `/characters/${characterId}/level-up`,
+    {},
   );
-
-  if (!response.ok) {
-    const error = await response.json();
-
-    throw new Error(error.error || "Failed to level up character");
-  }
-
-  return response.json();
 }
 
 /**
@@ -124,34 +136,19 @@ export async function levelUpCharacter(
  */
 export async function deleteCharacter(
   campaignId: string,
-  characterId: string
+  characterId: string,
 ): Promise<void> {
-  const response = await fetch(`/api/campaigns/${campaignId}/characters/${characterId}`, {
-    method: "DELETE",
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-
-    throw new Error(error.error || "Failed to delete character");
-  }
+  await campaignDelete<void>(campaignId, `/characters/${characterId}`);
 }
 
 /**
  * Видаляє всіх персонажів гравців кампанії
  */
 export async function deleteAllCharacters(
-  campaignId: string
+  campaignId: string,
 ): Promise<{ success: boolean; deleted: number }> {
-  const response = await fetch(`/api/campaigns/${campaignId}/characters`, {
-    method: "DELETE",
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-
-    throw new Error(error.error || "Failed to delete all characters");
-  }
-
-  return response.json();
+  return campaignDelete<{ success: boolean; deleted: number }>(
+    campaignId,
+    "/characters",
+  );
 }

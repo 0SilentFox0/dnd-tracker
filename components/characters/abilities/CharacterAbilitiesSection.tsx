@@ -5,8 +5,7 @@ import { useMemo } from "react";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
 import { MAIN_SKILL_BY_CATEGORY } from "@/lib/constants/main-skills";
-import { useMainSkills } from "@/lib/hooks/useMainSkills";
-import { useSkills } from "@/lib/hooks/useSkills";
+import { useMainSkills, useSkills } from "@/lib/hooks/skills";
 import { getSkillMainSkillId } from "@/lib/utils/skills/skill-helpers";
 
 /** Назва скіла: підтримка basicInfo.name та name в корені */

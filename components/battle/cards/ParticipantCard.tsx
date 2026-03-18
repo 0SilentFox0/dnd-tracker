@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import {
   groupEffectsBySource,
@@ -10,6 +10,7 @@ import {
 } from "@/components/battle/cards/participant-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ParticipantSide } from "@/lib/constants/battle";
+import { useDamageFlash } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import type { BattleScene } from "@/types/api";
 import type { BattleParticipant } from "@/types/battle";
@@ -41,37 +42,15 @@ export function ParticipantCard({
 
   const isDead = participant.combatStats.status === "dead";
 
-  const [lastHp, setLastHp] = useState(participant.combatStats.currentHp);
-
-  const [showDamage, setShowDamage] = useState(false);
-
-  const [damageAmount, setDamageAmount] = useState(0);
+  const { showDamage, damageAmount } = useDamageFlash(
+    participant.combatStats.currentHp,
+  );
 
   const { groupedHeroEffects, regularEffects } = useMemo(() => {
     const order = (battle?.initiativeOrder ?? []) as BattleParticipant[];
 
     return groupEffectsBySource(participant.battleData.activeEffects, order);
   }, [battle?.initiativeOrder, participant.battleData.activeEffects]);
-
-  useEffect(() => {
-    const currentHp = participant.combatStats.currentHp;
-
-    if (currentHp === lastHp) return;
-
-    const diff = currentHp - lastHp;
-
-    const id = setTimeout(() => {
-      setShowDamage(false);
-    }, 2000);
-
-    queueMicrotask(() => {
-      setLastHp(currentHp);
-      setDamageAmount(diff);
-      setShowDamage(true);
-    });
-
-    return () => clearTimeout(id);
-  }, [participant.combatStats.currentHp, lastHp]);
 
   const { currentHp, maxHp } = participant.combatStats;
 

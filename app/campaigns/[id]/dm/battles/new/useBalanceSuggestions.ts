@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback,useState } from "react";
+import { useCallback, useState } from "react";
 
 import type {
   AllyStats,
@@ -8,6 +8,8 @@ import type {
   Participant,
   SuggestedEnemy,
 } from "./types";
+
+import { getBattleBalance } from "@/lib/api/battles";
 
 interface AllyParticipants {
   characterIds: string[];
@@ -48,17 +50,9 @@ export function useBalanceSuggestions({
 
     setBalanceLoading(true);
     try {
-      const res = await fetch(`/api/campaigns/${campaignId}/battles/balance`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ allyParticipants }),
-      });
+      const data = await getBattleBalance(campaignId, { allyParticipants });
 
-      if (res.ok) {
-        const data = await res.json();
-
-        setAllyStats(data.allyStats ?? null);
-      }
+      setAllyStats((data.allyStats ?? null) as AllyStats | null);
     } catch (e) {
       console.error(e);
     } finally {
@@ -72,24 +66,16 @@ export function useBalanceSuggestions({
     setBalanceLoading(true);
     setSuggestedEnemies([]);
     try {
-      const res = await fetch(`/api/campaigns/${campaignId}/battles/balance`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          allyParticipants,
-          difficulty,
-          minTier,
-          maxTier,
-          race: balanceRace || undefined,
-        }),
+      const data = await getBattleBalance(campaignId, {
+        allyParticipants,
+        difficulty,
+        minTier,
+        maxTier,
+        race: balanceRace || undefined,
       });
 
-      if (res.ok) {
-        const data = await res.json();
-
-        setAllyStats(data.allyStats ?? null);
-        setSuggestedEnemies(data.suggestedEnemies ?? []);
-      }
+      setAllyStats((data.allyStats ?? null) as AllyStats | null);
+      setSuggestedEnemies((data.suggestedEnemies ?? []) as SuggestedEnemy[]);
     } catch (e) {
       console.error(e);
     } finally {

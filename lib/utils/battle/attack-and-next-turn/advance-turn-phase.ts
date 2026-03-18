@@ -14,7 +14,7 @@ import {
   checkVictoryConditions,
 } from "@/lib/utils/battle/battle-victory";
 import { slimInitiativeOrderForStorage } from "@/lib/utils/battle/strip-battle-payload";
-import { executeSkillsByTrigger } from "@/lib/utils/skills/skill-triggers-execution";
+import { executeSkillsByTrigger } from "@/lib/utils/skills/execution";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 export type AdvanceTurnPhaseInput = {

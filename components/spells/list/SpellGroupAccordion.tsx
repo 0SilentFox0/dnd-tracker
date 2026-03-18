@@ -28,7 +28,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useSpellGroupActions } from "@/lib/hooks/useSpellGroupActions";
+import { useSpellGroupActions } from "@/lib/hooks/spells";
 import { calculateTotalSpellsInGroup } from "@/lib/utils/spells/spells";
 import type { Spell, SpellGroup } from "@/types/spells";
 
@@ -75,20 +75,7 @@ export function SpellGroupAccordion({
 
   const totalSpells = calculateTotalSpellsInGroup(levels);
 
-  const {
-    renameDialogOpen,
-    removeAllDialogOpen,
-    newGroupName,
-    setNewGroupName,
-    setRenameDialogOpen,
-    setRemoveAllDialogOpen,
-    handleRenameGroup,
-    handleRemoveAllSpells,
-    openRenameDialog,
-    closeRenameDialog,
-    isRenaming,
-    isRemoving,
-  } = useSpellGroupActions({
+  const actions = useSpellGroupActions({
     campaignId,
     groupName,
     groupId,
@@ -132,7 +119,7 @@ export function SpellGroupAccordion({
                   <DropdownMenuItem
                     onClick={(e) => {
                       e.stopPropagation();
-                      openRenameDialog();
+                      actions.handlers.openRenameDialog();
                     }}
                   >
                     <Edit className="h-4 w-4 mr-2" />
@@ -141,7 +128,7 @@ export function SpellGroupAccordion({
                   <DropdownMenuItem
                     onClick={(e) => {
                       e.stopPropagation();
-                      setRemoveAllDialogOpen(true);
+                      actions.dialogs.removeAll.setOpen(true);
                     }}
                   >
                     <X className="h-4 w-4 mr-2" />
@@ -179,22 +166,22 @@ export function SpellGroupAccordion({
       </AccordionItem>
 
       <RenameGroupDialog
-        open={renameDialogOpen}
-        onOpenChange={setRenameDialogOpen}
+        open={actions.dialogs.rename.open}
+        onOpenChange={actions.dialogs.rename.setOpen}
         groupName={groupName}
-        newGroupName={newGroupName}
-        onNewGroupNameChange={setNewGroupName}
-        onConfirm={handleRenameGroup}
-        onCancel={closeRenameDialog}
-        isRenaming={isRenaming}
+        newGroupName={actions.state.newGroupName}
+        onNewGroupNameChange={actions.state.setNewGroupName}
+        onConfirm={actions.handlers.handleRenameGroup}
+        onCancel={actions.handlers.closeRenameDialog}
+        isRenaming={actions.pending.isRenaming}
       />
 
       <RemoveAllSpellsDialog
-        open={removeAllDialogOpen}
-        onOpenChange={setRemoveAllDialogOpen}
+        open={actions.dialogs.removeAll.open}
+        onOpenChange={actions.dialogs.removeAll.setOpen}
         groupName={groupName}
-        onConfirm={handleRemoveAllSpells}
-        isRemoving={isRemoving}
+        onConfirm={actions.handlers.handleRemoveAllSpells}
+        isRemoving={actions.pending.isRemoving}
       />
     </>
   );

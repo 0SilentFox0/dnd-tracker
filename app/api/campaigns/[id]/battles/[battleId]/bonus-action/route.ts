@@ -8,7 +8,7 @@ import {
   preparePusherPayload,
   stripStateBeforeForClient,
 } from "@/lib/utils/battle/strip-battle-payload";
-import { executeBonusActionSkill } from "@/lib/utils/skills/skill-triggers-execution";
+import { executeBonusActionSkill } from "@/lib/utils/skills/execution";
 import { BattleAction, BattleParticipant } from "@/types/battle";
 
 const bonusActionSchema = z.object({

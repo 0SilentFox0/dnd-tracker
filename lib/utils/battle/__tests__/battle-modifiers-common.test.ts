@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { AttackType } from "@/lib/constants/battle";
 import {
   calculatePercentBonus,
   formatFlatBonusBreakdown,
   formatPercentBonusBreakdown,
   matchesAttackType,
-} from "../battle-modifiers-common";
+} from "../common/modifiers";
+
+import { AttackType } from "@/lib/constants/battle";
 
 describe("battle-modifiers-common", () => {
   describe("matchesAttackType", () => {

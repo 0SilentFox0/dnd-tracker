@@ -8,8 +8,10 @@ import {
 } from "@/components/battle/dialogs/shared";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { parseDiceNotationToGroups } from "@/lib/utils/battle/balance-calculations";
-import { getParticipantExtras } from "@/lib/utils/battle/battle-participant";
+import {
+  getDiceSlots,
+} from "@/lib/utils/battle/balance";
+import { getParticipantExtras } from "@/lib/utils/battle/participant";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 interface DamageRollDialogProps {
@@ -22,22 +24,6 @@ interface DamageRollDialogProps {
   /** Кількість цілей (для multi-target ranged — окремий кидок на ціль) */
   targetsCount?: number;
   onConfirm: (damageRolls: number[]) => void;
-}
-
-function getDiceSlots(formula: string): number[] {
-  const groups = parseDiceNotationToGroups(formula);
-
-  const slots: number[] = [];
-
-  for (const g of groups) {
-    const sides = Number(g.sides);
-
-    if (!Number.isFinite(sides) || sides < 1) continue;
-
-    for (let i = 0; i < g.count; i++) slots.push(sides);
-  }
-
-  return slots;
 }
 
 export function DamageRollDialog({

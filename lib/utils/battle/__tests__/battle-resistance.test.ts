@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   applyResistance,
   getCombinedResistancePercent,
-} from "../battle-resistance";
+} from "../resistance";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import type { BattleParticipant } from "@/types/battle";

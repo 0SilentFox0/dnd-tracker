@@ -2,7 +2,12 @@
  * API сервіс для роботи з інвентарем персонажа
  */
 
-import { EquippedItems,InventoryFormData, InventoryItem } from "@/types/inventory";
+import { campaignGet, campaignPatch } from "@/lib/api/client";
+import type {
+  EquippedItems,
+  InventoryFormData,
+  InventoryItem,
+} from "@/types/inventory";
 
 export interface Inventory {
   id: string;
@@ -21,17 +26,12 @@ export interface Inventory {
  */
 export async function getInventory(
   campaignId: string,
-  characterId: string
+  characterId: string,
 ): Promise<Inventory> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/characters/${characterId}/inventory`
+  return campaignGet<Inventory>(
+    campaignId,
+    `/characters/${characterId}/inventory`,
   );
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch inventory");
-  }
-
-  return response.json();
 }
 
 /**
@@ -40,24 +40,11 @@ export async function getInventory(
 export async function updateInventory(
   campaignId: string,
   characterId: string,
-  data: Partial<InventoryFormData>
+  data: Partial<InventoryFormData>,
 ): Promise<Inventory> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/characters/${characterId}/inventory`,
-    {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    }
+  return campaignPatch<Inventory>(
+    campaignId,
+    `/characters/${characterId}/inventory`,
+    data,
   );
-
-  if (!response.ok) {
-    const error = await response.json();
-
-    throw new Error(error.error || "Failed to update inventory");
-  }
-
-  return response.json();
 }

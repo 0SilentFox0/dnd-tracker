@@ -21,8 +21,8 @@ import { UnitImmunities } from "@/components/units/form/UnitImmunities";
 import { UnitKnownSpells } from "@/components/units/form/UnitKnownSpells";
 import { UnitSpecialAbilities } from "@/components/units/form/UnitSpecialAbilities";
 import { getSpells } from "@/lib/api/spells";
-import { useRaces } from "@/lib/hooks/useRaces";
-import { useDeleteUnit, useUnit, useUpdateUnit } from "@/lib/hooks/useUnits";
+import { useRaces } from "@/lib/hooks/races";
+import { useDeleteUnit, useUnit, useUpdateUnit } from "@/lib/hooks/units";
 import type { Spell } from "@/types/spells";
 import type { Unit } from "@/types/units";
 

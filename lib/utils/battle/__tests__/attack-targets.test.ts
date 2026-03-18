@@ -2,7 +2,7 @@ import { describe, expect,it } from "vitest";
 
 import { BattleAttack,BattleParticipant } from "../../../../types/battle";
 import { AttackType,ParticipantSide } from "../../../constants/battle";
-import { processAttack } from "../battle-attack-process";
+import { processAttack } from "../attack";
 
 describe("Multi-target Attack Logic", () => {
   const mockAttacker: BattleParticipant = {

@@ -91,8 +91,6 @@ export function ParticipantEffectsRow({
         <EffectBadge
           key={`effect-${participantId}-${idx}`}
           effect={effect}
-          participantId={participantId}
-          index={idx}
         />
       ))}
 
@@ -104,15 +102,7 @@ export function ParticipantEffectsRow({
   );
 }
 
-function EffectBadge({
-  effect,
-  participantId,
-  index,
-}: {
-  effect: ActiveEffect;
-  participantId: string;
-  index: number;
-}) {
+function EffectBadge({ effect }: { effect: ActiveEffect }) {
   const isBuff = effect.type === "buff";
 
   const isDebuff = effect.type === "debuff";

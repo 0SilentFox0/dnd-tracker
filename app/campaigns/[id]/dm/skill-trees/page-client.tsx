@@ -6,8 +6,8 @@ import { SkillTreeCard } from "@/components/skill-tree/core/SkillTreeCard";
 import { SkillTreeContent } from "@/components/skill-tree/core/SkillTreeContent";
 import { SkillTreeHeader } from "@/components/skill-tree/core/SkillTreeHeader";
 import { Button } from "@/components/ui/button";
-import type { SkillFromLibrary } from "@/lib/hooks/useSkills";
-import { useSkillTreePage } from "@/lib/hooks/useSkillTreePage";
+import { type SkillFromLibrary,useSkillTreePage } from "@/lib/hooks/skills";
+import type { MainSkill } from "@/types/main-skills";
 import type { Race } from "@/types/races";
 import type { SkillTree } from "@/types/skill-tree";
 
@@ -120,7 +120,7 @@ export function SkillTreePageClient({
               ? races.find((r) => r.name === selectedRace) || null
               : null
           }
-          mainSkills={mainSkills}
+          mainSkills={mainSkills as MainSkill[]}
           isDMMode={isDMMode}
           isTrainingCompleted={isTrainingCompleted}
           playerLevel={playerLevel}

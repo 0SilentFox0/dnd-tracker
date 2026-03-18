@@ -7,10 +7,9 @@ import {
   canLearnRacialSkillLevel,
   getRacialSkillLevelId,
 } from "@/components/skill-tree/utils/hooks";
-import { useMainSkills } from "@/lib/hooks/useMainSkills";
-import { useRaces } from "@/lib/hooks/useRaces";
-import { useSkills } from "@/lib/hooks/useSkills";
-import { useSkillTreeEnrichment } from "@/lib/hooks/useSkillTreeEnrichment";
+import { getSkillTrees } from "@/lib/api/skill-trees";
+import { useRaces } from "@/lib/hooks/races";
+import { useMainSkills, useSkills, useSkillTreeEnrichment } from "@/lib/hooks/skills";
 import {
   convertPrismaToSkillTree,
   createMockSkillTree,
@@ -60,10 +59,9 @@ export function CharacterSkillTreeView({
   useEffect(() => {
     let cancelled = false;
 
-    fetch(`/api/campaigns/${campaignId}/skill-trees`)
-      .then((res) => (res.ok ? res.json() : []))
-      .then((data: PrismaSkillTree[]) => {
-        if (!cancelled) setTrees(Array.isArray(data) ? data : []);
+    getSkillTrees(campaignId)
+      .then((data) => {
+        if (!cancelled) setTrees((Array.isArray(data) ? data : []) as PrismaSkillTree[]);
       })
       .catch(() => {
         if (!cancelled) setTrees([]);

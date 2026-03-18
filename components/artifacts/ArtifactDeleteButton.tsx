@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { deleteArtifact } from "@/lib/api/artifacts";
 
 interface ArtifactDeleteButtonProps {
   campaignId: string;
@@ -25,14 +26,7 @@ export function ArtifactDeleteButton({
     setIsDeleting(true);
 
     try {
-      const response = await fetch(
-        `/api/campaigns/${campaignId}/artifacts/${artifactId}`,
-        { method: "DELETE" }
-      );
-
-      if (!response.ok) {
-        throw new Error("Не вдалося видалити артефакт");
-      }
+      await deleteArtifact(campaignId, artifactId);
 
       router.refresh();
     } catch (err) {

@@ -3,7 +3,7 @@
  */
 
 import { addActiveEffect } from "./battle-effects";
-import { checkTriggerCondition,getPassiveAbilitiesByTrigger } from "./battle-triggers";
+import { checkTriggerCondition, getPassiveAbilitiesByTrigger } from "./triggers";
 
 import { ActiveEffect,BattleParticipant } from "@/types/battle";
 

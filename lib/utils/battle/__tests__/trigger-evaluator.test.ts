@@ -1,6 +1,6 @@
 import { describe, expect,it } from "vitest";
 
-import { evaluateTrigger } from "../trigger-evaluator";
+import { evaluateTrigger } from "../triggers/evaluator";
 
 describe("TriggerEvaluator", () => {
   it("evaluates simple event triggers", () => {

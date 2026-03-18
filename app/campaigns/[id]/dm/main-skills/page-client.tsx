@@ -5,7 +5,7 @@ import { useState } from "react";
 import { CreateMainSkillDialog } from "@/components/main-skills/CreateMainSkillDialog";
 import { MainSkillCard } from "@/components/main-skills/MainSkillCard";
 import { MainSkillsPageHeader } from "@/components/main-skills/MainSkillsPageHeader";
-import { useDeleteMainSkill,useMainSkills } from "@/lib/hooks/useMainSkills";
+import { useDeleteMainSkill, useMainSkills } from "@/lib/hooks/skills";
 import type { MainSkill } from "@/types/main-skills";
 
 interface DMMainSkillsPageClientProps {

@@ -3,8 +3,8 @@
 import { useMemo } from "react";
 
 import { getStatLabel } from "@/lib/constants/skill-effects";
-import type { SkillTreeProgress } from "@/lib/hooks/useCharacterView";
-import { useSkills } from "@/lib/hooks/useSkills";
+import type { SkillTreeProgress } from "@/lib/hooks/characters";
+import { useSkills } from "@/lib/hooks/skills";
 
 interface CharacterLeveledSkillsTableProps {
   campaignId: string;

@@ -5,10 +5,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { SpellCastPayload, SpellDialogSpell } from "./types";
 
 import type { SpellRichOptionData } from "@/components/spells/SpellRichOption";
+import { getSpells } from "@/lib/api/spells";
 import type { BattleParticipant } from "@/types/battle";
-
-const SPELLS_API = (campaignId: string) =>
-  `/api/campaigns/${campaignId}/spells`;
 
 function parseDiceType(diceType: string | null | undefined): number {
   if (!diceType) return 6;
@@ -49,15 +47,7 @@ export function useSpellDialog(
 
     const load = async () => {
       try {
-        const res = await fetch(SPELLS_API(campaignId));
-
-        if (!res.ok) {
-          setSpells([]);
-
-          return;
-        }
-
-        const all: SpellDialogSpell[] = await res.json();
+        const all = (await getSpells(campaignId)) as SpellDialogSpell[];
 
         if (allowAllSpells) {
           setSpells(all);

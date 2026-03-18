@@ -2,6 +2,12 @@
  * API сервіс для роботи з кампаніями
  */
 
+import {
+  campaignDelete,
+  campaignGet,
+  campaignPatch,
+  request,
+} from "@/lib/api/client";
 import type { Campaign, CampaignMember } from "@/types/campaigns";
 
 export type ActiveBattle = { id: string; campaignId: string };
@@ -10,13 +16,7 @@ export type ActiveBattle = { id: string; campaignId: string };
  * Отримує активні бої в кампаніях, де користувач є учасником.
  */
 export async function getActiveBattles(): Promise<ActiveBattle[]> {
-  const response = await fetch("/api/campaigns/active-battles");
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch active battles");
-  }
-
-  return response.json();
+  return request<ActiveBattle[]>("/api/campaigns/active-battles");
 }
 
 export async function updateCampaign(
@@ -28,36 +28,16 @@ export async function updateCampaign(
     xpMultiplier: number;
     allowPlayerEdit: boolean;
     status: string;
-  }>
+  }>,
 ): Promise<Campaign> {
-  const response = await fetch(`/api/campaigns/${campaignId}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-
-    throw new Error(error.error || "Failed to update campaign");
-  }
-
-  return response.json();
+  return campaignPatch<Campaign>(campaignId, "", data);
 }
 
 /**
  * Отримує кампанію за ID
  */
 export async function getCampaign(campaignId: string): Promise<Campaign> {
-  const response = await fetch(`/api/campaigns/${campaignId}`);
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch campaign");
-  }
-
-  return response.json();
+  return campaignGet<Campaign>(campaignId, "");
 }
 
 /**
@@ -87,21 +67,10 @@ export async function createCampaign(data: {
   xpMultiplier?: number;
   allowPlayerEdit?: boolean;
 }): Promise<Campaign> {
-  const response = await fetch("/api/campaigns", {
+  return request<Campaign>("/api/campaigns", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify(data),
   });
-
-  if (!response.ok) {
-    const error = await response.json();
-
-    throw new Error(error.error || "Failed to create campaign");
-  }
-
-  return response.json();
 }
 
 /**
@@ -110,30 +79,23 @@ export async function createCampaign(data: {
 export async function joinCampaign(inviteCode: string): Promise<{
   campaign: Campaign;
 }> {
-  const response = await fetch("/api/campaigns/join", {
+  const data = await request<{ campaign: Campaign }>("/api/campaigns/join", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify({ inviteCode }),
   });
 
-  if (!response.ok) {
-    const error = await response.json();
+  return { campaign: data.campaign };
+}
 
-    const errorMessage = typeof error.error === "string" 
-      ? error.error 
-      : Array.isArray(error.error) 
-        ? error.error.map((e: { message?: string }) => e.message || JSON.stringify(e)).join(", ")
-        : "Failed to join campaign";
-
-    throw new Error(errorMessage);
-  }
-
-  const data = await response.json();
-
-  // API повертає member з campaign включеним
-  return {
-    campaign: data.campaign as Campaign,
-  };
+/**
+ * Видаляє учасника з кампанії (лише DM)
+ */
+export async function removeCampaignMember(
+  campaignId: string,
+  memberId: string,
+): Promise<{ success: boolean }> {
+  return campaignDelete<{ success: boolean }>(
+    campaignId,
+    `/members/${memberId}`,
+  );
 }

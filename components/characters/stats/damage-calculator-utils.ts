@@ -2,6 +2,8 @@
  * Утиліти для калькулятора шкоди
  */
 
+import { getDamagePreview } from "@/lib/api/characters";
+
 export interface DamagePreviewItem {
   total: number;
   breakdown: string[];
@@ -51,23 +53,14 @@ export async function fetchDamagePreview(
   meleeDiceSum: number | null,
   rangedDiceSum: number | null,
 ): Promise<DamagePreviewResponse> {
-  const params = new URLSearchParams();
+  const result = await getDamagePreview(campaignId, characterId, {
+    meleeMultiplier: meleeMult,
+    rangedMultiplier: rangedMult,
+    meleeDiceSum,
+    rangedDiceSum,
+  });
 
-  if (meleeMult !== 1) params.set("meleeMultiplier", String(meleeMult));
+  if (!result) throw new Error("Failed to load damage preview");
 
-  if (rangedMult !== 1) params.set("rangedMultiplier", String(rangedMult));
-
-  if (meleeDiceSum != null) params.set("meleeDiceSum", String(meleeDiceSum));
-
-  if (rangedDiceSum != null) params.set("rangedDiceSum", String(rangedDiceSum));
-
-  const qs = params.toString();
-
-  const url = `/api/campaigns/${campaignId}/characters/${characterId}/damage-preview${qs ? `?${qs}` : ""}`;
-
-  const res = await fetch(url);
-
-  if (!res.ok) throw new Error("Failed to load damage preview");
-
-  return res.json();
+  return result as unknown as DamagePreviewResponse;
 }

@@ -4,12 +4,13 @@
 
 import { describe, expect, it } from "vitest";
 
-import { AttackType, ParticipantSide } from "@/lib/constants/battle";
-import type { BattleAttack, BattleParticipant } from "@/types/battle";
 import {
   computeDamageBreakdown,
   computeDamageBreakdownMultiTarget,
-} from "../battle-damage-breakdown";
+} from "../damage";
+
+import { AttackType, ParticipantSide } from "@/lib/constants/battle";
+import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 function createBaseParticipant(overrides?: Partial<BattleParticipant>): BattleParticipant {
   return {
@@ -87,6 +88,7 @@ describe("battle-damage-breakdown", () => {
   describe("computeDamageBreakdown", () => {
     it("returns breakdown and totalDamage for basic melee attack", () => {
       const attacker = createBaseParticipant();
+
       const target = createBaseParticipant({
         basicInfo: {
           ...createBaseParticipant().basicInfo,
@@ -106,13 +108,16 @@ describe("battle-damage-breakdown", () => {
 
       expect(result.breakdown.length).toBeGreaterThan(0);
       expect(result.totalDamage).toBeGreaterThanOrEqual(0);
+
       const totalLine = result.breakdown.find((s) => s.includes("шкоди"));
+
       expect(totalLine).toBeDefined();
       expect(totalLine).toContain(String(result.totalDamage));
     });
 
     it("doubles totalDamage and appends crit line when isCritical is true", () => {
       const attacker = createBaseParticipant();
+
       const target = createBaseParticipant({
         basicInfo: {
           ...createBaseParticipant().basicInfo,
@@ -140,14 +145,17 @@ describe("battle-damage-breakdown", () => {
       });
 
       expect(critical.totalDamage).toBe(normal.totalDamage * 2);
+
       const critLine = critical.breakdown.find(
         (s) => s.includes("крит") || s.includes("× 2"),
       );
+
       expect(critLine).toBeDefined();
     });
 
     it("returns targetBreakdown and finalDamage for single target", () => {
       const attacker = createBaseParticipant();
+
       const target = createBaseParticipant({
         basicInfo: {
           ...createBaseParticipant().basicInfo,
@@ -173,6 +181,7 @@ describe("battle-damage-breakdown", () => {
 
     it("reduces finalDamage when target has physical resistance in extras", () => {
       const attacker = createBaseParticipant();
+
       const target = createBaseParticipant({
         basicInfo: {
           ...createBaseParticipant().basicInfo,
@@ -181,6 +190,7 @@ describe("battle-damage-breakdown", () => {
           side: ParticipantSide.ENEMY,
         },
       });
+
       (target.battleData as Record<string, unknown>).extras = {
         resistances: { physical: 50 },
       };
@@ -194,9 +204,11 @@ describe("battle-damage-breakdown", () => {
       });
 
       expect(result.finalDamage).toBeLessThan(result.totalDamage);
+
       const hasResistLine = result.targetBreakdown.some(
         (s) => s.includes("−") || s.includes("%") || s.includes("Сумарна шкода"),
       );
+
       expect(hasResistLine).toBe(true);
     });
   });
@@ -204,6 +216,7 @@ describe("battle-damage-breakdown", () => {
   describe("computeDamageBreakdownMultiTarget", () => {
     it("returns one entry per target with targetBreakdown and finalDamage", () => {
       const attacker = createBaseParticipant();
+
       const target1 = createBaseParticipant({
         basicInfo: {
           ...createBaseParticipant().basicInfo,
@@ -212,6 +225,7 @@ describe("battle-damage-breakdown", () => {
           side: ParticipantSide.ENEMY,
         },
       });
+
       const target2 = createBaseParticipant({
         basicInfo: {
           ...createBaseParticipant().basicInfo,

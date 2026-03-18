@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
-import { mergeBattleCache } from "@/lib/hooks/useBattles";
+import { mergeBattleCache } from "@/lib/hooks/battles";
 import type { BattleScene } from "@/types/api";
 
 export type PusherConnectionState = "connected" | "disconnected" | "connecting" | "unavailable" | null;

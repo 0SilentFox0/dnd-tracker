@@ -7,49 +7,24 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
+import { attackAndNextTurnSchema } from "./attack-and-next-turn-schema";
+
 import { prisma } from "@/lib/db";
 import { pusherServer } from "@/lib/pusher";
-import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import {
   advanceTurnPhase,
   AttackPhaseError,
   runAttackPhase,
 } from "@/lib/utils/battle/attack-and-next-turn";
+import { getBattleWithAccess } from "@/lib/utils/battle/get-battle-with-access";
 import {
   prepareBattleLogForStorage,
   preparePusherPayload,
   slimInitiativeOrderForStorage,
   stripStateBeforeForClient,
 } from "@/lib/utils/battle/strip-battle-payload";
-import { executeComplexTriggersForChangedParticipant } from "@/lib/utils/skills/skill-triggers-execution";
+import { executeComplexTriggersForChangedParticipant } from "@/lib/utils/skills/execution";
 import type { BattleParticipant } from "@/types/battle";
-
-const attackSchema = z
-  .object({
-    attackerId: z.string(),
-    targetId: z.string().optional(),
-    targetIds: z.array(z.string()).optional(),
-    attackId: z.string().optional(),
-    d20Roll: z.number().min(1).max(20).optional(),
-    attackRoll: z.number().min(1).max(20).optional(),
-    attackRolls: z.array(z.number().min(1).max(20)).optional(),
-    advantageRoll: z.number().min(1).max(20).optional(),
-    disadvantageRoll: z.number().min(1).max(20).optional(),
-    damageRolls: z.array(z.number()).default([]),
-  })
-  .refine(
-    (data) =>
-      data.d20Roll !== undefined ||
-      data.attackRoll !== undefined ||
-      (Array.isArray(data.attackRolls) && data.attackRolls.length > 0),
-    { message: "d20Roll, attackRoll або attackRolls обов'язковий", path: ["d20Roll"] },
-  )
-  .refine(
-    (data) =>
-      data.targetId !== undefined ||
-      (data.targetIds !== undefined && data.targetIds.length > 0),
-    { message: "Потрібно вказати хоча б одну ціль", path: ["targetIds"] },
-  );
 
 export async function POST(
   request: Request,
@@ -58,23 +33,17 @@ export async function POST(
   try {
     const { id, battleId } = await params;
 
-    const accessResult = await requireCampaignAccess(id, false);
+    const result = await getBattleWithAccess(id, battleId);
 
-    if (accessResult instanceof NextResponse) {
-      return accessResult;
+    if (result instanceof NextResponse) {
+      return result;
     }
+
+    const { accessResult, battle } = result;
 
     const { userId } = accessResult;
 
     const isDM = accessResult.campaign.members[0]?.role === "dm";
-
-    const battle = await prisma.battleScene.findUnique({
-      where: { id: battleId },
-    });
-
-    if (!battle || battle.campaignId !== id) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
-    }
 
     if (battle.status !== "active") {
       return NextResponse.json(
@@ -85,7 +54,7 @@ export async function POST(
 
     const body = await request.json();
 
-    const data = attackSchema.parse(body);
+    const data = attackAndNextTurnSchema.parse(body);
 
     const attackResult = runAttackPhase({
       battle: {

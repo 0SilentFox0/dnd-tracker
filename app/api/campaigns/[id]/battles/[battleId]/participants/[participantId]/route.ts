@@ -9,7 +9,7 @@ import {
   slimInitiativeOrderForStorage,
   stripStateBeforeForClient,
 } from "@/lib/utils/battle/strip-battle-payload";
-import { executeComplexTriggersForChangedParticipant } from "@/lib/utils/skills/skill-triggers-execution";
+import { executeComplexTriggersForChangedParticipant } from "@/lib/utils/skills/execution";
 import { BattleAction, BattleParticipant } from "@/types/battle";
 
 const patchSchema = z.object({

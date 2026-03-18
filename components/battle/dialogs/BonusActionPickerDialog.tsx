@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Zap } from "lucide-react";
 
 import { BattleDialog } from "@/components/battle/dialogs/shared";
@@ -45,10 +46,13 @@ export function BonusActionPickerDialog({
             onClick={() => handleSelect(skill)}
           >
             {skill.icon ? (
-              <img
+              <Image
                 src={skill.icon}
                 alt={skill.name}
+                width={40}
+                height={40}
                 className="h-10 w-10 rounded object-cover shrink-0"
+                unoptimized
               />
             ) : (
               <div className="h-10 w-10 rounded bg-yellow-500/20 flex items-center justify-center shrink-0">

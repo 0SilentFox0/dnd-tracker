@@ -6,7 +6,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import type { SkillTreeProgress } from "@/lib/hooks/useCharacterView";
+import type { SkillTreeProgress } from "@/lib/hooks/characters";
 import type { EquippedItems } from "@/types/inventory";
 
 export interface ArtifactsAccordionProps {

@@ -56,12 +56,8 @@ export interface StartOfTurnResult {
 
 export { AttackType } from "@/lib/constants/battle";
 
-export interface MoraleCheckResult {
-  shouldSkipTurn: boolean;
-  hasExtraTurn: boolean;
-  message: string;
-  moralePositive?: boolean;
-}
+/** Результат перевірки моралі — реекспорт з battle-morale для єдиного джерела істини */
+export type { MoraleCheckResult } from "@/lib/utils/battle/battle-morale";
 
 export interface DamageCalculationResult {
   totalDamage: number;

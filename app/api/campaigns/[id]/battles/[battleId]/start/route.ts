@@ -1,20 +1,21 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
+import { buildCampaignContextForStart } from "./start-build-context";
+import { battleStateSnapshot, debugBattleSync } from "./start-helpers";
+
 import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { requireDM } from "@/lib/utils/api/api-auth";
-import {
-  type CampaignSpellContext,
-  createBattleParticipantFromCharacter,
-  createBattleParticipantFromUnit,
-  parseMainSkillLevelId,
-} from "@/lib/utils/battle/battle-participant";
 import {
   applyStartOfBattleEffects,
   calculateInitiative,
   sortByInitiative,
 } from "@/lib/utils/battle/battle-start";
+import {
+  createBattleParticipantFromCharacter,
+  createBattleParticipantFromUnit,
+} from "@/lib/utils/battle/participant";
 import {
   preparePusherPayload,
   slimInitiativeOrderForStorage,
@@ -23,41 +24,8 @@ import {
 import {
   executeOnBattleStartEffectsForAll,
   executeStartOfRoundTriggers,
-} from "@/lib/utils/skills/skill-triggers-execution";
-import type { BattleAction, BattleParticipant } from "@/types/battle";
-
-const isBattleSyncDebugEnabled = false;
-
-function battleStateSnapshot(
-  initiativeOrder: BattleParticipant[],
-  currentTurnIndex: number,
-  currentRound: number,
-  status?: string,
-) {
-  const current = initiativeOrder[currentTurnIndex]?.basicInfo;
-
-  return {
-    status: status ?? null,
-    round: currentRound,
-    turnIndex: currentTurnIndex,
-    initiativeCount: initiativeOrder.length,
-    currentParticipantId: current?.id ?? null,
-    currentParticipantName: current?.name ?? null,
-    currentParticipantSide: current?.side ?? null,
-  };
-}
-
-function debugBattleSync(message: string, payload?: unknown) {
-  if (!isBattleSyncDebugEnabled) return;
-
-  if (payload === undefined) {
-    console.info("[battle-sync][start-battle]", message);
-
-    return;
-  }
-
-  console.info("[battle-sync][start-battle]", message, payload);
-}
+} from "@/lib/utils/skills/execution";
+import type { BattleAction } from "@/types/battle";
 
 export async function POST(
   request: Request,
@@ -136,185 +104,8 @@ export async function POST(
 
     const unitMap = new Map(units.map((u) => [u.id, u]));
 
-    // Collect all skill IDs and artifact IDs from characters (for batch load)
-    const allSkillIds = new Set<string>();
-
-    const allArtifactIds = new Set<string>();
-
-    for (const c of characters) {
-      const progress =
-        (c.skillTreeProgress as Record<string, { unlockedSkills?: string[] }>) ??
-        {};
-
-      for (const prog of Object.values(progress)) {
-        for (const sid of prog.unlockedSkills ?? []) {
-          allSkillIds.add(sid);
-        }
-      }
-
-      const personalId = (c as { personalSkillId?: string | null }).personalSkillId;
-
-      if (personalId?.trim()) allSkillIds.add(personalId);
-
-      const equipped =
-        (c.inventory?.equipped as Record<string, string | unknown>) ?? {};
-
-      for (const val of Object.values(equipped)) {
-        if (typeof val === "string" && val) allArtifactIds.add(val);
-      }
-    }
-
-    // Level IDs (e.g. mainSkillId_expert_level) are in allSkillIds but not in Skill.id; fetch by mainSkillId so extractActiveSkillsFromCharacter can resolve them
-    const mainSkillIdsFromLevels = new Set<string>();
-
-    for (const sid of allSkillIds) {
-      const parsed = parseMainSkillLevelId(sid);
-
-      if (parsed) mainSkillIdsFromLevels.add(parsed.mainSkillId);
-    }
-
-    // Collect unique races from characters and units
-    const uniqueRaces = new Set<string>();
-
-    for (const c of characters) {
-      if (c.race) uniqueRaces.add(c.race);
-    }
-    for (const u of units) {
-      if (u.race) uniqueRaces.add(u.race);
-    }
-
-    // Batch load campaign context (races for all; spell tree data only for characters)
-    const uniqueRaceNames = Array.from(uniqueRaces);
-
-    const [races, campaign, ...characterContext] = await Promise.all([
-      uniqueRaceNames.length > 0
-        ? prisma.race.findMany({
-            where: {
-              campaignId: id,
-              name: { in: uniqueRaceNames },
-            },
-          })
-        : [],
-      prisma.campaign.findUnique({
-        where: { id },
-        select: { maxLevel: true },
-      }),
-      ...(characters.length > 0
-        ? [
-            uniqueRaceNames.length > 0
-              ? prisma.skillTree.findMany({
-                  where: {
-                    campaignId: id,
-                    race: { in: uniqueRaceNames },
-                  },
-                })
-              : [],
-            prisma.mainSkill.findMany({
-              where: { campaignId: id },
-              select: { id: true, spellGroupId: true, name: true },
-            }),
-            prisma.spell.findMany({
-              where: { campaignId: id },
-              include: { spellGroup: { select: { id: true } } },
-            }),
-            prisma.skill.findMany({
-              where: { campaignId: id },
-              include: { spellGroup: { select: { id: true } } },
-            }),
-            allSkillIds.size > 0
-              ? prisma.skill.findMany({
-                  where: {
-                    id: { in: Array.from(allSkillIds) },
-                    campaignId: id,
-                  },
-                })
-              : [],
-            mainSkillIdsFromLevels.size > 0
-              ? prisma.skill.findMany({
-                  where: {
-                    mainSkillId: { in: Array.from(mainSkillIdsFromLevels) },
-                    campaignId: id,
-                  },
-                })
-              : [],
-            allArtifactIds.size > 0
-              ? prisma.artifact.findMany({
-                  where: {
-                    id: { in: Array.from(allArtifactIds) },
-                    campaignId: id,
-                  },
-                })
-              : [],
-          ]
-        : []),
-    ]);
-
-    const racesByName: Record<string, (typeof races)[0] | null> = {};
-
-    for (const r of races) {
-      racesByName[r.name] = r;
-    }
-    for (const rn of uniqueRaceNames) {
-      if (!(rn in racesByName)) racesByName[rn] = null;
-    }
-
-    let campaignContext: CampaignSpellContext | undefined;
-
-    if (characters.length > 0 && characterContext.length >= 4) {
-      const [
-        skillTrees,
-        mainSkills,
-        spells,
-        allSkills,
-        batchSkills,
-        batchSkillsByMainSkill,
-        batchArtifacts,
-      ] = characterContext;
-
-      const skillTreeByRace: Record<string, NonNullable<(typeof skillTrees)[number]> | null> = {};
-
-      const treesArr = (Array.isArray(skillTrees) ? skillTrees : []) as Array<{ race: string }>;
-
-      for (const st of treesArr) {
-        if (st?.race) skillTreeByRace[st.race] = st as NonNullable<(typeof skillTrees)[number]>;
-      }
-      for (const rn of uniqueRaceNames) {
-        if (!(rn in skillTreeByRace)) skillTreeByRace[rn] = null;
-      }
-
-      const skillsById: Record<string, Prisma.SkillGetPayload<object>> = {};
-
-      const skillsByIdArr = [
-        ...(Array.isArray(batchSkills) ? batchSkills : []),
-        ...(Array.isArray(batchSkillsByMainSkill) ? batchSkillsByMainSkill : []),
-      ];
-
-      for (const s of skillsByIdArr) {
-        if (s && typeof s === "object" && "id" in s) {
-          skillsById[(s as { id: string }).id] = s as Prisma.SkillGetPayload<object>;
-        }
-      }
-
-      const artifactsById: Record<string, Prisma.ArtifactGetPayload<object>> = {};
-
-      const artifactsArr = Array.isArray(batchArtifacts) ? batchArtifacts : [];
-
-      for (const a of artifactsArr) {
-        if (a && typeof a === "object" && "id" in a) {
-          artifactsById[(a as { id: string }).id] = a as Prisma.ArtifactGetPayload<object>;
-        }
-      }
-      campaignContext = {
-        skillTreeByRace: skillTreeByRace as CampaignSpellContext["skillTreeByRace"],
-        mainSkills: mainSkills as CampaignSpellContext["mainSkills"],
-        spells: spells as CampaignSpellContext["spells"],
-        allSkills: allSkills as CampaignSpellContext["allSkills"],
-        racesByName,
-        campaign: { maxLevel: (campaign as { maxLevel?: number })?.maxLevel ?? 20 },
-        skillsById: Object.keys(skillsById).length > 0 ? skillsById : undefined,
-        artifactsById: Object.keys(artifactsById).length > 0 ? artifactsById : undefined,
-      };
-    }
+    const { campaignContext, racesByName, uniqueRaceNames } =
+      await buildCampaignContextForStart(id, characters, units);
 
     // Build participant slots and create in parallel
     type ParticipantSlot =

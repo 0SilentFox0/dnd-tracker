@@ -2,27 +2,21 @@
 
 import { use, useMemo, useState } from "react";
 
+import { BattlePageDialogs, type BattlePageDialogsProps } from "./BattlePageDialogs";
+import { BattlePageLoadingState } from "./BattlePageLoadingState";
+
 import { BattleHeader } from "@/components/battle/BattleHeader";
-import { AddParticipantDialog } from "@/components/battle/dialogs/AddParticipantDialog";
-import { AttackDialog } from "@/components/battle/dialogs/AttackDialog";
-import { ChangeHpDialog } from "@/components/battle/dialogs/ChangeHpDialog";
-import { CounterAttackResultDialog } from "@/components/battle/dialogs/CounterAttackResultDialog";
-import { DmCasterPickerDialog } from "@/components/battle/dialogs/DmCasterPickerDialog";
-import { MoraleCheckDialog } from "@/components/battle/dialogs/MoraleCheckDialog";
-import { SpellDialog } from "@/components/battle/dialogs/SpellDialog";
-import { SpellResultModal } from "@/components/battle/dialogs/SpellResultModal";
-import { RollResultOverlay } from "@/components/battle/RollResultOverlay";
-import { GlobalDamageOverlay } from "@/components/battle/overlays";
 import { DmQuickActionsPanel } from "@/components/battle/panels";
 import { BattleFieldView } from "@/components/battle/views/BattleFieldView";
 import { BattlePreparationView } from "@/components/battle/views/BattlePreparationView";
 import { PlayerTurnView } from "@/components/battle/views/PlayerTurnView";
-import { useBattlePageDialogs } from "@/lib/hooks/battle/useBattlePageDialogs";
-import { useBattleSceneLogic } from "@/lib/hooks/battle/useBattleSceneLogic";
+import { spellPreview } from "@/lib/api/battles";
 import {
-  getMoraleOverlayText,
-  type MoraleCheckResult,
-} from "@/lib/utils/battle/battle-morale";
+  useBattlePageDialogs,
+  useBattleSceneLogic,
+  useMoraleOverlay,
+} from "@/lib/hooks/battle";
+import type { MoraleCheckResult } from "@/lib/utils/battle/battle-morale";
 import type { BattleScene } from "@/types/api";
 import type { BattleAction } from "@/types/battle";
 
@@ -59,15 +53,14 @@ export default function BattlePage({
 
   const dmDialogs = useBattlePageDialogs();
 
+  const moraleOverlay = useMoraleOverlay({
+    onSkipTurn: handlers.handleNextTurn,
+  });
+
   const [spellResultAction, setSpellResultAction] =
     useState<BattleAction | null>(null);
 
   const [spellResultModalOpen, setSpellResultModalOpen] = useState(false);
-
-  const [moraleResultModal, setMoraleResultModal] = useState<{
-    open: boolean;
-    result: MoraleCheckResult | null;
-  }>({ open: false, result: null });
 
   const [spellPreviewAction, setSpellPreviewAction] =
     useState<BattleAction | null>(null);
@@ -99,25 +92,10 @@ export default function BattlePage({
       }) => {
         setSpellPreviewLoading(true);
         try {
-          const res = await fetch(
-            `/api/campaigns/${id}/battles/${battleId}/spell`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ ...data, preview: true }),
-            },
-          );
-
-          if (!res.ok) {
-            const err = await res.json().catch(() => ({}));
-
-            throw new Error(err?.error ?? "Preview failed");
-          }
-
-          const json = await res.json();
+          const json = await spellPreview(id, battleId, data);
 
           if (json.preview && json.battleAction) {
-            setSpellPreviewAction(json.battleAction);
+            setSpellPreviewAction(json.battleAction as BattleAction);
             setPendingSpellData(data);
             setSpellResultModalOpen(true);
           }
@@ -160,31 +138,9 @@ export default function BattlePage({
     };
   }, [battle]);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-black text-white">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-xl font-black italic uppercase tracking-widest animate-pulse">
-            Завантаження...
-          </p>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <BattlePageLoadingState mode="loading" />;
 
-  if (!battle) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-black text-white">
-        <p className="text-2xl font-black italic uppercase tracking-widest">
-          Бій не знайдено
-        </p>
-      </div>
-    );
-  }
-
-  const isApplyingDamageOrTurn =
-    mutations.attack.isPending || mutations.nextTurn.isPending;
+  if (!battle) return <BattlePageLoadingState mode="not-found" />;
 
   return (
     <div className="flex flex-col h-dvh overflow-hidden bg-black selection:bg-primary/30 text-white relative">
@@ -260,10 +216,9 @@ export default function BattlePage({
                   },
                   {
                     onSuccess: (data) => {
-                      setMoraleResultModal({
-                        open: true,
-                        result: data.moraleResult,
-                      });
+                      moraleOverlay.showMoraleResult(
+                        data.moraleResult as MoraleCheckResult,
+                      );
                     },
                   },
                 );
@@ -311,203 +266,53 @@ export default function BattlePage({
         />
       )}
 
-      <AddParticipantDialog
-        open={dmDialogs.addParticipantDialogOpen}
-        onOpenChange={dmDialogs.setAddParticipantDialogOpen}
-        campaignId={id}
-        onAdd={(data) =>
-          addParticipantMutation.mutate(data, {
-            onSuccess: () => dmDialogs.setAddParticipantDialogOpen(false),
-          })
-        }
-        isPending={addParticipantMutation.isPending}
-      />
-
-      <ChangeHpDialog
-        open={dmDialogs.hpDialogParticipant !== null}
-        onOpenChange={(open) => !open && dmDialogs.closeHpDialog()}
-        participant={dmDialogs.hpDialogParticipant}
-        onConfirm={(participantId, newHp) => {
-          updateParticipantMutation.mutate({
-            participantId,
-            data: { currentHp: newHp },
-          });
-          dmDialogs.closeHpDialog();
+      <BattlePageDialogs
+        battleContext={{
+          campaignId: id,
+          battle,
+          isDM,
+          isCurrentPlayerTurn,
+          currentParticipant,
+          availableTargets,
+          canSeeEnemyHp,
         }}
-        isPending={updateParticipantMutation.isPending}
-      />
-
-      {/* Діалоги */}
-      <AttackDialog
-        open={dialogs.attack.open}
-        onOpenChange={dialogs.attack.setOpen}
-        attacker={null}
-        battle={battle}
-        availableTargets={availableTargets}
-        isDM={isDM}
-        canSeeEnemyHp={canSeeEnemyHp}
-        onAttack={(data) =>
-          handlers.handleAttack(data, () => dialogs.attack.setOpen(false))
-        }
-      />
-
-      {!isCurrentPlayerTurn && currentParticipant && (
-        <MoraleCheckDialog
-          open={dialogs.morale.open}
-          onOpenChange={dialogs.morale.setOpen}
-          participant={currentParticipant}
-          onConfirm={(d10Roll) =>
-            mutations.moraleCheck.mutate(
-              {
-                participantId: currentParticipant.basicInfo.id,
-                d10Roll,
-              },
-              {
-                onSuccess: (data) => {
-                  setMoraleResultModal({
-                    open: true,
-                    result: data.moraleResult,
-                  });
-                },
-              },
-            )
-          }
-        />
-      )}
-
-      <RollResultOverlay
-        type={
-          moraleResultModal.open && moraleResultModal.result
-            ? moraleResultModal.result.hasExtraTurn ||
-                !moraleResultModal.result.shouldSkipTurn
-              ? "success"
-              : "fail"
-            : null
-        }
-        customText={
-          moraleResultModal.open && moraleResultModal.result
-            ? getMoraleOverlayText(moraleResultModal.result)
-            : null
-        }
-        onComplete={() => {
-          const shouldSkip = moraleResultModal.result?.shouldSkipTurn;
-          setMoraleResultModal((prev) => ({ ...prev, open: false }));
-          if (shouldSkip) handlers.handleNextTurn();
+        dmSpell={{
+          dmSpellCasterId,
+          setDmSpellCasterId,
         }}
-      />
-
-      {dialogs.spell.open && isDM && !dmSpellCasterId && (
-        <DmCasterPickerDialog
-          open={dialogs.spell.open}
-          onOpenChange={(open) => {
-            if (!open) {
-              dialogs.spell.setOpen(false);
-              setDmSpellCasterId(null);
-            }
-          }}
-          participants={battle.initiativeOrder ?? []}
-          onSelectCaster={(p) => setDmSpellCasterId(p.basicInfo.id)}
-        />
-      )}
-
-      {dialogs.spell.open && (!isDM || dmSpellCasterId) && (
-        <SpellDialog
-          open={dialogs.spell.open}
-          onOpenChange={(open) => {
-            if (!open && isDM) setDmSpellCasterId(null);
-
-            dialogs.spell.setOpen(open);
-          }}
-          caster={
-            isDM && dmSpellCasterId
-              ? (battle.initiativeOrder ?? []).find(
-                  (p: { basicInfo: { id: string } }) =>
-                    p.basicInfo.id === dmSpellCasterId,
-                ) ?? null
-              : null
-          }
-          battle={battle}
-          campaignId={id}
-          availableTargets={availableTargets}
-          isDM={isDM}
-          canSeeEnemyHp={canSeeEnemyHp}
-          allowAllSpellsForDM={Boolean(isDM && dmSpellCasterId)}
-          onPreview={async (data) => {
-            dialogs.spell.setOpen(false);
-            await handleSpellPreview(data);
-          }}
-          onCast={(data) =>
-            mutations.spell.mutate(data, {
-              onSuccess: (updatedBattle: BattleScene | undefined) => {
-                dialogs.spell.setOpen(false);
-
-                if (isDM) setDmSpellCasterId(null);
-
-                if (updatedBattle) {
-                  handlers.triggerGlobalDamageFromBattle(updatedBattle);
-
-                  const log = updatedBattle.battleLog;
-
-                  if (log?.length) {
-                    const last = log[log.length - 1] as BattleAction;
-
-                    if (last.actionType === "spell") {
-                      setSpellResultAction(last);
-                      setSpellResultModalOpen(true);
-                    }
-                  }
-                }
-              },
-            })
-          }
-        />
-      )}
-
-      <CounterAttackResultDialog
-        open={dialogs.counterAttack.open}
-        onOpenChange={dialogs.counterAttack.setOpen}
-        info={dialogs.counterAttack.info}
-      />
-
-      <SpellResultModal
-        open={spellResultModalOpen}
-        onOpenChange={(open) => {
-          setSpellResultModalOpen(open);
-
-          if (!open) {
-            setPendingSpellData(null);
-            setSpellPreviewAction(null);
-          }
+        dialogs={dialogs}
+        dmDialogs={{
+          addParticipantDialogOpen: dmDialogs.addParticipantDialogOpen,
+          setAddParticipantDialogOpen: dmDialogs.setAddParticipantDialogOpen,
+          hpDialogParticipant: dmDialogs.hpDialogParticipant,
+          closeHpDialog: dmDialogs.closeHpDialog,
         }}
-        lastSpellAction={
-          pendingSpellData ? spellPreviewAction : spellResultAction
+        mutations={
+          {
+            addParticipant: addParticipantMutation,
+            updateParticipant: updateParticipantMutation,
+            moraleCheck: mutations.moraleCheck,
+            spell: mutations.spell,
+            attack: mutations.attack,
+            nextTurn: mutations.nextTurn,
+          } as BattlePageDialogsProps["mutations"]
         }
-        onApply={
-          pendingSpellData ? handleSpellApplyFromModal : undefined
-        }
+        handlers={handlers}
+        moraleOverlay={moraleOverlay}
+        spellResult={{
+          spellResultModalOpen,
+          setSpellResultModalOpen,
+          spellResultAction,
+          setSpellResultAction,
+          spellPreviewAction,
+          setSpellPreviewAction,
+          pendingSpellData,
+          setPendingSpellData,
+          handleSpellPreview,
+          handleSpellApplyFromModal,
+        }}
+        globalDamageFlash={globalDamageFlash}
       />
-
-      {globalDamageFlash && (
-        <GlobalDamageOverlay
-          value={globalDamageFlash.value}
-          isHealing={globalDamageFlash.isHealing}
-          onDone={handlers.clearGlobalDamageFlash}
-        />
-      )}
-
-      {/* Лоадер при застосуванні шкоди або переході ходу */}
-      {isApplyingDamageOrTurn && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm">
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-            <p className="text-lg font-medium text-white/90">
-              {mutations.attack.isPending
-                ? "Застосування шкоди…"
-                : "Перехід ходу…"}
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

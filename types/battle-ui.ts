@@ -2,25 +2,14 @@
  * Типи для UI компонентів битви
  */
 
-import type { BattleScene } from "./api";
+import type { AttackData, BattleScene } from "./api";
 import type { ActiveSkill, BattleParticipant } from "./battle";
 import type { SkillCircle as SkillCircleEnum, SkillLevel } from "./skill-tree";
 
 import { SpellDamageType, SpellType } from "@/lib/constants/spell-abilities";
 
-/**
- * Дані для атаки
- */
-export interface AttackData {
-  attackerId: string;
-  targetId?: string; // для однієї цілі (зворотна сумісність)
-  targetIds?: string[]; // для AOE — масив цілей
-  attackId?: string;
-  attackRoll: number;
-  advantageRoll?: number;
-  disadvantageRoll?: number;
-  damageRolls: number[];
-}
+/** Дані для атаки — реекспорт з api для єдиного джерела істини */
+export type { AttackData };
 
 /**
  * Дані для заклинання

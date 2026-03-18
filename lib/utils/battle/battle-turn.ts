@@ -7,12 +7,12 @@ import { calculateInitiative } from "./battle-start";
 import {
   checkTriggerCondition,
   getPassiveAbilitiesByTrigger,
-} from "./battle-triggers";
+} from "./triggers";
 
 import {
   applyOnBattleStartEffectsToNewAllies,
   executeStartOfRoundTriggers,
-} from "@/lib/utils/skills/skill-triggers-execution";
+} from "@/lib/utils/skills/execution";
 import { BattleParticipant } from "@/types/battle";
 
 /**
@@ -52,6 +52,7 @@ export function processStartOfTurn(
     updatedParticipant.combatStats.status !== "unconscious"
   ) {
     const dotResult = applyDOTEffects(updatedParticipant);
+
     updatedParticipant = {
       ...updatedParticipant,
       combatStats: {
@@ -62,6 +63,7 @@ export function processStartOfTurn(
     damageMessages.push(...dotResult.damageMessages);
 
     const durationResult = decreaseEffectDurations(updatedParticipant);
+
     expiredEffects = durationResult.expiredEffects;
     updatedParticipant = {
       ...updatedParticipant,

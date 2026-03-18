@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { updateArtifact } from "@/lib/api/artifacts";
 import { ARTIFACT_SLOT_OPTIONS } from "@/lib/constants/artifacts";
 
 export interface ArtifactCardData {
@@ -80,20 +81,7 @@ export function ArtifactCard({
 
     setUpdating(true);
     try {
-      const res = await fetch(
-        `/api/campaigns/${campaignId}/artifacts/${artifact.id}`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ slot: newSlot }),
-        }
-      );
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-
-        throw new Error(data.error || "Не вдалося оновити слот");
-      }
+      await updateArtifact(campaignId, artifact.id, { slot: newSlot });
 
       setSlot(newSlot);
       router.refresh();

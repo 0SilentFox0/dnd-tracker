@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { getSpells } from "@/lib/api/spells";
 import { SpellDamageType, SpellType } from "@/lib/constants/spell-abilities";
 import type { BattleParticipant } from "@/types/battle";
 import type { Spell } from "@/types/battle-ui";
@@ -46,23 +47,7 @@ export function SpellSelectionDialog({
           return;
         }
 
-        const response = await fetch(`/api/campaigns/${campaignId}/spells`);
-
-        if (!response.ok) {
-          setSpells([]);
-          setLoading(false);
-
-          return;
-        }
-
-        const allSpells: Array<{
-          id: string;
-          name: string;
-          level: number;
-          type: string;
-          damageType: string;
-          description?: string;
-        }> = await response.json();
+        const allSpells = await getSpells(campaignId);
 
         // Конвертуємо рядкові значення в enum
         const knownSpells: Spell[] = allSpells
@@ -72,12 +57,12 @@ export function SpellSelectionDialog({
             name: spell.name,
             level: spell.level,
             type: spell.type === "aoe" ? SpellType.AOE : SpellType.TARGET,
-            damageType: spell.damageType === "heal" 
-              ? SpellDamageType.HEAL 
+            damageType: spell.damageType === "heal"
+              ? SpellDamageType.HEAL
               : spell.damageType === "all"
-              ? SpellDamageType.ALL
-              : SpellDamageType.DAMAGE,
-            description: spell.description,
+                ? SpellDamageType.ALL
+                : SpellDamageType.DAMAGE,
+            description: spell.description ?? undefined,
           }));
 
         setSpells(knownSpells);

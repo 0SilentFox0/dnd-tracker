@@ -2,19 +2,21 @@
  * API сервіс для роботи з основними навиками
  */
 
+import {
+  campaignDelete,
+  campaignGet,
+  campaignPatch,
+  campaignPost,
+} from "@/lib/api/client";
 import type { MainSkill, MainSkillFormData } from "@/types/main-skills";
 
 /**
  * Отримує список основних навиків кампанії
  */
-export async function getMainSkills(campaignId: string): Promise<MainSkill[]> {
-  const response = await fetch(`/api/campaigns/${campaignId}/main-skills`);
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch main skills");
-  }
-
-  return response.json();
+export async function getMainSkills(
+  campaignId: string,
+): Promise<MainSkill[]> {
+  return campaignGet<MainSkill[]>(campaignId, "/main-skills");
 }
 
 /**
@@ -22,36 +24,9 @@ export async function getMainSkills(campaignId: string): Promise<MainSkill[]> {
  */
 export async function createMainSkill(
   campaignId: string,
-  data: MainSkillFormData
+  data: MainSkillFormData,
 ): Promise<MainSkill> {
-  const response = await fetch(`/api/campaigns/${campaignId}/main-skills`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-
-    // Якщо це помилка валідації Zod, показуємо деталі
-    if (Array.isArray(error.error)) {
-      const errorMessages = error.error
-        .map((issue: { path: string[]; message: string }) => {
-          const field = issue.path.join(".");
-
-          return `${field}: ${issue.message}`;
-        })
-        .join(", ");
-
-      throw new Error(errorMessages);
-    }
-
-    throw new Error(error.error || "Failed to create main skill");
-  }
-
-  return response.json();
+  return campaignPost<MainSkill>(campaignId, "/main-skills", data);
 }
 
 /**
@@ -60,26 +35,13 @@ export async function createMainSkill(
 export async function updateMainSkill(
   campaignId: string,
   mainSkillId: string,
-  data: Partial<MainSkillFormData>
+  data: Partial<MainSkillFormData>,
 ): Promise<MainSkill> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/main-skills/${mainSkillId}`,
-    {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    }
+  return campaignPatch<MainSkill>(
+    campaignId,
+    `/main-skills/${mainSkillId}`,
+    data,
   );
-
-  if (!response.ok) {
-    const error = await response.json();
-
-    throw new Error(error.error || "Failed to update main skill");
-  }
-
-  return response.json();
 }
 
 /**
@@ -87,18 +49,7 @@ export async function updateMainSkill(
  */
 export async function deleteMainSkill(
   campaignId: string,
-  mainSkillId: string
+  mainSkillId: string,
 ): Promise<void> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/main-skills/${mainSkillId}`,
-    {
-      method: "DELETE",
-    }
-  );
-
-  if (!response.ok) {
-    const error = await response.json();
-
-    throw new Error(error.error || "Failed to delete main skill");
-  }
+  await campaignDelete<void>(campaignId, `/main-skills/${mainSkillId}`);
 }

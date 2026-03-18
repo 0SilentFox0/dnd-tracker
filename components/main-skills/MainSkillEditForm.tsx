@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getSpellGroups } from "@/lib/api/spells";
-import { useUpdateMainSkill } from "@/lib/hooks/useMainSkills";
+import { useUpdateMainSkill } from "@/lib/hooks/skills";
 import type { MainSkill } from "@/types/main-skills";
 import type { MainSkillFormData } from "@/types/main-skills";
 import type { SpellGroup } from "@/types/spells";

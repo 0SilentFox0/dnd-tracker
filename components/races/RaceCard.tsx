@@ -14,8 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ABILITY_SCORES } from "@/lib/constants/abilities";
-import { useMainSkills } from "@/lib/hooks/useMainSkills";
-import { useSkills } from "@/lib/hooks/useSkills";
+import { useMainSkills, useSkills } from "@/lib/hooks/skills";
 import {
   getSkillMainSkillId,
   getSkillRaces,

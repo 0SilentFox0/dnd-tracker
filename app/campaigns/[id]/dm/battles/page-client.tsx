@@ -14,6 +14,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { deleteAllBattles } from "@/lib/api/battles";
 
 interface DeleteAllBattlesButtonProps {
   campaignId: string;
@@ -33,15 +34,8 @@ export function DeleteAllBattlesButton({
   const handleDeleteAll = async () => {
     setIsDeleting(true);
     try {
-      const response = await fetch(`/api/campaigns/${campaignId}/battles`, {
-        method: "DELETE",
-      });
+      await deleteAllBattles(campaignId);
 
-      if (!response.ok) {
-        throw new Error("Помилка при видаленні битв");
-      }
-
-      // Оновлюємо сторінку
       router.refresh();
       setShowDeleteDialog(false);
     } catch (error) {

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import type { ArtifactData, ArtifactSetOption } from "./ArtifactEditForm-types";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,27 +19,14 @@ import { LabeledInput } from "@/components/ui/labeled-input";
 import { SelectField } from "@/components/ui/select-field";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  deleteArtifact,
+  updateArtifact,
+} from "@/lib/api/artifacts";
+import {
   ARTIFACT_RARITY_OPTIONS,
   ARTIFACT_SLOT_OPTIONS,
   ArtifactRarity,
 } from "@/lib/constants/artifacts";
-
-interface ArtifactSetOption {
-  id: string;
-  name: string;
-}
-
-interface ArtifactData {
-  id: string;
-  name: string;
-  description: string | null;
-  rarity: string | null;
-  slot: string;
-  icon: string | null;
-  setId: string | null;
-  bonuses: Record<string, number>;
-  passiveAbility: { name?: string; description?: string } | null;
-}
 
 interface ArtifactEditFormProps {
   campaignId: string;
@@ -119,20 +108,7 @@ export function ArtifactEditForm({
             : null,
       };
 
-      const response = await fetch(
-        `/api/campaigns/${campaignId}/artifacts/${artifact.id}`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        },
-      );
-
-      if (!response.ok) {
-        const data = await response.json();
-
-        throw new Error(data.error || "Не вдалося оновити артефакт");
-      }
+      await updateArtifact(campaignId, artifact.id, payload);
 
       router.push(`/campaigns/${campaignId}/dm/artifacts`);
       router.refresh();
@@ -152,16 +128,7 @@ export function ArtifactEditForm({
     setError(null);
 
     try {
-      const response = await fetch(
-        `/api/campaigns/${campaignId}/artifacts/${artifact.id}`,
-        { method: "DELETE" },
-      );
-
-      if (!response.ok) {
-        const data = await response.json();
-
-        throw new Error(data.error || "Не вдалося видалити артефакт");
-      }
+      await deleteArtifact(campaignId, artifact.id);
 
       router.push(`/campaigns/${campaignId}/dm/artifacts`);
       router.refresh();

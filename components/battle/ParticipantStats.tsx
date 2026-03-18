@@ -1,7 +1,7 @@
 import { Shield, Sparkles } from "lucide-react";
 
-import { getEffectiveArmorClass } from "@/lib/utils/battle/battle-participant-helpers";
 import { cn } from "@/lib/utils";
+import { getEffectiveArmorClass } from "@/lib/utils/battle/participant";
 import type { BattleParticipant } from "@/types/battle";
 
 interface ParticipantStatsProps {

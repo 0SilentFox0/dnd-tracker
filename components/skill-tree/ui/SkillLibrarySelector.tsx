@@ -2,7 +2,7 @@
 
 import { SelectGroup, SelectItem, SelectLabel } from "@/components/ui/select";
 import { SelectField } from "@/components/ui/select-field";
-import type { SkillFromLibrary } from "@/lib/hooks/useSkills";
+import type { SkillFromLibrary } from "@/lib/hooks/skills";
 import type { MainSkill } from "@/types/main-skills";
 
 /** Назва скіла: API повертає basicInfo.name, тип може мати name в корені */

@@ -12,7 +12,7 @@ import {
   calculatePassiveAbilityDamageBonus,
   calculateSkillDamageFlatBonus,
   calculateSkillDamagePercentBonus,
-} from "../battle-damage-calculations";
+} from "../damage";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import type {

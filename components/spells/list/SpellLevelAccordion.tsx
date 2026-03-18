@@ -20,7 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useDeleteSpellsByLevel } from "@/lib/hooks/useSpells";
+import { useDeleteSpellsByLevel } from "@/lib/hooks/spells";
 import type { Spell, SpellGroup } from "@/types/spells";
 
 

@@ -4,8 +4,8 @@ import { z } from "zod";
 
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
-import { BattleSpell, processSpell } from "@/lib/utils/battle/battle-spell-process";
 import { logBattleTiming } from "@/lib/utils/battle/battle-timing";
+import { BattleSpell, processSpell } from "@/lib/utils/battle/spell";
 import {
   prepareBattleLogForStorage,
   preparePusherPayload,

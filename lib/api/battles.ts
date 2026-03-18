@@ -1,4 +1,20 @@
 import type {
+  AddParticipantData,
+  BattleBalanceBody,
+  BattleBalanceResponse,
+  CreateBattleData,
+  DamageBreakdownRequestBody,
+  DamageBreakdownResponse,
+  SpellPreviewResponse,
+} from "./battles-types";
+import {
+  campaignDelete,
+  campaignGet,
+  campaignPatch,
+  campaignPost,
+} from "./client";
+
+import type {
   AttackData,
   BattleScene,
   BonusActionData,
@@ -6,34 +22,91 @@ import type {
   SpellCastData,
 } from "@/types/api";
 
+export type {
+  AddParticipantData,
+  BattleBalanceBody,
+  BattleBalanceResponse,
+  CreateBattleData,
+  DamageBreakdownRequestBody,
+  DamageBreakdownResponse,
+  DamageBreakdownTargetResult,
+  SpellPreviewResponse,
+} from "./battles-types";
+
+export async function getDamageBreakdown(
+  campaignId: string,
+  battleId: string,
+  body: DamageBreakdownRequestBody,
+): Promise<DamageBreakdownResponse> {
+  const isMultiTarget =
+    Array.isArray(body.targetIds) && body.targetIds.length > 1;
+
+  return campaignPost<DamageBreakdownResponse>(
+    campaignId,
+    `/battles/${battleId}/damage-breakdown`,
+    {
+      attackerId: body.attackerId,
+      ...(isMultiTarget
+        ? { targetIds: body.targetIds }
+        : { targetId: body.targetIds?.[0] ?? body.targetId }),
+      attackId: body.attackId,
+      damageRolls: body.damageRolls,
+      isCritical: body.isCritical,
+    },
+  );
+}
+
+export async function getBattles(
+  campaignId: string,
+): Promise<BattleScene[]> {
+  return campaignGet<BattleScene[]>(campaignId, "/battles");
+}
+
+export async function deleteAllBattles(
+  campaignId: string,
+): Promise<{ success: boolean; deletedCount: number }> {
+  return campaignDelete<{ success: boolean; deletedCount: number }>(
+    campaignId,
+    "/battles",
+  );
+}
+
+export async function createBattle(
+  campaignId: string,
+  data: CreateBattleData,
+): Promise<BattleScene> {
+  return campaignPost<BattleScene>(campaignId, "/battles", data);
+}
+
+export async function getBattleBalance(
+  campaignId: string,
+  body: BattleBalanceBody,
+): Promise<BattleBalanceResponse> {
+  return campaignPost<BattleBalanceResponse>(
+    campaignId,
+    "/battles/balance",
+    body,
+  );
+}
+
 export async function getBattle(
   campaignId: string,
   battleId: string,
 ): Promise<BattleScene> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/battles/${battleId}`,
-    { cache: "no-store" },
-  );
-
-  if (!response.ok) throw new Error("Failed to fetch battle");
-
-  return response.json();
+  return campaignGet<BattleScene>(campaignId, `/battles/${battleId}`, {
+    cache: "no-store",
+  });
 }
 
 export async function nextTurn(
   campaignId: string,
   battleId: string,
 ): Promise<BattleScene> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/battles/${battleId}/next-turn`,
-    {
-      method: "POST",
-    },
+  return campaignPost<BattleScene>(
+    campaignId,
+    `/battles/${battleId}/next-turn`,
+    {},
   );
-
-  if (!response.ok) throw new Error("Failed to advance turn");
-
-  return response.json();
 }
 
 export async function attack(
@@ -41,20 +114,11 @@ export async function attack(
   battleId: string,
   data: AttackData,
 ): Promise<BattleScene> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/battles/${battleId}/attack`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    },
+  return campaignPost<BattleScene>(
+    campaignId,
+    `/battles/${battleId}/attack`,
+    data,
   );
-
-  if (!response.ok) throw new Error("Failed to process attack");
-
-  return response.json();
 }
 
 /** Attack and advance to next turn in one request (one fetch, one write). */
@@ -63,20 +127,11 @@ export async function attackAndNextTurn(
   battleId: string,
   data: AttackData,
 ): Promise<BattleScene> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/battles/${battleId}/attack-and-next-turn`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    },
+  return campaignPost<BattleScene>(
+    campaignId,
+    `/battles/${battleId}/attack-and-next-turn`,
+    data,
   );
-
-  if (!response.ok) throw new Error("Failed to process attack and advance turn");
-
-  return response.json();
 }
 
 export async function bonusAction(
@@ -84,20 +139,11 @@ export async function bonusAction(
   battleId: string,
   data: BonusActionData,
 ): Promise<BattleScene> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/battles/${battleId}/bonus-action`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    },
+  const result = await campaignPost<{ battle: BattleScene }>(
+    campaignId,
+    `/battles/${battleId}/bonus-action`,
+    data,
   );
-
-  if (!response.ok) throw new Error("Failed to process bonus action");
-
-  const result = await response.json();
 
   return result.battle;
 }
@@ -114,20 +160,7 @@ export async function moraleCheck(
     message: string;
   };
 }> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/battles/${battleId}/morale-check`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    },
-  );
-
-  if (!response.ok) throw new Error("Failed to process morale check");
-
-  return response.json();
+  return campaignPost(campaignId, `/battles/${battleId}/morale-check`, data);
 }
 
 export async function castSpell(
@@ -135,20 +168,23 @@ export async function castSpell(
   battleId: string,
   data: SpellCastData,
 ): Promise<BattleScene> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/battles/${battleId}/spell`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    },
+  return campaignPost<BattleScene>(
+    campaignId,
+    `/battles/${battleId}/spell`,
+    data,
   );
+}
 
-  if (!response.ok) throw new Error("Failed to process spell");
-
-  return response.json();
+export async function spellPreview(
+  campaignId: string,
+  battleId: string,
+  data: SpellCastData & { preview?: boolean },
+): Promise<SpellPreviewResponse> {
+  return campaignPost<SpellPreviewResponse>(
+    campaignId,
+    `/battles/${battleId}/spell`,
+    { ...data, preview: true },
+  );
 }
 
 export async function updateBattle(
@@ -156,68 +192,43 @@ export async function updateBattle(
   battleId: string,
   data: Partial<BattleScene>,
 ): Promise<BattleScene> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/battles/${battleId}`,
-    {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    },
+  return campaignPatch<BattleScene>(
+    campaignId,
+    `/battles/${battleId}`,
+    data,
   );
-
-  if (!response.ok) throw new Error("Failed to update battle");
-
-  return response.json();
 }
 
 export async function deleteBattle(
   campaignId: string,
   battleId: string,
 ): Promise<{ success: true }> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/battles/${battleId}`,
-    {
-      method: "DELETE",
-    },
+  return campaignDelete<{ success: true }>(
+    campaignId,
+    `/battles/${battleId}`,
   );
-
-  if (!response.ok) throw new Error("Failed to delete battle");
-
-  return response.json();
 }
 
 export async function startBattle(
   campaignId: string,
   battleId: string,
 ): Promise<BattleScene> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/battles/${battleId}/start`,
-    {
-      method: "POST",
-    },
+  return campaignPost<BattleScene>(
+    campaignId,
+    `/battles/${battleId}/start`,
+    {},
   );
-
-  if (!response.ok) throw new Error("Failed to start battle");
-
-  return response.json();
 }
 
 export async function resetBattle(
   campaignId: string,
   battleId: string,
 ): Promise<BattleScene> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/battles/${battleId}/reset`,
-    {
-      method: "POST",
-    },
+  return campaignPost<BattleScene>(
+    campaignId,
+    `/battles/${battleId}/reset`,
+    {},
   );
-
-  if (!response.ok) throw new Error("Failed to reset battle");
-
-  return response.json();
 }
 
 export async function completeBattle(
@@ -225,24 +236,11 @@ export async function completeBattle(
   battleId: string,
   data?: { result?: "victory" | "defeat" },
 ): Promise<BattleScene> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/battles/${battleId}/complete`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data ?? {}),
-    },
+  return campaignPost<BattleScene>(
+    campaignId,
+    `/battles/${battleId}/complete`,
+    data ?? {},
   );
-
-  if (!response.ok) {
-    const err = await response.json();
-
-    throw new Error(err.error || "Failed to complete battle");
-  }
-
-  return response.json();
 }
 
 export async function rollbackBattleAction(
@@ -250,54 +248,23 @@ export async function rollbackBattleAction(
   battleId: string,
   actionIndex: number,
 ): Promise<BattleScene> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/battles/${battleId}/rollback`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ actionIndex }),
-    },
+  return campaignPost<BattleScene>(
+    campaignId,
+    `/battles/${battleId}/rollback`,
+    { actionIndex },
   );
-
-  if (!response.ok) {
-    const err = await response.json();
-
-    throw new Error(err.error || "Failed to rollback action");
-  }
-
-  return response.json();
 }
-
-export type AddParticipantData = {
-  sourceId: string;
-  type: "character" | "unit";
-  side: "ally" | "enemy";
-  quantity?: number;
-};
 
 export async function addBattleParticipant(
   campaignId: string,
   battleId: string,
   data: AddParticipantData,
 ): Promise<BattleScene> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/battles/${battleId}/add-participant`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    },
+  return campaignPost<BattleScene>(
+    campaignId,
+    `/battles/${battleId}/add-participant`,
+    data,
   );
-
-  if (!response.ok) {
-    const err = await response.json();
-
-    throw new Error(err.error || "Failed to add participant");
-  }
-
-  return response.json();
 }
 
 export async function updateBattleParticipant(
@@ -306,20 +273,9 @@ export async function updateBattleParticipant(
   participantId: string,
   data: { currentHp?: number; removeFromBattle?: boolean },
 ): Promise<BattleScene> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/battles/${battleId}/participants/${participantId}`,
-    {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    },
+  return campaignPatch<BattleScene>(
+    campaignId,
+    `/battles/${battleId}/participants/${participantId}`,
+    data,
   );
-
-  if (!response.ok) {
-    const err = await response.json();
-
-    throw new Error(err.error || "Failed to update participant");
-  }
-
-  return response.json();
 }

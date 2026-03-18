@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 
+import { RaceEditFormSpellSlots } from "./RaceEditFormSpellSlots";
+import { RaceEditFormStatModifiers } from "./RaceEditFormStatModifiers";
+
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -14,8 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ABILITY_SCORES } from "@/lib/constants/abilities";
-import { useMainSkills } from "@/lib/hooks/useMainSkills";
+import { useMainSkills } from "@/lib/hooks/skills";
 import type { RaceFormData } from "@/types/races";
 
 interface CreateRaceDialogProps {
@@ -168,136 +169,7 @@ export function CreateRaceDialog({
             <p className="text-xs text-muted-foreground">
               Виберіть ефекти для кожної характеристики
             </p>
-            <div className="border rounded-md p-3 space-y-4 max-h-96 overflow-y-auto">
-              {ABILITY_SCORES.map((ability) => {
-                const modifiers =
-                  formData.passiveAbility?.statModifiers?.[ability.key] || {};
-
-                return (
-                  <div
-                    key={ability.key}
-                    className="space-y-2 pb-3 border-b last:border-0"
-                  >
-                    <Label className="text-sm font-semibold">
-                      {ability.label} ({ability.abbreviation})
-                    </Label>
-                    <div className="space-y-2 pl-4">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`${ability.key}-bonus`}
-                          checked={modifiers.bonus || false}
-                          onCheckedChange={(checked) => {
-                            setFormData((prev) => ({
-                              ...prev,
-                              passiveAbility: {
-                                ...prev.passiveAbility,
-                                description:
-                                  prev.passiveAbility?.description || "",
-                                statImprovements:
-                                  prev.passiveAbility?.statImprovements || "",
-                                statModifiers: {
-                                  ...prev.passiveAbility?.statModifiers,
-                                  [ability.key]: {
-                                    ...modifiers,
-                                    bonus: checked === true,
-                                    // Якщо вибрано "завжди 0", знімаємо бонус
-                                    alwaysZero:
-                                      checked === true
-                                        ? false
-                                        : modifiers.alwaysZero,
-                                  },
-                                },
-                              },
-                            }));
-                          }}
-                        />
-                        <Label
-                          htmlFor={`${ability.key}-bonus`}
-                          className="text-sm font-normal cursor-pointer"
-                        >
-                          Дати + (бонус)
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`${ability.key}-non-negative`}
-                          checked={modifiers.nonNegative || false}
-                          onCheckedChange={(checked) => {
-                            setFormData((prev) => ({
-                              ...prev,
-                              passiveAbility: {
-                                ...prev.passiveAbility,
-                                description:
-                                  prev.passiveAbility?.description || "",
-                                statImprovements:
-                                  prev.passiveAbility?.statImprovements || "",
-                                statModifiers: {
-                                  ...prev.passiveAbility?.statModifiers,
-                                  [ability.key]: {
-                                    ...modifiers,
-                                    nonNegative: checked === true,
-                                    // Якщо вибрано "завжди 0", знімаємо невід'ємність
-                                    alwaysZero:
-                                      checked === true
-                                        ? false
-                                        : modifiers.alwaysZero,
-                                  },
-                                },
-                              },
-                            }));
-                          }}
-                        />
-                        <Label
-                          htmlFor={`${ability.key}-non-negative`}
-                          className="text-sm font-normal cursor-pointer"
-                        >
-                          Зробити невід`ємним (мінімум 0)
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`${ability.key}-always-zero`}
-                          checked={modifiers.alwaysZero || false}
-                          onCheckedChange={(checked) => {
-                            setFormData((prev) => ({
-                              ...prev,
-                              passiveAbility: {
-                                ...prev.passiveAbility,
-                                description:
-                                  prev.passiveAbility?.description || "",
-                                statImprovements:
-                                  prev.passiveAbility?.statImprovements || "",
-                                statModifiers: {
-                                  ...prev.passiveAbility?.statModifiers,
-                                  [ability.key]: {
-                                    // Якщо вибрано "завжди 0", знімаємо всі інші опції
-                                    bonus:
-                                      checked === true
-                                        ? false
-                                        : modifiers.bonus,
-                                    nonNegative:
-                                      checked === true
-                                        ? false
-                                        : modifiers.nonNegative,
-                                    alwaysZero: checked === true,
-                                  },
-                                },
-                              },
-                            }));
-                          }}
-                        />
-                        <Label
-                          htmlFor={`${ability.key}-always-zero`}
-                          className="text-sm font-normal cursor-pointer"
-                        >
-                          Завжди 0
-                        </Label>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <RaceEditFormStatModifiers formData={formData} setFormData={setFormData} />
           </div>
 
           <div className="space-y-2">
@@ -306,54 +178,7 @@ export function CreateRaceDialog({
               Вкажіть максимальну кількість магічних слотів для кожного рівня
               магії при прокачці рівня персонажа
             </p>
-            <div className="border rounded-md p-4">
-              <div className="grid grid-cols-2 gap-4 mb-2 pb-2 border-b font-semibold text-sm">
-                <div>Рівень магії</div>
-                <div>Максимальна кількість слотів</div>
-              </div>
-              {[1, 2, 3, 4, 5].map((level) => {
-                const progression = formData.spellSlotProgression?.find(
-                  (p) => p.level === level,
-                );
-
-                return (
-                  <div key={level} className="grid grid-cols-2 gap-4 py-2">
-                    <div className="flex items-center text-sm">
-                      Рівень {level}
-                    </div>
-                    <Input
-                      type="number"
-                      value={progression?.slots}
-                      onChange={(e) => {
-                        const slots = Number(e.target.value);
-
-                        setFormData((prev) => {
-                          const current = prev.spellSlotProgression || [];
-
-                          const index = current.findIndex(
-                            (p) => p.level === level,
-                          );
-
-                          let updated;
-
-                          if (index >= 0) {
-                            updated = [...current];
-                            updated[index] = { level, slots };
-                          } else {
-                            updated = [...current, { level, slots }];
-                          }
-
-                          return {
-                            ...prev,
-                            spellSlotProgression: updated,
-                          };
-                        });
-                      }}
-                    />
-                  </div>
-                );
-              })}
-            </div>
+            <RaceEditFormSpellSlots formData={formData} setFormData={setFormData} />
           </div>
 
           <div className="flex justify-end gap-2">

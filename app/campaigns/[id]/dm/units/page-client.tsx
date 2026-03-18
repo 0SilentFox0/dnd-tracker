@@ -6,14 +6,14 @@ import { Accordion } from "@/components/ui/accordion";
 import { DeleteAllUnitsDialog } from "@/components/units/dialogs/DeleteAllUnitsDialog";
 import { UnitGroupAccordion } from "@/components/units/list/UnitGroupAccordion";
 import { UnitsPageHeader } from "@/components/units/ui/UnitsPageHeader";
-import { useRaces } from "@/lib/hooks/useRaces";
+import { useRaces } from "@/lib/hooks/races";
 import {
   useDeleteAllUnits,
   useDeleteUnit,
   useUnitGroups,
   useUnits,
   useUpdateUnitAny,
-} from "@/lib/hooks/useUnits";
+} from "@/lib/hooks/units";
 import type { Unit } from "@/types/units";
 
 interface DMUnitsPageClientProps {

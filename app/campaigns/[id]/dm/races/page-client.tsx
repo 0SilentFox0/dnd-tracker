@@ -9,7 +9,7 @@ import {
   useCreateRace,
   useDeleteRace,
   useRaces,
-} from "@/lib/hooks/useRaces";
+} from "@/lib/hooks/races";
 import type { Race } from "@/types/races";
 
 interface DMRacesPageClientProps {

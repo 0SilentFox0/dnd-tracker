@@ -3,7 +3,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { ImportDialog } from "@/components/common/ImportDialog";
-import { useFileImport } from "@/lib/hooks/useFileImport";
+import { importUnits } from "@/lib/api/units";
+import { useFileImport } from "@/lib/hooks/common";
 import { parseCSVFile, parseJSONFile } from "@/lib/utils/common/file-import";
 import { convertCSVRowToUnit } from "@/lib/utils/common/unit-parsing";
 import type {
@@ -23,24 +24,7 @@ export function UnitImportDialog({ campaignId }: UnitImportDialogProps) {
     mutationFn: async (
       units: Array<ImportUnit & { groupName?: string }>
     ): Promise<UnitImportResult> => {
-      const response = await fetch(
-        `/api/campaigns/${campaignId}/units/import`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ units }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-
-        throw new Error(errorData.error || "Помилка при імпорті юнітів");
-      }
-
-      return response.json();
+      return importUnits(campaignId, { units }) as Promise<UnitImportResult>;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["units", campaignId] });

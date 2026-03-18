@@ -3,13 +3,13 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { prisma } from "@/lib/db";
-import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { checkMorale } from "@/lib/utils/battle/battle-morale";
+import { getBattleWithAccess } from "@/lib/utils/battle/get-battle-with-access";
 import {
   preparePusherPayload,
   stripStateBeforeForClient,
 } from "@/lib/utils/battle/strip-battle-payload";
-import { executeSkillsByTrigger } from "@/lib/utils/skills/skill-triggers-execution";
+import { executeSkillsByTrigger } from "@/lib/utils/skills/execution";
 import { BattleAction, BattleParticipant } from "@/types/battle";
 
 const moraleCheckSchema = z.object({
@@ -24,19 +24,13 @@ export async function POST(
   try {
     const { id, battleId } = await params;
 
-    const accessResult = await requireCampaignAccess(id, false);
+    const result = await getBattleWithAccess(id, battleId);
 
-    if (accessResult instanceof NextResponse) {
-      return accessResult;
+    if (result instanceof NextResponse) {
+      return result;
     }
 
-    const battle = await prisma.battleScene.findUnique({
-      where: { id: battleId },
-    });
-
-    if (!battle || battle.campaignId !== id) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
-    }
+    const { accessResult, battle, initiativeOrder } = result;
 
     if (battle.status !== "active") {
       return NextResponse.json(
@@ -48,10 +42,6 @@ export async function POST(
     const body = await request.json();
 
     const data = moraleCheckSchema.parse(body);
-
-    // Отримуємо учасників з initiativeOrder
-    const initiativeOrder =
-      battle.initiativeOrder as unknown as BattleParticipant[];
 
     const participant = initiativeOrder.find(
       (p) => p.basicInfo.id === data.participantId,

@@ -4,12 +4,12 @@ import { z } from "zod";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
-import { requireDM } from "@/lib/utils/api/api-auth";
+import { calculateInitiative } from "@/lib/utils/battle/battle-start";
+import { getBattleWithAccess } from "@/lib/utils/battle/get-battle-with-access";
 import {
   createBattleParticipantFromCharacter,
   createBattleParticipantFromUnit,
-} from "@/lib/utils/battle/battle-participant";
-import { calculateInitiative } from "@/lib/utils/battle/battle-start";
+} from "@/lib/utils/battle/participant";
 import {
   preparePusherPayload,
   stripStateBeforeForClient,
@@ -34,19 +34,15 @@ export async function POST(
   try {
     const { id: campaignId, battleId } = await params;
 
-    const accessResult = await requireDM(campaignId);
-
-    if (accessResult instanceof NextResponse) {
-      return accessResult;
-    }
-
-    const battle = await prisma.battleScene.findUnique({
-      where: { id: battleId },
+    const result = await getBattleWithAccess(campaignId, battleId, {
+      requireDM: true,
     });
 
-    if (!battle || battle.campaignId !== campaignId) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (result instanceof NextResponse) {
+      return result;
     }
+
+    const { battle, initiativeOrder } = result;
 
     if (battle.status !== "active") {
       return NextResponse.json(
@@ -61,9 +57,6 @@ export async function POST(
 
     const side =
       data.side === "ally" ? ParticipantSide.ALLY : ParticipantSide.ENEMY;
-
-    const initiativeOrder =
-      (battle.initiativeOrder as unknown as BattleParticipant[]) ?? [];
 
     const currentTurnIndex = battle.currentTurnIndex;
 

@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
 import { CreateGroupDialog } from "@/components/units/dialogs/CreateGroupDialog";
 import { UnitImportDialog } from "@/components/units/dialogs/UnitImportDialog";
-import { useCreateUnitGroup } from "@/lib/hooks/useUnits";
+import { useCreateUnitGroup } from "@/lib/hooks/units";
 
 interface UnitsPageHeaderProps {
   campaignId: string;

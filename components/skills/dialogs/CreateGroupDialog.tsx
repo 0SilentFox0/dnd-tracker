@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { createSpellGroup } from "@/lib/api/spells";
 
 interface CreateGroupDialogProps {
   campaignId: string;
@@ -43,21 +44,9 @@ export function CreateGroupDialog({
     setError(null);
 
     try {
-      const response = await fetch(`/api/campaigns/${campaignId}/spells/groups`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name: name.trim() }),
+      const newGroup = await createSpellGroup(campaignId, {
+        name: name.trim(),
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-
-        throw new Error(errorData.error || "Failed to create group");
-      }
-
-      const newGroup = await response.json();
 
       setOpen(false);
       setName("");

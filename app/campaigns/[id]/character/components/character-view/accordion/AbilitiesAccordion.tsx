@@ -10,7 +10,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import type { SkillTreeProgress } from "@/lib/hooks/useCharacterView";
+import type { SkillTreeProgress } from "@/lib/hooks/characters";
 
 export interface AbilitiesAccordionProps {
   campaignId: string;

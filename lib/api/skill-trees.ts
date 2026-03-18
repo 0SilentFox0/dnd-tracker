@@ -2,7 +2,23 @@
  * API функції для роботи з деревом навиків
  */
 
-import type { UpdateSkillTreeParams, UpdateSkillTreeResponse } from "@/types/api";
+import { campaignGet, campaignPatch } from "@/lib/api/client";
+import type {
+  UpdateSkillTreeParams,
+  UpdateSkillTreeResponse,
+} from "@/types/api";
+
+export interface SkillTree {
+  id: string;
+  campaignId: string;
+  [key: string]: unknown;
+}
+
+export async function getSkillTrees(
+  campaignId: string,
+): Promise<SkillTree[]> {
+  return campaignGet<SkillTree[]>(campaignId, "/skill-trees");
+}
 
 /**
  * Оновлює дерево навиків
@@ -12,24 +28,9 @@ export async function updateSkillTree({
   treeId,
   skills,
 }: UpdateSkillTreeParams): Promise<UpdateSkillTreeResponse> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/skill-trees/${treeId}`,
-    {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        skills,
-      }),
-    }
+  return campaignPatch<UpdateSkillTreeResponse>(
+    campaignId,
+    `/skill-trees/${treeId}`,
+    { skills },
   );
-
-  if (!response.ok) {
-    const error = await response.json();
-
-    throw new Error(error.error || "Failed to update skill tree");
-  }
-
-  return response.json();
 }

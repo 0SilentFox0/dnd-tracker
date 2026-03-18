@@ -11,15 +11,15 @@
  */
 import { Prisma } from "@prisma/client";
 
+import {
+  createAssert,
+  getDiceCount,
+  type TestResult,
+} from "./simulate-battle-3v5-utils";
+
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
-import { processAttack } from "@/lib/utils/battle/battle-attack-process";
-import {
-  createBattleParticipantFromCharacter,
-  createBattleParticipantFromUnit,
-} from "@/lib/utils/battle/battle-participant";
-import type { BattleSpell } from "@/lib/utils/battle/battle-spell-process";
-import { processSpell } from "@/lib/utils/battle/battle-spell-process";
+import { processAttack } from "@/lib/utils/battle/attack";
 import {
   applyStartOfBattleEffects,
   calculateInitiative,
@@ -34,27 +34,24 @@ import {
   calculateAllyHpChangesOnVictory,
   checkVictoryConditions,
 } from "@/lib/utils/battle/battle-victory";
-import { executeOnBattleStartEffects } from "@/lib/utils/skills/skill-triggers-execution";
-import { executeSkillsByTrigger } from "@/lib/utils/skills/skill-triggers-execution";
-import { updateMoraleOnEvent } from "@/lib/utils/skills/skill-triggers-execution";
+import {
+  createBattleParticipantFromCharacter,
+  createBattleParticipantFromUnit,
+} from "@/lib/utils/battle/participant";
+import type { BattleSpell } from "@/lib/utils/battle/spell";
+import { processSpell } from "@/lib/utils/battle/spell";
+import {
+  executeOnBattleStartEffects,
+  executeSkillsByTrigger,
+  updateMoraleOnEvent,
+} from "@/lib/utils/skills/execution";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 const CAMPAIGN_ID = process.argv[2];
 
-const testResults: { name: string; passed: boolean; detail?: string }[] = [];
+const testResults: TestResult[] = [];
 
-function assert(name: string, condition: boolean, detail?: string) {
-  testResults.push({ name, passed: condition, detail });
-
-  if (!condition) console.log(`  ❌ ${name}${detail ? `: ${detail}` : ""}`);
-}
-
-/** Парсинг damageDice "2d6+4" -> кількість кубиків */
-function getDiceCount(damageDice: string): number {
-  const m = damageDice.match(/(\d+)d\d+/);
-
-  return m ? parseInt(m[1], 10) : 1;
-}
+const assert = createAssert(testResults);
 
 async function startBattle(
   campaignId: string,

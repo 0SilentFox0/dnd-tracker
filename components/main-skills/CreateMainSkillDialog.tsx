@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getSpellGroups } from "@/lib/api/spells";
-import { useCreateMainSkill } from "@/lib/hooks/useMainSkills";
+import { useCreateMainSkill } from "@/lib/hooks/skills";
 import type { MainSkillFormData } from "@/types/main-skills";
 import type { SpellGroup } from "@/types/spells";
 

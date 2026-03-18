@@ -6,11 +6,11 @@ import { BookOpen } from "lucide-react";
 
 import { CharacterSpellbookDialog } from "./CharacterSpellbookDialog";
 
+import { getSkillTrees } from "@/lib/api/skill-trees";
 import { getSpells } from "@/lib/api/spells";
-import { useMainSkills } from "@/lib/hooks/useMainSkills";
-import { useSkills } from "@/lib/hooks/useSkills";
+import { useMainSkills, useSkills } from "@/lib/hooks/skills";
 import { convertPrismaToSkillTree } from "@/lib/utils/skills/skill-tree-mock";
-import { getLearnedSpellIdsFromTree } from "@/lib/utils/spells/spell-learning";
+import { getLearnedSpellIdsFromTree } from "@/lib/utils/spells";
 import type { SkillTree } from "@/types/skill-tree";
 import type { Spell } from "@/types/spells";
 
@@ -46,15 +46,7 @@ export function CharacterSpellbook({
 
   const { data: rawTrees = [] } = useQuery({
     queryKey: ["skill-trees", campaignId],
-    queryFn: async () => {
-      const res = await fetch(`/api/campaigns/${campaignId}/skill-trees`);
-
-      if (!res.ok) return [];
-
-      const data = await res.json();
-
-      return Array.isArray(data) ? data : [];
-    },
+    queryFn: () => getSkillTrees(campaignId),
     enabled: spellbookOpen && !!campaignId && !!characterRace,
   });
 
@@ -62,14 +54,17 @@ export function CharacterSpellbook({
     if (!characterRace || !rawTrees.length) return null;
 
     const raw = rawTrees.find(
-      (t: { race: string }) => t.race === characterRace,
+      (t) => (t as { race?: string }).race === characterRace,
     );
 
     if (!raw) return null;
 
-    const tree = convertPrismaToSkillTree({
-      ...raw,
-      createdAt: new Date(raw.createdAt),
+    const tree = convertPrismaToSkillTree(raw as {
+      id: string;
+      campaignId: string;
+      race: string;
+      skills: unknown;
+      createdAt: Date;
     });
 
     if (tree && apiMainSkills.length > 0) {

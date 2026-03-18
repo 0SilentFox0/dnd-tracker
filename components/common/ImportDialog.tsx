@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { UseFileImportReturn } from "@/lib/hooks/useFileImport";
+import type { UseFileImportReturn } from "@/lib/hooks/common";
 
 interface ImportDialogProps {
   triggerLabel?: string;

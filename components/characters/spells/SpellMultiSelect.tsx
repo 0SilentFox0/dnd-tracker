@@ -9,8 +9,7 @@ import {
   DropdownMenu,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useSpells } from "@/lib/hooks/useSpells";
-import { useSpellSelection } from "@/lib/hooks/useSpellSelection";
+import { useSpells, useSpellSelection } from "@/lib/hooks/spells";
 
 interface SpellMultiSelectProps {
   campaignId: string;

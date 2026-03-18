@@ -3,10 +3,10 @@
  * Used by attack-and-next-turn route (and can be reused by attack route).
  */
 
-import { getTotalDiceCount } from "@/lib/utils/battle/balance-calculations";
-import { processAttack } from "@/lib/utils/battle/battle-attack-process";
+import { processAttack } from "@/lib/utils/battle/attack";
+import { getTotalDiceCount } from "@/lib/utils/battle/balance";
 import { slimInitiativeOrderForStorage } from "@/lib/utils/battle/strip-battle-payload";
-import { updateMoraleOnEvent } from "@/lib/utils/skills/skill-triggers-execution";
+import { updateMoraleOnEvent } from "@/lib/utils/skills/execution";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 export type AttackPhaseInput = {

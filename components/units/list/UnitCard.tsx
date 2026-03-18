@@ -7,7 +7,7 @@ import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getDamageElementLabel } from "@/lib/constants/damage";
-import { getDiceAverage } from "@/lib/utils/battle/balance-calculations";
+import { getDiceAverage } from "@/lib/utils/battle/balance";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import {
   getUnitDamageModifiers,

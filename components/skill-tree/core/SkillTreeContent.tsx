@@ -4,7 +4,7 @@ import { CircularSkillTree } from "@/components/skill-tree/core/CircularSkillTre
 import { SkillLibrarySelector } from "@/components/skill-tree/ui/SkillLibrarySelector";
 import { TrainingCompletedMessage } from "@/components/skill-tree/ui/TrainingCompletedMessage";
 import { TrainingCompletion } from "@/components/skill-tree/ui/TrainingCompletion";
-import type { SkillFromLibrary } from "@/lib/hooks/useSkills";
+import type { SkillFromLibrary } from "@/lib/hooks/skills";
 import type { MainSkill as MainSkillType } from "@/types/main-skills";
 import type { Race } from "@/types/races";
 import type { MainSkill,Skill, SkillTree, UltimateSkill } from "@/types/skill-tree";

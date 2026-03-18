@@ -16,7 +16,7 @@ import { CharacterDamagePreview } from "@/components/characters/stats/CharacterD
 import { CharacterHpPreview } from "@/components/characters/stats/CharacterHpPreview";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import type { SkillTreeProgress } from "@/lib/hooks/useCharacterView";
+import type { SkillTreeProgress } from "@/lib/hooks/characters";
 import type { CampaignMember } from "@/types/campaigns";
 import type { EquippedItems } from "@/types/inventory";
 import type { Race } from "@/types/races";

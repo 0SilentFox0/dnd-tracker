@@ -3,11 +3,12 @@
 import { memo, useCallback, useMemo, useState } from "react";
 import { X } from "lucide-react";
 
+import { ComplexTriggerForm } from "./ComplexTriggerForm";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { LabeledInput } from "@/components/ui/labeled-input";
 import { SelectField } from "@/components/ui/select-field";
 import {
   COMPARISON_OPERATOR_OPTIONS,
@@ -15,7 +16,6 @@ import {
   SIMPLE_TRIGGER_OPTIONS,
   STAT_TYPE_OPTIONS,
   TARGET_OPTIONS,
-  TriggerTarget,
   TriggerType,
   TriggerValueType,
   VALUE_TYPE_OPTIONS,
@@ -257,114 +257,17 @@ function SkillTriggersEditorComponent({
             </Button>
           </div>
         ) : (
-          <div className="space-y-3 border rounded-lg p-3">
-            <div className="flex items-center justify-between">
-              <Label>
-                Складний тригер (if{" "}
-                {newComplexTrigger.target || TriggerTarget.ALLY}{" "}
-                {newComplexTrigger.operator || DEFAULT_COMPLEX_TRIGGER.operator}{" "}
-                {newComplexTrigger.value ?? DEFAULT_COMPLEX_TRIGGER.value}
-                {newComplexTrigger.valueType === TriggerValueType.PERCENT
-                  ? "%"
-                  : ""}{" "}
-                {newComplexTrigger.stat || DEFAULT_COMPLEX_TRIGGER.stat})
-              </Label>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={handleCancelComplex}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="space-y-1">
-                <Label className="text-xs">Ціль (a)</Label>
-                <SelectField
-                  value={newComplexTrigger.target || TriggerTarget.ALLY}
-                  onValueChange={(value) =>
-                    setNewComplexTrigger({
-                      ...newComplexTrigger,
-                      target: value as ComplexSkillTrigger["target"],
-                    })
-                  }
-                  placeholder="Виберіть ціль"
-                  options={targetOptions}
-                />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs">Оператор (b)</Label>
-                <SelectField
-                  value={
-                    newComplexTrigger.operator ||
-                    DEFAULT_COMPLEX_TRIGGER.operator
-                  }
-                  onValueChange={(value) =>
-                    setNewComplexTrigger({
-                      ...newComplexTrigger,
-                      operator: value as ComplexSkillTrigger["operator"],
-                    })
-                  }
-                  placeholder="Виберіть оператор"
-                  options={comparisonOperatorOptions}
-                />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs">Значення (c)</Label>
-                <LabeledInput
-                  label=""
-                  type="number"
-                  value={newComplexTrigger.value?.toString() || ""}
-                  onChange={(e) =>
-                    setNewComplexTrigger({
-                      ...newComplexTrigger,
-                      value: e.target.value ? parseFloat(e.target.value) : 0,
-                    })
-                  }
-                  placeholder="15"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs">Тип значення</Label>
-                <SelectField
-                  value={
-                    newComplexTrigger.valueType || TriggerValueType.PERCENT
-                  }
-                  onValueChange={(value) =>
-                    setNewComplexTrigger({
-                      ...newComplexTrigger,
-                      valueType: value as ComplexSkillTrigger["valueType"],
-                    })
-                  }
-                  placeholder="Виберіть тип"
-                  options={valueTypeOptions}
-                />
-              </div>
-              <div className="space-y-1 col-span-2">
-                <Label className="text-xs">Статистика (d)</Label>
-                <SelectField
-                  value={newComplexTrigger.stat || DEFAULT_COMPLEX_TRIGGER.stat}
-                  onValueChange={(value) =>
-                    setNewComplexTrigger({
-                      ...newComplexTrigger,
-                      stat: value as ComplexSkillTrigger["stat"],
-                    })
-                  }
-                  placeholder="Виберіть статистику"
-                  options={statTypeOptions}
-                />
-              </div>
-            </div>
-            <Button
-              type="button"
-              size="sm"
-              onClick={addComplexTrigger}
-              disabled={!isComplexTriggerValid}
-            >
-              Додати
-            </Button>
-          </div>
+          <ComplexTriggerForm
+            value={newComplexTrigger}
+            onChange={setNewComplexTrigger}
+            onAdd={addComplexTrigger}
+            onCancel={handleCancelComplex}
+            isValid={isComplexTriggerValid}
+            targetOptions={targetOptions}
+            comparisonOperatorOptions={comparisonOperatorOptions}
+            valueTypeOptions={valueTypeOptions}
+            statTypeOptions={statTypeOptions}
+          />
         )}
       </CardContent>
     </Card>

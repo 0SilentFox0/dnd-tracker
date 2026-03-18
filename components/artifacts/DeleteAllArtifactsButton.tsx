@@ -16,6 +16,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { deleteAllArtifacts } from "@/lib/api/artifacts";
 
 interface DeleteAllArtifactsButtonProps {
   campaignId: string;
@@ -36,15 +37,7 @@ export function DeleteAllArtifactsButton({
     setIsDeleting(true);
 
     try {
-      const response = await fetch(`/api/campaigns/${campaignId}/artifacts`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-
-        throw new Error(data.error || "Не вдалося видалити артефакти");
-      }
+      await deleteAllArtifacts(campaignId);
 
       setOpen(false);
       router.refresh();

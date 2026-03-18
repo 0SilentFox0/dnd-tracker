@@ -5,7 +5,7 @@ import { ReferenceSectionAccordion } from "./ReferenceSectionAccordion";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useInfoReferenceFilters } from "@/lib/hooks/useInfoReferenceFilters";
+import { useInfoReferenceFilters } from "@/lib/hooks/common";
 import type { SkillForReference, SpellForReference } from "@/lib/types/info-reference";
 
 export interface InfoReferenceClientProps {
@@ -26,46 +26,46 @@ export function InfoReferenceClient({
   return (
     <div className="space-y-6">
       <ReferenceSearchBar
-        searchQuery={filters.searchQuery}
-        setSearchQuery={filters.setSearchQuery}
-        section={filters.section}
-        setSection={filters.setSection}
-        filtersOpen={filters.filtersOpen}
-        setFiltersOpen={filters.setFiltersOpen}
-        hasActiveFilters={filters.hasActiveFilters}
-        clearAllFilters={filters.clearAllFilters}
-        mainSkillFilter={filters.mainSkillFilter}
-        setMainSkillFilter={filters.setMainSkillFilter}
-        spellLevelFilter={filters.spellLevelFilter}
-        setSpellLevelFilter={filters.setSpellLevelFilter}
-        spellGroupFilter={filters.spellGroupFilter}
-        setSpellGroupFilter={filters.setSpellGroupFilter}
-        spellTypeFilter={filters.spellTypeFilter}
-        setSpellTypeFilter={filters.setSpellTypeFilter}
-        mainSkillOptions={filters.mainSkillOptions}
-        spellLevelOptions={filters.spellLevelOptions}
-        spellGroupOptions={filters.spellGroupOptions}
-        spellTypeOptions={filters.spellTypeOptions}
-        showSkillsFilter={filters.section === "all" || filters.section === "skills"}
-        showSpellsFilter={filters.section === "all" || filters.section === "spells"}
+        searchQuery={filters.filters.searchQuery}
+        setSearchQuery={filters.filters.setSearchQuery}
+        section={filters.filters.section}
+        setSection={filters.filters.setSection}
+        filtersOpen={filters.filters.open}
+        setFiltersOpen={filters.filters.setOpen}
+        hasActiveFilters={filters.results.hasActiveFilters}
+        clearAllFilters={filters.results.clearAllFilters}
+        mainSkillFilter={filters.filters.mainSkillFilter}
+        setMainSkillFilter={filters.filters.setMainSkillFilter}
+        spellLevelFilter={filters.filters.spellLevelFilter}
+        setSpellLevelFilter={filters.filters.setSpellLevelFilter}
+        spellGroupFilter={filters.filters.spellGroupFilter}
+        setSpellGroupFilter={filters.filters.setSpellGroupFilter}
+        spellTypeFilter={filters.filters.spellTypeFilter}
+        setSpellTypeFilter={filters.filters.setSpellTypeFilter}
+        mainSkillOptions={filters.options.mainSkill}
+        spellLevelOptions={filters.options.spellLevel}
+        spellGroupOptions={filters.options.spellGroup}
+        spellTypeOptions={filters.options.spellType}
+        showSkillsFilter={filters.filters.section === "all" || filters.filters.section === "skills"}
+        showSpellsFilter={filters.filters.section === "all" || filters.filters.section === "spells"}
       />
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-        {filters.showSkills && filters.showSpells && (
+        {filters.ui.showSkills && filters.ui.showSpells && (
           <>
             <span>
               Скілів:{" "}
               <strong className="text-foreground">
-                {filters.filteredSkills.length}
+                {filters.results.filteredSkills.length}
               </strong>
             </span>
             <span>
               Заклинань:{" "}
               <strong className="text-foreground">
-                {filters.filteredSpells.length}
+                {filters.results.filteredSpells.length}
               </strong>
             </span>
-            {!filters.skillsEmpty && (
+            {!filters.ui.skillsEmpty && (
               <a
                 href="#ref-skills"
                 className="text-primary underline-offset-2 hover:underline touch-manipulation"
@@ -73,7 +73,7 @@ export function InfoReferenceClient({
                 До скілів
               </a>
             )}
-            {!filters.spellsEmpty && (
+            {!filters.ui.spellsEmpty && (
               <a
                 href="#ref-spells"
                 className="text-primary underline-offset-2 hover:underline touch-manipulation"
@@ -83,25 +83,25 @@ export function InfoReferenceClient({
             )}
           </>
         )}
-        {filters.section === "skills" && (
+{filters.filters.section === "skills" && (
           <>
             Показано скілів:{" "}
-            <strong className="text-foreground">
-              {filters.filteredSkills.length}
-            </strong>
+              <strong className="text-foreground">
+                {filters.results.filteredSkills.length}
+              </strong>
           </>
         )}
-        {filters.section === "spells" && (
+{filters.filters.section === "spells" && (
           <>
             Показано заклинань:{" "}
-            <strong className="text-foreground">
-              {filters.filteredSpells.length}
-            </strong>
+              <strong className="text-foreground">
+                {filters.results.filteredSpells.length}
+              </strong>
           </>
         )}
       </div>
 
-      {filters.nothingFound && (
+      {filters.ui.nothingFound && (
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
             <p className="text-muted-foreground font-medium">
@@ -113,7 +113,7 @@ export function InfoReferenceClient({
             <Button
               variant="outline"
               className="mt-4"
-              onClick={filters.clearAllFilters}
+              onClick={filters.results.clearAllFilters}
             >
               Скинути фільтри та пошук
             </Button>
@@ -124,27 +124,27 @@ export function InfoReferenceClient({
       <ReferenceSectionAccordion
         campaignId={campaignId}
         isDM={isDM}
-        showSkills={filters.showSkills}
-        showSpells={filters.showSpells}
-        skillsEmpty={filters.skillsEmpty}
-        spellsEmpty={filters.spellsEmpty}
-        nothingFound={filters.nothingFound}
-        filteredSkills={filters.filteredSkills}
-        filteredSpells={filters.filteredSpells}
+        showSkills={filters.ui.showSkills}
+        showSpells={filters.ui.showSpells}
+        skillsEmpty={filters.ui.skillsEmpty}
+        spellsEmpty={filters.ui.spellsEmpty}
+        nothingFound={filters.ui.nothingFound}
+        filteredSkills={filters.results.filteredSkills}
+        filteredSpells={filters.results.filteredSpells}
       />
 
-      {filters.section === "skills" &&
-        filters.skillsEmpty &&
-        !filters.nothingFound && (
+      {filters.filters.section === "skills" &&
+        filters.ui.skillsEmpty &&
+        !filters.ui.nothingFound && (
           <Card className="border-dashed">
             <CardContent className="py-8 text-center text-muted-foreground text-sm">
               Скілів за цими фільтрами не знайдено.
             </CardContent>
           </Card>
         )}
-      {filters.section === "spells" &&
-        filters.spellsEmpty &&
-        !filters.nothingFound && (
+      {filters.filters.section === "spells" &&
+        filters.ui.spellsEmpty &&
+        !filters.ui.nothingFound && (
           <Card className="border-dashed">
             <CardContent className="py-8 text-center text-muted-foreground text-sm">
               Заклинань за цими фільтрами не знайдено.

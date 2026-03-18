@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useDamageCalculator } from "@/lib/hooks/useDamageCalculator";
+import { useDamageCalculator } from "@/lib/hooks/characters";
 
 export type { DamagePreviewItem, DamagePreviewResponse };
 
@@ -27,36 +27,17 @@ export interface CharacterDamageCalculatorProps {
     meleeMultiplier?: number;
     rangedMultiplier?: number;
   };
-  skillTreeProgress: import("@/lib/hooks/useCharacterView").SkillTreeProgress;
+  skillTreeProgress: import("@/lib/hooks/characters").SkillTreeProgress;
   knownSpellIds: string[];
 }
 
 export function CharacterDamageCalculator(props: CharacterDamageCalculatorProps) {
   const {
     damagePreview,
-    heroMelee,
-    heroRanged,
-    meleeDiceSides,
-    rangedDiceSides,
-    magicDiceSides,
-    meleeDiceValues,
-    rangedDiceValues,
-    magicDiceValues,
-    meleeSum,
-    rangedSum,
-    magicSum,
-    setMeleeSum,
-    setRangedSum,
-    setMagicSum,
-    setMeleeDiceAt,
-    setRangedDiceAt,
-    setMagicDiceAt,
-    selectedSpellId,
-    setSelectedSpellId,
-    knownSpells,
-    skillsAffectingDamage,
-    skillsAffectingSpell,
-    selectedSpell,
+    hero,
+    dice,
+    spell,
+    skills,
   } = useDamageCalculator(props);
 
   return (
@@ -67,7 +48,7 @@ export function CharacterDamageCalculator(props: CharacterDamageCalculatorProps)
           <CardTitle className="text-base">Режим розрахунку</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <DamageCalculatorSkillsLog skills={skillsAffectingDamage} />
+          <DamageCalculatorSkillsLog skills={skills.affectingDamage} />
           <Tabs defaultValue="melee" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="melee">Ближній бій</TabsTrigger>
@@ -81,25 +62,25 @@ export function CharacterDamageCalculator(props: CharacterDamageCalculatorProps)
                   <p className="text-sm text-muted-foreground">
                     Кидки:{" "}
                     <span className="font-mono">
-                      {[damagePreview.melee.diceFormula, heroMelee.diceNotation]
+                      {[damagePreview.melee.diceFormula, hero.heroMelee.diceNotation]
                         .filter(Boolean)
                         .join(" + ") || "—"}
                     </span>
                   </p>
                   <DamageCalculatorDiceInputs
-                    diceSides={meleeDiceSides}
-                    values={meleeDiceValues}
-                    onValueChange={setMeleeDiceAt}
-                    onCalculate={setMeleeSum}
+                    diceSides={dice.melee.sides}
+                    values={dice.melee.values}
+                    onValueChange={dice.melee.setValueAt}
+                    onCalculate={dice.melee.setSum}
                     readOnly={false}
                   />
                   <SkillsAffectingDamageList
-                    skills={skillsAffectingDamage}
+                    skills={skills.affectingDamage}
                     mode="melee"
                   />
-                  {meleeSum !== null && (
+                  {dice.melee.sum !== null && (
                     <DamageCalculatorResult
-                      diceSum={meleeSum}
+                      diceSum={dice.melee.sum}
                       breakdown={damagePreview.melee.breakdown}
                       total={damagePreview.melee.total}
                     />
@@ -118,26 +99,26 @@ export function CharacterDamageCalculator(props: CharacterDamageCalculatorProps)
                     <span className="font-mono">
                       {[
                         damagePreview.ranged.diceFormula,
-                        heroRanged.diceNotation,
+                        hero.heroRanged.diceNotation,
                       ]
                         .filter(Boolean)
                         .join(" + ") || "—"}
                     </span>
                   </p>
                   <DamageCalculatorDiceInputs
-                    diceSides={rangedDiceSides}
-                    values={rangedDiceValues}
-                    onValueChange={setRangedDiceAt}
-                    onCalculate={setRangedSum}
+                    diceSides={dice.ranged.sides}
+                    values={dice.ranged.values}
+                    onValueChange={dice.ranged.setValueAt}
+                    onCalculate={dice.ranged.setSum}
                     readOnly={false}
                   />
                   <SkillsAffectingDamageList
-                    skills={skillsAffectingDamage}
+                    skills={skills.affectingDamage}
                     mode="ranged"
                   />
-                  {rangedSum !== null && (
+                  {dice.ranged.sum !== null && (
                     <DamageCalculatorResult
-                      diceSum={rangedSum}
+                      diceSum={dice.ranged.sum}
                       breakdown={damagePreview.ranged.breakdown}
                       total={damagePreview.ranged.total}
                     />
@@ -154,63 +135,60 @@ export function CharacterDamageCalculator(props: CharacterDamageCalculatorProps)
                   Заклинання
                 </label>
                 <Select
-                  value={selectedSpellId ?? ""}
-                  onValueChange={(v) => setSelectedSpellId(v || null)}
+                  value={spell.selectedSpellId ?? ""}
+                  onValueChange={(v) => spell.setSelectedSpellId(v || null)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Оберіть заклинання" />
                   </SelectTrigger>
                   <SelectContent>
-                    {knownSpells
+                    {spell.knownSpells
                       .sort(
-                        (a: { level?: number }, b: { level?: number }) =>
-                          (a.level ?? 0) - (b.level ?? 0),
+                        (a, b) => (a.level ?? 0) - (b.level ?? 0),
                       )
-                      .map(
-                        (s: { id: string; name: string; level?: number }) => (
-                          <SelectItem key={s.id} value={s.id}>
-                            {s.name} (рів. {s.level ?? "?"})
-                          </SelectItem>
-                        ),
-                      )}
+                      .map((s) => (
+                        <SelectItem key={s.id} value={s.id}>
+                          {s.name ?? "—"} (рів. {s.level ?? "?"})
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
 
-              {selectedSpell && (
+              {spell.selectedSpell && (
                 <>
                   <p className="text-sm text-muted-foreground">
                     Кидки урону:{" "}
                     <span className="font-mono">
-                      {selectedSpell.diceCount != null &&
-                      selectedSpell.diceType != null
-                        ? `${selectedSpell.diceCount}d${selectedSpell.diceType}`
+                      {spell.selectedSpell.diceCount != null &&
+                      spell.selectedSpell.diceType != null
+                        ? `${spell.selectedSpell.diceCount}d${spell.selectedSpell.diceType}`
                         : "—"}
                     </span>
                   </p>
                   <DamageCalculatorDiceInputs
-                    diceSides={magicDiceSides}
-                    values={magicDiceValues}
-                    onValueChange={setMagicDiceAt}
-                    onCalculate={setMagicSum}
+                    diceSides={dice.magic.sides}
+                    values={dice.magic.values}
+                    onValueChange={dice.magic.setValueAt}
+                    onCalculate={dice.magic.setSum}
                     readOnly={false}
                   />
-                  {magicSum !== null && (
+                  {dice.magic.sum !== null && (
                     <p className="text-lg font-semibold tabular-nums">
-                      Сума кидків: {magicSum}
+                      Сума кидків: {dice.magic.sum}
                     </p>
                   )}
                   <SkillsAffectingDamageList
-                    skills={skillsAffectingDamage}
+                    skills={skills.affectingDamage}
                     mode="magic"
                   />
-                  {skillsAffectingSpell.length > 0 && (
+                  {skills.affectingSpell.length > 0 && (
                     <div>
                       <p className="text-sm font-medium mb-1">
                         Бонуси школи магії
                       </p>
                       <ul className="list-inside list-disc text-sm text-muted-foreground">
-                        {skillsAffectingSpell.map(
+                        {skills.affectingSpell.map(
                           (x: { name: string; bonus: number }) => (
                             <li key={x.name}>
                               {x.name}: +{x.bonus}%
@@ -223,7 +201,7 @@ export function CharacterDamageCalculator(props: CharacterDamageCalculatorProps)
                 </>
               )}
 
-              {knownSpells.length === 0 && (
+              {spell.knownSpells.length === 0 && (
                 <p className="text-sm text-muted-foreground">
                   Немає вивчених заклинань.
                 </p>

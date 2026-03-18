@@ -16,7 +16,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useSkillForm } from "@/lib/hooks/useSkillForm";
+import { useSkillForm } from "@/lib/hooks/skills";
+import type { SkillEffect } from "@/types/battle";
 import type { SkillTriggers } from "@/types/skill-triggers";
 
 interface SpellOption {
@@ -105,7 +106,7 @@ export function SkillCreateForm({
           <SkillBasicInfo basicInfo={basicInfo} />
 
           <SkillEffectsEditor
-            effects={effectsGroup.effects}
+            effects={effectsGroup.effects as SkillEffect[]}
             minTargets={effectsGroup.minTargets}
             maxTargets={effectsGroup.maxTargets}
             onEffectsChange={effectsGroup.setters.setEffects}

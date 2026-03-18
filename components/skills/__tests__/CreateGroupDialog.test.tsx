@@ -8,8 +8,14 @@ import { CreateGroupDialog } from "@/components/skills/dialogs/CreateGroupDialog
 
 const mockRefresh = vi.fn();
 
+const fakeGroupId = "new-group-id";
+
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ refresh: mockRefresh }),
+}));
+
+vi.mock("@/lib/api/spells", () => ({
+  createSpellGroup: vi.fn().mockResolvedValue({ id: "new-group-id" }),
 }));
 
 describe("CreateGroupDialog", () => {
@@ -60,13 +66,6 @@ describe("CreateGroupDialog", () => {
   it("викликає onGroupCreated після успішного створення групи", async () => {
     const onGroupCreated = vi.fn();
 
-    const fakeGroupId = "new-group-id";
-
-    global.fetch = vi.fn().mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve({ id: fakeGroupId }),
-    });
-
     render(
       <CreateGroupDialog campaignId="camp-1" onGroupCreated={onGroupCreated} />,
     );
@@ -81,15 +80,6 @@ describe("CreateGroupDialog", () => {
       screen.getByRole("button", { name: /Створити групу/i }),
     );
 
-    await vi.waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith(
-        "/api/campaigns/camp-1/spells/groups",
-        expect.objectContaining({
-          method: "POST",
-          body: JSON.stringify({ name: "Нова група" }),
-        }),
-      );
-    });
     await vi.waitFor(() => {
       expect(onGroupCreated).toHaveBeenCalledWith(fakeGroupId);
     });

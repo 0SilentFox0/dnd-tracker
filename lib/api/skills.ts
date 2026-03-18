@@ -1,114 +1,80 @@
+import {
+  ApiError,
+  campaignDelete,
+  campaignGet,
+  campaignPatch,
+  campaignPost,
+} from "@/lib/api/client";
 import type { SkillPayload, SkillUpdatePayload } from "@/types/api";
 import type { Skill } from "@/types/skills";
 
+export async function updateSkillAppearance(
+  campaignId: string,
+  skillId: string,
+  appearanceDescription: string | null,
+): Promise<Skill> {
+  return campaignPatch<Skill>(campaignId, `/skills/${skillId}`, {
+    appearanceDescription,
+  });
+}
+
 export async function getSkill(
   campaignId: string,
-  skillId: string
+  skillId: string,
 ): Promise<Skill> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/skills/${skillId}`,
-    { cache: "no-store" }
-  );
+  try {
+    return await campaignGet<Skill>(campaignId, `/skills/${skillId}`, {
+      cache: "no-store",
+    });
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) {
+      throw new Error("Skill not found");
+    }
 
-  if (!response.ok) {
-    if (response.status === 404) throw new Error("Skill not found");
-
-    throw new Error("Failed to fetch skill");
+    throw err;
   }
-
-  return response.json();
 }
 
 export async function getSkills(campaignId: string): Promise<Skill[]> {
-  const response = await fetch(`/api/campaigns/${campaignId}/skills`, {
+  return campaignGet<Skill[]>(campaignId, "/skills", {
     cache: "no-store",
   });
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch skills");
-  }
-
-  return response.json();
 }
 
 export async function createSkill(
   campaignId: string,
-  data: SkillPayload
+  data: SkillPayload,
 ): Promise<Skill> {
-  const response = await fetch(`/api/campaigns/${campaignId}/skills`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-
-    throw new Error(error.error || "Failed to create skill");
-  }
-
-  return response.json();
+  return campaignPost<Skill>(campaignId, "/skills", data);
 }
 
 export async function updateSkill(
   campaignId: string,
   skillId: string,
-  data: SkillUpdatePayload
+  data: SkillUpdatePayload,
 ): Promise<Skill> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/skills/${skillId}`,
-    {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    }
-  );
-
-  if (!response.ok) {
-    const error = await response.json();
-
-    throw new Error(error.error || "Failed to update skill");
-  }
-
-  return response.json();
+  return campaignPatch<Skill>(campaignId, `/skills/${skillId}`, data);
 }
 
 export async function deleteSkill(
   campaignId: string,
-  skillId: string
+  skillId: string,
 ): Promise<void> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/skills/${skillId}`,
-    {
-      method: "DELETE",
-    }
-  );
-
-  if (!response.ok) {
-    const error = await response.json();
-
-    throw new Error(error.error || "Failed to delete skill");
-  }
+  await campaignDelete<void>(campaignId, `/skills/${skillId}`);
 }
 
 export async function duplicateSkill(
   campaignId: string,
-  skillId: string
+  skillId: string,
 ): Promise<Skill> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/skills/${skillId}/duplicate`,
-    { method: "POST" }
+  return campaignPost<Skill>(campaignId, `/skills/${skillId}/duplicate`, {});
+}
+
+export async function deleteAllSkills(
+  campaignId: string,
+): Promise<{ success?: boolean; deleted?: number }> {
+  return campaignDelete<{ success?: boolean; deleted?: number }>(
+    campaignId,
+    "/skills",
   );
-
-  if (!response.ok) {
-    const error = await response.json();
-
-    throw new Error(error.error || "Failed to duplicate skill");
-  }
-
-  return response.json();
 }

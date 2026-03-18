@@ -4,7 +4,10 @@ import { useEffect, useState } from "react";
 
 import type { Character, EntityStats, Unit } from "./types";
 
-import { useRaces } from "@/lib/hooks/useRaces";
+import { getBattleBalance } from "@/lib/api/battles";
+import { getCharacters } from "@/lib/api/characters";
+import { getUnits } from "@/lib/api/units";
+import { useRaces } from "@/lib/hooks/races";
 
 export function useNewBattleData(campaignId: string) {
   const { data: races = [] } = useRaces(campaignId);
@@ -23,29 +26,33 @@ export function useNewBattleData(campaignId: string) {
   useEffect(() => {
     async function loadData() {
       try {
-        const [charactersRes, unitsRes, statsRes] = await Promise.all([
-          fetch(`/api/campaigns/${campaignId}/characters`),
-          fetch(`/api/campaigns/${campaignId}/units`),
-          fetch(`/api/campaigns/${campaignId}/battles/balance`),
+        const [chars, unitsData, balanceData] = await Promise.all([
+          getCharacters(campaignId),
+          getUnits(campaignId),
+          getBattleBalance(campaignId, {}),
         ]);
 
-        if (charactersRes.ok) setCharacters(await charactersRes.json());
+        setCharacters(chars as Character[]);
+        setUnits(unitsData as Unit[]);
 
-        if (unitsRes.ok) setUnits(await unitsRes.json());
+        if (
+          balanceData.characterStats != null ||
+          balanceData.unitStats != null
+        ) {
+          setEntityStats({
+            characterStats: balanceData.characterStats ?? {},
+            unitStats: balanceData.unitStats ?? {},
+          });
 
-        if (statsRes.ok) {
-          const data = await statsRes.json();
-
-          if (data.characterStats != null || data.unitStats != null) {
-            setEntityStats({
-              characterStats: data.characterStats ?? {},
-              unitStats: data.unitStats ?? {},
-            });
-          }
-
-          if (data._debug != null) {
-            console.info("[Balance] Основні навички кампанії (id, name):", data._debug.mainSkills);
-            console.info("[Balance] Прогрес основних навичок по персонажах:", data._debug.characterSkillProgress);
+          if (balanceData._debug != null) {
+            console.info(
+              "[Balance] Основні навички кампанії (id, name):",
+              balanceData._debug.mainSkills,
+            );
+            console.info(
+              "[Balance] Прогрес основних навичок по персонажах:",
+              balanceData._debug.characterSkillProgress,
+            );
           }
         }
       } catch (error) {

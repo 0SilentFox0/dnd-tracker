@@ -6,7 +6,7 @@ import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import {
   computeDamageBreakdown,
   computeDamageBreakdownMultiTarget,
-} from "@/lib/utils/battle/battle-damage-breakdown";
+} from "@/lib/utils/battle/damage";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const schema = z.object({

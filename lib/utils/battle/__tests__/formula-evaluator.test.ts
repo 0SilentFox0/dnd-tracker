@@ -1,6 +1,6 @@
 import { afterEach,beforeEach, describe, expect, it, vi } from "vitest";
 
-import { evaluateFormula } from "../formula-evaluator";
+import { evaluateFormula } from "../common/formula-evaluator";
 
 describe("FormulaEvaluator", () => {
   let consoleWarnSpy: ReturnType<typeof vi.spyOn>;

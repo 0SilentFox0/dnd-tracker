@@ -16,10 +16,16 @@
  * 
  * ВИДАЛИТИ ПІСЛЯ ТЕСТУВАННЯ!
  */
-import { Prisma,PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 
 import { AttackType } from "../lib/constants/battle";
 import { DEFAULT_CAMPAIGN_ID } from "../lib/constants/campaigns";
+import {
+  getElfSkillsData,
+  getHumanSkillsData,
+  MAIN_SKILLS_DATA,
+  SPELLS_DATA,
+} from "./seed-mock-battle-data-data";
 
 const prisma = new PrismaClient();
 
@@ -67,79 +73,9 @@ async function seedMockData() {
     // ============================================
     console.log("\n📜 Створення заклинань...");
 
-    const spells = [
-      {
-        name: "Fireball",
-        level: 3,
-        type: "aoe",
-        target: "enemies",
-        damageType: "damage",
-        damageElement: "fire",
-        diceCount: 8,
-        diceType: "d6",
-        savingThrow: {
-          ability: "dexterity",
-          onSuccess: "half",
-        },
-        description: "Вибух вогню, що вражає всіх ворогів в радіусі",
-        concentration: false,
-      },
-      {
-        name: "Heal",
-        level: 3,
-        type: "target",
-        target: "allies",
-        damageType: "heal",
-        diceCount: 4,
-        diceType: "d8",
-        description: "Лікує союзника",
-        concentration: false,
-      },
-      {
-        name: "Magic Missile",
-        level: 1,
-        type: "target",
-        target: "enemies",
-        damageType: "damage",
-        damageElement: "force",
-        diceCount: 3,
-        diceType: "d4",
-        description: "Три магічні стріли, що завжди попадають",
-        concentration: false,
-      },
-      {
-        name: "Cure Wounds",
-        level: 1,
-        type: "target",
-        target: "allies",
-        damageType: "heal",
-        diceCount: 1,
-        diceType: "d8",
-        description: "Базове лікування",
-        concentration: false,
-      },
-      {
-        name: "Poison Spray",
-        level: 0,
-        type: "target",
-        target: "enemies",
-        damageType: "damage",
-        damageElement: "poison",
-        damageModifier: "poison",
-        diceCount: 1,
-        diceType: "d12",
-        savingThrow: {
-          ability: "constitution",
-          onSuccess: "none",
-        },
-        description: "Отруйний спрей з DOT ефектом",
-        concentration: false,
-      },
-    ];
-
     const createdSpells = [];
 
-    for (const spellData of spells) {
+    for (const spellData of SPELLS_DATA) {
       // Перевіряємо чи вже існує заклинання з такою назвою
       const existing = await prisma.spell.findFirst({
         where: {
@@ -173,16 +109,9 @@ async function seedMockData() {
     // ============================================
     console.log("\n🎯 Створення основних скілів...");
 
-    const mainSkills = [
-      { name: "Бойова Майстерність", color: "#ef4444", icon: "⚔️" },
-      { name: "Магія", color: "#8b5cf6", icon: "✨" },
-      { name: "Захист", color: "#3b82f6", icon: "🛡️" },
-      { name: "Швидкість", color: "#10b981", icon: "💨" },
-    ];
-
     const createdMainSkills = [];
 
-    for (const mainSkillData of mainSkills) {
+    for (const mainSkillData of MAIN_SKILLS_DATA) {
       // Перевіряємо чи вже існує
       const existing = await prisma.mainSkill.findFirst({
         where: {
@@ -213,45 +142,7 @@ async function seedMockData() {
     // ============================================
     console.log("\n👤 Створення скілів для раси Human...");
 
-    const humanSkills: Array<{
-      name: string;
-      description: string;
-      bonuses: Record<string, number>;
-      mainSkillId: string;
-      spellEffectIncrease?: number;
-    }> = [
-      {
-        name: "Базова Атака",
-        description: "+15% до урону ближньою зброєю",
-        bonuses: {
-          melee_damage_percent: 15,
-        },
-        mainSkillId: createdMainSkills[0].id,
-      },
-      {
-        name: "Просунута Атака",
-        description: "+10% до урону ближньою зброєю",
-        bonuses: {
-          melee_damage_percent: 10,
-        },
-        mainSkillId: createdMainSkills[0].id,
-      },
-      {
-        name: "Базовий Захист",
-        description: "+2 до AC",
-        bonuses: {
-          ac_bonus: 2,
-        },
-        mainSkillId: createdMainSkills[2].id,
-      },
-      {
-        name: "Базове Заклинання",
-        description: "+10% до ефекту заклинань",
-        bonuses: {},
-        spellEffectIncrease: 10,
-        mainSkillId: createdMainSkills[1].id,
-      },
-    ];
+    const humanSkills = getHumanSkillsData(createdMainSkills);
 
     const createdHumanSkills = [];
 
@@ -290,41 +181,7 @@ async function seedMockData() {
     // ============================================
     console.log("\n🧝 Створення скілів для раси Elf...");
 
-    const elfSkills = [
-      {
-        name: "Ельфійська Точність",
-        description: "Advantage на дальні атаки",
-        bonuses: {
-          ranged_attack_advantage: true,
-        },
-        mainSkillId: createdMainSkills[0].id,
-      },
-      {
-        name: "Магічна Стрільба",
-        description: "+20% до урону дальньою зброєю",
-        bonuses: {
-          ranged_damage_percent: 20,
-        },
-        mainSkillId: createdMainSkills[0].id,
-      },
-      {
-        name: "Покращене Заклинання",
-        description: "+25% до ефекту заклинань",
-        spellEffectIncrease: 25,
-        mainSkillId: createdMainSkills[1].id,
-      },
-      {
-        name: "Отруйна Стріла",
-        description: "Додає отруту до заклинання",
-        spellId: createdSpells[4].id, // Poison Spray
-        spellAdditionalModifier: {
-          modifier: "poison",
-          damageDice: "1d6",
-          duration: 3,
-        },
-        mainSkillId: createdMainSkills[1].id,
-      },
-    ];
+    const elfSkills = getElfSkillsData(createdMainSkills, createdSpells);
 
     const createdElfSkills = [];
 

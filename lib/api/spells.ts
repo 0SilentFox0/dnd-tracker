@@ -1,189 +1,145 @@
+import {
+  campaignDelete,
+  campaignGet,
+  campaignPatch,
+  campaignPost,
+  campaignRequest,
+} from "@/lib/api/client";
 import type { Spell, SpellGroup } from "@/types/spells";
 
-export async function getSpells(campaignId: string): Promise<Spell[]> {
-  const response = await fetch(`/api/campaigns/${campaignId}/spells`);
-
-  if (!response.ok) throw new Error("Failed to fetch spells");
-
-  return response.json();
+export async function updateSpellAppearance(
+  campaignId: string,
+  spellId: string,
+  appearanceDescription: string | null,
+): Promise<Spell> {
+  return campaignPatch<Spell>(campaignId, `/spells/${spellId}`, {
+    appearanceDescription,
+  });
 }
 
-export async function getSpellGroups(campaignId: string): Promise<SpellGroup[]> {
-  const response = await fetch(`/api/campaigns/${campaignId}/spells/groups`);
+export async function getSpells(campaignId: string): Promise<Spell[]> {
+  return campaignGet<Spell[]>(campaignId, "/spells");
+}
 
-  if (!response.ok) throw new Error("Failed to fetch spell groups");
+export async function getSpellGroups(
+  campaignId: string,
+): Promise<SpellGroup[]> {
+  return campaignGet<SpellGroup[]>(campaignId, "/spells/groups");
+}
 
-  return response.json();
+export async function createSpellGroup(
+  campaignId: string,
+  data: { name: string },
+): Promise<SpellGroup> {
+  return campaignPost<SpellGroup>(campaignId, "/spells/groups", data);
 }
 
 export async function renameSpellGroup(
   campaignId: string,
   groupId: string,
-  name: string
+  name: string,
 ): Promise<SpellGroup> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/spells/groups/${groupId}`,
-    {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: name.trim() }),
-    }
+  return campaignPatch<SpellGroup>(
+    campaignId,
+    `/spells/groups/${groupId}`,
+    { name: name.trim() },
   );
-
-  if (!response.ok) throw new Error("Failed to rename group");
-
-  return response.json();
 }
 
 export async function removeAllSpellsFromGroup(
   campaignId: string,
-  groupId: string
+  groupId: string,
 ): Promise<{ success: boolean }> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/spells/groups/${groupId}/remove-all-spells`,
-    {
-      method: "POST",
-    }
+  return campaignPost<{ success: boolean }>(
+    campaignId,
+    `/spells/groups/${groupId}/remove-all-spells`,
+    {},
   );
-
-  if (!response.ok) throw new Error("Failed to remove all spells from group");
-
-  return response.json();
 }
 
 export async function removeSpellFromGroup(
   campaignId: string,
-  spellId: string
+  spellId: string,
 ): Promise<Spell> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/spells/${spellId}/remove-from-group`,
-    {
-      method: "POST",
-    }
+  return campaignPost<Spell>(
+    campaignId,
+    `/spells/${spellId}/remove-from-group`,
+    {},
   );
-
-  if (!response.ok) throw new Error("Failed to remove spell from group");
-
-  return response.json();
 }
 
 export async function moveSpellToGroup(
   campaignId: string,
   spellId: string,
-  groupId: string | null
+  groupId: string | null,
 ): Promise<Spell> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/spells/${spellId}`,
-    {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ groupId }),
-    }
-  );
-
-  if (!response.ok) throw new Error("Failed to move spell");
-
-  return response.json();
+  return campaignPatch<Spell>(campaignId, `/spells/${spellId}`, { groupId });
 }
 
 export async function deleteAllSpells(
-  campaignId: string
+  campaignId: string,
 ): Promise<{ success: boolean; deleted: number }> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/spells/delete-all`,
-    {
-      method: "DELETE",
-    }
+  return campaignDelete<{ success: boolean; deleted: number }>(
+    campaignId,
+    "/spells/delete-all",
   );
-
-  if (!response.ok) throw new Error("Failed to delete all spells");
-
-  return response.json();
 }
 
 export async function createSpell(
   campaignId: string,
-  data: Partial<Spell> & { name: string; description: string; type: string; damageType: string }
+  data: Partial<Spell> & {
+    name: string;
+    description: string;
+    type: string;
+    damageType: string;
+  },
 ): Promise<Spell> {
-  const response = await fetch(`/api/campaigns/${campaignId}/spells`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-
-    throw new Error(error.error || "Failed to create spell");
-  }
-
-  return response.json();
+  return campaignPost<Spell>(campaignId, "/spells", data);
 }
 
 export async function getSpell(
   campaignId: string,
-  spellId: string
+  spellId: string,
 ): Promise<Spell> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/spells/${spellId}`
-  );
-
-  if (!response.ok) throw new Error("Failed to fetch spell");
-
-  return response.json();
+  return campaignGet<Spell>(campaignId, `/spells/${spellId}`);
 }
 
 export async function updateSpell(
   campaignId: string,
   spellId: string,
-  data: Partial<Spell>
+  data: Partial<Spell>,
 ): Promise<Spell> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/spells/${spellId}`,
-    {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    }
-  );
-
-  if (!response.ok) throw new Error("Failed to update spell");
-
-  return response.json();
+  return campaignPatch<Spell>(campaignId, `/spells/${spellId}`, data);
 }
 
 export async function deleteSpell(
   campaignId: string,
-  spellId: string
+  spellId: string,
 ): Promise<{ success: boolean }> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/spells/${spellId}`,
-    {
-      method: "DELETE",
-    }
+  return campaignDelete<{ success: boolean }>(
+    campaignId,
+    `/spells/${spellId}`,
   );
-
-  if (!response.ok) throw new Error("Failed to delete spell");
-
-  return response.json();
 }
 
 export async function deleteSpellsByLevel(
   campaignId: string,
-  level: number
+  level: number,
 ): Promise<{ success: boolean; deleted: number }> {
-  const response = await fetch(
-    `/api/campaigns/${campaignId}/spells/delete-by-level`,
-    {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ level }),
-    }
+  return campaignRequest<{ success: boolean; deleted: number }>(
+    campaignId,
+    "/spells/delete-by-level",
+    { method: "DELETE", body: { level } },
   );
+}
 
-  if (!response.ok) throw new Error("Failed to delete spells by level");
-
-  return response.json();
+export async function importSpells(
+  campaignId: string,
+  body: { spells: unknown[]; groupId?: string },
+): Promise<{ imported: number }> {
+  return campaignPost<{ imported: number }>(
+    campaignId,
+    "/spells/import",
+    body,
+  );
 }
