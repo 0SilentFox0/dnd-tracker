@@ -144,7 +144,8 @@ export function usePusherBattleSync(
 
           const now = Date.now();
 
-          const skipRefetch = now - dataUpdatedAt < 2000;
+          /** Якщо кеш оновлювався недавно — не робити refetch (знижує egress). */
+          const skipRefetch = now - dataUpdatedAt < 8_000;
 
           if (skipRefetch) {
             debugLog(`event light payload (skip refetch, cache fresh): ${eventName}`, {

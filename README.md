@@ -416,6 +416,11 @@ npx prisma migrate reset  # УВАГА: видаляє всі дані
 - Перевірте чи всі типи правильно імпортовані з `lib/types/`
 - Використовуйте generic типи для форм: `<K extends keyof FormData>`
 
+## 💾 Backup і перехід на інший акаунт Supabase
+
+- **Бекап бази:** `./scripts/backup-database.sh` — зберігає дамп у `.migration-backup/`. Для Supabase використовуй **Direct connection** (порт 5432) у `BACKUP_DATABASE_URL` або в `.env.backup`.
+- **Повний чеклист переходу:** [docs/SWITCH-SUPABASE-ACCOUNT.md](./docs/SWITCH-SUPABASE-ACCOUNT.md) — бекап, новий проєкт, оновлення env, міграції, відновлення даних, Auth, Vercel.
+
 ## 📚 Додаткова документація
 
 - [Технічне завдання](./docs/TECHNICAL_SPECIFICATION.md) - Детальна технічна специфікація

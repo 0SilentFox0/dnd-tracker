@@ -314,10 +314,11 @@ model BattleScene {
   participants     Json      @default("[]")
   currentRound     Int       @default(1)
   currentTurnIndex Int       @default(0)
-  initiativeOrder  Json      @default("[]")
-  pendingSummons   Json      @default("[]")
-  battleLog        Json      @default("[]")
-  createdAt        DateTime  @default(now())
+  initiativeOrder     Json      @default("[]")
+  pendingSummons      Json      @default("[]")
+  pendingMoraleCheck  Json?
+  battleLog           Json      @default("[]")
+  createdAt           DateTime  @default(now())
   startedAt        DateTime?
   completedAt      DateTime?
   campaign         Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)

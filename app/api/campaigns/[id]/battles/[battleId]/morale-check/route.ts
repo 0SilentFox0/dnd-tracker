@@ -5,17 +5,20 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { checkMorale } from "@/lib/utils/battle/battle-morale";
 import { getBattleWithAccess } from "@/lib/utils/battle/get-battle-with-access";
-import {
-  preparePusherPayload,
-  stripStateBeforeForClient,
-} from "@/lib/utils/battle/strip-battle-payload";
-import { executeSkillsByTrigger } from "@/lib/utils/skills/execution";
-import { BattleAction, BattleParticipant } from "@/types/battle";
+import { stripStateBeforeForClient } from "@/lib/utils/battle/strip-battle-payload";
+import type { MoraleCheckResult } from "@/lib/utils/battle/battle-morale";
 
 const moraleCheckSchema = z.object({
   participantId: z.string(), // ID BattleParticipant з initiativeOrder
   d10Roll: z.number().min(1).max(10), // результат кидка 1d10
 });
+
+/** Payload збережений у pendingMoraleCheck для застосування при next-turn */
+export interface PendingMoraleCheckPayload {
+  participantId: string;
+  d10Roll: number;
+  moraleResult: MoraleCheckResult;
+}
 
 export async function POST(
   request: Request,
@@ -64,144 +67,22 @@ export async function POST(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Перевіряємо мораль
+    // Лише обчислюємо результат; застосування (extra turn, skip, тригери) — при next-turn
     const moraleResult = checkMorale(participant, data.d10Roll);
 
-    // Отримуємо учасників з initiativeOrder
-    let updatedInitiativeOrder = [...initiativeOrder];
-
-    // Якщо є додатковий хід, додаємо його в кінець черги ЦЬОГО раунду
-    if (moraleResult.hasExtraTurn) {
-      const extraParticipant: BattleParticipant = {
-        ...participant,
-        basicInfo: {
-          ...participant.basicInfo,
-          id: `${participant.basicInfo.id}-extra-${Date.now()}`,
-          isExtraTurnSlot: true,
-        },
-        actionFlags: {
-          ...participant.actionFlags,
-          hasExtraTurn: false, // видаляємо флаг зі слота, щоб не було рекурсії
-          hasUsedAction: false,
-          hasUsedBonusAction: false,
-          hasUsedReaction: false,
-        },
-      };
-
-      updatedInitiativeOrder.push(extraParticipant);
-    }
-
-    // Тригери скілів: onMoraleSuccess для учасника, allyMoraleCheck для союзників
-    const triggerMessages: string[] = [];
-
-    const moraleSuccess =
-      moraleResult.hasExtraTurn || !moraleResult.shouldSkipTurn;
-
-    if (moraleSuccess) {
-      const participantIdx = updatedInitiativeOrder.findIndex(
-        (p) => p.basicInfo.id === participant.basicInfo.id,
-      );
-
-      if (participantIdx >= 0) {
-        const result = executeSkillsByTrigger(
-          updatedInitiativeOrder[participantIdx],
-          "onMoraleSuccess",
-          updatedInitiativeOrder,
-          { currentRound: battle.currentRound },
-        );
-
-        triggerMessages.push(...result.messages);
-        updatedInitiativeOrder = updatedInitiativeOrder.map((p, i) =>
-          i === participantIdx ? result.participant : p,
-        );
-      }
-    }
-
-    // allyMoraleCheck для союзників
-    const allies = updatedInitiativeOrder.filter(
-      (p) =>
-        p.basicInfo.side === participant.basicInfo.side &&
-        p.basicInfo.id !== participant.basicInfo.id,
-    );
-
-    for (const ally of allies) {
-      const allyIdx = updatedInitiativeOrder.findIndex(
-        (p) => p.basicInfo.id === ally.basicInfo.id,
-      );
-
-      if (allyIdx >= 0) {
-        const result = executeSkillsByTrigger(
-          updatedInitiativeOrder[allyIdx],
-          "allyMoraleCheck",
-          updatedInitiativeOrder,
-          { currentRound: battle.currentRound },
-        );
-
-        triggerMessages.push(...result.messages);
-        updatedInitiativeOrder = updatedInitiativeOrder.map((p, i) =>
-          i === allyIdx ? result.participant : p,
-        );
-      }
-    }
-
-    // Створюємо BattleAction для логу
-    const battleLog = (battle.battleLog as unknown as BattleAction[]) || [];
-
-    const battleAction: BattleAction = {
-      id: `morale-${participant.basicInfo.id}-${Date.now()}`,
-      battleId,
-      round: battle.currentRound,
-      actionIndex: battleLog.length,
-      timestamp: new Date(),
-      actorId: participant.basicInfo.id,
-      actorName: participant.basicInfo.name,
-      actorSide: participant.basicInfo.side,
-      actionType: moraleResult.shouldSkipTurn ? "morale_skip" : "ability",
-      targets: [],
-      actionDetails: {
-        d10Roll: data.d10Roll,
-        morale: participant.combatStats.morale,
-      },
-      resultText: [
-        moraleResult.message,
-        ...triggerMessages,
-      ].filter(Boolean).join(" | "),
-      hpChanges: [],
-      isCancelled: false,
-      stateBefore: {
-        initiativeOrder: JSON.parse(
-          JSON.stringify(initiativeOrder),
-        ) as BattleParticipant[],
-        currentTurnIndex: battle.currentTurnIndex,
-        currentRound: battle.currentRound,
-      },
+    const pendingPayload: PendingMoraleCheckPayload = {
+      participantId: data.participantId,
+      d10Roll: data.d10Roll,
+      moraleResult,
     };
 
-    // Оновлюємо бій
+    // Зберігаємо результат для next-turn; бій не змінюємо (initiativeOrder, battleLog лишаються)
     const updatedBattle = await prisma.battleScene.update({
       where: { id: battleId },
       data: {
-        initiativeOrder:
-          updatedInitiativeOrder as unknown as Prisma.InputJsonValue,
-        battleLog: [
-          ...battleLog,
-          battleAction,
-        ] as unknown as Prisma.InputJsonValue,
+        pendingMoraleCheck: pendingPayload as unknown as Prisma.InputJsonValue,
       },
     });
-
-    // Відправляємо real-time оновлення через Pusher
-    if (process.env.PUSHER_APP_ID) {
-      const { pusherServer } = await import("@/lib/pusher");
-
-      void pusherServer
-        .trigger(
-          `battle-${battleId}`,
-          "battle-updated",
-          preparePusherPayload(updatedBattle),
-        )
-        .catch((err) => console.error("Pusher trigger failed:", err));
-    }
 
     return NextResponse.json({
       battle: stripStateBeforeForClient(updatedBattle),

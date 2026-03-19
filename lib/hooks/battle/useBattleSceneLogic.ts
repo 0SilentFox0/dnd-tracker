@@ -69,9 +69,22 @@ export function useBattleSceneLogic(id: string, battleId: string) {
 
   const attackAndNextTurnMutation = useAttackAndNextTurn(id, battleId);
 
+  const handleTurnStarted = useCallback((message: string) => {
+    setTurnStartedNotification(message);
+    setTimeout(() => setTurnStartedNotification(null), 4000);
+  }, []);
+
+  const { connectionState } = usePusherBattleSync(
+    id,
+    battleId,
+    currentUserId,
+    handleTurnStarted,
+  );
+
   const { data: battle, isLoading: loading } = useBattle(id, battleId, {
     pauseRefetchWhen:
       nextTurnMutation.isPending || attackAndNextTurnMutation.isPending,
+    pauseRefetchWhenPusherConnected: connectionState === "connected",
   });
 
   const triggerGlobalDamageFromBattle = useCallback(
@@ -123,18 +136,6 @@ export function useBattleSceneLogic(id: string, battleId: string) {
   const addParticipantMutation = useAddBattleParticipant(id, battleId);
 
   const updateParticipantMutation = useUpdateBattleParticipant(id, battleId);
-
-  const handleTurnStarted = useCallback((message: string) => {
-    setTurnStartedNotification(message);
-    setTimeout(() => setTurnStartedNotification(null), 4000);
-  }, []);
-
-  const { connectionState } = usePusherBattleSync(
-    id,
-    battleId,
-    currentUserId,
-    handleTurnStarted,
-  );
 
   const isDM = useMemo(() => battle?.isDM || false, [battle]);
 

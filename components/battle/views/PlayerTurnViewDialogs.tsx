@@ -39,6 +39,7 @@ export interface PlayerTurnViewDialogsProps {
     selectedTarget: BattleParticipant | null;
     selectedTargets: BattleParticipant[];
     currentRollTarget: BattleParticipant | null;
+    attackRollsData: Array<{ attackRoll: number; advantageRoll?: number; disadvantageRoll?: number }>;
     pendingAttackData: { damageRolls: number[] } | null;
     damageFromCrit: boolean;
   };
@@ -163,11 +164,19 @@ export function PlayerTurnViewDialogs({
       )}
       {selection.selectedAttack && (
         <DamageRollDialog
+          key={`damage-${selection.selectedTargets.length}-${selection.attackRollsData?.length ?? 0}`}
           open={dialogs.damageRoll.open}
           onOpenChange={dialogs.damageRoll.setOpen}
           attack={selection.selectedAttack}
           attacker={participant}
-          targetsCount={selection.selectedTargets.length}
+          targetsCount={
+            selection.selectedTargets.length > 1
+              ? Math.max(
+                  selection.selectedTargets.length,
+                  selection.attackRollsData?.length ?? 0,
+                ) || 1
+              : 1
+          }
           damageDiceFormula={
             participant.basicInfo.sourceType === "character"
               ? mergeDiceFormulas(

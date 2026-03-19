@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
+import { applyPendingMoraleCheck } from "./next-turn-apply-morale";
 import { runAdvanceTurnLoop } from "./next-turn-advance";
 import {
   applyVictoryCompletion,
@@ -8,6 +9,7 @@ import {
   debugBattleSync,
   logTurnTiming,
 } from "./next-turn-helpers";
+import type { PendingMoraleCheckPayload } from "../morale-check/route";
 
 import { prisma } from "@/lib/db";
 import { pusherServer } from "@/lib/pusher";
@@ -55,6 +57,7 @@ export async function POST(
         currentRound: true,
         initiativeOrder: true,
         pendingSummons: true,
+        pendingMoraleCheck: true,
         battleLog: true,
         completedAt: true,
       },
@@ -73,8 +76,29 @@ export async function POST(
       );
     }
 
-    const initiativeOrder =
+    let initiativeOrder =
       battle.initiativeOrder as unknown as BattleParticipant[];
+
+    let battleLog = (battle.battleLog as unknown as BattleAction[]) || [];
+    let currentBattleLogLength = battleLog.length;
+
+    // Застосовуємо pendingMoraleCheck перед advance (extra turn, тригери, лог)
+    const pendingMorale = battle.pendingMoraleCheck as
+      | PendingMoraleCheckPayload
+      | null
+      | undefined;
+    if (pendingMorale) {
+      const { updatedInitiativeOrder, moraleLogEntry } = applyPendingMoraleCheck(
+        initiativeOrder,
+        pendingMorale,
+        battle.currentRound,
+        battleId,
+        battleLog.length,
+      );
+      initiativeOrder = updatedInitiativeOrder;
+      battleLog = [...battleLog, moraleLogEntry];
+      currentBattleLogLength = battleLog.length;
+    }
 
     debugBattleSync("loaded battle", {
       campaignId: id,
@@ -109,10 +133,6 @@ export async function POST(
       );
     }
 
-    const currentBattleLogLength = (
-      battle.battleLog as unknown as BattleAction[]
-    ).length;
-
     const loopResult = runAdvanceTurnLoop({
       initiativeOrder,
       currentTurnIndex: battle.currentTurnIndex,
@@ -132,8 +152,6 @@ export async function POST(
     } = loopResult;
 
     logTurnTiming("while loop (triggers, startOfTurn)", t0, {});
-
-    const battleLog = (battle.battleLog as unknown as BattleAction[]) || [];
 
     const getStateBeforeForEntry = () => ({
       initiativeOrder: slimInitiativeOrderForStorage(updatedInitiativeOrder),
@@ -160,7 +178,7 @@ export async function POST(
 
     const tBeforeUpdate = Date.now();
 
-    // Оновлюємо бій (очищаємо pendingSummons після обробки початку раунду)
+    // Оновлюємо бій (очищаємо pendingSummons і pendingMoraleCheck після обробки)
     const updatedBattle = await prisma.battleScene.update({
       where: { id: battleId },
       data: {
@@ -174,6 +192,7 @@ export async function POST(
         pendingSummons: clearedPendingSummons
           ? ([] as unknown as Prisma.InputJsonValue)
           : (battle.pendingSummons as Prisma.InputJsonValue) ?? [],
+        pendingMoraleCheck: Prisma.JsonNull,
         battleLog: prepareBattleLogForStorage([
           ...battleLog,
           ...newLogEntries,

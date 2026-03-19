@@ -36,13 +36,19 @@ export { mergeBattleCache };
 export function useBattle(
   campaignId: string,
   battleId: string,
-  options?: { pauseRefetchWhen?: boolean },
+  options?: {
+    pauseRefetchWhen?: boolean;
+    /** Вимкнути polling, коли Pusher підключено — оновлення йдуть по Realtime. */
+    pauseRefetchWhenPusherConnected?: boolean;
+  },
 ) {
   return useQuery<BattleScene>({
     queryKey: ["battle", campaignId, battleId],
     queryFn: () => getBattle(campaignId, battleId),
+    staleTime: 15_000,
     refetchInterval: (query) => {
       if (options?.pauseRefetchWhen) return false;
+      if (options?.pauseRefetchWhenPusherConnected) return false;
 
       const data = query.state.data as BattleScene | undefined;
 
