@@ -28,6 +28,7 @@ export type AttackPhaseInput = {
     advantageRoll?: number;
     disadvantageRoll?: number;
     damageRolls: number[];
+    reactionDamage?: number;
   };
   battleId: string;
   userId: string;
@@ -224,6 +225,11 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
         ? data.damageRolls.slice(i * dicePerTarget, (i + 1) * dicePerTarget)
         : data.damageRolls;
 
+    const reactionOverride =
+      targets.length === 1 && data.reactionDamage != null
+        ? data.reactionDamage
+        : undefined;
+
     const attackResult = processAttack({
       attacker: currentAttacker,
       target,
@@ -236,6 +242,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       currentRound: battle.currentRound,
       battleId,
       damageMultiplier,
+      reactionDamageOverride: reactionOverride,
     });
 
     currentAttacker = attackResult.attackerUpdated;

@@ -20,6 +20,8 @@ export interface ProcessAttackParams {
   currentRound: number;
   battleId: string;
   damageMultiplier?: number;
+  /** Урон відповіді цілі (контратака), якщо передано з клієнта */
+  reactionDamageOverride?: number;
 }
 
 /** Результат обробки атаки */

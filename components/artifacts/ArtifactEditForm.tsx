@@ -3,8 +3,25 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import type { ArtifactModifierDraft } from "./artifact-combat-draft";
+import {
+  artifactBonusesFromDb,
+  type ArtifactEffectScopeDraft,
+  artifactEffectScopeDraftFromDb,
+  artifactModifierDraftsFromDb,
+  buildArtifactBonusesPayload,
+  buildArtifactPassiveAbilityPayload,
+  passiveSkillEffectsFromDb,
+} from "./artifact-combat-draft";
+import {
+  ArtifactCombatBonusFields,
+  buildArtifactModifiersPayload,
+} from "./ArtifactCombatBonusFields";
 import type { ArtifactData, ArtifactSetOption } from "./ArtifactEditForm-types";
+import { ArtifactEffectScopeFields } from "./ArtifactEffectScopeFields";
+import { ArtifactIconUrlPreview } from "./ArtifactIconUrlPreview";
 
+import { SkillEffectsEditor } from "@/components/skills/form/effects/SkillEffectsEditor";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -27,6 +44,7 @@ import {
   ARTIFACT_SLOT_OPTIONS,
   ArtifactRarity,
 } from "@/lib/constants/artifacts";
+import type { SkillEffect } from "@/types/battle";
 
 interface ArtifactEditFormProps {
   campaignId: string;
@@ -61,22 +79,36 @@ export function ArtifactEditForm({
 
   const [setId, setSetId] = useState<string | null>(artifact.setId);
 
-  const passive = artifact.passiveAbility as {
-    name?: string;
-    description?: string;
-  } | null;
+  const passive = artifact.passiveAbility as Record<string, unknown> | null;
 
-  const [effectName, setEffectName] = useState(passive?.name || "");
-
-  const [effectDescription, setEffectDescription] = useState(
-    passive?.description || "",
+  const [effectName, setEffectName] = useState(
+    typeof passive?.name === "string" ? passive.name : "",
   );
 
-  const bonuses = artifact.bonuses || {};
+  const [effectDescription, setEffectDescription] = useState(
+    typeof passive?.description === "string" ? passive.description : "",
+  );
 
-  const [minTargets, setMinTargets] = useState((bonuses.minTargets || 0) + 1);
+  const [bonuses, setBonuses] = useState(() =>
+    artifactBonusesFromDb(artifact.bonuses),
+  );
 
-  const [maxTargets, setMaxTargets] = useState((bonuses.maxTargets || 0) + 1);
+  const [modifiers, setModifiers] = useState<ArtifactModifierDraft[]>(() =>
+    artifactModifierDraftsFromDb(artifact.modifiers),
+  );
+
+  const [passiveEffects, setPassiveEffects] = useState<SkillEffect[]>(() =>
+    passiveSkillEffectsFromDb(artifact.passiveAbility),
+  );
+
+  const [effectScopeDraft, setEffectScopeDraft] =
+    useState<ArtifactEffectScopeDraft>(() =>
+      artifactEffectScopeDraftFromDb(artifact.passiveAbility),
+    );
+
+  const [skillFxMinT, setSkillFxMinT] = useState("1");
+
+  const [skillFxMaxT, setSkillFxMaxT] = useState("1");
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -87,6 +119,14 @@ export function ArtifactEditForm({
     setError(null);
 
     try {
+      const passiveAbility = buildArtifactPassiveAbilityPayload(
+        effectName,
+        effectDescription,
+        passiveEffects,
+        passive ?? null,
+        effectScopeDraft,
+      );
+
       const payload = {
         name: name.trim(),
         description: description.trim() || null,
@@ -94,18 +134,9 @@ export function ArtifactEditForm({
         slot,
         icon: icon.trim() || null,
         setId: setId || null,
-        bonuses: {
-          minTargets: minTargets > 1 ? minTargets - 1 : undefined,
-          maxTargets: maxTargets > 1 ? maxTargets - 1 : undefined,
-        },
-        modifiers: [],
-        passiveAbility:
-          effectName.trim() || effectDescription.trim()
-            ? {
-                name: effectName.trim() || "Ефект",
-                description: effectDescription.trim() || "",
-              }
-            : null,
+        bonuses: buildArtifactBonusesPayload(bonuses),
+        modifiers: buildArtifactModifiersPayload(modifiers),
+        passiveAbility,
       };
 
       await updateArtifact(campaignId, artifact.id, payload);
@@ -215,35 +246,31 @@ export function ArtifactEditForm({
             />
           </div>
 
-          <LabeledInput
-            id="artifact-icon"
-            label="Іконка (URL)"
-            value={icon}
-            onChange={(e) => setIcon(e.target.value)}
-            placeholder="https://example.com/icon.png"
-          />
-
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-2">
             <LabeledInput
-              id="artifact-min-targets"
-              label="Додаткові мін. цілі"
-              type="number"
-              min="0"
-              value={minTargets - 1}
-              onChange={(e) => setMinTargets(parseInt(e.target.value) + 1 || 1)}
+              id="artifact-icon"
+              label="Іконка (URL з інтернету)"
+              value={icon}
+              onChange={(e) => setIcon(e.target.value)}
+              placeholder="https://example.com/icon.png"
             />
-            <LabeledInput
-              id="artifact-max-targets"
-              label="Додаткові макс. цілі"
-              type="number"
-              min="0"
-              value={maxTargets - 1}
-              onChange={(e) => setMaxTargets(parseInt(e.target.value) + 1 || 1)}
-            />
+            <p className="text-xs text-muted-foreground">
+              Нове зовнішнє посилання при збереженні завантажується в бакет{" "}
+              <code className="text-xs bg-muted px-1 rounded">artifact-icons</code>
+              . URL уже з Supabase залишається без змін.
+            </p>
+            <ArtifactIconUrlPreview key={icon.trim()} url={icon} />
           </div>
 
+          <ArtifactCombatBonusFields
+            bonuses={bonuses}
+            onBonusesChange={setBonuses}
+            modifiers={modifiers}
+            onModifiersChange={setModifiers}
+          />
+
           <div className="rounded-md border p-4 space-y-3">
-            <p className="text-sm font-semibold">Ефект артефакту</p>
+            <p className="text-sm font-semibold">Пасив артефакту</p>
             <div className="space-y-2">
               <Label htmlFor="artifact-effect-name">Назва ефекту</Label>
               <Input
@@ -263,6 +290,21 @@ export function ArtifactEditForm({
                 rows={3}
               />
             </div>
+            <ArtifactEffectScopeFields
+              campaignId={campaignId}
+              value={effectScopeDraft}
+              onChange={setEffectScopeDraft}
+              idPrefix="artifact-edit"
+            />
+            <SkillEffectsEditor
+              effects={passiveEffects}
+              minTargets={skillFxMinT}
+              maxTargets={skillFxMaxT}
+              onEffectsChange={setPassiveEffects}
+              onMinTargetsChange={setSkillFxMinT}
+              onMaxTargetsChange={setSkillFxMaxT}
+              hideTargeting
+            />
           </div>
 
           <div className="flex gap-2">

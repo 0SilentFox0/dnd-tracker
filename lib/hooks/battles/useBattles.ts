@@ -48,6 +48,7 @@ export function useBattle(
     staleTime: 15_000,
     refetchInterval: (query) => {
       if (options?.pauseRefetchWhen) return false;
+
       if (options?.pauseRefetchWhenPusherConnected) return false;
 
       const data = query.state.data as BattleScene | undefined;

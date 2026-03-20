@@ -9,8 +9,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  getDiceSlots,
-} from "@/lib/utils/battle/balance";
+  canPerformReaction,
+  getReactionDamageAmount,
+} from "@/lib/utils/battle/attack";
+import { getDiceSlots } from "@/lib/utils/battle/balance";
 import { getParticipantExtras } from "@/lib/utils/battle/participant";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -21,9 +23,11 @@ interface DamageRollDialogProps {
   damageDiceFormula?: string;
   /** Атакуючий — для відображення Advantage/Disadvantage на кидки шкоди */
   attacker?: BattleParticipant | null;
+  /** Ціль (для однієї цілі — показуємо «Відповідь цілі» при контратаці) */
+  target?: BattleParticipant | null;
   /** Кількість цілей (для multi-target ranged — окремий кидок на ціль) */
   targetsCount?: number;
-  onConfirm: (damageRolls: number[]) => void;
+  onConfirm: (damageRolls: number[], reactionDamage?: number) => void;
 }
 
 export function DamageRollDialog({
@@ -32,9 +36,22 @@ export function DamageRollDialog({
   attack,
   damageDiceFormula,
   attacker,
+  target,
   targetsCount = 1,
   onConfirm,
 }: DamageRollDialogProps) {
+  const showReactionField =
+    targetsCount === 1 &&
+    !!target &&
+    !!attacker &&
+    canPerformReaction(target, attack.type);
+
+  const suggestedReaction = useMemo(() => {
+    if (!showReactionField || !target || !attacker) return 0;
+
+    return getReactionDamageAmount(target, attacker).damage;
+  }, [showReactionField, target, attacker]);
+
   const baseDiceSlots = useMemo(() => {
     const formula = damageDiceFormula?.trim() || attack.damageDice?.trim();
 
@@ -70,6 +87,8 @@ export function DamageRollDialog({
     Array(diceCount).fill(""),
   );
 
+  const [reactionDamageInput, setReactionDamageInput] = useState<string>("");
+
   const handleRollChange = (index: number, value: string) => {
     const newRolls = [...damageRolls];
 
@@ -79,6 +98,7 @@ export function DamageRollDialog({
 
   const handleCancel = () => {
     setDamageRolls(Array(diceCount).fill(""));
+    setReactionDamageInput("");
     onOpenChange(false);
   };
 
@@ -87,12 +107,32 @@ export function DamageRollDialog({
       .map((r) => parseInt(r, 10))
       .filter((n) => !Number.isNaN(n));
 
-    const valid =
+    const rollsValid =
       rolls.length === diceCount &&
       rolls.every((r, i) => r >= 1 && r <= diceSlots[i]);
 
-    if (valid) {
-      onConfirm(rolls);
+    let reactionDamage: number | undefined;
+
+    if (showReactionField) {
+      const raw = reactionDamageInput.trim();
+
+      if (raw === "") {
+        reactionDamage = suggestedReaction;
+      } else {
+        const n = parseInt(raw, 10);
+
+        if (Number.isNaN(n) || n < 0) {
+          alert("Відповідь цілі: введіть невід'ємне число урону.");
+
+          return;
+        }
+
+        reactionDamage = n;
+      }
+    }
+
+    if (rollsValid) {
+      onConfirm(rolls, reactionDamage);
       handleCancel();
     } else {
       alert(
@@ -109,7 +149,11 @@ export function DamageRollDialog({
       const max = diceSlots[i] ?? 6;
 
       return !roll || Number.isNaN(n) || n < 1 || n > max;
-    });
+    }) ||
+    (showReactionField &&
+      reactionDamageInput.trim() !== "" &&
+      (Number.isNaN(parseInt(reactionDamageInput, 10)) ||
+        parseInt(reactionDamageInput, 10) < 0));
 
   return (
     <BattleDialog
@@ -127,6 +171,27 @@ export function DamageRollDialog({
           <p className="text-sm text-green-600 dark:text-green-400">
             Advantage на кидки шкоди — введіть результат з урахуванням двох кидків (кращий)
           </p>
+        )}
+        {showReactionField && (
+          <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 space-y-2">
+            <div className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+              Відповідь цілі (контратака)
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Звичайна атака цілі + бонуси скілів + бонус контратаки. Рекомендовано: {suggestedReaction} урону.
+            </p>
+            <div>
+              <Label htmlFor="reaction-damage">Урон відповіді цілі</Label>
+              <Input
+                id="reaction-damage"
+                type="number"
+                min={0}
+                value={reactionDamageInput}
+                onChange={(e) => setReactionDamageInput(e.target.value)}
+                placeholder={String(suggestedReaction)}
+              />
+            </div>
+          </div>
         )}
         <div className="space-y-4">
           {targetsCount > 1

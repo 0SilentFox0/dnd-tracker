@@ -19,6 +19,7 @@ import {
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
+import { distributePendingScopedArtifactBonuses } from "@/lib/utils/battle/artifact-sets";
 import { processAttack } from "@/lib/utils/battle/attack";
 import {
   applyStartOfBattleEffects,
@@ -120,6 +121,8 @@ async function startBattle(
       }
     }
   }
+
+  distributePendingScopedArtifactBonuses(initiativeOrder);
 
   const afterStartEffects = initiativeOrder.map((p) =>
     applyStartOfBattleEffects(p, 1, initiativeOrder),

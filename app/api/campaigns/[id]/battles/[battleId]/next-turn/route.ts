@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
-import { applyPendingMoraleCheck } from "./next-turn-apply-morale";
+import type { PendingMoraleCheckPayload } from "../morale-check/route";
 import { runAdvanceTurnLoop } from "./next-turn-advance";
+import { applyPendingMoraleCheck } from "./next-turn-apply-morale";
 import {
   applyVictoryCompletion,
   battleStateSnapshot,
   debugBattleSync,
   logTurnTiming,
 } from "./next-turn-helpers";
-import type { PendingMoraleCheckPayload } from "../morale-check/route";
 
 import { prisma } from "@/lib/db";
 import { pusherServer } from "@/lib/pusher";
@@ -80,6 +80,7 @@ export async function POST(
       battle.initiativeOrder as unknown as BattleParticipant[];
 
     let battleLog = (battle.battleLog as unknown as BattleAction[]) || [];
+
     let currentBattleLogLength = battleLog.length;
 
     // Застосовуємо pendingMoraleCheck перед advance (extra turn, тригери, лог)
@@ -87,6 +88,7 @@ export async function POST(
       | PendingMoraleCheckPayload
       | null
       | undefined;
+
     if (pendingMorale) {
       const { updatedInitiativeOrder, moraleLogEntry } = applyPendingMoraleCheck(
         initiativeOrder,
@@ -95,6 +97,7 @@ export async function POST(
         battleId,
         battleLog.length,
       );
+
       initiativeOrder = updatedInitiativeOrder;
       battleLog = [...battleLog, moraleLogEntry];
       currentBattleLogLength = battleLog.length;

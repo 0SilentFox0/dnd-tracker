@@ -1,6 +1,25 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      {
+        source: "/campaigns/:id/dm/artifacts/sets/new",
+        destination: "/campaigns/:id/dm/artifact-sets/new",
+        permanent: false,
+      },
+      {
+        source: "/campaigns/:id/dm/artifacts/sets/:setId",
+        destination: "/campaigns/:id/dm/artifact-sets/:setId",
+        permanent: false,
+      },
+      {
+        source: "/campaigns/:id/dm/artifacts/sets",
+        destination: "/campaigns/:id/dm/artifact-sets",
+        permanent: false,
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {

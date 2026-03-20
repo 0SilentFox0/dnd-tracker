@@ -48,6 +48,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     currentRound,
     battleId,
     damageMultiplier,
+    reactionDamageOverride,
   } = params;
 
   let updatedAttacker = { ...attacker };
@@ -228,7 +229,13 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   const ignoreReactions = criticalEffectApplied?.effect.type === "ignore_reactions";
 
-  const reactionResult = applyReaction(updatedTarget, updatedAttacker, !!ignoreReactions);
+  const reactionResult = applyReaction(
+    updatedTarget,
+    updatedAttacker,
+    !!ignoreReactions,
+    reactionDamageOverride,
+    attack.type,
+  );
 
   updatedTarget = reactionResult.updatedDefender;
   updatedAttacker = reactionResult.updatedAttacker;

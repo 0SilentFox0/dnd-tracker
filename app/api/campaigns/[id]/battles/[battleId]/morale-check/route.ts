@@ -3,10 +3,10 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { prisma } from "@/lib/db";
+import type { MoraleCheckResult } from "@/lib/utils/battle/battle-morale";
 import { checkMorale } from "@/lib/utils/battle/battle-morale";
 import { getBattleWithAccess } from "@/lib/utils/battle/get-battle-with-access";
 import { stripStateBeforeForClient } from "@/lib/utils/battle/strip-battle-payload";
-import type { MoraleCheckResult } from "@/lib/utils/battle/battle-morale";
 
 const moraleCheckSchema = z.object({
   participantId: z.string(), // ID BattleParticipant з initiativeOrder

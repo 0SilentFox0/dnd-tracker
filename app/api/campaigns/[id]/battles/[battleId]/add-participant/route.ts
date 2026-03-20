@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
+import { distributePendingScopedArtifactBonuses } from "@/lib/utils/battle/artifact-sets";
 import { calculateInitiative } from "@/lib/utils/battle/battle-start";
 import { getBattleWithAccess } from "@/lib/utils/battle/get-battle-with-access";
 import {
@@ -86,16 +87,7 @@ export async function POST(
         side,
       );
 
-      const withInitiative = {
-        ...participant,
-        abilities: {
-          ...participant.abilities,
-          initiative: calculateInitiative(participant),
-          baseInitiative: calculateInitiative(participant),
-        },
-      };
-
-      newParticipants.push(withInitiative);
+      newParticipants.push(participant);
     } else {
       const unit = await prisma.unit.findUnique({
         where: { id: data.sourceId },
@@ -118,16 +110,7 @@ export async function POST(
           i + 1,
         );
 
-        const withInitiative = {
-          ...participant,
-          abilities: {
-            ...participant.abilities,
-            initiative: calculateInitiative(participant),
-            baseInitiative: calculateInitiative(participant),
-          },
-        };
-
-        newParticipants.push(withInitiative);
+        newParticipants.push(participant);
       }
     }
 
@@ -136,6 +119,15 @@ export async function POST(
       ...newParticipants,
       ...initiativeOrder.slice(insertAt),
     ];
+
+    distributePendingScopedArtifactBonuses(updatedInitiativeOrder);
+
+    for (const p of newParticipants) {
+      const calc = calculateInitiative(p);
+
+      p.abilities.initiative = calc;
+      p.abilities.baseInitiative = calc;
+    }
 
     const battleLog = (battle.battleLog as unknown as BattleAction[]) ?? [];
 

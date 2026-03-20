@@ -229,6 +229,8 @@ export function useSkillTreePage({
     skillsFromLibrary,
     setSelectedSkillFromLibrary,
     setIsTrainingCompleted,
+    isDMMode,
+    playerLevel,
   });
 
   return {

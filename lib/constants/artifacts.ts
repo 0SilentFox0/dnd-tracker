@@ -117,3 +117,58 @@ export const DEFAULT_ARTIFACT_MODIFIERS = {
   DAMAGE_DICE: "1d6",
   DAMAGE_TYPE: "slashing",
 } as const;
+
+/** Плоскі числові бонуси артефакта (застосовуються в бою з екіпіровки). */
+export const ARTIFACT_COMBAT_BONUS_OPTIONS: ReadonlyArray<{
+  key: string;
+  label: string;
+}> = [
+  { key: "strength", label: "Сила" },
+  { key: "dexterity", label: "Спритність" },
+  { key: "constitution", label: "Статура" },
+  { key: "intelligence", label: "Інтелект" },
+  { key: "wisdom", label: "Мудрість" },
+  { key: "charisma", label: "Харизма" },
+  { key: "armorClass", label: "Клас броні" },
+  { key: "speed", label: "Швидкість" },
+  { key: "initiative", label: "Ініціатива" },
+  { key: "morale", label: "Мораль" },
+  { key: "minTargets", label: "Мін. цілей (плоско)" },
+  { key: "maxTargets", label: "Макс. цілей (плоско)" },
+  { key: "attackBonus", label: "Бонус атаки (attackBonus)" },
+  { key: "attack", label: "Бонус атаки (attack)" },
+];
+
+export const ARTIFACT_SLOT_BONUS_LEVELS = [
+  1, 2, 3, 4, 5, 6, 7, 8, 9,
+] as const;
+
+export function artifactSlotBonusKey(level: number): string {
+  return `slotBonus_${level}`;
+}
+
+export type ArtifactModifierEditorValueKind = "number" | "string";
+
+/** Модифікатори для зброї та бойових бонусів (% / flat). */
+export const ARTIFACT_MODIFIER_EDITOR_OPTIONS: ReadonlyArray<{
+  value: string;
+  label: string;
+  valueKind: ArtifactModifierEditorValueKind;
+}> = [
+  { value: "damageDice", label: "Кубики шкоди (напр. 2d6)", valueKind: "string" },
+  { value: "damageType", label: "Тип шкоди (slashing, fire…)", valueKind: "string" },
+  { value: "attackType", label: "Тип атаки (melee / ranged)", valueKind: "string" },
+  { value: "range", label: "Дальність", valueKind: "string" },
+  { value: "properties", label: "Властивості зброї", valueKind: "string" },
+  { value: "minTargets", label: "Мін. цілей (на зброї)", valueKind: "string" },
+  { value: "maxTargets", label: "Макс. цілей (на зброї)", valueKind: "string" },
+  { value: "min_targets", label: "Мін. цілей (бойовий модифікатор)", valueKind: "number" },
+  { value: "max_targets", label: "Макс. цілей (бойовий модифікатор)", valueKind: "number" },
+  { value: "melee_damage", label: "Шкода ближня", valueKind: "number" },
+  { value: "ranged_damage", label: "Шкода дальня", valueKind: "number" },
+  { value: "physical_damage", label: "Шкода фізична", valueKind: "number" },
+  { value: "all_damage", label: "Шкода (усі фіз. атаки)", valueKind: "number" },
+  { value: "damageMelee", label: "Шкода ближня (legacy)", valueKind: "number" },
+  { value: "damageRanged", label: "Шкода дальня (legacy)", valueKind: "number" },
+  { value: "attack", label: "Бонус до кидка атаки", valueKind: "number" },
+];

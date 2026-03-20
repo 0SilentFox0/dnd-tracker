@@ -57,6 +57,8 @@ export const SPELL_EFFECT_OPTIONS: SelectOption[] = [
   { value: "Regain HP at start of each turn", label: "Regain HP at start of each turn" },
   { value: "Heal half melee damage (vampirism)", label: "Heal half melee damage (vampirism)" },
   { value: "Remove all curses/diseases/hostile spells", label: "Remove all curses/diseases/hostile spells" },
+  { value: "Remove all buffs", label: "Remove all buffs" },
+  { value: "Remove all debuffs", label: "Remove all debuffs" },
   { value: "Return to life. Max HP -20% until long rest", label: "Return to life. Max HP -20% until long rest" },
   { value: "Rises as temporary undead. Dies after combat", label: "Rises as temporary undead. Dies after combat" },
 

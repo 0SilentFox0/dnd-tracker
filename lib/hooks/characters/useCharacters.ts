@@ -11,10 +11,14 @@ import type { Character } from "@/types/characters";
 
 export type { Character };
 
-export function useCharacters(campaignId: string) {
+/** Без `opts` — усі персонажі кампанії (гравці та npc_hero). */
+export function useCharacters(
+  campaignId: string,
+  opts?: { type?: "player" | "npc_hero" },
+) {
   return useQuery<Character[]>({
-    queryKey: ["characters", campaignId],
-    queryFn: () => getCharacters(campaignId, { type: "player" }),
+    queryKey: ["characters", campaignId, opts?.type ?? "all"],
+    queryFn: () => getCharacters(campaignId, opts),
     staleTime: ENTITY_STALE_MS,
     enabled: !!campaignId,
   });

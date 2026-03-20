@@ -1,40 +1,15 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
-import { z } from "zod";
+import { randomUUID } from "crypto";
+import { ZodError } from "zod";
 
-import { ARTIFACT_RARITY_VALUES, ARTIFACT_SLOT_VALUES } from "@/lib/constants/artifacts";
+import { createArtifactSchema } from "@/app/api/campaigns/[id]/artifacts/schemas";
 import { prisma } from "@/lib/db";
+import {
+  mirrorArtifactIconToSupabase,
+  shouldMirrorArtifactIconUrl,
+} from "@/lib/supabase/artifact-icon-storage";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
-
-const createArtifactSchema = z.object({
-  name: z.string().min(1).max(100),
-  description: z.string().optional(),
-  rarity: z.enum(ARTIFACT_RARITY_VALUES).optional(),
-  slot: z.enum(ARTIFACT_SLOT_VALUES),
-  bonuses: z.record(z.string(), z.number()).default({}),
-  modifiers: z
-    .array(
-      z.object({
-        type: z.string(),
-        value: z.number(),
-        isPercentage: z.boolean(),
-        element: z.string().optional(),
-      })
-    )
-    .default([]),
-  passiveAbility: z
-    .object({
-      name: z.string(),
-      description: z.string(),
-      effect: z.record(z.string(), z.unknown()).optional(),
-    })
-    .optional(),
-  setId: z.string().optional(),
-  icon: z.preprocess(
-    (val) => (val === "" ? null : val),
-    z.string().url().nullable().optional()
-  ),
-});
 
 export async function POST(
   request: Request,
@@ -54,6 +29,21 @@ export async function POST(
 
     const data = createArtifactSchema.parse(body);
 
+    let icon = data.icon;
+
+    if (shouldMirrorArtifactIconUrl(icon)) {
+      const mirrored = await mirrorArtifactIconToSupabase(icon, {
+        campaignId: id,
+        objectBaseName: randomUUID(),
+      });
+
+      if (!mirrored.ok) {
+        return NextResponse.json({ error: mirrored.message }, { status: 422 });
+      }
+
+      icon = mirrored.publicUrl;
+    }
+
     const artifact = await prisma.artifact.create({
       data: {
         campaignId: id,
@@ -67,7 +57,7 @@ export async function POST(
           ? (data.passiveAbility as Prisma.InputJsonValue)
           : undefined,
         setId: data.setId,
-        icon: data.icon,
+        icon,
       },
       include: {
         artifactSet: true,
@@ -78,7 +68,7 @@ export async function POST(
   } catch (error) {
     console.error("Error creating artifact:", error);
 
-    if (error instanceof z.ZodError) {
+    if (error instanceof ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
 

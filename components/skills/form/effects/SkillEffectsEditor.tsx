@@ -18,6 +18,8 @@ export interface SkillEffectsEditorProps {
   onEffectsChange: (effects: SkillEffect[]) => void;
   onMinTargetsChange: (value: string) => void;
   onMaxTargetsChange: (value: string) => void;
+  /** Для артефактів: цілі задаються окремими полями бонусів */
+  hideTargeting?: boolean;
 }
 
 function SkillEffectsEditorComponent({
@@ -27,6 +29,7 @@ function SkillEffectsEditorComponent({
   onEffectsChange,
   onMinTargetsChange,
   onMaxTargetsChange,
+  hideTargeting = false,
 }: SkillEffectsEditorProps) {
   const [isAdding, setIsAdding] = useState(false);
 
@@ -68,12 +71,19 @@ function SkillEffectsEditorComponent({
     <div className="rounded-md border p-4 space-y-4">
       <p className="text-sm font-semibold">Бойові ефекти</p>
 
-      <SkillEffectsTargeting
-        minTargets={minTargets}
-        maxTargets={maxTargets}
-        onMinTargetsChange={onMinTargetsChange}
-        onMaxTargetsChange={onMaxTargetsChange}
-      />
+      {hideTargeting ? (
+        <p className="text-xs text-muted-foreground">
+          Мін/макс цілей для атак і заклинань налаштовуються в блоці «Бойові бонуси»
+          (поля мін/макс цілей).
+        </p>
+      ) : (
+        <SkillEffectsTargeting
+          minTargets={minTargets}
+          maxTargets={maxTargets}
+          onMinTargetsChange={onMinTargetsChange}
+          onMaxTargetsChange={onMaxTargetsChange}
+        />
+      )}
 
       {effects.length > 0 && (
         <div className="space-y-2">

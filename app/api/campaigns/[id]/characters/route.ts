@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { createCharacterSchema } from "./create-character-schema";
@@ -28,9 +29,56 @@ export async function POST(
       return accessResult;
     }
 
+    const { userId: dmUserId } = accessResult;
+
     const body = await request.json();
 
     const data = createCharacterSchema.parse(body);
+
+    // controlledBy — FK на users.id. Для NPC героя в UI поле не показується і часто лишається "".
+    let controlledBy: string;
+
+    if (data.type === "npc_hero") {
+      controlledBy = dmUserId;
+    } else {
+      const ownerId = data.controlledBy.trim();
+
+      if (!ownerId) {
+        return NextResponse.json(
+          { error: "Оберіть гравця для персонажа типу «Гравець»." },
+          { status: 400 },
+        );
+      }
+
+      const owner = await prisma.user.findUnique({
+        where: { id: ownerId },
+        select: { id: true },
+      });
+
+      if (!owner) {
+        return NextResponse.json(
+          {
+            error:
+              "Користувача з обраним ID немає в базі (наприклад, після зміни Supabase або міграції). Оновіть сторінку та оберіть гравця знову.",
+          },
+          { status: 400 },
+        );
+      }
+
+      const membership = await prisma.campaignMember.findFirst({
+        where: { campaignId: id, userId: ownerId },
+        select: { id: true },
+      });
+
+      if (!membership) {
+        return NextResponse.json(
+          { error: "Обраний користувач не є учасником цієї кампанії." },
+          { status: 400 },
+        );
+      }
+
+      controlledBy = ownerId;
+    }
 
     // Розраховуємо автоматичні значення
     const proficiencyBonus = getProficiencyBonus(data.level);
@@ -104,7 +152,7 @@ export async function POST(
       data: {
         campaignId: id,
         type: data.type,
-        controlledBy: data.controlledBy,
+        controlledBy,
         name: data.name,
         level: data.level,
         class: data.class,
@@ -183,6 +231,19 @@ export async function POST(
 
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
+    }
+
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2003"
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Невірне посилання на користувача (controlledBy). Переконайтесь, що обраний гравець існує в users і є учасником кампанії.",
+        },
+        { status: 400 },
+      );
     }
 
     return NextResponse.json(

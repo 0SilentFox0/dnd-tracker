@@ -11,7 +11,10 @@ import { GlobalDamageOverlay } from "@/components/battle/overlays";
 
 interface BattlePageDialogsOverlaysProps {
   dialogs: Pick<BattlePageDialogsDialogs, "counterAttack">;
-  mutations: Pick<BattlePageDialogsMutations, "attack" | "nextTurn">;
+  mutations: Pick<
+    BattlePageDialogsMutations,
+    "attack" | "nextTurn" | "spell"
+  >;
   handlers: Pick<BattlePageDialogsHandlers, "clearGlobalDamageFlash">;
   spellResult: BattlePageDialogsSpellResult;
   globalDamageFlash: { value: number; isHealing: boolean } | null;
@@ -25,7 +28,9 @@ export function BattlePageDialogsOverlays({
   globalDamageFlash,
 }: BattlePageDialogsOverlaysProps) {
   const isApplyingDamageOrTurn =
-    mutations.attack.isPending || mutations.nextTurn.isPending;
+    mutations.attack.isPending ||
+    mutations.nextTurn.isPending ||
+    mutations.spell.isPending;
 
   return (
     <>
@@ -67,9 +72,11 @@ export function BattlePageDialogsOverlays({
           <div className="flex flex-col items-center gap-4">
             <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
             <p className="text-lg font-medium text-white/90">
-              {mutations.attack.isPending
-                ? "Застосування шкоди…"
-                : "Перехід ходу…"}
+              {mutations.spell.isPending
+                ? "Застосування шкоди від магії…"
+                : mutations.attack.isPending
+                  ? "Застосування шкоди…"
+                  : "Перехід ходу…"}
             </p>
           </div>
         </div>

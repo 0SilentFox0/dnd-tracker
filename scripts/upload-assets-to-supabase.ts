@@ -4,6 +4,7 @@
  * - assets/unit-icons/* → bucket unit-icons
  * - assets/spell-icons/* → bucket spell-icons
  * - assets/skill-icons/* → bucket skill-icons
+ * - assets/artifact-icons/* → bucket artifact-icons (іконки з UI також потрапляють сюди через API)
  *
  * Потрібно: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (з .env.local або env)
  *
@@ -15,12 +16,16 @@ import * as path from "path";
 
 // Завантажити .env.local якщо є (для tsx без next)
 const envPath = path.join(process.cwd(), ".env.local");
+
 if (fs.existsSync(envPath)) {
   const content = fs.readFileSync(envPath, "utf8");
+
   for (const line of content.split("\n")) {
     const m = line.match(/^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/);
+
     if (m) {
       const value = m[2].replace(/^["']|["']$/g, "").trim();
+
       if (!process.env[m[1]]) process.env[m[1]] = value;
     }
   }
@@ -34,6 +39,7 @@ const BUCKET_FOLDERS = [
   { bucket: "unit-icons", folder: "unit-icons" },
   { bucket: "spell-icons", folder: "spell-icons" },
   { bucket: "skill-icons", folder: "skill-icons" },
+  { bucket: "artifact-icons", folder: "artifact-icons" },
 ] as const;
 
 async function ensureBucket(

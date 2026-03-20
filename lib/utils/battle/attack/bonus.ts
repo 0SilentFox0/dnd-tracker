@@ -38,7 +38,12 @@ export function calculateAttackBonus(
         modifier.type.toLowerCase().includes("attack") &&
         !modifier.isPercentage
       ) {
-        bonus += modifier.value;
+        const raw = modifier.value;
+
+        const num =
+          typeof raw === "number" ? raw : Number.parseFloat(String(raw));
+
+        bonus += Number.isFinite(num) ? num : 0;
       }
     }
   }

@@ -115,6 +115,11 @@ export function Header() {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
+                      <Link href={`/campaigns/${campaignId}/dm/artifact-sets`}>
+                        Сети артефактів
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
                       <Link href={`/campaigns/${campaignId}/dm/battles`}>
                         Сцени Боїв
                       </Link>

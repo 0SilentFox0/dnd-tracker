@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { CircularSkillTree } from "@/components/skill-tree/core/CircularSkillTree";
 import {
-  canLearnRacialSkillLevel,
+  canUnlockRacialSkillSlot,
   getRacialSkillLevelId,
 } from "@/components/skill-tree/utils/hooks";
 import { getSkillTrees } from "@/lib/api/skill-trees";
@@ -203,11 +203,10 @@ export function CharacterSkillTreeView({
     (mainSkill: MainSkill, level: SkillLevel) => {
       if (!canLevel) return;
 
-      const canLearn = canLearnRacialSkillLevel(
-        level,
-        mainSkill.id,
-        unlockedSkills,
-      );
+      const canLearn = canUnlockRacialSkillSlot(level, mainSkill.id, unlockedSkills, {
+        characterLevel: characterLevel,
+        isDMMode: false,
+      });
 
       if (!canLearn) return;
 
@@ -235,6 +234,7 @@ export function CharacterSkillTreeView({
     },
     [
       canLevel,
+      characterLevel,
       unlockedSkills,
       savedUnlockedSkills,
       maxSkills,

@@ -30,6 +30,12 @@ export interface BattleSpell {
   effectDetails?: {
     duration?: number;
     effects?: Array<{ type: string; value: number; isPercentage?: boolean }>;
+    /** DoT з самого заклинання (напр. Decay): урон протягом кількох раундів */
+    additionalModifier?: {
+      modifier?: string;
+      duration?: number;
+      damage?: number;
+    };
   } | null;
   icon?: string | null;
 }
@@ -49,6 +55,8 @@ export interface ProcessSpellParams {
   }>;
   additionalRollResult?: number;
   hitRoll?: number;
+  /** DM накладає з сайдбару — не витрачати spell slot, ігнорувати перевірку слотів */
+  isDMCast?: boolean;
 }
 
 /** Результат обробки заклинання */

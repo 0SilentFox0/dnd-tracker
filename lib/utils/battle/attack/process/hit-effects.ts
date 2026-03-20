@@ -27,11 +27,14 @@ export interface ApplyReactionResult {
 
 /**
  * Перевіряє та виконує реакцію (контр-удар) і застосовує урон до атакуючого.
+ * Якщо передано overrideReactionDamage, використовується цей урон замість розрахунку (напр. з UI).
  */
 export function applyReaction(
   defender: BattleParticipant,
   attacker: BattleParticipant,
   ignoreReactions: boolean,
+  overrideReactionDamage?: number,
+  incomingAttackType?: "melee" | "ranged" | "magic",
 ): ApplyReactionResult {
   const result: ApplyReactionResult = {
     updatedDefender: defender,
@@ -43,15 +46,29 @@ export function applyReaction(
     reactionAttackerHpChange: null,
   };
 
-  if (ignoreReactions || !canPerformReaction(defender)) {
+  const resolvedIncoming: AttackType | "magic" =
+    incomingAttackType === "ranged"
+      ? AttackType.RANGED
+      : incomingAttackType === "magic"
+        ? "magic"
+        : AttackType.MELEE;
+
+  if (ignoreReactions || !canPerformReaction(defender, resolvedIncoming)) {
     return result;
   }
+
+  const useOverride =
+    overrideReactionDamage != null &&
+    Number.isFinite(overrideReactionDamage) &&
+    overrideReactionDamage >= 0;
 
   const reactionResult = performReaction(defender, attacker);
 
   result.updatedDefender = reactionResult.updatedDefender;
   result.reactionTriggered = true;
-  result.reactionDamage = reactionResult.damage;
+  result.reactionDamage = useOverride
+    ? overrideReactionDamage
+    : reactionResult.damage;
   result.reactionBaseDamage = reactionResult.baseDamage;
   result.reactionBonusPercent = reactionResult.bonusPercent;
 
@@ -59,7 +76,7 @@ export function applyReaction(
 
   const oldAttackerHp = updatedAttacker.combatStats.currentHp;
 
-  let remainingReactionDamage = reactionResult.damage;
+  let remainingReactionDamage = result.reactionDamage;
 
   if (updatedAttacker.combatStats.tempHp > 0 && remainingReactionDamage > 0) {
     const tempDamage = Math.min(

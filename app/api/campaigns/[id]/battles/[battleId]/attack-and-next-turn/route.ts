@@ -74,6 +74,7 @@ export async function POST(
         advantageRoll: data.advantageRoll,
         disadvantageRoll: data.disadvantageRoll,
         damageRolls: data.damageRolls,
+        reactionDamage: data.reactionDamage,
       },
       battleId,
       userId,

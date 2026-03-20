@@ -52,6 +52,8 @@ export function useAttackFlow({
       advantageRoll?: number;
       disadvantageRoll?: number;
     }>;
+    /** Індекси цілей, по яких було попадання (для multi-target — показуємо шкоду лише по ним) */
+    hitTargetIndices?: number[];
   } | null>(null);
 
   const [attackRollsData, setAttackRollsData] = useState<

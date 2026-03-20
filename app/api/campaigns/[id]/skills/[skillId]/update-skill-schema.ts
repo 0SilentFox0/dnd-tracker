@@ -122,6 +122,7 @@ export const updateSkillSchema = z.object({
             stackable: z.boolean().optional(),
             condition: z.string().optional(),
             attackId: z.string().optional(),
+            responseType: z.enum(["melee", "ranged", "magic"]).optional(),
           }).optional(),
         }),
         z.object({
@@ -138,6 +139,7 @@ export const updateSkillSchema = z.object({
             stackable: z.boolean().optional(),
             condition: z.string().optional(),
             attackId: z.string().optional(),
+            responseType: z.enum(["melee", "ranged", "magic"]).optional(),
           }).optional(),
         }),
       ]),

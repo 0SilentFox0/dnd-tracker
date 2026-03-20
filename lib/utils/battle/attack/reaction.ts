@@ -7,6 +7,7 @@ import { getDiceAverage } from "../balance";
 import { AttackType } from "@/lib/constants/battle";
 import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
 import type { BattleParticipant } from "@/types/battle";
+import type { SimpleSkillTriggerConfig } from "@/types/skill-triggers";
 
 export function getCounterDamagePercent(defender: BattleParticipant): number {
   let total = 0;
@@ -26,14 +27,43 @@ export function getCounterDamagePercent(defender: BattleParticipant): number {
   return total;
 }
 
-export function canPerformReaction(defender: BattleParticipant): boolean {
-  if (defender.actionFlags.hasUsedReaction) return false;
+type IncomingAttackType = AttackType | "magic";
 
-  const counterPercent = getCounterDamagePercent(defender);
+/** Чи підходить тип вхідної атаки під налаштування тригера контратаки */
+function matchResponseType(
+  responseType: "melee" | "ranged" | "magic" | undefined,
+  incomingAttackType: IncomingAttackType,
+): boolean {
+  const expected = responseType ?? "melee";
 
-  if (counterPercent <= 0) return false;
+  if (expected === "magic") return incomingAttackType === "magic";
 
-  const hasCounterSkill = defender.battleData.activeSkills.some((skill) =>
+  return incomingAttackType === expected;
+}
+
+/** Чи є у учасника скіл з тригером «перший удар за раунд» для потрібного типу атаки */
+function hasOnFirstHitTakenPerRoundTrigger(
+  defender: BattleParticipant,
+  incomingAttackType: IncomingAttackType,
+): boolean {
+  const triggers = defender.battleData.activeSkills.flatMap(
+    (s) => s.skillTriggers ?? [],
+  );
+
+  return triggers.some((t) => {
+    if (t.type !== "simple") return false;
+
+    const simple = t as SimpleSkillTriggerConfig;
+
+    if (simple.trigger !== "onFirstHitTakenPerRound") return false;
+
+    return matchResponseType(simple.modifiers?.responseType, incomingAttackType);
+  });
+}
+
+/** Чи є у учасника скіл з ефектом counter_damage */
+function hasCounterDamageEffect(defender: BattleParticipant): boolean {
+  return defender.battleData.activeSkills.some((skill) =>
     skill.effects.some(
       (e) =>
         e.stat === "counter_damage" &&
@@ -42,8 +72,28 @@ export function canPerformReaction(defender: BattleParticipant): boolean {
         e.value > 0,
     ),
   );
+}
 
-  return hasCounterSkill;
+export function canPerformReaction(
+  defender: BattleParticipant,
+  incomingAttackType: IncomingAttackType = AttackType.MELEE,
+): boolean {
+  if (defender.actionFlags.hasUsedReaction) return false;
+
+  const hasTrigger = hasOnFirstHitTakenPerRoundTrigger(
+    defender,
+    incomingAttackType,
+  );
+
+  const hasCounterEffect = hasCounterDamageEffect(defender);
+
+  if (hasTrigger || (hasCounterEffect && incomingAttackType === AttackType.MELEE)) {
+    const counterPercent = getCounterDamagePercent(defender);
+
+    return counterPercent >= 0;
+  }
+
+  return false;
 }
 
 export function performReaction(
@@ -100,7 +150,8 @@ export function performReaction(
 
   const counterPercent = getCounterDamagePercent(defender);
 
-  const multiplier = counterPercent > 0 ? 1 + counterPercent / 100 : 1.15;
+  const multiplier =
+    counterPercent > 0 ? 1 + counterPercent / 100 : 1.15;
 
   const reactionDamage = Math.floor(baseDamage * multiplier);
 
@@ -118,5 +169,27 @@ export function performReaction(
     bonusPercent: counterPercent,
     message: `${defender.basicInfo.name} виконує контр-удар на ${attacker.basicInfo.name}!`,
     updatedDefender,
+  };
+}
+
+/**
+ * Розраховує суму урону відповіді (контратаки) без зміни стану учасника.
+ * Використовується в UI для підказки «Відповідь цілі».
+ */
+export function getReactionDamageAmount(
+  defender: BattleParticipant,
+  _attacker: BattleParticipant,
+): { damage: number; baseDamage: number; bonusPercent: number } {
+  const defenderCopy = {
+    ...defender,
+    actionFlags: { ...defender.actionFlags, hasUsedReaction: false },
+  };
+
+  const result = performReaction(defenderCopy, _attacker);
+
+  return {
+    damage: result.damage,
+    baseDamage: result.baseDamage,
+    bonusPercent: result.bonusPercent,
   };
 }

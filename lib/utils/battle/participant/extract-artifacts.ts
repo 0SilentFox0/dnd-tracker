@@ -6,6 +6,7 @@ import type { Prisma } from "@prisma/client";
 
 import type { CharacterFromPrisma } from "../types/participant";
 
+import { parseEffectScopeObject } from "@/lib/constants/artifact-effect-scope";
 import { prisma } from "@/lib/db";
 import type { EquippedArtifact } from "@/types/battle";
 
@@ -61,15 +62,27 @@ export async function extractEquippedArtifactsFromCharacter(
         isPercentage?: boolean;
       }>) || [];
 
+    const passiveRecord = artifact.passiveAbility
+      ? (artifact.passiveAbility as Record<string, unknown>)
+      : undefined;
+
+    const scope = passiveRecord
+      ? parseEffectScopeObject(passiveRecord.effectScope)
+      : {};
+
     equippedArtifacts.push({
       artifactId: artifact.id,
       name: artifact.name,
       slot: artifactIdToSlot[artifact.id] || artifact.slot,
+      setId: artifact.setId ?? undefined,
       bonuses,
       modifiers,
-      passiveAbility: artifact.passiveAbility
-        ? (artifact.passiveAbility as Record<string, unknown>)
-        : undefined,
+      passiveAbility: passiveRecord,
+      effectAudience: scope.effectAudience,
+      immuneSpellIds:
+        scope.immuneSpellIds && scope.immuneSpellIds.length > 0
+          ? scope.immuneSpellIds
+          : undefined,
     });
   }
 

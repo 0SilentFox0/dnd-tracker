@@ -55,8 +55,12 @@ export default async function EditArtifactPage({
           slot: artifact.slot,
           icon: artifact.icon,
           setId: artifact.setId,
-          bonuses: (artifact.bonuses as Record<string, number>) || {},
-          passiveAbility: artifact.passiveAbility as { name?: string; description?: string } | null,
+          bonuses: artifact.bonuses ?? {},
+          modifiers: artifact.modifiers ?? [],
+          passiveAbility: (artifact.passiveAbility as Record<
+            string,
+            unknown
+          > | null) ?? null,
         }}
         artifactSets={artifactSets}
       />

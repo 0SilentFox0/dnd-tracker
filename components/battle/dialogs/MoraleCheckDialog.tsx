@@ -84,7 +84,23 @@ export function MoraleCheckDialog({
             min={1}
             max={10}
             value={d10Roll}
-            onChange={(e) => setD10Roll(e.target.value)}
+            onChange={(e) => {
+              const v = e.target.value;
+
+              if (v === "") {
+                setD10Roll("");
+
+                return;
+              }
+
+              const n = parseInt(v, 10);
+
+              if (Number.isNaN(n)) return;
+
+              const clamped = Math.min(10, Math.max(1, n));
+
+              setD10Roll(String(clamped));
+            }}
             placeholder="Введіть результат (1-10)"
           />
         </div>

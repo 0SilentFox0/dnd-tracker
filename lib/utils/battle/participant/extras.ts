@@ -22,6 +22,8 @@ export interface ParticipantExtras {
   moralePerAllyDeath?: number;
   resistances?: ParticipantResistances;
   skillUsageCounts?: Record<string, number>;
+  /** ID заклинань кампанії, до яких учасник імунний (наприклад з effectScope сету/артефакта). */
+  immuneSpellIds?: string[];
 }
 
 /** Отримує розширені дані з battleData */
@@ -41,6 +43,18 @@ export function setParticipantExtras(
 ): void {
   (participant.battleData as unknown as Record<string, unknown>).extras =
     extras;
+}
+
+export function mergeParticipantImmuneSpellIds(
+  participant: BattleParticipant,
+  ids: string[] | undefined,
+): void {
+  if (!ids?.length) return;
+
+  const ext = getParticipantExtras(participant);
+
+  ext.immuneSpellIds = [...new Set([...(ext.immuneSpellIds ?? []), ...ids])];
+  setParticipantExtras(participant, ext);
 }
 
 /** Отримує резисти учасника з extras */

@@ -18,7 +18,9 @@ export interface ResolveAttackRollResult {
 /**
  * Обчислює ефективний d20 з урахуванням advantage/disadvantage.
  */
-export function getEffectiveD20(data: AttackRollData): number {
+export function getEffectiveD20(data: AttackRollData | undefined): number {
+  if (!data) return 0;
+
   if (data.advantageRoll != null) {
     return Math.max(data.attackRoll, data.advantageRoll);
   }

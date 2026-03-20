@@ -7,7 +7,7 @@ import { useCallback } from "react";
 import { assignSkillToSlot } from "./useSkillTreeAssignment";
 
 import {
-  canLearnRacialSkillLevel,
+  canUnlockRacialSkillSlot,
   getRacialSkillLevelId,
 } from "@/components/skill-tree/utils/hooks";
 import type {
@@ -32,6 +32,8 @@ export interface SkillTreePageHandlersParams {
   }>;
   setSelectedSkillFromLibrary: (id: string | null) => void;
   setIsTrainingCompleted: (value: boolean) => void;
+  isDMMode: boolean;
+  playerLevel: number;
 }
 
 export function useSkillTreePageHandlers({
@@ -44,6 +46,8 @@ export function useSkillTreePageHandlers({
   skillsFromLibrary,
   setSelectedSkillFromLibrary,
   setIsTrainingCompleted,
+  isDMMode,
+  playerLevel,
 }: SkillTreePageHandlersParams) {
   const handleSkillClick = useCallback(
     (skill: Skill) => {
@@ -85,10 +89,11 @@ export function useSkillTreePageHandlers({
 
   const handleRacialSkillClick = useCallback(
     (mainSkill: MainSkill, level: SkillLevel) => {
-      const canLearn = canLearnRacialSkillLevel(
+      const canLearn = canUnlockRacialSkillSlot(
         level,
         mainSkill.id,
         unlockedSkills,
+        { characterLevel: playerLevel, isDMMode },
       );
 
       if (!canLearn) return;
@@ -111,7 +116,7 @@ export function useSkillTreePageHandlers({
 
       setUnlockedSkills((prev) => [...prev, racialSkillLevelId]);
     },
-    [unlockedSkills, maxSkills, setUnlockedSkills],
+    [unlockedSkills, maxSkills, setUnlockedSkills, playerLevel, isDMMode],
   );
 
   const handleCompleteTraining = useCallback(() => {

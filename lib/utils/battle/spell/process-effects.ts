@@ -125,6 +125,56 @@ export function applySpellDurationEffects(
   });
 }
 
+const REMOVE_ALL_BUFFS = ["Remove all buffs"];
+
+const REMOVE_ALL_DEBUFFS = [
+  "Remove all debuffs",
+  "Remove all curses/diseases/hostile spells",
+];
+
+/**
+ * Знімає з цілей усі бафи або дебафи згідно з spell.effects.
+ * Логіка розділена на 2 незалежні ефекти:
+ * - "Remove all buffs" -> зняти лише buff
+ * - "Remove all debuffs"/"Remove all curses/diseases/hostile spells" -> зняти лише debuff
+ */
+export function applySpellRemoveBuffsDebuffs(
+  spell: BattleSpell,
+  updatedTargets: BattleParticipant[],
+): BattleParticipant[] {
+  const effects = Array.isArray(spell.effects) ? spell.effects : [];
+
+  const removeBuffs = effects.some((e) =>
+      REMOVE_ALL_BUFFS.some((tag) => typeof e === "string" && e.includes(tag)),
+    );
+
+  const removeDebuffs = effects.some((e) =>
+      REMOVE_ALL_DEBUFFS.some(
+        (tag) => typeof e === "string" && e.includes(tag),
+      ),
+    );
+
+  if (!removeBuffs && !removeDebuffs) return updatedTargets;
+
+  return updatedTargets.map((target) => {
+    let kept = target.battleData.activeEffects;
+
+    if (removeBuffs) kept = kept.filter((e) => e.type !== "buff");
+
+    if (removeDebuffs) kept = kept.filter((e) => e.type !== "debuff");
+
+    if (kept.length === target.battleData.activeEffects.length) return target;
+
+    return {
+      ...target,
+      battleData: {
+        ...target.battleData,
+        activeEffects: kept,
+      },
+    };
+  });
+}
+
 export function applySpellManaSteal(
   spell: BattleSpell,
   updatedTargets: BattleParticipant[],

@@ -8,7 +8,7 @@ import {
   canLearnRacialSkillLevel,
   getRacialSkillLevelId,
 } from "@/components/skill-tree/utils/hooks";
-import { assignSkillToSlot } from "@/lib/hooks/useSkillTreeAssignment";
+import { assignSkillToSlot } from "@/lib/hooks/skills/useSkillTreeAssignment";
 import type {
   MainSkill,
   Skill,

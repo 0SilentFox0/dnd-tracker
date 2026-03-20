@@ -86,6 +86,13 @@ export interface SkillTriggerModifiers {
   condition?: string; // додаткова умова ("onConsumeDead", "allyHP <= 0.15", тощо)
   /** Для onHit: скіл спрацьовує лише при атаці з цим id або назвою (напр. "Рублячий удар") */
   attackId?: string;
+  /**
+   * Для onFirstHitTakenPerRound: тип вхідної атаки, на яку є відповідь.
+   * - melee: лише ближня атака
+   * - ranged: лише дальня атака
+   * - magic: лише магія
+   */
+  responseType?: "melee" | "ranged" | "magic";
 }
 
 /**

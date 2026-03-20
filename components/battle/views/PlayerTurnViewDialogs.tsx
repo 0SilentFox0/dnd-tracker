@@ -40,7 +40,10 @@ export interface PlayerTurnViewDialogsProps {
     selectedTargets: BattleParticipant[];
     currentRollTarget: BattleParticipant | null;
     attackRollsData: Array<{ attackRoll: number; advantageRoll?: number; disadvantageRoll?: number }>;
-    pendingAttackData: { damageRolls: number[] } | null;
+    pendingAttackData: {
+      damageRolls: number[];
+      hitTargetIndices?: number[];
+    } | null;
     damageFromCrit: boolean;
   };
   clearAttackState: () => void;
@@ -164,18 +167,30 @@ export function PlayerTurnViewDialogs({
       )}
       {selection.selectedAttack && (
         <DamageRollDialog
-          key={`damage-${selection.selectedTargets.length}-${selection.attackRollsData?.length ?? 0}`}
+          key={`damage-${selection.selectedTargets.length}-${selection.attackRollsData?.length ?? 0}-${selection.pendingAttackData?.hitTargetIndices?.length ?? ""}`}
           open={dialogs.damageRoll.open}
           onOpenChange={dialogs.damageRoll.setOpen}
           attack={selection.selectedAttack}
           attacker={participant}
+          target={
+            selection.selectedTargets.length === 1
+              ? selection.selectedTarget ?? selection.selectedTargets[0] ?? null
+              : selection.pendingAttackData?.hitTargetIndices?.length === 1
+                ? selection.selectedTargets[
+                    selection.pendingAttackData.hitTargetIndices[0]
+                  ] ?? null
+                : null
+          }
           targetsCount={
-            selection.selectedTargets.length > 1
-              ? Math.max(
-                  selection.selectedTargets.length,
-                  selection.attackRollsData?.length ?? 0,
-                ) || 1
-              : 1
+            selection.selectedTargets.length > 1 &&
+            selection.pendingAttackData?.hitTargetIndices != null
+              ? selection.pendingAttackData.hitTargetIndices.length
+              : selection.selectedTargets.length > 1
+                ? Math.max(
+                    selection.selectedTargets.length,
+                    selection.attackRollsData?.length ?? 0,
+                  ) || 1
+                : 1
           }
           damageDiceFormula={
             participant.basicInfo.sourceType === "character"
@@ -200,11 +215,22 @@ export function PlayerTurnViewDialogs({
               if (!open) clearAttackState();
             }}
             attacker={participant}
-            target={selection.selectedTarget}
+            target={
+              selection.pendingAttackData.hitTargetIndices?.length
+                ? selection.selectedTargets[
+                    selection.pendingAttackData.hitTargetIndices[0]
+                  ] ?? selection.selectedTarget
+                : selection.selectedTarget
+            }
             targets={
-              selection.selectedTargets.length > 1
-                ? selection.selectedTargets
-                : undefined
+              selection.pendingAttackData.hitTargetIndices != null &&
+              selection.pendingAttackData.hitTargetIndices.length > 0
+                ? selection.pendingAttackData.hitTargetIndices
+                    .map((i) => selection.selectedTargets[i])
+                    .filter((t): t is BattleParticipant => t != null)
+                : selection.selectedTargets.length > 1
+                  ? selection.selectedTargets
+                  : undefined
             }
             attack={selection.selectedAttack}
             damageRolls={selection.pendingAttackData.damageRolls}

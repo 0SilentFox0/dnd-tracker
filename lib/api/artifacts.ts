@@ -10,6 +10,7 @@ export interface ArtifactListItem {
   name: string;
   slot: string;
   icon?: string | null;
+  setId?: string | null;
   [key: string]: unknown;
 }
 
@@ -21,8 +22,13 @@ export type CreateArtifactData = {
   rarity?: string;
   slot: string;
   bonuses?: Record<string, number | undefined>;
-  modifiers?: Array<{ type: string; value: number; isPercentage: boolean; element?: string }>;
-  passiveAbility?: { name: string; description: string; effect?: Record<string, unknown> };
+  modifiers?: Array<{
+    type: string;
+    value: number | string;
+    isPercentage?: boolean;
+    element?: string;
+  }>;
+  passiveAbility?: Record<string, unknown>;
   setId?: string;
   icon?: string | null;
 };
@@ -33,8 +39,13 @@ export type UpdateArtifactData = Partial<{
   rarity: string | null;
   slot: string;
   bonuses: Record<string, number | undefined>;
-  modifiers: Array<{ type: string; value: number; isPercentage: boolean; element?: string }>;
-  passiveAbility: { name: string; description: string; effect?: Record<string, unknown> } | null;
+  modifiers: Array<{
+    type: string;
+    value: number | string;
+    isPercentage?: boolean;
+    element?: string;
+  }>;
+  passiveAbility: Record<string, unknown> | null;
   setId: string | null;
   icon: string | null;
 }>;

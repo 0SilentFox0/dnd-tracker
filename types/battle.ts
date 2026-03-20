@@ -2,8 +2,14 @@
  * Типи для боїв
  */
 
+import {
+  ARTIFACT_EFFECT_ALL_ALLIES,
+  ARTIFACT_EFFECT_ALL_ENEMIES,
+  type ArtifactEffectAudience,
+} from "@/lib/constants/artifact-effect-scope";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
+import type { ParsedArtifactSetBonus } from "@/lib/types/artifact-set-bonus";
 import { SkillLevel } from "@/lib/types/skill-tree";
 
 export type { CriticalEffect };
@@ -136,13 +142,28 @@ export interface EquippedArtifact {
   artifactId: string;
   name: string;
   slot: string; // weapon, shield, cloak, ring, helmet, amulet, item
+  /** FK на ArtifactSet — для перевірки повного сету в бою */
+  setId?: string | null;
   bonuses: Record<string, number>; // бонуси до статів
   modifiers: Array<{
     type: string;
-    value: number;
+    value: number | string;
     isPercentage?: boolean;
   }>;
   passiveAbility?: Record<string, unknown>; // пасивна здібність артефакту
+  /** З `passiveAbility.effectScope` — поза `self` бонус чергується на роздачу після збору всіх учасників. */
+  effectAudience?: ArtifactEffectAudience;
+  immuneSpellIds?: string[];
+}
+
+/** Черга бонусу сету/артефакта з аудиторією all_allies / all_enemies. */
+export interface PendingScopedArtifactBonus {
+  sourceSide: ParticipantSide;
+  audience:
+    | typeof ARTIFACT_EFFECT_ALL_ALLIES
+    | typeof ARTIFACT_EFFECT_ALL_ENEMIES;
+  bundle: ParsedArtifactSetBonus;
+  displayName: string;
 }
 
 /**
@@ -252,6 +273,8 @@ export interface BattleParticipantBattleData {
   racialAbilities: RacialAbility[];
   activeSkills: ActiveSkill[];
   equippedArtifacts: EquippedArtifact[];
+  /** Бонуси з «аурою» (команда / вороги), збираються при створенні учасника й роздаються після повного списку. */
+  pendingScopedArtifactBonuses?: PendingScopedArtifactBonus[];
   /** Лічильник використань скілів за бій (skillId → count). Для oncePerBattle/twicePerBattle */
   skillUsageCounts?: Record<string, number>;
   /** Пул додаткових дій (ефект «actions»): накопичується при спрацюванні, споживається при використанні основної дії, діє до кінця бою */

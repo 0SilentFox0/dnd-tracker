@@ -109,12 +109,15 @@ export default function BattlePage({
   const handleSpellApplyFromModal = () => {
     if (!pendingSpellData) return;
 
-    mutations.spell.mutate(pendingSpellData, {
-      onSuccess: (updatedBattle: BattleScene | undefined) => {
-        setSpellResultModalOpen(false);
-        setSpellPreviewAction(null);
-        setPendingSpellData(null);
+    setSpellResultModalOpen(false);
+    setSpellPreviewAction(null);
 
+    const dataToApply = pendingSpellData;
+
+    setPendingSpellData(null);
+
+    mutations.spell.mutate(dataToApply, {
+      onSuccess: (updatedBattle: BattleScene | undefined) => {
         if (updatedBattle) handlers.triggerGlobalDamageFromBattle(updatedBattle);
       },
     });

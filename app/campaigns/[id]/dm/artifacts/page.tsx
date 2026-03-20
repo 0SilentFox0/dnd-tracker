@@ -117,9 +117,9 @@ export default async function DMArtifactsPage({
             campaignId={id}
             artifactsCount={artifacts.length}
           />
-          <Link href={`/campaigns/${id}/dm/artifacts/sets/new`}>
+          <Link href={`/campaigns/${id}/dm/artifact-sets`}>
             <Button variant="outline" className="whitespace-nowrap">
-              + Сет
+              Сети артефактів
             </Button>
           </Link>
           <Link href={`/campaigns/${id}/dm/artifacts/new`}>
@@ -182,7 +182,7 @@ export default async function DMArtifactsPage({
                         />
                       ))}
                     </div>
-                    <Link href={`/campaigns/${id}/dm/artifacts/sets/${set.id}`}>
+                    <Link href={`/campaigns/${id}/dm/artifact-sets/${set.id}`}>
                       <Button variant="outline" size="sm" className="w-full">
                         Редагувати сет
                       </Button>

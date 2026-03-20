@@ -1,44 +1,15 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
-import { z } from "zod";
+import { randomUUID } from "crypto";
+import { ZodError } from "zod";
 
-import { ARTIFACT_RARITY_VALUES, ARTIFACT_SLOT_VALUES } from "@/lib/constants/artifacts";
+import { patchArtifactSchema } from "@/app/api/campaigns/[id]/artifacts/schemas";
 import { prisma } from "@/lib/db";
+import {
+  mirrorArtifactIconToSupabase,
+  shouldMirrorArtifactIconUrl,
+} from "@/lib/supabase/artifact-icon-storage";
 import { requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
-
-const updateArtifactSchema = z.object({
-  name: z.string().min(1).max(100).optional(),
-  description: z.string().nullable().optional(),
-  rarity: z
-    .enum(ARTIFACT_RARITY_VALUES)
-    .nullable()
-    .optional(),
-  slot: z.enum(ARTIFACT_SLOT_VALUES).optional(),
-  bonuses: z.record(z.string(), z.number()).optional(),
-  modifiers: z
-    .array(
-      z.object({
-        type: z.string(),
-        value: z.number(),
-        isPercentage: z.boolean(),
-        element: z.string().optional(),
-      })
-    )
-    .optional(),
-  passiveAbility: z
-    .object({
-      name: z.string(),
-      description: z.string(),
-      effect: z.record(z.string(), z.unknown()).optional(),
-    })
-    .nullable()
-    .optional(),
-  setId: z.string().nullable().optional(),
-  icon: z.preprocess(
-    (val) => (val === "" ? null : val),
-    z.string().url().nullable().optional()
-  ),
-});
 
 export async function GET(
   _request: Request,
@@ -100,7 +71,25 @@ export async function PATCH(
 
     const body = await request.json();
 
-    const data = updateArtifactSchema.parse(body);
+    const data = patchArtifactSchema.parse(body);
+
+    let resolvedIcon = data.icon;
+
+    if (
+      data.icon !== undefined &&
+      shouldMirrorArtifactIconUrl(data.icon)
+    ) {
+      const mirrored = await mirrorArtifactIconToSupabase(data.icon, {
+        campaignId: id,
+        objectBaseName: `${artifactId}-${randomUUID()}`,
+      });
+
+      if (!mirrored.ok) {
+        return NextResponse.json({ error: mirrored.message }, { status: 422 });
+      }
+
+      resolvedIcon = mirrored.publicUrl;
+    }
 
     const updatedArtifact = await prisma.artifact.update({
       where: { id: artifactId },
@@ -113,12 +102,13 @@ export async function PATCH(
         modifiers: data.modifiers !== undefined ? (data.modifiers as Prisma.InputJsonValue) : undefined,
         passiveAbility:
           data.passiveAbility !== undefined
-            ? data.passiveAbility
-              ? (data.passiveAbility as Prisma.InputJsonValue)
-              : Prisma.JsonNull
+            ? data.passiveAbility === null
+              ? Prisma.JsonNull
+              : (data.passiveAbility as Prisma.InputJsonValue)
             : undefined,
         setId: data.setId !== undefined ? (data.setId || null) : undefined,
-        icon: data.icon !== undefined ? data.icon : undefined,
+        icon:
+          data.icon !== undefined ? resolvedIcon ?? null : undefined,
       },
       include: { artifactSet: true },
     });
@@ -127,7 +117,7 @@ export async function PATCH(
   } catch (error) {
     console.error("Error updating artifact:", error);
 
-    if (error instanceof z.ZodError) {
+    if (error instanceof ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
 

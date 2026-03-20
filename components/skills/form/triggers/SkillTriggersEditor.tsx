@@ -27,6 +27,12 @@ import type {
   SkillTriggers,
 } from "@/types/skill-triggers";
 
+const RESPONSE_TYPE_OPTIONS = [
+  { value: "melee", label: "Мілі" },
+  { value: "ranged", label: "Рендж" },
+  { value: "magic", label: "Магія" },
+] as const;
+
 interface SkillTriggersEditorProps {
   triggers: SkillTriggers;
   onChange: (triggers: SkillTriggers) => void;
@@ -43,6 +49,10 @@ function SkillTriggersEditorComponent({
   const [newSimpleTrigger, setNewSimpleTrigger] = useState<
     SimpleSkillTrigger | ""
   >("");
+
+  const [newResponseType, setNewResponseType] = useState<
+    "melee" | "ranged" | "magic"
+  >("melee");
 
   const [newComplexTrigger, setNewComplexTrigger] = useState<
     Partial<ComplexSkillTrigger>
@@ -91,12 +101,20 @@ function SkillTriggersEditorComponent({
     const newTrigger: SimpleSkillTriggerConfig = {
       type: TriggerType.SIMPLE,
       trigger: newSimpleTrigger,
+      ...(newSimpleTrigger === "onFirstHitTakenPerRound"
+        ? {
+            modifiers: {
+              responseType: newResponseType,
+            },
+          }
+        : {}),
     };
 
     onChange([...triggers, newTrigger]);
     setNewSimpleTrigger("");
+    setNewResponseType("melee");
     setNewTriggerType(null);
-  }, [newSimpleTrigger, triggers, onChange]);
+  }, [newSimpleTrigger, newResponseType, triggers, onChange]);
 
   const addComplexTrigger = useCallback(() => {
     if (
@@ -144,6 +162,7 @@ function SkillTriggersEditorComponent({
   const handleCancelSimple = useCallback(() => {
     setNewTriggerType(null);
     setNewSimpleTrigger("");
+    setNewResponseType("melee");
   }, []);
 
   const handleCancelComplex = useCallback(() => {
@@ -170,8 +189,25 @@ function SkillTriggersEditorComponent({
         trigger,
         label:
           trigger.type === TriggerType.SIMPLE
-            ? SIMPLE_TRIGGER_OPTIONS.find((t) => t.value === trigger.trigger)
-                ?.label || trigger.trigger
+            ? (() => {
+                const base =
+                  SIMPLE_TRIGGER_OPTIONS.find((t) => t.value === trigger.trigger)
+                    ?.label || trigger.trigger;
+
+                if (
+                  trigger.trigger === "onFirstHitTakenPerRound" &&
+                  trigger.modifiers?.responseType
+                ) {
+                  const rt =
+                    RESPONSE_TYPE_OPTIONS.find(
+                      (o) => o.value === trigger.modifiers?.responseType,
+                    )?.label ?? trigger.modifiers.responseType;
+
+                  return `${base} (${rt})`;
+                }
+
+                return base;
+              })()
             : formatComplexTrigger(trigger),
       })),
     [triggers, formatComplexTrigger],
@@ -247,6 +283,16 @@ function SkillTriggersEditorComponent({
               placeholder="Оберіть тригер"
               options={simpleTriggerOptions}
             />
+            {newSimpleTrigger === "onFirstHitTakenPerRound" && (
+              <SelectField
+                value={newResponseType}
+                onValueChange={(value) =>
+                  setNewResponseType(value as "melee" | "ranged" | "magic")
+                }
+                placeholder="Тип відповіді"
+                options={[...RESPONSE_TYPE_OPTIONS]}
+              />
+            )}
             <Button
               type="button"
               size="sm"

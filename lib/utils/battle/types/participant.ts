@@ -58,4 +58,11 @@ export interface CampaignSpellContext {
   campaign: { maxLevel: number };
   skillsById?: Record<string, Prisma.SkillGetPayload<object>>;
   artifactsById?: Record<string, Prisma.ArtifactGetPayload<object>>;
+  /** Сети артефактів (для бонусу повного комплекту без додаткових запитів). */
+  artifactSetsById?: Record<
+    string,
+    { id: string; name: string; setBonus: unknown }
+  >;
+  /** setId → усі id артефактів кампанії в цьому сеті */
+  artifactSetMemberIds?: Record<string, string[]>;
 }

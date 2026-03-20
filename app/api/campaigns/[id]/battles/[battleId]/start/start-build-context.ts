@@ -5,6 +5,7 @@
 import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
+import { attachArtifactSetsToSpellContext } from "@/lib/utils/battle/artifact-sets";
 import { parseMainSkillLevelId } from "@/lib/utils/battle/participant";
 import type { CampaignSpellContext } from "@/lib/utils/battle/types/participant";
 
@@ -197,6 +198,8 @@ export async function buildCampaignContextForStart(
       artifactsById:
         Object.keys(artifactsById).length > 0 ? artifactsById : undefined,
     };
+
+    await attachArtifactSetsToSpellContext(campaignId, campaignContext);
   }
 
   return { campaignContext, racesByName, uniqueRaceNames };

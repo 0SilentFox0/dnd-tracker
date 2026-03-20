@@ -52,6 +52,7 @@ export function BattlePageDialogs({
         mutations={{
           attack: mutations.attack,
           nextTurn: mutations.nextTurn,
+          spell: mutations.spell,
         }}
         handlers={{ clearGlobalDamageFlash: handlers.clearGlobalDamageFlash }}
         spellResult={spellResult}

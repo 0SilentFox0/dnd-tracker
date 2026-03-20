@@ -11,6 +11,7 @@ export const attackSchema = z
     advantageRoll: z.number().min(1).max(20).optional(),
     disadvantageRoll: z.number().min(1).max(20).optional(),
     damageRolls: z.array(z.number()).default([]),
+    reactionDamage: z.number().min(0).optional(),
   })
   .refine(
     (data) => data.d20Roll !== undefined || data.attackRoll !== undefined,

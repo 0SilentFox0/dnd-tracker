@@ -12,6 +12,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   units: "Юніти",
   spells: "Заклинання",
   artifacts: "Артефакти",
+  "artifact-sets": "Сети артефактів",
   battles: "Бої",
   character: "Персонаж",
   inventory: "Інвентар",

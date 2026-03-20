@@ -7,6 +7,7 @@ import { battleStateSnapshot, debugBattleSync } from "./start-helpers";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { requireDM } from "@/lib/utils/api/api-auth";
+import { distributePendingScopedArtifactBonuses } from "@/lib/utils/battle/artifact-sets";
 import {
   applyStartOfBattleEffects,
   calculateInitiative,
@@ -158,6 +159,8 @@ export async function POST(
             ),
       ),
     );
+
+    distributePendingScopedArtifactBonuses(initiativeOrder);
 
     // Застосовуємо початкові ефекти для всіх учасників (start_of_battle тригери)
     const updatedInitiativeOrder = initiativeOrder.map((participant) => {

@@ -20,6 +20,7 @@
     "redistribute-character-spell-slots": "tsx scripts/redistribute-character-spell-slots.ts",
     "migrate-unit-icons-to-supabase": "tsx scripts/migrate-unit-icons-to-supabase.ts",
     "upload-assets-to-supabase": "tsx scripts/upload-assets-to-supabase.ts",
+    "backfill-first-hit-response-type": "tsx scripts/backfill-first-hit-response-type.ts",
     "import-units": "tsx scripts/import-units.ts",
     "seed-artifacts": "tsx scripts/seed-artifacts.ts",
     "import-skills-library": "tsx scripts/import-skills-library.ts",

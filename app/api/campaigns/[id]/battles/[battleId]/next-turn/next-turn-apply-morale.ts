@@ -3,9 +3,10 @@
  * extra turn слот, тригери onMoraleSuccess/allyMoraleCheck, запис у battleLog.
  */
 
+import type { PendingMoraleCheckPayload } from "../morale-check/route";
+
 import { executeSkillsByTrigger } from "@/lib/utils/skills/execution";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
-import type { PendingMoraleCheckPayload } from "../morale-check/route";
 
 export interface ApplyPendingMoraleResult {
   updatedInitiativeOrder: BattleParticipant[];
@@ -66,10 +67,12 @@ export function applyPendingMoraleCheck(
         hasUsedReaction: false,
       },
     };
+
     updatedInitiativeOrder.push(extraParticipant);
   }
 
   const triggerMessages: string[] = [];
+
   const moraleSuccess =
     moraleResult.hasExtraTurn || !moraleResult.shouldSkipTurn;
 
@@ -77,6 +80,7 @@ export function applyPendingMoraleCheck(
     const participantIdx = updatedInitiativeOrder.findIndex(
       (p) => p.basicInfo.id === participant.basicInfo.id,
     );
+
     if (participantIdx >= 0) {
       const result = executeSkillsByTrigger(
         updatedInitiativeOrder[participantIdx],
@@ -84,6 +88,7 @@ export function applyPendingMoraleCheck(
         updatedInitiativeOrder,
         { currentRound },
       );
+
       triggerMessages.push(...result.messages);
       updatedInitiativeOrder = updatedInitiativeOrder.map((p, i) =>
         i === participantIdx ? result.participant : p,
@@ -96,10 +101,12 @@ export function applyPendingMoraleCheck(
       p.basicInfo.side === participant.basicInfo.side &&
       p.basicInfo.id !== participant.basicInfo.id,
   );
+
   for (const ally of allies) {
     const allyIdx = updatedInitiativeOrder.findIndex(
       (p) => p.basicInfo.id === ally.basicInfo.id,
     );
+
     if (allyIdx >= 0) {
       const result = executeSkillsByTrigger(
         updatedInitiativeOrder[allyIdx],
@@ -107,6 +114,7 @@ export function applyPendingMoraleCheck(
         updatedInitiativeOrder,
         { currentRound },
       );
+
       triggerMessages.push(...result.messages);
       updatedInitiativeOrder = updatedInitiativeOrder.map((p, i) =>
         i === allyIdx ? result.participant : p,
@@ -117,6 +125,7 @@ export function applyPendingMoraleCheck(
   const participantForLog = updatedInitiativeOrder.find(
     (p) => p.basicInfo.id === participant.basicInfo.id,
   );
+
   const moraleLogEntry: BattleAction = {
     id: `morale-${participant.basicInfo.id}-${Date.now()}`,
     battleId,

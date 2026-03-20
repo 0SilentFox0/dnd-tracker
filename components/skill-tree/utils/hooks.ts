@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 
+import { RACIAL_SKILL_LEVEL_REQUIREMENTS } from "./constants";
+
 import type { Race } from "@/types/races";
 import type { MainSkill,Skill, SkillTree } from "@/types/skill-tree";
 import {
@@ -272,6 +274,26 @@ export function canLearnRacialSkillLevel(
   }
 
   return false;
+}
+
+/**
+ * Чи доступний слот расового навику: послідовність basic → advanced → expert
+ * та (у режимі гравця) мінімальний рівень персонажа з {@link RACIAL_SKILL_LEVEL_REQUIREMENTS}.
+ */
+export function canUnlockRacialSkillSlot(
+  level: SkillLevel,
+  racialSkillId: string,
+  unlockedSkills: string[],
+  options: { characterLevel: number; isDMMode: boolean },
+): boolean {
+  if (
+    !options.isDMMode &&
+    options.characterLevel < RACIAL_SKILL_LEVEL_REQUIREMENTS[level]
+  ) {
+    return false;
+  }
+
+  return canLearnRacialSkillLevel(level, racialSkillId, unlockedSkills);
 }
 
 /**

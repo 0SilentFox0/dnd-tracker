@@ -1,5 +1,10 @@
 import { OptimizedImage } from "@/components/common/OptimizedImage";
-import { LEVEL_NAMES,SKILL_COLORS, Z_INDEX } from "@/components/skill-tree/utils/constants";
+import {
+  LEVEL_NAMES,
+  RACIAL_SKILL_LEVEL_REQUIREMENTS,
+  SKILL_COLORS,
+  Z_INDEX,
+} from "@/components/skill-tree/utils/constants";
 import {
   canLearnRacialSkillLevel,
   getLevelStatus,
@@ -32,13 +37,6 @@ interface RacialSkillProps {
     isRacial?: boolean;
   } | null;
 }
-
-// Вимоги до рівня гравця для кожного рівня расового навику
-const RACIAL_SKILL_LEVEL_REQUIREMENTS: Record<SkillLevel, number> = {
-  [SkillLevel.BASIC]: 1,
-  [SkillLevel.ADVANCED]: 7,
-  [SkillLevel.EXPERT]: 13,
-};
 
 export function RacialSkill({
   racialSkill,
@@ -86,16 +84,16 @@ export function RacialSkill({
 
           const isLearned = unlockedSkills.includes(racialSkillLevelId);
 
-          // Перевіряємо послідовність прокачки: basic -> advanced -> expert
-          const canLearnBySequence = canLearnRacialSkillLevel(
+          const sequenceOk = canLearnRacialSkillLevel(
             level,
             racialSkill.id,
-            unlockedSkills
+            unlockedSkills,
           );
 
-          // Можна прокачати якщо рівень гравця достатній І послідовність дотримана
-          // В DM mode всі скіли доступні
-          const canLearn = isDMMode || (playerLevel >= requiredLevel && canLearnBySequence);
+          const levelOk =
+            isDMMode || playerLevel >= RACIAL_SKILL_LEVEL_REQUIREMENTS[level];
+
+          const canLearn = sequenceOk && levelOk;
 
           // Перевіряємо чи скіл присвоєний (має icon для цього рівня)
           const hasAssignedSkill = !!(racialSkill.levelIcons?.[level] || racialSkill.icon);
@@ -161,12 +159,16 @@ export function RacialSkill({
                 isLearned
                   ? " (Прокачано)"
                   : canLearn
-                  ? ` (Доступно з ${requiredLevel} рівня)`
-                  : !canLearnBySequence
-                  ? level === SkillLevel.ADVANCED
-                    ? " (Спочатку прокачайте Основи)"
-                    : " (Спочатку прокачайте Просунутий)"
-                  : ` (Потрібен ${requiredLevel} рівень, зараз ${playerLevel})`
+                    ? ` (Доступно з ${requiredLevel} рівня)`
+                    : !sequenceOk
+                      ? level === SkillLevel.ADVANCED
+                        ? " (Спочатку прокачайте Основи)"
+                        : level === SkillLevel.EXPERT
+                          ? " (Спочатку прокачайте Просунутий)"
+                          : ""
+                      : !levelOk
+                        ? ` (Потрібен ${requiredLevel} рівень, зараз ${playerLevel})`
+                        : ""
               }`}
             >
               {(racialSkill.levelIcons?.[level] || racialSkill.icon) ? (

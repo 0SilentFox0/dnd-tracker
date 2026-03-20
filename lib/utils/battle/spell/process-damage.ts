@@ -5,6 +5,7 @@
 import { applyResistance } from "../resistance";
 import type { BattleSpell } from "../types/spell-process";
 import { calculateSpellDamageWithEnhancements } from "./calculations";
+import { participantImmuneToSpell } from "./spell-immunity";
 
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
 import type { BattleParticipant } from "@/types/battle";
@@ -78,6 +79,13 @@ export function computeSpellDamageAndApply(
           damageToApply = 0;
         }
       }
+    }
+
+    if (participantImmuneToSpell(target, spell.id)) {
+      damageToApply = 0;
+      allResistanceBreakdown.push(
+        `${target.basicInfo.name}: імунітет до цього заклинання`,
+      );
     }
 
     const damageType = spell.damageElement || "magic";
@@ -166,6 +174,13 @@ export function computeSpellHealAndApply(
     const targetIndex = resultTargets.findIndex((t) => t.basicInfo.id === target.basicInfo.id);
 
     if (targetIndex === -1) continue;
+
+    if (participantImmuneToSpell(target, spell.id)) {
+      spellCalculation.breakdown.push(
+        `${target.basicInfo.name}: імунітет — ефект лікування заблоковано`,
+      );
+      continue;
+    }
 
     const healing = spellCalculation.totalHealing || 0;
 

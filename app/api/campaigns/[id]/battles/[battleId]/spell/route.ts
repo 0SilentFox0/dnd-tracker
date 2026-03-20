@@ -202,6 +202,7 @@ export async function POST(
       savingThrows: data.savingThrows,
       additionalRollResult: data.additionalRollResult,
       hitRoll: data.hitRoll,
+      isDMCast: isDM,
     });
 
     logBattleTiming("spell: processSpell (перерахунок шкоди)", tSpell, {

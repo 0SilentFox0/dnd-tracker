@@ -3,17 +3,22 @@
  */
 
 import type { CampaignSpellContext, CharacterFromPrisma } from "../types/participant";
+import { applyEquippedArtifactFlatBonuses } from "./apply-artifact-flat-bonuses";
 import { extractEquippedArtifactsFromCharacter } from "./extract-artifacts";
 import { extractAttacksFromCharacter } from "./extract-attacks";
 import { extractRacialAbilities } from "./extract-racial";
 import { extractActiveSkillsFromCharacter } from "./extract-skills";
 import { resolveLearnedSpellsFromCharacter } from "./from-character-learned-spells";
 import { resolveSpellSlotsFromCharacter } from "./from-character-spell-slots";
-import { applyPassiveSkillEffects } from "./passive";
+import { mergeEquippedArtifactsImmuneSpellIds } from "./merge-equipped-immune";
+import { applyArtifactPassiveEffects, applyPassiveSkillEffects } from "./passive";
 
-import { ArtifactModifierType } from "@/lib/constants/artifacts";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { getHeroMaxHp } from "@/lib/constants/hero-scaling";
+import {
+  applyCompletedArtifactSets,
+  enqueueScopedBonusFromEquippedIfNeeded,
+} from "@/lib/utils/battle/artifact-sets";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -146,6 +151,18 @@ export async function createBattleParticipantFromCharacter(
     },
   };
 
+  await applyCompletedArtifactSets(
+    participant,
+    character.campaignId,
+    context,
+  );
+
+  for (const eq of participant.battleData.equippedArtifacts) {
+    enqueueScopedBonusFromEquippedIfNeeded(participant, eq);
+  }
+
+  applyEquippedArtifactFlatBonuses(participant);
+
   let minTargetsBonus = 0;
 
   let maxTargetsBonus = 0;
@@ -162,32 +179,14 @@ export async function createBattleParticipantFromCharacter(
     }
   }
 
-  for (const artifact of participant.battleData.equippedArtifacts) {
-    if (artifact.bonuses.minTargets) minTargetsBonus += artifact.bonuses.minTargets;
-
-    if (artifact.bonuses.maxTargets) maxTargetsBonus += artifact.bonuses.maxTargets;
-
-    for (const modifier of artifact.modifiers) {
-      if (
-        modifier.type === "min_targets" ||
-        modifier.type === ArtifactModifierType.MIN_TARGETS
-      ) {
-        minTargetsBonus += modifier.value;
-      }
-
-      if (
-        modifier.type === "max_targets" ||
-        modifier.type === ArtifactModifierType.MAX_TARGETS
-      ) {
-        maxTargetsBonus += modifier.value;
-      }
-    }
-  }
-
   participant.combatStats.minTargets += minTargetsBonus;
   participant.combatStats.maxTargets += maxTargetsBonus;
 
   applyPassiveSkillEffects(participant);
+
+  applyArtifactPassiveEffects(participant);
+
+  mergeEquippedArtifactsImmuneSpellIds(participant);
 
   return participant;
 }

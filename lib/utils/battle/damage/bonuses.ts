@@ -23,10 +23,17 @@ export function calculateArtifactDamageBonus(
         modifier.type.toLowerCase().includes("damage") &&
         matchesAttackType(modifier.type, attackType)
       ) {
+        const raw = modifier.value;
+
+        const num =
+          typeof raw === "number" ? raw : Number.parseFloat(String(raw));
+
+        const v = Number.isFinite(num) ? num : 0;
+
         if (modifier.isPercentage) {
-          percent += modifier.value;
+          percent += v;
         } else {
-          flat += modifier.value;
+          flat += v;
         }
       }
     }

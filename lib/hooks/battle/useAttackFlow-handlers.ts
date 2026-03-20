@@ -29,9 +29,13 @@ export interface UseAttackFlowHandlersParams {
     damageRolls: number[];
     attackRollData: AttackRollData;
     attackRollsData?: AttackRollData[];
+    reactionDamage?: number;
+    hitTargetIndices?: number[];
   } | null;
   rollResult: RollResultType | null;
-  setAttackRollData: React.Dispatch<React.SetStateAction<AttackRollData | null>>;
+  setAttackRollData: React.Dispatch<
+    React.SetStateAction<AttackRollData | null>
+  >;
   setAttackRollsData: React.Dispatch<React.SetStateAction<AttackRollData[]>>;
   setRollResult: React.Dispatch<React.SetStateAction<RollResultType | null>>;
   setPendingAttackData: React.Dispatch<
@@ -39,6 +43,8 @@ export interface UseAttackFlowHandlersParams {
       damageRolls: number[];
       attackRollData: AttackRollData;
       attackRollsData?: AttackRollData[];
+      reactionDamage?: number;
+      hitTargetIndices?: number[];
     } | null>
   >;
   setDamageFromCrit: (v: boolean) => void;
@@ -139,20 +145,25 @@ export function createAttackFlowHandlers({
       const totalBonus =
         attackBonus + statModifier + participant.abilities.proficiencyBonus;
 
-      const anyHit = attackRollsData.some((rollData, i) =>
-        resolveAttackRoll(
-          rollData,
-          selectedTargets[i].combatStats.armorClass,
-          totalBonus,
-        ).hit,
-      );
+      const hitTargetIndices = attackRollsData
+        .map((rollData, i) =>
+          resolveAttackRoll(
+            rollData,
+            selectedTargets[i].combatStats.armorClass,
+            totalBonus,
+          ).hit
+            ? i
+            : -1,
+        )
+        .filter((i) => i >= 0);
 
-      if (anyHit) {
+      if (hitTargetIndices.length > 0) {
         setDamageFromCrit(false);
         setPendingAttackData({
           damageRolls: [],
           attackRollData: attackRollsData[0],
           attackRollsData,
+          hitTargetIndices,
         });
         setDamageRollDialogOpen(true);
       } else {
@@ -196,20 +207,31 @@ export function createAttackFlowHandlers({
     }
   };
 
-  const handleDamageRollConfirm = (damageRolls: number[]) => {
+  const handleDamageRollConfirm = (
+    damageRolls: number[],
+    reactionDamage?: number,
+  ) => {
     if (!selectedAttack || selectedTargets.length === 0) return;
 
     if (selectedTargets.length === 1 && !attackRollData) return;
 
+    const payload = {
+      damageRolls,
+      ...(reactionDamage != null && { reactionDamage }),
+      ...(pendingAttackData?.hitTargetIndices != null && {
+        hitTargetIndices: pendingAttackData.hitTargetIndices,
+      }),
+    };
+
     if (selectedTargets.length > 1 && attackRollsData.length > 0) {
       setPendingAttackData({
-        damageRolls,
+        ...payload,
         attackRollData: attackRollsData[0],
         attackRollsData,
       });
     } else if (attackRollData) {
       setPendingAttackData({
-        damageRolls,
+        ...payload,
         attackRollData,
       });
     }
@@ -224,13 +246,26 @@ export function createAttackFlowHandlers({
 
     const multi = pendingAttackData.attackRollsData != null;
 
+    const hitIndices = pendingAttackData.hitTargetIndices;
+
     if (!multi && !attackRollData) return;
 
     onAttackSuccess?.();
 
+    const useHitTargetsOnly =
+      multi && hitIndices != null && hitIndices.length > 0;
+
+    const targetIds = useHitTargetsOnly
+      ? hitIndices.map((i) => selectedTargets[i].basicInfo.id)
+      : selectedTargets.map((t) => t.basicInfo.id);
+
     const effectiveRolls =
       multi && pendingAttackData.attackRollsData
-        ? pendingAttackData.attackRollsData.map((d) => getEffectiveD20(d))
+        ? useHitTargetsOnly
+          ? hitIndices.map((i) =>
+              getEffectiveD20(pendingAttackData?.attackRollsData?.[i]),
+            )
+          : pendingAttackData.attackRollsData.map((d) => getEffectiveD20(d))
         : undefined;
 
     const singleRoll =
@@ -240,7 +275,7 @@ export function createAttackFlowHandlers({
 
     onAttack({
       attackerId: participant.basicInfo.id,
-      targetIds: selectedTargets.map((t) => t.basicInfo.id),
+      targetIds,
       attackId: selectedAttack.id || selectedAttack.name,
       ...(multi && effectiveRolls
         ? { attackRolls: effectiveRolls }
@@ -252,6 +287,9 @@ export function createAttackFlowHandlers({
             }
           : {}),
       damageRolls: pendingAttackData.damageRolls,
+      ...(pendingAttackData.reactionDamage != null && {
+        reactionDamage: pendingAttackData.reactionDamage,
+      }),
     });
     clearAttackState();
   };

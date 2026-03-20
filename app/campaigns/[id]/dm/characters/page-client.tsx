@@ -88,9 +88,9 @@ export function DMCharactersClient({ campaignId }: DMCharactersClientProps) {
     <div className="container mx-auto p-4 space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-col">
-          <h1 className="text-3xl font-bold">Персонажі Гравців</h1>
+          <h1 className="text-3xl font-bold">Персонажі кампанії</h1>
           <p className="text-muted-foreground mt-1">
-            Управління персонажами гравців кампанії
+            Гравці та NPC герої
           </p>
         </div>
         <div className="flex flex-wrap gap-2 shrink-0">
@@ -184,10 +184,20 @@ export function DMCharactersClient({ campaignId }: DMCharactersClientProps) {
                     {character.name}
                   </p>
                   <p className="text-xs text-muted-foreground truncate">
-                    {character.user?.displayName || "Не призначено"}
+                    {character.type === "npc_hero"
+                      ? "NPC герой"
+                      : character.user?.displayName || "Не призначено"}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
+                  <Badge
+                    variant={
+                      character.type === "npc_hero" ? "secondary" : "outline"
+                    }
+                    className="text-xs"
+                  >
+                    {character.type === "npc_hero" ? "NPC герой" : "Гравець"}
+                  </Badge>
                   <Badge variant="outline" className="text-xs">
                     {character.race}
                     {character.subrace ? ` (${character.subrace})` : ""}
@@ -223,7 +233,7 @@ export function DMCharactersClient({ campaignId }: DMCharactersClientProps) {
         <Card>
           <CardContent className="py-12 text-center">
             <p className="text-muted-foreground mb-4">
-              Поки немає персонажів гравців
+              Поки немає персонажів (гравців або NPC героїв)
             </p>
             <Link href={`/campaigns/${campaignId}/dm/characters/new`}>
               <Button>Створити першого персонажа</Button>

@@ -24,6 +24,7 @@ import {
   applySpellAdditionalModifier,
   applySpellDurationEffects,
   applySpellManaSteal,
+  applySpellRemoveBuffsDebuffs,
 } from "./process-effects";
 import { generateSpellDamageRolls } from "./process-helpers";
 
@@ -50,6 +51,7 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
     savingThrows = [],
     additionalRollResult,
     hitRoll,
+    isDMCast = false,
   } = params;
 
   const needsRolls =
@@ -100,7 +102,10 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
 
   const spellSlot = updatedCaster.spellcasting.spellSlots[slotKey];
 
-  if (!spellSlot || spellSlot.current <= 0) {
+  if (
+    !isDMCast &&
+    (!spellSlot || spellSlot.current <= 0)
+  ) {
     return handleNoSpellSlot(
       updatedCaster,
       spell,
@@ -200,10 +205,27 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
     };
   }
 
-  const additionalModifier = calculateSpellAdditionalModifier(
+  const fromCaster = calculateSpellAdditionalModifier(
     updatedCaster,
     additionalRollResult,
   );
+
+  const fromSpell = spell.effectDetails?.additionalModifier;
+
+  const additionalModifier =
+    fromSpell &&
+    typeof fromSpell.duration === "number" &&
+    fromSpell.duration > 0 &&
+    (typeof fromSpell.damage === "number" || fromCaster.damage > 0)
+      ? {
+          modifier: fromSpell.modifier ?? fromCaster.modifier ?? "poison",
+          duration: fromSpell.duration,
+          damage:
+            typeof fromSpell.damage === "number"
+              ? fromSpell.damage
+              : fromCaster.damage ?? 0,
+        }
+      : fromCaster;
 
   updatedTargets = applySpellAdditionalModifier(
     spell,
@@ -212,21 +234,24 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
     currentRound,
   );
   updatedTargets = applySpellDurationEffects(spell, updatedTargets, currentRound);
+  updatedTargets = applySpellRemoveBuffsDebuffs(spell, updatedTargets);
   updatedTargets = applySpellManaSteal(spell, updatedTargets);
 
-  updatedCaster = {
-    ...updatedCaster,
-    spellcasting: {
-      ...updatedCaster.spellcasting,
-      spellSlots: {
-        ...updatedCaster.spellcasting.spellSlots,
-        [slotKey]: {
-          ...updatedCaster.spellcasting.spellSlots[slotKey],
-          current: updatedCaster.spellcasting.spellSlots[slotKey].current - 1,
+  if (!isDMCast && updatedCaster.spellcasting.spellSlots[slotKey]) {
+    updatedCaster = {
+      ...updatedCaster,
+      spellcasting: {
+        ...updatedCaster.spellcasting,
+        spellSlots: {
+          ...updatedCaster.spellcasting.spellSlots,
+          [slotKey]: {
+            ...updatedCaster.spellcasting.spellSlots[slotKey],
+            current: updatedCaster.spellcasting.spellSlots[slotKey].current - 1,
+          },
         },
       },
-    },
-  };
+    };
+  }
 
   const isBonusAction = spell.castingTime?.toLowerCase().includes("bonus") ?? false;
 

@@ -10,6 +10,7 @@ export { processAttack } from "./process";
 export {
   canPerformReaction,
   getCounterDamagePercent,
+  getReactionDamageAmount,
   performReaction,
 } from "./reaction";
 export { calculateAttackRoll } from "./roll";

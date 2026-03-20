@@ -1,3 +1,5 @@
+import { SkillLevel } from "@/types/skill-tree";
+
 // Константи для кольорів
 export const SKILL_COLORS = {
   unlocked: "#10b981", // Зелений
@@ -50,3 +52,13 @@ export const LEVEL_NAMES = {
   advanced: "Просунутий",
   expert: "Експертний",
 } as const;
+
+/**
+ * Мінімальний рівень персонажа для відкриття ступеня расового навику.
+ * Лише для гілки «Раса»; основні лінії скілів не залежать від цих порогів.
+ */
+export const RACIAL_SKILL_LEVEL_REQUIREMENTS: Record<SkillLevel, number> = {
+  [SkillLevel.BASIC]: 5,
+  [SkillLevel.ADVANCED]: 10,
+  [SkillLevel.EXPERT]: 15,
+};

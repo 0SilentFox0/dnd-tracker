@@ -11,6 +11,7 @@ export interface ArtifactData {
   slot: string;
   icon: string | null;
   setId: string | null;
-  bonuses: Record<string, number>;
-  passiveAbility: { name?: string; description?: string } | null;
+  bonuses: unknown;
+  modifiers: unknown;
+  passiveAbility: Record<string, unknown> | null;
 }

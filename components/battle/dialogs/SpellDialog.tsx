@@ -134,6 +134,8 @@ export function SpellDialog({
                 if (spell?.type === "no_target") setSelectedTargets([]);
               }}
               getIsDisabled={(spell) => {
+                if (allowAllSpellsForDM) return false;
+
                 const slot = spellSlots[spell.level.toString()];
 
                 return !(isUnit

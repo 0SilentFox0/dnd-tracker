@@ -35,6 +35,8 @@ export interface AttackHandlerInput {
     advantageRoll?: number;
     disadvantageRoll?: number;
     damageRolls: number[];
+    /** Урон відповіді цілі (контратака), для однієї цілі */
+    reactionDamage?: number;
   };
 }
 
@@ -152,6 +154,11 @@ export async function executeAttack({
         ? data.damageRolls.slice(i * dicePerTarget, (i + 1) * dicePerTarget)
         : data.damageRolls;
 
+    const reactionOverride =
+      targets.length === 1 && data.reactionDamage != null
+        ? data.reactionDamage
+        : undefined;
+
     const attackResult = processAttack({
       attacker: currentAttacker,
       target,
@@ -164,6 +171,7 @@ export async function executeAttack({
       currentRound: battle.currentRound,
       battleId,
       damageMultiplier,
+      reactionDamageOverride: reactionOverride,
     });
 
     currentAttacker = attackResult.attackerUpdated;
