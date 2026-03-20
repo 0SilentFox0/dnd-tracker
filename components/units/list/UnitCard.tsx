@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { GripVertical, X } from "lucide-react";
 
@@ -138,30 +138,31 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
 
   const savedDice = primaryAttack?.damageDice ?? "";
 
-  const [diceDraft, setDiceDraft] = useState(savedDice);
+  /** Скидання uncontrolled інпутів до знімка сервера без setState в useEffect (новий key → remount). */
+  const [acFieldEpoch, setAcFieldEpoch] = useState(0);
 
-  useEffect(() => {
-    // Синхронізація чернетки з даними після refetch (React Query)
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- draft vs server snapshot
-    setDiceDraft(savedDice);
-  }, [unit.id, savedDice]);
+  const [initFieldEpoch, setInitFieldEpoch] = useState(0);
 
-  const [acDraft, setAcDraft] = useState(String(unit.armorClass));
+  const [diceFieldEpoch, setDiceFieldEpoch] = useState(0);
 
-  const [initDraft, setInitDraft] = useState(String(unit.initiative));
+  const bumpAcField = () => setAcFieldEpoch((e) => e + 1);
 
-  useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect -- чернетки AC/Init з сервера після refetch */
-    setAcDraft(String(unit.armorClass));
-    setInitDraft(String(unit.initiative));
-    /* eslint-enable react-hooks/set-state-in-effect */
-  }, [unit.id, unit.armorClass, unit.initiative]);
+  const bumpInitField = () => setInitFieldEpoch((e) => e + 1);
+
+  const bumpDiceField = () => setDiceFieldEpoch((e) => e + 1);
 
   const persistArmor = () => {
-    const n = parseQuickStatInt(acDraft);
+    const raw =
+      (
+        document.getElementById(
+          `unit-ac-${unit.id}`,
+        ) as HTMLInputElement | null
+      )?.value ?? "";
+
+    const n = parseQuickStatInt(raw);
 
     if (n === null) {
-      setAcDraft(String(unit.armorClass));
+      bumpAcField();
 
       return;
     }
@@ -174,17 +175,24 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
       { unitId: unit.id, data: { armorClass: clamped } },
       {
         onError: () => {
-          setAcDraft(String(unit.armorClass));
+          bumpAcField();
         },
       },
     );
   };
 
   const persistInitiative = () => {
-    const n = parseQuickStatInt(initDraft);
+    const raw =
+      (
+        document.getElementById(
+          `unit-init-${unit.id}`,
+        ) as HTMLInputElement | null
+      )?.value ?? "";
+
+    const n = parseQuickStatInt(raw);
 
     if (n === null) {
-      setInitDraft(String(unit.initiative));
+      bumpInitField();
 
       return;
     }
@@ -195,21 +203,27 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
       { unitId: unit.id, data: { initiative: n } },
       {
         onError: () => {
-          setInitDraft(String(unit.initiative));
+          bumpInitField();
         },
       },
     );
   };
 
   const persistPrimaryDice = () => {
-    const trimmed = diceDraft.trim();
+    const trimmed = (
+      (
+        document.getElementById(
+          `unit-dice-${unit.id}`,
+        ) as HTMLInputElement | null
+      )?.value ?? ""
+    ).trim();
 
     if (primaryIdx < 0 || !primaryAttack) return;
 
     if (trimmed === (primaryAttack.damageDice ?? "").trim()) return;
 
     if (!trimmed) {
-      setDiceDraft(savedDice);
+      bumpDiceField();
 
       return;
     }
@@ -222,7 +236,7 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
       { unitId: unit.id, data: { attacks: nextAttacks } },
       {
         onError: () => {
-          setDiceDraft(savedDice);
+          bumpDiceField();
         },
       },
     );
@@ -299,13 +313,13 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
                 </Label>
                 <div className="flex gap-1.5 items-center">
                   <Input
+                    key={`${unit.id}-ac-${unit.armorClass}-${acFieldEpoch}`}
                     id={`unit-ac-${unit.id}`}
                     type="number"
                     min={0}
                     inputMode="numeric"
                     className="h-8 min-w-0 flex-1 text-sm tabular-nums"
-                    value={acDraft}
-                    onChange={(e) => setAcDraft(e.target.value)}
+                    defaultValue={String(unit.armorClass)}
                     onBlur={persistArmor}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
@@ -339,12 +353,12 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
                 </Label>
                 <div className="flex gap-1.5 items-center">
                   <Input
+                    key={`${unit.id}-init-${unit.initiative}-${initFieldEpoch}`}
                     id={`unit-init-${unit.id}`}
                     type="number"
                     inputMode="numeric"
                     className="h-8 min-w-0 flex-1 text-sm tabular-nums"
-                    value={initDraft}
-                    onChange={(e) => setInitDraft(e.target.value)}
+                    defaultValue={String(unit.initiative)}
                     onBlur={persistInitiative}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
@@ -390,10 +404,10 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
                 </Label>
                 <div className="flex gap-1.5 items-center">
                   <Input
+                    key={`${unit.id}-dice-${savedDice}-${diceFieldEpoch}`}
                     id={`unit-dice-${unit.id}`}
                     className="h-8 flex-1 min-w-0 text-sm font-mono"
-                    value={diceDraft}
-                    onChange={(e) => setDiceDraft(e.target.value)}
+                    defaultValue={savedDice}
                     onBlur={persistPrimaryDice}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
