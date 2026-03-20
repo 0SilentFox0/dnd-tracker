@@ -76,7 +76,7 @@ export default function BattlePage({
     hitRoll?: number;
   } | null>(null);
 
-  const [, setSpellPreviewLoading] = useState(false);
+  const [spellPreviewLoading, setSpellPreviewLoading] = useState(false);
 
   const handleSpellPreview = useMemo(
     () =>
@@ -99,6 +99,8 @@ export default function BattlePage({
             setPendingSpellData(data);
             setSpellResultModalOpen(true);
           }
+        } catch (err) {
+          console.error("spellPreview failed:", err);
         } finally {
           setSpellPreviewLoading(false);
         }
@@ -313,6 +315,7 @@ export default function BattlePage({
           setPendingSpellData,
           handleSpellPreview,
           handleSpellApplyFromModal,
+          spellPreviewLoading,
         }}
         globalDamageFlash={globalDamageFlash}
       />

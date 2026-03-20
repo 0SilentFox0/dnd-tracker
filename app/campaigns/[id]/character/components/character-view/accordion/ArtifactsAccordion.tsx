@@ -7,6 +7,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import type { SkillTreeProgress } from "@/lib/hooks/characters";
+import type { ArtifactSetRow } from "@/types/artifact-sets";
 import type { EquippedItems } from "@/types/inventory";
 
 export interface ArtifactsAccordionProps {
@@ -18,6 +19,7 @@ export interface ArtifactsAccordionProps {
   };
   skillTreeProgress: SkillTreeProgress;
   equipped: EquippedItems;
+  artifactSets?: ArtifactSetRow[];
   artifactOptions: Array<{
     id: string;
     name: string;
@@ -32,6 +34,7 @@ export function ArtifactsAccordion({
   spellcasting,
   skillTreeProgress,
   equipped,
+  artifactSets,
   artifactOptions,
 }: ArtifactsAccordionProps) {
   return (
@@ -47,6 +50,7 @@ export function ArtifactsAccordion({
           skillTreeProgress={skillTreeProgress}
           equipped={equipped}
           artifacts={artifactOptions}
+          artifactSets={artifactSets}
           spellSlots={spellcasting.spellSlots}
         />
       </AccordionContent>

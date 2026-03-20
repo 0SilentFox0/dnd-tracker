@@ -9,9 +9,12 @@ import {
   SkillsAccordion,
 } from "./accordion";
 
+import type { CharacterAbilityArtifactBonuses } from "@/components/characters/stats/CharacterAbilityScores";
+import type { CharacterCombatArtifactBonuses } from "@/components/characters/stats/CharacterCombatParams";
 import { Accordion } from "@/components/ui/accordion";
 import { Card, CardContent } from "@/components/ui/card";
 import type { SkillTreeProgress } from "@/lib/hooks/characters";
+import type { ArtifactSetRow } from "@/types/artifact-sets";
 import type { CampaignMember } from "@/types/campaigns";
 import type { EquippedItems } from "@/types/inventory";
 import type { Race } from "@/types/races";
@@ -37,6 +40,9 @@ export interface CharacterViewAccordionProps {
     };
   };
   equipped: EquippedItems;
+  artifactAbilityBonuses?: CharacterAbilityArtifactBonuses;
+  artifactCombatBonuses?: CharacterCombatArtifactBonuses;
+  artifactSets?: ArtifactSetRow[];
   artifactOptions: Array<{
     id: string;
     name: string;
@@ -66,6 +72,9 @@ export function CharacterViewAccordion({
   spellcasting,
   formData,
   equipped,
+  artifactAbilityBonuses,
+  artifactCombatBonuses,
+  artifactSets,
   artifactOptions,
   members,
   races,
@@ -99,7 +108,10 @@ export function CharacterViewAccordion({
             races={races}
             isPlayerView={isPlayerView}
           />
-          <AbilityScoresAccordion abilityScores={abilityScores} />
+          <AbilityScoresAccordion
+            abilityScores={abilityScores}
+            artifactBonuses={artifactAbilityBonuses}
+          />
           <CombatParamsAccordion
             campaignId={campaignId}
             characterId={characterId}
@@ -107,6 +119,7 @@ export function CharacterViewAccordion({
             abilityScores={abilityScores}
             combatStats={combatStats}
             scalingCoefficients={formData.scalingCoefficients}
+            artifactCombatBonuses={artifactCombatBonuses}
           />
           <SkillsAccordion skills={skills} />
           <AbilitiesAccordion
@@ -127,6 +140,7 @@ export function CharacterViewAccordion({
             spellcasting={spellcasting}
             skillTreeProgress={formData.skillTreeProgress ?? {}}
             equipped={equipped}
+            artifactSets={artifactSets}
             artifactOptions={artifactOptions}
           />
         </Accordion>

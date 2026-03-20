@@ -60,6 +60,7 @@ const updateSpellSchema = z.object({
     z.string().nullable().optional()
   ),
   appearanceDescription: z.string().nullable().optional(),
+  summonUnitId: z.string().nullable().optional(),
 });
 
 export async function GET(
@@ -161,6 +162,12 @@ export async function PATCH(
         groupId: data.groupId !== undefined ? data.groupId : undefined,
         icon: data.icon !== undefined ? (data.icon || null) : undefined,
         appearanceDescription: data.appearanceDescription !== undefined ? data.appearanceDescription : undefined,
+        summonUnitId:
+          data.summonUnitId !== undefined
+            ? data.summonUnitId === null || data.summonUnitId === ""
+              ? null
+              : data.summonUnitId
+            : undefined,
       },
       include: {
         spellGroup: true,

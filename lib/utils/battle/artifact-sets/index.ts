@@ -6,3 +6,4 @@ export {
   enqueueScopedBonusFromEquippedIfNeeded,
   mergeArtifactSetBonusIntoParticipant,
 } from "./merge-set-bonus";
+export { pushArtifactSetHudMarker } from "./push-artifact-set-hud-marker";

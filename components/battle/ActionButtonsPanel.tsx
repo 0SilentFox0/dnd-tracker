@@ -7,6 +7,7 @@ import { BonusActionPickerDialog } from "@/components/battle/dialogs/BonusAction
 import { Button } from "@/components/ui/button";
 import { AttackType } from "@/lib/constants/battle";
 import { cn } from "@/lib/utils";
+import { getDisabledAttackKinds } from "@/lib/utils/battle/attack/disabled-attacks";
 import type { ActiveSkill, BattleParticipant } from "@/types/battle";
 
 interface ActionButtonsPanelProps {
@@ -58,6 +59,8 @@ export function ActionButtonsPanel({
 
   const canUseBonusAction = !participant.actionFlags.hasUsedBonusAction;
 
+  const disabledAttacks = getDisabledAttackKinds(participant);
+
   return (
     <div className="w-full max-w-4xl space-y-4 sm:space-y-8 px-2">
       {/* Ряд 1: Основні дії */}
@@ -65,11 +68,17 @@ export function ActionButtonsPanel({
         <Button
           size="lg"
           variant={hasMeleeAttacks ? "default" : "outline"}
-          disabled={!hasMeleeAttacks || participant.actionFlags.hasUsedAction}
+          disabled={
+            !hasMeleeAttacks ||
+            participant.actionFlags.hasUsedAction ||
+            disabledAttacks.melee
+          }
           onClick={onMeleeAttack}
           className={cn(
             "h-20 sm:h-32 flex flex-col items-center justify-center gap-1 sm:gap-2 rounded-2xl transition-all duration-300 group relative overflow-hidden",
-            hasMeleeAttacks && !participant.actionFlags.hasUsedAction
+            hasMeleeAttacks &&
+              !participant.actionFlags.hasUsedAction &&
+              !disabledAttacks.melee
               ? "bg-gradient-to-br from-orange-600 to-red-700 hover:scale-105 hover:shadow-[0_0_20px_rgba(234,88,12,0.5)] border-none"
               : "glass-card opacity-50",
           )}
@@ -84,11 +93,17 @@ export function ActionButtonsPanel({
         <Button
           size="lg"
           variant={hasRangedAttacks ? "default" : "outline"}
-          disabled={!hasRangedAttacks || participant.actionFlags.hasUsedAction}
+          disabled={
+            !hasRangedAttacks ||
+            participant.actionFlags.hasUsedAction ||
+            disabledAttacks.ranged
+          }
           onClick={onRangedAttack}
           className={cn(
             "h-20 sm:h-32 flex flex-col items-center justify-center gap-1 sm:gap-2 rounded-2xl transition-all duration-300 group relative overflow-hidden",
-            hasRangedAttacks && !participant.actionFlags.hasUsedAction
+            hasRangedAttacks &&
+              !participant.actionFlags.hasUsedAction &&
+              !disabledAttacks.ranged
               ? "bg-gradient-to-br from-blue-600 to-indigo-700 hover:scale-105 hover:shadow-[0_0_20px_rgba(37,99,235,0.5)] border-none"
               : "glass-card opacity-50",
           )}
@@ -103,11 +118,17 @@ export function ActionButtonsPanel({
         <Button
           size="lg"
           variant={hasSpells ? "default" : "outline"}
-          disabled={!hasSpells || participant.actionFlags.hasUsedAction}
+          disabled={
+            !hasSpells ||
+            participant.actionFlags.hasUsedAction ||
+            disabledAttacks.spellCasting
+          }
           onClick={onSpell}
           className={cn(
             "h-20 sm:h-32 col-span-2 sm:col-span-1 flex flex-col items-center justify-center gap-1 sm:gap-2 rounded-2xl transition-all duration-300 group relative overflow-hidden",
-            hasSpells && !participant.actionFlags.hasUsedAction
+            hasSpells &&
+              !participant.actionFlags.hasUsedAction &&
+              !disabledAttacks.spellCasting
               ? "bg-gradient-to-br from-purple-600 to-fuchsia-700 hover:scale-105 hover:shadow-[0_0_20px_rgba(147,51,234,0.5)] border-none"
               : "glass-card opacity-50",
           )}

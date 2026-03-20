@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { ArtifactDeleteButton } from "@/components/artifacts/ArtifactDeleteButton";
+import { ArtifactPassiveAbilityDisplay } from "@/components/artifacts/ArtifactPassiveAbilityDisplay";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,27 +37,6 @@ export interface ArtifactCardData {
   artifactSet?: { name: string } | null;
 }
 
-function formatPassiveAbility(
-  passiveAbility: unknown
-): { title?: string; description: string } | null {
-  if (!passiveAbility) return null;
-
-  if (typeof passiveAbility === "string") {
-    return { description: passiveAbility };
-  }
-
-  if (typeof passiveAbility === "object") {
-    const value = passiveAbility as { name?: string; description?: string };
-
-    return {
-      title: value.name,
-      description: value.description || JSON.stringify(passiveAbility),
-    };
-  }
-
-  return { description: String(passiveAbility) };
-}
-
 interface ArtifactCardProps {
   campaignId: string;
   artifact: ArtifactCardData;
@@ -73,8 +53,6 @@ export function ArtifactCard({
   const [slot, setSlot] = useState(artifact.slot);
 
   const [updating, setUpdating] = useState(false);
-
-  const passive = formatPassiveAbility(artifact.passiveAbility);
 
   const handleSlotChange = async (newSlot: string) => {
     if (newSlot === slot) return;
@@ -169,12 +147,10 @@ export function ArtifactCard({
             {artifact.description}
           </p>
         )}
-        {passive && (
-          <p className="text-xs text-muted-foreground mt-2">
-            <span className="font-semibold">{passive.title || "Ефект"}:</span>{" "}
-            {passive.description}
-          </p>
-        )}
+        <ArtifactPassiveAbilityDisplay
+          passiveAbility={artifact.passiveAbility}
+          className="mt-2"
+        />
       </div>
     );
   }
@@ -233,14 +209,10 @@ export function ArtifactCard({
             {artifact.description}
           </p>
         )}
-        {passive && (
-          <p className="text-xs text-muted-foreground mb-2">
-            <span className="font-semibold">
-              {passive.title || "Ефект"}:
-            </span>{" "}
-            {passive.description}
-          </p>
-        )}
+        <ArtifactPassiveAbilityDisplay
+          passiveAbility={artifact.passiveAbility}
+          className="mb-2"
+        />
         <div className="flex gap-2">
           <Link
             href={`/campaigns/${campaignId}/dm/artifacts/${artifact.id}`}

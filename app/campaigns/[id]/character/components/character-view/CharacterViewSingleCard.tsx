@@ -9,7 +9,9 @@ import {
 import { CharacterAbilitiesSection } from "@/components/characters/abilities/CharacterAbilitiesSection";
 import { CharacterSkillTreeView } from "@/components/characters/abilities/CharacterSkillTreeView";
 import { CharacterArtifactsSection } from "@/components/characters/artifacts/CharacterArtifactsSection";
+import type { CharacterAbilityArtifactBonuses } from "@/components/characters/stats/CharacterAbilityScores";
 import { CharacterAbilityScores } from "@/components/characters/stats/CharacterAbilityScores";
+import type { CharacterCombatArtifactBonuses } from "@/components/characters/stats/CharacterCombatParams";
 import { CharacterCombatParams } from "@/components/characters/stats/CharacterCombatParams";
 import { CharacterDamageCalculator } from "@/components/characters/stats/CharacterDamageCalculator";
 import { CharacterDamagePreview } from "@/components/characters/stats/CharacterDamagePreview";
@@ -17,6 +19,7 @@ import { CharacterHpPreview } from "@/components/characters/stats/CharacterHpPre
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { SkillTreeProgress } from "@/lib/hooks/characters";
+import type { ArtifactSetRow } from "@/types/artifact-sets";
 import type { CampaignMember } from "@/types/campaigns";
 import type { EquippedItems } from "@/types/inventory";
 import type { Race } from "@/types/races";
@@ -41,6 +44,9 @@ export interface CharacterViewSingleCardProps {
     };
   };
   equipped: EquippedItems;
+  artifactAbilityBonuses?: CharacterAbilityArtifactBonuses;
+  artifactCombatBonuses?: CharacterCombatArtifactBonuses;
+  artifactSets?: ArtifactSetRow[];
   artifactOptions: Array<{
     id: string;
     name: string;
@@ -69,6 +75,9 @@ export function CharacterViewSingleCard({
   spellcasting,
   formData,
   equipped,
+  artifactAbilityBonuses,
+  artifactCombatBonuses,
+  artifactSets,
   artifactOptions,
   lastSavedSkillTreeProgress,
   onSkillTreeProgressChange,
@@ -94,6 +103,7 @@ export function CharacterViewSingleCard({
               Основні характеристики
             </h2>
             <CharacterAbilityScores
+              artifactBonuses={artifactAbilityBonuses}
               abilityScores={
                 {
                   ...abilityScores,
@@ -122,6 +132,7 @@ export function CharacterViewSingleCard({
                 isDm={false}
               />
               <CharacterCombatParams
+                artifactBonuses={artifactCombatBonuses}
                 combatStats={
                   {
                     ...combatStats,
@@ -185,6 +196,7 @@ export function CharacterViewSingleCard({
               skillTreeProgress={formData.skillTreeProgress ?? {}}
               equipped={equipped}
               artifacts={artifactOptions}
+              artifactSets={artifactSets}
               spellSlots={spellcasting.spellSlots}
             />
           </section>

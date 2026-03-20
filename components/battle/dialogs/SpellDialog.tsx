@@ -57,6 +57,7 @@ export function SpellDialog({
     handleTargetToggle,
     isSubmitDisabled,
     submitLabel,
+    spellTargetSelectionKind,
   } = useSpellDialog(
     campaignId,
     open,
@@ -128,10 +129,9 @@ export function SpellDialog({
             <SpellSelectDropdown
               groupedSpells={spellsByGroup}
               value={selectedSpellId}
-              onValueChange={(nextId, spell) => {
+              onValueChange={(nextId) => {
                 setSelectedSpellId(nextId);
-
-                if (spell?.type === "no_target") setSelectedTargets([]);
+                setSelectedTargets([]);
               }}
               getIsDisabled={(spell) => {
                 if (allowAllSpellsForDM) return false;
@@ -157,7 +157,7 @@ export function SpellDialog({
 
           {selectedSpell && (
             <SpellTargetsSection
-              selectedSpell={selectedSpell}
+              targetSelectionKind={spellTargetSelectionKind}
               selectedTargets={selectedTargets}
               availableTargets={availableTargets}
               isDM={isDM}

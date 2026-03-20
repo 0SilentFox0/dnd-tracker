@@ -5,7 +5,8 @@ import { useQuery } from "@tanstack/react-query";
 
 import { useCharacterForm } from "./useCharacterForm";
 
-import { getArtifacts } from "@/lib/api/artifacts";
+import { getArtifactSets } from "@/lib/api/artifact-sets";
+import { type ArtifactListItem,getArtifacts } from "@/lib/api/artifacts";
 import {
   getCharacter,
   getDamagePreview,
@@ -13,6 +14,7 @@ import {
 } from "@/lib/api/characters";
 import { getSpells } from "@/lib/api/spells";
 import { characterToFormData } from "@/lib/utils/characters/character-form";
+import type { ArtifactSetRow } from "@/types/artifact-sets";
 import type { Character } from "@/types/characters";
 import type { EquippedItems } from "@/types/inventory";
 
@@ -86,6 +88,12 @@ export function useCharacterView(campaignId: string, characterId: string) {
     enabled: !!campaignId && characterLoaded,
   });
 
+  const { data: artifactSets = [] } = useQuery({
+    queryKey: ["artifact-sets", campaignId],
+    queryFn: () => getArtifactSets(campaignId),
+    enabled: !!campaignId && characterLoaded,
+  });
+
   const meleeMult = formData.scalingCoefficients?.meleeMultiplier ?? 1;
 
   const rangedMult = formData.scalingCoefficients?.rangedMultiplier ?? 1;
@@ -151,6 +159,10 @@ export function useCharacterView(campaignId: string, characterId: string) {
     }),
   );
 
+  const artifactsDetail = artifacts as ArtifactListItem[];
+
+  const artifactSetsRows = artifactSets as ArtifactSetRow[];
+
   return {
     characterLoaded,
     formData,
@@ -165,6 +177,8 @@ export function useCharacterView(campaignId: string, characterId: string) {
     equipped,
     setFormData,
     artifacts: artifactOptions,
+    artifactsDetail,
+    artifactSets: artifactSetsRows,
     damagePreview,
     schoolsByCount,
     lastSavedSkillTreeProgress,

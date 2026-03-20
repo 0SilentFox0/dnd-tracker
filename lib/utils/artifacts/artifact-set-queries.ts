@@ -32,6 +32,7 @@ export function buildArtifactSetPatchInput(data: {
   name?: string;
   description?: string | null;
   setBonus?: unknown | null;
+  icon?: string | null;
 }): Prisma.ArtifactSetUpdateInput {
   const update: Prisma.ArtifactSetUpdateInput = {};
 
@@ -46,6 +47,10 @@ export function buildArtifactSetPatchInput(data: {
       data.setBonus === null
         ? Prisma.JsonNull
         : (data.setBonus as Prisma.InputJsonValue);
+  }
+
+  if (data.icon !== undefined) {
+    update.icon = data.icon;
   }
 
   return update;
@@ -97,7 +102,12 @@ export async function reloadArtifactSetDetail(setId: string) {
 
 export async function insertArtifactSet(
   campaignId: string,
-  input: { name: string; description: string | null; setBonus: unknown | undefined },
+  input: {
+    name: string;
+    description: string | null;
+    setBonus: unknown | undefined;
+    icon?: string | null;
+  },
 ) {
   return prisma.artifactSet.create({
     data: {
@@ -105,6 +115,7 @@ export async function insertArtifactSet(
       name: input.name,
       description: input.description,
       setBonus: setBonusToPrismaInput(input.setBonus),
+      icon: input.icon?.trim() ? input.icon.trim() : null,
     },
     include: includeList,
   });

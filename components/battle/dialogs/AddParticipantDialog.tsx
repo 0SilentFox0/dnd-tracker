@@ -43,7 +43,9 @@ export function AddParticipantDialog({
 
   const [quantity, setQuantity] = useState(1);
 
-  const { data: characters = [] } = useCharacters(campaignId);
+  const { data: characters = [] } = useCharacters(campaignId, {
+    compact: true,
+  });
 
   const { data: units = [] } = useUnits(campaignId);
 

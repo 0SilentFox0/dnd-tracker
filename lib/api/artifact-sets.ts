@@ -32,6 +32,7 @@ export async function createArtifactSet(
     description?: string | null;
     setBonus?: unknown;
     artifactIds?: string[];
+    icon?: string | null;
   },
 ): Promise<ArtifactSetRow> {
   return campaignPost<ArtifactSetRow>(campaignId, "/artifact-sets", body);
@@ -45,6 +46,7 @@ export async function updateArtifactSet(
     description?: string | null;
     setBonus?: unknown | null;
     artifactIds?: string[];
+    icon?: string | null;
   },
 ): Promise<ArtifactSetRow> {
   return campaignPatch<ArtifactSetRow>(

@@ -217,12 +217,35 @@ export async function extractActiveSkillsFromCharacter(
 
     const enhancementTypes = (skill.spellEnhancementTypes as string[]) || [];
 
+    const enhancementDataRaw =
+      skill.spellEnhancementData &&
+      typeof skill.spellEnhancementData === "object" &&
+      !Array.isArray(skill.spellEnhancementData)
+        ? (skill.spellEnhancementData as {
+            spellAllowMultipleTargets?: boolean;
+            spellAoeSpellIds?: unknown;
+          })
+        : {};
+
+    const spellAllowMultipleTargetsFromJson =
+      enhancementDataRaw.spellAllowMultipleTargets === true;
+
+    const spellAoeSpellIdsFromJson = Array.isArray(
+      enhancementDataRaw.spellAoeSpellIds,
+    )
+      ? enhancementDataRaw.spellAoeSpellIds.filter(
+          (id): id is string => typeof id === "string" && id.length > 0,
+        )
+      : [];
+
     if (
       enhancementTypes.length > 0 ||
       skill.spellEffectIncrease ||
       skill.spellTargetChange ||
       skill.spellAdditionalModifier ||
-      skill.spellNewSpellId
+      skill.spellNewSpellId ||
+      spellAllowMultipleTargetsFromJson ||
+      spellAoeSpellIdsFromJson.length > 0
     ) {
       spellEnhancements = {};
 
@@ -264,6 +287,14 @@ export async function extractActiveSkillsFromCharacter(
 
       if (skill.spellNewSpellId) {
         spellEnhancements.spellNewSpellId = skill.spellNewSpellId;
+      }
+
+      if (spellAllowMultipleTargetsFromJson) {
+        spellEnhancements.spellAllowMultipleTargets = true;
+      }
+
+      if (spellAoeSpellIdsFromJson.length > 0) {
+        spellEnhancements.spellAoeSpellIds = spellAoeSpellIdsFromJson;
       }
     }
 
@@ -308,6 +339,7 @@ export async function extractActiveSkillsFromCharacter(
       effects,
       affectsDamage: combatStats.affectsDamage,
       damageType: resolvedDamageType,
+      linkedSpellId: skill.spellId ?? undefined,
       spellEnhancements,
       skillTriggers,
     });

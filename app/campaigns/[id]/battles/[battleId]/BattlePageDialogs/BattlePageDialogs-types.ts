@@ -111,6 +111,8 @@ export interface BattlePageDialogsSpellResult {
   setPendingSpellData: (d: SpellPreviewData | null) => void;
   handleSpellPreview: (data: SpellPreviewData) => Promise<void>;
   handleSpellApplyFromModal: () => void;
+  /** Триває POST прев’ю заклинання (до відкриття модалки) */
+  spellPreviewLoading: boolean;
 }
 
 export interface BattlePageDialogsProps {

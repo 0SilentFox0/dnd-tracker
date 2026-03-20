@@ -122,6 +122,8 @@ export interface ActiveSkill {
   affectsDamage?: boolean;
   /** Тип шкоди: melee / ranged / magic — скіл враховується лише для цього типу */
   damageType?: SkillDamageType | null;
+  /** Заклинання, до якого прив’язаний скіл (для покращень по конкретному spellId) */
+  linkedSpellId?: string | null;
   spellEnhancements?: {
     spellEffectIncrease?: number; // +25% ефекту
     spellTargetChange?: { target: string }; // зміна цілі
@@ -131,6 +133,10 @@ export interface ActiveSkill {
       duration?: number; // тривалість в раундах
     };
     spellNewSpellId?: string; // нове заклинання
+    /** Кілька цілей у діалозі касту для прив’язаного заклинання (тип target у БД) */
+    spellAllowMultipleTargets?: boolean;
+    /** Заклинання (id), що кастуються як кілька цілей при наявності скіла */
+    spellAoeSpellIds?: string[];
   };
   skillTriggers?: import("@/types/skill-triggers").SkillTriggers; // Тригери скіла
 }
@@ -156,6 +162,13 @@ export interface EquippedArtifact {
   immuneSpellIds?: string[];
 }
 
+/** Іконка в HUD бою: активний бонус повного сету (носій або одержувач scoped). */
+export interface ArtifactSetHudMarker {
+  setId: string;
+  name: string;
+  icon?: string | null;
+}
+
 /** Черга бонусу сету/артефакта з аудиторією all_allies / all_enemies. */
 export interface PendingScopedArtifactBonus {
   sourceSide: ParticipantSide;
@@ -164,6 +177,8 @@ export interface PendingScopedArtifactBonus {
     | typeof ARTIFACT_EFFECT_ALL_ENEMIES;
   bundle: ParsedArtifactSetBonus;
   displayName: string;
+  /** Для відображення статусу сету в HUD після роздачі. */
+  hud?: ArtifactSetHudMarker;
 }
 
 /**
@@ -275,6 +290,8 @@ export interface BattleParticipantBattleData {
   equippedArtifacts: EquippedArtifact[];
   /** Бонуси з «аурою» (команда / вороги), збираються при створенні учасника й роздаються після повного списку. */
   pendingScopedArtifactBonuses?: PendingScopedArtifactBonus[];
+  /** Маркери повних сетів для HUD (іконка сету). */
+  artifactSetHudMarkers?: ArtifactSetHudMarker[];
   /** Лічильник використань скілів за бій (skillId → count). Для oncePerBattle/twicePerBattle */
   skillUsageCounts?: Record<string, number>;
   /** Пул додаткових дій (ефект «actions»): накопичується при спрацюванні, споживається при використанні основної дії, діє до кінця бою */
@@ -364,6 +381,11 @@ export interface BattleAction {
     spellName?: string;
     spellLevel?: number;
     spellSlotUsed?: number;
+    /** Промах по перевірці попадання заклинання — без приклику тощо */
+    hitCheckMiss?: boolean;
+    /** Приклик юніта після касту */
+    summonedUnitTemplateId?: string;
+    summonedParticipantId?: string;
     // Для saving throws:
     savingThrows?: Array<{
       participantId: string;

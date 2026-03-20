@@ -2,6 +2,7 @@
  * Бонус до атаки, Advantage, Disadvantage
  */
 
+import { matchesAttackBonusModifier } from "../common";
 import { getParticipantExtras } from "../participant";
 
 import { AttackType } from "@/lib/constants/battle";
@@ -34,17 +35,16 @@ export function calculateAttackBonus(
 
   for (const artifact of attacker.battleData.equippedArtifacts) {
     for (const modifier of artifact.modifiers) {
-      if (
-        modifier.type.toLowerCase().includes("attack") &&
-        !modifier.isPercentage
-      ) {
-        const raw = modifier.value;
+      if (modifier.isPercentage) continue;
 
-        const num =
-          typeof raw === "number" ? raw : Number.parseFloat(String(raw));
+      if (!matchesAttackBonusModifier(modifier.type, attack.type)) continue;
 
-        bonus += Number.isFinite(num) ? num : 0;
-      }
+      const raw = modifier.value;
+
+      const num =
+        typeof raw === "number" ? raw : Number.parseFloat(String(raw));
+
+      bonus += Number.isFinite(num) ? num : 0;
     }
   }
 
@@ -58,6 +58,10 @@ export function hasAdvantage(
   const extras = getParticipantExtras(attacker);
 
   if (extras.advantageOnAllRolls) return true;
+
+  if (extras.advantageOnRangedAttacks && attack.type === AttackType.RANGED) {
+    return true;
+  }
 
   if (
     attacker.abilities.race?.toLowerCase().includes("elf") &&

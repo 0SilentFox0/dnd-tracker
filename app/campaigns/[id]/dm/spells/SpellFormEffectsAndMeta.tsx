@@ -1,16 +1,19 @@
 "use client";
 
+import { useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
 import type { SpellFormData } from "./spell-form-defaults";
 
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
 import { Textarea } from "@/components/ui/textarea";
 import { SPELL_EFFECT_OPTIONS } from "@/lib/constants/spell-effects";
+import { useUnits } from "@/lib/hooks/units";
 
 export interface SpellFormEffectsAndMetaProps {
   campaignId: string;
@@ -31,6 +34,17 @@ export function SpellFormEffectsAndMeta({
   onDelete,
   isDeleting,
 }: SpellFormEffectsAndMetaProps) {
+  const { data: units = [], isLoading: unitsLoading } = useUnits(campaignId);
+
+  const unitOptions = useMemo(
+    () => units.map((u) => ({ value: u.id, label: u.name })),
+    [units],
+  );
+
+  const summonEnabled = Boolean(
+    formData.summonUnitId && String(formData.summonUnitId).length > 0,
+  );
+
   return (
     <>
       <div>
@@ -96,6 +110,58 @@ export function SpellFormEffectsAndMeta({
           <p className="text-sm text-muted-foreground italic">
             Ефекти не додано
           </p>
+        )}
+      </div>
+
+      <div className="space-y-3 rounded-lg border p-3">
+        <div className="flex items-center gap-2">
+          <Checkbox
+            id="spell-summon-unit"
+            checked={summonEnabled}
+            onCheckedChange={(checked) => {
+              if (checked === true) {
+                const firstId = unitOptions[0]?.value ?? null;
+
+                setFormData({
+                  ...formData,
+                  summonUnitId: firstId,
+                });
+              } else {
+                setFormData({ ...formData, summonUnitId: null });
+              }
+            }}
+          />
+          <Label htmlFor="spell-summon-unit" className="font-medium cursor-pointer">
+            Прикликає юніта на поле бою
+          </Label>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Після успішного касту (не промах по перевірці попадання, є слот магії)
+          обраний юніт з бібліотеки з&apos;являється на стороні кастера в{" "}
+          <strong>кінці</strong> поточної черги ініціативи.
+        </p>
+        {summonEnabled && (
+          <SelectField
+            id="spell-summon-unit-select"
+            value={formData.summonUnitId || ""}
+            onValueChange={(value) =>
+              setFormData({
+                ...formData,
+                summonUnitId: value || null,
+              })
+            }
+            placeholder={
+              unitsLoading
+                ? "Завантаження юнітів..."
+                : unitOptions.length === 0
+                  ? "Немає юнітів у кампанії"
+                  : "Оберіть юніта"
+            }
+            options={unitOptions}
+            disabled={unitsLoading || unitOptions.length === 0}
+            allowNone
+            noneLabel="Не обрано"
+          />
         )}
       </div>
 

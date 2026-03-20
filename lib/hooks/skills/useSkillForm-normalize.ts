@@ -34,9 +34,11 @@ export type InitialSkillFormData =
       spellEffectIncrease?: number | null;
       spellTargetChange?: unknown;
       spellAdditionalModifier?: unknown;
-      spellNewSpellId?: string | null;
-      skillTriggers?: SkillTriggers;
-    };
+  spellNewSpellId?: string | null;
+  spellAllowMultipleTargets?: boolean;
+  spellAoeSpellIds?: string[];
+  skillTriggers?: SkillTriggers;
+};
 
 export interface NormalizedSkillFormData {
   id?: string;
@@ -57,6 +59,8 @@ export interface NormalizedSkillFormData {
   spellTargetChange?: unknown;
   spellAdditionalModifier?: unknown;
   spellNewSpellId?: string | null;
+  spellAllowMultipleTargets?: boolean;
+  spellAoeSpellIds?: string[];
   skillTriggers?: SkillTriggers;
 }
 
@@ -89,6 +93,15 @@ export function normalizeInitialSkillData(
       spellAdditionalModifier:
         grouped.spellEnhancementData.spellAdditionalModifier || null,
       spellNewSpellId: grouped.spellEnhancementData.spellNewSpellId || null,
+      spellAllowMultipleTargets:
+        grouped.spellEnhancementData.spellAllowMultipleTargets === true,
+      spellAoeSpellIds: Array.isArray(
+        grouped.spellEnhancementData.spellAoeSpellIds,
+      )
+        ? grouped.spellEnhancementData.spellAoeSpellIds.filter(
+            (id): id is string => typeof id === "string" && id.length > 0,
+          )
+        : [],
       skillTriggers: grouped.skillTriggers,
     };
   }

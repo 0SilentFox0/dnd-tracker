@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import type { useCharacterForm } from "@/lib/hooks/characters";
+import type { ArtifactSetRow } from "@/types/artifact-sets";
 import type { CampaignMember } from "@/types/campaigns";
 import type { CharacterFormData } from "@/types/characters";
 import type { EquippedItems } from "@/types/inventory";
@@ -38,6 +39,7 @@ export interface DmCharacterEditFormAccordionProps {
   equipped: EquippedItems;
   setEquipped: (eq: EquippedItems | ((prev: EquippedItems) => EquippedItems)) => void;
   artifacts: { id: string; name: string; slot: string; icon?: string | null }[];
+  artifactSets?: ArtifactSetRow[];
   members: CampaignMember[];
   races: Race[];
 }
@@ -56,6 +58,7 @@ export function DmCharacterEditFormAccordion({
   equipped,
   setEquipped,
   artifacts,
+  artifactSets,
   members,
   races,
 }: DmCharacterEditFormAccordionProps) {
@@ -205,6 +208,7 @@ export function DmCharacterEditFormAccordion({
               slot: a.slot ?? "item",
               icon: a.icon ?? null,
             }))}
+            artifactSets={artifactSets}
             onEquippedChange={setEquipped}
             spellSlots={formData.spellcasting.spellSlots}
           />

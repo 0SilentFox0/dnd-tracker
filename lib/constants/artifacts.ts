@@ -170,5 +170,7 @@ export const ARTIFACT_MODIFIER_EDITOR_OPTIONS: ReadonlyArray<{
   { value: "all_damage", label: "Шкода (усі фіз. атаки)", valueKind: "number" },
   { value: "damageMelee", label: "Шкода ближня (legacy)", valueKind: "number" },
   { value: "damageRanged", label: "Шкода дальня (legacy)", valueKind: "number" },
-  { value: "attack", label: "Бонус до кидка атаки", valueKind: "number" },
+  { value: "attack", label: "Бонус до кидка атаки (мілі + дальн.)", valueKind: "number" },
+  { value: "ranged_attack", label: "Бонус до дальньої атаки", valueKind: "number" },
+  { value: "melee_attack", label: "Бонус до ближньої атаки", valueKind: "number" },
 ];

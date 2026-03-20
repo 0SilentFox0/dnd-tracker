@@ -2,6 +2,7 @@
 
 import { noopAbilitySetters } from "../constants";
 
+import type { CharacterAbilityArtifactBonuses } from "@/components/characters/stats/CharacterAbilityScores";
 import { CharacterAbilityScores } from "@/components/characters/stats/CharacterAbilityScores";
 import {
   AccordionContent,
@@ -11,10 +12,12 @@ import {
 
 export interface AbilityScoresAccordionProps {
   abilityScores: Record<string, unknown>;
+  artifactBonuses?: CharacterAbilityArtifactBonuses;
 }
 
 export function AbilityScoresAccordion({
   abilityScores,
+  artifactBonuses,
 }: AbilityScoresAccordionProps) {
   return (
     <AccordionItem value="item-2" className="rounded-xl border bg-card/75">
@@ -23,6 +26,7 @@ export function AbilityScoresAccordion({
       </AccordionTrigger>
       <AccordionContent className="px-4 pb-4 pt-1">
         <CharacterAbilityScores
+          artifactBonuses={artifactBonuses}
           abilityScores={
             {
               ...abilityScores,

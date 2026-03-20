@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { ArtifactSetBonusDisplay } from "@/components/artifact-sets/ArtifactSetBonusDisplay";
+import { ArtifactSetCardIcon } from "@/components/artifact-sets/ArtifactSetCardIcon";
 import { ArtifactCard } from "@/components/artifacts/ArtifactCard";
 import { DeleteAllArtifactsButton } from "@/components/artifacts/DeleteAllArtifactsButton";
 import {
@@ -21,27 +23,6 @@ import {
 import { getAuthUser } from "@/lib/auth";
 import { ARTIFACT_SLOT_OPTIONS } from "@/lib/constants/artifacts";
 import { prisma } from "@/lib/db";
-
-function formatSetBonus(setBonus: unknown): { title?: string; description: string } | null {
-  if (!setBonus) return null;
-
-  if (typeof setBonus === "string") {
-    return { description: setBonus };
-  }
-
-  if (typeof setBonus === "object") {
-    const value = setBonus as { name?: string; description?: string; effect?: string };
-
-    const description = value.description || value.effect || JSON.stringify(setBonus);
-
-    return {
-      title: value.name,
-      description,
-    };
-  }
-
-  return { description: String(setBonus) };
-}
 
 export default async function DMArtifactsPage({
   params,
@@ -134,15 +115,18 @@ export default async function DMArtifactsPage({
           <h2 className="text-2xl font-semibold">Сети артефактів</h2>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {artifactSets.map((set) => {
-              const setBonus = formatSetBonus(set.setBonus);
-
               return (
                 <Card key={set.id} className="hover:shadow-lg transition-shadow">
                   <CardHeader>
-                    <CardTitle>{set.name}</CardTitle>
-                    <CardDescription>
-                      {set.artifacts.length} артефактів в сеті
-                    </CardDescription>
+                    <div className="flex gap-3">
+                      <ArtifactSetCardIcon url={set.icon} name={set.name} />
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <CardTitle className="leading-tight">{set.name}</CardTitle>
+                        <CardDescription>
+                          {set.artifacts.length} артефактів в сеті
+                        </CardDescription>
+                      </div>
+                    </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {set.description && (
@@ -150,19 +134,7 @@ export default async function DMArtifactsPage({
                         {set.description}
                       </p>
                     )}
-                    {setBonus && (
-                      <div className="rounded-md border border-dashed p-3 text-sm">
-                        <p className="font-semibold">Ефект сету</p>
-                        {setBonus.title && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {setBonus.title}
-                          </p>
-                        )}
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {setBonus.description}
-                        </p>
-                      </div>
-                    )}
+                    <ArtifactSetBonusDisplay setBonus={set.setBonus} />
                     <div className="space-y-3">
                       {set.artifacts.map((artifact) => (
                         <ArtifactCard

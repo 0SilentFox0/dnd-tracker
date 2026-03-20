@@ -56,7 +56,7 @@ export function useEditBattleData(campaignId: string, battleId: string) {
     async function loadData() {
       try {
         const [chars, unitsData] = await Promise.all([
-          getCharacters(campaignId),
+          getCharacters(campaignId, { compact: true }),
           getUnits(campaignId),
         ]);
 
@@ -167,7 +167,7 @@ export function useEditBattleData(campaignId: string, battleId: string) {
     (c) => c.type === "player" && c.controlledBy !== null,
   );
 
-  const npcCharacters = characters.filter((c) => c.type === "npc");
+  const npcCharacters = characters.filter((c) => c.type === "npc_hero");
 
   return {
     campaignId,

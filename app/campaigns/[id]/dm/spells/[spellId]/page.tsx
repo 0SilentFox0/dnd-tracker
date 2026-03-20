@@ -63,6 +63,7 @@ export default function EditSpellPage({
         effects: formData.effects ?? null,
         groupId: formData.groupId || null,
         icon: formData.icon || null,
+        summonUnitId: formData.summonUnitId || null,
       },
       {
         onSuccess: () => {

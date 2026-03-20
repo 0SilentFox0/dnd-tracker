@@ -12,5 +12,6 @@ export {
   calculatePercentBonus,
   formatFlatBonusBreakdown,
   formatPercentBonusBreakdown,
+  matchesAttackBonusModifier,
   matchesAttackType,
 } from "./modifiers";

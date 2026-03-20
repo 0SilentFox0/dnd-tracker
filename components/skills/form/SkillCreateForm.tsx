@@ -122,6 +122,7 @@ export function SkillCreateForm({
           />
 
           <SkillSpellSection
+            campaignId={campaignId}
             spell={spell}
             spellEnhancement={spellEnhancement}
             spells={spells}

@@ -13,6 +13,28 @@ import { AttackType } from "@/lib/constants/battle";
  * @param attackType - тип атаки (AttackType enum)
  * @returns true якщо ефект застосовується до цього типу атаки
  */
+/**
+ * Чи застосовується модифікатор «бонус до кидка атаки» до цього типу атаки.
+ * `attack` / `attack_bonus` — на обидва типи; `ranged_attack` / `melee_attack` — вибірково.
+ * Рядки з `disadvantage` ігноруються (не бонус до атаки).
+ */
+export function matchesAttackBonusModifier(
+  modifierType: string,
+  attackType: AttackType,
+): boolean {
+  const s = modifierType.toLowerCase();
+
+  if (s.includes("disadvantage")) return false;
+
+  if (!s.includes("attack")) return false;
+
+  if (s.includes("ranged")) return attackType === AttackType.RANGED;
+
+  if (s.includes("melee")) return attackType === AttackType.MELEE;
+
+  return true;
+}
+
 export function matchesAttackType(effectStat: string, attackType: AttackType): boolean {
   const s = effectStat.toLowerCase();
 

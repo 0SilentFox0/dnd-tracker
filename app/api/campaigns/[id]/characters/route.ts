@@ -264,6 +264,10 @@ export async function GET(
 
     const type = searchParams.get("type"); // "player" | "npc_hero" | null = all
 
+    const compact =
+      searchParams.get("compact") === "1" ||
+      searchParams.get("compact") === "true";
+
     // Перевіряємо доступ до кампанії (не обов'язково DM)
     const accessResult = await requireCampaignAccess(id, false);
 
@@ -277,6 +281,28 @@ export async function GET(
 
     if (type === "player" || type === "npc_hero") {
       where.type = type;
+    }
+
+    if (compact) {
+      const characters = await prisma.character.findMany({
+        where,
+        select: {
+          id: true,
+          campaignId: true,
+          type: true,
+          controlledBy: true,
+          name: true,
+          level: true,
+          class: true,
+          race: true,
+          avatar: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+
+      return NextResponse.json(characters);
     }
 
     const characters = await prisma.character.findMany({

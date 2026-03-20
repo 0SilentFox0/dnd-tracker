@@ -2,9 +2,24 @@
  * Компонент для бойових параметрів персонажа
  */
 
+import { Fragment } from "react";
+
+import { ArtifactDeltaBadge } from "@/components/characters/stats/ArtifactDeltaBadge";
 import { LabeledInput } from "@/components/ui/labeled-input";
 
+export type CharacterCombatArtifactBonuses = {
+  armorClass?: number;
+  initiative?: number;
+  speed?: number;
+  minTargets?: number;
+  maxTargets?: number;
+  morale?: number;
+  spellSlotBonusByLevel?: Record<string, number>;
+};
+
 interface CharacterCombatParamsProps {
+  /** Плоскі бонуси з екіпірованих артефактів (носій). */
+  artifactBonuses?: CharacterCombatArtifactBonuses;
   combatStats: {
     armorClass: number;
     initiative: number;
@@ -26,6 +41,7 @@ interface CharacterCombatParamsProps {
 }
 
 export function CharacterCombatParams({
+  artifactBonuses,
   combatStats,
 }: CharacterCombatParamsProps) {
   const {
@@ -39,11 +55,23 @@ export function CharacterCombatParams({
     setters,
   } = combatStats;
 
+  const slotBonuses = artifactBonuses?.spellSlotBonusByLevel ?? {};
+
+  const slotBonusEntries = Object.entries(slotBonuses).filter(
+    ([, n]) => typeof n === "number" && n !== 0,
+  );
+
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
       <LabeledInput
         id="armorClass"
         label="Клас Броні (AC)"
+        labelExtra={
+          artifactBonuses ? (
+            <ArtifactDeltaBadge value={artifactBonuses.armorClass ?? 0} />
+          ) : null
+        }
         type="number"
         min="0"
         value={armorClass}
@@ -54,6 +82,11 @@ export function CharacterCombatParams({
       <LabeledInput
         id="initiative"
         label="Ініціатива"
+        labelExtra={
+          artifactBonuses ? (
+            <ArtifactDeltaBadge value={artifactBonuses.initiative ?? 0} />
+          ) : null
+        }
         type="number"
         value={initiative}
         onChange={(e) => setters.setInitiative(parseInt(e.target.value) || 0)}
@@ -63,6 +96,11 @@ export function CharacterCombatParams({
       <LabeledInput
         id="speed"
         label="Швидкість"
+        labelExtra={
+          artifactBonuses ? (
+            <ArtifactDeltaBadge value={artifactBonuses.speed ?? 0} />
+          ) : null
+        }
         type="number"
         min="0"
         value={speed}
@@ -82,6 +120,11 @@ export function CharacterCombatParams({
       <LabeledInput
         id="minTargets"
         label="Мін. цілей"
+        labelExtra={
+          artifactBonuses ? (
+            <ArtifactDeltaBadge value={artifactBonuses.minTargets ?? 0} />
+          ) : null
+        }
         type="number"
         min="1"
         value={minTargets}
@@ -92,6 +135,11 @@ export function CharacterCombatParams({
       <LabeledInput
         id="maxTargets"
         label="Макс. цілей"
+        labelExtra={
+          artifactBonuses ? (
+            <ArtifactDeltaBadge value={artifactBonuses.maxTargets ?? 0} />
+          ) : null
+        }
         type="number"
         min="1"
         value={maxTargets}
@@ -102,6 +150,11 @@ export function CharacterCombatParams({
       <LabeledInput
         id="morale"
         label="Мораль"
+        labelExtra={
+          artifactBonuses ? (
+            <ArtifactDeltaBadge value={artifactBonuses.morale ?? 0} />
+          ) : null
+        }
         type="number"
         min="-3"
         max="3"
@@ -110,6 +163,28 @@ export function CharacterCombatParams({
         containerClassName="w-full min-w-0"
         className="w-full"
       />
+      </div>
+      {slotBonusEntries.length > 0 && (
+        <p className="text-sm text-muted-foreground">
+          <span className="font-medium text-foreground">
+            Додаткові слоти від артефактів:
+          </span>{" "}
+          {slotBonusEntries.map(([lvl, n], i) => (
+            <Fragment key={lvl}>
+              {i > 0 ? ", " : null}
+              <span
+                className={
+                  n > 0
+                    ? "font-medium text-green-600 dark:text-green-500"
+                    : "font-medium text-red-600 dark:text-red-500"
+                }
+              >
+                рівень {lvl}: {n > 0 ? `+${n}` : n}
+              </span>
+            </Fragment>
+          ))}
+        </p>
+      )}
     </div>
   );
 }

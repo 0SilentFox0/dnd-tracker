@@ -22,7 +22,9 @@ import { CharacterSkillTreeView } from "@/components/characters/abilities/Charac
 import { CharacterArtifactsSection } from "@/components/characters/artifacts/CharacterArtifactsSection";
 import { CharacterBasicInfo } from "@/components/characters/basic/CharacterBasicInfo";
 import { CharacterSkillsSection } from "@/components/characters/skills/CharacterSkillsSection";
+import type { CharacterAbilityArtifactBonuses } from "@/components/characters/stats/CharacterAbilityScores";
 import { CharacterAbilityScores } from "@/components/characters/stats/CharacterAbilityScores";
+import type { CharacterCombatArtifactBonuses } from "@/components/characters/stats/CharacterCombatParams";
 import { CharacterCombatParams } from "@/components/characters/stats/CharacterCombatParams";
 import { CharacterDamagePreview } from "@/components/characters/stats/CharacterDamagePreview";
 import { CharacterHpPreview } from "@/components/characters/stats/CharacterHpPreview";
@@ -34,6 +36,7 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import type { SkillTreeProgress } from "@/lib/hooks/characters";
+import type { ArtifactSetRow } from "@/types/artifact-sets";
 import type { CampaignMember } from "@/types/campaigns";
 import type { EquippedItems } from "@/types/inventory";
 import type { Race } from "@/types/races";
@@ -61,6 +64,9 @@ export interface CharacterViewEnhancedAccordionProps {
   abilities: Record<string, unknown>;
   spellcasting: { knownSpells: string[]; spellSlots?: Record<string, { max: number; current: number }> };
   equipped: Record<string, unknown>;
+  artifactAbilityBonuses?: CharacterAbilityArtifactBonuses;
+  artifactCombatBonuses?: CharacterCombatArtifactBonuses;
+  artifactSets?: ArtifactSetRow[];
   artifactOptions: Array<{ id: string; name: string; slot: string; icon?: string | null }>;
   members: CampaignMember[];
   races: Array<{ id: string; name: string }>;
@@ -81,6 +87,9 @@ export function CharacterViewEnhancedAccordion({
   abilities,
   spellcasting,
   equipped,
+  artifactAbilityBonuses,
+  artifactCombatBonuses,
+  artifactSets,
   artifactOptions,
   members,
   races,
@@ -120,6 +129,7 @@ export function CharacterViewEnhancedAccordion({
         </AccordionTrigger>
         <AccordionContent className="px-4 pb-4 pt-2">
           <CharacterAbilityScores
+            artifactBonuses={artifactAbilityBonuses}
             abilityScores={{ ...abilityScores, setters: noopAbilitySetters } as never}
           />
         </AccordionContent>
@@ -147,6 +157,7 @@ export function CharacterViewEnhancedAccordion({
             isDm={false}
           />
           <CharacterCombatParams
+            artifactBonuses={artifactCombatBonuses}
             combatStats={{ ...combatStats, setters: noopCombatSetters } as never}
           />
         </AccordionContent>
@@ -213,6 +224,7 @@ export function CharacterViewEnhancedAccordion({
             skillTreeProgress={(formData.skillTreeProgress ?? {}) as SkillTreeProgress}
             equipped={equipped as EquippedItems}
             artifacts={artifactOptions}
+            artifactSets={artifactSets}
             spellSlots={formData.spellcasting.spellSlots}
           />
         </AccordionContent>

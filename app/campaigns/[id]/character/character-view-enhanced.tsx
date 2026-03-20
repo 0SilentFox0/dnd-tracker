@@ -1,22 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 
 import { CharacterViewEnhancedAccordion } from "./components/character-view/CharacterViewEnhancedAccordion";
 import { CharacterViewPlayerHero } from "./components/character-view/CharacterViewPlayerHero";
 
+import type { CharacterAbilityArtifactBonuses } from "@/components/characters/stats/CharacterAbilityScores";
+import type { CharacterCombatArtifactBonuses } from "@/components/characters/stats/CharacterCombatParams";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ReadOnlyProvider } from "@/components/ui/read-only-context";
-import { getArtifacts } from "@/lib/api/artifacts";
+import { getArtifactSets } from "@/lib/api/artifact-sets";
+import { type ArtifactListItem,getArtifacts } from "@/lib/api/artifacts";
 import { getCharacter, updateCharacter } from "@/lib/api/characters";
 import { getHeroMaxHpBreakdown } from "@/lib/constants/hero-scaling";
 import { useCampaignMembers } from "@/lib/hooks/campaigns";
 import { useCharacterForm } from "@/lib/hooks/characters";
 import { useRaces } from "@/lib/hooks/races";
+import { sumEquippedArtifactFlatBonuses } from "@/lib/utils/artifacts/sum-equipped-artifact-flat-bonuses";
 import { characterToFormData } from "@/lib/utils/characters/character-form";
+import type { ArtifactSetRow } from "@/types/artifact-sets";
 import type { Character } from "@/types/characters";
 import type { EquippedItems } from "@/types/inventory";
 
@@ -61,6 +66,12 @@ export function CharacterViewEnhanced({
     enabled: !!campaignId && characterLoaded,
   });
 
+  const { data: artifactSets = [] } = useQuery({
+    queryKey: ["artifact-sets", campaignId],
+    queryFn: () => getArtifactSets(campaignId),
+    enabled: !!campaignId && characterLoaded,
+  });
+
   useEffect(() => {
     let cancelled = false;
 
@@ -90,6 +101,49 @@ export function CharacterViewEnhanced({
       cancelled = true;
     };
   }, [campaignId, characterId, setFormData]);
+
+  const artifactSetsRows = artifactSets as ArtifactSetRow[];
+
+  const artifactOptions = artifacts.map(
+    (a: { id: string; name: string; slot: string; icon?: string | null }) => ({
+      id: a.id,
+      name: a.name,
+      slot: a.slot ?? "item",
+      icon: a.icon ?? null,
+    }),
+  );
+
+  const artifactsDetail = artifacts as ArtifactListItem[];
+
+  const equippedArtifactBonuses = useMemo(
+    () => sumEquippedArtifactFlatBonuses(equipped, artifactsDetail),
+    [equipped, artifactsDetail],
+  );
+
+  const artifactAbilityBonuses: CharacterAbilityArtifactBonuses = useMemo(
+    () => ({
+      strength: equippedArtifactBonuses.strength,
+      dexterity: equippedArtifactBonuses.dexterity,
+      constitution: equippedArtifactBonuses.constitution,
+      intelligence: equippedArtifactBonuses.intelligence,
+      wisdom: equippedArtifactBonuses.wisdom,
+      charisma: equippedArtifactBonuses.charisma,
+    }),
+    [equippedArtifactBonuses],
+  );
+
+  const artifactCombatBonuses: CharacterCombatArtifactBonuses = useMemo(
+    () => ({
+      armorClass: equippedArtifactBonuses.armorClass,
+      initiative: equippedArtifactBonuses.initiative,
+      speed: equippedArtifactBonuses.speed,
+      minTargets: equippedArtifactBonuses.minTargets,
+      maxTargets: equippedArtifactBonuses.maxTargets,
+      morale: equippedArtifactBonuses.morale,
+      spellSlotBonusByLevel: equippedArtifactBonuses.spellSlotBonusByLevel,
+    }),
+    [equippedArtifactBonuses],
+  );
 
   const handleSaveSkillTree = async () => {
     setSaveError(null);
@@ -121,15 +175,6 @@ export function CharacterViewEnhanced({
       </div>
     );
   }
-
-  const artifactOptions = artifacts.map(
-    (a: { id: string; name: string; slot: string; icon?: string | null }) => ({
-      id: a.id,
-      name: a.name,
-      slot: a.slot ?? "item",
-      icon: a.icon ?? null,
-    }),
-  );
 
   const isPlayerView = !allowPlayerEdit;
 
@@ -203,6 +248,9 @@ export function CharacterViewEnhanced({
             campaignId={campaignId}
             characterId={characterId}
             isPlayerView={isPlayerView}
+            artifactAbilityBonuses={artifactAbilityBonuses}
+            artifactCombatBonuses={artifactCombatBonuses}
+            artifactSets={artifactSetsRows}
             formData={formData}
             onSkillTreeProgressChange={(next) =>
               setFormData((prev) => ({

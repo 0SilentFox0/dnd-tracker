@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 
+import { CharacterCompletedArtifactSetsSummary } from "./CharacterCompletedArtifactSetsSummary";
 import { CharacterSpellbook } from "./CharacterSpellbook";
 import { SpellSlotsBadge } from "./SpellSlotsBadge";
 
@@ -14,6 +15,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { updateInventory } from "@/lib/api/inventory";
 import { ARTIFACT_GRID_9, ArtifactSlot } from "@/lib/constants/artifacts";
+import { getCompletedArtifactSetsPreview } from "@/lib/utils/artifacts/get-completed-artifact-sets-preview";
+import type { ArtifactSetRow } from "@/types/artifact-sets";
 import type { EquippedItems } from "@/types/inventory";
 
 type SkillTreeProgress = Record<
@@ -43,6 +46,8 @@ interface CharacterArtifactsSectionProps {
   onEquippedChange?: (equipped: EquippedItems) => void;
   /** Магічні слоти для відображення під іконкою книги */
   spellSlots?: SpellSlotsData;
+  /** Сети кампанії — для підказки бонусу повного сету за поточною екіпіровкою */
+  artifactSets?: ArtifactSetRow[];
 }
 
 export function CharacterArtifactsSection({
@@ -55,8 +60,17 @@ export function CharacterArtifactsSection({
   artifacts = [],
   onEquippedChange,
   spellSlots = {},
+  artifactSets,
 }: CharacterArtifactsSectionProps) {
   const [updatingSlot, setUpdatingSlot] = useState<string | null>(null);
+
+  const completedArtifactSets = useMemo(
+    () =>
+      artifactSets?.length
+        ? getCompletedArtifactSetsPreview(equipped, artifactSets)
+        : [],
+    [equipped, artifactSets],
+  );
 
   const isEditMode =
     characterId != null && artifacts.length >= 0 && onEquippedChange != null;
@@ -239,6 +253,10 @@ export function CharacterArtifactsSection({
           />
         </div>
       </div>
+
+      <CharacterCompletedArtifactSetsSummary
+        completedSets={completedArtifactSets}
+      />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { ArtifactSetCardIcon } from "@/components/artifact-sets/ArtifactSetCardIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -81,13 +82,16 @@ export default async function DMArtifactSetsPage({
             <Card key={s.id}>
               <CardHeader>
                 <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <CardTitle className="text-lg">{s.name}</CardTitle>
-                    {s.description && (
-                      <CardDescription className="mt-1">
-                        {s.description}
-                      </CardDescription>
-                    )}
+                  <div className="flex min-w-0 flex-1 gap-3">
+                    <ArtifactSetCardIcon url={s.icon} name={s.name} size="lg" />
+                    <div className="min-w-0">
+                      <CardTitle className="text-lg">{s.name}</CardTitle>
+                      {s.description && (
+                        <CardDescription className="mt-1">
+                          {s.description}
+                        </CardDescription>
+                      )}
+                    </div>
                   </div>
                   <Button size="sm" variant="outline" asChild>
                     <Link href={`/campaigns/${id}/dm/artifact-sets/${s.id}`}>

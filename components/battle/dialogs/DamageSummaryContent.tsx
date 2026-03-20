@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -83,8 +84,9 @@ export function DamageSummaryContent({
     <>
       <div className="min-h-[120px] space-y-2 py-2">
         {loading && (
-          <div className="flex items-center justify-center py-8 text-muted-foreground">
-            Обчислення…
+          <div className="flex flex-col items-center justify-center gap-3 py-8 text-muted-foreground">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <span>Обчислення…</span>
           </div>
         )}
         {error && (

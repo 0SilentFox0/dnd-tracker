@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 
 interface LabeledInputProps extends React.ComponentProps<typeof Input> {
   label: string;
+  /** Додатковий вміст після підпису (наприклад, дельта від артефактів). */
+  labelExtra?: React.ReactNode;
   description?: string;
   error?: string;
   required?: boolean;
@@ -17,6 +19,7 @@ interface LabeledInputProps extends React.ComponentProps<typeof Input> {
 
 export function LabeledInput({
   label,
+  labelExtra,
   description,
   error,
   required = false,
@@ -33,6 +36,7 @@ export function LabeledInput({
     <div className={cn("space-y-2", containerClassName)}>
       <Label htmlFor={readOnly ? undefined : inputId}>
         {label}
+        {labelExtra}
         {required && <span className="text-destructive ml-1">*</span>}
       </Label>
       <Input id={inputId} className={className} {...inputProps} />

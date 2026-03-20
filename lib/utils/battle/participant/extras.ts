@@ -15,6 +15,8 @@ export interface ParticipantExtras {
   minMorale?: number;
   enemyAttackDisadvantage?: boolean;
   advantageOnAllRolls?: boolean;
+  /** Перевага лише на кидки дальньої атаки (пасив сету / скілу). */
+  advantageOnRangedAttacks?: boolean;
   spellTargetsLvl45?: number;
   lightSpellsTargetAllAllies?: boolean;
   controlUnits?: number;

@@ -79,7 +79,9 @@ export async function PATCH(
       data.icon !== undefined &&
       shouldMirrorArtifactIconUrl(data.icon)
     ) {
-      const mirrored = await mirrorArtifactIconToSupabase(data.icon, {
+      const sourceUrl = (typeof data.icon === "string" ? data.icon : "").trim();
+
+      const mirrored = await mirrorArtifactIconToSupabase(sourceUrl, {
         campaignId: id,
         objectBaseName: `${artifactId}-${randomUUID()}`,
       });

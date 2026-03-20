@@ -10,12 +10,14 @@ import { DmCharacterEditForm } from "./DmCharacterEditForm";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { getArtifactSets } from "@/lib/api/artifact-sets";
 import { getArtifacts } from "@/lib/api/artifacts";
 import { getCharacter, updateCharacter } from "@/lib/api/characters";
 import { useCampaignMembers } from "@/lib/hooks/campaigns";
 import { useCharacterForm } from "@/lib/hooks/characters";
 import { useRaces } from "@/lib/hooks/races";
 import { characterToFormData } from "@/lib/utils/characters/character-form";
+import type { ArtifactSetRow } from "@/types/artifact-sets";
 import type { Character } from "@/types/characters";
 import type { EquippedItems } from "@/types/inventory";
 
@@ -44,6 +46,12 @@ export default function EditCharacterPage({
   const { data: artifacts = [] } = useQuery({
     queryKey: ["artifacts", id],
     queryFn: () => getArtifacts(id),
+    enabled: !!id && characterLoaded,
+  });
+
+  const { data: artifactSets = [] } = useQuery({
+    queryKey: ["artifact-sets", id],
+    queryFn: () => getArtifactSets(id),
     enabled: !!id && characterLoaded,
   });
 
@@ -94,6 +102,8 @@ export default function EditCharacterPage({
       cancelled = true;
     };
   }, [id, characterId, setFormData]);
+
+  const artifactSetsRows = artifactSets as ArtifactSetRow[];
 
   if (!characterLoaded || (loading && !formData.basicInfo.name)) {
     return (
@@ -150,6 +160,7 @@ export default function EditCharacterPage({
           equipped={equipped}
           setEquipped={setEquipped}
           artifacts={artifacts}
+          artifactSets={artifactSetsRows}
           loading={loading}
           membersLoading={membersLoading}
           queryClient={queryClient}

@@ -36,6 +36,7 @@ const createSpellSchema = z.object({
     (val) => (val === "" ? null : val),
     z.string().nullable().optional()
   ),
+  summonUnitId: z.string().optional().nullable(),
 });
 
 export async function POST(
@@ -80,6 +81,10 @@ export async function POST(
         effects: data.effects ? (data.effects as unknown as Prisma.InputJsonValue) : undefined,
         groupId: data.groupId || null,
         icon: data.icon || null,
+        summonUnitId:
+          data.summonUnitId && data.summonUnitId.length > 0
+            ? data.summonUnitId
+            : null,
       },
       include: {
         spellGroup: true,

@@ -77,10 +77,17 @@ export async function getDamagePreview(
  */
 export async function getCharacters(
   campaignId: string,
-  opts?: { type?: "player" | "npc_hero" },
+  opts?: { type?: "player" | "npc_hero"; compact?: boolean },
 ): Promise<Character[]> {
-  const path =
-    opts?.type ? `/characters?type=${opts.type}` : "/characters";
+  const params = new URLSearchParams();
+
+  if (opts?.type) params.set("type", opts.type);
+
+  if (opts?.compact) params.set("compact", "1");
+
+  const qs = params.toString();
+
+  const path = qs ? `/characters?${qs}` : "/characters";
 
   return campaignGet<Character[]>(campaignId, path);
 }

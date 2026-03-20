@@ -16,7 +16,8 @@ export interface ArtifactSetModifier {
 export interface ArtifactSetPassiveEffect {
   stat: string;
   type?: string;
-  value?: number | string;
+  value?: number | string | boolean;
+  isPercentage?: boolean;
 }
 
 export interface ParsedArtifactSetBonus {
@@ -85,13 +86,18 @@ function parsePassiveEffectsArray(raw: unknown): ArtifactSetPassiveEffect[] {
 
     if (typeof stat !== "string") continue;
 
+    const rawVal = p.value;
+
     out.push({
       stat,
       type: typeof p.type === "string" ? p.type : undefined,
       value:
-        typeof p.value === "number" || typeof p.value === "string"
-          ? p.value
+        typeof rawVal === "number" ||
+        typeof rawVal === "string" ||
+        typeof rawVal === "boolean"
+          ? rawVal
           : undefined,
+      isPercentage: Boolean(p.isPercentage),
     });
   }
 

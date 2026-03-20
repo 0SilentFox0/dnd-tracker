@@ -212,6 +212,14 @@ export function applyOnePassiveStatEffect(
       break;
     }
 
+    case "advantage_ranged": {
+      const ext = getParticipantExtras(participant);
+
+      ext.advantageOnRangedAttacks = true;
+      setParticipantExtras(participant, ext);
+      break;
+    }
+
     case "spell_targets_lvl4_5": {
       const ext = getParticipantExtras(participant);
 

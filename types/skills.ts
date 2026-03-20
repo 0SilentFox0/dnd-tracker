@@ -84,6 +84,10 @@ export interface GroupedSkill {
       duration?: number;
     } | null;
     spellNewSpellId?: string;
+    /** UI касту: дозволити кілька цілей для spellData.spellId */
+    spellAllowMultipleTargets?: boolean;
+    /** Заклинання з довідника (зазвичай target), що стають AOE у бою */
+    spellAoeSpellIds?: string[];
   };
   mainSkillData: {
     mainSkillId?: string;

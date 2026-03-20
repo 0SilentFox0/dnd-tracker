@@ -29,6 +29,8 @@ export interface SkillFormPayloadState {
     duration?: number;
   };
   spellNewSpellId: string | null;
+  spellAllowMultipleTargets: boolean;
+  spellAoeSpellIds: string[];
   skillTriggers: SkillTriggers;
 }
 
@@ -57,6 +59,8 @@ export function buildSkillFormPayload(
     spellTargetChange,
     spellAdditionalModifier,
     spellNewSpellId,
+    spellAllowMultipleTargets,
+    spellAoeSpellIds,
     skillTriggers,
   } = state;
 
@@ -101,6 +105,12 @@ export function buildSkillFormPayload(
             }
           : undefined,
       spellNewSpellId: spellNewSpellId || undefined,
+      spellAllowMultipleTargets,
+      spellAoeSpellIds: spellEnhancementTypes.includes(
+        SpellEnhancementType.AOE_SPELL_UNLOCK,
+      )
+        ? spellAoeSpellIds
+        : undefined,
     },
     mainSkillData: {
       mainSkillId: mainSkillId || undefined,

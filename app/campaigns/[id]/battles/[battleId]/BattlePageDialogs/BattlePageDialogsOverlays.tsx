@@ -32,6 +32,8 @@ export function BattlePageDialogsOverlays({
     mutations.nextTurn.isPending ||
     mutations.spell.isPending;
 
+  const showSpellPreviewWait = spellResult.spellPreviewLoading;
+
   return (
     <>
       <CounterAttackResultDialog
@@ -67,16 +69,18 @@ export function BattlePageDialogsOverlays({
           onDone={handlers.clearGlobalDamageFlash}
         />
       )}
-      {isApplyingDamageOrTurn && (
+      {(isApplyingDamageOrTurn || showSpellPreviewWait) && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-4">
             <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
             <p className="text-lg font-medium text-white/90">
-              {mutations.spell.isPending
-                ? "Застосування шкоди від магії…"
-                : mutations.attack.isPending
-                  ? "Застосування шкоди…"
-                  : "Перехід ходу…"}
+              {showSpellPreviewWait
+                ? "Підрахунок заклинання…"
+                : mutations.spell.isPending
+                  ? "Застосування шкоди від магії…"
+                  : mutations.attack.isPending
+                    ? "Застосування шкоди…"
+                    : "Перехід ходу…"}
             </p>
           </div>
         </div>

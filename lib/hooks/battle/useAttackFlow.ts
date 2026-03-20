@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { createAttackFlowHandlers } from "./useAttackFlow-handlers";
 
 import { AttackType } from "@/lib/constants/battle";
+import { getDisabledAttackKinds } from "@/lib/utils/battle/attack/disabled-attacks";
 import type { AttackData } from "@/types/api";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -101,6 +102,12 @@ export function useAttackFlow({
       : selectedTarget;
 
   const handleMeleeAttack = () => {
+    if (getDisabledAttackKinds(participant).melee) {
+      alert("Ближні атаки заблоковані активним ефектом");
+
+      return;
+    }
+
     const attack = participant.battleData.attacks?.find(
       (a) => a.type === AttackType.MELEE || a.range === "5 ft",
     );
@@ -114,6 +121,12 @@ export function useAttackFlow({
   };
 
   const handleRangedAttack = () => {
+    if (getDisabledAttackKinds(participant).ranged) {
+      alert("Дальні атаки заблоковані активним ефектом");
+
+      return;
+    }
+
     const attack = participant.battleData.attacks?.find(
       (a) => a.type === AttackType.RANGED || (a.range && a.range !== "5 ft"),
     );

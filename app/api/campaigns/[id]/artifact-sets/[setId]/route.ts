@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
+import { randomUUID } from "crypto";
 
 import { toArtifactSetErrorResponse } from "../route-errors";
 import { patchArtifactSetSchema } from "../schemas";
 
+import { resolveArtifactIconForPersistence } from "@/lib/supabase/artifact-icon-storage";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import {
   buildArtifactSetPatchInput,
@@ -64,7 +66,25 @@ export async function PATCH(
 
     const data = patchArtifactSetSchema.parse(await request.json());
 
-    const updateData = buildArtifactSetPatchInput(data);
+    let patch = data;
+
+    if (data.icon !== undefined) {
+      const raw =
+        data.icon === null ? null : String(data.icon).trim() || null;
+
+      const resolved = await resolveArtifactIconForPersistence(raw, {
+        campaignId: id,
+        objectBaseName: `${setId}-${randomUUID()}`,
+      });
+
+      if (!resolved.ok) {
+        return NextResponse.json({ error: resolved.message }, { status: 422 });
+      }
+
+      patch = { ...data, icon: resolved.icon };
+    }
+
+    const updateData = buildArtifactSetPatchInput(patch);
 
     if (Object.keys(updateData).length > 0) {
       await updateArtifactSetRow(setId, updateData);

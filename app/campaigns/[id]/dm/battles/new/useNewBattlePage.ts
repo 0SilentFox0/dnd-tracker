@@ -36,7 +36,7 @@ export function useNewBattlePage(params: Promise<{ id: string }>) {
     (c) => c.type === "player" && c.controlledBy !== null,
   );
 
-  const npcCharacters = characters.filter((c) => c.type === "npc");
+  const npcCharacters = characters.filter((c) => c.type === "npc_hero");
 
   return {
     id,

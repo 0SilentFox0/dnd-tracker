@@ -29,7 +29,13 @@ export interface BattleSpell {
   effects?: string[] | null;
   effectDetails?: {
     duration?: number;
-    effects?: Array<{ type: string; value: number; isPercentage?: boolean }>;
+    effects?: Array<{
+      type: string;
+      value: number;
+      isPercentage?: boolean;
+      /** Явно: шкідливий ефект (дебаф), навіть якщо value ≥ 0 */
+      harmful?: boolean;
+    }>;
     /** DoT з самого заклинання (напр. Decay): урон протягом кількох раундів */
     additionalModifier?: {
       modifier?: string;

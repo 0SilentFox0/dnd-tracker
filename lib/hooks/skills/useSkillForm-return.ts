@@ -2,6 +2,8 @@
  * Формування об'єкта return для useSkillForm.
  */
 
+import type React from "react";
+
 import { SpellEnhancementType } from "@/lib/constants/spell-enhancement";
 import type { SkillEffect } from "@/types/battle";
 import type { MainSkill } from "@/types/main-skills";
@@ -39,10 +41,13 @@ export interface SkillFormReturnParams {
   spellTargetChange: string | null;
   spellAdditionalModifier: { modifier?: string; damageDice?: string; duration?: number };
   spellNewSpellId: string | null;
+  spellAllowMultipleTargets: boolean;
+  spellAoeSpellIds: string[];
   setSpellEffectIncrease: (v: string) => void;
   setSpellTargetChange: (v: string | null) => void;
   setSpellAdditionalModifier: (v: { modifier?: string; damageDice?: string; duration?: number }) => void;
   setSpellNewSpellId: (v: string | null) => void;
+  setSpellAoeSpellIds: React.Dispatch<React.SetStateAction<string[]>>;
   handleEnhancementTypeToggle: (type: SpellEnhancementType) => void;
   mainSkillId: string | null;
   setMainSkillId: (v: string | null) => void;
@@ -86,11 +91,14 @@ export function buildSkillFormReturn(p: SkillFormReturnParams) {
       spellTargetChange: p.spellTargetChange,
       spellAdditionalModifier: p.spellAdditionalModifier,
       spellNewSpellId: p.spellNewSpellId,
+      spellAllowMultipleTargets: p.spellAllowMultipleTargets,
+      spellAoeSpellIds: p.spellAoeSpellIds,
       setters: {
         setSpellEffectIncrease: p.setSpellEffectIncrease,
         setSpellTargetChange: p.setSpellTargetChange,
         setSpellAdditionalModifier: p.setSpellAdditionalModifier,
         setSpellNewSpellId: p.setSpellNewSpellId,
+        setSpellAoeSpellIds: p.setSpellAoeSpellIds,
       },
       handlers: { handleEnhancementTypeToggle: p.handleEnhancementTypeToggle },
     },

@@ -61,7 +61,7 @@ export interface CampaignSpellContext {
   /** Сети артефактів (для бонусу повного комплекту без додаткових запитів). */
   artifactSetsById?: Record<
     string,
-    { id: string; name: string; setBonus: unknown }
+    { id: string; name: string; setBonus: unknown; icon?: string | null }
   >;
   /** setId → усі id артефактів кампанії в цьому сеті */
   artifactSetMemberIds?: Record<string, string[]>;

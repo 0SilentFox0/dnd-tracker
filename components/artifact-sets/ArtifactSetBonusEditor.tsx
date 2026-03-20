@@ -22,6 +22,7 @@ import {
   ARTIFACT_SET_MODIFIER_OPTIONS,
   ARTIFACT_SET_PASSIVE_FLAG_STATS,
   ARTIFACT_SET_PASSIVE_STAT_OPTIONS,
+  buildArtifactSetModifierSelectGroups,
   SPELL_SLOT_LEVEL_KEYS,
 } from "@/lib/constants/artifact-sets";
 import {
@@ -38,7 +39,7 @@ export interface ArtifactSetBonusEditorProps {
 
 function defaultModifier(): ArtifactSetModifierFormRow {
   return {
-    type: "melee_damage",
+    type: "all_damage",
     value: 0,
     isPercentage: false,
     element: "",
@@ -54,7 +55,7 @@ export function ArtifactSetBonusEditor({
   onChange,
   campaignId,
 }: ArtifactSetBonusEditorProps) {
-  const modifierSelectOptions = useMemo(() => {
+  const modifierSelectGroups = useMemo(() => {
     const known = new Set(ARTIFACT_SET_MODIFIER_OPTIONS.map((o) => o.value));
 
     const extra: SelectOption[] = [];
@@ -66,8 +67,29 @@ export function ArtifactSetBonusEditor({
       }
     }
 
-    return [...ARTIFACT_SET_MODIFIER_OPTIONS, ...extra];
+    const all = [...ARTIFACT_SET_MODIFIER_OPTIONS, ...extra];
+
+    return buildArtifactSetModifierSelectGroups(all);
   }, [value.modifiers]);
+
+  const hasRangedAttackAdvantage = value.passiveEffects.some(
+    (e) => e.stat === "advantage_ranged",
+  );
+
+  const setRangedAttackAdvantage = (enabled: boolean) => {
+    const without = value.passiveEffects.filter((e) => e.stat !== "advantage_ranged");
+
+    if (!enabled) {
+      setBonusField("passiveEffects", without);
+
+      return;
+    }
+
+    setBonusField("passiveEffects", [
+      ...without,
+      { stat: "advantage_ranged", type: "flag", value: "" },
+    ]);
+  };
 
   const passiveStatSelectOptions = useMemo(() => {
     const known = new Set(
@@ -315,9 +337,39 @@ export function ArtifactSetBonusEditor({
         )}
       </div>
 
+      <div className="space-y-3 rounded-md border border-dashed bg-muted/15 p-4">
+        <div>
+          <p className="text-sm font-medium">Шкода та дальні атаки</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Бонус до шкоди задається рядками «Модифікатори» нижче (група «Шкода»). Тут —
+            швидкий перемикач переваги на кидки дальньої атаки (як пасив сету).
+          </p>
+        </div>
+        <label className="flex cursor-pointer items-start gap-3 text-sm leading-snug">
+          <Checkbox
+            checked={hasRangedAttackAdvantage}
+            onCheckedChange={(c) => setRangedAttackAdvantage(c === true)}
+            className="mt-0.5"
+          />
+          <span>
+            <span className="font-medium">Перевага на всі дальні атаки</span>
+            <span className="block text-xs text-muted-foreground">
+              Еквівалент пасиву «Перевага на дальні атаки» у списку нижче; у бою
+              застосовується після збору повного сету.
+            </span>
+          </span>
+        </label>
+      </div>
+
       <div className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-sm font-medium">Модифікатори (атака / шкода / цілі)</p>
+          <div>
+            <p className="text-sm font-medium">Модифікатори (атака / шкода / цілі)</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Тип «Шкода (усі фізичні атаки)» або «Шкода дальня» — плоский бонус або % до
+              відповідної шкоди в бою.
+            </p>
+          </div>
           <Button type="button" variant="outline" size="sm" onClick={addModifier}>
             <Plus className="mr-1 h-4 w-4" />
             Додати
@@ -338,7 +390,7 @@ export function ArtifactSetBonusEditor({
                     value={m.type}
                     onValueChange={(v) => updateModifier(i, { type: v })}
                     placeholder="Тип"
-                    options={modifierSelectOptions}
+                    groups={modifierSelectGroups}
                   />
                 </div>
                 <div className="w-28 space-y-1">

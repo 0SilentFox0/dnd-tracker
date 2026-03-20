@@ -15,6 +15,7 @@ import { ArtifactSetBonusEditor } from "./ArtifactSetBonusEditor";
 import { ArtifactSetMembersPicker } from "./ArtifactSetMembersPicker";
 
 import { Button } from "@/components/ui/button";
+import { ImageUpload } from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,6 +31,8 @@ export interface ArtifactSetFormProps {
   setId?: string;
   initialName?: string;
   initialDescription?: string | null;
+  /** URL іконки (або data URL до збереження) — HUD бою при повному сеті */
+  initialIcon?: string | null;
   /** Сирий JSON з БД або порожній об'єкт для нового сету */
   initialSetBonus?: unknown;
   initialArtifactIds?: string[];
@@ -40,6 +43,7 @@ export function ArtifactSetForm({
   setId,
   initialName = "",
   initialDescription = "",
+  initialIcon = "",
   initialSetBonus,
   initialArtifactIds = [],
 }: ArtifactSetFormProps) {
@@ -48,6 +52,8 @@ export function ArtifactSetForm({
   const [name, setName] = useState(initialName);
 
   const [description, setDescription] = useState(initialDescription ?? "");
+
+  const [icon, setIcon] = useState(initialIcon ?? "");
 
   const [bonusForm, setBonusForm] = useState<ArtifactSetBonusFormState>(() =>
     initialSetBonus === undefined || initialSetBonus === null
@@ -99,6 +105,7 @@ export function ArtifactSetForm({
         description: description.trim() ? description : null,
         setBonus,
         artifactIds: [...selectedIds],
+        icon: icon.trim() ? icon : null,
       };
 
       if (setId) {
@@ -168,6 +175,21 @@ export function ArtifactSetForm({
           rows={2}
           placeholder="Коротко про призначення сету"
         />
+      </div>
+
+      <div className="space-y-2">
+        <ImageUpload
+          value={icon}
+          onChange={setIcon}
+          label="Іконка для бою"
+          placeholder="URL зображення або завантажте файл з комп’ютера"
+          previewAlt="Іконка сету в бою"
+        />
+        <p className="text-xs text-muted-foreground">
+          Показується біля портрета в битві при повному сеті. Завантажений файл
+          зберігається в сховищі кампанії (як іконки артефактів), у базі лишається
+          посилання.
+        </p>
       </div>
 
       <ArtifactSetBonusEditor

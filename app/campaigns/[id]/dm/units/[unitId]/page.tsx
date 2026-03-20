@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useMemo, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -26,6 +26,68 @@ import { useDeleteUnit, useUnit, useUpdateUnit } from "@/lib/hooks/units";
 import type { Spell } from "@/types/spells";
 import type { Unit } from "@/types/units";
 
+function buildUnitFormData(unit: Unit): Partial<Unit> {
+  const raceValue =
+    (unit.race && unit.race.trim()) ||
+    (unit.unitGroup?.name as string | undefined) ||
+    null;
+
+  return {
+    name: unit.name,
+    race: raceValue,
+    level: unit.level,
+    strength: unit.strength,
+    dexterity: unit.dexterity,
+    constitution: unit.constitution,
+    intelligence: unit.intelligence,
+    wisdom: unit.wisdom,
+    charisma: unit.charisma,
+    armorClass: unit.armorClass,
+    initiative: unit.initiative,
+    speed: unit.speed,
+    maxHp: unit.maxHp,
+    proficiencyBonus: unit.proficiencyBonus,
+    attacks: Array.isArray(unit.attacks) ? unit.attacks : [],
+    specialAbilities: Array.isArray(unit.specialAbilities)
+      ? unit.specialAbilities
+      : [],
+    immunities: Array.isArray(unit.immunities) ? unit.immunities : [],
+    knownSpells: Array.isArray(unit.knownSpells) ? unit.knownSpells : [],
+    groupId: unit.groupId || null,
+    avatar: unit.avatar || null,
+    damageModifier: unit.damageModifier || null,
+    minTargets: unit.minTargets,
+    maxTargets: unit.maxTargets,
+  };
+}
+
+function emptyUnitFormDefaults(): Partial<Unit> {
+  return {
+    name: "",
+    level: 1,
+    strength: 10,
+    dexterity: 10,
+    constitution: 10,
+    intelligence: 10,
+    wisdom: 10,
+    charisma: 10,
+    armorClass: 10,
+    initiative: 0,
+    speed: 30,
+    maxHp: 10,
+    proficiencyBonus: 2,
+    attacks: [],
+    specialAbilities: [],
+    immunities: [],
+    knownSpells: [],
+    avatar: null,
+    damageModifier: null,
+    race: null,
+    minTargets: 1,
+    maxTargets: 1,
+  };
+}
+
 export default function EditUnitPage({
   params,
 }: {
@@ -45,86 +107,31 @@ export default function EditUnitPage({
 
   const [spells, setSpells] = useState<Spell[]>([]);
 
-  // Використовуємо useMemo для обчислення початкових даних форми
-  const initialFormData = useMemo<Partial<Unit>>(() => {
-    if (unit) {
-      const raceValue =
-        (unit.race && unit.race.trim()) ||
-        (unit.unitGroup?.name as string | undefined) ||
-        null;
+  const [formData, setFormData] = useState<Partial<Unit>>(emptyUnitFormDefaults);
 
-      return {
-        name: unit.name,
-        race: raceValue,
-        level: unit.level,
-        strength: unit.strength,
-        dexterity: unit.dexterity,
-        constitution: unit.constitution,
-        intelligence: unit.intelligence,
-        wisdom: unit.wisdom,
-        charisma: unit.charisma,
-        armorClass: unit.armorClass,
-        initiative: unit.initiative,
-        speed: unit.speed,
-        maxHp: unit.maxHp,
-        proficiencyBonus: unit.proficiencyBonus,
-        attacks: Array.isArray(unit.attacks) ? unit.attacks : [],
-        specialAbilities: Array.isArray(unit.specialAbilities)
-          ? unit.specialAbilities
-          : [],
-        immunities: Array.isArray(unit.immunities) ? unit.immunities : [],
-        knownSpells: Array.isArray(unit.knownSpells) ? unit.knownSpells : [],
-        groupId: unit.groupId || null,
-        avatar: unit.avatar || null,
-        damageModifier: unit.damageModifier || null,
-        minTargets: unit.minTargets,
-        maxTargets: unit.maxTargets,
-      };
-    }
-
-    return {
-      name: "",
-      level: 1,
-      strength: 10,
-      dexterity: 10,
-      constitution: 10,
-      intelligence: 10,
-      wisdom: 10,
-      charisma: 10,
-      armorClass: 10,
-      initiative: 0,
-      speed: 30,
-      maxHp: 10,
-      proficiencyBonus: 2,
-      attacks: [],
-      specialAbilities: [],
-      immunities: [],
-      knownSpells: [],
-      avatar: null,
-      damageModifier: null,
-      race: null,
-      minTargets: 1,
-      maxTargets: 1,
-    };
-  }, [unit]);
-
-  const [formData, setFormData] = useState<Partial<Unit>>(initialFormData);
-
-  const hasSyncedUnitRef = useRef<string | null>(null);
+  /** Коли дані з сервера «добудовуються» (race, група), треба знову синхронізувати форму — не лише за unit.id */
+  const lastServerSyncKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     getSpells(id).then(setSpells).catch(console.error);
   }, [id]);
 
-  // Підтягуємо дані юніта в форму при першому завантаженні (включно з расою з групи)
+  // Підтягуємо дані юніта в форму; повторно — якщо змінились раса / група (кеш → повне завантаження)
   useEffect(() => {
     if (!unit) return;
 
-    if (hasSyncedUnitRef.current !== unit.id) {
-      hasSyncedUnitRef.current = unit.id;
-      setFormData(initialFormData); // eslint-disable-line react-hooks/set-state-in-effect -- sync form when unit loads/changes
-    }
-  }, [unit, initialFormData]);
+    const syncKey = [
+      unit.id,
+      unit.race ?? "",
+      unit.groupId ?? "",
+      unit.unitGroup?.name ?? "",
+    ].join("|");
+
+    if (lastServerSyncKeyRef.current === syncKey) return;
+
+    lastServerSyncKeyRef.current = syncKey;
+    setFormData(buildUnitFormData(unit)); // eslint-disable-line react-hooks/set-state-in-effect -- sync form from server snapshot
+  }, [unit]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -137,7 +144,11 @@ export default function EditUnitPage({
             ? formData.knownSpells
             : unit?.knownSpells ?? [],
         race:
-          formData.race !== undefined ? formData.race : unit?.race ?? null,
+          formData.race !== undefined
+            ? formData.race && String(formData.race).trim()
+              ? String(formData.race).trim()
+              : null
+            : (unit?.race?.trim() ?? null),
         avatar:
           formData.avatar === undefined ? undefined : formData.avatar || null,
         damageModifier:

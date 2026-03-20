@@ -71,9 +71,32 @@ export async function request<T>(
   }
 
   if (!response.ok) {
-    const rawMessage = (body as { error?: string })?.error ?? response.statusText;
+    const errField = (body as { error?: unknown })?.error;
 
-    const message = rawMessage || `Помилка ${response.status}`;
+    let message: string;
+
+    if (typeof errField === "string") {
+      message = errField;
+    } else if (Array.isArray(errField)) {
+      message = errField
+        .map((issue: unknown) =>
+          issue &&
+          typeof issue === "object" &&
+          "message" in issue &&
+          typeof (issue as { message: unknown }).message === "string"
+            ? (issue as { message: string }).message
+            : JSON.stringify(issue),
+        )
+        .join("; ");
+    } else if (errField != null && typeof errField === "object") {
+      message = JSON.stringify(errField);
+    } else {
+      message = response.statusText;
+    }
+
+    if (!message.trim()) {
+      message = `Помилка ${response.status}`;
+    }
 
     const payload: ApiErrorPayload = {
       status: response.status,

@@ -50,6 +50,7 @@ export const createSkillSchema = z.object({
           "target_change",
           "additional_modifier",
           "new_spell",
+          "aoe_spell_unlock",
         ]),
       )
       .optional(),
@@ -67,6 +68,8 @@ export const createSkillSchema = z.object({
       })
       .optional(),
     spellNewSpellId: z.string().optional(),
+    spellAllowMultipleTargets: z.boolean().optional(),
+    spellAoeSpellIds: z.array(z.string()).optional(),
   }),
   mainSkillData: z.object({
     mainSkillId: z.string().optional(),

@@ -8,6 +8,12 @@ import type { BattleSpell } from "../types/spell-process";
 import { parseDurationToRounds } from "@/lib/utils/spells/duration-to-rounds";
 import type { BattleParticipant } from "@/types/battle";
 
+const ATTACK_DISABLE_EFFECT_TAGS = new Set([
+  "disable_melee_attacks",
+  "disable_ranged_attacks",
+  "disable_spell_casting",
+]);
+
 export function applySpellAdditionalModifier(
   spell: BattleSpell,
   updatedTargets: BattleParticipant[],
@@ -74,6 +80,7 @@ export function applySpellDurationEffects(
       type: e.type,
       value: e.value,
       ...(e.isPercentage != null && { isPercentage: e.isPercentage }),
+      ...(e.harmful != null && { harmful: e.harmful }),
     })) ?? [];
 
   if (
@@ -86,6 +93,14 @@ export function applySpellDurationEffects(
     ];
   }
 
+  for (const tag of Array.isArray(spell.effects) ? spell.effects : []) {
+    if (typeof tag !== "string" || !ATTACK_DISABLE_EFFECT_TAGS.has(tag)) continue;
+
+    if (!spellEffectDetails.some((e) => e.type === tag)) {
+      spellEffectDetails.push({ type: tag, value: 1 });
+    }
+  }
+
   if (durationRounds <= 0 && spellEffectDetails.length === 0) {
     return updatedTargets;
   }
@@ -94,6 +109,16 @@ export function applySpellDurationEffects(
 
   const isBeneficial = spellEffectDetails.every((e) => {
     if (e.type === "vampirism" || e.type === "ranged_damage_reduction") return true;
+
+    if (ATTACK_DISABLE_EFFECT_TAGS.has(e.type)) return false;
+
+    if (e.type.startsWith("disable_")) return false;
+
+    const raw = (e as { harmful?: boolean }).harmful;
+
+    if (raw === true) return false;
+
+    if (raw === false) return true;
 
     return e.value >= 0;
   });

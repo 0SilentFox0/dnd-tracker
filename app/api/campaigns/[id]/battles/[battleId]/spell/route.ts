@@ -2,10 +2,12 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
+import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { logBattleTiming } from "@/lib/utils/battle/battle-timing";
 import { BattleSpell, processSpell } from "@/lib/utils/battle/spell";
+import { appendSummonedUnitToInitiativeEnd } from "@/lib/utils/battle/spell/append-summoned-unit";
 import {
   prepareBattleLogForStorage,
   preparePusherPayload,
@@ -137,22 +139,22 @@ export async function POST(
       );
     }
 
-    // Перевіряємо чи кастер може використати заклинання (action або bonus action)
-    const isBonusActionSpell =
-      spellData.castingTime?.toLowerCase().includes("bonus") ?? false;
+    // Прев’ю лише рахує результат — не вимагає вільної дії / бонус-дії
+    if (!data.preview) {
+      const isBonusActionSpell =
+        spellData.castingTime?.toLowerCase().includes("bonus") ?? false;
 
-    if (isBonusActionSpell) {
-      if (caster.actionFlags.hasUsedBonusAction) {
-        return NextResponse.json(
-          { error: "Caster has already used their bonus action" },
-          { status: 400 }
-        );
-      }
-    } else {
-      if (caster.actionFlags.hasUsedAction) {
+      if (isBonusActionSpell) {
+        if (caster.actionFlags.hasUsedBonusAction) {
+          return NextResponse.json(
+            { error: "Caster has already used their bonus action" },
+            { status: 400 },
+          );
+        }
+      } else if (caster.actionFlags.hasUsedAction) {
         return NextResponse.json(
           { error: "Caster has already used their action" },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
@@ -225,6 +227,57 @@ export async function POST(
       return p;
     });
 
+    const hitCheckMiss =
+      spellResult.battleAction.actionDetails?.hitCheckMiss === true;
+
+    const summonUnitId = spellData.summonUnitId?.trim() || null;
+
+    const canSummonFromSpell =
+      !data.preview &&
+      spellResult.success &&
+      !hitCheckMiss &&
+      summonUnitId != null &&
+      summonUnitId.length > 0;
+
+    let initiativeOrderToPersist = updatedInitiativeOrder;
+
+    let battleActionForLog = spellResult.battleAction;
+
+    if (canSummonFromSpell) {
+      const casterSide =
+        caster.basicInfo.side === "enemy"
+          ? ParticipantSide.ENEMY
+          : ParticipantSide.ALLY;
+
+      const { finalOrder, summoned } = await appendSummonedUnitToInitiativeEnd({
+        campaignId: id,
+        battleId,
+        summonUnitId,
+        casterSide,
+        orderAfterSpell: updatedInitiativeOrder,
+      });
+
+      if (summoned) {
+        initiativeOrderToPersist = finalOrder;
+        battleActionForLog = {
+          ...spellResult.battleAction,
+          targets: [
+            ...spellResult.battleAction.targets,
+            {
+              participantId: summoned.basicInfo.id,
+              participantName: summoned.basicInfo.name,
+            },
+          ],
+          actionDetails: {
+            ...spellResult.battleAction.actionDetails,
+            summonedUnitTemplateId: summoned.basicInfo.sourceId,
+            summonedParticipantId: summoned.basicInfo.id,
+          },
+          resultText: `${spellResult.battleAction.resultText} Прикликано: ${summoned.basicInfo.name}.`,
+        };
+      }
+    }
+
     // Отримуємо поточний battleLog та додаємо нову дію з stateBefore для rollback
     const battleLog = (battle.battleLog as unknown as BattleAction[]) || [];
 
@@ -239,7 +292,7 @@ export async function POST(
     };
 
     const battleAction: BattleAction = {
-      ...spellResult.battleAction,
+      ...battleActionForLog,
       actionIndex,
       stateBefore,
     };
@@ -259,7 +312,7 @@ export async function POST(
       where: { id: battleId },
       data: {
         initiativeOrder: slimInitiativeOrderForStorage(
-          updatedInitiativeOrder,
+          initiativeOrderToPersist,
         ) as unknown as Prisma.InputJsonValue,
         battleLog: prepareBattleLogForStorage([
           ...battleLog,

@@ -3,7 +3,10 @@
  * Див. також lib/types/artifact-set-bonus.ts та docs/ARTIFACT-SETS.md
  */
 
-import type { SelectOption } from "@/components/ui/select-field";
+import type {
+  SelectOption,
+  SelectOptionGroup,
+} from "@/components/ui/select-field";
 import { EFFECT_STAT_OPTIONS } from "@/lib/constants/skill-effects";
 
 /** Плоскі числові бонуси (merge-set-bonus). */
@@ -30,10 +33,71 @@ export const ARTIFACT_SET_MODIFIER_OPTIONS: SelectOption[] = [
   { value: "all_damage", label: "Шкода (усі фізичні атаки)" },
   { value: "damageMelee", label: "Шкода ближня (legacy)" },
   { value: "damageRanged", label: "Шкода дальня (legacy)" },
-  { value: "attack", label: "Бонус до кидка атаки" },
+  { value: "attack", label: "Бонус до кидка атаки (мілі + дальн.)" },
+  { value: "ranged_attack", label: "Бонус до дальньої атаки" },
+  { value: "melee_attack", label: "Бонус до ближньої атаки" },
   { value: "min_targets", label: "Мін. цілей (модифікатор)" },
   { value: "max_targets", label: "Макс. цілей (модифікатор)" },
 ];
+
+/** Порядок груп у селекті модифікаторів бонусу сету (решта потрапляє в «Інше»). */
+const ARTIFACT_SET_MODIFIER_GROUP_ORDER: { label: string; values: string[] }[] = [
+  {
+    label: "Шкода",
+    values: [
+      "all_damage",
+      "physical_damage",
+      "melee_damage",
+      "ranged_damage",
+      "damageMelee",
+      "damageRanged",
+    ],
+  },
+  {
+    label: "Кидок атаки",
+    values: ["attack", "ranged_attack", "melee_attack"],
+  },
+  {
+    label: "Цілі",
+    values: ["min_targets", "max_targets"],
+  },
+];
+
+/** Групує відомі типи модифікаторів; невідомі ключі з даних — в останній групі «Інше». */
+export function buildArtifactSetModifierSelectGroups(
+  options: SelectOption[],
+): SelectOptionGroup[] {
+  const byValue = new Map(options.map((o) => [o.value, o]));
+
+  const used = new Set<string>();
+
+  const groups: SelectOptionGroup[] = [];
+
+  for (const g of ARTIFACT_SET_MODIFIER_GROUP_ORDER) {
+    const opts: SelectOption[] = [];
+
+    for (const v of g.values) {
+      const o = byValue.get(v);
+
+      if (o) {
+        opts.push(o);
+        used.add(v);
+      }
+    }
+
+    if (opts.length > 0) {
+      groups.push({ label: g.label, options: opts });
+    }
+  }
+
+  const rest = options.filter((o) => !used.has(o.value));
+
+  if (rest.length > 0) {
+    groups.push({ label: "Інше", options: rest });
+  }
+
+  return groups.length > 0 ? groups : [{ label: "Модифікатори", options }];
+}
 
 const ARTIFACT_SET_PASSIVE_STATS = new Set([
   "hp_bonus",
@@ -46,6 +110,7 @@ const ARTIFACT_SET_PASSIVE_STATS = new Set([
   "spell_slots_lvl4_5",
   "enemy_attack_disadvantage",
   "advantage",
+  "advantage_ranged",
   "spell_targets_lvl4_5",
   "light_spells_target_all_allies",
   "control_units",
@@ -60,6 +125,7 @@ export const ARTIFACT_SET_PASSIVE_STAT_OPTIONS: SelectOption[] =
 export const ARTIFACT_SET_PASSIVE_FLAG_STATS = new Set([
   "enemy_attack_disadvantage",
   "advantage",
+  "advantage_ranged",
   "light_spells_target_all_allies",
 ]);
 

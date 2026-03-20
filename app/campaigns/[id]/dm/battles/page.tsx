@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAuthUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { battleSceneListSelect } from "@/lib/utils/battle/battle-scene-list-select";
 
 export default async function DMBattlesPage({
   params,
@@ -40,6 +41,7 @@ export default async function DMBattlesPage({
     orderBy: {
       createdAt: "desc",
     },
+    select: battleSceneListSelect,
   });
 
   const activeBattles = battles.filter(b => b.status === "active");

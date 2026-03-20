@@ -42,6 +42,8 @@ export interface GroupedSkillPayload {
       duration?: number;
     };
     spellNewSpellId?: string;
+    spellAllowMultipleTargets?: boolean;
+    spellAoeSpellIds?: string[];
   };
   mainSkillData: {
     mainSkillId?: string;

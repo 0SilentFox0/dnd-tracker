@@ -43,7 +43,12 @@ export function distributePendingScopedArtifactBonuses(
     };
 
     for (const r of recipients) {
-      applyParsedSetBonusToParticipantDirect(r, bundleForApply, item.displayName);
+      applyParsedSetBonusToParticipantDirect(
+        r,
+        bundleForApply,
+        item.displayName,
+        item.hud,
+      );
     }
   }
 }

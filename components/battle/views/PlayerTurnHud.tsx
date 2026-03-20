@@ -1,34 +1,51 @@
 "use client";
 
-import { Heart, TrendingDown, TrendingUp } from "lucide-react";
+import { useMemo } from "react";
+import { Heart } from "lucide-react";
 
+import {
+  groupEffectsBySource,
+  ParticipantBattleEffectsStrip,
+} from "@/components/battle/cards/participant-card";
 import { ParticipantStats } from "@/components/battle/ParticipantStats";
-import { EffectsRow } from "@/components/battle/views/ui/EffectsRow";
 import { cn } from "@/lib/utils";
 import type { BattleParticipant } from "@/types/battle";
-import type { ActiveEffect } from "@/types/battle";
 
 interface PlayerTurnHudProps {
   participant: BattleParticipant;
-  buffs: ActiveEffect[];
-  debuffs: ActiveEffect[];
-  conditions: ActiveEffect[];
+  initiativeOrder: BattleParticipant[];
 }
 
 export function PlayerTurnHud({
   participant,
-  buffs,
-  debuffs,
-  conditions,
+  initiativeOrder,
 }: PlayerTurnHudProps) {
   const { currentHp, maxHp } = participant.combatStats;
 
   const hpPercent = maxHp > 0 ? (currentHp / maxHp) * 100 : 0;
 
+  const { groupedHeroEffects, regularEffects } = useMemo(
+    () =>
+      groupEffectsBySource(
+        participant.battleData?.activeEffects ?? [],
+        initiativeOrder,
+      ),
+    [participant.battleData?.activeEffects, initiativeOrder],
+  );
+
+  const hasEffectStrip =
+    (participant.battleData?.activeEffects?.length ?? 0) > 0 ||
+    (participant.combatStats.tempHp > 0) ||
+    participant.combatStats.status === "unconscious" ||
+    (participant.battleData.artifactSetHudMarkers?.length ?? 0) > 0;
+
   return (
-    <div className="shrink-0 bg-black/50 backdrop-blur-md border-b border-white/10 px-3 py-2 space-y-2">
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <div className="flex items-center gap-2 min-w-0" title="Здоров'я">
+    <div className="shrink-0 bg-black/50 backdrop-blur-md border-b border-white/10 py-2">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4 px-3">
+        <div
+          className="flex items-center gap-2 shrink-0 min-w-0"
+          title="Здоров'я"
+        >
           <Heart className="h-4 w-4 shrink-0 text-red-400/90" />
           <span className="tabular-nums font-bold text-white">
             {currentHp}/{maxHp}
@@ -47,21 +64,19 @@ export function PlayerTurnHud({
             />
           </div>
         </div>
-        <EffectsRow
-          effects={buffs}
-          variant="buff"
-          icon={<TrendingUp className="h-3.5 w-3 shrink-0 text-green-400/80" />}
-        />
-        <EffectsRow
-          effects={debuffs}
-          variant="debuff"
-          icon={
-            <TrendingDown className="h-3.5 w-3 shrink-0 text-red-400/80" />
-          }
-        />
-        <EffectsRow effects={conditions} variant="condition" />
+
+        {hasEffectStrip && (
+          <ParticipantBattleEffectsStrip
+            participant={participant}
+            displayedHeroEffects={groupedHeroEffects}
+            regularEffects={regularEffects}
+            className="flex flex-wrap items-center gap-2 flex-1 min-w-0"
+            ringOffsetClassName="ring-offset-black/80"
+          />
+        )}
       </div>
-      <div className="flex justify-center">
+
+      <div className="flex justify-center px-3 pt-2 border-t border-white/5 mt-2">
         <ParticipantStats participant={participant} className="text-white/90" />
       </div>
     </div>

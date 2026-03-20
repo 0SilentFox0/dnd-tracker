@@ -57,6 +57,7 @@ export default async function EditArtifactSetPage({
         setId={setRow.id}
         initialName={setRow.name}
         initialDescription={setRow.description}
+        initialIcon={setRow.icon}
         initialSetBonus={setRow.setBonus ?? {}}
         initialArtifactIds={initialArtifactIds}
       />

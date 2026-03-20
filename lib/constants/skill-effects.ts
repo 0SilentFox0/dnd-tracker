@@ -73,6 +73,10 @@ export const EFFECT_STAT_OPTIONS: SelectOption[] = [
 
   // Тактичні
   { value: "advantage", label: "Перевага (advantage)" },
+  {
+    value: "advantage_ranged",
+    label: "Перевага на дальні атаки (advantage_ranged)",
+  },
   { value: "enemy_attack_disadvantage", label: "Недолік ворожої атаки" },
   { value: "guaranteed_hit", label: "Гарантований удар" },
   { value: "attack_before_enemy", label: "Атака перед ворогом" },

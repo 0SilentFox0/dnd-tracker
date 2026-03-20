@@ -32,6 +32,8 @@ export interface Spell {
   groupId: string | null;
   icon: string | null;
   appearanceDescription?: string | null;
+  /** Юніт з бібліотеки кампанії — з’являється на полі після успішного касту (кінець черги ініціативи) */
+  summonUnitId?: string | null;
   spellGroup?: {
     id: string;
     name: string;

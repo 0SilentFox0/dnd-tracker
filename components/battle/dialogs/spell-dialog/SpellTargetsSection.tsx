@@ -1,12 +1,10 @@
 "use client";
 
-import type { SpellDialogSpell } from "./types";
-
 import { Label } from "@/components/ui/label";
 import type { BattleParticipant } from "@/types/battle";
 
 interface SpellTargetsSectionProps {
-  selectedSpell: SpellDialogSpell;
+  targetSelectionKind: "none" | "single" | "multi";
   selectedTargets: string[];
   availableTargets: BattleParticipant[];
   isDM: boolean;
@@ -15,20 +13,20 @@ interface SpellTargetsSectionProps {
 }
 
 export function SpellTargetsSection({
-  selectedSpell,
+  targetSelectionKind,
   selectedTargets,
   availableTargets,
   isDM,
   canSeeEnemyHp,
   onTargetToggle,
 }: SpellTargetsSectionProps) {
-  if (selectedSpell.type === "no_target") return null;
+  if (targetSelectionKind === "none") return null;
 
   return (
     <div>
       <Label>
         Цілі
-        {selectedSpell.type === "target"
+        {targetSelectionKind === "single"
           ? " (1 ціль)"
           : " (AOE — кілька)"}
       </Label>

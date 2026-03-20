@@ -17,6 +17,7 @@ import {
 import { levelUpCharacter } from "@/lib/api/characters";
 import type { useCharacterForm } from "@/lib/hooks/characters";
 import { characterToFormData } from "@/lib/utils/characters/character-form";
+import type { ArtifactSetRow } from "@/types/artifact-sets";
 import type { CampaignMember } from "@/types/campaigns";
 import type { CharacterFormData } from "@/types/characters";
 import type { EquippedItems } from "@/types/inventory";
@@ -46,6 +47,7 @@ export interface DmCharacterEditFormProps {
     eq: EquippedItems | ((prev: EquippedItems) => EquippedItems),
   ) => void;
   artifacts: { id: string; name: string; slot: string; icon?: string | null }[];
+  artifactSets?: ArtifactSetRow[];
   loading: boolean;
   membersLoading: boolean;
   queryClient: QueryClient;
@@ -69,6 +71,7 @@ export function DmCharacterEditForm({
   equipped,
   setEquipped,
   artifacts,
+  artifactSets,
   loading,
   membersLoading,
   queryClient,
@@ -145,6 +148,7 @@ export function DmCharacterEditForm({
             equipped={equipped}
             setEquipped={setEquipped}
             artifacts={artifacts}
+            artifactSets={artifactSets}
             members={members}
             races={races}
           />

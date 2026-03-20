@@ -1,17 +1,22 @@
 "use client";
 
+import { useMemo } from "react";
+
 import {
   CharacterHeroBlock,
   CharacterViewAccordion,
   CharacterViewSingleCard,
 } from "./components/character-view";
 
+import type { CharacterAbilityArtifactBonuses } from "@/components/characters/stats/CharacterAbilityScores";
+import type { CharacterCombatArtifactBonuses } from "@/components/characters/stats/CharacterCombatParams";
 import { Card, CardContent } from "@/components/ui/card";
 import { ReadOnlyProvider } from "@/components/ui/read-only-context";
 import { getHeroMaxHpBreakdown } from "@/lib/constants/hero-scaling";
 import { useCampaignMembers } from "@/lib/hooks/campaigns";
 import { useCharacterView } from "@/lib/hooks/characters";
 import { useRaces } from "@/lib/hooks/races";
+import { sumEquippedArtifactFlatBonuses } from "@/lib/utils/artifacts/sum-equipped-artifact-flat-bonuses";
 
 export function CharacterViewClient({
   campaignId,
@@ -42,6 +47,8 @@ export function CharacterViewClient({
     equipped,
     setFormData,
     artifacts,
+    artifactsDetail,
+    artifactSets,
     damagePreview,
     schoolsByCount,
     lastSavedSkillTreeProgress,
@@ -50,6 +57,36 @@ export function CharacterViewClient({
   } = useCharacterView(campaignId, characterId);
 
   const isPlayerView = isDM !== undefined ? !isDM : !allowPlayerEdit;
+
+  const equippedArtifactBonuses = useMemo(
+    () => sumEquippedArtifactFlatBonuses(equipped, artifactsDetail),
+    [equipped, artifactsDetail],
+  );
+
+  const artifactAbilityBonuses: CharacterAbilityArtifactBonuses = useMemo(
+    () => ({
+      strength: equippedArtifactBonuses.strength,
+      dexterity: equippedArtifactBonuses.dexterity,
+      constitution: equippedArtifactBonuses.constitution,
+      intelligence: equippedArtifactBonuses.intelligence,
+      wisdom: equippedArtifactBonuses.wisdom,
+      charisma: equippedArtifactBonuses.charisma,
+    }),
+    [equippedArtifactBonuses],
+  );
+
+  const artifactCombatBonuses: CharacterCombatArtifactBonuses = useMemo(
+    () => ({
+      armorClass: equippedArtifactBonuses.armorClass,
+      initiative: equippedArtifactBonuses.initiative,
+      speed: equippedArtifactBonuses.speed,
+      minTargets: equippedArtifactBonuses.minTargets,
+      maxTargets: equippedArtifactBonuses.maxTargets,
+      morale: equippedArtifactBonuses.morale,
+      spellSlotBonusByLevel: equippedArtifactBonuses.spellSlotBonusByLevel,
+    }),
+    [equippedArtifactBonuses],
+  );
 
   const hpMult = formData.scalingCoefficients?.hpMultiplier ?? 1;
 
@@ -96,6 +133,9 @@ export function CharacterViewClient({
             spellcasting={spellcasting}
             formData={formData}
             equipped={equipped}
+            artifactAbilityBonuses={artifactAbilityBonuses}
+            artifactCombatBonuses={artifactCombatBonuses}
+            artifactSets={artifactSets}
             artifactOptions={artifacts}
             members={members}
             races={races}
@@ -125,6 +165,9 @@ export function CharacterViewClient({
             spellcasting={spellcasting}
             formData={formData}
             equipped={equipped}
+            artifactAbilityBonuses={artifactAbilityBonuses}
+            artifactCombatBonuses={artifactCombatBonuses}
+            artifactSets={artifactSets}
             artifactOptions={artifacts}
             members={members}
             races={races}

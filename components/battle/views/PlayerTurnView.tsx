@@ -11,6 +11,7 @@ import { TurnStartScreen } from "@/components/battle/views/TurnStartScreen";
 import { BATTLE_RACE } from "@/lib/constants/battle";
 import { useAttackFlow } from "@/lib/hooks/battle";
 import { getSkillsByTrigger } from "@/lib/utils/skills/triggers";
+import type { BattleParticipant } from "@/types/battle";
 import type { PlayerTurnViewProps } from "@/types/battle-ui";
 /**
  * Компонент для екрану ходу гравця
@@ -168,21 +169,11 @@ export function PlayerTurnView({
     );
   }
 
-  const activeEffects = participant.battleData?.activeEffects ?? [];
-
-  const buffs = activeEffects.filter((e) => e.type === "buff");
-
-  const debuffs = activeEffects.filter((e) => e.type === "debuff");
-
-  const conditions = activeEffects.filter((e) => e.type === "condition");
-
   return (
     <div className="flex flex-col h-full bg-gradient-to-b from-black/60 to-transparent animate-in fade-in duration-500">
       <PlayerTurnHud
         participant={participant}
-        buffs={buffs}
-        debuffs={debuffs}
-        conditions={conditions}
+        initiativeOrder={(battle.initiativeOrder ?? []) as BattleParticipant[]}
       />
 
       <PlayerTurnViewDialogs

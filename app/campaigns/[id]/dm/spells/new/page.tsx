@@ -60,6 +60,7 @@ export default function NewSpellPage({
         savingThrow: formData.savingThrow || null,
         groupId: formData.groupId || null,
         icon: formData.icon || null,
+        summonUnitId: formData.summonUnitId || null,
       },
       {
         onSuccess: () => router.push(`/campaigns/${id}/dm/spells`),

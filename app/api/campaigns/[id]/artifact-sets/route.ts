@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
+import { randomUUID } from "crypto";
 
 import { toArtifactSetErrorResponse } from "./route-errors";
 import { createArtifactSetSchema } from "./schemas";
 
+import { resolveArtifactIconForPersistence } from "@/lib/supabase/artifact-icon-storage";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import {
   insertArtifactSet,
@@ -52,10 +54,29 @@ export async function POST(
 
     const data = createArtifactSetSchema.parse(await request.json());
 
+    let icon: string | null | undefined = data.icon;
+
+    if (data.icon !== undefined) {
+      const raw =
+        data.icon === null ? null : String(data.icon).trim() || null;
+
+      const resolved = await resolveArtifactIconForPersistence(raw, {
+        campaignId: id,
+        objectBaseName: randomUUID(),
+      });
+
+      if (!resolved.ok) {
+        return NextResponse.json({ error: resolved.message }, { status: 422 });
+      }
+
+      icon = resolved.icon;
+    }
+
     const created = await insertArtifactSet(id, {
       name: data.name,
       description: data.description ?? null,
       setBonus: data.setBonus,
+      icon,
     });
 
     if (data.artifactIds?.length) {

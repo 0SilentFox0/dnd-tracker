@@ -10,6 +10,7 @@ import {
   SYNTHETIC_SET_BONUS_ID_PREFIX,
 } from "./constants";
 import { equippedArtifactToParsedBonusBundle } from "./equipped-to-parsed-bundle";
+import { pushArtifactSetHudMarker } from "./push-artifact-set-hud-marker";
 
 import {
   ARTIFACT_EFFECT_ALL_ALLIES,
@@ -17,7 +18,11 @@ import {
 } from "@/lib/constants/artifact-effect-scope";
 import type { ParsedArtifactSetBonus } from "@/lib/types/artifact-set-bonus";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
-import type { BattleParticipant, EquippedArtifact } from "@/types/battle";
+import type {
+  ArtifactSetHudMarker,
+  BattleParticipant,
+  EquippedArtifact,
+} from "@/types/battle";
 
 function recomputeAbilityModifiers(p: BattleParticipant): void {
   const a = p.abilities;
@@ -39,6 +44,7 @@ export function applyParsedSetBonusToParticipantDirect(
   participant: BattleParticipant,
   bundle: ParsedArtifactSetBonus,
   displayName: string,
+  hud?: ArtifactSetHudMarker,
 ): void {
   const remainingBonuses: Record<string, number> = { ...bundle.bonuses };
 
@@ -113,12 +119,15 @@ export function applyParsedSetBonusToParticipantDirect(
 
   applyArtifactSetPassiveEffects(participant, bundle.passiveEffects ?? []);
   mergeParticipantImmuneSpellIds(participant, bundle.immuneSpellIds);
+
+  if (hud) pushArtifactSetHudMarker(participant, hud);
 }
 
 export function mergeArtifactSetBonusIntoParticipant(
   participant: BattleParticipant,
   bundle: ParsedArtifactSetBonus,
   displayName: string,
+  hud?: ArtifactSetHudMarker,
 ): void {
   const aud = bundle.effectAudience;
 
@@ -129,12 +138,15 @@ export function mergeArtifactSetBonusIntoParticipant(
       audience: aud,
       bundle,
       displayName,
+      hud,
     });
+
+    if (hud) pushArtifactSetHudMarker(participant, hud);
 
     return;
   }
 
-  applyParsedSetBonusToParticipantDirect(participant, bundle, displayName);
+  applyParsedSetBonusToParticipantDirect(participant, bundle, displayName, hud);
 }
 
 /** Чергає пасив/плоскі бонуси артефакта з аудиторією команда/вороги. */

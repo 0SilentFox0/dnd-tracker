@@ -139,6 +139,7 @@ export function buildSpellMissAction(
       spellId: spell.id,
       spellName: spell.name,
       spellLevel: spell.level,
+      hitCheckMiss: true,
     },
     resultText: `${caster.basicInfo.name} використав ${spell.name}, але не влучив (перевірка попадання)`,
     hpChanges: [],

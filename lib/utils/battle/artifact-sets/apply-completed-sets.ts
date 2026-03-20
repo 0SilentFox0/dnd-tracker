@@ -76,6 +76,12 @@ export async function applyCompletedArtifactSets(
     const label =
       parsed.name || setRow.name || SET_BONUS_DEFAULT_LABEL;
 
-    mergeArtifactSetBonusIntoParticipant(participant, parsed, label);
+    const hud = {
+      setId,
+      name: setRow.name,
+      icon: setRow.icon ?? null,
+    };
+
+    mergeArtifactSetBonusIntoParticipant(participant, parsed, label, hud);
   }
 }

@@ -23,6 +23,18 @@ export const SPELL_EFFECT_OPTIONS: SelectOption[] = [
   { value: "-2 Dex saves", label: "-2 Dex saves" },
 
   // Атаки та урон
+  {
+    value: "disable_melee_attacks",
+    label: "Заборона ближніх атак (melee)",
+  },
+  {
+    value: "disable_ranged_attacks",
+    label: "Заборона дальніх атак (ranged)",
+  },
+  {
+    value: "disable_spell_casting",
+    label: "Заборона касту заклинань (кнопка магії)",
+  },
   { value: "Target deals half damage on all weapon attacks", label: "Target deals half damage on all weapon attacks" },
   { value: "-2 to attack rolls and saving throws", label: "-2 to attack rolls and saving throws" },
   { value: "-4 to attack rolls and damage rolls (min 1 damage)", label: "-4 to attack rolls and damage rolls (min 1 damage)" },
@@ -85,6 +97,12 @@ export const SPELL_EFFECT_OPTIONS: SelectOption[] = [
 
   // Мана
   { value: "Крадіжка мани", label: "Крадіжка мани — у ворога зникає 1 слот магії 1 рівня (якщо є)" },
+
+  // Приклик (механіка + юніт обирається в блоці нижче форми)
+  {
+    value: "summon_unit_to_battle",
+    label: "Прикликає юніта на поле бою (кінець черги ініціативи)",
+  },
 ];
 
 /** Чи є рядок ефектом з бази (для відображення кастомних) */

@@ -22,6 +22,7 @@ export function getDefaultSpellFormData(): SpellFormData {
     effects: [],
     groupId: null,
     icon: null,
+    summonUnitId: null,
   };
 }
 

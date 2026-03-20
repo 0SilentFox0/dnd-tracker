@@ -162,6 +162,7 @@ model Unit {
   minTargets       Int        @default(1)
   campaign         Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   unitGroup        UnitGroup? @relation(fields: [groupId], references: [id])
+  spellsSummoning  Spell[]    @relation("SpellSummonUnit")
 
   @@index([campaignId])
   @@map("units")
@@ -207,6 +208,8 @@ model Spell {
   diceCount        Int?
   diceType         String?
   appearanceDescription String?  // опис вигляду для довідника гравців (редагує DM)
+  summonUnitId      String?
+  summonUnit        Unit?       @relation("SpellSummonUnit", fields: [summonUnitId], references: [id], onDelete: SetNull)
   skills              Skill[]
   skillsAsNewSpell     Skill[]  @relation("SkillNewSpell")
   skillsGrantingSpell Skill[]  @relation("SkillGrantedSpell")
@@ -257,6 +260,7 @@ model ArtifactSet {
   description String?
   artifactIds Json       @default("[]")
   setBonus    Json?
+  icon        String?
   createdAt   DateTime   @default(now())
   campaign    Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   artifacts   Artifact[]

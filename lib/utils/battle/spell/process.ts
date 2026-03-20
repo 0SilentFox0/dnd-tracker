@@ -175,7 +175,15 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
 
   let spellCalculation: SpellCalculation;
 
-  if (spell.damageType === "damage" || spell.damageType === "all") {
+  const spellDiceCount = spell.diceCount ?? 0;
+
+  const appliesDiceDamage =
+    (spell.damageType === "damage" || spell.damageType === "all") &&
+    spellDiceCount > 0;
+
+  const appliesDiceHeal = spell.damageType === "heal" && spellDiceCount > 0;
+
+  if (appliesDiceDamage) {
     const result = computeSpellDamageAndApply({
       caster: updatedCaster,
       spell,
@@ -187,7 +195,7 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
 
     spellCalculation = result.spellCalculation;
     updatedTargets = result.updatedTargets;
-  } else if (spell.damageType === "heal") {
+  } else if (appliesDiceHeal) {
     const result = computeSpellHealAndApply(
       updatedCaster,
       spell,
@@ -199,8 +207,16 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
     spellCalculation = result.spellCalculation;
     updatedTargets = result.updatedTargets;
   } else {
+    const noDiceHint =
+      spellDiceCount === 0 &&
+      (spell.damageType === "damage" ||
+        spell.damageType === "heal" ||
+        spell.damageType === "all")
+        ? " (без кубиків — HP не змінено за дайсами)"
+        : "";
+
     spellCalculation = {
-      breakdown: [`${spell.name} застосовано`],
+      breakdown: [`${spell.name} застосовано${noDiceHint}`],
       resistanceBreakdown: [],
     };
   }
@@ -261,7 +277,7 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
     updatedCaster = applyMainActionUsed(updatedCaster);
   }
 
-  if (spell.damageType === "damage" || spell.damageType === "all") {
+  if (appliesDiceDamage) {
     const casterSkillUsageCounts: Record<string, number> = {
       ...(updatedCaster.battleData.skillUsageCounts ?? {}),
     };

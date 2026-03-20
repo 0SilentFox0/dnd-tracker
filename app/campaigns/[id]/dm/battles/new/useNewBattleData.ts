@@ -27,7 +27,7 @@ export function useNewBattleData(campaignId: string) {
     async function loadData() {
       try {
         const [chars, unitsData, balanceData] = await Promise.all([
-          getCharacters(campaignId),
+          getCharacters(campaignId, { compact: true }),
           getUnits(campaignId),
           getBattleBalance(campaignId, {}),
         ]);

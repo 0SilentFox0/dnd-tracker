@@ -46,6 +46,7 @@ export function useSpellFormSync(
         })(),
         groupId: spell.groupId,
         icon: spell.icon || null,
+        summonUnitId: spell.summonUnitId ?? null,
       });
     }, 0);
 

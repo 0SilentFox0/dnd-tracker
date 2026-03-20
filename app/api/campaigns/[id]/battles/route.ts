@@ -6,6 +6,7 @@ import {
   requireCampaignAccess,
   requireDM,
 } from "@/lib/utils/api/api-auth";
+import { battleSceneListSelect } from "@/lib/utils/battle/battle-scene-list-select";
 
 const createBattleSchema = z.object({
   name: z.string().min(1).max(100),
@@ -85,9 +86,15 @@ export async function GET(
       orderBy: {
         createdAt: "desc",
       },
+      select: battleSceneListSelect,
     });
 
-    return NextResponse.json(battles);
+    return NextResponse.json(
+      battles.map((b) => ({
+        ...b,
+        battleLog: [] as unknown[],
+      })),
+    );
   } catch (error) {
     console.error("Error fetching battles:", error);
 

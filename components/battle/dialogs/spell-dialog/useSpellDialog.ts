@@ -6,6 +6,7 @@ import type { SpellCastPayload, SpellDialogSpell } from "./types";
 
 import type { SpellRichOptionData } from "@/components/spells/SpellRichOption";
 import { getSpells } from "@/lib/api/spells";
+import { participantSpellAllowsMultipleTargets } from "@/lib/utils/battle/spell/participant-spell-target-mode";
 import type { BattleParticipant } from "@/types/battle";
 
 function parseDiceType(diceType: string | null | undefined): number {
@@ -103,6 +104,36 @@ export function useSpellDialog(
 
   const diceCount = selectedSpell?.diceCount ?? 1;
 
+  /** Вибір цілей: одна / кілька / немає (no_target) */
+  const spellTargetSelectionKind = useMemo((): "none" | "single" | "multi" => {
+    if (!selectedSpell) return "none";
+
+    if (selectedSpell.type === "no_target") return "none";
+
+    if (selectedSpell.type === "aoe") return "multi";
+
+    if (
+      selectedSpell.type === "target" &&
+      caster &&
+      participantSpellAllowsMultipleTargets(caster, selectedSpell.id)
+    ) {
+      return "multi";
+    }
+
+    if (selectedSpell.type === "target") return "single";
+
+    return "none";
+  }, [selectedSpell, caster]);
+
+  useEffect(() => {
+    if (spellTargetSelectionKind !== "single") return;
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- зрізати цілі при перемиканні на single-target
+    setSelectedTargets((prev) =>
+      prev.length <= 1 ? prev : [prev[0] as string],
+    );
+  }, [spellTargetSelectionKind, selectedSpellId]);
+
   const buildCastData = (): SpellCastPayload | null => {
     if (!caster || !selectedSpell) return null;
 
@@ -144,11 +175,15 @@ export function useSpellDialog(
   const handleCast = () => {
     if (!selectedSpellId || !selectedSpell || !caster) return;
 
-    if (selectedSpell.type !== "no_target") {
-      if (selectedSpell.type === "target" && selectedTargets.length !== 1)
+    if (spellTargetSelectionKind !== "none") {
+      if (spellTargetSelectionKind === "single" && selectedTargets.length !== 1)
         return;
 
-      if (selectedTargets.length === 0) return;
+      if (
+        spellTargetSelectionKind === "multi" &&
+        selectedTargets.length === 0
+      )
+        return;
     }
 
     const data = buildCastData();
@@ -169,9 +204,9 @@ export function useSpellDialog(
   const handleTargetToggle = (targetId: string, checked: boolean) => {
     if (!selectedSpell) return;
 
-    if (selectedSpell.type === "target") {
+    if (spellTargetSelectionKind === "single") {
       setSelectedTargets(checked ? [targetId] : []);
-    } else if (selectedSpell.type === "aoe") {
+    } else if (spellTargetSelectionKind === "multi") {
       setSelectedTargets((prev) =>
         checked ? [...prev, targetId] : prev.filter((id) => id !== targetId),
       );
@@ -191,10 +226,10 @@ export function useSpellDialog(
   const isSubmitDisabled =
     !selectedSpellId ||
     !selectedSpell ||
-    (selectedSpell.type !== "no_target" &&
-      (selectedSpell.type === "target"
-        ? selectedTargets.length !== 1
-        : selectedTargets.length === 0)) ||
+    (spellTargetSelectionKind === "single" &&
+      selectedTargets.length !== 1) ||
+    (spellTargetSelectionKind === "multi" &&
+      selectedTargets.length === 0) ||
     (selectedSpell.hitCheck != null &&
       !(parseInt(hitRoll, 10) >= 1 && parseInt(hitRoll, 10) <= 20));
 
@@ -228,5 +263,6 @@ export function useSpellDialog(
     handleTargetToggle,
     isSubmitDisabled,
     submitLabel,
+    spellTargetSelectionKind,
   };
 }

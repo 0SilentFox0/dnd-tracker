@@ -4,6 +4,9 @@ export const ARTIFACT_ICONS_BUCKET = "artifact-icons" as const;
 
 const MAX_BYTES = 5 * 1024 * 1024;
 
+/** Макс. довжина рядка data URL (base64 роздуває файл ~на 33%). */
+const MAX_DATA_URL_CHARS = 7 * 1024 * 1024;
+
 function getExtensionFromUrl(url: string): string {
   try {
     const pathname = new URL(url).pathname;
@@ -63,7 +66,7 @@ export function isArtifactIconHostedOnProjectStorage(url: string): boolean {
 /** Потрібно завантажити з зовнішнього URL у бакет. */
 export function shouldMirrorArtifactIconUrl(
   url: string | null | undefined,
-): url is string {
+): boolean {
   if (!url || typeof url !== "string") return false;
 
   const t = url.trim();
@@ -73,6 +76,176 @@ export function shouldMirrorArtifactIconUrl(
   if (isArtifactIconHostedOnProjectStorage(t)) return false;
 
   return true;
+}
+
+const ALLOWED_DATA_URL_MIME = new Set([
+  "image/png",
+  "image/jpeg",
+  "image/jpg",
+  "image/gif",
+  "image/webp",
+]);
+
+/** Клієнтський прев’ю через FileReader (data:image/...;base64,...). */
+export function isArtifactIconDataUrl(
+  value: string | null | undefined,
+): boolean {
+  if (!value || typeof value !== "string") return false;
+
+  const t = value.trim();
+
+  if (t.length > MAX_DATA_URL_CHARS) return false;
+
+  return /^data:image\/[a-z0-9.+-]+;base64,/i.test(t);
+}
+
+/**
+ * Завантажує data URL у bucket artifact-icons (після decode — ліміт MAX_BYTES).
+ */
+export async function uploadArtifactIconDataUrlToSupabase(
+  dataUrl: string,
+  options: { campaignId: string; objectBaseName: string },
+): Promise<
+  { ok: true; publicUrl: string } | { ok: false; message: string }
+> {
+  const trimmed = dataUrl.trim();
+
+  if (trimmed.length > MAX_DATA_URL_CHARS) {
+    return { ok: false, message: "Зображення завелике" };
+  }
+
+  const match = trimmed.match(/^data:(image\/[a-z0-9.+-]+);base64,([\s\S]+)$/i);
+
+  if (!match) {
+    return {
+      ok: false,
+      message: "Невалідний формат зображення (очікується data:image/*;base64,...)",
+    };
+  }
+
+  let mime = match[1].toLowerCase().split(";")[0].trim();
+
+  if (mime === "image/jpg") mime = "image/jpeg";
+
+  if (!ALLOWED_DATA_URL_MIME.has(mime)) {
+    return {
+      ok: false,
+      message: "Дозволені формати: PNG, JPEG, GIF, WebP",
+    };
+  }
+
+  const b64 = match[2].replace(/\s/g, "");
+
+  let buffer: Buffer;
+
+  try {
+    buffer = Buffer.from(b64, "base64");
+  } catch {
+    return { ok: false, message: "Пошкоджені дані зображення" };
+  }
+
+  if (buffer.length === 0) {
+    return { ok: false, message: "Порожній файл" };
+  }
+
+  if (buffer.length > MAX_BYTES) {
+    return { ok: false, message: "Файл завеликий (макс. 5 МБ)" };
+  }
+
+  let supabase: ReturnType<typeof createAdminClient>;
+
+  try {
+    supabase = createAdminClient();
+  } catch (e) {
+    return {
+      ok: false,
+      message:
+        e instanceof Error
+          ? e.message
+          : "Не налаштовано Supabase (URL або service role)",
+    };
+  }
+
+  const ensured = await ensureBucket(supabase);
+
+  if (!ensured.ok) {
+    return { ok: false, message: ensured.message };
+  }
+
+  const ext = getExtensionFromContentType(mime);
+
+  const safeBase = options.objectBaseName.replace(/[^a-zA-Z0-9_-]/g, "");
+
+  if (!safeBase) {
+    return { ok: false, message: "Невалідне ім'я файлу" };
+  }
+
+  const fullPath = `${options.campaignId}/${safeBase}${ext}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from(ARTIFACT_ICONS_BUCKET)
+    .upload(fullPath, buffer, {
+      contentType: mime,
+      upsert: true,
+    });
+
+  if (uploadError) {
+    return { ok: false, message: uploadError.message };
+  }
+
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from(ARTIFACT_ICONS_BUCKET).getPublicUrl(fullPath);
+
+  return { ok: true, publicUrl };
+}
+
+const STORED_ICON_URL_MAX_LEN = 2000;
+
+/**
+ * Підготовка значення `icon` для збереження в БД: дзеркало зовнішнього URL,
+ * upload data URL у Storage, інакше — короткий рядок як є.
+ */
+export async function resolveArtifactIconForPersistence(
+  icon: string | null,
+  options: { campaignId: string; objectBaseName: string },
+): Promise<
+  { ok: true; icon: string | null } | { ok: false; message: string }
+> {
+  if (icon === null) {
+    return { ok: true, icon: null };
+  }
+
+  const t = typeof icon === "string" ? icon.trim() : "";
+
+  if (!t) {
+    return { ok: true, icon: null };
+  }
+
+  if (shouldMirrorArtifactIconUrl(t)) {
+    const mirrored = await mirrorArtifactIconToSupabase(t, options);
+
+    return mirrored.ok
+      ? { ok: true, icon: mirrored.publicUrl }
+      : { ok: false, message: mirrored.message };
+  }
+
+  if (isArtifactIconDataUrl(t)) {
+    const uploaded = await uploadArtifactIconDataUrlToSupabase(t, options);
+
+    return uploaded.ok
+      ? { ok: true, icon: uploaded.publicUrl }
+      : { ok: false, message: uploaded.message };
+  }
+
+  if (t.length > STORED_ICON_URL_MAX_LEN) {
+    return {
+      ok: false,
+      message: `Посилання занадто довге (макс. ${STORED_ICON_URL_MAX_LEN} символів)`,
+    };
+  }
+
+  return { ok: true, icon: t };
 }
 
 /**

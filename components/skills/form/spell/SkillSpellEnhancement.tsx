@@ -22,6 +22,10 @@ interface SpellOption {
   name: string;
 }
 
+const ENHANCEMENT_CHECKBOX_TYPES = SPELL_ENHANCEMENT_TYPES.filter(
+  (t) => t.value !== SpellEnhancementType.AOE_SPELL_UNLOCK,
+);
+
 interface SkillSpellEnhancementProps {
   spellEnhancementTypes: SpellEnhancementType[];
   spellEffectIncrease: string;
@@ -116,7 +120,7 @@ function SkillSpellEnhancementComponent({
     <div className="space-y-3">
       <Label>Типи покращення (можна вибрати декілька)</Label>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {SPELL_ENHANCEMENT_TYPES.map((type) => (
+        {ENHANCEMENT_CHECKBOX_TYPES.map((type) => (
           <div key={type.value} className="flex items-center space-x-2">
             <Checkbox
               id={`enhancement-${type.value}`}

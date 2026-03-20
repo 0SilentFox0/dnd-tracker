@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { type FormEvent,useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -97,9 +97,22 @@ export function useSkillForm(
   // Spell enhancement
   const [spellEnhancementTypes, setSpellEnhancementTypes] = useState<
     SpellEnhancementType[]
-  >(() =>
-    parseInitialSpellEnhancementTypes(normalizedData?.spellEnhancementTypes),
-  );
+  >(() => {
+    const base = parseInitialSpellEnhancementTypes(
+      normalizedData?.spellEnhancementTypes,
+    );
+
+    const aoeIds = normalizedData?.spellAoeSpellIds ?? [];
+
+    if (
+      aoeIds.length > 0 &&
+      !base.includes(SpellEnhancementType.AOE_SPELL_UNLOCK)
+    ) {
+      return [...base, SpellEnhancementType.AOE_SPELL_UNLOCK];
+    }
+
+    return base;
+  });
 
   const [spellEffectIncrease, setSpellEffectIncrease] = useState(
     normalizedData?.spellEffectIncrease?.toString() || "",
@@ -123,6 +136,30 @@ export function useSkillForm(
     normalizedData?.spellNewSpellId || null,
   );
 
+  const [spellAllowMultipleTargets] = useState(
+    normalizedData?.spellAllowMultipleTargets === true,
+  );
+
+  const [spellAoeSpellIds, setSpellAoeSpellIds] = useState<string[]>(
+    () => normalizedData?.spellAoeSpellIds ?? [],
+  );
+
+  useEffect(() => {
+    setSpellEnhancementTypes((types) => {
+      const hasAoe = types.includes(SpellEnhancementType.AOE_SPELL_UNLOCK);
+
+      if (spellAoeSpellIds.length > 0 && !hasAoe) {
+        return [...types, SpellEnhancementType.AOE_SPELL_UNLOCK];
+      }
+
+      if (spellAoeSpellIds.length === 0 && hasAoe) {
+        return types.filter((t) => t !== SpellEnhancementType.AOE_SPELL_UNLOCK);
+      }
+
+      return types;
+    });
+  }, [spellAoeSpellIds]);
+
   // Skill triggers
   const [skillTriggers, setSkillTriggers] = useState<SkillTriggers>(
     (normalizedData?.skillTriggers as SkillTriggers) || [],
@@ -131,9 +168,17 @@ export function useSkillForm(
   // Handlers
   const handleEnhancementTypeToggle = useCallback(
     (type: SpellEnhancementType) => {
-      setSpellEnhancementTypes((prev) =>
-        prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type],
-      );
+      setSpellEnhancementTypes((prev) => {
+        if (prev.includes(type)) {
+          if (type === SpellEnhancementType.AOE_SPELL_UNLOCK) {
+            setSpellAoeSpellIds([]);
+          }
+
+          return prev.filter((t) => t !== type);
+        }
+
+        return [...prev, type];
+      });
     },
     [],
   );
@@ -157,6 +202,8 @@ export function useSkillForm(
       spellTargetChange,
       spellAdditionalModifier,
       spellNewSpellId,
+      spellAllowMultipleTargets,
+      spellAoeSpellIds,
       skillTriggers,
     });
   }, [
@@ -177,11 +224,13 @@ export function useSkillForm(
     spellTargetChange,
     spellAdditionalModifier,
     spellNewSpellId,
+    spellAllowMultipleTargets,
+    spellAoeSpellIds,
     skillTriggers,
   ]);
 
   const handleSubmit = useCallback(
-    async (event: React.FormEvent) => {
+    async (event: FormEvent) => {
       event.preventDefault();
 
       if (!name.trim()) return;
@@ -258,10 +307,13 @@ export function useSkillForm(
     spellTargetChange,
     spellAdditionalModifier,
     spellNewSpellId,
+    spellAllowMultipleTargets,
+    spellAoeSpellIds,
     setSpellEffectIncrease,
     setSpellTargetChange,
     setSpellAdditionalModifier,
     setSpellNewSpellId,
+    setSpellAoeSpellIds,
     handleEnhancementTypeToggle,
     mainSkillId,
     setMainSkillId,

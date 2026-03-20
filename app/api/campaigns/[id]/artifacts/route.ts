@@ -32,7 +32,9 @@ export async function POST(
     let icon = data.icon;
 
     if (shouldMirrorArtifactIconUrl(icon)) {
-      const mirrored = await mirrorArtifactIconToSupabase(icon, {
+      const sourceUrl = (typeof icon === "string" ? icon : "").trim();
+
+      const mirrored = await mirrorArtifactIconToSupabase(sourceUrl, {
         campaignId: id,
         objectBaseName: randomUUID(),
       });

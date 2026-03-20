@@ -2,6 +2,7 @@
 
 import { noopCombatSetters } from "../constants";
 
+import type { CharacterCombatArtifactBonuses } from "@/components/characters/stats/CharacterCombatParams";
 import { CharacterCombatParams } from "@/components/characters/stats/CharacterCombatParams";
 import { CharacterDamagePreview } from "@/components/characters/stats/CharacterDamagePreview";
 import { CharacterHpPreview } from "@/components/characters/stats/CharacterHpPreview";
@@ -22,6 +23,7 @@ export interface CombatParamsAccordionProps {
     meleeMultiplier?: number;
     rangedMultiplier?: number;
   };
+  artifactCombatBonuses?: CharacterCombatArtifactBonuses;
 }
 
 export function CombatParamsAccordion({
@@ -31,6 +33,7 @@ export function CombatParamsAccordion({
   abilityScores,
   combatStats,
   scalingCoefficients = {},
+  artifactCombatBonuses,
 }: CombatParamsAccordionProps) {
   return (
     <AccordionItem value="item-3" className="rounded-xl border bg-card/75">
@@ -52,6 +55,7 @@ export function CombatParamsAccordion({
           isDm={false}
         />
         <CharacterCombatParams
+          artifactBonuses={artifactCombatBonuses}
           combatStats={
             {
               ...combatStats,
