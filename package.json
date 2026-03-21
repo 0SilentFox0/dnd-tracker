@@ -9,7 +9,7 @@
     "build:local": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "prisma generate",
+    "postinstall": "node scripts/postinstall.mjs",
     "deploy": "vercel --prod",
     "deploy:preview": "vercel",
     "deploy:dev": "vercel --dev",

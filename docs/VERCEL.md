@@ -70,6 +70,15 @@ pnpm run deploy:preview  # preview-деплой
 
 У `vercel.json` задано `pnpm install --frozen-lockfile`, щоб збігатися з `pnpm-lock.yaml` і `packageManager` у `package.json`.
 
+### Чому збірка «висить» на Prisma / pooler Supabase (6543)
+
+`prisma generate` **не потребує** живої БД, але CLI може довго чекати TCP до `DATABASE_URL`. На етапі **install** і **generate** з реальним pooler (EU) з білд-машини Vercel (наприклад iad1) це іноді тягнеться хвилини.
+
+У проєкті зроблено так:
+
+- **`postinstall`** на Vercel пропускає `prisma generate` (`scripts/postinstall.mjs`, перевірка `VERCEL`).
+- **`buildCommand`** запускає `prisma generate` з **placeholder** `DATABASE_URL` на `127.0.0.1` (з’єднання не в Supabase), далі `next build` уже використовує справжній `DATABASE_URL` з env проєкту для коду, що звертається до БД під час білду (якщо такі маршрути є).
+
 ## Міграції БД
 
 За замовчуванням збірка на Vercel **не** викликає `prisma migrate deploy` (у `vercel.json` лише `prisma generate && next build`). Міграції потрібно накатувати **проти тієї ж БД**, що в `DATABASE_URL` у Vercel.
