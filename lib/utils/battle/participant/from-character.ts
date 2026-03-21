@@ -79,6 +79,12 @@ export async function createBattleParticipantFromCharacter(
 
   const hpMult = (character as { hpMultiplier?: number | null }).hpMultiplier ?? 1;
 
+  const meleeMult =
+    (character as { meleeMultiplier?: number | null }).meleeMultiplier ?? 1;
+
+  const rangedMult =
+    (character as { rangedMultiplier?: number | null }).rangedMultiplier ?? 1;
+
   const computedMaxHp = getHeroMaxHp(character.level, character.strength, {
     hpMultiplier: hpMult,
   });
@@ -109,6 +115,8 @@ export async function createBattleParticipantFromCharacter(
       modifiers,
       proficiencyBonus: character.proficiencyBonus,
       race: character.race,
+      meleeMultiplier: meleeMult,
+      rangedMultiplier: rangedMult,
     },
     combatStats: {
       maxHp: computedMaxHp,

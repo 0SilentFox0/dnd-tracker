@@ -247,6 +247,10 @@ export interface BattleParticipantAbilities {
   };
   proficiencyBonus: number;
   race: string;
+  /** Коеф. DM для фіз. шкоди ближнього бою (лише character); як у калькуляторі персонажа */
+  meleeMultiplier?: number;
+  /** Коеф. DM для дальнього бою */
+  rangedMultiplier?: number;
 }
 
 /**

@@ -8,6 +8,7 @@ import {
   mergeDiceFormulas,
 } from "../../balance";
 import { calculateDamageWithModifiers } from "../../damage";
+import { applyHeroDmDamageMultiplier } from "../../damage/hero-dm-multiplier";
 import { applyResistance } from "../../resistance";
 import { checkTriggerCondition, getPassiveAbilitiesByTrigger } from "../../triggers";
 import type { DamageCalculationResult } from "../../types/damage-calculations";
@@ -169,6 +170,19 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
 
   if (criticalEffectApplied?.effect.type === "additional_damage") {
     physicalDamage += Math.floor(Math.random() * 6) + 1;
+  }
+
+  const heroDm = applyHeroDmDamageMultiplier(
+    updatedAttacker,
+    attack.type as AttackType,
+    physicalDamage,
+  );
+
+  physicalDamage = heroDm.damage;
+
+  if (heroDm.breakdownLine) {
+    damageCalculation.breakdown.push("──────────");
+    damageCalculation.breakdown.push(heroDm.breakdownLine);
   }
 
   const dmgMult =

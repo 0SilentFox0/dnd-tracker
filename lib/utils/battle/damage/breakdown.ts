@@ -18,6 +18,7 @@ import type {
   DamageBreakdownTargetResult,
 } from "../types/damage-breakdown";
 import { getDefenderResistanceBreakdown } from "./breakdown-helpers";
+import { applyHeroDmDamageMultiplier } from "./hero-dm-multiplier";
 import { calculateDamageWithModifiersImpl } from "./impl";
 
 import { AttackType } from "@/lib/constants/battle";
@@ -136,6 +137,19 @@ export function computeDamageBreakdown(
     totalDamage *= 2;
     breakdown.push(`──────────`);
     breakdown.push(`× 2 (крит) = ${totalDamage} урону`);
+  }
+
+  const heroDm = applyHeroDmDamageMultiplier(
+    attacker,
+    attackTypeSafe,
+    totalDamage,
+  );
+
+  totalDamage = heroDm.damage;
+
+  if (heroDm.breakdownLine) {
+    breakdown.push(`──────────`);
+    breakdown.push(heroDm.breakdownLine);
   }
 
   const damageType = attack.damageType ?? "physical";
