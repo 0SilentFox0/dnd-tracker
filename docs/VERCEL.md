@@ -56,7 +56,9 @@ pnpm run deploy:preview  # preview-деплой
 
 ## Міграції БД
 
-Збірка **не** запускає `prisma migrate deploy`. Після змін схеми виконай міграції вручну проти production БД (локально з `DATABASE_URL` прод або через CI):
+На Vercel міграції виконуються **під час збірки**: у `vercel.json` задано `prisma migrate deploy` перед `prisma generate` і `next build`. Потрібен коректний **`DATABASE_URL`** у змінних середовища для того оточення (Production / Preview), до якого застосовується деплой.
+
+Локально або в CI без Vercel:
 
 ```bash
 pnpm exec prisma migrate deploy
@@ -66,7 +68,7 @@ pnpm exec prisma migrate deploy
 
 Часто це **не одна база**: перевір `DATABASE_URL` у Vercel (Production) і в `.env.local` — рядки мають збігатися, якщо очікуєш одні й ті самі дані.
 
-Якщо база одна, але після деплою **500** на API або RSC (наприклад `/campaigns/.../info`), найчастіше **на проді не накатані міграції** при тому, що код уже з новою схемою Prisma. Тоді PostgreSQL не знає нових колонок — виконай `migrate deploy` проти тієї ж БД, що в Vercel.
+Якщо база одна, але після деплою **500** на API або RSC (наприклад `/campaigns/.../info`), перевір логи збірки: чи пройшов крок `prisma migrate deploy`. Якщо збірка стара або Preview вказує на іншу БД без міграцій — накати вручну `migrate deploy` проти потрібної бази.
 
 ## Supabase: чому pooler egress ≫ розмір БД
 
