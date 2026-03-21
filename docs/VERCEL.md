@@ -1,5 +1,21 @@
 # Деплой на Vercel
 
+## Швидкий troubleshooting
+
+### Персонажі / дані є локально, на проді немає
+
+Це майже завжди **різні бази**. Порівняй рядки підключення (без пароля):
+
+- **Vercel** → Project → Settings → Environment Variables → **Production** → `DATABASE_URL`
+- Локально: `.env.local` або `.env` → `DATABASE_URL`
+
+Мають збігатися **хост** (напр. `aws-…pooler.supabase.com` або `db.xxx.supabase.co`), **ім’я БД**, **користувач / project ref**. Якщо локально інший Supabase-проєкт або branch — дані не з’являться на проді навіть після успішного деплою.
+
+### Деплой падає з P3005 (`prisma migrate deploy`)
+
+1. У репозиторії в `vercel.json` має бути **`prisma generate && next build`** без `migrate deploy`. Якщо так і є, але в логах збірки все одно `prisma migrate deploy` → у **Vercel → Settings → Build and Deployment → Build Command** знято галочку override або вистав та саму команду, що в `vercel.json` (інколи старий override лишається з попередніх експериментів).
+2. База вже зі схемою з Supabase / без таблиці Prisma **`_prisma_migrations`** — `migrate deploy` на такій БД без **baseline** не запускай у build. Схему оновлюй окремо (Supabase Dashboard, MCP `apply_migration`, або один раз `migrate deploy` з прямого `DATABASE_URL` після baseline — див. нижче).
+
 ## Змінні середовища (Production / Preview)
 
 Додай у **Project → Settings → Environment Variables** (або через CLI: `vercel env pull` / `vercel env add`).
@@ -56,19 +72,32 @@ pnpm run deploy:preview  # preview-деплой
 
 ## Міграції БД
 
-На Vercel міграції виконуються **під час збірки**: у `vercel.json` задано `prisma migrate deploy` перед `prisma generate` і `next build`. Потрібен коректний **`DATABASE_URL`** у змінних середовища для того оточення (Production / Preview), до якого застосовується деплой.
+За замовчуванням збірка на Vercel **не** викликає `prisma migrate deploy` (у `vercel.json` лише `prisma generate && next build`). Міграції потрібно накатувати **проти тієї ж БД**, що в `DATABASE_URL` у Vercel.
 
-Локально або в CI без Vercel:
+### Накатати міграції зараз (рекомендовано)
+
+1. Скопіюй **Production** `DATABASE_URL` з Vercel → Settings → Environment Variables. Для DDL часто зручніший **прямий** Postgres Supabase (порт `5432`, не transaction pooler `6543`), якщо pooler обриває довгі міграції.
+2. Локально один раз:
 
 ```bash
-pnpm exec prisma migrate deploy
+DATABASE_URL="postgresql://..." pnpm exec prisma migrate deploy
+```
+
+Перевір у Supabase → Table Editor, що з’явилися / оновилися таблиці та колонки.
+
+### Чому не вмикати `migrate deploy` у Vercel build без підготовки
+
+Якщо база вже існувала (створена вручну, через `db push` або старий процес), а таблиця `_prisma_migrations` порожня або не відповідає історії в `prisma/migrations`, `prisma migrate deploy` під час збірки впаде з **P3005** (*database schema is not empty*). Тоді потрібен **baseline** по [документації Prisma](https://www.prisma.io/docs/guides/migrate/production-troubleshooting#baseline-your-production-environment) (позначити вже застосовані міграції через `prisma migrate resolve --applied ...`). Після успішного baseline можна змінити `vercel.json`:
+
+```json
+"buildCommand": "prisma migrate deploy && prisma generate && next build"
 ```
 
 ### Симптоми: дані «не збігаються» з локалхостом, 500 на сторінках
 
-Часто це **не одна база**: перевір `DATABASE_URL` у Vercel (Production) і в `.env.local` — рядки мають збігатися, якщо очікуєш одні й ті самі дані.
+Часто це **не одна база**: порівняй `DATABASE_URL` у Vercel і локально.
 
-Якщо база одна, але після деплою **500** на API або RSC (наприклад `/campaigns/.../info`), перевір логи збірки: чи пройшов крок `prisma migrate deploy`. Якщо збірка стара або Preview вказує на іншу БД без міграцій — накати вручну `migrate deploy` проти потрібної бази.
+Якщо база одна, але **500** після деплою — часто **не накатані міграції** відносно коду Prisma. Виконай `migrate deploy` (див. вище).
 
 ## Supabase: чому pooler egress ≫ розмір БД
 
