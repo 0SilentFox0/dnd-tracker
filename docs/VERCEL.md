@@ -4,6 +4,8 @@
 
 ### Персонажі / дані є локально, на проді немає
 
+Див. також **`docs/DATABASE-SYNC.md`** (одна БД vs копіювання дампу).
+
 Це майже завжди **різні бази**. Порівняй рядки підключення (без пароля):
 
 - **Vercel** → Project → Settings → Environment Variables → **Production** → `DATABASE_URL`
