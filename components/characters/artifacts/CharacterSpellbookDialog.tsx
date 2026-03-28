@@ -108,6 +108,7 @@ export function CharacterSpellbookDialog({
                       >
                         <SpellRichOption
                           spell={spell}
+                          showDamageDiceToRoll
                           iconError={iconErrors.has(spell.id)}
                           onIconError={
                             spell.icon

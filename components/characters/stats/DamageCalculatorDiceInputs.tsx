@@ -1,24 +1,37 @@
 "use client";
 
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 interface DamageCalculatorDiceInputsProps {
   diceSides: number[];
-  values: number[];
-  onValueChange: (index: number, value: number) => void;
-  onCalculate: () => void;
+  onSubmitRolls: (parsedRolls: number[]) => void;
   readOnly?: boolean;
+}
+
+/** Для суми: ціле з рядка; нечисловий ввід дає 0. */
+function parseDiceField(raw: string): number {
+  const n = parseInt(String(raw).trim(), 10);
+
+  return Number.isNaN(n) ? 0 : n;
 }
 
 export function DamageCalculatorDiceInputs({
   diceSides,
-  values,
-  onValueChange,
-  onCalculate,
+  onSubmitRolls,
   readOnly = false,
 }: DamageCalculatorDiceInputsProps) {
+  const [texts, setTexts] = useState<string[]>(() => diceSides.map(() => "1"));
+
   if (diceSides.length === 0) return null;
+
+  const handleCalculate = () => {
+    const rolls = diceSides.map((_, i) => parseDiceField(texts[i] ?? ""));
+
+    onSubmitRolls(rolls);
+  };
 
   return (
     <div className="space-y-2">
@@ -30,21 +43,29 @@ export function DamageCalculatorDiceInputs({
               d{sides}
             </span>
             <Input
-              type="number"
-              min={1}
-              max={sides}
-              className="w-14 h-8 text-center tabular-nums"
-              value={values[i] ?? 1}
+              autoComplete="off"
+              className="min-w-18 h-8 text-center tabular-nums"
+              value={texts[i] ?? ""}
               readOnly={readOnly}
               onChange={(e) => {
-                const v = parseInt(e.target.value, 10);
+                const next = e.target.value;
 
-                if (!Number.isNaN(v)) onValueChange(i, Math.max(1, Math.min(sides, v)));
+                setTexts((prev) => {
+                  const copy = [...prev];
+
+                  while (copy.length < diceSides.length) {
+                    copy.push("1");
+                  }
+
+                  copy[i] = next;
+
+                  return copy;
+                });
               }}
             />
           </label>
         ))}
-        <Button type="button" size="sm" onClick={onCalculate}>
+        <Button type="button" size="sm" onClick={handleCalculate}>
           Рахувати
         </Button>
       </div>

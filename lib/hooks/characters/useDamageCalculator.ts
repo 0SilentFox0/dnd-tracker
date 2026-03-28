@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import type { SkillTreeProgress } from "./useCharacterView";
 import { useDamageCalculatorSkills } from "./useDamageCalculator-skills";
 import { useDamageCalculatorSpell } from "./useDamageCalculator-spell";
+import { useLearnedSpellIds } from "./useLearnedSpellIds";
 
 import {
   fetchDamagePreview,
@@ -25,6 +26,9 @@ export interface UseDamageCalculatorProps {
     rangedMultiplier?: number;
   };
   skillTreeProgress: SkillTreeProgress;
+  /** Раса для злиття заклинань з дерева скілів (як у книзі заклинань) */
+  characterRace?: string;
+  /** Базовий список knownSpells з персонажа; доповнюється заклинаннями з дерева */
   knownSpellIds: string[];
 }
 
@@ -34,9 +38,17 @@ export function useDamageCalculator({
   level,
   scalingCoefficients = {},
   skillTreeProgress,
+  characterRace,
   knownSpellIds,
 }: UseDamageCalculatorProps) {
   const [selectedSpellId, setSelectedSpellId] = useState<string | null>(null);
+
+  const learnedSpellIds = useLearnedSpellIds({
+    campaignId,
+    characterRace,
+    skillTreeProgress,
+    knownSpellIdsFallback: knownSpellIds,
+  });
 
   const [meleeDiceValues, setMeleeDiceValues] = useState<number[]>([]);
 
@@ -54,9 +66,19 @@ export function useDamageCalculator({
 
   const rangedMult = scalingCoefficients.rangedMultiplier ?? 1;
 
+  const setSelectedSpellIdAndClearMagic = useCallback(
+    (id: string | null) => {
+      setMagicSumState(null);
+
+      setSelectedSpellId(id);
+    },
+    [],
+  );
+
+  /** Окремий ключ/запит: інакше спільний префікс з CharacterDamagePreview перезаписує відповідь без spellId → magic завжди null. */
   const { data: damagePreview } = useQuery({
     queryKey: [
-      "character-damage-preview",
+      "damage-calculator-melee-ranged",
       campaignId,
       characterId,
       meleeMult,
@@ -76,12 +98,46 @@ export function useDamageCalculator({
     enabled: !!campaignId && !!characterId,
   });
 
+  const magicSpellEnabled =
+    !!campaignId &&
+    !!characterId &&
+    !!selectedSpellId &&
+    magicSum != null;
+
+  const { data: magicSpellPayload, isFetching: magicPreviewFetching } = useQuery(
+    {
+      queryKey: [
+        "damage-calculator-magic-spell",
+        campaignId,
+        characterId,
+        meleeMult,
+        rangedMult,
+        selectedSpellId,
+        magicSum,
+      ],
+      queryFn: () =>
+        fetchDamagePreview(
+          campaignId,
+          characterId,
+          meleeMult,
+          rangedMult,
+          null,
+          null,
+          selectedSpellId,
+          magicSum,
+        ),
+      enabled: magicSpellEnabled,
+    },
+  );
+
+  const magicPreview = magicSpellPayload?.magic ?? null;
+
   const { data: skillsList = [] } = useSkills(campaignId);
 
   const { data: spellsList = [] } = useQuery({
     queryKey: ["spells", campaignId],
     queryFn: () => getSpells(campaignId),
-    enabled: !!campaignId && knownSpellIds.length > 0,
+    enabled: !!campaignId,
   });
 
   const heroMelee = getHeroDamageComponents(level, AttackType.MELEE);
@@ -120,7 +176,7 @@ export function useDamageCalculator({
     magicDiceSides,
   } = useDamageCalculatorSpell(
     selectedSpellId,
-    knownSpellIds,
+    learnedSpellIds,
     spellsList,
     skillsList,
     unlockedSkillIds,
@@ -169,62 +225,52 @@ export function useDamageCalculator({
     );
   }, [magicDiceSides, magicDiceKey]);
 
-  const setMeleeDiceAt = (index: number, value: number) => {
-    setMeleeDiceValues((prev) =>
-      meleeDiceSides.map((s, j) => (j === index ? value : prev[j] ?? 1)),
-    );
+  const submitMeleeRolls = (rolls: number[]) => {
+    setMeleeDiceValues(rolls);
+
+    setMeleeSumState(rolls.reduce((a, b) => a + b, 0));
   };
 
-  const setRangedDiceAt = (index: number, value: number) => {
-    setRangedDiceValues((prev) =>
-      rangedDiceSides.map((s, j) => (j === index ? value : prev[j] ?? 1)),
-    );
+  const submitRangedRolls = (rolls: number[]) => {
+    setRangedDiceValues(rolls);
+
+    setRangedSumState(rolls.reduce((a, b) => a + b, 0));
   };
 
-  const setMagicDiceAt = (index: number, value: number) => {
-    setMagicDiceValues((prev) =>
-      magicDiceSides.map((s, j) => (j === index ? value : prev[j] ?? 1)),
-    );
+  const submitMagicRolls = (rolls: number[]) => {
+    setMagicDiceValues(rolls);
+
+    setMagicSumState(rolls.reduce((a, b) => a + b, 0));
   };
-
-  const handleCalculateMelee = () =>
-    setMeleeSumState(meleeDiceValues.reduce((a, b) => a + b, 0));
-
-  const handleCalculateRanged = () =>
-    setRangedSumState(rangedDiceValues.reduce((a, b) => a + b, 0));
-
-  const handleCalculateMagic = () =>
-    setMagicSumState(magicDiceValues.reduce((a, b) => a + b, 0));
 
   return {
     damagePreview,
+    magicPreview,
+    magicPreviewFetching,
     hero: { heroMelee, heroRanged },
     dice: {
       melee: {
         sides: meleeDiceSides,
         values: meleeDiceValues,
         sum: meleeSum,
-        setSum: handleCalculateMelee,
-        setValueAt: setMeleeDiceAt,
+        submitRolls: submitMeleeRolls,
       },
       ranged: {
         sides: rangedDiceSides,
         values: rangedDiceValues,
         sum: rangedSum,
-        setSum: handleCalculateRanged,
-        setValueAt: setRangedDiceAt,
+        submitRolls: submitRangedRolls,
       },
       magic: {
         sides: magicDiceSides,
         values: magicDiceValues,
         sum: magicSum,
-        setSum: handleCalculateMagic,
-        setValueAt: setMagicDiceAt,
+        submitRolls: submitMagicRolls,
       },
     },
     spell: {
       selectedSpellId,
-      setSelectedSpellId,
+      setSelectedSpellId: setSelectedSpellIdAndClearMagic,
       knownSpells,
       selectedSpell,
     },

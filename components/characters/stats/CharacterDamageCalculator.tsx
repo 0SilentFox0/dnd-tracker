@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDamageCalculator } from "@/lib/hooks/characters";
+import { formatSpellDamageDiceRoll } from "@/lib/utils/spells/spell-calculations";
 
 export type { DamagePreviewItem, DamagePreviewResponse };
 
@@ -28,12 +29,15 @@ export interface CharacterDamageCalculatorProps {
     rangedMultiplier?: number;
   };
   skillTreeProgress: import("@/lib/hooks/characters").SkillTreeProgress;
+  characterRace?: string;
   knownSpellIds: string[];
 }
 
 export function CharacterDamageCalculator(props: CharacterDamageCalculatorProps) {
   const {
     damagePreview,
+    magicPreview,
+    magicPreviewFetching,
     hero,
     dice,
     spell,
@@ -68,10 +72,13 @@ export function CharacterDamageCalculator(props: CharacterDamageCalculatorProps)
                     </span>
                   </p>
                   <DamageCalculatorDiceInputs
+                    key={`melee-${
+                      dice.melee.sides.length
+                        ? dice.melee.sides.join(",")
+                        : "empty"
+                    }`}
                     diceSides={dice.melee.sides}
-                    values={dice.melee.values}
-                    onValueChange={dice.melee.setValueAt}
-                    onCalculate={dice.melee.setSum}
+                    onSubmitRolls={dice.melee.submitRolls}
                     readOnly={false}
                   />
                   <SkillsAffectingDamageList
@@ -106,10 +113,13 @@ export function CharacterDamageCalculator(props: CharacterDamageCalculatorProps)
                     </span>
                   </p>
                   <DamageCalculatorDiceInputs
+                    key={`ranged-${
+                      dice.ranged.sides.length
+                        ? dice.ranged.sides.join(",")
+                        : "empty"
+                    }`}
                     diceSides={dice.ranged.sides}
-                    values={dice.ranged.values}
-                    onValueChange={dice.ranged.setValueAt}
-                    onCalculate={dice.ranged.setSum}
+                    onSubmitRolls={dice.ranged.submitRolls}
                     readOnly={false}
                   />
                   <SkillsAffectingDamageList
@@ -158,24 +168,63 @@ export function CharacterDamageCalculator(props: CharacterDamageCalculatorProps)
               {spell.selectedSpell && (
                 <>
                   <p className="text-sm text-muted-foreground">
-                    Кидки урону:{" "}
+                    Кидки:{" "}
                     <span className="font-mono">
-                      {spell.selectedSpell.diceCount != null &&
-                      spell.selectedSpell.diceType != null
-                        ? `${spell.selectedSpell.diceCount}d${spell.selectedSpell.diceType}`
-                        : "—"}
+                      {formatSpellDamageDiceRoll(
+                        spell.selectedSpell.diceCount,
+                        spell.selectedSpell.diceType,
+                      ) ?? "—"}
                     </span>
                   </p>
                   <DamageCalculatorDiceInputs
+                    key={`magic-${
+                      dice.magic.sides.length
+                        ? dice.magic.sides.join(",")
+                        : "empty"
+                    }`}
                     diceSides={dice.magic.sides}
-                    values={dice.magic.values}
-                    onValueChange={dice.magic.setValueAt}
-                    onCalculate={dice.magic.setSum}
+                    onSubmitRolls={dice.magic.submitRolls}
                     readOnly={false}
                   />
-                  {dice.magic.sum !== null && (
-                    <p className="text-lg font-semibold tabular-nums">
-                      Сума кидків: {dice.magic.sum}
+                  {dice.magic.sum !== null && magicPreview && (
+                    <DamageCalculatorResult
+                      diceSum={dice.magic.sum}
+                      breakdown={magicPreview.breakdown ?? []}
+                      total={magicPreview.total}
+                      spellEffectKind={magicPreview.spellEffectKind}
+                    />
+                  )}
+                  {dice.magic.sum !== null &&
+                    magicPreviewFetching &&
+                    !magicPreview && (
+                    <p className="text-sm text-muted-foreground">
+                      Розрахунок заклинання…
+                    </p>
+                  )}
+                  {dice.magic.sum !== null &&
+                    !magicPreviewFetching &&
+                    !magicPreview &&
+                    spell.selectedSpell &&
+                    (spell.selectedSpell.damageType === "damage" ||
+                      spell.selectedSpell.damageType === "heal" ||
+                      spell.selectedSpell.damageType === "all") && (
+                    <p className="text-sm text-muted-foreground">
+                      Не вдалося отримати розрахунок заклинання. Спробуйте ще
+                      раз.
+                    </p>
+                  )}
+                  {dice.magic.sum !== null &&
+                    !magicPreviewFetching &&
+                    !magicPreview &&
+                    spell.selectedSpell &&
+                    !(
+                      spell.selectedSpell.damageType === "damage" ||
+                      spell.selectedSpell.damageType === "heal" ||
+                      spell.selectedSpell.damageType === "all"
+                    ) && (
+                    <p className="text-sm text-muted-foreground">
+                      Сума кидків: {dice.magic.sum} (для цього типу ефекту
+                      повний розрахунок не застосовується)
                     </p>
                   )}
                   <SkillsAffectingDamageList

@@ -4,16 +4,22 @@
 
 import { getDamagePreview } from "@/lib/api/characters";
 
+/** Тип ефекту заклинання в превʼю магії (калькулятор) */
+export type SpellEffectKind = "damage" | "heal" | "all";
+
 export interface DamagePreviewItem {
   total: number;
   breakdown: string[];
   diceFormula: string | null;
   hasWeapon: boolean;
+  spellEffectKind?: SpellEffectKind;
 }
 
 export interface DamagePreviewResponse {
   melee: DamagePreviewItem;
   ranged: DamagePreviewItem;
+  /** Заповнюється при spellId + spellDiceSum у запиті */
+  magic?: DamagePreviewItem | null;
 }
 
 export interface SkillAffectingDamage {
@@ -52,12 +58,16 @@ export async function fetchDamagePreview(
   rangedMult: number,
   meleeDiceSum: number | null,
   rangedDiceSum: number | null,
+  spellId?: string | null,
+  spellDiceSum?: number | null,
 ): Promise<DamagePreviewResponse> {
   const result = await getDamagePreview(campaignId, characterId, {
     meleeMultiplier: meleeMult,
     rangedMultiplier: rangedMult,
     meleeDiceSum,
     rangedDiceSum,
+    spellId,
+    spellDiceSum,
   });
 
   if (!result) throw new Error("Failed to load damage preview");

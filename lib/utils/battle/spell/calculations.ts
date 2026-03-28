@@ -3,9 +3,26 @@
  */
 
 import { calculatePercentBonus } from "../common";
+import { evaluateFormula } from "../common/formula-evaluator";
 
 import { SkillLevel } from "@/lib/types/skill-tree";
-import type { ActiveSkill, BattleParticipant } from "@/types/battle";
+import type { ActiveSkill, BattleParticipant, SkillEffect } from "@/types/battle";
+
+/** Стат ефекту скіла, що застосовується до шкоди/ефекту заклинання */
+const SPELL_DAMAGE_SKILL_STATS = new Set([
+  "spell_damage",
+  "dark_spell_damage",
+  "chaos_spell_damage",
+  "all_damage",
+]);
+
+/** Тип ефекту в activeEffects (бафи заклинань тощо) */
+const SPELL_DAMAGE_BUFF_TYPES = new Set([
+  "spell_damage",
+  "dark_spell_damage",
+  "chaos_spell_damage",
+  "all_damage",
+]);
 
 /** Ранг рівня скіла для порівняння (більший = вищий рівень) */
 const SKILL_LEVEL_RANK: Record<string, number> = {
@@ -129,21 +146,235 @@ export function calculateSpellAdditionalModifier(
   return { damage: 0 };
 }
 
+function getSpellcastingModifier(participant: BattleParticipant): {
+  mod: number;
+  label: string;
+} {
+  const ability = participant.spellcasting?.spellcastingAbility;
+
+  if (!ability) return { mod: 0, label: "" };
+
+  const k = ability.toLowerCase();
+
+  const m = participant.abilities.modifiers;
+
+  if (k === "intelligence")
+    return { mod: m.intelligence, label: "INT" };
+
+  if (k === "wisdom") return { mod: m.wisdom, label: "WIS" };
+
+  if (k === "charisma") return { mod: m.charisma, label: "CHA" };
+
+  return { mod: 0, label: "" };
+}
+
+function formulaContextForSpell(participant: BattleParticipant): Record<
+  string,
+  number
+> {
+  const maxHp = participant.combatStats.maxHp;
+
+  const currentHp = participant.combatStats.currentHp;
+
+  const lostHpPercent = maxHp > 0 ? ((maxHp - currentHp) / maxHp) * 100 : 0;
+
+  return {
+    hero_level: participant.abilities.level,
+    lost_hp_percent: lostHpPercent,
+    morale: participant.combatStats.morale,
+    proficiency_bonus: participant.abilities.proficiencyBonus,
+  };
+}
+
+function isPercentageEffect(effect: SkillEffect): boolean {
+  const t = (effect.type || "").toLowerCase();
+
+  return (
+    effect.isPercentage === true ||
+    t === "percent" ||
+    t === "percentage"
+  );
+}
+
+/** Плоскі та % бонуси з активних скілів (магія / усі типи, не лише melee/ranged). */
+function aggregateMagicDamageFromActiveSkills(
+  participant: BattleParticipant,
+): { flat: number; percent: number; lines: string[] } {
+  const lines: string[] = [];
+
+  let flat = 0;
+
+  let percent = 0;
+
+  const ctx = formulaContextForSpell(participant);
+
+  for (const skill of participant.battleData.activeSkills) {
+    const dt = skill.damageType;
+
+    if (dt === "melee" || dt === "ranged") continue;
+
+    const label = skill.name || "Скіл";
+
+    for (const effect of skill.effects ?? []) {
+      const stat = (effect.stat || "").toLowerCase();
+
+      if (!SPELL_DAMAGE_SKILL_STATS.has(stat)) continue;
+
+      const typeStr = (effect.type || "flat").toLowerCase();
+
+      if (typeStr === "formula" && typeof effect.value === "string") {
+        const v = Math.floor(evaluateFormula(effect.value, ctx));
+
+        if (v !== 0) {
+          flat += v;
+
+          lines.push(`${label}: ${v >= 0 ? "+" : ""}${v} (${stat}, формула)`);
+        }
+
+        continue;
+      }
+
+      const num =
+        typeof effect.value === "number"
+          ? effect.value
+          : parseInt(String(effect.value ?? 0), 10) || 0;
+
+      if (isPercentageEffect(effect)) {
+        if (num !== 0) {
+          percent += num;
+
+          lines.push(`${label}: +${num}% (${stat})`);
+        }
+      } else if (num !== 0) {
+        flat += num;
+
+        lines.push(`${label}: ${num >= 0 ? "+" : ""}${num} (${stat})`);
+      }
+    }
+  }
+
+  return { flat, percent, lines };
+}
+
+/** Бафи з бою: activeEffects (наприклад після заклинань). */
+function aggregateMagicDamageFromActiveEffects(
+  participant: BattleParticipant,
+): { flat: number; percent: number; lines: string[] } {
+  const lines: string[] = [];
+
+  let flat = 0;
+
+  let percent = 0;
+
+  for (const ae of participant.battleData.activeEffects ?? []) {
+    const aeName = ae.name || "Ефект";
+
+    for (const d of ae.effects ?? []) {
+      const t = (d.type || "").toLowerCase();
+
+      if (!SPELL_DAMAGE_BUFF_TYPES.has(t)) continue;
+
+      const val = typeof d.value === "number" ? d.value : 0;
+
+      if (d.isPercentage === true) {
+        if (val !== 0) {
+          percent += val;
+
+          lines.push(`${aeName}: +${val}% (${t})`);
+        }
+      } else if (val !== 0) {
+        flat += val;
+
+        lines.push(`${aeName}: ${val >= 0 ? "+" : ""}${val} (${t})`);
+      }
+    }
+  }
+
+  return { flat, percent, lines };
+}
+
+export interface SpellDamageEnhancementOptions {
+  /**
+   * У калькуляторі шкоди на аркуші: після кубиків додається рівень героя.
+   * У бою за замовчуванням вимкнено, щоб не змінювати баланс без узгодження.
+   */
+  addHeroLevelToBase?: boolean;
+}
+
 export function calculateSpellDamageWithEnhancements(
   participant: BattleParticipant,
   baseDamage: number,
   additionalRollResult?: number,
+  options?: SpellDamageEnhancementOptions,
 ): SpellCalculationResult {
   const breakdown: string[] = [];
 
-  breakdown.push(`${baseDamage} (базовий урон заклинання)`);
+  let running = baseDamage;
+
+  breakdown.push(`${baseDamage} (сума кубиків заклинання)`);
+
+  if (options?.addHeroLevelToBase === true) {
+    const heroLevel = participant.abilities.level;
+
+    running += heroLevel;
+
+    breakdown.push(`+${heroLevel} (рівень героя)`);
+  }
+
+  const { mod: spellMod, label: spellAbbr } = getSpellcastingModifier(
+    participant,
+  );
+
+  if (spellMod !== 0 && spellAbbr) {
+    running += spellMod;
+
+    breakdown.push(
+      `${spellMod >= 0 ? "+" : ""}${spellMod} (модифікатор ${spellAbbr})`,
+    );
+  }
+
+  const fromSkills = aggregateMagicDamageFromActiveSkills(participant);
+
+  if (fromSkills.flat !== 0) {
+    running += fromSkills.flat;
+
+    breakdown.push(...fromSkills.lines);
+  }
+
+  const fromBuffs = aggregateMagicDamageFromActiveEffects(participant);
+
+  if (fromBuffs.flat !== 0) {
+    running += fromBuffs.flat;
+
+    breakdown.push(...fromBuffs.lines);
+  }
 
   const effectIncrease = calculateSpellEffectIncrease(participant);
 
-  const increaseDamage = calculatePercentBonus(baseDamage, effectIncrease);
+  const buffPercentTotal = fromSkills.percent + fromBuffs.percent;
+
+  if (effectIncrease > 0 || buffPercentTotal > 0) {
+    breakdown.push(`= ${running} (база перед %)`);
+  }
 
   if (effectIncrease > 0) {
-    breakdown.push(`+${effectIncrease}% ефекту (+${increaseDamage})`);
+    const add = calculatePercentBonus(running, effectIncrease);
+
+    running += add;
+
+    breakdown.push(
+      `+${effectIncrease}% баф до заклинання (школа магії) (+${add})`,
+    );
+  }
+
+  if (buffPercentTotal > 0) {
+    const add = calculatePercentBonus(running, buffPercentTotal);
+
+    running += add;
+
+    breakdown.push(
+      `+${buffPercentTotal}% інші бафи (скіл/ефект на полі) (+${add})`,
+    );
   }
 
   const additionalModifier = calculateSpellAdditionalModifier(
@@ -154,15 +385,15 @@ export function calculateSpellDamageWithEnhancements(
   const additionalDamage = additionalModifier.damage || 0;
 
   if (additionalDamage > 0) {
+    running += additionalDamage;
+
     breakdown.push(
-      `+${additionalDamage} (${additionalModifier.modifier || "додатковий урон"})`,
+      `+${additionalDamage} (${additionalModifier.modifier || "додатковий ефект"})`,
     );
   }
 
-  const totalDamage = baseDamage + increaseDamage + additionalDamage;
-
   breakdown.push(`──────────`);
-  breakdown.push(`Всього: ${totalDamage} урону`);
+  breakdown.push(`Всього: ${running} урону`);
 
   const targetChange = getSpellTargetChange(participant);
 
@@ -170,7 +401,7 @@ export function calculateSpellDamageWithEnhancements(
     baseDamage,
     spellEffectIncrease: effectIncrease,
     additionalModifierDamage: additionalDamage,
-    totalDamage,
+    totalDamage: running,
     breakdown,
     targetChange,
     hasAdditionalModifier: !!additionalModifier.modifier,

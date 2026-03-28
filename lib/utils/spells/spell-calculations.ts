@@ -43,3 +43,30 @@ export function formatSpellAverage(
 
   return "";
 }
+
+/** Нотація кидка для гравця (наприклад «3d6»). Порожньо, якщо кубиків немає. */
+export function formatSpellDamageDiceRoll(
+  diceCount: number | null | undefined,
+  diceType: string | null | undefined
+): string | null {
+  const n = diceCount ?? 0;
+
+  if (!diceType || n <= 0) return null;
+
+  const type = String(diceType).trim();
+
+  if (!type) return null;
+
+  return type.startsWith("d") ? `${n}${type}` : `${n}d${type}`;
+}
+
+/** Підпис для рядка «що кидати» залежно від типу ефекту заклинання. */
+export function spellDamageDiceRollCaption(damageType: string): string {
+  if (damageType === "heal") return "Кубики лікування";
+
+  if (damageType === "damage") return "Кубики шкоди";
+
+  if (damageType === "all") return "Кубики ефекту";
+
+  return "Кубики";
+}

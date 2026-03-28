@@ -108,6 +108,12 @@ export function DmCharacterEditForm({
       await queryClient.invalidateQueries({
         queryKey: ["character-damage-preview", campaignId, characterId],
       });
+      await queryClient.invalidateQueries({
+        queryKey: ["damage-calculator-melee-ranged", campaignId, characterId],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["damage-calculator-magic-spell", campaignId, characterId],
+      });
       router.refresh();
     } catch (err) {
       console.error("Error leveling up:", err);

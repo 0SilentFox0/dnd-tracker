@@ -1,10 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { BookOpen } from "lucide-react";
 
-import { CharacterSpellbookDialog } from "./CharacterSpellbookDialog";
+import type { SkillTreeProgress } from "./useCharacterView";
 
 import { getSkillTrees } from "@/lib/api/skill-trees";
 import { getSpells } from "@/lib/api/spells";
@@ -14,30 +13,28 @@ import { getLearnedSpellIdsFromTree } from "@/lib/utils/spells";
 import type { SkillTree } from "@/types/skill-tree";
 import type { Spell } from "@/types/spells";
 
-type SkillTreeProgress = Record<
-  string,
-  { level?: string; unlockedSkills?: string[] }
->;
-
-export interface CharacterSpellbookProps {
-  knownSpellIds: string[];
+export interface UseLearnedSpellIdsOptions {
   campaignId: string;
   characterRace?: string;
-  skillTreeProgress?: SkillTreeProgress;
+  skillTreeProgress: SkillTreeProgress;
+  /** Заклинання з аркуша персонажа, якщо дерево ще не змерджено */
+  knownSpellIdsFallback: string[];
 }
 
-export function CharacterSpellbook({
-  knownSpellIds,
+/**
+ * Ті самі ID заклинань, що й у книзі заклинань: дерево скілів + школи магії,
+ * інакше — knownSpells з персонажа.
+ */
+export function useLearnedSpellIds({
   campaignId,
   characterRace,
   skillTreeProgress = {},
-}: CharacterSpellbookProps) {
-  const [spellbookOpen, setSpellbookOpen] = useState(false);
-
+  knownSpellIdsFallback,
+}: UseLearnedSpellIdsOptions): string[] {
   const { data: allSpells = [] } = useQuery<Spell[]>({
     queryKey: ["spells", campaignId],
     queryFn: () => getSpells(campaignId),
-    enabled: spellbookOpen && !!campaignId,
+    enabled: !!campaignId,
   });
 
   const { data: allSkills = [] } = useSkills(campaignId);
@@ -47,7 +44,7 @@ export function CharacterSpellbook({
   const { data: rawTrees = [] } = useQuery({
     queryKey: ["skill-trees", campaignId],
     queryFn: () => getSkillTrees(campaignId),
-    enabled: spellbookOpen && !!campaignId && !!characterRace,
+    enabled: !!campaignId && !!characterRace,
   });
 
   const skillTree = useMemo((): SkillTree | null => {
@@ -80,7 +77,7 @@ export function CharacterSpellbook({
     return tree;
   }, [characterRace, rawTrees, apiMainSkills]);
 
-  const learnedSpellIds = useMemo(() => {
+  return useMemo(() => {
     if (
       characterRace &&
       skillTreeProgress &&
@@ -97,39 +94,13 @@ export function CharacterSpellbook({
       );
     }
 
-    return knownSpellIds;
+    return knownSpellIdsFallback;
   }, [
     characterRace,
     skillTreeProgress,
     skillTree,
     allSkills,
     allSpells,
-    knownSpellIds,
+    knownSpellIdsFallback,
   ]);
-
-  const knownSpells = useMemo(() => {
-    if (!allSpells.length) return [];
-
-    return learnedSpellIds
-      .map((id) => allSpells.find((s) => s.id === id))
-      .filter((s): s is Spell => !!s);
-  }, [allSpells, learnedSpellIds]);
-
-  return (
-    <>
-      <button
-        type="button"
-        onClick={() => setSpellbookOpen(true)}
-        className="flex shrink-0 items-center justify-center w-12 h-12 rounded-lg border-2 border-amber-500/90 bg-amber-950/80 text-amber-200 shadow-lg hover:bg-amber-900/80 hover:border-amber-400 transition-colors"
-        title="Заклинання героя"
-      >
-        <BookOpen className="h-6 w-6" />
-      </button>
-      <CharacterSpellbookDialog
-        open={spellbookOpen}
-        onOpenChange={setSpellbookOpen}
-        spells={knownSpells}
-      />
-    </>
-  );
 }

@@ -184,6 +184,7 @@ export function CharacterViewSingleCard({
             level={(basicInfo.level as number) ?? 1}
             scalingCoefficients={formData.scalingCoefficients}
             skillTreeProgress={formData.skillTreeProgress ?? {}}
+            characterRace={(basicInfo.race as string) || undefined}
             knownSpellIds={spellcasting.knownSpells}
           />
 

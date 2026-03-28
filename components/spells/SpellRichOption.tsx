@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 import {
   calculateAverageSpellEffect,
   formatSpellAverage,
+  formatSpellDamageDiceRoll,
+  spellDamageDiceRollCaption,
 } from "@/lib/utils/spells/spell-calculations";
 import { getSpellTypeIcon } from "@/lib/utils/spells/spell-icons";
 
@@ -31,6 +33,8 @@ interface SpellRichOptionProps {
   onIconError?: () => void;
   className?: string;
   compact?: boolean;
+  /** Показати нотацію кидка (наприклад 2d6) — для сторінки персонажа / книги заклинань */
+  showDamageDiceToRoll?: boolean;
 }
 
 export function SpellRichOption({
@@ -41,10 +45,15 @@ export function SpellRichOption({
   onIconError,
   className,
   compact = false,
+  showDamageDiceToRoll = false,
 }: SpellRichOptionProps) {
   const avg = calculateAverageSpellEffect(spell.diceCount, spell.diceType);
 
   const damageLabel = formatSpellAverage(spell.damageType, avg);
+
+  const diceRollNotation = showDamageDiceToRoll
+    ? formatSpellDamageDiceRoll(spell.diceCount, spell.diceType)
+    : null;
 
   const TypeIcon = getSpellTypeIcon(spell.type);
 
@@ -98,6 +107,16 @@ export function SpellRichOption({
         )}
         {damageLabel && (
           <p className="text-muted-foreground mt-1 text-xs">{damageLabel}</p>
+        )}
+        {diceRollNotation && (
+          <p className="mt-1 text-xs">
+            <span className="text-muted-foreground">
+              {spellDamageDiceRollCaption(spell.damageType)}:{" "}
+            </span>
+            <span className="font-mono font-semibold tabular-nums text-amber-200">
+              {diceRollNotation}
+            </span>
+          </p>
         )}
       </div>
     </div>

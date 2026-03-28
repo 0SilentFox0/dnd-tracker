@@ -15,6 +15,7 @@ import type { Character, CharacterFormData } from "@/types/characters";
 export interface DamagePreviewResponse {
   melee: { total: number; [key: string]: unknown };
   ranged: { total: number; [key: string]: unknown };
+  magic?: { total: number; [key: string]: unknown } | null;
 }
 
 /**
@@ -41,6 +42,8 @@ export async function getDamagePreview(
     rangedMultiplier?: number;
     meleeDiceSum?: number | null;
     rangedDiceSum?: number | null;
+    spellId?: string | null;
+    spellDiceSum?: number | null;
   },
 ): Promise<DamagePreviewResponse | null> {
   const search = new URLSearchParams();
@@ -59,6 +62,14 @@ export async function getDamagePreview(
 
   if (params?.rangedDiceSum != null) {
     search.set("rangedDiceSum", String(params.rangedDiceSum));
+  }
+
+  if (params?.spellId) {
+    search.set("spellId", params.spellId);
+  }
+
+  if (params?.spellDiceSum != null) {
+    search.set("spellDiceSum", String(params.spellDiceSum));
   }
 
   const qs = search.toString();

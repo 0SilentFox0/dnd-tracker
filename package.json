@@ -13,6 +13,7 @@
     "deploy": "vercel --prod",
     "deploy:preview": "vercel",
     "deploy:dev": "vercel --dev",
+    "sync-env:vercel": "node scripts/sync-env-to-vercel.mjs",
     "import-spells": "tsx scripts/import-spells.ts",
     "import-docs-spells": "tsx scripts/import-docs-spells.ts",
     "migrate-spell-icons-to-supabase": "tsx scripts/migrate-spell-icons-to-supabase.ts",

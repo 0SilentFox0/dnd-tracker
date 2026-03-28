@@ -3,6 +3,8 @@ import { describe, expect,it } from "vitest";
 import {
   calculateAverageSpellEffect,
   formatSpellAverage,
+  formatSpellDamageDiceRoll,
+  spellDamageDiceRollCaption,
 } from "../spell-calculations";
 
 describe("spell-calculations", () => {
@@ -34,6 +36,32 @@ describe("spell-calculations", () => {
       expect(formatSpellAverage("damage", 14)).toContain("шкоди");
       expect(formatSpellAverage("heal", 10)).toContain("лікування");
       expect(formatSpellAverage("all", 7)).toContain("ефекту");
+    });
+  });
+
+  describe("formatSpellDamageDiceRoll", () => {
+    it("повертає null без кубиків", () => {
+      expect(formatSpellDamageDiceRoll(null, "d6")).toBeNull();
+      expect(formatSpellDamageDiceRoll(0, "d6")).toBeNull();
+      expect(formatSpellDamageDiceRoll(2, null)).toBeNull();
+    });
+
+    it("склеює кількість і тип dN", () => {
+      expect(formatSpellDamageDiceRoll(2, "d6")).toBe("2d6");
+      expect(formatSpellDamageDiceRoll(1, "d20")).toBe("1d20");
+    });
+
+    it("додає d, якщо тип без префікса", () => {
+      expect(formatSpellDamageDiceRoll(3, "6")).toBe("3d6");
+    });
+  });
+
+  describe("spellDamageDiceRollCaption", () => {
+    it("підписи за типом ефекту", () => {
+      expect(spellDamageDiceRollCaption("damage")).toBe("Кубики шкоди");
+      expect(spellDamageDiceRollCaption("heal")).toBe("Кубики лікування");
+      expect(spellDamageDiceRollCaption("all")).toBe("Кубики ефекту");
+      expect(spellDamageDiceRollCaption("other")).toBe("Кубики");
     });
   });
 });

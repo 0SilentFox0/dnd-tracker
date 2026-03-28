@@ -9,17 +9,21 @@ import { getDiceAverage } from "@/lib/utils/battle/balance";
 import { logBattleTiming } from "@/lib/utils/battle/battle-timing";
 import { calculateDamageWithModifiers } from "@/lib/utils/battle/damage";
 import { createBattleParticipantFromCharacter } from "@/lib/utils/battle/participant";
+import { calculateSpellDamageWithEnhancements } from "@/lib/utils/battle/spell/calculations";
+import { formatSpellDamageDiceRoll } from "@/lib/utils/spells/spell-calculations";
 
 export interface DamagePreviewItem {
   total: number;
   breakdown: string[];
   diceFormula: string | null;
   hasWeapon: boolean;
+  spellEffectKind?: "damage" | "heal" | "all";
 }
 
 export interface DamagePreviewResponse {
   melee: DamagePreviewItem;
   ranged: DamagePreviewItem;
+  magic?: DamagePreviewItem | null;
 }
 
 export async function GET(
@@ -46,6 +50,10 @@ export async function GET(
     const meleeDiceSum = meleeDiceSumParam != null ? parseInt(meleeDiceSumParam, 10) : null;
 
     const rangedDiceSum = rangedDiceSumParam != null ? parseInt(rangedDiceSumParam, 10) : null;
+
+    const spellIdParam = searchParams.get("spellId");
+
+    const spellDiceSumParam = searchParams.get("spellDiceSum");
 
     const accessResult = await requireCampaignAccess(campaignId, false);
 
@@ -152,6 +160,65 @@ export async function GET(
       characterId,
     });
 
+    let magic: DamagePreviewItem | null = null;
+
+    if (
+      spellIdParam &&
+      spellDiceSumParam != null &&
+      spellDiceSumParam !== ""
+    ) {
+      const spellDiceSum = parseInt(spellDiceSumParam, 10);
+
+      if (!Number.isNaN(spellDiceSum)) {
+        const dbSpell = await prisma.spell.findFirst({
+          where: { id: spellIdParam, campaignId },
+        });
+
+        const dt = String(dbSpell?.damageType ?? "")
+          .trim()
+          .toLowerCase();
+
+        if (
+          dbSpell &&
+          (dt === "damage" || dt === "heal" || dt === "all")
+        ) {
+          const spellCalc = calculateSpellDamageWithEnhancements(
+            participant,
+            spellDiceSum,
+            undefined,
+            { addHeroLevelToBase: true },
+          );
+
+          const floorTotal = Math.floor(spellCalc.totalDamage);
+
+          const fullBreakdown = spellCalc.breakdown;
+
+          const breakdown =
+            fullBreakdown.length >= 2
+              ? fullBreakdown.slice(0, -2)
+              : fullBreakdown;
+
+          const diceNotation = formatSpellDamageDiceRoll(
+            dbSpell.diceCount,
+            dbSpell.diceType,
+          );
+
+          magic = {
+            total: floorTotal,
+            breakdown,
+            diceFormula: diceNotation,
+            hasWeapon: false,
+            spellEffectKind:
+              dt === "heal"
+                ? "heal"
+                : dt === "all"
+                  ? "all"
+                  : "damage",
+          };
+        }
+      }
+    }
+
     const response: DamagePreviewResponse = {
       melee: {
         total: Math.floor(meleeResult.totalDamage * meleeMultiplier),
@@ -171,6 +238,7 @@ export async function GET(
         diceFormula: rangedAttack?.damageDice ?? null,
         hasWeapon: !!rangedAttack,
       },
+      magic,
     };
 
     return NextResponse.json(response);
