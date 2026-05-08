@@ -1,121 +1,159 @@
 /**
- * Розрахунок бонусів урону зі скілів (percent, flat, breakdown)
+ * Розрахунок бонусів урону зі скілів (percent, flat, breakdown).
+ *
+ * Підтримує всі види шкоди (`SkillDamageType`): melee, ranged, magic.
+ * Magic-виклики додатково можуть передати `spellGroupId` цілі — тоді
+ * скіли, прив'язані до іншої школи магії, не застосовуються
+ * (school scope фільтр реалізований у `skill-resolve.getSkillsForDamageBonus`).
  */
 
 import { matchesAttackType } from "../common";
 import { getSkillsForDamageBonus } from "./skill-resolve";
 
 import { AttackType } from "@/lib/constants/battle";
-import type { BattleParticipant } from "@/types/battle";
+import type {
+  ActiveSkill,
+  BattleParticipant,
+  SkillDamageType,
+} from "@/types/battle";
 
-export function calculateSkillDamagePercentBonus(
+export interface SkillDamageBonusContext {
+  /** ID групи (школи) заклинання — релевантно лише для magic. */
+  spellGroupId?: string | null;
+}
+
+/**
+ * Один matched ефект: походить або зі скіла, або з активного ефекту на полі.
+ * Спільна точка ітерації для всіх агрегацій (sum / breakdown entries).
+ */
+interface MatchedEffect {
+  source: "skill" | "activeEffect";
+  /** Заданий лише для `source === "skill"`. */
+  skill?: ActiveSkill;
+  isPercentage: boolean;
+  value: number;
+}
+
+/**
+ * Спільна ітерація matching-ефектів для даного виду шкоди.
+ *
+ * Іде:
+ *  1) по скілам (`getSkillsForDamageBonus` уже фільтрує highest-level + school scope),
+ *  2) по активним ефектам на полі (бафи/дебафи).
+ * Викликає `visit` лише для ненульових значень, що метчаться `matchesAttackType`.
+ */
+function iterateMatchingEffects(
   attacker: BattleParticipant,
-  attackType: AttackType,
-): number {
-  let totalPercent = 0;
-
-  const skills = getSkillsForDamageBonus(attacker, attackType);
+  kind: SkillDamageType,
+  ctx: SkillDamageBonusContext | undefined,
+  visit: (e: MatchedEffect) => void,
+): void {
+  const skills = getSkillsForDamageBonus(attacker, kind, ctx);
 
   for (const skill of skills) {
     for (const effect of skill.effects) {
-      const isPct = effect.isPercentage === true;
-
-      const numVal =
+      const value =
         typeof effect.value === "number"
           ? effect.value
           : parseInt(String(effect.value ?? 0), 10) || 0;
 
-      if (isPct && numVal !== 0 && matchesAttackType(effect.stat, attackType)) {
-        totalPercent += numVal;
-      }
+      if (value === 0) continue;
+
+      if (!matchesAttackType(effect.stat, kind)) continue;
+
+      visit({
+        source: "skill",
+        skill,
+        isPercentage: effect.isPercentage === true,
+        value,
+      });
     }
   }
 
   for (const ae of attacker.battleData.activeEffects) {
     for (const d of ae.effects) {
-      const val = typeof d.value === "number" ? d.value : 0;
+      const value = typeof d.value === "number" ? d.value : 0;
 
-      const isPct = d.isPercentage === true;
+      if (value === 0) continue;
 
-      if (isPct && matchesAttackType(d.type ?? "", attackType)) {
-        totalPercent += val;
-      }
+      if (!matchesAttackType(d.type ?? "", kind)) continue;
+
+      visit({
+        source: "activeEffect",
+        isPercentage: d.isPercentage === true,
+        value,
+      });
     }
   }
+}
 
-  return totalPercent;
+export function calculateSkillDamagePercentBonus(
+  attacker: BattleParticipant,
+  attackType: AttackType | SkillDamageType,
+  ctx?: SkillDamageBonusContext,
+): number {
+  let total = 0;
+
+  iterateMatchingEffects(attacker, attackType as SkillDamageType, ctx, (e) => {
+    if (e.isPercentage) total += e.value;
+  });
+
+  return total;
 }
 
 export function calculateSkillDamageFlatBonus(
   attacker: BattleParticipant,
-  attackType: AttackType,
+  attackType: AttackType | SkillDamageType,
+  ctx?: SkillDamageBonusContext,
 ): number {
-  let totalFlat = 0;
+  let total = 0;
 
-  const skills = getSkillsForDamageBonus(attacker, attackType);
+  iterateMatchingEffects(attacker, attackType as SkillDamageType, ctx, (e) => {
+    if (!e.isPercentage) total += e.value;
+  });
 
-  for (const skill of skills) {
-    for (const effect of skill.effects) {
-      const isPct = effect.isPercentage === true;
+  return total;
+}
 
-      const numVal =
-        typeof effect.value === "number"
-          ? effect.value
-          : parseInt(String(effect.value ?? 0), 10) || 0;
+/**
+ * Breakdown entries — лише per-skill (не зливаємо активні ефекти у "Скіл" рядок).
+ * Сумуємо value по кожному скілу, відкидаємо нульові.
+ */
+function aggregateSkillBreakdown(
+  attacker: BattleParticipant,
+  kind: SkillDamageType,
+  ctx: SkillDamageBonusContext | undefined,
+  wantPercent: boolean,
+): Map<ActiveSkill, number> {
+  const perSkill = new Map<ActiveSkill, number>();
 
-      if (
-        !isPct &&
-        numVal !== 0 &&
-        matchesAttackType(effect.stat, attackType)
-      ) {
-        totalFlat += numVal;
-      }
-    }
-  }
+  iterateMatchingEffects(attacker, kind, ctx, (e) => {
+    if (e.source !== "skill" || !e.skill) return;
 
-  for (const ae of attacker.battleData.activeEffects) {
-    for (const d of ae.effects) {
-      const val = typeof d.value === "number" ? d.value : 0;
+    if (e.isPercentage !== wantPercent) return;
 
-      if (
-        d.isPercentage !== true &&
-        matchesAttackType(d.type ?? "", attackType)
-      ) {
-        totalFlat += val;
-      }
-    }
-  }
+    perSkill.set(e.skill, (perSkill.get(e.skill) ?? 0) + e.value);
+  });
 
-  return totalFlat;
+  return perSkill;
 }
 
 export function getSkillDamagePercentBreakdownEntries(
   attacker: BattleParticipant,
-  attackType: AttackType,
+  attackType: AttackType | SkillDamageType,
+  ctx?: SkillDamageBonusContext,
 ): Array<{ name: string; percent: number }> {
+  const perSkill = aggregateSkillBreakdown(
+    attacker,
+    attackType as SkillDamageType,
+    ctx,
+    true,
+  );
+
   const entries: Array<{ name: string; percent: number }> = [];
 
-  const skills = getSkillsForDamageBonus(attacker, attackType);
-
-  for (const skill of skills) {
-    let percent = 0;
-
-    for (const effect of skill.effects) {
-      const isPct = effect.isPercentage === true;
-
-      const numVal =
-        typeof effect.value === "number"
-          ? effect.value
-          : parseInt(String(effect.value ?? 0), 10) || 0;
-
-      if (isPct && numVal !== 0 && matchesAttackType(effect.stat, attackType)) {
-        percent += numVal;
-      }
-    }
-
-    if (percent !== 0) {
-      entries.push({ name: skill.name || "Скіл", percent });
-    }
+  for (const [skill, percent] of perSkill) {
+    if (percent !== 0) entries.push({ name: skill.name || "Скіл", percent });
   }
 
   return entries;
@@ -123,35 +161,20 @@ export function getSkillDamagePercentBreakdownEntries(
 
 export function getSkillDamageFlatBreakdownEntries(
   attacker: BattleParticipant,
-  attackType: AttackType,
+  attackType: AttackType | SkillDamageType,
+  ctx?: SkillDamageBonusContext,
 ): Array<{ name: string; flat: number }> {
+  const perSkill = aggregateSkillBreakdown(
+    attacker,
+    attackType as SkillDamageType,
+    ctx,
+    false,
+  );
+
   const entries: Array<{ name: string; flat: number }> = [];
 
-  const skills = getSkillsForDamageBonus(attacker, attackType);
-
-  for (const skill of skills) {
-    let flat = 0;
-
-    for (const effect of skill.effects) {
-      const isPct = effect.isPercentage === true;
-
-      const numVal =
-        typeof effect.value === "number"
-          ? effect.value
-          : parseInt(String(effect.value ?? 0), 10) || 0;
-
-      if (
-        !isPct &&
-        numVal !== 0 &&
-        matchesAttackType(effect.stat, attackType)
-      ) {
-        flat += numVal;
-      }
-    }
-
-    if (flat !== 0) {
-      entries.push({ name: skill.name || "Скіл", flat });
-    }
+  for (const [skill, flat] of perSkill) {
+    if (flat !== 0) entries.push({ name: skill.name || "Скіл", flat });
   }
 
   return entries;
