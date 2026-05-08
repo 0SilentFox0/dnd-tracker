@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { randomUUID } from "crypto";
-import { ZodError } from "zod";
 
 import { patchArtifactSchema } from "@/app/api/campaigns/[id]/artifacts/schemas";
 import { prisma } from "@/lib/db";
@@ -10,6 +9,7 @@ import {
   shouldMirrorArtifactIconUrl,
 } from "@/lib/supabase/artifact-icon-storage";
 import { requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 
 export async function GET(
   _request: Request,
@@ -37,12 +37,7 @@ export async function GET(
 
     return NextResponse.json(artifact);
   } catch (error) {
-    console.error("Error fetching artifact:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "fetch artifact" });
   }
 }
 
@@ -117,16 +112,7 @@ export async function PATCH(
 
     return NextResponse.json(updatedArtifact);
   } catch (error) {
-    console.error("Error updating artifact:", error);
-
-    if (error instanceof ZodError) {
-      return NextResponse.json({ error: error.issues }, { status: 400 });
-    }
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "update artifact" });
   }
 }
 
@@ -159,11 +145,6 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting artifact:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "delete artifact" });
   }
 }

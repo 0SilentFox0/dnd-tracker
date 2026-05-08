@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
-import { z } from "zod";
 
 import { createSkillSchema } from "./create-skill-schema";
 import { formatSkillsListResponse } from "./format-skills-response";
 
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 
 export async function POST(
   request: Request,
@@ -90,16 +90,7 @@ export async function POST(
 
     return NextResponse.json(skill);
   } catch (error) {
-    console.error("Error creating skill:", error);
-
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.issues }, { status: 400 });
-    }
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return handleApiError(error, { action: "create skill" });
   }
 }
 
@@ -136,12 +127,7 @@ export async function GET(
 
     return NextResponse.json(formattedSkills);
   } catch (error) {
-    console.error("Error fetching skills:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return handleApiError(error, { action: "list skills" });
   }
 }
 
@@ -171,11 +157,6 @@ export async function DELETE(
       deletedCount: result.count,
     });
   } catch (error) {
-    console.error("Error deleting all skills:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return handleApiError(error, { action: "delete all skills" });
   }
 }

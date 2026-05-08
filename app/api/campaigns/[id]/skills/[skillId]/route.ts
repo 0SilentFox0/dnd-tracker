@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 
 import { buildSkillUpdateData } from "./build-skill-update-data";
 import { formatSkillResponse } from "./format-skill-response";
@@ -7,6 +6,7 @@ import { updateSkillSchema } from "./update-skill-schema";
 
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess, requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 
 export async function GET(
   request: Request,
@@ -30,12 +30,7 @@ export async function GET(
 
     return NextResponse.json(formatSkillResponse(skill));
   } catch (error) {
-    console.error("Error fetching skill:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return handleApiError(error, { action: "fetch skill" });
   }
 }
 
@@ -82,16 +77,7 @@ export async function PATCH(
 
     return NextResponse.json(formatSkillResponse(updatedSkill));
   } catch (err) {
-    console.error("Error updating skill:", err);
-
-    if (err instanceof z.ZodError) {
-      return NextResponse.json({ error: err.issues }, { status: 400 });
-    }
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return handleApiError(err, { action: "update skill" });
   }
 }
 
@@ -125,11 +111,6 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting skill:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return handleApiError(error, { action: "delete skill" });
   }
 }

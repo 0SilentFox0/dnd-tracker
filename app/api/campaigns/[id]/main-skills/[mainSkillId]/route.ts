@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { prisma } from "@/lib/db";
 import { requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 
 const updateMainSkillSchema = z.object({
   name: z.string().min(1).max(100).optional(),
@@ -43,12 +44,7 @@ export async function GET(
 
     return NextResponse.json(mainSkill);
   } catch (error) {
-    console.error("Error fetching main skill:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return handleApiError(error, { action: "fetch main skill" });
   }
 }
 
@@ -101,16 +97,7 @@ export async function PATCH(
 
     return NextResponse.json(updatedMainSkill);
   } catch (error) {
-    console.error("Error updating main skill:", error);
-
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.issues }, { status: 400 });
-    }
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return handleApiError(error, { action: "update main skill" });
   }
 }
 
@@ -146,11 +133,6 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting main skill:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return handleApiError(error, { action: "delete main skill" });
   }
 }
