@@ -186,7 +186,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const snapshotState = () => ({
     initiativeOrder: slimInitiativeOrderForStorage(
-      JSON.parse(JSON.stringify(currentInitiativeOrder)) as BattleParticipant[],
+      structuredClone(currentInitiativeOrder),
     ),
     currentTurnIndex: battle.currentTurnIndex,
     currentRound: battle.currentRound,
