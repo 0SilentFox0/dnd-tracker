@@ -6,7 +6,6 @@ import {
   calculatePercentBonus,
   formatFlatBonusBreakdown,
   formatPercentBonusBreakdown,
-  matchesAttackType,
 } from "../common";
 import type { DamageCalculationResult } from "../types/damage-calculations";
 import { calculateArtifactDamageBonus, calculatePassiveAbilityDamageBonus } from "./bonuses";
@@ -16,10 +15,7 @@ import {
   getSkillDamageFlatBreakdownEntries,
   getSkillDamagePercentBreakdownEntries,
 } from "./skill";
-import {
-  getSkillsForDamageBonus,
-  skillAppliesToDamageType,
-} from "./skill-resolve";
+import { getSkillsForDamageBonus } from "./skill-resolve";
 
 import { AttackType, BATTLE_CONSTANTS } from "@/lib/constants/battle";
 import type { BattleParticipant } from "@/types/battle";
@@ -77,40 +73,6 @@ export function calculateDamageWithModifiersImpl(
   const skillPercent = calculateSkillDamagePercentBonus(attacker, attackType);
 
   const hasApplicableSkills = getSkillsForDamageBonus(attacker, attackType).length > 0;
-
-  const activeSkills = attacker.battleData?.activeSkills ?? [];
-
-  if (activeSkills.length > 0) {
-    const attackTypeStr = attackType === AttackType.MELEE ? "melee" : "ranged";
-
-    console.info(
-      "[calculateDamageWithModifiers] Атакуючий:",
-      attacker.basicInfo.name,
-      "тип атаки:",
-      attackTypeStr,
-    );
-    for (const s of activeSkills) {
-      const applies = skillAppliesToDamageType(s, attackType);
-
-      const effectsSummary = (s.effects ?? []).map((e) => ({
-        stat: e.stat,
-        value: e.value,
-        isPercentage: e.isPercentage,
-        matchesType: matchesAttackType(e.stat, attackType),
-      }));
-
-      console.info(
-        "  скіл:",
-        s.name,
-        "| appliesToDamageType:",
-        applies,
-        "| damageType скіла:",
-        s.damageType ?? "—",
-        "| ефекти:",
-        effectsSummary,
-      );
-    }
-  }
 
   const skillPercentEntries = getSkillDamagePercentBreakdownEntries(attacker, attackType);
 
