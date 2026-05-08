@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { mergeBattleCache } from "@/lib/hooks/battles";
+import { battleChannelName, userChannelName } from "@/lib/pusher-channels";
 import type { BattleScene } from "@/types/api";
 
 export type PusherConnectionState = "connected" | "disconnected" | "connecting" | "unavailable" | null;
@@ -99,9 +100,11 @@ export function usePusherBattleSync(
         return;
       }
 
+      const channel = battleChannelName(battleId);
+
       debugLog("pusher init (battle channel)", {
         queryKey: queryKey(),
-        battleChannel: `battle-${battleId}`,
+        battleChannel: channel,
       });
 
       const applyBattlePayload = (
@@ -192,9 +195,9 @@ export function usePusherBattleSync(
       });
       updateConnectionState();
 
-      const battleChannel = pusher.subscribe("battle-" + battleId);
+      const battleChannel = pusher.subscribe(channel);
 
-      debugLog("subscribed battle channel", { channel: `battle-${battleId}` });
+      debugLog("subscribed battle channel", { channel });
       battleChannel.bind("battle-updated", (data: unknown) =>
         applyBattlePayload("battle-updated", data),
       );
@@ -213,7 +216,7 @@ export function usePusherBattleSync(
 
       if (p) {
         debugLog("cleanup battle channel only");
-        p.unsubscribe("battle-" + battleId);
+        p.unsubscribe(battleChannelName(battleId));
         // не обнуляємо pusherRef — другий effect використовує його для cleanup user-каналу
       }
     };
@@ -234,12 +237,12 @@ export function usePusherBattleSync(
 
       if (!pusher) return;
 
-      const userChannelName = "user-" + currentUserId;
+      const channel = userChannelName(currentUserId);
 
-      userChannelRef.current = userChannelName;
-      debugLog("subscribed user channel", { channel: userChannelName });
+      userChannelRef.current = channel;
+      debugLog("subscribed user channel", { channel });
 
-      const userChannel = pusher.subscribe(userChannelName);
+      const userChannel = pusher.subscribe(channel);
 
       userChannel.bind(
         "turn-started",

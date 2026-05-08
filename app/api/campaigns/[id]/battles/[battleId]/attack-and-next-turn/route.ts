@@ -10,7 +10,11 @@ import { z } from "zod";
 import { attackAndNextTurnSchema } from "./attack-and-next-turn-schema";
 
 import { prisma } from "@/lib/db";
-import { pusherServer } from "@/lib/pusher";
+import {
+  battleChannelName,
+  pusherServer,
+  userChannelName,
+} from "@/lib/pusher";
 import {
   advanceTurnPhase,
   AttackPhaseError,
@@ -185,13 +189,15 @@ export async function POST(
     if (process.env.PUSHER_APP_ID) {
       const pusherPayload = preparePusherPayload(updatedBattle);
 
+      const battleChannel = battleChannelName(battleId);
+
       void pusherServer
-        .trigger(`battle-${battleId}`, "battle-updated", pusherPayload)
+        .trigger(battleChannel, "battle-updated", pusherPayload)
         .catch((err) => console.error("Pusher trigger failed:", err));
 
       if (finalStatus === "completed") {
         void pusherServer
-          .trigger(`battle-${battleId}`, "battle-completed", pusherPayload)
+          .trigger(battleChannel, "battle-completed", pusherPayload)
           .catch((err) => console.error("Pusher trigger failed:", err));
       }
 
@@ -203,7 +209,7 @@ export async function POST(
       ) {
         void pusherServer
           .trigger(
-            `user-${activeParticipant.basicInfo.controlledBy}`,
+            userChannelName(activeParticipant.basicInfo.controlledBy),
             "turn-started",
             {
               battleId,

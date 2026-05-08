@@ -247,15 +247,17 @@ export async function POST(
 
     // Відправляємо real-time оновлення через Pusher
     if (process.env.PUSHER_APP_ID) {
-      const { pusherServer } = await import("@/lib/pusher");
+      const { pusherServer, battleChannelName } = await import("@/lib/pusher");
+
+      const channel = battleChannelName(battleId);
 
       debugBattleSync("trigger battle-started", {
-        channel: `battle-${battleId}`,
+        channel,
         event: "battle-started",
       });
       void pusherServer
         .trigger(
-          `battle-${battleId}`,
+          channel,
           "battle-started",
           preparePusherPayload(updatedBattle),
         )

@@ -112,15 +112,17 @@ export async function POST(
 
     // Відправляємо real-time оновлення через Pusher
     if (process.env.PUSHER_APP_ID) {
-      const { pusherServer } = await import("@/lib/pusher");
+      const { pusherServer, battleChannelName } = await import("@/lib/pusher");
 
       const pusherPayload = preparePusherPayload(updatedBattle);
 
+      const channel = battleChannelName(battleId);
+
       void pusherServer
-        .trigger(`battle-${battleId}`, "battle-completed", pusherPayload)
+        .trigger(channel, "battle-completed", pusherPayload)
         .catch((err) => console.error("Pusher trigger failed:", err));
       void pusherServer
-        .trigger(`battle-${battleId}`, "battle-updated", pusherPayload)
+        .trigger(channel, "battle-updated", pusherPayload)
         .catch((err) => console.error("Pusher trigger failed:", err));
     }
 

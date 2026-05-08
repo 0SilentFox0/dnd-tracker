@@ -229,10 +229,10 @@ export async function executeAttack({
   });
 
   if (process.env.PUSHER_APP_ID) {
-    const { pusherServer } = await import("@/lib/pusher");
+    const { pusherServer, battleChannelName } = await import("@/lib/pusher");
 
     void pusherServer
-      .trigger(`battle-${battleId}`, "battle-updated", preparePusherPayload(updatedBattle))
+      .trigger(battleChannelName(battleId), "battle-updated", preparePusherPayload(updatedBattle))
       .catch((err) => console.error("Pusher trigger failed:", err));
   }
 

@@ -136,7 +136,7 @@ describe("usePusherBattleSync — two players receive same battle state", () => 
 
   const battleId = "battle-1";
 
-  const channelName = `battle-${battleId}`;
+  const channelName = `private-battle-${battleId}`;
 
   beforeEach(() => {
     process.env.NEXT_PUBLIC_PUSHER_KEY = "test-key";

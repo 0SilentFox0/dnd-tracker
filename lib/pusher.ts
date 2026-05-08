@@ -10,6 +10,15 @@ export const pusherServer = new Pusher({
   useTLS: true,
 });
 
+// Re-export безпечних channel-helpers, щоб `await import("@/lib/pusher")` у
+// клієнтських хуках і так отримував їх (динамічно), без додаткових імпортів.
+export {
+  BATTLE_CHANNEL_PREFIX,
+  battleChannelName,
+  USER_CHANNEL_PREFIX,
+  userChannelName,
+} from "./pusher-channels";
+
 let clientInstance: PusherClient | null = null;
 
 /**

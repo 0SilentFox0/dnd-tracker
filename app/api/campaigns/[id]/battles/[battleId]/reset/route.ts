@@ -43,11 +43,11 @@ export async function POST(
 
     // Відправляємо real-time оновлення через Pusher
     if (process.env.PUSHER_APP_ID) {
-      const { pusherServer } = await import("@/lib/pusher");
+      const { pusherServer, battleChannelName } = await import("@/lib/pusher");
 
       void pusherServer
         .trigger(
-          `battle-${battleId}`,
+          battleChannelName(battleId),
           "battle-updated",
           preparePusherPayload(updatedBattle),
         )

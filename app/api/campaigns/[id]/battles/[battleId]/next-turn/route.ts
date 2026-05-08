@@ -12,7 +12,11 @@ import {
 } from "./next-turn-helpers";
 
 import { prisma } from "@/lib/db";
-import { pusherServer } from "@/lib/pusher";
+import {
+  battleChannelName,
+  pusherServer,
+  userChannelName,
+} from "@/lib/pusher";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import {
   prepareBattleLogForStorage,
@@ -225,21 +229,23 @@ export async function POST(
     if (process.env.PUSHER_APP_ID) {
       const pusherPayload = preparePusherPayload(updatedBattle);
 
+      const battleChannel = battleChannelName(battleId);
+
       debugBattleSync("trigger battle-updated", {
-        channel: `battle-${battleId}`,
+        channel: battleChannel,
         event: "battle-updated",
       });
       void pusherServer
-        .trigger(`battle-${battleId}`, "battle-updated", pusherPayload)
+        .trigger(battleChannel, "battle-updated", pusherPayload)
         .catch((err) => console.error("Pusher trigger failed:", err));
 
       if (finalStatus === "completed") {
         debugBattleSync("trigger battle-completed", {
-          channel: `battle-${battleId}`,
+          channel: battleChannel,
           event: "battle-completed",
         });
         void pusherServer
-          .trigger(`battle-${battleId}`, "battle-completed", pusherPayload)
+          .trigger(battleChannel, "battle-completed", pusherPayload)
           .catch((err) => console.error("Pusher trigger failed:", err));
       }
 
@@ -249,22 +255,22 @@ export async function POST(
         activeParticipant &&
         activeParticipant.basicInfo.controlledBy !== "dm"
       ) {
+        const userChannel = userChannelName(
+          activeParticipant.basicInfo.controlledBy,
+        );
+
         debugBattleSync("trigger turn-started", {
-          channel: `user-${activeParticipant.basicInfo.controlledBy}`,
+          channel: userChannel,
           event: "turn-started",
           participantId: activeParticipant.basicInfo.id,
           participantName: activeParticipant.basicInfo.name,
         });
         void pusherServer
-          .trigger(
-            `user-${activeParticipant.basicInfo.controlledBy}`,
-            "turn-started",
-            {
-              battleId,
-              participantId: activeParticipant.basicInfo.id,
-              participantName: activeParticipant.basicInfo.name,
-            },
-          )
+          .trigger(userChannel, "turn-started", {
+            battleId,
+            participantId: activeParticipant.basicInfo.id,
+            participantName: activeParticipant.basicInfo.name,
+          })
           .catch((err) => console.error("Pusher trigger failed:", err));
       }
     }
