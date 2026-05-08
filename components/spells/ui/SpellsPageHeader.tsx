@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Printer } from "lucide-react";
 
 import { PageHeader } from "@/components/common/PageHeader";
 import { CreateGroupDialog } from "@/components/skills/dialogs/CreateGroupDialog";
@@ -30,6 +31,21 @@ export function SpellsPageHeader({
             + Створити заклинання
           </Button>
         </Link>
+        {spellsCount > 0 && (
+          <Link
+            href={`/campaigns/${campaignId}/dm/print/spells`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button
+              variant="outline"
+              className="whitespace-nowrap text-xs sm:text-sm w-full justify-center"
+            >
+              <Printer className="h-4 w-4 mr-1" />
+              Версія для друку
+            </Button>
+          </Link>
+        )}
         {spellsCount > 0 && (
           <Button
             variant="destructive"

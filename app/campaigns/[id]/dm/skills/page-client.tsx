@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { Printer } from "lucide-react";
 
 import { SkillGroupAccordion } from "@/components/skills/list/SkillGroupAccordion";
 import { Accordion } from "@/components/ui/accordion";
@@ -113,6 +114,21 @@ export function DMSkillsPageClient({
               + Створити скіл
             </Button>
           </Link>
+          {skills.length > 0 && (
+            <Link
+              href={`/campaigns/${campaignId}/dm/print/skills`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button
+                variant="outline"
+                className="whitespace-nowrap text-xs sm:text-sm"
+              >
+                <Printer className="h-4 w-4 mr-1" />
+                Версія для друку
+              </Button>
+            </Link>
+          )}
           {skills.length > 0 && (
             <Button
               variant="destructive"

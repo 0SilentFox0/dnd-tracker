@@ -40,6 +40,8 @@ export interface SkillCardProps {
   onRemove?: (skillId: string) => void;
   /** Викликається при дублюванні скіла (створює копію з новим id) */
   onDuplicate?: (skillId: string) => void;
+  /** Режим версії для друку: ховає інтерактивні елементи, розкриває обрізаний опис */
+  printMode?: boolean;
 }
 
 export function SkillCard({
@@ -47,6 +49,7 @@ export function SkillCard({
   campaignId,
   onRemove,
   onDuplicate,
+  printMode = false,
 }: SkillCardProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -108,24 +111,30 @@ export function SkillCard({
               </h3>
             </div>
           </div>
-          <SkillCardActionsMenu
-            skillId={skillId}
-            currentMainSkillId={currentMainSkillId}
-            mainSkills={mainSkills}
-            onRemove={onRemove}
-            onDuplicate={onDuplicate}
-            onOpenDeleteDialog={() => setShowDeleteDialog(true)}
-            onUpdateMainSkill={(mainSkillId) => {
-              updateSkillMutation.mutate({
-                skillId,
-                data: { mainSkillData: { mainSkillId } },
-              });
-            }}
-          />
+          {!printMode && (
+            <SkillCardActionsMenu
+              skillId={skillId}
+              currentMainSkillId={currentMainSkillId}
+              mainSkills={mainSkills}
+              onRemove={onRemove}
+              onDuplicate={onDuplicate}
+              onOpenDeleteDialog={() => setShowDeleteDialog(true)}
+              onUpdateMainSkill={(mainSkillId) => {
+                updateSkillMutation.mutate({
+                  skillId,
+                  data: { mainSkillData: { mainSkillId } },
+                });
+              }}
+            />
+          )}
         </div>
 
         {skillDescription && (
-          <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 mb-3">
+          <p
+            className={`text-xs sm:text-sm text-muted-foreground mb-3 ${
+              printMode ? "" : "line-clamp-2"
+            }`}
+          >
             {skillDescription}
           </p>
         )}
@@ -167,41 +176,60 @@ export function SkillCard({
           )}
 
           <div className="flex flex-wrap gap-2 items-center">
-            <label className="flex items-center gap-1.5 cursor-pointer">
-              <Checkbox
-                checked={combatStats.affectsDamage ?? false}
-                onCheckedChange={(checked) => {
-                  const next = !!checked;
+            {printMode ? (
+              combatStats.affectsDamage && (
+                <Badge variant="secondary" className="text-xs font-normal">
+                  Впливає на шкоду
+                  {combatStats.damageType
+                    ? `: ${
+                        combatStats.damageType === "melee"
+                          ? "ближній бій"
+                          : combatStats.damageType === "ranged"
+                            ? "дальній бій"
+                            : "магія"
+                      }`
+                    : ""}
+                </Badge>
+              )
+            ) : (
+              <>
+                <label className="flex items-center gap-1.5 cursor-pointer">
+                  <Checkbox
+                    checked={combatStats.affectsDamage ?? false}
+                    onCheckedChange={(checked) => {
+                      const next = !!checked;
 
-                  const baseStats =
-                    "combatStats" in skill ? (skill.combatStats as Record<string, unknown>) ?? {} : {};
+                      const baseStats =
+                        "combatStats" in skill ? (skill.combatStats as Record<string, unknown>) ?? {} : {};
 
-                  updateSkillMutation.mutate({
-                    skillId,
-                    data: {
-                      combatStats: {
-                        ...baseStats,
-                        affectsDamage: next,
-                        damageType:
-                          next && !combatStats.damageType
-                            ? "melee"
-                            : combatStats.damageType ?? undefined,
-                      },
-                    },
-                  });
-                }}
-                disabled={updateSkillMutation.isPending}
-              />
-              <span className="text-xs font-medium">Впливає на шкоду</span>
-            </label>
-            {combatStats.affectsDamage && combatStats.damageType && (
-              <Badge variant="secondary" className="text-xs font-normal">
-                {combatStats.damageType === "melee"
-                  ? "ближній бій"
-                  : combatStats.damageType === "ranged"
-                    ? "дальній бій"
-                    : "магія"}
-              </Badge>
+                      updateSkillMutation.mutate({
+                        skillId,
+                        data: {
+                          combatStats: {
+                            ...baseStats,
+                            affectsDamage: next,
+                            damageType:
+                              next && !combatStats.damageType
+                                ? "melee"
+                                : combatStats.damageType ?? undefined,
+                          },
+                        },
+                      });
+                    }}
+                    disabled={updateSkillMutation.isPending}
+                  />
+                  <span className="text-xs font-medium">Впливає на шкоду</span>
+                </label>
+                {combatStats.affectsDamage && combatStats.damageType && (
+                  <Badge variant="secondary" className="text-xs font-normal">
+                    {combatStats.damageType === "melee"
+                      ? "ближній бій"
+                      : combatStats.damageType === "ranged"
+                        ? "дальній бій"
+                        : "магія"}
+                  </Badge>
+                )}
+              </>
             )}
           </div>
 
@@ -216,22 +244,26 @@ export function SkillCard({
           )}
         </div>
       </div>
-      <Link href={`/campaigns/${campaignId}/dm/skills/${skillId}`}>
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-full text-xs sm:text-sm"
-        >
-          Редагувати
-        </Button>
-      </Link>
+      {!printMode && (
+        <>
+          <Link href={`/campaigns/${campaignId}/dm/skills/${skillId}`}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full text-xs sm:text-sm"
+            >
+              Редагувати
+            </Button>
+          </Link>
 
-      <SkillCardDeleteDialog
-        open={showDeleteDialog}
-        onOpenChange={setShowDeleteDialog}
-        skillName={skillName}
-        onConfirm={handleConfirmRemove}
-      />
+          <SkillCardDeleteDialog
+            open={showDeleteDialog}
+            onOpenChange={setShowDeleteDialog}
+            skillName={skillName}
+            onConfirm={handleConfirmRemove}
+          />
+        </>
+      )}
     </div>
   );
 }

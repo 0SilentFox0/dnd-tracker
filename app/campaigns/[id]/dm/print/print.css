@@ -1,0 +1,111 @@
+/*
+ * Стилі для друкованих довідників (/dm/print/*).
+ *
+ * Корінь html має .dark, тому Tailwind-класи типу `bg-card`, `text-foreground`,
+ * `text-muted-foreground` всередині SkillCard/SpellCard беруть значення з
+ * темної теми. Тут ми перевизначаємо ті ж CSS-змінні в межах .print-page —
+ * усе всередині нього автоматично стає світлим.
+ */
+
+.print-page {
+  /* Світлі значення (взято з :root globals.css) + трохи темніший muted-foreground для контрасту на папері */
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.141 0.005 285.823);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.141 0.005 285.823);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.141 0.005 285.823);
+  --primary: oklch(0.42 0.18 17.585);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.95 0.001 286.375);
+  --secondary-foreground: oklch(0.21 0.006 285.885);
+  --muted: oklch(0.95 0.001 286.375);
+  --muted-foreground: oklch(0.42 0.012 285.938);
+  --accent: oklch(0.95 0.001 286.375);
+  --accent-foreground: oklch(0.21 0.006 285.885);
+  --destructive: oklch(0.55 0.21 27.325);
+  --border: oklch(0.82 0.004 286.32);
+  --input: oklch(0.82 0.004 286.32);
+  --ring: oklch(0.55 0.16 13.428);
+
+  background: white;
+  color: oklch(0.141 0.005 285.823);
+  min-height: 100vh;
+  padding: 1.5rem;
+  max-width: 210mm; /* A4 width — щоб preview збігався з друком */
+  margin: 0 auto;
+}
+
+/* Гасимо світіння/прозорість, які малюють карти SkillCard/SpellCard на dark-темі */
+.print-page .print-card {
+  box-shadow: none !important;
+  background-color: white !important;
+}
+
+.print-page .print-card * {
+  text-shadow: none;
+}
+
+/*
+ * Badge має whitespace-nowrap + w-fit + shrink-0 за замовчуванням.
+ * Для довгих тригерів типу «При вбивстві (дія/бонус-дія доводить HP до 0)»
+ * це призводить до виходу за межі картки. У print-режимі дозволяємо перенос.
+ */
+.print-page [data-slot="badge"] {
+  white-space: normal !important;
+  word-break: break-word;
+  max-width: 100%;
+  height: auto;
+  text-align: left;
+  line-height: 1.3;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  filter: contrast(1.05);
+}
+
+@media print {
+  /* Прибираємо глобальний хедер і дарковий оверлей body */
+  body > header {
+    display: none !important;
+  }
+
+  body::before {
+    display: none !important;
+  }
+
+  html,
+  body {
+    background: white !important;
+    background-image: none !important;
+    color: black !important;
+  }
+
+  body {
+    background-image: none !important;
+  }
+
+  .print-page {
+    padding: 0 !important;
+    max-width: none !important;
+    background: white !important;
+  }
+
+  .print-card {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    box-shadow: none !important;
+  }
+
+  .print-section + .print-section {
+    page-break-before: always;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+}

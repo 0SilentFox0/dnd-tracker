@@ -35,6 +35,8 @@ interface SpellCardProps {
   spellGroups: SpellGroup[];
   onRemoveFromGroup: (spellId: string) => void;
   onMoveToGroup: (spellId: string, groupId: string | null) => void;
+  /** Режим версії для друку: ховає інтерактивні елементи, розкриває обрізаний опис */
+  printMode?: boolean;
 }
 
 
@@ -44,6 +46,7 @@ export function SpellCard({
   spellGroups,
   onRemoveFromGroup,
   onMoveToGroup,
+  printMode = false,
 }: SpellCardProps) {
   // Отримуємо іконки (це не створює нові компоненти, а повертає посилання на існуючі з lucide-react)
    
@@ -174,27 +177,33 @@ export function SpellCard({
             </>
           )}
         </CardDescription>
-        {/* Тимчасово: ID заклинання та копіювання */}
-        <div className="mt-2 flex items-center gap-2">
-          <code className="text-[10px] sm:text-xs text-muted-foreground font-mono truncate max-w-[180px] sm:max-w-none" title={spell.id}>
-            {spell.id}
-          </code>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7 shrink-0"
-            onClick={handleCopyId}
-            title={copied ? "Скопійовано" : "Копіювати ID"}
-          >
-            <Copy className="h-3 w-3" />
-          </Button>
-          {copied && (
-            <span className="text-[10px] text-muted-foreground">Скопійовано</span>
-          )}
-        </div>
+        {!printMode && (
+          /* Тимчасово: ID заклинання та копіювання */
+          <div className="mt-2 flex items-center gap-2">
+            <code className="text-[10px] sm:text-xs text-muted-foreground font-mono truncate max-w-[180px] sm:max-w-none" title={spell.id}>
+              {spell.id}
+            </code>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 shrink-0"
+              onClick={handleCopyId}
+              title={copied ? "Скопійовано" : "Копіювати ID"}
+            >
+              <Copy className="h-3 w-3" />
+            </Button>
+            {copied && (
+              <span className="text-[10px] text-muted-foreground">Скопійовано</span>
+            )}
+          </div>
+        )}
       </CardHeader>
       <CardContent className="flex-1 flex flex-col">
-        <div className="text-xs sm:text-sm text-muted-foreground flex-1 line-clamp-3">
+        <div
+          className={`text-xs sm:text-sm text-muted-foreground flex-1 ${
+            printMode ? "" : "line-clamp-3"
+          }`}
+        >
           {Array.isArray(spell.effects) && spell.effects.length > 0 ? (
             <ul className="list-disc list-inside space-y-0.5">
               {spell.effects.map((effect, i) => (
@@ -205,58 +214,65 @@ export function SpellCard({
             <p>{spell.description}</p>
           ) : null}
         </div>
-        <div className="flex gap-1 sm:gap-2 mt-2 sm:mt-3">
-          <Link
-            href={`/campaigns/${campaignId}/dm/spells/${spell.id}`}
-            className="flex-1 min-w-0"
-          >
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full text-xs sm:text-sm"
+        {printMode && spell.diceCount && spell.diceType && (
+          <div className="text-xs sm:text-sm mt-2 font-medium">
+            Шкода: {spell.diceCount}{spell.diceType}
+          </div>
+        )}
+        {!printMode && (
+          <div className="flex gap-1 sm:gap-2 mt-2 sm:mt-3">
+            <Link
+              href={`/campaigns/${campaignId}/dm/spells/${spell.id}`}
+              className="flex-1 min-w-0"
             >
-              Редагувати
-            </Button>
-          </Link>
-          {spell.spellGroup && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="shrink-0"
-              onClick={() => onRemoveFromGroup(spell.id)}
-              title="Видалити з групи"
-            >
-              <X className="h-3 w-3 sm:h-4 sm:w-4" />
-            </Button>
-          )}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full text-xs sm:text-sm"
+              >
+                Редагувати
+              </Button>
+            </Link>
+            {spell.spellGroup && (
               <Button
                 variant="outline"
                 size="sm"
                 className="shrink-0"
-                title="Перемістити в групу"
+                onClick={() => onRemoveFromGroup(spell.id)}
+                title="Видалити з групи"
               >
-                <Move className="h-3 w-3 sm:h-4 sm:w-4" />
+                <X className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem
-                onClick={() => onMoveToGroup(spell.id, null)}
-              >
-                Без групи
-              </DropdownMenuItem>
-              {spellGroups.map((group) => (
-                <DropdownMenuItem
-                  key={group.id}
-                  onClick={() => onMoveToGroup(spell.id, group.id)}
+            )}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="shrink-0"
+                  title="Перемістити в групу"
                 >
-                  {group.name}
+                  <Move className="h-3 w-3 sm:h-4 sm:w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem
+                  onClick={() => onMoveToGroup(spell.id, null)}
+                >
+                  Без групи
                 </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+                {spellGroups.map((group) => (
+                  <DropdownMenuItem
+                    key={group.id}
+                    onClick={() => onMoveToGroup(spell.id, group.id)}
+                  >
+                    {group.name}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
