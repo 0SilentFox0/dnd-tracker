@@ -4,6 +4,7 @@ import { z } from "zod";
 import { kvDel, kvGet, kvSet } from "@/lib/cache/kv";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 
 const createCampaignSchema = z.object({
   name: z.string().min(1).max(100),
@@ -75,16 +76,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(campaign);
   } catch (error) {
-    console.error("Error creating campaign:", error);
-
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.issues }, { status: 400 });
-    }
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "create campaign" });
   }
 }
 
@@ -139,11 +131,6 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error("Error fetching campaigns:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "list campaigns" });
   }
 }

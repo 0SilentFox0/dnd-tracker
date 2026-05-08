@@ -4,6 +4,7 @@ import { z } from "zod";
 import { kvDel } from "@/lib/cache/kv";
 import { prisma } from "@/lib/db";
 import { requireAuth, requireDM } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 
 const updateCampaignSchema = z.object({
   name: z.string().min(1).max(100).optional(),
@@ -55,12 +56,7 @@ export async function GET(
 
     return NextResponse.json(campaign);
   } catch (error) {
-    console.error("Error fetching campaign:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "fetch campaign" });
   }
 }
 
@@ -126,15 +122,6 @@ export async function PATCH(
 
     return NextResponse.json(updatedCampaign);
   } catch (error) {
-    console.error("Error updating campaign:", error);
-
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.issues }, { status: 400 });
-    }
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "update campaign" });
   }
 }

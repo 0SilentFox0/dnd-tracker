@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 
 /**
  * GET /api/campaigns/active-battles
@@ -37,11 +38,6 @@ export async function GET() {
 
     return NextResponse.json(activeBattles);
   } catch (error) {
-    console.error("Error fetching active battles:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return handleApiError(error, { action: "list active battles" });
   }
 }

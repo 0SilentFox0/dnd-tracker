@@ -4,6 +4,7 @@ import { z } from "zod";
 import { kvDel } from "@/lib/cache/kv";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 
 const joinCampaignSchema = z.object({
   inviteCode: z.string().min(1),
@@ -93,15 +94,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json(member);
   } catch (error) {
-    console.error("Error joining campaign:", error);
-
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.issues }, { status: 400 });
-    }
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "join campaign" });
   }
 }

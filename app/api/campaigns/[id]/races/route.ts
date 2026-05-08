@@ -6,6 +6,7 @@ import { z } from "zod";
 import { getCachedRaces } from "@/lib/cache/reference-data";
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 
 const createRaceSchema = z.object({
   name: z.string().min(1).max(100),
@@ -60,12 +61,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error("Error fetching races:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "list races" });
   }
 }
 
@@ -106,18 +102,6 @@ export async function POST(
 
     return NextResponse.json(race, { status: 201 });
   } catch (error) {
-    console.error("Error creating race:", error);
-
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: "Validation error", details: error.issues },
-        { status: 400 }
-      );
-    }
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "create race" });
   }
 }
