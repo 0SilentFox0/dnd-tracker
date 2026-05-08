@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess, requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 
 const updateUnitSchema = z.object({
   name: z.string().min(1).max(100).optional(),
@@ -95,12 +96,7 @@ export async function GET(
 
     return NextResponse.json(unit);
   } catch (error) {
-    console.error("Error fetching unit:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "fetch unit" });
   }
 }
 
@@ -136,12 +132,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting unit:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "delete unit" });
   }
 }
 
@@ -238,15 +229,6 @@ export async function PATCH(
 
     return NextResponse.json(updatedUnit);
   } catch (error) {
-    console.error("Error updating unit:", error);
-
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.issues }, { status: 400 });
-    }
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "update unit" });
   }
 }

@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess,requireDM } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 
 const createGroupSchema = z.object({
   name: z.string().min(1).max(100),
@@ -37,12 +38,7 @@ export async function GET(
 
     return NextResponse.json(groups);
   } catch (error) {
-    console.error("Error fetching unit groups:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "list unit groups" });
   }
 }
 
@@ -102,15 +98,6 @@ export async function POST(
 
     return NextResponse.json(group);
   } catch (error) {
-    console.error("Error creating unit group:", error);
-
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.issues }, { status: 400 });
-    }
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "create unit group" });
   }
 }

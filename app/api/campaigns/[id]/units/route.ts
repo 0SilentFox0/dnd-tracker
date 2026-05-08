@@ -6,6 +6,7 @@ import { z } from "zod";
 import { getCachedUnits } from "@/lib/cache/reference-data";
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess,requireDM } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 import { getProficiencyBonus } from "@/lib/utils/common/calculations";
 
 const createUnitSchema = z.object({
@@ -128,16 +129,7 @@ export async function POST(
 
     return NextResponse.json(unit);
   } catch (error) {
-    console.error("Error creating unit:", error);
-
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.issues }, { status: 400 });
-    }
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "create unit" });
   }
 }
 
@@ -164,11 +156,6 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error("Error fetching units:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "list units" });
   }
 }

@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { prisma } from "@/lib/db";
 import { requireDM } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 import type { ImportUnit } from "@/types/import";
 
 // Схема для одного юніта в імпорті
@@ -236,18 +237,6 @@ export async function POST(
       units: createdUnits,
     });
   } catch (error) {
-    console.error("Error importing units:", error);
-
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: "Validation error", details: error.issues },
-        { status: 400 }
-      );
-    }
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "import units" });
   }
 }
