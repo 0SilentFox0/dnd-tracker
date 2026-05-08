@@ -187,6 +187,7 @@ export async function GET(
             spellDiceSum,
             undefined,
             { addHeroLevelToBase: true },
+            { groupId: dbSpell.groupId ?? null },
           );
 
           const floorTotal = Math.floor(spellCalc.totalDamage);

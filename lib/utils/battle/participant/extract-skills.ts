@@ -116,6 +116,27 @@ export async function extractActiveSkillsFromCharacter(
     skillsMap.set(s.id, s);
   }
 
+  // Підтягуємо spellGroupId з MainSkill (школа магії як вузол дерева).
+  // Робимо одним додатковим запитом, щоб не міняти контракт preloadedSkillsById.
+  const mainSkillIdsToResolve = new Set<string>();
+
+  for (const s of fetchedSkills) {
+    if (s.mainSkillId) mainSkillIdsToResolve.add(s.mainSkillId);
+  }
+
+  const mainSkillSpellGroupById = new Map<string, string | null>();
+
+  if (mainSkillIdsToResolve.size > 0) {
+    const mainSkills = await prisma.mainSkill.findMany({
+      where: { id: { in: Array.from(mainSkillIdsToResolve) } },
+      select: { id: true, spellGroupId: true },
+    });
+
+    for (const ms of mainSkills) {
+      mainSkillSpellGroupById.set(ms.id, ms.spellGroupId ?? null);
+    }
+  }
+
   for (const levelId of levelIds) {
     const parsed = parseMainSkillLevelId(levelId);
 
@@ -306,6 +327,12 @@ export async function extractActiveSkillsFromCharacter(
       skillTriggers = skillTriggersValue as SkillTriggers;
     }
 
+    const resolvedSpellGroupId =
+      skill.spellGroupId ??
+      (skill.mainSkillId
+        ? (mainSkillSpellGroupById.get(skill.mainSkillId) ?? null)
+        : null);
+
     let resolvedDamageType: "melee" | "ranged" | "magic" | null =
       (combatStats.damageType as "melee" | "ranged" | "magic" | null) ?? null;
 
@@ -313,11 +340,33 @@ export async function extractActiveSkillsFromCharacter(
 
     const hasMelee = effects.some((e) => e.stat === "melee_damage");
 
+    // Magic-сигнали: ефекти з patterns *_spell_damage / magic_damage / spell_damage,
+    // або поля spellEffectIncrease / spellEnhancement*, або скіл прив'язаний до школи магії.
+    const hasMagicEffect = effects.some((e) => {
+      const stat = (e.stat || "").toLowerCase();
+
+      return (
+        stat === "spell_damage" ||
+        stat === "magic_damage" ||
+        stat.endsWith("_spell_damage") ||
+        (stat.includes("magic") && stat.includes("damage"))
+      );
+    });
+
+    const hasMagicSignal =
+      hasMagicEffect ||
+      !!skill.spellEffectIncrease ||
+      enhancementTypes.length > 0 ||
+      !!skill.spellTargetChange ||
+      !!skill.spellAdditionalModifier ||
+      !!resolvedSpellGroupId;
+
     if (resolvedDamageType == null || !resolvedDamageType.length) {
       if (hasRanged && !hasMelee) resolvedDamageType = "ranged";
       else if (hasMelee && !hasRanged) resolvedDamageType = "melee";
       else if (hasRanged) resolvedDamageType = "ranged";
       else if (hasMelee) resolvedDamageType = "melee";
+      else if (hasMagicSignal) resolvedDamageType = "magic";
     } else if (hasRanged && !hasMelee && resolvedDamageType === "melee") {
       resolvedDamageType = "ranged";
     } else if (hasMelee && !hasRanged && resolvedDamageType === "ranged") {
@@ -340,6 +389,7 @@ export async function extractActiveSkillsFromCharacter(
       affectsDamage: combatStats.affectsDamage,
       damageType: resolvedDamageType,
       linkedSpellId: skill.spellId ?? undefined,
+      spellGroupId: resolvedSpellGroupId,
       spellEnhancements,
       skillTriggers,
     });

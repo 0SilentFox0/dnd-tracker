@@ -3,16 +3,8 @@
  */
 
 import { AttackType } from "@/lib/constants/battle";
+import type { SkillDamageType } from "@/types/battle";
 
-/**
- * Перевіряє чи відповідає тип ефекту типу атаки.
- * Підтримує два формати:
- *  - новий: stat name ("melee_damage", "ranged_damage", "physical_damage")
- *  - легасі: повне ім'я ("melee_damage_percent")
- * @param effectStat - stat ефекту (або legacy type)
- * @param attackType - тип атаки (AttackType enum)
- * @returns true якщо ефект застосовується до цього типу атаки
- */
 /**
  * Чи застосовується модифікатор «бонус до кидка атаки» до цього типу атаки.
  * `attack` / `attack_bonus` — на обидва типи; `ranged_attack` / `melee_attack` — вибірково.
@@ -35,20 +27,36 @@ export function matchesAttackBonusModifier(
   return true;
 }
 
-export function matchesAttackType(effectStat: string, attackType: AttackType): boolean {
+/**
+ * Перевіряє чи відповідає stat-ефекту скіла певному виду шкоди.
+ *
+ * Підтримує три види шкоди (`SkillDamageType`):
+ *  - "melee"  — `melee_damage`, `physical_damage`, *_melee_*_damage, *_physical_*_damage
+ *  - "ranged" — `ranged_damage`, `physical_damage`, *_ranged_*_damage, *_physical_*_damage
+ *  - "magic"  — `spell_damage`, `magic_damage`, `*_spell_damage` (chaos_spell_damage, dark_spell_damage, тощо)
+ *  - `all_damage` — універсально для всіх трьох видів.
+ *
+ * Параметр `attackType` приймається як `AttackType` enum (для legacy melee/ranged
+ * викликів) або як `SkillDamageType` рядок (включно з "magic").
+ */
+export function matchesAttackType(
+  effectStat: string,
+  attackType: AttackType | SkillDamageType,
+): boolean {
   const s = effectStat.toLowerCase();
 
-  // all_damage застосовується до обох типів атаки (melee і ranged)
   if (s === "all_damage") return true;
 
-  if (attackType === AttackType.MELEE) {
+  if (attackType === "melee") {
     return (
       s === "melee_damage" ||
       s === "physical_damage" ||
       (s.includes("melee") && s.includes("damage")) ||
       (s.includes("physical") && s.includes("damage"))
     );
-  } else {
+  }
+
+  if (attackType === "ranged") {
     return (
       s === "ranged_damage" ||
       s === "physical_damage" ||
@@ -56,6 +64,14 @@ export function matchesAttackType(effectStat: string, attackType: AttackType): b
       (s.includes("physical") && s.includes("damage"))
     );
   }
+
+  // magic
+  return (
+    s === "spell_damage" ||
+    s === "magic_damage" ||
+    s.endsWith("_spell_damage") ||
+    (s.includes("magic") && s.includes("damage"))
+  );
 }
 
 /**

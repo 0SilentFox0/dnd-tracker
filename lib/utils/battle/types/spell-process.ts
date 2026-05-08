@@ -13,6 +13,8 @@ export interface BattleSpell {
   target?: "enemies" | "allies" | "all";
   damageType: "damage" | "heal" | "all";
   damageElement?: string | null;
+  /** ID групи (школи) заклинання — використовується magic pipeline для school-scope фільтра. */
+  groupId?: string | null;
   damageModifier?: string | null;
   healModifier?: string | null;
   diceCount?: number | null;

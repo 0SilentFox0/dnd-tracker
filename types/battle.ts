@@ -124,6 +124,14 @@ export interface ActiveSkill {
   damageType?: SkillDamageType | null;
   /** Заклинання, до якого прив’язаний скіл (для покращень по конкретному spellId) */
   linkedSpellId?: string | null;
+  /**
+   * ID групи (школи) заклинань, до якої прив'язаний скіл.
+   * Беремо з `mainSkill.spellGroupId` (школа магії як вузол дерева скілів),
+   * або з `skill.spellGroupId` (пряма прив'язка скіла до школи).
+   * Використовується magic-pipeline'ом для school-scope фільтра:
+   * бонус застосовується лише до заклинань тієї ж школи.
+   */
+  spellGroupId?: string | null;
   spellEnhancements?: {
     spellEffectIncrease?: number; // +25% ефекту
     spellTargetChange?: { target: string }; // зміна цілі

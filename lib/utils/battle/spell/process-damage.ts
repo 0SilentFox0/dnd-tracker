@@ -44,6 +44,8 @@ export function computeSpellDamageAndApply(
     caster,
     baseValue,
     additionalRollResult,
+    undefined,
+    { groupId: spell.groupId ?? null },
   );
 
   const allResistanceBreakdown: string[] = [];
@@ -160,6 +162,8 @@ export function computeSpellHealAndApply(
     caster,
     baseValue,
     additionalRollResult,
+    undefined,
+    { groupId: spell.groupId ?? null },
   );
 
   const spellCalculation: SpellCalculation = {

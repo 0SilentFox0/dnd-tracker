@@ -168,6 +168,7 @@ export async function POST(
       target: spellData.target as "enemies" | "allies" | "all" | undefined,
       damageType: spellData.damageType as "damage" | "heal" | "all",
       damageElement: spellData.damageElement,
+      groupId: spellData.groupId ?? null,
       damageModifier: spellData.damageModifier,
       healModifier: spellData.healModifier,
       diceCount: spellData.diceCount,

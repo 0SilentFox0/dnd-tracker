@@ -49,6 +49,40 @@ describe("battle-modifiers-common", () => {
       expect(matchesAttackType("hp_bonus", AttackType.MELEE)).toBe(false);
       expect(matchesAttackType("initiative", AttackType.RANGED)).toBe(false);
     });
+
+    describe("magic kind (SkillDamageType)", () => {
+      it("returns true for spell_damage", () => {
+        expect(matchesAttackType("spell_damage", "magic")).toBe(true);
+      });
+
+      it("returns true for magic_damage", () => {
+        expect(matchesAttackType("magic_damage", "magic")).toBe(true);
+      });
+
+      it("returns true for chaos_spell_damage / dark_spell_damage", () => {
+        expect(matchesAttackType("chaos_spell_damage", "magic")).toBe(true);
+        expect(matchesAttackType("dark_spell_damage", "magic")).toBe(true);
+      });
+
+      it("returns true for all_damage", () => {
+        expect(matchesAttackType("all_damage", "magic")).toBe(true);
+      });
+
+      it("returns false for melee_damage / ranged_damage / physical_damage", () => {
+        expect(matchesAttackType("melee_damage", "magic")).toBe(false);
+        expect(matchesAttackType("ranged_damage", "magic")).toBe(false);
+        expect(matchesAttackType("physical_damage", "magic")).toBe(false);
+      });
+
+      it("magic-stats не спрацьовують для melee/ranged", () => {
+        expect(matchesAttackType("chaos_spell_damage", AttackType.MELEE)).toBe(
+          false,
+        );
+        expect(matchesAttackType("spell_damage", AttackType.RANGED)).toBe(
+          false,
+        );
+      });
+    });
   });
 
   describe("calculatePercentBonus", () => {
