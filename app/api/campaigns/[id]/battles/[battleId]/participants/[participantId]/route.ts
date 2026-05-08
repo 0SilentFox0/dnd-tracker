@@ -54,7 +54,20 @@ export async function PATCH(
       );
     }
 
-    const body = await request.json().catch(() => ({}));
+    let body: unknown;
+
+    try {
+      body = await request.json();
+    } catch (err) {
+      console.warn("Invalid JSON in PATCH participant", {
+        campaignId,
+        battleId,
+        participantId,
+        error: err instanceof Error ? err.message : String(err),
+      });
+
+      return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    }
 
     const data = patchSchema.parse(body);
 
