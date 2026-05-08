@@ -12,10 +12,14 @@ import {
 import { executeComplexTriggersForChangedParticipant } from "@/lib/utils/skills/execution";
 import { BattleAction, BattleParticipant } from "@/types/battle";
 
-const patchSchema = z.object({
-  currentHp: z.number().int().min(0).optional(),
-  removeFromBattle: z.boolean().optional(),
-});
+const patchSchema = z
+  .object({
+    currentHp: z.number().int().min(0).optional(),
+    removeFromBattle: z.boolean().optional(),
+  })
+  .refine((d) => Object.keys(d).length > 0, {
+    message: "At least one field is required",
+  });
 
 /**
  * DM: змінити HP учасника або видалити його з бою.
