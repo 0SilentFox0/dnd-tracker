@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
 import { Textarea } from "@/components/ui/textarea";
-import { SPELL_EFFECT_OPTIONS } from "@/lib/constants/spell-effects";
+import { SPELL_EFFECT_GROUPS } from "@/lib/constants/spell-effects";
 import { useUnits } from "@/lib/hooks/units";
 
 export interface SpellFormEffectsAndMetaProps {
@@ -54,11 +54,19 @@ export function SpellFormEffectsAndMeta({
         </p>
         <div className="flex gap-2 mb-3">
           {(() => {
-            const available = SPELL_EFFECT_OPTIONS.filter(
-              (opt) => !(formData.effects ?? []).includes(opt.value),
+            const alreadyAdded = new Set(formData.effects ?? []);
+
+            const availableGroups = SPELL_EFFECT_GROUPS.map((g) => ({
+              label: g.label,
+              options: g.options.filter((opt) => !alreadyAdded.has(opt.value)),
+            })).filter((g) => g.options.length > 0);
+
+            const totalAvailable = availableGroups.reduce(
+              (sum, g) => sum + g.options.length,
+              0,
             );
 
-            return available.length > 0 ? (
+            return totalAvailable > 0 ? (
               <SelectField
                 value=""
                 onValueChange={(value) => {
@@ -71,7 +79,7 @@ export function SpellFormEffectsAndMeta({
                   setFormData({ ...formData, effects: [...current, value] });
                 }}
                 placeholder="Додати ефект..."
-                options={available}
+                groups={availableGroups}
                 triggerClassName="flex-1"
               />
             ) : (
