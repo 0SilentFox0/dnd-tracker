@@ -8,6 +8,7 @@
 
 import { AttackType } from "@/lib/constants/battle";
 import { SkillLevel } from "@/lib/types/skill-tree";
+import { inferLevelFromSkillName } from "@/lib/utils/battle/participant/parse";
 import type {
   ActiveSkill,
   BattleParticipant,
@@ -88,12 +89,20 @@ export function getSkillsForDamageBonus(
       skillAppliesToDamageType(s, kind) && skillAppliesToSpell(s, kind, ctx),
   );
 
-  const byMainSkill = new Map<string, ActiveSkill>();
+  // "Highest-level on a line wins" — застосовується лише до level-passive
+  // скілів (basic/advanced/expert у назві лінії). Leaf-скіли у дереві
+  // (наприклад "Пекельна сила" як унікальний leaf під Магією Хаосу) групуються
+  // за власним skillId, інакше level-passive експерт затирає leaf-скіл і
+  // його унікальні бонуси (+25% magic) втрачаються.
+  const byKey = new Map<string, ActiveSkill>();
 
   for (const skill of applicable) {
-    const key = skill.mainSkillId || skill.skillId;
+    const isLevelPassive = inferLevelFromSkillName(skill.name) !== null;
 
-    const existing = byMainSkill.get(key);
+    const key =
+      isLevelPassive && skill.mainSkillId ? skill.mainSkillId : skill.skillId;
+
+    const existing = byKey.get(key);
 
     const rankNew = SKILL_LEVEL_RANK[skill.level ?? SkillLevel.BASIC] ?? 1;
 
@@ -102,9 +111,9 @@ export function getSkillsForDamageBonus(
       : 0;
 
     if (!existing || rankNew > rankExisting) {
-      byMainSkill.set(key, skill);
+      byKey.set(key, skill);
     }
   }
 
-  return Array.from(byMainSkill.values());
+  return Array.from(byKey.values());
 }

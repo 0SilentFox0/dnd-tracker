@@ -19,6 +19,7 @@ import {
   applyOnePassiveStatEffect,
   type PassiveResistanceContext,
 } from "@/lib/utils/battle/participant/apply-passive-stat-effect";
+import { inferLevelFromSkillName } from "@/lib/utils/battle/participant/parse";
 import type {
   ActiveSkill,
   BattleParticipant,
@@ -34,11 +35,18 @@ const SKILL_LEVEL_RANK: Record<string, number> = {
   [SkillLevel.EXPERT]: 3,
 };
 
-/** Скіли з резистом — лише найвищий рівень на лінію (mainSkillId). */
+/**
+ * Скіли з резистом — лише найвищий рівень на лінію.
+ *
+ * Грипуємо за `mainSkillId` лише level-passive (basic/advanced/expert у назві),
+ * щоб не стекнути basic+advanced+expert одного passive. Leaf-скіли у дереві
+ * (унікальні unlock-и з резистом) групуємо за `skillId`, бо вони не мають
+ * рівневої прогресії і не повинні бути перетёрти експертом-passive.
+ */
 function getResistanceSkillIdsHighestOnly(
   activeSkills: ActiveSkill[],
 ): Set<string> {
-  const byMainSkill = new Map<string, { skill: ActiveSkill; rank: number }>();
+  const byKey = new Map<string, { skill: ActiveSkill; rank: number }>();
 
   for (const skill of activeSkills) {
     const hasResistance = (skill.effects ?? []).some(
@@ -50,18 +58,21 @@ function getResistanceSkillIdsHighestOnly(
 
     if (!hasResistance) continue;
 
-    const key = skill.mainSkillId || skill.skillId;
+    const isLevelPassive = inferLevelFromSkillName(skill.name) !== null;
+
+    const key =
+      isLevelPassive && skill.mainSkillId ? skill.mainSkillId : skill.skillId;
 
     const rank = SKILL_LEVEL_RANK[skill.level ?? SkillLevel.BASIC] ?? 1;
 
-    const existing = byMainSkill.get(key);
+    const existing = byKey.get(key);
 
     if (!existing || rank > existing.rank) {
-      byMainSkill.set(key, { skill, rank });
+      byKey.set(key, { skill, rank });
     }
   }
 
-  return new Set([...byMainSkill.values()].map((v) => v.skill.skillId));
+  return new Set([...byKey.values()].map((v) => v.skill.skillId));
 }
 
 /**
