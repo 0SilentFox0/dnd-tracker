@@ -1,23 +1,31 @@
 /**
- * Витягування активних скілів з character.skillTreeProgress та characterSkills
+ * Витягування активних скілів з character.skillTreeProgress та characterSkills.
+ *
+ * Сама extractActiveSkillsFromCharacter — orchestrator (CODE_AUDIT 1.7):
+ *   1. Збирає всі skill IDs з прогресу + personalSkillId
+ *   2. Резолвить ID-рівнів (mainSkillId_expert_level) → реальні Skill rows
+ *   3. Підвантажує MainSkill.spellGroupId map (для школи магії)
+ *   4. Будує ActiveSkill для кожного ID через buildActiveSkillFromRow
+ *
+ * Деталізована логіка побудови — у sibling-файлі build-active-skill.ts.
  */
 
 import type { Prisma } from "@prisma/client";
 
 import type { CharacterFromPrisma } from "../types/participant";
 import {
+  type BuildActiveSkillCtx,
+  buildActiveSkillFromRow,
+  buildUnknownActiveSkill,
+} from "./build-active-skill";
+import {
   inferLevelFromSkillName,
   parseMainSkillLevelId,
 } from "./parse";
 
 import { prisma } from "@/lib/db";
-import {
-  safeParseOrDefault,
-  skillCombatStatsSchema,
-} from "@/lib/schemas";
 import { SkillLevel } from "@/lib/types/skill-tree";
-import type { ActiveSkill, SkillEffect } from "@/types/battle";
-import type { SkillTriggers } from "@/types/skill-triggers";
+import type { ActiveSkill } from "@/types/battle";
 
 /**
  * Витягує активні скіли з character. Розв'язує id рівнів (mainSkillId_expert_level) у реальні скіли.
@@ -27,8 +35,6 @@ export async function extractActiveSkillsFromCharacter(
   campaignId: string,
   preloadedSkillsById?: Record<string, Prisma.SkillGetPayload<object>>,
 ): Promise<ActiveSkill[]> {
-  const activeSkills: ActiveSkill[] = [];
-
   const skillTreeProgress =
     (character.skillTreeProgress as Record<
       string,
@@ -62,9 +68,7 @@ export async function extractActiveSkillsFromCharacter(
     skillIdToLevel[personalSkillId] = SkillLevel.BASIC;
   }
 
-  if (allSkillIds.length === 0) {
-    return activeSkills;
-  }
+  if (allSkillIds.length === 0) return [];
 
   const directIds = allSkillIds.filter((id) => !parseMainSkillLevelId(id));
 
@@ -77,70 +81,18 @@ export async function extractActiveSkillsFromCharacter(
       .map((p) => p.mainSkillId),
   );
 
-  let fetchedSkills: Prisma.SkillGetPayload<object>[];
-
-  if (preloadedSkillsById) {
-    const byDirect = directIds
-      .map((id) => preloadedSkillsById[id])
-      .filter(Boolean);
-
-    const byMainSkill = Object.values(preloadedSkillsById).filter(
-      (s) =>
-        mainSkillIdsFromLevels.size > 0 &&
-        s.mainSkillId &&
-        mainSkillIdsFromLevels.has(s.mainSkillId),
-    );
-
-    fetchedSkills = [
-      ...new Map([...byDirect, ...byMainSkill].map((s) => [s.id, s])).values(),
-    ];
-  } else {
-    const orConditions: Array<
-      { id: { in: string[] } } | { mainSkillId: { in: string[] } }
-    > = [];
-
-    if (directIds.length > 0) orConditions.push({ id: { in: directIds } });
-
-    if (mainSkillIdsFromLevels.size > 0) {
-      orConditions.push({
-        mainSkillId: { in: Array.from(mainSkillIdsFromLevels) },
-      });
-    }
-
-    fetchedSkills = orConditions.length
-      ? await prisma.skill.findMany({
-          where: { campaignId, OR: orConditions },
-        })
-      : [];
-  }
+  const fetchedSkills = await fetchSkillsFor(
+    campaignId,
+    directIds,
+    mainSkillIdsFromLevels,
+    preloadedSkillsById,
+  );
 
   const skillsMap = new Map<string, Prisma.SkillGetPayload<object>>();
 
-  for (const s of fetchedSkills) {
-    skillsMap.set(s.id, s);
-  }
+  for (const s of fetchedSkills) skillsMap.set(s.id, s);
 
-  // Підтягуємо spellGroupId з MainSkill (школа магії як вузол дерева).
-  // Робимо одним додатковим запитом, щоб не міняти контракт preloadedSkillsById.
-  const mainSkillIdsToResolve = new Set<string>();
-
-  for (const s of fetchedSkills) {
-    if (s.mainSkillId) mainSkillIdsToResolve.add(s.mainSkillId);
-  }
-
-  const mainSkillSpellGroupById = new Map<string, string | null>();
-
-  if (mainSkillIdsToResolve.size > 0) {
-    const mainSkills = await prisma.mainSkill.findMany({
-      where: { id: { in: Array.from(mainSkillIdsToResolve) } },
-      select: { id: true, spellGroupId: true },
-    });
-
-    for (const ms of mainSkills) {
-      mainSkillSpellGroupById.set(ms.id, ms.spellGroupId ?? null);
-    }
-  }
-
+  // Резолвимо level-ID → реальний skill з тієї ж лінії за рівнем у назві.
   for (const levelId of levelIds) {
     const parsed = parseMainSkillLevelId(levelId);
 
@@ -159,252 +111,101 @@ export async function extractActiveSkillsFromCharacter(
     if (match) skillsMap.set(levelId, match);
   }
 
-  type RawEffect = {
-    stat: string;
-    type: string;
-    value?: number | string | boolean;
-    duration?: number;
-    target?: "self" | "enemy" | "all_enemies" | "all_allies" | "all";
-    maxTriggers?: number | null;
+  const mainSkillSpellGroupById = await loadMainSkillSpellGroups(fetchedSkills);
+
+  const ctx: BuildActiveSkillCtx = {
+    mainSkillSpellGroupById,
+    skillIdToMainSkill,
+    skillIdToLevel,
   };
-  type CombatStatsEffects = {
-    effects?: RawEffect[];
-    affectsDamage?: boolean;
-    damageType?: "melee" | "ranged" | "magic" | null;
-  };
+
+  const activeSkills: ActiveSkill[] = [];
 
   for (const skillId of allSkillIds) {
     const skill = skillsMap.get(skillId);
 
     if (!skill) {
-      activeSkills.push({
-        skillId,
-        name: `Unknown Skill (${skillId})`,
-        mainSkillId: skillIdToMainSkill[skillId],
-        level: skillIdToLevel[skillId],
-        effects: [],
-        spellEnhancements: undefined,
-      });
+      activeSkills.push(buildUnknownActiveSkill(skillId, ctx));
       continue;
     }
 
-    // Runtime parse: безпечне читання Skill.combatStats Json.
-    // На invalid дані повертаємо порожню структуру + warn-log замість крашу.
-    const combatStats = safeParseOrDefault(
-      skillCombatStatsSchema,
-      skill.combatStats,
-      {} as CombatStatsEffects,
-      { source: "Skill.combatStats", skillId: skill.id },
-    ) as CombatStatsEffects;
-
-    const rawEffects = Array.isArray(combatStats.effects)
-      ? combatStats.effects
-      : [];
-
-    let effects: SkillEffect[];
-
-    if (rawEffects.length > 0) {
-      effects = rawEffects
-        .filter((e) => e.stat || (e as { type?: string }).type)
-        .map((e) => {
-          const raw = e as RawEffect & { isPercentage?: boolean };
-
-          const isPct =
-            raw.isPercentage === true ||
-            e.type === "percent" ||
-            e.type === "percentage";
-
-          const stat = e.stat || (e as { type?: string }).type || "";
-
-          return {
-            stat,
-            type: e.type || "flat",
-            value: e.value ?? 0,
-            isPercentage: isPct,
-            duration: e.duration,
-            ...(raw.target != null && { target: raw.target }),
-            ...(raw.maxTriggers != null && { maxTriggers: raw.maxTriggers }),
-          };
-        });
-    } else {
-      const bonuses = (skill.bonuses as Record<string, number>) || {};
-
-      const percentKeys = ["melee_damage", "ranged_damage", "counter_damage"];
-
-      effects = Object.entries(bonuses).map(([key, value]) => ({
-        stat: key,
-        type:
-          percentKeys.includes(key) || key.includes("percent")
-            ? "percent"
-            : "flat",
-        value,
-        isPercentage:
-          key.includes("percent") ||
-          key.includes("_percent") ||
-          percentKeys.includes(key),
-      }));
-    }
-
-    let spellEnhancements: ActiveSkill["spellEnhancements"] | undefined;
-
-    const enhancementTypes = (skill.spellEnhancementTypes as string[]) || [];
-
-    const enhancementDataRaw =
-      skill.spellEnhancementData &&
-      typeof skill.spellEnhancementData === "object" &&
-      !Array.isArray(skill.spellEnhancementData)
-        ? (skill.spellEnhancementData as {
-            spellAllowMultipleTargets?: boolean;
-            spellAoeSpellIds?: unknown;
-          })
-        : {};
-
-    const spellAllowMultipleTargetsFromJson =
-      enhancementDataRaw.spellAllowMultipleTargets === true;
-
-    const spellAoeSpellIdsFromJson = Array.isArray(
-      enhancementDataRaw.spellAoeSpellIds,
-    )
-      ? enhancementDataRaw.spellAoeSpellIds.filter(
-          (id): id is string => typeof id === "string" && id.length > 0,
-        )
-      : [];
-
-    if (
-      enhancementTypes.length > 0 ||
-      skill.spellEffectIncrease ||
-      skill.spellTargetChange ||
-      skill.spellAdditionalModifier ||
-      skill.spellNewSpellId ||
-      spellAllowMultipleTargetsFromJson ||
-      spellAoeSpellIdsFromJson.length > 0
-    ) {
-      spellEnhancements = {};
-
-      if (skill.spellEffectIncrease) {
-        spellEnhancements.spellEffectIncrease = skill.spellEffectIncrease;
-      }
-
-      if (skill.spellTargetChange) {
-        const targetChange = skill.spellTargetChange as unknown as {
-          target: string;
-        };
-
-        if (
-          targetChange &&
-          typeof targetChange === "object" &&
-          "target" in targetChange
-        ) {
-          spellEnhancements.spellTargetChange = {
-            target: targetChange.target,
-          };
-        }
-      }
-
-      if (skill.spellAdditionalModifier) {
-        const additionalModifier = skill.spellAdditionalModifier as unknown as {
-          modifier?: string;
-          damageDice?: string;
-          duration?: number;
-        };
-
-        if (additionalModifier && typeof additionalModifier === "object") {
-          spellEnhancements.spellAdditionalModifier = {
-            modifier: additionalModifier.modifier,
-            damageDice: additionalModifier.damageDice,
-            duration: additionalModifier.duration,
-          };
-        }
-      }
-
-      if (skill.spellNewSpellId) {
-        spellEnhancements.spellNewSpellId = skill.spellNewSpellId;
-      }
-
-      if (spellAllowMultipleTargetsFromJson) {
-        spellEnhancements.spellAllowMultipleTargets = true;
-      }
-
-      if (spellAoeSpellIdsFromJson.length > 0) {
-        spellEnhancements.spellAoeSpellIds = spellAoeSpellIdsFromJson;
-      }
-    }
-
-    let skillTriggers: SkillTriggers | undefined;
-
-    const skillTriggersValue = (skill as Record<string, unknown>).skillTriggers;
-
-    if (skillTriggersValue && Array.isArray(skillTriggersValue)) {
-      skillTriggers = skillTriggersValue as SkillTriggers;
-    }
-
-    const resolvedSpellGroupId =
-      skill.spellGroupId ??
-      (skill.mainSkillId
-        ? (mainSkillSpellGroupById.get(skill.mainSkillId) ?? null)
-        : null);
-
-    let resolvedDamageType: "melee" | "ranged" | "magic" | null =
-      (combatStats.damageType as "melee" | "ranged" | "magic" | null) ?? null;
-
-    const hasRanged = effects.some((e) => e.stat === "ranged_damage");
-
-    const hasMelee = effects.some((e) => e.stat === "melee_damage");
-
-    // Magic-сигнали: ефекти з patterns *_spell_damage / magic_damage / spell_damage,
-    // або поля spellEffectIncrease / spellEnhancement*, або скіл прив'язаний до школи магії.
-    const hasMagicEffect = effects.some((e) => {
-      const stat = (e.stat || "").toLowerCase();
-
-      return (
-        stat === "spell_damage" ||
-        stat === "magic_damage" ||
-        stat.endsWith("_spell_damage") ||
-        (stat.includes("magic") && stat.includes("damage"))
-      );
-    });
-
-    const hasMagicSignal =
-      hasMagicEffect ||
-      !!skill.spellEffectIncrease ||
-      enhancementTypes.length > 0 ||
-      !!skill.spellTargetChange ||
-      !!skill.spellAdditionalModifier ||
-      !!resolvedSpellGroupId;
-
-    if (resolvedDamageType == null || !resolvedDamageType.length) {
-      if (hasRanged && !hasMelee) resolvedDamageType = "ranged";
-      else if (hasMelee && !hasRanged) resolvedDamageType = "melee";
-      else if (hasRanged) resolvedDamageType = "ranged";
-      else if (hasMelee) resolvedDamageType = "melee";
-      else if (hasMagicSignal) resolvedDamageType = "magic";
-    } else if (hasRanged && !hasMelee && resolvedDamageType === "melee") {
-      resolvedDamageType = "ranged";
-    } else if (hasMelee && !hasRanged && resolvedDamageType === "ranged") {
-      resolvedDamageType = "melee";
-    }
-
-    const resolvedLevel =
-      (inferLevelFromSkillName(skill.name) as SkillLevel | null) ??
-      skillIdToLevel[skillId] ??
-      SkillLevel.BASIC;
-
-    activeSkills.push({
-      skillId: skill.id,
-      name: skill.name,
-      mainSkillId: skill.mainSkillId ?? skillIdToMainSkill[skillId] ?? "",
-      level: resolvedLevel,
-      icon: skill.icon ?? undefined,
-      description: skill.description ?? undefined,
-      effects,
-      affectsDamage: combatStats.affectsDamage,
-      damageType: resolvedDamageType,
-      linkedSpellId: skill.spellId ?? undefined,
-      spellGroupId: resolvedSpellGroupId,
-      spellEnhancements,
-      skillTriggers,
-    });
+    activeSkills.push(buildActiveSkillFromRow(skill, skillId, ctx));
   }
 
   return activeSkills;
+}
+
+/**
+ * Завантажує всі скіли, на які посилається character — або з preloadedSkillsById,
+ * або одним findMany запитом.
+ */
+async function fetchSkillsFor(
+  campaignId: string,
+  directIds: string[],
+  mainSkillIdsFromLevels: Set<string>,
+  preloadedSkillsById?: Record<string, Prisma.SkillGetPayload<object>>,
+): Promise<Prisma.SkillGetPayload<object>[]> {
+  if (preloadedSkillsById) {
+    const byDirect = directIds
+      .map((id) => preloadedSkillsById[id])
+      .filter(Boolean);
+
+    const byMainSkill = Object.values(preloadedSkillsById).filter(
+      (s) =>
+        mainSkillIdsFromLevels.size > 0 &&
+        s.mainSkillId &&
+        mainSkillIdsFromLevels.has(s.mainSkillId),
+    );
+
+    return [
+      ...new Map([...byDirect, ...byMainSkill].map((s) => [s.id, s])).values(),
+    ];
+  }
+
+  const orConditions: Array<
+    { id: { in: string[] } } | { mainSkillId: { in: string[] } }
+  > = [];
+
+  if (directIds.length > 0) orConditions.push({ id: { in: directIds } });
+
+  if (mainSkillIdsFromLevels.size > 0) {
+    orConditions.push({
+      mainSkillId: { in: Array.from(mainSkillIdsFromLevels) },
+    });
+  }
+
+  if (orConditions.length === 0) return [];
+
+  return prisma.skill.findMany({
+    where: { campaignId, OR: orConditions },
+  });
+}
+
+/**
+ * Підтягує spellGroupId з MainSkill (школа магії як вузол дерева).
+ * Робимо одним додатковим запитом, щоб не міняти контракт preloadedSkillsById.
+ */
+async function loadMainSkillSpellGroups(
+  fetchedSkills: Prisma.SkillGetPayload<object>[],
+): Promise<Map<string, string | null>> {
+  const mainSkillIdsToResolve = new Set<string>();
+
+  for (const s of fetchedSkills) {
+    if (s.mainSkillId) mainSkillIdsToResolve.add(s.mainSkillId);
+  }
+
+  const mainSkillSpellGroupById = new Map<string, string | null>();
+
+  if (mainSkillIdsToResolve.size === 0) return mainSkillSpellGroupById;
+
+  const mainSkills = await prisma.mainSkill.findMany({
+    where: { id: { in: Array.from(mainSkillIdsToResolve) } },
+    select: { id: true, spellGroupId: true },
+  });
+
+  for (const ms of mainSkills) {
+    mainSkillSpellGroupById.set(ms.id, ms.spellGroupId ?? null);
+  }
+
+  return mainSkillSpellGroupById;
 }
