@@ -29,8 +29,9 @@ export default defineConfig({
     testTimeout: 30_000,
     hookTimeout: 30_000,
     // Серійний запуск — щоб не перевантажувати Pusher/Upstash free tier.
+    // Vitest 4: `poolOptions.forks.singleFork` → `fileParallelism: false`.
     pool: "forks",
-    poolOptions: { forks: { singleFork: true } },
+    fileParallelism: false,
   },
   resolve: {
     alias: {
