@@ -101,7 +101,14 @@ export function useDamageCalculatorSkills(
       name: string;
       affectsDamage: boolean;
       damageType: string | null;
-      effects: string;
+      effectsArray: Array<{
+        stat: string;
+        type: string;
+        value: unknown;
+        isPercentage: boolean;
+      }>;
+      legacyBonuses: Record<string, number> | null;
+      rawCombatStats: unknown;
     };
 
     const list: SkillItem[] = ids.map((unlockedId) => {
@@ -117,20 +124,33 @@ export function useDamageCalculatorSkills(
       const damageType =
         (s?.combatStats?.damageType as string | null) ?? null;
 
-      let effects = "";
+      const rawEffects = (
+        s?.combatStats as
+          | {
+              effects?: Array<{
+                stat?: string;
+                type?: string;
+                value?: unknown;
+                isPercentage?: boolean;
+              }>;
+            }
+          | undefined
+      )?.effects;
 
-      if (s?.combatStats?.effects?.length) {
-        effects = (s.combatStats as { effects: Array<{ stat?: string; type?: string; value?: unknown }> }).effects
-          .map(
-            (e) =>
-              `${e.stat ?? "?"}: ${String(e.value ?? "")}${e.type === "percent" ? "%" : ""}`,
-          )
-          .join("; ");
-      } else if (s?.bonuses && Object.keys(s.bonuses).length > 0) {
-        effects = Object.entries(s.bonuses)
-          .map(([k, v]) => `${k}: ${v}`)
-          .join("; ");
-      }
+      const effectsArray = Array.isArray(rawEffects)
+        ? rawEffects.map((e) => ({
+            stat: e.stat ?? "?",
+            type: e.type ?? "?",
+            value: e.value,
+            isPercentage:
+              e.isPercentage === true ||
+              e.type === "percent" ||
+              e.type === "percentage",
+          }))
+        : [];
+
+      const legacyBonuses =
+        s?.bonuses && Object.keys(s.bonuses).length > 0 ? s.bonuses : null;
 
       return {
         id: s?.id ?? unlockedId,
@@ -138,7 +158,9 @@ export function useDamageCalculatorSkills(
         name,
         affectsDamage,
         damageType,
-        effects,
+        effectsArray,
+        legacyBonuses,
+        rawCombatStats: s?.combatStats ?? null,
       };
     });
 
