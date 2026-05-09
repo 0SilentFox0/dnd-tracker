@@ -2,7 +2,10 @@
  * Константи для ефектів скілів (stat, type, тощо)
  */
 
-import type { SelectOption } from "@/components/ui/select-field";
+import type {
+  SelectOption,
+  SelectOptionGroup,
+} from "@/components/ui/select-field";
 
 // ---------- Effect type ----------
 
@@ -38,66 +41,110 @@ export const FLAG_VALUE_TYPES: ReadonlySet<string> = new Set(["flag", "ignore"])
 
 // ---------- Effect stat ----------
 
-export const EFFECT_STAT_OPTIONS: SelectOption[] = [
-  // Бойові
-  { value: "melee_damage", label: "Шкода ближня" },
-  { value: "ranged_damage", label: "Шкода дальня" },
-  { value: "all_damage", label: "Шкода (вся)" },
-  { value: "counter_damage", label: "Контр-атака" },
-  { value: "area_damage", label: "Площинна шкода" },
-
-  // DOT
-  { value: "bleed_damage", label: "Кровотеча (DOT)" },
-  { value: "poison_damage", label: "Отрута (DOT)" },
-  { value: "burn_damage", label: "Опік (DOT)" },
-  { value: "fire_damage", label: "Вогняна шкода (DOT)" },
-
-  // Захист
-  { value: "armor", label: "Броня" },
-  { value: "hp_bonus", label: "Бонус HP" },
-  { value: "physical_resistance", label: "Резист фізичний" },
-  { value: "spell_resistance", label: "Резист магічний" },
-  { value: "all_resistance", label: "Резист (увесь)" },
-  { value: "damage_resistance", label: "Зниження шкоди" },
-
-  // Характеристики
-  { value: "speed", label: "Швидкість" },
-  { value: "initiative", label: "Ініціатива" },
-  { value: "morale", label: "Мораль" },
-  { value: "crit_threshold", label: "Поріг криту" },
-
-  // Магія
-  { value: "spell_levels", label: "Рівень заклинань" },
-  { value: "spell_slots_lvl4_5", label: "Слоти 4-5 рівня" },
-  { value: "spell_targets_lvl4_5", label: "Цілі 4-5 рівня" },
-
-  // Тактичні
-  { value: "advantage", label: "Перевага (advantage)" },
+/**
+ * Групи stat-опцій для skill-form dropdown. UI рендерить їх як категорії
+ * з заголовками (через SelectField groups prop). Плаский масив
+ * `EFFECT_STAT_OPTIONS` нижче — для legacy callers (validation, lookup).
+ */
+export const EFFECT_STAT_GROUPS: SelectOptionGroup[] = [
   {
-    value: "advantage_ranged",
-    label: "Перевага на дальні атаки (advantage_ranged)",
+    label: "Бойові — шкода фізична",
+    options: [
+      { value: "melee_damage", label: "Шкода ближня" },
+      { value: "ranged_damage", label: "Шкода дальня" },
+      { value: "all_damage", label: "Шкода (вся — фіз. + магія)" },
+      { value: "counter_damage", label: "Контр-атака" },
+      { value: "area_damage", label: "Площинна шкода" },
+    ],
   },
-  { value: "enemy_attack_disadvantage", label: "Недолік ворожої атаки" },
-  { value: "guaranteed_hit", label: "Гарантований удар" },
-  { value: "attack_before_enemy", label: "Атака перед ворогом" },
-  { value: "control_units", label: "Контроль юнітів" },
-
-  // Бойові дії
-  { value: "actions", label: "Додаткова дія" },
-  { value: "summon_tier", label: "Виклик істоти (tier)" },
-  { value: "redirect_physical_damage", label: "Перенаправлення шкоди" },
-  { value: "marked_targets", label: "Позначені цілі" },
-  { value: "extra_casts", label: "Додаткові касти" },
-  { value: "restore_spell_slot", label: "Відновлення слоту" },
-  { value: "field_damage", label: "Пекельна земля (AoE)" },
-  { value: "revive_hp", label: "Воскресіння HP" },
-  { value: "runic_attack", label: "Рунічна атака" },
-  { value: "blood_sacrifice_heal", label: "Кровожертсво" },
-  { value: "clear_negative_effects", label: "Зняття негативних ефектів" },
-  { value: "morale_per_kill", label: "Мораль за вбивство" },
-  { value: "morale_per_ally_death", label: "Мораль за смерть союзника" },
-  { value: "light_spells_target_all_allies", label: "Заклинання світла на всіх" },
+  {
+    label: "Бойові — шкода магічна",
+    options: [
+      { value: "magic_damage", label: "Шкода магічна (всі заклинання)" },
+      { value: "spell_damage", label: "Шкода заклинань (синонім magic_damage)" },
+      { value: "chaos_spell_damage", label: "Шкода Магії Хаосу" },
+      { value: "dark_spell_damage", label: "Шкода Темної магії" },
+    ],
+  },
+  {
+    label: "DOT (шкода у часі)",
+    options: [
+      { value: "bleed_damage", label: "Кровотеча (DOT)" },
+      { value: "poison_damage", label: "Отрута (DOT)" },
+      { value: "burn_damage", label: "Опік (DOT)" },
+      { value: "fire_damage", label: "Вогняна шкода (DOT)" },
+    ],
+  },
+  {
+    label: "Захист",
+    options: [
+      { value: "armor", label: "Броня" },
+      { value: "hp_bonus", label: "Бонус HP" },
+      { value: "physical_resistance", label: "Резист фізичний" },
+      { value: "spell_resistance", label: "Резист магічний" },
+      { value: "all_resistance", label: "Резист (увесь)" },
+      { value: "damage_resistance", label: "Зниження шкоди" },
+    ],
+  },
+  {
+    label: "Характеристики",
+    options: [
+      { value: "speed", label: "Швидкість" },
+      { value: "initiative", label: "Ініціатива" },
+      { value: "morale", label: "Мораль" },
+      { value: "crit_threshold", label: "Поріг криту" },
+    ],
+  },
+  {
+    label: "Магія — слоти і ціли",
+    options: [
+      { value: "spell_levels", label: "Рівень заклинань" },
+      { value: "spell_slots_lvl4_5", label: "Слоти 4-5 рівня" },
+      { value: "spell_targets_lvl4_5", label: "Цілі 4-5 рівня" },
+    ],
+  },
+  {
+    label: "Тактичні",
+    options: [
+      { value: "advantage", label: "Перевага (advantage)" },
+      {
+        value: "advantage_ranged",
+        label: "Перевага на дальні атаки (advantage_ranged)",
+      },
+      { value: "enemy_attack_disadvantage", label: "Недолік ворожої атаки" },
+      { value: "guaranteed_hit", label: "Гарантований удар" },
+      { value: "attack_before_enemy", label: "Атака перед ворогом" },
+      { value: "control_units", label: "Контроль юнітів" },
+    ],
+  },
+  {
+    label: "Бойові дії",
+    options: [
+      { value: "actions", label: "Додаткова дія" },
+      { value: "summon_tier", label: "Виклик істоти (tier)" },
+      { value: "redirect_physical_damage", label: "Перенаправлення шкоди" },
+      { value: "marked_targets", label: "Позначені цілі" },
+      { value: "extra_casts", label: "Додаткові касти" },
+      { value: "restore_spell_slot", label: "Відновлення слоту" },
+      { value: "field_damage", label: "Пекельна земля (AoE)" },
+      { value: "revive_hp", label: "Воскресіння HP" },
+      { value: "runic_attack", label: "Рунічна атака" },
+      { value: "blood_sacrifice_heal", label: "Кровожертсво" },
+      { value: "clear_negative_effects", label: "Зняття негативних ефектів" },
+      { value: "morale_per_kill", label: "Мораль за вбивство" },
+      { value: "morale_per_ally_death", label: "Мораль за смерть союзника" },
+      {
+        value: "light_spells_target_all_allies",
+        label: "Заклинання світла на всіх",
+      },
+    ],
+  },
 ];
+
+/** Плаский масив для legacy callers (lookup, validation). */
+export const EFFECT_STAT_OPTIONS: SelectOption[] = EFFECT_STAT_GROUPS.flatMap(
+  (g) => g.options,
+);
 
 // ---------- Effect target ----------
 

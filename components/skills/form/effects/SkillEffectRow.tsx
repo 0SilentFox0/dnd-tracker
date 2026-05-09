@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
 import {
-  EFFECT_STAT_OPTIONS,
+  EFFECT_STAT_GROUPS,
   EFFECT_TARGET_OPTIONS,
   EFFECT_TYPE_OPTIONS,
   isFlagValueType,
@@ -41,7 +41,7 @@ export function SkillEffectRow({
             value={effect.stat}
             onValueChange={(v) => onUpdate(index, "stat", v)}
             placeholder="Стат"
-            options={EFFECT_STAT_OPTIONS}
+            groups={EFFECT_STAT_GROUPS}
           />
         </div>
 

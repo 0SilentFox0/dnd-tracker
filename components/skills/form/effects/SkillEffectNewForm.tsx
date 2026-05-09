@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
 import {
-  EFFECT_STAT_OPTIONS,
+  EFFECT_STAT_GROUPS,
   EFFECT_TYPE_OPTIONS,
   isFlagValueType,
   isTextValueType,
@@ -49,7 +49,7 @@ export function SkillEffectNewForm({ onAdd, onCancel }: SkillEffectNewFormProps)
             value={draft.stat}
             onValueChange={(v) => setDraft((p) => ({ ...p, stat: v }))}
             placeholder="Оберіть стат"
-            options={EFFECT_STAT_OPTIONS}
+            groups={EFFECT_STAT_GROUPS}
           />
         </div>
         <div className="space-y-1">
