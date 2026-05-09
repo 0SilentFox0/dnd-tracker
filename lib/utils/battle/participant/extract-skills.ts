@@ -11,6 +11,10 @@ import {
 } from "./parse";
 
 import { prisma } from "@/lib/db";
+import {
+  safeParseOrDefault,
+  skillCombatStatsSchema,
+} from "@/lib/schemas";
 import { SkillLevel } from "@/lib/types/skill-tree";
 import type { ActiveSkill, SkillEffect } from "@/types/battle";
 import type { SkillTriggers } from "@/types/skill-triggers";
@@ -184,7 +188,14 @@ export async function extractActiveSkillsFromCharacter(
       continue;
     }
 
-    const combatStats = (skill.combatStats as CombatStatsEffects) ?? {};
+    // Runtime parse: безпечне читання Skill.combatStats Json.
+    // На invalid дані повертаємо порожню структуру + warn-log замість крашу.
+    const combatStats = safeParseOrDefault(
+      skillCombatStatsSchema,
+      skill.combatStats,
+      {} as CombatStatsEffects,
+      { source: "Skill.combatStats", skillId: skill.id },
+    ) as CombatStatsEffects;
 
     const rawEffects = Array.isArray(combatStats.effects)
       ? combatStats.effects
