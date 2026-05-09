@@ -6,7 +6,6 @@ import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
 import { attachArtifactSetsToSpellContext } from "@/lib/utils/battle/artifact-sets";
-import { parseMainSkillLevelId } from "@/lib/utils/battle/participant";
 import type { CampaignSpellContext } from "@/lib/utils/battle/types/participant";
 
 type CharacterWithRelations = Prisma.CharacterGetPayload<{
@@ -25,38 +24,15 @@ export async function buildCampaignContextForStart(
   characters: CharacterWithRelations[],
   units: UnitRow[],
 ): Promise<BuildContextResult> {
-  const allSkillIds = new Set<string>();
-
   const allArtifactIds = new Set<string>();
 
   for (const c of characters) {
-    const progress =
-      (c.skillTreeProgress as Record<string, { unlockedSkills?: string[] }>) ?? {};
-
-    for (const prog of Object.values(progress)) {
-      for (const sid of prog.unlockedSkills ?? []) {
-        allSkillIds.add(sid);
-      }
-    }
-
-    const personalId = c.personalSkillId;
-
-    if (personalId?.trim()) allSkillIds.add(personalId);
-
     const equipped =
       (c.inventory?.equipped as Record<string, string | unknown>) ?? {};
 
     for (const val of Object.values(equipped)) {
       if (typeof val === "string" && val) allArtifactIds.add(val);
     }
-  }
-
-  const mainSkillIdsFromLevels = new Set<string>();
-
-  for (const sid of allSkillIds) {
-    const parsed = parseMainSkillLevelId(sid);
-
-    if (parsed) mainSkillIdsFromLevels.add(parsed.mainSkillId);
   }
 
   const uniqueRaces = new Set<string>();
@@ -99,19 +75,6 @@ export async function buildCampaignContextForStart(
             where: { campaignId },
             include: { spellGroup: { select: { id: true } } },
           }),
-          allSkillIds.size > 0
-            ? prisma.skill.findMany({
-                where: { id: { in: Array.from(allSkillIds) }, campaignId },
-              })
-            : [],
-          mainSkillIdsFromLevels.size > 0
-            ? prisma.skill.findMany({
-                where: {
-                  mainSkillId: { in: Array.from(mainSkillIdsFromLevels) },
-                  campaignId,
-                },
-              })
-            : [],
           allArtifactIds.size > 0
             ? prisma.artifact.findMany({
                 where: { id: { in: Array.from(allArtifactIds) }, campaignId },
@@ -138,8 +101,6 @@ export async function buildCampaignContextForStart(
       mainSkills,
       spells,
       allSkills,
-      batchSkills,
-      batchSkillsByMainSkill,
       batchArtifacts,
     ] = characterContext;
 
@@ -160,14 +121,15 @@ export async function buildCampaignContextForStart(
       if (!(rn in skillTreeByRace)) skillTreeByRace[rn] = null;
     }
 
+    // skillsById === allSkills, проіндексований за id. Раніше робилось
+    // двома додатковими DB-запитами (id IN + mainSkillId IN), але це
+    // підмножина allSkills — extract-skills.ts усе одно фільтрує
+    // по directIds + mainSkillIdsFromLevels всередині.
     const skillsById: Record<string, Prisma.SkillGetPayload<object>> = {};
 
-    const skillsByIdArr = [
-      ...(Array.isArray(batchSkills) ? batchSkills : []),
-      ...(Array.isArray(batchSkillsByMainSkill) ? batchSkillsByMainSkill : []),
-    ];
+    const allSkillsArr = Array.isArray(allSkills) ? allSkills : [];
 
-    for (const s of skillsByIdArr) {
+    for (const s of allSkillsArr) {
       if (s && typeof s === "object" && "id" in s) {
         skillsById[(s as { id: string }).id] = s as Prisma.SkillGetPayload<object>;
       }
