@@ -115,16 +115,18 @@ export async function POST(
     if (process.env.PUSHER_APP_ID) {
       const { pusherServer, battleChannelName } = await import("@/lib/pusher");
 
+      const { safePusherTrigger } = await import(
+        "@/lib/utils/pusher/safe-trigger"
+      );
+
       const pusherPayload = preparePusherPayload(updatedBattle);
 
       const channel = battleChannelName(battleId);
 
-      void pusherServer
-        .trigger(channel, "battle-completed", pusherPayload)
-        .catch((err) => console.error("Pusher trigger failed:", err));
-      void pusherServer
-        .trigger(channel, "battle-updated", pusherPayload)
-        .catch((err) => console.error("Pusher trigger failed:", err));
+      const ctx = { action: "complete battle", campaignId: id, battleId };
+
+      safePusherTrigger(pusherServer, channel, "battle-completed", pusherPayload, ctx);
+      safePusherTrigger(pusherServer, channel, "battle-updated", pusherPayload, ctx);
     }
 
     return NextResponse.json(stripStateBeforeForClient(updatedBattle));

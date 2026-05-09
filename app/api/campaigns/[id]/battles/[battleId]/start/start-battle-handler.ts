@@ -32,6 +32,7 @@ import {
   slimInitiativeOrderForStorage,
   stripStateBeforeForClient,
 } from "@/lib/utils/battle/strip-battle-payload";
+import { safePusherTrigger } from "@/lib/utils/pusher/safe-trigger";
 import {
   executeOnBattleStartEffectsForAll,
   executeStartOfRoundTriggers,
@@ -195,9 +196,13 @@ export async function executeStartBattle(
       channel,
       event: "battle-started",
     });
-    void pusherServer
-      .trigger(channel, "battle-started", preparePusherPayload(updatedBattle))
-      .catch((err) => console.error("Pusher trigger failed:", err));
+    safePusherTrigger(
+      pusherServer,
+      channel,
+      "battle-started",
+      preparePusherPayload(updatedBattle),
+      { action: "start battle", campaignId, battleId },
+    );
   }
 
   return NextResponse.json(stripStateBeforeForClient(updatedBattle));

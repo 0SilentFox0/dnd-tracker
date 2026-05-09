@@ -231,9 +231,17 @@ export async function executeAttack({
   if (process.env.PUSHER_APP_ID) {
     const { pusherServer, battleChannelName } = await import("@/lib/pusher");
 
-    void pusherServer
-      .trigger(battleChannelName(battleId), "battle-updated", preparePusherPayload(updatedBattle))
-      .catch((err) => console.error("Pusher trigger failed:", err));
+    const { safePusherTrigger } = await import(
+      "@/lib/utils/pusher/safe-trigger"
+    );
+
+    safePusherTrigger(
+      pusherServer,
+      battleChannelName(battleId),
+      "battle-updated",
+      preparePusherPayload(updatedBattle),
+      { action: "attack", battleId },
+    );
   }
 
   return stripStateBeforeForClient(updatedBattle);

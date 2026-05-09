@@ -27,6 +27,7 @@ import {
   slimInitiativeOrderForStorage,
   stripStateBeforeForClient,
 } from "@/lib/utils/battle/strip-battle-payload";
+import { safePusherTrigger } from "@/lib/utils/pusher/safe-trigger";
 import { executeComplexTriggersForChangedParticipant } from "@/lib/utils/skills/execution";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -191,14 +192,12 @@ export async function POST(
 
       const battleChannel = battleChannelName(battleId);
 
-      void pusherServer
-        .trigger(battleChannel, "battle-updated", pusherPayload)
-        .catch((err) => console.error("Pusher trigger failed:", err));
+      const ctx = { action: "attack and next turn", battleId };
+
+      safePusherTrigger(pusherServer, battleChannel, "battle-updated", pusherPayload, ctx);
 
       if (finalStatus === "completed") {
-        void pusherServer
-          .trigger(battleChannel, "battle-completed", pusherPayload)
-          .catch((err) => console.error("Pusher trigger failed:", err));
+        safePusherTrigger(pusherServer, battleChannel, "battle-completed", pusherPayload, ctx);
       }
 
       const activeParticipant = updatedInitiativeOrder[nextTurnIndex];
@@ -207,17 +206,17 @@ export async function POST(
         activeParticipant &&
         activeParticipant.basicInfo.controlledBy !== "dm"
       ) {
-        void pusherServer
-          .trigger(
-            userChannelName(activeParticipant.basicInfo.controlledBy),
-            "turn-started",
-            {
-              battleId,
-              participantId: activeParticipant.basicInfo.id,
-              participantName: activeParticipant.basicInfo.name,
-            },
-          )
-          .catch((err) => console.error("Pusher trigger failed:", err));
+        safePusherTrigger(
+          pusherServer,
+          userChannelName(activeParticipant.basicInfo.controlledBy),
+          "turn-started",
+          {
+            battleId,
+            participantId: activeParticipant.basicInfo.id,
+            participantName: activeParticipant.basicInfo.name,
+          },
+          ctx,
+        );
       }
     }
 

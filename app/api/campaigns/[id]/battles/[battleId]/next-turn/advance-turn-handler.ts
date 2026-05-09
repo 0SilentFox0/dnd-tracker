@@ -32,6 +32,7 @@ import {
   slimInitiativeOrderForStorage,
   stripStateBeforeForClient,
 } from "@/lib/utils/battle/strip-battle-payload";
+import { safePusherTrigger } from "@/lib/utils/pusher/safe-trigger";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 export interface ExecuteAdvanceTurnInput {
@@ -210,22 +211,20 @@ function triggerPusherEvents(input: {
 
   const battleChannel = battleChannelName(battleId);
 
+  const ctx = { action: "advance turn", battleId };
+
   debugBattleSync("trigger battle-updated", {
     channel: battleChannel,
     event: "battle-updated",
   });
-  void pusherServer
-    .trigger(battleChannel, "battle-updated", pusherPayload)
-    .catch((err) => console.error("Pusher trigger failed:", err));
+  safePusherTrigger(pusherServer, battleChannel, "battle-updated", pusherPayload, ctx);
 
   if (finalStatus === "completed") {
     debugBattleSync("trigger battle-completed", {
       channel: battleChannel,
       event: "battle-completed",
     });
-    void pusherServer
-      .trigger(battleChannel, "battle-completed", pusherPayload)
-      .catch((err) => console.error("Pusher trigger failed:", err));
+    safePusherTrigger(pusherServer, battleChannel, "battle-completed", pusherPayload, ctx);
   }
 
   const activeParticipant = finalInitiativeOrder[nextTurnIndex];
@@ -244,12 +243,16 @@ function triggerPusherEvents(input: {
       participantId: activeParticipant.basicInfo.id,
       participantName: activeParticipant.basicInfo.name,
     });
-    void pusherServer
-      .trigger(userChannel, "turn-started", {
+    safePusherTrigger(
+      pusherServer,
+      userChannel,
+      "turn-started",
+      {
         battleId,
         participantId: activeParticipant.basicInfo.id,
         participantName: activeParticipant.basicInfo.name,
-      })
-      .catch((err) => console.error("Pusher trigger failed:", err));
+      },
+      ctx,
+    );
   }
 }

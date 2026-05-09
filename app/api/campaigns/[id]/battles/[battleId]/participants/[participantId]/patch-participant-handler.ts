@@ -18,6 +18,7 @@ import {
   slimInitiativeOrderForStorage,
   stripStateBeforeForClient,
 } from "@/lib/utils/battle/strip-battle-payload";
+import { safePusherTrigger } from "@/lib/utils/pusher/safe-trigger";
 import { executeComplexTriggersForChangedParticipant } from "@/lib/utils/skills/execution";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -263,11 +264,11 @@ function triggerBattleUpdatedEvent(
 ): void {
   if (!process.env.PUSHER_APP_ID) return;
 
-  void pusherServer
-    .trigger(
-      battleChannelName(battleId),
-      "battle-updated",
-      preparePusherPayload(updatedBattle),
-    )
-    .catch((err) => console.error("Pusher trigger failed:", err));
+  safePusherTrigger(
+    pusherServer,
+    battleChannelName(battleId),
+    "battle-updated",
+    preparePusherPayload(updatedBattle),
+    { action: "patch participant", battleId },
+  );
 }
