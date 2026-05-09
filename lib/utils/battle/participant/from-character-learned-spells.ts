@@ -5,6 +5,7 @@
 import type { CampaignSpellContext, CharacterFromPrisma } from "../types/participant";
 
 import { prisma } from "@/lib/db";
+import { logger } from "@/lib/utils/logger";
 import { convertPrismaToSkillTree } from "@/lib/utils/skills/skill-tree-mock";
 import {
   getLearnedSpellIdsFromProgress,
@@ -104,7 +105,11 @@ export async function resolveLearnedSpellsFromCharacter(
       knownSpells = Array.from(new Set([...baseKnownSpells, ...learnedFromTree]));
     }
   } catch (e) {
-    console.error("Error loading learned spells from tree:", e);
+    logger.error(
+      "[battle/learned-spells] load from tree failed",
+      { characterId: character.id, race: character.race },
+      e,
+    );
   }
 
   return knownSpells;

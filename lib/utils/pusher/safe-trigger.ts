@@ -20,6 +20,8 @@
 
 import type Pusher from "pusher";
 
+import { logger } from "@/lib/utils/logger";
+
 export interface PusherTriggerContext {
   /** Що зараз робив handler (для structured логу). */
   action?: string;
@@ -33,16 +35,11 @@ export function safePusherTrigger(
   payload: unknown,
   context?: PusherTriggerContext,
 ): void {
-  void pusherServer
-    .trigger(channel, event, payload)
-    .catch((err) => {
-      console.error("[pusher] trigger failed", {
-        channel,
-        event,
-        ...context,
-        error: err instanceof Error
-          ? { message: err.message, name: err.name }
-          : String(err),
-      });
-    });
+  void pusherServer.trigger(channel, event, payload).catch((err) => {
+    logger.error(
+      "[pusher] trigger failed",
+      { channel, event, ...context },
+      err,
+    );
+  });
 }

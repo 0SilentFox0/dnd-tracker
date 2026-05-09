@@ -10,6 +10,7 @@ import { extractRacialAbilities } from "./extract-racial";
 import { AttackType } from "@/lib/constants/battle";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
+import { logger } from "@/lib/utils/logger";
 import type { BattleParticipant, RacialAbility } from "@/types/battle";
 
 /**
@@ -92,7 +93,11 @@ export async function createBattleParticipantFromUnit(
         racesByName?.[unit.race] ?? undefined,
       );
     } catch (error) {
-      console.error("Error extracting racial abilities:", error);
+      logger.error(
+        "[battle/from-unit] extract racial abilities failed",
+        { unitId: unit.id, race: unit.race, campaignId: unit.campaignId },
+        error,
+      );
       racialAbilities = [];
     }
   }

@@ -18,6 +18,8 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
+import { logger } from "@/lib/utils/logger";
+
 /**
  * Контекст логу. `action` обов'язковий — описує що робила route
  * (наприклад "create character", "patch participant HP").
@@ -32,7 +34,7 @@ export function handleApiError(
   error: unknown,
   context: ApiErrorContext,
 ): NextResponse {
-  logApiError(error, context);
+  logger.error(`[api] ${context.action} failed`, context, error);
 
   if (error instanceof z.ZodError) {
     return NextResponse.json({ error: error.issues }, { status: 400 });
@@ -55,40 +57,4 @@ export function handleApiError(
     { error: "Internal server error" },
     { status: 500 },
   );
-}
-
-function logApiError(error: unknown, context: ApiErrorContext): void {
-  const errorInfo = serializeError(error);
-
-  console.error(`[api] ${context.action} failed`, {
-    ...context,
-    error: errorInfo,
-  });
-}
-
-function serializeError(
-  error: unknown,
-): Record<string, unknown> | string {
-  if (error instanceof z.ZodError) {
-    return { kind: "ZodError", issues: error.issues };
-  }
-
-  if (error instanceof Prisma.PrismaClientKnownRequestError) {
-    return {
-      kind: "PrismaClientKnownRequestError",
-      code: error.code,
-      message: error.message,
-      meta: error.meta,
-    };
-  }
-
-  if (error instanceof Error) {
-    return {
-      kind: error.name,
-      message: error.message,
-      stack: error.stack,
-    };
-  }
-
-  return String(error);
 }
