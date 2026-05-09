@@ -4,17 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { MoreVertical, Pencil, Trash2, TrendingUp } from "lucide-react";
 
+import { DeleteAllCharactersDialog } from "./__dialogs__/DeleteAllCharactersDialog";
+import { DeleteCharacterDialog } from "./__dialogs__/DeleteCharacterDialog";
+
 import { OptimizedImage } from "@/components/common/OptimizedImage";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -242,50 +235,19 @@ export function DMCharactersClient({ campaignId }: DMCharactersClientProps) {
         </Card>
       )}
 
-      <AlertDialog open={deleteAllOpen} onOpenChange={setDeleteAllOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Видалити всіх персонажів?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Буде видалено всіх персонажів гравців у цій кампанії. Цю дію не
-              можна скасувати.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Скасувати</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteAll}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {deleteAllMutation.isPending ? "Видалення…" : "Видалити всіх"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteAllCharactersDialog
+        open={deleteAllOpen}
+        onOpenChange={setDeleteAllOpen}
+        onConfirm={handleDeleteAll}
+        isPending={deleteAllMutation.isPending}
+      />
 
-      <AlertDialog
-        open={!!characterToDelete}
-        onOpenChange={(open) => !open && setCharacterToDelete(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Видалити персонажа?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Персонажа &quot;{characterToDelete?.name}&quot; буде видалено. Цю
-              дію не можна скасувати.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Скасувати</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteOne}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {deleteOneMutation.isPending ? "Видалення…" : "Видалити"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteCharacterDialog
+        character={characterToDelete}
+        onClose={() => setCharacterToDelete(null)}
+        onConfirm={handleDeleteOne}
+        isPending={deleteOneMutation.isPending}
+      />
     </div>
   );
 }

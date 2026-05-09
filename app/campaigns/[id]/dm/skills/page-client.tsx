@@ -4,18 +4,10 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Printer } from "lucide-react";
 
+import { DeleteAllSkillsDialog } from "./__dialogs__/DeleteAllSkillsDialog";
+
 import { SkillGroupAccordion } from "@/components/skills/list/SkillGroupAccordion";
 import { Accordion } from "@/components/ui/accordion";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
   useDeleteAllSkills,
@@ -183,27 +175,13 @@ export function DMSkillsPageClient({
         </Accordion>
       )}
 
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Видалити всі скіли?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Ця дія видалить всі скіли з бібліотеки ({skills.length} скілів).
-              Цю дію неможливо скасувати.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteAllSkillsMutation.isPending}>Скасувати</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteAll}
-              disabled={deleteAllSkillsMutation.isPending}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {deleteAllSkillsMutation.isPending ? "Видалення..." : "Видалити всі"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteAllSkillsDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        onConfirm={handleDeleteAll}
+        isPending={deleteAllSkillsMutation.isPending}
+        skillsCount={skills.length}
+      />
     </div>
   );
 }
