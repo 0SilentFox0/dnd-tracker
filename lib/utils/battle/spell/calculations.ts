@@ -128,8 +128,9 @@ function getSpellcastingModifier(participant: BattleParticipant): {
 
 export interface SpellDamageEnhancementOptions {
   /**
-   * У калькуляторі шкоди на аркуші: після кубиків додається рівень героя.
-   * У бою за замовчуванням вимкнено, щоб не змінювати баланс без узгодження.
+   * Додає рівень героя після кубиків. Зараз увімкнено і у калькуляторі,
+   * і у бою (узгоджено з DM — magic damage scale аналогічно melee/ranged).
+   * Прапорець залишається опційним для тестових сценаріїв.
    */
   addHeroLevelToBase?: boolean;
 }

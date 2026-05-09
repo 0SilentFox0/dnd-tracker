@@ -44,7 +44,7 @@ export function computeSpellDamageAndApply(
     caster,
     baseValue,
     additionalRollResult,
-    undefined,
+    { addHeroLevelToBase: true },
     { groupId: spell.groupId ?? null },
   );
 
@@ -162,7 +162,7 @@ export function computeSpellHealAndApply(
     caster,
     baseValue,
     additionalRollResult,
-    undefined,
+    { addHeroLevelToBase: true },
     { groupId: spell.groupId ?? null },
   );
 
