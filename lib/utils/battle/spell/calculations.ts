@@ -17,6 +17,7 @@ import {
 } from "../damage/skill";
 import { getSkillsForDamageBonus } from "../damage/skill-resolve";
 
+import { logger } from "@/lib/utils/logger";
 import type { ActiveSkill, BattleParticipant } from "@/types/battle";
 
 /**
@@ -145,6 +146,80 @@ export interface SpellTarget {
   groupId?: string | null;
 }
 
+/** Стиснутий вид effect для діагностичного логу. */
+function compactEffectForLog(e: ActiveSkill["effects"][number]) {
+  return {
+    stat: e.stat,
+    type: e.type,
+    value: e.value,
+    isPercentage: e.isPercentage === true,
+  };
+}
+
+/** Стиснутий вид скіла для логу — тільки те, що впливає на magic damage. */
+function compactSkillForLog(skill: ActiveSkill) {
+  const damageRelated = (skill.effects ?? []).filter((e) => {
+    const stat = (e.stat || "").toLowerCase();
+
+    return stat.includes("damage") || stat.includes("spell");
+  });
+
+  return {
+    skillId: skill.skillId,
+    name: skill.name,
+    level: skill.level,
+    mainSkillId: skill.mainSkillId,
+    spellGroupId: skill.spellGroupId ?? null,
+    damageType: skill.damageType ?? null,
+    affectsDamage: skill.affectsDamage ?? null,
+    spellEnhancements: skill.spellEnhancements
+      ? {
+          spellEffectIncrease:
+            skill.spellEnhancements.spellEffectIncrease ?? null,
+          targetChange: skill.spellEnhancements.spellTargetChange ?? null,
+          additional: skill.spellEnhancements.spellAdditionalModifier ?? null,
+        }
+      : null,
+    damageEffects: damageRelated.map(compactEffectForLog),
+  };
+}
+
+/**
+ * Діагностичний лог підрахунку магічної шкоди (CODE_AUDIT — magic skill bonus).
+ * Логується кожен виклик calculateSpellDamageWithEnhancements: зрозуміло, які
+ * скіли вкачані у героя, який пройшов фільтр school+kind, і які бонуси нараховано.
+ *
+ * Через `logger.info` — попадає у Vercel function logs (`[magic-damage]` префікс
+ * для grep). Поза hot-path: spell cast стається N разів за бій, не на кожний tick.
+ */
+function logMagicDamageDiagnostic(
+  participant: BattleParticipant,
+  ctx: SkillDamageBonusContext,
+  results: {
+    flatBonus: number;
+    percentBonus: number;
+    flatEntries: Array<{ name: string; flat: number }>;
+    percentEntries: Array<{ name: string; percent: number }>;
+  },
+): void {
+  const allActiveSkills = participant.battleData.activeSkills ?? [];
+
+  const filteredSkills = getSkillsForDamageBonus(participant, "magic", ctx);
+
+  logger.info("[magic-damage]", {
+    casterId: participant.basicInfo.id,
+    casterName: participant.basicInfo.name,
+    spellGroupId: ctx.spellGroupId ?? null,
+    activeSkillsCount: allActiveSkills.length,
+    activeSkills: allActiveSkills.map(compactSkillForLog),
+    filteredSkillIds: filteredSkills.map((s) => s.skillId),
+    flatBonus: results.flatBonus,
+    percentBonus: results.percentBonus,
+    flatEntries: results.flatEntries,
+    percentEntries: results.percentEntries,
+  });
+}
+
 export function calculateSpellDamageWithEnhancements(
   participant: BattleParticipant,
   baseDamage: number,
@@ -198,6 +273,13 @@ export function calculateSpellDamageWithEnhancements(
   const percentBonus = calculateSkillDamagePercentBonus(participant, "magic", ctx);
 
   const percentEntries = getSkillDamagePercentBreakdownEntries(participant, "magic", ctx);
+
+  logMagicDamageDiagnostic(participant, ctx, {
+    flatBonus,
+    percentBonus,
+    flatEntries,
+    percentEntries,
+  });
 
   if (percentBonus > 0 || percentEntries.length > 0) {
     breakdown.push(`= ${baseBeforePercent} (база перед %)`);
