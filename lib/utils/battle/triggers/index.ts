@@ -1,6 +1,9 @@
 /**
  * Утиліти для перевірки тригерів пасивних здібностей (PassiveAbility).
- * Для тригерів скілів використовуйте lib/utils/skills/triggers.
+ * Для тригерів скілів (ActiveSkill.skillTriggers) — lib/utils/skills/triggers.
+ *
+ * Усі trigger-evaluator у проекті — типобезпечні (switch-case по
+ * дискримінованих union-типах). Динамічного string-eval немає.
  */
 
 import { hasAnyAllyLowHp } from "../participant";
@@ -9,9 +12,7 @@ import type { TriggerContextBase } from "./context";
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
 import { BattleParticipant, PassiveAbility } from "@/types/battle";
 
-export type { SkillTriggerContext,TriggerContextBase } from "./context";
-export type { TriggerContext } from "./evaluator";
-export { evaluateTrigger } from "./evaluator";
+export type { SkillTriggerContext, TriggerContextBase } from "./context";
 
 export function checkTriggerCondition(
   trigger: PassiveAbility["trigger"],
@@ -38,18 +39,4 @@ export function getPassiveAbilitiesByTrigger(
   return participant.battleData.passiveAbilities.filter(
     (ability) => ability.trigger.type === triggerType
   );
-}
-
-export function evaluateCondition(
-  condition: string,
-  participant: BattleParticipant,
-  context?: TriggerContextBase
-): boolean {
-  if (condition.includes("ally_hp") && context?.allParticipants) {
-    const threshold = parseFloat(condition.match(/(\d+)%?/)?.[1] || String(BATTLE_CONSTANTS.DEFAULT_LOW_HP_THRESHOLD_PERCENT));
-
-    return hasAnyAllyLowHp(participant, context.allParticipants, threshold);
-  }
-
-  return false;
 }
