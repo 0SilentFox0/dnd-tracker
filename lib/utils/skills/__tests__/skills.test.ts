@@ -26,7 +26,6 @@ describe("skills utils", () => {
       spellEnhancementData: {},
       mainSkillData: { mainSkillId },
       skillTriggers: [],
-      image: null,
       createdAt: new Date(),
       spell: null,
       spellGroup: null,

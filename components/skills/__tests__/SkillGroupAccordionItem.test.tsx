@@ -52,7 +52,6 @@ function minimalGroupedSkill(overrides: Partial<GroupedSkill> = {}): GroupedSkil
     spellEnhancementData: {},
     mainSkillData: {},
     skillTriggers: [],
-    image: null,
     createdAt: new Date(),
     spell: null,
     spellGroup: null,
@@ -76,8 +75,8 @@ describe("SkillGroupAccordionItem", () => {
       onRenameClick,
       onRemoveAllClick,
       skills: [
-        minimalGroupedSkill({ id: "s1", basicInfo: { name: "Удар", description: null, icon: undefined } }),
-        minimalGroupedSkill({ id: "s2", basicInfo: { name: "Блок", description: null, icon: undefined } }),
+        minimalGroupedSkill({ id: "s1", basicInfo: { name: "Удар", description: undefined, icon: undefined } }),
+        minimalGroupedSkill({ id: "s2", basicInfo: { name: "Блок", description: undefined, icon: undefined } }),
       ],
       campaignId: "c1",
     });
@@ -93,7 +92,7 @@ describe("SkillGroupAccordionItem", () => {
       groupId: undefined,
       onRenameClick: vi.fn(),
       onRemoveAllClick: vi.fn(),
-      skills: [minimalGroupedSkill({ basicInfo: { name: "Єдиний скіл", description: null, icon: undefined } })],
+      skills: [minimalGroupedSkill({ basicInfo: { name: "Єдиний скіл", description: undefined, icon: undefined } })],
       campaignId: "c1",
     });
     fireEvent.click(screen.getByRole("button", { name: /Група/i }));

@@ -43,7 +43,6 @@ function minimalGroupedSkill(overrides: Partial<GroupedSkill> = {}): GroupedSkil
     spellEnhancementData: {},
     mainSkillData: {},
     skillTriggers: [],
-    image: null,
     createdAt: new Date(),
     spell: null,
     spellGroup: null,

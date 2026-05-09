@@ -12,14 +12,13 @@ import type { Spell } from "@/types/spells";
 function makeSpell(overrides: Partial<Spell> = {}): Spell {
   return {
     id: "s1",
-    campaignId: "c1",
     name: "Test",
     level: 1,
     type: "target",
     damageType: "damage",
     description: "",
     ...overrides,
-  };
+  } as Spell;
 }
 
 describe("spells", () => {

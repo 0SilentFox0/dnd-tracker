@@ -191,7 +191,7 @@ describe("battle-damage-breakdown", () => {
         },
       });
 
-      (target.battleData as Record<string, unknown>).extras = {
+      (target.battleData as unknown as Record<string, unknown>).extras = {
         resistances: { physical: 50 },
       };
 

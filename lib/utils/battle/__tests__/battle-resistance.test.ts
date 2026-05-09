@@ -84,7 +84,7 @@ describe("battle-resistance", () => {
     it("returns skill physical resistance from extras for physical damage type", () => {
       const target = createParticipant();
 
-      (target.battleData as Record<string, unknown>).extras = {
+      (target.battleData as unknown as Record<string, unknown>).extras = {
         resistances: { physical: 30 },
       };
       expect(getCombinedResistancePercent(target, "slashing")).toBe(30);
@@ -94,7 +94,7 @@ describe("battle-resistance", () => {
     it("returns skill spell resistance from extras for spell damage type", () => {
       const target = createParticipant();
 
-      (target.battleData as Record<string, unknown>).extras = {
+      (target.battleData as unknown as Record<string, unknown>).extras = {
         resistances: { spell: 25 },
       };
       expect(getCombinedResistancePercent(target, "spell")).toBe(25);
@@ -105,7 +105,7 @@ describe("battle-resistance", () => {
     it("reduces damage by skill resistance when target has extras.resistances.physical", () => {
       const target = createParticipant();
 
-      (target.battleData as Record<string, unknown>).extras = {
+      (target.battleData as unknown as Record<string, unknown>).extras = {
         resistances: { physical: 50 },
       };
 
@@ -120,7 +120,7 @@ describe("battle-resistance", () => {
 
       const target = createParticipant();
 
-      (target.battleData as Record<string, unknown>).extras = {
+      (target.battleData as unknown as Record<string, unknown>).extras = {
         resistances: { physical: 30 },
       };
 

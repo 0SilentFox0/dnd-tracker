@@ -15,13 +15,13 @@ import {
   runAttackPhase,
 } from "../run-attack-phase";
 
-import { ParticipantSide } from "@/lib/constants/battle";
+import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import {
   createMockParticipant,
 } from "@/lib/utils/skills/__tests__/skill-triggers-execution-mocks";
-import type { Attack, BattleParticipant } from "@/types/battle";
+import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
-function meleeAttack(over: Partial<Attack> = {}): Attack {
+function meleeAttack(over: Partial<BattleAttack> = {}): BattleAttack {
   return {
     id: "atk-1",
     name: "Sword",
@@ -31,7 +31,7 @@ function meleeAttack(over: Partial<Attack> = {}): Attack {
     damageType: "physical",
     targetType: "single",
     ...over,
-  } as unknown as Attack;
+  } as unknown as BattleAttack;
 }
 
 function makeAttacker(over: Partial<BattleParticipant> = {}): BattleParticipant {
@@ -357,7 +357,7 @@ describe("runAttackPhase — happy path smoke", () => {
       combatStats: { ...baseAttacker.combatStats, maxTargets: 2 },
       battleData: {
         ...baseAttacker.battleData,
-        attacks: [meleeAttack({ type: "ranged", id: "bow", name: "Лук" })],
+        attacks: [meleeAttack({ type: AttackType.RANGED, id: "bow", name: "Лук" })],
       },
     };
 

@@ -15,6 +15,7 @@ import {
 } from "../damage";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
+import { SkillLevel } from "@/lib/types/skill-tree";
 import type {
   BattleParticipant,
   EquippedArtifact,
@@ -115,7 +116,7 @@ describe("battle-damage-calculations", () => {
               skillId: "s1",
               name: "Напад",
               mainSkillId: "ms1",
-              level: "expert",
+              level: SkillLevel.EXPERT,
               effects: [createSkillEffect("melee_damage", 30, true)],
               affectsDamage: true,
             },
@@ -140,7 +141,7 @@ describe("battle-damage-calculations", () => {
               skillId: "s2",
               name: "Експертна стрільба",
               mainSkillId: "ms2",
-              level: "expert",
+              level: SkillLevel.EXPERT,
               effects: [createSkillEffect("ranged_damage", 30, true)],
               affectsDamage: true,
             },
@@ -165,14 +166,14 @@ describe("battle-damage-calculations", () => {
               skillId: "s1",
               name: "Базова атака",
               mainSkillId: "ms1",
-              level: "basic",
+              level: SkillLevel.BASIC,
               effects: [createSkillEffect("melee_damage", 10, true)],
             },
             {
               skillId: "s2",
               name: "Просунута атака",
               mainSkillId: "ms1",
-              level: "advanced",
+              level: SkillLevel.ADVANCED,
               effects: [createSkillEffect("melee_damage", 15, true)],
             },
           ],
@@ -193,7 +194,7 @@ describe("battle-damage-calculations", () => {
               skillId: "s1",
               name: "Універсальний бонус",
               mainSkillId: "ms1",
-              level: "basic",
+              level: SkillLevel.BASIC,
               effects: [createSkillEffect("physical_damage", 20, true)],
             },
           ],
@@ -249,7 +250,7 @@ describe("battle-damage-calculations", () => {
               skillId: "s1",
               name: "Flat бонус",
               mainSkillId: "ms1",
-              level: "basic",
+              level: SkillLevel.BASIC,
               effects: [createSkillEffect("melee_damage", 3, false)],
             },
           ],
@@ -463,7 +464,7 @@ describe("battle-damage-calculations", () => {
               skillId: "s1",
               name: "Напад",
               mainSkillId: "ms1",
-              level: "expert",
+              level: SkillLevel.EXPERT,
               effects: [createSkillEffect("melee_damage", 30, true)],
             },
           ],
@@ -510,7 +511,7 @@ describe("battle-damage-calculations", () => {
               skillId: "s1",
               name: "Експертна стрільба",
               mainSkillId: "ms1",
-              level: "expert",
+              level: SkillLevel.EXPERT,
               effects: [createSkillEffect("ranged_damage", 30, true)],
             },
           ],
@@ -583,7 +584,7 @@ describe("battle-damage-calculations", () => {
     it("reduces damage by physical resistance percent when extras.resistances.physical is set", () => {
       const defender = createBaseParticipant();
 
-      (defender.battleData as Record<string, unknown>).extras = {
+      (defender.battleData as unknown as Record<string, unknown>).extras = {
         resistances: { physical: 25 },
       };
 
@@ -597,7 +598,7 @@ describe("battle-damage-calculations", () => {
     it("uses spell resistance when damageCategory is spell", () => {
       const defender = createBaseParticipant();
 
-      (defender.battleData as Record<string, unknown>).extras = {
+      (defender.battleData as unknown as Record<string, unknown>).extras = {
         resistances: { spell: 50 },
       };
 
@@ -610,7 +611,7 @@ describe("battle-damage-calculations", () => {
     it("returns finalDamage at least 0 when resistance is high", () => {
       const defender = createBaseParticipant();
 
-      (defender.battleData as Record<string, unknown>).extras = {
+      (defender.battleData as unknown as Record<string, unknown>).extras = {
         resistances: { physical: 100 },
       };
 
