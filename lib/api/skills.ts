@@ -1,31 +1,30 @@
 import {
   ApiError,
   campaignDelete,
-  campaignGet,
   campaignPatch,
   campaignPost,
+  createCampaignCrudApi,
 } from "@/lib/api/client";
 import type { SkillPayload, SkillUpdatePayload } from "@/types/api";
 import type { Skill } from "@/types/skills";
 
-export async function updateSkillAppearance(
-  campaignId: string,
-  skillId: string,
-  appearanceDescription: string | null,
-): Promise<Skill> {
-  return campaignPatch<Skill>(campaignId, `/skills/${skillId}`, {
-    appearanceDescription,
-  });
-}
+const skillsApi = createCampaignCrudApi<
+  Skill,
+  SkillPayload,
+  SkillUpdatePayload,
+  void
+>("/skills", { listCache: "no-store", getCache: "no-store" });
+
+export const getSkills = skillsApi.list;
+export const createSkill = skillsApi.create;
+export const updateSkill = skillsApi.update;
 
 export async function getSkill(
   campaignId: string,
   skillId: string,
 ): Promise<Skill> {
   try {
-    return await campaignGet<Skill>(campaignId, `/skills/${skillId}`, {
-      cache: "no-store",
-    });
+    return await skillsApi.get(campaignId, skillId);
   } catch (err) {
     if (err instanceof ApiError && err.status === 404) {
       throw new Error("Skill not found");
@@ -35,32 +34,21 @@ export async function getSkill(
   }
 }
 
-export async function getSkills(campaignId: string): Promise<Skill[]> {
-  return campaignGet<Skill[]>(campaignId, "/skills", {
-    cache: "no-store",
-  });
-}
-
-export async function createSkill(
-  campaignId: string,
-  data: SkillPayload,
-): Promise<Skill> {
-  return campaignPost<Skill>(campaignId, "/skills", data);
-}
-
-export async function updateSkill(
-  campaignId: string,
-  skillId: string,
-  data: SkillUpdatePayload,
-): Promise<Skill> {
-  return campaignPatch<Skill>(campaignId, `/skills/${skillId}`, data);
-}
-
 export async function deleteSkill(
   campaignId: string,
   skillId: string,
 ): Promise<void> {
   await campaignDelete<void>(campaignId, `/skills/${skillId}`);
+}
+
+export async function updateSkillAppearance(
+  campaignId: string,
+  skillId: string,
+  appearanceDescription: string | null,
+): Promise<Skill> {
+  return campaignPatch<Skill>(campaignId, `/skills/${skillId}`, {
+    appearanceDescription,
+  });
 }
 
 export async function duplicateSkill(

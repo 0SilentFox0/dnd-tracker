@@ -188,3 +188,79 @@ export async function campaignDelete<T>(
 ): Promise<T> {
   return campaignRequest<T>(campaignId, path, { ...options, method: "DELETE" });
 }
+
+/**
+ * Стандартний 5-метод CRUD для campaign-scoped ресурсу (CODE_AUDIT 2.12).
+ *
+ * Замість 5 однотипних wrapper-функцій на домен — фабрика з єдиним
+ * `basePath` (наприклад "/races", "/main-skills"). Кожен експорт у
+ * `lib/api/<domain>.ts` стає однорядковим re-export, лишаючи місце
+ * лише для домен-специфічних ендпоінтів.
+ *
+ * Приклад:
+ * ```ts
+ * const racesApi = createCampaignCrudApi<Race, RaceFormData>("/races");
+ * export const getRaces = racesApi.list;
+ * export const createRace = racesApi.create;
+ * // …
+ * ```
+ *
+ * Для не-стандартних кешів передавайте options.listCache / getCache.
+ * Для нестандартних DELETE return-shape (`{ deleted: number }`) —
+ * визначте `TDeleteResult` як 3-й generic.
+ */
+export interface CampaignCrudApi<
+  TEntity,
+  TCreate,
+  TUpdate = Partial<TCreate>,
+  TDeleteResult = TEntity | void,
+> {
+  list(campaignId: string, options?: CampaignRequestOptions): Promise<TEntity[]>;
+  get(campaignId: string, id: string, options?: CampaignRequestOptions): Promise<TEntity>;
+  create(campaignId: string, data: TCreate): Promise<TEntity>;
+  update(campaignId: string, id: string, data: TUpdate): Promise<TEntity>;
+  remove(campaignId: string, id: string): Promise<TDeleteResult>;
+}
+
+export function createCampaignCrudApi<
+  TEntity,
+  TCreate,
+  TUpdate = Partial<TCreate>,
+  TDeleteResult = TEntity | void,
+>(
+  basePath: string,
+  defaults: {
+    listCache?: RequestCache;
+    getCache?: RequestCache;
+  } = {},
+): CampaignCrudApi<TEntity, TCreate, TUpdate, TDeleteResult> {
+  return {
+    list(campaignId, options = {}) {
+      const cache = options.cache ?? defaults.listCache;
+
+      return campaignGet<TEntity[]>(
+        campaignId,
+        basePath,
+        cache ? { ...options, cache } : options,
+      );
+    },
+    get(campaignId, id, options = {}) {
+      const cache = options.cache ?? defaults.getCache;
+
+      return campaignGet<TEntity>(
+        campaignId,
+        `${basePath}/${id}`,
+        cache ? { ...options, cache } : options,
+      );
+    },
+    create(campaignId, data) {
+      return campaignPost<TEntity>(campaignId, basePath, data);
+    },
+    update(campaignId, id, data) {
+      return campaignPatch<TEntity>(campaignId, `${basePath}/${id}`, data);
+    },
+    remove(campaignId, id) {
+      return campaignDelete<TDeleteResult>(campaignId, `${basePath}/${id}`);
+    },
+  };
+}

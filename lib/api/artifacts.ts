@@ -1,9 +1,4 @@
-import {
-  campaignDelete,
-  campaignGet,
-  campaignPatch,
-  campaignPost,
-} from "@/lib/api/client";
+import { campaignDelete, createCampaignCrudApi } from "@/lib/api/client";
 
 export interface ArtifactListItem {
   id: string;
@@ -50,49 +45,26 @@ export type UpdateArtifactData = Partial<{
   icon: string | null;
 }>;
 
+const artifactsApi = createCampaignCrudApi<
+  Artifact,
+  CreateArtifactData,
+  UpdateArtifactData,
+  void
+>("/artifacts");
+
+/** list повертає Array; додаткова guard на випадок не-array відповіді. */
 export async function getArtifacts(
   campaignId: string,
 ): Promise<ArtifactListItem[]> {
-  const data = await campaignGet<ArtifactListItem[]>(
-    campaignId,
-    "/artifacts",
-  );
+  const data = await artifactsApi.list(campaignId);
 
   return Array.isArray(data) ? data : [];
 }
 
-export async function getArtifact(
-  campaignId: string,
-  artifactId: string,
-): Promise<Artifact> {
-  return campaignGet<Artifact>(campaignId, `/artifacts/${artifactId}`);
-}
-
-export async function createArtifact(
-  campaignId: string,
-  data: CreateArtifactData,
-): Promise<Artifact> {
-  return campaignPost<Artifact>(campaignId, "/artifacts", data);
-}
-
-export async function updateArtifact(
-  campaignId: string,
-  artifactId: string,
-  data: UpdateArtifactData,
-): Promise<Artifact> {
-  return campaignPatch<Artifact>(
-    campaignId,
-    `/artifacts/${artifactId}`,
-    data,
-  );
-}
-
-export async function deleteArtifact(
-  campaignId: string,
-  artifactId: string,
-): Promise<void> {
-  await campaignDelete<void>(campaignId, `/artifacts/${artifactId}`);
-}
+export const getArtifact = artifactsApi.get;
+export const createArtifact = artifactsApi.create;
+export const updateArtifact = artifactsApi.update;
+export const deleteArtifact = artifactsApi.remove;
 
 export async function deleteAllArtifacts(
   campaignId: string,
