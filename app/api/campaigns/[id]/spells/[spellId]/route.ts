@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess, requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 
 const updateSpellSchema = z.object({
   name: z.string().min(1).max(100).optional(),
@@ -92,12 +93,7 @@ export async function GET(
 
     return NextResponse.json(spell);
   } catch (error) {
-    console.error("Error fetching spell:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "fetch spell" });
   }
 }
 
@@ -178,16 +174,7 @@ export async function PATCH(
 
     return NextResponse.json(updatedSpell);
   } catch (error) {
-    console.error("Error updating spell:", error);
-
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.issues }, { status: 400 });
-    }
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "update spell" });
   }
 }
 
@@ -223,11 +210,6 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting spell:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "delete spell" });
   }
 }

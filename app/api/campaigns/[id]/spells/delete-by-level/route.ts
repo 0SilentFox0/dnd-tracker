@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { prisma } from "@/lib/db";
 import { requireDM } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 
 const deleteByLevelSchema = z.object({
   level: z.number().int().min(0).max(9),
@@ -39,18 +40,6 @@ export async function DELETE(
       deleted: result.count,
     });
   } catch (error) {
-    console.error("Error deleting spells by level:", error);
-
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: "Invalid request data", details: error.issues },
-        { status: 400 }
-      );
-    }
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "delete spells by level" });
   }
 }
