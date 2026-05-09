@@ -233,14 +233,14 @@ export function calculateSpellDamageWithEnhancements(
 
   let running = baseDamage;
 
-  breakdown.push(`${baseDamage} (сума кубиків заклинання)`);
+  breakdown.push(`+ сума кубиків (${baseDamage})`);
 
   if (options?.addHeroLevelToBase === true) {
     const heroLevel = participant.abilities.level;
 
     running += heroLevel;
 
-    breakdown.push(`+${heroLevel} (рівень героя)`);
+    breakdown.push(`+ рівень героя (${heroLevel})`);
   }
 
   const { mod: spellMod, label: spellAbbr } = getSpellcastingModifier(participant);
@@ -249,7 +249,7 @@ export function calculateSpellDamageWithEnhancements(
     running += spellMod;
 
     breakdown.push(
-      `${spellMod >= 0 ? "+" : ""}${spellMod} (модифікатор ${spellAbbr})`,
+      `+ модифікатор ${spellAbbr} (${spellMod >= 0 ? "+" : ""}${spellMod})`,
     );
   }
 
@@ -263,15 +263,15 @@ export function calculateSpellDamageWithEnhancements(
   }
 
   for (const e of flatEntries) {
-    breakdown.push(`${e.name}: ${e.flat >= 0 ? "+" : ""}${e.flat}`);
+    breakdown.push(
+      `+ бонус flat: ${e.name} (${e.flat >= 0 ? "+" : ""}${e.flat})`,
+    );
   }
 
   // %-бонуси зі скілів і активних ефектів застосовуються до СУМИ КУБИКІВ
-  // (baseDamage), а не до running (=кубики + hero level + flat). Тобто
-  // +25% на 40 кубиків = +10 (додатково до 40 + 10 hero level), а не
-  // +25% на (40 + 10) = +12. Це відповідає game-design очікуванню:
+  // (baseDamage), а не до running. Game-design очікування:
   // спел-бонус масштабує weapon/spell-damage-частину, не статичні
-  // character-надбавки.
+  // character-надбавки (рівень героя, flat-бонуси).
   const percentBonus = calculateSkillDamagePercentBonus(participant, "magic", ctx);
 
   const percentEntries = getSkillDamagePercentBreakdownEntries(participant, "magic", ctx);
@@ -283,20 +283,24 @@ export function calculateSpellDamageWithEnhancements(
     percentEntries,
   });
 
-  if (percentBonus > 0 || percentEntries.length > 0) {
-    breakdown.push(`= ${baseDamage} (база для %: сума кубиків)`);
-  }
-
-  for (const e of percentEntries) {
-    breakdown.push(`+${e.percent}% ${e.name}`);
-  }
-
   if (percentBonus > 0) {
     const add = calculatePercentBonus(baseDamage, percentBonus);
 
     running += add;
 
-    breakdown.push(`+${percentBonus}% разом (+${add})`);
+    if (percentEntries.length > 0) {
+      for (const e of percentEntries) {
+        const skillAdd = calculatePercentBonus(baseDamage, e.percent);
+
+        breakdown.push(
+          `+ бонус ${e.name}: ${e.percent}% від ${baseDamage} (+${skillAdd})`,
+        );
+      }
+    } else {
+      breakdown.push(
+        `+ бонус: ${percentBonus}% від ${baseDamage} (+${add})`,
+      );
+    }
   }
 
   // Окрема magic-механіка: апгрейд ефекту заклинання (`Skill.spellEffectIncrease`).
@@ -309,7 +313,7 @@ export function calculateSpellDamageWithEnhancements(
     running += add;
 
     breakdown.push(
-      `+${effectIncrease}% баф до заклинання (апгрейд) (+${add})`,
+      `+ апгрейд заклинання: ${effectIncrease}% (+${add})`,
     );
   }
 
@@ -325,12 +329,11 @@ export function calculateSpellDamageWithEnhancements(
     running += additionalDamage;
 
     breakdown.push(
-      `+${additionalDamage} (${additionalModifier.modifier || "додатковий ефект"})`,
+      `+ ${additionalModifier.modifier || "додатковий ефект"} (+${additionalDamage})`,
     );
   }
 
-  breakdown.push(`──────────`);
-  breakdown.push(`Всього: ${running} урону`);
+  breakdown.push(`= сума: ${running}`);
 
   const targetChange = getSpellTargetChange(participant, ctx);
 
