@@ -149,31 +149,70 @@ export function useDamageCalculatorSkills(
   useEffect(() => {
     if (skillsAffectingDamage.length === 0) return;
 
+    // Resolve full effect data per skill для діагностики +X% / +X flat бонусів.
+    const skillDetails = skillsAffectingDamage.map((s) => {
+      const skill = skillsList.find((sk) => sk.id === s.id) as
+        | typeof skillsList[0]
+        | undefined;
+
+      const rawEffects = (skill?.combatStats as
+        | {
+            effects?: Array<{
+              stat?: string;
+              type?: string;
+              value?: unknown;
+              isPercentage?: boolean;
+            }>;
+          }
+        | undefined)?.effects;
+
+      const effects = Array.isArray(rawEffects)
+        ? rawEffects.map((e) => ({
+            stat: e.stat ?? "?",
+            type: e.type ?? "?",
+            value: e.value,
+            isPercentage:
+              e.isPercentage === true ||
+              e.type === "percent" ||
+              e.type === "percentage",
+          }))
+        : [];
+
+      const legacyBonuses =
+        skill?.bonuses && Object.keys(skill.bonuses).length > 0
+          ? skill.bonuses
+          : null;
+
+      return {
+        name: s.name,
+        damageType: s.damageType ?? "усі",
+        effects,
+        legacyBonuses,
+      };
+    });
+
     const byType = {
-      melee: skillsAffectingDamage.filter(
-        (s) => !s.damageType || s.damageType === "melee",
+      melee: skillDetails.filter(
+        (s) => s.damageType === "усі" || s.damageType === "melee",
       ),
-      ranged: skillsAffectingDamage.filter(
-        (s) => !s.damageType || s.damageType === "ranged",
+      ranged: skillDetails.filter(
+        (s) => s.damageType === "усі" || s.damageType === "ranged",
       ),
-      magic: skillsAffectingDamage.filter(
-        (s) => !s.damageType || s.damageType === "magic",
+      magic: skillDetails.filter(
+        (s) => s.damageType === "усі" || s.damageType === "magic",
       ),
     };
 
     console.info(
       "[Калькулятор шкоди] Навички, що враховуються для героя при розрахунку:",
       {
-        всі_з_приміткою_affectsDamage: skillsAffectingDamage.map((s) => ({
-          name: s.name,
-          damageType: s.damageType ?? "усі",
-        })),
-        для_ближнього_бою: byType.melee.map((s) => s.name),
-        для_дальнього_бою: byType.ranged.map((s) => s.name),
-        для_магії: byType.magic.map((s) => s.name),
+        всі_з_приміткою_affectsDamage: skillDetails,
+        для_ближнього_бою: byType.melee,
+        для_дальнього_бою: byType.ranged,
+        для_магії: byType.magic,
       },
     );
-  }, [skillsAffectingDamage]);
+  }, [skillsAffectingDamage, skillsList]);
 
   return {
     unlockedSkillIds,
