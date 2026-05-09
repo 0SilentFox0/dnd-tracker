@@ -1,9 +1,6 @@
-import { redirect } from "next/navigation";
-
 import { DMCharactersClient } from "./page-client";
 
-import { getAuthUser } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { requireCampaignDM } from "@/lib/campaigns/access";
 
 export default async function DMCharactersPage({
   params,
@@ -12,28 +9,7 @@ export default async function DMCharactersPage({
 }) {
   const { id } = await params;
 
-  const user = await getAuthUser();
-
-  const userId = user.id;
-
-  const campaign = await prisma.campaign.findUnique({
-    where: { id },
-    include: {
-      members: {
-        where: { userId },
-      },
-    },
-  });
-
-  if (!campaign) {
-    redirect("/campaigns");
-  }
-
-  const userMember = campaign.members[0];
-
-  if (!userMember || userMember.role !== "dm") {
-    redirect(`/campaigns/${id}`);
-  }
+  await requireCampaignDM(id);
 
   return <DMCharactersClient campaignId={id} />;
 }

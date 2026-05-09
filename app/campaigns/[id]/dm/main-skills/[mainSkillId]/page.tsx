@@ -1,7 +1,7 @@
-import { notFound,redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 import { MainSkillEditForm } from "@/components/main-skills/MainSkillEditForm";
-import { getAuthUser } from "@/lib/auth";
+import { requireCampaignDM } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
 
 export default async function EditMainSkillPage({
@@ -11,22 +11,7 @@ export default async function EditMainSkillPage({
 }) {
   const { id, mainSkillId } = await params;
 
-  const user = await getAuthUser();
-
-  const userId = user.id;
-
-  const campaign = await prisma.campaign.findUnique({
-    where: { id },
-    include: {
-      members: {
-        where: { userId },
-      },
-    },
-  });
-
-  if (!campaign || campaign.members[0]?.role !== "dm") {
-    redirect(`/campaigns/${id}`);
-  }
+  await requireCampaignDM(id);
 
   const mainSkill = await prisma.mainSkill.findUnique({
     where: { id: mainSkillId },

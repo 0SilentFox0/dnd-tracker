@@ -1,8 +1,6 @@
-import { redirect } from "next/navigation";
-
 import { SkillTreePageClient } from "./page-client";
 
-import { getAuthUser } from "@/lib/auth";
+import { requireCampaignDM } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
 import { createMockSkillTree } from "@/lib/utils/skills/skill-tree-mock";
 import type { Race } from "@/types/races";
@@ -14,22 +12,7 @@ export default async function SkillTreesPage({
 }) {
   const { id } = await params;
 
-  const user = await getAuthUser();
-
-  const userId = user.id;
-
-  const campaign = await prisma.campaign.findUnique({
-    where: { id },
-    include: {
-      members: {
-        where: { userId },
-      },
-    },
-  });
-
-  if (!campaign || campaign.members[0]?.role !== "dm") {
-    redirect(`/campaigns/${id}`);
-  }
+  await requireCampaignDM(id);
 
   // Отримуємо існуючі дерева прокачки
   const skillTreesData = await prisma.skillTree.findMany({

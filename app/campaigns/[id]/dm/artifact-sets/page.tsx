@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 import { ArtifactSetCardIcon } from "@/components/artifact-sets/ArtifactSetCardIcon";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getAuthUser } from "@/lib/auth";
+import { requireCampaignDM } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
 
 export default async function DMArtifactSetsPage({
@@ -21,20 +20,7 @@ export default async function DMArtifactSetsPage({
 }) {
   const { id } = await params;
 
-  const user = await getAuthUser();
-
-  const campaign = await prisma.campaign.findUnique({
-    where: { id },
-    include: {
-      members: {
-        where: { userId: user.id },
-      },
-    },
-  });
-
-  if (!campaign || campaign.members[0]?.role !== "dm") {
-    redirect(`/campaigns/${id}`);
-  }
+  await requireCampaignDM(id);
 
   const sets = await prisma.artifactSet.findMany({
     where: { campaignId: id },

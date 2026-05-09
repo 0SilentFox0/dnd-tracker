@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 import { InfoReferenceClient } from "@/components/campaigns/info/InfoReferenceClient";
 import { Button } from "@/components/ui/button";
-import { getAuthUser } from "@/lib/auth";
+import { requireCampaignMember } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
 
 export default async function CampaignInfoPage({
@@ -13,20 +12,7 @@ export default async function CampaignInfoPage({
 }) {
   const { id: campaignId } = await params;
 
-  const user = await getAuthUser();
-
-  const campaign = await prisma.campaign.findUnique({
-    where: { id: campaignId },
-    include: {
-      members: { where: { userId: user.id } },
-    },
-  });
-
-  if (!campaign || campaign.members.length === 0) {
-    redirect("/campaigns");
-  }
-
-  const isDM = campaign.members[0]?.role === "dm";
+  const { isDM } = await requireCampaignMember(campaignId);
 
   const [skills, spells] = await Promise.all([
     prisma.skill.findMany({

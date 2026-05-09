@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { RaceEditForm } from "@/components/races/RaceEditForm";
-import { getAuthUser } from "@/lib/auth";
+import { requireCampaignDM } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
 import type { Race } from "@/types/races";
 
@@ -12,22 +12,7 @@ export default async function EditRacePage({
 }) {
   const { id, raceId } = await params;
 
-  const user = await getAuthUser();
-
-  const userId = user.id;
-
-  const campaign = await prisma.campaign.findUnique({
-    where: { id },
-    include: {
-      members: {
-        where: { userId },
-      },
-    },
-  });
-
-  if (!campaign || campaign.members[0]?.role !== "dm") {
-    redirect(`/campaigns/${id}`);
-  }
+  await requireCampaignDM(id);
 
   const raceData = await prisma.race.findUnique({
     where: {

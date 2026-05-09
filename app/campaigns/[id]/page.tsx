@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 import { JoinBattleButton } from "@/components/campaigns/JoinBattleButton";
 import { CampaignMembersList } from "@/components/campaigns/members/CampaignMembersList";
@@ -14,8 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getAuthUser } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { requireCampaignWithMembers } from "@/lib/campaigns/access";
 
 export default async function CampaignDetailPage({
   params,
@@ -24,33 +22,7 @@ export default async function CampaignDetailPage({
 }) {
   const { id } = await params;
 
-  const user = await getAuthUser();
-
-  const userId = user.id;
-
-  const campaign = await prisma.campaign.findUnique({
-    where: { id },
-    include: {
-      members: {
-        include: {
-          user: true,
-        },
-      },
-      dm: true,
-    },
-  });
-
-  if (!campaign) {
-    redirect("/campaigns");
-  }
-
-  const userMember = campaign.members.find((m) => m.userId === userId);
-
-  if (!userMember) {
-    redirect("/campaigns");
-  }
-
-  const isDM = userMember.role === "dm";
+  const { campaign, isDM, authUser: user } = await requireCampaignWithMembers(id);
 
   return (
     <div className="container mx-auto p-4 space-y-6">

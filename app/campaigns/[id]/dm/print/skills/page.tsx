@@ -1,8 +1,6 @@
-import { redirect } from "next/navigation";
-
 import { PrintSkillsPageClient } from "./page-client";
 
-import { getAuthUser } from "@/lib/auth";
+import { requireCampaignDM } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
 import type { SkillTriggers } from "@/types/skill-triggers";
 
@@ -13,22 +11,7 @@ export default async function PrintSkillsPage({
 }) {
   const { id } = await params;
 
-  const user = await getAuthUser();
-
-  const userId = user.id;
-
-  const campaign = await prisma.campaign.findUnique({
-    where: { id },
-    include: {
-      members: {
-        where: { userId },
-      },
-    },
-  });
-
-  if (!campaign || campaign.members[0]?.role !== "dm") {
-    redirect(`/campaigns/${id}`);
-  }
+  const { campaign } = await requireCampaignDM(id);
 
   const [skills, mainSkillsRaw, skillTrees] = await Promise.all([
     prisma.skill.findMany({

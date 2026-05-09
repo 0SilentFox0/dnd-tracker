@@ -1,8 +1,6 @@
-import { redirect } from "next/navigation";
-
 import { PrintSpellsPageClient } from "./page-client";
 
-import { getAuthUser } from "@/lib/auth";
+import { requireCampaignDM } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
 
 export default async function PrintSpellsPage({
@@ -12,22 +10,7 @@ export default async function PrintSpellsPage({
 }) {
   const { id } = await params;
 
-  const user = await getAuthUser();
-
-  const userId = user.id;
-
-  const campaign = await prisma.campaign.findUnique({
-    where: { id },
-    include: {
-      members: {
-        where: { userId },
-      },
-    },
-  });
-
-  if (!campaign || campaign.members[0]?.role !== "dm") {
-    redirect(`/campaigns/${id}`);
-  }
+  const { campaign } = await requireCampaignDM(id);
 
   const [spells, spellGroups] = await Promise.all([
     prisma.spell.findMany({

@@ -1,7 +1,5 @@
-import { redirect } from "next/navigation";
-
 import { SkillCreateForm } from "@/components/skills/form/SkillCreateForm";
-import { getAuthUser } from "@/lib/auth";
+import { requireCampaignDM } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
 
 export default async function NewSkillPage({
@@ -11,22 +9,7 @@ export default async function NewSkillPage({
 }) {
   const { id } = await params;
 
-  const user = await getAuthUser();
-
-  const userId = user.id;
-
-  const campaign = await prisma.campaign.findUnique({
-    where: { id },
-    include: {
-      members: {
-        where: { userId },
-      },
-    },
-  });
-
-  if (!campaign || campaign.members[0]?.role !== "dm") {
-    redirect(`/campaigns/${id}`);
-  }
+  await requireCampaignDM(id);
 
   const spells = await prisma.spell.findMany({
     where: { campaignId: id },

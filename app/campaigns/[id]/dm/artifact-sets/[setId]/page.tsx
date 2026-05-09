@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 import { ArtifactSetForm } from "@/components/artifact-sets/ArtifactSetForm";
 import { Button } from "@/components/ui/button";
-import { getAuthUser } from "@/lib/auth";
+import { requireCampaignDM } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
 
 export default async function EditArtifactSetPage({
@@ -13,20 +13,7 @@ export default async function EditArtifactSetPage({
 }) {
   const { id, setId } = await params;
 
-  const user = await getAuthUser();
-
-  const campaign = await prisma.campaign.findUnique({
-    where: { id },
-    include: {
-      members: {
-        where: { userId: user.id },
-      },
-    },
-  });
-
-  if (!campaign || campaign.members[0]?.role !== "dm") {
-    redirect(`/campaigns/${id}`);
-  }
+  await requireCampaignDM(id);
 
   const setRow = await prisma.artifactSet.findFirst({
     where: { id: setId, campaignId: id },

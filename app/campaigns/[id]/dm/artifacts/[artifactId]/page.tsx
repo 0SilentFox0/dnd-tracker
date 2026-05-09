@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { ArtifactEditForm } from "@/components/artifacts/ArtifactEditForm";
-import { getAuthUser } from "@/lib/auth";
+import { requireCampaignDM } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
 
 export default async function EditArtifactPage({
@@ -11,22 +11,7 @@ export default async function EditArtifactPage({
 }) {
   const { id, artifactId } = await params;
 
-  const user = await getAuthUser();
-
-  const userId = user.id;
-
-  const campaign = await prisma.campaign.findUnique({
-    where: { id },
-    include: {
-      members: {
-        where: { userId },
-      },
-    },
-  });
-
-  if (!campaign || campaign.members[0]?.role !== "dm") {
-    redirect(`/campaigns/${id}`);
-  }
+  await requireCampaignDM(id);
 
   const artifact = await prisma.artifact.findUnique({
     where: { id: artifactId, campaignId: id },

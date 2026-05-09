@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 
 import { PlayerCharacterEditClient } from "./edit-client";
 
-import { getAuthUser } from "@/lib/auth";
+import { requireCampaignMember } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
 
 export default async function PlayerCharacterEditPage({
@@ -12,20 +12,7 @@ export default async function PlayerCharacterEditPage({
 }) {
   const { id } = await params;
 
-  const user = await getAuthUser();
-
-  const campaign = await prisma.campaign.findUnique({
-    where: { id },
-    include: {
-      members: { where: { userId: user.id } },
-    },
-  });
-
-  if (!campaign || campaign.members.length === 0) {
-    redirect("/campaigns");
-  }
-
-  const isDM = campaign.members[0]?.role === "dm";
+  const { authUser: user, isDM } = await requireCampaignMember(id);
 
   if (!isDM) {
     redirect(`/campaigns/${id}/character`);
