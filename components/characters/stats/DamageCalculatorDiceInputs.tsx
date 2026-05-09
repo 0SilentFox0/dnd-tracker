@@ -9,6 +9,8 @@ interface DamageCalculatorDiceInputsProps {
   diceSides: number[];
   onSubmitRolls: (parsedRolls: number[]) => void;
   readOnly?: boolean;
+  /** Опційно: tag для логу (напр. "melee" / "ranged" / "magic"). */
+  logTag?: string;
 }
 
 /** Для суми: ціле з рядка; нечисловий ввід дає 0. */
@@ -22,6 +24,7 @@ export function DamageCalculatorDiceInputs({
   diceSides,
   onSubmitRolls,
   readOnly = false,
+  logTag,
 }: DamageCalculatorDiceInputsProps) {
   const [texts, setTexts] = useState<string[]>(() => diceSides.map(() => ""));
 
@@ -29,6 +32,15 @@ export function DamageCalculatorDiceInputs({
 
   const handleCalculate = () => {
     const rolls = diceSides.map((_, i) => parseDiceField(texts[i] ?? ""));
+
+    const sum = rolls.reduce((a, b) => a + b, 0);
+
+    console.info(`[damage-calc] Рахувати${logTag ? ` (${logTag})` : ""}`, {
+      diceSides,
+      texts: texts.slice(0, diceSides.length),
+      rolls,
+      sum,
+    });
 
     onSubmitRolls(rolls);
   };

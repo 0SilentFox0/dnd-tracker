@@ -88,6 +88,7 @@ export function CharacterDamageCalculator(
                     diceSides={dice.melee.sides}
                     onSubmitRolls={dice.melee.submitRolls}
                     readOnly={false}
+                    logTag="melee"
                   />
                   <SkillsAffectingDamageList
                     skills={skills.affectingDamage}
@@ -129,6 +130,7 @@ export function CharacterDamageCalculator(
                     diceSides={dice.ranged.sides}
                     onSubmitRolls={dice.ranged.submitRolls}
                     readOnly={false}
+                    logTag="ranged"
                   />
                   <SkillsAffectingDamageList
                     skills={skills.affectingDamage}
@@ -191,6 +193,7 @@ export function CharacterDamageCalculator(
                     diceSides={dice.magic.sides}
                     onSubmitRolls={dice.magic.submitRolls}
                     readOnly={false}
+                    logTag="magic"
                   />
                   {dice.magic.sum !== null && magicPreview && (
                     <DamageCalculatorResult

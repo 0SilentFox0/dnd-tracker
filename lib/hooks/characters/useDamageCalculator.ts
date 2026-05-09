@@ -132,6 +132,21 @@ export function useDamageCalculator({
 
   const magicPreview = magicSpellPayload?.magic ?? null;
 
+  // Клієнтський лог: щоб бачити breakdown у браузерній консолі при кожному
+  // оновленні magic preview (наприклад, після клацання "Рахувати" у magic-табі).
+  // Серверний лог `[magic-damage]` пише деталі activeSkills у Vercel Functions logs.
+  useEffect(() => {
+    if (!magicPreview) return;
+
+    console.info("[damage-calc] magic preview", {
+      total: magicPreview.total,
+      diceFormula: magicPreview.diceFormula,
+      breakdown: magicPreview.breakdown,
+      submittedSum: magicSum,
+      spellId: selectedSpellId,
+    });
+  }, [magicPreview, magicSum, selectedSpellId]);
+
   const { data: skillsList = [] } = useSkills(campaignId);
 
   const { data: spellsList = [] } = useQuery({
