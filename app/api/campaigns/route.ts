@@ -1,18 +1,10 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 
 import { kvDel, kvGet, kvSet } from "@/lib/cache/kv";
 import { prisma } from "@/lib/db";
+import { createCampaignSchema } from "@/lib/schemas";
 import { requireAuth } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
-
-const createCampaignSchema = z.object({
-  name: z.string().min(1).max(100),
-  description: z.string().optional(),
-  maxLevel: z.number().min(1).max(30).default(20),
-  xpMultiplier: z.number().min(1).max(10).default(2.5),
-  allowPlayerEdit: z.boolean().default(true),
-});
 
 // Генерує унікальний код запрошення
 function generateInviteCode(): string {

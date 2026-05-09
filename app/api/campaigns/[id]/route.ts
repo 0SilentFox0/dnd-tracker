@@ -1,19 +1,10 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 
 import { kvDel } from "@/lib/cache/kv";
 import { prisma } from "@/lib/db";
+import { updateCampaignSchema } from "@/lib/schemas";
 import { requireAuth, requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
-
-const updateCampaignSchema = z.object({
-  name: z.string().min(1).max(100).optional(),
-  description: z.string().optional().nullable(),
-  maxLevel: z.number().min(1).max(30).optional(),
-  xpMultiplier: z.number().min(1).max(10).optional(),
-  allowPlayerEdit: z.boolean().optional(),
-  status: z.enum(["active", "archived"]).optional(),
-});
 
 export async function GET(
   request: Request,

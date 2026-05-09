@@ -1,14 +1,10 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 
 import { kvDel } from "@/lib/cache/kv";
 import { prisma } from "@/lib/db";
+import { joinCampaignSchema } from "@/lib/schemas";
 import { requireAuth } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
-
-const joinCampaignSchema = z.object({
-  inviteCode: z.string().min(1),
-});
 
 export async function POST(request: Request) {
   try {

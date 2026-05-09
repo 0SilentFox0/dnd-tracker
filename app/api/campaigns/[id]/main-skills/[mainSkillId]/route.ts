@@ -1,22 +1,10 @@
 import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
-import { z } from "zod";
 
 import { prisma } from "@/lib/db";
+import { updateMainSkillSchema } from "@/lib/schemas";
 import { requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
-
-const updateMainSkillSchema = z.object({
-  name: z.string().min(1).max(100).optional(),
-  color: z.string().min(1).optional(),
-  icon: z
-    .union([z.string().url(), z.literal(""), z.null()])
-    .optional()
-    .nullable()
-    .transform((val) => (val === "" ? null : val)),
-  isEnableInSkillTree: z.boolean().optional(),
-  spellGroupId: z.string().nullable().optional(),
-});
 
 export async function GET(
   request: Request,

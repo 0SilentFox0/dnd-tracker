@@ -1,23 +1,11 @@
 import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
-import { z } from "zod";
 
 import { getCachedMainSkills } from "@/lib/cache/reference-data";
 import { prisma } from "@/lib/db";
+import { createMainSkillSchema } from "@/lib/schemas";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
-
-const createMainSkillSchema = z.object({
-  name: z.string().min(1).max(100),
-  color: z.string().min(1),
-  icon: z
-    .union([z.string().url(), z.literal(""), z.null()])
-    .optional()
-    .nullable()
-    .transform((val) => (val === "" ? null : val)),
-  isEnableInSkillTree: z.boolean().optional(),
-  spellGroupId: z.string().nullable().optional(),
-});
 
 export async function GET(
   request: Request,

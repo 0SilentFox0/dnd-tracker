@@ -1,41 +1,11 @@
 import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
-import { z } from "zod";
 
 import { prisma } from "@/lib/db";
+import { updateRaceSchema } from "@/lib/schemas";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
-
-const updateRaceSchema = z.object({
-  name: z.string().min(1).max(100).optional(),
-  availableSkills: z.array(z.string()).optional(),
-  disabledSkills: z.array(z.string()).optional(),
-  passiveAbility: z
-    .object({
-      description: z.string(),
-      statImprovements: z.string().optional(),
-      statModifiers: z
-        .record(
-          z.string(),
-          z.object({
-            bonus: z.boolean().optional(),
-            nonNegative: z.boolean().optional(),
-            alwaysZero: z.boolean().optional(),
-          })
-        )
-        .optional(),
-    })
-    .optional(),
-  spellSlotProgression: z
-    .array(
-      z.object({
-        level: z.number().min(1).max(5),
-        slots: z.number().min(0),
-      })
-    )
-    .optional(),
-});
 
 export async function GET(
   request: Request,
