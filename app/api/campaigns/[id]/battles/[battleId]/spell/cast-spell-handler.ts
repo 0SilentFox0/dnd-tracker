@@ -289,7 +289,7 @@ function mapDbSpellToBattleSpell(
     duration: spellData.duration,
     castingTime: spellData.castingTime,
     effects: Array.isArray(spellData.effects)
-      ? (spellData.effects as string[])
+      ? spellData.effects.filter((e): e is string => typeof e === "string")
       : undefined,
     effectDetails:
       (spellData.effectDetails as BattleSpell["effectDetails"]) ?? undefined,
