@@ -286,8 +286,9 @@ describe("calculateSpellDamageWithEnhancements (magic pipeline)", () => {
       { groupId: "chaos" },
     );
 
-    // 40 + 8 (рівень) = 48 → +25% (12) → 60
-    expect(result.totalDamage).toBe(60);
+    // 40 (кубики) + 8 (рівень) + 25% від 40 = +10 → 58
+    // %-бонус застосовується ДО суми кубиків, не до (кубики + рівень).
+    expect(result.totalDamage).toBe(58);
   });
 
   it("flat-бонус застосовується до бази перед відсотками", () => {
@@ -314,7 +315,8 @@ describe("calculateSpellDamageWithEnhancements (magic pipeline)", () => {
       { groupId: "chaos" },
     );
 
-    // 40 + 5 (flat) = 45 → +25% (11.25 → floor 11) → 56
-    expect(result.totalDamage).toBe(56);
+    // 40 (кубики) + 5 (flat) + 25% від 40 = +10 → 55
+    // %-бонус прив'язаний до бази кубиків (40), а не до running після flat.
+    expect(result.totalDamage).toBe(55);
   });
 });

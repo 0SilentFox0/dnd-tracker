@@ -266,10 +266,12 @@ export function calculateSpellDamageWithEnhancements(
     breakdown.push(`${e.name}: ${e.flat >= 0 ? "+" : ""}${e.flat}`);
   }
 
-  const baseBeforePercent = running;
-
-  // %-бонуси зі скілів і активних ефектів (shared pipeline) —
-  // тут спрацьовує "Магія хаосу: експерт" → +25%.
+  // %-бонуси зі скілів і активних ефектів застосовуються до СУМИ КУБИКІВ
+  // (baseDamage), а не до running (=кубики + hero level + flat). Тобто
+  // +25% на 40 кубиків = +10 (додатково до 40 + 10 hero level), а не
+  // +25% на (40 + 10) = +12. Це відповідає game-design очікуванню:
+  // спел-бонус масштабує weapon/spell-damage-частину, не статичні
+  // character-надбавки.
   const percentBonus = calculateSkillDamagePercentBonus(participant, "magic", ctx);
 
   const percentEntries = getSkillDamagePercentBreakdownEntries(participant, "magic", ctx);
@@ -282,7 +284,7 @@ export function calculateSpellDamageWithEnhancements(
   });
 
   if (percentBonus > 0 || percentEntries.length > 0) {
-    breakdown.push(`= ${baseBeforePercent} (база перед %)`);
+    breakdown.push(`= ${baseDamage} (база для %: сума кубиків)`);
   }
 
   for (const e of percentEntries) {
@@ -290,7 +292,7 @@ export function calculateSpellDamageWithEnhancements(
   }
 
   if (percentBonus > 0) {
-    const add = calculatePercentBonus(baseBeforePercent, percentBonus);
+    const add = calculatePercentBonus(baseDamage, percentBonus);
 
     running += add;
 
