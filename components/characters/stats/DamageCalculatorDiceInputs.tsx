@@ -23,7 +23,7 @@ export function DamageCalculatorDiceInputs({
   onSubmitRolls,
   readOnly = false,
 }: DamageCalculatorDiceInputsProps) {
-  const [texts, setTexts] = useState<string[]>(() => diceSides.map(() => "1"));
+  const [texts, setTexts] = useState<string[]>(() => diceSides.map(() => ""));
 
   if (diceSides.length === 0) return null;
 
@@ -54,7 +54,7 @@ export function DamageCalculatorDiceInputs({
                   const copy = [...prev];
 
                   while (copy.length < diceSides.length) {
-                    copy.push("1");
+                    copy.push("");
                   }
 
                   copy[i] = next;
