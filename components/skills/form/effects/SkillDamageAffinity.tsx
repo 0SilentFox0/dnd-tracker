@@ -44,10 +44,10 @@ export function SkillDamageAffinity({
           <div className="space-y-2">
             <Label className="text-muted-foreground">Тип шкоди</Label>
             <Select
-              value={damageType ?? ""}
+              value={damageType ?? "__all__"}
               onValueChange={(v) =>
                 onDamageTypeChange(
-                  v === "" ? null : (v as "melee" | "ranged" | "magic")
+                  v === "__all__" ? null : (v as "melee" | "ranged" | "magic")
                 )
               }
             >
@@ -55,11 +55,17 @@ export function SkillDamageAffinity({
                 <SelectValue placeholder="Оберіть тип" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="__all__">Усі види шкоди (універсально)</SelectItem>
                 <SelectItem value="melee">Ближній бій (melee)</SelectItem>
                 <SelectItem value="ranged">Дальній бій (ranged)</SelectItem>
                 <SelectItem value="magic">Магія (magic)</SelectItem>
               </SelectContent>
             </Select>
+            <p className="text-xs text-muted-foreground">
+              «Усі види шкоди» — бонус застосовується і до melee, і до ranged,
+              і до магічних заклинань. Конкретний тип звужує до однієї лінії
+              (наприклад «Магія» — тільки заклинання).
+            </p>
           </div>
         )}
       </CardContent>
