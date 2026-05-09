@@ -1,47 +1,28 @@
 /**
- * Опціональний кеш через Redis (REDIS_URL).
- * Redis Labs / Redis Cloud — redis://...
- * Інакше — no-op, застосунок працює без Redis.
+ * Опціональний кеш через Upstash Redis (REST API).
+ *
+ * Використовує спільний клієнт із `lib/redis.ts` — той самий, що й
+ * rate-limit. Підтримує кілька env-prefix варіантів (UPSTASH_REDIS_REST_*,
+ * KV_REST_API_*, dnd_KV_REST_API_*) — див. `lib/redis.ts`.
+ *
+ * Якщо Redis недоступний — kv* функції стають no-op (повертають null /
+ * нічого не зберігають). Застосунок працює без кешу.
  */
+
+import { getRedisClient } from "@/lib/redis";
 
 const KV_TTL_SECONDS = 60;
 
-let cachedRedisClient: {
-  get: (k: string) => Promise<string | null>;
-  setEx: (k: string, s: number, v: string) => Promise<string>;
-  del: (k: string) => Promise<number>;
-} | null = null;
-
-async function getRedisClient() {
-  if (cachedRedisClient) return cachedRedisClient;
-
-  if (!process.env.REDIS_URL) return null;
-
-  try {
-    const { createClient } = await import("redis");
-
-    const client = createClient({ url: process.env.REDIS_URL });
-
-    await client.connect();
-    cachedRedisClient = client;
-
-    return cachedRedisClient;
-  } catch {
-    return null;
-  }
-}
-
 export async function kvGet<T>(key: string): Promise<T | null> {
-  const redis = await getRedisClient();
+  const redis = getRedisClient();
 
   if (!redis) return null;
 
   try {
-    const data = await redis.get(key);
+    // @upstash/redis автоматично JSON-парсить значення.
+    const data = await redis.get<T>(key);
 
-    if (data == null) return null;
-
-    return JSON.parse(data) as T;
+    return data ?? null;
   } catch {
     return null;
   }
@@ -52,19 +33,20 @@ export async function kvSet(
   value: unknown,
   ttlSeconds = KV_TTL_SECONDS,
 ): Promise<void> {
-  const redis = await getRedisClient();
+  const redis = getRedisClient();
 
   if (!redis) return;
 
   try {
-    await redis.setEx(key, ttlSeconds, JSON.stringify(value));
+    // @upstash/redis автоматично JSON-серіалізує об'єкти.
+    await redis.set(key, value, { ex: ttlSeconds });
   } catch {
     // ignore
   }
 }
 
 export async function kvDel(key: string): Promise<void> {
-  const redis = await getRedisClient();
+  const redis = getRedisClient();
 
   if (!redis) return;
 
