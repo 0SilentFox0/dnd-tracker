@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 import {
   computeDamageBreakdown,
   computeDamageBreakdownMultiTarget,
@@ -138,13 +139,6 @@ export async function POST(
 
     return NextResponse.json(result);
   } catch (error) {
-    const err = error instanceof Error ? error : new Error(String(error));
-
-    console.error("Damage breakdown error:", err.message, err.stack);
-
-    return NextResponse.json(
-      { error: err.message || "Failed to compute damage breakdown" },
-      { status: 500 },
-    );
+    return handleApiError(error, { action: "compute damage breakdown" });
   }
 }

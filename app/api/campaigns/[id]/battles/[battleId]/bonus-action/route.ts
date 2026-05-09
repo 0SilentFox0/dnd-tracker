@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 import {
   preparePusherPayload,
   stripStateBeforeForClient,
@@ -171,15 +172,6 @@ export async function POST(
       battle: stripStateBeforeForClient(updatedBattle),
     });
   } catch (error) {
-    console.error("Error processing bonus action:", error);
-
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.issues }, { status: 400 });
-    }
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return handleApiError(error, { action: "process bonus action" });
   }
 }

@@ -5,6 +5,7 @@ import { z } from "zod";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { requireDM } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 import {
   preparePusherPayload,
   stripStateBeforeForClient,
@@ -185,15 +186,6 @@ export async function POST(
 
     return NextResponse.json(stripStateBeforeForClient(updatedBattle));
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.issues }, { status: 400 });
-    }
-
-    console.error("Add summon error:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return handleApiError(error, { action: "add summon" });
   }
 }

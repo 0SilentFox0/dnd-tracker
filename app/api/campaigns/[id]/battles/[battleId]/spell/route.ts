@@ -5,6 +5,7 @@ import { z } from "zod";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 import { logBattleTiming } from "@/lib/utils/battle/battle-timing";
 import { BattleSpell, processSpell } from "@/lib/utils/battle/spell";
 import { appendSummonedUnitToInitiativeEnd } from "@/lib/utils/battle/spell/append-summoned-unit";
@@ -339,15 +340,6 @@ export async function POST(
 
     return NextResponse.json(stripStateBeforeForClient(updatedBattle));
   } catch (error) {
-    console.error("Error processing spell:", error);
-
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.issues }, { status: 400 });
-    }
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "process spell" });
   }
 }

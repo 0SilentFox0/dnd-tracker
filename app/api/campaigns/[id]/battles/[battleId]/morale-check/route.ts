@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { prisma } from "@/lib/db";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 import type { MoraleCheckResult } from "@/lib/utils/battle/battle-morale";
 import { checkMorale } from "@/lib/utils/battle/battle-morale";
 import { getBattleWithAccess } from "@/lib/utils/battle/get-battle-with-access";
@@ -89,15 +90,6 @@ export async function POST(
       moraleResult,
     });
   } catch (error) {
-    console.error("Error processing morale check:", error);
-
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.issues }, { status: 400 });
-    }
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return handleApiError(error, { action: "process morale check" });
   }
 }

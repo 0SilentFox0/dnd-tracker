@@ -5,6 +5,7 @@ import {
   requireCampaignAccess,
   requireDM,
 } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 import { stripStateBeforeForClient } from "@/lib/utils/battle/strip-battle-payload";
 
 export const dynamic = "force-dynamic";
@@ -51,12 +52,7 @@ export async function GET(
 
     return NextResponse.json(payload);
   } catch (error) {
-    console.error("Error fetching battle:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return handleApiError(error, { action: "fetch battle" });
   }
 }
 
@@ -90,12 +86,7 @@ export async function PATCH(
 
     return NextResponse.json(stripStateBeforeForClient(updatedBattle));
   } catch (error) {
-    console.error("Error updating battle:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return handleApiError(error, { action: "update battle" });
   }
 }
 
@@ -126,11 +117,6 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting battle:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return handleApiError(error, { action: "delete battle" });
   }
 }

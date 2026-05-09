@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
 import { requireDM } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 import {
   preparePusherPayload,
   stripStateBeforeForClient,
@@ -56,11 +57,6 @@ export async function POST(
 
     return NextResponse.json(stripStateBeforeForClient(updatedBattle));
   } catch (error) {
-    console.error("Error resetting battle:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return handleApiError(error, { action: "reset battle" });
   }
 }

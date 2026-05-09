@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 import { distributePendingScopedArtifactBonuses } from "@/lib/utils/battle/artifact-sets";
 import { calculateInitiative } from "@/lib/utils/battle/battle-start";
 import { getBattleWithAccess } from "@/lib/utils/battle/get-battle-with-access";
@@ -177,15 +178,6 @@ export async function POST(
 
     return NextResponse.json(stripStateBeforeForClient(updatedBattle));
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.issues }, { status: 400 });
-    }
-
-    console.error("Add participant error:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return handleApiError(error, { action: "add participant" });
   }
 }

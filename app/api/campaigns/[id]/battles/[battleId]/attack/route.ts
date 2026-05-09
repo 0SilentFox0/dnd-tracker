@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 
 import { executeAttack } from "./attack-handler";
 import { attackSchema } from "./attack-schema";
 
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 import type { BattleParticipant } from "@/types/battle";
 
 export async function POST(
@@ -107,12 +107,6 @@ export async function POST(
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error("Error processing attack:", error);
-
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.issues }, { status: 400 });
-    }
-
     if (error instanceof Error) {
       const msg = error.message;
 
@@ -131,9 +125,6 @@ export async function POST(
       }
     }
 
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return handleApiError(error, { action: "process attack" });
   }
 }

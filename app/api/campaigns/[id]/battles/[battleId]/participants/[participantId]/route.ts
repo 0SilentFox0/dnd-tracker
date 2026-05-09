@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { prisma } from "@/lib/db";
 import { requireDM } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 import {
   preparePusherPayload,
   slimInitiativeOrderForStorage,
@@ -30,9 +31,9 @@ export async function PATCH(
     params,
   }: { params: Promise<{ id: string; battleId: string; participantId: string }> },
 ) {
-  try {
-    const { id: campaignId, battleId, participantId } = await params;
+  const { id: campaignId, battleId, participantId } = await params;
 
+  try {
     const accessResult = await requireDM(campaignId);
 
     if (accessResult instanceof NextResponse) {
@@ -289,15 +290,11 @@ export async function PATCH(
       { status: 400 },
     );
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.issues }, { status: 400 });
-    }
-
-    console.error("Patch participant error:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return handleApiError(error, {
+      action: "patch participant",
+      campaignId,
+      battleId,
+      participantId,
+    });
   }
 }

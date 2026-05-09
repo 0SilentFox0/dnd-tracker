@@ -5,7 +5,6 @@
 
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
-import { z } from "zod";
 
 import { attackAndNextTurnSchema } from "./attack-and-next-turn-schema";
 
@@ -15,6 +14,7 @@ import {
   pusherServer,
   userChannelName,
 } from "@/lib/pusher";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 import {
   advanceTurnPhase,
   AttackPhaseError,
@@ -230,15 +230,6 @@ export async function POST(
       );
     }
 
-    console.error("Error in attack-and-next-turn:", error);
-
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.issues }, { status: 400 });
-    }
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return handleApiError(error, { action: "attack and next turn" });
   }
 }

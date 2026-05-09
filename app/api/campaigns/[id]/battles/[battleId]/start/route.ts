@@ -7,6 +7,7 @@ import { battleStateSnapshot, debugBattleSync } from "./start-helpers";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { requireDM } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 import { distributePendingScopedArtifactBonuses } from "@/lib/utils/battle/artifact-sets";
 import {
   applyStartOfBattleEffects,
@@ -266,11 +267,6 @@ export async function POST(
 
     return NextResponse.json(stripStateBeforeForClient(updatedBattle));
   } catch (error) {
-    console.error("Error starting battle:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "start battle" });
   }
 }
