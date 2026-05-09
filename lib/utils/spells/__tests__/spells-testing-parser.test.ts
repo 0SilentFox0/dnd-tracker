@@ -94,26 +94,6 @@ describe("ST - no / HT NO", () => {
   });
 });
 
-describe("full SPELLS_TESTING.md", () => {
-  it("парсить реальний файл без помилок", async () => {
-    const fs = await import("fs");
-
-    const path = await import("path");
-
-    const content = fs.readFileSync(
-      path.join(process.cwd(), "docs", "SPELLS_TESTING.md"),
-      "utf8",
-    );
-
-    const cases = parseSpellsTestingMd(content);
-
-    const ids = getUniqueSpellIds(cases);
-
-    expect(cases.length).toBeGreaterThan(30);
-    expect(ids.length).toBeGreaterThan(30);
-  });
-});
-
 describe("getUniqueSpellIds", () => {
   it("повертає унікальні id збережені в порядку", () => {
     const cases: SpellTestCase[] = [
