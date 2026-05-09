@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
-import { z } from "zod";
 
 import { buildCharacterUpdateData } from "./build-character-update-data";
 import { updateCharacterSchema } from "./update-character-schema";
 
 import { prisma } from "@/lib/db";
 import { requireAuth, requireCampaignAccess, requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 
 export async function GET(
   request: Request,
@@ -62,12 +62,7 @@ export async function GET(
       knownSpells,
     });
   } catch (error) {
-    console.error("Error fetching character:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "fetch character" });
   }
 }
 
@@ -163,16 +158,7 @@ export async function PATCH(
 
     return NextResponse.json(updatedCharacter);
   } catch (error) {
-    console.error("Error updating character:", error);
-
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.issues }, { status: 400 });
-    }
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "update character" });
   }
 }
 
@@ -206,11 +192,6 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting character:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "delete character" });
   }
 }

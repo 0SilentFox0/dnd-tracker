@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/db";
 import { requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 import {
   calculateHPGain,
   getAbilityModifier,
@@ -215,11 +216,6 @@ export async function POST(
       },
     });
   } catch (error) {
-    console.error("Error leveling up character:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "level up character" });
   }
 }

@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
 import { requireDM } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 
 /**
  * POST /api/campaigns/[id]/skills/[skillId]/duplicate
@@ -113,11 +114,6 @@ export async function POST(
 
     return NextResponse.json(skill);
   } catch (error) {
-    console.error("Error duplicating skill:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return handleApiError(error, { action: "duplicate skill" });
   }
 }

@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { prisma } from "@/lib/db";
 import { requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 
 const updateGroupSchema = z.object({
   name: z.string().min(1).max(100),
@@ -51,15 +52,6 @@ export async function PATCH(
 
     return NextResponse.json(updatedGroup);
   } catch (error) {
-    console.error("Error updating unit group:", error);
-
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.issues }, { status: 400 });
-    }
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "update unit group" });
   }
 }

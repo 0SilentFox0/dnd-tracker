@@ -4,6 +4,7 @@ import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { getHeroDamageComponents } from "@/lib/constants/hero-scaling";
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 import { distributePendingScopedArtifactBonuses } from "@/lib/utils/battle/artifact-sets";
 import { getDiceAverage } from "@/lib/utils/battle/balance";
 import { logBattleTiming } from "@/lib/utils/battle/battle-timing";
@@ -244,11 +245,6 @@ export async function GET(
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error("Error computing damage preview:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "compute damage preview" });
   }
 }
