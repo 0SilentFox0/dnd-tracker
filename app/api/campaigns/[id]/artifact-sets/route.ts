@@ -6,6 +6,7 @@ import { createArtifactSetSchema } from "./schemas";
 
 import { resolveArtifactIconForPersistence } from "@/lib/supabase/artifact-icon-storage";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 import {
   insertArtifactSet,
   listArtifactSets,
@@ -30,12 +31,7 @@ export async function GET(
 
     return NextResponse.json(sets);
   } catch (error) {
-    console.error("Error fetching artifact sets:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return handleApiError(error, { action: "list artifact sets" });
   }
 }
 
@@ -87,15 +83,10 @@ export async function POST(
 
     return NextResponse.json(full);
   } catch (error) {
-    console.error("Error creating artifact set:", error);
-
     const known = toArtifactSetErrorResponse(error);
 
     if (known) return known;
 
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return handleApiError(error, { action: "create artifact set" });
   }
 }

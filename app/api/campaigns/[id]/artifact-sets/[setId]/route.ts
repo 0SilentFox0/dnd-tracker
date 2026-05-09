@@ -6,6 +6,7 @@ import { patchArtifactSetSchema } from "../schemas";
 
 import { resolveArtifactIconForPersistence } from "@/lib/supabase/artifact-icon-storage";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 import {
   buildArtifactSetPatchInput,
   deleteArtifactSetAndClearArtifacts,
@@ -36,12 +37,7 @@ export async function GET(
 
     return NextResponse.json(setRow);
   } catch (error) {
-    console.error("Error fetching artifact set:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return handleApiError(error, { action: "fetch artifact set" });
   }
 }
 
@@ -98,16 +94,11 @@ export async function PATCH(
 
     return NextResponse.json(full);
   } catch (error) {
-    console.error("Error updating artifact set:", error);
-
     const known = toArtifactSetErrorResponse(error);
 
     if (known) return known;
 
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return handleApiError(error, { action: "update artifact set" });
   }
 }
 
@@ -134,11 +125,6 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting artifact set:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return handleApiError(error, { action: "delete artifact set" });
   }
 }

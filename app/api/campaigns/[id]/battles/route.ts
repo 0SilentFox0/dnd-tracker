@@ -6,6 +6,7 @@ import {
   requireCampaignAccess,
   requireDM,
 } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 import { battleSceneListSelect } from "@/lib/utils/battle/battle-scene-list-select";
 
 const createBattleSchema = z.object({
@@ -53,16 +54,7 @@ export async function POST(
 
     return NextResponse.json(battle);
   } catch (error) {
-    console.error("Error creating battle:", error);
-
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.issues }, { status: 400 });
-    }
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "create battle" });
   }
 }
 
@@ -96,12 +88,7 @@ export async function GET(
       })),
     );
   } catch (error) {
-    console.error("Error fetching battles:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "list battles" });
   }
 }
 
@@ -125,16 +112,11 @@ export async function DELETE(
       },
     });
 
-    return NextResponse.json({ 
-      success: true, 
-      deletedCount: result.count 
+    return NextResponse.json({
+      success: true,
+      deletedCount: result.count
     });
   } catch (error) {
-    console.error("Error deleting all battles:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, { action: "delete all battles" });
   }
 }

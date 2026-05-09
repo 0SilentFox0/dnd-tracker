@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 
 import { getBalancePayload } from "./balance-get";
 import { postBalanceResponse } from "./balance-post";
 import { balanceSchema } from "./balance-schema";
 
 import { requireDM } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 
 /** GET: DPR, HP, KPI для кожного персонажа та юніта кампанії. */
 export async function GET(
@@ -23,12 +23,7 @@ export async function GET(
 
     return NextResponse.json(payload);
   } catch (e) {
-    console.error("Balance entity-stats GET error:", e);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return handleApiError(e, { action: "balance: GET entity stats" });
   }
 }
 
@@ -52,15 +47,6 @@ export async function POST(
 
     return NextResponse.json(response);
   } catch (e) {
-    if (e instanceof z.ZodError) {
-      return NextResponse.json({ error: e.issues }, { status: 400 });
-    }
-
-    console.error("Balance API error:", e);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return handleApiError(e, { action: "balance: POST recommendations" });
   }
 }
