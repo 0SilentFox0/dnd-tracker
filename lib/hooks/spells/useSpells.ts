@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import {
   createSpell,
@@ -14,6 +14,7 @@ import {
   renameSpellGroup,
   updateSpell,
 } from "@/lib/api/spells";
+import { useCrudMutation } from "@/lib/hooks/common";
 import { REFERENCE_STALE_MS } from "@/lib/providers/query-provider";
 import type { Spell, SpellGroup } from "@/types/spells";
 
@@ -38,66 +39,46 @@ export function useSpellGroups(campaignId: string) {
 }
 
 export function useRenameSpellGroup(campaignId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useCrudMutation({
     mutationFn: (data: { groupId: string; name: string }) =>
       renameSpellGroup(campaignId, data.groupId, data.name),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["spells", campaignId] });
-      queryClient.invalidateQueries({
-        queryKey: ["spellGroups", campaignId],
-      });
-    },
+    invalidateKeys: [
+      ["spells", campaignId],
+      ["spellGroups", campaignId],
+    ],
   });
 }
 
 export function useRemoveAllSpellsFromGroup(campaignId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useCrudMutation({
     mutationFn: (groupId: string) =>
       removeAllSpellsFromGroup(campaignId, groupId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["spells", campaignId] });
-    },
+    invalidateKeys: [["spells", campaignId]],
   });
 }
 
 export function useRemoveSpellFromGroup(campaignId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useCrudMutation({
     mutationFn: (spellId: string) => removeSpellFromGroup(campaignId, spellId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["spells", campaignId] });
-    },
+    invalidateKeys: [["spells", campaignId]],
   });
 }
 
 export function useMoveSpellToGroup(campaignId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useCrudMutation({
     mutationFn: (data: { spellId: string; groupId: string | null }) =>
       moveSpellToGroup(campaignId, data.spellId, data.groupId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["spells", campaignId] });
-    },
+    invalidateKeys: [["spells", campaignId]],
   });
 }
 
 export function useDeleteAllSpells(campaignId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useCrudMutation({
     mutationFn: () => deleteAllSpells(campaignId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["spells", campaignId] });
-      queryClient.invalidateQueries({
-        queryKey: ["spellGroups", campaignId],
-      });
-    },
+    invalidateKeys: [
+      ["spells", campaignId],
+      ["spellGroups", campaignId],
+    ],
   });
 }
 
@@ -109,50 +90,39 @@ export function useSpell(campaignId: string, spellId: string) {
 }
 
 export function useCreateSpell(campaignId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data: Partial<Spell> & { name: string; description: string; type: string; damageType: string }) =>
-      createSpell(campaignId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["spells", campaignId] });
-    },
+  return useCrudMutation({
+    mutationFn: (
+      data: Partial<Spell> & {
+        name: string;
+        description: string;
+        type: string;
+        damageType: string;
+      },
+    ) => createSpell(campaignId, data),
+    invalidateKeys: [["spells", campaignId]],
   });
 }
 
 export function useUpdateSpell(campaignId: string, spellId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data: Partial<Spell>) =>
-      updateSpell(campaignId, spellId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["spell", campaignId, spellId],
-      });
-      queryClient.invalidateQueries({ queryKey: ["spells", campaignId] });
-    },
+  return useCrudMutation({
+    mutationFn: (data: Partial<Spell>) => updateSpell(campaignId, spellId, data),
+    invalidateKeys: [
+      ["spell", campaignId, spellId],
+      ["spells", campaignId],
+    ],
   });
 }
 
 export function useDeleteSpell(campaignId: string, spellId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useCrudMutation({
     mutationFn: () => deleteSpell(campaignId, spellId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["spells", campaignId] });
-    },
+    invalidateKeys: [["spells", campaignId]],
   });
 }
 
 export function useDeleteSpellsByLevel(campaignId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useCrudMutation({
     mutationFn: (level: number) => deleteSpellsByLevel(campaignId, level),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["spells", campaignId] });
-    },
+    invalidateKeys: [["spells", campaignId]],
   });
 }

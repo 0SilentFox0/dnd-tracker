@@ -2,7 +2,7 @@
  * React Query hooks для роботи з основними навиками
  */
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import {
   createMainSkill,
@@ -10,6 +10,7 @@ import {
   getMainSkills,
   updateMainSkill,
 } from "@/lib/api/main-skills";
+import { useCrudMutation } from "@/lib/hooks/common";
 import { REFERENCE_STALE_MS } from "@/lib/providers/query-provider";
 import type { MainSkillFormData } from "@/types/main-skills";
 
@@ -19,7 +20,7 @@ import type { MainSkillFormData } from "@/types/main-skills";
  */
 export function useMainSkills(
   campaignId: string,
-  options?: { enabled?: boolean }
+  options?: { enabled?: boolean },
 ) {
   return useQuery({
     queryKey: ["main-skills", campaignId],
@@ -29,30 +30,17 @@ export function useMainSkills(
   });
 }
 
-/**
- * Створює новий основний навик
- */
+/** Створює новий основний навик */
 export function useCreateMainSkill(campaignId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data: MainSkillFormData) =>
-      createMainSkill(campaignId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["main-skills", campaignId],
-      });
-    },
+  return useCrudMutation({
+    mutationFn: (data: MainSkillFormData) => createMainSkill(campaignId, data),
+    invalidateKeys: [["main-skills", campaignId]],
   });
 }
 
-/**
- * Оновлює основний навик
- */
+/** Оновлює основний навик */
 export function useUpdateMainSkill(campaignId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useCrudMutation({
     mutationFn: ({
       mainSkillId,
       data,
@@ -60,31 +48,19 @@ export function useUpdateMainSkill(campaignId: string) {
       mainSkillId: string;
       data: Partial<MainSkillFormData>;
     }) => updateMainSkill(campaignId, mainSkillId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["main-skills", campaignId],
-      });
-    },
+    invalidateKeys: [["main-skills", campaignId]],
   });
 }
 
-/**
- * Видаляє основний навик
- */
+/** Видаляє основний навик */
 export function useDeleteMainSkill(campaignId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useCrudMutation({
     mutationFn: (mainSkillId: string) =>
       deleteMainSkill(campaignId, mainSkillId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["main-skills", campaignId],
-      });
-      // Також оновлюємо скіли, оскільки вони можуть посилатися на видалений mainSkill
-      queryClient.invalidateQueries({
-        queryKey: ["skills", campaignId],
-      });
-    },
+    // Також оновлюємо скіли, оскільки вони можуть посилатися на видалений mainSkill.
+    invalidateKeys: [
+      ["main-skills", campaignId],
+      ["skills", campaignId],
+    ],
   });
 }

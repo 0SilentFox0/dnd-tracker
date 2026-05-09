@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import {
   deleteAllCharacters,
@@ -6,6 +6,7 @@ import {
   getCharacters,
   levelUpCharacter,
 } from "@/lib/api/characters";
+import { useCrudMutation } from "@/lib/hooks/common";
 import { ENTITY_STALE_MS } from "@/lib/providers/query-provider";
 import type { Character } from "@/types/characters";
 
@@ -30,36 +31,24 @@ export function useCharacters(
 }
 
 export function useLevelUpCharacter(campaignId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useCrudMutation({
     mutationFn: (characterId: string) =>
       levelUpCharacter(campaignId, characterId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["characters", campaignId] });
-    },
+    invalidateKeys: [["characters", campaignId]],
   });
 }
 
 export function useDeleteCharacter(campaignId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useCrudMutation({
     mutationFn: (characterId: string) =>
       deleteCharacter(campaignId, characterId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["characters", campaignId] });
-    },
+    invalidateKeys: [["characters", campaignId]],
   });
 }
 
 export function useDeleteAllCharacters(campaignId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useCrudMutation({
     mutationFn: () => deleteAllCharacters(campaignId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["characters", campaignId] });
-    },
+    invalidateKeys: [["characters", campaignId]],
   });
 }

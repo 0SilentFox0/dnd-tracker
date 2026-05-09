@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import {
   deleteAllSkills,
@@ -7,6 +7,7 @@ import {
   getSkills,
   updateSkill,
 } from "@/lib/api/skills";
+import { useCrudMutation } from "@/lib/hooks/common";
 import type { SkillUpdatePayload } from "@/types/api";
 import type { Skill } from "@/types/skills";
 
@@ -36,45 +37,25 @@ export function useSkills(campaignId: string, initialData?: Skill[]) {
   });
 }
 
-/**
- * Видаляє окремий скіл
- */
+/** Видаляє окремий скіл */
 export function useDeleteSkill(campaignId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useCrudMutation({
     mutationFn: (skillId: string) => deleteSkill(campaignId, skillId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["skills", campaignId],
-      });
-    },
+    invalidateKeys: [["skills", campaignId]],
   });
 }
 
-/**
- * Дублює скіл (створює копію з новим id, назва + " (копія)")
- */
+/** Дублює скіл (створює копію з новим id, назва + " (копія)") */
 export function useDuplicateSkill(campaignId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useCrudMutation({
     mutationFn: (skillId: string) => duplicateSkill(campaignId, skillId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["skills", campaignId],
-      });
-    },
+    invalidateKeys: [["skills", campaignId]],
   });
 }
 
-/**
- * Оновлює скіл (частковий PATCH)
- */
+/** Оновлює скіл (частковий PATCH) */
 export function useUpdateSkill(campaignId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useCrudMutation({
     mutationFn: ({
       skillId,
       data,
@@ -82,26 +63,14 @@ export function useUpdateSkill(campaignId: string) {
       skillId: string;
       data: SkillUpdatePayload;
     }) => updateSkill(campaignId, skillId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["skills", campaignId],
-      });
-    },
+    invalidateKeys: [["skills", campaignId]],
   });
 }
 
-/**
- * Видаляє всі скіли кампанії
- */
+/** Видаляє всі скіли кампанії */
 export function useDeleteAllSkills(campaignId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useCrudMutation({
     mutationFn: () => deleteAllSkills(campaignId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["skills", campaignId],
-      });
-    },
+    invalidateKeys: [["skills", campaignId]],
   });
 }
