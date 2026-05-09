@@ -6,6 +6,11 @@ import { prisma } from "@/lib/db";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import {
+  BATTLE_RATE_LIMITS,
+  checkRateLimit,
+  rateLimitResponse,
+} from "@/lib/utils/api/rate-limit";
+import {
   preparePusherPayload,
   stripStateBeforeForClient,
 } from "@/lib/utils/battle/strip-battle-payload";
@@ -30,6 +35,15 @@ export async function POST(
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
+
+    const rl = await checkRateLimit({
+      userId: accessResult.userId,
+      scope: "bonus-action",
+      battleId,
+      ...BATTLE_RATE_LIMITS.bonusAction,
+    });
+
+    if (!rl.allowed) return rateLimitResponse(rl);
 
     const battle = await prisma.battleScene.findUnique({
       where: { id: battleId },

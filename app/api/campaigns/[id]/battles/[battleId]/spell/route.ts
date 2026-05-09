@@ -6,6 +6,11 @@ import { spellSchema } from "./cast-spell-schema";
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import {
+  BATTLE_RATE_LIMITS,
+  checkRateLimit,
+  rateLimitResponse,
+} from "@/lib/utils/api/rate-limit";
 import { logBattleTiming } from "@/lib/utils/battle/battle-timing";
 
 export async function POST(
@@ -24,6 +29,15 @@ export async function POST(
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
+
+    const rl = await checkRateLimit({
+      userId: accessResult.userId,
+      scope: "spell",
+      battleId,
+      ...BATTLE_RATE_LIMITS.spell,
+    });
+
+    if (!rl.allowed) return rateLimitResponse(rl);
 
     const battle = await prisma.battleScene.findUnique({
       where: { id: battleId },

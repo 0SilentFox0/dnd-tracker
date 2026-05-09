@@ -16,6 +16,11 @@ import {
 } from "@/lib/pusher";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import {
+  BATTLE_RATE_LIMITS,
+  checkRateLimit,
+  rateLimitResponse,
+} from "@/lib/utils/api/rate-limit";
+import {
   advanceTurnPhase,
   AttackPhaseError,
   runAttackPhase,
@@ -49,6 +54,15 @@ export async function POST(
     const { userId } = accessResult;
 
     const isDM = accessResult.campaign.members[0]?.role === "dm";
+
+    const rl = await checkRateLimit({
+      userId,
+      scope: "attack",
+      battleId,
+      ...BATTLE_RATE_LIMITS.attack,
+    });
+
+    if (!rl.allowed) return rateLimitResponse(rl);
 
     if (battle.status !== "active") {
       return NextResponse.json(

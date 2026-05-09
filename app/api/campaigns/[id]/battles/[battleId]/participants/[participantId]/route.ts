@@ -6,6 +6,11 @@ import { patchParticipantSchema } from "./patch-participant-schema";
 import { prisma } from "@/lib/db";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import {
+  BATTLE_RATE_LIMITS,
+  checkRateLimit,
+  rateLimitResponse,
+} from "@/lib/utils/api/rate-limit";
 
 /**
  * DM: змінити HP учасника або видалити його з бою.
@@ -24,6 +29,15 @@ export async function PATCH(
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
+
+    const rl = await checkRateLimit({
+      userId: accessResult.userId,
+      scope: "participant-patch",
+      battleId,
+      ...BATTLE_RATE_LIMITS.participantPatch,
+    });
+
+    if (!rl.allowed) return rateLimitResponse(rl);
 
     const battle = await prisma.battleScene.findUnique({
       where: { id: battleId },

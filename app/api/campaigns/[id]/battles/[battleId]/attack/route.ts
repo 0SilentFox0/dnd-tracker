@@ -6,6 +6,11 @@ import { attackSchema } from "./attack-schema";
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import {
+  BATTLE_RATE_LIMITS,
+  checkRateLimit,
+  rateLimitResponse,
+} from "@/lib/utils/api/rate-limit";
 import type { BattleParticipant } from "@/types/battle";
 
 export async function POST(
@@ -27,6 +32,15 @@ export async function POST(
     const { userId } = accessResult;
 
     const isDM = accessResult.campaign.members[0]?.role === "dm";
+
+    const rl = await checkRateLimit({
+      userId,
+      scope: "attack",
+      battleId,
+      ...BATTLE_RATE_LIMITS.attack,
+    });
+
+    if (!rl.allowed) return rateLimitResponse(rl);
 
     const battle = await prisma.battleScene.findUnique({
       where: { id: battleId },
