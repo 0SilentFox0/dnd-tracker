@@ -253,6 +253,21 @@ export function advanceTurnPhase(
     if (victoryCheck.result && battleStatus === "active") break;
   }
 
+  if (!activeParticipantFound && attempts >= maxAttempts) {
+    // Захист: жодного активного учасника не знайдено за `maxAttempts` ітерацій.
+    // Це ознака пошкодженого стану (всі впали / нескінченний skip-loop).
+    // Лог це детально, щоб дослідити, але не throw — нехай advance-turn
+    // повернеться з поточним станом, а UI покаже "battle ended".
+    console.warn("[advance-turn-phase] no active participant after maxAttempts", {
+      battleId,
+      attempts,
+      maxAttempts,
+      initiativeOrderLength: initiativeOrder.length,
+      currentTurnIndex,
+      currentRound,
+    });
+  }
+
   const victoryCheck = checkVictoryConditions(updatedInitiativeOrder);
 
   let finalStatus = battleStatus;
