@@ -11,4 +11,5 @@
 
 export * from "./campaigns";
 export * from "./main-skills";
+export * from "./prisma-json";
 export * from "./races";
