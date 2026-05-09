@@ -1,44 +1,12 @@
 import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
-import { z } from "zod";
 
 import { getCachedSpells } from "@/lib/cache/reference-data";
 import { prisma } from "@/lib/db";
+import { createSpellSchema } from "@/lib/schemas";
 import { requireCampaignAccess,requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
-
-const createSpellSchema = z.object({
-  name: z.string().min(1).max(100),
-  level: z.number().min(0).max(9).default(0),
-  type: z.enum(["target", "aoe"]),
-  target: z.enum(["enemies", "allies", "all"]).optional(),
-  damageType: z.enum(["damage", "heal", "all", "buff", "debuff"]),
-  damageElement: z.preprocess(
-    (val) => (val === "" ? null : val),
-    z.string().nullable().optional()
-  ),
-  damageModifier: z.enum(["control", "charm", "sleep", "state", "burning", "poison", "freezing"]).optional().nullable(),
-  healModifier: z.enum(["heal", "regeneration", "dispel", "shield", "vampirism"]).optional().nullable(),
-  castingTime: z.string().optional().nullable(),
-  range: z.string().optional().nullable(),
-  duration: z.string().optional().nullable(),
-  diceCount: z.number().min(0).max(10).optional().nullable(),
-  diceType: z.enum(["d4", "d6", "d8", "d10", "d12", "d20", "d100"]).optional().nullable(),
-  savingThrow: z.object({
-    ability: z.enum(["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"]),
-    onSuccess: z.enum(["half", "none"]),
-    dc: z.number().min(1).max(30).optional().nullable(),
-  }).optional().nullable(),
-  description: z.string().optional().nullable(),
-  effects: z.array(z.string()).optional().nullable(),
-  groupId: z.string().optional().nullable(),
-  icon: z.preprocess(
-    (val) => (val === "" ? null : val),
-    z.string().nullable().optional()
-  ),
-  summonUnitId: z.string().optional().nullable(),
-});
 
 export async function POST(
   request: Request,

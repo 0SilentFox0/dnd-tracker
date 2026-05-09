@@ -1,6 +1,9 @@
 "use client";
 
-import type { DamagePreviewItem, DamagePreviewResponse } from "./damage-calculator-utils";
+import type {
+  DamagePreviewItem,
+  DamagePreviewResponse,
+} from "./damage-calculator-utils";
 import { DamageCalculatorDiceInputs } from "./DamageCalculatorDiceInputs";
 import { DamageCalculatorResult } from "./DamageCalculatorResult";
 import { DamageCalculatorSkillsLog } from "./DamageCalculatorSkillsLog";
@@ -33,7 +36,9 @@ export interface CharacterDamageCalculatorProps {
   knownSpellIds: string[];
 }
 
-export function CharacterDamageCalculator(props: CharacterDamageCalculatorProps) {
+export function CharacterDamageCalculator(
+  props: CharacterDamageCalculatorProps
+) {
   const {
     damagePreview,
     magicPreview,
@@ -66,7 +71,10 @@ export function CharacterDamageCalculator(props: CharacterDamageCalculatorProps)
                   <p className="text-sm text-muted-foreground">
                     Кидки:{" "}
                     <span className="font-mono">
-                      {[damagePreview.melee.diceFormula, hero.heroMelee.diceNotation]
+                      {[
+                        damagePreview.melee.diceFormula,
+                        hero.heroMelee.diceNotation,
+                      ]
                         .filter(Boolean)
                         .join(" + ") || "—"}
                     </span>
@@ -153,9 +161,7 @@ export function CharacterDamageCalculator(props: CharacterDamageCalculatorProps)
                   </SelectTrigger>
                   <SelectContent>
                     {spell.knownSpells
-                      .sort(
-                        (a, b) => (a.level ?? 0) - (b.level ?? 0),
-                      )
+                      .sort((a, b) => (a.level ?? 0) - (b.level ?? 0))
                       .map((s) => (
                         <SelectItem key={s.id} value={s.id}>
                           {s.name ?? "—"} (рів. {s.level ?? "?"})
@@ -172,7 +178,7 @@ export function CharacterDamageCalculator(props: CharacterDamageCalculatorProps)
                     <span className="font-mono">
                       {formatSpellDamageDiceRoll(
                         spell.selectedSpell.diceCount,
-                        spell.selectedSpell.diceType,
+                        spell.selectedSpell.diceType
                       ) ?? "—"}
                     </span>
                   </p>
@@ -197,10 +203,10 @@ export function CharacterDamageCalculator(props: CharacterDamageCalculatorProps)
                   {dice.magic.sum !== null &&
                     magicPreviewFetching &&
                     !magicPreview && (
-                    <p className="text-sm text-muted-foreground">
-                      Розрахунок заклинання…
-                    </p>
-                  )}
+                      <p className="text-sm text-muted-foreground">
+                        Розрахунок заклинання…
+                      </p>
+                    )}
                   {dice.magic.sum !== null &&
                     !magicPreviewFetching &&
                     !magicPreview &&
@@ -208,11 +214,11 @@ export function CharacterDamageCalculator(props: CharacterDamageCalculatorProps)
                     (spell.selectedSpell.damageType === "damage" ||
                       spell.selectedSpell.damageType === "heal" ||
                       spell.selectedSpell.damageType === "all") && (
-                    <p className="text-sm text-muted-foreground">
-                      Не вдалося отримати розрахунок заклинання. Спробуйте ще
-                      раз.
-                    </p>
-                  )}
+                      <p className="text-sm text-muted-foreground">
+                        Не вдалося отримати розрахунок заклинання. Спробуйте ще
+                        раз.
+                      </p>
+                    )}
                   {dice.magic.sum !== null &&
                     !magicPreviewFetching &&
                     !magicPreview &&
@@ -222,11 +228,11 @@ export function CharacterDamageCalculator(props: CharacterDamageCalculatorProps)
                       spell.selectedSpell.damageType === "heal" ||
                       spell.selectedSpell.damageType === "all"
                     ) && (
-                    <p className="text-sm text-muted-foreground">
-                      Сума кидків: {dice.magic.sum} (для цього типу ефекту
-                      повний розрахунок не застосовується)
-                    </p>
-                  )}
+                      <p className="text-sm text-muted-foreground">
+                        Сума кидків: {dice.magic.sum} (для цього типу ефекту
+                        повний розрахунок не застосовується)
+                      </p>
+                    )}
                   <SkillsAffectingDamageList
                     skills={skills.affectingDamage}
                     mode="magic"
@@ -242,7 +248,7 @@ export function CharacterDamageCalculator(props: CharacterDamageCalculatorProps)
                             <li key={x.name}>
                               {x.name}: +{x.bonus}%
                             </li>
-                          ),
+                          )
                         )}
                       </ul>
                     </div>

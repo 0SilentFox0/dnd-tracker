@@ -1,24 +1,13 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 
 import { prisma } from "@/lib/db";
+import { createBattleSchema } from "@/lib/schemas";
 import {
   requireCampaignAccess,
   requireDM,
 } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { battleSceneListSelect } from "@/lib/utils/battle/battle-scene-list-select";
-
-const createBattleSchema = z.object({
-  name: z.string().min(1).max(100),
-  description: z.string().optional(),
-  participants: z.array(z.object({
-    id: z.string(),
-    type: z.enum(["character", "unit"]),
-    side: z.enum(["ally", "enemy"]),
-    quantity: z.number().min(1).optional(),
-  })),
-});
 
 export async function POST(
   request: Request,

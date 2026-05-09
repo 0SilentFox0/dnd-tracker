@@ -1,13 +1,9 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 
 import { prisma } from "@/lib/db";
+import { createSpellGroupSchema } from "@/lib/schemas";
 import { requireCampaignAccess,requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
-
-const createSpellGroupSchema = z.object({
-  name: z.string().min(1).max(100),
-});
 
 export async function POST(
   request: Request,

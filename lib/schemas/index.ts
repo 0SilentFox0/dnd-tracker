@@ -4,12 +4,11 @@
 //  - один контракт між сервером і клієнтськими формами,
 //  - легко знайти/перевикористати схему,
 //  - зменшити шум у route.ts.
-//
-// Старт: campaigns/main-skills/races. Решта (units/spells/skills/тощо)
-// залишаються inline — мігруються поступово, коли торкаємось відповідних
-// route handlers (in-place refactor).
 
+export * from "./battles";
 export * from "./campaigns";
 export * from "./main-skills";
 export * from "./prisma-json";
 export * from "./races";
+export * from "./spells";
+export * from "./units";

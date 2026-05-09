@@ -1,17 +1,9 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 
 import { prisma } from "@/lib/db";
+import { createUnitGroupSchema } from "@/lib/schemas";
 import { requireCampaignAccess,requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
-
-const createGroupSchema = z.object({
-  name: z.string().min(1).max(100),
-  damageModifier: z.preprocess(
-    (val) => (val === "" ? null : val),
-    z.string().nullable().optional()
-  ),
-});
 
 export async function GET(
   request: Request,
@@ -58,7 +50,7 @@ export async function POST(
 
     const body = await request.json();
 
-    const data = createGroupSchema.parse(body);
+    const data = createUnitGroupSchema.parse(body);
 
     const existing = await prisma.unitGroup.findFirst({
       where: { campaignId: id, name: data.name.trim() },

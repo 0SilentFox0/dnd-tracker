@@ -83,11 +83,19 @@ export function SkillCard({
   };
 
   return (
-    <div className="border rounded-lg p-4 bg-card hover:shadow-lg transition-shadow flex flex-col justify-between h-full">
+    <div
+      className={`border rounded-lg bg-card hover:shadow-lg transition-shadow flex flex-col justify-between h-full ${
+        printMode ? "p-2" : "p-4"
+      }`}
+    >
       <div>
-        <div className="flex items-start gap-3 mb-3">
+        <div className={`flex items-start gap-2 ${printMode ? "mb-1.5" : "mb-3"}`}>
           {skillIcon && (
-            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden bg-muted flex items-center justify-center shrink-0">
+            <div
+              className={`rounded-lg overflow-hidden bg-muted flex items-center justify-center shrink-0 ${
+                printMode ? "w-9 h-9" : "w-12 h-12 sm:w-16 sm:h-16"
+              }`}
+            >
               <OptimizedImage
                 src={skillIcon}
                 alt={skillName}
@@ -106,7 +114,11 @@ export function SkillCard({
           )}
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
-              <h3 className="font-semibold text-sm sm:text-base flex-1 min-w-0 truncate">
+              <h3
+                className={`font-semibold flex-1 min-w-0 truncate ${
+                  printMode ? "text-xs leading-tight" : "text-sm sm:text-base"
+                }`}
+              >
                 {skillName}
               </h3>
             </div>
@@ -131,15 +143,17 @@ export function SkillCard({
 
         {skillDescription && (
           <p
-            className={`text-xs sm:text-sm text-muted-foreground mb-3 ${
-              printMode ? "" : "line-clamp-2"
+            className={`text-muted-foreground ${
+              printMode
+                ? "text-[11px] leading-snug mb-1.5"
+                : "text-xs sm:text-sm mb-3 line-clamp-2"
             }`}
           >
             {skillDescription}
           </p>
         )}
 
-        <div className="space-y-2 mb-3">
+        <div className={printMode ? "space-y-1 mb-1.5" : "space-y-2 mb-3"}>
           {Object.keys(skillBonuses || {}).length > 0 && (
             <div className="flex flex-col gap-1">
               <span className="text-xs font-semibold text-muted-foreground">

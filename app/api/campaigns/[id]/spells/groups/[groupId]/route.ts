@@ -1,13 +1,9 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 
 import { prisma } from "@/lib/db";
+import { updateSpellGroupSchema } from "@/lib/schemas";
 import { requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
-
-const updateSpellGroupSchema = z.object({
-  name: z.string().min(1).max(100).optional(),
-});
 
 export async function PATCH(
   request: Request,

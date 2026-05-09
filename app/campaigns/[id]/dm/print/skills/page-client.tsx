@@ -3,13 +3,11 @@
 import { useMemo } from "react";
 import { Printer } from "lucide-react";
 
-import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { SkillCard } from "@/components/skills/list/SkillCard";
 import { Button } from "@/components/ui/button";
 import {
   buildSkillPositionMap,
   groupSkillsByLevel,
-  SKILL_LEVEL_LABEL,
   type SkillLevelKey,
 } from "@/lib/utils/skills/skill-tree-positions";
 import {
@@ -47,7 +45,7 @@ export function PrintSkillsPageClient({
 }: PrintSkillsPageClientProps) {
   const positions = useMemo(
     () => buildSkillPositionMap(skillTrees),
-    [skillTrees],
+    [skillTrees]
   );
 
   const groupedByMainSkill = useMemo(() => {
@@ -96,29 +94,18 @@ export function PrintSkillsPageClient({
           return (
             <section
               key={groupName}
-              className="print-section mb-8"
+              className="print-section mb-4"
               style={
                 mainSkill?.color
                   ? { borderTop: `4px solid ${mainSkill.color}` }
                   : undefined
               }
             >
-              <div className="flex items-center gap-3 py-3">
-                {mainSkill?.icon && (
-                  <div className="w-10 h-10 rounded overflow-hidden bg-muted shrink-0">
-                    <OptimizedImage
-                      src={mainSkill.icon}
-                      alt={mainSkill.name}
-                      width={40}
-                      height={40}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
-                <div>
-                  <h2 className="text-xl font-semibold">{groupName}</h2>
+              <div className="flex items-center gap-2 py-1.5">
+                <div className="leading-tight">
+                  <h2 className="text-base font-semibold">{groupName}</h2>
                   {mainSkill?.spellGroupName && (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-xs text-muted-foreground">
                       Школа магії: {mainSkill.spellGroupName}
                     </p>
                   )}
@@ -131,14 +118,8 @@ export function PrintSkillsPageClient({
                 if (!levelSkills.length) return null;
 
                 return (
-                  <div key={levelKey} className="mb-6">
-                    <h3 className="text-base font-semibold mb-2 uppercase tracking-wide text-muted-foreground">
-                      {SKILL_LEVEL_LABEL[levelKey]}
-                      <span className="ml-2 text-xs font-normal">
-                        ({levelSkills.length})
-                      </span>
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  <div key={levelKey} className="mb-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                       {levelSkills.map((skill) => (
                         <div key={skill.id} className="print-card">
                           <SkillCard

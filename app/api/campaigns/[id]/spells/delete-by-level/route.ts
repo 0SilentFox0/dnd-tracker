@@ -1,13 +1,9 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 
 import { prisma } from "@/lib/db";
+import { deleteSpellsByLevelSchema } from "@/lib/schemas";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
-
-const deleteByLevelSchema = z.object({
-  level: z.number().int().min(0).max(9),
-});
 
 export async function DELETE(
   request: Request,
@@ -25,7 +21,7 @@ export async function DELETE(
 
     const body = await request.json();
 
-    const { level } = deleteByLevelSchema.parse(body);
+    const { level } = deleteSpellsByLevelSchema.parse(body);
 
     // Видаляємо всі заклинання рівня в кампанії
     const result = await prisma.spell.deleteMany({

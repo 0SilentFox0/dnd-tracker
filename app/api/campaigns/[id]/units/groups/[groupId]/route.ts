@@ -1,17 +1,9 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 
 import { prisma } from "@/lib/db";
+import { updateUnitGroupSchema } from "@/lib/schemas";
 import { requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
-
-const updateGroupSchema = z.object({
-  name: z.string().min(1).max(100),
-  damageModifier: z.preprocess(
-    (val) => (val === "" ? null : val),
-    z.string().nullable().optional()
-  ),
-});
 
 export async function PATCH(
   request: Request,
@@ -39,7 +31,7 @@ export async function PATCH(
 
     const body = await request.json();
 
-    const { name, damageModifier } = updateGroupSchema.parse(body);
+    const { name, damageModifier } = updateUnitGroupSchema.parse(body);
 
     const updatedGroup = await prisma.unitGroup.update({
       where: { id: groupId },

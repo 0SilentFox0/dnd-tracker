@@ -1,18 +1,13 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
-import { z } from "zod";
 
 import { prisma } from "@/lib/db";
+import { moraleCheckSchema } from "@/lib/schemas";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import type { MoraleCheckResult } from "@/lib/utils/battle/battle-morale";
 import { checkMorale } from "@/lib/utils/battle/battle-morale";
 import { getBattleWithAccess } from "@/lib/utils/battle/get-battle-with-access";
 import { stripStateBeforeForClient } from "@/lib/utils/battle/strip-battle-payload";
-
-const moraleCheckSchema = z.object({
-  participantId: z.string(), // ID BattleParticipant з initiativeOrder
-  d10Roll: z.number().min(1).max(10), // результат кидка 1d10
-});
 
 /** Payload збережений у pendingMoraleCheck для застосування при next-turn */
 export interface PendingMoraleCheckPayload {

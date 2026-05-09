@@ -1,71 +1,11 @@
 import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
-import { z } from "zod";
 
 import { prisma } from "@/lib/db";
+import { updateUnitSchema } from "@/lib/schemas";
 import { requireCampaignAccess, requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
-
-const updateUnitSchema = z.object({
-  name: z.string().min(1).max(100).optional(),
-  race: z.string().optional().nullable(),
-  groupId: z.string().optional().nullable(),
-  damageModifier: z.preprocess(
-    (val) => (val === "" ? null : val),
-    z.string().nullable().optional()
-  ),
-  level: z.number().min(1).max(30).optional(),
-  strength: z.number().min(1).max(30).optional(),
-  dexterity: z.number().min(1).max(30).optional(),
-  constitution: z.number().min(1).max(30).optional(),
-  intelligence: z.number().min(1).max(30).optional(),
-  wisdom: z.number().min(1).max(30).optional(),
-  charisma: z.number().min(1).max(30).optional(),
-  armorClass: z.number().min(0).optional(),
-  initiative: z.number().optional(),
-  speed: z.number().min(0).optional(),
-  maxHp: z.number().min(1).optional(),
-  proficiencyBonus: z.number().min(0).optional(),
-  attacks: z
-    .array(
-      z.object({
-        name: z.string(),
-        type: z.enum(["melee", "ranged"]).optional(),
-        targetType: z.enum(["target", "aoe"]).optional(),
-        attackBonus: z.number(),
-        damageType: z.string(),
-        damageDice: z.string(),
-        range: z.string().optional(),
-        properties: z.string().optional(),
-        maxTargets: z.number().min(1).max(20).optional(),
-        damageDistribution: z.array(z.number().min(0).max(100)).optional(),
-        guaranteedDamage: z.number().min(0).optional(),
-      })
-    )
-    .optional(),
-  specialAbilities: z
-    .array(
-      z.object({
-        name: z.string(),
-        description: z.string().optional(),
-        type: z.enum(["passive", "active"]),
-        spellId: z.string().optional(),
-        actionType: z.enum(["action", "bonus_action"]).optional(),
-        effect: z.record(z.string(), z.unknown()).optional(),
-      })
-    )
-    .optional(),
-  immunities: z.array(z.string()).optional(),
-  knownSpells: z.array(z.string()).optional(),
-  minTargets: z.number().min(1).optional(),
-  maxTargets: z.number().min(1).optional(),
-  morale: z.number().min(-3).max(3).optional(),
-  avatar: z.preprocess(
-    (val) => (val === "" ? null : val),
-    z.string().url().nullable().optional()
-  ),
-});
 
 export async function GET(
   request: Request,
