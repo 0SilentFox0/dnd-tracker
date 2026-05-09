@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 
 import { ActionButtonsPanel } from "@/components/battle/ActionButtonsPanel";
@@ -80,6 +80,14 @@ export function PlayerTurnView({
     );
   }, [participant, battle.initiativeOrder, battle.currentRound]);
 
+  // Stable ref для onSkipTurn — щоб useEffect нижче не reset-ив timer коли
+  // parent передає нову (не memoized) функцію на кожен render (CODE_AUDIT 4.5).
+  const onSkipTurnRef = useRef(onSkipTurn);
+
+  useEffect(() => {
+    onSkipTurnRef.current = onSkipTurn;
+  });
+
   // Автоматичне завершення ходу, якщо не залишилося дій (чекати завершення атаки та next-turn)
   useEffect(() => {
     if (
@@ -92,7 +100,7 @@ export function PlayerTurnView({
       return;
     }
 
-    const timer = setTimeout(() => onSkipTurn(), 1500);
+    const timer = setTimeout(() => onSkipTurnRef.current(), 1500);
 
     return () => clearTimeout(timer);
   }, [
@@ -101,22 +109,9 @@ export function PlayerTurnView({
     hasPerformedAction,
     bonusActions.length,
     turnStarted,
-    onSkipTurn,
     isNextTurnPending,
     isAttackPending,
   ]);
-
-  // ... (handleStartTurn, handleMoraleCheckConfirm, etc. - keep unchanged)
-  // But replace_file_content cannot skip large chunks easily without context.
-  // I will target the useEffect first.
-
-  // Actually, I can replace just the useEffect block.
-  // But wait, replace_file_content needs contiguous block.
-  // I will replace useEffect first.
-
-  // ...
-
-  // Wait, I will split these.
 
   const handleStartTurn = () => {
     setTurnStarted(true);
