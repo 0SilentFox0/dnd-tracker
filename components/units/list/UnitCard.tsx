@@ -1,16 +1,14 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { GripVertical, X } from "lucide-react";
+
+import { UnitQuickStatsEditor } from "./UnitQuickStatsEditor";
 
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { getDamageElementLabel } from "@/lib/constants/damage";
-import { useUpdateUnitAny } from "@/lib/hooks/units";
 import { getDiceAverage } from "@/lib/utils/battle/balance";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import {
@@ -29,16 +27,6 @@ function primaryAttackIndex(attacks: Unit["attacks"]): number {
   );
 
   return meleeIdx >= 0 ? meleeIdx : 0;
-}
-
-function parseQuickStatInt(raw: string): number | null {
-  const t = raw.trim();
-
-  if (t === "") return null;
-
-  const n = Number.parseInt(t, 10);
-
-  return Number.isFinite(n) ? n : null;
 }
 
 const DRAG_TYPE = "application/x-unit-id";
@@ -90,8 +78,6 @@ interface UnitCardProps {
 }
 
 export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
-  const updateUnitMutation = useUpdateUnitAny(campaignId);
-
   const handleDragStart = (e: React.DragEvent) => {
     e.dataTransfer.setData(DRAG_TYPE, getUnitDragPayload(unit));
     e.dataTransfer.effectAllowed = "move";
@@ -135,112 +121,6 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
   const primaryIdx = primaryAttackIndex(attacks);
 
   const primaryAttack = primaryIdx >= 0 ? attacks[primaryIdx] : null;
-
-  const savedDice = primaryAttack?.damageDice ?? "";
-
-  /** Скидання uncontrolled інпутів до знімка сервера без setState в useEffect (новий key → remount). */
-  const [acFieldEpoch, setAcFieldEpoch] = useState(0);
-
-  const [initFieldEpoch, setInitFieldEpoch] = useState(0);
-
-  const [diceFieldEpoch, setDiceFieldEpoch] = useState(0);
-
-  const bumpAcField = () => setAcFieldEpoch((e) => e + 1);
-
-  const bumpInitField = () => setInitFieldEpoch((e) => e + 1);
-
-  const bumpDiceField = () => setDiceFieldEpoch((e) => e + 1);
-
-  const persistArmor = () => {
-    const raw =
-      (
-        document.getElementById(
-          `unit-ac-${unit.id}`,
-        ) as HTMLInputElement | null
-      )?.value ?? "";
-
-    const n = parseQuickStatInt(raw);
-
-    if (n === null) {
-      bumpAcField();
-
-      return;
-    }
-
-    const clamped = Math.max(0, n);
-
-    if (clamped === unit.armorClass) return;
-
-    updateUnitMutation.mutate(
-      { unitId: unit.id, data: { armorClass: clamped } },
-      {
-        onError: () => {
-          bumpAcField();
-        },
-      },
-    );
-  };
-
-  const persistInitiative = () => {
-    const raw =
-      (
-        document.getElementById(
-          `unit-init-${unit.id}`,
-        ) as HTMLInputElement | null
-      )?.value ?? "";
-
-    const n = parseQuickStatInt(raw);
-
-    if (n === null) {
-      bumpInitField();
-
-      return;
-    }
-
-    if (n === unit.initiative) return;
-
-    updateUnitMutation.mutate(
-      { unitId: unit.id, data: { initiative: n } },
-      {
-        onError: () => {
-          bumpInitField();
-        },
-      },
-    );
-  };
-
-  const persistPrimaryDice = () => {
-    const trimmed = (
-      (
-        document.getElementById(
-          `unit-dice-${unit.id}`,
-        ) as HTMLInputElement | null
-      )?.value ?? ""
-    ).trim();
-
-    if (primaryIdx < 0 || !primaryAttack) return;
-
-    if (trimmed === (primaryAttack.damageDice ?? "").trim()) return;
-
-    if (!trimmed) {
-      bumpDiceField();
-
-      return;
-    }
-
-    const nextAttacks = attacks.map((a, i) =>
-      i === primaryIdx ? { ...a, damageDice: trimmed } : a,
-    );
-
-    updateUnitMutation.mutate(
-      { unitId: unit.id, data: { attacks: nextAttacks } },
-      {
-        onError: () => {
-          bumpDiceField();
-        },
-      },
-    );
-  };
 
   return (
     <div className="border rounded-lg p-4 hover:shadow-md transition-shadow space-y-3 flex flex-col justify-between relative group/card">
@@ -300,145 +180,12 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
               </div>
             </div>
 
-            <div
-              className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="space-y-1">
-                <Label
-                  htmlFor={`unit-ac-${unit.id}`}
-                  className="text-xs text-muted-foreground font-normal"
-                >
-                  Броня (AC)
-                </Label>
-                <div className="flex gap-1.5 items-center">
-                  <Input
-                    key={`${unit.id}-ac-${unit.armorClass}-${acFieldEpoch}`}
-                    id={`unit-ac-${unit.id}`}
-                    type="number"
-                    min={0}
-                    inputMode="numeric"
-                    className="h-8 min-w-0 flex-1 text-sm tabular-nums"
-                    defaultValue={String(unit.armorClass)}
-                    onBlur={persistArmor}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        persistArmor();
-                      }
-                    }}
-                    disabled={updateUnitMutation.isPending}
-                  />
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    className="h-8 shrink-0 px-2.5 text-xs"
-                    disabled={updateUnitMutation.isPending}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      persistArmor();
-                    }}
-                  >
-                    Зберегти
-                  </Button>
-                </div>
-              </div>
-              <div className="space-y-1">
-                <Label
-                  htmlFor={`unit-init-${unit.id}`}
-                  className="text-xs text-muted-foreground font-normal"
-                >
-                  Ініціатива
-                </Label>
-                <div className="flex gap-1.5 items-center">
-                  <Input
-                    key={`${unit.id}-init-${unit.initiative}-${initFieldEpoch}`}
-                    id={`unit-init-${unit.id}`}
-                    type="number"
-                    inputMode="numeric"
-                    className="h-8 min-w-0 flex-1 text-sm tabular-nums"
-                    defaultValue={String(unit.initiative)}
-                    onBlur={persistInitiative}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        persistInitiative();
-                      }
-                    }}
-                    disabled={updateUnitMutation.isPending}
-                  />
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    className="h-8 shrink-0 px-2.5 text-xs"
-                    disabled={updateUnitMutation.isPending}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      persistInitiative();
-                    }}
-                  >
-                    Зберегти
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            {primaryIdx >= 0 && primaryAttack ? (
-              <div
-                className="mt-2 space-y-1"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <Label
-                  htmlFor={`unit-dice-${unit.id}`}
-                  className="text-xs text-muted-foreground font-normal"
-                >
-                  Кубики шкоди
-                  {attacks.length > 1 ? (
-                    <span className="text-muted-foreground/80">
-                      {" "}
-                      ({primaryAttack.name})
-                    </span>
-                  ) : null}
-                </Label>
-                <div className="flex gap-1.5 items-center">
-                  <Input
-                    key={`${unit.id}-dice-${savedDice}-${diceFieldEpoch}`}
-                    id={`unit-dice-${unit.id}`}
-                    className="h-8 flex-1 min-w-0 text-sm font-mono"
-                    defaultValue={savedDice}
-                    onBlur={persistPrimaryDice}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        persistPrimaryDice();
-                      }
-                    }}
-                    placeholder="напр. 2d6+3"
-                    disabled={updateUnitMutation.isPending}
-                    title="Enter, кнопка «Зберегти» або втрата фокусу"
-                  />
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    className="h-8 shrink-0 px-2.5 text-xs"
-                    disabled={updateUnitMutation.isPending}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      persistPrimaryDice();
-                    }}
-                  >
-                    Зберегти
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <p className="mt-2 text-xs text-muted-foreground">
-                Немає атак — кубики можна додати в повному редакторі
-              </p>
-            )}
+            <UnitQuickStatsEditor
+              unit={unit}
+              campaignId={campaignId}
+              primaryAttackIndex={primaryIdx}
+              primaryAttackName={primaryAttack?.name}
+            />
           </div>
         </div>
 
