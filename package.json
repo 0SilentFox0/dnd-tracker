@@ -30,7 +30,7 @@
     "reset-mock-battle": "tsx scripts/reset-mock-battle-data.ts",
     "seed-mock-battles": "tsx scripts/seed-mock-battles.ts",
     "test": "vitest",
-    "test:run": "vitest run --exclude '**/*.integration.test.ts'",
+    "test:run": "vitest run",
     "test:integration": "vitest run --config vitest.integration.config.mts",
     "migrate:deploy": "bash scripts/prisma-migrate-deploy.sh",
     "migrate:baseline:resolve-all": "bash scripts/prisma-baseline-resolve-all.sh",
