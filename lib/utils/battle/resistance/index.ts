@@ -6,6 +6,7 @@
 import { getParticipantExtras } from "../participant";
 import { extractResistanceValue, findRacialAbilityByPattern } from "./helpers";
 
+import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
 import { BattleParticipant } from "@/types/battle";
 
 const PHYSICAL_DAMAGE_TYPES = ["slashing", "piercing", "bludgeoning", "physical"];
@@ -79,9 +80,14 @@ export function getCombinedResistancePercent(
 
   const racialResistance = getResistance(target, damageType);
 
-  const racialPercent = Math.round(racialResistance * 100);
+  const racialPercent = Math.round(
+    racialResistance * BATTLE_CONSTANTS.FRACTION_TO_PERCENT,
+  );
 
-  const total = Math.min(100, skillPercent + racialPercent);
+  const total = Math.min(
+    BATTLE_CONSTANTS.RESISTANCE_PERCENT_CAP,
+    skillPercent + racialPercent,
+  );
 
   return total;
 }
@@ -120,7 +126,7 @@ export function applyResistance(
   const resistancePercent = getCombinedResistancePercent(target, damageType);
 
   if (resistancePercent > 0) {
-    const factor = 1 - resistancePercent / 100;
+    const factor = 1 - resistancePercent / BATTLE_CONSTANTS.PERCENT_DIVISOR;
 
     finalDamage = Math.floor(damage * factor);
     breakdown.push(

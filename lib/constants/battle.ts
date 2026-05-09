@@ -61,4 +61,13 @@ export const BATTLE_CONSTANTS = {
   
   /** Максимальний відсоток HP (100%) */
   MAX_HP_PERCENT: 100,
+
+  /** Загальний дільник для percent → fraction (e.g. 25% → 0.25). */
+  PERCENT_DIVISOR: 100,
+
+  /** Жорсткий cap відсоткового опору в бою (skill+racial sum ≤ 100%). */
+  RESISTANCE_PERCENT_CAP: 100,
+
+  /** Множник для конвертації fraction → percent (e.g. 0.25 → 25). */
+  FRACTION_TO_PERCENT: 100,
 } as const;

@@ -2,7 +2,7 @@
  * Спільна логіка для розрахунку модифікаторів урону
  */
 
-import { AttackType } from "@/lib/constants/battle";
+import { AttackType, BATTLE_CONSTANTS } from "@/lib/constants/battle";
 import type { SkillDamageType } from "@/types/battle";
 
 /**
@@ -83,7 +83,7 @@ export function matchesAttackType(
 export function calculatePercentBonus(baseValue: number, percentBonus: number): number {
   if (percentBonus <= 0) return 0;
 
-  return Math.floor(baseValue * (percentBonus / 100));
+  return Math.floor(baseValue * (percentBonus / BATTLE_CONSTANTS.PERCENT_DIVISOR));
 }
 
 /**
