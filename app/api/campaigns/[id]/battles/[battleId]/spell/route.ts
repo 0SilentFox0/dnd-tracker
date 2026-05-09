@@ -1,51 +1,16 @@
 import { NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
-import { z } from "zod";
 
-import { ParticipantSide } from "@/lib/constants/battle";
+import { executeCastSpell } from "./cast-spell-handler";
+import { spellSchema } from "./cast-spell-schema";
+
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { logBattleTiming } from "@/lib/utils/battle/battle-timing";
-import { BattleSpell, processSpell } from "@/lib/utils/battle/spell";
-import { appendSummonedUnitToInitiativeEnd } from "@/lib/utils/battle/spell/append-summoned-unit";
-import {
-  prepareBattleLogForStorage,
-  preparePusherPayload,
-  slimInitiativeOrderForStorage,
-  stripStateBeforeForClient,
-} from "@/lib/utils/battle/strip-battle-payload";
-import { BattleAction,BattleParticipant } from "@/types/battle";
-
-const spellSchema = z.object({
-  casterId: z.string(), // ID BattleParticipant з initiativeOrder
-  casterType: z.string().optional(), // опціонально для сумісності
-  spellId: z.string(), // ID заклинання з бази даних
-  targetIds: z.array(z.string()), // масив ID цілей
-  damageRolls: z
-    .array(z.union([z.number(), z.string()]))
-    .default([])
-    .transform((arr) =>
-      arr
-        .map((v) => (typeof v === "string" ? parseInt(v, 10) : v))
-        .filter((n): n is number => Number.isFinite(n)),
-    ), // результати кубиків (number або string → number[])
-  savingThrows: z
-    .array(
-      z.object({
-        participantId: z.string(),
-        roll: z.number().min(1).max(20),
-      })
-    )
-    .optional(), // результати saving throws
-  additionalRollResult: z.number().optional(), // результат додаткових кубиків
-  hitRoll: z.number().min(1).max(20).optional(), // кидок попадання для заклинань з hitCheck
-  preview: z.boolean().optional(), // true = повернути підрахунок без збереження в БД
-});
 
 export async function POST(
   request: Request,
-  { params }: { params: Promise<{ id: string; battleId: string }> }
+  { params }: { params: Promise<{ id: string; battleId: string }> },
 ) {
   const t0 = Date.now();
 
@@ -60,10 +25,6 @@ export async function POST(
       return accessResult;
     }
 
-    const { userId } = accessResult;
-
-    const isDM = accessResult.campaign.members[0]?.role === "dm";
-
     const battle = await prisma.battleScene.findUnique({
       where: { id: battleId },
     });
@@ -75,7 +36,7 @@ export async function POST(
     if (battle.status !== "active") {
       return NextResponse.json(
         { error: "Battle is not active" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -83,262 +44,15 @@ export async function POST(
 
     const data = spellSchema.parse(body);
 
-    // Отримуємо учасників з initiativeOrder
-    const initiativeOrder = battle.initiativeOrder as unknown as BattleParticipant[];
-
-    const caster = initiativeOrder.find((p) => p.basicInfo.id === data.casterId);
-
-    if (!caster) {
-      return NextResponse.json(
-        { error: "Caster not found in battle" },
-        { status: 404 }
-      );
-    }
-
-    const currentParticipant = initiativeOrder[battle.currentTurnIndex];
-
-    const canCast =
-      isDM ||
-      (currentParticipant?.basicInfo.id === caster.basicInfo.id &&
-        caster.basicInfo.controlledBy === userId);
-
-    if (!canCast) {
-      return NextResponse.json(
-        { error: "Forbidden: only DM or current turn controller can cast spells" },
-        { status: 403 }
-      );
-    }
-
-    // Перевіряємо чи кастер активний
-    if (caster.combatStats.status !== "active") {
-      return NextResponse.json(
-        { error: "Caster is not active (unconscious or dead)" },
-        { status: 400 }
-      );
-    }
-
-    // Перевіряємо чи заклинання є в knownSpells (DM може накласти будь-яке заклинання)
-    if (
-      !isDM &&
-      !caster.spellcasting.knownSpells.includes(data.spellId)
-    ) {
-      return NextResponse.json(
-        { error: "Spell is not in caster's known spells" },
-        { status: 400 }
-      );
-    }
-
-    // Отримуємо заклинання з бази даних
-    const spellData = await prisma.spell.findUnique({
-      where: { id: data.spellId },
-    });
-
-    if (!spellData || spellData.campaignId !== id) {
-      return NextResponse.json(
-        { error: "Spell not found" },
-        { status: 404 }
-      );
-    }
-
-    // Прев’ю лише рахує результат — не вимагає вільної дії / бонус-дії
-    if (!data.preview) {
-      const isBonusActionSpell =
-        spellData.castingTime?.toLowerCase().includes("bonus") ?? false;
-
-      if (isBonusActionSpell) {
-        if (caster.actionFlags.hasUsedBonusAction) {
-          return NextResponse.json(
-            { error: "Caster has already used their bonus action" },
-            { status: 400 },
-          );
-        }
-      } else if (caster.actionFlags.hasUsedAction) {
-        return NextResponse.json(
-          { error: "Caster has already used their action" },
-          { status: 400 },
-        );
-      }
-    }
-
-    // Конвертуємо Spell в BattleSpell
-    const battleSpell: BattleSpell = {
-      id: spellData.id,
-      name: spellData.name,
-      level: spellData.level,
-      type: spellData.type as "target" | "aoe" | "no_target",
-      target: spellData.target as "enemies" | "allies" | "all" | undefined,
-      damageType: spellData.damageType as "damage" | "heal" | "all",
-      damageElement: spellData.damageElement,
-      groupId: spellData.groupId ?? null,
-      damageModifier: spellData.damageModifier,
-      healModifier: spellData.healModifier,
-      diceCount: spellData.diceCount,
-      diceType: spellData.diceType,
-      savingThrow: spellData.savingThrow as
-        | {
-            ability: string;
-            onSuccess: "half" | "none";
-            dc?: number;
-          }
-        | null,
-      hitCheck: spellData.hitCheck as { ability: string; dc: number } | null ?? undefined,
-      description: spellData.description ?? "",
-      duration: spellData.duration,
-      castingTime: spellData.castingTime,
-      effects: Array.isArray(spellData.effects)
-        ? (spellData.effects as string[])
-        : undefined,
-      effectDetails: spellData.effectDetails as BattleSpell["effectDetails"] ?? undefined,
-      icon: spellData.icon ?? undefined,
-    };
-
-    // Обробляємо заклинання через нову функцію (перерахунок шкоди)
-    const tSpell = Date.now();
-
-    const spellResult = processSpell({
-      caster,
-      spell: battleSpell,
-      targetIds: data.targetIds,
-      allParticipants: initiativeOrder,
-      currentRound: battle.currentRound,
+    return await executeCastSpell({
+      campaignId: id,
       battleId,
-      damageRolls: data.damageRolls,
-      savingThrows: data.savingThrows,
-      additionalRollResult: data.additionalRollResult,
-      hitRoll: data.hitRoll,
-      isDMCast: isDM,
+      userId: accessResult.userId,
+      isDM: accessResult.campaign.members[0]?.role === "dm",
+      battle,
+      data,
+      t0,
     });
-
-    logBattleTiming("spell: processSpell (перерахунок шкоди)", tSpell, {
-      spellId: data.spellId,
-      targetCount: data.targetIds.length,
-    });
-
-    // Оновлюємо учасників в initiativeOrder
-    const updatedInitiativeOrder = initiativeOrder.map((p) => {
-      if (p.basicInfo.id === caster.basicInfo.id) {
-        return spellResult.casterUpdated;
-      }
-
-      const updatedTarget = spellResult.targetsUpdated.find((t) => t.basicInfo.id === p.basicInfo.id);
-
-      if (updatedTarget) {
-        return updatedTarget;
-      }
-
-      return p;
-    });
-
-    const hitCheckMiss =
-      spellResult.battleAction.actionDetails?.hitCheckMiss === true;
-
-    const summonUnitId = spellData.summonUnitId?.trim() || null;
-
-    const canSummonFromSpell =
-      !data.preview &&
-      spellResult.success &&
-      !hitCheckMiss &&
-      summonUnitId != null &&
-      summonUnitId.length > 0;
-
-    let initiativeOrderToPersist = updatedInitiativeOrder;
-
-    let battleActionForLog = spellResult.battleAction;
-
-    if (canSummonFromSpell) {
-      const casterSide =
-        caster.basicInfo.side === "enemy"
-          ? ParticipantSide.ENEMY
-          : ParticipantSide.ALLY;
-
-      const { finalOrder, summoned } = await appendSummonedUnitToInitiativeEnd({
-        campaignId: id,
-        battleId,
-        summonUnitId,
-        casterSide,
-        orderAfterSpell: updatedInitiativeOrder,
-      });
-
-      if (summoned) {
-        initiativeOrderToPersist = finalOrder;
-        battleActionForLog = {
-          ...spellResult.battleAction,
-          targets: [
-            ...spellResult.battleAction.targets,
-            {
-              participantId: summoned.basicInfo.id,
-              participantName: summoned.basicInfo.name,
-            },
-          ],
-          actionDetails: {
-            ...spellResult.battleAction.actionDetails,
-            summonedUnitTemplateId: summoned.basicInfo.sourceId,
-            summonedParticipantId: summoned.basicInfo.id,
-          },
-          resultText: `${spellResult.battleAction.resultText} Прикликано: ${summoned.basicInfo.name}.`,
-        };
-      }
-    }
-
-    // Отримуємо поточний battleLog та додаємо нову дію з stateBefore для rollback
-    const battleLog = (battle.battleLog as unknown as BattleAction[]) || [];
-
-    const actionIndex = battleLog.length;
-
-    const stateBefore = {
-      initiativeOrder: JSON.parse(
-        JSON.stringify(initiativeOrder),
-      ) as BattleParticipant[],
-      currentTurnIndex: battle.currentTurnIndex,
-      currentRound: battle.currentRound,
-    };
-
-    const battleAction: BattleAction = {
-      ...battleActionForLog,
-      actionIndex,
-      stateBefore,
-    };
-
-    if (data.preview) {
-      return NextResponse.json({
-        preview: true,
-        battleAction: {
-          ...battleAction,
-          stateBefore: undefined,
-        },
-      });
-    }
-
-    // Оновлюємо бій
-    const updatedBattle = await prisma.battleScene.update({
-      where: { id: battleId },
-      data: {
-        initiativeOrder: slimInitiativeOrderForStorage(
-          initiativeOrderToPersist,
-        ) as unknown as Prisma.InputJsonValue,
-        battleLog: prepareBattleLogForStorage([
-          ...battleLog,
-          battleAction,
-        ]) as unknown as Prisma.InputJsonValue,
-      },
-    });
-
-    // Відправляємо real-time оновлення через Pusher
-    if (process.env.PUSHER_APP_ID) {
-      const { pusherServer, battleChannelName } = await import("@/lib/pusher");
-
-      void pusherServer
-        .trigger(
-          battleChannelName(battleId),
-          "battle-updated",
-          preparePusherPayload(updatedBattle),
-        )
-        .catch((err) => console.error("Pusher trigger failed:", err));
-    }
-
-    logBattleTiming("spell: total", t0, { targetCount: data.targetIds.length });
-
-    return NextResponse.json(stripStateBeforeForClient(updatedBattle));
   } catch (error) {
     return handleApiError(error, { action: "process spell" });
   }
