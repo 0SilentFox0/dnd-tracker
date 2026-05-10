@@ -234,11 +234,14 @@ export async function GET(
 
           const floorTotal = Math.floor(spellCalc.totalDamage);
 
+          // Останній рядок breakdown — `= сума: X`, дублює `total` поле відповіді
+          // (UI показує total окремо). Решту бонусних рядків треба зберегти.
           const fullBreakdown = spellCalc.breakdown;
 
           const breakdown =
-            fullBreakdown.length >= 2
-              ? fullBreakdown.slice(0, -2)
+            fullBreakdown.length >= 1 &&
+            fullBreakdown[fullBreakdown.length - 1]?.startsWith("= сума")
+              ? fullBreakdown.slice(0, -1)
               : fullBreakdown;
 
           const diceNotation = formatSpellDamageDiceRoll(

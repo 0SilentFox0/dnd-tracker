@@ -144,6 +144,9 @@ export function useDamageCalculator({
       breakdown: magicPreview.breakdown,
       submittedSum: magicSum,
       spellId: selectedSpellId,
+      targets: magicPreview.targets,
+      targetsTotal: magicPreview.targetsTotal,
+      distribution: magicPreview.distribution,
     });
   }, [magicPreview, magicSum, selectedSpellId]);
 

@@ -61,33 +61,26 @@ export function DamageCalculatorResult({
       )}
       {multiTargets ? (
         <>
-          <p className="text-sm font-semibold pt-1">
-            На одну ціль: {total} {totalUnitLabel(spellEffectKind)}
-          </p>
-          <p className="text-xs font-medium text-muted-foreground">
-            Розподіл AoE по цілях:
+          <p className="text-lg font-bold tabular-nums pt-1">
+            Сума: {targetsTotal} {totalUnitLabel(spellEffectKind)}
           </p>
           <ul className="text-sm tabular-nums">
             {multiTargets.map((dmg, i) => (
               <li key={i} className="flex items-center gap-2">
-                <span className="text-muted-foreground">Ціль {i + 1}:</span>
+                <span className="text-muted-foreground">{i + 1} таргет:</span>
                 <span className="font-medium">{dmg}</span>
                 {distribution && distribution[i] !== undefined && (
                   <span className="text-xs text-muted-foreground">
-                    ({distribution[i]}% від {total})
+                    ({distribution[i]}%)
                   </span>
                 )}
               </li>
             ))}
           </ul>
-          <p className="text-lg font-bold tabular-nums pt-1">
-            Сума по {multiTargets.length} цілях: {targetsTotal}{" "}
-            {totalUnitLabel(spellEffectKind)}
-          </p>
         </>
       ) : (
         <p className="text-lg font-bold tabular-nums pt-1">
-          Загалом: {total} {totalUnitLabel(spellEffectKind)}
+          Сума: {total} {totalUnitLabel(spellEffectKind)}
         </p>
       )}
     </div>
