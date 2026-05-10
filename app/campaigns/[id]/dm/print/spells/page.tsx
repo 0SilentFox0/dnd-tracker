@@ -27,6 +27,11 @@ export default async function PrintSpellsPage({
   const spellsForClient = spells.map((s) => ({
     ...s,
     effects: Array.isArray(s.effects) ? (s.effects as string[]) : null,
+    damageDistribution: Array.isArray(s.damageDistribution)
+      ? (s.damageDistribution as number[]).filter(
+          (n): n is number => typeof n === "number",
+        )
+      : null,
   }));
 
   return (

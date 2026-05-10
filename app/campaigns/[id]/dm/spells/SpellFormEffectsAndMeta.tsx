@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { SpellFormData } from "./spell-form-defaults";
+import { SpellDamageDistributionField } from "./SpellDamageDistributionField";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -120,6 +121,13 @@ export function SpellFormEffectsAndMeta({
           </p>
         )}
       </div>
+
+      <SpellDamageDistributionField
+        damageDistribution={formData.damageDistribution}
+        onChange={(next) =>
+          setFormData({ ...formData, damageDistribution: next })
+        }
+      />
 
       <div className="space-y-3 rounded-lg border p-3">
         <div className="flex items-center gap-2">

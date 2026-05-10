@@ -13,18 +13,59 @@ import { createBattleParticipantFromCharacter } from "@/lib/utils/battle/partici
 import { calculateSpellDamageWithEnhancements } from "@/lib/utils/battle/spell/calculations";
 import { formatSpellDamageDiceRoll } from "@/lib/utils/spells/spell-calculations";
 
+/**
+ * Розподіл шкоди по AoE-цілях. `total` — повна шкода для одного target
+ * (як зараз), `targets` — масив damages для кожної послідовної цілі
+ * (за damageDistribution). `targetsTotal` — сума по targets.
+ *
+ * Якщо distribution null/відсутнє — `targets` має 1 елемент = total
+ * (backward-compat: показуємо single-target preview).
+ */
 export interface DamagePreviewItem {
   total: number;
   breakdown: string[];
   diceFormula: string | null;
   hasWeapon: boolean;
   spellEffectKind?: "damage" | "heal" | "all";
+  /** Damage per AoE target (default [total] якщо distribution не заданий). */
+  targets?: number[];
+  /** Сума по targets (якщо distribution > 1 елемент). */
+  targetsTotal?: number;
+  /** Distribution % per target (для UI відображення). */
+  distribution?: number[] | null;
 }
 
 export interface DamagePreviewResponse {
   melee: DamagePreviewItem;
   ranged: DamagePreviewItem;
   magic?: DamagePreviewItem | null;
+}
+
+/**
+ * Обчислює damages per target за distribution + total + targetsTotal.
+ * Поведінка:
+ *  - distribution null/empty → targets=[fullDamage], total=fullDamage
+ *  - distribution=[100, 75] → targets=[full, floor(full × 0.75)]
+ */
+function buildTargetDamages(
+  fullDamage: number,
+  distribution: number[] | null | undefined,
+): { targets: number[]; targetsTotal: number; effectiveDist: number[] | null } {
+  if (!distribution || distribution.length === 0) {
+    return {
+      targets: [fullDamage],
+      targetsTotal: fullDamage,
+      effectiveDist: null,
+    };
+  }
+
+  const targets = distribution.map((pct) =>
+    Math.floor((fullDamage * pct) / 100),
+  );
+
+  const targetsTotal = targets.reduce((a, b) => a + b, 0);
+
+  return { targets, targetsTotal, effectiveDist: distribution };
 }
 
 export async function GET(
@@ -205,6 +246,14 @@ export async function GET(
             dbSpell.diceType,
           );
 
+          const magicDist = Array.isArray(dbSpell.damageDistribution)
+            ? (dbSpell.damageDistribution as number[]).filter(
+                (n) => typeof n === "number",
+              )
+            : null;
+
+          const magicTargets = buildTargetDamages(floorTotal, magicDist);
+
           magic = {
             total: floorTotal,
             breakdown,
@@ -216,29 +265,50 @@ export async function GET(
                 : dt === "all"
                   ? "all"
                   : "damage",
+            targets: magicTargets.targets,
+            targetsTotal: magicTargets.targetsTotal,
+            distribution: magicTargets.effectiveDist,
           };
         }
       }
     }
 
+    const meleeFullDamage = Math.floor(meleeResult.totalDamage * meleeMultiplier);
+
+    const meleeDist = meleeAttack?.damageDistribution ?? null;
+
+    const meleeTargets = buildTargetDamages(meleeFullDamage, meleeDist);
+
+    const rangedFullDamage = Math.floor(rangedResult.totalDamage * rangedMultiplier);
+
+    const rangedDist = rangedAttack?.damageDistribution ?? null;
+
+    const rangedTargets = buildTargetDamages(rangedFullDamage, rangedDist);
+
     const response: DamagePreviewResponse = {
       melee: {
-        total: Math.floor(meleeResult.totalDamage * meleeMultiplier),
+        total: meleeFullDamage,
         breakdown: [
           ...meleeResult.breakdown,
-          ...(meleeMultiplier !== 1 ? [`× ${meleeMultiplier} (коеф. DM) = ${Math.floor(meleeResult.totalDamage * meleeMultiplier)}`] : []),
+          ...(meleeMultiplier !== 1 ? [`× ${meleeMultiplier} (коеф. DM) = ${meleeFullDamage}`] : []),
         ],
         diceFormula: meleeAttack?.damageDice ?? null,
         hasWeapon: !!meleeAttack,
+        targets: meleeTargets.targets,
+        targetsTotal: meleeTargets.targetsTotal,
+        distribution: meleeTargets.effectiveDist,
       },
       ranged: {
-        total: Math.floor(rangedResult.totalDamage * rangedMultiplier),
+        total: rangedFullDamage,
         breakdown: [
           ...rangedResult.breakdown,
-          ...(rangedMultiplier !== 1 ? [`× ${rangedMultiplier} (коеф. DM) = ${Math.floor(rangedResult.totalDamage * rangedMultiplier)}`] : []),
+          ...(rangedMultiplier !== 1 ? [`× ${rangedMultiplier} (коеф. DM) = ${rangedFullDamage}`] : []),
         ],
         diceFormula: rangedAttack?.damageDice ?? null,
         hasWeapon: !!rangedAttack,
+        targets: rangedTargets.targets,
+        targetsTotal: rangedTargets.targetsTotal,
+        distribution: rangedTargets.effectiveDist,
       },
       magic,
     };

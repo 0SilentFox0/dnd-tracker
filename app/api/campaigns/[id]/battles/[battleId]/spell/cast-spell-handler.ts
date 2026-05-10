@@ -291,6 +291,11 @@ function mapDbSpellToBattleSpell(
     effects: Array.isArray(spellData.effects)
       ? spellData.effects.filter((e): e is string => typeof e === "string")
       : undefined,
+    damageDistribution: Array.isArray(spellData.damageDistribution)
+      ? (spellData.damageDistribution as unknown[]).filter(
+          (n): n is number => typeof n === "number",
+        )
+      : null,
     effectDetails:
       (spellData.effectDetails as BattleSpell["effectDetails"]) ?? undefined,
     icon: spellData.icon ?? undefined,

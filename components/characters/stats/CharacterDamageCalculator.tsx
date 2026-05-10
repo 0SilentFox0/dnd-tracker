@@ -99,6 +99,9 @@ export function CharacterDamageCalculator(
                       diceSum={dice.melee.sum}
                       breakdown={damagePreview.melee.breakdown}
                       total={damagePreview.melee.total}
+                      targets={damagePreview.melee.targets}
+                      targetsTotal={damagePreview.melee.targetsTotal}
+                      distribution={damagePreview.melee.distribution}
                     />
                   )}
                 </>
@@ -141,6 +144,9 @@ export function CharacterDamageCalculator(
                       diceSum={dice.ranged.sum}
                       breakdown={damagePreview.ranged.breakdown}
                       total={damagePreview.ranged.total}
+                      targets={damagePreview.ranged.targets}
+                      targetsTotal={damagePreview.ranged.targetsTotal}
+                      distribution={damagePreview.ranged.distribution}
                     />
                   )}
                 </>
@@ -201,6 +207,9 @@ export function CharacterDamageCalculator(
                       breakdown={magicPreview.breakdown ?? []}
                       total={magicPreview.total}
                       spellEffectKind={magicPreview.spellEffectKind}
+                      targets={magicPreview.targets}
+                      targetsTotal={magicPreview.targetsTotal}
+                      distribution={magicPreview.distribution}
                     />
                   )}
                   {dice.magic.sum !== null &&

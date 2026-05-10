@@ -32,6 +32,12 @@ export interface Spell {
   groupId: string | null;
   icon: string | null;
   appearanceDescription?: string | null;
+  /**
+   * AoE damage distribution per target slot, у відсотках.
+   * Приклад: [100, 75, 50, 25] — перша ціль 100%, друга 75% тощо.
+   * `null`/`undefined` = усі цілі 100% (backward-compat).
+   */
+  damageDistribution?: number[] | null;
   /** Юніт з бібліотеки кампанії — з’являється на полі після успішного касту (кінець черги ініціативи) */
   summonUnitId?: string | null;
   spellGroup?: {

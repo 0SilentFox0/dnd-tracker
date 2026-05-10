@@ -23,6 +23,7 @@ export function getDefaultSpellFormData(): SpellFormData {
     groupId: null,
     icon: null,
     summonUnitId: null,
+    damageDistribution: null,
   };
 }
 

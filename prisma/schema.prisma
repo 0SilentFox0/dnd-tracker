@@ -209,6 +209,7 @@ model Spell {
   diceCount        Int?
   diceType         String?
   appearanceDescription String?  // опис вигляду для довідника гравців (редагує DM)
+  damageDistribution Json?       // [100, 75, 50, 25] — % шкоди на кожну ціль для AoE спелів. Default: усі цілі 100%.
   summonUnitId      String?
   summonUnit        Unit?       @relation("SpellSummonUnit", fields: [summonUnitId], references: [id], onDelete: SetNull)
   skills              Skill[]

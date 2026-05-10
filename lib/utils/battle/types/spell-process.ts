@@ -29,6 +29,12 @@ export interface BattleSpell {
   duration?: string | null;
   castingTime?: string | null;
   effects?: string[] | null;
+  /**
+   * AoE per-target damage distribution у відсотках. Напр. `[100, 75, 50, 25]`
+   * — перша ціль отримує 100%, друга 75%, третя 50%, четверта 25%, 5-та і
+   * далі — 0%. `null`/відсутнє → всі цілі отримують 100%.
+   */
+  damageDistribution?: number[] | null;
   effectDetails?: {
     duration?: number;
     effects?: Array<{

@@ -107,6 +107,12 @@ export async function PATCH(
               ? null
               : data.summonUnitId
             : undefined,
+        damageDistribution:
+          data.damageDistribution !== undefined
+            ? data.damageDistribution === null
+              ? Prisma.JsonNull
+              : (data.damageDistribution as unknown as Prisma.InputJsonValue)
+            : undefined,
       },
       include: {
         spellGroup: true,

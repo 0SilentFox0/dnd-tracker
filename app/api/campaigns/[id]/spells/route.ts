@@ -54,6 +54,10 @@ export async function POST(
           data.summonUnitId && data.summonUnitId.length > 0
             ? data.summonUnitId
             : null,
+        damageDistribution:
+          data.damageDistribution && data.damageDistribution.length > 0
+            ? (data.damageDistribution as unknown as Prisma.InputJsonValue)
+            : undefined,
       },
       include: {
         spellGroup: true,

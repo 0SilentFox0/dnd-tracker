@@ -67,6 +67,10 @@ export const createSpellSchema = z.object({
   groupId: z.string().optional().nullable(),
   icon: nullableString,
   summonUnitId: z.string().optional().nullable(),
+  damageDistribution: z
+    .array(z.number().min(0).max(100))
+    .optional()
+    .nullable(),
 });
 
 export type CreateSpellInput = z.infer<typeof createSpellSchema>;
@@ -93,6 +97,10 @@ export const updateSpellSchema = z.object({
   icon: nullableString,
   appearanceDescription: z.string().nullable().optional(),
   summonUnitId: z.string().nullable().optional(),
+  damageDistribution: z
+    .array(z.number().min(0).max(100))
+    .nullable()
+    .optional(),
 });
 
 export type UpdateSpellInput = z.infer<typeof updateSpellSchema>;

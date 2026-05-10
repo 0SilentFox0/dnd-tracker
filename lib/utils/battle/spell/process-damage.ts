@@ -52,12 +52,26 @@ export function computeSpellDamageAndApply(
 
   const targetDamages: Array<{ target: BattleParticipant; finalDamage: number }> = [];
 
+  const dist =
+    Array.isArray(spell.damageDistribution) &&
+    spell.damageDistribution.length > 0
+      ? spell.damageDistribution
+      : null;
+
   for (let i = 0; i < updatedTargets.length; i++) {
     const target = updatedTargets[i];
 
     const savingThrow = savingThrows.find((st) => st.participantId === target.basicInfo.id);
 
-    let damageToApply = damageCalc.totalDamage;
+    const distPct = dist ? (dist[i] ?? 0) : 100;
+
+    let damageToApply = Math.floor((damageCalc.totalDamage * distPct) / 100);
+
+    if (dist && distPct !== 100) {
+      allResistanceBreakdown.push(
+        `${target.basicInfo.name}: ${distPct}% від ${damageCalc.totalDamage} = ${damageToApply}`,
+      );
+    }
 
     if (spell.savingThrow && savingThrow) {
       const ability = spell.savingThrow.ability.toLowerCase();
@@ -174,7 +188,15 @@ export function computeSpellHealAndApply(
 
   const resultTargets = updatedTargets.map((t) => ({ ...t }));
 
-  for (const target of updatedTargets) {
+  const dist =
+    Array.isArray(spell.damageDistribution) &&
+    spell.damageDistribution.length > 0
+      ? spell.damageDistribution
+      : null;
+
+  for (let i = 0; i < updatedTargets.length; i++) {
+    const target = updatedTargets[i];
+
     const targetIndex = resultTargets.findIndex((t) => t.basicInfo.id === target.basicInfo.id);
 
     if (targetIndex === -1) continue;
@@ -186,7 +208,17 @@ export function computeSpellHealAndApply(
       continue;
     }
 
-    const healing = spellCalculation.totalHealing || 0;
+    const fullHealing = spellCalculation.totalHealing || 0;
+
+    const distPct = dist ? (dist[i] ?? 0) : 100;
+
+    const healing = Math.floor((fullHealing * distPct) / 100);
+
+    if (dist && distPct !== 100) {
+      spellCalculation.breakdown.push(
+        `${target.basicInfo.name}: ${distPct}% від ${fullHealing} = ${healing}`,
+      );
+    }
 
     resultTargets[targetIndex] = {
       ...resultTargets[targetIndex],

@@ -13,6 +13,12 @@ export interface DamagePreviewItem {
   diceFormula: string | null;
   hasWeapon: boolean;
   spellEffectKind?: SpellEffectKind;
+  /** Damage per AoE target (за damageDistribution). Default `[total]`. */
+  targets?: number[];
+  /** Сума по targets (якщо distribution > 1 елемент). */
+  targetsTotal?: number;
+  /** Distribution % per target (для UI відображення). */
+  distribution?: number[] | null;
 }
 
 export interface DamagePreviewResponse {
