@@ -8,16 +8,14 @@ import { getActiveBattles } from "@/lib/api/campaigns";
 
 /**
  * Кнопка Join Battle з автоматичним оновленням при зміні активних боїв.
- * Використовує polling (refetchInterval) та refetchOnWindowFocus,
- * щоб активуватися без перезавантаження сторінки.
- * refetchInterval 30s знижує egress.
+ * Polling раз на 2 хв без refetch при фокусі — компроміс між свіжістю і egress Supabase.
  */
 export function JoinBattleButton() {
   const { data: activeBattles = [], isLoading } = useQuery({
     queryKey: ["active-battles"],
     queryFn: getActiveBattles,
-    refetchInterval: 30_000,
-    refetchOnWindowFocus: true,
+    refetchInterval: 120_000,
+    refetchOnWindowFocus: false,
   });
 
   const hasActiveBattle = activeBattles.length > 0;
