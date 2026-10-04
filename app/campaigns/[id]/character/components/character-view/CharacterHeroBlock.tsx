@@ -92,11 +92,11 @@ export function CharacterHeroBlock({
             {damagePreview && (
               <>
                 <QuickStat
-                  label="Melee damage ~"
+                  label="Шкода ближня ~"
                   value={damagePreview.melee?.total ?? "—"}
                 />
                 <QuickStat
-                  label="Ranged damage ~"
+                  label="Шкода дальня ~"
                   value={damagePreview.ranged?.total ?? "—"}
                 />
               </>

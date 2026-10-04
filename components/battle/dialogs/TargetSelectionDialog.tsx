@@ -49,7 +49,9 @@ export function TargetSelectionDialog({
         return [...prev, targetId];
       });
     } else {
-      setSelectedTargets([targetId]);
+      onSelect([targetId]);
+      setSelectedTargets([]);
+      onOpenChange(false);
     }
   };
 
@@ -156,12 +158,18 @@ export function TargetSelectionDialog({
                 );
               })}
             </div>
-            <ConfirmCancelFooter
-              onCancel={handleCancel}
-              confirmLabel={`Підтвердити (${selectedTargets.length})`}
-              onConfirm={handleConfirm}
-              confirmDisabled={selectedTargets.length === 0}
-            />
+            {isAOE ? (
+              <ConfirmCancelFooter
+                onCancel={handleCancel}
+                confirmLabel={`Підтвердити (${selectedTargets.length})`}
+                onConfirm={handleConfirm}
+                confirmDisabled={selectedTargets.length === 0}
+              />
+            ) : (
+              <Button variant="outline" className="w-full" onClick={handleCancel}>
+                Скасувати
+              </Button>
+            )}
           </>
         )}
       </div>

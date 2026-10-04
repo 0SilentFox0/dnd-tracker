@@ -32,15 +32,19 @@ export function SpellTargetsSection({
       </Label>
       <div className="space-y-2 max-h-48 overflow-y-auto">
         {availableTargets.map((target) => (
-          <div key={target.basicInfo.id} className="flex items-center gap-2">
+          <label
+            key={target.basicInfo.id}
+            className="flex min-h-11 cursor-pointer items-center gap-3 rounded-md px-2 hover:bg-muted/50"
+          >
             <input
               type="checkbox"
+              className="h-5 w-5 shrink-0"
               checked={selectedTargets.includes(target.basicInfo.id)}
               onChange={(e) =>
                 onTargetToggle(target.basicInfo.id, e.target.checked)
               }
             />
-            <label className="flex-1 text-sm">
+            <span className="flex-1 text-sm">
               {target.basicInfo.name}
               {(isDM ||
                 canSeeEnemyHp ||
@@ -50,8 +54,8 @@ export function SpellTargetsSection({
                   )
                 </span>
               )}
-            </label>
-          </div>
+            </span>
+          </label>
         ))}
       </div>
     </div>

@@ -85,7 +85,7 @@ export function ActionButtonsPanel({
         >
           <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
           <Sword className="w-6 h-6 sm:w-10 sm:h-10 drop-shadow-lg group-hover:rotate-12 transition-transform" />
-          <span className="text-[10px] sm:text-lg font-black uppercase tracking-widest italic drop-shadow-md">
+          <span className="text-xs sm:text-lg font-black uppercase tracking-widest italic drop-shadow-md">
             Меч
           </span>
         </Button>
@@ -110,7 +110,7 @@ export function ActionButtonsPanel({
         >
           <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
           <Crosshair className="w-6 h-6 sm:w-10 sm:h-10 drop-shadow-lg group-hover:scale-110 transition-transform" />
-          <span className="text-[10px] sm:text-lg font-black uppercase tracking-widest italic drop-shadow-md">
+          <span className="text-xs sm:text-lg font-black uppercase tracking-widest italic drop-shadow-md">
             Лук
           </span>
         </Button>
@@ -135,7 +135,7 @@ export function ActionButtonsPanel({
         >
           <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
           <Sparkles className="w-6 h-6 sm:w-10 sm:h-10 drop-shadow-lg group-hover:animate-pulse transition-transform" />
-          <span className="text-[10px] sm:text-lg font-black uppercase tracking-widest italic drop-shadow-md">
+          <span className="text-xs sm:text-lg font-black uppercase tracking-widest italic drop-shadow-md">
             Магія
           </span>
         </Button>
@@ -154,7 +154,7 @@ export function ActionButtonsPanel({
             >
               <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
               <Zap className="w-6 h-6 sm:w-10 sm:h-10 drop-shadow-lg group-hover:animate-bounce transition-transform" />
-              <span className="text-[10px] sm:text-lg font-black uppercase tracking-widest italic drop-shadow-md">
+              <span className="text-xs sm:text-lg font-black uppercase tracking-widest italic drop-shadow-md">
                 Бонусна дія
               </span>
             </Button>
@@ -166,8 +166,8 @@ export function ActionButtonsPanel({
             />
           </>
         ) : (
-          <div className="h-20 sm:h-32 flex items-center justify-center glass-card rounded-2xl text-muted-foreground text-[10px] sm:text-sm font-bold uppercase tracking-widest italic px-4 text-center">
-            {canUseBonusAction ? "No Bonus" : "Used"}
+          <div className="h-20 sm:h-32 flex items-center justify-center glass-card rounded-2xl text-muted-foreground text-xs sm:text-sm font-bold uppercase tracking-widest italic px-4 text-center">
+            {canUseBonusAction ? "Немає бонусних дій" : "Бонусну дію використано"}
           </div>
         )}
 
@@ -178,7 +178,7 @@ export function ActionButtonsPanel({
             onClick={onOpenMorale}
             className="h-20 sm:h-32 min-h-[44px] flex flex-col items-center justify-center gap-1 sm:gap-2 rounded-2xl border-amber-500/50 bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20"
           >
-            <span className="text-[10px] sm:text-lg font-black uppercase tracking-widest italic">
+            <span className="text-xs sm:text-lg font-black uppercase tracking-widest italic">
               Мораль
             </span>
           </Button>
@@ -193,8 +193,8 @@ export function ActionButtonsPanel({
             className="w-full h-20 sm:h-32 flex flex-col items-center justify-center gap-1 sm:gap-2 rounded-2xl border-primary/40 bg-primary/10 text-primary hover:bg-primary/20 hover:border-primary/60 transition-all duration-300 group"
           >
             <SkipForward className="w-6 h-6 sm:w-10 sm:h-10 group-hover:translate-x-1 transition-transform" />
-            <span className="text-[10px] sm:text-lg font-black uppercase tracking-widest italic">
-              Pass
+            <span className="text-xs sm:text-lg font-black uppercase tracking-widest italic">
+              Пропустити хід
             </span>
           </Button>
         </div>
