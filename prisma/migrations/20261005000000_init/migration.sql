@@ -1,3 +1,6 @@
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "public";
+
 -- CreateTable
 CREATE TABLE "users" (
     "id" TEXT NOT NULL,
@@ -22,6 +25,7 @@ CREATE TABLE "campaigns" (
     "status" TEXT NOT NULL DEFAULT 'active',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "friendlyFire" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "campaigns_pkey" PRIMARY KEY ("id")
 );
@@ -87,6 +91,14 @@ CREATE TABLE "characters" (
     "skillTreeProgress" JSONB NOT NULL DEFAULT '{}',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "immunities" JSONB NOT NULL DEFAULT '[]',
+    "morale" INTEGER NOT NULL DEFAULT 0,
+    "maxTargets" INTEGER NOT NULL DEFAULT 1,
+    "minTargets" INTEGER NOT NULL DEFAULT 1,
+    "personalSkillId" TEXT,
+    "hpMultiplier" DOUBLE PRECISION,
+    "meleeMultiplier" DOUBLE PRECISION,
+    "rangedMultiplier" DOUBLE PRECISION,
 
     CONSTRAINT "characters_pkey" PRIMARY KEY ("id")
 );
@@ -115,6 +127,12 @@ CREATE TABLE "units" (
     "knownSpells" JSONB NOT NULL DEFAULT '[]',
     "avatar" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "damageModifier" TEXT,
+    "immunities" JSONB NOT NULL DEFAULT '[]',
+    "race" TEXT,
+    "morale" INTEGER NOT NULL DEFAULT 0,
+    "maxTargets" INTEGER NOT NULL DEFAULT 1,
+    "minTargets" INTEGER NOT NULL DEFAULT 1,
 
     CONSTRAINT "units_pkey" PRIMARY KEY ("id")
 );
@@ -126,6 +144,7 @@ CREATE TABLE "unit_groups" (
     "name" TEXT NOT NULL,
     "color" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "damageModifier" TEXT,
 
     CONSTRAINT "unit_groups_pkey" PRIMARY KEY ("id")
 );
@@ -136,7 +155,6 @@ CREATE TABLE "spells" (
     "campaignId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "level" INTEGER NOT NULL DEFAULT 0,
-    "school" TEXT,
     "type" TEXT NOT NULL,
     "damageType" TEXT NOT NULL,
     "castingTime" TEXT,
@@ -144,11 +162,23 @@ CREATE TABLE "spells" (
     "components" TEXT,
     "duration" TEXT,
     "concentration" BOOLEAN NOT NULL DEFAULT false,
-    "damageDice" TEXT,
     "savingThrow" JSONB,
-    "description" TEXT NOT NULL,
+    "hitCheck" JSONB,
+    "description" TEXT,
+    "effects" JSONB,
+    "effectDetails" JSONB,
     "groupId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "damageElement" TEXT,
+    "icon" TEXT,
+    "target" TEXT,
+    "damageModifier" TEXT,
+    "healModifier" TEXT,
+    "diceCount" INTEGER,
+    "diceType" TEXT,
+    "appearanceDescription" TEXT,
+    "damageDistribution" JSONB,
+    "summonUnitId" TEXT,
 
     CONSTRAINT "spells_pkey" PRIMARY KEY ("id")
 );
@@ -189,6 +219,7 @@ CREATE TABLE "artifact_sets" (
     "description" TEXT,
     "artifactIds" JSONB NOT NULL DEFAULT '[]',
     "setBonus" JSONB,
+    "icon" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "artifact_sets_pkey" PRIMARY KEY ("id")
@@ -242,6 +273,8 @@ CREATE TABLE "battle_scenes" (
     "currentRound" INTEGER NOT NULL DEFAULT 1,
     "currentTurnIndex" INTEGER NOT NULL DEFAULT 0,
     "initiativeOrder" JSONB NOT NULL DEFAULT '[]',
+    "pendingSummons" JSONB NOT NULL DEFAULT '[]',
+    "pendingMoraleCheck" JSONB,
     "battleLog" JSONB NOT NULL DEFAULT '[]',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "startedAt" TIMESTAMP(3),
@@ -280,6 +313,71 @@ CREATE TABLE "racial_abilities" (
     CONSTRAINT "racial_abilities_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "skills" (
+    "id" TEXT NOT NULL,
+    "campaignId" TEXT NOT NULL,
+    "name" TEXT NOT NULL DEFAULT '',
+    "description" TEXT,
+    "bonuses" JSONB NOT NULL DEFAULT '{}',
+    "damage" INTEGER,
+    "armor" INTEGER,
+    "speed" INTEGER,
+    "physicalResistance" INTEGER,
+    "magicalResistance" INTEGER,
+    "spellId" TEXT,
+    "spellGroupId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "icon" TEXT,
+    "image" TEXT,
+    "mainSkillId" TEXT,
+    "spellEnhancementTypes" JSONB NOT NULL DEFAULT '[]',
+    "spellEffectIncrease" INTEGER,
+    "spellTargetChange" JSONB,
+    "spellAdditionalModifier" JSONB,
+    "spellNewSpellId" TEXT,
+    "grantedSpellId" TEXT,
+    "skillTriggers" JSONB NOT NULL DEFAULT '[]',
+    "basicInfo" JSONB NOT NULL DEFAULT '{}',
+    "combatStats" JSONB NOT NULL DEFAULT '{}',
+    "mainSkillData" JSONB NOT NULL DEFAULT '{}',
+    "spellData" JSONB NOT NULL DEFAULT '{}',
+    "spellEnhancementData" JSONB NOT NULL DEFAULT '{}',
+    "appearanceDescription" TEXT,
+
+    CONSTRAINT "skills_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "races" (
+    "id" TEXT NOT NULL,
+    "campaignId" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "availableSkills" JSONB NOT NULL DEFAULT '[]',
+    "disabledSkills" JSONB NOT NULL DEFAULT '[]',
+    "passiveAbility" JSONB,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "spellSlotProgression" JSONB NOT NULL DEFAULT '[]',
+
+    CONSTRAINT "races_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "main_skills" (
+    "id" TEXT NOT NULL,
+    "campaignId" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "color" TEXT NOT NULL,
+    "icon" TEXT,
+    "isEnableInSkillTree" BOOLEAN NOT NULL DEFAULT false,
+    "spellGroupId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "main_skills_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
@@ -287,13 +385,64 @@ CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 CREATE UNIQUE INDEX "campaigns_inviteCode_key" ON "campaigns"("inviteCode");
 
 -- CreateIndex
+CREATE INDEX "campaigns_dmUserId_idx" ON "campaigns"("dmUserId");
+
+-- CreateIndex
+CREATE INDEX "campaign_members_userId_idx" ON "campaign_members"("userId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "campaign_members_campaignId_userId_key" ON "campaign_members"("campaignId", "userId");
+
+-- CreateIndex
+CREATE INDEX "characters_campaignId_idx" ON "characters"("campaignId");
+
+-- CreateIndex
+CREATE INDEX "characters_controlledBy_idx" ON "characters"("controlledBy");
+
+-- CreateIndex
+CREATE INDEX "units_campaignId_idx" ON "units"("campaignId");
+
+-- CreateIndex
+CREATE INDEX "unit_groups_campaignId_idx" ON "unit_groups"("campaignId");
+
+-- CreateIndex
+CREATE INDEX "spells_campaignId_idx" ON "spells"("campaignId");
+
+-- CreateIndex
+CREATE INDEX "spell_groups_campaignId_idx" ON "spell_groups"("campaignId");
+
+-- CreateIndex
+CREATE INDEX "artifacts_campaignId_idx" ON "artifacts"("campaignId");
+
+-- CreateIndex
+CREATE INDEX "artifact_sets_campaignId_idx" ON "artifact_sets"("campaignId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "character_inventories_characterId_key" ON "character_inventories"("characterId");
 
 -- CreateIndex
+CREATE INDEX "skill_trees_campaignId_race_idx" ON "skill_trees"("campaignId", "race");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "character_skills_characterId_skillTreeId_key" ON "character_skills"("characterId", "skillTreeId");
+
+-- CreateIndex
+CREATE INDEX "battle_scenes_campaignId_idx" ON "battle_scenes"("campaignId");
+
+-- CreateIndex
+CREATE INDEX "racial_abilities_campaignId_idx" ON "racial_abilities"("campaignId");
+
+-- CreateIndex
+CREATE INDEX "skills_campaignId_idx" ON "skills"("campaignId");
+
+-- CreateIndex
+CREATE INDEX "skills_campaignId_id_idx" ON "skills"("campaignId", "id");
+
+-- CreateIndex
+CREATE INDEX "races_campaignId_name_idx" ON "races"("campaignId", "name");
+
+-- CreateIndex
+CREATE INDEX "main_skills_campaignId_idx" ON "main_skills"("campaignId");
 
 -- AddForeignKey
 ALTER TABLE "campaigns" ADD CONSTRAINT "campaigns_dmUserId_fkey" FOREIGN KEY ("dmUserId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -320,6 +469,9 @@ ALTER TABLE "units" ADD CONSTRAINT "units_groupId_fkey" FOREIGN KEY ("groupId") 
 ALTER TABLE "unit_groups" ADD CONSTRAINT "unit_groups_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "campaigns"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "spells" ADD CONSTRAINT "spells_summonUnitId_fkey" FOREIGN KEY ("summonUnitId") REFERENCES "units"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "spells" ADD CONSTRAINT "spells_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "campaigns"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -341,16 +493,72 @@ ALTER TABLE "artifact_sets" ADD CONSTRAINT "artifact_sets_campaignId_fkey" FOREI
 ALTER TABLE "character_inventories" ADD CONSTRAINT "character_inventories_characterId_fkey" FOREIGN KEY ("characterId") REFERENCES "characters"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "skill_trees" ADD CONSTRAINT "skill_trees_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "campaigns"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "character_skills" ADD CONSTRAINT "character_skills_characterId_fkey" FOREIGN KEY ("characterId") REFERENCES "characters"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "character_skills" ADD CONSTRAINT "character_skills_skillTreeId_fkey" FOREIGN KEY ("skillTreeId") REFERENCES "skill_trees"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "skill_trees" ADD CONSTRAINT "skill_trees_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "campaigns"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "battle_scenes" ADD CONSTRAINT "battle_scenes_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "campaigns"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "racial_abilities" ADD CONSTRAINT "racial_abilities_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "campaigns"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "skills" ADD CONSTRAINT "skills_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "campaigns"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "skills" ADD CONSTRAINT "skills_mainSkillId_fkey" FOREIGN KEY ("mainSkillId") REFERENCES "main_skills"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "skills" ADD CONSTRAINT "skills_spellGroupId_fkey" FOREIGN KEY ("spellGroupId") REFERENCES "spell_groups"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "skills" ADD CONSTRAINT "skills_spellId_fkey" FOREIGN KEY ("spellId") REFERENCES "spells"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "skills" ADD CONSTRAINT "skills_spellNewSpellId_fkey" FOREIGN KEY ("spellNewSpellId") REFERENCES "spells"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "skills" ADD CONSTRAINT "skills_grantedSpellId_fkey" FOREIGN KEY ("grantedSpellId") REFERENCES "spells"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "races" ADD CONSTRAINT "races_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "campaigns"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "main_skills" ADD CONSTRAINT "main_skills_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "campaigns"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "main_skills" ADD CONSTRAINT "main_skills_spellGroupId_fkey" FOREIGN KEY ("spellGroupId") REFERENCES "spell_groups"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+
+-- RLS: доступ через Supabase Data API (anon key) закритий; Prisma і service_role RLS не обмежує.
+-- shadow DB (migrate dev / diff) не має _prisma_migrations
+DO $$
+BEGIN
+  IF to_regclass('public._prisma_migrations') IS NOT NULL THEN
+    ALTER TABLE "_prisma_migrations" ENABLE ROW LEVEL SECURITY;
+  END IF;
+END $$;
+ALTER TABLE "users" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "campaigns" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "campaign_members" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "characters" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "units" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "unit_groups" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "spells" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "spell_groups" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "artifacts" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "artifact_sets" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "character_inventories" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "skill_trees" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "character_skills" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "battle_scenes" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "status_effects" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "racial_abilities" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "skills" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "races" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "main_skills" ENABLE ROW LEVEL SECURITY;

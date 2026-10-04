@@ -294,9 +294,8 @@ const { formData, updateField, handleSubmit } = useCharacterForm({
 npm run dev              # Запуск dev сервера
 
 # Build
-npm run build            # Production build з Prisma generate (без міграцій)
+npm run build            # Build з Prisma generate (на Vercel — scripts/vercel-build.mjs)
 npm run build:local      # Local build з Prisma generate
-npm run build:with-migrations  # Build з застосуванням міграцій
 
 # Deployment
 npm run deploy           # Deploy на Vercel (production)
@@ -306,7 +305,7 @@ npm run deploy:dev       # Deploy development
 # Database
 npx prisma generate      # Генерація Prisma Client
 npx prisma migrate dev   # Створення нової міграції (тільки локально)
-npx prisma migrate deploy # Застосування міграцій (локально / CI; на Vercel у `vercel.json` за замовчуванням **немає** — див. docs/VERCEL.md)
+pnpm migrate:deploy      # Застосування міграцій вручну (DIRECT_URL з .env.local); production-збірка з main робить це сама
 npx prisma studio        # Відкриття Prisma Studio
 
 # Icons in Supabase Storage (потрібен SUPABASE_SERVICE_ROLE_KEY)
@@ -315,7 +314,7 @@ pnpm run migrate-skill-icons-to-supabase [campaignId] # Іконки скілі�
 pnpm run migrate-unit-icons-to-supabase [campaignId]  # Аватари юнітів → bucket unit-icons
 ```
 
-**Примітка**: У `vercel.json` збірка — `prisma generate && next build` **без** `migrate deploy` (інакше на існуючій Supabase-БД без `_prisma_migrations` отримаєш **P3005**). Схему оновлюй через Supabase MCP / SQL або `migrate deploy` вручну проти потрібної БД. Деталі: `docs/VERCEL.md`.
+**Примітка**: Vercel запускає `node scripts/vercel-build.mjs`: `prisma migrate deploy` виконується лише в production-збірці з `main` (через `DIRECT_URL`). Деталі: `docs/VERCEL.md`.
 
 ## 🎨 UI/UX
 
@@ -369,17 +368,7 @@ pnpm run migrate-unit-icons-to-supabase [campaignId]  # Аватари юніт�
 
 ### Міграції та збірка на Vercel
 
-У репозиторії в `vercel.json` задано:
-
-```json
-{
-  "buildCommand": "prisma generate && next build"
-}
-```
-
-`prisma migrate deploy` у команду збірки **не додаємо**, поки в прод-БД немає коректної таблиці `_prisma_migrations` (baseline). Інакше збірка падає з **P3005** (*database schema is not empty*).
-
-Якщо в логах Vercel все одно видно `prisma migrate deploy` — у **Project → Settings → Build & Development** перевір, чи не перевизначено **Build Command**; прибери override або вирівняй з `vercel.json`.
+У `vercel.json` збірка — `node scripts/vercel-build.mjs`: `prisma generate` → `prisma migrate deploy` (лише production з `main`) → `next build`. Production-збірка з іншої гілки падає, якщо не задано `ALLOW_PROD_MIGRATE=1`.
 
 Однакові персонажі на локалці й на проді бувають лише якщо **той самий** `DATABASE_URL` (той самий хост/проєкт Postgres). Порівняй рядок з Vercel (Production) і з `.env.local` / `.env`.
 

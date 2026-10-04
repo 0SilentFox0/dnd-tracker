@@ -50,6 +50,7 @@ model Campaign {
   unitGroups      UnitGroup[]
   units           Unit[]
 
+  @@index([dmUserId])
   @@map("campaigns")
 }
 
@@ -63,6 +64,7 @@ model CampaignMember {
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([campaignId, userId])
+  @@index([userId])
   @@map("campaign_members")
 }
 
@@ -129,6 +131,7 @@ model Character {
   user                 User                @relation(fields: [controlledBy], references: [id], onDelete: SetNull)
 
   @@index([campaignId])
+  @@index([controlledBy])
   @@map("characters")
 }
 
@@ -179,44 +182,45 @@ model UnitGroup {
   campaign       Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   units          Unit[]
 
+  @@index([campaignId])
   @@map("unit_groups")
 }
 
 model Spell {
-  id               String      @id @default(cuid())
-  campaignId       String
-  name             String
-  level            Int         @default(0)
-  type             String
-  damageType       String
-  castingTime      String?
-  range            String?
-  components       String?
-  duration         String?
-  concentration    Boolean     @default(false)
-  savingThrow      Json?
-  hitCheck         Json?   // spell attack: { ability, dc } — заклинання застосовується якщо (кидок + мод. кастера) >= dc
-  description      String?
-  effects          Json?    // array of effect strings (like skills)
-  effectDetails    Json?    // { duration, effects: [{ type, value, isPercentage? }] } from test assertions
-  groupId          String?
-  createdAt        DateTime    @default(now())
-  damageElement    String?
-  icon             String?
-  target           String?
-  damageModifier   String?
-  healModifier     String?
-  diceCount        Int?
-  diceType         String?
-  appearanceDescription String?  // опис вигляду для довідника гравців (редагує DM)
-  damageDistribution Json?       // [100, 75, 50, 25] — % шкоди на кожну ціль для AoE спелів. Default: усі цілі 100%.
-  summonUnitId      String?
-  summonUnit        Unit?       @relation("SpellSummonUnit", fields: [summonUnitId], references: [id], onDelete: SetNull)
-  skills              Skill[]
-  skillsAsNewSpell     Skill[]  @relation("SkillNewSpell")
-  skillsGrantingSpell Skill[]  @relation("SkillGrantedSpell")
-  campaign            Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  spellGroup          SpellGroup? @relation(fields: [groupId], references: [id])
+  id                    String      @id @default(cuid())
+  campaignId            String
+  name                  String
+  level                 Int         @default(0)
+  type                  String
+  damageType            String
+  castingTime           String?
+  range                 String?
+  components            String?
+  duration              String?
+  concentration         Boolean     @default(false)
+  savingThrow           Json?
+  hitCheck              Json? // spell attack: { ability, dc } — заклинання застосовується якщо (кидок + мод. кастера) >= dc
+  description           String?
+  effects               Json? // array of effect strings (like skills)
+  effectDetails         Json? // { duration, effects: [{ type, value, isPercentage? }] } from test assertions
+  groupId               String?
+  createdAt             DateTime    @default(now())
+  damageElement         String?
+  icon                  String?
+  target                String?
+  damageModifier        String?
+  healModifier          String?
+  diceCount             Int?
+  diceType              String?
+  appearanceDescription String? // опис вигляду для довідника гравців (редагує DM)
+  damageDistribution    Json? // [100, 75, 50, 25] — % шкоди на кожну ціль для AoE спелів. Default: усі цілі 100%.
+  summonUnitId          String?
+  summonUnit            Unit?       @relation("SpellSummonUnit", fields: [summonUnitId], references: [id], onDelete: SetNull)
+  skills                Skill[]
+  skillsAsNewSpell      Skill[]     @relation("SkillNewSpell")
+  skillsGrantingSpell   Skill[]     @relation("SkillGrantedSpell")
+  campaign              Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  spellGroup            SpellGroup? @relation(fields: [groupId], references: [id])
 
   @@index([campaignId])
   @@map("spells")
@@ -232,6 +236,7 @@ model SpellGroup {
   spells     Spell[]
   mainSkills MainSkill[]
 
+  @@index([campaignId])
   @@map("spell_groups")
 }
 
@@ -267,6 +272,7 @@ model ArtifactSet {
   campaign    Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   artifacts   Artifact[]
 
+  @@index([campaignId])
   @@map("artifact_sets")
 }
 
@@ -312,23 +318,24 @@ model CharacterSkills {
 }
 
 model BattleScene {
-  id               String    @id @default(cuid())
-  campaignId       String
-  name             String
-  description      String?
-  status           String    @default("prepared")
-  participants     Json      @default("[]")
-  currentRound     Int       @default(1)
-  currentTurnIndex Int       @default(0)
-  initiativeOrder     Json      @default("[]")
-  pendingSummons      Json      @default("[]")
-  pendingMoraleCheck  Json?
-  battleLog           Json      @default("[]")
-  createdAt           DateTime  @default(now())
-  startedAt        DateTime?
-  completedAt      DateTime?
-  campaign         Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  id                 String    @id @default(cuid())
+  campaignId         String
+  name               String
+  description        String?
+  status             String    @default("prepared")
+  participants       Json      @default("[]")
+  currentRound       Int       @default(1)
+  currentTurnIndex   Int       @default(0)
+  initiativeOrder    Json      @default("[]")
+  pendingSummons     Json      @default("[]")
+  pendingMoraleCheck Json?
+  battleLog          Json      @default("[]")
+  createdAt          DateTime  @default(now())
+  startedAt          DateTime?
+  completedAt        DateTime?
+  campaign           Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
+  @@index([campaignId])
   @@map("battle_scenes")
 }
 
@@ -358,6 +365,7 @@ model RacialAbility {
   createdAt   DateTime @default(now())
   campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
+  @@index([campaignId])
   @@map("racial_abilities")
 }
 
@@ -383,20 +391,20 @@ model Skill {
   spellTargetChange       Json?
   spellAdditionalModifier Json?
   spellNewSpellId         String?
-  grantedSpellId          String?     // скіл додає це заклинання персонажу
+  grantedSpellId          String? // скіл додає це заклинання персонажу
   skillTriggers           Json        @default("[]")
   basicInfo               Json        @default("{}")
   combatStats             Json        @default("{}")
   mainSkillData           Json        @default("{}")
   spellData               Json        @default("{}")
   spellEnhancementData    Json        @default("{}")
-  appearanceDescription   String?     // опис вигляду для довідника гравців (редагує DM)
+  appearanceDescription   String? // опис вигляду для довідника гравців (редагує DM)
   campaign                Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   mainSkill               MainSkill?  @relation(fields: [mainSkillId], references: [id])
   spellGroup              SpellGroup? @relation(fields: [spellGroupId], references: [id])
   spell                   Spell?      @relation(fields: [spellId], references: [id])
   spellNewSpell           Spell?      @relation("SkillNewSpell", fields: [spellNewSpellId], references: [id])
-  grantedSpell             Spell?      @relation("SkillGrantedSpell", fields: [grantedSpellId], references: [id])
+  grantedSpell            Spell?      @relation("SkillGrantedSpell", fields: [grantedSpellId], references: [id])
 
   @@index([campaignId])
   @@index([campaignId, id])

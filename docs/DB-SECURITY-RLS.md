@@ -4,9 +4,10 @@
 
 ## Що зробити
 
-1. **Увімкнути RLS на всіх таблицях**  
-   Виконай SQL з файлу **`scripts/enable-rls.sql`** в Supabase:  
-   **Dashboard → SQL Editor** → вставити вміст → **Run**.
+1. **RLS на всіх таблицях вмикає міграція**  
+   `prisma/migrations/20261005000000_init/migration.sql` закінчується блоком `ALTER TABLE … ENABLE ROW LEVEL SECURITY`.
+   Кожна нова міграція з `CREATE TABLE` має містити такий самий `ALTER TABLE` — це перевіряє тест
+   `prisma/__tests__/migrations-rls.test.ts`.
 
 2. **Результат**
    - Через **anon key** (публічний клієнт) без політик ніхто не отримає рядків.

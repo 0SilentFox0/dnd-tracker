@@ -13,10 +13,6 @@
 
 Мають збігатися **хост** (напр. `aws-…pooler.supabase.com` або `db.xxx.supabase.co`), **ім’я БД**, **користувач / project ref**. Якщо локально інший Supabase-проєкт або branch — дані не з’являться на проді навіть після успішного деплою.
 
-### Деплой падає з P3005 (`prisma migrate deploy`)
-
-1. У репозиторії в `vercel.json` має бути **`prisma generate && next build`** без `migrate deploy`. Якщо так і є, але в логах збірки все одно `prisma migrate deploy` → у **Vercel → Settings → Build and Deployment → Build Command** знято галочку override або вистав та саму команду, що в `vercel.json` (інколи старий override лишається з попередніх експериментів).
-2. База вже зі схемою з Supabase / без таблиці Prisma **`_prisma_migrations`** — `migrate deploy` на такій БД без **baseline** не запускай у build. Схему оновлюй окремо (Supabase Dashboard, MCP `apply_migration`, або один раз `migrate deploy` з прямого `DATABASE_URL` після baseline — див. нижче).
 
 ## Змінні середовища (Production / Preview)
 
@@ -30,6 +26,7 @@
 | `NEXT_PUBLIC_SUPABASE_URL` | Усі | URL проєкту Supabase. |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Усі | Anon (public) key. |
 | `SUPABASE_SERVICE_ROLE_KEY` | Production, Preview | Service role — лише на сервері, не в клієнтському бандлі. |
+| `DIRECT_URL` | Production | Session pooler / Direct, порт 5432 — для `prisma migrate deploy` у збірці. |
 
 ### Рекомендовані (реалтайм бої)
 
@@ -38,7 +35,7 @@
 | `PUSHER_APP_ID` | Production, Preview | Якщо порожньо — події бою через Pusher не шлються. |
 | `PUSHER_SECRET` | Production, Preview | Секрет сервера Pusher. |
 | `NEXT_PUBLIC_PUSHER_KEY` | Усі | Публічний ключ (клієнт). |
-| `NEXT_PUBLIC_PUSHER_CLUSTER` | Усі | Кластер, напр. `eu` або `mt1` (за замовчуванням у коді `mt1`). |
+| `NEXT_PUBLIC_PUSHER_CLUSTER` | Усі | Кластер `eu` (за замовчуванням у коді `eu`). |
 
 ### Опційні
 
@@ -74,41 +71,24 @@ pnpm run deploy:preview  # preview-деплой
 
 ### Чому збірка «висить» на Prisma / pooler Supabase (6543)
 
-`prisma generate` **не потребує** живої БД, але CLI може довго чекати TCP до `DATABASE_URL`. На етапі **install** і **generate** з реальним pooler (EU) з білд-машини Vercel (наприклад iad1) це іноді тягнеться хвилини.
+`prisma generate` **не потребує** живої БД, але CLI може довго чекати TCP до `DATABASE_URL`. На етапі **install** і **generate** з реальним pooler (EU) з білд-машини Vercel це іноді тягнеться хвилини.
 
 У проєкті зроблено так:
 
 - **`postinstall`** на Vercel пропускає `prisma generate` (`scripts/postinstall.mjs`, перевірка `VERCEL`).
-- **`buildCommand`** запускає `prisma generate` з **placeholder** `DATABASE_URL` на `127.0.0.1` (з’єднання не в Supabase), далі `next build` уже використовує справжній `DATABASE_URL` з env проєкту для коду, що звертається до БД під час білду (якщо такі маршрути є).
+- **`scripts/vercel-build.mjs`** (buildCommand) запускає `prisma generate` з **placeholder** `DATABASE_URL` на `127.0.0.1` (з’єднання не в Supabase), далі `next build` уже використовує справжній `DATABASE_URL` з env проєкту для коду, що звертається до БД під час білду (якщо такі маршрути є).
 
 ## Міграції БД
 
-За замовчуванням збірка на Vercel **не** викликає `prisma migrate deploy` (у `vercel.json` лише `prisma generate && next build`). Міграції потрібно накатувати **проти тієї ж БД**, що в `DATABASE_URL` у Vercel.
-
-### Накатати міграції зараз (рекомендовано)
-
-1. Скопіюй **Production** `DATABASE_URL` з Vercel → Settings → Environment Variables. Для DDL часто зручніший **прямий** Postgres Supabase (порт `5432`, не transaction pooler `6543`), якщо pooler обриває довгі міграції.
-2. Локально один раз:
-
-```bash
-DATABASE_URL="postgresql://..." pnpm exec prisma migrate deploy
-```
-
-Перевір у Supabase → Table Editor, що з’явилися / оновилися таблиці та колонки.
-
-### Чому не вмикати `migrate deploy` у Vercel build без підготовки
-
-Якщо база вже існувала (створена вручну, через `db push` або старий процес), а таблиця `_prisma_migrations` порожня або не відповідає історії в `prisma/migrations`, `prisma migrate deploy` під час збірки впаде з **P3005** (*database schema is not empty*). Тоді потрібен **baseline** по [документації Prisma](https://www.prisma.io/docs/guides/migrate/production-troubleshooting#baseline-your-production-environment) (позначити вже застосовані міграції через `prisma migrate resolve --applied ...`). Після успішного baseline можна змінити `vercel.json`:
-
-```json
-"buildCommand": "prisma migrate deploy && prisma generate && next build"
-```
+Production-збірка накатує міграції сама (`scripts/vercel-build.mjs` → `prisma migrate deploy` через `DIRECT_URL`).
+Preview-збірки міграції не запускають, бо ділять ту саму БД. Вручну: `pnpm migrate:deploy` (бере `DIRECT_URL` з `.env.local`).
+Історію міграцій зведено в `20261005000000_init` (2026-10-05) під час переходу на новий Supabase-проєкт.
 
 ### Симптоми: дані «не збігаються» з локалхостом, 500 на сторінках
 
 Часто це **не одна база**: порівняй `DATABASE_URL` у Vercel і локально.
 
-Якщо база одна, але **500** після деплою — часто **не накатані міграції** відносно коду Prisma. Виконай `migrate deploy` (див. вище).
+Якщо база одна, але **500** після деплою — перевір у логах production-збірки крок `[vercel-build] prisma migrate deploy`.
 
 ## Supabase: чому pooler egress ≫ розмір БД
 

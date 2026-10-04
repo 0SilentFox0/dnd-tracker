@@ -5,7 +5,6 @@
   "scripts": {
     "dev": "NEXT_PUBLIC_BATTLE_TURN_TIMING=1 BATTLE_TURN_TIMING=1 next dev",
     "build": "prisma generate && next build",
-    "build:with-migrations": "prisma generate && pnpm migrate:deploy && next build",
     "build:local": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
@@ -32,9 +31,7 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:integration": "vitest run --config vitest.integration.config.mts",
-    "migrate:deploy": "bash scripts/prisma-migrate-deploy.sh",
-    "migrate:baseline:resolve-all": "bash scripts/prisma-baseline-resolve-all.sh",
-    "migrate:baseline:prefix": "bash scripts/prisma-resolve-prefix-and-deploy.sh"
+    "migrate:deploy": "bash scripts/prisma-migrate-deploy.sh"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

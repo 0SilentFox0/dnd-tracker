@@ -24,7 +24,7 @@
 Потрібно накатити **ті самі зміни** на обидві БД:
 
 - через **Supabase Dashboard → SQL** / **MCP `apply_migration`**, або
-- `pnpm exec prisma migrate deploy` з відповідним `DATABASE_URL` (на prod у вас часто потрібен **baseline** або прямий SQL — див. `docs/VERCEL.md`).
+- `pnpm migrate:deploy` з відповідним `DIRECT_URL`; production накатується автоматично під час збірки (`scripts/vercel-build.mjs`).
 
 `prisma generate` на Vercel **не** оновлює схему — лише генерує клієнт у репозиторії.
 

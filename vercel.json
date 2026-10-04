@@ -1,6 +1,6 @@
 {
-  "buildCommand": "DATABASE_URL='postgresql://build:build@127.0.0.1:5432/build?schema=public' prisma generate && next build",
+  "buildCommand": "node scripts/vercel-build.mjs",
   "installCommand": "pnpm install --frozen-lockfile",
   "framework": "nextjs",
-  "regions": ["iad1"]
+  "regions": ["fra1"]
 }
