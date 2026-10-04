@@ -33,4 +33,18 @@ describe("OptimizedImage", () => {
 
     expect(screen.queryByAltText("broken")).toBeNull();
   });
+
+  it("після помилки нова адреса знову показує картинку (прев'ю під час введення URL)", () => {
+    const { rerender } = render(
+      <OptimizedImage src="https://example.com/h" alt="preview" width={48} height={48} fallback={null} />,
+    );
+
+    fireEvent.error(screen.getByAltText("preview"));
+
+    rerender(
+      <OptimizedImage src="https://example.com/icon.png" alt="preview" width={48} height={48} fallback={null} />,
+    );
+
+    expect(screen.getByAltText("preview")).toBeInTheDocument();
+  });
 });

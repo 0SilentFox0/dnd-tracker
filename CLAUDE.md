@@ -60,6 +60,13 @@ Page `app/campaigns/[id]/battles/[battleId]/page.tsx` → `useBattleSceneLogic` 
 - `import/no-cycle` is on at maxDepth 1 — fix circular imports rather than working around them.
 - `padding-line-between-statements` requires a blank line around `const`/`let`/`var`/`if`/`function`/`class`/`return`/blocks — auto-fixable but easy to miss when hand-editing.
 
+### Component API conventions
+
+- Aim for ≤ ~7 props. Pass domain objects (`participant`, `character`, `form`) instead of exploding their fields into separate props.
+- Group related callbacks into one object prop (`actions={{ onRename, onDelete }}`) rather than many `onX` props.
+- Deep trees (battle scene, character view, skill tree) use a context provider instead of drilling `battle`/`handlers`/`mutations` bags through 3+ levels.
+- Shared UI goes in `components/common` or `components/ui`; check there before writing a new card, dialog, avatar or empty state.
+
 ### Lint/TS conventions enforced by ESLint
 
 - `no-console` allows only `info`/`warn`/`error` outside `scripts/` and `app/api/**`. Don't add `console.log` to client/lib code.
