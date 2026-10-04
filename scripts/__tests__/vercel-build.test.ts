@@ -21,6 +21,17 @@ describe("buildSteps", () => {
     expect(steps[1].timeoutMs).toBe(180_000);
   });
 
+  it("placeholder DATABASE_URL лише для generate — migrate і next build беруть справжній", () => {
+    const steps = buildSteps({
+      VERCEL_ENV: "production",
+      VERCEL_GIT_COMMIT_REF: "main",
+      DIRECT_URL: "postgresql://x",
+    });
+
+    expect(steps[1].env).toBeUndefined();
+    expect(steps[2].env).toBeUndefined();
+  });
+
   it("preview не запускає міграції", () => {
     const steps = buildSteps({ VERCEL_ENV: "preview" });
 
