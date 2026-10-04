@@ -6,7 +6,11 @@ const PLACEHOLDER = "postgresql://build:build@127.0.0.1:5432/build?schema=public
 
 describe("buildSteps", () => {
   it("production: generate з placeholder → migrate deploy → next build", () => {
-    const steps = buildSteps({ VERCEL_ENV: "production", DIRECT_URL: "postgresql://x" });
+    const steps = buildSteps({
+      VERCEL_ENV: "production",
+      VERCEL_GIT_COMMIT_REF: "main",
+      DIRECT_URL: "postgresql://x",
+    });
 
     expect(steps.map((s) => s.cmd)).toEqual([
       "prisma generate",
@@ -30,11 +34,43 @@ describe("buildSteps", () => {
 
 describe("assertBuildEnv", () => {
   it("кидає помилку в production без DIRECT_URL", () => {
-    expect(() => assertBuildEnv({ VERCEL_ENV: "production" })).toThrow(/DIRECT_URL/);
+    expect(() =>
+      assertBuildEnv({ VERCEL_ENV: "production", VERCEL_GIT_COMMIT_REF: "main" }),
+    ).toThrow(/DIRECT_URL/);
   });
 
   it("кидає помилку в production з порожнім DIRECT_URL", () => {
-    expect(() => assertBuildEnv({ VERCEL_ENV: "production", DIRECT_URL: "  " })).toThrow(/DIRECT_URL/);
+    expect(() =>
+      assertBuildEnv({ VERCEL_ENV: "production", VERCEL_GIT_COMMIT_REF: "main", DIRECT_URL: "  " }),
+    ).toThrow(/DIRECT_URL/);
+  });
+
+  it("кидає помилку для production-деплою не з main", () => {
+    expect(() =>
+      assertBuildEnv({
+        VERCEL_ENV: "production",
+        VERCEL_GIT_COMMIT_REF: "feat/x",
+        DIRECT_URL: "postgresql://x",
+      }),
+    ).toThrow(/feat\/x/);
+  });
+
+  it("кидає помилку для production-деплою з CLI без git ref", () => {
+    expect(() =>
+      assertBuildEnv({ VERCEL_ENV: "production", DIRECT_URL: "postgresql://x" }),
+    ).toThrow(/ALLOW_PROD_MIGRATE/);
+  });
+
+  it("дозволяє production не з main при ALLOW_PROD_MIGRATE=1", () => {
+    const env = {
+      VERCEL_ENV: "production",
+      VERCEL_GIT_COMMIT_REF: "hotfix",
+      DIRECT_URL: "postgresql://x",
+      ALLOW_PROD_MIGRATE: "1",
+    };
+
+    expect(() => assertBuildEnv(env)).not.toThrow();
+    expect(buildSteps(env).map((s) => s.cmd)).toContain("prisma migrate deploy");
   });
 
   it("не вимагає DIRECT_URL для preview", () => {

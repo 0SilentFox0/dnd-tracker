@@ -73,6 +73,9 @@ These trip people up repeatedly — read before touching the DB or `vercel.json`
 
 - **Migrations run automatically only in production builds.** `vercel.json` runs `node scripts/vercel-build.mjs`: `prisma generate` (placeholder URL) → `prisma migrate deploy` (only when `VERCEL_ENV=production`, via `DIRECT_URL`) → `next build`. Preview builds never migrate because they share the same DB. New migration: `pnpm exec prisma migrate dev --name X` against a local/shadow DB, then merge to `main`. History was squashed into `20261005000000_init` when moving to the new Supabase project.
 - **`DIRECT_URL` (port 5432) is required in Vercel Production** — without it the build fails with an explanatory error.
+- **Production builds from a branch other than `main`** (`vercel --prod` from a branch, CLI without git ref) fail on purpose, so an unmerged migration never reaches the prod DB. Override with `ALLOW_PROD_MIGRATE=1` only deliberately.
+- **Migrations must be expand-only** (add columns/tables, backfill, drop later): `migrate deploy` runs before `next build`, and a Vercel rollback does not revert the schema.
+- **Every `CREATE TABLE` migration must also `ALTER TABLE … ENABLE ROW LEVEL SECURITY`** — Supabase exposes `public` tables to the anon key otherwise. `prisma/__tests__/migrations-rls.test.ts` enforces it.
 - **Regions:** Supabase `eu-central-1`, Vercel functions `fra1`, Pusher cluster `eu`. Don't move one without the others — every DB round trip across continents adds ~100 ms.
 - **`DATABASE_URL` for Vercel = Transaction pooler (port 6543) with `?pgbouncer=true&sslmode=require`.** The Direct connection (port 5432) is only for one-off DDL/backups (`scripts/backup-database.sh`, manual migrations).
 - **Local dev pointing at the prod DB is intentional in some setups** — see `docs/DATABASE-SYNC.md` for the "one DB" vs "dev + prod" tradeoffs and the backup/restore scripts. Don't assume divergence is a bug without checking which `DATABASE_URL` is set.

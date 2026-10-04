@@ -1,7 +1,8 @@
 /**
  * Build command для Vercel.
  * generate — з placeholder URL, бо CLI може висіти на TCP до pooler (див. docs/VERCEL.md).
- * migrate deploy — лише production: preview ділить ту саму БД і не має накатувати незмерджені міграції.
+ * migrate deploy — лише production з main: preview ділить ту саму БД і не має накатувати незмерджені міграції.
+ * Production не з main (`vercel --prod` з гілки, CLI без git ref) падає, якщо не задано ALLOW_PROD_MIGRATE=1.
  */
 import { execSync } from "node:child_process";
 import { delimiter, resolve } from "node:path";
@@ -12,12 +13,27 @@ const PLACEHOLDER_DATABASE_URL =
 
 const MIGRATE_TIMEOUT_MS = 180_000;
 
+const PRODUCTION_BRANCH = "main";
+
 function isProduction(env) {
   return env.VERCEL_ENV === "production";
 }
 
 export function assertBuildEnv(env) {
-  if (isProduction(env) && !env.DIRECT_URL?.trim()) {
+  if (!isProduction(env)) {
+    return;
+  }
+
+  const ref = env.VERCEL_GIT_COMMIT_REF;
+
+  if (ref !== PRODUCTION_BRANCH && env.ALLOW_PROD_MIGRATE !== "1") {
+    throw new Error(
+      `Production-збірка з "${ref ?? "без git ref (CLI)"}", а не з ${PRODUCTION_BRANCH} — міграції цієї гілки потрапили б у прод-БД. ` +
+        "Змерджи в main або явно задай ALLOW_PROD_MIGRATE=1.",
+    );
+  }
+
+  if (!env.DIRECT_URL?.trim()) {
     throw new Error(
       "DIRECT_URL не задано для Production у Vercel — потрібен для prisma migrate deploy (порт 5432).",
     );
