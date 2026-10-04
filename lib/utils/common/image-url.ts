@@ -28,3 +28,19 @@ export function normalizeImageUrl(src: string): string {
     return src;
   }
 }
+
+const SUPABASE_PUBLIC_OBJECT_PATH = "/storage/v1/object/public/";
+
+export function isSupabaseStorageUrl(src: string): boolean {
+  try {
+    const url = new URL(src);
+
+    return (
+      url.protocol === "https:" &&
+      url.hostname.endsWith(".supabase.co") &&
+      url.pathname.startsWith(SUPABASE_PUBLIC_OBJECT_PATH)
+    );
+  } catch {
+    return false;
+  }
+}

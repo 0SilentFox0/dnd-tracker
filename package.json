@@ -31,7 +31,8 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:integration": "vitest run --config vitest.integration.config.mts",
-    "migrate:deploy": "bash scripts/prisma-migrate-deploy.sh"
+    "migrate:deploy": "bash scripts/prisma-migrate-deploy.sh",
+    "db:local": "docker compose up -d --wait db && pnpm migrate:deploy"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

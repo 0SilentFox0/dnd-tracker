@@ -32,6 +32,7 @@ if (fs.existsSync(envPath)) {
 }
 
 import { createAdminClient } from "../lib/supabase/admin";
+import { staticAssetUploadOptions } from "../lib/supabase/storage-cache";
 
 const ASSETS_DIR = path.join(process.cwd(), "assets");
 
@@ -120,10 +121,7 @@ async function main() {
 
       const { error } = await supabase.storage
         .from(bucket)
-        .upload(name, buffer, {
-          contentType,
-          upsert: true,
-        });
+        .upload(name, buffer, staticAssetUploadOptions(contentType));
 
       if (error) {
         console.warn(`[skip] ${name}: ${error.message}`);

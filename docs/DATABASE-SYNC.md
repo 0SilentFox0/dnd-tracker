@@ -2,6 +2,13 @@
 
 Є два різні питання: **однакова схема** (таблиці, колонки) і **однакові дані** (рядки в таблицях).
 
+## Рекомендовано — локальна БД у Docker
+
+`pnpm db:local` піднімає `postgres:17` на порту `54322` (`docker-compose.yml`) і накатує міграції.
+У `.env.local` `DATABASE_URL`/`DIRECT_URL` вказують на `postgresql://postgres:postgres@localhost:54322/postgres`;
+рядки прод-Supabase лежать у `.env.production-db.local`. Так `pnpm dev` не витрачає egress безкоштовного тарифу Supabase.
+Auth, Storage і Pusher лишаються хмарними.
+
 ## Варіант A — одна база для локалки і для Vercel (найпростіше)
 
 Якщо **той самий** Supabase-проєкт:

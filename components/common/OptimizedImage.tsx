@@ -3,7 +3,10 @@
 import { useState } from "react";
 import Image from "next/image";
 
-import { normalizeImageUrl } from "@/lib/utils/common/image-url";
+import {
+  isSupabaseStorageUrl,
+  normalizeImageUrl,
+} from "@/lib/utils/common/image-url";
 
 interface OptimizedImageProps {
   src: string;
@@ -38,7 +41,8 @@ export function OptimizedImage({
       height={height}
       className={className}
       referrerPolicy="no-referrer"
-      unoptimized
+      // зовнішні хости можуть бути не в remotePatterns; Supabase — через кеш Vercel, щоб не палити egress
+      unoptimized={!isSupabaseStorageUrl(normalizedSrc)}
       onError={() => setHasError(true)}
     />
   );
