@@ -89,4 +89,39 @@ describe.skipIf(missing.length > 0)("DB integration (Prisma → Supabase)", () =
       expect(["object", "string"]).toContain(typeof skill.combatStats);
     }
   });
+  it("усі таблиці public мають увімкнений RLS", async (ctx) => {
+    if (!canConnect) ctx.skip();
+
+    const rows = await prisma.$queryRaw<Array<{ tablename: string }>>`
+      SELECT c.relname AS tablename
+      FROM pg_class c
+      JOIN pg_namespace n ON n.oid = c.relnamespace
+      WHERE n.nspname = 'public' AND c.relkind = 'r' AND NOT c.relrowsecurity
+    `;
+
+    expect(rows.map((r) => r.tablename)).toEqual([]);
+  });
+
+  it("існують індекси для частих фільтрів", async (ctx) => {
+    if (!canConnect) ctx.skip();
+
+    const rows = await prisma.$queryRaw<Array<{ indexname: string }>>`
+      SELECT indexname FROM pg_indexes WHERE schemaname = 'public'
+    `;
+
+    const names = rows.map((r) => r.indexname);
+
+    expect(names).toEqual(
+      expect.arrayContaining([
+        "battle_scenes_campaignId_idx",
+        "campaign_members_userId_idx",
+        "campaigns_dmUserId_idx",
+        "characters_controlledBy_idx",
+        "unit_groups_campaignId_idx",
+        "spell_groups_campaignId_idx",
+        "artifact_sets_campaignId_idx",
+        "racial_abilities_campaignId_idx",
+      ]),
+    );
+  });
 });
