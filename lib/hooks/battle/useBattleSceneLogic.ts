@@ -30,16 +30,7 @@ import type { BattleParticipant } from "@/types/battle";
 export function useBattleSceneLogic(id: string, battleId: string) {
   useQueryClient(); // kept for cache invalidation in future
 
-  const [attackDialogOpen, setAttackDialogOpen] = useState(false);
-
   const [spellDialogOpen, setSpellDialogOpen] = useState(false);
-
-  const [moraleDialogOpen, setMoraleDialogOpen] = useState(false);
-
-  const [, setParticipantForMorale] =
-    useState<BattleParticipant | null>(null);
-
-  const [, setMoraleDialogDismissedFor] = useState<string | null>(null);
 
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
@@ -161,9 +152,6 @@ export function useBattleSceneLogic(id: string, battleId: string) {
     nextTurnMutation,
     nextTurnClickedAtRef,
     attackFlowStartRef,
-    setMoraleDialogDismissedFor,
-    setParticipantForMorale,
-    setMoraleDialogOpen,
     attackAndNextTurnMutation,
     triggerGlobalDamageFromBattle,
     setCounterAttackInfo,
@@ -253,9 +241,7 @@ export function useBattleSceneLogic(id: string, battleId: string) {
     canSeeEnemyHp,
     availableTargets,
     dialogs: {
-      attack: { open: attackDialogOpen, setOpen: setAttackDialogOpen },
       spell: { open: spellDialogOpen, setOpen: setSpellDialogOpen },
-      morale: { open: moraleDialogOpen, setOpen: setMoraleDialogOpen },
       counterAttack: {
         open: counterAttackDialogOpen,
         setOpen: setCounterAttackDialogOpen,
@@ -280,7 +266,6 @@ export function useBattleSceneLogic(id: string, battleId: string) {
       handleRollback,
       handleAttack,
       handleBonusAction,
-      setParticipantForMorale,
       triggerGlobalDamageFromBattle,
       clearGlobalDamageFlash: () => setGlobalDamageFlash(null),
     },

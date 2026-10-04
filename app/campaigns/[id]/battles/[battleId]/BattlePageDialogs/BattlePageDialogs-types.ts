@@ -45,8 +45,6 @@ export interface BattlePageDialogsDmSpell {
 
 /** Відкриття/закриття основних діалогів */
 export interface BattlePageDialogsDialogs {
-  attack: { open: boolean; setOpen: (v: boolean) => void };
-  morale: { open: boolean; setOpen: (v: boolean) => void };
   spell: { open: boolean; setOpen: (v: boolean) => void };
   counterAttack: {
     open: boolean;
