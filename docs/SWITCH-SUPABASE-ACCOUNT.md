@@ -29,12 +29,12 @@
 | `SUPABASE_SERVICE_ROLE_KEY` | Project Settings → API → service_role |
 | (опційно) `SUPABASE_JWT_SECRET` | Project Settings → API → JWT Secret (для однакової валідації сесій після переносу) |
 
-Pusher (якщо використовується) залишається тим самим — прив’язка до акаунту Pusher, не до Supabase.
+Pusher app має бути в кластері `eu` (поруч із Vercel `fra1`).
 
 ## 3. Новий акаунт / новий проєкт Supabase
 
 - Зайди в [Supabase Dashboard](https://supabase.com/dashboard) під **новим** акаунтом.
-- **New project**: вибери організацію, регіон, пароль для БД.
+- **New project**: вибери організацію, регіон **Central EU (Frankfurt) / eu-central-1** (поруч із Vercel `fra1`), пароль для БД.
 - Після створення відкрий **Project Settings → Database** і збери:
   - **Connection string → Transaction pooler** (для `DATABASE_URL` в додатку).
   - **Connection string → Direct connection** (для міграцій/бекапів, порт 5432).
@@ -43,6 +43,7 @@ Pusher (якщо використовується) залишається тим
 ## 4. Підключи проєкт до нової БД
 
 - У корені проєкту онови `.env`:
+  - `DIRECT_URL` — Session pooler або Direct, порт 5432 (для `prisma migrate deploy`).
   - `DATABASE_URL` — рядок підключення (див. шаблон нижче). Якщо в Dashboard є **Transaction pooler** (порт 6543) — краще використати його для додатку. Якщо є лише **Direct** (5432) — підстав його, для невеликих навантажень часто достатньо.
   - `NEXT_PUBLIC_SUPABASE_URL` — Project URL (наприклад `https://XXXX.supabase.co`).
   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` — **anon public** / Publish key з API.
@@ -50,7 +51,7 @@ Pusher (якщо використовується) залишається тим
 - Застосуй схему БД (міграції):
   ```bash
   pnpm prisma generate
-  pnpm prisma migrate deploy
+  pnpm migrate:deploy
   ```
   Якщо `migrate deploy` зависає на Supabase, виконай міграції вручну через **SQL Editor** в Dashboard (скопіюй вміст файлів з `prisma/migrations/.../migration.sql`).
 
@@ -60,7 +61,7 @@ Pusher (якщо використовується) залишається тим
 
 Що зробити в новому проєкті:
 
-1. **Створи бакети вручну:** Dashboard → Storage → створи бакети `unit-icons`, `spell-icons`, `skill-icons` (public, як у старому проєкті).
+1. **Бакети:** `pnpm run upload-assets-to-supabase` створює `unit-icons`, `spell-icons`, `skill-icons`, `artifact-icons` і завантажує вміст `assets/`.
 2. **Перенести файли:** зі старого проєкту (якщо він ще доступний) через Dashboard — експорт/завантаження, або скриптом через Supabase Storage API (list objects у старому → download → upload у новому). Якщо є локальна папка **`assets/`** з підпапками `unit-icons`, `spell-icons`, `skill-icons`, можна створити бакети і завантажити її вміст однією командою: `pnpm run upload-assets-to-supabase`. Інакше — `pnpm run migrate-unit-icons-to-supabase`, `migrate-spell-icons-to-supabase`, `migrate-skill-icons-to-supabase` для нового проєкту (якщо в БД є зовнішні URL).
 
 ## 6. (Опційно) Відновити дані з бекапу

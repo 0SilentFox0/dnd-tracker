@@ -12,7 +12,7 @@ The README, ARCHITECTURE.md, and most in-repo docs are written in Ukrainian. Mat
 
 ```bash
 pnpm dev                       # next dev with BATTLE_TURN_TIMING=1 (extra battle timing logs)
-pnpm build                     # prisma generate && next build  (no migrate deploy — see "Migrations")
+pnpm build                     # prisma generate && next build (Vercel uses scripts/vercel-build.mjs — see gotchas)
 pnpm lint                      # eslint
 pnpm test                      # vitest watch
 pnpm test:run                  # vitest run (single pass, used in CI)
@@ -25,7 +25,7 @@ Prisma:
 ```bash
 pnpm exec prisma generate              # regenerate client (also runs in postinstall, but skipped on Vercel)
 pnpm exec prisma migrate dev --name X  # create + apply a new migration locally
-pnpm exec prisma migrate deploy        # apply migrations against $DATABASE_URL (do NOT run in Vercel build)
+pnpm migrate:deploy                    # apply migrations against DIRECT_URL from .env.local
 pnpm exec prisma studio
 ```
 
@@ -71,10 +71,12 @@ Page `app/campaigns/[id]/battles/[battleId]/page.tsx` → `useBattleSceneLogic` 
 
 These trip people up repeatedly — read before touching the DB or `vercel.json`.
 
-- **`vercel.json` build is `prisma generate && next build` — not `migrate deploy`.** The Prisma `_prisma_migrations` table is not baselined against the existing Supabase schema, so adding `migrate deploy` to the build crashes with **P3005** (`database schema is not empty`). Apply schema changes via Supabase SQL editor / Supabase MCP `apply_migration`, or by running `pnpm exec prisma migrate deploy` locally against the production `DATABASE_URL` after a baseline. See `docs/VERCEL.md` for the baseline procedure.
+- **Migrations run automatically only in production builds.** `vercel.json` runs `node scripts/vercel-build.mjs`: `prisma generate` (placeholder URL) → `prisma migrate deploy` (only when `VERCEL_ENV=production`, via `DIRECT_URL`) → `next build`. Preview builds never migrate because they share the same DB. New migration: `pnpm exec prisma migrate dev --name X` against a local/shadow DB, then merge to `main`. History was squashed into `20261005000000_init` when moving to the new Supabase project.
+- **`DIRECT_URL` (port 5432) is required in Vercel Production** — without it the build fails with an explanatory error.
+- **Regions:** Supabase `eu-central-1`, Vercel functions `fra1`, Pusher cluster `eu`. Don't move one without the others — every DB round trip across continents adds ~100 ms.
 - **`DATABASE_URL` for Vercel = Transaction pooler (port 6543) with `?pgbouncer=true&sslmode=require`.** The Direct connection (port 5432) is only for one-off DDL/backups (`scripts/backup-database.sh`, manual migrations).
 - **Local dev pointing at the prod DB is intentional in some setups** — see `docs/DATABASE-SYNC.md` for the "one DB" vs "dev + prod" tradeoffs and the backup/restore scripts. Don't assume divergence is a bug without checking which `DATABASE_URL` is set.
-- **Vercel build placeholder URL.** `vercel.json` runs `prisma generate` with `DATABASE_URL=postgresql://build:build@127.0.0.1:5432/build` to avoid Prisma CLI hanging on the real Supabase pooler from the build region. The real `DATABASE_URL` from Vercel env is still used by `next build` and at runtime. Do not "fix" this by removing the placeholder.
+- **Vercel build placeholder URL.** `scripts/vercel-build.mjs` runs `prisma generate` with `DATABASE_URL=postgresql://build:build@127.0.0.1:5432/build` to avoid Prisma CLI hanging on the real Supabase pooler from the build region. The real `DATABASE_URL` from Vercel env is still used by `next build` and at runtime. Do not "fix" this by removing the placeholder.
 - **`postinstall`** is `node scripts/postinstall.mjs`, which skips `prisma generate` when `VERCEL` env is set (build runs it explicitly with the placeholder URL).
 
 ## Testing
