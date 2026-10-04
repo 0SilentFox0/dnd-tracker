@@ -7,6 +7,7 @@ import {
   Heart,
   LucideIcon,
   Moon,
+  Shell,
   Sparkles,
   Sun,
   Sword,
@@ -20,7 +21,7 @@ export function getSpellGroupIcon(groupName: string): LucideIcon {
     Light: Sun,
   };
 
-  return iconMap[groupName] || Sparkles;
+  return iconMap[groupName] ?? Shell;
 }
 
 export function getSpellTypeIcon(type: string): LucideIcon {

@@ -1,5 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { CORE_ABILITY_SCORES } from "@/lib/constants/abilities";
 import type { Unit } from "@/types/units";
 
 interface UnitAbilityScoresProps {
@@ -11,18 +12,9 @@ export function UnitAbilityScores({
   formData,
   onChange,
 }: UnitAbilityScoresProps) {
-  const abilities = [
-    { key: "strength", label: "Сила" },
-    { key: "dexterity", label: "Спритність" },
-    { key: "constitution", label: "Тіло" },
-    { key: "intelligence", label: "Інтелект" },
-    { key: "wisdom", label: "Мудрість" },
-    { key: "charisma", label: "Харизма" },
-  ] as const;
-
   return (
     <div className="grid gap-4 md:grid-cols-3">
-      {abilities.map((ability) => (
+      {CORE_ABILITY_SCORES.map((ability) => (
         <div key={ability.key}>
           <Label htmlFor={ability.key}>{ability.label}</Label>
           <Input

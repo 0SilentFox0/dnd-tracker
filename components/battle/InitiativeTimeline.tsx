@@ -20,7 +20,7 @@ export function InitiativeTimeline({
   battle,
   roundsToShow = 3,
 }: InitiativeTimelineProps) {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const timelineData = useMemo(() => {
     const rounds: Array<{
@@ -99,6 +99,7 @@ export function InitiativeTimeline({
     <div className="space-y-2">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
+        aria-expanded={isExpanded}
         className="text-sm font-semibold flex items-center gap-2 w-full hover:opacity-80 transition-opacity"
       >
         <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />

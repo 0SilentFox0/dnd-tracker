@@ -241,7 +241,10 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
         <Button
           variant="destructive"
           size="sm"
-          onClick={() => onDelete(unit.id)}
+          aria-label={`Видалити юніт ${unit.name}`}
+          onClick={() => {
+            if (confirm(`Видалити юніт «${unit.name}»?`)) onDelete(unit.id);
+          }}
         >
           <X className="h-4 w-4" />
         </Button>

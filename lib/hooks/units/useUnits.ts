@@ -8,8 +8,6 @@ import {
   getUnit,
   getUnitGroups,
   getUnits,
-  removeAllUnitsFromGroup,
-  renameUnitGroup,
   updateUnit,
 } from "@/lib/api/units";
 import { useCrudMutation } from "@/lib/hooks/common";
@@ -72,29 +70,6 @@ export function useDeleteUnitsByLevel(campaignId: string) {
 export function useDeleteUnit(campaignId: string) {
   return useCrudMutation({
     mutationFn: (unitId: string) => deleteUnit(campaignId, unitId),
-    invalidateKeys: [["units", campaignId]],
-  });
-}
-
-export function useRenameUnitGroup(campaignId: string) {
-  return useCrudMutation({
-    mutationFn: (data: {
-      groupId: string;
-      name: string;
-      damageModifier?: string | null;
-    }) =>
-      renameUnitGroup(campaignId, data.groupId, data.name, data.damageModifier),
-    invalidateKeys: [
-      ["units", campaignId],
-      ["unitGroups", campaignId],
-    ],
-  });
-}
-
-export function useRemoveAllUnitsFromGroup(campaignId: string) {
-  return useCrudMutation({
-    mutationFn: (groupId: string) =>
-      removeAllUnitsFromGroup(campaignId, groupId),
     invalidateKeys: [["units", campaignId]],
   });
 }

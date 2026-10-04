@@ -160,6 +160,7 @@ export default function BattlePage({
         onReset={() => mutations.resetBattle.mutate()}
         onCompleteBattle={handlers.handleCompleteBattle}
         isDM={isDM}
+        canAdvanceTurn={isDM || isCurrentPlayerTurn}
         connectionState={pusherConnectionState}
         isNextTurnPending={mutations.nextTurn.isPending}
       />

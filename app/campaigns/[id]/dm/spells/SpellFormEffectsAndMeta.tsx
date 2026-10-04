@@ -1,12 +1,12 @@
 "use client";
 
 import { useMemo } from "react";
-import Image from "next/image";
 import Link from "next/link";
 
 import type { SpellFormData } from "./spell-form-defaults";
 import { SpellDamageDistributionField } from "./SpellDamageDistributionField";
 
+import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -215,18 +215,13 @@ export function SpellFormEffectsAndMeta({
           <div className="mt-3">
             <Label>Попередній перегляд:</Label>
             <div className="mt-2 w-32 h-32 rounded-lg overflow-hidden bg-muted border">
-              <Image
+              <OptimizedImage
                 src={formData.icon}
                 alt="Preview"
                 width={128}
                 height={128}
                 className="w-full h-full object-cover"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-
-                  target.style.display = "none";
-                }}
-                referrerPolicy="no-referrer"
+                fallback={null}
               />
             </div>
           </div>

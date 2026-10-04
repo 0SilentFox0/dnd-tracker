@@ -29,13 +29,7 @@ export function BattlePageDialogs({
           updateParticipant: mutations.updateParticipant,
         }}
       />
-      <BattlePageDialogsCombatSection
-        battleContext={battleContext}
-        dialogs={{ attack: dialogs.attack, morale: dialogs.morale }}
-        mutations={{ moraleCheck: mutations.moraleCheck }}
-        handlers={{ handleAttack: handlers.handleAttack }}
-        moraleOverlay={moraleOverlay}
-      />
+      <BattlePageDialogsCombatSection moraleOverlay={moraleOverlay} />
       <BattlePageDialogsSpellSection
         battleContext={battleContext}
         dmSpell={dmSpell}

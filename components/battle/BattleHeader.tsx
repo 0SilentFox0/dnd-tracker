@@ -25,6 +25,8 @@ interface BattleHeaderProps {
   onReset: () => void;
   onCompleteBattle?: (result?: "victory" | "defeat") => void;
   isDM: boolean;
+  /** DM або контролер поточного учасника — інакше API відповість 403 */
+  canAdvanceTurn: boolean;
   /** Стан з'єднання Pusher для індикатора (опційно) */
   connectionState?: PusherConnectionState;
   /** Блокує кнопку "Наступний хід" — запобігає спаму при повільному API */
@@ -37,6 +39,7 @@ export function BattleHeader({
   onReset,
   onCompleteBattle,
   isDM,
+  canAdvanceTurn,
   connectionState = null,
   isNextTurnPending = false,
 }: BattleHeaderProps) {
@@ -142,7 +145,7 @@ export function BattleHeader({
                 Скинути бій
               </Button>
             )}
-            {battle.status === "active" && (
+            {battle.status === "active" && canAdvanceTurn && (
               <Button
                 onClick={onNextTurn}
                 disabled={isNextTurnPending}

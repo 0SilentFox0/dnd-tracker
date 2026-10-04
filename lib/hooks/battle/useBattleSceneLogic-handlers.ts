@@ -7,16 +7,12 @@ import type { UseMutationResult } from "@tanstack/react-query";
 
 import type { BattleScene } from "@/types/api";
 import type { AttackData } from "@/types/api";
-import type { BattleParticipant } from "@/types/battle";
 
 export interface BattleSceneHandlersParams {
   battle: BattleScene | null | undefined;
   nextTurnMutation: UseMutationResult<unknown, Error, void, unknown>;
   nextTurnClickedAtRef: React.MutableRefObject<number | null>;
   attackFlowStartRef: React.MutableRefObject<number | null>;
-  setMoraleDialogDismissedFor: (v: string | null) => void;
-  setParticipantForMorale: React.Dispatch<React.SetStateAction<BattleParticipant | null>>;
-  setMoraleDialogOpen: (v: boolean) => void;
   attackAndNextTurnMutation: UseMutationResult<
     BattleScene,
     Error,
@@ -53,9 +49,6 @@ export function useBattleSceneHandlers({
   nextTurnMutation,
   nextTurnClickedAtRef,
   attackFlowStartRef,
-  setMoraleDialogDismissedFor,
-  setParticipantForMorale,
-  setMoraleDialogOpen,
   attackAndNextTurnMutation,
   triggerGlobalDamageFromBattle,
   setCounterAttackInfo,
@@ -78,9 +71,6 @@ export function useBattleSceneHandlers({
       elapsedFromAttackStart:
         flowStart != null ? `${clickedAt - flowStart}ms` : "—",
     });
-    setMoraleDialogDismissedFor(null);
-    setParticipantForMorale(null);
-    setMoraleDialogOpen(false);
     nextTurnMutation.mutate(undefined, {
       onSuccess: () => {
         const done = Date.now();
@@ -100,9 +90,6 @@ export function useBattleSceneHandlers({
     nextTurnMutation,
     nextTurnClickedAtRef,
     attackFlowStartRef,
-    setMoraleDialogDismissedFor,
-    setParticipantForMorale,
-    setMoraleDialogOpen,
   ]);
 
   const handleStartBattle = useCallback(() => {

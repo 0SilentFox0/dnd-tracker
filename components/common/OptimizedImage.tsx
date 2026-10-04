@@ -25,11 +25,14 @@ export function OptimizedImage({
   className,
   fallback,
 }: OptimizedImageProps) {
-  const [hasError, setHasError] = useState(false);
-
   const normalizedSrc = normalizeImageUrl(src);
 
-  if (hasError && fallback) {
+  // помилка прив'язана до конкретної адреси: нова src (введення URL) знову пробує завантажити
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+
+  const hasError = failedSrc === normalizedSrc;
+
+  if (hasError && fallback !== undefined) {
     return <>{fallback}</>;
   }
 
@@ -43,7 +46,7 @@ export function OptimizedImage({
       referrerPolicy="no-referrer"
       // зовнішні хости можуть бути не в remotePatterns; Supabase — через кеш Vercel, щоб не палити egress
       unoptimized={!isSupabaseStorageUrl(normalizedSrc)}
-      onError={() => setHasError(true)}
+      onError={() => setFailedSrc(normalizedSrc)}
     />
   );
 }

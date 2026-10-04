@@ -1,15 +1,6 @@
 "use client";
 
-import {
-  Edit,
-  Flame,
-  Moon,
-  MoreVertical,
-  Shell,
-  Sparkles,
-  Sun,
-  X,
-} from "lucide-react";
+import { Edit, MoreVertical, X } from "lucide-react";
 
 import { RemoveAllSpellsDialog } from "@/components/spells/dialogs/RemoveAllSpellsDialog";
 import { RenameGroupDialog } from "@/components/spells/dialogs/RenameGroupDialog";
@@ -29,28 +20,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useSpellGroupActions } from "@/lib/hooks/spells";
+import { getSpellGroupIcon } from "@/lib/utils/spells/spell-icons";
 import { calculateTotalSpellsInGroup } from "@/lib/utils/spells/spells";
 import type { Spell, SpellGroup } from "@/types/spells";
-
-interface SpellGroupIconProps {
-  groupName: string;
-  className?: string;
-}
-
-function SpellGroupIcon({ groupName, className }: SpellGroupIconProps) {
-  switch (groupName) {
-    case "Dark":
-      return <Moon className={className} />;
-    case "Destr":
-      return <Flame className={className} />;
-    case "Summ":
-      return <Sparkles className={className} />;
-    case "Light":
-      return <Sun className={className} />;
-    default:
-      return <Shell className={className} />;
-  }
-}
 
 interface SpellGroupAccordionProps {
   groupName: string;
@@ -75,6 +47,8 @@ export function SpellGroupAccordion({
 
   const totalSpells = calculateTotalSpellsInGroup(levels);
 
+  const GroupIcon = getSpellGroupIcon(groupName);
+
   const actions = useSpellGroupActions({
     campaignId,
     groupName,
@@ -87,10 +61,7 @@ export function SpellGroupAccordion({
         <div className="relative">
           <AccordionTrigger className="px-4 sm:px-6">
             <div className="flex items-center gap-3 sm:gap-4 text-left w-full">
-              <SpellGroupIcon
-                groupName={groupName}
-                className="h-6 w-6 sm:h-7 sm:w-7 shrink-0"
-              />
+              <GroupIcon className="h-6 w-6 sm:h-7 sm:w-7 shrink-0" />
               <div className="flex-1 min-w-0">
                 <CardTitle className="text-lg truncate">{groupName}</CardTitle>
                 <CardDescription className="mt-1">

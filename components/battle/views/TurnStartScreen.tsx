@@ -48,7 +48,7 @@ export function TurnStartScreen({
         onClick={onStartTurn}
         className="text-xl px-12 py-8 rounded-full bg-primary hover:bg-primary/90 shadow-[0_0_30px_rgba(var(--primary),0.5)] transition-all duration-300 transform hover:scale-110 active:scale-95 font-black uppercase tracking-widest"
       >
-        ПОЧАТИ БІЙ
+        ПОЧАТИ ХІД
       </Button>
     </div>
   );
