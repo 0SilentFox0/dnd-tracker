@@ -29,7 +29,7 @@ export function OptimizedImage({
 
   const normalizedSrc = normalizeImageUrl(src);
 
-  if (hasError && fallback) {
+  if (hasError && fallback !== undefined) {
     return <>{fallback}</>;
   }
 

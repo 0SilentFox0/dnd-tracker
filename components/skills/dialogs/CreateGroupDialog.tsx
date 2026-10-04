@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +28,8 @@ export function CreateGroupDialog({
 }: CreateGroupDialogProps) {
   const router = useRouter();
 
+  const queryClient = useQueryClient();
+
   const [open, setOpen] = useState(false);
 
   const [name, setName] = useState("");
@@ -50,8 +53,9 @@ export function CreateGroupDialog({
 
       setOpen(false);
       setName("");
+      await queryClient.invalidateQueries({ queryKey: ["spellGroups", campaignId] });
       router.refresh();
-      
+
       if (onGroupCreated) {
         onGroupCreated(newGroup.id);
       }

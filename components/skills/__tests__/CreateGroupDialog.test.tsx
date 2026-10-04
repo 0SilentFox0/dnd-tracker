@@ -1,12 +1,20 @@
 /**
  * @vitest-environment happy-dom
  */
-import { cleanup, fireEvent,render, screen } from "@testing-library/react";
+import type { ReactElement } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { cleanup, fireEvent, render as rtlRender, screen } from "@testing-library/react";
 import { afterEach, beforeEach,describe, expect, it, vi } from "vitest";
 
 import { CreateGroupDialog } from "@/components/skills/dialogs/CreateGroupDialog";
 
 const mockRefresh = vi.fn();
+
+let queryClient: QueryClient;
+
+function render(ui: ReactElement) {
+  return rtlRender(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
+}
 
 const fakeGroupId = "new-group-id";
 
@@ -21,6 +29,7 @@ vi.mock("@/lib/api/spells", () => ({
 describe("CreateGroupDialog", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    queryClient = new QueryClient();
   });
 
   afterEach(cleanup);
@@ -82,6 +91,21 @@ describe("CreateGroupDialog", () => {
 
     await vi.waitFor(() => {
       expect(onGroupCreated).toHaveBeenCalledWith(fakeGroupId);
+    });
+  });
+
+  it("інвалідовує список груп заклинань, щоб нова група одразу з'явилась у меню", async () => {
+    const invalidate = vi.spyOn(queryClient, "invalidateQueries");
+
+    render(<CreateGroupDialog campaignId="camp-1" />);
+    fireEvent.click(screen.getByRole("button", { name: /Створити групу заклинань/i }));
+    fireEvent.change(screen.getByPlaceholderText("Назва групи"), {
+      target: { value: "Нова група" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Створити групу/i }));
+
+    await vi.waitFor(() => {
+      expect(invalidate).toHaveBeenCalledWith({ queryKey: ["spellGroups", "camp-1"] });
     });
   });
 });
