@@ -73,6 +73,10 @@ Page `app/campaigns/[id]/battles/[battleId]/page.tsx` → `useBattleSceneLogic` 
 - Group related callbacks into one object prop (`actions={{ onRename, onDelete }}`) rather than many `onX` props.
 - Deep trees (battle scene, character view, skill tree) use a context provider instead of drilling `battle`/`handlers`/`mutations` bags through 3+ levels.
 - Shared UI goes in `components/common` or `components/ui`; check there before writing a new card, dialog, avatar or empty state.
+- Dialogs: `ResponsiveDialog` (`components/ui/responsive-dialog`) — modal on desktop, `vaul` bottom sheet on phones. Never Radix `Dialog`/`AlertDialog` or `vaul` directly (ESLint enforces outside `components/ui`). Buttons go in its `footer`; a footer submit button needs `form="<form id>"`.
+- Confirmations and notices: `useConfirm()` / `useNotify()` from `@/lib/hooks/common` (provider in `app/layout.tsx`), never `window.confirm`/`alert` (ESLint enforces). Component tests render them inside `ConfirmProvider` (`components/ui/__tests__/render-with-confirm.tsx`).
+- Page states: `components/common/states` (`QueryState`, `EmptyState`, `LoadingState`, `ErrorState`); form buttons: `ActionBar`.
+- Layering: components never import `@/lib/api/*`. Requests live in `lib/api/<domain>`; loading, mutations and non-trivial logic live in hooks (`lib/hooks/<domain>`); a component calls a hook and renders.
 
 ### Lint/TS conventions enforced by ESLint
 

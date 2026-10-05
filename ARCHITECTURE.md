@@ -81,8 +81,8 @@
 
 | Папка | Що містить |
 |-------|------------|
-| **`ui/`** | Базові компоненти (Button, Card, Dialog, Select, Tabs, Accordion тощо) — shadcn/ui стиль. |
-| **`common/`** | Спільні блоки: FormCard, FormField, LabeledInput, ImageUpload. |
+| **`ui/`** | Базові компоненти (Button, Card, Select, Tabs, Accordion тощо) — shadcn/ui стиль. Діалоги — лише `ResponsiveDialog` (модалка на десктопі, шторка `vaul` на телефоні); підтвердження й повідомлення — `ConfirmProvider` + `useConfirm` / `useNotify`. |
+| **`common/`** | Спільні блоки: FormCard, FormField, LabeledInput, ImageUpload, `ActionBar` (кнопки форми, на телефоні прилипають донизу), `states/` (`EmptyState`, `LoadingState`, `ErrorState`, `QueryState`). |
 | **`layout/`** | Макети, хедери, навігація. |
 | **`battle/`** | Бій: картки учасників (`cards/`), діалоги атаки/заклинань/моралі (`dialogs/`), списки, оверлеї, панелі, представлення ходу (`views/`). |
 | **`characters/`** | Персонаж: basic info, ability scores, combat params, skills, spells, artifacts, stats (damage calculator, HP preview). |
