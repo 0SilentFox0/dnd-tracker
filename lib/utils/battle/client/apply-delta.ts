@@ -54,7 +54,9 @@ export function acceptFullBattle(cached: BattleScene | undefined, incoming: Batt
   const windowStart = Math.min(...incomingLog.map((e) => e.actionIndex));
 
   // GET віддає лише останні події: старіші з кешу лишаються, щоб не губити відомий AC і помічене в бою
-  const older = incomingLog.length ? (cached?.battleLog ?? []).filter((e) => e.actionIndex < windowStart) : [];
+  const sameRun = cached?.startedAt === incoming.startedAt;
+
+  const older = incomingLog.length && sameRun ? (cached?.battleLog ?? []).filter((e) => e.actionIndex < windowStart) : [];
 
   return {
     ...incoming,

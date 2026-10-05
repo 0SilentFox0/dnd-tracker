@@ -117,3 +117,13 @@ describe("acceptFullBattle — журнал за межами вікна GET", (
     expect(acceptFullBattle(withLog(5, [1, 2, 3]), withLog(6, [])).battleLog).toEqual([]);
   });
 });
+
+describe("acceptFullBattle — інший запуск бою", () => {
+  it("після reset (інший startedAt) старі записи з кешу не доклеюються", () => {
+    const old = { ...cached, version: 5, startedAt: "2026-01-01T00:00:00.000Z", battleLog: [1, 2, 3].map(entry) };
+
+    const rerun = { ...cached, version: 9, startedAt: "2026-01-02T00:00:00.000Z", battleLog: [3, 4].map(entry) };
+
+    expect(acceptFullBattle(old, rerun).battleLog.map((e) => e.actionIndex)).toEqual([3, 4]);
+  });
+});
