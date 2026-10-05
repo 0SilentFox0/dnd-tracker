@@ -212,4 +212,25 @@ describe("usePusherBattleSync — two players receive same battle state", () => 
       expect(data1.currentRound).toBe(data2.currentRound);
     }
   });
+
+  it("light-payload одразу після оновлення кешу — все одно рефетч (без 8-секундного пропуску)", async () => {
+    const qc = new QueryClient();
+
+    const invalidate = vi.spyOn(qc, "invalidateQueries");
+
+    render(<PlayerSync campaignId={campaignId} battleId={battleId} userId="user-1" client={qc} />);
+
+    await waitFor(() => {
+      expect(channelBindings.get(channelName)?.has("battle-updated")).toBe(true);
+    });
+
+    qc.setQueryData(["battle", campaignId, battleId], makeBattlePayload());
+    invalidate.mockClear();
+
+    act(() => {
+      simulateTrigger(channelName, "battle-updated", { type: "battle-updated", battleId });
+    });
+
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ["battle", campaignId, battleId] });
+  });
 });
