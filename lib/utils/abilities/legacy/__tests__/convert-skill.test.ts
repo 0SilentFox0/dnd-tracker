@@ -153,5 +153,18 @@ describe("convertLegacySkill", () => {
 
     for (const r of [onKill, dmg, armor]) expect(r.issues.some((i) => i.severity === "behavior")).toBe(true);
   });
-});
+  it("combatStats.min_targets/max_targets → пасивні цілі + behavior issue", () => {
+    const r = convertLegacySkill(row({ combatStats: { min_targets: 1, max_targets: 2, effects: [] } }));
 
+    expect(r.abilities).toContainEqual({
+      id: "targets",
+      name: "Скіл",
+      trigger: { event: "passive" },
+      effects: [
+        { kind: "modifyStat", stat: "minTargets", flat: 1 },
+        { kind: "modifyStat", stat: "maxTargets", flat: 2 },
+      ],
+    });
+    expect(r.issues.some((i) => i.message.includes("цілей"))).toBe(true);
+  });
+});

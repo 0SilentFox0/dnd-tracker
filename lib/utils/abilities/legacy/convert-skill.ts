@@ -117,5 +117,18 @@ export function convertLegacySkill(row: LegacySkillRow, opts: ConvertOptions = {
 
   extras.forEach((x, n) => abilities.push({ id: `x${n}`, name: row.name, ...x }));
 
+  const cs = (row.combatStats ?? {}) as { min_targets?: unknown; max_targets?: unknown };
+
+  const targets: Effect[] = [];
+
+  if (typeof cs.min_targets === "number" && cs.min_targets !== 0) targets.push({ kind: "modifyStat", stat: "minTargets", flat: cs.min_targets });
+
+  if (typeof cs.max_targets === "number" && cs.max_targets !== 0) targets.push({ kind: "modifyStat", stat: "maxTargets", flat: cs.max_targets });
+
+  if (targets.length && !opts.skipBakedStats) {
+    abilities.push({ id: "targets", name: row.name, trigger: { event: "passive" }, effects: targets });
+    issues.push({ severity: "behavior", message: "Мін./макс. цілей скіла: раніше не діяло, тепер додається до цілей" });
+  }
+
   return { abilities, issues };
 }
