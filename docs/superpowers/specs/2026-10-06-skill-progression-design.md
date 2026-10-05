@@ -186,7 +186,7 @@ optional і ігнорується), `CharacterSkillProgress`, `prerequisites`/`
 
 Доступ: власник персонажа або DM. Сервер:
 
-1. персонаж: `level, race, skillTreeProgress, seenLevel, controlledBy, updatedAt` (один `findFirst` за
+1. персонаж: `level, race, skillTreeProgress, seenLevel, controlledBy` (один `findFirst` за
    `id + campaignId`; власник — `controlledBy === userId` сесії);
 2. дерево раси (`findFirst { campaignId, race }`) → `normalizeTree`;
 3. скіли лише з цього дерева: `select { id, name, icon, abilities, basicInfo }` + гілки
@@ -201,7 +201,6 @@ interface CharacterProgressionDto {
   level: number;
   seenLevel: number | null;
   unlocked: string[];                    // progress[treeId] ?? progress[json.id]
-  updatedAt: string;                     // для 409
   skills: Record<string, { name: string; icon: string | null; summary: string; description: string }>;
   branches: Record<string, { name: string; color: string; icon: string | null }>;
 }
@@ -222,10 +221,12 @@ interface CharacterProgressionDto {
 | `…/progression/seen-level` | лише власник | — | ставить `seenLevel = level` |
 
 - `learn` не залежить від `campaign.allowPlayerEdit`.
-- Запис: `updateMany({ where: { id, updatedAt: <прочитаний> }, data: { skillTreeProgress } })`; `count === 0` → **409**.
+- Запис: `updateMany({ where: { id, level: <прочитаний>, skillTreeProgress: { equals: <прочитаний> } }, data: { skillTreeProgress } })`;
+  `count === 0` → **409** (паралельна зміна саме прогресу чи рівня; інші правки персонажа — PATCH профілю, HP — 409 не
+  викликають, тому `updatedAt` для захисту не використовується).
   Порушення правил → **422** `{ reason }`; немає дерева/персонажа → 404; чужий → 403.
 - `reset` пише `{}`; `unlearn`/`learn` змінюють лише `progress[treeId]`, інші ключі не чіпають.
-- Відповідь `learn/unlearn/reset`: `{ unlocked: string[]; updatedAt: string }`. `seen-level`: `{ seenLevel }`.
+- Відповідь `learn/unlearn/reset`: `{ unlocked: string[] }`. `seen-level`: `{ seenLevel }`.
 
 ### 4.3 Зміни в існуючих маршрутах
 
@@ -244,9 +245,10 @@ interface CharacterProgressionDto {
   `markLevelSeen`.
 - `lib/hooks/skills/` (через барел): `useCharacterProgression` (запит + `useMemo` над `normalizeTree`,
   `progressionView`, `rankOffers`), `useLearnNode`, `useUnlearnNode`, `useResetProgression`, `useMarkLevelSeen`.
-- Мутації патчать кеш `character-progression` через `setQueryData` (`unlocked`, `updatedAt`) без рефетчу, а також
-  `["character", campaignId, characterId]` через `setQueryData` (`skillTreeProgress`, `updatedAt`), щоб наступний
-  PATCH профілю не отримав 409/старий стан. Інвалідуються з рефетчем активних: `["character-damage-preview",
+- Мутації патчать кеш `character-progression` через `setQueryData` (`unlocked`) без рефетчу, а також
+  `["character", campaignId, characterId]` через `setQueryData` (`skillTreeProgress`), щоб профіль не тримав
+  старий стан. Навпаки: успішний PATCH персонажа й `level-up` інвалідують `["character-progression", campaignId,
+  characterId]` (рівень впливає на очки й расові вузли). Інвалідуються з рефетчем активних: `["character-damage-preview",
   campaignId, characterId]` (рахується на сервері з прогресу); `["battle-balance"]` — `refetchType: "none"`.
   409 → `invalidateQueries` прогресу + `useNotify` «Прогрес змінився — оновлено». 422 → `useNotify` з текстом причини.
 - Споживачі прогресу на сторінці профілю (спелбук, артефакти, калькулятор шкоди, `useLearnedSpellIds`) беруть
@@ -277,7 +279,9 @@ interface CharacterProgressionDto {
 - `NodeSheet` (`ResponsiveDialog`) — одна шторка для всіх тапів: іконка, назва, мітка, `summary`, повний опис.
   - вивчений → лише опис; DM — ще «Розвчити» (якщо `canUnlearn`);
   - доступний (картка або золотий «?») → кнопка «Вивчити» у `footer` (шторка і є підтвердженням);
-  - закритий «?» → текст причини.
+  - закритий «?» → текст причини;
+  - `branchLevel`/`racial` без призначеного скіла → назва рівня («Напад · Просунутий», «Расове · Основи») і «Майстер
+    ще не призначив скіл цьому рівню» (вивчити все одно можна — відкриває слоти/наступний рівень).
 
 Поведінка:
 
@@ -319,8 +323,8 @@ interface CharacterProgressionDto {
   внутрішнє; внизу «+ Додати гілку» і ультимейт. На телефоні назви в клітинках ховаються, колонка «Гілка» sticky,
   горизонтальний скрол.
 - Клік по клітинці → `SlotPicker` (десктоп — панель праворуч; телефон — `ResponsiveDialog`): скіли бібліотеки гілки
-  (`mainSkillId`) з пошуком і `summary`; для расового рядка — скіли, у яких `races` містить цю расу (те саме поле, що
-  зараз фільтрує `useSkillTreeFilters`), і скіли без `mainSkillId`; для ультимейта — усі; перемикач «усі скіли»
+  (`mainSkillId`) з пошуком і `summary`; для расового рядка — скіли без `mainSkillId` (зв'язку скіл ↔ раса в схемі
+  немає; `getSkillRaces` завжди повертає `[]` — видаляється разом із `useSkillTreeFilters`); для ультимейта — усі; перемикач «усі скіли»
   знімає фільтр. «Поставити» / «Прибрати». Скіл, що вже є в дереві, — «вже в {гілка} · {слот}», недоступний.
 - Біля назви гілки — ↑ ↓ і «Прибрати гілку» (`useConfirm`: «Вивчені вузли цієї гілки в персонажів перестануть діяти»).
 - «+ Додати гілку» → шторка: main skills кампанії, яких ще немає в дереві, або «Створити нову» (назва, колір,
@@ -374,7 +378,7 @@ TDD: тест першим для кожної чистої функції й м
   (рівні гілки без слова рівня в назві не стакаються; старий знімок без `levelNode` — фолбек на назву);
   `seenLevelOnLevelChange`.
 - Маршрути (`app/api/__tests__`): `learn` (власник без `allowPlayerEdit` → 200, чужий → 403, правило → 422,
-  змінений `updatedAt` → 409), `unlearn`/`reset` лише DM, `seen-level` лише власник, `GET progression` (лише скіли
+  паралельно змінений прогрес → 409, PATCH профілю між читанням і `learn` → не 409), `unlearn`/`reset` лише DM, `seen-level` лише власник, `GET progression` (лише скіли
   дерева), PATCH персонажа без `skillTreeProgress` і з `seenLevel` при підвищенні через досвід, PATCH дерева
   (дублікати → 400, колізія id, `skills.id` = id рядка), `level-up` ставить `seenLevel`. Профіль: після `learn`
   рівня школи магії спелбук показує нове заклинання без перезавантаження. `extract-skills`: рівень гілки через `levelSkillIds` для скіла, назва якого не містить рівня;
