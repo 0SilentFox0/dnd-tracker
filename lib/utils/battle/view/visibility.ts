@@ -29,5 +29,8 @@ export function hiddenTargetSteps(steps: DamageStep[], targetId: string, log: Ba
 
   const known = new Set(observedTraits(log, targetId).map((t) => t.label));
 
-  return steps.filter((s) => s.side === "attacker" || known.has(s.label));
+  const allKnown = steps.every((s) => s.side === "attacker" || known.has(s.label));
+
+  // after відомого кроку вже містить прихований опір, тож або всі кроки цілі, або жодного
+  return allKnown ? steps : steps.filter((s) => s.side === "attacker");
 }

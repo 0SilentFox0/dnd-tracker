@@ -41,4 +41,16 @@ describe("видимість", () => {
     expect(hiddenTargetSteps(steps, "t", seen, false)).toHaveLength(2);
     expect(hiddenTargetSteps(steps, "t", [], true)).toHaveLength(2);
   });
+
+  it("якщо хоч один крок цілі прихований, відомі теж не показуються — їхні числа вже містять прихований опір", () => {
+    const steps: DamageStep[] = [
+      { label: "Кубики", side: "attacker", kind: "dice", value: 10, after: 10 },
+      { label: "Таємний оберіг", side: "target", kind: "percent", value: -20, after: 8 },
+      { label: "Експертний захист", side: "target", kind: "percent", value: -20, after: 6 },
+    ];
+
+    const seen = [{ targets: [{ participantId: "t" }], actionDetails: { damageSteps: { t: [steps[2]] } } }] as unknown as BattleAction[];
+
+    expect(hiddenTargetSteps(steps, "t", seen, false).map((s) => s.label)).toEqual(["Кубики"]);
+  });
 });
