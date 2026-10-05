@@ -104,3 +104,29 @@ describe("convertLegacySnapshot", () => {
     expect(r.spellEnhancers).toEqual([expect.objectContaining({ skillId: "s3", spellGroupId: "g", spellEnhancements: { spellEffectIncrease: 25 } })]);
   });
 });
+
+describe("convertLegacySnapshot: extras старого snapshot", () => {
+  const flagsOf = (r: ReturnType<typeof convertLegacySnapshot>) =>
+    r.resolvedAbilities.filter((a) => a.trigger.event === "passive").flatMap((a) => a.effects).filter((e) => e.kind === "flag");
+
+  it("резист сету з extras переноситься; пасивний резист скіла не дублюється", () => {
+    const r = convertLegacySnapshot({
+      activeSkills: [
+        { skillId: "s1", name: "Захист", mainSkillId: "m", level: "basic", effects: [{ stat: "physical_resistance", type: "percent", value: 30, isPercentage: true }], skillTriggers: [{ type: "simple", trigger: "passive" }] },
+      ],
+      equippedArtifacts: [],
+      extras: { resistances: { physical: 50, spell: 10 }, advantageOnRangedAttacks: true, immuneSpellIds: ["sp1"] },
+    });
+
+    expect(flagsOf(r)).toEqual(
+      expect.arrayContaining([
+        { kind: "flag", flag: "resistance", damageType: "physical", percent: 50 },
+        { kind: "flag", flag: "resistance", damageType: "spell", percent: 10 },
+        { kind: "flag", flag: "advantage", attackKind: "ranged" },
+        { kind: "flag", flag: "spellImmunity", spellIds: ["sp1"] },
+      ]),
+    );
+    expect(flagsOf(r).filter((f) => f.flag === "resistance")).toHaveLength(2);
+  });
+});
+

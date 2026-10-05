@@ -71,7 +71,7 @@ describe("splitParticipant / joinParticipant", () => {
 
     const p = joinParticipant(legacy, "b1");
 
-    expect(p.battleData.resolvedAbilities?.map((a) => a.key)).toEqual(["skill:sk1:t0"]);
+    expect(p.battleData.resolvedAbilities?.map((a) => a.key)).toEqual(["skill:sk1:t0", "skill:legacy-extras:extras"]);
     expect(p.battleData.abilityUsage?.["skill:sk1:t0"]).toEqual({ battle: 1, round: 0, turn: 0 });
     expect("activeSkills" in p.battleData).toBe(false);
   });
