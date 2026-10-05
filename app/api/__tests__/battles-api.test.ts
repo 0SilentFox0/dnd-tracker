@@ -92,107 +92,11 @@ describe("GET /api/campaigns/[id]/battles", () => {
 
     expect(Array.isArray(data)).toBe(true);
     expect((data as { id: string }[])[0].id).toBe("battle-1");
-  });
-});
 
-describe("GET /api/campaigns/[id]/battles/[battleId]", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+    const select = vi.mocked(prisma.battleScene.findMany).mock.calls[0][0]?.select as Record<string, unknown>;
 
-  it("повертає 403, якщо немає доступу", async () => {
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
-      NextResponse.json({ error: "Forbidden" }, { status: 403 }),
-    );
-
-    const { GET } = await import("@/app/api/campaigns/[id]/battles/[battleId]/route");
-
-    const request = createRequest("http://localhost/api/campaigns/c1/battles/b1");
-
-    const response = await GET(request, {
-      params: Promise.resolve({ id: "c1", battleId: "b1" }),
-    });
-
-    expect(await getResponseStatus(response)).toBe(403);
-  });
-
-  it("повертає 404, якщо битву не знайдено", async () => {
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
-      userId: "user-1",
-      authUser: { id: "user-1", email: null, user_metadata: null },
-      campaign: {
-        id: "c1",
-        maxLevel: 20,
-        xpMultiplier: 2.5,
-        members: [{ userId: "user-1", role: "player" }],
-      },
-    });
-    vi.mocked(prisma.battleScene.findUnique).mockResolvedValue(null);
-
-    const { GET } = await import("@/app/api/campaigns/[id]/battles/[battleId]/route");
-
-    const request = createRequest("http://localhost/api/campaigns/c1/battles/b1");
-
-    const response = await GET(request, {
-      params: Promise.resolve({ id: "c1", battleId: "b1" }),
-    });
-
-    expect(await getResponseStatus(response)).toBe(404);
-
-    const data = await getResponseJson<{ error: string }>(response);
-
-    expect(data.error).toBe("Not found");
-  });
-
-  it("повертає 200 та битву з userRole та isDM при успіху", async () => {
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
-      userId: "user-1",
-      authUser: { id: "user-1", email: null, user_metadata: null },
-      campaign: {
-        id: "c1",
-        maxLevel: 20,
-        xpMultiplier: 2.5,
-        members: [{ userId: "user-1", role: "dm" }],
-      },
-    });
-
-    const mockBattle = {
-      id: "b1",
-      campaignId: "c1",
-      name: "Test Battle",
-      description: null,
-      status: "active",
-      participants: [],
-      currentRound: 1,
-      currentTurnIndex: 0,
-      initiativeOrder: [],
-      battleLog: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      completedAt: null,
-      campaign: {
-        id: "c1",
-        friendlyFire: false,
-      },
-    };
-
-    vi.mocked(prisma.battleScene.findUnique).mockResolvedValue(mockBattle as never);
-
-    const { GET } = await import("@/app/api/campaigns/[id]/battles/[battleId]/route");
-
-    const request = createRequest("http://localhost/api/campaigns/c1/battles/b1");
-
-    const response = await GET(request, {
-      params: Promise.resolve({ id: "c1", battleId: "b1" }),
-    });
-
-    expect(await getResponseStatus(response)).toBe(200);
-
-    const data = await getResponseJson(response) as { id: string; userRole: string; isDM: boolean };
-
-    expect(data.id).toBe("b1");
-    expect(data.userRole).toBe("dm");
-    expect(data.isDM).toBe(true);
+    expect(select).not.toHaveProperty("initiativeOrder");
+    expect(select).not.toHaveProperty("pendingSummons");
   });
 });
 

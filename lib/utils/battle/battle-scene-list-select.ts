@@ -1,7 +1,7 @@
 import type { Prisma } from "@prisma/client";
 
 /**
- * Список сцен бою без `battleLog` — лог може займати мегабайти й множити Supabase pooler egress.
+ * Список сцен бою: лише метадані й лобі; стан учасників і журнал живуть в окремих таблицях.
  */
 export const battleSceneListSelect = {
   id: true,
@@ -12,9 +12,6 @@ export const battleSceneListSelect = {
   participants: true,
   currentRound: true,
   currentTurnIndex: true,
-  initiativeOrder: true,
-  pendingSummons: true,
-  pendingMoraleCheck: true,
   createdAt: true,
   startedAt: true,
   completedAt: true,
