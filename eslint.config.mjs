@@ -9,6 +9,12 @@ import simpleImportSortPlugin from "eslint-plugin-simple-import-sort";
 import prettierConfig from "eslint-config-prettier";
 import reactHooks from "eslint-plugin-react-hooks";
 
+const DIALOG_RESTRICTED_PATHS = [
+  { name: "@/components/ui/dialog", message: "Використайте ResponsiveDialog з @/components/ui/responsive-dialog" },
+  { name: "@/components/ui/alert-dialog", message: "Використайте useConfirm з @/lib/hooks/common" },
+  { name: "vaul", message: "Використайте ResponsiveDialog з @/components/ui/responsive-dialog" },
+];
+
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
@@ -126,11 +132,7 @@ const eslintConfig = defineConfig([
       "no-restricted-imports": [
         "error",
         {
-          paths: [
-            { name: "@/components/ui/dialog", message: "Використайте ResponsiveDialog з @/components/ui/responsive-dialog" },
-            { name: "@/components/ui/alert-dialog", message: "Використайте useConfirm з @/lib/hooks/common" },
-            { name: "vaul", message: "Використайте ResponsiveDialog з @/components/ui/responsive-dialog" },
-          ],
+          paths: DIALOG_RESTRICTED_PATHS,
         },
       ],
       "no-restricted-globals": [
@@ -142,6 +144,24 @@ const eslintConfig = defineConfig([
         "error",
         { object: "window", property: "confirm", message: "Використайте useConfirm з @/lib/hooks/common" },
         { object: "window", property: "alert", message: "Використайте useNotify з @/lib/hooks/common" },
+      ],
+    },
+  },
+  {
+    files: ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}"],
+    ignores: ["app/api/**", "components/ui/**", "**/__tests__/**"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: DIALOG_RESTRICTED_PATHS,
+          patterns: [
+            {
+              group: ["@/lib/api", "@/lib/api/*"],
+              message: "Компоненти не ходять в API — використайте хук із @/lib/hooks/<domain>.",
+            },
+          ],
+        },
       ],
     },
   },
