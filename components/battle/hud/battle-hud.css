@@ -24,7 +24,8 @@
   background: linear-gradient(180deg, rgba(8, 6, 5, 0.94) 0, rgba(8, 6, 5, 0.6) 30%, rgba(8, 6, 5, 0.72) 60%, rgba(8, 6, 5, 0.97) 80%);
 }
 
-.battle-hud > * { position: relative; }
+/* шари над затемненням; оверлеї й тости лишаються fixed */
+.battle-hud > :not(.fixed) { position: relative; }
 
 .hud-sc { font-family: var(--font-hud-sc), serif; letter-spacing: 0.04em; }
 
