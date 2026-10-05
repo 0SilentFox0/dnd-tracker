@@ -4,7 +4,8 @@ import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
 import { updateRaceSchema } from "@/lib/schemas";
-import { syncRaceAbilities } from "@/lib/utils/abilities/legacy/sync";
+import { readAbilities } from "@/lib/utils/abilities/legacy/read";
+import { abilitiesJson } from "@/lib/utils/abilities/legacy/read";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 
@@ -33,7 +34,9 @@ export async function GET(
       return NextResponse.json({ error: "Race not found" }, { status: 404 });
     }
 
-    return NextResponse.json(race);
+    const { abilities, issues: abilityIssues } = readAbilities("race", race);
+
+    return NextResponse.json({ ...race, abilities, abilityIssues });
   } catch (error) {
     return handleApiError(error, { action: "fetch race" });
   }
@@ -88,10 +91,9 @@ export async function PATCH(
         spellSlotProgression: data.spellSlotProgression !== undefined 
           ? (data.spellSlotProgression as Prisma.InputJsonValue)
           : undefined,
+        abilities: data.abilities !== undefined ? abilitiesJson(data.abilities) : undefined,
       },
     });
-
-    await syncRaceAbilities(prisma, updatedRace);
 
     revalidateTag(`races-${id}`, "max");
 

@@ -8,7 +8,7 @@ import {
   mirrorArtifactIconToSupabase,
   shouldMirrorArtifactIconUrl,
 } from "@/lib/supabase/artifact-icon-storage";
-import { syncArtifactAbilities } from "@/lib/utils/abilities/legacy/sync";
+import { abilitiesJson } from "@/lib/utils/abilities/legacy/read";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 
@@ -54,11 +54,7 @@ export async function POST(
         description: data.description,
         rarity: data.rarity,
         slot: data.slot,
-        bonuses: data.bonuses as Prisma.InputJsonValue,
-        modifiers: data.modifiers as Prisma.InputJsonValue,
-        passiveAbility: data.passiveAbility
-          ? (data.passiveAbility as Prisma.InputJsonValue)
-          : undefined,
+        ...(data.abilities && { abilities: abilitiesJson(data.abilities) }),
         setId: data.setId,
         icon,
       },
@@ -66,8 +62,6 @@ export async function POST(
         artifactSet: true,
       },
     });
-
-    await syncArtifactAbilities(prisma, artifact);
 
     return NextResponse.json(artifact);
   } catch (error) {

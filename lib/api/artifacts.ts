@@ -1,4 +1,5 @@
 import { campaignDelete, createCampaignCrudApi } from "@/lib/api/client";
+import type { Ability } from "@/lib/utils/abilities/schema";
 
 export interface ArtifactListItem {
   id: string;
@@ -26,6 +27,7 @@ export type CreateArtifactData = {
   passiveAbility?: Record<string, unknown>;
   setId?: string;
   icon?: string | null;
+  abilities?: Ability[];
 };
 
 export type UpdateArtifactData = Partial<{
@@ -43,6 +45,7 @@ export type UpdateArtifactData = Partial<{
   passiveAbility: Record<string, unknown> | null;
   setId: string | null;
   icon: string | null;
+  abilities: Ability[];
 }>;
 
 const artifactsApi = createCampaignCrudApi<

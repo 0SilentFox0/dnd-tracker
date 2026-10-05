@@ -50,3 +50,9 @@ export type AbilityEvent =
   | { type: "bonusAction"; actorId: string; abilityKey: string; targetId?: string };
 
 export type AbilityDamageKind = DamageKind;
+
+export interface AbilitySourceRef {
+  kind: "skill" | "race" | "artifact" | "artifactSet" | "unit";
+  id: string;
+  name: string;
+}

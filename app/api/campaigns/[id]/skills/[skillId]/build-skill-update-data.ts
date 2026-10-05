@@ -7,6 +7,8 @@ import type { z } from "zod";
 
 import type { updateSkillSchema } from "./update-skill-schema";
 
+import { abilitiesJson } from "@/lib/utils/abilities/legacy/read";
+
 export type UpdateSkillData = z.infer<typeof updateSkillSchema>;
 
 export function buildSkillUpdateData(
@@ -28,28 +30,6 @@ export function buildSkillUpdateData(
 
     if (basicInfo.icon !== undefined)
       updateData.icon = basicInfo.icon as string | null;
-  }
-
-  if (data.bonuses !== undefined) {
-    updateData.bonuses = data.bonuses as Prisma.InputJsonValue;
-  }
-
-  if (data.combatStats !== undefined) {
-    updateData.combatStats = data.combatStats as Prisma.InputJsonValue;
-
-    const combatStats = data.combatStats as Record<string, unknown>;
-
-    if (combatStats.damage !== undefined) updateData.damage = combatStats.damage;
-
-    if (combatStats.armor !== undefined) updateData.armor = combatStats.armor;
-
-    if (combatStats.speed !== undefined) updateData.speed = combatStats.speed;
-
-    if (combatStats.physicalResistance !== undefined)
-      updateData.physicalResistance = combatStats.physicalResistance;
-
-    if (combatStats.magicalResistance !== undefined)
-      updateData.magicalResistance = combatStats.magicalResistance;
   }
 
   if (data.spellData !== undefined) {
@@ -118,6 +98,10 @@ export function buildSkillUpdateData(
     }
   }
 
+  if (data.abilities !== undefined) {
+    updateData.abilities = abilitiesJson(data.abilities);
+  }
+
   if (data.mainSkillData !== undefined) {
     updateData.mainSkillData = data.mainSkillData as Prisma.InputJsonValue;
 
@@ -129,10 +113,6 @@ export function buildSkillUpdateData(
           ? { disconnect: true }
           : { connect: { id: mainSkillData.mainSkillId as string } };
     }
-  }
-
-  if (data.skillTriggers !== undefined) {
-    updateData.skillTriggers = data.skillTriggers as Prisma.InputJsonValue;
   }
 
   if (data.appearanceDescription !== undefined) {

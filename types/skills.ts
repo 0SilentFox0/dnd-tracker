@@ -1,11 +1,15 @@
 /**
  * Типи для скілів
  */
-
 import type { SkillEffect } from "./battle";
 import type { SkillTriggers } from "./skill-triggers";
 
+import type { ConversionIssue } from "@/lib/utils/abilities/legacy/types";
+import type { Ability } from "@/lib/utils/abilities/schema";
+
 export interface Skill {
+  abilities?: Ability[];
+  abilityIssues?: ConversionIssue[];
   id: string;
   campaignId: string;
   name: string;
@@ -47,6 +51,8 @@ export interface Skill {
  * Згрупована структура скіла (як повертає API)
  */
 export interface GroupedSkill {
+  abilities?: Ability[];
+  abilityIssues?: ConversionIssue[];
   id: string;
   campaignId: string;
   basicInfo: {

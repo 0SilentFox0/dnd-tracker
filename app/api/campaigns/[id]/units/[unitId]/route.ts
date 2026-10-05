@@ -4,7 +4,8 @@ import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
 import { updateUnitSchema } from "@/lib/schemas";
-import { syncUnitAbilities } from "@/lib/utils/abilities/legacy/sync";
+import { readAbilities } from "@/lib/utils/abilities/legacy/read";
+import { abilitiesJson } from "@/lib/utils/abilities/legacy/read";
 import { requireCampaignAccess, requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 
@@ -35,7 +36,9 @@ export async function GET(
       return validationError;
     }
 
-    return NextResponse.json(unit);
+    const { abilities, issues: abilityIssues } = readAbilities("unit", unit as NonNullable<typeof unit>);
+
+    return NextResponse.json({ ...unit, abilities, abilityIssues });
   } catch (error) {
     return handleApiError(error, { action: "fetch unit" });
   }
@@ -145,10 +148,7 @@ export async function PATCH(
           data.attacks !== undefined
             ? (data.attacks as Prisma.InputJsonValue)
             : undefined,
-        specialAbilities:
-          data.specialAbilities !== undefined
-            ? (data.specialAbilities as Prisma.InputJsonValue)
-            : undefined,
+        abilities: data.abilities !== undefined ? abilitiesJson(data.abilities) : undefined,
         immunities:
           data.immunities !== undefined
             ? (data.immunities as Prisma.InputJsonValue)
@@ -165,8 +165,6 @@ export async function PATCH(
         unitGroup: true,
       },
     });
-
-    await syncUnitAbilities(prisma, updatedUnit);
 
     revalidateTag(`units-${id}`, "max");
 

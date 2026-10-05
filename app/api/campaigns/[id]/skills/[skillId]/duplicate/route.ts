@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
-import { syncSkillAbilities } from "@/lib/utils/abilities/legacy/sync";
+import { abilitiesJson, skillAbilities } from "@/lib/utils/abilities/legacy/read";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 
@@ -104,6 +104,7 @@ export async function POST(
           ? (source.spellAdditionalModifier as Prisma.InputJsonValue)
           : undefined,
         spellNewSpellId: source.spellNewSpellId ?? null,
+        abilities: abilitiesJson(skillAbilities(source)),
       },
       include: {
         spell: true,
@@ -112,8 +113,6 @@ export async function POST(
         mainSkill: true,
       },
     });
-
-    await syncSkillAbilities(prisma, skill);
 
     return NextResponse.json(skill);
   } catch (error) {

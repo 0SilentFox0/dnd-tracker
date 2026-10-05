@@ -5,7 +5,7 @@ import { convertLegacyArtifactSet } from "./convert-artifact-set";
 import { convertLegacyRace } from "./convert-race";
 import { convertLegacySkill, type LegacySkillRow } from "./convert-skill";
 import { convertLegacyUnit } from "./convert-unit";
-import type { ConversionResult } from "./types";
+import type { ConversionIssue, ConversionResult } from "./types";
 
 import { type Ability, parseAbilities } from "@/lib/utils/abilities/schema";
 
@@ -31,4 +31,28 @@ export const unitAbilities = (row: Parameters<typeof convertLegacyUnit>[0] & { a
 
 export function abilitiesJson(abilities: Ability[]): Prisma.InputJsonValue {
   return abilities as unknown as Prisma.InputJsonValue;
+}
+export type OwnerKind = "skill" | "race" | "artifact" | "artifactSet" | "unit";
+
+const CONVERTERS: Record<OwnerKind, (row: never) => ConversionResult> = {
+  skill: convertLegacySkill as never,
+  race: ((r: never) => convertLegacyRace(r)) as never,
+  artifact: ((r: never) => convertLegacyArtifact(r)) as never,
+  artifactSet: ((r: never) => convertLegacyArtifactSet(r)) as never,
+  unit: convertLegacyUnit as never,
+};
+
+export function readAbilities(kind: OwnerKind, row: { id: string; abilities?: unknown }): { abilities: Ability[]; issues: ConversionIssue[] } {
+  const parsed = parseAbilities(row.abilities);
+
+  if (parsed) return { abilities: parsed, issues: [] };
+
+  const converted = CONVERTERS[kind](row as never);
+
+  const invalid = row.abilities !== null && row.abilities !== undefined;
+
+  return {
+    abilities: converted.abilities,
+    issues: invalid ? [{ severity: "loss", message: "Дані вмінь у колонці невалідні — показано перенесене зі старого формату" }, ...converted.issues] : converted.issues,
+  };
 }

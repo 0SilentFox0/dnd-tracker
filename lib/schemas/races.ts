@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { AbilitiesSchema } from "@/lib/utils/abilities/schema";
+
 const passiveAbilitySchema = z
   .object({
     description: z.string(),
@@ -31,6 +33,7 @@ export const createRaceSchema = z.object({
   availableSkills: z.array(z.string()).default([]),
   disabledSkills: z.array(z.string()).default([]),
   passiveAbility: passiveAbilitySchema,
+  abilities: AbilitiesSchema.optional(),
   spellSlotProgression: spellSlotProgressionSchema,
 });
 
@@ -41,6 +44,7 @@ export const updateRaceSchema = z.object({
   availableSkills: z.array(z.string()).optional(),
   disabledSkills: z.array(z.string()).optional(),
   passiveAbility: passiveAbilitySchema,
+  abilities: AbilitiesSchema.optional(),
   spellSlotProgression: spellSlotProgressionSchema,
 });
 

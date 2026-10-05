@@ -5,7 +5,8 @@
 import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
-import { syncArtifactSetAbilities } from "@/lib/utils/abilities/legacy/sync";
+import { abilitiesJson } from "@/lib/utils/abilities/legacy/read";
+import type { Ability } from "@/lib/utils/abilities/schema";
 
 const includeList = {
   artifacts: {
@@ -34,6 +35,7 @@ export function buildArtifactSetPatchInput(data: {
   description?: string | null;
   setBonus?: unknown | null;
   icon?: string | null;
+  abilities?: Ability[];
 }): Prisma.ArtifactSetUpdateInput {
   const update: Prisma.ArtifactSetUpdateInput = {};
 
@@ -53,6 +55,8 @@ export function buildArtifactSetPatchInput(data: {
   if (data.icon !== undefined) {
     update.icon = data.icon;
   }
+
+  if (data.abilities !== undefined) update.abilities = abilitiesJson(data.abilities);
 
   return update;
 }
@@ -108,6 +112,7 @@ export async function insertArtifactSet(
     description: string | null;
     setBonus: unknown | undefined;
     icon?: string | null;
+    abilities?: Ability[];
   },
 ) {
   const row = await prisma.artifactSet.create({
@@ -116,12 +121,11 @@ export async function insertArtifactSet(
       name: input.name,
       description: input.description,
       setBonus: setBonusToPrismaInput(input.setBonus),
+      ...(input.abilities && { abilities: abilitiesJson(input.abilities) }),
       icon: input.icon?.trim() ? input.icon.trim() : null,
     },
     include: includeList,
   });
-
-  await syncArtifactSetAbilities(prisma, row);
 
   return row;
 }
@@ -134,8 +138,6 @@ export async function updateArtifactSetRow(
     where: { id: setId },
     data,
   });
-
-  await syncArtifactSetAbilities(prisma, row);
 
   return row;
 }

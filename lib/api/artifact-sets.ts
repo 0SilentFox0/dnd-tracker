@@ -3,6 +3,7 @@
  */
 
 import { createCampaignCrudApi } from "@/lib/api/client";
+import type { Ability } from "@/lib/utils/abilities/schema";
 import type { ArtifactSetRow } from "@/types/artifact-sets";
 
 export type { ArtifactSetRow };
@@ -13,6 +14,7 @@ export type ArtifactSetCreatePayload = {
   setBonus?: unknown;
   artifactIds?: string[];
   icon?: string | null;
+  abilities?: Ability[];
 };
 
 export type ArtifactSetUpdatePayload = {
@@ -21,6 +23,7 @@ export type ArtifactSetUpdatePayload = {
   setBonus?: unknown | null;
   artifactIds?: string[];
   icon?: string | null;
+  abilities?: Ability[];
 };
 
 const artifactSetsApi = createCampaignCrudApi<

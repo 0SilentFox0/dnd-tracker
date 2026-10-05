@@ -8,7 +8,8 @@ import {
   mirrorArtifactIconToSupabase,
   shouldMirrorArtifactIconUrl,
 } from "@/lib/supabase/artifact-icon-storage";
-import { syncArtifactAbilities } from "@/lib/utils/abilities/legacy/sync";
+import { readAbilities } from "@/lib/utils/abilities/legacy/read";
+import { abilitiesJson } from "@/lib/utils/abilities/legacy/read";
 import { requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 
@@ -36,7 +37,9 @@ export async function GET(
       return validationError;
     }
 
-    return NextResponse.json(artifact);
+    const { abilities, issues: abilityIssues } = readAbilities("artifact", artifact as NonNullable<typeof artifact>);
+
+    return NextResponse.json({ ...artifact, abilities, abilityIssues });
   } catch (error) {
     return handleApiError(error, { action: "fetch artifact" });
   }
@@ -96,22 +99,13 @@ export async function PATCH(
         description: data.description !== undefined ? data.description : undefined,
         rarity: data.rarity !== undefined ? data.rarity : undefined,
         slot: data.slot,
-        bonuses: data.bonuses !== undefined ? (data.bonuses as Prisma.InputJsonValue) : undefined,
-        modifiers: data.modifiers !== undefined ? (data.modifiers as Prisma.InputJsonValue) : undefined,
-        passiveAbility:
-          data.passiveAbility !== undefined
-            ? data.passiveAbility === null
-              ? Prisma.JsonNull
-              : (data.passiveAbility as Prisma.InputJsonValue)
-            : undefined,
+        abilities: data.abilities !== undefined ? abilitiesJson(data.abilities) : undefined,
         setId: data.setId !== undefined ? (data.setId || null) : undefined,
         icon:
           data.icon !== undefined ? resolvedIcon ?? null : undefined,
       },
       include: { artifactSet: true },
     });
-
-    await syncArtifactAbilities(prisma, updatedArtifact);
 
     return NextResponse.json(updatedArtifact);
   } catch (error) {

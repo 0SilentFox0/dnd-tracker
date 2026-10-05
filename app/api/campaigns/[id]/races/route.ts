@@ -5,7 +5,7 @@ import { Prisma } from "@prisma/client";
 import { getCachedRaces } from "@/lib/cache/reference-data";
 import { prisma } from "@/lib/db";
 import { createRaceSchema } from "@/lib/schemas";
-import { syncRaceAbilities } from "@/lib/utils/abilities/legacy/sync";
+import { abilitiesJson } from "@/lib/utils/abilities/legacy/read";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 
@@ -66,10 +66,9 @@ export async function POST(
         spellSlotProgression: data.spellSlotProgression 
           ? (data.spellSlotProgression as Prisma.InputJsonValue)
           : [],
+        ...(data.abilities && { abilities: abilitiesJson(data.abilities) }),
       },
     });
-
-    await syncRaceAbilities(prisma, race);
 
     revalidateTag(`races-${id}`, "max");
 
