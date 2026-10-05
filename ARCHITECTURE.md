@@ -139,22 +139,27 @@ React-хуки згруповані по папках за доменом; ко�
 - **`turn/`** — єдиний движок переходу ходу (`advanceTurn`).
 - **`store/`**, **`pipeline/`** — нормалізоване сховище бою і `runBattleMutation` для всіх battle-роутів.
 - **`damage/`** — розбиття урону (breakdown), модифікатори, resistance, бонуси, формули.
-- **`participant/`** — учасник бою: з character/unit, пасивні ефекти, артефакти.
+- **`participant/`** — учасник бою: з character/unit, збирання умінь, артефакти, покращення заклинань.
 - **`spell/`** — застосування заклинання: гілки (process-branches), ефекти (process-effects), розрахунки.
 - **`balance/`** — баланс бою (CR, DPR тощо).
 - **`resistance/`** — опір урону.
-- **`triggers/`** — контекст тригерів для скілів у бою.
 - **`common/`**, **`types/`** — спільні типи та хелпери.
 
 Файли тримаються компактними (<300 рядків), складна логіка винесена в окремі модулі/папки.
 
+#### `lib/utils/abilities/`
+
+Уміння — одна модель «тригер → умова → ліміти → ефекти» для скілів, рас, артефактів, сетів і юнітів.
+
+- **`schema/`** — Zod-модель уміння (тригери, умови, ефекти, правила сумісності).
+- **`registry/`** — реєстр тригерів, умов і ефектів: `matches` / `evaluate` / `apply`, `describe`, `fields` для UI.
+- **`engine/`** — `runAbilities` (один виконавець подій бою з лімітами й шансом), `resolveDowned` (летальна шкода → вбивство), `collectModifiers` (постійні модифікатори: пасивки, аури, таймові ефекти).
+- **`build/`** — збирання умінь учасника («найвищий рівень у лінії», школа магії) і запікання статів при побудові.
+- **`legacy/`** — конвертер старих форматів (`skillTriggers`, `combatStats`, `passiveAbility`, `setBonus`, `specialAbilities`, старі snapshot), читання колонки `abilities` із запасним варіантом, подвійний запис і звіт `pnpm convert-abilities`.
+
 #### `lib/utils/skills/`
 
-Скіли: тригери, виконання ефектів у бою.
-
-- **`triggers/`** — умови тригерів (evaluateSkillTrigger, getSkillsByTrigger тощо).
-- **`execution/`** — виконання скілів за типом тригера: bonus-action, battle-start, on-hit, on-kill, morale, effects, simple; типи в `types/`.
-- **`skill-helpers.ts`**, **`skill-tree-mock.ts`** тощо — допоміжні функції та моки для дерева.
+- **`skill-helpers.ts`**, **`skill-tree-mock.ts`** тощо — допоміжні функції для дерева скілів і форм.
 
 #### `lib/utils/spells/`
 
@@ -168,7 +173,7 @@ React-хуки згруповані по папках за доменом; ко�
 - **`api/`** — спільні API-допоміжки.
 - **`common/`** — загальні утиліти.
 
-Тести: поруч з кодом у папках **`__tests__/`** (наприклад `lib/utils/battle/__tests__/`, `lib/utils/skills/__tests__/`).
+Тести: поруч з кодом у папках **`__tests__/`** (наприклад `lib/utils/battle/__tests__/`, `lib/utils/abilities/**/__tests__/`).
 
 ### 3.4 `lib/constants/`
 
@@ -226,7 +231,8 @@ React-провайдери: **`query-provider.tsx`** (TanStack Query), можл�
 - **Імпорт:** `import-spells.ts`, `import-docs-spells.ts`, `import-units.ts`, `import-skills-library.ts` (та допоміжні parse/triggers/types).
 - **Міграції зберігання:** `migrate-spell-icons-to-supabase.ts`, `migrate-skill-icons-to-supabase.ts`, `migrate-unit-icons-to-supabase.ts`.
 - **Дані:** `seed-artifacts.ts`, `seed-mock-battle-data.ts`, `seed-mock-battles.ts`, `reset-mock-battle-data.ts`, `delete-mock-battle-data.ts`, `redistribute-character-spell-slots.ts`.
-- **Тести/симуляції:** `run-skills-testing.ts`, `run-spells-testing.ts`, `simulate-battle-3v5.ts`, `setup-battle-test-3v5.ts`.
+- **Тести/симуляції:** `run-spells-testing.ts`, `setup-battle-test-3v5.ts`.
+- **Конвертація умінь:** `pnpm convert-abilities` (dry-run зі звітом у `docs/reports/`; `--apply` / `--force`).
 - **Інше:** `fetch-skill-structure.ts`, `artifact-icon-map.ts`, `update-artifact-icons.ts`, `import-spells-from-csv.ts`.
 
 Детальніший опис mock-даних — у **`scripts/README-MOCK-DATA.md`**.

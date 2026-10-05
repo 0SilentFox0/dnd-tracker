@@ -11,7 +11,7 @@ import { prisma } from "@/lib/db";
 import type { PipelineDeps } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { loadBattle, loadRecentEvents, loadSnapshotsFrom, saveBattle } from "@/lib/utils/battle/store";
-import { createMockParticipant } from "@/lib/utils/skills/__tests__/skill-triggers-execution-mocks";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 
 const url = process.env.DATABASE_URL ?? "";
 

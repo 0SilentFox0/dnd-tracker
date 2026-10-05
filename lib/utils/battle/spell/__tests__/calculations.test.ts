@@ -12,12 +12,9 @@ import { calculateSpellDamageWithEnhancements } from "../calculations";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { SkillLevel } from "@/lib/types/skill-tree";
+import type { LegacyActiveSkill as ActiveSkill } from "@/lib/utils/abilities/legacy/types";
 import { upgradeLegacyParticipant } from "@/lib/utils/battle/store/split-participant";
-import type {
-  ActiveSkill,
-  BattleParticipant,
-  SkillEffect,
-} from "@/types/battle";
+import type { BattleParticipant, SkillEffect } from "@/types/battle";
 
 // Старі ActiveSkill проходять реальний шлях міграції snapshot → уміння.
 function createCaster(overrides?: {
@@ -70,8 +67,6 @@ function createCaster(overrides?: {
     battleData: {
       attacks: [],
       activeEffects: [],
-      passiveAbilities: [],
-      racialAbilities: [],
       activeSkills: overrides?.activeSkills ?? [],
       equippedArtifacts: [],
     },

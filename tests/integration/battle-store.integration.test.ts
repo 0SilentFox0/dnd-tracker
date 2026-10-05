@@ -13,7 +13,7 @@ import {
   restoreParticipantsAt,
   saveBattle,
 } from "@/lib/utils/battle/store";
-import { createMockParticipant } from "@/lib/utils/skills/__tests__/skill-triggers-execution-mocks";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 
 const url = process.env.DATABASE_URL ?? "";
 

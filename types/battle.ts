@@ -4,14 +4,9 @@
 
 import type { AbilityUsageCounter, ResolvedAbility, SpellEnhancer, StaticEffect } from "./abilities";
 
-import {
-  ARTIFACT_EFFECT_ALL_ALLIES,
-  ARTIFACT_EFFECT_ALL_ENEMIES,
-  type ArtifactEffectAudience,
-} from "@/lib/constants/artifact-effect-scope";
+import type { ArtifactEffectAudience } from "@/lib/constants/artifact-effect-scope";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
-import type { ParsedArtifactSetBonus } from "@/lib/types/artifact-set-bonus";
 import { SkillLevel } from "@/lib/types/skill-tree";
 
 export type { CriticalEffect };
@@ -58,46 +53,6 @@ export interface ActiveEffect {
 }
 
 /**
- * Типи для пасивних здібностей
- */
-export interface PassiveAbility {
-  id: string;
-  name: string;
-  description: string;
-  trigger: {
-    type:
-      | "always"
-      | "on_hit"
-      | "on_attack"
-      | "ally_low_hp"
-      | "start_of_turn"
-      | "end_of_turn"
-      | "start_of_battle";
-    condition?: string; // умова (наприклад "ally_hp <= 15%")
-    chance?: number; // відсоток спрацювання (25%, 20%)
-    lowHpThresholdPercent?: number; // поріг низького HP для trigger "ally_low_hp" (наприклад, 15, 25, тощо)
-  };
-  effect: {
-    type: string;
-    value?: number;
-    // ... специфічні поля залежно від типу
-  };
-}
-
-/**
- * Типи для расових здібностей
- */
-export interface RacialAbility {
-  id: string;
-  name: string;
-  effect: Record<string, unknown>; // деталі ефекту
-  // Наприклад: fire_immunity, magic_resistance, morale_rules
-}
-
-/**
- * Типи для активних скілів
- */
-/**
  * Один ефект скіла (збагачений формат)
  */
 export interface SkillEffect {
@@ -114,44 +69,6 @@ export interface SkillEffect {
 /** Тип шкоди для фільтрації скілів при розрахунку урону */
 export type SkillDamageType = "melee" | "ranged" | "magic";
 
-export interface ActiveSkill {
-  skillId: string;
-  name: string;
-  mainSkillId: string;
-  level: SkillLevel;
-  icon?: string | null;
-  description?: string | null;
-  effects: SkillEffect[];
-  /** Чи враховувати скіл лише коли він позначений як такий, що впливає на шкоду */
-  affectsDamage?: boolean;
-  /** Тип шкоди: melee / ranged / magic — скіл враховується лише для цього типу */
-  damageType?: SkillDamageType | null;
-  /** Заклинання, до якого прив’язаний скіл (для покращень по конкретному spellId) */
-  linkedSpellId?: string | null;
-  /**
-   * ID групи (школи) заклинань, до якої прив'язаний скіл.
-   * Беремо з `mainSkill.spellGroupId` (школа магії як вузол дерева скілів),
-   * або з `skill.spellGroupId` (пряма прив'язка скіла до школи).
-   * Використовується magic-pipeline'ом для school-scope фільтра:
-   * бонус застосовується лише до заклинань тієї ж школи.
-   */
-  spellGroupId?: string | null;
-  spellEnhancements?: {
-    spellEffectIncrease?: number; // +25% ефекту
-    spellTargetChange?: { target: string }; // зміна цілі
-    spellAdditionalModifier?: {
-      modifier?: string; // "burning", "poison", тощо
-      damageDice?: string; // "1d6" для додаткової шкоди
-      duration?: number; // тривалість в раундах
-    };
-    spellNewSpellId?: string; // нове заклинання
-    /** Кілька цілей у діалозі касту для прив’язаного заклинання (тип target у БД) */
-    spellAllowMultipleTargets?: boolean;
-    /** Заклинання (id), що кастуються як кілька цілей при наявності скіла */
-    spellAoeSpellIds?: string[];
-  };
-  skillTriggers?: import("@/types/skill-triggers").SkillTriggers; // Тригери скіла
-}
 
 /**
  * Типи для екіпірованих артефактів
@@ -181,17 +98,6 @@ export interface ArtifactSetHudMarker {
   icon?: string | null;
 }
 
-/** Черга бонусу сету/артефакта з аудиторією all_allies / all_enemies. */
-export interface PendingScopedArtifactBonus {
-  sourceSide: ParticipantSide;
-  audience:
-    | typeof ARTIFACT_EFFECT_ALL_ALLIES
-    | typeof ARTIFACT_EFFECT_ALL_ENEMIES;
-  bundle: ParsedArtifactSetBonus;
-  displayName: string;
-  /** Для відображення статусу сету в HUD після роздачі. */
-  hud?: ArtifactSetHudMarker;
-}
 
 /**
  * Типи для атак
@@ -300,16 +206,9 @@ export interface BattleParticipantSpellcasting {
 export interface BattleParticipantBattleData {
   attacks: BattleAttack[];
   activeEffects: ActiveEffect[];
-  passiveAbilities?: PassiveAbility[];
-  racialAbilities?: RacialAbility[];
-  activeSkills?: ActiveSkill[];
   equippedArtifacts: EquippedArtifact[];
-  /** Бонуси з «аурою» (команда / вороги), збираються при створенні учасника й роздаються після повного списку. */
-  pendingScopedArtifactBonuses?: PendingScopedArtifactBonus[];
   /** Маркери повних сетів для HUD (іконка сету). */
   artifactSetHudMarkers?: ArtifactSetHudMarker[];
-  /** Лічильник використань скілів за бій (skillId → count). Для oncePerBattle/twicePerBattle */
-  skillUsageCounts?: Record<string, number>;
   /** Пул додаткових дій (ефект «actions»): накопичується при спрацюванні, споживається при використанні основної дії, діє до кінця бою */
   pendingExtraActions?: number;
   /** Учасник зараз робить додатковий хід від моралі (наприкінці раунду) */

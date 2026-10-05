@@ -132,7 +132,7 @@ describe("splitParticipant / joinParticipant", () => {
   it("pendingScopedArtifactBonuses не зберігається", () => {
     const p = richParticipant();
 
-    p.battleData.pendingScopedArtifactBonuses = [{} as never];
+    (p.battleData as unknown as Record<string, unknown>).pendingScopedArtifactBonuses = [{}];
 
     const stored = splitParticipant(p, { orderIndex: 0, isPending: false });
 

@@ -17,10 +17,8 @@ import {
   applySpellRemoveBuffsDebuffs,
 } from "../process-effects";
 
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 import type { BattleSpell } from "@/lib/utils/battle/types/spell-process";
-import {
-  createMockParticipant,
-} from "@/lib/utils/skills/__tests__/skill-triggers-execution-mocks";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
 function makeSpell(overrides: Partial<BattleSpell> = {}): BattleSpell {

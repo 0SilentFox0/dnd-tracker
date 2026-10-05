@@ -58,9 +58,6 @@ function createParticipant(
     battleData: {
       attacks: [],
       activeEffects: [],
-      passiveAbilities: [],
-      racialAbilities: [],
-      activeSkills: [],
       equippedArtifacts: [],
       resolvedAbilities: [],
       spellEnhancers: [],

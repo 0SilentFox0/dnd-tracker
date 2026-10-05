@@ -16,9 +16,7 @@ import {
 } from "../run-attack-phase";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
-import {
-  createMockParticipant,
-} from "@/lib/utils/skills/__tests__/skill-triggers-execution-mocks";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 function meleeAttack(over: Partial<BattleAttack> = {}): BattleAttack {

@@ -16,18 +16,11 @@ export type {
   DamageBreakdownTargetResult,
 } from "../types/damage-breakdown";
 export type { DamageCalculationResult } from "../types/damage-calculations";
-export { calculateArtifactDamageBonus, calculatePassiveAbilityDamageBonus } from "./bonuses";
 export {
   computeDamageBreakdown,
   computeDamageBreakdownMultiTarget,
 } from "./breakdown";
 export { applyResistance } from "./resist";
-export {
-  calculateSkillDamageFlatBonus,
-  calculateSkillDamagePercentBonus,
-  getSkillDamageFlatBreakdownEntries,
-  getSkillDamagePercentBreakdownEntries,
-} from "./skill";
 
 export function calculateDamageWithModifiers(
   attacker: BattleParticipant,

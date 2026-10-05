@@ -60,9 +60,6 @@ function createBaseParticipant(overrides?: Partial<BattleParticipant>): BattlePa
     battleData: {
       attacks: [],
       activeEffects: [],
-      passiveAbilities: [],
-      racialAbilities: [],
-      activeSkills: [],
       equippedArtifacts: [],
       resolvedAbilities: [],
       spellEnhancers: [],

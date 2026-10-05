@@ -27,7 +27,6 @@ export const getParticipantSpeed = (p: BattleParticipant) => p.combatStats.speed
 export const getParticipantMorale = (p: BattleParticipant) => p.combatStats.morale;
 export const getParticipantStatus = (p: BattleParticipant) => p.combatStats.status;
 export const getParticipantAttacks = (p: BattleParticipant) => p.battleData.attacks;
-export const getParticipantActiveSkills = (p: BattleParticipant) => p.battleData.activeSkills;
 export const getParticipantHasUsedAction = (p: BattleParticipant) => p.actionFlags.hasUsedAction;
 export const getParticipantHasUsedBonusAction = (p: BattleParticipant) => p.actionFlags.hasUsedBonusAction;
 export const getParticipantHasUsedReaction = (p: BattleParticipant) => p.actionFlags.hasUsedReaction;

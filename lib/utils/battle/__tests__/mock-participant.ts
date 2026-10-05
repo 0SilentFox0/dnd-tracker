@@ -52,9 +52,6 @@ export function createMockParticipant(
     battleData: {
       attacks: [],
       activeEffects: [],
-      passiveAbilities: [],
-      racialAbilities: [],
-      activeSkills: [],
       equippedArtifacts: [],
       resolvedAbilities: [],
       spellEnhancers: [],
@@ -83,7 +80,7 @@ export function grantPassive(p: BattleParticipant, effects: StaticEffect[], name
 
 /** Для тестів зі старими activeSkills: додає сконвертовані вміння, не прибираючи старі поля. */
 export function withConvertedSkills(p: BattleParticipant): BattleParticipant {
-  const converted = convertLegacySnapshot({ activeSkills: p.battleData.activeSkills ?? [] });
+  const converted = convertLegacySnapshot({ activeSkills: (p.battleData as unknown as Record<string, unknown>).activeSkills ?? [] });
 
   return {
     ...p,

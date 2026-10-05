@@ -25,7 +25,7 @@ export function splitParticipant(
   const { activeEffects, abilityUsage, pendingExtraActions, ...battleDataWithScoped } = p.battleData;
 
   // потрібне лише під час старту бою
-  const battleDataRest = omit(battleDataWithScoped, ["pendingScopedArtifactBonuses", "skillUsageCounts"]);
+  const battleDataRest = omit(battleDataWithScoped as typeof battleDataWithScoped & { pendingScopedArtifactBonuses?: unknown; skillUsageCounts?: unknown }, ["pendingScopedArtifactBonuses", "skillUsageCounts"]);
 
   const spellSlotsCurrent: Record<string, number> = {};
 
