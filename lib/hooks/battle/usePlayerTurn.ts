@@ -60,6 +60,8 @@ export function usePlayerTurn(participant: BattleParticipant) {
     actionUsed: participant.actionFlags.hasUsedAction,
     bonusAvailable: !participant.actionFlags.hasUsedBonusAction,
     afterAction: () => {
+      if (scene.readBattle()?.status !== "active") return;
+
       if (exhausted(fresh())) dispatch({ type: "EXHAUSTED" });
     },
     rollMorale: async (d10: number) => {

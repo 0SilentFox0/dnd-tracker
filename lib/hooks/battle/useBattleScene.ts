@@ -94,7 +94,7 @@ export function deriveTurn(battle: BattleScene, userId: string | null, isDM: boo
     p.basicInfo.controlledBy === userId ||
     (isDM && (p.basicInfo.id === dmControlledId || p.basicInfo.controlledBy === "dm" || p.basicInfo.side === ParticipantSide.ENEMY));
 
-  const isMyTurn = !!current && !!userId && controls(current);
+  const isMyTurn = battle.status === "active" && !!current && !!userId && controls(current);
 
   const dmHero = isDM && dmControlledId ? order.find((p) => p.basicInfo.id === dmControlledId) ?? null : null;
 

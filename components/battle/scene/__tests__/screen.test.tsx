@@ -49,4 +49,20 @@ describe("BattleScreen", () => {
     expect(screen.getByText(/Вороги ·/)).toBeTruthy();
     expect(screen.getByText("Журнал")).toBeTruthy();
   });
+
+  it("завершений бій: банер «Бій завершено» замість «ходить», без дій — на телефоні й десктопі", () => {
+    for (const wide of [false, true]) {
+      media.wide = wide;
+
+      const { wrapper } = fakeScene({ isMyTurn: false, status: "completed" });
+
+      render(<BattleScreen />, { wrapper });
+
+      expect(screen.getAllByText("Бій завершено").length).toBeGreaterThan(0);
+      expect(screen.queryByText(/ходить/)).toBeNull();
+      expect(screen.queryByRole("button", { name: /Атака/ })).toBeNull();
+
+      cleanup();
+    }
+  });
 });

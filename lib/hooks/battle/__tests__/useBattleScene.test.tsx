@@ -14,7 +14,7 @@ const p = (id: string, controlledBy: string, side = ParticipantSide.ALLY) => {
 };
 
 const battle = (turnIndex: number) =>
-  ({ initiativeOrder: [p("gob", "dm", ParticipantSide.ENEMY), p("h1", "u1"), p("h2", "u1"), p("other", "u2")], currentTurnIndex: turnIndex }) as unknown as BattleScene;
+  ({ initiativeOrder: [p("gob", "dm", ParticipantSide.ENEMY), p("h1", "u1"), p("h2", "u1"), p("other", "u2")], currentTurnIndex: turnIndex, status: "active" }) as unknown as BattleScene;
 
 describe("deriveTurn", () => {
   it("гравець з двома героями: hero — поточний, якщо це мій, інакше мій, хто ходитиме найближче", () => {
@@ -31,7 +31,7 @@ describe("deriveTurn", () => {
 
     const order = [p("h1", "u1"), p("gob", "dm", ParticipantSide.ENEMY), p("h2", "u1")];
 
-    const nextUp = deriveTurn({ initiativeOrder: order, currentTurnIndex: 1, currentRound: 1 } as unknown as BattleScene, "u1", false, null);
+    const nextUp = deriveTurn({ initiativeOrder: order, currentTurnIndex: 1, currentRound: 1, status: "active" } as unknown as BattleScene, "u1", false, null);
 
     expect(nextUp.hero?.basicInfo.id).toBe("h2");
     expect(waiting.myParticipants.map((x) => x.basicInfo.id)).toEqual(["h1", "h2"]);
@@ -59,5 +59,14 @@ describe("canSeeEnemyHp", () => {
     expect(canSeeEnemyHp(detectMagic, [detectMagic])).toBe(false);
     expect(canSeeEnemyHp(trueSight, [trueSight])).toBe(true);
     expect(canSeeEnemyHp(null, [])).toBe(false);
+  });
+});
+
+describe("deriveTurn — завершений бій", () => {
+  it("після завершення нічий хід не активний", () => {
+    const done = { ...battle(1), status: "completed" } as unknown as BattleScene;
+
+    expect(deriveTurn(done, "u1", false, null).isMyTurn).toBe(false);
+    expect(deriveTurn(done, "dm-user", true, null).isMyTurn).toBe(false);
   });
 });

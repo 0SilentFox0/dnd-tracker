@@ -21,6 +21,7 @@ export interface FakeSceneOptions {
   morale?: number;
   confirmAnswer?: boolean;
   isDM?: boolean;
+  status?: BattleScene["status"];
 }
 
 function participant(id: string, name: string, side: ParticipantSide, over: Partial<{ hp: number; ac: number; controlledBy: string }> = {}): BattleParticipant {
@@ -56,7 +57,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
   const order = [me, gob, ally];
 
   const battle = {
-    id: "b1", campaignId: "c1", name: "Засідка", status: "active", participants: [], currentRound: 3, currentTurnIndex: opts.isMyTurn === false ? 1 : 0,
+    id: "b1", campaignId: "c1", name: "Засідка", status: opts.status ?? "active", participants: [], currentRound: 3, currentTurnIndex: opts.isMyTurn === false ? 1 : 0,
     initiativeOrder: order, pendingSummons: [], battleLog: [], createdAt: "", version: 5, isDM: opts.isDM ?? false,
     campaign: { id: "c1", friendlyFire: false }, pendingMoraleCheck: null,
   } as BattleScene;

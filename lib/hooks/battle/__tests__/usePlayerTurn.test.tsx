@@ -101,4 +101,18 @@ describe("usePlayerTurn", () => {
 
     expect(result.current.phase).not.toBe("ended");
   });
+
+  it("бій завершився цією дією — відлік не запускається", () => {
+    const scene = fakeScene();
+
+    const done = { ...scene.value.readBattle(), status: "completed" };
+
+    scene.value.readBattle = () => done as never;
+
+    const { result } = renderHook(() => usePlayerTurn(scene.me), { wrapper: scene.wrapper });
+
+    act(() => result.current.afterAction());
+
+    expect(result.current.phase).toBe("acting");
+  });
 });

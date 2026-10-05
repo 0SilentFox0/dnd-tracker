@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { BattleLog } from "./BattleLog";
+import { BattleOverBanner } from "./BattleOverBanner";
 import { BattleTopBar } from "./BattleTopBar";
 import { ConnectionBanner } from "./ConnectionBanner";
 import { InitiativeTrack } from "./InitiativeTrack";
@@ -40,7 +41,9 @@ export function MobileBattleLayout() {
       <BattleTopBar />
       <InitiativeTrack />
       <LastActionTicker onOpenLog={() => setLogOpen(true)} />
-      {isMyTurn ? (
+      {battle.status === "completed" ? (
+        <BattleOverBanner />
+      ) : isMyTurn ? (
         <div className="hud-sc mx-4 mt-2 flex h-10 items-center justify-center gap-3 border-y border-[var(--enemy)] bg-[var(--enemy)]/20 text-[17px] tracking-[.12em] text-[var(--ink)]">Твій хід</div>
       ) : (
         <div className="flex h-8 items-center gap-2 px-4 text-[15px] italic text-[#b8ab95]">ходить <b className="hud-sc not-italic text-[var(--ink)]">{current?.basicInfo.name}</b></div>
