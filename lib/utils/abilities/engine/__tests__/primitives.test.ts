@@ -87,6 +87,7 @@ describe("hp", () => {
     const p = { ...makeParticipant({ id: "p", hp: 5 }), combatStats: { ...makeParticipant({ id: "p", hp: 5 }).combatStats, tempHp: 2 } };
 
     expect(applyRawDamage(p, 7).combatStats).toMatchObject({ tempHp: 0, currentHp: 0, status: "unconscious" });
-    expect(applyRawDamage(p, 9).combatStats.status).toBe("dead");
+    // як атака: HP не нижче 0, тож надмірна шкода від уміння лишає непритомним, а не мертвим
+    expect(applyRawDamage(p, 9).combatStats).toMatchObject({ currentHp: 0, status: "unconscious" });
   });
 });

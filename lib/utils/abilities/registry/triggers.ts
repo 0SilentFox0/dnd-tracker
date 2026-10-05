@@ -65,11 +65,18 @@ export const TRIGGER_REGISTRY: { [E in TriggerEvent]: TriggerDefinition<E> } = {
     matches: (t, e, o, ps) => {
       if (e.type !== "kill") return false;
 
-      if (t.role === "killer") return e.actorId === id(o);
+      const killer = e.actorId ? findParticipant(ps, e.actorId) : undefined;
 
-      if (t.role === "killerSide") return sameSide(e.actorId ? findParticipant(ps, e.actorId) : undefined, o);
+      const victim = findParticipant(ps, e.targetId);
 
-      return e.targetId !== id(o) && sameSide(findParticipant(ps, e.targetId), o);
+      // friendly fire не рахується як вбивство для вбивці та його сторони
+      const enemyKilled = !!killer && !!victim && killer.basicInfo.side !== victim.basicInfo.side;
+
+      if (t.role === "killer") return enemyKilled && e.actorId === id(o);
+
+      if (t.role === "killerSide") return enemyKilled && sameSide(killer, o);
+
+      return e.targetId !== id(o) && sameSide(victim, o);
     },
   },
   lethalDamage: { event: "lethalDamage", label: "Летальна шкода", fields: [], matches: (_t, e, o) => e.type === "lethalDamage" && e.targetId === id(o) },

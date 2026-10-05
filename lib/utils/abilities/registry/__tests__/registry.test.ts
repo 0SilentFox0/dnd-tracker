@@ -50,6 +50,13 @@ describe("triggerMatches", () => {
     expect(triggerMatches({ event: "kill", role: "victimSide" }, { type: "kill", actorId: "e", targetId: "a" }, ally, ps)).toBe(true);
   });
 
+  it("вбивство союзника (friendly fire) не зараховується вбивці і його стороні", () => {
+    const friendly = { type: "kill" as const, actorId: "a", targetId: "b" };
+
+    expect(triggerMatches({ event: "kill", role: "killer" }, friendly, a, ps)).toBe(false);
+    expect(triggerMatches({ event: "kill", role: "killerSide" }, friendly, a, ps)).toBe(false);
+  });
+
   it("battleStart з newcomerIds — лише для новачків", () => {
     expect(triggerMatches({ event: "battleStart" }, { type: "battleStart", newcomerIds: ["b"] }, a, ps)).toBe(false);
     expect(triggerMatches({ event: "battleStart" }, { type: "battleStart", newcomerIds: ["b"] }, ally, ps)).toBe(true);

@@ -49,7 +49,7 @@ describe("effects", () => {
     const r = run({ kind: "dealDamage", amount: 5 }, ["t"], ps);
 
     expect(r.downed).toEqual([{ victimId: "t", actorId: "o" }]);
-    expect(r.participants[1].combatStats.status).toBe("dead");
+    expect(r.participants[1].combatStats.status).toBe("unconscious");
   });
 
   it("heal з revive повертає з 0 HP", () => {

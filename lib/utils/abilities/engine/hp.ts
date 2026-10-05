@@ -7,7 +7,7 @@ export function downStatus(hp: number): BattleParticipantCombatStats["status"] {
 export function applyRawDamage(p: BattleParticipant, amount: number): BattleParticipant {
   const fromTemp = Math.min(p.combatStats.tempHp, amount);
 
-  const hp = p.combatStats.currentHp - (amount - fromTemp);
+  const hp = Math.max(0, p.combatStats.currentHp - (amount - fromTemp));
 
   return {
     ...p,
