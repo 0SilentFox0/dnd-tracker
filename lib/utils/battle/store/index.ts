@@ -1,5 +1,6 @@
 export * from "./diff-participants";
 export * from "./errors";
+export * from "./event-mapping";
 export * from "./load-battle";
 export * from "./save-battle";
 export * from "./snapshot-state";
