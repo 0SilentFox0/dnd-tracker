@@ -1,7 +1,10 @@
 import { branchLevelNodeId, racialNodeId } from "./ids";
 import { learnedInTree } from "./progress";
 import { canLearn } from "./rules";
-import type { BranchLevel, LearnBlockReason, ProgressionNode, TreeNodes } from "./types";
+import type { BranchGrid, BranchLevel, LearnBlockReason, ProgressionNode, TreeNodes } from "./types";
+
+const NO_CELLS: BranchGrid = { outer: [], middle: [], inner: [] };
+
 import { BRANCH_LEVELS, CIRCLES } from "./types";
 
 export interface NodeState { nodeId: string | null; state: "learned" | "available" | "locked"; reason?: LearnBlockReason }
@@ -56,7 +59,7 @@ export function progressionView(tree: TreeNodes, unlocked: string[], characterLe
     points: { spent: inTree.length, total: characterLevel, free: Math.max(0, characterLevel - inTree.length) },
     racial: BRANCH_LEVELS.map((l) => state(racialNodeId(l))),
     branches: rows.map((b) => {
-      const cells = tree.grid.get(b.id)!;
+      const cells = tree.grid.get(b.id) ?? NO_CELLS;
 
       return { branchId: b.id, level: branchLevelOf(tree, learned, b.id), outer: cells.outer.map(state), middle: cells.middle.map(state), inner: cells.inner.map(state) };
     }),
@@ -87,8 +90,8 @@ export function rankOffers(tree: TreeNodes, unlocked: string[], characterLevel: 
     .sort((a, b) => rank(b.id) - rank(a.id));
 
   touched.forEach((b) => BRANCH_LEVELS.forEach((l) => offer(branchLevelNodeId(b.id, l))));
-  touched.forEach((b) => CIRCLES.forEach((c) => tree.grid.get(b.id)![c].forEach(offer)));
+  touched.forEach((b) => CIRCLES.forEach((c) => (tree.grid.get(b.id) ?? NO_CELLS)[c].forEach(offer)));
   tree.branches.filter((b) => !learned.has(branchLevelNodeId(b.id, "basic"))).forEach((b) => offer(branchLevelNodeId(b.id, "basic")));
 
-  return out.map((id) => tree.nodes.get(id)!);
+  return out.flatMap((id) => tree.nodes.get(id) ?? []);
 }

@@ -18,7 +18,6 @@ import {
 } from "./spell-learning-internals";
 
 import type { SkillLevelType } from "@/types/skill-tree";
-import type { Skill } from "@/types/skills";
 import type { Spell } from "@/types/spells";
 
 /**
@@ -61,43 +60,4 @@ export function getSpellsToAddForSkill(
   }
 
   return spellIdsToAdd;
-}
-
-/**
- * Обчислює список заклинань, які потрібно додати на основі прокачених скілів
- */
-export function calculateSpellsToAdd(
-  unlockedSkillIds: string[],
-  allSkills: Skill[],
-  allSpells: Spell[],
-  skillTreeProgress?: Record<
-    string,
-    { level?: SkillLevelType; unlockedSkills?: string[] }
-  >,
-): string[] {
-  const newSpellIds: string[] = [];
-
-  for (const skillId of unlockedSkillIds) {
-    const skill = allSkills.find((s) => s.id === skillId);
-
-    if (!skill) continue;
-
-    let skillLevel: SkillLevelType | undefined;
-
-    if (skillTreeProgress) {
-      for (const [, progress] of Object.entries(skillTreeProgress)) {
-        if (progress.unlockedSkills?.includes(skillId) && progress.level) {
-          skillLevel = progress.level;
-
-          break;
-        }
-      }
-    }
-
-    const spellsToAdd = getSpellsToAddForSkill(skill, allSpells, skillLevel);
-
-    newSpellIds.push(...spellsToAdd);
-  }
-
-  return Array.from(new Set(newSpellIds));
 }

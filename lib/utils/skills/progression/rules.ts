@@ -95,11 +95,13 @@ export function canUnlearn(tree: TreeNodes, unlocked: string[], nodeId: string):
   const remaining = new Set(unlocked.filter((id) => id !== nodeId && tree.nodes.has(id)));
 
   for (const id of remaining) {
+    const node = tree.nodes.get(id);
+
     const others = new Set(remaining);
 
     others.delete(id);
 
-    if (!nodeRules(tree, others, Number.POSITIVE_INFINITY, tree.nodes.get(id)!).ok) return no("hasDependents");
+    if (node && !nodeRules(tree, others, Number.POSITIVE_INFINITY, node).ok) return no("hasDependents");
   }
 
   return OK;
