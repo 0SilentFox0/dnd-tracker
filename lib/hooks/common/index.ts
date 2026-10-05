@@ -1,4 +1,6 @@
+export { ConfirmContext, type ConfirmFn, type ConfirmOptions } from "./confirm-context";
 export { useAppearanceSave } from "./useAppearanceSave";
+export { useConfirm } from "./useConfirm";
 export { useCrudMutation } from "./useCrudMutation";
 export type { UseFileImportReturn } from "./useFileImport";
 export { useFileImport } from "./useFileImport";
