@@ -49,8 +49,16 @@ export function applyBattleDelta(cached: BattleScene, delta: ClientBattleDelta):
 export function acceptFullBattle(cached: BattleScene | undefined, incoming: BattleScene): BattleScene {
   if (cached?.version !== undefined && incoming.version !== undefined && incoming.version < cached.version) return cached;
 
+  const incomingLog = incoming.battleLog ?? [];
+
+  const windowStart = Math.min(...incomingLog.map((e) => e.actionIndex));
+
+  // GET віддає лише останні події: старіші з кешу лишаються, щоб не губити відомий AC і помічене в бою
+  const older = incomingLog.length ? (cached?.battleLog ?? []).filter((e) => e.actionIndex < windowStart) : [];
+
   return {
     ...incoming,
+    battleLog: [...older, ...incomingLog],
     isDM: incoming.isDM ?? cached?.isDM,
     userRole: incoming.userRole ?? cached?.userRole,
     campaign: incoming.campaign ?? cached?.campaign,

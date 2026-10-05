@@ -101,3 +101,19 @@ describe("acceptFullBattle", () => {
     expect(acceptFullBattle(cached, { ...cached, version: 4 })).toBe(cached);
   });
 });
+
+describe("acceptFullBattle — журнал за межами вікна GET", () => {
+  const withLog = (version: number, idx: number[]) => ({ ...cached, version, battleLog: idx.map(entry) });
+
+  it("старіші записи з кешу лишаються, коли GET приніс лише останнє вікно", () => {
+    const next = acceptFullBattle(withLog(5, [1, 2, 3, 4]), withLog(6, [3, 4, 5]));
+
+    expect(next.battleLog.map((e) => e.actionIndex)).toEqual([1, 2, 3, 4, 5]);
+  });
+
+  it("записи, яких немає у вікні GET (скасовані відкатом), зникають; новий бій після reset — без старих", () => {
+    expect(acceptFullBattle(withLog(5, [1, 2, 3, 4]), withLog(6, [2, 3])).battleLog.map((e) => e.actionIndex)).toEqual([1, 2, 3]);
+    expect(acceptFullBattle(withLog(5, [1, 2, 3]), withLog(6, [1])).battleLog.map((e) => e.actionIndex)).toEqual([1]);
+    expect(acceptFullBattle(withLog(5, [1, 2, 3]), withLog(6, [])).battleLog).toEqual([]);
+  });
+});

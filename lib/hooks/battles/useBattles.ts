@@ -44,9 +44,12 @@ export function useBattle(
     pauseRefetchWhenPusherConnected?: boolean;
   },
 ) {
+  const queryClient = useQueryClient();
+
   return useQuery<BattleScene>({
     queryKey: ["battle", campaignId, battleId],
-    queryFn: () => getBattle(campaignId, battleId),
+    queryFn: async () =>
+      acceptFullBattle(queryClient.getQueryData<BattleScene>(["battle", campaignId, battleId]), await getBattle(campaignId, battleId)),
     staleTime: 15_000,
     refetchInterval: (query) => {
       if (options?.pauseRefetchWhen) return false;
