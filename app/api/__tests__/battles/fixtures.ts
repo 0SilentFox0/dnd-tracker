@@ -1,6 +1,6 @@
 import { ParticipantSide } from "@/lib/constants/battle";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { createMockParticipant } from "@/lib/utils/skills/__tests__/skill-triggers-execution-mocks";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 import type { BattleParticipant } from "@/types/battle";
 
 const base = createMockParticipant();

@@ -5,7 +5,7 @@ import { restoreParticipantsAt } from "@/lib/utils/battle/store/history";
 import { buildSnapshotState } from "@/lib/utils/battle/store/snapshot-state";
 import { splitParticipant } from "@/lib/utils/battle/store/split-participant";
 import type { BattleSceneState, LoadedBattle } from "@/lib/utils/battle/store/types";
-import { createMockParticipant } from "@/lib/utils/skills/__tests__/skill-triggers-execution-mocks";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 
 const scene: BattleSceneState = {
   id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0,

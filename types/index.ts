@@ -3,6 +3,7 @@
  */
 
 // Основні типи
+export * from "./abilities";
 export * from "./artifact-sets";
 export * from "./artifacts";
 export * from "./battle";

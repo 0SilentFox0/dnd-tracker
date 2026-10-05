@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { joinParticipant, splitParticipant } from "@/lib/utils/battle/store/split-participant";
 import { hashJson, stableStringify } from "@/lib/utils/battle/store/stable-json";
-import { createMockParticipant } from "@/lib/utils/skills/__tests__/skill-triggers-execution-mocks";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 import type { BattleParticipant } from "@/types/battle";
 
 function richParticipant(): BattleParticipant {

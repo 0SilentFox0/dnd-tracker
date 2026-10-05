@@ -2,6 +2,8 @@
  * Типи для боїв
  */
 
+import type { AbilityUsageCounter, ResolvedAbility, SpellEnhancer, StaticEffect } from "./abilities";
+
 import {
   ARTIFACT_EFFECT_ALL_ALLIES,
   ARTIFACT_EFFECT_ALL_ENEMIES,
@@ -51,6 +53,8 @@ export interface ActiveEffect {
     damagePerRound: number;
     damageType: string;
   };
+  abilityKey?: string;
+  abilityEffects?: StaticEffect[];
 }
 
 /**
@@ -310,6 +314,9 @@ export interface BattleParticipantBattleData {
   pendingExtraActions?: number;
   /** Учасник зараз робить додатковий хід від моралі (наприкінці раунду) */
   extraTurnActive?: boolean;
+  resolvedAbilities?: ResolvedAbility[];
+  spellEnhancers?: SpellEnhancer[];
+  abilityUsage?: Record<string, AbilityUsageCounter>;
 }
 
 /**

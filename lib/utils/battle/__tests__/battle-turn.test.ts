@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 import { processStartOfTurn } from "@/lib/utils/battle/battle-turn";
-import { createMockParticipant } from "@/lib/utils/skills/__tests__/skill-triggers-execution-mocks";
 import type { ActiveEffect } from "@/types/battle";
 
 const debuff = (type: string, duration: number): ActiveEffect => ({
