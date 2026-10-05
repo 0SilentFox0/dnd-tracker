@@ -81,8 +81,6 @@ export function useBattleScene(): BattleSceneValue {
   return value;
 }
 
-const isUp = (p: BattleParticipant) => p.combatStats.status === "active" && p.combatStats.currentHp > 0;
-
 export function deriveTurn(battle: BattleScene, userId: string | null, isDM: boolean, dmControlledId: string | null) {
   const order = battle.initiativeOrder ?? [];
 
@@ -98,7 +96,13 @@ export function deriveTurn(battle: BattleScene, userId: string | null, isDM: boo
 
   const dmHero = isDM && dmControlledId ? order.find((p) => p.basicInfo.id === dmControlledId) ?? null : null;
 
-  const hero = (isMyTurn ? current : null) ?? dmHero ?? myParticipants.find(isUp) ?? myParticipants[0] ?? (isDM ? current : null);
+  const mine = new Set(myParticipants.map((p) => p.basicInfo.id));
+
+  const nextMine = turnQueue(order, battle.currentTurnIndex, battle.currentRound ?? 1).find(
+    (e): e is Extract<QueueEntry, { participant: BattleParticipant }> => e.kind !== "round" && !e.down && mine.has(e.participant.basicInfo.id),
+  )?.participant;
+
+  const hero = (isMyTurn ? current : null) ?? dmHero ?? nextMine ?? myParticipants[0] ?? (isDM ? current : null);
 
   return { current, isMyTurn, myParticipants, hero };
 }

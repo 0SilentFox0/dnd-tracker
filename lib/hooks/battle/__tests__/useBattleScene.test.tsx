@@ -17,13 +17,23 @@ const battle = (turnIndex: number) =>
   ({ initiativeOrder: [p("gob", "dm", ParticipantSide.ENEMY), p("h1", "u1"), p("h2", "u1"), p("other", "u2")], currentTurnIndex: turnIndex }) as unknown as BattleScene;
 
 describe("deriveTurn", () => {
-  it("гравець з двома героями: hero — поточний, якщо це мій, інакше перший живий мій", () => {
+  it("гравець з двома героями: hero — поточний, якщо це мій, інакше мій, хто ходитиме найближче", () => {
     expect(deriveTurn(battle(2), "u1", false, null)).toMatchObject({ isMyTurn: true, hero: { basicInfo: { id: "h2" } } });
 
     const waiting = deriveTurn(battle(0), "u1", false, null);
 
     expect(waiting.isMyTurn).toBe(false);
     expect(waiting.hero?.basicInfo.id).toBe("h1");
+
+    const later = deriveTurn(battle(3), "u1", false, null);
+
+    expect(later.hero?.basicInfo.id).toBe("h1");
+
+    const order = [p("h1", "u1"), p("gob", "dm", ParticipantSide.ENEMY), p("h2", "u1")];
+
+    const nextUp = deriveTurn({ initiativeOrder: order, currentTurnIndex: 1, currentRound: 1 } as unknown as BattleScene, "u1", false, null);
+
+    expect(nextUp.hero?.basicInfo.id).toBe("h2");
     expect(waiting.myParticipants.map((x) => x.basicInfo.id)).toEqual(["h1", "h2"]);
   });
 
