@@ -11,7 +11,7 @@ import { MyTurnControls } from "./MyTurnControls";
 import { ParticipantDetails } from "./ParticipantDetails";
 import { ParticipantList } from "./ParticipantList";
 
-import { useBattleScene } from "@/lib/hooks/battle";
+import { useBattleScene, useBelowHeaderHeight } from "@/lib/hooks/battle";
 
 const H3 = ({ color, children }: { color: string; children: React.ReactNode }) => (
   <h3 className="hud-sc flex h-8 items-center gap-2 border-b border-white/[.14] text-[15px] font-bold tracking-[.1em] text-[#a89c88]">
@@ -23,10 +23,12 @@ const H3 = ({ color, children }: { color: string; children: React.ReactNode }) =
 export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) {
   const { battle, hero, isMyTurn, isDM, allies, enemies, selectedId, select } = useBattleScene();
 
+  const height = useBelowHeaderHeight();
+
   const selected = battle.initiativeOrder.find((p) => p.basicInfo.id === selectedId) ?? null;
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden">
+    <div className="flex flex-col overflow-hidden" style={{ height }}>
       <ConnectionBanner />
       <BattleTopBar onComplete={onComplete} />
       <div className="flex h-20 items-center border-y border-white/[.08]">

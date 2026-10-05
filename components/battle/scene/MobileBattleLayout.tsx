@@ -14,7 +14,7 @@ import { ParticipantList } from "./ParticipantList";
 
 import { HUD_SURFACE } from "@/components/battle/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { useBattleScene } from "@/lib/hooks/battle";
+import { useBattleScene, useBelowHeaderHeight } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 
 export function MobileBattleLayout() {
@@ -23,6 +23,8 @@ export function MobileBattleLayout() {
   const [tab, setTab] = useState<"ally" | "enemy">("enemy");
 
   const [logOpen, setLogOpen] = useState(false);
+
+  const height = useBelowHeaderHeight();
 
   const selected = battle.initiativeOrder.find((p) => p.basicInfo.id === selectedId) ?? null;
 
@@ -33,7 +35,7 @@ export function MobileBattleLayout() {
   );
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden">
+    <div className="flex flex-col overflow-hidden" style={{ height }}>
       <ConnectionBanner />
       <BattleTopBar />
       <InitiativeTrack />
