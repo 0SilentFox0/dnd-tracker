@@ -67,4 +67,8 @@ describe("attack mutation", () => {
 
     expect(out.events[0].targets).toEqual([expect.objectContaining({ participantId: "gob" })]);
   });
+
+  it("неможливий кидок шкоди (99 на d8) — invalid_dice", () => {
+    expect(() => attackMutation(ctx, body({ damageRolls: [99] }))).toThrow(expect.objectContaining({ code: "invalid_dice" }));
+  });
 });

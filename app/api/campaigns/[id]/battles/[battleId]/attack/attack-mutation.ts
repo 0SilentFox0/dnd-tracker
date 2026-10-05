@@ -6,6 +6,7 @@ import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/p
 import { battleActionToEvent, systemEvent } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";
 import { resolveTargetId } from "@/lib/utils/battle/turn/extra-turn";
+import { assertAttackRolls, assertReactionDamage } from "@/lib/utils/battle/validation/dice-checks";
 import { executeComplexTriggersForChangedParticipant } from "@/lib/utils/skills/execution/simple";
 
 export const attackBodySchema = z
@@ -34,6 +35,23 @@ export const attackBodySchema = z
 
 export type AttackBody = z.infer<typeof attackBodySchema>;
 
+// атака шукається так само, як у runAttackPhase; якщо її немає — помилку дасть сама фаза атаки
+function assertAttackInput(ctx: BattleMutationContext, data: Omit<AttackBody, "endTurn">): void {
+  const attacker = ctx.participants.find((p) => p.basicInfo.id === data.attackerId);
+
+  const attack = data.attackId
+    ? attacker?.battleData.attacks.find((a) => a.id === data.attackId || a.name === data.attackId)
+    : attacker?.battleData.attacks[0];
+
+  const targetIds = data.targetIds?.length ? data.targetIds : data.targetId ? [data.targetId] : [];
+
+  if (attack) assertAttackRolls(attack, { damageRolls: data.damageRolls, targetCount: targetIds.length });
+
+  const firstTarget = ctx.participants.find((p) => p.basicInfo.id === targetIds[0]);
+
+  if (firstTarget) assertReactionDamage(firstTarget, data.reactionDamage);
+}
+
 export function attackMutation(ctx: BattleMutationContext, body: AttackBody): MutationResult {
   const { endTurn, ...raw } = body;
 
@@ -43,6 +61,8 @@ export function attackMutation(ctx: BattleMutationContext, body: AttackBody): Mu
     targetId: raw.targetId && resolveTargetId(ctx.participants, raw.targetId),
     targetIds: raw.targetIds?.map((id) => resolveTargetId(ctx.participants, id)),
   };
+
+  assertAttackInput(ctx, data);
 
   let phase: ReturnType<typeof runAttackPhase>;
 

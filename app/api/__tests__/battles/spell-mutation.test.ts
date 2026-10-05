@@ -104,4 +104,10 @@ describe("spell mutation", () => {
       BattleRuleError,
     );
   });
+
+  it("неможливий кидок шкоди заклинання (99 на d10) — invalid_dice", async () => {
+    await expect(mutation()(context({ participants: [caster, goblin] }), body({ damageRolls: [99] }) as never)).rejects.toMatchObject({
+      code: "invalid_dice",
+    });
+  });
 });
