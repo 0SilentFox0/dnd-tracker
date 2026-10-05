@@ -136,4 +136,23 @@ describe("useConfirm", () => {
     fireEvent.click(screen.getByRole("button", { name: "Зрозуміло" }));
     await expect(p).resolves.toBeUndefined();
   });
+
+  it("телефон: під час анімації закриття шторка показує той самий зміст, а не порожній заголовок", async () => {
+    mockMatchMedia(true);
+    mount();
+
+    let p!: Promise<boolean>;
+
+    act(() => {
+      p = confirm({ title: "Видалити юніта?", confirmLabel: "Видалити", cancelLabel: null });
+    });
+    fireEvent.click(await screen.findByRole("button", { name: "Видалити" }));
+    await expect(p).resolves.toBe(true);
+
+    const sheet = document.querySelector("[data-slot=sheet]");
+
+    expect(sheet).toHaveAttribute("data-state", "closed");
+    expect(sheet).toHaveTextContent("Видалити юніта?");
+    expect(sheet).not.toHaveTextContent("Скасувати");
+  });
 });

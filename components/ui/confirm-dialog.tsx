@@ -11,6 +11,9 @@ type Pending = ConfirmOptions & { resolve: (ok: boolean) => void };
 export function ConfirmProvider({ children }: { children: ReactNode }) {
   const [pending, setPending] = useState<Pending | null>(null);
 
+  // last options stay rendered while the dialog/sheet animates closed
+  const [shown, setShown] = useState<ConfirmOptions | null>(null);
+
   const [busy, setBusy] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
@@ -36,6 +39,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
         setBusy(false);
         setError(null);
         setPending(next);
+        setShown(options);
       }),
     [],
   );
@@ -70,19 +74,19 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
       <ResponsiveDialog
         open={pending !== null}
         onOpenChange={(open) => !open && settle(false)}
-        title={pending?.title ?? ""}
-        description={pending?.description}
+        title={shown?.title ?? ""}
+        description={shown?.description}
         size="sm"
         dismissible={!busy}
         footer={
           <>
-            {pending?.cancelLabel === null ? null : (
+            {shown?.cancelLabel === null ? null : (
               <Button variant="outline" onClick={() => settle(false)} disabled={busy}>
-                {pending?.cancelLabel ?? "Скасувати"}
+                {shown?.cancelLabel ?? "Скасувати"}
               </Button>
             )}
-            <Button variant={pending?.destructive ? "destructive" : "default"} onClick={accept} disabled={busy}>
-              {busy ? "…" : (pending?.confirmLabel ?? "Підтвердити")}
+            <Button variant={shown?.destructive ? "destructive" : "default"} onClick={accept} disabled={busy}>
+              {busy ? "…" : (shown?.confirmLabel ?? "Підтвердити")}
             </Button>
           </>
         }
