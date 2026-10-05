@@ -4,9 +4,9 @@
 
 import type { CounterAttackResultInfo } from "@/components/battle/dialogs/CounterAttackResultDialog";
 import type { RollResultType } from "@/components/battle/RollResultOverlay";
-import type { AddParticipantData } from "@/lib/api/battles";
 import type { MoraleCheckResult } from "@/lib/utils/battle/battle-morale";
 import type { AttackData, BattleScene } from "@/types/api";
+import type { AddParticipantData } from "@/types/battle";
 import type { BattleAction } from "@/types/battle";
 import type { BattleParticipant } from "@/types/battle";
 

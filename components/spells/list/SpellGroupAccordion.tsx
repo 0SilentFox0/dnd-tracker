@@ -2,7 +2,6 @@
 
 import { Edit, MoreVertical, X } from "lucide-react";
 
-import { RemoveAllSpellsDialog } from "@/components/spells/dialogs/RemoveAllSpellsDialog";
 import { RenameGroupDialog } from "@/components/spells/dialogs/RenameGroupDialog";
 import { SpellLevelAccordion } from "@/components/spells/list/SpellLevelAccordion";
 import {
@@ -99,7 +98,7 @@ export function SpellGroupAccordion({
                   <DropdownMenuItem
                     onClick={(e) => {
                       e.stopPropagation();
-                      actions.dialogs.removeAll.setOpen(true);
+                      void actions.handlers.confirmRemoveAll();
                     }}
                   >
                     <X className="h-4 w-4 mr-2" />
@@ -147,13 +146,6 @@ export function SpellGroupAccordion({
         isRenaming={actions.pending.isRenaming}
       />
 
-      <RemoveAllSpellsDialog
-        open={actions.dialogs.removeAll.open}
-        onOpenChange={actions.dialogs.removeAll.setOpen}
-        groupName={groupName}
-        onConfirm={actions.handlers.handleRemoveAllSpells}
-        isRemoving={actions.pending.isRemoving}
-      />
     </>
   );
 }

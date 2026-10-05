@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import type { ArtifactData, ArtifactSetOption } from "./ArtifactEditForm-types";
 import { ArtifactForm } from "./ArtifactForm";
 
-import { deleteArtifact, updateArtifact } from "@/lib/api/artifacts";
 import { ArtifactRarity } from "@/lib/constants/artifacts";
+import { useDeleteArtifact, useUpdateArtifact } from "@/lib/hooks/artifacts";
 
 interface ArtifactEditFormProps {
   campaignId: string;
@@ -20,6 +20,10 @@ export function ArtifactEditForm({
   artifactSets,
 }: ArtifactEditFormProps) {
   const router = useRouter();
+
+  const update = useUpdateArtifact(campaignId);
+
+  const remove = useDeleteArtifact(campaignId);
 
   return (
     <ArtifactForm
@@ -50,16 +54,12 @@ export function ArtifactEditForm({
         weapon: artifact.weapon,
       }}
       onSubmit={async (payload) => {
-        await updateArtifact(campaignId, artifact.id, payload);
-
+        await update.mutateAsync({ artifactId: artifact.id, data: payload });
         router.push(`/campaigns/${campaignId}/dm/artifacts`);
-        router.refresh();
       }}
       onDelete={async () => {
-        await deleteArtifact(campaignId, artifact.id);
-
+        await remove.mutateAsync(artifact.id);
         router.push(`/campaigns/${campaignId}/dm/artifacts`);
-        router.refresh();
       }}
     />
   );

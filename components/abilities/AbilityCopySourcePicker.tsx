@@ -4,8 +4,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { getOwnerAbilities } from "@/lib/api/abilities";
-import { useAbilitySources } from "@/lib/hooks/abilities";
+import { useAbilitySources, useCopyOwnerAbilities } from "@/lib/hooks/abilities";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import type { AbilitySourceRef } from "@/types/abilities";
 
@@ -22,26 +21,15 @@ export function AbilityCopySourcePicker({ campaignId, onPick }: { campaignId: st
 
   const [query, setQuery] = useState("");
 
-  const [busy, setBusy] = useState(false);
-
-  const [error, setError] = useState<string | null>(null);
+  const copy = useCopyOwnerAbilities(campaignId);
 
   const q = query.trim().toLowerCase();
 
   const sources = (data?.sources ?? []).filter((s) => !q || s.name.toLowerCase().includes(q));
 
-  const pick = async (s: AbilitySourceRef) => {
-    setBusy(true);
-    setError(null);
+  const pick = (s: AbilitySourceRef) => copy.mutate(s, { onSuccess: onPick });
 
-    try {
-      onPick((await getOwnerAbilities(campaignId, s.kind, s.id)).abilities);
-    } catch {
-      setError(`Не вдалося завантажити вміння «${s.name}». Спробуйте ще раз.`);
-    } finally {
-      setBusy(false);
-    }
-  };
+  const error = copy.isError ? `Не вдалося завантажити вміння «${copy.variables?.name}». Спробуйте ще раз.` : null;
 
   return (
     <div className="space-y-2">
@@ -58,7 +46,7 @@ export function AbilityCopySourcePicker({ campaignId, onPick }: { campaignId: st
             <div key={kind} className="space-y-1">
               <p className="text-xs font-semibold text-muted-foreground">{KIND_LABELS[kind]}</p>
               {items.map((s) => (
-                <Button key={`${s.kind}:${s.id}`} type="button" variant="outline" className="w-full justify-start" disabled={busy} onClick={() => pick(s)}>
+                <Button key={`${s.kind}:${s.id}`} type="button" variant="outline" className="w-full justify-start" disabled={copy.isPending} onClick={() => pick(s)}>
                   {s.name}
                 </Button>
               ))}

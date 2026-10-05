@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import {
   createSpell,
+  createSpellGroup,
   deleteAllSpells,
   deleteSpell,
   deleteSpellsByLevel,
@@ -20,21 +21,32 @@ import type { Spell, SpellGroup } from "@/types/spells";
 
 export type { Spell, SpellGroup };
 
-export function useSpells(campaignId: string, initialSpells?: Spell[]) {
+export function useSpells(campaignId: string, opts?: { initialData?: Spell[]; enabled?: boolean }) {
   return useQuery<Spell[]>({
     queryKey: ["spells", campaignId],
     queryFn: () => getSpells(campaignId),
     staleTime: REFERENCE_STALE_MS,
-    ...(initialSpells !== undefined && { initialData: initialSpells }),
-    enabled: !!campaignId,
+    ...(opts?.initialData !== undefined && { initialData: opts.initialData }),
+    enabled: !!campaignId && (opts?.enabled ?? true),
   });
 }
 
-export function useSpellGroups(campaignId: string) {
+export function useSpellGroups(campaignId: string, opts?: { enabled?: boolean }) {
   return useQuery<SpellGroup[]>({
     queryKey: ["spellGroups", campaignId],
     queryFn: () => getSpellGroups(campaignId),
     staleTime: REFERENCE_STALE_MS,
+    enabled: opts?.enabled ?? true,
+  });
+}
+
+export function useCreateSpellGroup(campaignId: string) {
+  return useCrudMutation({
+    mutationFn: (name: string) => createSpellGroup(campaignId, { name }),
+    invalidateKeys: [
+      ["spellGroups", campaignId],
+      ["spells", campaignId],
+    ],
   });
 }
 

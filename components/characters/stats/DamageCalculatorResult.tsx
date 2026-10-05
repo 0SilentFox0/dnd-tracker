@@ -1,6 +1,6 @@
 "use client";
 
-import type { SpellEffectKind } from "./damage-calculator-utils";
+import type { SpellEffectKind } from "@/lib/utils/characters/damage-calculator";
 
 interface DamageCalculatorResultProps {
   diceSum: number;

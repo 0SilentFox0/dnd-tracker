@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ArtifactForm } from "@/components/artifacts/ArtifactForm";
@@ -114,5 +114,28 @@ describe("ArtifactForm", () => {
 
     expect(bar).not.toBeNull();
     expect(bar.lastElementChild).toHaveTextContent("Створити");
+  });
+
+  it("помилка видалення показується в діалозі підтвердження, діалог лишається", async () => {
+    const onDelete = vi.fn(async () => {
+      throw new Error("Артефакт екіпіровано");
+    });
+
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <ConfirmProvider>
+          <ArtifactForm campaignId="c1" artifactSets={[]} mode="edit" title="Ред." submitLabel="Зберегти" submitLabelSaving="..." cancelHref="/x" iconHint="" initial={{ name: "Меч", description: "", rarity: "", slot: "ring", icon: "", setId: "", abilities: [], abilityIssues: [] }} onSubmit={vi.fn(async () => {})} onDelete={onDelete} />
+        </ConfirmProvider>
+      </QueryClientProvider>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Видалити" }));
+
+    const dialog = await screen.findByRole("dialog");
+
+    fireEvent.click(within(dialog).getByRole("button", { name: "Видалити" }));
+
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent("Артефакт екіпіровано");
+    expect(onDelete).toHaveBeenCalledTimes(1);
   });
 });

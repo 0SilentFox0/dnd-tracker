@@ -1,13 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Skull } from "lucide-react";
 
 import { EmptyState, LoadingState } from "@/components/common/states";
 import { Accordion } from "@/components/ui/accordion";
-import { DeleteAllUnitsDialog } from "@/components/units/dialogs/DeleteAllUnitsDialog";
 import { UnitGroupAccordion } from "@/components/units/list/UnitGroupAccordion";
 import { UnitsPageHeader } from "@/components/units/ui/UnitsPageHeader";
+import { useConfirm } from "@/lib/hooks/common";
 import { useRaces } from "@/lib/hooks/races";
 import {
   useDeleteAllUnits,
@@ -27,8 +27,7 @@ export function DMUnitsPageClient({
   campaignId,
   initialUnits,
 }: DMUnitsPageClientProps) {
-  const [deleteAllUnitsDialogOpen, setDeleteAllUnitsDialogOpen] =
-    useState(false);
+  const confirm = useConfirm();
 
   // Запити для юнітів
   const { data: units = initialUnits, isLoading: unitsLoading } = useUnits(
@@ -52,13 +51,14 @@ export function DMUnitsPageClient({
     deleteUnitMutation.mutate(unitId);
   };
 
-  const handleDeleteAllUnits = () => {
-    deleteAllUnitsMutation.mutate(undefined, {
-      onSuccess: () => {
-        setDeleteAllUnitsDialogOpen(false);
-      },
+  const handleDeleteAllUnits = () =>
+    confirm({
+      title: "Видалити всі юніти?",
+      description: `Ви впевнені, що хочете видалити всі юніти з кампанії? Ця дія незворотна. Буде видалено ${units.length} юнітів.`,
+      confirmLabel: "Видалити всі юніти",
+      destructive: true,
+      onConfirm: () => deleteAllUnitsMutation.mutateAsync(),
     });
-  };
 
   const handleDropOnGroup = (unitId: string, targetRaceName: string) => {
     const group = unitGroups.find((g) => g.name === targetRaceName);
@@ -107,7 +107,7 @@ export function DMUnitsPageClient({
       <UnitsPageHeader
         campaignId={campaignId}
         unitsCount={units.length}
-        onDeleteAll={() => setDeleteAllUnitsDialogOpen(true)}
+        onDeleteAll={() => void handleDeleteAllUnits()}
       />
 
       {unitsLoading && units.length === 0 ? (
@@ -135,13 +135,6 @@ export function DMUnitsPageClient({
         </Accordion>
       )}
 
-      <DeleteAllUnitsDialog
-        open={deleteAllUnitsDialogOpen}
-        onOpenChange={setDeleteAllUnitsDialogOpen}
-        unitsCount={units.length}
-        onConfirm={handleDeleteAllUnits}
-        isDeleting={deleteAllUnitsMutation.isPending}
-      />
     </div>
   );
 }

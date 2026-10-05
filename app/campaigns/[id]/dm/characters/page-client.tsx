@@ -1,85 +1,22 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { MoreVertical, Pencil, Trash2, TrendingUp, Users } from "lucide-react";
+import { Trash2, Users } from "lucide-react";
 
-import { DeleteAllCharactersDialog } from "./__dialogs__/DeleteAllCharactersDialog";
-import { DeleteCharacterDialog } from "./__dialogs__/DeleteCharacterDialog";
+import { DmCharacterCard } from "./DmCharacterCard";
 
-import { OptimizedImage } from "@/components/common/OptimizedImage";
-import { EmptyState, LoadingState } from "@/components/common/states";
-import { Badge } from "@/components/ui/badge";
+import { EmptyState, LoadingState, QueryState } from "@/components/common/states";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { getHeroMaxHp } from "@/lib/constants/hero-scaling";
-import {
-  useCharacters,
-  useDeleteAllCharacters,
-  useDeleteCharacter,
-  useLevelUpCharacter,
-} from "@/lib/hooks/characters";
-import { useNotify } from "@/lib/hooks/common";
-import type { Character } from "@/types/characters";
+import { useDmCharactersPage } from "@/lib/hooks/characters";
 
 interface DMCharactersClientProps {
   campaignId: string;
 }
 
 export function DMCharactersClient({ campaignId }: DMCharactersClientProps) {
-  const notify = useNotify();
+  const page = useDmCharactersPage(campaignId);
 
-  const [deleteAllOpen, setDeleteAllOpen] = useState(false);
-
-  const [characterToDelete, setCharacterToDelete] = useState<Character | null>(
-    null,
-  );
-
-  const { data: characters = [], isLoading } = useCharacters(campaignId);
-
-  const deleteAllMutation = useDeleteAllCharacters(campaignId);
-
-  const deleteOneMutation = useDeleteCharacter(campaignId);
-
-  const levelUpMutation = useLevelUpCharacter(campaignId);
-
-  const handleLevelUp = async (character: Character) => {
-    try {
-      await levelUpMutation.mutateAsync(character.id);
-    } catch (error) {
-      console.error("Error leveling up:", error);
-      void notify("Не вдалося підняти рівень. Спробуйте ще раз.");
-    }
-  };
-
-  const handleDeleteAll = async () => {
-    try {
-      await deleteAllMutation.mutateAsync();
-      setDeleteAllOpen(false);
-    } catch (error) {
-      console.error("Error deleting all characters:", error);
-      void notify("Не вдалося видалити всіх персонажів. Спробуйте ще раз.");
-    }
-  };
-
-  const handleDeleteOne = async () => {
-    if (!characterToDelete) return;
-
-    try {
-      await deleteOneMutation.mutateAsync(characterToDelete.id);
-      setCharacterToDelete(null);
-    } catch (error) {
-      console.error("Error deleting character:", error);
-      void notify("Не вдалося видалити персонажа. Спробуйте ще раз.");
-    }
-  };
+  const characterCount = page.query.data?.length ?? 0;
 
   return (
     <div className="container mx-auto p-4 space-y-6">
@@ -91,12 +28,12 @@ export function DMCharactersClient({ campaignId }: DMCharactersClientProps) {
           </p>
         </div>
         <div className="flex flex-wrap gap-2 shrink-0">
-          {characters.length > 0 && (
+          {characterCount > 0 && (
             <Button
               variant="destructive"
               className="whitespace-nowrap"
-              onClick={() => setDeleteAllOpen(true)}
-              disabled={deleteAllMutation.isPending}
+              onClick={() => void page.confirmDeleteAll()}
+              disabled={page.isDeletingAll}
             >
               <Trash2 className="mr-2 h-4 w-4" />
               Видалити всіх
@@ -110,123 +47,10 @@ export function DMCharactersClient({ campaignId }: DMCharactersClientProps) {
         </div>
       </div>
 
-      {isLoading ? (
-        <LoadingState rows={6} label="Завантаження персонажів…" />
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {characters.map((character) => (
-            <Card
-              key={character.id}
-              className="overflow-hidden hover:shadow-lg transition-shadow pt-0"
-            >
-              <div className="relative aspect-square h-full w-full bg-muted">
-                {character.avatar ? (
-                  <>
-                    <OptimizedImage
-                      src={character.avatar}
-                      alt=""
-                      className="absolute inset-0 h-full w-full object-cover"
-                      width={100}
-                      height={100}
-                    />
-                    <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/30 to-transparent" />
-                  </>
-                ) : (
-                  <div className="absolute inset-0 bg-muted flex items-center justify-center text-4xl font-bold text-muted-foreground">
-                    {character.name.charAt(0).toUpperCase()}
-                  </div>
-                )}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="secondary"
-                      size="icon"
-                      className="absolute top-2 right-2 h-8 w-8 rounded-full shadow-md bg-black/40 hover:bg-black/60 text-white border-0"
-                      onClick={(e) => e.preventDefault()}
-                    >
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href={`/campaigns/${campaignId}/dm/characters/${character.id}`}
-                      >
-                        <Pencil className="mr-2 h-4 w-4" />
-                        Редагувати
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleLevelUp(character)}
-                      disabled={levelUpMutation.isPending}
-                    >
-                      <TrendingUp className="mr-2 h-4 w-4" />
-                      Підняти рівень
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      variant="destructive"
-                      onClick={() => setCharacterToDelete(character)}
-                      disabled={deleteOneMutation.isPending}
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Видалити
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-              <CardContent className="p-3 space-y-2">
-                <div>
-                  <p className="font-semibold text-lg leading-tight truncate">
-                    {character.name}
-                  </p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {character.type === "npc_hero"
-                      ? "NPC герой"
-                      : character.user?.displayName || "Не призначено"}
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  <Badge
-                    variant={
-                      character.type === "npc_hero" ? "secondary" : "outline"
-                    }
-                    className="text-xs"
-                  >
-                    {character.type === "npc_hero" ? "NPC герой" : "Гравець"}
-                  </Badge>
-                  <Badge variant="outline" className="text-xs">
-                    {character.race}
-                    {character.subrace ? ` (${character.subrace})` : ""}
-                  </Badge>
-                  <Badge variant="outline" className="text-xs">
-                    {character.class}
-                  </Badge>
-                  <Badge variant="default" className="text-xs">
-                    Рівень {character.level}
-                  </Badge>
-                  <Badge variant="secondary" className="text-xs">
-                    HP {getHeroMaxHp(character.level, character.strength, {
-                    hpMultiplier: (character as { hpMultiplier?: number | null }).hpMultiplier ?? 1,
-                  })}
-                  </Badge>
-                  <Badge variant="secondary" className="text-xs">
-                    AC {character.armorClass}
-                  </Badge>
-                  <Badge variant="secondary" className="text-xs">
-                    Init {character.initiative}
-                  </Badge>
-                  <Badge variant="secondary" className="text-xs">
-                    XP {character.experience}
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-
-      {!isLoading && characters.length === 0 && (
+      <QueryState
+        query={page.query}
+        loading={<LoadingState rows={6} label="Завантаження персонажів…" />}
+        empty={
         <EmptyState
           icon={Users}
           title="Ще немає персонажів"
@@ -237,21 +61,22 @@ export function DMCharactersClient({ campaignId }: DMCharactersClientProps) {
             </Link>
           }
         />
-      )}
-
-      <DeleteAllCharactersDialog
-        open={deleteAllOpen}
-        onOpenChange={setDeleteAllOpen}
-        onConfirm={handleDeleteAll}
-        isPending={deleteAllMutation.isPending}
-      />
-
-      <DeleteCharacterDialog
-        character={characterToDelete}
-        onClose={() => setCharacterToDelete(null)}
-        onConfirm={handleDeleteOne}
-        isPending={deleteOneMutation.isPending}
-      />
+        }
+      >
+        {(characters) => (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {characters.map((character) => (
+              <DmCharacterCard
+                key={character.id}
+                character={character}
+                campaignId={campaignId}
+                busy={page.levelingUpId === character.id}
+                actions={{ onLevelUp: () => page.levelUp(character), onDelete: () => void page.confirmDelete(character) }}
+              />
+            ))}
+          </div>
+        )}
+      </QueryState>
     </div>
   );
 }

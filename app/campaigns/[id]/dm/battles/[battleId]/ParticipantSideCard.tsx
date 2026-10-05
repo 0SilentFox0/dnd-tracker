@@ -2,9 +2,6 @@
 
 import Image from "next/image";
 
-import type { EditBattleCharacter } from "./useEditBattleData";
-import type { EditBattleUnit } from "./useEditBattleData";
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,6 +12,8 @@ import {
 } from "@/components/ui/card";
 import { ParticipantSide } from "@/lib/constants/battle";
 import type { BattlePreparationParticipant } from "@/types/battle";
+import type { EditBattleCharacter } from "@/types/battle-setup";
+import type { EditBattleUnit } from "@/types/battle-setup";
 
 interface ParticipantSideCardProps {
   side: "ally" | "enemy";

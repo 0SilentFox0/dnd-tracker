@@ -2,8 +2,6 @@
 
 import Image from "next/image";
 
-import type { Character, EntityStats } from "./types";
-
 import {
   Card,
   CardContent,
@@ -17,10 +15,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import type { EntityStats, SetupCharacter } from "@/types/battle-setup";
 
 interface CharactersListCardProps {
-  playerCharacters: Character[];
-  npcCharacters: Character[];
+  playerCharacters: SetupCharacter[];
+  npcCharacters: SetupCharacter[];
   entityStats: Record<string, EntityStats> | null;
   isParticipantSelected: (id: string) => boolean;
   onParticipantToggle: (
@@ -36,7 +35,7 @@ function CharacterRow({
   isSelected,
   onToggle,
 }: {
-  character: Character;
+  character: SetupCharacter;
   stats: EntityStats | undefined;
   isSelected: boolean;
   onToggle: (checked: boolean) => void;

@@ -7,6 +7,7 @@ export * from "./abilities";
 export * from "./artifact-sets";
 export * from "./artifacts";
 export * from "./battle";
+export * from "./battle-setup";
 export * from "./campaigns";
 export * from "./characters";
 export * from "./import";

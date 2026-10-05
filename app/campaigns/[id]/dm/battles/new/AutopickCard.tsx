@@ -1,7 +1,5 @@
 "use client";
 
-import type { AllyStats, Difficulty, SuggestedEnemy } from "./types";
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import type { AllyStats, Difficulty, SuggestedEnemy } from "@/types/battle-setup";
 
 interface AutopickCardProps {
   hasAllies: boolean;

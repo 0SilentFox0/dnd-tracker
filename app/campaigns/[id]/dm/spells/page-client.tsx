@@ -1,13 +1,13 @@
 "use client";
 
-import { useMemo,useState } from "react";
+import { useMemo } from "react";
 import { Wand2 } from "lucide-react";
 
 import { EmptyState, LoadingState } from "@/components/common/states";
-import { DeleteAllSpellsDialog } from "@/components/spells/dialogs/DeleteAllSpellsDialog";
 import { SpellGroupAccordion } from "@/components/spells/list/SpellGroupAccordion";
 import { SpellsPageHeader } from "@/components/spells/ui/SpellsPageHeader";
 import { Accordion } from "@/components/ui/accordion";
+import { useConfirm } from "@/lib/hooks/common";
 import {
   useDeleteAllSpells,
   useMoveSpellToGroup,
@@ -30,14 +30,9 @@ export function DMSpellsPageClient({
   campaignId,
   initialSpells,
 }: DMSpellsPageClientProps) {
-  const [deleteAllSpellsDialogOpen, setDeleteAllSpellsDialogOpen] =
-    useState(false);
+  const confirm = useConfirm();
 
-  // Запити для заклинань та груп
-  const { data: spells = initialSpells, isLoading: spellsLoading } = useSpells(
-    campaignId,
-    initialSpells
-  );
+  const { data: spells = initialSpells, isLoading: spellsLoading } = useSpells(campaignId, { initialData: initialSpells });
 
   const { data: spellGroups = [] } = useSpellGroups(campaignId);
 
@@ -56,13 +51,14 @@ export function DMSpellsPageClient({
     moveSpellMutation.mutate({ spellId, groupId });
   };
 
-  const handleDeleteAllSpells = () => {
-    deleteAllSpellsMutation.mutate(undefined, {
-      onSuccess: () => {
-        setDeleteAllSpellsDialogOpen(false);
-      },
+  const handleDeleteAllSpells = () =>
+    confirm({
+      title: "Видалити всі заклинання?",
+      description: `Ви впевнені, що хочете видалити всі заклинання з кампанії? Ця дія незворотна. Буде видалено ${spells.length} заклинань.`,
+      confirmLabel: "Видалити всі заклинання",
+      destructive: true,
+      onConfirm: () => deleteAllSpellsMutation.mutateAsync(),
     });
-  };
 
   // Групуємо заклинання спочатку по групах, потім по рівнях
   const sortedGroupedSpells = useMemo(() => {
@@ -76,7 +72,7 @@ export function DMSpellsPageClient({
       <SpellsPageHeader
         campaignId={campaignId}
         spellsCount={spells.length}
-        onDeleteAll={() => setDeleteAllSpellsDialogOpen(true)}
+        onDeleteAll={() => void handleDeleteAllSpells()}
       />
 
       {spellsLoading && spells.length === 0 ? (
@@ -103,13 +99,6 @@ export function DMSpellsPageClient({
         </Accordion>
       )}
 
-      <DeleteAllSpellsDialog
-        open={deleteAllSpellsDialogOpen}
-        onOpenChange={setDeleteAllSpellsDialogOpen}
-        spellsCount={spells.length}
-        onConfirm={handleDeleteAllSpells}
-        isDeleting={deleteAllSpellsMutation.isPending}
-      />
     </div>
   );
 }

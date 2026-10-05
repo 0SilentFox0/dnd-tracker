@@ -372,3 +372,10 @@ export interface BattleAction {
     currentRound: number;
   };
 }
+
+export type AddParticipantData = {
+  sourceId: string;
+  type: "character" | "unit";
+  side: "ally" | "enemy";
+  quantity?: number;
+};

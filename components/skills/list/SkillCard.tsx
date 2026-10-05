@@ -1,14 +1,13 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 
 import { SkillCardActionsMenu } from "./SkillCardActionsMenu";
-import { SkillCardDeleteDialog } from "./SkillCardDeleteDialog";
 
 import { AbilitySummary } from "@/components/abilities";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { Button } from "@/components/ui/button";
+import { useConfirm } from "@/lib/hooks/common";
 import { useMainSkills, useUpdateSkill } from "@/lib/hooks/skills";
 import {
   getSkillDescription,
@@ -23,8 +22,7 @@ import type { GroupedSkill, Skill } from "@/types/skills";
 export interface SkillCardProps {
   skill: Skill | GroupedSkill;
   campaignId: string;
-  /** Викликається при підтвердженні видалення скіла */
-  onRemove?: (skillId: string) => void;
+  onRemove?: (skillId: string) => Promise<unknown> | void;
   /** Викликається при дублюванні скіла (створює копію з новим id) */
   onDuplicate?: (skillId: string) => void;
   /** Режим версії для друку: ховає інтерактивні елементи, розкриває обрізаний опис */
@@ -38,7 +36,7 @@ export function SkillCard({
   onDuplicate,
   printMode = false,
 }: SkillCardProps) {
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const confirm = useConfirm();
 
   const { data: mainSkills = [] } = useMainSkills(campaignId);
 
@@ -58,10 +56,16 @@ export function SkillCard({
 
   const abilitySummary = skill.abilitySummary ?? [];
 
-  const handleConfirmRemove = () => {
-    onRemove?.(skillId);
-    setShowDeleteDialog(false);
-  };
+  const handleRemove = () =>
+    confirm({
+      title: "Видалити скіл?",
+      description: `Скіл "${skillName}" буде видалено. Цю дію неможливо скасувати.`,
+      confirmLabel: "Видалити",
+      destructive: true,
+      onConfirm: async () => {
+        await onRemove?.(skillId);
+      },
+    });
 
   return (
     <div
@@ -111,7 +115,7 @@ export function SkillCard({
               mainSkills={mainSkills}
               onRemove={onRemove}
               onDuplicate={onDuplicate}
-              onOpenDeleteDialog={() => setShowDeleteDialog(true)}
+              onOpenDeleteDialog={() => void handleRemove()}
               onUpdateMainSkill={(mainSkillId) => {
                 updateSkillMutation.mutate({
                   skillId,
@@ -157,12 +161,6 @@ export function SkillCard({
             </Button>
           </Link>
 
-          <SkillCardDeleteDialog
-            open={showDeleteDialog}
-            onOpenChange={setShowDeleteDialog}
-            skillName={skillName}
-            onConfirm={handleConfirmRemove}
-          />
         </>
       )}
     </div>

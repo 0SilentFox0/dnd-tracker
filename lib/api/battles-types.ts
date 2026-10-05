@@ -65,9 +65,4 @@ export interface SpellPreviewResponse {
   battle?: BattleScene;
 }
 
-export type AddParticipantData = {
-  sourceId: string;
-  type: "character" | "unit";
-  side: "ally" | "enemy";
-  quantity?: number;
-};
+export type { AddParticipantData } from "@/types/battle";

@@ -1,16 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import { Printer, Sparkles } from "lucide-react";
-
-import { DeleteAllSkillsDialog } from "./__dialogs__/DeleteAllSkillsDialog";
 
 import { EmptyState, LoadingState } from "@/components/common/states";
 import { SkillGroupAccordion } from "@/components/skills/list/SkillGroupAccordion";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { useNotify } from "@/lib/hooks/common";
+import { useConfirm, useNotify } from "@/lib/hooks/common";
 import {
   useDeleteAllSkills,
   useDeleteSkill,
@@ -35,7 +33,7 @@ export function DMSkillsPageClient({
 }: DMSkillsPageClientProps) {
   const notify = useNotify();
 
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const confirm = useConfirm();
 
   // Запити для скілів та основних навиків
   const { data: skills = initialSkills, isLoading: skillsLoading } = useSkills(
@@ -59,24 +57,16 @@ export function DMSkillsPageClient({
     return convertGroupedSkillsToArray(groupedSkillsMap);
   }, [skills, mainSkills]);
 
-  const handleDeleteAll = async () => {
-    try {
-      await deleteAllSkillsMutation.mutateAsync();
-      setShowDeleteDialog(false);
-    } catch (error) {
-      console.error("Error deleting all skills:", error);
-      void notify("Не вдалося видалити всі скіли. Спробуйте ще раз.");
-    }
-  };
+  const handleDeleteAll = () =>
+    confirm({
+      title: "Видалити всі скіли?",
+      description: `Ця дія видалить всі скіли з бібліотеки (${skills.length} скілів). Цю дію неможливо скасувати.`,
+      confirmLabel: "Видалити всі",
+      destructive: true,
+      onConfirm: () => deleteAllSkillsMutation.mutateAsync(),
+    });
 
-  const handleDeleteSkill = async (skillId: string) => {
-    try {
-      await deleteSkillMutation.mutateAsync(skillId);
-    } catch (error) {
-      console.error("Error deleting skill:", error);
-      void notify("Не вдалося видалити скіл. Спробуйте ще раз.");
-    }
-  };
+  const handleDeleteSkill = (skillId: string) => deleteSkillMutation.mutateAsync(skillId);
 
   const handleDuplicateSkill = async (skillId: string) => {
     try {
@@ -129,7 +119,7 @@ export function DMSkillsPageClient({
             <Button
               variant="destructive"
               className="whitespace-nowrap text-xs sm:text-sm"
-              onClick={() => setShowDeleteDialog(true)}
+              onClick={() => void handleDeleteAll()}
             >
               Видалити всі
             </Button>
@@ -166,13 +156,6 @@ export function DMSkillsPageClient({
         </Accordion>
       )}
 
-      <DeleteAllSkillsDialog
-        open={showDeleteDialog}
-        onOpenChange={setShowDeleteDialog}
-        onConfirm={handleDeleteAll}
-        isPending={deleteAllSkillsMutation.isPending}
-        skillsCount={skills.length}
-      />
     </div>
   );
 }

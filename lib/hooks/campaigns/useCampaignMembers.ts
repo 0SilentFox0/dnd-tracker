@@ -1,40 +1,15 @@
-/**
- * Хук для отримання учасників кампанії
- */
-
-import { useEffect,useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 import { getCampaignMembers } from "@/lib/api/campaigns";
-import type { CampaignMember } from "@/types/campaigns";
+import { ENTITY_STALE_MS } from "@/lib/providers/query-provider";
 
 export function useCampaignMembers(campaignId: string) {
-  const [members, setMembers] = useState<CampaignMember[]>([]);
+  const { data, isPending, error } = useQuery({
+    queryKey: ["campaign-members", campaignId],
+    queryFn: () => getCampaignMembers(campaignId),
+    enabled: !!campaignId,
+    staleTime: ENTITY_STALE_MS,
+  });
 
-  const [loading, setLoading] = useState(true);
-
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchMembers = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const data = await getCampaignMembers(campaignId);
-
-        setMembers(data);
-      } catch (err) {
-        setError((err as Error).message);
-        console.error("Error fetching campaign members:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (campaignId) {
-      fetchMembers();
-    }
-  }, [campaignId]);
-
-  return { members, loading, error };
+  return { members: data ?? [], loading: isPending && !!campaignId, error: error?.message ?? null };
 }

@@ -1,25 +1,14 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { use, useState } from "react";
 
 import { CharacterViewClient } from "../../../character/character-view-client";
 import { DmCharacterEditForm } from "./DmCharacterEditForm";
 
-import { Card, CardContent } from "@/components/ui/card";
+import { LoadingState, QueryState } from "@/components/common/states";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { getArtifactSets } from "@/lib/api/artifact-sets";
-import { getArtifacts } from "@/lib/api/artifacts";
-import { getCharacter, updateCharacter } from "@/lib/api/characters";
-import { useCampaignMembers } from "@/lib/hooks/campaigns";
-import { useCharacterForm } from "@/lib/hooks/characters";
-import { useRaces } from "@/lib/hooks/races";
-import { characterToFormData } from "@/lib/utils/characters/character-form";
-import type { ArtifactSetRow } from "@/types/artifact-sets";
-import type { Character } from "@/types/characters";
-import type { EquippedItems } from "@/types/inventory";
+import { useDmCharacterEditor } from "@/lib/hooks/characters";
 
 export default function EditCharacterPage({
   params,
@@ -28,94 +17,11 @@ export default function EditCharacterPage({
 }) {
   const { id, characterId } = use(params);
 
-  const router = useRouter();
+  const editor = useDmCharacterEditor({ campaignId: id, characterId });
 
-  const queryClient = useQueryClient();
-
-  const { members, loading: membersLoading } = useCampaignMembers(id);
-
-  const { data: races = [] } = useRaces(id);
-
-  const [characterLoaded, setCharacterLoaded] = useState(false);
-
-  const [equipped, setEquipped] = useState<EquippedItems>({});
-
-  /** Перемикач: показувати сторінку як для гравця (read-only + дерево скілів) */
   const [viewAsPlayer, setViewAsPlayer] = useState(false);
 
-  const { data: artifacts = [] } = useQuery({
-    queryKey: ["artifacts", id],
-    queryFn: () => getArtifacts(id),
-    enabled: !!id && characterLoaded,
-  });
-
-  const { data: artifactSets = [] } = useQuery({
-    queryKey: ["artifact-sets", id],
-    queryFn: () => getArtifactSets(id),
-    enabled: !!id && characterLoaded,
-  });
-
-  const {
-    formData,
-    loading,
-    error,
-    basicInfo,
-    abilityScores,
-    combatStats,
-    skills,
-    abilities,
-    spellcasting,
-    handleSubmit,
-    setFormData,
-  } = useCharacterForm({
-    onSubmit: async (data) => {
-      await updateCharacter(id, characterId, data);
-      router.push(`/campaigns/${id}/dm/characters`);
-    },
-  });
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const fetchCharacter = async () => {
-      try {
-        const character: Character = await getCharacter(id, characterId);
-
-        if (cancelled) return;
-
-        const formDataFromCharacter = characterToFormData(character);
-
-        setFormData(formDataFromCharacter);
-        setEquipped((character.inventory?.equipped as EquippedItems) ?? {});
-        setCharacterLoaded(true);
-      } catch (err) {
-        if (!cancelled) {
-          console.error("Error fetching character:", err);
-          setCharacterLoaded(true);
-        }
-      }
-    };
-
-    fetchCharacter();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [id, characterId, setFormData]);
-
-  const artifactSetsRows = artifactSets as ArtifactSetRow[];
-
-  if (!characterLoaded || (loading && !formData.basicInfo.name)) {
-    return (
-      <div className="container mx-auto p-4 max-w-4xl">
-        <Card>
-          <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground">Завантаження...</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  const characterLoading = <LoadingState rows={6} label="Завантаження персонажа…" />;
 
   return (
     <div className="container mx-auto p-4 max-w-5xl space-y-4">
@@ -142,29 +48,9 @@ export default function EditCharacterPage({
           allowPlayerEdit={false}
         />
       ) : (
-        <DmCharacterEditForm
-          campaignId={id}
-          characterId={characterId}
-          formData={formData}
-          setFormData={setFormData}
-          basicInfo={basicInfo}
-          abilityScores={abilityScores}
-          combatStats={combatStats}
-          skills={skills}
-          abilities={abilities}
-          spellcasting={spellcasting}
-          handleSubmit={handleSubmit}
-          error={error}
-          members={members}
-          races={races}
-          equipped={equipped}
-          setEquipped={setEquipped}
-          artifacts={artifacts}
-          artifactSets={artifactSetsRows}
-          loading={loading}
-          membersLoading={membersLoading}
-          queryClient={queryClient}
-        />
+        <QueryState query={editor.query} loading={characterLoading}>
+          {() => (editor.ready ? <DmCharacterEditForm editor={editor} /> : characterLoading)}
+        </QueryState>
       )}
     </div>
   );

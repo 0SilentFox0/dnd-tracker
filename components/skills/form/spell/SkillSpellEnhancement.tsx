@@ -7,15 +7,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { SelectField } from "@/components/ui/select-field";
-import { DICE_OPTIONS } from "@/lib/constants/dice";
 import {
   SPELL_ENHANCEMENT_TYPES,
   SpellEnhancementType,
 } from "@/lib/constants/spell-enhancement";
 import {
-  DAMAGE_MODIFIER_OPTIONS,
-  SPELL_TARGET_OPTIONS,
-} from "@/lib/constants/spells";
+  DAMAGE_MODIFIER_SELECT_OPTIONS,
+  DICE_SIDE_OPTIONS,
+  parseDamageDice,
+  SPELL_TARGET_SELECT_OPTIONS,
+} from "@/lib/utils/skills/spell-enhancement";
 
 interface SpellOption {
   id: string;
@@ -26,95 +27,38 @@ const ENHANCEMENT_CHECKBOX_TYPES = SPELL_ENHANCEMENT_TYPES.filter(
   (t) => t.value !== SpellEnhancementType.AOE_SPELL_UNLOCK,
 );
 
-interface SkillSpellEnhancementProps {
-  spellEnhancementTypes: SpellEnhancementType[];
-  spellEffectIncrease: string;
-  spellTargetChange: string | null;
-  spellAdditionalModifier: {
-    modifier?: string;
-    damageDice?: string;
-    duration?: number;
-  };
-  spellNewSpellId: string | null;
-  spells: SpellOption[];
-  onEnhancementTypeToggle: (type: SpellEnhancementType) => void;
-  onEffectIncreaseChange: (value: string) => void;
-  onTargetChangeChange: (value: string | null) => void;
-  onAdditionalModifierChange: (modifier: {
-    modifier?: string;
-    damageDice?: string;
-    duration?: number;
-  }) => void;
-  onNewSpellIdChange: (value: string | null) => void;
+type AdditionalModifier = { modifier?: string; damageDice?: string; duration?: number };
+
+export interface SpellEnhancementValue {
+  types: SpellEnhancementType[];
+  effectIncrease: string;
+  targetChange: string | null;
+  additionalModifier: AdditionalModifier;
+  newSpellId: string | null;
 }
 
-function SkillSpellEnhancementComponent({
-  spellEnhancementTypes,
-  spellEffectIncrease,
-  spellTargetChange,
-  spellAdditionalModifier,
-  spellNewSpellId,
-  spells,
-  onEnhancementTypeToggle,
-  onEffectIncreaseChange,
-  onTargetChangeChange,
-  onAdditionalModifierChange,
-  onNewSpellIdChange,
-}: SkillSpellEnhancementProps) {
-  const hasEffectIncrease = useMemo(
-    () => spellEnhancementTypes.includes(SpellEnhancementType.EFFECT_INCREASE),
-    [spellEnhancementTypes],
-  );
+export interface SpellEnhancementActions {
+  toggleType: (type: SpellEnhancementType) => void;
+  setEffectIncrease: (value: string) => void;
+  setTargetChange: (value: string | null) => void;
+  setAdditionalModifier: (modifier: AdditionalModifier) => void;
+  setNewSpellId: (value: string | null) => void;
+}
 
-  const hasTargetChange = useMemo(
-    () => spellEnhancementTypes.includes(SpellEnhancementType.TARGET_CHANGE),
-    [spellEnhancementTypes],
-  );
+interface SkillSpellEnhancementProps {
+  value: SpellEnhancementValue;
+  spells: SpellOption[];
+  actions: SpellEnhancementActions;
+}
 
-  const hasAdditionalModifier = useMemo(
-    () => spellEnhancementTypes.includes(SpellEnhancementType.ADDITIONAL_MODIFIER),
-    [spellEnhancementTypes],
-  );
+function SkillSpellEnhancementComponent({ value, spells, actions }: SkillSpellEnhancementProps) {
+  const has = (t: SpellEnhancementType) => value.types.includes(t);
 
-  const hasNewSpell = useMemo(
-    () => spellEnhancementTypes.includes(SpellEnhancementType.NEW_SPELL),
-    [spellEnhancementTypes],
-  );
+  const spellOptions = useMemo(() => spells.map((spell) => ({ value: spell.id, label: spell.name })), [spells]);
 
-  const spellTargetOptions = useMemo(
-    () => SPELL_TARGET_OPTIONS.map((opt) => ({ value: opt.value, label: opt.label })),
-    [],
-  );
+  const modifier = value.additionalModifier;
 
-  const damageModifierOptions = useMemo(
-    () => DAMAGE_MODIFIER_OPTIONS.map((opt) => ({ value: opt.value, label: opt.label })),
-    [],
-  );
-
-  const diceOptions = useMemo(
-    () =>
-      DICE_OPTIONS.map((dice) => ({
-        value: dice.value.replace("d", ""),
-        label: dice.label,
-      })),
-    [],
-  );
-
-  const spellOptions = useMemo(
-    () => spells.map((spell) => ({ value: spell.id, label: spell.name })),
-    [spells],
-  );
-
-  const diceCount = useMemo(
-    () => spellAdditionalModifier.damageDice?.match(/^(\d+)/)?.[1] || "",
-    [spellAdditionalModifier.damageDice],
-  );
-
-  const diceType = useMemo(() => {
-    const match = spellAdditionalModifier.damageDice?.match(/d(\d+)/);
-
-    return match?.[1] || "6";
-  }, [spellAdditionalModifier.damageDice]);
+  const { count: diceCount, sides: diceType } = parseDamageDice(modifier.damageDice);
 
   return (
     <div className="space-y-3">
@@ -124,8 +68,8 @@ function SkillSpellEnhancementComponent({
           <div key={type.value} className="flex items-center space-x-2">
             <Checkbox
               id={`enhancement-${type.value}`}
-              checked={spellEnhancementTypes.includes(type.value)}
-              onCheckedChange={() => onEnhancementTypeToggle(type.value)}
+              checked={has(type.value)}
+              onCheckedChange={() => actions.toggleType(type.value)}
             />
             <Label
               htmlFor={`enhancement-${type.value}`}
@@ -137,7 +81,7 @@ function SkillSpellEnhancementComponent({
         ))}
       </div>
 
-      {hasEffectIncrease && (
+      {has(SpellEnhancementType.EFFECT_INCREASE) && (
         <div className="space-y-2 border-t pt-4">
           <LabeledInput
             id="spell-effect-increase"
@@ -145,30 +89,30 @@ function SkillSpellEnhancementComponent({
             type="number"
             min="0"
             max="200"
-            value={spellEffectIncrease}
-            onChange={(e) => onEffectIncreaseChange(e.target.value)}
+            value={value.effectIncrease}
+            onChange={(e) => actions.setEffectIncrease(e.target.value)}
             placeholder="Наприклад: 25"
             description="Відсоток, на який збільшується ефективність заклинання (шкода/лікування)"
           />
         </div>
       )}
 
-      {hasTargetChange && (
+      {has(SpellEnhancementType.TARGET_CHANGE) && (
         <div className="space-y-2 border-t pt-4">
           <Label htmlFor="spell-target-change">Новий таргет</Label>
           <SelectField
             id="spell-target-change"
-            value={spellTargetChange || ""}
-            onValueChange={(value) => onTargetChangeChange(value || null)}
+            value={value.targetChange || ""}
+            onValueChange={(v) => actions.setTargetChange(v || null)}
             placeholder="Виберіть таргет"
-            options={spellTargetOptions}
+            options={SPELL_TARGET_SELECT_OPTIONS}
             allowNone
             noneLabel="Без зміни"
           />
         </div>
       )}
 
-      {hasAdditionalModifier && (
+      {has(SpellEnhancementType.ADDITIONAL_MODIFIER) && (
         <div className="space-y-3 border-t pt-4">
           <Label>Додатковий модифікатор</Label>
           <div className="space-y-3">
@@ -178,21 +122,16 @@ function SkillSpellEnhancementComponent({
               </Label>
               <SelectField
                 id="additional-modifier-type"
-                value={spellAdditionalModifier.modifier || ""}
-                onValueChange={(value) =>
-                  onAdditionalModifierChange({
-                    ...spellAdditionalModifier,
-                    modifier: value || undefined,
-                  })
-                }
+                value={modifier.modifier || ""}
+                onValueChange={(v) => actions.setAdditionalModifier({ ...modifier, modifier: v || undefined })}
                 placeholder="Виберіть модифікатор"
-                options={damageModifierOptions}
+                options={DAMAGE_MODIFIER_SELECT_OPTIONS}
                 allowNone
                 noneLabel="Без модифікатора"
               />
             </div>
 
-            {spellAdditionalModifier.modifier && (
+            {modifier.modifier && (
               <>
                 <div className="grid gap-3 md:grid-cols-2">
                   <div className="space-y-2">
@@ -210,10 +149,7 @@ function SkillSpellEnhancementComponent({
                         onChange={(e) => {
                           const count = e.target.value;
 
-                          onAdditionalModifierChange({
-                            ...spellAdditionalModifier,
-                            damageDice: count ? `${count}d${diceType}` : "",
-                          });
+                          actions.setAdditionalModifier({ ...modifier, damageDice: count ? `${count}d${diceType}` : "" });
                         }}
                       />
                       <SelectField
@@ -221,12 +157,9 @@ function SkillSpellEnhancementComponent({
                         onValueChange={(diceTypeNum) => {
                           const count = diceCount || "1";
 
-                          onAdditionalModifierChange({
-                            ...spellAdditionalModifier,
-                            damageDice: `${count}d${diceTypeNum}`,
-                          });
+                          actions.setAdditionalModifier({ ...modifier, damageDice: `${count}d${diceTypeNum}` });
                         }}
-                        options={diceOptions}
+                        options={DICE_SIDE_OPTIONS}
                         triggerClassName="w-24"
                       />
                     </div>
@@ -238,13 +171,11 @@ function SkillSpellEnhancementComponent({
                       type="number"
                       min="0"
                       max="10"
-                      value={spellAdditionalModifier.duration?.toString() || ""}
+                      value={modifier.duration?.toString() || ""}
                       onChange={(e) =>
-                        onAdditionalModifierChange({
-                          ...spellAdditionalModifier,
-                          duration: e.target.value
-                            ? parseInt(e.target.value, 10)
-                            : undefined,
+                        actions.setAdditionalModifier({
+                          ...modifier,
+                          duration: e.target.value ? parseInt(e.target.value, 10) : undefined,
                         })
                       }
                       placeholder="Наприклад: 3"
@@ -261,13 +192,13 @@ function SkillSpellEnhancementComponent({
         </div>
       )}
 
-      {hasNewSpell && (
+      {has(SpellEnhancementType.NEW_SPELL) && (
         <div className="space-y-2 border-t pt-4">
           <Label htmlFor="spell-new-spell">Нове заклинання</Label>
           <SelectField
             id="spell-new-spell"
-            value={spellNewSpellId || ""}
-            onValueChange={(value) => onNewSpellIdChange(value || null)}
+            value={value.newSpellId || ""}
+            onValueChange={(v) => actions.setNewSpellId(v || null)}
             placeholder="Виберіть заклинання"
             options={spellOptions}
             allowNone

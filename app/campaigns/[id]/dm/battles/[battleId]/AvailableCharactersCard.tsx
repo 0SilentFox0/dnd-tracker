@@ -2,8 +2,6 @@
 
 import Image from "next/image";
 
-import type { EditBattleCharacter } from "./useEditBattleData";
-
 import {
   Card,
   CardContent,
@@ -12,6 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import type { EditBattleCharacter } from "@/types/battle-setup";
 
 interface AvailableCharactersCardProps {
   playerCharacters: EditBattleCharacter[];

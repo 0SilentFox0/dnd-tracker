@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { joinCampaign } from "@/lib/api/campaigns";
+import { useJoinCampaign } from "@/lib/hooks/campaigns";
+import { joinErrorMessage } from "@/lib/utils/campaigns/join-error";
 
 export function JoinCampaignDialog() {
   const router = useRouter();
@@ -17,60 +18,39 @@ export function JoinCampaignDialog() {
 
   const [inviteCode, setInviteCode] = useState("");
 
-  const [loading, setLoading] = useState(false);
+  const join = useJoinCampaign();
 
   const [error, setError] = useState<string | null>(null);
 
   const [success, setSuccess] = useState(false);
 
-  const handleJoin = async () => {
+  const loading = join.isPending;
+
+  const handleJoin = () => {
     if (!inviteCode.trim()) {
       setError("Введіть код запрошення");
 
       return;
     }
 
-    setLoading(true);
     setError(null);
     setSuccess(false);
-
-    try {
-      const result = await joinCampaign(inviteCode.trim());
-
-      setSuccess(true);
-      
-      // Перенаправляємо на кампанію через 1 секунду
-      setTimeout(() => {
-        router.push(`/campaigns/${result.campaign.id}`);
-        router.refresh();
-      }, 1000);
-    } catch (err) {
-      let errorMessage = "Помилка приєднання до кампанії";
-
-      if (err instanceof Error) {
-        errorMessage = err.message;
-
-        // Перекладаємо стандартні помилки
-        if (errorMessage.includes("Campaign not found")) {
-          errorMessage = "Кампанію не знайдено. Перевірте код запрошення.";
-        } else if (errorMessage.includes("Already a member")) {
-          errorMessage = "Ви вже є учасником цієї кампанії.";
-        } else if (errorMessage.includes("not active")) {
-          errorMessage = "Кампанія неактивна.";
-        }
-      }
-
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
+    join.mutate(inviteCode.trim(), {
+      onSuccess: (result) => {
+        setSuccess(true);
+        setTimeout(() => {
+          router.push(`/campaigns/${result.campaign.id}`);
+          router.refresh();
+        }, 1000);
+      },
+      onError: (err) => setError(joinErrorMessage(err)),
+    });
   };
 
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
 
     if (!newOpen) {
-      // Скидаємо стан при закритті
       setInviteCode("");
       setError(null);
       setSuccess(false);

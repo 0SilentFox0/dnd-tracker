@@ -10,15 +10,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { Textarea } from "@/components/ui/textarea";
-import { createCampaign } from "@/lib/api/campaigns";
+import { useCreateCampaign } from "@/lib/hooks/campaigns";
 import { useNotify } from "@/lib/hooks/common";
 
 export default function NewCampaignPage() {
   const notify = useNotify();
 
   const router = useRouter();
-
-  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -28,20 +26,16 @@ export default function NewCampaignPage() {
     allowPlayerEdit: true,
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const create = useCreateCampaign();
+
+  const loading = create.isPending;
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-
-    try {
-      const campaign = await createCampaign(formData);
-
-      router.push(`/campaigns/${campaign.id}`);
-    } catch (error) {
-      console.error("Error creating campaign:", error);
-      void notify("Помилка при створенні кампанії");
-    } finally {
-      setLoading(false);
-    }
+    create.mutate(formData, {
+      onSuccess: (campaign) => router.push(`/campaigns/${campaign.id}`),
+      onError: () => void notify("Помилка при створенні кампанії"),
+    });
   };
 
   return (

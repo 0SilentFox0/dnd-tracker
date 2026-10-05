@@ -4,6 +4,7 @@ import {
   deleteAllSkills,
   deleteSkill,
   duplicateSkill,
+  getSkill,
   getSkills,
   updateSkill,
 } from "@/lib/api/skills";
@@ -34,6 +35,14 @@ export function useSkills(campaignId: string, initialData?: Skill[]) {
     queryKey: ["skills", campaignId],
     queryFn: () => getSkills(campaignId),
     initialData,
+  });
+}
+
+export function useSkill(campaignId: string, skillId: string) {
+  return useQuery({
+    queryKey: ["skill", campaignId, skillId],
+    queryFn: () => getSkill(campaignId, skillId),
+    staleTime: 0,
   });
 }
 

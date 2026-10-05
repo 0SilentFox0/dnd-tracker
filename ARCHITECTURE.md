@@ -111,7 +111,7 @@
 - **`campaigns.ts`**, **`characters.ts`**, **`battles.ts`**, **`skills.ts`**, **`spells.ts`**, **`races.ts`**, **`units.ts`**, **`artifacts.ts`**, **`inventory.ts`**, **`main-skills.ts`**, **`skill-trees.ts`** — методи типу get/create/update/delete для відповідних сутностей.
 - **`battles-types.ts`** — типи для battles API.
 
-Виклики йдуть з клієнтських компонентів або з хуків; серверні route в `app/api/` обробляють запити і використовують Prisma.
+Виклики йдуть лише з хуків (`lib/hooks/<domain>`); компоненти й сторінки імпортувати `@/lib/api/*` не можуть — це перевіряє ESLint (`no-restricted-imports`). Типи, потрібні компонентам, лежать у `types/`. Серверні route в `app/api/` обробляють запити і використовують Prisma.
 
 ### 3.2 `lib/hooks/`
 

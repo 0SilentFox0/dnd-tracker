@@ -10,6 +10,7 @@ export {
   useDeleteAllSkills,
   useDeleteSkill,
   useDuplicateSkill,
+  useSkill,
   useSkills,
   useUpdateSkill,
 } from "./useSkills";
@@ -18,4 +19,5 @@ export { clearSkillTree } from "./useSkillTreeClear";
 export { useSkillTreeEnrichment } from "./useSkillTreeEnrichment";
 export { useSkillTreeFilters } from "./useSkillTreeFilters";
 export { useSkillTreePage } from "./useSkillTreePage";
+export { useSkillTrees } from "./useSkillTrees";
 export { useSkillTreeSave } from "./useSkillTreeSave";

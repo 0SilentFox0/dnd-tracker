@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { useState } from "react";
 import { Trash2 } from "lucide-react";
 
 import { SpellCard } from "@/components/spells/list/SpellCard";
@@ -12,7 +11,7 @@ import {
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
+import { useConfirm } from "@/lib/hooks/common";
 import { useDeleteSpellsByLevel } from "@/lib/hooks/spells";
 import type { Spell, SpellGroup } from "@/types/spells";
 
@@ -36,17 +35,18 @@ export function SpellLevelAccordion({
   onRemoveSpellFromGroup,
   onMoveSpellToGroup,
 }: SpellLevelAccordionProps) {
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const confirm = useConfirm();
 
   const deleteSpellsByLevelMutation = useDeleteSpellsByLevel(campaignId);
 
-  const handleDelete = () => {
-    deleteSpellsByLevelMutation.mutate(level, {
-      onSuccess: () => {
-        setDeleteDialogOpen(false);
-      },
+  const handleDelete = () =>
+    confirm({
+      title: "Видалити всі заклинання рівня?",
+      description: `Ви впевнені, що хочете видалити всі заклинання рівня "${levelName}"? Ця дія незворотна. Буде видалено ${spells.length} заклинань.`,
+      confirmLabel: "Видалити",
+      destructive: true,
+      onConfirm: () => deleteSpellsByLevelMutation.mutateAsync(level),
     });
-  };
 
   return (
     <>
@@ -70,7 +70,7 @@ export function SpellLevelAccordion({
                 variant="ghost"
                 size="icon"
                 className="h-10 w-10 sm:h-12 sm:w-12"
-                onClick={() => setDeleteDialogOpen(true)}
+                onClick={() => void handleDelete()}
                 title="Видалити всі заклинання рівня"
               >
                 <Trash2 className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -94,27 +94,6 @@ export function SpellLevelAccordion({
         </AccordionContent>
       </AccordionItem>
 
-      <ResponsiveDialog
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-        title="Видалити всі заклинання рівня?"
-        description={
-          <>
-            Ви впевнені, що хочете видалити всі заклинання рівня &quot;{levelName}&quot;? Ця дія незворотна. Буде видалено {spells.length}{" "}
-            заклинань.
-          </>
-        }
-        footer={
-          <>
-            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} disabled={deleteSpellsByLevelMutation.isPending}>
-              Скасувати
-            </Button>
-            <Button variant="destructive" onClick={handleDelete} disabled={deleteSpellsByLevelMutation.isPending}>
-              {deleteSpellsByLevelMutation.isPending ? "Видалення..." : "Видалити всі заклинання рівня"}
-            </Button>
-          </>
-        }
-      ></ResponsiveDialog>
     </>
   );
 }

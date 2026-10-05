@@ -16,53 +16,22 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import type { useCharacterForm } from "@/lib/hooks/characters";
+import type { DmCharacterEditor } from "@/lib/hooks/characters";
 import { useConfirm } from "@/lib/hooks/common";
-import type { ArtifactSetRow } from "@/types/artifact-sets";
-import type { CampaignMember } from "@/types/campaigns";
-import type { CharacterFormData } from "@/types/characters";
-import type { EquippedItems } from "@/types/inventory";
-import type { Race } from "@/types/races";
 
-type CharacterFormReturn = ReturnType<typeof useCharacterForm>;
+export function DmCharacterEditFormAccordion({ editor }: { editor: DmCharacterEditor }) {
+  const {
+    form: { formData, setFormData, basicInfo, abilityScores, combatStats, skills, abilities, spellcasting },
+    campaignId,
+    characterId,
+    equipped,
+    setEquipped,
+    artifacts,
+    artifactSets,
+    members,
+    races,
+  } = editor;
 
-export interface DmCharacterEditFormAccordionProps {
-  formData: CharacterFormData;
-  setFormData: (data: CharacterFormData | ((prev: CharacterFormData) => CharacterFormData)) => void;
-  basicInfo: CharacterFormReturn["basicInfo"];
-  abilityScores: CharacterFormReturn["abilityScores"];
-  combatStats: CharacterFormReturn["combatStats"];
-  skills: CharacterFormReturn["skills"];
-  abilities: CharacterFormReturn["abilities"];
-  spellcasting: CharacterFormReturn["spellcasting"];
-  campaignId: string;
-  characterId: string;
-  equipped: EquippedItems;
-  setEquipped: (eq: EquippedItems | ((prev: EquippedItems) => EquippedItems)) => void;
-  artifacts: { id: string; name: string; slot: string; icon?: string | null }[];
-  artifactSets?: ArtifactSetRow[];
-  members: CampaignMember[];
-  races: Race[];
-}
-
-export function DmCharacterEditFormAccordion({
-  formData,
-  setFormData,
-  basicInfo,
-  abilityScores,
-  combatStats,
-  skills,
-  abilities,
-  spellcasting,
-  campaignId,
-  characterId,
-  equipped,
-  setEquipped,
-  artifacts,
-  artifactSets,
-  members,
-  races,
-}: DmCharacterEditFormAccordionProps) {
   const confirm = useConfirm();
 
   return (

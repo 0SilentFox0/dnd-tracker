@@ -1,0 +1,50 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+import { useCharacterForm } from "./useCharacterForm";
+import { useCharacter, useUpdateCharacter } from "./useCharacters";
+
+import { useCampaignMembers } from "@/lib/hooks/campaigns";
+import { useRaces } from "@/lib/hooks/races";
+import { characterToFormData } from "@/lib/utils/characters/character-form";
+import type { EquippedItems } from "@/types/inventory";
+
+export function useCharacterEditor({ campaignId, characterId, onSaved }: { campaignId: string; characterId: string; onSaved: () => void }) {
+  const query = useCharacter(campaignId, characterId);
+
+  const update = useUpdateCharacter(campaignId, characterId);
+
+  const { members, loading: membersLoading } = useCampaignMembers(campaignId);
+
+  const { data: races = [] } = useRaces(campaignId);
+
+  const [equipped, setEquipped] = useState<EquippedItems>({});
+
+  const form = useCharacterForm({
+    onSubmit: async (data) => {
+      await update.mutateAsync(data);
+      onSaved();
+    },
+  });
+
+  const { setFormData } = form;
+
+  // Seed once from data fetched on this mount: a cached snapshot may predate saves made elsewhere,
+  // and later refetches must not overwrite what the user is typing.
+  const [seededFor, setSeededFor] = useState<string | null>(null);
+
+  const freshData = query.isFetchedAfterMount ? query.data : undefined;
+
+  useEffect(() => {
+    if (!freshData || seededFor === characterId) return;
+
+    setFormData(characterToFormData(freshData));
+    setEquipped((freshData.inventory?.equipped as EquippedItems) ?? {}); // eslint-disable-line react-hooks/set-state-in-effect -- seed from the first server snapshot
+    setSeededFor(characterId);
+  }, [freshData, characterId, seededFor, setFormData]);
+
+  return { query, ready: seededFor === characterId, form, equipped, setEquipped, members, membersLoading, races };
+}
+
+export type CharacterEditor = ReturnType<typeof useCharacterEditor>;

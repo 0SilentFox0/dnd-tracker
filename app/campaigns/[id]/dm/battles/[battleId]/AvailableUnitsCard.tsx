@@ -2,8 +2,6 @@
 
 import Image from "next/image";
 
-import type { EditBattleUnit } from "./useEditBattleData";
-
 import {
   Card,
   CardContent,
@@ -14,6 +12,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import type { EditBattleUnit } from "@/types/battle-setup";
 
 interface AvailableUnitsCardProps {
   units: EditBattleUnit[];

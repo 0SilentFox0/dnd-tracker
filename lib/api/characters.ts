@@ -10,13 +10,9 @@ import {
   campaignRequest,
 } from "@/lib/api/client";
 import { formDataToCharacter } from "@/lib/utils/characters/character-form";
-import type { Character, CharacterFormData } from "@/types/characters";
+import type { Character, CharacterFormData, DamagePreviewResponse } from "@/types/characters";
 
-export interface DamagePreviewResponse {
-  melee: { total: number; [key: string]: unknown };
-  ranged: { total: number; [key: string]: unknown };
-  magic?: { total: number; [key: string]: unknown } | null;
-}
+export type { DamagePreviewResponse };
 
 /**
  * Отримує персонажа за ID

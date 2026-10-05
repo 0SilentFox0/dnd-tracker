@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 import { AbilitySummary } from "@/components/abilities";
 import { ArtifactDeleteButton } from "@/components/artifacts/ArtifactDeleteButton";
@@ -23,8 +22,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { updateArtifact } from "@/lib/api/artifacts";
 import { ARTIFACT_SLOT_OPTIONS } from "@/lib/constants/artifacts";
+import { useUpdateArtifact } from "@/lib/hooks/artifacts";
+import { useNotify } from "@/lib/hooks/common";
 
 export interface ArtifactCardData {
   id: string;
@@ -48,33 +48,34 @@ export function ArtifactCard({
   artifact,
   variant = "full",
 }: ArtifactCardProps) {
-  const router = useRouter();
+  const notify = useNotify();
+
+  const update = useUpdateArtifact(campaignId);
 
   const [slot, setSlot] = useState(artifact.slot);
 
-  const [updating, setUpdating] = useState(false);
-
-  const handleSlotChange = async (newSlot: string) => {
+  const handleSlotChange = (newSlot: string) => {
     if (newSlot === slot) return;
 
-    setUpdating(true);
-    try {
-      await updateArtifact(campaignId, artifact.id, { slot: newSlot });
+    const prev = slot;
 
-      setSlot(newSlot);
-      router.refresh();
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setUpdating(false);
-    }
+    setSlot(newSlot);
+    update.mutate(
+      { artifactId: artifact.id, data: { slot: newSlot } },
+      {
+        onError: () => {
+          setSlot(prev);
+          void notify("Не вдалося змінити слот");
+        },
+      },
+    );
   };
 
   const slotSelect = (
     <Select
       value={slot}
       onValueChange={handleSlotChange}
-      disabled={updating}
+      disabled={update.isPending}
     >
       <SelectTrigger
         className={

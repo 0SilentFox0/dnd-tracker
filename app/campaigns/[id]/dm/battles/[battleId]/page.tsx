@@ -8,9 +8,9 @@ import { AvailableUnitsCard } from "./AvailableUnitsCard";
 import { EditBattleBasicInfoCard } from "./EditBattleBasicInfoCard";
 import { EditBattlePageHeader } from "./EditBattlePageHeader";
 import { ParticipantSideCard } from "./ParticipantSideCard";
-import { useEditBattleData } from "./useEditBattleData";
 
 import { Button } from "@/components/ui/button";
+import { useEditBattleData } from "@/lib/hooks/battles";
 
 export default function EditBattlePage({
   params,

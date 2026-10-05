@@ -47,12 +47,14 @@ export default async function CampaignDetailPage({
             {isDM && (
               <CampaignSettingsButton
                 campaignId={id}
-                initialName={campaign.name}
-                initialDescription={campaign.description || null}
-                initialMaxLevel={campaign.maxLevel}
-                initialXpMultiplier={campaign.xpMultiplier}
-                initialAllowPlayerEdit={campaign.allowPlayerEdit}
-                initialStatus={campaign.status}
+                campaign={{
+                  name: campaign.name,
+                  description: campaign.description || null,
+                  maxLevel: campaign.maxLevel,
+                  xpMultiplier: campaign.xpMultiplier,
+                  allowPlayerEdit: campaign.allowPlayerEdit,
+                  status: campaign.status,
+                }}
               />
             )}
           </div>

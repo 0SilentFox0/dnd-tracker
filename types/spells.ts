@@ -50,3 +50,5 @@ export interface SpellGroup {
   id: string;
   name: string;
 }
+
+export type SpellFormData = Partial<Spell> & { effects?: string[] };

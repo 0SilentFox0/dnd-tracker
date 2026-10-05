@@ -1,9 +1,5 @@
 "use client";
 
-import type {
-  DamagePreviewItem,
-  DamagePreviewResponse,
-} from "./damage-calculator-utils";
 import { DamageCalculatorDiceInputs } from "./DamageCalculatorDiceInputs";
 import { DamageCalculatorResult } from "./DamageCalculatorResult";
 import { DamageCalculatorSkillsLog } from "./DamageCalculatorSkillsLog";
@@ -19,6 +15,10 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDamageCalculator } from "@/lib/hooks/characters";
+import type {
+  DamagePreviewItem,
+  DamagePreviewResponse,
+} from "@/lib/utils/characters/damage-calculator";
 import { formatSpellDamageDiceRoll } from "@/lib/utils/spells/spell-calculations";
 
 export type { DamagePreviewItem, DamagePreviewResponse };

@@ -13,13 +13,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ABILITY_SCORES } from "@/lib/constants/abilities";
 import { useMainSkills, useSkills } from "@/lib/hooks/skills";
 import {
-  getSkillMainSkillId,
-  getSkillRaces,
-} from "@/lib/utils/skills/skill-helpers";
-import type { Race, StatModifier } from "@/types/races";
+  countRaceSkills,
+  modifiedAbilityScores,
+  normalizePassiveAbility,
+  raceMainSkillsForDisplay,
+} from "@/lib/utils/races/race-summary";
+import type { Race } from "@/types/races";
 
 interface RaceCardProps {
   race: Race;
@@ -32,105 +33,15 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
 
   const { data: mainSkills = [] } = useMainSkills(campaignId);
 
-  // Підраховуємо реальну кількість доступних скілів для цієї раси
-  const availableSkillsCount = useMemo(() => {
-    const raceAvailableMainSkills = Array.isArray(race.availableSkills)
-      ? race.availableSkills
-      : [];
+  const availableSkillsCount = useMemo(() => countRaceSkills(race, allSkills), [race, allSkills]);
 
-    // Якщо немає обмежень на основні навики, всі скіли доступні
-    if (raceAvailableMainSkills.length === 0) {
-      // Фільтруємо скіли, які доступні для цієї раси (через skill.races)
-      return allSkills.filter((skill) => {
-        const skillRaces = getSkillRaces(skill);
+  const disabledSkillsCount = Array.isArray(race.disabledSkills) ? race.disabledSkills.length : 0;
 
-        // Якщо скіл не має обмежень по расам, він доступний
-        if (!skillRaces || skillRaces.length === 0) {
-          return true;
-        }
+  const availableMainSkillsForDisplay = useMemo(() => raceMainSkillsForDisplay(race, mainSkills), [race, mainSkills]);
 
-        // Перевіряємо чи ID раси або назва раси є в списку доступних для скіла
-        return skillRaces.includes(race.id) || skillRaces.includes(race.name);
-      }).length;
-    }
+  const passiveAbility = normalizePassiveAbility(race);
 
-    // Якщо є обмеження на основні навики, фільтруємо скіли
-    return allSkills.filter((skill) => {
-      const mainSkillId = getSkillMainSkillId(skill);
-
-      const skillRaces = getSkillRaces(skill);
-
-      // Перевіряємо чи основний навик скіла є в списку доступних
-      const isMainSkillAvailable = mainSkillId
-        ? raceAvailableMainSkills.includes(mainSkillId)
-        : true; // Скіли без основного навику доступні, якщо немає обмежень
-
-      // Перевіряємо чи скіл доступний для цієї раси
-      const isRaceAvailable =
-        !skillRaces || skillRaces.length === 0
-          ? true
-          : skillRaces.includes(race.id) || skillRaces.includes(race.name);
-
-      return isMainSkillAvailable && isRaceAvailable;
-    }).length;
-  }, [race, allSkills]);
-
-  const disabledSkillsCount = Array.isArray(race.disabledSkills)
-    ? race.disabledSkills.length
-    : 0;
-
-  // Доступні групи навиків (main skills) для відображення кольорами
-  const availableMainSkillsForDisplay = useMemo(() => {
-    const ids = Array.isArray(race.availableSkills) ? race.availableSkills : [];
-
-    if (ids.length === 0) {
-      return mainSkills.filter(
-        (ms) => ms.id !== "racial" && ms.id !== "ultimate",
-      );
-    }
-
-    return ids
-      .map((id) => mainSkills.find((ms) => ms.id === id))
-      .filter((ms): ms is NonNullable<typeof ms> => ms != null);
-  }, [race.availableSkills, mainSkills]);
-
-  const passiveAbility = race.passiveAbility
-    ? typeof race.passiveAbility === "string"
-      ? {
-          description: race.passiveAbility,
-          statImprovements: undefined,
-          statModifiers: undefined,
-        }
-      : typeof race.passiveAbility === "object" && race.passiveAbility !== null
-        ? {
-            description:
-              "description" in race.passiveAbility
-                ? String(race.passiveAbility.description)
-                : "",
-            statImprovements:
-              "statImprovements" in race.passiveAbility
-                ? String(race.passiveAbility.statImprovements || "")
-                : undefined,
-            statModifiers:
-              "statModifiers" in race.passiveAbility
-                ? (race.passiveAbility.statModifiers as Record<
-                    string,
-                    StatModifier
-                  >)
-                : undefined,
-          }
-        : null
-    : null;
-
-  // Отримуємо всі характеристики з модифікаторами
-  const modifiedAbilities = ABILITY_SCORES.filter((ability) => {
-    const modifiers = passiveAbility?.statModifiers?.[ability.key];
-
-    return (
-      modifiers &&
-      (modifiers.bonus || modifiers.nonNegative || modifiers.alwaysZero)
-    );
-  });
+  const modifiedAbilities = modifiedAbilityScores(passiveAbility);
 
   return (
     <Card className="hover:shadow-md transition-shadow h-full flex flex-col">

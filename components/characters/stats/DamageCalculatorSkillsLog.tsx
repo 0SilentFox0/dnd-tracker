@@ -1,6 +1,6 @@
 "use client";
 
-import type { SkillAffectingDamage } from "./damage-calculator-utils";
+import type { SkillAffectingDamage } from "@/lib/utils/characters/damage-calculator";
 
 interface DamageCalculatorSkillsLogProps {
   skills: SkillAffectingDamage[];

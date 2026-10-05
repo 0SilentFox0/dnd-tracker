@@ -29,7 +29,7 @@ export interface SkillGroupAccordionItemProps {
   onRenameClick: () => void;
   onRemoveAllClick: () => void;
   /** Викликається при видаленні одного скіла (DM) */
-  onDeleteSkill?: (skillId: string) => void;
+  onDeleteSkill?: (skillId: string) => Promise<unknown> | void;
   /** Викликається при дублюванні скіла (DM) */
   onDuplicateSkill?: (skillId: string) => void;
   skills: (Skill | GroupedSkill)[];

@@ -1,6 +1,7 @@
 "use client";
 
 import type React from "react";
+import { useMemo } from "react";
 
 import { SkillSpellEnhancement } from "./SkillSpellEnhancement";
 import { SkillSpellSelector } from "./SkillSpellSelector";
@@ -78,6 +79,28 @@ export function SkillSpellSection({
     handlers,
   } = spellEnhancement;
 
+  const enhancementValue = useMemo(
+    () => ({
+      types: spellEnhancementTypes,
+      effectIncrease: spellEffectIncrease,
+      targetChange: spellTargetChange,
+      additionalModifier: spellAdditionalModifier,
+      newSpellId: spellNewSpellId,
+    }),
+    [spellEnhancementTypes, spellEffectIncrease, spellTargetChange, spellAdditionalModifier, spellNewSpellId],
+  );
+
+  const enhancementActions = useMemo(
+    () => ({
+      toggleType: handlers.handleEnhancementTypeToggle,
+      setEffectIncrease: enhancementSetters.setSpellEffectIncrease,
+      setTargetChange: enhancementSetters.setSpellTargetChange,
+      setAdditionalModifier: enhancementSetters.setSpellAdditionalModifier,
+      setNewSpellId: enhancementSetters.setSpellNewSpellId,
+    }),
+    [handlers.handleEnhancementTypeToggle, enhancementSetters],
+  );
+
   return (
     <div className="space-y-4 rounded-md border p-4">
       <div className="grid gap-4 md:grid-cols-2">
@@ -126,19 +149,7 @@ export function SkillSpellSection({
             <span className="font-medium">Інші покращення заклинань</span>
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4 space-y-4">
-            <SkillSpellEnhancement
-              spellEnhancementTypes={spellEnhancementTypes}
-              spellEffectIncrease={spellEffectIncrease}
-              spellTargetChange={spellTargetChange}
-              spellAdditionalModifier={spellAdditionalModifier}
-              spellNewSpellId={spellNewSpellId}
-              spells={spells}
-              onEnhancementTypeToggle={handlers.handleEnhancementTypeToggle}
-              onEffectIncreaseChange={enhancementSetters.setSpellEffectIncrease}
-              onTargetChangeChange={enhancementSetters.setSpellTargetChange}
-              onAdditionalModifierChange={enhancementSetters.setSpellAdditionalModifier}
-              onNewSpellIdChange={enhancementSetters.setSpellNewSpellId}
-            />
+            <SkillSpellEnhancement value={enhancementValue} spells={spells} actions={enhancementActions} />
           </AccordionContent>
         </AccordionItem>
       </Accordion>

@@ -1,14 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { BookOpen } from "lucide-react";
 
 import { CharacterSpellbookDialog } from "./CharacterSpellbookDialog";
 
-import { getSkillTrees } from "@/lib/api/skill-trees";
-import { getSpells } from "@/lib/api/spells";
-import { useMainSkills, useSkills } from "@/lib/hooks/skills";
+import { useMainSkills, useSkills, useSkillTrees } from "@/lib/hooks/skills";
+import { useSpells } from "@/lib/hooks/spells";
 import { convertPrismaToSkillTree } from "@/lib/utils/skills/skill-tree-mock";
 import { getLearnedSpellIdsFromTree } from "@/lib/utils/spells";
 import type { SkillTree } from "@/types/skill-tree";
@@ -34,21 +32,13 @@ export function CharacterSpellbook({
 }: CharacterSpellbookProps) {
   const [spellbookOpen, setSpellbookOpen] = useState(false);
 
-  const { data: allSpells = [] } = useQuery<Spell[]>({
-    queryKey: ["spells", campaignId],
-    queryFn: () => getSpells(campaignId),
-    enabled: spellbookOpen && !!campaignId,
-  });
+  const { data: allSpells = [] } = useSpells(campaignId, { enabled: spellbookOpen });
 
   const { data: allSkills = [] } = useSkills(campaignId);
 
   const { data: apiMainSkills = [] } = useMainSkills(campaignId);
 
-  const { data: rawTrees = [] } = useQuery({
-    queryKey: ["skill-trees", campaignId],
-    queryFn: () => getSkillTrees(campaignId),
-    enabled: spellbookOpen && !!campaignId && !!characterRace,
-  });
+  const { data: rawTrees = [] } = useSkillTrees(campaignId, { enabled: spellbookOpen && !!characterRace });
 
   const skillTree = useMemo((): SkillTree | null => {
     if (!characterRace || !rawTrees.length) return null;

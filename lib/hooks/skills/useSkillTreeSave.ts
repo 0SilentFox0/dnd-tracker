@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { updateSkillTree } from "@/lib/api/skill-trees";
 import type { SkillTree } from "@/types/skill-tree";
@@ -16,6 +17,8 @@ export function useSkillTreeSave({
   onError,
 }: UseSkillTreeSaveOptions) {
   const router = useRouter();
+
+  const queryClient = useQueryClient();
 
   const [isSaving, setIsSaving] = useState(false);
 
@@ -71,10 +74,9 @@ export function useSkillTreeSave({
         };
       }
 
-      // Викликаємо onSuccess перед refresh, щоб оновити стан
       onSuccess?.(convertedTree);
 
-      // Оновлюємо сторінку для синхронізації даних
+      void queryClient.invalidateQueries({ queryKey: ["skill-trees", campaignId] });
       router.refresh();
 
       return convertedTree;

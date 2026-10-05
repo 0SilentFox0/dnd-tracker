@@ -1,16 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 
 import { CircularSkillTree } from "@/components/skill-tree/core/CircularSkillTree";
 import {
   canUnlockRacialSkillSlot,
   getRacialSkillLevelId,
 } from "@/components/skill-tree/utils/hooks";
-import { getSkillTrees } from "@/lib/api/skill-trees";
 import { useNotify } from "@/lib/hooks/common";
 import { useRaces } from "@/lib/hooks/races";
-import { useMainSkills, useSkills, useSkillTreeEnrichment } from "@/lib/hooks/skills";
+import { useMainSkills, useSkills, useSkillTreeEnrichment, useSkillTrees } from "@/lib/hooks/skills";
 import {
   convertPrismaToSkillTree,
   createMockSkillTree,
@@ -51,29 +50,15 @@ export function CharacterSkillTreeView({
 }: CharacterSkillTreeViewProps) {
   const notify = useNotify();
 
-  const [trees, setTrees] = useState<PrismaSkillTree[]>([]);
-
   const { data: skillsFromLibrary = [] } = useSkills(campaignId);
 
   const { data: races = [] } = useRaces(campaignId);
 
   const { data: mainSkills = [] } = useMainSkills(campaignId);
 
-  useEffect(() => {
-    let cancelled = false;
+  const { data: rawTrees = [] } = useSkillTrees(campaignId);
 
-    getSkillTrees(campaignId)
-      .then((data) => {
-        if (!cancelled) setTrees((Array.isArray(data) ? data : []) as PrismaSkillTree[]);
-      })
-      .catch(() => {
-        if (!cancelled) setTrees([]);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [campaignId]);
+  const trees = rawTrees as unknown as PrismaSkillTree[];
 
   const baseSkillTree = useMemo(() => {
     if (!characterRace) return null;

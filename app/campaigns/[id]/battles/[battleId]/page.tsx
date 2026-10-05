@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useMemo, useState } from "react";
+import { use, useCallback, useMemo, useState } from "react";
 
 import { BattlePageDialogs, type BattlePageDialogsProps } from "./BattlePageDialogs";
 import { BattlePageLoadingState } from "./BattlePageLoadingState";
@@ -10,16 +10,28 @@ import { DmQuickActionsPanel } from "@/components/battle/panels";
 import { BattleFieldView } from "@/components/battle/views/BattleFieldView";
 import { BattlePreparationView } from "@/components/battle/views/BattlePreparationView";
 import { PlayerTurnView } from "@/components/battle/views/PlayerTurnView";
-import { spellPreview } from "@/lib/api/battles";
 import {
   useBattlePageDialogs,
   useBattleSceneLogic,
   useMoraleOverlay,
 } from "@/lib/hooks/battle";
+import { useSpellPreview } from "@/lib/hooks/battles";
+import { useNotify } from "@/lib/hooks/common";
 import { findLastSpellAction } from "@/lib/utils/battle/battle-log";
 import type { MoraleCheckResult } from "@/lib/utils/battle/battle-morale";
 import type { BattleScene } from "@/types/api";
 import type { BattleAction } from "@/types/battle";
+
+type PendingSpellData = {
+  casterId: string;
+  casterType: string;
+  spellId: string;
+  targetIds: string[];
+  damageRolls: number[];
+  savingThrows?: Array<{ participantId: string; roll: number }>;
+  additionalRollResult?: number;
+  hitRoll?: number;
+};
 
 export default function BattlePage({
   params,
@@ -66,47 +78,31 @@ export default function BattlePage({
   const [spellPreviewAction, setSpellPreviewAction] =
     useState<BattleAction | null>(null);
 
-  const [pendingSpellData, setPendingSpellData] = useState<{
-    casterId: string;
-    casterType: string;
-    spellId: string;
-    targetIds: string[];
-    damageRolls: number[];
-    savingThrows?: Array<{ participantId: string; roll: number }>;
-    additionalRollResult?: number;
-    hitRoll?: number;
-  } | null>(null);
+  const [pendingSpellData, setPendingSpellData] = useState<PendingSpellData | null>(null);
 
-  const [spellPreviewLoading, setSpellPreviewLoading] = useState(false);
+  const notify = useNotify();
 
-  const handleSpellPreview = useMemo(
-    () =>
-      async (data: {
-        casterId: string;
-        casterType: string;
-        spellId: string;
-        targetIds: string[];
-        damageRolls: number[];
-        savingThrows?: Array<{ participantId: string; roll: number }>;
-        additionalRollResult?: number;
-        hitRoll?: number;
-      }) => {
-        setSpellPreviewLoading(true);
-        try {
-          const json = await spellPreview(id, battleId, data);
+  const preview = useSpellPreview(id, battleId);
 
-          if (json.preview && json.battleAction) {
-            setSpellPreviewAction(json.battleAction as BattleAction);
-            setPendingSpellData(data);
-            setSpellResultModalOpen(true);
-          }
-        } catch (err) {
-          console.error("spellPreview failed:", err);
-        } finally {
-          setSpellPreviewLoading(false);
+  const { mutateAsync: requestPreview } = preview;
+
+  const spellPreviewLoading = preview.isPending;
+
+  const handleSpellPreview = useCallback(
+    async (data: PendingSpellData) => {
+      try {
+        const json = await requestPreview(data);
+
+        if (json.preview && json.battleAction) {
+          setSpellPreviewAction(json.battleAction as BattleAction);
+          setPendingSpellData(data);
+          setSpellResultModalOpen(true);
         }
-      },
-    [id, battleId],
+      } catch {
+        void notify("Не вдалося порахувати превʼю заклинання");
+      }
+    },
+    [requestPreview, notify],
   );
 
   const handleSpellApplyFromModal = () => {
