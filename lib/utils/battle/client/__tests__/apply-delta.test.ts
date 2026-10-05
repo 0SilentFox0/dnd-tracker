@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 import { acceptFullBattle, applyBattleDelta } from "@/lib/utils/battle/client/apply-delta";
 import type { BattleScene, ClientBattleDelta } from "@/types/api";
@@ -70,7 +71,7 @@ describe("applyBattleDelta", () => {
   });
 
   it("reset у prepared: setup і порожні учасники", () => {
-    const setup = [{ id: "u1", type: "unit" as const, side: "enemy" as const }];
+    const setup = [{ id: "u1", type: "unit" as const, side: ParticipantSide.ENEMY }];
 
     const next = applyBattleDelta(cached, delta({
       scene: { status: "prepared", round: 1, turnIndex: 0, pendingMoraleCheck: null },
