@@ -22,6 +22,7 @@ export interface ProcessAttackParams {
   damageMultiplier?: number;
   /** Урон відповіді цілі (контратака), якщо передано з клієнта */
   reactionDamageOverride?: number;
+  rng?: () => number;
 }
 
 /** Результат обробки атаки */

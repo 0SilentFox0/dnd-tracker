@@ -5,7 +5,6 @@
 
 import { processAttack } from "@/lib/utils/battle/attack";
 import { getTotalDiceCount } from "@/lib/utils/battle/balance";
-import { updateMoraleOnEvent } from "@/lib/utils/skills/execution";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 export type AttackPhaseInput = {
@@ -169,17 +168,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   let currentAttacker = { ...attacker };
 
-  let currentInitiativeOrder: BattleParticipant[] = initiativeOrder.map(
-    (p) => ({
-      ...p,
-      battleData: p.battleData
-        ? {
-            ...p.battleData,
-            skillUsageCounts: { ...(p.battleData.skillUsageCounts ?? {}) },
-          }
-        : p.battleData,
-    }),
-  );
+  let currentInitiativeOrder: BattleParticipant[] = initiativeOrder;
 
   const allBattleActions: BattleAction[] = [];
 
@@ -219,9 +208,11 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
         ? data.reactionDamage
         : undefined;
 
+    const freshTarget = currentInitiativeOrder.find((p) => p.basicInfo.id === target.basicInfo.id) ?? target;
+
     const attackResult = processAttack({
       attacker: currentAttacker,
-      target,
+      target: freshTarget,
       attack,
       d20Roll,
       advantageRoll: data.advantageRoll,
@@ -234,27 +225,10 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       reactionDamageOverride: reactionOverride,
     });
 
+    const updatedMap = new Map((attackResult.allParticipantsUpdated ?? []).map((p) => [p.basicInfo.id, p]));
+
+    currentInitiativeOrder = currentInitiativeOrder.map((p) => updatedMap.get(p.basicInfo.id) ?? p);
     currentAttacker = attackResult.attackerUpdated;
-
-    if (attackResult.allParticipantsUpdated?.length) {
-      const updatedMap = new Map(
-        attackResult.allParticipantsUpdated.map((p) => [p.basicInfo.id, p]),
-      );
-
-      currentInitiativeOrder = currentInitiativeOrder.map(
-        (p) => updatedMap.get(p.basicInfo.id) ?? p,
-      );
-    } else {
-      currentInitiativeOrder = currentInitiativeOrder.map((p) => {
-        if (p.basicInfo.id === currentAttacker.basicInfo.id)
-          return currentAttacker as BattleParticipant;
-
-        if (p.basicInfo.id === target.basicInfo.id)
-          return attackResult.targetUpdated as BattleParticipant;
-
-        return p;
-      });
-    }
 
     allBattleActions.push({
       ...attackResult.battleAction,
@@ -262,35 +236,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
     });
   }
 
-  let finalInitiativeOrder = currentInitiativeOrder;
-
-  for (const target of targets) {
-    const currentTarget = finalInitiativeOrder.find(
-      (p) => p.basicInfo.id === target.basicInfo.id,
-    );
-
-    if (
-      currentTarget &&
-      (currentTarget.combatStats.status === "dead" ||
-        currentTarget.combatStats.status === "unconscious")
-    ) {
-      const allyResult = updateMoraleOnEvent(
-        finalInitiativeOrder,
-        "allyDeath",
-        target.basicInfo.id,
-      );
-
-      finalInitiativeOrder = allyResult.updatedParticipants;
-    }
-  }
-
-  const killResult = updateMoraleOnEvent(
-    finalInitiativeOrder,
-    "kill",
-    currentAttacker.basicInfo.id,
-  );
-
-  finalInitiativeOrder = killResult.updatedParticipants;
+  const finalInitiativeOrder = currentInitiativeOrder;
 
   return {
     finalInitiativeOrder,

@@ -6,39 +6,26 @@ import { applyMainActionUsed } from "../../participant";
 import type { ProcessAttackResult } from "../../types/attack-process";
 import type { AttackRollResult } from "..";
 import { applyCriticalEffect } from "..";
+import { type AttackFlow, fire, getP, put } from "./ability-flow";
 import { buildBattleActionForCriticalFail } from "./actions";
 
-import { ParticipantSide } from "@/lib/constants/battle";
-import { executeAfterAttackTriggers } from "@/lib/utils/skills/execution";
-import type { BattleParticipant } from "@/types/battle";
+import { AttackType } from "@/lib/constants/battle";
 import type { BattleAttack } from "@/types/battle";
 
 export interface HandleCriticalFailParams {
-  attacker: BattleParticipant;
-  target: BattleParticipant;
+  flow: AttackFlow;
+  attackerId: string;
+  targetId: string;
   attack: BattleAttack;
   d20Roll: number;
   attackRoll: AttackRollResult;
   targetAC: number;
-  allParticipants: BattleParticipant[];
   currentRound: number;
   battleId: string;
-  beforeMessages: string[];
 }
 
 export function handleCriticalFail(params: HandleCriticalFailParams): ProcessAttackResult {
-  const {
-    attacker,
-    target,
-    attack,
-    d20Roll,
-    attackRoll,
-    targetAC,
-    allParticipants,
-    currentRound,
-    battleId,
-    beforeMessages,
-  } = params;
+  const { flow, attackerId, targetId, attack, d20Roll, attackRoll, targetAC, currentRound, battleId } = params;
 
   const criticalEffectApplied = attackRoll.criticalEffect;
 
@@ -46,46 +33,40 @@ export function handleCriticalFail(params: HandleCriticalFailParams): ProcessAtt
     throw new Error("criticalEffect required for handleCriticalFail");
   }
 
-  let updatedAttacker = applyCriticalEffect(
-    attacker,
-    criticalEffectApplied,
-    currentRound,
-  );
+  const attacker = getP(flow, attackerId);
+
+  put(flow, applyCriticalEffect(attacker, criticalEffectApplied, currentRound));
+
+  fire(flow, {
+    type: "attack",
+    phase: "after",
+    actorId: attackerId,
+    targetId,
+    attackKind: attack.type === AttackType.RANGED ? "ranged" : "melee",
+  });
+
+  put(flow, applyMainActionUsed(getP(flow, attackerId)));
 
   const battleAction = buildBattleActionForCriticalFail(
     attacker,
-    target,
+    getP(flow, targetId),
     attack,
     d20Roll,
     attackRoll,
     targetAC,
     criticalEffectApplied,
-    beforeMessages,
+    flow.messages,
     [],
     battleId,
     currentRound,
   );
 
-  const afterAttackResultFail = executeAfterAttackTriggers(
-    updatedAttacker,
-    target,
-    allParticipants,
-    attacker.basicInfo.side === ParticipantSide.ALLY,
-  );
-
-  updatedAttacker = afterAttackResultFail.updatedAttacker;
-  battleAction.resultText = [
-    battleAction.resultText,
-    ...afterAttackResultFail.messages,
-  ].filter(Boolean).join(" | ");
-
-  updatedAttacker = applyMainActionUsed(updatedAttacker);
-
   return {
     success: false,
     attackRoll,
-    targetUpdated: target,
-    attackerUpdated: updatedAttacker,
+    targetUpdated: getP(flow, targetId),
+    attackerUpdated: getP(flow, attackerId),
+    allParticipantsUpdated: flow.ps,
     criticalEffectApplied,
     reactionTriggered: false,
     battleAction,

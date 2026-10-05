@@ -6,123 +6,72 @@ import { applyMainActionUsed } from "../../participant";
 import { applyResistance } from "../../resistance";
 import type { ProcessAttackResult } from "../../types/attack-process";
 import type { AttackRollResult } from "..";
+import { type AttackFlow, fire, getP, put, settleDowned } from "./ability-flow";
 import { buildBattleActionForMiss } from "./actions";
+import { applyDamageToTarget } from "./damage";
 
-import { ParticipantSide } from "@/lib/constants/battle";
-import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
-import { executeAfterAttackTriggers } from "@/lib/utils/skills/execution";
-import type { BattleParticipant } from "@/types/battle";
+import { AttackType } from "@/lib/constants/battle";
 import type { BattleAttack } from "@/types/battle";
 
 export interface HandleMissParams {
-  attacker: BattleParticipant;
-  target: BattleParticipant;
+  flow: AttackFlow;
+  attackerId: string;
+  targetId: string;
   attack: BattleAttack;
   d20Roll: number;
   attackRoll: AttackRollResult;
   targetAC: number;
-  allParticipants: BattleParticipant[];
   currentRound: number;
   battleId: string;
-  beforeMessages: string[];
 }
 
 export function handleMiss(params: HandleMissParams): ProcessAttackResult {
-  const {
-    attacker,
-    target,
-    attack,
-    d20Roll,
-    attackRoll,
-    targetAC,
-    allParticipants,
-    currentRound,
-    battleId,
-    beforeMessages,
-  } = params;
+  const { flow, attackerId, targetId, attack, d20Roll, attackRoll, targetAC, currentRound, battleId } = params;
 
-  let updatedTargetOnMiss = { ...target };
+  const target = getP(flow, targetId);
 
   const guaranteedDamage = attack.guaranteedDamage ?? 0;
 
   let actualGuaranteedDamage = 0;
 
   if (guaranteedDamage > 0) {
-    const resistResult = applyResistance(
-      target,
-      guaranteedDamage,
-      attack.damageType ?? "physical",
-      { participants: allParticipants },
-    );
+    actualGuaranteedDamage = applyResistance(target, guaranteedDamage, attack.damageType ?? "physical", { participants: flow.ps }).finalDamage;
 
-    actualGuaranteedDamage = resistResult.finalDamage;
-
-    let remaining = actualGuaranteedDamage;
-
-    if (target.combatStats.tempHp > 0 && remaining > 0) {
-      const tempDmg = Math.min(target.combatStats.tempHp, remaining);
-
-      updatedTargetOnMiss = {
-        ...updatedTargetOnMiss,
-        combatStats: {
-          ...updatedTargetOnMiss.combatStats,
-          tempHp: updatedTargetOnMiss.combatStats.tempHp - tempDmg,
-        },
-      };
-      remaining -= tempDmg;
-    }
-
-    if (remaining > 0) {
-      updatedTargetOnMiss = {
-        ...updatedTargetOnMiss,
-        combatStats: {
-          ...updatedTargetOnMiss.combatStats,
-          currentHp: Math.max(
-            BATTLE_CONSTANTS.MIN_DAMAGE,
-            updatedTargetOnMiss.combatStats.currentHp - remaining,
-          ),
-        },
-      };
-    }
+    put(flow, applyDamageToTarget(target, actualGuaranteedDamage).updatedTarget);
+    settleDowned(flow, targetId, attackerId);
   }
 
+  fire(flow, {
+    type: "attack",
+    phase: "after",
+    actorId: attackerId,
+    targetId,
+    attackKind: attack.type === AttackType.RANGED ? "ranged" : "melee",
+  });
+
+  put(flow, applyMainActionUsed(getP(flow, attackerId)));
+
   const battleAction = buildBattleActionForMiss(
-    attacker,
+    getP(flow, attackerId),
     target,
-    updatedTargetOnMiss,
+    getP(flow, targetId),
     attack,
     d20Roll,
     attackRoll,
     targetAC,
     actualGuaranteedDamage,
-    beforeMessages,
+    flow.messages,
     [],
     battleId,
     currentRound,
   );
 
-  let updatedAttacker = { ...attacker };
-
-  const afterAttackResultMiss = executeAfterAttackTriggers(
-    updatedAttacker,
-    updatedTargetOnMiss,
-    allParticipants,
-    attacker.basicInfo.side === ParticipantSide.ALLY,
-  );
-
-  updatedAttacker = afterAttackResultMiss.updatedAttacker;
-  battleAction.resultText = [
-    battleAction.resultText,
-    ...afterAttackResultMiss.messages,
-  ].filter(Boolean).join(" | ");
-
-  updatedAttacker = applyMainActionUsed(updatedAttacker);
-
   return {
     success: false,
     attackRoll,
-    targetUpdated: updatedTargetOnMiss,
-    attackerUpdated: updatedAttacker,
+    targetUpdated: getP(flow, targetId),
+    attackerUpdated: getP(flow, attackerId),
+    allParticipantsUpdated: flow.ps,
     reactionTriggered: false,
     battleAction,
   };

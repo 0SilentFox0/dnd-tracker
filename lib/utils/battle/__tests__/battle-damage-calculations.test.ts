@@ -16,12 +16,12 @@ import {
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { SkillLevel } from "@/lib/types/skill-tree";
+import { grantPassive, withConvertedSkills } from "@/lib/utils/battle/__tests__/mock-participant";
 import type {
   BattleParticipant,
   EquippedArtifact,
   SkillEffect,
 } from "@/types/battle";
-import { grantPassive, withConvertedSkills } from "@/lib/utils/battle/__tests__/mock-participant";
 
 function createBaseParticipant(
   overrides?: Partial<BattleParticipant>,

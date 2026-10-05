@@ -10,8 +10,8 @@ import {
 } from "../damage";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
-import type { BattleAttack, BattleParticipant } from "@/types/battle";
 import { grantPassive, withConvertedSkills } from "@/lib/utils/battle/__tests__/mock-participant";
+import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 function createBaseParticipant(overrides?: Partial<BattleParticipant>): BattleParticipant {
   return withConvertedSkills({

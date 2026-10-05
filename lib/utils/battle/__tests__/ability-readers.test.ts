@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
+import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { calculateAttackBonus, calculateAttackRoll, hasAdvantage, hasDisadvantage } from "@/lib/utils/battle/attack";
 import { canPerformReaction, getCounterDamagePercent } from "@/lib/utils/battle/attack/reaction";
 import { calculateDamageWithModifiers } from "@/lib/utils/battle/damage";

@@ -6,8 +6,8 @@ import {
 } from "../resistance";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import type { BattleParticipant } from "@/types/battle";
 import { grantPassive } from "@/lib/utils/battle/__tests__/mock-participant";
+import type { BattleParticipant } from "@/types/battle";
 
 function createParticipant(
   overrides?: Partial<BattleParticipant>,

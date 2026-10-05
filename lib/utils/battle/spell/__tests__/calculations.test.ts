@@ -11,8 +11,8 @@ import { describe, expect, it } from "vitest";
 import { calculateSpellDamageWithEnhancements } from "../calculations";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import { upgradeLegacyParticipant } from "@/lib/utils/battle/store/split-participant";
 import { SkillLevel } from "@/lib/types/skill-tree";
+import { upgradeLegacyParticipant } from "@/lib/utils/battle/store/split-participant";
 import type {
   ActiveSkill,
   BattleParticipant,

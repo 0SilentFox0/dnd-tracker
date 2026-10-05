@@ -8,12 +8,12 @@ import {
 } from "@/components/battle/dialogs/shared";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
 import {
   canPerformReaction,
   getReactionDamageAmount,
 } from "@/lib/utils/battle/attack";
 import { getDiceSlots } from "@/lib/utils/battle/balance";
-import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 interface DamageRollDialogProps {

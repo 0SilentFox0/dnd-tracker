@@ -273,3 +273,30 @@ export function buildBattleActionForHit(params: BuildHitActionParams): BattleAct
     isCancelled: false,
   };
 }
+
+/** Ціль загинула від умінь до кидка атаки. */
+export function buildAbortedAttackAction(
+  attacker: BattleParticipant,
+  target: BattleParticipant,
+  attack: BattleAttack,
+  messages: string[],
+  battleId: string,
+  currentRound: number,
+): BattleAction {
+  return {
+    id: `attack-${attacker.basicInfo.id}-${Date.now()}`,
+    battleId,
+    round: currentRound,
+    actionIndex: 0,
+    timestamp: new Date(),
+    actorId: attacker.basicInfo.id,
+    actorName: attacker.basicInfo.name,
+    actorSide: attacker.basicInfo.side,
+    actionType: "attack",
+    targets: [{ participantId: target.basicInfo.id, participantName: target.basicInfo.name }],
+    actionDetails: { weaponName: attack.name, attackKind: attack.type === AttackType.RANGED ? "ranged" : "melee", isHit: false },
+    resultText: [`${attacker.basicInfo.name} → ${target.basicInfo.name}: ціль загинула до атаки`, ...messages].join(" | "),
+    hpChanges: [],
+    isCancelled: false,
+  };
+}

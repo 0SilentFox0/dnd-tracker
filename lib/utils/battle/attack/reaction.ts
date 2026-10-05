@@ -6,9 +6,9 @@ import { getDiceAverage } from "../balance";
 
 import { AttackType } from "@/lib/constants/battle";
 import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
-import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
 import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
+import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
 import type { BattleParticipant } from "@/types/battle";
 
 type IncomingAttackType = AttackType | "magic";
