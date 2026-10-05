@@ -4,7 +4,7 @@ import { formatArtifactSlotLabel } from "./artifact-set-form-helpers";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import type { ArtifactListItem } from "@/lib/api/artifacts";
+import type { ArtifactListItem } from "@/types/artifacts";
 
 export interface ArtifactSetMembersPickerProps {
   artifacts: ArtifactListItem[];

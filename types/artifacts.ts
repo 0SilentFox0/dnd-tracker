@@ -19,3 +19,12 @@ export interface Artifact {
   bonuses: ArtifactBonus;
   modifiers: ArtifactModifier[];
 }
+
+export interface ArtifactListItem {
+  id: string;
+  name: string;
+  slot: string;
+  icon?: string | null;
+  setId?: string | null;
+  [key: string]: unknown;
+}
