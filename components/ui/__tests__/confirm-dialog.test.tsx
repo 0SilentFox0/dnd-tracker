@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import { useEffect } from "react";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
@@ -7,10 +8,16 @@ import { mockMatchMedia } from "./match-media";
 import { ConfirmProvider } from "@/components/ui/confirm-dialog";
 import { type ConfirmFn, useConfirm } from "@/lib/hooks/common";
 
-let confirm: ConfirmFn;
+const holder: { confirm?: ConfirmFn } = {};
+
+const confirm: ConfirmFn = (o) => holder.confirm!(o);
 
 function Grab() {
-  confirm = useConfirm();
+  const c = useConfirm();
+
+  useEffect(() => {
+    holder.confirm = c;
+  }, [c]);
 
   return null;
 }
