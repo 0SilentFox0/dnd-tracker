@@ -27,8 +27,12 @@ export function RaceEditForm({ campaignId, race }: RaceEditFormProps) {
     getInitialRaceFormData(race),
   );
 
+  const [abilitiesValid, setAbilitiesValid] = useState(true);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!abilitiesValid) return;
 
     const dataToSave: RaceFormData = {
       ...formData,
@@ -55,14 +59,17 @@ export function RaceEditForm({ campaignId, race }: RaceEditFormProps) {
       title="Редагувати расу"
       description="Оновіть інформацію про расу"
       onSubmit={handleSubmit}
-      isSubmitting={updateRaceMutation.isPending}
+      isSubmitting={updateRaceMutation.isPending || !abilitiesValid}
       onCancel={() => router.push(`/campaigns/${campaignId}/dm/races`)}
       submitLabel="Зберегти"
     >
       <RaceFormFields
+        campaignId={campaignId}
         formData={formData}
         setFormData={setFormData}
         mainSkills={mainSkills}
+        abilityIssues={race.abilityIssues}
+        onAbilitiesValidityChange={setAbilitiesValid}
       />
     </FormCard>
   );

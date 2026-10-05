@@ -16,15 +16,6 @@ const unitAttackSchema = z.object({
   guaranteedDamage: z.number().min(0).optional(),
 });
 
-const unitSpecialAbilitySchema = z.object({
-  name: z.string(),
-  description: z.string().optional(),
-  type: z.enum(["passive", "active"]),
-  spellId: z.string().optional(),
-  actionType: z.enum(["action", "bonus_action"]).optional(),
-  effect: z.record(z.string(), z.unknown()).optional(),
-});
-
 export const createUnitSchema = z.object({
   name: z.string().min(1).max(100),
   race: z.string().optional(),

@@ -1,3 +1,4 @@
+import type { Ability } from "@/lib/utils/abilities/schema";
 import type { RaceFormData, StatModifier } from "@/types/races";
 import type { SpellSlotProgression } from "@/types/races";
 
@@ -49,6 +50,7 @@ export function getInitialRaceFormData(race: {
   availableSkills: unknown;
   passiveAbility?: unknown;
   spellSlotProgression?: unknown;
+  abilities?: Ability[];
 }): RaceFormData {
   const parsedPassiveAbility = parsePassiveAbility(race.passiveAbility);
 
@@ -63,5 +65,6 @@ export function getInitialRaceFormData(race: {
     passiveAbility: parsedPassiveAbility,
     spellSlotProgression:
       progression.length > 0 ? progression : DEFAULT_SPELL_SLOT_PROGRESSION,
+    abilities: race.abilities ?? [],
   };
 }

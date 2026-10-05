@@ -43,4 +43,5 @@ export interface RaceFormData {
     statModifiers?: Record<string, StatModifier>;
   };
   spellSlotProgression?: SpellSlotProgression[];
+  abilities: Ability[];
 }
