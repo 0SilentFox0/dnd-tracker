@@ -6,6 +6,7 @@ import type { Ability } from "@/lib/utils/abilities/schema";
 
 export interface Unit {
   abilities?: Ability[];
+  abilitySummary?: string[];
   abilityIssues?: ConversionIssue[];
   id: string;
   campaignId: string;

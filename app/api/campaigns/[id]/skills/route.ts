@@ -100,7 +100,7 @@ export async function GET(
       return accessResult;
     }
 
-    const skills = await prisma.skill.findMany({ omit: { abilities: true },
+    const skills = await prisma.skill.findMany({
       where: {
         campaignId: id,
       },

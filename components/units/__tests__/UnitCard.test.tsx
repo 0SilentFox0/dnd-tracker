@@ -49,3 +49,14 @@ describe("UnitCard delete", () => {
     expect(onDelete).toHaveBeenCalledWith("unit-1");
   });
 });
+
+describe("UnitCard вміння", () => {
+  afterEach(cleanup);
+
+  it("показує опис умінь", () => {
+    render(<UnitCard unit={{ ...unit, abilitySummary: ["Влучання · bleed 1d4/раунд × 2 р."] } as Unit} campaignId="c1" onDelete={vi.fn()} />);
+
+    expect(screen.getByText("Вміння:")).toBeInTheDocument();
+    expect(screen.getByText("Влучання · bleed 1d4/раунд × 2 р.")).toBeInTheDocument();
+  });
+});

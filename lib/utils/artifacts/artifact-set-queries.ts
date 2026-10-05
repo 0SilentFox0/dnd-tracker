@@ -7,6 +7,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { abilitiesJson } from "@/lib/utils/abilities/legacy/read";
 import type { Ability } from "@/lib/utils/abilities/schema";
+import { withAbilitySummary } from "@/lib/utils/abilities/summary";
 
 const includeList = {
   artifacts: {
@@ -62,11 +63,13 @@ export function buildArtifactSetPatchInput(data: {
 }
 
 export async function listArtifactSets(campaignId: string) {
-  return prisma.artifactSet.findMany({ omit: { abilities: true },
+  const sets = await prisma.artifactSet.findMany({
     where: { campaignId },
     include: includeList,
     orderBy: { createdAt: "desc" },
   });
+
+  return sets.map((s) => withAbilitySummary("artifactSet", s));
 }
 
 export async function findArtifactSetInCampaign(

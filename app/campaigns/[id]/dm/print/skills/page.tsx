@@ -2,6 +2,7 @@ import { PrintSkillsPageClient } from "./page-client";
 
 import { requireCampaignDM } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
+import { withAbilitySummary } from "@/lib/utils/abilities/summary";
 import type { SkillTriggers } from "@/types/skill-triggers";
 
 export default async function PrintSkillsPage({
@@ -14,7 +15,7 @@ export default async function PrintSkillsPage({
   const { campaign } = await requireCampaignDM(id);
 
   const [skills, mainSkillsRaw, skillTrees] = await Promise.all([
-    prisma.skill.findMany({ omit: { abilities: true },
+    prisma.skill.findMany({
       where: { campaignId: id },
       include: {
         spell: true,
@@ -33,7 +34,7 @@ export default async function PrintSkillsPage({
     }),
   ]);
 
-  const transformedSkills = skills.map((skill) => ({
+  const transformedSkills = skills.map((row) => withAbilitySummary("skill", row)).map((skill) => ({
     ...skill,
     bonuses:
       typeof skill.bonuses === "object" && skill.bonuses !== null

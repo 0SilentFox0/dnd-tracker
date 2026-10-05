@@ -4,8 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { AbilitySummary } from "@/components/abilities";
 import { ArtifactDeleteButton } from "@/components/artifacts/ArtifactDeleteButton";
-import { ArtifactPassiveAbilityDisplay } from "@/components/artifacts/ArtifactPassiveAbilityDisplay";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,7 @@ export interface ArtifactCardData {
   rarity: string | null;
   icon: string | null;
   description: string | null;
-  passiveAbility: unknown;
+  abilitySummary: string[];
   artifactSet?: { name: string } | null;
 }
 
@@ -147,10 +147,11 @@ export function ArtifactCard({
             {artifact.description}
           </p>
         )}
-        <ArtifactPassiveAbilityDisplay
-          passiveAbility={artifact.passiveAbility}
-          className="mt-2"
-        />
+        {artifact.abilitySummary.length > 0 && (
+          <div className="mt-2">
+            <AbilitySummary lines={artifact.abilitySummary} />
+          </div>
+        )}
       </div>
     );
   }
@@ -209,10 +210,11 @@ export function ArtifactCard({
             {artifact.description}
           </p>
         )}
-        <ArtifactPassiveAbilityDisplay
-          passiveAbility={artifact.passiveAbility}
-          className="mb-2"
-        />
+        {artifact.abilitySummary.length > 0 && (
+          <div className="mb-2">
+            <AbilitySummary lines={artifact.abilitySummary} />
+          </div>
+        )}
         <div className="flex gap-2">
           <Link
             href={`/campaigns/${campaignId}/dm/artifacts/${artifact.id}`}

@@ -4,13 +4,15 @@ import { DMUnitsPageClient } from "./page-client";
 
 import { requireCampaignDM } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
+import { abilitySummary } from "@/lib/utils/abilities/summary";
 import type { Unit } from "@/types/units";
 
 function transformPrismaUnitToUnit(
-  unit: Prisma.UnitGetPayload<{ include: { unitGroup: true }; omit: { abilities: true } }>
+  { abilities: _abilities, ...unit }: Prisma.UnitGetPayload<{ include: { unitGroup: true } }>
 ): Unit {
   return {
     ...unit,
+    abilitySummary: abilitySummary("unit", { ...unit, abilities: _abilities }),
     attacks: Array.isArray(unit.attacks)
       ? (unit.attacks as Unit["attacks"])
       : [],
@@ -43,7 +45,7 @@ export default async function DMUnitsPage({
 
   await requireCampaignDM(id);
 
-  const unitsData = await prisma.unit.findMany({ omit: { abilities: true },
+  const unitsData = await prisma.unit.findMany({
     where: {
       campaignId: id,
     },

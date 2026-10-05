@@ -9,6 +9,7 @@ import type { Ability } from "@/lib/utils/abilities/schema";
 
 export interface Skill {
   abilities?: Ability[];
+  abilitySummary?: string[];
   abilityIssues?: ConversionIssue[];
   id: string;
   campaignId: string;
@@ -52,6 +53,7 @@ export interface Skill {
  */
 export interface GroupedSkill {
   abilities?: Ability[];
+  abilitySummary?: string[];
   abilityIssues?: ConversionIssue[];
   id: string;
   campaignId: string;
