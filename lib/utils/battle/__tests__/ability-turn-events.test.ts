@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { processStartOfRound, processStartOfTurn } from "@/lib/utils/battle/battle-turn";
+import { advanceTurn } from "@/lib/utils/battle/turn/advance-turn";
 import { applyPendingMoraleCheck } from "@/lib/utils/battle/turn/apply-pending-morale";
 import { runAdvanceTurnLoop } from "@/lib/utils/battle/turn/run-advance-turn-loop";
 
@@ -66,4 +67,21 @@ describe("turn events", () => {
 
     expect(r.updatedInitiativeOrder[0].combatStats.morale).toBe(0);
   });
+
+  it("turnEnd — для того, чий хід закінчився, навіть коли далі екстра-хід", () => {
+    const tired = resolved({ trigger: { event: "turnEnd" }, effects: [{ kind: "changeMorale", delta: -1 }] });
+
+    const a = { ...makeParticipant({ id: "a" }), actionFlags: { ...makeParticipant({ id: "a" }).actionFlags, hasExtraTurn: true } };
+
+    const b = makeParticipant({ id: "b", abilities: [tired] });
+
+    const scene = { id: "b1", campaignId: "c1", status: "active" as const, round: 1, turnIndex: 1, version: 1, eventSeq: 0, pendingMoraleCheck: null, startedAt: null, completedAt: null };
+
+    const r = advanceTurn({ participants: [a, b], pending: [], scene });
+
+    expect(r.scene.turnIndex).toBe(0);
+    expect(r.participants.find((p) => p.basicInfo.id === "b")?.combatStats.morale).toBe(-1);
+    expect(r.participants.find((p) => p.basicInfo.id === "a")?.combatStats.morale).toBe(0);
+  });
 });
+

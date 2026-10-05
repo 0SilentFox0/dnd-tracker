@@ -81,16 +81,6 @@ export function runAdvanceTurnLoop(
     stateBefore: getStateBeforeForEntry(),
   });
 
-  const ending = updatedInitiativeOrder[nextTurnIndex];
-
-  if (ending && ending.combatStats.status === "active") {
-    const ended = runAbilities(updatedInitiativeOrder, { type: "turnEnd", actorId: ending.basicInfo.id }, { round: nextRound, rng });
-
-    updatedInitiativeOrder = ended.participants;
-
-    if (ended.messages.length > 0) newLogEntries.push(systemEntry(nextRound, `Кінець ходу ${ending.basicInfo.name}: ${ended.messages.join("; ")}`, "triggers-turn-end"));
-  }
-
   while (!activeParticipantFound && attempts < maxAttempts) {
     attempts++;
 
