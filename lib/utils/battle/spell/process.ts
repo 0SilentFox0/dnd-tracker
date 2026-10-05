@@ -191,6 +191,7 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
       additionalRollResult,
       savingThrows,
       updatedTargets,
+      allParticipants,
     });
 
     spellCalculation = result.spellCalculation;
@@ -202,6 +203,7 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
       damageRolls,
       additionalRollResult,
       updatedTargets,
+      allParticipants,
     );
 
     spellCalculation = result.spellCalculation;

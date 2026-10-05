@@ -1,18 +1,17 @@
 /**
- * Утиліти для роботи з імунітетами та опором в бою.
- * Враховує опір з расових здібностей та зі скілів (extras.resistances.physical / spell).
+ * Імунітети та опір у бою — з прапорців resistance уніфікованих умінь.
  */
 
-import { getParticipantExtras } from "../participant";
-import { extractResistanceValue, findRacialAbilityByPattern } from "./helpers";
-
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
+import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
+import { withSelf } from "@/lib/utils/abilities/engine/participants";
 import { BattleParticipant } from "@/types/battle";
 
 const PHYSICAL_DAMAGE_TYPES = ["slashing", "piercing", "bludgeoning", "physical"];
 
-function isPhysicalDamageType(damageType: string): boolean {
-  return PHYSICAL_DAMAGE_TYPES.includes(damageType.toLowerCase());
+export interface ResistanceOptions {
+  participants?: BattleParticipant[];
+  fromSpell?: boolean;
 }
 
 /**
@@ -25,71 +24,29 @@ export interface ResistanceResult {
   breakdown: string[];
 }
 
-/**
- * Перевіряє чи є імунітет до типу урону
- * @param target - ціль атаки
- * @param damageType - тип урону (fire, poison, physical, тощо)
- * @returns true якщо є імунітет
- */
-export function hasImmunity(
-  target: BattleParticipant,
-  damageType: string
-): boolean {
-  return findRacialAbilityByPattern(target, damageType, "immunity") !== undefined;
+function matchesDamageType(flagType: string, damageType: string, fromSpell: boolean): boolean {
+  const t = damageType.toLowerCase();
+
+  const f = flagType.toLowerCase();
+
+  return f === t || (f === "physical" && PHYSICAL_DAMAGE_TYPES.includes(t)) || (f === "spell" && (fromSpell || t === "spell" || t === "magic"));
 }
 
-/**
- * Отримує значення опору (resistance) до типу урону з расових здібностей (від 0 до 1).
- * Наприклад, 0.5 = 50% опір (урон зменшується вдвічі)
- * @param target - ціль атаки
- * @param damageType - тип урону
- * @returns значення опору (0 = немає опору, 0.5 = 50% опір, 1 = повний імунітет)
- */
-export function getResistance(
-  target: BattleParticipant,
-  damageType: string
-): number {
-  const racial = findRacialAbilityByPattern(target, damageType, "resistance");
-
-  if (!racial) {
-    return 0; // Немає опору
-  }
-
-  return extractResistanceValue(racial) || 0;
+function matchingResistances(target: BattleParticipant, damageType: string, opts: ResistanceOptions = {}) {
+  return findFlags(withSelf(opts.participants ?? [], target), target.basicInfo.id, "resistance").filter((f) =>
+    matchesDamageType(f.damageType, damageType, opts.fromSpell === true),
+  );
 }
 
-/**
- * Повертає сумарний відсоток опору (0–100): скіли (extras.resistances) + расовий опір, кеп 100%.
- * Для фізичних типів урону використовується extras.resistances.physical, для spell — .spell.
- */
-export function getCombinedResistancePercent(
-  target: BattleParticipant,
-  damageType: string,
-): number {
-  const extras = getParticipantExtras(target);
+export function hasImmunity(target: BattleParticipant, damageType: string, opts?: ResistanceOptions): boolean {
+  return matchingResistances(target, damageType, opts).some((f) => f.percent >= 100);
+}
 
-  const resistances = extras.resistances ?? {};
+/** Сумарний відсоток опору (0–100) з прапорців resistance. */
+export function getCombinedResistancePercent(target: BattleParticipant, damageType: string, opts?: ResistanceOptions): number {
+  const total = matchingResistances(target, damageType, opts).reduce((sum, f) => sum + f.percent, 0);
 
-  let skillPercent = 0;
-
-  if (damageType.toLowerCase() === "spell") {
-    skillPercent = resistances.spell ?? 0;
-  } else if (isPhysicalDamageType(damageType)) {
-    skillPercent = resistances.physical ?? 0;
-  }
-
-  const racialResistance = getResistance(target, damageType);
-
-  const racialPercent = Math.round(
-    racialResistance * BATTLE_CONSTANTS.FRACTION_TO_PERCENT,
-  );
-
-  const total = Math.min(
-    BATTLE_CONSTANTS.RESISTANCE_PERCENT_CAP,
-    skillPercent + racialPercent,
-  );
-
-  return total;
+  return Math.min(BATTLE_CONSTANTS.RESISTANCE_PERCENT_CAP, total);
 }
 
 /**
@@ -104,14 +61,15 @@ export function getCombinedResistancePercent(
 export function applyResistance(
   target: BattleParticipant,
   damage: number,
-  damageType: string
+  damageType: string,
+  opts?: ResistanceOptions,
 ): ResistanceResult {
   const breakdown: string[] = [];
 
   let finalDamage = damage;
 
   // Перевіряємо імунітет
-  if (hasImmunity(target, damageType)) {
+  if (hasImmunity(target, damageType, opts)) {
     finalDamage = 0;
     breakdown.push(`${damage} ${damageType} → ІМУНІТЕТ (0 урону)`);
 
@@ -123,7 +81,7 @@ export function applyResistance(
     };
   }
 
-  const resistancePercent = getCombinedResistancePercent(target, damageType);
+  const resistancePercent = getCombinedResistancePercent(target, damageType, opts);
 
   if (resistancePercent > 0) {
     const factor = 1 - resistancePercent / BATTLE_CONSTANTS.PERCENT_DIVISOR;
@@ -161,7 +119,8 @@ export function applyResistance(
  */
 export function applyResistanceToMultipleDamage(
   target: BattleParticipant,
-  damageByType: Record<string, number>
+  damageByType: Record<string, number>,
+  opts?: ResistanceOptions,
 ): ResistanceResult {
   const breakdown: string[] = [];
 
@@ -174,7 +133,7 @@ export function applyResistanceToMultipleDamage(
   for (const [damageType, damage] of Object.entries(damageByType)) {
     if (damage <= 0) continue;
 
-    const result = applyResistance(target, damage, damageType);
+    const result = applyResistance(target, damage, damageType, opts);
 
     totalFinalDamage += result.finalDamage;
     
@@ -197,4 +156,3 @@ export function applyResistanceToMultipleDamage(
   };
 }
 
-export { extractResistanceValue, findRacialAbilityByPattern } from "./helpers";

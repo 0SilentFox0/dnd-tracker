@@ -1,24 +1,22 @@
 /**
  * Утиліти для розрахунку шкоди заклинання.
  *
- * Magic damage використовує спільний з melee/ranged pipeline через
- * `calculateSkillDamage{Percent,Flat}Bonus(attacker, "magic", ctx)`. Magic-специфічні
+ * Magic damage бере бонуси з `collectModifiers` (damage: magic + школа). Magic-специфічні
  * механіки (spellEffectIncrease, додатковий модифікатор, targetChange,
  * spellcasting modifier) живуть тут і застосовуються поверх загального pipeline.
  */
 
 import { calculatePercentBonus } from "../common";
-import {
-  calculateSkillDamageFlatBonus,
-  calculateSkillDamagePercentBonus,
-  getSkillDamageFlatBreakdownEntries,
-  getSkillDamagePercentBreakdownEntries,
-  type SkillDamageBonusContext,
-} from "../damage/skill";
-import { getSkillsForDamageBonus } from "../damage/skill-resolve";
 
+import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
+import { withSelf } from "@/lib/utils/abilities/engine/participants";
 import { logger } from "@/lib/utils/logger";
-import type { ActiveSkill, BattleParticipant } from "@/types/battle";
+import type { SpellEnhancer } from "@/types/abilities";
+import type { BattleParticipant } from "@/types/battle";
+
+export interface SkillDamageBonusContext {
+  spellGroupId?: string | null;
+}
 
 /**
  * Результат розрахунку урону/ефекту заклинання
@@ -33,17 +31,11 @@ export interface SpellCalculationResult {
   hasAdditionalModifier: boolean;
 }
 
-/**
- * Magic-скіли героя зі spellEnhancements (ціль: упгрейд заклинання),
- * відфільтровані по школі заклинання, лише найвищий рівень на mainSkillId.
- */
-function getSpellEnhancementSkills(
-  participant: BattleParticipant,
-  ctx?: SkillDamageBonusContext,
-): ActiveSkill[] {
-  return getSkillsForDamageBonus(participant, "magic", ctx).filter(
-    (s) => !!s.spellEnhancements,
-  );
+/** Покращення заклинань, відфільтровані по школі (найвищий рівень у лінії відібрано при побудові). */
+function getSpellEnhancementSkills(participant: BattleParticipant, ctx?: SkillDamageBonusContext): SpellEnhancer[] {
+  const school = ctx?.spellGroupId ?? null;
+
+  return (participant.battleData.spellEnhancers ?? []).filter((e) => !e.spellGroupId || !school || e.spellGroupId === school);
 }
 
 export function calculateSpellEffectIncrease(
@@ -53,7 +45,7 @@ export function calculateSpellEffectIncrease(
   let totalIncrease = 0;
 
   for (const skill of getSpellEnhancementSkills(participant, ctx)) {
-    if (skill.spellEnhancements?.spellEffectIncrease) {
+    if (skill.spellEnhancements.spellEffectIncrease) {
       totalIncrease += skill.spellEnhancements.spellEffectIncrease;
     }
   }
@@ -66,7 +58,7 @@ export function getSpellTargetChange(
   ctx?: SkillDamageBonusContext,
 ): { target: string } | undefined {
   for (const skill of getSpellEnhancementSkills(participant, ctx)) {
-    if (skill.spellEnhancements?.spellTargetChange) {
+    if (skill.spellEnhancements.spellTargetChange) {
       return skill.spellEnhancements.spellTargetChange;
     }
   }
@@ -85,7 +77,7 @@ export function calculateSpellAdditionalModifier(
   duration?: number;
 } {
   for (const skill of getSpellEnhancementSkills(participant, ctx)) {
-    if (skill.spellEnhancements?.spellAdditionalModifier) {
+    if (skill.spellEnhancements.spellAdditionalModifier) {
       const modifier = skill.spellEnhancements.spellAdditionalModifier;
 
       let damage = 0;
@@ -134,6 +126,7 @@ export interface SpellDamageEnhancementOptions {
    * Прапорець залишається опційним для тестових сценаріїв.
    */
   addHeroLevelToBase?: boolean;
+  allParticipants?: BattleParticipant[];
 }
 
 /**
@@ -144,80 +137,6 @@ export interface SpellDamageEnhancementOptions {
  */
 export interface SpellTarget {
   groupId?: string | null;
-}
-
-/** Стиснутий вид effect для діагностичного логу. */
-function compactEffectForLog(e: ActiveSkill["effects"][number]) {
-  return {
-    stat: e.stat,
-    type: e.type,
-    value: e.value,
-    isPercentage: e.isPercentage === true,
-  };
-}
-
-/** Стиснутий вид скіла для логу — тільки те, що впливає на magic damage. */
-function compactSkillForLog(skill: ActiveSkill) {
-  const damageRelated = (skill.effects ?? []).filter((e) => {
-    const stat = (e.stat || "").toLowerCase();
-
-    return stat.includes("damage") || stat.includes("spell");
-  });
-
-  return {
-    skillId: skill.skillId,
-    name: skill.name,
-    level: skill.level,
-    mainSkillId: skill.mainSkillId,
-    spellGroupId: skill.spellGroupId ?? null,
-    damageType: skill.damageType ?? null,
-    affectsDamage: skill.affectsDamage ?? null,
-    spellEnhancements: skill.spellEnhancements
-      ? {
-          spellEffectIncrease:
-            skill.spellEnhancements.spellEffectIncrease ?? null,
-          targetChange: skill.spellEnhancements.spellTargetChange ?? null,
-          additional: skill.spellEnhancements.spellAdditionalModifier ?? null,
-        }
-      : null,
-    damageEffects: damageRelated.map(compactEffectForLog),
-  };
-}
-
-/**
- * Діагностичний лог підрахунку магічної шкоди (CODE_AUDIT — magic skill bonus).
- * Логується кожен виклик calculateSpellDamageWithEnhancements: зрозуміло, які
- * скіли вкачані у героя, який пройшов фільтр school+kind, і які бонуси нараховано.
- *
- * Через `logger.info` — попадає у Vercel function logs (`[magic-damage]` префікс
- * для grep). Поза hot-path: spell cast стається N разів за бій, не на кожний tick.
- */
-function logMagicDamageDiagnostic(
-  participant: BattleParticipant,
-  ctx: SkillDamageBonusContext,
-  results: {
-    flatBonus: number;
-    percentBonus: number;
-    flatEntries: Array<{ name: string; flat: number }>;
-    percentEntries: Array<{ name: string; percent: number }>;
-  },
-): void {
-  const allActiveSkills = participant.battleData.activeSkills ?? [];
-
-  const filteredSkills = getSkillsForDamageBonus(participant, "magic", ctx);
-
-  logger.info("[magic-damage]", {
-    casterId: participant.basicInfo.id,
-    casterName: participant.basicInfo.name,
-    spellGroupId: ctx.spellGroupId ?? null,
-    activeSkillsCount: allActiveSkills.length,
-    activeSkills: allActiveSkills.map(compactSkillForLog),
-    filteredSkillIds: filteredSkills.map((s) => s.skillId),
-    flatBonus: results.flatBonus,
-    percentBonus: results.percentBonus,
-    flatEntries: results.flatEntries,
-    percentEntries: results.percentEntries,
-  });
 }
 
 export function calculateSpellDamageWithEnhancements(
@@ -253,55 +172,32 @@ export function calculateSpellDamageWithEnhancements(
     );
   }
 
-  // Flat bonuses зі скілів і активних ефектів (shared pipeline).
-  const flatBonus = calculateSkillDamageFlatBonus(participant, "magic", ctx);
-
-  const flatEntries = getSkillDamageFlatBreakdownEntries(participant, "magic", ctx);
-
-  if (flatBonus !== 0) {
-    running += flatBonus;
-  }
-
-  for (const e of flatEntries) {
-    breakdown.push(
-      `+ бонус flat: ${e.name} (${e.flat >= 0 ? "+" : ""}${e.flat})`,
-    );
-  }
-
-  // %-бонуси зі скілів і активних ефектів застосовуються до СУМИ КУБИКІВ
-  // (baseDamage), а не до running. Game-design очікування:
-  // спел-бонус масштабує weapon/spell-damage-частину, не статичні
-  // character-надбавки (рівень героя, flat-бонуси).
-  const percentBonus = calculateSkillDamagePercentBonus(participant, "magic", ctx);
-
-  const percentEntries = getSkillDamagePercentBreakdownEntries(participant, "magic", ctx);
-
-  logMagicDamageDiagnostic(participant, ctx, {
-    flatBonus,
-    percentBonus,
-    flatEntries,
-    percentEntries,
+  const mods = collectModifiers(withSelf(options?.allParticipants ?? [], participant), participant.basicInfo.id, {
+    damage: { kind: "magic", school: ctx.spellGroupId },
   });
 
-  if (percentBonus > 0) {
-    const add = calculatePercentBonus(baseDamage, percentBonus);
+  running += mods.flat;
 
-    running += add;
+  for (const e of mods.entries) {
+    if (e.flat) breakdown.push(`+ бонус flat: ${e.label} (${e.flat >= 0 ? "+" : ""}${e.flat})`);
+  }
 
-    if (percentEntries.length > 0) {
-      for (const e of percentEntries) {
-        const skillAdd = calculatePercentBonus(baseDamage, e.percent);
+  // %-бонуси масштабують лише суму кубиків, не рівень героя і flat-надбавки
+  if (mods.percent !== 0) {
+    running += Math.floor((baseDamage * mods.percent) / 100);
 
-        breakdown.push(
-          `+ бонус ${e.name}: ${e.percent}% від ${baseDamage} (+${skillAdd})`,
-        );
-      }
-    } else {
-      breakdown.push(
-        `+ бонус: ${percentBonus}% від ${baseDamage} (+${add})`,
-      );
+    for (const e of mods.entries) {
+      if (e.percent) breakdown.push(`+ бонус ${e.label}: ${e.percent}% від ${baseDamage} (${e.percent >= 0 ? "+" : ""}${Math.floor((baseDamage * e.percent) / 100)})`);
     }
   }
+
+  logger.info("[magic-damage]", {
+    casterId: participant.basicInfo.id,
+    spellGroupId: ctx.spellGroupId ?? null,
+    flatBonus: mods.flat,
+    percentBonus: mods.percent,
+    entries: mods.entries,
+  });
 
   // Окрема magic-механіка: апгрейд ефекту заклинання (`Skill.spellEffectIncrease`).
   // Застосовується після %-бонусу зі скілів — як додаткова стадія.

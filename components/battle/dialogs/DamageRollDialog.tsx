@@ -13,7 +13,7 @@ import {
   getReactionDamageAmount,
 } from "@/lib/utils/battle/attack";
 import { getDiceSlots } from "@/lib/utils/battle/balance";
-import { getParticipantExtras } from "@/lib/utils/battle/participant";
+import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 interface DamageRollDialogProps {
@@ -79,9 +79,9 @@ export function DamageRollDialog({
 
   const diceCount = diceSlots.length;
 
-  const extras = attacker ? getParticipantExtras(attacker) : {};
-
-  const hasAdvantageOnDamage = Boolean(extras.advantageOnAllRolls);
+  const hasAdvantageOnDamage = attacker
+    ? findFlags([attacker], attacker.basicInfo.id, "advantage").some((f) => f.attackKind === "all")
+    : false;
 
   const [damageRolls, setDamageRolls] = useState<string[]>(
     Array(diceCount).fill(""),

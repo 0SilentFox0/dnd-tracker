@@ -7,6 +7,7 @@ import {
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import type { BattleParticipant } from "@/types/battle";
+import { grantPassive } from "@/lib/utils/battle/__tests__/mock-participant";
 
 function createParticipant(
   overrides?: Partial<BattleParticipant>,
@@ -86,9 +87,7 @@ describe("battle-resistance", () => {
     it("returns skill physical resistance from extras for physical damage type", () => {
       const target = createParticipant();
 
-      (target.battleData as unknown as Record<string, unknown>).extras = {
-        resistances: { physical: 30 },
-      };
+      grantPassive(target, [{ kind: "flag", flag: "resistance", damageType: "physical", percent: 30 }]);
       expect(getCombinedResistancePercent(target, "slashing")).toBe(30);
       expect(getCombinedResistancePercent(target, "piercing")).toBe(30);
     });
@@ -96,9 +95,7 @@ describe("battle-resistance", () => {
     it("returns skill spell resistance from extras for spell damage type", () => {
       const target = createParticipant();
 
-      (target.battleData as unknown as Record<string, unknown>).extras = {
-        resistances: { spell: 25 },
-      };
+      grantPassive(target, [{ kind: "flag", flag: "resistance", damageType: "spell", percent: 25 }]);
       expect(getCombinedResistancePercent(target, "spell")).toBe(25);
     });
   });
@@ -107,9 +104,7 @@ describe("battle-resistance", () => {
     it("reduces damage by skill resistance when target has extras.resistances.physical", () => {
       const target = createParticipant();
 
-      (target.battleData as unknown as Record<string, unknown>).extras = {
-        resistances: { physical: 50 },
-      };
+      grantPassive(target, [{ kind: "flag", flag: "resistance", damageType: "physical", percent: 50 }]);
 
       const r = applyResistance(target, 100, "slashing");
 
@@ -122,9 +117,7 @@ describe("battle-resistance", () => {
 
       const target = createParticipant();
 
-      (target.battleData as unknown as Record<string, unknown>).extras = {
-        resistances: { physical: 30 },
-      };
+      grantPassive(target, [{ kind: "flag", flag: "resistance", damageType: "physical", percent: 30 }]);
 
       expect(getCombinedResistancePercent(target, "physical")).toBe(30);
       expect(getCombinedResistancePercent(target, "piercing")).toBe(30);

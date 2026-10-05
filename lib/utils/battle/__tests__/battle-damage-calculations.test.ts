@@ -21,11 +21,12 @@ import type {
   EquippedArtifact,
   SkillEffect,
 } from "@/types/battle";
+import { grantPassive, withConvertedSkills } from "@/lib/utils/battle/__tests__/mock-participant";
 
 function createBaseParticipant(
   overrides?: Partial<BattleParticipant>,
 ): BattleParticipant {
-  return {
+  return withConvertedSkills({
     basicInfo: {
       id: "p1",
       battleId: "b1",
@@ -85,7 +86,7 @@ function createBaseParticipant(
       hasExtraTurn: false,
     },
     ...overrides,
-  };
+  });
 }
 
 function createSkillEffect(
@@ -586,9 +587,7 @@ describe("battle-damage-calculations", () => {
     it("reduces damage by physical resistance percent when extras.resistances.physical is set", () => {
       const defender = createBaseParticipant();
 
-      (defender.battleData as unknown as Record<string, unknown>).extras = {
-        resistances: { physical: 25 },
-      };
+      grantPassive(defender, [{ kind: "flag", flag: "resistance", damageType: "physical", percent: 25 }]);
 
       const r = applyResistance(100, defender, "physical");
 
@@ -600,9 +599,7 @@ describe("battle-damage-calculations", () => {
     it("uses spell resistance when damageCategory is spell", () => {
       const defender = createBaseParticipant();
 
-      (defender.battleData as unknown as Record<string, unknown>).extras = {
-        resistances: { spell: 50 },
-      };
+      grantPassive(defender, [{ kind: "flag", flag: "resistance", damageType: "spell", percent: 50 }]);
 
       const r = applyResistance(100, defender, "spell");
 
@@ -613,9 +610,7 @@ describe("battle-damage-calculations", () => {
     it("returns finalDamage at least 0 when resistance is high", () => {
       const defender = createBaseParticipant();
 
-      (defender.battleData as unknown as Record<string, unknown>).extras = {
-        resistances: { physical: 100 },
-      };
+      grantPassive(defender, [{ kind: "flag", flag: "resistance", damageType: "physical", percent: 100 }]);
 
       const r = applyResistance(10, defender, "physical");
 

@@ -34,14 +34,7 @@ export function calculateDamageWithModifiers(
   baseDamage: number,
   statModifier: number,
   attackType: AttackType,
-  context?: {
-    allParticipants?: BattleParticipant[];
-    additionalDamage?: Array<{ type: string; value: number }>;
-    heroLevelPart?: number;
-    heroDicePart?: number;
-    heroDiceNotation?: string;
-    weaponDiceNotation?: string;
-  },
+  context?: Parameters<typeof calculateDamageWithModifiersImpl>[4],
 ): DamageCalculationResult {
   return measureTiming(
     "calculateDamageWithModifiers",

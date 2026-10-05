@@ -1,4 +1,6 @@
 import { ParticipantSide } from "@/lib/constants/battle";
+import { convertLegacySnapshot } from "@/lib/utils/abilities/legacy/convert-snapshot";
+import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import type { BattleParticipant } from "@/types/battle";
 
 export function createMockParticipant(
@@ -64,5 +66,31 @@ export function createMockParticipant(
       hasExtraTurn: false,
     },
     ...overrides,
+  };
+}
+
+/** Додає учаснику пасивне вміння з указаними ефектами (мутує battleData). */
+export function grantPassive(p: BattleParticipant, effects: StaticEffect[], name = "Пасивка"): BattleParticipant {
+  const n = p.battleData.resolvedAbilities.length;
+
+  p.battleData.resolvedAbilities = [
+    ...p.battleData.resolvedAbilities,
+    { id: `p${n}`, name, trigger: { event: "passive" }, effects, key: `skill:test:p${n}`, source: { type: "skill", id: "test", name } },
+  ];
+
+  return p;
+}
+
+/** Для тестів зі старими activeSkills: додає сконвертовані вміння, не прибираючи старі поля. */
+export function withConvertedSkills(p: BattleParticipant): BattleParticipant {
+  const converted = convertLegacySnapshot({ activeSkills: p.battleData.activeSkills ?? [] });
+
+  return {
+    ...p,
+    battleData: {
+      ...p.battleData,
+      resolvedAbilities: [...(p.battleData.resolvedAbilities ?? []), ...converted.resolvedAbilities],
+      spellEnhancers: [...(p.battleData.spellEnhancers ?? []), ...converted.spellEnhancers],
+    },
   };
 }

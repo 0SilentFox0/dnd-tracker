@@ -7,7 +7,8 @@ import {
   getCombinedResistancePercent,
 } from "../resistance";
 
-import { SkillLevel } from "@/lib/types/skill-tree";
+import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
+import { withSelf } from "@/lib/utils/abilities/engine/participants";
 import type { BattleParticipant } from "@/types/battle";
 
 const PHYSICAL_DAMAGE_TYPES = [
@@ -21,100 +22,47 @@ export function isPhysicalDamageType(dt: string): boolean {
   return PHYSICAL_DAMAGE_TYPES.includes(dt.toLowerCase());
 }
 
-const SKILL_LEVEL_RANK: Record<string, number> = {
-  [SkillLevel.BASIC]: 1,
-  [SkillLevel.ADVANCED]: 2,
-  [SkillLevel.EXPERT]: 3,
-};
-
 export function getResistanceSkillsHighestOnly(
   target: BattleParticipant,
   damageType: string,
+  participants: BattleParticipant[] = [target],
 ): Array<{ name: string; percent: number }> {
   const isPhysical = isPhysicalDamageType(damageType);
 
-  const isSpell = damageType.toLowerCase() === "spell";
+  const t = damageType.toLowerCase();
 
-  const byMainSkill = new Map<
-    string,
-    { name: string; percent: number; rank: number }
-  >();
+  const mods = collectModifiers(withSelf(participants, target), target.basicInfo.id, { flag: "resistance" });
 
-  for (const skill of (target.battleData.activeSkills ?? [])) {
-    let percent = 0;
-
-    let matched = false;
-
-    for (const effect of skill.effects) {
-      const stat = (effect.stat ?? "").toLowerCase();
-
-      const val =
-        typeof effect.value === "number"
-          ? effect.value
-          : parseInt(String(effect.value ?? 0), 10) || 0;
-
-      if (val <= 0) continue;
-
-      if (stat === "physical_resistance" && isPhysical) {
-        percent = val;
-        matched = true;
-        break;
-      }
-
-      if (stat === "spell_resistance" && isSpell) {
-        percent = val;
-        matched = true;
-        break;
-      }
-
-      if (stat === "all_resistance") {
-        percent = val;
-        matched = true;
-        break;
-      }
-    }
-
-    if (!matched || percent <= 0) continue;
-
-    const key = skill.mainSkillId || skill.skillId;
-
-    const rank = SKILL_LEVEL_RANK[skill.level ?? SkillLevel.BASIC] ?? 1;
-
-    const existing = byMainSkill.get(key);
-
-    if (!existing || rank > existing.rank) {
-      byMainSkill.set(key, { name: skill.name || "Скіл", percent, rank });
-    }
-  }
-
-  return [...byMainSkill.values()].map((v) => ({
-    name: v.name,
-    percent: v.percent,
-  }));
+  return mods.flags.flatMap((f, i) =>
+    f.flag === "resistance" && (f.damageType === t || (f.damageType === "physical" && isPhysical) || (f.damageType === "spell" && t === "spell"))
+      ? [{ name: mods.entries[i]?.label ?? "Опір", percent: f.percent }]
+      : [],
+  );
 }
 
 export function getDefenderResistanceBreakdown(
   target: BattleParticipant,
   damageType: string,
   incomingDamage: number,
+  participants: BattleParticipant[] = [target],
 ): { targetBreakdown: string[]; finalDamage: number } {
   const targetBreakdown: string[] = [];
 
   const targetName = target.basicInfo.name;
 
-  const resistanceSkills = getResistanceSkillsHighestOnly(target, damageType);
+  const resistanceSkills = getResistanceSkillsHighestOnly(target, damageType, participants);
 
   for (const s of resistanceSkills) {
     targetBreakdown.push(
-      `${targetName}: вкачаний ${s.name} = ${s.percent}% резисту`,
+      `${targetName}: ${s.name} = ${s.percent}% резисту`,
     );
   }
 
-  const resistanceResult = applyResistance(target, incomingDamage, damageType);
+  const resistanceResult = applyResistance(target, incomingDamage, damageType, { participants });
 
   const finalDamage = resistanceResult.finalDamage;
 
-  const resistPercent = getCombinedResistancePercent(target, damageType);
+  const resistPercent = getCombinedResistancePercent(target, damageType, { participants });
 
   if (resistPercent > 0) {
     targetBreakdown.push(

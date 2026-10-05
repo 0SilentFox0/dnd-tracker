@@ -5,6 +5,8 @@
 import { addActiveEffect } from "./battle-effects";
 import { checkTriggerCondition, getPassiveAbilitiesByTrigger } from "./triggers";
 
+import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
+import { withSelf } from "@/lib/utils/abilities/engine/participants";
 import { ActiveEffect,BattleParticipant } from "@/types/battle";
 
 /**
@@ -110,7 +112,7 @@ export function applyStartOfBattleEffects(
  * @param participant - учасник бою
  * @returns розрахована ініціатива
  */
-export function calculateInitiative(participant: BattleParticipant): number {
+export function calculateInitiative(participant: BattleParticipant, participants: BattleParticipant[] = [participant]): number {
   // Спеціальні правила: певні персонажі завжди перші в черзі (initiative 999)
   const nameLower = participant.basicInfo.name.toLowerCase();
 
@@ -128,19 +130,7 @@ export function calculateInitiative(participant: BattleParticipant): number {
     return 999;
   }
 
-  // Базова ініціатива з participant
-  let initiative = participant.abilities.baseInitiative;
-
-  // Додаємо тимчасові бонуси з activeEffects
-  for (const effect of participant.battleData.activeEffects) {
-    for (const effectDetail of effect.effects) {
-      if (effectDetail.type === "initiative_bonus" || effectDetail.type === "initiative") {
-        initiative += effectDetail.value || 0;
-      }
-    }
-  }
-
-  return initiative;
+  return participant.abilities.baseInitiative + collectModifiers(withSelf(participants, participant), participant.basicInfo.id, { stat: "initiative" }).flat;
 }
 
 /**

@@ -52,6 +52,7 @@ export function handleMiss(params: HandleMissParams): ProcessAttackResult {
       target,
       guaranteedDamage,
       attack.damageType ?? "physical",
+      { participants: allParticipants },
     );
 
     actualGuaranteedDamage = resistResult.finalDamage;

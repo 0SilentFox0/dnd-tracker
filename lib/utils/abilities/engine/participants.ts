@@ -28,3 +28,8 @@ export function resolvedAbilitiesOf(p: BattleParticipant): ResolvedAbility[] {
 export function participantNames(ps: BattleParticipant[], ids: string[]): string {
   return ids.map((id) => findParticipant(ps, id)?.basicInfo.name ?? id).join(", ");
 }
+
+// Гарантує, що в списку саме свіжа версія p (читачі часто отримують оновлений об'єкт окремо від списку).
+export function withSelf(ps: BattleParticipant[], p: BattleParticipant): BattleParticipant[] {
+  return [p, ...ps.filter((x) => x.basicInfo.id !== p.basicInfo.id)];
+}

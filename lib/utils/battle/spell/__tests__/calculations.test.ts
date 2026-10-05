@@ -11,6 +11,7 @@ import { describe, expect, it } from "vitest";
 import { calculateSpellDamageWithEnhancements } from "../calculations";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { upgradeLegacyParticipant } from "@/lib/utils/battle/store/split-participant";
 import { SkillLevel } from "@/lib/types/skill-tree";
 import type {
   ActiveSkill,
@@ -18,11 +19,12 @@ import type {
   SkillEffect,
 } from "@/types/battle";
 
+// Старі ActiveSkill проходять реальний шлях міграції snapshot → уміння.
 function createCaster(overrides?: {
   activeSkills?: ActiveSkill[];
   level?: number;
 }): BattleParticipant {
-  return {
+  const legacy = {
     basicInfo: {
       id: "caster",
       battleId: "b1",
@@ -72,8 +74,6 @@ function createCaster(overrides?: {
       racialAbilities: [],
       activeSkills: overrides?.activeSkills ?? [],
       equippedArtifacts: [],
-      resolvedAbilities: [],
-      spellEnhancers: [],
     },
     actionFlags: {
       hasUsedAction: false,
@@ -81,7 +81,9 @@ function createCaster(overrides?: {
       hasUsedReaction: false,
       hasExtraTurn: false,
     },
-  };
+  } as unknown as BattleParticipant;
+
+  return upgradeLegacyParticipant(legacy);
 }
 
 function effect(stat: string, value: number, isPercentage: boolean): SkillEffect {

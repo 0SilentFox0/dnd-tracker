@@ -24,6 +24,7 @@ export interface ComputeSpellDamageParams {
   additionalRollResult?: number;
   savingThrows: Array<{ participantId: string; roll: number }>;
   updatedTargets: BattleParticipant[];
+  allParticipants?: BattleParticipant[];
 }
 
 export function computeSpellDamageAndApply(
@@ -36,6 +37,7 @@ export function computeSpellDamageAndApply(
     additionalRollResult,
     savingThrows,
     updatedTargets,
+    allParticipants = [],
   } = params;
 
   const baseValue = damageRolls.reduce((sum, roll) => sum + roll, 0);
@@ -44,7 +46,7 @@ export function computeSpellDamageAndApply(
     caster,
     baseValue,
     additionalRollResult,
-    { addHeroLevelToBase: true },
+    { addHeroLevelToBase: true, allParticipants },
     { groupId: spell.groupId ?? null },
   );
 
@@ -97,7 +99,7 @@ export function computeSpellDamageAndApply(
       }
     }
 
-    if (participantImmuneToSpell(target, spell.id)) {
+    if (participantImmuneToSpell(target, spell.id, allParticipants)) {
       damageToApply = 0;
       allResistanceBreakdown.push(
         `${target.basicInfo.name}: імунітет до цього заклинання`,
@@ -106,7 +108,7 @@ export function computeSpellDamageAndApply(
 
     const damageType = spell.damageElement || "magic";
 
-    const resistanceResult = applyResistance(target, damageToApply, damageType);
+    const resistanceResult = applyResistance(target, damageToApply, damageType, { participants: allParticipants, fromSpell: true });
 
     targetDamages.push({ target, finalDamage: resistanceResult.finalDamage });
     allResistanceBreakdown.push(...resistanceResult.breakdown);
@@ -169,6 +171,7 @@ export function computeSpellHealAndApply(
   damageRolls: number[],
   additionalRollResult: number | undefined,
   updatedTargets: BattleParticipant[],
+  allParticipants: BattleParticipant[] = [],
 ): { spellCalculation: SpellCalculation; updatedTargets: BattleParticipant[] } {
   const baseValue = damageRolls.reduce((sum, roll) => sum + roll, 0);
 
@@ -176,7 +179,7 @@ export function computeSpellHealAndApply(
     caster,
     baseValue,
     additionalRollResult,
-    { addHeroLevelToBase: true },
+    { addHeroLevelToBase: true, allParticipants },
     { groupId: spell.groupId ?? null },
   );
 
@@ -201,7 +204,7 @@ export function computeSpellHealAndApply(
 
     if (targetIndex === -1) continue;
 
-    if (participantImmuneToSpell(target, spell.id)) {
+    if (participantImmuneToSpell(target, spell.id, allParticipants)) {
       spellCalculation.breakdown.push(
         `${target.basicInfo.name}: імунітет — ефект лікування заблоковано`,
       );

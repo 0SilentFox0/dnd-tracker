@@ -10,7 +10,6 @@ import {
 import { calculateDamageWithModifiers } from "../../damage";
 import { applyHeroDmDamageMultiplier } from "../../damage/hero-dm-multiplier";
 import { applyResistance } from "../../resistance";
-import { checkTriggerCondition, getPassiveAbilitiesByTrigger } from "../../triggers";
 import type { DamageCalculationResult } from "../../types/damage-calculations";
 import { applyCriticalEffect } from "..";
 import { applyResistanceForAdditional } from "./damage";
@@ -18,6 +17,7 @@ import { applyResistanceForAdditional } from "./damage";
 import { AttackType } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
+import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
 import type { BattleParticipant } from "@/types/battle";
 import type { BattleAttack } from "@/types/battle";
@@ -31,6 +31,7 @@ export interface ComputeHitDamageParams {
   attackRoll: { isCritical: boolean; criticalEffect?: CriticalEffect };
   damageMultiplier?: number;
   currentRound: number;
+  actionModifiers?: StaticEffect[];
 }
 
 export interface ComputeHitDamageResult {
@@ -87,27 +88,7 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
   const heroDicePart =
     heroDiceNotation && !clientSentFullRolls ? getDiceAverage(heroDiceNotation) : 0;
 
-  const onAttackAbilities = getPassiveAbilitiesByTrigger(updatedAttacker, "on_attack");
-
   const additionalDamageModifiers: Array<{ type: string; value: number }> = [];
-
-  for (const ability of onAttackAbilities) {
-    if (
-      checkTriggerCondition(ability.trigger, updatedAttacker, {
-        target: updatedTarget,
-        allParticipants,
-      })
-    ) {
-      if (ability.effect.type === "additional_damage") {
-        const modifierType = (ability.effect as { damageType?: string }).damageType || "fire";
-
-        additionalDamageModifiers.push({
-          type: modifierType,
-          value: ability.effect.value || 0,
-        });
-      }
-    }
-  }
 
   const weaponDiceNotationForBreakdown = clientSentFullRolls
     ? mergeDiceFormulas(attack.damageDice ?? "", heroDiceNotation)
@@ -127,6 +108,7 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
       heroDicePart,
       heroDiceNotation: heroDiceNotationForBreakdown,
       weaponDiceNotation: weaponDiceNotationForBreakdown || attack.damageDice || undefined,
+      actionModifiers: params.actionModifiers,
     },
   );
 
@@ -193,12 +175,14 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
     updatedTarget,
     physicalDamageForTarget,
     attack.damageType ?? "physical",
+    { participants: allParticipants },
   );
 
   const { totalAdditionalDamage, additionalDamageBreakdown } = applyResistanceForAdditional(
     updatedTarget,
     damageCalculation.additionalDamage,
     dmgMult,
+    allParticipants,
   );
 
   const totalFinalDamage = resistanceResult.finalDamage + totalAdditionalDamage;

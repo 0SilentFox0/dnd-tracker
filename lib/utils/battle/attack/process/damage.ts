@@ -94,6 +94,7 @@ export function applyResistanceForAdditional(
   target: BattleParticipant,
   additionalDamageList: Array<{ type: string; value: number }>,
   dmgMult: number,
+  participants: BattleParticipant[] = [target],
 ): ApplyResistanceForAdditionalResult {
   let totalAdditionalDamage = 0;
 
@@ -106,6 +107,7 @@ export function applyResistanceForAdditional(
       target,
       additionalValue,
       additionalDamage.type,
+      { participants },
     );
 
     totalAdditionalDamage += additionalResistance.finalDamage;

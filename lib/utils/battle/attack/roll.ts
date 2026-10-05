@@ -7,6 +7,9 @@ import { calculateAttackBonus, hasAdvantage, hasDisadvantage } from "./bonus";
 
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import { getRandomCriticalEffect } from "@/lib/constants/critical-effects";
+import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
+import { withSelf } from "@/lib/utils/abilities/engine/participants";
+import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 export function calculateAttackRoll(
@@ -15,12 +18,17 @@ export function calculateAttackRoll(
   d20Roll: number,
   advantageRoll?: number,
   disadvantageRoll?: number,
+  opts: { participants?: BattleParticipant[]; extra?: StaticEffect[]; targetId?: string; targetExtra?: StaticEffect[] } = {},
 ): AttackRollResult {
-  const attackBonus = calculateAttackBonus(attacker, attack);
+  const participants = withSelf(opts.participants ?? [], attacker);
 
-  const hasAdv = hasAdvantage(attacker, attack);
+  const attackBonus = calculateAttackBonus(attacker, attack, participants, opts.extra);
 
-  const hasDisadv = hasDisadvantage(attacker, attack);
+  const hasAdv = hasAdvantage(attacker, attack, participants, opts.extra);
+
+  const hasDisadv = hasDisadvantage(attacker, attack, participants, opts);
+
+  const critThreshold = Math.max(2, 20 + collectModifiers(participants, attacker.basicInfo.id, { stat: "critThreshold" }, opts.extra).flat);
 
   let finalRoll = d20Roll;
 
@@ -41,7 +49,7 @@ export function calculateAttackRoll(
 
   const totalAttackValue = finalRoll + attackBonus;
 
-  const isCritical = finalRoll === 20;
+  const isCritical = finalRoll >= critThreshold;
 
   const isCriticalFail = finalRoll === 1;
 
