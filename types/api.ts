@@ -82,6 +82,37 @@ export interface BattleScene {
   pendingMoraleCheck?: unknown;
 }
 
+export interface ClientBattleDelta {
+  battleId: string;
+  version: number;
+  scene: {
+    status: BattleScene["status"];
+    round: number;
+    turnIndex: number;
+    pendingMoraleCheck: unknown;
+    startedAt?: string;
+    completedAt?: string;
+  };
+  upserted: BattleParticipant[];
+  removed: string[];
+  order?: string[];
+  pending?: BattleParticipant[];
+  setup?: BattlePreparationParticipant[];
+  log: BattleAction[];
+  cancelledFrom?: number;
+}
+
+export interface BattleRefetchSignal {
+  battleId: string;
+  version: number;
+  refetch: true;
+}
+
+export interface BattleMutationResponse<R = Record<string, unknown>> {
+  delta: ClientBattleDelta;
+  response?: R;
+}
+
 export interface AttackData {
   attackerId: string;
   attackerType?: "character" | "unit";
