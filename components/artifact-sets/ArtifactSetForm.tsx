@@ -8,6 +8,7 @@ import { filterArtifactsSelectableForSet } from "./artifact-set-form-helpers";
 import { ArtifactSetMembersPicker } from "./ArtifactSetMembersPicker";
 
 import { AbilityListEditor, withAbilityErrors } from "@/components/abilities";
+import { ActionBar } from "@/components/common/ActionBar";
 import { Button } from "@/components/ui/button";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
@@ -224,15 +225,7 @@ export function ArtifactSetForm({
         onToggle={toggleArtifact}
       />
 
-      <div className="flex flex-wrap gap-2">
-        <Button type="submit" disabled={loading || !name.trim() || !abilitiesValid}>
-          {loading ? "Збереження…" : withAbilityErrors(setId ? "Зберегти зміни" : "Створити сет", abilityErrors)}
-        </Button>
-        <Button type="button" variant="outline" asChild>
-          <Link href={`/campaigns/${campaignId}/dm/artifact-sets`}>
-            Скасувати
-          </Link>
-        </Button>
+      <ActionBar>
         {setId && (
           <Button
             type="button"
@@ -243,7 +236,15 @@ export function ArtifactSetForm({
             Видалити сет
           </Button>
         )}
-      </div>
+        <Button type="button" variant="outline" asChild>
+          <Link href={`/campaigns/${campaignId}/dm/artifact-sets`}>
+            Скасувати
+          </Link>
+        </Button>
+        <Button type="submit" disabled={loading || !name.trim() || !abilitiesValid}>
+          {loading ? "Збереження…" : withAbilityErrors(setId ? "Зберегти зміни" : "Створити сет", abilityErrors)}
+        </Button>
+      </ActionBar>
     </form>
   );
 }

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { ActionBar } from "@/components/common/ActionBar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -107,14 +108,14 @@ export default function NewCampaignPage() {
               <Label htmlFor="allowPlayerEdit">Дозволити гравцям редагувати своїх персонажів</Label>
             </div>
 
-            <div className="flex gap-2">
-              <Button type="submit" disabled={loading}>
-                {loading ? "Створення..." : "Створити кампанію"}
-              </Button>
+            <ActionBar>
               <Link href="/campaigns">
                 <Button type="button" variant="outline">Скасувати</Button>
               </Link>
-            </div>
+              <Button type="submit" disabled={loading}>
+                {loading ? "Створення..." : "Створити кампанію"}
+              </Button>
+            </ActionBar>
           </form>
         </CardContent>
       </Card>

@@ -6,6 +6,7 @@ import type { QueryClient } from "@tanstack/react-query";
 
 import { DmCharacterEditFormAccordion } from "./DmCharacterEditFormAccordion";
 
+import { ActionBar } from "@/components/common/ActionBar";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -160,10 +161,7 @@ export function DmCharacterEditForm({
             races={races}
           />
 
-          <div className="flex gap-2 pt-4">
-            <Button type="submit" disabled={loading || membersLoading}>
-              {loading ? "Збереження..." : "Зберегти зміни"}
-            </Button>
+          <ActionBar>
             <Button
               type="button"
               variant="default"
@@ -179,7 +177,10 @@ export function DmCharacterEditForm({
                 Скасувати
               </Button>
             </Link>
-          </div>
+            <Button type="submit" disabled={loading || membersLoading}>
+              {loading ? "Збереження..." : "Зберегти зміни"}
+            </Button>
+          </ActionBar>
         </form>
       </CardContent>
     </Card>

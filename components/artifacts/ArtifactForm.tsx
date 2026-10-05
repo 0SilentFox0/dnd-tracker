@@ -15,6 +15,7 @@ import { ArtifactIconUrlPreview } from "./ArtifactIconUrlPreview";
 import { ArtifactWeaponFields } from "./ArtifactWeaponFields";
 
 import { AbilityListEditor, withAbilityErrors } from "@/components/abilities";
+import { ActionBar } from "@/components/common/ActionBar";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -282,10 +283,18 @@ export function ArtifactForm({
             onValidityChange={(_, n) => setAbilityErrors(n)}
           />
 
-          <div className="flex gap-2">
-            <Button type="submit" disabled={isBusy || !abilitiesValid}>
-              {isSaving ? submitLabelSaving : withAbilityErrors(submitLabel, abilityErrors)}
-            </Button>
+          <ActionBar>
+            {onDelete && (
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={handleDelete}
+                disabled={isBusy}
+                className=""
+              >
+                {isDeleting ? "Видалення..." : "Видалити"}
+              </Button>
+            )}
             <Button
               type="button"
               variant="outline"
@@ -294,18 +303,10 @@ export function ArtifactForm({
             >
               Скасувати
             </Button>
-            {onDelete && (
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={handleDelete}
-                disabled={isBusy}
-                className="ml-auto"
-              >
-                {isDeleting ? "Видалення..." : "Видалити"}
-              </Button>
-            )}
-          </div>
+            <Button type="submit" disabled={isBusy || !abilitiesValid}>
+              {isSaving ? submitLabelSaving : withAbilityErrors(submitLabel, abilityErrors)}
+            </Button>
+          </ActionBar>
         </form>
       </CardContent>
     </Card>

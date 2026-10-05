@@ -100,4 +100,19 @@ describe("ArtifactForm", () => {
 
     expect(button).toBeDisabled();
   });
+
+  it("кнопки форми — у панелі дій, «Створити» остання", () => {
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <ConfirmProvider>
+          <ArtifactForm campaignId="c1" artifactSets={[]} mode="create" title="Новий" submitLabel="Створити" submitLabelSaving="..." cancelHref="/x" iconHint="" initial={{ name: "Меч", description: "", rarity: "", slot: "ring", icon: "", setId: "", abilities: [], abilityIssues: [] }} onSubmit={vi.fn(async () => {})} />
+        </ConfirmProvider>
+      </QueryClientProvider>,
+    );
+
+    const bar = document.querySelector("[data-slot=action-bar]") as HTMLElement;
+
+    expect(bar).not.toBeNull();
+    expect(bar.lastElementChild).toHaveTextContent("Створити");
+  });
 });

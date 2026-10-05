@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { AbilityListEditor, withAbilityErrors } from "@/components/abilities";
+import { ActionBar } from "@/components/common/ActionBar";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -275,12 +276,7 @@ export default function EditUnitPage({
               onChange={handleFormDataChange}
             />
 
-            <div className="flex gap-2 pt-4">
-              <Button type="submit" disabled={updateUnitMutation.isPending || !abilitiesValid}>
-                {updateUnitMutation.isPending
-                  ? "Збереження..."
-                  : withAbilityErrors("Зберегти зміни", abilityErrors)}
-              </Button>
+            <ActionBar>
               <Button
                 type="button"
                 variant="destructive"
@@ -294,7 +290,12 @@ export default function EditUnitPage({
                   Скасувати
                 </Button>
               </Link>
-            </div>
+              <Button type="submit" disabled={updateUnitMutation.isPending || !abilitiesValid}>
+                {updateUnitMutation.isPending
+                  ? "Збереження..."
+                  : withAbilityErrors("Зберегти зміни", abilityErrors)}
+              </Button>
+            </ActionBar>
           </form>
         </CardContent>
       </Card>
