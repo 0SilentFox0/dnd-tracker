@@ -4,15 +4,13 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { fetchDamagePreview } from "./damage-preview";
-import type { SkillTreeProgress } from "./useCharacterView";
-import { useDamageCalculatorSkills } from "./useDamageCalculator-skills";
+import { damageSkillsFromProgression } from "./useDamageCalculator-skills";
 import { useDamageCalculatorSpell } from "./useDamageCalculator-spell";
-import { useLearnedSpellIds } from "./useLearnedSpellIds";
 
 import { getSpells } from "@/lib/api/spells";
 import { AttackType } from "@/lib/constants/battle";
 import { getHeroDamageComponents } from "@/lib/constants/hero-scaling";
-import { useSkills } from "@/lib/hooks/skills";
+import { useCharacterLearnedSpellIds, useCharacterProgression, useSkills } from "@/lib/hooks/skills";
 import { parseDiceFormulaToSides } from "@/lib/utils/characters/damage-calculator";
 
 export interface UseDamageCalculatorProps {
@@ -23,9 +21,6 @@ export interface UseDamageCalculatorProps {
     meleeMultiplier?: number;
     rangedMultiplier?: number;
   };
-  skillTreeProgress: SkillTreeProgress;
-  /** Раса для злиття заклинань з дерева скілів (як у книзі заклинань) */
-  characterRace?: string;
   /** Базовий список knownSpells з персонажа; доповнюється заклинаннями з дерева */
   knownSpellIds: string[];
 }
@@ -35,18 +30,13 @@ export function useDamageCalculator({
   characterId,
   level,
   scalingCoefficients = {},
-  skillTreeProgress,
-  characterRace,
   knownSpellIds,
 }: UseDamageCalculatorProps) {
   const [selectedSpellId, setSelectedSpellId] = useState<string | null>(null);
 
-  const learnedSpellIds = useLearnedSpellIds({
-    campaignId,
-    characterRace,
-    skillTreeProgress,
-    knownSpellIdsFallback: knownSpellIds,
-  });
+  const learnedSpellIds = useCharacterLearnedSpellIds(campaignId, characterId, knownSpellIds);
+
+  const { data: progression, learned } = useCharacterProgression(campaignId, characterId);
 
   const [meleeDiceValues, setMeleeDiceValues] = useState<number[]>([]);
 
@@ -180,9 +170,11 @@ export function useDamageCalculator({
     return parseDiceFormulaToSides(formula);
   }, [damagePreview, heroRanged.diceNotation]);
 
-  const { unlockedSkillIds, skillsAffectingDamage } = useDamageCalculatorSkills(
-    skillTreeProgress,
-    skillsList,
+  const unlockedSkillIds = useMemo(() => new Set(learned.flatMap((n) => (n.skillId ? [n.skillId] : []))), [learned]);
+
+  const skillsAffectingDamage = useMemo(
+    () => damageSkillsFromProgression([...unlockedSkillIds], progression?.skills ?? {}),
+    [unlockedSkillIds, progression?.skills],
   );
 
   const {

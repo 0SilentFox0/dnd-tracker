@@ -7,7 +7,6 @@ import {
 } from "./constants";
 
 import { CharacterAbilitiesSection } from "@/components/characters/abilities/CharacterAbilitiesSection";
-import { CharacterSkillTreeView } from "@/components/characters/abilities/CharacterSkillTreeView";
 import { CharacterArtifactsSection } from "@/components/characters/artifacts/CharacterArtifactsSection";
 import type { CharacterAbilityArtifactBonuses } from "@/components/characters/stats/CharacterAbilityScores";
 import { CharacterAbilityScores } from "@/components/characters/stats/CharacterAbilityScores";
@@ -16,9 +15,8 @@ import { CharacterCombatParams } from "@/components/characters/stats/CharacterCo
 import { CharacterDamageCalculator } from "@/components/characters/stats/CharacterDamageCalculator";
 import { CharacterDamagePreview } from "@/components/characters/stats/CharacterDamagePreview";
 import { CharacterHpPreview } from "@/components/characters/stats/CharacterHpPreview";
-import { Button } from "@/components/ui/button";
+import { ProgressionPanel } from "@/components/skill-tree/progression";
 import { Card, CardContent } from "@/components/ui/card";
-import type { SkillTreeProgress } from "@/lib/hooks/characters";
 import type { ArtifactSetRow } from "@/types/artifact-sets";
 import type { CampaignMember } from "@/types/campaigns";
 import type { EquippedItems } from "@/types/inventory";
@@ -36,7 +34,6 @@ export interface CharacterViewSingleCardProps {
     spellSlots?: Record<string, { max: number; current: number }>;
   };
   formData: {
-    skillTreeProgress?: SkillTreeProgress;
     scalingCoefficients?: {
       hpMultiplier?: number;
       meleeMultiplier?: number;
@@ -56,13 +53,8 @@ export interface CharacterViewSingleCardProps {
   members: CampaignMember[];
   races: Race[];
   isPlayerView: boolean;
-  lastSavedSkillTreeProgress: SkillTreeProgress;
-  onSkillTreeProgressChange: (next: SkillTreeProgress) => void;
-  onResetSkillTree: () => void;
-  savingTree: boolean;
-  handleSaveSkillTree: () => Promise<void>;
+  canManage: boolean;
   error: string | null;
-  saveError: string | null;
 }
 
 export function CharacterViewSingleCard({
@@ -79,21 +71,17 @@ export function CharacterViewSingleCard({
   artifactCombatBonuses,
   artifactSets,
   artifactOptions,
-  lastSavedSkillTreeProgress,
-  onSkillTreeProgressChange,
-  savingTree,
-  handleSaveSkillTree,
+  canManage,
   error,
-  saveError,
 }: CharacterViewSingleCardProps) {
   const scalingCoefficients = formData.scalingCoefficients ?? {};
 
   return (
     <Card className="overflow-hidden">
       <CardContent className="w-full overflow-x-auto pt-4 sm:pt-6">
-        {(error || saveError) && (
+        {error && (
           <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-            <strong>Помилка:</strong> {error ?? saveError}
+            <strong>Помилка:</strong> {error}
           </div>
         )}
 
@@ -158,24 +146,7 @@ export function CharacterViewSingleCard({
                 >[0]["abilities"]
               }
             />
-            <CharacterSkillTreeView
-              campaignId={campaignId}
-              characterRace={(basicInfo.race as string) ?? ""}
-              characterLevel={(basicInfo.level as number) ?? 1}
-              skillTreeProgress={formData.skillTreeProgress ?? {}}
-              savedSkillTreeProgress={lastSavedSkillTreeProgress}
-              onSkillTreeProgressChange={onSkillTreeProgressChange}
-            />
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <Button
-                type="button"
-                onClick={handleSaveSkillTree}
-                disabled={savingTree}
-                className="touch-manipulation"
-              >
-                {savingTree ? "Збереження…" : "Зберегти дерево скілів"}
-              </Button>
-            </div>
+            <ProgressionPanel campaignId={campaignId} characterId={characterId} canManage={canManage} />
           </section>
 
           <CharacterDamageCalculator
@@ -183,8 +154,6 @@ export function CharacterViewSingleCard({
             characterId={characterId}
             level={(basicInfo.level as number) ?? 1}
             scalingCoefficients={formData.scalingCoefficients}
-            skillTreeProgress={formData.skillTreeProgress ?? {}}
-            characterRace={(basicInfo.race as string) || undefined}
             knownSpellIds={spellcasting.knownSpells}
           />
 
@@ -193,8 +162,7 @@ export function CharacterViewSingleCard({
             <CharacterArtifactsSection
               knownSpellIds={spellcasting.knownSpells}
               campaignId={campaignId}
-              characterRace={basicInfo.race as string}
-              skillTreeProgress={formData.skillTreeProgress ?? {}}
+              progressionCharacterId={characterId}
               equipped={equipped}
               artifacts={artifactOptions}
               artifactSets={artifactSets}

@@ -15,7 +15,6 @@ import { ReadOnlyProvider } from "@/components/ui/read-only-context";
 import { getHeroMaxHpBreakdown } from "@/lib/constants/hero-scaling";
 import { useCampaignMembers } from "@/lib/hooks/campaigns";
 import { useCharacterView } from "@/lib/hooks/characters";
-import { useConfirm } from "@/lib/hooks/common";
 import { useRaces } from "@/lib/hooks/races";
 import { sumEquippedArtifactFlatBonuses } from "@/lib/utils/artifacts/sum-equipped-artifact-flat-bonuses";
 
@@ -30,8 +29,6 @@ export function CharacterViewClient({
   allowPlayerEdit: boolean;
   isDM?: boolean;
 }) {
-  const confirm = useConfirm();
-
   const { members } = useCampaignMembers(campaignId);
 
   const { data: races = [] } = useRaces(campaignId);
@@ -40,7 +37,6 @@ export function CharacterViewClient({
     characterLoaded,
     formData,
     error,
-    saveError,
     basicInfo,
     abilityScores,
     combatStats,
@@ -48,15 +44,11 @@ export function CharacterViewClient({
     abilities,
     spellcasting,
     equipped,
-    setFormData,
     artifacts,
     artifactsDetail,
     artifactSets,
     damagePreview,
     schoolsByCount,
-    lastSavedSkillTreeProgress,
-    savingTree,
-    handleSaveSkillTree,
   } = useCharacterView(campaignId, characterId);
 
   const isPlayerView = isDM !== undefined ? !isDM : !allowPlayerEdit;
@@ -143,18 +135,8 @@ export function CharacterViewClient({
             members={members}
             races={races}
             isPlayerView={isPlayerView}
-            lastSavedSkillTreeProgress={lastSavedSkillTreeProgress}
-            onSkillTreeProgressChange={(next) =>
-              setFormData((prev) => ({
-                ...prev,
-                skillTreeProgress: next,
-              }))
-            }
-            onResetSkillTree={() => {}}
-            savingTree={savingTree}
-            handleSaveSkillTree={handleSaveSkillTree}
+            canManage={isDM === true}
             error={error}
-            saveError={saveError}
           />
         ) : (
           <CharacterViewAccordion
@@ -175,32 +157,8 @@ export function CharacterViewClient({
             members={members}
             races={races}
             isPlayerView={isPlayerView}
-            lastSavedSkillTreeProgress={lastSavedSkillTreeProgress}
-            onSkillTreeProgressChange={(next) =>
-              setFormData((prev) => ({
-                ...prev,
-                skillTreeProgress: next,
-              }))
-            }
-            onResetSkillTree={async () => {
-              const hasProgress =
-                formData.skillTreeProgress &&
-                Object.keys(formData.skillTreeProgress).length > 0;
-
-              if (
-                !hasProgress ||
-                (await confirm({ title: "Скинути всі прокачані уміння цього персонажа? Натисніть «Зберегти дерево скілів» щоб зберегти зміни.", confirmLabel: "Скинути", destructive: true }))
-              ) {
-                setFormData((prev) => ({
-                  ...prev,
-                  skillTreeProgress: {},
-                }));
-              }
-            }}
-            savingTree={savingTree}
-            handleSaveSkillTree={handleSaveSkillTree}
+            canManage={isDM === true}
             error={error}
-            saveError={saveError}
           />
         )}
       </div>

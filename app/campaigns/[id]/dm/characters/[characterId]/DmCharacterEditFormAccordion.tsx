@@ -1,7 +1,6 @@
 "use client";
 
 import { CharacterAbilitiesSection } from "@/components/characters/abilities/CharacterAbilitiesSection";
-import { CharacterSkillTreeView } from "@/components/characters/abilities/CharacterSkillTreeView";
 import { CharacterArtifactsSection } from "@/components/characters/artifacts/CharacterArtifactsSection";
 import { CharacterBasicInfo } from "@/components/characters/basic/CharacterBasicInfo";
 import { CharacterSkillsSection } from "@/components/characters/skills/CharacterSkillsSection";
@@ -9,15 +8,14 @@ import { CharacterAbilityScores } from "@/components/characters/stats/CharacterA
 import { CharacterCombatParams } from "@/components/characters/stats/CharacterCombatParams";
 import { CharacterDamagePreview } from "@/components/characters/stats/CharacterDamagePreview";
 import { CharacterHpPreview } from "@/components/characters/stats/CharacterHpPreview";
+import { ProgressionPanel } from "@/components/skill-tree/progression";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
 import type { DmCharacterEditor } from "@/lib/hooks/characters";
-import { useConfirm } from "@/lib/hooks/common";
 
 export function DmCharacterEditFormAccordion({ editor }: { editor: DmCharacterEditor }) {
   const {
@@ -31,8 +29,6 @@ export function DmCharacterEditFormAccordion({ editor }: { editor: DmCharacterEd
     members,
     races,
   } = editor;
-
-  const confirm = useConfirm();
 
   return (
     <Accordion
@@ -126,39 +122,9 @@ export function DmCharacterEditFormAccordion({ editor }: { editor: DmCharacterEd
             campaignId={campaignId}
             abilities={abilities}
           />
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={async () => {
-                const hasProgress =
-                  formData.skillTreeProgress &&
-                  Object.keys(formData.skillTreeProgress).length > 0;
-
-                if (
-                  !hasProgress ||
-                  (await confirm({ title: "Скинути всі прокачані уміння цього персонажа? Зміни збережаться після натискання «Зберегти зміни».", confirmLabel: "Скинути", destructive: true }))
-                ) {
-                  setFormData((prev) => ({
-                    ...prev,
-                    skillTreeProgress: {},
-                  }));
-                }
-              }}
-            >
-              Скинути дерево прокачки
-            </Button>
+          <div className="mt-4">
+            <ProgressionPanel campaignId={campaignId} characterId={characterId} canManage />
           </div>
-          <CharacterSkillTreeView
-            campaignId={campaignId}
-            characterRace={basicInfo.race}
-            characterLevel={basicInfo.level}
-            skillTreeProgress={formData.skillTreeProgress ?? {}}
-            onSkillTreeProgressChange={(next) =>
-              setFormData((prev) => ({ ...prev, skillTreeProgress: next }))
-            }
-          />
         </AccordionContent>
       </AccordionItem>
 
@@ -168,9 +134,8 @@ export function DmCharacterEditFormAccordion({ editor }: { editor: DmCharacterEd
           <CharacterArtifactsSection
             knownSpellIds={spellcasting.knownSpells}
             campaignId={campaignId}
-            characterRace={basicInfo.race}
-            skillTreeProgress={formData.skillTreeProgress ?? {}}
             characterId={characterId}
+            progressionCharacterId={characterId}
             equipped={equipped}
             artifacts={artifacts.map((a) => ({
               id: a.id,

@@ -56,6 +56,7 @@ export function useUpdateCharacter(campaignId: string, characterId: string) {
     invalidateKeys: [
       ["characters", campaignId],
       ["character", campaignId, characterId],
+      ["character-progression", campaignId, characterId],
     ],
   });
 }
@@ -70,6 +71,8 @@ export function useLevelUpCharacter(campaignId: string) {
       ["character-damage-preview", campaignId],
       ["damage-calculator-melee-ranged", campaignId],
       ["damage-calculator-magic-spell", campaignId],
+      ["character-progression", campaignId],
+      ["battle-balance"],
     ],
   });
 }
