@@ -1,13 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { removeCampaignMember } from "@/lib/api/campaigns";
-import { useConfirm, useNotify } from "@/lib/hooks/common";
+import { useRemoveCampaignMember } from "@/lib/hooks/campaigns";
+import { useConfirm } from "@/lib/hooks/common";
 
 interface CampaignMember {
   id: string;
@@ -29,31 +27,19 @@ export function CampaignMembersList({
   members,
   isDM,
 }: CampaignMembersListProps) {
-  const notify = useNotify();
-
   const confirm = useConfirm();
 
-  const router = useRouter();
+  const removeMember = useRemoveCampaignMember(campaignId);
 
-  const [removingMemberId, setRemovingMemberId] = useState<string | null>(null);
+  const handleRemoveMember = (memberId: string) =>
+    confirm({
+      title: "Ви впевнені, що хочете виключити цього учасника з кампанії?",
+      confirmLabel: "Виключити",
+      destructive: true,
+      onConfirm: () => removeMember.mutateAsync(memberId),
+    });
 
-  const handleRemoveMember = async (memberId: string) => {
-    if (!(await confirm({ title: "Ви впевнені, що хочете виключити цього учасника з кампанії?", confirmLabel: "Виключити", destructive: true }))) {
-      return;
-    }
-
-    setRemovingMemberId(memberId);
-    try {
-      await removeCampaignMember(campaignId, memberId);
-
-      router.refresh();
-    } catch (error) {
-      console.error("Error removing member:", error);
-      void notify(error instanceof Error ? error.message : "Помилка при видаленні учасника");
-    } finally {
-      setRemovingMemberId(null);
-    }
-  };
+  const removingMemberId = removeMember.isPending ? removeMember.variables : null;
 
   return (
     <div className="space-y-2">
@@ -72,7 +58,7 @@ export function CampaignMembersList({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => handleRemoveMember(member.id)}
+              onClick={() => void handleRemoveMember(member.id)}
               disabled={removingMemberId === member.id}
             >
               {removingMemberId === member.id ? (

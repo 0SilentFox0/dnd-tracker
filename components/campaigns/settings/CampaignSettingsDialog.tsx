@@ -1,96 +1,44 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { updateCampaign } from "@/lib/api/campaigns";
+import { useUpdateCampaign } from "@/lib/hooks/campaigns";
+import type { CampaignSettings } from "@/types/campaigns";
 
 interface CampaignSettingsDialogProps {
   campaignId: string;
-  initialName: string;
-  initialDescription: string | null;
-  initialMaxLevel: number;
-  initialXpMultiplier: number;
-  initialAllowPlayerEdit: boolean;
-  initialStatus: string;
+  campaign: CampaignSettings;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onUpdated: () => void;
 }
 
-export function CampaignSettingsDialog({
-  campaignId,
-  initialName,
-  initialDescription,
-  initialMaxLevel,
-  initialXpMultiplier,
-  initialAllowPlayerEdit,
-  initialStatus,
-  open,
-  onOpenChange,
-  onUpdated,
-}: CampaignSettingsDialogProps) {
-  const [name, setName] = useState(initialName);
+const toFields = (c: CampaignSettings) => ({ ...c, description: c.description || "" });
 
-  const [description, setDescription] = useState(initialDescription || "");
+export function CampaignSettingsDialog({ campaignId, campaign, open, onOpenChange }: CampaignSettingsDialogProps) {
+  const update = useUpdateCampaign(campaignId);
 
-  const [maxLevel, setMaxLevel] = useState(initialMaxLevel);
-
-  const [xpMultiplier, setXpMultiplier] = useState(initialXpMultiplier);
-
-  const [allowPlayerEdit, setAllowPlayerEdit] = useState(initialAllowPlayerEdit);
-
-  const [status, setStatus] = useState(initialStatus);
-
-  const [isSaving, setIsSaving] = useState(false);
+  const [fields, setFields] = useState(() => toFields(campaign));
 
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (open) {
-      setName(initialName);
-      setDescription(initialDescription || "");
-      setMaxLevel(initialMaxLevel);
-      setXpMultiplier(initialXpMultiplier);
-      setAllowPlayerEdit(initialAllowPlayerEdit);
-      setStatus(initialStatus);
-      setError(null);
-    }
-  }, [
-    open,
-    initialName,
-    initialDescription,
-    initialMaxLevel,
-    initialXpMultiplier,
-    initialAllowPlayerEdit,
-    initialStatus,
-  ]);
+  const isSaving = update.isPending;
 
-  const handleSave = async () => {
-    setIsSaving(true);
+  const set = <K extends keyof typeof fields>(key: K, value: (typeof fields)[K]) => setFields((prev) => ({ ...prev, [key]: value }));
+
+  const handleSave = () => {
     setError(null);
-    try {
-      await updateCampaign(campaignId, {
-        name: name.trim(),
-        description: description.trim() || null,
-        maxLevel,
-        xpMultiplier,
-        allowPlayerEdit,
-        status,
-      });
-      onUpdated();
-      onOpenChange(false);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Помилка збереження";
-
-      setError(message);
-    } finally {
-      setIsSaving(false);
-    }
+    update.mutate(
+      { ...fields, name: fields.name.trim(), description: fields.description.trim() || null },
+      {
+        onSuccess: () => onOpenChange(false),
+        onError: (err) => setError(err instanceof Error ? err.message : "Помилка збереження"),
+      },
+    );
   };
 
   return (
@@ -104,20 +52,20 @@ export function CampaignSettingsDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>
             Скасувати
           </Button>
-          <Button onClick={handleSave} disabled={isSaving || !name.trim()}>
+          <Button onClick={handleSave} disabled={isSaving || !fields.name.trim()}>
             {isSaving ? "Збереження..." : "Зберегти"}
           </Button>
         </>
       }
     >
       <div className="space-y-4">
-        <LabeledInput id="campaign-name" label="Назва" value={name} onChange={(e) => setName(e.target.value)} disabled={isSaving} />
+        <LabeledInput id="campaign-name" label="Назва" value={fields.name} onChange={(e) => set("name", e.target.value)} disabled={isSaving} />
         <div className="space-y-2">
           <Label htmlFor="campaign-description">Опис</Label>
           <Textarea
             id="campaign-description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            value={fields.description}
+            onChange={(e) => set("description", e.target.value)}
             disabled={isSaving}
             rows={3}
           />
@@ -129,8 +77,8 @@ export function CampaignSettingsDialog({
             type="number"
             min="1"
             max="30"
-            value={maxLevel}
-            onChange={(e) => setMaxLevel(parseInt(e.target.value) || 1)}
+            value={fields.maxLevel}
+            onChange={(e) => set("maxLevel", parseInt(e.target.value) || 1)}
             disabled={isSaving}
           />
           <LabeledInput
@@ -140,8 +88,8 @@ export function CampaignSettingsDialog({
             min="1"
             max="10"
             step="0.1"
-            value={xpMultiplier}
-            onChange={(e) => setXpMultiplier(parseFloat(e.target.value) || 1)}
+            value={fields.xpMultiplier}
+            onChange={(e) => set("xpMultiplier", parseFloat(e.target.value) || 1)}
             disabled={isSaving}
           />
         </div>
@@ -149,8 +97,8 @@ export function CampaignSettingsDialog({
           <input
             type="checkbox"
             id="allow-player-edit"
-            checked={allowPlayerEdit}
-            onChange={(e) => setAllowPlayerEdit(e.target.checked)}
+            checked={fields.allowPlayerEdit}
+            onChange={(e) => set("allowPlayerEdit", e.target.checked)}
             disabled={isSaving}
             className="rounded"
           />
@@ -160,8 +108,8 @@ export function CampaignSettingsDialog({
           <input
             type="checkbox"
             id="campaign-status"
-            checked={status === "active"}
-            onChange={(e) => setStatus(e.target.checked ? "active" : "archived")}
+            checked={fields.status === "active"}
+            onChange={(e) => set("status", e.target.checked ? "active" : "archived")}
             disabled={isSaving}
             className="rounded"
           />

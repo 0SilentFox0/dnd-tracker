@@ -1,22 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
-import { getActiveBattles } from "@/lib/api/campaigns";
+import { useActiveBattles } from "@/lib/hooks/campaigns";
 
-/**
- * Кнопка Join Battle з автоматичним оновленням при зміні активних боїв.
- * Polling раз на 2 хв без refetch при фокусі — компроміс між свіжістю і egress Supabase.
- */
 export function JoinBattleButton() {
-  const { data: activeBattles = [], isLoading } = useQuery({
-    queryKey: ["active-battles"],
-    queryFn: getActiveBattles,
-    refetchInterval: 120_000,
-    refetchOnWindowFocus: false,
-  });
+  const { data: activeBattles = [], isLoading } = useActiveBattles();
 
   const hasActiveBattle = activeBattles.length > 0;
 
