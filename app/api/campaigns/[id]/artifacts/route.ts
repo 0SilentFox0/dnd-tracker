@@ -7,7 +7,9 @@ import {
   mirrorArtifactIconToSupabase,
   shouldMirrorArtifactIconUrl,
 } from "@/lib/supabase/artifact-icon-storage";
-import { abilitiesJson } from "@/lib/utils/abilities/legacy/read";
+import { abilitiesJson, artifactAbilities } from "@/lib/utils/abilities/legacy/read";
+import { sheetStatBonuses } from "@/lib/utils/abilities/sheet-bonuses";
+import { abilitySummary } from "@/lib/utils/abilities/summary";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { weaponStatsColumns } from "@/lib/utils/artifacts/weapon-stats";
@@ -84,7 +86,7 @@ export async function GET(
       return accessResult;
     }
 
-    const artifacts = await prisma.artifact.findMany({ omit: { abilities: true },
+    const rows = await prisma.artifact.findMany({
       where: {
         campaignId: id,
       },
@@ -95,6 +97,12 @@ export async function GET(
         createdAt: "desc",
       },
     });
+
+    const artifacts = rows.map(({ abilities, ...row }) => ({
+      ...row,
+      sheetBonuses: sheetStatBonuses(artifactAbilities({ ...row, abilities })),
+      abilitySummary: abilitySummary("artifact", { ...row, abilities }),
+    }));
 
     return NextResponse.json(artifacts);
   } catch (error) {

@@ -19,6 +19,7 @@ export type CompletedArtifactSetPreview = {
   setName: string;
   displayName: string;
   parsed: ParsedArtifactSetBonus;
+  abilitySummary: string[];
   /** Як у бою: не накладається на лист носія, а роздається союзникам/ворогам. */
   isBattleScoped: boolean;
 };
@@ -66,11 +67,11 @@ export function getCompletedArtifactSetsPreview(
 
     if (!memberIds.every((id) => equippedIds.has(id))) continue;
 
-    if (set.setBonus == null) continue;
+    const parsed = parseArtifactSetBonus(set.setBonus ?? {});
 
-    const parsed = parseArtifactSetBonus(set.setBonus);
+    const abilitySummary = set.abilitySummary ?? [];
 
-    if (!previewHasDisplayableContent(parsed)) continue;
+    if (abilitySummary.length === 0 && !previewHasDisplayableContent(parsed)) continue;
 
     const aud = parsed.effectAudience;
 
@@ -83,6 +84,7 @@ export function getCompletedArtifactSetsPreview(
       setName: set.name,
       displayName: parsed.name?.trim() || set.name,
       parsed,
+      abilitySummary,
       isBattleScoped,
     });
   }
