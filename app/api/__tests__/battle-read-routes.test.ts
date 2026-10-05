@@ -87,7 +87,7 @@ describe("PATCH /battles/[battleId]", () => {
     const res = await PATCH(new Request("http://x/api", { method: "PATCH", body: JSON.stringify({ name: "Нова назва" }) }), params);
 
     expect(res.status).toBe(200);
-    expect(prisma.battleScene.update).toHaveBeenCalledWith({ where: { id: "b1" }, data: { name: "Нова назва" } });
+    expect(prisma.battleScene.update).toHaveBeenCalledWith({ where: { id: "b1" }, data: { name: "Нова назва", version: { increment: 1 } } });
   });
 
   it("не DM — відповідь requireDM", async () => {

@@ -243,7 +243,7 @@ describe("runBattleMutation", () => {
       d,
     );
 
-    expect(vi.mocked(d.publish).mock.calls[0][0][0].payload).toEqual({ type: "battle-updated", battleId: "b1" });
+    expect(vi.mocked(d.publish).mock.calls[0][0][0].payload).toEqual({ type: "battle-updated", battleId: "b1", version: 4 });
   });
 
   it("ліміт payload — у байтах: довгий кириличний запис журналу дає light battle-updated", async () => {
@@ -255,7 +255,7 @@ describe("runBattleMutation", () => {
 
     await runBattleMutation(req(), { params, access: "member", mutate: noop }, d);
 
-    expect(vi.mocked(d.publish).mock.calls[0][0][0].payload).toEqual({ type: "battle-updated", battleId: "b1" });
+    expect(vi.mocked(d.publish).mock.calls[0][0][0].payload).toEqual({ type: "battle-updated", battleId: "b1", version: 4 });
   });
 
   it("respond: wrapped — {battle, ...response}", async () => {
@@ -326,5 +326,18 @@ describe("runBattleMutation", () => {
     const res = await runBattleMutation(req({ expectedVersion: 2 }), { params, access: "member", mutate: noop }, deps());
 
     expect(res.status).toBe(409);
+  });
+
+  it("очищення історії (reset/start) скасовує весь журнал у клієнтів", async () => {
+    const d = deps();
+
+    const res = await runBattleMutation(
+      req(),
+      { params, access: "member", mutate: (ctx) => ({ participants: ctx.participants, pending: ctx.pending, events: [], history: { clear: true } }) },
+      d,
+    );
+
+    expect((await res.json()).battleLogCancelledFrom).toBe(0);
+    expect(vi.mocked(d.publish).mock.calls[0][0][0].payload).toMatchObject({ battleLogCancelledFrom: 0 });
   });
 });

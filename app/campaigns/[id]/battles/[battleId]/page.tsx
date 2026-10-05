@@ -16,6 +16,7 @@ import {
   useBattleSceneLogic,
   useMoraleOverlay,
 } from "@/lib/hooks/battle";
+import { findLastSpellAction } from "@/lib/utils/battle/battle-log";
 import type { MoraleCheckResult } from "@/lib/utils/battle/battle-morale";
 import type { BattleScene } from "@/types/api";
 import type { BattleAction } from "@/types/battle";
@@ -190,13 +191,9 @@ export default function BattlePage({
             onSpell={(data) =>
               mutations.spell.mutate(data, {
                 onSuccess: (updatedBattle: BattleScene | undefined) => {
-                  const log = updatedBattle?.battleLog;
+                  const last = findLastSpellAction(updatedBattle?.battleLog);
 
-                  if (!log || log.length === 0) return;
-
-                  const last = log[log.length - 1] as BattleAction;
-
-                  if (last.actionType === "spell") {
+                  if (last) {
                     setSpellResultAction(last);
                     setSpellResultModalOpen(true);
                   }

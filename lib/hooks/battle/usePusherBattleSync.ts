@@ -141,7 +141,15 @@ export function usePusherBattleSync(
           "battleId" in data &&
           "type" in data
         ) {
-          // інший клієнт міг змінити стан, навіть якщо наш кеш щойно оновився
+          const lightVersion = (data as { version?: unknown }).version;
+
+          const cachedVersion = queryClient.getQueryData<BattleScene>(queryKey())?.version;
+
+          // власна дія вже в кеші — повторне читання бою лише палить egress
+          if (typeof lightVersion === "number" && cachedVersion !== undefined && cachedVersion >= lightVersion) {
+            return;
+          }
+
           debugLog(`event light payload (refetch): ${eventName}`, {
             battleId: (data as { battleId: string }).battleId,
           });

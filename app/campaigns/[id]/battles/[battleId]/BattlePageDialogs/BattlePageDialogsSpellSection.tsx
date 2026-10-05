@@ -9,8 +9,8 @@ import type { BattlePageDialogsSpellResult } from "./BattlePageDialogs-types";
 
 import { DmCasterPickerDialog } from "@/components/battle/dialogs/DmCasterPickerDialog";
 import { SpellDialog } from "@/components/battle/dialogs/SpellDialog";
+import { findLastSpellAction } from "@/lib/utils/battle/battle-log";
 import type { BattleScene } from "@/types/api";
-import type { BattleAction } from "@/types/battle";
 
 interface BattlePageDialogsSpellSectionProps {
   battleContext: BattlePageDialogsBattleContext;
@@ -85,15 +85,11 @@ export function BattlePageDialogsSpellSection({
                 if (updatedBattle) {
                   handlers.triggerGlobalDamageFromBattle(updatedBattle);
 
-                  const log = updatedBattle.battleLog;
+                  const last = findLastSpellAction(updatedBattle.battleLog);
 
-                  if (log?.length) {
-                    const last = log[log.length - 1] as BattleAction;
-
-                    if (last.actionType === "spell") {
-                      setSpellResultAction(last);
-                      setSpellResultModalOpen(true);
-                    }
+                  if (last) {
+                    setSpellResultAction(last);
+                    setSpellResultModalOpen(true);
                   }
                 }
               },

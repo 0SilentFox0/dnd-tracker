@@ -65,6 +65,6 @@ describe("buildPusherMessages", () => {
 
     const [updated] = buildPusherMessages({ before: scene, after: scene, participants: [hero], battlePayload: big });
 
-    expect(updated.payload).toEqual({ type: "battle-updated", battleId: "b1" });
+    expect(updated.payload).toEqual({ type: "battle-updated", battleId: "b1", version: 3 });
   });
 });

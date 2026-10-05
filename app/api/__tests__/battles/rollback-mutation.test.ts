@@ -16,7 +16,7 @@ describe("rollback mutation", () => {
   it("відкат на подію в середині багатоподійної дії — до знімка першої події цієї дії", async () => {
     const load = vi.fn(async () => [snapshot]);
 
-    const out = await createRollbackMutation(load)(ctx, { actionIndex: 5 });
+    const out = await createRollbackMutation(load, vi.fn(async () => true))(ctx, { actionIndex: 5 });
 
     expect(load).toHaveBeenCalledWith("b1", 5);
     expect(out.history).toEqual({ cancelFromSeq: 4 });
@@ -25,6 +25,15 @@ describe("rollback mutation", () => {
   });
 
   it("немає знімків — action_rejected", async () => {
-    await expect(createRollbackMutation(vi.fn(async () => []))(ctx, { actionIndex: 1 })).rejects.toMatchObject({ code: "action_rejected" });
+    await expect(createRollbackMutation(vi.fn(async () => []), vi.fn(async () => true))(ctx, { actionIndex: 1 })).rejects.toMatchObject({ code: "action_rejected" });
+  });
+
+  it("подія вже скасована (подвійний клік) або не існує — action_rejected, без відкату", async () => {
+    const load = vi.fn(async () => [snapshot]);
+
+    await expect(createRollbackMutation(load, vi.fn(async () => false))(ctx, { actionIndex: 5 })).rejects.toMatchObject({
+      code: "action_rejected",
+    });
+    expect(load).not.toHaveBeenCalled();
   });
 });

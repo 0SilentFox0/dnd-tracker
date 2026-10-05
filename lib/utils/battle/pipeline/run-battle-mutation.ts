@@ -240,8 +240,12 @@ export async function runBattleMutation<TBody>(
 
     const entries = delta.events.map((e) => eventToBattleAction(e, battleId));
 
-    const cancelledFrom =
-      result.history && "cancelFromSeq" in result.history ? result.history.cancelFromSeq : undefined;
+    // clear (reset/start) нумерує події з 1 — клієнт має відкинути весь старий журнал
+    const cancelledFrom = !result.history
+      ? undefined
+      : "cancelFromSeq" in result.history
+        ? result.history.cancelFromSeq
+        : 0;
 
     const shared = toLegacyBattle(loaded, after, result.participants, result.pending, {
       mode: "append",

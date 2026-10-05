@@ -61,7 +61,7 @@ export function buildPusherMessages(args: {
 
   const fits = Buffer.byteLength(JSON.stringify(battlePayload), "utf8") <= PUSHER_DELTA_LIMIT_BYTES;
 
-  const payload = fits ? battlePayload : { type: "battle-updated", battleId: after.id };
+  const payload = fits ? battlePayload : { type: "battle-updated", battleId: after.id, version: after.version };
 
   const messages: PusherMessage[] = [{ channel, event: "battle-updated", payload }];
 

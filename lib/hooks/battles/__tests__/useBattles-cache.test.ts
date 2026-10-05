@@ -48,4 +48,16 @@ describe("mergeBattleCache", () => {
 
     expect(merged.battleLog.map((e) => e.actionIndex)).toEqual([7]);
   });
+
+  it("reset і новий старт: старий журнал повністю зникає, нова нумерація з 1", () => {
+    const qc = seeded({ version: 3, battleLog: [entry(1), entry(2), entry(3), entry(4)] });
+
+    const reset = mergeBattleCache(qc, "c1", "b1", { id: "b1", version: 4, battleLogMode: "append", battleLogCancelledFrom: 0, battleLog: [] } as unknown as BattleScene);
+
+    qc.setQueryData(key, reset);
+
+    const started = mergeBattleCache(qc, "c1", "b1", { id: "b1", version: 5, battleLogMode: "append", battleLogCancelledFrom: 0, battleLog: [entry(1)] } as unknown as BattleScene);
+
+    expect(started.battleLog.map((e) => e.actionIndex)).toEqual([1]);
+  });
 });

@@ -9,10 +9,20 @@ export const rollbackSchema = z.object({ actionIndex: z.number().int().min(1) })
 
 type LoadSnapshots = (battleId: string, seq: number) => Promise<Array<{ seq: number; state: SnapshotState }>>;
 
+type IsActiveEvent = (battleId: string, seq: number) => Promise<boolean>;
+
 const defaultLoad: LoadSnapshots = (battleId, seq) => loadSnapshotsFrom(prisma, battleId, seq);
 
-export function createRollbackMutation(load: LoadSnapshots = defaultLoad) {
+const defaultIsActiveEvent: IsActiveEvent = async (battleId, seq) =>
+  (await prisma.battleEvent.count({ where: { battleId, seq, cancelledAt: null } })) > 0;
+
+export function createRollbackMutation(load: LoadSnapshots = defaultLoad, isActiveEvent: IsActiveEvent = defaultIsActiveEvent) {
   return async (ctx: BattleMutationContext, body: z.infer<typeof rollbackSchema>): Promise<MutationResult> => {
+    // повторний клік чи друга вкладка DM: скасовану подію не відкочуємо вдруге
+    if (!(await isActiveEvent(ctx.scene.id, body.actionIndex))) {
+      throw new BattleRuleError("action_rejected", "Цієї дії вже немає в журналі");
+    }
+
     const snapshots = await load(ctx.scene.id, body.actionIndex);
 
     const [first] = snapshots;

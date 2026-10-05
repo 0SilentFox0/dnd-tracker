@@ -51,7 +51,7 @@ export async function PATCH(request: Request, { params }: Params) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    await prisma.battleScene.update({ where: { id: battleId }, data: parsed.data });
+    await prisma.battleScene.update({ where: { id: battleId }, data: { ...parsed.data, version: { increment: 1 } } });
 
     return readBattle({ id, battleId });
   } catch (error) {
