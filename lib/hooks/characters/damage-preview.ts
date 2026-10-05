@@ -20,7 +20,7 @@ export async function fetchDamagePreview(
     spellDiceSum,
   });
 
-  if (!result) throw new Error("Failed to load damage preview");
+  if (!result) throw new Error("Не вдалося завантажити превʼю урону");
 
   return result;
 }

@@ -10,6 +10,7 @@ export {
   useDeleteAllSkills,
   useDeleteSkill,
   useDuplicateSkill,
+  useSkill,
   useSkills,
   useUpdateSkill,
 } from "./useSkills";
