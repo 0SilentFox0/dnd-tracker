@@ -1,4 +1,5 @@
 export { useAttackFlow } from "./useAttackFlow";
+export { rollDie, useAttackWizard } from "./useAttackWizard";
 export { useBattlePageDialogs } from "./useBattlePageDialogs";
 export {
   type BattleSceneActions,
@@ -15,5 +16,7 @@ export { useDamageBreakdown } from "./useDamageBreakdown";
 export { useDamageFlash } from "./useDamageFlash";
 export { useHpChange } from "./useHpChange";
 export { useMoraleOverlay } from "./useMoraleOverlay";
+export { usePlayerTurn } from "./usePlayerTurn";
 export type { PusherConnectionState } from "./usePusherBattleSync";
 export { usePusherBattleSync } from "./usePusherBattleSync";
+export { type BookSpell, useSpellBook } from "./useSpellBook";
