@@ -5,6 +5,7 @@ import { ArtifactSetForm } from "@/components/artifact-sets/ArtifactSetForm";
 import { Button } from "@/components/ui/button";
 import { requireCampaignDM } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
+import { readAbilities } from "@/lib/utils/abilities/legacy/read";
 
 export default async function EditArtifactSetPage({
   params,
@@ -28,6 +29,10 @@ export default async function EditArtifactSetPage({
 
   const initialArtifactIds = setRow.artifacts.map((a) => a.id);
 
+  const { abilities, issues } = readAbilities("artifactSet", setRow);
+
+  const bonus = (setRow.setBonus ?? {}) as { name?: unknown; description?: unknown };
+
   return (
     <div className="container mx-auto p-4 space-y-6">
       <div className="flex items-center gap-2">
@@ -45,7 +50,12 @@ export default async function EditArtifactSetPage({
         initialName={setRow.name}
         initialDescription={setRow.description}
         initialIcon={setRow.icon}
-        initialSetBonus={setRow.setBonus ?? {}}
+        initialSetBonus={{
+          name: typeof bonus.name === "string" ? bonus.name : undefined,
+          description: typeof bonus.description === "string" ? bonus.description : undefined,
+        }}
+        initialAbilities={abilities}
+        initialAbilityIssues={issues}
         initialArtifactIds={initialArtifactIds}
       />
     </div>

@@ -11,20 +11,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import type { ArtifactModifierDraft } from "./artifact-combat-draft";
-import {
-  type ArtifactEffectScopeDraft,
-  buildArtifactBonusesPayload,
-  buildArtifactPassiveAbilityPayload,
-} from "./artifact-combat-draft";
-import {
-  ArtifactCombatBonusFields,
-  buildArtifactModifiersPayload,
-} from "./ArtifactCombatBonusFields";
-import { ArtifactEffectScopeFields } from "./ArtifactEffectScopeFields";
 import { ArtifactIconUrlPreview } from "./ArtifactIconUrlPreview";
 
-import { SkillEffectsEditor } from "@/components/skills/form/effects/SkillEffectsEditor";
+import { AbilityListEditor } from "@/components/abilities";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -33,7 +22,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { SelectField } from "@/components/ui/select-field";
@@ -42,7 +30,9 @@ import {
   ARTIFACT_RARITY_OPTIONS,
   ARTIFACT_SLOT_OPTIONS,
 } from "@/lib/constants/artifacts";
-import type { SkillEffect } from "@/types/battle";
+import { abilitySaveError } from "@/lib/hooks/abilities";
+import type { ConversionIssue } from "@/lib/utils/abilities/legacy/types";
+import type { Ability } from "@/lib/utils/abilities/schema";
 
 export interface ArtifactSetOption {
   id: string;
@@ -57,14 +47,8 @@ export interface ArtifactFormInitial {
   slot: string;
   icon: string;
   setId: string | null;
-  effectName: string;
-  effectDescription: string;
-  bonuses: Record<string, number>;
-  modifiers: ArtifactModifierDraft[];
-  passiveEffects: SkillEffect[];
-  effectScopeDraft: ArtifactEffectScopeDraft;
-  /** Існуюча passive payload — щоб merge-ити при збереженні (для Edit режиму). */
-  existingPassive?: Record<string, unknown> | null;
+  abilities: Ability[];
+  abilityIssues: ConversionIssue[];
 }
 
 export interface ArtifactFormSubmitPayload {
@@ -74,9 +58,7 @@ export interface ArtifactFormSubmitPayload {
   slot: string;
   icon: string | null;
   setId: string | null | undefined;
-  bonuses: ReturnType<typeof buildArtifactBonusesPayload>;
-  modifiers: ReturnType<typeof buildArtifactModifiersPayload>;
-  passiveAbility: ReturnType<typeof buildArtifactPassiveAbilityPayload>;
+  abilities: Ability[];
 }
 
 export interface ArtifactFormProps {
@@ -89,8 +71,6 @@ export interface ArtifactFormProps {
   title: string;
   /** Опис під заголовком. */
   description?: string;
-  /** Префікс для id-атрибутів (для unique input ids на одній сторінці). */
-  idPrefix: string;
   /** Лейбл submit-кнопки під час норм. стану. */
   submitLabel: string;
   /** Лейбл під час saving. */
@@ -112,7 +92,6 @@ export function ArtifactForm({
   mode,
   title,
   description: cardDescription,
-  idPrefix,
   submitLabel,
   submitLabelSaving,
   onSubmit,
@@ -140,48 +119,21 @@ export function ArtifactForm({
 
   const [setId, setSetId] = useState<string | null>(initial.setId);
 
-  const [effectName, setEffectName] = useState(initial.effectName);
+  const [abilities, setAbilities] = useState<Ability[]>(initial.abilities);
 
-  const [effectDescription, setEffectDescription] = useState(
-    initial.effectDescription,
-  );
-
-  const [bonuses, setBonuses] = useState(initial.bonuses);
-
-  const [modifiers, setModifiers] = useState<ArtifactModifierDraft[]>(
-    initial.modifiers,
-  );
-
-  const [passiveEffects, setPassiveEffects] = useState<SkillEffect[]>(
-    initial.passiveEffects,
-  );
-
-  const [effectScopeDraft, setEffectScopeDraft] =
-    useState<ArtifactEffectScopeDraft>(initial.effectScopeDraft);
-
-  const [skillFxMinT, setSkillFxMinT] = useState("1");
-
-  const [skillFxMaxT, setSkillFxMaxT] = useState("1");
+  const [abilitiesValid, setAbilitiesValid] = useState(true);
 
   const isBusy = isSaving || isDeleting;
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!name.trim()) return;
+    if (!name.trim() || !abilitiesValid) return;
 
     setIsSaving(true);
     setError(null);
 
     try {
-      const passiveAbility = buildArtifactPassiveAbilityPayload(
-        effectName,
-        effectDescription,
-        passiveEffects,
-        initial.existingPassive ?? null,
-        effectScopeDraft,
-      );
-
       const payload: ArtifactFormSubmitPayload = {
         name: name.trim(),
         description:
@@ -192,21 +144,12 @@ export function ArtifactForm({
         slot,
         icon: icon.trim() || null,
         setId: mode === "edit" ? setId || null : setId || undefined,
-        bonuses: buildArtifactBonusesPayload(bonuses),
-        modifiers: buildArtifactModifiersPayload(modifiers),
-        passiveAbility,
+        abilities,
       };
 
       await onSubmit(payload);
     } catch (err) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : mode === "edit"
-            ? "Помилка оновлення"
-            : "Помилка створення";
-
-      setError(message);
+      setError(abilitySaveError(err, mode === "edit" ? "Помилка оновлення" : "Помилка створення"));
     } finally {
       setIsSaving(false);
     }
@@ -317,59 +260,16 @@ export function ArtifactForm({
             <ArtifactIconUrlPreview key={icon.trim()} url={icon} />
           </div>
 
-          <ArtifactCombatBonusFields
-            bonuses={bonuses}
-            onBonusesChange={setBonuses}
-            modifiers={modifiers}
-            onModifiersChange={setModifiers}
+          <AbilityListEditor
+            campaignId={campaignId}
+            value={abilities}
+            onChange={setAbilities}
+            issues={initial.abilityIssues}
+            onValidityChange={setAbilitiesValid}
           />
 
-          <div className="rounded-md border p-4 space-y-3">
-            <p className="text-sm font-semibold">Пасив артефакту</p>
-            {mode === "create" && (
-              <p className="text-xs text-muted-foreground">
-                Назва та опис — для довідки. Нижче — ефекти як у пасивного
-                скіла (резисти, HP, слоти 4–5, перевага…).
-              </p>
-            )}
-            <div className="space-y-2">
-              <Label htmlFor="artifact-effect-name">Назва ефекту</Label>
-              <Input
-                id="artifact-effect-name"
-                value={effectName}
-                onChange={(e) => setEffectName(e.target.value)}
-                placeholder="Наприклад: Полум'я Сар Ісси"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="artifact-effect-description">Опис ефекту</Label>
-              <Textarea
-                id="artifact-effect-description"
-                value={effectDescription}
-                onChange={(e) => setEffectDescription(e.target.value)}
-                placeholder="Опис ефекту артефакту"
-                rows={3}
-              />
-            </div>
-            <ArtifactEffectScopeFields
-              campaignId={campaignId}
-              value={effectScopeDraft}
-              onChange={setEffectScopeDraft}
-              idPrefix={idPrefix}
-            />
-            <SkillEffectsEditor
-              effects={passiveEffects}
-              minTargets={skillFxMinT}
-              maxTargets={skillFxMaxT}
-              onEffectsChange={setPassiveEffects}
-              onMinTargetsChange={setSkillFxMinT}
-              onMaxTargetsChange={setSkillFxMaxT}
-              hideTargeting
-            />
-          </div>
-
           <div className="flex gap-2">
-            <Button type="submit" disabled={isBusy}>
+            <Button type="submit" disabled={isBusy || !abilitiesValid}>
               {isSaving ? submitLabelSaving : submitLabel}
             </Button>
             <Button

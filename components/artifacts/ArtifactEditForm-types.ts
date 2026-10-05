@@ -1,3 +1,6 @@
+import type { ConversionIssue } from "@/lib/utils/abilities/legacy/types";
+import type { Ability } from "@/lib/utils/abilities/schema";
+
 export interface ArtifactSetOption {
   id: string;
   name: string;
@@ -11,7 +14,6 @@ export interface ArtifactData {
   slot: string;
   icon: string | null;
   setId: string | null;
-  bonuses: unknown;
-  modifiers: unknown;
-  passiveAbility: Record<string, unknown> | null;
+  abilities: Ability[];
+  abilityIssues: ConversionIssue[];
 }

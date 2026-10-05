@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 
-import { emptyArtifactBonusesRecord } from "./artifact-combat-draft";
 import {
   ArtifactForm,
   type ArtifactSetOption,
@@ -28,8 +27,7 @@ export function ArtifactCreateForm({
       artifactSets={artifactSets}
       mode="create"
       title="Створити артефакт"
-      description="Бойові бонуси, модифікатори зброї та пасивні ефекти (як у скілів)"
-      idPrefix="artifact-create"
+      description="Бонуси та ефекти артефакту задаються вміннями"
       submitLabel="Створити артефакт"
       submitLabelSaving="Створення..."
       cancelHref={`/campaigns/${campaignId}/dm/artifacts`}
@@ -48,13 +46,8 @@ export function ArtifactCreateForm({
         slot: ArtifactSlot.ITEM,
         icon: "",
         setId: null,
-        effectName: "",
-        effectDescription: "",
-        bonuses: emptyArtifactBonusesRecord(),
-        modifiers: [],
-        passiveEffects: [],
-        effectScopeDraft: { audience: "", immuneSpellIds: [] },
-        existingPassive: null,
+        abilities: [],
+        abilityIssues: [],
       }}
       onSubmit={async (payload) => {
         await createArtifact(campaignId, {
@@ -64,9 +57,7 @@ export function ArtifactCreateForm({
           slot: payload.slot,
           icon: payload.icon,
           setId: payload.setId ?? undefined,
-          bonuses: payload.bonuses,
-          modifiers: payload.modifiers,
-          passiveAbility: payload.passiveAbility ?? undefined,
+          abilities: payload.abilities,
         });
 
         router.push(`/campaigns/${campaignId}/dm/artifacts`);

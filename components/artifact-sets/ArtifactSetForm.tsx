@@ -4,16 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import {
-  artifactSetBonusFormFromUnknown,
-  type ArtifactSetBonusFormState,
-  buildArtifactSetBonusPayload,
-  createEmptyArtifactSetBonusForm,
-} from "./artifact-set-bonus-form";
 import { filterArtifactsSelectableForSet } from "./artifact-set-form-helpers";
-import { ArtifactSetBonusEditor } from "./ArtifactSetBonusEditor";
 import { ArtifactSetMembersPicker } from "./ArtifactSetMembersPicker";
 
+import { AbilityListEditor } from "@/components/abilities";
 import { Button } from "@/components/ui/button";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
@@ -25,6 +19,9 @@ import {
   updateArtifactSet,
 } from "@/lib/api/artifact-sets";
 import { type ArtifactListItem, getArtifacts } from "@/lib/api/artifacts";
+import { abilitySaveError } from "@/lib/hooks/abilities";
+import type { ConversionIssue } from "@/lib/utils/abilities/legacy/types";
+import type { Ability } from "@/lib/utils/abilities/schema";
 
 export interface ArtifactSetFormProps {
   campaignId: string;
@@ -33,8 +30,9 @@ export interface ArtifactSetFormProps {
   initialDescription?: string | null;
   /** URL іконки (або data URL до збереження) — HUD бою при повному сеті */
   initialIcon?: string | null;
-  /** Сирий JSON з БД або порожній об'єкт для нового сету */
-  initialSetBonus?: unknown;
+  initialSetBonus?: { name?: string; description?: string };
+  initialAbilities?: Ability[];
+  initialAbilityIssues?: ConversionIssue[];
   initialArtifactIds?: string[];
 }
 
@@ -44,7 +42,9 @@ export function ArtifactSetForm({
   initialName = "",
   initialDescription = "",
   initialIcon = "",
-  initialSetBonus,
+  initialSetBonus = {},
+  initialAbilities = [],
+  initialAbilityIssues = [],
   initialArtifactIds = [],
 }: ArtifactSetFormProps) {
   const router = useRouter();
@@ -55,11 +55,13 @@ export function ArtifactSetForm({
 
   const [icon, setIcon] = useState(initialIcon ?? "");
 
-  const [bonusForm, setBonusForm] = useState<ArtifactSetBonusFormState>(() =>
-    initialSetBonus === undefined || initialSetBonus === null
-      ? createEmptyArtifactSetBonusForm()
-      : artifactSetBonusFormFromUnknown(initialSetBonus),
-  );
+  const [bonusName, setBonusName] = useState(initialSetBonus.name ?? "");
+
+  const [bonusDescription, setBonusDescription] = useState(initialSetBonus.description ?? "");
+
+  const [abilities, setAbilities] = useState<Ability[]>(initialAbilities);
+
+  const [abilitiesValid, setAbilitiesValid] = useState(true);
 
   const [artifacts, setArtifacts] = useState<ArtifactListItem[]>([]);
 
@@ -93,17 +95,19 @@ export function ArtifactSetForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!abilitiesValid) return;
+
     setError(null);
 
     setLoading(true);
 
     try {
-      const setBonus = buildArtifactSetBonusPayload(bonusForm);
-
       const payload = {
         name,
         description: description.trim() ? description : null,
-        setBonus,
+        setBonus: { name: bonusName.trim() || undefined, description: bonusDescription.trim() || undefined },
+        abilities,
         artifactIds: [...selectedIds],
         icon: icon.trim() ? icon : null,
       };
@@ -117,7 +121,7 @@ export function ArtifactSetForm({
       router.push(`/campaigns/${campaignId}/dm/artifact-sets`);
       router.refresh();
     } catch (err) {
-      setError((err as Error).message);
+      setError(abilitySaveError(err, "Помилка збереження"));
     } finally {
       setLoading(false);
     }
@@ -192,10 +196,23 @@ export function ArtifactSetForm({
         </p>
       </div>
 
-      <ArtifactSetBonusEditor
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="set-bonus-name">Назва бонусу</Label>
+          <Input id="set-bonus-name" value={bonusName} onChange={(e) => setBonusName(e.target.value)} placeholder="Наприклад, Кров дракона" />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="set-bonus-desc">Опис бонусу</Label>
+          <Textarea id="set-bonus-desc" value={bonusDescription} onChange={(e) => setBonusDescription(e.target.value)} rows={2} />
+        </div>
+      </div>
+
+      <AbilityListEditor
         campaignId={campaignId}
-        value={bonusForm}
-        onChange={setBonusForm}
+        value={abilities}
+        onChange={setAbilities}
+        issues={initialAbilityIssues}
+        onValidityChange={setAbilitiesValid}
       />
 
       <ArtifactSetMembersPicker
@@ -205,7 +222,7 @@ export function ArtifactSetForm({
       />
 
       <div className="flex flex-wrap gap-2">
-        <Button type="submit" disabled={loading || !name.trim()}>
+        <Button type="submit" disabled={loading || !name.trim() || !abilitiesValid}>
           {loading ? "Збереження…" : setId ? "Зберегти зміни" : "Створити сет"}
         </Button>
         <Button type="button" variant="outline" asChild>

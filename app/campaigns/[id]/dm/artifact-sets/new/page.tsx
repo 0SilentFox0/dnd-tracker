@@ -26,7 +26,7 @@ export default async function NewArtifactSetPage({
           Задайте бонус повного комплекту та оберіть артефакти-члени сету.
         </p>
       </div>
-      <ArtifactSetForm campaignId={id} initialSetBonus={{}} />
+      <ArtifactSetForm campaignId={id} />
     </div>
   );
 }
