@@ -1,15 +1,16 @@
 /**
  * @vitest-environment happy-dom
  */
-import { cleanup, fireEvent,render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach,describe, expect, it, vi } from "vitest";
 
 import { SkillGroupAccordionItem } from "@/components/skills/list/SkillGroupAccordionItem";
+import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
 import { Accordion } from "@/components/ui/accordion";
 import type { GroupedSkill } from "@/types/skills";
 
 function renderItem(props: React.ComponentProps<typeof SkillGroupAccordionItem>) {
-  return render(
+  return renderWithConfirm(
     <Accordion type="single" collapsible>
       <SkillGroupAccordionItem {...props} />
     </Accordion>,

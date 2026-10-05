@@ -1,10 +1,11 @@
 /**
  * @vitest-environment happy-dom
  */
-import { cleanup,render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen, within } from "@testing-library/react";
 import { afterEach,beforeEach, describe, expect, it, vi } from "vitest";
 
 import { SkillCard } from "@/components/skills/list/SkillCard";
+import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
 import type { GroupedSkill } from "@/types/skills";
 
 vi.mock("@/lib/hooks/skills", () => ({
@@ -31,6 +32,8 @@ vi.mock("@/components/common/OptimizedImage", () => ({
     fallback: React.ReactNode;
   }) => <span data-testid="skill-icon" title={alt}>{fallback}</span>,
 }));
+
+Object.assign(Element.prototype, { hasPointerCapture: () => false, releasePointerCapture: () => {}, setPointerCapture: () => {}, scrollIntoView: () => {} });
 
 function minimalGroupedSkill(overrides: Partial<GroupedSkill> = {}): GroupedSkill {
   return {
@@ -62,7 +65,7 @@ describe("SkillCard", () => {
   it("рендерить назву скіла", () => {
     const skill = minimalGroupedSkill({ basicInfo: { name: "Вогняна куля" } });
 
-    render(<SkillCard skill={skill} campaignId="c1" />);
+    renderWithConfirm(<SkillCard skill={skill} campaignId="c1" />);
     expect(screen.getByText("Вогняна куля")).toBeInTheDocument();
   });
 
@@ -71,14 +74,14 @@ describe("SkillCard", () => {
       basicInfo: { name: "Скіл", description: "Короткий опис скіла" },
     });
 
-    render(<SkillCard skill={skill} campaignId="c1" />);
+    renderWithConfirm(<SkillCard skill={skill} campaignId="c1" />);
     expect(screen.getByText("Короткий опис скіла")).toBeInTheDocument();
   });
 
   it("рендерить кнопку Редагувати з посиланням на сторінку скіла", () => {
     const skill = minimalGroupedSkill();
 
-    render(<SkillCard skill={skill} campaignId="camp-123" />);
+    renderWithConfirm(<SkillCard skill={skill} campaignId="camp-123" />);
 
     const links = screen.getAllByRole("link", { name: /редагувати/i });
 
@@ -93,7 +96,7 @@ describe("SkillCard", () => {
       basicInfo: { name: "СкілБезОпису", description: "" },
     });
 
-    render(<SkillCard skill={skill} campaignId="c1" />);
+    renderWithConfirm(<SkillCard skill={skill} campaignId="c1" />);
     expect(screen.getByText("СкілБезОпису")).toBeInTheDocument();
     expect(screen.queryByText("Опис скіла")).not.toBeInTheDocument();
   });
@@ -101,12 +104,41 @@ describe("SkillCard", () => {
   it("показує опис умінь", () => {
     const skill = minimalGroupedSkill({ abilitySummary: ["Пасивно · шкода (ближня) +10%"] });
 
-    render(<SkillCard skill={skill} campaignId="c1" />);
+    renderWithConfirm(<SkillCard skill={skill} campaignId="c1" />);
     expect(screen.getByText("Пасивно · шкода (ближня) +10%")).toBeInTheDocument();
   });
 
   it("не показує старий перемикач «Впливає на шкоду»", () => {
-    render(<SkillCard skill={minimalGroupedSkill()} campaignId="c1" />);
+    renderWithConfirm(<SkillCard skill={minimalGroupedSkill()} campaignId="c1" />);
     expect(screen.queryByText("Впливає на шкоду")).not.toBeInTheDocument();
+  });
+
+  const openDelete = async () => {
+    fireEvent.pointerDown(screen.getByLabelText("Меню дій"), { button: 0, ctrlKey: false, pointerType: "mouse" });
+    fireEvent.click(await screen.findByRole("menuitem", { name: /Видалити/ }));
+
+    return screen.findByRole("dialog");
+  };
+
+  it("видаляє після підтвердження", async () => {
+    const onRemove = vi.fn(async () => {});
+
+    renderWithConfirm(<SkillCard skill={minimalGroupedSkill()} campaignId="c1" onRemove={onRemove} />);
+    fireEvent.click(within(await openDelete()).getByRole("button", { name: "Видалити" }));
+
+    await vi.waitFor(() => expect(onRemove).toHaveBeenCalledWith("skill-1"));
+  });
+
+  it("помилка видалення лишається в діалозі", async () => {
+    const onRemove = vi.fn(async () => {
+      throw new Error("Скіл використовується");
+    });
+
+    renderWithConfirm(<SkillCard skill={minimalGroupedSkill()} campaignId="c1" onRemove={onRemove} />);
+
+    const dialog = await openDelete();
+
+    fireEvent.click(within(dialog).getByRole("button", { name: "Видалити" }));
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent("Скіл використовується");
   });
 });

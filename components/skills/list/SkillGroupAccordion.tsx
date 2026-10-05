@@ -1,7 +1,6 @@
 "use client";
 
 import { SkillGroupAccordionItem } from "@/components/skills/list/SkillGroupAccordionItem";
-import { RemoveAllSpellsDialog } from "@/components/spells/dialogs/RemoveAllSpellsDialog";
 import { RenameGroupDialog } from "@/components/spells/dialogs/RenameGroupDialog";
 import { useSpellGroupActions } from "@/lib/hooks/spells";
 import { calculateTotalSkillsInGroup } from "@/lib/utils/skills/skills";
@@ -31,7 +30,7 @@ interface SkillGroupAccordionProps {
   /** Колір основного навику для підсвітки акордеону (40% opacity) */
   mainSkillColor?: string | null;
   /** Викликається при видаленні одного скіла (DM) */
-  onDeleteSkill?: (skillId: string) => void;
+  onDeleteSkill?: (skillId: string) => Promise<unknown> | void;
   /** Викликається при дублюванні скіла (DM) */
   onDuplicateSkill?: (skillId: string) => void;
 }
@@ -72,7 +71,7 @@ export function SkillGroupAccordion({
         isUngrouped={isUngrouped}
         groupId={groupId}
         onRenameClick={actions.handlers.openRenameDialog}
-        onRemoveAllClick={() => actions.dialogs.removeAll.setOpen(true)}
+        onRemoveAllClick={() => void actions.handlers.confirmRemoveAll()}
         onDeleteSkill={onDeleteSkill}
         onDuplicateSkill={onDuplicateSkill}
         skills={skills}
@@ -90,13 +89,6 @@ export function SkillGroupAccordion({
         isRenaming={actions.pending.isRenaming}
       />
 
-      <RemoveAllSpellsDialog
-        open={actions.dialogs.removeAll.open}
-        onOpenChange={actions.dialogs.removeAll.setOpen}
-        groupName={groupName}
-        onConfirm={actions.handlers.handleRemoveAllSpells}
-        isRemoving={actions.pending.isRemoving}
-      />
     </>
   );
 }

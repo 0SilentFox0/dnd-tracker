@@ -1,9 +1,11 @@
-import { useCallback,useState } from "react";
+import { useCallback, useState } from "react";
 
 import {
   useRemoveAllSpellsFromGroup,
   useRenameSpellGroup,
 } from "./useSpells";
+
+import { useConfirm } from "@/lib/hooks/common";
 
 interface UseSpellGroupActionsProps {
   campaignId: string;
@@ -21,13 +23,13 @@ export function useSpellGroupActions({
 }: UseSpellGroupActionsProps) {
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
 
-  const [removeAllDialogOpen, setRemoveAllDialogOpen] = useState(false);
-
   const [newGroupName, setNewGroupName] = useState(groupName);
 
   const renameGroupMutation = useRenameSpellGroup(campaignId);
 
   const removeAllSpellsMutation = useRemoveAllSpellsFromGroup(campaignId);
+
+  const confirm = useConfirm();
 
   const handleRenameGroup = useCallback(() => {
     if (!groupId || !newGroupName.trim()) return;
@@ -46,15 +48,19 @@ export function useSpellGroupActions({
     );
   }, [groupId, newGroupName, groupName, renameGroupMutation]);
 
-  const handleRemoveAllSpells = useCallback(() => {
-    if (!groupId) return;
-
-    removeAllSpellsMutation.mutate(groupId, {
-      onSuccess: () => {
-        setRemoveAllDialogOpen(false);
-      },
-    });
-  }, [groupId, removeAllSpellsMutation]);
+  const confirmRemoveAll = useCallback(
+    () =>
+      groupId
+        ? confirm({
+            title: "Видалити всі заклинання з групи?",
+            description: `Ви впевнені, що хочете видалити всі заклинання з групи "${groupName}"? Заклинання не будуть видалені, але вони втратять зв'язок з цією групою.`,
+            confirmLabel: "Видалити всі з групи",
+            destructive: true,
+            onConfirm: () => removeAllSpellsMutation.mutateAsync(groupId),
+          })
+        : Promise.resolve(false),
+    [confirm, groupId, groupName, removeAllSpellsMutation],
+  );
 
   const openRenameDialog = useCallback(() => {
     setNewGroupName(groupName);
@@ -69,12 +75,11 @@ export function useSpellGroupActions({
   return {
     dialogs: {
       rename: { open: renameDialogOpen, setOpen: setRenameDialogOpen },
-      removeAll: { open: removeAllDialogOpen, setOpen: setRemoveAllDialogOpen },
     },
     state: { newGroupName, setNewGroupName },
     handlers: {
       handleRenameGroup,
-      handleRemoveAllSpells,
+      confirmRemoveAll,
       openRenameDialog,
       closeRenameDialog,
     },
