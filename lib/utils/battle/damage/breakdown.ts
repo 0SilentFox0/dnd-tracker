@@ -23,6 +23,7 @@ import { calculateDamageWithModifiersImpl } from "./impl";
 
 import { AttackType } from "@/lib/constants/battle";
 import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
+import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 export type {
@@ -54,9 +55,7 @@ export function computeDamageBreakdown(
     ? AttackType.MELEE
     : AttackType.RANGED;
 
-  const statModifier = isMelee
-    ? Math.floor((attacker.abilities.strength - 10) / 2)
-    : Math.floor((attacker.abilities.dexterity - 10) / 2);
+  const statModifier = getAttackAbilityModifier(attacker.abilities, isMelee ? AttackType.MELEE : AttackType.RANGED);
 
   const isHero = attacker.basicInfo.sourceType === "character";
 

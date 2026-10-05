@@ -8,8 +8,9 @@ import {
 } from "@/components/battle/dialogs/shared";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AttackType, ParticipantSide } from "@/lib/constants/battle";
+import { ParticipantSide } from "@/lib/constants/battle";
 import { hasAdvantage, hasDisadvantage } from "@/lib/utils/battle/attack";
+import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 interface AttackRollDialogProps {
@@ -44,9 +45,7 @@ export function AttackRollDialog({
   const attackBonus = attack.attackBonus || 0;
 
   const statModifier =
-    attack.type === AttackType.MELEE
-      ? Math.floor((attacker.abilities.strength - 10) / 2)
-      : Math.floor((attacker.abilities.dexterity - 10) / 2);
+    getAttackAbilityModifier(attacker.abilities, attack.type);
 
   const totalBonus =
     attackBonus + statModifier + attacker.abilities.proficiencyBonus;

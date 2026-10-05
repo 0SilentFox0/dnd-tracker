@@ -18,6 +18,7 @@ import { applyResistanceForAdditional } from "./damage";
 import { AttackType } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
+import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
 import type { BattleParticipant } from "@/types/battle";
 import type { BattleAttack } from "@/types/battle";
 
@@ -65,9 +66,7 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
   const baseDamage = damageRolls.reduce((sum, roll) => sum + roll, 0);
 
   const statModifier =
-    attack.type === AttackType.MELEE
-      ? Math.floor((updatedAttacker.abilities.strength - 10) / 2)
-      : Math.floor((updatedAttacker.abilities.dexterity - 10) / 2);
+    getAttackAbilityModifier(updatedAttacker.abilities, attack.type);
 
   const isHero = updatedAttacker.basicInfo.sourceType === "character";
 

@@ -4,11 +4,11 @@
 
 import type { RollResultType } from "./useAttackFlow";
 
-import { AttackType } from "@/lib/constants/battle";
 import {
   getEffectiveD20,
   resolveAttackRoll,
 } from "@/lib/utils/battle/common/attack-roll-helpers";
+import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
 import type { AttackData } from "@/types/api";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -85,9 +85,7 @@ export function createAttackFlowHandlers({
     const attackBonus = selectedAttack.attackBonus || 0;
 
     const statModifier =
-      selectedAttack.type === AttackType.MELEE
-        ? Math.floor((participant.abilities.strength - 10) / 2)
-        : Math.floor((participant.abilities.dexterity - 10) / 2);
+      getAttackAbilityModifier(participant.abilities, selectedAttack.type);
 
     const totalBonus =
       attackBonus + statModifier + participant.abilities.proficiencyBonus;
@@ -138,9 +136,7 @@ export function createAttackFlowHandlers({
       const attackBonus = selectedAttack?.attackBonus || 0;
 
       const statModifier =
-        selectedAttack?.type === AttackType.MELEE
-          ? Math.floor((participant.abilities.strength - 10) / 2)
-          : Math.floor((participant.abilities.dexterity - 10) / 2);
+        getAttackAbilityModifier(participant.abilities, selectedAttack?.type ?? "");
 
       const totalBonus =
         attackBonus + statModifier + participant.abilities.proficiencyBonus;

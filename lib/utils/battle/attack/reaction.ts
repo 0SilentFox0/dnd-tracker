@@ -6,6 +6,7 @@ import { getDiceAverage } from "../balance";
 
 import { AttackType } from "@/lib/constants/battle";
 import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
+import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
 import type { BattleParticipant } from "@/types/battle";
 import type { SimpleSkillTriggerConfig } from "@/types/skill-triggers";
 
@@ -131,9 +132,7 @@ export function performReaction(
   }
 
   const statModifier =
-    reactionAttack.type === AttackType.MELEE
-      ? Math.floor((defender.abilities.strength - 10) / 2)
-      : Math.floor((defender.abilities.dexterity - 10) / 2);
+    getAttackAbilityModifier(defender.abilities, reactionAttack.type);
 
   baseDamage += statModifier;
 
