@@ -41,7 +41,7 @@ describe("patch-participant mutation", () => {
     const out = patchParticipantMutation(context({ participants: [hero, goblin, orc], scene: { ...context().scene, turnIndex: 2 } }), "orc", { removeFromBattle: true });
 
     expect(out.scene).toMatchObject({ round: 2 });
-    expect(out.participants[out.scene!.turnIndex!].basicInfo.id).toBe("hero");
+    expect(out.participants[out.scene?.turnIndex ?? -1]?.basicInfo.id).toBe("hero");
   });
 
   it("HP > 0 повертає непритомного до бою", () => {
