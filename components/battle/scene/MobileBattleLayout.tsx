@@ -12,6 +12,7 @@ import { MyTurnControls } from "./MyTurnControls";
 import { ParticipantDetails } from "./ParticipantDetails";
 import { ParticipantList } from "./ParticipantList";
 
+import { HUD_SURFACE } from "@/components/battle/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { useBattleScene } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
@@ -55,10 +56,10 @@ export function MobileBattleLayout() {
           {isMyTurn && <MyTurnControls key={`${hero.basicInfo.id}-${battle.currentRound}-${hero.battleData.extraTurnActive ? "x" : "n"}`} hero={hero} />}
         </div>
       )}
-      <ResponsiveDialog open={!!selected} onOpenChange={(o) => !o && select(null)} title="Учасник" className="battle-hud border-white/25 bg-[#15110e] text-[var(--bone)]">
+      <ResponsiveDialog open={!!selected} onOpenChange={(o) => !o && select(null)} title="Учасник" className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
         {selected && <ParticipantDetails participant={selected} />}
       </ResponsiveDialog>
-      <ResponsiveDialog open={logOpen} onOpenChange={setLogOpen} title="Журнал" className="battle-hud border-white/25 bg-[#15110e] text-[var(--bone)]">
+      <ResponsiveDialog open={logOpen} onOpenChange={setLogOpen} title="Журнал" className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
         <BattleLog />
       </ResponsiveDialog>
     </div>

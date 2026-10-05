@@ -27,7 +27,7 @@ export function MyHeroPanel({ hero, compact = false }: { hero: BattleParticipant
         <div className="min-w-0 flex-1">
           <div className="hud-sc flex h-6 items-center justify-between text-[19px] font-bold text-[var(--ink)]">
             <span className="truncate">{hero.basicInfo.name}</span>
-            <span className="font-sans text-sm font-normal italic tracking-normal text-[#b8ab95]">
+            <span className="shrink-0 whitespace-nowrap pl-2 font-sans text-sm font-normal italic tracking-normal text-[#b8ab95]">
               {compact ? `${hero.combatStats.currentHp} / ${hero.combatStats.maxHp} · AC ${effectiveArmorClass(hero, battle.initiativeOrder)}` : isMyTurn ? "твій хід" : until === 0 ? "ходить" : until !== null ? `хід через ${until}` : ""}
             </span>
           </div>

@@ -7,3 +7,6 @@ const sans = Alegreya_Sans({ subsets: ["latin", "cyrillic"], weight: ["400", "50
 const book = EB_Garamond({ subsets: ["latin", "cyrillic"], weight: ["400", "500", "600"], style: ["normal", "italic"], variable: "--font-hud-book", display: "swap" });
 
 export const hudFontClassName = `${sc.variable} ${sans.variable} ${book.variable}`;
+
+// діалоги рендеряться в портал поза .battle-hud, тож несуть змінні шрифтів самі
+export const HUD_SURFACE = `hud-surface ${hudFontClassName}`;

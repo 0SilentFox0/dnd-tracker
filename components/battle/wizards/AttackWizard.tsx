@@ -5,7 +5,7 @@ import { Loader2, Swords } from "lucide-react";
 
 import { AiRollButton, DamageDice, DiceGrid } from "./DiceInput";
 
-import { HealthLabel, Portrait } from "@/components/battle/hud";
+import { HealthLabel, HUD_SURFACE,Portrait } from "@/components/battle/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { rollDie, type useAttackWizard } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
@@ -51,7 +51,7 @@ export function AttackWizard({ wizard }: { wizard: Wizard }) {
   );
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={(o) => !o && wizard.close()} title={attack ? `${attack.name}${target ? ` → ${target.basicInfo.name}` : ""}` : "Атака"} className="battle-hud border-white/25 bg-[#15110e] text-[var(--bone)]">
+    <ResponsiveDialog open={open} onOpenChange={(o) => !o && wizard.close()} title={attack ? `${attack.name}${target ? ` → ${target.basicInfo.name}` : ""}` : "Атака"} className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
       {header}
       {state.step === "weapon" && (
         <div className="space-y-2">

@@ -1,15 +1,19 @@
-.battle-hud {
+.battle-hud,
+.hud-surface {
   --ally: #6f8fb0;
   --enemy: #9c2a1d;
   --bone: #e6dccb;
   --ink: #efe5d2;
   --muted: #8f8473;
   --gold: #c9b37a;
-  position: relative;
   color: var(--bone);
-  background: #0b0908 url("/screen-bg/battle-bg.jpg") center 70% / cover;
   font-family: var(--font-hud-sans), system-ui, sans-serif;
   font-variant-numeric: tabular-nums lining-nums;
+}
+
+.battle-hud {
+  position: relative;
+  background: #0b0908 url("/screen-bg/battle-bg.jpg") center 70% / cover;
 }
 
 .battle-hud::before {

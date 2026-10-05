@@ -5,7 +5,7 @@ import { Loader2, Sparkles, Swords } from "lucide-react";
 
 import { AiRollButton, DamageDice, DiceGrid } from "./DiceInput";
 
-import { metalClass, Portrait } from "@/components/battle/hud";
+import { HUD_SURFACE, metalClass, Portrait } from "@/components/battle/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import type { useSpellBook } from "@/lib/hooks/battle";
 import { useMediaQuery } from "@/lib/hooks/common";
@@ -170,7 +170,7 @@ export function SpellBook({ book }: { book: Book }) {
   const showDetail = state.step !== "book";
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={(o) => !o && book.close()} title={showDetail && !wide ? "← До списку" : "Книга заклинань"} size="lg" className="max-w-[980px] border-none bg-[#3a2016] p-2.5 text-[#2a2018] shadow-[0_30px_80px_rgba(0,0,0,.9),inset_0_0_0_2px_#2a160f]">
+    <ResponsiveDialog open={open} onOpenChange={(o) => !o && book.close()} title={showDetail && !wide ? "← До списку" : "Книга заклинань"} size="lg" className={cn(HUD_SURFACE, "max-w-[980px] border-none bg-[#3a2016] p-2.5 text-[#2a2018] shadow-[0_30px_80px_rgba(0,0,0,.9),inset_0_0_0_2px_#2a160f]")}>
       <div className="relative pr-11">
         {ribbons}
         <div className={cn("hud-book relative min-h-[70dvh] bg-[#e9dec5] shadow-[inset_14px_0_18px_-10px_rgba(60,40,20,.55)]", wide && "grid grid-cols-2")}>

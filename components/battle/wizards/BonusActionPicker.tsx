@@ -4,9 +4,10 @@ import { useState } from "react";
 import Image from "next/image";
 import { Zap } from "lucide-react";
 
-import { HealthLabel, Portrait } from "@/components/battle/hud";
+import { HealthLabel, HUD_SURFACE,Portrait } from "@/components/battle/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { useBattleScene } from "@/lib/hooks/battle";
+import { cn } from "@/lib/utils";
 import { describeEffect } from "@/lib/utils/abilities";
 import { withinLimits } from "@/lib/utils/abilities/engine/usage";
 import { bonusTargetSide } from "@/lib/utils/battle/view";
@@ -36,7 +37,7 @@ export function BonusActionPicker({ participant, open, onOpenChange, onDone }: {
   return (
     <ResponsiveDialog open={open} onOpenChange={(o) => { if (!o) setAiming(null);
 
- onOpenChange(o); }} title={aiming ? `${aiming.name} · ціль` : "Бонусна дія"} className="battle-hud border-white/25 bg-[#15110e] text-[var(--bone)]">
+ onOpenChange(o); }} title={aiming ? `${aiming.name} · ціль` : "Бонусна дія"} className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
       <div className="space-y-2">
         {!aiming && abilities.map((a) => (
           <button key={a.key} type="button" disabled={actions.bonusAction.isPending} onClick={() => (bonusTargetSide(a) ? setAiming(a) : void fire(a))} className="flex min-h-14 w-full items-center gap-3 border border-white/15 px-3 py-2.5 text-left">
