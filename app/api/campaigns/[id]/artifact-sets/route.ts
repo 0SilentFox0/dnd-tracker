@@ -73,6 +73,7 @@ export async function POST(
       description: data.description ?? null,
       setBonus: data.setBonus,
       icon,
+      abilities: data.abilities,
     });
 
     if (data.artifactIds?.length) {

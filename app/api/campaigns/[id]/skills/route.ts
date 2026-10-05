@@ -5,7 +5,7 @@ import { createSkillSchema } from "./create-skill-schema";
 import { formatSkillsListResponse } from "./format-skills-response";
 
 import { prisma } from "@/lib/db";
-import { syncSkillAbilities } from "@/lib/utils/abilities/legacy/sync";
+import { abilitiesJson } from "@/lib/utils/abilities/legacy/read";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 
@@ -45,24 +45,15 @@ export async function POST(
         image: data.image ?? null,
         // Згруповані дані
         basicInfo: data.basicInfo as Prisma.InputJsonValue,
-        bonuses: data.bonuses as Prisma.InputJsonValue,
-        combatStats: data.combatStats as Prisma.InputJsonValue,
         spellData: data.spellData as Prisma.InputJsonValue,
         spellEnhancementData:
           data.spellEnhancementData as Prisma.InputJsonValue,
         mainSkillData: data.mainSkillData as Prisma.InputJsonValue,
-        skillTriggers: data.skillTriggers
-          ? (data.skillTriggers as Prisma.InputJsonValue)
-          : [],
+        ...(data.abilities && { abilities: abilitiesJson(data.abilities) }),
         // Старі поля для зворотної сумісності (relations)
         name: (basicInfo.name as string) || "",
         description: (basicInfo.description as string) || null,
         icon: (basicInfo.icon as string) || null,
-        damage: data.combatStats.damage || null,
-        armor: data.combatStats.armor || null,
-        speed: data.combatStats.speed || null,
-        physicalResistance: data.combatStats.physicalResistance || null,
-        magicalResistance: data.combatStats.magicalResistance || null,
         spellId: (spellData.spellId as string) || null,
         spellGroupId: (spellData.spellGroupId as string) || null,
         grantedSpellId:
@@ -89,8 +80,6 @@ export async function POST(
       },
     });
 
-    await syncSkillAbilities(prisma, skill);
-
     return NextResponse.json(skill);
   } catch (error) {
     return handleApiError(error, { action: "create skill" });
@@ -111,7 +100,7 @@ export async function GET(
       return accessResult;
     }
 
-    const skills = await prisma.skill.findMany({ omit: { abilities: true },
+    const skills = await prisma.skill.findMany({
       where: {
         campaignId: id,
       },

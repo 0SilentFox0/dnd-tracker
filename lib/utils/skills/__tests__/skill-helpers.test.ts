@@ -1,15 +1,11 @@
 import { describe, expect,it } from "vitest";
 
 import {
-  getSkillBonuses,
-  getSkillCombatStats,
   getSkillDescription,
-  getSkillEffects,
   getSkillId,
   getSkillMainSkillId,
   getSkillName,
   getSkillSpell,
-  getSkillTriggers,
 } from "../skill-helpers";
 
 import type { GroupedSkill, Skill } from "@/types/skills";
@@ -50,40 +46,6 @@ describe("skill-helpers", () => {
       const noDesc = { ...withDesc, basicInfo: { name: "X" } };
 
       expect(getSkillDescription(noDesc)).toBeNull();
-    });
-  });
-
-  describe("getSkillBonuses", () => {
-    it("повертає bonuses або порожній об'єкт", () => {
-      const skill = { id: "s1", campaignId: "c1", basicInfo: { name: "X" }, bonuses: { strength: 2 }, combatStats: {}, spellData: {}, spellEnhancementData: {}, mainSkillData: {}, skillTriggers: [], createdAt: new Date(), spell: null, spellGroup: null } as GroupedSkill;
-
-      expect(getSkillBonuses(skill)).toEqual({ strength: 2 });
-    });
-  });
-
-  describe("getSkillCombatStats", () => {
-    it("повертає combatStats з GroupedSkill", () => {
-      const skill = { id: "s1", campaignId: "c1", basicInfo: { name: "X" }, bonuses: {}, combatStats: { damage: 5, armor: 10 }, spellData: {}, spellEnhancementData: {}, mainSkillData: {}, skillTriggers: [], createdAt: new Date(), spell: null, spellGroup: null } as GroupedSkill;
-
-      expect(getSkillCombatStats(skill)).toEqual({ damage: 5, armor: 10 });
-    });
-  });
-
-  describe("getSkillEffects", () => {
-    it("повертає combatStats.effects або порожній масив", () => {
-      const skill = { id: "s1", campaignId: "c1", basicInfo: { name: "X" }, bonuses: {}, combatStats: { effects: [{ stat: "strength", type: "flat", value: 2 }] }, spellData: {}, spellEnhancementData: {}, mainSkillData: {}, skillTriggers: [], createdAt: new Date(), spell: null, spellGroup: null } as unknown as GroupedSkill;
-
-      expect(getSkillEffects(skill)).toHaveLength(1);
-      expect(getSkillEffects({ ...skill, combatStats: {} })).toEqual([]);
-    });
-  });
-
-  describe("getSkillTriggers", () => {
-    it("повертає skillTriggers або порожній масив", () => {
-      const skill = { id: "s1", campaignId: "c1", basicInfo: { name: "X" }, bonuses: {}, combatStats: {}, spellData: {}, spellEnhancementData: {}, mainSkillData: {}, skillTriggers: [{ type: "simple", trigger: "onHit" }], createdAt: new Date(), spell: null, spellGroup: null } as GroupedSkill;
-
-      expect(getSkillTriggers(skill)).toHaveLength(1);
-      expect(getSkillTriggers({ ...skill, skillTriggers: undefined })).toEqual([]);
     });
   });
 

@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { RaceFormFields } from "./RaceFormFields";
 
+import { withAbilityErrors } from "@/components/abilities";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -38,6 +39,7 @@ const EMPTY_FORM: RaceFormData = {
     { level: 4, slots: 0 },
     { level: 5, slots: 0 },
   ],
+  abilities: [],
 };
 
 export function CreateRaceDialog({
@@ -50,8 +52,15 @@ export function CreateRaceDialog({
 
   const [formData, setFormData] = useState<RaceFormData>(EMPTY_FORM);
 
+  const [abilityErrors, setAbilityErrors] = useState(0);
+
+  const abilitiesValid = abilityErrors === 0;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!abilitiesValid) return;
+
     onCreateRace(formData);
 
     setFormData(EMPTY_FORM);
@@ -68,10 +77,12 @@ export function CreateRaceDialog({
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <RaceFormFields
+            campaignId={campaignId}
             formData={formData}
             setFormData={setFormData}
             mainSkills={mainSkills}
             compact
+            onAbilitiesValidityChange={(_, n) => setAbilityErrors(n)}
           />
           <div className="flex justify-end gap-2">
             <Button
@@ -81,7 +92,9 @@ export function CreateRaceDialog({
             >
               Скасувати
             </Button>
-            <Button type="submit">Створити расу</Button>
+            <Button type="submit" disabled={!abilitiesValid}>
+              {withAbilityErrors("Створити расу", abilityErrors)}
+            </Button>
           </div>
         </form>
       </DialogContent>

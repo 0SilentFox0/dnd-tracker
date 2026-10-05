@@ -32,13 +32,16 @@ export function scopeOf(effectScope: unknown): { target?: AbilityTarget; immuneS
   return { ...(target && { target }), immuneSpellIds: immuneSpellIds ?? [] };
 }
 
+// weapon attack bonus is read by attack extraction, not converted to an ability
+const WEAPON_BONUS_KEYS = new Set(["attackBonus", "attack"]);
+
 export function mapBonuses(bonuses: unknown, skipBaked: boolean, issues: ConversionIssue[]): Effect[] {
   if (!isRecord(bonuses) || skipBaked) return [];
 
   const out: Effect[] = [];
 
   for (const [key, raw] of Object.entries(bonuses)) {
-    if (typeof raw !== "number" || raw === 0) continue;
+    if (typeof raw !== "number" || raw === 0 || WEAPON_BONUS_KEYS.has(key)) continue;
 
     const slot = /^slotBonus_(\d)$/.exec(key);
 

@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
 import { randomUUID } from "crypto";
 
 import { createArtifactSchema } from "@/app/api/campaigns/[id]/artifacts/schemas";
@@ -8,9 +7,12 @@ import {
   mirrorArtifactIconToSupabase,
   shouldMirrorArtifactIconUrl,
 } from "@/lib/supabase/artifact-icon-storage";
-import { syncArtifactAbilities } from "@/lib/utils/abilities/legacy/sync";
+import { abilitiesJson, artifactAbilities } from "@/lib/utils/abilities/legacy/read";
+import { sheetStatBonuses } from "@/lib/utils/abilities/sheet-bonuses";
+import { abilitySummary } from "@/lib/utils/abilities/summary";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { weaponStatsColumns } from "@/lib/utils/artifacts/weapon-stats";
 
 export async function POST(
   request: Request,
@@ -54,11 +56,8 @@ export async function POST(
         description: data.description,
         rarity: data.rarity,
         slot: data.slot,
-        bonuses: data.bonuses as Prisma.InputJsonValue,
-        modifiers: data.modifiers as Prisma.InputJsonValue,
-        passiveAbility: data.passiveAbility
-          ? (data.passiveAbility as Prisma.InputJsonValue)
-          : undefined,
+        ...(data.abilities && { abilities: abilitiesJson(data.abilities) }),
+        ...(data.weapon && weaponStatsColumns(data.weapon)),
         setId: data.setId,
         icon,
       },
@@ -66,8 +65,6 @@ export async function POST(
         artifactSet: true,
       },
     });
-
-    await syncArtifactAbilities(prisma, artifact);
 
     return NextResponse.json(artifact);
   } catch (error) {
@@ -89,7 +86,7 @@ export async function GET(
       return accessResult;
     }
 
-    const artifacts = await prisma.artifact.findMany({ omit: { abilities: true },
+    const rows = await prisma.artifact.findMany({
       where: {
         campaignId: id,
       },
@@ -100,6 +97,12 @@ export async function GET(
         createdAt: "desc",
       },
     });
+
+    const artifacts = rows.map(({ abilities, ...row }) => ({
+      ...row,
+      sheetBonuses: sheetStatBonuses(artifactAbilities({ ...row, abilities })),
+      abilitySummary: abilitySummary("artifact", { ...row, abilities }),
+    }));
 
     return NextResponse.json(artifacts);
   } catch (error) {

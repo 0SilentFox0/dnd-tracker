@@ -5,39 +5,7 @@ export function formatMechanicsSkill(s: SkillForReference): string {
 
   if (s.mainSkillName) parts.push(`Гілка: ${s.mainSkillName}`);
 
-  const bonuses = s.bonuses as Record<string, number> | undefined;
-
-  if (bonuses && Object.keys(bonuses).length > 0) {
-    parts.push(
-      "Бонуси: " +
-        Object.entries(bonuses)
-          .map(([k, v]) => `${k}: ${v}`)
-          .join(", ")
-    );
-  }
-
-  const combat = s.combatStats as Record<string, unknown> | undefined;
-
-  if (combat) {
-    const effects = combat.effects as
-      | Array<{ stat: string; type: string; value: unknown }>
-      | undefined;
-
-    if (effects?.length) {
-      parts.push(
-        "Ефекти: " +
-          effects
-            .map((e) => `${e.stat} (${e.type}: ${String(e.value)})`)
-            .join("; ")
-      );
-    }
-  }
-
-  const triggers = s.skillTriggers as Array<{ trigger?: string }> | undefined;
-
-  if (Array.isArray(triggers) && triggers.length > 0) {
-    parts.push("Тригери: " + triggers.map((t) => t.trigger || "—").join(", "));
-  }
+  if (s.abilitySummary.length > 0) parts.push(`Вміння: ${s.abilitySummary.join("; ")}`);
 
   if (s.grantedSpellName) parts.push(`Додає заклинання: ${s.grantedSpellName}`);
 

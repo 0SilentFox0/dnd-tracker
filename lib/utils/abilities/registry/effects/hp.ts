@@ -7,6 +7,7 @@ import { applyRawDamage } from "@/lib/utils/abilities/engine/hp";
 import { findParticipant, isUp, replaceParticipant } from "@/lib/utils/abilities/engine/participants";
 import { upsertTimedEffect } from "@/lib/utils/abilities/engine/timed-effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
+import { hasImmunity } from "@/lib/utils/battle/resistance";
 
 type Of<K extends Effect["kind"]> = Extract<Effect, { kind: K }>;
 
@@ -97,6 +98,11 @@ export function applyDot(input: EffectApplyInput<Of<"dot">>): EffectApplyResult 
 
     if (!t || !isUp(t)) continue;
 
+    if (hasImmunity(t, effect.damageType, { participants: ps })) {
+      messages.push(`⛔ ${ability.name}: ${t.basicInfo.name} — імунітет до ${effect.damageType}`);
+      continue;
+    }
+
     const dmg = resolveAmount(effect.damagePerRound, { owner, target: t, eventDamage: eventDamage(input.event), rng: ctx.rng });
 
     if (dmg <= 0) continue;
@@ -126,4 +132,4 @@ export const describeDealDamage = (e: Of<"dealDamage">) => `шкода ${amountL
 
 export const describeHeal = (e: Of<"heal">) => `${e.revive ? "воскресіння" : "лікування"} ${amountLabel(e.amount)}`;
 
-export const describeDot = (e: Of<"dot">) => `${e.damageType} ${amountLabel(e.damagePerRound)}/раунд × ${e.duration.rounds} р.`;
+export const describeDot = (e: Of<"dot">) => `${e.damageType} ${amountLabel(e.damagePerRound)}/раунд × ${e.duration?.rounds ?? "?"} р.`;

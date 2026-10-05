@@ -4,6 +4,7 @@ import { use, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { AbilityListEditor, withAbilityErrors } from "@/components/abilities";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,7 +20,6 @@ import { UnitBasicInfo } from "@/components/units/form/UnitBasicInfo";
 import { UnitDamageModifier } from "@/components/units/form/UnitDamageModifier";
 import { UnitImmunities } from "@/components/units/form/UnitImmunities";
 import { UnitKnownSpells } from "@/components/units/form/UnitKnownSpells";
-import { UnitSpecialAbilities } from "@/components/units/form/UnitSpecialAbilities";
 import { getSpells } from "@/lib/api/spells";
 import { useRaces } from "@/lib/hooks/races";
 import { useDeleteUnit, useUnit, useUpdateUnit } from "@/lib/hooks/units";
@@ -48,9 +48,7 @@ function buildUnitFormData(unit: Unit): Partial<Unit> {
     maxHp: unit.maxHp,
     proficiencyBonus: unit.proficiencyBonus,
     attacks: Array.isArray(unit.attacks) ? unit.attacks : [],
-    specialAbilities: Array.isArray(unit.specialAbilities)
-      ? unit.specialAbilities
-      : [],
+    abilities: unit.abilities ?? [],
     immunities: Array.isArray(unit.immunities) ? unit.immunities : [],
     knownSpells: Array.isArray(unit.knownSpells) ? unit.knownSpells : [],
     groupId: unit.groupId || null,
@@ -77,7 +75,7 @@ function emptyUnitFormDefaults(): Partial<Unit> {
     maxHp: 10,
     proficiencyBonus: 2,
     attacks: [],
-    specialAbilities: [],
+    abilities: [],
     immunities: [],
     knownSpells: [],
     avatar: null,
@@ -109,6 +107,10 @@ export default function EditUnitPage({
 
   const [formData, setFormData] = useState<Partial<Unit>>(emptyUnitFormDefaults);
 
+  const [abilityErrors, setAbilityErrors] = useState(0);
+
+  const abilitiesValid = abilityErrors === 0;
+
   /** Коли дані з сервера «добудовуються» (race, група), треба знову синхронізувати форму — не лише за unit.id */
   const lastServerSyncKeyRef = useRef<string | null>(null);
 
@@ -135,6 +137,8 @@ export default function EditUnitPage({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!abilitiesValid) return;
 
     updateUnitMutation.mutate(
       {
@@ -254,14 +258,12 @@ export default function EditUnitPage({
               onChange={handleFormDataChange}
             />
 
-            <UnitSpecialAbilities
-              formData={formData}
-              spells={spells}
-              onChange={(abilities) =>
-                handleFormDataChange({
-                  specialAbilities: abilities as Unit["specialAbilities"],
-                })
-              }
+            <AbilityListEditor
+              campaignId={id}
+              value={formData.abilities ?? []}
+              onChange={(abilities) => handleFormDataChange({ abilities })}
+              issues={unit?.abilityIssues}
+              onValidityChange={(_, n) => setAbilityErrors(n)}
             />
 
             <UnitKnownSpells
@@ -271,10 +273,10 @@ export default function EditUnitPage({
             />
 
             <div className="flex gap-2 pt-4">
-              <Button type="submit" disabled={updateUnitMutation.isPending}>
+              <Button type="submit" disabled={updateUnitMutation.isPending || !abilitiesValid}>
                 {updateUnitMutation.isPending
                   ? "Збереження..."
-                  : "Зберегти зміни"}
+                  : withAbilityErrors("Зберегти зміни", abilityErrors)}
               </Button>
               <Button
                 type="button"

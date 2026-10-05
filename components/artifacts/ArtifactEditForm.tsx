@@ -2,12 +2,6 @@
 
 import { useRouter } from "next/navigation";
 
-import {
-  artifactBonusesFromDb,
-  artifactEffectScopeDraftFromDb,
-  artifactModifierDraftsFromDb,
-  passiveSkillEffectsFromDb,
-} from "./artifact-combat-draft";
 import type { ArtifactData, ArtifactSetOption } from "./ArtifactEditForm-types";
 import { ArtifactForm } from "./ArtifactForm";
 
@@ -27,8 +21,6 @@ export function ArtifactEditForm({
 }: ArtifactEditFormProps) {
   const router = useRouter();
 
-  const passive = artifact.passiveAbility as Record<string, unknown> | null;
-
   return (
     <ArtifactForm
       campaignId={campaignId}
@@ -36,7 +28,6 @@ export function ArtifactEditForm({
       mode="edit"
       title="Редагувати артефакт"
       description="Зміни зберігаються при натисканні кнопки"
-      idPrefix="artifact-edit"
       submitLabel="Зберегти"
       submitLabelSaving="Збереження..."
       cancelHref={`/campaigns/${campaignId}/dm/artifacts`}
@@ -54,14 +45,9 @@ export function ArtifactEditForm({
         slot: artifact.slot,
         icon: artifact.icon || "",
         setId: artifact.setId,
-        effectName: typeof passive?.name === "string" ? passive.name : "",
-        effectDescription:
-          typeof passive?.description === "string" ? passive.description : "",
-        bonuses: artifactBonusesFromDb(artifact.bonuses),
-        modifiers: artifactModifierDraftsFromDb(artifact.modifiers),
-        passiveEffects: passiveSkillEffectsFromDb(artifact.passiveAbility),
-        effectScopeDraft: artifactEffectScopeDraftFromDb(artifact.passiveAbility),
-        existingPassive: passive,
+        abilities: artifact.abilities,
+        abilityIssues: artifact.abilityIssues,
+        weapon: artifact.weapon,
       }}
       onSubmit={async (payload) => {
         await updateArtifact(campaignId, artifact.id, payload);

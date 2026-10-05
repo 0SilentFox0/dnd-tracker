@@ -6,30 +6,17 @@ import Link from "next/link";
 import { SkillCardActionsMenu } from "./SkillCardActionsMenu";
 import { SkillCardDeleteDialog } from "./SkillCardDeleteDialog";
 
+import { AbilitySummary } from "@/components/abilities";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
-import {
-  AbilityBonusIcons,
-  SkillStatsIcons,
-} from "@/components/skills/icons/AbilityBonusIcons";
-import {
-  SkillCardEffectsList,
-  SkillCardTriggersList,
-} from "@/components/skills/list/ui";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useMainSkills, useUpdateSkill } from "@/lib/hooks/skills";
 import {
-  getSkillBonuses,
-  getSkillCombatStats,
   getSkillDescription,
-  getSkillEffects,
   getSkillIcon,
   getSkillId,
   getSkillMainSkillId,
   getSkillName,
   getSkillSpell,
-  getSkillTriggers,
 } from "@/lib/utils/skills/skill-helpers";
 import type { GroupedSkill, Skill } from "@/types/skills";
 
@@ -67,15 +54,9 @@ export function SkillCard({
 
   const skillIcon = getSkillIcon(skill);
 
-  const skillBonuses = getSkillBonuses(skill);
-
-  const combatStats = getSkillCombatStats(skill);
-
   const skillSpell = getSkillSpell(skill);
 
-  const effects = getSkillEffects(skill);
-
-  const triggers = getSkillTriggers(skill);
+  const abilitySummary = skill.abilitySummary ?? [];
 
   const handleConfirmRemove = () => {
     onRemove?.(skillId);
@@ -154,101 +135,7 @@ export function SkillCard({
         )}
 
         <div className={printMode ? "space-y-1 mb-1.5" : "space-y-2 mb-3"}>
-          {Object.keys(skillBonuses || {}).length > 0 && (
-            <div className="flex flex-col gap-1">
-              <span className="text-xs font-semibold text-muted-foreground">
-                Бонуси:
-              </span>
-              <AbilityBonusIcons bonuses={skillBonuses} />
-            </div>
-          )}
-
-          {(combatStats.armor ||
-            combatStats.physicalResistance ||
-            combatStats.magicalResistance) && (
-            <div className="flex flex-col gap-1">
-              <span className="text-xs font-semibold text-muted-foreground">
-                Захист:
-              </span>
-              <SkillStatsIcons
-                armor={combatStats.armor}
-                physicalResistance={combatStats.physicalResistance}
-                magicalResistance={combatStats.magicalResistance}
-              />
-            </div>
-          )}
-
-          {(combatStats.damage || combatStats.speed) && (
-            <div className="text-xs text-muted-foreground space-y-0.5">
-              {combatStats.damage != null && (
-                <div>Шкода: {combatStats.damage}</div>
-              )}
-              {combatStats.speed != null && (
-                <div>Швидкість: {combatStats.speed}</div>
-              )}
-            </div>
-          )}
-
-          <div className="flex flex-wrap gap-2 items-center">
-            {printMode ? (
-              combatStats.affectsDamage && (
-                <Badge variant="secondary" className="text-xs font-normal">
-                  Впливає на шкоду
-                  {combatStats.damageType
-                    ? `: ${
-                        combatStats.damageType === "melee"
-                          ? "ближній бій"
-                          : combatStats.damageType === "ranged"
-                            ? "дальній бій"
-                            : "магія"
-                      }`
-                    : ""}
-                </Badge>
-              )
-            ) : (
-              <>
-                <label className="flex items-center gap-1.5 cursor-pointer">
-                  <Checkbox
-                    checked={combatStats.affectsDamage ?? false}
-                    onCheckedChange={(checked) => {
-                      const next = !!checked;
-
-                      const baseStats =
-                        "combatStats" in skill ? (skill.combatStats as Record<string, unknown>) ?? {} : {};
-
-                      updateSkillMutation.mutate({
-                        skillId,
-                        data: {
-                          combatStats: {
-                            ...baseStats,
-                            affectsDamage: next,
-                            damageType:
-                              next && !combatStats.damageType
-                                ? "melee"
-                                : combatStats.damageType ?? undefined,
-                          },
-                        },
-                      });
-                    }}
-                    disabled={updateSkillMutation.isPending}
-                  />
-                  <span className="text-xs font-medium">Впливає на шкоду</span>
-                </label>
-                {combatStats.affectsDamage && combatStats.damageType && (
-                  <Badge variant="secondary" className="text-xs font-normal">
-                    {combatStats.damageType === "melee"
-                      ? "ближній бій"
-                      : combatStats.damageType === "ranged"
-                        ? "дальній бій"
-                        : "магія"}
-                  </Badge>
-                )}
-              </>
-            )}
-          </div>
-
-          <SkillCardEffectsList effects={effects} />
-          <SkillCardTriggersList triggers={triggers} />
+          {abilitySummary.length > 0 && <AbilitySummary lines={abilitySummary} />}
 
           {skillSpell && (
             <div className="text-xs text-muted-foreground">

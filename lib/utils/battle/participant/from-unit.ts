@@ -11,9 +11,13 @@ import { AttackType } from "@/lib/constants/battle";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { bakePassives } from "@/lib/utils/abilities/build/bake";
 import { collectUnitAbilities } from "@/lib/utils/abilities/build/collect";
+import { immunityAbilities } from "@/lib/utils/abilities/build/immunities";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { logger } from "@/lib/utils/logger";
+import { getUnitImmunities } from "@/lib/utils/races/race-effects";
 import type { BattleParticipant } from "@/types/battle";
+import type { Race } from "@/types/races";
+import type { Unit } from "@/types/units";
 
 /**
  * Створює BattleParticipant з Unit
@@ -143,7 +147,10 @@ export async function createBattleParticipantFromUnit(
       attacks: battleAttacks,
       activeEffects: [],
       equippedArtifacts: [],
-      resolvedAbilities: collectUnitAbilities(unit, race),
+      resolvedAbilities: [
+        ...collectUnitAbilities(unit, race),
+        ...immunityAbilities(getUnitImmunities(unit as unknown as Unit, race as unknown as Race | null), { type: "unit", id: unit.id }),
+      ],
       spellEnhancers: [],
       abilityUsage: {},
       pendingExtraActions: 0,

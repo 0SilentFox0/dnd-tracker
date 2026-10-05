@@ -2,6 +2,7 @@ import { DMSkillsPageClient } from "./page-client";
 
 import { requireCampaignDM } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
+import { withAbilitySummary } from "@/lib/utils/abilities/summary";
 import type { SkillTriggers } from "@/types/skill-triggers";
 
 export default async function DMSkillsPage({
@@ -13,7 +14,7 @@ export default async function DMSkillsPage({
 
   await requireCampaignDM(id);
 
-  const skills = await prisma.skill.findMany({ omit: { abilities: true },
+  const skills = await prisma.skill.findMany({
     where: {
       campaignId: id,
     },
@@ -27,7 +28,7 @@ export default async function DMSkillsPage({
   });
 
   // Перетворюємо дані з Prisma у правильний тип Skill
-  const transformedSkills = skills.map((skill) => ({
+  const transformedSkills = skills.map((row) => withAbilitySummary("skill", row)).map((skill) => ({
     ...skill,
     bonuses: typeof skill.bonuses === "object" && skill.bonuses !== null
       ? (skill.bonuses as Record<string, number>)

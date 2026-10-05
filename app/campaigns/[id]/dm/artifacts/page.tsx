@@ -22,6 +22,7 @@ import {
 import { requireCampaignDM } from "@/lib/campaigns/access";
 import { ARTIFACT_SLOT_OPTIONS } from "@/lib/constants/artifacts";
 import { prisma } from "@/lib/db";
+import { abilitySummary } from "@/lib/utils/abilities/summary";
 
 export default async function DMArtifactsPage({
   params,
@@ -118,7 +119,7 @@ export default async function DMArtifactsPage({
                         {set.description}
                       </p>
                     )}
-                    <ArtifactSetBonusDisplay setBonus={set.setBonus} />
+                    <ArtifactSetBonusDisplay setBonus={set.setBonus} abilitySummary={abilitySummary("artifactSet", set)} />
                     <div className="space-y-3">
                       {set.artifacts.map((artifact) => (
                         <ArtifactCard
@@ -131,7 +132,7 @@ export default async function DMArtifactsPage({
                             rarity: artifact.rarity,
                             icon: artifact.icon,
                             description: artifact.description,
-                            passiveAbility: artifact.passiveAbility,
+                            abilitySummary: abilitySummary("artifact", artifact),
                             artifactSet: { name: set.name },
                           }}
                           variant="compact"
@@ -183,7 +184,7 @@ export default async function DMArtifactsPage({
                           rarity: artifact.rarity,
                           icon: artifact.icon,
                           description: artifact.description,
-                          passiveAbility: artifact.passiveAbility,
+                          abilitySummary: abilitySummary("artifact", artifact),
                           artifactSet: artifact.artifactSet,
                         }}
                         variant="full"

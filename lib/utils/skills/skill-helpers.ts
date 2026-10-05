@@ -2,8 +2,6 @@
  * Утиліти для роботи зі скілами (підтримка обох структур)
  */
 
-import type { SkillEffect } from "@/types/battle";
-import type { SkillTriggers } from "@/types/skill-triggers";
 import type { GroupedSkill, Skill } from "@/types/skills";
 
 /**
@@ -57,13 +55,6 @@ export function getSkillIsRacial(skill: Skill | GroupedSkill): boolean {
 }
 
 /**
- * Отримує бонуси скіла
- */
-export function getSkillBonuses(skill: Skill | GroupedSkill): Record<string, number> {
-  return skill.bonuses || {};
-}
-
-/**
  * Отримує mainSkillId скіла
  */
 export function getSkillMainSkillId(skill: Skill | GroupedSkill): string | null | undefined {
@@ -73,52 +64,6 @@ export function getSkillMainSkillId(skill: Skill | GroupedSkill): string | null 
 
   // TypeScript тепер знає, що це Skill
   return (skill as Skill).mainSkillId;
-}
-
-/**
- * Отримує combat stats скіла
- */
-export function getSkillCombatStats(skill: Skill | GroupedSkill): {
-  damage?: number;
-  armor?: number;
-  speed?: number;
-  physicalResistance?: number;
-  magicalResistance?: number;
-  effects?: SkillEffect[];
-  affectsDamage?: boolean;
-  damageType?: "melee" | "ranged" | "magic" | null;
-} {
-  if ("combatStats" in skill) {
-    return skill.combatStats || {};
-  }
-
-  const skillData = skill as Skill;
-
-  return {
-    damage: skillData.damage || undefined,
-    armor: skillData.armor || undefined,
-    speed: skillData.speed || undefined,
-    physicalResistance: skillData.physicalResistance || undefined,
-    magicalResistance: skillData.magicalResistance || undefined,
-  };
-}
-
-/**
- * Отримує ефекти скіла (структуровані)
- */
-export function getSkillEffects(skill: Skill | GroupedSkill): SkillEffect[] {
-  if ("combatStats" in skill && skill.combatStats?.effects) {
-    return skill.combatStats.effects;
-  }
-
-  return [];
-}
-
-/**
- * Отримує тригери скіла
- */
-export function getSkillTriggers(skill: Skill | GroupedSkill): SkillTriggers {
-  return skill.skillTriggers ?? [];
 }
 
 /**

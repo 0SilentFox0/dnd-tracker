@@ -6,6 +6,7 @@
 import { unstable_cache } from "next/cache";
 
 import { prisma } from "@/lib/db";
+import { withAbilitySummary } from "@/lib/utils/abilities/summary";
 
 const REFERENCE_REVALIDATE_SECONDS = 300; // 5 хвилин
 
@@ -28,11 +29,13 @@ export async function getCachedSpells(campaignId: string) {
 export async function getCachedUnits(campaignId: string) {
   return unstable_cache(
     async () =>
-      prisma.unit.findMany({ omit: { abilities: true },
-        where: { campaignId },
-        include: { unitGroup: true },
-        orderBy: { createdAt: "desc" },
-      }),
+      prisma.unit
+        .findMany({
+          where: { campaignId },
+          include: { unitGroup: true },
+          orderBy: { createdAt: "desc" },
+        })
+        .then((units) => units.map((u) => withAbilitySummary("unit", u))),
     [`units`, campaignId],
     {
       tags: [`units-${campaignId}`],

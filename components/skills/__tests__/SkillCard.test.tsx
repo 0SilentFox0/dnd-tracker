@@ -98,26 +98,15 @@ describe("SkillCard", () => {
     expect(screen.queryByText("Опис скіла")).not.toBeInTheDocument();
   });
 
-  it("рендерить тригери, якщо вони є", () => {
-    const skill = minimalGroupedSkill({
-      basicInfo: { name: "СкілЗТригером", description: undefined },
-      skillTriggers: [
-        { type: "simple", trigger: "onHit", modifiers: undefined },
-      ],
-    });
+  it("показує опис умінь", () => {
+    const skill = minimalGroupedSkill({ abilitySummary: ["Пасивно · шкода (ближня) +10%"] });
 
     render(<SkillCard skill={skill} campaignId="c1" />);
-    expect(screen.getByText("СкілЗТригером")).toBeInTheDocument();
-    expect(screen.getByText(/Тригери/)).toBeInTheDocument();
-    expect(screen.getByText("При влучанні")).toBeInTheDocument();
+    expect(screen.getByText("Пасивно · шкода (ближня) +10%")).toBeInTheDocument();
   });
 
-  it("рендерить бонуси, якщо вони є", () => {
-    const skill = minimalGroupedSkill({
-      bonuses: { strength: 2 },
-    });
-
-    render(<SkillCard skill={skill} campaignId="c1" />);
-    expect(screen.getByText("Бонуси:")).toBeInTheDocument();
+  it("не показує старий перемикач «Впливає на шкоду»", () => {
+    render(<SkillCard skill={minimalGroupedSkill()} campaignId="c1" />);
+    expect(screen.queryByText("Впливає на шкоду")).not.toBeInTheDocument();
   });
 });

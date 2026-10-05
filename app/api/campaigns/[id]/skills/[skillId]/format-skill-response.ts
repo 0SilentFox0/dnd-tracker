@@ -1,3 +1,5 @@
+import { readAbilities } from "@/lib/utils/abilities/legacy/read";
+
 /** Форматує один скіл з Prisma у згруповану структуру для фронтенду */
 export function formatSkillResponse(skill: {
   id: string;
@@ -26,6 +28,7 @@ export function formatSkillResponse(skill: {
   spellData: unknown;
   spellEnhancementData: unknown;
   skillTriggers: unknown;
+  abilities?: unknown;
   image: string | null;
   createdAt: Date;
   spell?: { id: string; name: string } | null;
@@ -108,9 +111,13 @@ export function formatSkillResponse(skill: {
       ? (skill.mainSkillData as Record<string, unknown>)
       : { mainSkillId: skill.mainSkillId || undefined };
 
+  const { abilities, issues: abilityIssues } = readAbilities("skill", skill);
+
   return {
     id: skill.id,
     campaignId: skill.campaignId,
+    abilities,
+    abilityIssues,
     basicInfo,
     image: skill.image ?? null,
     appearanceDescription: (skill as { appearanceDescription?: string | null }).appearanceDescription ?? null,

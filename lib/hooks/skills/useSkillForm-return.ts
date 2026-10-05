@@ -5,9 +5,9 @@
 import type React from "react";
 
 import { SpellEnhancementType } from "@/lib/constants/spell-enhancement";
-import type { SkillEffect } from "@/types/battle";
+import type { ConversionIssue } from "@/lib/utils/abilities/legacy/types";
+import type { Ability } from "@/lib/utils/abilities/schema";
 import type { MainSkill } from "@/types/main-skills";
-import type { SkillTriggers } from "@/types/skill-triggers";
 
 export interface SkillFormReturnParams {
   isSaving: boolean;
@@ -20,16 +20,12 @@ export interface SkillFormReturnParams {
   setName: (v: string) => void;
   setDescription: (v: string) => void;
   setIcon: (v: string) => void;
-  effects: SkillEffect[];
-  minTargets: string;
-  maxTargets: string;
-  setEffects: React.Dispatch<React.SetStateAction<SkillEffect[]>>;
-  setMinTargets: (v: string) => void;
-  setMaxTargets: (v: string) => void;
-  affectsDamage: boolean;
-  damageType: "melee" | "ranged" | "magic" | null;
-  setAffectsDamage: (v: boolean) => void;
-  setDamageType: (v: "melee" | "ranged" | "magic" | null) => void;
+  abilities: Ability[];
+  abilityIssues: ConversionIssue[];
+  abilitiesValid: boolean;
+  abilityErrors: number;
+  setAbilities: (v: Ability[]) => void;
+  setAbilityErrors: (n: number) => void;
   spellId: string | null;
   spellGroupId: string | null;
   grantedSpellId: string | null;
@@ -51,8 +47,6 @@ export interface SkillFormReturnParams {
   handleEnhancementTypeToggle: (type: SpellEnhancementType) => void;
   mainSkillId: string | null;
   setMainSkillId: (v: string | null) => void;
-  skillTriggers: SkillTriggers;
-  setSkillTriggers: React.Dispatch<React.SetStateAction<SkillTriggers>>;
   handleSubmit: (e: React.FormEvent) => Promise<void>;
 }
 
@@ -68,16 +62,13 @@ export function buildSkillFormReturn(p: SkillFormReturnParams) {
       icon: p.icon,
       setters: { setName: p.setName, setDescription: p.setDescription, setIcon: p.setIcon },
     },
-    effectsGroup: {
-      effects: p.effects,
-      minTargets: p.minTargets,
-      maxTargets: p.maxTargets,
-      setters: { setEffects: p.setEffects, setMinTargets: p.setMinTargets, setMaxTargets: p.setMaxTargets },
-    },
-    damageGroup: {
-      affectsDamage: p.affectsDamage,
-      damageType: p.damageType,
-      setters: { setAffectsDamage: p.setAffectsDamage, setDamageType: p.setDamageType },
+    abilitiesGroup: {
+      abilities: p.abilities,
+      issues: p.abilityIssues,
+      valid: p.abilitiesValid,
+      errors: p.abilityErrors,
+      setAbilities: p.setAbilities,
+      onValidityChange: (_ok: boolean, n: number) => p.setAbilityErrors(n),
     },
     spell: {
       spellId: p.spellId,
@@ -105,10 +96,6 @@ export function buildSkillFormReturn(p: SkillFormReturnParams) {
     mainSkill: {
       mainSkillId: p.mainSkillId,
       setters: { setMainSkillId: p.setMainSkillId },
-    },
-    skillTriggers: {
-      skillTriggers: p.skillTriggers,
-      setters: { setSkillTriggers: p.setSkillTriggers },
     },
     handleSubmit: p.handleSubmit,
   };

@@ -4,6 +4,7 @@ import { InfoReferenceClient } from "@/components/campaigns/info/InfoReferenceCl
 import { Button } from "@/components/ui/button";
 import { requireCampaignMember } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
+import { abilitySummary } from "@/lib/utils/abilities/summary";
 
 export default async function CampaignInfoPage({
   params,
@@ -15,7 +16,8 @@ export default async function CampaignInfoPage({
   const { isDM } = await requireCampaignMember(campaignId);
 
   const [skills, spells] = await Promise.all([
-    prisma.skill.findMany({ omit: { abilities: true },
+    prisma.skill.findMany({
+      omit: { spellEnhancementData: true },
       where: { campaignId },
       include: {
         mainSkill: true,
@@ -42,9 +44,7 @@ export default async function CampaignInfoPage({
       name: (basicInfo.name as string) || s.name,
       description: (basicInfo.description as string) || s.description,
       appearanceDescription: (s as { appearanceDescription?: string | null }).appearanceDescription ?? null,
-      combatStats: s.combatStats,
-      bonuses: s.bonuses,
-      skillTriggers: s.skillTriggers,
+      abilitySummary: abilitySummary("skill", s),
       mainSkillId: s.mainSkill?.id ?? null,
       mainSkillName: s.mainSkill?.name ?? null,
       mainSkillIcon: s.mainSkill?.icon ?? null,

@@ -15,7 +15,9 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { getHeroMaxHp } from "@/lib/constants/hero-scaling";
 import { bakePassives } from "@/lib/utils/abilities/build/bake";
 import { collectCharacterAbilities } from "@/lib/utils/abilities/build/collect";
+import { immunityAbilities } from "@/lib/utils/abilities/build/immunities";
 import { findCompletedSets } from "@/lib/utils/battle/artifact-sets";
+import { getCharacterImmunities } from "@/lib/utils/characters/character-race-effects";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -81,12 +83,15 @@ export async function createBattleParticipantFromCharacter(
     hpMultiplier: hpMult,
   });
 
-  const resolvedAbilities = collectCharacterAbilities({
+  const resolvedAbilities = [
+    ...collectCharacterAbilities({
     skills,
     race,
     artifacts: artifactRows.map(({ row, slot }) => ({ ...row, slot })),
     completedSets: completed.sets,
-  });
+  }),
+    ...immunityAbilities(getCharacterImmunities(character, race as never), { type: "character", id: character.id }),
+  ];
 
   const participant: BattleParticipant = {
     basicInfo: {

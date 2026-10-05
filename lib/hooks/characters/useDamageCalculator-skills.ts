@@ -8,10 +8,7 @@ import { resolveUnlockedIdToSkill } from "./useDamageCalculator-helpers";
 
 import type { SkillAffectingDamage } from "@/components/characters/stats/damage-calculator-utils";
 
-function isAffectsDamage(skill: {
-  combatStats?: unknown;
-  affectsDamage?: unknown;
-}): boolean {
+function legacyAffectsDamage(skill: { combatStats?: unknown; affectsDamage?: unknown }): boolean {
   const cs = skill.combatStats as { affectsDamage?: unknown } | undefined;
 
   const val =
@@ -24,6 +21,23 @@ function isAffectsDamage(skill: {
   return false;
 }
 
+type DamageType = "melee" | "ranged" | "magic" | null;
+
+/** Prefers the server-derived `damageAffinity` (from abilities); legacy `combatStats` only for old payloads. */
+export function skillDamageAffinity(skill: {
+  combatStats?: unknown;
+  affectsDamage?: unknown;
+  damageAffinity?: { affectsDamage: boolean; damageType: DamageType };
+}): { affectsDamage: boolean; damageType: DamageType } {
+  if (skill.damageAffinity) return skill.damageAffinity;
+
+  const cs = skill.combatStats as { damageType?: DamageType } | undefined;
+
+  return { affectsDamage: legacyAffectsDamage(skill), damageType: cs?.damageType ?? null };
+}
+
+const isAffectsDamage = (skill: Parameters<typeof skillDamageAffinity>[0]) => skillDamageAffinity(skill).affectsDamage;
+
 export function useDamageCalculatorSkills(
   skillTreeProgress: Record<string, { unlockedSkills?: string[] } | undefined> | undefined,
   skillsList: Array<{
@@ -33,6 +47,7 @@ export function useDamageCalculatorSkills(
     combatStats?: { affectsDamage?: unknown; damageType?: string | null; effects?: Array<{ stat?: string; type?: string; value?: unknown }> };
     mainSkillData?: { mainSkillId?: string };
     bonuses?: Record<string, number>;
+    damageAffinity?: { affectsDamage: boolean; damageType: DamageType };
   }>,
 ) {
   const unlockedSkillIds = useMemo(() => {
@@ -80,7 +95,7 @@ export function useDamageCalculatorSkills(
           (s.basicInfo as { name?: string } | undefined)?.name ??
           (s as { name?: string }).name ??
           "—",
-        damageType: (s.combatStats?.damageType as "melee" | "ranged" | "magic" | null) ?? null,
+        damageType: skillDamageAffinity(s).damageType,
       }));
   }, [skillsList, resolvedSkillIds]);
 

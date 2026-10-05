@@ -1,8 +1,13 @@
+import type { ConversionIssue } from "@/lib/utils/abilities/legacy/types";
+import type { Ability } from "@/lib/utils/abilities/schema";
 /**
  * Типи для юнітів
  */
 
 export interface Unit {
+  abilities?: Ability[];
+  abilitySummary?: string[];
+  abilityIssues?: ConversionIssue[];
   id: string;
   campaignId: string;
   name: string;

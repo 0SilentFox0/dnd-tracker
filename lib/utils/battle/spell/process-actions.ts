@@ -208,6 +208,12 @@ export function buildSpellSuccessAction(
     return { participantId: st.participantId, ability, roll: st.roll, result };
   });
 
+  const dealt = hpChanges.reduce((sum, h) => sum + Math.max(0, h.change), 0);
+
+  const planned = spellCalculation.totalDamage || 0;
+
+  const damageText = dealt < planned ? `${dealt} урону (${planned - dealt} поглинуто опором/імунітетом)` : `${planned} урону`;
+
   return {
     id: `spell-${caster.basicInfo.id}-${Date.now()}`,
     battleId,
@@ -252,7 +258,7 @@ export function buildSpellSuccessAction(
             }))
           : undefined,
     },
-    resultText: `${caster.basicInfo.name} використав ${spell.name}${spell.damageType === "damage" ? ` завдавши ${spellCalculation.totalDamage || 0} урону` : spell.damageType === "heal" ? ` вилікувавши ${spellCalculation.totalHealing || 0} HP` : ""}`,
+    resultText: `${caster.basicInfo.name} використав ${spell.name}${spell.damageType === "damage" ? ` завдавши ${damageText}` : spell.damageType === "heal" ? ` вилікувавши ${spellCalculation.totalHealing || 0} HP` : ""}`,
     hpChanges,
     isCancelled: false,
   };

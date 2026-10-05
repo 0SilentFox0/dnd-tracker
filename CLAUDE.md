@@ -57,7 +57,7 @@ Page `app/campaigns/[id]/battles/[battleId]/page.tsx` → `useBattleSceneLogic` 
 - **Turn advance** has one engine: `lib/utils/battle/turn/advanceTurn` (used by next-turn and attack with `endTurn`).
 - **Client compatibility:** responses and `battle-updated` events keep the legacy `BattleScene` shape; the log is sent incrementally (`battleLogMode: "append"`) and merged by `mergeBattleCache`, which also ignores stale `version`s. `actionIndex` in the client log is the event `seq` (rollback target).
 - **Legacy JSON columns** on `battle_scenes` (`initiativeOrder`, `battleLog`, `pendingSummons`) are no longer read or written; they will be dropped by a contract migration.
-- **Abilities** (skills, races, artifacts, sets, units) share one model in `lib/utils/abilities/`: engine code fires typed events into `runAbilities` (limits, chance, `lethalDamage` → `kill`) and reads every stat/damage/resistance/flag bonus via `collectModifiers` — never from raw skill JSON. Owners have an `abilities JSONB` column; until the contract migration, `NULL` falls back to `legacy/read` converters and save routes dual-write it from the old fields (`legacy/sync`).
+- **Abilities** (skills, races, artifacts, sets, units) share one model in `lib/utils/abilities/`: engine code fires typed events into `runAbilities` (limits, chance, `lethalDamage` → `kill`) and reads every stat/damage/resistance/flag bonus via `collectModifiers` — never from raw skill JSON. Owners have an `abilities JSONB` column; edit forms write `abilities` directly through `AbilityListEditor` (`components/abilities`); `NULL` falls back to `legacy/read` converters until the contract migration.
 - When changing battle behavior, expect to touch the mutation, the engine util, and possibly the hook and UI under `components/battle/`.
 
 ### Path alias & imports
@@ -108,5 +108,5 @@ These trip people up repeatedly — read before touching the DB or `vercel.json`
 
 - New API endpoint → `app/api/campaigns/[id]/<domain>/route.ts`, then `lib/api/<domain>.ts`, then a hook in `lib/hooks/<domain>/`, then types in `types/<domain>.ts`.
 - New battle mechanic → start in `lib/utils/battle/` (server-side rules) and the matching handler under `app/api/campaigns/[id]/battles/[battleId]/`. UI lives in `components/battle/`.
-- D&D rule constants (abilities, alignments, spell slots, hero scaling, skill triggers, critical effects, artifacts) → `lib/constants/`. Reuse before adding new ones.
+- D&D rule constants (abilities, alignments, spell slots, hero scaling, critical effects, artifacts) → `lib/constants/`. Reuse before adding new ones.
 - Prisma schema lives in `prisma/schema.prisma`; migrations in `prisma/migrations/`. After editing the schema, run `pnpm exec prisma generate` (and create a migration if the change is structural).

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { RaceEditForm } from "@/components/races/RaceEditForm";
 import { requireCampaignDM } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
+import { readAbilities } from "@/lib/utils/abilities/legacy/read";
 import type { Race } from "@/types/races";
 
 export default async function EditRacePage({
@@ -26,8 +27,12 @@ export default async function EditRacePage({
   }
 
   // Конвертуємо Prisma дані в формат Race
+  const { abilities, issues: abilityIssues } = readAbilities("race", raceData);
+
   const race: Race = {
     ...raceData,
+    abilities,
+    abilityIssues,
     availableSkills: Array.isArray(raceData.availableSkills)
       ? (raceData.availableSkills as string[])
       : [],

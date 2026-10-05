@@ -87,7 +87,8 @@
 | **`battle/`** | Бій: картки учасників (`cards/`), діалоги атаки/заклинань/моралі (`dialogs/`), списки, оверлеї, панелі, представлення ходу (`views/`). |
 | **`characters/`** | Персонаж: basic info, ability scores, combat params, skills, spells, artifacts, stats (damage calculator, HP preview). |
 | **`campaigns/`** | Кампанія: join, members, info, settings. |
-| **`skills/`** | Скіли: форми створення/редагування (`form/`), списки, картки, тригери, ефекти, діалоги (наприклад CreateGroupDialog). |
+| **`abilities/`** | Редактор умінь для всіх власників: акордеон (`AbilityListEditor`), секції «Коли / Умова / Ліміти / Що робить», поля з реєстру (`fields/`), шаблони й «Скопіювати з…», `AbilitySummary` для карток. |
+| **`skills/`** | Скіли: форми створення/редагування (`form/`), списки, картки, діалоги (наприклад CreateGroupDialog). |
 | **`skill-tree/`** | Дерево прокачки: `core/` (CircularSkillTree, SkillTreeCard, SkillTreeContent), `elements/`, `ui/`, `utils/`. |
 | **`spells/`** | Заклинання: списки, групи, діалоги, форми. |
 | **`races/`** | Раси: форми редагування, стати, слоти заклинань. |
@@ -155,7 +156,7 @@ React-хуки згруповані по папках за доменом; ко�
 - **`registry/`** — реєстр тригерів, умов і ефектів: `matches` / `evaluate` / `apply`, `describe`, `fields` для UI.
 - **`engine/`** — `runAbilities` (один виконавець подій бою з лімітами й шансом), `resolveDowned` (летальна шкода → вбивство), `collectModifiers` (постійні модифікатори: пасивки, аури, таймові ефекти).
 - **`build/`** — збирання умінь учасника («найвищий рівень у лінії», школа магії) і запікання статів при побудові.
-- **`legacy/`** — конвертер старих форматів (`skillTriggers`, `combatStats`, `passiveAbility`, `setBonus`, `specialAbilities`, старі snapshot), читання колонки `abilities` із запасним варіантом, подвійний запис і звіт `pnpm convert-abilities`.
+- **`legacy/`** — конвертер старих форматів (`skillTriggers`, `combatStats`, `passiveAbility`, `setBonus`, `specialAbilities`, старі snapshot), читання колонки `abilities` із запасним варіантом (`readAbilities`) і звіт `pnpm convert-abilities`. Форми пишуть `abilities` напряму; `summary.ts` рахує короткі описи для списків.
 
 #### `lib/utils/skills/`
 
@@ -177,7 +178,7 @@ React-хуки згруповані по папках за доменом; ко�
 
 ### 3.4 `lib/constants/`
 
-Константи D&D та гри: abilities, alignment, battle (ParticipantSide, AttackType тощо), hero-scaling, spell-enhancement, skill-triggers, critical-effects, artifacts. Використовуються в логіці та формах.
+Константи D&D та гри: abilities, alignment, battle (ParticipantSide, AttackType тощо), hero-scaling, spell-enhancement, critical-effects, artifacts. Використовуються в логіці та формах.
 
 ### 3.5 `lib/providers/`
 
@@ -233,6 +234,7 @@ React-провайдери: **`query-provider.tsx`** (TanStack Query), можл�
 - **Дані:** `seed-artifacts.ts`, `seed-mock-battle-data.ts`, `seed-mock-battles.ts`, `reset-mock-battle-data.ts`, `delete-mock-battle-data.ts`, `redistribute-character-spell-slots.ts`.
 - **Тести/симуляції:** `run-spells-testing.ts`, `setup-battle-test-3v5.ts`.
 - **Конвертація умінь:** `pnpm convert-abilities` (dry-run зі звітом у `docs/reports/`; `--apply` / `--force`).
+- **Симуляція бою:** `pnpm simulate-battle` — лише на локальній БД: створює окрему кампанію (персонажі з різними прокачками й артефактами, юніти з уміннями, частина даних у старому форматі) і проганяє бій через ті самі mutation-функції, що й API, з перевірками ефектів.
 - **Інше:** `fetch-skill-structure.ts`, `artifact-icon-map.ts`, `update-artifact-icons.ts`, `import-spells-from-csv.ts`.
 
 Детальніший опис mock-даних — у **`scripts/README-MOCK-DATA.md`**.

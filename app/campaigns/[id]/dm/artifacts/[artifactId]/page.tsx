@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { ArtifactEditForm } from "@/components/artifacts/ArtifactEditForm";
 import { requireCampaignDM } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
+import { readAbilities } from "@/lib/utils/abilities/legacy/read";
+import { weaponStatsFromRow } from "@/lib/utils/artifacts/weapon-stats";
 
 export default async function EditArtifactPage({
   params,
@@ -28,6 +30,8 @@ export default async function EditArtifactPage({
     orderBy: { createdAt: "desc" },
   });
 
+  const { abilities, issues } = readAbilities("artifact", artifact);
+
   return (
     <div className="container mx-auto p-4 max-w-4xl">
       <ArtifactEditForm
@@ -40,12 +44,9 @@ export default async function EditArtifactPage({
           slot: artifact.slot,
           icon: artifact.icon,
           setId: artifact.setId,
-          bonuses: artifact.bonuses ?? {},
-          modifiers: artifact.modifiers ?? [],
-          passiveAbility: (artifact.passiveAbility as Record<
-            string,
-            unknown
-          > | null) ?? null,
+          abilities,
+          abilityIssues: issues,
+          weapon: weaponStatsFromRow(artifact),
         }}
         artifactSets={artifactSets}
       />

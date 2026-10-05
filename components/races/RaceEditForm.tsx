@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { getInitialRaceFormData } from "./RaceEditFormUtils";
 import { RaceFormFields } from "./RaceFormFields";
 
+import { withAbilityErrors } from "@/components/abilities";
 import { FormCard } from "@/components/common/FormCard";
 import { useUpdateRace } from "@/lib/hooks/races";
 import { useMainSkills } from "@/lib/hooks/skills";
@@ -27,8 +28,14 @@ export function RaceEditForm({ campaignId, race }: RaceEditFormProps) {
     getInitialRaceFormData(race),
   );
 
+  const [abilityErrors, setAbilityErrors] = useState(0);
+
+  const abilitiesValid = abilityErrors === 0;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!abilitiesValid) return;
 
     const dataToSave: RaceFormData = {
       ...formData,
@@ -55,14 +62,17 @@ export function RaceEditForm({ campaignId, race }: RaceEditFormProps) {
       title="Редагувати расу"
       description="Оновіть інформацію про расу"
       onSubmit={handleSubmit}
-      isSubmitting={updateRaceMutation.isPending}
+      isSubmitting={updateRaceMutation.isPending || !abilitiesValid}
       onCancel={() => router.push(`/campaigns/${campaignId}/dm/races`)}
-      submitLabel="Зберегти"
+      submitLabel={withAbilityErrors("Зберегти", abilityErrors)}
     >
       <RaceFormFields
+        campaignId={campaignId}
         formData={formData}
         setFormData={setFormData}
         mainSkills={mainSkills}
+        abilityIssues={race.abilityIssues}
+        onAbilitiesValidityChange={(_, n) => setAbilityErrors(n)}
       />
     </FormCard>
   );

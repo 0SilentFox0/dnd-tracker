@@ -2,12 +2,10 @@
 
 import { useRouter } from "next/navigation";
 
+import { AbilityListEditor, withAbilityErrors } from "@/components/abilities";
 import { SkillBasicInfo } from "@/components/skills/form/basic";
-import { SkillEffectsEditor } from "@/components/skills/form/effects";
-import { SkillDamageAffinity } from "@/components/skills/form/effects/SkillDamageAffinity";
 import { SkillMainSkillSection } from "@/components/skills/form/main-skill";
 import { SkillSpellSection } from "@/components/skills/form/spell";
-import { SkillTriggersEditor } from "@/components/skills/form/triggers";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,8 +15,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useSkillForm } from "@/lib/hooks/skills";
-import type { SkillEffect } from "@/types/battle";
-import type { SkillTriggers } from "@/types/skill-triggers";
 
 interface SpellOption {
   id: string;
@@ -38,28 +34,7 @@ interface SkillCreateFormProps {
   spells: SpellOption[];
   spellGroups?: SpellGroupOption[];
   initialMainSkills?: MainSkill[];
-  initialData?: Skill | GroupedSkill | {
-    id: string;
-    name: string;
-    description: string | null;
-    icon: string | null;
-    bonuses: unknown;
-    damage: number | null;
-    armor: number | null;
-    speed: number | null;
-    physicalResistance: number | null;
-    magicalResistance: number | null;
-    spellId: string | null;
-    spellGroupId: string | null;
-    grantedSpellId?: string | null;
-    mainSkillId: string | null;
-    spellEnhancementTypes?: unknown;
-    spellEffectIncrease?: number | null;
-    spellTargetChange?: unknown;
-    spellAdditionalModifier?: unknown;
-    spellNewSpellId?: string | null;
-    skillTriggers?: SkillTriggers;
-  };
+  initialData?: Skill | GroupedSkill;
 }
 
 export function SkillCreateForm({
@@ -76,12 +51,10 @@ export function SkillCreateForm({
     isEdit,
     mainSkills,
     basicInfo,
-    effectsGroup,
-    damageGroup,
+    abilitiesGroup,
     spell,
     spellEnhancement,
     mainSkill,
-    skillTriggers: skillTriggersGroup,
     handleSubmit,
   } = useSkillForm(
     campaignId,
@@ -105,22 +78,6 @@ export function SkillCreateForm({
         <form onSubmit={handleSubmit} className="space-y-5">
           <SkillBasicInfo basicInfo={basicInfo} />
 
-          <SkillEffectsEditor
-            effects={effectsGroup.effects as SkillEffect[]}
-            minTargets={effectsGroup.minTargets}
-            maxTargets={effectsGroup.maxTargets}
-            onEffectsChange={effectsGroup.setters.setEffects}
-            onMinTargetsChange={effectsGroup.setters.setMinTargets}
-            onMaxTargetsChange={effectsGroup.setters.setMaxTargets}
-          />
-
-          <SkillDamageAffinity
-            affectsDamage={damageGroup.affectsDamage}
-            damageType={damageGroup.damageType}
-            onAffectsDamageChange={damageGroup.setters.setAffectsDamage}
-            onDamageTypeChange={damageGroup.setters.setDamageType}
-          />
-
           <SkillSpellSection
             campaignId={campaignId}
             spell={spell}
@@ -133,20 +90,21 @@ export function SkillCreateForm({
             mainSkills={mainSkills}
           />
 
-          <SkillTriggersEditor
-            triggers={skillTriggersGroup.skillTriggers}
-            onChange={skillTriggersGroup.setters.setSkillTriggers}
+          <AbilityListEditor
+            campaignId={campaignId}
+            value={abilitiesGroup.abilities}
+            onChange={abilitiesGroup.setAbilities}
+            issues={abilitiesGroup.issues}
+            onValidityChange={abilitiesGroup.onValidityChange}
           />
 
           <div className="flex gap-2">
-            <Button type="submit" disabled={isSaving}>
+            <Button type="submit" disabled={isSaving || !abilitiesGroup.valid}>
               {isSaving
                 ? isEdit
                   ? "Збереження..."
                   : "Створення..."
-                : isEdit
-                ? "Зберегти зміни"
-                : "Створити скіл"}
+                : withAbilityErrors(isEdit ? "Зберегти зміни" : "Створити скіл", abilitiesGroup.errors)}
             </Button>
             <Button
               type="button"

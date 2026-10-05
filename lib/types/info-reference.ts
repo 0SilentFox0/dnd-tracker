@@ -3,9 +3,7 @@ export interface SkillForReference {
   name: string;
   description: string | null;
   appearanceDescription: string | null;
-  combatStats: unknown;
-  bonuses: unknown;
-  skillTriggers: unknown;
+  abilitySummary: string[];
   mainSkillId: string | null;
   mainSkillName: string | null;
   mainSkillIcon: string | null;

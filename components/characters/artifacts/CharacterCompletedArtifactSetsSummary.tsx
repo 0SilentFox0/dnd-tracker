@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 
+import { AbilitySummary } from "@/components/abilities";
 import { PassiveEffectsList } from "@/components/artifacts/PassiveEffectsList";
 import { ArtifactDeltaBadge } from "@/components/characters/stats/ArtifactDeltaBadge";
 import type { CompletedArtifactSetPreview } from "@/lib/utils/artifacts/get-completed-artifact-sets-preview";
@@ -48,7 +49,12 @@ function SetBonusBlock({ item }: { item: CompletedArtifactSetPreview }) {
           {item.parsed.description.trim()}
         </p>
       ) : null}
-      {lines.length > 0 ? (
+      {item.abilitySummary.length > 0 ? (
+        <div className="mt-2">
+          <AbilitySummary lines={item.abilitySummary} />
+        </div>
+      ) : null}
+      {item.abilitySummary.length === 0 && lines.length > 0 ? (
         <ul className="mt-2 space-y-1 text-xs text-foreground">
           {lines.map((line, i) => (
             <li key={i} className="flex flex-wrap items-baseline gap-x-1.5">
@@ -62,7 +68,7 @@ function SetBonusBlock({ item }: { item: CompletedArtifactSetPreview }) {
           ))}
         </ul>
       ) : null}
-      {item.parsed.passiveEffects.length > 0 ? (
+      {item.abilitySummary.length === 0 && item.parsed.passiveEffects.length > 0 ? (
         <div className="mt-2 border-t border-border pt-2">
           <p className="mb-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
             Пасиви сету
@@ -73,7 +79,7 @@ function SetBonusBlock({ item }: { item: CompletedArtifactSetPreview }) {
           />
         </div>
       ) : null}
-      {item.parsed.immuneSpellIds && item.parsed.immuneSpellIds.length > 0 ? (
+      {item.abilitySummary.length === 0 && item.parsed.immuneSpellIds && item.parsed.immuneSpellIds.length > 0 ? (
         <p className="mt-2 text-xs text-muted-foreground">
           Імунітет до заклинань:{" "}
           {item.parsed.immuneSpellIds.slice(0, 6).join(", ")}

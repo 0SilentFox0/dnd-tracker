@@ -9,20 +9,7 @@ import type {
 
 // ---------- Effect type ----------
 
-export const EFFECT_TYPES = [
-  "percent",
-  "flat",
-  "formula",
-  "dice",
-  "flag",
-  "ignore",
-  "stack",
-  "min",
-] as const;
-
-export type EffectType = (typeof EFFECT_TYPES)[number];
-
-export const EFFECT_TYPE_OPTIONS: SelectOption[] = [
+const EFFECT_TYPE_OPTIONS: SelectOption[] = [
   { value: "percent", label: "Відсоток (%)" },
   { value: "flat", label: "Фіксоване число" },
   { value: "formula", label: "Формула" },
@@ -34,11 +21,6 @@ export const EFFECT_TYPE_OPTIONS: SelectOption[] = [
 ];
 
 /** Типи, що потребують текстового вводу (не числового) */
-export const TEXT_VALUE_TYPES: ReadonlySet<string> = new Set(["formula", "dice"]);
-
-/** Типи, що є прапорцями (boolean, не мають числового значення) */
-export const FLAG_VALUE_TYPES: ReadonlySet<string> = new Set(["flag", "ignore"]);
-
 // ---------- Effect stat ----------
 
 /**
@@ -46,7 +28,7 @@ export const FLAG_VALUE_TYPES: ReadonlySet<string> = new Set(["flag", "ignore"])
  * з заголовками (через SelectField groups prop). Плаский масив
  * `EFFECT_STAT_OPTIONS` нижче — для legacy callers (validation, lookup).
  */
-export const EFFECT_STAT_GROUPS: SelectOptionGroup[] = [
+const EFFECT_STAT_GROUPS: SelectOptionGroup[] = [
   {
     label: "Бойові — шкода фізична",
     options: [
@@ -142,19 +124,9 @@ export const EFFECT_STAT_GROUPS: SelectOptionGroup[] = [
 ];
 
 /** Плаский масив для legacy callers (lookup, validation). */
-export const EFFECT_STAT_OPTIONS: SelectOption[] = EFFECT_STAT_GROUPS.flatMap(
+const EFFECT_STAT_OPTIONS: SelectOption[] = EFFECT_STAT_GROUPS.flatMap(
   (g) => g.options,
 );
-
-// ---------- Effect target ----------
-
-export const EFFECT_TARGET_OPTIONS: SelectOption[] = [
-  { value: "self", label: "Сам" },
-  { value: "enemy", label: "Ворог" },
-  { value: "all_allies", label: "Союзники" },
-  { value: "all_enemies", label: "Вороги" },
-  { value: "all", label: "Усі" },
-];
 
 // ---------- Lookup helpers ----------
 
@@ -170,14 +142,4 @@ export function getStatLabel(stat: string): string {
 /** Повертає людино-читабельну назву типу ефекту */
 export function getTypeLabel(type: string): string {
   return _typeLabelMap.get(type) ?? type;
-}
-
-/** Чи потребує цей тип текстового вводу для value */
-export function isTextValueType(type: string): boolean {
-  return TEXT_VALUE_TYPES.has(type);
-}
-
-/** Чи є цей тип прапорцем (boolean) */
-export function isFlagValueType(type: string): boolean {
-  return FLAG_VALUE_TYPES.has(type);
 }

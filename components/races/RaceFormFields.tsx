@@ -12,25 +12,33 @@
 import { RaceEditFormSpellSlots } from "./RaceEditFormSpellSlots";
 import { RaceEditFormStatModifiers } from "./RaceEditFormStatModifiers";
 
+import { AbilityListEditor } from "@/components/abilities";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import type { ConversionIssue } from "@/lib/utils/abilities/legacy/types";
 import type { MainSkill } from "@/types/main-skills";
 import type { RaceFormData } from "@/types/races";
 
 export interface RaceFormFieldsProps {
+  campaignId: string;
   formData: RaceFormData;
   setFormData: React.Dispatch<React.SetStateAction<RaceFormData>>;
   mainSkills: MainSkill[];
   /** Compact (Dialog) — менший max-h, опис тоншим. */
   compact?: boolean;
+  abilityIssues?: ConversionIssue[];
+  onAbilitiesValidityChange?: (ok: boolean, errorCount: number) => void;
 }
 
 export function RaceFormFields({
+  campaignId,
   formData,
   setFormData,
   mainSkills,
   compact = false,
+  abilityIssues,
+  onAbilitiesValidityChange,
 }: RaceFormFieldsProps) {
   const toggleAvailableSkill = (skillId: string) => {
     setFormData((prev) => {
@@ -140,6 +148,17 @@ export function RaceFormFields({
         <RaceEditFormSpellSlots
           formData={formData}
           setFormData={setFormData}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <h3 className="text-sm font-semibold">Вміння в бою</h3>
+        <AbilityListEditor
+          campaignId={campaignId}
+          value={formData.abilities}
+          onChange={(abilities) => setFormData((prev) => ({ ...prev, abilities }))}
+          issues={abilityIssues}
+          onValidityChange={onAbilitiesValidityChange}
         />
       </div>
     </>

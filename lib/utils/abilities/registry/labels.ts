@@ -1,4 +1,4 @@
-import type { Amount, DamageFilterKind, Flat, StatKey } from "@/lib/utils/abilities/schema";
+import type { AbilityTarget, Amount, CONDITION_KEYS, DamageFilterKind, Flat, Limits, StatKey } from "@/lib/utils/abilities/schema";
 
 export const STAT_LABELS: Record<StatKey, string> = {
   armor: "AC",
@@ -41,4 +41,31 @@ export function amountLabel(amount: Amount): string {
   if ("formula" in amount) return `(${amount.formula})`;
 
   return `${amount.value}% від ${amount.percentOf === "eventDamage" ? "завданої шкоди" : "макс. HP"}`;
+}
+
+export const TARGET_LABELS: Record<AbilityTarget, string> = {
+  self: "я",
+  eventTarget: "ціль події",
+  eventActor: "виконавець події",
+  allAllies: "усі союзники",
+  allEnemies: "усі вороги",
+};
+
+export const CONDITION_LABELS: Record<(typeof CONDITION_KEYS)[number], string> = {
+  no_bonus_action: "без бонусної дії",
+  no_reaction: "без реакції",
+  disable_melee_attacks: "без ближніх атак",
+  disable_ranged_attacks: "без дальніх атак",
+  disable_spell_casting: "без заклинань",
+};
+
+export function limitsLabel(l: Limits | undefined): string[] {
+  if (!l) return [];
+
+  return [
+    l.perBattle ? `${l.perBattle} раз${l.perBattle > 1 ? "и" : ""} за бій` : null,
+    l.perRound ? `${l.perRound}/раунд` : null,
+    l.perTurn ? `${l.perTurn}/хід` : null,
+    l.chance ? `${l.chance}%` : null,
+  ].filter((x): x is string => !!x);
 }

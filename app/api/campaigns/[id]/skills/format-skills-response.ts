@@ -2,6 +2,10 @@
  * Форматує список скілів з Prisma у згруповану структуру для фронтенду.
  */
 
+import { skillAbilities } from "@/lib/utils/abilities/legacy/read";
+import { damageAffinity } from "@/lib/utils/abilities/sheet-bonuses";
+import { abilitySummary } from "@/lib/utils/abilities/summary";
+
 export function formatSkillsListResponse(
   skills: Array<{
     id: string;
@@ -30,6 +34,7 @@ export function formatSkillsListResponse(
     spellData: unknown;
     spellEnhancementData: unknown;
     skillTriggers: unknown;
+    abilities?: unknown;
     image: string | null;
     appearanceDescription?: string | null;
     createdAt: Date;
@@ -131,6 +136,8 @@ export function formatSkillsListResponse(
       skillTriggers: Array.isArray(skill.skillTriggers)
         ? skill.skillTriggers
         : [],
+      abilitySummary: abilitySummary("skill", skill),
+      damageAffinity: damageAffinity(skillAbilities(skill as never)),
       createdAt: skill.createdAt,
       spell: skill.spell
         ? { id: skill.spell.id, name: skill.spell.name }

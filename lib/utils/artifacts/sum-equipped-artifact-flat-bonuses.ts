@@ -8,6 +8,7 @@ import {
   parseEffectScopeObject,
 } from "@/lib/constants/artifact-effect-scope";
 import { ArtifactModifierType } from "@/lib/constants/artifacts";
+import type { SheetStatBonuses } from "@/lib/utils/abilities/sheet-bonuses";
 import type { EquippedItems } from "@/types/inventory";
 
 const ABILITY_KEYS = [
@@ -40,6 +41,8 @@ export type ArtifactRowForFlatBonus = {
   bonuses?: unknown;
   modifiers?: unknown;
   passiveAbility?: unknown;
+  /** Server-derived from `abilities`; when present the legacy columns are ignored. */
+  sheetBonuses?: SheetStatBonuses;
 };
 
 function emptyTotals(): EquippedArtifactFlatBonusTotals {
@@ -74,6 +77,16 @@ export function sumEquippedArtifactFlatBonuses(
     const artifact = byId.get(artifactId);
 
     if (!artifact) continue;
+
+    if (artifact.sheetBonuses) {
+      for (const [k, v] of Object.entries(artifact.sheetBonuses.stats)) totals[k as keyof typeof artifact.sheetBonuses.stats] += v ?? 0;
+
+      for (const [lvl, v] of Object.entries(artifact.sheetBonuses.spellSlotBonusByLevel)) {
+        totals.spellSlotBonusByLevel[lvl] = (totals.spellSlotBonusByLevel[lvl] ?? 0) + v;
+      }
+
+      continue;
+    }
 
     const passiveRecord = artifact.passiveAbility
       ? (artifact.passiveAbility as Record<string, unknown>)

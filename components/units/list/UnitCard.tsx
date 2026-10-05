@@ -5,6 +5,7 @@ import { GripVertical, X } from "lucide-react";
 
 import { UnitQuickStatsEditor } from "./UnitQuickStatsEditor";
 
+import { AbilitySummary } from "@/components/abilities";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -88,11 +89,7 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
     ? unit.attacks
     : [];
 
-  const specialAbilities: Unit["specialAbilities"] = Array.isArray(
-    unit.specialAbilities,
-  )
-    ? unit.specialAbilities
-    : [];
+  const abilitySummary = unit.abilitySummary ?? [];
 
   // Отримуємо модифікатори урону з раси та юніта
   const allDamageModifiers = getUnitDamageModifiers(unit, race);
@@ -189,13 +186,11 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
           </div>
         </div>
 
-        {specialAbilities.length > 0 && (
+        {abilitySummary.length > 0 && (
           <div className="space-y-1 mt-4">
-            <div className="text-xs font-semibold">Здібності:</div>
-            <div className="text-xs text-muted-foreground">
-              {specialAbilities.map((ability, saIdx) => (
-                <div key={`sa-${saIdx}-${ability.name}`}>{ability.name}</div>
-              ))}
+            <div className="text-xs font-semibold">Вміння:</div>
+            <div className="text-muted-foreground">
+              <AbilitySummary lines={abilitySummary} />
             </div>
           </div>
         )}

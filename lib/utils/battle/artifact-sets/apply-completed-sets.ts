@@ -33,7 +33,7 @@ export async function findCompletedSets(
 
     const row = maps.artifactSetsById[setId];
 
-    if (!row?.setBonus || !memberIds?.length || !memberIds.every((id) => equippedIds.has(id))) continue;
+    if (!row || (row.setBonus == null && row.abilities == null) || !memberIds?.length || !memberIds.every((id) => equippedIds.has(id))) continue;
 
     sets.push({ id: row.id, name: row.name, icon: row.icon ?? null, setBonus: row.setBonus, abilities: row.abilities });
     hudMarkers.push({ setId, name: row.name, icon: row.icon ?? null });

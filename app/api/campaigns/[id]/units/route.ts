@@ -5,7 +5,7 @@ import { Prisma } from "@prisma/client";
 import { getCachedUnits } from "@/lib/cache/reference-data";
 import { prisma } from "@/lib/db";
 import { createUnitSchema } from "@/lib/schemas";
-import { syncUnitAbilities } from "@/lib/utils/abilities/legacy/sync";
+import { abilitiesJson } from "@/lib/utils/abilities/legacy/read";
 import { requireCampaignAccess,requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { getProficiencyBonus } from "@/lib/utils/common/calculations";
@@ -63,7 +63,7 @@ export async function POST(
         maxHp: data.maxHp,
         proficiencyBonus,
         attacks: data.attacks as Prisma.InputJsonValue,
-        specialAbilities: data.specialAbilities as Prisma.InputJsonValue,
+        ...(data.abilities && { abilities: abilitiesJson(data.abilities) }),
         immunities: data.immunities as Prisma.InputJsonValue,
         knownSpells: data.knownSpells,
         morale: data.morale,
@@ -73,8 +73,6 @@ export async function POST(
         unitGroup: true,
       },
     });
-
-    await syncUnitAbilities(prisma, unit);
 
     revalidateTag(`units-${id}`, "max");
 

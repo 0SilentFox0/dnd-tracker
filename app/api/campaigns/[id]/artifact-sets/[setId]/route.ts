@@ -5,6 +5,7 @@ import { toArtifactSetErrorResponse } from "../route-errors";
 import { patchArtifactSetSchema } from "../schemas";
 
 import { resolveArtifactIconForPersistence } from "@/lib/supabase/artifact-icon-storage";
+import { readAbilities } from "@/lib/utils/abilities/legacy/read";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import {
@@ -35,7 +36,9 @@ export async function GET(
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    return NextResponse.json(setRow);
+    const { abilities, issues: abilityIssues } = readAbilities("artifactSet", setRow);
+
+    return NextResponse.json({ ...setRow, abilities, abilityIssues });
   } catch (error) {
     return handleApiError(error, { action: "fetch artifact set" });
   }

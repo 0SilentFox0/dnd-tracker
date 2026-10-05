@@ -16,6 +16,7 @@ const BONUS_PREFIX: Record<ModifierEntry["sourceType"], string> = {
   artifact: "Бонус артефакту",
   artifactSet: "Бонус сету",
   unit: "Бонус істоти",
+  character: "Бонус персонажа",
   effect: "Бонус ефекту",
   action: "Бонус дії",
 };

@@ -20,4 +20,5 @@ export interface ArtifactSetRow {
   icon?: string | null;
   createdAt: string;
   artifacts?: ArtifactSetSummaryArtifact[];
+  abilitySummary?: string[];
 }

@@ -3,7 +3,7 @@ import type { Ability, DamageKind, StaticEffect } from "@/lib/utils/abilities/sc
 export type { Ability, StaticEffect };
 
 export interface AbilitySource {
-  type: "skill" | "race" | "artifact" | "artifactSet" | "unit";
+  type: "skill" | "race" | "artifact" | "artifactSet" | "unit" | "character";
   id: string;
   name: string;
   icon?: string | null;
@@ -50,3 +50,9 @@ export type AbilityEvent =
   | { type: "bonusAction"; actorId: string; abilityKey: string; targetId?: string };
 
 export type AbilityDamageKind = DamageKind;
+
+export interface AbilitySourceRef {
+  kind: "skill" | "race" | "artifact" | "artifactSet" | "unit";
+  id: string;
+  name: string;
+}

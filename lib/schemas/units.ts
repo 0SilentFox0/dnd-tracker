@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { AbilitiesSchema } from "@/lib/utils/abilities/schema";
+
 const unitAttackSchema = z.object({
   name: z.string(),
   type: z.enum(["melee", "ranged"]).optional(),
@@ -12,15 +14,6 @@ const unitAttackSchema = z.object({
   maxTargets: z.number().min(1).max(20).optional(),
   damageDistribution: z.array(z.number().min(0).max(100)).optional(),
   guaranteedDamage: z.number().min(0).optional(),
-});
-
-const unitSpecialAbilitySchema = z.object({
-  name: z.string(),
-  description: z.string().optional(),
-  type: z.enum(["passive", "active"]),
-  spellId: z.string().optional(),
-  actionType: z.enum(["action", "bonus_action"]).optional(),
-  effect: z.record(z.string(), z.unknown()).optional(),
 });
 
 export const createUnitSchema = z.object({
@@ -41,7 +34,7 @@ export const createUnitSchema = z.object({
   maxHp: z.number().min(1).default(10),
   proficiencyBonus: z.number().min(0).default(2),
   attacks: z.array(unitAttackSchema).default([]),
-  specialAbilities: z.array(unitSpecialAbilitySchema).default([]),
+  abilities: AbilitiesSchema.optional(),
   immunities: z.array(z.string()).default([]),
   knownSpells: z.array(z.string()).default([]),
   morale: z.number().min(-3).max(3).default(0),
@@ -71,7 +64,7 @@ export const updateUnitSchema = z.object({
   maxHp: z.number().min(1).optional(),
   proficiencyBonus: z.number().min(0).optional(),
   attacks: z.array(unitAttackSchema).optional(),
-  specialAbilities: z.array(unitSpecialAbilitySchema).optional(),
+  abilities: AbilitiesSchema.optional(),
   immunities: z.array(z.string()).optional(),
   knownSpells: z.array(z.string()).optional(),
   minTargets: z.number().min(1).optional(),
