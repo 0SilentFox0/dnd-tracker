@@ -13,7 +13,11 @@ const hero = createMockParticipant({
   battleData: { ...base.battleData, attacks: [{ id: "sword", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d8", damageType: "slashing" }] },
 });
 
-const goblin = createMockParticipant({ basicInfo: { ...base.basicInfo, id: "gob", side: ParticipantSide.ENEMY, controlledBy: "dm" } });
+// багато HP і не критичний кидок: ефект криту випадковий і може вбити ціль, тоді хід перескакує
+const goblin = createMockParticipant({
+  basicInfo: { ...base.basicInfo, id: "gob", side: ParticipantSide.ENEMY, controlledBy: "dm" },
+  combatStats: { ...base.combatStats, maxHp: 100, currentHp: 100 },
+});
 
 const ctx = {
   scene: { id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0, version: 2, eventSeq: 3, pendingMoraleCheck: null, startedAt: null, completedAt: null },
@@ -24,7 +28,7 @@ const ctx = {
 } as unknown as BattleMutationContext;
 
 const body = (over: Record<string, unknown> = {}) =>
-  attackBodySchema.parse({ attackerId: "hero", targetId: "gob", attackId: "sword", d20Roll: 20, damageRolls: [8], ...over });
+  attackBodySchema.parse({ attackerId: "hero", targetId: "gob", attackId: "sword", d20Roll: 15, damageRolls: [8], ...over });
 
 describe("attack mutation", () => {
   it("атака без endTurn — подія атаки, хід не змінюється", () => {

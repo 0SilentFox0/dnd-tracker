@@ -96,7 +96,7 @@ describe.skipIf(!isLocal)("battle flow (local DB)", () => {
     const player = deps(ids.player);
 
     const attackRes = await runBattleMutation(
-      post({ attackerId: "hero", targetId: "gob", attackId: "sword", d20Roll: 20, damageRolls: [8], endTurn: true }),
+      post({ attackerId: "hero", targetId: "gob", attackId: "sword", d20Roll: 15, damageRolls: [8], endTurn: true }),
       { params, access: "member", requireStatus: "active", schema: attackBodySchema, mutate: attackMutation },
       player,
     );
