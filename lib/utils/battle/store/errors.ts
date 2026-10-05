@@ -22,7 +22,8 @@ export type BattleRuleCode =
   | "invalid_dice"
   | "action_used"
   | "invalid_target"
-  | "action_rejected";
+  | "action_rejected"
+  | "ability_limit";
 
 export class BattleRuleError extends Error {
   constructor(

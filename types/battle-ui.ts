@@ -2,8 +2,9 @@
  * Типи для UI компонентів битви
  */
 
+import type { ResolvedAbility } from "./abilities";
 import type { AttackData, BattleScene } from "./api";
-import type { ActiveSkill, BattleParticipant } from "./battle";
+import type { BattleParticipant } from "./battle";
 import type { SkillCircle as SkillCircleEnum, SkillLevel } from "./skill-tree";
 
 import { SpellDamageType, SpellType } from "@/lib/constants/spell-abilities";
@@ -52,7 +53,7 @@ export interface PlayerTurnViewProps {
   onSpell: (data: SpellCastData) => void;
   /** Показати модалку підрахунку шкоди перед застосуванням; після підтвердження викликається onSpell */
   onSpellPreview?: (data: SpellCastData) => void;
-  onBonusAction: (skill: ActiveSkill) => void;
+  onBonusAction: (ability: ResolvedAbility) => void;
   onSkipTurn: () => void;
   onMoraleCheck: (d10Roll: number) => void;
   /** Не запускати авто-таймер завершення ходу, поки next-turn виконується */

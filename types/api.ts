@@ -106,7 +106,7 @@ export interface MoraleCheckData {
 
 export interface BonusActionData {
   participantId: string;
-  skillId: string;
+  abilityKey: string;
   targetParticipantId?: string;
 }
 

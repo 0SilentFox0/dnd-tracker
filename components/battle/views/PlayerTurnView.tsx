@@ -10,7 +10,7 @@ import { PlayerTurnViewDialogs } from "@/components/battle/views/PlayerTurnViewD
 import { TurnStartScreen } from "@/components/battle/views/TurnStartScreen";
 import { BATTLE_RACE } from "@/lib/constants/battle";
 import { useAttackFlow } from "@/lib/hooks/battle";
-import { getSkillsByTrigger } from "@/lib/utils/skills/triggers";
+import { getBonusActionAbilities } from "@/lib/utils/abilities";
 import type { BattleParticipant } from "@/types/battle";
 import type { PlayerTurnViewProps } from "@/types/battle-ui";
 /**
@@ -61,24 +61,7 @@ export function PlayerTurnView({
     setHasPerformedAction(false); // eslint-disable-line react-hooks/set-state-in-effect
   }, [participant.basicInfo.id, turnStarted]);
 
-  // Отримуємо бонусні дії з тригерів
-  const bonusActions = useMemo(() => {
-    if (
-      !participant.battleData.activeSkills ||
-      participant.battleData.activeSkills.length === 0
-    )
-      return [];
-
-    return getSkillsByTrigger(
-      participant.battleData.activeSkills,
-      "bonusAction",
-      participant,
-      battle.initiativeOrder,
-      {
-        currentRound: battle.currentRound,
-      },
-    );
-  }, [participant, battle.initiativeOrder, battle.currentRound]);
+  const bonusActions = useMemo(() => getBonusActionAbilities(participant), [participant]);
 
   // Stable ref для onSkipTurn — щоб useEffect нижче не reset-ив timer коли
   // parent передає нову (не memoized) функцію на кожен render (CODE_AUDIT 4.5).

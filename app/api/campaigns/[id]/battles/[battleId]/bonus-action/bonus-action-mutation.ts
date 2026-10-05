@@ -1,12 +1,14 @@
 import { z } from "zod";
 
+import { updateParticipant } from "@/lib/utils/abilities/engine/participants";
+import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
+import { withinLimits } from "@/lib/utils/abilities/engine/usage";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
-import { executeBonusActionSkill } from "@/lib/utils/skills/execution";
 
 export const bonusActionSchema = z.object({
   participantId: z.string(),
-  skillId: z.string(),
+  abilityKey: z.string(),
   targetParticipantId: z.string().optional(),
 });
 
@@ -17,34 +19,25 @@ export function bonusActionMutation(ctx: BattleMutationContext, data: BonusActio
 
   if (!participant) throw new BattleAccessError(404, "Учасника немає в бою");
 
-  if (!ctx.isDM && participant.basicInfo.controlledBy !== ctx.userId) {
-    throw new BattleAccessError(403, "Forbidden");
-  }
+  if (!ctx.isDM && participant.basicInfo.controlledBy !== ctx.userId) throw new BattleAccessError(403, "Forbidden");
 
-  const skill = participant.battleData.activeSkills?.find((s) => s.skillId === data.skillId);
+  const ability = (participant.battleData.resolvedAbilities ?? []).find((a) => a.key === data.abilityKey && a.trigger.event === "bonusAction");
 
-  if (!skill) throw new BattleRuleError("action_rejected", "У учасника немає такого скіла");
+  if (!ability) throw new BattleRuleError("action_rejected", "У учасника немає такого вміння");
 
-  if (participant.actionFlags.hasUsedBonusAction) {
-    throw new BattleRuleError("action_used", "Бонусну дію вже використано цього ходу");
-  }
+  if (participant.actionFlags.hasUsedBonusAction) throw new BattleRuleError("action_used", "Бонусну дію вже використано цього ходу");
 
-  const skillUsageCounts = { ...participant.battleData.skillUsageCounts };
+  if (!withinLimits(participant, ability)) throw new BattleRuleError("ability_limit", "Ліміт використань вичерпано");
 
-  const result = executeBonusActionSkill(
-    participant,
-    skill,
+  const run = runAbilities(
     ctx.participants,
-    ctx.scene.round,
-    data.targetParticipantId,
-    skillUsageCounts,
+    { type: "bonusAction", actorId: participant.basicInfo.id, abilityKey: ability.key, targetId: data.targetParticipantId },
+    { round: ctx.scene.round, rng: Math.random },
   );
 
-  const participants = result.updatedParticipants.map((p) =>
-    p.basicInfo.id === participant.basicInfo.id
-      ? { ...p, battleData: { ...p.battleData, skillUsageCounts } }
-      : p,
-  );
+  const participants = updateParticipant(run.participants, participant.basicInfo.id, (p) => ({ ...p, actionFlags: { ...p.actionFlags, hasUsedBonusAction: true } }));
+
+  const text = run.fired.length ? run.messages.join(" | ") : `${ability.name}: не спрацювало`;
 
   return {
     participants,
@@ -54,12 +47,8 @@ export function bonusActionMutation(ctx: BattleMutationContext, data: BonusActio
         type: "ability",
         round: ctx.scene.round,
         actorId: participant.basicInfo.id,
-        resultText: result.messages.join(" | "),
-        details: {
-          actorName: participant.basicInfo.name,
-          actorSide: participant.basicInfo.side,
-          actionDetails: { skillId: data.skillId, skillName: skill.name },
-        },
+        resultText: text || ability.name,
+        details: { actorName: participant.basicInfo.name, actorSide: participant.basicInfo.side, actionDetails: { abilityKey: ability.key, skillName: ability.name } },
       },
     ],
   };
