@@ -29,7 +29,7 @@ export function updateMoraleOnEvent(
 
     let moraleChange = 0;
 
-    for (const skill of p.battleData.activeSkills) {
+    for (const skill of (p.battleData.activeSkills ?? [])) {
       for (const effect of skill.effects) {
         if (
           eventType === "kill" &&

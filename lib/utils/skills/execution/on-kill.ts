@@ -16,7 +16,7 @@ export function executeOnKillEffects(
 
   const messages: string[] = [];
 
-  for (const skill of killer.battleData.activeSkills) {
+  for (const skill of (killer.battleData.activeSkills ?? [])) {
     if (!skill.skillTriggers) continue;
 
     const trigger = skill.skillTriggers.find(

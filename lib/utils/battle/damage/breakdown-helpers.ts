@@ -40,7 +40,7 @@ export function getResistanceSkillsHighestOnly(
     { name: string; percent: number; rank: number }
   >();
 
-  for (const skill of target.battleData.activeSkills) {
+  for (const skill of (target.battleData.activeSkills ?? [])) {
     let percent = 0;
 
     let matched = false;

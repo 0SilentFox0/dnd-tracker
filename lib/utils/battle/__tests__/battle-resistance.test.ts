@@ -61,6 +61,8 @@ function createParticipant(
       racialAbilities: [],
       activeSkills: [],
       equippedArtifacts: [],
+      resolvedAbilities: [],
+      spellEnhancers: [],
     },
     actionFlags: {
       hasUsedAction: false,

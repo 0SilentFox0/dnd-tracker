@@ -72,6 +72,8 @@ function createCaster(overrides?: {
       racialAbilities: [],
       activeSkills: overrides?.activeSkills ?? [],
       equippedArtifacts: [],
+      resolvedAbilities: [],
+      spellEnhancers: [],
     },
     actionFlags: {
       hasUsedAction: false,

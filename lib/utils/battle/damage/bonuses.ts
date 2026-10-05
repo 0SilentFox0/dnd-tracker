@@ -53,7 +53,7 @@ export function calculatePassiveAbilityDamageBonus(
 
   let flat = 0;
 
-  for (const passive of attacker.battleData.passiveAbilities) {
+  for (const passive of (attacker.battleData.passiveAbilities ?? [])) {
     if (
       passive.effect.type === "modify_damage" ||
       passive.effect.type === "damage_bonus"

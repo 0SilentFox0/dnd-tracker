@@ -19,7 +19,7 @@ export function findRacialAbilityByPattern(
 ): RacialAbility | undefined {
   const damageTypeLower = damageType.toLowerCase();
 
-  for (const racial of target.battleData.racialAbilities) {
+  for (const racial of (target.battleData.racialAbilities ?? [])) {
     const abilityId = racial.id.toLowerCase();
 
     const abilityName = racial.name.toLowerCase();

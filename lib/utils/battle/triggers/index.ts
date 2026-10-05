@@ -36,7 +36,7 @@ export function getPassiveAbilitiesByTrigger(
   participant: BattleParticipant,
   triggerType: PassiveAbility["trigger"]["type"]
 ): PassiveAbility[] {
-  return participant.battleData.passiveAbilities.filter(
+  return (participant.battleData.passiveAbilities ?? []).filter(
     (ability) => ability.trigger.type === triggerType
   );
 }

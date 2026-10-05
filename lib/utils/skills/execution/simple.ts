@@ -29,8 +29,8 @@ export function executeSkillsByTrigger(
   const messages: string[] = [];
 
   if (
-    !updatedParticipant.battleData.activeSkills ||
-    updatedParticipant.battleData.activeSkills.length === 0
+    !(updatedParticipant.battleData.activeSkills ?? []) ||
+    (updatedParticipant.battleData.activeSkills ?? []).length === 0
   ) {
     return {
       participant: updatedParticipant,
@@ -40,7 +40,7 @@ export function executeSkillsByTrigger(
   }
 
   const skillsToExecute = getSkillsByTrigger(
-    updatedParticipant.battleData.activeSkills,
+    (updatedParticipant.battleData.activeSkills ?? []),
     triggerType,
     updatedParticipant,
     allParticipants,
@@ -266,7 +266,7 @@ export function checkSurviveLethal(
   participant: BattleParticipant,
   skillUsageCounts?: Record<string, number>,
 ): { survived: boolean; message: string | null } {
-  for (const skill of participant.battleData.activeSkills) {
+  for (const skill of (participant.battleData.activeSkills ?? [])) {
     if (!skill.skillTriggers) continue;
 
     const trigger = skill.skillTriggers.find(

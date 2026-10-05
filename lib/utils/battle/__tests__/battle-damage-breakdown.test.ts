@@ -63,6 +63,8 @@ function createBaseParticipant(overrides?: Partial<BattleParticipant>): BattlePa
       racialAbilities: [],
       activeSkills: [],
       equippedArtifacts: [],
+      resolvedAbilities: [],
+      spellEnhancers: [],
     },
     actionFlags: {
       hasUsedAction: false,

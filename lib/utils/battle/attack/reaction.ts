@@ -13,7 +13,7 @@ import type { SimpleSkillTriggerConfig } from "@/types/skill-triggers";
 export function getCounterDamagePercent(defender: BattleParticipant): number {
   let total = 0;
 
-  for (const skill of defender.battleData.activeSkills) {
+  for (const skill of (defender.battleData.activeSkills ?? [])) {
     for (const effect of skill.effects) {
       if (
         effect.stat === "counter_damage" &&
@@ -47,7 +47,7 @@ function hasOnFirstHitTakenPerRoundTrigger(
   defender: BattleParticipant,
   incomingAttackType: IncomingAttackType,
 ): boolean {
-  const triggers = defender.battleData.activeSkills.flatMap(
+  const triggers = (defender.battleData.activeSkills ?? []).flatMap(
     (s) => s.skillTriggers ?? [],
   );
 
@@ -64,7 +64,7 @@ function hasOnFirstHitTakenPerRoundTrigger(
 
 /** Чи є у учасника скіл з ефектом counter_damage */
 function hasCounterDamageEffect(defender: BattleParticipant): boolean {
-  return defender.battleData.activeSkills.some((skill) =>
+  return (defender.battleData.activeSkills ?? []).some((skill) =>
     skill.effects.some(
       (e) =>
         e.stat === "counter_damage" &&

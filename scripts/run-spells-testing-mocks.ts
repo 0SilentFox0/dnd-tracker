@@ -104,6 +104,8 @@ export function createMockCaster(
       racialAbilities: [],
       activeSkills: [],
       equippedArtifacts: [],
+      resolvedAbilities: [],
+      spellEnhancers: [],
       skillUsageCounts: {},
     },
     actionFlags: {
@@ -176,6 +178,8 @@ export function createMockEnemy(id: string, tier: number = 7): BattleParticipant
       racialAbilities: [],
       activeSkills: [],
       equippedArtifacts: [],
+      resolvedAbilities: [],
+      spellEnhancers: [],
       skillUsageCounts: {},
     },
     actionFlags: {

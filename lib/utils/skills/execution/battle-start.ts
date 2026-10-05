@@ -34,7 +34,7 @@ export function executeOnBattleStartEffects(
 
   const messages: string[] = [];
 
-  for (const skill of participant.battleData.activeSkills) {
+  for (const skill of (participant.battleData.activeSkills ?? [])) {
     if (!skill.skillTriggers) continue;
 
     const trigger = skill.skillTriggers.find(
@@ -178,7 +178,7 @@ export function executeOnBattleStartEffectsForAll(
   for (const participant of initiativeOrder) {
     const current = get(participant.basicInfo.id);
 
-    for (const skill of current.battleData.activeSkills) {
+    for (const skill of (current.battleData.activeSkills ?? [])) {
       if (!skill.skillTriggers) continue;
 
       const trigger = skill.skillTriggers.find(
@@ -369,7 +369,7 @@ export function applyOnBattleStartEffectsToNewAllies(
     );
 
     for (const ally of allies) {
-      for (const skill of ally.battleData.activeSkills) {
+      for (const skill of (ally.battleData.activeSkills ?? [])) {
         if (
           !skill.skillTriggers?.some(
             (t) => t.type === "simple" && t.trigger === "onBattleStart",

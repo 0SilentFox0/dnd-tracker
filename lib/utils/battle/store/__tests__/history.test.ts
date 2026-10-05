@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 import { diffParticipants } from "@/lib/utils/battle/store/diff-participants";
 import { restoreParticipantsAt } from "@/lib/utils/battle/store/history";
 import { buildSnapshotState } from "@/lib/utils/battle/store/snapshot-state";
 import { splitParticipant } from "@/lib/utils/battle/store/split-participant";
 import type { BattleSceneState, LoadedBattle } from "@/lib/utils/battle/store/types";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 
 const scene: BattleSceneState = {
   id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0,

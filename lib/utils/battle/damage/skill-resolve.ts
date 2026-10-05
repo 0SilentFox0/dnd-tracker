@@ -84,7 +84,7 @@ export function getSkillsForDamageBonus(
 ): ActiveSkill[] {
   const kind = toSkillDamageType(attackType);
 
-  const applicable = attacker.battleData.activeSkills.filter(
+  const applicable = (attacker.battleData.activeSkills ?? []).filter(
     (s) =>
       skillAppliesToDamageType(s, kind) && skillAppliesToSpell(s, kind, ctx),
   );

@@ -1,87 +1,43 @@
 /**
- * Бонуси повних сетів після збору equippedArtifacts.
+ * Повні сети артефактів на учаснику: рядки сетів (для вмінь) і маркери HUD.
  */
 
 import type { CampaignSpellContext } from "../types/participant";
-import { SET_BONUS_DEFAULT_LABEL, SYNTHETIC_SET_BONUS_ID_PREFIX } from "./constants";
-import {
-  type ArtifactSetBattleMaps,
-  loadArtifactSetBattleMaps,
-} from "./load-maps";
-import { mergeArtifactSetBonusIntoParticipant } from "./merge-set-bonus";
+import { type ArtifactSetBattleMaps, loadArtifactSetBattleMaps } from "./load-maps";
 
-import { parseArtifactSetBonus } from "@/lib/types/artifact-set-bonus";
-import type { BattleParticipant, EquippedArtifact } from "@/types/battle";
+import type { ArtifactSetRowLike } from "@/lib/utils/abilities/build/collect";
+import type { ArtifactSetHudMarker, EquippedArtifact } from "@/types/battle";
 
-function uniqueSetIdsFromEquipped(equipped: EquippedArtifact[]): Set<string> {
-  const ids = new Set<string>();
-
-  for (const a of equipped) {
-    if (a.setId) ids.add(a.setId);
-  }
-
-  return ids;
-}
-
-function isRealEquippedArtifact(a: EquippedArtifact): boolean {
-  return !a.artifactId.startsWith(SYNTHETIC_SET_BONUS_ID_PREFIX);
-}
-
-/**
- * Якщо на персонажі всі частини сету — застосовує setBonus.
- */
-export async function applyCompletedArtifactSets(
-  participant: BattleParticipant,
+export async function findCompletedSets(
+  equipped: EquippedArtifact[],
   campaignId: string,
   context?: CampaignSpellContext,
-): Promise<void> {
-  const realEquipped = participant.battleData.equippedArtifacts.filter(
-    isRealEquippedArtifact,
-  );
+): Promise<{ sets: ArtifactSetRowLike[]; hudMarkers: ArtifactSetHudMarker[] }> {
+  const equippedIds = new Set(equipped.map((a) => a.artifactId));
 
-  const equippedIds = new Set(realEquipped.map((a) => a.artifactId));
+  const setIds = [...new Set(equipped.map((a) => a.setId).filter((id): id is string => !!id))];
 
-  const setIds = uniqueSetIdsFromEquipped(realEquipped);
+  if (setIds.length === 0) return { sets: [], hudMarkers: [] };
 
-  if (setIds.size === 0) return;
+  const maps: ArtifactSetBattleMaps =
+    context?.artifactSetsById && context.artifactSetMemberIds && Object.keys(context.artifactSetsById).length > 0
+      ? { artifactSetsById: context.artifactSetsById, artifactSetMemberIds: context.artifactSetMemberIds }
+      : await loadArtifactSetBattleMaps(campaignId, setIds);
 
-  let maps: ArtifactSetBattleMaps;
+  const sets: ArtifactSetRowLike[] = [];
 
-  if (
-    context?.artifactSetsById &&
-    context.artifactSetMemberIds &&
-    Object.keys(context.artifactSetsById).length > 0
-  ) {
-    maps = {
-      artifactSetsById: context.artifactSetsById,
-      artifactSetMemberIds: context.artifactSetMemberIds,
-    };
-  } else {
-    maps = await loadArtifactSetBattleMaps(campaignId, [...setIds]);
-  }
+  const hudMarkers: ArtifactSetHudMarker[] = [];
 
   for (const setId of setIds) {
     const memberIds = maps.artifactSetMemberIds[setId];
 
-    if (!memberIds?.length) continue;
+    const row = maps.artifactSetsById[setId];
 
-    if (!memberIds.every((id) => equippedIds.has(id))) continue;
+    if (!row?.setBonus || !memberIds?.length || !memberIds.every((id) => equippedIds.has(id))) continue;
 
-    const setRow = maps.artifactSetsById[setId];
-
-    if (!setRow?.setBonus) continue;
-
-    const parsed = parseArtifactSetBonus(setRow.setBonus);
-
-    const label =
-      parsed.name || setRow.name || SET_BONUS_DEFAULT_LABEL;
-
-    const hud = {
-      setId,
-      name: setRow.name,
-      icon: setRow.icon ?? null,
-    };
-
-    mergeArtifactSetBonusIntoParticipant(participant, parsed, label, hud);
+    sets.push({ id: row.id, name: row.name, icon: row.icon ?? null, setBonus: row.setBonus, abilities: row.abilities });
+    hudMarkers.push({ setId, name: row.name, icon: row.icon ?? null });
   }
+
+  return { sets, hudMarkers };
 }

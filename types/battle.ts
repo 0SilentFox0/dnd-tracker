@@ -300,9 +300,9 @@ export interface BattleParticipantSpellcasting {
 export interface BattleParticipantBattleData {
   attacks: BattleAttack[];
   activeEffects: ActiveEffect[];
-  passiveAbilities: PassiveAbility[];
-  racialAbilities: RacialAbility[];
-  activeSkills: ActiveSkill[];
+  passiveAbilities?: PassiveAbility[];
+  racialAbilities?: RacialAbility[];
+  activeSkills?: ActiveSkill[];
   equippedArtifacts: EquippedArtifact[];
   /** Бонуси з «аурою» (команда / вороги), збираються при створенні учасника й роздаються після повного списку. */
   pendingScopedArtifactBonuses?: PendingScopedArtifactBonus[];
@@ -314,8 +314,8 @@ export interface BattleParticipantBattleData {
   pendingExtraActions?: number;
   /** Учасник зараз робить додатковий хід від моралі (наприкінці раунду) */
   extraTurnActive?: boolean;
-  resolvedAbilities?: ResolvedAbility[];
-  spellEnhancers?: SpellEnhancer[];
+  resolvedAbilities: ResolvedAbility[];
+  spellEnhancers: SpellEnhancer[];
   abilityUsage?: Record<string, AbilityUsageCounter>;
 }
 

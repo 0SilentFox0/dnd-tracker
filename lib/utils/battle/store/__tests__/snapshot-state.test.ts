@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 import { diffParticipants } from "@/lib/utils/battle/store/diff-participants";
 import { buildSnapshotState } from "@/lib/utils/battle/store/snapshot-state";
 import { splitParticipant } from "@/lib/utils/battle/store/split-participant";
 import type { BattleSceneState } from "@/lib/utils/battle/store/types";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 
 const scene: BattleSceneState = {
   id: "b1",

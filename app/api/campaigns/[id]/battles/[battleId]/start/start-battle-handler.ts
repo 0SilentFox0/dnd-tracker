@@ -13,7 +13,7 @@ import { buildCampaignContextForStart } from "./start-build-context";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
-import { distributePendingScopedArtifactBonuses } from "@/lib/utils/battle/artifact-sets";
+import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import {
   applyStartOfBattleEffects,
   calculateInitiative,
@@ -120,7 +120,7 @@ export async function buildStartOrder(
     }
   }
 
-  const initiativeOrder = await Promise.all(
+  const built = await Promise.all(
     slots.map((slot) =>
       slot.type === "character"
         ? createBattleParticipantFromCharacter(
@@ -140,7 +140,7 @@ export async function buildStartOrder(
     ),
   );
 
-  distributePendingScopedArtifactBonuses(initiativeOrder);
+  const initiativeOrder = applyBakedAuras(built, new Set(built.map((p) => p.basicInfo.id)));
 
   const sortedInitiativeOrder = applyStartOfBattleAndSort(
     initiativeOrder,

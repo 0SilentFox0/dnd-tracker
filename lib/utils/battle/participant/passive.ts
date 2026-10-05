@@ -112,10 +112,10 @@ export function applyArtifactPassiveEffects(
  */
 export function applyPassiveSkillEffects(participant: BattleParticipant): void {
   const resistanceSkillIds = getResistanceSkillIdsHighestOnly(
-    participant.battleData.activeSkills,
+    (participant.battleData.activeSkills ?? []),
   );
 
-  for (const skill of participant.battleData.activeSkills) {
+  for (const skill of (participant.battleData.activeSkills ?? [])) {
     const isPassive = skill.skillTriggers?.some(
       (t) => t.type === "simple" && t.trigger === "passive",
     );

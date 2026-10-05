@@ -14,32 +14,28 @@ import type { Prisma } from "@prisma/client";
 
 import type { CharacterFromPrisma } from "../types/participant";
 import {
-  type BuildActiveSkillCtx,
-  buildActiveSkillFromRow,
-  buildUnknownActiveSkill,
-} from "./build-active-skill";
-import {
   inferLevelFromSkillName,
   parseMainSkillLevelId,
 } from "./parse";
 
 import { prisma } from "@/lib/db";
 import { SkillLevel } from "@/lib/types/skill-tree";
-import type { ActiveSkill } from "@/types/battle";
+import type { SkillEntry } from "@/lib/utils/abilities/build/collect";
 
 /**
  * Витягує активні скіли з character. Розв'язує id рівнів (mainSkillId_expert_level) у реальні скіли.
  */
-export async function extractActiveSkillsFromCharacter(
+export type SkillRowEntry = SkillEntry & { row: Prisma.SkillGetPayload<object> };
+
+/** Розв'язує id зі skillTreeProgress (і рівневі `${mainSkillId}_expert_level`) у рядки скілів. */
+export async function resolveCharacterSkillEntries(
   character: CharacterFromPrisma,
   campaignId: string,
   preloadedSkillsById?: Record<string, Prisma.SkillGetPayload<object>>,
-): Promise<ActiveSkill[]> {
+  preloadedMainSkillGroups?: Map<string, string | null>,
+): Promise<SkillRowEntry[]> {
   const skillTreeProgress =
-    (character.skillTreeProgress as Record<
-      string,
-      { level?: SkillLevel; unlockedSkills?: string[] }
-    >) || {};
+    (character.skillTreeProgress as Record<string, { level?: SkillLevel; unlockedSkills?: string[] }>) || {};
 
   const allSkillIds: string[] = [];
 
@@ -48,23 +44,17 @@ export async function extractActiveSkillsFromCharacter(
   const skillIdToLevel: Record<string, SkillLevel> = {};
 
   for (const [mainSkillId, progress] of Object.entries(skillTreeProgress)) {
-    if (!progress.unlockedSkills || progress.unlockedSkills.length === 0) {
-      continue;
-    }
-
-    for (const skillId of progress.unlockedSkills) {
+    for (const skillId of progress.unlockedSkills ?? []) {
       allSkillIds.push(skillId);
       skillIdToMainSkill[skillId] = mainSkillId;
       skillIdToLevel[skillId] = progress.level || SkillLevel.BASIC;
     }
   }
 
-  const personalSkillId = (character as { personalSkillId?: string | null })
-    .personalSkillId;
+  const personalSkillId = (character as { personalSkillId?: string | null }).personalSkillId;
 
   if (personalSkillId?.trim() && !allSkillIds.includes(personalSkillId)) {
     allSkillIds.push(personalSkillId);
-    skillIdToMainSkill[personalSkillId] = "";
     skillIdToLevel[personalSkillId] = SkillLevel.BASIC;
   }
 
@@ -81,64 +71,48 @@ export async function extractActiveSkillsFromCharacter(
       .map((p) => p.mainSkillId),
   );
 
-  const fetchedSkills = await fetchSkillsFor(
-    campaignId,
-    directIds,
-    mainSkillIdsFromLevels,
-    preloadedSkillsById,
-  );
+  const fetchedSkills = await fetchSkillsFor(campaignId, directIds, mainSkillIdsFromLevels, preloadedSkillsById);
 
   const skillsMap = new Map<string, Prisma.SkillGetPayload<object>>();
 
   for (const s of fetchedSkills) skillsMap.set(s.id, s);
 
-  // Резолвимо level-ID → реальний skill з тієї ж лінії за рівнем у назві.
   for (const levelId of levelIds) {
     const parsed = parseMainSkillLevelId(levelId);
 
     if (!parsed) continue;
 
     const match = fetchedSkills.find((s) => {
-      const msId =
-        s.mainSkillId ??
-        (s.mainSkillData as { mainSkillId?: string } | undefined)?.mainSkillId;
+      const msId = s.mainSkillId ?? (s.mainSkillData as { mainSkillId?: string } | undefined)?.mainSkillId;
 
-      if (msId !== parsed.mainSkillId) return false;
-
-      return inferLevelFromSkillName(s.name) === parsed.level;
+      return msId === parsed.mainSkillId && inferLevelFromSkillName(s.name) === parsed.level;
     });
 
     if (match) skillsMap.set(levelId, match);
   }
 
-  const mainSkillSpellGroupById = await loadMainSkillSpellGroups(fetchedSkills);
+  const groups = preloadedMainSkillGroups ?? (await loadMainSkillSpellGroups(fetchedSkills));
 
-  const ctx: BuildActiveSkillCtx = {
-    mainSkillSpellGroupById,
-    skillIdToMainSkill,
-    skillIdToLevel,
-  };
-
-  const activeSkills: ActiveSkill[] = [];
+  const entries: SkillRowEntry[] = [];
 
   for (const skillId of allSkillIds) {
-    const skill = skillsMap.get(skillId);
+    const row = skillsMap.get(skillId);
 
-    if (!skill) {
-      activeSkills.push(buildUnknownActiveSkill(skillId, ctx));
-      continue;
-    }
+    if (!row) continue;
 
-    activeSkills.push(buildActiveSkillFromRow(skill, skillId, ctx));
+    const mainSkillId = row.mainSkillId ?? skillIdToMainSkill[skillId] ?? null;
+
+    entries.push({
+      row,
+      mainSkillId: mainSkillId || null,
+      level: inferLevelFromSkillName(row.name) ?? skillIdToLevel[skillId] ?? SkillLevel.BASIC,
+      mainSkillSpellGroupId: row.mainSkillId ? (groups.get(row.mainSkillId) ?? null) : null,
+    });
   }
 
-  return activeSkills;
+  return entries;
 }
 
-/**
- * Завантажує всі скіли, на які посилається character — або з preloadedSkillsById,
- * або одним findMany запитом.
- */
 async function fetchSkillsFor(
   campaignId: string,
   directIds: string[],

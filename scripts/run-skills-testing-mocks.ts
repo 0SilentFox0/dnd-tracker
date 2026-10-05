@@ -49,6 +49,8 @@ export function createMockAttacker(activeSkills: ActiveSkill[]): BattleParticipa
       racialAbilities: [],
       activeSkills,
       equippedArtifacts: [],
+      resolvedAbilities: [],
+      spellEnhancers: [],
       skillUsageCounts: {},
     },
     actionFlags: {
@@ -104,6 +106,8 @@ export function createMockTarget(overrides?: Partial<BattleParticipant>): Battle
       racialAbilities: [],
       activeSkills: [],
       equippedArtifacts: [],
+      resolvedAbilities: [],
+      spellEnhancers: [],
       skillUsageCounts: {},
     },
     actionFlags: {
