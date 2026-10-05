@@ -2,9 +2,7 @@
 
 import { useEffect } from "react";
 
-import type { SpellFormData } from "./spell-form-defaults";
-
-import type { Spell } from "@/types/spells";
+import type { Spell, SpellFormData } from "@/types/spells";
 
 export function useSpellFormSync(
   spell: Spell | undefined | null,

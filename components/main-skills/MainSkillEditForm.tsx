@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
 
 import { FormCard } from "@/components/common/FormCard";
 import { FormField } from "@/components/common/FormField";
@@ -16,12 +15,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getSpellGroups } from "@/lib/api/spells";
 import { useNotify } from "@/lib/hooks/common";
 import { useUpdateMainSkill } from "@/lib/hooks/skills";
+import { useSpellGroups } from "@/lib/hooks/spells";
 import type { MainSkill } from "@/types/main-skills";
 import type { MainSkillFormData } from "@/types/main-skills";
-import type { SpellGroup } from "@/types/spells";
 
 interface MainSkillEditFormProps {
   campaignId: string;
@@ -38,10 +36,7 @@ export function MainSkillEditForm({
 
   const updateMainSkillMutation = useUpdateMainSkill(campaignId);
 
-  const { data: spellGroups = [] } = useQuery<SpellGroup[]>({
-    queryKey: ["spell-groups", campaignId],
-    queryFn: () => getSpellGroups(campaignId),
-  });
+  const { data: spellGroups = [] } = useSpellGroups(campaignId);
 
   const [formData, setFormData] = useState<MainSkillFormData>({
     name: mainSkill.name,

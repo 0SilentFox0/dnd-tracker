@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import {
   createSpell,
+  createSpellGroup,
   deleteAllSpells,
   deleteSpell,
   deleteSpellsByLevel,
@@ -30,11 +31,22 @@ export function useSpells(campaignId: string, initialSpells?: Spell[]) {
   });
 }
 
-export function useSpellGroups(campaignId: string) {
+export function useSpellGroups(campaignId: string, opts?: { enabled?: boolean }) {
   return useQuery<SpellGroup[]>({
     queryKey: ["spellGroups", campaignId],
     queryFn: () => getSpellGroups(campaignId),
     staleTime: REFERENCE_STALE_MS,
+    enabled: opts?.enabled ?? true,
+  });
+}
+
+export function useCreateSpellGroup(campaignId: string) {
+  return useCrudMutation({
+    mutationFn: (name: string) => createSpellGroup(campaignId, { name }),
+    invalidateKeys: [
+      ["spellGroups", campaignId],
+      ["spells", campaignId],
+    ],
   });
 }
 

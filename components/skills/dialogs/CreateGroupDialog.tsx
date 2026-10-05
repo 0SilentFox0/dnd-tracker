@@ -2,13 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { createSpellGroup } from "@/lib/api/spells";
+import { useCreateSpellGroup } from "@/lib/hooks/spells";
 
 interface CreateGroupDialogProps {
   campaignId: string;
@@ -21,44 +20,29 @@ export function CreateGroupDialog({
 }: CreateGroupDialogProps) {
   const router = useRouter();
 
-  const queryClient = useQueryClient();
+  const createGroup = useCreateSpellGroup(campaignId);
 
   const [open, setOpen] = useState(false);
 
   const [name, setName] = useState("");
 
-  const [isCreating, setIsCreating] = useState(false);
-
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!name.trim()) return;
 
-    setIsCreating(true);
     setError(null);
-
-    try {
-      const newGroup = await createSpellGroup(campaignId, {
-        name: name.trim(),
-      });
-
-      setOpen(false);
-      setName("");
-      await queryClient.invalidateQueries({ queryKey: ["spellGroups", campaignId] });
-      router.refresh();
-
-      if (onGroupCreated) {
-        onGroupCreated(newGroup.id);
-      }
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Помилка створення групи";
-
-      setError(message);
-    } finally {
-      setIsCreating(false);
-    }
+    createGroup.mutate(name.trim(), {
+      onSuccess: (group) => {
+        setOpen(false);
+        setName("");
+        router.refresh();
+        onGroupCreated?.(group.id);
+      },
+      onError: (err) => setError(err instanceof Error ? err.message : "Помилка створення групи"),
+    });
   };
 
   return (
@@ -99,12 +83,12 @@ export function CreateGroupDialog({
                 setName("");
                 setError(null);
               }}
-              disabled={isCreating}
+              disabled={createGroup.isPending}
             >
               Скасувати
             </Button>
-            <Button type="submit" disabled={isCreating || !name.trim()}>
-              {isCreating ? "Створення..." : "Створити групу"}
+            <Button type="submit" disabled={createGroup.isPending || !name.trim()}>
+              {createGroup.isPending ? "Створення..." : "Створити групу"}
             </Button>
           </div>
         </form>

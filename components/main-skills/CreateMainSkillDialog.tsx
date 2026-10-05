@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -16,11 +15,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getSpellGroups } from "@/lib/api/spells";
 import { useNotify } from "@/lib/hooks/common";
 import { useCreateMainSkill } from "@/lib/hooks/skills";
+import { useSpellGroups } from "@/lib/hooks/spells";
 import type { MainSkillFormData } from "@/types/main-skills";
-import type { SpellGroup } from "@/types/spells";
 
 interface CreateMainSkillDialogProps {
   open: boolean;
@@ -39,11 +37,7 @@ export function CreateMainSkillDialog({
 
   const createMainSkillMutation = useCreateMainSkill(campaignId);
 
-  const { data: spellGroups = [] } = useQuery<SpellGroup[]>({
-    queryKey: ["spell-groups", campaignId],
-    queryFn: () => getSpellGroups(campaignId),
-    enabled: open,
-  });
+  const { data: spellGroups = [] } = useSpellGroups(campaignId, { enabled: open });
 
   const [formData, setFormData] = useState<MainSkillFormData>({
     name: "",

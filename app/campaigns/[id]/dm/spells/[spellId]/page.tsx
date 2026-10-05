@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import type { SpellFormData } from "../spell-form-defaults";
 import { getDefaultSpellFormData } from "../spell-form-defaults";
 import { SpellFormBody } from "../SpellFormBody";
-import { useSpellFormSync } from "../useSpellFormSync";
 
 import {
   Card,
@@ -19,6 +18,7 @@ import { useConfirm } from "@/lib/hooks/common";
 import {
   useDeleteSpell,
   useSpell,
+  useSpellFormSync,
   useSpellGroups,
   useUpdateSpell,
 } from "@/lib/hooks/spells";

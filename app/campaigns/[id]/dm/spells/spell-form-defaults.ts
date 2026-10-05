@@ -1,6 +1,6 @@
-import type { Spell } from "@/types/spells";
+import type { SpellFormData } from "@/types/spells";
 
-export type SpellFormData = Partial<Spell> & { effects?: string[] };
+export type { SpellFormData };
 
 export function getDefaultSpellFormData(): SpellFormData {
   return {
