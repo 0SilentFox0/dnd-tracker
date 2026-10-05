@@ -21,6 +21,8 @@ import {
   useStartBattle,
   useUpdateBattleParticipant,
 } from "@/lib/hooks/battles";
+import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
+import { withSelf } from "@/lib/utils/abilities/engine/participants";
 import { type QueueEntry, turnQueue, type Viewer } from "@/lib/utils/battle/view";
 import type { BattleScene } from "@/types/api";
 import type { BattleParticipant } from "@/types/battle";
@@ -107,10 +109,10 @@ export function deriveTurn(battle: BattleScene, userId: string | null, isDM: boo
   return { current, isMyTurn, myParticipants, hero };
 }
 
-function canSeeEnemyHpOf(hero: BattleParticipant | null): boolean {
-  return (hero?.battleData.resolvedAbilities ?? []).some(
-    (a) => /enemy hp|detect/i.test(a.name) || a.effects.some((e) => e.kind === "flag" && e.flag === "seeEnemyHp"),
-  );
+export function canSeeEnemyHp(hero: BattleParticipant | null, order: BattleParticipant[]): boolean {
+  if (!hero) return false;
+
+  return findFlags(withSelf(order, hero), hero.basicInfo.id, "seeEnemyHp").length > 0;
 }
 
 export function useBattleSceneValue(campaignId: string, battleId: string, userId: string | null) {
@@ -178,7 +180,7 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
     battle,
     userId,
     isDM,
-    viewer: { userId, isDM, canSeeEnemyHp: canSeeEnemyHpOf(turn.hero) },
+    viewer: { userId, isDM, canSeeEnemyHp: canSeeEnemyHp(turn.hero, order) },
     ...turn,
     queue: turnQueue(order, battle.currentTurnIndex, battle.currentRound),
     allies: order.filter((p) => p.basicInfo.side === ParticipantSide.ALLY),
