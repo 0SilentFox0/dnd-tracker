@@ -3,13 +3,12 @@
  */
 
 import { applyResistance } from "../resistance";
-
-import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import type { BattleSpell } from "../types/spell-process";
 import { calculateSpellDamageWithEnhancements } from "./calculations";
 import { participantImmuneToSpell } from "./spell-immunity";
 
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
+import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import type { BattleParticipant } from "@/types/battle";
 
 export interface SpellCalculation {
