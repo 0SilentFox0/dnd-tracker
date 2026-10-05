@@ -1,12 +1,14 @@
 import { z } from "zod";
 
+import type { AttackType } from "@/lib/constants/battle";
+import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
 import { runAttackPhase } from "@/lib/utils/battle/attack-and-next-turn/run-attack-phase";
+import { mergeDiceFormulas } from "@/lib/utils/battle/balance/dice";
 import { toPipelineError } from "@/lib/utils/battle/pipeline/compat-errors";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { battleActionToEvent, systemEvent } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";
-import { resolveTargetId } from "@/lib/utils/battle/turn/extra-turn";
-import { assertAttackRolls, assertReactionDamage } from "@/lib/utils/battle/validation/dice-checks";
+import { assertAttackRolls } from "@/lib/utils/battle/validation/dice-checks";
 import { executeComplexTriggersForChangedParticipant } from "@/lib/utils/skills/execution/simple";
 
 export const attackBodySchema = z
@@ -43,24 +45,21 @@ function assertAttackInput(ctx: BattleMutationContext, data: Omit<AttackBody, "e
     ? attacker?.battleData.attacks.find((a) => a.id === data.attackId || a.name === data.attackId)
     : attacker?.battleData.attacks[0];
 
+  if (!attacker || !attack) return;
+
   const targetIds = data.targetIds?.length ? data.targetIds : data.targetId ? [data.targetId] : [];
 
-  if (attack) assertAttackRolls(attack, { damageRolls: data.damageRolls, targetCount: targetIds.length });
+  // клієнт героя кидає кубики зброї разом із кубиками рівня (PlayerTurnViewDialogs)
+  const formula =
+    attacker.basicInfo.sourceType === "character"
+      ? mergeDiceFormulas(attack.damageDice ?? "", getHeroDamageDiceForLevel(attacker.abilities.level, attack.type as AttackType))
+      : (attack.damageDice ?? "");
 
-  const firstTarget = ctx.participants.find((p) => p.basicInfo.id === targetIds[0]);
-
-  if (firstTarget) assertReactionDamage(firstTarget, data.reactionDamage);
+  assertAttackRolls(formula, { damageRolls: data.damageRolls, targetCount: targetIds.length });
 }
 
 export function attackMutation(ctx: BattleMutationContext, body: AttackBody): MutationResult {
-  const { endTurn, ...raw } = body;
-
-  // удар по слоту екстра-ходу йде в самого учасника
-  const data = {
-    ...raw,
-    targetId: raw.targetId && resolveTargetId(ctx.participants, raw.targetId),
-    targetIds: raw.targetIds?.map((id) => resolveTargetId(ctx.participants, id)),
-  };
+  const { endTurn, ...data } = body;
 
   assertAttackInput(ctx, data);
 

@@ -1,15 +1,17 @@
 import { BattleRuleError } from "@/lib/utils/battle/store";
-import { maxRoll, parseDice } from "@/lib/utils/common/dice";
-import type { BattleAttack, BattleParticipant } from "@/types/battle";
+import { parseDice } from "@/lib/utils/common/dice";
 
 function invalid(message: string): never {
   throw new BattleRuleError("invalid_dice", message);
 }
 
+/** Невідомий запис кубиків (вільний текст у формі юніта) не перевіряється — клієнт кидає його по-своєму. */
 export function assertRollsWithinFormula(formula: string, rolls: number[], maxCount: number): void {
   const parsed = parseDice(formula);
 
-  const largest = parsed ? Math.max(0, ...parsed.groups.map((g) => g.size)) : 0;
+  if (!parsed || parsed.groups.length === 0) return;
+
+  const largest = Math.max(...parsed.groups.map((g) => g.size));
 
   if (rolls.length > maxCount) invalid(`Забагато кидків: ${rolls.length} (максимум ${maxCount})`);
 
@@ -22,28 +24,20 @@ function diceCount(formula: string): number {
   return parseDice(formula)?.groups.reduce((sum, g) => sum + g.count, 0) ?? 0;
 }
 
-export function assertAttackRolls(attack: Pick<BattleAttack, "damageDice">, body: { damageRolls: number[]; targetCount: number }): void {
-  const formula = attack.damageDice ?? "";
-
+/** formula — те, що реально кидає клієнт (для героя — зброя плюс кубики рівня). */
+export function assertAttackRolls(formula: string, body: { damageRolls: number[]; targetCount: number }): void {
   assertRollsWithinFormula(formula, body.damageRolls, diceCount(formula) * Math.max(1, body.targetCount) * 2);
 }
 
-export function assertSpellRolls(spell: { diceCount: number | null; diceType: string | null }, rolls: number[], targetCount: number): void {
-  if (!spell.diceCount || !spell.diceType) {
-    if (rolls.length > 0) invalid("Заклинання не має кубиків шкоди");
-
-    return;
-  }
+export function assertSpellRolls(
+  spell: { diceCount: number | null; diceType: string | null },
+  rolls: number[],
+  targetCount: number,
+): void {
+  if (!spell.diceCount || !spell.diceType) return;
 
   const die = spell.diceType.startsWith("d") ? spell.diceType : `d${spell.diceType}`;
 
   assertRollsWithinFormula(`${spell.diceCount}${die}`, rolls, spell.diceCount * Math.max(1, targetCount) * 2);
 }
 
-export function assertReactionDamage(defender: BattleParticipant, value: number | undefined): void {
-  if (value === undefined) return;
-
-  const best = Math.max(0, ...defender.battleData.attacks.map((a) => maxRoll(a.damageDice ?? "")));
-
-  if (!Number.isInteger(value) || value < 0 || value > best * 2) invalid(`Шкода реакції ${value} неможлива`);
-}

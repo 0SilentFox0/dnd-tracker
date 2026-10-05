@@ -9,7 +9,6 @@ import { processSpell } from "@/lib/utils/battle/spell";
 import { appendSummonedUnitToInitiativeEnd } from "@/lib/utils/battle/spell/append-summoned-unit";
 import { mapDbSpellToBattleSpell } from "@/lib/utils/battle/spell/map-db-spell";
 import { BattleAccessError, battleActionToEvent, BattleRuleError } from "@/lib/utils/battle/store";
-import { resolveTargetId } from "@/lib/utils/battle/turn/extra-turn";
 import { assertSpellRolls } from "@/lib/utils/battle/validation/dice-checks";
 
 export interface SpellMutationDeps {
@@ -64,7 +63,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
     const result = processSpell({
       caster,
       spell: mapDbSpellToBattleSpell(spellRow),
-      targetIds: data.targetIds.map((id) => resolveTargetId(order, id)),
+      targetIds: data.targetIds,
       allParticipants: order,
       currentRound: ctx.scene.round,
       battleId: ctx.scene.id,

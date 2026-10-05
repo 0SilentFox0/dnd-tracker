@@ -230,7 +230,6 @@ export interface BattleParticipantBasicInfo {
   side: ParticipantSide;
   controlledBy: string; // userId (для players) або "dm" (для NPC/units)
   isExtraTurnSlot?: boolean; // чи є цей слот додатковим ходом
-  extraTurnOf?: string; // id оригіналу для слота екстра-ходу
 }
 
 /**
@@ -309,6 +308,8 @@ export interface BattleParticipantBattleData {
   skillUsageCounts?: Record<string, number>;
   /** Пул додаткових дій (ефект «actions»): накопичується при спрацюванні, споживається при використанні основної дії, діє до кінця бою */
   pendingExtraActions?: number;
+  /** Учасник зараз робить додатковий хід від моралі (наприкінці раунду) */
+  extraTurnActive?: boolean;
 }
 
 /**

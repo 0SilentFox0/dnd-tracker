@@ -2,7 +2,6 @@
  * Логіка циклу переходу ходу: пошук наступного живого учасника, endRound/startOfRound, processStartOfTurn, логи.
  */
 
-import { syncSlotFromOriginal } from "./extra-turn";
 import { logTurnTiming } from "./turn-helpers";
 
 import {
@@ -129,8 +128,6 @@ export function runAdvanceTurnLoop(
         });
       }
     }
-
-    updatedInitiativeOrder = syncSlotFromOriginal(updatedInitiativeOrder, nextTurnIndex);
 
     const nextParticipant = updatedInitiativeOrder[nextTurnIndex];
 

@@ -1,5 +1,4 @@
 import { applyPendingMoraleCheck } from "./apply-pending-morale";
-import { syncOriginalFromSlot } from "./extra-turn";
 import type { PendingMoraleCheckPayload } from "./pending-morale";
 import { runAdvanceTurnLoop } from "./run-advance-turn-loop";
 import { applyVictoryCompletion } from "./turn-helpers";
@@ -21,7 +20,7 @@ export interface AdvanceTurnOutput {
 }
 
 export function advanceTurn({ participants, pending, scene }: AdvanceTurnInput): AdvanceTurnOutput {
-  let order = syncOriginalFromSlot(participants, scene.turnIndex);
+  let order = participants;
 
   const actions: BattleAction[] = [];
 
@@ -33,9 +32,46 @@ export function advanceTurn({ participants, pending, scene }: AdvanceTurnInput):
     if (morale.moraleLogEntry) actions.push(morale.moraleLogEntry);
   }
 
+  const current = order[scene.turnIndex];
+
+  const endingExtraTurn = current?.battleData.extraTurnActive === true;
+
+  if (endingExtraTurn) {
+    order = order.map((p, i) =>
+      i === scene.turnIndex ? { ...p, battleData: { ...p.battleData, extraTurnActive: false } } : p,
+    );
+  }
+
+  const roundIsOver = endingExtraTurn || !order.slice(scene.turnIndex + 1).some(isAlive);
+
+  const extraIndex = roundIsOver ? order.findIndex((p) => isAlive(p) && p.actionFlags.hasExtraTurn) : -1;
+
+  if (extraIndex >= 0) {
+    const taker = order[extraIndex];
+
+    // без processStartOfTurn: DoT і тривалості вже спрацювали на початку звичайного ходу
+    order = order.map((p, i) =>
+      i === extraIndex
+        ? {
+            ...p,
+            actionFlags: { hasUsedAction: false, hasUsedBonusAction: false, hasUsedReaction: false, hasExtraTurn: false },
+            battleData: { ...p.battleData, extraTurnActive: true },
+          }
+        : p,
+    );
+
+    return {
+      participants: order,
+      pending,
+      scene: { turnIndex: extraIndex, round: scene.round, status: scene.status, pendingMoraleCheck: null },
+      actions: [...actions, extraTurnAction(taker, scene)],
+    };
+  }
+
   const loop = runAdvanceTurnLoop({
     initiativeOrder: order,
-    currentTurnIndex: scene.turnIndex,
+    // після додаткового ходу раунд закінчено: з останнього індексу цикл переходить у новий раунд
+    currentTurnIndex: endingExtraTurn ? order.length - 1 : scene.turnIndex,
     currentRound: scene.round,
     battleId: scene.id,
     currentBattleLogLength: scene.eventSeq + actions.length,
@@ -66,5 +102,28 @@ export function advanceTurn({ participants, pending, scene }: AdvanceTurnInput):
       pendingMoraleCheck: null,
     },
     actions: [...actions, ...newLogEntries],
+  };
+}
+
+function isAlive(p: BattleParticipant): boolean {
+  return p.combatStats.status !== "dead" && p.combatStats.status !== "unconscious";
+}
+
+function extraTurnAction(p: BattleParticipant, scene: BattleSceneState): BattleAction {
+  return {
+    id: `extra-turn-${p.basicInfo.id}-${Date.now()}`,
+    battleId: scene.id,
+    round: scene.round,
+    actionIndex: scene.eventSeq,
+    timestamp: new Date(),
+    actorId: p.basicInfo.id,
+    actorName: p.basicInfo.name,
+    actorSide: p.basicInfo.side,
+    actionType: "ability",
+    targets: [],
+    actionDetails: {},
+    resultText: `${p.basicInfo.name} отримує додатковий хід`,
+    hpChanges: [],
+    isCancelled: false,
   };
 }
