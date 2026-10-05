@@ -21,6 +21,7 @@ import { prisma } from "../lib/db";
 import { applyBattleDelta } from "../lib/utils/battle/client/apply-delta";
 import { type PipelineDeps, runBattleMutation, type RunBattleMutationOptions } from "../lib/utils/battle/pipeline/run-battle-mutation";
 import { loadBattle, loadRecentEvents, saveBattle } from "../lib/utils/battle/store";
+import { branchLevelNodeId, buildTreeJson, racialNodeId } from "../lib/utils/skills/progression";
 import type { BattleMutationResponse, BattleScene } from "../types/api";
 import type { BattleAction, BattleParticipant } from "../types/battle";
 import { artifactRows, DRAGON_SET, RACES, SIM_CAMPAIGN_NAME, SIM_PLAYER, SIM_USER, SKILLS, UNITS } from "./simulate-battle-scenario";
@@ -93,16 +94,32 @@ async function seed() {
     art[key] = (await prisma.artifact.create({ data: a as Prisma.ArtifactUncheckedCreateInput })).id;
   }
 
-  const progress = (ids: string[]) => ({ [mainSkill.id]: { level: "basic", unlockedSkills: ids } });
+  const treeFor = async (race: string, branch: { levels?: Partial<Record<"basic" | "advanced" | "expert", string>>; outer: string[]; middle?: string[] }, racial?: { basic: string }) => {
+    const row = await prisma.skillTree.create({ data: { campaignId, race, skills: {} } });
+
+    const json = buildTreeJson({ id: row.id, race, branches: [{ id: mainSkill.id, name: mainSkill.name, color: mainSkill.color, ...branch }], racial });
+
+    await prisma.skillTree.update({ where: { id: row.id }, data: { skills: json as unknown as Prisma.InputJsonValue } });
+
+    return row.id;
+  };
+
+  const dwarfTree = await treeFor("Дварф", { outer: [skills.rage, skills.undying, skills.ironSkin], middle: [skills.legacyGuard] });
+
+  const elfTree = await treeFor("Ельф", { levels: { basic: skills.hunterEye }, outer: [skills.bleed, skills.secondWind] }, { basic: skills.forestStep });
+
+  const levels = ["basic", "advanced", "expert"].map((l) => branchLevelNodeId(mainSkill.id, l as "basic"));
+
+  const progress = (treeId: string, ids: string[]) => ({ [treeId]: { unlockedSkills: [...levels, ...ids] } });
 
   const base = { campaignId, type: "player", controlledBy: SIM_PLAYER.id, class: "Fighter", proficiencyBonus: 2 };
 
   const chars = {
     thorin: await prisma.character.create({
-      data: { ...base, name: "Торін", race: "Дварф", level: 5, strength: 16, dexterity: 12, constitution: 16, armorClass: 16, maxHp: 40, currentHp: 40, initiative: 1, skillTreeProgress: progress([skills.rage, skills.undying, skills.ironSkin, skills.legacyGuard]) },
+      data: { ...base, name: "Торін", race: "Дварф", level: 5, strength: 16, dexterity: 12, constitution: 16, armorClass: 16, maxHp: 40, currentHp: 40, initiative: 1, skillTreeProgress: progress(dwarfTree, [skills.rage, skills.undying, skills.ironSkin, skills.legacyGuard]) },
     }),
     lyra: await prisma.character.create({
-      data: { ...base, class: "Ranger", name: "Ліра", race: "Ельф", level: 4, dexterity: 18, armorClass: 14, maxHp: 28, currentHp: 28, initiative: 4, skillTreeProgress: progress([skills.bleed, skills.secondWind]) },
+      data: { ...base, class: "Ranger", name: "Ліра", race: "Ельф", level: 4, dexterity: 18, armorClass: 14, maxHp: 28, currentHp: 28, initiative: 4, skillTreeProgress: progress(elfTree, [skills.bleed, skills.secondWind, racialNodeId("basic")]) },
     }),
     myron: await prisma.character.create({
       data: { ...base, class: "Wizard", name: "Мирон", race: "Людина", level: 3, intelligence: 17, armorClass: 12, maxHp: 18, currentHp: 18, initiative: 2, immunities: ["контроль"], knownSpells: [spell.id], spellSlots: { "1": { max: 2, current: 2 } } },
@@ -310,6 +327,11 @@ async function scenario() {
   );
   check("Ліра отримала вміння повного сету", abilityKeysOf(by("Ліра")).includes("Аура дракона:passive"), abilityKeysOf(by("Ліра")).join(", "));
   check("Ельфійська стійкість (раса) у Ліри", abilityKeysOf(by("Ліра")).includes("Ельфійська стійкість:passive"));
+  check(
+    "Дерево Ліри: рівень гілки (levelSkillIds, назва без рівня) і расовий вузол діють у бою",
+    ["Око мисливця:passive", "Лісовий крок:passive"].every((k) => abilityKeysOf(by("Ліра")).includes(k)),
+    abilityKeysOf(by("Ліра")).join(", "),
+  );
   check("Голем: імунітети стали прапорцями", (by("Кам'яний голем #1").battleData.resolvedAbilities ?? []).some((a) => a.effects.some((e) => e.kind === "flag" && e.flag === "conditionImmunity")));
   check("Атака зброї Торіна з артефакту (1d8 slashing)", by("Торін").battleData.attacks.some((a) => a.damageDice === "1d8" && a.damageType === "slashing"), JSON.stringify(by("Торін").battleData.attacks.map((a) => [a.name, a.damageDice, a.damageType])));
 

@@ -36,6 +36,8 @@ export const SKILLS = {
   },
   undying: { name: "Невмирущий", abilities: [ab("undying", "Невмирущий", { trigger: { event: "lethalDamage" }, limits: { perBattle: 1 }, effects: [{ kind: "heal", amount: 1, revive: true }] })] },
   secondWind: { name: "Друге дихання", abilities: [ab("second-wind", "Друге дихання", { trigger: { event: "bonusAction" }, limits: { perBattle: 1 }, effects: [{ kind: "heal", amount: 5 }] })] },
+  hunterEye: { name: "Око мисливця", abilities: [ab("hunter-eye", "Око мисливця", { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "resistance", damageType: "psychic", percent: 10 }] })] },
+  forestStep: { name: "Лісовий крок", abilities: [ab("forest-step", "Лісовий крок", { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "resistance", damageType: "necrotic", percent: 10 }] })] },
   ironSkin: { name: "Залізна шкіра", abilities: [ab("iron-skin", "Залізна шкіра", { trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "armor", flat: 2 }] })] },
   // старий формат: abilities = NULL, ефект у combatStats
   legacyGuard: { name: "Стара стійкість (legacy)", combatStats: json({ effects: [{ stat: "armor", type: "flat", value: 1 }] }), skillTriggers: json([{ type: "simple", trigger: "passive" }]) },

@@ -26,6 +26,7 @@ import {
   getSpellAttackBonus,
   getSpellSaveDC,
 } from "../lib/utils/common/calculations";
+import { buildTreeJson } from "../lib/utils/skills/progression";
 
 const prisma = new PrismaClient();
 
@@ -120,12 +121,10 @@ async function main() {
       data: {
         campaignId: CAMPAIGN_ID,
         race: "dwarf",
-        skills: [
-          {
-            mainSkillId: dwarfMainSkill.id,
-            skills: [{ skillId: dwarfSkill.id, level: "basic" }],
-          },
-        ] as Prisma.InputJsonValue,
+        skills: buildTreeJson({
+          race: "dwarf",
+          branches: [{ id: dwarfMainSkill.id, name: dwarfMainSkill.name, color: dwarfMainSkill.color, outer: [dwarfSkill.id] }],
+        }) as unknown as Prisma.InputJsonValue,
       },
     });
 
@@ -269,37 +268,11 @@ async function main() {
         },
       });
 
-      const existingCs = await prisma.characterSkills.findUnique({
-        where: { characterId_skillTreeId: { characterId: char.id, skillTreeId: payload.skillTreeId } },
-      });
-
-      if (existingCs) {
-        await prisma.characterSkills.update({
-          where: { id: existingCs.id },
-          data: { unlockedSkills: payload.unlockedSkills as Prisma.InputJsonValue },
-        });
-      } else {
-        await prisma.characterSkills.create({
-          data: {
-            characterId: char.id,
-            skillTreeId: payload.skillTreeId,
-            unlockedSkills: payload.unlockedSkills as Prisma.InputJsonValue,
-          },
-        });
-      }
-
       characterIds.push(char.id);
       console.log("Оновлено персонажа:", payload.name);
     } else {
       char = await prisma.character.create({
         data: baseStats,
-      });
-      await prisma.characterSkills.create({
-        data: {
-          characterId: char.id,
-          skillTreeId: payload.skillTreeId,
-          unlockedSkills: payload.unlockedSkills as Prisma.InputJsonValue,
-        },
       });
 
       const weaponType = payload.class === "Fighter" ? AttackType.MELEE : payload.class === "Ranger" ? AttackType.RANGED : AttackType.MELEE;
