@@ -1,73 +1,21 @@
-import { NextResponse } from "next/server";
-
-import { executeCastSpell } from "./cast-spell-handler";
 import { spellSchema } from "./cast-spell-schema";
+import { createSpellMutation } from "./spell-mutation";
 
-import { prisma } from "@/lib/db";
-import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
-import { handleApiError } from "@/lib/utils/api/error-handler";
-import {
-  BATTLE_RATE_LIMITS,
-  checkRateLimit,
-  rateLimitResponse,
-} from "@/lib/utils/api/rate-limit";
-import { logBattleTiming } from "@/lib/utils/battle/battle-timing";
+import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+
+const mutate = createSpellMutation();
 
 export async function POST(
-  request: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string; battleId: string }> },
 ) {
-  const t0 = Date.now();
-
-  try {
-    const { id, battleId } = await params;
-
-    const accessResult = await requireCampaignAccess(id, false);
-
-    logBattleTiming("spell: auth", t0);
-
-    if (accessResult instanceof NextResponse) {
-      return accessResult;
-    }
-
-    const rl = await checkRateLimit({
-      userId: accessResult.userId,
-      scope: "spell",
-      battleId,
-      ...BATTLE_RATE_LIMITS.spell,
-    });
-
-    if (!rl.allowed) return rateLimitResponse(rl);
-
-    const battle = await prisma.battleScene.findUnique({
-      where: { id: battleId },
-    });
-
-    if (!battle || battle.campaignId !== id) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
-    }
-
-    if (battle.status !== "active") {
-      return NextResponse.json(
-        { error: "Battle is not active" },
-        { status: 400 },
-      );
-    }
-
-    const body = await request.json();
-
-    const data = spellSchema.parse(body);
-
-    return await executeCastSpell({
-      campaignId: id,
-      battleId,
-      userId: accessResult.userId,
-      isDM: accessResult.campaign.members[0]?.role === "dm",
-      battle,
-      data,
-      t0,
-    });
-  } catch (error) {
-    return handleApiError(error, { action: "process spell" });
-  }
+  return runBattleMutation(req, {
+    params: await params,
+    access: "member",
+    requireStatus: "active",
+    rateLimitScope: "spell",
+    schema: spellSchema,
+    dryRun: (body) => body.preview === true,
+    mutate,
+  });
 }
