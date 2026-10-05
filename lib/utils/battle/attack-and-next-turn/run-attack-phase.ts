@@ -5,7 +5,6 @@
 
 import { processAttack } from "@/lib/utils/battle/attack";
 import { getTotalDiceCount } from "@/lib/utils/battle/balance";
-import { slimInitiativeOrderForStorage } from "@/lib/utils/battle/strip-battle-payload";
 import { updateMoraleOnEvent } from "@/lib/utils/skills/execution";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -184,16 +183,6 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const allBattleActions: BattleAction[] = [];
 
-  const snapshotState = () => ({
-    initiativeOrder: slimInitiativeOrderForStorage(
-      structuredClone(currentInitiativeOrder),
-    ),
-    currentTurnIndex: battle.currentTurnIndex,
-    currentRound: battle.currentRound,
-  });
-
-  let stateBefore = snapshotState();
-
   const dicePerTarget =
     isMultiTargetRanged && targets.length > 1
       ? getTotalDiceCount(attack.damageDice ?? "")
@@ -270,9 +259,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
     allBattleActions.push({
       ...attackResult.battleAction,
       actionIndex: baseBattleLog.length + allBattleActions.length,
-      stateBefore: { ...stateBefore },
     });
-    stateBefore = snapshotState();
   }
 
   let finalInitiativeOrder = currentInitiativeOrder;
