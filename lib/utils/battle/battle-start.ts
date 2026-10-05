@@ -5,7 +5,7 @@
 
 import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
-import { ActiveEffect,BattleParticipant } from "@/types/battle";
+import { BattleParticipant } from "@/types/battle";
 
 /**
  * Розраховує ініціативу з урахуванням спеціальних правил
