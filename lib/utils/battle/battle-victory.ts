@@ -20,10 +20,12 @@ export interface VictoryCheckResult {
 export function checkVictoryConditions(
   initiativeOrder: BattleParticipant[]
 ): VictoryCheckResult {
-  // Розділяємо на союзників та ворогів
-  const allies = initiativeOrder.filter((p) => p.basicInfo.side === ParticipantSide.ALLY);
+  // слот екстра-ходу — не окремий учасник
+  const real = initiativeOrder.filter((p) => !p.basicInfo.isExtraTurnSlot);
 
-  const enemies = initiativeOrder.filter((p) => p.basicInfo.side === ParticipantSide.ENEMY);
+  const allies = real.filter((p) => p.basicInfo.side === ParticipantSide.ALLY);
+
+  const enemies = real.filter((p) => p.basicInfo.side === ParticipantSide.ENEMY);
 
   // Перевіряємо чи всі вороги мертві або непритомні
   const allEnemiesDefeated = enemies.every(

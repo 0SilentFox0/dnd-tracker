@@ -58,6 +58,7 @@ export function applyPendingMoraleCheck(
         ...participant.basicInfo,
         id: `${participant.basicInfo.id}-extra-${Date.now()}`,
         isExtraTurnSlot: true,
+        extraTurnOf: participant.basicInfo.id,
       },
       actionFlags: {
         ...participant.actionFlags,

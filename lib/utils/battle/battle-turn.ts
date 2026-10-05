@@ -9,6 +9,7 @@ import {
   getPassiveAbilitiesByTrigger,
 } from "./triggers";
 
+import { syncOriginalFromSlot } from "@/lib/utils/battle/turn/extra-turn";
 import {
   applyOnBattleStartEffectsToNewAllies,
   executeStartOfRoundTriggers,
@@ -207,9 +208,12 @@ export function processStartOfRound(
   triggerMessages: string[];
 } {
   // 0. Видаляємо тимчасові слоти додаткових ходів з попереднього раунду
-  const baseOrder = (initiativeOrder || []).filter(
-    (p) => !p.basicInfo?.isExtraTurnSlot,
+  const synced = (initiativeOrder || []).reduce(
+    (acc, p, i) => (p.basicInfo?.isExtraTurnSlot ? syncOriginalFromSlot(acc, i) : acc),
+    initiativeOrder || [],
   );
+
+  const baseOrder = synced.filter((p) => !p.basicInfo?.isExtraTurnSlot);
 
   // Додаємо призваних істот до baseOrder
   const updatedOrder = [...baseOrder, ...pendingSummons];

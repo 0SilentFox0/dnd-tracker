@@ -1,4 +1,5 @@
 import { applyPendingMoraleCheck } from "./apply-pending-morale";
+import { syncOriginalFromSlot } from "./extra-turn";
 import type { PendingMoraleCheckPayload } from "./pending-morale";
 import { runAdvanceTurnLoop } from "./run-advance-turn-loop";
 import { applyVictoryCompletion } from "./turn-helpers";
@@ -20,7 +21,7 @@ export interface AdvanceTurnOutput {
 }
 
 export function advanceTurn({ participants, pending, scene }: AdvanceTurnInput): AdvanceTurnOutput {
-  let order = participants;
+  let order = syncOriginalFromSlot(participants, scene.turnIndex);
 
   const actions: BattleAction[] = [];
 

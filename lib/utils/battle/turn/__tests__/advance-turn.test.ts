@@ -82,4 +82,18 @@ describe("advanceTurn", () => {
     expect(out.scene.round).toBe(2);
     expect(out.participants[out.scene.turnIndex ?? -1].basicInfo.id).toBe("wolf");
   });
+
+  it("кінець ходу слота екстра-ходу записує його стан в оригінал", () => {
+    const original = createMockParticipant({ basicInfo: { ...base.basicInfo, id: "hero" } });
+
+    const slotHurt = {
+      ...original,
+      basicInfo: { ...original.basicInfo, id: "hero-extra-1", isExtraTurnSlot: true, extraTurnOf: "hero" },
+      combatStats: { ...original.combatStats, currentHp: 3 },
+    };
+
+    const out = advanceTurn({ participants: [original, goblin, slotHurt], pending: [], scene: { ...scene, turnIndex: 2 } });
+
+    expect(out.participants.find((p) => p.basicInfo.id === "hero")?.combatStats.currentHp).toBe(3);
+  });
 });

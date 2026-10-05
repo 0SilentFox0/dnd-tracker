@@ -230,6 +230,7 @@ export interface BattleParticipantBasicInfo {
   side: ParticipantSide;
   controlledBy: string; // userId (для players) або "dm" (для NPC/units)
   isExtraTurnSlot?: boolean; // чи є цей слот додатковим ходом
+  extraTurnOf?: string; // id оригіналу для слота екстра-ходу
 }
 
 /**

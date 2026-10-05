@@ -59,4 +59,12 @@ describe("attack mutation", () => {
       expect(e instanceof BattleAccessError || e instanceof BattleRuleError).toBe(true);
     }
   });
+
+  it("атака по слоту екстра-ходу влучає в справжнього учасника", () => {
+    const slot = { ...goblin, basicInfo: { ...goblin.basicInfo, id: "gob-extra-1", isExtraTurnSlot: true, extraTurnOf: "gob" } };
+
+    const out = attackMutation({ ...ctx, participants: [hero, goblin, slot] } as never, body({ targetId: "gob-extra-1" }));
+
+    expect(out.events[0].targets).toEqual([expect.objectContaining({ participantId: "gob" })]);
+  });
 });

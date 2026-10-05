@@ -5,6 +5,7 @@ import { toPipelineError } from "@/lib/utils/battle/pipeline/compat-errors";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { battleActionToEvent, systemEvent } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";
+import { resolveTargetId } from "@/lib/utils/battle/turn/extra-turn";
 import { executeComplexTriggersForChangedParticipant } from "@/lib/utils/skills/execution/simple";
 
 export const attackBodySchema = z
@@ -34,7 +35,14 @@ export const attackBodySchema = z
 export type AttackBody = z.infer<typeof attackBodySchema>;
 
 export function attackMutation(ctx: BattleMutationContext, body: AttackBody): MutationResult {
-  const { endTurn, ...data } = body;
+  const { endTurn, ...raw } = body;
+
+  // удар по слоту екстра-ходу йде в самого учасника
+  const data = {
+    ...raw,
+    targetId: raw.targetId && resolveTargetId(ctx.participants, raw.targetId),
+    targetIds: raw.targetIds?.map((id) => resolveTargetId(ctx.participants, id)),
+  };
 
   let phase: ReturnType<typeof runAttackPhase>;
 

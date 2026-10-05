@@ -60,7 +60,7 @@ export function splitParticipant(
       controlledBy,
       orderIndex: place.orderIndex,
       isPending: place.isPending,
-      extraTurnOf: null,
+      extraTurnOf: p.basicInfo.extraTurnOf ?? null,
       currentHp: Math.round(currentHp),
       tempHp: Math.round(tempHp),
       maxHp: Math.round(maxHp),
