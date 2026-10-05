@@ -21,7 +21,7 @@ export function BattlePageClient({ campaignId, battleId, userId }: { campaignId:
 
   if (!value) {
     return (
-      <div className="battle-hud flex h-dvh items-center justify-center px-4">
+      <div className="battle-hud flex min-h-[70dvh] items-center justify-center px-4">
         {loading ? <LoadingState label="Завантаження бою…" className="w-full max-w-md" /> : <ErrorState error="Бій не знайдено" className="w-full max-w-md" />}
       </div>
     );
