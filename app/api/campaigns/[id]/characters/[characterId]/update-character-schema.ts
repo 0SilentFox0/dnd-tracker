@@ -71,17 +71,6 @@ export const updateCharacterSchema = z.object({
   // Уміння (персональний скіл)
   personalSkillId: z.string().optional().nullable(),
 
-  // Прогрес по деревах прокачки
-  skillTreeProgress: z
-    .record(
-      z.string(),
-      z.object({
-        level: z.string().optional(),
-        unlockedSkills: z.array(z.string()).optional(),
-      }),
-    )
-    .optional(),
-
   // Коефіцієнти масштабування (HP, melee, ranged) — окремі для кожного героя
   hpMultiplier: z.number().min(0.1).max(3).optional(),
   meleeMultiplier: z.number().min(0.1).max(3).optional(),

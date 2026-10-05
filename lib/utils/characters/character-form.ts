@@ -92,11 +92,6 @@ export function characterToFormData(
       meleeMultiplier: (character as { meleeMultiplier?: number | null }).meleeMultiplier ?? 1,
       rangedMultiplier: (character as { rangedMultiplier?: number | null }).rangedMultiplier ?? 1,
     },
-    skillTreeProgress:
-      character.skillTreeProgress &&
-      typeof character.skillTreeProgress === "object"
-        ? character.skillTreeProgress
-        : undefined,
   };
 }
 
@@ -157,9 +152,6 @@ export function formDataToCharacter(
       hpMultiplier: formData.scalingCoefficients.hpMultiplier,
       meleeMultiplier: formData.scalingCoefficients.meleeMultiplier,
       rangedMultiplier: formData.scalingCoefficients.rangedMultiplier,
-    }),
-    ...(formData.skillTreeProgress != null && {
-      skillTreeProgress: formData.skillTreeProgress,
     }),
   };
 }

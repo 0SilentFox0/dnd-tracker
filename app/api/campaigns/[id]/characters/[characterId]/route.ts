@@ -149,6 +149,7 @@ export async function PATCH(
         ...(computed.skillTreeProgressUpdate !== undefined && {
           skillTreeProgress: computed.skillTreeProgressUpdate,
         }),
+        ...(computed.seenLevel !== undefined && { seenLevel: computed.seenLevel }),
       },
       include: {
         user: true,

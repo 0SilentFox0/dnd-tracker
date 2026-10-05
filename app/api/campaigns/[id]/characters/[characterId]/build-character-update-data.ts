@@ -4,6 +4,7 @@
 
 import { Prisma } from "@prisma/client";
 
+import { seenLevelOnLevelChange } from "@/lib/utils/characters/seen-level";
 import {
   calculateHPGain,
   getAbilityModifier,
@@ -46,7 +47,6 @@ export interface BuildCharacterUpdateDataParams {
     spellcastingAbility?: string | null;
     spellSlots?: Record<string, { max: number; current: number }>;
     immunities?: unknown;
-    skillTreeProgress?: unknown;
     [key: string]: unknown;
   };
   xpMultiplier: number;
@@ -68,6 +68,7 @@ export function buildCharacterUpdateData({
   spellAttackBonus: number | null;
   spellSlotsToSave: Record<string, { max: number; current: number }>;
   skillTreeProgressUpdate: Prisma.InputJsonValue | undefined;
+  seenLevel: number | undefined;
 } {
   const level = (data.level ?? character.level) as number;
 
@@ -177,13 +178,9 @@ export function buildCharacterUpdateData({
     spellSlotsToSave.universal = existingSlots.universal as { max: number; current: number };
   }
 
-  const levelDecreased = finalLevel < character.level;
+  const skillTreeProgressUpdate = finalLevel < character.level ? ({} as Prisma.InputJsonValue) : undefined;
 
-  const skillTreeProgressUpdate = levelDecreased
-    ? ({} as Prisma.InputJsonValue)
-    : data.skillTreeProgress !== undefined
-      ? (data.skillTreeProgress as Prisma.InputJsonValue)
-      : undefined;
+  const seenLevel = seenLevelOnLevelChange(character.level, finalLevel, (character.seenLevel as number | null | undefined) ?? null);
 
   return {
     finalLevel,
@@ -197,5 +194,6 @@ export function buildCharacterUpdateData({
     spellAttackBonus,
     spellSlotsToSave,
     skillTreeProgressUpdate,
+    seenLevel,
   };
 }
