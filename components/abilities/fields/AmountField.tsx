@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import type { FieldProps } from "./FieldRenderer";
 
 import { Input } from "@/components/ui/input";
@@ -32,30 +34,48 @@ function textOf(v: Amount | undefined): string {
   return "formula" in v ? v.formula : String(v.value);
 }
 
-function build(mode: Mode, text: string): Amount | undefined {
+/** `null` means "not a number yet" (e.g. a lone "-") — keep the previous value. */
+function build(mode: Mode, text: string): Amount | undefined | null {
   if (text.trim() === "") return undefined;
 
   switch (mode) {
     case "number":
-      return Number(text);
+      return Number.isFinite(Number(text)) ? Number(text) : null;
     case "dice":
       return DICE_RE.test(text.trim()) ? text.trim() : text;
     case "formula":
       return { formula: text };
     default:
-      return { percentOf: mode, value: Number(text) };
+      return Number.isFinite(Number(text)) ? { percentOf: mode, value: Number(text) } : null;
   }
 }
 
 export function AmountField({ id, value, onChange }: FieldProps<Amount | undefined>) {
   const mode = modeOf(value);
 
+  const [draft, setDraft] = useState<string | null>(null);
+
+  const emit = (next: Amount | undefined | null) => {
+    if (next !== null) onChange(next);
+  };
+
   return (
     <div className="flex gap-1">
       <div className="w-28 shrink-0">
-        <SelectField value={mode} options={MODES} onValueChange={(m) => onChange(build(m as Mode, textOf(value)))} />
+        <SelectField value={mode} options={MODES} onValueChange={(m) => {
+            setDraft(null);
+            emit(build(m as Mode, textOf(value)));
+          }} />
       </div>
-      <Input id={id} value={textOf(value)} onChange={(e) => onChange(build(mode, e.target.value))} />
+      <Input
+        id={id}
+        value={draft ?? textOf(value)}
+        onChange={(e) => {
+          setDraft(e.target.value);
+          emit(build(mode, e.target.value));
+        }}
+        onBlur={() => setDraft(null)}
+      />
     </div>
   );
 }
