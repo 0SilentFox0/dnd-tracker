@@ -7,9 +7,8 @@ import { useBattleScene } from "@/lib/hooks/battle";
 export function CompleteBattleDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const { actions } = useBattleScene();
 
-  const finish = async (result?: "victory" | "defeat") => {
-    await actions.complete.mutateAsync(result ? { result } : {});
-    onOpenChange(false);
+  const finish = (result?: "victory" | "defeat") => {
+    actions.complete.mutate(result ? { result } : {}, { onSuccess: () => onOpenChange(false) });
   };
 
   return (
@@ -25,13 +24,13 @@ export function CompleteBattleDialog({ open, onOpenChange }: { open: boolean; on
           <Button variant="outline" className="border-slate-600 text-slate-300" onClick={() => onOpenChange(false)}>
             Скасувати
           </Button>
-          <Button variant="outline" disabled={actions.complete.isPending} className="border-red-500/50 text-red-400 hover:bg-red-500/20" onClick={() => void finish("defeat")}>
+          <Button variant="outline" disabled={actions.complete.isPending} className="border-red-500/50 text-red-400 hover:bg-red-500/20" onClick={() => finish("defeat")}>
             Поразка
           </Button>
-          <Button variant="outline" disabled={actions.complete.isPending} className="border-amber-500/50 text-amber-400 hover:bg-amber-500/20" onClick={() => void finish()}>
+          <Button variant="outline" disabled={actions.complete.isPending} className="border-amber-500/50 text-amber-400 hover:bg-amber-500/20" onClick={() => finish()}>
             Авто
           </Button>
-          <Button disabled={actions.complete.isPending} className="bg-emerald-600 text-white hover:bg-emerald-700" onClick={() => void finish("victory")}>
+          <Button disabled={actions.complete.isPending} className="bg-emerald-600 text-white hover:bg-emerald-700" onClick={() => finish("victory")}>
             Перемога
           </Button>
         </>

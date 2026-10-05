@@ -7,6 +7,7 @@ import type { BattleMutationResponse, BattleScene } from "@/types/api";
 export interface BattleActionOptions {
   invalidate?: ("battles" | "active-battles")[];
   onConflict?: () => void;
+  onFailure?: (message: string) => void;
 }
 
 export function useBattleAction<TVars extends object, TResp = Record<string, unknown>>(
@@ -21,7 +22,9 @@ export function useBattleAction<TVars extends object, TResp = Record<string, unk
 
   return useMutation({
     mutationFn: async (vars: TVars) => {
-      const expectedVersion = queryClient.getQueryData<BattleScene>(key)?.version;
+      const pinned = (vars as { expectedVersion?: number }).expectedVersion;
+
+      const expectedVersion = pinned ?? queryClient.getQueryData<BattleScene>(key)?.version;
 
       const { delta, response } = await fn({ ...vars, expectedVersion });
 
@@ -42,7 +45,11 @@ export function useBattleAction<TVars extends object, TResp = Record<string, unk
       if (error instanceof ApiError && error.status === 409) {
         void queryClient.invalidateQueries({ queryKey: key });
         options.onConflict?.();
+
+        return;
       }
+
+      options.onFailure?.(error instanceof Error && error.message ? error.message : "Дію не виконано");
     },
   });
 }

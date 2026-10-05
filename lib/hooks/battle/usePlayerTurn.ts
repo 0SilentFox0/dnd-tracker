@@ -1,6 +1,6 @@
 "use client";
 
-import { useReducer } from "react";
+import { useEffect, useReducer, useRef } from "react";
 
 import { useBattleScene } from "./useBattleScene";
 
@@ -28,6 +28,15 @@ export function usePlayerTurn(participant: BattleParticipant) {
 
   const id = participant.basicInfo.id;
 
+  const skipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(
+    () => () => {
+      if (skipTimer.current) clearTimeout(skipTimer.current);
+    },
+    [],
+  );
+
   const fresh = () => scene.readBattle()?.initiativeOrder.find((p) => p.basicInfo.id === id) ?? participant;
 
   const endTurn = async () => {
@@ -37,8 +46,13 @@ export function usePlayerTurn(participant: BattleParticipant) {
       if (!ok) return;
     }
 
+    try {
+      await scene.actions.nextTurn.mutateAsync({});
+    } catch {
+      return;
+    }
+
     dispatch({ type: "END" });
-    await scene.actions.nextTurn.mutateAsync({});
   };
 
   return {
@@ -49,7 +63,13 @@ export function usePlayerTurn(participant: BattleParticipant) {
       if (exhausted(fresh())) dispatch({ type: "EXHAUSTED" });
     },
     rollMorale: async (d10: number) => {
-      const res = await scene.actions.moraleCheck.mutateAsync({ participantId: id, d10Roll: d10 });
+      let res;
+
+      try {
+        res = await scene.actions.moraleCheck.mutateAsync({ participantId: id, d10Roll: d10 });
+      } catch {
+        return;
+      }
 
       const r = res?.moraleResult;
 
@@ -62,7 +82,11 @@ export function usePlayerTurn(participant: BattleParticipant) {
       if (result === "extra") scene.showResult({ kind: "morale-extra", ...base });
       else if (result === "skip") {
         scene.showResult({ kind: "morale-skip", ...base });
-        setTimeout(() => void scene.actions.nextTurn.mutateAsync({}), MORALE_SKIP_MS);
+
+        // версія фіксується одразу: якщо DM встигне передати хід сам, таймер отримає 409, а не пропустить наступного
+        const expectedVersion = scene.readBattle()?.version;
+
+        skipTimer.current = setTimeout(() => scene.actions.nextTurn.mutate({ expectedVersion }), MORALE_SKIP_MS);
       }
       else scene.toast.show(`${participant.basicInfo.name} · мораль: без змін (d10 = ${d10})`);
     },

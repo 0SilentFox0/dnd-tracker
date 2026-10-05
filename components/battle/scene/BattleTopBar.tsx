@@ -13,7 +13,7 @@ export function BattleTopBar({ onComplete }: { onComplete?: () => void }) {
 
   const reset = async () => {
     if (await confirm({ title: "Скинути бій?", description: "Бій повернеться до підготовки, журнал буде очищено.", confirmLabel: "Скинути" })) {
-      await actions.reset.mutateAsync({});
+      actions.reset.mutate({});
     }
   };
 
@@ -31,7 +31,7 @@ export function BattleTopBar({ onComplete }: { onComplete?: () => void }) {
         <span className="hidden gap-2 lg:flex">
           {onComplete && <button type="button" onClick={onComplete} className="hud-sc h-8 w-32 border border-emerald-500/50 text-sm text-emerald-400">Завершити</button>}
           <button type="button" onClick={() => void reset()} className="hud-sc h-8 w-28 border border-red-500/50 text-sm text-red-400">Скинути</button>
-          <button type="button" disabled={nextPending} onClick={() => void actions.nextTurn.mutateAsync({})} className="hud-sc flex h-8 w-36 items-center justify-center bg-[var(--enemy)] text-sm text-white disabled:opacity-70">
+          <button type="button" disabled={nextPending} onClick={() => actions.nextTurn.mutate({})} className="hud-sc flex h-8 w-36 items-center justify-center bg-[var(--enemy)] text-sm text-white disabled:opacity-70">
             {nextPending ? <Loader2 className="size-4 animate-spin" /> : "Наступний хід"}
           </button>
         </span>

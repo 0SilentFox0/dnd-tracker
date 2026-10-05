@@ -82,3 +82,37 @@ describe("useBattleAction", () => {
     expect(spy).toHaveBeenCalledWith({ queryKey: key });
   });
 });
+
+describe("useBattleAction — версія і помилки", () => {
+  it("явна expectedVersion у змінних не перезаписується кешем", async () => {
+    const { wrapper } = setup();
+
+    const fn = vi.fn(async () => ({ delta: delta(6) }));
+
+    const { result } = renderHook(() => useBattleAction<{ expectedVersion?: number }>("c1", "b1", fn), { wrapper });
+
+    await act(async () => {
+      await result.current.mutateAsync({ expectedVersion: 3 }).catch(() => undefined);
+    });
+
+    expect(fn).toHaveBeenCalledWith({ expectedVersion: 3 });
+  });
+
+  it("помилка, що не 409, — onFailure з текстом помилки", async () => {
+    const { wrapper } = setup();
+
+    const onFailure = vi.fn();
+
+    const fn = vi.fn(async () => {
+      throw new ApiError("Бонусну дію вже використано цього ходу", 422, "/x", { code: "action_used" });
+    });
+
+    const { result } = renderHook(() => useBattleAction("c1", "b1", fn, { onFailure }), { wrapper });
+
+    await act(async () => {
+      await result.current.mutateAsync({}).catch(() => undefined);
+    });
+
+    await waitFor(() => expect(onFailure).toHaveBeenCalledWith("Бонусну дію вже використано цього ходу"));
+  });
+});

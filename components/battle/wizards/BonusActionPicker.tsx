@@ -24,7 +24,12 @@ export function BonusActionPicker({ participant, open, onOpenChange, onDone }: {
   const abilities = (participant.battleData.resolvedAbilities ?? []).filter((a) => a.trigger.event === "bonusAction" && withinLimits(participant, a));
 
   const fire = async (a: ResolvedAbility, targetId?: string) => {
-    await actions.bonusAction.mutateAsync({ participantId: participant.basicInfo.id, abilityKey: a.key, ...(targetId && { targetParticipantId: targetId }) });
+    try {
+      await actions.bonusAction.mutateAsync({ participantId: participant.basicInfo.id, abilityKey: a.key, ...(targetId && { targetParticipantId: targetId }) });
+    } catch {
+      return;
+    }
+
     setAiming(null);
     onOpenChange(false);
     onDone();

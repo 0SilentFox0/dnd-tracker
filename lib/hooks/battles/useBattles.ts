@@ -111,7 +111,7 @@ export function useDeleteAllBattles(campaignId: string) {
   });
 }
 
-type ActionOpts = { onConflict?: () => void };
+type ActionOpts = { onConflict?: () => void; onFailure?: (message: string) => void };
 
 export const useNextTurn = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<object>(c, b, (body) => nextTurn(c, b, body), { ...o, invalidate: ["battles"] });

@@ -137,7 +137,9 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
 
   const onConflict = useCallback(() => show("Стан бою змінився, повторіть дію"), [show]);
 
-  const o = { onConflict };
+  const onFailure = useCallback((message: string) => show(message), [show]);
+
+  const o = { onConflict, onFailure };
 
   const actions: BattleSceneActions = {
     nextTurn: useNextTurn(campaignId, battleId, o),

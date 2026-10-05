@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { act, renderHook } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { usePlayerTurn } from "../usePlayerTurn";
 import { fakeScene } from "./fake-scene";
@@ -55,5 +55,50 @@ describe("usePlayerTurn", () => {
 
     expect(scene.confirm).not.toHaveBeenCalled();
     expect(scene.nextTurn).toHaveBeenCalledWith({});
+  });
+
+  it("паніка: перехід ходу через 4 с з версією після перевірки; демонтаж скасовує таймер", async () => {
+    vi.useFakeTimers();
+
+    const scene = fakeScene({ morale: -1 });
+
+    scene.moraleCheck.mockResolvedValue({ moraleResult: { hasExtraTurn: false, shouldSkipTurn: true, moralePositive: false, message: "" } });
+
+    const nextMutate = scene.value.actions.nextTurn.mutate as ReturnType<typeof vi.fn>;
+
+    const { result, unmount } = renderHook(() => usePlayerTurn(scene.me), { wrapper: scene.wrapper });
+
+    await act(async () => result.current.rollMorale(2));
+    act(() => vi.advanceTimersByTime(4_100));
+
+    expect(nextMutate).toHaveBeenCalledWith({ expectedVersion: 5 });
+
+    nextMutate.mockClear();
+
+    const second = renderHook(() => usePlayerTurn(scene.me), { wrapper: scene.wrapper });
+
+    await act(async () => second.result.current.rollMorale(2));
+    second.unmount();
+    act(() => vi.advanceTimersByTime(4_100));
+
+    expect(nextMutate).not.toHaveBeenCalled();
+
+    unmount();
+    vi.useRealTimers();
+  });
+
+  it("невдалий «Завершити хід» лишає дії доступними", async () => {
+    const scene = fakeScene();
+
+    const used = { ...scene.me, actionFlags: { ...scene.me.actionFlags, hasUsedAction: true } };
+
+    scene.nextTurn.mockRejectedValueOnce(new Error("Зараз не ваш хід"));
+
+    const { result } = renderHook(() => usePlayerTurn(used), { wrapper: scene.wrapper });
+
+    act(() => result.current.afterAction());
+    await act(async () => result.current.endTurn().catch(() => undefined));
+
+    expect(result.current.phase).not.toBe("ended");
   });
 });

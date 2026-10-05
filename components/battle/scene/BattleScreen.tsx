@@ -28,7 +28,7 @@ export function BattleScreen() {
 
     return (
       <div className={cn("battle-hud overflow-y-auto", hudFontClassName)} style={{ height }}>
-        <BattlePreparationView battle={battle} alliesCount={count("ally")} enemiesCount={count("enemy")} isDM={isDM} onStartBattle={() => void actions.start.mutateAsync({})} isStarting={actions.start.isPending} />
+        <BattlePreparationView battle={battle} alliesCount={count("ally")} enemiesCount={count("enemy")} isDM={isDM} onStartBattle={() => actions.start.mutate({})} isStarting={actions.start.isPending} />
       </div>
     );
   }
