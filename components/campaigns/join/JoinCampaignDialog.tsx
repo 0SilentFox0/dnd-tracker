@@ -5,17 +5,9 @@ import { useRouter } from "next/navigation";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { joinCampaign } from "@/lib/api/campaigns";
 
 export function JoinCampaignDialog() {
@@ -86,18 +78,18 @@ export function JoinCampaignDialog() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button variant="outline">Приєднатися до кампанії</Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Приєднатися до кампанії</DialogTitle>
-          <DialogDescription>
-            Введіть код запрошення, який вам надав DM кампанії
-          </DialogDescription>
-        </DialogHeader>
-
+    <>
+      <Button onClick={() => handleOpenChange(true)} variant="outline">Приєднатися до кампанії</Button>
+    <ResponsiveDialog open={open} onOpenChange={handleOpenChange} title="Приєднатися до кампанії" description="Введіть код запрошення, який вам надав DM кампанії" footer={<><Button
+            variant="outline"
+            onClick={() => handleOpenChange(false)}
+            disabled={loading || success}
+          >
+            Скасувати
+          </Button>
+          <Button onClick={handleJoin} disabled={loading || success || !inviteCode.trim()}>
+            {loading ? "Приєднання..." : success ? "Успішно!" : "Приєднатися"}
+          </Button></>}>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="inviteCode">Код запрошення</Label>
@@ -130,19 +122,8 @@ export function JoinCampaignDialog() {
           )}
         </div>
 
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => handleOpenChange(false)}
-            disabled={loading || success}
-          >
-            Скасувати
-          </Button>
-          <Button onClick={handleJoin} disabled={loading || success || !inviteCode.trim()}>
-            {loading ? "Приєднання..." : success ? "Успішно!" : "Приєднатися"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        
+    </ResponsiveDialog>
+    </>
   );
 }

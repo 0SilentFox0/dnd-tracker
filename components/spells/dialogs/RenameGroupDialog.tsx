@@ -1,16 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 
 interface RenameGroupDialogProps {
   open: boolean;
@@ -34,14 +27,12 @@ export function RenameGroupDialog({
   isRenaming,
 }: RenameGroupDialogProps) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Перейменувати групу</DialogTitle>
-          <DialogDescription>
-            Введіть нову назву для групи &quot;{groupName}&quot;
-          </DialogDescription>
-        </DialogHeader>
+    <ResponsiveDialog open={open} onOpenChange={onOpenChange} title="Перейменувати групу" description={<>Введіть нову назву для групи &quot;{groupName}&quot;</>} footer={<><Button variant="outline" onClick={onCancel} disabled={isRenaming}>
+            Скасувати
+          </Button>
+          <Button onClick={onConfirm} disabled={isRenaming}>
+            Зберегти
+          </Button></>}>
         <div className="space-y-4">
           <div>
             <Label htmlFor="groupName">Назва групи</Label>
@@ -59,15 +50,7 @@ export function RenameGroupDialog({
             />
           </div>
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onCancel} disabled={isRenaming}>
-            Скасувати
-          </Button>
-          <Button onClick={onConfirm} disabled={isRenaming}>
-            Зберегти
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        
+    </ResponsiveDialog>
   );
 }

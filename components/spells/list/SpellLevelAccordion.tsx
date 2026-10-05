@@ -12,14 +12,7 @@ import {
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { useDeleteSpellsByLevel } from "@/lib/hooks/spells";
 import type { Spell, SpellGroup } from "@/types/spells";
 
@@ -103,18 +96,9 @@ export function SpellLevelAccordion({
         </AccordionContent>
       </AccordionItem>
 
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Видалити всі заклинання рівня?</DialogTitle>
-            <DialogDescription>
-              Ви впевнені, що хочете видалити всі заклинання рівня &quot;
+      <ResponsiveDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen} title="Видалити всі заклинання рівня?" description={<>Ви впевнені, що хочете видалити всі заклинання рівня &quot;
               {levelName}&quot;? Ця дія незворотна. Буде видалено {spells.length}{" "}
-              заклинань.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
+              заклинань.</>} footer={<><Button
               variant="outline"
               onClick={() => setDeleteDialogOpen(false)}
               disabled={deleteSpellsByLevelMutation.isPending}
@@ -129,10 +113,9 @@ export function SpellLevelAccordion({
               {deleteSpellsByLevelMutation.isPending
                 ? "Видалення..."
                 : "Видалити всі заклинання рівня"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </Button></>}>
+          
+      </ResponsiveDialog>
     </>
   );
 }

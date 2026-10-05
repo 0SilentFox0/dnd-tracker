@@ -6,15 +6,9 @@ import { useQuery } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import {
   Select,
   SelectContent,
@@ -80,15 +74,25 @@ export function CreateMainSkillDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Створити основний навик</DialogTitle>
-          <DialogDescription>
-            Основні навики використовуються для групування скілів в дереві прокачки
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <ResponsiveDialog open={open} onOpenChange={onOpenChange} title="Створити основний навик" description="Основні навики використовуються для групування скілів в дереві прокачки" size="sm" footer={<>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
+              Скасувати
+            </Button>
+            <Button
+              type="submit"
+              form="create-main-skill-form"
+              disabled={createMainSkillMutation.isPending}
+            >
+              {createMainSkillMutation.isPending
+                ? "Створення..."
+                : "Створити"}
+            </Button>
+</>}>
+        <form id="create-main-skill-form" onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Назва *</Label>
             <Input
@@ -191,25 +195,8 @@ export function CreateMainSkillDialog({
             </Label>
           </div>
 
-          <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Скасувати
-            </Button>
-            <Button
-              type="submit"
-              disabled={createMainSkillMutation.isPending}
-            >
-              {createMainSkillMutation.isPending
-                ? "Створення..."
-                : "Створити"}
-            </Button>
-          </div>
         </form>
-      </DialogContent>
-    </Dialog>
+      
+    </ResponsiveDialog>
   );
 }

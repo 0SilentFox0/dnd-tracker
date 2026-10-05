@@ -1,12 +1,6 @@
 import { LEVEL_NAMES } from "@/components/skill-tree/utils/constants";
 import { getAllSkillsFromMainSkill } from "@/components/skill-tree/utils/hooks";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import type {
   Skill,
   SkillTree,
@@ -33,21 +27,9 @@ export function SkillDialogs({
 }: SkillDialogsProps) {
   return (
     <>
-      {/* Діалог з описом навики (modal={false} щоб уникнути конфлікту aria-hidden з відкритим Select) */}
-      <Dialog
-        open={!!selectedSkill}
-        onOpenChange={(open) => !open && onCloseSkill()}
-        modal={false}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{selectedSkill?.name}</DialogTitle>
-            <DialogDescription>
-              Рівень:{" "}
+      <ResponsiveDialog open={!!selectedSkill} onOpenChange={(open) => !open && onCloseSkill()} title={<>{selectedSkill?.name}</>} description={<>Рівень:{" "}
               {LEVEL_NAMES[selectedSkill?.level || SkillLevel.BASIC]} • Коло{" "}
-              {selectedSkill?.circle}
-            </DialogDescription>
-          </DialogHeader>
+              {selectedSkill?.circle}</>}>
           <div className="space-y-2">
             <p className="text-sm">{selectedSkill?.description}</p>
             {selectedSkill?.prerequisites &&
@@ -80,25 +62,15 @@ export function SkillDialogs({
                 </div>
               )}
           </div>
-        </DialogContent>
-      </Dialog>
+        
+      </ResponsiveDialog>
 
-      {/* Діалог з описом ультимативного навику (modal={false} щоб уникнути конфлікту aria-hidden з Select) */}
-      <Dialog
-        open={!!selectedUltimateSkill}
-        onOpenChange={(open) => !open && onCloseUltimateSkill()}
-        modal={false}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{selectedUltimateSkill?.name}</DialogTitle>
-            <DialogDescription>Ультимативний навик</DialogDescription>
-          </DialogHeader>
+      <ResponsiveDialog open={!!selectedUltimateSkill} onOpenChange={(open) => !open && onCloseUltimateSkill()} title={<>{selectedUltimateSkill?.name}</>} description="Ультимативний навик">
           <div className="space-y-2">
             <p className="text-sm">{selectedUltimateSkill?.description}</p>
           </div>
-        </DialogContent>
-      </Dialog>
+        
+      </ResponsiveDialog>
     </>
   );
 }

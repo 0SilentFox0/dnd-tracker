@@ -3,16 +3,9 @@
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { LabeledInput } from "@/components/ui/labeled-input";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { updateCampaign } from "@/lib/api/campaigns";
 
@@ -101,12 +94,16 @@ export function CampaignSettingsDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Налаштування кампанії</DialogTitle>
-          <DialogDescription>Оновіть основні параметри кампанії</DialogDescription>
-        </DialogHeader>
+    <ResponsiveDialog open={open} onOpenChange={onOpenChange} title="Налаштування кампанії" description="Оновіть основні параметри кампанії" footer={<><Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isSaving}
+          >
+            Скасувати
+          </Button>
+          <Button onClick={handleSave} disabled={isSaving || !name.trim()}>
+            {isSaving ? "Збереження..." : "Зберегти"}
+          </Button></>}>
         <div className="space-y-4">
           <LabeledInput
             id="campaign-name"
@@ -176,19 +173,7 @@ export function CampaignSettingsDialog({
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
         </div>
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isSaving}
-          >
-            Скасувати
-          </Button>
-          <Button onClick={handleSave} disabled={isSaving || !name.trim()}>
-            {isSaving ? "Збереження..." : "Зберегти"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        
+    </ResponsiveDialog>
   );
 }

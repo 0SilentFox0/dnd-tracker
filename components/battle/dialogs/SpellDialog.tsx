@@ -11,14 +11,8 @@ import {
 } from "@/components/battle/dialogs/spell-dialog";
 import { SpellSelectDropdown } from "@/components/spells/SpellSelectDropdown";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 
 export type { SpellTargetType } from "@/components/battle/dialogs/spell-dialog";
 
@@ -113,14 +107,7 @@ export function SpellDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleDialogOpenChange}>
-      <DialogContent className="fixed bottom-[10px] left-1/2 top-auto w-[calc(100vw-20px)] max-w-md -translate-x-1/2 translate-y-0 max-h-[calc(100vh-20px)] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>✨ Заклинання</DialogTitle>
-          <DialogDescription>
-            {caster.basicInfo.name} кастує заклинання
-          </DialogDescription>
-        </DialogHeader>
+    <ResponsiveDialog open={open} onOpenChange={handleDialogOpenChange} title="✨ Заклинання" description={<>{caster.basicInfo.name} кастує заклинання</>} size="sm" className="fixed bottom-[10px] left-1/2 top-auto w-[calc(100vw-20px)] -translate-x-1/2 translate-y-0">
         <div className="space-y-4">
           <SpellSlotsSection spellSlots={spellSlots} />
 
@@ -225,7 +212,7 @@ export function SpellDialog({
             {submitLabel}
           </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+      
+    </ResponsiveDialog>
   );
 }

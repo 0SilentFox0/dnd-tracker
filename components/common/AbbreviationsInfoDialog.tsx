@@ -4,14 +4,7 @@ import { useState } from "react";
 import { Info } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { ABILITY_SCORES } from "@/lib/constants/abilities";
 
 export function AbbreviationsInfoDialog() {
@@ -21,9 +14,8 @@ export function AbbreviationsInfoDialog() {
   const mainAbilities = ABILITY_SCORES.slice(0, 6);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button
+    <>
+      <Button onClick={() => setOpen(true)}
           variant="ghost"
           size="icon"
           className="h-8 w-8 text-muted-foreground hover:text-foreground"
@@ -32,14 +24,7 @@ export function AbbreviationsInfoDialog() {
           <Info className="h-4 w-4" />
           <span className="sr-only">Інформація про абревіатури</span>
         </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Довідка про абревіатури</DialogTitle>
-          <DialogDescription>
-            Пояснення скорочень характеристик та параметрів
-          </DialogDescription>
-        </DialogHeader>
+    <ResponsiveDialog open={open} onOpenChange={setOpen} title="Довідка про абревіатури" description="Пояснення скорочень характеристик та параметрів" size="sm">
         <div className="space-y-4 py-4">
           <div>
             <h3 className="font-semibold mb-2 text-sm">Основні характеристики:</h3>
@@ -72,7 +57,8 @@ export function AbbreviationsInfoDialog() {
             </div>
           )}
         </div>
-      </DialogContent>
-    </Dialog>
+      
+    </ResponsiveDialog>
+    </>
   );
 }
