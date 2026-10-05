@@ -45,4 +45,5 @@ export * from "./api";
 export * from "./hooks";
 
 // Utility типи
+export type * from "./progression";
 export * from "./utils";
