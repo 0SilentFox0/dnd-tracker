@@ -140,7 +140,26 @@ function joinRaw(stored: StoredParticipant, battleId: string): BattleParticipant
 export function upgradeLegacyParticipant(p: BattleParticipant): BattleParticipant {
   const bd = p.battleData as BattleParticipant["battleData"] & Record<string, unknown>;
 
-  if (Array.isArray(bd.resolvedAbilities)) return p;
+  if (Array.isArray(bd.resolvedAbilities)) {
+    const counts = bd.skillUsageCounts as Record<string, number> | undefined;
+
+    if (!counts) return p;
+
+    // новий heavy snapshot з'єднаний зі state до 3a (відкат): переносимо лічильники за skillId
+    const { skillUsageCounts: _counts, ...modern } = bd;
+
+    void _counts;
+
+    const abilityUsage = { ...modern.abilityUsage };
+
+    for (const a of modern.resolvedAbilities) {
+      const used = a.source.type === "skill" ? counts[a.source.id] : undefined;
+
+      if (used && !abilityUsage[a.key]) abilityUsage[a.key] = { battle: used, round: 0, turn: 0 };
+    }
+
+    return { ...p, battleData: { ...modern, abilityUsage } as BattleParticipant["battleData"] };
+  }
 
   const { activeSkills: _a, racialAbilities: _r, passiveAbilities: _p, skillUsageCounts: _s, ...rest } = bd;
 
