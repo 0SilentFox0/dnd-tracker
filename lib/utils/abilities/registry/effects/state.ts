@@ -1,4 +1,4 @@
-import { signed } from "../labels";
+import { CONDITION_LABELS, signed } from "../labels";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
@@ -48,13 +48,7 @@ function immuneTo(ps: BattleParticipant[], id: string, key: ConditionImmunityKey
   return findFlags(ps, id, "conditionImmunity").some((f) => f.conditions === "all" || f.conditions.includes(key));
 }
 
-export const CONDITION_LABELS: Record<Of<"applyCondition">["condition"], string> = {
-  no_bonus_action: "без бонусної дії",
-  no_reaction: "без реакції",
-  disable_melee_attacks: "без ближніх атак",
-  disable_ranged_attacks: "без дальніх атак",
-  disable_spell_casting: "без заклинань",
-};
+export { CONDITION_LABELS };
 
 export function applyCondition(input: EffectApplyInput<Of<"applyCondition">>): EffectApplyResult {
   const { ability, effect, ctx } = input;
