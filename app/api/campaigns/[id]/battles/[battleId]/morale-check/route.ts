@@ -4,17 +4,12 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { moraleCheckSchema } from "@/lib/schemas";
 import { handleApiError } from "@/lib/utils/api/error-handler";
-import type { MoraleCheckResult } from "@/lib/utils/battle/battle-morale";
 import { checkMorale } from "@/lib/utils/battle/battle-morale";
 import { getBattleWithAccess } from "@/lib/utils/battle/get-battle-with-access";
 import { stripStateBeforeForClient } from "@/lib/utils/battle/strip-battle-payload";
+import type { PendingMoraleCheckPayload } from "@/lib/utils/battle/turn/pending-morale";
 
 /** Payload збережений у pendingMoraleCheck для застосування при next-turn */
-export interface PendingMoraleCheckPayload {
-  participantId: string;
-  d10Roll: number;
-  moraleResult: MoraleCheckResult;
-}
 
 export async function POST(
   request: Request,

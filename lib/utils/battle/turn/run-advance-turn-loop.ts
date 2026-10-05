@@ -2,7 +2,7 @@
  * Логіка циклу переходу ходу: пошук наступного живого учасника, endRound/startOfRound, processStartOfTurn, логи.
  */
 
-import { logTurnTiming } from "./next-turn-helpers";
+import { logTurnTiming } from "./turn-helpers";
 
 import {
   processEndOfTurn,
@@ -10,7 +10,6 @@ import {
   processStartOfTurn,
 } from "@/lib/utils/battle/battle-turn";
 import { checkVictoryConditions } from "@/lib/utils/battle/battle-victory";
-import { slimInitiativeOrderForStorage } from "@/lib/utils/battle/strip-battle-payload";
 import { executeSkillsByTrigger } from "@/lib/utils/skills/execution";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -55,25 +54,10 @@ export function runAdvanceTurnLoop(
 
   let nextRound = currentRound;
 
-  const stateBeforeNextTurn = {
-    initiativeOrder: slimInitiativeOrderForStorage(
-      structuredClone(initiativeOrder) as BattleParticipant[],
-    ),
-    currentTurnIndex,
-    currentRound,
-  };
-
   const newLogEntries: BattleAction[] = [];
 
-  let stateBeforeAddedToBatch = false;
-
-  const getStateBeforeForEntry = () => {
-    if (stateBeforeAddedToBatch) return undefined;
-
-    stateBeforeAddedToBatch = true;
-
-    return stateBeforeNextTurn;
-  };
+  // відкат тепер через battle_snapshots, stateBefore у записах не потрібен
+  const getStateBeforeForEntry = () => undefined;
 
   let clearedPendingSummons = false;
 

@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 
 import { executeAdvanceTurn } from "./advance-turn-handler";
-import { debugBattleSync } from "./next-turn-helpers";
 
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
@@ -11,6 +10,7 @@ import {
   checkRateLimit,
   rateLimitResponse,
 } from "@/lib/utils/api/rate-limit";
+import { debugBattleSync } from "@/lib/utils/battle/turn/turn-helpers";
 import type { BattleParticipant } from "@/types/battle";
 
 export async function POST(

@@ -10,16 +10,6 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
-import type { PendingMoraleCheckPayload } from "../morale-check/route";
-import { runAdvanceTurnLoop } from "./next-turn-advance";
-import { applyPendingMoraleCheck } from "./next-turn-apply-morale";
-import {
-  applyVictoryCompletion,
-  battleStateSnapshot,
-  debugBattleSync,
-  logTurnTiming,
-} from "./next-turn-helpers";
-
 import { prisma } from "@/lib/db";
 import {
   battleChannelName,
@@ -32,6 +22,15 @@ import {
   slimInitiativeOrderForStorage,
   stripStateBeforeForClient,
 } from "@/lib/utils/battle/strip-battle-payload";
+import { applyPendingMoraleCheck } from "@/lib/utils/battle/turn/apply-pending-morale";
+import type { PendingMoraleCheckPayload } from "@/lib/utils/battle/turn/pending-morale";
+import { runAdvanceTurnLoop } from "@/lib/utils/battle/turn/run-advance-turn-loop";
+import {
+  applyVictoryCompletion,
+  battleStateSnapshot,
+  debugBattleSync,
+  logTurnTiming,
+} from "@/lib/utils/battle/turn/turn-helpers";
 import { safePusherTrigger } from "@/lib/utils/pusher/safe-trigger";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
