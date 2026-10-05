@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
+import { immunityAbilities } from "@/lib/utils/abilities/build/immunities";
 import { calculateAttackBonus, calculateAttackRoll, hasAdvantage, hasDisadvantage, predictAttackNumbers } from "@/lib/utils/battle/attack";
 import { canPerformReaction, getCounterDamagePercent } from "@/lib/utils/battle/attack/reaction";
 import { calculateDamageWithModifiers } from "@/lib/utils/battle/damage";
@@ -107,5 +108,10 @@ describe("readers", () => {
     expect(r.targetAC).toBe(16);
     expect(r.totalBonus).toBe(calculateAttackBonus(makeParticipant({ id: "z" }), bow) + 1);
   });
-});
+  it("юніт з імунітетом до вогню не отримує вогняної шкоди", () => {
+    const p = makeParticipant({ id: "u", abilities: immunityAbilities(["вогню"], { type: "unit", id: "u" }) });
 
+    expect(applyResistance(p, 10, "fire").finalDamage).toBe(0);
+    expect(applyResistance(p, 10, "fire", { fromSpell: true }).finalDamage).toBe(0);
+  });
+});
