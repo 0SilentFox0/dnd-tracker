@@ -1,0 +1,106 @@
+import { z } from "zod";
+
+import { ParticipantSide } from "@/lib/constants/battle";
+import { prisma } from "@/lib/db";
+import { distributePendingScopedArtifactBonuses } from "@/lib/utils/battle/artifact-sets";
+import { calculateInitiative } from "@/lib/utils/battle/battle-start";
+import {
+  createBattleParticipantFromCharacter,
+  createBattleParticipantFromUnit,
+} from "@/lib/utils/battle/participant";
+import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { BattleAccessError } from "@/lib/utils/battle/store";
+import type { BattleParticipant } from "@/types/battle";
+
+export const addParticipantSchema = z.object({
+  sourceId: z.string(),
+  type: z.enum(["character", "unit"]),
+  side: z.enum(["ally", "enemy"]),
+  quantity: z.number().int().min(1).max(10).optional().default(1),
+});
+
+export type AddParticipantBody = z.infer<typeof addParticipantSchema>;
+
+type CharacterRow = Parameters<typeof createBattleParticipantFromCharacter>[0] & { campaignId: string };
+
+type UnitRow = Parameters<typeof createBattleParticipantFromUnit>[0] & { campaignId: string };
+
+export interface AddParticipantDeps {
+  loadCharacter(id: string): Promise<CharacterRow | null>;
+  loadUnit(id: string): Promise<UnitRow | null>;
+  fromCharacter: typeof createBattleParticipantFromCharacter;
+  fromUnit: typeof createBattleParticipantFromUnit;
+}
+
+const defaultDeps: AddParticipantDeps = {
+  loadCharacter: (id) =>
+    prisma.character.findUnique({
+      where: { id },
+      include: { inventory: true, characterSkills: { include: { skillTree: true } } },
+    }) as Promise<CharacterRow | null>,
+  loadUnit: (id) => prisma.unit.findUnique({ where: { id } }) as Promise<UnitRow | null>,
+  fromCharacter: createBattleParticipantFromCharacter,
+  fromUnit: createBattleParticipantFromUnit,
+};
+
+export function createAddParticipantMutation(deps: AddParticipantDeps = defaultDeps) {
+  return async (ctx: BattleMutationContext, data: AddParticipantBody): Promise<MutationResult> => {
+    const side = data.side === "ally" ? ParticipantSide.ALLY : ParticipantSide.ENEMY;
+
+    const battleId = ctx.scene.id;
+
+    const added: BattleParticipant[] = [];
+
+    if (data.type === "character") {
+      const character = await deps.loadCharacter(data.sourceId);
+
+      if (!character || character.campaignId !== ctx.scene.campaignId) {
+        throw new BattleAccessError(404, "Персонажа не знайдено");
+      }
+
+      added.push(await deps.fromCharacter(character, battleId, side));
+    } else {
+      const unit = await deps.loadUnit(data.sourceId);
+
+      if (!unit || unit.campaignId !== ctx.scene.campaignId) {
+        throw new BattleAccessError(404, "Юніта не знайдено");
+      }
+
+      for (let i = 0; i < (data.quantity ?? 1); i++) {
+        added.push(await deps.fromUnit(unit, battleId, side, i + 1));
+      }
+    }
+
+    const insertAt = ctx.scene.turnIndex + 1;
+
+    const participants = [
+      ...ctx.participants.slice(0, insertAt),
+      ...added,
+      ...ctx.participants.slice(insertAt),
+    ];
+
+    distributePendingScopedArtifactBonuses(participants);
+
+    for (const p of added) {
+      const initiative = calculateInitiative(p);
+
+      p.abilities.initiative = initiative;
+      p.abilities.baseInitiative = initiative;
+    }
+
+    return {
+      participants,
+      pending: ctx.pending,
+      events: [
+        {
+          type: "ability",
+          round: ctx.scene.round,
+          actorId: "dm",
+          targets: added.map((p) => ({ participantId: p.basicInfo.id, participantName: p.basicInfo.name })),
+          resultText: `DM додав на поле: ${added.map((p) => p.basicInfo.name).join(", ")}`,
+          details: { actorName: "DM", actorSide: "ally", actionDetails: {} },
+        },
+      ],
+    };
+  };
+}

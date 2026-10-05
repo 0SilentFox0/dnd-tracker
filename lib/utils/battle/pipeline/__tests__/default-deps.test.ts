@@ -1,13 +1,13 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 const afterCallbacks: Array<() => unknown> = [];
 
-let resolveTrigger: () => void = () => {};
+const resolvers: Array<() => void> = [];
 
 const trigger = vi.fn(
   () =>
     new Promise<void>((resolve) => {
-      resolveTrigger = resolve;
+      resolvers.push(resolve);
     }),
 );
 
@@ -19,32 +19,32 @@ vi.mock("next/server", async (importOriginal) => ({
 vi.mock("@/lib/pusher", () => ({ pusherServer: { trigger } }));
 
 describe("defaultPipelineDeps.publish", () => {
-  beforeEach(() => {
-    afterCallbacks.length = 0;
-  });
-
-  it("after() отримує проміс, що завершується лише після відповіді Pusher", async () => {
+  it("один after(), чий проміс завершується лише після всіх відправок у Pusher", async () => {
     const { defaultPipelineDeps } = await import("@/lib/utils/battle/pipeline/default-deps");
 
-    defaultPipelineDeps.publish("b1", { battleId: "b1", version: 1, refetch: true });
+    defaultPipelineDeps.publish([
+      { channel: "private-battle-b1", event: "battle-updated", payload: {} },
+      { channel: "private-user-u1", event: "turn-started", payload: {} },
+    ]);
 
     expect(afterCallbacks).toHaveLength(1);
 
-    const pending = afterCallbacks[0]();
+    const pending = afterCallbacks[0]() as Promise<unknown>;
 
     expect(pending).toBeInstanceOf(Promise);
 
     let done = false;
 
-    void (pending as Promise<unknown>).then(() => {
+    void pending.then(() => {
       done = true;
     });
     await Promise.resolve();
     expect(done).toBe(false);
 
-    resolveTrigger();
+    resolvers.forEach((r) => r());
     await pending;
     expect(done).toBe(true);
-    expect(trigger).toHaveBeenCalledWith("private-battle-b1", "battle-delta", expect.anything());
+    expect(trigger).toHaveBeenCalledWith("private-battle-b1", "battle-updated", {});
+    expect(trigger).toHaveBeenCalledWith("private-user-u1", "turn-started", {});
   });
 });

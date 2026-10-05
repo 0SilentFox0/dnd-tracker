@@ -2,27 +2,37 @@ import { NextResponse } from "next/server";
 import type { ZodType } from "zod";
 
 import { defaultPipelineDeps } from "./default-deps";
-import { toApiBattle } from "./to-api-battle";
+import type { PusherMessage } from "./legacy-battle";
+import { buildPusherMessages, toLegacyBattle } from "./legacy-battle";
 
 import type { BATTLE_RATE_LIMITS, RateLimitResult } from "@/lib/utils/api/rate-limit";
 import { rateLimitResponse } from "@/lib/utils/api/rate-limit";
 import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/battle-victory";
 import type {
   BattleDelta,
+  BattleMeta,
   BattleMutationOutcome,
   BattleSceneState,
   BattleStatus,
   LoadedBattle,
 } from "@/lib/utils/battle/store";
-import { BattleAccessError, BattleConflictError, BattleRuleError } from "@/lib/utils/battle/store";
-import type { BattleParticipant } from "@/types/battle";
+import {
+  BattleAccessError,
+  battleActionToEvent,
+  BattleConflictError,
+  BattleRuleError,
+  eventToBattleAction,
+} from "@/lib/utils/battle/store";
+import type { BattleScene } from "@/types/api";
+import type { BattleAction, BattleParticipant } from "@/types/battle";
 
-export const PUSHER_DELTA_LIMIT_BYTES = 9_500;
+export { PUSHER_DELTA_LIMIT_BYTES } from "./limits";
 
-export type BattleAccess = "dm" | "turnController" | "member";
+export type BattleAccess = "dm" | "turnController" | "currentController" | "member";
 
 export interface BattleMutationContext {
   scene: BattleSceneState;
+  meta: BattleMeta;
   participants: BattleParticipant[];
   pending: BattleParticipant[];
   userId: string;
@@ -33,14 +43,13 @@ export interface MutationResult extends BattleMutationOutcome {
   response?: Record<string, unknown>;
 }
 
-type RefetchPayload = { battleId: string; version: number; refetch: true };
-
 export interface PipelineDeps {
   getUserId(): Promise<string | null>;
   rateLimit(input: { userId: string; scope: keyof typeof BATTLE_RATE_LIMITS; battleId: string }): Promise<RateLimitResult>;
   loadBattle(args: { battleId: string; campaignId: string; userId: string }): Promise<(LoadedBattle & { isMember: boolean }) | null>;
   saveBattle(before: LoadedBattle, outcome: BattleMutationOutcome): Promise<BattleDelta>;
-  publish(battleId: string, payload: BattleDelta | RefetchPayload): void;
+  publish(messages: PusherMessage[]): void;
+  loadRecentEvents(battleId: string, limit: number): Promise<BattleAction[]>;
 }
 
 export interface RunBattleMutationOptions<TBody> {
@@ -49,6 +58,9 @@ export interface RunBattleMutationOptions<TBody> {
   requireStatus?: BattleStatus | BattleStatus[];
   schema?: ZodType<TBody>;
   rateLimitScope?: keyof typeof BATTLE_RATE_LIMITS;
+  dryRun?: (body: TBody) => boolean;
+  respond?: "battle" | "wrapped" | "response";
+  includeRecentEvents?: number;
   mutate(ctx: BattleMutationContext, body: TBody): MutationResult | Promise<MutationResult>;
 }
 
@@ -58,6 +70,14 @@ function assertAccess(access: BattleAccess, ctx: BattleMutationContext): void {
   if (access === "dm") throw new BattleAccessError(403, "Лише DM");
 
   const current = ctx.participants[ctx.scene.turnIndex];
+
+  if (access === "currentController") {
+    if (!current || current.basicInfo.controlledBy !== ctx.userId) {
+      throw new BattleRuleError("not_your_turn", "Зараз не ваш хід");
+    }
+
+    return;
+  }
 
   if (!current || current.basicInfo.controlledBy !== ctx.userId) {
     throw new BattleRuleError("not_your_turn", "Зараз не ваш хід");
@@ -85,11 +105,20 @@ function withVictory(scene: BattleSceneState, result: MutationResult): MutationR
     ...result,
     participants: updatedParticipants,
     scene: { ...result.scene, status: "completed", completedAt: new Date() },
-    events: [
-      ...result.events,
-      { type: "battle_end", round, resultText: battleAction.resultText, hpChanges: battleAction.hpChanges },
-    ],
+    events: [...result.events, battleActionToEvent({ ...battleAction, round })],
   };
+}
+
+function respondWith(
+  mode: "battle" | "wrapped" | "response" | undefined,
+  battle: BattleScene,
+  response?: Record<string, unknown>,
+): NextResponse {
+  if (mode === "response") return NextResponse.json(response ?? {});
+
+  if (mode === "wrapped") return NextResponse.json({ battle, ...response });
+
+  return NextResponse.json({ ...battle, ...response });
 }
 
 function errorResponse(err: unknown): NextResponse {
@@ -158,6 +187,7 @@ export async function runBattleMutation<TBody>(
 
     const ctx: BattleMutationContext = {
       scene: loaded.scene,
+      meta: loaded.meta,
       participants: loaded.participants,
       pending: loaded.pending,
       userId,
@@ -182,22 +212,56 @@ export async function runBattleMutation<TBody>(
 
     const result = withVictory(loaded.scene, await options.mutate(ctx, parsed.body));
 
+    if (options.dryRun?.(parsed.body)) {
+      const entries = options.includeRecentEvents
+        ? await deps.loadRecentEvents(battleId, options.includeRecentEvents)
+        : [];
+
+      const battle = toLegacyBattle(
+        loaded,
+        loaded.scene,
+        result.participants,
+        result.pending,
+        { mode: "full", entries },
+        { isDM: loaded.isDM },
+      );
+
+      return respondWith(options.respond, battle, result.response);
+    }
+
     const delta = await deps.saveBattle(loaded, result);
 
-    const nextScene = { ...loaded.scene, ...result.scene, version: delta.version };
+    const after: BattleSceneState = {
+      ...loaded.scene,
+      ...result.scene,
+      version: delta.version,
+      eventSeq: delta.events.at(-1)?.seq ?? loaded.scene.eventSeq,
+    };
 
-    const payload =
-      Buffer.byteLength(JSON.stringify(delta), "utf8") > PUSHER_DELTA_LIMIT_BYTES
-        ? { battleId, version: delta.version, refetch: true as const }
-        : delta;
+    const entries = delta.events.map((e) => eventToBattleAction(e, battleId));
 
-    deps.publish(battleId, payload);
+    // clear (reset/start) нумерує події з 1 — клієнт має відкинути весь старий журнал
+    const cancelledFrom = !result.history
+      ? undefined
+      : "cancelFromSeq" in result.history
+        ? result.history.cancelFromSeq
+        : 0;
 
-    return NextResponse.json({
-      battle: toApiBattle(nextScene, result.participants, result.pending),
-      delta,
-      ...result.response,
+    const shared = toLegacyBattle(loaded, after, result.participants, result.pending, {
+      mode: "append",
+      entries,
+      cancelledFrom,
     });
+
+    deps.publish(
+      buildPusherMessages({ before: loaded.scene, after, participants: result.participants, battlePayload: shared }),
+    );
+
+    return respondWith(
+      options.respond,
+      { ...shared, isDM: loaded.isDM, userRole: loaded.isDM ? "dm" : "player" },
+      result.response,
+    );
   } catch (err) {
     return errorResponse(err);
   }

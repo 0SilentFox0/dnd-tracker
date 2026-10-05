@@ -21,7 +21,8 @@ export type BattleRuleCode =
   | "participant_dead"
   | "invalid_dice"
   | "action_used"
-  | "invalid_target";
+  | "invalid_target"
+  | "action_rejected";
 
 export class BattleRuleError extends Error {
   constructor(

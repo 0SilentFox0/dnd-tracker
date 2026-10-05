@@ -1,13 +1,9 @@
-import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { prisma } from "@/lib/db";
-import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
-import { handleApiError } from "@/lib/utils/api/error-handler";
-import {
-  computeDamageBreakdown,
-  computeDamageBreakdownMultiTarget,
-} from "@/lib/utils/battle/damage";
+import { computeDamageBreakdown, computeDamageBreakdownMultiTarget } from "@/lib/utils/battle/damage";
+import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const schema = z.object({
@@ -19,126 +15,53 @@ const schema = z.object({
   isCritical: z.boolean().optional(),
 });
 
+type Body = z.infer<typeof schema>;
+
+function breakdown(ctx: BattleMutationContext, data: Body) {
+  const order = ctx.participants;
+
+  const attacker = order.find((p) => p.basicInfo.id === data.attackerId);
+
+  if (!attacker) throw new BattleAccessError(404, "Атакувальника не знайдено");
+
+  const targetIds = data.targetIds?.length ? data.targetIds : data.targetId ? [data.targetId] : [];
+
+  if (targetIds.length === 0) throw new BattleRuleError("invalid_target", "Потрібна хоча б одна ціль");
+
+  const targets = targetIds
+    .map((id) => order.find((p) => p.basicInfo.id === id))
+    .filter((p): p is BattleParticipant => Boolean(p));
+
+  if (targets.length !== targetIds.length) throw new BattleAccessError(404, "Ціль не знайдено");
+
+  const attack: BattleAttack | undefined = data.attackId
+    ? attacker.battleData.attacks?.find((a) => a.id === data.attackId || a.name === data.attackId)
+    : attacker.battleData.attacks?.[0];
+
+  if (!attack) throw new BattleAccessError(404, "Атаку не знайдено");
+
+  const common = { attacker, attack, damageRolls: data.damageRolls, allParticipants: order, isCritical: data.isCritical };
+
+  return targets.length > 1
+    ? computeDamageBreakdownMultiTarget({ ...common, targets })
+    : computeDamageBreakdown({ ...common, target: targets[0] });
+}
+
 export async function POST(
-  request: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string; battleId: string }> },
 ) {
-  try {
-    const { id: campaignId, battleId } = await params;
-
-    const accessResult = await requireCampaignAccess(campaignId, false);
-
-    if (accessResult instanceof NextResponse) return accessResult;
-
-    const body = await request.json();
-
-    const data = schema.parse(body);
-
-    const battle = await prisma.battleScene.findUnique({
-      where: { id: battleId, campaignId },
-      select: { initiativeOrder: true },
-    });
-
-    if (!battle) {
-      return NextResponse.json({ error: "Battle not found" }, { status: 404 });
-    }
-
-    const initiativeOrder = (battle.initiativeOrder ??
-      []) as unknown as BattleParticipant[];
-
-    const attacker = initiativeOrder.find(
-      (p) => p.basicInfo.id === data.attackerId,
-    );
-
-    if (!attacker) {
-      return NextResponse.json(
-        { error: "Attacker not found" },
-        { status: 404 },
-      );
-    }
-
-    const targetIdList =
-      data.targetIds && data.targetIds.length > 0
-        ? data.targetIds
-        : data.targetId
-          ? [data.targetId]
-          : [];
-
-    if (targetIdList.length === 0) {
-      return NextResponse.json(
-        { error: "At least one target required" },
-        { status: 400 },
-      );
-    }
-
-    const targets = targetIdList
-      .map((id) => initiativeOrder.find((p) => p.basicInfo.id === id))
-      .filter((p): p is BattleParticipant => !!p);
-
-    if (targets.length !== targetIdList.length) {
-      return NextResponse.json(
-        { error: "One or more targets not found" },
-        { status: 404 },
-      );
-    }
-
-    const attack: BattleAttack | undefined = data.attackId
-      ? attacker.battleData.attacks?.find(
-          (a) => a.id === data.attackId || a.name === data.attackId,
-        )
-      : attacker.battleData.attacks?.[0];
-
-    // Логування скілів атакуючого для діагностики бонусу урону
-    const activeSkills = attacker.battleData?.activeSkills ?? [];
-
-    console.info("[damage-breakdown] Атакуючий:", {
-      name: attacker.basicInfo.name,
-      id: attacker.basicInfo.id,
-      attackType: attack?.type,
-      attackName: attack?.name,
-      activeSkillsCount: activeSkills.length,
-      activeSkills: activeSkills.map((s) => ({
-        name: s.name,
-        skillId: s.skillId,
-        affectsDamage: s.affectsDamage,
-        damageType: s.damageType ?? null,
-        effects: (s.effects ?? []).map((e) => ({
-          stat: e.stat,
-          type: e.type,
-          value: e.value,
-          isPercentage: e.isPercentage,
-        })),
-      })),
-    });
-
-    if (!attack) {
-      return NextResponse.json({ error: "Attack not found" }, { status: 404 });
-    }
-
-    if (targets.length > 1) {
-      const result = computeDamageBreakdownMultiTarget({
-        attacker,
-        targets,
-        attack,
-        damageRolls: data.damageRolls,
-        allParticipants: initiativeOrder,
-        isCritical: data.isCritical,
-      });
-
-      return NextResponse.json(result);
-    }
-
-    const result = computeDamageBreakdown({
-      attacker,
-      target: targets[0],
-      attack,
-      damageRolls: data.damageRolls,
-      allParticipants: initiativeOrder,
-      isCritical: data.isCritical,
-    });
-
-    return NextResponse.json(result);
-  } catch (error) {
-    return handleApiError(error, { action: "compute damage breakdown" });
-  }
+  return runBattleMutation(req, {
+    params: await params,
+    access: "member",
+    schema,
+    dryRun: () => true,
+    respond: "response",
+    mutate: (ctx, body) => ({
+      participants: ctx.participants,
+      pending: ctx.pending,
+      events: [],
+      response: breakdown(ctx, body) as unknown as Record<string, unknown>,
+    }),
+  });
 }

@@ -3,20 +3,16 @@
  *
  * route.ts: тонка (auth + battle fetch + status check) → executeStartBattle
  *
- * Тут: завантаження учасників, побудова slot-ів, paralel створення
+ * Тут: завантаження учасників, побудова slot-ів, паралельне створення
  * BattleParticipant, ефекти/тригери на старт бою, розрахунок ініціативи,
- * сортування, БД update, Pusher trigger.
+ * сортування. Запис і Pusher — у runBattleMutation.
  */
 
-import { NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
 
 import { buildCampaignContextForStart } from "./start-build-context";
-import { battleStateSnapshot, debugBattleSync } from "./start-helpers";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
-import { battleChannelName, pusherServer } from "@/lib/pusher";
 import { distributePendingScopedArtifactBonuses } from "@/lib/utils/battle/artifact-sets";
 import {
   applyStartOfBattleEffects,
@@ -28,31 +24,17 @@ import {
   createBattleParticipantFromUnit,
 } from "@/lib/utils/battle/participant";
 import {
-  preparePusherPayload,
-  slimInitiativeOrderForStorage,
-  stripStateBeforeForClient,
-} from "@/lib/utils/battle/strip-battle-payload";
-import { safePusherTrigger } from "@/lib/utils/pusher/safe-trigger";
-import {
   executeOnBattleStartEffectsForAll,
   executeStartOfRoundTriggers,
 } from "@/lib/utils/skills/execution";
-import type { BattleAction, BattleParticipant } from "@/types/battle";
+import type { BattleAction, BattleParticipant, BattlePreparationParticipant } from "@/types/battle";
 
-export interface ExecuteStartBattleInput {
-  campaignId: string;
-  battleId: string;
-  battle: {
-    participants: unknown;
-  };
-}
-
-export async function executeStartBattle(
-  input: ExecuteStartBattleInput,
-): Promise<NextResponse> {
-  const { campaignId, battleId, battle } = input;
-
-  const participantsRaw = battle.participants as Array<{
+export async function buildStartOrder(
+  battleId: string,
+  campaignId: string,
+  setup: BattlePreparationParticipant[],
+): Promise<{ order: BattleParticipant[]; triggerLogEntries: BattleAction[] }> {
+  const participantsRaw = setup as Array<{
     id: string;
     type: "character" | "unit";
     side: string;
@@ -165,53 +147,12 @@ export async function executeStartBattle(
     battleId,
   );
 
-  const triggerLogEntries = sortedInitiativeOrder.triggerLogEntries;
-
-  const updatedBattle = await prisma.battleScene.update({
-    where: { id: battleId },
-    data: {
-      status: "active",
-      startedAt: new Date(),
-      initiativeOrder: slimInitiativeOrderForStorage(
-        sortedInitiativeOrder.order,
-      ) as unknown as Prisma.InputJsonValue,
-      currentRound: 1,
-      currentTurnIndex: 0,
-      battleLog: triggerLogEntries as unknown as Prisma.InputJsonValue,
-    },
-  });
-
-  debugBattleSync("battle started and saved", {
-    campaignId,
-    battleId,
-    snapshot: battleStateSnapshot(sortedInitiativeOrder.order, 0, 1, "active"),
-    triggerLogEntries: triggerLogEntries.length,
-    battleLogCount: triggerLogEntries.length,
-  });
-
-  if (process.env.PUSHER_APP_ID) {
-    const channel = battleChannelName(battleId);
-
-    debugBattleSync("trigger battle-started", {
-      channel,
-      event: "battle-started",
-    });
-    safePusherTrigger(
-      pusherServer,
-      channel,
-      "battle-started",
-      preparePusherPayload(updatedBattle),
-      { action: "start battle", campaignId, battleId },
-    );
-  }
-
-  return NextResponse.json(stripStateBeforeForClient(updatedBattle));
+  return {
+    order: sortedInitiativeOrder.order,
+    triggerLogEntries: sortedInitiativeOrder.triggerLogEntries,
+  };
 }
 
-/**
- * Застосовує start-of-battle ефекти + тригери, рахує ініціативу і сортує.
- * Повертає sorted initiativeOrder + battle-log записи від тригерів.
- */
 function applyStartOfBattleAndSort(
   initiativeOrder: BattleParticipant[],
   battleId: string,

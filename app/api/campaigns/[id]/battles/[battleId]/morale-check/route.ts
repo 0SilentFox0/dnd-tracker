@@ -1,90 +1,18 @@
-import { NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
+import { moraleCheckMutation } from "./morale-check-mutation";
 
-import { prisma } from "@/lib/db";
 import { moraleCheckSchema } from "@/lib/schemas";
-import { handleApiError } from "@/lib/utils/api/error-handler";
-import type { MoraleCheckResult } from "@/lib/utils/battle/battle-morale";
-import { checkMorale } from "@/lib/utils/battle/battle-morale";
-import { getBattleWithAccess } from "@/lib/utils/battle/get-battle-with-access";
-import { stripStateBeforeForClient } from "@/lib/utils/battle/strip-battle-payload";
-
-/** Payload збережений у pendingMoraleCheck для застосування при next-turn */
-export interface PendingMoraleCheckPayload {
-  participantId: string;
-  d10Roll: number;
-  moraleResult: MoraleCheckResult;
-}
+import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 
 export async function POST(
-  request: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string; battleId: string }> },
 ) {
-  try {
-    const { id, battleId } = await params;
-
-    const result = await getBattleWithAccess(id, battleId);
-
-    if (result instanceof NextResponse) {
-      return result;
-    }
-
-    const { accessResult, battle, initiativeOrder } = result;
-
-    if (battle.status !== "active") {
-      return NextResponse.json(
-        { error: "Battle is not active" },
-        { status: 400 },
-      );
-    }
-
-    const body = await request.json();
-
-    const data = moraleCheckSchema.parse(body);
-
-    const participant = initiativeOrder.find(
-      (p) => p.basicInfo.id === data.participantId,
-    );
-
-    if (!participant) {
-      return NextResponse.json(
-        { error: "Participant not found in battle" },
-        { status: 404 },
-      );
-    }
-
-    // Дозволяємо DM або гравцю, який контролює цього учасника
-    const isDM = accessResult.campaign.members[0]?.role === "dm";
-
-    const isController =
-      participant.basicInfo.controlledBy === accessResult.userId;
-
-    if (!isDM && !isController) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
-    // Лише обчислюємо результат; застосування (extra turn, skip, тригери) — при next-turn
-    const moraleResult = checkMorale(participant, data.d10Roll);
-
-    const pendingPayload: PendingMoraleCheckPayload = {
-      participantId: data.participantId,
-      d10Roll: data.d10Roll,
-      moraleResult,
-    };
-
-    // Зберігаємо результат для next-turn; бій не змінюємо (initiativeOrder, battleLog лишаються)
-    const updatedBattle = await prisma.battleScene.update({
-      where: { id: battleId },
-      data: {
-        pendingMoraleCheck: pendingPayload as unknown as Prisma.InputJsonValue,
-      },
-    });
-
-    return NextResponse.json({
-      battle: stripStateBeforeForClient(updatedBattle),
-      moraleResult,
-    });
-  } catch (error) {
-    return handleApiError(error, { action: "process morale check" });
-  }
+  return runBattleMutation(req, {
+    params: await params,
+    access: "member",
+    requireStatus: "active",
+    schema: moraleCheckSchema,
+    respond: "wrapped",
+    mutate: moraleCheckMutation,
+  });
 }

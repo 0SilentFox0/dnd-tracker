@@ -1,54 +1,46 @@
 /**
- * Advances turn after attack: processEndOfTurn loop, startOfRound/startOfTurn,
- * victory check. Used by attack-and-next-turn route.
+ * Логіка циклу переходу ходу: пошук наступного живого учасника, endRound/startOfRound, processStartOfTurn, логи.
  */
 
-import { ParticipantSide } from "@/lib/constants/battle";
+import { logTurnTiming } from "./turn-helpers";
+
 import {
   processEndOfTurn,
   processStartOfRound,
   processStartOfTurn,
 } from "@/lib/utils/battle/battle-turn";
-import {
-  calculateAllyHpChangesOnVictory,
-  checkVictoryConditions,
-} from "@/lib/utils/battle/battle-victory";
-import { slimInitiativeOrderForStorage } from "@/lib/utils/battle/strip-battle-payload";
+import { checkVictoryConditions } from "@/lib/utils/battle/battle-victory";
 import { executeSkillsByTrigger } from "@/lib/utils/skills/execution";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
-export type AdvanceTurnPhaseInput = {
+export interface AdvanceTurnLoopParams {
   initiativeOrder: BattleParticipant[];
   currentTurnIndex: number;
   currentRound: number;
   battleId: string;
-  battleLogLength: number;
+  currentBattleLogLength: number;
   pendingSummons: BattleParticipant[];
-  battleStatus: string;
-};
+}
 
-export type AdvanceTurnPhaseResult = {
+export interface AdvanceTurnLoopResult {
   updatedInitiativeOrder: BattleParticipant[];
   nextTurnIndex: number;
   nextRound: number;
   newLogEntries: BattleAction[];
-  finalStatus: string;
-  completedAt: Date | null;
   clearedPendingSummons: boolean;
-};
+}
 
-export function advanceTurnPhase(
-  input: AdvanceTurnPhaseInput,
-): AdvanceTurnPhaseResult {
+export function runAdvanceTurnLoop(
+  params: AdvanceTurnLoopParams,
+): AdvanceTurnLoopResult {
   const {
     initiativeOrder,
     currentTurnIndex,
     currentRound,
     battleId,
-    battleLogLength,
+    currentBattleLogLength,
     pendingSummons,
-    battleStatus,
-  } = input;
+  } = params;
 
   let activeParticipantFound = false;
 
@@ -62,30 +54,17 @@ export function advanceTurnPhase(
 
   let nextRound = currentRound;
 
-  const stateBeforeNextTurn = {
-    initiativeOrder: slimInitiativeOrderForStorage(
-      structuredClone(initiativeOrder) as BattleParticipant[],
-    ),
-    currentTurnIndex,
-    currentRound,
-  };
-
   const newLogEntries: BattleAction[] = [];
 
-  let stateBeforeAddedToBatch = false;
-
-  const getStateBeforeForEntry = () => {
-    if (stateBeforeAddedToBatch) return undefined;
-
-    stateBeforeAddedToBatch = true;
-
-    return stateBeforeNextTurn;
-  };
+  // відкат тепер через battle_snapshots, stateBefore у записах не потрібен
+  const getStateBeforeForEntry = () => undefined;
 
   let clearedPendingSummons = false;
 
   while (!activeParticipantFound && attempts < maxAttempts) {
     attempts++;
+
+    const tStep = Date.now();
 
     const turnTransition = processEndOfTurn(
       nextTurnIndex,
@@ -97,6 +76,11 @@ export function advanceTurnPhase(
 
     nextTurnIndex = turnTransition.nextTurnIndex;
     nextRound = turnTransition.nextRound;
+    logTurnTiming("processEndOfTurn (переключення на наступного гравця)", tStep, {
+      attempt: attempts,
+      nextTurnIndex,
+      nextRound,
+    });
 
     if (nextRound > previousRound) {
       const afterEndRound = updatedInitiativeOrder.map((participant) => {
@@ -126,7 +110,7 @@ export function advanceTurnPhase(
           id: `triggers-round-${nextRound}-${Date.now()}-${attempts}`,
           battleId,
           round: nextRound,
-          actionIndex: battleLogLength + newLogEntries.length,
+          actionIndex: currentBattleLogLength + newLogEntries.length,
           timestamp: new Date(),
           actorId: "system",
           actorName: "Система",
@@ -146,11 +130,18 @@ export function advanceTurnPhase(
 
     if (!nextParticipant) break;
 
+    const tStartTurn = Date.now();
+
     const turnResult = processStartOfTurn(
       nextParticipant,
       nextRound,
       updatedInitiativeOrder,
     );
+
+    logTurnTiming("processStartOfTurn (початок ходу)", tStartTurn, {
+      participantId: nextParticipant.basicInfo.id,
+      participantName: nextParticipant.basicInfo.name,
+    });
 
     updatedInitiativeOrder[nextTurnIndex] = turnResult.participant;
 
@@ -159,7 +150,7 @@ export function advanceTurnPhase(
         id: `turn-${nextTurnIndex}-${Date.now()}-${attempts}`,
         battleId,
         round: nextRound,
-        actionIndex: battleLogLength + newLogEntries.length,
+        actionIndex: currentBattleLogLength + newLogEntries.length,
         timestamp: new Date(),
         actorId: turnResult.participant.basicInfo.id,
         actorName: turnResult.participant.basicInfo.name,
@@ -196,7 +187,7 @@ export function advanceTurnPhase(
         id: `effects-${nextTurnIndex}-${Date.now()}-${attempts}`,
         battleId,
         round: nextRound,
-        actionIndex: battleLogLength + newLogEntries.length,
+        actionIndex: currentBattleLogLength + newLogEntries.length,
         timestamp: new Date(),
         actorId: turnResult.participant.basicInfo.id,
         actorName: turnResult.participant.basicInfo.name,
@@ -222,7 +213,7 @@ export function advanceTurnPhase(
         id: `triggers-turn-${nextTurnIndex}-${Date.now()}-${attempts}`,
         battleId,
         round: nextRound,
-        actionIndex: battleLogLength + newLogEntries.length,
+        actionIndex: currentBattleLogLength + newLogEntries.length,
         timestamp: new Date(),
         actorId: turnResult.participant.basicInfo.id,
         actorName: turnResult.participant.basicInfo.name,
@@ -250,75 +241,7 @@ export function advanceTurnPhase(
 
     const victoryCheck = checkVictoryConditions(updatedInitiativeOrder);
 
-    if (victoryCheck.result && battleStatus === "active") break;
-  }
-
-  if (!activeParticipantFound && attempts >= maxAttempts) {
-    // Захист: жодного активного учасника не знайдено за `maxAttempts` ітерацій.
-    // Це ознака пошкодженого стану (всі впали / нескінченний skip-loop).
-    // Лог це детально, щоб дослідити, але не throw — нехай advance-turn
-    // повернеться з поточним станом, а UI покаже "battle ended".
-    console.warn("[advance-turn-phase] no active participant after maxAttempts", {
-      battleId,
-      attempts,
-      maxAttempts,
-      initiativeOrderLength: initiativeOrder.length,
-      currentTurnIndex,
-      currentRound,
-    });
-  }
-
-  const victoryCheck = checkVictoryConditions(updatedInitiativeOrder);
-
-  let finalStatus = battleStatus;
-
-  let completedAt: Date | null = null;
-
-  if (victoryCheck.result && battleStatus === "active") {
-    finalStatus = "completed";
-    completedAt = new Date();
-
-    if (victoryCheck.result === "victory") {
-      updatedInitiativeOrder = updatedInitiativeOrder.map((participant) => {
-        if (
-          participant.basicInfo.side === ParticipantSide.ALLY &&
-          participant.combatStats.status === "unconscious"
-        ) {
-          return {
-            ...participant,
-            combatStats: {
-              ...participant.combatStats,
-              currentHp: participant.combatStats.maxHp,
-              status: "active",
-            },
-          };
-        }
-
-        return participant;
-      });
-    }
-
-    newLogEntries.push({
-      id: `battle-complete-${Date.now()}`,
-      battleId,
-      round: nextRound,
-      actionIndex: battleLogLength + newLogEntries.length,
-      timestamp: new Date(),
-      actorId: "system",
-      actorName: "Система",
-      actorSide: "ally",
-      actionType: "end_turn",
-      targets: [],
-      actionDetails: {},
-      resultText: victoryCheck.message,
-      hpChanges: calculateAllyHpChangesOnVictory(
-        initiativeOrder,
-        updatedInitiativeOrder,
-        victoryCheck,
-      ),
-      isCancelled: false,
-      stateBefore: getStateBeforeForEntry(),
-    });
+    if (victoryCheck.result) break;
   }
 
   return {
@@ -326,8 +249,6 @@ export function advanceTurnPhase(
     nextTurnIndex,
     nextRound,
     newLogEntries,
-    finalStatus,
-    completedAt,
     clearedPendingSummons,
   };
 }

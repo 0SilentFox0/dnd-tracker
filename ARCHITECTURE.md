@@ -122,7 +122,7 @@ React-хуки згруповані по папках за доменом; ко�
 - **`lib/hooks/characters/`** — персонажі та форма: `useCharacterForm`, `useCharacterView`, `useCharacters`, `useInventory`, `useDamageCalculator`, `useHeroScalingCoefficients`; типи `SkillTreeProgress`, `Character`.
 - **`lib/hooks/skills/`** — скіли та дерево: `useSkills`, `useMainSkills`, `useSkillForm`, `useSkillTreePage`, `useSkillTreeEnrichment`, `useSkillTreeFilters`, `useSkillTreeSave`, `useSkillTreeClear`, `useSkillTreeAssignment`; тип `SkillFromLibrary`.
 - **`lib/hooks/spells/`** — заклинання: `useSpells`, `useSpellGroups`, `useSpellGroupActions`, `useSpellSelection` та мутації (create, update, delete, move, …).
-- **`lib/hooks/units/`** — юніти: `useUnits`, `useUnit`, `useUnitGroups`, `useCreateUnitGroup`, `useUnitGroupActions` та мутації.
+- **`lib/hooks/units/`** — юніти: `useUnits`, `useUnit`, `useUnitGroups`, `useCreateUnitGroup` та мутації.
 - **`lib/hooks/races/`** — раси: `useRaces`, `useCreateRace`, `useUpdateRace`, `useDeleteRace`.
 - **`lib/hooks/common/`** — спільні: `useFileImport`, `useInfoReferenceFilters`, `useAppearanceSave`; тип `UseFileImportReturn`.
 
@@ -135,7 +135,9 @@ React-хуки згруповані по папках за доменом; ко�
 Вся логіка бою: атаки, урон, заклинання, учасники, ініціатива, мораль.
 
 - **`attack/`** — розрахунок атаки: куби, крит, ефекти, процес удару (`process/`: hit, critical, critical-fail тощо).
-- **`attack-and-next-turn/`** — перехід ходу після атаки (advance-turn-phase, run-attack-phase).
+- **`attack-and-next-turn/`** — фаза атаки (`runAttackPhase`).
+- **`turn/`** — єдиний движок переходу ходу (`advanceTurn`).
+- **`store/`**, **`pipeline/`** — нормалізоване сховище бою і `runBattleMutation` для всіх battle-роутів.
 - **`damage/`** — розбиття урону (breakdown), модифікатори, resistance, бонуси, формули.
 - **`participant/`** — учасник бою: з character/unit, пасивні ефекти, артефакти.
 - **`spell/`** — застосування заклинання: гілки (process-branches), ефекти (process-effects), розрахунки.
@@ -247,7 +249,7 @@ React-провайдери: **`query-provider.tsx`** (TanStack Query), можл�
 
 ### 7.3 API routes
 
-- **`route.ts`** — тільки валідація (Zod), перевірка сесії, виклик хендлера/хелпера. Важка логіка — в окремих файлах (наприклад **`attack-handler.ts`**, **`build-character-update-data.ts`**).
+- **`route.ts`** — тільки валідація (Zod), перевірка сесії, виклик хендлера/хелпера. Важка логіка — в окремих файлах (наприклад **`attack-mutation.ts`**, **`build-character-update-data.ts`**).
 
 ### 7.4 Тести
 

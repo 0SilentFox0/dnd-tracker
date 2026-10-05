@@ -51,7 +51,13 @@ Many one-off ops live in `scripts/` and run via `tsx` (e.g. `pnpm import-spells`
 
 ### Battle data flow (the most complex part)
 
-Page `app/campaigns/[id]/battles/[battleId]/page.tsx` → `useBattleSceneLogic` (in `lib/hooks/battle/`) → mutations like `useAttackFlow`, `useNextTurn`, `useCastSpell`. Mutations call `lib/api/battles.ts` → server route in `app/api/campaigns/[id]/battles/[battleId]/...` → server-side helpers in `lib/utils/battle/{attack,attack-and-next-turn,damage,spell,participant,resistance,triggers,balance}/` → mutates `BattleScene` row in Postgres → server emits a Pusher event → all connected clients update via `usePusherBattleSync`. When changing battle behavior, expect to touch all four layers (api route + util + hook + UI component under `components/battle/`).
+Page `app/campaigns/[id]/battles/[battleId]/page.tsx` → `useBattleSceneLogic` (in `lib/hooks/battle/`) → mutations in `lib/hooks/battles/useBattles.ts` → `lib/api/battles.ts` → route in `app/api/campaigns/[id]/battles/[battleId]/<action>/route.ts`.
+
+- **Every battle route** is a Zod schema + `runBattleMutation` (`lib/utils/battle/pipeline/`) with a sibling `<action>-mutation.ts`. The pipeline does auth (`getClaims`), loads the battle in one query (`lib/utils/battle/store/loadBattle`), checks access (`dm` / `turnController` / `currentController` / `member`) and status, runs `mutate` (pure engine code from `lib/utils/battle/*`, `lib/utils/skills/execution/*`), checks victory once, saves with an optimistic `version` lock (`saveBattle`: changed `battle_participants` rows, append-only `battle_events`, `battle_snapshots` for rollback) and publishes Pusher events after the response (`after()`).
+- **Turn advance** has one engine: `lib/utils/battle/turn/advanceTurn` (used by next-turn and attack with `endTurn`).
+- **Client compatibility:** responses and `battle-updated` events keep the legacy `BattleScene` shape; the log is sent incrementally (`battleLogMode: "append"`) and merged by `mergeBattleCache`, which also ignores stale `version`s. `actionIndex` in the client log is the event `seq` (rollback target).
+- **Legacy JSON columns** on `battle_scenes` (`initiativeOrder`, `battleLog`, `pendingSummons`) are no longer read or written; they will be dropped by a contract migration.
+- When changing battle behavior, expect to touch the mutation, the engine util, and possibly the hook and UI under `components/battle/`.
 
 ### Path alias & imports
 

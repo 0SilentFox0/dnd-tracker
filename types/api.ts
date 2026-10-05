@@ -74,6 +74,12 @@ export interface BattleScene {
   };
   userRole?: "dm" | "player";
   isDM?: boolean;
+  version?: number;
+  /** Журнал у цій відповіді — лише нові записи, які треба доклеїти до кешу */
+  battleLogMode?: "append";
+  /** Записи з actionIndex ≥ цього значення скасовано відкатом */
+  battleLogCancelledFrom?: number;
+  pendingMoraleCheck?: unknown;
 }
 
 export interface AttackData {

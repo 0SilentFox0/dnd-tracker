@@ -3,7 +3,7 @@
  * extra turn слот, тригери onMoraleSuccess/allyMoraleCheck, запис у battleLog.
  */
 
-import type { PendingMoraleCheckPayload } from "../morale-check/route";
+import type { PendingMoraleCheckPayload } from "./pending-morale";
 
 import { executeSkillsByTrigger } from "@/lib/utils/skills/execution";
 import type { BattleAction, BattleParticipant } from "@/types/battle";

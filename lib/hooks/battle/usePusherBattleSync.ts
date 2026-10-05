@@ -141,26 +141,19 @@ export function usePusherBattleSync(
           "battleId" in data &&
           "type" in data
         ) {
-          const state = queryClient.getQueryState(queryKey());
+          const lightVersion = (data as { version?: unknown }).version;
 
-          const dataUpdatedAt = state?.dataUpdatedAt ?? 0;
+          const cachedVersion = queryClient.getQueryData<BattleScene>(queryKey())?.version;
 
-          const now = Date.now();
-
-          /** Якщо кеш оновлювався недавно — не робити refetch (знижує egress). */
-          const skipRefetch = now - dataUpdatedAt < 8_000;
-
-          if (skipRefetch) {
-            debugLog(`event light payload (skip refetch, cache fresh): ${eventName}`, {
-              battleId: (data as { battleId: string }).battleId,
-              dataUpdatedAt,
-            });
-          } else {
-            debugLog(`event light payload (refetch): ${eventName}`, {
-              battleId: (data as { battleId: string }).battleId,
-            });
-            queryClient.invalidateQueries({ queryKey: queryKey() });
+          // власна дія вже в кеші — повторне читання бою лише палить egress
+          if (typeof lightVersion === "number" && cachedVersion !== undefined && cachedVersion >= lightVersion) {
+            return;
           }
+
+          debugLog(`event light payload (refetch): ${eventName}`, {
+            battleId: (data as { battleId: string }).battleId,
+          });
+          queryClient.invalidateQueries({ queryKey: queryKey() });
         } else {
           debugLog(`event invalid payload: ${eventName}`, {
             payloadType: typeof data,

@@ -73,6 +73,7 @@ export async function GET(
     return NextResponse.json(
       battles.map((b) => ({
         ...b,
+        initiativeOrder: [] as unknown[],
         battleLog: [] as unknown[],
       })),
     );

@@ -5,7 +5,14 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
-import { BattleConflictError, loadBattle, saveBattle } from "@/lib/utils/battle/store";
+import {
+  BattleConflictError,
+  loadBattle,
+  loadRecentEvents,
+  loadSnapshotsFrom,
+  restoreParticipantsAt,
+  saveBattle,
+} from "@/lib/utils/battle/store";
 import { createMockParticipant } from "@/lib/utils/skills/__tests__/skill-triggers-execution-mocks";
 
 const url = process.env.DATABASE_URL ?? "";
@@ -176,5 +183,43 @@ describe.skipIf(!isLocal)("battle store (local DB)", () => {
 
     expect(after.pending.map((p) => p.basicInfo.id)).toEqual(["wolf"]);
     expect(after.participants.map((p) => p.basicInfo.id)).not.toContain("wolf");
+  });
+  it("відкат: знімки з seq, скасування подій і повернення стану", async () => {
+    const before = await mustLoad();
+
+    const hurt = { ...before.participants[0], combatStats: { ...before.participants[0].combatStats, currentHp: 1 } };
+
+    await saveBattle(prisma, before, { participants: [hurt, ...before.participants.slice(1)], pending: before.pending, events: [{ type: "attack", round: 1, resultText: "Удар" }] });
+
+    const after = await mustLoad();
+
+    const seq = after.scene.eventSeq;
+
+    const snapshots = await loadSnapshotsFrom(prisma, ids.battle, seq);
+
+    expect(snapshots[0].seq).toBe(seq);
+
+    const restored = restoreParticipantsAt(snapshots, after);
+
+    expect(restored.participants[0].combatStats.currentHp).toBe(before.participants[0].combatStats.currentHp);
+
+    await saveBattle(prisma, after, { ...restored, events: [], history: { cancelFromSeq: seq } });
+
+    const events = await loadRecentEvents(prisma, ids.battle);
+
+    expect(events.map((e) => e.actionIndex)).not.toContain(seq);
+    expect(await prisma.battleSnapshot.count({ where: { battleId: ids.battle, seq: { gte: seq } } })).toBe(0);
+  });
+
+  it("clear: журнал і знімки порожні, eventSeq = 0", async () => {
+    const before = await mustLoad();
+
+    await saveBattle(prisma, before, { participants: [], pending: [], events: [], history: { clear: true } });
+
+    const after = await mustLoad();
+
+    expect(after.scene.eventSeq).toBe(0);
+    expect(await prisma.battleEvent.count({ where: { battleId: ids.battle } })).toBe(0);
+    expect(after.participants).toEqual([]);
   });
 });

@@ -28,6 +28,7 @@ function loaded(over: Partial<LoadedBattle> = {}): LoadedBattle & { isMember: bo
       startedAt: null,
       completedAt: null,
     },
+    meta: { name: "Бій", description: null, setup: [], friendlyFire: false, createdAt: new Date("2026-01-01") },
     participants: [hero, goblin],
     pending: [],
     isDM: false,
@@ -54,6 +55,7 @@ function deps(over: Partial<PipelineDeps> = {}): PipelineDeps {
     loadBattle: vi.fn(async () => loaded()),
     saveBattle: vi.fn(async () => delta()),
     publish: vi.fn(),
+    loadRecentEvents: vi.fn(async () => []),
     ...over,
   };
 }
@@ -210,10 +212,10 @@ describe("runBattleMutation", () => {
 
     expect(outcome.scene?.status).toBe("completed");
     expect(outcome.scene?.completedAt).toBeInstanceOf(Date);
-    expect(outcome.events.at(-1)?.type).toBe("battle_end");
+    expect(outcome.events.at(-1)).toMatchObject({ type: "end_turn", resultText: expect.stringContaining("Бій завершено") });
   });
 
-  it("успіх — 200, відповідь з battle і delta, публікація дельти", async () => {
+  it("успіх — 200, сумісна відповідь для того, хто діяв, і battle-updated без isDM для інших", async () => {
     const d = deps();
 
     const res = await runBattleMutation(req(), { params, access: "member", mutate: noop }, d);
@@ -221,33 +223,90 @@ describe("runBattleMutation", () => {
     const json = await res.json();
 
     expect(res.status).toBe(200);
-    expect(json.delta.version).toBe(4);
-    expect(json.battle.initiativeOrder).toHaveLength(2);
-    expect(d.publish).toHaveBeenCalledWith("b1", expect.objectContaining({ version: 4 }));
+    expect(json.initiativeOrder).toHaveLength(2);
+    expect(json.isDM).toBe(false);
+    expect(json.battleLogMode).toBe("append");
+    expect(json.version).toBe(4);
+
+    const messages = vi.mocked(d.publish).mock.calls[0][0];
+
+    expect(messages[0]).toMatchObject({ event: "battle-updated", channel: "private-battle-b1" });
+    expect(messages[0].payload).not.toHaveProperty("isDM");
   });
 
-  it("завелика дельта — публікується refetch", async () => {
-    const big = { ...delta(), upserted: Array.from({ length: 40 }, () => hero) };
+  it("великий стан — light battle-updated", async () => {
+    const d = deps();
 
-    const d = deps({ saveBattle: vi.fn(async () => big) });
+    await runBattleMutation(
+      req(),
+      { params, access: "member", mutate: () => ({ participants: Array.from({ length: 60 }, () => hero), pending: [], events: [] }) },
+      d,
+    );
 
-    await runBattleMutation(req(), { params, access: "member", mutate: noop }, d);
-
-    expect(d.publish).toHaveBeenCalledWith("b1", { battleId: "b1", version: 4, refetch: true });
+    expect(vi.mocked(d.publish).mock.calls[0][0][0].payload).toEqual({ type: "battle-updated", battleId: "b1", version: 4 });
   });
 
-  it("ліміт дельти — у байтах: кирилиця під лімітом символів, але над лімітом байтів → refetch", async () => {
+  it("ліміт payload — у байтах: довгий кириличний запис журналу дає light battle-updated", async () => {
     const text = "Ш".repeat(6_000);
 
     const cyr = { ...delta(), events: [{ seq: 5, type: "attack", round: 1, actorId: null, targets: [], details: {}, hpChanges: [], resultText: text }] };
-
-    expect(JSON.stringify(cyr).length).toBeLessThan(9_500);
 
     const d = deps({ saveBattle: vi.fn(async () => cyr) });
 
     await runBattleMutation(req(), { params, access: "member", mutate: noop }, d);
 
-    expect(d.publish).toHaveBeenCalledWith("b1", { battleId: "b1", version: 4, refetch: true });
+    expect(vi.mocked(d.publish).mock.calls[0][0][0].payload).toEqual({ type: "battle-updated", battleId: "b1", version: 4 });
+  });
+
+  it("respond: wrapped — {battle, ...response}", async () => {
+    const res = await runBattleMutation(
+      req(),
+      {
+        params,
+        access: "member",
+        respond: "wrapped",
+        mutate: (ctx) => ({ participants: ctx.participants, pending: ctx.pending, events: [], response: { moraleResult: { ok: true } } }),
+      },
+      deps(),
+    );
+
+    const json = await res.json();
+
+    expect(json.battle.id).toBe("b1");
+    expect(json.moraleResult).toEqual({ ok: true });
+  });
+
+  it("currentController: контролер непритомного учасника може передати хід", async () => {
+    const downed = { ...hero, combatStats: { ...hero.combatStats, status: "unconscious" as const } };
+
+    const res = await runBattleMutation(
+      req(),
+      { params, access: "currentController", mutate: noop },
+      deps({ loadBattle: vi.fn(async () => loaded({ participants: [downed, goblin] })) }),
+    );
+
+    expect(res.status).toBe(200);
+  });
+
+  it("dryRun: нічого не зберігає і не публікує, повертає response", async () => {
+    const d = deps();
+
+    const res = await runBattleMutation(
+      req({ preview: true }),
+      {
+        params,
+        access: "member",
+        schema: z.object({ preview: z.boolean() }),
+        dryRun: (b) => b.preview,
+        respond: "response",
+        mutate: (ctx) => ({ participants: ctx.participants, pending: ctx.pending, events: [], response: { preview: true } }),
+      },
+      d,
+    );
+
+    expect(await res.json()).toEqual({ preview: true });
+    expect(d.saveBattle).not.toHaveBeenCalled();
+    expect(d.publish).not.toHaveBeenCalled();
   });
 
   it("expectedVersion перевіряється, навіть якщо схема роуту його не оголошує", async () => {
@@ -267,5 +326,18 @@ describe("runBattleMutation", () => {
     const res = await runBattleMutation(req({ expectedVersion: 2 }), { params, access: "member", mutate: noop }, deps());
 
     expect(res.status).toBe(409);
+  });
+
+  it("очищення історії (reset/start) скасовує весь журнал у клієнтів", async () => {
+    const d = deps();
+
+    const res = await runBattleMutation(
+      req(),
+      { params, access: "member", mutate: (ctx) => ({ participants: ctx.participants, pending: ctx.pending, events: [], history: { clear: true } }) },
+      d,
+    );
+
+    expect((await res.json()).battleLogCancelledFrom).toBe(0);
+    expect(vi.mocked(d.publish).mock.calls[0][0][0].payload).toMatchObject({ battleLogCancelledFrom: 0 });
   });
 });

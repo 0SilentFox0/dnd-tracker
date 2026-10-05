@@ -35,7 +35,9 @@ export async function saveBattle(
 
   const diff = diffParticipants(beforeStored, afterStored);
 
-  const firstSeq = scene.eventSeq + 1;
+  const clearHistory = Boolean(outcome.history && "clear" in outcome.history);
+
+  const firstSeq = clearHistory ? 1 : scene.eventSeq + 1;
 
   const events: StoredBattleEvent[] = outcome.events.map((e, i) => ({
     seq: firstSeq + i,
@@ -55,7 +57,7 @@ export async function saveBattle(
       where: { id: scene.id, version: scene.version },
       data: {
         version: { increment: 1 },
-        eventSeq: scene.eventSeq + events.length,
+        eventSeq: clearHistory ? events.length : scene.eventSeq + events.length,
         ...(patch.status !== undefined && { status: patch.status }),
         ...(patch.round !== undefined && { currentRound: patch.round }),
         ...(patch.turnIndex !== undefined && { currentTurnIndex: patch.turnIndex }),
@@ -99,6 +101,21 @@ export async function saveBattle(
           }),
         },
       });
+    }
+
+    if (outcome.history && "cancelFromSeq" in outcome.history) {
+      await tx.battleEvent.updateMany({
+        where: { battleId: scene.id, seq: { gte: outcome.history.cancelFromSeq }, cancelledAt: null },
+        data: { cancelledAt: new Date() },
+      });
+      await tx.battleSnapshot.deleteMany({
+        where: { battleId: scene.id, seq: { gte: outcome.history.cancelFromSeq } },
+      });
+    }
+
+    if (clearHistory) {
+      await tx.battleEvent.deleteMany({ where: { battleId: scene.id } });
+      await tx.battleSnapshot.deleteMany({ where: { battleId: scene.id } });
     }
 
     if (events.length > 0) {
