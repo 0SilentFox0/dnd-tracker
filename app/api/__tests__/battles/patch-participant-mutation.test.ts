@@ -14,12 +14,6 @@ describe("patch-participant mutation", () => {
     expect(out.scene?.turnIndex).toBe(1);
   });
 
-  it("видалення останнього, коли хід на ньому, — індекс обрізається", () => {
-    const out = patchParticipantMutation(context({ participants: [hero, goblin], scene: { ...context().scene, turnIndex: 1 } }), "gob", { removeFromBattle: true });
-
-    expect(out.scene?.turnIndex).toBe(0);
-  });
-
   it("HP до 0 — unconscious і подія зі зміною HP", () => {
     const out = patchParticipantMutation(context(), "gob", { currentHp: 0 });
 
@@ -31,5 +25,30 @@ describe("patch-participant mutation", () => {
 
   it("немає учасника — 404", () => {
     expect(() => patchParticipantMutation(context(), "nobody", { currentHp: 3 })).toThrow(expect.objectContaining({ status: 404 }));
+  });
+
+  it("видалення поточного учасника: наступний отримує початок ходу, флаги скинуті", () => {
+    const tired = { ...goblin, actionFlags: { ...goblin.actionFlags, hasUsedAction: true } };
+
+    const out = patchParticipantMutation(context({ participants: [hero, tired], scene: { ...context().scene, turnIndex: 0 } }), "hero", { removeFromBattle: true });
+
+    expect(out.participants.map((p) => p.basicInfo.id)).toEqual(["gob"]);
+    expect(out.scene?.turnIndex).toBe(0);
+    expect(out.participants[0].actionFlags.hasUsedAction).toBe(false);
+  });
+
+  it("видалення останнього в черзі, коли хід на ньому, — новий раунд", () => {
+    const out = patchParticipantMutation(context({ participants: [hero, goblin, orc], scene: { ...context().scene, turnIndex: 2 } }), "orc", { removeFromBattle: true });
+
+    expect(out.scene).toMatchObject({ round: 2 });
+    expect(out.participants[out.scene!.turnIndex!].basicInfo.id).toBe("hero");
+  });
+
+  it("HP > 0 повертає непритомного до бою", () => {
+    const downed = { ...goblin, combatStats: { ...goblin.combatStats, currentHp: 0, status: "unconscious" as const } };
+
+    const out = patchParticipantMutation(context({ participants: [hero, downed] }), "gob", { currentHp: 5 });
+
+    expect(out.participants.find((p) => p.basicInfo.id === "gob")?.combatStats.status).toBe("active");
   });
 });

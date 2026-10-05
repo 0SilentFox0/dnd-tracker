@@ -114,19 +114,21 @@ export function completeBattle(
       result === "victory"
         ? "🎉 Бій завершено! Перемога союзників!"
         : "💀 Бій завершено! Поразка союзників!",
-    hpChanges: updatedParticipants
-      .filter((p) => p.basicInfo.side === "ally" && p.combatStats.status === "unconscious")
-          .map((p) => {
-            const oldHp = p.combatStats.currentHp;
-
-            return {
-              participantId: p.basicInfo.id,
-              participantName: p.basicInfo.name,
-              oldHp,
-              newHp: p.combatStats.maxHp,
-              change: p.combatStats.maxHp - oldHp,
-            };
-          }),
+    // з учасників до відродження: після нього вони вже active
+    hpChanges: initiativeOrder
+      .filter(
+        (p) =>
+          result === "victory" &&
+          p.basicInfo.side === ParticipantSide.ALLY &&
+          p.combatStats.status === "unconscious",
+      )
+      .map((p) => ({
+        participantId: p.basicInfo.id,
+        participantName: p.basicInfo.name,
+        oldHp: p.combatStats.currentHp,
+        newHp: p.combatStats.maxHp,
+        change: p.combatStats.maxHp - p.combatStats.currentHp,
+      })),
     isCancelled: false,
   };
 
