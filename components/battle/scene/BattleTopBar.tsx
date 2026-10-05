@@ -27,13 +27,13 @@ export function BattleTopBar({ onComplete }: { onComplete?: () => void }) {
         Раунд {battle.currentRound}
         <i className={cn("size-1.5 rounded-full", connection === "connected" ? "bg-[#9fb98a]" : "bg-[#f0b44c] animate-[hud-pulse_1.2s_infinite]")} />
       </span>
-      {isDM && battle.status === "active" && (
+      {isDM && battle.status !== "prepared" && (
         <span className="hidden gap-2 lg:flex">
-          {onComplete && <button type="button" onClick={onComplete} className="hud-sc h-8 w-32 border border-emerald-500/50 text-sm text-emerald-400">Завершити</button>}
+          {onComplete && battle.status === "active" && <button type="button" onClick={onComplete} className="hud-sc h-8 w-32 border border-emerald-500/50 text-sm text-emerald-400">Завершити</button>}
           <button type="button" onClick={() => void reset()} className="hud-sc h-8 w-28 border border-red-500/50 text-sm text-red-400">Скинути</button>
-          <button type="button" disabled={nextPending} onClick={() => actions.nextTurn.mutate({})} className="hud-sc flex h-8 w-36 items-center justify-center bg-[var(--enemy)] text-sm text-white disabled:opacity-70">
+          {battle.status === "active" && <button type="button" disabled={nextPending} onClick={() => actions.nextTurn.mutate({})} className="hud-sc flex h-8 w-36 items-center justify-center bg-[var(--enemy)] text-sm text-white disabled:opacity-70">
             {nextPending ? <Loader2 className="size-4 animate-spin" /> : "Наступний хід"}
-          </button>
+          </button>}
         </span>
       )}
     </header>

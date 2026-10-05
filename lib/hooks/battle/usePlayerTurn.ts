@@ -57,6 +57,7 @@ export function usePlayerTurn(participant: BattleParticipant) {
     phase: state.phase,
     actionUsed: participant.actionFlags.hasUsedAction,
     bonusAvailable: !participant.actionFlags.hasUsedBonusAction,
+    skipped: state.moraleResult === "skip",
     afterAction: () => {
       if (scene.readBattle()?.status !== "active") return;
 

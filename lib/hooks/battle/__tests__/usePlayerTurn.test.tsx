@@ -132,6 +132,7 @@ describe("usePlayerTurn", () => {
 
     act(() => vi.advanceTimersByTime(4_100));
     expect(result.current.phase).toBe("acting");
+    expect(result.current.skipped).toBe(true);
 
     vi.useRealTimers();
   });

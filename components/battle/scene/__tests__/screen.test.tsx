@@ -61,8 +61,20 @@ describe("BattleScreen", () => {
       expect(screen.getAllByText("Бій завершено").length).toBeGreaterThan(0);
       expect(screen.queryByText(/ходить/)).toBeNull();
       expect(screen.queryByRole("button", { name: /Атака/ })).toBeNull();
+      expect(screen.queryByText(/хід через|Дії стануть доступні/)).toBeNull();
 
       cleanup();
     }
+  });
+
+  it("DM може скинути завершений бій, але не передати хід", () => {
+    media.wide = true;
+
+    const { wrapper } = fakeScene({ isDM: true, isMyTurn: false, status: "completed" });
+
+    render(<BattleScreen />, { wrapper });
+
+    expect(screen.getByRole("button", { name: "Скинути" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Наступний хід" })).toBeNull();
   });
 });

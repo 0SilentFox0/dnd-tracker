@@ -24,9 +24,9 @@ export function ActionGrid({ turn, pending, labels, available, actions }: {
   return (
     <>
       <div className="grid grid-cols-2 gap-2 pt-3">
-        <Tile icon={Swords} label="Атака" sub={turn.actionUsed ? "використано" : labels.attack} used={turn.actionUsed || pending} primary onClick={actions.attack} />
-        <Tile icon={BookOpen} label="Магія" sub={turn.actionUsed ? "дію використано" : labels.magic} used={turn.actionUsed || !available.magic || pending} onClick={actions.magic} />
-        <Tile icon={Sparkles} label="Бонус" sub={labels.bonus} used={!turn.bonusAvailable || !available.bonus || pending} onClick={actions.bonus} />
+        <Tile icon={Swords} label="Атака" sub={turn.actionUsed ? "використано" : labels.attack} used={turn.actionUsed || turn.skipped || pending} primary onClick={actions.attack} />
+        <Tile icon={BookOpen} label="Магія" sub={turn.actionUsed ? "дію використано" : labels.magic} used={turn.actionUsed || turn.skipped || !available.magic || pending} onClick={actions.magic} />
+        <Tile icon={Sparkles} label="Бонус" sub={labels.bonus} used={!turn.bonusAvailable || turn.skipped || !available.bonus || pending} onClick={actions.bonus} />
         <Tile icon={Hourglass} label="Мораль" sub="перевірено" used />
       </div>
       {turn.phase !== "countdown" && (
