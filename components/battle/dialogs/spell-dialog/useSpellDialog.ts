@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { SpellCastPayload, SpellDialogSpell } from "./types";
 
 import type { SpellRichOptionData } from "@/components/spells/SpellRichOption";
-import { getSpells } from "@/lib/api/spells";
+import { useSpells } from "@/lib/hooks/spells";
 import { participantSpellAllowsMultipleTargets } from "@/lib/utils/battle/spell/participant-spell-target-mode";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -39,38 +39,19 @@ export function useSpellDialog(
 
   const [hitRoll, setHitRoll] = useState("");
 
-  const [spells, setSpells] = useState<SpellDialogSpell[]>([]);
-
   const rollInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  useEffect(() => {
-    if (!caster || !open || !campaignId) return;
+  const { data: allSpells = [] } = useSpells(campaignId, { enabled: open && !!caster && !!campaignId });
 
-    const load = async () => {
-      try {
-        const all = (await getSpells(campaignId)) as SpellDialogSpell[];
+  const spells = useMemo(() => {
+    const all = allSpells as SpellDialogSpell[];
 
-        if (allowAllSpells) {
-          setSpells(all);
-        } else {
-          const knownIds = caster.spellcasting.knownSpells ?? [];
+    if (allowAllSpells) return all;
 
-          if (knownIds.length === 0) {
-            setSpells([]);
+    const knownIds = caster?.spellcasting.knownSpells ?? [];
 
-            return;
-          }
-
-          setSpells(all.filter((s) => knownIds.includes(s.id)));
-        }
-      } catch (err) {
-        console.error("Error loading spells:", err);
-        setSpells([]);
-      }
-    };
-
-    load();
-  }, [caster, campaignId, open, allowAllSpells]);
+    return all.filter((s) => knownIds.includes(s.id));
+  }, [allSpells, allowAllSpells, caster]);
 
   const spellsByGroup = useMemo(() => {
     const map = new Map<string, SpellRichOptionData[]>();

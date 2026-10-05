@@ -2,7 +2,8 @@
 
 import { useCallback, useState } from "react";
 
-import { getBattleBalance } from "@/lib/api/battles";
+import { useBattleBalance } from "../useBattleSetupQueries";
+
 import type { AllyStats, Difficulty, SetupParticipant, SuggestedEnemy } from "@/types/battle-setup";
 
 interface AllyParticipants {
@@ -25,9 +26,11 @@ export function useBalanceSuggestions({
   hasAllies,
   setParticipants,
 }: UseBalanceSuggestionsParams) {
-  const [allyStats, setAllyStats] = useState<AllyStats | null>(null);
+  const balance = useBattleBalance(campaignId);
 
-  const [balanceLoading, setBalanceLoading] = useState(false);
+  const { mutate: requestBalance } = balance;
+
+  const [allyStats, setAllyStats] = useState<AllyStats | null>(null);
 
   const [suggestedEnemies, setSuggestedEnemies] = useState<SuggestedEnemy[]>([]);
 
@@ -39,51 +42,26 @@ export function useBalanceSuggestions({
 
   const [balanceRace, setBalanceRace] = useState("");
 
-  const fetchAllyStats = useCallback(async () => {
+  const fetchAllyStats = useCallback(() => {
     if (!hasAllies) return;
 
-    setBalanceLoading(true);
-    try {
-      const data = await getBattleBalance(campaignId, { allyParticipants });
+    requestBalance({ allyParticipants }, { onSuccess: (data) => setAllyStats((data.allyStats ?? null) as AllyStats | null) });
+  }, [requestBalance, allyParticipants, hasAllies]);
 
-      setAllyStats((data.allyStats ?? null) as AllyStats | null);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setBalanceLoading(false);
-    }
-  }, [campaignId, allyParticipants, hasAllies]);
-
-  const suggestEnemies = useCallback(async () => {
+  const suggestEnemies = useCallback(() => {
     if (!hasAllies) return;
 
-    setBalanceLoading(true);
     setSuggestedEnemies([]);
-    try {
-      const data = await getBattleBalance(campaignId, {
-        allyParticipants,
-        difficulty,
-        minTier,
-        maxTier,
-        race: balanceRace || undefined,
-      });
-
-      setAllyStats((data.allyStats ?? null) as AllyStats | null);
-      setSuggestedEnemies((data.suggestedEnemies ?? []) as SuggestedEnemy[]);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setBalanceLoading(false);
-    }
-  }, [
-    campaignId,
-    allyParticipants,
-    hasAllies,
-    difficulty,
-    minTier,
-    maxTier,
-    balanceRace,
-  ]);
+    requestBalance(
+      { allyParticipants, difficulty, minTier, maxTier, race: balanceRace || undefined },
+      {
+        onSuccess: (data) => {
+          setAllyStats((data.allyStats ?? null) as AllyStats | null);
+          setSuggestedEnemies((data.suggestedEnemies ?? []) as SuggestedEnemy[]);
+        },
+      },
+    );
+  }, [requestBalance, allyParticipants, hasAllies, difficulty, minTier, maxTier, balanceRace]);
 
   const applySuggestedEnemies = useCallback(() => {
     const allies = participants.filter((p) => p.side === "ally");
@@ -101,7 +79,7 @@ export function useBalanceSuggestions({
 
   return {
     allyStats,
-    balanceLoading,
+    balanceLoading: balance.isPending,
     suggestedEnemies,
     difficulty,
     setDifficulty,

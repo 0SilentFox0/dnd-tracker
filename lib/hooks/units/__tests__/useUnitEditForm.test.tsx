@@ -33,7 +33,8 @@ describe("useUnitEditForm", () => {
     await waitFor(() => expect(result.current.spells).toHaveLength(1));
 
     act(() => result.current.change({ name: "Орк" }));
-    act(() => client.setQueryData(["unit", "c1", "u1"], { ...unit }));
+    act(() => client.setQueryData(["unit", "c1", "u1"], { ...unit, maxHp: 99 }));
+    await waitFor(() => expect(result.current.query.data?.maxHp).toBe(99));
 
     expect(result.current.formData.name).toBe("Орк");
   });

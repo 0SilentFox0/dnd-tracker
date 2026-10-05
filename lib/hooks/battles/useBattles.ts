@@ -1,3 +1,4 @@
+import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
@@ -5,7 +6,7 @@ import {
   mergeBattleCache,
 } from "./useBattles-cache";
 
-import type { AddParticipantData } from "@/lib/api/battles";
+import type { AddParticipantData, CreateBattleData } from "@/lib/api/battles";
 import {
   addBattleParticipant,
   attack,
@@ -13,12 +14,15 @@ import {
   bonusAction,
   castSpell,
   completeBattle,
+  createBattle,
+  deleteAllBattles,
   deleteBattle,
   getBattle,
   moraleCheck,
   nextTurn,
   resetBattle,
   rollbackBattleAction,
+  spellPreview,
   startBattle,
   updateBattle,
   updateBattleParticipant,
@@ -290,4 +294,31 @@ export function useUpdateBattleParticipant(
       );
     },
   });
+}
+
+export function useCreateBattle(campaignId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: CreateBattleData) => createBattle(campaignId, data),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["battles", campaignId] }),
+  });
+}
+
+export function useDeleteAllBattles(campaignId: string) {
+  const router = useRouter();
+
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => deleteAllBattles(campaignId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["battles", campaignId] });
+      router.refresh();
+    },
+  });
+}
+
+export function useSpellPreview(campaignId: string, battleId: string) {
+  return useMutation({ mutationFn: (data: SpellCastData) => spellPreview(campaignId, battleId, data) });
 }

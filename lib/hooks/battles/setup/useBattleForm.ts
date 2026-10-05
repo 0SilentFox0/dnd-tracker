@@ -1,37 +1,30 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 
-import { createBattle } from "@/lib/api/battles";
+import { useCreateBattle } from "../useBattles";
+
 import { useNotify } from "@/lib/hooks/common";
 import type { SetupParticipant } from "@/types/battle-setup";
 
 interface UseBattleFormParams {
   campaignId: string;
   formData: { name: string; description: string };
-  setFormData: React.Dispatch<
-    React.SetStateAction<{ name: string; description: string }>
-  >;
   participants: SetupParticipant[];
 }
 
-export function useBattleForm({
-  campaignId,
-  formData,
-  setFormData: _setFormData,
-  participants,
-}: UseBattleFormParams) {
+export function useBattleForm({ campaignId, formData, participants }: UseBattleFormParams) {
   const notify = useNotify();
-
-  void _setFormData;
 
   const router = useRouter();
 
-  const [loading, setLoading] = useState(false);
+  const create = useCreateBattle(campaignId);
+
+  const { mutate } = create;
 
   const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
+    (e: React.FormEvent) => {
       e.preventDefault();
 
       if (participants.length === 0) {
@@ -40,24 +33,16 @@ export function useBattleForm({
         return;
       }
 
-      setLoading(true);
-      try {
-        const battle = await createBattle(campaignId, {
-          name: formData.name,
-          description: formData.description,
-          participants,
-        });
-
-        router.push(`/campaigns/${campaignId}/dm/battles/${battle.id}`);
-      } catch (error) {
-        console.error("Error creating battle:", error);
-        void notify(error instanceof Error ? error.message : "Помилка при створенні бою");
-      } finally {
-        setLoading(false);
-      }
+      mutate(
+        { name: formData.name, description: formData.description, participants },
+        {
+          onSuccess: (battle) => router.push(`/campaigns/${campaignId}/dm/battles/${battle.id}`),
+          onError: (error) => void notify(error instanceof Error ? error.message : "Помилка при створенні бою"),
+        },
+      );
     },
-    [campaignId, formData.name, formData.description, participants, router, notify],
+    [campaignId, formData.name, formData.description, participants, router, notify, mutate],
   );
 
-  return { loading, handleSubmit };
+  return { loading: create.isPending, handleSubmit };
 }

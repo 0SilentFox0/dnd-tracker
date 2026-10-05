@@ -20,7 +20,6 @@ export function useNewBattlePage(params: Promise<{ id: string }>) {
   const { loading, handleSubmit } = useBattleForm({
     campaignId: id,
     formData,
-    setFormData,
     participants: participantsBag.participants,
   });
 

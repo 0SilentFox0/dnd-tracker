@@ -1,0 +1,35 @@
+"use client";
+
+import { useMutation, useQuery } from "@tanstack/react-query";
+
+import { getBattleBalance } from "@/lib/api/battles";
+import type { BattleBalanceBody } from "@/lib/api/battles-types";
+import { useCharacters } from "@/lib/hooks/characters";
+import { useUnits } from "@/lib/hooks/units";
+import type { EntityStats, SetupCharacter, SetupUnit } from "@/types/battle-setup";
+
+export function useSetupRoster(campaignId: string) {
+  const characters = useCharacters(campaignId, { compact: true });
+
+  const units = useUnits(campaignId);
+
+  return {
+    characters: (characters.data ?? []) as unknown as SetupCharacter[],
+    units: (units.data ?? []) as unknown as SetupUnit[],
+    isPending: characters.isPending || units.isPending,
+  };
+}
+
+export function useBattleBalanceStats(campaignId: string) {
+  return useQuery({
+    queryKey: ["battle-balance", campaignId],
+    queryFn: () => getBattleBalance(campaignId, {}),
+    select: (d): { characterStats: Record<string, EntityStats>; unitStats: Record<string, EntityStats> } | null =>
+      d.characterStats != null || d.unitStats != null ? { characterStats: d.characterStats ?? {}, unitStats: d.unitStats ?? {} } : null,
+    enabled: !!campaignId,
+  });
+}
+
+export function useBattleBalance(campaignId: string) {
+  return useMutation({ mutationFn: (body: BattleBalanceBody) => getBattleBalance(campaignId, body) });
+}

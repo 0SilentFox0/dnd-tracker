@@ -6,7 +6,10 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }) }));
 vi.mock("@/lib/api/characters", () => ({
-  getCharacter: vi.fn(async () => ({ id: "ch1", name: "Арвен", level: 3, inventory: { equipped: { ring1: "a1" } } })),
+  getCharacter: vi
+    .fn()
+    .mockResolvedValueOnce({ id: "ch1", name: "Арвен", level: 3, inventory: { equipped: { ring1: "a1" } } })
+    .mockResolvedValue({ id: "ch1", name: "Арвен", level: 4, inventory: { equipped: { ring1: "a1" } } }),
   updateCharacter: vi.fn(async () => ({})),
   createCharacter: vi.fn(),
   getCharacters: vi.fn(async () => []),
@@ -34,6 +37,7 @@ describe("useCharacterEditor", () => {
 
     act(() => result.current.form.setFormData((prev) => ({ ...prev, basicInfo: { ...prev.basicInfo, name: "Арвен II" } })));
     await act(() => client.invalidateQueries({ queryKey: ["character", "c1", "ch1"] }));
+    await waitFor(() => expect(result.current.query.data?.level).toBe(4));
 
     expect(result.current.form.formData.basicInfo.name).toBe("Арвен II");
   });

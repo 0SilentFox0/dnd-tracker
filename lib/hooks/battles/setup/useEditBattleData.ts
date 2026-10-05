@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { useBattle, useDeleteBattle, useUpdateBattle } from "../useBattles";
+import { useSetupRoster } from "../useBattleSetupQueries";
 
-import { getCharacters } from "@/lib/api/characters";
-import { getUnits } from "@/lib/api/units";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { useConfirm, useNotify } from "@/lib/hooks/common";
 import type { BattlePreparationParticipant } from "@/types/battle";
@@ -28,11 +27,11 @@ export function useEditBattleData(campaignId: string, battleId: string) {
 
   const deleteBattleMutation = useDeleteBattle(campaignId);
 
-  const [characters, setCharacters] = useState<EditBattleCharacter[]>([]);
+  const roster = useSetupRoster(campaignId);
 
-  const [units, setUnits] = useState<EditBattleUnit[]>([]);
+  const characters = roster.characters as EditBattleCharacter[];
 
-  const [loadingData, setLoadingData] = useState(true);
+  const units = roster.units as EditBattleUnit[];
 
   const [formData, setFormData] = useState({ name: "", description: "" });
 
@@ -40,37 +39,16 @@ export function useEditBattleData(campaignId: string, battleId: string) {
     BattlePreparationParticipant[]
   >([]);
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const [chars, unitsData] = await Promise.all([
-          getCharacters(campaignId, { compact: true }),
-          getUnits(campaignId),
-        ]);
-
-        setCharacters(chars as EditBattleCharacter[]);
-        setUnits(unitsData as EditBattleUnit[]);
-      } catch (error) {
-        console.error("Error loading data:", error);
-      } finally {
-        setLoadingData(false);
-      }
-    }
-
-    loadData();
-  }, [campaignId]);
+  // Polling/refetches must not overwrite what the DM is editing.
+  const seededFor = useRef<string | null>(null);
 
   useEffect(() => {
-    if (battle) {
-      setFormData({
-        name: battle.name || "",
-        description: (battle.description as string) || "",
-      });
-      setParticipants(
-        (battle.participants ?? []) as BattlePreparationParticipant[],
-      );
-    }
-  }, [battle]);
+    if (!battle || seededFor.current === battleId) return;
+
+    seededFor.current = battleId;
+    setFormData({ name: battle.name || "", description: (battle.description as string) || "" }); // eslint-disable-line react-hooks/set-state-in-effect -- seed from the first server snapshot
+    setParticipants((battle.participants ?? []) as BattlePreparationParticipant[]);
+  }, [battle, battleId]);
 
   const handleParticipantToggle = (
     participantId: string,
@@ -122,10 +100,7 @@ export function useEditBattleData(campaignId: string, battleId: string) {
           router.push(`/campaigns/${campaignId}/dm/battles`);
           router.refresh();
         },
-        onError: (error) => {
-          console.error("Error updating battle:", error);
-          void notify("Помилка при оновленні бою");
-        },
+        onError: () => void notify("Помилка при оновленні бою"),
       },
     );
   };
@@ -138,10 +113,7 @@ export function useEditBattleData(campaignId: string, battleId: string) {
         router.push(`/campaigns/${campaignId}/dm/battles`);
         router.refresh();
       },
-      onError: (error) => {
-        console.error("Error deleting battle:", error);
-        void notify("Помилка при видаленні бою");
-      },
+      onError: () => void notify("Помилка при видаленні бою"),
     });
   };
 
@@ -161,7 +133,7 @@ export function useEditBattleData(campaignId: string, battleId: string) {
     campaignId,
     battleId,
     battle,
-    loading: loadingData || loadingBattle,
+    loading: roster.isPending || loadingBattle,
     formData,
     setFormData,
     participants,
