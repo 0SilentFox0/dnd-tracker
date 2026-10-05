@@ -1,0 +1,40 @@
+import { SlotButton } from "./SlotButton";
+
+import { OptimizedImage } from "@/components/common/OptimizedImage";
+import type { BranchRow as Row, NodeState } from "@/lib/utils/skills/progression";
+import { BRANCH_LEVEL_LABEL } from "@/lib/utils/skills/progression";
+import type { CharacterProgressionDto } from "@/types/progression";
+
+const METAL = { basic: "metal-bronze", advanced: "metal-silver", expert: "metal-gold" } as const;
+
+export function BranchRow({ row, dto, onSelect }: { row: Row; dto: CharacterProgressionDto; onSelect: (state: NodeState) => void }) {
+  const branch = dto.branches[row.branchId];
+
+  const label = (s: NodeState) => (s.nodeId ? (dto.skills[s.nodeId]?.name ?? "Невідомий скіл") : "Порожній слот");
+
+  const icon = (s: NodeState) => (s.nodeId ? (dto.skills[s.nodeId]?.icon ?? branch?.icon ?? null) : null);
+
+  const levelText = row.level ? BRANCH_LEVEL_LABEL[row.level] : "—";
+
+  const renderSlot = (s: NodeState, i: number, size: 46 | 40) => <SlotButton key={i} state={s} label={label(s)} icon={icon(s)} size={size} onSelect={() => onSelect(s)} />;
+
+  return (
+    <div role="group" aria-label={`${branch?.name ?? row.branchId} · ${levelText}`} className="flex items-center gap-2 border-b border-[rgba(230,220,203,.07)] px-4 py-2">
+      <div className={`flex w-14 shrink-0 flex-col items-center gap-1 ${row.level ? METAL[row.level] : "metal-iron"}`}>
+        <span className="branch-frame">
+          {branch?.icon ? <OptimizedImage src={branch.icon} alt="" width={52} height={52} className="h-full w-full object-cover" fallback={<span className="hud-sc">{branch.name[0]}</span>} /> : <span className="hud-sc text-xl">{branch?.name[0] ?? "?"}</span>}
+        </span>
+        <span className="hud-sc text-[11px] text-[var(--m2)]">{levelText}</span>
+      </div>
+      <span aria-hidden className="text-[#6b5f50]">▸</span>
+      <div className="flex flex-col gap-1">
+        <div className="flex">{row.outer.map((s, i) => renderSlot(s, i, 46))}</div>
+        <div className="flex items-center">
+          {row.middle.map((s, i) => renderSlot(s, i, 40))}
+          <span className="w-2" />
+          {row.inner.map((s, i) => renderSlot(s, i, 40))}
+        </div>
+      </div>
+    </div>
+  );
+}
