@@ -50,7 +50,8 @@ describe("AbilityListEditor", () => {
     fireEvent.pointerDown(screen.getByLabelText("Подія"), { button: 0, ctrlKey: false, pointerType: "mouse" });
     fireEvent.click(await screen.findByRole("option", { name: "Пасивно (завжди)" }));
 
-    await waitFor(() => expect(onValid).toHaveBeenLastCalledWith(false));
+    await waitFor(() => expect(onValid).toHaveBeenLastCalledWith(false, expect.any(Number)));
+    expect(onValid.mock.lastCall?.[1]).toBeGreaterThan(0);
     expect(screen.getAllByText(/Пасивка допускає/).length).toBeGreaterThan(0);
   });
 
@@ -92,7 +93,7 @@ describe("AbilityListEditor", () => {
 
     expect(screen.getByText("Невідомий ефект")).toBeInTheDocument();
     expect(screen.getByTestId("effect-errors-0.effects.0")).toBeInTheDocument();
-    await waitFor(() => expect(onValid).toHaveBeenLastCalledWith(false));
+    await waitFor(() => expect(onValid).toHaveBeenLastCalledWith(false, expect.any(Number)));
   });
 
   it("порожня назва — помилка біля поля назви", () => {

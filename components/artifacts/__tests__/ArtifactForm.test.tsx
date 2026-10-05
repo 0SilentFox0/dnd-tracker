@@ -70,4 +70,27 @@ describe("ArtifactForm", () => {
     await vi.waitFor(() => expect(onSubmit).toHaveBeenCalled());
     expect((onSubmit.mock.calls[0][0] as { weapon: unknown }).weapon).toEqual({ damageDice: "2d8", damageType: "fire", attackBonus: -1 });
   });
+
+  it("кнопка збереження показує кількість помилок у вміннях", async () => {
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <ArtifactForm
+          campaignId="c1"
+          artifactSets={[]}
+          mode="create"
+          title="Новий"
+          submitLabel="Створити"
+          submitLabelSaving="..."
+          cancelHref="/x"
+          iconHint=""
+          initial={{ name: "Меч", description: "", rarity: "", slot: "ring", icon: "", setId: "", abilities: [{ id: "a1", name: "", trigger: { event: "passive" }, effects: [] }], abilityIssues: [] }}
+          onSubmit={vi.fn(async () => {})}
+        />
+      </QueryClientProvider>,
+    );
+
+    const button = await screen.findByRole("button", { name: /Створити \(помилок у вміннях: \d+\)/ });
+
+    expect(button).toBeDisabled();
+  });
 });

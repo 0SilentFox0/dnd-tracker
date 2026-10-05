@@ -17,7 +17,8 @@ interface EffectCardProps {
   effect: Effect;
   trigger: Trigger;
   path: string;
-  actions: { onChange: (e: Effect) => void; onRemove: () => void };
+  /** Without onRemove the ✕ is disabled (e.g. the last two randomOf options). */
+  actions: { onChange: (e: Effect) => void; onRemove?: () => void };
   kinds?: EffectKind[];
 }
 
@@ -33,7 +34,7 @@ export function EffectCard({ effect, trigger, path, actions, kinds }: EffectCard
       <div className="rounded-md border border-dashed p-2 text-xs">
         <div className="flex items-center justify-between font-medium">
           Невідомий ефект
-          <Button type="button" size="icon" variant="ghost" onClick={actions.onRemove} aria-label="Видалити ефект">
+          <Button type="button" size="icon" variant="ghost" onClick={actions.onRemove} disabled={!actions.onRemove} title={actions.onRemove ? undefined : "Потрібно щонайменше 2 варіанти"} aria-label="Видалити ефект">
             <X className="h-4 w-4" />
           </Button>
         </div>
@@ -64,7 +65,7 @@ export function EffectCard({ effect, trigger, path, actions, kinds }: EffectCard
         <div className="flex-1">
           <SelectField value={effect.kind} options={options} onValueChange={(k) => actions.onChange(changeEffectKind(effect, k as EffectKind, trigger))} />
         </div>
-        <Button type="button" size="icon" variant="ghost" onClick={actions.onRemove} aria-label="Видалити ефект">
+        <Button type="button" size="icon" variant="ghost" onClick={actions.onRemove} disabled={!actions.onRemove} title={actions.onRemove ? undefined : "Потрібно щонайменше 2 варіанти"} aria-label="Видалити ефект">
           <X className="h-4 w-4" />
         </Button>
       </div>
@@ -97,7 +98,7 @@ function RandomOfEditor({ effect, trigger, path, onChange }: { effect: RandomOf;
           kinds={kinds}
           actions={{
             onChange: (next) => setOptions(effect.options.map((o, j) => (j === i ? (next as RandomOf["options"][number]) : o))),
-            onRemove: () => (effect.options.length > 2 ? setOptions(effect.options.filter((_, j) => j !== i)) : undefined),
+            onRemove: effect.options.length > 2 ? () => setOptions(effect.options.filter((_, j) => j !== i)) : undefined,
           }}
         />
       ))}

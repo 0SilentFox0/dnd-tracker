@@ -17,7 +17,7 @@ interface AbilityListEditorProps {
   value: Ability[];
   onChange: (next: Ability[]) => void;
   issues?: ConversionIssue[];
-  onValidityChange?: (ok: boolean) => void;
+  onValidityChange?: (ok: boolean, errorCount: number) => void;
 }
 
 export function AbilityListEditor({ campaignId, value, onChange, issues = [], onValidityChange }: AbilityListEditorProps) {
@@ -27,9 +27,11 @@ export function AbilityListEditor({ campaignId, value, onChange, issues = [], on
 
   const validation = useMemo(() => validateAbilities(value), [value]);
 
+  const errorCount = Object.keys(validation.errorsByPath).length;
+
   useEffect(() => {
-    onValidityChange?.(validation.ok);
-  }, [validation.ok, onValidityChange]);
+    onValidityChange?.(validation.ok, errorCount);
+  }, [validation.ok, errorCount, onValidityChange]);
 
   const add = (items: Ability[]) => {
     const fresh = withFreshIds(items, value.map((a) => a.id));
@@ -37,8 +39,6 @@ export function AbilityListEditor({ campaignId, value, onChange, issues = [], on
     onChange([...value, ...fresh]);
     setOpen((o) => [...o, ...fresh.map((a) => a.id)]);
   };
-
-  const errorCount = Object.keys(validation.errorsByPath).length;
 
   return (
     <AbilityEditorProvider value={{ campaignId, errorsByPath: validation.errorsByPath }}>

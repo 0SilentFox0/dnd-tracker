@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation";
 import { ArtifactIconUrlPreview } from "./ArtifactIconUrlPreview";
 import { ArtifactWeaponFields } from "./ArtifactWeaponFields";
 
-import { AbilityListEditor } from "@/components/abilities";
+import { AbilityListEditor, withAbilityErrors } from "@/components/abilities";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -125,7 +125,9 @@ export function ArtifactForm({
 
   const [abilities, setAbilities] = useState<Ability[]>(initial.abilities);
 
-  const [abilitiesValid, setAbilitiesValid] = useState(true);
+  const [abilityErrors, setAbilityErrors] = useState(0);
+
+  const abilitiesValid = abilityErrors === 0;
 
   const [weapon, setWeapon] = useState<WeaponStats>(initial.weapon ?? {});
 
@@ -274,12 +276,12 @@ export function ArtifactForm({
             value={abilities}
             onChange={setAbilities}
             issues={initial.abilityIssues}
-            onValidityChange={setAbilitiesValid}
+            onValidityChange={(_, n) => setAbilityErrors(n)}
           />
 
           <div className="flex gap-2">
             <Button type="submit" disabled={isBusy || !abilitiesValid}>
-              {isSaving ? submitLabelSaving : submitLabel}
+              {isSaving ? submitLabelSaving : withAbilityErrors(submitLabel, abilityErrors)}
             </Button>
             <Button
               type="button"

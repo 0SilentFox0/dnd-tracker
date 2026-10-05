@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import { AmountField } from "@/components/abilities/fields/AmountField";
 import { FlatField } from "@/components/abilities/fields/FlatField";
+import { NumberListField } from "@/components/abilities/fields/NumberListField";
 import type { FieldMeta } from "@/lib/utils/abilities/registry/fields";
 
 const meta = { name: "flat", label: "Значення", input: "flat" } as FieldMeta;
@@ -36,5 +37,23 @@ describe.each(["flat", "amount"] as const)("%s: від'ємні числа", (ki
 
     fireEvent.change(input, { target: { value: "-2" } });
     expect(screen.getByTestId("v").textContent).toBe("-2");
+  });
+});
+
+describe("NumberListField", () => {
+  afterEach(cleanup);
+
+  it("кома лишається під час набору «1, 2»", () => {
+    let v: unknown;
+
+    render(<NumberListField id="l" meta={meta} value={undefined} onChange={(x: unknown) => (v = x)} />);
+
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+
+    fireEvent.change(input, { target: { value: "1," } });
+    expect(input.value).toBe("1,");
+    fireEvent.change(input, { target: { value: "1, 2" } });
+    expect(input.value).toBe("1, 2");
+    expect(v).toEqual([1, 2]);
   });
 });

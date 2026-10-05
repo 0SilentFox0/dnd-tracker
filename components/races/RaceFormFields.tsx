@@ -28,7 +28,7 @@ export interface RaceFormFieldsProps {
   /** Compact (Dialog) — менший max-h, опис тоншим. */
   compact?: boolean;
   abilityIssues?: ConversionIssue[];
-  onAbilitiesValidityChange?: (ok: boolean) => void;
+  onAbilitiesValidityChange?: (ok: boolean, errorCount: number) => void;
 }
 
 export function RaceFormFields({

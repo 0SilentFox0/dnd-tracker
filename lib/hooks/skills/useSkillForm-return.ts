@@ -23,8 +23,9 @@ export interface SkillFormReturnParams {
   abilities: Ability[];
   abilityIssues: ConversionIssue[];
   abilitiesValid: boolean;
+  abilityErrors: number;
   setAbilities: (v: Ability[]) => void;
-  setAbilitiesValid: (v: boolean) => void;
+  setAbilityErrors: (n: number) => void;
   spellId: string | null;
   spellGroupId: string | null;
   grantedSpellId: string | null;
@@ -65,8 +66,9 @@ export function buildSkillFormReturn(p: SkillFormReturnParams) {
       abilities: p.abilities,
       issues: p.abilityIssues,
       valid: p.abilitiesValid,
+      errors: p.abilityErrors,
       setAbilities: p.setAbilities,
-      setAbilitiesValid: p.setAbilitiesValid,
+      onValidityChange: (_ok: boolean, n: number) => p.setAbilityErrors(n),
     },
     spell: {
       spellId: p.spellId,

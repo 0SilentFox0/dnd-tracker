@@ -24,15 +24,20 @@ export function AbilityCopySourcePicker({ campaignId, onPick }: { campaignId: st
 
   const [busy, setBusy] = useState(false);
 
+  const [error, setError] = useState<string | null>(null);
+
   const q = query.trim().toLowerCase();
 
   const sources = (data?.sources ?? []).filter((s) => !q || s.name.toLowerCase().includes(q));
 
   const pick = async (s: AbilitySourceRef) => {
     setBusy(true);
+    setError(null);
 
     try {
       onPick((await getOwnerAbilities(campaignId, s.kind, s.id)).abilities);
+    } catch {
+      setError(`Не вдалося завантажити вміння «${s.name}». Спробуйте ще раз.`);
     } finally {
       setBusy(false);
     }
@@ -42,6 +47,7 @@ export function AbilityCopySourcePicker({ campaignId, onPick }: { campaignId: st
     <div className="space-y-2">
       <Input placeholder="Пошук…" value={query} onChange={(e) => setQuery(e.target.value)} />
       {isLoading && <p className="text-xs text-muted-foreground">Завантаження…</p>}
+      {error && <p className="text-xs text-destructive">{error}</p>}
       <div className="max-h-[50dvh] space-y-3 overflow-y-auto">
         {(Object.keys(KIND_LABELS) as AbilitySourceRef["kind"][]).map((kind) => {
           const items = sources.filter((s) => s.kind === kind);

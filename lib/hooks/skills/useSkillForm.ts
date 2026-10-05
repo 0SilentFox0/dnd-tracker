@@ -58,7 +58,9 @@ export function useSkillForm(
 
   const [abilities, setAbilities] = useState<Ability[]>(normalizedData?.abilities ?? []);
 
-  const [abilitiesValid, setAbilitiesValid] = useState(true);
+  const [abilityErrors, setAbilityErrors] = useState(0);
+
+  const abilitiesValid = abilityErrors === 0;
 
   // Spell and main skill
   const [spellId, setSpellId] = useState<string | null>(
@@ -255,8 +257,9 @@ export function useSkillForm(
     abilities,
     abilityIssues: normalizedData?.abilityIssues ?? [],
     abilitiesValid,
+    abilityErrors,
     setAbilities,
-    setAbilitiesValid,
+    setAbilityErrors,
     spellId,
     spellGroupId,
     grantedSpellId,

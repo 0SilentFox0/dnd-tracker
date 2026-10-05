@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { filterArtifactsSelectableForSet } from "./artifact-set-form-helpers";
 import { ArtifactSetMembersPicker } from "./ArtifactSetMembersPicker";
 
-import { AbilityListEditor } from "@/components/abilities";
+import { AbilityListEditor, withAbilityErrors } from "@/components/abilities";
 import { Button } from "@/components/ui/button";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
@@ -61,7 +61,9 @@ export function ArtifactSetForm({
 
   const [abilities, setAbilities] = useState<Ability[]>(initialAbilities);
 
-  const [abilitiesValid, setAbilitiesValid] = useState(true);
+  const [abilityErrors, setAbilityErrors] = useState(0);
+
+  const abilitiesValid = abilityErrors === 0;
 
   const [artifacts, setArtifacts] = useState<ArtifactListItem[]>([]);
 
@@ -212,7 +214,7 @@ export function ArtifactSetForm({
         value={abilities}
         onChange={setAbilities}
         issues={initialAbilityIssues}
-        onValidityChange={setAbilitiesValid}
+        onValidityChange={(_, n) => setAbilityErrors(n)}
       />
 
       <ArtifactSetMembersPicker
@@ -223,7 +225,7 @@ export function ArtifactSetForm({
 
       <div className="flex flex-wrap gap-2">
         <Button type="submit" disabled={loading || !name.trim() || !abilitiesValid}>
-          {loading ? "Збереження…" : setId ? "Зберегти зміни" : "Створити сет"}
+          {loading ? "Збереження…" : withAbilityErrors(setId ? "Зберегти зміни" : "Створити сет", abilityErrors)}
         </Button>
         <Button type="button" variant="outline" asChild>
           <Link href={`/campaigns/${campaignId}/dm/artifact-sets`}>

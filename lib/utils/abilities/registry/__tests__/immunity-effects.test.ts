@@ -47,4 +47,12 @@ describe("immunities", () => {
     expect(fire.participants[1].battleData.activeEffects).toHaveLength(0);
     expect(bleed.participants[1].battleData.activeEffects).toHaveLength(1);
   });
+
+  it("DOT враховує групи типів: фізичний імунітет блокує slashing", () => {
+    const t = makeParticipant({ id: "t", side: ParticipantSide.ENEMY, abilities: [immune({ kind: "flag", flag: "resistance", damageType: "physical", percent: 100 })] });
+
+    const slash = apply({ kind: "dot", damagePerRound: 3, damageType: "slashing", duration: { rounds: 2 }, target: "eventTarget" }, t);
+
+    expect(slash.participants[1].battleData.activeEffects).toHaveLength(0);
+  });
 });

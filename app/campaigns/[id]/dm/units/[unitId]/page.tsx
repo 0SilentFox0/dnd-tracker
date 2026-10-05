@@ -4,7 +4,7 @@ import { use, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { AbilityListEditor } from "@/components/abilities";
+import { AbilityListEditor, withAbilityErrors } from "@/components/abilities";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -107,7 +107,9 @@ export default function EditUnitPage({
 
   const [formData, setFormData] = useState<Partial<Unit>>(emptyUnitFormDefaults);
 
-  const [abilitiesValid, setAbilitiesValid] = useState(true);
+  const [abilityErrors, setAbilityErrors] = useState(0);
+
+  const abilitiesValid = abilityErrors === 0;
 
   /** Коли дані з сервера «добудовуються» (race, група), треба знову синхронізувати форму — не лише за unit.id */
   const lastServerSyncKeyRef = useRef<string | null>(null);
@@ -261,7 +263,7 @@ export default function EditUnitPage({
               value={formData.abilities ?? []}
               onChange={(abilities) => handleFormDataChange({ abilities })}
               issues={unit?.abilityIssues}
-              onValidityChange={setAbilitiesValid}
+              onValidityChange={(_, n) => setAbilityErrors(n)}
             />
 
             <UnitKnownSpells
@@ -274,7 +276,7 @@ export default function EditUnitPage({
               <Button type="submit" disabled={updateUnitMutation.isPending || !abilitiesValid}>
                 {updateUnitMutation.isPending
                   ? "Збереження..."
-                  : "Зберегти зміни"}
+                  : withAbilityErrors("Зберегти зміни", abilityErrors)}
               </Button>
               <Button
                 type="button"
