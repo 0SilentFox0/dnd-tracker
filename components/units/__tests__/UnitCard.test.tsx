@@ -38,6 +38,8 @@ describe("UnitCard delete", () => {
     fireEvent.click(screen.getByRole("button", { name: "Видалити юніт Гоблін" }));
     fireEvent.click(await screen.findByRole("button", { name: "Скасувати" }));
 
+    await waitFor(() => expect(screen.queryByRole("button", { name: "Скасувати" })).toBeNull());
+    await new Promise((r) => setTimeout(r, 0));
     expect(onDelete).not.toHaveBeenCalled();
   });
 

@@ -11,6 +11,14 @@ const SIZE_CLASS = { sm: "sm:max-w-sm", md: "sm:max-w-lg", lg: "sm:max-w-2xl" } 
 
 const InsideSheet = createContext(false);
 
+const LAYOUT_TOKEN = /^(sm:|md:|lg:|fixed$|absolute$|inset-|top-|bottom-|left-|right-|-?translate-|w-|max-w-|max-h-|min-h-|overflow-)/;
+
+// callers style the desktop modal; the sheet keeps only colours/borders
+const sheetClasses = (className?: string) => className?.split(/\s+/).filter((t) => t && !LAYOUT_TOKEN.test(t)).join(" ");
+
+// plain max-w-* must beat the sm:max-w-* size class at ≥640px
+const desktopClasses = (className?: string) => className?.split(/\s+/).map((t) => (/^max-w-/.test(t) ? `sm:${t}` : t)).join(" ");
+
 export interface ResponsiveDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -41,7 +49,7 @@ export function ResponsiveDialog({ open, onOpenChange, title, description, foote
       <Root open={open} onOpenChange={handleOpenChange} dismissible={dismissible}>
         <Drawer.Portal>
           <Drawer.Overlay className="fixed inset-0 z-50 bg-black/50" />
-          <Drawer.Content data-slot="sheet" className={cn("fixed inset-x-0 bottom-0 z-50 flex max-h-[90dvh] flex-col rounded-t-xl border-t bg-background outline-none", className)}>
+          <Drawer.Content data-slot="sheet" className={cn("fixed inset-x-0 bottom-0 z-50 flex max-h-[90dvh] flex-col rounded-t-xl border-t bg-background outline-none", sheetClasses(className))}>
             <div data-slot="sheet-handle" aria-hidden className="mx-auto mt-3 h-1.5 w-12 shrink-0 rounded-full bg-muted" />
             <div className="space-y-1 px-4 pt-3 pb-2">
               <Drawer.Title className="text-lg font-semibold leading-tight">{title}</Drawer.Title>
@@ -68,7 +76,7 @@ export function ResponsiveDialog({ open, onOpenChange, title, description, foote
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
-        className={cn("flex flex-col overflow-hidden", SIZE_CLASS[size], className)}
+        className={cn("flex flex-col overflow-hidden", SIZE_CLASS[size], desktopClasses(className))}
         showCloseButton={dismissible}
         onEscapeKeyDown={block}
         onInteractOutside={block}

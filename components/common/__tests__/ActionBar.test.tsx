@@ -17,6 +17,8 @@ describe("ActionBar", () => {
     expect(bar.className).toMatch(/(^| )sticky( |$)/);
     expect(bar.className).toContain("safe-area-inset-bottom");
     expect(bar.className).toContain("sm:static");
+    // must not overhang Card/Form padding on phones
+    expect(bar.className).not.toMatch(/(^| )-mx-/);
   });
 
   it("FormCard: submitDisabled вимикає кнопку, але підпис не «Збереження...»", () => {

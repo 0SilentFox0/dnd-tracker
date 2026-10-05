@@ -100,3 +100,38 @@ describe("ResponsiveDialog", () => {
     expect(screen.getByRole("combobox")).toHaveTextContent("Б");
   });
 });
+
+describe("ResponsiveDialog ширина", () => {
+  afterEach(cleanup);
+
+  it("className з sm:max-w-* перекриває size на десктопі", () => {
+    mockMatchMedia(false);
+    render(<ResponsiveDialog open onOpenChange={vi.fn()} title="Бонусна дія" size="sm" className="sm:max-w-lg">x</ResponsiveDialog>);
+
+    expect(screen.getByRole("dialog").className).toContain("sm:max-w-lg");
+    expect(screen.getByRole("dialog").className).not.toContain("sm:max-w-sm");
+  });
+
+  it("телефон: десктопні класи позиціонування не застосовуються до шторки", () => {
+    mockMatchMedia(true);
+    render(<ResponsiveDialog open onOpenChange={vi.fn()} title="Закляття" className="sm:max-w-lg top-[10px] translate-y-0">x</ResponsiveDialog>);
+
+    const sheet = document.querySelector("[data-slot=sheet]") as HTMLElement;
+
+    expect(sheet.className).not.toContain("top-[10px]");
+    expect(sheet.className).toContain("bottom-0");
+  });
+});
+
+describe("BattleDialog", () => {
+  afterEach(cleanup);
+
+  it("на десктопі лишається шириною md, як до міграції", async () => {
+    mockMatchMedia(false);
+
+    const { BattleDialog } = await import("@/components/battle/dialogs/shared/BattleDialog");
+
+    render(<BattleDialog open onOpenChange={vi.fn()} title="Атака">x</BattleDialog>);
+    expect(screen.getByRole("dialog").className).toContain("sm:max-w-lg");
+  });
+});

@@ -109,9 +109,9 @@ export default function NewCampaignPage() {
             </div>
 
             <ActionBar>
-              <Link href="/campaigns">
-                <Button type="button" variant="outline">Скасувати</Button>
-              </Link>
+              <Button type="button" variant="outline" asChild>
+            <Link href="/campaigns">Скасувати</Link>
+          </Button>
               <Button type="submit" disabled={loading}>
                 {loading ? "Створення..." : "Створити кампанію"}
               </Button>

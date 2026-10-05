@@ -285,11 +285,9 @@ export default function EditUnitPage({
               >
                 {deleteUnitMutation.isPending ? "Видалення..." : "Видалити"}
               </Button>
-              <Link href={`/campaigns/${id}/dm/units`}>
-                <Button type="button" variant="outline">
-                  Скасувати
-                </Button>
-              </Link>
+              <Button type="button" variant="outline" asChild>
+                <Link href={`/campaigns/${id}/dm/units`}>Скасувати</Link>
+              </Button>
               <Button type="submit" disabled={updateUnitMutation.isPending || !abilitiesValid}>
                 {updateUnitMutation.isPending
                   ? "Збереження..."

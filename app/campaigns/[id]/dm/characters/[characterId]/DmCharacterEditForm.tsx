@@ -172,11 +172,9 @@ export function DmCharacterEditForm({
             >
               Підняти рівень ({basicInfo.level} → {basicInfo.level + 1})
             </Button>
-            <Link href={`/campaigns/${campaignId}/dm/characters`}>
-              <Button type="button" variant="outline">
-                Скасувати
-              </Button>
-            </Link>
+            <Button type="button" variant="outline" asChild>
+              <Link href={`/campaigns/${campaignId}/dm/characters`}>Скасувати</Link>
+            </Button>
             <Button type="submit" disabled={loading || membersLoading}>
               {loading ? "Збереження..." : "Зберегти зміни"}
             </Button>

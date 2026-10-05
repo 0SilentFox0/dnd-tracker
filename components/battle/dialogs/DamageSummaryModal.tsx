@@ -61,7 +61,7 @@ export function DamageSummaryModal({
       onOpenChange={onOpenChange}
       title="💥 Підсумок урону"
       description={`${attacker.basicInfo.name} → ${targets.map((t) => t.basicInfo.name).join(", ")}${isCritical ? " (крит!)" : ""}`}
-      size="sm"
+      size="md"
     >
         {open && damageRolls.length > 0 ? (
           <DamageSummaryContent

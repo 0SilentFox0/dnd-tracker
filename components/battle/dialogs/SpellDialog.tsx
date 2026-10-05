@@ -112,7 +112,7 @@ export function SpellDialog({
       onOpenChange={handleDialogOpenChange}
       title="✨ Заклинання"
       description={<>{caster.basicInfo.name} кастує заклинання</>}
-      size="sm"
+      size="md"
       className="fixed bottom-[10px] left-1/2 top-auto w-[calc(100vw-20px)] -translate-x-1/2 translate-y-0"
     >
         <div className="space-y-4">
