@@ -9,7 +9,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ParticipantSide } from "@/lib/constants/battle";
-import { hasAdvantage, hasDisadvantage } from "@/lib/utils/battle/attack";
+import { hasAdvantage, hasDisadvantage, predictAttackNumbers } from "@/lib/utils/battle/attack";
 import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -47,12 +47,11 @@ export function AttackRollDialog({
   const statModifier =
     getAttackAbilityModifier(attacker.abilities, attack.type);
 
-  const totalBonus =
-    attackBonus + statModifier + attacker.abilities.proficiencyBonus;
+  const { totalBonus, targetAC } = predictAttackNumbers(attacker, target, attack, [attacker, target]);
 
   const hasAdvantageOnAttack = hasAdvantage(attacker, attack);
 
-  const hasDisadvantageOnAttack = hasDisadvantage(attacker, attack);
+  const hasDisadvantageOnAttack = hasDisadvantage(attacker, attack, [attacker, target], { targetId: target.basicInfo.id });
 
   const handleCancel = () => {
     setAttackRoll("");
@@ -115,7 +114,7 @@ export function AttackRollDialog({
             Загальне значення:{" "}
             {attackRoll ? `${parseInt(attackRoll, 10) + totalBonus}` : "?"} vs AC{" "}
             {canSeeEnemyHp || target.basicInfo.side === ParticipantSide.ALLY
-              ? target.combatStats.armorClass
+              ? targetAC
               : "?"}
           </p>
         </div>

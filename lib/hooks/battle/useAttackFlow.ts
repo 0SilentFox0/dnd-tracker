@@ -164,6 +164,7 @@ export function useAttackFlow({
     () =>
       createAttackFlowHandlers({
         participant,
+        participants: initiativeOrder,
         selectedAttack,
         selectedTarget,
         selectedTargets,
@@ -186,6 +187,7 @@ export function useAttackFlow({
       }),
     [
       participant,
+      initiativeOrder,
       selectedAttack,
       selectedTarget,
       selectedTargets,

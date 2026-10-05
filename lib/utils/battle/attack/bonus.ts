@@ -3,7 +3,7 @@
  */
 
 import { AttackType } from "@/lib/constants/battle";
-import { collectModifiers, findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
+import { collectModifiers, findFlags, statWithModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
@@ -54,4 +54,19 @@ export function hasDisadvantage(
   if (findFlags(ps, attacker.basicInfo.id, "disadvantage", opts.extra).length > 0) return true;
 
   return !!opts.targetId && findFlags(ps, opts.targetId, "disadvantageForAttackers", opts.targetExtra).length > 0;
+}
+
+/** Числа для прогнозу влучання на клієнті — ті самі, що рахує сервер (без модифікаторів фази before). */
+export function predictAttackNumbers(
+  attacker: BattleParticipant,
+  target: BattleParticipant,
+  attack: BattleAttack,
+  participants: BattleParticipant[],
+): { totalBonus: number; targetAC: number } {
+  const ps = withSelf(withSelf(participants, target), attacker);
+
+  return {
+    totalBonus: calculateAttackBonus(attacker, attack, ps),
+    targetAC: statWithModifiers(ps, target.basicInfo.id, "armor", target.combatStats.armorClass),
+  };
 }

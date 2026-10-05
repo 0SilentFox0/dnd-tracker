@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
-import { calculateAttackBonus, calculateAttackRoll, hasAdvantage, hasDisadvantage } from "@/lib/utils/battle/attack";
+import { calculateAttackBonus, calculateAttackRoll, hasAdvantage, hasDisadvantage, predictAttackNumbers } from "@/lib/utils/battle/attack";
 import { canPerformReaction, getCounterDamagePercent } from "@/lib/utils/battle/attack/reaction";
 import { calculateDamageWithModifiers } from "@/lib/utils/battle/damage";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant";
@@ -95,6 +95,17 @@ describe("readers", () => {
     });
 
     expect(getCounterDamagePercent(p)).toBe(30);
+  });
+
+  it("прогноз для клієнта: AC і бонус атаки з умінь (артефакт +2 AC)", () => {
+    const target = makeParticipant({ id: "t", side: ParticipantSide.ENEMY, abilities: [resolved({ trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "armor", flat: 2 }] }, { type: "artifact" })] });
+
+    const archer = makeParticipant({ id: "a", abilities: [resolved({ trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "attackBonus", flat: 1 }] })] });
+
+    const r = predictAttackNumbers(archer, target, bow, [archer, target]);
+
+    expect(r.targetAC).toBe(16);
+    expect(r.totalBonus).toBe(calculateAttackBonus(makeParticipant({ id: "z" }), bow) + 1);
   });
 });
 
