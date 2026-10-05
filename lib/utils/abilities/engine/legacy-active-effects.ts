@@ -1,23 +1,6 @@
-import type { DamageFilterKind, StaticEffect } from "@/lib/utils/abilities/schema";
+import { legacyDamageKindOf } from "@/lib/utils/abilities/legacy/damage-kind";
+import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import type { ActiveEffect } from "@/types/battle";
-
-function legacyDamageKind(type: string): DamageFilterKind | null {
-  const s = type.toLowerCase();
-
-  if (s === "all_damage") return "all";
-
-  if (!s.includes("damage") || s.includes("reduction")) return null;
-
-  if (s.includes("melee")) return "melee";
-
-  if (s.includes("ranged")) return "ranged";
-
-  if (s.includes("physical")) return "physical";
-
-  if (s === "spell_damage" || s === "magic_damage" || s.endsWith("_spell_damage") || s.includes("magic")) return "magic";
-
-  return null;
-}
 
 export function legacyActiveEffectModifiers(ae: ActiveEffect): StaticEffect[] {
   const out: StaticEffect[] = [];
@@ -45,7 +28,7 @@ export function legacyActiveEffectModifiers(ae: ActiveEffect): StaticEffect[] {
         out.push({ kind: "flag", flag: "disadvantage" });
         break;
       default: {
-        const kind = legacyDamageKind(d.type);
+        const kind = legacyDamageKindOf(d.type);
 
         if (kind && value !== 0) out.push({ kind: "damageBonus", filter: { kind }, ...(d.isPercentage ? { percent: value } : { flat: value }) });
       }
