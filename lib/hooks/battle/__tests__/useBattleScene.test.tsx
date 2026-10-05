@@ -29,7 +29,7 @@ describe("deriveTurn", () => {
 
   it("DM: хід ворога — його; взяв керування гравцем — його", () => {
     expect(deriveTurn(battle(0), "dm-user", true, null).isMyTurn).toBe(true);
-    expect(deriveTurn(battle(3), "dm-user", true, null).isMyTurn).toBe(false);
+    expect(deriveTurn(battle(3), "dm-user", true, null)).toMatchObject({ isMyTurn: false, hero: { basicInfo: { id: "other" } } });
     expect(deriveTurn(battle(3), "dm-user", true, "other")).toMatchObject({ isMyTurn: true, hero: { basicInfo: { id: "other" } } });
   });
 });
