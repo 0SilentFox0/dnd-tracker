@@ -25,12 +25,15 @@ export function DeleteAllCharactersDialog({
       size="sm"
       footer={
         <>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Скасувати</Button>
-          <Button variant="destructive"
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Скасувати
+          </Button>
+          <Button
+            variant="destructive"
             onClick={() => {
-            void onConfirm();
-            onOpenChange(false);
-          }}
+              void onConfirm();
+              onOpenChange(false);
+            }}
           >
             {isPending ? "Видалення…" : "Видалити всіх"}
           </Button>

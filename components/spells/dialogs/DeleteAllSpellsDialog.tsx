@@ -23,26 +23,19 @@ export function DeleteAllSpellsDialog({
       open={open}
       onOpenChange={onOpenChange}
       title="Видалити всі заклинання?"
-      description={<>Ви впевнені, що хочете видалити всі заклинання з кампанії? Ця дія незворотна. Буде видалено {spellsCount} заклинань.</>}
+      description={
+        <>Ви впевнені, що хочете видалити всі заклинання з кампанії? Ця дія незворотна. Буде видалено {spellsCount} заклинань.</>
+      }
       footer={
         <>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isDeleting}
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isDeleting}>
             Скасувати
           </Button>
-          <Button
-            variant="destructive"
-            onClick={onConfirm}
-            disabled={isDeleting}
-          >
+          <Button variant="destructive" onClick={onConfirm} disabled={isDeleting}>
             {isDeleting ? "Видалення..." : "Видалити всі заклинання"}
           </Button>
         </>
       }
-    >
-    </ResponsiveDialog>
+    ></ResponsiveDialog>
   );
 }

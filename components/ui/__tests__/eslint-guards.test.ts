@@ -16,6 +16,12 @@ describe("ESLint guards", () => {
     expect(restrictedGlobals(rules["no-restricted-globals"])).toEqual(expect.arrayContaining(["confirm", "alert"]));
   });
 
+  it("window.confirm / window.alert member calls are forbidden too", async () => {
+    const props = ((await rulesFor("components/foo/Bar.tsx"))["no-restricted-properties"] ?? []).slice(1) as { object: string; property: string }[];
+
+    expect(props).toEqual(expect.arrayContaining([expect.objectContaining({ object: "window", property: "confirm" }), expect.objectContaining({ object: "window", property: "alert" })]));
+  });
+
   it("allowed inside components/ui", async () => {
     expect(restrictedImports((await rulesFor("components/ui/responsive-dialog.tsx"))["no-restricted-imports"])).not.toContain("vaul");
   });

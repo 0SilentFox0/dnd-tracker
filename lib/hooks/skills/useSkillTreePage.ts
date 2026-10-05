@@ -179,13 +179,11 @@ export function useSkillTreePage({
 
       setEditedSkillTree(clearedTree);
 
-      // Автоматично зберігаємо очищене дерево
+      // save hook's onSuccess/onError already notify the result
       try {
         await saveSkillTree(clearedTree);
-        void notify("Всі присвоєння скілів успішно видалено та збережено!");
       } catch (saveError) {
         console.error("Помилка збереження після очищення:", saveError);
-        void notify("Дерево очищено, але не вдалося зберегти зміни");
       }
     } catch (error) {
       console.error("Error clearing skill tree:", error);

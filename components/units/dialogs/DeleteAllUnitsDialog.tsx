@@ -26,23 +26,14 @@ export function DeleteAllUnitsDialog({
       description={<>Ви впевнені, що хочете видалити всі юніти з кампанії? Ця дія незворотна. Буде видалено {unitsCount} юнітів.</>}
       footer={
         <>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isDeleting}
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isDeleting}>
             Скасувати
           </Button>
-          <Button
-            variant="destructive"
-            onClick={onConfirm}
-            disabled={isDeleting}
-          >
+          <Button variant="destructive" onClick={onConfirm} disabled={isDeleting}>
             {isDeleting ? "Видалення..." : "Видалити всі юніти"}
           </Button>
         </>
       }
-    >
-    </ResponsiveDialog>
+    ></ResponsiveDialog>
   );
 }

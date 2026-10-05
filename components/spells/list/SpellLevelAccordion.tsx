@@ -54,9 +54,7 @@ export function SpellLevelAccordion({
         <div className="relative">
           <AccordionTrigger className="px-3 sm:px-5 pr-12 sm:pr-14">
             <div className="flex items-center justify-between w-full min-w-0 gap-2 sm:gap-3">
-              <span className="font-medium text-sm sm:text-base truncate">
-                {levelName}
-              </span>
+              <span className="font-medium text-sm sm:text-base truncate">{levelName}</span>
               <Badge variant="secondary" className="ml-2 shrink-0">
                 {spells.length}
               </Badge>
@@ -100,29 +98,23 @@ export function SpellLevelAccordion({
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         title="Видалити всі заклинання рівня?"
-        description={<>Ви впевнені, що хочете видалити всі заклинання рівня &quot; {levelName}&quot;? Ця дія незворотна. Буде видалено {spells.length}{" "} заклинань.</>}
+        description={
+          <>
+            Ви впевнені, що хочете видалити всі заклинання рівня &quot;{levelName}&quot;? Ця дія незворотна. Буде видалено {spells.length}{" "}
+            заклинань.
+          </>
+        }
         footer={
           <>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteDialogOpen(false)}
-              disabled={deleteSpellsByLevelMutation.isPending}
-            >
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} disabled={deleteSpellsByLevelMutation.isPending}>
               Скасувати
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDelete}
-              disabled={deleteSpellsByLevelMutation.isPending}
-            >
-              {deleteSpellsByLevelMutation.isPending
-                ? "Видалення..."
-                : "Видалити всі заклинання рівня"}
+            <Button variant="destructive" onClick={handleDelete} disabled={deleteSpellsByLevelMutation.isPending}>
+              {deleteSpellsByLevelMutation.isPending ? "Видалення..." : "Видалити всі заклинання рівня"}
             </Button>
           </>
         }
-      >
-      </ResponsiveDialog>
+      ></ResponsiveDialog>
     </>
   );
 }

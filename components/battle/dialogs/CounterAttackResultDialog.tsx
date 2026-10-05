@@ -31,7 +31,17 @@ export function CounterAttackResultDialog({
       open={open}
       onOpenChange={onOpenChange}
       title="Контр-атака"
-      description={<>{info.defenderName} виконав(ла) контр-атаку та завдав(ла){" "} <strong>{info.damage}</strong> урону {info.attackerName}. {info.baseDamage != null && info.bonusPercent != null && ( <span className="mt-2 block text-sm text-muted-foreground"> Базовий урон {info.baseDamage} + бонус {info.bonusPercent}% ={" "} {info.damage} урону </span> )}</>}
+      description={
+        <>
+          {info.defenderName} виконав(ла) контр-атаку та завдав(ла) <strong>{info.damage}</strong> урону {info.attackerName}.{" "}
+          {info.baseDamage != null && info.bonusPercent != null && (
+            <span className="mt-2 block text-sm text-muted-foreground">
+              {" "}
+              Базовий урон {info.baseDamage} + бонус {info.bonusPercent}% = {info.damage} урону{" "}
+            </span>
+          )}
+        </>
+      }
       size="sm"
       footer={
         <>

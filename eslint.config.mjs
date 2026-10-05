@@ -138,6 +138,11 @@ const eslintConfig = defineConfig([
         { name: "confirm", message: "Використайте useConfirm з @/lib/hooks/common" },
         { name: "alert", message: "Використайте useNotify з @/lib/hooks/common" },
       ],
+      "no-restricted-properties": [
+        "error",
+        { object: "window", property: "confirm", message: "Використайте useConfirm з @/lib/hooks/common" },
+        { object: "window", property: "alert", message: "Використайте useNotify з @/lib/hooks/common" },
+      ],
     },
   },
   {

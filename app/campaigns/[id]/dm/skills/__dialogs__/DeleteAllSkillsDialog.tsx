@@ -27,12 +27,15 @@ export function DeleteAllSkillsDialog({
       size="sm"
       footer={
         <>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>Скасувати</Button>
-          <Button variant="destructive"
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
+            Скасувати
+          </Button>
+          <Button
+            variant="destructive"
             onClick={() => {
-            void onConfirm();
-            onOpenChange(false);
-          }}
+              void onConfirm();
+              onOpenChange(false);
+            }}
             disabled={isPending}
           >
             {isPending ? "Видалення..." : "Видалити всі"}

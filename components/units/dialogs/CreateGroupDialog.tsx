@@ -36,11 +36,7 @@ export function CreateGroupDialog({
       description="Додайте нову групу для юнітів"
       footer={
         <>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isCreating}
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isCreating}>
             Скасувати
           </Button>
           <Button onClick={onConfirm} disabled={!name.trim() || isCreating}>
@@ -49,33 +45,33 @@ export function CreateGroupDialog({
         </>
       }
     >
-        <div className="space-y-4">
-          <LabeledInput
-            id="group-name"
-            label="Назва групи"
-            value={name}
-            onChange={(e) => onNameChange(e.target.value)}
-            placeholder="Введіть назву групи"
+      <div className="space-y-4">
+        <LabeledInput
+          id="group-name"
+          label="Назва групи"
+          value={name}
+          onChange={(e) => onNameChange(e.target.value)}
+          placeholder="Введіть назву групи"
+          disabled={isCreating}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && name.trim() && !isCreating) {
+              onConfirm();
+            }
+          }}
+        />
+        <div className="space-y-2">
+          <Label>Модифікатор шкоди для групи</Label>
+          <SelectField
+            value={damageModifier || ""}
+            onValueChange={(value) => onDamageModifierChange(value || null)}
+            placeholder="Без модифікатора"
+            options={DAMAGE_ELEMENT_OPTIONS.map((opt) => ({ value: opt.value, label: opt.label }))}
+            allowNone
+            noneLabel="Без модифікатора"
             disabled={isCreating}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && name.trim() && !isCreating) {
-                onConfirm();
-              }
-            }}
           />
-          <div className="space-y-2">
-            <Label>Модифікатор шкоди для групи</Label>
-            <SelectField
-              value={damageModifier || ""}
-              onValueChange={(value) => onDamageModifierChange(value || null)}
-              placeholder="Без модифікатора"
-              options={DAMAGE_ELEMENT_OPTIONS.map(opt => ({ value: opt.value, label: opt.label }))}
-              allowNone
-              noneLabel="Без модифікатора"
-              disabled={isCreating}
-            />
-          </div>
         </div>
+      </div>
     </ResponsiveDialog>
   );
 }

@@ -46,11 +46,7 @@ export function DeleteAllBattlesButton({
 
   return (
     <>
-      <Button
-        variant="destructive"
-        className="whitespace-nowrap text-xs sm:text-sm"
-        onClick={() => setShowDeleteDialog(true)}
-      >
+      <Button variant="destructive" className="whitespace-nowrap text-xs sm:text-sm" onClick={() => setShowDeleteDialog(true)}>
         Видалити всі
       </Button>
 
@@ -62,16 +58,19 @@ export function DeleteAllBattlesButton({
         size="sm"
         footer={
           <>
-            <Button variant="outline" onClick={() => setShowDeleteDialog(false)} disabled={isDeleting}>Скасувати</Button>
-              <Button variant="destructive"
-                onClick={() => {
-              void handleDeleteAll();
-              setShowDeleteDialog(false);
-            }}
-                disabled={isDeleting}
-              >
-                {isDeleting ? "Видалення..." : "Видалити всі"}
-              </Button>
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)} disabled={isDeleting}>
+              Скасувати
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                void handleDeleteAll();
+                setShowDeleteDialog(false);
+              }}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Видалення..." : "Видалити всі"}
+            </Button>
           </>
         }
       />

@@ -43,23 +43,23 @@ export function RenameGroupDialog({
         </>
       }
     >
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="groupName">Назва групи</Label>
-            <Input
-              id="groupName"
-              value={newGroupName}
-              onChange={(e) => onNewGroupNameChange(e.target.value)}
-              placeholder="Назва групи"
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  onConfirm();
-                }
-              }}
-            />
-          </div>
+      <div className="space-y-4">
+        <div>
+          <Label htmlFor="groupName">Назва групи</Label>
+          <Input
+            id="groupName"
+            value={newGroupName}
+            onChange={(e) => onNewGroupNameChange(e.target.value)}
+            placeholder="Назва групи"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                onConfirm();
+              }
+            }}
+          />
         </div>
+      </div>
     </ResponsiveDialog>
   );
 }

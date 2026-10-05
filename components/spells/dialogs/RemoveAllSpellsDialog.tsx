@@ -23,26 +23,22 @@ export function RemoveAllSpellsDialog({
       open={open}
       onOpenChange={onOpenChange}
       title="Видалити всі заклинання з групи?"
-      description={<>Ви впевнені, що хочете видалити всі заклинання з групи &quot; {groupName}&quot;? Заклинання не будуть видалені, але вони втратять зв&apos;язок з цією групою.</>}
+      description={
+        <>
+          Ви впевнені, що хочете видалити всі заклинання з групи &quot;{groupName}&quot;? Заклинання не будуть видалені, але вони втратять
+          зв&apos;язок з цією групою.
+        </>
+      }
       footer={
         <>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isRemoving}
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isRemoving}>
             Скасувати
           </Button>
-          <Button
-            variant="destructive"
-            onClick={onConfirm}
-            disabled={isRemoving}
-          >
+          <Button variant="destructive" onClick={onConfirm} disabled={isRemoving}>
             Видалити всі з групи
           </Button>
         </>
       }
-    >
-    </ResponsiveDialog>
+    ></ResponsiveDialog>
   );
 }
