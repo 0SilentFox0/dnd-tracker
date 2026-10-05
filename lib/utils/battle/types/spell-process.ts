@@ -71,6 +71,7 @@ export interface ProcessSpellParams {
   hitRoll?: number;
   /** DM накладає з сайдбару — не витрачати spell slot, ігнорувати перевірку слотів */
   isDMCast?: boolean;
+  rng?: () => number;
 }
 
 /** Результат обробки заклинання */
@@ -83,6 +84,7 @@ export interface ProcessSpellResult {
     resistanceBreakdown: string[];
   };
   targetsUpdated: BattleParticipant[];
+  allParticipantsUpdated?: BattleParticipant[];
   casterUpdated: BattleParticipant;
   battleAction: BattleAction;
 }

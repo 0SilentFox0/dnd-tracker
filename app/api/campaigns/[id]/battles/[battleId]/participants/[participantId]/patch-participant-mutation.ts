@@ -1,9 +1,9 @@
 import type { PatchParticipantData } from "./patch-participant-schema";
 
+import { resolveDowned } from "@/lib/utils/abilities/engine/run-abilities";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, battleActionToEvent, BattleRuleError, systemEvent } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";
-import { executeComplexTriggersForChangedParticipant } from "@/lib/utils/skills/execution";
 import type { BattleParticipant } from "@/types/battle";
 
 const DM_DETAILS = { actorName: "DM", actorSide: "ally", actionDetails: {} };
@@ -104,7 +104,9 @@ function updateHp(ctx: BattleMutationContext, participantId: string, requestedHp
 
   order[idx] = updated;
 
-  const triggered = executeComplexTriggersForChangedParticipant(order, participantId, ctx.scene.round);
+  const downed = oldHp > 0 && newHp <= 0
+    ? resolveDowned(order, { victimId: participantId, actorId: null }, { round: ctx.scene.round, rng: Math.random }, { allowSurvive: false })
+    : { participants: order, messages: [] as string[] };
 
   const name = updated.basicInfo.name;
 
@@ -120,9 +122,9 @@ function updateHp(ctx: BattleMutationContext, participantId: string, requestedHp
     },
   ];
 
-  if (triggered.messages.length > 0) {
-    events.push(systemEvent(ctx.scene.round, `Тригери після зміни HP: ${triggered.messages.join("; ")}`));
+  if (downed.messages.length > 0) {
+    events.push(systemEvent(ctx.scene.round, downed.messages.join(" | ")));
   }
 
-  return { participants: triggered.updatedParticipants, pending: ctx.pending, events };
+  return { participants: downed.participants, pending: ctx.pending, events };
 }

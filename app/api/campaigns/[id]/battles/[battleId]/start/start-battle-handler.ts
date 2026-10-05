@@ -14,8 +14,8 @@ import { buildCampaignContextForStart } from "./start-build-context";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
+import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import {
-  applyStartOfBattleEffects,
   calculateInitiative,
   sortByInitiative,
 } from "@/lib/utils/battle/battle-start";
@@ -23,10 +23,6 @@ import {
   createBattleParticipantFromCharacter,
   createBattleParticipantFromUnit,
 } from "@/lib/utils/battle/participant";
-import {
-  executeOnBattleStartEffectsForAll,
-  executeStartOfRoundTriggers,
-} from "@/lib/utils/skills/execution";
 import type { BattleAction, BattleParticipant, BattlePreparationParticipant } from "@/types/battle";
 
 export async function buildStartOrder(
@@ -157,27 +153,18 @@ function applyStartOfBattleAndSort(
   initiativeOrder: BattleParticipant[],
   battleId: string,
 ): { order: BattleParticipant[]; triggerLogEntries: BattleAction[] } {
-  const updatedInitiativeOrder = initiativeOrder.map((participant) =>
-    applyStartOfBattleEffects(participant, 1, initiativeOrder),
-  );
+  const ctx = { round: 1, rng: Math.random };
 
-  const {
-    updatedParticipants: afterOnBattleStart,
-    messages: onBattleStartMessages,
-  } = executeOnBattleStartEffectsForAll(updatedInitiativeOrder, 1);
+  const battleStart = runAbilities(initiativeOrder, { type: "battleStart" }, ctx);
 
-  const {
-    updatedParticipants: afterStartOfRound,
-    messages: startOfRoundMessages,
-  } = executeStartOfRoundTriggers(afterOnBattleStart, 1);
+  const roundStart = runAbilities(battleStart.participants, { type: "roundStart" }, ctx);
 
-  const allTriggerMessages = [
-    ...onBattleStartMessages,
-    ...startOfRoundMessages,
-  ].filter(Boolean);
+  const afterStartOfRound = roundStart.participants;
+
+  const allTriggerMessages = [...battleStart.messages, ...roundStart.messages];
 
   const withCalculatedInitiative = afterStartOfRound.map((participant) => {
-    const calculatedInitiative = calculateInitiative(participant);
+    const calculatedInitiative = calculateInitiative(participant, afterStartOfRound);
 
     return {
       ...participant,

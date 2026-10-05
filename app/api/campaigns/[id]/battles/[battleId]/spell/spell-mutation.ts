@@ -83,11 +83,11 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
       };
     }
 
-    let nextOrder = order.map((p) => {
-      if (p.basicInfo.id === caster.basicInfo.id) return result.casterUpdated;
+    const updatedById = new Map(
+      (result.allParticipantsUpdated ?? [result.casterUpdated, ...result.targetsUpdated]).map((p) => [p.basicInfo.id, p]),
+    );
 
-      return result.targetsUpdated.find((t) => t.basicInfo.id === p.basicInfo.id) ?? p;
-    });
+    let nextOrder = order.map((p) => updatedById.get(p.basicInfo.id) ?? p);
 
     let action = result.battleAction;
 
