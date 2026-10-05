@@ -7,12 +7,24 @@ import { convertLegacySkill, type LegacySkillRow } from "./convert-skill";
 import { convertLegacyUnit } from "./convert-unit";
 import type { ConversionIssue, ConversionResult } from "./types";
 
-import { type Ability, parseAbilities } from "@/lib/utils/abilities/schema";
+import { type Ability, AbilitySchema, parseAbilities } from "@/lib/utils/abilities/schema";
 
 function read<R extends { id: string; abilities?: unknown }>(row: R, convert: (r: R) => ConversionResult): Ability[] {
   const parsed = parseAbilities(row.abilities);
 
   if (parsed) return parsed;
+
+  if (Array.isArray(row.abilities)) {
+    const valid = row.abilities.flatMap((a) => {
+      const r = AbilitySchema.safeParse(a);
+
+      return r.success ? [r.data] : [];
+    });
+
+    console.warn(`[abilities] ${row.abilities.length - valid.length} invalid abilities dropped for ${row.id}`);
+
+    return valid;
+  }
 
   if (row.abilities !== null && row.abilities !== undefined) console.warn(`[abilities] invalid JSON for ${row.id}, using legacy conversion`);
 
@@ -46,6 +58,14 @@ export function readAbilities(kind: OwnerKind, row: { id: string; abilities?: un
   const parsed = parseAbilities(row.abilities);
 
   if (parsed) return { abilities: parsed, issues: [] };
+
+  // stored list stays authoritative: the editor shows broken entries instead of replacing them with legacy data
+  if (Array.isArray(row.abilities)) {
+    return {
+      abilities: row.abilities.filter((a): a is Ability => !!a && typeof a === "object" && !Array.isArray(a)),
+      issues: [{ severity: "loss", message: "Частина збережених вмінь має невалідні дані — виправте або видаліть їх перед збереженням" }],
+    };
+  }
 
   const converted = CONVERTERS[kind](row as never);
 

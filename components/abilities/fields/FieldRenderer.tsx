@@ -11,7 +11,8 @@ import { SpellPickerField } from "./SpellPickerField";
 import { TextField } from "./TextField";
 import { ToggleField } from "./ToggleField";
 
-import { useFieldErrors } from "@/components/abilities/editor-context";
+import { useErrorsUnder } from "@/components/abilities/editor-context";
+import { FieldErrors } from "@/components/abilities/FieldErrors";
 import { Label } from "@/components/ui/label";
 import type { FieldMeta } from "@/lib/utils/abilities/registry/fields";
 import { TARGET_LABELS } from "@/lib/utils/abilities/registry/labels";
@@ -26,7 +27,7 @@ export interface FieldProps<V = unknown> {
 const TARGET_OPTIONS = Object.entries(TARGET_LABELS).map(([value, label]) => ({ value, label }));
 
 export function FieldRenderer({ meta, value, onChange, path }: { meta: FieldMeta; value: unknown; onChange: (v: unknown) => void; path: string }) {
-  const errors = useFieldErrors(path);
+  const errors = useErrorsUnder(path);
 
   const props = { id: path, value: value as never, onChange, meta };
 
@@ -66,11 +67,7 @@ export function FieldRenderer({ meta, value, onChange, path }: { meta: FieldMeta
         {meta.label}
       </Label>
       {input}
-      {errors.map((e) => (
-        <p key={e} className="text-xs text-destructive">
-          {e}
-        </p>
-      ))}
+      <FieldErrors errors={errors} testId={`field-errors-${path}`} />
     </div>
   );
 }

@@ -81,4 +81,25 @@ describe("AbilityListEditor", () => {
 
     expect(new Set(json().map((a) => a.id)).size).toBe(2);
   });
+
+  it("зламаний ефект: картка «Невідомий ефект» з помилкою, зберегти не можна", async () => {
+    const onValid = vi.fn();
+
+    const broken = { id: "a1", name: "Зламане", trigger: { event: "passive" }, effects: [{ kind: "teleport" }] } as unknown as Ability;
+
+    render(<Harness initial={[broken]} onValid={onValid} />);
+    fireEvent.click(screen.getByText("Зламане"));
+
+    expect(screen.getByText("Невідомий ефект")).toBeInTheDocument();
+    expect(screen.getByTestId("effect-errors-0.effects.0")).toBeInTheDocument();
+    await waitFor(() => expect(onValid).toHaveBeenLastCalledWith(false));
+  });
+
+  it("порожня назва — помилка біля поля назви", () => {
+    render(<Harness initial={[{ id: "a1", name: "Х", trigger: { event: "passive" }, effects: [{ kind: "note", text: "x" }] }]} />);
+    fireEvent.click(screen.getByText("Х"));
+    fireEvent.change(screen.getByLabelText("Назва"), { target: { value: "" } });
+
+    expect(screen.getByTestId("field-errors-0.name")).toBeInTheDocument();
+  });
 });

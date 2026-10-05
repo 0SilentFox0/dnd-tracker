@@ -6,6 +6,8 @@ import { ConditionSection } from "./sections/ConditionSection";
 import { EffectsSection } from "./sections/EffectsSection";
 import { LimitsSection } from "./sections/LimitsSection";
 import { TriggerSection } from "./sections/TriggerSection";
+import { useErrorsUnder } from "./editor-context";
+import { FieldErrors } from "./FieldErrors";
 
 import { AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -23,6 +25,8 @@ export interface AbilitySectionProps {
 
 export function AbilityRow({ ability, path, actions }: { ability: Ability; path: string; actions: { onChange: (a: Ability) => void; onRemove: () => void } }) {
   const section = { ability, path, onChange: actions.onChange };
+
+  const nameErrors = useErrorsUnder(`${path}.name`);
 
   return (
     <AccordionItem value={ability.id} className="rounded-md border px-2">
@@ -43,6 +47,7 @@ export function AbilityRow({ ability, path, actions }: { ability: Ability; path:
             Назва
           </Label>
           <Input id={`${path}.name`} value={ability.name} onChange={(e) => actions.onChange({ ...ability, name: e.target.value })} />
+          <FieldErrors errors={nameErrors} testId={`field-errors-${path}.name`} />
         </div>
         <div className="space-y-1">
           <Label htmlFor={`${path}.description`} className="text-xs text-muted-foreground">

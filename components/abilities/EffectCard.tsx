@@ -4,6 +4,8 @@ import { X } from "lucide-react";
 
 import { FlagEditor } from "./effect-renderers/FlagEditor";
 import { FieldRenderer } from "./fields/FieldRenderer";
+import { useAbilityEditor, useErrorsUnder } from "./editor-context";
+import { FieldErrors } from "./FieldErrors";
 
 import { Button } from "@/components/ui/button";
 import { SelectField } from "@/components/ui/select-field";
@@ -22,6 +24,10 @@ interface EffectCardProps {
 export function EffectCard({ effect, trigger, path, actions, kinds }: EffectCardProps) {
   const def = EFFECT_REGISTRY[effect.kind as EffectKind];
 
+  const errorsUnder = useErrorsUnder(path);
+
+  const kindErrors = useAbilityEditor().errorsByPath[`${path}.kind`] ?? [];
+
   if (!def) {
     return (
       <div className="rounded-md border border-dashed p-2 text-xs">
@@ -32,6 +38,7 @@ export function EffectCard({ effect, trigger, path, actions, kinds }: EffectCard
           </Button>
         </div>
         <pre className="overflow-x-auto text-muted-foreground">{JSON.stringify(effect)}</pre>
+        <FieldErrors errors={errorsUnder} testId={`effect-errors-${path}`} />
       </div>
     );
   }
@@ -61,6 +68,7 @@ export function EffectCard({ effect, trigger, path, actions, kinds }: EffectCard
           <X className="h-4 w-4" />
         </Button>
       </div>
+      <FieldErrors errors={kindErrors} />
       <div className="grid grid-cols-2 gap-2">{body}</div>
       <p className="text-xs text-primary">
         <span aria-hidden>= </span>

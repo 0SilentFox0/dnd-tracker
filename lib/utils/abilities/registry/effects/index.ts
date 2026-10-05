@@ -101,9 +101,9 @@ export function applyEffect(input: EffectApplyInput): EffectApplyResult {
 }
 
 export function describeEffect(effect: Effect): string {
-  const def = EFFECT_REGISTRY[effect.kind] as EffectDefinition<EffectKind>;
+  const def = EFFECT_REGISTRY[effect.kind] as EffectDefinition<EffectKind> | undefined;
 
-  return def.describe(effect as never);
+  return def ? def.describe(effect as never) : `невідомий ефект (${String(effect.kind)})`;
 }
 
 export { FLAG_FIELDS, FLAG_LABELS };

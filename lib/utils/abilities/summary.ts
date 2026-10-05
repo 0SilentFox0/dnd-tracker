@@ -1,8 +1,9 @@
 import { type OwnerKind, readAbilities } from "./legacy/read";
 import { describeAbility } from "./registry/effects";
+import { AbilitySchema } from "./schema";
 
 export function abilitySummary(kind: OwnerKind, row: { id: string; abilities?: unknown }): string[] {
-  return readAbilities(kind, row).abilities.map(describeAbility);
+  return readAbilities(kind, row).abilities.filter((a) => AbilitySchema.safeParse(a).success).map(describeAbility);
 }
 
 /** Replaces heavy ability/legacy columns of a list row with short summary lines. */
