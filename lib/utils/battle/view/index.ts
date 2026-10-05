@@ -1,3 +1,5 @@
 export * from "./health";
+export * from "./hero";
 export * from "./knowledge";
+export * from "./queue";
 export * from "./visibility";
