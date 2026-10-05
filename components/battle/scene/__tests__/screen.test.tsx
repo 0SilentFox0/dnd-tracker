@@ -2,7 +2,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/components/battle/hud/fonts", () => ({ hudFontClassName: "" }));
+vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 
 const media = vi.hoisted(() => ({ wide: false }));
 

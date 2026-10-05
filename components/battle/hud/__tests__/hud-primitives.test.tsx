@@ -2,7 +2,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@/components/battle/hud/fonts", () => ({ hudFontClassName: "" }));
+vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 
 import { EffectLine, HealthBar, SlotGrid } from "@/components/battle/hud";
 import { ParticipantSide } from "@/lib/constants/battle";

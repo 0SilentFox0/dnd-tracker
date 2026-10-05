@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@/components/battle/hud/fonts", () => ({ hudFontClassName: "" }));
+vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 
 import { BattleLog } from "@/components/battle/scene/BattleLog";
 import { InitiativeTrack } from "@/components/battle/scene/InitiativeTrack";
