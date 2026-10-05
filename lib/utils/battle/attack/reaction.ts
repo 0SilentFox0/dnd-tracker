@@ -18,7 +18,7 @@ function counterFlags(defender: BattleParticipant, participants: BattleParticipa
 }
 
 export function getCounterDamagePercent(defender: BattleParticipant, participants: BattleParticipant[] = [defender]): number {
-  return counterFlags(defender, participants).reduce((max, f) => Math.max(max, f.bonusPercent), 0);
+  return counterFlags(defender, participants).reduce((sum, f) => sum + f.bonusPercent, 0);
 }
 
 export function canPerformReaction(

@@ -84,4 +84,17 @@ describe("readers", () => {
     expect(canPerformReaction(p, AttackType.MELEE)).toBe(false);
     expect(getCounterDamagePercent(p)).toBe(30);
   });
+
+  it("контратака: відсотки з кількох джерел сумуються, як раніше", () => {
+    const p = makeParticipant({
+      id: "a",
+      abilities: [
+        resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "counterAttack", attackKinds: ["melee"], bonusPercent: 20 }] }),
+        resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "counterAttack", attackKinds: ["melee"], bonusPercent: 10 }] }, { id: "s2" }),
+      ],
+    });
+
+    expect(getCounterDamagePercent(p)).toBe(30);
+  });
 });
+

@@ -157,6 +157,12 @@ export function mapLegacyEffect(e: LegacyEffect, ctx: StatMapContext): StatMapRe
 
     out.effects.push({ ...bonus, ...target(trigger.event === "battleStart" ? "allAllies" : "self"), ...timing(trigger.event === "hit" ? 2 : 1) } as Effect);
 
+    if (!passive && !isActionScopedTrigger(trigger)) {
+      out.issues.push({ severity: "behavior", message: `${e.stat}: раніше діяв завжди, тепер — тимчасово після події тригера` });
+    }
+
+    if (e.stat === "damage") out.issues.push({ severity: "behavior", message: "damage: раніше не діяв, тепер — бонус до всієї шкоди" });
+
     return out;
   }
 
@@ -237,6 +243,8 @@ export function mapLegacyEffect(e: LegacyEffect, ctx: StatMapContext): StatMapRe
       const fallback: AbilityTarget = isHitAttacker ? "eventTarget" : trigger.event === "battleStart" && e.stat === "initiative" ? "allAllies" : "self";
 
       const rounds = trigger.event === "battleStart" && e.stat === "initiative" ? 99 : isHitAttacker ? (e.stat === "initiative" ? 2 : 1) : 1;
+
+      if (passive && e.stat === "armor") out.issues.push({ severity: "behavior", message: "armor у пасивці: раніше не діяв, тепер додає AC" });
 
       out.effects.push({ kind: "modifyStat", stat: e.stat, flat, ...target(fallback), ...timing(rounds) } as Effect);
 

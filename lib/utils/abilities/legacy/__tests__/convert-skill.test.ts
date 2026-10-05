@@ -143,4 +143,15 @@ describe("convertLegacySkill", () => {
 
     expect(r.abilities).toEqual([]);
   });
+
+  it("звіт позначає зміни поведінки: подійний бонус шкоди, damage→all, пасивна броня", () => {
+    const onKill = convertLegacySkill(row({ combatStats: { effects: [{ stat: "melee_damage", type: "percent", value: 10 }] }, skillTriggers: [{ type: "simple", trigger: "onKill" }] }));
+
+    const dmg = convertLegacySkill(row({ combatStats: { effects: [{ stat: "damage", type: "flat", value: 2 }] }, skillTriggers: [{ type: "simple", trigger: "passive" }] }));
+
+    const armor = convertLegacySkill(row({ combatStats: { effects: [{ stat: "armor", type: "flat", value: 1 }] }, skillTriggers: [{ type: "simple", trigger: "passive" }] }));
+
+    for (const r of [onKill, dmg, armor]) expect(r.issues.some((i) => i.severity === "behavior")).toBe(true);
+  });
 });
+
