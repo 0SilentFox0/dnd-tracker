@@ -100,11 +100,9 @@ export function createMockCaster(
     battleData: {
       attacks: [],
       activeEffects: [],
-      passiveAbilities: [],
-      racialAbilities: [],
-      activeSkills: [],
       equippedArtifacts: [],
-      skillUsageCounts: {},
+      resolvedAbilities: [],
+      spellEnhancers: [],
     },
     actionFlags: {
       hasUsedAction: false,
@@ -172,11 +170,9 @@ export function createMockEnemy(id: string, tier: number = 7): BattleParticipant
     battleData: {
       attacks: [],
       activeEffects: [],
-      passiveAbilities: [],
-      racialAbilities: [],
-      activeSkills: [],
       equippedArtifacts: [],
-      skillUsageCounts: {},
+      resolvedAbilities: [],
+      spellEnhancers: [],
     },
     actionFlags: {
       hasUsedAction: false,

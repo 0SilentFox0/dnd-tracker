@@ -6,100 +6,37 @@ import { getDiceAverage } from "../balance";
 
 import { AttackType } from "@/lib/constants/battle";
 import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
+import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
+import { withSelf } from "@/lib/utils/abilities/engine/participants";
 import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
 import type { BattleParticipant } from "@/types/battle";
-import type { SimpleSkillTriggerConfig } from "@/types/skill-triggers";
-
-export function getCounterDamagePercent(defender: BattleParticipant): number {
-  let total = 0;
-
-  for (const skill of defender.battleData.activeSkills) {
-    for (const effect of skill.effects) {
-      if (
-        effect.stat === "counter_damage" &&
-        effect.isPercentage &&
-        typeof effect.value === "number"
-      ) {
-        total += effect.value;
-      }
-    }
-  }
-
-  return total;
-}
 
 type IncomingAttackType = AttackType | "magic";
 
-/** Чи підходить тип вхідної атаки під налаштування тригера контратаки */
-function matchResponseType(
-  responseType: "melee" | "ranged" | "magic" | undefined,
-  incomingAttackType: IncomingAttackType,
-): boolean {
-  const expected = responseType ?? "melee";
-
-  if (expected === "magic") return incomingAttackType === "magic";
-
-  return incomingAttackType === expected;
+function counterFlags(defender: BattleParticipant, participants: BattleParticipant[]) {
+  return findFlags(withSelf(participants, defender), defender.basicInfo.id, "counterAttack");
 }
 
-/** Чи є у учасника скіл з тригером «перший удар за раунд» для потрібного типу атаки */
-function hasOnFirstHitTakenPerRoundTrigger(
-  defender: BattleParticipant,
-  incomingAttackType: IncomingAttackType,
-): boolean {
-  const triggers = defender.battleData.activeSkills.flatMap(
-    (s) => s.skillTriggers ?? [],
-  );
-
-  return triggers.some((t) => {
-    if (t.type !== "simple") return false;
-
-    const simple = t as SimpleSkillTriggerConfig;
-
-    if (simple.trigger !== "onFirstHitTakenPerRound") return false;
-
-    return matchResponseType(simple.modifiers?.responseType, incomingAttackType);
-  });
-}
-
-/** Чи є у учасника скіл з ефектом counter_damage */
-function hasCounterDamageEffect(defender: BattleParticipant): boolean {
-  return defender.battleData.activeSkills.some((skill) =>
-    skill.effects.some(
-      (e) =>
-        e.stat === "counter_damage" &&
-        e.isPercentage &&
-        typeof e.value === "number" &&
-        e.value > 0,
-    ),
-  );
+export function getCounterDamagePercent(defender: BattleParticipant, participants: BattleParticipant[] = [defender]): number {
+  return counterFlags(defender, participants).reduce((sum, f) => sum + f.bonusPercent, 0);
 }
 
 export function canPerformReaction(
   defender: BattleParticipant,
   incomingAttackType: IncomingAttackType = AttackType.MELEE,
+  participants: BattleParticipant[] = [defender],
 ): boolean {
   if (defender.actionFlags.hasUsedReaction) return false;
 
-  const hasTrigger = hasOnFirstHitTakenPerRoundTrigger(
-    defender,
-    incomingAttackType,
-  );
+  const kind = incomingAttackType === "magic" ? "magic" : incomingAttackType === AttackType.RANGED ? "ranged" : "melee";
 
-  const hasCounterEffect = hasCounterDamageEffect(defender);
-
-  if (hasTrigger || (hasCounterEffect && incomingAttackType === AttackType.MELEE)) {
-    const counterPercent = getCounterDamagePercent(defender);
-
-    return counterPercent >= 0;
-  }
-
-  return false;
+  return counterFlags(defender, participants).some((f) => f.attackKinds.includes(kind));
 }
 
 export function performReaction(
   defender: BattleParticipant,
   attacker: BattleParticipant,
+  participants: BattleParticipant[] = [defender],
 ): {
   damage: number;
   baseDamage: number;
@@ -147,12 +84,9 @@ export function performReaction(
     baseDamage += getDiceAverage(heroDice);
   }
 
-  const counterPercent = getCounterDamagePercent(defender);
+  const counterPercent = getCounterDamagePercent(defender, participants);
 
-  const multiplier =
-    counterPercent > 0 ? 1 + counterPercent / 100 : 1.15;
-
-  const reactionDamage = Math.floor(baseDamage * multiplier);
+  const reactionDamage = Math.floor(baseDamage * (1 + counterPercent / 100));
 
   const updatedDefender: BattleParticipant = {
     ...defender,
@@ -178,13 +112,14 @@ export function performReaction(
 export function getReactionDamageAmount(
   defender: BattleParticipant,
   _attacker: BattleParticipant,
+  participants: BattleParticipant[] = [defender],
 ): { damage: number; baseDamage: number; bonusPercent: number } {
   const defenderCopy = {
     ...defender,
     actionFlags: { ...defender.actionFlags, hasUsedReaction: false },
   };
 
-  const result = performReaction(defenderCopy, _attacker);
+  const result = performReaction(defenderCopy, _attacker, participants);
 
   return {
     damage: result.damage,

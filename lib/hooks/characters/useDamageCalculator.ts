@@ -134,7 +134,7 @@ export function useDamageCalculator({
 
   // Клієнтський лог: щоб бачити breakdown у браузерній консолі при кожному
   // оновленні magic preview (наприклад, після клацання "Рахувати" у magic-табі).
-  // Серверний лог `[magic-damage]` пише деталі activeSkills у Vercel Functions logs.
+  // Серверний лог `[magic-damage]` пише бонуси магічної шкоди у Vercel Functions logs.
   useEffect(() => {
     if (!magicPreview) return;
 

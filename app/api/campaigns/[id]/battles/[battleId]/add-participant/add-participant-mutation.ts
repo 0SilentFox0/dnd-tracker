@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
-import { distributePendingScopedArtifactBonuses } from "@/lib/utils/battle/artifact-sets";
+import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { calculateInitiative } from "@/lib/utils/battle/battle-start";
 import {
   createBattleParticipantFromCharacter,
@@ -73,15 +73,15 @@ export function createAddParticipantMutation(deps: AddParticipantDeps = defaultD
 
     const insertAt = ctx.scene.turnIndex + 1;
 
-    const participants = [
+    const addedIds = new Set(added.map((p) => p.basicInfo.id));
+
+    const participants = applyBakedAuras([
       ...ctx.participants.slice(0, insertAt),
       ...added,
       ...ctx.participants.slice(insertAt),
-    ];
+    ], addedIds);
 
-    distributePendingScopedArtifactBonuses(participants);
-
-    for (const p of added) {
+    for (const p of participants.filter((x) => addedIds.has(x.basicInfo.id))) {
       const initiative = calculateInitiative(p);
 
       p.abilities.initiative = initiative;

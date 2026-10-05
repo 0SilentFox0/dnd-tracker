@@ -4,15 +4,11 @@
 
 import { applyDOTEffects, decreaseEffectDurations } from "./battle-effects";
 import { calculateInitiative } from "./battle-start";
-import {
-  checkTriggerCondition,
-  getPassiveAbilitiesByTrigger,
-} from "./triggers";
 
-import {
-  applyOnBattleStartEffectsToNewAllies,
-  executeStartOfRoundTriggers,
-} from "@/lib/utils/skills/execution";
+import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
+import { findParticipant, isUp, replaceParticipant } from "@/lib/utils/abilities/engine/participants";
+import { resolveDowned, runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
+import type { Rng } from "@/lib/utils/abilities/engine/types";
 import { BattleParticipant } from "@/types/battle";
 
 /**
@@ -20,9 +16,11 @@ import { BattleParticipant } from "@/types/battle";
  */
 export interface StartOfTurnResult {
   participant: BattleParticipant;
+  /** повний список: вміння turnStart і смерть від DOT можуть змінити інших */
+  participants: BattleParticipant[];
   damageMessages: string[];
   expiredEffects: string[];
-  triggeredAbilities: string[];
+  abilityMessages: string[];
   statusChanged: boolean; // чи змінився статус (unconscious/dead)
 }
 
@@ -37,6 +35,7 @@ export function processStartOfTurn(
   participant: BattleParticipant,
   currentRound: number,
   allParticipants: BattleParticipant[],
+  rng: Rng = Math.random,
 ): StartOfTurnResult {
   let updatedParticipant = { ...participant };
 
@@ -51,8 +50,6 @@ export function processStartOfTurn(
   const damageMessages: string[] = [];
 
   let expiredEffects: string[] = [];
-
-  const triggeredAbilities: string[] = [];
 
   // DoT і зменшення тривалості ефектів — на початку ходу цієї цілі (Decay тощо)
   if (
@@ -100,25 +97,6 @@ export function processStartOfTurn(
     statusChanged = true;
   }
 
-  // 4. Перевіряємо пасивки з тригером "start_of_turn"
-  const startOfTurnAbilities = getPassiveAbilitiesByTrigger(
-    updatedParticipant,
-    "start_of_turn",
-  );
-
-  for (const ability of startOfTurnAbilities) {
-    if (
-      checkTriggerCondition(ability.trigger, updatedParticipant, {
-        allParticipants,
-        currentRound,
-      })
-    ) {
-      triggeredAbilities.push(ability.name);
-      // Тут можна застосувати ефект зі здібності (наприклад, додати activeEffect)
-      // Поки що просто відмічаємо що здібність спрацювала
-    }
-  }
-
   // 5. Скидаємо флаги дій; ефекти no_bonus_action / no_reaction блокують відповідні дії
   updatedParticipant = {
     ...updatedParticipant,
@@ -130,11 +108,34 @@ export function processStartOfTurn(
     },
   };
 
+  const id = participant.basicInfo.id;
+
+  const ctx = { round: currentRound, rng };
+
+  let participants = allParticipants.some((p) => p.basicInfo.id === id)
+    ? replaceParticipant(allParticipants, updatedParticipant)
+    : [updatedParticipant];
+
+  const abilityMessages: string[] = [];
+
+  if (statusChanged) {
+    const r = resolveDowned(participants, { victimId: id, actorId: null }, ctx);
+
+    participants = r.participants;
+    abilityMessages.push(...r.messages);
+  } else if (isUp(updatedParticipant)) {
+    const r = runAbilities(participants, { type: "turnStart", actorId: id }, ctx);
+
+    participants = r.participants;
+    abilityMessages.push(...r.messages);
+  }
+
   return {
-    participant: updatedParticipant,
+    participant: findParticipant(participants, id) ?? updatedParticipant,
+    participants,
     damageMessages,
     expiredEffects,
-    triggeredAbilities,
+    abilityMessages,
     statusChanged,
   };
 }
@@ -201,6 +202,7 @@ export function processStartOfRound(
   initiativeOrder: BattleParticipant[],
   currentRound: number,
   pendingSummons: BattleParticipant[] = [],
+  rng: Rng = Math.random,
 ): {
   updatedInitiativeOrder: BattleParticipant[];
   message: string;
@@ -212,49 +214,41 @@ export function processStartOfRound(
   // Додаємо призваних істот до baseOrder
   const updatedOrder = [...baseOrder, ...pendingSummons];
 
-  // Застосовуємо onBattleStart (all_allies) від союзників до нових призваних — щоб скіли типу Ізабель діяли на союзників
   const newSummonIds = new Set(pendingSummons.map((p) => p.basicInfo.id));
 
-  const orderWithAllyBuffs = applyOnBattleStartEffectsToNewAllies(
-    updatedOrder,
-    newSummonIds,
-    currentRound,
-  );
+  const ctx = { round: currentRound, rng };
 
-  // Оновлюємо abilities.initiative з activeEffects (бо бонуси Ізабель тощо змінюють ініціативу)
-  const orderWithInitiative = orderWithAllyBuffs.map((p) => ({
-    ...p,
-    abilities: {
-      ...p.abilities,
-      initiative: calculateInitiative(p),
-    },
-  }));
+  const messages: string[] = [];
 
-  // Виконуємо тригери startRound для всіх учасників
-  const triggerResult = executeStartOfRoundTriggers(
-    orderWithInitiative,
-    currentRound,
-  );
+  let order = updatedOrder;
 
-  // Пересортуємо з урахуванням можливих змін ініціативи
-  const sortedOrder = triggerResult.updatedParticipants.sort((a, b) => {
-    if (b.abilities.initiative !== a.abilities.initiative) {
-      return b.abilities.initiative - a.abilities.initiative;
-    }
+  if (newSummonIds.size > 0) {
+    order = applyBakedAuras(order, newSummonIds);
 
-    if (b.abilities.baseInitiative !== a.abilities.baseInitiative) {
-      return b.abilities.baseInitiative - a.abilities.baseInitiative;
-    }
+    const joined = runAbilities(order, { type: "battleStart", newcomerIds: [...newSummonIds] }, ctx);
 
-    return b.abilities.dexterity - a.abilities.dexterity;
-  });
+    order = joined.participants;
+    messages.push(...joined.messages);
+  }
+
+  const round = runAbilities(order, { type: "roundStart" }, ctx);
+
+  messages.push(...round.messages);
+
+  const sortedOrder = round.participants
+    .map((p) => ({ ...p, abilities: { ...p.abilities, initiative: calculateInitiative(p, round.participants) } }))
+    .sort((a, b) => {
+      if (b.abilities.initiative !== a.abilities.initiative) return b.abilities.initiative - a.abilities.initiative;
+
+      if (b.abilities.baseInitiative !== a.abilities.baseInitiative) return b.abilities.baseInitiative - a.abilities.baseInitiative;
+
+      return b.abilities.dexterity - a.abilities.dexterity;
+    });
 
   // DoT і зменшення тривалості ефектів тепер на початку ходу кожного учасника (processStartOfTurn)
-  const allRoundMessages = [...triggerResult.messages];
-
   return {
     updatedInitiativeOrder: sortedOrder,
     message: `🔁 Початок Раунду ${currentRound}`,
-    triggerMessages: allRoundMessages,
+    triggerMessages: messages,
   };
 }

@@ -10,10 +10,11 @@ import {
 } from "../damage";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
+import { grantPassive, withConvertedSkills } from "@/lib/utils/battle/__tests__/mock-participant";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 function createBaseParticipant(overrides?: Partial<BattleParticipant>): BattleParticipant {
-  return {
+  return withConvertedSkills({
     basicInfo: {
       id: "p1",
       battleId: "b1",
@@ -59,10 +60,9 @@ function createBaseParticipant(overrides?: Partial<BattleParticipant>): BattlePa
     battleData: {
       attacks: [],
       activeEffects: [],
-      passiveAbilities: [],
-      racialAbilities: [],
-      activeSkills: [],
       equippedArtifacts: [],
+      resolvedAbilities: [],
+      spellEnhancers: [],
     },
     actionFlags: {
       hasUsedAction: false,
@@ -71,7 +71,7 @@ function createBaseParticipant(overrides?: Partial<BattleParticipant>): BattlePa
       hasExtraTurn: false,
     },
     ...overrides,
-  };
+  });
 }
 
 function createMeleeAttack(): BattleAttack {
@@ -191,9 +191,7 @@ describe("battle-damage-breakdown", () => {
         },
       });
 
-      (target.battleData as unknown as Record<string, unknown>).extras = {
-        resistances: { physical: 50 },
-      };
+      grantPassive(target, [{ kind: "flag", flag: "resistance", damageType: "physical", percent: 50 }]);
 
       const result = computeDamageBreakdown({
         attacker,

@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 import { diffParticipants } from "@/lib/utils/battle/store/diff-participants";
 import { splitParticipant } from "@/lib/utils/battle/store/split-participant";
-import { createMockParticipant } from "@/lib/utils/skills/__tests__/skill-triggers-execution-mocks";
 
 const at = (i: number) => ({ orderIndex: i, isPending: false });
 

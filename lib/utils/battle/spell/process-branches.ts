@@ -11,7 +11,6 @@ import {
   buildSpellMissAction,
 } from "./process-actions";
 
-import { executeAfterSpellCastTriggers } from "@/lib/utils/skills/execution";
 import type { BattleParticipant } from "@/types/battle";
 
 export function handleNoSpellSlot(
@@ -47,7 +46,6 @@ export function handleNoTargetSpell(
   slotKey: string,
   battleId: string,
   currentRound: number,
-  isOwnerAction: boolean,
 ): ProcessSpellResult {
   let updatedCaster = {
     ...caster,
@@ -78,17 +76,10 @@ export function handleNoTargetSpell(
     currentRound,
   );
 
-  const afterNoTarget = executeAfterSpellCastTriggers(
-    updatedCaster,
-    undefined,
-    allParticipants,
-    isOwnerAction,
-  );
-
   return {
     success: true,
     targetsUpdated: [],
-    casterUpdated: afterNoTarget.updatedCaster,
+    casterUpdated: updatedCaster,
     battleAction: noTargetAction,
   };
 }
@@ -102,8 +93,6 @@ export function handleDispelSpell(
   slotKey: string,
   battleId: string,
   currentRound: number,
-  isOwnerAction: boolean,
-  firstTarget: BattleParticipant | undefined,
 ): ProcessSpellResult {
   const targetsWithDispel = updatedTargets.map((t) => ({
     ...t,
@@ -147,17 +136,10 @@ export function handleDispelSpell(
     currentRound,
   );
 
-  const afterDispel = executeAfterSpellCastTriggers(
-    updatedCaster,
-    firstTarget,
-    allParticipants,
-    isOwnerAction,
-  );
-
   return {
     success: true,
     targetsUpdated: targetsWithDispel,
-    casterUpdated: afterDispel.updatedCaster,
+    casterUpdated: updatedCaster,
     battleAction: dispelAction,
   };
 }

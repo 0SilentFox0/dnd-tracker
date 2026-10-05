@@ -5,6 +5,7 @@ import { createSkillSchema } from "./create-skill-schema";
 import { formatSkillsListResponse } from "./format-skills-response";
 
 import { prisma } from "@/lib/db";
+import { syncSkillAbilities } from "@/lib/utils/abilities/legacy/sync";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 
@@ -88,6 +89,8 @@ export async function POST(
       },
     });
 
+    await syncSkillAbilities(prisma, skill);
+
     return NextResponse.json(skill);
   } catch (error) {
     return handleApiError(error, { action: "create skill" });
@@ -108,7 +111,7 @@ export async function GET(
       return accessResult;
     }
 
-    const skills = await prisma.skill.findMany({
+    const skills = await prisma.skill.findMany({ omit: { abilities: true },
       where: {
         campaignId: id,
       },

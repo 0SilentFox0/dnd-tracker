@@ -6,16 +6,13 @@
 
 import { describe, expect, it, vi } from "vitest";
 
-import { setParticipantExtras } from "../../participant/extras";
 import {
   generateSpellDamageRolls,
   getDiceSize,
 } from "../process-helpers";
 import { participantImmuneToSpell } from "../spell-immunity";
 
-import {
-  createMockParticipant,
-} from "@/lib/utils/skills/__tests__/skill-triggers-execution-mocks";
+import { createMockParticipant, grantPassive } from "@/lib/utils/battle/__tests__/mock-participant";
 
 describe("getDiceSize", () => {
   it("parses standard dice notation (d6, d8, d20)", () => {
@@ -94,7 +91,6 @@ describe("participantImmuneToSpell", () => {
   it("returns false when immuneSpellIds undefined", () => {
     const p = createMockParticipant();
 
-    setParticipantExtras(p, {});
 
     expect(participantImmuneToSpell(p, "spell-1")).toBe(false);
   });
@@ -102,7 +98,7 @@ describe("participantImmuneToSpell", () => {
   it("returns true when spellId in immuneSpellIds", () => {
     const p = createMockParticipant();
 
-    setParticipantExtras(p, { immuneSpellIds: ["spell-1", "spell-2"] });
+    grantPassive(p, [{ kind: "flag", flag: "spellImmunity", spellIds: ["spell-1", "spell-2"] }]);
 
     expect(participantImmuneToSpell(p, "spell-1")).toBe(true);
     expect(participantImmuneToSpell(p, "spell-2")).toBe(true);
@@ -111,7 +107,7 @@ describe("participantImmuneToSpell", () => {
   it("returns false when spellId not in list", () => {
     const p = createMockParticipant();
 
-    setParticipantExtras(p, { immuneSpellIds: ["spell-1"] });
+    grantPassive(p, [{ kind: "flag", flag: "spellImmunity", spellIds: ["spell-1"] }]);
 
     expect(participantImmuneToSpell(p, "other-spell")).toBe(false);
   });
@@ -119,7 +115,7 @@ describe("participantImmuneToSpell", () => {
   it("empty list — not immune", () => {
     const p = createMockParticipant();
 
-    setParticipantExtras(p, { immuneSpellIds: [] });
+    grantPassive(p, []);
 
     expect(participantImmuneToSpell(p, "any")).toBe(false);
   });

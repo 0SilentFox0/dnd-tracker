@@ -1,11 +1,11 @@
 /**
  * Застосовує збережену перевірку моралі (pendingMoraleCheck) при next-turn:
- * extra turn слот, тригери onMoraleSuccess/allyMoraleCheck, запис у battleLog.
+ * екстра-хід, подія moraleCheck для вмінь, запис у battleLog.
  */
 
 import type { PendingMoraleCheckPayload } from "./pending-morale";
 
-import { executeSkillsByTrigger } from "@/lib/utils/skills/execution";
+import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 export interface ApplyPendingMoraleResult {
@@ -19,6 +19,7 @@ export function applyPendingMoraleCheck(
   currentRound: number,
   battleId: string,
   battleLogLength: number,
+  rng: () => number = Math.random,
 ): ApplyPendingMoraleResult {
   const { participantId, d10Roll, moraleResult } = payload;
 
@@ -60,56 +61,17 @@ export function applyPendingMoraleCheck(
     );
   }
 
-  const triggerMessages: string[] = [];
+  const moraleSuccess = moraleResult.hasExtraTurn || !moraleResult.shouldSkipTurn;
 
-  const moraleSuccess =
-    moraleResult.hasExtraTurn || !moraleResult.shouldSkipTurn;
-
-  if (moraleSuccess) {
-    const participantIdx = updatedInitiativeOrder.findIndex(
-      (p) => p.basicInfo.id === participant.basicInfo.id,
-    );
-
-    if (participantIdx >= 0) {
-      const result = executeSkillsByTrigger(
-        updatedInitiativeOrder[participantIdx],
-        "onMoraleSuccess",
-        updatedInitiativeOrder,
-        { currentRound },
-      );
-
-      triggerMessages.push(...result.messages);
-      updatedInitiativeOrder = updatedInitiativeOrder.map((p, i) =>
-        i === participantIdx ? result.participant : p,
-      );
-    }
-  }
-
-  const allies = updatedInitiativeOrder.filter(
-    (p) =>
-      p.basicInfo.side === participant.basicInfo.side &&
-      p.basicInfo.id !== participant.basicInfo.id,
+  const run = runAbilities(
+    updatedInitiativeOrder,
+    { type: "moraleCheck", actorId: participant.basicInfo.id, result: moraleSuccess ? "success" : "fail" },
+    { round: currentRound, rng },
   );
 
-  for (const ally of allies) {
-    const allyIdx = updatedInitiativeOrder.findIndex(
-      (p) => p.basicInfo.id === ally.basicInfo.id,
-    );
+  updatedInitiativeOrder = run.participants;
 
-    if (allyIdx >= 0) {
-      const result = executeSkillsByTrigger(
-        updatedInitiativeOrder[allyIdx],
-        "allyMoraleCheck",
-        updatedInitiativeOrder,
-        { currentRound },
-      );
-
-      triggerMessages.push(...result.messages);
-      updatedInitiativeOrder = updatedInitiativeOrder.map((p, i) =>
-        i === allyIdx ? result.participant : p,
-      );
-    }
-  }
+  const triggerMessages = run.messages;
 
   const participantForLog = updatedInitiativeOrder.find(
     (p) => p.basicInfo.id === participant.basicInfo.id,

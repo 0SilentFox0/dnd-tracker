@@ -1,45 +1,49 @@
 import { describe, expect, it } from "vitest";
 
-import { context, goblin, hero, participant } from "./fixtures";
+import { context, goblin, participant } from "./fixtures";
 
 import { bonusActionMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/bonus-action/bonus-action-mutation";
+import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { BattleAccessError } from "@/lib/utils/battle/store";
 
-const skilled = participant("hero", { controlledBy: "user-1" }, {
-  battleData: {
-    ...hero.battleData,
-    activeSkills: [{ skillId: "sk1", name: "Ривок", effects: [], skillTriggers: [{ type: "simple", trigger: "bonusAction" }] } as never],
-  },
-});
+const rally = resolved({ id: "r", trigger: { event: "bonusAction" }, limits: { perBattle: 1 }, effects: [{ kind: "changeMorale", delta: 1, target: "eventTarget" }] });
 
-describe("bonus-action mutation", () => {
-  it("виконує скіл і пише одну подію від імені учасника", () => {
-    const out = bonusActionMutation(context({ participants: [skilled, goblin] }), { participantId: "hero", skillId: "sk1" });
+const hero = participant("hero", { controlledBy: "user-1" }, {});
 
-    expect(out.events).toHaveLength(1);
-    expect(out.events[0]).toMatchObject({ type: "ability", actorId: "hero" });
+const heroWith = { ...hero, battleData: { ...hero.battleData, resolvedAbilities: [rally] } };
+
+describe("bonusActionMutation", () => {
+  it("виконує обране вміння, витрачає бонусну дію і ліміт", () => {
+    const r = bonusActionMutation(context({ participants: [heroWith, goblin] }), { participantId: "hero", abilityKey: rally.key });
+
+    const h = r.participants.find((p) => p.basicInfo.id === "hero");
+
+    if (!h) throw new Error("hero missing");
+
+    expect(h.combatStats.morale).toBe(1);
+    expect(h.actionFlags.hasUsedBonusAction).toBe(true);
+    expect(h.battleData.abilityUsage?.[rally.key].battle).toBe(1);
+    expect(r.events[0]).toMatchObject({ type: "ability", details: { actionDetails: { abilityKey: rally.key, skillName: rally.name } } });
   });
 
-  it("контролер може діяти поза своїм ходом (як зараз)", () => {
-    const out = bonusActionMutation(context({ participants: [goblin, skilled] }), { participantId: "hero", skillId: "sk1" });
+  it("ліміт вичерпано → ability_limit", () => {
+    const used = { ...heroWith, battleData: { ...heroWith.battleData, abilityUsage: { [rally.key]: { battle: 1, round: 1, turn: 1 } } } };
 
-    expect(out.events).toHaveLength(1);
+    expect(() => bonusActionMutation(context({ participants: [used, goblin] }), { participantId: "hero", abilityKey: rally.key })).toThrow(/ліміт/i);
   });
 
-  it("чужий учасник — 403", () => {
-    expect(() =>
-      bonusActionMutation(context({ participants: [skilled, goblin], userId: "someone" }), { participantId: "hero", skillId: "sk1" }),
-    ).toThrow(BattleAccessError);
+  it("невідоме вміння → action_rejected", () => {
+    expect(() => bonusActionMutation(context({ participants: [heroWith, goblin] }), { participantId: "hero", abilityKey: "nope" })).toThrow();
   });
 
-  it("немає скіла — action_rejected; бонусна дія використана — action_used", () => {
-    expect(() => bonusActionMutation(context({ participants: [skilled, goblin] }), { participantId: "hero", skillId: "nope" })).toThrow(
-      expect.objectContaining({ code: "action_rejected" }),
+  it("чужий учасник — 403; бонусна дія вже використана — action_used", () => {
+    expect(() => bonusActionMutation(context({ participants: [heroWith, goblin], userId: "someone" }), { participantId: "hero", abilityKey: rally.key })).toThrow(
+      BattleAccessError,
     );
 
-    const used = { ...skilled, actionFlags: { ...skilled.actionFlags, hasUsedBonusAction: true } };
+    const used = { ...heroWith, actionFlags: { ...heroWith.actionFlags, hasUsedBonusAction: true } };
 
-    expect(() => bonusActionMutation(context({ participants: [used, goblin] }), { participantId: "hero", skillId: "sk1" })).toThrow(
+    expect(() => bonusActionMutation(context({ participants: [used, goblin] }), { participantId: "hero", abilityKey: rally.key })).toThrow(
       expect.objectContaining({ code: "action_used" }),
     );
   });

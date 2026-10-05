@@ -8,6 +8,7 @@ import { calculateSpellDamageWithEnhancements } from "./calculations";
 import { participantImmuneToSpell } from "./spell-immunity";
 
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
+import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import type { BattleParticipant } from "@/types/battle";
 
 export interface SpellCalculation {
@@ -24,6 +25,8 @@ export interface ComputeSpellDamageParams {
   additionalRollResult?: number;
   savingThrows: Array<{ participantId: string; roll: number }>;
   updatedTargets: BattleParticipant[];
+  allParticipants?: BattleParticipant[];
+  actionModifiers?: Record<string, StaticEffect[]>;
 }
 
 export function computeSpellDamageAndApply(
@@ -36,6 +39,8 @@ export function computeSpellDamageAndApply(
     additionalRollResult,
     savingThrows,
     updatedTargets,
+    allParticipants = [],
+    actionModifiers = {},
   } = params;
 
   const baseValue = damageRolls.reduce((sum, roll) => sum + roll, 0);
@@ -44,7 +49,7 @@ export function computeSpellDamageAndApply(
     caster,
     baseValue,
     additionalRollResult,
-    { addHeroLevelToBase: true },
+    { addHeroLevelToBase: true, allParticipants, actionModifiers: actionModifiers[caster.basicInfo.id] },
     { groupId: spell.groupId ?? null },
   );
 
@@ -97,7 +102,7 @@ export function computeSpellDamageAndApply(
       }
     }
 
-    if (participantImmuneToSpell(target, spell.id)) {
+    if (participantImmuneToSpell(target, spell.id, allParticipants, actionModifiers[target.basicInfo.id])) {
       damageToApply = 0;
       allResistanceBreakdown.push(
         `${target.basicInfo.name}: імунітет до цього заклинання`,
@@ -106,7 +111,7 @@ export function computeSpellDamageAndApply(
 
     const damageType = spell.damageElement || "magic";
 
-    const resistanceResult = applyResistance(target, damageToApply, damageType);
+    const resistanceResult = applyResistance(target, damageToApply, damageType, { participants: allParticipants, fromSpell: true, extra: actionModifiers[target.basicInfo.id] });
 
     targetDamages.push({ target, finalDamage: resistanceResult.finalDamage });
     allResistanceBreakdown.push(...resistanceResult.breakdown);
@@ -169,6 +174,8 @@ export function computeSpellHealAndApply(
   damageRolls: number[],
   additionalRollResult: number | undefined,
   updatedTargets: BattleParticipant[],
+  allParticipants: BattleParticipant[] = [],
+  actionModifiers: Record<string, StaticEffect[]> = {},
 ): { spellCalculation: SpellCalculation; updatedTargets: BattleParticipant[] } {
   const baseValue = damageRolls.reduce((sum, roll) => sum + roll, 0);
 
@@ -176,7 +183,7 @@ export function computeSpellHealAndApply(
     caster,
     baseValue,
     additionalRollResult,
-    { addHeroLevelToBase: true },
+    { addHeroLevelToBase: true, allParticipants, actionModifiers: actionModifiers[caster.basicInfo.id] },
     { groupId: spell.groupId ?? null },
   );
 
@@ -201,7 +208,7 @@ export function computeSpellHealAndApply(
 
     if (targetIndex === -1) continue;
 
-    if (participantImmuneToSpell(target, spell.id)) {
+    if (participantImmuneToSpell(target, spell.id, allParticipants)) {
       spellCalculation.breakdown.push(
         `${target.basicInfo.name}: імунітет — ефект лікування заблоковано`,
       );

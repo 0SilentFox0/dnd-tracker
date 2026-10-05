@@ -1,6 +1,7 @@
 import { hashJson } from "./stable-json";
 import type { ParticipantSnapshot, ParticipantState, StoredParticipant } from "./types";
 
+import { convertLegacySnapshot } from "@/lib/utils/abilities/legacy/convert-snapshot";
 import type { BattleParticipant } from "@/types/battle";
 
 function omit<T extends object, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
@@ -21,10 +22,10 @@ export function splitParticipant(
 
   const { currentHp, tempHp, maxHp, morale, status, ...combatRest } = p.combatStats;
 
-  const { activeEffects, skillUsageCounts, pendingExtraActions, ...battleDataWithScoped } = p.battleData;
+  const { activeEffects, abilityUsage, pendingExtraActions, ...battleDataWithScoped } = p.battleData;
 
   // потрібне лише під час старту бою
-  const battleDataRest = omit(battleDataWithScoped, ["pendingScopedArtifactBonuses"]);
+  const battleDataRest = omit(battleDataWithScoped as typeof battleDataWithScoped & { pendingScopedArtifactBonuses?: unknown; skillUsageCounts?: unknown }, ["pendingScopedArtifactBonuses", "skillUsageCounts"]);
 
   const spellSlotsCurrent: Record<string, number> = {};
 
@@ -45,7 +46,7 @@ export function splitParticipant(
 
   const state: ParticipantState = {
     activeEffects: activeEffects ?? [],
-    skillUsageCounts,
+    abilityUsage,
     pendingExtraActions,
     spellSlotsCurrent,
   };
@@ -79,6 +80,10 @@ export function splitParticipant(
 }
 
 export function joinParticipant(stored: StoredParticipant, battleId: string): BattleParticipant {
+  return upgradeLegacyParticipant(joinRaw(stored, battleId));
+}
+
+function joinRaw(stored: StoredParticipant, battleId: string): BattleParticipant {
   const { columns: c, state } = stored;
 
   const s = stored.snapshot as {
@@ -118,6 +123,7 @@ export function joinParticipant(stored: StoredParticipant, battleId: string): Ba
     battleData: {
       ...s.battleData,
       activeEffects: state.activeEffects,
+      ...(state.abilityUsage !== undefined && { abilityUsage: state.abilityUsage }),
       ...(state.skillUsageCounts !== undefined && { skillUsageCounts: state.skillUsageCounts }),
       ...(state.pendingExtraActions !== undefined && { pendingExtraActions: state.pendingExtraActions }),
     },
@@ -128,4 +134,46 @@ export function joinParticipant(stored: StoredParticipant, battleId: string): Ba
       hasExtraTurn: c.hasExtraTurn,
     },
   } as BattleParticipant;
+}
+
+// Учасник, збережений до 3a: вміння виводяться зі старих полів snapshot.
+export function upgradeLegacyParticipant(p: BattleParticipant): BattleParticipant {
+  const bd = p.battleData as BattleParticipant["battleData"] & Record<string, unknown>;
+
+  if (Array.isArray(bd.resolvedAbilities)) {
+    const counts = bd.skillUsageCounts as Record<string, number> | undefined;
+
+    if (!counts) return p;
+
+    // новий heavy snapshot з'єднаний зі state до 3a (відкат): переносимо лічильники за skillId
+    const { skillUsageCounts: _counts, ...modern } = bd;
+
+    void _counts;
+
+    const abilityUsage = { ...modern.abilityUsage };
+
+    for (const a of modern.resolvedAbilities) {
+      const used = a.source.type === "skill" ? counts[a.source.id] : undefined;
+
+      if (used && !abilityUsage[a.key]) abilityUsage[a.key] = { battle: used, round: 0, turn: 0 };
+    }
+
+    return { ...p, battleData: { ...modern, abilityUsage } as BattleParticipant["battleData"] };
+  }
+
+  const { activeSkills: _a, racialAbilities: _r, passiveAbilities: _p, skillUsageCounts: _s, ...rest } = bd;
+
+  void [_a, _r, _p, _s];
+
+  const legacy = convertLegacySnapshot(bd);
+
+  return {
+    ...p,
+    battleData: {
+      ...rest,
+      resolvedAbilities: legacy.resolvedAbilities,
+      spellEnhancers: legacy.spellEnhancers,
+      abilityUsage: { ...legacy.abilityUsage, ...rest.abilityUsage },
+    } as BattleParticipant["battleData"],
+  };
 }

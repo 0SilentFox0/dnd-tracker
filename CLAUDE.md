@@ -39,7 +39,7 @@ Many one-off ops live in `scripts/` and run via `tsx` (e.g. `pnpm import-spells`
 2. **`app/api/campaigns/[id]/...`** — route handlers. `route.ts` should stay thin: Zod validation, session check, then delegate to a sibling handler/helper file (e.g. `attack-handler.ts`, `build-character-update-data.ts`). Heavy logic does **not** belong in `route.ts`.
 3. **`lib/api/<domain>.ts`** — thin client wrappers (`get`/`create`/`update`/`delete`) used by client components/hooks. Do not call `fetch` directly from components — extend the matching `lib/api` module.
 4. **`lib/hooks/<domain>/`** — TanStack Query hooks and form/state hooks per domain (`battles`, `battle` (single-battle scene), `characters`, `skills`, `spells`, `units`, `races`, `campaigns`, `common`). Each domain folder has an `index.ts` barrel; import from the folder, not deep paths.
-5. **`lib/utils/<domain>/`** — pure domain logic (esp. `battle/` for attacks, damage, spells, participants, balance; `skills/` for trigger evaluation + execution; `spells/` for learning rules). Tests sit in sibling `__tests__/` folders.
+5. **`lib/utils/<domain>/`** — pure domain logic (esp. `battle/` for attacks, damage, spells, participants, balance; `abilities/` for the unified ability model (schema, registry, `runAbilities`, `collectModifiers`, legacy converters); `spells/` for learning rules). Tests sit in sibling `__tests__/` folders.
 
 ### Key cross-cutting modules
 
@@ -53,10 +53,11 @@ Many one-off ops live in `scripts/` and run via `tsx` (e.g. `pnpm import-spells`
 
 Page `app/campaigns/[id]/battles/[battleId]/page.tsx` → `useBattleSceneLogic` (in `lib/hooks/battle/`) → mutations in `lib/hooks/battles/useBattles.ts` → `lib/api/battles.ts` → route in `app/api/campaigns/[id]/battles/[battleId]/<action>/route.ts`.
 
-- **Every battle route** is a Zod schema + `runBattleMutation` (`lib/utils/battle/pipeline/`) with a sibling `<action>-mutation.ts`. The pipeline does auth (`getClaims`), loads the battle in one query (`lib/utils/battle/store/loadBattle`), checks access (`dm` / `turnController` / `currentController` / `member`) and status, runs `mutate` (pure engine code from `lib/utils/battle/*`, `lib/utils/skills/execution/*`), checks victory once, saves with an optimistic `version` lock (`saveBattle`: changed `battle_participants` rows, append-only `battle_events`, `battle_snapshots` for rollback) and publishes Pusher events after the response (`after()`).
+- **Every battle route** is a Zod schema + `runBattleMutation` (`lib/utils/battle/pipeline/`) with a sibling `<action>-mutation.ts`. The pipeline does auth (`getClaims`), loads the battle in one query (`lib/utils/battle/store/loadBattle`), checks access (`dm` / `turnController` / `currentController` / `member`) and status, runs `mutate` (pure engine code from `lib/utils/battle/*`, `lib/utils/abilities/*`), checks victory once, saves with an optimistic `version` lock (`saveBattle`: changed `battle_participants` rows, append-only `battle_events`, `battle_snapshots` for rollback) and publishes Pusher events after the response (`after()`).
 - **Turn advance** has one engine: `lib/utils/battle/turn/advanceTurn` (used by next-turn and attack with `endTurn`).
 - **Client compatibility:** responses and `battle-updated` events keep the legacy `BattleScene` shape; the log is sent incrementally (`battleLogMode: "append"`) and merged by `mergeBattleCache`, which also ignores stale `version`s. `actionIndex` in the client log is the event `seq` (rollback target).
 - **Legacy JSON columns** on `battle_scenes` (`initiativeOrder`, `battleLog`, `pendingSummons`) are no longer read or written; they will be dropped by a contract migration.
+- **Abilities** (skills, races, artifacts, sets, units) share one model in `lib/utils/abilities/`: engine code fires typed events into `runAbilities` (limits, chance, `lethalDamage` → `kill`) and reads every stat/damage/resistance/flag bonus via `collectModifiers` — never from raw skill JSON. Owners have an `abilities JSONB` column; until the contract migration, `NULL` falls back to `legacy/read` converters and save routes dual-write it from the old fields (`legacy/sync`).
 - When changing battle behavior, expect to touch the mutation, the engine util, and possibly the hook and UI under `components/battle/`.
 
 ### Path alias & imports

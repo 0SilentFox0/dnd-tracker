@@ -209,15 +209,9 @@ export function useBattleSceneLogic(id: string, battleId: string) {
 
     if (!currentParticipant) return false;
 
-    const skills = currentParticipant.battleData?.activeSkills ?? [];
-
-    return (
-      skills.some(
-        (skill: { name?: string; effects?: Array<{ type?: string }> }) =>
-          skill.name?.toLowerCase().includes("enemy hp") ||
-          skill.name?.toLowerCase().includes("detect") ||
-          skill.effects?.some((e) => e.type === "see_enemy_hp"),
-      ) ?? false
+    return (currentParticipant.battleData?.resolvedAbilities ?? []).some(
+      (a) =>
+        /enemy hp|detect/i.test(a.name) || a.effects.some((e) => e.kind === "flag" && e.flag === "seeEnemyHp"),
     );
   }, [battle, isDM, currentParticipant]);
 

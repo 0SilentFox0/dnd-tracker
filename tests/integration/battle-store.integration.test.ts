@@ -5,6 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 import {
   BattleConflictError,
   loadBattle,
@@ -13,7 +14,6 @@ import {
   restoreParticipantsAt,
   saveBattle,
 } from "@/lib/utils/battle/store";
-import { createMockParticipant } from "@/lib/utils/skills/__tests__/skill-triggers-execution-mocks";
 
 const url = process.env.DATABASE_URL ?? "";
 

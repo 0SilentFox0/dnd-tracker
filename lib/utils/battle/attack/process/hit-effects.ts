@@ -1,5 +1,5 @@
 /**
- * Ефекти при попаданні: OnKill, OnHit, вампіризм, реакція (контр-удар)
+ * Ефекти при попаданні: вампіризм, реакція (контр-удар)
  */
 
 import {
@@ -9,10 +9,6 @@ import {
 
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
 import { AttackType } from "@/lib/constants/battle";
-import {
-  executeOnHitEffects,
-  executeOnKillEffects,
-} from "@/lib/utils/skills/execution";
 import type { BattleParticipant } from "@/types/battle";
 
 export interface ApplyReactionResult {
@@ -35,6 +31,7 @@ export function applyReaction(
   ignoreReactions: boolean,
   overrideReactionDamage?: number,
   incomingAttackType?: "melee" | "ranged" | "magic",
+  participants: BattleParticipant[] = [defender, attacker],
 ): ApplyReactionResult {
   const result: ApplyReactionResult = {
     updatedDefender: defender,
@@ -53,7 +50,7 @@ export function applyReaction(
         ? "magic"
         : AttackType.MELEE;
 
-  if (ignoreReactions || !canPerformReaction(defender, resolvedIncoming)) {
+  if (ignoreReactions || !canPerformReaction(defender, resolvedIncoming, participants)) {
     return result;
   }
 
@@ -62,7 +59,7 @@ export function applyReaction(
     Number.isFinite(overrideReactionDamage) &&
     overrideReactionDamage >= 0;
 
-  const reactionResult = performReaction(defender, attacker);
+  const reactionResult = performReaction(defender, attacker, participants);
 
   result.updatedDefender = reactionResult.updatedDefender;
   result.reactionTriggered = true;
@@ -112,59 +109,6 @@ export function applyReaction(
   result.reactionAttackerHpChange = { oldHp: oldAttackerHp, newHp };
 
   return result;
-}
-
-/**
- * Застосовує OnKill ефекти якщо ціль була вбита.
- */
-export function applyOnKillIfDead(
-  attacker: BattleParticipant,
-  targetWasAlive: boolean,
-  targetIsDead: boolean,
-  attackerSkillUsageCounts: Record<string, number>,
-): BattleParticipant {
-  if (!targetWasAlive || !targetIsDead) {
-    return attacker;
-  }
-
-  const onKillResult = executeOnKillEffects(attacker, attackerSkillUsageCounts);
-
-  return onKillResult.updatedKiller;
-}
-
-/**
- * Застосовує OnHit ефекти та повертає оновлених учасників.
- */
-export function applyOnHit(
-  attacker: BattleParticipant,
-  target: BattleParticipant,
-  currentRound: number,
-  attackerSkillUsageCounts: Record<string, number>,
-  physicalDamageDealt: number,
-  allParticipants: BattleParticipant[],
-  attackId: string,
-  attackName: string,
-): {
-  updatedTarget: BattleParticipant;
-  updatedAttacker: BattleParticipant;
-  updatedParticipants?: BattleParticipant[];
-} {
-  const onHitResult = executeOnHitEffects(
-    attacker,
-    target,
-    currentRound,
-    attackerSkillUsageCounts,
-    physicalDamageDealt,
-    allParticipants,
-    attackId,
-    attackName,
-  );
-
-  return {
-    updatedTarget: onHitResult.updatedTarget,
-    updatedAttacker: onHitResult.updatedAttacker,
-    updatedParticipants: onHitResult.updatedParticipants,
-  };
 }
 
 /**

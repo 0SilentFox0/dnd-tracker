@@ -2,100 +2,71 @@
  * Бонус до атаки, Advantage, Disadvantage
  */
 
-import { matchesAttackBonusModifier } from "../common";
-import { getParticipantExtras } from "../participant";
-
 import { AttackType } from "@/lib/constants/battle";
+import { collectModifiers, findFlags, statWithModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
+import { withSelf } from "@/lib/utils/abilities/engine/participants";
+import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
+
+function attackKindOf(attack: BattleAttack): "melee" | "ranged" {
+  return attack.type === AttackType.RANGED ? "ranged" : "melee";
+}
 
 export function calculateAttackBonus(
   attacker: BattleParticipant,
   attack: BattleAttack,
+  participants: BattleParticipant[] = [attacker],
+  extra?: StaticEffect[],
 ): number {
-  let bonus = attack.attackBonus || 0;
-
   const statModifier =
-    attack.type === AttackType.MELEE
-      ? attacker.abilities.modifiers.strength
-      : attacker.abilities.modifiers.dexterity;
+    attack.type === AttackType.MELEE ? attacker.abilities.modifiers.strength : attacker.abilities.modifiers.dexterity;
 
-  bonus += statModifier;
-  bonus += attacker.abilities.proficiencyBonus;
+  const base = (attack.attackBonus || 0) + statModifier + attacker.abilities.proficiencyBonus;
 
-  for (const effect of attacker.battleData.activeEffects) {
-    for (const effectDetail of effect.effects) {
-      if (
-        effectDetail.type === "attack_bonus" ||
-        effectDetail.type === "attack"
-      ) {
-        bonus += effectDetail.value || 0;
-      }
-    }
-  }
-
-  for (const artifact of attacker.battleData.equippedArtifacts) {
-    for (const modifier of artifact.modifiers) {
-      if (modifier.isPercentage) continue;
-
-      if (!matchesAttackBonusModifier(modifier.type, attack.type)) continue;
-
-      const raw = modifier.value;
-
-      const num =
-        typeof raw === "number" ? raw : Number.parseFloat(String(raw));
-
-      bonus += Number.isFinite(num) ? num : 0;
-    }
-  }
-
-  return bonus;
+  return base + collectModifiers(withSelf(participants, attacker), attacker.basicInfo.id, { stat: "attackBonus", attackKind: attackKindOf(attack) }, extra).flat;
 }
 
 export function hasAdvantage(
   attacker: BattleParticipant,
   attack: BattleAttack,
+  participants: BattleParticipant[] = [attacker],
+  extra?: StaticEffect[],
 ): boolean {
-  const extras = getParticipantExtras(attacker);
+  const kind = attackKindOf(attack);
 
-  if (extras.advantageOnAllRolls) return true;
+  if (attacker.abilities.race?.toLowerCase().includes("elf") && kind === "ranged") return true;
 
-  if (extras.advantageOnRangedAttacks && attack.type === AttackType.RANGED) {
-    return true;
-  }
-
-  if (
-    attacker.abilities.race?.toLowerCase().includes("elf") &&
-    attack.type === AttackType.RANGED
-  ) {
-    return true;
-  }
-
-  for (const effect of attacker.battleData.activeEffects) {
-    for (const effectDetail of effect.effects) {
-      if (
-        effectDetail.type === "advantage" ||
-        effectDetail.type === "advantage_attack"
-      ) {
-        return true;
-      }
-    }
-  }
-
-  return false;
+  return findFlags(withSelf(participants, attacker), attacker.basicInfo.id, "advantage", extra).some(
+    (f) => f.attackKind === "all" || f.attackKind === kind,
+  );
 }
 
 export function hasDisadvantage(
   attacker: BattleParticipant,
   _attack: BattleAttack,
+  participants: BattleParticipant[] = [attacker],
+  opts: { extra?: StaticEffect[]; targetId?: string; targetExtra?: StaticEffect[] } = {},
 ): boolean {
   void _attack;
-  for (const effect of attacker.battleData.activeEffects) {
-    for (const effectDetail of effect.effects) {
-      if (effectDetail.type === "disadvantage_attack") {
-        return true;
-      }
-    }
-  }
 
-  return false;
+  const ps = withSelf(participants, attacker);
+
+  if (findFlags(ps, attacker.basicInfo.id, "disadvantage", opts.extra).length > 0) return true;
+
+  return !!opts.targetId && findFlags(ps, opts.targetId, "disadvantageForAttackers", opts.targetExtra).length > 0;
+}
+
+/** Числа для прогнозу влучання на клієнті — ті самі, що рахує сервер (без модифікаторів фази before). */
+export function predictAttackNumbers(
+  attacker: BattleParticipant,
+  target: BattleParticipant,
+  attack: BattleAttack,
+  participants: BattleParticipant[],
+): { totalBonus: number; targetAC: number } {
+  const ps = withSelf(withSelf(participants, target), attacker);
+
+  return {
+    totalBonus: calculateAttackBonus(attacker, attack, ps),
+    targetAC: statWithModifiers(ps, target.basicInfo.id, "armor", target.combatStats.armorClass),
+  };
 }

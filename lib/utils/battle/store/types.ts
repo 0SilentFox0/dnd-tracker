@@ -1,3 +1,4 @@
+import type { AbilityUsageCounter } from "@/types/abilities";
 import type { BattleParticipant, BattlePreparationParticipant } from "@/types/battle";
 
 export type BattleStatus = "prepared" | "active" | "completed";
@@ -40,6 +41,8 @@ export type ParticipantSnapshot = Record<string, unknown>;
 
 export interface ParticipantState {
   activeEffects: unknown[];
+  abilityUsage?: Record<string, AbilityUsageCounter>;
+  /** лише в рядках, збережених до 3a */
   skillUsageCounts?: Record<string, number>;
   pendingExtraActions?: number;
   spellSlotsCurrent: Record<string, number>;

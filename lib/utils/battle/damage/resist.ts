@@ -2,7 +2,7 @@
  * Застосування резисту до урону (для breakdown / preview)
  */
 
-import { getParticipantExtras } from "../participant";
+import { getCombinedResistancePercent } from "../resistance";
 
 import type { BattleParticipant } from "@/types/battle";
 
@@ -10,26 +10,13 @@ export function applyResistance(
   damage: number,
   defender: BattleParticipant,
   damageCategory: "physical" | "spell" = "physical",
+  participants: BattleParticipant[] = [defender],
 ): {
   finalDamage: number;
   resistPercent: number;
   resistMessage: string | null;
 } {
-  const extras = getParticipantExtras(defender);
-
-  const resistances = extras.resistances;
-
-  if (!resistances) {
-    return { finalDamage: damage, resistPercent: 0, resistMessage: null };
-  }
-
-  let resistPercent = 0;
-
-  if (damageCategory === "physical") {
-    resistPercent = resistances.physical ?? 0;
-  } else if (damageCategory === "spell") {
-    resistPercent = resistances.spell ?? 0;
-  }
+  const resistPercent = getCombinedResistancePercent(defender, damageCategory, { participants });
 
   if (resistPercent <= 0) {
     return { finalDamage: damage, resistPercent: 0, resistMessage: null };

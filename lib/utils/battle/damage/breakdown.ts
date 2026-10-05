@@ -7,10 +7,6 @@ import {
   getTotalDiceCount,
   mergeDiceFormulas,
 } from "../balance";
-import {
-  checkTriggerCondition,
-  getPassiveAbilitiesByTrigger,
-} from "../triggers";
 import type {
   ComputeDamageBreakdownParams,
   DamageBreakdownMultiTargetResult,
@@ -79,30 +75,7 @@ export function computeDamageBreakdown(
       ? getDiceAverage(heroDiceNotation)
       : 0;
 
-  const onAttackAbilities = getPassiveAbilitiesByTrigger(attacker, "on_attack");
-
   const additionalDamageModifiers: Array<{ type: string; value: number }> = [];
-
-  for (const ability of onAttackAbilities) {
-    if (
-      checkTriggerCondition(ability.trigger, attacker, {
-        target,
-        allParticipants,
-      })
-    ) {
-      if (ability.effect.type === "additional_damage") {
-        const modifierType =
-          (ability.effect as { damageType?: string }).damageType || "fire";
-
-        const modifierValue = ability.effect.value || 0;
-
-        additionalDamageModifiers.push({
-          type: modifierType,
-          value: modifierValue,
-        });
-      }
-    }
-  }
 
   const weaponDiceNotationForBreakdown = clientSentFullRolls
     ? mergeDiceFormulas(attack.damageDice ?? "", heroDiceNotation)

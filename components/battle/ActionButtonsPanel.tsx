@@ -8,15 +8,16 @@ import { Button } from "@/components/ui/button";
 import { AttackType } from "@/lib/constants/battle";
 import { cn } from "@/lib/utils";
 import { getDisabledAttackKinds } from "@/lib/utils/battle/attack/disabled-attacks";
-import type { ActiveSkill, BattleParticipant } from "@/types/battle";
+import type { ResolvedAbility } from "@/types/abilities";
+import type { BattleParticipant } from "@/types/battle";
 
 interface ActionButtonsPanelProps {
   participant: BattleParticipant;
-  bonusActions: ActiveSkill[];
+  bonusActions: ResolvedAbility[];
   onMeleeAttack: () => void;
   onRangedAttack: () => void;
   onSpell: () => void;
-  onBonusAction: (skill: ActiveSkill) => void;
+  onBonusAction: (ability: ResolvedAbility) => void;
   onSkipTurn: () => void;
   /** Показати кнопку «Мораль» (fallback, якщо модалка не з’явилась після «Почати хід») */
   showMoraleButton?: boolean;
@@ -161,8 +162,8 @@ export function ActionButtonsPanel({
             <BonusActionPickerDialog
               open={bonusActionPickerOpen}
               onOpenChange={setBonusActionPickerOpen}
-              skills={bonusActions}
-              onSelect={(skill) => onBonusAction(skill)}
+              abilities={bonusActions}
+              onSelect={(ability) => onBonusAction(ability)}
             />
           </>
         ) : (

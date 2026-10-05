@@ -3,7 +3,7 @@
  */
 
 export type { AttackResult, AttackRollResult } from "../types/attack";
-export { calculateAttackBonus, hasAdvantage, hasDisadvantage } from "./bonus";
+export { calculateAttackBonus, hasAdvantage, hasDisadvantage, predictAttackNumbers } from "./bonus";
 export { applyCriticalEffect } from "./critical";
 export {
   DISABLE_MELEE_ATTACKS,

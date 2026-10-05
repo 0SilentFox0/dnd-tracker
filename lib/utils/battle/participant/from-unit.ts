@@ -5,13 +5,15 @@
 import type { Prisma } from "@prisma/client";
 
 import type { UnitFromPrisma } from "../types/participant";
-import { extractRacialAbilities } from "./extract-racial";
+import { loadRace } from "./load-race";
 
 import { AttackType } from "@/lib/constants/battle";
 import { ParticipantSide } from "@/lib/constants/battle";
+import { bakePassives } from "@/lib/utils/abilities/build/bake";
+import { collectUnitAbilities } from "@/lib/utils/abilities/build/collect";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { logger } from "@/lib/utils/logger";
-import type { BattleParticipant, RacialAbility } from "@/types/battle";
+import type { BattleParticipant } from "@/types/battle";
 
 /**
  * Створює BattleParticipant з Unit
@@ -83,23 +85,12 @@ export async function createBattleParticipantFromUnit(
     };
   });
 
-  let racialAbilities: RacialAbility[] = [];
+  let race: Awaited<ReturnType<typeof loadRace>> = null;
 
-  if (unit.race) {
-    try {
-      racialAbilities = await extractRacialAbilities(
-        unit.race,
-        unit.campaignId,
-        racesByName?.[unit.race] ?? undefined,
-      );
-    } catch (error) {
-      logger.error(
-        "[battle/from-unit] extract racial abilities failed",
-        { unitId: unit.id, race: unit.race, campaignId: unit.campaignId },
-        error,
-      );
-      racialAbilities = [];
-    }
+  try {
+    race = await loadRace(unit.race, unit.campaignId, racesByName ? (racesByName[unit.race ?? ""] ?? null) : undefined);
+  } catch (error) {
+    logger.error("[battle/from-unit] load race failed", { unitId: unit.id, race: unit.race, campaignId: unit.campaignId }, error);
   }
 
   const participant: BattleParticipant = {
@@ -151,11 +142,10 @@ export async function createBattleParticipantFromUnit(
     battleData: {
       attacks: battleAttacks,
       activeEffects: [],
-      passiveAbilities: [],
-      racialAbilities,
-      activeSkills: [],
       equippedArtifacts: [],
-      skillUsageCounts: {},
+      resolvedAbilities: collectUnitAbilities(unit, race),
+      spellEnhancers: [],
+      abilityUsage: {},
       pendingExtraActions: 0,
     },
     actionFlags: {
@@ -166,30 +156,5 @@ export async function createBattleParticipantFromUnit(
     },
   };
 
-  let minTargetsBonus = 0;
-
-  let maxTargetsBonus = 0;
-
-  for (const racial of participant.battleData.racialAbilities) {
-    if (typeof racial.effect === "object" && racial.effect !== null) {
-      const effect = racial.effect as Record<string, unknown>;
-
-      if (typeof effect.min_targets === "number")
-        minTargetsBonus += effect.min_targets;
-
-      if (typeof effect.max_targets === "number")
-        maxTargetsBonus += effect.max_targets;
-
-      if (typeof effect.minTargets === "number")
-        minTargetsBonus += effect.minTargets;
-
-      if (typeof effect.maxTargets === "number")
-        maxTargetsBonus += effect.maxTargets;
-    }
-  }
-
-  participant.combatStats.minTargets += minTargetsBonus;
-  participant.combatStats.maxTargets += maxTargetsBonus;
-
-  return participant;
+  return bakePassives(participant);
 }

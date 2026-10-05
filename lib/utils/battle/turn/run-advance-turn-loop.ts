@@ -4,13 +4,13 @@
 
 import { logTurnTiming } from "./turn-helpers";
 
+import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import {
   processEndOfTurn,
   processStartOfRound,
   processStartOfTurn,
 } from "@/lib/utils/battle/battle-turn";
 import { checkVictoryConditions } from "@/lib/utils/battle/battle-victory";
-import { executeSkillsByTrigger } from "@/lib/utils/skills/execution";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 export interface AdvanceTurnLoopParams {
@@ -20,6 +20,7 @@ export interface AdvanceTurnLoopParams {
   battleId: string;
   currentBattleLogLength: number;
   pendingSummons: BattleParticipant[];
+  rng?: () => number;
 }
 
 export interface AdvanceTurnLoopResult {
@@ -40,6 +41,7 @@ export function runAdvanceTurnLoop(
     battleId,
     currentBattleLogLength,
     pendingSummons,
+    rng = Math.random,
   } = params;
 
   let activeParticipantFound = false;
@@ -60,6 +62,24 @@ export function runAdvanceTurnLoop(
   const getStateBeforeForEntry = () => undefined;
 
   let clearedPendingSummons = false;
+
+  const systemEntry = (round: number, text: string, tag: string): BattleAction => ({
+    id: `${tag}-${round}-${Date.now()}-${attempts}`,
+    battleId,
+    round,
+    actionIndex: currentBattleLogLength + newLogEntries.length,
+    timestamp: new Date(),
+    actorId: "system",
+    actorName: "Система",
+    actorSide: "ally",
+    actionType: "ability",
+    targets: [],
+    actionDetails: {},
+    resultText: text,
+    hpChanges: [],
+    isCancelled: false,
+    stateBefore: getStateBeforeForEntry(),
+  });
 
   while (!activeParticipantFound && attempts < maxAttempts) {
     attempts++;
@@ -83,24 +103,21 @@ export function runAdvanceTurnLoop(
     });
 
     if (nextRound > previousRound) {
-      const afterEndRound = updatedInitiativeOrder.map((participant) => {
-        const result = executeSkillsByTrigger(
-          participant,
-          "endRound",
-          updatedInitiativeOrder,
-          { currentRound: previousRound },
-        );
+      const roundEnd = runAbilities(updatedInitiativeOrder, { type: "roundEnd" }, { round: previousRound, rng });
 
-        return result.participant;
-      });
+      updatedInitiativeOrder = roundEnd.participants;
 
-      updatedInitiativeOrder = afterEndRound;
+      if (roundEnd.messages.length > 0) {
+        newLogEntries.push(systemEntry(previousRound, `Кінець раунду ${previousRound}: ${roundEnd.messages.join("; ")}`, "triggers-round-end"));
+      }
+
       clearedPendingSummons = true;
 
       const roundResult = processStartOfRound(
         updatedInitiativeOrder,
         nextRound,
         pendingSummons,
+        rng,
       );
 
       updatedInitiativeOrder = roundResult.updatedInitiativeOrder;
@@ -139,6 +156,7 @@ export function runAdvanceTurnLoop(
       nextParticipant,
       nextRound,
       updatedInitiativeOrder,
+      rng,
     );
 
     logTurnTiming("processStartOfTurn (початок ходу)", tStartTurn, {
@@ -146,7 +164,7 @@ export function runAdvanceTurnLoop(
       participantName: nextParticipant.basicInfo.name,
     });
 
-    updatedInitiativeOrder[nextTurnIndex] = turnResult.participant;
+    updatedInitiativeOrder = turnResult.participants;
 
     if (turnResult.damageMessages.length > 0) {
       newLogEntries.push({
@@ -211,7 +229,7 @@ export function runAdvanceTurnLoop(
       });
     }
 
-    if (turnResult.triggeredAbilities.length > 0) {
+    if (turnResult.abilityMessages.length > 0) {
       newLogEntries.push({
         id: `triggers-turn-${nextTurnIndex}-${Date.now()}-${attempts}`,
         battleId,
@@ -223,13 +241,8 @@ export function runAdvanceTurnLoop(
         actorSide: turnResult.participant.basicInfo.side,
         actionType: "ability",
         targets: [],
-        actionDetails: {
-          triggeredAbilities: turnResult.triggeredAbilities.map((name) => ({
-            id: name,
-            name,
-          })),
-        },
-        resultText: `Тригери початку ходу: ${turnResult.triggeredAbilities.join(", ")}`,
+        actionDetails: {},
+        resultText: `Початок ходу: ${turnResult.abilityMessages.join("; ")}`,
         hpChanges: [],
         isCancelled: false,
         stateBefore: getStateBeforeForEntry(),

@@ -6,10 +6,9 @@ import { runAttackPhase } from "@/lib/utils/battle/attack-and-next-turn/run-atta
 import { mergeDiceFormulas } from "@/lib/utils/battle/balance/dice";
 import { toPipelineError } from "@/lib/utils/battle/pipeline/compat-errors";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { battleActionToEvent, systemEvent } from "@/lib/utils/battle/store";
+import { battleActionToEvent } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";
 import { assertAttackRolls } from "@/lib/utils/battle/validation/dice-checks";
-import { executeComplexTriggersForChangedParticipant } from "@/lib/utils/skills/execution/simple";
 
 export const attackBodySchema = z
   .object({
@@ -77,26 +76,9 @@ export function attackMutation(ctx: BattleMutationContext, body: AttackBody): Mu
     toPipelineError(e);
   }
 
-  let order = phase.finalInitiativeOrder;
+  const order = phase.finalInitiativeOrder;
 
   const events = phase.allBattleActions.map(battleActionToEvent);
-
-  const changedIds = new Set(
-    phase.allBattleActions.flatMap((a) => a.hpChanges.filter((h) => h.oldHp !== h.newHp).map((h) => h.participantId)),
-  );
-
-  const messages: string[] = [];
-
-  for (const id of changedIds) {
-    const triggered = executeComplexTriggersForChangedParticipant(order, id, ctx.scene.round);
-
-    order = triggered.updatedParticipants;
-    messages.push(...triggered.messages);
-  }
-
-  if (messages.length > 0) {
-    events.push(systemEvent(ctx.scene.round, `Тригери після зміни HP: ${messages.join("; ")}`));
-  }
 
   if (!endTurn) return { participants: order, pending: ctx.pending, events };
 

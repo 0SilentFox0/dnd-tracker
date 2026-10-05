@@ -4,7 +4,7 @@
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
-import { distributePendingScopedArtifactBonuses } from "@/lib/utils/battle/artifact-sets";
+import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { calculateInitiative } from "@/lib/utils/battle/battle-start";
 import { createBattleParticipantFromUnit } from "@/lib/utils/battle/participant";
 import type { BattleParticipant } from "@/types/battle";
@@ -37,16 +37,16 @@ export async function appendSummonedUnitToInitiativeEnd(params: {
         p.basicInfo.sourceId === unit.id,
     ).length + 1;
 
-  const newParticipant = await createBattleParticipantFromUnit(
+  const built = await createBattleParticipantFromUnit(
     unit,
     battleId,
     casterSide,
     instanceNumber,
   );
 
-  const finalOrder = [...orderAfterSpell, newParticipant];
+  const finalOrder = applyBakedAuras([...orderAfterSpell, built], new Set([built.basicInfo.id]));
 
-  distributePendingScopedArtifactBonuses(finalOrder);
+  const newParticipant = finalOrder[finalOrder.length - 1];
 
   const calc = calculateInitiative(newParticipant);
 

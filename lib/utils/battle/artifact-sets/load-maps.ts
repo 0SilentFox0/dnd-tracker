@@ -40,6 +40,7 @@ export async function loadArtifactSetBattleMaps(
       name: s.name,
       setBonus: s.setBonus,
       icon: s.icon ?? null,
+      abilities: s.abilities,
     };
   }
 

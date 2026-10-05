@@ -4,18 +4,12 @@
  */
 
 export type { CampaignSpellContext } from "../types/participant";
-export type { ParticipantExtras } from "./extras";
-export {
-  getParticipantExtras,
-  setParticipantExtras,
-} from "./extras";
 export { createBattleParticipantFromCharacter } from "./from-character";
 export { createBattleParticipantFromUnit } from "./from-unit";
 export {
   applyMainActionUsed,
   getAllies,
   getEffectiveArmorClass,
-  getParticipantActiveSkills,
   getParticipantArmorClass,
   getParticipantAttacks,
   getParticipantCurrentHp,
@@ -35,4 +29,3 @@ export {
   hasLowHp,
 } from "./helpers";
 export { parseMainSkillLevelId } from "./parse";
-export { applyPassiveSkillEffects } from "./passive";

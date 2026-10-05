@@ -200,10 +200,10 @@ export default function BattlePage({
                 },
               })
             }
-            onBonusAction={(skill) =>
+            onBonusAction={(ability) =>
               handlers.handleBonusAction(
                 currentParticipant.basicInfo.id,
-                skill.skillId,
+                ability.key,
               )
             }
             onSkipTurn={handlers.handleNextTurn}

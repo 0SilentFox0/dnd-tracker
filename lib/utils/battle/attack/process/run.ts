@@ -1,40 +1,30 @@
 /**
- * Повна обробка атаки з усіма модифікаторами та ефектами
+ * Повна обробка атаки з усіма модифікаторами, вміннями та ефектами
  */
 
 import {
   applyMainActionUsed,
   getEffectiveArmorClass,
 } from "../../participant";
-import {
-  checkTriggerCondition,
-  getPassiveAbilitiesByTrigger,
-} from "../../triggers";
 import type {
   ProcessAttackParams,
   ProcessAttackResult,
 } from "../../types/attack-process";
 import { calculateAttackRoll } from "..";
-import { buildBattleActionForHit } from "./actions";
+import { appendHpChanges, type AttackFlow, fire, getP, put, settleDowned } from "./ability-flow";
+import { buildAbortedAttackAction, buildBattleActionForHit } from "./actions";
 import { computeHitDamage } from "./compute";
 import { handleCriticalFail } from "./critical-fail";
 import { applyDamageToTarget } from "./damage";
-import {
-  applyOnHit,
-  applyOnKillIfDead,
-  applyReaction,
-  applyVampirism,
-} from "./hit-effects";
+import { applyReaction, applyVampirism } from "./hit-effects";
 import { handleMiss } from "./miss";
 
-import { ParticipantSide } from "@/lib/constants/battle";
-import { executeAfterAttackTriggers, executeBeforeAttackTriggers } from "@/lib/utils/skills/execution";
+import { AttackType } from "@/lib/constants/battle";
+import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
+import { isUp, withSelf } from "@/lib/utils/abilities/engine/participants";
 
 export type { ProcessAttackParams, ProcessAttackResult };
 
-/**
- * Повна обробка атаки
- */
 export function processAttack(params: ProcessAttackParams): ProcessAttackResult {
   const {
     attacker,
@@ -51,78 +41,81 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     reactionDamageOverride,
   } = params;
 
-  let updatedAttacker = { ...attacker };
+  const attackerId = attacker.basicInfo.id;
 
-  let updatedTarget = { ...target };
+  const targetId = target.basicInfo.id;
 
-  const isOwnerAction = attacker.basicInfo.side === ParticipantSide.ALLY;
+  const attackKind = attack.type === AttackType.RANGED ? "ranged" : "melee";
 
-  const beforeAttackResult = executeBeforeAttackTriggers(
-    updatedAttacker,
-    updatedTarget,
-    allParticipants,
-    isOwnerAction,
-  );
+  const before = withSelf(withSelf(allParticipants, target), attacker);
 
-  updatedAttacker = beforeAttackResult.updatedAttacker;
+  const flow: AttackFlow = { ps: before, messages: [], ctx: { round: currentRound, rng: params.rng ?? Math.random } };
 
-  const attackRoll = calculateAttackRoll(
-    updatedAttacker,
-    attack,
-    d20Roll,
-    advantageRoll,
-    disadvantageRoll,
-  );
+  const { actionModifiers } = fire(flow, { type: "attack", phase: "before", actorId: attackerId, targetId, attackKind });
 
-  const targetAC = getEffectiveArmorClass(updatedTarget);
+  if (!isUp(getP(flow, targetId))) {
+    put(flow, applyMainActionUsed(getP(flow, attackerId)));
 
-  const isHit =
-    !attackRoll.isCriticalFail &&
-    (attackRoll.isCritical || attackRoll.totalAttackValue >= targetAC);
+    const battleAction = buildAbortedAttackAction(getP(flow, attackerId), target, attack, flow.messages, battleId, currentRound);
+
+    appendHpChanges(battleAction, before, flow.ps);
+
+    return {
+      success: false,
+      attackRoll: calculateAttackRoll(getP(flow, attackerId), attack, d20Roll, advantageRoll, disadvantageRoll, { participants: flow.ps }),
+      targetUpdated: getP(flow, targetId),
+      attackerUpdated: getP(flow, attackerId),
+      allParticipantsUpdated: flow.ps,
+      reactionTriggered: false,
+      battleAction,
+    };
+  }
+
+  const attackRoll = calculateAttackRoll(getP(flow, attackerId), attack, d20Roll, advantageRoll, disadvantageRoll, {
+    participants: flow.ps,
+    extra: actionModifiers[attackerId],
+    targetId,
+    targetExtra: actionModifiers[targetId],
+  });
+
+  const targetAC = getEffectiveArmorClass(getP(flow, targetId), flow.ps, actionModifiers[targetId]);
+
+  const guaranteedHit = findFlags(flow.ps, attackerId, "guaranteedHit", actionModifiers[attackerId]).length > 0;
+
+  const isHit = !attackRoll.isCriticalFail && (attackRoll.isCritical || guaranteedHit || attackRoll.totalAttackValue >= targetAC);
+
+  const branch = { flow, attackerId, targetId, attack, d20Roll, attackRoll, targetAC, currentRound, battleId };
 
   if (attackRoll.isCriticalFail && attackRoll.criticalEffect) {
-    return handleCriticalFail({
-      attacker: updatedAttacker,
-      target: updatedTarget,
-      attack,
-      d20Roll,
-      attackRoll,
-      targetAC,
-      allParticipants,
-      currentRound,
-      battleId,
-      beforeMessages: beforeAttackResult.messages,
-    });
+    const r = handleCriticalFail(branch);
+
+    appendHpChanges(r.battleAction, before, flow.ps);
+
+    return r;
   }
 
   if (!isHit) {
-    return handleMiss({
-      attacker: updatedAttacker,
-      target: updatedTarget,
-      attack,
-      d20Roll,
-      attackRoll,
-      targetAC,
-      allParticipants,
-      currentRound,
-      battleId,
-      beforeMessages: beforeAttackResult.messages,
-    });
+    const r = handleMiss(branch);
+
+    appendHpChanges(r.battleAction, before, flow.ps);
+
+    return r;
   }
 
   const hitDamage = computeHitDamage({
-    attacker: updatedAttacker,
-    target: updatedTarget,
+    attacker: getP(flow, attackerId),
+    target: getP(flow, targetId),
     attack,
     damageRolls,
-    allParticipants,
+    allParticipants: flow.ps,
     attackRoll,
     damageMultiplier,
     currentRound,
+    actionModifiers: actionModifiers[attackerId],
   });
 
-  updatedAttacker = hitDamage.updatedAttacker;
-  updatedTarget = hitDamage.updatedTarget;
+  put(flow, hitDamage.updatedAttacker);
+  put(flow, hitDamage.updatedTarget);
 
   const {
     damageCalculation,
@@ -134,117 +127,34 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     oldHp,
   } = hitDamage;
 
-  const attackerSkillUsageCounts: Record<string, number> = {
-    ...(updatedAttacker.battleData.skillUsageCounts ?? {}),
-  };
+  put(flow, applyDamageToTarget(getP(flow, targetId), totalFinalDamage).updatedTarget);
+  settleDowned(flow, targetId, attackerId);
 
-  const targetSkillUsageCounts: Record<string, number> = {
-    ...(updatedTarget.battleData.skillUsageCounts ?? {}),
-  };
+  fire(flow, { type: "hit", actorId: attackerId, targetId, attackKind, damage: resistanceResult.finalDamage });
 
-  const damageApplyResult = applyDamageToTarget(
-    updatedTarget,
-    totalFinalDamage,
-    targetSkillUsageCounts,
-  );
+  const vampirismResult = applyVampirism(getP(flow, attackerId), totalFinalDamage, attack.type);
 
-  updatedTarget = damageApplyResult.updatedTarget;
+  put(flow, vampirismResult.updatedAttacker);
 
-  const targetWasAlive = target.combatStats.currentHp > 0;
-
-  const targetIsDead =
-    updatedTarget.combatStats.status === "dead" ||
-    updatedTarget.combatStats.status === "unconscious";
-
-  updatedAttacker = applyOnKillIfDead(
-    updatedAttacker,
-    targetWasAlive,
-    targetIsDead,
-    attackerSkillUsageCounts,
-  );
-
-  const onHitResult = applyOnHit(
-    updatedAttacker,
-    updatedTarget,
-    currentRound,
-    attackerSkillUsageCounts,
-    resistanceResult.finalDamage,
-    allParticipants,
-    attack.id ?? "",
-    attack.name ?? "",
-  );
-
-  updatedTarget = onHitResult.updatedTarget;
-  updatedAttacker = onHitResult.updatedAttacker;
-
-  const allParticipantsUpdated = onHitResult.updatedParticipants;
-
-  const vampirismResult = applyVampirism(
-    updatedAttacker,
-    totalFinalDamage,
-    attack.type,
-  );
-
-  updatedAttacker = vampirismResult.updatedAttacker;
-
-  const vampirismHeal = vampirismResult.vampirismHeal;
-
-  updatedAttacker = {
-    ...updatedAttacker,
-    battleData: {
-      ...updatedAttacker.battleData,
-      skillUsageCounts: attackerSkillUsageCounts,
-    },
-  };
-  updatedTarget = {
-    ...updatedTarget,
-    battleData: {
-      ...updatedTarget.battleData,
-      skillUsageCounts: targetSkillUsageCounts,
-    },
-  };
-
-  const onHitAbilities = getPassiveAbilitiesByTrigger(updatedAttacker, "on_hit");
-
-  for (const ability of onHitAbilities) {
-    if (
-      checkTriggerCondition(ability.trigger, updatedAttacker, {
-        target: updatedTarget,
-        allParticipants,
-        damage: totalFinalDamage,
-      })
-    ) {
-      // TODO: Реалізувати застосування ефектів
-    }
-  }
-
-  const afterAttackResult = executeAfterAttackTriggers(
-    updatedAttacker,
-    updatedTarget,
-    allParticipants,
-    isOwnerAction,
-  );
-
-  updatedAttacker = afterAttackResult.updatedAttacker;
+  fire(flow, { type: "attack", phase: "after", actorId: attackerId, targetId, attackKind });
 
   const ignoreReactions = criticalEffectApplied?.effect.type === "ignore_reactions";
 
-  const reactionResult = applyReaction(
-    updatedTarget,
-    updatedAttacker,
-    !!ignoreReactions,
-    reactionDamageOverride,
-    attack.type,
-  );
+  const reactionResult = isUp(getP(flow, targetId))
+    ? applyReaction(getP(flow, targetId), getP(flow, attackerId), !!ignoreReactions, reactionDamageOverride, attack.type, flow.ps)
+    : null;
 
-  updatedTarget = reactionResult.updatedDefender;
-  updatedAttacker = reactionResult.updatedAttacker;
+  if (reactionResult) {
+    put(flow, reactionResult.updatedDefender);
+    put(flow, reactionResult.updatedAttacker);
+    settleDowned(flow, attackerId, targetId);
+  }
 
-  updatedAttacker = applyMainActionUsed(updatedAttacker);
+  put(flow, applyMainActionUsed(getP(flow, attackerId)));
 
   const battleAction = buildBattleActionForHit({
-    attacker: updatedAttacker,
-    target: updatedTarget,
+    attacker: getP(flow, attackerId),
+    target: getP(flow, targetId),
     attack,
     d20Roll,
     damageRolls,
@@ -255,18 +165,20 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     totalFinalDamage,
     resistanceResult,
     criticalEffectApplied,
-    beforeMessages: beforeAttackResult.messages,
-    afterMessages: afterAttackResult.messages,
-    vampirismHeal,
-    reactionTriggered: reactionResult.reactionTriggered,
-    reactionDamage: reactionResult.reactionDamage,
-    reactionBaseDamage: reactionResult.reactionBaseDamage,
-    reactionBonusPercent: reactionResult.reactionBonusPercent,
-    reactionAttackerHpChange: reactionResult.reactionAttackerHpChange,
+    beforeMessages: [],
+    afterMessages: flow.messages,
+    vampirismHeal: vampirismResult.vampirismHeal,
+    reactionTriggered: reactionResult?.reactionTriggered ?? false,
+    reactionDamage: reactionResult?.reactionDamage ?? 0,
+    reactionBaseDamage: reactionResult?.reactionBaseDamage ?? 0,
+    reactionBonusPercent: reactionResult?.reactionBonusPercent ?? 0,
+    reactionAttackerHpChange: reactionResult?.reactionAttackerHpChange ?? null,
     oldHp,
     battleId,
     currentRound,
   });
+
+  appendHpChanges(battleAction, before, flow.ps);
 
   return {
     success: true,
@@ -278,12 +190,12 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
       resistanceBreakdown: resistanceResult.breakdown,
       additionalDamageBreakdown,
     },
-    targetUpdated: updatedTarget,
-    attackerUpdated: updatedAttacker,
-    allParticipantsUpdated,
+    targetUpdated: getP(flow, targetId),
+    attackerUpdated: getP(flow, attackerId),
+    allParticipantsUpdated: flow.ps,
     criticalEffectApplied,
-    reactionTriggered: reactionResult.reactionTriggered,
-    reactionDamage: reactionResult.reactionDamage,
+    reactionTriggered: reactionResult?.reactionTriggered ?? false,
+    reactionDamage: reactionResult?.reactionDamage ?? 0,
     battleAction,
   };
 }

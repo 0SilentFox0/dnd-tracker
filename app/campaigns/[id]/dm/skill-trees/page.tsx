@@ -20,7 +20,7 @@ export default async function SkillTreesPage({
   });
 
   // Отримуємо раси з кампанії
-  const racesData = await prisma.race.findMany({
+  const racesData = await prisma.race.findMany({ omit: { abilities: true },
     where: { campaignId: id },
     orderBy: { createdAt: "desc" },
   });

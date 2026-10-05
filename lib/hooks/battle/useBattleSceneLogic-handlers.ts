@@ -39,7 +39,7 @@ export interface BattleSceneHandlersParams {
   bonusActionMutation: UseMutationResult<
     unknown,
     Error,
-    { participantId: string; skillId: string; targetParticipantId?: string },
+    { participantId: string; abilityKey: string; targetParticipantId?: string },
     unknown
   >;
 }
@@ -162,12 +162,12 @@ export function useBattleSceneHandlers({
   const handleBonusAction = useCallback(
     (
       participantId: string,
-      skillId: string,
+      abilityKey: string,
       targetParticipantId?: string,
     ) => {
       bonusActionMutation.mutate({
         participantId,
-        skillId,
+        abilityKey,
         targetParticipantId,
       });
     },

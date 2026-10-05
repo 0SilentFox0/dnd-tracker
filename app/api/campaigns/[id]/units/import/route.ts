@@ -3,6 +3,8 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { prisma } from "@/lib/db";
+import { convertLegacyUnit } from "@/lib/utils/abilities/legacy/convert-unit";
+import { abilitiesJson } from "@/lib/utils/abilities/legacy/read";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import type { ImportUnit } from "@/types/import";
@@ -193,6 +195,7 @@ export async function POST(
             proficiencyBonus: unit.proficiencyBonus,
             attacks: unit.attacks as Prisma.InputJsonValue,
             specialAbilities: unit.specialAbilities as Prisma.InputJsonValue,
+            abilities: abilitiesJson(convertLegacyUnit({ id: unit.name, name: unit.name, specialAbilities: unit.specialAbilities }).abilities),
             knownSpells: unit.knownSpells,
             avatar: unit.avatar || null,
           };
@@ -212,7 +215,7 @@ export async function POST(
     }
 
     // Отримуємо створені юніти для повернення
-    const createdUnits = await prisma.unit.findMany({
+    const createdUnits = await prisma.unit.findMany({ omit: { abilities: true },
       where: {
         campaignId: id,
         name: {

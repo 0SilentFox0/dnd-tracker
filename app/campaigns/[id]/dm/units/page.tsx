@@ -7,7 +7,7 @@ import { prisma } from "@/lib/db";
 import type { Unit } from "@/types/units";
 
 function transformPrismaUnitToUnit(
-  unit: Prisma.UnitGetPayload<{ include: { unitGroup: true } }>
+  unit: Prisma.UnitGetPayload<{ include: { unitGroup: true }; omit: { abilities: true } }>
 ): Unit {
   return {
     ...unit,
@@ -43,7 +43,7 @@ export default async function DMUnitsPage({
 
   await requireCampaignDM(id);
 
-  const unitsData = await prisma.unit.findMany({
+  const unitsData = await prisma.unit.findMany({ omit: { abilities: true },
     where: {
       campaignId: id,
     },

@@ -2,6 +2,7 @@
  * Повна обробка заклинання з усіма модифікаторами та ефектами
  */
 
+import { type AttackFlow, fire, getP, put, settleDowned } from "../attack/process/ability-flow";
 import { applyMainActionUsed } from "../participant";
 import type {
   BattleSpell,
@@ -28,12 +29,7 @@ import {
 } from "./process-effects";
 import { generateSpellDamageRolls } from "./process-helpers";
 
-import { ParticipantSide } from "@/lib/constants/battle";
-import {
-  executeAfterSpellCastTriggers,
-  executeBeforeSpellCastTriggers,
-  executeOnKillEffects,
-} from "@/lib/utils/skills/execution";
+import { isUp, withSelf } from "@/lib/utils/abilities/engine/participants";
 export type { BattleSpell, ProcessSpellParams, ProcessSpellResult };
 
 /**
@@ -75,24 +71,36 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
         ? validRolls
         : rawDamageRolls.filter((r) => Number.isFinite(r));
 
-  let updatedCaster = { ...caster };
+  const casterId = caster.basicInfo.id;
 
-  const targets = allParticipants.filter((p) => targetIds.includes(p.basicInfo.id));
+  const flow: AttackFlow = { ps: withSelf(allParticipants, caster), messages: [], ctx: { round: currentRound, rng: params.rng ?? Math.random } };
+
+  const { actionModifiers } = fire(flow, { type: "spellCast", phase: "before", actorId: casterId, targetIds });
+
+  let updatedCaster = getP(flow, casterId);
+
+  const targets = flow.ps.filter((p) => targetIds.includes(p.basicInfo.id));
 
   let updatedTargets = targets.map((t) => ({ ...t }));
 
-  const isOwnerAction = caster.basicInfo.side === ParticipantSide.ALLY;
+  const finish = (result: ProcessSpellResult, opts: { after: boolean }): ProcessSpellResult => {
+    put(flow, result.casterUpdated);
 
-  const firstTarget = targets[0];
+    for (const t of result.targetsUpdated) put(flow, t);
 
-  const beforeSpellResult = executeBeforeSpellCastTriggers(
-    updatedCaster,
-    firstTarget,
-    allParticipants,
-    isOwnerAction,
-  );
+    if (opts.after) fire(flow, { type: "spellCast", phase: "after", actorId: casterId, targetIds });
 
-  updatedCaster = beforeSpellResult.updatedCaster;
+    if (flow.messages.length > 0) {
+      result.battleAction.resultText = [result.battleAction.resultText, ...flow.messages].filter(Boolean).join(" | ");
+    }
+
+    return {
+      ...result,
+      casterUpdated: getP(flow, casterId),
+      targetsUpdated: result.targetsUpdated.map((t) => getP(flow, t.basicInfo.id)),
+      allParticipantsUpdated: flow.ps,
+    };
+  };
 
   const spellLevel = spell.level.toString();
 
@@ -106,27 +114,26 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
     !isDMCast &&
     (!spellSlot || spellSlot.current <= 0)
   ) {
-    return handleNoSpellSlot(
+    return finish(handleNoSpellSlot(
       updatedCaster,
       spell,
       targetIds,
-      allParticipants,
+      flow.ps,
       updatedTargets,
       battleId,
       currentRound,
-    );
+    ), { after: false });
   }
 
   if (spell.type === "no_target") {
-    return handleNoTargetSpell(
+    return finish(handleNoTargetSpell(
       updatedCaster,
       spell,
-      allParticipants,
+      flow.ps,
       slotKey,
       battleId,
       currentRound,
-      isOwnerAction,
-    );
+    ), { after: true });
   }
 
   const isDispel =
@@ -135,18 +142,16 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
     spell.name === "Очищення";
 
   if (isDispel) {
-    return handleDispelSpell(
+    return finish(handleDispelSpell(
       updatedCaster,
       spell,
       targetIds,
-      allParticipants,
+      flow.ps,
       updatedTargets,
       slotKey,
       battleId,
       currentRound,
-      isOwnerAction,
-      firstTarget,
-    );
+    ), { after: true });
   }
 
   if (spell.hitCheck) {
@@ -160,16 +165,16 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
     const totalHit = (hitRoll ?? 0) + modifier;
 
     if (hitRoll === undefined || totalHit < spell.hitCheck.dc) {
-      return handleSpellHitCheckMiss(
+      return finish(handleSpellHitCheckMiss(
         updatedCaster,
         spell,
         targetIds,
-        allParticipants,
+        flow.ps,
         updatedTargets,
         slotKey,
         battleId,
         currentRound,
-      );
+      ), { after: false });
     }
   }
 
@@ -191,6 +196,8 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
       additionalRollResult,
       savingThrows,
       updatedTargets,
+      allParticipants: flow.ps,
+      actionModifiers,
     });
 
     spellCalculation = result.spellCalculation;
@@ -202,6 +209,8 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
       damageRolls,
       additionalRollResult,
       updatedTargets,
+      flow.ps,
+      actionModifiers,
     );
 
     spellCalculation = result.spellCalculation;
@@ -277,48 +286,20 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
     updatedCaster = applyMainActionUsed(updatedCaster);
   }
 
-  if (appliesDiceDamage) {
-    const casterSkillUsageCounts: Record<string, number> = {
-      ...(updatedCaster.battleData.skillUsageCounts ?? {}),
-    };
+  put(flow, updatedCaster);
 
-    let killedCount = 0;
+  for (const t of updatedTargets) put(flow, t);
 
-    for (let i = 0; i < updatedTargets.length; i++) {
-      const orig = targets[i];
-
-      const after = updatedTargets[i];
-
-      if (
-        orig &&
-        after &&
-        orig.basicInfo.side !== updatedCaster.basicInfo.side &&
-        orig.combatStats.currentHp > 0 &&
-        after.combatStats.currentHp <= 0
-      ) {
-        killedCount += 1;
-      }
-    }
-    for (let k = 0; k < killedCount; k++) {
-      const onKillResult = executeOnKillEffects(updatedCaster, casterSkillUsageCounts);
-
-      updatedCaster = onKillResult.updatedKiller;
-    }
-    updatedCaster = {
-      ...updatedCaster,
-      battleData: {
-        ...updatedCaster.battleData,
-        skillUsageCounts: casterSkillUsageCounts,
-      },
-    };
+  for (const orig of targets) {
+    if (isUp(orig)) settleDowned(flow, orig.basicInfo.id, casterId);
   }
 
   const battleAction = buildSpellSuccessAction(
-    updatedCaster,
+    getP(flow, casterId),
     spell,
     targetIds,
-    allParticipants,
-    updatedTargets,
+    flow.ps,
+    updatedTargets.map((t) => getP(flow, t.basicInfo.id)),
     targets,
     spellCalculation,
     additionalModifier,
@@ -327,18 +308,14 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
     currentRound,
   );
 
-  const afterSpellResult = executeAfterSpellCastTriggers(
-    updatedCaster,
-    firstTarget,
-    allParticipants,
-    isOwnerAction,
+  return finish(
+    {
+      success: true,
+      spellCalculation,
+      targetsUpdated: updatedTargets,
+      casterUpdated: getP(flow, casterId),
+      battleAction,
+    },
+    { after: true },
   );
-
-  return {
-    success: true,
-    spellCalculation,
-    targetsUpdated: updatedTargets,
-    casterUpdated: afterSpellResult.updatedCaster,
-    battleAction,
-  };
 }

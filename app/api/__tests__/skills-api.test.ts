@@ -277,6 +277,7 @@ describe("POST /api/campaigns/[id]/skills", () => {
 
     expect(data.id).toBe("skill-new");
     expect(data.name).toBe("New Skill");
+    expect(prisma.skill.update).toHaveBeenCalledWith({ where: { id: "skill-new" }, data: { abilities: expect.any(Array) } });
   });
 });
 

@@ -3,22 +3,19 @@
  */
 
 import type { CampaignSpellContext, CharacterFromPrisma } from "../types/participant";
-import { applyEquippedArtifactFlatBonuses } from "./apply-artifact-flat-bonuses";
-import { extractEquippedArtifactsFromCharacter } from "./extract-artifacts";
+import { loadEquippedArtifactRows, toEquippedArtifacts } from "./extract-artifacts";
 import { extractAttacksFromCharacter } from "./extract-attacks";
-import { extractRacialAbilities } from "./extract-racial";
-import { extractActiveSkillsFromCharacter } from "./extract-skills";
+import { resolveCharacterSkillEntries } from "./extract-skills";
 import { resolveLearnedSpellsFromCharacter } from "./from-character-learned-spells";
 import { resolveSpellSlotsFromCharacter } from "./from-character-spell-slots";
-import { mergeEquippedArtifactsImmuneSpellIds } from "./merge-equipped-immune";
-import { applyArtifactPassiveEffects, applyPassiveSkillEffects } from "./passive";
+import { loadRace } from "./load-race";
+import { buildSpellEnhancers } from "./spell-enhancers";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { getHeroMaxHp } from "@/lib/constants/hero-scaling";
-import {
-  applyCompletedArtifactSets,
-  enqueueScopedBonusFromEquippedIfNeeded,
-} from "@/lib/utils/battle/artifact-sets";
+import { bakePassives } from "@/lib/utils/abilities/build/bake";
+import { collectCharacterAbilities } from "@/lib/utils/abilities/build/collect";
+import { findCompletedSets } from "@/lib/utils/battle/artifact-sets";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -41,27 +38,22 @@ export async function createBattleParticipantFromCharacter(
     charisma: getAbilityModifier(character.charisma),
   };
 
-  const activeSkills = await extractActiveSkillsFromCharacter(
-    character,
-    character.campaignId,
-    context?.skillsById,
-  );
+  const mainSkillGroups = context ? new Map(context.mainSkills.map((m) => [m.id, m.spellGroupId])) : undefined;
 
-  const equippedArtifacts = await extractEquippedArtifactsFromCharacter(
-    character,
-    context?.artifactsById,
-  );
+  const skills = await resolveCharacterSkillEntries(character, character.campaignId, context?.skillsById, mainSkillGroups);
+
+  const artifactRows = await loadEquippedArtifactRows(character, context?.artifactsById);
+
+  const equippedArtifacts = toEquippedArtifacts(artifactRows);
+
+  const completed = await findCompletedSets(equippedArtifacts, character.campaignId, context);
 
   const attacks = await extractAttacksFromCharacter(
     character,
     context?.artifactsById,
   );
 
-  const racialAbilities = await extractRacialAbilities(
-    character.race,
-    character.campaignId,
-    context?.racesByName?.[character.race] ?? undefined,
-  );
+  const race = await loadRace(character.race, character.campaignId, context ? (context.racesByName[character.race] ?? null) : undefined);
 
   const rawKnown = character.knownSpells;
 
@@ -87,6 +79,13 @@ export async function createBattleParticipantFromCharacter(
 
   const computedMaxHp = getHeroMaxHp(character.level, character.strength, {
     hpMultiplier: hpMult,
+  });
+
+  const resolvedAbilities = collectCharacterAbilities({
+    skills,
+    race,
+    artifacts: artifactRows.map(({ row, slot }) => ({ ...row, slot })),
+    completedSets: completed.sets,
   });
 
   const participant: BattleParticipant = {
@@ -144,11 +143,11 @@ export async function createBattleParticipantFromCharacter(
     battleData: {
       attacks,
       activeEffects: [],
-      passiveAbilities: [],
-      racialAbilities,
-      activeSkills,
       equippedArtifacts,
-      skillUsageCounts: {},
+      artifactSetHudMarkers: completed.hudMarkers,
+      resolvedAbilities,
+      spellEnhancers: buildSpellEnhancers(skills),
+      abilityUsage: {},
       pendingExtraActions: 0,
     },
     actionFlags: {
@@ -159,42 +158,5 @@ export async function createBattleParticipantFromCharacter(
     },
   };
 
-  await applyCompletedArtifactSets(
-    participant,
-    character.campaignId,
-    context,
-  );
-
-  for (const eq of participant.battleData.equippedArtifacts) {
-    enqueueScopedBonusFromEquippedIfNeeded(participant, eq);
-  }
-
-  applyEquippedArtifactFlatBonuses(participant);
-
-  let minTargetsBonus = 0;
-
-  let maxTargetsBonus = 0;
-
-  for (const skill of participant.battleData.activeSkills) {
-    for (const effect of skill.effects) {
-      if (effect.stat === "min_targets" || effect.stat === "min_targets_bonus") {
-        minTargetsBonus += typeof effect.value === "number" ? effect.value : 0;
-      }
-
-      if (effect.stat === "max_targets" || effect.stat === "max_targets_bonus") {
-        maxTargetsBonus += typeof effect.value === "number" ? effect.value : 0;
-      }
-    }
-  }
-
-  participant.combatStats.minTargets += minTargetsBonus;
-  participant.combatStats.maxTargets += maxTargetsBonus;
-
-  applyPassiveSkillEffects(participant);
-
-  applyArtifactPassiveEffects(participant);
-
-  mergeEquippedArtifactsImmuneSpellIds(participant);
-
-  return participant;
+  return bakePassives(participant);
 }

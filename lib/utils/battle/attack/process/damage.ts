@@ -1,85 +1,33 @@
 /**
- * Розрахунок урону атаки та застосування до цілі (опір, tempHp, survive lethal, статус)
+ * Розрахунок урону атаки та застосування до цілі (опір, tempHp, статус)
  */
 
 import { applyResistance } from "../../resistance";
 
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
-import { checkSurviveLethal } from "@/lib/utils/skills/execution";
 import type { BattleParticipant } from "@/types/battle";
 
 export interface ApplyDamageToTargetResult {
   updatedTarget: BattleParticipant;
-  targetSkillUsageCounts: Record<string, number>;
 }
 
-/**
- * Застосовує фізичний + додатковий урон до цілі (tempHp, currentHp), survive lethal, статус dead/unconscious.
- */
-export function applyDamageToTarget(
-  target: BattleParticipant,
-  totalFinalDamage: number,
-  targetSkillUsageCounts: Record<string, number>,
-): ApplyDamageToTargetResult {
-  let updatedTarget = { ...target };
+/** Фізичний + додатковий урон: спершу tempHp, далі HP і статус. Виживання вирішують уміння (lethalDamage). */
+export function applyDamageToTarget(target: BattleParticipant, totalFinalDamage: number): ApplyDamageToTargetResult {
+  const fromTemp = Math.min(target.combatStats.tempHp, Math.max(0, totalFinalDamage));
 
-  let remainingDamage = totalFinalDamage;
+  const currentHp = Math.max(BATTLE_CONSTANTS.MIN_DAMAGE, target.combatStats.currentHp - (totalFinalDamage - fromTemp));
 
-  let newTempHp = updatedTarget.combatStats.tempHp;
-
-  let newCurrentHp = updatedTarget.combatStats.currentHp;
-
-  if (newTempHp > 0 && remainingDamage > 0) {
-    const tempDamage = Math.min(newTempHp, remainingDamage);
-
-    newTempHp -= tempDamage;
-    remainingDamage -= tempDamage;
-  }
-
-  newCurrentHp = Math.max(
-    BATTLE_CONSTANTS.MIN_DAMAGE,
-    newCurrentHp - remainingDamage,
-  );
-
-  updatedTarget = {
-    ...updatedTarget,
-    combatStats: {
-      ...updatedTarget.combatStats,
-      tempHp: newTempHp,
-      currentHp: newCurrentHp,
+  return {
+    updatedTarget: {
+      ...target,
+      combatStats: {
+        ...target.combatStats,
+        tempHp: target.combatStats.tempHp - fromTemp,
+        currentHp,
+        status: currentHp <= 0 ? (currentHp < 0 ? "dead" : "unconscious") : target.combatStats.status,
+      },
     },
   };
-
-  if (updatedTarget.combatStats.currentHp <= 0) {
-    const surviveResult = checkSurviveLethal(
-      updatedTarget,
-      targetSkillUsageCounts,
-    );
-
-    if (surviveResult.survived) {
-      updatedTarget = {
-        ...updatedTarget,
-        combatStats: {
-          ...updatedTarget.combatStats,
-          currentHp: 1,
-          status: "active",
-        },
-      };
-    }
-  }
-
-  if (updatedTarget.combatStats.currentHp <= 0) {
-    updatedTarget = {
-      ...updatedTarget,
-      combatStats: {
-        ...updatedTarget.combatStats,
-        status:
-          updatedTarget.combatStats.currentHp < 0 ? "dead" : "unconscious",
-      },
-    };
-  }
-
-  return { updatedTarget, targetSkillUsageCounts };
 }
 
 export interface ApplyResistanceForAdditionalResult {
@@ -94,6 +42,7 @@ export function applyResistanceForAdditional(
   target: BattleParticipant,
   additionalDamageList: Array<{ type: string; value: number }>,
   dmgMult: number,
+  participants: BattleParticipant[] = [target],
 ): ApplyResistanceForAdditionalResult {
   let totalAdditionalDamage = 0;
 
@@ -106,6 +55,7 @@ export function applyResistanceForAdditional(
       target,
       additionalValue,
       additionalDamage.type,
+      { participants },
     );
 
     totalAdditionalDamage += additionalResistance.finalDamage;

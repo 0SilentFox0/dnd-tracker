@@ -8,10 +8,10 @@ import { nextTurnMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/ne
 import { createRollbackMutation, rollbackSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/rollback/rollback-mutation";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 import type { PipelineDeps } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { loadBattle, loadRecentEvents, loadSnapshotsFrom, saveBattle } from "@/lib/utils/battle/store";
-import { createMockParticipant } from "@/lib/utils/skills/__tests__/skill-triggers-execution-mocks";
 
 const url = process.env.DATABASE_URL ?? "";
 

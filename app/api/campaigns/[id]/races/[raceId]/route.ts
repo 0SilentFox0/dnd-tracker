@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
 import { updateRaceSchema } from "@/lib/schemas";
+import { syncRaceAbilities } from "@/lib/utils/abilities/legacy/sync";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 
@@ -89,6 +90,8 @@ export async function PATCH(
           : undefined,
       },
     });
+
+    await syncRaceAbilities(prisma, updatedRace);
 
     revalidateTag(`races-${id}`, "max");
 

@@ -2,23 +2,23 @@
  * Реалізація повного розрахунку урону з усіма модифікаторами
  */
 
-import {
-  calculatePercentBonus,
-  formatFlatBonusBreakdown,
-  formatPercentBonusBreakdown,
-} from "../common";
 import type { DamageCalculationResult } from "../types/damage-calculations";
-import { calculateArtifactDamageBonus, calculatePassiveAbilityDamageBonus } from "./bonuses";
-import {
-  calculateSkillDamageFlatBonus,
-  calculateSkillDamagePercentBonus,
-  getSkillDamageFlatBreakdownEntries,
-  getSkillDamagePercentBreakdownEntries,
-} from "./skill";
-import { getSkillsForDamageBonus } from "./skill-resolve";
 
 import { AttackType, BATTLE_CONSTANTS } from "@/lib/constants/battle";
+import { collectModifiers, type ModifierEntry } from "@/lib/utils/abilities/engine/collect-modifiers";
+import { withSelf } from "@/lib/utils/abilities/engine/participants";
+import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import type { BattleParticipant } from "@/types/battle";
+
+const BONUS_PREFIX: Record<ModifierEntry["sourceType"], string> = {
+  skill: "Бонус зі скілів",
+  race: "Расовий бонус",
+  artifact: "Бонус артефакту",
+  artifactSet: "Бонус сету",
+  unit: "Бонус істоти",
+  effect: "Бонус ефекту",
+  action: "Бонус дії",
+};
 
 export function calculateDamageWithModifiersImpl(
   attacker: BattleParticipant,
@@ -32,6 +32,7 @@ export function calculateDamageWithModifiersImpl(
     heroDicePart?: number;
     heroDiceNotation?: string;
     weaponDiceNotation?: string;
+    actionModifiers?: StaticEffect[];
   },
 ): DamageCalculationResult {
   const breakdown: string[] = [];
@@ -70,79 +71,44 @@ export function calculateDamageWithModifiersImpl(
     breakdown.push(`= ${baseWithStat} (база)`);
   }
 
-  const skillPercent = calculateSkillDamagePercentBonus(attacker, attackType);
+  const kind = attackType === AttackType.MELEE ? "melee" : "ranged";
 
-  const hasApplicableSkills = getSkillsForDamageBonus(attacker, attackType).length > 0;
-
-  const skillPercentEntries = getSkillDamagePercentBreakdownEntries(attacker, attackType);
-
-  if (skillPercentEntries.length > 0) {
-    for (const e of skillPercentEntries) {
-      breakdown.push(`Бонус зі скілів: +${e.percent}% (${e.name})`);
-    }
-  } else if (hasApplicableSkills) {
-    breakdown.push("Бонус зі скілів: +0%");
-  }
-
-  const skillFlat = calculateSkillDamageFlatBonus(attacker, attackType);
-
-  const skillFlatEntries = getSkillDamageFlatBreakdownEntries(attacker, attackType);
-
-  if (skillFlatEntries.length > 0) {
-    for (const e of skillFlatEntries) {
-      breakdown.push(`Flat бонус зі скілів: +${e.flat} (${e.name})`);
-    }
-  } else if (hasApplicableSkills) {
-    breakdown.push("Flat бонус зі скілів: +0");
-  }
-
-  const artifactBonuses = calculateArtifactDamageBonus(attacker, attackType);
-
-  if (artifactBonuses.percent > 0) breakdown.push(`Бонус артефакту: +${artifactBonuses.percent}%`);
-
-  if (artifactBonuses.flat > 0) breakdown.push(`Бонус артефакту: +${artifactBonuses.flat}`);
-
-  if (artifactBonuses.percent === 0 && artifactBonuses.flat === 0) {
-    breakdown.push("Бонус артефакту: 0");
-  }
-
-  const passiveBonuses = calculatePassiveAbilityDamageBonus(attacker, context);
-
-  const passivePercentBreakdown = formatPercentBonusBreakdown(
-    "Бонус з пасивних здібностей",
-    passiveBonuses.percent,
+  const mods = collectModifiers(
+    withSelf(context?.allParticipants ?? [], attacker),
+    attacker.basicInfo.id,
+    { damage: { kind } },
+    context?.actionModifiers,
   );
 
-  if (passivePercentBreakdown) breakdown.push(passivePercentBreakdown);
+  for (const e of mods.entries) {
+    const prefix = BONUS_PREFIX[e.sourceType];
 
-  const passiveFlatBreakdown = formatFlatBonusBreakdown(
-    "Flat бонус з пасивок",
-    passiveBonuses.flat,
-  );
+    if (e.percent) breakdown.push(`${prefix}: ${e.percent > 0 ? "+" : ""}${e.percent}% (${e.label})`);
 
-  if (passiveFlatBreakdown) breakdown.push(passiveFlatBreakdown);
+    if (e.flat) breakdown.push(`Flat ${prefix.toLowerCase()}: ${e.flat > 0 ? "+" : ""}${e.flat} (${e.label})`);
+  }
 
-  const totalPercent =
-    skillPercent + artifactBonuses.percent + passiveBonuses.percent;
+  const isArtifact = (e: ModifierEntry) => e.sourceType === "artifact" || e.sourceType === "artifactSet";
 
-  const percentBonusDamage = calculatePercentBonus(baseWithStat, totalPercent);
+  const sum = (pred: (e: ModifierEntry) => boolean, key: "flat" | "percent") =>
+    mods.entries.filter(pred).reduce((acc, e) => acc + e[key], 0);
 
-  const totalFlat = skillFlat + artifactBonuses.flat + passiveBonuses.flat;
+  const percentBonusDamage = Math.floor((baseWithStat * mods.percent) / BATTLE_CONSTANTS.PERCENT_DIVISOR);
 
-  const totalBeforeFloor = baseWithStat + percentBonusDamage + totalFlat;
+  const totalBeforeFloor = baseWithStat + percentBonusDamage + mods.flat;
 
-  const totalDamage = Math.floor(totalBeforeFloor);
+  const totalDamage = Math.max(0, Math.floor(totalBeforeFloor));
 
   breakdown.push(`──────────`);
   breakdown.push(`Сума ${totalBeforeFloor.toFixed(1)} = ${totalDamage} шкоди`);
 
   return {
     baseDamage: baseWithStat,
-    skillPercentBonus: skillPercent,
-    skillFlatBonus: skillFlat,
-    artifactPercentBonus: artifactBonuses.percent,
-    artifactFlatBonus: artifactBonuses.flat,
-    passiveAbilityBonus: passiveBonuses.percent + passiveBonuses.flat,
+    skillPercentBonus: sum((e) => !isArtifact(e), "percent"),
+    skillFlatBonus: sum((e) => !isArtifact(e), "flat"),
+    artifactPercentBonus: sum(isArtifact, "percent"),
+    artifactFlatBonus: sum(isArtifact, "flat"),
+    passiveAbilityBonus: 0,
     additionalDamage: context?.additionalDamage || [],
     totalDamage,
     breakdown,

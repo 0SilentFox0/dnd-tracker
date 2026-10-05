@@ -5,6 +5,7 @@ import { Prisma } from "@prisma/client";
 import { getCachedUnits } from "@/lib/cache/reference-data";
 import { prisma } from "@/lib/db";
 import { createUnitSchema } from "@/lib/schemas";
+import { syncUnitAbilities } from "@/lib/utils/abilities/legacy/sync";
 import { requireCampaignAccess,requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { getProficiencyBonus } from "@/lib/utils/common/calculations";
@@ -72,6 +73,8 @@ export async function POST(
         unitGroup: true,
       },
     });
+
+    await syncUnitAbilities(prisma, unit);
 
     revalidateTag(`units-${id}`, "max");
 

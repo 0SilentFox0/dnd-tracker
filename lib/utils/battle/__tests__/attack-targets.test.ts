@@ -54,10 +54,9 @@ describe("Multi-target Attack Logic", () => {
     battleData: {
       attacks: [],
       activeEffects: [],
-      passiveAbilities: [],
-      racialAbilities: [],
-      activeSkills: [],
       equippedArtifacts: [],
+      resolvedAbilities: [],
+      spellEnhancers: [],
     },
     actionFlags: {
       hasUsedAction: false,

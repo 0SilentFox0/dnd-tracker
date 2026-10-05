@@ -77,11 +77,9 @@ export function addSummonMutation(ctx: BattleMutationContext, data: SummonBody):
       battleData: {
         attacks: [],
         activeEffects: [],
-        passiveAbilities: [],
-        racialAbilities: [],
-        activeSkills: [],
         equippedArtifacts: [],
-        skillUsageCounts: {},
+        resolvedAbilities: [],
+        spellEnhancers: [],
       },
       actionFlags: {
         hasUsedAction: false,

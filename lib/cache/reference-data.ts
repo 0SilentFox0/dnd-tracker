@@ -28,7 +28,7 @@ export async function getCachedSpells(campaignId: string) {
 export async function getCachedUnits(campaignId: string) {
   return unstable_cache(
     async () =>
-      prisma.unit.findMany({
+      prisma.unit.findMany({ omit: { abilities: true },
         where: { campaignId },
         include: { unitGroup: true },
         orderBy: { createdAt: "desc" },
@@ -44,7 +44,7 @@ export async function getCachedUnits(campaignId: string) {
 export async function getCachedRaces(campaignId: string) {
   return unstable_cache(
     async () =>
-      prisma.race.findMany({
+      prisma.race.findMany({ omit: { abilities: true },
         where: { campaignId },
         orderBy: { createdAt: "desc" },
       }),

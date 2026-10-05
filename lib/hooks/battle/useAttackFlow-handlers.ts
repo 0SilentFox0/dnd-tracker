@@ -4,11 +4,11 @@
 
 import type { RollResultType } from "./useAttackFlow";
 
+import { predictAttackNumbers } from "@/lib/utils/battle/attack";
 import {
   getEffectiveD20,
   resolveAttackRoll,
 } from "@/lib/utils/battle/common/attack-roll-helpers";
-import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
 import type { AttackData } from "@/types/api";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -20,6 +20,7 @@ export interface AttackRollData {
 
 export interface UseAttackFlowHandlersParams {
   participant: BattleParticipant;
+  participants: BattleParticipant[];
   selectedAttack: BattleAttack | null;
   selectedTarget: BattleParticipant | null;
   selectedTargets: BattleParticipant[];
@@ -59,6 +60,7 @@ export interface UseAttackFlowHandlersParams {
 
 export function createAttackFlowHandlers({
   participant,
+  participants,
   selectedAttack,
   selectedTarget,
   selectedTargets,
@@ -82,15 +84,7 @@ export function createAttackFlowHandlers({
   const handleAttackRollConfirm = (data: AttackRollData) => {
     if (!selectedAttack || !selectedTarget) return;
 
-    const attackBonus = selectedAttack.attackBonus || 0;
-
-    const statModifier =
-      getAttackAbilityModifier(participant.abilities, selectedAttack.type);
-
-    const totalBonus =
-      attackBonus + statModifier + participant.abilities.proficiencyBonus;
-
-    const targetAC = selectedTarget.combatStats.armorClass;
+    const { totalBonus, targetAC } = predictAttackNumbers(participant, selectedTarget, selectedAttack, participants);
 
     const { hit, crit, critFail } = resolveAttackRoll(
       data,
@@ -133,24 +127,14 @@ export function createAttackFlowHandlers({
         return;
       }
 
-      const attackBonus = selectedAttack?.attackBonus || 0;
-
-      const statModifier =
-        getAttackAbilityModifier(participant.abilities, selectedAttack?.type ?? "");
-
-      const totalBonus =
-        attackBonus + statModifier + participant.abilities.proficiencyBonus;
-
       const hitTargetIndices = attackRollsData
-        .map((rollData, i) =>
-          resolveAttackRoll(
-            rollData,
-            selectedTargets[i].combatStats.armorClass,
-            totalBonus,
-          ).hit
-            ? i
-            : -1,
-        )
+        .map((rollData, i) => {
+          const { totalBonus, targetAC } = selectedAttack
+            ? predictAttackNumbers(participant, selectedTargets[i], selectedAttack, participants)
+            : { totalBonus: 0, targetAC: selectedTargets[i].combatStats.armorClass };
+
+          return resolveAttackRoll(rollData, targetAC, totalBonus).hit ? i : -1;
+        })
         .filter((i) => i >= 0);
 
       if (hitTargetIndices.length > 0) {

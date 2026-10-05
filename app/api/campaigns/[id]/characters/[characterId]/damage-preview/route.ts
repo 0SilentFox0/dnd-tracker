@@ -3,9 +3,9 @@ import { NextResponse } from "next/server";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { getHeroDamageComponents } from "@/lib/constants/hero-scaling";
 import { prisma } from "@/lib/db";
+import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
-import { distributePendingScopedArtifactBonuses } from "@/lib/utils/battle/artifact-sets";
 import { getDiceAverage } from "@/lib/utils/battle/balance";
 import { logBattleTiming } from "@/lib/utils/battle/battle-timing";
 import { calculateDamageWithModifiers } from "@/lib/utils/battle/damage";
@@ -119,13 +119,13 @@ export async function GET(
       );
     }
 
-    const participant = await createBattleParticipantFromCharacter(
+    const built = await createBattleParticipantFromCharacter(
       character,
       "",
       ParticipantSide.ALLY
     );
 
-    distributePendingScopedArtifactBonuses([participant]);
+    const [participant] = applyBakedAuras([built], new Set([built.basicInfo.id]));
 
     const meleeAttack = participant.battleData.attacks?.find(
       (a) => a.type === AttackType.MELEE

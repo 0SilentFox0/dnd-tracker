@@ -16,32 +16,18 @@ export type {
   DamageBreakdownTargetResult,
 } from "../types/damage-breakdown";
 export type { DamageCalculationResult } from "../types/damage-calculations";
-export { calculateArtifactDamageBonus, calculatePassiveAbilityDamageBonus } from "./bonuses";
 export {
   computeDamageBreakdown,
   computeDamageBreakdownMultiTarget,
 } from "./breakdown";
 export { applyResistance } from "./resist";
-export {
-  calculateSkillDamageFlatBonus,
-  calculateSkillDamagePercentBonus,
-  getSkillDamageFlatBreakdownEntries,
-  getSkillDamagePercentBreakdownEntries,
-} from "./skill";
 
 export function calculateDamageWithModifiers(
   attacker: BattleParticipant,
   baseDamage: number,
   statModifier: number,
   attackType: AttackType,
-  context?: {
-    allParticipants?: BattleParticipant[];
-    additionalDamage?: Array<{ type: string; value: number }>;
-    heroLevelPart?: number;
-    heroDicePart?: number;
-    heroDiceNotation?: string;
-    weaponDiceNotation?: string;
-  },
+  context?: Parameters<typeof calculateDamageWithModifiersImpl>[4],
 ): DamageCalculationResult {
   return measureTiming(
     "calculateDamageWithModifiers",
