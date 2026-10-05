@@ -234,6 +234,7 @@ React-провайдери: **`query-provider.tsx`** (TanStack Query), можл�
 - **Дані:** `seed-artifacts.ts`, `seed-mock-battle-data.ts`, `seed-mock-battles.ts`, `reset-mock-battle-data.ts`, `delete-mock-battle-data.ts`, `redistribute-character-spell-slots.ts`.
 - **Тести/симуляції:** `run-spells-testing.ts`, `setup-battle-test-3v5.ts`.
 - **Конвертація умінь:** `pnpm convert-abilities` (dry-run зі звітом у `docs/reports/`; `--apply` / `--force`).
+- **Симуляція бою:** `pnpm simulate-battle` — лише на локальній БД: створює окрему кампанію (персонажі з різними прокачками й артефактами, юніти з уміннями, частина даних у старому форматі) і проганяє бій через ті самі mutation-функції, що й API, з перевірками ефектів.
 - **Інше:** `fetch-skill-structure.ts`, `artifact-icon-map.ts`, `update-artifact-icons.ts`, `import-spells-from-csv.ts`.
 
 Детальніший опис mock-даних — у **`scripts/README-MOCK-DATA.md`**.
