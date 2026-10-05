@@ -7,7 +7,7 @@ import type { AttackRollResult } from "..";
 
 import { AttackType } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
-import type { BattleAction, BattleAttack, BattleParticipant } from "@/types/battle";
+import type { BattleAction, BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
 
 export function buildBattleActionForCriticalFail(
   attacker: BattleParticipant,
@@ -147,6 +147,7 @@ export interface BuildHitActionParams {
   totalFinalDamage: number;
   resistanceResult: { finalDamage: number; breakdown: string[] };
   criticalEffectApplied?: CriticalEffect;
+  damageSteps: DamageStep[];
   beforeMessages: string[];
   afterMessages: string[];
   vampirismHeal: number;
@@ -173,6 +174,7 @@ export function buildBattleActionForHit(params: BuildHitActionParams): BattleAct
     physicalDamage,
     totalFinalDamage,
     criticalEffectApplied,
+    damageSteps,
     beforeMessages,
     afterMessages,
     vampirismHeal,
@@ -228,6 +230,7 @@ export function buildBattleActionForHit(params: BuildHitActionParams): BattleAct
       })),
       totalDamage: physicalDamage,
       damageBreakdown: damageCalculation.breakdown.join("; "),
+      damageSteps: { [target.basicInfo.id]: damageSteps },
       ...(reactionTriggered && {
         counterReactionDamage: reactionDamage,
         counterReactionBaseDamage: reactionBaseDamage,

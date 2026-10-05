@@ -19,7 +19,7 @@ import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
-import type { BattleParticipant } from "@/types/battle";
+import type { BattleParticipant, DamageStep } from "@/types/battle";
 import type { BattleAttack } from "@/types/battle";
 
 export interface ComputeHitDamageParams {
@@ -45,6 +45,7 @@ export interface ComputeHitDamageResult {
   updatedAttacker: BattleParticipant;
   updatedTarget: BattleParticipant;
   criticalEffectApplied?: CriticalEffect;
+  damageSteps: DamageStep[];
   oldHp: number;
 }
 
@@ -135,7 +136,12 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
 
   let physicalDamage = damageCalculation.totalDamage;
 
-  if (criticalEffectApplied?.effect.type === "double_damage") physicalDamage *= 2;
+  const damageSteps: DamageStep[] = [...damageCalculation.steps];
+
+  if (criticalEffectApplied?.effect.type === "double_damage") {
+    physicalDamage *= 2;
+    damageSteps.push({ label: criticalEffectApplied.name, side: "attacker", kind: "multiplier", value: 2, after: physicalDamage });
+  }
 
   if (criticalEffectApplied?.effect.type === "max_damage") {
     const diceMatch = attack.damageDice?.match(/(\d+)d(\d+)([+-]\d+)?/);
@@ -146,11 +152,17 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
 
     const diceMod = diceMatch?.[3] ? parseInt(diceMatch[3], 10) : 0;
 
+    const before = physicalDamage;
+
     physicalDamage = count * size + diceMod + statModifier;
+    damageSteps.push({ label: criticalEffectApplied.name, side: "attacker", kind: "flat", value: physicalDamage - before, after: physicalDamage });
   }
 
   if (criticalEffectApplied?.effect.type === "additional_damage") {
-    physicalDamage += Math.floor(Math.random() * 6) + 1;
+    const extra = Math.floor(Math.random() * 6) + 1;
+
+    physicalDamage += extra;
+    damageSteps.push({ label: criticalEffectApplied.name, side: "attacker", kind: "flat", value: extra, after: physicalDamage });
   }
 
   const heroDm = applyHeroDmDamageMultiplier(
@@ -164,6 +176,7 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
   if (heroDm.breakdownLine) {
     damageCalculation.breakdown.push("──────────");
     damageCalculation.breakdown.push(heroDm.breakdownLine);
+    damageSteps.push({ label: "Коефіцієнт DM", side: "attacker", kind: "multiplier", value: heroDm.multiplier, after: physicalDamage });
   }
 
   const dmgMult =
@@ -187,6 +200,12 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
 
   const totalFinalDamage = resistanceResult.finalDamage + totalAdditionalDamage;
 
+  if (dmgMult !== 1) damageSteps.push({ label: "Частка шкоди", side: "attacker", kind: "multiplier", value: dmgMult, after: physicalDamageForTarget });
+
+  damageSteps.push(...resistanceResult.steps);
+
+  if (totalAdditionalDamage > 0) damageSteps.push({ label: "Додаткова шкода", side: "attacker", kind: "flat", value: totalAdditionalDamage, after: totalFinalDamage });
+
   const oldHp = updatedTarget.combatStats.currentHp;
 
   return {
@@ -200,6 +219,7 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
     updatedAttacker,
     updatedTarget,
     criticalEffectApplied,
+    damageSteps,
     oldHp,
   };
 }

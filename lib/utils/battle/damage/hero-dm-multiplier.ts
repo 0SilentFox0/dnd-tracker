@@ -20,9 +20,9 @@ export function applyHeroDmDamageMultiplier(
   attacker: BattleParticipant,
   attackType: AttackType,
   physicalDamage: number,
-): { damage: number; breakdownLine: string | null } {
+): { damage: number; breakdownLine: string | null; multiplier: number } {
   if (attacker.basicInfo.sourceType !== "character") {
-    return { damage: physicalDamage, breakdownLine: null };
+    return { damage: physicalDamage, breakdownLine: null, multiplier: 1 };
   }
 
   const mult =
@@ -31,7 +31,7 @@ export function applyHeroDmDamageMultiplier(
       : clampHeroDamageMultiplier(attacker.abilities.rangedMultiplier);
 
   if (mult === 1) {
-    return { damage: physicalDamage, breakdownLine: null };
+    return { damage: physicalDamage, breakdownLine: null, multiplier: 1 };
   }
 
   const damage = Math.floor(physicalDamage * mult);
@@ -39,5 +39,6 @@ export function applyHeroDmDamageMultiplier(
   return {
     damage,
     breakdownLine: `× ${mult} (коеф. DM) = ${damage}`,
+    multiplier: mult,
   };
 }

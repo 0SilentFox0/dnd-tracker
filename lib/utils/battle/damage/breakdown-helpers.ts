@@ -9,7 +9,7 @@ import {
 
 import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
-import type { BattleParticipant } from "@/types/battle";
+import type { BattleParticipant, DamageStep } from "@/types/battle";
 
 const PHYSICAL_DAMAGE_TYPES = [
   "slashing",
@@ -45,7 +45,7 @@ export function getDefenderResistanceBreakdown(
   damageType: string,
   incomingDamage: number,
   participants: BattleParticipant[] = [target],
-): { targetBreakdown: string[]; finalDamage: number } {
+): { targetBreakdown: string[]; finalDamage: number; targetSteps: DamageStep[] } {
   const targetBreakdown: string[] = [];
 
   const targetName = target.basicInfo.name;
@@ -72,5 +72,5 @@ export function getDefenderResistanceBreakdown(
     targetBreakdown.push(`Сумарна шкода по ${targetName}: ${finalDamage}`);
   }
 
-  return { targetBreakdown, finalDamage };
+  return { targetBreakdown, finalDamage, targetSteps: resistanceResult.steps };
 }

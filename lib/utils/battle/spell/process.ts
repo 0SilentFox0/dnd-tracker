@@ -10,13 +10,14 @@ import type {
   ProcessSpellResult,
 } from "../types/spell-process";
 import { calculateSpellAdditionalModifier } from "./calculations";
-import { buildSpellSuccessAction, type SpellCalculation } from "./process-actions";
+import { buildSpellSuccessAction } from "./process-actions";
 import {
   handleDispelSpell,
   handleNoSpellSlot,
   handleNoTargetSpell,
   handleSpellHitCheckMiss,
 } from "./process-branches";
+import type { SpellCalculation } from "./process-damage";
 import {
   computeSpellDamageAndApply,
   computeSpellHealAndApply,

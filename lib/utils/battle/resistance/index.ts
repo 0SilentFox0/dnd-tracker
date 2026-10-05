@@ -3,10 +3,10 @@
  */
 
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
-import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
+import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
-import { BattleParticipant } from "@/types/battle";
+import type { BattleParticipant, DamageStep } from "@/types/battle";
 
 const PHYSICAL_DAMAGE_TYPES = ["slashing", "piercing", "bludgeoning", "physical"];
 
@@ -25,6 +25,7 @@ export interface ResistanceResult {
   immunityApplied: boolean;
   resistanceApplied: boolean;
   breakdown: string[];
+  steps: DamageStep[];
 }
 
 function matchesDamageType(flagType: string, damageType: string, fromSpell: boolean): boolean {
@@ -36,8 +37,12 @@ function matchesDamageType(flagType: string, damageType: string, fromSpell: bool
 }
 
 function matchingResistances(target: BattleParticipant, damageType: string, opts: ResistanceOptions = {}) {
-  return findFlags(withSelf(opts.participants ?? [], target), target.basicInfo.id, "resistance", opts.extra).filter((f) =>
-    matchesDamageType(f.damageType, damageType, opts.fromSpell === true),
+  const { entries } = collectModifiers(withSelf(opts.participants ?? [], target), target.basicInfo.id, { flag: "resistance" }, opts.extra);
+
+  return entries.flatMap((e) =>
+    e.flag?.flag === "resistance" && matchesDamageType(e.flag.damageType, damageType, opts.fromSpell === true)
+      ? [{ label: e.label, percent: e.flag.percent, icon: e.icon }]
+      : [],
   );
 }
 
@@ -71,9 +76,11 @@ export function applyResistance(
 
   let finalDamage = damage;
 
-  // Перевіряємо імунітет
-  if (hasImmunity(target, damageType, opts)) {
-    finalDamage = 0;
+  const matches = matchingResistances(target, damageType, opts);
+
+  const immune = matches.find((m) => m.percent >= 100);
+
+  if (immune) {
     breakdown.push(`${damage} ${damageType} → ІМУНІТЕТ (0 урону)`);
 
     return {
@@ -81,36 +88,32 @@ export function applyResistance(
       immunityApplied: true,
       resistanceApplied: false,
       breakdown,
+      steps: [{ label: immune.label, side: "target", kind: "immunity", value: -100, after: 0, icon: immune.icon }],
     };
   }
 
-  const resistancePercent = getCombinedResistancePercent(target, damageType, opts);
+  const resistancePercent = Math.min(BATTLE_CONSTANTS.RESISTANCE_PERCENT_CAP, matches.reduce((sum, m) => sum + m.percent, 0));
 
   if (resistancePercent > 0) {
-    const factor = 1 - resistancePercent / BATTLE_CONSTANTS.PERCENT_DIVISOR;
+    finalDamage = Math.floor(damage * (1 - resistancePercent / BATTLE_CONSTANTS.PERCENT_DIVISOR));
+    breakdown.push(`${damage} ${damageType} → -${resistancePercent}% опір (${finalDamage} урону)`);
 
-    finalDamage = Math.floor(damage * factor);
-    breakdown.push(
-      `${damage} ${damageType} → -${resistancePercent}% опір (${finalDamage} урону)`,
-    );
+    let used = 0;
 
-    return {
-      finalDamage,
-      immunityApplied: false,
-      resistanceApplied: true,
-      breakdown,
-    };
+    const steps = matches.map((m, i): DamageStep => {
+      used = Math.min(resistancePercent, used + m.percent);
+
+      const after = i === matches.length - 1 ? finalDamage : Math.floor(damage * (1 - used / BATTLE_CONSTANTS.PERCENT_DIVISOR));
+
+      return { label: m.label, side: "target", kind: "percent", value: -m.percent, after, icon: m.icon };
+    });
+
+    return { finalDamage, immunityApplied: false, resistanceApplied: true, breakdown, steps };
   }
 
-  // Немає імунітету або опору
   breakdown.push(`${damage} ${damageType} урону`);
 
-  return {
-    finalDamage,
-    immunityApplied: false,
-    resistanceApplied: false,
-    breakdown,
-  };
+  return { finalDamage, immunityApplied: false, resistanceApplied: false, breakdown, steps: [] };
 }
 
 /**
@@ -133,6 +136,8 @@ export function applyResistanceToMultipleDamage(
 
   let hasResistance = false;
 
+  const steps: DamageStep[] = [];
+
   for (const [damageType, damage] of Object.entries(damageByType)) {
     if (damage <= 0) continue;
 
@@ -149,6 +154,7 @@ export function applyResistanceToMultipleDamage(
     }
     
     breakdown.push(...result.breakdown);
+    steps.push(...result.steps);
   }
 
   return {
@@ -156,6 +162,7 @@ export function applyResistanceToMultipleDamage(
     immunityApplied: hasImmunity,
     resistanceApplied: hasResistance,
     breakdown,
+    steps,
   };
 }
 
