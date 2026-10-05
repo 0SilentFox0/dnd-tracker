@@ -1,7 +1,6 @@
 "use client";
 
 import { ParticipantRow } from "./ParticipantRow";
-import type { Character, Participant, Unit } from "./types";
 
 import {
   Card,
@@ -10,12 +9,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import type { SetupCharacter, SetupParticipant, SetupUnit } from "@/types/battle-setup";
 
 interface SidePanelCardProps {
   side: "ally" | "enemy";
-  participants: Participant[];
-  characters: Character[];
-  units: Unit[];
+  participants: SetupParticipant[];
+  characters: SetupCharacter[];
+  units: SetupUnit[];
   onSideChange: (participantId: string, newSide: "ally" | "enemy") => void;
   onRemove: (participantId: string) => void;
 }

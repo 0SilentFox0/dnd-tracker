@@ -2,21 +2,20 @@
 
 import { useEffect, useState } from "react";
 
-import type { Character, EntityStats, Unit } from "./types";
-
 import { getBattleBalance } from "@/lib/api/battles";
 import { getCharacters } from "@/lib/api/characters";
 import { getUnits } from "@/lib/api/units";
 import { useRaces } from "@/lib/hooks/races";
+import type { EntityStats, SetupCharacter, SetupUnit } from "@/types/battle-setup";
 
 export function useNewBattleData(campaignId: string) {
   const { data: races = [] } = useRaces(campaignId);
 
   const [loadingData, setLoadingData] = useState(true);
 
-  const [characters, setCharacters] = useState<Character[]>([]);
+  const [characters, setCharacters] = useState<SetupCharacter[]>([]);
 
-  const [units, setUnits] = useState<Unit[]>([]);
+  const [units, setUnits] = useState<SetupUnit[]>([]);
 
   const [entityStats, setEntityStats] = useState<{
     characterStats: Record<string, EntityStats>;
@@ -32,8 +31,8 @@ export function useNewBattleData(campaignId: string) {
           getBattleBalance(campaignId, {}),
         ]);
 
-        setCharacters(chars as Character[]);
-        setUnits(unitsData as Unit[]);
+        setCharacters(chars as SetupCharacter[]);
+        setUnits(unitsData as SetupUnit[]);
 
         if (
           balanceData.characterStats != null ||

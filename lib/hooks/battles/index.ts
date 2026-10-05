@@ -1,3 +1,5 @@
+export { useEditBattleData } from "./setup/useEditBattleData";
+export { useNewBattlePage } from "./setup/useNewBattlePage";
 export { mergeBattleCache } from "./useBattles";
 export {
   useAddBattleParticipant,

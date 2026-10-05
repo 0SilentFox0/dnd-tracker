@@ -2,8 +2,6 @@
 
 import Image from "next/image";
 
-import type { EntityStats, Unit } from "./types";
-
 import {
   Accordion,
   AccordionContent,
@@ -19,9 +17,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import type { EntityStats, SetupUnit } from "@/types/battle-setup";
 
 interface UnitsListCardProps {
-  units: Unit[];
+  units: SetupUnit[];
   entityStats: Record<string, EntityStats> | null;
   isParticipantSelected: (id: string) => boolean;
   getParticipantSide: (id: string) => "ally" | "enemy" | null;
@@ -34,8 +33,8 @@ interface UnitsListCardProps {
   onQuantityChange: (id: string, quantity: number) => void;
 }
 
-function groupUnitsByRace(units: Unit[]): Map<string, Unit[]> {
-  const byRace = new Map<string, Unit[]>();
+function groupUnitsByRace(units: SetupUnit[]): Map<string, SetupUnit[]> {
+  const byRace = new Map<string, SetupUnit[]>();
 
   for (const u of units) {
     const raceKey = u.race?.trim() || "Без раси";
@@ -61,7 +60,7 @@ function UnitRow({
   onAddToEnemies,
   onQuantityChange,
 }: {
-  unit: Unit;
+  unit: SetupUnit;
   stats: EntityStats | undefined;
   isSelected: boolean;
   side: "ally" | "enemy" | null;

@@ -3,31 +3,14 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { useBattle, useDeleteBattle, useUpdateBattle } from "../useBattles";
+
 import { getCharacters } from "@/lib/api/characters";
 import { getUnits } from "@/lib/api/units";
 import { ParticipantSide } from "@/lib/constants/battle";
-import {
-  useBattle,
-  useDeleteBattle,
-  useUpdateBattle,
-} from "@/lib/hooks/battles";
 import { useConfirm, useNotify } from "@/lib/hooks/common";
 import type { BattlePreparationParticipant } from "@/types/battle";
-
-export interface EditBattleCharacter {
-  id: string;
-  name: string;
-  type: string;
-  controlledBy: string | null;
-  avatar: string | null;
-}
-
-export interface EditBattleUnit {
-  id: string;
-  name: string;
-  groupId: string | null;
-  avatar: string | null;
-}
+import type { EditBattleCharacter, EditBattleUnit } from "@/types/battle-setup";
 
 export function useEditBattleData(campaignId: string, battleId: string) {
   const notify = useNotify();

@@ -1,4 +1,4 @@
-export interface Character {
+export interface SetupCharacter {
   id: string;
   name: string;
   type: string;
@@ -6,7 +6,7 @@ export interface Character {
   avatar: string | null;
 }
 
-export interface Unit {
+export interface SetupUnit {
   id: string;
   name: string;
   groupId: string | null;
@@ -32,7 +32,7 @@ export interface SuggestedEnemy {
   totalHp: number;
 }
 
-export interface Participant {
+export interface SetupParticipant {
   id: string;
   type: "character" | "unit";
   side: "ally" | "enemy";
@@ -57,3 +57,18 @@ export interface EntityStats {
 }
 
 export type Difficulty = "easy" | "medium" | "hard";
+
+export interface EditBattleCharacter {
+  id: string;
+  name: string;
+  type: string;
+  controlledBy: string | null;
+  avatar: string | null;
+}
+
+export interface EditBattleUnit {
+  id: string;
+  name: string;
+  groupId: string | null;
+  avatar: string | null;
+}

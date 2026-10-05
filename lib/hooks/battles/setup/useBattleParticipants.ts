@@ -2,10 +2,10 @@
 
 import { useCallback,useState } from "react";
 
-import type { Participant } from "./types";
+import type { SetupParticipant } from "@/types/battle-setup";
 
 export function useBattleParticipants() {
-  const [participants, setParticipants] = useState<Participant[]>([]);
+  const [participants, setParticipants] = useState<SetupParticipant[]>([]);
 
   const handleParticipantToggle = useCallback(
     (

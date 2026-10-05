@@ -2,14 +2,8 @@
 
 import { useCallback, useState } from "react";
 
-import type {
-  AllyStats,
-  Difficulty,
-  Participant,
-  SuggestedEnemy,
-} from "./types";
-
 import { getBattleBalance } from "@/lib/api/battles";
+import type { AllyStats, Difficulty, SetupParticipant, SuggestedEnemy } from "@/types/battle-setup";
 
 interface AllyParticipants {
   characterIds: string[];
@@ -18,10 +12,10 @@ interface AllyParticipants {
 
 interface UseBalanceSuggestionsParams {
   campaignId: string;
-  participants: Participant[];
+  participants: SetupParticipant[];
   allyParticipants: AllyParticipants;
   hasAllies: boolean;
-  setParticipants: React.Dispatch<React.SetStateAction<Participant[]>>;
+  setParticipants: React.Dispatch<React.SetStateAction<SetupParticipant[]>>;
 }
 
 export function useBalanceSuggestions({
@@ -94,7 +88,7 @@ export function useBalanceSuggestions({
   const applySuggestedEnemies = useCallback(() => {
     const allies = participants.filter((p) => p.side === "ally");
 
-    const newEnemies: Participant[] = suggestedEnemies.map((s) => ({
+    const newEnemies: SetupParticipant[] = suggestedEnemies.map((s) => ({
       id: s.unitId,
       type: "unit",
       side: "enemy",

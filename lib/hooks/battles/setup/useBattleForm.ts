@@ -3,10 +3,9 @@
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import type { Participant } from "./types";
-
 import { createBattle } from "@/lib/api/battles";
 import { useNotify } from "@/lib/hooks/common";
+import type { SetupParticipant } from "@/types/battle-setup";
 
 interface UseBattleFormParams {
   campaignId: string;
@@ -14,7 +13,7 @@ interface UseBattleFormParams {
   setFormData: React.Dispatch<
     React.SetStateAction<{ name: string; description: string }>
   >;
-  participants: Participant[];
+  participants: SetupParticipant[];
 }
 
 export function useBattleForm({

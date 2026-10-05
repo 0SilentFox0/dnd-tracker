@@ -7,10 +7,10 @@ import { BattleFormBasicInfo } from "./BattleFormBasicInfo";
 import { CharactersListCard } from "./CharactersListCard";
 import { SidePanelCard } from "./SidePanelCard";
 import { UnitsListCard } from "./UnitsListCard";
-import { useNewBattlePage } from "./useNewBattlePage";
 
 import { ActionBar } from "@/components/common/ActionBar";
 import { Button } from "@/components/ui/button";
+import { useNewBattlePage } from "@/lib/hooks/battles";
 
 export default function NewBattlePage({
   params,
