@@ -23,11 +23,11 @@ export const defaultPipelineDeps: PipelineDeps = {
   loadBattle: (args) => loadBattle(prisma, args),
   saveBattle: (before, outcome) => saveBattle(prisma, before, outcome),
   publish(battleId, payload) {
-    after(() => {
+    after(() =>
       safePusherTrigger(pusherServer, battleChannelName(battleId), "battle-delta", payload, {
         action: "battle mutation",
         battleId,
-      });
-    });
+      }),
+    );
   },
 };

@@ -112,4 +112,21 @@ describe("splitParticipant / joinParticipant", () => {
 
     expect(stableStringify(stored.snapshot)).not.toContain("pendingScopedArtifactBonuses");
   });
+
+  it("дробові HP/мораль/ініціатива округлюються — колонки INTEGER не мають падати", () => {
+    const p = richParticipant();
+
+    const stored = splitParticipant(
+      {
+        ...p,
+        abilities: { ...p.abilities, initiative: 12.5 },
+        combatStats: { ...p.combatStats, currentHp: 7.4, tempHp: 0.6, maxHp: 20.2, morale: -0.7 },
+      },
+      { orderIndex: 0, isPending: false },
+    );
+
+    for (const key of ["currentHp", "tempHp", "maxHp", "morale", "initiative"] as const) {
+      expect(Number.isInteger(stored.columns[key])).toBe(true);
+    }
+  });
 });

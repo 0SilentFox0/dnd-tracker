@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import type { PipelineDeps } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import type { BattleMutationContext, PipelineDeps } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { BattleDelta, LoadedBattle } from "@/lib/utils/battle/store";
 import { BattleConflictError, BattleRuleError } from "@/lib/utils/battle/store";
@@ -234,5 +234,38 @@ describe("runBattleMutation", () => {
     await runBattleMutation(req(), { params, access: "member", mutate: noop }, d);
 
     expect(d.publish).toHaveBeenCalledWith("b1", { battleId: "b1", version: 4, refetch: true });
+  });
+
+  it("ліміт дельти — у байтах: кирилиця під лімітом символів, але над лімітом байтів → refetch", async () => {
+    const text = "Ш".repeat(6_000);
+
+    const cyr = { ...delta(), events: [{ seq: 5, type: "attack", round: 1, actorId: null, targets: [], details: {}, hpChanges: [], resultText: text }] };
+
+    expect(JSON.stringify(cyr).length).toBeLessThan(9_500);
+
+    const d = deps({ saveBattle: vi.fn(async () => cyr) });
+
+    await runBattleMutation(req(), { params, access: "member", mutate: noop }, d);
+
+    expect(d.publish).toHaveBeenCalledWith("b1", { battleId: "b1", version: 4, refetch: true });
+  });
+
+  it("expectedVersion перевіряється, навіть якщо схема роуту його не оголошує", async () => {
+    const mutate = vi.fn((ctx: BattleMutationContext) => ({ participants: ctx.participants, pending: ctx.pending, events: [] }));
+
+    const res = await runBattleMutation(
+      req({ targetId: "gob", expectedVersion: 2 }),
+      { params, access: "member", schema: z.object({ targetId: z.string() }), mutate },
+      deps(),
+    );
+
+    expect(res.status).toBe(409);
+    expect(mutate).not.toHaveBeenCalled();
+  });
+
+  it("expectedVersion перевіряється і для роуту без схеми", async () => {
+    const res = await runBattleMutation(req({ expectedVersion: 2 }), { params, access: "member", mutate: noop }, deps());
+
+    expect(res.status).toBe(409);
   });
 });

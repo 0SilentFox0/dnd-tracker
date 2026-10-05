@@ -111,14 +111,20 @@ function errorResponse(err: unknown): NextResponse {
 }
 
 async function readBody<TBody>(req: Request, schema?: ZodType<TBody>) {
-  if (!schema) return { ok: true as const, body: undefined as TBody };
+  const raw: unknown = await req.json().catch(() => undefined);
 
-  const raw = await req.json().catch(() => undefined);
+  // з сирого JSON: схема роуту може не оголошувати expectedVersion і тихо його відкинути
+  const expectedVersion =
+    raw && typeof raw === "object" && typeof (raw as { expectedVersion?: unknown }).expectedVersion === "number"
+      ? (raw as { expectedVersion: number }).expectedVersion
+      : undefined;
+
+  if (!schema) return { ok: true as const, body: undefined as TBody, expectedVersion };
 
   const parsed = schema.safeParse(raw);
 
   return parsed.success
-    ? { ok: true as const, body: parsed.data }
+    ? { ok: true as const, body: parsed.data, expectedVersion }
     : { ok: false as const, issues: parsed.error.issues };
 }
 
@@ -168,9 +174,9 @@ export async function runBattleMutation<TBody>(
       throw new BattleRuleError("wrong_status", `Дія недоступна в статусі «${loaded.scene.status}»`);
     }
 
-    const expected = (parsed.body as { expectedVersion?: unknown } | undefined)?.expectedVersion;
+    const expected = parsed.expectedVersion;
 
-    if (typeof expected === "number" && expected !== loaded.scene.version) {
+    if (expected !== undefined && expected !== loaded.scene.version) {
       throw new BattleConflictError(loaded.scene.version);
     }
 
@@ -181,7 +187,7 @@ export async function runBattleMutation<TBody>(
     const nextScene = { ...loaded.scene, ...result.scene, version: delta.version };
 
     const payload =
-      JSON.stringify(delta).length > PUSHER_DELTA_LIMIT_BYTES
+      Buffer.byteLength(JSON.stringify(delta), "utf8") > PUSHER_DELTA_LIMIT_BYTES
         ? { battleId, version: delta.version, refetch: true as const }
         : delta;
 

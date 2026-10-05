@@ -50,6 +50,7 @@ export function splitParticipant(
     spellSlotsCurrent,
   };
 
+  // колонки INTEGER: JSON раніше приймав дроби від відсоткових модифікаторів
   return {
     columns: {
       id,
@@ -60,12 +61,12 @@ export function splitParticipant(
       orderIndex: place.orderIndex,
       isPending: place.isPending,
       extraTurnOf: null,
-      currentHp,
-      tempHp,
-      maxHp,
-      morale,
+      currentHp: Math.round(currentHp),
+      tempHp: Math.round(tempHp),
+      maxHp: Math.round(maxHp),
+      morale: Math.round(morale),
       status,
-      initiative,
+      initiative: Math.round(initiative),
       hasUsedAction: p.actionFlags.hasUsedAction,
       hasUsedBonusAction: p.actionFlags.hasUsedBonusAction,
       hasUsedReaction: p.actionFlags.hasUsedReaction,
