@@ -32,6 +32,7 @@ import {
   ARTIFACT_SLOT_OPTIONS,
 } from "@/lib/constants/artifacts";
 import { abilitySaveError } from "@/lib/hooks/abilities";
+import { useConfirm } from "@/lib/hooks/common";
 import type { ConversionIssue } from "@/lib/utils/abilities/legacy/types";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import { isWeaponSlot, type WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
@@ -103,6 +104,8 @@ export function ArtifactForm({
   cancelHref,
   iconHint,
 }: ArtifactFormProps) {
+  const confirm = useConfirm();
+
   const router = useRouter();
 
   const [isSaving, setIsSaving] = useState(false);
@@ -167,7 +170,7 @@ export function ArtifactForm({
   const handleDelete = async () => {
     if (!onDelete) return;
 
-    if (!confirm("Ви впевнені, що хочете видалити цей артефакт?")) return;
+    if (!(await confirm({ title: "Ви впевнені, що хочете видалити цей артефакт?", confirmLabel: "Видалити", destructive: true }))) return;
 
     setIsDeleting(true);
     setError(null);

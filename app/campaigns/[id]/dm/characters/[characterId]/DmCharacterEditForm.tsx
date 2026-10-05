@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/card";
 import { levelUpCharacter } from "@/lib/api/characters";
 import type { useCharacterForm } from "@/lib/hooks/characters";
+import { useConfirm, useNotify } from "@/lib/hooks/common";
 import { characterToFormData } from "@/lib/utils/characters/character-form";
 import type { ArtifactSetRow } from "@/types/artifact-sets";
 import type { CampaignMember } from "@/types/campaigns";
@@ -76,13 +77,15 @@ export function DmCharacterEditForm({
   membersLoading,
   queryClient,
 }: DmCharacterEditFormProps) {
+  const notify = useNotify();
+
+  const confirm = useConfirm();
+
   const router = useRouter();
 
   const handleLevelUp = async () => {
     if (
-      !confirm(
-        `Підняти рівень персонажа ${basicInfo.name}? (Рівень ${basicInfo.level} → ${basicInfo.level + 1})`,
-      )
+      !(await confirm({ title: `Підняти рівень персонажа ${basicInfo.name}? (Рівень ${basicInfo.level} → ${basicInfo.level + 1})`, confirmLabel: "Підняти" }))
     ) {
       return;
     }
@@ -100,9 +103,7 @@ export function DmCharacterEditForm({
           hpGain?: number;
         };
 
-        alert(
-          `Рівень піднято! ${details.abilityIncreased ?? "Характеристика"}: +1, HP: +${details.hpGain ?? 0}, Додано магічні слоти.`,
-        );
+        void notify(`Рівень піднято! ${details.abilityIncreased ?? "Характеристика"}: +1, HP: +${details.hpGain ?? 0}, Додано магічні слоти.`);
       }
 
       await queryClient.invalidateQueries({
@@ -117,7 +118,7 @@ export function DmCharacterEditForm({
       router.refresh();
     } catch (err) {
       console.error("Error leveling up:", err);
-      alert("Помилка при піднятті рівня");
+      void notify("Помилка при піднятті рівня");
     }
   };
 

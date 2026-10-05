@@ -8,6 +8,7 @@ import {
   getRacialSkillLevelId,
 } from "@/components/skill-tree/utils/hooks";
 import { getSkillTrees } from "@/lib/api/skill-trees";
+import { useNotify } from "@/lib/hooks/common";
 import { useRaces } from "@/lib/hooks/races";
 import { useMainSkills, useSkills, useSkillTreeEnrichment } from "@/lib/hooks/skills";
 import {
@@ -48,6 +49,8 @@ export function CharacterSkillTreeView({
   savedSkillTreeProgress,
   onSkillTreeProgressChange,
 }: CharacterSkillTreeViewProps) {
+  const notify = useNotify();
+
   const [trees, setTrees] = useState<PrismaSkillTree[]>([]);
 
   const { data: skillsFromLibrary = [] } = useSkills(campaignId);
@@ -152,7 +155,7 @@ export function CharacterSkillTreeView({
       }
 
       if (unlockedSkills.length >= maxSkills) {
-        alert(`Досягнуто максимальну кількість навиків (${maxSkills})`);
+        void notify(`Досягнуто максимальну кількість навиків (${maxSkills})`);
 
         return;
       }
@@ -165,6 +168,7 @@ export function CharacterSkillTreeView({
       savedUnlockedSkills,
       maxSkills,
       applyNewUnlocked,
+      notify,
     ],
   );
 
@@ -183,7 +187,7 @@ export function CharacterSkillTreeView({
       }
 
       if (unlockedSkills.length >= maxSkills) {
-        alert(`Досягнуто максимальну кількість навиків (${maxSkills})`);
+        void notify(`Досягнуто максимальну кількість навиків (${maxSkills})`);
 
         return;
       }
@@ -196,6 +200,7 @@ export function CharacterSkillTreeView({
       savedUnlockedSkills,
       maxSkills,
       applyNewUnlocked,
+      notify,
     ],
   );
 
@@ -225,7 +230,7 @@ export function CharacterSkillTreeView({
       }
 
       if (unlockedSkills.length >= maxSkills) {
-        alert(`Досягнуто максимальну кількість навиків (${maxSkills})`);
+        void notify(`Досягнуто максимальну кількість навиків (${maxSkills})`);
 
         return;
       }
@@ -239,6 +244,7 @@ export function CharacterSkillTreeView({
       savedUnlockedSkills,
       maxSkills,
       applyNewUnlocked,
+      notify,
     ],
   );
 

@@ -11,6 +11,7 @@ import {
   useDeleteBattle,
   useUpdateBattle,
 } from "@/lib/hooks/battles";
+import { useConfirm, useNotify } from "@/lib/hooks/common";
 import type { BattlePreparationParticipant } from "@/types/battle";
 
 export interface EditBattleCharacter {
@@ -29,6 +30,10 @@ export interface EditBattleUnit {
 }
 
 export function useEditBattleData(campaignId: string, battleId: string) {
+  const notify = useNotify();
+
+  const confirm = useConfirm();
+
   const router = useRouter();
 
   const { data: battle, isLoading: loadingBattle } = useBattle(
@@ -118,7 +123,7 @@ export function useEditBattleData(campaignId: string, battleId: string) {
     e.preventDefault();
 
     if (participants.length === 0) {
-      alert("Оберіть хоча б одного учасника");
+      void notify("Оберіть хоча б одного учасника");
 
       return;
     }
@@ -136,14 +141,14 @@ export function useEditBattleData(campaignId: string, battleId: string) {
         },
         onError: (error) => {
           console.error("Error updating battle:", error);
-          alert("Помилка при оновленні бою");
+          void notify("Помилка при оновленні бою");
         },
       },
     );
   };
 
-  const handleDelete = () => {
-    if (!confirm("Ви впевнені, що хочете видалити цю сцену бою?")) return;
+  const handleDelete = async () => {
+    if (!(await confirm({ title: "Ви впевнені, що хочете видалити цю сцену бою?", confirmLabel: "Видалити", destructive: true }))) return;
 
     deleteBattleMutation.mutate(battleId, {
       onSuccess: () => {
@@ -152,7 +157,7 @@ export function useEditBattleData(campaignId: string, battleId: string) {
       },
       onError: (error) => {
         console.error("Error deleting battle:", error);
-        alert("Помилка при видаленні бою");
+        void notify("Помилка при видаленні бою");
       },
     });
   };

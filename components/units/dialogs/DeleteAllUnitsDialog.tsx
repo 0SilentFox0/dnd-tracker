@@ -19,8 +19,14 @@ export function DeleteAllUnitsDialog({
   isDeleting,
 }: DeleteAllUnitsDialogProps) {
   return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange} title="Видалити всі юніти?" description={<>Ви впевнені, що хочете видалити всі юніти з кампанії? Ця дія
-            незворотна. Буде видалено {unitsCount} юнітів.</>} footer={<><Button
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Видалити всі юніти?"
+      description={<>Ви впевнені, що хочете видалити всі юніти з кампанії? Ця дія незворотна. Буде видалено {unitsCount} юнітів.</>}
+      footer={
+        <>
+          <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isDeleting}
@@ -33,8 +39,10 @@ export function DeleteAllUnitsDialog({
             disabled={isDeleting}
           >
             {isDeleting ? "Видалення..." : "Видалити всі юніти"}
-          </Button></>}>
-        
+          </Button>
+        </>
+      }
+    >
     </ResponsiveDialog>
   );
 }

@@ -27,12 +27,22 @@ export function RenameGroupDialog({
   isRenaming,
 }: RenameGroupDialogProps) {
   return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange} title="Перейменувати групу" description={<>Введіть нову назву для групи &quot;{groupName}&quot;</>} footer={<><Button variant="outline" onClick={onCancel} disabled={isRenaming}>
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Перейменувати групу"
+      description={<>Введіть нову назву для групи &quot;{groupName}&quot;</>}
+      footer={
+        <>
+          <Button variant="outline" onClick={onCancel} disabled={isRenaming}>
             Скасувати
           </Button>
           <Button onClick={onConfirm} disabled={isRenaming}>
             Зберегти
-          </Button></>}>
+          </Button>
+        </>
+      }
+    >
         <div className="space-y-4">
           <div>
             <Label htmlFor="groupName">Назва групи</Label>
@@ -50,7 +60,6 @@ export function RenameGroupDialog({
             />
           </div>
         </div>
-        
     </ResponsiveDialog>
   );
 }

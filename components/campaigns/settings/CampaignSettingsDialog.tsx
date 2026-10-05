@@ -94,7 +94,14 @@ export function CampaignSettingsDialog({
   };
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange} title="Налаштування кампанії" description="Оновіть основні параметри кампанії" footer={<><Button
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Налаштування кампанії"
+      description="Оновіть основні параметри кампанії"
+      footer={
+        <>
+          <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isSaving}
@@ -103,7 +110,10 @@ export function CampaignSettingsDialog({
           </Button>
           <Button onClick={handleSave} disabled={isSaving || !name.trim()}>
             {isSaving ? "Збереження..." : "Зберегти"}
-          </Button></>}>
+          </Button>
+        </>
+      }
+    >
         <div className="space-y-4">
           <LabeledInput
             id="campaign-name"
@@ -173,7 +183,6 @@ export function CampaignSettingsDialog({
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
         </div>
-        
     </ResponsiveDialog>
   );
 }

@@ -40,9 +40,12 @@ export function SpellResultModal({
     (lastSpellAction.hpChanges?.some((h) => h.change < 0) ?? false);
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange} title={<>{allPassed && savingThrows.length > 0
-              ? "Перевірка пройдена"
-              : (details?.spellName ?? "Результат заклинання")}</>} size="sm">
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={<>{allPassed && savingThrows.length > 0 ? "Перевірка пройдена" : (details?.spellName ?? "Результат заклинання")}</>}
+      size="sm"
+    >
         <div className="space-y-3">
           {allPassed && savingThrows.length > 0 ? (
             <p className="text-muted-foreground text-sm">
@@ -113,7 +116,6 @@ export function SpellResultModal({
             <Button onClick={() => onOpenChange(false)}>Зрозуміло</Button>
           )}
         </div>
-      
     </ResponsiveDialog>
   );
 }

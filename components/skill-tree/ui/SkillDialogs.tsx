@@ -27,9 +27,12 @@ export function SkillDialogs({
 }: SkillDialogsProps) {
   return (
     <>
-      <ResponsiveDialog open={!!selectedSkill} onOpenChange={(open) => !open && onCloseSkill()} title={<>{selectedSkill?.name}</>} description={<>Рівень:{" "}
-              {LEVEL_NAMES[selectedSkill?.level || SkillLevel.BASIC]} • Коло{" "}
-              {selectedSkill?.circle}</>}>
+      <ResponsiveDialog
+        open={!!selectedSkill}
+        onOpenChange={(open) => !open && onCloseSkill()}
+        title={<>{selectedSkill?.name}</>}
+        description={<>Рівень:{" "} {LEVEL_NAMES[selectedSkill?.level || SkillLevel.BASIC]} • Коло{" "} {selectedSkill?.circle}</>}
+      >
           <div className="space-y-2">
             <p className="text-sm">{selectedSkill?.description}</p>
             {selectedSkill?.prerequisites &&
@@ -62,14 +65,17 @@ export function SkillDialogs({
                 </div>
               )}
           </div>
-        
       </ResponsiveDialog>
 
-      <ResponsiveDialog open={!!selectedUltimateSkill} onOpenChange={(open) => !open && onCloseUltimateSkill()} title={<>{selectedUltimateSkill?.name}</>} description="Ультимативний навик">
+      <ResponsiveDialog
+        open={!!selectedUltimateSkill}
+        onOpenChange={(open) => !open && onCloseUltimateSkill()}
+        title={<>{selectedUltimateSkill?.name}</>}
+        description="Ультимативний навик"
+      >
           <div className="space-y-2">
             <p className="text-sm">{selectedUltimateSkill?.description}</p>
           </div>
-        
       </ResponsiveDialog>
     </>
   );

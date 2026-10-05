@@ -3,18 +3,9 @@
 import { useState } from "react";
 import { Trophy } from "lucide-react";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import type { PusherConnectionState } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import type { BattleScene } from "@/types/api";
@@ -159,54 +150,53 @@ export function BattleHeader({
         </div>
       </div>
 
-      <AlertDialog
+      <ResponsiveDialog
         open={completeDialogOpen}
         onOpenChange={setCompleteDialogOpen}
-      >
-        <AlertDialogContent className="bg-slate-900 border-slate-700 text-white">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Завершити бій?</AlertDialogTitle>
-            <AlertDialogDescription className="text-slate-300">
-              Оберіть результат завершення або визначте автоматично за умовами
-              перемоги.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="gap-2 sm:gap-0">
-            <AlertDialogCancel className="border-slate-600 text-slate-300">
-              Скасувати
-            </AlertDialogCancel>
-            <Button
-              variant="outline"
-              className="border-red-500/50 text-red-400 hover:bg-red-500/20"
-              onClick={() => {
-                onCompleteBattle?.("defeat");
-                setCompleteDialogOpen(false);
-              }}
-            >
-              Поразка
-            </Button>
-            <Button
-              variant="outline"
-              className="border-amber-500/50 text-amber-400 hover:bg-amber-500/20"
-              onClick={() => {
-                onCompleteBattle?.();
-                setCompleteDialogOpen(false);
-              }}
-            >
-              Авто
-            </Button>
-            <AlertDialogAction
-              className="bg-emerald-600 hover:bg-emerald-700 text-white"
-              onClick={() => {
-                onCompleteBattle?.("victory");
-                setCompleteDialogOpen(false);
-              }}
-            >
-              Перемога
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        title="Завершити бій?"
+        description="Оберіть результат завершення або визначте автоматично за умовами перемоги."
+        size="sm"
+        className="bg-slate-900 border-slate-700 text-white"
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setCompleteDialogOpen(false)} className="border-slate-600 text-slate-300">
+                Скасувати
+              </Button>
+              <Button
+                variant="outline"
+                className="border-red-500/50 text-red-400 hover:bg-red-500/20"
+                onClick={() => {
+                  onCompleteBattle?.("defeat");
+                  setCompleteDialogOpen(false);
+                }}
+              >
+                Поразка
+              </Button>
+              <Button
+                variant="outline"
+                className="border-amber-500/50 text-amber-400 hover:bg-amber-500/20"
+                onClick={() => {
+                  onCompleteBattle?.();
+                  setCompleteDialogOpen(false);
+                }}
+              >
+                Авто
+              </Button>
+              <Button
+                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                onClick={() => {
+              void (() => {
+                  onCompleteBattle?.("victory");
+                  setCompleteDialogOpen(false);
+                })();
+              setCompleteDialogOpen(false);
+            }}
+              >
+                Перемога
+              </Button>
+          </>
+        }
+      />
     </div>
   );
 }

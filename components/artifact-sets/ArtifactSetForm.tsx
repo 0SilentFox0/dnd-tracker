@@ -20,6 +20,7 @@ import {
 } from "@/lib/api/artifact-sets";
 import { type ArtifactListItem, getArtifacts } from "@/lib/api/artifacts";
 import { abilitySaveError } from "@/lib/hooks/abilities";
+import { useConfirm } from "@/lib/hooks/common";
 import type { ConversionIssue } from "@/lib/utils/abilities/legacy/types";
 import type { Ability } from "@/lib/utils/abilities/schema";
 
@@ -47,6 +48,8 @@ export function ArtifactSetForm({
   initialAbilityIssues = [],
   initialArtifactIds = [],
 }: ArtifactSetFormProps) {
+  const confirm = useConfirm();
+
   const router = useRouter();
 
   const [name, setName] = useState(initialName);
@@ -132,9 +135,7 @@ export function ArtifactSetForm({
   const handleDelete = async () => {
     if (
       !setId ||
-      !confirm(
-        "Видалити сет? Артефакти залишаться в кампанії, поле «Сет» у них буде очищено.",
-      )
+      !(await confirm({ title: "Видалити сет? Артефакти залишаться в кампанії, поле «Сет» у них буде очищено.", confirmLabel: "Видалити", destructive: true }))
     ) {
       return;
     }

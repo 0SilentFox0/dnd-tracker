@@ -24,7 +24,13 @@ export function AbbreviationsInfoDialog() {
           <Info className="h-4 w-4" />
           <span className="sr-only">Інформація про абревіатури</span>
         </Button>
-    <ResponsiveDialog open={open} onOpenChange={setOpen} title="Довідка про абревіатури" description="Пояснення скорочень характеристик та параметрів" size="sm">
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={setOpen}
+      title="Довідка про абревіатури"
+      description="Пояснення скорочень характеристик та параметрів"
+      size="sm"
+    >
         <div className="space-y-4 py-4">
           <div>
             <h3 className="font-semibold mb-2 text-sm">Основні характеристики:</h3>
@@ -57,7 +63,6 @@ export function AbbreviationsInfoDialog() {
             </div>
           )}
         </div>
-      
     </ResponsiveDialog>
     </>
   );

@@ -4,7 +4,8 @@ export interface ConfirmOptions {
   title: ReactNode;
   description?: ReactNode;
   confirmLabel?: string;
-  cancelLabel?: string;
+  /** `null` hides the cancel button (notice-style dialog). */
+  cancelLabel?: string | null;
   destructive?: boolean;
   onConfirm?: () => Promise<unknown>;
 }

@@ -12,6 +12,7 @@ import {
 import { LogEntryDetails } from "./LogEntryDetails";
 
 import { Button } from "@/components/ui/button";
+import { useConfirm } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 import { formatLogEntry } from "@/lib/utils/battle/battle-log-format";
 import type { BattleScene } from "@/types/api";
@@ -38,6 +39,8 @@ export function BattleLogPanel({
   onOpenChange,
   embedInSidebar = false,
 }: BattleLogPanelProps) {
+  const confirm = useConfirm();
+
   const [internalOpen, setInternalOpen] = useState(false);
 
   const open = controlledOpen ?? internalOpen;
@@ -123,12 +126,10 @@ export function BattleLogPanel({
                           size="icon"
                           className="h-8 w-8 shrink-0 text-red-400 hover:text-red-300 hover:bg-red-500/20"
                           title="Відмінити дію (відкотити до стану перед нею)"
-                          onClick={() => {
+                          onClick={async () => {
                             if (
                               typeof window !== "undefined" &&
-                              window.confirm(
-                                "Відкотити бій до стану перед цією дією? Ця та всі наступні дії будуть видалені.",
-                              )
+                              (await confirm({ title: "Відкотити бій до стану перед цією дією? Ця та всі наступні дії будуть видалені.", confirmLabel: "Підтвердити" }))
                             ) {
                               onRollback(entry.actionIndex);
                             }

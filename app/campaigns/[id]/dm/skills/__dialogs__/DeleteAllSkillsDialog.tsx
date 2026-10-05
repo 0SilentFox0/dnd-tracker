@@ -1,15 +1,7 @@
 "use client";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 
 interface Props {
   open: boolean;
@@ -27,26 +19,26 @@ export function DeleteAllSkillsDialog({
   skillsCount,
 }: Props) {
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Видалити всі скіли?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Ця дія видалить всі скіли з бібліотеки ({skillsCount} скілів).
-            Цю дію неможливо скасувати.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>Скасувати</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={onConfirm}
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Видалити всі скіли?"
+      description={<>Ця дія видалить всі скіли з бібліотеки ({skillsCount} скілів). Цю дію неможливо скасувати.</>}
+      size="sm"
+      footer={
+        <>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>Скасувати</Button>
+          <Button variant="destructive"
+            onClick={() => {
+            void onConfirm();
+            onOpenChange(false);
+          }}
             disabled={isPending}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
             {isPending ? "Видалення..." : "Видалити всі"}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+          </Button>
+        </>
+      }
+    />
   );
 }

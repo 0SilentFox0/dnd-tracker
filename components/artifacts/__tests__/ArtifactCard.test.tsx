@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ArtifactSetBonusDisplay } from "@/components/artifact-sets/ArtifactSetBonusDisplay";
 import { ArtifactCard } from "@/components/artifacts/ArtifactCard";
+import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }) }));
 
@@ -11,7 +12,7 @@ describe("картки артефактів", () => {
   afterEach(cleanup);
 
   it("ArtifactCard показує опис умінь", () => {
-    render(
+    renderWithConfirm(
       <ArtifactCard
         campaignId="c1"
         artifact={{ id: "a1", name: "Меч", slot: "weapon", rarity: null, icon: null, description: null, abilitySummary: ["Пасивно · шкода (ближня) +2"] }}

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { CreateMainSkillDialog } from "@/components/main-skills/CreateMainSkillDialog";
 import { MainSkillCard } from "@/components/main-skills/MainSkillCard";
 import { MainSkillsPageHeader } from "@/components/main-skills/MainSkillsPageHeader";
+import { useConfirm, useNotify } from "@/lib/hooks/common";
 import { useDeleteMainSkill, useMainSkills } from "@/lib/hooks/skills";
 import type { MainSkill } from "@/types/main-skills";
 
@@ -17,6 +18,10 @@ export function DMMainSkillsPageClient({
   campaignId,
   initialMainSkills,
 }: DMMainSkillsPageClientProps) {
+  const notify = useNotify();
+
+  const confirm = useConfirm();
+
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   const { data: mainSkills = initialMainSkills } = useMainSkills(campaignId);
@@ -25,15 +30,13 @@ export function DMMainSkillsPageClient({
 
   const handleDelete = async (mainSkillId: string) => {
     if (
-      confirm(
-        "Ви впевнені, що хочете видалити цей основний навик? Це також видалить всі скіли, пов'язані з ним."
-      )
+      (await confirm({ title: "Ви впевнені, що хочете видалити цей основний навик? Це також видалить всі скіли, пов'язані з ним.", confirmLabel: "Видалити", destructive: true }))
     ) {
       try {
         await deleteMainSkillMutation.mutateAsync(mainSkillId);
       } catch (error) {
         console.error("Error deleting main skill:", error);
-        alert("Помилка при видаленні основного навику");
+        void notify("Помилка при видаленні основного навику");
       }
     }
   };

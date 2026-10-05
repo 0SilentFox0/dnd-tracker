@@ -96,9 +96,14 @@ export function SpellLevelAccordion({
         </AccordionContent>
       </AccordionItem>
 
-      <ResponsiveDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen} title="Видалити всі заклинання рівня?" description={<>Ви впевнені, що хочете видалити всі заклинання рівня &quot;
-              {levelName}&quot;? Ця дія незворотна. Буде видалено {spells.length}{" "}
-              заклинань.</>} footer={<><Button
+      <ResponsiveDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Видалити всі заклинання рівня?"
+        description={<>Ви впевнені, що хочете видалити всі заклинання рівня &quot; {levelName}&quot;? Ця дія незворотна. Буде видалено {spells.length}{" "} заклинань.</>}
+        footer={
+          <>
+            <Button
               variant="outline"
               onClick={() => setDeleteDialogOpen(false)}
               disabled={deleteSpellsByLevelMutation.isPending}
@@ -113,8 +118,10 @@ export function SpellLevelAccordion({
               {deleteSpellsByLevelMutation.isPending
                 ? "Видалення..."
                 : "Видалити всі заклинання рівня"}
-            </Button></>}>
-          
+            </Button>
+          </>
+        }
+      >
       </ResponsiveDialog>
     </>
   );

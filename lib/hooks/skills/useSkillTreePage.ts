@@ -13,6 +13,7 @@ import {
 import type { UseSkillTreePageOptions } from "./useSkillTreePage-types";
 import { useSkillTreeSave } from "./useSkillTreeSave";
 
+import { useNotify } from "@/lib/hooks/common";
 import {
   convertPrismaToSkillTree,
   createMockSkillTree,
@@ -26,6 +27,8 @@ export function useSkillTreePage({
   races = [],
   defaultRace,
 }: UseSkillTreePageOptions) {
+  const notify = useNotify();
+
   const [selectedRace, setSelectedRace] = useState<string>(
     defaultRace || skillTrees[0]?.race || ""
   );
@@ -140,15 +143,13 @@ export function useSkillTreePage({
       
       setBaseSkillTrees(updatedBaseSkillTrees);
       setEditedSkillTree(null);
-      alert("Дерево прокачки успішно збережено!");
+      void notify("Дерево прокачки успішно збережено!");
     },
     onError: (error) => {
       console.error("Error saving skill tree:", error);
-      alert(
-        `Помилка збереження: ${
+      void notify(`Помилка збереження: ${
           error instanceof Error ? error.message : "Невідома помилка"
-        }`
-      );
+        }`);
     },
   });
 
@@ -168,7 +169,7 @@ export function useSkillTreePage({
     const treeToClear = currentSkillTree || baseSkillTree;
 
     if (!treeToClear) {
-      alert("Помилка: дерево прокачки не знайдено");
+      void notify("Помилка: дерево прокачки не знайдено");
 
       return;
     }
@@ -181,14 +182,14 @@ export function useSkillTreePage({
       // Автоматично зберігаємо очищене дерево
       try {
         await saveSkillTree(clearedTree);
-        alert("Всі присвоєння скілів успішно видалено та збережено!");
+        void notify("Всі присвоєння скілів успішно видалено та збережено!");
       } catch (saveError) {
         console.error("Помилка збереження після очищення:", saveError);
-        alert("Дерево очищено, але не вдалося зберегти зміни");
+        void notify("Дерево очищено, але не вдалося зберегти зміни");
       }
     } catch (error) {
       console.error("Error clearing skill tree:", error);
-      alert("Помилка при очищенні дерева прокачки");
+      void notify("Помилка при очищенні дерева прокачки");
     }
   };
 

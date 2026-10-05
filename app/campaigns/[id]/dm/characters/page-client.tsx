@@ -25,6 +25,7 @@ import {
   useDeleteCharacter,
   useLevelUpCharacter,
 } from "@/lib/hooks/characters";
+import { useNotify } from "@/lib/hooks/common";
 import type { Character } from "@/types/characters";
 
 interface DMCharactersClientProps {
@@ -32,6 +33,8 @@ interface DMCharactersClientProps {
 }
 
 export function DMCharactersClient({ campaignId }: DMCharactersClientProps) {
+  const notify = useNotify();
+
   const [deleteAllOpen, setDeleteAllOpen] = useState(false);
 
   const [characterToDelete, setCharacterToDelete] = useState<Character | null>(
@@ -51,7 +54,7 @@ export function DMCharactersClient({ campaignId }: DMCharactersClientProps) {
       await levelUpMutation.mutateAsync(character.id);
     } catch (error) {
       console.error("Error leveling up:", error);
-      alert("Не вдалося підняти рівень. Спробуйте ще раз.");
+      void notify("Не вдалося підняти рівень. Спробуйте ще раз.");
     }
   };
 
@@ -61,7 +64,7 @@ export function DMCharactersClient({ campaignId }: DMCharactersClientProps) {
       setDeleteAllOpen(false);
     } catch (error) {
       console.error("Error deleting all characters:", error);
-      alert("Не вдалося видалити всіх персонажів. Спробуйте ще раз.");
+      void notify("Не вдалося видалити всіх персонажів. Спробуйте ще раз.");
     }
   };
 
@@ -73,7 +76,7 @@ export function DMCharactersClient({ campaignId }: DMCharactersClientProps) {
       setCharacterToDelete(null);
     } catch (error) {
       console.error("Error deleting character:", error);
-      alert("Не вдалося видалити персонажа. Спробуйте ще раз.");
+      void notify("Не вдалося видалити персонажа. Спробуйте ще раз.");
     }
   };
 

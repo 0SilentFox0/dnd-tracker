@@ -80,7 +80,14 @@ export function JoinCampaignDialog() {
   return (
     <>
       <Button onClick={() => handleOpenChange(true)} variant="outline">Приєднатися до кампанії</Button>
-    <ResponsiveDialog open={open} onOpenChange={handleOpenChange} title="Приєднатися до кампанії" description="Введіть код запрошення, який вам надав DM кампанії" footer={<><Button
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={handleOpenChange}
+      title="Приєднатися до кампанії"
+      description="Введіть код запрошення, який вам надав DM кампанії"
+      footer={
+        <>
+          <Button
             variant="outline"
             onClick={() => handleOpenChange(false)}
             disabled={loading || success}
@@ -89,7 +96,10 @@ export function JoinCampaignDialog() {
           </Button>
           <Button onClick={handleJoin} disabled={loading || success || !inviteCode.trim()}>
             {loading ? "Приєднання..." : success ? "Успішно!" : "Приєднатися"}
-          </Button></>}>
+          </Button>
+        </>
+      }
+    >
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="inviteCode">Код запрошення</Label>
@@ -122,7 +132,6 @@ export function JoinCampaignDialog() {
           )}
         </div>
 
-        
     </ResponsiveDialog>
     </>
   );

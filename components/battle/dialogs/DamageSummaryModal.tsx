@@ -56,7 +56,13 @@ export function DamageSummaryModal({
       : "closed";
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange} title="💥 Підсумок урону" description={`${attacker.basicInfo.name} → ${targets.map((t) => t.basicInfo.name).join(", ")}${isCritical ? " (крит!)" : ""}`} size="sm">
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="💥 Підсумок урону"
+      description={`${attacker.basicInfo.name} → ${targets.map((t) => t.basicInfo.name).join(", ")}${isCritical ? " (крит!)" : ""}`}
+      size="sm"
+    >
         {open && damageRolls.length > 0 ? (
           <DamageSummaryContent
             key={contentKey}
@@ -81,7 +87,6 @@ export function DamageSummaryModal({
             </div>
           </>
         )}
-      
     </ResponsiveDialog>
   );
 }

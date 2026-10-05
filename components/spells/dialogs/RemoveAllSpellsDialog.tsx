@@ -19,9 +19,14 @@ export function RemoveAllSpellsDialog({
   isRemoving,
 }: RemoveAllSpellsDialogProps) {
   return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange} title="Видалити всі заклинання з групи?" description={<>Ви впевнені, що хочете видалити всі заклинання з групи &quot;
-            {groupName}&quot;? Заклинання не будуть видалені, але вони
-            втратять зв&apos;язок з цією групою.</>} footer={<><Button
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Видалити всі заклинання з групи?"
+      description={<>Ви впевнені, що хочете видалити всі заклинання з групи &quot; {groupName}&quot;? Заклинання не будуть видалені, але вони втратять зв&apos;язок з цією групою.</>}
+      footer={
+        <>
+          <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isRemoving}
@@ -34,8 +39,10 @@ export function RemoveAllSpellsDialog({
             disabled={isRemoving}
           >
             Видалити всі з групи
-          </Button></>}>
-        
+          </Button>
+        </>
+      }
+    >
     </ResponsiveDialog>
   );
 }

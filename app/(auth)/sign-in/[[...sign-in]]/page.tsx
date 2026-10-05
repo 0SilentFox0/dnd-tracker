@@ -5,9 +5,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useNotify } from "@/lib/hooks/common";
 import { createClient } from "@/lib/supabase/client";
 
 function SignInForm() {
+  const notify = useNotify();
+
   const router = useRouter();
 
   const searchParams = useSearchParams();
@@ -55,9 +58,9 @@ function SignInForm() {
         console.error("Error signing in:", error);
 
         if (error.message?.includes("provider is not enabled")) {
-          alert("Google OAuth не налаштований. Будь ласка, зверніться до адміністратора.");
+          void notify("Google OAuth не налаштований. Будь ласка, зверніться до адміністратора.");
         } else {
-          alert(`Помилка при вході: ${error.message}`);
+          void notify(`Помилка при вході: ${error.message}`);
         }
 
         return;
@@ -69,7 +72,7 @@ function SignInForm() {
 
       const errorMessage = error instanceof Error ? error.message : "Невідома помилка";
 
-      alert(`Помилка при вході: ${errorMessage}`);
+      void notify(`Помилка при вході: ${errorMessage}`);
     } finally {
       setLoading(false);
     }

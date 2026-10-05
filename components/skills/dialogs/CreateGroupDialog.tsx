@@ -66,7 +66,12 @@ export function CreateGroupDialog({
       <Button onClick={() => setOpen(true)} variant="outline" className="whitespace-nowrap">
           + Створити групу заклинань
         </Button>
-    <ResponsiveDialog open={open} onOpenChange={setOpen} title="Створити нову групу заклинань" description="Групи заклинань дозволяють організувати заклинання та скіли">
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={setOpen}
+      title="Створити нову групу заклинань"
+      description="Групи заклинань дозволяють організувати заклинання та скіли"
+    >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="group-name">Назва групи *</Label>
@@ -103,7 +108,6 @@ export function CreateGroupDialog({
             </Button>
           </div>
         </form>
-      
     </ResponsiveDialog>
     </>
   );

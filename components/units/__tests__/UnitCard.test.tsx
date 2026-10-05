@@ -3,9 +3,11 @@
  */
 import type { ReactElement } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, fireEvent, render as rtlRender, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render as rtlRender, screen, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { mockMatchMedia } from "@/components/ui/__tests__/match-media";
+import { ConfirmProvider } from "@/components/ui/confirm-dialog";
 import { UnitCard } from "@/components/units/list/UnitCard";
 import type { Unit } from "@/lib/hooks/units";
 
@@ -18,35 +20,35 @@ const unit = {
 } as unknown as Unit;
 
 function render(ui: ReactElement) {
-  return rtlRender(<QueryClientProvider client={new QueryClient()}>{ui}</QueryClientProvider>);
+  return rtlRender(
+    <QueryClientProvider client={new QueryClient()}>
+      <ConfirmProvider>{ui}</ConfirmProvider>
+    </QueryClientProvider>,
+  );
 }
 
 describe("UnitCard delete", () => {
-  afterEach(() => {
-    cleanup();
-    vi.unstubAllGlobals();
-  });
+  beforeEach(() => mockMatchMedia(false));
+  afterEach(cleanup);
 
-  it("не видаляє юніт, якщо користувач скасував підтвердження", () => {
-    vi.stubGlobal("confirm", vi.fn(() => false));
-
+  it("не видаляє юніт, якщо користувач скасував підтвердження", async () => {
     const onDelete = vi.fn();
 
     render(<UnitCard unit={unit} campaignId="c1" onDelete={onDelete} />);
     fireEvent.click(screen.getByRole("button", { name: "Видалити юніт Гоблін" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Скасувати" }));
 
     expect(onDelete).not.toHaveBeenCalled();
   });
 
-  it("видаляє юніт після підтвердження", () => {
-    vi.stubGlobal("confirm", vi.fn(() => true));
-
+  it("видаляє юніт після підтвердження", async () => {
     const onDelete = vi.fn();
 
     render(<UnitCard unit={unit} campaignId="c1" onDelete={onDelete} />);
     fireEvent.click(screen.getByRole("button", { name: "Видалити юніт Гоблін" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Видалити" }));
 
-    expect(onDelete).toHaveBeenCalledWith("unit-1");
+    await waitFor(() => expect(onDelete).toHaveBeenCalledWith("unit-1"));
   });
 });
 

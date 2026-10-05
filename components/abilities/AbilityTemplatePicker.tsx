@@ -32,7 +32,11 @@ export function AbilityTemplatePicker({ open, onOpenChange, onPick }: AbilityTem
   };
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={(o) => (o ? onOpenChange(true) : close())} title={<>{copying ? "Скопіювати вміння з…" : "Додати вміння"}</>}>
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={(o) => (o ? onOpenChange(true) : close())}
+      title={<>{copying ? "Скопіювати вміння з…" : "Додати вміння"}</>}
+    >
         {copying ? (
           <AbilityCopySourcePicker campaignId={campaignId} onPick={pick} />
         ) : (
@@ -48,7 +52,6 @@ export function AbilityTemplatePicker({ open, onOpenChange, onPick }: AbilityTem
             </Button>
           </div>
         )}
-      
     </ResponsiveDialog>
   );
 }

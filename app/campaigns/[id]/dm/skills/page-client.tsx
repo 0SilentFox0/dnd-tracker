@@ -9,6 +9,7 @@ import { DeleteAllSkillsDialog } from "./__dialogs__/DeleteAllSkillsDialog";
 import { SkillGroupAccordion } from "@/components/skills/list/SkillGroupAccordion";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import { useNotify } from "@/lib/hooks/common";
 import {
   useDeleteAllSkills,
   useDeleteSkill,
@@ -31,6 +32,8 @@ export function DMSkillsPageClient({
   campaignId,
   initialSkills,
 }: DMSkillsPageClientProps) {
+  const notify = useNotify();
+
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   // Запити для скілів та основних навиків
@@ -61,7 +64,7 @@ export function DMSkillsPageClient({
       setShowDeleteDialog(false);
     } catch (error) {
       console.error("Error deleting all skills:", error);
-      alert("Не вдалося видалити всі скіли. Спробуйте ще раз.");
+      void notify("Не вдалося видалити всі скіли. Спробуйте ще раз.");
     }
   };
 
@@ -70,7 +73,7 @@ export function DMSkillsPageClient({
       await deleteSkillMutation.mutateAsync(skillId);
     } catch (error) {
       console.error("Error deleting skill:", error);
-      alert("Не вдалося видалити скіл. Спробуйте ще раз.");
+      void notify("Не вдалося видалити скіл. Спробуйте ще раз.");
     }
   };
 
@@ -79,7 +82,7 @@ export function DMSkillsPageClient({
       await duplicateSkillMutation.mutateAsync(skillId);
     } catch (error) {
       console.error("Error duplicating skill:", error);
-      alert("Не вдалося дублювати скіл. Спробуйте ще раз.");
+      void notify("Не вдалося дублювати скіл. Спробуйте ще раз.");
     }
   };
 

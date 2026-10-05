@@ -21,6 +21,7 @@ import { UnitDamageModifier } from "@/components/units/form/UnitDamageModifier";
 import { UnitImmunities } from "@/components/units/form/UnitImmunities";
 import { UnitKnownSpells } from "@/components/units/form/UnitKnownSpells";
 import { getSpells } from "@/lib/api/spells";
+import { useConfirm } from "@/lib/hooks/common";
 import { useRaces } from "@/lib/hooks/races";
 import { useDeleteUnit, useUnit, useUpdateUnit } from "@/lib/hooks/units";
 import type { Spell } from "@/types/spells";
@@ -91,6 +92,8 @@ export default function EditUnitPage({
 }: {
   params: Promise<{ id: string; unitId: string }>;
 }) {
+  const confirm = useConfirm();
+
   const { id, unitId } = use(params);
 
   const router = useRouter();
@@ -172,7 +175,7 @@ export default function EditUnitPage({
   };
 
   const handleDelete = async () => {
-    if (!confirm("Ви впевнені, що хочете видалити цього юніта?")) {
+    if (!(await confirm({ title: "Ви впевнені, що хочете видалити цього юніта?", confirmLabel: "Видалити", destructive: true }))) {
       return;
     }
 

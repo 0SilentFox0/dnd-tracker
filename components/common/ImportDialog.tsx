@@ -66,7 +66,12 @@ export function ImportDialog({
           <Upload className="h-4 w-4 mr-2" />
           {triggerLabel}
         </Button>
-    <ResponsiveDialog open={isOpen} onOpenChange={handleDialogOpenChange} title={title} description={description}>
+    <ResponsiveDialog
+      open={isOpen}
+      onOpenChange={handleDialogOpenChange}
+      title={title}
+      description={description}
+    >
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="file-upload">Файл</Label>
@@ -117,7 +122,6 @@ export function ImportDialog({
             </Button>
           </div>
         </div>
-      
     </ResponsiveDialog>
     </>
   );

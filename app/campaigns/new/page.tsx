@@ -10,8 +10,11 @@ import { Label } from "@/components/ui/label";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { Textarea } from "@/components/ui/textarea";
 import { createCampaign } from "@/lib/api/campaigns";
+import { useNotify } from "@/lib/hooks/common";
 
 export default function NewCampaignPage() {
+  const notify = useNotify();
+
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
@@ -34,7 +37,7 @@ export default function NewCampaignPage() {
       router.push(`/campaigns/${campaign.id}`);
     } catch (error) {
       console.error("Error creating campaign:", error);
-      alert("Помилка при створенні кампанії");
+      void notify("Помилка при створенні кампанії");
     } finally {
       setLoading(false);
     }

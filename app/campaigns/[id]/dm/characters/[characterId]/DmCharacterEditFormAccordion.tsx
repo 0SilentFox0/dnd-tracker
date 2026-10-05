@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import type { useCharacterForm } from "@/lib/hooks/characters";
+import { useConfirm } from "@/lib/hooks/common";
 import type { ArtifactSetRow } from "@/types/artifact-sets";
 import type { CampaignMember } from "@/types/campaigns";
 import type { CharacterFormData } from "@/types/characters";
@@ -62,6 +63,8 @@ export function DmCharacterEditFormAccordion({
   members,
   races,
 }: DmCharacterEditFormAccordionProps) {
+  const confirm = useConfirm();
+
   return (
     <Accordion
       type="single"
@@ -159,16 +162,14 @@ export function DmCharacterEditFormAccordion({
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => {
+              onClick={async () => {
                 const hasProgress =
                   formData.skillTreeProgress &&
                   Object.keys(formData.skillTreeProgress).length > 0;
 
                 if (
                   !hasProgress ||
-                  confirm(
-                    "Скинути всі прокачані уміння цього персонажа? Зміни збережаться після натискання «Зберегти зміни».",
-                  )
+                  (await confirm({ title: "Скинути всі прокачані уміння цього персонажа? Зміни збережаться після натискання «Зберегти зміни».", confirmLabel: "Скинути", destructive: true }))
                 ) {
                   setFormData((prev) => ({
                     ...prev,

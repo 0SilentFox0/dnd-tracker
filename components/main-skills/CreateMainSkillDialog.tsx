@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getSpellGroups } from "@/lib/api/spells";
+import { useNotify } from "@/lib/hooks/common";
 import { useCreateMainSkill } from "@/lib/hooks/skills";
 import type { MainSkillFormData } from "@/types/main-skills";
 import type { SpellGroup } from "@/types/spells";
@@ -32,6 +33,8 @@ export function CreateMainSkillDialog({
   onOpenChange,
   campaignId,
 }: CreateMainSkillDialogProps) {
+  const notify = useNotify();
+
   const router = useRouter();
 
   const createMainSkillMutation = useCreateMainSkill(campaignId);
@@ -69,29 +72,38 @@ export function CreateMainSkillDialog({
       const errorMessage =
         error instanceof Error ? error.message : "Помилка при створенні основного навику";
 
-      alert(errorMessage);
+      void notify(errorMessage);
     }
   };
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange} title="Створити основний навик" description="Основні навики використовуються для групування скілів в дереві прокачки" size="sm" footer={<>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Скасувати
-            </Button>
-            <Button
-              type="submit"
-              form="create-main-skill-form"
-              disabled={createMainSkillMutation.isPending}
-            >
-              {createMainSkillMutation.isPending
-                ? "Створення..."
-                : "Створити"}
-            </Button>
-</>}>
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Створити основний навик"
+      description="Основні навики використовуються для групування скілів в дереві прокачки"
+      size="sm"
+      footer={
+        <>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+          >
+            Скасувати
+          </Button>
+          <Button
+            type="submit"
+            form="create-main-skill-form"
+            disabled={createMainSkillMutation.isPending}
+          >
+            {createMainSkillMutation.isPending
+              ? "Створення..."
+              : "Створити"}
+          </Button>
+        </>
+      }
+    >
         <form id="create-main-skill-form" onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Назва *</Label>
@@ -196,7 +208,6 @@ export function CreateMainSkillDialog({
           </div>
 
         </form>
-      
     </ResponsiveDialog>
   );
 }

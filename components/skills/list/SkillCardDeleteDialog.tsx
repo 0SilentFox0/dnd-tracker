@@ -1,15 +1,7 @@
 "use client";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 
 interface SkillCardDeleteDialogProps {
   open: boolean;
@@ -25,25 +17,25 @@ export function SkillCardDeleteDialog({
   onConfirm,
 }: SkillCardDeleteDialogProps) {
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Видалити скіл?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Скіл &quot;{skillName}&quot; буде видалено. Цю дію неможливо
-            скасувати.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Скасувати</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={onConfirm}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Видалити скіл?"
+      description={<>Скіл &quot;{skillName}&quot; буде видалено. Цю дію неможливо скасувати.</>}
+      size="sm"
+      footer={
+        <>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Скасувати</Button>
+          <Button variant="destructive"
+            onClick={() => {
+            void onConfirm();
+            onOpenChange(false);
+          }}
           >
             Видалити
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+          </Button>
+        </>
+      }
+    />
   );
 }

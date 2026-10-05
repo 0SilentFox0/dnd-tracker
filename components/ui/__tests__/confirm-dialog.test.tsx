@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { mockMatchMedia } from "./match-media";
 
 import { ConfirmProvider } from "@/components/ui/confirm-dialog";
-import { type ConfirmFn, useConfirm } from "@/lib/hooks/common";
+import { type ConfirmFn, useConfirm, useNotify } from "@/lib/hooks/common";
 
 const holder: { confirm?: ConfirmFn } = {};
 
@@ -109,5 +109,31 @@ describe("useConfirm", () => {
 
   it("поза провайдером — зрозуміла помилка", () => {
     expect(() => render(<Grab />)).toThrow(/ConfirmProvider/);
+  });
+
+  it("useNotify: одна кнопка «Зрозуміло», без «Скасувати»", async () => {
+    let notify!: (message: string) => Promise<void>;
+
+    function GrabNotify() {
+      const n = useNotify();
+
+      useEffect(() => {
+        notify = n;
+      }, [n]);
+
+      return null;
+    }
+
+    render(<ConfirmProvider><GrabNotify /></ConfirmProvider>);
+
+    let p!: Promise<void>;
+
+    act(() => {
+      p = notify("Оберіть хоча б одного учасника");
+    });
+    expect(await screen.findByText("Оберіть хоча б одного учасника")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Скасувати" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Зрозуміло" }));
+    await expect(p).resolves.toBeUndefined();
   });
 });

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { CreateRaceDialog } from "@/components/races/CreateRaceDialog";
 import { RaceCard } from "@/components/races/RaceCard";
 import { RacesPageHeader } from "@/components/races/RacesPageHeader";
+import { useConfirm } from "@/lib/hooks/common";
 import {
   useCreateRace,
   useDeleteRace,
@@ -21,6 +22,8 @@ export function DMRacesPageClient({
   campaignId,
   initialRaces,
 }: DMRacesPageClientProps) {
+  const confirm = useConfirm();
+
   const [createRaceDialogOpen, setCreateRaceDialogOpen] = useState(false);
 
   // Запити для рас
@@ -34,8 +37,8 @@ export function DMRacesPageClient({
 
   const deleteRaceMutation = useDeleteRace(campaignId);
 
-  const handleDeleteRace = (raceId: string) => {
-    if (confirm("Ви впевнені, що хочете видалити цю расу?")) {
+  const handleDeleteRace = async (raceId: string) => {
+    if ((await confirm({ title: "Ви впевнені, що хочете видалити цю расу?", confirmLabel: "Видалити", destructive: true }))) {
       deleteRaceMutation.mutate(raceId);
     }
   };

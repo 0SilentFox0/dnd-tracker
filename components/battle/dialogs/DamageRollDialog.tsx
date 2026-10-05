@@ -8,6 +8,7 @@ import {
 } from "@/components/battle/dialogs/shared";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useNotify } from "@/lib/hooks/common";
 import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
 import {
   canPerformReaction,
@@ -40,6 +41,8 @@ export function DamageRollDialog({
   targetsCount = 1,
   onConfirm,
 }: DamageRollDialogProps) {
+  const notify = useNotify();
+
   const showReactionField =
     targetsCount === 1 &&
     !!target &&
@@ -122,7 +125,7 @@ export function DamageRollDialog({
         const n = parseInt(raw, 10);
 
         if (Number.isNaN(n) || n < 0) {
-          alert("Відповідь цілі: введіть невід'ємне число урону.");
+          void notify("Відповідь цілі: введіть невід'ємне число урону.");
 
           return;
         }
@@ -135,9 +138,7 @@ export function DamageRollDialog({
       onConfirm(rolls, reactionDamage);
       handleCancel();
     } else {
-      alert(
-        `Введіть ${diceCount} значень: кожне від 1 до відповідного d (d6=1-6, d8=1-8 тощо).`,
-      );
+      void notify(`Введіть ${diceCount} значень: кожне від 1 до відповідного d (d6=1-6, d8=1-8 тощо).`);
     }
   };
 

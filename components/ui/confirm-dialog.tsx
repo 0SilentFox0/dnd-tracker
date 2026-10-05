@@ -76,9 +76,11 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
         dismissible={!busy}
         footer={
           <>
-            <Button variant="outline" onClick={() => settle(false)} disabled={busy}>
-              {pending?.cancelLabel ?? "Скасувати"}
-            </Button>
+            {pending?.cancelLabel === null ? null : (
+              <Button variant="outline" onClick={() => settle(false)} disabled={busy}>
+                {pending?.cancelLabel ?? "Скасувати"}
+              </Button>
+            )}
             <Button variant={pending?.destructive ? "destructive" : "default"} onClick={accept} disabled={busy}>
               {busy ? "…" : (pending?.confirmLabel ?? "Підтвердити")}
             </Button>

@@ -3,6 +3,7 @@
 import { Heart, LogIn, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useConfirm } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -23,6 +24,8 @@ export function DmParticipantRow({
   onRemove,
   onActionDone,
 }: DmParticipantRowProps) {
+  const confirm = useConfirm();
+
   const close = () => onActionDone?.();
 
   return (
@@ -75,12 +78,10 @@ export function DmParticipantRow({
           size="icon"
           className="h-8 w-8 text-red-400 hover:bg-red-500/20"
           title="Видалити з бою"
-          onClick={() => {
+          onClick={async () => {
             if (
               typeof window !== "undefined" &&
-              window.confirm(
-                "Видалити " + participant.basicInfo.name + " з бою?",
-              )
+              (await confirm({ title: "Видалити " + participant.basicInfo.name + " з бою?", confirmLabel: "Видалити", destructive: true }))
             ) {
               onRemove(participant);
               close();

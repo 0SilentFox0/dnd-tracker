@@ -65,7 +65,13 @@ export function CharacterSpellbookDialog({
   };
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange} title="Заклинання героя" size="sm" className="flex flex-col">
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Заклинання героя"
+      size="sm"
+      className="flex flex-col"
+    >
         {spells.length === 0 ? (
           <p className="text-muted-foreground py-4 text-sm">
             Персонаж поки не знає жодного заклинання. Вивчіть школу магії в
@@ -115,7 +121,6 @@ export function CharacterSpellbookDialog({
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-      
     </ResponsiveDialog>
   );
 }

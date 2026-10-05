@@ -29,7 +29,14 @@ export function CreateGroupDialog({
   isCreating,
 }: CreateGroupDialogProps) {
   return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange} title="Створити групу" description="Додайте нову групу для юнітів" footer={<><Button
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Створити групу"
+      description="Додайте нову групу для юнітів"
+      footer={
+        <>
+          <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isCreating}
@@ -38,7 +45,10 @@ export function CreateGroupDialog({
           </Button>
           <Button onClick={onConfirm} disabled={!name.trim() || isCreating}>
             {isCreating ? "Створення..." : "Створити"}
-          </Button></>}>
+          </Button>
+        </>
+      }
+    >
         <div className="space-y-4">
           <LabeledInput
             id="group-name"
@@ -66,7 +76,6 @@ export function CreateGroupDialog({
             />
           </div>
         </div>
-        
     </ResponsiveDialog>
   );
 }
