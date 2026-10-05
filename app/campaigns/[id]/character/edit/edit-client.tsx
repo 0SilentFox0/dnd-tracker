@@ -35,18 +35,20 @@ export function PlayerCharacterEditClient({
 }) {
   const router = useRouter();
 
-  const { query, form, members, membersLoading, races } = useCharacterEditor({
+  const { query, ready, form, members, membersLoading, races } = useCharacterEditor({
     campaignId: id,
     characterId,
     onSaved: () => router.push(`/campaigns/${id}/character`),
   });
 
+  const characterLoading = <LoadingState rows={6} label="Завантаження персонажа…" />;
+
   const { formData, loading, error, basicInfo, abilityScores, combatStats, skills, abilities, spellcasting, handleSubmit } = form;
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">
-      <QueryState query={query} loading={<LoadingState rows={6} label="Завантаження персонажа…" />}>
-        {() => (
+      <QueryState query={query} loading={characterLoading}>
+        {() => !ready ? characterLoading : (
       <Card>
         <CardHeader>
           <CardTitle>

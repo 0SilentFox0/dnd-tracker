@@ -42,3 +42,22 @@ describe("useCharacterEditor", () => {
     expect(result.current.form.formData.basicInfo.name).toBe("Арвен II");
   });
 });
+
+describe("useCharacterEditor fresh seed", () => {
+  it("seeds from a fresh fetch, not from an older cached snapshot", async () => {
+    const { getCharacter } = await import("@/lib/api/characters");
+
+    vi.mocked(getCharacter).mockResolvedValue({ id: "ch2", name: "Нове ім'я", level: 5, inventory: {} } as never);
+
+    const fresh = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
+    fresh.setQueryData(["character", "c1", "ch2"], { id: "ch2", name: "Старе ім'я", level: 4, inventory: {} });
+
+    const { result } = renderHook(() => useCharacterEditor({ campaignId: "c1", characterId: "ch2", onSaved: vi.fn() }), {
+      wrapper: ({ children }: { children: ReactNode }) => <QueryClientProvider client={fresh}>{children}</QueryClientProvider>,
+    });
+
+    await waitFor(() => expect(result.current.ready).toBe(true));
+    expect(result.current.form.formData.basicInfo.name).toBe("Нове ім'я");
+  });
+});

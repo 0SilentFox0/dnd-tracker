@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useCharacterForm } from "./useCharacterForm";
 import { useCharacter, useUpdateCharacter } from "./useCharacters";
@@ -30,18 +30,21 @@ export function useCharacterEditor({ campaignId, characterId, onSaved }: { campa
 
   const { setFormData } = form;
 
-  // Refetches (focus, invalidation) must not overwrite what the user is typing.
-  const seededFor = useRef<string | null>(null);
+  // Seed once from data fetched on this mount: a cached snapshot may predate saves made elsewhere,
+  // and later refetches must not overwrite what the user is typing.
+  const [seededFor, setSeededFor] = useState<string | null>(null);
+
+  const freshData = query.isFetchedAfterMount ? query.data : undefined;
 
   useEffect(() => {
-    if (!query.data || seededFor.current === characterId) return;
+    if (!freshData || seededFor === characterId) return;
 
-    seededFor.current = characterId;
-    setFormData(characterToFormData(query.data));
-    setEquipped((query.data.inventory?.equipped as EquippedItems) ?? {}); // eslint-disable-line react-hooks/set-state-in-effect -- seed from the first server snapshot
-  }, [query.data, characterId, setFormData]);
+    setFormData(characterToFormData(freshData));
+    setEquipped((freshData.inventory?.equipped as EquippedItems) ?? {}); // eslint-disable-line react-hooks/set-state-in-effect -- seed from the first server snapshot
+    setSeededFor(characterId);
+  }, [freshData, characterId, seededFor, setFormData]);
 
-  return { query, form, equipped, setEquipped, members, membersLoading, races };
+  return { query, ready: seededFor === characterId, form, equipped, setEquipped, members, membersLoading, races };
 }
 
 export type CharacterEditor = ReturnType<typeof useCharacterEditor>;

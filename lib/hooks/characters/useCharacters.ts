@@ -37,7 +37,8 @@ export function useCharacter(campaignId: string, characterId: string) {
   return useQuery<Character>({
     queryKey: ["character", campaignId, characterId],
     queryFn: () => getCharacter(campaignId, characterId),
-    staleTime: ENTITY_STALE_MS,
+    // Editors seed a form from this; other writers (profile, battles) don't invalidate it.
+    staleTime: 0,
     enabled: !!campaignId && !!characterId,
   });
 }

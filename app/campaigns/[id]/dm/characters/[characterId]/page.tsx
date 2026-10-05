@@ -21,6 +21,8 @@ export default function EditCharacterPage({
 
   const [viewAsPlayer, setViewAsPlayer] = useState(false);
 
+  const characterLoading = <LoadingState rows={6} label="Завантаження персонажа…" />;
+
   return (
     <div className="container mx-auto p-4 max-w-5xl space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border bg-muted/40 px-4 py-3">
@@ -46,8 +48,8 @@ export default function EditCharacterPage({
           allowPlayerEdit={false}
         />
       ) : (
-        <QueryState query={editor.query} loading={<LoadingState rows={6} label="Завантаження персонажа…" />}>
-          {() => <DmCharacterEditForm editor={editor} />}
+        <QueryState query={editor.query} loading={characterLoading}>
+          {() => (editor.ready ? <DmCharacterEditForm editor={editor} /> : characterLoading)}
         </QueryState>
       )}
     </div>
