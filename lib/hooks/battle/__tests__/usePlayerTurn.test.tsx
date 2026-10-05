@@ -71,7 +71,7 @@ describe("usePlayerTurn", () => {
     await act(async () => result.current.rollMorale(2));
     act(() => vi.advanceTimersByTime(4_100));
 
-    expect(nextMutate).toHaveBeenCalledWith({ expectedVersion: 5 });
+    expect(nextMutate).toHaveBeenCalledWith({ expectedVersion: 5 }, expect.anything());
 
     nextMutate.mockClear();
 
@@ -114,5 +114,25 @@ describe("usePlayerTurn", () => {
     act(() => result.current.afterAction());
 
     expect(result.current.phase).toBe("acting");
+  });
+
+  it("автоперехід після паніки не вдався (409) — дії повертаються, щоб завершити хід вручну", async () => {
+    vi.useFakeTimers();
+
+    const scene = fakeScene({ morale: 2 });
+
+    scene.moraleCheck.mockResolvedValue({ moraleResult: { hasExtraTurn: false, shouldSkipTurn: true, moralePositive: false, message: "" } });
+
+    (scene.value.actions.nextTurn.mutate as ReturnType<typeof vi.fn>).mockImplementation((_vars: unknown, opts?: { onError?: () => void }) => opts?.onError?.());
+
+    const { result } = renderHook(() => usePlayerTurn(scene.me), { wrapper: scene.wrapper });
+
+    await act(async () => result.current.rollMorale(2));
+    expect(result.current.phase).toBe("ended");
+
+    act(() => vi.advanceTimersByTime(4_100));
+    expect(result.current.phase).toBe("acting");
+
+    vi.useRealTimers();
   });
 });

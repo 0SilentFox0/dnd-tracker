@@ -65,7 +65,6 @@ export function useBattle(
   });
 }
 
-
 export function useUpdateBattle(campaignId: string, battleId: string) {
   const queryClient = useQueryClient();
 

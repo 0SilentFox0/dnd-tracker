@@ -5,11 +5,9 @@ import { useEffect, useReducer, useRef } from "react";
 import { useBattleScene } from "./useBattleScene";
 
 import { useConfirm } from "@/lib/hooks/common";
-import { initialTurnFlow, turnFlow } from "@/lib/utils/battle/flows";
+import { initialTurnFlow, MORALE_SKIP_MS, turnFlow } from "@/lib/utils/battle/flows";
 import { needsMoraleCheck } from "@/lib/utils/battle/view";
 import type { BattleParticipant } from "@/types/battle";
-
-const MORALE_SKIP_MS = 4_000;
 
 const exhausted = (p: BattleParticipant) => {
   const bonusLeft = (p.battleData.resolvedAbilities ?? []).some((a) => a.trigger.event === "bonusAction") && !p.actionFlags.hasUsedBonusAction;
@@ -88,7 +86,10 @@ export function usePlayerTurn(participant: BattleParticipant) {
         // версія фіксується одразу: якщо DM встигне передати хід сам, таймер отримає 409, а не пропустить наступного
         const expectedVersion = scene.readBattle()?.version;
 
-        skipTimer.current = setTimeout(() => scene.actions.nextTurn.mutate({ expectedVersion }), MORALE_SKIP_MS);
+        skipTimer.current = setTimeout(
+          () => scene.actions.nextTurn.mutate({ expectedVersion }, { onError: () => dispatch({ type: "RECOVER" }) }),
+          MORALE_SKIP_MS,
+        );
       }
       else scene.toast.show(`${participant.basicInfo.name} · мораль: без змін (d10 = ${d10})`);
     },

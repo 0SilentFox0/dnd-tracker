@@ -69,7 +69,6 @@ export function buildPusherMessages(args: {
     { channel, event: "battle-updated", payload: { type: "battle-updated", battleId: delta.battleId, version: delta.version } },
   ];
 
-
   const turnMoved = before.round !== after.round || before.turnIndex !== after.turnIndex || before.status !== after.status;
 
   const active = participants[after.turnIndex];

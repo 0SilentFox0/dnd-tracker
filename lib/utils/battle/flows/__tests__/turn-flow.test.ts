@@ -31,3 +31,12 @@ describe("turnFlow", () => {
     expect(run({ type: "BEGIN", needsMorale: false }, { type: "END" }).phase).toBe("ended");
   });
 });
+
+describe("turnFlow — RECOVER", () => {
+  it("із ended повертає до дій без автовідліку; з інших фаз нічого не робить", () => {
+    const ended = run({ type: "BEGIN", needsMorale: false }, { type: "END" });
+
+    expect(turnFlow(ended, { type: "RECOVER" })).toMatchObject({ phase: "acting", stayed: true });
+    expect(turnFlow(initialTurnFlow, { type: "RECOVER" })).toBe(initialTurnFlow);
+  });
+});

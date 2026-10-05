@@ -4,8 +4,7 @@ import { useEffect } from "react";
 
 import { useBattleScene } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
-
-const MORALE_SKIP_MS = 4_000;
+import { MORALE_SKIP_MS } from "@/lib/utils/battle/flows";
 
 const die = "hud-sc flex items-center justify-center font-extrabold [clip-path:polygon(50%_0,100%_38%,82%_100%,18%_100%,0_38%)] animate-[hud-dropin_.7s_cubic-bezier(.16,1,.3,1)_both]";
 
