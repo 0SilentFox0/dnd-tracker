@@ -5,6 +5,7 @@
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
 import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
+import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { BattleParticipant } from "@/types/battle";
 
 const PHYSICAL_DAMAGE_TYPES = ["slashing", "piercing", "bludgeoning", "physical"];
@@ -12,6 +13,8 @@ const PHYSICAL_DAMAGE_TYPES = ["slashing", "piercing", "bludgeoning", "physical"
 export interface ResistanceOptions {
   participants?: BattleParticipant[];
   fromSpell?: boolean;
+  /** модифікатори поточної дії для цілі (фаза before) */
+  extra?: StaticEffect[];
 }
 
 /**
@@ -33,7 +36,7 @@ function matchesDamageType(flagType: string, damageType: string, fromSpell: bool
 }
 
 function matchingResistances(target: BattleParticipant, damageType: string, opts: ResistanceOptions = {}) {
-  return findFlags(withSelf(opts.participants ?? [], target), target.basicInfo.id, "resistance").filter((f) =>
+  return findFlags(withSelf(opts.participants ?? [], target), target.basicInfo.id, "resistance", opts.extra).filter((f) =>
     matchesDamageType(f.damageType, damageType, opts.fromSpell === true),
   );
 }

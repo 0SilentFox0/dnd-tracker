@@ -3,6 +3,8 @@
  */
 
 import { applyResistance } from "../resistance";
+
+import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import type { BattleSpell } from "../types/spell-process";
 import { calculateSpellDamageWithEnhancements } from "./calculations";
 import { participantImmuneToSpell } from "./spell-immunity";
@@ -25,6 +27,7 @@ export interface ComputeSpellDamageParams {
   savingThrows: Array<{ participantId: string; roll: number }>;
   updatedTargets: BattleParticipant[];
   allParticipants?: BattleParticipant[];
+  actionModifiers?: Record<string, StaticEffect[]>;
 }
 
 export function computeSpellDamageAndApply(
@@ -38,6 +41,7 @@ export function computeSpellDamageAndApply(
     savingThrows,
     updatedTargets,
     allParticipants = [],
+    actionModifiers = {},
   } = params;
 
   const baseValue = damageRolls.reduce((sum, roll) => sum + roll, 0);
@@ -46,7 +50,7 @@ export function computeSpellDamageAndApply(
     caster,
     baseValue,
     additionalRollResult,
-    { addHeroLevelToBase: true, allParticipants },
+    { addHeroLevelToBase: true, allParticipants, actionModifiers: actionModifiers[caster.basicInfo.id] },
     { groupId: spell.groupId ?? null },
   );
 
@@ -99,7 +103,7 @@ export function computeSpellDamageAndApply(
       }
     }
 
-    if (participantImmuneToSpell(target, spell.id, allParticipants)) {
+    if (participantImmuneToSpell(target, spell.id, allParticipants, actionModifiers[target.basicInfo.id])) {
       damageToApply = 0;
       allResistanceBreakdown.push(
         `${target.basicInfo.name}: імунітет до цього заклинання`,
@@ -108,7 +112,7 @@ export function computeSpellDamageAndApply(
 
     const damageType = spell.damageElement || "magic";
 
-    const resistanceResult = applyResistance(target, damageToApply, damageType, { participants: allParticipants, fromSpell: true });
+    const resistanceResult = applyResistance(target, damageToApply, damageType, { participants: allParticipants, fromSpell: true, extra: actionModifiers[target.basicInfo.id] });
 
     targetDamages.push({ target, finalDamage: resistanceResult.finalDamage });
     allResistanceBreakdown.push(...resistanceResult.breakdown);
@@ -172,6 +176,7 @@ export function computeSpellHealAndApply(
   additionalRollResult: number | undefined,
   updatedTargets: BattleParticipant[],
   allParticipants: BattleParticipant[] = [],
+  actionModifiers: Record<string, StaticEffect[]> = {},
 ): { spellCalculation: SpellCalculation; updatedTargets: BattleParticipant[] } {
   const baseValue = damageRolls.reduce((sum, roll) => sum + roll, 0);
 
@@ -179,7 +184,7 @@ export function computeSpellHealAndApply(
     caster,
     baseValue,
     additionalRollResult,
-    { addHeroLevelToBase: true, allParticipants },
+    { addHeroLevelToBase: true, allParticipants, actionModifiers: actionModifiers[caster.basicInfo.id] },
     { groupId: spell.groupId ?? null },
   );
 

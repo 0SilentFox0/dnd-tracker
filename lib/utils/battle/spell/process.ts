@@ -75,7 +75,7 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
 
   const flow: AttackFlow = { ps: withSelf(allParticipants, caster), messages: [], ctx: { round: currentRound, rng: params.rng ?? Math.random } };
 
-  fire(flow, { type: "spellCast", phase: "before", actorId: casterId, targetIds });
+  const { actionModifiers } = fire(flow, { type: "spellCast", phase: "before", actorId: casterId, targetIds });
 
   let updatedCaster = getP(flow, casterId);
 
@@ -118,7 +118,7 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
       updatedCaster,
       spell,
       targetIds,
-      allParticipants,
+      flow.ps,
       updatedTargets,
       battleId,
       currentRound,
@@ -129,7 +129,7 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
     return finish(handleNoTargetSpell(
       updatedCaster,
       spell,
-      allParticipants,
+      flow.ps,
       slotKey,
       battleId,
       currentRound,
@@ -146,7 +146,7 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
       updatedCaster,
       spell,
       targetIds,
-      allParticipants,
+      flow.ps,
       updatedTargets,
       slotKey,
       battleId,
@@ -169,7 +169,7 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
         updatedCaster,
         spell,
         targetIds,
-        allParticipants,
+        flow.ps,
         updatedTargets,
         slotKey,
         battleId,
@@ -196,7 +196,8 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
       additionalRollResult,
       savingThrows,
       updatedTargets,
-      allParticipants,
+      allParticipants: flow.ps,
+      actionModifiers,
     });
 
     spellCalculation = result.spellCalculation;
@@ -208,7 +209,8 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
       damageRolls,
       additionalRollResult,
       updatedTargets,
-      allParticipants,
+      flow.ps,
+      actionModifiers,
     );
 
     spellCalculation = result.spellCalculation;
@@ -296,7 +298,7 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
     getP(flow, casterId),
     spell,
     targetIds,
-    allParticipants,
+    flow.ps,
     updatedTargets.map((t) => getP(flow, t.basicInfo.id)),
     targets,
     spellCalculation,

@@ -10,6 +10,7 @@ import { calculatePercentBonus } from "../common";
 
 import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
+import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { logger } from "@/lib/utils/logger";
 import type { SpellEnhancer } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
@@ -127,6 +128,8 @@ export interface SpellDamageEnhancementOptions {
    */
   addHeroLevelToBase?: boolean;
   allParticipants?: BattleParticipant[];
+  /** модифікатори цього касту (spellCast/before без duration) */
+  actionModifiers?: StaticEffect[];
 }
 
 /**
@@ -174,7 +177,7 @@ export function calculateSpellDamageWithEnhancements(
 
   const mods = collectModifiers(withSelf(options?.allParticipants ?? [], participant), participant.basicInfo.id, {
     damage: { kind: "magic", school: ctx.spellGroupId },
-  });
+  }, options?.actionModifiers);
 
   running += mods.flat;
 

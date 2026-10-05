@@ -52,4 +52,24 @@ describe("spell ability events", () => {
     expect(r.casterUpdated.combatStats.morale).toBe(1);
     expect(r.allParticipantsUpdated?.find((p) => p.basicInfo.id === "e2")?.combatStats.morale).toBe(-1);
   });
+
+  it("бонус шкоди з spellCast/before діє на це заклинання", () => {
+    const focus = resolved({ trigger: { event: "spellCast", phase: "before", role: "caster" }, effects: [{ kind: "damageBonus", filter: { kind: "magic" }, percent: 100 }] });
+
+    const tank = () => [makeParticipant({ id: "e", side: ParticipantSide.ENEMY, hp: 100, maxHp: 100 })];
+
+    const plain = cast(makeParticipant({ id: "c" }), tank());
+
+    const boosted = cast(makeParticipant({ id: "c", abilities: [focus] }), tank());
+
+    expect(boosted.spellCalculation?.totalDamage ?? 0).toBeGreaterThan(plain.spellCalculation?.totalDamage ?? 0);
+  });
+
+  it("опір цілі з spellCast/before (role target) зменшує шкоду цього заклинання", () => {
+    const ward = resolved({ trigger: { event: "spellCast", phase: "before", role: "target" }, effects: [{ kind: "flag", flag: "resistance", damageType: "fire", percent: 100, target: "self" }] });
+
+    const r = cast(makeParticipant({ id: "c" }), [makeParticipant({ id: "e", side: ParticipantSide.ENEMY, hp: 100, maxHp: 100, abilities: [ward] })]);
+
+    expect(r.targetsUpdated[0].combatStats.currentHp).toBe(100);
+  });
 });
