@@ -6,20 +6,9 @@ import { ArtifactModifierType } from "@/lib/constants/artifacts";
 import { AttackType } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { SkillLevel } from "@/lib/types/skill-tree";
+import { type ArtifactModifier, getModifierValue } from "@/lib/utils/battle/participant/artifact-utils";
 
-export type ArtifactModifier = { type: string; value?: number | string };
-
-export function getModifierValue(
-  modifiers: ArtifactModifier[],
-  modifierType: string,
-  defaultValue: string,
-): string {
-  const m = modifiers.find((x) => x.type === modifierType);
-
-  if (m?.value == null) return defaultValue;
-
-  return String(m.value);
-}
+export { type ArtifactModifier, getModifierValue };
 
 export function getOptionalModifierValue(
   modifiers: ArtifactModifier[],

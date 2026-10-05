@@ -11,6 +11,7 @@ import { logBattleTiming } from "@/lib/utils/battle/battle-timing";
 import { calculateDamageWithModifiers } from "@/lib/utils/battle/damage";
 import { createBattleParticipantFromCharacter } from "@/lib/utils/battle/participant";
 import { calculateSpellDamageWithEnhancements } from "@/lib/utils/battle/spell/calculations";
+import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { formatSpellDamageDiceRoll } from "@/lib/utils/spells/spell-calculations";
 
 /**
@@ -134,9 +135,9 @@ export async function GET(
       (a) => a.type === AttackType.RANGED
     );
 
-    const strMod = Math.floor((participant.abilities.strength - 10) / 2);
+    const strMod = getAbilityModifier(participant.abilities.strength);
 
-    const dexMod = Math.floor((participant.abilities.dexterity - 10) / 2);
+    const dexMod = getAbilityModifier(participant.abilities.dexterity);
 
     const meleeHero = getHeroDamageComponents(
       participant.abilities.level,

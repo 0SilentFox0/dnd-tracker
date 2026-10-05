@@ -40,6 +40,14 @@ export function processStartOfTurn(
 ): StartOfTurnResult {
   let updatedParticipant = { ...participant };
 
+  // до зменшення тривалостей: обмеження на 1 раунд має подіяти в цей хід
+  const restrictedBy = (type: string) =>
+    participant.battleData.activeEffects.some((e) => e.effects.some((d) => d.type === type));
+
+  const hasNoBonusAction = restrictedBy("no_bonus_action");
+
+  const hasNoReaction = restrictedBy("no_reaction");
+
   const damageMessages: string[] = [];
 
   let expiredEffects: string[] = [];
@@ -112,14 +120,6 @@ export function processStartOfTurn(
   }
 
   // 5. Скидаємо флаги дій; ефекти no_bonus_action / no_reaction блокують відповідні дії
-  const hasNoBonusAction = updatedParticipant.battleData.activeEffects.some(
-    (e) => e.effects.some((d) => d.type === "no_bonus_action"),
-  );
-
-  const hasNoReaction = updatedParticipant.battleData.activeEffects.some(
-    (e) => e.effects.some((d) => d.type === "no_reaction"),
-  );
-
   updatedParticipant = {
     ...updatedParticipant,
     actionFlags: {
@@ -207,9 +207,7 @@ export function processStartOfRound(
   triggerMessages: string[];
 } {
   // 0. Видаляємо тимчасові слоти додаткових ходів з попереднього раунду
-  const baseOrder = (initiativeOrder || []).filter(
-    (p) => !p.basicInfo?.isExtraTurnSlot,
-  );
+  const baseOrder = (initiativeOrder || []).filter((p) => !p.basicInfo?.isExtraTurnSlot);
 
   // Додаємо призваних істот до baseOrder
   const updatedOrder = [...baseOrder, ...pendingSummons];

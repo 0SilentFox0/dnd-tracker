@@ -51,24 +51,13 @@ export function applyPendingMoraleCheck(
 
   let updatedInitiativeOrder = [...initiativeOrder];
 
+  // без клона: учасник ходить ще раз наприкінці раунду (advanceTurn)
   if (moraleResult.hasExtraTurn) {
-    const extraParticipant: BattleParticipant = {
-      ...participant,
-      basicInfo: {
-        ...participant.basicInfo,
-        id: `${participant.basicInfo.id}-extra-${Date.now()}`,
-        isExtraTurnSlot: true,
-      },
-      actionFlags: {
-        ...participant.actionFlags,
-        hasExtraTurn: false,
-        hasUsedAction: false,
-        hasUsedBonusAction: false,
-        hasUsedReaction: false,
-      },
-    };
-
-    updatedInitiativeOrder.push(extraParticipant);
+    updatedInitiativeOrder = updatedInitiativeOrder.map((p) =>
+      p.basicInfo.id === participant.basicInfo.id
+        ? { ...p, actionFlags: { ...p.actionFlags, hasExtraTurn: true } }
+        : p,
+    );
   }
 
   const triggerMessages: string[] = [];

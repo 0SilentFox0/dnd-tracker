@@ -9,6 +9,7 @@ import { processSpell } from "@/lib/utils/battle/spell";
 import { appendSummonedUnitToInitiativeEnd } from "@/lib/utils/battle/spell/append-summoned-unit";
 import { mapDbSpellToBattleSpell } from "@/lib/utils/battle/spell/map-db-spell";
 import { BattleAccessError, battleActionToEvent, BattleRuleError } from "@/lib/utils/battle/store";
+import { assertSpellRolls } from "@/lib/utils/battle/validation/dice-checks";
 
 export interface SpellMutationDeps {
   loadSpell(spellId: string): Promise<Spell | null>;
@@ -56,6 +57,8 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
         throw new BattleRuleError("action_used", isBonus ? "Бонусну дію вже використано" : "Дію вже використано");
       }
     }
+
+    assertSpellRolls(spellRow, data.damageRolls, data.targetIds.length);
 
     const result = processSpell({
       caster,

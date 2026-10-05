@@ -105,6 +105,9 @@ export function runAdvanceTurnLoop(
 
       updatedInitiativeOrder = roundResult.updatedInitiativeOrder;
 
+      // індекс обрано за старим порядком; після пересортування раунд починається з початку
+      nextTurnIndex = 0;
+
       if (roundResult.triggerMessages.length > 0) {
         newLogEntries.push({
           id: `triggers-round-${nextRound}-${Date.now()}-${attempts}`,

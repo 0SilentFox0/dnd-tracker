@@ -1,7 +1,8 @@
 import type { PatchParticipantData } from "./patch-participant-schema";
 
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { BattleAccessError, BattleRuleError, systemEvent } from "@/lib/utils/battle/store";
+import { BattleAccessError, battleActionToEvent, BattleRuleError, systemEvent } from "@/lib/utils/battle/store";
+import { advanceTurn } from "@/lib/utils/battle/turn";
 import { executeComplexTriggersForChangedParticipant } from "@/lib/utils/skills/execution";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -28,14 +29,38 @@ function removeParticipant(ctx: BattleMutationContext, participantId: string): M
 
   const participants = ctx.participants.filter((p) => p.basicInfo.id !== participantId);
 
+  const removalEvent: MutationResult["events"][number] = {
+    type: "ability",
+    round: ctx.scene.round,
+    actorId: "dm",
+    resultText: `DM видалив з бою: ${removed.basicInfo.name}`,
+    details: DM_DETAILS,
+  };
+
   const current = ctx.scene.turnIndex;
+
+  // хід був на видаленому — наступний отримує повний початок ходу (а з кінця черги — новий раунд)
+  if (removedIndex === current && participants.length > 0) {
+    const advanced = advanceTurn({
+      participants,
+      pending: ctx.pending,
+      scene: { ...ctx.scene, turnIndex: removedIndex - 1, pendingMoraleCheck: null },
+    });
+
+    return {
+      participants: advanced.participants,
+      pending: advanced.pending,
+      scene: advanced.scene,
+      events: [removalEvent, ...advanced.actions.map(battleActionToEvent)],
+    };
+  }
 
   let turnIndex = current;
 
   if (participants.length === 0) {
     turnIndex = 0;
-  } else if (removedIndex <= current) {
-    turnIndex = Math.max(0, current - (removedIndex < current ? 1 : 0));
+  } else if (removedIndex < current) {
+    turnIndex = current - 1;
   }
 
   turnIndex = Math.min(turnIndex, Math.max(0, participants.length - 1));
@@ -44,15 +69,7 @@ function removeParticipant(ctx: BattleMutationContext, participantId: string): M
     participants,
     pending: ctx.pending,
     scene: { turnIndex },
-    events: [
-      {
-        type: "ability",
-        round: ctx.scene.round,
-        actorId: "dm",
-        resultText: `DM видалив з бою: ${removed.basicInfo.name}`,
-        details: DM_DETAILS,
-      },
-    ],
+    events: [removalEvent],
   };
 }
 
@@ -77,7 +94,9 @@ function updateHp(ctx: BattleMutationContext, participantId: string, requestedHp
           ? participant.combatStats.status === "dead"
             ? "dead"
             : "unconscious"
-          : participant.combatStats.status,
+          : participant.combatStats.status === "unconscious"
+            ? "active"
+            : participant.combatStats.status,
     },
   };
 

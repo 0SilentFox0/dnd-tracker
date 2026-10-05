@@ -277,3 +277,10 @@ export function getSkillTreeBonus(
 
   return 0;
 }
+
+export function getAttackAbilityModifier(
+  abilities: { strength: number; dexterity: number },
+  attackType: AttackType | string,
+): number {
+  return getAbilityModifier(attackType === AttackType.MELEE ? abilities.strength : abilities.dexterity);
+}

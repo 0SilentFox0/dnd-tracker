@@ -1,10 +1,14 @@
 import { z } from "zod";
 
+import type { AttackType } from "@/lib/constants/battle";
+import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
 import { runAttackPhase } from "@/lib/utils/battle/attack-and-next-turn/run-attack-phase";
+import { mergeDiceFormulas } from "@/lib/utils/battle/balance/dice";
 import { toPipelineError } from "@/lib/utils/battle/pipeline/compat-errors";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { battleActionToEvent, systemEvent } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";
+import { assertAttackRolls } from "@/lib/utils/battle/validation/dice-checks";
 import { executeComplexTriggersForChangedParticipant } from "@/lib/utils/skills/execution/simple";
 
 export const attackBodySchema = z
@@ -33,8 +37,31 @@ export const attackBodySchema = z
 
 export type AttackBody = z.infer<typeof attackBodySchema>;
 
+// атака шукається так само, як у runAttackPhase; якщо її немає — помилку дасть сама фаза атаки
+function assertAttackInput(ctx: BattleMutationContext, data: Omit<AttackBody, "endTurn">): void {
+  const attacker = ctx.participants.find((p) => p.basicInfo.id === data.attackerId);
+
+  const attack = data.attackId
+    ? attacker?.battleData.attacks.find((a) => a.id === data.attackId || a.name === data.attackId)
+    : attacker?.battleData.attacks[0];
+
+  if (!attacker || !attack) return;
+
+  const targetIds = data.targetIds?.length ? data.targetIds : data.targetId ? [data.targetId] : [];
+
+  // клієнт героя кидає кубики зброї разом із кубиками рівня (PlayerTurnViewDialogs)
+  const formula =
+    attacker.basicInfo.sourceType === "character"
+      ? mergeDiceFormulas(attack.damageDice ?? "", getHeroDamageDiceForLevel(attacker.abilities.level, attack.type as AttackType))
+      : (attack.damageDice ?? "");
+
+  assertAttackRolls(formula, { damageRolls: data.damageRolls, targetCount: targetIds.length });
+}
+
 export function attackMutation(ctx: BattleMutationContext, body: AttackBody): MutationResult {
   const { endTurn, ...data } = body;
+
+  assertAttackInput(ctx, data);
 
   let phase: ReturnType<typeof runAttackPhase>;
 

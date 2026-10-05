@@ -14,7 +14,7 @@ import {
   isHit,
   rollDamage,
 } from "../calculations";
-import { getAttackDamageModifier } from "../calculations";
+import { getAttackAbilityModifier, getAttackDamageModifier } from "../calculations";
 
 import { AttackType } from "@/lib/constants/battle";
 
@@ -127,5 +127,14 @@ describe("calculations", () => {
     it("RANGED використовує спритність", () => {
       expect(getAttackDamageModifier(AttackType.RANGED, 10, 16)).toBe(3);
     });
+  });
+});
+
+describe("getAttackAbilityModifier", () => {
+  it("ближня — Сила, дальня — Спритність", () => {
+    const abilities = { strength: 16, dexterity: 12 };
+
+    expect(getAttackAbilityModifier(abilities, AttackType.MELEE)).toBe(3);
+    expect(getAttackAbilityModifier(abilities, AttackType.RANGED)).toBe(1);
   });
 });

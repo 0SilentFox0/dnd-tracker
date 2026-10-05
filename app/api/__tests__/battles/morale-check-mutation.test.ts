@@ -21,4 +21,12 @@ describe("morale-check mutation", () => {
       expect.objectContaining({ status: 404 }),
     );
   });
+
+  it("повторна перевірка моралі тим самим учасником у цьому ході — action_used", () => {
+    const pending = { participantId: "hero", d10Roll: 5, moraleResult: { shouldSkipTurn: false, hasExtraTurn: false, message: "", moralePositive: true } };
+
+    expect(() => moraleCheckMutation(context({ scene: { ...context().scene, pendingMoraleCheck: pending } }), { participantId: "hero", d10Roll: 10 })).toThrow(
+      expect.objectContaining({ code: "action_used" }),
+    );
+  });
 });

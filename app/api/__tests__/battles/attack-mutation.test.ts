@@ -2,8 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import { attackBodySchema, attackMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/attack/attack-mutation";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
+import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
+import { mergeDiceFormulas } from "@/lib/utils/battle/balance/dice";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
+import { parseDice } from "@/lib/utils/common/dice";
 import { createMockParticipant } from "@/lib/utils/skills/__tests__/skill-triggers-execution-mocks";
 
 const base = createMockParticipant();
@@ -58,5 +61,39 @@ describe("attack mutation", () => {
     } catch (e) {
       expect(e instanceof BattleAccessError || e instanceof BattleRuleError).toBe(true);
     }
+  });
+
+
+  it("неможливий кидок шкоди (99 на d8) — invalid_dice", () => {
+    expect(() => attackMutation(ctx, body({ damageRolls: [99] }))).toThrow(expect.objectContaining({ code: "invalid_dice" }));
+  });
+
+  it("герой кидає кубики зброї плюс кубики рівня — це не помилка", () => {
+    const heroAttacker = {
+      ...hero,
+      basicInfo: { ...hero.basicInfo, sourceType: "character" as const },
+      abilities: { ...hero.abilities, level: 9 },
+      battleData: { ...hero.battleData, attacks: [{ id: "sword", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d6", damageType: "slashing" }] },
+    };
+
+    const formula = mergeDiceFormulas("1d6", getHeroDamageDiceForLevel(9, AttackType.MELEE));
+
+    const rolls = (parseDice(formula)?.groups ?? []).flatMap((g) => Array.from({ length: g.count }, () => g.size));
+
+    expect(() => attackMutation({ ...ctx, participants: [heroAttacker, goblin] } as never, body({ damageRolls: rolls }))).not.toThrow(
+      expect.objectContaining({ code: "invalid_dice" }),
+    );
+  });
+
+  it("підказана клієнтом шкода реакції (більша за подвоєну зброю захисника) приймається", () => {
+    expect(() => attackMutation(ctx, body({ reactionDamage: 37 }))).not.toThrow(expect.objectContaining({ code: "invalid_dice" }));
+  });
+
+  it("нестандартний запис кубиків зброї (\"1d8 piercing\") не блокує атаку", () => {
+    const odd = { ...hero, basicInfo: { ...hero.basicInfo, sourceType: "unit" as const }, battleData: { ...hero.battleData, attacks: [{ id: "sword", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d8 piercing", damageType: "piercing" }] } };
+
+    expect(() => attackMutation({ ...ctx, participants: [odd, goblin] } as never, body({ damageRolls: [5] }))).not.toThrow(
+      expect.objectContaining({ code: "invalid_dice" }),
+    );
   });
 });
