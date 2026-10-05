@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { createStartMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/start/start-mutation";
-import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
+import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 
 const ctx = {
   scene: { id: "b1", campaignId: "c1", status: "prepared", round: 1, turnIndex: 0, version: 0, eventSeq: 0, pendingMoraleCheck: null, startedAt: null, completedAt: null },

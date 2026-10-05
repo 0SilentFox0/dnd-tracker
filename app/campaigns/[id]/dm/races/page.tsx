@@ -13,7 +13,7 @@ export default async function DMRacesPage({
 
   await requireCampaignDM(id);
 
-  const racesData = await prisma.race.findMany({
+  const racesData = await prisma.race.findMany({ omit: { abilities: true },
     where: {
       campaignId: id,
     },

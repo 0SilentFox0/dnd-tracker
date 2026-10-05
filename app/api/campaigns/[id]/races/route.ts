@@ -5,6 +5,7 @@ import { Prisma } from "@prisma/client";
 import { getCachedRaces } from "@/lib/cache/reference-data";
 import { prisma } from "@/lib/db";
 import { createRaceSchema } from "@/lib/schemas";
+import { syncRaceAbilities } from "@/lib/utils/abilities/legacy/sync";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 
@@ -67,6 +68,8 @@ export async function POST(
           : [],
       },
     });
+
+    await syncRaceAbilities(prisma, race);
 
     revalidateTag(`races-${id}`, "max");
 

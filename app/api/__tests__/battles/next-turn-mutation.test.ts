@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { nextTurnMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/next-turn/next-turn-mutation";
 import { ParticipantSide } from "@/lib/constants/battle";
-import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
+import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 
 const base = createMockParticipant();
 

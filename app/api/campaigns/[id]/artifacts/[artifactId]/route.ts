@@ -8,6 +8,7 @@ import {
   mirrorArtifactIconToSupabase,
   shouldMirrorArtifactIconUrl,
 } from "@/lib/supabase/artifact-icon-storage";
+import { syncArtifactAbilities } from "@/lib/utils/abilities/legacy/sync";
 import { requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 
@@ -109,6 +110,8 @@ export async function PATCH(
       },
       include: { artifactSet: true },
     });
+
+    await syncArtifactAbilities(prisma, updatedArtifact);
 
     return NextResponse.json(updatedArtifact);
   } catch (error) {

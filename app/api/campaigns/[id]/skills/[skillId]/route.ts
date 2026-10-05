@@ -5,6 +5,7 @@ import { formatSkillResponse } from "./format-skill-response";
 import { updateSkillSchema } from "./update-skill-schema";
 
 import { prisma } from "@/lib/db";
+import { syncSkillAbilities } from "@/lib/utils/abilities/legacy/sync";
 import { requireCampaignAccess, requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 
@@ -74,6 +75,8 @@ export async function PATCH(
         mainSkill: true,
       },
     });
+
+    await syncSkillAbilities(prisma, updatedSkill);
 
     return NextResponse.json(formatSkillResponse(updatedSkill));
   } catch (err) {

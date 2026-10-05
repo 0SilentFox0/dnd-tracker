@@ -8,6 +8,7 @@ import {
   mirrorArtifactIconToSupabase,
   shouldMirrorArtifactIconUrl,
 } from "@/lib/supabase/artifact-icon-storage";
+import { syncArtifactAbilities } from "@/lib/utils/abilities/legacy/sync";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 
@@ -66,6 +67,8 @@ export async function POST(
       },
     });
 
+    await syncArtifactAbilities(prisma, artifact);
+
     return NextResponse.json(artifact);
   } catch (error) {
     return handleApiError(error, { action: "create artifact" });
@@ -86,7 +89,7 @@ export async function GET(
       return accessResult;
     }
 
-    const artifacts = await prisma.artifact.findMany({
+    const artifacts = await prisma.artifact.findMany({ omit: { abilities: true },
       where: {
         campaignId: id,
       },

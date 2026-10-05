@@ -5,6 +5,7 @@
 import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
+import { syncArtifactSetAbilities } from "@/lib/utils/abilities/legacy/sync";
 
 const includeList = {
   artifacts: {
@@ -57,7 +58,7 @@ export function buildArtifactSetPatchInput(data: {
 }
 
 export async function listArtifactSets(campaignId: string) {
-  return prisma.artifactSet.findMany({
+  return prisma.artifactSet.findMany({ omit: { abilities: true },
     where: { campaignId },
     include: includeList,
     orderBy: { createdAt: "desc" },
@@ -109,7 +110,7 @@ export async function insertArtifactSet(
     icon?: string | null;
   },
 ) {
-  return prisma.artifactSet.create({
+  const row = await prisma.artifactSet.create({
     data: {
       campaignId,
       name: input.name,
@@ -119,16 +120,24 @@ export async function insertArtifactSet(
     },
     include: includeList,
   });
+
+  await syncArtifactSetAbilities(prisma, row);
+
+  return row;
 }
 
 export async function updateArtifactSetRow(
   setId: string,
   data: Prisma.ArtifactSetUpdateInput,
 ) {
-  return prisma.artifactSet.update({
+  const row = await prisma.artifactSet.update({
     where: { id: setId },
     data,
   });
+
+  await syncArtifactSetAbilities(prisma, row);
+
+  return row;
 }
 
 export async function deleteArtifactSetAndClearArtifacts(

@@ -14,7 +14,7 @@ export default async function PrintSkillsPage({
   const { campaign } = await requireCampaignDM(id);
 
   const [skills, mainSkillsRaw, skillTrees] = await Promise.all([
-    prisma.skill.findMany({
+    prisma.skill.findMany({ omit: { abilities: true },
       where: { campaignId: id },
       include: {
         spell: true,

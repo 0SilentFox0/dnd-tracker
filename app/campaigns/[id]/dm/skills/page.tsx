@@ -13,7 +13,7 @@ export default async function DMSkillsPage({
 
   await requireCampaignDM(id);
 
-  const skills = await prisma.skill.findMany({
+  const skills = await prisma.skill.findMany({ omit: { abilities: true },
     where: {
       campaignId: id,
     },

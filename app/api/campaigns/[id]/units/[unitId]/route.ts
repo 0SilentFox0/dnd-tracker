@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
 import { updateUnitSchema } from "@/lib/schemas";
+import { syncUnitAbilities } from "@/lib/utils/abilities/legacy/sync";
 import { requireCampaignAccess, requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 
@@ -164,6 +165,8 @@ export async function PATCH(
         unitGroup: true,
       },
     });
+
+    await syncUnitAbilities(prisma, updatedUnit);
 
     revalidateTag(`units-${id}`, "max");
 

@@ -17,6 +17,7 @@ import {
   getCanonicalMainSkillName,
   getMainSkillNameVariants,
 } from "../lib/constants/main-skills";
+import { convertLegacySkill } from "../lib/utils/abilities/legacy/convert-skill";
 import { loadSkillsFromDoc } from "./import-skills-library-parse";
 import { triggerStringToSkillTriggers } from "./import-skills-library-triggers";
 import type { LibraryEffect, LibrarySkill } from "./import-skills-library-types";
@@ -212,6 +213,8 @@ async function upsertSkill(
     skillTriggers: skillTriggers as object[],
   };
 
+  const abilities = convertLegacySkill({ id: existing?.id ?? lib.name, name: payload.name, combatStats: payload.combatStats, bonuses: payload.bonuses, skillTriggers: payload.skillTriggers, spellGroupId: null }).abilities as unknown as object[];
+
   if (existing) {
     await prisma.skill.update({
       where: { id: existing.id },
@@ -226,12 +229,13 @@ async function upsertSkill(
         mainSkillData: payload.mainSkillData,
         spellData: payload.spellData,
         skillTriggers: payload.skillTriggers,
+        abilities,
       },
     });
     console.log(`  Updated: ${lib.name} [${skillTriggers.map(t => t.type === "simple" ? t.trigger : "complex").join(", ")}]`);
   } else {
     await prisma.skill.create({
-      data: payload,
+      data: { ...payload, abilities },
     });
     console.log(`  Created: ${lib.name} [${skillTriggers.map(t => t.type === "simple" ? t.trigger : "complex").join(", ")}]`);
   }
