@@ -69,18 +69,10 @@ export function CreateRaceDialog({
       size="lg"
       footer={
         <>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-          >
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             Скасувати
           </Button>
-          <Button
-            type="submit"
-            form="create-race-form"
-            disabled={!abilitiesValid}
-          >
+          <Button type="submit" form="create-race-form" disabled={!abilitiesValid}>
             {withAbilityErrors("Створити расу", abilityErrors)}
           </Button>
         </>
