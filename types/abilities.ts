@@ -7,7 +7,7 @@ export interface AbilitySource {
   id: string;
   name: string;
   icon?: string | null;
-  line?: { mainSkillId: string; level: string };
+  line?: { mainSkillId: string; level: string; levelNode?: boolean };
 }
 
 export type ResolvedAbility = Ability & { key: string; source: AbilitySource };

@@ -42,7 +42,13 @@ export async function createBattleParticipantFromCharacter(
 
   const mainSkillGroups = context ? new Map(context.mainSkills.map((m) => [m.id, m.spellGroupId])) : undefined;
 
-  const skills = await resolveCharacterSkillEntries(character, character.campaignId, context?.skillsById, mainSkillGroups);
+  const skills = await resolveCharacterSkillEntries(
+    character,
+    character.campaignId,
+    context?.skillsById,
+    mainSkillGroups,
+    context ? (context.skillTreeByRace[character.race] ?? null) : undefined,
+  );
 
   const artifactRows = await loadEquippedArtifactRows(character, context?.artifactsById);
 
