@@ -3,11 +3,7 @@
  */
 
 import { getDiceAverage } from "./dice";
-import {
-  getNonMagicMainSkillDprFromProgress,
-  getSpellDprFromProgress,
-  type TreeIdToMainSkillIds,
-} from "./dpr";
+import { getNonMagicBranchDpr, getSpellDprFromBranchLevels } from "./dpr";
 
 import { AttackType } from "@/lib/constants/battle";
 import {
@@ -15,11 +11,7 @@ import {
   getHeroMaxHp,
 } from "@/lib/constants/hero-scaling";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
-
-type SkillTreeProgress = Record<
-  string,
-  { level?: string; unlockedSkills?: string[] }
->;
+import type { BranchLevel } from "@/lib/utils/skills/progression";
 
 export type DifficultyRatio = "easy" | "medium" | "hard";
 
@@ -77,8 +69,7 @@ export interface GetCharacterStatsParams {
     type?: string;
     attackBonus?: number;
   }>;
-  skillTreeProgress?: SkillTreeProgress | null;
-  treeIdToMainSkillIds?: TreeIdToMainSkillIds | null;
+  branchLevels?: Record<string, BranchLevel> | null;
   magicMainSkillIds?: Set<string> | null;
 }
 
@@ -205,17 +196,9 @@ export function getCharacterStats(character: GetCharacterStatsParams): {
     `Melee total = ${Math.round(meleeAvg * 10) / 10}, Ranged total = ${Math.round(rangedAvg * 10) / 10} → фізичний DPR = max = ${Math.round(physicalDpr * 10) / 10}`,
   );
 
-  const spellDpr = getSpellDprFromProgress(
-    character.skillTreeProgress,
-    character.treeIdToMainSkillIds,
-    character.magicMainSkillIds,
-  );
+  const spellDpr = getSpellDprFromBranchLevels(character.branchLevels ?? {}, character.magicMainSkillIds);
 
-  const nonMagicDpr = getNonMagicMainSkillDprFromProgress(
-    character.skillTreeProgress,
-    character.treeIdToMainSkillIds,
-    character.magicMainSkillIds,
-  );
+  const nonMagicDpr = getNonMagicBranchDpr(character.branchLevels ?? {}, character.magicMainSkillIds);
 
   logLines.push(`Школа магії (найвищий рівень): +${spellDpr} DPR`);
   logLines.push(`Немагічні основні навички (сума): +${nonMagicDpr} DPR`);

@@ -27,13 +27,10 @@ export type ExtractedAttack = {
   maxTargets?: number;
 };
 
-/** Character з Prisma (з include для inventory, characterSkills) */
+/** Character з Prisma (з include для inventory) */
 export type CharacterFromPrisma = Prisma.CharacterGetPayload<{
   include: {
     inventory?: true;
-    characterSkills?: {
-      include: { skillTree?: true };
-    };
   };
 }>;
 

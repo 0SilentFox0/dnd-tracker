@@ -106,9 +106,6 @@ export async function GET(
       where: { id: characterId, campaignId },
       include: {
         inventory: true,
-        characterSkills: {
-          include: { skillTree: true },
-        },
       },
     });
 

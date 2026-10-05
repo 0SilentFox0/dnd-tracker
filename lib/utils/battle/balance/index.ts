@@ -11,12 +11,8 @@ export {
   mergeDiceFormulas,
   parseDiceNotationToGroups,
 } from "./dice";
-export type { MagicMainSkillId, TreeIdToMainSkillIds } from "./dpr";
-export {
-  getNonMagicMainSkillDprFromProgress,
-  getSpellDprFromProgress,
-  MAGIC_MAIN_SKILL_IDS,
-} from "./dpr";
+export type { MagicMainSkillId } from "./dpr";
+export { getNonMagicBranchDpr, getSpellDprFromBranchLevels, MAGIC_MAIN_SKILL_IDS } from "./dpr";
 export type {
   AllyStats,
   CharacterDprBreakdown,

@@ -6,7 +6,6 @@ import {
   ArtifactModifier,
 } from "@/types/artifacts";
 import { EquippedItems } from "@/types/inventory";
-import { CharacterSkill, UnlockedSkill } from "@/types/skills";
 
 /**
  * Розраховує модифікатор з ability score
@@ -245,38 +244,6 @@ export function getArtifactAttackBonus(
   return bonus;
 }
 
-/**
- * Розраховує бонус з дерева скілів
- * @param characterSkills - Масив CharacterSkills
- * @param skillTreeId - ID дерева скілів
- * @param skillName - Назва скілу (наприклад "melee_damage", "ranged_damage")
- * @returns Бонус зі скілу
- */
-export function getSkillTreeBonus(
-  characterSkills: CharacterSkill[],
-  skillTreeId: string,
-  skillName: string
-): number {
-  const characterSkill = characterSkills.find(
-    (cs: CharacterSkill) => cs.skillTreeId === skillTreeId
-  );
-
-  if (!characterSkill) return 0;
-
-  const unlockedSkills = Array.isArray(characterSkill.unlockedSkills)
-    ? characterSkill.unlockedSkills
-    : [];
-
-  const skill = unlockedSkills.find(
-    (s: UnlockedSkill) => s && (s.name === skillName || s.id === skillName)
-  );
-
-  if (skill?.bonus) {
-    return Number(skill.bonus) || 0;
-  }
-
-  return 0;
-}
 
 export function getAttackAbilityModifier(
   abilities: { strength: number; dexterity: number },

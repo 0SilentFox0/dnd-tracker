@@ -9,7 +9,7 @@ import { attachArtifactSetsToSpellContext } from "@/lib/utils/battle/artifact-se
 import type { CampaignSpellContext } from "@/lib/utils/battle/types/participant";
 
 type CharacterWithRelations = Prisma.CharacterGetPayload<{
-  include: { inventory: true; characterSkills: { include: { skillTree: true } } };
+  include: { inventory: true };
 }> & { skillTreeProgress?: unknown; personalSkillId?: string | null };
 type UnitRow = { id: string; race: string | null };
 

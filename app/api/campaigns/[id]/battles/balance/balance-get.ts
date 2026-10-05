@@ -2,25 +2,18 @@
  * GET balance: DPR, HP, KPI для персонажів та юнітів кампанії.
  */
 
-import {
-  enrichSkillTreeProgressWithInferredLevels,
-  getCharacterAttacks,
-} from "./balance-helpers";
+import { getCharacterAttacks } from "./balance-helpers";
 
 import {
   MAGIC_MAIN_SKILL_IDS,
   MAGIC_MAIN_SKILL_NAME_ALIASES,
 } from "@/lib/constants/dpr-by-main-skill";
 import { prisma } from "@/lib/db";
-import type {
-  CharacterDprBreakdown,
-  TreeIdToMainSkillIds,
-} from "@/lib/utils/battle/balance";
+import type { CharacterDprBreakdown } from "@/lib/utils/battle/balance";
 import { getCharacterStats, getUnitStats } from "@/lib/utils/battle/balance";
+import { branchLevels, normalizeTree, resolveLearned } from "@/lib/utils/skills/progression";
 
 export async function getBalancePayload(campaignId: string) {
-  const treeIdToMainSkillIds: TreeIdToMainSkillIds = {};
-
   const [trees, mainSkills] = await Promise.all([
     prisma.skillTree.findMany({ where: { campaignId } }),
     prisma.mainSkill.findMany({
@@ -49,11 +42,7 @@ export async function getBalancePayload(campaignId: string) {
       .map((ms) => ms.id),
   );
 
-  for (const t of trees) {
-    const skills = t.skills as { mainSkills?: Array<{ id: string }> } | null;
-
-    treeIdToMainSkillIds[t.id] = skills?.mainSkills?.map((ms) => ms.id) ?? [];
-  }
+  const treesByRace = new Map(trees.map((t) => [t.race, normalizeTree(t)]));
 
   const characterStats: Record<
     string,
@@ -67,27 +56,11 @@ export async function getBalancePayload(campaignId: string) {
   for (const character of characters) {
     const attacks = await getCharacterAttacks(character.id, campaignId);
 
-    const rawProgress =
-      (character.skillTreeProgress as Record<
-        string,
-        { level?: string; unlockedSkills?: string[] }
-      >) ?? undefined;
+    const tree = treesByRace.get(character.race);
 
-    const skillTreeProgress =
-      enrichSkillTreeProgressWithInferredLevels(rawProgress) ?? rawProgress;
+    const levels = tree ? branchLevels(resolveLearned(tree, character.skillTreeProgress)) : {};
 
-    const progressForLog = rawProgress
-      ? Object.entries(rawProgress).map(([key, entry]) => ({
-          treeOrMainSkillId: key,
-          level: entry?.level,
-          unlockedCount: entry?.unlockedSkills?.length ?? 0,
-        }))
-      : [];
-
-    console.log(
-      `[Balance GET] Персонаж "${character.name}" (${character.id}): основні навички (прогрес)`,
-      progressForLog,
-    );
+    console.log(`[Balance GET] Персонаж "${character.name}" (${character.id}): рівні гілок`, levels);
 
     const stats = getCharacterStats({
       id: character.id,
@@ -96,8 +69,7 @@ export async function getBalancePayload(campaignId: string) {
       strength: character.strength,
       dexterity: character.dexterity,
       attacks: attacks.map((a) => ({ damageDice: a.damageDice, type: a.type })),
-      skillTreeProgress,
-      treeIdToMainSkillIds,
+      branchLevels: levels,
       magicMainSkillIds,
     });
 
@@ -141,21 +113,9 @@ export async function getBalancePayload(campaignId: string) {
 
   if (process.env.NODE_ENV === "development") {
     const characterSkillProgress = characters.map((c) => {
-      const raw =
-        (c.skillTreeProgress as Record<
-          string,
-          { level?: string; unlockedSkills?: string[] }
-        >) ?? {};
+      const tree = treesByRace.get(c.race);
 
-      return {
-        characterId: c.id,
-        characterName: c.name,
-        progress: Object.entries(raw).map(([key, entry]) => ({
-          treeOrMainSkillId: key,
-          level: entry?.level,
-          unlockedCount: entry?.unlockedSkills?.length ?? 0,
-        })),
-      };
+      return { characterId: c.id, characterName: c.name, branchLevels: tree ? branchLevels(resolveLearned(tree, c.skillTreeProgress)) : {} };
     });
 
     payload._debug = { mainSkills: mainSkillsList, characterSkillProgress };

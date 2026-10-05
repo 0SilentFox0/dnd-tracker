@@ -60,9 +60,6 @@ export async function buildStartOrder(
           where: { id: { in: charIds } },
           include: {
             inventory: true,
-            characterSkills: {
-              include: { skillTree: true },
-            },
           },
         })
       : [],

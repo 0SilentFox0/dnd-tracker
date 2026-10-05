@@ -1,22 +1,11 @@
 /**
  * Спільні Prisma `include` constants (CODE_AUDIT 2.6).
  *
- * Замість inline `{ inventory: true, characterSkills: { include: { skillTree: true } } }`
- * у ~20 місцях — використовуйте ці іменовані constants.
- *
  * Імплементовано як `as const satisfies Prisma.XxxInclude`, щоб TypeScript
  * правильно вивів типи відповіді (Prisma.XxxGetPayload<{ include: typeof CONST }>).
  */
 
 import { Prisma } from "@prisma/client";
-
-/** Character: повна форма з inventory + skill-tree progression. */
-export const CHARACTER_FULL_INCLUDE = {
-  inventory: true,
-  characterSkills: {
-    include: { skillTree: true },
-  },
-} as const satisfies Prisma.CharacterInclude;
 
 /** Character: лише з inventory (для simple read). */
 export const CHARACTER_WITH_INVENTORY_INCLUDE = {

@@ -36,7 +36,7 @@ const defaultDeps: AddParticipantDeps = {
   loadCharacter: (id) =>
     prisma.character.findUnique({
       where: { id },
-      include: { inventory: true, characterSkills: { include: { skillTree: true } } },
+      include: { inventory: true },
     }) as Promise<CharacterRow | null>,
   loadUnit: (id) => prisma.unit.findUnique({ where: { id } }) as Promise<UnitRow | null>,
   fromCharacter: createBattleParticipantFromCharacter,
