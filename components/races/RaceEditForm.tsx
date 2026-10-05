@@ -62,7 +62,8 @@ export function RaceEditForm({ campaignId, race }: RaceEditFormProps) {
       title="Редагувати расу"
       description="Оновіть інформацію про расу"
       onSubmit={handleSubmit}
-      isSubmitting={updateRaceMutation.isPending || !abilitiesValid}
+      isSubmitting={updateRaceMutation.isPending}
+      submitDisabled={!abilitiesValid}
       onCancel={() => router.push(`/campaigns/${campaignId}/dm/races`)}
       submitLabel={withAbilityErrors("Зберегти", abilityErrors)}
     >

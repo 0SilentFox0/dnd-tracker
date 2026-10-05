@@ -6,14 +6,7 @@ import {
 } from "./DamageSummaryContent";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 interface DamageSummaryModalProps {
@@ -63,16 +56,13 @@ export function DamageSummaryModal({
       : "closed";
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto z-[110]">
-        <DialogHeader>
-          <DialogTitle>💥 Підсумок урону</DialogTitle>
-          <DialogDescription>
-            {attacker.basicInfo.name} → {targets.map((t) => t.basicInfo.name).join(", ")}
-            {isCritical && " (крит!)"}
-          </DialogDescription>
-        </DialogHeader>
-
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="💥 Підсумок урону"
+      description={`${attacker.basicInfo.name} → ${targets.map((t) => t.basicInfo.name).join(", ")}${isCritical ? " (крит!)" : ""}`}
+      size="md"
+    >
         {open && damageRolls.length > 0 ? (
           <DamageSummaryContent
             key={contentKey}
@@ -90,14 +80,13 @@ export function DamageSummaryModal({
         ) : (
           <>
             <div className="min-h-[120px] py-2" />
-            <DialogFooter>
+            <div className="flex gap-2 pt-2 [&>*]:flex-1 sm:justify-end sm:[&>*]:flex-none">
               <Button variant="outline" onClick={() => onOpenChange(false)}>
                 Скасувати
               </Button>
-            </DialogFooter>
+            </div>
           </>
         )}
-      </DialogContent>
-    </Dialog>
+    </ResponsiveDialog>
   );
 }

@@ -1,15 +1,7 @@
 "use client";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import type { Character } from "@/types/characters";
 
 interface Props {
@@ -26,28 +18,28 @@ export function DeleteCharacterDialog({
   isPending,
 }: Props) {
   return (
-    <AlertDialog
+    <ResponsiveDialog
       open={!!character}
       onOpenChange={(open) => !open && onClose()}
-    >
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Видалити персонажа?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Персонажа &quot;{character?.name}&quot; буде видалено. Цю дію не
-            можна скасувати.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Скасувати</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={onConfirm}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+      title="Видалити персонажа?"
+      description={<>Персонажа &quot;{character?.name}&quot; буде видалено. Цю дію не можна скасувати.</>}
+      size="sm"
+      footer={
+        <>
+          <Button variant="outline" onClick={() => ((open) => !open && onClose())(false)}>
+            Скасувати
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={() => {
+              void onConfirm();
+              ((open) => !open && onClose())(false);
+            }}
           >
             {isPending ? "Видалення…" : "Видалити"}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+          </Button>
+        </>
+      }
+    />
   );
 }

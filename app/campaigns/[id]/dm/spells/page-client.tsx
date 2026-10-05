@@ -1,7 +1,9 @@
 "use client";
 
 import { useMemo,useState } from "react";
+import { Wand2 } from "lucide-react";
 
+import { EmptyState, LoadingState } from "@/components/common/states";
 import { DeleteAllSpellsDialog } from "@/components/spells/dialogs/DeleteAllSpellsDialog";
 import { SpellGroupAccordion } from "@/components/spells/list/SpellGroupAccordion";
 import { SpellsPageHeader } from "@/components/spells/ui/SpellsPageHeader";
@@ -77,21 +79,10 @@ export function DMSpellsPageClient({
         onDeleteAll={() => setDeleteAllSpellsDialogOpen(true)}
       />
 
-      {spellsLoading && (
-        <div className="text-center py-4">
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Оновлення...
-          </p>
-        </div>
-      )}
-
-      {!spellsLoading && spells.length === 0 ? (
-        <div className="text-center py-8 sm:py-12">
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Заклинання ще не додані. Створіть перше заклинання або імпортуйте їх
-            з файлу.
-          </p>
-        </div>
+      {spellsLoading && spells.length === 0 ? (
+        <LoadingState rows={6} label="Завантаження заклинань…" />
+      ) : spells.length === 0 ? (
+        <EmptyState icon={Wand2} title="Ще немає заклинань" description="Створіть перше заклинання або імпортуйте їх з файлу." />
       ) : (
         <Accordion
           type="multiple"

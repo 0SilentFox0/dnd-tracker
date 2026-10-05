@@ -3,18 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { deleteAllBattles } from "@/lib/api/battles";
+import { useNotify } from "@/lib/hooks/common";
 
 interface DeleteAllBattlesButtonProps {
   campaignId: string;
@@ -25,6 +17,8 @@ export function DeleteAllBattlesButton({
   campaignId,
   battlesCount,
 }: DeleteAllBattlesButtonProps) {
+  const notify = useNotify();
+
   const router = useRouter();
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -40,7 +34,7 @@ export function DeleteAllBattlesButton({
       setShowDeleteDialog(false);
     } catch (error) {
       console.error("Error deleting all battles:", error);
-      alert("Не вдалося видалити всі битви. Спробуйте ще раз.");
+      void notify("Не вдалося видалити всі битви. Спробуйте ще раз.");
     } finally {
       setIsDeleting(false);
     }
@@ -52,35 +46,34 @@ export function DeleteAllBattlesButton({
 
   return (
     <>
-      <Button
-        variant="destructive"
-        className="whitespace-nowrap text-xs sm:text-sm"
-        onClick={() => setShowDeleteDialog(true)}
-      >
+      <Button variant="destructive" className="whitespace-nowrap text-xs sm:text-sm" onClick={() => setShowDeleteDialog(true)}>
         Видалити всі
       </Button>
 
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Видалити всі битви?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Ця дія видалить всі сцени бою з кампанії ({battlesCount} битв).
-              Цю дію неможливо скасувати.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Скасувати</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteAll}
+      <ResponsiveDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Видалити всі битви?"
+        description={<>Ця дія видалить всі сцени бою з кампанії ({battlesCount} битв). Цю дію неможливо скасувати.</>}
+        size="sm"
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)} disabled={isDeleting}>
+              Скасувати
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                void handleDeleteAll();
+                setShowDeleteDialog(false);
+              }}
               disabled={isDeleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {isDeleting ? "Видалення..." : "Видалити всі"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            </Button>
+          </>
+        }
+      />
     </>
   );
 }

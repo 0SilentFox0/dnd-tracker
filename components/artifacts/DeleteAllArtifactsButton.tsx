@@ -1,22 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { deleteAllArtifacts } from "@/lib/api/artifacts";
+import { useConfirm } from "@/lib/hooks/common";
 
 interface DeleteAllArtifactsButtonProps {
   campaignId: string;
@@ -29,62 +18,30 @@ export function DeleteAllArtifactsButton({
 }: DeleteAllArtifactsButtonProps) {
   const router = useRouter();
 
-  const [isDeleting, setIsDeleting] = useState(false);
+  const confirm = useConfirm();
 
-  const [open, setOpen] = useState(false);
+  const handleClick = async () => {
+    const ok = await confirm({
+      title: "Видалити всі артефакти?",
+      description: `Буде видалено всі артефакти кампанії (${artifactsCount}). Сети артефактів залишаться, але стануть порожніми. Цю дію не можна скасувати.`,
+      confirmLabel: "Видалити всі",
+      destructive: true,
+      onConfirm: () => deleteAllArtifacts(campaignId),
+    });
 
-  const handleDelete = async () => {
-    setIsDeleting(true);
-
-    try {
-      await deleteAllArtifacts(campaignId);
-
-      setOpen(false);
-      router.refresh();
-    } catch (err) {
-      console.error(err);
-      alert("Помилка при видаленні артефактів");
-    } finally {
-      setIsDeleting(false);
-    }
+    if (ok) router.refresh();
   };
 
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
-        <Button
-          variant="outline"
-          className="whitespace-nowrap text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30"
-          disabled={artifactsCount === 0}
-          title="Видалити всі артефакти"
-        >
-          <Trash2 className="h-4 w-4 mr-1.5" />
-          Видалити всі
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Видалити всі артефакти?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Буде видалено всі артефакти кампанії ({artifactsCount}). Сети
-            артефактів залишаться, але стануть порожніми. Цю дію не можна
-            скасувати.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>Скасувати</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={(e) => {
-              e.preventDefault();
-              handleDelete();
-            }}
-            disabled={isDeleting}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-          >
-            {isDeleting ? "Видалення…" : "Видалити всі"}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <Button
+      variant="outline"
+      className="whitespace-nowrap text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30"
+      disabled={artifactsCount === 0}
+      title="Видалити всі артефакти"
+      onClick={handleClick}
+    >
+      <Trash2 className="h-4 w-4 mr-1.5" />
+      Видалити всі
+    </Button>
   );
 }

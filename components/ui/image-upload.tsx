@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useReadOnly } from "@/components/ui/read-only-context";
+import { useNotify } from "@/lib/hooks/common";
 import { normalizeImageUrl } from "@/lib/utils/common/image-url";
 
 const DEFAULT_MAX_SIZE_BYTES = 3 * 1024 * 1024; // 3 MB
@@ -33,6 +34,8 @@ export function ImageUpload({
   previewAlt = "Попередній перегляд",
   className,
 }: ImageUploadProps) {
+  const notify = useNotify();
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const readOnly = useReadOnly();
@@ -75,7 +78,7 @@ export function ImageUpload({
     if (!file) return;
 
     if (file.size > maxSizeBytes) {
-      alert(`Файл завеликий. Максимум ${maxSizeBytes / 1024 / 1024} МБ.`);
+      void notify(`Файл завеликий. Максимум ${maxSizeBytes / 1024 / 1024} МБ.`);
       e.target.value = "";
 
       return;

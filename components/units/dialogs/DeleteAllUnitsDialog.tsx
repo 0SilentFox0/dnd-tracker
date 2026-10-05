@@ -1,14 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 
 interface DeleteAllUnitsDialogProps {
   open: boolean;
@@ -26,32 +19,21 @@ export function DeleteAllUnitsDialog({
   isDeleting,
 }: DeleteAllUnitsDialogProps) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Видалити всі юніти?</DialogTitle>
-          <DialogDescription>
-            Ви впевнені, що хочете видалити всі юніти з кампанії? Ця дія
-            незворотна. Буде видалено {unitsCount} юнітів.
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isDeleting}
-          >
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Видалити всі юніти?"
+      description={<>Ви впевнені, що хочете видалити всі юніти з кампанії? Ця дія незворотна. Буде видалено {unitsCount} юнітів.</>}
+      footer={
+        <>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isDeleting}>
             Скасувати
           </Button>
-          <Button
-            variant="destructive"
-            onClick={onConfirm}
-            disabled={isDeleting}
-          >
+          <Button variant="destructive" onClick={onConfirm} disabled={isDeleting}>
             {isDeleting ? "Видалення..." : "Видалити всі юніти"}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </>
+      }
+    ></ResponsiveDialog>
   );
 }

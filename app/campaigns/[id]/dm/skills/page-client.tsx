@@ -2,13 +2,15 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Printer } from "lucide-react";
+import { Printer, Sparkles } from "lucide-react";
 
 import { DeleteAllSkillsDialog } from "./__dialogs__/DeleteAllSkillsDialog";
 
+import { EmptyState, LoadingState } from "@/components/common/states";
 import { SkillGroupAccordion } from "@/components/skills/list/SkillGroupAccordion";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import { useNotify } from "@/lib/hooks/common";
 import {
   useDeleteAllSkills,
   useDeleteSkill,
@@ -31,6 +33,8 @@ export function DMSkillsPageClient({
   campaignId,
   initialSkills,
 }: DMSkillsPageClientProps) {
+  const notify = useNotify();
+
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   // Запити для скілів та основних навиків
@@ -61,7 +65,7 @@ export function DMSkillsPageClient({
       setShowDeleteDialog(false);
     } catch (error) {
       console.error("Error deleting all skills:", error);
-      alert("Не вдалося видалити всі скіли. Спробуйте ще раз.");
+      void notify("Не вдалося видалити всі скіли. Спробуйте ще раз.");
     }
   };
 
@@ -70,7 +74,7 @@ export function DMSkillsPageClient({
       await deleteSkillMutation.mutateAsync(skillId);
     } catch (error) {
       console.error("Error deleting skill:", error);
-      alert("Не вдалося видалити скіл. Спробуйте ще раз.");
+      void notify("Не вдалося видалити скіл. Спробуйте ще раз.");
     }
   };
 
@@ -79,7 +83,7 @@ export function DMSkillsPageClient({
       await duplicateSkillMutation.mutateAsync(skillId);
     } catch (error) {
       console.error("Error duplicating skill:", error);
-      alert("Не вдалося дублювати скіл. Спробуйте ще раз.");
+      void notify("Не вдалося дублювати скіл. Спробуйте ще раз.");
     }
   };
 
@@ -133,23 +137,10 @@ export function DMSkillsPageClient({
         </div>
       </div>
 
-      {skillsLoading && (
-        <div className="text-center py-4">
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Оновлення...
-          </p>
-        </div>
-      )}
-
-      {!skillsLoading && skills.length === 0 ? (
-        <div className="text-center py-8 sm:py-12">
-          <p className="text-sm sm:text-base text-muted-foreground mb-4">
-            Поки немає скілів
-          </p>
-          <Link href={`/campaigns/${campaignId}/dm/skills/new`}>
-            <Button>Створити перший скіл</Button>
-          </Link>
-        </div>
+      {skillsLoading && skills.length === 0 ? (
+        <LoadingState rows={6} label="Завантаження скілів…" />
+      ) : skills.length === 0 ? (
+        <EmptyState icon={Sparkles} title="Ще немає скілів" description="Створіть перший скіл, щоб наповнити дерево прокачки." action={<Link href={`/campaigns/${campaignId}/dm/skills/new`}><Button>Створити перший скіл</Button></Link>} />
       ) : (
         <Accordion
           type="multiple"

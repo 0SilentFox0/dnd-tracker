@@ -5,9 +5,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useNotify } from "@/lib/hooks/common";
 import { createClient } from "@/lib/supabase/client";
 
 function SignUpForm() {
+  const notify = useNotify();
+
   const router = useRouter();
 
   const searchParams = useSearchParams();
@@ -55,9 +58,9 @@ function SignUpForm() {
         console.error("Error signing up:", error);
 
         if (error.message?.includes("provider is not enabled")) {
-          alert("Google OAuth не налаштований. Будь ласка, зверніться до адміністратора.");
+          void notify("Google OAuth не налаштований. Будь ласка, зверніться до адміністратора.");
         } else {
-          alert(`Помилка при реєстрації: ${error.message}`);
+          void notify(`Помилка при реєстрації: ${error.message}`);
         }
 
         return;
@@ -67,7 +70,7 @@ function SignUpForm() {
 
       const errorMessage = error instanceof Error ? error.message : "Невідома помилка";
 
-      alert(`Помилка при реєстрації: ${errorMessage}`);
+      void notify(`Помилка при реєстрації: ${errorMessage}`);
     } finally {
       setLoading(false);
     }

@@ -6,6 +6,7 @@ import type { QueryClient } from "@tanstack/react-query";
 
 import { DmCharacterEditFormAccordion } from "./DmCharacterEditFormAccordion";
 
+import { ActionBar } from "@/components/common/ActionBar";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,6 +17,7 @@ import {
 } from "@/components/ui/card";
 import { levelUpCharacter } from "@/lib/api/characters";
 import type { useCharacterForm } from "@/lib/hooks/characters";
+import { useConfirm, useNotify } from "@/lib/hooks/common";
 import { characterToFormData } from "@/lib/utils/characters/character-form";
 import type { ArtifactSetRow } from "@/types/artifact-sets";
 import type { CampaignMember } from "@/types/campaigns";
@@ -76,13 +78,15 @@ export function DmCharacterEditForm({
   membersLoading,
   queryClient,
 }: DmCharacterEditFormProps) {
+  const notify = useNotify();
+
+  const confirm = useConfirm();
+
   const router = useRouter();
 
   const handleLevelUp = async () => {
     if (
-      !confirm(
-        `Підняти рівень персонажа ${basicInfo.name}? (Рівень ${basicInfo.level} → ${basicInfo.level + 1})`,
-      )
+      !(await confirm({ title: `Підняти рівень персонажа ${basicInfo.name}? (Рівень ${basicInfo.level} → ${basicInfo.level + 1})`, confirmLabel: "Підняти" }))
     ) {
       return;
     }
@@ -100,9 +104,7 @@ export function DmCharacterEditForm({
           hpGain?: number;
         };
 
-        alert(
-          `Рівень піднято! ${details.abilityIncreased ?? "Характеристика"}: +1, HP: +${details.hpGain ?? 0}, Додано магічні слоти.`,
-        );
+        void notify(`Рівень піднято! ${details.abilityIncreased ?? "Характеристика"}: +1, HP: +${details.hpGain ?? 0}, Додано магічні слоти.`);
       }
 
       await queryClient.invalidateQueries({
@@ -117,7 +119,7 @@ export function DmCharacterEditForm({
       router.refresh();
     } catch (err) {
       console.error("Error leveling up:", err);
-      alert("Помилка при піднятті рівня");
+      void notify("Помилка при піднятті рівня");
     }
   };
 
@@ -159,10 +161,7 @@ export function DmCharacterEditForm({
             races={races}
           />
 
-          <div className="flex gap-2 pt-4">
-            <Button type="submit" disabled={loading || membersLoading}>
-              {loading ? "Збереження..." : "Зберегти зміни"}
-            </Button>
+          <ActionBar>
             <Button
               type="button"
               variant="default"
@@ -173,12 +172,13 @@ export function DmCharacterEditForm({
             >
               Підняти рівень ({basicInfo.level} → {basicInfo.level + 1})
             </Button>
-            <Link href={`/campaigns/${campaignId}/dm/characters`}>
-              <Button type="button" variant="outline">
-                Скасувати
-              </Button>
-            </Link>
-          </div>
+            <Button type="button" variant="outline" asChild>
+              <Link href={`/campaigns/${campaignId}/dm/characters`}>Скасувати</Link>
+            </Button>
+            <Button type="submit" disabled={loading || membersLoading}>
+              {loading ? "Збереження..." : "Зберегти зміни"}
+            </Button>
+          </ActionBar>
         </form>
       </CardContent>
     </Card>

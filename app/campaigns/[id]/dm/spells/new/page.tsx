@@ -14,6 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useNotify } from "@/lib/hooks/common";
 import { useCreateSpell, useSpellGroups } from "@/lib/hooks/spells";
 
 export default function NewSpellPage({
@@ -21,6 +22,8 @@ export default function NewSpellPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const notify = useNotify();
+
   const { id } = use(params);
 
   const router = useRouter();
@@ -35,7 +38,7 @@ export default function NewSpellPage({
     e.preventDefault();
 
     if (!formData.name) {
-      alert("Будь ласка, вкажіть назву заклинання");
+      void notify("Будь ласка, вкажіть назву заклинання");
 
       return;
     }

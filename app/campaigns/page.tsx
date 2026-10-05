@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { Map as MapIcon } from "lucide-react";
 
 import { JoinCampaignDialog } from "@/components/campaigns/join/JoinCampaignDialog";
+import { EmptyState } from "@/components/common/states";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -151,14 +153,15 @@ export default async function CampaignsPage() {
       </div>
 
       {campaigns.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground mb-4">
-            У вас поки немає кампаній
-          </p>
-          <Link href="/campaigns/new">
-            <Button>Створити першу кампанію</Button>
-          </Link>
-        </div>
+        <EmptyState
+          icon={MapIcon}
+          title="У вас поки немає кампаній"
+          action={
+            <Link href="/campaigns/new">
+              <Button>Створити першу кампанію</Button>
+            </Link>
+          }
+        />
       )}
     </div>
   );

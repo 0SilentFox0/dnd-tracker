@@ -5,16 +5,9 @@ import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { createSpellGroup } from "@/lib/api/spells";
 
 interface CreateGroupDialogProps {
@@ -69,19 +62,16 @@ export function CreateGroupDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="whitespace-nowrap">
+    <>
+      <Button onClick={() => setOpen(true)} variant="outline" className="whitespace-nowrap">
           + Створити групу заклинань
         </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Створити нову групу заклинань</DialogTitle>
-          <DialogDescription>
-            Групи заклинань дозволяють організувати заклинання та скіли
-          </DialogDescription>
-        </DialogHeader>
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={setOpen}
+      title="Створити нову групу заклинань"
+      description="Групи заклинань дозволяють організувати заклинання та скіли"
+    >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="group-name">Назва групи *</Label>
@@ -118,7 +108,7 @@ export function CreateGroupDialog({
             </Button>
           </div>
         </form>
-      </DialogContent>
-    </Dialog>
+    </ResponsiveDialog>
+    </>
   );
 }

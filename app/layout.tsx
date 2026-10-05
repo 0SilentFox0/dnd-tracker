@@ -5,6 +5,7 @@ import "./globals.css";
 import { BackgroundImage } from "@/components/layout/BackgroundImage";
 import { Header } from "@/components/layout/Header";
 import { PageTransition } from "@/components/layout/PageTransition";
+import { ConfirmProvider } from "@/components/ui/confirm-dialog";
 import { QueryProvider } from "@/lib/providers/query-provider";
 
 const geistSans = Geist({
@@ -33,9 +34,11 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <QueryProvider>
-          <BackgroundImage />
-          <Header />
-          <PageTransition>{children}</PageTransition>
+          <ConfirmProvider>
+            <BackgroundImage />
+            <Header />
+            <PageTransition>{children}</PageTransition>
+          </ConfirmProvider>
         </QueryProvider>
       </body>
     </html>

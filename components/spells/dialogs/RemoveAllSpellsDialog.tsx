@@ -1,14 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 
 interface RemoveAllSpellsDialogProps {
   open: boolean;
@@ -26,33 +19,26 @@ export function RemoveAllSpellsDialog({
   isRemoving,
 }: RemoveAllSpellsDialogProps) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Видалити всі заклинання з групи?</DialogTitle>
-          <DialogDescription>
-            Ви впевнені, що хочете видалити всі заклинання з групи &quot;
-            {groupName}&quot;? Заклинання не будуть видалені, але вони
-            втратять зв&apos;язок з цією групою.
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isRemoving}
-          >
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Видалити всі заклинання з групи?"
+      description={
+        <>
+          Ви впевнені, що хочете видалити всі заклинання з групи &quot;{groupName}&quot;? Заклинання не будуть видалені, але вони втратять
+          зв&apos;язок з цією групою.
+        </>
+      }
+      footer={
+        <>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isRemoving}>
             Скасувати
           </Button>
-          <Button
-            variant="destructive"
-            onClick={onConfirm}
-            disabled={isRemoving}
-          >
+          <Button variant="destructive" onClick={onConfirm} disabled={isRemoving}>
             Видалити всі з групи
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </>
+      }
+    ></ResponsiveDialog>
   );
 }

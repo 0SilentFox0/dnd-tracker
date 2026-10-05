@@ -120,6 +120,32 @@ const eslintConfig = defineConfig([
     },
   },
   {
+    files: ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}", "lib/**/*.{ts,tsx}"],
+    ignores: ["components/ui/**"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            { name: "@/components/ui/dialog", message: "Використайте ResponsiveDialog з @/components/ui/responsive-dialog" },
+            { name: "@/components/ui/alert-dialog", message: "Використайте useConfirm з @/lib/hooks/common" },
+            { name: "vaul", message: "Використайте ResponsiveDialog з @/components/ui/responsive-dialog" },
+          ],
+        },
+      ],
+      "no-restricted-globals": [
+        "error",
+        { name: "confirm", message: "Використайте useConfirm з @/lib/hooks/common" },
+        { name: "alert", message: "Використайте useNotify з @/lib/hooks/common" },
+      ],
+      "no-restricted-properties": [
+        "error",
+        { object: "window", property: "confirm", message: "Використайте useConfirm з @/lib/hooks/common" },
+        { object: "window", property: "alert", message: "Використайте useNotify з @/lib/hooks/common" },
+      ],
+    },
+  },
+  {
     files: ["**/*.tsx"],
     rules: {
       "react/no-unescaped-entities": "warn",

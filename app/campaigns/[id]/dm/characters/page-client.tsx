@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { MoreVertical, Pencil, Trash2, TrendingUp } from "lucide-react";
+import { MoreVertical, Pencil, Trash2, TrendingUp, Users } from "lucide-react";
 
 import { DeleteAllCharactersDialog } from "./__dialogs__/DeleteAllCharactersDialog";
 import { DeleteCharacterDialog } from "./__dialogs__/DeleteCharacterDialog";
 
 import { OptimizedImage } from "@/components/common/OptimizedImage";
+import { EmptyState, LoadingState } from "@/components/common/states";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,6 +26,7 @@ import {
   useDeleteCharacter,
   useLevelUpCharacter,
 } from "@/lib/hooks/characters";
+import { useNotify } from "@/lib/hooks/common";
 import type { Character } from "@/types/characters";
 
 interface DMCharactersClientProps {
@@ -32,6 +34,8 @@ interface DMCharactersClientProps {
 }
 
 export function DMCharactersClient({ campaignId }: DMCharactersClientProps) {
+  const notify = useNotify();
+
   const [deleteAllOpen, setDeleteAllOpen] = useState(false);
 
   const [characterToDelete, setCharacterToDelete] = useState<Character | null>(
@@ -51,7 +55,7 @@ export function DMCharactersClient({ campaignId }: DMCharactersClientProps) {
       await levelUpMutation.mutateAsync(character.id);
     } catch (error) {
       console.error("Error leveling up:", error);
-      alert("Не вдалося підняти рівень. Спробуйте ще раз.");
+      void notify("Не вдалося підняти рівень. Спробуйте ще раз.");
     }
   };
 
@@ -61,7 +65,7 @@ export function DMCharactersClient({ campaignId }: DMCharactersClientProps) {
       setDeleteAllOpen(false);
     } catch (error) {
       console.error("Error deleting all characters:", error);
-      alert("Не вдалося видалити всіх персонажів. Спробуйте ще раз.");
+      void notify("Не вдалося видалити всіх персонажів. Спробуйте ще раз.");
     }
   };
 
@@ -73,7 +77,7 @@ export function DMCharactersClient({ campaignId }: DMCharactersClientProps) {
       setCharacterToDelete(null);
     } catch (error) {
       console.error("Error deleting character:", error);
-      alert("Не вдалося видалити персонажа. Спробуйте ще раз.");
+      void notify("Не вдалося видалити персонажа. Спробуйте ще раз.");
     }
   };
 
@@ -107,7 +111,7 @@ export function DMCharactersClient({ campaignId }: DMCharactersClientProps) {
       </div>
 
       {isLoading ? (
-        <p className="text-muted-foreground">Завантаження...</p>
+        <LoadingState rows={6} label="Завантаження персонажів…" />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {characters.map((character) => (
@@ -223,16 +227,16 @@ export function DMCharactersClient({ campaignId }: DMCharactersClientProps) {
       )}
 
       {!isLoading && characters.length === 0 && (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground mb-4">
-              Поки немає персонажів (гравців або NPC героїв)
-            </p>
+        <EmptyState
+          icon={Users}
+          title="Ще немає персонажів"
+          description="Гравці або NPC-герої з'являться тут."
+          action={
             <Link href={`/campaigns/${campaignId}/dm/characters/new`}>
               <Button>Створити першого персонажа</Button>
             </Link>
-          </CardContent>
-        </Card>
+          }
+        />
       )}
 
       <DeleteAllCharactersDialog

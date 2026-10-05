@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { createAttackFlowHandlers } from "./useAttackFlow-handlers";
 
 import { AttackType } from "@/lib/constants/battle";
+import { useNotify } from "@/lib/hooks/common";
 import { getDisabledAttackKinds } from "@/lib/utils/battle/attack/disabled-attacks";
 import type { AttackData } from "@/types/api";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
@@ -30,6 +31,8 @@ export function useAttackFlow({
   onAttack,
   onAttackSuccess,
 }: UseAttackFlowParams) {
+  const notify = useNotify();
+
   const [targetSelectionDialogOpen, setTargetSelectionDialogOpen] =
     useState(false);
 
@@ -103,7 +106,7 @@ export function useAttackFlow({
 
   const handleMeleeAttack = () => {
     if (getDisabledAttackKinds(participant).melee) {
-      alert("Ближні атаки заблоковані активним ефектом");
+      void notify("Ближні атаки заблоковані активним ефектом");
 
       return;
     }
@@ -116,13 +119,13 @@ export function useAttackFlow({
       setSelectedAttack(attack);
       setTargetSelectionDialogOpen(true);
     } else {
-      alert("Немає доступної ближньої атаки");
+      void notify("Немає доступної ближньої атаки");
     }
   };
 
   const handleRangedAttack = () => {
     if (getDisabledAttackKinds(participant).ranged) {
-      alert("Дальні атаки заблоковані активним ефектом");
+      void notify("Дальні атаки заблоковані активним ефектом");
 
       return;
     }
@@ -135,7 +138,7 @@ export function useAttackFlow({
       setSelectedAttack(attack);
       setTargetSelectionDialogOpen(true);
     } else {
-      alert("Немає доступної дальньої атаки");
+      void notify("Немає доступної дальньої атаки");
     }
   };
 

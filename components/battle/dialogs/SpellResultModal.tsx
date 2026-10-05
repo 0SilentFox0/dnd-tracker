@@ -1,12 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import type { BattleAction } from "@/types/battle";
 
 interface SpellResultModalProps {
@@ -45,15 +40,12 @@ export function SpellResultModal({
     (lastSpellAction.hpChanges?.some((h) => h.change < 0) ?? false);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>
-            {allPassed && savingThrows.length > 0
-              ? "Перевірка пройдена"
-              : (details?.spellName ?? "Результат заклинання")}
-          </DialogTitle>
-        </DialogHeader>
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={<>{allPassed && savingThrows.length > 0 ? "Перевірка пройдена" : (details?.spellName ?? "Результат заклинання")}</>}
+      size="sm"
+    >
         <div className="space-y-3">
           {allPassed && savingThrows.length > 0 ? (
             <p className="text-muted-foreground text-sm">
@@ -124,7 +116,6 @@ export function SpellResultModal({
             <Button onClick={() => onOpenChange(false)}>Зрозуміло</Button>
           )}
         </div>
-      </DialogContent>
-    </Dialog>
+    </ResponsiveDialog>
   );
 }

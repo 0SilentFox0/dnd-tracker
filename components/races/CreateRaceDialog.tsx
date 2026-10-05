@@ -6,13 +6,7 @@ import { RaceFormFields } from "./RaceFormFields";
 
 import { withAbilityErrors } from "@/components/abilities";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { useMainSkills } from "@/lib/hooks/skills";
 import type { RaceFormData } from "@/types/races";
 
@@ -67,37 +61,33 @@ export function CreateRaceDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Створити расу</DialogTitle>
-          <DialogDescription>
-            Заповніть інформацію про расу та її здібності
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <RaceFormFields
-            campaignId={campaignId}
-            formData={formData}
-            setFormData={setFormData}
-            mainSkills={mainSkills}
-            compact
-            onAbilitiesValidityChange={(_, n) => setAbilityErrors(n)}
-          />
-          <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Скасувати
-            </Button>
-            <Button type="submit" disabled={!abilitiesValid}>
-              {withAbilityErrors("Створити расу", abilityErrors)}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Створити расу"
+      description="Заповніть інформацію про расу та її здібності"
+      size="lg"
+      footer={
+        <>
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            Скасувати
+          </Button>
+          <Button type="submit" form="create-race-form" disabled={!abilitiesValid}>
+            {withAbilityErrors("Створити расу", abilityErrors)}
+          </Button>
+        </>
+      }
+    >
+      <form id="create-race-form" onSubmit={handleSubmit} className="space-y-4">
+        <RaceFormFields
+          campaignId={campaignId}
+          formData={formData}
+          setFormData={setFormData}
+          mainSkills={mainSkills}
+          compact
+          onAbilitiesValidityChange={(_, n) => setAbilityErrors(n)}
+        />
+      </form>
+    </ResponsiveDialog>
   );
 }

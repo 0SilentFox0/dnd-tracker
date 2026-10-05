@@ -15,6 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useConfirm } from "@/lib/hooks/common";
 import {
   useDeleteSpell,
   useSpell,
@@ -27,6 +28,8 @@ export default function EditSpellPage({
 }: {
   params: Promise<{ id: string; spellId: string }>;
 }) {
+  const confirm = useConfirm();
+
   const { id, spellId } = use(params);
 
   const router = useRouter();
@@ -77,7 +80,7 @@ export default function EditSpellPage({
   };
 
   const handleDelete = async () => {
-    if (!confirm("Ви впевнені, що хочете видалити це заклинання?")) {
+    if (!(await confirm({ title: "Ви впевнені, що хочете видалити це заклинання?", confirmLabel: "Видалити", destructive: true }))) {
       return;
     }
 

@@ -4,14 +4,18 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { ActionBar } from "@/components/common/ActionBar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { Textarea } from "@/components/ui/textarea";
 import { createCampaign } from "@/lib/api/campaigns";
+import { useNotify } from "@/lib/hooks/common";
 
 export default function NewCampaignPage() {
+  const notify = useNotify();
+
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
@@ -34,7 +38,7 @@ export default function NewCampaignPage() {
       router.push(`/campaigns/${campaign.id}`);
     } catch (error) {
       console.error("Error creating campaign:", error);
-      alert("Помилка при створенні кампанії");
+      void notify("Помилка при створенні кампанії");
     } finally {
       setLoading(false);
     }
@@ -104,14 +108,14 @@ export default function NewCampaignPage() {
               <Label htmlFor="allowPlayerEdit">Дозволити гравцям редагувати своїх персонажів</Label>
             </div>
 
-            <div className="flex gap-2">
+            <ActionBar>
+              <Button type="button" variant="outline" asChild>
+            <Link href="/campaigns">Скасувати</Link>
+          </Button>
               <Button type="submit" disabled={loading}>
                 {loading ? "Створення..." : "Створити кампанію"}
               </Button>
-              <Link href="/campaigns">
-                <Button type="button" variant="outline">Скасувати</Button>
-              </Link>
-            </div>
+            </ActionBar>
           </form>
         </CardContent>
       </Card>

@@ -6,7 +6,7 @@ import { AbilityCopySourcePicker } from "./AbilityCopySourcePicker";
 import { useAbilityEditor } from "./editor-context";
 
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import { ABILITY_TEMPLATES } from "@/lib/utils/abilities/templates";
 
@@ -32,11 +32,11 @@ export function AbilityTemplatePicker({ open, onOpenChange, onPick }: AbilityTem
   };
 
   return (
-    <Dialog open={open} onOpenChange={(o) => (o ? onOpenChange(true) : close())}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{copying ? "Скопіювати вміння з…" : "Додати вміння"}</DialogTitle>
-        </DialogHeader>
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={(o) => (o ? onOpenChange(true) : close())}
+      title={<>{copying ? "Скопіювати вміння з…" : "Додати вміння"}</>}
+    >
         {copying ? (
           <AbilityCopySourcePicker campaignId={campaignId} onPick={pick} />
         ) : (
@@ -52,7 +52,6 @@ export function AbilityTemplatePicker({ open, onOpenChange, onPick }: AbilityTem
             </Button>
           </div>
         )}
-      </DialogContent>
-    </Dialog>
+    </ResponsiveDialog>
   );
 }

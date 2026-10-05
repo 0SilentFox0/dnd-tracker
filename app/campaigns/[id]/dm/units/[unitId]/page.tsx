@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { AbilityListEditor, withAbilityErrors } from "@/components/abilities";
+import { ActionBar } from "@/components/common/ActionBar";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,6 +22,7 @@ import { UnitDamageModifier } from "@/components/units/form/UnitDamageModifier";
 import { UnitImmunities } from "@/components/units/form/UnitImmunities";
 import { UnitKnownSpells } from "@/components/units/form/UnitKnownSpells";
 import { getSpells } from "@/lib/api/spells";
+import { useConfirm } from "@/lib/hooks/common";
 import { useRaces } from "@/lib/hooks/races";
 import { useDeleteUnit, useUnit, useUpdateUnit } from "@/lib/hooks/units";
 import type { Spell } from "@/types/spells";
@@ -91,6 +93,8 @@ export default function EditUnitPage({
 }: {
   params: Promise<{ id: string; unitId: string }>;
 }) {
+  const confirm = useConfirm();
+
   const { id, unitId } = use(params);
 
   const router = useRouter();
@@ -172,7 +176,7 @@ export default function EditUnitPage({
   };
 
   const handleDelete = async () => {
-    if (!confirm("Ви впевнені, що хочете видалити цього юніта?")) {
+    if (!(await confirm({ title: "Ви впевнені, що хочете видалити цього юніта?", confirmLabel: "Видалити", destructive: true }))) {
       return;
     }
 
@@ -272,12 +276,7 @@ export default function EditUnitPage({
               onChange={handleFormDataChange}
             />
 
-            <div className="flex gap-2 pt-4">
-              <Button type="submit" disabled={updateUnitMutation.isPending || !abilitiesValid}>
-                {updateUnitMutation.isPending
-                  ? "Збереження..."
-                  : withAbilityErrors("Зберегти зміни", abilityErrors)}
-              </Button>
+            <ActionBar>
               <Button
                 type="button"
                 variant="destructive"
@@ -286,12 +285,15 @@ export default function EditUnitPage({
               >
                 {deleteUnitMutation.isPending ? "Видалення..." : "Видалити"}
               </Button>
-              <Link href={`/campaigns/${id}/dm/units`}>
-                <Button type="button" variant="outline">
-                  Скасувати
-                </Button>
-              </Link>
-            </div>
+              <Button type="button" variant="outline" asChild>
+                <Link href={`/campaigns/${id}/dm/units`}>Скасувати</Link>
+              </Button>
+              <Button type="submit" disabled={updateUnitMutation.isPending || !abilitiesValid}>
+                {updateUnitMutation.isPending
+                  ? "Збереження..."
+                  : withAbilityErrors("Зберегти зміни", abilityErrors)}
+              </Button>
+            </ActionBar>
           </form>
         </CardContent>
       </Card>

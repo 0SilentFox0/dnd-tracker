@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import type { Participant } from "./types";
 
 import { createBattle } from "@/lib/api/battles";
+import { useNotify } from "@/lib/hooks/common";
 
 interface UseBattleFormParams {
   campaignId: string;
@@ -22,6 +23,8 @@ export function useBattleForm({
   setFormData: _setFormData,
   participants,
 }: UseBattleFormParams) {
+  const notify = useNotify();
+
   void _setFormData;
 
   const router = useRouter();
@@ -33,7 +36,7 @@ export function useBattleForm({
       e.preventDefault();
 
       if (participants.length === 0) {
-        alert("Оберіть хоча б одного учасника");
+        void notify("Оберіть хоча б одного учасника");
 
         return;
       }
@@ -49,14 +52,12 @@ export function useBattleForm({
         router.push(`/campaigns/${campaignId}/dm/battles/${battle.id}`);
       } catch (error) {
         console.error("Error creating battle:", error);
-        alert(
-          error instanceof Error ? error.message : "Помилка при створенні бою",
-        );
+        void notify(error instanceof Error ? error.message : "Помилка при створенні бою");
       } finally {
         setLoading(false);
       }
     },
-    [campaignId, formData.name, formData.description, participants, router],
+    [campaignId, formData.name, formData.description, participants, router, notify],
   );
 
   return { loading, handleSubmit };

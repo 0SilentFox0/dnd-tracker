@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { Dna } from "lucide-react";
 
+import { EmptyState, LoadingState } from "@/components/common/states";
 import { CreateRaceDialog } from "@/components/races/CreateRaceDialog";
 import { RaceCard } from "@/components/races/RaceCard";
 import { RacesPageHeader } from "@/components/races/RacesPageHeader";
+import { useConfirm } from "@/lib/hooks/common";
 import {
   useCreateRace,
   useDeleteRace,
@@ -21,6 +24,8 @@ export function DMRacesPageClient({
   campaignId,
   initialRaces,
 }: DMRacesPageClientProps) {
+  const confirm = useConfirm();
+
   const [createRaceDialogOpen, setCreateRaceDialogOpen] = useState(false);
 
   // Запити для рас
@@ -34,8 +39,8 @@ export function DMRacesPageClient({
 
   const deleteRaceMutation = useDeleteRace(campaignId);
 
-  const handleDeleteRace = (raceId: string) => {
-    if (confirm("Ви впевнені, що хочете видалити цю расу?")) {
+  const handleDeleteRace = async (raceId: string) => {
+    if ((await confirm({ title: "Ви впевнені, що хочете видалити цю расу?", confirmLabel: "Видалити", destructive: true }))) {
       deleteRaceMutation.mutate(raceId);
     }
   };
@@ -48,20 +53,10 @@ export function DMRacesPageClient({
         onCreateRace={() => setCreateRaceDialogOpen(true)}
       />
 
-      {racesLoading && (
-        <div className="text-center py-4">
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Оновлення...
-          </p>
-        </div>
-      )}
-
-      {!racesLoading && races.length === 0 ? (
-        <div className="text-center py-8 sm:py-12">
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Раси ще не додані. Створіть першу расу.
-          </p>
-        </div>
+      {racesLoading && races.length === 0 ? (
+        <LoadingState rows={6} label="Завантаження рас…" />
+      ) : races.length === 0 ? (
+        <EmptyState icon={Dna} title="Ще немає рас" description="Створіть першу расу." />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {races.map((race) => (

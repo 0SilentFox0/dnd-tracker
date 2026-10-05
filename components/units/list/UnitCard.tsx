@@ -10,6 +10,7 @@ import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getDamageElementLabel } from "@/lib/constants/damage";
+import { useConfirm } from "@/lib/hooks/common";
 import { getDiceAverage } from "@/lib/utils/battle/balance";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import {
@@ -79,6 +80,8 @@ interface UnitCardProps {
 }
 
 export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
+  const confirm = useConfirm();
+
   const handleDragStart = (e: React.DragEvent) => {
     e.dataTransfer.setData(DRAG_TYPE, getUnitDragPayload(unit));
     e.dataTransfer.effectAllowed = "move";
@@ -237,8 +240,8 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
           variant="destructive"
           size="sm"
           aria-label={`Видалити юніт ${unit.name}`}
-          onClick={() => {
-            if (confirm(`Видалити юніт «${unit.name}»?`)) onDelete(unit.id);
+          onClick={async () => {
+            if ((await confirm({ title: `Видалити юніт «${unit.name}»?`, confirmLabel: "Видалити", destructive: true }))) onDelete(unit.id);
           }}
         >
           <X className="h-4 w-4" />

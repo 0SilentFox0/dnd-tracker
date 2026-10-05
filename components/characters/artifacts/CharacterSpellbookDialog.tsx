@@ -7,16 +7,11 @@ import type { SpellRichOptionData } from "@/components/spells/SpellRichOption";
 import { SpellRichOption } from "@/components/spells/SpellRichOption";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import type { Spell } from "@/types/spells";
 
 interface CharacterSpellbookDialogProps {
@@ -70,11 +65,13 @@ export function CharacterSpellbookDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md flex flex-col">
-        <DialogHeader>
-          <DialogTitle>Заклинання героя</DialogTitle>
-        </DialogHeader>
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Заклинання героя"
+      size="sm"
+      className="flex flex-col"
+    >
         {spells.length === 0 ? (
           <p className="text-muted-foreground py-4 text-sm">
             Персонаж поки не знає жодного заклинання. Вивчіть школу магії в
@@ -124,7 +121,6 @@ export function CharacterSpellbookDialog({
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-      </DialogContent>
-    </Dialog>
+    </ResponsiveDialog>
   );
 }

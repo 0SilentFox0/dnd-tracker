@@ -10,6 +10,7 @@ import {
   canUnlockRacialSkillSlot,
   getRacialSkillLevelId,
 } from "@/components/skill-tree/utils/hooks";
+import { useNotify } from "@/lib/hooks/common";
 import type {
   MainSkill,
   Skill,
@@ -49,6 +50,8 @@ export function useSkillTreePageHandlers({
   isDMMode,
   playerLevel,
 }: SkillTreePageHandlersParams) {
+  const notify = useNotify();
+
   const handleSkillClick = useCallback(
     (skill: Skill) => {
       if (unlockedSkills.includes(skill.id)) {
@@ -58,14 +61,14 @@ export function useSkillTreePageHandlers({
       }
 
       if (unlockedSkills.length >= maxSkills) {
-        alert(`Досягнуто максимальну кількість навиків (${maxSkills})`);
+        void notify(`Досягнуто максимальну кількість навиків (${maxSkills})`);
 
         return;
       }
 
       setUnlockedSkills((prev) => [...prev, skill.id]);
     },
-    [unlockedSkills, maxSkills, setUnlockedSkills],
+    [unlockedSkills, maxSkills, setUnlockedSkills, notify],
   );
 
   const handleUltimateSkillClick = useCallback(
@@ -77,14 +80,14 @@ export function useSkillTreePageHandlers({
       }
 
       if (unlockedSkills.length >= maxSkills) {
-        alert(`Досягнуто максимальну кількість навиків (${maxSkills})`);
+        void notify(`Досягнуто максимальну кількість навиків (${maxSkills})`);
 
         return;
       }
 
       setUnlockedSkills((prev) => [...prev, skill.id]);
     },
-    [unlockedSkills, maxSkills, setUnlockedSkills],
+    [unlockedSkills, maxSkills, setUnlockedSkills, notify],
   );
 
   const handleRacialSkillClick = useCallback(
@@ -109,25 +112,25 @@ export function useSkillTreePageHandlers({
       }
 
       if (unlockedSkills.length >= maxSkills) {
-        alert(`Досягнуто максимальну кількість навиків (${maxSkills})`);
+        void notify(`Досягнуто максимальну кількість навиків (${maxSkills})`);
 
         return;
       }
 
       setUnlockedSkills((prev) => [...prev, racialSkillLevelId]);
     },
-    [unlockedSkills, maxSkills, setUnlockedSkills, playerLevel, isDMMode],
+    [unlockedSkills, maxSkills, setUnlockedSkills, playerLevel, isDMMode, notify],
   );
 
   const handleCompleteTraining = useCallback(() => {
     if (unlockedSkills.length === 0) {
-      alert("Спочатку виберіть навики для прокачки");
+      void notify("Спочатку виберіть навики для прокачки");
 
       return;
     }
 
     setIsTrainingCompleted(true);
-  }, [unlockedSkills, setIsTrainingCompleted]);
+  }, [unlockedSkills, setIsTrainingCompleted, notify]);
 
   const handleSkillSlotClick = useCallback(
     (slot: {
@@ -140,7 +143,7 @@ export function useSkillTreePageHandlers({
       isUltimate?: boolean;
     }) => {
       if (!selectedSkillFromLibrary) {
-        alert("Спочатку виберіть скіл з бібліотеки");
+        void notify("Спочатку виберіть скіл з бібліотеки");
 
         return;
       }
@@ -150,13 +153,13 @@ export function useSkillTreePageHandlers({
       );
 
       if (!selectedSkill) {
-        alert("Помилка: скіл не знайдено в бібліотеці");
+        void notify("Помилка: скіл не знайдено в бібліотеці");
 
         return;
       }
 
       if (!currentSkillTree) {
-        alert("Помилка: дерево прокачки не знайдено");
+        void notify("Помилка: дерево прокачки не знайдено");
 
         return;
       }
@@ -176,21 +179,15 @@ export function useSkillTreePageHandlers({
         slot.isMainSkillLevel === true || slot.isRacial === true;
 
       if (slot.isUltimate === true) {
-        alert(
-          `Скіл "${skillDisplayName}" успішно присвоєно ультимативному навику`,
-        );
+        void notify(`Скіл "${skillDisplayName}" успішно присвоєно ультимативному навику`);
       } else if (isMainSkillLevelOrRacial) {
-        alert(
-          `Скіл "${skillDisplayName}" успішно присвоєно до ${
+        void notify(`Скіл "${skillDisplayName}" успішно присвоєно до ${
             slot.mainSkillId === "racial"
               ? "расового навику"
               : `основного навику "${slot.mainSkillId}"`
-          }`,
-        );
+          }`);
       } else {
-        alert(
-          `Скіл "${skillDisplayName}" успішно присвоєно колу ${slot.circle}`,
-        );
+        void notify(`Скіл "${skillDisplayName}" успішно присвоєно колу ${slot.circle}`);
       }
 
       setSelectedSkillFromLibrary(null);
@@ -201,6 +198,7 @@ export function useSkillTreePageHandlers({
       currentSkillTree,
       setEditedSkillTree,
       setSelectedSkillFromLibrary,
+      notify,
     ],
   );
 

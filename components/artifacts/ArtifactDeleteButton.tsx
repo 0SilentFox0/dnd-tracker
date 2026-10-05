@@ -6,6 +6,7 @@ import { Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { deleteArtifact } from "@/lib/api/artifacts";
+import { useConfirm, useNotify } from "@/lib/hooks/common";
 
 interface ArtifactDeleteButtonProps {
   campaignId: string;
@@ -16,12 +17,16 @@ export function ArtifactDeleteButton({
   campaignId,
   artifactId,
 }: ArtifactDeleteButtonProps) {
+  const notify = useNotify();
+
+  const confirm = useConfirm();
+
   const router = useRouter();
 
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
-    if (!confirm("Ви впевнені, що хочете видалити цей артефакт?")) return;
+    if (!(await confirm({ title: "Ви впевнені, що хочете видалити цей артефакт?", confirmLabel: "Видалити", destructive: true }))) return;
 
     setIsDeleting(true);
 
@@ -32,7 +37,7 @@ export function ArtifactDeleteButton({
     } catch (err) {
       console.error(err);
 
-      alert("Помилка при видаленні артефакту");
+      void notify("Помилка при видаленні артефакту");
     } finally {
       setIsDeleting(false);
     }

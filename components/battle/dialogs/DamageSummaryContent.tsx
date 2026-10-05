@@ -4,9 +4,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  DialogFooter,
-} from "@/components/ui/dialog";
 import { useDamageBreakdown } from "@/lib/hooks/battle";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -197,7 +194,7 @@ export function DamageSummaryContent({
         </AnimatePresence>
       </div>
 
-      <DialogFooter>
+      <div className="flex gap-2 pt-2 [&>*]:flex-1 sm:justify-end sm:[&>*]:flex-none">
         <Button variant="outline" onClick={() => onOpenChange(false)}>
           Скасувати
         </Button>
@@ -212,7 +209,7 @@ export function DamageSummaryContent({
               ? `(${totalDamage} урону)`
               : ""}
         </Button>
-      </DialogFooter>
+      </div>
     </>
   );
 }

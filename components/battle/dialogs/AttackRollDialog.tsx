@@ -9,6 +9,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ParticipantSide } from "@/lib/constants/battle";
+import { useNotify } from "@/lib/hooks/common";
 import { hasAdvantage, hasDisadvantage, predictAttackNumbers } from "@/lib/utils/battle/attack";
 import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
@@ -36,6 +37,8 @@ export function AttackRollDialog({
   canSeeEnemyHp = false,
   onConfirm,
 }: AttackRollDialogProps) {
+  const notify = useNotify();
+
   const [attackRoll, setAttackRoll] = useState("");
 
   const [advantageRoll, setAdvantageRoll] = useState("");
@@ -69,13 +72,13 @@ export function AttackRollDialog({
       const disadvantage = disadvantageRoll ? parseInt(disadvantageRoll, 10) : undefined;
 
       if (advantage != null && (advantage < 1 || advantage > 20)) {
-        alert("Кидок переваги має бути від 1 до 20");
+        void notify("Кидок переваги має бути від 1 до 20");
 
         return;
       }
 
       if (disadvantage != null && (disadvantage < 1 || disadvantage > 20)) {
-        alert("Кидок недоліку має бути від 1 до 20");
+        void notify("Кидок недоліку має бути від 1 до 20");
 
         return;
       }
@@ -83,7 +86,7 @@ export function AttackRollDialog({
       onConfirm({ attackRoll: roll, advantageRoll: advantage, disadvantageRoll: disadvantage });
       handleCancel();
     } else {
-      alert("Кидок має бути від 1 до 20");
+      void notify("Кидок має бути від 1 до 20");
     }
   };
 

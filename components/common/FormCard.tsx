@@ -4,6 +4,8 @@
 
 import { ReactNode } from "react";
 
+import { ActionBar } from "./ActionBar";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,6 +23,7 @@ interface FormCardProps {
   cancelLabel?: string;
   submitLabel?: string;
   isSubmitting?: boolean;
+  submitDisabled?: boolean;
   children: ReactNode;
   className?: string;
 }
@@ -33,6 +36,7 @@ export function FormCard({
   cancelLabel = "Скасувати",
   submitLabel = "Зберегти зміни",
   isSubmitting = false,
+  submitDisabled = false,
   children,
   className,
 }: FormCardProps) {
@@ -45,16 +49,16 @@ export function FormCard({
       <CardContent>
         <form onSubmit={onSubmit} className="space-y-6">
           {children}
-          <div className="flex gap-2 pt-4">
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Збереження..." : submitLabel}
-            </Button>
+          <ActionBar>
             {onCancel && (
               <Button type="button" variant="outline" onClick={onCancel}>
                 {cancelLabel}
               </Button>
             )}
-          </div>
+            <Button type="submit" disabled={isSubmitting || submitDisabled}>
+              {isSubmitting ? "Збереження..." : submitLabel}
+            </Button>
+          </ActionBar>
         </form>
       </CardContent>
     </Card>

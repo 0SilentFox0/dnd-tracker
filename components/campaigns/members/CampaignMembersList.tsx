@@ -7,6 +7,7 @@ import { X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { removeCampaignMember } from "@/lib/api/campaigns";
+import { useConfirm, useNotify } from "@/lib/hooks/common";
 
 interface CampaignMember {
   id: string;
@@ -28,12 +29,16 @@ export function CampaignMembersList({
   members,
   isDM,
 }: CampaignMembersListProps) {
+  const notify = useNotify();
+
+  const confirm = useConfirm();
+
   const router = useRouter();
 
   const [removingMemberId, setRemovingMemberId] = useState<string | null>(null);
 
   const handleRemoveMember = async (memberId: string) => {
-    if (!confirm("Ви впевнені, що хочете виключити цього учасника з кампанії?")) {
+    if (!(await confirm({ title: "Ви впевнені, що хочете виключити цього учасника з кампанії?", confirmLabel: "Виключити", destructive: true }))) {
       return;
     }
 
@@ -44,7 +49,7 @@ export function CampaignMembersList({
       router.refresh();
     } catch (error) {
       console.error("Error removing member:", error);
-      alert(error instanceof Error ? error.message : "Помилка при видаленні учасника");
+      void notify(error instanceof Error ? error.message : "Помилка при видаленні учасника");
     } finally {
       setRemovingMemberId(null);
     }

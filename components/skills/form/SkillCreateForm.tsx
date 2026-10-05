@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 
 import { AbilityListEditor, withAbilityErrors } from "@/components/abilities";
+import { ActionBar } from "@/components/common/ActionBar";
 import { SkillBasicInfo } from "@/components/skills/form/basic";
 import { SkillMainSkillSection } from "@/components/skills/form/main-skill";
 import { SkillSpellSection } from "@/components/skills/form/spell";
@@ -98,14 +99,7 @@ export function SkillCreateForm({
             onValidityChange={abilitiesGroup.onValidityChange}
           />
 
-          <div className="flex gap-2">
-            <Button type="submit" disabled={isSaving || !abilitiesGroup.valid}>
-              {isSaving
-                ? isEdit
-                  ? "Збереження..."
-                  : "Створення..."
-                : withAbilityErrors(isEdit ? "Зберегти зміни" : "Створити скіл", abilitiesGroup.errors)}
-            </Button>
+          <ActionBar>
             <Button
               type="button"
               variant="outline"
@@ -114,7 +108,14 @@ export function SkillCreateForm({
             >
               Скасувати
             </Button>
-          </div>
+            <Button type="submit" disabled={isSaving || !abilitiesGroup.valid}>
+              {isSaving
+                ? isEdit
+                  ? "Збереження..."
+                  : "Створення..."
+                : withAbilityErrors(isEdit ? "Зберегти зміни" : "Створити скіл", abilitiesGroup.errors)}
+            </Button>
+          </ActionBar>
         </form>
       </CardContent>
     </Card>

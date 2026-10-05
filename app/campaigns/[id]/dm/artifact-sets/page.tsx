@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { Layers } from "lucide-react";
 
 import { ArtifactSetCardIcon } from "@/components/artifact-sets/ArtifactSetCardIcon";
+import { EmptyState } from "@/components/common/states";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -52,16 +54,16 @@ export default async function DMArtifactSetsPage({
       </div>
 
       {sets.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
-            <p className="mb-4">Ще немає сетів.</p>
+        <EmptyState
+          icon={Layers}
+          title="Ще немає сетів"
+          description="Сет дає бонус, коли персонаж носить усі його артефакти."
+          action={
             <Button asChild>
-              <Link href={`/campaigns/${id}/dm/artifact-sets/new`}>
-                Створити перший сет
-              </Link>
+              <Link href={`/campaigns/${id}/dm/artifact-sets/new`}>Створити перший сет</Link>
             </Button>
-          </CardContent>
-        </Card>
+          }
+        />
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {sets.map((s) => (

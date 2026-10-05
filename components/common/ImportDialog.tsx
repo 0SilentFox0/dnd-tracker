@@ -1,18 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { AlertCircle, CheckCircle2,FileText, Upload } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import type { UseFileImportReturn } from "@/lib/hooks/common";
 
 interface ImportDialogProps {
@@ -42,11 +36,16 @@ export function ImportDialog({
     reset,
   } = importHook;
 
+  const [innerOpen, setInnerOpen] = useState(false);
+
+  const isOpen = open ?? innerOpen;
+
   const handleDialogOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
       reset();
     }
 
+    setInnerOpen(newOpen);
     onOpenChange?.(newOpen);
   };
 
@@ -62,19 +61,17 @@ export function ImportDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleDialogOpenChange}>
-      <DialogTrigger asChild>
-        <Button variant="outline">
+    <>
+      <Button onClick={() => handleDialogOpenChange(true)} variant="outline">
           <Upload className="h-4 w-4 mr-2" />
           {triggerLabel}
         </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
-
+    <ResponsiveDialog
+      open={isOpen}
+      onOpenChange={handleDialogOpenChange}
+      title={title}
+      description={description}
+    >
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="file-upload">Файл</Label>
@@ -125,7 +122,7 @@ export function ImportDialog({
             </Button>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+    </ResponsiveDialog>
+    </>
   );
 }

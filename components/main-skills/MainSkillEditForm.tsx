@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getSpellGroups } from "@/lib/api/spells";
+import { useNotify } from "@/lib/hooks/common";
 import { useUpdateMainSkill } from "@/lib/hooks/skills";
 import type { MainSkill } from "@/types/main-skills";
 import type { MainSkillFormData } from "@/types/main-skills";
@@ -31,6 +32,8 @@ export function MainSkillEditForm({
   campaignId,
   mainSkill,
 }: MainSkillEditFormProps) {
+  const notify = useNotify();
+
   const router = useRouter();
 
   const updateMainSkillMutation = useUpdateMainSkill(campaignId);
@@ -59,7 +62,7 @@ export function MainSkillEditForm({
       router.refresh();
     } catch (error) {
       console.error("Error updating main skill:", error);
-      alert("Помилка при оновленні основного навику");
+      void notify("Помилка при оновленні основного навику");
     }
   };
 

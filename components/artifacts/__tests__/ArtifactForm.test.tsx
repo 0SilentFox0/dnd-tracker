@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ArtifactForm } from "@/components/artifacts/ArtifactForm";
+import { ConfirmProvider } from "@/components/ui/confirm-dialog";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }) }));
 
@@ -15,6 +16,7 @@ describe("ArtifactForm", () => {
 
     render(
       <QueryClientProvider client={new QueryClient()}>
+        <ConfirmProvider>
         <ArtifactForm
           campaignId="c1"
           artifactSets={[]}
@@ -27,6 +29,7 @@ describe("ArtifactForm", () => {
           initial={{ name: "Меч", description: "", rarity: "", slot: "weapon", icon: "", setId: "", abilities: [{ id: "a1", name: "Гострота", trigger: { event: "passive" }, effects: [{ kind: "damageBonus", filter: { kind: "melee" }, flat: 2 }] }], abilityIssues: [] }}
           onSubmit={onSubmit}
         />
+        </ConfirmProvider>
       </QueryClientProvider>,
     );
 
@@ -47,6 +50,7 @@ describe("ArtifactForm", () => {
 
     render(
       <QueryClientProvider client={new QueryClient()}>
+        <ConfirmProvider>
         <ArtifactForm
           campaignId="c1"
           artifactSets={[]}
@@ -59,6 +63,7 @@ describe("ArtifactForm", () => {
           initial={{ name: "Меч", description: "", rarity: "", slot: "weapon", icon: "", setId: "", abilities: [], abilityIssues: [], weapon: { damageDice: "1d8" } }}
           onSubmit={onSubmit}
         />
+        </ConfirmProvider>
       </QueryClientProvider>,
     );
 
@@ -74,6 +79,7 @@ describe("ArtifactForm", () => {
   it("кнопка збереження показує кількість помилок у вміннях", async () => {
     render(
       <QueryClientProvider client={new QueryClient()}>
+        <ConfirmProvider>
         <ArtifactForm
           campaignId="c1"
           artifactSets={[]}
@@ -86,11 +92,27 @@ describe("ArtifactForm", () => {
           initial={{ name: "Меч", description: "", rarity: "", slot: "ring", icon: "", setId: "", abilities: [{ id: "a1", name: "", trigger: { event: "passive" }, effects: [] }], abilityIssues: [] }}
           onSubmit={vi.fn(async () => {})}
         />
+        </ConfirmProvider>
       </QueryClientProvider>,
     );
 
     const button = await screen.findByRole("button", { name: /Створити \(помилок у вміннях: \d+\)/ });
 
     expect(button).toBeDisabled();
+  });
+
+  it("кнопки форми — у панелі дій, «Створити» остання", () => {
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <ConfirmProvider>
+          <ArtifactForm campaignId="c1" artifactSets={[]} mode="create" title="Новий" submitLabel="Створити" submitLabelSaving="..." cancelHref="/x" iconHint="" initial={{ name: "Меч", description: "", rarity: "", slot: "ring", icon: "", setId: "", abilities: [], abilityIssues: [] }} onSubmit={vi.fn(async () => {})} />
+        </ConfirmProvider>
+      </QueryClientProvider>,
+    );
+
+    const bar = document.querySelector("[data-slot=action-bar]") as HTMLElement;
+
+    expect(bar).not.toBeNull();
+    expect(bar.lastElementChild).toHaveTextContent("Створити");
   });
 });

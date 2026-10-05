@@ -9,6 +9,7 @@ import { SidePanelCard } from "./SidePanelCard";
 import { UnitsListCard } from "./UnitsListCard";
 import { useNewBattlePage } from "./useNewBattlePage";
 
+import { ActionBar } from "@/components/common/ActionBar";
 import { Button } from "@/components/ui/button";
 
 export default function NewBattlePage({
@@ -152,16 +153,14 @@ export default function NewBattlePage({
           />
         </div>
 
-        <div className="flex gap-4 justify-end">
-          <Link href={`/campaigns/${id}/dm/battles`}>
-            <Button type="button" variant="outline">
-              Скасувати
-            </Button>
-          </Link>
+        <ActionBar>
+          <Button type="button" variant="outline" asChild>
+            <Link href={`/campaigns/${id}/dm/battles`}>Скасувати</Link>
+          </Button>
           <Button type="submit" disabled={loading}>
             {loading ? "Створення..." : "Створити сцену бою"}
           </Button>
-        </div>
+        </ActionBar>
       </form>
     </div>
   );

@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { Gem } from "lucide-react";
 
 import { ArtifactSetBonusDisplay } from "@/components/artifact-sets/ArtifactSetBonusDisplay";
 import { ArtifactSetCardIcon } from "@/components/artifact-sets/ArtifactSetCardIcon";
 import { ArtifactCard } from "@/components/artifacts/ArtifactCard";
 import { DeleteAllArtifactsButton } from "@/components/artifacts/DeleteAllArtifactsButton";
+import { EmptyState } from "@/components/common/states";
 import {
   Accordion,
   AccordionContent,
@@ -199,14 +201,15 @@ export default async function DMArtifactsPage({
       </div>
 
       {artifacts.length === 0 && artifactSets.length === 0 && (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground mb-4">Поки немає артефактів</p>
+        <EmptyState
+          icon={Gem}
+          title="Ще немає артефактів"
+          action={
             <Link href={`/campaigns/${id}/dm/artifacts/new`}>
               <Button>Створити перший артефакт</Button>
             </Link>
-          </CardContent>
-        </Card>
+          }
+        />
       )}
 
     </div>
