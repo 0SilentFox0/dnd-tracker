@@ -1,0 +1,1 @@
+export const PUSHER_DELTA_LIMIT_BYTES = 9_500;

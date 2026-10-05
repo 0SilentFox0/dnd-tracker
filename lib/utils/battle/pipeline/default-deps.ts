@@ -4,10 +4,9 @@ import type { PipelineDeps } from "./run-battle-mutation";
 
 import { prisma } from "@/lib/db";
 import { pusherServer } from "@/lib/pusher";
-import { battleChannelName } from "@/lib/pusher-channels";
 import { createClient } from "@/lib/supabase/server";
 import { BATTLE_RATE_LIMITS, checkRateLimit } from "@/lib/utils/api/rate-limit";
-import { loadBattle, saveBattle } from "@/lib/utils/battle/store";
+import { loadBattle, loadRecentEvents, saveBattle } from "@/lib/utils/battle/store";
 import { safePusherTrigger } from "@/lib/utils/pusher/safe-trigger";
 
 export const defaultPipelineDeps: PipelineDeps = {
@@ -22,12 +21,14 @@ export const defaultPipelineDeps: PipelineDeps = {
     checkRateLimit({ userId, scope, battleId, ...BATTLE_RATE_LIMITS[scope] }),
   loadBattle: (args) => loadBattle(prisma, args),
   saveBattle: (before, outcome) => saveBattle(prisma, before, outcome),
-  publish(battleId, payload) {
+  loadRecentEvents: (battleId, limit) => loadRecentEvents(prisma, battleId, limit),
+  publish(messages) {
     after(() =>
-      safePusherTrigger(pusherServer, battleChannelName(battleId), "battle-delta", payload, {
-        action: "battle mutation",
-        battleId,
-      }),
+      Promise.all(
+        messages.map((m) =>
+          safePusherTrigger(pusherServer, m.channel, m.event, m.payload, { action: "battle mutation" }),
+        ),
+      ),
     );
   },
 };
