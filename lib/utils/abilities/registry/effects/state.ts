@@ -3,7 +3,7 @@ import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/participants";
-import { upsertTimedEffect } from "@/lib/utils/abilities/engine/timed-effects";
+import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/timed-effects";
 import type { ConditionImmunityKey, Effect } from "@/lib/utils/abilities/schema";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -60,6 +60,7 @@ export function applyCondition(input: EffectApplyInput<Of<"applyCondition">>): E
         p,
         {
           timedKey: `${ability.key}#${input.effectIndex}`,
+          source: effectSource(findParticipant(input.participants, input.ownerId), ability),
           name: ability.name,
           type: "condition",
           rounds: effect.duration.rounds,

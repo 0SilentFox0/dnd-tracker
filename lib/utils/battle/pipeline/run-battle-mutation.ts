@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { ZodType } from "zod";
 
+import { buildClientDelta } from "./client-delta";
 import { defaultPipelineDeps } from "./default-deps";
 import type { PusherMessage } from "./legacy-battle";
 import { buildPusherMessages, toLegacyBattle } from "./legacy-battle";
@@ -247,21 +248,19 @@ export async function runBattleMutation<TBody>(
         ? result.history.cancelFromSeq
         : 0;
 
-    const shared = toLegacyBattle(loaded, after, result.participants, result.pending, {
-      mode: "append",
-      entries,
+    const clientDelta = buildClientDelta({
+      before: loaded,
+      after,
+      participants: result.participants,
+      pending: result.pending,
+      upsertedIds: delta.upserted.map((p) => p.basicInfo.id),
+      log: entries,
       cancelledFrom,
     });
 
-    deps.publish(
-      buildPusherMessages({ before: loaded.scene, after, participants: result.participants, battlePayload: shared }),
-    );
+    deps.publish(buildPusherMessages({ before: loaded.scene, after, participants: result.participants, delta: clientDelta }));
 
-    return respondWith(
-      options.respond,
-      { ...shared, isDM: loaded.isDM, userRole: loaded.isDM ? "dm" : "player" },
-      result.response,
-    );
+    return NextResponse.json({ delta: clientDelta, ...(result.response && { response: result.response }) });
   } catch (err) {
     return errorResponse(err);
   }

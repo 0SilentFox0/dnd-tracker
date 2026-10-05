@@ -124,6 +124,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     resistanceResult,
     additionalDamageBreakdown,
     criticalEffectApplied,
+    damageSteps,
     oldHp,
   } = hitDamage;
 
@@ -165,6 +166,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     totalFinalDamage,
     resistanceResult,
     criticalEffectApplied,
+    damageSteps,
     beforeMessages: [],
     afterMessages: flow.messages,
     vampirismHeal: vampirismResult.vampirismHeal,

@@ -10,6 +10,16 @@ export interface TimedEffectInput {
   abilityEffects?: StaticEffect[];
   effects?: ActiveEffect["effects"];
   dotDamage?: ActiveEffect["dotDamage"];
+  source?: ActiveEffect["source"];
+}
+
+export function effectSource(
+  owner: BattleParticipant | undefined,
+  ability: { name: string; source?: { icon?: string | null } },
+): ActiveEffect["source"] {
+  if (!owner) return undefined;
+
+  return { participantId: owner.basicInfo.id, name: owner.basicInfo.name, abilityName: ability.name, icon: ability.source?.icon };
 }
 
 export function upsertTimedEffect(p: BattleParticipant, input: TimedEffectInput, round: number): BattleParticipant {
@@ -27,6 +37,7 @@ export function upsertTimedEffect(p: BattleParticipant, input: TimedEffectInput,
     abilityKey: input.timedKey,
     ...(input.abilityEffects && { abilityEffects: input.abilityEffects }),
     ...(input.dotDamage && { dotDamage: input.dotDamage }),
+    ...(input.source && { source: input.source }),
   };
 
   const next = existing >= 0 ? current.map((e, i) => (i === existing ? effect : e)) : [...current, effect];

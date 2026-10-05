@@ -50,6 +50,7 @@ export interface ActiveEffect {
   };
   abilityKey?: string;
   abilityEffects?: StaticEffect[];
+  source?: { participantId: string; name: string; abilityName?: string; icon?: string | null };
 }
 
 /**
@@ -250,6 +251,15 @@ export interface BattlePreparationParticipant {
   quantity?: number;
 }
 
+export interface DamageStep {
+  label: string;
+  side: "attacker" | "target";
+  kind: "dice" | "flat" | "percent" | "multiplier" | "immunity";
+  value: number;
+  after: number;
+  icon?: string | null;
+}
+
 /**
  * Детальна дія в бою (BattleAction)
  * Кожна дія записується для історії та можливості відміни
@@ -296,6 +306,7 @@ export interface BattleAction {
     }>;
     totalDamage?: number;
     damageBreakdown?: string; // детальний опис урону
+    damageSteps?: Record<string, DamageStep[]>;
     // Для заклинань:
     spellId?: string;
     spellName?: string;

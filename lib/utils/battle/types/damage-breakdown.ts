@@ -2,13 +2,14 @@
  * Типи для breakdown урону
  */
 
-import type { BattleAttack, BattleParticipant } from "@/types/battle";
+import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
 
 export interface DamageBreakdownResult {
   breakdown: string[];
   totalDamage: number;
   targetBreakdown: string[];
   finalDamage: number;
+  steps: DamageStep[];
 }
 
 export interface ComputeDamageBreakdownParams {
@@ -25,6 +26,7 @@ export interface DamageBreakdownTargetResult {
   targetName: string;
   targetBreakdown: string[];
   finalDamage: number;
+  steps: DamageStep[];
 }
 
 export interface DamageBreakdownMultiTargetResult {

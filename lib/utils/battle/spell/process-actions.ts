@@ -3,6 +3,7 @@
  */
 
 import type { BattleSpell } from "../types/spell-process";
+import type { SpellCalculation } from "./process-damage";
 
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -147,12 +148,6 @@ export function buildSpellMissAction(
   };
 }
 
-export interface SpellCalculation {
-  totalDamage?: number;
-  totalHealing?: number;
-  breakdown: string[];
-  resistanceBreakdown: string[];
-}
 
 export function buildSpellSuccessAction(
   caster: BattleParticipant,
@@ -240,6 +235,7 @@ export function buildSpellSuccessAction(
       totalDamage: spellCalculation.totalDamage,
       totalHealing: spellCalculation.totalHealing,
       damageBreakdown: spellCalculation.breakdown.join("; "),
+      damageSteps: spellCalculation.damageSteps,
       savingThrows:
         savingThrowsDetails.length > 0
           ? savingThrowsDetails.map((st) => ({

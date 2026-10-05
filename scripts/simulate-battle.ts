@@ -18,9 +18,10 @@ import { spellSchema } from "../app/api/campaigns/[id]/battles/[battleId]/spell/
 import { createSpellMutation } from "../app/api/campaigns/[id]/battles/[battleId]/spell/spell-mutation";
 import { createStartMutation } from "../app/api/campaigns/[id]/battles/[battleId]/start/start-mutation";
 import { prisma } from "../lib/db";
+import { applyBattleDelta } from "../lib/utils/battle/client/apply-delta";
 import { type PipelineDeps, runBattleMutation, type RunBattleMutationOptions } from "../lib/utils/battle/pipeline/run-battle-mutation";
 import { loadBattle, loadRecentEvents, saveBattle } from "../lib/utils/battle/store";
-import type { BattleScene } from "../types/api";
+import type { BattleMutationResponse, BattleScene } from "../types/api";
 import type { BattleAction, BattleParticipant } from "../types/battle";
 import { artifactRows, DRAGON_SET, RACES, SIM_CAMPAIGN_NAME, SIM_PLAYER, SIM_USER, SKILLS, UNITS } from "./simulate-battle-scenario";
 
@@ -151,6 +152,22 @@ let state: BattleScene;
 
 const log: BattleAction[] = [];
 
+async function readState(): Promise<BattleScene> {
+  const res = await runBattleMutation(
+    new Request("http://localhost/battle"),
+    {
+      params: { id: ctx.campaignId, battleId: ctx.battleId },
+      access: "member",
+      dryRun: () => true,
+      includeRecentEvents: 100,
+      mutate: (c) => ({ participants: c.participants, pending: c.pending, events: [] }),
+    },
+    deps,
+  );
+
+  return (await res.json()) as BattleScene;
+}
+
 async function call<T>(label: string, options: Omit<RunBattleMutationOptions<T>, "params">, body: unknown = {}, as?: string): Promise<{ status: number; body: Record<string, unknown> }> {
   actingUser = as ?? (state && current()?.basicInfo.side === "ally" && options.access !== "dm" ? SIM_PLAYER.id : SIM_USER.id);
 
@@ -164,12 +181,14 @@ async function call<T>(label: string, options: Omit<RunBattleMutationOptions<T>,
 
   const json = (await res.json()) as Record<string, unknown>;
 
-  if (res.status === 200) {
-    const battle = (json.battle ?? json) as BattleScene;
+  if (res.status === 200 && "delta" in json) {
+    const { delta } = json as unknown as BattleMutationResponse;
 
-    if (battle.initiativeOrder) state = battle;
+    const applied = state ? applyBattleDelta(state, delta) : "refetch";
 
-    for (const e of (battle.battleLog ?? []) as BattleAction[]) {
+    state = applied === "refetch" ? await readState() : applied;
+
+    for (const e of delta.log) {
       if (!log.some((l) => l.actionIndex === e.actionIndex)) log.push(e);
 
       console.info(`   📜 [р${e.round}] ${e.resultText}`);
@@ -224,6 +243,8 @@ async function main() {
   console.info("🌱 Створюю тестову кампанію…");
   ctx = await seed();
   console.info(`   кампанія ${ctx.campaignId}, бій ${ctx.battleId}`);
+
+  state = await readState();
 
   console.info("\n⚔️  Старт бою");
   await call("start", START);

@@ -5,7 +5,7 @@ import { resolveAmount } from "@/lib/utils/abilities/engine/amount";
 import { eventDamage } from "@/lib/utils/abilities/engine/events";
 import { applyRawDamage } from "@/lib/utils/abilities/engine/hp";
 import { findParticipant, isUp, replaceParticipant } from "@/lib/utils/abilities/engine/participants";
-import { upsertTimedEffect } from "@/lib/utils/abilities/engine/timed-effects";
+import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/timed-effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import { hasImmunity } from "@/lib/utils/battle/resistance";
 
@@ -113,6 +113,7 @@ export function applyDot(input: EffectApplyInput<Of<"dot">>): EffectApplyResult 
         t,
         {
           timedKey: `${ability.key}#${input.effectIndex}`,
+          source: effectSource(findParticipant(input.participants, input.ownerId), ability),
           name: ability.name,
           type: "debuff",
           rounds: effect.duration.rounds,

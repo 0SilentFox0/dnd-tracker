@@ -1,0 +1,68 @@
+.battle-hud,
+.hud-surface {
+  --ally: #6f8fb0;
+  --enemy: #9c2a1d;
+  --bone: #e6dccb;
+  --ink: #efe5d2;
+  --muted: #8f8473;
+  --gold: #c9b37a;
+  color: var(--bone);
+  font-family: var(--font-hud-sans), system-ui, sans-serif;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.battle-hud {
+  position: relative;
+  background: #0b0908 url("/screen-bg/battle-bg.jpg") center 70% / cover;
+}
+
+.battle-hud::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(8, 6, 5, 0.94) 0, rgba(8, 6, 5, 0.6) 30%, rgba(8, 6, 5, 0.72) 60%, rgba(8, 6, 5, 0.97) 80%);
+}
+
+/* шари над затемненням; оверлеї й тости лишаються fixed */
+.battle-hud > :not(.fixed) { position: relative; }
+
+.hud-sc { font-family: var(--font-hud-sc), serif; letter-spacing: 0.04em; }
+
+.hud-book { font-family: var(--font-hud-book), serif; }
+
+.metal-iron { --m1: #5d5f63; --m2: #8a8d92; --mt: #eeeeee; }
+.metal-bronze { --m1: #6e3f1c; --m2: #b07842; --mt: #fbe3c6; }
+.metal-silver { --m1: #6d7177; --m2: #c9ced6; --mt: #1d2026; }
+.metal-gold { --m1: #8a6414; --m2: #e6c25a; --mt: #2a1d05; }
+.metal-mithril { --m1: #2f5a74; --m2: #8fd0e8; --mt: #06202c; }
+.metal-platinum { --m1: #9aa0ab; --m2: #ffffff; --mt: #2b2f3a; }
+
+.metal-fill { background: linear-gradient(135deg, var(--m1), var(--m2) 55%, var(--m1)); color: var(--mt); }
+.metal-platinum.metal-fill {
+  background: linear-gradient(120deg, #9aa0ab, #fff 35%, #d9e6ff 50%, #fff 62%, #9aa0ab);
+  background-size: 200% 100%;
+  animation: hud-glint 3.5s linear infinite;
+}
+
+@keyframes hud-glint { to { background-position: -200% 0; } }
+@keyframes hud-shake { 0%, 100% { transform: none; } 25% { transform: translateX(-6px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-3px); } }
+@keyframes hud-float { 0% { opacity: 0; transform: translateY(10px) scale(0.8); } 15% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-34px); } }
+@keyframes hud-flash-red { 30% { box-shadow: 0 0 0 2px #ff6a4d, 0 0 24px 8px rgba(255, 80, 50, 0.8); filter: brightness(1.6); } }
+@keyframes hud-flash-green { 30% { box-shadow: 0 0 0 2px #8fd07a, 0 0 24px 8px rgba(120, 220, 100, 0.6); filter: brightness(1.3); } }
+@keyframes hud-pulse { 50% { opacity: 0.4; } }
+@keyframes hud-vignette { 25% { box-shadow: inset 0 0 80px 20px rgba(200, 30, 20, 0.75); } }
+@keyframes hud-spin { to { transform: rotate(360deg); } }
+@keyframes hud-dropin { from { opacity: 0; transform: translateY(-60px) rotate(-200deg) scale(0.6); } }
+@keyframes hud-rise { from { opacity: 0; transform: translateY(16px) scale(0.94); letter-spacing: 0.3em; } }
+@keyframes hud-fade { from { opacity: 0; } }
+@keyframes hud-pop { from { opacity: 0; transform: scale(2); } }
+@keyframes hud-slash { from { transform: rotate(-20deg) scaleX(0); } }
+@keyframes hud-whoosh { from { transform: translateX(-160px); opacity: 0; } 60% { opacity: 1; } to { transform: translateX(120px); opacity: 0; } }
+@keyframes hud-shake-title { 20% { transform: translateX(-8px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(3px); } }
+@keyframes hud-countdown { from { width: 100%; } to { width: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .battle-hud *, .battle-hud *::before, .battle-hud *::after { animation: none !important; transition: none !important; }
+}
+@keyframes hud-crack { to { stroke-dashoffset: 0; } }

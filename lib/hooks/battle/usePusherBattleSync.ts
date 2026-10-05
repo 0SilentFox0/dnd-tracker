@@ -3,35 +3,17 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
-import { mergeBattleCache } from "@/lib/hooks/battles";
 import { battleChannelName, userChannelName } from "@/lib/pusher-channels";
-import type { BattleScene } from "@/types/api";
+import { applyBattleDelta } from "@/lib/utils/battle/client/apply-delta";
+import type { BattleRefetchSignal, BattleScene, ClientBattleDelta } from "@/types/api";
 
 export type PusherConnectionState = "connected" | "disconnected" | "connecting" | "unavailable" | null;
 
 const isBattleSyncDebugEnabled = false;
 
-function battleSnapshot(battle: BattleScene | null | undefined) {
-  if (!battle) return null;
-
-  const current =
-    battle.initiativeOrder?.[battle.currentTurnIndex]?.basicInfo;
-
-  return {
-    id: battle.id,
-    status: battle.status,
-    round: battle.currentRound,
-    turnIndex: battle.currentTurnIndex,
-    initiativeCount: battle.initiativeOrder?.length ?? 0,
-    battleLogCount: battle.battleLog?.length ?? 0,
-    currentParticipantId: current?.id ?? null,
-    currentParticipantName: current?.name ?? null,
-  };
-}
-
 /**
  * Підписка на Pusher-канали бою: оновлення битви, старт, завершення, turn-started для поточного юзера.
- * Оновлює кеш з payload події (setQueryData), щоб UI реагував миттєво без refetch.
+ * Застосовує battle-delta до кешу; refetch-сигнал або пропуск версії — одна інвалідація.
  * Канал battle-* підписується окремо від currentUserId, щоб не втрачати події під час завантаження userId.
  * При reconnect робить refetch битви. Повертає connectionState для індикатора з'єднання.
  */
@@ -52,6 +34,8 @@ export function usePusherBattleSync(
   const userChannelRef = useRef<string | null>(null);
 
   const wasDisconnectedRef = useRef(false);
+
+  const cleanupRef = useRef<(() => void) | null>(null);
 
   const onTurnStartedRef = useRef(onTurnStarted);
 
@@ -77,7 +61,7 @@ export function usePusherBattleSync(
     [battleId, currentUserId],
   );
 
-  // 1) Підписка на канал бою — БЕЗ залежності від currentUserId, щоб не відписуватись під час завантаження userId (гравець не втрачає battle-updated).
+  // 1) Підписка на канал бою — БЕЗ залежності від currentUserId, щоб не відписуватись під час завантаження userId (гравець не втрачає battle-delta).
   useEffect(() => {
     if (typeof window === "undefined" || !process.env.NEXT_PUBLIC_PUSHER_KEY) {
       debugLog("skip init: no window or NEXT_PUBLIC_PUSHER_KEY");
@@ -107,59 +91,23 @@ export function usePusherBattleSync(
         battleChannel: channel,
       });
 
-      const applyBattlePayload = (
-        eventName: "battle-updated" | "battle-started" | "battle-completed",
-        data: unknown,
-      ) => {
-        if (data && typeof data === "object" && "id" in data) {
-          const previous = queryClient.getQueryData<BattleScene>(queryKey());
+      const onDelta = (data: unknown) => {
+        if (!data || typeof data !== "object" || !("version" in data)) {
+          void queryClient.invalidateQueries({ queryKey: queryKey() });
 
-          const incoming = data as BattleScene;
-
-          debugLog(`event received: ${eventName}`, {
-            previous: battleSnapshot(previous),
-            incoming: battleSnapshot(incoming),
-          });
-
-          const merged = mergeBattleCache(
-            queryClient,
-            campaignId,
-            battleId,
-            incoming,
-          );
-
-          queryClient.setQueryData(queryKey(), { ...merged });
-
-          const next = queryClient.getQueryData<BattleScene>(queryKey());
-
-          debugLog(`cache updated: ${eventName}`, {
-            next: battleSnapshot(next),
-          });
-        } else if (
-          data &&
-          typeof data === "object" &&
-          "battleId" in data &&
-          "type" in data
-        ) {
-          const lightVersion = (data as { version?: unknown }).version;
-
-          const cachedVersion = queryClient.getQueryData<BattleScene>(queryKey())?.version;
-
-          // власна дія вже в кеші — повторне читання бою лише палить egress
-          if (typeof lightVersion === "number" && cachedVersion !== undefined && cachedVersion >= lightVersion) {
-            return;
-          }
-
-          debugLog(`event light payload (refetch): ${eventName}`, {
-            battleId: (data as { battleId: string }).battleId,
-          });
-          queryClient.invalidateQueries({ queryKey: queryKey() });
-        } else {
-          debugLog(`event invalid payload: ${eventName}`, {
-            payloadType: typeof data,
-          });
-          queryClient.invalidateQueries({ queryKey: queryKey() });
+          return;
         }
+
+        const cached = queryClient.getQueryData<BattleScene>(queryKey());
+
+        const signal = data as ClientBattleDelta | BattleRefetchSignal;
+
+        if (cached?.version !== undefined && signal.version <= cached.version) return;
+
+        const next = !cached || "refetch" in signal ? "refetch" : applyBattleDelta(cached, signal);
+
+        if (next === "refetch") void queryClient.invalidateQueries({ queryKey: queryKey() });
+        else queryClient.setQueryData(queryKey(), next);
       };
 
       const updateConnectionState = () => {
@@ -172,7 +120,7 @@ export function usePusherBattleSync(
         }
       };
 
-      pusher.connection.bind("state_change", (states: { previous: string; current: string }) => {
+      const onState = (states: { previous: string; current: string }) => {
         debugLog("connection state change", states);
         updateConnectionState();
 
@@ -182,30 +130,31 @@ export function usePusherBattleSync(
 
         if (states.current === "connected" && wasDisconnectedRef.current) {
           wasDisconnectedRef.current = false;
-          debugLog("reconnected -> invalidate battle query");
-          queryClient.invalidateQueries({ queryKey: queryKey() });
+          void queryClient.invalidateQueries({ queryKey: queryKey() });
         }
-      });
+      };
+
+      pusher.connection.bind("state_change", onState);
       updateConnectionState();
 
       const battleChannel = pusher.subscribe(channel);
 
       debugLog("subscribed battle channel", { channel });
-      battleChannel.bind("battle-updated", (data: unknown) =>
-        applyBattlePayload("battle-updated", data),
-      );
-      battleChannel.bind("battle-started", (data: unknown) =>
-        applyBattlePayload("battle-started", data),
-      );
-      battleChannel.bind("battle-completed", (data: unknown) =>
-        applyBattlePayload("battle-completed", data),
-      );
+      battleChannel.bind("battle-delta", onDelta);
+
+      cleanupRef.current = () => {
+        battleChannel.unbind("battle-delta", onDelta);
+        pusher.connection.unbind("state_change", onState);
+      };
     });
 
     return () => {
       mounted = false;
 
       const p = pusherRef.current;
+
+      cleanupRef.current?.();
+      cleanupRef.current = null;
 
       if (p) {
         debugLog("cleanup battle channel only");

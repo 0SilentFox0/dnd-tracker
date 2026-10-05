@@ -6,4 +6,5 @@ export type { UseFileImportReturn } from "./useFileImport";
 export { useFileImport } from "./useFileImport";
 export { useInfoReferenceFilters } from "./useInfoReferenceFilters";
 export { MOBILE_QUERY, useIsMobile } from "./useIsMobile";
+export { useMediaQuery } from "./useMediaQuery";
 export { useNotify } from "./useNotify";

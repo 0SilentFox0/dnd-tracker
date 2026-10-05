@@ -26,6 +26,8 @@ export interface ModifierEntry {
   sourceType: AbilitySource["type"] | "effect" | "action";
   flat: number;
   percent: number;
+  flag?: FlagEffect;
+  icon?: string | null;
 }
 
 export interface ModifierResult {
@@ -84,12 +86,12 @@ export function collectModifiers(
 
   if (!subject) return result;
 
-  const add = (effect: StaticEffect, owner: BattleParticipant, label: string, sourceType: ModifierEntry["sourceType"]) => {
+  const add = (effect: StaticEffect, owner: BattleParticipant, label: string, sourceType: ModifierEntry["sourceType"], icon?: string | null) => {
     if (!matchesQuery(effect, query)) return;
 
     if (effect.kind === "flag") {
       result.flags.push(effect);
-      result.entries.push({ label, sourceType, flat: 0, percent: 0 });
+      result.entries.push({ label, sourceType, flat: 0, percent: 0, flag: effect, icon });
 
       return;
     }
@@ -100,7 +102,7 @@ export function collectModifiers(
 
     result.flat += flat;
     result.percent += percent;
-    result.entries.push({ label, sourceType, flat, percent });
+    result.entries.push({ label, sourceType, flat, percent, icon });
   };
 
   const skipPassive = "stat" in query && isBakedStat(query.stat);
@@ -116,7 +118,7 @@ export function collectModifiers(
 
         for (const effect of ability.effects) {
           if (isStaticEffect(effect) && appliesTo(effect.target, source, subject)) {
-            add(effect, source, ability.name, ability.source.type);
+            add(effect, source, ability.name, ability.source.type, ability.source.icon);
           }
         }
       }
@@ -124,7 +126,7 @@ export function collectModifiers(
   }
 
   for (const ae of subject.battleData.activeEffects) {
-    for (const effect of ae.abilityEffects ?? legacyActiveEffectModifiers(ae)) add(effect, subject, ae.name, "effect");
+    for (const effect of ae.abilityEffects ?? legacyActiveEffectModifiers(ae)) add(effect, subject, ae.name, "effect", ae.icon ?? ae.source?.icon);
   }
 
   for (const effect of extra) add(effect, subject, "Ця дія", "action");

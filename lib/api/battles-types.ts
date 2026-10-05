@@ -2,7 +2,6 @@
  * Типи для API битв (request/response)
  */
 
-import type { BattleScene } from "@/types/api";
 
 export interface CreateBattleData {
   name: string;
@@ -33,36 +32,6 @@ export interface BattleBalanceResponse {
   characterStats?: Record<string, { dpr: number; hp: number; kpi: number }>;
   unitStats?: Record<string, { dpr: number; hp: number; kpi: number }>;
   _debug?: { mainSkills?: unknown; characterSkillProgress?: unknown };
-}
-
-export interface DamageBreakdownRequestBody {
-  attackerId: string;
-  targetId?: string;
-  targetIds?: string[];
-  attackId?: string;
-  damageRolls: number[];
-  isCritical?: boolean;
-}
-
-export interface DamageBreakdownTargetResult {
-  targetId: string;
-  targetName: string;
-  targetBreakdown: string[];
-  finalDamage: number;
-}
-
-export interface DamageBreakdownResponse {
-  breakdown: string[];
-  totalDamage: number;
-  targetBreakdown?: string[];
-  finalDamage?: number;
-  targets?: DamageBreakdownTargetResult[];
-}
-
-export interface SpellPreviewResponse {
-  preview?: boolean;
-  battleAction?: unknown;
-  battle?: BattleScene;
 }
 
 export type { AddParticipantData } from "@/types/battle";

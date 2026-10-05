@@ -9,13 +9,14 @@ import { participantImmuneToSpell } from "./spell-immunity";
 
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
-import type { BattleParticipant } from "@/types/battle";
+import type { BattleParticipant, DamageStep } from "@/types/battle";
 
 export interface SpellCalculation {
   totalDamage?: number;
   totalHealing?: number;
   breakdown: string[];
   resistanceBreakdown: string[];
+  damageSteps?: Record<string, DamageStep[]>;
 }
 
 export interface ComputeSpellDamageParams {
@@ -54,6 +55,8 @@ export function computeSpellDamageAndApply(
   );
 
   const allResistanceBreakdown: string[] = [];
+
+  const damageSteps: Record<string, DamageStep[]> = {};
 
   const targetDamages: Array<{ target: BattleParticipant; finalDamage: number }> = [];
 
@@ -115,6 +118,7 @@ export function computeSpellDamageAndApply(
 
     targetDamages.push({ target, finalDamage: resistanceResult.finalDamage });
     allResistanceBreakdown.push(...resistanceResult.breakdown);
+    damageSteps[target.basicInfo.id] = resistanceResult.steps;
   }
 
   const resultTargets = updatedTargets.map((t) => ({ ...t }));
@@ -163,6 +167,7 @@ export function computeSpellDamageAndApply(
       totalDamage: damageCalc.totalDamage,
       breakdown: damageCalc.breakdown,
       resistanceBreakdown: allResistanceBreakdown,
+      damageSteps,
     },
     updatedTargets: resultTargets,
   };

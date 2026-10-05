@@ -20,7 +20,7 @@ import { calculateDamageWithModifiersImpl } from "./impl";
 import { AttackType } from "@/lib/constants/battle";
 import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
 import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
-import type { BattleAttack, BattleParticipant } from "@/types/battle";
+import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
 
 export type {
   ComputeDamageBreakdownParams,
@@ -105,10 +105,13 @@ export function computeDamageBreakdown(
 
   const breakdown = [...damageCalculation.breakdown];
 
+  const steps: DamageStep[] = [...damageCalculation.steps];
+
   if (isCritical) {
     totalDamage *= 2;
     breakdown.push(`──────────`);
     breakdown.push(`× 2 (крит) = ${totalDamage} урону`);
+    steps.push({ label: "Критичне влучання", side: "attacker", kind: "multiplier", value: 2, after: totalDamage });
   }
 
   const heroDm = applyHeroDmDamageMultiplier(
@@ -122,21 +125,25 @@ export function computeDamageBreakdown(
   if (heroDm.breakdownLine) {
     breakdown.push(`──────────`);
     breakdown.push(heroDm.breakdownLine);
+    steps.push({ label: "Коефіцієнт DM", side: "attacker", kind: "multiplier", value: heroDm.multiplier, after: totalDamage });
   }
 
   const damageType = attack.damageType ?? "physical";
 
-  const { targetBreakdown, finalDamage } = getDefenderResistanceBreakdown(
+  const { targetBreakdown, finalDamage, targetSteps } = getDefenderResistanceBreakdown(
     target,
     damageType,
     totalDamage,
   );
+
+  steps.push(...targetSteps);
 
   return {
     breakdown,
     totalDamage,
     targetBreakdown,
     finalDamage,
+    steps,
   };
 }
 
@@ -201,7 +208,7 @@ export function computeDamageBreakdownMultiTarget(params: {
 
       const damageType = params.attack.damageType ?? "physical";
 
-      const { targetBreakdown, finalDamage } = getDefenderResistanceBreakdown(
+      const { targetBreakdown, finalDamage, targetSteps } = getDefenderResistanceBreakdown(
         target,
         damageType,
         single.totalDamage,
@@ -212,6 +219,7 @@ export function computeDamageBreakdownMultiTarget(params: {
         targetName: target.basicInfo.name,
         targetBreakdown,
         finalDamage,
+        steps: [...single.steps.filter((st) => st.side === "attacker"), ...targetSteps],
       });
     }
 
@@ -248,17 +256,22 @@ export function computeDamageBreakdownMultiTarget(params: {
 
     const damageForTarget = Math.floor(single.totalDamage * dmgMult);
 
-    const { targetBreakdown, finalDamage } = getDefenderResistanceBreakdown(
+    const { targetBreakdown, finalDamage, targetSteps } = getDefenderResistanceBreakdown(
       target,
       damageType,
       damageForTarget,
     );
+
+    const attackerSteps = single.steps.filter((st) => st.side === "attacker");
+
+    const share: DamageStep[] = dmgMult === 1 ? [] : [{ label: "Частка шкоди", side: "attacker", kind: "multiplier", value: dmgMult, after: damageForTarget }];
 
     targetsResult.push({
       targetId: target.basicInfo.id,
       targetName: target.basicInfo.name,
       targetBreakdown,
       finalDamage,
+      steps: [...attackerSteps, ...share, ...targetSteps],
     });
   }
 

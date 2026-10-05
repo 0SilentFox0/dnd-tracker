@@ -8,7 +8,7 @@ import { AttackType, BATTLE_CONSTANTS } from "@/lib/constants/battle";
 import { collectModifiers, type ModifierEntry } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
-import type { BattleParticipant } from "@/types/battle";
+import type { BattleParticipant, DamageStep } from "@/types/battle";
 
 const BONUS_PREFIX: Record<ModifierEntry["sourceType"], string> = {
   skill: "Бонус зі скілів",
@@ -103,6 +103,43 @@ export function calculateDamageWithModifiersImpl(
   breakdown.push(`──────────`);
   breakdown.push(`Сума ${totalBeforeFloor.toFixed(1)} = ${totalDamage} шкоди`);
 
+  const steps: DamageStep[] = [{ label: "Кубики", side: "attacker", kind: "dice", value: baseDamage, after: baseDamage }];
+
+  let running = baseDamage;
+
+  if (statModifier !== 0) {
+    running += statModifier;
+    steps.push({ label: attackType === AttackType.MELEE ? "Сила" : "Спритність", side: "attacker", kind: "flat", value: statModifier, after: running });
+  }
+
+  if (heroLevelPart + heroDicePart > 0) {
+    running += heroLevelPart + heroDicePart;
+    steps.push({ label: "Рівень героя", side: "attacker", kind: "flat", value: heroLevelPart + heroDicePart, after: running });
+  }
+
+  let percentSoFar = 0;
+
+  for (const e of mods.entries.filter((x) => x.percent)) {
+    percentSoFar += e.percent;
+    steps.push({
+      label: e.label,
+      side: "attacker",
+      kind: "percent",
+      value: e.percent,
+      after: baseWithStat + Math.floor((baseWithStat * percentSoFar) / BATTLE_CONSTANTS.PERCENT_DIVISOR),
+      icon: e.icon,
+    });
+  }
+
+  let flatSoFar = 0;
+
+  for (const e of mods.entries.filter((x) => x.flat)) {
+    flatSoFar += e.flat;
+    steps.push({ label: e.label, side: "attacker", kind: "flat", value: e.flat, after: baseWithStat + percentBonusDamage + flatSoFar, icon: e.icon });
+  }
+
+  steps[steps.length - 1] = { ...steps[steps.length - 1], after: totalDamage };
+
   return {
     baseDamage: baseWithStat,
     skillPercentBonus: sum((e) => !isArtifact(e), "percent"),
@@ -113,5 +150,6 @@ export function calculateDamageWithModifiersImpl(
     additionalDamage: context?.additionalDamage || [],
     totalDamage,
     breakdown,
+    steps,
   };
 }

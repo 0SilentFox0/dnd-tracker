@@ -2,7 +2,7 @@ import { PUSHER_DELTA_LIMIT_BYTES } from "./limits";
 
 import { battleChannelName, userChannelName } from "@/lib/pusher-channels";
 import type { BattleSceneState, LoadedBattle } from "@/lib/utils/battle/store";
-import type { BattleScene } from "@/types/api";
+import type { BattleRefetchSignal, BattleScene, ClientBattleDelta } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 export interface LegacyView {
@@ -53,27 +53,23 @@ export function buildPusherMessages(args: {
   before: BattleSceneState;
   after: BattleSceneState;
   participants: BattleParticipant[];
-  battlePayload: BattleScene;
+  delta: ClientBattleDelta;
 }): PusherMessage[] {
-  const { before, after, participants, battlePayload } = args;
+  const { before, after, participants, delta } = args;
 
   const channel = battleChannelName(after.id);
 
-  const fits = Buffer.byteLength(JSON.stringify(battlePayload), "utf8") <= PUSHER_DELTA_LIMIT_BYTES;
+  const fits = Buffer.byteLength(JSON.stringify(delta), "utf8") <= PUSHER_DELTA_LIMIT_BYTES;
 
-  const payload = fits ? battlePayload : { type: "battle-updated", battleId: after.id, version: after.version };
+  const payload: ClientBattleDelta | BattleRefetchSignal = fits ? delta : { battleId: delta.battleId, version: delta.version, refetch: true };
 
-  const messages: PusherMessage[] = [{ channel, event: "battle-updated", payload }];
+  const messages: PusherMessage[] = [
+    { channel, event: "battle-delta", payload },
+    // TODO(після наступного релізу): прибрати — вкладки зі старим клієнтом сприймають це як «перечитай бій»
+    { channel, event: "battle-updated", payload: { type: "battle-updated", battleId: delta.battleId, version: delta.version } },
+  ];
 
-  if (before.status !== "active" && after.status === "active") {
-    messages.push({ channel, event: "battle-started", payload });
-  }
-
-  if (after.status === "completed" && before.status !== "completed") {
-    messages.push({ channel, event: "battle-completed", payload });
-  }
-
-  const turnMoved = before.round !== after.round || before.turnIndex !== after.turnIndex;
+  const turnMoved = before.round !== after.round || before.turnIndex !== after.turnIndex || before.status !== after.status;
 
   const active = participants[after.turnIndex];
 

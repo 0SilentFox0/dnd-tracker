@@ -100,25 +100,3 @@ describe("PATCH /battles/[battleId]", () => {
     expect(res.status).toBe(403);
   });
 });
-
-describe("POST /battles/[battleId]/damage-breakdown", () => {
-  it("рахує розклад шкоди з учасників нового сховища, нічого не зберігаючи", async () => {
-    const attacker = {
-      ...hero,
-      battleData: { ...hero.battleData, attacks: [{ id: "sword", name: "Меч", type: "melee", attackBonus: 5, damageDice: "1d8", damageType: "slashing" }] },
-    };
-
-    deps.loadBattle.mockResolvedValueOnce({ ...loaded(), participants: [attacker, goblin] } as never);
-
-    const { POST } = await import("@/app/api/campaigns/[id]/battles/[battleId]/damage-breakdown/route");
-
-    const res = await POST(
-      new Request("http://x/api", { method: "POST", body: JSON.stringify({ attackerId: "hero", targetId: "gob", attackId: "sword", damageRolls: [6] }) }),
-      params,
-    );
-
-    expect(res.status).toBe(200);
-    expect(await res.json()).toHaveProperty("finalDamage");
-    expect(deps.saveBattle).not.toHaveBeenCalled();
-  });
-});

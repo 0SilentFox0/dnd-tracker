@@ -1,16 +1,12 @@
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import {
-  BATTLE_ACTIVE_REFETCH_INTERVAL_MS,
-  mergeBattleCache,
-} from "./useBattles-cache";
+import { useBattleAction } from "./useBattleAction";
 
 import type { AddParticipantData, CreateBattleData } from "@/lib/api/battles";
 import {
   addBattleParticipant,
   attack,
-  attackAndNextTurn,
   bonusAction,
   castSpell,
   completeBattle,
@@ -22,11 +18,12 @@ import {
   nextTurn,
   resetBattle,
   rollbackBattleAction,
-  spellPreview,
   startBattle,
   updateBattle,
   updateBattleParticipant,
 } from "@/lib/api/battles";
+import type { MoraleCheckResult } from "@/lib/utils/battle/battle-morale";
+import { acceptFullBattle } from "@/lib/utils/battle/client/apply-delta";
 import type {
   AttackData,
   BattleScene,
@@ -35,7 +32,8 @@ import type {
   SpellCastData,
 } from "@/types/api";
 
-export { mergeBattleCache };
+/** Fallback-polling для активного бою. 30s — знижує egress; оновлення йдуть через Pusher та мутації. */
+export const BATTLE_ACTIVE_REFETCH_INTERVAL_MS = 30_000;
 
 export function useBattle(
   campaignId: string,
@@ -46,9 +44,12 @@ export function useBattle(
     pauseRefetchWhenPusherConnected?: boolean;
   },
 ) {
+  const queryClient = useQueryClient();
+
   return useQuery<BattleScene>({
     queryKey: ["battle", campaignId, battleId],
-    queryFn: () => getBattle(campaignId, battleId),
+    queryFn: async () =>
+      acceptFullBattle(queryClient.getQueryData<BattleScene>(["battle", campaignId, battleId]), await getBattle(campaignId, battleId)),
     staleTime: 15_000,
     refetchInterval: (query) => {
       if (options?.pauseRefetchWhen) return false;
@@ -67,20 +68,13 @@ export function useBattle(
 export function useUpdateBattle(campaignId: string, battleId: string) {
   const queryClient = useQueryClient();
 
+  const key = ["battle", campaignId, battleId];
+
   return useMutation({
-    mutationFn: (data: Partial<BattleScene>) =>
-      updateBattle(campaignId, battleId, data),
+    mutationFn: (data: Partial<BattleScene>) => updateBattle(campaignId, battleId, data),
     onSuccess: (data) => {
-      queryClient.setQueryData(
-        ["battle", campaignId, battleId],
-        mergeBattleCache(
-          queryClient,
-          campaignId,
-          battleId,
-          data as BattleScene,
-        ),
-      );
-      queryClient.invalidateQueries({ queryKey: ["battles", campaignId] });
+      queryClient.setQueryData(key, acceptFullBattle(queryClient.getQueryData<BattleScene>(key), data));
+      void queryClient.invalidateQueries({ queryKey: ["battles", campaignId] });
     },
   });
 }
@@ -92,206 +86,6 @@ export function useDeleteBattle(campaignId: string) {
     mutationFn: (battleId: string) => deleteBattle(campaignId, battleId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["battles", campaignId] });
-    },
-  });
-}
-
-export function useNextTurn(campaignId: string, battleId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: () => nextTurn(campaignId, battleId),
-    onSuccess: (data) => {
-      queryClient.setQueryData(
-        ["battle", campaignId, battleId],
-        mergeBattleCache(queryClient, campaignId, battleId, data),
-      );
-      queryClient.invalidateQueries({ queryKey: ["battles", campaignId] });
-    },
-  });
-}
-
-export function useAttack(campaignId: string, battleId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data: AttackData) => attack(campaignId, battleId, data),
-    onSuccess: (data) => {
-      const merged = mergeBattleCache(
-        queryClient,
-        campaignId,
-        battleId,
-        data,
-      );
-
-      queryClient.setQueryData(["battle", campaignId, battleId], merged);
-    },
-  });
-}
-
-/** Attack and advance turn in one API call. */
-export function useAttackAndNextTurn(campaignId: string, battleId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data: AttackData) =>
-      attackAndNextTurn(campaignId, battleId, data),
-    onSuccess: (data) => {
-      const merged = mergeBattleCache(
-        queryClient,
-        campaignId,
-        battleId,
-        data,
-      );
-
-      queryClient.setQueryData(["battle", campaignId, battleId], merged);
-      queryClient.invalidateQueries({ queryKey: ["battles", campaignId] });
-    },
-  });
-}
-
-export function useMoraleCheck(campaignId: string, battleId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data: MoraleCheckData) =>
-      moraleCheck(campaignId, battleId, data),
-    onSuccess: (result) => {
-      queryClient.setQueryData(
-        ["battle", campaignId, battleId],
-        mergeBattleCache(queryClient, campaignId, battleId, result.battle),
-      );
-    },
-  });
-}
-
-export function useBonusAction(campaignId: string, battleId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data: BonusActionData) =>
-      bonusAction(campaignId, battleId, data),
-    onSuccess: (battle) => {
-      queryClient.setQueryData(
-        ["battle", campaignId, battleId],
-        mergeBattleCache(queryClient, campaignId, battleId, battle),
-      );
-    },
-  });
-}
-
-export function useCastSpell(campaignId: string, battleId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data: SpellCastData) => castSpell(campaignId, battleId, data),
-    onSuccess: (data) => {
-      queryClient.setQueryData(
-        ["battle", campaignId, battleId],
-        mergeBattleCache(queryClient, campaignId, battleId, data),
-      );
-    },
-  });
-}
-
-export function useStartBattle(campaignId: string, battleId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: () => startBattle(campaignId, battleId),
-    onSuccess: (data) => {
-      queryClient.setQueryData(
-        ["battle", campaignId, battleId],
-        mergeBattleCache(queryClient, campaignId, battleId, data),
-      );
-      queryClient.invalidateQueries({ queryKey: ["battles", campaignId] });
-      queryClient.invalidateQueries({ queryKey: ["active-battles"] });
-    },
-  });
-}
-
-export function useResetBattle(campaignId: string, battleId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: () => resetBattle(campaignId, battleId),
-    onSuccess: (data) => {
-      queryClient.setQueryData(
-        ["battle", campaignId, battleId],
-        mergeBattleCache(queryClient, campaignId, battleId, data),
-      );
-      queryClient.invalidateQueries({ queryKey: ["battles", campaignId] });
-    },
-  });
-}
-
-export function useCompleteBattle(campaignId: string, battleId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data?: { result?: "victory" | "defeat" }) =>
-      completeBattle(campaignId, battleId, data),
-    onSuccess: (data) => {
-      queryClient.setQueryData(
-        ["battle", campaignId, battleId],
-        mergeBattleCache(queryClient, campaignId, battleId, data),
-      );
-      queryClient.invalidateQueries({ queryKey: ["battles", campaignId] });
-      queryClient.invalidateQueries({ queryKey: ["active-battles"] });
-    },
-  });
-}
-
-export function useRollbackBattleAction(campaignId: string, battleId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (actionIndex: number) =>
-      rollbackBattleAction(campaignId, battleId, actionIndex),
-    onSuccess: (data) => {
-      queryClient.setQueryData(
-        ["battle", campaignId, battleId],
-        mergeBattleCache(queryClient, campaignId, battleId, data),
-      );
-      queryClient.invalidateQueries({ queryKey: ["battles", campaignId] });
-    },
-  });
-}
-
-export function useAddBattleParticipant(campaignId: string, battleId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data: AddParticipantData) =>
-      addBattleParticipant(campaignId, battleId, data),
-    onSuccess: (data) => {
-      queryClient.setQueryData(
-        ["battle", campaignId, battleId],
-        mergeBattleCache(queryClient, campaignId, battleId, data),
-      );
-    },
-  });
-}
-
-export function useUpdateBattleParticipant(
-  campaignId: string,
-  battleId: string,
-) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({
-      participantId,
-      data,
-    }: {
-      participantId: string;
-      data: { currentHp?: number; removeFromBattle?: boolean };
-    }) => updateBattleParticipant(campaignId, battleId, participantId, data),
-    onSuccess: (data) => {
-      queryClient.setQueryData(
-        ["battle", campaignId, battleId],
-        mergeBattleCache(queryClient, campaignId, battleId, data),
-      );
     },
   });
 }
@@ -319,6 +113,45 @@ export function useDeleteAllBattles(campaignId: string) {
   });
 }
 
-export function useSpellPreview(campaignId: string, battleId: string) {
-  return useMutation({ mutationFn: (data: SpellCastData) => spellPreview(campaignId, battleId, data) });
-}
+type ActionOpts = { onConflict?: () => void; onFailure?: (message: string) => void };
+
+export const useNextTurn = (c: string, b: string, o: ActionOpts = {}) =>
+  useBattleAction<object>(c, b, (body) => nextTurn(c, b, body), { ...o, invalidate: ["battles"] });
+
+export const useAttack = (c: string, b: string, o: ActionOpts = {}) =>
+  useBattleAction<AttackData & { endTurn?: boolean }>(c, b, (data) => attack(c, b, data), { ...o, invalidate: ["battles"] });
+
+export const useMoraleCheck = (c: string, b: string, o: ActionOpts = {}) =>
+  useBattleAction<MoraleCheckData, { moraleResult: MoraleCheckResult }>(c, b, (data) => moraleCheck(c, b, data), o);
+
+export const useBonusAction = (c: string, b: string, o: ActionOpts = {}) =>
+  useBattleAction<BonusActionData>(c, b, (data) => bonusAction(c, b, data), o);
+
+export const useCastSpell = (c: string, b: string, o: ActionOpts = {}) =>
+  useBattleAction<SpellCastData>(c, b, (data) => castSpell(c, b, data), o);
+
+export const useStartBattle = (c: string, b: string, o: ActionOpts = {}) =>
+  useBattleAction<object>(c, b, (body) => startBattle(c, b, body), { ...o, invalidate: ["battles", "active-battles"] });
+
+export const useResetBattle = (c: string, b: string, o: ActionOpts = {}) =>
+  useBattleAction<object>(c, b, (body) => resetBattle(c, b, body), { ...o, invalidate: ["battles"] });
+
+export const useCompleteBattle = (c: string, b: string, o: ActionOpts = {}) =>
+  useBattleAction<{ result?: "victory" | "defeat" }>(c, b, (body) => completeBattle(c, b, body), {
+    ...o,
+    invalidate: ["battles", "active-battles"],
+  });
+
+export const useRollbackBattleAction = (c: string, b: string, o: ActionOpts = {}) =>
+  useBattleAction<{ actionIndex: number }>(c, b, (body) => rollbackBattleAction(c, b, body), { ...o, invalidate: ["battles"] });
+
+export const useAddBattleParticipant = (c: string, b: string, o: ActionOpts = {}) =>
+  useBattleAction<AddParticipantData>(c, b, (data) => addBattleParticipant(c, b, data), o);
+
+export const useUpdateBattleParticipant = (c: string, b: string, o: ActionOpts = {}) =>
+  useBattleAction<{ participantId: string; data: { currentHp?: number; removeFromBattle?: boolean } }>(
+    c,
+    b,
+    ({ participantId, data, expectedVersion }) => updateBattleParticipant(c, b, participantId, { ...data, expectedVersion }),
+    o,
+  );

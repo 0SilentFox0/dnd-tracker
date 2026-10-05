@@ -40,31 +40,33 @@ describe("toLegacyBattle", () => {
 });
 
 describe("buildPusherMessages", () => {
-  const payload = toLegacyBattle({ meta }, scene, [hero, goblin], [], { mode: "append", entries: [] });
+  const payload = { battleId: "b1", version: 4, scene: { status: "active" as const, round: 1, turnIndex: 0, pendingMoraleCheck: null }, upserted: [], removed: [], log: [] };
 
-  it("зміна ходу на гравця — battle-updated + turn-started у його канал", () => {
-    const messages = buildPusherMessages({ before: { ...scene, turnIndex: 1 }, after: scene, participants: [hero, goblin], battlePayload: payload });
+  it("зміна ходу на гравця — battle-delta + turn-started у його канал", () => {
+    const messages = buildPusherMessages({ before: { ...scene, turnIndex: 1 }, after: scene, participants: [hero, goblin], delta: payload });
 
-    expect(messages.map((m) => m.event)).toEqual(["battle-updated", "turn-started"]);
-    expect(messages[1]).toMatchObject({ channel: "private-user-u-player", payload: { battleId: "b1", participantId: "hero" } });
+    expect(messages.map((m) => m.event)).toEqual(["battle-delta", "battle-updated", "turn-started"]);
+    expect(messages[2]).toMatchObject({ channel: "private-user-u-player", payload: { battleId: "b1", participantId: "hero" } });
   });
 
   it("хід переходить до DM-учасника — без turn-started", () => {
-    const messages = buildPusherMessages({ before: scene, after: { ...scene, turnIndex: 1 }, participants: [hero, goblin], battlePayload: payload });
-
-    expect(messages.map((m) => m.event)).toEqual(["battle-updated"]);
+    expect(buildPusherMessages({ before: scene, after: { ...scene, turnIndex: 1 }, participants: [hero, goblin], delta: payload }).map((m) => m.event)).toEqual(["battle-delta", "battle-updated"]);
   });
 
-  it("старт і завершення бою", () => {
-    expect(buildPusherMessages({ before: { ...scene, status: "prepared" }, after: scene, participants: [hero], battlePayload: payload }).map((m) => m.event)).toContain("battle-started");
-    expect(buildPusherMessages({ before: scene, after: { ...scene, status: "completed" }, participants: [hero], battlePayload: payload }).map((m) => m.event)).toContain("battle-completed");
+  it("старт і завершення — лише battle-delta (+ сумісний battle-updated), без окремих подій", () => {
+    expect(buildPusherMessages({ before: { ...scene, status: "prepared" }, after: scene, participants: [hero], delta: payload }).map((m) => m.event)).toEqual(["battle-delta", "battle-updated", "turn-started"]);
+    expect(buildPusherMessages({ before: scene, after: { ...scene, status: "completed" }, participants: [hero], delta: payload }).map((m) => m.event)).toEqual(["battle-delta", "battle-updated"]);
   });
 
-  it("великий payload — light {type, battleId}", () => {
-    const big = { ...payload, initiativeOrder: Array.from({ length: 60 }, () => hero) };
+  it("велика дельта — refetch", () => {
+    const big = { ...payload, upserted: Array.from({ length: 60 }, () => hero) };
 
-    const [updated] = buildPusherMessages({ before: scene, after: scene, participants: [hero], battlePayload: big });
+    expect(buildPusherMessages({ before: scene, after: scene, participants: [hero], delta: big })[0].payload).toEqual({ battleId: "b1", version: 4, refetch: true });
+  });
 
-    expect(updated.payload).toEqual({ type: "battle-updated", battleId: "b1", version: 3 });
+  it("сумісність зі старими вкладками: легкий battle-updated, який старий клієнт сприймає як рефетч", () => {
+    const [, legacy] = buildPusherMessages({ before: scene, after: scene, participants: [hero], delta: payload });
+
+    expect(legacy).toEqual({ channel: "private-battle-b1", event: "battle-updated", payload: { type: "battle-updated", battleId: "b1", version: 4 } });
   });
 });

@@ -3,7 +3,7 @@ import { CONDITION_LABELS, DAMAGE_FILTER_LABELS, flatLabel, signed, STAT_LABELS 
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/participants";
-import { upsertTimedEffect } from "@/lib/utils/abilities/engine/timed-effects";
+import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/timed-effects";
 import type { Effect, FlagKey, StaticEffect } from "@/lib/utils/abilities/schema";
 
 export function stripTiming(effect: StaticEffect): StaticEffect {
@@ -40,6 +40,7 @@ export function applyStatic(input: EffectApplyInput<StaticEffect>, describe: (e:
         p,
         {
           timedKey: `${ability.key}#${input.effectIndex}`,
+          source: effectSource(owner, ability),
           name: ability.name,
           type: p.basicInfo.side === owner?.basicInfo.side ? "buff" : "debuff",
           rounds,
