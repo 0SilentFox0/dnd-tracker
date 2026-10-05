@@ -7,8 +7,8 @@ import {
   type ArtifactSetOption,
 } from "./ArtifactForm";
 
-import { createArtifact } from "@/lib/api/artifacts";
 import { ArtifactRarity, ArtifactSlot } from "@/lib/constants/artifacts";
+import { useCreateArtifact } from "@/lib/hooks/artifacts";
 
 interface ArtifactCreateFormProps {
   campaignId: string;
@@ -20,6 +20,8 @@ export function ArtifactCreateForm({
   artifactSets,
 }: ArtifactCreateFormProps) {
   const router = useRouter();
+
+  const create = useCreateArtifact(campaignId);
 
   return (
     <ArtifactForm
@@ -50,19 +52,12 @@ export function ArtifactCreateForm({
         abilityIssues: [],
       }}
       onSubmit={async (payload) => {
-        await createArtifact(campaignId, {
-          name: payload.name,
+        await create.mutateAsync({
+          ...payload,
           description: payload.description ?? undefined,
-          rarity: payload.rarity,
-          slot: payload.slot,
-          icon: payload.icon,
           setId: payload.setId ?? undefined,
-          abilities: payload.abilities,
-          weapon: payload.weapon,
         });
-
         router.push(`/campaigns/${campaignId}/dm/artifacts`);
-        router.refresh();
       }}
     />
   );

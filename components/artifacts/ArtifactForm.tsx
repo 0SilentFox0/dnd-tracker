@@ -1,14 +1,5 @@
 "use client";
 
-/**
- * Універсальна форма артефакту: і Create, і Edit.
- *
- * 95% полів і логіки спільні для обох режимів, тому вони тут.
- * `ArtifactCreateForm` і `ArtifactEditForm` стають тонкими обгортками
- * що передають initial values + onSubmit + (опційно) onDelete.
- */
-
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { ArtifactIconUrlPreview } from "./ArtifactIconUrlPreview";
@@ -32,18 +23,19 @@ import {
   ARTIFACT_RARITY_OPTIONS,
   ARTIFACT_SLOT_OPTIONS,
 } from "@/lib/constants/artifacts";
-import { abilitySaveError } from "@/lib/hooks/abilities";
-import { useConfirm } from "@/lib/hooks/common";
+import { useArtifactForm } from "@/lib/hooks/artifacts";
 import type { ConversionIssue } from "@/lib/utils/abilities/legacy/types";
 import type { Ability } from "@/lib/utils/abilities/schema";
+import type { ArtifactFormSubmitPayload } from "@/lib/utils/artifacts/artifact-form";
 import { isWeaponSlot, type WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
+
+export type { ArtifactFormSubmitPayload };
 
 export interface ArtifactSetOption {
   id: string;
   name: string;
 }
 
-/** Початковий стан усіх полів форми. */
 export interface ArtifactFormInitial {
   name: string;
   description: string;
@@ -56,38 +48,18 @@ export interface ArtifactFormInitial {
   weapon?: WeaponStats;
 }
 
-export interface ArtifactFormSubmitPayload {
-  name: string;
-  description: string | null | undefined;
-  rarity: string;
-  slot: string;
-  icon: string | null;
-  setId: string | null | undefined;
-  abilities: Ability[];
-  weapon?: WeaponStats;
-}
-
 export interface ArtifactFormProps {
   campaignId: string;
   artifactSets: ArtifactSetOption[];
   initial: ArtifactFormInitial;
-  /** "create" — без кнопки видалити; "edit" — з нею. */
   mode: "create" | "edit";
-  /** Заголовок картки. */
   title: string;
-  /** Опис під заголовком. */
   description?: string;
-  /** Лейбл submit-кнопки під час норм. стану. */
   submitLabel: string;
-  /** Лейбл під час saving. */
   submitLabelSaving: string;
-  /** Колбек при сабміті — отримує payload, що готовий для API. */
   onSubmit: (payload: ArtifactFormSubmitPayload) => Promise<void>;
-  /** Опційний колбек видалення (Edit режим). */
   onDelete?: () => Promise<void>;
-  /** Шлях для кнопки "Скасувати" — куди повертатись. */
   cancelHref: string;
-  /** Підказка під полем іконки (Create vs Edit формулюється різно). */
   iconHint: React.ReactNode;
 }
 
@@ -105,87 +77,11 @@ export function ArtifactForm({
   cancelHref,
   iconHint,
 }: ArtifactFormProps) {
-  const confirm = useConfirm();
-
   const router = useRouter();
 
-  const [isSaving, setIsSaving] = useState(false);
+  const form = useArtifactForm({ initial, mode, onSubmit, onDelete });
 
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  const [error, setError] = useState<string | null>(null);
-
-  const [name, setName] = useState(initial.name);
-
-  const [description, setDescription] = useState(initial.description);
-
-  const [rarity, setRarity] = useState<string>(initial.rarity);
-
-  const [slot, setSlot] = useState<string>(initial.slot);
-
-  const [icon, setIcon] = useState(initial.icon);
-
-  const [setId, setSetId] = useState<string | null>(initial.setId);
-
-  const [abilities, setAbilities] = useState<Ability[]>(initial.abilities);
-
-  const [abilityErrors, setAbilityErrors] = useState(0);
-
-  const abilitiesValid = abilityErrors === 0;
-
-  const [weapon, setWeapon] = useState<WeaponStats>(initial.weapon ?? {});
-
-  const isBusy = isSaving || isDeleting;
-
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-
-    if (!name.trim() || !abilitiesValid) return;
-
-    setIsSaving(true);
-    setError(null);
-
-    try {
-      const payload: ArtifactFormSubmitPayload = {
-        name: name.trim(),
-        description:
-          mode === "edit"
-            ? description.trim() || null
-            : description.trim() || undefined,
-        rarity,
-        slot,
-        icon: icon.trim() || null,
-        setId: mode === "edit" ? setId || null : setId || undefined,
-        abilities,
-        ...(isWeaponSlot(slot) && { weapon }),
-      };
-
-      await onSubmit(payload);
-    } catch (err) {
-      setError(abilitySaveError(err, mode === "edit" ? "Помилка оновлення" : "Помилка створення"));
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!onDelete) return;
-
-    if (!(await confirm({ title: "Ви впевнені, що хочете видалити цей артефакт?", confirmLabel: "Видалити", destructive: true }))) return;
-
-    setIsDeleting(true);
-    setError(null);
-
-    try {
-      await onDelete();
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Помилка видалення";
-
-      setError(message);
-    } finally {
-      setIsDeleting(false);
-    }
-  };
+  const { fields, setField } = form;
 
   return (
     <Card>
@@ -196,14 +92,14 @@ export function ArtifactForm({
         )}
       </CardHeader>
       <CardContent>
-        {error && <p className="text-sm text-destructive mb-4">{error}</p>}
-        <form onSubmit={handleSubmit} className="space-y-5">
+        {form.error && <p className="text-sm text-destructive mb-4">{form.error}</p>}
+        <form onSubmit={form.submit} className="space-y-5">
           <div className="grid gap-4 md:grid-cols-2">
             <LabeledInput
               id="artifact-name"
               label="Назва"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={fields.name}
+              onChange={(e) => setField("name", e.target.value)}
               placeholder="Наприклад: Кільце Сар Ісси"
               required
             />
@@ -211,8 +107,8 @@ export function ArtifactForm({
               <Label htmlFor="artifact-rarity">Рідкість</Label>
               <SelectField
                 id="artifact-rarity"
-                value={rarity}
-                onValueChange={setRarity}
+                value={fields.rarity}
+                onValueChange={(v) => setField("rarity", v)}
                 placeholder="Виберіть рідкість"
                 options={ARTIFACT_RARITY_OPTIONS.map((opt) => ({
                   value: opt.value,
@@ -224,8 +120,8 @@ export function ArtifactForm({
               <Label htmlFor="artifact-slot">Слот</Label>
               <SelectField
                 id="artifact-slot"
-                value={slot}
-                onValueChange={setSlot}
+                value={fields.slot}
+                onValueChange={(v) => setField("slot", v)}
                 placeholder="Виберіть слот"
                 options={ARTIFACT_SLOT_OPTIONS.map((opt) => ({
                   value: opt.value,
@@ -237,8 +133,8 @@ export function ArtifactForm({
               <Label htmlFor="artifact-set">Сет</Label>
               <SelectField
                 id="artifact-set"
-                value={setId || ""}
-                onValueChange={(value) => setSetId(value || null)}
+                value={fields.setId || ""}
+                onValueChange={(value) => setField("setId", value || null)}
                 placeholder="Без сету"
                 options={artifactSets.map((set) => ({
                   value: set.id,
@@ -254,8 +150,8 @@ export function ArtifactForm({
             <Label htmlFor="artifact-description">Опис</Label>
             <Textarea
               id="artifact-description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              value={fields.description}
+              onChange={(e) => setField("description", e.target.value)}
               placeholder="Короткий опис артефакту"
               rows={3}
             />
@@ -265,22 +161,22 @@ export function ArtifactForm({
             <LabeledInput
               id="artifact-icon"
               label="Іконка (URL з інтернету)"
-              value={icon}
-              onChange={(e) => setIcon(e.target.value)}
+              value={fields.icon}
+              onChange={(e) => setField("icon", e.target.value)}
               placeholder="https://example.com/icon.png"
             />
             <p className="text-xs text-muted-foreground">{iconHint}</p>
-            <ArtifactIconUrlPreview key={icon.trim()} url={icon} />
+            <ArtifactIconUrlPreview key={fields.icon.trim()} url={fields.icon} />
           </div>
 
-          {isWeaponSlot(slot) && <ArtifactWeaponFields value={weapon} onChange={setWeapon} />}
+          {isWeaponSlot(fields.slot) && <ArtifactWeaponFields value={fields.weapon} onChange={(w) => setField("weapon", w)} />}
 
           <AbilityListEditor
             campaignId={campaignId}
-            value={abilities}
-            onChange={setAbilities}
+            value={fields.abilities}
+            onChange={(a) => setField("abilities", a)}
             issues={initial.abilityIssues}
-            onValidityChange={(_, n) => setAbilityErrors(n)}
+            onValidityChange={(_, n) => form.setAbilityErrors(n)}
           />
 
           <ActionBar>
@@ -288,23 +184,22 @@ export function ArtifactForm({
               <Button
                 type="button"
                 variant="destructive"
-                onClick={handleDelete}
-                disabled={isBusy}
-                className=""
+                onClick={() => void form.remove()}
+                disabled={form.isBusy}
               >
-                {isDeleting ? "Видалення..." : "Видалити"}
+                Видалити
               </Button>
             )}
             <Button
               type="button"
               variant="outline"
               onClick={() => router.push(cancelHref)}
-              disabled={isBusy}
+              disabled={form.isBusy}
             >
               Скасувати
             </Button>
-            <Button type="submit" disabled={isBusy || !abilitiesValid}>
-              {isSaving ? submitLabelSaving : withAbilityErrors(submitLabel, abilityErrors)}
+            <Button type="submit" disabled={form.isBusy || !form.abilitiesValid}>
+              {form.isSaving ? submitLabelSaving : withAbilityErrors(submitLabel, form.abilityErrors)}
             </Button>
           </ActionBar>
         </form>
