@@ -318,25 +318,88 @@ model CharacterSkills {
 }
 
 model BattleScene {
-  id                 String    @id @default(cuid())
+  id                 String              @id @default(cuid())
   campaignId         String
   name               String
   description        String?
-  status             String    @default("prepared")
-  participants       Json      @default("[]")
-  currentRound       Int       @default(1)
-  currentTurnIndex   Int       @default(0)
-  initiativeOrder    Json      @default("[]")
-  pendingSummons     Json      @default("[]")
+  status             String              @default("prepared")
+  participants       Json                @default("[]")
+  currentRound       Int                 @default(1)
+  currentTurnIndex   Int                 @default(0)
+  initiativeOrder    Json                @default("[]")
+  pendingSummons     Json                @default("[]")
   pendingMoraleCheck Json?
-  battleLog          Json      @default("[]")
-  createdAt          DateTime  @default(now())
+  battleLog          Json                @default("[]")
+  createdAt          DateTime            @default(now())
   startedAt          DateTime?
   completedAt        DateTime?
-  campaign           Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  version            Int                 @default(0)
+  eventSeq           Int                 @default(0)
+  battleParticipants BattleParticipant[]
+  battleEvents       BattleEvent[]
+  battleSnapshots    BattleSnapshot[]
+  campaign           Campaign            @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   @@index([campaignId])
   @@map("battle_scenes")
+}
+
+model BattleParticipant {
+  id                 String      @id
+  battleId           String
+  sourceType         String
+  sourceId           String
+  side               String
+  controlledBy       String
+  orderIndex         Int
+  isPending          Boolean     @default(false)
+  extraTurnOf        String?
+  currentHp          Int
+  tempHp             Int
+  maxHp              Int
+  morale             Int
+  status             String
+  initiative         Int
+  hasUsedAction      Boolean
+  hasUsedBonusAction Boolean
+  hasUsedReaction    Boolean
+  hasExtraTurn       Boolean
+  snapshot           Json
+  state              Json
+  snapshotHash       String
+  battle             BattleScene @relation(fields: [battleId], references: [id], onDelete: Cascade)
+
+  @@index([battleId, orderIndex])
+  @@map("battle_participants")
+}
+
+model BattleEvent {
+  id          String      @id @default(cuid())
+  battleId    String
+  seq         Int
+  round       Int
+  type        String
+  actorId     String?
+  targets     Json        @default("[]")
+  details     Json        @default("{}")
+  hpChanges   Json        @default("[]")
+  resultText  String
+  cancelledAt DateTime?
+  createdAt   DateTime    @default(now())
+  battle      BattleScene @relation(fields: [battleId], references: [id], onDelete: Cascade)
+
+  @@unique([battleId, seq])
+  @@map("battle_events")
+}
+
+model BattleSnapshot {
+  battleId String
+  seq      Int
+  state    Json
+  battle   BattleScene @relation(fields: [battleId], references: [id], onDelete: Cascade)
+
+  @@id([battleId, seq])
+  @@map("battle_snapshots")
 }
 
 model StatusEffect {

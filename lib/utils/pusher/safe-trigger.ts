@@ -10,7 +10,8 @@
  *  - не змінює API контракту з клієнтом — клієнт продовжує invalidate
  *    query при reconnect, тому втрачена подія підхопиться сама.
  *
- * Залишається fire-and-forget (`void`) щоб не блокувати API response.
+ * Повертає проміс, який ніколи не відхиляється: старі виклики лишаються fire-and-forget,
+ * а `after(() => safePusherTrigger(...))` дочікується відправки до заморожування функції.
  *
  * Використання:
  *   safePusherTrigger(pusherServer, battleChannel, "battle-updated", payload, {
@@ -34,8 +35,8 @@ export function safePusherTrigger(
   event: string,
   payload: unknown,
   context?: PusherTriggerContext,
-): void {
-  void pusherServer.trigger(channel, event, payload).catch((err) => {
+): Promise<void> {
+  return pusherServer.trigger(channel, event, payload).then(() => undefined, (err) => {
     logger.error(
       "[pusher] trigger failed",
       { channel, event, ...context },
