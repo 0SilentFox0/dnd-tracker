@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { vi } from "vitest";
 
 import { BattleSceneContext, type BattleSceneValue, type ResultFx } from "../useBattleScene";
@@ -115,10 +116,14 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
 
   const confirm = vi.fn(async () => opts.confirmAnswer ?? true);
 
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false, enabled: false } } });
+
   const wrapper = ({ children }: { children: ReactNode }) => (
-    <ConfirmContext.Provider value={confirm}>
-      <BattleSceneContext.Provider value={value}>{children}</BattleSceneContext.Provider>
-    </ConfirmContext.Provider>
+    <QueryClientProvider client={queryClient}>
+      <ConfirmContext.Provider value={confirm}>
+        <BattleSceneContext.Provider value={value}>{children}</BattleSceneContext.Provider>
+      </ConfirmContext.Provider>
+    </QueryClientProvider>
   );
 
   return {

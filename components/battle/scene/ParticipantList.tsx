@@ -3,9 +3,10 @@
 import { ParticipantRow } from "./ParticipantRow";
 
 import { useBattleScene } from "@/lib/hooks/battle";
+import { cn } from "@/lib/utils";
 import { canSeeExactStats, effectiveArmorClass, formatKnownArmorClass, knownArmorClass } from "@/lib/utils/battle/view";
 
-export function ParticipantList({ side }: { side: "ally" | "enemy" }) {
+export function ParticipantList({ side, className }: { side: "ally" | "enemy"; className?: string }) {
   const { allies, enemies, battle, viewer, current, select } = useBattleScene();
 
   const list = side === "ally" ? allies : enemies;
@@ -13,7 +14,7 @@ export function ParticipantList({ side }: { side: "ally" | "enemy" }) {
   const order = battle.initiativeOrder;
 
   return (
-    <div className="px-4">
+    <div className={cn("px-4", className)}>
       {list.map((p) => {
         const exact = canSeeExactStats(p, viewer);
 
