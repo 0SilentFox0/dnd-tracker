@@ -10,13 +10,14 @@ import type { AttackData } from "@/types/api";
 
 export interface BattleSceneHandlersParams {
   battle: BattleScene | null | undefined;
-  nextTurnMutation: UseMutationResult<unknown, Error, void, unknown>;
+  nextTurnMutation: UseMutationResult<unknown, Error, object, unknown>;
+  readBattle: () => BattleScene | undefined;
   nextTurnClickedAtRef: React.MutableRefObject<number | null>;
   attackFlowStartRef: React.MutableRefObject<number | null>;
   attackAndNextTurnMutation: UseMutationResult<
-    BattleScene,
+    unknown,
     Error,
-    AttackData,
+    AttackData & { endTurn?: boolean },
     unknown
   >;
   triggerGlobalDamageFromBattle: (updatedBattle: BattleScene) => void;
@@ -31,11 +32,11 @@ export interface BattleSceneHandlersParams {
   completeBattleMutation: UseMutationResult<
     unknown,
     Error,
-    { result?: "victory" | "defeat" } | undefined,
+    { result?: "victory" | "defeat" },
     unknown
   >;
-  startBattleMutation: UseMutationResult<unknown, Error, void, unknown>;
-  rollbackMutation: UseMutationResult<unknown, Error, number, unknown>;
+  startBattleMutation: UseMutationResult<unknown, Error, object, unknown>;
+  rollbackMutation: UseMutationResult<unknown, Error, { actionIndex: number }, unknown>;
   bonusActionMutation: UseMutationResult<
     unknown,
     Error,
@@ -50,6 +51,7 @@ export function useBattleSceneHandlers({
   nextTurnClickedAtRef,
   attackFlowStartRef,
   attackAndNextTurnMutation,
+  readBattle,
   triggerGlobalDamageFromBattle,
   setCounterAttackInfo,
   setCounterAttackDialogOpen,
@@ -71,7 +73,7 @@ export function useBattleSceneHandlers({
       elapsedFromAttackStart:
         flowStart != null ? `${clickedAt - flowStart}ms` : "—",
     });
-    nextTurnMutation.mutate(undefined, {
+    nextTurnMutation.mutate({}, {
       onSuccess: () => {
         const done = Date.now();
 
@@ -93,7 +95,7 @@ export function useBattleSceneHandlers({
   ]);
 
   const handleStartBattle = useCallback(() => {
-    startBattleMutation.mutate();
+    startBattleMutation.mutate({});
   }, [startBattleMutation]);
 
   const handleCompleteBattle = useCallback(
@@ -105,8 +107,12 @@ export function useBattleSceneHandlers({
 
   const handleAttack = useCallback(
     (data: AttackData, onSuccess?: () => void) => {
-      attackAndNextTurnMutation.mutate(data, {
-        onSuccess: (updatedBattle: BattleScene) => {
+      attackAndNextTurnMutation.mutate({ ...data, endTurn: true }, {
+        onSuccess: () => {
+          const updatedBattle = readBattle();
+
+          if (!updatedBattle) return;
+
           const log = updatedBattle?.battleLog ?? [];
 
           const lastAction = log[log.length - 1];
@@ -148,6 +154,7 @@ export function useBattleSceneHandlers({
     },
     [
       attackAndNextTurnMutation,
+      readBattle,
       triggerGlobalDamageFromBattle,
       setCounterAttackInfo,
       setCounterAttackDialogOpen,
@@ -155,7 +162,7 @@ export function useBattleSceneHandlers({
   );
 
   const handleRollback = useCallback(
-    (actionIndex: number) => rollbackMutation.mutate(actionIndex),
+    (actionIndex: number) => rollbackMutation.mutate({ actionIndex }),
     [rollbackMutation],
   );
 

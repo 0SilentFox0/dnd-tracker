@@ -1,10 +1,10 @@
 export { useEditBattleData } from "./setup/useEditBattleData";
 export { useNewBattlePage } from "./setup/useNewBattlePage";
-export { mergeBattleCache } from "./useBattles";
+export { type BattleActionOptions, useBattleAction } from "./useBattleAction";
 export {
+  BATTLE_ACTIVE_REFETCH_INTERVAL_MS,
   useAddBattleParticipant,
   useAttack,
-  useAttackAndNextTurn,
   useBattle,
   useBonusAction,
   useCastSpell,
@@ -16,7 +16,6 @@ export {
   useNextTurn,
   useResetBattle,
   useRollbackBattleAction,
-  useSpellPreview,
   useStartBattle,
   useUpdateBattle,
   useUpdateBattleParticipant,

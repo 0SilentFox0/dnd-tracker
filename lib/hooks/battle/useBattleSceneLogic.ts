@@ -11,7 +11,7 @@ import type { CounterAttackResultInfo } from "@/components/battle/dialogs/Counte
 import { ParticipantSide } from "@/lib/constants/battle";
 import {
   useAddBattleParticipant,
-  useAttackAndNextTurn,
+  useAttack,
   useBattle,
   useBonusAction,
   useCastSpell,
@@ -28,7 +28,7 @@ import type { BattleScene } from "@/types/api";
 import type { BattleParticipant } from "@/types/battle";
 
 export function useBattleSceneLogic(id: string, battleId: string) {
-  useQueryClient(); // kept for cache invalidation in future
+  const queryClient = useQueryClient();
 
   const [spellDialogOpen, setSpellDialogOpen] = useState(false);
 
@@ -58,7 +58,7 @@ export function useBattleSceneLogic(id: string, battleId: string) {
 
   const nextTurnMutation = useNextTurn(id, battleId);
 
-  const attackAndNextTurnMutation = useAttackAndNextTurn(id, battleId);
+  const attackAndNextTurnMutation = useAttack(id, battleId);
 
   const handleTurnStarted = useCallback((message: string) => {
     setTurnStartedNotification(message);
@@ -153,6 +153,7 @@ export function useBattleSceneLogic(id: string, battleId: string) {
     nextTurnClickedAtRef,
     attackFlowStartRef,
     attackAndNextTurnMutation,
+    readBattle: () => queryClient.getQueryData<BattleScene>(["battle", id, battleId]),
     triggerGlobalDamageFromBattle,
     setCounterAttackInfo,
     setCounterAttackDialogOpen,

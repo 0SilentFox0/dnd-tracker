@@ -1,6 +1,7 @@
 "use client";
 
 import { use, useCallback, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { BattlePageDialogs, type BattlePageDialogsProps } from "./BattlePageDialogs";
 import { BattlePageLoadingState } from "./BattlePageLoadingState";
@@ -15,7 +16,6 @@ import {
   useBattleSceneLogic,
   useMoraleOverlay,
 } from "@/lib/hooks/battle";
-import { useSpellPreview } from "@/lib/hooks/battles";
 import { useNotify } from "@/lib/hooks/common";
 import { findLastSpellAction } from "@/lib/utils/battle/battle-log";
 import type { MoraleCheckResult } from "@/lib/utils/battle/battle-morale";
@@ -82,44 +82,42 @@ export default function BattlePage({
 
   const notify = useNotify();
 
-  const preview = useSpellPreview(id, battleId);
+  const queryClient = useQueryClient();
 
-  const { mutateAsync: requestPreview } = preview;
+  const readBattle = useCallback(
+    () => queryClient.getQueryData<BattleScene>(["battle", id, battleId]),
+    [queryClient, id, battleId],
+  );
 
-  const spellPreviewLoading = preview.isPending;
+  const spellPreviewLoading = mutations.spell.isPending;
 
-  const handleSpellPreview = useCallback(
+  const castAndShow = useCallback(
     async (data: PendingSpellData) => {
       try {
-        const json = await requestPreview(data);
+        await mutations.spell.mutateAsync(data);
 
-        if (json.preview && json.battleAction) {
-          setSpellPreviewAction(json.battleAction as BattleAction);
-          setPendingSpellData(data);
+        const last = findLastSpellAction(readBattle()?.battleLog);
+
+        if (last) {
+          setSpellResultAction(last);
           setSpellResultModalOpen(true);
         }
       } catch {
-        void notify("Не вдалося порахувати превʼю заклинання");
+        void notify("Не вдалося застосувати заклинання");
       }
     },
-    [requestPreview, notify],
+    [mutations.spell, readBattle, notify],
   );
+
+  const handleSpellPreview = castAndShow;
 
   const handleSpellApplyFromModal = () => {
     if (!pendingSpellData) return;
 
     setSpellResultModalOpen(false);
     setSpellPreviewAction(null);
-
-    const dataToApply = pendingSpellData;
-
     setPendingSpellData(null);
-
-    mutations.spell.mutate(dataToApply, {
-      onSuccess: (updatedBattle: BattleScene | undefined) => {
-        if (updatedBattle) handlers.triggerGlobalDamageFromBattle(updatedBattle);
-      },
-    });
+    void castAndShow(pendingSpellData);
   };
 
   const preparationCounts = useMemo(() => {
@@ -154,7 +152,7 @@ export default function BattlePage({
       <BattleHeader
         battle={battle}
         onNextTurn={handlers.handleNextTurn}
-        onReset={() => mutations.resetBattle.mutate()}
+        onReset={() => mutations.resetBattle.mutate({})}
         onCompleteBattle={handlers.handleCompleteBattle}
         isDM={isDM}
         canAdvanceTurn={isDM || isCurrentPlayerTurn}
@@ -184,18 +182,7 @@ export default function BattlePage({
             canSeeEnemyHp={canSeeEnemyHp}
             onAttack={(data) => handlers.handleAttack(data)}
             onSpellPreview={handleSpellPreview}
-            onSpell={(data) =>
-              mutations.spell.mutate(data, {
-                onSuccess: (updatedBattle: BattleScene | undefined) => {
-                  const last = findLastSpellAction(updatedBattle?.battleLog);
-
-                  if (last) {
-                    setSpellResultAction(last);
-                    setSpellResultModalOpen(true);
-                  }
-                },
-              })
-            }
+            onSpell={(data) => void castAndShow(data)}
             onBonusAction={(ability) =>
               handlers.handleBonusAction(
                 currentParticipant.basicInfo.id,
@@ -215,9 +202,7 @@ export default function BattlePage({
                   },
                   {
                     onSuccess: (data) => {
-                      moraleOverlay.showMoraleResult(
-                        data.moraleResult as MoraleCheckResult,
-                      );
+                      if (data) moraleOverlay.showMoraleResult(data.moraleResult as MoraleCheckResult);
                     },
                   },
                 );

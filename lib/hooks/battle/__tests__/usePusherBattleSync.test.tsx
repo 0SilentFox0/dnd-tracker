@@ -4,7 +4,7 @@
  * Тест: два гравці, підписані на канал бою, отримують однаковий стан після battle-updated.
  */
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act,render, screen, waitFor } from "@testing-library/react";
+import { act, render, waitFor } from "@testing-library/react";
 import { afterEach,beforeEach, describe, expect, it, vi } from "vitest";
 
 import { usePusherBattleSync } from "../usePusherBattleSync";
@@ -40,6 +40,9 @@ function subscribeToChannel(channelName: string) {
 
       set.add(callback);
     },
+    unbind: (eventName: string, callback: (data: unknown) => void) => {
+      events.get(eventName)?.delete(callback);
+    },
   };
 }
 
@@ -68,6 +71,7 @@ function createMockPusher() {
     connection: {
       state: "connected",
       bind: vi.fn(),
+      unbind: vi.fn(),
     },
   };
 }
@@ -148,10 +152,30 @@ describe("usePusherBattleSync — two players receive same battle state", () => 
     delete process.env.NEXT_PUBLIC_PUSHER_KEY;
   });
 
-  it("обидва гравці отримують battle-updated і мають однаковий currentTurnIndex", async () => {
+  const key = ["battle", campaignId, battleId];
+
+  const delta = (version: number, turnIndex = 1) => ({
+    battleId,
+    version,
+    scene: { status: "active", round: 1, turnIndex, pendingMoraleCheck: null },
+    upserted: [{ basicInfo: { id: "p-2", name: "Аграїл (поранений)", side: "ally" } }],
+    removed: [],
+    log: [],
+  });
+
+  async function subscribed() {
+    await waitFor(() => {
+      expect(channelBindings.get(channelName)?.has("battle-delta")).toBe(true);
+    });
+  }
+
+  it("обидва гравці застосовують battle-delta і мають однаковий стан", async () => {
     const qc1 = new QueryClient();
 
     const qc2 = new QueryClient();
+
+    qc1.setQueryData(key, makeBattlePayload({ version: 1, currentTurnIndex: 0 }));
+    qc2.setQueryData(key, makeBattlePayload({ version: 1, currentTurnIndex: 0 }));
 
     render(
       <>
@@ -160,104 +184,70 @@ describe("usePusherBattleSync — two players receive same battle state", () => 
       </>,
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId("player-user-1")).toBeInTheDocument();
-      expect(screen.getByTestId("player-user-2")).toBeInTheDocument();
-    });
-
-    await waitFor(() => {
-      expect(channelBindings.has(channelName)).toBe(true);
-
-      const events = channelBindings.get(channelName);
-
-      expect(events?.has("battle-updated")).toBe(true);
-      expect((events?.get("battle-updated")?.size ?? 0) >= 1).toBe(true);
-    });
-
-    const payload = makeBattlePayload({
-      currentTurnIndex: 1,
-      currentRound: 1,
-      initiativeOrder: [
-        { basicInfo: { id: "p-1", name: "Айвен", side: "ally" } },
-        { basicInfo: { id: "p-2", name: "Аграїл", side: "ally" } },
-      ] as BattleScene["initiativeOrder"],
-    });
+    await subscribed();
 
     act(() => {
-      simulateTrigger(channelName, "battle-updated", payload);
+      simulateTrigger(channelName, "battle-delta", delta(2));
     });
 
-    // Усі підписники каналу отримують подію; у тесті може бути 1 або 2 (залежить від event loop).
-    // Перевіряємо, що хоча б один клієнт отримав коректний стан.
     await waitFor(() => {
-      const data1 = qc1.getQueryData<BattleScene>(["battle", campaignId, battleId]);
+      const data = qc1.getQueryData<BattleScene>(key) ?? qc2.getQueryData<BattleScene>(key);
 
-      const data2 = qc2.getQueryData<BattleScene>(["battle", campaignId, battleId]);
-
-      const data = data1 ?? data2;
-
-      expect(data).toBeDefined();
+      expect(data?.version).toBe(2);
       expect(data?.currentTurnIndex).toBe(1);
-      expect(data?.currentRound).toBe(1);
-      expect(data?.initiativeOrder?.[1]?.basicInfo?.name).toBe("Аграїл");
+      expect(data?.initiativeOrder?.[1]?.basicInfo?.name).toBe("Аграїл (поранений)");
     });
 
-    // Якщо обидва підписались — обидва мають однакові дані
-    const data1 = qc1.getQueryData<BattleScene>(["battle", campaignId, battleId]);
+    const d1 = qc1.getQueryData<BattleScene>(key);
 
-    const data2 = qc2.getQueryData<BattleScene>(["battle", campaignId, battleId]);
+    const d2 = qc2.getQueryData<BattleScene>(key);
 
-    if (data1 && data2) {
-      expect(data1.currentTurnIndex).toBe(data2.currentTurnIndex);
-      expect(data1.currentRound).toBe(data2.currentRound);
-    }
+    if (d1?.version === 2 && d2?.version === 2) expect(d1.initiativeOrder).toEqual(d2.initiativeOrder);
   });
 
-  it("light-payload одразу після оновлення кешу — все одно рефетч (без 8-секундного пропуску)", async () => {
+  it("refetch-сигнал новішої версії — одна інвалідація; версія, яку кеш уже має, — нічого", async () => {
     const qc = new QueryClient();
+
+    qc.setQueryData(key, makeBattlePayload({ version: 5 }));
 
     const invalidate = vi.spyOn(qc, "invalidateQueries");
 
     render(<PlayerSync campaignId={campaignId} battleId={battleId} userId="user-1" client={qc} />);
 
-    await waitFor(() => {
-      expect(channelBindings.get(channelName)?.has("battle-updated")).toBe(true);
-    });
-
-    qc.setQueryData(["battle", campaignId, battleId], makeBattlePayload());
+    await subscribed();
     invalidate.mockClear();
 
     act(() => {
-      simulateTrigger(channelName, "battle-updated", { type: "battle-updated", battleId });
-    });
-
-    expect(invalidate).toHaveBeenCalledWith({ queryKey: ["battle", campaignId, battleId] });
-  });
-
-  it("light-payload з версією, яку кеш уже має (власна дія), — без рефетчу; новіша — рефетч", async () => {
-    const qc = new QueryClient();
-
-    const invalidate = vi.spyOn(qc, "invalidateQueries");
-
-    render(<PlayerSync campaignId={campaignId} battleId={battleId} userId="user-1" client={qc} />);
-
-    await waitFor(() => {
-      expect(channelBindings.get(channelName)?.has("battle-updated")).toBe(true);
-    });
-
-    qc.setQueryData(["battle", campaignId, battleId], makeBattlePayload({ version: 5 }));
-    invalidate.mockClear();
-
-    act(() => {
-      simulateTrigger(channelName, "battle-updated", { type: "battle-updated", battleId, version: 5 });
+      simulateTrigger(channelName, "battle-delta", { battleId, version: 5, refetch: true });
     });
 
     expect(invalidate).not.toHaveBeenCalled();
 
     act(() => {
-      simulateTrigger(channelName, "battle-updated", { type: "battle-updated", battleId, version: 6 });
+      simulateTrigger(channelName, "battle-delta", { battleId, version: 6, refetch: true });
     });
 
-    expect(invalidate).toHaveBeenCalledWith({ queryKey: ["battle", campaignId, battleId] });
+    expect(invalidate).toHaveBeenCalledTimes(1);
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: key });
+  });
+
+  it("пропуск версії в дельті — інвалідація замість патчу", async () => {
+    const qc = new QueryClient();
+
+    qc.setQueryData(key, makeBattlePayload({ version: 1 }));
+
+    const invalidate = vi.spyOn(qc, "invalidateQueries");
+
+    render(<PlayerSync campaignId={campaignId} battleId={battleId} userId="user-1" client={qc} />);
+
+    await subscribed();
+    invalidate.mockClear();
+
+    act(() => {
+      simulateTrigger(channelName, "battle-delta", delta(3));
+    });
+
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: key });
+    expect(qc.getQueryData<BattleScene>(key)?.version).toBe(1);
   });
 });
