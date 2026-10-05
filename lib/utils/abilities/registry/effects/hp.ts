@@ -2,6 +2,7 @@ import { amountLabel } from "../labels";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { resolveAmount } from "@/lib/utils/abilities/engine/amount";
+import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { eventDamage } from "@/lib/utils/abilities/engine/events";
 import { applyRawDamage } from "@/lib/utils/abilities/engine/hp";
 import { findParticipant, isUp, replaceParticipant } from "@/lib/utils/abilities/engine/participants";
@@ -96,6 +97,11 @@ export function applyDot(input: EffectApplyInput<Of<"dot">>): EffectApplyResult 
     const t = findParticipant(ps, id);
 
     if (!t || !isUp(t)) continue;
+
+    if (findFlags(ps, id, "resistance").some((f) => f.percent >= 100 && f.damageType.toLowerCase() === effect.damageType.toLowerCase())) {
+      messages.push(`⛔ ${ability.name}: ${t.basicInfo.name} — імунітет до ${effect.damageType}`);
+      continue;
+    }
 
     const dmg = resolveAmount(effect.damagePerRound, { owner, target: t, eventDamage: eventDamage(input.event), rng: ctx.rng });
 

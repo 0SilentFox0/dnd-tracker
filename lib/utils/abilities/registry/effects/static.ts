@@ -111,5 +111,7 @@ export function describeFlag(e: Extract<Effect, { kind: "flag" }>): string {
       return `контратака +${e.bonusPercent}%`;
     case "seeEnemyHp":
       return "бачить HP ворогів";
+    case "conditionImmunity":
+      return e.conditions === "all" ? "імунітет до контролю" : `імунітет: ${e.conditions.map((c) => (c === "fear" ? "страх" : c)).join(", ")}`;
   }
 }

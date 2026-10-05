@@ -42,6 +42,8 @@ export const CONDITION_KEYS = [
 
 export type StatKey = (typeof STAT_KEYS)[number];
 
+export type ConditionImmunityKey = (typeof CONDITION_KEYS)[number] | "fear";
+
 const target = { target: AbilityTargetSchema.optional() };
 
 const timed = { ...target, duration: DurationSchema.optional() };
@@ -91,6 +93,11 @@ const FlagSchema = z.discriminatedUnion("flag", [
     bonusPercent: z.number().min(0),
   }),
   z.object({ ...flagBase, flag: z.literal("seeEnemyHp") }),
+  z.object({
+    ...flagBase,
+    flag: z.literal("conditionImmunity"),
+    conditions: z.union([z.literal("all"), z.array(z.enum([...CONDITION_KEYS, "fear"])).min(1)]),
+  }),
 ]);
 
 const NoteSchema = z.object({ kind: z.literal("note"), text: z.string().min(1) });

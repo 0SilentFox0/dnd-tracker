@@ -1,9 +1,10 @@
 import { signed } from "../labels";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
+import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/participants";
 import { upsertTimedEffect } from "@/lib/utils/abilities/engine/timed-effects";
-import type { Effect } from "@/lib/utils/abilities/schema";
+import type { ConditionImmunityKey, Effect } from "@/lib/utils/abilities/schema";
 import type { BattleParticipant } from "@/types/battle";
 
 type Of<K extends Effect["kind"]> = Extract<Effect, { kind: K }>;
@@ -12,13 +13,21 @@ function each(
   input: EffectApplyInput,
   fn: (p: BattleParticipant) => BattleParticipant | null,
   message: (names: string) => string,
+  immune?: (p: BattleParticipant) => boolean,
 ): EffectApplyResult {
   let ps = input.participants;
 
   const touched: string[] = [];
 
+  const blocked: string[] = [];
+
   for (const id of input.targetIds) {
     const p = findParticipant(ps, id);
+
+    if (p && immune?.(p)) {
+      blocked.push(id);
+      continue;
+    }
 
     const next = p ? fn(p) : null;
 
@@ -28,7 +37,15 @@ function each(
     touched.push(id);
   }
 
-  return { participants: ps, messages: touched.length ? [message(participantNames(ps, touched))] : [] };
+  const messages = touched.length ? [message(participantNames(ps, touched))] : [];
+
+  if (blocked.length) messages.push(`⛔ ${input.ability.name}: ${participantNames(ps, blocked)} — імунітет`);
+
+  return { participants: ps, messages };
+}
+
+function immuneTo(ps: BattleParticipant[], id: string, key: ConditionImmunityKey): boolean {
+  return findFlags(ps, id, "conditionImmunity").some((f) => f.conditions === "all" || f.conditions.includes(key));
 }
 
 export const CONDITION_LABELS: Record<Of<"applyCondition">["condition"], string> = {
@@ -58,6 +75,7 @@ export function applyCondition(input: EffectApplyInput<Of<"applyCondition">>): E
         ctx.round,
       ),
     (names) => `⛓ ${ability.name}: ${names} — ${CONDITION_LABELS[effect.condition]} (${effect.duration.rounds} р.)`,
+    (p) => immuneTo(input.participants, p.basicInfo.id, effect.condition),
   );
 }
 
@@ -118,6 +136,7 @@ export function applyChangeMorale(input: EffectApplyInput<Of<"changeMorale">>): 
       return morale === p.combatStats.morale ? null : { ...p, combatStats: { ...p.combatStats, morale } };
     },
     (names) => `📊 ${ability.name}: ${names} мораль ${signed(effect.delta)}`,
+    (p) => effect.delta < 0 && immuneTo(input.participants, p.basicInfo.id, "fear"),
   );
 }
 
