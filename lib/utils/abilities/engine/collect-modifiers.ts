@@ -126,7 +126,7 @@ export function collectModifiers(
   }
 
   for (const ae of subject.battleData.activeEffects) {
-    for (const effect of ae.abilityEffects ?? legacyActiveEffectModifiers(ae)) add(effect, subject, ae.name, "effect", ae.icon);
+    for (const effect of ae.abilityEffects ?? legacyActiveEffectModifiers(ae)) add(effect, subject, ae.name, "effect", ae.icon ?? ae.source?.icon);
   }
 
   for (const effect of extra) add(effect, subject, "Ця дія", "action");

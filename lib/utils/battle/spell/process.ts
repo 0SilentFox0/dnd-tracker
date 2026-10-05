@@ -258,8 +258,9 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
     updatedTargets,
     additionalModifier,
     currentRound,
+    caster,
   );
-  updatedTargets = applySpellDurationEffects(spell, updatedTargets, currentRound);
+  updatedTargets = applySpellDurationEffects(spell, updatedTargets, currentRound, caster);
   updatedTargets = applySpellRemoveBuffsDebuffs(spell, updatedTargets);
   updatedTargets = applySpellManaSteal(spell, updatedTargets);
 

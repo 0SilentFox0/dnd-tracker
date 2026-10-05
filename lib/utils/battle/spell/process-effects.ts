@@ -1,10 +1,10 @@
 /**
  * Застосування ефектів заклинання: DOT, дебафи/бафи з тривалістю, крадіжка мани
  */
-
 import { addActiveEffect } from "../battle-effects";
 import type { BattleSpell } from "../types/spell-process";
 
+import { effectSource } from "@/lib/utils/abilities/engine/timed-effects";
 import { parseDurationToRounds } from "@/lib/utils/spells/duration-to-rounds";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -19,6 +19,7 @@ export function applySpellAdditionalModifier(
   updatedTargets: BattleParticipant[],
   additionalModifier: { modifier?: string; duration?: number; damage?: number },
   currentRound: number,
+  caster?: BattleParticipant,
 ): BattleParticipant[] {
   if (!additionalModifier.modifier || !additionalModifier.duration) {
     return updatedTargets;
@@ -41,6 +42,7 @@ export function applySpellAdditionalModifier(
         type: "debuff",
         description: spell.description,
         icon: spell.icon ?? undefined,
+        source: effectSource(caster, { name: spell.name, source: { icon: spell.icon } }),
         duration: additionalModifier.duration ?? 1,
         effects: [
           {
@@ -71,6 +73,7 @@ export function applySpellDurationEffects(
   spell: BattleSpell,
   updatedTargets: BattleParticipant[],
   currentRound: number,
+  caster?: BattleParticipant,
 ): BattleParticipant[] {
   const durationRounds =
     spell.effectDetails?.duration ?? parseDurationToRounds(spell.duration ?? "");
@@ -134,6 +137,7 @@ export function applySpellDurationEffects(
         type: effectType,
         description: spell.description,
         icon: spell.icon ?? undefined,
+        source: effectSource(caster, { name: spell.name, source: { icon: spell.icon } }),
         duration: actualDuration,
         effects: spellEffectDetails,
       },

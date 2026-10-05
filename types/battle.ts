@@ -50,6 +50,7 @@ export interface ActiveEffect {
   };
   abilityKey?: string;
   abilityEffects?: StaticEffect[];
+  source?: { participantId: string; name: string; abilityName?: string; icon?: string | null };
 }
 
 /**
