@@ -1,4 +1,4 @@
-import type { BattleParticipant } from "@/types/battle";
+import type { BattleParticipant, BattlePreparationParticipant } from "@/types/battle";
 
 export type BattleStatus = "prepared" | "active" | "completed";
 
@@ -67,8 +67,19 @@ export interface StoredBattleEvent extends Required<Omit<NewBattleEvent, "actorI
   actorId: string | null;
 }
 
+export interface BattleMeta {
+  name: string;
+  description: string | null;
+  setup: BattlePreparationParticipant[];
+  friendlyFire: boolean;
+  createdAt: Date;
+}
+
+export type HistoryChange = { cancelFromSeq: number } | { clear: true };
+
 export interface LoadedBattle {
   scene: BattleSceneState;
+  meta: BattleMeta;
   participants: BattleParticipant[];
   pending: BattleParticipant[];
   isDM: boolean;
@@ -83,6 +94,7 @@ export interface BattleMutationOutcome {
   participants: BattleParticipant[];
   pending: BattleParticipant[];
   events: NewBattleEvent[];
+  history?: HistoryChange;
 }
 
 export interface BattleDelta {

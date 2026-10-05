@@ -3,7 +3,7 @@ import type { PrismaClient } from "@prisma/client";
 import { joinParticipant } from "./split-participant";
 import type { BattleSceneState, BattleStatus, LoadedBattle, ParticipantColumns, ParticipantSnapshot, ParticipantState } from "./types";
 
-import type { BattleParticipant } from "@/types/battle";
+import type { BattleParticipant, BattlePreparationParticipant } from "@/types/battle";
 
 export type BattleDb = Pick<
   PrismaClient,
@@ -37,9 +37,25 @@ export async function loadBattle(
 ): Promise<(LoadedBattle & { isMember: boolean }) | null> {
   const row = await db.battleScene.findFirst({
     where: { id: args.battleId, campaignId: args.campaignId },
-    include: {
+    select: {
+      id: true,
+      campaignId: true,
+      name: true,
+      description: true,
+      status: true,
+      currentRound: true,
+      currentTurnIndex: true,
+      version: true,
+      eventSeq: true,
+      pendingMoraleCheck: true,
+      startedAt: true,
+      completedAt: true,
+      createdAt: true,
+      participants: true,
       battleParticipants: { orderBy: { orderIndex: "asc" } },
-      campaign: { select: { members: { where: { userId: args.userId }, select: { role: true } } } },
+      campaign: {
+        select: { friendlyFire: true, members: { where: { userId: args.userId }, select: { role: true } } },
+      },
     },
   });
 
@@ -64,6 +80,13 @@ export async function loadBattle(
 
   return {
     scene,
+    meta: {
+      name: row.name,
+      description: row.description,
+      setup: (row.participants ?? []) as unknown as BattlePreparationParticipant[],
+      friendlyFire: row.campaign.friendlyFire ?? false,
+      createdAt: row.createdAt,
+    },
     participants: all.filter((p) => !p.isPending).map((p) => p.participant),
     pending: all.filter((p) => p.isPending).map((p) => p.participant),
     isDM: membership?.role === "dm",
