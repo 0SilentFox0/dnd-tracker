@@ -69,8 +69,18 @@ interface TreeNodes {
   `placeholder_*`) пропускаються; `nodeId = skillId`;
 - `ultimate` — з `tree.ultimateSkill`, якщо `id` не порожній і не плейсхолдер.
 
-Вузол без скіла (`skillId: null`) не можна вивчити (`notInTree`), окрім `branchLevel`: рівень гілки можна вчити й
-без призначеного скіла (він дає доступ до слотів; так працює й зараз). `racial` без скіла вчити не можна.
+`branchLevel` і `racial` існують завжди (по 3) і вчаться й без призначеного скіла — так працює й зараз
+(`MainSkillLevel.tsx`, `RacialSkill.tsx`); такий вивчений вузол рахується в очки, але нічого не дає в бою.
+`slot` і `ultimate` існують лише з призначеним скілом.
+
+**Id дерева.** Канонічний ключ прогресу й `TreeNodes.treeId` — **id рядка `skill_trees`**. `normalizeTree(row)`
+приймає рядок (а не лише JSON). Зараз прогрес ключується id з JSON (`skills.id`), який збігається з id рядка лише
+для дерев, створених із мок-id; тому читання бере `progress[row.id] ?? progress[json.id]`, а будь-який запис
+(`learn`/`unlearn`) пише під `row.id` і видаляє ключ `json.id`. `PATCH …/skill-trees` завжди перезаписує `skills.id`
+на id рядка.
+
+**Дублікати.** Якщо в наявному дереві той самий скіл стоїть у двох слотах, `normalizeTree` бере перше входження
+(порядок гілок, далі outer → middle → inner), `validateTree` повертає `duplicateSkill`.
 
 ### 3.2 Правила — `canLearn(tree, unlocked, characterLevel, nodeId)`
 
@@ -79,7 +89,7 @@ interface TreeNodes {
 
 1. `noPoints` — `unlocked.length >= characterLevel`.
 2. `alreadyLearned`.
-3. `notInTree` — вузла немає, або це `racial`/`slot`/`ultimate` без скіла.
+3. `notInTree` — вузла немає в `normalizeTree` (у т.ч. порожній слот дерева).
 4. `branchOrder` — рівні гілки строго basic → advanced → expert (так само для `racial`).
 5. `outerLimit` — зовнішній слот: вивчених зовнішніх у гілці < вивчених рівнів гілки.
 6. `needOuter` — середній: ≥ 1 вивчений зовнішній у гілці.
@@ -128,8 +138,27 @@ reason: "notInTree" }`.
 
 `resolveLearned(tree, progress)` → `LearnedNode[]`:
 `{ nodeId, kind, skillId: string | null, branchId: string | null, level: BranchLevel | null, circle: Circle | null }`.
-Бере лише `progress[tree.id].unlockedSkills`, лише вузли поточного дерева. **Сироти** (id, яких більше немає в дереві
-— DM прибрав гілку або замінив скіл у слоті) не рахуються в очки, не діють у бою й не дають заклинань.
+Бере `progress[row.id] ?? progress[json.id]`, лише вузли поточного дерева. **Сироти** (id, яких більше немає в
+дереві — DM прибрав гілку або замінив скіл у слоті) не рахуються в очки, не діють у бою й не дають заклинань.
+Прогрес під іншими ключами (зокрема старий формат «ключ = mainSkillId», який пише `simulate-battle`) ігнорується.
+Продова БД порожня — міграція даних не потрібна; локальні персонажі з таким прогресом втрачають скіли, поки DM не
+вивчить їх заново (або сід не перезапуститься).
+
+`personalSkillId` персонажа не є вузлом дерева і додається до скілів бою **поза** резолвером, як зараз.
+
+**Рівень і «лінія» скіла в бою.** Зараз `pickHighestPerLine` (`lib/utils/abilities/build/resolve.ts`, використовують
+`collect.ts`, `spell-enhancers.ts`, `legacy/convert-snapshot.ts`) відрізняє скіли-рівні гілки від решти за словом
+рівня в назві. Замість цього `AbilitySource.line` отримує явне поле `levelNode: boolean`:
+
+- вузол `branchLevel` → `line = { mainSkillId: branchId, level, levelNode: true }` — групується за гілкою, діє лише
+  найвищий рівень;
+- `slot` → `line = { mainSkillId: branchId, level: "basic", levelNode: false }` (як зараз: `progress.level` ніхто не
+  пише, тож слоти фактично мають `basic`) — групується за власним id;
+- `racial`/`ultimate`/`personalSkillId` → `line` без змін щодо поточної поведінки (немає `mainSkillId` → без лінії).
+
+`pickHighestPerLine` групує за `line.levelNode`; якщо поле `undefined` (старі знімки бою) — фолбек на
+`inferLevelFromSkillName` (функція лишається лише для цього фолбеку в `parse.ts`). Клієнтська копія в
+`lib/hooks/characters/useDamageCalculator-helpers.ts` видаляється — калькулятор бере рівні з резолвера.
 
 ### 3.5 Валідація дерева — `validateTree(tree, ctx)`
 
@@ -137,7 +166,7 @@ reason: "notInTree" }`.
 
 - `duplicateSkill` — той самий скіл бібліотеки у двох місцях дерева (слоти, рівні, расові, ультимейт), бо id слота
   = id скіла;
-- `unknownBranch` — id гілки не є main skill цієї кампанії;
+- `unknownBranch` — id гілки не є main skill цієї кампанії (псевдогілки `racial` і `ultimate` — виняток);
 - `unknownSkill` — скіл не з цієї кампанії;
 - `duplicateBranch`.
 
@@ -157,7 +186,8 @@ optional і ігнорується), `CharacterSkillProgress`, `prerequisites`/`
 
 Доступ: власник персонажа або DM. Сервер:
 
-1. персонаж: `level, race, skillTreeProgress, seenLevel, userId` (один `findFirst` за `id + campaignId`);
+1. персонаж: `level, race, skillTreeProgress, seenLevel, controlledBy, updatedAt` (один `findFirst` за
+   `id + campaignId`; власник — `controlledBy === userId` сесії);
 2. дерево раси (`findFirst { campaignId, race }`) → `normalizeTree`;
 3. скіли лише з цього дерева: `select { id, name, icon, abilities, basicInfo }` + гілки
    (`MainSkill select { id, name, color, icon }`), паралельно.
@@ -166,11 +196,11 @@ optional і ігнорується), `CharacterSkillProgress`, `prerequisites`/`
 
 ```ts
 interface CharacterProgressionDto {
-  treeId: string | null;                 // null — для раси немає дерева
-  tree: SkillTreeJson | null;            // сирий JSON дерева (клієнт сам викликає normalizeTree)
+  treeId: string | null;                 // id рядка skill_trees; null — для раси немає дерева
+  tree: SkillTreeJson | null;            // JSON дерева без name/description у слотах (вони в `skills`)
   level: number;
   seenLevel: number | null;
-  unlocked: string[];                    // progress[treeId].unlockedSkills
+  unlocked: string[];                    // progress[treeId] ?? progress[json.id]
   updatedAt: string;                     // для 409
   skills: Record<string, { name: string; icon: string | null; summary: string; description: string }>;
   branches: Record<string, { name: string; color: string; icon: string | null }>;
@@ -214,9 +244,15 @@ interface CharacterProgressionDto {
   `markLevelSeen`.
 - `lib/hooks/skills/` (через барел): `useCharacterProgression` (запит + `useMemo` над `normalizeTree`,
   `progressionView`, `rankOffers`), `useLearnNode`, `useUnlearnNode`, `useResetProgression`, `useMarkLevelSeen`.
-- Мутації патчать кеш `character-progression` через `setQueryData` (`unlocked`, `updatedAt`) без рефетчу;
-  `["character", campaignId, characterId]` і `["battle-balance"]` — `invalidateQueries` з `refetchType: "none"`.
+- Мутації патчать кеш `character-progression` через `setQueryData` (`unlocked`, `updatedAt`) без рефетчу, а також
+  `["character", campaignId, characterId]` через `setQueryData` (`skillTreeProgress`, `updatedAt`), щоб наступний
+  PATCH профілю не отримав 409/старий стан. Інвалідуються з рефетчем активних: `["character-damage-preview",
+  campaignId, characterId]` (рахується на сервері з прогресу); `["battle-balance"]` — `refetchType: "none"`.
   409 → `invalidateQueries` прогресу + `useNotify` «Прогрес змінився — оновлено». 422 → `useNotify` з текстом причини.
+- Споживачі прогресу на сторінці профілю (спелбук, артефакти, калькулятор шкоди, `useLearnedSpellIds`) беруть
+  вивчене з `useCharacterProgression` (резолвер над його кешем), а не з `formData.skillTreeProgress` у
+  `useCharacterView`; `formData` більше не містить `skillTreeProgress`. Так вивчення рівня школи магії одразу
+  оновлює спелбук і цифри шкоди на тому ж екрані.
 
 ## 5. UI гравця — `components/skill-tree/progression/`
 
@@ -258,9 +294,12 @@ interface CharacterProgressionDto {
 
 - Нова колонка `characters."seenLevel" INTEGER NULL` (expand-only міграція; таблиця існує, RLS уже ввімкнено).
   `NULL` = «бачив поточний рівень».
-- Показ: профіль відкриває **власник** (не DM), `seenLevel !== null && level > seenLevel`. Підняття рівня
-  (`level-up/route.ts`) ставить `seenLevel = старий рівень`, якщо він `NULL` (щоб анімація спрацювала і для
-  наявних персонажів після першого підняття); інакше не чіпає.
+- Показ: профіль відкриває **власник** (не DM), `seenLevel !== null && level > seenLevel`. Будь-яке підвищення
+  рівня ставить `seenLevel = старий рівень`, якщо він `NULL` (щоб анімація спрацювала і для наявних персонажів після
+  першого підняття); інакше не чіпає. Рівень росте у двох місцях — `level-up/route.ts` і PATCH персонажа
+  (`build-character-update-data.ts`: досвід або пряме `level`); обидва викликають одну чисту функцію
+  `seenLevelOnLevelChange(oldLevel, newLevel, seenLevel)` з `lib/utils/characters`. Зниження рівня не чіпає
+  `seenLevel` (анімації не буде, бо `level > seenLevel` хибне).
 - Повноекранний оверлей (портал, HUD-поверхня): «НОВИЙ РІВЕНЬ», ім'я → старий рівень (залізо) відлітає вгору →
   новий рівень золотом зі спалахом, променями, іскрами → «N вільне очко / вільні очки» → кнопка «До прокачки»
   (закриває й прокручує до панелі); тап будь-де закриває. Кілька пропущених рівнів — одразу старий → новий.
@@ -280,8 +319,9 @@ interface CharacterProgressionDto {
   внутрішнє; внизу «+ Додати гілку» і ультимейт. На телефоні назви в клітинках ховаються, колонка «Гілка» sticky,
   горизонтальний скрол.
 - Клік по клітинці → `SlotPicker` (десктоп — панель праворуч; телефон — `ResponsiveDialog`): скіли бібліотеки гілки
-  (`mainSkillId`) з пошуком і `summary`; для расового рядка — скіли раси; для ультимейта — усі; перемикач «усі
-  скіли». «Поставити» / «Прибрати». Скіл, що вже є в дереві, — «вже в {гілка} · {слот}», недоступний.
+  (`mainSkillId`) з пошуком і `summary`; для расового рядка — скіли, у яких `races` містить цю расу (те саме поле, що
+  зараз фільтрує `useSkillTreeFilters`), і скіли без `mainSkillId`; для ультимейта — усі; перемикач «усі скіли»
+  знімає фільтр. «Поставити» / «Прибрати». Скіл, що вже є в дереві, — «вже в {гілка} · {слот}», недоступний.
 - Біля назви гілки — ↑ ↓ і «Прибрати гілку» (`useConfirm`: «Вивчені вузли цієї гілки в персонажів перестануть діяти»).
 - «+ Додати гілку» → шторка: main skills кампанії, яких ще немає в дереві, або «Створити нову» (назва, колір,
   іконка) → `POST …/main-skills` → гілка додається рядком.
@@ -302,16 +342,22 @@ DM-сторінки, генератор мок-дерев (окрім створ
 
 Усі переходять на `resolveLearned`:
 
-- `lib/utils/battle/participant/extract-skills.ts`: дерева потрібних рас вантажаться **одним запитом** при
-  старті бою / додаванні учасника / damage-preview; рівні гілок — зі `skillId` вузла (`levelSkillIds`);
-  `inferLevelFromSkillName` видаляється; `_racial` дають свої скіли; ключ прогресу — `tree.id`.
+- `lib/utils/battle/participant/extract-skills.ts`: дерева потрібних рас — один `findMany` (старт бою вже так
+  робить у `start-build-context.ts`; додати для add-participant, damage-preview і фолбеку `findFirst` у
+  `from-character-learned-spells.ts`); рівні гілок — зі `skillId` вузла (`levelSkillIds`), з `line.levelNode`
+  (§3.4); `_racial` дають свої скіли; `personalSkillId` — поза резолвером.
+- `include: { characterSkills }` прибирається з `start-battle-handler.ts`, `lib/utils/prisma/includes.ts` і типу
+  `CharacterFromPrisma`.
 - Баланс: `lib/utils/battle/balance/{stats,dpr}.ts`, `balance-get/post`.
 - Заклинання з дерева: `lib/utils/spells/spell-learning.ts`, `from-character-learned-spells.ts`,
   `useLearnedSpellIds` — рівень гілки та її `spellGroupId` із резолвера.
 - Клієнтські калькулятори (`useDamageCalculator-skills`, `CharacterDamageCalculator`, артефакти, спелбук,
   `useCharacterView`): резолвер замість власного пошуку дерева; де можливо — дані з кешу `character-progression`.
 - Форми персонажа (`edit-client`, `character-form`, `dm/characters/new`) більше не несуть `skillTreeProgress`.
-- Скрипти `simulate-battle`, `seed-mock-battle-data`, `setup-battle-test-3v5` пишуть прогрес із ключем `tree.id`.
+- Скрипти `simulate-battle`, `seed-mock-battle-data`, `setup-battle-test-3v5` **створюють дерево раси** зі скілами
+  в слотах/рівнях (через спільний хелпер `buildTreeJson` у `progression/`) і пишуть прогрес під id рядка дерева;
+  `setup-battle-test-3v5` більше не пише `CharacterSkills`. Без цього `simulate-battle` втратить усі скіли
+  персонажів (зараз ключ прогресу — mainSkillId, дерев у локальній БД немає).
 
 До списку контракт-міграції додаються: таблиця `CharacterSkills`, `Race.availableSkills`,
 `MainSkill.isEnableInSkillTree`.
@@ -324,11 +370,14 @@ TDD: тест першим для кожної чистої функції й м
   расове на рівні 4/5, ультимейт при 2/3 внутрішніх, `noPoints`, сироти, плейсхолдери); `canUnlearn`; `rankOffers`
   (приклад: Просунутий Напад + Основи Захисту → расове → Напад→Експерт → Захист→Просунутий → скіли Нападу → скіли
   Захисту → Основи нових); `progressionView`; `normalizeTree` (старий JSON із порожніми advanced/expert);
-  `validateTree`; `resolveLearned`.
+  `validateTree`; `resolveLearned` (ключ рядка й фолбек на JSON id, `levelNode`, сироти); `pickHighestPerLine`
+  (рівні гілки без слова рівня в назві не стакаються; старий знімок без `levelNode` — фолбек на назву);
+  `seenLevelOnLevelChange`.
 - Маршрути (`app/api/__tests__`): `learn` (власник без `allowPlayerEdit` → 200, чужий → 403, правило → 422,
   змінений `updatedAt` → 409), `unlearn`/`reset` лише DM, `seen-level` лише власник, `GET progression` (лише скіли
-  дерева), PATCH персонажа без `skillTreeProgress`, PATCH дерева (дублікати → 400, колізія id), `level-up` ставить
-  `seenLevel`. `extract-skills`: рівень гілки через `levelSkillIds` для скіла, назва якого не містить рівня;
+  дерева), PATCH персонажа без `skillTreeProgress` і з `seenLevel` при підвищенні через досвід, PATCH дерева
+  (дублікати → 400, колізія id, `skills.id` = id рядка), `level-up` ставить `seenLevel`. Профіль: після `learn`
+  рівня школи магії спелбук показує нове заклинання без перезавантаження. `extract-skills`: рівень гілки через `levelSkillIds` для скіла, назва якого не містить рівня;
   расовий вузол.
 - Хуки/UI (happy-dom, `afterEach(cleanup)`, мок `components/hud/fonts`): `useLearnNode` (патч кешу, 409);
   `ProgressionPanel` (рядки B, шторка вивченого без «Вивчити», золотий «?» фільтрує, причина закритого, «Ще N»);
