@@ -44,6 +44,9 @@ function baseEffect(kind: EffectKind): Effect {
 
 function fitToTrigger(effect: Effect, trigger: Trigger): Effect {
   if (trigger.event === "passive") {
+    // keep incompatible effects intact so validation names the real problem instead of a missing field
+    if (effect.kind !== "note" && !isStaticEffect(effect)) return effect;
+
     const next = { ...effect } as Record<string, unknown>;
 
     delete next.duration;

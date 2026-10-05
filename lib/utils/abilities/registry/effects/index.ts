@@ -67,7 +67,7 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
     label: "Накласти стан",
     static: false,
     fields: [{ name: "condition", label: "Стан", input: "select", options: Object.entries(CONDITION_LABELS).map(([value, label]) => ({ value, label })) }, TARGET_FIELD, REQUIRED_DURATION],
-    describe: (e) => `${CONDITION_LABELS[e.condition]} × ${e.duration.rounds} р.`,
+    describe: (e) => `${CONDITION_LABELS[e.condition]} × ${e.duration?.rounds ?? "?"} р.`,
     apply: applyCondition,
   },
   grantAction: { kind: "grantAction", label: "Дати дію", static: false, fields: [
