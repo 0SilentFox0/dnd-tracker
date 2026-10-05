@@ -215,38 +215,42 @@ describe("runBattleMutation", () => {
     expect(outcome.events.at(-1)).toMatchObject({ type: "end_turn", resultText: expect.stringContaining("Бій завершено") });
   });
 
-  it("успіх — 200, сумісна відповідь для того, хто діяв, і battle-updated без isDM для інших", async () => {
-    const d = deps();
+  it("успіх — 200, { delta, response } для того, хто діяв, і battle-delta для інших", async () => {
+    const d = deps({ saveBattle: vi.fn(async () => ({ ...delta(), upserted: [goblin] })) });
 
-    const res = await runBattleMutation(req(), { params, access: "member", mutate: noop }, d);
+    const mutate = vi.fn((ctx: BattleMutationContext) => ({
+      participants: ctx.participants, pending: ctx.pending, events: [], response: { moraleResult: { ok: true } },
+    }));
+
+    const res = await runBattleMutation(req(), { params, access: "member", mutate }, d);
 
     const json = await res.json();
 
     expect(res.status).toBe(200);
-    expect(json.initiativeOrder).toHaveLength(2);
-    expect(json.isDM).toBe(false);
-    expect(json.battleLogMode).toBe("append");
-    expect(json.version).toBe(4);
+    expect(json.delta).toMatchObject({ battleId: "b1", version: 4, removed: [] });
+    expect(json.delta.upserted.map((p: { basicInfo: { id: string } }) => p.basicInfo.id)).toEqual(["gob"]);
+    expect(json.response).toEqual({ moraleResult: { ok: true } });
 
     const messages = vi.mocked(d.publish).mock.calls[0][0];
 
-    expect(messages[0]).toMatchObject({ event: "battle-updated", channel: "private-battle-b1" });
-    expect(messages[0].payload).not.toHaveProperty("isDM");
+    expect(messages[0]).toMatchObject({ event: "battle-delta", channel: "private-battle-b1" });
+    expect(messages[0].payload).toEqual(json.delta);
   });
 
-  it("великий стан — light battle-updated", async () => {
-    const d = deps();
-
-    await runBattleMutation(
-      req(),
-      { params, access: "member", mutate: () => ({ participants: Array.from({ length: 60 }, () => hero), pending: [], events: [] }) },
-      d,
+  it("велика дельта — battle-delta з refetch, відповідь усе одно повна", async () => {
+    const many = Array.from({ length: 60 }, (_, i) =>
+      createMockParticipant({ basicInfo: { ...hero.basicInfo, id: `h${i}` } }),
     );
 
-    expect(vi.mocked(d.publish).mock.calls[0][0][0].payload).toEqual({ type: "battle-updated", battleId: "b1", version: 4 });
+    const d = deps({ saveBattle: vi.fn(async () => ({ ...delta(), upserted: many })) });
+
+    const res = await runBattleMutation(req(), { params, access: "member", mutate: () => ({ participants: many, pending: [], events: [] }) }, d);
+
+    expect((await res.json()).delta.upserted).toHaveLength(60);
+    expect(vi.mocked(d.publish).mock.calls[0][0][0].payload).toEqual({ battleId: "b1", version: 4, refetch: true });
   });
 
-  it("ліміт payload — у байтах: довгий кириличний запис журналу дає light battle-updated", async () => {
+  it("ліміт — у байтах: довгий кириличний запис журналу дає refetch", async () => {
     const text = "Ш".repeat(6_000);
 
     const cyr = { ...delta(), events: [{ seq: 5, type: "attack", round: 1, actorId: null, targets: [], details: {}, hpChanges: [], resultText: text }] };
@@ -255,25 +259,20 @@ describe("runBattleMutation", () => {
 
     await runBattleMutation(req(), { params, access: "member", mutate: noop }, d);
 
-    expect(vi.mocked(d.publish).mock.calls[0][0][0].payload).toEqual({ type: "battle-updated", battleId: "b1", version: 4 });
+    expect(vi.mocked(d.publish).mock.calls[0][0][0].payload).toEqual({ battleId: "b1", version: 4, refetch: true });
   });
 
-  it("respond: wrapped — {battle, ...response}", async () => {
-    const res = await runBattleMutation(
-      req(),
-      {
-        params,
-        access: "member",
-        respond: "wrapped",
-        mutate: (ctx) => ({ participants: ctx.participants, pending: ctx.pending, events: [], response: { moraleResult: { ok: true } } }),
-      },
-      deps(),
-    );
+  it("бій із 10 учасниками, атака по одній цілі — дельта вміщується в Pusher", async () => {
+    const ten = Array.from({ length: 10 }, (_, i) => createMockParticipant({ basicInfo: { ...hero.basicInfo, id: `p${i}` } }));
 
-    const json = await res.json();
+    const d = deps({
+      loadBattle: vi.fn(async () => loaded({ participants: ten })),
+      saveBattle: vi.fn(async () => ({ ...delta(), upserted: [ten[3]] })),
+    });
 
-    expect(json.battle.id).toBe("b1");
-    expect(json.moraleResult).toEqual({ ok: true });
+    await runBattleMutation(req(), { params, access: "member", mutate: (ctx) => ({ participants: ctx.participants, pending: [], events: [] }) }, d);
+
+    expect(vi.mocked(d.publish).mock.calls[0][0][0].payload).toHaveProperty("upserted");
   });
 
   it("currentController: контролер непритомного учасника може передати хід", async () => {
@@ -337,7 +336,7 @@ describe("runBattleMutation", () => {
       d,
     );
 
-    expect((await res.json()).battleLogCancelledFrom).toBe(0);
-    expect(vi.mocked(d.publish).mock.calls[0][0][0].payload).toMatchObject({ battleLogCancelledFrom: 0 });
+    expect((await res.json()).delta.cancelledFrom).toBe(0);
+    expect(vi.mocked(d.publish).mock.calls[0][0][0].payload).toMatchObject({ cancelledFrom: 0 });
   });
 });
