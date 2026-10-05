@@ -6,7 +6,7 @@ import { useEffect, useMemo } from "react";
 
 import { resolveUnlockedIdToSkill } from "./useDamageCalculator-helpers";
 
-import type { SkillAffectingDamage } from "@/components/characters/stats/damage-calculator-utils";
+import type { SkillAffectingDamage } from "@/lib/utils/characters/damage-calculator";
 
 function legacyAffectsDamage(skill: { combatStats?: unknown; affectsDamage?: unknown }): boolean {
   const cs = skill.combatStats as { affectsDamage?: unknown } | undefined;

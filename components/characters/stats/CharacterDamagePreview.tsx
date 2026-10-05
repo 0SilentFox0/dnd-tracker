@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 
+import { QueryState } from "@/components/common/states";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,19 +12,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { getDamagePreview } from "@/lib/api/characters";
-
-export interface DamagePreviewItem {
-  total: number;
-  breakdown: string[];
-  diceFormula: string | null;
-  hasWeapon: boolean;
-}
-
-export interface DamagePreviewResponse {
-  melee: DamagePreviewItem;
-  ranged: DamagePreviewItem;
-}
+import { useDamagePreview } from "@/lib/hooks/characters";
+import type { DamagePreviewItem } from "@/types/characters";
 
 interface CharacterDamagePreviewProps {
   campaignId: string;
@@ -36,22 +25,6 @@ interface CharacterDamagePreviewProps {
   onMeleeCoefficientChange?: (value: number) => void;
   onRangedCoefficientChange?: (value: number) => void;
   isDm?: boolean;
-}
-
-async function fetchDamagePreview(
-  campaignId: string,
-  characterId: string,
-  meleeMultiplier: number,
-  rangedMultiplier: number,
-): Promise<DamagePreviewResponse> {
-  const result = await getDamagePreview(campaignId, characterId, {
-    meleeMultiplier,
-    rangedMultiplier,
-  });
-
-  if (!result) throw new Error("Failed to load damage preview");
-
-  return result as unknown as DamagePreviewResponse;
 }
 
 function DamageBlock({
@@ -142,26 +115,42 @@ export function CharacterDamagePreview({
   onRangedCoefficientChange,
   isDm,
 }: CharacterDamagePreviewProps) {
-  const { data, isLoading, error } = useQuery({
-    queryKey: [
-      "character-damage-preview",
-      campaignId,
-      characterId,
-      meleeCoefficient,
-      rangedCoefficient,
-    ],
-    queryFn: () =>
-      fetchDamagePreview(
-        campaignId,
-        characterId,
-        meleeCoefficient,
-        rangedCoefficient,
-      ),
-    enabled: !!campaignId && !!characterId,
-  });
+  const query = useDamagePreview(campaignId, characterId, { melee: meleeCoefficient, ranged: rangedCoefficient });
 
-  if (isLoading) {
-    return (
+  return (
+    <QueryState query={query} loading={<DamagePreviewSkeleton />}>
+      {(data) => (
+        <div className="space-y-4">
+          <h4 className="text-sm font-medium text-muted-foreground">
+            Поточна шкода (середній урон за удар)
+          </h4>
+          <p className="text-xs text-muted-foreground">
+            Модифікатор STR/DEX: (характеристика − 10) ÷ 2, округлення вниз. Ближній бій використовує STR, дальній — DEX.
+          </p>
+          <div className="space-y-4">
+            <DamageBlock
+              title="Ближній бій (melee)"
+              data={data.melee}
+              coefficient={meleeCoefficient}
+              onCoefficientChange={onMeleeCoefficientChange}
+              isDm={isDm}
+            />
+            <DamageBlock
+              title="Дальній бій (ranged)"
+              data={data.ranged}
+              coefficient={rangedCoefficient}
+              onCoefficientChange={onRangedCoefficientChange}
+              isDm={isDm}
+            />
+          </div>
+        </div>
+      )}
+    </QueryState>
+  );
+}
+
+function DamagePreviewSkeleton() {
+  return (
       <div className="space-y-4">
         <div>
           <div className="h-4 w-48 rounded bg-muted animate-pulse" />
@@ -198,43 +187,5 @@ export function CharacterDamagePreview({
           </Card>
         </div>
       </div>
-    );
-  }
-
-  if (error || !data) {
-    return (
-      <Card>
-        <CardContent className="py-6 text-center text-destructive text-sm">
-          Не вдалося завантажити превʼю урону
-        </CardContent>
-      </Card>
-    );
-  }
-
-  return (
-    <div className="space-y-4">
-      <h4 className="text-sm font-medium text-muted-foreground">
-        Поточна шкода (середній урон за удар)
-      </h4>
-      <p className="text-xs text-muted-foreground">
-        Модифікатор STR/DEX: (характеристика − 10) ÷ 2, округлення вниз. Ближній бій використовує STR, дальній — DEX.
-      </p>
-      <div className="space-y-4">
-        <DamageBlock
-          title="Ближній бій (melee)"
-          data={data.melee}
-          coefficient={meleeCoefficient}
-          onCoefficientChange={onMeleeCoefficientChange}
-          isDm={isDm}
-        />
-        <DamageBlock
-          title="Дальній бій (ranged)"
-          data={data.ranged}
-          coefficient={rangedCoefficient}
-          onCoefficientChange={onRangedCoefficientChange}
-          isDm={isDm}
-        />
-      </div>
-    </div>
   );
 }

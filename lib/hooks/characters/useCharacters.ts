@@ -1,14 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 
 import {
+  createCharacter,
   deleteAllCharacters,
   deleteCharacter,
+  getCharacter,
   getCharacters,
   levelUpCharacter,
+  updateCharacter,
 } from "@/lib/api/characters";
 import { useCrudMutation } from "@/lib/hooks/common";
 import { ENTITY_STALE_MS } from "@/lib/providers/query-provider";
-import type { Character } from "@/types/characters";
+import type { Character, CharacterFormData } from "@/types/characters";
 
 export type { Character };
 
@@ -30,11 +33,43 @@ export function useCharacters(
   });
 }
 
+export function useCharacter(campaignId: string, characterId: string) {
+  return useQuery<Character>({
+    queryKey: ["character", campaignId, characterId],
+    queryFn: () => getCharacter(campaignId, characterId),
+    staleTime: ENTITY_STALE_MS,
+    enabled: !!campaignId && !!characterId,
+  });
+}
+
+export function useCreateCharacter(campaignId: string) {
+  return useCrudMutation({
+    mutationFn: (data: CharacterFormData) => createCharacter(campaignId, data),
+    invalidateKeys: [["characters", campaignId]],
+  });
+}
+
+export function useUpdateCharacter(campaignId: string, characterId: string) {
+  return useCrudMutation({
+    mutationFn: (data: CharacterFormData) => updateCharacter(campaignId, characterId, data),
+    invalidateKeys: [
+      ["characters", campaignId],
+      ["character", campaignId, characterId],
+    ],
+  });
+}
+
 export function useLevelUpCharacter(campaignId: string) {
   return useCrudMutation({
     mutationFn: (characterId: string) =>
       levelUpCharacter(campaignId, characterId),
-    invalidateKeys: [["characters", campaignId]],
+    invalidateKeys: [
+      ["characters", campaignId],
+      ["character", campaignId],
+      ["character-damage-preview", campaignId],
+      ["damage-calculator-melee-ranged", campaignId],
+      ["damage-calculator-magic-spell", campaignId],
+    ],
   });
 }
 

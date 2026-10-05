@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -10,6 +9,7 @@ import { CharacterBasicInfo } from "@/components/characters/basic/CharacterBasic
 import { CharacterSkillsSection } from "@/components/characters/skills/CharacterSkillsSection";
 import { CharacterAbilityScores } from "@/components/characters/stats/CharacterAbilityScores";
 import { CharacterCombatParams } from "@/components/characters/stats/CharacterCombatParams";
+import { LoadingState, QueryState } from "@/components/common/states";
 import {
   Accordion,
   AccordionContent,
@@ -24,12 +24,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getCharacter, updateCharacter } from "@/lib/api/characters";
-import { useCampaignMembers } from "@/lib/hooks/campaigns";
-import { useCharacterForm } from "@/lib/hooks/characters";
-import { useRaces } from "@/lib/hooks/races";
-import { characterToFormData } from "@/lib/utils/characters/character-form";
-import type { Character } from "@/types/characters";
+import { useCharacterEditor } from "@/lib/hooks/characters";
 
 export function PlayerCharacterEditClient({
   campaignId: id,
@@ -40,73 +35,18 @@ export function PlayerCharacterEditClient({
 }) {
   const router = useRouter();
 
-  const { members, loading: membersLoading } = useCampaignMembers(id);
-
-  const { data: races = [] } = useRaces(id);
-
-  const [characterLoaded, setCharacterLoaded] = useState(false);
-
-  const {
-    formData,
-    loading,
-    error,
-    basicInfo,
-    abilityScores,
-    combatStats,
-    skills,
-    abilities,
-    spellcasting,
-    handleSubmit,
-    setFormData,
-  } = useCharacterForm({
-    onSubmit: async (data) => {
-      await updateCharacter(id, characterId, data);
-      router.push(`/campaigns/${id}/character`);
-    },
+  const { query, form, members, membersLoading, races } = useCharacterEditor({
+    campaignId: id,
+    characterId,
+    onSaved: () => router.push(`/campaigns/${id}/character`),
   });
 
-  useEffect(() => {
-    let cancelled = false;
-
-    const fetchCharacter = async () => {
-      try {
-        const character: Character = await getCharacter(id, characterId);
-
-        if (cancelled) return;
-
-        const formDataFromCharacter = characterToFormData(character);
-
-        setFormData(formDataFromCharacter);
-        setCharacterLoaded(true);
-      } catch (err) {
-        if (!cancelled) {
-          console.error("Error fetching character:", err);
-          setCharacterLoaded(true);
-        }
-      }
-    };
-
-    fetchCharacter();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [id, characterId, setFormData]);
-
-  if (!characterLoaded || (loading && !formData.basicInfo.name)) {
-    return (
-      <div className="container mx-auto p-4 max-w-4xl">
-        <Card>
-          <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground">Завантаження...</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  const { formData, loading, error, basicInfo, abilityScores, combatStats, skills, abilities, spellcasting, handleSubmit } = form;
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">
+      <QueryState query={query} loading={<LoadingState rows={6} label="Завантаження персонажа…" />}>
+        {() => (
       <Card>
         <CardHeader>
           <CardTitle>
@@ -200,6 +140,8 @@ export function PlayerCharacterEditClient({
           </form>
         </CardContent>
       </Card>
+        )}
+      </QueryState>
     </div>
   );
 }

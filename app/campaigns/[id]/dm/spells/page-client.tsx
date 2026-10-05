@@ -33,11 +33,7 @@ export function DMSpellsPageClient({
   const [deleteAllSpellsDialogOpen, setDeleteAllSpellsDialogOpen] =
     useState(false);
 
-  // Запити для заклинань та груп
-  const { data: spells = initialSpells, isLoading: spellsLoading } = useSpells(
-    campaignId,
-    initialSpells
-  );
+  const { data: spells = initialSpells, isLoading: spellsLoading } = useSpells(campaignId, { initialData: initialSpells });
 
   const { data: spellGroups = [] } = useSpellGroups(campaignId);
 

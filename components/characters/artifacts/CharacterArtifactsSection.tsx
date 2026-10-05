@@ -13,8 +13,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { updateInventory } from "@/lib/api/inventory";
 import { ARTIFACT_GRID_9, ArtifactSlot } from "@/lib/constants/artifacts";
+import { useEquipArtifact } from "@/lib/hooks/characters";
+import { useNotify } from "@/lib/hooks/common";
+import { buildEquipped } from "@/lib/utils/artifacts/equipment";
 import { getCompletedArtifactSetsPreview } from "@/lib/utils/artifacts/get-completed-artifact-sets-preview";
 import type { ArtifactSetRow } from "@/types/artifact-sets";
 import type { EquippedItems } from "@/types/inventory";
@@ -62,6 +64,10 @@ export function CharacterArtifactsSection({
   spellSlots = {},
   artifactSets,
 }: CharacterArtifactsSectionProps) {
+  const notify = useNotify();
+
+  const equip = useEquipArtifact(campaignId, characterId);
+
   const [updatingSlot, setUpdatingSlot] = useState<string | null>(null);
 
   const completedArtifactSets = useMemo(
@@ -75,31 +81,17 @@ export function CharacterArtifactsSection({
   const isEditMode =
     characterId != null && artifacts.length >= 0 && onEquippedChange != null;
 
-  const handleSlotChange = async (
-    slotKey: string,
-    artifactId: string | null,
-  ) => {
+  const handleSlotChange = (slotKey: string, artifactId: string | null) => {
     if (!characterId || !onEquippedChange) return;
 
-    const newEquipped: EquippedItems = {};
+    const next = buildEquipped(equipped, slotKey, artifactId);
 
-    for (const cell of ARTIFACT_GRID_9) {
-      const id =
-        cell.key === slotKey
-          ? (artifactId ?? undefined)
-          : (equipped[cell.key] as string | undefined);
-
-      if (id) newEquipped[cell.key] = id;
-    }
     setUpdatingSlot(slotKey);
-    try {
-      await updateInventory(campaignId, characterId, { equipped: newEquipped });
-      onEquippedChange(newEquipped);
-    } catch (err) {
-      console.error("Failed to update equipped artifact:", err);
-    } finally {
-      setUpdatingSlot(null);
-    }
+    equip.mutate(next, {
+      onSuccess: () => onEquippedChange(next),
+      onError: () => void notify("Не вдалося змінити спорядження"),
+      onSettled: () => setUpdatingSlot(null),
+    });
   };
 
   const cellClassName =

@@ -21,13 +21,13 @@ import type { Spell, SpellGroup } from "@/types/spells";
 
 export type { Spell, SpellGroup };
 
-export function useSpells(campaignId: string, initialSpells?: Spell[]) {
+export function useSpells(campaignId: string, opts?: { initialData?: Spell[]; enabled?: boolean }) {
   return useQuery<Spell[]>({
     queryKey: ["spells", campaignId],
     queryFn: () => getSpells(campaignId),
     staleTime: REFERENCE_STALE_MS,
-    ...(initialSpells !== undefined && { initialData: initialSpells }),
-    enabled: !!campaignId,
+    ...(opts?.initialData !== undefined && { initialData: opts.initialData }),
+    enabled: !!campaignId && (opts?.enabled ?? true),
   });
 }
 

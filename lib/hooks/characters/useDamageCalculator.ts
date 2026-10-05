@@ -3,19 +3,17 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
+import { fetchDamagePreview } from "./damage-preview";
 import type { SkillTreeProgress } from "./useCharacterView";
 import { useDamageCalculatorSkills } from "./useDamageCalculator-skills";
 import { useDamageCalculatorSpell } from "./useDamageCalculator-spell";
 import { useLearnedSpellIds } from "./useLearnedSpellIds";
 
-import {
-  fetchDamagePreview,
-  parseDiceFormulaToSides,
-} from "@/components/characters/stats/damage-calculator-utils";
 import { getSpells } from "@/lib/api/spells";
 import { AttackType } from "@/lib/constants/battle";
 import { getHeroDamageComponents } from "@/lib/constants/hero-scaling";
 import { useSkills } from "@/lib/hooks/skills";
+import { parseDiceFormulaToSides } from "@/lib/utils/characters/damage-calculator";
 
 export interface UseDamageCalculatorProps {
   campaignId: string;

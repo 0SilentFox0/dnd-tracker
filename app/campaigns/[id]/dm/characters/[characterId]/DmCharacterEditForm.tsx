@@ -1,8 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import type { QueryClient } from "@tanstack/react-query";
 
 import { DmCharacterEditFormAccordion } from "./DmCharacterEditFormAccordion";
 
@@ -15,113 +13,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { levelUpCharacter } from "@/lib/api/characters";
-import type { useCharacterForm } from "@/lib/hooks/characters";
-import { useConfirm, useNotify } from "@/lib/hooks/common";
-import { characterToFormData } from "@/lib/utils/characters/character-form";
-import type { ArtifactSetRow } from "@/types/artifact-sets";
-import type { CampaignMember } from "@/types/campaigns";
-import type { CharacterFormData } from "@/types/characters";
-import type { EquippedItems } from "@/types/inventory";
-import type { Race } from "@/types/races";
+import type { DmCharacterEditor } from "@/lib/hooks/characters";
 
-type CharacterFormReturn = ReturnType<typeof useCharacterForm>;
+export function DmCharacterEditForm({ editor }: { editor: DmCharacterEditor }) {
+  const { form, campaignId, membersLoading, levelUp } = editor;
 
-export interface DmCharacterEditFormProps {
-  campaignId: string;
-  characterId: string;
-  formData: CharacterFormData;
-  setFormData: (
-    data: CharacterFormData | ((prev: CharacterFormData) => CharacterFormData),
-  ) => void;
-  basicInfo: CharacterFormReturn["basicInfo"];
-  abilityScores: CharacterFormReturn["abilityScores"];
-  combatStats: CharacterFormReturn["combatStats"];
-  skills: CharacterFormReturn["skills"];
-  abilities: CharacterFormReturn["abilities"];
-  spellcasting: CharacterFormReturn["spellcasting"];
-  handleSubmit: (e: React.FormEvent) => void;
-  error: string | null;
-  members: CampaignMember[];
-  races: Race[];
-  equipped: EquippedItems;
-  setEquipped: (
-    eq: EquippedItems | ((prev: EquippedItems) => EquippedItems),
-  ) => void;
-  artifacts: { id: string; name: string; slot: string; icon?: string | null }[];
-  artifactSets?: ArtifactSetRow[];
-  loading: boolean;
-  membersLoading: boolean;
-  queryClient: QueryClient;
-}
-
-export function DmCharacterEditForm({
-  campaignId,
-  characterId,
-  formData,
-  setFormData,
-  basicInfo,
-  abilityScores,
-  combatStats,
-  skills,
-  abilities,
-  spellcasting,
-  handleSubmit,
-  error,
-  members,
-  races,
-  equipped,
-  setEquipped,
-  artifacts,
-  artifactSets,
-  loading,
-  membersLoading,
-  queryClient,
-}: DmCharacterEditFormProps) {
-  const notify = useNotify();
-
-  const confirm = useConfirm();
-
-  const router = useRouter();
-
-  const handleLevelUp = async () => {
-    if (
-      !(await confirm({ title: `Підняти рівень персонажа ${basicInfo.name}? (Рівень ${basicInfo.level} → ${basicInfo.level + 1})`, confirmLabel: "Підняти" }))
-    ) {
-      return;
-    }
-
-    try {
-      const updatedCharacter = await levelUpCharacter(campaignId, characterId);
-
-      const updatedFormData = characterToFormData(updatedCharacter);
-
-      setFormData(updatedFormData);
-
-      if (updatedCharacter.levelUpDetails) {
-        const details = updatedCharacter.levelUpDetails as {
-          abilityIncreased?: string;
-          hpGain?: number;
-        };
-
-        void notify(`Рівень піднято! ${details.abilityIncreased ?? "Характеристика"}: +1, HP: +${details.hpGain ?? 0}, Додано магічні слоти.`);
-      }
-
-      await queryClient.invalidateQueries({
-        queryKey: ["character-damage-preview", campaignId, characterId],
-      });
-      await queryClient.invalidateQueries({
-        queryKey: ["damage-calculator-melee-ranged", campaignId, characterId],
-      });
-      await queryClient.invalidateQueries({
-        queryKey: ["damage-calculator-magic-spell", campaignId, characterId],
-      });
-      router.refresh();
-    } catch (err) {
-      console.error("Error leveling up:", err);
-      void notify("Помилка при піднятті рівня");
-    }
-  };
+  const { basicInfo, error, handleSubmit, loading } = form;
 
   return (
     <Card>
@@ -142,24 +39,7 @@ export function DmCharacterEditForm({
           onSubmit={handleSubmit}
           className="space-y-6 w-full flex flex-col"
         >
-          <DmCharacterEditFormAccordion
-            formData={formData}
-            setFormData={setFormData}
-            basicInfo={basicInfo}
-            abilityScores={abilityScores}
-            combatStats={combatStats}
-            skills={skills}
-            abilities={abilities}
-            spellcasting={spellcasting}
-            campaignId={campaignId}
-            characterId={characterId}
-            equipped={equipped}
-            setEquipped={setEquipped}
-            artifacts={artifacts}
-            artifactSets={artifactSets}
-            members={members}
-            races={races}
-          />
+          <DmCharacterEditFormAccordion editor={editor} />
 
           <ActionBar>
             <Button
@@ -167,7 +47,7 @@ export function DmCharacterEditForm({
               variant="default"
               onClick={(e) => {
                 e.preventDefault();
-                void handleLevelUp();
+                void levelUp();
               }}
             >
               Підняти рівень ({basicInfo.level} → {basicInfo.level + 1})

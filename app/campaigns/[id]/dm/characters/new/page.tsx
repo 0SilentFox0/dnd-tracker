@@ -24,9 +24,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { createCharacter } from "@/lib/api/characters";
 import { useCampaignMembers } from "@/lib/hooks/campaigns";
-import { useCharacterForm } from "@/lib/hooks/characters";
+import { useCharacterForm, useCreateCharacter } from "@/lib/hooks/characters";
 import { useRaces } from "@/lib/hooks/races";
 
 export default function NewCharacterPage({
@@ -37,6 +36,8 @@ export default function NewCharacterPage({
   const { id } = use(params);
 
   const router = useRouter();
+
+  const create = useCreateCharacter(id);
 
   const { members, loading: membersLoading } = useCampaignMembers(id);
 
@@ -55,7 +56,7 @@ export default function NewCharacterPage({
     handleSubmit,
   } = useCharacterForm({
     onSubmit: async (data) => {
-      await createCharacter(id, data);
+      await create.mutateAsync(data);
       router.push(`/campaigns/${id}/dm/characters`);
     },
   });
