@@ -45,7 +45,7 @@
 | `api/campaigns/[id]/characters` | CRUD персонажів |
 | `api/campaigns/[id]/characters/[characterId]` | GET/PATCH персонажа, damage-preview, inventory, level-up |
 | `api/campaigns/[id]/battles` | Список боїв, balance |
-| `api/campaigns/[id]/battles/[battleId]` | Старт, next-turn, attack, attack-and-next-turn, spell, morale-check, complete, rollback, add-participant, damage-breakdown тощо |
+| `api/campaigns/[id]/battles/[battleId]` | Старт, next-turn, attack (з `endTurn`), spell, bonus-action, morale-check, complete, rollback, add-participant тощо; мутації відповідають `{ delta, response? }` |
 | `api/campaigns/[id]/skills` | CRUD скілів |
 | `api/campaigns/[id]/skills/[skillId]` | GET/PATCH скіла |
 | `api/campaigns/[id]/spells` | Заклинання, групи, імпорт |
@@ -84,7 +84,7 @@
 | **`ui/`** | Базові компоненти (Button, Card, Select, Tabs, Accordion тощо) — shadcn/ui стиль. Діалоги — лише `ResponsiveDialog` (модалка на десктопі, шторка `vaul` на телефоні); підтвердження й повідомлення — `ConfirmProvider` + `useConfirm` / `useNotify`. |
 | **`common/`** | Спільні блоки: FormCard, FormField, LabeledInput, ImageUpload, `ActionBar` (кнопки форми, на телефоні прилипають донизу), `states/` (`EmptyState`, `LoadingState`, `ErrorState`, `QueryState`). |
 | **`layout/`** | Макети, хедери, навігація. |
-| **`battle/`** | Бій: картки учасників (`cards/`), діалоги атаки/заклинань/моралі (`dialogs/`), списки, оверлеї, панелі, представлення ходу (`views/`). |
+| **`battle/`** | Бій: `scene/` (провайдер, `BattleScreen`, мобільна й десктопна розкладки, трек ініціативи, рядки учасників, мій герой, журнал), `wizards/` (майстер атаки, книга заклинань, бонусна дія, введення кубиків), `fx/` (оверлеї результатів), `hud/` (тема, шрифти, примітиви), `dialogs/` і `panels/` (DM), `views/BattlePreparationView`. |
 | **`characters/`** | Персонаж: basic info, ability scores, combat params, skills, spells, artifacts, stats (damage calculator, HP preview). |
 | **`campaigns/`** | Кампанія: join, members, info, settings. |
 | **`abilities/`** | Редактор умінь для всіх власників: акордеон (`AbilityListEditor`), секції «Коли / Умова / Ліміти / Що робить», поля з реєстру (`fields/`), шаблони й «Скопіювати з…», `AbilitySummary` для карток. |
@@ -97,7 +97,7 @@
 | **`inventory/`** | Інвентар: валюта, екіпіровка, рюкзак. |
 | **`units/`** | Юніти: списки, форми, діалоги. |
 
-Іменування: доменні компоненти з великої літери; підкомпоненти часто в тій самій папці або в підпапках (`battle/cards/participant-card/`).
+Іменування: доменні компоненти з великої літери; підкомпоненти часто в тій самій папці або в підпапках (`battle/scene/`, `battle/wizards/`).
 
 ---
 
@@ -117,8 +117,8 @@
 
 React-хуки згруповані по папках за доменом; кожна папка має `index.ts` для публічного API. Імпорт: `@/lib/hooks/battles`, `@/lib/hooks/characters` тощо.
 
-- **`lib/hooks/battles/`** — список і CRUD боїв: `useBattles` (useBattle, useStartBattle, useUpdateBattle, …), `mergeBattleCache`, `useBattles-cache`.
-- **`lib/hooks/battle/`** — логіка одного бою: `useBattleSceneLogic`, `usePusherBattleSync`, `useAttackFlow`, `useDamageBreakdown`, `useDamageFlash`, `useMoraleOverlay`, `useBattlePageDialogs`.
+- **`lib/hooks/battles/`** — список і CRUD боїв: `useBattles` (useBattle, useStartBattle, useUpdateBattle, …); усі мутації бою — через `useBattleAction` (`expectedVersion`, застосування дельти, 409 → рефетч і тост).
+- **`lib/hooks/battle/`** — логіка одного бою: `useBattleSceneValue`/`useBattleScene` (контекст сцени), `usePusherBattleSync` (`battle-delta`), `useAttackWizard`, `useSpellBook`, `usePlayerTurn`, `useBattleToast`, `useHpChange`, `useBattlePageDialogs` (DM-діалоги).
 - **`lib/hooks/campaigns/`** — `useCampaignMembers`.
 - **`lib/hooks/characters/`** — персонажі та форма: `useCharacterForm`, `useCharacterView`, `useCharacters`, `useInventory`, `useDamageCalculator`, `useHeroScalingCoefficients`; типи `SkillTreeProgress`, `Character`.
 - **`lib/hooks/skills/`** — скіли та дерево: `useSkills`, `useMainSkills`, `useSkillForm`, `useSkillTreePage`, `useSkillTreeEnrichment`, `useSkillTreeFilters`, `useSkillTreeSave`, `useSkillTreeClear`, `useSkillTreeAssignment`; тип `SkillFromLibrary`.
@@ -138,7 +138,8 @@ React-хуки згруповані по папках за доменом; ко�
 - **`attack/`** — розрахунок атаки: куби, крит, ефекти, процес удару (`process/`: hit, critical, critical-fail тощо).
 - **`attack-and-next-turn/`** — фаза атаки (`runAttackPhase`).
 - **`turn/`** — єдиний движок переходу ходу (`advanceTurn`).
-- **`store/`**, **`pipeline/`** — нормалізоване сховище бою і `runBattleMutation` для всіх battle-роутів.
+- **`store/`**, **`pipeline/`** — нормалізоване сховище бою і `runBattleMutation` для всіх battle-роутів (`client-delta.ts` будує дельту для клієнта).
+- **`client/`** — `applyBattleDelta` для кешу на клієнті; **`flows/`** — редʼюсери майстрів (атака, книга, хід); **`view/`** — що бачить гравець (стани HP, відомий AC, помічене в бою, черга ходів).
 - **`damage/`** — розбиття урону (breakdown), модифікатори, resistance, бонуси, формули.
 - **`participant/`** — учасник бою: з character/unit, збирання умінь, артефакти, покращення заклинань.
 - **`spell/`** — застосування заклинання: гілки (process-branches), ефекти (process-effects), розрахунки.
@@ -252,7 +253,7 @@ React-провайдери: **`query-provider.tsx`** (TanStack Query), можл�
 ### 7.2 Компоненти
 
 - Сторінки та великі екрани — в **`app/`**; переиспользувані блоки — в **`components/`**.
-- Якщо компонент великий або багато пропсів — виносити в підкомпоненти або в окрему папку з `index.ts` (наприклад **`BattlePageDialogs/`**).
+- Якщо компонент великий або багато пропсів — виносити в підкомпоненти або в окрему папку з `index.ts` (наприклад **`components/battle/scene/`**).
 - Клієнтський код: **`"use client"`** на початку файлу.
 
 ### 7.3 API routes
@@ -273,8 +274,8 @@ React-провайдери: **`query-provider.tsx`** (TanStack Query), можл�
 
 ## 8. Типові потоки даних
 
-1. **Відкриття бою:** сторінка `app/campaigns/[id]/battles/[battleId]/page.tsx` → хук `useBattleSceneLogic` → API `useBattle`, мутації (nextTurn, attack, spell тощо) → оновлення через Pusher.
-2. **Атака:** кнопка в UI → `handleAttack` (з useBattleSceneLogic-handlers) → API `attack` або `attack-and-next-turn` → `lib/utils/battle/attack*` та **`damage/`** на сервері → оновлення BattleScene та кешу.
+1. **Відкриття бою:** серверна сторінка `app/campaigns/[id]/battles/[battleId]/page.tsx` (userId) → `BattlePageClient` → `useBattleSceneValue` + `BattleSceneProvider` → `BattleScreen`; мутації через `useBattleAction`, оновлення — дельтами (відповідь і Pusher `battle-delta`).
+2. **Атака:** «Атака» → `AttackWizard` + `useAttackWizard` (редʼюсер `flows/attack-flow`: зброя → ціль → кидок → шкода → підсумок) → API `attack` → `lib/utils/battle/attack*` та **`damage/`** на сервері (кроки шкоди пишуться в `actionDetails.damageSteps`) → дельта в кеш → `ResultOverlay`.
 3. **Форма скіла:** сторінка DM → **`useSkillForm`** → **`SkillCreateForm`** / **`SkillEditForm`** → **`buildSkillFormPayload`** → API **PATCH/POST** skills.
 4. **Дерево прокачки:** **`useSkillTreePage`** → **`useSkillTreeFilters`**, **`useSkillTreeEnrichment`**, **`useSkillTreePage-handlers`** → збереження через **`useSkillTreeSave`** до API skill-trees / characters.
 
