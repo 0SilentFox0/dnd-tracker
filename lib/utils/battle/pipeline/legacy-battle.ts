@@ -69,9 +69,6 @@ export function buildPusherMessages(args: {
     { channel, event: "battle-updated", payload: { type: "battle-updated", battleId: delta.battleId, version: delta.version } },
   ];
 
-  if (after.status === "completed" && before.status !== "completed") {
-    messages.push({ channel, event: "battle-completed", payload: { battleId: delta.battleId, version: delta.version } });
-  }
 
   const turnMoved = before.round !== after.round || before.turnIndex !== after.turnIndex || before.status !== after.status;
 

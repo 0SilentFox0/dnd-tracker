@@ -53,9 +53,9 @@ describe("buildPusherMessages", () => {
     expect(buildPusherMessages({ before: scene, after: { ...scene, turnIndex: 1 }, participants: [hero, goblin], delta: payload }).map((m) => m.event)).toEqual(["battle-delta", "battle-updated"]);
   });
 
-  it("завершення бою — battle-completed; battle-started більше немає", () => {
+  it("старт і завершення — лише battle-delta (+ сумісний battle-updated), без окремих подій", () => {
     expect(buildPusherMessages({ before: { ...scene, status: "prepared" }, after: scene, participants: [hero], delta: payload }).map((m) => m.event)).toEqual(["battle-delta", "battle-updated", "turn-started"]);
-    expect(buildPusherMessages({ before: scene, after: { ...scene, status: "completed" }, participants: [hero], delta: payload }).map((m) => m.event)).toContain("battle-completed");
+    expect(buildPusherMessages({ before: scene, after: { ...scene, status: "completed" }, participants: [hero], delta: payload }).map((m) => m.event)).toEqual(["battle-delta", "battle-updated"]);
   });
 
   it("велика дельта — refetch", () => {
