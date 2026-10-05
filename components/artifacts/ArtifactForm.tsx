@@ -12,6 +12,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { ArtifactIconUrlPreview } from "./ArtifactIconUrlPreview";
+import { ArtifactWeaponFields } from "./ArtifactWeaponFields";
 
 import { AbilityListEditor } from "@/components/abilities";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ import {
 import { abilitySaveError } from "@/lib/hooks/abilities";
 import type { ConversionIssue } from "@/lib/utils/abilities/legacy/types";
 import type { Ability } from "@/lib/utils/abilities/schema";
+import { isWeaponSlot, type WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
 
 export interface ArtifactSetOption {
   id: string;
@@ -49,6 +51,7 @@ export interface ArtifactFormInitial {
   setId: string | null;
   abilities: Ability[];
   abilityIssues: ConversionIssue[];
+  weapon?: WeaponStats;
 }
 
 export interface ArtifactFormSubmitPayload {
@@ -59,6 +62,7 @@ export interface ArtifactFormSubmitPayload {
   icon: string | null;
   setId: string | null | undefined;
   abilities: Ability[];
+  weapon?: WeaponStats;
 }
 
 export interface ArtifactFormProps {
@@ -123,6 +127,8 @@ export function ArtifactForm({
 
   const [abilitiesValid, setAbilitiesValid] = useState(true);
 
+  const [weapon, setWeapon] = useState<WeaponStats>(initial.weapon ?? {});
+
   const isBusy = isSaving || isDeleting;
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -145,6 +151,7 @@ export function ArtifactForm({
         icon: icon.trim() || null,
         setId: mode === "edit" ? setId || null : setId || undefined,
         abilities,
+        ...(isWeaponSlot(slot) && { weapon }),
       };
 
       await onSubmit(payload);
@@ -259,6 +266,8 @@ export function ArtifactForm({
             <p className="text-xs text-muted-foreground">{iconHint}</p>
             <ArtifactIconUrlPreview key={icon.trim()} url={icon} />
           </div>
+
+          {isWeaponSlot(slot) && <ArtifactWeaponFields value={weapon} onChange={setWeapon} />}
 
           <AbilityListEditor
             campaignId={campaignId}

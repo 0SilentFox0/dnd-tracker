@@ -1,5 +1,6 @@
 import type { ConversionIssue } from "@/lib/utils/abilities/legacy/types";
 import type { Ability } from "@/lib/utils/abilities/schema";
+import type { WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
 
 export interface ArtifactSetOption {
   id: string;
@@ -16,4 +17,5 @@ export interface ArtifactData {
   setId: string | null;
   abilities: Ability[];
   abilityIssues: ConversionIssue[];
+  weapon: WeaponStats;
 }

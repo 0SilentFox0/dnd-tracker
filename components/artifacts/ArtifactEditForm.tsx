@@ -47,6 +47,7 @@ export function ArtifactEditForm({
         setId: artifact.setId,
         abilities: artifact.abilities,
         abilityIssues: artifact.abilityIssues,
+        weapon: artifact.weapon,
       }}
       onSubmit={async (payload) => {
         await updateArtifact(campaignId, artifact.id, payload);

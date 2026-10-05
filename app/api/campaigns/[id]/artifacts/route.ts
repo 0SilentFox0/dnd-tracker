@@ -10,6 +10,7 @@ import {
 import { abilitiesJson } from "@/lib/utils/abilities/legacy/read";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { weaponStatsColumns } from "@/lib/utils/artifacts/weapon-stats";
 
 export async function POST(
   request: Request,
@@ -54,6 +55,7 @@ export async function POST(
         rarity: data.rarity,
         slot: data.slot,
         ...(data.abilities && { abilities: abilitiesJson(data.abilities) }),
+        ...(data.weapon && weaponStatsColumns(data.weapon)),
         setId: data.setId,
         icon,
       },

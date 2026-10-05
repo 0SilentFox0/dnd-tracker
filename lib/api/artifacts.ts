@@ -1,5 +1,6 @@
 import { campaignDelete, createCampaignCrudApi } from "@/lib/api/client";
 import type { Ability } from "@/lib/utils/abilities/schema";
+import type { WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
 
 export interface ArtifactListItem {
   id: string;
@@ -17,17 +18,10 @@ export type CreateArtifactData = {
   description?: string;
   rarity?: string;
   slot: string;
-  bonuses?: Record<string, number | undefined>;
-  modifiers?: Array<{
-    type: string;
-    value: number | string;
-    isPercentage?: boolean;
-    element?: string;
-  }>;
-  passiveAbility?: Record<string, unknown>;
   setId?: string;
   icon?: string | null;
   abilities?: Ability[];
+  weapon?: WeaponStats;
 };
 
 export type UpdateArtifactData = Partial<{
@@ -35,17 +29,10 @@ export type UpdateArtifactData = Partial<{
   description: string | null;
   rarity: string | null;
   slot: string;
-  bonuses: Record<string, number | undefined>;
-  modifiers: Array<{
-    type: string;
-    value: number | string;
-    isPercentage?: boolean;
-    element?: string;
-  }>;
-  passiveAbility: Record<string, unknown> | null;
   setId: string | null;
   icon: string | null;
   abilities: Ability[];
+  weapon: WeaponStats;
 }>;
 
 const artifactsApi = createCampaignCrudApi<

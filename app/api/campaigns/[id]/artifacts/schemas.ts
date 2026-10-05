@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { ARTIFACT_RARITY_VALUES, ARTIFACT_SLOT_VALUES } from "@/lib/constants/artifacts";
 import { AbilitiesSchema } from "@/lib/utils/abilities/schema";
+import { WeaponStatsSchema } from "@/lib/utils/artifacts/weapon-stats";
 
 export const artifactSkillEffectSchema = z.object({
   stat: z.string(),
@@ -42,6 +43,7 @@ export const createArtifactSchema = z.object({
   rarity: z.enum(ARTIFACT_RARITY_VALUES).optional(),
   slot: z.enum(ARTIFACT_SLOT_VALUES),
   abilities: AbilitiesSchema.optional(),
+  weapon: WeaponStatsSchema.optional(),
   setId: z.string().optional(),
   icon: z.preprocess(
     (val) => (val === "" ? null : val),
@@ -55,6 +57,7 @@ export const patchArtifactSchema = z.object({
   rarity: z.enum(ARTIFACT_RARITY_VALUES).nullable().optional(),
   slot: z.enum(ARTIFACT_SLOT_VALUES).optional(),
   abilities: AbilitiesSchema.optional(),
+  weapon: WeaponStatsSchema.optional(),
   setId: z.string().nullable().optional(),
   icon: z.preprocess(
     (val) => (val === "" ? null : val),

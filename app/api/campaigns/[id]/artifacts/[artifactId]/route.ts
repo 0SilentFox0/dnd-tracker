@@ -11,6 +11,7 @@ import { readAbilities } from "@/lib/utils/abilities/legacy/read";
 import { abilitiesJson } from "@/lib/utils/abilities/legacy/read";
 import { requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { weaponStatsColumns } from "@/lib/utils/artifacts/weapon-stats";
 
 export async function GET(
   _request: Request,
@@ -99,6 +100,7 @@ export async function PATCH(
         rarity: data.rarity !== undefined ? data.rarity : undefined,
         slot: data.slot,
         abilities: data.abilities !== undefined ? abilitiesJson(data.abilities) : undefined,
+        ...(data.weapon && weaponStatsColumns(data.weapon)),
         setId: data.setId !== undefined ? (data.setId || null) : undefined,
         icon:
           data.icon !== undefined ? resolvedIcon ?? null : undefined,

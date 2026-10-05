@@ -58,6 +58,7 @@ export function ArtifactCreateForm({
           icon: payload.icon,
           setId: payload.setId ?? undefined,
           abilities: payload.abilities,
+          weapon: payload.weapon,
         });
 
         router.push(`/campaigns/${campaignId}/dm/artifacts`);
