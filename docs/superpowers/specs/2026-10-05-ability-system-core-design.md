@@ -300,3 +300,27 @@ defineEffect({
   - видалити таблицю `racial_abilities`;
   - прибрати запасний варіант конвертера на час читання і в `loadBattle`;
   - зробити `abilities` NOT NULL.
+
+## 9. Уточнення під час планування
+
+Під час читання коду рушія з'ясувалося таке. Ці пункти мають пріоритет над попередніми розділами.
+
+- **Види ефектів (13 замість ~10).** Основні: `modifyStat`, `damageBonus`, `flag`, `note`, `grantAction`, `dealDamage`, `heal` (`revive`), `dot`, `applyCondition`. `resource` розділено на `restoreSpellSlot` і `changeMorale`. Додано `cleanse` (зняти дебафи) і `randomOf` (рунічна атака). Ще не автоматизовані механіки, наприклад саммон чи перенаправлення шкоди, стають `note`, як і зараз.
+- **Ролі `kill`:** `killer` | `killerSide` (будь-хто з моєї сторони вбив, це стара «мораль за вбивство») | `victimSide` (загинув союзник).
+- **`moraleCheck.result`** додатково приймає `any`.
+- **`battleStart` для саммонів** спрацьовує лише для вмінь самих новачків (`newcomerIds`). Аури старих учасників на саммонів для запечених статів доходять через `applyBakedAuras`.
+- **Контратака** — це пасивний прапорець `counterAttack { attackKinds, bonusPercent }`, а не `hit/target`. Обмеження «раз на раунд» уже дає `hasUsedReaction`.
+- **Запечені стати** (`BAKED_STATS`): `initiative`, `maxHp`, `speed`, `morale`, `minTargets`/`maxTargets`, `spellSlots`, шість характеристик. Вони застосовуються при побудові учасника, з аурами для `allAllies`/`allEnemies`. Динамічні стати: `armor`, `attackBonus` (з `attackKind`), `critThreshold`. Таймові ефекти змінюють лише `armor`, `attackBonus`, `critThreshold`, `initiative`.
+- **Прапорці:** `advantage`, `disadvantage`, `disadvantageForAttackers`, `guaranteedHit`, `resistance { damageType, percent }` (100 = імунітет), `spellImmunity`, `counterAttack`, `seeEnemyHp`. Тож поріг криту, недолік для атакувальників і гарантоване влучання **починають працювати**. Раніше вони записувалися, але ніде не читалися.
+- **Покращення заклинань** (`spellEffectIncrease`, `spellAdditionalModifier`, мультицілі, AoE) — окремий механізм. Вони йдуть у `battleData.spellEnhancers` і не входять в `abilities`.
+- **«Найвищий рівень у лінії»** (level-скіли за `mainSkillId`, leaf-скіли — за власним id) тепер діє для всіх умінь скілів, а не лише для шкоди. Школа магії для `damageBonus` береться з `skill.spellGroupId`, а якщо його немає — з `mainSkill.spellGroupId` під час побудови.
+- **Бонуси й модифікатори артефактів** (`bonuses`, `modifiers`), а не лише `passiveAbility`, також конвертуються. Так зникає окремий шлях шкоди та атаки від артефактів. Цілі зброї (`min/max_targets` у слоті `weapon`) і далі рахує атака.
+- **Складні тригери** стають `turnStart` + умовою `hpBelow`/`hpAbove`. Раніше вони перевірялися після кожної зміни HP. У звіті це позначено як зміна поведінки.
+- **Скіл без тригерів** стає пасивкою.
+- **Бонусна дія** передає `abilityKey` замість `skillId`. Вичерпаний ліміт дає 422 `ability_limit`, а невдалий `chance` витрачає дію і пише «не спрацювало».
+- **Супутні виправлення:**
+  - `allParticipantsUpdated` після атаки більше не губить зміни після on-hit;
+  - гарантована шкода при промаху тепер виставляє статус;
+  - мораль «за вбивство» не нараховується без вбивства;
+  - спел-резист застосовується до шкоди від заклинань.
+- **`scripts/run-skills-testing*`** видаляються в 3a, а в 3c переписуються на `runAbilities`.
