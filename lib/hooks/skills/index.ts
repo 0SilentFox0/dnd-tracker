@@ -1,9 +1,13 @@
+export { progressionKey } from "./progression-keys";
+export { useCharacterLearnedSpellIds } from "./useCharacterLearnedSpellIds";
+export { useCharacterProgression } from "./useCharacterProgression";
 export {
   useCreateMainSkill,
   useDeleteMainSkill,
   useMainSkills,
   useUpdateMainSkill,
 } from "./useMainSkills";
+export { useProgressionActions } from "./useProgressionActions";
 export { useSkillForm } from "./useSkillForm";
 export type { SkillFromLibrary } from "./useSkills";
 export {
