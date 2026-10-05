@@ -2,10 +2,8 @@
  * Типи для React hooks
  */
 
-import type { SkillEffect } from "./battle";
-import type { SkillTriggers } from "./skill-triggers";
-
 import type { SpellEnhancementType } from "@/lib/constants/spell-enhancement";
+import type { Ability } from "@/lib/utils/abilities/schema";
 
 // useSkillForm
 export interface GroupedSkillPayload {
@@ -14,23 +12,11 @@ export interface GroupedSkillPayload {
     description?: string;
     icon?: string;
   };
-  bonuses: Record<string, number>;
-  combatStats: {
-    damage?: number;
-    armor?: number;
-    speed?: number;
-    physicalResistance?: number;
-    magicalResistance?: number;
-    min_targets?: number;
-    max_targets?: number;
-    effects?: SkillEffect[];
-    affectsDamage?: boolean;
-    damageType?: "melee" | "ranged" | "magic" | null;
-  };
+  abilities: Ability[];
   spellData: {
-    spellId?: string;
-    spellGroupId?: string;
-    grantedSpellId?: string;
+    spellId: string | null;
+    spellGroupId: string | null;
+    grantedSpellId: string | null;
   };
   spellEnhancementData: {
     spellEnhancementTypes?: SpellEnhancementType[];
@@ -46,9 +32,8 @@ export interface GroupedSkillPayload {
     spellAoeSpellIds?: string[];
   };
   mainSkillData: {
-    mainSkillId?: string;
+    mainSkillId: string | null;
   };
-  skillTriggers?: SkillTriggers;
 }
 
 // useCharacterForm

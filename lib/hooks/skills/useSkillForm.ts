@@ -16,10 +16,10 @@ import { buildSkillFormReturn } from "./useSkillForm-return";
 
 import { createSkill, updateSkill } from "@/lib/api/skills";
 import { SpellEnhancementType } from "@/lib/constants/spell-enhancement";
-import type { SkillEffect } from "@/types/battle";
+import { abilitySaveError } from "@/lib/hooks/abilities";
+import type { Ability } from "@/lib/utils/abilities/schema";
 import type { GroupedSkillPayload } from "@/types/hooks";
 import type { MainSkill } from "@/types/main-skills";
-import type { SkillTriggers } from "@/types/skill-triggers";
 
 export function useSkillForm(
   campaignId: string,
@@ -56,26 +56,9 @@ export function useSkillForm(
 
   const [icon, setIcon] = useState(normalizedData?.icon || "");
 
-  // Effects & targeting
-  const [effects, setEffects] = useState<SkillEffect[]>(
-    normalizedData?.effects || [],
-  );
+  const [abilities, setAbilities] = useState<Ability[]>(normalizedData?.abilities ?? []);
 
-  const [minTargets, setMinTargets] = useState(
-    normalizedData?.min_targets?.toString() || "",
-  );
-
-  const [maxTargets, setMaxTargets] = useState(
-    normalizedData?.max_targets?.toString() || "",
-  );
-
-  const [affectsDamage, setAffectsDamage] = useState(
-    normalizedData?.affectsDamage ?? false,
-  );
-
-  const [damageType, setDamageType] = useState<
-    "melee" | "ranged" | "magic" | null
-  >(normalizedData?.damageType ?? null);
+  const [abilitiesValid, setAbilitiesValid] = useState(true);
 
   // Spell and main skill
   const [spellId, setSpellId] = useState<string | null>(
@@ -160,11 +143,6 @@ export function useSkillForm(
     });
   }, [spellAoeSpellIds]);
 
-  // Skill triggers
-  const [skillTriggers, setSkillTriggers] = useState<SkillTriggers>(
-    (normalizedData?.skillTriggers as SkillTriggers) || [],
-  );
-
   // Handlers
   const handleEnhancementTypeToggle = useCallback(
     (type: SpellEnhancementType) => {
@@ -188,11 +166,7 @@ export function useSkillForm(
       name,
       description,
       icon,
-      minTargets,
-      maxTargets,
-      effects,
-      affectsDamage,
-      damageType,
+      abilities,
       spellId,
       spellGroupId,
       grantedSpellId,
@@ -204,17 +178,12 @@ export function useSkillForm(
       spellNewSpellId,
       spellAllowMultipleTargets,
       spellAoeSpellIds,
-      skillTriggers,
     });
   }, [
     name,
     description,
     icon,
-    minTargets,
-    maxTargets,
-    effects,
-    affectsDamage,
-    damageType,
+    abilities,
     spellId,
     spellGroupId,
     grantedSpellId,
@@ -226,14 +195,13 @@ export function useSkillForm(
     spellNewSpellId,
     spellAllowMultipleTargets,
     spellAoeSpellIds,
-    skillTriggers,
   ]);
 
   const handleSubmit = useCallback(
     async (event: FormEvent) => {
       event.preventDefault();
 
-      if (!name.trim()) return;
+      if (!name.trim() || !abilitiesValid) return;
 
       setIsSaving(true);
       setError(null);
@@ -256,10 +224,7 @@ export function useSkillForm(
         });
         router.push(`/campaigns/${campaignId}/dm/skills`);
       } catch (err) {
-        const message =
-          err instanceof Error ? err.message : "Помилка створення";
-
-        setError(message);
+        setError(abilitySaveError(err, "Помилка створення"));
       } finally {
         setIsSaving(false);
       }
@@ -272,6 +237,7 @@ export function useSkillForm(
       queryClient,
       router,
       name,
+      abilitiesValid,
     ],
   );
 
@@ -286,16 +252,11 @@ export function useSkillForm(
     setName,
     setDescription,
     setIcon,
-    effects,
-    minTargets,
-    maxTargets,
-    setEffects,
-    setMinTargets,
-    setMaxTargets,
-    affectsDamage,
-    damageType,
-    setAffectsDamage,
-    setDamageType,
+    abilities,
+    abilityIssues: normalizedData?.abilityIssues ?? [],
+    abilitiesValid,
+    setAbilities,
+    setAbilitiesValid,
     spellId,
     spellGroupId,
     grantedSpellId,
@@ -317,8 +278,6 @@ export function useSkillForm(
     handleEnhancementTypeToggle,
     mainSkillId,
     setMainSkillId,
-    skillTriggers,
-    setSkillTriggers,
     handleSubmit,
   });
 }

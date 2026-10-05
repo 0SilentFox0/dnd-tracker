@@ -3,8 +3,8 @@
  */
 
 import { SpellEnhancementType } from "@/lib/constants/spell-enhancement";
-import type { SkillEffect } from "@/types/battle";
-import type { SkillTriggers } from "@/types/skill-triggers";
+import type { ConversionIssue } from "@/lib/utils/abilities/legacy/types";
+import type { Ability } from "@/lib/utils/abilities/schema";
 import type { GroupedSkill, Skill } from "@/types/skills";
 
 export interface SpellOption {
@@ -12,44 +12,15 @@ export interface SpellOption {
   name: string;
 }
 
-export type InitialSkillFormData =
-  | Skill
-  | GroupedSkill
-  | {
-      id: string;
-      name: string;
-      description: string | null;
-      icon: string | null;
-      bonuses: unknown;
-      damage: number | null;
-      armor: number | null;
-      speed: number | null;
-      physicalResistance: number | null;
-      magicalResistance: number | null;
-      spellId: string | null;
-      spellGroupId: string | null;
-      grantedSpellId?: string | null;
-      mainSkillId: string | null;
-      spellEnhancementTypes?: unknown;
-      spellEffectIncrease?: number | null;
-      spellTargetChange?: unknown;
-      spellAdditionalModifier?: unknown;
-  spellNewSpellId?: string | null;
-  spellAllowMultipleTargets?: boolean;
-  spellAoeSpellIds?: string[];
-  skillTriggers?: SkillTriggers;
-};
+export type InitialSkillFormData = Skill | GroupedSkill;
 
 export interface NormalizedSkillFormData {
   id?: string;
   name: string;
   description: string | null;
   icon: string | null;
-  min_targets?: number | null;
-  max_targets?: number | null;
-  effects?: SkillEffect[];
-  affectsDamage?: boolean;
-  damageType?: "melee" | "ranged" | "magic" | null;
+  abilities?: Ability[];
+  abilityIssues?: ConversionIssue[];
   spellId: string | null;
   spellGroupId: string | null;
   grantedSpellId?: string | null;
@@ -61,7 +32,6 @@ export interface NormalizedSkillFormData {
   spellNewSpellId?: string | null;
   spellAllowMultipleTargets?: boolean;
   spellAoeSpellIds?: string[];
-  skillTriggers?: SkillTriggers;
 }
 
 export function normalizeInitialSkillData(
@@ -69,7 +39,7 @@ export function normalizeInitialSkillData(
 ): NormalizedSkillFormData | undefined {
   if (!data) return undefined;
 
-  if ("basicInfo" in data && "combatStats" in data) {
+  if ("basicInfo" in data) {
     const grouped = data as GroupedSkill;
 
     return {
@@ -77,11 +47,8 @@ export function normalizeInitialSkillData(
       name: grouped.basicInfo.name,
       description: grouped.basicInfo.description || null,
       icon: grouped.basicInfo.icon || null,
-      min_targets: grouped.combatStats.min_targets || null,
-      max_targets: grouped.combatStats.max_targets || null,
-      effects: grouped.combatStats.effects || [],
-      affectsDamage: grouped.combatStats.affectsDamage ?? false,
-      damageType: grouped.combatStats.damageType ?? null,
+      abilities: grouped.abilities,
+      abilityIssues: grouped.abilityIssues,
       spellId: grouped.spellData.spellId || null,
       spellGroupId: grouped.spellData.spellGroupId || null,
       grantedSpellId: grouped.spellData.grantedSpellId ?? null,
@@ -102,7 +69,6 @@ export function normalizeInitialSkillData(
             (id): id is string => typeof id === "string" && id.length > 0,
           )
         : [],
-      skillTriggers: grouped.skillTriggers,
     };
   }
 

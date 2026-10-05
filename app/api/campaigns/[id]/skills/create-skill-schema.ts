@@ -13,8 +13,8 @@ export const createSkillSchema = z.object({
     ),
   }),
   spellData: z.object({
-    spellId: z.string().optional(),
-    spellGroupId: z.string().optional(),
+    spellId: z.string().nullable().optional(),
+    spellGroupId: z.string().nullable().optional(),
     grantedSpellId: z.string().nullable().optional(),
   }),
   spellEnhancementData: z.object({
@@ -48,7 +48,7 @@ export const createSkillSchema = z.object({
   }),
   abilities: AbilitiesSchema.optional(),
   mainSkillData: z.object({
-    mainSkillId: z.string().optional(),
+    mainSkillId: z.string().nullable().optional(),
   }),
   image: z.string().nullable().optional(),
 });

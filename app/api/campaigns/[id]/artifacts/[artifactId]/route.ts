@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
 import { randomUUID } from "crypto";
 
 import { patchArtifactSchema } from "@/app/api/campaigns/[id]/artifacts/schemas";

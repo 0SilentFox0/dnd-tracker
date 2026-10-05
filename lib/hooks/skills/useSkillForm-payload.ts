@@ -3,19 +3,14 @@
  */
 
 import { SpellEnhancementType } from "@/lib/constants/spell-enhancement";
-import type { SkillEffect } from "@/types/battle";
+import type { Ability } from "@/lib/utils/abilities/schema";
 import type { GroupedSkillPayload } from "@/types/hooks";
-import type { SkillTriggers } from "@/types/skill-triggers";
 
 export interface SkillFormPayloadState {
   name: string;
   description: string;
   icon: string;
-  minTargets: string;
-  maxTargets: string;
-  effects: Array<{ stat?: string; type?: string; value?: unknown }>;
-  affectsDamage: boolean;
-  damageType: "melee" | "ranged" | "magic" | null;
+  abilities: Ability[];
   spellId: string | null;
   spellGroupId: string | null;
   grantedSpellId: string | null;
@@ -31,7 +26,6 @@ export interface SkillFormPayloadState {
   spellNewSpellId: string | null;
   spellAllowMultipleTargets: boolean;
   spellAoeSpellIds: string[];
-  skillTriggers: SkillTriggers;
 }
 
 function parseNumber(value: string): number | undefined {
@@ -45,11 +39,7 @@ export function buildSkillFormPayload(
     name,
     description,
     icon,
-    minTargets,
-    maxTargets,
-    effects,
-    affectsDamage,
-    damageType,
+    abilities,
     spellId,
     spellGroupId,
     grantedSpellId,
@@ -61,7 +51,6 @@ export function buildSkillFormPayload(
     spellNewSpellId,
     spellAllowMultipleTargets,
     spellAoeSpellIds,
-    skillTriggers,
   } = state;
 
   return {
@@ -70,18 +59,11 @@ export function buildSkillFormPayload(
       description: description.trim() || undefined,
       icon: icon.trim() || undefined,
     },
-    bonuses: {},
-    combatStats: {
-      min_targets: parseNumber(minTargets),
-      max_targets: parseNumber(maxTargets),
-      effects: effects.length > 0 ? (effects as SkillEffect[]) : undefined,
-      affectsDamage: affectsDamage || undefined,
-      damageType: damageType ?? undefined,
-    },
+    abilities,
     spellData: {
-      spellId: spellId || undefined,
-      spellGroupId: spellGroupId || undefined,
-      grantedSpellId: grantedSpellId || undefined,
+      spellId: spellId || null,
+      spellGroupId: spellGroupId || null,
+      grantedSpellId: grantedSpellId || null,
     },
     spellEnhancementData: {
       spellEnhancementTypes:
@@ -113,8 +95,7 @@ export function buildSkillFormPayload(
         : undefined,
     },
     mainSkillData: {
-      mainSkillId: mainSkillId || undefined,
+      mainSkillId: mainSkillId || null,
     },
-    skillTriggers: skillTriggers.length > 0 ? skillTriggers : undefined,
   };
 }
