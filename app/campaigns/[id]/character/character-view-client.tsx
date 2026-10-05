@@ -10,6 +10,7 @@ import {
 
 import type { CharacterAbilityArtifactBonuses } from "@/components/characters/stats/CharacterAbilityScores";
 import type { CharacterCombatArtifactBonuses } from "@/components/characters/stats/CharacterCombatParams";
+import { FreePointBadge, LevelUpOverlay } from "@/components/skill-tree/progression";
 import { Card, CardContent } from "@/components/ui/card";
 import { ReadOnlyProvider } from "@/components/ui/read-only-context";
 import { getHeroMaxHpBreakdown } from "@/lib/constants/hero-scaling";
@@ -106,6 +107,10 @@ export function CharacterViewClient({
   return (
     <ReadOnlyProvider value={isPlayerView}>
       <div className="min-h-screen pb-8 container mx-auto max-w-3xl md:px-4 py-4 sm:px-6 sm:py-6 md:max-w-4xl">
+        <LevelUpOverlay campaignId={campaignId} characterId={characterId} name={basicInfo.name} />
+        <div className="mb-3 flex justify-end empty:hidden">
+          <FreePointBadge campaignId={campaignId} characterId={characterId} />
+        </div>
         {isPlayerView && (
           <CharacterHeroBlock
             basicInfo={basicInfo}
