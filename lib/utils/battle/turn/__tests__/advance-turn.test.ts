@@ -63,4 +63,23 @@ describe("advanceTurn", () => {
     expect(out.scene.pendingMoraleCheck).toBeNull();
     expect(out.actions.some((a) => a.resultText.length > 0)).toBe(true);
   });
+
+  it("новий раунд починається з першого в пересортованому порядку (саммон не пропускає хід)", () => {
+    const deadFirst = {
+      ...hero,
+      abilities: { ...hero.abilities, initiative: 20, baseInitiative: 20 },
+      combatStats: { ...hero.combatStats, currentHp: 0, status: "unconscious" as const },
+    };
+
+    const mid = createMockParticipant({ basicInfo: { ...base.basicInfo, id: "mid" }, abilities: { ...base.abilities, initiative: 10, baseInitiative: 10 } });
+
+    const enemy = { ...goblin, abilities: { ...goblin.abilities, initiative: 5, baseInitiative: 5 } };
+
+    const wolf = createMockParticipant({ basicInfo: { ...base.basicInfo, id: "wolf" }, abilities: { ...base.abilities, initiative: 30, baseInitiative: 30 } });
+
+    const out = advanceTurn({ participants: [deadFirst, mid, enemy], pending: [wolf], scene: { ...scene, turnIndex: 2 } });
+
+    expect(out.scene.round).toBe(2);
+    expect(out.participants[out.scene.turnIndex ?? -1].basicInfo.id).toBe("wolf");
+  });
 });
