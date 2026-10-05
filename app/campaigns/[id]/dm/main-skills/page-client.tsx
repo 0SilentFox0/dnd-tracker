@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { Network } from "lucide-react";
 
+import { EmptyState } from "@/components/common/states";
 import { CreateMainSkillDialog } from "@/components/main-skills/CreateMainSkillDialog";
 import { MainSkillCard } from "@/components/main-skills/MainSkillCard";
 import { MainSkillsPageHeader } from "@/components/main-skills/MainSkillsPageHeader";
@@ -49,11 +51,7 @@ export function DMMainSkillsPageClient({
       />
 
       {mainSkills.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground mb-4">
-            Немає основних навиків. Створіть перший основний навик.
-          </p>
-        </div>
+        <EmptyState icon={Network} title="Ще немає основних навиків" description="Створіть перший основний навик — він групує скіли в дереві прокачки." />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {mainSkills.map((mainSkill) => (

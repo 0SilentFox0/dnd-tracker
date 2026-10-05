@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { Dna } from "lucide-react";
 
+import { EmptyState, LoadingState } from "@/components/common/states";
 import { CreateRaceDialog } from "@/components/races/CreateRaceDialog";
 import { RaceCard } from "@/components/races/RaceCard";
 import { RacesPageHeader } from "@/components/races/RacesPageHeader";
@@ -51,20 +53,10 @@ export function DMRacesPageClient({
         onCreateRace={() => setCreateRaceDialogOpen(true)}
       />
 
-      {racesLoading && (
-        <div className="text-center py-4">
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Оновлення...
-          </p>
-        </div>
-      )}
-
-      {!racesLoading && races.length === 0 ? (
-        <div className="text-center py-8 sm:py-12">
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Раси ще не додані. Створіть першу расу.
-          </p>
-        </div>
+      {racesLoading && races.length === 0 ? (
+        <LoadingState rows={6} label="Завантаження рас…" />
+      ) : races.length === 0 ? (
+        <EmptyState icon={Dna} title="Ще немає рас" description="Створіть першу расу." />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {races.map((race) => (

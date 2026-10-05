@@ -1,7 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Skull } from "lucide-react";
 
+import { EmptyState, LoadingState } from "@/components/common/states";
 import { Accordion } from "@/components/ui/accordion";
 import { DeleteAllUnitsDialog } from "@/components/units/dialogs/DeleteAllUnitsDialog";
 import { UnitGroupAccordion } from "@/components/units/list/UnitGroupAccordion";
@@ -108,20 +110,10 @@ export function DMUnitsPageClient({
         onDeleteAll={() => setDeleteAllUnitsDialogOpen(true)}
       />
 
-      {unitsLoading && (
-        <div className="text-center py-4">
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Оновлення...
-          </p>
-        </div>
-      )}
-
-      {!unitsLoading && units.length === 0 ? (
-        <div className="text-center py-8 sm:py-12">
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Юніти ще не додані. Створіть першого юніта або імпортуйте їх з файлу.
-          </p>
-        </div>
+      {unitsLoading && units.length === 0 ? (
+        <LoadingState rows={6} label="Завантаження юнітів…" />
+      ) : units.length === 0 ? (
+        <EmptyState icon={Skull} title="Ще немає юнітів" description="Створіть першого юніта або імпортуйте їх з файлу." />
       ) : (
         <Accordion
           type="multiple"
