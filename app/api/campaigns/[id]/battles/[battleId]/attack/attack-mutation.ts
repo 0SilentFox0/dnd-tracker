@@ -1,9 +1,7 @@
 import { z } from "zod";
 
-import type { AttackType } from "@/lib/constants/battle";
-import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
 import { runAttackPhase } from "@/lib/utils/battle/attack-and-next-turn/run-attack-phase";
-import { mergeDiceFormulas } from "@/lib/utils/battle/balance/dice";
+import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { toPipelineError } from "@/lib/utils/battle/pipeline/compat-errors";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { battleActionToEvent } from "@/lib/utils/battle/store";
@@ -49,12 +47,7 @@ function assertAttackInput(ctx: BattleMutationContext, data: Omit<AttackBody, "e
   const targetIds = data.targetIds?.length ? data.targetIds : data.targetId ? [data.targetId] : [];
 
   // клієнт героя кидає кубики зброї разом із кубиками рівня (PlayerTurnViewDialogs)
-  const formula =
-    attacker.basicInfo.sourceType === "character"
-      ? mergeDiceFormulas(attack.damageDice ?? "", getHeroDamageDiceForLevel(attacker.abilities.level, attack.type as AttackType))
-      : (attack.damageDice ?? "");
-
-  assertAttackRolls(formula, { damageRolls: data.damageRolls, targetCount: targetIds.length });
+  assertAttackRolls(heroAttackDamageParts(attacker, attack).formula, { damageRolls: data.damageRolls, targetCount: targetIds.length });
 }
 
 export function attackMutation(ctx: BattleMutationContext, body: AttackBody): MutationResult {

@@ -1,10 +1,9 @@
-import type { AttackType } from "@/lib/constants/battle";
 import { BATTLE_RACE } from "@/lib/constants/battle";
-import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
 import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
-import { getDiceSlots, mergeDiceFormulas } from "@/lib/utils/battle/balance/dice";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
+import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
+import { diceSlots } from "@/lib/utils/common/dice";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleAction, BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -89,14 +88,6 @@ export function needsMoraleCheck(p: BattleParticipant, pendingMoraleCheck: unkno
   return morale !== 0;
 }
 
-export function attackDamageFormula(p: BattleParticipant, attack: BattleAttack): string {
-  const weapon = attack.damageDice ?? "";
-
-  return p.basicInfo.sourceType === "character"
-    ? mergeDiceFormulas(weapon, getHeroDamageDiceForLevel(p.abilities.level, attack.type as AttackType))
-    : weapon;
-}
-
 export function weaponPreview(p: BattleParticipant, attack: BattleAttack, all: BattleParticipant[]) {
   const mods = collectModifiers(withSelf(all, p), p.basicInfo.id, { damage: { kind: attack.type === "melee" ? "melee" : "ranged" } });
 
@@ -108,7 +99,7 @@ export function weaponPreview(p: BattleParticipant, attack: BattleAttack, all: B
 }
 
 export function damageDiceSlots(p: BattleParticipant, attack: BattleAttack): number[] {
-  const slots = getDiceSlots(attackDamageFormula(p, attack) || "1d6").filter((s) => Number.isFinite(s) && s >= 1);
+  const slots = diceSlots(heroAttackDamageParts(p, attack).formula);
 
   return slots.length ? slots : [6];
 }

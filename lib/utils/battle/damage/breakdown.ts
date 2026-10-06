@@ -2,11 +2,6 @@
  * Утиліта для обчислення breakdown урону (для превью в UI).
  */
 
-import {
-  getDiceAverage,
-  getTotalDiceCount,
-  mergeDiceFormulas,
-} from "../balance";
 import type {
   ComputeDamageBreakdownParams,
   DamageBreakdownMultiTargetResult,
@@ -14,12 +9,13 @@ import type {
   DamageBreakdownTargetResult,
 } from "../types/damage-breakdown";
 import { getDefenderResistanceBreakdown } from "./breakdown-helpers";
+import { heroDamageContext } from "./hero-damage";
 import { applyHeroDmDamageMultiplier } from "./hero-dm-multiplier";
 import { calculateDamageWithModifiersImpl } from "./impl";
 
 import { AttackType } from "@/lib/constants/battle";
-import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
 import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
+import { diceCount } from "@/lib/utils/common/dice";
 import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
 
 export type {
@@ -53,37 +49,7 @@ export function computeDamageBreakdown(
 
   const statModifier = getAttackAbilityModifier(attacker.abilities, isMelee ? AttackType.MELEE : AttackType.RANGED);
 
-  const isHero = attacker.basicInfo.sourceType === "character";
-
-  const heroLevelPart = isHero ? attacker.abilities.level : 0;
-
-  const heroDiceNotation = isHero
-    ? getHeroDamageDiceForLevel(attacker.abilities.level, attackTypeSafe)
-    : "";
-
-  const weaponDiceCount = getTotalDiceCount(attack.damageDice ?? "");
-
-  const heroDiceCount = getTotalDiceCount(heroDiceNotation);
-
-  const fullDiceCount = weaponDiceCount + heroDiceCount;
-
-  const clientSentFullRolls =
-    isHero && fullDiceCount > 0 && damageRolls.length === fullDiceCount;
-
-  const heroDicePart =
-    heroDiceNotation && !clientSentFullRolls
-      ? getDiceAverage(heroDiceNotation)
-      : 0;
-
   const additionalDamageModifiers: Array<{ type: string; value: number }> = [];
-
-  const weaponDiceNotationForBreakdown = clientSentFullRolls
-    ? mergeDiceFormulas(attack.damageDice ?? "", heroDiceNotation)
-    : undefined;
-
-  const heroDiceNotationForBreakdown = clientSentFullRolls
-    ? ""
-    : heroDiceNotation;
 
   const damageCalculation = calculateDamageWithModifiersImpl(
     attacker,
@@ -93,11 +59,7 @@ export function computeDamageBreakdown(
     {
       allParticipants,
       additionalDamage: additionalDamageModifiers,
-      heroLevelPart,
-      heroDicePart,
-      heroDiceNotation: heroDiceNotationForBreakdown,
-      weaponDiceNotation:
-        weaponDiceNotationForBreakdown || attack.damageDice || undefined,
+      ...heroDamageContext(attacker, attack, damageRolls),
     },
   );
 
@@ -171,7 +133,7 @@ export function computeDamageBreakdownMultiTarget(params: {
     (params.attacker.combatStats.maxTargets ?? 1) > 1 &&
     params.targets.length > 1;
 
-  const dicePerTarget = getTotalDiceCount(params.attack.damageDice ?? "");
+  const dicePerTarget = diceCount(params.attack.damageDice ?? "");
 
   const hasPerTargetRolls =
     isMultiTargetRanged &&

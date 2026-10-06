@@ -1,0 +1,55 @@
+import { AttackType } from "@/lib/constants/battle";
+import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
+import { diceAverage, diceCount, diceMax, mergeDiceFormulas, parseDice } from "@/lib/utils/common/dice";
+import type { BattleAttack, BattleParticipant } from "@/types/battle";
+
+export interface HeroAttackDamageParts {
+  weaponDice: string;
+  heroDice: string;
+  formula: string;
+}
+
+export function heroAttackDamageParts(p: BattleParticipant, attack: BattleAttack): HeroAttackDamageParts {
+  const weaponDice = attack.damageDice ?? "";
+
+  if (p.basicInfo.sourceType !== "character") return { weaponDice, heroDice: "", formula: weaponDice };
+
+  const type = attack.type === AttackType.RANGED ? AttackType.RANGED : AttackType.MELEE;
+
+  const heroDice = getHeroDamageDiceForLevel(p.abilities.level, type);
+
+  return { weaponDice, heroDice, formula: mergeDiceFormulas(weaponDice, heroDice) };
+}
+
+export interface HeroDamageContext {
+  heroLevelPart: number;
+  heroDicePart: number;
+  heroDiceNotation: string;
+  weaponDiceNotation: string | undefined;
+}
+
+/** Клієнт героя кидає зброю разом із кубиками рівня; якщо кидків менше — кубики рівня йдуть середнім. */
+export function heroDamageContext(p: BattleParticipant, attack: BattleAttack, damageRolls: number[]): HeroDamageContext {
+  const { weaponDice, heroDice, formula } = heroAttackDamageParts(p, attack);
+
+  const isHero = p.basicInfo.sourceType === "character";
+
+  const fullDiceCount = diceCount(weaponDice) + diceCount(heroDice);
+
+  const fullRolls = isHero && fullDiceCount > 0 && damageRolls.length === fullDiceCount;
+
+  return {
+    heroLevelPart: isHero ? p.abilities.level : 0,
+    heroDicePart: heroDice && !fullRolls ? diceAverage(heroDice) : 0,
+    heroDiceNotation: fullRolls ? "" : heroDice,
+    weaponDiceNotation: (fullRolls ? formula : "") || weaponDice || undefined,
+  };
+}
+
+export function maxDamageCritDice(p: BattleParticipant, attack: BattleAttack): number {
+  const parsed = parseDice(heroAttackDamageParts(p, attack).weaponDice);
+
+  const first = parsed?.groups[0];
+
+  return parsed && first ? first.count * first.size + parsed.flat : diceMax("1d6");
+}

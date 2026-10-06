@@ -1,10 +1,10 @@
+import { heroAttackDamageParts } from "./hero-damage";
 import { applyHeroDmDamageMultiplier } from "./hero-dm-multiplier";
 import { calculateDamageWithModifiers } from "./index";
 
 import { AttackType } from "@/lib/constants/battle";
-import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
-import { getDiceAverage } from "@/lib/utils/battle/balance";
 import { attackAbilityLabel, getAttackAbilityModifier } from "@/lib/utils/common/calculations";
+import { diceAverage } from "@/lib/utils/common/dice";
 import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
 
 export interface AverageDamage {
@@ -23,11 +23,11 @@ export function averageAttackDamage(p: BattleParticipant, attack: BattleAttack, 
 
   const isHero = p.basicInfo.sourceType === "character";
 
-  const heroDice = isHero ? getHeroDamageDiceForLevel(p.abilities.level, type) : "";
+  const { weaponDice, heroDice } = heroAttackDamageParts(p, attack);
 
-  const heroDiceAvg = heroDice ? getDiceAverage(heroDice) : 0;
+  const heroDiceAvg = diceAverage(heroDice);
 
-  const weaponAvg = attack.damageDice ? getDiceAverage(attack.damageDice) : 0;
+  const weaponAvg = diceAverage(weaponDice);
 
   const statMod = getAttackAbilityModifier(p.abilities, type);
 
