@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
+import type { Prisma } from "@prisma/client";
+
+import { loadRaceProgression } from "../load-race-progression";
 
 import { prisma } from "@/lib/db";
 import { requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { applyLevelGain } from "@/lib/utils/characters/level-up/apply-level-gain";
 import { seenLevelOnLevelChange } from "@/lib/utils/characters/seen-level";
-import { calculateHPGain, getAbilityModifier } from "@/lib/utils/common/calculations";
-import { calculateSpellSlotGain } from "@/lib/utils/spells/spell-slots";
-import type { SpellSlotProgression } from "@/types/races";
 
 export async function POST(
   request: Request,
@@ -14,8 +15,7 @@ export async function POST(
 ) {
   try {
     const { id, characterId } = await params;
-    
-    // Перевіряємо права DM
+
     const accessResult = await requireDM(id);
 
     if (accessResult instanceof NextResponse) {
@@ -24,7 +24,6 @@ export async function POST(
 
     const { campaign } = accessResult;
 
-    // Отримуємо персонажа з його расою
     const character = await prisma.character.findUnique({
       where: { id: characterId },
     });
@@ -35,116 +34,32 @@ export async function POST(
       return validationError;
     }
 
-    // Після перевірки character гарантовано не null
     if (!character) {
       return NextResponse.json({ error: "Character not found" }, { status: 404 });
     }
-    
-    // Перевіряємо максимальний рівень
-    if (character.level >= campaign.maxLevel) {
+
+    const newLevel = character.level + 1;
+
+    if (newLevel > campaign.maxLevel) {
       return NextResponse.json(
         { error: `Персонаж досяг максимального рівня ${campaign.maxLevel}` },
-        { status: 400 }
+        { status: 422 }
       );
     }
 
-    // Отримуємо расу персонажа
-    const race = await prisma.race.findFirst({
-      where: {
-        campaignId: id,
-        name: character.race,
-      },
-    });
+    const race = await loadRaceProgression(id, character.race);
 
-    const spellSlotProgression: SpellSlotProgression[] =
-      Array.isArray(race?.spellSlotProgression)
-        ? (race.spellSlotProgression as unknown as SpellSlotProgression[])
-        : [];
-
-    // Новий рівень
-    const newLevel = character.level + 1;
+    const gain = applyLevelGain({ character, race, campaign, fromLevel: character.level, toLevel: newLevel });
 
     const seenLevel = seenLevelOnLevelChange(character.level, newLevel, character.seenLevel);
 
-    // Розраховуємо модифікатор конституції для розрахунку HP
-    const conMod = getAbilityModifier(character.constitution);
-
-    // Обираємо випадковий атрибут для +1
-    const abilities = [
-      "strength",
-      "dexterity",
-      "constitution",
-      "intelligence",
-      "wisdom",
-      "charisma",
-    ] as const;
-
-    const randomAbility =
-      abilities[Math.floor(Math.random() * abilities.length)];
-
-    // Оновлюємо значення атрибуту
-    const updatedAbilities: Record<string, number> = {
-      strength: character.strength,
-      dexterity: character.dexterity,
-      constitution: character.constitution,
-      intelligence: character.intelligence,
-      wisdom: character.wisdom,
-      charisma: character.charisma,
-    };
-    
-    // Додаємо +1 до випадкового атрибуту
-    updatedAbilities[randomAbility] = (character[randomAbility as keyof typeof character] as number) + 1;
-
-
-    // Збільшуємо HP
-    const hitDice = character.hitDice;
-
-    const hpGain = calculateHPGain(hitDice, conMod);
-
-    const newMaxHp = character.maxHp + hpGain;
-
-    const newCurrentHp = character.currentHp + hpGain; // Автоматично лікуємо при прокачці
-
-    // Розраховуємо нові магічні слоти
-    const currentSpellSlots = (character.spellSlots ||
-      {}) as Record<
-      string,
-      { max: number; current: number }
-    >;
-
-    const spellSlotGain = calculateSpellSlotGain(
-      character.level,
-      newLevel,
-      campaign.maxLevel,
-      spellSlotProgression
-    );
-
-    // Об'єднуємо поточні слоти з новими
-    const newSpellSlots: Record<string, { max: number; current: number }> = {
-      ...currentSpellSlots,
-    };
-
-    for (const [level, slots] of Object.entries(spellSlotGain)) {
-      if (newSpellSlots[level]) {
-        newSpellSlots[level] = {
-          max: newSpellSlots[level].max + slots.max,
-          current: newSpellSlots[level].current + slots.current,
-        };
-      } else {
-        newSpellSlots[level] = slots;
-      }
-    }
-
-    // Оновлюємо персонажа
     const updatedCharacter = await prisma.character.update({
       where: { id: characterId },
       data: {
         level: newLevel,
         ...(seenLevel !== undefined && { seenLevel }),
-        ...updatedAbilities,
-        maxHp: newMaxHp,
-        currentHp: newCurrentHp,
-        spellSlots: newSpellSlots,
+        ...gain.abilityScores,
+        spellSlots: gain.spellSlots as Prisma.InputJsonValue,
       },
       include: {
         user: true,
@@ -155,9 +70,8 @@ export async function POST(
     return NextResponse.json({
       ...updatedCharacter,
       levelUpDetails: {
-        abilityIncreased: randomAbility,
-        hpGain,
-        spellSlotGain,
+        abilityIncreased: gain.gained[0] ?? null,
+        spellSlots: gain.spellSlots,
       },
     });
   } catch (error) {

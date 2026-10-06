@@ -33,7 +33,7 @@ export function useDmCharacterEditor({ campaignId, characterId, onSaved }: { cam
   const levelUp = async () => {
     const { name, level } = editor.form.basicInfo;
 
-    let details: { abilityIncreased?: string; hpGain?: number } | undefined;
+    let details: { abilityIncreased?: string | null } | undefined;
 
     const ok = await confirm({
       title: `Підняти рівень персонажа ${name}? (Рівень ${level} → ${level + 1})`,
@@ -47,7 +47,7 @@ export function useDmCharacterEditor({ campaignId, characterId, onSaved }: { cam
     });
 
     if (ok && details) {
-      void notify(`Рівень піднято! ${details.abilityIncreased ?? "Характеристика"}: +1, HP: +${details.hpGain ?? 0}, Додано магічні слоти.`);
+      void notify(`Рівень піднято! ${details.abilityIncreased ? `${details.abilityIncreased}: +1. ` : "Усі характеристики на максимумі. "}Магічні слоти оновлено.`);
     }
   };
 
