@@ -4,18 +4,13 @@
 
 import { PrimaryAbilityPicker } from "./PrimaryAbilityPicker";
 
-import { ArtifactDeltaBadge } from "@/components/characters/stats/ArtifactDeltaBadge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { type AbilityKey, CORE_ABILITY_SCORES } from "@/lib/constants/abilities";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { signed } from "@/lib/utils/format";
 
-
-export type CharacterAbilityArtifactBonuses = Partial<Record<AbilityKey, number>>;
-
 interface CharacterAbilityScoresProps {
-  artifactBonuses?: CharacterAbilityArtifactBonuses;
   primary?: { value: AbilityKey | null; onChange: (v: AbilityKey | null) => void };
   abilityScores: {
     strength: number;
@@ -36,7 +31,6 @@ interface CharacterAbilityScoresProps {
 }
 
 export function CharacterAbilityScores({
-  artifactBonuses,
   abilityScores,
   primary,
 }: CharacterAbilityScoresProps) {
@@ -62,9 +56,6 @@ export function CharacterAbilityScores({
             <Label htmlFor={key}>
               {label}
               <span className="text-muted-foreground"> ({signed(getAbilityModifier(ability.value))})</span>
-              {artifactBonuses ? (
-                <ArtifactDeltaBadge value={artifactBonuses[key] ?? 0} />
-              ) : null}
             </Label>
             <Input
               id={key}

@@ -71,58 +71,6 @@ export function useCharacterForm(options: UseCharacterFormOptions) {
     }));
   }, []);
 
-  const addLanguage = useCallback(() => {
-    const lang = prompt("Введіть мову:");
-
-    if (lang && lang.trim()) {
-      setFormData((prev) => ({
-        ...prev,
-        roleplay: {
-          ...prev.roleplay,
-          languages: [...prev.roleplay.languages, lang.trim()],
-        },
-      }));
-    }
-  }, []);
-
-  const removeLanguage = useCallback((index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      roleplay: {
-        ...prev.roleplay,
-        languages: prev.roleplay.languages.filter((_, i) => i !== index),
-      },
-    }));
-  }, []);
-
-  const addKnownSpell = useCallback((spellId: string) => {
-    setFormData((prev) => {
-      if (prev.spellcasting.knownSpells.includes(spellId)) {
-        return prev;
-      }
-
-      return {
-        ...prev,
-        spellcasting: {
-          ...prev.spellcasting,
-          knownSpells: [...prev.spellcasting.knownSpells, spellId],
-        },
-      };
-    });
-  }, []);
-
-  const removeKnownSpell = useCallback((index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      spellcasting: {
-        ...prev.spellcasting,
-        knownSpells: prev.spellcasting.knownSpells.filter(
-          (_, i) => i !== index,
-        ),
-      },
-    }));
-  }, []);
-
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
@@ -162,26 +110,10 @@ export function useCharacterForm(options: UseCharacterFormOptions) {
     skills,
     spellcasting,
     abilities,
-    roleplay,
   } = useMemo(
     () =>
-      buildCharacterFormBindings(formData, setFormData, {
-        toggleSavingThrow,
-        toggleSkill,
-        addLanguage,
-        removeLanguage,
-        addKnownSpell,
-        removeKnownSpell,
-      }),
-    [
-      formData,
-      toggleSavingThrow,
-      toggleSkill,
-      addLanguage,
-      removeLanguage,
-      addKnownSpell,
-      removeKnownSpell,
-    ],
+      buildCharacterFormBindings(formData, setFormData, { toggleSavingThrow, toggleSkill }),
+    [formData, toggleSavingThrow, toggleSkill],
   );
 
   return {
@@ -194,15 +126,10 @@ export function useCharacterForm(options: UseCharacterFormOptions) {
     skills,
     spellcasting,
     abilities,
-    roleplay,
     updateField,
     updateFields,
     toggleSavingThrow,
     toggleSkill,
-    addLanguage,
-    removeLanguage,
-    addKnownSpell,
-    removeKnownSpell,
     handleSubmit,
     handleCancel,
     setFormData,

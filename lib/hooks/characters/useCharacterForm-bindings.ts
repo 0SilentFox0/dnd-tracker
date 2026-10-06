@@ -7,10 +7,6 @@ import type { AbilityKey, CharacterFormData } from "@/types/characters";
 export interface CharacterFormHandlers {
   toggleSavingThrow: (ability: string) => void;
   toggleSkill: (skill: string) => void;
-  addLanguage: () => void;
-  removeLanguage: (index: number) => void;
-  addKnownSpell: (spellId: string) => void;
-  removeKnownSpell: (index: number) => void;
 }
 
 export function buildCharacterFormBindings(
@@ -18,8 +14,7 @@ export function buildCharacterFormBindings(
   setFormData: React.Dispatch<React.SetStateAction<CharacterFormData>>,
   handlers: CharacterFormHandlers,
 ) {
-  const { toggleSavingThrow, toggleSkill, addLanguage, removeLanguage, addKnownSpell, removeKnownSpell } =
-    handlers;
+  const { toggleSavingThrow, toggleSkill } = handlers;
 
   const basicInfo = {
     ...formData.basicInfo,
@@ -206,13 +201,7 @@ export function buildCharacterFormBindings(
           ...prev,
           spellcasting: { ...prev.spellcasting, spellSlots: value },
         })),
-      setKnownSpells: (value: string[]) =>
-        setFormData((prev) => ({
-          ...prev,
-          spellcasting: { ...prev.spellcasting, knownSpells: value },
-        })),
     },
-    handlers: { addKnownSpell, removeKnownSpell },
   };
 
   const abilities = {
@@ -226,33 +215,6 @@ export function buildCharacterFormBindings(
     },
   };
 
-  const roleplay = {
-    ...formData.roleplay,
-    setters: {
-      setLanguages: (value: string[]) =>
-        setFormData((prev) => ({
-          ...prev,
-          roleplay: { ...prev.roleplay, languages: value },
-        })),
-      setProficiencies: (value: Record<string, string[]>) =>
-        setFormData((prev) => ({
-          ...prev,
-          roleplay: { ...prev.roleplay, proficiencies: value },
-        })),
-      setImmunities: (value: string[]) =>
-        setFormData((prev) => ({
-          ...prev,
-          roleplay: { ...prev.roleplay, immunities: value },
-        })),
-      setMorale: (value: number | undefined) =>
-        setFormData((prev) => ({
-          ...prev,
-          roleplay: { ...prev.roleplay, morale: value },
-        })),
-    },
-    handlers: { addLanguage, removeLanguage },
-  };
-
   return {
     basicInfo,
     abilityScores,
@@ -260,6 +222,5 @@ export function buildCharacterFormBindings(
     skills,
     spellcasting,
     abilities,
-    roleplay,
   };
 }
