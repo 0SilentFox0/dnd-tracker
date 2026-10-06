@@ -89,7 +89,7 @@
 | **`characters/`** | Персонаж: basic info, ability scores, combat params, skills, spells, artifacts, stats (damage calculator, HP preview). |
 | **`campaigns/`** | Кампанія: join, members, info, settings. |
 | **`abilities/`** | Редактор умінь для всіх власників: акордеон (`AbilityListEditor`), секції «Коли / Умова / Ліміти / Що робить», поля з реєстру (`fields/`), шаблони й «Скопіювати з…», `AbilitySummary` для карток. |
-| **`skills/`** | Скіли: форми створення/редагування (`form/`), списки, картки, діалоги (наприклад CreateGroupDialog). |
+| **`skills/`** | Скіли: форми створення/редагування (`form/`), списки, картки, діалоги (наприклад CreateSpellGroupDialog). |
 | **`skill-tree/`** | Прокачка: `progression/` (панель гравця — рядки гілок, пропозиції, шторка вузла, анімація нового рівня), `editor/` (таблиця-редактор дерева для DM). |
 | **`spells/`** | Заклинання: списки, групи, діалоги, форми. |
 | **`races/`** | Раси: форми редагування, стати, слоти заклинань. |

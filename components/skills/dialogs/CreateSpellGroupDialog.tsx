@@ -9,15 +9,15 @@ import { Label } from "@/components/ui/label";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { useCreateSpellGroup } from "@/lib/hooks/spells";
 
-interface CreateGroupDialogProps {
+interface CreateSpellGroupDialogProps {
   campaignId: string;
   onGroupCreated?: (groupId: string) => void;
 }
 
-export function CreateGroupDialog({
+export function CreateSpellGroupDialog({
   campaignId,
   onGroupCreated,
-}: CreateGroupDialogProps) {
+}: CreateSpellGroupDialogProps) {
   const router = useRouter();
 
   const createGroup = useCreateSpellGroup(campaignId);

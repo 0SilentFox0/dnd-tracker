@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, fireEvent, render as rtlRender, screen } from "@testing-library/react";
 import { afterEach, beforeEach,describe, expect, it, vi } from "vitest";
 
-import { CreateGroupDialog } from "@/components/skills/dialogs/CreateGroupDialog";
+import { CreateSpellGroupDialog } from "@/components/skills/dialogs/CreateSpellGroupDialog";
 
 const mockRefresh = vi.fn();
 
@@ -26,7 +26,7 @@ vi.mock("@/lib/api/spells", () => ({
   createSpellGroup: vi.fn().mockResolvedValue({ id: "new-group-id" }),
 }));
 
-describe("CreateGroupDialog", () => {
+describe("CreateSpellGroupDialog", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     queryClient = new QueryClient();
@@ -35,14 +35,14 @@ describe("CreateGroupDialog", () => {
   afterEach(cleanup);
 
   it("рендерить тригер відкриття діалогу", () => {
-    render(<CreateGroupDialog campaignId="camp-1" />);
+    render(<CreateSpellGroupDialog campaignId="camp-1" />);
     expect(
       screen.getByRole("button", { name: /Створити групу заклинань/i }),
     ).toBeInTheDocument();
   });
 
   it("відкриває діалог і показує форму після кліку на тригер", () => {
-    render(<CreateGroupDialog campaignId="camp-1" />);
+    render(<CreateSpellGroupDialog campaignId="camp-1" />);
 
     const trigger = screen.getByRole("button", {
       name: /Створити групу заклинань/i,
@@ -59,7 +59,7 @@ describe("CreateGroupDialog", () => {
   });
 
   it("має поле вводу назви групи та кнопку Скасувати", () => {
-    render(<CreateGroupDialog campaignId="camp-1" />);
+    render(<CreateSpellGroupDialog campaignId="camp-1" />);
     fireEvent.click(
       screen.getByRole("button", { name: /Створити групу заклинань/i }),
     );
@@ -76,7 +76,7 @@ describe("CreateGroupDialog", () => {
     const onGroupCreated = vi.fn();
 
     render(
-      <CreateGroupDialog campaignId="camp-1" onGroupCreated={onGroupCreated} />,
+      <CreateSpellGroupDialog campaignId="camp-1" onGroupCreated={onGroupCreated} />,
     );
     fireEvent.click(
       screen.getByRole("button", { name: /Створити групу заклинань/i }),
@@ -97,7 +97,7 @@ describe("CreateGroupDialog", () => {
   it("інвалідовує список груп заклинань, щоб нова група одразу з'явилась у меню", async () => {
     const invalidate = vi.spyOn(queryClient, "invalidateQueries");
 
-    render(<CreateGroupDialog campaignId="camp-1" />);
+    render(<CreateSpellGroupDialog campaignId="camp-1" />);
     fireEvent.click(screen.getByRole("button", { name: /Створити групу заклинань/i }));
     fireEvent.change(screen.getByPlaceholderText("Назва групи"), {
       target: { value: "Нова група" },
