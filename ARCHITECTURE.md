@@ -66,9 +66,9 @@
 - **`battles/[battleId]/`** — сторінка активного бою (черга, учасники, атаки, заклинання).
 - **`info/`** — інформаційні сторінки кампанії.
 - **`dm/`** — панель DM:
-  - `dm/characters` — список персонажів; `[characterId]` — редагування; `new` — створення.
+  - `dm/characters` — список персонажів із вкладками «Усі / Гравці / NPC-герої» (`?type=player|npc_hero`); `[characterId]` — редагування; `new?type=` — створення.
   - `dm/battles` — список боїв; `[battleId]` — редагування; `new` — створення.
-  - `dm/spells`, `dm/units`, `dm/races`, `dm/artifacts`, `dm/main-skills`, `dm/skill-trees`, `dm/npc-heroes` — відповідні розділи налаштувань.
+  - `dm/spells`, `dm/units`, `dm/races`, `dm/artifacts`, `dm/main-skills`, `dm/skill-trees` — відповідні розділи налаштувань.
 
 Сторінки часто розділені: `page.tsx` (серверний компонент, дані) + `*-client` / `page-client` (клієнтський UI з `"use client"`).
 

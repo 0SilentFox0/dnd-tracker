@@ -152,7 +152,7 @@ dnd-combat-tracker/
 │   │       │   ├── spells/       # Управління заклинаннями
 │   │       │   ├── units/        # Управління юнітами
 │   │       │   ├── artifacts/    # Управління артефактами
-│   │       │   └── npc-heroes/   # Управління NPC героями
+│   │       │   └── npc-heroes/   # Редирект на characters?type=npc_hero
 │   │       ├── battles/          # Сторінка бою
 │   │       │   └── [battleId]/
 │   │       └── character/        # Сторінка персонажа гравця

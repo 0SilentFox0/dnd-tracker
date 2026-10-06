@@ -6,7 +6,6 @@ const BACKGROUND_MAP: Record<string, string> = {
   "/artifacts": "artefacts-bg.jpg",
   "/battles": "battle-bg.jpg",
   "/character": "character-bg.jpg",
-  "/npc-heroes": "character-bg.jpg",
   "/races": "races-bg.jpg",
   "/skill-trees": "skill-tree-bg.jpg",
   "/skills": "skills-bg.jpg",

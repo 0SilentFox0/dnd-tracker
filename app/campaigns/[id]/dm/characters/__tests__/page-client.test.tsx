@@ -7,30 +7,41 @@ import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm
 
 const deleteAllCharacters = vi.fn(async () => ({}));
 
-vi.mock("@/lib/api/characters", () => ({
-  getCharacters: vi.fn(async () => [
+const getCharacters = vi.hoisted(() =>
+  vi.fn(async () => [
     { id: "ch1", name: "Арвен", type: "player", race: "Ельф", class: "Лучник", level: 3, strength: 10, armorClass: 14, initiative: 2, experience: 0, avatar: null },
     { id: "ch2", name: "Борин", type: "npc_hero", race: "Гном", class: "Воїн", level: 4, strength: 14, armorClass: 16, initiative: 1, experience: 0, avatar: null },
   ]),
+);
+
+vi.mock("@/lib/api/characters", () => ({
+  getCharacters: (...a: unknown[]) => getCharacters(...(a as [])),
   deleteAllCharacters: (...a: unknown[]) => deleteAllCharacters(...(a as [])),
   deleteCharacter: vi.fn(),
   levelUpCharacter: vi.fn(),
 }));
-vi.mock("next/link", () => ({ default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a> }));
+vi.mock("next/link", () => ({
+  default: ({ children, href, ...rest }: { children: React.ReactNode; href: string } & Record<string, unknown>) => (
+    <a href={href} {...rest}>
+      {children}
+    </a>
+  ),
+}));
 vi.mock("@/components/common/OptimizedImage", () => ({ OptimizedImage: () => null }));
 
 import { DMCharactersClient } from "@/app/campaigns/[id]/dm/characters/page-client";
 
-const renderIt = () =>
+const renderIt = (type?: "player" | "npc_hero") =>
   renderWithConfirm(
     <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
-      <DMCharactersClient campaignId="c1" />
+      <DMCharactersClient campaignId="c1" type={type} />
     </QueryClientProvider>,
   );
 
 afterEach(() => {
   cleanup();
   deleteAllCharacters.mockReset();
+  getCharacters.mockClear();
 });
 
 describe("DMCharactersClient delete all", () => {
@@ -51,5 +62,29 @@ describe("DMCharactersClient delete all", () => {
 
     fireEvent.click(within(dialog).getByRole("button", { name: "Видалити всіх" }));
     expect(await within(dialog).findByRole("alert")).toHaveTextContent("Збій");
+  });
+});
+
+describe("DMCharactersClient tabs", () => {
+  it("NPC-герої: запит з type, активна вкладка, «Створити» передає тип", async () => {
+    renderIt("npc_hero");
+
+    await screen.findByText("Борин");
+
+    expect(getCharacters).toHaveBeenCalledWith("c1", { type: "npc_hero" });
+    expect(screen.getByRole("link", { name: "NPC-герої" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Усі" })).toHaveAttribute("href", "/campaigns/c1/dm/characters");
+    expect(screen.getByRole("link", { name: "Гравці" })).toHaveAttribute("href", "/campaigns/c1/dm/characters?type=player");
+    expect(screen.getByRole("link", { name: /Створити персонажа/ })).toHaveAttribute("href", "/campaigns/c1/dm/characters/new?type=npc_hero");
+  });
+
+  it("без type — усі персонажі, активна «Усі»", async () => {
+    renderIt();
+
+    await screen.findByText("Арвен");
+
+    expect(getCharacters).toHaveBeenLastCalledWith("c1", undefined);
+    expect(screen.getByRole("link", { name: "Усі" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: /Створити персонажа/ })).toHaveAttribute("href", "/campaigns/c1/dm/characters/new");
   });
 });

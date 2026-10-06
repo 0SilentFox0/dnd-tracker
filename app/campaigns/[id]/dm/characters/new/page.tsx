@@ -23,16 +23,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { CharacterType, type CharacterTypeValue } from "@/lib/constants/characters";
 import { useCampaignMembers } from "@/lib/hooks/campaigns";
 import { useCharacterForm, useCreateCharacter } from "@/lib/hooks/characters";
 import { useRaces } from "@/lib/hooks/races";
 
-export default function NewCharacterPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function NewCharacterPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ type?: string }> }) {
   const { id } = use(params);
+
+  const { type } = use(searchParams);
+
+  const characterType: CharacterTypeValue = type === CharacterType.NPC_HERO ? CharacterType.NPC_HERO : CharacterType.PLAYER;
 
   const router = useRouter();
 
@@ -52,9 +53,10 @@ export default function NewCharacterPage({
     abilities,
     handleSubmit,
   } = useCharacterForm({
+    type: characterType,
     onSubmit: async (data) => {
       await create.mutateAsync(data);
-      router.push(`/campaigns/${id}/dm/characters`);
+      router.push(`/campaigns/${id}/dm/characters?type=${data.basicInfo.type}`);
     },
   });
 

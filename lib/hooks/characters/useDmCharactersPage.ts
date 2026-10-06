@@ -2,15 +2,16 @@
 
 import { useCharacters, useDeleteAllCharacters, useDeleteCharacter, useLevelUpCharacter } from "./useCharacters";
 
+import type { CharacterTypeValue } from "@/lib/constants/characters";
 import { useConfirm, useNotify } from "@/lib/hooks/common";
 import type { Character } from "@/types/characters";
 
-export function useDmCharactersPage(campaignId: string) {
+export function useDmCharactersPage(campaignId: string, type?: CharacterTypeValue) {
   const confirm = useConfirm();
 
   const notify = useNotify();
 
-  const query = useCharacters(campaignId);
+  const query = useCharacters(campaignId, type ? { type } : undefined);
 
   const deleteAll = useDeleteAllCharacters(campaignId);
 

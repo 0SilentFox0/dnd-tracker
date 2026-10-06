@@ -7,23 +7,27 @@ import { useCallback, useMemo, useState } from "react";
 import { buildCharacterFormBindings } from "./useCharacterForm-bindings";
 import { defaultCharacterFormData } from "./useCharacterForm-defaults";
 
+import type { CharacterTypeValue } from "@/lib/constants/characters";
 import { characterToFormData } from "@/lib/utils/characters/character-form";
 import type { Character } from "@/types/characters";
 import { CharacterFormData } from "@/types/characters";
 
 export interface UseCharacterFormOptions {
   initialData?: Partial<Character> | Partial<CharacterFormData>;
+  type?: CharacterTypeValue;
   onSubmit: (data: CharacterFormData) => Promise<void>;
   onCancel?: () => void;
 }
 
 export function useCharacterForm(options: UseCharacterFormOptions) {
   // Конвертуємо initialData в CharacterFormData якщо це Character
-  const initialFormData = options.initialData
+  const base = options.initialData
     ? "basicInfo" in options.initialData
       ? { ...defaultCharacterFormData, ...options.initialData }
       : characterToFormData(options.initialData as Partial<Character>)
     : defaultCharacterFormData;
+
+  const initialFormData = options.type ? { ...base, basicInfo: { ...base.basicInfo, type: options.type } } : base;
 
   const [formData, setFormData] = useState<CharacterFormData>(initialFormData);
 

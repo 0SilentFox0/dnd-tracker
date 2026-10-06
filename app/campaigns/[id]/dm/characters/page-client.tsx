@@ -7,16 +7,29 @@ import { DmCharacterCard } from "./DmCharacterCard";
 
 import { EmptyState, LoadingState, QueryState } from "@/components/common/states";
 import { Button } from "@/components/ui/button";
+import { CharacterType, type CharacterTypeValue } from "@/lib/constants/characters";
 import { useDmCharactersPage } from "@/lib/hooks/characters";
+import { cn } from "@/lib/utils";
+
+const TABS: { type?: CharacterTypeValue; label: string }[] = [
+  { label: "Усі" },
+  { type: CharacterType.PLAYER, label: "Гравці" },
+  { type: CharacterType.NPC_HERO, label: "NPC-герої" },
+];
 
 interface DMCharactersClientProps {
   campaignId: string;
+  type?: CharacterTypeValue;
 }
 
-export function DMCharactersClient({ campaignId }: DMCharactersClientProps) {
-  const page = useDmCharactersPage(campaignId);
+export function DMCharactersClient({ campaignId, type }: DMCharactersClientProps) {
+  const page = useDmCharactersPage(campaignId, type);
 
   const characterCount = page.query.data?.length ?? 0;
+
+  const base = `/campaigns/${campaignId}/dm/characters`;
+
+  const newHref = type ? `${base}/new?type=${type}` : `${base}/new`;
 
   return (
     <div className="container mx-auto p-4 space-y-6">
@@ -39,13 +52,26 @@ export function DMCharactersClient({ campaignId }: DMCharactersClientProps) {
               Видалити всіх
             </Button>
           )}
-          <Link href={`/campaigns/${campaignId}/dm/characters/new`}>
+          <Link href={newHref}>
             <Button className="whitespace-nowrap w-full md:w-auto">
               + Створити персонажа
             </Button>
           </Link>
         </div>
       </div>
+
+      <nav aria-label="Тип персонажів" className="flex w-fit gap-1 rounded-lg bg-muted p-1">
+        {TABS.map((t) => (
+          <Link
+            key={t.label}
+            href={t.type ? `${base}?type=${t.type}` : base}
+            aria-current={t.type === type ? "page" : undefined}
+            className={cn("rounded-md px-3 py-1.5 text-sm", t.type === type ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}
+          >
+            {t.label}
+          </Link>
+        ))}
+      </nav>
 
       <QueryState
         query={page.query}
@@ -56,7 +82,7 @@ export function DMCharactersClient({ campaignId }: DMCharactersClientProps) {
           title="Ще немає персонажів"
           description="Гравці або NPC-герої з'являться тут."
           action={
-            <Link href={`/campaigns/${campaignId}/dm/characters/new`}>
+            <Link href={newHref}>
               <Button>Створити першого персонажа</Button>
             </Link>
           }

@@ -8,7 +8,6 @@ const SEGMENT_LABELS: Record<string, string> = {
   campaigns: "Кампанії",
   dm: "DM",
   characters: "Персонажі",
-  "npc-heroes": "NPC Герої",
   units: "Юніти",
   spells: "Заклинання",
   artifacts: "Артефакти",
@@ -29,7 +28,6 @@ const ID_LABELS_BY_PARENT: Record<string, string> = {
   units: "Юніт",
   spells: "Заклинання",
   artifacts: "Артефакт",
-  "npc-heroes": "NPC Герой",
   sets: "Сет",
 };
 

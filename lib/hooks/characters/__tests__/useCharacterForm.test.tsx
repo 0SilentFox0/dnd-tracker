@@ -16,4 +16,11 @@ describe("useCharacterForm", () => {
     expect(result.current.spellcasting.setters).not.toHaveProperty("setKnownSpells");
     expect(result.current.formData.roleplay).toEqual({ languages: [], proficiencies: {}, immunities: [] });
   });
+
+  it("type з опцій задає тип нового персонажа", () => {
+    const { result } = renderHook(() => useCharacterForm({ type: "npc_hero", onSubmit: vi.fn() }));
+
+    expect(result.current.formData.basicInfo.type).toBe("npc_hero");
+    expect(result.current.formData.spellcasting.spellSlots).toEqual({});
+  });
 });
