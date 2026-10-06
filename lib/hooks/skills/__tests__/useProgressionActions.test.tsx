@@ -30,7 +30,7 @@ function setup() {
 }
 
 describe("useProgressionActions", () => {
-  it("learn патчить кеш прогресу без рефетчу й інвалідує damage-preview", async () => {
+  it("learn патчить кеш прогресу без рефетчу й інвалідує лист персонажа", async () => {
     vi.mocked(api.learnNode).mockResolvedValue({ unlocked: ["a", "b"] });
 
     const { qc, invalidate, result } = setup();
@@ -38,9 +38,7 @@ describe("useProgressionActions", () => {
     await act(() => result.current.learn("b"));
 
     expect(qc.getQueryData<{ unlocked: string[] }>(progressionKey("camp", "ch"))?.unlocked).toEqual(["a", "b"]);
-    expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ queryKey: ["character-damage-preview", "camp", "ch"] }));
-    expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ queryKey: ["damage-calculator-melee-ranged", "camp", "ch"] }));
-    expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ queryKey: ["damage-calculator-magic-spell", "camp", "ch"] }));
+    expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ queryKey: ["character-sheet", "camp", "ch"] }));
     expect(invalidate).not.toHaveBeenCalledWith(expect.objectContaining({ queryKey: progressionKey("camp", "ch") }));
   });
 

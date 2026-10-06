@@ -158,26 +158,7 @@ export interface Character {
   };
 }
 
-export type SpellEffectKind = "damage" | "heal" | "all";
 
-export interface DamagePreviewItem {
-  total: number;
-  breakdown: string[];
-  diceFormula: string | null;
-  hasWeapon: boolean;
-  spellEffectKind?: SpellEffectKind;
-  /** Damage per AoE target (за damageDistribution). Default `[total]`. */
-  targets?: number[];
-  targetsTotal?: number;
-  distribution?: number[] | null;
-}
-
-export interface DamagePreviewResponse {
-  melee: DamagePreviewItem;
-  ranged: DamagePreviewItem;
-  /** Заповнюється при spellId + spellDiceSum у запиті */
-  magic?: DamagePreviewItem | null;
-}
 
 export type SheetLineSource = "base" | "ability" | "proficiency" | "weapon" | "level" | "dice" | "skill" | "race" | "artifact" | "artifactSet" | "unit" | "character" | "effect" | "action" | "multiplier";
 

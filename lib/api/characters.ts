@@ -8,13 +8,10 @@ import {
   campaignPatch,
   campaignPost,
   campaignPut,
-  campaignRequest,
 } from "@/lib/api/client";
 import type { GoalInput } from "@/lib/schemas/character-goals";
 import { formDataToCharacter } from "@/lib/utils/characters/character-form";
-import type { Character, CharacterFormData, CharacterGoal, CharacterSheet, DamagePreviewResponse } from "@/types/characters";
-
-export type { DamagePreviewResponse };
+import type { Character, CharacterFormData, CharacterGoal, CharacterSheet } from "@/types/characters";
 
 /**
  * Отримує персонажа за ID
@@ -33,58 +30,6 @@ export const putCharacterGoals = (campaignId: string, characterId: string, goals
   campaignPut<{ goals: CharacterGoal[] }>(campaignId, `/characters/${characterId}/goals`, { goals });
 
 export const getCharacterSheet = (campaignId: string, characterId: string) => campaignGet<CharacterSheet>(campaignId, `/characters/${characterId}/sheet`);
-
-/**
- * Отримує превʼю шкоди персонажа (melee/ranged total).
- */
-export async function getDamagePreview(
-  campaignId: string,
-  characterId: string,
-  params?: {
-    meleeMultiplier?: number;
-    rangedMultiplier?: number;
-    meleeDiceSum?: number | null;
-    rangedDiceSum?: number | null;
-    spellId?: string | null;
-    spellDiceSum?: number | null;
-  },
-): Promise<DamagePreviewResponse | null> {
-  const search = new URLSearchParams();
-
-  if (params?.meleeMultiplier != null && params.meleeMultiplier !== 1) {
-    search.set("meleeMultiplier", String(params.meleeMultiplier));
-  }
-
-  if (params?.rangedMultiplier != null && params.rangedMultiplier !== 1) {
-    search.set("rangedMultiplier", String(params.rangedMultiplier));
-  }
-
-  if (params?.meleeDiceSum != null) {
-    search.set("meleeDiceSum", String(params.meleeDiceSum));
-  }
-
-  if (params?.rangedDiceSum != null) {
-    search.set("rangedDiceSum", String(params.rangedDiceSum));
-  }
-
-  if (params?.spellId) {
-    search.set("spellId", params.spellId);
-  }
-
-  if (params?.spellDiceSum != null) {
-    search.set("spellDiceSum", String(params.spellDiceSum));
-  }
-
-  const qs = search.toString();
-
-  const path = `/characters/${characterId}/damage-preview${qs ? `?${qs}` : ""}`;
-
-  try {
-    return await campaignRequest<DamagePreviewResponse>(campaignId, path);
-  } catch {
-    return null;
-  }
-}
 
 /**
  * Отримує список персонажів кампанії

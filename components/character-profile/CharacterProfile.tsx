@@ -16,6 +16,7 @@ import { StoryTab } from "./StoryTab";
 import "@/components/hud/hud.css";
 import { HUD_SURFACE } from "@/components/battle/hud";
 import { QueryState } from "@/components/common/states";
+import { FreePointBadge, LevelUpOverlay } from "@/components/skill-tree/progression";
 import { Button } from "@/components/ui/button";
 import { useCharacterSheet } from "@/lib/hooks/characters";
 import { cn } from "@/lib/utils";
@@ -99,7 +100,11 @@ export function CharacterProfile({ campaignId, characterId, canEdit }: { campaig
                     ) : null
                   }
                 />
+                <div className="px-4 empty:hidden">
+                  <FreePointBadge campaignId={campaignId} characterId={characterId} />
+                </div>
                 <ProfileTabs value={tab} onValueChange={setTab} tabs={viewTabs()} header={hero.past ? <CompactHero /> : null} />
+                <LevelUpOverlay campaignId={campaignId} characterId={characterId} name={sheet.identity.name} />
               </>
             )}
           </ProfileShell>
