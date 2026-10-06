@@ -31,4 +31,11 @@ describe("ProfileSpellBook", () => {
     expect(screen.getByText(/концентрація/)).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Обрати цілі/ })).toBeNull();
   });
+
+  it("пергамент сам задає темне чорнило, не покладаючись на колір шторки", () => {
+    mockMatchMedia(true);
+    render(<Harness />);
+
+    expect(document.querySelector(".hud-book")?.className).toContain("text-[#2a2018]");
+  });
 });
