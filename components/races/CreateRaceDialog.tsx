@@ -20,6 +20,7 @@ interface CreateRaceDialogProps {
 
 const EMPTY_FORM: RaceFormData = {
   name: "",
+  color: "",
   availableSkills: [],
   disabledSkills: [],
   passiveAbility: {

@@ -18,6 +18,7 @@ export interface SpellSlotProgression {
 export interface Race {
   abilities?: Ability[];
   icon?: string | null;
+  color?: string | null;
   abilityIssues?: ConversionIssue[];
   id: string;
   campaignId: string;
@@ -37,6 +38,7 @@ export interface Race {
 export interface RaceFormData {
   name: string;
   icon?: string;
+  color?: string;
   availableSkills: string[];
   disabledSkills: string[];
   passiveAbility?: {

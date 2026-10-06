@@ -6,6 +6,7 @@ import type { RaceFormData, SpellSlotProgression } from "@/types/races";
 export function getInitialRaceFormData(race: {
   name: string;
   icon?: string | null;
+  color?: string | null;
   availableSkills: unknown;
   passiveAbility?: unknown;
   spellSlotProgression?: unknown;
@@ -20,6 +21,7 @@ export function getInitialRaceFormData(race: {
   return {
     name: race.name,
     icon: race.icon ?? "",
+    color: race.color ?? "",
     availableSkills: Array.isArray(race.availableSkills) ? race.availableSkills : [],
     disabledSkills: [],
     passiveAbility: { description: passive?.description ?? "", statImprovements: passive?.statImprovements ?? "", statModifiers: passive?.statModifiers ?? {} },

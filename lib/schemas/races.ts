@@ -33,9 +33,15 @@ const raceIconSchema = z.preprocess(
   z.string().max(2000).refine((v) => !v.startsWith("data:"), "Іконка раси — лише посилання на зображення").nullable().optional(),
 );
 
+const raceColorSchema = z.preprocess(
+  (v) => (v === "" ? null : v),
+  z.string().regex(/^#[0-9a-fA-F]{6}$/, "Колір раси — у форматі #RRGGBB").nullable().optional(),
+);
+
 export const createRaceSchema = z.object({
-  name: z.string().min(1).max(100),
+  name: z.string().trim().min(1).max(100),
   icon: raceIconSchema,
+  color: raceColorSchema,
   availableSkills: z.array(z.string()).default([]),
   disabledSkills: z.array(z.string()).default([]),
   passiveAbility: passiveAbilitySchema,
@@ -46,8 +52,9 @@ export const createRaceSchema = z.object({
 export type CreateRaceInput = z.infer<typeof createRaceSchema>;
 
 export const updateRaceSchema = z.object({
-  name: z.string().min(1).max(100).optional(),
+  name: z.string().trim().min(1).max(100).optional(),
   icon: raceIconSchema,
+  color: raceColorSchema,
   availableSkills: z.array(z.string()).optional(),
   disabledSkills: z.array(z.string()).optional(),
   passiveAbility: passiveAbilitySchema,

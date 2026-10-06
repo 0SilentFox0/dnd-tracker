@@ -15,7 +15,7 @@ describe("MainSkillFormFields", () => {
     render(<MainSkillFormFields form={form} onChange={onChange} spellGroups={[]} />);
 
     fireEvent.change(screen.getByLabelText(/Назва/), { target: { value: "Напад" } });
-    fireEvent.change(screen.getByLabelText("Колір (hex)"), { target: { value: "#ff0000" } });
+    fireEvent.change(screen.getByLabelText("Колір сегменту (hex)"), { target: { value: "#ff0000" } });
     fireEvent.change(screen.getByLabelText("Іконка (URL)"), { target: { value: "https://example.com/i.png" } });
 
     expect(onChange.mock.calls).toEqual([[{ name: "Напад" }], [{ color: "#ff0000" }], [{ icon: "https://example.com/i.png" }]]);

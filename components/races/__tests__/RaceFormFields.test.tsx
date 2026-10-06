@@ -16,6 +16,7 @@ function Harness() {
       <RaceFormFields campaignId="c1" formData={data} setFormData={setData} mainSkills={[]} />
       <output data-testid="n">{data.abilities.length}</output>
       <output data-testid="icon">{data.icon}</output>
+      <output data-testid="color">{data.color}</output>
     </QueryClientProvider>
   );
 }
@@ -45,5 +46,13 @@ describe("RaceFormFields", () => {
     renderWithConfirm(<Harness />);
 
     expect(screen.queryByRole("button", { name: /Завантажити з комп/ })).toBeNull();
+  });
+
+  it("колір раси: hex записується у форму", () => {
+    renderWithConfirm(<Harness />);
+
+    fireEvent.change(screen.getByLabelText("Колір раси (hex)"), { target: { value: "#123456" } });
+
+    expect(screen.getByTestId("color").textContent).toBe("#123456");
   });
 });
