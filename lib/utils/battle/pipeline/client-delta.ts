@@ -1,5 +1,6 @@
 import type { BattleMeta, BattleSceneState } from "@/lib/utils/battle/store";
 import { buildParticipantPatch, FULL_PARTICIPANT } from "@/lib/utils/battle/store";
+import type { BattleKnowledge } from "@/lib/utils/battle/view/knowledge";
 import type { BattleParticipantPatch, ClientBattleDelta } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -18,8 +19,9 @@ export function buildClientDelta(args: {
   fullIds: string[];
   log: BattleAction[];
   cancelledFrom?: number;
+  knowledge?: BattleKnowledge;
 }): ClientBattleDelta {
-  const { before, after, participants, pending, log, cancelledFrom } = args;
+  const { before, after, participants, pending, log, cancelledFrom, knowledge } = args;
 
   const storedById = new Map(args.stored.map((p) => [p.basicInfo.id, p]));
 
@@ -77,5 +79,6 @@ export function buildClientDelta(args: {
     ...(after.status === "prepared" && { setup: before.meta.setup }),
     log,
     ...(cancelledFrom !== undefined && { cancelledFrom }),
+    ...(knowledge && { knowledge }),
   };
 }

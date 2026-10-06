@@ -99,6 +99,8 @@ export interface ClientBattleDelta {
   setup?: BattlePreparationParticipant[];
   log: BattleAction[];
   cancelledFrom?: number;
+  /** зведення знань після відкату: вікно журналу клієнта не бачить подій за його межами */
+  knowledge?: BattleKnowledge;
 }
 
 export interface BattleEventsPage {

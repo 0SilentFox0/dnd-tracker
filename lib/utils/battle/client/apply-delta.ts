@@ -51,13 +51,14 @@ export function applyBattleDelta(cached: BattleScene, delta: ClientBattleDelta):
 
   const { scene } = delta;
 
-  // знання з GET могло спиратися на скасовані події; без нього клієнт рахує знання з журналу до наступного GET
+  // знання з GET могло спиратися на скасовані події: відкат приносить перераховане
   const { knowledge: _knowledge, ...withoutKnowledge } = cached;
 
   void _knowledge;
 
   return {
     ...(delta.cancelledFrom === undefined ? cached : withoutKnowledge),
+    ...(delta.knowledge && { knowledge: delta.knowledge }),
     version: delta.version,
     status: scene.status,
     currentRound: scene.round,

@@ -261,6 +261,9 @@ export async function runBattleMutation<TBody>(
         ? result.history.cancelFromSeq
         : 0;
 
+    // одне читання на сервері замість повного GET у кожного гравця після відкату
+    const knowledge = cancelledFrom === undefined ? undefined : cancelledFrom === 0 ? {} : await deps.loadKnowledge?.(battleId);
+
     const clientDelta = buildClientDelta({
       before: loaded,
       after,
@@ -270,6 +273,7 @@ export async function runBattleMutation<TBody>(
       fullIds: delta.fullIds,
       log: entries,
       cancelledFrom,
+      knowledge,
     });
 
     deps.publish(buildPusherMessages({ before: loaded.scene, after, participants: result.participants, delta: clientDelta }));

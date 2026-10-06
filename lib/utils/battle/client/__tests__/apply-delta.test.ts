@@ -91,6 +91,10 @@ describe("applyBattleDelta", () => {
     expect((applyBattleDelta(withKnowledge, delta()) as BattleScene).knowledge).toBe(knowledge);
     expect(applyBattleDelta(withKnowledge, delta({ cancelledFrom: 2 }))).not.toHaveProperty("knowledge");
     expect(applyBattleDelta(withKnowledge, delta({ cancelledFrom: 0 }))).not.toHaveProperty("knowledge");
+
+    const fresh = { b: { ac: { min: 10, evidence: [] }, traits: [] } };
+
+    expect((applyBattleDelta(withKnowledge, delta({ cancelledFrom: 2, knowledge: fresh })) as BattleScene).knowledge).toBe(fresh);
   });
 
   it("cancelledFrom обрізає журнал; повторне застосування тієї ж дельти — без змін", () => {

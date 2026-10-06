@@ -350,4 +350,23 @@ describe("runBattleMutation", () => {
     expect((await res.json()).delta.cancelledFrom).toBe(0);
     expect(vi.mocked(d.publish).mock.calls[0][0][0].payload).toMatchObject({ cancelledFrom: 0 });
   });
+
+  it("відкат несе перераховане знання з сервера, reset — порожнє, звичайна дія — без знання", async () => {
+    const knowledge = { gob: { ac: { min: 12, evidence: [] }, traits: [] } };
+
+    const loadKnowledge = vi.fn(async () => knowledge);
+
+    const run = (history?: { cancelFromSeq: number } | { clear: true }) =>
+      runBattleMutation(
+        req(),
+        { params, access: "member", mutate: (ctx) => ({ participants: ctx.participants, pending: ctx.pending, events: [], history }) },
+        deps({ loadKnowledge }),
+      ).then((r) => r.json());
+
+    expect((await run({ cancelFromSeq: 3 })).delta.knowledge).toEqual(knowledge);
+    expect(loadKnowledge).toHaveBeenCalledWith("b1");
+    expect((await run({ clear: true })).delta.knowledge).toEqual({});
+    expect((await run()).delta).not.toHaveProperty("knowledge");
+    expect(loadKnowledge).toHaveBeenCalledTimes(1);
+  });
 });
