@@ -26,7 +26,7 @@ export function EffectLine({ effects, max = 2 }: { effects: ActiveEffect[]; max?
   return (
     <div className="mt-1.5 flex h-5 items-center gap-3 overflow-hidden">
       {shown.map((e) => <EffectChip key={e.id} effect={e} />)}
-      {effects.length > max && <span className="text-[13px] text-[var(--muted)]">+{effects.length - max}</span>}
+      {effects.length > max && <span className="text-[13px] text-[var(--hud-muted)]">+{effects.length - max}</span>}
     </div>
   );
 }

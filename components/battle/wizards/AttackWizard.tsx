@@ -43,7 +43,7 @@ export function AttackWizard({ wizard }: { wizard: Wizard }) {
         const idx = i + (state.weaponCount > 1 ? 0 : 1);
 
         return (
-          <div key={label} className={cn("flex flex-col justify-end gap-1.5 text-xs after:h-[3px] after:content-['']", idx < current ? "text-[#a89c88] after:bg-[var(--muted)]" : idx === current ? "font-bold text-[var(--ink)] after:bg-[var(--enemy)]" : "text-[#6b604f] after:bg-white/10")}>
+          <div key={label} className={cn("flex flex-col justify-end gap-1.5 text-xs after:h-[3px] after:content-['']", idx < current ? "text-[#a89c88] after:bg-[var(--hud-muted)]" : idx === current ? "font-bold text-[var(--ink)] after:bg-[var(--enemy)]" : "text-[#6b604f] after:bg-white/10")}>
             {label}
           </div>
         );
@@ -66,7 +66,7 @@ export function AttackWizard({ wizard }: { wizard: Wizard }) {
                   {wizard.previews[a.id ?? a.name]?.bonuses.map((b) => <span key={b.label}>{b.label} {b.percent ? `${signed(b.percent)}%` : signed(b.flat)}</span>)}
                 </span>
               </span>
-              <span className="w-[72px] text-right text-[15px]">{a.damageDice}<small className="block text-xs text-[var(--muted)]">≈ {wizard.previews[a.id ?? a.name]?.estimate}</small></span>
+              <span className="w-[72px] text-right text-[15px]">{a.damageDice}<small className="block text-xs text-[var(--hud-muted)]">≈ {wizard.previews[a.id ?? a.name]?.estimate}</small></span>
             </button>
           ))}
         </div>
@@ -91,13 +91,13 @@ export function AttackWizard({ wizard }: { wizard: Wizard }) {
       {state.step === "roll" && target && (
         <>
           <div className="hud-sc text-xl font-bold">Кидок атаки · d20</div>
-          {state.strikes.length > 1 && <div className="mt-1 text-sm text-[var(--muted)]">Удар {state.index + 1} з {state.strikes.length} · {target.basicInfo.name}</div>}
+          {state.strikes.length > 1 && <div className="mt-1 text-sm text-[var(--hud-muted)]">Удар {state.index + 1} з {state.strikes.length} · {target.basicInfo.name}</div>}
           <div className="mt-3 grid h-10 grid-cols-3 border border-white/20">
             {MODES.map(([m, label]) => (
               <button key={m} type="button" onClick={() => wizard.setMode(m)} className={cn("border-l border-white/20 text-sm first:border-l-0", state.mode === m ? "bg-white/10 font-bold text-[var(--ink)]" : "text-[#a89c88]")}>{label}</button>
             ))}
           </div>
-          {state.mode !== "normal" && <div className="mt-2 text-xs text-[var(--muted)]">Спершу перший кубик, потім другий</div>}
+          {state.mode !== "normal" && <div className="mt-2 text-xs text-[var(--hud-muted)]">Спершу перший кубик, потім другий</div>}
           <DiceGrid
             sides={20}
             value={second}
@@ -151,7 +151,7 @@ export function AttackWizard({ wizard }: { wizard: Wizard }) {
               ))}
             </div>
           ))}
-          {wizard.unknownDefense && <div className="flex min-h-9 items-center justify-between text-sm italic text-[var(--muted)]"><span>Захист і опори цілі</span><span>невідомо</span></div>}
+          {wizard.unknownDefense && <div className="flex min-h-9 items-center justify-between text-sm italic text-[var(--hud-muted)]"><span>Захист і опори цілі</span><span>невідомо</span></div>}
           {steps.length > 0 && <div className="hud-sc flex h-12 items-center justify-between text-lg font-bold"><span>Орієнтовно</span><span className="text-[26px]">{estimate}</span></div>}
           {state.error && <p className="mt-2 text-sm text-[#e9a08f]">{state.error}</p>}
           <div className="mt-3 grid grid-cols-2 gap-2">

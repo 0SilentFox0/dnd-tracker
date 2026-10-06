@@ -34,5 +34,5 @@ export function HealthBar({ participant, exact, className }: { participant: Batt
 export function HealthLabel({ participant }: { participant: BattleParticipant }) {
   const state = healthState(participant);
 
-  return <span className={cn("ml-2 text-[13px] italic", state === "unhurt" ? "text-[var(--muted)]" : "text-[#c98a7c]")}>{HEALTH_LABEL[state]}</span>;
+  return <span className={cn("ml-2 text-[13px] italic", state === "unhurt" ? "text-[var(--hud-muted)]" : "text-[#c98a7c]")}>{HEALTH_LABEL[state]}</span>;
 }

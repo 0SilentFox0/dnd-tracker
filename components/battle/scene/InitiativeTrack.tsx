@@ -16,7 +16,7 @@ export function InitiativeTrack() {
       {queue.map((e, i) =>
         e.kind === "round" ? (
           <span key={`r${e.round}`} className="relative mx-0.5 h-12 w-px shrink-0 bg-white/30">
-            <span className="hud-sc absolute left-1/2 top-0 -translate-x-1/2 -translate-y-full text-[11px] text-[var(--muted)]">{roman(e.round)}</span>
+            <span className="hud-sc absolute left-1/2 top-0 -translate-x-1/2 -translate-y-full text-[11px] text-[var(--hud-muted)]">{roman(e.round)}</span>
           </span>
         ) : (
           <button key={`${e.participant.basicInfo.id}-${i}`} type="button" onClick={() => select(e.participant.basicInfo.id)} className="shrink-0">

@@ -4,7 +4,7 @@
   --enemy: #9c2a1d;
   --bone: #e6dccb;
   --ink: #efe5d2;
-  --muted: #8f8473;
+  --hud-muted: #8f8473;
   --gold: #c9b37a;
   color: var(--bone);
   font-family: var(--font-hud-sans), system-ui, sans-serif;
@@ -43,3 +43,36 @@
 @keyframes hud-countdown { from { width: 100%; } to { width: 0; } }
 @keyframes hud-crack { to { stroke-dashoffset: 0; } }
 .profile-tab[data-state="active"] { background: linear-gradient(135deg, #8a6414, #e6c25a 55%, #8a6414); color: #2a1d05; font-weight: 700; }
+
+/* shadcn tokens for forms, dialogs and buttons inside the HUD (html has .dark; these override it) */
+.hud-surface {
+  --background: #110e0b;
+  --foreground: #e6dccb;
+  --card: #1a140f;
+  --card-foreground: #e6dccb;
+  --popover: #1a140f;
+  --popover-foreground: #e6dccb;
+  --primary: #c9b37a;
+  --primary-foreground: #2a1d05;
+  --secondary: #2a2218;
+  --secondary-foreground: #efe5d2;
+  --muted: #1c1610;
+  --muted-foreground: #8f8473;
+  --accent: #2a2218;
+  --accent-foreground: #efe5d2;
+  --destructive: #d0705c;
+  --border: #4a3c2c;
+  --input: #4a3c2c;
+  --ring: #c9b37a;
+}
+.hud-surface [data-slot="input"],
+.hud-surface [data-slot="textarea"],
+.hud-surface [data-slot="select-trigger"] { background-color: #1a140f; color: #efe5d2; }
+.hud-surface [data-slot="input"]:focus-visible,
+.hud-surface [data-slot="textarea"]:focus-visible,
+.hud-surface [data-slot="select-trigger"]:focus-visible { border-color: #c9b37a; box-shadow: 0 0 0 2px rgba(201, 179, 122, 0.25); }
+.hud-surface [data-slot="button"][data-variant="default"] { background: linear-gradient(135deg, #8a6414, #e6c25a 55%, #8a6414); color: #2a1d05; font-weight: 700; }
+.hud-surface [data-slot="button"][data-variant="default"]:disabled { filter: grayscale(0.6); opacity: 0.6; }
+.hud-form-page { background: radial-gradient(120% 80% at 50% 0, #1d1611, #0b0908); }
+.hud-scroll-x { scrollbar-width: none; }
+.hud-scroll-x::-webkit-scrollbar { display: none; }
