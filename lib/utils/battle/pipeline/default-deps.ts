@@ -4,7 +4,7 @@ import type { BattleReadDeps } from "./read-battle";
 import type { PipelineDeps } from "./run-battle-mutation";
 
 import { prisma } from "@/lib/db";
-import { pusherServer } from "@/lib/pusher";
+import { pusherServer } from "@/lib/pusher-server";
 import { createClient } from "@/lib/supabase/server";
 import { BATTLE_RATE_LIMITS, checkRateLimit } from "@/lib/utils/api/rate-limit";
 import {

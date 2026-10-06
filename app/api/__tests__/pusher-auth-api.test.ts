@@ -8,10 +8,7 @@ const getUser = vi.hoisted(() => vi.fn());
 
 const findBattle = vi.hoisted(() => vi.fn());
 
-vi.mock("@/lib/pusher", async () => ({
-  ...(await vi.importActual<object>("@/lib/pusher-channels")),
-  pusherServer: { authorizeChannel },
-}));
+vi.mock("@/lib/pusher-server", () => ({ pusherServer: { authorizeChannel } }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({ auth: { getUser } }) }));
 vi.mock("@/lib/db", () => ({ prisma: { battleScene: { findUnique: findBattle } } }));
 

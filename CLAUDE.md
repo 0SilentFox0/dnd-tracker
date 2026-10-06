@@ -45,7 +45,7 @@ Many one-off ops live in `scripts/` and run via `tsx` (e.g. `pnpm import-docs-sp
 
 - **`lib/db.ts`** — singleton `PrismaClient`. `withSafePoolLimits` rewrites `DATABASE_URL` to add `connection_limit` (1 on Vercel/pgbouncer, 10 in dev). Always import `prisma` from here, never `new PrismaClient()`.
 - **`lib/supabase/{client,server,middleware}.ts`** — Supabase Auth. Use `client.ts` from `"use client"` code, `server.ts` (cookie-aware) from server components / route handlers.
-- **`lib/pusher.ts`** + **`app/api/pusher/auth/route.ts`** — Pusher channels for real-time battle sync. Battle pages fall back to polling if Pusher env vars are missing; in production the server-side env vars (`PUSHER_APP_ID`, `PUSHER_SECRET`) must be set or events silently no-op.
+- **`lib/pusher-server.ts`** (`server-only`, routes/pipeline) / **`lib/pusher-client.ts`** (`pusher-js`, lazy-imported by `usePusherBattleSync`) / `lib/pusher-channels.ts` (names, safe for both) + **`app/api/pusher/auth/route.ts`** — Pusher channels for real-time battle sync. Battle pages fall back to polling if Pusher env vars are missing; in production the server-side env vars (`PUSHER_APP_ID`, `PUSHER_SECRET`) must be set or events silently no-op.
 - **`lib/providers/query-provider.tsx`** — TanStack Query provider; wired into `app/layout.tsx`.
 - **`types/index.ts`** — single barrel for cross-domain TS types. Prefer adding to an existing domain file in `types/` over creating new top-level types.
 

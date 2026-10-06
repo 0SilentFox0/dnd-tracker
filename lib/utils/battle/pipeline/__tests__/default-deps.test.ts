@@ -16,7 +16,7 @@ vi.mock("next/server", async (importOriginal) => ({
   after: (cb: () => unknown) => afterCallbacks.push(cb),
 }));
 
-vi.mock("@/lib/pusher", () => ({ pusherServer: { trigger } }));
+vi.mock("@/lib/pusher-server", () => ({ pusherServer: { trigger } }));
 
 describe("defaultPipelineDeps.publish", () => {
   it("один after(), чий проміс завершується лише після всіх відправок у Pusher", async () => {

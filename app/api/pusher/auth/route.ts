@@ -1,11 +1,8 @@
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/db";
-import {
-  BATTLE_CHANNEL_PREFIX,
-  pusherServer,
-  USER_CHANNEL_PREFIX,
-} from "@/lib/pusher";
+import { BATTLE_CHANNEL_PREFIX, USER_CHANNEL_PREFIX } from "@/lib/pusher-channels";
+import { pusherServer } from "@/lib/pusher-server";
 import { createClient } from "@/lib/supabase/server";
 
 /**

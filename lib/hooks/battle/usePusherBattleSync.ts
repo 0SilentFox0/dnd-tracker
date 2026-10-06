@@ -33,7 +33,7 @@ export function usePusherBattleSync(
   const [connectionState, setConnectionState] = useState<PusherConnectionState>(null);
 
   const pusherRef = useRef<ReturnType<
-    typeof import("@/lib/pusher").getPusherClient
+    typeof import("@/lib/pusher-client").getPusherClient
   > | null>(null);
 
   const userChannelRef = useRef<string | null>(null);
@@ -98,7 +98,7 @@ export function usePusherBattleSync(
 
     let mounted = true;
 
-    import("@/lib/pusher").then(({ getPusherClient }) => {
+    import("@/lib/pusher-client").then(({ getPusherClient }) => {
       if (!mounted) return;
 
       const pusher = getPusherClient();
@@ -246,7 +246,7 @@ export function usePusherBattleSync(
 
     let mounted = true;
 
-    import("@/lib/pusher").then(({ getPusherClient }) => {
+    import("@/lib/pusher-client").then(({ getPusherClient }) => {
       if (!mounted) return;
 
       const pusher = getPusherClient();

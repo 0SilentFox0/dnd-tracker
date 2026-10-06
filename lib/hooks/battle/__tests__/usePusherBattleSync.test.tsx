@@ -94,7 +94,7 @@ function createMockPusher() {
   };
 }
 
-vi.mock("@/lib/pusher", () => ({
+vi.mock("@/lib/pusher-client", () => ({
   getPusherClient: () => {
     if (!mockPusherInstance) mockPusherInstance = createMockPusher();
 
