@@ -1,0 +1,22 @@
+.skill-tree-editor { background: radial-gradient(120% 80% at 50% 0, #1d1611, #0b0908); }
+.skill-tree-editor .editor-scroll { overflow-x: auto; }
+.skill-tree-editor .editor-table { border-collapse: separate; border-spacing: 4px; min-width: 100%; }
+.skill-tree-editor th { font-family: var(--font-hud-sc), serif; font-weight: 500; font-size: 13px; letter-spacing: 0.08em; color: #8f8473; text-align: left; padding: 2px 4px; }
+.skill-tree-editor tbody th:first-child, .skill-tree-editor thead th:first-child { position: sticky; left: 0; z-index: 1; background: #0d0a08; }
+.skill-tree-editor .editor-branch { min-width: 120px; color: #efe5d2; font-size: 15px; }
+.skill-tree-editor .editor-branch small { display: block; font-family: var(--font-hud-sans), sans-serif; font-size: 11px; color: #8f8473; letter-spacing: 0; }
+.skill-tree-editor .editor-branch-actions { display: flex; gap: 4px; margin-top: 2px; }
+.skill-tree-editor .editor-branch-actions button { min-width: 28px; min-height: 28px; color: #b8ab95; }
+.skill-tree-editor .editor-cell { height: 56px; width: 100%; min-width: 120px; display: flex; align-items: center; gap: 8px; padding: 6px; background: rgba(20, 16, 12, 0.8); box-shadow: inset 0 0 0 1px rgba(230, 220, 203, 0.1); text-align: left; }
+.skill-tree-editor .editor-cell.empty { justify-content: center; color: #6b5f50; font-size: 20px; background: transparent; border: 1px dashed #4a4036; box-shadow: none; }
+.skill-tree-editor .editor-cell.error { box-shadow: inset 0 0 0 2px #d0705c; }
+.skill-tree-editor .editor-icon { width: 40px; height: 40px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; background: radial-gradient(#2c2219, #0f0c09); color: #e8d6b0; box-shadow: inset 0 0 0 2px var(--m2); }
+.skill-tree-editor .editor-name { font-size: 13px; line-height: 1.15; color: #d6cbb7; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.skill-tree-editor .editor-add { padding: 8px 0; color: #c9b37a; }
+@media (max-width: 767px) {
+  .skill-tree-editor .editor-cell { min-width: 56px; width: 56px; justify-content: center; }
+  .skill-tree-editor .editor-name { display: none; }
+}
+.hud-surface .picker-item { padding: 8px 6px; border-bottom: 1px solid rgba(230, 220, 203, 0.07); cursor: pointer; }
+.hud-surface .picker-item.on { background: rgba(230, 194, 90, 0.12); }
+.hud-surface .picker-item.used { opacity: 0.45; cursor: not-allowed; }
