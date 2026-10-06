@@ -45,4 +45,17 @@ describe("ResultOverlay", () => {
     fireEvent.click(within(container).getByRole("button", { name: "Деталі шкоди" }));
     expect(second.showResult).toHaveBeenCalledWith(null);
   });
+
+  it("«Деталі шкоди» закриває оверлей і відкриває журнал на останньому записі", () => {
+    const s = fakeScene({ result: { kind: "hit", targetName: "Циклоп", damage: 10, downed: false, d20: 14 } });
+
+    s.battle.battleLog = [{ actionIndex: 3 }, { actionIndex: 4 }] as never;
+
+    const { container } = render(<ResultOverlay />, { wrapper: s.wrapper });
+
+    fireEvent.click(within(container).getByRole("button", { name: "Деталі шкоди" }));
+
+    expect(s.showResult).toHaveBeenCalledWith(null);
+    expect(s.openLog).toHaveBeenCalledWith(4);
+  });
 });

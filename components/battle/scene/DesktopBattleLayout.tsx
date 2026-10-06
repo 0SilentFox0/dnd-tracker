@@ -22,7 +22,7 @@ const H3 = ({ color, children }: { color: string; children: React.ReactNode }) =
 );
 
 export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) {
-  const { battle, hero, isMyTurn, isDM, allies, enemies, selectedId, select } = useBattleScene();
+  const { battle, hero, isMyTurn, isDM, allies, enemies, selectedId, select, log } = useBattleScene();
 
   const height = useBelowHeaderHeight();
 
@@ -53,7 +53,7 @@ export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) 
             {selected ? "Учасник" : "Журнал"}
             {selected && <button type="button" onClick={() => select(null)} className="font-sans text-[13px] font-normal tracking-normal text-[var(--muted)]">← журнал</button>}
           </h3>
-          {selected ? <div className="pt-3"><ParticipantDetails participant={selected} /></div> : <BattleLog />}
+          {selected ? <div className="pt-3"><ParticipantDetails participant={selected} /></div> : <BattleLog key={log.focus ?? "latest"} />}
         </aside>
       </div>
     </div>

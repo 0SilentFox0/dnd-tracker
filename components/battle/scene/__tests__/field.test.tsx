@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import type { ReactNode } from "react";
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 
@@ -39,7 +39,7 @@ function scene(isDM = false) {
 
   return {
     battle, isDM, viewer: { userId: "u", isDM, canSeeEnemyHp: false }, hero, myParticipants: [hero],
-    queue: turnQueue([gob, hero], 0, 3), allies: [hero], enemies: [gob], select: vi.fn(), selectedId: null,
+    queue: turnQueue([gob, hero], 0, 3), allies: [hero], enemies: [gob], select: vi.fn(), selectedId: null, log: { open: false, focus: null },
   } as unknown as BattleSceneValue;
 }
 
@@ -50,6 +50,8 @@ function wrap(value: BattleSceneValue) {
 }
 
 describe("поле бою", () => {
+  afterEach(cleanup);
+
   it("гравець бачить ворога станом і відомим AC, союзника — числами", () => {
     render(<><ParticipantList side="enemy" /><ParticipantList side="ally" /></>, { wrapper: wrap(scene()) });
 
@@ -77,5 +79,23 @@ describe("поле бою", () => {
 
     expect(screen.getByText("Годрік завдав 6")).toBeTruthy();
     expect(screen.queryByText(/секрет/)).toBeNull();
+  });
+
+  it("журнал, відкритий на записі, показує його деталі без прихованого від гравця", () => {
+    render(<BattleLog />, { wrapper: wrap({ ...scene(), log: { open: true, focus: 1 } } as BattleSceneValue) });
+
+    expect(screen.getByText("Попадання")).toBeTruthy();
+    expect(screen.queryByText(/КЛ цілі/)).toBeNull();
+    expect(screen.queryByText(/секрет/)).toBeNull();
+  });
+
+  it("без фокуса деталі згорнуті й розгортаються дотиком", () => {
+    render(<BattleLog />, { wrapper: wrap(scene()) });
+
+    expect(screen.queryByText("Попадання")).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Годрік завдав 6" }));
+
+    expect(screen.getByText("Попадання")).toBeTruthy();
   });
 });

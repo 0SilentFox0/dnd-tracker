@@ -89,6 +89,8 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
 
   const isMyTurn = opts.isMyTurn ?? true;
 
+  const openLog = vi.fn();
+
   const value = {
     campaignId: "c1",
     battleId: "b1",
@@ -111,6 +113,9 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
     toast,
     result: opts.result ?? null,
     showResult,
+    log: { open: false, focus: null },
+    openLog,
+    closeLog: vi.fn(),
     readBattle: () => after,
     actions,
     anyPending: false,
@@ -129,7 +134,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
   );
 
   return {
-    wrapper, value, me, caster: me, gob, ally, battle, confirm, showResult, toast,
+    wrapper, value, me, caster: me, gob, ally, battle, confirm, showResult, openLog, toast,
     mutateAsync: actions.attack.mutateAsync,
     castSpell: actions.castSpell.mutateAsync,
     bonusAction: actions.bonusAction.mutateAsync,

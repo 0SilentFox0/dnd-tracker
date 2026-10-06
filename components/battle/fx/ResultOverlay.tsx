@@ -23,7 +23,7 @@ function RetaliationLine({ retaliation }: { retaliation?: RetaliationOutcome }) 
 }
 
 export function ResultOverlay() {
-  const { result, showResult } = useBattleScene();
+  const { result, showResult, battle, openLog } = useBattleScene();
 
   useEffect(() => {
     if (result?.kind !== "morale-skip") return;
@@ -94,7 +94,16 @@ export function ResultOverlay() {
       <div className="relative mt-3 text-[15px] text-[#d9cfbd]">{result.targetName}{result.downed ? " · повалений" : ""}</div>
       <div className="relative mt-1.5 text-sm text-[#a89c88]">d20 = {result.d20}{result.weapon ? ` · ${result.weapon}` : ""}</div>
       <RetaliationLine retaliation={result.retaliation} />
-      <button type="button" onClick={close} className={cn(cta, "relative border border-[#a8473a] bg-[#7a2a1f] text-[#f3e7cc]")}>Деталі шкоди</button>
+      <button
+        type="button"
+        onClick={() => {
+          close();
+          openLog(battle.battleLog?.at(-1)?.actionIndex ?? null);
+        }}
+        className={cn(cta, "relative border border-[#a8473a] bg-[#7a2a1f] text-[#f3e7cc]")}
+      >
+        Деталі шкоди
+      </button>
     </div>
   );
 }

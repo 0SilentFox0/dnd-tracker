@@ -19,11 +19,9 @@ import { useBattleScene, useBelowHeaderHeight } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 
 export function MobileBattleLayout() {
-  const { battle, current, hero, isMyTurn, allies, enemies, selectedId, select } = useBattleScene();
+  const { battle, current, hero, isMyTurn, allies, enemies, selectedId, select, log, openLog, closeLog } = useBattleScene();
 
   const [tab, setTab] = useState<"ally" | "enemy">("enemy");
-
-  const [logOpen, setLogOpen] = useState(false);
 
   const height = useBelowHeaderHeight();
 
@@ -40,7 +38,7 @@ export function MobileBattleLayout() {
       <ConnectionBanner />
       <BattleTopBar />
       <InitiativeTrack />
-      <LastActionTicker onOpenLog={() => setLogOpen(true)} />
+      <LastActionTicker onOpenLog={() => openLog()} />
       {battle.status === "completed" ? (
         <BattleOverBanner />
       ) : isMyTurn ? (
@@ -64,8 +62,8 @@ export function MobileBattleLayout() {
       <ResponsiveDialog open={!!selected} onOpenChange={(o) => !o && select(null)} title="Учасник" className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
         {selected && <ParticipantDetails participant={selected} />}
       </ResponsiveDialog>
-      <ResponsiveDialog open={logOpen} onOpenChange={setLogOpen} title="Журнал" className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
-        <BattleLog />
+      <ResponsiveDialog open={log.open} onOpenChange={(o) => !o && closeLog()} title="Журнал" className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
+        <BattleLog key={log.focus ?? "latest"} />
       </ResponsiveDialog>
     </div>
   );
