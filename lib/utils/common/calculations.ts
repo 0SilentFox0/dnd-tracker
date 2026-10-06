@@ -20,18 +20,6 @@ export function getProficiencyBonus(level: number): number {
 }
 
 /**
- * Розраховує пасивне значення (perception, investigation, insight)
- * Формула: 10 + ability modifier + (proficiency bonus якщо є proficiency)
- */
-export function getPassiveScore(
-  abilityModifier: number,
-  hasProficiency: boolean,
-  proficiencyBonus: number
-): number {
-  return 10 + abilityModifier + (hasProficiency ? proficiencyBonus : 0);
-}
-
-/**
  * Розраховує Spell Save DC
  * Формула: 8 + proficiency bonus + ability modifier
  */
@@ -98,42 +86,6 @@ export function calculateHPGain(
   const averageRoll = Math.ceil(diceSize / 2) + 0.5; // Середнє значення для dN
 
   return Math.floor(averageRoll) + constitutionModifier;
-}
-
-/**
- * Розраховує урон з кубиків
- * Підтримує формати: "2d4", "3d8+4", "1d6-1"
- */
-export function rollDamage(dice: string, modifier: number = 0): number {
-  const match = dice.match(/(\d+)d(\d+)([+-]\d+)?/);
-
-  if (!match) return 0;
-
-  const count = parseInt(match[1]);
-
-  const size = parseInt(match[2]);
-
-  const diceModifier = match[3] ? parseInt(match[3]) : 0;
-
-  // В реальному застосунку тут буде генерація випадкових чисел
-  // Для тестування повертаємо середнє значення
-  const averageRoll = (count * (size + 1)) / 2;
-
-  return Math.floor(averageRoll) + diceModifier + modifier;
-}
-
-/**
- * Перевіряє чи є критичне попадання (20 на d20)
- */
-export function isCriticalHit(roll: number): boolean {
-  return roll === 20;
-}
-
-/**
- * Перевіряє чи є критичний промах (1 на d20)
- */
-export function isCriticalMiss(roll: number): boolean {
-  return roll === 1;
 }
 
 /**

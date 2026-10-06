@@ -9,18 +9,3 @@ export const DICE_OPTIONS = [
 ] as const;
 
 export type DiceType = (typeof DICE_OPTIONS)[number]["value"];
-
-export const DICE_LABELS = DICE_OPTIONS.reduce<Record<string, string>>(
-  (acc, option) => {
-    acc[option.value] = option.label;
-
-    return acc;
-  },
-  {}
-);
-
-export function getDiceLabel(value?: string | null): string {
-  if (!value) return "";
-
-  return DICE_LABELS[value] || value;
-}

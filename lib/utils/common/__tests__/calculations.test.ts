@@ -4,15 +4,11 @@ import {
   calculateHPGain,
   getAbilityModifier,
   getLevelFromXP,
-  getPassiveScore,
   getProficiencyBonus,
   getSpellAttackBonus,
   getSpellSaveDC,
   getXPForLevel,
-  isCriticalHit,
-  isCriticalMiss,
   isHit,
-  rollDamage,
 } from "../calculations";
 import { getAttackAbilityModifier } from "../calculations";
 
@@ -37,15 +33,6 @@ describe("calculations", () => {
     });
     it("зростає з рівнем", () => {
       expect(getProficiencyBonus(5)).toBe(3);
-    });
-  });
-
-  describe("getPassiveScore", () => {
-    it("10 + modifier без proficiency", () => {
-      expect(getPassiveScore(2, false, 2)).toBe(12);
-    });
-    it("10 + modifier + proficiency якщо є", () => {
-      expect(getPassiveScore(2, true, 2)).toBe(14);
     });
   });
 
@@ -87,29 +74,6 @@ describe("calculations", () => {
     });
     it("повертає 0 для невалідного hitDice", () => {
       expect(calculateHPGain("invalid", 0)).toBe(0);
-    });
-  });
-
-  describe("rollDamage", () => {
-    it("парсить 2d6 і повертає число", () => {
-      const dmg = rollDamage("2d6");
-
-      expect(typeof dmg).toBe("number");
-      expect(dmg).toBeGreaterThan(0);
-    });
-    it("повертає 0 для невалідного формату", () => {
-      expect(rollDamage("x")).toBe(0);
-    });
-  });
-
-  describe("isCriticalHit / isCriticalMiss", () => {
-    it("20 = критичне влучання", () => {
-      expect(isCriticalHit(20)).toBe(true);
-      expect(isCriticalHit(19)).toBe(false);
-    });
-    it("1 = критичний промах", () => {
-      expect(isCriticalMiss(1)).toBe(true);
-      expect(isCriticalMiss(2)).toBe(false);
     });
   });
 

@@ -36,27 +36,3 @@ export enum SpellDamageType {
   BUFF = "buff",
   DEBUFF = "debuff",
 }
-
-/**
- * Масиви значень для використання в Zod схемах
- */
-export const SPELL_TYPE_VALUES = [SpellType.TARGET, SpellType.AOE] as const;
-export const SPELL_DAMAGE_TYPE_VALUES = [
-  SpellDamageType.DAMAGE,
-  SpellDamageType.HEAL,
-  SpellDamageType.ALL,
-  SpellDamageType.BUFF,
-  SpellDamageType.DEBUFF,
-] as const;
-export const SPELL_SAVING_THROW_ABILITY_VALUES = [
-  SpellSavingThrowAbility.STRENGTH,
-  SpellSavingThrowAbility.DEXTERITY,
-  SpellSavingThrowAbility.CONSTITUTION,
-  SpellSavingThrowAbility.INTELLIGENCE,
-  SpellSavingThrowAbility.WISDOM,
-  SpellSavingThrowAbility.CHARISMA,
-] as const;
-export const SPELL_SAVING_THROW_ON_SUCCESS_VALUES = [
-  SpellSavingThrowOnSuccess.HALF,
-  SpellSavingThrowOnSuccess.NONE,
-] as const;

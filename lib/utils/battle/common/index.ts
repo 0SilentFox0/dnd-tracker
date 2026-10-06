@@ -8,10 +8,4 @@ export {
   resolveAttackRoll,
 } from "./attack-roll-helpers";
 export { evaluateFormula } from "./formula-evaluator";
-export {
-  calculatePercentBonus,
-  formatFlatBonusBreakdown,
-  formatPercentBonusBreakdown,
-  matchesAttackBonusModifier,
-  matchesAttackType,
-} from "./modifiers";
+export { calculatePercentBonus, matchesAttackBonusModifier } from "./modifiers";

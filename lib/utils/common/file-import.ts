@@ -149,19 +149,3 @@ export async function parseJSONFile<T>(file: File): Promise<T[]> {
 
   return Array.isArray(data) ? data : [data];
 }
-
-/**
- * Валідує файл перед імпортом
- */
-export function validateImportFile(file: File): { valid: boolean; error?: string } {
-  const ext = file.name.split(".").pop()?.toLowerCase();
-  
-  if (ext !== "csv" && ext !== "json") {
-    return {
-      valid: false,
-      error: "Підтримуються тільки CSV та JSON файли",
-    };
-  }
-
-  return { valid: true };
-}

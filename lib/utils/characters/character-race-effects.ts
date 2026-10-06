@@ -2,10 +2,7 @@
  * Утиліти для роботи з ефектами рас для персонажів
  */
 
-import {
-  extractRaceDamageModifiers,
-  extractRaceImmunities,
-} from "@/lib/utils/races/race-effects";
+import { extractRaceImmunities } from "@/lib/utils/races/race-effects";
 import type { Character } from "@/types/characters";
 import type { Race } from "@/types/races";
 
@@ -46,37 +43,4 @@ export function getCharacterImmunities(
         i
       );
     });
-}
-
-/**
- * Отримує всі модифікатори урону персонажа, включаючи модифікатори з раси
- */
-export function getCharacterDamageModifiers(
-  character: Character | { damageModifier?: string } | { damageModifier?: unknown } | Record<string, unknown>,
-  race: Race | RaceFromPrisma | null | undefined
-): string[] {
-  const characterModifiers: string[] = [];
-
-  // Якщо в Character є поле damageModifier, додаємо його
-  const characterWithModifier = character as Character & { damageModifier?: string };
-
-  if (characterWithModifier.damageModifier) {
-    characterModifiers.push(characterWithModifier.damageModifier);
-  }
-
-  const raceModifiers = extractRaceDamageModifiers(race);
-
-  // Об'єднуємо та видаляємо дублікати
-  const allModifiers = [...characterModifiers, ...raceModifiers];
-
-  return Array.from(
-    new Set(allModifiers.map((m) => m.toLowerCase().trim()))
-  ).map((m) => {
-    // Знаходимо оригінальну назву (з правильним регістром)
-    return (
-      characterModifiers.find((cm) => cm.toLowerCase().trim() === m) ||
-      raceModifiers.find((rm: string) => rm.toLowerCase().trim() === m) ||
-      m
-    );
-  });
 }

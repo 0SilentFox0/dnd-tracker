@@ -20,7 +20,7 @@ const DEFAULT_BACKGROUND = "tavern.png";
 /**
  * Отримує назву файлу фонового зображення на основі шляху
  */
-export function getBackgroundImage(pathname: string): string {
+function getBackgroundImage(pathname: string): string {
   // Перевіряємо точкові збіги спочатку (від найбільш специфічних до найменш специфічних)
   const sortedPaths = Object.entries(BACKGROUND_MAP).sort((a, b) => b[0].length - a[0].length);
   

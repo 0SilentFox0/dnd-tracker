@@ -1,4 +1,3 @@
-import { ABILITY_SCORES } from "@/lib/constants/abilities";
 import { getProficiencyBonus } from "@/lib/utils/common/calculations";
 import type { CSVUnitRow, UnitAttack, UnitSpecialAbility } from "@/types/import";
 
@@ -136,44 +135,6 @@ export function parseAttacks(value: string): UnitAttack[] {
   }
 
   return attacks;
-}
-
-/**
- * Парсить saving throws з рядка
- * Формат: "МДР +7, ХАР +9" або "Відсутні"
- */
-export function parseSavingThrows(value: string): string[] {
-  if (!value || value.trim() === "Відсутні" || value.trim() === "") {
-    return [];
-  }
-
-  const saves: string[] = [];
-  
-  // Створюємо мапінг на основі ABILITY_SCORES (тільки перші 6 - основні характеристики)
-  // Використовуємо тільки англійські ключі та абревіатури
-  const saveMap: Record<string, string> = {};
-
-  const baseAbilities = ABILITY_SCORES.slice(0, 6);
-  
-  for (const ability of baseAbilities) {
-    // Додаємо англійський ключ (напр. "strength")
-    saveMap[ability.key] = ability.key;
-    // Додаємо англійську абревіатуру (напр. "STR")
-    saveMap[ability.abbreviation] = ability.key;
-  }
-
-  const parts = value.split(",").map((s) => s.trim());
-
-  for (const part of parts) {
-    for (const [key, ability] of Object.entries(saveMap)) {
-      if (part.includes(key)) {
-        saves.push(ability);
-        break;
-      }
-    }
-  }
-
-  return saves;
 }
 
 /**

@@ -6,7 +6,7 @@ import type { ActiveEffect } from "@/types/battle";
 
 const tone = (e: ActiveEffect) => (e.type === "buff" ? "text-[#cdb87e]" : "text-[#d0705c]");
 
-export function EffectChip({ effect }: { effect: ActiveEffect }) {
+function EffectChip({ effect }: { effect: ActiveEffect }) {
   const icon = effect.icon ?? effect.source?.icon;
 
   return (
