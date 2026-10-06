@@ -93,3 +93,9 @@
 .hud-surface [data-slot="error-state"] { border-color: rgba(208, 112, 92, 0.5); }
 .hud-surface [data-slot="skeleton-row"] { background: #1c1610; }
 .hud-page { color: #e6dccb; }
+.hud-form input[type="number"],
+.hud-page input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+.hud-form input[type="number"]::-webkit-inner-spin-button,
+.hud-form input[type="number"]::-webkit-outer-spin-button,
+.hud-page input[type="number"]::-webkit-inner-spin-button,
+.hud-page input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }

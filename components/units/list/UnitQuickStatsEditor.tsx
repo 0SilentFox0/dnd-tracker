@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { Check } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,16 +36,16 @@ function QuickStatInput({
   const commitFromInput = () => field.commit((document.getElementById(field.id) as HTMLInputElement | null)?.value ?? "");
 
   return (
-    <>
-      <Label htmlFor={field.id} className="text-xs text-muted-foreground font-normal">
+    <div className="min-w-0 space-y-1">
+      <Label htmlFor={field.id} className="block truncate text-[11px] font-normal text-[#8f8473]">
         {label}
       </Label>
-      <div className="flex gap-1.5 items-center">
+      <div className="flex items-center gap-1">
         <Input
           key={field.key}
           id={field.id}
           {...(numeric && { type: "number", inputMode: "numeric" as const })}
-          className={cn("h-8 min-w-0 flex-1 text-sm", numeric ? "tabular-nums" : "font-mono")}
+          className={cn("h-8 min-w-0 flex-1 px-2 text-sm", numeric ? "tabular-nums" : "font-mono")}
           defaultValue={field.defaultValue}
           onBlur={(e) => field.commit(e.currentTarget.value)}
           onKeyDown={(e) => {
@@ -58,19 +59,20 @@ function QuickStatInput({
         />
         <Button
           type="button"
-          variant="secondary"
-          size="sm"
-          className="h-8 shrink-0 px-2.5 text-xs"
+          variant="ghost"
+          size="icon"
+          aria-label="Зберегти"
+          className="size-7 shrink-0 text-[#c9b37a] hover:text-[#e6c25a]"
           disabled={disabled}
           onClick={(e) => {
             e.preventDefault();
             commitFromInput();
           }}
         >
-          Зберегти
+          <Check className="size-4" />
         </Button>
       </div>
-    </>
+    </div>
   );
 }
 
@@ -87,37 +89,19 @@ export function UnitQuickStatsEditor({
   const hasPrimaryAttack = primaryAttackIndex >= 0 && !!attacks[primaryAttackIndex];
 
   return (
-    <>
-      <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2" onClick={(e) => e.stopPropagation()}>
-        <div className="space-y-1">
-          <QuickStatInput field={field("ac")} label="Броня (AC)" disabled={isBusy} numeric inputProps={{ min: 0 }} />
-        </div>
-        <div className="space-y-1">
-          <QuickStatInput field={field("init")} label="Ініціатива" disabled={isBusy} numeric />
-        </div>
-      </div>
-
+    <div className="grid grid-cols-[1fr_1fr_1.4fr] gap-2" onClick={(e) => e.stopPropagation()}>
+      <QuickStatInput field={field("ac")} label="Броня (AC)" disabled={isBusy} numeric inputProps={{ min: 0 }} />
+      <QuickStatInput field={field("init")} label="Ініціатива" disabled={isBusy} numeric />
       {hasPrimaryAttack ? (
-        <div className="mt-2 space-y-1" onClick={(e) => e.stopPropagation()}>
-          <QuickStatInput
-            field={field("dice")}
-            label={
-              <>
-                Кубики шкоди
-                {attacks.length > 1 && primaryAttackName ? (
-                  <span className="text-muted-foreground/80"> ({primaryAttackName})</span>
-                ) : null}
-              </>
-            }
-            disabled={isBusy}
-            inputProps={{ placeholder: "напр. 2d6+3", title: "Enter, кнопка «Зберегти» або втрата фокусу" }}
-          />
-        </div>
+        <QuickStatInput
+          field={field("dice")}
+          label={attacks.length > 1 && primaryAttackName ? `Кубики (${primaryAttackName})` : "Кубики шкоди"}
+          disabled={isBusy}
+          inputProps={{ placeholder: "2d6+3", title: "Enter, ✓ або втрата фокусу" }}
+        />
       ) : (
-        <p className="mt-2 text-xs text-muted-foreground">
-          Немає атак — кубики можна додати в повному редакторі
-        </p>
+        <p className="self-end text-[11px] leading-tight text-[#8f8473]">Немає атак — кубики в повному редакторі</p>
       )}
-    </>
+    </div>
   );
 }

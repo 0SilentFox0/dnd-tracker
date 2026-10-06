@@ -91,14 +91,11 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
                 {avgDamage !== null && ` • Урон ~${avgDamage}`}
               </div>
             </div>
-
-            <UnitQuickStatsEditor
-              unit={unit}
-              campaignId={campaignId}
-              primaryAttackIndex={primaryIdx}
-              primaryAttackName={primaryAttack?.name}
-            />
           </div>
+        </div>
+
+        <div className="mt-3 mb-3">
+          <UnitQuickStatsEditor unit={unit} campaignId={campaignId} primaryAttackIndex={primaryIdx} primaryAttackName={primaryAttack?.name} />
         </div>
 
         {abilitySummary.length > 0 && (
