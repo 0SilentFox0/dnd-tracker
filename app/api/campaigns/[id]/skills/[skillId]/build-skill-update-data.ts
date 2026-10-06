@@ -19,8 +19,6 @@ export function buildSkillUpdateData(
   if (data.image !== undefined) updateData.image = data.image;
 
   if (data.basicInfo !== undefined) {
-    updateData.basicInfo = data.basicInfo as Prisma.InputJsonValue;
-
     const basicInfo = data.basicInfo as Record<string, unknown>;
 
     if (basicInfo.name !== undefined) updateData.name = basicInfo.name as string;
@@ -33,8 +31,6 @@ export function buildSkillUpdateData(
   }
 
   if (data.spellData !== undefined) {
-    updateData.spellData = data.spellData as Prisma.InputJsonValue;
-
     const spellData = data.spellData as Record<string, unknown>;
 
     if (spellData.spellId !== undefined) {
@@ -103,8 +99,6 @@ export function buildSkillUpdateData(
   }
 
   if (data.mainSkillData !== undefined) {
-    updateData.mainSkillData = data.mainSkillData as Prisma.InputJsonValue;
-
     const mainSkillData = data.mainSkillData as Record<string, unknown>;
 
     if (mainSkillData.mainSkillId !== undefined) {

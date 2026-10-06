@@ -3,7 +3,6 @@ import { DMSkillsPageClient } from "./page-client";
 import { requireCampaignDM } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
 import { withAbilitySummary } from "@/lib/utils/abilities/summary";
-import type { SkillTriggers } from "@/types/skill-triggers";
 
 export default async function DMSkillsPage({
   params,
@@ -30,9 +29,6 @@ export default async function DMSkillsPage({
   // Перетворюємо дані з Prisma у правильний тип Skill
   const transformedSkills = skills.map((row) => withAbilitySummary("skill", row)).map((skill) => ({
     ...skill,
-    bonuses: typeof skill.bonuses === "object" && skill.bonuses !== null
-      ? (skill.bonuses as Record<string, number>)
-      : {},
     spellEnhancementTypes: Array.isArray(skill.spellEnhancementTypes)
       ? (skill.spellEnhancementTypes as string[])
       : undefined,
@@ -55,9 +51,6 @@ export default async function DMSkillsPage({
             duration?: number;
           })
         : null,
-    skillTriggers: Array.isArray(skill.skillTriggers)
-      ? (skill.skillTriggers as unknown as SkillTriggers)
-      : undefined,
   }));
 
   return (

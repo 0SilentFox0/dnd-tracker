@@ -3,7 +3,6 @@
  */
 
 import type { GroupedSkillPayload } from "./hooks";
-import type { SkillTriggers } from "./skill-triggers";
 
 import { type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import { type CampaignRoleValue } from "@/lib/constants/campaigns";
@@ -19,16 +18,6 @@ export interface SkillUpdatePayload {
     icon?: string | null;
     races?: string[];
     isRacial?: boolean;
-  };
-  bonuses?: Record<string, number>;
-  combatStats?: {
-    damage?: number;
-    armor?: number;
-    speed?: number;
-    physicalResistance?: number;
-    magicalResistance?: number;
-    affectsDamage?: boolean;
-    damageType?: "melee" | "ranged" | "magic" | null;
   };
   spellData?: {
     spellId?: string | null;
@@ -48,7 +37,6 @@ export interface SkillUpdatePayload {
   mainSkillData?: {
     mainSkillId?: string | null;
   };
-  skillTriggers?: SkillTriggers;
 }
 
 // Battles API

@@ -4,7 +4,6 @@
  * Поля типу Json у Prisma не валідуються при читанні — у бізнес-логіку
  * тече `unknown` через `as unknown as Foo` cast (~20 місць).
  * Тут — Zod-схеми для найбільш чутливих JSON-колонок:
- *  - Skill.combatStats — структура ефектів скіла,
  *  - Skill.spellEnhancementData — апгрейди заклинань,
  *  - Character.skillTreeProgress — прогрес у дереві скілів,
  *  - Spell.effects (string[]) — список ефектів.
@@ -15,39 +14,6 @@
  */
 
 import { z } from "zod";
-
-// ─────────────────────────────────────────────────────────────────────
-// Skill.combatStats
-// ─────────────────────────────────────────────────────────────────────
-
-const skillEffectRawSchema = z.object({
-  stat: z.string().optional(),
-  type: z.string().optional(),
-  value: z.union([z.number(), z.string(), z.boolean()]).optional(),
-  isPercentage: z.boolean().optional(),
-  duration: z.number().optional(),
-  target: z
-    .enum(["self", "enemy", "all_enemies", "all_allies", "all"])
-    .optional(),
-  maxTriggers: z.number().nullable().optional(),
-});
-
-export const skillCombatStatsSchema = z
-  .object({
-    effects: z.array(skillEffectRawSchema).optional(),
-    affectsDamage: z.boolean().optional(),
-    damageType: z.enum(["melee", "ranged", "magic"]).nullable().optional(),
-    min_targets: z.number().optional(),
-    max_targets: z.number().optional(),
-    damage: z.number().nullable().optional(),
-    armor: z.number().nullable().optional(),
-    speed: z.number().nullable().optional(),
-    physicalResistance: z.number().nullable().optional(),
-    magicalResistance: z.number().nullable().optional(),
-  })
-  .passthrough();
-
-export type SkillCombatStats = z.infer<typeof skillCombatStatsSchema>;
 
 // ─────────────────────────────────────────────────────────────────────
 // Skill.spellEnhancementData
