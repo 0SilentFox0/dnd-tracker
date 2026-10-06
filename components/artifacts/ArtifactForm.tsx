@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 
+import type { ArtifactSetOption } from "./ArtifactEditForm-types";
 import { ArtifactIconUrlPreview } from "./ArtifactIconUrlPreview";
 import { ArtifactWeaponFields } from "./ArtifactWeaponFields";
 
@@ -30,11 +31,6 @@ import type { ArtifactFormSubmitPayload } from "@/lib/utils/artifacts/artifact-f
 import { isWeaponSlot, type WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
 
 export type { ArtifactFormSubmitPayload };
-
-export interface ArtifactSetOption {
-  id: string;
-  name: string;
-}
 
 export interface ArtifactFormInitial {
   name: string;

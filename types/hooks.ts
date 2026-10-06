@@ -35,36 +35,3 @@ export interface GroupedSkillPayload {
     mainSkillId: string | null;
   };
 }
-
-// useCharacterForm
-export interface UseCharacterFormOptions {
-  initialData?: unknown;
-  onSuccess?: () => void;
-}
-
-// useInventory
-export interface UseInventoryOptions {
-  characterId: string;
-  initialData?: unknown;
-}
-
-// useFileImport
-export interface UseFileImportOptions<T> {
-  onSuccess?: (data: T[]) => void;
-  onError?: (error: Error) => void;
-}
-
-export interface UseFileImportReturn<T> {
-  importFile: (file: File) => Promise<void>;
-  isImporting: boolean;
-  error: Error | null;
-  data: T[] | null;
-}
-
-// useSkills
-export interface SkillFromLibrary {
-  id: string;
-  name: string;
-  description: string | null;
-  icon: string | null;
-}

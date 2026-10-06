@@ -5,9 +5,9 @@
 import { getCharacterAttacks } from "./balance-helpers";
 
 import { prisma } from "@/lib/db";
-import type { CharacterDprBreakdown } from "@/lib/utils/battle/balance";
 import { getCharacterStats, getUnitStats, magicMainSkillIds as magicMainSkillIdsOf } from "@/lib/utils/battle/balance";
 import { branchLevels, normalizeTree, resolveLearned } from "@/lib/utils/skills/progression";
+import type { CharacterDprBreakdown } from "@/types/battle-setup";
 
 export async function getBalancePayload(campaignId: string) {
   const [trees, mainSkills] = await Promise.all([

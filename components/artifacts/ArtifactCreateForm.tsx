@@ -2,10 +2,8 @@
 
 import { useRouter } from "next/navigation";
 
-import {
-  ArtifactForm,
-  type ArtifactSetOption,
-} from "./ArtifactForm";
+import type { ArtifactSetOption } from "./ArtifactEditForm-types";
+import { ArtifactForm } from "./ArtifactForm";
 
 import { ArtifactRarity, ArtifactSlot } from "@/lib/constants/artifacts";
 import { useCreateArtifact } from "@/lib/hooks/artifacts";

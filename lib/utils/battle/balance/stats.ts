@@ -12,6 +12,7 @@ import {
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { diceAverage } from "@/lib/utils/common/dice";
 import type { BranchLevel } from "@/lib/utils/skills/progression";
+import type { CharacterDprBreakdown, SuggestedEnemy } from "@/types/battle-setup";
 
 export type DifficultyRatio = "easy" | "medium" | "hard";
 
@@ -20,13 +21,6 @@ export const DIFFICULTY_DPR_HP_RATIOS: Record<DifficultyRatio, number> = {
   medium: 1,
   hard: 1.5,
 };
-
-export interface AllyStats {
-  dpr: number;
-  totalHp: number;
-  kpi: number;
-  allyCount: number;
-}
 
 export interface UnitStats {
   unitId: string;
@@ -37,25 +31,6 @@ export interface UnitStats {
   level: number;
   groupId: string | null;
   race: string | null;
-}
-
-export interface SuggestedEnemy {
-  unitId: string;
-  name: string;
-  quantity: number;
-  dpr: number;
-  hp: number;
-  totalDpr: number;
-  totalHp: number;
-}
-
-export interface CharacterDprBreakdown {
-  physicalDpr: number;
-  meleeAvg: number;
-  rangedAvg: number;
-  spellDpr: number;
-  nonMagicDpr: number;
-  logLines: string[];
 }
 
 export interface GetCharacterStatsParams {

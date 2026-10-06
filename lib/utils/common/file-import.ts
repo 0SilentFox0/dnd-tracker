@@ -2,9 +2,7 @@
  * Загальні утиліти для імпорту файлів (CSV та JSON)
  */
 
-export interface CSVRow {
-  [key: string]: string | undefined;
-}
+import type { CSVRow } from "@/types/import";
 
 /**
  * Парсить CSV рядок з підтримкою лапок та різних роздільників

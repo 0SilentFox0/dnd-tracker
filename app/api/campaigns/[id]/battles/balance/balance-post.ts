@@ -8,12 +8,7 @@ import { getCharacterAttacks } from "./balance-helpers";
 import type { balanceSchema } from "./balance-schema";
 
 import { prisma } from "@/lib/db";
-import type {
-  AllyStats,
-  DifficultyRatio,
-  SuggestedEnemy,
-  UnitStats,
-} from "@/lib/utils/battle/balance";
+import type { DifficultyRatio, UnitStats } from "@/lib/utils/battle/balance";
 import {
   DIFFICULTY_DPR_HP_RATIOS,
   getCharacterStats,
@@ -22,6 +17,7 @@ import {
 } from "@/lib/utils/battle/balance";
 import { magicMainSkillIds as magicMainSkillIdsOf } from "@/lib/utils/battle/balance/magic-school";
 import { branchLevels, normalizeTree, resolveLearned, type TreeNodes } from "@/lib/utils/skills/progression";
+import type { AllyStats, SuggestedEnemy } from "@/types/battle-setup";
 
 type BalancePostData = z.infer<typeof balanceSchema>;
 
