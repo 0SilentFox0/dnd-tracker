@@ -149,6 +149,24 @@ describe("ResponsiveDialog ширина", () => {
   });
 });
 
+describe("ResponsiveDialog hud", () => {
+  afterEach(cleanup);
+
+  it("десктоп: модалка отримує HUD-поверхню", () => {
+    mockMatchMedia(false);
+    render(<ResponsiveDialog open hud title="Т" onOpenChange={vi.fn()}>тіло</ResponsiveDialog>);
+
+    expect(screen.getByRole("dialog").className).toContain("hud-surface");
+  });
+
+  it("телефон: шторка отримує HUD-поверхню", () => {
+    mockMatchMedia(true);
+    render(<ResponsiveDialog open hud title="Т" onOpenChange={vi.fn()}>тіло</ResponsiveDialog>);
+
+    expect((document.querySelector("[data-slot=sheet]") as HTMLElement).className).toContain("hud-surface");
+  });
+});
+
 describe("BattleDialog", () => {
   afterEach(cleanup);
 

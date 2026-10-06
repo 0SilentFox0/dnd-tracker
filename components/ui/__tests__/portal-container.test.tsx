@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
-import { cleanup, render, screen } from "@testing-library/react";
 import { useState } from "react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { PortalContainerProvider } from "@/components/ui/portal-container";
