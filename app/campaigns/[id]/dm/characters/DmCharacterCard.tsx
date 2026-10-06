@@ -4,9 +4,8 @@ import Link from "next/link";
 import { MoreVertical, Pencil, Trash2, TrendingUp } from "lucide-react";
 
 import { EntityIcon } from "@/components/common/EntityIcon";
-import { Badge } from "@/components/ui/badge";
+import { HudCard } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CharacterType } from "@/lib/constants/characters";
+import { cn } from "@/lib/utils";
 import { heroBaseHp } from "@/lib/utils/characters/hero-hp";
 import type { Character } from "@/types/characters";
 
@@ -25,20 +25,41 @@ interface DmCharacterCardProps {
   actions: { onLevelUp: () => void; onDelete: () => void };
 }
 
-export function DmCharacterCard({ character, campaignId, busy, actions }: DmCharacterCardProps) {
+function StatChip({ short, value }: { short: string; value: string | number }) {
   return (
-    <Card
-      className="overflow-hidden hover:shadow-lg transition-shadow pt-0"
-    >
-      <div className="relative aspect-square h-full w-full bg-muted">
-        <EntityIcon src={character.avatar} name={character.name} size={100} className="absolute inset-0 size-full rounded-none text-4xl font-bold" />
-        {character.avatar && <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/30 to-transparent" />}
+    <div className="min-w-0 flex-1 rounded-lg border border-[#4a3c2c] bg-[#1c1610] px-1 py-1 text-center">
+      <b className="block truncate text-base leading-5 text-[#efe5d2]">{value}</b>
+      <span className="text-[10px] uppercase text-[#8f8473]">{short}</span>
+    </div>
+  );
+}
+
+export function DmCharacterCard({ character, campaignId, busy, actions }: DmCharacterCardProps) {
+  const isNpc = character.type === CharacterType.NPC_HERO;
+
+  return (
+    <HudCard className="space-y-3 p-3">
+      <div className="flex items-start gap-3">
+        <EntityIcon src={character.avatar} name={character.name} size={56} className="hud-sc size-14 shrink-0 rounded-full border-2 border-[#c9b37a] bg-[#2a2016] text-2xl text-inherit" />
+        <div className="min-w-0 flex-1 space-y-1">
+          <p className="hud-sc truncate text-lg leading-6 text-[#efe5d2]">{character.name}</p>
+          <p className="truncate text-xs text-[#8f8473]">
+            {character.race}
+            {character.subrace ? ` (${character.subrace})` : ""} · {character.class}
+          </p>
+          <div className="flex min-w-0 items-center gap-1.5">
+            <span className={cn("metal-fill shrink-0 rounded-full px-2 text-[11px] font-semibold", isNpc ? "metal-silver" : "metal-gold")}>
+              {isNpc ? "NPC герой" : "Гравець"}
+            </span>
+            {!isNpc && <span className="truncate text-xs text-[#8f8473]">{character.user?.displayName || "Не призначено"}</span>}
+          </div>
+        </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
-              variant="secondary"
+              variant="ghost"
               size="icon"
-              className="absolute top-2 right-2 h-8 w-8 rounded-full shadow-md bg-black/40 hover:bg-black/60 text-white border-0"
+              className="h-8 w-8 shrink-0 rounded-full text-[#c9b37a] hover:bg-transparent hover:text-[#e6c25a]"
               onClick={(e) => e.preventDefault()}
             >
               <MoreVertical className="h-4 w-4" />
@@ -46,75 +67,30 @@ export function DmCharacterCard({ character, campaignId, busy, actions }: DmChar
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
-              <Link
-                href={`/campaigns/${campaignId}/dm/characters/${character.id}`}
-              >
+              <Link href={`/campaigns/${campaignId}/dm/characters/${character.id}`}>
                 <Pencil className="mr-2 h-4 w-4" />
                 Редагувати
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={actions.onLevelUp}
-              disabled={busy}
-            >
+            <DropdownMenuItem onClick={actions.onLevelUp} disabled={busy}>
               <TrendingUp className="mr-2 h-4 w-4" />
               Підняти рівень
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              variant="destructive"
-              onClick={actions.onDelete}
-                          >
+            <DropdownMenuItem variant="destructive" onClick={actions.onDelete}>
               <Trash2 className="mr-2 h-4 w-4" />
               Видалити
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <CardContent className="p-3 space-y-2">
-        <div>
-          <p className="font-semibold text-lg leading-tight truncate">
-            {character.name}
-          </p>
-          <p className="text-xs text-muted-foreground truncate">
-            {character.type === CharacterType.NPC_HERO
-              ? "NPC герой"
-              : character.user?.displayName || "Не призначено"}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-1.5">
-          <Badge
-            variant={
-              character.type === CharacterType.NPC_HERO ? "secondary" : "outline"
-            }
-            className="text-xs"
-          >
-            {character.type === CharacterType.NPC_HERO ? "NPC герой" : "Гравець"}
-          </Badge>
-          <Badge variant="outline" className="text-xs">
-            {character.race}
-            {character.subrace ? ` (${character.subrace})` : ""}
-          </Badge>
-          <Badge variant="outline" className="text-xs">
-            {character.class}
-          </Badge>
-          <Badge variant="default" className="text-xs">
-            Рівень {character.level}
-          </Badge>
-          <Badge variant="secondary" className="text-xs">
-            HP {heroBaseHp(character).total}
-          </Badge>
-          <Badge variant="secondary" className="text-xs">
-            AC {character.armorClass}
-          </Badge>
-          <Badge variant="secondary" className="text-xs">
-            Init {character.initiative}
-          </Badge>
-          <Badge variant="secondary" className="text-xs">
-            XP {character.experience}
-          </Badge>
-        </div>
-      </CardContent>
-    </Card>
+      <div className="flex gap-1.5">
+        <StatChip short="Рів" value={character.level} />
+        <StatChip short="HP" value={heroBaseHp(character).total} />
+        <StatChip short="AC" value={character.armorClass} />
+        <StatChip short="Ініц" value={character.initiative} />
+        <StatChip short="XP" value={character.experience} />
+      </div>
+    </HudCard>
   );
 }
