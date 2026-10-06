@@ -159,4 +159,23 @@ describe("buildClientDelta", () => {
     expect(d.patched).toEqual([{ id: "a", combatStats: { currentHp: 38, maxHp: 38 } }]);
     expect(d.pending).toEqual([storedSummon]);
   });
+
+  it("відкат із completed → completedAt: null, щоб клієнт прибрав позначку завершення", () => {
+    const a = p("a");
+
+    const done = { ...scene, status: "completed" as const, completedAt: new Date("2026-01-02") };
+
+    const d = buildClientDelta({
+      before: { scene: done, meta, participants: [a], pending: [] },
+      after: { ...scene, version: 8 },
+      participants: [a],
+      pending: [],
+      stored: [],
+      fullIds: [],
+      log: [],
+      cancelledFrom: 5,
+    });
+
+    expect(d.scene).toMatchObject({ status: "active", completedAt: null });
+  });
 });

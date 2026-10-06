@@ -68,8 +68,10 @@ export function buildClientDelta(args: {
       round: after.round,
       turnIndex: after.turnIndex,
       pendingMoraleCheck: after.pendingMoraleCheck,
-      ...(after.startedAt && { startedAt: after.startedAt.toISOString() }),
-      ...(after.completedAt && { completedAt: after.completedAt.toISOString() }),
+      ...(after.startedAt ? { startedAt: after.startedAt.toISOString() } : before.scene.startedAt && { startedAt: null }),
+      ...(after.completedAt
+        ? { completedAt: after.completedAt.toISOString() }
+        : before.scene.completedAt && { completedAt: null }),
     },
     upserted,
     ...(patched.length > 0 && { patched }),

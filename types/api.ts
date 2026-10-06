@@ -88,8 +88,9 @@ export interface ClientBattleDelta {
     round: number;
     turnIndex: number;
     pendingMoraleCheck: unknown;
-    startedAt?: string;
-    completedAt?: string;
+    /** null — дату скинуто (reset, відкат завершеного бою) */
+    startedAt?: string | null;
+    completedAt?: string | null;
   };
   upserted: BattleParticipant[];
   patched?: BattleParticipantPatch[];

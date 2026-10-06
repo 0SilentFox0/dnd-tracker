@@ -129,6 +129,17 @@ describe("applyBattleDelta", () => {
   });
 });
 
+describe("applyBattleDelta — відкат завершеного бою", () => {
+  it("completedAt: null прибирає дату завершення з кешу", () => {
+    const done = { ...cached, status: "completed" as const, completedAt: "2026-01-02T00:00:00.000Z" };
+
+    const next = applyBattleDelta(done, delta({ scene: { status: "active", round: 1, turnIndex: 0, pendingMoraleCheck: null, completedAt: null } })) as BattleScene;
+
+    expect(next.status).toBe("active");
+    expect(next.completedAt).toBeUndefined();
+  });
+});
+
 describe("acceptFullBattle", () => {
   it("зберігає isDM/userRole/campaign, якщо у відповіді їх немає; ігнорує старішу версію", () => {
     const incoming = { ...cached, version: 9, isDM: undefined, userRole: undefined, campaign: undefined };
