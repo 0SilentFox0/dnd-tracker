@@ -6,6 +6,7 @@ import {
   BattleDialog,
   ConfirmCancelFooter,
 } from "@/components/battle/dialogs/shared";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -77,16 +78,15 @@ export function AddParticipantDialog({
       onOpenChange={onOpenChange}
       title="Додати учасника на поле"
       description="Обраний герой або юніт з'явиться одразу після завершення ходу поточного активного гравця."
-      contentClassName="bg-slate-900 border-slate-700 text-white max-w-md"
     >
       <div className="space-y-4 py-2">
         <div className="space-y-2">
-          <Label className="text-slate-200">Сторона</Label>
+          <Label>Сторона</Label>
           <Select
             value={side}
             onValueChange={(v) => setSide(v as "ally" | "enemy")}
           >
-            <SelectTrigger className="bg-slate-800 border-slate-600">
+            <SelectTrigger className="w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -96,12 +96,12 @@ export function AddParticipantDialog({
           </Select>
         </div>
         <div className="space-y-2">
-          <Label className="text-slate-200">Тип</Label>
+          <Label>Тип</Label>
           <Select
             value={type}
             onValueChange={(v) => setType(v as ParticipantSourceTypeValue)}
           >
-            <SelectTrigger className="bg-slate-800 border-slate-600">
+            <SelectTrigger className="w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -112,9 +112,9 @@ export function AddParticipantDialog({
         </div>
         {type === ParticipantSourceType.CHARACTER && (
           <div className="space-y-2">
-            <Label className="text-slate-200">Герой</Label>
+            <Label>Герой</Label>
             <Select value={characterId} onValueChange={setCharacterId}>
-              <SelectTrigger className="bg-slate-800 border-slate-600">
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Оберіть героя" />
               </SelectTrigger>
               <SelectContent>
@@ -130,9 +130,9 @@ export function AddParticipantDialog({
         {type === ParticipantSourceType.UNIT && (
           <>
             <div className="space-y-2">
-              <Label className="text-slate-200">Юніт</Label>
+              <Label>Юніт</Label>
               <Select value={unitId} onValueChange={setUnitId}>
-                <SelectTrigger className="bg-slate-800 border-slate-600">
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Оберіть юніта" />
                 </SelectTrigger>
                 <SelectContent>
@@ -145,8 +145,8 @@ export function AddParticipantDialog({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label className="text-slate-200">Кількість</Label>
-              <input
+              <Label>Кількість</Label>
+              <Input
                 type="number"
                 min={1}
                 max={10}
@@ -156,7 +156,6 @@ export function AddParticipantDialog({
                     Math.max(1, Math.min(10, Number(e.target.value) || 1)),
                   )
                 }
-                className="flex h-9 w-full rounded-md border border-slate-600 bg-slate-800 px-3 py-1 text-sm text-white"
               />
             </div>
           </>

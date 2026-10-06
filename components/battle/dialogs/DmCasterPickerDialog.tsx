@@ -28,7 +28,7 @@ export function DmCasterPickerDialog({
       onOpenChange={onOpenChange}
       title="Накласти заклинання"
       description="Оберіть учасника, від імені якого буде накладено заклинання"
-      contentClassName="bg-slate-900 border-slate-700 text-white max-w-sm"
+      contentClassName="max-w-sm"
     >
       <div className="space-y-2 pt-2">
         {activeParticipants.length === 0 ? (
@@ -41,14 +41,15 @@ export function DmCasterPickerDialog({
               key={p.basicInfo.id}
               type="button"
               variant="outline"
-              className="w-full justify-start border-white/20 text-white hover:bg-white/10"
+              className="w-full justify-start gap-2"
               onClick={() => {
                 onSelectCaster(p);
               }}
             >
+              <i className="size-2 shrink-0 rounded-full" style={{ background: p.basicInfo.side === "ally" ? "var(--ally)" : "var(--enemy)" }} />
               <span className="font-medium">{p.basicInfo.name}</span>
               {p.basicInfo.side && (
-                <span className="text-muted-foreground ml-2 text-xs">
+                <span className="text-muted-foreground text-xs">
                   {p.basicInfo.side === "ally" ? "союзник" : "ворог"}
                 </span>
               )}
