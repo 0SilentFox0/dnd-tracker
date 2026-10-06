@@ -48,18 +48,27 @@ export function usePusherBattleSync(
 
   const queryKey = useCallback(() => battleQueryKey(campaignId, battleId), [campaignId, battleId]);
 
-  const resync = useCallback(async () => {
-    try {
-      const { version } = await getBattleVersion(campaignId, battleId);
+  const resyncRef = useRef<Promise<void> | null>(null);
 
-      const cached = queryClient.getQueryData<BattleScene>(queryKey())?.version;
+  // видимість і перепідключення часто приходять разом: один запит версії на обидва
+  const resync = useCallback(() => {
+    resyncRef.current ??= (async () => {
+      try {
+        const { version } = await getBattleVersion(campaignId, battleId);
 
-      if (cached !== undefined && version <= cached) return;
-    } catch {
-      // без версії безпечніше перечитати бій
-    }
+        const cached = queryClient.getQueryData<BattleScene>(queryKey())?.version;
 
-    void queryClient.invalidateQueries({ queryKey: queryKey() });
+        if (cached !== undefined && version <= cached) return;
+      } catch {
+        // без версії безпечніше перечитати бій
+      }
+
+      await queryClient.invalidateQueries({ queryKey: queryKey() });
+    })().finally(() => {
+      resyncRef.current = null;
+    });
+
+    return resyncRef.current;
   }, [campaignId, battleId, queryClient, queryKey]);
 
   const debugLog = useCallback(

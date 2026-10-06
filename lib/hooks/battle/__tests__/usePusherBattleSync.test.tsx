@@ -4,8 +4,8 @@
  * Тест: два гравці, підписані на канал бою, отримують однаковий стан після battle-delta.
  */
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, render, waitFor } from "@testing-library/react";
-import { afterEach,beforeEach, describe, expect, it, vi } from "vitest";
+import { act, cleanup, render, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { RESYNC_AFTER_HIDDEN_MS, usePusherBattleSync } from "../usePusherBattleSync";
 
@@ -169,6 +169,7 @@ describe("usePusherBattleSync — two players receive same battle state", () => 
   });
 
   afterEach(() => {
+    cleanup();
     delete process.env.NEXT_PUBLIC_PUSHER_KEY;
   });
 
@@ -332,6 +333,29 @@ describe("usePusherBattleSync — two players receive same battle state", () => 
       act(() => setVisibility("visible"));
 
       await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: key }));
+      now.mockRestore();
+    });
+
+    it("повернення вкладки й перепідключення одночасно — один запит версії й одна інвалідація", async () => {
+      let resolve: (v: { version: number }) => void = () => {};
+
+      vi.mocked(getBattleVersion).mockImplementation(() => new Promise((r) => { resolve = r; }));
+
+      const now = vi.spyOn(Date, "now");
+
+      const invalidate = await mounted();
+
+      now.mockReturnValue(1_000);
+      act(() => setVisibility("hidden"));
+      act(() => changeState("connected", "connecting"));
+      now.mockReturnValue(1_000 + RESYNC_AFTER_HIDDEN_MS + 1);
+      act(() => setVisibility("visible"));
+      act(() => changeState("connecting", "connected"));
+
+      expect(getBattleVersion).toHaveBeenCalledTimes(1);
+
+      await act(async () => resolve({ version: 9 }));
+      await waitFor(() => expect(invalidate).toHaveBeenCalledTimes(1));
       now.mockRestore();
     });
   });
