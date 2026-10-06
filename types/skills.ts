@@ -84,3 +84,4 @@ export interface GroupedSkill {
     name: string;
   } | null;
 }
+export type PersonalSkillOption = Pick<Skill, "id" | "name" | "icon" | "description">;

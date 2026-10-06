@@ -13,6 +13,7 @@ export {
   useDeleteAllSkills,
   useDeleteSkill,
   useDuplicateSkill,
+  usePersonalSkills,
   useSkill,
   useSkills,
   useUpdateSkill,

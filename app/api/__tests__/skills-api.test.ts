@@ -143,6 +143,28 @@ describe("GET /api/campaigns/[id]/skills", () => {
     expect(Array.isArray(data)).toBe(true);
     expect((data as unknown[]).length).toBe(0);
   });
+
+  it("?mainSkillId фільтрує за основним навиком і читає лише вузькі поля", async () => {
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
+      userId: "user-1",
+      authUser: { id: "user-1", email: null, user_metadata: null },
+      campaign: { id: "c1", maxLevel: 20, xpMultiplier: 2.5, members: [{ userId: "user-1", role: "player" }] },
+    });
+    vi.mocked(prisma.skill.findMany).mockResolvedValue([{ id: "s1", name: "Поклик", icon: null, description: null }] as never);
+
+    const { GET } = await import("@/app/api/campaigns/[id]/skills/route");
+
+    const response = await GET(createRequest("http://localhost/api/campaigns/c1/skills?mainSkillId=m1"), { params: Promise.resolve({ id: "c1" }) });
+
+    expect(await getResponseStatus(response)).toBe(200);
+    expect(await getResponseJson(response)).toEqual([{ id: "s1", name: "Поклик", icon: null, description: null }]);
+
+    const args = vi.mocked(prisma.skill.findMany).mock.calls[0][0] as { where: unknown; select: unknown; include?: unknown };
+
+    expect(args.where).toEqual({ campaignId: "c1", mainSkillId: "m1" });
+    expect(args.select).toEqual({ id: true, name: true, icon: true, description: true });
+    expect(args.include).toBeUndefined();
+  });
 });
 
 describe("POST /api/campaigns/[id]/skills", () => {
