@@ -74,8 +74,7 @@ export async function buildStartOrder(
 
   const unitMap = new Map(units.map((u) => [u.id, u]));
 
-  const { campaignContext, racesByName, uniqueRaceNames } =
-    await buildCampaignContextForStart(campaignId, characters, units);
+  const { campaignContext, racesById } = await buildCampaignContextForStart(campaignId, characters, units);
 
   type ParticipantSlot =
     | { type: typeof ParticipantSourceType.CHARACTER; character: (typeof characters)[number]; side: ParticipantSide }
@@ -123,13 +122,7 @@ export async function buildStartOrder(
             undefined,
             campaignContext,
           )
-        : createBattleParticipantFromUnit(
-            slot.unit,
-            battleId,
-            slot.side,
-            slot.instanceNumber,
-            uniqueRaceNames.length > 0 ? racesByName : undefined,
-          ),
+        : createBattleParticipantFromUnit(slot.unit, battleId, slot.side, slot.instanceNumber, racesById),
     ),
   );
 

@@ -77,7 +77,7 @@ export const DRAGON_SET = {
 export const UNITS = {
   goblin: {
     name: "Гоблін-лучник",
-    race: "Орк",
+    raceKey: "orc",
     maxHp: 14,
     armorClass: 12,
     initiative: 2,
@@ -87,7 +87,7 @@ export const UNITS = {
   },
   shaman: {
     name: "Орк-шаман",
-    race: "Орк",
+    raceKey: "orc",
     maxHp: 45,
     armorClass: 11,
     initiative: 1,
@@ -100,7 +100,7 @@ export const UNITS = {
   },
   golem: {
     name: "Кам'яний голем",
-    race: null,
+    raceKey: null,
     maxHp: 50,
     armorClass: 14,
     initiative: 0,

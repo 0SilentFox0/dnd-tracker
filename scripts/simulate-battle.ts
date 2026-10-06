@@ -79,7 +79,11 @@ async function seed() {
   await prisma.campaignMember.create({ data: { campaignId, userId: SIM_USER.id, role: CampaignRole.DM } });
   await prisma.campaignMember.create({ data: { campaignId, userId: SIM_PLAYER.id, role: CampaignRole.PLAYER } });
 
-  for (const r of Object.values(RACES)) await prisma.race.create({ data: { campaignId, ...r } as Prisma.RaceUncheckedCreateInput });
+  const raceIds: Record<string, string> = {};
+
+  for (const [key, r] of Object.entries(RACES)) {
+    raceIds[key] = (await prisma.race.create({ data: { campaignId, ...r } as Prisma.RaceUncheckedCreateInput })).id;
+  }
 
   const mainSkill = await prisma.mainSkill.create({ data: { campaignId, name: "Бойове мистецтво", color: "#c00" } });
 
@@ -143,8 +147,8 @@ async function seed() {
 
   const units: Record<string, string> = {};
 
-  for (const [key, u] of Object.entries(UNITS)) {
-    units[key] = (await prisma.unit.create({ data: { campaignId, ...u } as Prisma.UnitUncheckedCreateInput })).id;
+  for (const [key, { raceKey, ...u }] of Object.entries(UNITS)) {
+    units[key] = (await prisma.unit.create({ data: { campaignId, ...u, raceId: raceKey ? raceIds[raceKey] : null } as Prisma.UnitUncheckedCreateInput })).id;
   }
 
   const battle = await prisma.battleScene.create({
@@ -348,6 +352,7 @@ async function scenario() {
     abilityKeysOf(by("Ліра")).join(", "),
   );
   check("Голем: імунітети стали прапорцями", (by("Кам'яний голем #1").battleData.resolvedAbilities ?? []).some((a) => a.effects.some((e) => e.kind === "flag" && e.flag === "conditionImmunity")));
+  check("Раса юніта — з races за raceId", by("Гоблін-лучник #1").abilities.race === "Орк" && by("Кам'яний голем #1").abilities.race === "", `${by("Гоблін-лучник #1").abilities.race} / ${by("Кам'яний голем #1").abilities.race}`);
   check("Атака зброї Торіна з артефакту (1d8 slashing)", by("Торін").battleData.attacks.some((a) => a.damageDice === "1d8" && a.damageType === "slashing"), JSON.stringify(by("Торін").battleData.attacks.map((a) => [a.name, a.damageDice, a.damageType])));
 
   console.info("\n🎲 Раунд 1");

@@ -24,8 +24,7 @@ export interface BattleBalanceBody {
   difficulty?: "easy" | "medium" | "hard";
   minTier?: number;
   maxTier?: number;
-  groupId?: string;
-  race?: string;
+  raceId?: string;
 }
 
 export interface BattleBalanceResponse {

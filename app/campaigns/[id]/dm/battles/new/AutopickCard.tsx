@@ -141,7 +141,7 @@ export function AutopickCard({
                 >
                   <option value="">Будь-яка</option>
                   {races.map((r) => (
-                    <option key={r.id} value={r.name}>
+                    <option key={r.id} value={r.id}>
                       {r.name}
                     </option>
                   ))}

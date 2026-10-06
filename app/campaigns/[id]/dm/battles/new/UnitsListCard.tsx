@@ -38,7 +38,7 @@ function groupUnitsByRace(units: SetupUnit[]): Map<string, SetupUnit[]> {
   const byRace = new Map<string, SetupUnit[]>();
 
   for (const u of units) {
-    const raceKey = u.race?.trim() || "Без раси";
+    const raceKey = u.raceName?.trim() || "Без раси";
 
     if (!byRace.has(raceKey)) byRace.set(raceKey, []);
 

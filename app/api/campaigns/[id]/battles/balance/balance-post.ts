@@ -22,8 +22,7 @@ export async function postBalanceResponse(
   campaignId: string,
   data: BalancePostData,
 ) {
-  const { allyParticipants, difficulty, minTier, maxTier, groupId, race } =
-    data;
+  const { allyParticipants, difficulty, minTier, maxTier, raceId } = data;
 
   let totalDpr = 0;
 
@@ -51,8 +50,7 @@ export async function postBalanceResponse(
       name: unit.name,
       maxHp: unit.maxHp,
       level: unit.level,
-      groupId: unit.groupId,
-      race: unit.race,
+      raceId: unit.raceId,
       strength: unit.strength,
       dexterity: unit.dexterity,
       attacks:
@@ -86,17 +84,14 @@ export async function postBalanceResponse(
     const where: {
       campaignId: string;
       level?: { gte?: number; lte?: number };
-      groupId?: string | null;
-      race?: string;
+      raceId?: string;
     } = { campaignId };
 
     if (minTier != null) where.level = { ...where.level, gte: minTier };
 
     if (maxTier != null) where.level = { ...where.level, lte: maxTier };
 
-    if (groupId != null) where.groupId = groupId;
-
-    if (race != null && race !== "") where.race = race;
+    if (raceId) where.raceId = raceId;
 
     const units = await prisma.unit.findMany({ where });
 
@@ -106,8 +101,7 @@ export async function postBalanceResponse(
         name: u.name,
         maxHp: u.maxHp,
         level: u.level,
-        groupId: u.groupId,
-        race: u.race,
+        raceId: u.raceId,
         strength: u.strength,
         dexterity: u.dexterity,
         attacks:

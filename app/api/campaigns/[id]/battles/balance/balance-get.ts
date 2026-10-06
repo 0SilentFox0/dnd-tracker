@@ -38,8 +38,7 @@ export async function getBalancePayload(campaignId: string) {
       name: unit.name,
       maxHp: unit.maxHp,
       level: unit.level,
-      groupId: unit.groupId,
-      race: unit.race,
+      raceId: unit.raceId,
       strength: unit.strength,
       dexterity: unit.dexterity,
       attacks:

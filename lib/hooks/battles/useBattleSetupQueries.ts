@@ -6,7 +6,7 @@ import { getBattleBalance } from "@/lib/api/battles";
 import type { BattleBalanceBody } from "@/lib/api/battles-types";
 import { useCharacters } from "@/lib/hooks/characters";
 import { useUnits } from "@/lib/hooks/units";
-import type { EntityStats, SetupCharacter, SetupUnit } from "@/types/battle-setup";
+import type { EntityStats, SetupCharacter } from "@/types/battle-setup";
 
 export function useSetupRoster(campaignId: string) {
   const characters = useCharacters(campaignId, { compact: true });
@@ -15,7 +15,7 @@ export function useSetupRoster(campaignId: string) {
 
   return {
     characters: (characters.data ?? []) as unknown as SetupCharacter[],
-    units: (units.data ?? []) as unknown as SetupUnit[],
+    units: units.data ?? [],
     isPending: characters.isPending || units.isPending,
   };
 }

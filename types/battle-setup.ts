@@ -11,9 +11,9 @@ export interface SetupCharacter {
 export interface SetupUnit {
   id: string;
   name: string;
-  groupId: string | null;
+  raceId: string | null;
+  raceName: string | null;
   avatar: string | null;
-  race: string | null;
   level: number;
 }
 
@@ -71,6 +71,5 @@ export interface EditBattleCharacter {
 export interface EditBattleUnit {
   id: string;
   name: string;
-  groupId: string | null;
   avatar: string | null;
 }

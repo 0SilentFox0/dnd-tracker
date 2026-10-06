@@ -1,11 +1,7 @@
-/**
- * Створення BattleParticipant з Unit
- */
-
 import type { Prisma } from "@prisma/client";
 
 import type { UnitFromPrisma } from "../types/participant";
-import { loadRace } from "./load-race";
+import { loadUnitRace } from "./load-race";
 
 import { AttackType, ParticipantSourceType } from "@/lib/constants/battle";
 import { ParticipantSide } from "@/lib/constants/battle";
@@ -19,15 +15,12 @@ import type { BattleParticipant } from "@/types/battle";
 import type { Race } from "@/types/races";
 import type { Unit } from "@/types/units";
 
-/**
- * Створює BattleParticipant з Unit
- */
 export async function createBattleParticipantFromUnit(
   unit: UnitFromPrisma,
   battleId: string,
   side: ParticipantSide,
   instanceNumber: number,
-  racesByName?: Record<string, Prisma.RaceGetPayload<object> | null>,
+  racesById?: Record<string, Prisma.RaceGetPayload<object> | null>,
 ): Promise<BattleParticipant> {
   const modifiers = {
     strength: getAbilityModifier(unit.strength),
@@ -89,12 +82,12 @@ export async function createBattleParticipantFromUnit(
     };
   });
 
-  let race: Awaited<ReturnType<typeof loadRace>> = null;
+  let race: Awaited<ReturnType<typeof loadUnitRace>> = null;
 
   try {
-    race = await loadRace(unit.race, unit.campaignId, racesByName ? (racesByName[unit.race ?? ""] ?? null) : undefined);
+    race = await loadUnitRace(unit.raceId, unit.campaignId, racesById ? (racesById[unit.raceId ?? ""] ?? null) : undefined);
   } catch (error) {
-    logger.error("[battle/from-unit] load race failed", { unitId: unit.id, race: unit.race, campaignId: unit.campaignId }, error);
+    logger.error("[battle/from-unit] load race failed", { unitId: unit.id, raceId: unit.raceId, campaignId: unit.campaignId }, error);
   }
 
   const participant: BattleParticipant = {
@@ -122,7 +115,7 @@ export async function createBattleParticipantFromUnit(
       charisma: unit.charisma,
       modifiers,
       proficiencyBonus: unit.proficiencyBonus,
-      race: unit.race || "",
+      race: race?.name ?? "",
     },
     combatStats: {
       maxHp: unit.maxHp,

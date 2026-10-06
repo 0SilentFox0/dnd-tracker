@@ -54,7 +54,7 @@ export function useBalanceSuggestions({
 
     setSuggestedEnemies([]);
     requestBalance(
-      { allyParticipants, difficulty, minTier, maxTier, race: balanceRace || undefined },
+      { allyParticipants, difficulty, minTier, maxTier, raceId: balanceRace || undefined },
       {
         onSuccess: (data) => {
           setAllyStats((data.allyStats ?? null) as AllyStats | null);

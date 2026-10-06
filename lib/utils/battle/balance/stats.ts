@@ -27,8 +27,7 @@ export interface UnitStats {
   hp: number;
   kpi: number;
   level: number;
-  groupId: string | null;
-  race: string | null;
+  raceId: string | null;
 }
 
 export interface GetCharacterStatsParams {
@@ -42,8 +41,7 @@ export function getUnitStats(unit: {
   name: string;
   maxHp: number;
   level: number;
-  groupId?: string | null;
-  race?: string | null;
+  raceId?: string | null;
   strength?: number;
   dexterity?: number;
   attacks: Array<{
@@ -92,8 +90,7 @@ export function getUnitStats(unit: {
     hp,
     kpi,
     level: unit.level,
-    groupId: unit.groupId ?? null,
-    race: unit.race ?? null,
+    raceId: unit.raceId ?? null,
   };
 }
 
