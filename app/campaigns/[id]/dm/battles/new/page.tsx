@@ -10,6 +10,7 @@ import { UnitsListCard } from "./UnitsListCard";
 
 import { ActionBar } from "@/components/common/ActionBar";
 import { Button } from "@/components/ui/button";
+import { ParticipantSourceType } from "@/lib/constants/battle";
 import { useNewBattlePage } from "@/lib/hooks/battles";
 
 export default function NewBattlePage({
@@ -146,9 +147,9 @@ export default function NewBattlePage({
             getParticipantQuantity={getParticipantQuantity}
             onParticipantToggle={handleParticipantToggle}
             onAddToEnemies={(id, quantity) =>
-              handleAddToSide(id, "unit", "enemy", quantity)
+              handleAddToSide(id, ParticipantSourceType.UNIT, "enemy", quantity)
             }
-            onMoveToAllies={(id) => handleAddToSide(id, "unit", "ally")}
+            onMoveToAllies={(id) => handleAddToSide(id, ParticipantSourceType.UNIT, "ally")}
             onQuantityChange={handleQuantityChange}
           />
         </div>

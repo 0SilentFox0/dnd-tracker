@@ -28,6 +28,9 @@ import {
   SPELLS_DATA,
 } from "./seed-mock-battle-data-data";
 
+import { CampaignRole } from "@/lib/constants/campaigns";
+import { CharacterType } from "@/lib/constants/characters";
+
 const prisma = new PrismaClient();
 
 // ID кампанії (потрібно передати як аргумент або змінити вручну)
@@ -348,7 +351,7 @@ async function seedMockData() {
 
     // Отримуємо першого користувача кампанії як DM
     const campaignMember = await prisma.campaignMember.findFirst({
-      where: { campaignId: CAMPAIGN_ID, role: "dm" },
+      where: { campaignId: CAMPAIGN_ID, role: CampaignRole.DM },
     });
 
     if (!campaignMember) {
@@ -362,7 +365,7 @@ async function seedMockData() {
     const humanCharacters = [
       {
         name: "Годрик Воїн",
-        type: "player",
+        type: CharacterType.PLAYER,
         controlledBy: dmUserId,
         level: 5,
         class: "Fighter",
@@ -388,7 +391,7 @@ async function seedMockData() {
       },
       {
         name: "Айра Маг",
-        type: "player",
+        type: CharacterType.PLAYER,
         controlledBy: dmUserId,
         level: 5,
         class: "Wizard",
@@ -430,7 +433,7 @@ async function seedMockData() {
     const elfCharacters = [
       {
         name: "Ліра Стрілець",
-        type: "player",
+        type: CharacterType.PLAYER,
         controlledBy: dmUserId,
         level: 5,
         class: "Ranger",
@@ -459,7 +462,7 @@ async function seedMockData() {
       },
       {
         name: "Елвін Чарівник",
-        type: "player",
+        type: CharacterType.PLAYER,
         controlledBy: dmUserId,
         level: 5,
         class: "Sorcerer",

@@ -5,6 +5,8 @@
 import type { GroupedSkillPayload } from "./hooks";
 import type { SkillTriggers } from "./skill-triggers";
 
+import { type ParticipantSourceTypeValue } from "@/lib/constants/battle";
+import { type CampaignRoleValue } from "@/lib/constants/campaigns";
 import type { SpellEnhancementType } from "@/lib/constants/spell-enhancement";
 
 // Skills API
@@ -72,7 +74,7 @@ export interface BattleScene {
     id: string;
     friendlyFire: boolean;
   };
-  userRole?: "dm" | "player";
+  userRole?: CampaignRoleValue;
   isDM?: boolean;
   version?: number;
   /** Журнал у цій відповіді — лише нові записи, які треба доклеїти до кешу */
@@ -115,10 +117,10 @@ export interface BattleMutationResponse<R = Record<string, unknown>> {
 
 export interface AttackData {
   attackerId: string;
-  attackerType?: "character" | "unit";
+  attackerType?: ParticipantSourceTypeValue;
   targetId?: string;
   targetIds?: string[];
-  targetType?: "character" | "unit";
+  targetType?: ParticipantSourceTypeValue;
   attackRoll?: number;
   /** Один кидок на ціль (multi-target); якщо передано, використовується замість attackRoll */
   attackRolls?: number[];

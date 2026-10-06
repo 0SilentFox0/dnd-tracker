@@ -1,5 +1,6 @@
 import { PUSHER_DELTA_LIMIT_BYTES } from "./limits";
 
+import { CampaignRole } from "@/lib/constants/campaigns";
 import { battleChannelName, userChannelName } from "@/lib/pusher-channels";
 import type { BattleSceneState, LoadedBattle } from "@/lib/utils/battle/store";
 import type { BattleRefetchSignal, BattleScene, ClientBattleDelta } from "@/types/api";
@@ -45,7 +46,7 @@ export function toLegacyBattle(
     startedAt: scene.startedAt?.toISOString(),
     completedAt: scene.completedAt?.toISOString(),
     campaign: { id: scene.campaignId, friendlyFire: meta.friendlyFire },
-    ...(view && { isDM: Boolean(view.isDM), userRole: view.isDM ? ("dm" as const) : ("player" as const) }),
+    ...(view && { isDM: Boolean(view.isDM), userRole: view.isDM ? CampaignRole.DM : CampaignRole.PLAYER }),
   };
 }
 

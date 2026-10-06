@@ -7,7 +7,7 @@ import { useCallback, useMemo, useState } from "react";
 import { buildCharacterFormBindings } from "./useCharacterForm-bindings";
 import { defaultCharacterFormData } from "./useCharacterForm-defaults";
 
-import type { CharacterTypeValue } from "@/lib/constants/characters";
+import { CharacterType, type CharacterTypeValue } from "@/lib/constants/characters";
 import { characterToFormData } from "@/lib/utils/characters/character-form";
 import type { Character } from "@/types/characters";
 import { CharacterFormData } from "@/types/characters";
@@ -81,7 +81,7 @@ export function useCharacterForm(options: UseCharacterFormOptions) {
       setError(null);
 
       if (
-        formData.basicInfo.type === "player" &&
+        formData.basicInfo.type === CharacterType.PLAYER &&
         !formData.basicInfo.controlledBy
       ) {
         setError("Будь ласка, виберіть гравця для персонажа типу 'Гравець'");

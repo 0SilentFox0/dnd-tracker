@@ -68,3 +68,10 @@ export const BATTLE_CONSTANTS = {
   /** Множник для конвертації fraction → percent (e.g. 0.25 → 25). */
   FRACTION_TO_PERCENT: 100,
 } as const;
+
+export const ParticipantSourceType = {
+  CHARACTER: "character",
+  UNIT: "unit",
+} as const;
+
+export type ParticipantSourceTypeValue = (typeof ParticipantSourceType)[keyof typeof ParticipantSourceType];

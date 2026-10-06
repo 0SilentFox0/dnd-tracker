@@ -2,7 +2,7 @@
  * Коефіцієнти melee/ranged DM для героїв (ті самі в бою і в листі персонажа).
  */
 
-import { AttackType } from "@/lib/constants/battle";
+import { AttackType, ParticipantSourceType } from "@/lib/constants/battle";
 import type { BattleParticipant } from "@/types/battle";
 
 export function clampHeroDamageMultiplier(raw: number | undefined | null): number {
@@ -21,7 +21,7 @@ export function applyHeroDmDamageMultiplier(
   attackType: AttackType,
   physicalDamage: number,
 ): { damage: number; breakdownLine: string | null; multiplier: number } {
-  if (attacker.basicInfo.sourceType !== "character") {
+  if (attacker.basicInfo.sourceType !== ParticipantSourceType.CHARACTER) {
     return { damage: physicalDamage, breakdownLine: null, multiplier: 1 };
   }
 

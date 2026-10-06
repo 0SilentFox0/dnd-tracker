@@ -2,12 +2,13 @@
  * Дефолтні значення форми персонажа для useCharacterForm
  */
 
+import { CharacterType } from "@/lib/constants/characters";
 import type { CharacterFormData } from "@/types/characters";
 
 export const defaultCharacterFormData: CharacterFormData = {
   basicInfo: {
     name: "",
-    type: "player",
+    type: CharacterType.PLAYER,
     controlledBy: "",
     level: 1,
     class: "",

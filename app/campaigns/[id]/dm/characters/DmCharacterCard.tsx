@@ -14,6 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { CharacterType } from "@/lib/constants/characters";
 import { heroBaseHp } from "@/lib/utils/characters/hero-hp";
 import type { Character } from "@/types/characters";
 
@@ -76,7 +77,7 @@ export function DmCharacterCard({ character, campaignId, busy, actions }: DmChar
             {character.name}
           </p>
           <p className="text-xs text-muted-foreground truncate">
-            {character.type === "npc_hero"
+            {character.type === CharacterType.NPC_HERO
               ? "NPC герой"
               : character.user?.displayName || "Не призначено"}
           </p>
@@ -84,11 +85,11 @@ export function DmCharacterCard({ character, campaignId, busy, actions }: DmChar
         <div className="flex flex-wrap gap-1.5">
           <Badge
             variant={
-              character.type === "npc_hero" ? "secondary" : "outline"
+              character.type === CharacterType.NPC_HERO ? "secondary" : "outline"
             }
             className="text-xs"
           >
-            {character.type === "npc_hero" ? "NPC герой" : "Гравець"}
+            {character.type === CharacterType.NPC_HERO ? "NPC герой" : "Гравець"}
           </Badge>
           <Badge variant="outline" className="text-xs">
             {character.race}

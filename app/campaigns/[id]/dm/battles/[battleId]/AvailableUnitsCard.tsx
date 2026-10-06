@@ -12,6 +12,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ParticipantSourceType } from "@/lib/constants/battle";
 import type { EditBattleUnit } from "@/types/battle-setup";
 
 interface AvailableUnitsCardProps {
@@ -20,7 +21,7 @@ interface AvailableUnitsCardProps {
   getParticipantQuantity: (id: string) => number;
   onParticipantToggle: (
     id: string,
-    type: "unit",
+    type: typeof ParticipantSourceType.UNIT,
     checked: boolean,
   ) => void;
   onQuantityChange: (participantId: string, quantity: number) => void;
@@ -58,7 +59,7 @@ export function AvailableUnitsCard({
                     <Checkbox
                       checked={isSelected}
                       onCheckedChange={(checked) =>
-                        onParticipantToggle(unit.id, "unit", checked as boolean)
+                        onParticipantToggle(unit.id, ParticipantSourceType.UNIT, checked as boolean)
                       }
                     />
                     {unit.avatar && (

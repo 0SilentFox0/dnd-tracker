@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { kvDel } from "@/lib/cache/kv";
+import { CampaignRole } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { updateCampaignSchema } from "@/lib/schemas";
 import { requireAuth, requireDM } from "@/lib/utils/api/api-auth";
@@ -80,7 +81,7 @@ export async function PATCH(
 
     const userMember = campaign.members.find((m) => m.userId === userId);
 
-    if (!userMember || userMember.role !== "dm") {
+    if (!userMember || userMember.role !== CampaignRole.DM) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

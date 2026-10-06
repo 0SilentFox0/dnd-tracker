@@ -15,6 +15,8 @@ import { Prisma,PrismaClient } from "@prisma/client";
 
 import { DEFAULT_CAMPAIGN_ID } from "../lib/constants/campaigns";
 
+import { ParticipantSourceType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
+
 const prisma = new PrismaClient();
 
 // ID кампанії (потрібно передати як аргумент або змінити вручну)
@@ -101,19 +103,19 @@ async function seedMockBattles() {
 
     const battle1Participants: Array<{
       id: string;
-      type: "character" | "unit";
+      type: ParticipantSourceTypeValue;
       side: "ally" | "enemy";
       quantity?: number;
     }> = [
       // Союзники: 2 персонажі
       {
         id: characters[0].id, // Годрик Воїн
-        type: "character",
+        type: ParticipantSourceType.CHARACTER,
         side: "ally",
       },
       {
         id: characters[1].id, // Айра Маг
-        type: "character",
+        type: ParticipantSourceType.CHARACTER,
         side: "ally",
       },
     ];
@@ -122,7 +124,7 @@ async function seedMockBattles() {
     if (units.length > 0) {
       battle1Participants.push({
         id: units[0].id,
-        type: "unit",
+        type: ParticipantSourceType.UNIT,
         side: "enemy",
         quantity: 1,
       });
@@ -130,7 +132,7 @@ async function seedMockBattles() {
       // Якщо немає юнітів, використовуємо персонажа як ворога
       battle1Participants.push({
         id: characters[2].id, // Ліра Стрілець
-        type: "character",
+        type: ParticipantSourceType.CHARACTER,
         side: "enemy",
       });
     }
@@ -162,14 +164,14 @@ async function seedMockBattles() {
 
     const battle2Participants: Array<{
       id: string;
-      type: "character" | "unit";
+      type: ParticipantSourceTypeValue;
       side: "ally" | "enemy";
       quantity?: number;
     }> = [
       // Союзники: всі доступні персонажі (до 4)
       ...characters.slice(0, 4).map((char) => ({
         id: char.id,
-        type: "character" as const,
+        type: ParticipantSourceType.CHARACTER,
         side: "ally" as const,
       })),
     ];
@@ -179,7 +181,7 @@ async function seedMockBattles() {
       battle2Participants.push(
         ...units.slice(0, 3).map((unit) => ({
           id: unit.id,
-          type: "unit" as const,
+          type: ParticipantSourceType.UNIT,
           side: "enemy" as const,
           quantity: 1,
         }))
@@ -189,7 +191,7 @@ async function seedMockBattles() {
       battle2Participants.push(
         ...characters.slice(4, 7).map((char) => ({
           id: char.id,
-          type: "character" as const,
+          type: ParticipantSourceType.CHARACTER,
           side: "enemy" as const,
         }))
       );
@@ -198,14 +200,14 @@ async function seedMockBattles() {
       if (units.length > 0) {
         battle2Participants.push({
           id: units[0].id,
-          type: "unit",
+          type: ParticipantSourceType.UNIT,
           side: "enemy",
           quantity: 2, // 2 копії одного юніта
         });
       } else if (characters.length >= 3) {
         battle2Participants.push({
           id: characters[2].id,
-          type: "character",
+          type: ParticipantSourceType.CHARACTER,
           side: "enemy",
         });
       }
@@ -215,17 +217,17 @@ async function seedMockBattles() {
     // (в реальності це буде згенеровано через /start endpoint)
     // Для моку використовуємо спрощену структуру
     const mockInitiativeOrder = battle2Participants.map((participant, index) => {
-      const isCharacter = participant.type === "character";
+      const isCharacter = participant.type === ParticipantSourceType.CHARACTER;
 
       const char = isCharacter ? characters.find((c) => c.id === participant.id) : null;
       
       return {
-        id: `${participant.id}-${participant.type === "unit" ? (participant.quantity || 1) : 0}-${Date.now()}-${index}`,
+        id: `${participant.id}-${participant.type === ParticipantSourceType.UNIT ? (participant.quantity || 1) : 0}-${Date.now()}-${index}`,
         battleId: "will-be-updated",
         sourceId: participant.id,
         sourceType: participant.type,
-        instanceNumber: participant.type === "unit" ? 1 : undefined,
-        instanceId: participant.type === "unit" ? `${participant.id}-0` : undefined,
+        instanceNumber: participant.type === ParticipantSourceType.UNIT ? 1 : undefined,
+        instanceId: participant.type === ParticipantSourceType.UNIT ? `${participant.id}-0` : undefined,
         name: isCharacter && char ? char.name : `Mock ${participant.type} ${index}`,
         avatar: isCharacter && char ? char.avatar || undefined : undefined,
         side: participant.side,

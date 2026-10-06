@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
 
+import { CampaignRole } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 
@@ -23,7 +24,7 @@ export async function loadProgressionContext(campaignId: string, characterId: st
 
   if (!character) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const isDM = access.campaign.members[0]?.role === "dm";
+  const isDM = access.campaign.members[0]?.role === CampaignRole.DM;
 
   const isOwner = character.controlledBy === access.userId;
 

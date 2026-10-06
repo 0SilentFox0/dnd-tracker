@@ -5,7 +5,7 @@
 import type { AbilityUsageCounter, ResolvedAbility, SpellEnhancer, StaticEffect } from "./abilities";
 
 import type { ArtifactEffectAudience } from "@/lib/constants/artifact-effect-scope";
-import { AttackType, ParticipantSide } from "@/lib/constants/battle";
+import { AttackType, ParticipantSide, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { AbilityKey, SetProgress } from "@/types/characters";
 import { SkillLevel } from "@/types/skill-tree";
@@ -127,7 +127,7 @@ export interface BattleParticipantBasicInfo {
   id: string; // унікальний ID учасника В ЦІЙ БИТВІ
   battleId: string; // ID битви
   sourceId: string; // оригінальний ID character/unit
-  sourceType: "character" | "unit";
+  sourceType: ParticipantSourceTypeValue;
   instanceNumber?: number; // номер копії (для units: 1, 2, 3...)
   instanceId?: string; // унікальний ID інстансу (для units)
   name: string;
@@ -240,7 +240,7 @@ export interface BattleParticipant {
  */
 export interface BattlePreparationParticipant {
   id: string;
-  type: "character" | "unit";
+  type: ParticipantSourceTypeValue;
   side: ParticipantSide;
   quantity?: number;
 }
@@ -380,7 +380,7 @@ export interface BattleAction {
 
 export type AddParticipantData = {
   sourceId: string;
-  type: "character" | "unit";
+  type: ParticipantSourceTypeValue;
   side: "ally" | "enemy";
   quantity?: number;
 };

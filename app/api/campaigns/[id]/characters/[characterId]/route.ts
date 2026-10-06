@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import { buildCharacterUpdateData } from "./build-character-update-data";
 import { updateCharacterSchema } from "./update-character-schema";
 
+import { CampaignRole } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { requireAuth, requireCampaignAccess, requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
@@ -44,7 +45,7 @@ export async function GET(
     }
 
     // Перевіряємо права доступу (DM або власник)
-    const isDM = character.campaign.members[0]?.role === "dm";
+    const isDM = character.campaign.members[0]?.role === CampaignRole.DM;
 
     const isOwner = character.controlledBy === userId;
 
@@ -95,7 +96,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Character not found" }, { status: 404 });
     }
 
-    const isDM = campaign.members[0]?.role === "dm";
+    const isDM = campaign.members[0]?.role === CampaignRole.DM;
 
     const isOwner = character.controlledBy === userId;
 

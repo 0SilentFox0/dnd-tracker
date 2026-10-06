@@ -2,7 +2,7 @@
  * Контр-удар (Reaction): перевірка та виконання
  */
 
-import { AttackType } from "@/lib/constants/battle";
+import { AttackType, ParticipantSourceType } from "@/lib/constants/battle";
 import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
 import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
@@ -72,7 +72,7 @@ export function performReaction(
 
   baseDamage += statModifier;
 
-  if (defender.basicInfo.sourceType === "character") {
+  if (defender.basicInfo.sourceType === ParticipantSourceType.CHARACTER) {
     baseDamage += defender.abilities.level;
 
     const heroDice = getHeroDamageDiceForLevel(

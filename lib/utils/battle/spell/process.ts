@@ -30,6 +30,7 @@ import {
 } from "./process-effects";
 import { generateSpellDamageRolls } from "./process-helpers";
 
+import { ParticipantSourceType } from "@/lib/constants/battle";
 import { isUp, withSelf } from "@/lib/utils/abilities/engine/participants";
 export type { BattleSpell, ProcessSpellParams, ProcessSpellResult };
 
@@ -105,7 +106,7 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
 
   const spellLevel = spell.level.toString();
 
-  const isUnit = updatedCaster.basicInfo.sourceType === "unit";
+  const isUnit = updatedCaster.basicInfo.sourceType === ParticipantSourceType.UNIT;
 
   const slotKey = isUnit ? "universal" : spellLevel;
 

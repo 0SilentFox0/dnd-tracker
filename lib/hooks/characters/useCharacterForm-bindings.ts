@@ -2,6 +2,7 @@
  * Побудова об'єктів basicInfo, abilityScores, combatStats тощо для useCharacterForm.
  */
 
+import { type CharacterTypeValue } from "@/lib/constants/characters";
 import type { AbilityKey, CharacterFormData } from "@/types/characters";
 
 export interface CharacterFormHandlers {
@@ -24,7 +25,7 @@ export function buildCharacterFormBindings(
           ...prev,
           basicInfo: { ...prev.basicInfo, name: value },
         })),
-      setType: (value: "player" | "npc_hero") =>
+      setType: (value: CharacterTypeValue) =>
         setFormData((prev) => ({
           ...prev,
           basicInfo: { ...prev.basicInfo, type: value },

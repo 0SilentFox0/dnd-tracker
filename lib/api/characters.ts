@@ -9,6 +9,7 @@ import {
   campaignPost,
   campaignPut,
 } from "@/lib/api/client";
+import { type CharacterTypeValue } from "@/lib/constants/characters";
 import type { GoalInput } from "@/lib/schemas/character-goals";
 import { formDataToCharacter } from "@/lib/utils/characters/character-form";
 import type { Character, CharacterFormData, CharacterGoal, CharacterSheet } from "@/types/characters";
@@ -36,7 +37,7 @@ export const getCharacterSheet = (campaignId: string, characterId: string) => ca
  */
 export async function getCharacters(
   campaignId: string,
-  opts?: { type?: "player" | "npc_hero"; compact?: boolean },
+  opts?: { type?: CharacterTypeValue; compact?: boolean },
 ): Promise<Character[]> {
   const params = new URLSearchParams();
 

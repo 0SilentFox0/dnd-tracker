@@ -3,6 +3,7 @@ import type { PrismaClient } from "@prisma/client";
 import { joinParticipant } from "./split-participant";
 import type { BattleSceneState, BattleStatus, LoadedBattle, ParticipantColumns, ParticipantSnapshot, ParticipantState } from "./types";
 
+import { CampaignRole } from "@/lib/constants/campaigns";
 import type { BattleParticipant, BattlePreparationParticipant } from "@/types/battle";
 
 export type BattleDb = Pick<
@@ -89,7 +90,7 @@ export async function loadBattle(
     },
     participants: all.filter((p) => !p.isPending).map((p) => p.participant),
     pending: all.filter((p) => p.isPending).map((p) => p.participant),
-    isDM: membership?.role === "dm",
+    isDM: membership?.role === CampaignRole.DM,
     isMember: Boolean(membership),
   };
 }

@@ -4,6 +4,7 @@
 
 import { NextResponse } from "next/server";
 
+import { CampaignRole } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 
@@ -93,7 +94,7 @@ export async function requireCampaignAccess(
   }
 
   // Якщо потрібен DM доступ
-  if (requireDM && campaign.members[0]?.role !== "dm") {
+  if (requireDM && campaign.members[0]?.role !== CampaignRole.DM) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

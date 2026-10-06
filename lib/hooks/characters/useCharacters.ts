@@ -9,6 +9,7 @@ import {
   levelUpCharacter,
   updateCharacter,
 } from "@/lib/api/characters";
+import { type CharacterTypeValue } from "@/lib/constants/characters";
 import { useCrudMutation } from "@/lib/hooks/common";
 import { ENTITY_STALE_MS } from "@/lib/providers/query-provider";
 import type { Character, CharacterFormData } from "@/types/characters";
@@ -18,7 +19,7 @@ export type { Character };
 /** Без `opts` — усі персонажі кампанії (гравці та npc_hero). `compact` — без важких JSON/інвентаря (менший egress). */
 export function useCharacters(
   campaignId: string,
-  opts?: { type?: "player" | "npc_hero"; compact?: boolean },
+  opts?: { type?: CharacterTypeValue; compact?: boolean },
 ) {
   return useQuery<Character[]>({
     queryKey: [

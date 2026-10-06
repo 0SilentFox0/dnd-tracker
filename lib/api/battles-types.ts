@@ -1,3 +1,5 @@
+import { type ParticipantSourceTypeValue } from "@/lib/constants/battle";
+
 /**
  * Типи для API битв (request/response)
  */
@@ -8,7 +10,7 @@ export interface CreateBattleData {
   description?: string;
   participants: Array<{
     id: string;
-    type: "character" | "unit";
+    type: ParticipantSourceTypeValue;
     side: "ally" | "enemy";
     quantity?: number;
   }>;

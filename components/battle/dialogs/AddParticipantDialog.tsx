@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ParticipantSourceType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import { useCharacters } from "@/lib/hooks/characters";
 import { useUnits } from "@/lib/hooks/units";
 import type { AddParticipantData } from "@/types/battle";
@@ -33,7 +34,7 @@ export function AddParticipantDialog({
   onAdd,
   isPending,
 }: AddParticipantDialogProps) {
-  const [type, setType] = useState<"character" | "unit">("character");
+  const [type, setType] = useState<ParticipantSourceTypeValue>(ParticipantSourceType.CHARACTER);
 
   const [side, setSide] = useState<"ally" | "enemy">("ally");
 
@@ -50,14 +51,14 @@ export function AddParticipantDialog({
   const { data: units = [] } = useUnits(campaignId);
 
   const handleSubmit = () => {
-    if (type === "character" && characterId) {
-      onAdd({ sourceId: characterId, type: "character", side });
+    if (type === ParticipantSourceType.CHARACTER && characterId) {
+      onAdd({ sourceId: characterId, type: ParticipantSourceType.CHARACTER, side });
       onOpenChange(false);
       setCharacterId("");
-    } else if (type === "unit" && unitId) {
+    } else if (type === ParticipantSourceType.UNIT && unitId) {
       onAdd({
         sourceId: unitId,
-        type: "unit",
+        type: ParticipantSourceType.UNIT,
         side,
         quantity: quantity || 1,
       });
@@ -68,7 +69,7 @@ export function AddParticipantDialog({
   };
 
   const canSubmit =
-    type === "character" ? Boolean(characterId) : Boolean(unitId);
+    type === ParticipantSourceType.CHARACTER ? Boolean(characterId) : Boolean(unitId);
 
   return (
     <BattleDialog
@@ -98,18 +99,18 @@ export function AddParticipantDialog({
           <Label className="text-slate-200">Тип</Label>
           <Select
             value={type}
-            onValueChange={(v) => setType(v as "character" | "unit")}
+            onValueChange={(v) => setType(v as ParticipantSourceTypeValue)}
           >
             <SelectTrigger className="bg-slate-800 border-slate-600">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="character">Герой</SelectItem>
-              <SelectItem value="unit">Юніт</SelectItem>
+              <SelectItem value={ParticipantSourceType.CHARACTER}>Герой</SelectItem>
+              <SelectItem value={ParticipantSourceType.UNIT}>Юніт</SelectItem>
             </SelectContent>
           </Select>
         </div>
-        {type === "character" && (
+        {type === ParticipantSourceType.CHARACTER && (
           <div className="space-y-2">
             <Label className="text-slate-200">Герой</Label>
             <Select value={characterId} onValueChange={setCharacterId}>
@@ -126,7 +127,7 @@ export function AddParticipantDialog({
             </Select>
           </div>
         )}
-        {type === "unit" && (
+        {type === ParticipantSourceType.UNIT && (
           <>
             <div className="space-y-2">
               <Label className="text-slate-200">Юніт</Label>

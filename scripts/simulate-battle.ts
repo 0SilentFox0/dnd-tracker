@@ -26,6 +26,9 @@ import type { BattleMutationResponse, BattleScene } from "../types/api";
 import type { BattleAction, BattleParticipant } from "../types/battle";
 import { artifactRows, DRAGON_SET, RACES, SIM_CAMPAIGN_NAME, SIM_PLAYER, SIM_USER, SKILLS, UNITS } from "./simulate-battle-scenario";
 
+import { ParticipantSourceType } from "@/lib/constants/battle";
+import { CampaignRole } from "@/lib/constants/campaigns";
+
 
 const url = process.env.DATABASE_URL ?? "";
 
@@ -65,8 +68,8 @@ async function seed() {
 
   const campaignId = campaign.id;
 
-  await prisma.campaignMember.create({ data: { campaignId, userId: SIM_USER.id, role: "dm" } });
-  await prisma.campaignMember.create({ data: { campaignId, userId: SIM_PLAYER.id, role: "player" } });
+  await prisma.campaignMember.create({ data: { campaignId, userId: SIM_USER.id, role: CampaignRole.DM } });
+  await prisma.campaignMember.create({ data: { campaignId, userId: SIM_PLAYER.id, role: CampaignRole.PLAYER } });
 
   for (const r of Object.values(RACES)) await prisma.race.create({ data: { campaignId, ...r } as Prisma.RaceUncheckedCreateInput });
 
@@ -142,12 +145,12 @@ async function seed() {
       name: "Засідка в ущелині",
       status: "prepared",
       participants: [
-        { id: chars.thorin.id, type: "character", side: "ally" },
-        { id: chars.lyra.id, type: "character", side: "ally" },
-        { id: chars.myron.id, type: "character", side: "ally" },
-        { id: units.goblin, type: "unit", side: "enemy", quantity: 2 },
-        { id: units.shaman, type: "unit", side: "enemy" },
-        { id: units.golem, type: "unit", side: "enemy" },
+        { id: chars.thorin.id, type: ParticipantSourceType.CHARACTER, side: "ally" },
+        { id: chars.lyra.id, type: ParticipantSourceType.CHARACTER, side: "ally" },
+        { id: chars.myron.id, type: ParticipantSourceType.CHARACTER, side: "ally" },
+        { id: units.goblin, type: ParticipantSourceType.UNIT, side: "enemy", quantity: 2 },
+        { id: units.shaman, type: ParticipantSourceType.UNIT, side: "enemy" },
+        { id: units.golem, type: ParticipantSourceType.UNIT, side: "enemy" },
       ],
       currentRound: 1,
       currentTurnIndex: 0,

@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 
 import { useBattleBalance } from "../useBattleSetupQueries";
 
+import { ParticipantSourceType } from "@/lib/constants/battle";
 import type { AllyStats, Difficulty, SetupParticipant, SuggestedEnemy } from "@/types/battle-setup";
 
 interface AllyParticipants {
@@ -68,7 +69,7 @@ export function useBalanceSuggestions({
 
     const newEnemies: SetupParticipant[] = suggestedEnemies.map((s) => ({
       id: s.unitId,
-      type: "unit",
+      type: ParticipantSourceType.UNIT,
       side: "enemy",
       quantity: s.quantity,
     }));

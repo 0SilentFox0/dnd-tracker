@@ -1,10 +1,11 @@
 import { z } from "zod";
 
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
+import { CharacterType } from "@/lib/constants/characters";
 
 export const createCharacterSchema = z.object({
   name: z.string().min(1).max(100),
-  type: z.enum(["player", "npc_hero"]),
+  type: z.enum([CharacterType.PLAYER, CharacterType.NPC_HERO]),
   controlledBy: z.string(),
   level: z.number().min(1).max(30).default(1),
   class: z.string().min(1),

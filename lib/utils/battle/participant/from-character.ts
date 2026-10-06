@@ -12,7 +12,7 @@ import { loadRace } from "./load-race";
 import { buildSpellEnhancers } from "./spell-enhancers";
 
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
-import { ParticipantSide } from "@/lib/constants/battle";
+import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { bakePassives } from "@/lib/utils/abilities/build/bake";
 import { collectCharacterAbilities } from "@/lib/utils/abilities/build/collect";
 import { immunityAbilities } from "@/lib/utils/abilities/build/immunities";
@@ -109,7 +109,7 @@ export async function createBattleParticipantFromCharacter(
       id: `${character.id}-${instanceNumber || 0}-${Date.now()}`,
       battleId,
       sourceId: character.id,
-      sourceType: "character",
+      sourceType: ParticipantSourceType.CHARACTER,
       instanceNumber: instanceNumber || undefined,
       instanceId: instanceNumber ? `${character.id}-${instanceNumber - 1}` : undefined,
       name: character.name,

@@ -6,6 +6,7 @@ import type { EquippedItems, InventoryItem } from "./inventory";
 import type { BookSpell } from "./spells";
 
 import type { AbilityKey } from "@/lib/constants/abilities";
+import { type CharacterTypeValue } from "@/lib/constants/characters";
 
 export type { AbilityKey };
 
@@ -24,7 +25,7 @@ export interface CharacterGoal {
 export interface CharacterFormData {
   basicInfo: {
     name: string;
-    type: "player" | "npc_hero";
+    type: CharacterTypeValue;
     controlledBy: string;
     level: number;
     class: string;

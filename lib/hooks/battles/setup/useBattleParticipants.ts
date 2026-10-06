@@ -2,6 +2,7 @@
 
 import { useCallback,useState } from "react";
 
+import { ParticipantSourceType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import type { SetupParticipant } from "@/types/battle-setup";
 
 export function useBattleParticipants() {
@@ -10,7 +11,7 @@ export function useBattleParticipants() {
   const handleParticipantToggle = useCallback(
     (
       participantId: string,
-      type: "character" | "unit",
+      type: ParticipantSourceTypeValue,
       checked: boolean,
     ) => {
       setParticipants((prev) => {
@@ -37,7 +38,7 @@ export function useBattleParticipants() {
   const handleAddToSide = useCallback(
     (
       participantId: string,
-      type: "character" | "unit",
+      type: ParticipantSourceTypeValue,
       side: "ally" | "enemy",
       quantity?: number,
     ) => {
@@ -50,7 +51,7 @@ export function useBattleParticipants() {
               ? {
                   ...p,
                   side,
-                  ...(type === "unit" && {
+                  ...(type === ParticipantSourceType.UNIT && {
                     quantity: quantity ?? p.quantity ?? 1,
                   }),
                 }
@@ -64,7 +65,7 @@ export function useBattleParticipants() {
             id: participantId,
             type,
             side,
-            ...(type === "unit" && { quantity: quantity ?? 1 }),
+            ...(type === ParticipantSourceType.UNIT && { quantity: quantity ?? 1 }),
           },
         ];
       });
@@ -108,10 +109,10 @@ export function useBattleParticipants() {
 
   const allyParticipants = {
     characterIds: participants
-      .filter((p) => p.side === "ally" && p.type === "character")
+      .filter((p) => p.side === "ally" && p.type === ParticipantSourceType.CHARACTER)
       .map((p) => p.id),
     units: participants
-      .filter((p) => p.side === "ally" && p.type === "unit")
+      .filter((p) => p.side === "ally" && p.type === ParticipantSourceType.UNIT)
       .map((p) => ({ id: p.id, quantity: p.quantity ?? 1 })),
   };
 

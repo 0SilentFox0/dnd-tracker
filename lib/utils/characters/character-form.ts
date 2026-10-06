@@ -2,6 +2,7 @@
  * Утиліти для конвертації між CharacterFormData (згрупована) та Character (плоска)
  */
 
+import { CharacterType, type CharacterTypeValue } from "@/lib/constants/characters";
 import { calculateCharacterSpellSlots } from "@/lib/utils/spells/spell-slots";
 import type { Character, CharacterFormData } from "@/types/characters";
 
@@ -24,7 +25,7 @@ export function characterToFormData(
   return {
     basicInfo: {
       name: character.name || "",
-      type: (character.type as "player" | "npc_hero") || "player",
+      type: (character.type as CharacterTypeValue) || CharacterType.PLAYER,
       controlledBy: character.controlledBy || "",
       level: character.level || 1,
       class: character.class || "",

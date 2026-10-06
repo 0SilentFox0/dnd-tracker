@@ -7,7 +7,7 @@ import type { Prisma } from "@prisma/client";
 import type { UnitFromPrisma } from "../types/participant";
 import { loadRace } from "./load-race";
 
-import { AttackType } from "@/lib/constants/battle";
+import { AttackType, ParticipantSourceType } from "@/lib/constants/battle";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { bakePassives } from "@/lib/utils/abilities/build/bake";
 import { collectUnitAbilities } from "@/lib/utils/abilities/build/collect";
@@ -102,7 +102,7 @@ export async function createBattleParticipantFromUnit(
       id: `${unit.id}-${instanceNumber}-${Date.now()}`,
       battleId,
       sourceId: unit.id,
-      sourceType: "unit",
+      sourceType: ParticipantSourceType.UNIT,
       instanceNumber,
       instanceId: `${unit.id}-${instanceNumber - 1}`,
       name: `${unit.name} #${instanceNumber}`,

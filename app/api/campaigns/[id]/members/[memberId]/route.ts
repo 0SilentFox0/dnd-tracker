@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { CampaignRole } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
@@ -35,7 +36,7 @@ export async function DELETE(
     }
 
     // Не дозволяємо видаляти DM
-    if (member.role === "dm") {
+    if (member.role === CampaignRole.DM) {
       return NextResponse.json(
         { error: "Cannot remove DM from campaign" },
         { status: 400 }

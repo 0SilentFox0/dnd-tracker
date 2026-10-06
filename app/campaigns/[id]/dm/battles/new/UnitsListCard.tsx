@@ -17,6 +17,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { ParticipantSourceType } from "@/lib/constants/battle";
 import type { EntityStats, SetupUnit } from "@/types/battle-setup";
 
 interface UnitsListCardProps {
@@ -25,7 +26,7 @@ interface UnitsListCardProps {
   isParticipantSelected: (id: string) => boolean;
   getParticipantSide: (id: string) => "ally" | "enemy" | null;
   getParticipantQuantity: (id: string) => number;
-  onParticipantToggle: (id: string, type: "unit", checked: boolean) => void;
+  onParticipantToggle: (id: string, type: typeof ParticipantSourceType.UNIT, checked: boolean) => void;
   /** Додати юніта до ворогів (або перемістити з союзників). */
   onAddToEnemies: (id: string, quantity: number) => void;
   /** Перемістити в союзники (якщо зараз у ворогах). */
@@ -261,9 +262,9 @@ export function UnitsListCard({
                         quantity={quantity}
                         onToggle={() => {
                           if (!isSelected) {
-                            onParticipantToggle(unit.id, "unit", true);
+                            onParticipantToggle(unit.id, ParticipantSourceType.UNIT, true);
                           } else if (side === "ally") {
-                            onParticipantToggle(unit.id, "unit", false);
+                            onParticipantToggle(unit.id, ParticipantSourceType.UNIT, false);
                           } else {
                             onMoveToAllies(unit.id);
                           }

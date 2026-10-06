@@ -2,7 +2,7 @@
  * Моки учасників та допоміжні функції для run-spells-testing
  */
 
-import { ParticipantSide } from "@/lib/constants/battle";
+import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import type { BattleParticipant } from "@/types/battle";
 
 export function mod(ability: number): number {
@@ -50,7 +50,7 @@ export function createMockCaster(
       id: "caster-test",
       battleId: "test-battle",
       sourceId: "caster-test",
-      sourceType: "character",
+      sourceType: ParticipantSourceType.CHARACTER,
       instanceId: undefined,
       name: "Test Caster",
       avatar: undefined,
@@ -127,7 +127,7 @@ export function createMockEnemy(id: string, tier: number = 7): BattleParticipant
       id,
       battleId: "test-battle",
       sourceId: id,
-      sourceType: "unit",
+      sourceType: ParticipantSourceType.UNIT,
       instanceId: id,
       name: `Test Enemy T${tier}`,
       avatar: undefined,

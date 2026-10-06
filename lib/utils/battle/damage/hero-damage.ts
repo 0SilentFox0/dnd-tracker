@@ -1,4 +1,4 @@
-import { AttackType } from "@/lib/constants/battle";
+import { AttackType, ParticipantSourceType } from "@/lib/constants/battle";
 import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
 import { diceAverage, diceCount, diceMax, mergeDiceFormulas, parseDice } from "@/lib/utils/common/dice";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
@@ -12,7 +12,7 @@ export interface HeroAttackDamageParts {
 export function heroAttackDamageParts(p: BattleParticipant, attack: BattleAttack): HeroAttackDamageParts {
   const weaponDice = attack.damageDice ?? "";
 
-  if (p.basicInfo.sourceType !== "character") return { weaponDice, heroDice: "", formula: weaponDice };
+  if (p.basicInfo.sourceType !== ParticipantSourceType.CHARACTER) return { weaponDice, heroDice: "", formula: weaponDice };
 
   const type = attack.type === AttackType.RANGED ? AttackType.RANGED : AttackType.MELEE;
 
@@ -32,7 +32,7 @@ export interface HeroDamageContext {
 export function heroDamageContext(p: BattleParticipant, attack: BattleAttack, damageRolls: number[]): HeroDamageContext {
   const { weaponDice, heroDice, formula } = heroAttackDamageParts(p, attack);
 
-  const isHero = p.basicInfo.sourceType === "character";
+  const isHero = p.basicInfo.sourceType === ParticipantSourceType.CHARACTER;
 
   const fullDiceCount = diceCount(weaponDice) + diceCount(heroDice);
 

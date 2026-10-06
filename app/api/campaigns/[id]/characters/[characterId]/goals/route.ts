@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
 
+import { CampaignRole } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { parseGoals, putGoalsSchema } from "@/lib/schemas/character-goals";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
@@ -20,7 +21,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
     if (!character || character.campaignId !== id) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    const isDM = access.campaign.members[0]?.role === "dm";
+    const isDM = access.campaign.members[0]?.role === CampaignRole.DM;
 
     if (!isDM && character.controlledBy !== access.userId) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 

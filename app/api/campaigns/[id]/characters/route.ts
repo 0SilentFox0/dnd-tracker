@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 
 import { createCharacterSchema } from "./create-character-schema";
 
+import { CharacterType, type CharacterTypeValue } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
@@ -31,7 +32,7 @@ export async function POST(
     // controlledBy — FK на users.id. Для NPC героя в UI поле не показується і часто лишається "".
     let controlledBy: string;
 
-    if (data.type === "npc_hero") {
+    if (data.type === CharacterType.NPC_HERO) {
       controlledBy = dmUserId;
     } else {
       const ownerId = data.controlledBy.trim();
@@ -191,7 +192,7 @@ export async function GET(
 
     const { searchParams } = new URL(request.url);
 
-    const type = searchParams.get("type"); // "player" | "npc_hero" | null = all
+    const type = searchParams.get("type"); // CharacterTypeValue | null = all
 
     const compact =
       searchParams.get("compact") === "1" ||
@@ -204,11 +205,11 @@ export async function GET(
       return accessResult;
     }
 
-    const where: { campaignId: string; type?: "player" | "npc_hero" } = {
+    const where: { campaignId: string; type?: CharacterTypeValue } = {
       campaignId: id,
     };
 
-    if (type === "player" || type === "npc_hero") {
+    if (type === CharacterType.PLAYER || type === CharacterType.NPC_HERO) {
       where.type = type;
     }
 
@@ -267,7 +268,7 @@ export async function DELETE(
     const result = await prisma.character.deleteMany({
       where: {
         campaignId: id,
-        type: "player",
+        type: CharacterType.PLAYER,
       },
     });
 
