@@ -1,5 +1,7 @@
 "use client";
 
+import { useProfile } from "./ProfileContext";
+
 import { CharacterBasicInfo } from "@/components/characters/basic/CharacterBasicInfo";
 import { CharacterHpPreview } from "@/components/characters/stats/CharacterHpPreview";
 import { Button } from "@/components/ui/button";
@@ -10,6 +12,8 @@ type Coef = "hpMultiplier" | "meleeMultiplier" | "rangedMultiplier";
 
 export function BasicEditTab({ editor, onDeleted }: { editor: DmCharacterEditor; onDeleted: () => void }) {
   const { form, members, races } = editor;
+
+  const { sheet } = useProfile();
 
   const coef = form.formData.scalingCoefficients;
 
@@ -31,7 +35,7 @@ export function BasicEditTab({ editor, onDeleted }: { editor: DmCharacterEditor;
   return (
     <div className="space-y-6">
       <CharacterBasicInfo basicInfo={form.basicInfo} campaignMembers={members} races={races} />
-      <CharacterHpPreview level={form.basicInfo.level} strength={form.abilityScores.strength} coefficient={coef?.hpMultiplier ?? 1} onCoefficientChange={(v) => setCoef("hpMultiplier", v)} isDm />
+      <CharacterHpPreview hp={sheet.hp} coefficient={coef?.hpMultiplier ?? 1} onCoefficientChange={(v) => setCoef("hpMultiplier", v)} />
       <div className="grid grid-cols-2 gap-3">
         <LabeledInput id="meleeMultiplier" label="Коеф. ближньої шкоди" type="number" step="0.1" min={0.1} max={3} value={coef?.meleeMultiplier ?? 1} onChange={(e) => setCoef("meleeMultiplier", Number(e.target.value) || 1)} />
         <LabeledInput id="rangedMultiplier" label="Коеф. дальньої шкоди" type="number" step="0.1" min={0.1} max={3} value={coef?.rangedMultiplier ?? 1} onChange={(e) => setCoef("rangedMultiplier", Number(e.target.value) || 1)} />

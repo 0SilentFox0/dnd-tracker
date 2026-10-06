@@ -1,79 +1,49 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { getHeroMaxHpBreakdown } from "@/lib/constants/hero-scaling";
+import type { SheetTotal } from "@/types/characters";
 
 interface CharacterHpPreviewProps {
-  level: number;
-  strength: number;
-  /** Коефіціент масштабування (×). Редагується лише DM. */
-  coefficient?: number;
-  onCoefficientChange?: (value: number) => void;
-  /** Чи поточний користувач DM (може змінювати коефіціент) */
-  isDm?: boolean;
+  hp: SheetTotal;
+  coefficient: number;
+  onCoefficientChange: (value: number) => void;
 }
 
-/**
- * Показує обчислене HP героя та спосіб обрахунку (як для melee damage).
- * У режимі DM у правому верхньому кутку — коефіціент, який можна змінити.
- */
-export function CharacterHpPreview({
-  level,
-  strength,
-  coefficient = 1,
-  onCoefficientChange,
-  isDm,
-}: CharacterHpPreviewProps) {
-  const { total, breakdown } = getHeroMaxHpBreakdown(level, strength, {
-    hpMultiplier: coefficient,
-  });
-
+export function CharacterHpPreview({ hp, coefficient, onCoefficientChange }: CharacterHpPreviewProps) {
   return (
     <Card>
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-2">
           <div className="space-y-1.5">
             <CardTitle className="text-base">Здоровʼя (HP)</CardTitle>
-            <CardDescription>
-              Обрахунок за рівнем та силою (у бою використовується це значення)
-            </CardDescription>
+            <CardDescription>Як у бою: рівень, сила, коефіцієнт і бонуси. Оновлюється після збереження.</CardDescription>
           </div>
-          {isDm && (
-            <div className="flex items-center gap-1.5 shrink-0">
-              <span className="text-xs text-muted-foreground whitespace-nowrap">
-                ×
-              </span>
-              <Input
-                type="number"
-                min={0.1}
-                max={3}
-                step={0.1}
-                className="h-8 w-24 text-left tabular-nums"
-                value={coefficient}
-                onChange={(e) => {
-                  const v = parseFloat(e.target.value);
+          <div className="flex shrink-0 items-center gap-1.5">
+            <span className="whitespace-nowrap text-xs text-muted-foreground">×</span>
+            <Input
+              aria-label="Коефіцієнт HP"
+              type="number"
+              min={0.1}
+              max={3}
+              step={0.1}
+              className="h-8 w-24 text-left tabular-nums"
+              value={coefficient}
+              onChange={(e) => {
+                const v = parseFloat(e.target.value);
 
-                  if (!Number.isNaN(v) && v >= 0.1 && v <= 3)
-                    onCoefficientChange?.(v);
-                }}
-              />
-            </div>
-          )}
+                if (!Number.isNaN(v) && v >= 0.1 && v <= 3) onCoefficientChange(v);
+              }}
+            />
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-2">
-        <p className="text-2xl font-semibold tabular-nums">{total}</p>
-        {breakdown.length > 0 && (
-          <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-            {breakdown.map((line, i) => (
-              <li key={i}>{line}</li>
+        <p className="text-2xl font-semibold tabular-nums">{hp.total}</p>
+        {hp.lines.length > 0 && (
+          <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
+            {hp.lines.map((line, i) => (
+              <li key={i}>{line.value ? `${line.label} ${line.value}` : line.label}</li>
             ))}
           </ul>
         )}

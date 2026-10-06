@@ -13,12 +13,12 @@ import { buildSpellEnhancers } from "./spell-enhancers";
 
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { ParticipantSide } from "@/lib/constants/battle";
-import { getHeroMaxHp } from "@/lib/constants/hero-scaling";
 import { bakePassives } from "@/lib/utils/abilities/build/bake";
 import { collectCharacterAbilities } from "@/lib/utils/abilities/build/collect";
 import { immunityAbilities } from "@/lib/utils/abilities/build/immunities";
 import { findCompletedSets } from "@/lib/utils/battle/artifact-sets";
 import { getCharacterImmunities } from "@/lib/utils/characters/character-race-effects";
+import { heroBaseHp } from "@/lib/utils/characters/hero-hp";
 import { getAbilityModifier, getProficiencyBonus, spellcastingDerived } from "@/lib/utils/common/calculations";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -78,8 +78,6 @@ export async function createBattleParticipantFromCharacter(
 
   const resolvedSpellSlots = await resolveSpellSlotsFromCharacter(character, context);
 
-  const hpMult = (character as { hpMultiplier?: number | null }).hpMultiplier ?? 1;
-
   const meleeMult =
     (character as { meleeMultiplier?: number | null }).meleeMultiplier ?? 1;
 
@@ -94,9 +92,7 @@ export async function createBattleParticipantFromCharacter(
 
   const spell = spellcastingDerived(character.level, character.spellcastingAbility, scores);
 
-  const computedMaxHp = getHeroMaxHp(character.level, character.strength, {
-    hpMultiplier: hpMult,
-  });
+  const computedMaxHp = heroBaseHp(character).total;
 
   const resolvedAbilities = [
     ...collectCharacterAbilities({

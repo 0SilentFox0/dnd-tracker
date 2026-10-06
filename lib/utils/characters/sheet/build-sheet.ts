@@ -3,9 +3,9 @@ import { abilityLabel, abilityLines, armorTotal, attackSheet, checkBonus } from 
 import { DND_SKILL_META, DND_SKILLS } from "@/lib/constants";
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { ARTIFACT_GRID_9 } from "@/lib/constants/artifacts";
-import { getHeroMaxHpBreakdown } from "@/lib/constants/hero-scaling";
 import { parseGoals } from "@/lib/schemas/character-goals";
 import { slotLevels } from "@/lib/utils/battle/view";
+import { heroBaseHp } from "@/lib/utils/characters/hero-hp";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { signed } from "@/lib/utils/format";
 import type { BattleParticipant } from "@/types/battle";
@@ -72,7 +72,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
 
   const attacks = p.battleData.attacks.map((a) => attackSheet(p, a));
 
-  const hp = getHeroMaxHpBreakdown(c.level, c.strength, { hpMultiplier: c.hpMultiplier ?? 1 });
+  const hp = heroBaseHp(c);
 
   const hpBonus = p.combatStats.maxHp - hp.total;
 

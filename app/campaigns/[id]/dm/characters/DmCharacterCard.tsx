@@ -14,7 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { getHeroMaxHp } from "@/lib/constants/hero-scaling";
+import { heroBaseHp } from "@/lib/utils/characters/hero-hp";
 import type { Character } from "@/types/characters";
 
 interface DmCharacterCardProps {
@@ -115,9 +115,7 @@ export function DmCharacterCard({ character, campaignId, busy, actions }: DmChar
             Рівень {character.level}
           </Badge>
           <Badge variant="secondary" className="text-xs">
-            HP {getHeroMaxHp(character.level, character.strength, {
-            hpMultiplier: (character as { hpMultiplier?: number | null }).hpMultiplier ?? 1,
-          })}
+            HP {heroBaseHp(character).total}
           </Badge>
           <Badge variant="secondary" className="text-xs">
             AC {character.armorClass}
