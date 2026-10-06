@@ -3,6 +3,7 @@ export {
   useCharacterForm,
   type UseCharacterFormOptions,
 } from "./useCharacterForm";
+export { useCharacterGoals } from "./useCharacterGoals";
 export type { Character } from "./useCharacters";
 export {
   useCharacter,

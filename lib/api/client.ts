@@ -178,6 +178,18 @@ export async function campaignPatch<T>(
 }
 
 /**
+ * PUT до campaign API; тіло — третій аргумент.
+ */
+export async function campaignPut<T>(
+  campaignId: string,
+  path: string,
+  body: unknown,
+  options: Omit<CampaignRequestOptions, "body" | "method"> = {},
+): Promise<T> {
+  return campaignRequest<T>(campaignId, path, { ...options, method: "PUT", body });
+}
+
+/**
  * DELETE до campaign API (без body).
  * Якщо потрібен body (наприклад delete-by-level), використовуй campaignRequest.
  */

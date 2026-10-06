@@ -7,10 +7,12 @@ import {
   campaignGet,
   campaignPatch,
   campaignPost,
+  campaignPut,
   campaignRequest,
 } from "@/lib/api/client";
+import type { GoalInput } from "@/lib/schemas/character-goals";
 import { formDataToCharacter } from "@/lib/utils/characters/character-form";
-import type { Character, CharacterFormData, CharacterSheet, DamagePreviewResponse } from "@/types/characters";
+import type { Character, CharacterFormData, CharacterGoal, CharacterSheet, DamagePreviewResponse } from "@/types/characters";
 
 export type { DamagePreviewResponse };
 
@@ -26,6 +28,9 @@ export async function getCharacter(
     `/characters/${characterId}`,
   );
 }
+
+export const putCharacterGoals = (campaignId: string, characterId: string, goals: GoalInput[]) =>
+  campaignPut<{ goals: CharacterGoal[] }>(campaignId, `/characters/${characterId}/goals`, { goals });
 
 export const getCharacterSheet = (campaignId: string, characterId: string) => campaignGet<CharacterSheet>(campaignId, `/characters/${characterId}/sheet`);
 
