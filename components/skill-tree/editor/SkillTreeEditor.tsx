@@ -52,7 +52,7 @@ export function SkillTreeEditor({ campaignId }: { campaignId: string }) {
     <div className={`${HUD_SURFACE} skill-tree-editor rounded-xl p-4`}>
       <div className="mb-3 flex flex-wrap items-center gap-3">
         <span className="hud-sc text-xl text-[#efe5d2]">Дерево прокачки</span>
-        <SelectField value={editor.race ?? ""} onValueChange={editor.setRace} triggerClassName="w-40">
+        <SelectField value={editor.race ?? ""} onValueChange={(v) => void editor.setRace(v)} triggerClassName="w-40">
           {editor.races.map((r) => <SelectItem key={r.id} value={r.name}>{r.name}</SelectItem>)}
         </SelectField>
         {editor.dirty && <span className="text-xs italic text-[#c9b37a]">Незбережені зміни</span>}
@@ -106,8 +106,11 @@ export function SkillTreeEditor({ campaignId }: { campaignId: string }) {
             setAdding(false);
           },
           onCreate: async (input) => {
-            await editor.actions.createBranch(input);
-            setAdding(false);
+            const ok = await editor.actions.createBranch(input);
+
+            if (ok) setAdding(false);
+
+            return ok;
           },
         }}
       />

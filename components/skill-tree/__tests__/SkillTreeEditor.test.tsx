@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, screen, within } from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { SkillTreeEditor } from "@/components/skill-tree/editor";
@@ -79,5 +79,23 @@ describe("SkillTreeEditor", () => {
 
     expect(screen.queryByText(/Додайте расу/)).toBeNull();
     expect(screen.getByText("Завантаження…")).toBeTruthy();
+  });
+
+  it("невдале створення гілки лишає шторку відкритою; вдале — закриває", async () => {
+    actions.createBranch.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+    renderWithConfirm(<SkillTreeEditor campaignId="c" />);
+    fireEvent.click(screen.getByRole("button", { name: "+ Додати гілку" }));
+
+    const input = screen.getByPlaceholderText("Назва нової гілки");
+
+    fireEvent.change(input, { target: { value: "Тінь" } });
+    fireEvent.submit(input.closest("form") as HTMLFormElement);
+
+    await waitFor(() => expect(actions.createBranch).toHaveBeenCalledWith({ name: "Тінь", color: "#8a6414" }));
+    expect(screen.getByPlaceholderText("Назва нової гілки")).toBeTruthy();
+
+    fireEvent.submit(screen.getByPlaceholderText("Назва нової гілки").closest("form") as HTMLFormElement);
+
+    await waitFor(() => expect(screen.queryByPlaceholderText("Назва нової гілки")).toBeNull());
   });
 });
