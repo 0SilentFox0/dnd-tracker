@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
-import { abilityCharges, bonusTargetSide, effectiveArmorClass, lastAction, needsMoraleCheck, slotLevels, spellTier, weaponPreview } from "@/lib/utils/battle/view";
+import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
+import { abilityCharges, bonusTargetSide, lastAction, needsMoraleCheck, slotLevels, spellTier, weaponPreview } from "@/lib/utils/battle/view";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleAction } from "@/types/battle";
 
@@ -38,7 +39,7 @@ describe("мій герой", () => {
     expect(charges).toEqual([{ key: "sw", name: "Друге дихання", icon: undefined, left: 0, limit: 1, per: "battle" }]);
   });
 
-  it("effectiveArmorClass враховує ауру союзника", () => {
+  it("getEffectiveArmorClass враховує ауру союзника", () => {
     const base = createMockParticipant();
 
     const me = { ...base, basicInfo: { ...base.basicInfo, id: "me" }, combatStats: { ...base.combatStats, armorClass: 16 } };
@@ -49,7 +50,7 @@ describe("мій герой", () => {
       battleData: { ...base.battleData, resolvedAbilities: [ability({ key: "aura", trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "armor", flat: 4, target: "allAllies" }] as ResolvedAbility["effects"] })] },
     };
 
-    expect(effectiveArmorClass(me, [me, paladin])).toBe(20);
+    expect(getEffectiveArmorClass(me, [me, paladin])).toBe(20);
   });
 
   it("bonusTargetSide", () => {

@@ -10,12 +10,18 @@ export const HEALTH_LABEL: Record<HealthState, string> = {
   down: "повалений",
 };
 
+export function hpRatio(p: Pick<BattleParticipant, "combatStats">): number {
+  const { currentHp, maxHp } = p.combatStats;
+
+  return maxHp > 0 ? Math.max(0, Math.min(1, currentHp / maxHp)) : 0;
+}
+
 export function healthState(p: BattleParticipant): HealthState {
-  const { currentHp, maxHp, status } = p.combatStats;
+  const { currentHp, status } = p.combatStats;
 
   if (status !== "active" || currentHp <= 0) return "down";
 
-  const ratio = maxHp > 0 ? currentHp / maxHp : 0;
+  const ratio = hpRatio(p);
 
   if (ratio >= 1) return "unhurt";
 

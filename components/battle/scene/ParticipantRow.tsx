@@ -6,6 +6,7 @@ import { Shield } from "lucide-react";
 import { EffectLine, HealthBar, HealthLabel, Portrait } from "@/components/battle/hud";
 import { useHpChange } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
+import { hpRatio } from "@/lib/utils/battle/view";
 import type { BattleParticipant } from "@/types/battle";
 
 export const ParticipantRow = memo(function ParticipantRow({ participant, exact, acText, current, onSelect }: {
@@ -37,7 +38,7 @@ export const ParticipantRow = memo(function ParticipantRow({ participant, exact,
       <div className="min-w-0 flex-1">
         <div className={cn("hud-sc flex h-5 items-center whitespace-nowrap text-base font-bold text-[var(--ink)]", down && "line-through")}>
           <span className="truncate">{participant.basicInfo.name}</span>
-          {exact ? <span className={cn("ml-auto pl-2 font-sans text-sm font-medium tracking-normal", currentHp / Math.max(1, maxHp) <= 0.25 ? "text-[#e04a35]" : "text-[#d6cbb7]")}>{currentHp} / {maxHp}</span> : <HealthLabel participant={participant} />}
+          {exact ? <span className={cn("ml-auto pl-2 font-sans text-sm font-medium tracking-normal", hpRatio(participant) <= 0.25 ? "text-[#e04a35]" : "text-[#d6cbb7]")}>{currentHp} / {maxHp}</span> : <HealthLabel participant={participant} />}
         </div>
         <HealthBar participant={participant} exact={exact} />
         <EffectLine effects={participant.battleData.activeEffects} />

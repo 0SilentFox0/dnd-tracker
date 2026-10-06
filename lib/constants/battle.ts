@@ -53,9 +53,6 @@ export const BATTLE_CONSTANTS = {
   /** За замовчуванням опір (якщо не вказано значення) */
   DEFAULT_RESISTANCE_PERCENT: 50,
   
-  /** За замовчуванням поріг низького HP для пасивних здібностей (якщо не вказано) */
-  DEFAULT_LOW_HP_THRESHOLD_PERCENT: 15,
-  
   /** Мінімальний відсоток HP (0%) */
   MIN_HP_PERCENT: 0,
   

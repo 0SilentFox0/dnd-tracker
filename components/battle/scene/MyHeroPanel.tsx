@@ -5,7 +5,8 @@ import { Heart, Shield } from "lucide-react";
 import { EffectLine, HealthBar, Portrait, SlotGrid } from "@/components/battle/hud";
 import { useBattleScene, useHpChange } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
-import { abilityCharges, effectiveArmorClass, turnsUntil } from "@/lib/utils/battle/view";
+import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
+import { abilityCharges, turnsUntil } from "@/lib/utils/battle/view";
 import type { BattleParticipant } from "@/types/battle";
 
 export function MyHeroPanel({ hero, compact = false }: { hero: BattleParticipant; compact?: boolean }) {
@@ -28,14 +29,14 @@ export function MyHeroPanel({ hero, compact = false }: { hero: BattleParticipant
           <div className="hud-sc flex h-6 items-center justify-between text-[19px] font-bold text-[var(--ink)]">
             <span className="truncate">{hero.basicInfo.name}</span>
             <span className="shrink-0 whitespace-nowrap pl-2 font-sans text-sm font-normal italic tracking-normal text-[#b8ab95]">
-              {compact ? `${hero.combatStats.currentHp} / ${hero.combatStats.maxHp} · AC ${effectiveArmorClass(hero, battle.initiativeOrder)}` : battle.status !== "active" ? "" : isMyTurn ? "твій хід" : until === 0 ? "ходить" : until !== null ? `хід через ${until}` : ""}
+              {compact ? `${hero.combatStats.currentHp} / ${hero.combatStats.maxHp} · AC ${getEffectiveArmorClass(hero, battle.initiativeOrder)}` : battle.status !== "active" ? "" : isMyTurn ? "твій хід" : until === 0 ? "ходить" : until !== null ? `хід через ${until}` : ""}
             </span>
           </div>
           <HealthBar participant={hero} exact className="h-1.5" />
           {!compact && (
             <div className="mt-1.5 flex h-6 items-center gap-4 text-[15px] text-[#d6cbb7]">
               <span className="flex items-center gap-1.5"><Heart className="size-4 text-[var(--enemy)]" />{hero.combatStats.currentHp} / {hero.combatStats.maxHp}</span>
-              <span className="flex items-center gap-1.5"><Shield className="size-4 text-[#b8ab95]" />{effectiveArmorClass(hero, battle.initiativeOrder)}</span>
+              <span className="flex items-center gap-1.5"><Shield className="size-4 text-[#b8ab95]" />{getEffectiveArmorClass(hero, battle.initiativeOrder)}</span>
             </div>
           )}
         </div>

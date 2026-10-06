@@ -3,6 +3,7 @@ import type { FieldMeta } from "./fields";
 import { eventActorId, eventAttackKind, eventTargetIds } from "@/lib/utils/abilities/engine/events";
 import { findParticipant, isUp } from "@/lib/utils/abilities/engine/participants";
 import type { Condition, ConditionSubject } from "@/lib/utils/abilities/schema";
+import { hpRatio } from "@/lib/utils/battle/view/health";
 import type { AbilityEvent } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -56,7 +57,7 @@ function subjects(who: ConditionSubject, ctx: ConditionContext): BattleParticipa
   }
 }
 
-const hpPercent = (p: BattleParticipant) => (p.combatStats.maxHp > 0 ? (p.combatStats.currentHp / p.combatStats.maxHp) * 100 : 0);
+const hpPercent = (p: BattleParticipant) => hpRatio(p) * 100;
 
 export function evaluateCondition(c: Condition, ctx: ConditionContext): boolean {
   switch (c.type) {

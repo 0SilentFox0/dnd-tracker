@@ -1,5 +1,5 @@
 import { BATTLE_RACE } from "@/lib/constants/battle";
-import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
+import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
@@ -48,10 +48,6 @@ export function abilityCharges(p: BattleParticipant): AbilityCharge[] {
 
     return [{ key: a.key, name: a.name, icon: a.source.icon ?? undefined, left: Math.max(0, limit - used), limit, per }];
   });
-}
-
-export function effectiveArmorClass(p: BattleParticipant, all: BattleParticipant[]): number {
-  return statWithModifiers(withSelf(all, p), p.basicInfo.id, "armor", p.combatStats.armorClass);
 }
 
 const HOSTILE = new Set(["dealDamage", "dot", "applyCondition"]);
