@@ -22,7 +22,26 @@ export async function saveSkillTree(campaignId: string, treeId: string, race: st
 
   const rowId = existing?.id ?? (await prisma.skillTree.create({ data: { campaignId, race, skills: {} } })).id;
 
+  const oldJsonId = existing ? readTreeJson(existing.skills).id : undefined;
+
+  if (oldJsonId && oldJsonId !== rowId) await moveProgressKey(campaignId, existing?.race ?? race, oldJsonId, rowId);
+
   const saved = await prisma.skillTree.update({ where: { id: rowId }, data: { skills: { ...raw, id: rowId, race } as Prisma.InputJsonValue } });
 
   return NextResponse.json({ id: saved.id, race: saved.race, skills: saved.skills });
+}
+
+// старий прогрес ключувався id з JSON дерева; після збереження JSON id = id рядка, тож переносимо ключ
+async function moveProgressKey(campaignId: string, race: string, from: string, to: string) {
+  const characters = await prisma.character.findMany({ where: { campaignId, race }, select: { id: true, skillTreeProgress: true } });
+
+  for (const c of characters) {
+    const progress = (c.skillTreeProgress ?? {}) as Record<string, unknown>;
+
+    if (!(from in progress) || to in progress) continue;
+
+    const { [from]: moved, ...rest } = progress;
+
+    await prisma.character.update({ where: { id: c.id }, data: { skillTreeProgress: { [to]: moved, ...rest } as Prisma.InputJsonValue } });
+  }
 }

@@ -11,6 +11,7 @@ vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn() }));
 vi.mock("@/lib/db", () => ({
   prisma: {
     skillTree: { findFirst: vi.fn(), create: vi.fn(), update: vi.fn() },
+    character: { findMany: vi.fn(), update: vi.fn() },
     mainSkill: { findMany: vi.fn() },
     skill: { findMany: vi.fn() },
   },
@@ -30,6 +31,7 @@ describe("PATCH skill tree", () => {
     vi.mocked(apiAuth.requireDM).mockResolvedValue({ userId: "dm" } as never);
     vi.mocked(prisma.mainSkill.findMany).mockResolvedValue([{ id: "attack" }] as never);
     vi.mocked(prisma.skill.findMany).mockResolvedValue([{ id: "o1" }] as never);
+    vi.mocked(prisma.character.findMany).mockResolvedValue([] as never);
     vi.mocked(prisma.skillTree.create).mockImplementation((async ({ data }: { data: object }) => ({ id: "generated", ...data })) as never);
     vi.mocked(prisma.skillTree.update).mockImplementation((async ({ where, data }: { where: { id: string }; data: object }) => ({ id: where.id, race: "Ельф", ...data })) as never);
   });
@@ -63,5 +65,20 @@ describe("PATCH skill tree", () => {
 
     expect(res.status).toBe(400);
     expect(await getResponseJson(res as never)).toEqual({ errors: [{ code: "duplicateSkill", ref: "o1" }] });
+  });
+
+  it("прогрес під старим JSON id дерева переноситься під id рядка при збереженні", async () => {
+    vi.mocked(prisma.skillTree.findFirst).mockResolvedValueOnce({ id: "row", campaignId: "camp", race: "Ельф", skills: { id: "mock-Ельф-camp", mainSkills: [] } } as never);
+    vi.mocked(prisma.character.findMany).mockResolvedValue([
+      { id: "a", skillTreeProgress: { "mock-Ельф-camp": { unlockedSkills: ["o1"] }, other: { unlockedSkills: ["x"] } } },
+      { id: "b", skillTreeProgress: { row: { unlockedSkills: ["o1"] } } },
+    ] as never);
+
+    await patch("row", RAW);
+
+    expect(vi.mocked(prisma.character.findMany).mock.calls[0][0]).toMatchObject({ where: { campaignId: "camp", race: "Ельф" } });
+    expect(vi.mocked(prisma.character.update).mock.calls).toEqual([
+      [{ where: { id: "a" }, data: { skillTreeProgress: { row: { unlockedSkills: ["o1"] }, other: { unlockedSkills: ["x"] } } } }],
+    ]);
   });
 });
