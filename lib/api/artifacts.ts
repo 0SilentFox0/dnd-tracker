@@ -45,7 +45,6 @@ export async function getArtifacts(
   return Array.isArray(data) ? data : [];
 }
 
-export const getArtifact = artifactsApi.get;
 export const createArtifact = artifactsApi.create;
 export const updateArtifact = artifactsApi.update;
 export const deleteArtifact = artifactsApi.remove;

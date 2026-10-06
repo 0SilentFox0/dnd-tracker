@@ -121,7 +121,7 @@ React-хуки згруповані по папках за доменом; ко�
 - **`lib/hooks/battles/`** — список і CRUD боїв: `useBattles` (useBattle, useStartBattle, useUpdateBattle, …); усі мутації бою — через `useBattleAction` (`expectedVersion`, застосування дельти, 409 → рефетч і тост).
 - **`lib/hooks/battle/`** — логіка одного бою: `useBattleSceneValue`/`useBattleScene` (контекст сцени), `usePusherBattleSync` (`battle-delta`), `useAttackWizard`, `useSpellBook`, `usePlayerTurn`, `useBattleToast`, `useHpChange`, `useBattlePageDialogs` (DM-діалоги).
 - **`lib/hooks/campaigns/`** — `useCampaignMembers`.
-- **`lib/hooks/characters/`** — персонажі та форма: `useCharacterForm`, `useCharacterView`, `useCharacters`, `useInventory`, `useDamageCalculator`, `useHeroScalingCoefficients`; тип `Character`.
+- **`lib/hooks/characters/`** — персонажі та форма: `useCharacterForm`, `useCharacterView`, `useCharacters`, `useDamageCalculator`, `useHeroScalingCoefficients`; тип `Character`.
 - **`lib/hooks/skills/`** — скіли та прокачка: `useSkills`, `useMainSkills`, `useSkillForm`, `useCharacterProgression`, `useProgressionActions`, `useCharacterLearnedSpellIds`, `useLevelUpCelebration`, `useSkillTreeEditor`; тип `SkillFromLibrary`.
 - **`lib/hooks/spells/`** — заклинання: `useSpells`, `useSpellGroups`, `useSpellGroupActions`, `useSpellSelection` та мутації (create, update, delete, move, …).
 - **`lib/hooks/units/`** — юніти: `useUnits`, `useUnit`, `useUnitGroups`, `useCreateUnitGroup` та мутації.
@@ -233,13 +233,13 @@ React-провайдери: **`query-provider.tsx`** (TanStack Query), можл�
 
 Скрипти для CLI та одноразових операцій (запуск: `pnpm run <script>` або `tsx scripts/імʼя.ts`).
 
-- **Імпорт:** `import-spells.ts`, `import-docs-spells.ts`, `import-units.ts`, `import-skills-library.ts` (та допоміжні parse/triggers/types).
+- **Імпорт:** `import-docs-spells.ts`, `import-units.ts`, `import-skills-library.ts` (та допоміжні parse/triggers/types).
 - **Міграції зберігання:** `migrate-spell-icons-to-supabase.ts`, `migrate-skill-icons-to-supabase.ts`, `migrate-unit-icons-to-supabase.ts`.
 - **Дані:** `seed-artifacts.ts`, `seed-mock-battle-data.ts`, `seed-mock-battles.ts`, `reset-mock-battle-data.ts`, `delete-mock-battle-data.ts`, `redistribute-character-spell-slots.ts`.
-- **Тести/симуляції:** `run-spells-testing.ts`, `setup-battle-test-3v5.ts`.
+- **Тести/симуляції:** `run-spells-testing.ts`, `simulate-battle.ts`.
 - **Конвертація умінь:** `pnpm convert-abilities` (dry-run зі звітом у `docs/reports/`; `--apply` / `--force`).
 - **Симуляція бою:** `pnpm simulate-battle` — лише на локальній БД: створює окрему кампанію (персонажі з різними прокачками й артефактами, юніти з уміннями, частина даних у старому форматі) і проганяє бій через ті самі mutation-функції, що й API, з перевірками ефектів.
-- **Інше:** `fetch-skill-structure.ts`, `artifact-icon-map.ts`, `update-artifact-icons.ts`, `import-spells-from-csv.ts`.
+- **Інше:** `artifact-icon-map.ts`, `update-artifact-icons.ts`.
 
 Детальніший опис mock-даних — у **`scripts/README-MOCK-DATA.md`**.
 

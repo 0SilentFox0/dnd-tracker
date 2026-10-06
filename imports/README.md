@@ -11,15 +11,7 @@
 
 ### Імпорт заклинань
 
-```bash
-npm run import-spells <campaignId> imports/spells-import.csv
-```
-
-або
-
-```bash
-npm run import-spells-csv <campaignId> imports/spells-import.csv
-```
+У застосунку: ДМ → Заклинання → «Імпорт» (CSV або JSON).
 
 ### Імпорт юнітів
 

@@ -30,12 +30,6 @@ export type {
 
 export type WithVersion<T> = T & { expectedVersion?: number };
 
-export async function getBattles(
-  campaignId: string,
-): Promise<BattleScene[]> {
-  return campaignGet<BattleScene[]>(campaignId, "/battles");
-}
-
 export async function deleteAllBattles(
   campaignId: string,
 ): Promise<{ success: boolean; deletedCount: number }> {

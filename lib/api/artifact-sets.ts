@@ -34,7 +34,6 @@ const artifactSetsApi = createCampaignCrudApi<
 >("/artifact-sets");
 
 export const getArtifactSets = artifactSetsApi.list;
-export const getArtifactSet = artifactSetsApi.get;
 export const createArtifactSet = artifactSetsApi.create;
 export const updateArtifactSet = artifactSetsApi.update;
 export const deleteArtifactSet = artifactSetsApi.remove;

@@ -2,7 +2,7 @@
  * API сервіс для роботи з інвентарем персонажа
  */
 
-import { campaignGet, campaignPatch } from "@/lib/api/client";
+import { campaignPatch } from "@/lib/api/client";
 import type {
   EquippedItems,
   InventoryFormData,
@@ -19,19 +19,6 @@ export interface Inventory {
   copper: number;
   items: InventoryItem[];
   updatedAt: string;
-}
-
-/**
- * Отримує інвентар персонажа
- */
-export async function getInventory(
-  campaignId: string,
-  characterId: string,
-): Promise<Inventory> {
-  return campaignGet<Inventory>(
-    campaignId,
-    `/characters/${characterId}/inventory`,
-  );
 }
 
 /**

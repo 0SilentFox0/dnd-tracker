@@ -178,13 +178,10 @@ dnd-combat-tracker/
 │   │   └── inventory.ts         # API для інвентаря
 │   ├── hooks/                   # Кастомні React хуки
 │   │   ├── useCharacterForm.ts  # Хук для форми персонажа
-│   │   ├── useCampaignMembers.ts # Хук для учасників кампанії
-│   │   └── useInventory.ts      # Хук для інвентаря
+│   │   └── useCampaignMembers.ts # Хук для учасників кампанії
 │   ├── constants/               # Константи D&D 5e
 │   │   ├── skills.ts            # Навички та збереження
 │   │   ├── alignment.ts         # Світогляди
-│   │   ├── spellcasting.ts     # Заклинання
-│   │   ├── equipment.ts        # Обладнання
 │   │   ├── abilities.ts        # Характеристики
 │   │   └── index.ts            # Центральний експорт
 │   ├── types/                   # TypeScript типи

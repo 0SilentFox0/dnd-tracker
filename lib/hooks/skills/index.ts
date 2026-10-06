@@ -20,4 +20,3 @@ export {
   useUpdateSkill,
 } from "./useSkills";
 export { useSkillTreeEditor } from "./useSkillTreeEditor";
-export { useSkillTrees } from "./useSkillTrees";
