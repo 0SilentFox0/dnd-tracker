@@ -151,7 +151,11 @@ export interface Character {
   };
 }
 
-
+/** Рядок списку персонажів кампанії (GET /characters). */
+export type CharacterListItem = Pick<
+  Character,
+  "id" | "campaignId" | "type" | "controlledBy" | "name" | "level" | "class" | "race" | "subrace" | "avatar" | "strength" | "hpMultiplier" | "armorClass" | "initiative" | "experience"
+> & { user?: { displayName: string } | null };
 
 export type SheetLineSource = "base" | "ability" | "proficiency" | "weapon" | "level" | "dice" | "skill" | "race" | "artifact" | "artifactSet" | "unit" | "character" | "effect" | "action" | "multiplier";
 

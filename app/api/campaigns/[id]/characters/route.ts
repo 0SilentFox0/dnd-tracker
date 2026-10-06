@@ -233,9 +233,23 @@ export async function GET(
 
     const characters = await prisma.character.findMany({
       where,
-      include: {
-        user: true,
-        inventory: true,
+      select: {
+        id: true,
+        campaignId: true,
+        type: true,
+        controlledBy: true,
+        name: true,
+        level: true,
+        class: true,
+        race: true,
+        subrace: true,
+        avatar: true,
+        strength: true,
+        hpMultiplier: true,
+        armorClass: true,
+        initiative: true,
+        experience: true,
+        user: { select: { displayName: true } },
       },
       orderBy: {
         createdAt: "desc",
