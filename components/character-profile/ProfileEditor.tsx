@@ -43,7 +43,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
   const { formData, setFormData, abilityScores, combatStats, skills, abilities, spellcasting } = form;
 
   return (
-    <form id="profile-edit" onSubmit={form.handleSubmit}>
+    <form id="profile-edit" className="hud-form" onSubmit={form.handleSubmit}>
       <ProfileHero
         actions={
           <Button type="button" size="sm" variant="outline" onClick={() => void editor.levelUp()}>
@@ -51,9 +51,11 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
           </Button>
         }
       />
-      {form.error && <p role="alert" className="mx-4 rounded-md border border-[#d0705c]/50 bg-[#d0705c]/10 px-3 py-2 text-sm text-[#f0b4a6]">
+      {form.error && (
+        <p role="alert" className="mx-4 rounded-md border border-[#d0705c]/50 bg-[#d0705c]/10 px-3 py-2 text-sm text-[#f0b4a6]">
           {form.error}
-        </p>}
+        </p>
+      )}
       <ProfileTabs
         value={tab}
         onValueChange={setTab}
