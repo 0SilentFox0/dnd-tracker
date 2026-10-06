@@ -1,6 +1,7 @@
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { battleQueryKey } from "./keys";
 import { useBattleAction } from "./useBattleAction";
 
 import type { AddParticipantData, CreateBattleData } from "@/lib/api/battles";
@@ -48,9 +49,9 @@ export function useBattle(
   const queryClient = useQueryClient();
 
   return useQuery<BattleScene>({
-    queryKey: ["battle", campaignId, battleId],
+    queryKey: battleQueryKey(campaignId, battleId),
     queryFn: async () =>
-      acceptFullBattle(queryClient.getQueryData<BattleScene>(["battle", campaignId, battleId]), await getBattle(campaignId, battleId)),
+      acceptFullBattle(queryClient.getQueryData<BattleScene>(battleQueryKey(campaignId, battleId)), await getBattle(campaignId, battleId)),
     staleTime: 15_000,
     refetchInterval: (query) => {
       if (options?.pauseRefetchWhen) return false;
@@ -69,7 +70,7 @@ export function useBattle(
 export function useUpdateBattle(campaignId: string, battleId: string) {
   const queryClient = useQueryClient();
 
-  const key = ["battle", campaignId, battleId];
+  const key = battleQueryKey(campaignId, battleId);
 
   return useMutation({
     mutationFn: (data: Partial<BattleScene>) => updateBattle(campaignId, battleId, data),

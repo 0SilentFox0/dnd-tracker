@@ -117,6 +117,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
     openLog,
     closeLog: vi.fn(),
     readBattle: () => after,
+    logHistory: { canLoadEarlier: false, isLoading: false, loadEarlier: vi.fn() },
     actions,
     anyPending: false,
   } as unknown as BattleSceneValue;

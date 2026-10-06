@@ -74,6 +74,10 @@ export function applyBattleDelta(cached: BattleScene, delta: ClientBattleDelta):
   };
 }
 
+export function prependBattleLog(cached: BattleScene, earlier: BattleAction[]): BattleScene {
+  return { ...cached, battleLog: mergeLog(earlier, cached.battleLog ?? []) };
+}
+
 export function acceptFullBattle(cached: BattleScene | undefined, incoming: BattleScene): BattleScene {
   if (cached?.version !== undefined && incoming.version !== undefined && incoming.version < cached.version) return cached;
 

@@ -9,6 +9,7 @@ import {
   Trash2,
 } from "lucide-react";
 
+import { BattleLogLoadEarlier } from "./BattleLogLoadEarlier";
 import { LogEntryDetails } from "./LogEntryDetails";
 
 import { useConfirm } from "@/lib/hooks/common";
@@ -146,6 +147,7 @@ export function BattleLogPanel({
               })
             )}
           </ul>
+          <BattleLogLoadEarlier />
     </div>
   );
 
