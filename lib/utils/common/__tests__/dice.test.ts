@@ -1,12 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  getDiceAverage,
-  getDiceSlots,
-  getTotalDiceCount,
-  mergeDiceFormulas as mergeLegacy,
-} from "@/lib/utils/battle/balance/dice";
-import {
   diceAverage,
   diceCount,
   diceMax,
@@ -120,17 +114,5 @@ describe("rollDice / rollDiceList", () => {
   it("невалідне → 0 / []", () => {
     expect(rollDice("x", seq(0.5))).toBe(0);
     expect(rollDiceList("x")).toEqual([]);
-  });
-});
-
-describe("паритет зі старим balance/dice на чистих формулах", () => {
-  it.each(["2d6+3", "1d8+1d6", "1d6-1", "3d8+1d4", "1d4+1d6", "2d6 + 3", "", "abc"])("%s", (formula) => {
-    expect(diceAverage(formula)).toBe(getDiceAverage(formula));
-    expect(diceCount(formula)).toBe(getTotalDiceCount(formula));
-    expect(mergeDiceFormulas(formula, "1d6")).toBe(mergeLegacy(formula, "1d6"));
-  });
-
-  it.each(["2d6+3", "1d8+1d6", "1d6-1", "3d8+1d4", "2d6 + 3"])("слоти %s", (formula) => {
-    expect(diceSlots(formula)).toEqual(getDiceSlots(formula));
   });
 });

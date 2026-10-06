@@ -11,8 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getDamageElementLabel } from "@/lib/constants/damage";
 import { useConfirm } from "@/lib/hooks/common";
-import { getDiceAverage } from "@/lib/utils/battle/balance";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
+import { diceAverage } from "@/lib/utils/common/dice";
 import {
   getUnitDamageModifiers,
   getUnitImmunities,
@@ -112,7 +112,7 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
       ? Math.round(
           Math.max(
             ...attacks.map(
-              (a) => getDiceAverage(a.damageDice || "1d6") + strMod,
+              (a) => diceAverage(a.damageDice || "1d6") + strMod,
             ),
           ),
         )

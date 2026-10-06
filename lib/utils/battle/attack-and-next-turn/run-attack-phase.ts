@@ -4,7 +4,7 @@
  */
 
 import { processAttack } from "@/lib/utils/battle/attack";
-import { getTotalDiceCount } from "@/lib/utils/battle/balance";
+import { diceCount } from "@/lib/utils/common/dice";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 export type AttackPhaseInput = {
@@ -174,7 +174,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const dicePerTarget =
     isMultiTargetRanged && targets.length > 1
-      ? getTotalDiceCount(attack.damageDice ?? "")
+      ? diceCount(attack.damageDice ?? "")
       : 0;
 
   for (let i = 0; i < targets.length; i++) {

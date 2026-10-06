@@ -2,7 +2,6 @@
  * Статистика союзників/ворогів та підбір юнітів за DPR/HP
  */
 
-import { getDiceAverage } from "./dice";
 import { getNonMagicBranchDpr, getSpellDprFromBranchLevels } from "./dpr";
 
 import { AttackType } from "@/lib/constants/battle";
@@ -11,6 +10,7 @@ import {
   getHeroMaxHp,
 } from "@/lib/constants/hero-scaling";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
+import { diceAverage } from "@/lib/utils/common/dice";
 import type { BranchLevel } from "@/lib/utils/skills/progression";
 
 export type DifficultyRatio = "easy" | "medium" | "hard";
@@ -102,7 +102,7 @@ export function getUnitStats(unit: {
   for (const a of attacks) {
     const dice = (a.damageDice as string) || "1d6";
 
-    const avg = getDiceAverage(dice);
+    const avg = diceAverage(dice);
 
     const isRanged = (a.type as string) === AttackType.RANGED;
 
@@ -115,7 +115,7 @@ export function getUnitStats(unit: {
   }
 
   const dpr =
-    Math.max(meleeAvg, rangedAvg) || getDiceAverage("1d6");
+    Math.max(meleeAvg, rangedAvg) || diceAverage("1d6");
 
   const hp = unit.maxHp;
 
@@ -152,9 +152,9 @@ export function getCharacterStats(character: GetCharacterStatsParams): {
 
   const rangedDice = getHeroDamageDiceForLevel(level, AttackType.RANGED);
 
-  const heroMeleeBase = level + strMod + getDiceAverage(meleeDice);
+  const heroMeleeBase = level + strMod + diceAverage(meleeDice);
 
-  const heroRangedBase = level + dexMod + getDiceAverage(rangedDice);
+  const heroRangedBase = level + dexMod + diceAverage(rangedDice);
 
   logLines.push(
     `Рівень ${level}: база melee = ${level} + ${strMod}(STR) + кубики(${meleeDice}) = ${Math.round(heroMeleeBase * 10) / 10}`,
@@ -172,7 +172,7 @@ export function getCharacterStats(character: GetCharacterStatsParams): {
   for (const a of attacks) {
     const dice = (a.damageDice as string) || "";
 
-    const avg = dice ? getDiceAverage(dice) : 0;
+    const avg = dice ? diceAverage(dice) : 0;
 
     const isRanged = (a.type as string) === AttackType.RANGED;
 

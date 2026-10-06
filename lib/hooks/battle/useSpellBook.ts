@@ -6,10 +6,10 @@ import { rollDie } from "./useAttackWizard";
 import { useBattleScene } from "./useBattleScene";
 
 import { useSpells } from "@/lib/hooks/spells";
-import { getDiceSlots } from "@/lib/utils/battle/balance/dice";
 import { initialSpellFlow, spellFlow, spellPayload,type SpellPick } from "@/lib/utils/battle/flows";
 import { participantSpellAllowsMultipleTargets } from "@/lib/utils/battle/spell/participant-spell-target-mode";
 import { slotLevels } from "@/lib/utils/battle/view";
+import { diceSlots } from "@/lib/utils/common/dice";
 import { groupSpellsByLevel } from "@/lib/utils/spells/group-by-level";
 import type { BattleParticipant } from "@/types/battle";
 import type { BookSpell } from "@/types/spells";
@@ -49,7 +49,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
     targetMode: s.type === "no_target" ? "none" : s.type === "aoe" || (caster && participantSpellAllowsMultipleTargets(caster, s.id)) ? "multi" : "single",
     needsHit: !!s.hitCheck,
     needsSaves: !!s.savingThrow,
-    diceSlots: s.diceCount && s.diceType ? getDiceSlots(`${s.diceCount}${s.diceType}`) : [],
+    diceSlots: s.diceCount && s.diceType ? diceSlots(`${s.diceCount}${s.diceType}`) : [],
   });
 
   const send = useEffectEvent(async () => {

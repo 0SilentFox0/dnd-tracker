@@ -2,13 +2,12 @@
  * Контр-удар (Reaction): перевірка та виконання
  */
 
-import { getDiceAverage } from "../balance";
-
 import { AttackType } from "@/lib/constants/battle";
 import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
 import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
 import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
+import { diceAverage } from "@/lib/utils/common/dice";
 import type { BattleParticipant } from "@/types/battle";
 
 type IncomingAttackType = AttackType | "magic";
@@ -81,7 +80,7 @@ export function performReaction(
       reactionAttack.type as AttackType,
     );
 
-    baseDamage += getDiceAverage(heroDice);
+    baseDamage += diceAverage(heroDice);
   }
 
   const counterPercent = getCounterDamagePercent(defender, participants);

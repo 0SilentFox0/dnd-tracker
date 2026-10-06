@@ -1,16 +1,8 @@
 /**
  * Розрахунки для автопідбору ворогів за KPI (DPR / Total HP).
- * Реекспорт з модулів: dice, dpr, stats.
+ * Реекспорт з модулів: dpr, stats.
  */
 
-export type { DiceGroup } from "./dice";
-export {
-  getDiceAverage,
-  getDiceSlots,
-  getTotalDiceCount,
-  mergeDiceFormulas,
-  parseDiceNotationToGroups,
-} from "./dice";
 export type { MagicMainSkillId } from "./dpr";
 export { getNonMagicBranchDpr, getSpellDprFromBranchLevels, MAGIC_MAIN_SKILL_IDS } from "./dpr";
 export type {
