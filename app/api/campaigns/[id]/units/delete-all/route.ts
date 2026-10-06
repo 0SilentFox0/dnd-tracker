@@ -1,3 +1,4 @@
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/db";
@@ -10,25 +11,18 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    
-    // Перевіряємо права DM
+
     const accessResult = await requireDM(id);
 
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
 
-    // Видаляємо всі юніти кампанії
-    const result = await prisma.unit.deleteMany({
-      where: {
-        campaignId: id,
-      },
-    });
+    const result = await prisma.unit.deleteMany({ where: { campaignId: id } });
 
-    return NextResponse.json({
-      success: true,
-      deleted: result.count,
-    });
+    revalidateTag(`units-${id}`, { expire: 0 });
+
+    return NextResponse.json({ success: true, deleted: result.count });
   } catch (error) {
     return handleApiError(error, { action: "delete all units" });
   }

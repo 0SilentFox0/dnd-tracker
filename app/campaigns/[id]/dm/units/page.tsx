@@ -2,6 +2,7 @@ import { Prisma } from "@prisma/client";
 
 import { DMUnitsPageClient } from "./page-client";
 
+import { UNIT_LIST_ORDER } from "@/lib/cache/reference-data";
 import { requireCampaignDM } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
 import { abilitySummary } from "@/lib/utils/abilities/summary";
@@ -45,17 +46,7 @@ export default async function DMUnitsPage({
 
   await requireCampaignDM(id);
 
-  const unitsData = await prisma.unit.findMany({
-    where: {
-      campaignId: id,
-    },
-    include: {
-      unitGroup: true,
-    },
-    orderBy: {
-      level: "asc",
-    },
-  });
+  const unitsData = await prisma.unit.findMany({ where: { campaignId: id }, include: { unitGroup: true }, orderBy: UNIT_LIST_ORDER });
 
   const units: Unit[] = unitsData.map(transformPrismaUnitToUnit);
 

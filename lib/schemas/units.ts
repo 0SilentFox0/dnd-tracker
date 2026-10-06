@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { AbilitiesSchema } from "@/lib/utils/abilities/schema";
 
-const unitAttackSchema = z.object({
+export const unitAttackSchema = z.object({
   name: z.string(),
   type: z.enum(["melee", "ranged"]).optional(),
   targetType: z.enum(["target", "aoe"]).optional(),
@@ -16,12 +16,21 @@ const unitAttackSchema = z.object({
   guaranteedDamage: z.number().min(0).optional(),
 });
 
+export const unitAvatarSchema = z.preprocess(
+  (v) => (typeof v === "string" && v.trim() === "" ? null : v),
+  z
+    .string()
+    .trim()
+    .max(2000)
+    .refine((v) => /^(https?:\/\/|\/)/i.test(v), "Аватар — посилання на зображення (http(s):// або /)")
+    .nullable()
+    .optional(),
+);
+
 export const createUnitSchema = z.object({
-  name: z.string().min(1).max(100),
-  race: z.string().optional(),
-  groupId: z.string().optional(),
+  name: z.string().trim().min(1).max(100),
+  raceId: z.string().min(1).nullable().optional(),
   level: z.number().min(1).max(30).default(1),
-  damageModifier: z.string().optional(),
   strength: z.number().min(1).max(30).default(10),
   dexterity: z.number().min(1).max(30).default(10),
   constitution: z.number().min(1).max(30).default(10),
@@ -33,24 +42,21 @@ export const createUnitSchema = z.object({
   speed: z.number().min(0).default(30),
   maxHp: z.number().min(1).default(10),
   proficiencyBonus: z.number().min(0).default(2),
+  minTargets: z.number().min(1).default(1),
+  maxTargets: z.number().min(1).default(1),
   attacks: z.array(unitAttackSchema).default([]),
   abilities: AbilitiesSchema.optional(),
   immunities: z.array(z.string()).default([]),
   knownSpells: z.array(z.string()).default([]),
   morale: z.number().min(-3).max(3).default(0),
-  avatar: z.string().optional(),
+  avatar: unitAvatarSchema,
 });
 
 export type CreateUnitInput = z.infer<typeof createUnitSchema>;
 
 export const updateUnitSchema = z.object({
-  name: z.string().min(1).max(100).optional(),
-  race: z.string().optional().nullable(),
-  groupId: z.string().optional().nullable(),
-  damageModifier: z.preprocess(
-    (val) => (val === "" ? null : val),
-    z.string().nullable().optional(),
-  ),
+  name: z.string().trim().min(1).max(100).optional(),
+  raceId: z.string().min(1).nullable().optional(),
   level: z.number().min(1).max(30).optional(),
   strength: z.number().min(1).max(30).optional(),
   dexterity: z.number().min(1).max(30).optional(),
@@ -70,10 +76,7 @@ export const updateUnitSchema = z.object({
   minTargets: z.number().min(1).optional(),
   maxTargets: z.number().min(1).optional(),
   morale: z.number().min(-3).max(3).optional(),
-  avatar: z.preprocess(
-    (val) => (val === "" ? null : val),
-    z.string().url().nullable().optional(),
-  ),
+  avatar: unitAvatarSchema,
 });
 
 export type UpdateUnitInput = z.infer<typeof updateUnitSchema>;
