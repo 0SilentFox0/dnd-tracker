@@ -31,10 +31,15 @@ export function useLevelUpCelebration(campaignId: string, characterId: string) {
     void markLevelSeen(campaignId, characterId).catch(() => {});
   }, [pending, level, campaignId, characterId]);
 
-  const celebration = pending && seenLevel !== null && dismissedFor !== level ? { from: seenLevel, to: level, free: progression?.freePoints ?? 0 } : null;
+  const [opened, setOpened] = useState<{ from: number; to: number } | null>(null);
+
+  // після markLevelSeen наступний лист приходить уже з seenLevel = level: відкритий оверлей тримається до закриття
+  if (pending && seenLevel !== null && opened?.to !== level && dismissedFor !== level) setOpened({ from: seenLevel, to: level });
+
+  const celebration = opened && dismissedFor !== opened.to ? { ...opened, free: progression?.freePoints ?? 0 } : null;
 
   const dismiss = () => {
-    setDismissedFor(level);
+    setDismissedFor(opened?.to ?? level);
     queryClient.setQueryData<CharacterSheet>(characterSheetKey(campaignId, characterId), (old) =>
       old ? { ...old, progression: { ...old.progression, seenLevel: old.progression.level } } : old,
     );
