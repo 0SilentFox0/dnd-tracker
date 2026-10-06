@@ -103,6 +103,8 @@ export interface BattleDelta {
   version: number;
   scene: Pick<BattleSceneState, "status" | "round" | "turnIndex" | "pendingMoraleCheck">;
   upserted: BattleParticipant[];
+  /** нові учасники й ті, чий знімок змінився */
+  fullIds: string[];
   removed: string[];
   events: StoredBattleEvent[];
 }

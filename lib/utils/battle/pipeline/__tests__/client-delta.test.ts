@@ -20,7 +20,7 @@ const scene: BattleSceneState = {
 const meta = { name: "Бій", description: null, setup: [], friendlyFire: false, createdAt: new Date() };
 
 describe("buildClientDelta", () => {
-  it("лише змінені учасники, без order, коли порядок той самий", () => {
+  it("зміна HP наявного учасника — лише патч поля, без order, коли порядок той самий", () => {
     const a = p("a"), b = p("b"), b2 = p("b", 4);
 
     const d = buildClientDelta({
@@ -29,12 +29,13 @@ describe("buildClientDelta", () => {
       participants: [a, b2],
       pending: [],
       upsertedIds: ["b"],
+      fullIds: [],
       log: [],
     });
 
     expect(d.version).toBe(8);
-    expect(d.upserted).toEqual([b2]);
-    expect(d.upserted[0]).toBe(b2);
+    expect(d.upserted).toEqual([]);
+    expect(d.patched).toEqual([{ id: "b", combatStats: { currentHp: 4 } }]);
     expect(d.removed).toEqual([]);
     expect(d.order).toBeUndefined();
     expect(d.pending).toBeUndefined();
@@ -50,6 +51,7 @@ describe("buildClientDelta", () => {
       participants: [c, a],
       pending: [],
       upsertedIds: [],
+      fullIds: [],
       log: [],
     });
 
@@ -66,6 +68,7 @@ describe("buildClientDelta", () => {
       participants: [a],
       pending: [s],
       upsertedIds: ["s"],
+      fullIds: [],
       log: [],
     });
 
@@ -78,13 +81,38 @@ describe("buildClientDelta", () => {
       participants: [a, s],
       pending: [],
       upsertedIds: ["s"],
+      fullIds: [],
       log: [],
     });
 
     expect(promoted.pending).toEqual([]);
     expect(promoted.upserted).toEqual([s]);
+    expect(promoted.patched).toBeUndefined();
     expect(promoted.order).toEqual(["a", "s"]);
     expect(promoted.removed).toEqual([]);
+  });
+
+  it("змінений знімок або видалене поле стану — повний учасник; зміна лише orderIndex — нічого", () => {
+    const a = p("a"), b = p("b"), c = p("c");
+
+    const a2 = { ...a, combatStats: { ...a.combatStats, armorClass: 30 } };
+
+    const { abilityUsage: _drop, ...bData } = { ...b.battleData, abilityUsage: {} };
+
+    void _drop;
+
+    const d = buildClientDelta({
+      before: { scene, meta, participants: [a, { ...b, battleData: { ...b.battleData, abilityUsage: {} } }, c], pending: [] },
+      after: { ...scene, version: 8 },
+      participants: [a2, { ...b, battleData: bData }, c],
+      pending: [],
+      upsertedIds: ["a", "b", "c"],
+      fullIds: ["a"],
+      log: [],
+    });
+
+    expect(d.upserted.map((x) => x.basicInfo.id)).toEqual(["a", "b"]);
+    expect(d.patched).toBeUndefined();
   });
 
   it("prepared → setup; журнал і cancelledFrom передаються як є", () => {
@@ -96,6 +124,7 @@ describe("buildClientDelta", () => {
       participants: [],
       pending: [],
       upsertedIds: [],
+      fullIds: [],
       log: [],
       cancelledFrom: 0,
     });

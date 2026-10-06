@@ -8,7 +8,7 @@ import type { BattleParticipant, BattlePreparationParticipant } from "@/types/ba
 
 export type BattleDb = Pick<
   PrismaClient,
-  "battleScene" | "battleParticipant" | "battleEvent" | "battleSnapshot" | "$transaction" | "$queryRaw"
+  "battleScene" | "battleParticipant" | "battleEvent" | "battleSnapshot" | "$transaction" | "$queryRaw" | "$executeRaw"
 >;
 
 type ParticipantRow = ParticipantColumns & {

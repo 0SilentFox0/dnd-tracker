@@ -14,6 +14,7 @@ import {
   restoreParticipantsAt,
   saveBattle,
 } from "@/lib/utils/battle/store";
+import type { BattleParticipant } from "@/types/battle";
 
 const url = process.env.DATABASE_URL ?? "";
 
@@ -35,6 +36,27 @@ async function mustLoad() {
   if (!battle) throw new Error("battle not found");
 
   return battle;
+}
+
+function countingDb() {
+  const calls: unknown[] = [];
+
+  const wrap = <T extends object>(target: T): T =>
+    new Proxy(target, {
+      get(t, key) {
+        const value = Reflect.get(t, key);
+
+        if (typeof value === "function") {
+          return (...args: unknown[]) => Promise.resolve(value.apply(t, args)).then((r: unknown) => (calls.push(r), r));
+        }
+
+        return value && typeof value === "object" ? wrap(value as object) : value;
+      },
+    });
+
+  const db = { ...prisma, $transaction: (fn: (tx: unknown) => Promise<unknown>) => prisma.$transaction((tx) => fn(wrap(tx))) };
+
+  return { db: db as unknown as typeof prisma, calls };
 }
 
 async function cleanup() {
@@ -103,6 +125,7 @@ describe.skipIf(!isLocal)("battle store (local DB)", () => {
     expect(delta.version).toBe(1);
     expect(delta.upserted.map((p) => p.basicInfo.id).sort()).toEqual(["gob", "hero"]);
     expect(delta.events[0].seq).toBe(1);
+    expect([...delta.fullIds].sort()).toEqual(["gob", "hero"]);
 
     const after = await mustLoad();
 
@@ -124,7 +147,44 @@ describe.skipIf(!isLocal)("battle store (local DB)", () => {
     });
 
     expect(delta.upserted.map((p) => p.basicInfo.id)).toEqual(["gob"]);
+    expect(delta.fullIds).toEqual([]);
     expect(delta.removed).toEqual([]);
+  });
+
+  it("оновлення учасників: кількість запитів не залежить від їх числа, рядки назад не читаються", async () => {
+    const hurt = (p: BattleParticipant, hp: number) => ({ ...p, combatStats: { ...p.combatStats, currentHp: hp } });
+
+    const one = countingDb();
+
+    const b1 = await mustLoad();
+
+    await saveBattle(one.db, b1, { participants: [hurt(b1.participants[0], 7), b1.participants[1]], pending: [], events: [{ type: "attack", round: 1, resultText: "Удар" }] });
+
+    const two = countingDb();
+
+    const b2 = await mustLoad();
+
+    const delta = await saveBattle(two.db, b2, { participants: [hurt(b2.participants[0], 6), hurt(b2.participants[1], 1)], pending: [], events: [{ type: "attack", round: 1, resultText: "Удар" }] });
+
+    expect(two.calls.length).toBe(one.calls.length);
+    expect(JSON.stringify(two.calls)).not.toContain("snapshot");
+
+    const after = await mustLoad();
+
+    expect(after.participants.map((p) => p.combatStats.currentHp)).toEqual([6, 1]);
+    expect(after.participants[0]).toEqual(hurt(b2.participants[0], 6));
+    expect(delta.upserted.map((p) => p.basicInfo.id)).toEqual(["hero", "gob"]);
+  });
+
+  it("зміна знімка пишеться тим самим UPDATE", async () => {
+    const before = await mustLoad();
+
+    const buffed = { ...before.participants[0], combatStats: { ...before.participants[0].combatStats, armorClass: 25 } };
+
+    const delta = await saveBattle(prisma, before, { participants: [buffed, before.participants[1]], pending: [], events: [] });
+
+    expect(delta.fullIds).toEqual(["hero"]);
+    expect((await mustLoad()).participants[0]).toEqual(buffed);
   });
 
   it("два збереження з однієї версії — друге отримує конфлікт", async () => {

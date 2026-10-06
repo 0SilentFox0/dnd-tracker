@@ -1,4 +1,4 @@
-import type { BattleScene, ClientBattleDelta } from "@/types/api";
+import type { BattleParticipantPatch, BattleScene, ClientBattleDelta } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 function mergeLog(previous: BattleAction[], incoming: BattleAction[], cancelledFrom?: number): BattleAction[] {
@@ -11,6 +11,21 @@ function mergeLog(previous: BattleAction[], incoming: BattleAction[], cancelledF
   return [...kept, ...incoming];
 }
 
+function mergeSection<T extends object>(current: T, patch: Partial<T> | undefined): T {
+  return patch ? { ...current, ...patch } : current;
+}
+
+function mergeParticipantPatch(current: BattleParticipant, patch: BattleParticipantPatch): BattleParticipant {
+  return {
+    basicInfo: mergeSection(current.basicInfo, patch.basicInfo),
+    abilities: mergeSection(current.abilities, patch.abilities),
+    combatStats: mergeSection(current.combatStats, patch.combatStats),
+    spellcasting: mergeSection(current.spellcasting, patch.spellcasting),
+    battleData: mergeSection(current.battleData, patch.battleData),
+    actionFlags: mergeSection(current.actionFlags, patch.actionFlags),
+  };
+}
+
 export function applyBattleDelta(cached: BattleScene, delta: ClientBattleDelta): BattleScene | "refetch" {
   if (cached.version !== undefined && delta.version <= cached.version) return cached;
 
@@ -19,6 +34,14 @@ export function applyBattleDelta(cached: BattleScene, delta: ClientBattleDelta):
   const byId = new Map<string, BattleParticipant>(cached.initiativeOrder.map((p) => [p.basicInfo.id, p]));
 
   for (const p of delta.upserted) byId.set(p.basicInfo.id, p);
+
+  for (const patch of delta.patched ?? []) {
+    const current = byId.get(patch.id);
+
+    if (!current) return "refetch";
+
+    byId.set(patch.id, mergeParticipantPatch(current, patch));
+  }
 
   for (const id of delta.removed) byId.delete(id);
 

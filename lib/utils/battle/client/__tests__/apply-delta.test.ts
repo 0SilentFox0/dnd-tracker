@@ -52,6 +52,28 @@ describe("applyBattleDelta", () => {
     expect(next).toMatchObject({ isDM: true, userRole: "dm", campaign: { id: "c1", friendlyFire: false } });
   });
 
+  it("patched — мердж розділів поверх кешованого учасника; незмінені розділи й учасники зберігають посилання", () => {
+    const effects = [{ id: "e1", name: "Кровотеча" }] as unknown as BattleParticipant["battleData"]["activeEffects"];
+
+    const next = applyBattleDelta(
+      cached,
+      delta({ patched: [{ id: "b", combatStats: { currentHp: 2 }, battleData: { activeEffects: effects } }] }),
+    ) as BattleScene;
+
+    const merged = next.initiativeOrder[1];
+
+    expect(next.initiativeOrder[0]).toBe(a);
+    expect(merged.combatStats).toEqual({ ...b.combatStats, currentHp: 2 });
+    expect(merged.battleData.activeEffects).toBe(effects);
+    expect(merged.battleData.attacks).toBe(b.battleData.attacks);
+    expect(merged.abilities).toBe(b.abilities);
+    expect(merged.actionFlags).toBe(b.actionFlags);
+  });
+
+  it("patched на невідомий id — refetch", () => {
+    expect(applyBattleDelta(cached, delta({ patched: [{ id: "ghost", combatStats: { currentHp: 1 } }] }))).toBe("refetch");
+  });
+
   it("order + removed + pending", () => {
     const s = p("s");
 

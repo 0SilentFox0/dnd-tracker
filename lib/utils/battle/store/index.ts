@@ -3,6 +3,7 @@ export * from "./errors";
 export * from "./event-mapping";
 export * from "./history";
 export * from "./load-battle";
+export * from "./participant-patch";
 export * from "./save-battle";
 export * from "./snapshot-state";
 export * from "./split-participant";
