@@ -12,7 +12,7 @@ const db = vi.hoisted(() => ({
     delete: vi.fn(),
     deleteMany: vi.fn(),
   },
-  spellGroup: { create: vi.fn(), findFirst: vi.fn(), findUnique: vi.fn(), findMany: vi.fn(), update: vi.fn(), delete: vi.fn() },
+  spellGroup: { create: vi.fn(), findFirst: vi.fn(), findUnique: vi.fn(), findMany: vi.fn(), update: vi.fn(), deleteMany: vi.fn() },
 }));
 
 const revalidateTag = vi.hoisted(() => vi.fn());
@@ -70,7 +70,7 @@ const writes: Array<[string, () => Promise<Response>]> = [
 
 const dbWrites = () => [
   db.spell.create, db.spell.createMany, db.spell.update, db.spell.updateMany, db.spell.delete, db.spell.deleteMany,
-  db.spellGroup.create, db.spellGroup.update, db.spellGroup.delete,
+  db.spellGroup.create, db.spellGroup.update, db.spellGroup.deleteMany,
 ];
 
 describe("spells API", () => {

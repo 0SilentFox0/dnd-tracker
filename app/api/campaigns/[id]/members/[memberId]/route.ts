@@ -22,6 +22,7 @@ export async function DELETE(
     // Перевіряємо чи учасник існує та належить до цієї кампанії
     const member = await prisma.campaignMember.findUnique({
       where: { id: memberId },
+      select: { campaignId: true, role: true },
     });
 
     const validationError = validateCampaignOwnership(member, id);
@@ -44,7 +45,7 @@ export async function DELETE(
     }
 
     // Видаляємо учасника
-    await prisma.campaignMember.delete({
+    await prisma.campaignMember.deleteMany({
       where: { id: memberId },
     });
 

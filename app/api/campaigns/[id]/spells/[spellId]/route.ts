@@ -140,6 +140,7 @@ export async function DELETE(
 
     const spell = await prisma.spell.findUnique({
       where: { id: spellId },
+      select: { campaignId: true },
     });
 
     const validationError = validateCampaignOwnership(spell, id);
@@ -148,7 +149,7 @@ export async function DELETE(
       return validationError;
     }
 
-    await prisma.spell.delete({
+    await prisma.spell.deleteMany({
       where: { id: spellId },
     });
 

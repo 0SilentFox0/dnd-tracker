@@ -59,6 +59,7 @@ export async function DELETE(
 
     const unit = await prisma.unit.findUnique({
       where: { id: unitId },
+      select: { campaignId: true },
     });
 
     const validationError = validateCampaignOwnership(unit, id);
@@ -67,7 +68,7 @@ export async function DELETE(
       return validationError;
     }
 
-    await prisma.unit.delete({
+    await prisma.unit.deleteMany({
       where: { id: unitId },
     });
 

@@ -63,6 +63,7 @@ export async function DELETE(
 
     const spellGroup = await prisma.spellGroup.findUnique({
       where: { id: groupId },
+      select: { campaignId: true },
     });
 
     const validationError = validateCampaignOwnership(spellGroup, id);
@@ -72,7 +73,7 @@ export async function DELETE(
     }
 
     // Видаляємо групу (заклинання автоматично втратять зв'язок через onDelete: SetNull в схемі)
-    await prisma.spellGroup.delete({
+    await prisma.spellGroup.deleteMany({
       where: { id: groupId },
     });
 

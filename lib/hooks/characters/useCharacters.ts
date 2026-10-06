@@ -31,7 +31,7 @@ export function useCharacters(
       opts?.type ?? "all",
       opts?.compact ? "compact" : "full",
     ],
-    queryFn: () => getCharacters(campaignId, { type: opts?.type, compact: opts?.compact }),
+    queryFn: () => getCharacters(campaignId, opts),
     staleTime: ENTITY_STALE_MS,
     enabled: !!campaignId && (opts?.enabled ?? true),
   });

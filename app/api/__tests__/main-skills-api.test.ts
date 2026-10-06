@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const db = vi.hoisted(() => ({
-  mainSkill: { create: vi.fn(), findUnique: vi.fn(), update: vi.fn(), delete: vi.fn() },
+  mainSkill: { create: vi.fn(), findUnique: vi.fn(), update: vi.fn(), deleteMany: vi.fn() },
 }));
 
 const revalidateTag = vi.hoisted(() => vi.fn());
@@ -70,7 +70,7 @@ describe("main-skills API", () => {
     expect((await call()).status).toBe(403);
     expect(db.mainSkill.create).not.toHaveBeenCalled();
     expect(db.mainSkill.update).not.toHaveBeenCalled();
-    expect(db.mainSkill.delete).not.toHaveBeenCalled();
+    expect(db.mainSkill.deleteMany).not.toHaveBeenCalled();
     expect(revalidateTag).not.toHaveBeenCalled();
   });
 

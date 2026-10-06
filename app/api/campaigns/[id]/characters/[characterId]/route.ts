@@ -182,6 +182,7 @@ export async function DELETE(
 
     const character = await prisma.character.findUnique({
       where: { id: characterId },
+      select: { campaignId: true },
     });
 
     const validationError = validateCampaignOwnership(character, id);
@@ -190,7 +191,7 @@ export async function DELETE(
       return validationError;
     }
 
-    await prisma.character.delete({
+    await prisma.character.deleteMany({
       where: { id: characterId },
     });
 
