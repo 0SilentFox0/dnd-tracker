@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import { deleteSpellsByLevelSchema } from "@/lib/schemas";
 import { requireDM } from "@/lib/utils/api/api-auth";
@@ -12,7 +13,6 @@ export async function DELETE(
   try {
     const { id } = await params;
     
-    // Перевіряємо права DM
     const accessResult = await requireDM(id);
 
     if (accessResult instanceof NextResponse) {
@@ -30,6 +30,8 @@ export async function DELETE(
         level,
       },
     });
+
+    invalidateReference(ReferenceKind.SPELLS, id);
 
     return NextResponse.json({
       success: true,

@@ -5,7 +5,7 @@ import { useEffect, useEffectEvent, useMemo, useReducer } from "react";
 import { rollDie } from "./useAttackWizard";
 import { useBattleScene } from "./useBattleScene";
 
-import { useSpells } from "@/lib/hooks/spells";
+import { usePrefetchSpellsByIds, useSpells, useSpellsByIds } from "@/lib/hooks/spells";
 import { initialSpellFlow, spellFlow, spellPayload,type SpellPick } from "@/lib/utils/battle/flows";
 import { participantSpellAllowsMultipleTargets } from "@/lib/utils/battle/spell/participant-spell-target-mode";
 import { slotLevels } from "@/lib/utils/battle/view";
@@ -18,22 +18,27 @@ export type { BookSpell };
 
 const isUp = (p: BattleParticipant) => p.combatStats.status === "active" && p.combatStats.currentHp > 0;
 
+const NO_SPELLS: string[] = [];
+
+/** Прогріває книгу заклинань героя гравця, поки бій простоює. */
+export function useSpellBookPrefetch() {
+  const { campaignId, hero, isDM } = useBattleScene();
+
+  usePrefetchSpellsByIds(campaignId, isDM ? NO_SPELLS : (hero?.spellcasting.knownSpells ?? NO_SPELLS));
+}
+
 export function useSpellBook(caster: BattleParticipant | null, options: { allSpells?: boolean; onDone?: () => void } = {}) {
   const scene = useBattleScene();
 
   const [state, dispatch] = useReducer(spellFlow, initialSpellFlow);
 
-  const { data = [] } = useSpells(scene.campaignId, { enabled: state.step !== "closed" && !!caster });
+  const isOpen = state.step !== "closed" && !!caster;
 
-  const spells = useMemo(() => {
-    const all = data as BookSpell[];
+  const library = useSpells(scene.campaignId, { enabled: isOpen && !!options.allSpells });
 
-    if (options.allSpells) return all;
+  const known = useSpellsByIds(scene.campaignId, caster?.spellcasting.knownSpells ?? [], { enabled: isOpen && !options.allSpells });
 
-    const known = new Set(caster?.spellcasting.knownSpells ?? []);
-
-    return all.filter((s) => known.has(s.id));
-  }, [data, options.allSpells, caster]);
+  const spells = useMemo(() => (options.allSpells ? ((library.data ?? []) as BookSpell[]) : (known.data ?? [])), [options.allSpells, library.data, known.data]);
 
   const byLevel = useMemo(() => groupSpellsByLevel(spells), [spells]);
 

@@ -45,11 +45,9 @@ export function AddParticipantDialog({
 
   const [quantity, setQuantity] = useState(1);
 
-  const { data: characters = [] } = useCharacters(campaignId, {
-    compact: true,
-  });
+  const { data: characters = [] } = useCharacters(campaignId, { compact: true, enabled: open });
 
-  const { data: units = [] } = useUnits(campaignId);
+  const { data: units = [] } = useUnits(campaignId, undefined, { enabled: open });
 
   const handleSubmit = () => {
     if (type === ParticipantSourceType.CHARACTER && characterId) {

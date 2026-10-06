@@ -11,11 +11,14 @@ import {
   campaignPost,
 } from "./client";
 
+import { BATTLE_LOG_PAGE_SIZE, BATTLE_VERSION_ONLY_PARAM } from "@/lib/constants/battle";
 import type { MoraleCheckResult } from "@/lib/utils/battle/battle-morale";
 import type {
   AttackData,
+  BattleEventsPage,
   BattleMutationResponse,
   BattleScene,
+  BattleVersion,
   BonusActionData,
   MoraleCheckData,
   SpellCastData,
@@ -64,6 +67,20 @@ export async function getBattle(
   return campaignGet<BattleScene>(campaignId, `/battles/${battleId}`, {
     cache: "no-store",
   });
+}
+
+export async function getBattleVersion(campaignId: string, battleId: string): Promise<BattleVersion> {
+  return campaignGet<BattleVersion>(campaignId, `/battles/${battleId}?${BATTLE_VERSION_ONLY_PARAM}=1`, { cache: "no-store" });
+}
+
+export async function getBattleEvents(
+  campaignId: string,
+  battleId: string,
+  page: { before: number; limit?: number },
+): Promise<BattleEventsPage> {
+  const query = new URLSearchParams({ before: String(page.before), limit: String(page.limit ?? BATTLE_LOG_PAGE_SIZE) });
+
+  return campaignGet<BattleEventsPage>(campaignId, `/battles/${battleId}/events?${query}`, { cache: "no-store" });
 }
 
 export async function nextTurn(campaignId: string, battleId: string, body: WithVersion<object> = {}): Promise<BattleMutationResponse> {

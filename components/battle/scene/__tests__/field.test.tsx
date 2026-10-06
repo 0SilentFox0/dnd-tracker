@@ -40,6 +40,7 @@ function scene(isDM = false) {
   return {
     battle, isDM, viewer: { userId: "u", isDM, canSeeEnemyHp: false }, hero, myParticipants: [hero],
     queue: turnQueue([gob, hero], 0, 3), allies: [hero], enemies: [gob], select: vi.fn(), selectedId: null, log: { open: false, focus: null },
+    logHistory: { canLoadEarlier: false, isLoading: false, loadEarlier: vi.fn() },
   } as unknown as BattleSceneValue;
 }
 
@@ -97,5 +98,23 @@ describe("поле бою", () => {
     fireEvent.click(screen.getByRole("button", { name: "Годрік завдав 6" }));
 
     expect(screen.getByText("Попадання")).toBeTruthy();
+  });
+
+  it("журнал із неповною історією показує «Показати раніші», дотик підвантажує сторінку", () => {
+    const value = scene();
+
+    const loadEarlier = vi.fn();
+
+    render(<BattleLog />, { wrapper: wrap({ ...value, logHistory: { canLoadEarlier: true, isLoading: false, loadEarlier } }) });
+
+    fireEvent.click(screen.getByRole("button", { name: "Показати раніші" }));
+
+    expect(loadEarlier).toHaveBeenCalledTimes(1);
+  });
+
+  it("повна історія — кнопки немає", () => {
+    render(<BattleLog />, { wrapper: wrap(scene()) });
+
+    expect(screen.queryByRole("button", { name: "Показати раніші" })).toBeNull();
   });
 });

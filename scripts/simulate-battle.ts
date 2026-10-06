@@ -29,8 +29,11 @@ import type { BattleMutationResponse, BattleScene } from "../types/api";
 import type { BattleAction, BattleParticipant } from "../types/battle";
 import { artifactRows, DRAGON_SET, RACES, SIM_CAMPAIGN_NAME, SIM_PLAYER, SIM_USER, SKILLS, UNITS } from "./simulate-battle-scenario";
 
-import { ParticipantSourceType } from "@/lib/constants/battle";
+import { BATTLE_LOG_RECENT_EVENTS, ParticipantSourceType } from "@/lib/constants/battle";
 import { CampaignRole } from "@/lib/constants/campaigns";
+import { PUSHER_DELTA_LIMIT_BYTES } from "@/lib/utils/battle/pipeline/limits";
+import { PATCHABLE_PARTICIPANT_FIELDS } from "@/lib/utils/battle/store/participant-patch";
+import { stableStringify } from "@/lib/utils/battle/store/stable-json";
 
 
 const url = process.env.DATABASE_URL ?? "";
@@ -182,6 +185,8 @@ let state: BattleScene;
 
 const log: BattleAction[] = [];
 
+const deltas: Array<{ label: string; bytes: number; fullParticipants: number; refetch: boolean }> = [];
+
 async function readState(): Promise<BattleScene> {
   const res = await runBattleMutation(
     new Request("http://localhost/battle"),
@@ -189,7 +194,7 @@ async function readState(): Promise<BattleScene> {
       params: { id: ctx.campaignId, battleId: ctx.battleId },
       access: "member",
       dryRun: () => true,
-      includeRecentEvents: 100,
+      includeRecentEvents: BATTLE_LOG_RECENT_EVENTS,
       mutate: (c) => ({ participants: c.participants, pending: c.pending, events: [] }),
     },
     deps,
@@ -215,6 +220,8 @@ async function call<T>(label: string, options: Omit<RunBattleMutationOptions<T>,
     const { delta } = json as unknown as BattleMutationResponse;
 
     const applied = state ? applyBattleDelta(state, delta) : "refetch";
+
+    deltas.push({ label, bytes: Buffer.byteLength(JSON.stringify(delta), "utf8"), fullParticipants: delta.upserted.length, refetch: applied === "refetch" });
 
     state = applied === "refetch" ? await readState() : applied;
 
@@ -515,10 +522,31 @@ async function scenario() {
 
   const reloaded = await loadBattle(prisma, { battleId: ctx.battleId, campaignId: ctx.campaignId, userId: SIM_USER.id });
 
+  const patchable = (p: BattleParticipant | undefined) =>
+    p && stableStringify(Object.entries(PATCHABLE_PARTICIPANT_FIELDS).map(([section, fields]) => fields.map((f) => (p[section as keyof BattleParticipant] as unknown as Record<string, unknown>)[f] ?? null)));
+
+  const drifted = (reloaded?.participants ?? []).filter((p) => patchable(p) !== patchable(state.initiativeOrder.find((x) => x.basicInfo.id === p.basicInfo.id)));
+
   check(
-    "Стан у БД збігається з відповіддю API",
-    !!reloaded && reloaded.participants.every((p) => hp(p) === hp(state.initiativeOrder.find((x) => x.basicInfo.id === p.basicInfo.id) as BattleParticipant)),
-    `version ${reloaded?.scene.version} / ${state.version}`,
+    "Кеш, зібраний із дельт і патчів, збігається з БД (HP, статус, ефекти, прапорці, слоти)",
+    !!reloaded && reloaded.scene.version === state.version && drifted.length === 0,
+    `version ${reloaded?.scene.version} / ${state.version}; розбіжності: ${drifted.map((p) => p.basicInfo.name).join(", ") || "—"}`,
+  );
+
+  const turnDeltas = deltas.filter((d) => d.label === "attack" || d.label === "next-turn");
+
+  check(
+    "Атаки й ходи передають учасників лише патчами, без жодного повного GET",
+    turnDeltas.every((d) => d.fullParticipants === 0) && deltas.every((d) => !d.refetch),
+    `повних учасників: ${turnDeltas.reduce((n, d) => n + d.fullParticipants, 0)}, refetch: ${deltas.filter((d) => d.refetch).length}`,
+  );
+
+  const oversized = deltas.filter((d) => d.label !== "start" && d.bytes > PUSHER_DELTA_LIMIT_BYTES);
+
+  check(
+    "Усі дельти після старту вміщуються в Pusher",
+    oversized.length === 0,
+    `макс. ${Math.max(...turnDeltas.map((d) => d.bytes))} B за хід/атаку; завеликі: ${oversized.map((d) => `${d.label} ${d.bytes} B`).join(", ") || "—"}`,
   );
   printState("Фінал");
   void lastEvent;

@@ -76,6 +76,10 @@ export interface BattleScene {
   knowledge?: BattleKnowledge;
 }
 
+export type BattleParticipantPatch = { id: string } & {
+  [K in keyof BattleParticipant]?: Partial<BattleParticipant[K]>;
+};
+
 export interface ClientBattleDelta {
   battleId: string;
   version: number;
@@ -84,16 +88,29 @@ export interface ClientBattleDelta {
     round: number;
     turnIndex: number;
     pendingMoraleCheck: unknown;
-    startedAt?: string;
-    completedAt?: string;
+    /** null — дату скинуто (reset, відкат завершеного бою) */
+    startedAt?: string | null;
+    completedAt?: string | null;
   };
   upserted: BattleParticipant[];
+  patched?: BattleParticipantPatch[];
   removed: string[];
   order?: string[];
   pending?: BattleParticipant[];
   setup?: BattlePreparationParticipant[];
   log: BattleAction[];
   cancelledFrom?: number;
+  /** зведення знань після відкату: вікно журналу клієнта не бачить подій за його межами */
+  knowledge?: BattleKnowledge;
+}
+
+export interface BattleEventsPage {
+  events: BattleAction[];
+  hasMore: boolean;
+}
+
+export interface BattleVersion {
+  version: number;
 }
 
 export interface BattleRefetchSignal {

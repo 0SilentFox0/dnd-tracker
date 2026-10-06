@@ -4,6 +4,7 @@ import { buildSkillUpdateData } from "./build-skill-update-data";
 import { formatSkillResponse } from "./format-skill-response";
 import { updateSkillSchema } from "./update-skill-schema";
 
+import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess, requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
@@ -41,7 +42,6 @@ export async function PATCH(
   try {
     const { id, skillId } = await params;
 
-    // Перевіряємо права DM
     const accessResult = await requireDM(id);
 
     if (accessResult instanceof NextResponse) {
@@ -75,6 +75,8 @@ export async function PATCH(
       },
     });
 
+    invalidateReference(ReferenceKind.SKILLS, id);
+
     return NextResponse.json(formatSkillResponse(updatedSkill));
   } catch (err) {
     return handleApiError(err, { action: "update skill" });
@@ -88,7 +90,6 @@ export async function DELETE(
   try {
     const { id, skillId } = await params;
 
-    // Перевіряємо права DM
     const accessResult = await requireDM(id);
 
     if (accessResult instanceof NextResponse) {
@@ -97,6 +98,7 @@ export async function DELETE(
 
     const skill = await prisma.skill.findUnique({
       where: { id: skillId },
+      select: { campaignId: true },
     });
 
     const validationError = validateCampaignOwnership(skill, id);
@@ -105,9 +107,11 @@ export async function DELETE(
       return validationError;
     }
 
-    await prisma.skill.delete({
+    await prisma.skill.deleteMany({
       where: { id: skillId },
     });
+
+    invalidateReference(ReferenceKind.SKILLS, id);
 
     return NextResponse.json({ success: true });
   } catch (error) {

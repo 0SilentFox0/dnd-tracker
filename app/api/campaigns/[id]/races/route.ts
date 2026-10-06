@@ -1,15 +1,16 @@
-import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
 import { raceNameConflict } from "./race-name";
 
 import { getCachedRaces } from "@/lib/cache/reference-data";
+import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { raceColorAt } from "@/lib/constants/race-colors";
 import { prisma } from "@/lib/db";
 import { createRaceSchema } from "@/lib/schemas";
 import { abilitiesJson } from "@/lib/utils/abilities/read";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
+import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 
 export async function GET(
@@ -28,7 +29,7 @@ export async function GET(
 
     const races = await getCachedRaces(id);
 
-    return NextResponse.json(races, { headers: { "Cache-Control": "private, no-store" } });
+    return NextResponse.json(races, { headers: PRIVATE_NO_STORE_HEADERS });
   } catch (error) {
     return handleApiError(error, { action: "list races" });
   }
@@ -73,8 +74,7 @@ export async function POST(
       },
     });
 
-    revalidateTag(`races-${id}`, { expire: 0 });
-    revalidateTag(`units-${id}`, { expire: 0 });
+    invalidateReference([ReferenceKind.RACES, ReferenceKind.UNITS], id);
 
     return NextResponse.json(race, { status: 201 });
   } catch (error) {

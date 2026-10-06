@@ -14,7 +14,7 @@ vi.mock("@/lib/api/characters", () => ({
   getCharacters: vi.fn(),
 }));
 
-import { useLevelUpCharacter, useUpdateCharacter } from "@/lib/hooks/characters";
+import { characterSheetKey, useLevelUpCharacter, useUpdateCharacter } from "@/lib/hooks/characters";
 
 function setup() {
   const qc = new QueryClient();
@@ -45,5 +45,7 @@ describe("мутації персонажа інвалідують баланс 
     await act(() => result.current.mutateAsync("ch"));
 
     expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ queryKey: ["battle-balance"] }));
+    // бейдж і оверлей нового рівня читають лист: він не має чекати staleTime
+    expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ queryKey: characterSheetKey("c") }));
   });
 });

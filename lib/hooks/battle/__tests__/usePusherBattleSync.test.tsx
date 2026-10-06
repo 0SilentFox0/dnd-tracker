@@ -4,12 +4,15 @@
  * Тест: два гравці, підписані на канал бою, отримують однаковий стан після battle-delta.
  */
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, render, waitFor } from "@testing-library/react";
-import { afterEach,beforeEach, describe, expect, it, vi } from "vitest";
+import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { usePusherBattleSync } from "../usePusherBattleSync";
+import { RESYNC_AFTER_HIDDEN_MS, usePusherBattleSync } from "../usePusherBattleSync";
 
+import { getBattleVersion } from "@/lib/api/battles";
 import type { BattleScene } from "@/types/api";
+
+vi.mock("@/lib/api/battles", () => ({ getBattleVersion: vi.fn() }));
 
 // Стан для симуляції Pusher: зберігає callbacks по channel+event
 const channelBindings = new Map<string, Map<string, Set<(data: unknown) => void>>>();
@@ -62,6 +65,17 @@ function unsubscribeChannel(channelName: string) {
   channelBindings.delete(channelName);
 }
 
+const stateListeners = new Set<(states: { previous: string; current: string }) => void>();
+
+function changeState(previous: string, current: string) {
+  stateListeners.forEach((cb) => cb({ previous, current }));
+}
+
+function setVisibility(state: DocumentVisibilityState) {
+  Object.defineProperty(document, "visibilityState", { value: state, configurable: true });
+  document.dispatchEvent(new Event("visibilitychange"));
+}
+
 let mockPusherInstance: ReturnType<typeof createMockPusher> | null = null;
 
 function createMockPusher() {
@@ -70,8 +84,12 @@ function createMockPusher() {
     unsubscribe: (channelName: string) => unsubscribeChannel(channelName),
     connection: {
       state: "connected",
-      bind: vi.fn(),
-      unbind: vi.fn(),
+      bind: vi.fn((event: string, cb: (states: { previous: string; current: string }) => void) => {
+        if (event === "state_change") stateListeners.add(cb);
+      }),
+      unbind: vi.fn((_event: string, cb: (states: { previous: string; current: string }) => void) => {
+        stateListeners.delete(cb);
+      }),
     },
   };
 }
@@ -145,10 +163,13 @@ describe("usePusherBattleSync — two players receive same battle state", () => 
   beforeEach(() => {
     process.env.NEXT_PUBLIC_PUSHER_KEY = "test-key";
     channelBindings.clear();
+    stateListeners.clear();
     mockPusherInstance = null;
+    vi.mocked(getBattleVersion).mockReset();
   });
 
   afterEach(() => {
+    cleanup();
     delete process.env.NEXT_PUBLIC_PUSHER_KEY;
   });
 
@@ -249,5 +270,123 @@ describe("usePusherBattleSync — two players receive same battle state", () => 
 
     expect(invalidate).toHaveBeenCalledWith({ queryKey: key });
     expect(qc.getQueryData<BattleScene>(key)?.version).toBe(1);
+  });
+
+  it("помилка авторизації каналу бою — не вважаємо себе підключеними, щоб працював polling", async () => {
+    const qc = new QueryClient();
+
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    function StateProbe() {
+      const { connectionState } = usePusherBattleSync(campaignId, battleId, "user-1", vi.fn());
+
+      return <span data-testid="state">{String(connectionState)}</span>;
+    }
+
+    render(
+      <QueryClientProvider client={qc}>
+        <StateProbe />
+      </QueryClientProvider>,
+    );
+
+    await waitFor(() => expect(screen.getByTestId("state").textContent).toBe("connected"));
+    await waitFor(() => expect(channelBindings.get(channelName)?.has("pusher:subscription_error")).toBe(true));
+
+    act(() => simulateTrigger(channelName, "pusher:subscription_error", { status: 404 }));
+
+    expect(screen.getByTestId("state").textContent).toBe("unavailable");
+    expect(warn).toHaveBeenCalled();
+
+    act(() => changeState("connecting", "connected"));
+    expect(screen.getByTestId("state").textContent).toBe("unavailable");
+    warn.mockRestore();
+  });
+
+  describe("ресинхронізація після розриву", () => {
+    async function mounted(version = 5) {
+      const qc = new QueryClient();
+
+      qc.setQueryData(key, makeBattlePayload({ version }));
+
+      const invalidate = vi.spyOn(qc, "invalidateQueries");
+
+      render(<PlayerSync campaignId={campaignId} battleId={battleId} userId="user-1" client={qc} />);
+
+      await subscribed();
+      await waitFor(() => expect(stateListeners.size).toBe(1));
+      invalidate.mockClear();
+
+      return invalidate;
+    }
+
+    it("будь-який вихід із connected і повернення — запит версії; новіша → повний GET", async () => {
+      vi.mocked(getBattleVersion).mockResolvedValue({ version: 6 });
+
+      const invalidate = await mounted();
+
+      act(() => changeState("connected", "connecting"));
+      act(() => changeState("connecting", "connected"));
+
+      await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: key }));
+      expect(getBattleVersion).toHaveBeenCalledWith(campaignId, battleId);
+    });
+
+    it("версія не новіша за кеш — без повного GET", async () => {
+      vi.mocked(getBattleVersion).mockResolvedValue({ version: 5 });
+
+      const invalidate = await mounted();
+
+      act(() => changeState("connected", "unavailable"));
+      act(() => changeState("unavailable", "connected"));
+
+      await waitFor(() => expect(getBattleVersion).toHaveBeenCalledTimes(1));
+      await Promise.resolve();
+      expect(invalidate).not.toHaveBeenCalled();
+    });
+
+    it("вкладка схована довше за поріг — перевірка версії при поверненні; коротко — нічого", async () => {
+      vi.mocked(getBattleVersion).mockResolvedValue({ version: 7 });
+
+      const now = vi.spyOn(Date, "now");
+
+      const invalidate = await mounted();
+
+      now.mockReturnValue(1_000);
+      act(() => setVisibility("hidden"));
+      now.mockReturnValue(1_000 + RESYNC_AFTER_HIDDEN_MS / 2);
+      act(() => setVisibility("visible"));
+      expect(getBattleVersion).not.toHaveBeenCalled();
+
+      now.mockReturnValue(10_000);
+      act(() => setVisibility("hidden"));
+      now.mockReturnValue(10_000 + RESYNC_AFTER_HIDDEN_MS + 1);
+      act(() => setVisibility("visible"));
+
+      await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: key }));
+      now.mockRestore();
+    });
+
+    it("повернення вкладки й перепідключення одночасно — один запит версії й одна інвалідація", async () => {
+      let resolve: (v: { version: number }) => void = () => {};
+
+      vi.mocked(getBattleVersion).mockImplementation(() => new Promise((r) => { resolve = r; }));
+
+      const now = vi.spyOn(Date, "now");
+
+      const invalidate = await mounted();
+
+      now.mockReturnValue(1_000);
+      act(() => setVisibility("hidden"));
+      act(() => changeState("connected", "connecting"));
+      now.mockReturnValue(1_000 + RESYNC_AFTER_HIDDEN_MS + 1);
+      act(() => setVisibility("visible"));
+      act(() => changeState("connecting", "connected"));
+
+      expect(getBattleVersion).toHaveBeenCalledTimes(1);
+
+      await act(async () => resolve({ version: 9 }));
+      await waitFor(() => expect(invalidate).toHaveBeenCalledTimes(1));
+      now.mockRestore();
+    });
   });
 });

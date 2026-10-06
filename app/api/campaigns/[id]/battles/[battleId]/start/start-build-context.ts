@@ -6,8 +6,8 @@ import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
 import { attachArtifactSetsToSpellContext } from "@/lib/utils/battle/artifact-sets";
+import { referencedSkillIds } from "@/lib/utils/battle/participant/extract-skills";
 import type { CampaignSpellContext } from "@/lib/utils/battle/types/participant";
-import { normalizeTree, resolveLearned } from "@/lib/utils/skills/progression";
 
 type CharacterWithRelations = Prisma.CharacterGetPayload<{
   include: { inventory: true };
@@ -19,32 +19,11 @@ export interface BuildContextResult {
   racesById: Record<string, Prisma.RaceGetPayload<object> | null>;
 }
 
-function referencedSkillIds(characters: CharacterWithRelations[], trees: Array<Prisma.SkillTreeGetPayload<object>>): string[] {
-  const treeByRace = new Map(trees.map((t) => [t.race, t]));
-
-  const ids = new Set<string>();
-
-  for (const c of characters) {
-    const tree = treeByRace.get(c.race);
-
-    if (tree) {
-      for (const n of resolveLearned(normalizeTree(tree), c.skillTreeProgress)) if (n.skillId) ids.add(n.skillId);
-    }
-
-    const personal = c.personalSkillId?.trim();
-
-    if (personal) ids.add(personal);
-  }
-
-  return [...ids];
-}
-
-/** forBalance: лише скіли, на які посилаються персонажі, і спел-рядки без описів (економія egress). */
+/** Лише скіли, на які посилаються персонажі, і спел-рядки без описів (економія egress). */
 export async function buildCampaignContextForStart(
   campaignId: string,
   characters: CharacterWithRelations[],
   units: UnitRow[],
-  options: { forBalance?: boolean } = {},
 ): Promise<BuildContextResult> {
   const allArtifactIds = new Set<string>();
 
@@ -68,9 +47,9 @@ export async function buildCampaignContextForStart(
 
   const treeWhere = { campaignId, race: { in: uniqueRaceNames } };
 
-  const balanceTrees = options.forBalance && characters.length > 0 && uniqueRaceNames.length > 0 ? await prisma.skillTree.findMany({ where: treeWhere }) : undefined;
+  const trees = characters.length > 0 && uniqueRaceNames.length > 0 ? await prisma.skillTree.findMany({ where: treeWhere }) : [];
 
-  const balanceSkillIds = options.forBalance ? referencedSkillIds(characters, balanceTrees ?? []) : [];
+  const skillIds = referencedSkillIds(characters, trees);
 
   const [races, campaign, ...characterContext] = await Promise.all([
     raceFilters.length > 0 ? prisma.race.findMany({ where: { campaignId, OR: raceFilters } }) : [],
@@ -80,19 +59,13 @@ export async function buildCampaignContextForStart(
     }),
     ...(characters.length > 0
       ? [
-          balanceTrees ?? (uniqueRaceNames.length > 0 ? prisma.skillTree.findMany({ where: treeWhere }) : []),
+          trees,
           prisma.mainSkill.findMany({
             where: { campaignId },
             select: { id: true, spellGroupId: true, name: true },
           }),
-          options.forBalance
-            ? prisma.spell.findMany({ where: { campaignId }, select: { id: true, level: true, spellGroup: { select: { id: true } } } })
-            : prisma.spell.findMany({ where: { campaignId }, include: { spellGroup: { select: { id: true } } } }),
-          options.forBalance
-            ? balanceSkillIds.length > 0
-              ? prisma.skill.findMany({ where: { campaignId, id: { in: balanceSkillIds } }, include: { spellGroup: { select: { id: true } } } })
-              : []
-            : prisma.skill.findMany({ where: { campaignId }, include: { spellGroup: { select: { id: true } } } }),
+          prisma.spell.findMany({ where: { campaignId }, select: { id: true, level: true, spellGroup: { select: { id: true } } } }),
+          skillIds.length > 0 ? prisma.skill.findMany({ where: { campaignId, id: { in: skillIds } } }) : [],
           allArtifactIds.size > 0
             ? prisma.artifact.findMany({
                 where: { id: { in: Array.from(allArtifactIds) }, campaignId },
@@ -146,7 +119,6 @@ export async function buildCampaignContextForStart(
       if (!(rn in skillTreeByRace)) skillTreeByRace[rn] = null;
     }
 
-    // allSkills за id: extract-skills бере з нього лише вивчені вузли дерева й personalSkillId
     const skillsById: Record<string, Prisma.SkillGetPayload<object>> = {};
 
     const allSkillsArr = Array.isArray(allSkills) ? allSkills : [];
@@ -177,8 +149,7 @@ export async function buildCampaignContextForStart(
       campaign: {
         maxLevel: (campaign as { maxLevel?: number })?.maxLevel ?? 20,
       },
-      skillsById:
-        Object.keys(skillsById).length > 0 ? skillsById : undefined,
+      skillsById,
       artifactsById:
         Object.keys(artifactsById).length > 0 ? artifactsById : undefined,
     };

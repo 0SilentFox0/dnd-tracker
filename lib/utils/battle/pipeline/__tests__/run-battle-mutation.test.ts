@@ -43,6 +43,7 @@ function delta(): BattleDelta {
     version: 4,
     scene: { status: "active", round: 1, turnIndex: 0, pendingMoraleCheck: null },
     upserted: [],
+    fullIds: [],
     removed: [],
     events: [],
   };
@@ -226,7 +227,7 @@ describe("runBattleMutation", () => {
   });
 
   it("успіх — 200, { delta, response } для того, хто діяв, і battle-delta для інших", async () => {
-    const d = deps({ saveBattle: vi.fn(async () => ({ ...delta(), upserted: [goblin] })) });
+    const d = deps({ saveBattle: vi.fn(async () => ({ ...delta(), upserted: [goblin], fullIds: ["gob"] })) });
 
     const mutate = vi.fn((ctx: BattleMutationContext) => ({
       participants: ctx.participants, pending: ctx.pending, events: [], response: { moraleResult: { ok: true } },
@@ -252,7 +253,7 @@ describe("runBattleMutation", () => {
       createMockParticipant({ basicInfo: { ...hero.basicInfo, id: `h${i}` } }),
     );
 
-    const d = deps({ saveBattle: vi.fn(async () => ({ ...delta(), upserted: many })) });
+    const d = deps({ saveBattle: vi.fn(async () => ({ ...delta(), upserted: many, fullIds: many.map((p) => p.basicInfo.id) })) });
 
     const res = await runBattleMutation(req(), { params, access: "member", mutate: () => ({ participants: many, pending: [], events: [] }) }, d);
 
@@ -277,7 +278,7 @@ describe("runBattleMutation", () => {
 
     const d = deps({
       loadBattle: vi.fn(async () => loaded({ participants: ten })),
-      saveBattle: vi.fn(async () => ({ ...delta(), upserted: [ten[3]] })),
+      saveBattle: vi.fn(async () => ({ ...delta(), upserted: [ten[3]], fullIds: ["p3"] })),
     });
 
     await runBattleMutation(req(), { params, access: "member", mutate: (ctx) => ({ participants: ctx.participants, pending: [], events: [] }) }, d);
@@ -348,5 +349,24 @@ describe("runBattleMutation", () => {
 
     expect((await res.json()).delta.cancelledFrom).toBe(0);
     expect(vi.mocked(d.publish).mock.calls[0][0][0].payload).toMatchObject({ cancelledFrom: 0 });
+  });
+
+  it("відкат несе перераховане знання з сервера, reset — порожнє, звичайна дія — без знання", async () => {
+    const knowledge = { gob: { ac: { min: 12, evidence: [] }, traits: [] } };
+
+    const loadKnowledge = vi.fn(async () => knowledge);
+
+    const run = (history?: { cancelFromSeq: number } | { clear: true }) =>
+      runBattleMutation(
+        req(),
+        { params, access: "member", mutate: (ctx) => ({ participants: ctx.participants, pending: ctx.pending, events: [], history }) },
+        deps({ loadKnowledge }),
+      ).then((r) => r.json());
+
+    expect((await run({ cancelFromSeq: 3 })).delta.knowledge).toEqual(knowledge);
+    expect(loadKnowledge).toHaveBeenCalledWith("b1");
+    expect((await run({ clear: true })).delta.knowledge).toEqual({});
+    expect((await run()).delta).not.toHaveProperty("knowledge");
+    expect(loadKnowledge).toHaveBeenCalledTimes(1);
   });
 });

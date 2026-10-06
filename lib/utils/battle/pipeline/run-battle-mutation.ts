@@ -131,7 +131,7 @@ function respondWith(
   return NextResponse.json({ ...battle, ...response });
 }
 
-function errorResponse(err: unknown): NextResponse {
+export function battleErrorResponse(err: unknown): NextResponse {
   if (err instanceof BattleConflictError) {
     return NextResponse.json({ code: "conflict", error: err.message, version: err.currentVersion }, { status: 409 });
   }
@@ -261,20 +261,25 @@ export async function runBattleMutation<TBody>(
         ? result.history.cancelFromSeq
         : 0;
 
+    // одне читання на сервері замість повного GET у кожного гравця після відкату
+    const knowledge = cancelledFrom === undefined ? undefined : cancelledFrom === 0 ? {} : await deps.loadKnowledge?.(battleId);
+
     const clientDelta = buildClientDelta({
       before: loaded,
       after,
       participants: result.participants,
       pending: result.pending,
-      upsertedIds: delta.upserted.map((p) => p.basicInfo.id),
+      stored: delta.upserted,
+      fullIds: delta.fullIds,
       log: entries,
       cancelledFrom,
+      knowledge,
     });
 
     deps.publish(buildPusherMessages({ before: loaded.scene, after, participants: result.participants, delta: clientDelta }));
 
     return NextResponse.json({ delta: clientDelta, ...(result.response && { response: result.response }) });
   } catch (err) {
-    return errorResponse(err);
+    return battleErrorResponse(err);
   }
 }

@@ -1,5 +1,7 @@
 import type { BattleMeta, BattleSceneState } from "@/lib/utils/battle/store";
-import type { ClientBattleDelta } from "@/types/api";
+import { buildParticipantPatch, FULL_PARTICIPANT } from "@/lib/utils/battle/store";
+import type { BattleKnowledge } from "@/lib/utils/battle/view/knowledge";
+import type { BattleParticipantPatch, ClientBattleDelta } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 const ids = (list: BattleParticipant[]) => list.map((p) => p.basicInfo.id);
@@ -11,13 +13,38 @@ export function buildClientDelta(args: {
   after: BattleSceneState;
   participants: BattleParticipant[];
   pending: BattleParticipant[];
-  upsertedIds: string[];
+  /** змінені учасники у збереженій формі (split → join): клієнт має бачити те саме, що віддасть GET */
+  stored: BattleParticipant[];
+  /** нові учасники й ті, чий знімок змінився */
+  fullIds: string[];
   log: BattleAction[];
   cancelledFrom?: number;
+  knowledge?: BattleKnowledge;
 }): ClientBattleDelta {
-  const { before, after, participants, pending, log, cancelledFrom } = args;
+  const { before, after, participants, pending, log, cancelledFrom, knowledge } = args;
 
-  const changed = new Set(args.upsertedIds);
+  const storedById = new Map(args.stored.map((p) => [p.basicInfo.id, p]));
+
+  const full = new Set(args.fullIds);
+
+  const previous = new Map(before.participants.map((p) => [p.basicInfo.id, p]));
+
+  const upserted: BattleParticipant[] = [];
+
+  const patched: BattleParticipantPatch[] = [];
+
+  for (const { basicInfo } of participants) {
+    const p = storedById.get(basicInfo.id);
+
+    if (!p) continue;
+
+    const old = previous.get(p.basicInfo.id);
+
+    const patch = old && !full.has(p.basicInfo.id) ? buildParticipantPatch(old, p) : FULL_PARTICIPANT;
+
+    if (patch === FULL_PARTICIPANT) upserted.push(p);
+    else if (patch) patched.push(patch);
+  }
 
   const afterIds = new Set([...ids(participants), ...ids(pending)]);
 
@@ -27,7 +54,11 @@ export function buildClientDelta(args: {
 
   const beforePending = ids(before.pending);
 
-  const pendingChanged = !sameIds(beforePending, ids(pending)) || pending.some((p) => changed.has(p.basicInfo.id));
+  const pendingChanged = !sameIds(beforePending, ids(pending)) || pending.some((p) => storedById.has(p.basicInfo.id));
+
+  const previousPending = new Map(before.pending.map((p) => [p.basicInfo.id, p]));
+
+  const storedPending = pending.map((p) => storedById.get(p.basicInfo.id) ?? previousPending.get(p.basicInfo.id) ?? p);
 
   return {
     battleId: after.id,
@@ -37,15 +68,19 @@ export function buildClientDelta(args: {
       round: after.round,
       turnIndex: after.turnIndex,
       pendingMoraleCheck: after.pendingMoraleCheck,
-      ...(after.startedAt && { startedAt: after.startedAt.toISOString() }),
-      ...(after.completedAt && { completedAt: after.completedAt.toISOString() }),
+      ...(after.startedAt ? { startedAt: after.startedAt.toISOString() } : before.scene.startedAt && { startedAt: null }),
+      ...(after.completedAt
+        ? { completedAt: after.completedAt.toISOString() }
+        : before.scene.completedAt && { completedAt: null }),
     },
-    upserted: participants.filter((p) => changed.has(p.basicInfo.id)),
+    upserted,
+    ...(patched.length > 0 && { patched }),
     removed: [...beforeOrder, ...beforePending].filter((id) => !afterIds.has(id)),
     ...(!sameIds(beforeOrder, afterOrder) && { order: afterOrder }),
-    ...(pendingChanged && { pending }),
+    ...(pendingChanged && { pending: storedPending }),
     ...(after.status === "prepared" && { setup: before.meta.setup }),
     log,
     ...(cancelledFrom !== undefined && { cancelledFrom }),
+    ...(knowledge && { knowledge }),
   };
 }

@@ -6,19 +6,55 @@ import type { SnapshotState } from "./snapshot-state";
 import { joinParticipant, splitParticipant } from "./split-participant";
 import type { LoadedBattle, ParticipantSnapshot, StoredBattleEvent } from "./types";
 
+import { BATTLE_LOG_RECENT_EVENTS } from "@/lib/constants/battle";
 import { KNOWLEDGE_EVENT_TYPES } from "@/lib/utils/battle/view/knowledge";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
-export async function loadRecentEvents(db: BattleDb, battleId: string, limit = 100): Promise<BattleAction[]> {
+const EVENT_SELECT = {
+  seq: true,
+  round: true,
+  type: true,
+  actorId: true,
+  targets: true,
+  details: true,
+  hpChanges: true,
+  resultText: true,
+  createdAt: true,
+  cancelledAt: true,
+} as const satisfies Prisma.BattleEventSelect;
+
+type EventRow = Prisma.BattleEventGetPayload<{ select: typeof EVENT_SELECT }>;
+
+function toActions(rows: EventRow[], battleId: string): BattleAction[] {
+  return rows.map((r) =>
+    eventToBattleAction(r as unknown as StoredBattleEvent, battleId, { createdAt: r.createdAt, cancelledAt: r.cancelledAt }),
+  );
+}
+
+export async function loadRecentEvents(db: BattleDb, battleId: string, limit = BATTLE_LOG_RECENT_EVENTS): Promise<BattleAction[]> {
   const rows = await db.battleEvent.findMany({
     where: { battleId, cancelledAt: null },
     orderBy: { seq: "desc" },
     take: limit,
+    select: EVENT_SELECT,
   });
 
-  return rows
-    .reverse()
-    .map((r) => eventToBattleAction(r as unknown as StoredBattleEvent, battleId, { createdAt: r.createdAt, cancelledAt: r.cancelledAt }));
+  return toActions(rows.reverse(), battleId);
+}
+
+export async function loadEventsBefore(
+  db: BattleDb,
+  battleId: string,
+  page: { before: number; limit: number },
+): Promise<{ events: BattleAction[]; hasMore: boolean }> {
+  const rows = await db.battleEvent.findMany({
+    where: { battleId, cancelledAt: null, seq: { lt: page.before } },
+    orderBy: { seq: "desc" },
+    take: page.limit + 1,
+    select: EVENT_SELECT,
+  });
+
+  return { events: toActions(rows.slice(0, page.limit).reverse(), battleId), hasMore: rows.length > page.limit };
 }
 
 export async function loadSnapshotsFrom(

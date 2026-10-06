@@ -42,6 +42,7 @@ export const sheetFixture: CharacterSheet = {
     sets: [{ setId: "s1", name: "Мисливець", have: 2, total: 3, complete: false, effects: ["Ініціатива +1"] }],
   },
   personalSkill: null,
+  progression: { freePoints: 0, level: 5, seenLevel: null },
   story: {
     biography: "Мати ==загинула== давно",
     goals: [

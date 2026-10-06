@@ -151,7 +151,11 @@ export interface Character {
   };
 }
 
-
+/** Рядок списку персонажів кампанії (GET /characters). */
+export type CharacterListItem = Pick<
+  Character,
+  "id" | "campaignId" | "type" | "controlledBy" | "name" | "level" | "class" | "race" | "subrace" | "avatar" | "strength" | "hpMultiplier" | "armorClass" | "initiative" | "experience"
+> & { user?: { displayName: string } | null };
 
 export type SheetLineSource = "base" | "ability" | "proficiency" | "weapon" | "level" | "dice" | "skill" | "race" | "artifact" | "artifactSet" | "unit" | "character" | "effect" | "action" | "multiplier";
 
@@ -236,4 +240,5 @@ export interface CharacterSheet {
   items: { grid: Record<string, SheetArtifact | null>; artifacts: SheetArtifact[]; sets: SetProgress[] };
   personalSkill: { id: string; name: string; icon: string | null; description: string | null } | null;
   story: { biography: string | null; goals: CharacterGoal[] };
+  progression: { freePoints: number; level: number; seenLevel: number | null };
 }

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import { updateSpellGroupSchema } from "@/lib/schemas";
 import { requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
@@ -12,7 +13,6 @@ export async function PATCH(
   try {
     const { id, groupId } = await params;
     
-    // Перевіряємо права DM
     const accessResult = await requireDM(id);
 
     if (accessResult instanceof NextResponse) {
@@ -40,6 +40,8 @@ export async function PATCH(
       },
     });
 
+    invalidateReference(ReferenceKind.SPELLS, id);
+
     return NextResponse.json(updatedGroup);
   } catch (error) {
     return handleApiError(error, { action: "update spell group" });
@@ -53,7 +55,6 @@ export async function DELETE(
   try {
     const { id, groupId } = await params;
     
-    // Перевіряємо права DM
     const accessResult = await requireDM(id);
 
     if (accessResult instanceof NextResponse) {
@@ -62,6 +63,7 @@ export async function DELETE(
 
     const spellGroup = await prisma.spellGroup.findUnique({
       where: { id: groupId },
+      select: { campaignId: true },
     });
 
     const validationError = validateCampaignOwnership(spellGroup, id);
@@ -71,9 +73,11 @@ export async function DELETE(
     }
 
     // Видаляємо групу (заклинання автоматично втратять зв'язок через onDelete: SetNull в схемі)
-    await prisma.spellGroup.delete({
+    await prisma.spellGroup.deleteMany({
       where: { id: groupId },
     });
+
+    invalidateReference(ReferenceKind.SPELLS, id);
 
     return NextResponse.json({ success: true });
   } catch (error) {

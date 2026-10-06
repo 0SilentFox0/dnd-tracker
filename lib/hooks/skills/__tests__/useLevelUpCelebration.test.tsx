@@ -4,53 +4,66 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import * as api from "@/lib/api/character-progression";
-import { progressionKey, useLevelUpCelebration } from "@/lib/hooks/skills";
+import * as progressionApi from "@/lib/api/character-progression";
+import { characterSheetKey } from "@/lib/hooks/characters";
+import { useLevelUpCelebration } from "@/lib/hooks/skills";
+import type { CharacterSheet } from "@/types/characters";
 
 vi.mock("@/lib/api/character-progression");
+vi.mock("@/lib/api/characters");
 
 afterEach(cleanup);
 
+const sheet = (isDM: boolean) => ({ viewer: { isDM, isOwner: true }, progression: { freePoints: 2, level: 5, seenLevel: 3 } }) as unknown as CharacterSheet;
+
+const setup = (isDM: boolean) => {
+  const qc = new QueryClient();
+
+  qc.setQueryData(characterSheetKey("c", "ch"), sheet(isDM));
+
+  const wrapper = ({ children }: { children: ReactNode }) => <QueryClientProvider client={qc}>{children}</QueryClientProvider>;
+
+  return { qc, ...renderHook(() => useLevelUpCelebration("c", "ch"), { wrapper }) };
+};
+
 describe("useLevelUpCelebration", () => {
-  it("після закриття оверлея кеш прогресу має seenLevel = level, тож повторне відкриття не показує анімацію", async () => {
-    const dto = { treeId: null, tree: null, race: "Ельф", raceIcon: null, level: 5, seenLevel: 3, isOwner: true, isDM: false, unlocked: [], skills: {}, branches: {} };
+  it("читає рівні з листа; після закриття кеш листа має seenLevel = level", async () => {
+    vi.mocked(progressionApi.markLevelSeen).mockResolvedValue({ seenLevel: 5 });
 
-    vi.mocked(api.getCharacterProgression).mockResolvedValue(dto);
-    vi.mocked(api.markLevelSeen).mockResolvedValue({ seenLevel: 5 });
+    const { qc, result } = setup(false);
 
-    const qc = new QueryClient();
+    expect(result.current.celebration).toEqual({ from: 3, to: 5, free: 2 });
 
-    qc.setQueryData(progressionKey("c", "ch"), dto);
-
-    const wrapper = ({ children }: { children: ReactNode }) => <QueryClientProvider client={qc}>{children}</QueryClientProvider>;
-
-    const { result } = renderHook(() => useLevelUpCelebration("c", "ch"), { wrapper });
-
-    expect(result.current.celebration).toMatchObject({ from: 3, to: 5 });
-
-    await waitFor(() => expect(api.markLevelSeen).toHaveBeenCalled());
+    await waitFor(() => expect(progressionApi.markLevelSeen).toHaveBeenCalledWith("c", "ch"));
     act(() => result.current.dismiss());
 
-    expect(qc.getQueryData<{ seenLevel: number }>(progressionKey("c", "ch"))?.seenLevel).toBe(5);
+    expect(qc.getQueryData<CharacterSheet>(characterSheetKey("c", "ch"))?.progression.seenLevel).toBe(5);
+    expect(result.current.celebration).toBeNull();
+  });
+
+  it("оновлення листа з сервера (seenLevel уже = level) не закриває відкритий оверлей", async () => {
+    vi.mocked(progressionApi.markLevelSeen).mockResolvedValue({ seenLevel: 5 });
+
+    const { qc, result } = setup(false);
+
+    expect(result.current.celebration).toEqual({ from: 3, to: 5, free: 2 });
+
+    act(() => qc.setQueryData(characterSheetKey("c", "ch"), { ...sheet(false), progression: { freePoints: 1, level: 5, seenLevel: 5 } }));
+
+    await waitFor(() => expect(result.current.celebration).toEqual({ from: 3, to: 5, free: 1 }));
+
+    act(() => result.current.dismiss());
+
     expect(result.current.celebration).toBeNull();
   });
 
   it("ДМ, що сам власник персонажа, не бачить оверлея й не скидає seenLevel", async () => {
-    const dto = { treeId: null, tree: null, race: "Ельф", raceIcon: null, level: 5, seenLevel: 3, isOwner: true, isDM: true, unlocked: [], skills: {}, branches: {} };
+    vi.mocked(progressionApi.markLevelSeen).mockClear();
 
-    vi.mocked(api.getCharacterProgression).mockResolvedValue(dto);
-    vi.mocked(api.markLevelSeen).mockClear();
-
-    const qc = new QueryClient();
-
-    qc.setQueryData(progressionKey("c", "ch"), dto);
-
-    const wrapper = ({ children }: { children: ReactNode }) => <QueryClientProvider client={qc}>{children}</QueryClientProvider>;
-
-    const { result } = renderHook(() => useLevelUpCelebration("c", "ch"), { wrapper });
+    const { result } = setup(true);
 
     expect(result.current.celebration).toBeNull();
     await new Promise((r) => setTimeout(r, 0));
-    expect(api.markLevelSeen).not.toHaveBeenCalled();
+    expect(progressionApi.markLevelSeen).not.toHaveBeenCalled();
   });
 });

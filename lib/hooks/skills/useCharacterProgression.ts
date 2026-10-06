@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { progressionKey } from "./progression-keys";
 
 import { getCharacterProgression } from "@/lib/api/character-progression";
+import { ENTITY_STALE_MS } from "@/lib/providers/query-provider";
 import { normalizeTree, progressionView, rankOffers, resolveLearned } from "@/lib/utils/skills/progression";
 
 export function useCharacterProgression(campaignId: string, characterId: string | undefined) {
@@ -13,7 +14,7 @@ export function useCharacterProgression(campaignId: string, characterId: string 
     queryKey: progressionKey(campaignId, characterId ?? ""),
     queryFn: () => getCharacterProgression(campaignId, characterId ?? ""),
     enabled: !!campaignId && !!characterId,
-    staleTime: 0,
+    staleTime: ENTITY_STALE_MS,
   });
 
   const { data } = query;

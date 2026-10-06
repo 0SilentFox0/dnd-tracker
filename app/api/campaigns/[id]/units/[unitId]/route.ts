@@ -1,9 +1,9 @@
-import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
 import { invalidUnitRace } from "../unit-race";
 
+import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import { updateUnitSchema } from "@/lib/schemas";
 import { abilitiesJson, readAbilities } from "@/lib/utils/abilities/read";
@@ -59,6 +59,7 @@ export async function DELETE(
 
     const unit = await prisma.unit.findUnique({
       where: { id: unitId },
+      select: { campaignId: true },
     });
 
     const validationError = validateCampaignOwnership(unit, id);
@@ -67,11 +68,11 @@ export async function DELETE(
       return validationError;
     }
 
-    await prisma.unit.delete({
+    await prisma.unit.deleteMany({
       where: { id: unitId },
     });
 
-    revalidateTag(`units-${id}`, { expire: 0 });
+    invalidateReference(ReferenceKind.UNITS, id);
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -135,7 +136,7 @@ export async function PATCH(
       },
     });
 
-    revalidateTag(`units-${id}`, { expire: 0 });
+    invalidateReference(ReferenceKind.UNITS, id);
 
     return NextResponse.json(toUnit(updatedUnit));
   } catch (error) {

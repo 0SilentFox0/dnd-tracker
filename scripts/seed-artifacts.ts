@@ -9,8 +9,8 @@
 
 import { PrismaClient } from "@prisma/client";
 
-import { DEFAULT_CAMPAIGN_ID } from "../lib/constants/campaigns";
 import { ARTIFACT_ICONS } from "./artifact-icon-map";
+import { DEFAULT_CAMPAIGN_ID } from "./default-campaign";
 
 const prisma = new PrismaClient();
 

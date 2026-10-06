@@ -45,4 +45,16 @@ describe("useEditBattleData", () => {
     expect(result.current.formData.name).toBe("Нова");
     expect(result.current.participants).toEqual([]);
   });
+
+  it("does not poll the prepared battle while the DM edits it", async () => {
+    const { result } = renderHook(() => useEditBattleData("c1", "b1"), { wrapper });
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    const query = client.getQueryCache().find({ queryKey: ["battle", "c1", "b1"] });
+
+    const interval = query?.observers[0]?.options.refetchInterval;
+
+    expect(typeof interval === "function" ? interval(query as never) : interval).toBe(false);
+  });
 });
