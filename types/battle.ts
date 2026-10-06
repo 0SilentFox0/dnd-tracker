@@ -7,6 +7,7 @@ import type { AbilityUsageCounter, ResolvedAbility, SpellEnhancer, StaticEffect 
 import type { ArtifactEffectAudience } from "@/lib/constants/artifact-effect-scope";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
+import type { AbilityKey } from "@/types/characters";
 import { SkillLevel } from "@/types/skill-tree";
 
 export type { CriticalEffect };
@@ -166,6 +167,7 @@ export interface BattleParticipantAbilities {
   };
   proficiencyBonus: number;
   race: string;
+  primaryAbility?: AbilityKey;
   /** Коеф. DM для фіз. шкоди ближнього бою (лише character); як у калькуляторі персонажа */
   meleeMultiplier?: number;
   /** Коеф. DM для дальнього бою */

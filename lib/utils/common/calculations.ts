@@ -5,6 +5,7 @@ import {
   ArtifactBonus,
   ArtifactModifier,
 } from "@/types/artifacts";
+import type { AbilityKey } from "@/types/characters";
 import { EquippedItems } from "@/types/inventory";
 
 /**
@@ -245,9 +246,26 @@ export function getArtifactAttackBonus(
 }
 
 
-export function getAttackAbilityModifier(
-  abilities: { strength: number; dexterity: number },
-  attackType: AttackType | string,
-): number {
-  return getAbilityModifier(attackType === AttackType.MELEE ? abilities.strength : abilities.dexterity);
+type AttackAbilities = { strength: number; dexterity: number; primaryAbility?: AbilityKey | null } & Partial<Record<AbilityKey, number>>;
+
+export function attackAbilityKey(abilities: { primaryAbility?: AbilityKey | null }, attackType: AttackType | string): AbilityKey {
+  return abilities.primaryAbility ?? (attackType === AttackType.MELEE ? "strength" : "dexterity");
+}
+
+export function getAttackAbilityModifier(abilities: AttackAbilities, attackType: AttackType | string): number {
+  return getAbilityModifier(abilities[attackAbilityKey(abilities, attackType)] ?? 10);
+}
+
+export function spellcastingDerived(
+  level: number,
+  ability: string | null | undefined,
+  scores: Record<AbilityKey, number>,
+): { saveDC: number; attackBonus: number } | null {
+  if (!ability || !(ability in scores)) return null;
+
+  const prof = getProficiencyBonus(level);
+
+  const mod = getAbilityModifier(scores[ability as AbilityKey]);
+
+  return { saveDC: getSpellSaveDC(prof, mod), attackBonus: getSpellAttackBonus(prof, mod) };
 }
