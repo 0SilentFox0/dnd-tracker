@@ -4,9 +4,9 @@ import { useMemo } from "react";
 import Link from "next/link";
 import { Circle, Edit, MoreVertical, Plus, Shield, Trash2 } from "lucide-react";
 
+import { HudCard } from "@/components/hud/page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,13 +44,11 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
   const modifiedAbilities = modifiedAbilityScores(passiveAbility);
 
   return (
-    <Card className="hover:shadow-md transition-shadow h-full flex flex-col">
-      <CardHeader className="pb-3">
+    <HudCard accent={race.color ?? undefined} className="flex h-full flex-col gap-3">
+      <div>
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <CardTitle className="text-lg font-semibold truncate">
-              {race.name}
-            </CardTitle>
+            <h3 className="hud-sc truncate text-lg text-[#efe5d2]">{race.name}</h3>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -75,20 +73,16 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-      </CardHeader>
-      <CardContent className="flex-1 flex flex-col gap-3">
+      </div>
+      <div className="flex flex-1 flex-col gap-3">
         <div className="space-y-2">
           <p className="text-sm font-medium">Доступні навики:</p>
           <div className="flex flex-wrap gap-2">
             {availableMainSkillsForDisplay.map((ms) => (
               <span
                 key={ms.id}
-                className="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium border border-current/20"
-                style={{
-                  backgroundColor: `${ms.color}10/50`,
-                  color: `${ms.color}500`,
-                  borderColor: ms.color,
-                }}
+                className="inline-flex items-center rounded-full px-2 text-xs text-[#e6dccb]"
+                style={{ boxShadow: `inset 0 0 0 1px ${ms.color}` }}
                 title={ms.name}
               >
                 {ms.name}
@@ -142,7 +136,7 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
                     return (
                       <div
                         key={ability.key}
-                        className="flex items-center gap-1.5 px-2 py-1 bg-muted rounded-md"
+                        className="flex items-center gap-1.5 rounded-md bg-[#1a140f] px-2 py-1"
                         title={ability.label}
                       >
                         <span className="text-xs font-semibold">
@@ -160,14 +154,14 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
                             }
                           >
                             {iconToShow === "bonus" && (
-                              <Plus className="h-3 w-3 text-green-600" />
+                              <Plus className="h-3 w-3 text-[#e6c25a]" />
                             )}
                             {iconToShow === "nonNegative" && (
-                              <Shield className="h-3 w-3 text-blue-600" />
+                              <Shield className="h-3 w-3 text-[#8fd0e8]" />
                             )}
                             {iconToShow === "alwaysZero" && (
                               <Circle
-                                className="h-3 w-3 text-red-600"
+                                className="h-3 w-3 text-[#d0705c]"
                                 strokeWidth={2}
                                 fill="none"
                               />
@@ -196,7 +190,7 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
             Пасивна здібність не вказана
           </p>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </HudCard>
   );
 }

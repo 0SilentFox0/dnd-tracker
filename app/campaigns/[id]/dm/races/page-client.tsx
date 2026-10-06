@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Dna } from "lucide-react";
 
 import { EmptyState, LoadingState } from "@/components/common/states";
+import { HudPage } from "@/components/hud/page";
 import { CreateRaceDialog } from "@/components/races/CreateRaceDialog";
 import { RaceCard } from "@/components/races/RaceCard";
 import { RacesPageHeader } from "@/components/races/RacesPageHeader";
@@ -46,7 +47,7 @@ export function DMRacesPageClient({
   };
 
   return (
-    <div className="container mx-auto p-2 sm:p-4 space-y-4 sm:space-y-6 max-w-full">
+    <HudPage>
       <RacesPageHeader
         campaignId={campaignId}
         racesCount={races.length}
@@ -58,7 +59,7 @@ export function DMRacesPageClient({
       ) : races.length === 0 ? (
         <EmptyState icon={Dna} title="Ще немає рас" description="Створіть першу расу." />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {races.map((race) => (
             <RaceCard
               key={race.id}
@@ -82,6 +83,6 @@ export function DMRacesPageClient({
           });
         }}
       />
-    </div>
+    </HudPage>
   );
 }
