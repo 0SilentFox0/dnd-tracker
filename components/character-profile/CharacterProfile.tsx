@@ -4,9 +4,12 @@ import { type ReactNode, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { CombatTab } from "./CombatTab";
+import { ItemsTab } from "./ItemsTab";
+import { MagicTab } from "./MagicTab";
 import { ProfileContext } from "./ProfileContext";
 import { CompactHero, ProfileHero } from "./ProfileHero";
 import { type ProfileTab, type ProfileTabId, ProfileTabs } from "./ProfileTabs";
+import { SkillsTab } from "./SkillsTab";
 
 import "@/components/hud/hud.css";
 import { HUD_SURFACE } from "@/components/battle/hud";
@@ -20,9 +23,9 @@ const VIEW_TABS: ProfileTabId[] = ["combat", "skills", "magic", "items", "story"
 function viewTabs(): ProfileTab[] {
   return [
     { id: "combat", label: "Бій", content: <CombatTab /> },
-    { id: "skills", label: "Вміння", content: null },
-    { id: "magic", label: "Магія", content: null },
-    { id: "items", label: "Речі", content: null },
+    { id: "skills", label: "Вміння", content: <SkillsTab /> },
+    { id: "magic", label: "Магія", content: <MagicTab /> },
+    { id: "items", label: "Речі", content: <ItemsTab /> },
     { id: "story", label: "Історія", content: null },
   ];
 }
