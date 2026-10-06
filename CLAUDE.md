@@ -102,6 +102,7 @@ These trip people up repeatedly — read before touching the DB or `vercel.json`
 - **Egress is a hard constraint (Supabase free tier).** Avoid re-reading large rows, prefer deltas over refetches, keep polling slow, serve Storage images through `next/image` (cached by Vercel) with long `cacheControl` on immutable uploads.
 - **Local dev pointing at the prod DB is intentional in some setups** — see `docs/DATABASE-SYNC.md` for the "one DB" vs "dev + prod" tradeoffs and the backup/restore scripts. Don't assume divergence is a bug without checking which `DATABASE_URL` is set.
 - **Vercel build placeholder URL.** `scripts/vercel-build.mjs` runs `prisma generate` with `DATABASE_URL=postgresql://build:build@127.0.0.1:5432/build` to avoid Prisma CLI hanging on the real Supabase pooler from the build region. The real `DATABASE_URL` from Vercel env is still used by `next build` and at runtime. Do not "fix" this by removing the placeholder.
+- **`scripts/` imports can't invalidate the Next data cache.** Reference data cached in `lib/cache/reference-data.ts` (spells, skills, units, races, main skills; `unstable_cache` + tags from `lib/cache/tags.ts`) is revalidated only by app writes (`invalidateReference`); after a `tsx` import it may stay stale for up to `REFERENCE_REVALIDATE_SECONDS` = 300 s unless something writes through the app again.
 - **`postinstall`** is `node scripts/postinstall.mjs`, which skips `prisma generate` when `VERCEL` env is set (build runs it explicitly with the placeholder URL).
 
 ## Testing
