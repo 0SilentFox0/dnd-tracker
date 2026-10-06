@@ -45,7 +45,7 @@ export function CombatTab() {
                 {a.isPrimary ? " ★" : ""}
               </small>
               <b className="block text-[17px] leading-5">{a.score}</b>
-              <small className={cn("text-[11px]", a.isPrimary ? "text-[#c9b37a]" : "text-[#8f8473]")}>{signed(a.mod)}</small>
+              <span className={cn("block text-[15px] font-semibold leading-5 tabular-nums", a.isPrimary ? "text-[#c9b37a]" : "text-[#8f8473]")}>{signed(a.mod)}</span>
             </div>
           ))}
         </div>
@@ -80,7 +80,7 @@ export function CombatTab() {
       </Section>
       <Section title="ЗАХИСТ І ПАРАМЕТРИ">
         <Row label="AC" value={String(sheet.armorClass.total)} lines={sheet.armorClass.lines} />
-        <Row label="Ініціатива" value={signed(sheet.initiative)} />
+        <Row label="Ініціатива" value={String(sheet.initiative)} />
         <Row label="Швидкість" value={String(sheet.speed)} />
         <Row label="Мораль" value={signed(sheet.morale)} />
         <Row label="Цілей за атаку" value={sheet.targets.min === sheet.targets.max ? String(sheet.targets.max) : `${sheet.targets.min}–${sheet.targets.max}`} />

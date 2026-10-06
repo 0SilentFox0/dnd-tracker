@@ -52,7 +52,7 @@ export function ProfileHero({ actions, badge, ref }: { actions?: ReactNode; badg
       {hpOpen && <Breakdown lines={sheet.hp.lines} />}
       <div className="mt-3 flex gap-1.5">
         <Chip label="AC" short="AC" value={String(sheet.armorClass.total)} />
-        <Chip label="Ініціатива" short="Ініц" value={signed(sheet.initiative)} />
+        <Chip label="Ініціатива" short="Ініц" value={String(sheet.initiative)} />
         <Chip label="Швидкість" short="Швидк" value={String(sheet.speed)} />
         <Chip label="Влучання" short="Влуч" value={sheet.bestToHit === null ? "—" : signed(sheet.bestToHit)} />
         <Chip label="Майстерність" short="Майст" value={signed(sheet.proficiency)} />

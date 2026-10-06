@@ -42,6 +42,14 @@ describe("CharacterProfile — перегляд", () => {
     expect(screen.getByLabelText("AC")).toHaveTextContent("17");
     expect(screen.getByLabelText("Влучання")).toHaveTextContent("+13");
     expect(screen.getByLabelText("Майстерність")).toHaveTextContent("+9");
+    expect(screen.getByLabelText("Ініціатива")).toHaveTextContent("4");
+    expect(screen.getByLabelText("Ініціатива")).not.toHaveTextContent("+4");
+  });
+
+  it("бойова вкладка: ініціатива без знака", () => {
+    renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit={false} initialTab="combat" />);
+
+    expect(screen.getByText("Ініціатива").parentElement).toHaveTextContent(/^Ініціатива4$/);
   });
 
   it("таба з URL; перемикання пише ?tab= без запиту на сервер", () => {
