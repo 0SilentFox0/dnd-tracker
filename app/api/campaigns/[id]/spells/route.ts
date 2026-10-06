@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
+import { listSpellsQuerySchema } from "./list-spells-query";
+
 import { getCachedSpells } from "@/lib/cache/reference-data";
 import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
@@ -8,6 +10,7 @@ import { createSpellSchema } from "@/lib/schemas";
 import { requireCampaignAccess,requireDM } from "@/lib/utils/api/api-auth";
 import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { loadBookSpellsByIds } from "@/lib/utils/spells/book-spells-by-ids";
 
 export async function POST(
   request: Request,
@@ -83,6 +86,10 @@ export async function GET(
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
+
+    const { ids } = listSpellsQuerySchema.parse(Object.fromEntries(new URL(request.url).searchParams));
+
+    if (ids) return NextResponse.json(await loadBookSpellsByIds(id, ids), { headers: PRIVATE_NO_STORE_HEADERS });
 
     const spells = await getCachedSpells(id);
 

@@ -79,13 +79,14 @@ export async function DELETE(
 
     const battle = await prisma.battleScene.findUnique({
       where: { id: battleId },
+      select: { campaignId: true },
     });
 
     if (!battle || battle.campaignId !== id) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    await prisma.battleScene.delete({
+    await prisma.battleScene.deleteMany({
       where: { id: battleId },
     });
 

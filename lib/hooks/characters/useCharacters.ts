@@ -15,16 +15,16 @@ import { type CharacterTypeValue } from "@/lib/constants/characters";
 import { useCrudMutation } from "@/lib/hooks/common";
 import { progressionCampaignKey, progressionKey } from "@/lib/hooks/skills/progression-keys";
 import { ENTITY_STALE_MS } from "@/lib/providers/query-provider";
-import type { Character, CharacterFormData } from "@/types/characters";
+import type { Character, CharacterFormData, CharacterListItem } from "@/types/characters";
 
 export type { Character };
 
 /** Без `opts` — усі персонажі кампанії (гравці та npc_hero). `compact` — без важких JSON/інвентаря (менший egress). */
 export function useCharacters(
   campaignId: string,
-  opts?: { type?: CharacterTypeValue; compact?: boolean },
+  opts?: { type?: CharacterTypeValue; compact?: boolean; enabled?: boolean },
 ) {
-  return useQuery<Character[]>({
+  return useQuery<CharacterListItem[]>({
     queryKey: [
       "characters",
       campaignId,
@@ -33,7 +33,7 @@ export function useCharacters(
     ],
     queryFn: () => getCharacters(campaignId, opts),
     staleTime: ENTITY_STALE_MS,
-    enabled: !!campaignId,
+    enabled: !!campaignId && (opts?.enabled ?? true),
   });
 }
 

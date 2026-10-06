@@ -4,18 +4,23 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
+
+const lib = vi.hoisted(() => ({
+  spells: [
+    { id: "ray", name: "Палаючий промінь", level: 2, type: "target", damageType: "damage", diceCount: 2, diceType: "d6", hitCheck: { ability: "int", dc: 12 } },
+    { id: "bolt", name: "Крижаний спис", level: 1, type: "target", damageType: "damage", diceCount: 3, diceType: "d8" },
+  ],
+}));
+
 vi.mock("@/lib/hooks/spells", () => ({
-  useSpells: () => ({
-    data: [
-      { id: "ray", name: "Палаючий промінь", level: 2, type: "target", damageType: "damage", diceCount: 2, diceType: "d6", hitCheck: { ability: "int", dc: 12 } },
-      { id: "bolt", name: "Крижаний спис", level: 1, type: "target", damageType: "damage", diceCount: 3, diceType: "d8" },
-    ],
-  }),
+  useSpells: vi.fn(() => ({ data: undefined })),
+  useSpellsByIds: vi.fn((_campaignId: string, ids: string[]) => ({ data: lib.spells.filter((s) => ids.includes(s.id)) })),
 }));
 
 import { SpellBook } from "@/components/battle/wizards/SpellBook";
 import { useSpellBook } from "@/lib/hooks/battle";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
+import { useSpells, useSpellsByIds } from "@/lib/hooks/spells";
 
 function Harness({ caster }: { caster: Parameters<typeof useSpellBook>[0] }) {
   const book = useSpellBook(caster, {});
@@ -56,5 +61,15 @@ describe("SpellBook", () => {
     fireEvent.click(await screen.findByRole("button", { name: /^I коло/ }));
 
     expect(screen.getByText("Крижаний спис")).toBeTruthy();
+  });
+
+  it("гравець бере відомі заклинання героя за id, а не всю бібліотеку", async () => {
+    const { wrapper, caster } = fakeScene({ knownSpells: ["bolt"], slots: { "1": { max: 3, current: 3 } } });
+
+    render(<Harness caster={caster} />, { wrapper });
+
+    expect(await screen.findByText("Крижаний спис")).toBeTruthy();
+    expect(useSpellsByIds).toHaveBeenLastCalledWith(expect.any(String), ["bolt"], { enabled: true });
+    expect(useSpells).toHaveBeenLastCalledWith(expect.any(String), { enabled: false });
   });
 });

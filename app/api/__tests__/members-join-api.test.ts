@@ -5,7 +5,7 @@ import { CampaignRole } from "@/lib/constants/campaigns";
 
 const db = vi.hoisted(() => ({
   campaign: { findUnique: vi.fn() },
-  campaignMember: { findUnique: vi.fn(), create: vi.fn(), delete: vi.fn() },
+  campaignMember: { findUnique: vi.fn(), create: vi.fn(), deleteMany: vi.fn() },
   user: { findUnique: vi.fn(), create: vi.fn() },
 }));
 
@@ -44,26 +44,26 @@ describe("DELETE /campaigns/:id/members/:memberId", () => {
     auth.requireDM.mockResolvedValue(forbidden());
 
     expect((await removeMember()).status).toBe(403);
-    expect(db.campaignMember.delete).not.toHaveBeenCalled();
+    expect(db.campaignMember.deleteMany).not.toHaveBeenCalled();
   });
 
   it("учасник іншої кампанії — 403", async () => {
     db.campaignMember.findUnique.mockResolvedValue({ id: "m1", campaignId: "c2", role: CampaignRole.PLAYER });
 
     expect((await removeMember()).status).toBe(403);
-    expect(db.campaignMember.delete).not.toHaveBeenCalled();
+    expect(db.campaignMember.deleteMany).not.toHaveBeenCalled();
   });
 
   it("DM не можна видалити — 400", async () => {
     db.campaignMember.findUnique.mockResolvedValue({ id: "m1", campaignId: "c1", role: CampaignRole.DM });
 
     expect((await removeMember()).status).toBe(400);
-    expect(db.campaignMember.delete).not.toHaveBeenCalled();
+    expect(db.campaignMember.deleteMany).not.toHaveBeenCalled();
   });
 
   it("DM видаляє гравця", async () => {
     expect((await removeMember()).status).toBe(200);
-    expect(db.campaignMember.delete).toHaveBeenCalledWith({ where: { id: "m1" } });
+    expect(db.campaignMember.deleteMany).toHaveBeenCalledWith({ where: { id: "m1" } });
   });
 });
 

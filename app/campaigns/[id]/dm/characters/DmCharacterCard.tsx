@@ -16,10 +16,10 @@ import {
 import { CharacterType } from "@/lib/constants/characters";
 import { cn } from "@/lib/utils";
 import { heroBaseHp } from "@/lib/utils/characters/hero-hp";
-import type { Character } from "@/types/characters";
+import type { CharacterListItem } from "@/types/characters";
 
 interface DmCharacterCardProps {
-  character: Character;
+  character: CharacterListItem;
   campaignId: string;
   busy: boolean;
   actions: { onLevelUp?: () => void; onDelete: () => void };

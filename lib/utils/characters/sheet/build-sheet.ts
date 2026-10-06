@@ -41,6 +41,7 @@ export interface SheetInput {
   artifacts: SheetArtifact[];
   spells: BookSpell[];
   personalSkill: CharacterSheet["personalSkill"];
+  progression: CharacterSheet["progression"];
 }
 
 const flags = (raw: unknown) => (raw && typeof raw === "object" && !Array.isArray(raw) ? (raw as Record<string, boolean>) : {});
@@ -110,6 +111,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
     spells: input.spells,
     items: { grid, artifacts: input.artifacts, sets: p.battleData.artifactSets ?? [] },
     personalSkill: input.personalSkill,
+    progression: input.progression,
     story: { biography: c.background?.trim() ? c.background : null, goals: parseGoals(c.goals) },
   };
 }

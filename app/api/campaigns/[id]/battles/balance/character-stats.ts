@@ -15,7 +15,7 @@ export async function loadCharacterBalanceStats(campaignId: string, characterIds
 
   if (characters.length === 0) return [];
 
-  const { campaignContext } = await buildCampaignContextForStart(campaignId, characters, [], { forBalance: true });
+  const { campaignContext } = await buildCampaignContextForStart(campaignId, characters, []);
 
   const magic = magicMainSkillIds(campaignContext?.mainSkills ?? []);
 

@@ -17,4 +17,4 @@ export { useHpChange } from "./useHpChange";
 export { usePlayerTurn } from "./usePlayerTurn";
 export type { PusherConnectionState } from "./usePusherBattleSync";
 export { usePusherBattleSync } from "./usePusherBattleSync";
-export { type BookSpell, useSpellBook } from "./useSpellBook";
+export { type BookSpell, useSpellBook, useSpellBookPrefetch } from "./useSpellBook";

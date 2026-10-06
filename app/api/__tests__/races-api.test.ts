@@ -5,7 +5,7 @@ import { getResponseJson } from "./helpers";
 
 const db = vi.hoisted(() => {
   const m = {
-    race: { findFirst: vi.fn(), findUnique: vi.fn(), count: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
+    race: { findFirst: vi.fn(), findUnique: vi.fn(), count: vi.fn(), create: vi.fn(), update: vi.fn(), deleteMany: vi.fn() },
     character: { updateMany: vi.fn() },
     skillTree: { updateMany: vi.fn() },
     $transaction: vi.fn(),

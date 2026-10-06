@@ -4,7 +4,7 @@ import { useCharacters, useDeleteAllCharacters, useDeleteCharacter, useLevelUpCh
 
 import type { CharacterTypeValue } from "@/lib/constants/characters";
 import { useConfirm, useNotify } from "@/lib/hooks/common";
-import type { Character } from "@/types/characters";
+import type { CharacterListItem } from "@/types/characters";
 
 export function useDmCharactersPage(campaignId: string, type?: CharacterTypeValue) {
   const confirm = useConfirm();
@@ -19,10 +19,10 @@ export function useDmCharactersPage(campaignId: string, type?: CharacterTypeValu
 
   const levelUpMutation = useLevelUpCharacter(campaignId);
 
-  const levelUp = (character: Character) =>
+  const levelUp = (character: CharacterListItem) =>
     levelUpMutation.mutate(character.id, { onError: () => void notify("Не вдалося підняти рівень. Спробуйте ще раз.") });
 
-  const confirmDelete = (character: Character) =>
+  const confirmDelete = (character: CharacterListItem) =>
     confirm({
       title: "Видалити персонажа?",
       description: `Персонажа "${character.name}" буде видалено. Цю дію не можна скасувати.`,

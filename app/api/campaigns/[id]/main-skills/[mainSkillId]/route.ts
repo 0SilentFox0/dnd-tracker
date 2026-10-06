@@ -102,6 +102,7 @@ export async function DELETE(
 
     const mainSkill = await prisma.mainSkill.findUnique({
       where: { id: mainSkillId },
+      select: { campaignId: true },
     });
 
     const validationError = validateCampaignOwnership(mainSkill, id);
@@ -110,7 +111,7 @@ export async function DELETE(
       return validationError;
     }
 
-    await prisma.mainSkill.delete({
+    await prisma.mainSkill.deleteMany({
       where: { id: mainSkillId },
     });
 

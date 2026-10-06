@@ -5,7 +5,8 @@ import {
   campaignPost,
   campaignRequest,
 } from "@/lib/api/client";
-import type { Spell, SpellGroup } from "@/types/spells";
+import { SPELL_IDS_QUERY_MAX } from "@/lib/constants/spells";
+import type { BookSpell, Spell, SpellGroup } from "@/types/spells";
 
 export async function updateSpellAppearance(
   campaignId: string,
@@ -19,6 +20,16 @@ export async function updateSpellAppearance(
 
 export async function getSpells(campaignId: string): Promise<Spell[]> {
   return campaignGet<Spell[]>(campaignId, "/spells");
+}
+
+export async function getSpellsByIds(campaignId: string, ids: string[]): Promise<BookSpell[]> {
+  const chunks: string[][] = [];
+
+  for (let i = 0; i < ids.length; i += SPELL_IDS_QUERY_MAX) chunks.push(ids.slice(i, i + SPELL_IDS_QUERY_MAX));
+
+  const pages = await Promise.all(chunks.map((chunk) => campaignGet<BookSpell[]>(campaignId, `/spells?ids=${chunk.map(encodeURIComponent).join(",")}`)));
+
+  return pages.flat();
 }
 
 export async function getSpellGroups(

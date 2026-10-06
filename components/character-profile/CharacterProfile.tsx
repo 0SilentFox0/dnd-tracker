@@ -90,7 +90,7 @@ export function CharacterProfile({ campaignId, characterId, canEdit, initialTab 
               <>
                 <ProfileHero
                   ref={hero.ref}
-                  badge={<LevelUpBadge campaignId={campaignId} characterId={characterId} onOpen={() => setTab("skills")} />}
+                  badge={<LevelUpBadge free={sheet.progression.freePoints} onOpen={() => setTab("skills")} />}
                   actions={
                     canEdit && sheet.viewer.isDM ? (
                       <Button type="button" size="sm" variant="outline" onClick={() => setEditing(true)}>

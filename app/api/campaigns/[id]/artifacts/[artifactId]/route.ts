@@ -129,6 +129,7 @@ export async function DELETE(
 
     const artifact = await prisma.artifact.findUnique({
       where: { id: artifactId },
+      select: { campaignId: true },
     });
 
     const validationError = validateCampaignOwnership(artifact, id);
@@ -137,7 +138,7 @@ export async function DELETE(
       return validationError;
     }
 
-    await prisma.artifact.delete({
+    await prisma.artifact.deleteMany({
       where: { id: artifactId },
     });
 

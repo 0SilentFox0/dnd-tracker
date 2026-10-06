@@ -102,13 +102,14 @@ export async function DELETE(
         id: raceId,
         campaignId: id,
       },
+      select: { campaignId: true },
     });
 
     if (!race) {
       return NextResponse.json({ error: "Race not found" }, { status: 404 });
     }
 
-    await prisma.race.delete({
+    await prisma.race.deleteMany({
       where: {
         id: raceId,
       },

@@ -3,20 +3,9 @@
 import { ChevronsUp } from "lucide-react";
 
 import { metalClass } from "@/components/battle/hud";
-import { useCharacterProgression } from "@/lib/hooks/skills";
 import { cn } from "@/lib/utils";
 
-interface LevelUpBadgeProps {
-  campaignId: string;
-  characterId: string;
-  onOpen: () => void;
-}
-
-export function LevelUpBadge({ campaignId, characterId, onOpen }: LevelUpBadgeProps) {
-  const { view } = useCharacterProgression(campaignId, characterId);
-
-  const free = view?.points.free ?? 0;
-
+export function LevelUpBadge({ free, onOpen }: { free: number; onOpen: () => void }) {
   if (free === 0) return null;
 
   return (

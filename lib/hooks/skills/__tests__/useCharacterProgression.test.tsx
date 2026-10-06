@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import type { ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, renderHook, waitFor } from "@testing-library/react";
+import { cleanup, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import * as api from "@/lib/api/character-progression";
@@ -12,12 +12,14 @@ vi.mock("@/lib/api/character-progression");
 afterEach(cleanup);
 
 describe("useCharacterProgression", () => {
-  it("кешований прогрес перечитується при кожному відкритті (рівень міг змінити ДМ)", async () => {
+  it("свіжий кеш прогресу не перечитується при повторному відкритті табу", async () => {
     const dto = { treeId: null, tree: null, race: "Ельф", raceIcon: null, level: 5, seenLevel: 5, isOwner: true, isDM: false, unlocked: [], skills: {}, branches: {} };
 
     vi.mocked(api.getCharacterProgression).mockResolvedValue(dto);
 
-    const qc = new QueryClient({ defaultOptions: { queries: { staleTime: 60_000 } } });
+    vi.mocked(api.getCharacterProgression).mockClear();
+
+    const qc = new QueryClient();
 
     qc.setQueryData(progressionKey("c", "ch"), dto);
 
@@ -25,6 +27,7 @@ describe("useCharacterProgression", () => {
 
     renderHook(() => useCharacterProgression("c", "ch"), { wrapper });
 
-    await waitFor(() => expect(api.getCharacterProgression).toHaveBeenCalledWith("c", "ch"));
+    await new Promise((r) => setTimeout(r, 0));
+    expect(api.getCharacterProgression).not.toHaveBeenCalled();
   });
 });

@@ -9,10 +9,11 @@ import * as api from "@/lib/api/character-progression";
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "", HUD_SURFACE: "hud-surface" }));
 vi.mock("@/lib/api/character-progression");
 
-let data: Record<string, unknown> | undefined;
+let data: { level: number; seenLevel: number | null; isOwner: boolean } | undefined;
 
-vi.mock("@/lib/hooks/skills/useCharacterProgression", () => ({
-  useCharacterProgression: () => ({ data, view: data ? { points: { free: 2 } } : null }),
+vi.mock("@/lib/hooks/characters", () => ({
+  characterSheetKey: (c: string, ch: string) => ["character-sheet", c, ch],
+  useCharacterSheet: () => ({ data: data && { viewer: { isOwner: data.isOwner, isDM: false }, progression: { freePoints: 2, level: data.level, seenLevel: data.seenLevel } } }),
 }));
 
 afterEach(cleanup);

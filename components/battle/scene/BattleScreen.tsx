@@ -10,7 +10,7 @@ import { MobileBattleLayout } from "./MobileBattleLayout";
 import { ResultOverlay } from "@/components/battle/fx/ResultOverlay";
 import { hudFontClassName } from "@/components/battle/hud";
 import { BattlePreparationView } from "@/components/battle/views/BattlePreparationView";
-import { useBattleScene, useBelowHeaderHeight } from "@/lib/hooks/battle";
+import { useBattleScene, useBelowHeaderHeight, useSpellBookPrefetch } from "@/lib/hooks/battle";
 import { useMediaQuery } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +22,8 @@ export function BattleScreen() {
   const height = useBelowHeaderHeight();
 
   const [completeOpen, setCompleteOpen] = useState(false);
+
+  useSpellBookPrefetch();
 
   if (battle.status === "prepared") {
     const count = (side: string) => battle.participants.filter((p) => p.side === side).reduce((s, p) => s + (p.quantity ?? 1), 0);

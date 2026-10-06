@@ -41,16 +41,8 @@ export type UnitFromPrisma = Prisma.UnitGetPayload<Record<string, never>>;
 export interface CampaignSpellContext {
   skillTreeByRace: Record<string, Prisma.SkillTreeGetPayload<object> | null>;
   mainSkills: Array<{ id: string; spellGroupId: string | null; name: string }>;
-  spells: Array<
-    Prisma.SpellGetPayload<{
-      include: { spellGroup: { select: { id: true } } };
-    }>
-  >;
-  allSkills: Array<
-    Prisma.SkillGetPayload<{
-      include: { spellGroup: { select: { id: true } } };
-    }>
-  >;
+  spells: Array<{ id: string; level: number; spellGroup?: { id: string } | null }>;
+  allSkills: Array<Prisma.SkillGetPayload<object>>;
   racesByName: Record<string, Prisma.RaceGetPayload<object> | null>;
   campaign: { maxLevel: number };
   skillsById?: Record<string, Prisma.SkillGetPayload<object>>;

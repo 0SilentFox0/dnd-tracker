@@ -8,6 +8,7 @@ const findMany = vi.fn<(args?: unknown) => Promise<unknown[]>>(async () => [
   },
 ]);
 
+vi.mock("next/cache", () => ({ unstable_cache: (fn: () => unknown) => fn }));
 vi.mock("@/lib/campaigns/access", () => ({ requireCampaignMember: vi.fn(async () => ({ isDM: false })) }));
 vi.mock("@/lib/db", () => ({ prisma: { skill: { findMany: (a: unknown) => findMany(a) }, spell: { findMany: vi.fn(async () => []) } } }));
 vi.mock("@/components/campaigns/info/InfoReferenceClient", () => ({ InfoReferenceClient: () => null }));
