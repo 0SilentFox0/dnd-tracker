@@ -4,12 +4,12 @@ import { useState } from "react";
 import { Crosshair, Swords } from "lucide-react";
 
 import { Breakdown } from "./Breakdown";
-import { signed } from "./format";
 import { useProfile } from "./ProfileContext";
 import { Section } from "./Section";
 
 import { EmptyState } from "@/components/common/states";
 import { cn } from "@/lib/utils";
+import { signed } from "@/lib/utils/format";
 import type { SheetLine } from "@/types/characters";
 
 const SHORT: Record<string, string> = { strength: "СИЛ", dexterity: "СПР", constitution: "ТІЛ", intelligence: "ІНТ", wisdom: "МУД", charisma: "ХАР" };

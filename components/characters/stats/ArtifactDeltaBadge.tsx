@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { signed } from "@/lib/utils/format";
 
 export function ArtifactDeltaBadge({
   value,
@@ -12,7 +13,7 @@ export function ArtifactDeltaBadge({
 }) {
   if (!value) return null;
 
-  const text = value > 0 ? `+${value}` : String(value);
+  const text = signed(value);
 
   return (
     <span

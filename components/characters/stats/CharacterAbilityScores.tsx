@@ -9,9 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ABILITY_SCORES } from "@/lib/constants";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
+import { signed } from "@/lib/utils/format";
 import type { AbilityKey } from "@/types/characters";
 
-const signed = (n: number) => (n >= 0 ? `+${n}` : `${n}`);
 
 export type CharacterAbilityArtifactBonuses = Partial<
   Record<

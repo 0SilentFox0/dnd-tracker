@@ -7,6 +7,7 @@ import { useBattleScene, useHpChange } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
 import { abilityCharges, turnsUntil } from "@/lib/utils/battle/view";
+import { signed } from "@/lib/utils/format";
 import type { BattleParticipant } from "@/types/battle";
 
 export function MyHeroPanel({ hero, compact = false }: { hero: BattleParticipant; compact?: boolean }) {
@@ -44,7 +45,7 @@ export function MyHeroPanel({ hero, compact = false }: { hero: BattleParticipant
       {!compact && <SlotGrid participant={hero} />}
       {!compact && (morale !== 0 || charges.length > 0) && (
         <div className="mt-2.5 flex h-6 items-center gap-4 text-sm text-[#d6cbb7]">
-          {morale !== 0 && <span>Мораль <span className={morale > 0 ? "text-[#9fc48a]" : "text-[#d0705c]"}>{morale > 0 ? `+${morale}` : morale}</span></span>}
+          {morale !== 0 && <span>Мораль <span className={morale > 0 ? "text-[#9fc48a]" : "text-[#d0705c]"}>{signed(morale)}</span></span>}
           {charges.map((c) => <span key={c.key}>{c.name} {c.left}/{c.limit}</span>)}
         </div>
       )}

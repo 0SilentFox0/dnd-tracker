@@ -6,6 +6,7 @@ import { getHeroMaxHpBreakdown } from "@/lib/constants/hero-scaling";
 import { parseGoals } from "@/lib/schemas/character-goals";
 import { slotLevels } from "@/lib/utils/battle/view";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
+import { signed } from "@/lib/utils/format";
 import type { BattleParticipant } from "@/types/battle";
 import { ABILITY_KEYS, type AbilityKey, type CharacterSheet, type SheetArtifact, type SheetSet } from "@/types/characters";
 import type { BookSpell } from "@/types/spells";
@@ -87,7 +88,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
     proficiency: prof,
     hp: {
       total: p.combatStats.maxHp,
-      lines: [...hp.breakdown.map((b) => ({ label: b, value: "", source: "level" as const })), ...(hpBonus ? [{ label: "Бонуси", value: hpBonus > 0 ? `+${hpBonus}` : String(hpBonus) }] : [])],
+      lines: [...hp.breakdown.map((b) => ({ label: b, value: "", source: "level" as const })), ...(hpBonus ? [{ label: "Бонуси", value: signed(hpBonus) }] : [])],
     },
     armorClass: armorTotal(p),
     initiative: p.abilities.initiative,

@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { useBattleScene } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { MORALE_SKIP_MS } from "@/lib/utils/battle/flows";
+import { signed } from "@/lib/utils/format";
 
 const die = "hud-sc flex items-center justify-center font-extrabold [clip-path:polygon(50%_0,100%_38%,82%_100%,18%_100%,0_38%)] animate-[hud-dropin_.7s_cubic-bezier(.16,1,.3,1)_both]";
 
@@ -34,7 +35,7 @@ export function ResultOverlay() {
         <div className={cn(die, "relative mb-5 size-[88px] bg-[#e8c77a] text-[40px] text-[#2a1d05]")}>{result.d10}</div>
         <div className="hud-sc relative text-[40px] font-extrabold leading-[44px] tracking-[.08em] text-[#f3dc9a] [text-shadow:0_0_24px_rgba(232,199,122,.6)] animate-[hud-rise_.7s_.25s_both]">Бойовий дух</div>
         <div className="relative mt-3 text-base animate-[hud-fade_.5s_.6s_both]">{result.name} отримує додатковий хід наприкінці раунду</div>
-        <div className="relative mt-1.5 text-sm text-[#a89c88]">d10 = {result.d10} · мораль {result.morale > 0 ? `+${result.morale}` : result.morale}</div>
+        <div className="relative mt-1.5 text-sm text-[#a89c88]">d10 = {result.d10} · мораль {signed(result.morale)}</div>
         <button type="button" onClick={close} className={cn(cta, "relative border border-[#e6c25a] bg-[#8a6414] text-[#fff3d1]")}>До бою</button>
       </div>
     );

@@ -3,10 +3,10 @@
 import { type ReactNode, type Ref, useState } from "react";
 
 import { Breakdown } from "./Breakdown";
-import { signed } from "./format";
 import { useProfile } from "./ProfileContext";
 
 import { OptimizedImage } from "@/components/common/OptimizedImage";
+import { signed } from "@/lib/utils/format";
 
 function Chip({ label, short, value }: { label: string; short: string; value: string }) {
   return (

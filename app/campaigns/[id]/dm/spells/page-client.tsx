@@ -15,6 +15,7 @@ import {
   useSpellGroups,
   useSpells,
 } from "@/lib/hooks/spells";
+import { pluralUk } from "@/lib/utils/plural";
 import {
   convertGroupedSpellsToArray,
   groupSpellsByGroupAndLevel,
@@ -54,7 +55,7 @@ export function DMSpellsPageClient({
   const handleDeleteAllSpells = () =>
     confirm({
       title: "Видалити всі заклинання?",
-      description: `Ви впевнені, що хочете видалити всі заклинання з кампанії? Ця дія незворотна. Буде видалено ${spells.length} заклинань.`,
+      description: `Ви впевнені, що хочете видалити всі заклинання з кампанії? Ця дія незворотна. Буде видалено ${spells.length} ${pluralUk(spells.length, ["заклинання", "заклинання", "заклинань"])}.`,
       confirmLabel: "Видалити всі заклинання",
       destructive: true,
       onConfirm: () => deleteAllSpellsMutation.mutateAsync(),

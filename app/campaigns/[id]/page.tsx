@@ -14,6 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { requireCampaignWithMembers } from "@/lib/campaigns/access";
+import { pluralUk } from "@/lib/utils/plural";
 
 export default async function CampaignDetailPage({
   params,
@@ -90,7 +91,7 @@ export default async function CampaignDetailPage({
         <CardHeader>
           <CardTitle>Учасники</CardTitle>
           <CardDescription>
-            {campaign.members.length} учасник(ів) в кампанії
+            {campaign.members.length} {pluralUk(campaign.members.length, ["учасник", "учасники", "учасників"])} в кампанії
           </CardDescription>
         </CardHeader>
         <CardContent>

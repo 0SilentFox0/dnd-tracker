@@ -1,10 +1,11 @@
 import { DURATION_FIELD, type FieldMeta, TARGET_FIELD } from "../fields";
-import { CONDITION_LABELS, DAMAGE_FILTER_LABELS, flatLabel, signed, STAT_LABELS } from "../labels";
+import { CONDITION_LABELS, DAMAGE_FILTER_LABELS, flatLabel, STAT_LABELS } from "../labels";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/participants";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/timed-effects";
 import type { Effect, FlagKey, StaticEffect } from "@/lib/utils/abilities/schema";
+import { signed } from "@/lib/utils/format";
 
 export function stripTiming(effect: StaticEffect): StaticEffect {
   const { duration: _d, target: _t, ...rest } = effect;

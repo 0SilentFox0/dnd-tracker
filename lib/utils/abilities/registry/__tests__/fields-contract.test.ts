@@ -3,6 +3,7 @@ import type { z } from "zod";
 
 import { CONDITION_REGISTRY } from "@/lib/utils/abilities/registry/conditions";
 import { describeAbility, EFFECT_REGISTRY, FLAG_FIELDS } from "@/lib/utils/abilities/registry/effects";
+import { limitsLabel } from "@/lib/utils/abilities/registry/labels";
 import { TRIGGER_REGISTRY } from "@/lib/utils/abilities/registry/triggers";
 import { ConditionSchema, EffectSchema, TriggerSchema } from "@/lib/utils/abilities/schema";
 
@@ -63,5 +64,10 @@ describe("fields contract", () => {
     expect(
       describeAbility({ id: "a", name: "Кровотеча", trigger: { event: "hit", role: "attacker" }, limits: { perBattle: 1, chance: 30 }, effects: [{ kind: "dot", damagePerRound: "1d4", damageType: "bleed", duration: { rounds: 2 }, target: "eventTarget" }] }),
     ).toBe("Влучання · 1 раз за бій · 30% · bleed 1d4/раунд × 2 р.");
+  });
+
+  it("ліміт за бій узгоджується з числом", () => {
+    expect(limitsLabel({ perBattle: 2 })).toEqual(["2 рази за бій"]);
+    expect(limitsLabel({ perBattle: 5 })).toEqual(["5 разів за бій"]);
   });
 });

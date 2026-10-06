@@ -6,6 +6,7 @@ import { Fragment } from "react";
 
 import { ArtifactDeltaBadge } from "@/components/characters/stats/ArtifactDeltaBadge";
 import { LabeledInput } from "@/components/ui/labeled-input";
+import { signed } from "@/lib/utils/format";
 
 export type CharacterCombatArtifactBonuses = {
   armorClass?: number;
@@ -167,7 +168,7 @@ export function CharacterCombatParams({
                     : "font-medium text-red-600 dark:text-red-500"
                 }
               >
-                рівень {lvl}: {n > 0 ? `+${n}` : n}
+                рівень {lvl}: {signed(n)}
               </span>
             </Fragment>
           ))}

@@ -1,5 +1,5 @@
 import { DURATION_FIELD, type FieldMeta, TARGET_FIELD } from "../fields";
-import { limitsLabel, signed } from "../labels";
+import { limitsLabel } from "../labels";
 import { TRIGGER_REGISTRY } from "../triggers";
 import { applyDealDamage, applyDot, applyHeal, describeDealDamage, describeDot, describeHeal } from "./hp";
 import {
@@ -24,6 +24,7 @@ import {
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import type { Ability, Effect, EffectKind } from "@/lib/utils/abilities/schema";
+import { signed } from "@/lib/utils/format";
 
 export type { EffectApplyInput, EffectApplyResult };
 

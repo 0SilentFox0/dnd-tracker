@@ -8,6 +8,7 @@ import { AttackType, BATTLE_CONSTANTS } from "@/lib/constants/battle";
 import { collectModifiers, type ModifierEntry } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
+import { signed } from "@/lib/utils/format";
 import type { BattleParticipant, DamageStep } from "@/types/battle";
 
 const BONUS_PREFIX: Record<ModifierEntry["sourceType"], string> = {
@@ -85,9 +86,9 @@ export function calculateDamageWithModifiersImpl(
   for (const e of mods.entries) {
     const prefix = BONUS_PREFIX[e.sourceType];
 
-    if (e.percent) breakdown.push(`${prefix}: ${e.percent > 0 ? "+" : ""}${e.percent}% (${e.label})`);
+    if (e.percent) breakdown.push(`${prefix}: ${signed(e.percent)}% (${e.label})`);
 
-    if (e.flat) breakdown.push(`Flat ${prefix.toLowerCase()}: ${e.flat > 0 ? "+" : ""}${e.flat} (${e.label})`);
+    if (e.flat) breakdown.push(`Flat ${prefix.toLowerCase()}: ${signed(e.flat)} (${e.label})`);
   }
 
   const isArtifact = (e: ModifierEntry) => e.sourceType === "artifact" || e.sourceType === "artifactSet";

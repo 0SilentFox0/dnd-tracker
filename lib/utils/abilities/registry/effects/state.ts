@@ -1,10 +1,12 @@
-import { CONDITION_LABELS, signed } from "../labels";
+import { CONDITION_LABELS } from "../labels";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/participants";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/timed-effects";
 import type { ConditionImmunityKey, Effect } from "@/lib/utils/abilities/schema";
+import { signed } from "@/lib/utils/format";
+import { pluralUk } from "@/lib/utils/plural";
 import type { BattleParticipant } from "@/types/battle";
 
 type Of<K extends Effect["kind"]> = Extract<Effect, { kind: K }>;
@@ -116,7 +118,7 @@ export function applyRestoreSpellSlot(input: EffectApplyInput<Of<"restoreSpellSl
         spellcasting: { ...p.spellcasting, spellSlots: { ...slots, [level]: { ...slot, current: Math.min(slot.max, slot.current + effect.count) } } },
       };
     },
-    (names) => `🔮 ${ability.name}: ${names} відновлює ${effect.count} слот(и)`,
+    (names) => `🔮 ${ability.name}: ${names} відновлює ${effect.count} ${pluralUk(effect.count, ["слот", "слоти", "слотів"])}`,
   );
 }
 

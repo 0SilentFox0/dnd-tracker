@@ -5,12 +5,12 @@ import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engin
 import { calculateAttackBonus } from "@/lib/utils/battle/attack";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
 import { getAbilityModifier, getAttackAbilityModifier } from "@/lib/utils/common/calculations";
+import { signed } from "@/lib/utils/format";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 import type { AbilityKey, SheetAttack, SheetLine, SheetLineSource, SheetTotal } from "@/types/characters";
 
 export const abilityLabel = (key: AbilityKey) => CORE_ABILITY_SCORES.find((a) => a.key === key)?.label ?? key;
 
-export const signed = (n: number) => (n >= 0 ? `+${n}` : `${n}`);
 
 const asSource = (t: string): SheetLineSource => t as SheetLineSource;
 

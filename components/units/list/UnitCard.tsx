@@ -13,6 +13,7 @@ import { getDamageElementLabel } from "@/lib/constants/damage";
 import { useConfirm } from "@/lib/hooks/common";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { diceAverage } from "@/lib/utils/common/dice";
+import { pluralUk } from "@/lib/utils/plural";
 import {
   getUnitDamageModifiers,
   getUnitImmunities,
@@ -220,8 +221,7 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
           <div className="space-y-1">
             <div className="text-xs font-semibold">Заклинання:</div>
             <div className="text-xs text-muted-foreground">
-              {unit.knownSpells.length}{" "}
-              {unit.knownSpells.length === 1 ? "заклинання" : "заклинань"}
+              {unit.knownSpells.length} {pluralUk(unit.knownSpells.length, ["заклинання", "заклинання", "заклинань"])}
             </div>
           </div>
         )}

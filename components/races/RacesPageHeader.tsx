@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 
 import { PageHeader } from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
+import { pluralUk } from "@/lib/utils/plural";
 
 interface RacesPageHeaderProps {
   campaignId: string;
@@ -18,7 +19,7 @@ export function RacesPageHeader({
   return (
     <PageHeader
       title="Ігрові Раси"
-      description={`${racesCount} ${racesCount === 1 ? "раса" : "рас"}`}
+      description={`${racesCount} ${pluralUk(racesCount, ["раса", "раси", "рас"])}`}
       actions={
         <Button onClick={onCreateRace} className="flex items-center gap-2">
           <Plus className="h-4 w-4" />

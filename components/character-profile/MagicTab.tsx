@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { BookOpen } from "lucide-react";
 
-import { signed } from "./format";
 import { useProfile } from "./ProfileContext";
 import { ProfileSpellBook } from "./ProfileSpellBook";
 import { Section } from "./Section";
@@ -13,6 +12,7 @@ import { EmptyState } from "@/components/common/states";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ROMAN, spellTier } from "@/lib/utils/battle/view";
+import { signed } from "@/lib/utils/format";
 import { pluralUk } from "@/lib/utils/plural";
 
 export function MagicTab() {

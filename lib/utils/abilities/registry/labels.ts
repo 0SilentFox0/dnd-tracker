@@ -1,4 +1,6 @@
 import type { AbilityTarget, Amount, CONDITION_KEYS, DamageFilterKind, Flat, Limits, StatKey } from "@/lib/utils/abilities/schema";
+import { signed } from "@/lib/utils/format";
+import { pluralUk } from "@/lib/utils/plural";
 
 export const STAT_LABELS: Record<StatKey, string> = {
   armor: "AC",
@@ -26,10 +28,6 @@ export const DAMAGE_FILTER_LABELS: Record<DamageFilterKind, string> = {
   physical: "фізична",
   all: "вся",
 };
-
-export function signed(n: number): string {
-  return n >= 0 ? `+${n}` : `${n}`;
-}
 
 export function flatLabel(flat: Flat): string {
   return typeof flat === "number" ? signed(flat) : `+(${flat.formula})`;
@@ -63,7 +61,7 @@ export function limitsLabel(l: Limits | undefined): string[] {
   if (!l) return [];
 
   return [
-    l.perBattle ? `${l.perBattle} раз${l.perBattle > 1 ? "и" : ""} за бій` : null,
+    l.perBattle ? `${l.perBattle} ${pluralUk(l.perBattle, ["раз", "рази", "разів"])} за бій` : null,
     l.perRound ? `${l.perRound}/раунд` : null,
     l.perTurn ? `${l.perTurn}/хід` : null,
     l.chance ? `${l.chance}%` : null,
