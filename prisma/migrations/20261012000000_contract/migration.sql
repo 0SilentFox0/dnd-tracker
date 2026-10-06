@@ -18,12 +18,18 @@ SET "raceId" = (
 )
 WHERE u."raceId" IS NULL AND u."groupId" IS NOT NULL;
 
--- abilities: NULL -> [] before NOT NULL
-UPDATE "skills" SET "abilities" = '[]' WHERE "abilities" IS NULL;
-UPDATE "races" SET "abilities" = '[]' WHERE "abilities" IS NULL;
-UPDATE "artifacts" SET "abilities" = '[]' WHERE "abilities" IS NULL;
-UPDATE "artifact_sets" SET "abilities" = '[]' WHERE "abilities" IS NULL;
-UPDATE "units" SET "abilities" = '[]' WHERE "abilities" IS NULL;
+-- abilities: default first (old deploy may still insert NULL), then backfill NULL/non-array, then NOT NULL below
+ALTER TABLE "skills" ALTER COLUMN "abilities" SET DEFAULT '[]';
+ALTER TABLE "races" ALTER COLUMN "abilities" SET DEFAULT '[]';
+ALTER TABLE "artifacts" ALTER COLUMN "abilities" SET DEFAULT '[]';
+ALTER TABLE "artifact_sets" ALTER COLUMN "abilities" SET DEFAULT '[]';
+ALTER TABLE "units" ALTER COLUMN "abilities" SET DEFAULT '[]';
+
+UPDATE "skills" SET "abilities" = '[]' WHERE "abilities" IS NULL OR jsonb_typeof("abilities") <> 'array';
+UPDATE "races" SET "abilities" = '[]' WHERE "abilities" IS NULL OR jsonb_typeof("abilities") <> 'array';
+UPDATE "artifacts" SET "abilities" = '[]' WHERE "abilities" IS NULL OR jsonb_typeof("abilities") <> 'array';
+UPDATE "artifact_sets" SET "abilities" = '[]' WHERE "abilities" IS NULL OR jsonb_typeof("abilities") <> 'array';
+UPDATE "units" SET "abilities" = '[]' WHERE "abilities" IS NULL OR jsonb_typeof("abilities") <> 'array';
 
 -- DropForeignKey
 ALTER TABLE "racial_abilities" DROP CONSTRAINT "racial_abilities_campaignId_fkey";
