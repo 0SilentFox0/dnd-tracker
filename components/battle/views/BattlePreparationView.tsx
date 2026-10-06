@@ -1,7 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
-
 import { cn } from "@/lib/utils";
 import type { BattleScene } from "@/types/api";
 
@@ -28,11 +26,7 @@ export function BattlePreparationView({
     <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-12 animate-in fade-in duration-1000 relative">
       <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)]" />
 
-      <motion.div
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="max-w-2xl w-full space-y-8 relative z-10"
-      >
+      <div className="max-w-2xl w-full space-y-8 relative z-10 animate-in fade-in slide-in-from-bottom-5 duration-300">
         <div className="space-y-4">
           <span className="hud-sc inline-flex h-8 items-center border-y border-[var(--gold)]/60 bg-[var(--gold)]/[.08] px-5 text-sm tracking-[.2em] text-[var(--gold)]">
             Підготовка до битви
@@ -93,7 +87,7 @@ export function BattlePreparationView({
             </div>
           )}
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }
