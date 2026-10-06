@@ -9,7 +9,7 @@ import { UnitKnownSpells } from "./UnitKnownSpells";
 
 import { AbilityListEditor } from "@/components/abilities";
 import { IconUrlField } from "@/components/common/IconUrlField";
-import { HudSection,type HudTab } from "@/components/hud/form";
+import { HudSection, type HudTab } from "@/components/hud/form";
 import type { UnitFormFieldsState } from "@/lib/hooks/units";
 import type { ConversionIssue } from "@/lib/utils/abilities/schema";
 

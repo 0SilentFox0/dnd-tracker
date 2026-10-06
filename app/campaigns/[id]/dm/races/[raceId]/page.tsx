@@ -53,9 +53,5 @@ export default async function EditRacePage({
     updatedAt: raceData.updatedAt,
   };
 
-  return (
-    <div className="container mx-auto p-4 max-w-4xl">
-      <RaceEditForm campaignId={id} race={race} />
-    </div>
-  );
+  return <RaceEditForm campaignId={id} race={race} />;
 }

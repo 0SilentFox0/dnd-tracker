@@ -158,5 +158,10 @@ describe("ArtifactForm", () => {
 
     expect(screen.queryByRole("tab", { name: "Зброя" })).toBeNull();
     expect(screen.getByRole("tab", { name: "Основне" })).toHaveAttribute("data-state", "active");
+
+    fireEvent.change(Array.from(document.querySelectorAll<HTMLSelectElement>("select")).find((el) => el.value === ArtifactSlot.RING) as HTMLSelectElement, { target: { value: "weapon" } });
+
+    expect(screen.getByRole("tab", { name: "Зброя" })).toHaveAttribute("data-state", "inactive");
+    expect(screen.getByRole("tab", { name: "Основне" })).toHaveAttribute("data-state", "active");
   });
 });

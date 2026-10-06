@@ -11,7 +11,7 @@ import { CharacterBasicInfo } from "@/components/characters/basic/CharacterBasic
 import { CharacterSkillsSection } from "@/components/characters/skills/CharacterSkillsSection";
 import { CharacterAbilityScores } from "@/components/characters/stats/CharacterAbilityScores";
 import { CharacterCombatParams } from "@/components/characters/stats/CharacterCombatParams";
-import { HudForm, HudFormPage, HudSection,type HudTab } from "@/components/hud/form";
+import { HudForm, HudFormPage, HudSection, type HudTab } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { CharacterType, type CharacterTypeValue } from "@/lib/constants/characters";
 import { useCampaignMembers } from "@/lib/hooks/campaigns";

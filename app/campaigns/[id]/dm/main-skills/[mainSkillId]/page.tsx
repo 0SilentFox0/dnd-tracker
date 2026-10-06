@@ -22,15 +22,13 @@ export default async function EditMainSkillPage({
   }
 
   return (
-    <div className="container mx-auto p-4 max-w-4xl">
-      <MainSkillEditForm 
-        campaignId={id} 
-        mainSkill={{
-          ...mainSkill,
-          createdAt: mainSkill.createdAt.toISOString(),
-          updatedAt: mainSkill.updatedAt.toISOString(),
-        }} 
-      />
-    </div>
+    <MainSkillEditForm
+      campaignId={id}
+      mainSkill={{
+        ...mainSkill,
+        createdAt: mainSkill.createdAt.toISOString(),
+        updatedAt: mainSkill.updatedAt.toISOString(),
+      }}
+    />
   );
 }

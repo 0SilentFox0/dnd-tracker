@@ -78,6 +78,8 @@ export function ArtifactForm({
 
   const [tab, setTab] = useState<ArtifactFormTabId>(ARTIFACT_FORM_TAB.basic);
 
+  if (!hasWeapon && tab === ARTIFACT_FORM_TAB.weapon) setTab(ARTIFACT_FORM_TAB.basic);
+
   const activeTab = hasWeapon || tab !== ARTIFACT_FORM_TAB.weapon ? tab : ARTIFACT_FORM_TAB.basic;
 
   const tabs: HudTab<ArtifactFormTabId>[] = [
