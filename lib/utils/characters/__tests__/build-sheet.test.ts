@@ -32,7 +32,6 @@ function lira(over: Partial<SheetInput["character"]> = {}, attacks: BattleAttack
     raceIcon: null,
     immunities: [],
     artifacts: [{ id: "a1", name: "Кольчуга ельфів", icon: null, slot: "armor", rarity: "rare", description: null, effects: ["AC +2"] }],
-    sets: [],
     spells: [],
     personalSkill: null,
   };
@@ -130,5 +129,15 @@ describe("buildCharacterSheet", () => {
 
     expect(lines.find((l) => l.label === "Лук вітру")?.source).toBe("artifact");
     expect(lines.find((l) => l.label === "Стрільба")?.source).toBe("skill");
+  });
+
+  it("сети бере з учасника", () => {
+    const input = lira();
+
+    const set = { setId: "s1", name: "Мисливець", have: 2, total: 3, complete: false, effects: ["Ініціатива +1"] };
+
+    input.participant.battleData.artifactSets = [set];
+
+    expect(buildCharacterSheet(input).items.sets).toEqual([set]);
   });
 });

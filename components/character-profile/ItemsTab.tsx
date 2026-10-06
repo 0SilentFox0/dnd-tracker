@@ -68,7 +68,7 @@ export function ItemsTab() {
             </li>
           ))}
           {sheet.items.sets.map((s) => (
-            <li key={s.id} className="border-b border-[#2a2218] py-2">
+            <li key={s.setId} className="border-b border-[#2a2218] py-2">
               <span className={cn("block text-sm", s.complete ? "text-[#e6c25a]" : "text-[#efe5d2]")}>
                 ✦ Сет «{s.name}» {s.have}/{s.total}
               </span>

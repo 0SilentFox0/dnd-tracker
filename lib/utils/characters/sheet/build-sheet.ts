@@ -9,7 +9,7 @@ import { slotLevels } from "@/lib/utils/battle/view";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { signed } from "@/lib/utils/format";
 import type { BattleParticipant } from "@/types/battle";
-import type { CharacterSheet, SheetArtifact, SheetSet } from "@/types/characters";
+import type { CharacterSheet, SheetArtifact } from "@/types/characters";
 import type { BookSpell } from "@/types/spells";
 
 export interface SheetInput {
@@ -38,7 +38,6 @@ export interface SheetInput {
   raceIcon: string | null;
   immunities: string[];
   artifacts: SheetArtifact[];
-  sets: SheetSet[];
   spells: BookSpell[];
   personalSkill: CharacterSheet["personalSkill"];
 }
@@ -107,7 +106,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
     magic: c.spellcastingAbility && spellSaveDC != null && spellAttackBonus != null ? { ability: abilityLabel(c.spellcastingAbility as AbilityKey), saveDC: spellSaveDC, attackBonus: spellAttackBonus } : null,
     slots: slotLevels(p).filter((s) => s.max > 0).map((s) => ({ level: s.level, count: s.max })),
     spells: input.spells,
-    items: { grid, artifacts: input.artifacts, sets: input.sets },
+    items: { grid, artifacts: input.artifacts, sets: p.battleData.artifactSets ?? [] },
     personalSkill: input.personalSkill,
     story: { biography: c.background?.trim() ? c.background : null, goals: parseGoals(c.goals) },
   };

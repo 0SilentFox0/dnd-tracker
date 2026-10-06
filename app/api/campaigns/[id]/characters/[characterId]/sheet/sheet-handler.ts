@@ -2,13 +2,12 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { abilitySummary } from "@/lib/utils/abilities/summary";
-import { loadArtifactSetBattleMaps } from "@/lib/utils/battle/artifact-sets/load-maps";
 import { createBattleParticipantFromCharacter } from "@/lib/utils/battle/participant";
 import { loadEquippedArtifactRows } from "@/lib/utils/battle/participant/extract-artifacts";
 import { getCharacterImmunities } from "@/lib/utils/characters/character-race-effects";
 import { buildCharacterSheet } from "@/lib/utils/characters/sheet";
 import { toBookSpell } from "@/lib/utils/spells/to-book-spell";
-import type { CharacterSheet, SheetArtifact, SheetSet } from "@/types/characters";
+import type { CharacterSheet, SheetArtifact } from "@/types/characters";
 
 export const loadSheetCharacter = (characterId: string) => prisma.character.findUnique({ where: { id: characterId }, include: { inventory: true } });
 
@@ -40,12 +39,9 @@ export async function buildSheetFor(character: SheetCharacter, viewer: Character
 
   const [participant] = applyBakedAuras([built], new Set([built.basicInfo.id]));
 
-  const setIds = [...new Set(rows.map((r) => r.row.setId).filter((x): x is string => !!x))];
-
   const known = participant.spellcasting.knownSpells ?? [];
 
-  const [maps, race, spells, personal] = await Promise.all([
-    loadArtifactSetBattleMaps(character.campaignId, setIds),
+  const [race, spells, personal] = await Promise.all([
     prisma.race.findFirst({ where: { campaignId: character.campaignId, name: character.race }, select: { icon: true, passiveAbility: true } }),
     known.length ? prisma.spell.findMany({ where: { campaignId: character.campaignId, id: { in: known } }, select: SPELL_SELECT }) : Promise.resolve([]),
     character.personalSkillId
@@ -55,20 +51,6 @@ export async function buildSheetFor(character: SheetCharacter, viewer: Character
 
   const artifacts: SheetArtifact[] = rows.map(({ row, slot }) => ({ id: row.id, name: row.name, icon: row.icon, slot, rarity: row.rarity, description: row.description, effects: abilitySummary("artifact", row) }));
 
-  const equippedIds = new Set(rows.map((r) => r.row.id));
-
-  const sets: SheetSet[] = setIds.flatMap((id) => {
-    const set = maps.artifactSetsById[id];
-
-    if (!set) return [];
-
-    const members = maps.artifactSetMemberIds[id] ?? [];
-
-    const have = members.filter((m) => equippedIds.has(m)).length;
-
-    return [{ id, name: set.name, have, total: members.length, complete: members.length > 0 && have === members.length, effects: abilitySummary("artifactSet", set as never) }];
-  });
-
   return buildCharacterSheet({
     participant,
     viewer,
@@ -76,7 +58,6 @@ export async function buildSheetFor(character: SheetCharacter, viewer: Character
     raceIcon: race?.icon ?? null,
     immunities: getCharacterImmunities(character, race as never),
     artifacts,
-    sets,
     spells: spells.map(toBookSpell),
     personalSkill: personal,
   });

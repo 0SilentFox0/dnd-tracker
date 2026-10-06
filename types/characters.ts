@@ -207,8 +207,8 @@ export interface SheetArtifact {
   effects: string[];
 }
 
-export interface SheetSet {
-  id: string;
+export interface SetProgress {
+  setId: string;
   name: string;
   have: number;
   total: number;
@@ -239,7 +239,7 @@ export interface CharacterSheet {
   magic: { ability: string; saveDC: number; attackBonus: number } | null;
   slots: { level: number; count: number }[];
   spells: BookSpell[];
-  items: { grid: Record<string, SheetArtifact | null>; artifacts: SheetArtifact[]; sets: SheetSet[] };
+  items: { grid: Record<string, SheetArtifact | null>; artifacts: SheetArtifact[]; sets: SetProgress[] };
   personalSkill: { id: string; name: string; icon: string | null; description: string | null } | null;
   story: { biography: string | null; goals: CharacterGoal[] };
 }

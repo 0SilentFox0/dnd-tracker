@@ -165,7 +165,7 @@ export async function createBattleParticipantFromCharacter(
       attacks,
       activeEffects: [],
       equippedArtifacts,
-      artifactSetHudMarkers: completed.hudMarkers,
+      artifactSets: completed.progress,
       resolvedAbilities,
       spellEnhancers: buildSpellEnhancers(skills),
       abilityUsage: {},

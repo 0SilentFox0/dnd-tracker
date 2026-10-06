@@ -7,7 +7,7 @@ import type { AbilityUsageCounter, ResolvedAbility, SpellEnhancer, StaticEffect 
 import type { ArtifactEffectAudience } from "@/lib/constants/artifact-effect-scope";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
-import type { AbilityKey } from "@/types/characters";
+import type { AbilityKey, SetProgress } from "@/types/characters";
 import { SkillLevel } from "@/types/skill-tree";
 
 export type { CriticalEffect };
@@ -91,13 +91,6 @@ export interface EquippedArtifact {
   /** З `passiveAbility.effectScope` — поза `self` бонус чергується на роздачу після збору всіх учасників. */
   effectAudience?: ArtifactEffectAudience;
   immuneSpellIds?: string[];
-}
-
-/** Іконка в HUD бою: активний бонус повного сету (носій або одержувач scoped). */
-export interface ArtifactSetHudMarker {
-  setId: string;
-  name: string;
-  icon?: string | null;
 }
 
 
@@ -210,8 +203,7 @@ export interface BattleParticipantBattleData {
   attacks: BattleAttack[];
   activeEffects: ActiveEffect[];
   equippedArtifacts: EquippedArtifact[];
-  /** Маркери повних сетів для HUD (іконка сету). */
-  artifactSetHudMarkers?: ArtifactSetHudMarker[];
+  artifactSets?: SetProgress[];
   /** Пул додаткових дій (ефект «actions»): накопичується при спрацюванні, споживається при використанні основної дії, діє до кінця бою */
   pendingExtraActions?: number;
   /** Учасник зараз робить додатковий хід від моралі (наприкінці раунду) */
