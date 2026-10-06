@@ -17,10 +17,10 @@ export function BranchRow({ row, dto, onSelect }: { row: Row; dto: CharacterProg
 
   const levelText = row.level ? BRANCH_LEVEL_LABEL[row.level] : "—";
 
-  const renderSlot = (s: NodeState, i: number, size: 46 | 40) => <SlotButton key={i} state={s} label={label(s)} icon={icon(s)} size={size} onSelect={() => onSelect(s)} />;
+  const renderSlot = (s: NodeState, i: number) => <SlotButton key={i} state={s} label={label(s)} icon={icon(s)} onSelect={() => onSelect(s)} />;
 
   return (
-    <div role="group" aria-label={`${branch?.name ?? row.branchId} · ${levelText}`} className="flex items-center gap-2 border-b border-[rgba(230,220,203,.07)] px-4 py-2">
+    <div role="group" aria-label={`${branch?.name ?? row.branchId} · ${levelText}`} className="flex items-center gap-2 border-b border-[rgba(230,220,203,.07)] px-3 py-2 sm:px-4">
       <Button
         type="button"
         variant="ghost"
@@ -34,14 +34,11 @@ export function BranchRow({ row, dto, onSelect }: { row: Row; dto: CharacterProg
         </span>
         <span className="hud-sc text-[11px] text-[var(--m2)]">{levelText}</span>
       </Button>
-      <span aria-hidden className="text-[#6b5f50]">▸</span>
-      <div className="flex flex-col gap-1">
-        <div className="flex">{row.outer.map((s, i) => renderSlot(s, i, 46))}</div>
-        <div className="flex items-center">
-          {row.middle.map((s, i) => renderSlot(s, i, 40))}
-          <span className="w-2" />
-          {row.inner.map((s, i) => renderSlot(s, i, 40))}
-        </div>
+      <span aria-hidden className="hidden text-[#6b5f50] sm:inline">▸</span>
+      <div className="flex items-center gap-2 lg:gap-4">
+        <div className="flex">{row.outer.map(renderSlot)}</div>
+        <div className="flex">{row.middle.map(renderSlot)}</div>
+        <div className="flex">{row.inner.map(renderSlot)}</div>
       </div>
     </div>
   );
