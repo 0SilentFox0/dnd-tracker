@@ -3,12 +3,12 @@
 import Link from "next/link";
 
 import { AutopickCard } from "./AutopickCard";
-import { BATTLE_FORM_TAB, type BattleFormTabId } from "./battle-form-tabs";
 import { BattleFormBasicInfo } from "./BattleFormBasicInfo";
 import { CharactersListCard } from "./CharactersListCard";
 import { SidePanelCard } from "./SidePanelCard";
 import { UnitsListCard } from "./UnitsListCard";
 
+import { BATTLE_FORM_TAB, type BattleFormTabId } from "@/components/battle/battle-form-tabs";
 import { LoadingState } from "@/components/common/states";
 import { HudForm, HudFormPage, type HudTab } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";

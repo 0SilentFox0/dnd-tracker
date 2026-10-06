@@ -8,7 +8,7 @@ import { AvailableUnitsCard } from "./AvailableUnitsCard";
 import { EditBattleBasicInfoCard } from "./EditBattleBasicInfoCard";
 import { ParticipantSideCard } from "./ParticipantSideCard";
 
-import { BATTLE_FORM_TAB, type BattleFormTabId } from "@/app/campaigns/[id]/dm/battles/new/battle-form-tabs";
+import { BATTLE_FORM_TAB, type BattleFormTabId } from "@/components/battle/battle-form-tabs";
 import { LoadingState } from "@/components/common/states";
 import { HudForm, HudFormPage, type HudTab } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
