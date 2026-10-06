@@ -1,6 +1,6 @@
 import { attackBodySchema, attackMutation } from "./attack-mutation";
 
-import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { BattleAccess, runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 
 export async function POST(
   req: Request,
@@ -8,7 +8,7 @@ export async function POST(
 ) {
   return runBattleMutation(req, {
     params: await params,
-    access: "member",
+    access: BattleAccess.MEMBER,
     requireStatus: "active",
     rateLimitScope: "attack",
     schema: attackBodySchema,

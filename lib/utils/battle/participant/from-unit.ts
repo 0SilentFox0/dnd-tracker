@@ -5,6 +5,7 @@ import { loadUnitRace } from "./load-race";
 
 import { AttackType, ParticipantSourceType } from "@/lib/constants/battle";
 import { ParticipantSide } from "@/lib/constants/battle";
+import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import { bakePassives } from "@/lib/utils/abilities/build/bake";
 import { collectUnitAbilities } from "@/lib/utils/abilities/build/collect";
 import { immunityAbilities } from "@/lib/utils/abilities/build/immunities";
@@ -101,7 +102,7 @@ export async function createBattleParticipantFromUnit(
       name: `${unit.name} #${instanceNumber}`,
       avatar: unit.avatar || undefined,
       side,
-      controlledBy: "dm",
+      controlledBy: CONTROLLED_BY_DM,
     },
     abilities: {
       level: unit.level,

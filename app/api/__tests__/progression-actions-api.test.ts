@@ -139,7 +139,6 @@ describe("progression actions", () => {
       spellSlots: {},
       immunities: [],
       strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10,
-      maxHp: 10, currentHp: 10, hitDice: "1d8",
     };
 
     vi.mocked(prisma.skillTree.findFirst).mockResolvedValue(tree as never);

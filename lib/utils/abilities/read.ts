@@ -2,7 +2,9 @@ import type { Prisma } from "@prisma/client";
 
 import { type Ability, AbilitySchema, type ConversionIssue, parseAbilities } from "@/lib/utils/abilities/schema";
 
-export type OwnerKind = "skill" | "race" | "artifact" | "artifactSet" | "unit";
+export const OwnerKind = { SKILL: "skill", RACE: "race", ARTIFACT: "artifact", ARTIFACT_SET: "artifactSet", UNIT: "unit" } as const;
+
+export type OwnerKind = (typeof OwnerKind)[keyof typeof OwnerKind];
 
 type OwnerRow = { id: string; abilities?: unknown };
 

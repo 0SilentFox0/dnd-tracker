@@ -191,7 +191,7 @@ export function calculateSpellDamageWithEnhancements(
     running += Math.floor((baseDamage * mods.percent) / 100);
 
     for (const e of mods.entries) {
-      if (e.percent) breakdown.push(`+ бонус ${e.label}: ${e.percent}% від ${baseDamage} (${e.percent >= 0 ? "+" : ""}${Math.floor((baseDamage * e.percent) / 100)})`);
+      if (e.percent) breakdown.push(`+ бонус ${e.label}: ${e.percent}% від ${baseDamage} (${signed(Math.floor((baseDamage * e.percent) / 100))})`);
     }
   }
 

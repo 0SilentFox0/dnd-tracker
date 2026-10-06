@@ -6,7 +6,7 @@ import type { EquippedItems, InventoryItem } from "./inventory";
 import type { BookSpell } from "./spells";
 
 import type { AbilityKey } from "@/lib/constants/abilities";
-import { type CharacterTypeValue } from "@/lib/constants/characters";
+import { type CharacterTypeValue, type GoalAuthorValue } from "@/lib/constants/characters";
 
 export type { AbilityKey };
 
@@ -16,7 +16,7 @@ export interface CharacterGoal {
   id: string;
   text: string;
   status: GoalStatus;
-  author: "dm" | "player";
+  author: GoalAuthorValue;
 }
 
 /**

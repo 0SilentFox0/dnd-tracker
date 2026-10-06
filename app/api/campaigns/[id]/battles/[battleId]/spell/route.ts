@@ -1,7 +1,7 @@
 import { spellSchema } from "./cast-spell-schema";
 import { createSpellMutation } from "./spell-mutation";
 
-import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { BattleAccess, runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 
 const mutate = createSpellMutation();
 
@@ -11,7 +11,7 @@ export async function POST(
 ) {
   return runBattleMutation(req, {
     params: await params,
-    access: "member",
+    access: BattleAccess.MEMBER,
     requireStatus: "active",
     rateLimitScope: "spell",
     schema: spellSchema,

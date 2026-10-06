@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
+import { characterSheetKey } from "./useCharacterSheet";
+
 import {
   createCharacter,
   deleteAllCharacters,
@@ -11,6 +13,7 @@ import {
 } from "@/lib/api/characters";
 import { type CharacterTypeValue } from "@/lib/constants/characters";
 import { useCrudMutation } from "@/lib/hooks/common";
+import { progressionCampaignKey, progressionKey } from "@/lib/hooks/skills/progression-keys";
 import { ENTITY_STALE_MS } from "@/lib/providers/query-provider";
 import type { Character, CharacterFormData } from "@/types/characters";
 
@@ -57,8 +60,8 @@ export function useUpdateCharacter(campaignId: string, characterId: string) {
     invalidateKeys: [
       ["characters", campaignId],
       ["character", campaignId, characterId],
-      ["character-progression", campaignId, characterId],
-      ["character-sheet", campaignId, characterId],
+      progressionKey(campaignId, characterId),
+      characterSheetKey(campaignId, characterId),
       ["battle-balance"],
     ],
   });
@@ -71,8 +74,8 @@ export function useLevelUpCharacter(campaignId: string) {
     invalidateKeys: [
       ["characters", campaignId],
       ["character", campaignId],
-      ["character-sheet", campaignId],
-      ["character-progression", campaignId],
+      characterSheetKey(campaignId),
+      progressionCampaignKey(campaignId),
       ["battle-balance"],
     ],
   });

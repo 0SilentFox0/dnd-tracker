@@ -7,6 +7,7 @@ import { type BattleToastApi, useBattleToast } from "./useBattleToast";
 import { type PusherConnectionState, usePusherBattleSync } from "./usePusherBattleSync";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import {
   useAddBattleParticipant,
   useAttack,
@@ -100,7 +101,7 @@ export function deriveTurn(battle: BattleScene, userId: string | null, isDM: boo
 
   const controls = (p: BattleParticipant) =>
     p.basicInfo.controlledBy === userId ||
-    (isDM && (p.basicInfo.id === dmControlledId || p.basicInfo.controlledBy === "dm" || p.basicInfo.side === ParticipantSide.ENEMY));
+    (isDM && (p.basicInfo.id === dmControlledId || p.basicInfo.controlledBy === CONTROLLED_BY_DM || p.basicInfo.side === ParticipantSide.ENEMY));
 
   const isMyTurn = battle.status === "active" && !!current && !!userId && controls(current);
 

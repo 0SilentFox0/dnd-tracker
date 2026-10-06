@@ -128,7 +128,7 @@ export interface BattleParticipantBasicInfo {
   name: string;
   avatar?: string;
   side: ParticipantSide;
-  controlledBy: string; // userId (для players) або "dm" (для NPC/units)
+  controlledBy: string; // userId (для players) або CONTROLLED_BY_DM (для NPC/units)
   isExtraTurnSlot?: boolean; // чи є цей слот додатковим ходом
 }
 

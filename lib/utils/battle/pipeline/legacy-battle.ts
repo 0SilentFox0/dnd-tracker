@@ -1,6 +1,7 @@
 import { PUSHER_DELTA_LIMIT_BYTES } from "./limits";
 
 import { CampaignRole } from "@/lib/constants/campaigns";
+import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import { battleChannelName, userChannelName } from "@/lib/pusher-channels";
 import type { BattleSceneState, LoadedBattle } from "@/lib/utils/battle/store";
 import type { BattleRefetchSignal, BattleScene, ClientBattleDelta } from "@/types/api";
@@ -70,7 +71,7 @@ export function buildPusherMessages(args: {
 
   const active = participants[after.turnIndex];
 
-  if (after.status === "active" && turnMoved && active && active.basicInfo.controlledBy !== "dm") {
+  if (after.status === "active" && turnMoved && active && active.basicInfo.controlledBy !== CONTROLLED_BY_DM) {
     messages.push({
       channel: userChannelName(active.basicInfo.controlledBy),
       event: "turn-started",

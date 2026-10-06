@@ -1,7 +1,6 @@
 /**
  * Створення BattleParticipant з Character
  */
-
 import type { CampaignSpellContext, CharacterFromPrisma } from "../types/participant";
 import { type EquippedArtifactRow, loadEquippedArtifactRows, toEquippedArtifacts } from "./extract-artifacts";
 import { extractAttacksFromCharacter } from "./extract-attacks";
@@ -13,6 +12,7 @@ import { buildSpellEnhancers } from "./spell-enhancers";
 
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import { bakePassives } from "@/lib/utils/abilities/build/bake";
 import { collectCharacterAbilities } from "@/lib/utils/abilities/build/collect";
 import { immunityAbilities } from "@/lib/utils/abilities/build/immunities";
@@ -115,7 +115,7 @@ export async function createBattleParticipantFromCharacter(
       name: character.name,
       avatar: character.avatar || undefined,
       side,
-      controlledBy: character.controlledBy || "dm",
+      controlledBy: character.controlledBy || CONTROLLED_BY_DM,
     },
     abilities: {
       level: character.level,

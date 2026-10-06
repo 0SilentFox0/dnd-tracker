@@ -14,7 +14,6 @@ const dm = (maxLevel = 20) => ({ userId: "dm", campaign: { id: "camp", maxLevel,
 const CHARACTER = {
   id: "ch", campaignId: "camp", race: "Ельф", level: 3, seenLevel: 3,
   strength: 30, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10,
-  maxHp: 20, currentHp: 20, hitDice: "1d8",
   spellSlots: { "1": { max: 3, current: 1 } },
 };
 

@@ -30,7 +30,9 @@ import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 export { PUSHER_DELTA_LIMIT_BYTES } from "./limits";
 
-export type BattleAccess = "dm" | "turnController" | "currentController" | "member";
+export const BattleAccess = { DM: "dm", TURN_CONTROLLER: "turnController", CURRENT_CONTROLLER: "currentController", MEMBER: "member" } as const;
+
+export type BattleAccess = (typeof BattleAccess)[keyof typeof BattleAccess];
 
 export interface BattleMutationContext {
   scene: BattleSceneState;
@@ -69,13 +71,13 @@ export interface RunBattleMutationOptions<TBody> {
 }
 
 function assertAccess(access: BattleAccess, ctx: BattleMutationContext): void {
-  if (access === "member" || ctx.isDM) return;
+  if (access === BattleAccess.MEMBER || ctx.isDM) return;
 
-  if (access === "dm") throw new BattleAccessError(403, "Лише DM");
+  if (access === BattleAccess.DM) throw new BattleAccessError(403, "Лише DM");
 
   const current = ctx.participants[ctx.scene.turnIndex];
 
-  if (access === "currentController") {
+  if (access === BattleAccess.CURRENT_CONTROLLER) {
     if (!current || current.basicInfo.controlledBy !== ctx.userId) {
       throw new BattleRuleError("not_your_turn", "Зараз не ваш хід");
     }

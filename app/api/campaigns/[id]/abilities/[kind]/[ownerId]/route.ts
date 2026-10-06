@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/db";
-import { type OwnerKind, readAbilities } from "@/lib/utils/abilities/read";
+import { OwnerKind, readAbilities } from "@/lib/utils/abilities/read";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 
@@ -9,20 +9,20 @@ async function findOwner(kind: OwnerKind, campaignId: string, id: string) {
   const where = { id, campaignId };
 
   switch (kind) {
-    case "skill":
+    case OwnerKind.SKILL:
       return prisma.skill.findFirst({ where });
-    case "race":
+    case OwnerKind.RACE:
       return prisma.race.findFirst({ where });
-    case "artifact":
+    case OwnerKind.ARTIFACT:
       return prisma.artifact.findFirst({ where });
-    case "artifactSet":
+    case OwnerKind.ARTIFACT_SET:
       return prisma.artifactSet.findFirst({ where });
-    case "unit":
+    case OwnerKind.UNIT:
       return prisma.unit.findFirst({ where });
   }
 }
 
-const KINDS = new Set<OwnerKind>(["skill", "race", "artifact", "artifactSet", "unit"]);
+const KINDS = new Set<OwnerKind>(Object.values(OwnerKind));
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string; kind: string; ownerId: string }> }) {
   try {
