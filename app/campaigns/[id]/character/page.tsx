@@ -1,5 +1,6 @@
 import { CharacterProfile } from "@/components/character-profile";
 import { EmptyState } from "@/components/common/states";
+import { HudPage } from "@/components/hud/page";
 import { requireCampaignMember } from "@/lib/campaigns/access";
 import { CharacterType } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
@@ -16,9 +17,9 @@ export default async function CharacterPage({ params, searchParams }: { params: 
 
   if (!character) {
     return (
-      <div className="container mx-auto p-4">
+      <HudPage>
         <EmptyState title="У вас поки немає персонажа в цій кампанії" />
-      </div>
+      </HudPage>
     );
   }
 

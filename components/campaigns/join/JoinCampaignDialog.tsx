@@ -63,6 +63,7 @@ export function JoinCampaignDialog() {
         Приєднатися до кампанії
       </Button>
       <ResponsiveDialog
+        hud
         open={open}
         onOpenChange={handleOpenChange}
         title="Приєднатися до кампанії"
@@ -96,14 +97,14 @@ export function JoinCampaignDialog() {
           </div>
 
           {error && (
-            <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md text-sm text-red-700 dark:text-red-400">
+            <div className="flex items-center gap-2 p-3 rounded-md bg-[#1a140f] text-sm text-[#d0705c] shadow-[inset_0_0_0_1px_#d0705c]">
               <AlertCircle className="h-4 w-4 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           {success && (
-            <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md text-sm text-green-700 dark:text-green-400">
+            <div className="flex items-center gap-2 p-3 rounded-md bg-[#1a140f] text-sm text-[#c9b37a] shadow-[inset_0_0_0_1px_#c9b37a]">
               <CheckCircle2 className="h-4 w-4 shrink-0" />
               <span>Успішно приєднано! Перенаправлення...</span>
             </div>

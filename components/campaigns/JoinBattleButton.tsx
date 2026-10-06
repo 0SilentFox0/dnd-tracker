@@ -23,11 +23,8 @@ export function JoinBattleButton() {
       >
         <Button
           size="lg"
-          className={
-            hasActiveBattle
-              ? "animate-pulse bg-green-600 hover:bg-green-700"
-              : "bg-gray-400 cursor-not-allowed"
-          }
+          variant={hasActiveBattle ? "default" : "outline"}
+          className={hasActiveBattle ? "animate-pulse" : "cursor-not-allowed"}
           disabled={!hasActiveBattle || isLoading}
         >
           {isLoading ? "⚔️ Завантаження..." : "⚔️ JOIN BATTLE"}

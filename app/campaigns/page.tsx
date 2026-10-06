@@ -2,16 +2,9 @@ import Link from "next/link";
 import { Map as MapIcon } from "lucide-react";
 
 import { JoinCampaignDialog } from "@/components/campaigns/join/JoinCampaignDialog";
-import { EmptyState } from "@/components/common/states";
-import { Badge } from "@/components/ui/badge";
+import { EmptyState, ErrorState } from "@/components/common/states";
+import { HudCard, HudPage, HudPageHeader, HudPanel } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { getAuthUser } from "@/lib/auth";
 import { CampaignRole } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
@@ -70,26 +63,21 @@ export default async function CampaignsPage() {
       prismaError?.message?.includes("Can't reach database")
     ) {
       return (
-        <div className="container mx-auto p-4">
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-            <h2 className="text-xl font-bold text-yellow-800 mb-2">
-              Помилка підключення до бази даних
-            </h2>
-            <p className="text-yellow-700 mb-4">
-              Не вдається підключитися до бази даних. Перевірте DATABASE_URL в
-              .env файлі.
-            </p>
-            <div className="bg-white p-4 rounded border border-yellow-300">
-              <p className="text-sm font-semibold mb-2">Як виправити:</p>
-              <ol className="text-sm text-gray-700 list-decimal list-inside space-y-1">
+        <HudPage>
+          <HudPanel className="space-y-3">
+            <h2 className="hud-sc text-xl text-[#efe5d2]">Помилка підключення до бази даних</h2>
+            <ErrorState error={new Error("Не вдається підключитися до бази даних. Перевірте DATABASE_URL в .env файлі.")} />
+            <div className="rounded-lg bg-[#1a140f] p-4">
+              <p className="mb-2 text-sm font-semibold text-[#c9b37a]">Як виправити:</p>
+              <ol className="list-inside list-decimal space-y-1 text-sm text-[#e6dccb]">
                 <li>Відкрийте Supabase Dashboard → Settings → Database</li>
                 <li>Скопіюйте Connection Pooling URI (порт 6543)</li>
                 <li>Оновіть DATABASE_URL в .env файлі</li>
                 <li>Перезапустіть dev сервер</li>
               </ol>
             </div>
-          </div>
-        </div>
+          </HudPanel>
+        </HudPage>
       );
     }
 
@@ -97,58 +85,44 @@ export default async function CampaignsPage() {
   }
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <h1 className="text-3xl font-bold">Мої Кампанії</h1>
-        <div className="flex gap-2 shrink-0">
-          <JoinCampaignDialog />
-          <Link href="/campaigns/new">
-            <Button className="whitespace-nowrap w-full md:w-auto">
-              + Нова Кампанія
-            </Button>
-          </Link>
-        </div>
-      </div>
+    <HudPage>
+      <HudPageHeader
+        title="Мої Кампанії"
+        actions={
+          <>
+            <JoinCampaignDialog />
+            <Link href="/campaigns/new">
+              <Button className="whitespace-nowrap">+ Нова Кампанія</Button>
+            </Link>
+          </>
+        }
+      />
 
-      {/* Список кампаній */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
         {campaigns.map((campaign) => {
           const userMember = campaign.members.find((m) => m.userId === userId);
 
           const isDM = userMember?.role === CampaignRole.DM;
 
           return (
-            <Link key={campaign.id} href={`/campaigns/${campaign.id}`}>
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <CardTitle>{campaign.name}</CardTitle>
-                    {isDM && <Badge variant="default">DM</Badge>}
-                  </div>
-                  {campaign.description && (
-                    <CardDescription>{campaign.description}</CardDescription>
+            <HudCard key={campaign.id} asChild className="space-y-2">
+              <Link href={`/campaigns/${campaign.id}`}>
+                <div className="flex items-start justify-between gap-2">
+                  <h2 className="hud-sc text-lg text-[#efe5d2]">{campaign.name}</h2>
+                  {isDM && (
+                    <span className="shrink-0 rounded-full bg-[linear-gradient(135deg,#8a6414,#e6c25a_55%,#8a6414)] px-2 text-[11px] text-[#2a1d05]">DM</span>
                   )}
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2 text-sm text-muted-foreground">
-                    <p>Рівень: до {campaign.maxLevel}</p>
-                    <p>
-                      Гравців:{" "}
-                      {
-                        campaign.members.filter((m) => m.role === CampaignRole.PLAYER)
-                          .length
-                      }
-                    </p>
-                    <p>
-                      Код запрошення:{" "}
-                      <code className="bg-muted px-1 rounded">
-                        {campaign.inviteCode}
-                      </code>
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
+                </div>
+                {campaign.description && <p className="text-sm text-[#8f8473]">{campaign.description}</p>}
+                <div className="space-y-1 text-sm text-[#8f8473]">
+                  <p>Рівень: до {campaign.maxLevel}</p>
+                  <p>Гравців: {campaign.members.filter((m) => m.role === CampaignRole.PLAYER).length}</p>
+                  <p>
+                    Код запрошення: <code className="rounded bg-[#1a140f] px-1.5 font-mono text-[#e6dccb]">{campaign.inviteCode}</code>
+                  </p>
+                </div>
+              </Link>
+            </HudCard>
           );
         })}
       </div>
@@ -164,6 +138,6 @@ export default async function CampaignsPage() {
           }
         />
       )}
-    </div>
+    </HudPage>
   );
 }
