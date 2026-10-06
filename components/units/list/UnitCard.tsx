@@ -7,6 +7,7 @@ import { UnitQuickStatsEditor } from "./UnitQuickStatsEditor";
 
 import { AbilitySummary } from "@/components/abilities";
 import { EntityIcon } from "@/components/common/EntityIcon";
+import { HudCard } from "@/components/hud/page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/lib/hooks/common";
@@ -70,7 +71,7 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
   const primaryAttack = primaryIdx >= 0 ? attacks[primaryIdx] : null;
 
   return (
-    <div className="border rounded-lg p-4 hover:shadow-md transition-shadow space-y-3 flex flex-col justify-between relative group/card">
+    <HudCard className="group/card relative flex flex-col justify-between space-y-3">
       <div
         draggable
         onDragStart={handleDragStart}
@@ -83,7 +84,7 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
         <div className="flex items-start gap-3">
           <EntityIcon src={unit.avatar} name={unit.name} size={80} className="size-16 rounded-lg text-2xl sm:size-20" />
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-base">{unit.name}</h3>
+            <h3 className="text-base font-semibold text-[#efe5d2]">{unit.name}</h3>
             <div className="text-sm text-muted-foreground space-y-1">
               <div>
                 Рівень {unit.level} • HP {unit.maxHp}
@@ -157,6 +158,6 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
           <X className="h-4 w-4" />
         </Button>
       </div>
-    </div>
+    </HudCard>
   );
 }
