@@ -19,7 +19,7 @@ export function ArtifactSetMembersPicker({
   return (
     <HudSection title="Артефакти в сеті" className="space-y-3">
       <p className="text-xs text-muted-foreground">
-        Бонус спрацьовує лише якщо персонаж екіпірував усі обрані тут предмети.
+        Бонус спрацьовує лише якщо персонаж екіпірував усі обрані тут артефакти.
         Доступні лише артефакти без іншого сету або вже з цього сету.
       </p>
       <div className="border rounded-md divide-y max-h-72 overflow-y-auto">

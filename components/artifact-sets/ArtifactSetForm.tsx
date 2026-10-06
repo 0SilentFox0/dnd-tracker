@@ -107,7 +107,7 @@ export function ArtifactSetForm({
     },
     {
       id: ARTIFACT_SET_FORM_TAB.members,
-      label: "Предмети",
+      label: "Артефакти",
       content: <ArtifactSetMembersPicker artifacts={form.selectableArtifacts} selectedIds={form.selectedIds} onToggle={form.toggleArtifact} />,
     },
     {
