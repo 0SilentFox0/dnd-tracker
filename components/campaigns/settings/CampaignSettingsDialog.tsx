@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 
+import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
@@ -47,6 +49,7 @@ export function CampaignSettingsDialog({ campaignId, campaign, open, onOpenChang
       onOpenChange={onOpenChange}
       title="Налаштування кампанії"
       description="Оновіть основні параметри кампанії"
+      hud
       footer={
         <>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>
@@ -58,65 +61,55 @@ export function CampaignSettingsDialog({ campaignId, campaign, open, onOpenChang
         </>
       }
     >
-      <div className="space-y-4">
-        <LabeledInput id="campaign-name" label="Назва" value={fields.name} onChange={(e) => set("name", e.target.value)} disabled={isSaving} />
-        <div className="space-y-2">
-          <Label htmlFor="campaign-description">Опис</Label>
-          <Textarea
-            id="campaign-description"
-            value={fields.description}
-            onChange={(e) => set("description", e.target.value)}
-            disabled={isSaving}
-            rows={3}
-          />
+      <HudSection title="Кампанія">
+        <div className="space-y-4">
+          <LabeledInput id="campaign-name" label="Назва" value={fields.name} onChange={(e) => set("name", e.target.value)} disabled={isSaving} />
+          <div className="space-y-2">
+            <Label htmlFor="campaign-description">Опис</Label>
+            <Textarea id="campaign-description" value={fields.description} onChange={(e) => set("description", e.target.value)} disabled={isSaving} rows={3} />
+          </div>
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          <LabeledInput
-            id="campaign-max-level"
-            label="Макс. рівень"
-            type="number"
-            min="1"
-            max="30"
-            value={fields.maxLevel}
-            onChange={(e) => set("maxLevel", parseInt(e.target.value) || 1)}
-            disabled={isSaving}
-          />
-          <LabeledInput
-            id="campaign-xp"
-            label="Множник XP"
-            type="number"
-            min="1"
-            max="10"
-            step="0.1"
-            value={fields.xpMultiplier}
-            onChange={(e) => set("xpMultiplier", parseFloat(e.target.value) || 1)}
-            disabled={isSaving}
-          />
+      </HudSection>
+      <HudSection title="Правила">
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <LabeledInput
+              id="campaign-max-level"
+              label="Макс. рівень"
+              type="number"
+              min="1"
+              max="30"
+              value={fields.maxLevel}
+              onChange={(e) => set("maxLevel", parseInt(e.target.value) || 1)}
+              disabled={isSaving}
+            />
+            <LabeledInput
+              id="campaign-xp"
+              label="Множник XP"
+              type="number"
+              min="1"
+              max="10"
+              step="0.1"
+              value={fields.xpMultiplier}
+              onChange={(e) => set("xpMultiplier", parseFloat(e.target.value) || 1)}
+              disabled={isSaving}
+            />
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox id="allow-player-edit" checked={fields.allowPlayerEdit} onCheckedChange={(v) => set("allowPlayerEdit", v === true)} disabled={isSaving} />
+            <Label htmlFor="allow-player-edit">Дозволити гравцям редагувати своїх персонажів</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox id="campaign-status" checked={fields.status === "active"} onCheckedChange={(v) => set("status", v === true ? "active" : "archived")} disabled={isSaving} />
+            <Label htmlFor="campaign-status">Кампанія активна</Label>
+          </div>
         </div>
-        <div className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            id="allow-player-edit"
-            checked={fields.allowPlayerEdit}
-            onChange={(e) => set("allowPlayerEdit", e.target.checked)}
-            disabled={isSaving}
-            className="rounded"
-          />
-          <Label htmlFor="allow-player-edit">Дозволити гравцям редагувати своїх персонажів</Label>
-        </div>
-        <div className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            id="campaign-status"
-            checked={fields.status === "active"}
-            onChange={(e) => set("status", e.target.checked ? "active" : "archived")}
-            disabled={isSaving}
-            className="rounded"
-          />
-          <Label htmlFor="campaign-status">Кампанія активна</Label>
-        </div>
-        {error && <p className="text-sm text-destructive">{error}</p>}
-      </div>
+      </HudSection>
+      {error && (
+        <p role="alert" className="mt-4 rounded-md border border-[#d0705c]/50 bg-[#d0705c]/10 px-3 py-2 text-sm text-[#f0b4a6]">
+          {error}
+        </p>
+      )}
     </ResponsiveDialog>
   );
 }
