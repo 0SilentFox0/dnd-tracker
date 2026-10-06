@@ -18,7 +18,7 @@ function Chip({ label, short, value }: { label: string; short: string; value: st
   );
 }
 
-export function ProfileHero({ actions, ref }: { actions?: ReactNode; ref?: Ref<HTMLElement> }) {
+export function ProfileHero({ actions, badge, ref }: { actions?: ReactNode; badge?: ReactNode; ref?: Ref<HTMLElement> }) {
   const { sheet } = useProfile();
 
   const [hpOpen, setHpOpen] = useState(false);
@@ -36,6 +36,7 @@ export function ProfileHero({ actions, ref }: { actions?: ReactNode; ref?: Ref<H
               {id.level} рів. · {id.className}
               {id.subclass ? ` (${id.subclass})` : ""} ·
             </span>
+            {badge}
             {id.raceIcon && <OptimizedImage src={id.raceIcon} alt="" width={14} height={14} className="size-3.5 shrink-0 rounded-sm" />}
             <span className="truncate">
               {id.race}
