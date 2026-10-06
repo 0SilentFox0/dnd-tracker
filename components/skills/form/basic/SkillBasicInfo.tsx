@@ -24,7 +24,7 @@ export function SkillBasicInfo({
   const { name, description, icon, setters } = basicInfo;
 
   return (
-    <div className="rounded-md border p-4 space-y-3">
+    <div className="space-y-3">
       <LabeledInput
         id="skill-name"
         label="Назва"

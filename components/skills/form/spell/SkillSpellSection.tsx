@@ -7,13 +7,7 @@ import { SkillSpellEnhancement } from "./SkillSpellEnhancement";
 import { SkillSpellSelector } from "./SkillSpellSelector";
 
 import { SpellMultiSelect } from "@/components/characters/spells/SpellMultiSelect";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Label } from "@/components/ui/label";
+import { HudSection } from "@/components/hud/form";
 import type { SpellEnhancementType } from "@/lib/constants/spell-enhancement";
 
 interface SpellOption {
@@ -102,57 +96,55 @@ export function SkillSpellSection({
   );
 
   return (
-    <div className="space-y-4 rounded-md border p-4">
-      <div className="grid gap-4 md:grid-cols-2">
-        <SkillSpellSelector
-          spellId={spellId}
-          spells={spells}
-          onSpellIdChange={spellSetters.setSpellId}
-          label="Пов'язане заклинання"
-          placeholder="Не обрано"
-          noneLabel="Не обрано"
-        />
-        <SkillSpellSelector
-          id="skill-granted-spell"
-          spellId={grantedSpellId}
-          spells={spells}
-          onSpellIdChange={spellSetters.setGrantedSpellId}
-          label="Скіл додає заклинання"
-          placeholder="Не додає заклинання"
-          noneLabel="Не додає заклинання"
-        />
-      </div>
-      <p className="text-xs text-muted-foreground">
-        Поле «Пов&apos;язане заклинання» потрібне для модифікаторів ефекту, таргету
-        тощо. Заклинання, які стають багатоціль у бою, обираються окремо нижче —
-        без прив&apos;язки до цього списку.
-      </p>
+    <>
+      <HudSection title="Заклинання">
+        <div className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <SkillSpellSelector
+              spellId={spellId}
+              spells={spells}
+              onSpellIdChange={spellSetters.setSpellId}
+              label="Пов'язане заклинання"
+              placeholder="Не обрано"
+              noneLabel="Не обрано"
+            />
+            <SkillSpellSelector
+              id="skill-granted-spell"
+              spellId={grantedSpellId}
+              spells={spells}
+              onSpellIdChange={spellSetters.setGrantedSpellId}
+              label="Скіл додає заклинання"
+              placeholder="Не додає заклинання"
+              noneLabel="Не додає заклинання"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Поле «Пов&apos;язане заклинання» потрібне для модифікаторів ефекту, таргету
+            тощо. Заклинання, які стають багатоціль у бою, обираються окремо нижче —
+            без прив&apos;язки до цього списку.
+          </p>
+        </div>
+      </HudSection>
 
-      <div className="space-y-2 rounded-lg border bg-muted/20 p-3">
-        <Label>Заклинання для багатоцільового касту</Label>
-        <p className="text-xs text-muted-foreground">
-          У списку — усі заклинання бібліотеки кампанії. У бою кілька цілей
-          з’являється для заклинань типу «одна ціль», якщо вони тут обрані;
-          AoE вже багатоціль, без цілі — без зміни поведінки. Не залежить від
-          поля «Пов&apos;язане заклинання».
-        </p>
-        <SpellMultiSelect
-          campaignId={campaignId}
-          selectedSpellIds={spellAoeSpellIds}
-          onSelectionChange={enhancementSetters.setSpellAoeSpellIds}
-        />
-      </div>
+      <HudSection title="Заклинання для багатоцільового касту">
+        <div className="space-y-2">
+          <p className="text-xs text-muted-foreground">
+            У списку — усі заклинання бібліотеки кампанії. У бою кілька цілей
+            з’являється для заклинань типу «одна ціль», якщо вони тут обрані;
+            AoE вже багатоціль, без цілі — без зміни поведінки. Не залежить від
+            поля «Пов&apos;язане заклинання».
+          </p>
+          <SpellMultiSelect
+            campaignId={campaignId}
+            selectedSpellIds={spellAoeSpellIds}
+            onSelectionChange={enhancementSetters.setSpellAoeSpellIds}
+          />
+        </div>
+      </HudSection>
 
-      <Accordion type="single" collapsible className="border rounded-lg">
-        <AccordionItem value="spell-enhancement">
-          <AccordionTrigger className="px-4">
-            <span className="font-medium">Інші покращення заклинань</span>
-          </AccordionTrigger>
-          <AccordionContent className="px-4 pb-4 space-y-4">
-            <SkillSpellEnhancement value={enhancementValue} spells={spells} actions={enhancementActions} />
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-    </div>
+      <HudSection title="Інші покращення заклинань">
+        <SkillSpellEnhancement value={enhancementValue} spells={spells} actions={enhancementActions} />
+      </HudSection>
+    </>
   );
 }

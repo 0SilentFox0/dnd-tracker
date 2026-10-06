@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { LoadingState, QueryState } from "@/components/common/states";
+import { HudFormPage } from "@/components/hud/form";
 import { SkillCreateForm } from "@/components/skills/form/SkillCreateForm";
 import { Button } from "@/components/ui/button";
 import { useSkill } from "@/lib/hooks/skills";
@@ -27,8 +28,15 @@ export function EditSkillClient({
   const query = useSkill(campaignId, skillId);
 
   return (
-    <div className="container mx-auto p-4 max-w-4xl space-y-4">
-      <QueryState query={query} loading={<LoadingState rows={6} label="Завантаження скіла…" />}>
+    <>
+      <QueryState
+        query={query}
+        loading={
+          <HudFormPage title="Редагувати скіл">
+            <LoadingState rows={6} label="Завантаження скіла…" />
+          </HudFormPage>
+        }
+      >
         {(skill) => (
           <SkillCreateForm
             campaignId={campaignId}
@@ -40,10 +48,12 @@ export function EditSkillClient({
         )}
       </QueryState>
       {query.isError && (
-        <Link href={`/campaigns/${campaignId}/dm/skills`}>
-          <Button variant="outline">Назад до бібліотеки скілів</Button>
-        </Link>
+        <div className="p-4">
+          <Link href={`/campaigns/${campaignId}/dm/skills`}>
+            <Button variant="outline">Назад до бібліотеки скілів</Button>
+          </Link>
+        </div>
       )}
-    </div>
+    </>
   );
 }

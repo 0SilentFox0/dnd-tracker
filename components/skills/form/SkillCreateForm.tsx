@@ -2,19 +2,14 @@
 
 import { useRouter } from "next/navigation";
 
+import { SKILL_FORM_TAB, type SkillFormTabId } from "./skill-form-tabs";
+
 import { AbilityListEditor, withAbilityErrors } from "@/components/abilities";
-import { ActionBar } from "@/components/common/ActionBar";
+import { HudForm, HudFormPage, type HudTab } from "@/components/hud/form";
 import { SkillBasicInfo } from "@/components/skills/form/basic";
 import { SkillMainSkillSection } from "@/components/skills/form/main-skill";
 import { SkillSpellSection } from "@/components/skills/form/spell";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { useSkillForm } from "@/lib/hooks/skills";
 
 interface SpellOption {
@@ -64,48 +59,55 @@ export function SkillCreateForm({
     initialMainSkills
   );
 
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{isEdit ? "Редагувати скіл" : "Створити скіл"}</CardTitle>
-        <CardDescription>
-          {isEdit
-            ? "Оновіть інформацію про скіл"
-            : "Додайте новий скіл з його характеристиками та ефектами"}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {error && <p className="text-sm text-destructive mb-4">{error}</p>}
-        <form onSubmit={handleSubmit} className="space-y-5">
+  const tabs: HudTab<SkillFormTabId>[] = [
+    {
+      id: SKILL_FORM_TAB.basic,
+      label: "Основне",
+      content: (
+        <div className="space-y-5">
           <SkillBasicInfo basicInfo={basicInfo} />
+          <SkillMainSkillSection mainSkill={mainSkill} mainSkills={mainSkills} />
+        </div>
+      ),
+    },
+    {
+      id: SKILL_FORM_TAB.spell,
+      label: "Заклинання",
+      content: <SkillSpellSection campaignId={campaignId} spell={spell} spellEnhancement={spellEnhancement} spells={spells} />,
+    },
+    {
+      id: SKILL_FORM_TAB.abilities,
+      label: "Вміння",
+      invalid: abilitiesGroup.errors > 0,
+      content: (
+        <AbilityListEditor
+          campaignId={campaignId}
+          value={abilitiesGroup.abilities}
+          onChange={abilitiesGroup.setAbilities}
+          issues={abilitiesGroup.issues}
+          onValidityChange={abilitiesGroup.onValidityChange}
+        />
+      ),
+    },
+  ];
 
-          <SkillSpellSection
-            campaignId={campaignId}
-            spell={spell}
-            spellEnhancement={spellEnhancement}
-            spells={spells}
-          />
-
-          <SkillMainSkillSection
-            mainSkill={mainSkill}
-            mainSkills={mainSkills}
-          />
-
-          <AbilityListEditor
-            campaignId={campaignId}
-            value={abilitiesGroup.abilities}
-            onChange={abilitiesGroup.setAbilities}
-            issues={abilitiesGroup.issues}
-            onValidityChange={abilitiesGroup.onValidityChange}
-          />
-
-          <ActionBar>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => router.push(`/campaigns/${campaignId}/dm/skills`)}
-              disabled={isSaving}
-            >
+  return (
+    <HudFormPage
+      title={isEdit ? "Редагувати скіл" : "Створити скіл"}
+      aside={isEdit ? "Оновіть інформацію про скіл" : "Додайте новий скіл з його характеристиками та ефектами"}
+    >
+      {error && (
+        <p role="alert" className="mx-4 mt-3 rounded-md border border-[#d0705c]/50 bg-[#d0705c]/10 px-3 py-2 text-sm text-[#f0b4a6]">
+          {error}
+        </p>
+      )}
+      <HudForm
+        id="skill-form"
+        onSubmit={handleSubmit}
+        tabs={tabs}
+        actions={
+          <>
+            <Button type="button" variant="outline" onClick={() => router.push(`/campaigns/${campaignId}/dm/skills`)} disabled={isSaving}>
               Скасувати
             </Button>
             <Button type="submit" disabled={isSaving || !abilitiesGroup.valid}>
@@ -115,9 +117,9 @@ export function SkillCreateForm({
                   : "Створення..."
                 : withAbilityErrors(isEdit ? "Зберегти зміни" : "Створити скіл", abilitiesGroup.errors)}
             </Button>
-          </ActionBar>
-        </form>
-      </CardContent>
-    </Card>
+          </>
+        }
+      />
+    </HudFormPage>
   );
 }
