@@ -62,7 +62,7 @@ describe("GET progression", () => {
     const { select } = vi.mocked(prisma.skill.findMany).mock.calls[0][0] as { select?: Record<string, boolean> };
 
     expect(Object.keys(select ?? {}).sort()).toEqual([
-      "abilities", "bonuses", "combatStats", "description", "icon", "id", "name", "skillTriggers", "spellData", "spellEnhancementData", "spellGroupId", "spellNewSpellId",
+      "abilities", "description", "icon", "id", "name", "spellEnhancementData", "spellGroupId", "spellNewSpellId",
     ]);
   });
 

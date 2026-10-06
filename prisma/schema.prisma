@@ -42,12 +42,10 @@ model Campaign {
   characters      Character[]
   mainSkills      MainSkill[]
   races           Race[]
-  racialAbilities RacialAbility[]
   skillTrees      SkillTree[]
   skills          Skill[]
   spellGroups     SpellGroup[]
   spells          Spell[]
-  unitGroups      UnitGroup[]
   units           Unit[]
 
   @@index([dmUserId])
@@ -69,69 +67,54 @@ model CampaignMember {
 }
 
 model Character {
-  id                   String              @id @default(cuid())
-  campaignId           String
-  type                 String
-  controlledBy         String
-  name                 String
-  level                Int                 @default(1)
-  class                String
-  subclass             String?
-  race                 String
-  subrace              String?
-  alignment            String?
-  background           String?
-  experience           Int                 @default(0)
-  avatar               String?
-  strength             Int                 @default(10)
-  dexterity            Int                 @default(10)
-  constitution         Int                 @default(10)
-  intelligence         Int                 @default(10)
-  wisdom               Int                 @default(10)
-  charisma             Int                 @default(10)
-  armorClass           Int                 @default(10)
-  initiative           Int                 @default(0)
-  speed                Int                 @default(30)
-  maxHp                Int                 @default(10)
-  currentHp            Int                 @default(10)
-  tempHp               Int                 @default(0)
-  hitDice              String              @default("1d8")
-  proficiencyBonus     Int                 @default(2)
-  savingThrows         Json                @default("{}")
-  skills               Json                @default("{}")
-  passivePerception    Int                 @default(10)
-  passiveInvestigation Int                 @default(10)
-  passiveInsight       Int                 @default(10)
-  spellcastingClass    String?
-  spellcastingAbility  String?
-  spellSaveDC          Int?
-  spellAttackBonus     Int?
-  spellSlots           Json                @default("{}")
-  knownSpells          Json                @default("[]")
-  languages            Json                @default("[]")
-  proficiencies        Json                @default("{}")
-  personalityTraits    String?
-  ideals               String?
-  bonds                String?
-  flaws                String?
-  skillTreeProgress    Json                @default("{}")
-  seenLevel            Int?
-  createdAt            DateTime            @default(now())
-  updatedAt            DateTime            @updatedAt
-  immunities           Json                @default("[]")
-  morale               Int                 @default(0)
-  maxTargets           Int                 @default(1)
-  minTargets           Int                 @default(1)
-  personalSkillId      String?
-  primaryAbility       String?
-  goals                Json                @default("[]")
-  hpMultiplier         Float?
-  meleeMultiplier      Float?
-  rangedMultiplier     Float?
-  inventory            CharacterInventory?
-  characterSkills      CharacterSkills[]
-  campaign             Campaign            @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  user                 User                @relation(fields: [controlledBy], references: [id], onDelete: SetNull)
+  id                  String              @id @default(cuid())
+  campaignId          String
+  type                String
+  controlledBy        String
+  name                String
+  level               Int                 @default(1)
+  class               String
+  subclass            String?
+  race                String
+  subrace             String?
+  alignment           String?
+  background          String?
+  experience          Int                 @default(0)
+  avatar              String?
+  strength            Int                 @default(10)
+  dexterity           Int                 @default(10)
+  constitution        Int                 @default(10)
+  intelligence        Int                 @default(10)
+  wisdom              Int                 @default(10)
+  charisma            Int                 @default(10)
+  armorClass          Int                 @default(10)
+  initiative          Int                 @default(0)
+  speed               Int                 @default(30)
+  savingThrows        Json                @default("{}")
+  skills              Json                @default("{}")
+  spellcastingAbility String?
+  spellSlots          Json                @default("{}")
+  knownSpells         Json                @default("[]")
+  languages           Json                @default("[]")
+  proficiencies       Json                @default("{}")
+  skillTreeProgress   Json                @default("{}")
+  seenLevel           Int?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  immunities          Json                @default("[]")
+  morale              Int                 @default(0)
+  maxTargets          Int                 @default(1)
+  minTargets          Int                 @default(1)
+  personalSkillId     String?
+  primaryAbility      String?
+  goals               Json                @default("[]")
+  hpMultiplier        Float?
+  meleeMultiplier     Float?
+  rangedMultiplier    Float?
+  inventory           CharacterInventory?
+  characterSkills     CharacterSkills[]
+  campaign            Campaign            @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  user                User                @relation(fields: [controlledBy], references: [id], onDelete: SetNull)
 
   @@index([campaignId])
   @@index([controlledBy])
@@ -139,58 +122,38 @@ model Character {
 }
 
 model Unit {
-  id               String     @id @default(cuid())
+  id               String   @id @default(cuid())
   campaignId       String
   name             String
-  groupId          String?
   raceId           String?
-  groupColor       String?
-  level            Int        @default(1)
-  strength         Int        @default(10)
-  dexterity        Int        @default(10)
-  constitution     Int        @default(10)
-  intelligence     Int        @default(10)
-  wisdom           Int        @default(10)
-  charisma         Int        @default(10)
-  armorClass       Int        @default(10)
-  initiative       Int        @default(0)
-  speed            Int        @default(30)
-  maxHp            Int        @default(10)
-  proficiencyBonus Int        @default(2)
-  attacks          Json       @default("[]")
-  specialAbilities Json       @default("[]")
-  knownSpells      Json       @default("[]")
+  level            Int      @default(1)
+  strength         Int      @default(10)
+  dexterity        Int      @default(10)
+  constitution     Int      @default(10)
+  intelligence     Int      @default(10)
+  wisdom           Int      @default(10)
+  charisma         Int      @default(10)
+  armorClass       Int      @default(10)
+  initiative       Int      @default(0)
+  speed            Int      @default(30)
+  maxHp            Int      @default(10)
+  proficiencyBonus Int      @default(2)
+  attacks          Json     @default("[]")
+  knownSpells      Json     @default("[]")
   avatar           String?
-  createdAt        DateTime   @default(now())
-  damageModifier   String?
-  immunities       Json       @default("[]")
-  race             String?
-  morale           Int        @default(0)
-  maxTargets       Int        @default(1)
-  minTargets       Int        @default(1)
+  createdAt        DateTime @default(now())
+  immunities       Json     @default("[]")
+  morale           Int      @default(0)
+  maxTargets       Int      @default(1)
+  minTargets       Int      @default(1)
   abilities        Json?
-  campaign         Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  unitGroup        UnitGroup? @relation(fields: [groupId], references: [id])
-  raceRef          Race?      @relation(fields: [raceId], references: [id], onDelete: SetNull)
-  spellsSummoning  Spell[]    @relation("SpellSummonUnit")
+  campaign         Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  race             Race?    @relation(fields: [raceId], references: [id], onDelete: SetNull)
+  spellsSummoning  Spell[]  @relation("SpellSummonUnit")
 
   @@index([campaignId])
   @@index([raceId])
   @@map("units")
-}
-
-model UnitGroup {
-  id             String   @id @default(cuid())
-  campaignId     String
-  name           String
-  color          String
-  createdAt      DateTime @default(now())
-  damageModifier String?
-  campaign       Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  units          Unit[]
-
-  @@index([campaignId])
-  @@map("unit_groups")
 }
 
 model Spell {
@@ -248,21 +211,20 @@ model SpellGroup {
 }
 
 model Artifact {
-  id             String       @id @default(cuid())
-  campaignId     String
-  name           String
-  description    String?
-  rarity         String?
-  slot           String
-  bonuses        Json         @default("{}")
-  modifiers      Json         @default("[]")
-  passiveAbility Json?
-  setId          String?
-  icon           String?
-  createdAt      DateTime     @default(now())
-  abilities      Json?
-  campaign       Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  artifactSet    ArtifactSet? @relation(fields: [setId], references: [id])
+  id          String       @id @default(cuid())
+  campaignId  String
+  name        String
+  description String?
+  rarity      String?
+  slot        String
+  bonuses     Json         @default("{}")
+  modifiers   Json         @default("[]")
+  setId       String?
+  icon        String?
+  createdAt   DateTime     @default(now())
+  abilities   Json?
+  campaign    Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  artifactSet ArtifactSet? @relation(fields: [setId], references: [id])
 
   @@index([campaignId])
   @@map("artifacts")
@@ -273,7 +235,6 @@ model ArtifactSet {
   campaignId  String
   name        String
   description String?
-  artifactIds Json       @default("[]")
   setBonus    Json?
   icon        String?
   createdAt   DateTime   @default(now())
@@ -335,10 +296,7 @@ model BattleScene {
   participants       Json                @default("[]")
   currentRound       Int                 @default(1)
   currentTurnIndex   Int                 @default(0)
-  initiativeOrder    Json                @default("[]")
-  pendingSummons     Json                @default("[]")
   pendingMoraleCheck Json?
-  battleLog          Json                @default("[]")
   createdAt          DateTime            @default(now())
   startedAt          DateTime?
   completedAt        DateTime?
@@ -424,34 +382,11 @@ model StatusEffect {
   @@map("status_effects")
 }
 
-model RacialAbility {
-  id          String   @id @default(cuid())
-  campaignId  String
-  race        String
-  name        String
-  description String
-  type        String
-  trigger     Json?
-  effect      Json
-  appliesTo   Json?
-  createdAt   DateTime @default(now())
-  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-
-  @@index([campaignId])
-  @@map("racial_abilities")
-}
-
 model Skill {
   id                      String      @id @default(cuid())
   campaignId              String
   name                    String      @default("")
   description             String?
-  bonuses                 Json        @default("{}")
-  damage                  Int?
-  armor                   Int?
-  speed                   Int?
-  physicalResistance      Int?
-  magicalResistance       Int?
   spellId                 String?
   spellGroupId            String?
   createdAt               DateTime    @default(now())
@@ -464,11 +399,6 @@ model Skill {
   spellAdditionalModifier Json?
   spellNewSpellId         String?
   grantedSpellId          String? // скіл додає це заклинання персонажу
-  skillTriggers           Json        @default("[]")
-  basicInfo               Json        @default("{}")
-  combatStats             Json        @default("{}")
-  mainSkillData           Json        @default("{}")
-  spellData               Json        @default("{}")
   spellEnhancementData    Json        @default("{}")
   appearanceDescription   String? // опис вигляду для довідника гравців (редагує DM)
   abilities               Json?

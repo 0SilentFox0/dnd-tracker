@@ -10,7 +10,6 @@ import { normalizeTree, readTreeJson, readUnlocked, stripTreeForClient } from "@
 import { toSpellSkillInfo } from "@/lib/utils/spells";
 import type { CharacterProgressionDto } from "@/types/progression";
 
-// combatStats/bonuses/skillTriggers/spellData потрібні legacy-читачам до контракту (§6.5)
 export const PROGRESSION_SKILL_SELECT = {
   id: true,
   name: true,
@@ -19,11 +18,7 @@ export const PROGRESSION_SKILL_SELECT = {
   abilities: true,
   spellGroupId: true,
   spellNewSpellId: true,
-  spellData: true,
   spellEnhancementData: true,
-  combatStats: true,
-  bonuses: true,
-  skillTriggers: true,
 } satisfies Prisma.SkillSelect;
 
 export async function buildProgressionDto(campaignId: string, ctx: ProgressionContext): Promise<CharacterProgressionDto> {
