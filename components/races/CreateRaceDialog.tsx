@@ -63,6 +63,7 @@ export function CreateRaceDialog({
       title="Створити расу"
       description="Заповніть інформацію про расу та її здібності"
       size="lg"
+      hud
       footer={
         <>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

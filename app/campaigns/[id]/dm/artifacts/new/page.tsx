@@ -18,8 +18,6 @@ export default async function NewArtifactPage({
   });
 
   return (
-    <div className="container mx-auto p-4 max-w-4xl">
-      <ArtifactCreateForm campaignId={id} artifactSets={artifactSets} />
-    </div>
+    <ArtifactCreateForm campaignId={id} artifactSets={artifactSets} />
   );
 }

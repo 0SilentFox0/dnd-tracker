@@ -1,5 +1,6 @@
 import { X } from "lucide-react";
 
+import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
@@ -44,23 +45,24 @@ export function UnitKnownSpells({
   );
 
   return (
-    <div className="space-y-4 border-t pt-4">
-      <div className="flex items-center justify-between">
-        <Label className="text-base font-semibold">Заклинання</Label>
-        {availableSpells.length > 0 && (
+    <HudSection
+      title="Заклинання"
+      className="space-y-4"
+      action={
+        availableSpells.length > 0 && (
           <SelectField
             value=""
             onValueChange={handleAdd}
             placeholder="Додати заклинання"
-            options={availableSpells.map(spell => ({
+            options={availableSpells.map((spell) => ({
               value: spell.id,
               label: `${spell.name}${spell.level > 0 ? ` (${spell.level} рівень)` : ""}`,
             }))}
             triggerClassName="w-[200px]"
           />
-        )}
-      </div>
-
+        )
+      }
+    >
       {knownSpells.length > 0 && (
         <div className="space-y-2">
           <Label className="text-sm text-muted-foreground">
@@ -107,6 +109,6 @@ export function UnitKnownSpells({
           &quot;Заклинання&quot;.
         </p>
       )}
-    </div>
+    </HudSection>
   );
 }

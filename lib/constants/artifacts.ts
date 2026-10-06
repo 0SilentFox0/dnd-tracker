@@ -74,7 +74,7 @@ export const ARTIFACT_SLOT_OPTIONS: ReadonlyArray<{
   { value: ArtifactSlot.AMULET, label: "Амулет" },
   { value: ArtifactSlot.ARMOR, label: "Броня" },
   { value: ArtifactSlot.BOOTS, label: "Черевики" },
-  { value: ArtifactSlot.ITEM, label: "Предмет" },
+  { value: ArtifactSlot.ITEM, label: "Артефакт" },
 ];
 
 // ─── Сітка 3×3 слотів на персонажі (ключ у equipped + тип артефакта) ───────

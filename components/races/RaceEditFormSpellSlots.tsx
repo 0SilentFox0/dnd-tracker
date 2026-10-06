@@ -14,18 +14,19 @@ export function RaceEditFormSpellSlots({
 }: RaceEditFormSpellSlotsProps) {
   return (
     <div className="border rounded-md p-4">
-      <div className="grid grid-cols-2 gap-4 mb-2 pb-2 border-b font-semibold text-sm">
+      <div className="mb-2 flex flex-wrap justify-between gap-x-4 border-b pb-2 text-sm font-semibold">
         <div>Рівень магії</div>
         <div>Максимальна кількість слотів</div>
       </div>
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
       {[1, 2, 3, 4, 5].map((level) => {
         const progression = formData.spellSlotProgression?.find(
           (p) => p.level === level,
         );
 
         return (
-          <div key={level} className="grid grid-cols-2 gap-4 py-2">
-            <div className="flex items-center text-sm">Рівень {level}</div>
+          <div key={level} className="space-y-1">
+            <div className="text-xs leading-tight">Рівень {level}</div>
             <Input
               type="number"
               value={progression?.slots || 0}
@@ -53,6 +54,7 @@ export function RaceEditFormSpellSlots({
           </div>
         );
       })}
+      </div>
     </div>
   );
 }

@@ -14,6 +14,7 @@ interface LabeledInputProps extends React.ComponentProps<typeof Input> {
   error?: string;
   required?: boolean;
   containerClassName?: string;
+  labelClassName?: string;
 }
 
 export function LabeledInput({
@@ -23,6 +24,7 @@ export function LabeledInput({
   error,
   required = false,
   containerClassName,
+  labelClassName,
   id,
   className,
   ...inputProps
@@ -31,7 +33,7 @@ export function LabeledInput({
 
   return (
     <div className={cn("space-y-2", containerClassName)}>
-      <Label htmlFor={inputId}>
+      <Label htmlFor={inputId} className={labelClassName}>
         {label}
         {labelExtra}
         {required && <span className="text-destructive ml-1">*</span>}

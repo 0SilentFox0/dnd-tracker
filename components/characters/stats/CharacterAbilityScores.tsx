@@ -47,13 +47,13 @@ export function CharacterAbilityScores({
 
   return (
     <div className="w-full space-y-4">
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 w-full">
+    <div className="grid w-full grid-cols-3 items-end gap-2 sm:grid-cols-6">
       {CORE_ABILITY_SCORES.map(({ key, label }) => {
         const ability = abilityMap[key];
 
         return (
           <div key={key} className="w-full min-w-0">
-            <Label htmlFor={key}>
+            <Label htmlFor={key} className="text-xs leading-tight">
               {label}
               <span className="text-muted-foreground"> ({signed(getAbilityModifier(ability.value))})</span>
             </Label>

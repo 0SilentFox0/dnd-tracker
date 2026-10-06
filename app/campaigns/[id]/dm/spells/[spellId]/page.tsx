@@ -7,13 +7,8 @@ import type { SpellFormData } from "../spell-form-defaults";
 import { getDefaultSpellFormData } from "../spell-form-defaults";
 import { SpellFormBody } from "../SpellFormBody";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { LoadingState } from "@/components/common/states";
+import { HudFormPage } from "@/components/hud/form";
 import { useConfirm } from "@/lib/hooks/common";
 import {
   useDeleteSpell,
@@ -96,42 +91,32 @@ export default function EditSpellPage({
 
   if (fetching) {
     return (
-      <div className="container mx-auto p-4 max-w-4xl">
-        <Card>
-          <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground">Завантаження...</p>
-          </CardContent>
-        </Card>
-      </div>
+      <HudFormPage title="Редагувати заклинання">
+        <div className="px-4 py-3">
+          <LoadingState rows={6} label="Завантаження..." />
+        </div>
+      </HudFormPage>
     );
   }
 
   return (
-    <div className="container mx-auto p-4 max-w-4xl">
-      <Card>
-        <CardHeader>
-          <CardTitle>Редагувати заклинання: {formData.name}</CardTitle>
-          <CardDescription>Оновіть інформацію про заклинання</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <SpellFormBody
-            campaignId={id}
-            formData={formData}
-            setFormData={setFormData}
-            spellGroups={spellGroups}
-            onSubmit={handleSubmit}
-            isSubmitting={updateSpellMutation.isPending}
-            submitLabel="Зберегти зміни"
-            error={
-              (updateSpellMutation.error as Error)?.message ||
-              (deleteSpellMutation.error as Error)?.message ||
-              null
-            }
-            onDelete={handleDelete}
-            isDeleting={deleteSpellMutation.isPending}
-          />
-        </CardContent>
-      </Card>
-    </div>
+    <HudFormPage title={`Редагувати заклинання: ${formData.name ?? ""}`} aside="Оновіть інформацію про заклинання">
+      <SpellFormBody
+        campaignId={id}
+        formData={formData}
+        setFormData={setFormData}
+        spellGroups={spellGroups}
+        onSubmit={handleSubmit}
+        isSubmitting={updateSpellMutation.isPending}
+        submitLabel="Зберегти зміни"
+        error={
+          (updateSpellMutation.error as Error)?.message ||
+          (deleteSpellMutation.error as Error)?.message ||
+          null
+        }
+        onDelete={handleDelete}
+        isDeleting={deleteSpellMutation.isPending}
+      />
+    </HudFormPage>
   );
 }

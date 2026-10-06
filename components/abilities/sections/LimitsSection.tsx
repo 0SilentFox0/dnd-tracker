@@ -1,6 +1,6 @@
 "use client";
 
-import type { AbilitySectionProps } from "../AbilityRow";
+import type { AbilitySectionProps } from "../AbilityPanel";
 import { FieldRenderer } from "../fields/FieldRenderer";
 import { SectionTitle } from "./SectionTitle";
 
@@ -38,7 +38,7 @@ export function LimitsSection({ ability, path, onChange }: AbilitySectionProps) 
   return (
     <div className="space-y-2">
       <SectionTitle>Ліміти</SectionTitle>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-6 items-end gap-2 [&>*]:min-w-0">
         {LIMIT_FIELDS.map((f) => (
           <FieldRenderer key={f.name} meta={f} path={`${path}.limits.${f.name}`} value={ability.limits?.[f.name as keyof Limits]} onChange={(v) => set(f.name as keyof Limits, v)} />
         ))}

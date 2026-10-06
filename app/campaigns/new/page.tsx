@@ -4,9 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { ActionBar } from "@/components/common/ActionBar";
+import { HudForm, HudFormPage, HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { Textarea } from "@/components/ui/textarea";
@@ -39,16 +39,23 @@ export default function NewCampaignPage() {
   };
 
   return (
-    <div className="container mx-auto p-4 max-w-2xl">
-      <Card>
-        <CardHeader>
-          <CardTitle>Створити нову кампанію</CardTitle>
-          <CardDescription>
-            Створіть нову кампанію D&D та станьте Dungeon Master
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+    <HudFormPage title="Створити нову кампанію" aside="Станьте Dungeon Master">
+      <HudForm
+        id="campaign-form"
+        onSubmit={handleSubmit}
+        actions={
+          <>
+            <Button type="button" variant="outline" asChild>
+              <Link href="/campaigns">Скасувати</Link>
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? "Створення..." : "Створити кампанію"}
+            </Button>
+          </>
+        }
+      >
+        <HudSection title="Кампанія">
+          <div className="space-y-4">
             <LabeledInput
               id="name"
               label="Назва кампанії"
@@ -57,7 +64,6 @@ export default function NewCampaignPage() {
               required
               placeholder="Назва вашої кампанії"
             />
-
             <div>
               <Label htmlFor="description">Опис</Label>
               <Textarea
@@ -68,11 +74,15 @@ export default function NewCampaignPage() {
                 rows={3}
               />
             </div>
-
-            <div className="grid grid-cols-2 gap-4">
+          </div>
+        </HudSection>
+        <HudSection title="Правила">
+          <div className="space-y-4">
+            <div className="grid grid-cols-3 items-end gap-2 sm:grid-cols-4">
               <LabeledInput
                 id="maxLevel"
                 label="Максимальний рівень"
+                labelClassName="text-xs leading-tight"
                 type="number"
                 min="1"
                 max="30"
@@ -82,6 +92,7 @@ export default function NewCampaignPage() {
               <LabeledInput
                 id="xpMultiplier"
                 label="Множник досвіду"
+                labelClassName="text-xs leading-tight"
                 type="number"
                 min="1"
                 max="10"
@@ -90,29 +101,13 @@ export default function NewCampaignPage() {
                 onChange={(e) => setFormData({ ...formData, xpMultiplier: parseFloat(e.target.value) })}
               />
             </div>
-
             <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="allowPlayerEdit"
-                checked={formData.allowPlayerEdit}
-                onChange={(e) => setFormData({ ...formData, allowPlayerEdit: e.target.checked })}
-                className="rounded"
-              />
+              <Checkbox id="allowPlayerEdit" checked={formData.allowPlayerEdit} onCheckedChange={(v) => setFormData({ ...formData, allowPlayerEdit: v === true })} />
               <Label htmlFor="allowPlayerEdit">Дозволити гравцям редагувати своїх персонажів</Label>
             </div>
-
-            <ActionBar>
-              <Button type="button" variant="outline" asChild>
-            <Link href="/campaigns">Скасувати</Link>
-          </Button>
-              <Button type="submit" disabled={loading}>
-                {loading ? "Створення..." : "Створити кампанію"}
-              </Button>
-            </ActionBar>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+          </div>
+        </HudSection>
+      </HudForm>
+    </HudFormPage>
   );
 }

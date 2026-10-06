@@ -27,7 +27,7 @@ export function BattleLog() {
 
         return (
           <div key={e.actionIndex} ref={e.actionIndex === log.focus ? focused : undefined} className="border-b border-white/[.06] py-2.5">
-            {(i === 0 || entries[i - 1].round !== e.round) && <div className="text-xs text-[var(--muted)]">Раунд {e.round}</div>}
+            {(i === 0 || entries[i - 1].round !== e.round) && <div className="text-xs text-[var(--hud-muted)]">Раунд {e.round}</div>}
             {getLogEntryDetailLines(e).length > 0 ? (
               <button type="button" aria-expanded={open} onClick={() => setExpanded(open ? null : e.actionIndex)} className="w-full text-left">
                 {e.resultText}

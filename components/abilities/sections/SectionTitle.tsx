@@ -1,3 +1,3 @@
 export function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <p className="text-xs font-semibold uppercase tracking-wide text-primary">{children}</p>;
+  return <p className="hud-sc text-[12px] tracking-[.06em] text-[#c9b37a]">{children}</p>;
 }

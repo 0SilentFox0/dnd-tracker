@@ -27,9 +27,6 @@ import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
 import { useDmCharacterEditor } from "@/lib/hooks/characters";
 
-
-const EDIT_PANEL = "rounded-lg bg-background p-3 text-foreground";
-
 export function ProfileEditor({ onDone }: { onDone: () => void }) {
   const { campaignId, characterId, sheet } = useProfile();
 
@@ -46,7 +43,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
   const { formData, setFormData, abilityScores, combatStats, skills, abilities, spellcasting } = form;
 
   return (
-    <form id="profile-edit" onSubmit={form.handleSubmit}>
+    <form id="profile-edit" className="hud-form" onSubmit={form.handleSubmit}>
       <ProfileHero
         actions={
           <Button type="button" size="sm" variant="outline" onClick={() => void editor.levelUp()}>
@@ -54,17 +51,21 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
           </Button>
         }
       />
-      {form.error && <p className="mx-4 rounded border border-[#9c2a1d] bg-[#9c2a1d]/15 px-3 py-2 text-sm">{form.error}</p>}
+      {form.error && (
+        <p role="alert" className="mx-4 rounded-md border border-[#d0705c]/50 bg-[#d0705c]/10 px-3 py-2 text-sm text-[#f0b4a6]">
+          {form.error}
+        </p>
+      )}
       <ProfileTabs
         value={tab}
         onValueChange={setTab}
         tabs={[
-          { id: "basic", label: "Основне", content: <div className={EDIT_PANEL}><BasicEditTab editor={editor} onDeleted={() => router.push(`/campaigns/${campaignId}/dm/characters`)} /></div> },
+          { id: "basic", label: "Основне", content: <BasicEditTab editor={editor} onDeleted={() => router.push(`/campaigns/${campaignId}/dm/characters`)} /> },
           {
             id: "combat",
             label: "Бій",
             content: (
-              <div className={`${EDIT_PANEL} space-y-6`}>
+              <div className="space-y-6">
                 <CharacterAbilityScores abilityScores={abilityScores} primary={{ value: abilityScores.primaryAbility, onChange: abilityScores.setters.setPrimaryAbility }} />
                 <CharacterCombatParams combatStats={combatStats} />
                 <CharacterSkillsSection skills={skills} />
@@ -76,9 +77,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
             label: "Вміння",
             content: (
               <div className="space-y-4">
-                <div className={EDIT_PANEL}>
-                  <CharacterAbilitiesSection campaignId={campaignId} abilities={abilities} />
-                </div>
+                <CharacterAbilitiesSection campaignId={campaignId} abilities={abilities} />
                 <SkillsTab manage />
               </div>
             ),
@@ -88,7 +87,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
             label: "Магія",
             content: (
               <div className="space-y-4">
-                <div className={`${EDIT_PANEL} space-y-2`}>
+                <div className="space-y-2">
                   <Label htmlFor="spellcastingAbility">Характеристика заклинань</Label>
                   <SelectField
                     id="spellcastingAbility"
@@ -109,15 +108,13 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
             label: "Речі",
             content: (
               <div className="space-y-4">
-                <div className={EDIT_PANEL}>
-                  <CharacterArtifactsSection
-                    campaignId={campaignId}
-                    characterId={characterId}
-                    equipped={equipped}
-                    artifacts={artifacts.map((a) => ({ id: a.id, name: a.name, slot: a.slot ?? "item", icon: a.icon ?? null }))}
-                    onEquippedChange={setEquipped}
-                  />
-                </div>
+                <CharacterArtifactsSection
+                  campaignId={campaignId}
+                  characterId={characterId}
+                  equipped={equipped}
+                  artifacts={artifacts.map((a) => ({ id: a.id, name: a.name, slot: a.slot ?? "item", icon: a.icon ?? null }))}
+                  onEquippedChange={setEquipped}
+                />
                 {sheet.items.sets.length > 0 && (
                   <Section title="СЕТИ">
                     <SetList sets={sheet.items.sets} />

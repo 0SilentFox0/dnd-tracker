@@ -45,7 +45,7 @@ export const ParticipantRow = memo(function ParticipantRow({ participant, exact,
       </div>
       <span className="mt-3.5 flex w-16 shrink-0 items-center justify-end gap-1.5 self-start text-sm text-[#b8ab95]">
         {acText}
-        <Shield className="size-4 text-[var(--muted)]" />
+        <Shield className="size-4 text-[var(--hud-muted)]" />
       </span>
     </button>
   );

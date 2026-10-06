@@ -45,21 +45,23 @@ export function UnitBasicInfo({ formData, races, onChange }: UnitBasicInfoProps)
         />
       </div>
 
-      {NUMBER_FIELDS.map((field) => (
-        <div key={field.key}>
-          <Label htmlFor={field.key}>
-            {field.label}
-            {field.required && " *"}
-          </Label>
-          <NumberInput
-            id={field.key}
-            value={formData[field.key]}
-            onChange={(value) => onChange({ [field.key]: value } as Partial<Unit>)}
-            required={field.required}
-            inputMode={field.key === "initiative" ? "text" : "numeric"}
-          />
-        </div>
-      ))}
+      <div className="grid grid-cols-3 items-end gap-2 sm:grid-cols-4 md:col-span-2">
+        {NUMBER_FIELDS.map((field) => (
+          <div key={field.key} className="flex flex-col justify-end">
+            <Label htmlFor={field.key} className="text-xs leading-tight">
+              {field.label}
+              {field.required && " *"}
+            </Label>
+            <NumberInput
+              id={field.key}
+              value={formData[field.key]}
+              onChange={(value) => onChange({ [field.key]: value } as Partial<Unit>)}
+              required={field.required}
+              inputMode={field.key === "initiative" ? "text" : "numeric"}
+            />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

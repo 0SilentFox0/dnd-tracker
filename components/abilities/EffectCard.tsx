@@ -70,7 +70,7 @@ export function EffectCard({ effect, trigger, path, actions, kinds }: EffectCard
         </Button>
       </div>
       <FieldErrors errors={kindErrors} />
-      <div className="grid grid-cols-2 gap-2">{body}</div>
+      <div className="grid grid-cols-6 items-end gap-2 [&>*]:min-w-0">{body}</div>
       <p className="text-xs text-primary">
         <span aria-hidden>= </span>
         <span>{describeEffect(effect)}</span>
@@ -87,7 +87,7 @@ function RandomOfEditor({ effect, trigger, path, onChange }: { effect: RandomOf;
   const setOptions = (options: RandomOf["options"]) => onChange({ ...effect, options });
 
   return (
-    <div className="col-span-2 space-y-2">
+    <div className="col-span-6 space-y-2">
       <p className="text-xs text-muted-foreground">Варіанти (обирається один випадково)</p>
       {effect.options.map((option, i) => (
         <EffectCard

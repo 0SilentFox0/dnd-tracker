@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 
-import { LoadingState, QueryState } from "@/components/common/states";
+import { ErrorState, LoadingState, QueryState } from "@/components/common/states";
+import { HudFormPage } from "@/components/hud/form";
 import { SkillCreateForm } from "@/components/skills/form/SkillCreateForm";
 import { Button } from "@/components/ui/button";
 import { useSkill } from "@/lib/hooks/skills";
@@ -26,24 +27,37 @@ export function EditSkillClient({
 }: EditSkillClientProps) {
   const query = useSkill(campaignId, skillId);
 
+  if (query.isError) {
+    return (
+      <HudFormPage title="Редагувати скіл">
+        <ErrorState error={query.error} onRetry={() => void query.refetch()} />
+        <div className="p-4">
+          <Link href={`/campaigns/${campaignId}/dm/skills`}>
+            <Button variant="outline">Назад до бібліотеки скілів</Button>
+          </Link>
+        </div>
+      </HudFormPage>
+    );
+  }
+
   return (
-    <div className="container mx-auto p-4 max-w-4xl space-y-4">
-      <QueryState query={query} loading={<LoadingState rows={6} label="Завантаження скіла…" />}>
-        {(skill) => (
-          <SkillCreateForm
-            campaignId={campaignId}
-            spells={spells}
-            spellGroups={spellGroups}
-            initialMainSkills={initialMainSkills}
-            initialData={skill as unknown as GroupedSkill}
-          />
-        )}
-      </QueryState>
-      {query.isError && (
-        <Link href={`/campaigns/${campaignId}/dm/skills`}>
-          <Button variant="outline">Назад до бібліотеки скілів</Button>
-        </Link>
+    <QueryState
+      query={query}
+      loading={
+        <HudFormPage title="Редагувати скіл">
+          <LoadingState rows={6} label="Завантаження скіла…" />
+        </HudFormPage>
+      }
+    >
+      {(skill) => (
+        <SkillCreateForm
+          campaignId={campaignId}
+          spells={spells}
+          spellGroups={spellGroups}
+          initialMainSkills={initialMainSkills}
+          initialData={skill as unknown as GroupedSkill}
+        />
       )}
-    </div>
+    </QueryState>
   );
 }

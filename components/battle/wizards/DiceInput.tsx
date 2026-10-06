@@ -30,7 +30,7 @@ export function DamageDice({ slots, values, onChange }: { slots: number[]; value
   return (
     <div className="mt-3 grid grid-cols-4 gap-2">
       {slots.map((sides, i) => (
-        <label key={i} className="flex flex-col gap-1 text-xs text-[var(--muted)]">
+        <label key={i} className="flex flex-col gap-1 text-xs text-[var(--hud-muted)]">
           d{sides}
           <input
             aria-label={`Кубик ${i + 1} (d${sides})`}

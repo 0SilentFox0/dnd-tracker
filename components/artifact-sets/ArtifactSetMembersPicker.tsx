@@ -1,7 +1,7 @@
 "use client";
 
+import { HudSection } from "@/components/hud/form";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { formatArtifactSlotLabel } from "@/lib/utils/artifacts/artifact-set-form";
 import type { ArtifactListItem } from "@/types/artifacts";
 
@@ -17,10 +17,9 @@ export function ArtifactSetMembersPicker({
   onToggle,
 }: ArtifactSetMembersPickerProps) {
   return (
-    <div className="space-y-3">
-      <Label>Артефакти в сеті</Label>
+    <HudSection title="Артефакти в сеті" className="space-y-3">
       <p className="text-xs text-muted-foreground">
-        Бонус спрацьовує лише якщо персонаж екіпірував усі обрані тут предмети.
+        Бонус спрацьовує лише якщо персонаж екіпірував усі обрані тут артефакти.
         Доступні лише артефакти без іншого сету або вже з цього сету.
       </p>
       <div className="border rounded-md divide-y max-h-72 overflow-y-auto">
@@ -49,6 +48,6 @@ export function ArtifactSetMembersPicker({
           ))
         )}
       </div>
-    </div>
+    </HudSection>
   );
 }

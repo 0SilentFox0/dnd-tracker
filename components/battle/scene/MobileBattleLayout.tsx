@@ -28,7 +28,7 @@ export function MobileBattleLayout() {
   const selected = battle.initiativeOrder.find((p) => p.basicInfo.id === selectedId) ?? null;
 
   const tabBtn = (side: "ally" | "enemy", label: string, n: number) => (
-    <button role="tab" aria-selected={tab === side} type="button" onClick={() => setTab(side)} className={cn("hud-sc flex flex-1 items-center justify-center gap-2 text-[15px] tracking-[.08em]", tab === side ? "text-[var(--ink)] shadow-[inset_0_-2px_0_var(--enemy)]" : "text-[var(--muted)]")}>
+    <button role="tab" aria-selected={tab === side} type="button" onClick={() => setTab(side)} className={cn("hud-sc flex flex-1 items-center justify-center gap-2 text-[15px] tracking-[.08em]", tab === side ? "text-[var(--ink)] shadow-[inset_0_-2px_0_var(--enemy)]" : "text-[var(--hud-muted)]")}>
       {label} {n}
     </button>
   );

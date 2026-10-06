@@ -1,13 +1,7 @@
 "use client";
 
+import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { AllyStats, Difficulty, SuggestedEnemy } from "@/types/battle-setup";
@@ -59,15 +53,11 @@ export function AutopickCard({
   );
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>⚖️ Автопідбір ворогів</CardTitle>
-        <CardDescription>
+    <HudSection title="Автопідбір ворогів" className="space-y-4">
+        <p className="text-xs text-muted-foreground">
           Цільові DPR та HP ворогів відповідають союзникам (середній бій 1:1).
           Оберіть складність і фільтри, підберіть юнітів.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
+        </p>
         {hasAllies ? (
           <>
             <div className="flex flex-wrap items-center gap-4">
@@ -89,8 +79,8 @@ export function AutopickCard({
                 </span>
               )}
             </div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <div>
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 [&>*]:min-w-0">
+              <div className="col-span-2 lg:col-span-1">
                 <Label htmlFor="difficulty">Складність</Label>
                 <select
                   id="difficulty"
@@ -131,7 +121,7 @@ export function AutopickCard({
                   }
                 />
               </div>
-              <div>
+              <div className="col-span-2 lg:col-span-1">
                 <Label htmlFor="balanceRace">Раса юнітів</Label>
                 <select
                   id="balanceRace"
@@ -189,7 +179,6 @@ export function AutopickCard({
             Додайте союзників зліва, щоб підібрати ворогів за DPR та HP.
           </p>
         )}
-      </CardContent>
-    </Card>
+    </HudSection>
   );
 }

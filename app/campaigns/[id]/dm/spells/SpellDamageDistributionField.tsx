@@ -2,9 +2,9 @@
 
 import { Plus, Trash2 } from "lucide-react";
 
+import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 interface Props {
   /** Поточний розподіл, або null = за замовчуванням 100% усім */
@@ -56,35 +56,23 @@ export function SpellDamageDistributionField({
   const reset = () => onChange(null);
 
   return (
-    <div className="space-y-2 rounded-md border bg-muted/30 p-3">
-      <div className="flex items-center justify-between gap-2">
-        <Label className="text-sm font-medium">
-          Розподіл шкоди по цілях (AoE)
-        </Label>
+    <HudSection
+      title="Розподіл шкоди по цілях (AoE)"
+      className="space-y-2"
+      action={
         <div className="flex gap-1">
           {dist.length > 0 && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={reset}
-              className="h-7 text-xs"
-            >
+            <Button type="button" variant="ghost" size="sm" onClick={reset} className="h-7 text-xs">
               Скинути
             </Button>
           )}
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={addTarget}
-            className="h-7 text-xs"
-          >
+          <Button type="button" variant="outline" size="sm" onClick={addTarget} className="h-7 text-xs">
             <Plus className="mr-1 h-3 w-3" />
             Ціль
           </Button>
         </div>
-      </div>
+      }
+    >
       <p className="text-xs text-muted-foreground">
         % шкоди на кожну послідовну ціль. Якщо порожньо — усі цілі отримують
         100% (стандартна поведінка).
@@ -124,6 +112,6 @@ export function SpellDamageDistributionField({
           ))}
         </div>
       )}
-    </div>
+    </HudSection>
   );
 }

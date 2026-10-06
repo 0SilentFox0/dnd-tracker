@@ -46,7 +46,7 @@ describe("AbilityListEditor", () => {
 
     render(<Harness initial={[{ id: "a1", name: "Кровотеча", trigger: { event: "hit", role: "attacker" }, effects: [{ kind: "dot", damagePerRound: "1d4", damageType: "bleed", duration: { rounds: 2 }, target: "eventTarget" }] }]} onValid={onValid} />);
 
-    fireEvent.click(screen.getByText("Кровотеча"));
+    fireEvent.click(screen.getByRole("tab", { name: /Кровотеча/ }));
     fireEvent.pointerDown(screen.getByLabelText("Подія"), { button: 0, ctrlKey: false, pointerType: "mouse" });
     fireEvent.click(await screen.findByRole("option", { name: "Пасивно (завжди)" }));
 
@@ -83,13 +83,43 @@ describe("AbilityListEditor", () => {
     expect(new Set(json().map((a) => a.id)).size).toBe(2);
   });
 
+  it("додане з шаблону вміння вибране", () => {
+    render(<Harness initial={[{ id: "a1", name: "Лють", trigger: { event: "passive" }, effects: [{ kind: "note", text: "x" }] }]} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "+ Вміння" }));
+    fireEvent.click(screen.getByText("Бонус шкоди"));
+
+    const tabs = screen.getAllByRole("tab");
+
+    expect(tabs).toHaveLength(2);
+    expect(tabs[1].getAttribute("aria-selected")).toBe("true");
+  });
+
+  it("видалення вибраного переносить вибір на сусіда", () => {
+    const note = (id: string, name: string): Ability => ({ id, name, trigger: { event: "passive" }, effects: [{ kind: "note", text: "x" }] });
+
+    render(<Harness initial={[note("a", "Перше"), note("b", "Друге"), note("c", "Трете")]} />);
+
+    fireEvent.click(screen.getByRole("tab", { name: /Друге/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Видалити вміння Друге" }));
+
+    expect(json().map((a) => a.id)).toEqual(["a", "c"]);
+    expect(screen.getByRole("tab", { name: /Трете/ }).getAttribute("aria-selected")).toBe("true");
+  });
+
+  it("порожній список: підказка", () => {
+    render(<Harness />);
+
+    expect(screen.getByText("Вмінь ще немає")).toBeInTheDocument();
+  });
+
   it("зламаний ефект: картка «Невідомий ефект» з помилкою, зберегти не можна", async () => {
     const onValid = vi.fn();
 
     const broken = { id: "a1", name: "Зламане", trigger: { event: "passive" }, effects: [{ kind: "teleport" }] } as unknown as Ability;
 
     render(<Harness initial={[broken]} onValid={onValid} />);
-    fireEvent.click(screen.getByText("Зламане"));
+    fireEvent.click(screen.getByRole("tab", { name: /Зламане/ }));
 
     expect(screen.getByText("Невідомий ефект")).toBeInTheDocument();
     expect(screen.getByTestId("effect-errors-0.effects.0")).toBeInTheDocument();
@@ -98,7 +128,7 @@ describe("AbilityListEditor", () => {
 
   it("порожня назва — помилка біля поля назви", () => {
     render(<Harness initial={[{ id: "a1", name: "Х", trigger: { event: "passive" }, effects: [{ kind: "note", text: "x" }] }]} />);
-    fireEvent.click(screen.getByText("Х"));
+    fireEvent.click(screen.getByRole("tab", { name: /Х/ }));
     fireEvent.change(screen.getByLabelText("Назва"), { target: { value: "" } });
 
     expect(screen.getByTestId("field-errors-0.name")).toBeInTheDocument();

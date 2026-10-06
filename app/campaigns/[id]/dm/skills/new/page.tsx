@@ -24,12 +24,10 @@ export default async function NewSkillPage({
   });
 
   return (
-    <div className="container mx-auto p-4 max-w-4xl">
-      <SkillCreateForm
-        campaignId={id}
-        spells={spells}
-        spellGroups={spellGroups}
-      />
-    </div>
+    <SkillCreateForm
+      campaignId={id}
+      spells={spells}
+      spellGroups={spellGroups}
+    />
   );
 }

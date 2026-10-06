@@ -25,7 +25,7 @@ export function SkillMainSkillSection({
   const { mainSkillId, setters } = mainSkill;
 
   return (
-    <div className="rounded-md border p-4 space-y-3">
+    <div className="space-y-3">
       <div className="space-y-2">
         <Label htmlFor="skill-main-skill">Основний навик</Label>
         <SelectField

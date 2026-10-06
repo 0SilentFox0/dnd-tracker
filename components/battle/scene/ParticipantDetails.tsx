@@ -13,7 +13,7 @@ import type { BattleParticipant } from "@/types/battle";
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="mt-4">
-      <h4 className="hud-sc flex h-5 items-center text-[13px] tracking-[.08em] text-[var(--muted)]">{title}</h4>
+      <h4 className="hud-sc flex h-5 items-center text-[13px] tracking-[.08em] text-[var(--hud-muted)]">{title}</h4>
       {children}
     </section>
   );
@@ -46,13 +46,13 @@ export function ParticipantDetails({ participant }: { participant: BattlePartici
           <span className="font-medium text-[var(--ink)]">{exact ? getEffectiveArmorClass(participant, battle.initiativeOrder) : formatKnownArmorClass(known)}</span>
         </div>
         {!exact && known.evidence.map((e, i) => (
-          <div key={i} className="flex min-h-8 items-center text-[13px] text-[var(--muted)]">
+          <div key={i} className="flex min-h-8 items-center text-[13px] text-[var(--hud-muted)]">
             {e.hit ? "влучання" : "промах"} {e.total} · {e.actorName}, раунд {e.round}
           </div>
         ))}
       </Section>
       <Section title="Ефекти">
-        {participant.battleData.activeEffects.length === 0 && <div className="py-2 text-sm text-[var(--muted)]">немає</div>}
+        {participant.battleData.activeEffects.length === 0 && <div className="py-2 text-sm text-[var(--hud-muted)]">немає</div>}
         {participant.battleData.activeEffects.map((e) => {
           const icon = e.icon ?? e.source?.icon;
 
@@ -62,7 +62,7 @@ export function ParticipantDetails({ participant }: { participant: BattlePartici
                 {icon && <Image src={icon} alt="" width={24} height={24} className="size-6 object-contain" />}
               </span>
               <div className="min-w-0 flex-1">
-                <div className="flex justify-between text-[15px] font-medium text-[var(--ink)]"><span>{e.name}</span><span className="text-[13px] font-normal text-[var(--muted)]">{e.duration} р.</span></div>
+                <div className="flex justify-between text-[15px] font-medium text-[var(--ink)]"><span>{e.name}</span><span className="text-[13px] font-normal text-[var(--hud-muted)]">{e.duration} р.</span></div>
                 {e.description && <p className="mt-0.5 text-[13px] leading-[18px] text-[#a89c88]">{e.description}</p>}
                 {e.source && <p className="text-[13px] leading-[18px] text-[#a89c88]">Від: {e.source.abilityName ? `${e.source.abilityName} (${e.source.name})` : e.source.name}</p>}
               </div>

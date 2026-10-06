@@ -41,7 +41,7 @@ export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) 
         <aside className="flex flex-col gap-3 overflow-y-auto border-r border-white/10 p-5">
           {hero && <MyHeroPanel hero={hero} />}
           {isMyTurn && hero && <MyTurnControls key={`${hero.basicInfo.id}-${battle.currentRound}-${hero.battleData.extraTurnActive ? "x" : "n"}`} hero={hero} />}
-          {!isMyTurn && !isDM && battle.status === "active" && <div className="flex h-11 items-center justify-center border border-dashed border-white/[.18] text-sm italic text-[var(--muted)]">Дії стануть доступні у твій хід</div>}
+          {!isMyTurn && !isDM && battle.status === "active" && <div className="flex h-11 items-center justify-center border border-dashed border-white/[.18] text-sm italic text-[var(--hud-muted)]">Дії стануть доступні у твій хід</div>}
           {isDM && <DmPanel />}
         </aside>
         <main className="grid min-h-0 grid-cols-2 gap-6 overflow-y-auto px-6 py-4">
@@ -51,7 +51,7 @@ export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) 
         <aside className="flex min-h-0 flex-col overflow-y-auto border-l border-white/10 px-5 py-4">
           <h3 className="hud-sc flex h-8 items-center justify-between border-b border-white/[.14] text-[15px] font-bold tracking-[.1em] text-[#a89c88]">
             {selected ? "Учасник" : "Журнал"}
-            {selected && <button type="button" onClick={() => select(null)} className="font-sans text-[13px] font-normal tracking-normal text-[var(--muted)]">← журнал</button>}
+            {selected && <button type="button" onClick={() => select(null)} className="font-sans text-[13px] font-normal tracking-normal text-[var(--hud-muted)]">← журнал</button>}
           </h3>
           {selected ? <div className="pt-3"><ParticipantDetails participant={selected} /></div> : <BattleLog key={log.focus ?? "latest"} />}
         </aside>

@@ -61,7 +61,7 @@ export function ConditionEditor({ condition, path, actions }: { condition: Condi
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-6 items-end gap-2 [&>*]:min-w-0">
           {CONDITION_REGISTRY[condition.type].fields.map((f) => (
             <FieldRenderer
               key={f.name}

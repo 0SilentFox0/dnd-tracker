@@ -1,6 +1,6 @@
 "use client";
 
-import type { AbilitySectionProps } from "../AbilityRow";
+import type { AbilitySectionProps } from "../AbilityPanel";
 import { ConditionEditor, DEFAULT_CONDITION } from "../ConditionEditor";
 import { SectionTitle } from "./SectionTitle";
 

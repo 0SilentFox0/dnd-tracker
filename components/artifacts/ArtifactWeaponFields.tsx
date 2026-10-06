@@ -1,6 +1,6 @@
 "use client";
 
-
+import { HudSection } from "@/components/hud/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NumberInput } from "@/components/ui/number-input";
@@ -39,8 +39,7 @@ export function ArtifactWeaponFields({ value, onChange }: { value: WeaponStats; 
   };
 
   return (
-    <div className="space-y-3 rounded-md border p-4">
-      <p className="text-sm font-semibold">Зброя</p>
+    <HudSection title="Зброя" className="space-y-3">
       <div className="grid gap-3 sm:grid-cols-2">
         {TEXT_FIELDS.map((f) => (
           <div key={f.key} className="space-y-1">
@@ -63,15 +62,17 @@ export function ArtifactWeaponFields({ value, onChange }: { value: WeaponStats; 
             onValueChange={(v) => set("attackType", (v || undefined) as WeaponStats["attackType"])}
           />
         </div>
+      </div>
+      <div className="grid grid-cols-3 items-end gap-2 sm:grid-cols-4">
         {NUMBER_FIELDS.map((f) => (
-          <div key={f.key} className="space-y-1">
-            <Label htmlFor={`weapon-${f.key}`} className="text-xs text-muted-foreground">
+          <div key={f.key} className="flex flex-col justify-end space-y-1">
+            <Label htmlFor={`weapon-${f.key}`} className="text-xs leading-tight text-muted-foreground">
               {f.label}
             </Label>
             <NumberInput id={`weapon-${f.key}`} value={value[f.key]} onChange={(v) => set(f.key, v)} />
           </div>
         ))}
       </div>
-    </div>
+    </HudSection>
   );
 }

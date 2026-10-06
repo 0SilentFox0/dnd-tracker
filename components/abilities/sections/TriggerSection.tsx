@@ -1,6 +1,6 @@
 "use client";
 
-import type { AbilitySectionProps } from "../AbilityRow";
+import type { AbilitySectionProps } from "../AbilityPanel";
 import { useFieldErrors } from "../editor-context";
 import { FieldRenderer } from "../fields/FieldRenderer";
 import { SectionTitle } from "./SectionTitle";
@@ -32,7 +32,7 @@ export function TriggerSection({ ability, path, onChange }: AbilitySectionProps)
           onValueChange={(event) => onChange(changeTriggerEvent(ability, event as TriggerEvent))}
         />
       </div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-6 items-end gap-2 [&>*]:min-w-0">
         {fields.map((f) => (
           <FieldRenderer
             key={f.name}

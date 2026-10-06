@@ -8,10 +8,12 @@ import {
   SPELL_TYPE_OPTIONS,
 } from "./spell-form-defaults";
 
+import { IconUrlField } from "@/components/common/IconUrlField";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { SelectField } from "@/components/ui/select-field";
+import { Textarea } from "@/components/ui/textarea";
 import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
 import { DICE_OPTIONS } from "@/lib/constants/dice";
 import {
@@ -32,8 +34,9 @@ export function SpellFormBasicFields({
   spellGroups,
 }: SpellFormBasicFieldsProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="grid grid-cols-2 gap-4 [&>*]:min-w-0">
       <LabeledInput
+        containerClassName="col-span-2"
         id="name"
         label="Назва заклинання"
         value={formData.name || ""}
@@ -53,7 +56,7 @@ export function SpellFormBasicFields({
           options={SPELL_LEVEL_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
         />
       </div>
-      <div>
+      <div className="col-span-2">
         <Label htmlFor="groupId">Група заклинань</Label>
         <SelectField
           id="groupId"
@@ -96,6 +99,65 @@ export function SpellFormBasicFields({
           noneLabel="Не вказано"
         />
       </div>
+      <div>
+        <Label htmlFor="castingTime">Час створення</Label>
+        <SelectField
+          id="castingTime"
+          value={formData.castingTime || ""}
+          onValueChange={(value) =>
+            setFormData({ ...formData, castingTime: value || null })
+          }
+          placeholder="Виберіть"
+          options={CASTING_TIME_OPTIONS.map((o) => ({
+            value: o.value,
+            label: o.label,
+          }))}
+          allowNone
+          noneLabel="Не вказано"
+        />
+      </div>
+      <div>
+        <Label htmlFor="range">Дальність</Label>
+        <Input
+          id="range"
+          value={formData.range || ""}
+          onChange={(e) =>
+            setFormData({ ...formData, range: e.target.value })
+          }
+          placeholder="60 feet"
+        />
+      </div>
+      <div>
+        <Label htmlFor="duration">Тривалість</Label>
+        <Input
+          id="duration"
+          value={formData.duration || ""}
+          onChange={(e) =>
+            setFormData({ ...formData, duration: e.target.value })
+          }
+          placeholder="Instantaneous"
+        />
+      </div>
+      <div className="col-span-2">
+        <Label htmlFor="description">Опис (опційно)</Label>
+        <Textarea
+          id="description"
+          value={formData.description ?? ""}
+          onChange={(e) => setFormData({ ...formData, description: e.target.value || null })}
+          placeholder="Додатковий опис за потреби"
+          rows={2}
+        />
+      </div>
+      <div className="col-span-2">
+        <IconUrlField id="icon" label="Посилання на картинку" value={formData.icon ?? ""} onChange={(icon) => setFormData({ ...formData, icon: icon || null })} fallbackText={formData.name ?? ""} />
+      </div>
+    </div>
+  );
+}
+
+export function SpellFormRollFields({ formData, setFormData }: Omit<SpellFormBasicFieldsProps, "spellGroups">) {
+  return (
+    <div className="grid grid-cols-2 gap-4 [&>*]:min-w-0">
       <div>
         <Label htmlFor="damageType">Тип шкоди/ефекту *</Label>
         <SelectField
@@ -183,46 +245,7 @@ export function SpellFormBasicFields({
         </div>
       )}
 
-      <div>
-        <Label htmlFor="castingTime">Час створення</Label>
-        <SelectField
-          id="castingTime"
-          value={formData.castingTime || ""}
-          onValueChange={(value) =>
-            setFormData({ ...formData, castingTime: value || null })
-          }
-          placeholder="Виберіть"
-          options={CASTING_TIME_OPTIONS.map((o) => ({
-            value: o.value,
-            label: o.label,
-          }))}
-          allowNone
-          noneLabel="Не вказано"
-        />
-      </div>
-      <div>
-        <Label htmlFor="range">Дальність</Label>
-        <Input
-          id="range"
-          value={formData.range || ""}
-          onChange={(e) =>
-            setFormData({ ...formData, range: e.target.value })
-          }
-          placeholder="60 feet"
-        />
-      </div>
-      <div>
-        <Label htmlFor="duration">Тривалість</Label>
-        <Input
-          id="duration"
-          value={formData.duration || ""}
-          onChange={(e) =>
-            setFormData({ ...formData, duration: e.target.value })
-          }
-          placeholder="Instantaneous"
-        />
-      </div>
-      <div className="md:col-span-2">
+      <div className="col-span-2">
         <Label htmlFor="dice">
           {formData.damageType === "heal"
             ? "Кубики лікування"

@@ -4,25 +4,15 @@ import { use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { CHARACTER_FORM_TAB, type CharacterFormTabId } from "./character-form-tabs";
+
 import { CharacterAbilitiesSection } from "@/components/characters/abilities/CharacterAbilitiesSection";
 import { CharacterBasicInfo } from "@/components/characters/basic/CharacterBasicInfo";
 import { CharacterSkillsSection } from "@/components/characters/skills/CharacterSkillsSection";
 import { CharacterAbilityScores } from "@/components/characters/stats/CharacterAbilityScores";
 import { CharacterCombatParams } from "@/components/characters/stats/CharacterCombatParams";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { HudForm, HudFormPage, HudSection, type HudTab } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { CharacterType, type CharacterTypeValue } from "@/lib/constants/characters";
 import { useCampaignMembers } from "@/lib/hooks/campaigns";
 import { useCharacterForm, useCreateCharacter } from "@/lib/hooks/characters";
@@ -60,91 +50,62 @@ export default function NewCharacterPage({ params, searchParams }: { params: Pro
     },
   });
 
+  const tabs: HudTab<CharacterFormTabId>[] = [
+    {
+      id: CHARACTER_FORM_TAB.basic,
+      label: "Основне",
+      content: <CharacterBasicInfo basicInfo={basicInfo} campaignMembers={members} races={races} />,
+    },
+    {
+      id: CHARACTER_FORM_TAB.combat,
+      label: "Бій",
+      content: (
+        <>
+          <HudSection title="Характеристики">
+            <CharacterAbilityScores abilityScores={abilityScores} />
+          </HudSection>
+          <HudSection title="Бойові параметри">
+            <CharacterCombatParams combatStats={combatStats} />
+          </HudSection>
+        </>
+      ),
+    },
+    {
+      id: CHARACTER_FORM_TAB.skills,
+      label: "Вміння",
+      content: (
+        <>
+          <CharacterSkillsSection skills={skills} />
+          <HudSection title="Персональне вміння">
+            <CharacterAbilitiesSection campaignId={id} abilities={abilities} />
+          </HudSection>
+        </>
+      ),
+    },
+  ];
+
   return (
-    <div className="container mx-auto p-4 max-w-4xl">
-      <Card>
-        <CardHeader>
-          <CardTitle>Створити нового персонажа</CardTitle>
-          <CardDescription>
-            Заповніть основну інформацію про персонажа
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="w-full overflow-hidden">
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-              <strong className="font-bold">Помилка:</strong>
-              <span className="block sm:inline"> {error}</span>
-            </div>
-          )}
-          <form onSubmit={handleSubmit} className="space-y-6 w-full">
-            <Accordion type="single" defaultValue="item-1" collapsible>
-              {/* Етап 1: Загальна інформація */}
-              <AccordionItem value="item-1">
-                <AccordionTrigger>1. Загальна інформація</AccordionTrigger>
-                <AccordionContent>
-                  <CharacterBasicInfo
-                    basicInfo={basicInfo}
-                    campaignMembers={members}
-                    races={races}
-                  />
-                </AccordionContent>
-              </AccordionItem>
-
-              {/* Етап 2: Основні характеристики */}
-              <AccordionItem value="item-2">
-                <AccordionTrigger>2. Основні характеристики</AccordionTrigger>
-                <AccordionContent>
-                  <CharacterAbilityScores
-                    abilityScores={abilityScores}
-                  />
-                </AccordionContent>
-              </AccordionItem>
-
-              {/* Етап 3: Бойові параметри */}
-              <AccordionItem value="item-3">
-                <AccordionTrigger>3. Бойові параметри</AccordionTrigger>
-                <AccordionContent>
-                  <CharacterCombatParams
-                    combatStats={combatStats}
-                  />
-                </AccordionContent>
-              </AccordionItem>
-
-              {/* Етап 4: Навички та Збереження */}
-              <AccordionItem value="item-4">
-                <AccordionTrigger>4. Навички та Збереження</AccordionTrigger>
-                <AccordionContent>
-                  <CharacterSkillsSection
-                    skills={skills}
-                  />
-                </AccordionContent>
-              </AccordionItem>
-
-              {/* Етап 5: Уміння */}
-              <AccordionItem value="item-5">
-                <AccordionTrigger>5. Уміння</AccordionTrigger>
-                <AccordionContent>
-                  <CharacterAbilitiesSection
-                    campaignId={id}
-                    abilities={abilities}
-                  />
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-
-            <div className="flex gap-2 pt-4">
-              <Button type="submit" disabled={loading || membersLoading}>
-                {loading ? "Створення..." : "Створити персонажа"}
-              </Button>
-              <Link href={`/campaigns/${id}/dm/characters`}>
-                <Button type="button" variant="outline">
-                  Скасувати
-                </Button>
-              </Link>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+    <HudFormPage title="Створити нового персонажа" aside="Заповніть основну інформацію про персонажа">
+      {error && (
+        <p role="alert" className="mx-4 mt-3 rounded-md border border-[#d0705c]/50 bg-[#d0705c]/10 px-3 py-2 text-sm text-[#f0b4a6]">
+          <strong>Помилка:</strong> {error}
+        </p>
+      )}
+      <HudForm
+        id="character-form"
+        onSubmit={handleSubmit}
+        tabs={tabs}
+        actions={
+          <>
+            <Button type="submit" disabled={loading || membersLoading}>
+              {loading ? "Створення..." : "Створити персонажа"}
+            </Button>
+            <Button type="button" variant="outline" asChild>
+              <Link href={`/campaigns/${id}/dm/characters`}>Скасувати</Link>
+            </Button>
+          </>
+        }
+      />
+    </HudFormPage>
   );
 }

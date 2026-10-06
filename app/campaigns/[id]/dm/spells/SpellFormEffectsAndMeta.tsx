@@ -1,17 +1,14 @@
 "use client";
 
 import { useMemo } from "react";
-import Link from "next/link";
 
 import type { SpellFormData } from "./spell-form-defaults";
-import { SpellDamageDistributionField } from "./SpellDamageDistributionField";
 
-import { IconUrlField } from "@/components/common/IconUrlField";
+import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
-import { Textarea } from "@/components/ui/textarea";
 import { SPELL_EFFECT_GROUPS } from "@/lib/constants/spell-effects";
 import { useUnits } from "@/lib/hooks/units";
 
@@ -19,20 +16,12 @@ export interface SpellFormEffectsAndMetaProps {
   campaignId: string;
   formData: SpellFormData;
   setFormData: (data: SpellFormData | ((prev: SpellFormData) => SpellFormData)) => void;
-  isSubmitting: boolean;
-  submitLabel: string;
-  onDelete?: () => void;
-  isDeleting?: boolean;
 }
 
 export function SpellFormEffectsAndMeta({
   campaignId,
   formData,
   setFormData,
-  isSubmitting,
-  submitLabel,
-  onDelete,
-  isDeleting,
 }: SpellFormEffectsAndMetaProps) {
   const { data: units = [], isLoading: unitsLoading } = useUnits(campaignId);
 
@@ -47,8 +36,7 @@ export function SpellFormEffectsAndMeta({
 
   return (
     <>
-      <div>
-        <Label>Ефекти</Label>
+      <HudSection title="Ефекти">
         <p className="text-xs text-muted-foreground mb-2">
           Виберіть ефекти зі списку. Кожен ефект зберігається окремо.
         </p>
@@ -119,16 +107,9 @@ export function SpellFormEffectsAndMeta({
             Ефекти не додано
           </p>
         )}
-      </div>
+      </HudSection>
 
-      <SpellDamageDistributionField
-        damageDistribution={formData.damageDistribution}
-        onChange={(next) =>
-          setFormData({ ...formData, damageDistribution: next })
-        }
-      />
-
-      <div className="space-y-3 rounded-lg border p-3">
+      <HudSection title="Призив" className="space-y-3">
         <div className="flex items-center gap-2">
           <Checkbox
             id="spell-summon-unit"
@@ -178,46 +159,7 @@ export function SpellFormEffectsAndMeta({
             noneLabel="Не обрано"
           />
         )}
-      </div>
-
-      <div>
-        <Label htmlFor="description">Опис (опційно)</Label>
-        <Textarea
-          id="description"
-          value={formData.description ?? ""}
-          onChange={(e) =>
-            setFormData({
-              ...formData,
-              description: e.target.value || null,
-            })
-          }
-          placeholder="Додатковий опис за потреби"
-          rows={2}
-        />
-      </div>
-
-      <IconUrlField id="icon" label="Посилання на картинку" value={formData.icon ?? ""} onChange={(icon) => setFormData({ ...formData, icon: icon || null })} fallbackText={formData.name ?? ""} />
-
-      <div className="flex gap-2 pt-4">
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Збереження..." : submitLabel}
-        </Button>
-        {onDelete != null && (
-          <Button
-            type="button"
-            variant="destructive"
-            onClick={onDelete}
-            disabled={isDeleting}
-          >
-            {isDeleting ? "Видалення..." : "Видалити"}
-          </Button>
-        )}
-        <Link href={`/campaigns/${campaignId}/dm/spells`}>
-          <Button type="button" variant="outline">
-            Скасувати
-          </Button>
-        </Link>
-      </div>
+      </HudSection>
     </>
   );
 }

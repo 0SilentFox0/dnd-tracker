@@ -6,7 +6,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { mockMatchMedia } from "./match-media";
 
 import { Button } from "@/components/ui/button";
+import { HudPortalClassProvider } from "@/components/ui/portal-class";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SelectField } from "@/components/ui/select-field";
 
 Object.assign(Element.prototype, { hasPointerCapture: () => false, releasePointerCapture: () => {}, setPointerCapture: () => {}, scrollIntoView: () => {} });
@@ -146,6 +148,56 @@ describe("ResponsiveDialog ширина", () => {
 
     expect(sheet.className).not.toContain("top-[10px]");
     expect(sheet.className).toContain("bottom-0");
+  });
+});
+
+describe("ResponsiveDialog hud", () => {
+  afterEach(cleanup);
+
+  it("десктоп: модалка отримує HUD-поверхню", () => {
+    mockMatchMedia(false);
+    render(<ResponsiveDialog open hud title="Т" onOpenChange={vi.fn()}>тіло</ResponsiveDialog>);
+
+    expect(screen.getByRole("dialog").className).toContain("hud-surface");
+  });
+
+  it("телефон: шторка отримує HUD-поверхню", () => {
+    mockMatchMedia(true);
+    render(<ResponsiveDialog open hud title="Т" onOpenChange={vi.fn()}>тіло</ResponsiveDialog>);
+
+    expect((document.querySelector("[data-slot=sheet]") as HTMLElement).className).toContain("hud-surface");
+  });
+});
+
+describe("ResponsiveDialog portal class", () => {
+  afterEach(cleanup);
+
+  const Menu = () => (
+    <Select open value="a">
+      <SelectTrigger><SelectValue /></SelectTrigger>
+      <SelectContent><SelectItem value="a">Альфа</SelectItem></SelectContent>
+    </Select>
+  );
+
+  const content = () => document.body.querySelector('[data-slot="select-content"]');
+
+  it("hud: випадайка в body отримує HUD-клас", () => {
+    mockMatchMedia(false);
+    render(<ResponsiveDialog open hud title="Т" onOpenChange={vi.fn()}><Menu /></ResponsiveDialog>);
+
+    expect(content()?.className).toContain("hud-surface");
+    expect(document.querySelector("[role=dialog]")?.contains(content())).toBe(false);
+  });
+
+  it("без hud скидає клас, успадкований від HUD-сторінки", () => {
+    mockMatchMedia(false);
+    render(
+      <HudPortalClassProvider value="hud-surface">
+        <ResponsiveDialog open title="Т" onOpenChange={vi.fn()}><Menu /></ResponsiveDialog>
+      </HudPortalClassProvider>,
+    );
+
+    expect(content()?.className).not.toContain("hud-surface");
   });
 });
 

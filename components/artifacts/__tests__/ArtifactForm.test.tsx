@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ArtifactForm } from "@/components/artifacts/ArtifactForm";
 import { ConfirmProvider } from "@/components/ui/confirm-dialog";
+import { ArtifactSlot } from "@/lib/constants/artifacts";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }) }));
 
@@ -137,5 +138,30 @@ describe("ArtifactForm", () => {
 
     expect(await within(dialog).findByRole("alert")).toHaveTextContent("Артефакт екіпіровано");
     expect(onDelete).toHaveBeenCalledTimes(1);
+  });
+
+  it("слот змінено зі зброї при відкритому табі «Зброя» → активний таб «Основне»", () => {
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <ConfirmProvider>
+          <ArtifactForm campaignId="c1" artifactSets={[]} mode="create" title="Новий" submitLabel="Створити" submitLabelSaving="..." cancelHref="/x" iconHint="" initial={{ name: "Меч", description: "", rarity: "", slot: "weapon", icon: "", setId: "", abilities: [], abilityIssues: [] }} onSubmit={vi.fn(async () => {})} />
+        </ConfirmProvider>
+      </QueryClientProvider>,
+    );
+
+    fireEvent.mouseDown(screen.getByRole("tab", { name: "Зброя" }));
+    expect(screen.getByRole("tab", { name: "Зброя" })).toHaveAttribute("data-state", "active");
+
+    const slotSelect = Array.from(document.querySelectorAll<HTMLSelectElement>("select")).find((el) => el.value === "weapon");
+
+    fireEvent.change(slotSelect as HTMLSelectElement, { target: { value: ArtifactSlot.RING } });
+
+    expect(screen.queryByRole("tab", { name: "Зброя" })).toBeNull();
+    expect(screen.getByRole("tab", { name: "Основне" })).toHaveAttribute("data-state", "active");
+
+    fireEvent.change(Array.from(document.querySelectorAll<HTMLSelectElement>("select")).find((el) => el.value === ArtifactSlot.RING) as HTMLSelectElement, { target: { value: "weapon" } });
+
+    expect(screen.getByRole("tab", { name: "Зброя" })).toHaveAttribute("data-state", "inactive");
+    expect(screen.getByRole("tab", { name: "Основне" })).toHaveAttribute("data-state", "active");
   });
 });

@@ -3,12 +3,14 @@
 import Link from "next/link";
 
 import { AutopickCard } from "./AutopickCard";
+import { BATTLE_FORM_TAB, type BattleFormTabId } from "./battle-form-tabs";
 import { BattleFormBasicInfo } from "./BattleFormBasicInfo";
 import { CharactersListCard } from "./CharactersListCard";
 import { SidePanelCard } from "./SidePanelCard";
 import { UnitsListCard } from "./UnitsListCard";
 
-import { ActionBar } from "@/components/common/ActionBar";
+import { LoadingState } from "@/components/common/states";
+import { HudForm, HudFormPage, type HudTab } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { ParticipantSourceType } from "@/lib/constants/battle";
 import { useNewBattlePage } from "@/lib/hooks/battles";
@@ -59,41 +61,82 @@ export default function NewBattlePage({
 
   if (loadingData) {
     return (
-      <div className="container mx-auto p-4">
-        <p>Завантаження...</p>
-      </div>
+      <HudFormPage title="Створити сцену бою" className="max-w-6xl">
+        <div className="px-4 py-3">
+          <LoadingState label="Завантаження..." />
+        </div>
+      </HudFormPage>
     );
   }
 
-  return (
-    <div className="container mx-auto p-4 max-w-6xl space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold">
-            Створити сцену бою
-          </h1>
-          <p className="max-w-4/5 sm:max-w-full text-muted-foreground mt-1">
-            Оберіть учасників та розподіліть їх на союзників та ворогів
-          </p>
-        </div>
-        <Link href={`/campaigns/${id}/dm/battles`}>
-          <Button variant="outline">Назад</Button>
-        </Link>
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-6">
+  const tabs: HudTab<BattleFormTabId>[] = [
+    {
+      id: BATTLE_FORM_TAB.basic,
+      label: "Основне",
+      content: (
         <BattleFormBasicInfo
           name={formData.name}
           description={formData.description}
-          onNameChange={(value) =>
-            setFormData((prev) => ({ ...prev, name: value }))
-          }
-          onDescriptionChange={(value) =>
-            setFormData((prev) => ({ ...prev, description: value }))
-          }
+          onNameChange={(value) => setFormData((prev) => ({ ...prev, name: value }))}
+          onDescriptionChange={(value) => setFormData((prev) => ({ ...prev, description: value }))}
         />
-
-        <div className="grid gap-6 md:grid-cols-2">
+      ),
+    },
+    {
+      id: BATTLE_FORM_TAB.heroes,
+      label: "Герої",
+      content: (
+        <CharactersListCard
+          playerCharacters={playerCharacters}
+          npcCharacters={npcCharacters}
+          entityStats={entityStats?.characterStats ?? null}
+          isParticipantSelected={isParticipantSelected}
+          onParticipantToggle={handleParticipantToggle}
+        />
+      ),
+    },
+    {
+      id: BATTLE_FORM_TAB.units,
+      label: "Юніти",
+      content: (
+        <div className="space-y-4">
+          <AutopickCard
+            hasAllies={hasAllies}
+            allyStats={allyStats}
+            balanceLoading={balanceLoading}
+            difficulty={difficulty}
+            minTier={minTier}
+            maxTier={maxTier}
+            balanceRace={balanceRace}
+            races={races}
+            suggestedEnemies={suggestedEnemies}
+            onDifficultyChange={setDifficulty}
+            onMinTierChange={setMinTier}
+            onMaxTierChange={setMaxTier}
+            onBalanceRaceChange={setBalanceRace}
+            onFetchAllyStats={fetchAllyStats}
+            onSuggestEnemies={suggestEnemies}
+            onApplySuggestedEnemies={applySuggestedEnemies}
+          />
+          <UnitsListCard
+            units={units}
+            entityStats={entityStats?.unitStats ?? null}
+            isParticipantSelected={isParticipantSelected}
+            getParticipantSide={getParticipantSide}
+            getParticipantQuantity={getParticipantQuantity}
+            onParticipantToggle={handleParticipantToggle}
+            onAddToEnemies={(id, quantity) => handleAddToSide(id, ParticipantSourceType.UNIT, "enemy", quantity)}
+            onMoveToAllies={(id) => handleAddToSide(id, ParticipantSourceType.UNIT, "ally")}
+            onQuantityChange={handleQuantityChange}
+          />
+        </div>
+      ),
+    },
+    {
+      id: BATTLE_FORM_TAB.roster,
+      label: `Склад · ${participants.length}`,
+      content: (
+        <div className="grid gap-4 md:grid-cols-2">
           <SidePanelCard
             side="ally"
             participants={participants}
@@ -111,58 +154,27 @@ export default function NewBattlePage({
             onRemove={handleRemoveParticipant}
           />
         </div>
+      ),
+    },
+  ];
 
-        <AutopickCard
-          hasAllies={hasAllies}
-          allyStats={allyStats}
-          balanceLoading={balanceLoading}
-          difficulty={difficulty}
-          minTier={minTier}
-          maxTier={maxTier}
-          balanceRace={balanceRace}
-          races={races}
-          suggestedEnemies={suggestedEnemies}
-          onDifficultyChange={setDifficulty}
-          onMinTierChange={setMinTier}
-          onMaxTierChange={setMaxTier}
-          onBalanceRaceChange={setBalanceRace}
-          onFetchAllyStats={fetchAllyStats}
-          onSuggestEnemies={suggestEnemies}
-          onApplySuggestedEnemies={applySuggestedEnemies}
-        />
-
-        <div className="grid gap-6 md:grid-cols-2">
-          <CharactersListCard
-            playerCharacters={playerCharacters}
-            npcCharacters={npcCharacters}
-            entityStats={entityStats?.characterStats ?? null}
-            isParticipantSelected={isParticipantSelected}
-            onParticipantToggle={handleParticipantToggle}
-          />
-          <UnitsListCard
-            units={units}
-            entityStats={entityStats?.unitStats ?? null}
-            isParticipantSelected={isParticipantSelected}
-            getParticipantSide={getParticipantSide}
-            getParticipantQuantity={getParticipantQuantity}
-            onParticipantToggle={handleParticipantToggle}
-            onAddToEnemies={(id, quantity) =>
-              handleAddToSide(id, ParticipantSourceType.UNIT, "enemy", quantity)
-            }
-            onMoveToAllies={(id) => handleAddToSide(id, ParticipantSourceType.UNIT, "ally")}
-            onQuantityChange={handleQuantityChange}
-          />
-        </div>
-
-        <ActionBar>
-          <Button type="button" variant="outline" asChild>
-            <Link href={`/campaigns/${id}/dm/battles`}>Скасувати</Link>
-          </Button>
-          <Button type="submit" disabled={loading}>
-            {loading ? "Створення..." : "Створити сцену бою"}
-          </Button>
-        </ActionBar>
-      </form>
-    </div>
+  return (
+    <HudFormPage title="Створити сцену бою" aside="Оберіть учасників та розподіліть їх на союзників та ворогів" className="max-w-6xl">
+      <HudForm
+        id="battle-form"
+        onSubmit={handleSubmit}
+        tabs={tabs}
+        actions={
+          <>
+            <Button type="button" variant="outline" asChild>
+              <Link href={`/campaigns/${id}/dm/battles`}>Скасувати</Link>
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? "Створення..." : "Створити сцену бою"}
+            </Button>
+          </>
+        }
+      />
+    </HudFormPage>
   );
 }
