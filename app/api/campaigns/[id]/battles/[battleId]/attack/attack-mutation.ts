@@ -20,7 +20,6 @@ export const attackBodySchema = z
     advantageRoll: z.number().min(1).max(20).optional(),
     disadvantageRoll: z.number().min(1).max(20).optional(),
     damageRolls: z.array(z.number()).default([]),
-    reactionDamage: z.number().min(0).optional(),
     endTurn: z.boolean().default(false),
   })
   .refine(
@@ -64,6 +63,7 @@ export function attackMutation(ctx: BattleMutationContext, body: AttackBody): Mu
       battleId: ctx.scene.id,
       userId: ctx.userId,
       isDM: ctx.isDM,
+      rng: ctx.rng,
     });
   } catch (e) {
     toPipelineError(e);

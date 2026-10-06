@@ -6,6 +6,7 @@ import { defaultPipelineDeps } from "./default-deps";
 import type { PusherMessage } from "./legacy-battle";
 import { buildPusherMessages, toLegacyBattle } from "./legacy-battle";
 
+import type { Rng } from "@/lib/utils/abilities/engine/types";
 import type { BATTLE_RATE_LIMITS, RateLimitResult } from "@/lib/utils/api/rate-limit";
 import { rateLimitResponse } from "@/lib/utils/api/rate-limit";
 import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/battle-victory";
@@ -38,6 +39,7 @@ export interface BattleMutationContext {
   pending: BattleParticipant[];
   userId: string;
   isDM: boolean;
+  rng?: Rng;
 }
 
 export interface MutationResult extends BattleMutationOutcome {
@@ -51,6 +53,7 @@ export interface PipelineDeps {
   saveBattle(before: LoadedBattle, outcome: BattleMutationOutcome): Promise<BattleDelta>;
   publish(messages: PusherMessage[]): void;
   loadRecentEvents(battleId: string, limit: number): Promise<BattleAction[]>;
+  rng?: Rng;
 }
 
 export interface RunBattleMutationOptions<TBody> {
@@ -193,6 +196,7 @@ export async function runBattleMutation<TBody>(
       pending: loaded.pending,
       userId,
       isDM: loaded.isDM,
+      ...(deps.rng && { rng: deps.rng }),
     };
 
     assertAccess(options.access, ctx);

@@ -40,12 +40,12 @@ describe("attackFlow", () => {
       { type: "CONFIRM_TARGETS" },
       { type: "SET_MODE", mode: "advantage" },
       { type: "ROLL", d20: 14, second: 6, outcome: "hit" },
-      { type: "DAMAGE", values: [6], reactionDamage: 2 },
+      { type: "DAMAGE", values: [6] },
     );
 
     expect(s.step).toBe("summary");
     expect(attackPayload(s, "me")).toEqual({
-      attackerId: "me", attackId: "rapier", targetIds: ["a"], attackRoll: 14, advantageRoll: 6, damageRolls: [6], reactionDamage: 2, endTurn: false,
+      attackerId: "me", attackId: "rapier", targetIds: ["a"], attackRoll: 14, advantageRoll: 6, damageRolls: [6], endTurn: false,
     });
     expect(attackFlow(s, { type: "SUBMIT" }).step).toBe("submitting");
   });

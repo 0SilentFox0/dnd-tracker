@@ -84,10 +84,6 @@ describe("attack mutation", () => {
     );
   });
 
-  it("підказана клієнтом шкода реакції (більша за подвоєну зброю захисника) приймається", () => {
-    expect(() => attackMutation(ctx, body({ reactionDamage: 37 }))).not.toThrow(expect.objectContaining({ code: "invalid_dice" }));
-  });
-
   it("нестандартний запис кубиків зброї (\"1d8 piercing\") не блокує атаку", () => {
     const odd = { ...hero, basicInfo: { ...hero.basicInfo, sourceType: "unit" as const }, battleData: { ...hero.battleData, attacks: [{ id: "sword", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d8 piercing", damageType: "piercing" }] } };
 

@@ -3,6 +3,7 @@
  * Used by attack-and-next-turn route (and can be reused by attack route).
  */
 
+import type { Rng } from "@/lib/utils/abilities/engine/types";
 import { processAttack } from "@/lib/utils/battle/attack";
 import { diceCount } from "@/lib/utils/common/dice";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
@@ -26,11 +27,11 @@ export type AttackPhaseInput = {
     advantageRoll?: number;
     disadvantageRoll?: number;
     damageRolls: number[];
-    reactionDamage?: number;
   };
   battleId: string;
   userId: string;
   isDM: boolean;
+  rng?: Rng;
 };
 
 export type AttackPhaseResult = {
@@ -203,11 +204,6 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
         ? data.damageRolls.slice(i * dicePerTarget, (i + 1) * dicePerTarget)
         : data.damageRolls;
 
-    const reactionOverride =
-      targets.length === 1 && data.reactionDamage != null
-        ? data.reactionDamage
-        : undefined;
-
     const freshTarget = currentInitiativeOrder.find((p) => p.basicInfo.id === target.basicInfo.id) ?? target;
 
     const attackResult = processAttack({
@@ -222,7 +218,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       currentRound: battle.currentRound,
       battleId,
       damageMultiplier,
-      reactionDamageOverride: reactionOverride,
+      rng: input.rng ?? Math.random,
     });
 
     const updatedMap = new Map((attackResult.allParticipantsUpdated ?? []).map((p) => [p.basicInfo.id, p]));

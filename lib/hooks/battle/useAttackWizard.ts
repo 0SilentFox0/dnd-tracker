@@ -155,7 +155,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
       dispatch({ type: "ROLL", d20, second, outcome: outcomeOf(d20, second) });
     },
-    damage: (values: number[], reaction?: number) => dispatch({ type: "DAMAGE", values, reactionDamage: reaction }),
+    damage: (values: number[]) => dispatch({ type: "DAMAGE", values }),
     back: () => dispatch({ type: "BACK" }),
     submit: () => dispatch({ type: "SUBMIT" }),
     close: () => dispatch({ type: "CLOSE" }),

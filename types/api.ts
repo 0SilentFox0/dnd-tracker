@@ -128,8 +128,6 @@ export interface AttackData {
   disadvantageRoll?: number;
   damageRolls: number[];
   attackId?: string;
-  /** Урон відповіді цілі (контратака), для однієї цілі */
-  reactionDamage?: number;
 }
 
 export interface MoraleCheckData {
