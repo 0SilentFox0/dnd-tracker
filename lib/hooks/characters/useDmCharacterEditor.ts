@@ -3,11 +3,9 @@
 import { useCharacterEditor } from "./useCharacterEditor";
 import { useDeleteCharacter, useLevelUpCharacter } from "./useCharacters";
 
-import { useArtifactSetsList } from "@/lib/hooks/artifact-sets";
 import { useArtifactsList } from "@/lib/hooks/artifacts";
 import { useConfirm, useNotify } from "@/lib/hooks/common";
 import { characterToFormData } from "@/lib/utils/characters/character-form";
-import type { ArtifactSetRow } from "@/types/artifact-sets";
 
 export function useDmCharacterEditor({ campaignId, characterId, onSaved }: { campaignId: string; characterId: string; onSaved: () => void }) {
   const confirm = useConfirm();
@@ -19,8 +17,6 @@ export function useDmCharacterEditor({ campaignId, characterId, onSaved }: { cam
   const loaded = !!editor.query.data;
 
   const { data: artifacts = [] } = useArtifactsList(campaignId, { enabled: loaded });
-
-  const { data: artifactSets = [] } = useArtifactSetsList(campaignId, { enabled: loaded });
 
   const levelUpMutation = useLevelUpCharacter(campaignId);
 
@@ -55,7 +51,7 @@ export function useDmCharacterEditor({ campaignId, characterId, onSaved }: { cam
     }
   };
 
-  return { ...editor, campaignId, characterId, artifacts, artifactSets: artifactSets as ArtifactSetRow[], levelUp, remove };
+  return { ...editor, campaignId, characterId, artifacts, levelUp, remove };
 }
 
 export type DmCharacterEditor = ReturnType<typeof useDmCharacterEditor>;

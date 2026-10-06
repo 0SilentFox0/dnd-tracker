@@ -1,23 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import {
   type ArtifactSetCreatePayload,
   createArtifactSet,
   deleteArtifactSet,
-  getArtifactSets,
   updateArtifactSet,
 } from "@/lib/api/artifact-sets";
-
-export function useArtifactSetsList(campaignId: string, opts?: { enabled?: boolean }) {
-  return useQuery({
-    queryKey: ["artifact-sets", campaignId],
-    queryFn: () => getArtifactSets(campaignId),
-    enabled: !!campaignId && (opts?.enabled ?? true),
-  });
-}
 
 function useRefreshAfter(campaignId: string) {
   const router = useRouter();

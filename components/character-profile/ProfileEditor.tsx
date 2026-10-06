@@ -41,7 +41,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
 
   if (!editor.ready) return <LoadingState rows={6} label="Завантаження редактора…" />;
 
-  const { form, equipped, setEquipped, artifacts, artifactSets } = editor;
+  const { form, equipped, setEquipped, artifacts } = editor;
 
   const { formData, setFormData, abilityScores, combatStats, skills, abilities, spellcasting } = form;
 
@@ -111,15 +111,11 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
               <div className="space-y-4">
                 <div className={EDIT_PANEL}>
                   <CharacterArtifactsSection
-                    knownSpellIds={spellcasting.knownSpells}
                     campaignId={campaignId}
                     characterId={characterId}
-                    progressionCharacterId={characterId}
                     equipped={equipped}
                     artifacts={artifacts.map((a) => ({ id: a.id, name: a.name, slot: a.slot ?? "item", icon: a.icon ?? null }))}
-                    artifactSets={artifactSets}
                     onEquippedChange={setEquipped}
-                    spellSlots={formData.spellcasting.spellSlots}
                   />
                 </div>
                 {sheet.items.sets.length > 0 && (

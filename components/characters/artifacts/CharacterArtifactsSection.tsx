@@ -1,24 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 
-import { CharacterCompletedArtifactSetsSummary } from "./CharacterCompletedArtifactSetsSummary";
-import { CharacterSpellbook } from "./CharacterSpellbook";
-import { SpellSlotsBadge } from "./SpellSlotsBadge";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { EntityIcon } from "@/components/common/EntityIcon";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ARTIFACT_GRID_9, ArtifactSlot } from "@/lib/constants/artifacts";
 import { useEquipArtifact } from "@/lib/hooks/characters";
 import { useNotify } from "@/lib/hooks/common";
 import { buildEquipped } from "@/lib/utils/artifacts/equipment";
-import { getCompletedArtifactSetsPreview } from "@/lib/utils/artifacts/get-completed-artifact-sets-preview";
-import type { ArtifactSetRow } from "@/types/artifact-sets";
 import type { EquippedItems } from "@/types/inventory";
 
 export interface ArtifactOption {
@@ -28,56 +18,25 @@ export interface ArtifactOption {
   icon?: string | null;
 }
 
-/** Магічні слоти: рівень → { max, current } */
-type SpellSlotsData = Record<string, { max: number; current: number }>;
-
 interface CharacterArtifactsSectionProps {
-  knownSpellIds: string[];
   campaignId: string;
-  /** Персонаж, чиє дерево прокачки додає заклинання до книги */
-  progressionCharacterId?: string;
-  /** Режим редагування слотів: якщо передано — клік по комірці відкриває меню вибору артефакта */
-  characterId?: string;
-  equipped?: EquippedItems;
-  artifacts?: ArtifactOption[];
-  onEquippedChange?: (equipped: EquippedItems) => void;
-  /** Магічні слоти для відображення під іконкою книги */
-  spellSlots?: SpellSlotsData;
-  /** Сети кампанії — для підказки бонусу повного сету за поточною екіпіровкою */
-  artifactSets?: ArtifactSetRow[];
+  characterId: string;
+  equipped: EquippedItems;
+  artifacts: ArtifactOption[];
+  onEquippedChange: (equipped: EquippedItems) => void;
 }
 
-export function CharacterArtifactsSection({
-  knownSpellIds,
-  campaignId,
-  progressionCharacterId,
-  characterId,
-  equipped = {},
-  artifacts = [],
-  onEquippedChange,
-  spellSlots = {},
-  artifactSets,
-}: CharacterArtifactsSectionProps) {
+const CELL =
+  "relative flex aspect-square cursor-pointer flex-col items-center justify-center overflow-hidden rounded border-2 border-amber-700/80 bg-stone-900/60 p-1 text-center shadow-inner transition-colors hover:border-amber-600/90 hover:bg-stone-800/80 disabled:opacity-50";
+
+export function CharacterArtifactsSection({ campaignId, characterId, equipped, artifacts, onEquippedChange }: CharacterArtifactsSectionProps) {
   const notify = useNotify();
 
   const equip = useEquipArtifact(campaignId, characterId);
 
   const [updatingSlot, setUpdatingSlot] = useState<string | null>(null);
 
-  const completedArtifactSets = useMemo(
-    () =>
-      artifactSets?.length
-        ? getCompletedArtifactSetsPreview(equipped, artifactSets)
-        : [],
-    [equipped, artifactSets],
-  );
-
-  const isEditMode =
-    characterId != null && artifacts.length >= 0 && onEquippedChange != null;
-
   const handleSlotChange = (slotKey: string, artifactId: string | null) => {
-    if (!characterId || !onEquippedChange) return;
-
     const next = buildEquipped(equipped, slotKey, artifactId);
 
     setUpdatingSlot(slotKey);
@@ -88,160 +47,56 @@ export function CharacterArtifactsSection({
     });
   };
 
-  const cellClassName =
-    "aspect-square rounded border-2 border-amber-700/80 bg-stone-900/60 shadow-inner flex flex-col items-center justify-center text-center p-1 overflow-hidden " +
-    (isEditMode
-      ? "cursor-pointer hover:bg-stone-800/80 hover:border-amber-600/90 transition-colors"
-      : "");
-
   return (
-    <div className="w-full">
-      <div className="relative w-full max-w-md mx-auto aspect-square rounded-lg overflow-hidden bg-[#2a2520] border border-amber-900/50 shadow-xl">
-        <div className="absolute inset-0">
-          <Image
-            src="/screen-bg/artefacts-bg.jpg"
-            alt=""
-            fill
-            className="object-cover opacity-40 sepia"
-            sizes="(max-width: 448px) 100vw, 448px"
-            priority={false}
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-stone-900/30 to-stone-950/50" />
-        </div>
+    <div className="relative mx-auto aspect-square w-full max-w-md overflow-hidden rounded-lg border border-amber-900/50 bg-[#2a2520] shadow-xl">
+      <div className="absolute inset-0">
+        <Image src="/screen-bg/artefacts-bg.jpg" alt="" fill className="object-cover opacity-40 sepia" sizes="(max-width: 448px) 100vw, 448px" />
+        <div className="absolute inset-0 bg-gradient-to-b from-stone-900/30 to-stone-950/50" />
+      </div>
+      <div className="absolute inset-0 flex items-center justify-center p-4">
+        <div className="grid h-full max-h-[280px] w-full max-w-[280px] grid-cols-3 grid-rows-3 gap-2">
+          {ARTIFACT_GRID_9.map((cell) => {
+            const equippedId = equipped[cell.key] as string | undefined;
 
-        <div className="absolute inset-0 flex items-center justify-center p-4">
-          <div className="grid grid-cols-3 grid-rows-3 gap-2 w-full h-full max-w-[280px] max-h-[280px]">
-            {ARTIFACT_GRID_9.map((cell) => {
-              const equippedId = equipped[cell.key] as string | undefined;
+            const current = equippedId ? artifacts.find((a) => a.id === equippedId) : undefined;
 
-              const equippedArtifact = equippedId
-                ? artifacts.find((a) => a.id === equippedId)
-                : null;
+            const available = artifacts.filter((a) => a.slot === cell.slotType || (cell.slotType === ArtifactSlot.WEAPON && a.slot === ArtifactSlot.RANGE_WEAPON));
 
-              const available = artifacts.filter(
-                (a) =>
-                  a.slot === cell.slotType ||
-                  (cell.slotType === ArtifactSlot.WEAPON &&
-                    a.slot === ArtifactSlot.RANGE_WEAPON),
-              );
-
-              const isUpdating = updatingSlot === cell.key;
-
-              const content = equippedArtifact ? (
-                <div className="absolute inset-0 flex flex-col overflow-hidden rounded">
-                  {equippedArtifact.icon ? (
-                    // eslint-disable-next-line @next/next/no-img-element -- artifact icons can be external URLs
-                    <img
-                      src={equippedArtifact.icon}
-                      alt=""
-                      className="h-full w-full object-cover"
-                    />
+            return (
+              <DropdownMenu key={cell.key}>
+                <DropdownMenuTrigger asChild>
+                  <button type="button" disabled={updatingSlot === cell.key} className={CELL} title={current ? `${cell.label}: ${current.name}` : cell.label}>
+                    {current ? (
+                      <>
+                        <EntityIcon src={current.icon} name={current.name} size={80} className="absolute inset-0 size-full rounded bg-muted/80 text-lg font-medium text-amber-200" />
+                        <span className="absolute inset-x-0 bottom-0 bg-black/60 py-0.5 text-center text-[9px] uppercase text-amber-200/90">{cell.label}</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-[10px] uppercase leading-tight text-amber-200/80">{cell.label}</span>
+                        <span className="mt-0.5 w-full truncate text-xs font-medium text-amber-100">—</span>
+                      </>
+                    )}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="center" className="min-w-[180px]">
+                  <DropdownMenuItem onClick={() => handleSlotChange(cell.key, null)}>Не обрано</DropdownMenuItem>
+                  {available.length === 0 ? (
+                    <DropdownMenuItem disabled>Немає артефактів для цього слоту</DropdownMenuItem>
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-muted/80 text-lg font-medium text-amber-200">
-                      {equippedArtifact.name[0]?.toUpperCase() ?? "?"}
-                    </div>
-                  )}
-                  <span className="absolute bottom-0 left-0 right-0 bg-black/60 py-0.5 text-center text-[9px] uppercase text-amber-200/90">
-                    {cell.label}
-                  </span>
-                </div>
-              ) : (
-                <>
-                  <span className="text-[10px] uppercase text-amber-200/80 leading-tight">
-                    {cell.label}
-                  </span>
-                  <span className="text-xs font-medium text-amber-100 truncate w-full mt-0.5">
-                    —
-                  </span>
-                </>
-              );
-
-              const slotTitle = equippedArtifact
-                ? `${cell.label}: ${equippedArtifact.name}`
-                : cell.label;
-
-              if (isEditMode) {
-                return (
-                  <DropdownMenu key={cell.key}>
-                    <DropdownMenuTrigger asChild>
-                      <button
-                        type="button"
-                        disabled={isUpdating}
-                        className={
-                          cellClassName + " relative disabled:opacity-50"
-                        }
-                        title={slotTitle}
-                      >
-                        {content}
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align="center"
-                      className="min-w-[180px]"
-                    >
-                      <DropdownMenuItem
-                        onClick={() => handleSlotChange(cell.key, null)}
-                      >
-                        Не обрано
+                    available.map((a) => (
+                      <DropdownMenuItem key={a.id} onClick={() => handleSlotChange(cell.key, a.id)} className="flex items-center gap-2">
+                        <EntityIcon src={a.icon} name={a.name} size={20} className="size-5 rounded text-[10px] font-medium" />
+                        <span className="truncate">{a.name}</span>
                       </DropdownMenuItem>
-                      {available.length === 0 ? (
-                        <DropdownMenuItem disabled>
-                          Немає артефактів для цього слоту
-                        </DropdownMenuItem>
-                      ) : (
-                        available.map((a) => (
-                          <DropdownMenuItem
-                            key={a.id}
-                            onClick={() => handleSlotChange(cell.key, a.id)}
-                            className="flex items-center gap-2"
-                          >
-                            {a.icon ? (
-                              // eslint-disable-next-line @next/next/no-img-element -- artifact icons can be external URLs
-                              <img
-                                src={a.icon}
-                                alt=""
-                                className="h-5 w-5 shrink-0 rounded object-cover"
-                              />
-                            ) : (
-                              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-muted text-[10px] font-medium">
-                                {a.name[0]?.toUpperCase() ?? "?"}
-                              </span>
-                            )}
-                            <span className="truncate">{a.name}</span>
-                          </DropdownMenuItem>
-                        ))
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                );
-              }
-
-              return (
-                <div
-                  key={cell.key}
-                  className={cellClassName + " relative"}
-                  title={slotTitle}
-                >
-                  {content}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="absolute top-3 right-3 z-10 flex flex-col items-end gap-1.5">
-          <SpellSlotsBadge spellSlots={spellSlots} />
-          <CharacterSpellbook
-            knownSpellIds={knownSpellIds}
-            campaignId={campaignId}
-            characterId={progressionCharacterId}
-          />
+                    ))
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            );
+          })}
         </div>
       </div>
-
-      <CharacterCompletedArtifactSetsSummary
-        completedSets={completedArtifactSets}
-      />
     </div>
   );
 }

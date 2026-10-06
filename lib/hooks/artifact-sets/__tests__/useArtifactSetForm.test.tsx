@@ -20,7 +20,6 @@ vi.mock("@/lib/api/artifact-sets", () => ({
   updateArtifactSet: vi.fn(async () => ({})),
   createArtifactSet: vi.fn(async () => ({})),
   deleteArtifactSet: vi.fn(),
-  getArtifactSets: vi.fn(),
 }));
 
 import { updateArtifactSet } from "@/lib/api/artifact-sets";

@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { CharacterAbilitiesSection } from "@/components/characters/abilities/CharacterAbilitiesSection";
-import { CharacterArtifactsSection } from "@/components/characters/artifacts/CharacterArtifactsSection";
 import { CharacterBasicInfo } from "@/components/characters/basic/CharacterBasicInfo";
 import { CharacterSkillsSection } from "@/components/characters/skills/CharacterSkillsSection";
 import { CharacterAbilityScores } from "@/components/characters/stats/CharacterAbilityScores";
@@ -44,7 +43,6 @@ export default function NewCharacterPage({
   const { data: races = [] } = useRaces(id);
 
   const {
-    formData,
     loading,
     error,
     basicInfo,
@@ -52,7 +50,6 @@ export default function NewCharacterPage({
     combatStats,
     skills,
     abilities,
-    spellcasting,
     handleSubmit,
   } = useCharacterForm({
     onSubmit: async (data) => {
@@ -128,18 +125,6 @@ export default function NewCharacterPage({
                   <CharacterAbilitiesSection
                     campaignId={id}
                     abilities={abilities}
-                  />
-                </AccordionContent>
-              </AccordionItem>
-
-              {/* Етап 6: Артефакти */}
-              <AccordionItem value="item-6">
-                <AccordionTrigger>6. Артефакти</AccordionTrigger>
-                <AccordionContent>
-                  <CharacterArtifactsSection
-                    knownSpellIds={spellcasting.knownSpells}
-                    campaignId={id}
-                    spellSlots={formData.spellcasting.spellSlots}
                   />
                 </AccordionContent>
               </AccordionItem>

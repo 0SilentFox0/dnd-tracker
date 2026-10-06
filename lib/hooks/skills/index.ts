@@ -1,5 +1,4 @@
 export { progressionKey } from "./progression-keys";
-export { useCharacterLearnedSpellIds } from "./useCharacterLearnedSpellIds";
 export { useCharacterProgression } from "./useCharacterProgression";
 export { useLevelUpCelebration } from "./useLevelUpCelebration";
 export {
