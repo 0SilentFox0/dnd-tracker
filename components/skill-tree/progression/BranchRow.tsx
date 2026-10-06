@@ -1,6 +1,7 @@
 import { SlotButton } from "./SlotButton";
 
 import { OptimizedImage } from "@/components/common/OptimizedImage";
+import { Button } from "@/components/ui/button";
 import type { BranchRow as Row, NodeState } from "@/lib/utils/skills/progression";
 import { BRANCH_LEVEL_LABEL, branchLevelNodeId } from "@/lib/utils/skills/progression";
 import type { CharacterProgressionDto } from "@/types/progression";
@@ -20,18 +21,19 @@ export function BranchRow({ row, dto, onSelect }: { row: Row; dto: CharacterProg
 
   return (
     <div role="group" aria-label={`${branch?.name ?? row.branchId} · ${levelText}`} className="flex items-center gap-2 border-b border-[rgba(230,220,203,.07)] px-4 py-2">
-      <button
+      <Button
         type="button"
+        variant="ghost"
         aria-label={`Рівень гілки: ${branch?.name ?? row.branchId} · ${levelText}`}
         disabled={!row.level}
         onClick={() => row.level && onSelect({ nodeId: branchLevelNodeId(row.branchId, row.level), state: "learned" })}
-        className={`flex w-14 shrink-0 flex-col items-center gap-1 ${row.level ? METAL[row.level] : "metal-iron"}`}
+        className={`h-auto whitespace-normal rounded-none p-0 font-normal hover:bg-transparent dark:hover:bg-transparent flex w-14 shrink-0 flex-col items-center gap-1 disabled:opacity-100 ${row.level ? METAL[row.level] : "metal-iron"}`}
       >
         <span className="branch-frame">
           {branch?.icon ? <OptimizedImage src={branch.icon} alt="" width={52} height={52} className="h-full w-full object-cover" fallback={<span className="hud-sc">{branch.name[0]}</span>} /> : <span className="hud-sc text-xl">{branch?.name[0] ?? "?"}</span>}
         </span>
         <span className="hud-sc text-[11px] text-[var(--m2)]">{levelText}</span>
-      </button>
+      </Button>
       <span aria-hidden className="text-[#6b5f50]">▸</span>
       <div className="flex flex-col gap-1">
         <div className="flex">{row.outer.map((s, i) => renderSlot(s, i, 46))}</div>

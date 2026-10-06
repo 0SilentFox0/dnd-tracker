@@ -14,6 +14,7 @@ import "@/components/hud/hud.css";
 import "./progression.css";
 import { EmptyState, QueryState } from "@/components/common/states";
 import { HUD_SURFACE } from "@/components/hud";
+import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/lib/hooks/common";
 import { useCharacterProgression, useProgressionActions } from "@/lib/hooks/skills";
 import type { NodeState, ProgressionNode } from "@/lib/utils/skills/progression";
@@ -84,11 +85,11 @@ export function ProgressionPanel({ campaignId, characterId, canManage = false }:
               {canManage && (
                 <div className="flex flex-wrap gap-2 px-4 py-3">
                   {view.orphans.length > 0 && (
-                    <button type="button" className="text-xs underline" onClick={async () => { for (const id of view.orphans) await actions.unlearn(id); }}>
+                    <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs text-[#d6cbb7]" onClick={async () => { for (const id of view.orphans) await actions.unlearn(id); }}>
                       Застарілі вузли: {view.orphans.length} · Прибрати
-                    </button>
+                    </Button>
                   )}
-                  <button type="button" className="text-xs text-[#d0705c] underline" onClick={reset}>Скинути дерево</button>
+                  <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs text-[#d0705c]" onClick={reset}>Скинути дерево</Button>
                 </div>
               )}
               <NodeSheet

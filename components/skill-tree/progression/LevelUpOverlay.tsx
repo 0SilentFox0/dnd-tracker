@@ -6,6 +6,7 @@ import { pointsText } from "./node-labels";
 
 import "./level-up.css";
 import { HUD_SURFACE } from "@/components/hud";
+import { Button } from "@/components/ui/button";
 import { useLevelUpCelebration } from "@/lib/hooks/skills";
 
 export function LevelUpOverlay({ campaignId, characterId, name }: { campaignId: string; characterId: string; name: string }) {
@@ -35,7 +36,7 @@ export function LevelUpOverlay({ campaignId, characterId, name }: { campaignId: 
           <p>Можна вивчити нове вміння</p>
         </div>
       )}
-      <button type="button" className="lu-cta hud-sc metal-gold metal-fill" onClick={(e) => { e.stopPropagation(); toPanel(); }}>До прокачки</button>
+      <Button type="button" variant="ghost" className="lu-cta hud-sc metal-gold metal-fill h-auto whitespace-normal rounded-none p-0 font-normal hover:bg-transparent dark:hover:bg-transparent" onClick={(e) => { e.stopPropagation(); toPanel(); }}>До прокачки</Button>
       <div className="lu-skip">торкніться, щоб закрити</div>
     </div>,
     document.body,

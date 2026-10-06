@@ -3,6 +3,7 @@ import { useState } from "react";
 import { nodeLabel } from "./node-labels";
 
 import { OptimizedImage } from "@/components/common/OptimizedImage";
+import { Button } from "@/components/ui/button";
 import type { ProgressionNode } from "@/lib/utils/skills/progression";
 import type { CharacterProgressionDto } from "@/types/progression";
 
@@ -17,9 +18,9 @@ export function OfferList({ offers, dto, filter, onClearFilter, onSelect }: { of
     <section id="progression-offers" className="pb-2">
       <h3 className="hud-sc mx-4 mb-1.5 mt-3.5 text-[13px] uppercase tracking-[.12em] text-[#8f8473]">Вивчити (1 очко)</h3>
       {filter && (
-        <button type="button" onClick={onClearFilter} className="mx-4 mb-2 rounded-full border border-[#4a4036] px-3 py-1 text-xs text-[#d6cbb7]">
+        <Button type="button" variant="ghost" size="sm" onClick={onClearFilter} className="mx-4 mb-2 h-auto rounded-full border border-[#4a4036] px-3 py-1 text-xs text-[#d6cbb7]">
           {filter.label} ✕
-        </button>
+        </Button>
       )}
       <ul aria-label="Вивчити" className="flex flex-col gap-2 px-4">
         {shown.map((node, i) => {
@@ -31,7 +32,7 @@ export function OfferList({ offers, dto, filter, onClearFilter, onSelect }: { of
 
           return (
             <li key={node.nodeId}>
-              <button type="button" onClick={() => onSelect(node)} className={`offer-card ${i === 0 && !filter ? "top" : ""}`}>
+              <Button type="button" variant="ghost" onClick={() => onSelect(node)} className={`offer-card h-auto whitespace-normal rounded-none p-0 font-normal hover:bg-transparent dark:hover:bg-transparent justify-start text-left ${i === 0 && !filter ? "top" : ""}`}>
                 <span className="skill-slot learned" style={{ width: 48, height: 48 }}>
                   {icon ? <OptimizedImage src={icon} alt="" width={48} height={48} className="h-full w-full object-cover" fallback={<span className="hud-sc">{title[0]}</span>} /> : <span className="hud-sc">{title[0]}</span>}
                 </span>
@@ -40,15 +41,15 @@ export function OfferList({ offers, dto, filter, onClearFilter, onSelect }: { of
                   <span className="block text-xs text-[#c9b37a]">{tag}</span>
                   {skill?.summary[0] && <span className="mt-1 block text-[13px] leading-snug text-[#b8ab95]">{skill.summary.join(" · ")}</span>}
                 </span>
-              </button>
+              </Button>
             </li>
           );
         })}
       </ul>
       {!filter && !expanded && list.length > 3 && (
-        <button type="button" onClick={() => setExpanded(true)} className="mx-4 mt-2 text-xs text-[#8f8473]">
+        <Button type="button" variant="link" size="sm" onClick={() => setExpanded(true)} className="mx-4 mt-2 h-auto p-0 text-xs text-[#8f8473]">
           Ще {list.length - 3} варіантів ▾
-        </button>
+        </Button>
       )}
     </section>
   );

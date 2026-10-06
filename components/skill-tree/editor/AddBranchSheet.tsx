@@ -22,10 +22,10 @@ export function AddBranchSheet({ open, branches, actions }: {
     >
       <div className="flex flex-col gap-1">
         {branches.map((b) => (
-          <button key={b.id} type="button" className="flex items-center gap-2 py-2 text-left" onClick={() => actions.onAdd(b.id)}>
+          <Button key={b.id} type="button" variant="ghost" className="justify-start gap-2" onClick={() => actions.onAdd(b.id)}>
             <span className="h-3 w-3 rounded-full" style={{ background: b.color }} />
             {b.name}
-          </button>
+          </Button>
         ))}
       </div>
       <form
