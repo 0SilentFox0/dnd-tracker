@@ -3,7 +3,7 @@ import { mapLegacyEffect } from "./stat-map";
 import { mapLegacyTrigger } from "./trigger-map";
 import type { ConversionIssue, ConversionResult, ConvertOptions } from "./types";
 
-import type { Ability, DamageKind, Effect } from "@/lib/utils/abilities/schema";
+import type { Ability, AttackKind, DamageKind, Effect } from "@/lib/utils/abilities/schema";
 
 export interface LegacySkillRow {
   id: string;
@@ -31,7 +31,7 @@ export function convertLegacySkill(row: LegacySkillRow, opts: ConvertOptions = {
 
   const extras: Omit<Ability, "id" | "name">[] = [];
 
-  let counterKinds: DamageKind[] | null = null;
+  let counterKinds: AttackKind[] | null = null;
 
   let counterPercent = 0;
 

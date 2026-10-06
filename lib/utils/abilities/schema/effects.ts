@@ -5,7 +5,6 @@ import {
   AmountSchema,
   ATTACK_KINDS,
   DAMAGE_FILTER_KINDS,
-  DAMAGE_KINDS,
   DurationSchema,
   FlatSchema,
 } from "./common";
@@ -86,7 +85,8 @@ const FlagSchema = z.discriminatedUnion("flag", [
   z.object({
     ...flagBase,
     flag: z.literal("counterAttack"),
-    attackKinds: z.array(z.enum(DAMAGE_KINDS)).min(1),
+    // old records may hold "magic" — spells never trigger retaliation
+    attackKinds: z.preprocess((v) => (Array.isArray(v) ? v.filter((k) => k !== "magic") : v), z.array(z.enum(ATTACK_KINDS))),
     bonusPercent: z.number().min(0),
   }),
   z.object({ ...flagBase, flag: z.literal("seeEnemyHp") }),

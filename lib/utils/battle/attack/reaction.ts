@@ -27,7 +27,9 @@ export function canPerformReaction(
 ): boolean {
   if (defender.actionFlags.hasUsedReaction) return false;
 
-  const kind = incomingAttackType === "magic" ? "magic" : incomingAttackType === AttackType.RANGED ? "ranged" : "melee";
+  if (incomingAttackType === "magic") return false;
+
+  const kind = incomingAttackType === AttackType.RANGED ? "ranged" : "melee";
 
   return counterFlags(defender, participants).some((f) => f.attackKinds.includes(kind));
 }

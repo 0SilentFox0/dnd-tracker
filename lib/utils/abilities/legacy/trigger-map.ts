@@ -1,13 +1,13 @@
 import type { ConversionIssue } from "./types";
 
-import type { Condition, DamageKind, Limits, Trigger } from "@/lib/utils/abilities/schema";
+import type { AttackKind, Condition, Limits, Trigger } from "@/lib/utils/abilities/schema";
 
 export interface MappedTrigger {
   trigger: Trigger;
   condition?: Condition;
   limits?: Limits;
   stackable?: boolean;
-  counter?: { attackKinds: DamageKind[] };
+  counter?: { attackKinds: AttackKind[] };
   notes: string[];
   issues: ConversionIssue[];
 }
@@ -84,7 +84,7 @@ export function mapLegacyTrigger(raw: unknown): MappedTrigger | null {
 
     return {
       trigger: { event: "passive" },
-      counter: { attackKinds: [kind === "ranged" || kind === "magic" ? kind : "melee"] },
+      counter: { attackKinds: [kind === "ranged" ? "ranged" : "melee"] },
       notes: [],
       issues: [],
     };

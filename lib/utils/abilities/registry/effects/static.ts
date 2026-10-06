@@ -112,7 +112,7 @@ export function describeFlag(e: Extract<Effect, { kind: "flag" }>): string {
     case "spellImmunity":
       return `імунітет до заклинань (${e.spellIds.length})`;
     case "counterAttack":
-      return `контратака +${e.bonusPercent}%`;
+      return `відсіч${e.attackKinds.includes("ranged") ? " (і на дальні)" : ""} +${e.bonusPercent}%`;
     case "seeEnemyHp":
       return "бачить HP ворогів";
     case "conditionImmunity":
@@ -138,10 +138,9 @@ const ATTACK_KIND_ALL = [
   { value: "ranged", label: "дальні" },
 ] as const;
 
-const DAMAGE_KIND_OPTIONS = [
+const COUNTER_KIND_OPTIONS = [
   { value: "melee", label: "ближня" },
   { value: "ranged", label: "дальня" },
-  { value: "magic", label: "магія" },
 ] as const;
 
 export const FLAG_FIELDS: Record<FlagKey, readonly FieldMeta[]> = {
@@ -155,7 +154,7 @@ export const FLAG_FIELDS: Record<FlagKey, readonly FieldMeta[]> = {
   ],
   spellImmunity: [{ name: "spellIds", label: "Заклинання", input: "spells" }],
   counterAttack: [
-    { name: "attackKinds", label: "На атаки", input: "multiselect", options: DAMAGE_KIND_OPTIONS },
+    { name: "attackKinds", label: "На атаки", input: "multiselect", options: COUNTER_KIND_OPTIONS },
     { name: "bonusPercent", label: "Бонус шкоди, %", input: "number" },
   ],
   seeEnemyHp: [],
