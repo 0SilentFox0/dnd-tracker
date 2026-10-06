@@ -18,10 +18,19 @@ const ab = (id: string, name: string, rest: Omit<Ability, "id" | "name">): Abili
 const json = (v: unknown) => v as Prisma.InputJsonValue;
 
 export const RACES = {
-  human: { name: "Людина", abilities: json([]) },
+  human: {
+    name: "Людина",
+    abilities: json([
+      ab("human-counter", "Контратака", { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "counterAttack", attackKinds: ["melee"], bonusPercent: 50 }] }),
+      ab("human-steady", "Незламність", { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "noNegativeMorale" }] }),
+    ]),
+  },
   elf: {
     name: "Ельф",
-    abilities: json([ab("elf-magic", "Ельфійська стійкість", { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "resistance", damageType: "spell", percent: 25 }] })]),
+    abilities: json([
+      ab("elf-magic", "Ельфійська стійкість", { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "resistance", damageType: "spell", percent: 25 }] }),
+      ab("elf-calm", "Ельфійський спокій", { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "ignoreMorale" }] }),
+    ]),
   },
   // старий формат: імунітет з опису, abilities = NULL
   dwarf: { name: "Дварф", passiveAbility: json({ description: "Міцні як камінь. Імунітет до отруєння." }) },
