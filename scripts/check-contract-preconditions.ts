@@ -14,7 +14,7 @@ config({ path: args.includes("--env") ? args[args.indexOf("--env") + 1] : ".env.
 
 const prisma = new PrismaClient();
 
-// той самий предикат, що в upgradeLegacyParticipant: немає resolvedAbilities або лишились поля до 3a
+// учасник до 3a: немає resolvedAbilities або лишились поля до 3a
 const legacySnapshot = (s: string) => `(
   jsonb_typeof(${s}->'battleData'->'resolvedAbilities') IS DISTINCT FROM 'array'
   OR ${s}->'battleData'->'activeSkills' IS NOT NULL

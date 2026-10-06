@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import { convertLegacyArtifact } from "@/lib/utils/abilities/legacy/convert-artifact";
 import { convertLegacyArtifactSet } from "@/lib/utils/abilities/legacy/convert-artifact-set";
 import { convertLegacyRace } from "@/lib/utils/abilities/legacy/convert-race";
-import { convertLegacySnapshot } from "@/lib/utils/abilities/legacy/convert-snapshot";
 import { convertLegacyUnit } from "@/lib/utils/abilities/legacy/convert-unit";
 import { AbilitiesSchema } from "@/lib/utils/abilities/schema";
 
@@ -82,51 +81,3 @@ describe("convertLegacyArtifactSet / Race / Unit", () => {
     expect(AbilitiesSchema.safeParse(r.abilities).success).toBe(true);
   });
 });
-
-describe("convertLegacySnapshot", () => {
-  it("activeSkills + artifacts → resolvedAbilities без запечених статів; usage з skillUsageCounts", () => {
-    const r = convertLegacySnapshot({
-      activeSkills: [
-        { skillId: "s1", name: "Напад — Базовий", mainSkillId: "m", level: "basic", effects: [{ stat: "melee_damage", type: "percent", value: 10, isPercentage: true }], skillTriggers: [{ type: "simple", trigger: "passive" }] },
-        { skillId: "s2", name: "Напад — Експерт", mainSkillId: "m", level: "expert", effects: [{ stat: "melee_damage", type: "percent", value: 30, isPercentage: true }], skillTriggers: [{ type: "simple", trigger: "passive" }] },
-        { skillId: "s3", name: "Шип", mainSkillId: "m", level: "basic", effects: [{ stat: "survive_lethal", type: "flag", value: true, isPercentage: false }], skillTriggers: [{ type: "simple", trigger: "onLethalDamage", modifiers: { oncePerBattle: true } }], spellEnhancements: { spellEffectIncrease: 25 }, spellGroupId: "g" },
-      ],
-      racialAbilities: [],
-      equippedArtifacts: [{ artifactId: "a", name: "Меч", slot: "weapon", bonuses: { armorClass: 2 }, modifiers: [{ type: "melee_damage", value: 3 }] }],
-      skillUsageCounts: { s3: 1 },
-    });
-
-    const keys = r.resolvedAbilities.map((a) => a.key);
-
-    expect(keys).toEqual(expect.arrayContaining(["skill:s2:t0", "skill:s3:t0", "artifact:a:bonuses"]));
-    expect(keys).not.toContain("skill:s1:t0");
-    expect(r.abilityUsage["skill:s3:t0"]).toEqual({ battle: 1, round: 0, turn: 0 });
-    expect(r.spellEnhancers).toEqual([expect.objectContaining({ skillId: "s3", spellGroupId: "g", spellEnhancements: { spellEffectIncrease: 25 } })]);
-  });
-});
-
-describe("convertLegacySnapshot: extras старого snapshot", () => {
-  const flagsOf = (r: ReturnType<typeof convertLegacySnapshot>) =>
-    r.resolvedAbilities.filter((a) => a.trigger.event === "passive").flatMap((a) => a.effects).filter((e) => e.kind === "flag");
-
-  it("резист сету з extras переноситься; пасивний резист скіла не дублюється", () => {
-    const r = convertLegacySnapshot({
-      activeSkills: [
-        { skillId: "s1", name: "Захист", mainSkillId: "m", level: "basic", effects: [{ stat: "physical_resistance", type: "percent", value: 30, isPercentage: true }], skillTriggers: [{ type: "simple", trigger: "passive" }] },
-      ],
-      equippedArtifacts: [],
-      extras: { resistances: { physical: 50, spell: 10 }, advantageOnRangedAttacks: true, immuneSpellIds: ["sp1"] },
-    });
-
-    expect(flagsOf(r)).toEqual(
-      expect.arrayContaining([
-        { kind: "flag", flag: "resistance", damageType: "physical", percent: 50 },
-        { kind: "flag", flag: "resistance", damageType: "spell", percent: 10 },
-        { kind: "flag", flag: "advantage", attackKind: "ranged" },
-        { kind: "flag", flag: "spellImmunity", spellIds: ["sp1"] },
-      ]),
-    );
-    expect(flagsOf(r).filter((f) => f.flag === "resistance")).toHaveLength(2);
-  });
-});
-

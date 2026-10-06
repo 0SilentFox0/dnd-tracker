@@ -10,97 +10,64 @@ import { describe, expect, it } from "vitest";
 
 import { calculateSpellDamageWithEnhancements } from "../calculations";
 
-import { ParticipantSide } from "@/lib/constants/battle";
-import type { LegacyActiveSkill as ActiveSkill } from "@/lib/utils/abilities/legacy/types";
-import { upgradeLegacyParticipant } from "@/lib/utils/battle/store/split-participant";
-import type { BattleParticipant, SkillEffect } from "@/types/battle";
+import { pickHighestPerLine, resolveAbilities } from "@/lib/utils/abilities/build/resolve";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
+import type { SpellEnhancer } from "@/types/abilities";
+import type { BattleParticipant } from "@/types/battle";
 import { SkillLevel } from "@/types/skill-tree";
 
-// Старі ActiveSkill проходять реальний шлях міграції snapshot → уміння.
-function createCaster(overrides?: {
-  activeSkills?: ActiveSkill[];
-  level?: number;
-}): BattleParticipant {
-  const legacy = {
-    basicInfo: {
-      id: "caster",
-      battleId: "b1",
-      sourceId: "c1",
-      sourceType: "character",
-      name: "Hero",
-      side: ParticipantSide.ALLY,
-      controlledBy: "user",
-    },
-    abilities: {
-      level: overrides?.level ?? 5,
-      initiative: 10,
-      baseInitiative: 10,
-      strength: 10,
-      dexterity: 10,
-      constitution: 10,
-      intelligence: 10,
-      wisdom: 10,
-      charisma: 10,
-      modifiers: {
-        strength: 0,
-        dexterity: 0,
-        constitution: 0,
-        intelligence: 0,
-        wisdom: 0,
-        charisma: 0,
+interface TestSkill {
+  id: string;
+  name: string;
+  mainSkillId: string;
+  level: SkillLevel;
+  kind: "melee" | "ranged" | "magic";
+  school?: string;
+  percent?: number;
+  flat?: number;
+  spellEffectIncrease?: number;
+}
+
+function createCaster(overrides?: { skills?: TestSkill[]; level?: number }): BattleParticipant {
+  const base = createMockParticipant();
+
+  const picked = pickHighestPerLine(
+    (overrides?.skills ?? []).map((s) => ({
+      item: s,
+      source: { type: "skill" as const, id: s.id, name: s.name, icon: null, line: { mainSkillId: s.mainSkillId, level: s.level, levelNode: true } },
+    })),
+  );
+
+  const resolvedAbilities = picked.flatMap(({ item: s, source }) =>
+    resolveAbilities(source, [
+      {
+        id: "t0",
+        name: s.name,
+        trigger: { event: "passive" },
+        effects: [{ kind: "damageBonus", filter: { kind: s.kind, ...(s.school && { school: s.school }) }, ...(s.percent !== undefined ? { percent: s.percent } : { flat: s.flat ?? 0 }) }],
       },
-      proficiencyBonus: 2,
-      race: "human",
-    },
-    combatStats: {
-      maxHp: 30,
-      currentHp: 30,
-      tempHp: 0,
-      armorClass: 14,
-      speed: 30,
-      morale: 0,
-      status: "active",
-      minTargets: 1,
-      maxTargets: 1,
-    },
-    spellcasting: { spellSlots: {}, knownSpells: [] },
-    battleData: {
-      attacks: [],
-      activeEffects: [],
-      activeSkills: overrides?.activeSkills ?? [],
-      equippedArtifacts: [],
-    },
-    actionFlags: {
-      hasUsedAction: false,
-      hasUsedBonusAction: false,
-      hasUsedReaction: false,
-      hasExtraTurn: false,
-    },
-  } as unknown as BattleParticipant;
+    ]),
+  );
 
-  return upgradeLegacyParticipant(legacy);
+  const spellEnhancers: SpellEnhancer[] = picked
+    .filter(({ item }) => item.spellEffectIncrease !== undefined)
+    .map(({ item: s }) => ({ skillId: s.id, name: s.name, mainSkillId: s.mainSkillId, level: s.level, linkedSpellId: null, spellGroupId: s.school ?? null, spellEnhancements: { spellEffectIncrease: s.spellEffectIncrease } }));
+
+  return createMockParticipant({
+    basicInfo: { ...base.basicInfo, id: "caster", controlledBy: "user", name: "Hero" },
+    abilities: { ...base.abilities, level: overrides?.level ?? 5, strength: 10, dexterity: 10, modifiers: { strength: 0, dexterity: 0, constitution: 0, intelligence: 0, wisdom: 0, charisma: 0 } },
+    combatStats: { ...base.combatStats, maxHp: 30, currentHp: 30 },
+    battleData: { ...base.battleData, resolvedAbilities, spellEnhancers },
+  });
 }
 
-function effect(stat: string, value: number, isPercentage: boolean): SkillEffect {
-  return { stat, type: isPercentage ? "percent" : "flat", value, isPercentage };
-}
-
-function chaosExpertSkill(): ActiveSkill {
-  return {
-    skillId: "chaos-expert",
-    name: "Магія хаосу: експерт",
-    mainSkillId: "main-chaos",
-    level: SkillLevel.EXPERT,
-    effects: [effect("chaos_spell_damage", 25, true)],
-    affectsDamage: true,
-    damageType: "magic",
-    spellGroupId: "chaos",
-  };
+function chaosExpertSkill(): TestSkill {
+  return { id: "chaos-expert", name: "Магія хаосу: експерт", mainSkillId: "main-chaos", level: SkillLevel.EXPERT, kind: "magic", school: "chaos", percent: 25 };
 }
 
 describe("calculateSpellDamageWithEnhancements (magic pipeline)", () => {
   it("expert 'Магія хаосу' дає +25% до шкоди заклинання школи Хаосу", () => {
-    const caster = createCaster({ activeSkills: [chaosExpertSkill()] });
+    const caster = createCaster({ skills: [chaosExpertSkill()] });
 
     const result = calculateSpellDamageWithEnhancements(
       caster,
@@ -118,7 +85,7 @@ describe("calculateSpellDamageWithEnhancements (magic pipeline)", () => {
   });
 
   it("скіл Хаосу не дає бонус заклинанню Темної магії (school scope)", () => {
-    const caster = createCaster({ activeSkills: [chaosExpertSkill()] });
+    const caster = createCaster({ skills: [chaosExpertSkill()] });
 
     const result = calculateSpellDamageWithEnhancements(
       caster,
@@ -133,7 +100,7 @@ describe("calculateSpellDamageWithEnhancements (magic pipeline)", () => {
   });
 
   it("без spellGroupId у спела — фолбек: бонус застосовується (зворотна сумісність)", () => {
-    const caster = createCaster({ activeSkills: [chaosExpertSkill()] });
+    const caster = createCaster({ skills: [chaosExpertSkill()] });
 
     const result = calculateSpellDamageWithEnhancements(
       caster,
@@ -147,18 +114,9 @@ describe("calculateSpellDamageWithEnhancements (magic pipeline)", () => {
   });
 
   it("універсальний скіл (spell_damage без spellGroupId) застосовується до будь-якої школи", () => {
-    const universalSkill: ActiveSkill = {
-      skillId: "universal",
-      name: "Магія: експерт",
-      mainSkillId: "main-magic",
-      level: SkillLevel.EXPERT,
-      effects: [effect("spell_damage", 25, true)],
-      affectsDamage: true,
-      damageType: "magic",
-      spellGroupId: null,
-    };
+    const universalSkill: TestSkill = { id: "universal", name: "Магія: експерт", mainSkillId: "main-magic", level: SkillLevel.EXPERT, kind: "magic", percent: 25 };
 
-    const caster = createCaster({ activeSkills: [universalSkill] });
+    const caster = createCaster({ skills: [universalSkill] });
 
     const r1 = calculateSpellDamageWithEnhancements(
       caster,
@@ -181,19 +139,10 @@ describe("calculateSpellDamageWithEnhancements (magic pipeline)", () => {
   });
 
   it("expert > basic на одному mainSkillId — береться лише найвищий", () => {
-    const basic: ActiveSkill = {
-      skillId: "chaos-basic",
-      name: "Магія хаосу: базовий",
-      mainSkillId: "main-chaos",
-      level: SkillLevel.BASIC,
-      effects: [effect("chaos_spell_damage", 10, true)],
-      affectsDamage: true,
-      damageType: "magic",
-      spellGroupId: "chaos",
-    };
+    const basic: TestSkill = { id: "chaos-basic", name: "Магія хаосу: базовий", mainSkillId: "main-chaos", level: SkillLevel.BASIC, kind: "magic", school: "chaos", percent: 10 };
 
     const caster = createCaster({
-      activeSkills: [basic, chaosExpertSkill()],
+      skills: [basic, chaosExpertSkill()],
     });
 
     const result = calculateSpellDamageWithEnhancements(
@@ -209,19 +158,9 @@ describe("calculateSpellDamageWithEnhancements (magic pipeline)", () => {
   });
 
   it("spellEffectIncrease застосовується після %-бонусу зі скіла (множить вже збільшений урон)", () => {
-    const skillWithIncrease: ActiveSkill = {
-      skillId: "chaos-with-incr",
-      name: "Магія хаосу: експерт",
-      mainSkillId: "main-chaos",
-      level: SkillLevel.EXPERT,
-      effects: [effect("chaos_spell_damage", 25, true)],
-      affectsDamage: true,
-      damageType: "magic",
-      spellGroupId: "chaos",
-      spellEnhancements: { spellEffectIncrease: 20 },
-    };
+    const skillWithIncrease: TestSkill = { ...chaosExpertSkill(), id: "chaos-with-incr", spellEffectIncrease: 20 };
 
-    const caster = createCaster({ activeSkills: [skillWithIncrease] });
+    const caster = createCaster({ skills: [skillWithIncrease] });
 
     const result = calculateSpellDamageWithEnhancements(
       caster,
@@ -236,28 +175,12 @@ describe("calculateSpellDamageWithEnhancements (magic pipeline)", () => {
   });
 
   it("melee/ranged скіл не впливає на magic", () => {
-    const meleeSkill: ActiveSkill = {
-      skillId: "melee",
-      name: "Меч-мастер: експерт",
-      mainSkillId: "main-melee",
-      level: SkillLevel.EXPERT,
-      effects: [effect("melee_damage", 25, true)],
-      affectsDamage: true,
-      damageType: "melee",
-    };
+    const meleeSkill: TestSkill = { id: "melee", name: "Меч-мастер: експерт", mainSkillId: "main-melee", level: SkillLevel.EXPERT, kind: "melee", percent: 25 };
 
-    const rangedSkill: ActiveSkill = {
-      skillId: "ranged",
-      name: "Стрілець: експерт",
-      mainSkillId: "main-ranged",
-      level: SkillLevel.EXPERT,
-      effects: [effect("ranged_damage", 25, true)],
-      affectsDamage: true,
-      damageType: "ranged",
-    };
+    const rangedSkill: TestSkill = { id: "ranged", name: "Стрілець: експерт", mainSkillId: "main-ranged", level: SkillLevel.EXPERT, kind: "ranged", percent: 25 };
 
     const caster = createCaster({
-      activeSkills: [meleeSkill, rangedSkill],
+      skills: [meleeSkill, rangedSkill],
     });
 
     const result = calculateSpellDamageWithEnhancements(
@@ -273,7 +196,7 @@ describe("calculateSpellDamageWithEnhancements (magic pipeline)", () => {
 
   it("addHeroLevelToBase=true додає рівень героя у базу", () => {
     const caster = createCaster({
-      activeSkills: [chaosExpertSkill()],
+      skills: [chaosExpertSkill()],
       level: 8,
     });
 
@@ -291,19 +214,10 @@ describe("calculateSpellDamageWithEnhancements (magic pipeline)", () => {
   });
 
   it("flat-бонус застосовується до бази перед відсотками", () => {
-    const flatSkill: ActiveSkill = {
-      skillId: "flat-magic",
-      name: "Магічна сила",
-      mainSkillId: "main-magic-flat",
-      level: SkillLevel.EXPERT,
-      effects: [effect("magic_damage", 5, false)],
-      affectsDamage: true,
-      damageType: "magic",
-      spellGroupId: null, // універсальний
-    };
+    const flatSkill: TestSkill = { id: "flat-magic", name: "Магічна сила", mainSkillId: "main-magic-flat", level: SkillLevel.EXPERT, kind: "magic", flat: 5 };
 
     const caster = createCaster({
-      activeSkills: [flatSkill, chaosExpertSkill()],
+      skills: [flatSkill, chaosExpertSkill()],
     });
 
     const result = calculateSpellDamageWithEnhancements(

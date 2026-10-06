@@ -1,5 +1,4 @@
 import { ParticipantSide } from "@/lib/constants/battle";
-import { convertLegacySnapshot } from "@/lib/utils/abilities/legacy/convert-snapshot";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -76,18 +75,4 @@ export function grantPassive(p: BattleParticipant, effects: StaticEffect[], name
   ];
 
   return p;
-}
-
-/** Для тестів зі старими activeSkills: додає сконвертовані вміння, не прибираючи старі поля. */
-export function withConvertedSkills(p: BattleParticipant): BattleParticipant {
-  const converted = convertLegacySnapshot({ activeSkills: (p.battleData as unknown as Record<string, unknown>).activeSkills ?? [] });
-
-  return {
-    ...p,
-    battleData: {
-      ...p.battleData,
-      resolvedAbilities: [...(p.battleData.resolvedAbilities ?? []), ...converted.resolvedAbilities],
-      spellEnhancers: [...(p.battleData.spellEnhancers ?? []), ...converted.spellEnhancers],
-    },
-  };
 }

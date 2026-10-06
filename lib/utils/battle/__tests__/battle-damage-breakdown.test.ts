@@ -9,11 +9,11 @@ import {
 } from "../damage";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
-import { grantPassive, withConvertedSkills } from "@/lib/utils/battle/__tests__/mock-participant";
+import { grantPassive } from "@/lib/utils/battle/__tests__/mock-participant";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 function createBaseParticipant(overrides?: Partial<BattleParticipant>): BattleParticipant {
-  return withConvertedSkills({
+  return {
     basicInfo: {
       id: "p1",
       battleId: "b1",
@@ -70,7 +70,7 @@ function createBaseParticipant(overrides?: Partial<BattleParticipant>): BattlePa
       hasExtraTurn: false,
     },
     ...overrides,
-  });
+  };
 }
 
 function createMeleeAttack(): BattleAttack {
