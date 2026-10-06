@@ -107,13 +107,13 @@ export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, o
             </Link>
           </Button>
           {spell.spellGroup && (
-            <Button variant="ghost" size="icon" className={ICON_BTN} onClick={() => onRemoveFromGroup(spell.id)} title="Видалити з групи">
+            <Button variant="ghost" size="icon" className={ICON_BTN} onClick={() => onRemoveFromGroup(spell.id)} aria-label="Видалити з групи" title="Видалити з групи">
               <X className="size-3.5" />
             </Button>
           )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className={ICON_BTN} title="Перемістити в групу">
+              <Button variant="ghost" size="icon" className={ICON_BTN} aria-label="Перемістити в групу" title="Перемістити в групу">
                 <Move className="size-3.5" />
               </Button>
             </DropdownMenuTrigger>
@@ -138,7 +138,7 @@ export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, o
         <code className="ml-auto max-w-[45%] truncate font-mono text-[10px]" title={spell.id}>
           {copied ? "Скопійовано" : spell.id}
         </code>
-        <Button variant="ghost" size="icon" className="size-6 shrink-0 text-[#8f8473]" onClick={handleCopyId} title={copied ? "Скопійовано" : "Копіювати ID"}>
+        <Button variant="ghost" size="icon" className="size-6 shrink-0 text-[#8f8473]" onClick={handleCopyId} aria-label={copied ? "Скопійовано" : "Копіювати ID"} title={copied ? "Скопійовано" : "Копіювати ID"}>
           <Copy className="size-3" />
         </Button>
       </div>
