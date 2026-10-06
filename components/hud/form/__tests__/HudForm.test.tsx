@@ -3,7 +3,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { HudForm } from "@/components/hud/form";
-import { revealInvalidTab } from "@/components/hud/form/reveal-invalid-tab";
+import { findInvalidTab } from "@/components/hud/form/reveal-invalid-tab";
 import { Button } from "@/components/ui/button";
 
 afterEach(cleanup);
@@ -46,6 +46,25 @@ describe("HudForm", () => {
     expect(screen.getByRole("tab", { name: "Основне" }).getAttribute("data-state")).toBe("active");
   });
 
+  it("lands on the first invalid tab when several tabs are invalid", () => {
+    render(
+      <HudForm
+        id="t-form"
+        onSubmit={() => {}}
+        tabs={[
+          { id: "a", label: "Основне", content: <input aria-label="ім'я" defaultValue="x" /> },
+          { id: "b", label: "Бій", content: <input aria-label="AC" required defaultValue="" /> },
+          { id: "c", label: "Магія", content: <input aria-label="СЛ" required defaultValue="" /> },
+        ]}
+        actions={<Button type="submit">Зберегти</Button>}
+      />,
+    );
+
+    fireEvent.invalid(screen.getByLabelText("AC"));
+    fireEvent.invalid(screen.getByLabelText("СЛ"));
+    expect(screen.getByRole("tab", { name: "Бій" }).getAttribute("data-state")).toBe("active");
+  });
+
   it("renders actions inside the form", () => {
     render(<HudForm id="t-form" onSubmit={() => {}} actions={<Button type="submit">Зберегти</Button>}>поля</HudForm>);
 
@@ -53,33 +72,31 @@ describe("HudForm", () => {
   });
 });
 
-describe("revealInvalidTab", () => {
+describe("findInvalidTab", () => {
   const build = () => {
     const root = document.createElement("div");
 
-    root.innerHTML = '<div data-tab-id="a"><input id="x" value="ok" /></div><div data-tab-id="b"><input id="y" required value="" /></div>';
+    root.innerHTML = '<div data-tab-id="a"><input id="x" value="ok" /></div><div data-tab-id="b"><input id="y" required value="" /></div><div data-tab-id="c"><input id="z" required value="" /></div>';
 
     return root;
   };
 
-  it("returns the owner tab of the invalid target when the active tab is valid", () => {
-    const root = build();
+  it("returns the first invalid control's tab in DOM order when the active tab is valid", () => {
+    const found = findInvalidTab(build(), "a");
 
-    expect(revealInvalidTab(root, "a", root.querySelector("#y"))).toBe("b");
+    expect(found?.owner).toBe("b");
+    expect(found?.control.id).toBe("y");
   });
 
-  it("returns null when the target already sits in the active tab", () => {
-    const root = build();
-
-    expect(revealInvalidTab(root, "b", root.querySelector("#y"))).toBeNull();
+  it("returns null when the active tab has an invalid field", () => {
+    expect(findInvalidTab(build(), "c")).toBeNull();
   });
 
-  it("returns null when the active tab has its own invalid field", () => {
+  it("returns null when everything is valid", () => {
     const root = build();
 
-    root.querySelector("#x")?.setAttribute("required", "");
-    (root.querySelector("#x") as HTMLInputElement).value = "";
+    root.querySelectorAll("[required]").forEach((el) => ((el as HTMLInputElement).value = "v"));
 
-    expect(revealInvalidTab(root, "a", root.querySelector("#y"))).toBeNull();
+    expect(findInvalidTab(root, "a")).toBeNull();
   });
 });

@@ -1,9 +1,9 @@
 "use client";
 
-import { type FormEvent, type ReactNode, useRef, useState } from "react";
+import { type FormEvent, type ReactNode, useState } from "react";
 
 import { type HudTab, HudTabs } from "./HudTabs";
-import { revealInvalidTab } from "./reveal-invalid-tab";
+import { useRevealInvalidTab } from "./reveal-invalid-tab";
 
 import { ActionBar } from "@/components/common/ActionBar";
 import { cn } from "@/lib/utils";
@@ -20,8 +20,6 @@ interface HudFormProps<T extends string> {
 }
 
 export function HudForm<T extends string>({ id, onSubmit, tabs, tab, onTabChange, children, actions, className }: HudFormProps<T>) {
-  const formRef = useRef<HTMLFormElement>(null);
-
   const [innerTab, setInnerTab] = useState<T | undefined>(tabs?.[0]?.id);
 
   const active = tab ?? innerTab ?? tabs?.[0]?.id;
@@ -31,22 +29,12 @@ export function HudForm<T extends string>({ id, onSubmit, tabs, tab, onTabChange
     onTabChange?.(next);
   };
 
-  // the browser cannot focus an invalid control inside a hidden tab, so reveal that tab first
-  const onInvalidCapture = (e: FormEvent<HTMLFormElement>) => {
-    if (!tabs || !active) return;
-
-    const owner = revealInvalidTab(formRef.current, active, e.target) as T | null;
-
-    if (!owner) return;
-
-    setActive(owner);
-    requestAnimationFrame(() => (e.target as HTMLElement).focus());
-  };
+  const onInvalidCapture = useRevealInvalidTab(tabs ? active : undefined, setActive);
 
   return (
-    <form ref={formRef} id={id} onSubmit={onSubmit} onInvalidCapture={onInvalidCapture} className={cn("flex flex-col", className)}>
+    <form id={id} onSubmit={onSubmit} onInvalidCapture={onInvalidCapture} className={cn("flex flex-1 flex-col", className)}>
       {tabs && active ? <HudTabs tabs={tabs} value={active} onValueChange={setActive} keepMounted /> : <div className="px-4 py-3">{children}</div>}
-      <ActionBar className="mt-auto border-[#3a2e22] bg-[#110e0b]/95 px-4 sm:px-4 sm:pb-4">{actions}</ActionBar>
+      <ActionBar className="mt-auto flex-wrap [&>*]:min-w-fit border-[#3a2e22] bg-[#110e0b]/95 px-4 sm:px-4 sm:pb-4">{actions}</ActionBar>
     </form>
   );
 }

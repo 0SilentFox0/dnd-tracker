@@ -1,9 +1,39 @@
-export function revealInvalidTab(root: ParentNode | null, active: string, target: EventTarget | null): string | null {
-  const activeFields = root?.querySelectorAll<HTMLInputElement>(`[data-tab-id="${active}"] :is(input, textarea, select)`) ?? [];
+import { type SyntheticEvent, useRef } from "react";
 
-  if (Array.from(activeFields).some((el) => el.willValidate && !el.validity.valid)) return null;
+const invalidControls = (root: ParentNode) =>
+  Array.from(root.querySelectorAll<HTMLInputElement>("input, textarea, select")).filter((el) => el.willValidate && !el.validity.valid);
 
-  const owner = (target as HTMLElement | null)?.closest<HTMLElement>("[data-tab-id]")?.dataset.tabId;
+const tabOf = (el: Element) => el.closest<HTMLElement>("[data-tab-id]")?.dataset.tabId;
 
-  return owner && owner !== active ? owner : null;
+export function findInvalidTab(root: ParentNode, active: string): { owner: string; control: HTMLInputElement } | null {
+  const invalid = invalidControls(root);
+
+  if (invalid.length === 0 || invalid.some((el) => tabOf(el) === active)) return null;
+
+  const control = invalid.find((el) => tabOf(el));
+
+  const owner = control && tabOf(control);
+
+  return control && owner ? { owner, control } : null;
+}
+
+export function useRevealInvalidTab<T extends string>(active: T | undefined, setActive: (tab: T) => void) {
+  const handled = useRef(false);
+
+  return (e: SyntheticEvent<HTMLElement>) => {
+    if (handled.current || !active) return;
+
+    handled.current = true;
+
+    const found = findInvalidTab(e.currentTarget, active);
+
+    if (found) setActive(found.owner as T);
+
+    // reportValidity re-fires `invalid`, so the flag is released only after it
+    requestAnimationFrame(() => {
+      if (found) found.control.reportValidity();
+
+      handled.current = false;
+    });
+  };
 }

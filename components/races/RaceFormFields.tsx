@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useState } from "react";
+import { useState } from "react";
 
 import { RACE_FORM_TAB, type RaceFormTabId } from "./race-form-tabs";
 import { RaceEditFormSpellSlots } from "./RaceEditFormSpellSlots";
@@ -9,7 +9,7 @@ import { RaceEditFormStatModifiers } from "./RaceEditFormStatModifiers";
 import { AbilityListEditor } from "@/components/abilities";
 import { ColorField } from "@/components/common/ColorField";
 import { HudSection, type HudTab, HudTabs } from "@/components/hud/form";
-import { revealInvalidTab } from "@/components/hud/form/reveal-invalid-tab";
+import { useRevealInvalidTab } from "@/components/hud/form/reveal-invalid-tab";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,6 +37,15 @@ export function RaceFormFields({
   onAbilitiesValidityChange,
 }: RaceFormFieldsProps) {
   const [tab, setTab] = useState<RaceFormTabId>(RACE_FORM_TAB.basic);
+
+  const [abilityErrors, setAbilityErrors] = useState(0);
+
+  const onInvalidCapture = useRevealInvalidTab(tab, setTab);
+
+  const handleAbilitiesValidity = (ok: boolean, errorCount: number) => {
+    setAbilityErrors(errorCount);
+    onAbilitiesValidityChange?.(ok, errorCount);
+  };
 
   const tabs: HudTab<RaceFormTabId>[] = [
     {
@@ -121,30 +130,18 @@ export function RaceFormFields({
     {
       id: RACE_FORM_TAB.abilities,
       label: "Вміння",
-      invalid: (abilityIssues?.length ?? 0) > 0,
+      invalid: (abilityIssues?.length ?? 0) > 0 || abilityErrors > 0,
       content: (
         <AbilityListEditor
           campaignId={campaignId}
           value={formData.abilities}
           onChange={(abilities) => setFormData((prev) => ({ ...prev, abilities }))}
           issues={abilityIssues}
-          onValidityChange={onAbilitiesValidityChange}
+          onValidityChange={handleAbilitiesValidity}
         />
       ),
     },
   ];
-
-  const onInvalidCapture = (e: FormEvent<HTMLDivElement>) => {
-    const owner = revealInvalidTab(e.currentTarget, tab, e.target) as RaceFormTabId | null;
-
-    if (!owner) return;
-
-    setTab(owner);
-
-    const target = e.target as HTMLElement;
-
-    requestAnimationFrame(() => target.focus());
-  };
 
   return (
     <div onInvalidCapture={onInvalidCapture}>
