@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { useState } from "react";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 
 import { PortalContainerProvider } from "@/components/ui/portal-container";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -20,6 +20,8 @@ function Harness() {
     </div>
   );
 }
+
+afterEach(cleanup);
 
 describe("PortalContainerProvider", () => {
   it("renders select content inside the provided container", () => {
