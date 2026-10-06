@@ -32,4 +32,9 @@ describe("race summary", () => {
 
     expect(modifiedAbilityScores(passive).map((a) => a.key)).toEqual(["strength"]);
   });
+
+  it("пасивка з порожнім описом і масивом модифікаторів — безпечні значення", () => {
+    expect(normalizePassiveAbility({ passiveAbility: { description: null, statModifiers: [] } })).toEqual({ description: "", statImprovements: undefined, statModifiers: undefined });
+    expect(normalizePassiveAbility({ passiveAbility: null })).toBeNull();
+  });
 });

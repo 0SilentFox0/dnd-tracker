@@ -1,3 +1,7 @@
+import type { SpellSlotProgression } from "@/types/races";
+
+export const DEFAULT_SPELL_SLOT_PROGRESSION: SpellSlotProgression[] = [1, 2, 3, 4, 5].map((level) => ({ level, slots: 0 }));
+
 export const SPELL_TARGET_OPTIONS = [
   { value: "enemies", label: "Вороги" },
   { value: "allies", label: "Союзники" },

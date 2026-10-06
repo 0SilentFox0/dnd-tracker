@@ -7,6 +7,7 @@ import { progressionKey } from "./progression-keys";
 
 import { learnNode, resetProgression, unlearnNode } from "@/lib/api/character-progression";
 import { ApiError } from "@/lib/api/client";
+import { characterSheetKey } from "@/lib/hooks/characters";
 import { useNotify } from "@/lib/hooks/common";
 import type { LearnBlockReason, UnlearnBlockReason } from "@/lib/utils/skills/progression";
 import { LEARN_BLOCK_TEXT, UNLEARN_BLOCK_TEXT } from "@/lib/utils/skills/progression";
@@ -38,7 +39,7 @@ export function useProgressionActions(campaignId: string, characterId: string) {
 
         return old && treeId ? { ...old, skillTreeProgress: { [treeId]: { unlockedSkills: unlocked } } } : old;
       });
-      void queryClient.invalidateQueries({ queryKey: ["character-sheet", campaignId, characterId] });
+      void queryClient.invalidateQueries({ queryKey: characterSheetKey(campaignId, characterId) });
       void queryClient.invalidateQueries({ queryKey: ["battle-balance"], refetchType: "none" });
 
       return true;

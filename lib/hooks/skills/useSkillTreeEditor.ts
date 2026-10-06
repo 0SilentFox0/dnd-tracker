@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { progressionCampaignKey } from "./progression-keys";
 import { useMainSkills } from "./useMainSkills";
 import { useSkills } from "./useSkills";
 
@@ -13,7 +14,7 @@ import { useRaces } from "@/lib/hooks/races";
 import type { CellRef, RawTree } from "@/lib/utils/skills/progression";
 import { RACIAL_BRANCH_ID } from "@/lib/utils/skills/progression";
 import * as edit from "@/lib/utils/skills/progression";
-import { getSkillMainSkillId } from "@/lib/utils/skills/skill-helpers";
+import { getSkillMainSkillId, getSkillName } from "@/lib/utils/skills/skill-helpers";
 
 export function useSkillTreeEditor(campaignId: string) {
   const queryClient = useQueryClient();
@@ -73,7 +74,7 @@ export function useSkillTreeEditor(campaignId: string) {
 
   const skillIcon = (s: (typeof skills)[number]) => s.icon || (s as { basicInfo?: { icon?: string } }).basicInfo?.icon || null;
 
-  const skillName = (s: (typeof skills)[number]) => (s as { basicInfo?: { name?: string } }).basicInfo?.name ?? s.name ?? s.id;
+  const skillName = (s: (typeof skills)[number]) => getSkillName(s) || s.id;
 
   const save = async () => {
     if (!current || !activeRace || errors.length > 0) return;
@@ -84,7 +85,7 @@ export function useSkillTreeEditor(campaignId: string) {
 
       setDraft({ key: `${activeRace}:${saved.id}`, treeId: saved.id, raw: edit.readTreeJson(saved.skills) });
       await queryClient.invalidateQueries({ queryKey: ["skill-trees", campaignId] });
-      void queryClient.invalidateQueries({ queryKey: ["character-progression", campaignId] });
+      void queryClient.invalidateQueries({ queryKey: progressionCampaignKey(campaignId) });
     } catch (error) {
       await notify((error as Error).message);
     } finally {

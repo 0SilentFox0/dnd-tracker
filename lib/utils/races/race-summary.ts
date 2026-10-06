@@ -1,5 +1,5 @@
 import { ABILITY_SCORES } from "@/lib/constants/abilities";
-import { getSkillMainSkillId, getSkillRaces } from "@/lib/utils/skills/skill-helpers";
+import { getSkillMainSkillId } from "@/lib/utils/skills/skill-helpers";
 import type { MainSkill } from "@/types/main-skills";
 import type { Race, StatModifier } from "@/types/races";
 import type { Skill } from "@/types/skills";
@@ -10,21 +10,15 @@ export interface RacePassiveAbility {
   statModifiers?: Record<string, StatModifier>;
 }
 
-const isOpenToRace = (skill: Skill, race: Race) => {
-  const skillRaces = getSkillRaces(skill);
-
-  return !skillRaces || skillRaces.length === 0 || skillRaces.includes(race.id) || skillRaces.includes(race.name);
-};
-
 export function countRaceSkills(race: Race, skills: Skill[]): number {
   const allowedMainSkills = Array.isArray(race.availableSkills) ? race.availableSkills : [];
 
-  if (allowedMainSkills.length === 0) return skills.filter((skill) => isOpenToRace(skill, race)).length;
+  if (allowedMainSkills.length === 0) return skills.length;
 
   return skills.filter((skill) => {
     const mainSkillId = getSkillMainSkillId(skill);
 
-    return (!mainSkillId || allowedMainSkills.includes(mainSkillId)) && isOpenToRace(skill, race);
+    return !mainSkillId || allowedMainSkills.includes(mainSkillId);
   }).length;
 }
 
@@ -36,7 +30,7 @@ export function raceMainSkillsForDisplay(race: Race, mainSkills: MainSkill[]): M
   return ids.map((id) => mainSkills.find((ms) => ms.id === id)).filter((ms): ms is MainSkill => ms != null);
 }
 
-export function normalizePassiveAbility(race: Race): RacePassiveAbility | null {
+export function normalizePassiveAbility(race: { passiveAbility?: unknown }): RacePassiveAbility | null {
   const passive = race.passiveAbility;
 
   if (!passive) return null;
@@ -45,10 +39,14 @@ export function normalizePassiveAbility(race: Race): RacePassiveAbility | null {
 
   if (typeof passive !== "object") return null;
 
+  const obj = passive as Record<string, unknown>;
+
+  const mods = obj.statModifiers;
+
   return {
-    description: "description" in passive ? String(passive.description) : "",
-    statImprovements: "statImprovements" in passive ? String(passive.statImprovements || "") : undefined,
-    statModifiers: "statModifiers" in passive ? (passive.statModifiers as Record<string, StatModifier>) : undefined,
+    description: String(obj.description || ""),
+    statImprovements: "statImprovements" in obj ? String(obj.statImprovements || "") : undefined,
+    statModifiers: mods && typeof mods === "object" && !Array.isArray(mods) ? (mods as Record<string, StatModifier>) : undefined,
   };
 }
 
