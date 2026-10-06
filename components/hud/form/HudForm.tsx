@@ -3,6 +3,7 @@
 import { type FormEvent, type ReactNode, useRef, useState } from "react";
 
 import { type HudTab, HudTabs } from "./HudTabs";
+import { revealInvalidTab } from "./reveal-invalid-tab";
 
 import { ActionBar } from "@/components/common/ActionBar";
 import { cn } from "@/lib/utils";
@@ -34,18 +35,12 @@ export function HudForm<T extends string>({ id, onSubmit, tabs, tab, onTabChange
   const onInvalidCapture = (e: FormEvent<HTMLFormElement>) => {
     if (!tabs || !active) return;
 
-    const activeFields = formRef.current?.querySelectorAll<HTMLInputElement>(`[data-tab-id="${active}"] :is(input, textarea, select)`) ?? [];
+    const owner = revealInvalidTab(formRef.current, active, e.target) as T | null;
 
-    if (Array.from(activeFields).some((el) => el.willValidate && !el.validity.valid)) return;
-
-    const target = e.target as HTMLElement;
-
-    const owner = target.closest<HTMLElement>("[data-tab-id]")?.dataset.tabId as T | undefined;
-
-    if (!owner || owner === active) return;
+    if (!owner) return;
 
     setActive(owner);
-    requestAnimationFrame(() => target.focus());
+    requestAnimationFrame(() => (e.target as HTMLElement).focus());
   };
 
   return (
