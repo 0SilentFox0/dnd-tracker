@@ -9,7 +9,15 @@ export function SlotButton({ state, label, icon, size, onSelect }: { state: Node
   return (
     <button type="button" aria-label={aria} onClick={onSelect} disabled={!state.nodeId} className="flex min-h-11 min-w-11 items-center justify-center">
       <span className={tone} style={{ width: size, height: size }}>
-        {state.state === "learned" && icon ? <OptimizedImage src={icon} alt="" width={size} height={size} className="h-full w-full object-cover" fallback={<span className="hud-sc">?</span>} /> : <span className="hud-sc">?</span>}
+        {state.state === "learned" ? (
+          icon ? (
+            <OptimizedImage src={icon} alt="" width={size} height={size} className="h-full w-full object-cover" fallback={<span className="hud-sc">{label[0]}</span>} />
+          ) : (
+            <span className="hud-sc">{label[0]}</span>
+          )
+        ) : (
+          <span className="hud-sc">?</span>
+        )}
       </span>
     </button>
   );

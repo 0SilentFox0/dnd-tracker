@@ -33,7 +33,7 @@ export function OfferList({ offers, dto, filter, onClearFilter, onSelect }: { of
             <li key={node.nodeId}>
               <button type="button" onClick={() => onSelect(node)} className={`offer-card ${i === 0 && !filter ? "top" : ""}`}>
                 <span className="skill-slot learned" style={{ width: 48, height: 48 }}>
-                  {icon ? <OptimizedImage src={icon} alt="" width={48} height={48} className="h-full w-full object-cover" fallback={<span className="hud-sc">?</span>} /> : <span className="hud-sc">?</span>}
+                  {icon ? <OptimizedImage src={icon} alt="" width={48} height={48} className="h-full w-full object-cover" fallback={<span className="hud-sc">{title[0]}</span>} /> : <span className="hud-sc">{title[0]}</span>}
                 </span>
                 <span className="min-w-0 text-left">
                   <span className="hud-sc block text-base text-[#efe5d2]">{title}</span>

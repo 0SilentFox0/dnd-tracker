@@ -99,4 +99,10 @@ describe("ProgressionPanel", () => {
 
     expect(screen.getByRole("button", { name: "Розвчити" })).toBeTruthy();
   });
+
+  it("вивчений скіл без іконки показує першу літеру, не «?»", () => {
+    renderWithConfirm(<ProgressionPanel campaignId="c" characterId="ch" />);
+
+    expect(screen.getByRole("button", { name: "Скіл o1" }).textContent).toBe("С");
+  });
 });
