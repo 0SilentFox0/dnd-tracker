@@ -51,6 +51,7 @@ export function CreateSpellGroupDialog({
           + Створити групу заклинань
         </Button>
     <ResponsiveDialog
+      hud
       open={open}
       onOpenChange={setOpen}
       title="Створити нову групу заклинань"

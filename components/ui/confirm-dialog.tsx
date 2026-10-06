@@ -72,6 +72,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
     <ConfirmContext.Provider value={confirm}>
       {children}
       <ResponsiveDialog
+        hud
         open={pending !== null}
         onOpenChange={(open) => !open && settle(false)}
         title={shown?.title ?? ""}

@@ -15,6 +15,7 @@ export function AddBranchSheet({ open, branches, actions }: {
 
   return (
     <ResponsiveDialog
+      hud
       open={open}
       onOpenChange={(o) => !o && actions.onClose()}
       title="Додати гілку"
