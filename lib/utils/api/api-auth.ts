@@ -4,12 +4,16 @@
 
 import { NextResponse } from "next/server";
 
+import { getSessionUserId } from "@/lib/auth";
 import { CampaignRole } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 
 export interface AuthResult {
   userId: string;
+}
+
+export interface AuthUserResult extends AuthResult {
   authUser: {
     id: string;
     email?: string | null;
@@ -31,20 +35,24 @@ export interface CampaignAccessResult extends AuthResult {
   };
 }
 
-/**
- * Перевіряє авторизацію користувача
- * @returns AuthResult або NextResponse з помилкою
- */
+const unauthorized = () => NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+/** Session check from the JWT claims — verified locally, no Supabase Auth round trip. */
 export async function requireAuth(): Promise<AuthResult | NextResponse> {
+  const userId = await getSessionUserId();
+
+  return userId ? { userId } : unauthorized();
+}
+
+/** Fresh email / user_metadata from Supabase Auth — only where a DB user row is created. */
+export async function requireAuthUser(): Promise<AuthUserResult | NextResponse> {
   const supabase = await createClient();
 
   const {
     data: { user: authUser },
   } = await supabase.auth.getUser();
 
-  if (!authUser) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!authUser) return unauthorized();
 
   return {
     userId: authUser.id,

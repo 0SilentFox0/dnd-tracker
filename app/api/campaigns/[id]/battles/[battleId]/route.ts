@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { BATTLE_LOG_RECENT_EVENTS, BATTLE_VERSION_ONLY_PARAM } from "@/lib/constants/battle";
+import { BATTLE_VERSION_ONLY_PARAM } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { createBattleSchema } from "@/lib/schemas";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
-import { readBattleVersion } from "@/lib/utils/battle/pipeline/read-battle";
-import { BattleAccess, runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { readBattleScene, readBattleVersion } from "@/lib/utils/battle/pipeline/read-battle";
 
 type Params = { params: Promise<{ id: string; battleId: string }> };
 
@@ -19,21 +18,10 @@ const patchBattleSchema = z
   })
   .strict();
 
-function readBattle(params: { id: string; battleId: string }) {
-  return runBattleMutation(new Request("http://internal/battle"), {
-    params,
-    access: BattleAccess.MEMBER,
-    dryRun: () => true,
-    includeRecentEvents: BATTLE_LOG_RECENT_EVENTS,
-    includeKnowledge: true,
-    mutate: (ctx) => ({ participants: ctx.participants, pending: ctx.pending, events: [] }),
-  });
-}
-
 export async function GET(req: Request, { params }: Params) {
   if (new URL(req.url).searchParams.has(BATTLE_VERSION_ONLY_PARAM)) return readBattleVersion(await params);
 
-  return readBattle(await params);
+  return readBattleScene(await params);
 }
 
 export async function PATCH(request: Request, { params }: Params) {
@@ -58,7 +46,7 @@ export async function PATCH(request: Request, { params }: Params) {
 
     await prisma.battleScene.update({ where: { id: battleId }, data: { ...parsed.data, version: { increment: 1 } } });
 
-    return readBattle({ id, battleId });
+    return readBattleScene({ id, battleId });
   } catch (error) {
     return handleApiError(error, { action: "update battle" });
   }

@@ -52,7 +52,6 @@ describe("GET /api/campaigns/[id]/skills", () => {
   it("повертає 200 та масив скілів при успішному доступі", async () => {
     vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
       userId: "user-1",
-      authUser: { id: "user-1", email: null, user_metadata: null },
       campaign: {
         id: "c1",
         maxLevel: 20,
@@ -120,7 +119,6 @@ describe("GET /api/campaigns/[id]/skills", () => {
   it("повертає порожній масив, якщо скілів немає", async () => {
     vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
       userId: "user-1",
-      authUser: { id: "user-1", email: null, user_metadata: null },
       campaign: {
         id: "c1",
         maxLevel: 20,
@@ -149,7 +147,6 @@ describe("GET /api/campaigns/[id]/skills", () => {
   it("?mainSkillId фільтрує за основним навиком і читає лише вузькі поля", async () => {
     vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
       userId: "user-1",
-      authUser: { id: "user-1", email: null, user_metadata: null },
       campaign: { id: "c1", maxLevel: 20, xpMultiplier: 2.5, members: [{ userId: "user-1", role: "player" }] },
     });
     vi.mocked(prisma.skill.findMany).mockResolvedValue([{ id: "s1", name: "Поклик", icon: null, description: null }] as never);
@@ -202,7 +199,6 @@ describe("POST /api/campaigns/[id]/skills", () => {
 
     vi.mocked(apiAuth.requireDM).mockResolvedValue({
       userId: "dm-1",
-      authUser: { id: "dm-1", email: null, user_metadata: null },
       campaign: {
         id: "c1",
         maxLevel: 20,
@@ -230,7 +226,6 @@ describe("POST /api/campaigns/[id]/skills", () => {
   it("повертає 200 та створений скіл при валідному body", async () => {
     vi.mocked(apiAuth.requireDM).mockResolvedValue({
       userId: "dm-1",
-      authUser: { id: "dm-1", email: null, user_metadata: null },
       campaign: {
         id: "c1",
         maxLevel: 20,
@@ -331,7 +326,6 @@ describe("DELETE /api/campaigns/[id]/skills (delete all)", () => {
   it("повертає 200 та deletedCount при успіху", async () => {
     vi.mocked(apiAuth.requireDM).mockResolvedValue({
       userId: "dm-1",
-      authUser: { id: "dm-1", email: null, user_metadata: null },
       campaign: {
         id: "c1",
         maxLevel: 20,
@@ -384,7 +378,6 @@ describe("GET /api/campaigns/[id]/skills/[skillId]", () => {
   it("повертає 404, якщо скіл не знайдено або з іншої кампанії", async () => {
     vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
       userId: "user-1",
-      authUser: { id: "user-1", email: null, user_metadata: null },
       campaign: {
         id: "c1",
         maxLevel: 20,
@@ -412,7 +405,6 @@ describe("GET /api/campaigns/[id]/skills/[skillId]", () => {
   it("повертає 404, якщо скіл належить іншій кампанії", async () => {
     vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
       userId: "user-1",
-      authUser: { id: "user-1", email: null, user_metadata: null },
       campaign: {
         id: "c1",
         maxLevel: 20,
@@ -469,7 +461,6 @@ describe("GET /api/campaigns/[id]/skills/[skillId]", () => {
   it("повертає 200 та скіл при успіху", async () => {
     vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
       userId: "user-1",
-      authUser: { id: "user-1", email: null, user_metadata: null },
       campaign: {
         id: "c1",
         maxLevel: 20,
@@ -560,7 +551,6 @@ describe("PATCH /api/campaigns/[id]/skills/[skillId]", () => {
   it("повертає 404, якщо скіл не знайдено", async () => {
     vi.mocked(apiAuth.requireDM).mockResolvedValue({
       userId: "dm-1",
-      authUser: { id: "dm-1", email: null, user_metadata: null },
       campaign: {
         id: "c1",
         maxLevel: 20,
@@ -591,7 +581,6 @@ describe("PATCH /api/campaigns/[id]/skills/[skillId]", () => {
   it("повертає 200 та оновлений скіл при успіху", async () => {
     vi.mocked(apiAuth.requireDM).mockResolvedValue({
       userId: "dm-1",
-      authUser: { id: "dm-1", email: null, user_metadata: null },
       campaign: {
         id: "c1",
         maxLevel: 20,
@@ -696,7 +685,6 @@ describe("DELETE /api/campaigns/[id]/skills/[skillId]", () => {
   it("повертає 404, якщо скіл не знайдено", async () => {
     vi.mocked(apiAuth.requireDM).mockResolvedValue({
       userId: "dm-1",
-      authUser: { id: "dm-1", email: null, user_metadata: null },
       campaign: {
         id: "c1",
         maxLevel: 20,
@@ -725,7 +713,6 @@ describe("DELETE /api/campaigns/[id]/skills/[skillId]", () => {
   it("повертає 200 при успішному видаленні", async () => {
     vi.mocked(apiAuth.requireDM).mockResolvedValue({
       userId: "dm-1",
-      authUser: { id: "dm-1", email: null, user_metadata: null },
       campaign: {
         id: "c1",
         maxLevel: 20,

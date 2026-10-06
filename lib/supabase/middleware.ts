@@ -57,6 +57,9 @@ export async function updateSession(request: NextRequest) {
 
   if (csrfReject) return csrfReject;
 
+  // Routes check the session themselves (401) and refresh the token through their own server client.
+  if (request.nextUrl.pathname.startsWith('/api/')) return NextResponse.next()
+
   let supabaseResponse = NextResponse.next({
     request,
   })
@@ -92,10 +95,10 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // Оновлюємо сесію користувача
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // getClaims refreshes an expired session and verifies the JWT locally against the cached JWKS
+  const { data } = await supabase.auth.getClaims()
+
+  const user = data?.claims?.sub ?? null
 
   // Захищаємо приватні маршрути
   // Виключаємо публічні маршрути та callback

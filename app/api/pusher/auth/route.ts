@@ -1,12 +1,9 @@
 import { NextResponse } from "next/server";
 
+import { getSessionUserId } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import {
-  BATTLE_CHANNEL_PREFIX,
-  pusherServer,
-  USER_CHANNEL_PREFIX,
-} from "@/lib/pusher";
-import { createClient } from "@/lib/supabase/server";
+import { BATTLE_CHANNEL_PREFIX, USER_CHANNEL_PREFIX } from "@/lib/pusher-channels";
+import { pusherServer } from "@/lib/pusher-server";
 
 /**
  * Pusher channel auth.
@@ -20,17 +17,11 @@ import { createClient } from "@/lib/supabase/server";
  */
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
+    const userId = await getSessionUserId();
 
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    const userId = authUser.id;
 
     const { socket_id, channel_name } = await readAuthParams(request);
 

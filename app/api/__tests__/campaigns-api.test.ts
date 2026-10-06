@@ -48,7 +48,6 @@ describe("GET /api/campaigns/[id]", () => {
   it("повертає 404, якщо кампанію не знайдено", async () => {
     vi.mocked(apiAuth.requireAuth).mockResolvedValue({
       userId: "user-1",
-      authUser: { id: "user-1", email: null, user_metadata: null },
     });
     vi.mocked(prisma.campaign.findUnique).mockResolvedValue(null);
 
@@ -70,7 +69,6 @@ describe("GET /api/campaigns/[id]", () => {
   it("повертає 403, якщо користувач не учасник кампанії", async () => {
     vi.mocked(apiAuth.requireAuth).mockResolvedValue({
       userId: "user-1",
-      authUser: { id: "user-1", email: null, user_metadata: null },
     });
     vi.mocked(prisma.campaign.findUnique).mockResolvedValue({
       id: "c1",
@@ -109,7 +107,6 @@ describe("GET /api/campaigns/[id]", () => {
 
     vi.mocked(apiAuth.requireAuth).mockResolvedValue({
       userId: "user-1",
-      authUser: { id: "user-1", email: null, user_metadata: null },
     });
 
     const campaign = {
@@ -188,7 +185,6 @@ describe("PATCH /api/campaigns/[id]", () => {
 
     vi.mocked(apiAuth.requireDM).mockResolvedValue({
       userId: "dm-1",
-      authUser: { id: "dm-1", email: null, user_metadata: null },
       campaign: {
         id: campaignId,
         maxLevel: 20,

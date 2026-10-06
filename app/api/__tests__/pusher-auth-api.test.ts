@@ -4,15 +4,12 @@ import { battleChannelName, userChannelName } from "@/lib/pusher-channels";
 
 const authorizeChannel = vi.hoisted(() => vi.fn(() => ({ auth: "signed" })));
 
-const getUser = vi.hoisted(() => vi.fn());
+const getClaims = vi.hoisted(() => vi.fn());
 
 const findBattle = vi.hoisted(() => vi.fn());
 
-vi.mock("@/lib/pusher", async () => ({
-  ...(await vi.importActual<object>("@/lib/pusher-channels")),
-  pusherServer: { authorizeChannel },
-}));
-vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({ auth: { getUser } }) }));
+vi.mock("@/lib/pusher-server", () => ({ pusherServer: { authorizeChannel } }));
+vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({ auth: { getClaims } }) }));
 vi.mock("@/lib/db", () => ({ prisma: { battleScene: { findUnique: findBattle } } }));
 
 import { POST } from "@/app/api/pusher/auth/route";
@@ -25,7 +22,7 @@ const auth = (channel_name: string) =>
 describe("POST /api/pusher/auth", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    getUser.mockResolvedValue({ data: { user: { id: MEMBER } } });
+    getClaims.mockResolvedValue({ data: { claims: { sub: MEMBER } } });
     findBattle.mockImplementation(async (args: { where: { id: string }; select: { campaign: { select: { members: { where: { userId: string } } } } } }) => {
       if (args.where.id !== "b-own") return null;
 
@@ -36,7 +33,7 @@ describe("POST /api/pusher/auth", () => {
   });
 
   it("без сесії — 401", async () => {
-    getUser.mockResolvedValue({ data: { user: null } });
+    getClaims.mockResolvedValue({ data: null, error: null });
 
     expect((await auth(battleChannelName("b-own"))).status).toBe(401);
   });
@@ -49,7 +46,7 @@ describe("POST /api/pusher/auth", () => {
   });
 
   it("не член кампанії бою — 403", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u-stranger" } } });
+    getClaims.mockResolvedValue({ data: { claims: { sub: "u-stranger" } } });
 
     expect((await auth(battleChannelName("b-own"))).status).toBe(403);
     expect(authorizeChannel).not.toHaveBeenCalled();

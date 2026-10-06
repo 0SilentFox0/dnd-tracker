@@ -1,15 +1,17 @@
 import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { requireAuth, requireCampaignAccess, requireDM, validateCampaignOwnership } from "../api-auth";
+import { requireAuth, requireAuthUser, requireCampaignAccess, requireDM, validateCampaignOwnership } from "../api-auth";
 
 import { CampaignRole, type CampaignRoleValue } from "@/lib/constants/campaigns";
 
 const getUser = vi.hoisted(() => vi.fn());
 
+const getClaims = vi.hoisted(() => vi.fn());
+
 const findCampaign = vi.hoisted(() => vi.fn());
 
-vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({ auth: { getUser } }) }));
+vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({ auth: { getUser, getClaims } }) }));
 vi.mock("@/lib/db", () => ({ prisma: { campaign: { findUnique: findCampaign } } }));
 
 const campaign = (role?: CampaignRoleValue) => ({
@@ -24,24 +26,47 @@ const statusOf = (result: unknown) => (result instanceof NextResponse ? result.s
 describe("api-auth", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    getUser.mockResolvedValue({ data: { user: { id: "u1", email: "a@b.c", user_metadata: {} } } });
+    getUser.mockResolvedValue({ data: { user: { id: "u1", email: "a@b.c", user_metadata: { name: "A" } } } });
+    getClaims.mockResolvedValue({ data: { claims: { sub: "u1", email: "a@b.c" } } });
   });
 
   describe("requireAuth", () => {
     it("без сесії — 401", async () => {
-      getUser.mockResolvedValue({ data: { user: null } });
+      getClaims.mockResolvedValue({ data: null, error: null });
 
       expect(statusOf(await requireAuth())).toBe(401);
     });
 
-    it("із сесією — userId", async () => {
-      expect(await requireAuth()).toMatchObject({ userId: "u1" });
+    it("невалідний токен — 401", async () => {
+      getClaims.mockResolvedValue({ data: null, error: new Error("invalid JWT") });
+
+      expect(statusOf(await requireAuth())).toBe(401);
+    });
+
+    it("із сесією — userId з claims без запиту до Supabase Auth", async () => {
+      expect(await requireAuth()).toEqual({ userId: "u1" });
+      expect(getUser).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("requireAuthUser", () => {
+    it("без сесії — 401", async () => {
+      getUser.mockResolvedValue({ data: { user: null } });
+
+      expect(statusOf(await requireAuthUser())).toBe(401);
+    });
+
+    it("повертає email і user_metadata з Supabase Auth", async () => {
+      expect(await requireAuthUser()).toEqual({
+        userId: "u1",
+        authUser: { id: "u1", email: "a@b.c", user_metadata: { name: "A" } },
+      });
     });
   });
 
   describe("requireCampaignAccess", () => {
     it("без сесії — 401 без запиту до БД", async () => {
-      getUser.mockResolvedValue({ data: { user: null } });
+      getClaims.mockResolvedValue({ data: null, error: null });
 
       expect(statusOf(await requireCampaignAccess("c1"))).toBe(401);
       expect(findCampaign).not.toHaveBeenCalled();
