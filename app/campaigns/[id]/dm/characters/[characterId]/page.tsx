@@ -1,6 +1,7 @@
 "use client";
 
 import { use, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { CharacterViewClient } from "../../../character/character-view-client";
 import { DmCharacterEditForm } from "./DmCharacterEditForm";
@@ -17,7 +18,9 @@ export default function EditCharacterPage({
 }) {
   const { id, characterId } = use(params);
 
-  const editor = useDmCharacterEditor({ campaignId: id, characterId });
+  const router = useRouter();
+
+  const editor = useDmCharacterEditor({ campaignId: id, characterId, onSaved: () => router.push(`/campaigns/${id}/dm/characters`) });
 
   const [viewAsPlayer, setViewAsPlayer] = useState(false);
 

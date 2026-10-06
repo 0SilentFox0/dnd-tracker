@@ -4,12 +4,22 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { sheetFixture, withSheet } from "./sheet-fixture";
 
-const h = vi.hoisted(() => ({ replace: vi.fn(), search: new URLSearchParams(), sheetQuery: { data: null as unknown, isPending: false, isError: false, error: null, refetch: () => {} } }));
+const h = vi.hoisted(() => ({ replace: vi.fn(), search: new URLSearchParams(), editorMounts: 0, sheetQuery: { data: null as unknown, isPending: false, isError: false, error: null, refetch: () => {} } }));
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: h.replace, push: vi.fn() }), usePathname: () => "/c/1/character", useSearchParams: () => h.search }));
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "", HUD_SURFACE: "hud-surface" }));
 vi.mock("@/components/skill-tree/progression", () => ({ ProgressionPanel: () => <div>прокачка</div>, LevelUpOverlay: () => null, FreePointBadge: () => null }));
-vi.mock("@/lib/hooks/characters", async (orig) => ({ ...(await orig<object>()), useCharacterSheet: () => h.sheetQuery, useCharacterGoals: () => ({ save: vi.fn(), isPending: false }) }));
+vi.mock("@/lib/hooks/characters", async (orig) => ({
+  ...(await orig<object>()),
+  useCharacterSheet: () => h.sheetQuery,
+  useCharacterGoals: () => ({ save: vi.fn(), isPending: false }),
+  useDmCharacterEditor: () => {
+    h.editorMounts += 1;
+
+    return { ready: true, form: { formData: { basicInfo: {}, spellcasting: {} }, basicInfo: { level: 30 }, abilityScores: { strength: 10, setters: {} }, combatStats: {}, skills: {}, abilities: {}, spellcasting: { knownSpells: [], setters: {} }, handleSubmit: vi.fn(), setFormData: vi.fn(), loading: false, error: null }, equipped: {}, setEquipped: vi.fn(), artifacts: [], artifactSets: [], members: [], races: [], membersLoading: false, levelUp: vi.fn(), remove: vi.fn() };
+  },
+}));
+vi.mock("@/components/character-profile/BasicEditTab", () => ({ BasicEditTab: () => <div>основне</div> }));
 
 import { CharacterProfile } from "@/components/character-profile";
 import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
@@ -68,6 +78,27 @@ describe("CharacterProfile — перегляд", () => {
     expect(screen.queryByRole("button", { name: "Редагувати" })).toBeNull();
     unmount();
     renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit />);
+    expect(screen.getByRole("button", { name: "Редагувати" })).toBeTruthy();
+  });
+});
+
+describe("CharacterProfile — редагування ДМа", () => {
+  beforeEach(() => {
+    h.search = new URLSearchParams();
+    h.sheetQuery.data = withSheet({ viewer: { isDM: true, isOwner: false } });
+  });
+
+  afterEach(cleanup);
+
+  it("«Редагувати» монтує редактор лише після натискання; «Скасувати» повертає перегляд", async () => {
+    renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit />);
+
+    expect(h.editorMounts).toBe(0);
+    fireEvent.click(screen.getByRole("button", { name: "Редагувати" }));
+    expect(h.editorMounts).toBeGreaterThan(0);
+    expect(screen.getByRole("tab", { name: "Основне" })).toHaveAttribute("data-state", "active");
+    expect(screen.getByRole("button", { name: "Зберегти" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Скасувати" }));
     expect(screen.getByRole("button", { name: "Редагувати" })).toBeTruthy();
   });
 });

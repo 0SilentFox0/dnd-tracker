@@ -7,6 +7,7 @@ import { CombatTab } from "./CombatTab";
 import { ItemsTab } from "./ItemsTab";
 import { MagicTab } from "./MagicTab";
 import { ProfileContext } from "./ProfileContext";
+import { ProfileEditor } from "./ProfileEditor";
 import { CompactHero, ProfileHero } from "./ProfileHero";
 import { type ProfileTab, type ProfileTabId, ProfileTabs } from "./ProfileTabs";
 import { SkillsTab } from "./SkillsTab";
@@ -70,6 +71,8 @@ export function CharacterProfile({ campaignId, characterId, canEdit }: { campaig
 
   const hero = useScrolledPast();
 
+  const [editing, setEditing] = useState(false);
+
   const setTab = (id: ProfileTabId) => {
     const next = new URLSearchParams(params.toString());
 
@@ -82,17 +85,23 @@ export function CharacterProfile({ campaignId, characterId, canEdit }: { campaig
       {(sheet) => (
         <ProfileContext.Provider value={{ campaignId, characterId, sheet, canEdit }}>
           <ProfileShell>
-            <ProfileHero
-              ref={hero.ref}
-              actions={
-                canEdit ? (
-                  <Button type="button" size="sm" variant="outline">
-                    Редагувати
-                  </Button>
-                ) : null
-              }
-            />
-            <ProfileTabs value={tab} onValueChange={setTab} tabs={viewTabs()} header={hero.past ? <CompactHero /> : null} />
+            {editing ? (
+              <ProfileEditor onDone={() => setEditing(false)} />
+            ) : (
+              <>
+                <ProfileHero
+                  ref={hero.ref}
+                  actions={
+                    canEdit ? (
+                      <Button type="button" size="sm" variant="outline" onClick={() => setEditing(true)}>
+                        Редагувати
+                      </Button>
+                    ) : null
+                  }
+                />
+                <ProfileTabs value={tab} onValueChange={setTab} tabs={viewTabs()} header={hero.past ? <CompactHero /> : null} />
+              </>
+            )}
           </ProfileShell>
         </ProfileContext.Provider>
       )}
