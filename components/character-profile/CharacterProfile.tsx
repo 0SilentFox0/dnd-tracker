@@ -1,7 +1,6 @@
 "use client";
 
 import { type ReactNode, useEffect, useRef, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { CombatTab } from "./CombatTab";
 import { ItemsTab } from "./ItemsTab";
@@ -57,29 +56,27 @@ export function ProfileShell({ children }: { children: ReactNode }) {
   return <div className={cn(HUD_SURFACE, "mx-auto min-h-dvh max-w-3xl bg-[radial-gradient(120%_60%_at_50%_0%,#2a221a,#110e0b_70%)]")}>{children}</div>;
 }
 
-export function CharacterProfile({ campaignId, characterId, canEdit }: { campaignId: string; characterId: string; canEdit: boolean }) {
+const asTab = (v: string | undefined): ProfileTabId => (v && (VIEW_TABS as string[]).includes(v) ? (v as ProfileTabId) : "combat");
+
+export function CharacterProfile({ campaignId, characterId, canEdit, initialTab }: { campaignId: string; characterId: string; canEdit: boolean; initialTab?: string }) {
   const query = useCharacterSheet(campaignId, characterId);
 
-  const router = useRouter();
+  const [tab, setTabState] = useState<ProfileTabId>(() => asTab(initialTab));
 
-  const pathname = usePathname();
+  const setTab = (id: ProfileTabId) => {
+    setTabState(id);
 
-  const params = useSearchParams();
+    const next = new URLSearchParams(window.location.search);
 
-  const fromUrl = params.get("tab") as ProfileTabId | null;
-
-  const tab: ProfileTabId = fromUrl && VIEW_TABS.includes(fromUrl) ? fromUrl : "combat";
+    next.set("tab", id);
+    // shallow URL update: no useSearchParams (it forces a client-only Suspense boundary) and no server round trip
+    window.history.replaceState(null, "", `${window.location.pathname}?${next.toString()}`);
+  };
 
   const hero = useScrolledPast();
 
   const [editing, setEditing] = useState(false);
 
-  const setTab = (id: ProfileTabId) => {
-    const next = new URLSearchParams(params.toString());
-
-    next.set("tab", id);
-    router.replace(`${pathname}?${next.toString()}`, { scroll: false });
-  };
 
   return (
     <QueryState query={query}>

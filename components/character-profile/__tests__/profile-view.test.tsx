@@ -4,9 +4,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { sheetFixture, withSheet } from "./sheet-fixture";
 
-const h = vi.hoisted(() => ({ replace: vi.fn(), search: new URLSearchParams(), editorMounts: 0, sheetQuery: { data: null as unknown, isPending: false, isError: false, error: null, refetch: () => {} } }));
+const h = vi.hoisted(() => ({ replace: vi.fn(), editorMounts: 0, sheetQuery: { data: null as unknown, isPending: false, isError: false, error: null, refetch: () => {} } }));
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: h.replace, push: vi.fn() }), usePathname: () => "/c/1/character", useSearchParams: () => h.search }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: h.replace, push: vi.fn() }) }));
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "", HUD_SURFACE: "hud-surface" }));
 vi.mock("@/components/skill-tree/progression", () => ({ ProgressionPanel: () => <div>прокачка</div>, LevelUpOverlay: () => null, FreePointBadge: () => null }));
 vi.mock("@/lib/hooks/characters", async (orig) => ({
@@ -26,7 +26,6 @@ import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm
 
 describe("CharacterProfile — перегляд", () => {
   beforeEach(() => {
-    h.search = new URLSearchParams();
     h.sheetQuery.data = sheetFixture;
     h.replace.mockClear();
   });
@@ -43,13 +42,16 @@ describe("CharacterProfile — перегляд", () => {
     expect(screen.getByLabelText("Майстерність")).toHaveTextContent("+9");
   });
 
-  it("таба з URL; перемикання пише ?tab=", () => {
-    h.search = new URLSearchParams("tab=magic");
-    renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit={false} />);
+  it("таба з URL; перемикання пише ?tab= без запиту на сервер", () => {
+    renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit={false} initialTab="magic" />);
+
+    const replaceState = vi.spyOn(window.history, "replaceState");
 
     expect(screen.getByRole("tab", { name: "Магія" })).toHaveAttribute("data-state", "active");
     fireEvent.mouseDown(screen.getByRole("tab", { name: "Речі" }));
-    expect(h.replace).toHaveBeenCalledWith("/c/1/character?tab=items", { scroll: false });
+    expect(replaceState).toHaveBeenCalledWith(null, "", expect.stringMatching(/\?tab=items$/));
+    expect(screen.getByRole("tab", { name: "Речі" })).toHaveAttribute("data-state", "active");
+    expect(h.replace).not.toHaveBeenCalled();
   });
 
   it("атака: влучання і середня шкода, розкладка за тапом", () => {
@@ -84,7 +86,6 @@ describe("CharacterProfile — перегляд", () => {
 
 describe("CharacterProfile — редагування ДМа", () => {
   beforeEach(() => {
-    h.search = new URLSearchParams();
     h.sheetQuery.data = withSheet({ viewer: { isDM: true, isOwner: false } });
   });
 

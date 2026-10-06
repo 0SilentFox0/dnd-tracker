@@ -1,12 +1,10 @@
-import { Suspense } from "react";
-
 import { CharacterProfile } from "@/components/character-profile";
-import { EmptyState, LoadingState } from "@/components/common/states";
+import { EmptyState } from "@/components/common/states";
 import { requireCampaignMember } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
 
-export default async function CharacterPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function CharacterPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ tab?: string }> }) {
+  const [{ id }, { tab }] = await Promise.all([params, searchParams]);
 
   const { userId, isDM } = await requireCampaignMember(id);
 
@@ -23,9 +21,5 @@ export default async function CharacterPage({ params }: { params: Promise<{ id: 
     );
   }
 
-  return (
-    <Suspense fallback={<LoadingState rows={6} />}>
-      <CharacterProfile campaignId={id} characterId={character.id} canEdit={isDM} />
-    </Suspense>
-  );
+  return <CharacterProfile campaignId={id} characterId={character.id} canEdit={isDM} initialTab={tab} />;
 }
