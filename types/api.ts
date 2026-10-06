@@ -42,6 +42,8 @@ export interface SkillUpdatePayload {
 // Battles API
 import type { BattleAction,BattleParticipant, BattlePreparationParticipant } from "./battle";
 
+import type { BattleKnowledge } from "@/lib/utils/battle/view/knowledge";
+
 export interface BattleScene {
   id: string;
   campaignId: string;
@@ -70,6 +72,8 @@ export interface BattleScene {
   /** Записи з actionIndex ≥ цього значення скасовано відкатом */
   battleLogCancelledFrom?: number;
   pendingMoraleCheck?: unknown;
+  /** Підсумок знань про ціль з усіх атак бою (не лише з останніх записів журналу); лише для гравців */
+  knowledge?: BattleKnowledge;
 }
 
 export interface ClientBattleDelta {

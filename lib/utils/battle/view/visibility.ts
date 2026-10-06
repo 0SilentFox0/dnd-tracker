@@ -1,4 +1,4 @@
-import { observedTraits } from "./knowledge";
+import { type BattleKnowledge, resolveObservedTraits } from "./knowledge";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import type { BattleAction, BattleParticipant, DamageStep } from "@/types/battle";
@@ -24,10 +24,10 @@ export function sanitizeLogEntry(e: BattleAction, viewer: Viewer): BattleAction 
   return { ...e, actionDetails: rest };
 }
 
-export function hiddenTargetSteps(steps: DamageStep[], targetId: string, log: BattleAction[], exact: boolean): DamageStep[] {
+export function hiddenTargetSteps(steps: DamageStep[], targetId: string, log: BattleAction[], exact: boolean, knowledge?: BattleKnowledge): DamageStep[] {
   if (exact) return steps;
 
-  const known = new Set(observedTraits(log, targetId).map((t) => t.label));
+  const known = new Set(resolveObservedTraits(log, targetId, knowledge).map((t) => t.label));
 
   const allKnown = steps.every((s) => s.side === "attacker" || known.has(s.label));
 

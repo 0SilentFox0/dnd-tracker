@@ -32,7 +32,7 @@ const SPELL_SELECT = {
   spellGroup: { select: { id: true, name: true } },
 } as const;
 
-export async function buildSheetFor(character: SheetCharacter, viewer: CharacterSheet["viewer"]): Promise<CharacterSheet> {
+export async function buildSheetFor(character: SheetCharacter, viewer: CharacterSheet["viewer"], maxLevel: number): Promise<CharacterSheet> {
   const rows = await loadEquippedArtifactRows(character);
 
   const built = await createBattleParticipantFromCharacter(character, "", ParticipantSide.ALLY, undefined, undefined, { artifactRows: rows });
@@ -54,6 +54,7 @@ export async function buildSheetFor(character: SheetCharacter, viewer: Character
   return buildCharacterSheet({
     participant,
     viewer,
+    maxLevel,
     character,
     raceIcon: race?.icon ?? null,
     immunities: getCharacterImmunities(character, race as never),

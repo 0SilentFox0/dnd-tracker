@@ -1,12 +1,13 @@
 import {
   ApiError,
   campaignDelete,
+  campaignGet,
   campaignPatch,
   campaignPost,
   createCampaignCrudApi,
 } from "@/lib/api/client";
 import type { SkillPayload, SkillUpdatePayload } from "@/types/api";
-import type { Skill } from "@/types/skills";
+import type { PersonalSkillOption, Skill } from "@/types/skills";
 
 const skillsApi = createCampaignCrudApi<
   Skill,
@@ -16,6 +17,9 @@ const skillsApi = createCampaignCrudApi<
 >("/skills", { listCache: "no-store", getCache: "no-store" });
 
 export const getSkills = skillsApi.list;
+
+export const getSkillsByMainSkill = (campaignId: string, mainSkillId: string) =>
+  campaignGet<PersonalSkillOption[]>(campaignId, `/skills?mainSkillId=${encodeURIComponent(mainSkillId)}`, { cache: "no-store" });
 export const createSkill = skillsApi.create;
 export const updateSkill = skillsApi.update;
 

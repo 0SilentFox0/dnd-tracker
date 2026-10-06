@@ -8,7 +8,7 @@ import { predictAttackNumbers } from "@/lib/utils/battle/attack";
 import { resolveAttackRoll } from "@/lib/utils/battle/common/attack-roll-helpers";
 import { computeDamageBreakdown } from "@/lib/utils/battle/damage";
 import { attackFlow, type AttackMode, attackPayload, effectiveD20, initialAttackFlow, type RollOutcome } from "@/lib/utils/battle/flows";
-import { canSeeExactStats, damageDiceSlots, formatKnownArmorClass, hiddenTargetSteps, knownArmorClass, retaliationOutcome, weaponPreview } from "@/lib/utils/battle/view";
+import { canSeeExactStats, damageDiceSlots, formatKnownArmorClass, hiddenTargetSteps, resolveKnownArmorClass, retaliationOutcome, weaponPreview } from "@/lib/utils/battle/view";
 import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
 
 export function rollDie(sides: number): number {
@@ -50,11 +50,11 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
         const full = computeDamageBreakdown({ attacker, target, attack, damageRolls: s.damage, allParticipants: order, isCritical: s.outcome === "crit" }).steps;
 
-        return hiddenTargetSteps(full, s.targetId, scene.battle.battleLog ?? [], canSeeExactStats(target, scene.viewer));
+        return hiddenTargetSteps(full, s.targetId, scene.battle.battleLog ?? [], canSeeExactStats(target, scene.viewer), scene.battle.knowledge);
       });
     // byId читає order, який уже в deps
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [attacker, attack, state.step, state.strikes, order, scene.battle.battleLog, scene.viewer]);
+  }, [attacker, attack, state.step, state.strikes, order, scene.battle.battleLog, scene.battle.knowledge, scene.viewer]);
 
   const estimate = steps.reduce((sum, list) => sum + (list.at(-1)?.after ?? 0), 0);
 
@@ -123,9 +123,11 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
       const retaliation = retaliationOutcome(scene.readBattle()?.battleLog ?? [], seen);
 
       if (first.kind === "miss") {
-        const log = scene.readBattle()?.battleLog ?? [];
+        const current = scene.readBattle();
 
-        scene.showResult({ kind: "miss", targetName: target?.basicInfo.name ?? "", d20: effectiveD20(strike, state.mode), known: formatKnownArmorClass(knownArmorClass(log, first.targetId)), ...(retaliation && { retaliation }) });
+        const log = current?.battleLog ?? [];
+
+        scene.showResult({ kind: "miss", targetName: target?.basicInfo.name ?? "", d20: effectiveD20(strike, state.mode), known: formatKnownArmorClass(resolveKnownArmorClass(log, first.targetId, current?.knowledge)), ...(retaliation && { retaliation }) });
       } else {
         scene.showResult({ kind: first.kind, targetName: target?.basicInfo.name ?? "", damage: results.reduce((s, r) => s + r.damage, 0), downed: first.downed, d20: effectiveD20(strike, state.mode), weapon: attack?.name, ...(retaliation && { retaliation }) });
       }

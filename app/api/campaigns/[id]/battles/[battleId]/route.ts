@@ -23,6 +23,7 @@ function readBattle(params: { id: string; battleId: string }) {
     access: BattleAccess.MEMBER,
     dryRun: () => true,
     includeRecentEvents: 100,
+    includeKnowledge: true,
     mutate: (ctx) => ({ participants: ctx.participants, pending: ctx.pending, events: [] }),
   });
 }

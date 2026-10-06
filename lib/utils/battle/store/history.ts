@@ -4,6 +4,7 @@ import type { SnapshotState } from "./snapshot-state";
 import { joinParticipant, splitParticipant } from "./split-participant";
 import type { LoadedBattle, ParticipantSnapshot, StoredBattleEvent } from "./types";
 
+import { KNOWLEDGE_EVENT_TYPES } from "@/lib/utils/battle/view/knowledge";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 export async function loadRecentEvents(db: BattleDb, battleId: string, limit = 100): Promise<BattleAction[]> {
@@ -79,4 +80,14 @@ export function restoreParticipantsAt(
     participants: restored.filter((r) => !r.isPending).sort(byOrder).map((r) => r.p),
     pending: restored.filter((r) => r.isPending).sort(byOrder).map((r) => r.p),
   };
+}
+
+export async function loadKnowledgeEvents(db: BattleDb, battleId: string): Promise<BattleAction[]> {
+  const rows = await db.battleEvent.findMany({
+    where: { battleId, cancelledAt: null, type: { in: [...KNOWLEDGE_EVENT_TYPES] } },
+    orderBy: { seq: "asc" },
+    select: { seq: true, round: true, type: true, actorId: true, targets: true, details: true },
+  });
+
+  return rows.map((r) => eventToBattleAction({ ...r, hpChanges: [], resultText: "" } as unknown as StoredBattleEvent, battleId));
 }

@@ -211,6 +211,7 @@ export interface SetProgress {
 
 export interface CharacterSheet {
   viewer: { isDM: boolean; isOwner: boolean };
+  maxLevel: number;
   identity: { id: string; name: string; avatar: string | null; level: number; className: string; subclass: string | null; race: string; raceIcon: string | null; alignment: string | null };
   abilities: SheetAbility[];
   primaryAbility: AbilityKey | null;

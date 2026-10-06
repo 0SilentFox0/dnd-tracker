@@ -15,6 +15,7 @@ import type { BookSpell } from "@/types/spells";
 export interface SheetInput {
   participant: BattleParticipant;
   viewer: CharacterSheet["viewer"];
+  maxLevel: number;
   character: Record<AbilityKey, number> & {
     id: string;
     name: string;
@@ -82,6 +83,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
 
   return {
     viewer: input.viewer,
+    maxLevel: input.maxLevel,
     identity: { id: c.id, name: c.name, avatar: c.avatar, level: c.level, className: c.class, subclass: c.subclass, race: c.race, raceIcon: input.raceIcon, alignment: c.alignment },
     abilities: ABILITY_KEYS.map((key) => ({ key, score: scores[key], mod: getAbilityModifier(scores[key]), isPrimary: primary === key, lines: abilityLines(p, key, c[key]) })),
     primaryAbility: primary,

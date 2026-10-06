@@ -17,7 +17,7 @@ export interface PusherMessage {
   payload: unknown;
 }
 
-export function toLegacyBattle(
+export function toBattleResponse(
   loaded: Pick<LoadedBattle, "meta">,
   scene: BattleSceneState,
   participants: BattleParticipant[],
