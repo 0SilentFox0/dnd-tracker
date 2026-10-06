@@ -128,4 +128,16 @@ describe("resolveRetaliation", () => {
     expect(find(r?.participants, "a")?.combatStats.status).not.toBe("active");
     expect(find(r?.participants, "a2")?.combatStats.morale).toBe(-1);
   });
+
+  it("вільний текст кубиків («2d6 + STR») кидає дві кістки, а не 0", () => {
+    const calls = (dice: string) => {
+      let n = 0;
+
+      retaliate(attacker(), defender({ attacks: [{ ...sword, damageDice: dice }] }), { rng: () => (n++, 0.85) });
+
+      return n;
+    };
+
+    expect(calls("2d6 + STR") - calls("1d6")).toBe(1);
+  });
 });

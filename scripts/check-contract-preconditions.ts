@@ -28,24 +28,24 @@ const nonEmpty = (col: string, empty: "{}" | "[]") => `(${col} IS NOT NULL AND $
 const CHECKS: Array<{ name: string; sql: string; requires?: { table: string; column: string } }> = [
   {
     name: "1. skills: abilities NULL при непорожніх combatStats/bonuses/skillTriggers",
-    sql: `SELECT count(*) FROM skills WHERE abilities IS NULL AND (${nonEmpty(`"combatStats"`, "{}")} OR ${nonEmpty("bonuses", "{}")} OR ${nonEmpty(`"skillTriggers"`, "[]")})`,
+    sql: `SELECT count(*) FROM skills WHERE (abilities IS NULL OR jsonb_typeof(abilities) <> 'array') AND (${nonEmpty(`"combatStats"`, "{}")} OR ${nonEmpty("bonuses", "{}")} OR ${nonEmpty(`"skillTriggers"`, "[]")})`,
   },
   {
     name: "1. races: abilities NULL при непорожньому passiveAbility",
-    sql: `SELECT count(*) FROM races WHERE abilities IS NULL AND ${nonEmpty(`"passiveAbility"`, "{}")}`,
+    sql: `SELECT count(*) FROM races WHERE (abilities IS NULL OR jsonb_typeof(abilities) <> 'array') AND ${nonEmpty(`"passiveAbility"`, "{}")}`,
   },
   {
     // bonuses/modifiers лишаються статами зброї, але конвертер брав із них і вміння
     name: "1. artifacts: abilities NULL при непорожніх bonuses/modifiers/passiveAbility",
-    sql: `SELECT count(*) FROM artifacts WHERE abilities IS NULL AND (${nonEmpty("bonuses", "{}")} OR ${nonEmpty("modifiers", "[]")} OR ${nonEmpty(`"passiveAbility"`, "{}")})`,
+    sql: `SELECT count(*) FROM artifacts WHERE (abilities IS NULL OR jsonb_typeof(abilities) <> 'array') AND (${nonEmpty("bonuses", "{}")} OR ${nonEmpty("modifiers", "[]")} OR ${nonEmpty(`"passiveAbility"`, "{}")})`,
   },
   {
     name: "1. artifact_sets: abilities NULL при непорожньому setBonus",
-    sql: `SELECT count(*) FROM artifact_sets WHERE abilities IS NULL AND ${nonEmpty(`"setBonus"`, "{}")}`,
+    sql: `SELECT count(*) FROM artifact_sets WHERE (abilities IS NULL OR jsonb_typeof(abilities) <> 'array') AND ${nonEmpty(`"setBonus"`, "{}")}`,
   },
   {
     name: "1. units: abilities NULL при непорожніх specialAbilities",
-    sql: `SELECT count(*) FROM units WHERE abilities IS NULL AND ${nonEmpty(`"specialAbilities"`, "[]")}`,
+    sql: `SELECT count(*) FROM units WHERE (abilities IS NULL OR jsonb_typeof(abilities) <> 'array') AND ${nonEmpty(`"specialAbilities"`, "[]")}`,
   },
   {
     name: "2. battle_participants: snapshot/state до 3a",

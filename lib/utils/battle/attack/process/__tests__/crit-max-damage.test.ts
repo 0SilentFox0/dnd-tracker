@@ -35,3 +35,19 @@ describe("крит max_damage", () => {
     expect(crit(hero)).toBe(diceMax(heroAttackDamageParts(hero, club).formula) + getAttackAbilityModifier(hero.abilities, AttackType.MELEE));
   });
 });
+
+describe("крит max_damage: вільний текст кубиків", () => {
+  it("«2d6 + STR» дає максимум першої групи, не менше за звичайне влучання", () => {
+    const p = makeParticipant({ id: "u" });
+
+    const unit = { ...p, basicInfo: { ...p.basicInfo, sourceType: "unit" as const } };
+
+    const free = { ...club, damageDice: "2d6 + STR" };
+
+    const run = (isCritical: boolean) =>
+      computeHitDamage({ attacker: unit, target, attack: free, damageRolls: [1, 1], allParticipants: [unit, target], attackRoll: { isCritical, criticalEffect: isCritical ? maxCrit : undefined }, currentRound: 1 }).physicalDamage;
+
+    expect(run(true)).toBe(12 + getAttackAbilityModifier(unit.abilities, AttackType.MELEE));
+    expect(run(true)).toBeGreaterThanOrEqual(run(false));
+  });
+});

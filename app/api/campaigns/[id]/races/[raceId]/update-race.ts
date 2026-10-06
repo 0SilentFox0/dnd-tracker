@@ -30,8 +30,8 @@ export async function updateRaceCascade(campaignId: string, current: { id: strin
     });
 
     if (renamed) {
-      await tx.character.updateMany({ where: { campaignId, race: current.name }, data: { race: data.name } });
-      await tx.skillTree.updateMany({ where: { campaignId, race: current.name }, data: { race: data.name } });
+      await tx.character.updateMany({ where: { campaignId, race: { equals: current.name, mode: "insensitive" } }, data: { race: data.name } });
+      await tx.skillTree.updateMany({ where: { campaignId, race: { equals: current.name, mode: "insensitive" } }, data: { race: data.name } });
     }
 
     return race;

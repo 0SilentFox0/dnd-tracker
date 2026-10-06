@@ -40,20 +40,24 @@ export function parseDice(formula: string): DiceFormula | null {
   return result;
 }
 
+export function averageOf(parsed: DiceFormula): number {
+  return parsed.groups.reduce((sum, g) => sum + (g.count * (g.size + 1)) / 2, parsed.flat);
+}
+
+export function maxOf(parsed: DiceFormula): number {
+  return parsed.groups.reduce((sum, g) => sum + g.count * g.size, parsed.flat);
+}
+
 export function diceAverage(formula: string): number {
   const parsed = parseDice(formula);
 
-  if (!parsed) return 0;
-
-  return parsed.groups.reduce((sum, g) => sum + (g.count * (g.size + 1)) / 2, parsed.flat);
+  return parsed ? averageOf(parsed) : 0;
 }
 
 export function diceMax(formula: string): number {
   const parsed = parseDice(formula);
 
-  if (!parsed) return 0;
-
-  return parsed.groups.reduce((sum, g) => sum + g.count * g.size, parsed.flat);
+  return parsed ? maxOf(parsed) : 0;
 }
 
 export function diceCount(formula: string): number {
@@ -93,10 +97,23 @@ export function leadingDice(text: string): DiceGroup | null {
   return count >= 1 && size >= 1 ? { count, size } : null;
 }
 
+/** Юніти зберігають атаки вільним текстом («2d6 + STR»): розбір → перша група кубиків → 1d6. */
+export function parseDiceLenient(formula: string): DiceFormula {
+  const strict = parseDice(formula);
+
+  if (strict) return strict;
+
+  const lead = leadingDice(formula);
+
+  return { groups: [lead ?? { count: 1, size: 6 }], flat: 0 };
+}
+
+export function rollGroups(groups: DiceGroup[], rng: () => number = Math.random): number[] {
+  return groups.flatMap((g) => Array.from({ length: g.count }, () => 1 + Math.floor(rng() * g.size)));
+}
+
 export function rollDiceList(formula: string, rng: () => number = Math.random): number[] {
-  return (parseDice(formula)?.groups ?? []).flatMap((g) =>
-    Array.from({ length: g.count }, () => 1 + Math.floor(rng() * g.size)),
-  );
+  return rollGroups(parseDice(formula)?.groups ?? [], rng);
 }
 
 export function rollDice(formula: string, rng: () => number = Math.random): number {

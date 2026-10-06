@@ -94,3 +94,16 @@ describe("readers", () => {
     expect(applyResistance(p, 10, "fire", { fromSpell: true }).finalDamage).toBe(0);
   });
 });
+
+describe("calculateAttackRoll: rng", () => {
+  it("критичний ефект береться з переданого rng", () => {
+    const p = makeParticipant({ id: "a" });
+
+    const bow = { id: "b", name: "Лук", type: AttackType.RANGED, attackBonus: 0, damageDice: "1d6", damageType: "piercing" } as BattleAttack;
+
+    const pick = (v: number) => calculateAttackRoll(p, bow, 20, undefined, undefined, { rng: () => v }).criticalEffect?.id;
+
+    expect(pick(0)).toBe(1);
+    expect(pick(0.999)).not.toBe(1);
+  });
+});

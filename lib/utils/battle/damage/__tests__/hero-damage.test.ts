@@ -61,11 +61,12 @@ describe("шкода атаки: числа до дедупу", () => {
     expect(hit(unit, { ...sword, damageDice: "" }, [3])).toBe(5);
   });
 
-  it("крит «Максимальний урон»: усі групи зброї (+ кубики рівня героя) на максимум + характеристика", () => {
+  it("крит «Максимальний урон»: усі групи зброї (+ кубики рівня героя і плоский бонус зброї) на максимум + характеристика", () => {
     expect(hit(unit, sword, [5], true)).toBe(12);
-    expect(hit(hero, sword, [5], true)).toBe(22);
+    expect(hit(hero, sword, [5], true)).toBe(24);
     expect(hit(unit, { ...sword, damageDice: "2d6" }, [5, 5], true)).toBe(14);
     expect(hit(unit, { ...sword, damageDice: "" }, [3], true)).toBe(8);
+    expect(hit(unit, { ...sword, damageDice: "2d6 + STR" }, [5, 5], true)).toBe(14);
   });
 });
 

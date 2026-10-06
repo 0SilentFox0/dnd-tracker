@@ -2,6 +2,7 @@
  * Утиліти для конвертації між CharacterFormData (згрупована) та Character (плоска)
  */
 
+import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { CharacterType, type CharacterTypeValue } from "@/lib/constants/characters";
 import { calculateCharacterSpellSlots } from "@/lib/utils/spells/spell-slots";
 import type { Character, CharacterFormData } from "@/types/characters";
@@ -85,6 +86,18 @@ export function characterToFormData(
       meleeMultiplier: (character as { meleeMultiplier?: number | null }).meleeMultiplier ?? 1,
       rangedMultiplier: (character as { rangedMultiplier?: number | null }).rangedMultiplier ?? 1,
     },
+  };
+}
+
+/** Після підняття рівня оновлюються лише рівень, характеристики й слоти — решта правок форми лишається. */
+export function mergeLevelUpIntoForm(prev: CharacterFormData, updated: Partial<Character>): CharacterFormData {
+  const next = characterToFormData(updated);
+
+  return {
+    ...prev,
+    basicInfo: { ...prev.basicInfo, level: next.basicInfo.level },
+    abilityScores: { ...prev.abilityScores, ...Object.fromEntries(ABILITY_KEYS.map((k) => [k, next.abilityScores[k]])) },
+    spellcasting: { ...prev.spellcasting, spellSlots: next.spellcasting.spellSlots },
   };
 }
 

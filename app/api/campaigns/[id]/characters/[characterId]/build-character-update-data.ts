@@ -30,10 +30,13 @@ export function resolveFinalLevel(
   character: { level: number; experience: number },
   data: { level?: number; experience?: number },
   xpMultiplier: number,
+  maxLevel: number = Number.POSITIVE_INFINITY,
 ): number {
-  if (data.level === undefined && data.experience === undefined) return character.level;
+  const explicit = data.level ?? character.level;
 
-  return Math.max(data.level ?? character.level, getLevelFromXP(data.experience ?? character.experience, xpMultiplier));
+  if (data.experience === undefined || data.experience === character.experience) return explicit;
+
+  return Math.max(explicit, Math.min(getLevelFromXP(data.experience, xpMultiplier), maxLevel));
 }
 
 function tableSlots(level: number, existing: SpellSlots | null | undefined): SpellSlots {
@@ -51,7 +54,7 @@ function tableSlots(level: number, existing: SpellSlots | null | undefined): Spe
 }
 
 export function buildCharacterUpdateData({ character, data, xpMultiplier, campaign, race, rng }: BuildCharacterUpdateDataParams): CharacterUpdateComputed {
-  const finalLevel = resolveFinalLevel(character, data, xpMultiplier);
+  const finalLevel = resolveFinalLevel(character, data, xpMultiplier, campaign.maxLevel);
 
   const existingSlots = (data.spellSlots ?? character.spellSlots) as SpellSlots | null | undefined;
 

@@ -5,7 +5,7 @@ import { useDeleteCharacter, useLevelUpCharacter } from "./useCharacters";
 
 import { useArtifactsList } from "@/lib/hooks/artifacts";
 import { useConfirm, useNotify } from "@/lib/hooks/common";
-import { characterToFormData } from "@/lib/utils/characters/character-form";
+import { mergeLevelUpIntoForm } from "@/lib/utils/characters/character-form";
 
 export function useDmCharacterEditor({ campaignId, characterId, onSaved }: { campaignId: string; characterId: string; onSaved: () => void }) {
   const confirm = useConfirm();
@@ -41,7 +41,7 @@ export function useDmCharacterEditor({ campaignId, characterId, onSaved }: { cam
       onConfirm: async () => {
         const updated = await levelUpMutation.mutateAsync(characterId);
 
-        editor.form.setFormData(characterToFormData(updated));
+        editor.form.setFormData((prev) => mergeLevelUpIntoForm(prev, updated));
         details = updated.levelUpDetails as typeof details;
       },
     });

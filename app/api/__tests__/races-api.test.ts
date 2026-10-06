@@ -91,8 +91,8 @@ describe("races API", () => {
     expect(res.status).toBe(200);
     expect(db.$transaction).toHaveBeenCalledTimes(1);
     expect(db.race.update.mock.calls[0][0]).toMatchObject({ where: { id: "r1" }, data: { name: "Високий ельф" } });
-    expect(db.character.updateMany).toHaveBeenCalledWith({ where: { campaignId: "c1", race: "Ельф" }, data: { race: "Високий ельф" } });
-    expect(db.skillTree.updateMany).toHaveBeenCalledWith({ where: { campaignId: "c1", race: "Ельф" }, data: { race: "Високий ельф" } });
+    expect(db.character.updateMany).toHaveBeenCalledWith({ where: { campaignId: "c1", race: { equals: "Ельф", mode: "insensitive" } }, data: { race: "Високий ельф" } });
+    expect(db.skillTree.updateMany).toHaveBeenCalledWith({ where: { campaignId: "c1", race: { equals: "Ельф", mode: "insensitive" } }, data: { race: "Високий ельф" } });
     expect(revalidateTag).toHaveBeenCalledWith("units-c1", { expire: 0 });
     expect(await getResponseJson(res)).toMatchObject({ name: "Високий ельф" });
   });

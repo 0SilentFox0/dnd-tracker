@@ -7,7 +7,7 @@ import { getNonMagicBranchDpr, getSpellDprFromBranchLevels } from "./dpr";
 import { AttackType } from "@/lib/constants/battle";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
-import { diceAverage } from "@/lib/utils/common/dice";
+import { averageOf, diceAverage, parseDiceLenient } from "@/lib/utils/common/dice";
 import type { BranchLevel } from "@/lib/utils/skills/progression";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 import type { CharacterDprBreakdown, SuggestedEnemy } from "@/types/battle-setup";
@@ -64,7 +64,7 @@ export function getUnitStats(unit: {
   for (const a of attacks) {
     const dice = (a.damageDice as string) || "1d6";
 
-    const avg = diceAverage(dice);
+    const avg = averageOf(parseDiceLenient(dice));
 
     const isRanged = (a.type as string) === AttackType.RANGED;
 

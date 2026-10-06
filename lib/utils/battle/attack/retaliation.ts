@@ -12,7 +12,7 @@ import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { findParticipant, isUp, withSelf } from "@/lib/utils/abilities/engine/participants";
 import type { Rng } from "@/lib/utils/abilities/engine/types";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
-import { rollDiceList } from "@/lib/utils/common/dice";
+import { parseDiceLenient, rollGroups } from "@/lib/utils/common/dice";
 import type { BattleAction, BattleAttack, BattleParticipant } from "@/types/battle";
 
 type Kind = "melee" | "ranged";
@@ -74,7 +74,7 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
 
   const second = rollD20(rng);
 
-  const roll = calculateAttackRoll(getP(flow, defenderId), weapon.attack, first, second, second, { participants: flow.ps, targetId: attackerId });
+  const roll = calculateAttackRoll(getP(flow, defenderId), weapon.attack, first, second, second, { participants: flow.ps, targetId: attackerId, rng });
 
   const targetAC = getEffectiveArmorClass(getP(flow, attackerId), flow.ps);
 
@@ -85,7 +85,7 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
   let hit: BuildRetaliationParams["hit"] = null;
 
   if (isHit) {
-    const damageRolls = rollDiceList(heroAttackDamageParts(getP(flow, defenderId), weapon.attack).formula, rng);
+    const damageRolls = rollGroups(parseDiceLenient(heroAttackDamageParts(getP(flow, defenderId), weapon.attack).formula).groups, rng);
 
     const { hitDamage } = resolveHit({
       flow,

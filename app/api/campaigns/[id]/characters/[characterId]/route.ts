@@ -129,7 +129,7 @@ export async function PATCH(
 
     const xpMultiplier = campaign.xpMultiplier ?? 1;
 
-    const finalLevel = resolveFinalLevel(character, data, xpMultiplier);
+    const finalLevel = resolveFinalLevel(character, data, xpMultiplier, campaign.maxLevel);
 
     if (finalLevel > character.level && finalLevel > campaign.maxLevel) {
       return NextResponse.json({ error: `Максимальний рівень кампанії — ${campaign.maxLevel}` }, { status: 422 });

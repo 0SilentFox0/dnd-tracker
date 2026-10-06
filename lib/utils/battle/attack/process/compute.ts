@@ -10,11 +10,11 @@ import type { DamageCalculationResult } from "../../types/damage-calculations";
 import { applyCriticalEffect } from "..";
 import { applyResistanceForAdditional } from "./damage";
 
-import { AttackType } from "@/lib/constants/battle";
+import { AttackType, ParticipantSourceType } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { attackAbilityLabel, getAttackAbilityModifier } from "@/lib/utils/common/calculations";
-import { diceMax, rollDice } from "@/lib/utils/common/dice";
+import { maxOf, parseDice, parseDiceLenient, rollGroups } from "@/lib/utils/common/dice";
 import type { BattleParticipant, DamageStep } from "@/types/battle";
 import type { BattleAttack } from "@/types/battle";
 
@@ -29,6 +29,7 @@ export interface ComputeHitDamageParams {
   currentRound: number;
   actionModifiers?: StaticEffect[];
   bonusPercent?: number;
+  rng?: () => number;
 }
 
 export interface ComputeHitDamageResult {
@@ -116,12 +117,16 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
   if (criticalEffectApplied?.effect.type === "max_damage") {
     const before = physicalDamage;
 
-    physicalDamage = diceMax(heroAttackDamageParts(updatedAttacker, attack).formula || "1d6") + statModifier;
+    const { formula, weaponDice } = heroAttackDamageParts(updatedAttacker, attack);
+
+    const weaponFlat = updatedAttacker.basicInfo.sourceType === ParticipantSourceType.CHARACTER ? (parseDice(weaponDice)?.flat ?? 0) : 0;
+
+    physicalDamage = maxOf(parseDiceLenient(formula)) + weaponFlat + statModifier;
     damageSteps.push({ label: criticalEffectApplied.name, side: "attacker", kind: "flat", value: physicalDamage - before, after: physicalDamage });
   }
 
   if (criticalEffectApplied?.effect.type === "additional_damage") {
-    const extra = rollDice("1d6");
+    const extra = rollGroups([{ count: 1, size: 6 }], params.rng)[0];
 
     physicalDamage += extra;
     damageSteps.push({ label: criticalEffectApplied.name, side: "attacker", kind: "flat", value: extra, after: physicalDamage });

@@ -35,6 +35,7 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
     currentRound: p.currentRound,
     actionModifiers: p.actionModifiers,
     bonusPercent: p.bonusPercent,
+    rng: flow.ctx.rng,
   });
 
   put(flow, hitDamage.updatedAttacker);

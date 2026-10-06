@@ -59,7 +59,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
     return {
       success: false,
-      attackRoll: calculateAttackRoll(getP(flow, attackerId), attack, d20Roll, advantageRoll, disadvantageRoll, { participants: flow.ps }),
+      attackRoll: calculateAttackRoll(getP(flow, attackerId), attack, d20Roll, advantageRoll, disadvantageRoll, { participants: flow.ps, rng: flow.ctx.rng }),
       targetUpdated: getP(flow, targetId),
       attackerUpdated: getP(flow, attackerId),
       allParticipantsUpdated: flow.ps,
@@ -72,6 +72,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     extra: actionModifiers[attackerId],
     targetId,
     targetExtra: actionModifiers[targetId],
+    rng: flow.ctx.rng,
   });
 
   const targetAC = getEffectiveArmorClass(getP(flow, targetId), flow.ps, actionModifiers[targetId]);

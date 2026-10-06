@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-const calls = vi.hoisted(() => ({ byKey: {} as Record<string, number> }));
+const calls = vi.hoisted(() => ({ byKey: {} as Record<string, number>, args: {} as Record<string, unknown> }));
 
 const CHARACTERS = vi.hoisted(() =>
   ["c1", "c2", "c3"].map((id) => ({
@@ -17,10 +17,12 @@ vi.mock("@/lib/db", () => {
     new Proxy(
       {},
       {
-        get: (_t, method: string) => async () => {
+        get: (_t, method: string) => async (arg?: unknown) => {
           const key = `${name}.${method}`;
 
           calls.byKey[key] = (calls.byKey[key] ?? 0) + 1;
+
+          calls.args[key] = arg;
 
           if (key === "character.findMany") return CHARACTERS;
 
@@ -49,5 +51,13 @@ describe("loadCharacterBalanceStats", () => {
     expect(calls.byKey["character.findUnique"]).toBeUndefined();
     expect(calls.byKey["character.findMany"]).toBe(1);
     expect(total).toBeLessThanOrEqual(4 + 2 * CHARACTERS.length);
+  });
+
+  it("egress: спели без описів, скіли лише за посиланнями (тут жодних — запиту немає)", async () => {
+    await loadCharacterBalanceStats("camp");
+
+    expect(calls.args["spell.findMany"]).toMatchObject({ select: { id: true, level: true } });
+    expect(calls.args["spell.findMany"]).not.toHaveProperty("include");
+    expect(calls.byKey["skill.findMany"]).toBeUndefined();
   });
 });

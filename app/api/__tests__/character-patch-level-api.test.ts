@@ -70,6 +70,25 @@ describe("PATCH персонажа: рівень і слоти", () => {
     expect(prisma.character.update).not.toHaveBeenCalled();
   });
 
+  it("ДМ: персонаж на maxLevel з XP понад поріг — правка імені проходить, рівень не змінюється", async () => {
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("dm", 3));
+    vi.mocked(prisma.character.findUnique).mockResolvedValue({ ...CHARACTER, experience: 999_999 } as never);
+
+    const res = await patch({ name: "Нове", experience: 999_999 });
+
+    expect(res.status).toBe(200);
+    expect(written()).toMatchObject({ level: 3, name: "Нове" });
+  });
+
+  it("ДМ: нове XP понад maxLevel підвищує лише до maxLevel", async () => {
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("dm", 4));
+
+    const res = await patch({ experience: 999_999 });
+
+    expect(res.status).toBe(200);
+    expect(written()).toMatchObject({ level: 4 });
+  });
+
   it("ДМ: без зміни рівня слоти не перераховуються; ручна правка слотів проходить як є", async () => {
     vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("dm"));
 
