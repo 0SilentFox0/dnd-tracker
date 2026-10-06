@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import { BattleActionType } from "@/lib/constants/battle";
 import { formatKnownArmorClass, type KnownArmorClass, knownArmorClass, mergeKnownArmorClass, mergeObservedTraits, observedTraits, summarizeKnowledge } from "@/lib/utils/battle/view";
+import { KNOWLEDGE_EVENT_TYPES } from "@/lib/utils/battle/view/knowledge";
 import type { BattleAction } from "@/types/battle";
 
 const atk = (actorName: string, total: number, isHit: boolean, round = 1, extra: Partial<BattleAction["actionDetails"]> = {}): BattleAction =>
@@ -107,5 +109,22 @@ describe("summarizeKnowledge", () => {
     expect(Object.keys(summary)).toEqual(["t"]);
     expect(summary.t.ac.max).toBe(10);
     expect(summary.t.ac.evidence).toHaveLength(5);
+  });
+});
+
+describe("знання з заклинань", () => {
+  const step = { label: "Опір вогню", side: "target" as const, kind: "percent" as const, value: -50, after: 5 };
+
+  const spell = { ...atk("Маг", 30, true, 1, { damageSteps: { t: [step] } }), actionType: BattleActionType.SPELL } as BattleAction;
+
+  it("підсумок бере риси з заклинань, але AC — лише з атак", () => {
+    const summary = summarizeKnowledge([spell]);
+
+    expect(summary.t.traits).toEqual([{ label: "Опір вогню", kind: "percent", value: -50 }]);
+    expect(summary.t.ac).toMatchObject({ min: undefined, max: undefined });
+  });
+
+  it("сервер читає події заклинань для знання", () => {
+    expect(KNOWLEDGE_EVENT_TYPES).toEqual(expect.arrayContaining([BattleActionType.ATTACK, BattleActionType.RETALIATION, BattleActionType.SPELL]));
   });
 });

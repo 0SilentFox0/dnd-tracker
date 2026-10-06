@@ -27,6 +27,17 @@ export const CombatStatus = {
   DEAD: "dead",
 } as const;
 
+export const BattleActionType = {
+  ATTACK: "attack",
+  SPELL: "spell",
+  BONUS_ACTION: "bonus_action",
+  ABILITY: "ability",
+  END_TURN: "end_turn",
+  SKIP_TURN: "skip_turn",
+  MORALE_SKIP: "morale_skip",
+  RETALIATION: "retaliation",
+} as const;
+
 export type CombatStatusType = (typeof CombatStatus)[keyof typeof CombatStatus];
 
 /**

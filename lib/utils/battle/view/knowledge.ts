@@ -1,3 +1,4 @@
+import { BattleActionType } from "@/lib/constants/battle";
 import type { BattleAction, DamageStep } from "@/types/battle";
 
 export interface KnownArmorClass {
@@ -12,6 +13,8 @@ export interface ObservedTrait {
   value: number;
   icon?: string | null;
 }
+
+const AC_EVENT_TYPES: readonly string[] = [BattleActionType.ATTACK, BattleActionType.RETALIATION];
 
 const targets = (e: BattleAction, id: string) => e.targets?.some((t) => t.participantId === id) ?? false;
 
@@ -30,7 +33,7 @@ function bounds(evidence: KnownArmorClass["evidence"]): Pick<KnownArmorClass, "m
 
 export function knownArmorClass(log: BattleAction[], targetId: string): KnownArmorClass {
   const evidence = log
-    .filter((e) => (e.actionType === "attack" || e.actionType === "retaliation") && targets(e, targetId))
+    .filter((e) => AC_EVENT_TYPES.includes(e.actionType) && targets(e, targetId))
     .filter((e) => typeof e.actionDetails?.totalAttackValue === "number" && typeof e.actionDetails.isHit === "boolean")
     .filter((e) => !e.actionDetails.isCritical && !e.actionDetails.isCriticalFail)
     .map((e) => ({ actorName: e.actorName, total: e.actionDetails.totalAttackValue as number, hit: e.actionDetails.isHit as boolean, round: e.round }));
@@ -77,7 +80,8 @@ export interface EnemyKnowledge {
 
 export type BattleKnowledge = Record<string, EnemyKnowledge>;
 
-export const KNOWLEDGE_EVENT_TYPES = ["attack", "retaliation"] as const;
+// кроки шкоди (риси цілі) пишуть і заклинання, AC — лише атаки
+export const KNOWLEDGE_EVENT_TYPES = [...AC_EVENT_TYPES, BattleActionType.SPELL];
 
 const KNOWLEDGE_EVIDENCE_LIMIT = 5;
 
