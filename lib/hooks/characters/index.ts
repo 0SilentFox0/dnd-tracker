@@ -26,3 +26,4 @@ export type { HeroScalingCoefficients } from "./useHeroScalingCoefficients";
 export { useHeroScalingCoefficients } from "./useHeroScalingCoefficients";
 export type { UseInventoryOptions } from "./useInventory";
 export { useInventory } from "./useInventory";
+export { useSpellBrowser } from "./useSpellBrowser";

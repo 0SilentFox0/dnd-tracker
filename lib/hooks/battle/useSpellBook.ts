@@ -10,6 +10,7 @@ import { getDiceSlots } from "@/lib/utils/battle/balance/dice";
 import { initialSpellFlow, spellFlow, spellPayload,type SpellPick } from "@/lib/utils/battle/flows";
 import { participantSpellAllowsMultipleTargets } from "@/lib/utils/battle/spell/participant-spell-target-mode";
 import { slotLevels } from "@/lib/utils/battle/view";
+import { groupSpellsByLevel } from "@/lib/utils/spells/group-by-level";
 import type { BattleParticipant } from "@/types/battle";
 import type { BookSpell } from "@/types/spells";
 
@@ -34,15 +35,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
     return all.filter((s) => known.has(s.id));
   }, [data, options.allSpells, caster]);
 
-  const byLevel = useMemo(() => {
-    const map: Record<number, BookSpell[]> = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [] };
-
-    for (const s of spells) (map[s.level] ??= []).push(s);
-
-    for (const list of Object.values(map)) list.sort((a, b) => a.name.localeCompare(b.name, "uk"));
-
-    return map;
-  }, [spells]);
+  const byLevel = useMemo(() => groupSpellsByLevel(spells), [spells]);
 
   const selected = spells.find((s) => s.id === state.pick?.spellId) ?? null;
 
