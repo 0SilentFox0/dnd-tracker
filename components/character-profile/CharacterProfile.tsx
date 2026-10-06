@@ -10,6 +10,7 @@ import { ProfileContext } from "./ProfileContext";
 import { CompactHero, ProfileHero } from "./ProfileHero";
 import { type ProfileTab, type ProfileTabId, ProfileTabs } from "./ProfileTabs";
 import { SkillsTab } from "./SkillsTab";
+import { StoryTab } from "./StoryTab";
 
 import "@/components/hud/hud.css";
 import { HUD_SURFACE } from "@/components/battle/hud";
@@ -26,7 +27,7 @@ function viewTabs(): ProfileTab[] {
     { id: "skills", label: "Вміння", content: <SkillsTab /> },
     { id: "magic", label: "Магія", content: <MagicTab /> },
     { id: "items", label: "Речі", content: <ItemsTab /> },
-    { id: "story", label: "Історія", content: null },
+    { id: "story", label: "Історія", content: <StoryTab /> },
   ];
 }
 
