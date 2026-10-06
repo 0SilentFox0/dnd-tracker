@@ -19,10 +19,7 @@ export function useEditBattleData(campaignId: string, battleId: string) {
 
   const router = useRouter();
 
-  const { data: battle, isLoading: loadingBattle } = useBattle(
-    campaignId,
-    battleId,
-  );
+  const { data: battle, isLoading: loadingBattle } = useBattle(campaignId, battleId, { pauseRefetchWhen: true });
 
   const updateBattleMutation = useUpdateBattle(campaignId, battleId);
 
