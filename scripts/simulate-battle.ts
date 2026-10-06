@@ -91,7 +91,7 @@ async function seed() {
 
   for (const [key, s] of Object.entries(SKILLS)) {
     const row = await prisma.skill.create({
-      data: { campaignId, mainSkillId: mainSkill.id, name: s.name, ...("abilities" in s ? { abilities: s.abilities as unknown as Prisma.InputJsonValue } : {}), ...("combatStats" in s ? { combatStats: s.combatStats, skillTriggers: s.skillTriggers } : {}) } as Prisma.SkillUncheckedCreateInput,
+      data: { campaignId, mainSkillId: mainSkill.id, name: s.name, abilities: s.abilities as unknown as Prisma.InputJsonValue },
     });
 
     skills[key] = row.id;
@@ -119,7 +119,7 @@ async function seed() {
     return row.id;
   };
 
-  const dwarfTree = await treeFor("Дварф", { outer: [skills.rage, skills.undying, skills.ironSkin], middle: [skills.legacyGuard] });
+  const dwarfTree = await treeFor("Дварф", { outer: [skills.rage, skills.undying, skills.ironSkin] });
 
   const elfTree = await treeFor("Ельф", { levels: { basic: skills.hunterEye }, outer: [skills.bleed, skills.secondWind] }, { basic: skills.forestStep });
 
@@ -127,17 +127,17 @@ async function seed() {
 
   const progress = (treeId: string, ids: string[]) => ({ [treeId]: { unlockedSkills: [...levels, ...ids] } });
 
-  const base = { campaignId, type: "player", controlledBy: SIM_PLAYER.id, class: "Fighter", proficiencyBonus: 2 };
+  const base = { campaignId, type: "player", controlledBy: SIM_PLAYER.id, class: "Fighter" };
 
   const chars = {
     thorin: await prisma.character.create({
-      data: { ...base, name: "Торін", race: "Дварф", level: 5, strength: 16, dexterity: 12, constitution: 16, armorClass: 16, maxHp: 40, currentHp: 40, initiative: 1, skillTreeProgress: progress(dwarfTree, [skills.rage, skills.undying, skills.ironSkin, skills.legacyGuard]) },
+      data: { ...base, name: "Торін", race: "Дварф", level: 5, strength: 16, dexterity: 12, constitution: 16, armorClass: 16, initiative: 1, skillTreeProgress: progress(dwarfTree, [skills.rage, skills.undying, skills.ironSkin]) },
     }),
     lyra: await prisma.character.create({
-      data: { ...base, class: "Ranger", name: "Ліра", race: "Ельф", level: 4, morale: 2, dexterity: 18, armorClass: 14, maxHp: 28, currentHp: 28, initiative: 4, skillTreeProgress: progress(elfTree, [skills.bleed, skills.secondWind, racialNodeId("basic")]) },
+      data: { ...base, class: "Ranger", name: "Ліра", race: "Ельф", level: 4, morale: 2, dexterity: 18, armorClass: 14, initiative: 4, skillTreeProgress: progress(elfTree, [skills.bleed, skills.secondWind, racialNodeId("basic")]) },
     }),
     myron: await prisma.character.create({
-      data: { ...base, class: "Wizard", name: "Мирон", race: "Людина", level: 3, morale: -2, intelligence: 17, armorClass: 12, maxHp: 18, currentHp: 18, initiative: 2, immunities: ["контроль"], knownSpells: [spell.id], spellSlots: { "1": { max: 2, current: 2 } } },
+      data: { ...base, class: "Wizard", name: "Мирон", race: "Людина", level: 3, morale: -2, intelligence: 17, armorClass: 12, initiative: 2, immunities: ["контроль"], knownSpells: [spell.id], spellSlots: { "1": { max: 2, current: 2 } } },
     }),
   };
 
@@ -166,8 +166,6 @@ async function seed() {
       ],
       currentRound: 1,
       currentTurnIndex: 0,
-      initiativeOrder: [],
-      battleLog: [],
     },
   });
 
@@ -336,11 +334,7 @@ async function scenario() {
   check("Кільце сили запечене в силу Торіна (16 → 18)", thorin.abilities.strength === 18, `STR ${thorin.abilities.strength}`);
   check("Торін має скіли з нового формату", ["Лють берсерка:passive", "Невмирущий:lethalDamage", "Залізна шкіра:passive"].every((k) => abilityKeysOf(thorin).includes(k)), abilityKeysOf(thorin).join(", "));
   check(
-    "Legacy-скіл Торіна (abilities = NULL) сконвертовано в бою",
-    (thorin.battleData.resolvedAbilities ?? []).some((a) => a.effects.some((e) => e.kind === "modifyStat" && e.stat === "armor" && e.flat === 1)),
-  );
-  check(
-    "Раса Дварф (legacy опис) дає імунітет до отрути як resistance 100",
+    "Раса Дварф (опис пасивки) дає імунітет до отрути як resistance 100",
     (thorin.battleData.resolvedAbilities ?? []).some((a) => a.effects.some((e) => e.kind === "flag" && e.flag === "resistance" && /poison|отру/i.test(e.damageType) && e.percent === 100)),
     abilityKeysOf(thorin).join(", "),
   );
@@ -399,8 +393,8 @@ async function scenario() {
 
   const g1 = await attack("Гоблін-лучник #1", "Торін", 12, [4]);
 
-  check("AC Торіна в атаці = 16 + 2 (шкіра) + 1 (legacy) + 1 (аура сету) = 20", g1.details?.targetAC === 20, `targetAC ${g1.details?.targetAC}`);
-  check("Гоблін промахується по Торіну (16 < 20)", g1.details?.isHit === false, g1.ev?.resultText ?? "");
+  check("AC Торіна в атаці = 16 + 2 (шкіра) + 1 (аура сету) = 19", g1.details?.targetAC === 19, `targetAC ${g1.details?.targetAC}`);
+  check("Гоблін промахується по Торіну (16 < 19)", g1.details?.isHit === false, g1.ev?.resultText ?? "");
 
   await until("Гоблін-лучник #2");
 

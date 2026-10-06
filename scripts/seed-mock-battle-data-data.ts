@@ -99,25 +99,25 @@ export function getHumanSkillsData(mainSkillIds: { id: string }[]) {
     {
       name: "Базова Атака",
       description: "+15% до урону ближньою зброєю",
-      bonuses: { melee_damage_percent: 15 },
+      abilities: [{ id: "a1", name: "Базова Атака", trigger: { event: "passive" }, effects: [{ kind: "damageBonus", filter: { kind: "melee" }, percent: 15 }] }],
       mainSkillId: mainSkillIds[0].id,
     },
     {
       name: "Просунута Атака",
       description: "+10% до урону ближньою зброєю",
-      bonuses: { melee_damage_percent: 10 },
+      abilities: [{ id: "a1", name: "Просунута Атака", trigger: { event: "passive" }, effects: [{ kind: "damageBonus", filter: { kind: "melee" }, percent: 10 }] }],
       mainSkillId: mainSkillIds[0].id,
     },
     {
       name: "Базовий Захист",
       description: "+2 до AC",
-      bonuses: { ac_bonus: 2 },
+      abilities: [{ id: "a1", name: "Базовий Захист", trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "armor", flat: 2 }] }],
       mainSkillId: mainSkillIds[2].id,
     },
     {
       name: "Базове Заклинання",
       description: "+10% до ефекту заклинань",
-      bonuses: {},
+      abilities: [],
       spellEffectIncrease: 10,
       mainSkillId: mainSkillIds[1].id,
     },
@@ -132,13 +132,13 @@ export function getElfSkillsData(
     {
       name: "Ельфійська Точність",
       description: "Advantage на дальні атаки",
-      bonuses: { ranged_attack_advantage: true },
+      abilities: [{ id: "a1", name: "Ельфійська Точність", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "advantage", attackKind: "ranged" }] }],
       mainSkillId: mainSkillIds[0].id,
     },
     {
       name: "Магічна Стрільба",
       description: "+20% до урону дальньою зброєю",
-      bonuses: { ranged_damage_percent: 20 },
+      abilities: [{ id: "a1", name: "Магічна Стрільба", trigger: { event: "passive" }, effects: [{ kind: "damageBonus", filter: { kind: "ranged" }, percent: 20 }] }],
       mainSkillId: mainSkillIds[0].id,
     },
     {

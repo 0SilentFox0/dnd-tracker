@@ -1,6 +1,6 @@
 /**
  * Дані сценарію для `pnpm simulate-battle`: персонажі з різними прокачками й артефактами,
- * юніти з різними вміннями. Частина записів навмисно в старому форматі (abilities = NULL).
+ * юніти з різними вміннями.
  */
 import type { Prisma } from "@prisma/client";
 
@@ -32,8 +32,8 @@ export const RACES = {
       ab("elf-calm", "Ельфійський спокій", { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "ignoreMorale" }] }),
     ]),
   },
-  // старий формат: імунітет з опису, abilities = NULL
-  dwarf: { name: "Дварф", passiveAbility: json({ description: "Міцні як камінь. Імунітет до отруєння." }) },
+  // імунітет до отрути — з опису пасивки раси (race-effects)
+  dwarf: { name: "Дварф", abilities: json([]), passiveAbility: json({ description: "Міцні як камінь. Імунітет до отруєння." }) },
   orc: { name: "Орк", abilities: json([]) },
 };
 
@@ -48,8 +48,6 @@ export const SKILLS = {
   hunterEye: { name: "Око мисливця", abilities: [ab("hunter-eye", "Око мисливця", { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "resistance", damageType: "psychic", percent: 10 }] })] },
   forestStep: { name: "Лісовий крок", abilities: [ab("forest-step", "Лісовий крок", { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "resistance", damageType: "necrotic", percent: 10 }] })] },
   ironSkin: { name: "Залізна шкіра", abilities: [ab("iron-skin", "Залізна шкіра", { trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "armor", flat: 2 }] })] },
-  // старий формат: abilities = NULL, ефект у combatStats
-  legacyGuard: { name: "Стара стійкість (legacy)", combatStats: json({ effects: [{ stat: "armor", type: "flat", value: 1 }] }), skillTriggers: json([{ type: "simple", trigger: "passive" }]) },
 };
 
 export function artifactRows(campaignId: string, setId: string) {
