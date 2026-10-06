@@ -13,6 +13,7 @@ vi.mock("@/lib/db", () => ({
   prisma: {
     character: { findFirst: vi.fn(), updateMany: vi.fn() },
     skillTree: { findFirst: vi.fn() },
+    race: { findFirst: vi.fn() },
     skill: { findMany: vi.fn() },
     mainSkill: { findMany: vi.fn() },
   },
@@ -34,6 +35,7 @@ describe("GET progression", () => {
     vi.mocked(prisma.skillTree.findFirst).mockResolvedValue(TREE_ROW as never);
     vi.mocked(prisma.skill.findMany).mockResolvedValue([{ id: "o1", name: "Кровопуск", icon: null, description: "опис", abilities: [], basicInfo: null, spellGroupId: null, spellNewSpellId: null }] as never);
     vi.mocked(prisma.mainSkill.findMany).mockResolvedValue([{ id: "attack", name: "Напад", color: "red", icon: null, spellGroupId: null }] as never);
+    vi.mocked(prisma.race.findFirst).mockResolvedValue({ icon: "/elf.png" } as never);
   });
 
   it("власник отримує дерево, вивчене (фолбек JSON id), лише скіли дерева", async () => {
@@ -45,6 +47,8 @@ describe("GET progression", () => {
 
     expect(body).toMatchObject({ treeId: "row-id", level: 3, seenLevel: 2, isOwner: true, isDM: false, unlocked: ["attack_basic_level"] });
     expect(Object.keys(body.skills as object)).toEqual(["o1"]);
+    expect(body.raceIcon).toBe("/elf.png");
+    expect(vi.mocked(prisma.race.findFirst).mock.calls[0][0]).toMatchObject({ where: { campaignId: "camp", name: "Ельф" } });
     expect(vi.mocked(prisma.skill.findMany).mock.calls[0][0]).toMatchObject({ where: { campaignId: "camp", id: { in: ["o1"] } } });
   });
 

@@ -77,6 +77,7 @@ export async function PATCH(
       },
       data: {
         name: data.name,
+        ...(data.icon !== undefined && { icon: data.icon }),
         availableSkills: data.availableSkills 
           ? (data.availableSkills as Prisma.InputJsonValue)
           : undefined,

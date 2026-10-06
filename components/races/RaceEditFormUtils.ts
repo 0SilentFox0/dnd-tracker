@@ -47,6 +47,7 @@ const DEFAULT_SPELL_SLOT_PROGRESSION: SpellSlotProgression[] = [
 
 export function getInitialRaceFormData(race: {
   name: string;
+  icon?: string | null;
   availableSkills: unknown;
   passiveAbility?: unknown;
   spellSlotProgression?: unknown;
@@ -60,6 +61,7 @@ export function getInitialRaceFormData(race: {
 
   return {
     name: race.name,
+    icon: race.icon ?? "",
     availableSkills: Array.isArray(race.availableSkills) ? race.availableSkills : [],
     disabledSkills: [],
     passiveAbility: parsedPassiveAbility,

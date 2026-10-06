@@ -1,10 +1,11 @@
 // @vitest-environment happy-dom
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { CreateRaceDialog } from "@/components/races/CreateRaceDialog";
 import { mockMatchMedia } from "@/components/ui/__tests__/match-media";
+import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
 
 vi.mock("@/lib/hooks/skills", () => ({ useMainSkills: () => ({ data: [] }) }));
 
@@ -16,7 +17,7 @@ describe("CreateRaceDialog", () => {
 
     const onCreateRace = vi.fn();
 
-    render(
+    renderWithConfirm(
       <QueryClientProvider client={new QueryClient()}>
         <CreateRaceDialog open onOpenChange={vi.fn()} campaignId="c1" onCreateRace={onCreateRace} />
       </QueryClientProvider>,

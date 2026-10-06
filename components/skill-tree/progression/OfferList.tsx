@@ -4,6 +4,7 @@ import { nodeLabel } from "./node-labels";
 
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { Button } from "@/components/ui/button";
+import { pluralUk } from "@/lib/utils/plural";
 import type { ProgressionNode } from "@/lib/utils/skills/progression";
 import type { CharacterProgressionDto } from "@/types/progression";
 
@@ -48,7 +49,7 @@ export function OfferList({ offers, dto, filter, onClearFilter, onSelect }: { of
       </ul>
       {!filter && !expanded && list.length > 3 && (
         <Button type="button" variant="link" size="sm" onClick={() => setExpanded(true)} className="mx-4 mt-2 h-auto p-0 text-xs text-[#8f8473]">
-          Ще {list.length - 3} варіантів ▾
+          Ще {list.length - 3} {pluralUk(list.length - 3, ["варіант", "варіанти", "варіантів"])} ▾
         </Button>
       )}
     </section>

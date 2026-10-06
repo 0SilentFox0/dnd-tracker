@@ -30,6 +30,7 @@ const spellSlotProgressionSchema = z
 
 export const createRaceSchema = z.object({
   name: z.string().min(1).max(100),
+  icon: z.preprocess((v) => (v === "" ? null : v), z.string().max(2000).nullable().optional()),
   availableSkills: z.array(z.string()).default([]),
   disabledSkills: z.array(z.string()).default([]),
   passiveAbility: passiveAbilitySchema,
@@ -41,6 +42,7 @@ export type CreateRaceInput = z.infer<typeof createRaceSchema>;
 
 export const updateRaceSchema = z.object({
   name: z.string().min(1).max(100).optional(),
+  icon: z.preprocess((v) => (v === "" ? null : v), z.string().max(2000).nullable().optional()),
   availableSkills: z.array(z.string()).optional(),
   disabledSkills: z.array(z.string()).optional(),
   passiveAbility: passiveAbilitySchema,

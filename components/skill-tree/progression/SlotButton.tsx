@@ -8,7 +8,7 @@ export function SlotButton({ state, label, icon, onSelect }: { state: NodeState;
   const tone = state.state === "learned" ? "skill-slot learned" : state.state === "available" ? "skill-slot available" : "skill-slot locked";
 
   return (
-    <Button type="button" variant="ghost" aria-label={aria} onClick={onSelect} disabled={!state.nodeId} className="h-auto whitespace-normal rounded-none p-0 font-normal hover:bg-transparent dark:hover:bg-transparent flex items-center justify-center disabled:opacity-100">
+    <Button type="button" variant="ghost" aria-label={aria} onClick={onSelect} disabled={!state.nodeId} className="relative h-auto whitespace-normal rounded-none p-0 font-normal after:absolute after:-inset-1 after:content-[''] hover:bg-transparent dark:hover:bg-transparent flex items-center justify-center disabled:opacity-100">
       <span className={tone}>
         {state.state === "learned" ? (
           icon ? (

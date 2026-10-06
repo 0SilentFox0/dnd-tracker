@@ -13,6 +13,7 @@ import { RaceEditFormSpellSlots } from "./RaceEditFormSpellSlots";
 import { RaceEditFormStatModifiers } from "./RaceEditFormStatModifiers";
 
 import { AbilityListEditor } from "@/components/abilities";
+import { ImageUpload } from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -54,6 +55,14 @@ export function RaceFormFields({
           placeholder={compact ? "Наприклад: Люди, Ельфи, Демони" : undefined}
         />
       </div>
+
+      <ImageUpload
+        value={formData.icon ?? ""}
+        onChange={(v) => setFormData((prev) => ({ ...prev, icon: v }))}
+        label="Іконка раси"
+        placeholder="URL іконки раси або завантажте файл"
+        previewAlt="Іконка раси"
+      />
 
       <div className="space-y-2">
         <Label htmlFor="passiveDescription">Опис пасивної здібності</Label>
