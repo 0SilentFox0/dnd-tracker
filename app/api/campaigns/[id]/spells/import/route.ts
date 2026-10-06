@@ -2,11 +2,12 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
+import { damageDiceColumns } from "./damage-dice-columns";
+
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { prisma } from "@/lib/db";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
-import { leadingDice } from "@/lib/utils/common/dice";
 
 // Схема для одного заклинання в імпорті
 const importSpellSchema = z.object({
@@ -125,7 +126,7 @@ export async function POST(
       .map((spell) => {
         const schoolKey = spell.school ?? (spell as Record<string, unknown>).School as string | undefined;
 
-        const dice = spell.damageDice ? leadingDice(spell.damageDice) : null;
+        const { diceCount, diceType } = damageDiceColumns(spell.damageDice);
 
         return {
           campaignId: id,
@@ -139,8 +140,8 @@ export async function POST(
           components: spell.components || null,
           duration: spell.duration || null,
           concentration: spell.concentration ?? false,
-          diceCount: dice?.count ?? null,
-          diceType: dice ? `d${dice.size}` : null,
+          diceCount,
+          diceType,
           savingThrow: spell.savingThrowAbility
             ? ({
                 ability: spell.savingThrowAbility,

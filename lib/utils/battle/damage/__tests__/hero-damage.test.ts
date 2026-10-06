@@ -6,7 +6,7 @@ import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-partici
 import { computeHitDamage } from "@/lib/utils/battle/attack/process/compute";
 import { computeDamageBreakdown } from "@/lib/utils/battle/damage";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
-import { heroAttackDamageParts, heroDamageContext, maxDamageCritDice } from "@/lib/utils/battle/damage/hero-damage";
+import { heroAttackDamageParts, heroDamageContext } from "@/lib/utils/battle/damage/hero-damage";
 import { damageDiceSlots } from "@/lib/utils/battle/view";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -61,9 +61,9 @@ describe("шкода атаки: числа до дедупу", () => {
     expect(hit(unit, { ...sword, damageDice: "" }, [3])).toBe(5);
   });
 
-  it("крит «Максимальний урон»: перша група зброї + її модифікатор + характеристика, без зброї — 1d6", () => {
+  it("крит «Максимальний урон»: усі групи зброї (+ кубики рівня героя) на максимум + характеристика", () => {
     expect(hit(unit, sword, [5], true)).toBe(12);
-    expect(hit(hero, sword, [5], true)).toBe(12);
+    expect(hit(hero, sword, [5], true)).toBe(22);
     expect(hit(unit, { ...sword, damageDice: "2d6" }, [5, 5], true)).toBe(14);
     expect(hit(unit, { ...sword, damageDice: "" }, [3], true)).toBe(8);
   });
@@ -91,13 +91,5 @@ describe("heroDamageContext", () => {
   it("юніт", () => {
     expect(heroDamageContext(unit, sword, [5])).toEqual({ heroLevelPart: 0, heroDicePart: 0, heroDiceNotation: "", weaponDiceNotation: "1d8+2" });
     expect(heroDamageContext(unit, { ...sword, damageDice: "" }, [3]).weaponDiceNotation).toBeUndefined();
-  });
-});
-
-describe("maxDamageCritDice", () => {
-  it("максимум першої групи зброї з модифікатором, без зброї — 6", () => {
-    expect(maxDamageCritDice(unit, sword)).toBe(10);
-    expect(maxDamageCritDice(unit, { ...sword, damageDice: "2d6" })).toBe(12);
-    expect(maxDamageCritDice(unit, { ...sword, damageDice: "" })).toBe(6);
   });
 });

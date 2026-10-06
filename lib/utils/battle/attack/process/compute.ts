@@ -3,7 +3,7 @@
  */
 
 import { calculateDamageWithModifiers } from "../../damage";
-import { heroDamageContext, maxDamageCritDice } from "../../damage/hero-damage";
+import { heroAttackDamageParts, heroDamageContext } from "../../damage/hero-damage";
 import { applyHeroDmDamageMultiplier } from "../../damage/hero-dm-multiplier";
 import { applyResistance } from "../../resistance";
 import type { DamageCalculationResult } from "../../types/damage-calculations";
@@ -14,7 +14,7 @@ import { AttackType } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { attackAbilityLabel, getAttackAbilityModifier } from "@/lib/utils/common/calculations";
-import { rollDice } from "@/lib/utils/common/dice";
+import { diceMax, rollDice } from "@/lib/utils/common/dice";
 import type { BattleParticipant, DamageStep } from "@/types/battle";
 import type { BattleAttack } from "@/types/battle";
 
@@ -116,7 +116,7 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
   if (criticalEffectApplied?.effect.type === "max_damage") {
     const before = physicalDamage;
 
-    physicalDamage = maxDamageCritDice(updatedAttacker, attack) + statModifier;
+    physicalDamage = diceMax(heroAttackDamageParts(updatedAttacker, attack).formula || "1d6") + statModifier;
     damageSteps.push({ label: criticalEffectApplied.name, side: "attacker", kind: "flat", value: physicalDamage - before, after: physicalDamage });
   }
 

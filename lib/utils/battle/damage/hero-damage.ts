@@ -1,6 +1,6 @@
 import { AttackType, ParticipantSourceType } from "@/lib/constants/battle";
 import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
-import { diceAverage, diceCount, diceMax, mergeDiceFormulas, parseDice } from "@/lib/utils/common/dice";
+import { diceAverage, diceCount, mergeDiceFormulas } from "@/lib/utils/common/dice";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 export interface HeroAttackDamageParts {
@@ -44,12 +44,4 @@ export function heroDamageContext(p: BattleParticipant, attack: BattleAttack, da
     heroDiceNotation: fullRolls ? "" : heroDice,
     weaponDiceNotation: (fullRolls ? formula : "") || weaponDice || undefined,
   };
-}
-
-export function maxDamageCritDice(p: BattleParticipant, attack: BattleAttack): number {
-  const parsed = parseDice(heroAttackDamageParts(p, attack).weaponDice);
-
-  const first = parsed?.groups[0];
-
-  return parsed && first ? first.count * first.size + parsed.flat : diceMax("1d6");
 }
