@@ -11,6 +11,7 @@ import { getSkillTrees, updateSkillTree } from "@/lib/api/skill-trees";
 import { useNotify } from "@/lib/hooks/common";
 import { useRaces } from "@/lib/hooks/races";
 import type { CellRef, RawTree } from "@/lib/utils/skills/progression";
+import { RACIAL_BRANCH_ID } from "@/lib/utils/skills/progression";
 import * as edit from "@/lib/utils/skills/progression";
 
 export function useSkillTreeEditor(campaignId: string) {
@@ -18,7 +19,7 @@ export function useSkillTreeEditor(campaignId: string) {
 
   const notify = useNotify();
 
-  const { data: races = [] } = useRaces(campaignId);
+  const { data: races = [], isPending: racesPending } = useRaces(campaignId);
 
   const { data: mainSkills = [] } = useMainSkills(campaignId);
 
@@ -98,7 +99,10 @@ export function useSkillTreeEditor(campaignId: string) {
     raw,
     tree,
     errors,
-    dirty: !!current && (baseline === null || (draft?.key === seedKey && JSON.stringify(current.raw) !== baseline)),
+    loading: racesPending || trees.isPending,
+    dirty:
+      !!current &&
+      (draft?.key === seedKey ? JSON.stringify(current.raw) !== baseline : baseline === null && current.raw.mainSkills.some((b) => b.id !== RACIAL_BRANCH_ID)),
     saving,
     locations: raw ? edit.skillLocations(raw) : new Map<string, CellRef[]>(),
     librarySkills: skills.map((s) => ({ id: s.id, name: skillName(s), icon: s.icon ?? null, mainSkillId: s.mainSkillId ?? null, summary: (s as { abilitySummary?: string[] }).abilitySummary ?? [] })),

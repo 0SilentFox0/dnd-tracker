@@ -1,5 +1,5 @@
 .skill-tree-editor { background: radial-gradient(120% 80% at 50% 0, #1d1611, #0b0908); }
-.skill-tree-editor .editor-scroll { overflow-x: auto; }
+.skill-tree-editor .editor-scroll { overflow-x: auto; scrollbar-color: #4a4036 transparent; }
 .skill-tree-editor .editor-table { border-collapse: separate; border-spacing: 4px; min-width: 100%; }
 .skill-tree-editor th { font-family: var(--font-hud-sc), serif; font-weight: 500; font-size: 13px; letter-spacing: 0.08em; color: #8f8473; text-align: left; padding: 2px 4px; }
 .skill-tree-editor tbody th:first-child, .skill-tree-editor thead th:first-child { position: sticky; left: 0; z-index: 1; background: #0d0a08; }

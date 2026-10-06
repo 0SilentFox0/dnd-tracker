@@ -9,7 +9,10 @@ import { useSkillTreeEditor } from "@/lib/hooks/skills";
 import { buildTreeJson } from "@/lib/utils/skills/progression";
 
 vi.mock("@/lib/api/skill-trees");
-vi.mock("@/lib/hooks/races", () => ({ useRaces: () => ({ data: [{ id: "r1", name: "Ельф", availableSkills: ["attack"] }] }) }));
+
+let races: Array<{ id: string; name: string; availableSkills: string[] }> = [{ id: "r1", name: "Ельф", availableSkills: ["attack"] }];
+
+vi.mock("@/lib/hooks/races", () => ({ useRaces: () => ({ data: races }) }));
 vi.mock("@/lib/hooks/skills/useMainSkills", () => ({ useMainSkills: () => ({ data: [{ id: "attack", name: "Напад", color: "red" }, { id: "defense", name: "Захист", color: "blue" }] }) }));
 vi.mock("@/lib/hooks/skills/useSkills", () => ({ useSkills: () => ({ data: [{ id: "o1", name: "Кровопуск", mainSkillId: "attack" }, { id: "o2", name: "Шквал", mainSkillId: "attack" }] }) }));
 vi.mock("@/lib/hooks/common", () => ({ useNotify: () => vi.fn(), useConfirm: () => vi.fn(async () => true) }));
@@ -87,5 +90,22 @@ describe("useSkillTreeEditor", () => {
 
     act(() => result.current.actions.removeBranch("attack"));
     expect(result.current.tree?.branches.map((b) => b.id)).toEqual(["defense"]);
+  });
+
+  it("нове дерево без гілок не позначене як незбережене; зі стартовими гілками — позначене", async () => {
+    vi.mocked(treesApi.getSkillTrees).mockResolvedValue([] as never);
+    races = [{ id: "r1", name: "Орк", availableSkills: [] }];
+
+    const empty = setup();
+
+    await waitFor(() => expect(empty.result.current.tree).not.toBeNull());
+    expect(empty.result.current.dirty).toBe(false);
+
+    races = [{ id: "r1", name: "Ельф", availableSkills: ["attack"] }];
+
+    const seeded = setup();
+
+    await waitFor(() => expect(seeded.result.current.tree).not.toBeNull());
+    expect(seeded.result.current.dirty).toBe(true);
   });
 });

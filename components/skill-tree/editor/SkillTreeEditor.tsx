@@ -8,7 +8,7 @@ import { SlotPicker } from "./SlotPicker";
 
 import "@/components/hud/hud.css";
 import "./editor.css";
-import { EmptyState } from "@/components/common/states";
+import { EmptyState, LoadingState } from "@/components/common/states";
 import { HUD_SURFACE } from "@/components/hud";
 import { Button } from "@/components/ui/button";
 import { SelectItem } from "@/components/ui/select";
@@ -41,6 +41,8 @@ export function SkillTreeEditor({ campaignId }: { campaignId: string }) {
   const errorIds = useMemo(() => new Set(editor.errors.map((e) => e.ref)), [editor.errors]);
 
   const { raw, tree } = editor;
+
+  if (editor.loading) return <LoadingState />;
 
   if (!raw || !tree) return <EmptyState title="Додайте расу, щоб налаштувати дерево" />;
 

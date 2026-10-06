@@ -14,13 +14,16 @@ const raw = buildTreeJson({ id: "row", race: "Ельф", branches: [{ id: "attac
 
 let errors: Array<{ code: string; ref: string }> = [];
 
+let loading = false;
+
 vi.mock("@/lib/hooks/skills", () => ({
   useSkillTreeEditor: () => ({
+    loading,
     races: [{ id: "r", name: "Ельф" }],
     race: "Ельф",
     setRace: vi.fn(),
-    raw,
-    tree: normalizeTree({ id: "row", skills: raw }),
+    raw: loading ? null : raw,
+    tree: loading ? null : normalizeTree({ id: "row", skills: raw }),
     errors,
     dirty: true,
     saving: false,
@@ -35,6 +38,7 @@ afterEach(() => {
   cleanup();
   vi.clearAllMocks();
   errors = [];
+  loading = false;
 });
 
 describe("SkillTreeEditor", () => {
@@ -67,5 +71,13 @@ describe("SkillTreeEditor", () => {
 
     expect((screen.getByRole("button", { name: "Зберегти" }) as HTMLButtonElement).disabled).toBe(true);
     expect(screen.getByText(/Цей скіл уже стоїть в іншому місці дерева/)).toBeTruthy();
+  });
+
+  it("поки дані вантажаться — стан завантаження, не «Додайте расу»", () => {
+    loading = true;
+    renderWithConfirm(<SkillTreeEditor campaignId="c" />);
+
+    expect(screen.queryByText(/Додайте расу/)).toBeNull();
+    expect(screen.getByText("Завантаження…")).toBeTruthy();
   });
 });
