@@ -62,7 +62,6 @@ export function CharacterBasicInfo({
     race,
     subrace,
     alignment,
-    background,
     experience,
     avatar,
     setters,
@@ -172,15 +171,6 @@ export function CharacterBasicInfo({
         />
       </div>
 
-      <LabeledInput
-        id="background"
-        label="Передісторія"
-        value={background || ""}
-        onChange={(e) => setters.setBackground(e.target.value)}
-        placeholder="Наприклад: Народжений на вулиці"
-        containerClassName="w-full min-w-0"
-        className="w-full"
-      />
       <LabeledInput
         id="level"
         label="Рівень"

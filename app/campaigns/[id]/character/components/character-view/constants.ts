@@ -27,7 +27,6 @@ export const noopCombatSetters = {
   setArmorClass: () => {},
   setInitiative: () => {},
   setSpeed: () => {},
-  setHitDice: () => {},
   setMinTargets: () => {},
   setMaxTargets: () => {},
   setMorale: () => {},

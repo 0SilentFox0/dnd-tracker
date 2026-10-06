@@ -42,6 +42,7 @@ export interface CharacterFormData {
     intelligence: number;
     wisdom: number;
     charisma: number;
+    primaryAbility: AbilityKey | null;
   };
   combatStats: {
     armorClass: number;
@@ -50,7 +51,6 @@ export interface CharacterFormData {
     maxHp: number;
     currentHp: number;
     tempHp: number;
-    hitDice: string;
     minTargets: number;
     maxTargets: number;
     morale: number;
@@ -69,10 +69,6 @@ export interface CharacterFormData {
     languages: string[];
     proficiencies: Record<string, string[]>;
     immunities?: string[];
-    personalityTraits?: string;
-    ideals?: string;
-    bonds?: string;
-    flaws?: string;
   };
   /** Уміння: скіл з групи «Персональні» */
   abilities: {
@@ -116,21 +112,16 @@ export interface Character {
   maxHp: number;
   currentHp: number;
   tempHp: number;
-  hitDice: string;
   savingThrows: Record<string, boolean>;
   skills: Record<string, boolean>;
   spellcastingClass?: string;
-  spellcastingAbility?: "intelligence" | "wisdom" | "charisma";
+  spellcastingAbility?: "intelligence" | "wisdom" | "charisma" | null;
   spellSlots?: Record<string, { max: number; current: number }>;
   knownSpells: string[];
   languages: string[];
   proficiencies: Record<string, string[]>;
   immunities?: string[];
   morale?: number;
-  personalityTraits?: string;
-  ideals?: string;
-  bonds?: string;
-  flaws?: string;
   minTargets: number;
   maxTargets: number;
   personalSkillId?: string | null;

@@ -134,15 +134,10 @@ export async function PATCH(
       data: {
         ...data,
         level: computed.finalLevel,
-        proficiencyBonus: computed.proficiencyBonus,
-        passivePerception: computed.passivePerception,
-        passiveInvestigation: computed.passiveInvestigation,
-        passiveInsight: computed.passiveInsight,
-        spellSaveDC: computed.spellSaveDC,
-        spellAttackBonus: computed.spellAttackBonus,
         spellSlots: computed.spellSlotsToSave as Prisma.InputJsonValue,
         maxHp: computed.maxHp,
         currentHp: computed.currentHp,
+        goals: data.goals !== undefined ? (data.goals as unknown as Prisma.InputJsonValue) : undefined,
         immunities: data.immunities !== undefined
           ? (data.immunities as Prisma.InputJsonValue)
           : (character.immunities as Prisma.InputJsonValue | undefined),

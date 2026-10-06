@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+import { characterGoalsSchema } from "@/lib/schemas/character-goals";
+import { ABILITY_KEYS } from "@/types/characters";
+
 export const updateCharacterSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   level: z.number().min(1).max(30).optional(),
@@ -11,7 +14,7 @@ export const updateCharacterSchema = z.object({
   ),
   subrace: z.string().optional(),
   alignment: z.string().optional(),
-  background: z.string().optional(),
+  background: z.string().max(20000).optional(),
   experience: z.number().min(0).optional(),
   avatar: z.string().optional(),
 
@@ -30,7 +33,6 @@ export const updateCharacterSchema = z.object({
   maxHp: z.number().min(1).optional(),
   currentHp: z.number().min(0).optional(),
   tempHp: z.number().min(0).optional(),
-  hitDice: z.string().optional(),
 
   // Saving Throws & Skills
   savingThrows: z.record(z.string(), z.boolean()).optional(),
@@ -39,8 +41,8 @@ export const updateCharacterSchema = z.object({
   // Заклинання
   spellcastingClass: z.string().optional(),
   spellcastingAbility: z.preprocess(
-    (v) => (v === "" || v === null ? undefined : v),
-    z.enum(["intelligence", "wisdom", "charisma"]).optional(),
+    (v) => (v === "" ? null : v),
+    z.enum(["intelligence", "wisdom", "charisma"]).nullable().optional(),
   ),
   spellSlots: z
     .record(
@@ -59,17 +61,14 @@ export const updateCharacterSchema = z.object({
   immunities: z.array(z.string()).optional(),
   morale: z.number().min(-3).max(3).optional(),
 
-  // Roleplay
-  personalityTraits: z.string().optional(),
-  ideals: z.string().optional(),
-  bonds: z.string().optional(),
-  flaws: z.string().optional(),
-
   // Прокачка
   controlledBy: z.string().optional(),
 
   // Уміння (персональний скіл)
   personalSkillId: z.string().optional().nullable(),
+
+  primaryAbility: z.enum(ABILITY_KEYS).nullable().optional(),
+  goals: characterGoalsSchema.optional(),
 
   // Коефіцієнти масштабування (HP, melee, ranged) — окремі для кожного героя
   hpMultiplier: z.number().min(0.1).max(3).optional(),

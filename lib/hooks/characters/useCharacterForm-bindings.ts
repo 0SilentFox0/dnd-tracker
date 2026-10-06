@@ -2,7 +2,7 @@
  * Побудова об'єктів basicInfo, abilityScores, combatStats тощо для useCharacterForm.
  */
 
-import type { CharacterFormData } from "@/types/characters";
+import type { AbilityKey, CharacterFormData } from "@/types/characters";
 
 export interface CharacterFormHandlers {
   toggleSavingThrow: (ability: string) => void;
@@ -120,6 +120,11 @@ export function buildCharacterFormBindings(
           ...prev,
           abilityScores: { ...prev.abilityScores, charisma: value },
         })),
+      setPrimaryAbility: (value: AbilityKey | null) =>
+        setFormData((prev) => ({
+          ...prev,
+          abilityScores: { ...prev.abilityScores, primaryAbility: value },
+        })),
     },
   };
 
@@ -155,11 +160,6 @@ export function buildCharacterFormBindings(
         setFormData((prev) => ({
           ...prev,
           combatStats: { ...prev.combatStats, tempHp: value },
-        })),
-      setHitDice: (value: string) =>
-        setFormData((prev) => ({
-          ...prev,
-          combatStats: { ...prev.combatStats, hitDice: value },
         })),
       setMinTargets: (value: number) =>
         setFormData((prev) => ({
@@ -248,26 +248,6 @@ export function buildCharacterFormBindings(
         setFormData((prev) => ({
           ...prev,
           roleplay: { ...prev.roleplay, morale: value },
-        })),
-      setPersonalityTraits: (value: string) =>
-        setFormData((prev) => ({
-          ...prev,
-          roleplay: { ...prev.roleplay, personalityTraits: value },
-        })),
-      setIdeals: (value: string) =>
-        setFormData((prev) => ({
-          ...prev,
-          roleplay: { ...prev.roleplay, ideals: value },
-        })),
-      setBonds: (value: string) =>
-        setFormData((prev) => ({
-          ...prev,
-          roleplay: { ...prev.roleplay, bonds: value },
-        })),
-      setFlaws: (value: string) =>
-        setFormData((prev) => ({
-          ...prev,
-          roleplay: { ...prev.roleplay, flaws: value },
         })),
     },
     handlers: { addLanguage, removeLanguage },
