@@ -2,19 +2,13 @@
 
 import { type ReactNode, useState } from "react";
 import Link from "next/link";
-import { Copy, Move, Sparkles, X, Zap } from "lucide-react";
+import { Copy, Move, Pencil, Sparkles, X, Zap } from "lucide-react";
+
+import { SpellPrintCard } from "./SpellPrintCard";
 
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { HudCard } from "@/components/hud/page";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,13 +16,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getDamageElementLabel } from "@/lib/constants/damage";
-import { getDamageModifierLabel, getHealModifierLabel, getSpellTargetLabel } from "@/lib/constants/spells";
-import { cn } from "@/lib/utils";
-import {
-  getSpellDamageTypeIcon,
-  getSpellGroupIcon,
-  getSpellTypeIcon,
-} from "@/lib/utils/spells/spell-icons";
+import { getDamageModifierLabel, getHealModifierLabel, getSpellDamageTypeLabel, getSpellTargetLabel } from "@/lib/constants/spells";
+import { getSpellDamageTypeIcon, getSpellGroupIcon, getSpellTypeIcon } from "@/lib/utils/spells/spell-icons";
 import type { Spell, SpellGroup } from "@/types/spells";
 
 interface SpellCardProps {
@@ -41,33 +30,31 @@ interface SpellCardProps {
   printMode?: boolean;
 }
 
-function SpellCardShell({ printMode, children }: { printMode: boolean; children: ReactNode }) {
-  return printMode ? (
-    <Card className="hover:shadow-md transition-shadow h-full flex flex-col">{children}</Card>
-  ) : (
-    <HudCard className="flex h-full flex-col gap-4 px-0 py-4">{children}</HudCard>
+const ICON_BTN = "size-7 shrink-0 text-[#8f8473] hover:text-[#efe5d2]";
+
+function Fact({ icon, children }: { icon?: ReactNode; children: ReactNode }) {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full px-1.5 text-[11px] leading-5 text-[#c9bfae] shadow-[inset_0_0_0_1px_#4a3c2c]">
+      {icon}
+      {children}
+    </span>
   );
 }
 
-export function SpellCard({
-  spell,
-  campaignId,
-  spellGroups,
-  onRemoveFromGroup,
-  onMoveToGroup,
-  printMode = false,
-}: SpellCardProps) {
-  // Отримуємо іконки (це не створює нові компоненти, а повертає посилання на існуючі з lucide-react)
-   
-  const SpellGroupIcon = getSpellGroupIcon(spell.spellGroup?.name || "Без групи");
+export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, onMoveToGroup, printMode = false }: SpellCardProps) {
+  const [copied, setCopied] = useState(false);
 
-   
+  if (printMode) return <SpellPrintCard spell={spell} />;
+
+  const groupName = spell.spellGroup?.name || "Без групи";
+
+  const GroupIcon = getSpellGroupIcon(groupName);
+
   const TypeIcon = getSpellTypeIcon(spell.type);
 
-   
   const DamageTypeIcon = getSpellDamageTypeIcon(spell.damageType);
 
-  const [copied, setCopied] = useState(false);
+  const description = Array.isArray(spell.effects) && spell.effects.length > 0 ? spell.effects.join(" · ") : spell.description;
 
   const handleCopyId = async () => {
     await navigator.clipboard.writeText(spell.id);
@@ -75,214 +62,86 @@ export function SpellCard({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const fallbackIcon = <Sparkles className="size-5 text-[#8f8473]" />;
+
   return (
-    <SpellCardShell printMode={printMode}>
-      <CardHeader className="pb-3">
-        <div className="flex items-start gap-3 mb-2">
-          <div className={cn("w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden flex items-center justify-center shrink-0 relative", printMode ? "bg-muted" : "border border-[#4a3c2c] bg-[#1a140f]")}>
-            {spell.icon ? (
-              <OptimizedImage
-                src={spell.icon}
-                alt={spell.name}
-                width={64}
-                height={64}
-                className="w-full h-full object-cover"
-                fallback={
-                  <div className="absolute inset-0 w-full h-full flex items-center justify-center">
-                    <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
-                  </div>
-                }
-              />
-            ) : (
-              <div className="absolute inset-0 w-full h-full flex items-center justify-center">
-                <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
-              </div>
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-2 min-w-0">
-              <CardTitle className="text-sm sm:text-base truncate flex-1 min-w-0">
-                {spell.name}
-              </CardTitle>
-              <Badge
-                variant={spell.level === 0 ? "secondary" : "default"}
-                className="flex items-center gap-1 shrink-0 text-xs"
-              >
-                {spell.level === 0 ? (
-                  <>
-                    <Sparkles className="h-3 w-3" />
-                    <span className="hidden sm:inline">Cantrip</span>
-                    <span className="sm:hidden">C</span>
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-3 w-3" />
-                    <span className="hidden sm:inline">{spell.level}</span>
-                    <span className="sm:hidden">{spell.level}</span>
-                  </>
-                )}
-              </Badge>
-            </div>
-            {spell.damageElement && (
-              <Badge variant="outline" className="mt-2 text-xs">
-                {getDamageElementLabel(spell.damageElement)}
-              </Badge>
-            )}
-            {spell.damageModifier && (
-              <Badge variant="outline" className="mt-2 text-xs">
-                {getDamageModifierLabel(spell.damageModifier)}
-              </Badge>
-            )}
-            {spell.healModifier && (
-              <Badge variant="outline" className="mt-2 text-xs">
-                {getHealModifierLabel(spell.healModifier)}
-              </Badge>
-            )}
-            {spell.target && (
-              <Badge variant="outline" className="mt-2 text-xs">
-                {getSpellTargetLabel(spell.target)}
-              </Badge>
-            )}
-          </div>
-        </div>
-        <CardDescription className="flex flex-wrap gap-1 sm:gap-2 mt-2">
-          <Badge variant="outline" className="flex items-center gap-1 text-xs">
-            <SpellGroupIcon className="h-3 w-3" />
-            <span className="hidden sm:inline">
-              {spell.spellGroup?.name || "Без групи"}
-            </span>
-            <span className="sm:hidden truncate max-w-[60px]">
-              {spell.spellGroup?.name?.[0] || "-"}
-            </span>
-          </Badge>
-          {spell.type === "aoe" && spell.damageType === "damage" ? (
-            <Badge variant="outline" className="flex items-center gap-1 text-xs">
-              <Zap className="h-3 w-3" />
-              <span className="hidden sm:inline">AOE Демедж</span>
-              <span className="sm:hidden">AOE</span>
-            </Badge>
+    <HudCard className="flex h-full flex-col gap-2">
+      <div className="flex items-start gap-3">
+        <div className="metal-bronze relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-md bg-[radial-gradient(#2c2219,#0f0c09)] shadow-[inset_0_0_0_2px_var(--m2)]">
+          {spell.icon ? (
+            <OptimizedImage src={spell.icon} alt={spell.name} width={44} height={44} className="size-full object-cover p-0.5" fallback={fallbackIcon} />
           ) : (
-            <>
-              <Badge variant="outline" className="flex items-center gap-1 text-xs">
-                <TypeIcon className="h-3 w-3" />
-                <span className="hidden sm:inline">
-                  {spell.type === "target" ? "Цільове" : "AoE"}
-                </span>
-              </Badge>
-              <Badge variant="outline" className="flex items-center gap-1 text-xs">
-                <DamageTypeIcon className="h-3 w-3" />
-                <span className="hidden sm:inline">
-                  {spell.damageType === "damage"
-                    ? "Шкода"
-                    : spell.damageType === "heal"
-                    ? "Лікування"
-                    : spell.damageType === "buff"
-                    ? "Баф"
-                    : spell.damageType === "debuff"
-                    ? "Дебаф"
-                    : spell.damageType}
-                </span>
-              </Badge>
-            </>
+            fallbackIcon
           )}
-        </CardDescription>
-        {!printMode && (
-          /* Тимчасово: ID заклинання та копіювання */
-          <div className="mt-2 flex items-center gap-2">
-            <code className="text-[10px] sm:text-xs text-muted-foreground font-mono truncate max-w-[180px] sm:max-w-none" title={spell.id}>
-              {spell.id}
-            </code>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 shrink-0"
-              onClick={handleCopyId}
-              title={copied ? "Скопійовано" : "Копіювати ID"}
-            >
-              <Copy className="h-3 w-3" />
-            </Button>
-            {copied && (
-              <span className="text-[10px] text-muted-foreground">Скопійовано</span>
-            )}
-          </div>
-        )}
-      </CardHeader>
-      <CardContent className="flex-1 flex flex-col">
-        <div
-          className={`text-xs sm:text-sm text-muted-foreground flex-1 ${
-            printMode ? "" : "line-clamp-3"
-          }`}
-        >
-          {Array.isArray(spell.effects) && spell.effects.length > 0 ? (
-            <ul className="list-disc list-inside space-y-0.5">
-              {spell.effects.map((effect, i) => (
-                <li key={i}>{effect}</li>
-              ))}
-            </ul>
-          ) : spell.description ? (
-            <p>{spell.description}</p>
-          ) : null}
         </div>
-        {printMode && spell.diceCount && spell.diceType && (
-          <div className="text-xs sm:text-sm mt-2 font-medium">
-            Шкода: {spell.diceCount}{spell.diceType}
-          </div>
-        )}
-        {!printMode && (
-          <div className="flex gap-1 sm:gap-2 mt-2 sm:mt-3">
-            <Link
-              href={`/campaigns/${campaignId}/dm/spells/${spell.id}`}
-              className="flex-1 min-w-0"
-            >
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full text-xs sm:text-sm"
-              >
-                Редагувати
-              </Button>
-            </Link>
-            {spell.spellGroup && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="shrink-0"
-                onClick={() => onRemoveFromGroup(spell.id)}
-                title="Видалити з групи"
-              >
-                <X className="h-3 w-3 sm:h-4 sm:w-4" />
-              </Button>
+        <div className="min-w-0 flex-1">
+          <h3 className="hud-sc truncate text-[15px] text-[#efe5d2]">{spell.name}</h3>
+          <div className="mt-1 flex flex-wrap gap-1">
+            <Fact icon={<Sparkles className="size-3" />}>{spell.level === 0 ? "Cantrip" : spell.level}</Fact>
+            {spell.type === "aoe" && spell.damageType === "damage" ? (
+              <Fact icon={<Zap className="size-3" />}>AOE Демедж</Fact>
+            ) : (
+              <>
+                <Fact icon={<TypeIcon className="size-3" />}>{spell.type === "target" ? "Цільове" : "AoE"}</Fact>
+                <Fact icon={<DamageTypeIcon className="size-3" />}>{getSpellDamageTypeLabel(spell.damageType)}</Fact>
+              </>
             )}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="shrink-0"
-                  title="Перемістити в групу"
-                >
-                  <Move className="h-3 w-3 sm:h-4 sm:w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem
-                  onClick={() => onMoveToGroup(spell.id, null)}
-                >
-                  Без групи
-                </DropdownMenuItem>
-                {spellGroups.map((group) => (
-                  <DropdownMenuItem
-                    key={group.id}
-                    onClick={() => onMoveToGroup(spell.id, group.id)}
-                  >
-                    {group.name}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {spell.diceCount && spell.diceType ? (
+              <Fact>
+                {spell.diceCount}
+                {spell.diceType}
+              </Fact>
+            ) : null}
+            {spell.damageElement && <Fact>{getDamageElementLabel(spell.damageElement)}</Fact>}
+            {spell.damageModifier && <Fact>{getDamageModifierLabel(spell.damageModifier)}</Fact>}
+            {spell.healModifier && <Fact>{getHealModifierLabel(spell.healModifier)}</Fact>}
+            {spell.target && <Fact>{getSpellTargetLabel(spell.target)}</Fact>}
+            {spell.range && <Fact>{spell.range}</Fact>}
+            {spell.castingTime && <Fact>{spell.castingTime}</Fact>}
           </div>
-        )}
-      </CardContent>
-    </SpellCardShell>
+        </div>
+        <div className="-mr-1 -mt-1 flex shrink-0">
+          <Button variant="ghost" size="icon" className={ICON_BTN} asChild>
+            <Link href={`/campaigns/${campaignId}/dm/spells/${spell.id}`} aria-label="Редагувати" title="Редагувати">
+              <Pencil className="size-3.5" />
+            </Link>
+          </Button>
+          {spell.spellGroup && (
+            <Button variant="ghost" size="icon" className={ICON_BTN} onClick={() => onRemoveFromGroup(spell.id)} title="Видалити з групи">
+              <X className="size-3.5" />
+            </Button>
+          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className={ICON_BTN} title="Перемістити в групу">
+                <Move className="size-3.5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => onMoveToGroup(spell.id, null)}>Без групи</DropdownMenuItem>
+              {spellGroups.map((group) => (
+                <DropdownMenuItem key={group.id} onClick={() => onMoveToGroup(spell.id, group.id)}>
+                  {group.name}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      <p className="line-clamp-2 flex-1 text-xs text-[#8f8473]">{description}</p>
+
+      <div className="flex min-w-0 items-center gap-1.5 border-t border-[#2a2218] pt-1.5 text-[11px] text-[#8f8473]">
+        <GroupIcon className="size-3 shrink-0" />
+        <span className="truncate">{groupName}</span>
+        {/* Тимчасово: ID заклинання та копіювання */}
+        <code className="ml-auto max-w-[45%] truncate font-mono text-[10px]" title={spell.id}>
+          {copied ? "Скопійовано" : spell.id}
+        </code>
+        <Button variant="ghost" size="icon" className="size-6 shrink-0 text-[#8f8473]" onClick={handleCopyId} title={copied ? "Скопійовано" : "Копіювати ID"}>
+          <Copy className="size-3" />
+        </Button>
+      </div>
+    </HudCard>
   );
 }
