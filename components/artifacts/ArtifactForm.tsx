@@ -1,21 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { ARTIFACT_FORM_TAB, type ArtifactFormTabId } from "./artifact-form-tabs";
 import type { ArtifactSetOption } from "./ArtifactEditForm-types";
 import { ArtifactWeaponFields } from "./ArtifactWeaponFields";
 
 import { AbilityListEditor, withAbilityErrors } from "@/components/abilities";
-import { ActionBar } from "@/components/common/ActionBar";
 import { IconUrlField } from "@/components/common/IconUrlField";
+import { HudForm, HudFormPage, type HudTab } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { SelectField } from "@/components/ui/select-field";
@@ -79,17 +74,18 @@ export function ArtifactForm({
 
   const { fields, setField } = form;
 
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        {cardDescription && (
-          <CardDescription>{cardDescription}</CardDescription>
-        )}
-      </CardHeader>
-      <CardContent>
-        {form.error && <p className="text-sm text-destructive mb-4">{form.error}</p>}
-        <form onSubmit={form.submit} className="space-y-5">
+  const hasWeapon = isWeaponSlot(fields.slot);
+
+  const [tab, setTab] = useState<ArtifactFormTabId>(ARTIFACT_FORM_TAB.basic);
+
+  const activeTab = hasWeapon || tab !== ARTIFACT_FORM_TAB.weapon ? tab : ARTIFACT_FORM_TAB.basic;
+
+  const tabs: HudTab<ArtifactFormTabId>[] = [
+    {
+      id: ARTIFACT_FORM_TAB.basic,
+      label: "Основне",
+      content: (
+        <div className="space-y-5">
           <div className="grid gap-4 md:grid-cols-2">
             <LabeledInput
               id="artifact-name"
@@ -157,42 +153,63 @@ export function ArtifactForm({
             <IconUrlField id="artifact-icon" label="Іконка (URL з інтернету)" value={fields.icon} onChange={(v) => setField("icon", v)} fallbackText={fields.name} />
             <p className="text-xs text-muted-foreground">{iconHint}</p>
           </div>
+        </div>
+      ),
+    },
+    ...(hasWeapon
+      ? [
+          {
+            id: ARTIFACT_FORM_TAB.weapon,
+            label: "Зброя",
+            content: <ArtifactWeaponFields value={fields.weapon} onChange={(w) => setField("weapon", w)} />,
+          },
+        ]
+      : []),
+    {
+      id: ARTIFACT_FORM_TAB.abilities,
+      label: "Вміння",
+      invalid: form.abilityErrors > 0 || initial.abilityIssues.length > 0,
+      content: (
+        <AbilityListEditor
+          campaignId={campaignId}
+          value={fields.abilities}
+          onChange={(a) => setField("abilities", a)}
+          issues={initial.abilityIssues}
+          onValidityChange={(_, n) => form.setAbilityErrors(n)}
+        />
+      ),
+    },
+  ];
 
-          {isWeaponSlot(fields.slot) && <ArtifactWeaponFields value={fields.weapon} onChange={(w) => setField("weapon", w)} />}
-
-          <AbilityListEditor
-            campaignId={campaignId}
-            value={fields.abilities}
-            onChange={(a) => setField("abilities", a)}
-            issues={initial.abilityIssues}
-            onValidityChange={(_, n) => form.setAbilityErrors(n)}
-          />
-
-          <ActionBar>
+  return (
+    <HudFormPage title={title} aside={cardDescription}>
+      {form.error && (
+        <p role="alert" className="mx-4 mt-3 rounded-md border border-[#d0705c]/50 bg-[#d0705c]/10 px-3 py-2 text-sm text-[#f0b4a6]">
+          {form.error}
+        </p>
+      )}
+      <HudForm
+        id="artifact-form"
+        onSubmit={form.submit}
+        tabs={tabs}
+        tab={activeTab}
+        onTabChange={setTab}
+        actions={
+          <>
             {onDelete && (
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={() => void form.remove()}
-                disabled={form.isBusy}
-              >
+              <Button type="button" variant="destructive" onClick={() => void form.remove()} disabled={form.isBusy}>
                 Видалити
               </Button>
             )}
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => router.push(cancelHref)}
-              disabled={form.isBusy}
-            >
+            <Button type="button" variant="outline" onClick={() => router.push(cancelHref)} disabled={form.isBusy}>
               Скасувати
             </Button>
             <Button type="submit" disabled={form.isBusy || !form.abilitiesValid}>
               {form.isSaving ? submitLabelSaving : withAbilityErrors(submitLabel, form.abilityErrors)}
             </Button>
-          </ActionBar>
-        </form>
-      </CardContent>
-    </Card>
+          </>
+        }
+      />
+    </HudFormPage>
   );
 }

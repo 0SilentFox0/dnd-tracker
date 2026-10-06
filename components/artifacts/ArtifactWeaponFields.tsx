@@ -1,6 +1,6 @@
 "use client";
 
-
+import { HudSection } from "@/components/hud/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NumberInput } from "@/components/ui/number-input";
@@ -39,8 +39,7 @@ export function ArtifactWeaponFields({ value, onChange }: { value: WeaponStats; 
   };
 
   return (
-    <div className="space-y-3 rounded-md border p-4">
-      <p className="text-sm font-semibold">Зброя</p>
+    <HudSection title="Зброя" className="space-y-3">
       <div className="grid gap-3 sm:grid-cols-2">
         {TEXT_FIELDS.map((f) => (
           <div key={f.key} className="space-y-1">
@@ -72,6 +71,6 @@ export function ArtifactWeaponFields({ value, onChange }: { value: WeaponStats; 
           </div>
         ))}
       </div>
-    </div>
+    </HudSection>
   );
 }

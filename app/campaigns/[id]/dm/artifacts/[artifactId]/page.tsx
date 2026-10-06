@@ -33,23 +33,21 @@ export default async function EditArtifactPage({
   const { abilities, issues } = readAbilities("artifact", artifact);
 
   return (
-    <div className="container mx-auto p-4 max-w-4xl">
-      <ArtifactEditForm
-        campaignId={id}
-        artifact={{
-          id: artifact.id,
-          name: artifact.name,
-          description: artifact.description,
-          rarity: artifact.rarity,
-          slot: artifact.slot,
-          icon: artifact.icon,
-          setId: artifact.setId,
-          abilities,
-          abilityIssues: issues,
-          weapon: weaponStatsFromRow(artifact),
-        }}
-        artifactSets={artifactSets}
-      />
-    </div>
+    <ArtifactEditForm
+      campaignId={id}
+      artifact={{
+        id: artifact.id,
+        name: artifact.name,
+        description: artifact.description,
+        rarity: artifact.rarity,
+        slot: artifact.slot,
+        icon: artifact.icon,
+        setId: artifact.setId,
+        abilities,
+        abilityIssues: issues,
+        weapon: weaponStatsFromRow(artifact),
+      }}
+      artifactSets={artifactSets}
+    />
   );
 }
