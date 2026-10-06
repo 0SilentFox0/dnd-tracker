@@ -116,10 +116,8 @@ describe.skipIf(missing.length > 0)("DB integration (Prisma → Supabase)", () =
         "campaign_members_userId_idx",
         "campaigns_dmUserId_idx",
         "characters_controlledBy_idx",
-        "unit_groups_campaignId_idx",
         "spell_groups_campaignId_idx",
         "artifact_sets_campaignId_idx",
-        "racial_abilities_campaignId_idx",
       ]),
     );
   });

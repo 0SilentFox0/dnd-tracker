@@ -22,8 +22,6 @@
     "import-units": "tsx scripts/import-units.ts",
     "seed-artifacts": "tsx scripts/seed-artifacts.ts",
     "import-skills-library": "tsx scripts/import-skills-library.ts",
-    "convert-abilities": "tsx scripts/convert-abilities.ts",
-    "check-contract": "tsx scripts/check-contract-preconditions.ts",
     "simulate-battle": "tsx --env-file=.env.local scripts/simulate-battle.ts",
     "seed-mock-battle": "tsx scripts/seed-mock-battle-data.ts",
     "delete-mock-battle": "tsx scripts/delete-mock-battle-data.ts",
