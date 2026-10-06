@@ -9,6 +9,8 @@ import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-partici
 import {
   BattleConflictError,
   loadBattle,
+  loadBattleAccess,
+  loadEventsBefore,
   loadRecentEvents,
   loadSnapshotsFrom,
   restoreParticipantsAt,
@@ -294,6 +296,27 @@ describe.skipIf(!isLocal)("battle store (local DB)", () => {
     expect(kept).toHaveLength(BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE);
     expect(kept[0].seq).toBe(after.scene.eventSeq);
     expect(await prisma.battleEvent.count({ where: { battleId: ids.battle } })).toBeGreaterThan(BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE);
+  });
+
+  it("сторінка журналу до seq: старіші події по зростанню, hasMore; доступ — лише версія й членство", async () => {
+    const before = await mustLoad();
+
+    const last = before.scene.eventSeq;
+
+    const page = await loadEventsBefore(prisma, ids.battle, { before: last, limit: 3 });
+
+    expect(page.events.map((e) => e.actionIndex)).toEqual([last - 3, last - 2, last - 1]);
+    expect(page.hasMore).toBe(true);
+    expect(page.events[0]).toMatchObject({ battleId: ids.battle, resultText: expect.any(String) });
+
+    const first = await loadEventsBefore(prisma, ids.battle, { before: 3, limit: 50 });
+
+    expect(first.events.every((e) => e.actionIndex < 3 && !e.isCancelled)).toBe(true);
+    expect(first.hasMore).toBe(false);
+
+    expect(await loadBattleAccess(prisma, { battleId: ids.battle, campaignId: ids.campaign, userId: ids.user })).toEqual({ version: before.scene.version, isMember: true });
+    expect(await loadBattleAccess(prisma, { battleId: ids.battle, campaignId: ids.campaign, userId: "stranger" })).toEqual({ version: before.scene.version, isMember: false });
+    expect(await loadBattleAccess(prisma, { battleId: ids.battle, campaignId: "other", userId: ids.user })).toBeNull();
   });
 
   it("clear: журнал і знімки порожні, eventSeq = 0", async () => {

@@ -101,6 +101,15 @@ export interface ClientBattleDelta {
   cancelledFrom?: number;
 }
 
+export interface BattleEventsPage {
+  events: BattleAction[];
+  hasMore: boolean;
+}
+
+export interface BattleVersion {
+  version: number;
+}
+
 export interface BattleRefetchSignal {
   battleId: string;
   version: number;

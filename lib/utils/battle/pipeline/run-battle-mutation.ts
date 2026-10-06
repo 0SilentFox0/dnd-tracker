@@ -131,7 +131,7 @@ function respondWith(
   return NextResponse.json({ ...battle, ...response });
 }
 
-function errorResponse(err: unknown): NextResponse {
+export function battleErrorResponse(err: unknown): NextResponse {
   if (err instanceof BattleConflictError) {
     return NextResponse.json({ code: "conflict", error: err.message, version: err.currentVersion }, { status: 409 });
   }
@@ -276,6 +276,6 @@ export async function runBattleMutation<TBody>(
 
     return NextResponse.json({ delta: clientDelta, ...(result.response && { response: result.response }) });
   } catch (err) {
-    return errorResponse(err);
+    return battleErrorResponse(err);
   }
 }

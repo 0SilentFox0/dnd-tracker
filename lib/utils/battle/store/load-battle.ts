@@ -94,3 +94,15 @@ export async function loadBattle(
     isMember: Boolean(membership),
   };
 }
+
+export async function loadBattleAccess(
+  db: BattleDb,
+  args: { battleId: string; campaignId: string; userId: string },
+): Promise<{ version: number; isMember: boolean } | null> {
+  const row = await db.battleScene.findFirst({
+    where: { id: args.battleId, campaignId: args.campaignId },
+    select: { version: true, campaign: { select: { members: { where: { userId: args.userId }, select: { userId: true } } } } },
+  });
+
+  return row ? { version: row.version, isMember: row.campaign.members.length > 0 } : null;
+}
