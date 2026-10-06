@@ -1,10 +1,11 @@
 import { unstable_cache } from "next/cache";
 import type { Prisma } from "@prisma/client";
 
+import { cacheTags } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import { toUnit } from "@/lib/utils/units/to-unit";
 
-const REFERENCE_REVALIDATE_SECONDS = 300; // 5 хвилин
+const REFERENCE_REVALIDATE_SECONDS = 300;
 
 export async function getCachedSpells(campaignId: string) {
   return unstable_cache(
@@ -14,9 +15,9 @@ export async function getCachedSpells(campaignId: string) {
         include: { spellGroup: true },
         orderBy: { level: "asc" },
       }),
-    [`spells`, campaignId],
+    [cacheTags.spells(campaignId)],
     {
-      tags: [`spells-${campaignId}`],
+      tags: [cacheTags.spells(campaignId)],
       revalidate: REFERENCE_REVALIDATE_SECONDS,
     },
   )();
@@ -30,9 +31,9 @@ export async function getCachedUnits(campaignId: string) {
       prisma.unit
         .findMany({ where: { campaignId }, orderBy: UNIT_LIST_ORDER })
         .then((units) => units.map(toUnit)),
-    [`units`, campaignId],
+    [cacheTags.units(campaignId)],
     {
-      tags: [`units-${campaignId}`],
+      tags: [cacheTags.units(campaignId)],
       revalidate: REFERENCE_REVALIDATE_SECONDS,
     },
   )();
@@ -41,13 +42,14 @@ export async function getCachedUnits(campaignId: string) {
 export async function getCachedRaces(campaignId: string) {
   return unstable_cache(
     async () =>
-      prisma.race.findMany({ omit: { abilities: true },
+      prisma.race.findMany({
+        omit: { abilities: true },
         where: { campaignId },
         orderBy: { createdAt: "desc" },
       }),
-    [`races`, campaignId],
+    [cacheTags.races(campaignId)],
     {
-      tags: [`races-${campaignId}`],
+      tags: [cacheTags.races(campaignId)],
       revalidate: REFERENCE_REVALIDATE_SECONDS,
     },
   )();
@@ -60,9 +62,9 @@ export async function getCachedMainSkills(campaignId: string) {
         where: { campaignId },
         orderBy: { createdAt: "asc" },
       }),
-    [`main-skills`, campaignId],
+    [cacheTags.mainSkills(campaignId)],
     {
-      tags: [`main-skills-${campaignId}`],
+      tags: [cacheTags.mainSkills(campaignId)],
       revalidate: REFERENCE_REVALIDATE_SECONDS,
     },
   )();

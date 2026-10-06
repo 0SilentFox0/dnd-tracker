@@ -5,6 +5,7 @@ import { createSkillSchema } from "./create-skill-schema";
 import { formatSkillsListResponse } from "./format-skills-response";
 import { listSkillsQuerySchema } from "./list-skills-query";
 
+import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import { abilitiesJson } from "@/lib/utils/abilities/read";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
@@ -17,7 +18,6 @@ export async function POST(
   try {
     const { id } = await params;
 
-    // Перевіряємо права DM
     const accessResult = await requireDM(id);
 
     if (accessResult instanceof NextResponse) {
@@ -75,6 +75,8 @@ export async function POST(
       },
     });
 
+    invalidateReference(ReferenceKind.SKILLS, id);
+
     return NextResponse.json(skill);
   } catch (error) {
     return handleApiError(error, { action: "create skill" });
@@ -88,7 +90,6 @@ export async function GET(
   try {
     const { id } = await params;
 
-    // Перевіряємо доступ до кампанії (не обов'язково DM)
     const accessResult = await requireCampaignAccess(id, false);
 
     if (accessResult instanceof NextResponse) {
@@ -137,7 +138,6 @@ export async function DELETE(
   try {
     const { id } = await params;
 
-    // Перевіряємо права DM
     const accessResult = await requireDM(id);
 
     if (accessResult instanceof NextResponse) {
@@ -150,6 +150,8 @@ export async function DELETE(
         campaignId: id,
       },
     });
+
+    invalidateReference(ReferenceKind.SKILLS, id);
 
     return NextResponse.json({
       success: true,

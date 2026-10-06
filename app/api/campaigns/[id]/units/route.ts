@@ -1,14 +1,15 @@
-import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
 import { invalidUnitRace } from "./unit-race";
 
 import { getCachedUnits } from "@/lib/cache/reference-data";
+import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import { createUnitSchema } from "@/lib/schemas";
 import { abilitiesJson } from "@/lib/utils/abilities/read";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
+import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { getProficiencyBonus } from "@/lib/utils/common/calculations";
 import { toUnit } from "@/lib/utils/units/to-unit";
@@ -60,7 +61,7 @@ export async function POST(
       },
     });
 
-    revalidateTag(`units-${id}`, { expire: 0 });
+    invalidateReference(ReferenceKind.UNITS, id);
 
     return NextResponse.json(toUnit(unit), { status: 201 });
   } catch (error) {
@@ -83,7 +84,7 @@ export async function GET(
 
     const units = await getCachedUnits(id);
 
-    return NextResponse.json(units, { headers: { "Cache-Control": "private, no-store" } });
+    return NextResponse.json(units, { headers: PRIVATE_NO_STORE_HEADERS });
   } catch (error) {
     return handleApiError(error, { action: "list units" });
   }

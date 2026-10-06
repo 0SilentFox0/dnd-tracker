@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { damageDiceColumns } from "./damage-dice-columns";
 
+import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { prisma } from "@/lib/db";
 import { requireDM } from "@/lib/utils/api/api-auth";
@@ -61,7 +62,6 @@ export async function POST(
   try {
     const { id } = await params;
 
-    // Перевіряємо права DM
     const accessResult = await requireDM(id);
 
     if (accessResult instanceof NextResponse) {
@@ -185,6 +185,8 @@ export async function POST(
         level: "asc",
       },
     });
+
+    invalidateReference(ReferenceKind.SPELLS, id);
 
     const skipped = data.spells.length - spellsToCreate.length;
 

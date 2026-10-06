@@ -1,7 +1,7 @@
-import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
+import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import { updateSpellSchema } from "@/lib/schemas";
 import { requireCampaignAccess, requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
@@ -14,7 +14,6 @@ export async function GET(
   try {
     const { id, spellId } = await params;
     
-    // Перевіряємо доступ до кампанії (не обов'язково DM)
     const accessResult = await requireCampaignAccess(id, false);
 
     if (accessResult instanceof NextResponse) {
@@ -47,7 +46,6 @@ export async function PATCH(
   try {
     const { id, spellId } = await params;
     
-    // Перевіряємо права DM
     const accessResult = await requireDM(id);
 
     if (accessResult instanceof NextResponse) {
@@ -119,7 +117,7 @@ export async function PATCH(
       },
     });
 
-    revalidateTag(`spells-${id}`, "max");
+    invalidateReference(ReferenceKind.SPELLS, id);
 
     return NextResponse.json(updatedSpell);
   } catch (error) {
@@ -134,7 +132,6 @@ export async function DELETE(
   try {
     const { id, spellId } = await params;
     
-    // Перевіряємо права DM
     const accessResult = await requireDM(id);
 
     if (accessResult instanceof NextResponse) {
@@ -155,7 +152,7 @@ export async function DELETE(
       where: { id: spellId },
     });
 
-    revalidateTag(`spells-${id}`, "max");
+    invalidateReference(ReferenceKind.SPELLS, id);
 
     return NextResponse.json({ success: true });
   } catch (error) {

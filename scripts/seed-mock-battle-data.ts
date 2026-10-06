@@ -19,8 +19,8 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 
 import { AttackType } from "../lib/constants/battle";
-import { DEFAULT_CAMPAIGN_ID } from "../lib/constants/campaigns";
 import { buildTreeJson } from "../lib/utils/skills/progression";
+import { DEFAULT_CAMPAIGN_ID } from "./default-campaign";
 import {
   getElfSkillsData,
   getHumanSkillsData,
