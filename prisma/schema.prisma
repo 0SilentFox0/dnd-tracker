@@ -123,6 +123,8 @@ model Character {
   maxTargets           Int                 @default(1)
   minTargets           Int                 @default(1)
   personalSkillId      String?
+  primaryAbility       String?
+  goals                Json                @default("[]")
   hpMultiplier         Float?
   meleeMultiplier      Float?
   rangedMultiplier     Float?
@@ -490,6 +492,7 @@ model Race {
   updatedAt            DateTime @updatedAt
   spellSlotProgression Json     @default("[]")
   abilities            Json?
+  icon                 String?
   campaign             Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   @@index([campaignId, name])

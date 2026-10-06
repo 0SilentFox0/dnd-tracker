@@ -4,6 +4,19 @@
 
 import type { EquippedItems, InventoryItem } from "./inventory";
 
+export const ABILITY_KEYS = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"] as const;
+
+export type AbilityKey = (typeof ABILITY_KEYS)[number];
+
+export type GoalStatus = "active" | "done" | "failed";
+
+export interface CharacterGoal {
+  id: string;
+  text: string;
+  status: GoalStatus;
+  author: "dm" | "player";
+}
+
 /**
  * Згрупована структура даних персонажа (як використовується в формі)
  */
@@ -121,6 +134,8 @@ export interface Character {
   minTargets: number;
   maxTargets: number;
   personalSkillId?: string | null;
+  primaryAbility?: AbilityKey | null;
+  goals?: CharacterGoal[];
   /** Коефіцієнт HP (×). За замовчуванням 1. */
   hpMultiplier?: number | null;
   /** Коефіцієнт урону ближнього бою (×). За замовчуванням 1. */
