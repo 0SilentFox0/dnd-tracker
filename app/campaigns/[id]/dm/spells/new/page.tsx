@@ -7,13 +7,7 @@ import type { SpellFormData } from "../spell-form-defaults";
 import { getDefaultSpellFormData } from "../spell-form-defaults";
 import { SpellFormBody } from "../SpellFormBody";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { HudFormPage } from "@/components/hud/form";
 import { useNotify } from "@/lib/hooks/common";
 import { useCreateSpell, useSpellGroups } from "@/lib/hooks/spells";
 
@@ -73,27 +67,17 @@ export default function NewSpellPage({
   };
 
   return (
-    <div className="container mx-auto p-4 max-w-4xl">
-      <Card>
-        <CardHeader>
-          <CardTitle>Створити нове заклинання</CardTitle>
-          <CardDescription>
-            Додайте інформацію про нове заклинання
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <SpellFormBody
-            campaignId={id}
-            formData={formData}
-            setFormData={setFormData}
-            spellGroups={spellGroups}
-            onSubmit={handleSubmit}
-            isSubmitting={createSpellMutation.isPending}
-            submitLabel="Створити заклинання"
-            error={(createSpellMutation.error as Error)?.message ?? null}
-          />
-        </CardContent>
-      </Card>
-    </div>
+    <HudFormPage title="Створити нове заклинання" aside="Додайте інформацію про нове заклинання">
+      <SpellFormBody
+        campaignId={id}
+        formData={formData}
+        setFormData={setFormData}
+        spellGroups={spellGroups}
+        onSubmit={handleSubmit}
+        isSubmitting={createSpellMutation.isPending}
+        submitLabel="Створити заклинання"
+        error={(createSpellMutation.error as Error)?.message ?? null}
+      />
+    </HudFormPage>
   );
 }

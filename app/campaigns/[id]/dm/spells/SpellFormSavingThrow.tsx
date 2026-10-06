@@ -6,6 +6,7 @@ import {
   SAVE_ON_SUCCESS_OPTIONS,
 } from "./spell-form-defaults";
 
+import { HudSection } from "@/components/hud/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
@@ -33,9 +34,8 @@ export function SpellFormSavingThrow({
       : null;
 
   return (
-    <div>
-      <Label>Збереження (Save)</Label>
-      <div className="grid gap-4 md:grid-cols-3 mt-2">
+    <HudSection title="Збереження (Save)">
+      <div className="grid gap-4 md:grid-cols-3">
         <div>
           <Label htmlFor="savingThrowAbility">Характеристика</Label>
           <SelectField
@@ -123,6 +123,6 @@ export function SpellFormSavingThrow({
           />
         </div>
       </div>
-    </div>
+    </HudSection>
   );
 }
