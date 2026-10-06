@@ -4,13 +4,12 @@ import { kvDel } from "@/lib/cache/kv";
 import { CampaignRole } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { joinCampaignSchema } from "@/lib/schemas";
-import { requireAuth } from "@/lib/utils/api/api-auth";
+import { requireAuthUser } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 
 export async function POST(request: Request) {
   try {
-    // Перевіряємо авторизацію
-    const authResult = await requireAuth();
+    const authResult = await requireAuthUser();
 
     if (authResult instanceof NextResponse) {
       return authResult;

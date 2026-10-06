@@ -9,7 +9,7 @@ const db = vi.hoisted(() => ({
   user: { findUnique: vi.fn(), create: vi.fn() },
 }));
 
-const auth = vi.hoisted(() => ({ requireAuth: vi.fn(), requireDM: vi.fn() }));
+const auth = vi.hoisted(() => ({ requireAuthUser: vi.fn(), requireDM: vi.fn() }));
 
 const kvDel = vi.hoisted(() => vi.fn());
 
@@ -17,7 +17,7 @@ vi.mock("@/lib/db", () => ({ prisma: db }));
 vi.mock("@/lib/cache/kv", () => ({ kvDel }));
 vi.mock("@/lib/utils/api/api-auth", async (orig) => ({
   ...(await orig<object>()),
-  requireAuth: auth.requireAuth,
+  requireAuthUser: auth.requireAuthUser,
   requireDM: auth.requireDM,
 }));
 
@@ -70,14 +70,14 @@ describe("DELETE /campaigns/:id/members/:memberId", () => {
 describe("POST /campaigns/join", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    auth.requireAuth.mockResolvedValue({ userId: "u1", authUser: { id: "u1", email: "u1@x.y" } });
+    auth.requireAuthUser.mockResolvedValue({ userId: "u1", authUser: { id: "u1", email: "u1@x.y" } });
     db.campaign.findUnique.mockResolvedValue({ id: "c1", status: "active", members: [{ userId: "dm" }] });
     db.user.findUnique.mockResolvedValue({ id: "u1" });
     db.campaignMember.create.mockResolvedValue({ id: "m9" });
   });
 
   it("без сесії — 401", async () => {
-    auth.requireAuth.mockResolvedValue(NextResponse.json({ error: "Unauthorized" }, { status: 401 }));
+    auth.requireAuthUser.mockResolvedValue(NextResponse.json({ error: "Unauthorized" }, { status: 401 }));
 
     expect((await joinWith("code")).status).toBe(401);
     expect(db.campaignMember.create).not.toHaveBeenCalled();

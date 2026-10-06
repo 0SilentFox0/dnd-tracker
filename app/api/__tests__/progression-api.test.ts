@@ -20,7 +20,7 @@ vi.mock("@/lib/db", () => ({
 }));
 
 const access = (userId: string, role: "dm" | "player") =>
-  ({ userId, authUser: { id: userId, email: null, user_metadata: null }, campaign: { id: "camp", maxLevel: 20, xpMultiplier: 1, members: [{ userId, role }] } }) as never;
+  ({ userId, campaign: { id: "camp", maxLevel: 20, xpMultiplier: 1, members: [{ userId, role }] } }) as never;
 
 const CHAR = { id: "ch", level: 3, race: "Ельф", skillTreeProgress: { "json-id": { unlockedSkills: ["attack_basic_level"] } }, seenLevel: 2, controlledBy: "owner" };
 

@@ -3,9 +3,9 @@ import { after } from "next/server";
 import type { BattleReadDeps } from "./read-battle";
 import type { PipelineDeps } from "./run-battle-mutation";
 
+import { getSessionUserId } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { pusherServer } from "@/lib/pusher-server";
-import { createClient } from "@/lib/supabase/server";
 import { BATTLE_RATE_LIMITS, checkRateLimit } from "@/lib/utils/api/rate-limit";
 import {
   loadBattle,
@@ -18,16 +18,8 @@ import {
 import { summarizeKnowledge } from "@/lib/utils/battle/view/knowledge";
 import { safePusherTrigger } from "@/lib/utils/pusher/safe-trigger";
 
-async function getUserId(): Promise<string | null> {
-  const supabase = await createClient();
-
-  const { data } = await supabase.auth.getClaims();
-
-  return data?.claims?.sub ?? null;
-}
-
 export const defaultPipelineDeps: PipelineDeps = {
-  getUserId,
+  getUserId: getSessionUserId,
   rateLimit: ({ userId, scope, battleId }) =>
     checkRateLimit({ userId, scope, battleId, ...BATTLE_RATE_LIMITS[scope] }),
   loadBattle: (args) => loadBattle(prisma, args),
@@ -46,7 +38,7 @@ export const defaultPipelineDeps: PipelineDeps = {
 };
 
 export const defaultReadDeps: BattleReadDeps = {
-  getUserId,
+  getUserId: getSessionUserId,
   loadAccess: (args) => loadBattleAccess(prisma, args),
   loadEventsBefore: (battleId, page) => loadEventsBefore(prisma, battleId, page),
 };
