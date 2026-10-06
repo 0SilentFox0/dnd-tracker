@@ -143,6 +143,7 @@ model Unit {
   campaignId       String
   name             String
   groupId          String?
+  raceId           String?
   groupColor       String?
   level            Int        @default(1)
   strength         Int        @default(10)
@@ -170,9 +171,11 @@ model Unit {
   abilities        Json?
   campaign         Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   unitGroup        UnitGroup? @relation(fields: [groupId], references: [id])
+  raceRef          Race?      @relation(fields: [raceId], references: [id], onDelete: SetNull)
   spellsSummoning  Spell[]    @relation("SpellSummonUnit")
 
   @@index([campaignId])
+  @@index([raceId])
   @@map("units")
 }
 
@@ -493,7 +496,9 @@ model Race {
   spellSlotProgression Json     @default("[]")
   abilities            Json?
   icon                 String?
+  color                String?
   campaign             Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  units                Unit[]
 
   @@index([campaignId, name])
   @@map("races")
