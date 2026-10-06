@@ -8,7 +8,7 @@ import { predictAttackNumbers } from "@/lib/utils/battle/attack";
 import { resolveAttackRoll } from "@/lib/utils/battle/common/attack-roll-helpers";
 import { computeDamageBreakdown } from "@/lib/utils/battle/damage";
 import { attackFlow, type AttackMode, attackPayload, effectiveD20, initialAttackFlow, type RollOutcome } from "@/lib/utils/battle/flows";
-import { canSeeExactStats, damageDiceSlots, formatKnownArmorClass, hiddenTargetSteps, knownArmorClass, weaponPreview } from "@/lib/utils/battle/view";
+import { canSeeExactStats, damageDiceSlots, formatKnownArmorClass, hiddenTargetSteps, knownArmorClass, retaliationOutcome, weaponPreview } from "@/lib/utils/battle/view";
 import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
 
 export function rollDie(sides: number): number {
@@ -92,6 +92,8 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
     const before = new Map(order.map((p) => [p.basicInfo.id, p.combatStats.currentHp]));
 
+    const seen = new Set((scene.battle.battleLog ?? []).map((e) => e.actionIndex));
+
     try {
       await scene.actions.attack.mutateAsync(attackPayload(state, attacker.basicInfo.id));
 
@@ -118,12 +120,14 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
       const target = byId(first.targetId);
 
+      const retaliation = retaliationOutcome(scene.readBattle()?.battleLog ?? [], seen);
+
       if (first.kind === "miss") {
         const log = scene.readBattle()?.battleLog ?? [];
 
-        scene.showResult({ kind: "miss", targetName: target?.basicInfo.name ?? "", d20: effectiveD20(strike, state.mode), known: formatKnownArmorClass(knownArmorClass(log, first.targetId)) });
+        scene.showResult({ kind: "miss", targetName: target?.basicInfo.name ?? "", d20: effectiveD20(strike, state.mode), known: formatKnownArmorClass(knownArmorClass(log, first.targetId)), ...(retaliation && { retaliation }) });
       } else {
-        scene.showResult({ kind: first.kind, targetName: target?.basicInfo.name ?? "", damage: results.reduce((s, r) => s + r.damage, 0), downed: first.downed, d20: effectiveD20(strike, state.mode), weapon: attack?.name });
+        scene.showResult({ kind: first.kind, targetName: target?.basicInfo.name ?? "", damage: results.reduce((s, r) => s + r.damage, 0), downed: first.downed, d20: effectiveD20(strike, state.mode), weapon: attack?.name, ...(retaliation && { retaliation }) });
       }
 
       onDone?.();

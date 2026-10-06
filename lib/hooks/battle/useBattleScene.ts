@@ -23,13 +23,13 @@ import {
 } from "@/lib/hooks/battles";
 import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
-import { type QueueEntry, turnQueue, type Viewer } from "@/lib/utils/battle/view";
+import { type QueueEntry, type RetaliationOutcome, turnQueue, type Viewer } from "@/lib/utils/battle/view";
 import type { BattleScene } from "@/types/api";
 import type { BattleParticipant } from "@/types/battle";
 
 export type ResultFx =
-  | { kind: "hit" | "crit"; targetName: string; damage: number; downed: boolean; d20: number; weapon?: string }
-  | { kind: "miss"; targetName: string; d20: number; known: string }
+  | { kind: "hit" | "crit"; targetName: string; damage: number; downed: boolean; d20: number; weapon?: string; retaliation?: RetaliationOutcome }
+  | { kind: "miss"; targetName: string; d20: number; known: string; retaliation?: RetaliationOutcome }
   | { kind: "morale-extra" | "morale-skip"; name: string; d10: number; morale: number };
 
 export interface BattleSceneActions {

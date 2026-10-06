@@ -10,7 +10,7 @@ import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-partici
 import { turnQueue } from "@/lib/utils/battle/view";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleScene } from "@/types/api";
-import type { BattleParticipant } from "@/types/battle";
+import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 export interface FakeSceneOptions {
   knownSpells?: string[];
@@ -22,6 +22,7 @@ export interface FakeSceneOptions {
   confirmAnswer?: boolean;
   isDM?: boolean;
   status?: BattleScene["status"];
+  afterLog?: BattleAction[];
 }
 
 function participant(id: string, name: string, side: ParticipantSide, over: Partial<{ hp: number; ac: number; controlledBy: string }> = {}): BattleParticipant {
@@ -64,7 +65,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
 
   const usedMe = { ...me, actionFlags: { ...me.actionFlags, hasUsedAction: true, hasUsedBonusAction: true } };
 
-  const after = { ...battle, initiativeOrder: [usedMe, { ...gob, combatStats: { ...gob.combatStats, currentHp: 11 } }, ally] } as BattleScene;
+  const after = { ...battle, battleLog: opts.afterLog ?? [], initiativeOrder: [usedMe, { ...gob, combatStats: { ...gob.combatStats, currentHp: 11 } }, ally] } as BattleScene;
 
   const mutation = (impl: (...a: unknown[]) => Promise<unknown> = async () => undefined) => ({ mutateAsync: vi.fn(impl), mutate: vi.fn(), isPending: false });
 
