@@ -51,6 +51,7 @@ export function CreateMainSkillDialog({ open, onOpenChange, campaignId }: Create
       title="Створити основний навик"
       description="Основні навики використовуються для групування скілів в дереві прокачки"
       size="sm"
+      hud
       footer={
         <>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

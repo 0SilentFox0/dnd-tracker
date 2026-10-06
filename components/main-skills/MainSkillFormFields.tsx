@@ -3,6 +3,7 @@
 import { ColorField } from "@/components/common/ColorField";
 import { FormField } from "@/components/common/FormField";
 import { IconUrlField } from "@/components/common/IconUrlField";
+import { HudSection } from "@/components/hud/form";
 import { Input } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
 import type { MainSkillFormData } from "@/types/main-skills";
@@ -15,7 +16,7 @@ interface MainSkillFormFieldsProps {
 
 export function MainSkillFormFields({ form, onChange, spellGroups }: MainSkillFormFieldsProps) {
   return (
-    <>
+    <HudSection title="Основний навик" className="space-y-4">
       <FormField label="Назва" htmlFor="name" required>
         <Input id="name" value={form.name} onChange={(e) => onChange({ name: e.target.value })} required placeholder="Наприклад: Напад, Захист, Магія" />
       </FormField>
@@ -42,6 +43,6 @@ export function MainSkillFormFields({ form, onChange, spellGroups }: MainSkillFo
           />
         </FormField>
       )}
-    </>
+    </HudSection>
   );
 }
