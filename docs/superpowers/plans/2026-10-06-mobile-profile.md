@@ -104,8 +104,8 @@ ALTER TABLE "characters" ADD COLUMN "goals" JSONB NOT NULL DEFAULT '[]';
 ALTER TABLE "races" ADD COLUMN "icon" TEXT;
 ```
 
-Run: `pnpm exec prisma migrate deploy` (локальна Docker-БД з `.env.local`, порт 54322) → `pnpm exec prisma generate`
-Expected: `1 migration applied`; generate без помилок.
+Run: `pnpm exec prisma migrate dev --name mobile_profile` (локальна Docker-БД з `.env.local`, порт 54322; `pnpm db:local`, якщо не запущена).
+Expected: створено `prisma/migrations/<timestamp>_mobile_profile/migration.sql` з рівно цими трьома `ADD COLUMN` (порівняти з SQL вище; якщо Prisma згенерувала щось ще — це дрейф, зупинитися й розібратися), client перегенеровано. Перейменовувати теку не треба — шлях у файловій структурі умовний.
 
 - [ ] **Step 2: Типи**
 
@@ -433,7 +433,7 @@ Run → FAIL.
 
 - [ ] **Step 2: Схема**
 
-`update-character-schema.ts`: видалити `hitDice`, `personalityTraits`, `ideals`, `bonds`, `flaws`, `maxHp`, `currentHp`, `tempHp`; додати:
+`update-character-schema.ts`: видалити `hitDice`, `personalityTraits`, `ideals`, `bonds`, `flaws` (`maxHp`/`currentHp`/`tempHp` лишаються — їх показує сторінка NPC-героїв `dm/npc-heroes/page.tsx:75`); додати:
 
 ```ts
   primaryAbility: z.enum(ABILITY_KEYS).nullable().optional(),
@@ -445,7 +445,7 @@ Run → FAIL.
 
 - [ ] **Step 3: Без денормалізації**
 
-`build-character-update-data.ts`: прибрати з результату й обчислень `proficiencyBonus`, `passive*`, `spellSaveDC`, `spellAttackBonus`, `maxHp`, `currentHp`, `hitDice`; лишити `finalLevel`, `spellSlotsToSave`, `skillTreeProgressUpdate`, `seenLevel`. У PATCH `route.ts` відповідно прибрати ці поля з `data:`; `goals` записувати як `data.goals as Prisma.InputJsonValue`.
+`build-character-update-data.ts`: прибрати з результату й обчислень `proficiencyBonus`, `passive*`, `spellSaveDC`, `spellAttackBonus`; лишити `finalLevel`, `maxHp`, `currentHp` (приріст HP читає колонку `character.hitDice`, з форми її більше не шлють), `spellSlotsToSave`, `skillTreeProgressUpdate`, `seenLevel`. У PATCH `route.ts` відповідно прибрати ці поля з `data:`; `goals` записувати як `data.goals as Prisma.InputJsonValue`.
 
 `level-up/route.ts`: прибрати запис `proficiencyBonus`, `spellSaveDC`, `spellAttackBonus`, passive-полів (рядки ~122–160, ~200); HP-приріст у `levelUpDetails` лишити, як є, якщо він показується користувачу.
 
@@ -616,12 +616,14 @@ git commit -m "feat(characters): biography highlight markup (==…==) parse and 
 - Modify: `lib/constants/skills.ts` (метадані навичок)
 - Modify: `lib/utils/abilities/build/bake.ts` (експорт `bakedStatSources`)
 - Modify: `types/characters.ts` (типи листа)
+- Create: `lib/utils/battle/damage/average.ts` (`averageAttackDamage` — одна формула середньої шкоди для листа і прев'ю бою)
+- Modify: `lib/utils/battle/view/hero.ts` (`weaponPreview` → `averageAttackDamage`)
 - Create: `lib/utils/characters/sheet/lines.ts`, `build-sheet.ts`, `index.ts`
-- Test: `lib/utils/characters/__tests__/build-sheet.test.ts`
+- Test: `lib/utils/characters/__tests__/build-sheet.test.ts`, `lib/utils/battle/__tests__/average-damage.test.ts`
 
 **Interfaces:**
-- Consumes: `getAttackAbilityModifier`, `spellcastingDerived` (Task 2); `parseGoals` (Task 1); `calculateAttackBonus`, `calculateDamageWithModifiers`, `applyHeroDmDamageMultiplier`, `collectModifiers`, `statWithModifiers`, `getHeroDamageDiceForLevel`, `getHeroMaxHpBreakdown`, `getDiceAverage`, `slotLevels`; `BookSpell` з `@/lib/hooks/battle/useSpellBook` (перенести тип у `types/spells.ts` як `BookSpell` і реекспортувати з хука, щоб `lib/utils` не імпортував хук)
-- Produces: `CharacterSheet` та підтипи (нижче), `buildCharacterSheet(input: SheetInput): CharacterSheet`, `DND_SKILL_META`, `bakedStatSources(p, stat)`
+- Consumes: `getAttackAbilityModifier`, `spellcastingDerived` (Task 2); `parseGoals` (Task 1); `calculateAttackBonus`, `calculateDamageWithModifiers`, `applyHeroDmDamageMultiplier` (через `averageAttackDamage`), `collectModifiers`, `statWithModifiers`, `getHeroDamageDiceForLevel`, `getHeroMaxHpBreakdown`, `getDiceAverage`, `slotLevels`; `BookSpell` з `@/lib/hooks/battle/useSpellBook` (перенести тип у `types/spells.ts` як `BookSpell` і реекспортувати з хука, щоб `lib/utils` не імпортував хук)
+- Produces: `CharacterSheet` та підтипи (нижче), `buildCharacterSheet(input: SheetInput): CharacterSheet`, `DND_SKILL_META`, `bakedStatSources(p, stat)`, `averageAttackDamage(p, attack, all): AverageDamage`
 
 - [ ] **Step 1: Типи листа** (`types/characters.ts`)
 
@@ -765,15 +767,16 @@ import { AttackType } from "@/lib/constants/battle";
 import { calculateAttackBonus } from "@/lib/utils/battle/attack";
 import { buildCharacterSheet, type SheetInput } from "@/lib/utils/characters/sheet";
 import type { BattleAttack } from "@/types/battle";
+import type { AbilityKey } from "@/types/characters";
 
 const bow = { id: "bow", name: "Довгий лук", type: AttackType.RANGED, attackBonus: 0, damageDice: "1d8" } as BattleAttack;
 
 const sword = { id: "sw", name: "Кинджал", type: AttackType.MELEE, attackBonus: 0, damageDice: "1d4" } as BattleAttack;
 
-function lira(over: Partial<SheetInput["character"]> = {}, attacks: BattleAttack[] = [bow, sword]): SheetInput {
+function lira(over: Partial<SheetInput["character"]> = {}, attacks: BattleAttack[] = [bow, sword], meleeMultiplier = 1): SheetInput {
   const p = createMockParticipant();
 
-  p.abilities = { ...p.abilities, level: 30, strength: 10, dexterity: 18, modifiers: { ...p.abilities.modifiers, strength: 0, dexterity: 4 }, proficiencyBonus: 9, primaryAbility: over.primaryAbility ?? undefined, meleeMultiplier: over.meleeMultiplier ?? 1, rangedMultiplier: 1 };
+  p.abilities = { ...p.abilities, level: 30, strength: 10, dexterity: 18, modifiers: { ...p.abilities.modifiers, strength: 0, dexterity: 4 }, proficiencyBonus: 9, primaryAbility: (over.primaryAbility ?? undefined) as AbilityKey | undefined, meleeMultiplier, rangedMultiplier: 1 };
   p.battleData.attacks = attacks;
   p.combatStats = { ...p.combatStats, armorClass: 14, maxHp: 127 };
 
@@ -785,7 +788,7 @@ function lira(over: Partial<SheetInput["character"]> = {}, attacks: BattleAttack
       strength: 10, dexterity: 18, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10,
       armorClass: 14, savingThrows: { dexterity: true }, skills: { stealth: true, perception: true },
       languages: ["Ельфійська"], proficiencies: {}, immunities: [], spellcastingAbility: null, hpMultiplier: null,
-      primaryAbility: null, meleeMultiplier: null, background: "Вона ==вірить== у брата", goals: [{ id: "g", text: "Знайти брата", status: "active", author: "dm" }],
+      primaryAbility: null, background: "Вона ==вірить== у брата", goals: [{ id: "g", text: "Знайти брата", status: "active", author: "dm" }],
       ...over,
     },
     raceIcon: null,
@@ -824,7 +827,7 @@ describe("buildCharacterSheet", () => {
   it("середня шкода: кубики зброї + рівень + кубики рівня + характеристика, з коефіцієнтом ДМа", () => {
     const plain = buildCharacterSheet(lira()).attacks.find((a) => a.id === "sw")!.avgDamage.total;
 
-    const doubled = buildCharacterSheet(lira({ meleeMultiplier: 2 })).attacks.find((a) => a.id === "sw")!.avgDamage.total;
+    const doubled = buildCharacterSheet(lira({}, [bow, sword], 2)).attacks.find((a) => a.id === "sw")!.avgDamage.total;
 
     expect(plain).toBeGreaterThan(30);
     expect(doubled).toBe(Math.floor(plain * 2));
@@ -863,91 +866,82 @@ describe("buildCharacterSheet", () => {
 
 Run → FAIL.
 
-- [ ] **Step 5: Реалізація — `lines.ts`**
+- [ ] **Step 4a: Середня шкода — спільна з боєм**
+
+Зараз `weaponPreview` (майстер атаки) рахує `≈` інакше, ніж справжній удар `computeHitDamage`: бере середнє злитої формули зброя+кубики рівня, але не додає `+рівень` героя і не множить на коеф. ДМа. Виносимо одну функцію.
+
+Падаючий тест `lib/utils/battle/__tests__/average-damage.test.ts`:
 
 ```ts
+import { describe, expect, it } from "vitest";
+
+import { createMockParticipant } from "./mock-participant";
+
 import { AttackType } from "@/lib/constants/battle";
-import { CORE_ABILITY_SCORES } from "@/lib/constants/abilities";
 import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
-import { bakedStatSources } from "@/lib/utils/abilities/build/bake";
-import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { calculateAttackBonus } from "@/lib/utils/battle/attack";
 import { getDiceAverage } from "@/lib/utils/battle/balance";
-import { calculateDamageWithModifiers } from "@/lib/utils/battle/damage";
-import { applyHeroDmDamageMultiplier } from "@/lib/utils/battle/damage/hero-dm-multiplier";
-import { getAbilityModifier, getAttackAbilityModifier } from "@/lib/utils/common/calculations";
-import type { BattleAttack, BattleParticipant } from "@/types/battle";
-import type { AbilityKey, SheetAttack, SheetLine, SheetLineSource, SheetTotal } from "@/types/characters";
+import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
+import { weaponPreview } from "@/lib/utils/battle/view";
+import type { BattleAttack } from "@/types/battle";
 
-export const abilityLabel = (key: AbilityKey) => CORE_ABILITY_SCORES.find((a) => a.key === key)?.label ?? key;
+const sword = { id: "s", name: "Меч", type: AttackType.MELEE, attackBonus: 0, damageDice: "1d8" } as BattleAttack;
 
-export const signed = (n: number) => (n >= 0 ? `+${n}` : `${n}`);
+describe("averageAttackDamage", () => {
+  it("герой: кубики зброї + рівень + кубики рівня + характеристика, × коеф. ДМа", () => {
+    const p = createMockParticipant();
 
-const asSource = (t: string): SheetLineSource => t as SheetLineSource;
+    p.abilities = { ...p.abilities, level: 10, strength: 14, meleeMultiplier: 1 };
 
-export function abilityLines(p: BattleParticipant, key: AbilityKey, base: number): SheetLine[] {
-  return [{ label: "База", value: String(base), source: "base" }, ...bakedStatSources(p, key).map((s) => ({ label: s.label, value: signed(s.value), source: asSource(s.sourceType) }))];
-}
+    const expected = Math.floor(4.5 + 10 + getDiceAverage(getHeroDamageDiceForLevel(10, AttackType.MELEE)) + 2);
 
-export function armorTotal(p: BattleParticipant): SheetTotal {
-  const mods = collectModifiers([p], p.basicInfo.id, { stat: "armor" });
+    expect(averageAttackDamage(p, sword, [p]).total).toBe(expected);
 
-  return {
-    total: statWithModifiers([p], p.basicInfo.id, "armor", p.combatStats.armorClass),
-    lines: [
-      { label: "База", value: String(p.combatStats.armorClass), source: "base" },
-      ...mods.entries.flatMap((e) => [
-        ...(e.flat ? [{ label: e.label, value: signed(e.flat), source: asSource(e.sourceType) }] : []),
-        ...(e.percent ? [{ label: e.label, value: `${signed(e.percent)}%`, source: asSource(e.sourceType) }] : []),
-      ]),
-    ],
-  };
-}
-
-function attackAbilityKey(p: BattleParticipant, kind: AttackType): AbilityKey {
-  return p.abilities.primaryAbility ?? (kind === AttackType.MELEE ? "strength" : "dexterity");
-}
-
-export function attackSheet(p: BattleParticipant, attack: BattleAttack): SheetAttack {
-  const type = attack.type === AttackType.RANGED ? AttackType.RANGED : AttackType.MELEE;
-
-  const key = attackAbilityKey(p, type);
-
-  const statMod = getAttackAbilityModifier(p.abilities, type);
-
-  const star = p.abilities.primaryAbility ? " ★" : "";
-
-  const hitMods = collectModifiers([p], p.basicInfo.id, { stat: "attackBonus", attackKind: type === AttackType.RANGED ? "ranged" : "melee" });
-
-  const toHitLines: SheetLine[] = [
-    { label: `${abilityLabel(key)}${star}`, value: signed(statMod), source: "ability" },
-    { label: "Майстерність", value: signed(p.abilities.proficiencyBonus), source: "proficiency" },
-    ...(attack.attackBonus ? [{ label: "Зброя", value: signed(attack.attackBonus), source: "weapon" as const }] : []),
-    ...hitMods.entries.filter((e) => e.flat).map((e) => ({ label: e.label, value: signed(e.flat), source: asSource(e.sourceType) })),
-  ];
-
-  const isHero = p.basicInfo.sourceType === "character";
-
-  const heroDice = isHero ? getHeroDamageDiceForLevel(p.abilities.level, type) : "";
-
-  const weaponAvg = attack.damageDice ? getDiceAverage(attack.damageDice) : 0;
-
-  const calc = calculateDamageWithModifiers(p, weaponAvg, statMod, type, {
-    allParticipants: [p],
-    heroLevelPart: isHero ? p.abilities.level : 0,
-    heroDicePart: heroDice ? getDiceAverage(heroDice) : 0,
-    heroDiceNotation: heroDice,
-    weaponDiceNotation: attack.damageDice ?? undefined,
+    p.abilities.meleeMultiplier = 2;
+    expect(averageAttackDamage(p, sword, [p]).total).toBe(Math.floor(expected * 2));
   });
 
-  const dm = applyHeroDmDamageMultiplier(p, type, calc.totalDamage);
+  it("weaponPreview у бою показує те саме число", () => {
+    const p = createMockParticipant();
+
+    p.abilities = { ...p.abilities, level: 10 };
+    expect(weaponPreview(p, sword, [p]).estimate).toBe(averageAttackDamage(p, sword, [p]).total);
+  });
+});
+```
+
+`lib/utils/battle/damage/average.ts`:
+
+```ts
+import { calculateDamageWithModifiers } from "./index";
+import { applyHeroDmDamageMultiplier } from "./hero-dm-multiplier";
+
+import { AttackType } from "@/lib/constants/battle";
+import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
+import { getDiceAverage } from "@/lib/utils/battle/balance";
+import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
+import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
+
+export interface AverageDamage {
+  total: number;
+  weaponAvg: number;
+  heroDice: string;
+  heroPart: number;
+  statMod: number;
+  steps: DamageStep[];
+  multiplier: number;
+}
+
+export function averageAttackDamage(p: BattleParticipant, attack: BattleAttack, all: BattleParticipant[]): AverageDamage {
+  const type = attack.type === AttackType.RANGED ? AttackType.RANGED : AttackType.MELEE;
+
+  const avg = averageAttackDamage(p, attack, [p]);
 
   const damageLines: SheetLine[] = [
-    ...(attack.damageDice ? [{ label: `Зброя ${attack.damageDice}`, value: weaponAvg.toFixed(1), source: "dice" as const }] : []),
-    ...(isHero ? [{ label: `Рівень + ${heroDice}`, value: (p.abilities.level + getDiceAverage(heroDice)).toFixed(1), source: "level" as const }] : []),
+    ...(attack.damageDice ? [{ label: `Зброя ${attack.damageDice}`, value: avg.weaponAvg.toFixed(1), source: "dice" as const }] : []),
+    ...(avg.heroPart ? [{ label: `Рівень + ${avg.heroDice}`, value: avg.heroPart.toFixed(1), source: "level" as const }] : []),
     { label: abilityLabel(key), value: signed(statMod), source: "ability" },
-    ...calc.steps.filter((s) => s.kind === "percent" || (s.kind === "flat" && s.label !== "Сила" && s.label !== "Спритність" && s.label !== "Рівень героя")).map((s) => ({ label: s.label, value: s.kind === "percent" ? `${signed(s.value)}%` : signed(s.value), source: "skill" as const })),
-    ...(dm.multiplier !== 1 ? [{ label: "Коеф. ДМа", value: `×${dm.multiplier}`, source: "multiplier" as const }] : []),
+    ...avg.steps.filter((s) => s.kind === "percent" || (s.kind === "flat" && s.label !== "Сила" && s.label !== "Спритність" && s.label !== "Рівень героя")).map((s) => ({ label: s.label, value: s.kind === "percent" ? `${signed(s.value)}%` : signed(s.value), source: "skill" as const })),
+    ...(avg.multiplier !== 1 ? [{ label: "Коеф. ДМа", value: `×${avg.multiplier}`, source: "multiplier" as const }] : []),
   ];
 
   return {
@@ -955,14 +949,14 @@ export function attackSheet(p: BattleParticipant, attack: BattleAttack): SheetAt
     name: attack.name,
     kind: type === AttackType.RANGED ? "ranged" : "melee",
     toHit: { total: calculateAttackBonus(p, attack), lines: toHitLines },
-    avgDamage: { total: dm.damage, lines: damageLines },
+    avgDamage: { total: avg.total, lines: damageLines },
   };
 }
 
 export const checkBonus = (score: number, proficient: boolean, prof: number) => getAbilityModifier(score) + (proficient ? prof : 0);
 ```
 
-Примітка: якщо `calc.steps` для персонажа з не-СИЛ/СПР основною дає мітку кроку характеристики інакше (`impl.ts:105` пише «Сила»/«Спритність» за типом атаки), фільтр вище відкидає її за міткою. Додатково виправити `impl.ts`: мітка кроку `statLabel` і рядок `breakdown` мають брати назву фактичної характеристики. Для цього в `context` додати `statLabel?: string` і передавати `abilityLabel(key)` з листа та з `process/compute.ts` (там `getAttackAbilityModifier` — ключ обчислюється тим самим виразом; винести `attackAbilityKey` у `lib/utils/common/calculations.ts` поруч із `getAttackAbilityModifier` і використати в обох місцях). Тоді фільтр стає `s.kind === "percent" || (s.kind === "flat" && s.label !== statLabel && s.label !== "Рівень героя")`.
+Примітка: якщо `avg.steps` для персонажа з не-СИЛ/СПР основною дає мітку кроку характеристики інакше (`impl.ts:105` пише «Сила»/«Спритність» за типом атаки), фільтр вище відкидає її за міткою. Додатково виправити `impl.ts`: мітка кроку `statLabel` і рядок `breakdown` мають брати назву фактичної характеристики. Для цього в `context` додати `statLabel?: string` і передавати `abilityLabel(key)` з листа та з `process/compute.ts` (там `getAttackAbilityModifier` — ключ обчислюється тим самим виразом; винести `attackAbilityKey` у `lib/utils/common/calculations.ts` поруч із `getAttackAbilityModifier` і використати в обох місцях). Тоді фільтр стає `s.kind === "percent" || (s.kind === "flat" && s.label !== statLabel && s.label !== "Рівень героя")`.
 
 - [ ] **Step 6: Реалізація — `build-sheet.ts`**
 
@@ -985,7 +979,7 @@ export interface SheetInput {
   character: Record<AbilityKey, number> & {
     id: string; name: string; avatar: string | null; level: number; class: string; subclass: string | null; race: string; alignment: string | null;
     armorClass: number; savingThrows: unknown; skills: unknown; languages: unknown; proficiencies: unknown; immunities: unknown;
-    spellcastingAbility: string | null; hpMultiplier: number | null; meleeMultiplier: number | null; primaryAbility: string | null;
+    spellcastingAbility: string | null; hpMultiplier: number | null; primaryAbility: string | null;
     background: string | null; goals: unknown;
   };
   raceIcon: string | null;
@@ -1419,7 +1413,20 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 }
 ```
 
-Перевірити, що в `lib/api/client.ts` є PUT-хелпер; якщо немає — додати `campaignPut` поруч із `campaignPatch` (та сама форма, `method: "PUT"`).
+`lib/api/client.ts` PUT-хелпера не має — додати поруч із `campaignPatch`:
+
+```ts
+export async function campaignPut<T>(
+  campaignId: string,
+  path: string,
+  body: unknown,
+  options: Omit<CampaignRequestOptions, "body" | "method"> = {},
+): Promise<T> {
+  return campaignRequest<T>(campaignId, path, { ...options, method: "PUT", body });
+}
+```
+
+(перевірити, що `CampaignRequestOptions["method"]` допускає `"PUT"`; якщо там union без PUT — розширити.)
 
 - [ ] **Step 3: Клієнт і хук**
 
@@ -1554,6 +1561,8 @@ export function pluralUk(n: number, [one, few, many]: [string, string, string]):
   {dto.raceIcon ? <OptimizedImage src={dto.raceIcon} alt="" width={52} height={52} className="h-full w-full object-cover" fallback={<span>{dto.race[0] ?? "?"}</span>} /> : (dto.race[0] ?? "?")}
 </span>
 ```
+
+(у `RacialRow.tsx` додати `import { OptimizedImage } from "@/components/common/OptimizedImage";`)
 
 `types/progression.ts`: `raceIcon: string | null;` у `CharacterProgressionDto`.
 `load-progression-context.ts`: паралельно з `skillTree.findFirst` — `prisma.race.findFirst({ where: { campaignId, name: character.race }, select: { icon: true } })`, повернути `raceIcon` у контексті; `get-progression-handler.ts` кладе `raceIcon` у DTO. Оновити мок `prisma` у `app/api/__tests__/progression-actions-api.test.ts` та тестах GET прогресії (`race: { findFirst: vi.fn().mockResolvedValue(null) }`) і фікстури DTO в `lib/hooks/skills/__tests__/*` (`raceIcon: null`).
@@ -1869,25 +1878,20 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { sheetFixture, withSheet } from "./sheet-fixture";
 
-const replace = vi.fn();
+const h = vi.hoisted(() => ({ replace: vi.fn(), search: new URLSearchParams(), sheetQuery: { data: null as unknown, isPending: false, isError: false, error: null, refetch: () => {} } }));
 
-let search = new URLSearchParams();
-
-vi.mock("next/navigation", () => ({ useRouter: () => ({ replace }), usePathname: () => "/c/1/character", useSearchParams: () => search }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: h.replace }), usePathname: () => "/c/1/character", useSearchParams: () => h.search }));
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "", HUD_SURFACE: "hud-surface" }));
 vi.mock("@/components/skill-tree/progression", () => ({ ProgressionPanel: () => <div>прокачка</div>, LevelUpOverlay: () => null, FreePointBadge: () => null }));
-
-const sheetQuery = { data: sheetFixture, isPending: false, error: null } as { data: unknown; isPending: boolean; error: unknown };
-
-vi.mock("@/lib/hooks/characters", async (orig) => ({ ...(await orig<object>()), useCharacterSheet: () => sheetQuery }));
+vi.mock("@/lib/hooks/characters", async (orig) => ({ ...(await orig<object>()), useCharacterSheet: () => h.sheetQuery, useCharacterGoals: () => ({ save: vi.fn(), isPending: false }) }));
 
 import { CharacterProfile } from "@/components/character-profile";
 import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
 
 describe("CharacterProfile — перегляд", () => {
   beforeEach(() => {
-    search = new URLSearchParams();
-    sheetQuery.data = sheetFixture;
+    h.search = new URLSearchParams();
+    h.sheetQuery.data = sheetFixture;
   });
 
   it("hero: імʼя, HP, AC, Влуч, Майст", () => {
@@ -1900,12 +1904,12 @@ describe("CharacterProfile — перегляд", () => {
   });
 
   it("таба з URL; перемикання пише ?tab=", () => {
-    search = new URLSearchParams("tab=magic");
+    h.search = new URLSearchParams("tab=magic");
     renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit={false} />);
 
     expect(screen.getByRole("tab", { name: "Магія" })).toHaveAttribute("data-state", "active");
     fireEvent.mouseDown(screen.getByRole("tab", { name: "Речі" }));
-    expect(replace).toHaveBeenCalledWith("/c/1/character?tab=items", { scroll: false });
+    expect(h.replace).toHaveBeenCalledWith("/c/1/character?tab=items", { scroll: false });
   });
 
   it("атака: влучання і середня шкода, розкладка за тапом", () => {
@@ -1920,7 +1924,7 @@ describe("CharacterProfile — перегляд", () => {
   });
 
   it("без атак — порожній стан і «—» у чипі", () => {
-    sheetQuery.data = withSheet({ attacks: [], bestToHit: null });
+    h.sheetQuery.data = withSheet({ attacks: [], bestToHit: null });
     renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit={false} />);
 
     expect(screen.getByText("Немає зброї — атак поки немає")).toBeTruthy();
@@ -1934,7 +1938,7 @@ describe("CharacterProfile — перегляд", () => {
 });
 ```
 
-(`renderWithConfirm` — перевірити фактичну назву експорту в `components/ui/__tests__/render-with-confirm.tsx`, а також обгорнути в `QueryClientProvider`, якщо хелпер цього не робить.)
+(`renderWithConfirm` лише додає `ConfirmProvider`; усі хуки з запитами в цих тестах замоковані, тож `QueryClientProvider` не потрібен. Неактивні таби Radix не монтує.)
 
 Run → FAIL.
 
@@ -1989,7 +1993,7 @@ export function ProfileTabs({ tabs, value, onValueChange }: { tabs: ProfileTab[]
     <Tabs value={value} onValueChange={(v) => onValueChange(v as ProfileTabId)}>
       <TabsList className="sticky top-[52px] z-20 flex h-auto w-full gap-1 rounded-none border-b border-[#3a2e22] bg-[#110e0b]/95 p-1.5 backdrop-blur">
         {tabs.map((t) => (
-          <TabsTrigger key={t.id} value={t.id} className="hud-sc min-w-0 flex-1 rounded-md px-1 py-2 text-[13px] text-[#8f8473] data-[state=active]:metal-gold data-[state=active]:metal-fill data-[state=active]:font-bold data-[state=active]:shadow-none">
+          <TabsTrigger key={t.id} value={t.id} className="profile-tab hud-sc min-w-0 flex-1 rounded-md px-1 py-2 text-[13px] text-[#8f8473] data-[state=active]:shadow-none">
             {t.label}
           </TabsTrigger>
         ))}
@@ -2004,9 +2008,11 @@ export function ProfileTabs({ tabs, value, onValueChange }: { tabs: ProfileTab[]
 }
 ```
 
-(Tailwind `data-[state=active]:metal-gold` не працює для довільних класів; замість цього в `components/hud/hud.css` додати
-`.profile-tab[data-state="active"] { background: linear-gradient(135deg, #8a6414, #e6c25a 55%, #8a6414); color: #2a1d05; font-weight: 700; }`
-і давати тригеру клас `profile-tab`.)
+У `components/hud/hud.css` додати (той самий золотий метал, що `.metal-gold.metal-fill`):
+
+```css
+.profile-tab[data-state="active"] { background: linear-gradient(135deg, #8a6414, #e6c25a 55%, #8a6414); color: #2a1d05; font-weight: 700; }
+```
 
 `Breakdown.tsx`:
 
@@ -2573,7 +2579,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { sheetFixture, withSheet } from "./sheet-fixture";
 
-const save = vi.fn().mockResolvedValue(undefined);
+const { save } = vi.hoisted(() => ({ save: vi.fn().mockResolvedValue(undefined) }));
 
 vi.mock("@/lib/hooks/characters", async (orig) => ({ ...(await orig<object>()), useCharacterGoals: () => ({ save, isPending: false }) }));
 
@@ -2777,7 +2783,7 @@ git commit -m "feat(profile): story tab — highlighted biography and goals (pla
 
 **Files:**
 - Modify: `lib/hooks/characters/useDmCharacterEditor.ts` (параметр `onSaved`, без router), `useCharacterEditor.ts` (без змін логіки)
-- Create: `components/character-profile/{ProfileEditor,BasicEditTab,BiographyEditor,PrimaryAbilityPicker}.tsx`
+- Create: `components/character-profile/{ProfileEditor,BasicEditTab,BiographyEditor}.tsx`, `components/characters/stats/PrimaryAbilityPicker.tsx`
 - Modify: `components/characters/stats/CharacterAbilityScores.tsx` (рядок основної характеристики), `components/characters/skills/CharacterSkillsSection.tsx` (українські назви з `DND_SKILL_META`/`CORE_ABILITY_SCORES`)
 - Modify: `CharacterProfile.tsx`
 - Test: `components/character-profile/__tests__/profile-editor.test.tsx`
@@ -2794,7 +2800,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { BiographyEditor } from "@/components/character-profile/BiographyEditor";
-import { PrimaryAbilityPicker } from "@/components/character-profile/PrimaryAbilityPicker";
+import { PrimaryAbilityPicker } from "@/components/characters/stats/PrimaryAbilityPicker";
 
 describe("редактор ДМа", () => {
   it("Маркер обгортає виділене", () => {
@@ -2894,7 +2900,7 @@ export function PrimaryAbilityPicker({ value, onChange }: { value: AbilityKey | 
 }
 ```
 
-`CharacterAbilityScores.tsx`: прийняти `primary?: { value: AbilityKey | null; onChange: (v: AbilityKey | null) => void }` і рендерити під сіткою `{primary && <PrimaryAbilityPicker … />}` (імпорт з `@/components/character-profile/PrimaryAbilityPicker`; якщо це створює цикл імпортів — перенести `PrimaryAbilityPicker` у `components/characters/stats/`). Показувати модифікатор біля кожного інпуту: `({signed(getAbilityModifier(score))})`.
+`CharacterAbilityScores.tsx`: прийняти `primary?: { value: AbilityKey | null; onChange: (v: AbilityKey | null) => void }` і рендерити під сіткою `{primary && <PrimaryAbilityPicker … />}` (імпорт з `./PrimaryAbilityPicker`). Показувати модифікатор біля кожного інпуту: `({signed(getAbilityModifier(score))})`.
 
 `CharacterSkillsSection.tsx`: підписи — `CORE_ABILITY_SCORES.find(...).label` для рятівних і `DND_SKILL_META[skill].label` для навичок; чекбокси `size-5`, рядок `h-11`.
 
@@ -3061,6 +3067,8 @@ export function BasicEditTab({ editor, onDeleted }: { editor: DmCharacterEditor;
 }
 ```
 
+Проблема 3 («Зберегти» в заголовку переноситься) зникає разом із заголовком: окремого заголовка-картки з кнопкою більше немає, кнопки лише в ActionBar, а hero показує імʼя персонажа (обрізається `truncate`).
+
 `CharacterProfile.tsx`: `{editing ? <ProfileEditor onDone={() => setEditing(false)} /> : …}`; у редагуванні таба з URL не використовується. Після `onSaved` інвалідація листа робить `useUpdateCharacter` (Step 3), тож повернення в перегляд показує нові цифри.
 
 - [ ] **Step 4: Перевірка** — `pnpm test:run components lib/hooks/characters` → PASS; tsc + lint. Перевірити в `components/ui/__tests__/eslint-guards.test.ts`, що нових заборонених імпортів немає (`pnpm lint`).
@@ -3102,13 +3110,18 @@ git commit -m "feat(profile): DM edit mode in the same tabs — basic tab, prima
 ```tsx
 "use client";
 
+import { Suspense } from "react";
+
 import { CharacterProfile } from "@/components/character-profile";
+import { LoadingState } from "@/components/common/states";
 import { FreePointBadge, LevelUpOverlay } from "@/components/skill-tree/progression";
 
 export function CharacterPageClient({ campaignId, characterId, canEdit }: { campaignId: string; characterId: string; canEdit: boolean }) {
   return (
     <>
-      <CharacterProfile campaignId={campaignId} characterId={characterId} canEdit={canEdit} />
+      <Suspense fallback={<LoadingState rows={6} />}>
+        <CharacterProfile campaignId={campaignId} characterId={characterId} canEdit={canEdit} />
+      </Suspense>
       <LevelUpOverlay campaignId={campaignId} characterId={characterId} />
       <FreePointBadge campaignId={campaignId} characterId={characterId} />
     </>
@@ -3130,9 +3143,15 @@ import { CharacterProfile } from "@/components/character-profile";
 export default function DmCharacterPage({ params }: { params: Promise<{ id: string; characterId: string }> }) {
   const { id, characterId } = use(params);
 
-  return <CharacterProfile campaignId={id} characterId={characterId} canEdit />;
+  return (
+    <Suspense fallback={<LoadingState rows={6} />}>
+      <CharacterProfile campaignId={id} characterId={characterId} canEdit />
+    </Suspense>
+  );
 }
 ```
+
+(`useSearchParams` у `CharacterProfile` вимагає межі `Suspense`, інакше `next build` падає з «useSearchParams() should be wrapped in a suspense boundary»; так само зроблено в `app/(auth)/sign-in`. Імпорти `Suspense` і `LoadingState` додати.)
 
 (Перемикач «Перегляд як гравець» зникає: ДМ і так бачить те саме, що гравець, у режимі перегляду.)
 
@@ -3241,7 +3260,7 @@ git commit -m "fix(ui): release body pointer lock right after a sheet closes so 
 
 - [ ] **Step 3: ДМ** — `UPDATE campaign_members SET role='dm' WHERE id='preview-player-member';` (локальна БД), відкрити `/campaigns/cmuvy29ix0001eyhew9cq07qf/dm/characters/<id Ліри>`: «Редагувати» → позначити СПР основною, у біографії виділити фрагмент «Маркером», «Зберегти» (ActionBar влазить на 390 px, «Зберегти» не обрізане), «+ рівень» у hero працює. Повернути роль: `UPDATE campaign_members SET role='player' WHERE id='preview-player-member';` — **обов'язково**, перевірити `SELECT role …`.
 
-- [ ] **Step 4: Бій** — створити/відкрити бій з Лірою в SIM-кампанії; «Влуч» у майстрі атаки = значення з профілю.
+- [ ] **Step 4: Бій** — створити/відкрити бій з Лірою в SIM-кампанії; «Влуч» і «≈» шкоди в майстрі атаки = значення з профілю.
 
 - [ ] **Step 5: Desktop ≥ 1024 px** — профіль центрований (`max-w-3xl`), книга двосторінкова.
 
