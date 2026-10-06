@@ -3,7 +3,6 @@ import { Geist } from "next/font/google";
 
 import "./globals.css";
 import { hudFontClassName } from "@/components/hud";
-import { BackgroundImage } from "@/components/layout/BackgroundImage";
 import { Header } from "@/components/layout/Header";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { ConfirmProvider } from "@/components/ui/confirm-dialog";
@@ -30,7 +29,6 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${hudFontClassName} antialiased`}>
         <QueryProvider>
           <ConfirmProvider>
-            <BackgroundImage />
             <Header />
             <PageTransition>{children}</PageTransition>
           </ConfirmProvider>
