@@ -42,3 +42,4 @@
 @keyframes hud-shake-title { 20% { transform: translateX(-8px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(3px); } }
 @keyframes hud-countdown { from { width: 100%; } to { width: 0; } }
 @keyframes hud-crack { to { stroke-dashoffset: 0; } }
+.profile-tab[data-state="active"] { background: linear-gradient(135deg, #8a6414, #e6c25a 55%, #8a6414); color: #2a1d05; font-weight: 700; }

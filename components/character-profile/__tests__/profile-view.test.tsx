@@ -1,0 +1,73 @@
+// @vitest-environment happy-dom
+import { cleanup, fireEvent, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { sheetFixture, withSheet } from "./sheet-fixture";
+
+const h = vi.hoisted(() => ({ replace: vi.fn(), search: new URLSearchParams(), sheetQuery: { data: null as unknown, isPending: false, isError: false, error: null, refetch: () => {} } }));
+
+vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: h.replace, push: vi.fn() }), usePathname: () => "/c/1/character", useSearchParams: () => h.search }));
+vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "", HUD_SURFACE: "hud-surface" }));
+vi.mock("@/components/skill-tree/progression", () => ({ ProgressionPanel: () => <div>прокачка</div>, LevelUpOverlay: () => null, FreePointBadge: () => null }));
+vi.mock("@/lib/hooks/characters", async (orig) => ({ ...(await orig<object>()), useCharacterSheet: () => h.sheetQuery, useCharacterGoals: () => ({ save: vi.fn(), isPending: false }) }));
+
+import { CharacterProfile } from "@/components/character-profile";
+import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
+
+describe("CharacterProfile — перегляд", () => {
+  beforeEach(() => {
+    h.search = new URLSearchParams();
+    h.sheetQuery.data = sheetFixture;
+    h.replace.mockClear();
+  });
+
+  afterEach(cleanup);
+
+  it("hero: імʼя, HP, AC, Влуч, Майст", () => {
+    renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit={false} />);
+
+    expect(screen.getByRole("heading", { name: "Ліра" })).toBeTruthy();
+    expect(screen.getByText("HP 300")).toBeTruthy();
+    expect(screen.getByLabelText("AC")).toHaveTextContent("17");
+    expect(screen.getByLabelText("Влучання")).toHaveTextContent("+13");
+    expect(screen.getByLabelText("Майстерність")).toHaveTextContent("+9");
+  });
+
+  it("таба з URL; перемикання пише ?tab=", () => {
+    h.search = new URLSearchParams("tab=magic");
+    renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit={false} />);
+
+    expect(screen.getByRole("tab", { name: "Магія" })).toHaveAttribute("data-state", "active");
+    fireEvent.mouseDown(screen.getByRole("tab", { name: "Речі" }));
+    expect(h.replace).toHaveBeenCalledWith("/c/1/character?tab=items", { scroll: false });
+  });
+
+  it("атака: влучання і середня шкода, розкладка за тапом", () => {
+    renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit={false} />);
+
+    const row = screen.getByRole("button", { name: /Довгий лук/ });
+
+    expect(row).toHaveTextContent("+13");
+    expect(row).toHaveTextContent("≈68");
+    fireEvent.click(row);
+    expect(screen.getAllByText("Майстерність").length).toBeGreaterThan(0);
+    expect(screen.getByText("Рівень + 6d8+1d6")).toBeTruthy();
+  });
+
+  it("без атак — порожній стан і «—» у чипі", () => {
+    h.sheetQuery.data = withSheet({ attacks: [], bestToHit: null });
+    renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit={false} />);
+
+    expect(screen.getByText("Немає зброї — атак поки немає")).toBeTruthy();
+    expect(screen.getByLabelText("Влучання")).toHaveTextContent("—");
+  });
+
+  it("гравець не бачить «Редагувати», ДМ бачить", () => {
+    const { unmount } = renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit={false} />);
+
+    expect(screen.queryByRole("button", { name: "Редагувати" })).toBeNull();
+    unmount();
+    renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit />);
+    expect(screen.getByRole("button", { name: "Редагувати" })).toBeTruthy();
+  });
+});
