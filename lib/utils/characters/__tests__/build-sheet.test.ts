@@ -99,4 +99,13 @@ describe("buildCharacterSheet", () => {
     expect(s.items.artifacts[0].effects).toEqual(["AC +2"]);
     expect(s.items.grid.armor?.id).toBe("a1");
   });
+
+  it("СЛ і атака заклинанням — ті самі, що в бою (з учасника, а не з бонусних характеристик)", () => {
+    const input = lira({ spellcastingAbility: "intelligence" });
+
+    input.participant.abilities.intelligence = 12;
+    input.participant.spellcasting = { ...input.participant.spellcasting, spellSaveDC: 17, spellAttackBonus: 9 };
+
+    expect(buildCharacterSheet(input).magic).toEqual({ ability: "Інтелект", saveDC: 17, attackBonus: 9 });
+  });
 });

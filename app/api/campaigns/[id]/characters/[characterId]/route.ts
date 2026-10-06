@@ -137,7 +137,6 @@ export async function PATCH(
         spellSlots: computed.spellSlotsToSave as Prisma.InputJsonValue,
         maxHp: computed.maxHp,
         currentHp: computed.currentHp,
-        goals: data.goals !== undefined ? (data.goals as unknown as Prisma.InputJsonValue) : undefined,
         immunities: data.immunities !== undefined
           ? (data.immunities as Prisma.InputJsonValue)
           : (character.immunities as Prisma.InputJsonValue | undefined),

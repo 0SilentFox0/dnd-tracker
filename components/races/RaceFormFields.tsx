@@ -60,8 +60,9 @@ export function RaceFormFields({
         value={formData.icon ?? ""}
         onChange={(v) => setFormData((prev) => ({ ...prev, icon: v }))}
         label="Іконка раси"
-        placeholder="URL іконки раси або завантажте файл"
+        placeholder="URL іконки раси"
         previewAlt="Іконка раси"
+        allowFile={false}
       />
 
       <div className="space-y-2">

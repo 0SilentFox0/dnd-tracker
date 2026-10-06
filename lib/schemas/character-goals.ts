@@ -15,7 +15,7 @@ export type GoalInput = z.infer<typeof goalInputSchema>;
 
 export const characterGoalsSchema = z.array(goalInputSchema.required({ author: true })).max(MAX_GOALS);
 
-export const putGoalsSchema = z.object({ goals: z.array(goalInputSchema).max(MAX_GOALS) });
+export const putGoalsSchema = z.object({ goals: z.array(goalInputSchema).max(MAX_GOALS), seen: z.array(z.string().max(40)).max(200).optional() });
 
 export function parseGoals(raw: unknown): CharacterGoal[] {
   const parsed = characterGoalsSchema.safeParse(raw);

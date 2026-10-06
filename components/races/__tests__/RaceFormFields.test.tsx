@@ -36,8 +36,14 @@ describe("RaceFormFields", () => {
   it("іконка раси: URL записується у форму", () => {
     renderWithConfirm(<Harness />);
 
-    fireEvent.change(screen.getByPlaceholderText("URL іконки раси або завантажте файл"), { target: { value: "https://x/elf.png" } });
+    fireEvent.change(screen.getByPlaceholderText("URL іконки раси"), { target: { value: "https://x/elf.png" } });
 
     expect(screen.getByTestId("icon").textContent).toBe("https://x/elf.png");
+  });
+
+  it("іконка раси — лише посилання: файл з компʼютера не пропонується", () => {
+    renderWithConfirm(<Harness />);
+
+    expect(screen.queryByRole("button", { name: /Завантажити з комп/ })).toBeNull();
   });
 });

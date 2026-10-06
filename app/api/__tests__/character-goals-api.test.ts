@@ -13,10 +13,10 @@ const access = (userId: string, role: "dm" | "player") => ({ userId, campaign: {
 
 const DM_GOAL = { id: "d1", text: "Знайти брата", status: "active", author: "dm" };
 
-const put = async (goals: unknown) => {
+const put = async (goals: unknown, seen?: string[]) => {
   const mod = await import("@/app/api/campaigns/[id]/characters/[characterId]/goals/route");
 
-  return mod.PUT(new Request("http://x", { method: "PUT", body: JSON.stringify({ goals }) }), { params: Promise.resolve({ id: "camp", characterId: "ch" }) }) as Promise<NextResponse>;
+  return mod.PUT(new Request("http://x", { method: "PUT", body: JSON.stringify({ goals, seen }) }), { params: Promise.resolve({ id: "camp", characterId: "ch" }) }) as Promise<NextResponse>;
 };
 
 describe("PUT goals", () => {
@@ -51,5 +51,34 @@ describe("PUT goals", () => {
   it("текст понад 300 символів — 400", async () => {
     vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("owner", "player"));
     expect((await put([{ id: "x", text: "a".repeat(301), status: "active" }])).status).toBe(400);
+  });
+
+  it("ДМ зі старим кешем не стирає ціль гравця, якої ще не бачив", async () => {
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("dm", "dm"));
+
+    const fresh = { id: "p9", text: "Щойно додана", status: "active", author: "player" };
+
+    vi.mocked(prisma.character.findUnique).mockResolvedValue({ id: "ch", campaignId: "camp", controlledBy: "owner", goals: [DM_GOAL, fresh] } as never);
+
+    const res = await put([{ ...DM_GOAL, status: "done" }], ["d1"]);
+
+    expect(await getResponseJson(res)).toEqual({ goals: [{ ...DM_GOAL, status: "done" }, fresh] });
+  });
+
+  it("ДМ видаляє ціль гравця, яку бачив", async () => {
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("dm", "dm"));
+    vi.mocked(prisma.character.findUnique).mockResolvedValue({ id: "ch", campaignId: "camp", controlledBy: "owner", goals: [DM_GOAL, { id: "p1", text: "x", status: "active", author: "player" }] } as never);
+
+    expect(await getResponseJson(await put([DM_GOAL], ["d1", "p1"]))).toEqual({ goals: [DM_GOAL] });
+  });
+
+  it("не-JSON тіло — 400", async () => {
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("owner", "player"));
+
+    const mod = await import("@/app/api/campaigns/[id]/characters/[characterId]/goals/route");
+
+    const res = (await mod.PUT(new Request("http://x", { method: "PUT", body: "{oops" }), { params: Promise.resolve({ id: "camp", characterId: "ch" }) })) as NextResponse;
+
+    expect(res.status).toBe(400);
   });
 });

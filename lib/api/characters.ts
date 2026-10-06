@@ -26,8 +26,8 @@ export async function getCharacter(
   );
 }
 
-export const putCharacterGoals = (campaignId: string, characterId: string, goals: GoalInput[]) =>
-  campaignPut<{ goals: CharacterGoal[] }>(campaignId, `/characters/${characterId}/goals`, { goals });
+export const putCharacterGoals = (campaignId: string, characterId: string, goals: GoalInput[], seen?: string[]) =>
+  campaignPut<{ goals: CharacterGoal[] }>(campaignId, `/characters/${characterId}/goals`, { goals, seen });
 
 export const getCharacterSheet = (campaignId: string, characterId: string) => campaignGet<CharacterSheet>(campaignId, `/characters/${characterId}/sheet`);
 

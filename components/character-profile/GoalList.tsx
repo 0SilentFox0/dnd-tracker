@@ -37,7 +37,7 @@ export function GoalList() {
 
   const [draft, setDraft] = useState<{ id: string | null; text: string } | null>(null);
 
-  const send = (next: CharacterGoal[]) => save(isDM ? next : next.filter((g) => g.author === "player"));
+  const send = (next: CharacterGoal[]) => (isDM ? save(next, all.map((g) => g.id)) : save(next.filter((g) => g.author === "player")));
 
   const commit = async () => {
     const text = draft?.text.trim().slice(0, 300);
@@ -90,7 +90,16 @@ export function GoalList() {
       </ul>
       {draft ? (
         <div className="mt-2 flex gap-2">
-          <Input aria-label="Текст цілі" maxLength={300} value={draft.text} onChange={(e) => setDraft({ ...draft, text: e.target.value })} className="h-11 min-w-0 flex-1" autoFocus />
+          <Input aria-label="Текст цілі" maxLength={300} value={draft.text} onChange={(e) => setDraft({ ...draft, text: e.target.value })}
+            onKeyDown={(e) => {
+              if (e.key !== "Enter") return;
+
+              e.preventDefault();
+              void commit();
+            }}
+            className="h-11 min-w-0 flex-1"
+            autoFocus
+          />
           <Button type="button" className="h-11" aria-label="Зберегти ціль" disabled={isPending || !draft.text.trim()} onClick={() => void commit()}>
             <Check className="size-4" />
           </Button>

@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-import { characterGoalsSchema } from "@/lib/schemas/character-goals";
 import { ABILITY_KEYS } from "@/types/characters";
 
 export const updateCharacterSchema = z.object({
@@ -68,7 +67,6 @@ export const updateCharacterSchema = z.object({
   personalSkillId: z.string().optional().nullable(),
 
   primaryAbility: z.enum(ABILITY_KEYS).nullable().optional(),
-  goals: characterGoalsSchema.optional(),
 
   // Коефіцієнти масштабування (HP, melee, ranged) — окремі для кожного героя
   hpMultiplier: z.number().min(0.1).max(3).optional(),

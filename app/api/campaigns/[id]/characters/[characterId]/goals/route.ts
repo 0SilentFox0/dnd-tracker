@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db";
 import { parseGoals, putGoalsSchema } from "@/lib/schemas/character-goals";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
-import { mergePlayerGoals } from "@/lib/utils/characters/goals";
+import { mergeDmGoals, mergePlayerGoals } from "@/lib/utils/characters/goals";
 import type { CharacterGoal } from "@/types/characters";
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string; characterId: string }> }) {
@@ -24,13 +24,13 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
     if (!isDM && character.controlledBy !== access.userId) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-    const parsed = putGoalsSchema.safeParse(await request.json());
+    const parsed = putGoalsSchema.safeParse(await request.json().catch(() => null));
 
     if (!parsed.success) return NextResponse.json({ error: "Некоректні цілі" }, { status: 400 });
 
-    const goals: CharacterGoal[] = isDM
-      ? parsed.data.goals.map((g) => ({ id: g.id, text: g.text, status: g.status, author: g.author ?? "dm" }))
-      : mergePlayerGoals(parseGoals(character.goals), parsed.data.goals);
+    const current = parseGoals(character.goals);
+
+    const goals: CharacterGoal[] = isDM ? mergeDmGoals(current, parsed.data.goals, parsed.data.seen) : mergePlayerGoals(current, parsed.data.goals);
 
     const updated = await prisma.character.update({ where: { id: characterId }, data: { goals: goals as unknown as Prisma.InputJsonValue }, select: { goals: true } });
 

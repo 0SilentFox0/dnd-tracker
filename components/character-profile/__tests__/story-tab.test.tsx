@@ -63,11 +63,34 @@ describe("Історія", () => {
 
     await waitFor(() => expect(save).toHaveBeenCalled());
     expect(save.mock.calls[0][0][0]).toMatchObject({ id: "d1", status: "done" });
+    expect(save.mock.calls[0][1]).toEqual(["d1", "p1"]);
   });
 
   it("порожня біографія — підказка", () => {
     inProfile(withSheet({ story: { biography: null, goals: [] } }));
 
     expect(screen.getByText("Біографію ще не написано")).toBeTruthy();
+  });
+
+  it("Enter у полі цілі зберігає ціль і не відправляє зовнішню форму", async () => {
+    const outer = vi.fn((e: Event) => e.preventDefault());
+
+    renderWithConfirm(
+      <form onSubmit={(e) => outer(e.nativeEvent)}>
+        <ProfileContext.Provider value={{ campaignId: "c", characterId: "ch", sheet: withSheet({ viewer: { isDM: true, isOwner: false } }), canEdit: true }}>
+          <StoryTab />
+        </ProfileContext.Provider>
+      </form>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Додати ціль" }));
+
+    const input = screen.getByRole("textbox", { name: "Текст цілі" });
+
+    fireEvent.change(input, { target: { value: "Знайти карту" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    await waitFor(() => expect(save).toHaveBeenCalled());
+    expect(outer).not.toHaveBeenCalled();
   });
 });

@@ -15,15 +15,15 @@ export function useCharacterGoals(campaignId: string, characterId: string) {
   const notify = useNotify();
 
   const mutation = useMutation({
-    mutationFn: (goals: GoalInput[]) => putCharacterGoals(campaignId, characterId, goals),
+    mutationFn: ({ goals, seen }: { goals: GoalInput[]; seen?: string[] }) => putCharacterGoals(campaignId, characterId, goals, seen),
     onSuccess: ({ goals }) =>
       queryClient.setQueryData<CharacterSheet>(characterSheetKey(campaignId, characterId), (old) => (old ? { ...old, story: { ...old.story, goals } } : old)),
     onError: () => void notify("Не вдалося зберегти цілі"),
   });
 
   return {
-    save: (goals: GoalInput[]) =>
-      mutation.mutateAsync(goals).then(
+    save: (goals: GoalInput[], seen?: string[]) =>
+      mutation.mutateAsync({ goals, seen }).then(
         () => true,
         () => false,
       ),

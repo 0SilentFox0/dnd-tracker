@@ -3,15 +3,17 @@ import { describe, expect, it } from "vitest";
 import { updateCharacterSchema } from "@/app/api/campaigns/[id]/characters/[characterId]/update-character-schema";
 
 describe("updateCharacterSchema", () => {
-  it("приймає primaryAbility, goals, background", () => {
-    const parsed = updateCharacterSchema.parse({
-      primaryAbility: "dexterity",
-      goals: [{ id: "g1", text: "Ціль", status: "active", author: "dm" }],
-      background: "Текст ==важливе==",
-    });
+  it("приймає primaryAbility і background", () => {
+    const parsed = updateCharacterSchema.parse({ primaryAbility: "dexterity", background: "Текст ==важливе==" });
 
     expect(parsed.primaryAbility).toBe("dexterity");
-    expect(parsed.goals).toHaveLength(1);
+    expect(parsed.background).toBe("Текст ==важливе==");
+  });
+
+  it("цілі через PATCH не приймаються — лише через /goals з його правилами", () => {
+    const parsed = updateCharacterSchema.parse({ goals: [{ id: "g1", text: "Підробка", status: "active", author: "dm" }] }) as Record<string, unknown>;
+
+    expect(parsed.goals).toBeUndefined();
   });
 
   it("null знімає основну характеристику, невідомий ключ — помилка", () => {

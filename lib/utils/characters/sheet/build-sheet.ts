@@ -5,7 +5,7 @@ import { ARTIFACT_GRID_9 } from "@/lib/constants/artifacts";
 import { getHeroMaxHpBreakdown } from "@/lib/constants/hero-scaling";
 import { parseGoals } from "@/lib/schemas/character-goals";
 import { slotLevels } from "@/lib/utils/battle/view";
-import { getAbilityModifier, spellcastingDerived } from "@/lib/utils/common/calculations";
+import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import type { BattleParticipant } from "@/types/battle";
 import { ABILITY_KEYS, type AbilityKey, type CharacterSheet, type SheetArtifact, type SheetSet } from "@/types/characters";
 import type { BookSpell } from "@/types/spells";
@@ -75,7 +75,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
 
   const hpBonus = p.combatStats.maxHp - hp.total;
 
-  const magic = spellcastingDerived(c.level, c.spellcastingAbility, scores);
+  const { spellSaveDC, spellAttackBonus } = p.spellcasting;
 
   const grid = Object.fromEntries(ARTIFACT_GRID_9.map((cell) => [cell.key, input.artifacts.find((a) => a.slot === cell.key) ?? null]));
 
@@ -102,7 +102,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
     saves: ABILITY_KEYS.map((key) => ({ key, label: abilityLabel(key), ability: key, proficient: !!savingThrows[key], bonus: checkBonus(scores[key], !!savingThrows[key], prof) })),
     skills,
     passives: { perception: passive("perception"), investigation: passive("investigation"), insight: passive("insight") },
-    magic: magic && c.spellcastingAbility ? { ability: abilityLabel(c.spellcastingAbility as AbilityKey), ...magic } : null,
+    magic: c.spellcastingAbility && spellSaveDC != null && spellAttackBonus != null ? { ability: abilityLabel(c.spellcastingAbility as AbilityKey), saveDC: spellSaveDC, attackBonus: spellAttackBonus } : null,
     slots: slotLevels(p).filter((s) => s.max > 0).map((s) => ({ level: s.level, count: s.max })),
     spells: input.spells,
     items: { grid, artifacts: input.artifacts, sets: input.sets },

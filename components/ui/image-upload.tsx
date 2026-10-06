@@ -21,6 +21,7 @@ export interface ImageUploadProps {
   accept?: string;
   previewAlt?: string;
   className?: string;
+  allowFile?: boolean;
 }
 
 export function ImageUpload({
@@ -32,6 +33,7 @@ export function ImageUpload({
   accept = DEFAULT_ACCEPT,
   previewAlt = "Попередній перегляд",
   className,
+  allowFile = true,
 }: ImageUploadProps) {
   const notify = useNotify();
 
@@ -74,29 +76,31 @@ export function ImageUpload({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
         />
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-sm text-muted-foreground">або</span>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept={accept}
-            className="hidden"
-            onChange={handleFileChange}
-          />
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            Завантажити з комп&apos;ютера
-          </Button>
-          {value?.startsWith("data:") && (
-            <span className="text-xs text-muted-foreground">
-              (завантажено з файлу)
-            </span>
-          )}
-        </div>
+        {allowFile && (
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-sm text-muted-foreground">або</span>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept={accept}
+              className="hidden"
+              onChange={handleFileChange}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              Завантажити з комп&apos;ютера
+            </Button>
+            {value?.startsWith("data:") && (
+              <span className="text-xs text-muted-foreground">
+                (завантажено з файлу)
+              </span>
+            )}
+          </div>
+        )}
       </div>
       {value && (
         <div className="mt-2">
