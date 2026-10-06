@@ -23,7 +23,8 @@ const BattlePreparationView = dynamic(() => import("@/components/battle/views/Ba
 export function BattleScreen() {
   const { battle, isDM, actions } = useBattleScene();
 
-  const wide = useMediaQuery("(min-width: 1024px)", true);
+  // перший HTML — мобільний макет: телефони не бачать підміни після гідратації
+  const wide = useMediaQuery("(min-width: 1024px)");
 
   const height = useBelowHeaderHeight();
 
