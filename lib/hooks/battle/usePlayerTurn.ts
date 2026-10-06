@@ -21,7 +21,7 @@ export function usePlayerTurn(participant: BattleParticipant) {
   const confirm = useConfirm();
 
   const [state, dispatch] = useReducer(turnFlow, initialTurnFlow, (s) =>
-    turnFlow(s, { type: "BEGIN", needsMorale: needsMoraleCheck(participant, scene.battle.pendingMoraleCheck) }),
+    turnFlow(s, { type: "BEGIN", needsMorale: needsMoraleCheck(participant, scene.battle.initiativeOrder, scene.battle.pendingMoraleCheck) }),
   );
 
   const id = participant.basicInfo.id;

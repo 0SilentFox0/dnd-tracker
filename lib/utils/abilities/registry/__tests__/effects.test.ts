@@ -90,3 +90,12 @@ describe("counterAttack у редакторі", () => {
     expect(describeEffect({ kind: "flag", flag: "counterAttack", attackKinds: ["melee"], bonusPercent: 15 })).toBe("відсіч +15%");
   });
 });
+
+describe("прапорці моралі", () => {
+  it("мітки й описи", () => {
+    expect(describeEffect({ kind: "flag", flag: "noNegativeMorale" })).toBe("від'ємна мораль = 0");
+    expect(describeEffect({ kind: "flag", flag: "ignoreMorale" })).toBe("мораль не діє");
+    expect(FLAG_FIELDS.noNegativeMorale).toEqual([]);
+    expect(FLAG_FIELDS.ignoreMorale).toEqual([]);
+  });
+});

@@ -90,6 +90,8 @@ const FlagSchema = z.discriminatedUnion("flag", [
     bonusPercent: z.number().min(0),
   }),
   z.object({ ...flagBase, flag: z.literal("seeEnemyHp") }),
+  z.object({ ...flagBase, flag: z.literal("noNegativeMorale") }),
+  z.object({ ...flagBase, flag: z.literal("ignoreMorale") }),
   z.object({
     ...flagBase,
     flag: z.literal("conditionImmunity"),

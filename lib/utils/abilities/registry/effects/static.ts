@@ -115,6 +115,10 @@ export function describeFlag(e: Extract<Effect, { kind: "flag" }>): string {
       return `відсіч${e.attackKinds.includes("ranged") ? " (і на дальні)" : ""} +${e.bonusPercent}%`;
     case "seeEnemyHp":
       return "бачить HP ворогів";
+    case "noNegativeMorale":
+      return "від'ємна мораль = 0";
+    case "ignoreMorale":
+      return "мораль не діє";
     case "conditionImmunity":
       return e.conditions === "all" ? "імунітет до контролю" : `імунітет: ${e.conditions.map((c) => (c === "fear" ? "страх" : c)).join(", ")}`;
   }
@@ -129,6 +133,8 @@ export const FLAG_LABELS: Record<FlagKey, string> = {
   spellImmunity: "Імунітет до заклинань",
   counterAttack: "Контратака",
   seeEnemyHp: "Бачить HP ворогів",
+  noNegativeMorale: "Мораль не нижче 0",
+  ignoreMorale: "Мораль не діє",
   conditionImmunity: "Імунітет до станів",
 };
 
@@ -158,6 +164,8 @@ export const FLAG_FIELDS: Record<FlagKey, readonly FieldMeta[]> = {
     { name: "bonusPercent", label: "Бонус шкоди, %", input: "number" },
   ],
   seeEnemyHp: [],
+  noNegativeMorale: [],
+  ignoreMorale: [],
   conditionImmunity: [
     {
       name: "conditions",

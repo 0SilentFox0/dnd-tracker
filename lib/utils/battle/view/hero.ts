@@ -1,8 +1,8 @@
-import { BATTLE_RACE } from "@/lib/constants/battle";
 import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
+import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import { diceSlots } from "@/lib/utils/common/dice";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleAction, BattleAttack, BattleParticipant } from "@/types/battle";
@@ -72,16 +72,10 @@ export function lastAction(log: BattleAction[]): BattleAction | null {
   return null;
 }
 
-export function needsMoraleCheck(p: BattleParticipant, pendingMoraleCheck: unknown): boolean {
+export function needsMoraleCheck(p: BattleParticipant, participants: BattleParticipant[], pendingMoraleCheck: unknown): boolean {
   if ((pendingMoraleCheck as { participantId?: string } | null)?.participantId === p.basicInfo.id) return false;
 
-  const race = p.abilities.race?.toLowerCase() ?? "";
-
-  if (race === BATTLE_RACE.NECROMANCER) return false;
-
-  const morale = race === BATTLE_RACE.HUMAN && p.combatStats.morale < 0 ? 0 : p.combatStats.morale;
-
-  return morale !== 0;
+  return effectiveMorale(p, participants).value !== 0;
 }
 
 export function weaponPreview(p: BattleParticipant, attack: BattleAttack, all: BattleParticipant[]) {
