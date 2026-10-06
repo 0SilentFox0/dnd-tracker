@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -21,7 +22,7 @@ beforeEach(() => {
   vi.mocked(api.markLevelSeen).mockResolvedValue({ seenLevel: 5 });
 });
 
-const renderIt = () => render(<LevelUpOverlay campaignId="c" characterId="ch" name="Ельдріс" />);
+const renderIt = () => render(<QueryClientProvider client={new QueryClient()}><LevelUpOverlay campaignId="c" characterId="ch" name="Ельдріс" /></QueryClientProvider>);
 
 describe("LevelUpOverlay", () => {
   it("власник, level > seenLevel → показ old → new, позначає seen одразу", () => {
