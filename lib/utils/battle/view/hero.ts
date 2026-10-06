@@ -1,13 +1,10 @@
 import type { AttackType } from "@/lib/constants/battle";
-import { AttackType as AttackTypeValue } from "@/lib/constants/battle";
 import { BATTLE_RACE } from "@/lib/constants/battle";
 import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
 import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
-import { getDiceAverage } from "@/lib/utils/battle/balance/dice";
 import { getDiceSlots, mergeDiceFormulas } from "@/lib/utils/battle/balance/dice";
-import { calculateDamageWithModifiersImpl } from "@/lib/utils/battle/damage/impl";
-import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
+import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleAction, BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -101,15 +98,11 @@ export function attackDamageFormula(p: BattleParticipant, attack: BattleAttack):
 }
 
 export function weaponPreview(p: BattleParticipant, attack: BattleAttack, all: BattleParticipant[]) {
-  const type = (attack.type === "melee" ? AttackTypeValue.MELEE : AttackTypeValue.RANGED) as AttackType;
-
   const mods = collectModifiers(withSelf(all, p), p.basicInfo.id, { damage: { kind: attack.type === "melee" ? "melee" : "ranged" } });
 
   const bonuses = mods.entries.filter((e) => e.percent || e.flat).map((e) => ({ label: e.label, percent: e.percent, flat: e.flat, icon: e.icon }));
 
-  const avg = Math.round(getDiceAverage(attackDamageFormula(p, attack) || "1d6"));
-
-  const estimate = calculateDamageWithModifiersImpl(p, avg, getAttackAbilityModifier(p.abilities, type), type, { allParticipants: all }).totalDamage;
+  const estimate = averageAttackDamage(p, attack, all).total;
 
   return { bonuses, estimate };
 }

@@ -1,5 +1,6 @@
 // Утиліти для розрахунків D&D
 
+import { CORE_ABILITY_SCORES } from "@/lib/constants/abilities";
 import {
   Artifact,
   ArtifactBonus,
@@ -250,6 +251,12 @@ type AttackAbilities = { strength: number; dexterity: number; primaryAbility?: A
 
 export function attackAbilityKey(abilities: { primaryAbility?: AbilityKey | null }, attackType: AttackType | string): AbilityKey {
   return abilities.primaryAbility ?? (attackType === AttackType.MELEE ? "strength" : "dexterity");
+}
+
+export function attackAbilityLabel(abilities: { primaryAbility?: AbilityKey | null }, attackType: AttackType | string): string {
+  const key = attackAbilityKey(abilities, attackType);
+
+  return CORE_ABILITY_SCORES.find((a) => a.key === key)?.label ?? key;
 }
 
 export function getAttackAbilityModifier(abilities: AttackAbilities, attackType: AttackType | string): number {

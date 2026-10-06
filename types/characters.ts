@@ -3,6 +3,7 @@
  */
 
 import type { EquippedItems, InventoryItem } from "./inventory";
+import type { BookSpell } from "./spells";
 
 export const ABILITY_KEYS = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"] as const;
 
@@ -176,4 +177,88 @@ export interface DamagePreviewResponse {
   ranged: DamagePreviewItem;
   /** Заповнюється при spellId + spellDiceSum у запиті */
   magic?: DamagePreviewItem | null;
+}
+
+export type SheetLineSource = "base" | "ability" | "proficiency" | "weapon" | "level" | "dice" | "skill" | "race" | "artifact" | "artifactSet" | "unit" | "character" | "effect" | "action" | "multiplier";
+
+export interface SheetLine {
+  label: string;
+  value: string;
+  source?: SheetLineSource;
+}
+
+export interface SheetTotal {
+  total: number;
+  lines: SheetLine[];
+}
+
+export interface SheetAbility {
+  key: AbilityKey;
+  score: number;
+  mod: number;
+  isPrimary: boolean;
+  lines: SheetLine[];
+}
+
+export interface SheetAttack {
+  id: string;
+  name: string;
+  kind: "melee" | "ranged";
+  toHit: SheetTotal;
+  avgDamage: SheetTotal;
+}
+
+export interface SheetCheck {
+  key: string;
+  label: string;
+  ability: AbilityKey;
+  bonus: number;
+  proficient: boolean;
+}
+
+export interface SheetArtifact {
+  id: string;
+  name: string;
+  icon: string | null;
+  slot: string;
+  rarity: string | null;
+  description: string | null;
+  effects: string[];
+}
+
+export interface SheetSet {
+  id: string;
+  name: string;
+  have: number;
+  total: number;
+  complete: boolean;
+  effects: string[];
+}
+
+export interface CharacterSheet {
+  viewer: { isDM: boolean; isOwner: boolean };
+  identity: { id: string; name: string; avatar: string | null; level: number; className: string; subclass: string | null; race: string; raceIcon: string | null; alignment: string | null };
+  abilities: SheetAbility[];
+  primaryAbility: AbilityKey | null;
+  proficiency: number;
+  hp: SheetTotal;
+  armorClass: SheetTotal;
+  initiative: number;
+  speed: number;
+  morale: number;
+  targets: { min: number; max: number };
+  immunities: string[];
+  languages: string[];
+  proficiencies: string[];
+  attacks: SheetAttack[];
+  bestToHit: number | null;
+  saves: SheetCheck[];
+  skills: SheetCheck[];
+  passives: { perception: number; investigation: number; insight: number };
+  magic: { ability: string; saveDC: number; attackBonus: number } | null;
+  slots: { level: number; count: number }[];
+  spells: BookSpell[];
+  items: { grid: Record<string, SheetArtifact | null>; artifacts: SheetArtifact[]; sets: SheetSet[] };
+  personalSkill: { id: string; name: string; icon: string | null; description: string | null } | null;
+  story: { biography: string | null; goals: CharacterGoal[] };
 }

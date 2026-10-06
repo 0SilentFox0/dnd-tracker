@@ -11,25 +11,9 @@ import { initialSpellFlow, spellFlow, spellPayload,type SpellPick } from "@/lib/
 import { participantSpellAllowsMultipleTargets } from "@/lib/utils/battle/spell/participant-spell-target-mode";
 import { slotLevels } from "@/lib/utils/battle/view";
 import type { BattleParticipant } from "@/types/battle";
+import type { BookSpell } from "@/types/spells";
 
-export type BookSpell = {
-  id: string;
-  name: string;
-  level: number;
-  type: "target" | "aoe" | "no_target";
-  damageType: "damage" | "heal" | "all";
-  diceCount?: number | null;
-  diceType?: string | null;
-  savingThrow?: { ability: string; onSuccess: "half" | "none"; dc?: number } | null;
-  hitCheck?: { ability: string; dc: number } | null;
-  description?: string | null;
-  icon?: string | null;
-  range?: string | null;
-  duration?: string | null;
-  concentration?: boolean;
-  damageElement?: string | null;
-  spellGroup?: { id: string; name: string } | null;
-};
+export type { BookSpell };
 
 const isUp = (p: BattleParticipant) => p.combatStats.status === "active" && p.combatStats.currentHp > 0;
 

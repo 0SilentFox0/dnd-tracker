@@ -2,6 +2,7 @@ import { resolveFlat } from "@/lib/utils/abilities/engine/amount";
 import { resolvedAbilitiesOf } from "@/lib/utils/abilities/engine/participants";
 import { type Effect, isBakedStat } from "@/lib/utils/abilities/schema";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
+import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
 
 type ModifyStat = Extract<Effect, { kind: "modifyStat" }>;
@@ -87,4 +88,15 @@ export function applyBakedAuras(ps: BattleParticipant[], newIds: Set<string>): B
   }
 
   return out;
+}
+
+export function bakedStatSources(p: BattleParticipant, stat: string): { label: string; value: number; sourceType: ResolvedAbility["source"]["type"] }[] {
+  return resolvedAbilitiesOf(p)
+    .filter((a) => a.trigger.event === "passive" && !a.condition)
+    .flatMap((a) =>
+      a.effects
+        .filter((e): e is ModifyStat => e.kind === "modifyStat" && e.stat === stat && (e.target ?? "self") === "self")
+        .map((e) => ({ label: a.source.name, value: e.flat === undefined ? 0 : resolveFlat(e.flat, p), sourceType: a.source.type })),
+    )
+    .filter((x) => x.value !== 0);
 }
