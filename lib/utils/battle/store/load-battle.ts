@@ -1,5 +1,6 @@
 import type { PrismaClient } from "@prisma/client";
 
+import { snapshotCache } from "./snapshot-cache";
 import { joinParticipant } from "./split-participant";
 import type { BattleSceneState, BattleStatus, LoadedBattle, ParticipantColumns, ParticipantSnapshot, ParticipantState } from "./types";
 
@@ -32,6 +33,53 @@ export function rowToParticipant(row: ParticipantRow): BattleParticipant {
   );
 }
 
+const PARTICIPANT_ROW_SELECT = {
+  id: true,
+  battleId: true,
+  sourceType: true,
+  sourceId: true,
+  side: true,
+  controlledBy: true,
+  orderIndex: true,
+  isPending: true,
+  extraTurnOf: true,
+  currentHp: true,
+  tempHp: true,
+  maxHp: true,
+  morale: true,
+  status: true,
+  initiative: true,
+  hasUsedAction: true,
+  hasUsedBonusAction: true,
+  hasUsedReaction: true,
+  hasExtraTurn: true,
+  state: true,
+  snapshotHash: true,
+} as const;
+
+/** Snapshots (the bulk of a battle row set) rarely change between actions: only cache misses are read. */
+async function withSnapshots(db: BattleDb, rows: Array<Omit<ParticipantRow, "snapshot">>): Promise<ParticipantRow[]> {
+  const known = new Map(rows.map((r) => [r.id, snapshotCache.get(r.snapshotHash)]));
+
+  const missing = rows.filter((r) => known.get(r.id) === undefined).map((r) => r.id);
+
+  const fetched = missing.length
+    ? await db.battleParticipant.findMany({ where: { id: { in: missing } }, select: { id: true, snapshot: true, snapshotHash: true } })
+    : [];
+
+  for (const f of fetched) {
+    snapshotCache.remember(f.snapshotHash, f.snapshot);
+    known.set(f.id, f.snapshot as ParticipantSnapshot);
+  }
+
+  // a participant deleted between the two reads is dropped, like a row the scene query missed
+  return rows.flatMap((r) => {
+    const snapshot = known.get(r.id);
+
+    return snapshot === undefined ? [] : [{ ...r, snapshot }];
+  });
+}
+
 export async function loadBattle(
   db: BattleDb,
   args: { battleId: string; campaignId: string; userId: string },
@@ -53,7 +101,7 @@ export async function loadBattle(
       completedAt: true,
       createdAt: true,
       participants: true,
-      battleParticipants: { orderBy: { orderIndex: "asc" } },
+      battleParticipants: { orderBy: { orderIndex: "asc" }, select: PARTICIPANT_ROW_SELECT },
       campaign: {
         select: { friendlyFire: true, members: { where: { userId: args.userId }, select: { role: true } } },
       },
@@ -77,7 +125,7 @@ export async function loadBattle(
 
   const membership = row.campaign.members[0];
 
-  const all = row.battleParticipants.map((p) => ({ isPending: p.isPending, participant: rowToParticipant(p) }));
+  const all = (await withSnapshots(db, row.battleParticipants)).map((p) => ({ isPending: p.isPending, participant: rowToParticipant(p) }));
 
   return {
     scene,
