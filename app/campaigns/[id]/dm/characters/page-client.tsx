@@ -20,9 +20,10 @@ const TABS: { type?: CharacterTypeValue; label: string }[] = [
 interface DMCharactersClientProps {
   campaignId: string;
   type?: CharacterTypeValue;
+  maxLevel: number;
 }
 
-export function DMCharactersClient({ campaignId, type }: DMCharactersClientProps) {
+export function DMCharactersClient({ campaignId, type, maxLevel }: DMCharactersClientProps) {
   const page = useDmCharactersPage(campaignId, type);
 
   const characterCount = page.query.data?.length ?? 0;
@@ -92,7 +93,7 @@ export function DMCharactersClient({ campaignId, type }: DMCharactersClientProps
                 character={character}
                 campaignId={campaignId}
                 busy={page.levelingUpId === character.id}
-                actions={{ onLevelUp: () => page.levelUp(character), onDelete: () => void page.confirmDelete(character) }}
+                actions={{ onLevelUp: character.level < maxLevel ? () => page.levelUp(character) : undefined, onDelete: () => void page.confirmDelete(character) }}
               />
             ))}
           </div>

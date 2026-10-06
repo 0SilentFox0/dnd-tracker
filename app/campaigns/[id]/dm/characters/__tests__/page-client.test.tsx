@@ -34,7 +34,7 @@ import { DMCharactersClient } from "@/app/campaigns/[id]/dm/characters/page-clie
 const renderIt = (type?: "player" | "npc_hero") =>
   renderWithConfirm(
     <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
-      <DMCharactersClient campaignId="c1" type={type} />
+      <DMCharactersClient campaignId="c1" type={type} maxLevel={4} />
     </QueryClientProvider>,
   );
 
@@ -86,5 +86,26 @@ describe("DMCharactersClient tabs", () => {
     expect(getCharacters).toHaveBeenLastCalledWith("c1", undefined);
     expect(screen.getByRole("link", { name: "Усі" })).toHaveAttribute("aria-current", "page");
     expect(screen.getByRole("link", { name: /Створити персонажа/ })).toHaveAttribute("href", "/campaigns/c1/dm/characters/new");
+  });
+});
+
+describe("DMCharactersClient level up", () => {
+  const openMenu = async (name: string) => {
+    const card = (await screen.findByText(name)).closest(".space-y-3") as HTMLElement;
+
+    fireEvent.pointerDown(within(card).getByRole("button", { name: "Дії персонажа" }), { button: 0, ctrlKey: false, pointerType: "mouse" });
+
+    return screen.findByRole("menu");
+  };
+
+  it("«Підняти рівень» лише нижче максимального рівня кампанії", async () => {
+    renderIt();
+
+    expect(within(await openMenu("Арвен")).getByRole("menuitem", { name: /Підняти рівень/ })).toBeInTheDocument();
+
+    fireEvent.keyDown(document.activeElement ?? document.body, { key: "Escape" });
+    await vi.waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
+
+    expect(within(await openMenu("Борин")).queryByRole("menuitem", { name: /Підняти рівень/ })).toBeNull();
   });
 });

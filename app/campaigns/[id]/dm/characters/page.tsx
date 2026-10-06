@@ -8,7 +8,7 @@ export default async function DMCharactersPage({ params, searchParams }: { param
 
   const { type } = await searchParams;
 
-  await requireCampaignDM(id);
+  const { campaign } = await requireCampaignDM(id);
 
-  return <DMCharactersClient campaignId={id} type={type === CharacterType.PLAYER || type === CharacterType.NPC_HERO ? type : undefined} />;
+  return <DMCharactersClient campaignId={id} maxLevel={campaign.maxLevel} type={type === CharacterType.PLAYER || type === CharacterType.NPC_HERO ? type : undefined} />;
 }

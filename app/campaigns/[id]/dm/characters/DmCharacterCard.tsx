@@ -22,7 +22,7 @@ interface DmCharacterCardProps {
   character: Character;
   campaignId: string;
   busy: boolean;
-  actions: { onLevelUp: () => void; onDelete: () => void };
+  actions: { onLevelUp?: () => void; onDelete: () => void };
 }
 
 function StatChip({ short, value }: { short: string; value: string | number }) {
@@ -60,6 +60,7 @@ export function DmCharacterCard({ character, campaignId, busy, actions }: DmChar
               variant="ghost"
               size="icon"
               className="h-8 w-8 shrink-0 rounded-full text-[#c9b37a] hover:bg-transparent hover:text-[#e6c25a]"
+              aria-label="Дії персонажа"
               onClick={(e) => e.preventDefault()}
             >
               <MoreVertical className="h-4 w-4" />
@@ -72,10 +73,12 @@ export function DmCharacterCard({ character, campaignId, busy, actions }: DmChar
                 Редагувати
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={actions.onLevelUp} disabled={busy}>
-              <TrendingUp className="mr-2 h-4 w-4" />
-              Підняти рівень
-            </DropdownMenuItem>
+            {actions.onLevelUp && (
+              <DropdownMenuItem onClick={actions.onLevelUp} disabled={busy}>
+                <TrendingUp className="mr-2 h-4 w-4" />
+                Підняти рівень
+              </DropdownMenuItem>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive" onClick={actions.onDelete}>
               <Trash2 className="mr-2 h-4 w-4" />
