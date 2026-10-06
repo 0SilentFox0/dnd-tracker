@@ -49,7 +49,7 @@ describe.skipIf(!enabled)("Pusher integration (server trigger)", () => {
   it("pusherServer.trigger() на тестовий канал — успішний (без error)", async () => {
     const channel = battleChannelName(`int-test-${TEST_RUN_ID}`);
 
-    const response = await pusherServer.trigger(channel, "battle-updated", {
+    const response = await pusherServer.trigger(channel, "battle-delta", {
       test: true,
       runId: TEST_RUN_ID,
     });
@@ -65,7 +65,7 @@ describe.skipIf(!enabled)("Pusher integration (server trigger)", () => {
       safePusherTrigger(
         pusherServer,
         channel,
-        "battle-updated",
+        "battle-delta",
         { test: true },
         { action: "integration test", channel },
       ),

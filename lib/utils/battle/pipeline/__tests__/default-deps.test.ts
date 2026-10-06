@@ -23,7 +23,7 @@ describe("defaultPipelineDeps.publish", () => {
     const { defaultPipelineDeps } = await import("@/lib/utils/battle/pipeline/default-deps");
 
     defaultPipelineDeps.publish([
-      { channel: "private-battle-b1", event: "battle-updated", payload: {} },
+      { channel: "private-battle-b1", event: "battle-delta", payload: {} },
       { channel: "private-user-u1", event: "turn-started", payload: {} },
     ]);
 
@@ -44,7 +44,7 @@ describe("defaultPipelineDeps.publish", () => {
     resolvers.forEach((r) => r());
     await pending;
     expect(done).toBe(true);
-    expect(trigger).toHaveBeenCalledWith("private-battle-b1", "battle-updated", {});
+    expect(trigger).toHaveBeenCalledWith("private-battle-b1", "battle-delta", {});
     expect(trigger).toHaveBeenCalledWith("private-user-u1", "turn-started", {});
   });
 });

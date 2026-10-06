@@ -64,11 +64,7 @@ export function buildPusherMessages(args: {
 
   const payload: ClientBattleDelta | BattleRefetchSignal = fits ? delta : { battleId: delta.battleId, version: delta.version, refetch: true };
 
-  const messages: PusherMessage[] = [
-    { channel, event: "battle-delta", payload },
-    // TODO(після наступного релізу): прибрати — вкладки зі старим клієнтом сприймають це як «перечитай бій»
-    { channel, event: "battle-updated", payload: { type: "battle-updated", battleId: delta.battleId, version: delta.version } },
-  ];
+  const messages: PusherMessage[] = [{ channel, event: "battle-delta", payload }];
 
   const turnMoved = before.round !== after.round || before.turnIndex !== after.turnIndex || before.status !== after.status;
 

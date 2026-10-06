@@ -45,28 +45,22 @@ describe("buildPusherMessages", () => {
   it("зміна ходу на гравця — battle-delta + turn-started у його канал", () => {
     const messages = buildPusherMessages({ before: { ...scene, turnIndex: 1 }, after: scene, participants: [hero, goblin], delta: payload });
 
-    expect(messages.map((m) => m.event)).toEqual(["battle-delta", "battle-updated", "turn-started"]);
-    expect(messages[2]).toMatchObject({ channel: "private-user-u-player", payload: { battleId: "b1", participantId: "hero" } });
+    expect(messages.map((m) => m.event)).toEqual(["battle-delta", "turn-started"]);
+    expect(messages[1]).toMatchObject({ channel: "private-user-u-player", payload: { battleId: "b1", participantId: "hero" } });
   });
 
   it("хід переходить до DM-учасника — без turn-started", () => {
-    expect(buildPusherMessages({ before: scene, after: { ...scene, turnIndex: 1 }, participants: [hero, goblin], delta: payload }).map((m) => m.event)).toEqual(["battle-delta", "battle-updated"]);
+    expect(buildPusherMessages({ before: scene, after: { ...scene, turnIndex: 1 }, participants: [hero, goblin], delta: payload }).map((m) => m.event)).toEqual(["battle-delta"]);
   });
 
-  it("старт і завершення — лише battle-delta (+ сумісний battle-updated), без окремих подій", () => {
-    expect(buildPusherMessages({ before: { ...scene, status: "prepared" }, after: scene, participants: [hero], delta: payload }).map((m) => m.event)).toEqual(["battle-delta", "battle-updated", "turn-started"]);
-    expect(buildPusherMessages({ before: scene, after: { ...scene, status: "completed" }, participants: [hero], delta: payload }).map((m) => m.event)).toEqual(["battle-delta", "battle-updated"]);
+  it("старт і завершення — лише battle-delta, без окремих подій", () => {
+    expect(buildPusherMessages({ before: { ...scene, status: "prepared" }, after: scene, participants: [hero], delta: payload }).map((m) => m.event)).toEqual(["battle-delta", "turn-started"]);
+    expect(buildPusherMessages({ before: scene, after: { ...scene, status: "completed" }, participants: [hero], delta: payload }).map((m) => m.event)).toEqual(["battle-delta"]);
   });
 
   it("велика дельта — refetch", () => {
     const big = { ...payload, upserted: Array.from({ length: 60 }, () => hero) };
 
     expect(buildPusherMessages({ before: scene, after: scene, participants: [hero], delta: big })[0].payload).toEqual({ battleId: "b1", version: 4, refetch: true });
-  });
-
-  it("сумісність зі старими вкладками: легкий battle-updated, який старий клієнт сприймає як рефетч", () => {
-    const [, legacy] = buildPusherMessages({ before: scene, after: scene, participants: [hero], delta: payload });
-
-    expect(legacy).toEqual({ channel: "private-battle-b1", event: "battle-updated", payload: { type: "battle-updated", battleId: "b1", version: 4 } });
   });
 });

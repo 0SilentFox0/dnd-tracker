@@ -14,7 +14,7 @@
  * а `after(() => safePusherTrigger(...))` дочікується відправки до заморожування функції.
  *
  * Використання:
- *   safePusherTrigger(pusherServer, battleChannel, "battle-updated", payload, {
+ *   safePusherTrigger(pusherServer, battleChannel, "battle-delta", payload, {
  *     campaignId, battleId, action: "complete battle",
  *   });
  */
