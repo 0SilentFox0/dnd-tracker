@@ -31,12 +31,19 @@ describe("artifacts hooks", () => {
     await waitFor(() => expect(result.current.data).toHaveLength(1));
   });
 
-  it("delete refreshes the server-rendered list", async () => {
-    const { result } = renderHook(() => useDeleteArtifact("c1"), { wrapper });
+  it("delete інвалідує список і не оновлює сторінку сам", async () => {
+    const qc = new QueryClient();
+
+    const spy = vi.spyOn(qc, "invalidateQueries");
+
+    const { result } = renderHook(() => useDeleteArtifact("c1"), {
+      wrapper: ({ children }: { children: ReactNode }) => <QueryClientProvider client={qc}>{children}</QueryClientProvider>,
+    });
 
     await act(() => result.current.mutateAsync("a1"));
 
     expect(deleteArtifact).toHaveBeenCalledWith("c1", "a1");
-    expect(refresh).toHaveBeenCalled();
+    expect(spy).toHaveBeenCalledWith({ queryKey: ["artifacts", "c1"] });
+    expect(refresh).not.toHaveBeenCalled();
   });
 });

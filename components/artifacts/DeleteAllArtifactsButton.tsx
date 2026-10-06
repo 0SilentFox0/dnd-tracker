@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,8 @@ export function DeleteAllArtifactsButton({
   campaignId,
   artifactsCount,
 }: DeleteAllArtifactsButtonProps) {
+  const router = useRouter();
+
   const confirm = useConfirm();
 
   const deleteAll = useDeleteAllArtifacts(campaignId);
@@ -25,7 +28,10 @@ export function DeleteAllArtifactsButton({
       description: `Буде видалено всі артефакти кампанії (${artifactsCount}). Сети артефактів залишаться, але стануть порожніми. Цю дію не можна скасувати.`,
       confirmLabel: "Видалити всі",
       destructive: true,
-      onConfirm: () => deleteAll.mutateAsync(),
+      onConfirm: async () => {
+        await deleteAll.mutateAsync();
+        router.refresh();
+      },
     });
 
   return (

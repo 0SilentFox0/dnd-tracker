@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,8 @@ export function ArtifactDeleteButton({
   campaignId,
   artifactId,
 }: ArtifactDeleteButtonProps) {
+  const router = useRouter();
+
   const confirm = useConfirm();
 
   const remove = useDeleteArtifact(campaignId);
@@ -24,7 +27,10 @@ export function ArtifactDeleteButton({
       title: "Ви впевнені, що хочете видалити цей артефакт?",
       confirmLabel: "Видалити",
       destructive: true,
-      onConfirm: () => remove.mutateAsync(artifactId),
+      onConfirm: async () => {
+        await remove.mutateAsync(artifactId);
+        router.refresh();
+      },
     });
 
   return (
