@@ -9,6 +9,7 @@ import { processSpell } from "@/lib/utils/battle/spell";
 import { appendSummonedUnitToInitiativeEnd } from "@/lib/utils/battle/spell/append-summoned-unit";
 import { mapDbSpellToBattleSpell } from "@/lib/utils/battle/spell/map-db-spell";
 import { BattleAccessError, battleActionToEvent, BattleRuleError } from "@/lib/utils/battle/store";
+import { assertNotPanicking } from "@/lib/utils/battle/turn";
 import { assertSpellRolls } from "@/lib/utils/battle/validation/dice-checks";
 
 export interface SpellMutationDeps {
@@ -51,6 +52,8 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
     }
 
     if (!data.preview) {
+      assertNotPanicking(ctx.scene.pendingMoraleCheck, caster.basicInfo.id);
+
       const isBonus = spellRow.castingTime?.toLowerCase().includes("bonus") ?? false;
 
       if (isBonus ? caster.actionFlags.hasUsedBonusAction : caster.actionFlags.hasUsedAction) {

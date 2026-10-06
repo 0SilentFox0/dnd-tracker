@@ -5,6 +5,7 @@ import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import { withinLimits } from "@/lib/utils/abilities/engine/usage";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
+import { assertNotPanicking } from "@/lib/utils/battle/turn";
 
 export const bonusActionSchema = z.object({
   participantId: z.string(),
@@ -20,6 +21,8 @@ export function bonusActionMutation(ctx: BattleMutationContext, data: BonusActio
   if (!participant) throw new BattleAccessError(404, "Учасника немає в бою");
 
   if (!ctx.isDM && participant.basicInfo.controlledBy !== ctx.userId) throw new BattleAccessError(403, "Forbidden");
+
+  assertNotPanicking(ctx.scene.pendingMoraleCheck, participant.basicInfo.id);
 
   const ability = (participant.battleData.resolvedAbilities ?? []).find((a) => a.key === data.abilityKey && a.trigger.event === "bonusAction");
 

@@ -91,4 +91,12 @@ describe("attack mutation", () => {
       expect.objectContaining({ code: "invalid_dice" }),
     );
   });
+
+  it("атакувальник у паніці (pendingMoraleCheck із пропуском) — action_used", () => {
+    const panic = { participantId: "hero", d10Roll: 1, moraleResult: { shouldSkipTurn: true, hasExtraTurn: false, moralePositive: false, message: "" } };
+
+    expect(() => attackMutation({ ...ctx, scene: { ...ctx.scene, pendingMoraleCheck: panic } } as BattleMutationContext, body())).toThrow(
+      expect.objectContaining({ code: "action_used" }),
+    );
+  });
 });

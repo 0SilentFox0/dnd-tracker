@@ -5,7 +5,7 @@ import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { toPipelineError } from "@/lib/utils/battle/pipeline/compat-errors";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { battleActionToEvent } from "@/lib/utils/battle/store";
-import { advanceTurn } from "@/lib/utils/battle/turn";
+import { advanceTurn, assertNotPanicking } from "@/lib/utils/battle/turn";
 import { assertAttackRolls } from "@/lib/utils/battle/validation/dice-checks";
 
 export const attackBodySchema = z
@@ -53,6 +53,7 @@ export function attackMutation(ctx: BattleMutationContext, body: AttackBody): Mu
   const { endTurn, ...data } = body;
 
   assertAttackInput(ctx, data);
+  assertNotPanicking(ctx.scene.pendingMoraleCheck, data.attackerId);
 
   let phase: ReturnType<typeof runAttackPhase>;
 

@@ -110,4 +110,12 @@ describe("spell mutation", () => {
       code: "invalid_dice",
     });
   });
+
+  it("кастер у паніці — action_used", async () => {
+    const panic = { participantId: "hero", d10Roll: 1, moraleResult: { shouldSkipTurn: true, hasExtraTurn: false, moralePositive: false, message: "" } };
+
+    const ctx = context({ participants: [caster, goblin] });
+
+    await expect(mutation()({ ...ctx, scene: { ...ctx.scene, pendingMoraleCheck: panic } }, body() as never)).rejects.toMatchObject({ code: "action_used" });
+  });
 });

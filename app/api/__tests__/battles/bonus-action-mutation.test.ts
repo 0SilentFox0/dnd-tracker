@@ -47,4 +47,14 @@ describe("bonusActionMutation", () => {
       expect.objectContaining({ code: "action_used" }),
     );
   });
+
+  it("учасник у паніці — action_used", () => {
+    const panic = { participantId: "hero", d10Roll: 1, moraleResult: { shouldSkipTurn: true, hasExtraTurn: false, moralePositive: false, message: "" } };
+
+    const ctx = context({ participants: [heroWith, goblin] });
+
+    expect(() => bonusActionMutation({ ...ctx, scene: { ...ctx.scene, pendingMoraleCheck: panic } }, { participantId: "hero", abilityKey: rally.key })).toThrow(
+      expect.objectContaining({ code: "action_used" }),
+    );
+  });
 });
