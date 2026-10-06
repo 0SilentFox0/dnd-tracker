@@ -39,6 +39,8 @@ describe("useProgressionActions", () => {
 
     expect(qc.getQueryData<{ unlocked: string[] }>(progressionKey("camp", "ch"))?.unlocked).toEqual(["a", "b"]);
     expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ queryKey: ["character-damage-preview", "camp", "ch"] }));
+    expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ queryKey: ["damage-calculator-melee-ranged", "camp", "ch"] }));
+    expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ queryKey: ["damage-calculator-magic-spell", "camp", "ch"] }));
     expect(invalidate).not.toHaveBeenCalledWith(expect.objectContaining({ queryKey: progressionKey("camp", "ch") }));
   });
 
@@ -61,5 +63,30 @@ describe("useProgressionActions", () => {
     await act(() => result.current.learn("b"));
 
     expect(notify).toHaveBeenCalledWith("Потрібне хоча б одне вміння зовнішнього кола цієї гілки");
+  });
+
+  it("подвійний тап: другий виклик під час першого не надсилає запит", async () => {
+    let resolve: (v: { unlocked: string[] }) => void = () => {};
+
+    vi.mocked(api.learnNode).mockClear();
+    vi.mocked(api.learnNode).mockImplementation(() => new Promise((r) => (resolve = r)));
+
+    const { result } = setup();
+
+    let first: Promise<boolean> = Promise.resolve(false);
+
+    let second = true;
+
+    await act(async () => {
+      first = result.current.learn("b");
+      second = await result.current.learn("b");
+    });
+    await act(async () => {
+      resolve({ unlocked: ["a", "b"] });
+      await first;
+    });
+
+    expect(api.learnNode).toHaveBeenCalledTimes(1);
+    expect(second).toBe(false);
   });
 });

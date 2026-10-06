@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { progressionKey } from "./progression-keys";
@@ -19,9 +19,15 @@ export function useProgressionActions(campaignId: string, characterId: string) {
 
   const [pendingNodeId, setPendingNodeId] = useState<string | null>(null);
 
+  const inFlight = useRef(false);
+
   const key = progressionKey(campaignId, characterId);
 
   const run = async (nodeId: string, call: () => Promise<{ unlocked: string[] }>): Promise<boolean> => {
+    // подвійний тап приходить раніше, ніж React вимкне кнопку
+    if (inFlight.current) return false;
+
+    inFlight.current = true;
     setPendingNodeId(nodeId);
     try {
       const { unlocked } = await call();
@@ -32,7 +38,9 @@ export function useProgressionActions(campaignId: string, characterId: string) {
 
         return old && treeId ? { ...old, skillTreeProgress: { [treeId]: { unlockedSkills: unlocked } } } : old;
       });
-      void queryClient.invalidateQueries({ queryKey: ["character-damage-preview", campaignId, characterId] });
+      for (const prefix of ["character-damage-preview", "damage-calculator-melee-ranged", "damage-calculator-magic-spell"]) {
+        void queryClient.invalidateQueries({ queryKey: [prefix, campaignId, characterId] });
+      }
       void queryClient.invalidateQueries({ queryKey: ["battle-balance"], refetchType: "none" });
 
       return true;
@@ -50,6 +58,7 @@ export function useProgressionActions(campaignId: string, characterId: string) {
 
       return false;
     } finally {
+      inFlight.current = false;
       setPendingNodeId(null);
     }
   };
