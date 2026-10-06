@@ -11,7 +11,6 @@ import {
 
 import { LogEntryDetails } from "./LogEntryDetails";
 
-import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 import { formatLogEntry } from "@/lib/utils/battle/battle-log-format";
@@ -61,12 +60,12 @@ export function BattleLogPanel({
     <div
       className={cn(
         "overflow-y-auto custom-scrollbar",
-        embedInSidebar ? "h-[min(50vh,400px)] border border-white/10 rounded-md" : "max-h-48 border-t border-white/10",
+        embedInSidebar ? "h-[min(50vh,400px)] border border-[#3a2e22] bg-black/40" : "max-h-48 border-t border-[#3a2e22]",
       )}
     >
-          <ul className="p-3 space-y-1.5 text-sm">
+          <ul className="px-2 py-1 text-sm text-[#cfc5b2]">
             {log.length === 0 ? (
-              <li className="text-white/50 italic py-2">Записів поки немає.</li>
+              <li className="py-2 italic text-[var(--hud-muted)]">Записів поки немає.</li>
             ) : (
               [...log].reverse().map((entry) => {
                 const isExpanded = expandedId === entry.id;
@@ -79,7 +78,7 @@ export function BattleLogPanel({
                 return (
                   <li
                     key={entry.id}
-                    className="rounded bg-white/5 border border-white/5 overflow-hidden"
+                    className="border-b border-white/[.06] last:border-b-0"
                   >
                     <div className="flex items-center gap-0.5">
                       <button
@@ -90,41 +89,39 @@ export function BattleLogPanel({
                         }
                         className={cn(
                           "flex-1 min-w-0 flex gap-2 py-1.5 px-2 text-left text-sm",
-                          hasDetails && "cursor-pointer hover:bg-white/5",
+                          hasDetails && "cursor-pointer hover:bg-[var(--gold)]/[.06]",
                         )}
                       >
                         {hasDetails ? (
                           isExpanded ? (
-                            <ChevronDown className="h-4 w-4 shrink-0 text-white/50" />
+                            <ChevronDown className="size-4 shrink-0 text-[var(--hud-muted)]" />
                           ) : (
-                            <ChevronRight className="h-4 w-4 shrink-0 text-white/50" />
+                            <ChevronRight className="size-4 shrink-0 text-[var(--hud-muted)]" />
                           )
                         ) : (
                           <span className="w-4 shrink-0" />
                         )}
-                        <span className="shrink-0 text-white/50 font-mono text-xs">
+                        <span className="shrink-0 pt-0.5 text-xs text-[var(--hud-muted)]">
                           Р{entry.round}
                         </span>
                         <span
                           className={cn(
                             "shrink-0 font-medium",
                             entry.actorSide === "ally"
-                              ? "text-blue-400"
-                              : "text-red-400",
+                              ? "text-[#8fb0d0]"
+                              : "text-[#d0705c]",
                           )}
                         >
                           {entry.actorName}
                         </span>
-                        <span className="text-white/80 truncate min-w-0">
+                        <span className="min-w-0 truncate">
                           {formatLogEntry(entry)}
                         </span>
                       </button>
                       {isDM && onRollback && (
-                        <Button
+                        <button
                           type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 shrink-0 text-red-400 hover:text-red-300 hover:bg-red-500/20"
+                          className="flex size-8 shrink-0 items-center justify-center text-[#d0705c] transition-colors hover:bg-[#d0705c]/15"
                           title="Відмінити дію (відкотити до стану перед нею)"
                           onClick={async () => {
                             if (
@@ -135,8 +132,8 @@ export function BattleLogPanel({
                             }
                           }}
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
+                          <Trash2 className="size-3.5" />
+                        </button>
                       )}
                     </div>
                     {isExpanded && hasDetails && (
@@ -156,22 +153,21 @@ export function BattleLogPanel({
     return (
       <div className={cn("flex flex-col gap-2", className)}>
         <div className="flex items-center justify-between gap-2 shrink-0">
-          <span className="flex items-center gap-2 font-medium text-sm text-white/90">
-            <ScrollText className="h-4 w-4" />
+          <span className="hud-sc flex items-center gap-2 text-[15px] tracking-[.08em] text-[var(--gold)]">
+            <ScrollText className="size-4" />
             Лог бою
             {log.length > 0 && (
-              <span className="text-xs text-white/50">({log.length})</span>
+              <span className="font-sans text-xs tracking-normal text-[var(--hud-muted)]">({log.length})</span>
             )}
           </span>
           {onOpenChange && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-white/70 hover:text-white h-8 px-2"
+            <button
+              type="button"
+              className="h-8 px-2 text-[13px] text-[var(--hud-muted)] hover:text-[var(--ink)]"
               onClick={() => onOpenChange(false)}
             >
               Закрити
-            </Button>
+            </button>
           )}
         </div>
         {logContent}
@@ -182,29 +178,28 @@ export function BattleLogPanel({
   return (
     <div
       className={cn(
-        "shrink-0 border-t border-white/10 bg-black/40 backdrop-blur-md z-30 overflow-hidden",
+        "z-30 shrink-0 overflow-hidden border-t border-[#3a2e22] bg-[#14100c]/90 backdrop-blur-md",
         className,
       )}
     >
-      <Button
-        variant="ghost"
-        size="sm"
-        className="w-full justify-between rounded-none h-10 px-4 text-white/80 hover:text-white hover:bg-white/10"
+      <button
+        type="button"
+        className="hud-sc flex h-10 w-full items-center justify-between px-4 text-[15px] tracking-[.08em] text-[var(--gold)] hover:bg-[var(--gold)]/[.06]"
         onClick={handleToggle}
       >
-        <span className="flex items-center gap-2 font-medium">
-          <ScrollText className="h-4 w-4" />
+        <span className="flex items-center gap-2">
+          <ScrollText className="size-4" />
           Лог бою
           {log.length > 0 && (
-            <span className="text-xs text-white/50">({log.length})</span>
+            <span className="font-sans text-xs tracking-normal text-[var(--hud-muted)]">({log.length})</span>
           )}
         </span>
         {open ? (
-          <ChevronUp className="h-4 w-4" />
+          <ChevronUp className="size-4 text-[var(--hud-muted)]" />
         ) : (
-          <ChevronDown className="h-4 w-4" />
+          <ChevronDown className="size-4 text-[var(--hud-muted)]" />
         )}
-      </Button>
+      </button>
       {open && logContent}
     </div>
   );
