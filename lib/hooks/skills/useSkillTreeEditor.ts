@@ -122,10 +122,14 @@ export function useSkillTreeEditor(campaignId: string) {
         if (m) update((r) => edit.addBranch(r, { id: m.id, name: m.name, color: m.color, icon: m.icon ?? null, spellGroupId: m.spellGroupId ?? null }));
       },
       createBranch: async (input: { name: string; color: string; icon?: string | null }) => {
-        const created = await createMainSkill(campaignId, { name: input.name, color: input.color, ...(input.icon && { icon: input.icon }) });
+        try {
+          const created = await createMainSkill(campaignId, { name: input.name, color: input.color, ...(input.icon && { icon: input.icon }) });
 
-        await queryClient.invalidateQueries({ queryKey: ["main-skills", campaignId] });
-        update((r) => edit.addBranch(r, { id: created.id, name: created.name, color: created.color, icon: created.icon ?? null }));
+          await queryClient.invalidateQueries({ queryKey: ["main-skills", campaignId] });
+          update((r) => edit.addBranch(r, { id: created.id, name: created.name, color: created.color, icon: created.icon ?? null }));
+        } catch (error) {
+          await notify((error as Error).message);
+        }
       },
       removeBranch: (branchId: string) => update((r) => edit.removeBranch(r, branchId)),
       moveBranch: (branchId: string, dir: -1 | 1) => update((r) => edit.moveBranch(r, branchId, dir)),
