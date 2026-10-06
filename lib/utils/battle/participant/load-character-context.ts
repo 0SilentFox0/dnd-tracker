@@ -4,6 +4,7 @@ import type { CampaignSpellContext, CharacterFromPrisma } from "../types/partici
 import { referencedSkillIds } from "./extract-skills";
 
 import { prisma } from "@/lib/db";
+import { normalizeTree, resolveLearned } from "@/lib/utils/skills/progression";
 
 export interface CharacterContext {
   context: CampaignSpellContext;
@@ -17,7 +18,24 @@ function equippedArtifactIds(character: CharacterFromPrisma): string[] {
   return [...new Set(Object.values(equipped).filter((v): v is string => typeof v === "string" && !!v))];
 }
 
-/** Контекст одного персонажа за 3 виклики Prisma: кампанія (раса, дерево, школи, спели) + артефакти зі сетами → скіли. */
+/** Learned-вузли дерева й особистий скіл персонажа: що саме з бібліотеки кампанії йому потрібне. */
+function learnedNeeds(character: CharacterFromPrisma, tree: Prisma.SkillTreeGetPayload<object> | null) {
+  const normalized = tree ? normalizeTree(tree) : null;
+
+  const learned = normalized ? resolveLearned(normalized, character.skillTreeProgress) : [];
+
+  return {
+    learned: learned.length > 0,
+    skillIds: referencedSkillIds([character], tree ? [tree] : []),
+    branchIds: normalized?.branches.map((b) => b.id) ?? [],
+    branchGroupIds: (normalized?.branches ?? []).flatMap((b) => (b.spellGroupId ? [b.spellGroupId] : [])),
+  };
+}
+
+/**
+ * Контекст одного персонажа за 3 виклики Prisma: раса й дерево + артефакти зі сетами → скіли, школи й заклинання.
+ * Школи й заклинання — лише коли є вивчені вузли, і лише групи гілок дерева та вивчених скілів.
+ */
 export async function loadCharacterContext(character: CharacterFromPrisma, maxLevel: number): Promise<CharacterContext> {
   const { campaignId, race: raceName } = character;
 
@@ -29,8 +47,6 @@ export async function loadCharacterContext(character: CharacterFromPrisma, maxLe
       select: {
         races: { where: { name: raceName }, take: 1 },
         skillTrees: { where: { race: raceName }, take: 1 },
-        mainSkills: { select: { id: true, spellGroupId: true, name: true } },
-        spells: { select: { id: true, level: true, groupId: true } },
       },
     }),
     artifactIds.length > 0
@@ -45,9 +61,32 @@ export async function loadCharacterContext(character: CharacterFromPrisma, maxLe
 
   const tree = campaign?.skillTrees[0] ?? null;
 
-  const skillIds = referencedSkillIds([character], tree ? [tree] : []);
+  const needs = learnedNeeds(character, tree);
 
-  const skills = skillIds.length > 0 ? await prisma.skill.findMany({ where: { campaignId, id: { in: skillIds } } }) : [];
+  const library =
+    needs.skillIds.length > 0 || needs.learned
+      ? await prisma.campaign.findUnique({
+          where: { id: campaignId },
+          select: {
+            ...(needs.skillIds.length > 0 && { skills: { where: { id: { in: needs.skillIds } } } }),
+            ...(needs.learned && {
+              mainSkills: { where: { id: { in: needs.branchIds } }, select: { id: true, spellGroupId: true, name: true } },
+              spells: {
+                where: {
+                  OR: [
+                    { groupId: { in: needs.branchGroupIds } },
+                    { spellGroup: { mainSkills: { some: { id: { in: needs.branchIds } } } } },
+                    { spellGroup: { skills: { some: { id: { in: needs.skillIds } } } } },
+                  ],
+                },
+                select: { id: true, level: true, groupId: true },
+              },
+            }),
+          },
+        })
+      : null;
+
+  const skills = library?.skills ?? [];
 
   const artifactsById: NonNullable<CampaignSpellContext["artifactsById"]> = {};
 
@@ -69,8 +108,8 @@ export async function loadCharacterContext(character: CharacterFromPrisma, maxLe
     tree,
     context: {
       skillTreeByRace: { [raceName]: tree },
-      mainSkills: campaign?.mainSkills ?? [],
-      spells: (campaign?.spells ?? []).map((s) => ({ id: s.id, level: s.level, spellGroup: s.groupId ? { id: s.groupId } : null })),
+      mainSkills: library?.mainSkills ?? [],
+      spells: (library?.spells ?? []).map((s) => ({ id: s.id, level: s.level, spellGroup: s.groupId ? { id: s.groupId } : null })),
       allSkills: skills,
       racesByName: { [raceName]: race },
       campaign: { maxLevel },

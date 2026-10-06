@@ -2,19 +2,28 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { buildTreeJson } from "@/lib/utils/skills/progression";
 
-const db = vi.hoisted(() => ({ calls: {} as Record<string, number>, results: {} as Record<string, unknown> }));
+const db = vi.hoisted(() => ({
+  calls: {} as Record<string, number>,
+  args: {} as Record<string, unknown[]>,
+  results: {} as Record<string, unknown>,
+}));
 
 vi.mock("@/lib/db", () => {
   const model = (name: string) =>
     new Proxy(
       {},
       {
-        get: (_t, method: string) => async () => {
+        get: (_t, method: string) => async (arg: unknown) => {
           const key = `${name}.${method}`;
 
           db.calls[key] = (db.calls[key] ?? 0) + 1;
+          (db.args[key] ??= []).push(arg);
 
-          return key in db.results ? db.results[key] : method === "findMany" ? [] : null;
+          const result = db.results[key];
+
+          if (typeof result === "function") return (result as (a: unknown) => unknown)(arg);
+
+          return key in db.results ? result : method === "findMany" ? [] : null;
         },
       },
     );
@@ -56,11 +65,15 @@ const total = () => Object.values(db.calls).reduce((a, b) => a + b, 0);
 describe("лист персонажа: запити до БД", () => {
   beforeEach(() => {
     db.calls = {};
+    db.args = {};
     db.results = {
       "character.findUnique": character,
-      "campaign.findUnique": { races: [{ id: "race", name: "Ельф", icon: "elf.png", passiveAbility: null, spellSlotProgression: [], abilities: [] }], skillTrees: [tree], mainSkills: [], spells: [{ id: "sp1", level: 1, groupId: null }] },
+      // перший виклик — раса й дерево, другий — скіли, школи й заклинання для вивчених вузлів
+      "campaign.findUnique": (arg: { select: Record<string, unknown> }) =>
+        "races" in arg.select
+          ? { races: [{ id: "race", name: "Ельф", icon: "elf.png", passiveAbility: null, spellSlotProgression: [], abilities: [] }], skillTrees: [tree] }
+          : { skills: [skill("atk-b"), skill("o1"), skill("p1")], mainSkills: [], spells: [{ id: "sp1", level: 1, groupId: null }] },
       "artifact.findMany": [armor],
-      "skill.findMany": [skill("atk-b"), skill("o1"), skill("p1")],
       "spell.findMany": [bookSpell],
     };
   });
@@ -73,7 +86,7 @@ describe("лист персонажа: запити до БД", () => {
     expect(total()).toBeLessThanOrEqual(5);
     expect(db.calls["race.findFirst"]).toBeUndefined();
     expect(db.calls["skillTree.findFirst"]).toBeUndefined();
-    expect(db.calls["skill.findMany"]).toBe(1);
+    expect(db.calls["campaign.findUnique"]).toBe(2);
     expect(sheet.identity.raceIcon).toBe("elf.png");
     expect(sheet.personalSkill).toEqual({ id: "p1", name: "p1", icon: null, description: "опис p1" });
     expect(sheet.spells.map((s) => s.id)).toEqual(["sp1"]);
@@ -97,10 +110,41 @@ describe("лист персонажа: запити до БД", () => {
   });
 
   it("без дерева раси — 0 вільних очок", async () => {
-    db.results["campaign.findUnique"] = { races: [], skillTrees: [], mainSkills: [], spells: [] };
+    db.results["campaign.findUnique"] = { races: [], skillTrees: [], skills: [], mainSkills: [], spells: [] };
 
     const sheet = await buildSheetFor(character as never, { isDM: false, isOwner: true }, 20);
 
     expect(sheet.progression.freePoints).toBe(0);
+  });
+
+  it("без вивчених вузлів і особистого скіла — без скілів, шкіл і заклинань кампанії", async () => {
+    const fresh = { ...character, skillTreeProgress: {}, personalSkillId: null };
+
+    await buildSheetFor(fresh as never, { isDM: false, isOwner: true }, 20);
+
+    expect(db.calls["campaign.findUnique"]).toBe(1);
+    expect(db.args["campaign.findUnique"][0]).not.toHaveProperty("select.spells");
+    expect(db.args["campaign.findUnique"][0]).not.toHaveProperty("select.mainSkills");
+  });
+
+  it("лише особистий скіл — скіл за id, без шкіл і заклинань", async () => {
+    const personalOnly = { ...character, skillTreeProgress: {} };
+
+    await buildSheetFor(personalOnly as never, { isDM: false, isOwner: true }, 20);
+
+    const [, second] = db.args["campaign.findUnique"] as Array<{ select: Record<string, unknown> }>;
+
+    expect(second.select.skills).toEqual({ where: { id: { in: ["p1"] } } });
+    expect(second.select).not.toHaveProperty("spells");
+    expect(second.select).not.toHaveProperty("mainSkills");
+  });
+
+  it("вивчені вузли — школи й заклинання лише для гілок дерева і вивчених скілів", async () => {
+    await buildSheetFor(character as never, { isDM: false, isOwner: true }, 20);
+
+    const [, second] = db.args["campaign.findUnique"] as Array<{ select: Record<string, { where?: unknown }> }>;
+
+    expect(second.select.mainSkills.where).toEqual({ id: { in: ["attack"] } });
+    expect(second.select.spells.where).toBeDefined();
   });
 });
