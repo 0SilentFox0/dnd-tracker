@@ -5,7 +5,6 @@ import { Plus, Trash2 } from "lucide-react";
 import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 interface Props {
   /** Поточний розподіл, або null = за замовчуванням 100% усім */
