@@ -12,7 +12,8 @@ export function buildClientDelta(args: {
   after: BattleSceneState;
   participants: BattleParticipant[];
   pending: BattleParticipant[];
-  upsertedIds: string[];
+  /** змінені учасники у збереженій формі (split → join): клієнт має бачити те саме, що віддасть GET */
+  stored: BattleParticipant[];
   /** нові учасники й ті, чий знімок змінився */
   fullIds: string[];
   log: BattleAction[];
@@ -20,7 +21,7 @@ export function buildClientDelta(args: {
 }): ClientBattleDelta {
   const { before, after, participants, pending, log, cancelledFrom } = args;
 
-  const changed = new Set(args.upsertedIds);
+  const storedById = new Map(args.stored.map((p) => [p.basicInfo.id, p]));
 
   const full = new Set(args.fullIds);
 
@@ -30,8 +31,10 @@ export function buildClientDelta(args: {
 
   const patched: BattleParticipantPatch[] = [];
 
-  for (const p of participants) {
-    if (!changed.has(p.basicInfo.id)) continue;
+  for (const { basicInfo } of participants) {
+    const p = storedById.get(basicInfo.id);
+
+    if (!p) continue;
 
     const old = previous.get(p.basicInfo.id);
 
@@ -49,7 +52,11 @@ export function buildClientDelta(args: {
 
   const beforePending = ids(before.pending);
 
-  const pendingChanged = !sameIds(beforePending, ids(pending)) || pending.some((p) => changed.has(p.basicInfo.id));
+  const pendingChanged = !sameIds(beforePending, ids(pending)) || pending.some((p) => storedById.has(p.basicInfo.id));
+
+  const previousPending = new Map(before.pending.map((p) => [p.basicInfo.id, p]));
+
+  const storedPending = pending.map((p) => storedById.get(p.basicInfo.id) ?? previousPending.get(p.basicInfo.id) ?? p);
 
   return {
     battleId: after.id,
@@ -66,7 +73,7 @@ export function buildClientDelta(args: {
     ...(patched.length > 0 && { patched }),
     removed: [...beforeOrder, ...beforePending].filter((id) => !afterIds.has(id)),
     ...(!sameIds(beforeOrder, afterOrder) && { order: afterOrder }),
-    ...(pendingChanged && { pending }),
+    ...(pendingChanged && { pending: storedPending }),
     ...(after.status === "prepared" && { setup: before.meta.setup }),
     log,
     ...(cancelledFrom !== undefined && { cancelledFrom }),

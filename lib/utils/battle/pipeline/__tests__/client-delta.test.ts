@@ -28,7 +28,7 @@ describe("buildClientDelta", () => {
       after: { ...scene, version: 8, turnIndex: 0 },
       participants: [a, b2],
       pending: [],
-      upsertedIds: ["b"],
+      stored: [b2],
       fullIds: [],
       log: [],
     });
@@ -50,7 +50,7 @@ describe("buildClientDelta", () => {
       after: { ...scene, version: 8 },
       participants: [c, a],
       pending: [],
-      upsertedIds: [],
+      stored: [],
       fullIds: [],
       log: [],
     });
@@ -67,7 +67,7 @@ describe("buildClientDelta", () => {
       after: { ...scene, version: 8 },
       participants: [a],
       pending: [s],
-      upsertedIds: ["s"],
+      stored: [s],
       fullIds: [],
       log: [],
     });
@@ -80,7 +80,7 @@ describe("buildClientDelta", () => {
       after: { ...scene, version: 9 },
       participants: [a, s],
       pending: [],
-      upsertedIds: ["s"],
+      stored: [s],
       fullIds: [],
       log: [],
     });
@@ -106,7 +106,7 @@ describe("buildClientDelta", () => {
       after: { ...scene, version: 8 },
       participants: [a2, { ...b, battleData: bData }, c],
       pending: [],
-      upsertedIds: ["a", "b", "c"],
+      stored: [a2, { ...b, battleData: bData }, c],
       fullIds: ["a"],
       log: [],
     });
@@ -123,7 +123,7 @@ describe("buildClientDelta", () => {
       after: { ...scene, status: "prepared", version: 8, round: 1, turnIndex: 0 },
       participants: [],
       pending: [],
-      upsertedIds: [],
+      stored: [],
       fullIds: [],
       log: [],
       cancelledFrom: 0,
@@ -133,5 +133,30 @@ describe("buildClientDelta", () => {
     expect(d.cancelledFrom).toBe(0);
     expect(d.removed).toEqual(["a"]);
     expect(d.order).toEqual([]);
+  });
+
+  it("патчі й pending будуються зі збереженої форми, а не з сирого виводу рушія", () => {
+    const a = p("a"), s = p("s");
+
+    const raw = { ...a, combatStats: { ...a.combatStats, currentHp: 37.5, maxHp: 37.5 } };
+
+    const stored = { ...a, combatStats: { ...a.combatStats, currentHp: 38, maxHp: 38 } };
+
+    const rawSummon = { ...s, combatStats: { ...s.combatStats, maxHp: 12.5 } };
+
+    const storedSummon = { ...s, combatStats: { ...s.combatStats, maxHp: 13 } };
+
+    const d = buildClientDelta({
+      before: { scene, meta, participants: [a], pending: [] },
+      after: { ...scene, version: 8 },
+      participants: [raw],
+      pending: [rawSummon],
+      stored: [stored, storedSummon],
+      fullIds: [],
+      log: [],
+    });
+
+    expect(d.patched).toEqual([{ id: "a", combatStats: { currentHp: 38, maxHp: 38 } }]);
+    expect(d.pending).toEqual([storedSummon]);
   });
 });

@@ -266,7 +266,7 @@ export async function runBattleMutation<TBody>(
       after,
       participants: result.participants,
       pending: result.pending,
-      upsertedIds: delta.upserted.map((p) => p.basicInfo.id),
+      stored: delta.upserted,
       fullIds: delta.fullIds,
       log: entries,
       cancelledFrom,
