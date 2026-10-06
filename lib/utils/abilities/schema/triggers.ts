@@ -1,6 +1,8 @@
 import { z } from "zod";
 
-import { ATTACK_KINDS } from "./common";
+import { ATTACK_KINDS } from "./kinds";
+
+export { isActionScopedTrigger } from "./kinds";
 
 const attackRole = z.enum(["attacker", "target"]);
 
@@ -29,7 +31,3 @@ export const TriggerSchema = z.discriminatedUnion("event", [
 export type Trigger = z.infer<typeof TriggerSchema>;
 
 export type TriggerEvent = Trigger["event"];
-
-export function isActionScopedTrigger(t: Trigger): boolean {
-  return (t.event === "attack" || t.event === "spellCast") && t.phase === "before";
-}

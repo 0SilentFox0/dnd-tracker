@@ -1,5 +1,5 @@
-import { GoalAuthor } from "@/lib/constants/characters";
-import { type GoalInput, MAX_GOALS } from "@/lib/schemas/character-goals";
+import { GoalAuthor, MAX_GOALS } from "@/lib/constants/characters";
+import type { GoalInput } from "@/lib/schemas/character-goals";
 import type { CharacterGoal } from "@/types/characters";
 
 const uniqueById = (goals: CharacterGoal[]) => goals.filter((g, i) => goals.findIndex((x) => x.id === g.id) === i);

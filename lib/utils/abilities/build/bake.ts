@@ -1,7 +1,8 @@
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { resolveFlat } from "@/lib/utils/abilities/engine/amount";
 import { resolvedAbilitiesOf } from "@/lib/utils/abilities/engine/participants";
-import { type Effect, isBakedStat } from "@/lib/utils/abilities/schema";
+import type { Effect } from "@/lib/utils/abilities/schema";
+import { isBakedStat } from "@/lib/utils/abilities/schema/kinds";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";

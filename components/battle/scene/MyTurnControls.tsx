@@ -1,17 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 
 import { ActionGrid } from "./ActionGrid";
 import { TurnCountdown } from "./TurnCountdown";
 
-import { AttackWizard } from "@/components/battle/wizards/AttackWizard";
-import { BonusActionPicker } from "@/components/battle/wizards/BonusActionPicker";
 import { AiRollButton, DiceGrid } from "@/components/battle/wizards/DiceInput";
-import { SpellBook } from "@/components/battle/wizards/SpellBook";
 import { rollDie, useAttackWizard, useBattleScene, usePlayerTurn, useSpellBook } from "@/lib/hooks/battle";
 import { COUNTDOWN_SECONDS } from "@/lib/utils/battle/flows";
 import type { BattleParticipant } from "@/types/battle";
+
+const AttackWizard = dynamic(() => import("@/components/battle/wizards/AttackWizard").then((m) => m.AttackWizard), { ssr: false });
+
+const SpellBook = dynamic(() => import("@/components/battle/wizards/SpellBook").then((m) => m.SpellBook), { ssr: false });
+
+const BonusActionPicker = dynamic(() => import("@/components/battle/wizards/BonusActionPicker").then((m) => m.BonusActionPicker), { ssr: false });
 
 export function MyTurnControls({ hero }: { hero: BattleParticipant }) {
   const { anyPending, isDM } = useBattleScene();

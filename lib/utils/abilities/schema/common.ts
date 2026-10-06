@@ -1,16 +1,20 @@
 import { z } from "zod";
 
-export const DICE_RE = /^(\d+)d(\d+)([+-]\d+)?$/;
+import { ABILITY_TARGETS, DICE_RE } from "./kinds";
 
-export const ABILITY_TARGETS = ["self", "eventTarget", "eventActor", "allAllies", "allEnemies"] as const;
+export {
+  ABILITY_TARGETS,
+  type AbilityTarget,
+  ATTACK_KINDS,
+  type AttackKind,
+  DAMAGE_FILTER_KINDS,
+  DAMAGE_KINDS,
+  type DamageFilterKind,
+  type DamageKind,
+  DICE_RE,
+} from "./kinds";
 
 export const AbilityTargetSchema = z.enum(ABILITY_TARGETS);
-
-export const ATTACK_KINDS = ["melee", "ranged"] as const;
-
-export const DAMAGE_KINDS = ["melee", "ranged", "magic"] as const;
-
-export const DAMAGE_FILTER_KINDS = ["melee", "ranged", "magic", "physical", "all"] as const;
 
 export const DurationSchema = z.object({ rounds: z.number().int().min(1).max(99) });
 
@@ -24,14 +28,6 @@ export const AmountSchema = z.union([
   FormulaSchema,
   z.object({ percentOf: z.enum(["eventDamage", "maxHp"]), value: z.number().positive() }),
 ]);
-
-export type AbilityTarget = z.infer<typeof AbilityTargetSchema>;
-
-export type AttackKind = (typeof ATTACK_KINDS)[number];
-
-export type DamageKind = (typeof DAMAGE_KINDS)[number];
-
-export type DamageFilterKind = (typeof DAMAGE_FILTER_KINDS)[number];
 
 export type Duration = z.infer<typeof DurationSchema>;
 

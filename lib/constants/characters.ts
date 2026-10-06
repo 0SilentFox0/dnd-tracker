@@ -7,3 +7,5 @@ export const CONTROLLED_BY_DM = "dm";
 export const GoalAuthor = { DM: "dm", PLAYER: "player" } as const;
 
 export type GoalAuthorValue = (typeof GoalAuthor)[keyof typeof GoalAuthor];
+
+export const MAX_GOALS = 30;
