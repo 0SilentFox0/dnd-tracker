@@ -46,6 +46,36 @@ describe("useBattleAction", () => {
     expect(qc.getQueryData<BattleScene>(key)?.version).toBe(6);
   });
 
+  it("розрив версії — mutateAsync чекає рефетчу, щоб кеш після дії був свіжим", async () => {
+    const { qc, wrapper } = setup();
+
+    let release: () => void = () => {};
+
+    vi.spyOn(qc, "invalidateQueries").mockImplementation(() => new Promise<void>((r) => (release = r)));
+
+    const { result } = renderHook(() => useBattleAction("c1", "b1", async () => ({ delta: delta(8) })), { wrapper });
+
+    let settled = false;
+
+    let done: Promise<void> = Promise.resolve();
+
+    act(() => {
+      done = result.current.mutateAsync({}).then(() => {
+        settled = true;
+      });
+    });
+
+    await waitFor(() => expect(qc.invalidateQueries).toHaveBeenCalledWith({ queryKey: key }));
+    expect(settled).toBe(false);
+
+    await act(async () => {
+      release();
+      await done;
+    });
+
+    expect(settled).toBe(true);
+  });
+
   it("пропуск версії — інвалідація замість патчу", async () => {
     const { qc, wrapper } = setup();
 

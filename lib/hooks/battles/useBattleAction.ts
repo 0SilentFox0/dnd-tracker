@@ -32,7 +32,7 @@ export function useBattleAction<TVars extends object, TResp = Record<string, unk
 
       const next = cached ? applyBattleDelta(cached, delta) : "refetch";
 
-      if (next === "refetch") void queryClient.invalidateQueries({ queryKey: key });
+      if (next === "refetch") await queryClient.invalidateQueries({ queryKey: key });
       else queryClient.setQueryData(key, next);
 
       for (const list of options.invalidate ?? []) {
