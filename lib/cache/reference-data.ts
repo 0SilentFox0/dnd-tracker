@@ -5,7 +5,7 @@ import { cacheTags } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import { toUnit } from "@/lib/utils/units/to-unit";
 
-const REFERENCE_REVALIDATE_SECONDS = 300;
+export const REFERENCE_REVALIDATE_SECONDS = 300;
 
 export async function getCachedSpells(campaignId: string) {
   return unstable_cache(

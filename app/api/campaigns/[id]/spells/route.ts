@@ -89,7 +89,7 @@ export async function GET(
 
     const { ids } = listSpellsQuerySchema.parse(Object.fromEntries(new URL(request.url).searchParams));
 
-    if (ids) return NextResponse.json(await loadBookSpellsByIds(id, ids), { headers: { "Cache-Control": "private, no-store" } });
+    if (ids) return NextResponse.json(await loadBookSpellsByIds(id, ids), { headers: PRIVATE_NO_STORE_HEADERS });
 
     const spells = await getCachedSpells(id);
 
