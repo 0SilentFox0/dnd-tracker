@@ -1,16 +1,6 @@
-/**
- * Універсальний компонент для заголовків сторінок
- */
-
 import { ReactNode } from "react";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { HudPageHeader } from "@/components/hud/page";
 
 interface PageHeaderProps {
   title: string;
@@ -21,42 +11,26 @@ interface PageHeaderProps {
   className?: string;
 }
 
-export function PageHeader({
-  title,
-  description,
-  stats,
-  actions,
-  children,
-  className,
-}: PageHeaderProps) {
-  // Формуємо опис зі статистикою
-  const descriptionText = description
-    ? `${description}${
-        stats !== undefined && typeof stats === "number"
-          ? ` Всього: ${stats}`
-          : stats !== undefined && typeof stats === "string"
-          ? ` Всього: ${stats}`
-          : ""
-      }`
-    : stats !== undefined && typeof stats === "number"
-    ? `Всього: ${stats}`
-    : undefined;
+export function PageHeader({ title, description, stats, actions, children, className }: PageHeaderProps) {
+  const isScalarStats = typeof stats === "number" || typeof stats === "string";
+
+  const totalText = isScalarStats ? `Всього: ${stats}` : undefined;
+
+  const descriptionText = description ? `${description}${totalText ? ` ${totalText}` : ""}` : totalText;
+
+  const hasNodeStats = stats !== undefined && !isScalarStats;
+
+  const subtitle =
+    descriptionText || hasNodeStats ? (
+      <>
+        {descriptionText}
+        {hasNodeStats && <span className="block">{stats}</span>}
+      </>
+    ) : undefined;
 
   return (
-    <Card className={className}>
-      <CardHeader>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <CardTitle>{title}</CardTitle>
-            {descriptionText && <CardDescription>{descriptionText}</CardDescription>}
-            {stats !== undefined && typeof stats !== "string" && typeof stats !== "number" && (
-              <CardDescription>{stats}</CardDescription>
-            )}
-          </div>
-          {actions && <div className="flex gap-2">{actions}</div>}
-        </div>
-      </CardHeader>
-      {children && <CardContent>{children}</CardContent>}
-    </Card>
+    <HudPageHeader title={title} subtitle={subtitle} actions={actions} className={className}>
+      {children}
+    </HudPageHeader>
   );
 }
