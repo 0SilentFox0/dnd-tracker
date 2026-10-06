@@ -1,44 +1,19 @@
 import { z } from "zod";
 
-import {
-  AbilityTargetSchema,
-  AmountSchema,
-  ATTACK_KINDS,
-  DAMAGE_FILTER_KINDS,
-  DurationSchema,
-  FlatSchema,
-} from "./common";
+import { AbilityTargetSchema, AmountSchema, DurationSchema, FlatSchema } from "./common";
+import { ATTACK_KINDS, CONDITION_KEYS, DAMAGE_FILTER_KINDS, STAT_KEYS } from "./kinds";
 
-import { ABILITY_KEYS } from "@/lib/constants/abilities";
-
-export const DYNAMIC_STATS = ["armor", "attackBonus", "critThreshold"] as const;
-
-export const BAKED_STATS = [
-  "initiative",
-  "maxHp",
-  "speed",
-  "morale",
-  "minTargets",
-  "maxTargets",
-  "spellSlots",
-  ...ABILITY_KEYS,
-] as const;
-
-export const STAT_KEYS = [...DYNAMIC_STATS, ...BAKED_STATS] as const;
-
-export const TIMED_STATS = ["armor", "attackBonus", "critThreshold", "initiative"] as const;
-
-export const CONDITION_KEYS = [
-  "no_bonus_action",
-  "no_reaction",
-  "disable_melee_attacks",
-  "disable_ranged_attacks",
-  "disable_spell_casting",
-] as const;
-
-export type StatKey = (typeof STAT_KEYS)[number];
-
-export type ConditionImmunityKey = (typeof CONDITION_KEYS)[number] | "fear";
+export {
+  BAKED_STATS,
+  CONDITION_KEYS,
+  type ConditionImmunityKey,
+  DYNAMIC_STATS,
+  isBakedStat,
+  isStaticEffect,
+  STAT_KEYS,
+  type StatKey,
+  TIMED_STATS,
+} from "./kinds";
 
 const target = { target: AbilityTargetSchema.optional() };
 
@@ -178,11 +153,3 @@ export type StaticEffect = Extract<Effect, { kind: "modifyStat" | "damageBonus" 
 export type FlagEffect = Extract<Effect, { kind: "flag" }>;
 
 export type FlagKey = FlagEffect["flag"];
-
-export function isStaticEffect(e: Effect): e is StaticEffect {
-  return e.kind === "modifyStat" || e.kind === "damageBonus" || e.kind === "flag";
-}
-
-export function isBakedStat(stat: StatKey): boolean {
-  return (BAKED_STATS as readonly string[]).includes(stat);
-}

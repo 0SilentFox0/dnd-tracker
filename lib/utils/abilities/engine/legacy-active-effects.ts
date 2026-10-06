@@ -1,5 +1,5 @@
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
-import { legacyDamageKindOf } from "@/lib/utils/abilities/schema";
+import { legacyDamageKindOf } from "@/lib/utils/abilities/schema/damage-kind";
 import type { ActiveEffect } from "@/types/battle";
 
 export function legacyActiveEffectModifiers(ae: ActiveEffect): StaticEffect[] {

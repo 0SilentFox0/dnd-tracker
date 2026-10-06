@@ -3,16 +3,8 @@ import { legacyActiveEffectModifiers } from "./legacy-active-effects";
 import { findParticipant, isUp, resolvedAbilitiesOf } from "./participants";
 
 import { evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
-import {
-  type AttackKind,
-  type DamageKind,
-  type FlagEffect,
-  type FlagKey,
-  isBakedStat,
-  isStaticEffect,
-  type StaticEffect,
-  type StatKey,
-} from "@/lib/utils/abilities/schema";
+import type { AttackKind, DamageKind, FlagEffect, FlagKey, StaticEffect, StatKey } from "@/lib/utils/abilities/schema";
+import { isBakedStat, isStaticEffect } from "@/lib/utils/abilities/schema/kinds";
 import type { AbilitySource } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
 

@@ -1,6 +1,6 @@
 import type { Rng } from "./types";
 
-import { type Amount, type Flat } from "@/lib/utils/abilities/schema";
+import type { Amount, Flat } from "@/lib/utils/abilities/schema";
 import { evaluateFormula } from "@/lib/utils/battle/common/formula-evaluator";
 import { rollDice } from "@/lib/utils/common/dice";
 import type { BattleParticipant } from "@/types/battle";

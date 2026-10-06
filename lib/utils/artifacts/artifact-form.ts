@@ -1,5 +1,6 @@
 import type { Ability } from "@/lib/utils/abilities/schema";
-import { isWeaponSlot, type WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
+import { isWeaponSlot } from "@/lib/utils/artifacts/weapon-slot";
+import type { WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
 
 export interface ArtifactFormState {
   name: string;
