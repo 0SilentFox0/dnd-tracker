@@ -17,7 +17,7 @@ export function AbbreviationsInfoDialog() {
       <Button onClick={() => setOpen(true)}
           variant="ghost"
           size="icon"
-          className="h-8 w-8 text-muted-foreground hover:text-foreground"
+          className="h-8 w-8 text-[#c9b37a] hover:bg-transparent hover:text-[#e6c25a]"
           title="Довідка про абревіатури"
         >
           <Info className="h-4 w-4" />
@@ -29,6 +29,7 @@ export function AbbreviationsInfoDialog() {
       title="Довідка про абревіатури"
       description="Пояснення скорочень характеристик та параметрів"
       size="sm"
+      hud
     >
         <div className="space-y-4 py-4">
           <div>

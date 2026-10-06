@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Home, LogOut,Menu, User } from "lucide-react";
 
 import { AbbreviationsInfoDialog } from "@/components/common/AbbreviationsInfoDialog";
+import { HUD_SURFACE, hudFontClassName } from "@/components/hud";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { HudPortalClassProvider } from "@/components/ui/portal-class";
 import { createClient } from "@/lib/supabase/client";
 
 export function Header() {
@@ -60,12 +62,13 @@ export function Header() {
   const isPlayerPage = !isDMPage && isCampaignPage;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+    <header className={`sticky top-0 z-50 w-full border-b border-[#3a2e22] bg-[#0b0908]/90 backdrop-blur ${hudFontClassName}`}>
+      <HudPortalClassProvider value={HUD_SURFACE}>
       <div className="container mx-auto flex h-14 items-center justify-between px-4">
         <div className="flex items-center gap-2">
           {/* Кнопка "На головну" */}
           <Link href="/campaigns">
-            <Button variant="ghost" size="icon" className="h-9 w-9">
+            <Button variant="ghost" size="icon" className="h-9 w-9 text-[#c9b37a] hover:bg-transparent hover:text-[#e6c25a]">
               <Home className="h-4 w-4" />
               <span className="sr-only">На головну</span>
             </Button>
@@ -75,7 +78,7 @@ export function Header() {
           {isCampaignPage && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-9 w-9">
+                <Button variant="ghost" size="icon" className="h-9 w-9 text-[#c9b37a] hover:bg-transparent hover:text-[#e6c25a]">
                   <Menu className="h-4 w-4" />
                   <span className="sr-only">Меню кампанії</span>
                 </Button>
@@ -145,13 +148,13 @@ export function Header() {
         <div className="flex items-center gap-2">
           <AbbreviationsInfoDialog />
           {userEmail && (
-            <span className="hidden sm:inline text-sm text-muted-foreground">
+            <span className="hidden sm:inline text-sm text-[#8f8473]">
               {userEmail}
             </span>
           )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-9 w-9">
+              <Button variant="ghost" size="icon" className="h-9 w-9 text-[#c9b37a] hover:bg-transparent hover:text-[#e6c25a]">
                 <User className="h-4 w-4" />
                 <span className="sr-only">Профіль</span>
               </Button>
@@ -176,6 +179,7 @@ export function Header() {
       <div className="container mx-auto px-4 pb-2">
         <Breadcrumbs />
       </div>
+      </HudPortalClassProvider>
     </header>
   );
 }

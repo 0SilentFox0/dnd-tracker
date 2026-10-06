@@ -1,9 +1,8 @@
 "use client";
 
-import "@/components/hud/hud.css";
-
 import type { ReactNode } from "react";
 
+import "@/components/hud/hud.css";
 import { HUD_SURFACE } from "@/components/hud";
 import { HudPortalClassProvider } from "@/components/ui/portal-class";
 import { cn } from "@/lib/utils";

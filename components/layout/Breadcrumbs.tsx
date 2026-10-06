@@ -19,6 +19,12 @@ const SEGMENT_LABELS: Record<string, string> = {
   edit: "Редагувати",
   sets: "Сети",
   groups: "Групи",
+  skills: "Скіли",
+  races: "Раси",
+  "main-skills": "Основні навики",
+  "skill-trees": "Дерева прокачки",
+  info: "Довідник",
+  print: "Друк",
 };
 
 const ID_LABELS_BY_PARENT: Record<string, string> = {
@@ -93,22 +99,22 @@ export function Breadcrumbs() {
   return (
     <nav
       aria-label="Breadcrumb"
-      className="text-xs sm:text-sm text-muted-foreground"
+      className="text-xs text-[#8f8473]"
     >
       <ol className="flex flex-wrap items-center gap-1">
         {crumbs.map((crumb) => (
           <li key={crumb.href} className="flex items-center gap-1">
             {crumb.isLast ? (
-              <span className="text-foreground">{crumb.label}</span>
+              <span className="text-[#efe5d2]">{crumb.label}</span>
             ) : (
               <Link
                 href={crumb.href}
-                className="hover:text-foreground transition-colors"
+                className="transition-colors hover:text-[#efe5d2]"
               >
                 {crumb.label}
               </Link>
             )}
-            {!crumb.isLast && <ChevronRight className="h-3 w-3" />}
+            {!crumb.isLast && <ChevronRight className="h-3 w-3 text-[#4a3c2c]" />}
           </li>
         ))}
       </ol>
