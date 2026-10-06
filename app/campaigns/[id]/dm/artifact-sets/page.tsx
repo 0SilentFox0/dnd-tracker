@@ -1,19 +1,13 @@
 import Link from "next/link";
 import { Layers } from "lucide-react";
 
-import { ArtifactSetCardIcon } from "@/components/artifact-sets/ArtifactSetCardIcon";
+import { ArtifactSetCard } from "@/components/artifact-sets/ArtifactSetCard";
 import { EmptyState } from "@/components/common/states";
-import { Badge } from "@/components/ui/badge";
+import { HudPage, HudPageHeader } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { requireCampaignDM } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
+import { abilitySummary } from "@/lib/utils/abilities/summary";
 
 export default async function DMArtifactSetsPage({
   params,
@@ -33,28 +27,27 @@ export default async function DMArtifactSetsPage({
   });
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Сети артефактів</h1>
-          <p className="text-muted-foreground mt-1">
-            Групи артефактів з бонусом за повний комплект (у бою)
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2 shrink-0">
-          <Button asChild>
-            <Link href={`/campaigns/${id}/dm/artifact-sets/new`}>
-              + Новий сет
-            </Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link href={`/campaigns/${id}/dm/artifacts`}>До артефактів</Link>
-          </Button>
-        </div>
-      </div>
+    <HudPage>
+      <HudPageHeader
+        title="Сети артефактів"
+        subtitle="Групи артефактів з бонусом за повний комплект (у бою)"
+        actions={
+          <>
+            <Button asChild>
+              <Link href={`/campaigns/${id}/dm/artifact-sets/new`}>
+                + Новий сет
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href={`/campaigns/${id}/dm/artifacts`}>До артефактів</Link>
+            </Button>
+          </>
+        }
+      />
 
       {sets.length === 0 ? (
         <EmptyState
+          className="bg-[rgba(17,14,11,.82)]"
           icon={Layers}
           title="Ще немає сетів"
           description="Сет дає бонус, коли персонаж носить усі його артефакти."
@@ -65,47 +58,18 @@ export default async function DMArtifactSetsPage({
           }
         />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-3 md:grid-cols-2">
           {sets.map((s) => (
-            <Card key={s.id}>
-              <CardHeader>
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex min-w-0 flex-1 gap-3">
-                    <ArtifactSetCardIcon url={s.icon} name={s.name} size="lg" />
-                    <div className="min-w-0">
-                      <CardTitle className="text-lg">{s.name}</CardTitle>
-                      {s.description && (
-                        <CardDescription className="mt-1">
-                          {s.description}
-                        </CardDescription>
-                      )}
-                    </div>
-                  </div>
-                  <Button size="sm" variant="outline" asChild>
-                    <Link href={`/campaigns/${id}/dm/artifact-sets/${s.id}`}>
-                      Редагувати
-                    </Link>
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1.5">
-                    Частин: {s.artifacts.length}
-                  </p>
-                  <div className="flex flex-wrap gap-1">
-                    {s.artifacts.map((a) => (
-                      <Badge key={a.id} variant="secondary" className="text-xs">
-                        {a.name}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <ArtifactSetCard
+              key={s.id}
+              variant="summary"
+              campaignId={id}
+              set={{ ...s, abilitySummary: abilitySummary("artifactSet", s) }}
+              artifacts={s.artifacts}
+            />
           ))}
         </div>
       )}
-    </div>
+    </HudPage>
   );
 }

@@ -6,6 +6,7 @@ import { ReferenceGroupSection } from "./ReferenceGroupSection";
 import { SkillReferenceCard } from "./SkillReferenceCard";
 import { SpellReferenceCard } from "./SpellReferenceCard";
 
+import { HudPanel } from "@/components/hud/page";
 import { Accordion } from "@/components/ui/accordion";
 import type { SkillForReference, SpellForReference } from "@/lib/types/info-reference";
 
@@ -75,15 +76,15 @@ export function ReferenceSectionAccordion({
   const showBoth = showSkills && !skillsEmpty && showSpells && !spellsEmpty;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-3">
       {showSkills && !skillsEmpty && (
-        <div className="space-y-4">
+        <HudPanel className="space-y-3">
           {showBoth && (
-            <h2 className="text-lg font-semibold scroll-mt-4" id="ref-skills">
+            <h2 className="hud-sc scroll-mt-4 text-lg text-[#c9b37a]" id="ref-skills">
               Скіли
             </h2>
           )}
-          <p className="text-muted-foreground text-sm px-0">
+          <p className="text-sm text-[#8f8473]">
             Як діють скіли та як вони виглядають у грі. Опис вигляду може
             редагувати лише DM.
           </p>
@@ -129,17 +130,17 @@ export function ReferenceSectionAccordion({
                 );
               })}
           </Accordion>
-        </div>
+        </HudPanel>
       )}
 
       {showSpells && !spellsEmpty && (
-        <div className="space-y-4">
+        <HudPanel className="space-y-3">
           {showBoth && (
-            <h2 className="text-lg font-semibold scroll-mt-4" id="ref-spells">
+            <h2 className="hud-sc scroll-mt-4 text-lg text-[#c9b37a]" id="ref-spells">
               Заклинання
             </h2>
           )}
-          <p className="text-muted-foreground text-sm px-0">
+          <p className="text-sm text-[#8f8473]">
             Як діють заклинання та як вони виглядають. Опис вигляду може
             редагувати лише DM.
           </p>
@@ -179,7 +180,7 @@ export function ReferenceSectionAccordion({
                 </ReferenceGroupSection>
               ))}
           </Accordion>
-        </div>
+        </HudPanel>
       )}
     </div>
   );

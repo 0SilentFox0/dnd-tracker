@@ -2,13 +2,7 @@
 
 import Image from "next/image";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { HudSection } from "@/components/hud/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,14 +29,10 @@ export function AvailableUnitsCard({
   onQuantityChange,
 }: AvailableUnitsCardProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>⚔️ Усі Юніти</CardTitle>
-        <CardDescription>
+    <HudSection title="Усі Юніти" className="max-h-[600px] space-y-4 overflow-y-auto">
+        <p className="text-xs text-muted-foreground">
           NPC юніти з можливістю вибору кількості
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4 max-h-[600px] overflow-y-auto">
+        </p>
         {units.length > 0 ? (
           <div className="space-y-2">
             {units.map((unit) => {
@@ -53,7 +43,7 @@ export function AvailableUnitsCard({
               return (
                 <div
                   key={unit.id}
-                  className="flex flex-col gap-2 p-3 border rounded hover:bg-accent transition-colors"
+                  className="flex flex-col gap-2 rounded border border-[#4a3c2c] bg-[#1a140f] p-3 transition-colors hover:bg-accent"
                 >
                   <div className="flex items-center gap-2">
                     <Checkbox
@@ -108,7 +98,6 @@ export function AvailableUnitsCard({
             Немає доступних юнітів
           </p>
         )}
-      </CardContent>
-    </Card>
+    </HudSection>
   );
 }

@@ -2,13 +2,7 @@
 
 import Image from "next/image";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { HudSection } from "@/components/hud/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ParticipantSourceType } from "@/lib/constants/battle";
 import type { EditBattleCharacter } from "@/types/battle-setup";
@@ -36,7 +30,7 @@ export function AvailableCharactersCard({
     list.map((character) => (
       <div
         key={character.id}
-        className="flex items-center justify-between p-2 border rounded hover:bg-accent transition-colors"
+        className="flex items-center justify-between rounded border border-[#4a3c2c] bg-[#1a140f] p-2 transition-colors hover:bg-accent"
       >
         <div className="flex items-center gap-2 flex-1">
           <Checkbox
@@ -60,12 +54,8 @@ export function AvailableCharactersCard({
     ));
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>👥 Усі Персонажі</CardTitle>
-        <CardDescription>Гравці та NPC герої</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4 max-h-[600px] overflow-y-auto">
+    <HudSection title="Усі Персонажі" className="max-h-[600px] space-y-4 overflow-y-auto">
+        <p className="text-xs text-muted-foreground">Гравці та NPC герої</p>
         {playerCharacters.length > 0 && (
           <div>
             <h3 className="font-semibold mb-2 text-sm text-muted-foreground">
@@ -86,7 +76,6 @@ export function AvailableCharactersCard({
             </div>
           </div>
         )}
-      </CardContent>
-    </Card>
+    </HudSection>
   );
 }

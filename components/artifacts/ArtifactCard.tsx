@@ -6,15 +6,9 @@ import Link from "next/link";
 import { AbilitySummary } from "@/components/abilities";
 import { ArtifactDeleteButton } from "@/components/artifacts/ArtifactDeleteButton";
 import { EntityIcon } from "@/components/common/EntityIcon";
+import { HudCard } from "@/components/hud/page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -98,11 +92,11 @@ export function ArtifactCard({
 
   if (variant === "compact") {
     return (
-      <div className="rounded-md border p-3">
+      <div className="rounded-md bg-[#1a140f] p-2 shadow-[inset_0_0_0_1px_#4a3c2c]">
         <div className="flex items-center gap-2">
           <EntityIcon src={artifact.icon} name={artifact.name} size={40} className="text-sm" />
           <div className="min-w-0 flex-1">
-            <p className="font-semibold text-sm truncate">{artifact.name}</p>
+            <p className="truncate text-sm font-semibold text-[#efe5d2]">{artifact.name}</p>
             <div className="flex gap-2 flex-wrap items-center mt-1">
               {artifact.rarity && (
                 <Badge variant="outline" className="text-xs">
@@ -125,7 +119,7 @@ export function ArtifactCard({
           </div>
         </div>
         {artifact.description && (
-          <p className="text-xs text-muted-foreground mt-2">
+          <p className="mt-2 text-xs text-[#8f8473]">
             {artifact.description}
           </p>
         )}
@@ -139,56 +133,46 @@ export function ArtifactCard({
   }
 
   return (
-    <Card className="hover:shadow-lg transition-shadow">
-      <CardHeader>
-        <div className="flex items-start gap-3 mb-2">
-          <EntityIcon src={artifact.icon} name={artifact.name} size={64} className="size-12 rounded-lg text-xl sm:size-16" />
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-2">
-              <CardTitle className="text-base flex-1 min-w-0 truncate">
-                {artifact.name}
-              </CardTitle>
-              {artifact.rarity && (
-                <Badge variant="outline" className="shrink-0">
-                  {artifact.rarity}
-                </Badge>
-              )}
-            </div>
-          </div>
-        </div>
-        <CardDescription className="flex flex-wrap items-center gap-2 mt-2">
-          {slotSelect}
-          {artifact.artifactSet && (
-            <Badge variant="outline">Сет: {artifact.artifactSet.name}</Badge>
+    <HudCard className="space-y-2 p-4">
+      <div className="flex items-start gap-3">
+        <EntityIcon src={artifact.icon} name={artifact.name} size={64} className="size-12 rounded-lg text-xl sm:size-16" />
+        <div className="flex min-w-0 flex-1 items-start justify-between gap-2">
+          <h3 className="hud-sc min-w-0 flex-1 truncate text-base text-[#efe5d2]">{artifact.name}</h3>
+          {artifact.rarity && (
+            <Badge variant="outline" className="shrink-0">
+              {artifact.rarity}
+            </Badge>
           )}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {artifact.description && (
-          <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-            {artifact.description}
-          </p>
-        )}
-        {artifact.abilitySummary.length > 0 && (
-          <div className="mb-2">
-            <AbilitySummary lines={artifact.abilitySummary} />
-          </div>
-        )}
-        <div className="flex gap-2">
-          <Link
-            href={`/campaigns/${campaignId}/dm/artifacts/${artifact.id}`}
-            className="flex-1"
-          >
-            <Button variant="outline" size="sm" className="w-full">
-              Редагувати
-            </Button>
-          </Link>
-          <ArtifactDeleteButton
-            campaignId={campaignId}
-            artifactId={artifact.id}
-          />
         </div>
-      </CardContent>
-    </Card>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        {slotSelect}
+        {artifact.artifactSet && (
+          <Badge variant="outline">Сет: {artifact.artifactSet.name}</Badge>
+        )}
+      </div>
+      {artifact.description && (
+        <p className="line-clamp-2 text-sm text-[#8f8473]">
+          {artifact.description}
+        </p>
+      )}
+      {artifact.abilitySummary.length > 0 && (
+        <AbilitySummary lines={artifact.abilitySummary} />
+      )}
+      <div className="flex gap-2">
+        <Link
+          href={`/campaigns/${campaignId}/dm/artifacts/${artifact.id}`}
+          className="flex-1"
+        >
+          <Button variant="outline" size="sm" className="w-full">
+            Редагувати
+          </Button>
+        </Link>
+        <ArtifactDeleteButton
+          campaignId={campaignId}
+          artifactId={artifact.id}
+        />
+      </div>
+    </HudCard>
   );
 }

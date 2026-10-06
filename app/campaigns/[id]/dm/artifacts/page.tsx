@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { Gem } from "lucide-react";
 
-import { ArtifactSetBonusDisplay } from "@/components/artifact-sets/ArtifactSetBonusDisplay";
-import { ArtifactSetCardIcon } from "@/components/artifact-sets/ArtifactSetCardIcon";
+import { ArtifactSetCard } from "@/components/artifact-sets/ArtifactSetCard";
 import { ArtifactCard } from "@/components/artifacts/ArtifactCard";
 import { DeleteAllArtifactsButton } from "@/components/artifacts/DeleteAllArtifactsButton";
 import { EmptyState } from "@/components/common/states";
+import { HudSection } from "@/components/hud/form";
+import { HudPage, HudPageHeader, HudPanel } from "@/components/hud/page";
 import {
   Accordion,
   AccordionContent,
@@ -14,18 +15,10 @@ import {
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { requireCampaignDM } from "@/lib/campaigns/access";
 import { ARTIFACT_SLOT_OPTIONS } from "@/lib/constants/artifacts";
 import { prisma } from "@/lib/db";
 import { abilitySummary } from "@/lib/utils/abilities/summary";
-import { pluralUk } from "@/lib/utils/plural";
 
 export default async function DMArtifactsPage({
   params,
@@ -62,7 +55,6 @@ export default async function DMArtifactsPage({
 
   const ungroupedArtifacts = artifacts.filter((artifact) => !artifact.setId);
 
-  /** Групує артефакти по слотах у порядку ARTIFACT_SLOT_OPTIONS */
   const artifactsBySlot = ARTIFACT_SLOT_OPTIONS.reduce(
     (acc, { value }) => {
       acc[value] = ungroupedArtifacts.filter((a) => a.slot === value);
@@ -73,58 +65,76 @@ export default async function DMArtifactsPage({
   );
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex flex-col">
-          <h1 className="text-3xl font-bold">Артефакти</h1>
-          <p className="text-muted-foreground mt-1">
-            Управління артефактами та сетами
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2 shrink-0">
-          <DeleteAllArtifactsButton
-            campaignId={id}
-            artifactsCount={artifacts.length}
-          />
-          <Link href={`/campaigns/${id}/dm/artifact-sets`}>
-            <Button variant="outline" className="whitespace-nowrap">
-              Сети артефактів
-            </Button>
-          </Link>
-          <Link href={`/campaigns/${id}/dm/artifacts/new`}>
-            <Button className="whitespace-nowrap">+ Створити артефакт</Button>
-          </Link>
-        </div>
-      </div>
+    <HudPage>
+      <HudPageHeader
+        title="Артефакти"
+        subtitle="Управління артефактами та сетами"
+        actions={
+          <>
+            <DeleteAllArtifactsButton
+              campaignId={id}
+              artifactsCount={artifacts.length}
+            />
+            <Link href={`/campaigns/${id}/dm/artifact-sets`}>
+              <Button variant="outline" className="whitespace-nowrap">
+                Сети артефактів
+              </Button>
+            </Link>
+            <Link href={`/campaigns/${id}/dm/artifacts/new`}>
+              <Button className="whitespace-nowrap">+ Створити артефакт</Button>
+            </Link>
+          </>
+        }
+      />
 
-      {/* Сети артефактів */}
       {artifactSets.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-2xl font-semibold">Сети артефактів</h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {artifactSets.map((set) => {
+        <HudPanel>
+          <HudSection title="Сети артефактів">
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+              {artifactSets.map((set) => (
+                <ArtifactSetCard
+                  key={set.id}
+                  variant="withArtifacts"
+                  campaignId={id}
+                  set={{ ...set, abilitySummary: abilitySummary("artifactSet", set) }}
+                  artifacts={set.artifacts.map((artifact) => ({
+                    id: artifact.id,
+                    name: artifact.name,
+                    slot: artifact.slot,
+                    rarity: artifact.rarity,
+                    icon: artifact.icon,
+                    description: artifact.description,
+                    abilitySummary: abilitySummary("artifact", artifact),
+                    artifactSet: { name: set.name },
+                  }))}
+                />
+              ))}
+            </div>
+          </HudSection>
+        </HudPanel>
+      )}
+
+      <HudPanel>
+        <HudSection title="Артефакти без сету">
+          <Accordion type="multiple" className="w-full space-y-2">
+            {ARTIFACT_SLOT_OPTIONS.map(({ value: slotValue, label: slotLabel }) => {
+              const list = artifactsBySlot[slotValue] ?? [];
+
+              if (list.length === 0) return null;
+
               return (
-                <Card key={set.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="flex gap-3">
-                      <ArtifactSetCardIcon url={set.icon} name={set.name} />
-                      <div className="min-w-0 flex-1 space-y-1">
-                        <CardTitle className="leading-tight">{set.name}</CardTitle>
-                        <CardDescription>
-                          {set.artifacts.length} {pluralUk(set.artifacts.length, ["артефакт", "артефакти", "артефактів"])} в сеті
-                        </CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {set.description && (
-                      <p className="text-sm text-muted-foreground">
-                        {set.description}
-                      </p>
-                    )}
-                    <ArtifactSetBonusDisplay setBonus={set.setBonus} abilitySummary={abilitySummary("artifactSet", set)} />
-                    <div className="space-y-3">
-                      {set.artifacts.map((artifact) => (
+                <AccordionItem key={slotValue} value={slotValue} className="rounded-lg border last:border-b">
+                  <AccordionTrigger className="px-4 hover:no-underline">
+                    <span className="flex items-center gap-2">
+                      {slotLabel}
+                      <Badge variant="secondary" className="text-xs">
+                        {list.length}
+                      </Badge>
+                    </span>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-3">
+                    <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 pt-2">
+                      {list.map((artifact) => (
                         <ArtifactCard
                           key={artifact.id}
                           campaignId={id}
@@ -136,73 +146,23 @@ export default async function DMArtifactsPage({
                             icon: artifact.icon,
                             description: artifact.description,
                             abilitySummary: abilitySummary("artifact", artifact),
-                            artifactSet: { name: set.name },
+                            artifactSet: artifact.artifactSet,
                           }}
-                          variant="compact"
+                          variant="full"
                         />
                       ))}
                     </div>
-                    <Link href={`/campaigns/${id}/dm/artifact-sets/${set.id}`}>
-                      <Button variant="outline" size="sm" className="w-full">
-                        Редагувати сет
-                      </Button>
-                    </Link>
-                  </CardContent>
-                </Card>
+                  </AccordionContent>
+                </AccordionItem>
               );
             })}
-          </div>
-        </div>
-      )}
-
-      {/* Артефакти без сету — згруповані по слотах в акордеоні */}
-      <div className="space-y-4">
-        <h2 className="text-2xl font-semibold">Артефакти без сету</h2>
-        <Accordion type="multiple" className="w-full">
-          {ARTIFACT_SLOT_OPTIONS.map(({ value: slotValue, label: slotLabel }) => {
-            const list = artifactsBySlot[slotValue] ?? [];
-
-            if (list.length === 0) return null;
-
-            return (
-              <AccordionItem key={slotValue} value={slotValue}>
-                <AccordionTrigger className="px-4 hover:no-underline">
-                  <span className="flex items-center gap-2">
-                    {slotLabel}
-                    <Badge variant="secondary" className="text-xs">
-                      {list.length}
-                    </Badge>
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 pt-2">
-                    {list.map((artifact) => (
-                      <ArtifactCard
-                        key={artifact.id}
-                        campaignId={id}
-                        artifact={{
-                          id: artifact.id,
-                          name: artifact.name,
-                          slot: artifact.slot,
-                          rarity: artifact.rarity,
-                          icon: artifact.icon,
-                          description: artifact.description,
-                          abilitySummary: abilitySummary("artifact", artifact),
-                          artifactSet: artifact.artifactSet,
-                        }}
-                        variant="full"
-                      />
-                    ))}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            );
-          })}
-        </Accordion>
-      </div>
+          </Accordion>
+        </HudSection>
+      </HudPanel>
 
       {artifacts.length === 0 && artifactSets.length === 0 && (
         <EmptyState
+          className="bg-[rgba(17,14,11,.82)]"
           icon={Gem}
           title="Ще немає артефактів"
           action={
@@ -212,7 +172,6 @@ export default async function DMArtifactsPage({
           }
         />
       )}
-
-    </div>
+    </HudPage>
   );
 }
