@@ -25,6 +25,7 @@ import {
   BattleRuleError,
   eventToBattleAction,
 } from "@/lib/utils/battle/store";
+import type { BattleKnowledge } from "@/lib/utils/battle/view/knowledge";
 import type { BattleScene } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -55,6 +56,7 @@ export interface PipelineDeps {
   saveBattle(before: LoadedBattle, outcome: BattleMutationOutcome): Promise<BattleDelta>;
   publish(messages: PusherMessage[]): void;
   loadRecentEvents(battleId: string, limit: number): Promise<BattleAction[]>;
+  loadKnowledge?(battleId: string): Promise<BattleKnowledge>;
   rng?: Rng;
 }
 
@@ -67,6 +69,7 @@ export interface RunBattleMutationOptions<TBody> {
   dryRun?: (body: TBody) => boolean;
   respond?: "battle" | "wrapped" | "response";
   includeRecentEvents?: number;
+  includeKnowledge?: boolean;
   mutate(ctx: BattleMutationContext, body: TBody): MutationResult | Promise<MutationResult>;
 }
 
@@ -220,9 +223,10 @@ export async function runBattleMutation<TBody>(
     const result = withVictory(loaded.scene, await options.mutate(ctx, parsed.body));
 
     if (options.dryRun?.(parsed.body)) {
-      const entries = options.includeRecentEvents
-        ? await deps.loadRecentEvents(battleId, options.includeRecentEvents)
-        : [];
+      const [entries, knowledge] = await Promise.all([
+        options.includeRecentEvents ? deps.loadRecentEvents(battleId, options.includeRecentEvents) : [],
+        options.includeKnowledge && !loaded.isDM ? deps.loadKnowledge?.(battleId) : undefined,
+      ]);
 
       const battle = toLegacyBattle(
         loaded,
@@ -233,7 +237,7 @@ export async function runBattleMutation<TBody>(
         { isDM: loaded.isDM },
       );
 
-      return respondWith(options.respond, battle, result.response);
+      return respondWith(options.respond, knowledge ? { ...battle, knowledge } : battle, result.response);
     }
 
     const delta = await deps.saveBattle(loaded, result);

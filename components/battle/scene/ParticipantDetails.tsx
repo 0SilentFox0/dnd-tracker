@@ -7,7 +7,7 @@ import { HealthBar, HealthLabel, Portrait } from "@/components/battle/hud";
 import { useBattleScene } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
-import { canSeeExactStats, formatKnownArmorClass, knownArmorClass, observedTraits } from "@/lib/utils/battle/view";
+import { canSeeExactStats, formatKnownArmorClass, resolveKnownArmorClass, resolveObservedTraits } from "@/lib/utils/battle/view";
 import type { BattleParticipant } from "@/types/battle";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
@@ -26,9 +26,9 @@ export function ParticipantDetails({ participant }: { participant: BattlePartici
 
   const log = battle.battleLog ?? [];
 
-  const known = knownArmorClass(log, participant.basicInfo.id);
+  const known = resolveKnownArmorClass(log, participant.basicInfo.id, battle.knowledge);
 
-  const traits = exact ? [] : observedTraits(log, participant.basicInfo.id);
+  const traits = exact ? [] : resolveObservedTraits(log, participant.basicInfo.id, battle.knowledge);
 
   return (
     <div className="text-[var(--bone)]">
