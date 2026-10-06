@@ -15,6 +15,7 @@ import { LogEntryDetails } from "./LogEntryDetails";
 import { useConfirm } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 import { formatLogEntry } from "@/lib/utils/battle/battle-log-format";
+import { canRollbackEntry } from "@/lib/utils/battle/view";
 import type { BattleScene } from "@/types/api";
 import type { BattleAction } from "@/types/battle";
 
@@ -119,7 +120,7 @@ export function BattleLogPanel({
                           {formatLogEntry(entry)}
                         </span>
                       </button>
-                      {isDM && onRollback && (
+                      {isDM && onRollback && canRollbackEntry(battle, entry) && (
                         <button
                           type="button"
                           className="flex size-8 shrink-0 items-center justify-center text-[#d0705c] transition-colors hover:bg-[#d0705c]/15"

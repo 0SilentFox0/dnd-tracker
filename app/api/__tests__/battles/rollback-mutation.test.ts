@@ -25,7 +25,10 @@ describe("rollback mutation", () => {
   });
 
   it("немає знімків — action_rejected", async () => {
-    await expect(createRollbackMutation(vi.fn(async () => []), vi.fn(async () => true))(ctx, { actionIndex: 1 })).rejects.toMatchObject({ code: "action_rejected" });
+    await expect(createRollbackMutation(vi.fn(async () => []), vi.fn(async () => true))(ctx, { actionIndex: 1 })).rejects.toMatchObject({
+      code: "action_rejected",
+      message: expect.stringContaining("лише останні 20"),
+    });
   });
 
   it("подія вже скасована (подвійний клік) або не існує — action_rejected, без відкату", async () => {
