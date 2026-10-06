@@ -181,7 +181,7 @@ export function BattleLogPanel({
   return (
     <div
       className={cn(
-        "z-30 shrink-0 overflow-hidden border-t border-[#3a2e22] bg-[#14100c]/90 backdrop-blur-md",
+        "z-30 shrink-0 overflow-hidden border-t border-[#3a2e22] bg-[#14100c]/[.97]",
         className,
       )}
     >

@@ -44,7 +44,7 @@ export function Header({ email }: { email: string | null }) {
   const isPlayerPage = !isDMPage && isCampaignPage;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-[#3a2e22] bg-[#0b0908]/90 backdrop-blur">
+    <header className="sticky top-0 z-50 w-full border-b border-[#3a2e22] bg-[#0b0908]/[.97]">
       <HudPortalClassProvider value={HUD_SURFACE}>
       <div className="container mx-auto flex h-14 items-center justify-between px-4">
         <div className="flex items-center gap-2">
