@@ -7,10 +7,6 @@ import type { z } from "zod";
 import { getCharacterAttacks } from "./balance-helpers";
 import type { balanceSchema } from "./balance-schema";
 
-import {
-  MAGIC_MAIN_SKILL_IDS,
-  MAGIC_MAIN_SKILL_NAME_ALIASES,
-} from "@/lib/constants/dpr-by-main-skill";
 import { prisma } from "@/lib/db";
 import type {
   AllyStats,
@@ -24,6 +20,7 @@ import {
   getUnitStats,
   suggestEnemyUnits,
 } from "@/lib/utils/battle/balance";
+import { magicMainSkillIds as magicMainSkillIdsOf } from "@/lib/utils/battle/balance/magic-school";
 import { branchLevels, normalizeTree, resolveLearned, type TreeNodes } from "@/lib/utils/skills/progression";
 
 type BalancePostData = z.infer<typeof balanceSchema>;
@@ -54,22 +51,7 @@ export async function postBalanceResponse(
       }),
     ]);
 
-    magicMainSkillIds = new Set(
-      mainSkills
-        .filter((ms) => {
-          const nameNorm = ms.name.toLowerCase().trim().replace(/\s+/g, "_");
-
-          const byId = MAGIC_MAIN_SKILL_IDS.some((slug) => ms.id === slug);
-
-          const byName = MAGIC_MAIN_SKILL_NAME_ALIASES.some(
-            (alias) =>
-              alias.toLowerCase().replace(/\s+/g, "_") === nameNorm,
-          );
-
-          return byId || byName;
-        })
-        .map((ms) => ms.id),
-    );
+    magicMainSkillIds = magicMainSkillIdsOf(mainSkills);
 
     treesByRace = new Map(trees.map((t) => [t.race, normalizeTree(t)]));
   }

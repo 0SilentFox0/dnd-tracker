@@ -4,13 +4,9 @@
 
 import { getCharacterAttacks } from "./balance-helpers";
 
-import {
-  MAGIC_MAIN_SKILL_IDS,
-  MAGIC_MAIN_SKILL_NAME_ALIASES,
-} from "@/lib/constants/dpr-by-main-skill";
 import { prisma } from "@/lib/db";
 import type { CharacterDprBreakdown } from "@/lib/utils/battle/balance";
-import { getCharacterStats, getUnitStats } from "@/lib/utils/battle/balance";
+import { getCharacterStats, getUnitStats, magicMainSkillIds as magicMainSkillIdsOf } from "@/lib/utils/battle/balance";
 import { branchLevels, normalizeTree, resolveLearned } from "@/lib/utils/skills/progression";
 
 export async function getBalancePayload(campaignId: string) {
@@ -26,21 +22,7 @@ export async function getBalancePayload(campaignId: string) {
 
   console.log("[Balance GET] Main skills кампанії (id, name):", mainSkillsList);
 
-  const magicMainSkillIds = new Set(
-    mainSkills
-      .filter((ms) => {
-        const nameNorm = ms.name.toLowerCase().trim().replace(/\s+/g, "_");
-
-        const byId = MAGIC_MAIN_SKILL_IDS.some((slug) => ms.id === slug);
-
-        const byName = MAGIC_MAIN_SKILL_NAME_ALIASES.some(
-          (alias) => alias.toLowerCase().replace(/\s+/g, "_") === nameNorm,
-        );
-
-        return byId || byName;
-      })
-      .map((ms) => ms.id),
-  );
+  const magicMainSkillIds = magicMainSkillIdsOf(mainSkills);
 
   const treesByRace = new Map(trees.map((t) => [t.race, normalizeTree(t)]));
 

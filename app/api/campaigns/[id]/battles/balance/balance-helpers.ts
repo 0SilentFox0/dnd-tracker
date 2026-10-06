@@ -5,20 +5,7 @@
 import { ArtifactModifierType } from "@/lib/constants/artifacts";
 import { AttackType } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
-import { type ArtifactModifier, getModifierValue } from "@/lib/utils/battle/participant/artifact-utils";
-
-export { type ArtifactModifier, getModifierValue };
-
-export function getOptionalModifierValue(
-  modifiers: ArtifactModifier[],
-  modifierType: string,
-): string | undefined {
-  const m = modifiers.find((x) => x.type === modifierType);
-
-  if (m?.value == null) return undefined;
-
-  return String(m.value);
-}
+import { type ArtifactModifier, getModifierValue, getOptionalModifierValue } from "@/lib/utils/battle/participant/artifact-utils";
 
 export async function getCharacterAttacks(
   characterId: string,

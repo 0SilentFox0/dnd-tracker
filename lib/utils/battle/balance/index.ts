@@ -5,6 +5,7 @@
 
 export type { MagicMainSkillId } from "./dpr";
 export { getNonMagicBranchDpr, getSpellDprFromBranchLevels, MAGIC_MAIN_SKILL_IDS } from "./dpr";
+export { isMagicMainSkill, magicMainSkillIds } from "./magic-school";
 export type {
   AllyStats,
   CharacterDprBreakdown,
