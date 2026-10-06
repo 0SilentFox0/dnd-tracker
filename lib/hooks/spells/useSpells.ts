@@ -43,10 +43,7 @@ export function useSpellGroups(campaignId: string, opts?: { enabled?: boolean })
 export function useCreateSpellGroup(campaignId: string) {
   return useCrudMutation({
     mutationFn: (name: string) => createSpellGroup(campaignId, { name }),
-    invalidateKeys: [
-      ["spellGroups", campaignId],
-      ["spells", campaignId],
-    ],
+    invalidateKeys: [["spellGroups", campaignId]],
   });
 }
 
