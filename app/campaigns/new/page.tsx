@@ -78,10 +78,11 @@ export default function NewCampaignPage() {
         </HudSection>
         <HudSection title="Правила">
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 items-end gap-2 sm:grid-cols-4">
               <LabeledInput
                 id="maxLevel"
                 label="Максимальний рівень"
+                labelClassName="text-xs leading-tight"
                 type="number"
                 min="1"
                 max="30"
@@ -91,6 +92,7 @@ export default function NewCampaignPage() {
               <LabeledInput
                 id="xpMultiplier"
                 label="Множник досвіду"
+                labelClassName="text-xs leading-tight"
                 type="number"
                 min="1"
                 max="10"

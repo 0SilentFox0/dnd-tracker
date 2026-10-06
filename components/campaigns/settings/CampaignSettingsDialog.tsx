@@ -72,10 +72,11 @@ export function CampaignSettingsDialog({ campaignId, campaign, open, onOpenChang
       </HudSection>
       <HudSection title="Правила">
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 items-end gap-2 sm:grid-cols-4">
             <LabeledInput
               id="campaign-max-level"
               label="Макс. рівень"
+              labelClassName="text-xs leading-tight"
               type="number"
               min="1"
               max="30"
@@ -86,6 +87,7 @@ export function CampaignSettingsDialog({ campaignId, campaign, open, onOpenChang
             <LabeledInput
               id="campaign-xp"
               label="Множник XP"
+              labelClassName="text-xs leading-tight"
               type="number"
               min="1"
               max="10"

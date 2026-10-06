@@ -172,27 +172,31 @@ export function CharacterBasicInfo({
         />
       </div>
 
-      <LabeledInput
-        id="level"
-        label="Рівень"
-        type="number"
-        min="1"
-        max="30"
-        value={level}
-        onChange={(e) => setters.setLevel(parseInt(e.target.value) || 1)}
-        containerClassName="w-full min-w-0"
-        className="w-full"
-      />
-      <LabeledInput
-        id="experience"
-        label="Досвід (XP)"
-        type="number"
-        min="0"
-        value={experience}
-        onChange={(e) => setters.setExperience(parseInt(e.target.value) || 0)}
-        containerClassName="w-full min-w-0"
-        className="w-full"
-      />
+      <div className="col-span-2 grid grid-cols-3 gap-2">
+        <LabeledInput
+          id="level"
+          label="Рівень"
+          labelClassName="text-xs leading-tight"
+          type="number"
+          min="1"
+          max="30"
+          value={level}
+          onChange={(e) => setters.setLevel(parseInt(e.target.value) || 1)}
+          containerClassName="w-full min-w-0"
+          className="w-full"
+        />
+        <LabeledInput
+          id="experience"
+          label="Досвід (XP)"
+          labelClassName="text-xs leading-tight"
+          type="number"
+          min="0"
+          value={experience}
+          onChange={(e) => setters.setExperience(parseInt(e.target.value) || 0)}
+          containerClassName="w-full min-w-0"
+          className="w-full"
+        />
+      </div>
       {!isPlayerView && (
         <div className="w-full min-w-0 md:col-span-2">
           <ImageUpload label="Картинка персонажа" value={avatar || ""} onChange={setters.setAvatar} fallbackText={name} />

@@ -62,9 +62,11 @@ export function ArtifactWeaponFields({ value, onChange }: { value: WeaponStats; 
             onValueChange={(v) => set("attackType", (v || undefined) as WeaponStats["attackType"])}
           />
         </div>
+      </div>
+      <div className="grid grid-cols-3 items-end gap-2 sm:grid-cols-4">
         {NUMBER_FIELDS.map((f) => (
-          <div key={f.key} className="space-y-1">
-            <Label htmlFor={`weapon-${f.key}`} className="text-xs text-muted-foreground">
+          <div key={f.key} className="flex flex-col justify-end space-y-1">
+            <Label htmlFor={`weapon-${f.key}`} className="text-xs leading-tight text-muted-foreground">
               {f.label}
             </Label>
             <NumberInput id={`weapon-${f.key}`} value={value[f.key]} onChange={(v) => set(f.key, v)} />

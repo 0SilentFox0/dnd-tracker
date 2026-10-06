@@ -34,8 +34,9 @@ export function SpellFormBasicFields({
   spellGroups,
 }: SpellFormBasicFieldsProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="grid grid-cols-2 gap-4 [&>*]:min-w-0">
       <LabeledInput
+        containerClassName="col-span-2"
         id="name"
         label="Назва заклинання"
         value={formData.name || ""}
@@ -55,7 +56,7 @@ export function SpellFormBasicFields({
           options={SPELL_LEVEL_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
         />
       </div>
-      <div>
+      <div className="col-span-2">
         <Label htmlFor="groupId">Група заклинань</Label>
         <SelectField
           id="groupId"
@@ -137,7 +138,7 @@ export function SpellFormBasicFields({
           placeholder="Instantaneous"
         />
       </div>
-      <div className="md:col-span-2">
+      <div className="col-span-2">
         <Label htmlFor="description">Опис (опційно)</Label>
         <Textarea
           id="description"
@@ -147,7 +148,7 @@ export function SpellFormBasicFields({
           rows={2}
         />
       </div>
-      <div className="md:col-span-2">
+      <div className="col-span-2">
         <IconUrlField id="icon" label="Посилання на картинку" value={formData.icon ?? ""} onChange={(icon) => setFormData({ ...formData, icon: icon || null })} fallbackText={formData.name ?? ""} />
       </div>
     </div>
@@ -156,7 +157,7 @@ export function SpellFormBasicFields({
 
 export function SpellFormRollFields({ formData, setFormData }: Omit<SpellFormBasicFieldsProps, "spellGroups">) {
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="grid grid-cols-2 gap-4 [&>*]:min-w-0">
       <div>
         <Label htmlFor="damageType">Тип шкоди/ефекту *</Label>
         <SelectField
@@ -244,7 +245,7 @@ export function SpellFormRollFields({ formData, setFormData }: Omit<SpellFormBas
         </div>
       )}
 
-      <div className="md:col-span-2">
+      <div className="col-span-2">
         <Label htmlFor="dice">
           {formData.damageType === "heal"
             ? "Кубики лікування"

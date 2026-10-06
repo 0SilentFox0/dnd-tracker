@@ -133,7 +133,7 @@ function SkillSpellEnhancementComponent({ value, spells, actions }: SkillSpellEn
 
             {modifier.modifier && (
               <>
-                <div className="grid gap-3 md:grid-cols-2">
+                <div className="grid grid-cols-2 items-end gap-3 [&>*]:min-w-0">
                   <div className="space-y-2">
                     <Label htmlFor="additional-modifier-dice">
                       Кубики шкоди
@@ -168,6 +168,7 @@ function SkillSpellEnhancementComponent({ value, spells, actions }: SkillSpellEn
                     <LabeledInput
                       id="additional-modifier-duration"
                       label="Тривалість (раунди)"
+                      labelClassName="text-xs leading-tight"
                       type="number"
                       min="0"
                       max="10"

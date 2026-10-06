@@ -79,8 +79,8 @@ export function AutopickCard({
                 </span>
               )}
             </div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <div>
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 [&>*]:min-w-0">
+              <div className="col-span-2 lg:col-span-1">
                 <Label htmlFor="difficulty">Складність</Label>
                 <select
                   id="difficulty"
@@ -121,7 +121,7 @@ export function AutopickCard({
                   }
                 />
               </div>
-              <div>
+              <div className="col-span-2 lg:col-span-1">
                 <Label htmlFor="balanceRace">Раса юнітів</Label>
                 <select
                   id="balanceRace"

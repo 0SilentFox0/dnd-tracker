@@ -70,18 +70,6 @@ export function UnitAttack({
             />
           </div>
           <LabeledInput
-            id={`attack-bonus-${index}`}
-            label="Бонус до атаки"
-            type="number"
-            value={attack.attackBonus}
-            onChange={(e) =>
-              onChange({
-                ...attack,
-                attackBonus: parseInt(e.target.value, 10) || 0,
-              })
-            }
-          />
-          <LabeledInput
             id={`attack-damage-dice-${index}`}
             label="Кубики шкоди"
             value={attack.damageDice}
@@ -117,22 +105,6 @@ export function UnitAttack({
             onChange={(e) => onChange({ ...attack, properties: e.target.value })}
             placeholder="Finesse, reach"
           />
-          <LabeledInput
-            id={`attack-guaranteed-${index}`}
-            label="Гарантована шкода (опц.)"
-            type="number"
-            min={0}
-            value={attack.guaranteedDamage ?? ""}
-            onChange={(e) => {
-              const v = parseInt(e.target.value, 10);
-
-              onChange({
-                ...attack,
-                guaranteedDamage: e.target.value === "" ? undefined : Math.max(0, v),
-              });
-            }}
-            placeholder="0 — навіть при промаху"
-          />
           <div>
             <Label htmlFor={`attack-target-type-${index}`}>Ціль (Target/AOE)</Label>
             <SelectField
@@ -150,58 +122,92 @@ export function UnitAttack({
               ]}
             />
           </div>
+        </div>
+        <div className="grid grid-cols-3 items-end gap-2">
+          <LabeledInput
+            id={`attack-bonus-${index}`}
+            label="Бонус до атаки"
+            labelClassName="text-xs leading-tight"
+            type="number"
+            value={attack.attackBonus}
+            onChange={(e) =>
+              onChange({
+                ...attack,
+                attackBonus: parseInt(e.target.value, 10) || 0,
+              })
+            }
+          />
+          <LabeledInput
+            id={`attack-guaranteed-${index}`}
+            label="Гарантована шкода (опц.)"
+            labelClassName="text-xs leading-tight"
+            type="number"
+            min={0}
+            value={attack.guaranteedDamage ?? ""}
+            onChange={(e) => {
+              const v = parseInt(e.target.value, 10);
+
+              onChange({
+                ...attack,
+                guaranteedDamage: e.target.value === "" ? undefined : Math.max(0, v),
+              });
+            }}
+            placeholder="0 — навіть при промаху"
+          />
           {attack.targetType === "aoe" && (
-            <>
-              <LabeledInput
-                id={`attack-max-targets-${index}`}
-                label="Макс. цілей"
-                type="number"
-                min={1}
-                max={20}
-                value={attack.maxTargets ?? 3}
-                onChange={(e) =>
-                  onChange({
-                    ...attack,
-                    maxTargets: Math.min(20, Math.max(1, parseInt(e.target.value, 10) || 1)),
-                  })
-                }
-              />
-              <div className="md:col-span-2 space-y-2">
-                <Label>Розподіл шкоди (%) — окремо на ціль</Label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {Array.from({ length: attack.maxTargets ?? 3 }).map((_, i) => (
-                    <LabeledInput
-                      key={i}
-                      id={`attack-damage-dist-${index}-${i}`}
-                      label={`Ціль ${i + 1}`}
-                      type="number"
-                      min={0}
-                      max={100}
-                      value={
-                        attack.damageDistribution?.[i] ??
-                        Math.round(100 / (attack.maxTargets ?? 3))
-                      }
-                      onChange={(e) => {
-                        const val = Math.min(100, Math.max(0, parseInt(e.target.value, 10) || 0));
-
-                        const prev = attack.damageDistribution ?? [];
-
-                        const next = [...prev];
-
-                        next[i] = val;
-                        while (next.length > (attack.maxTargets ?? 3)) next.pop();
-                        onChange({ ...attack, damageDistribution: next });
-                      }}
-                    />
-                  ))}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Кожна ціль: 0–100%. Сума може перевищувати 100%.
-                </p>
-              </div>
-            </>
+            <LabeledInput
+              id={`attack-max-targets-${index}`}
+              label="Макс. цілей"
+              labelClassName="text-xs leading-tight"
+              type="number"
+              min={1}
+              max={20}
+              value={attack.maxTargets ?? 3}
+              onChange={(e) =>
+                onChange({
+                  ...attack,
+                  maxTargets: Math.min(20, Math.max(1, parseInt(e.target.value, 10) || 1)),
+                })
+              }
+            />
           )}
         </div>
+        {attack.targetType === "aoe" && (
+          <div className="space-y-2">
+            <Label>Розподіл шкоди (%) — окремо на ціль</Label>
+            <div className="grid grid-cols-3 items-end gap-2 sm:grid-cols-4">
+              {Array.from({ length: attack.maxTargets ?? 3 }).map((_, i) => (
+                <LabeledInput
+                  key={i}
+                  id={`attack-damage-dist-${index}-${i}`}
+                  label={`Ціль ${i + 1}`}
+                  labelClassName="text-xs leading-tight"
+                  type="number"
+                  min={0}
+                  max={100}
+                  value={
+                    attack.damageDistribution?.[i] ??
+                    Math.round(100 / (attack.maxTargets ?? 3))
+                  }
+                  onChange={(e) => {
+                    const val = Math.min(100, Math.max(0, parseInt(e.target.value, 10) || 0));
+
+                    const prev = attack.damageDistribution ?? [];
+
+                    const next = [...prev];
+
+                    next[i] = val;
+                    while (next.length > (attack.maxTargets ?? 3)) next.pop();
+                    onChange({ ...attack, damageDistribution: next });
+                  }}
+                />
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Кожна ціль: 0–100%. Сума може перевищувати 100%.
+            </p>
+          </div>
+        )}
       </div>
     </Card>
   );

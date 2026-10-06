@@ -61,9 +61,11 @@ export function FieldRenderer({ meta, value, onChange, path }: { meta: FieldMeta
     }
   })();
 
+  const compact = meta.input === "number" || meta.input === "duration";
+
   return (
-    <div className="space-y-1">
-      <Label htmlFor={path} className="text-xs text-muted-foreground">
+    <div className={compact ? "col-span-2 flex flex-col justify-end space-y-1" : "col-span-3 space-y-1"}>
+      <Label htmlFor={path} className={compact ? "text-xs leading-tight text-muted-foreground" : "text-xs text-muted-foreground"}>
         {meta.label}
       </Label>
       {input}

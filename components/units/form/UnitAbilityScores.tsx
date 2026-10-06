@@ -10,10 +10,10 @@ interface UnitAbilityScoresProps {
 
 export function UnitAbilityScores({ formData, onChange }: UnitAbilityScoresProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
       {CORE_ABILITY_SCORES.map((ability) => (
         <div key={ability.key}>
-          <Label htmlFor={ability.key}>{ability.label}</Label>
+          <Label htmlFor={ability.key} className="text-xs leading-tight">{ability.label}</Label>
           <NumberInput
             id={ability.key}
             value={formData[ability.key]}
