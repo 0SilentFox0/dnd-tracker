@@ -3,7 +3,7 @@
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { ParticipantSide } from "@/lib/constants/battle";
+import { BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE, ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 import {
@@ -269,6 +269,31 @@ describe.skipIf(!isLocal)("battle store (local DB)", () => {
 
     expect(events.map((e) => e.actionIndex)).not.toContain(seq);
     expect(await prisma.battleSnapshot.count({ where: { battleId: ids.battle, seq: { gte: seq } } })).toBe(0);
+  });
+
+  it("завершення бою лишає лише останні знімки (відкат після завершення можливий)", async () => {
+    for (let i = 0; i < BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE + 3; i++) {
+      const before = await mustLoad();
+
+      await saveBattle(prisma, before, { participants: before.participants, pending: before.pending, events: [{ type: "attack", round: 1, resultText: `Удар ${i}` }] });
+    }
+
+    const before = await mustLoad();
+
+    await saveBattle(prisma, before, {
+      scene: { status: "completed", completedAt: new Date() },
+      participants: before.participants,
+      pending: before.pending,
+      events: [{ type: "end_turn", round: 1, resultText: "Бій завершено" }],
+    });
+
+    const after = await mustLoad();
+
+    const kept = await prisma.battleSnapshot.findMany({ where: { battleId: ids.battle }, select: { seq: true }, orderBy: { seq: "desc" } });
+
+    expect(kept).toHaveLength(BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE);
+    expect(kept[0].seq).toBe(after.scene.eventSeq);
+    expect(await prisma.battleEvent.count({ where: { battleId: ids.battle } })).toBeGreaterThan(BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE);
   });
 
   it("clear: журнал і знімки порожні, eventSeq = 0", async () => {
