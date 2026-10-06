@@ -83,6 +83,7 @@
 | Папка | Що містить |
 |-------|------------|
 | **`ui/`** | Базові компоненти (Button, Card, Select, Tabs, Accordion тощо) — shadcn/ui стиль. Діалоги — лише `ResponsiveDialog` (модалка на десктопі, шторка `vaul` на телефоні); підтвердження й повідомлення — `ConfirmProvider` + `useConfirm` / `useNotify`. |
+| **`hud/form/`** | HUD-форми: `HudFormPage` + `HudForm` (таби `HudTab`, заголовки секцій `HudSection`); діалоги-форми — `ResponsiveDialog hud`. Усередині `.hud-surface` shadcn-токени HUD-кольорові, текстова змінна HUD — `--hud-muted`. Акордеони — лише у списках. |
 | **`common/`** | Спільні блоки: FormCard, FormField, LabeledInput, ImageUpload, `ActionBar` (кнопки форми, на телефоні прилипають донизу), `states/` (`EmptyState`, `LoadingState`, `ErrorState`, `QueryState`). |
 | **`layout/`** | Макети, хедери, навігація. |
 | **`battle/`** | Бій: `scene/` (провайдер, `BattleScreen`, мобільна й десктопна розкладки, трек ініціативи, рядки учасників, мій герой, журнал), `wizards/` (майстер атаки, книга заклинань, бонусна дія, введення кубиків), `fx/` (оверлеї результатів), `hud/` (тема, шрифти, примітиви), `dialogs/` і `panels/` (DM), `views/BattlePreparationView`. |
