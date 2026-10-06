@@ -81,7 +81,13 @@ export function SkillCard({
     <SkillCardShell printMode={printMode}>
       <div>
         <div className={`flex items-start gap-2 ${printMode ? "mb-1.5" : "mb-3"}`}>
-          {skillIcon && <EntityIcon src={skillIcon} name={skillName} size={64} className={`rounded-lg text-xl ${printMode ? "size-9" : "size-12 sm:size-16"}`} />}
+          {printMode ? (
+            skillIcon && <EntityIcon src={skillIcon} name={skillName} size={64} className="size-9 rounded-lg text-xl" />
+          ) : (
+            <span className="metal-bronze flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-md bg-[radial-gradient(#2c2219,#0f0c09)] p-0.5 shadow-[inset_0_0_0_2px_var(--m2)] sm:size-14">
+              <EntityIcon src={skillIcon} name={skillName} size={56} className="hud-sc size-full rounded-[4px] bg-transparent text-lg text-[#e8d6b0]" />
+            </span>
+          )}
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
               <h3
