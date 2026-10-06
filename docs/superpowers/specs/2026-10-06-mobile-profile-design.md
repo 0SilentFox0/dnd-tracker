@@ -100,7 +100,7 @@ HP і слоти поза боєм: бій стартує з повними HP (
   заклинання у формі, яку їсть книга з бою).
 - `items`: `{ grid: ArtifactCell[9], artifacts: { id, name, icon, slot, rarity, description, effects: string[] }[],
   sets: { id, name, have, total, effects: string[] }[] }` — `effects` з `abilitySummary` (`lib/utils/abilities/summary.ts`).
-- `personalSkill: { id, name, icon, description } | null` — з рядків `extract-skills` (окремого запиту немає).
+- `personalSkill: { id, name, icon, description } | null` — один `skill.findFirst` з `select` чотирьох полів (учасник бою не зберігає опис вміння).
 - `story: { biography: string | null, goals: Goal[] }`.
 
 `Line = { label: string; value: number | string; source?: "ability"|"proficiency"|"weapon"|"skill"|"race"|"artifact"|"artifactSet"|"level"|"base" }`.
@@ -120,9 +120,9 @@ HP і слоти поза боєм: бій стартує з повними HP (
 
 - `useCharacterSheet(campaignId, characterId)` — TanStack Query, ключ `["character-sheet", campaignId, characterId]`,
   `staleTime` 60 с. Єдине джерело для перегляду.
-- `useCharacterEdit(campaignId, characterId, { editing })` — обгортає наявний `useCharacterForm`; персонажа та бібліотеки
-  (артефакти, сети, раси, вміння + main skills, заклинання) вантажить лише при `editing === true`. Зберегти → PATCH →
-  інвалідація листа.
+- Редагування — наявний `useDmCharacterEditor` (поверх `useCharacterForm`) усередині компонента `ProfileEditor`, який
+  монтується лише в режимі «Редагувати»; тому персонаж і бібліотеки (артефакти, сети, раси, вміння) вантажаться тільки
+  тоді. Зберегти → PATCH → інвалідація листа.
 - `useCharacterGoals` — мутація цілей з оптимістичним оновленням листа.
 - Інвалідація `["character-sheet", …]` після: прокачки (`useProgressionActions` — замість ключів damage-preview і
   калькулятора), level-up, PATCH, екіпірування, цілей.
@@ -216,7 +216,7 @@ HP і слоти поза боєм: бій стартує з повними HP (
   `author` ставить сервер, ліміти; PATCH — нові поля, мертві поля ігноруються.
 - Компоненти (happy-dom): `ProfileTabs` + `?tab=`; `BiographyText`; `GoalList` (гравець/ДМ); `AbilityGrid` чекбокс
   основної; `OfferList` відмінки; `SlotButton` ≥ 44 px; `ResponsiveDialog` — тап після закриття.
-- Хуки: `useCharacterEdit` не вантажить бібліотек без `editing`.
+- Профіль ДМа в режимі перегляду не вантажить бібліотек (редактор не змонтований).
 - Редактор раси: завантаження/очищення іконки зберігає `icon`; Zod-схема раси приймає `icon`.
 - Браузер (локальна Docker-БД, SIM-кампанія, Ліра; 390 px і десктоп): гравець — усі таби без обрізань, у мережі лише
   `sheet` + `progression`, книга, додавання цілі; ДМ (тимчасово роль у `preview-player-member`, потім повернути) —
