@@ -3,17 +3,20 @@
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { ParticipantSide } from "@/lib/constants/battle";
+import { BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE, ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 import {
   BattleConflictError,
   loadBattle,
+  loadBattleAccess,
+  loadEventsBefore,
   loadRecentEvents,
   loadSnapshotsFrom,
   restoreParticipantsAt,
   saveBattle,
 } from "@/lib/utils/battle/store";
+import type { BattleParticipant } from "@/types/battle";
 
 const url = process.env.DATABASE_URL ?? "";
 
@@ -35,6 +38,27 @@ async function mustLoad() {
   if (!battle) throw new Error("battle not found");
 
   return battle;
+}
+
+function countingDb() {
+  const calls: unknown[] = [];
+
+  const wrap = <T extends object>(target: T): T =>
+    new Proxy(target, {
+      get(t, key) {
+        const value = Reflect.get(t, key);
+
+        if (typeof value === "function") {
+          return (...args: unknown[]) => Promise.resolve(value.apply(t, args)).then((r: unknown) => (calls.push(r), r));
+        }
+
+        return value && typeof value === "object" ? wrap(value as object) : value;
+      },
+    });
+
+  const db = { ...prisma, $transaction: (fn: (tx: unknown) => Promise<unknown>) => prisma.$transaction((tx) => fn(wrap(tx))) };
+
+  return { db: db as unknown as typeof prisma, calls };
 }
 
 async function cleanup() {
@@ -103,6 +127,7 @@ describe.skipIf(!isLocal)("battle store (local DB)", () => {
     expect(delta.version).toBe(1);
     expect(delta.upserted.map((p) => p.basicInfo.id).sort()).toEqual(["gob", "hero"]);
     expect(delta.events[0].seq).toBe(1);
+    expect([...delta.fullIds].sort()).toEqual(["gob", "hero"]);
 
     const after = await mustLoad();
 
@@ -124,7 +149,44 @@ describe.skipIf(!isLocal)("battle store (local DB)", () => {
     });
 
     expect(delta.upserted.map((p) => p.basicInfo.id)).toEqual(["gob"]);
+    expect(delta.fullIds).toEqual([]);
     expect(delta.removed).toEqual([]);
+  });
+
+  it("оновлення учасників: кількість запитів не залежить від їх числа, рядки назад не читаються", async () => {
+    const hurt = (p: BattleParticipant, hp: number) => ({ ...p, combatStats: { ...p.combatStats, currentHp: hp } });
+
+    const one = countingDb();
+
+    const b1 = await mustLoad();
+
+    await saveBattle(one.db, b1, { participants: [hurt(b1.participants[0], 7), b1.participants[1]], pending: [], events: [{ type: "attack", round: 1, resultText: "Удар" }] });
+
+    const two = countingDb();
+
+    const b2 = await mustLoad();
+
+    const delta = await saveBattle(two.db, b2, { participants: [hurt(b2.participants[0], 6), hurt(b2.participants[1], 1)], pending: [], events: [{ type: "attack", round: 1, resultText: "Удар" }] });
+
+    expect(two.calls.length).toBe(one.calls.length);
+    expect(JSON.stringify(two.calls)).not.toContain("snapshot");
+
+    const after = await mustLoad();
+
+    expect(after.participants.map((p) => p.combatStats.currentHp)).toEqual([6, 1]);
+    expect(after.participants[0]).toEqual(hurt(b2.participants[0], 6));
+    expect(delta.upserted.map((p) => p.basicInfo.id)).toEqual(["hero", "gob"]);
+  });
+
+  it("зміна знімка пишеться тим самим UPDATE", async () => {
+    const before = await mustLoad();
+
+    const buffed = { ...before.participants[0], combatStats: { ...before.participants[0].combatStats, armorClass: 25 } };
+
+    const delta = await saveBattle(prisma, before, { participants: [buffed, before.participants[1]], pending: [], events: [] });
+
+    expect(delta.fullIds).toEqual(["hero"]);
+    expect((await mustLoad()).participants[0]).toEqual(buffed);
   });
 
   it("два збереження з однієї версії — друге отримує конфлікт", async () => {
@@ -209,6 +271,52 @@ describe.skipIf(!isLocal)("battle store (local DB)", () => {
 
     expect(events.map((e) => e.actionIndex)).not.toContain(seq);
     expect(await prisma.battleSnapshot.count({ where: { battleId: ids.battle, seq: { gte: seq } } })).toBe(0);
+  });
+
+  it("завершення бою лишає лише останні знімки (відкат після завершення можливий)", async () => {
+    for (let i = 0; i < BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE + 3; i++) {
+      const before = await mustLoad();
+
+      await saveBattle(prisma, before, { participants: before.participants, pending: before.pending, events: [{ type: "attack", round: 1, resultText: `Удар ${i}` }] });
+    }
+
+    const before = await mustLoad();
+
+    await saveBattle(prisma, before, {
+      scene: { status: "completed", completedAt: new Date() },
+      participants: before.participants,
+      pending: before.pending,
+      events: [{ type: "end_turn", round: 1, resultText: "Бій завершено" }],
+    });
+
+    const after = await mustLoad();
+
+    const kept = await prisma.battleSnapshot.findMany({ where: { battleId: ids.battle }, select: { seq: true }, orderBy: { seq: "desc" } });
+
+    expect(kept).toHaveLength(BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE);
+    expect(kept[0].seq).toBe(after.scene.eventSeq);
+    expect(await prisma.battleEvent.count({ where: { battleId: ids.battle } })).toBeGreaterThan(BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE);
+  });
+
+  it("сторінка журналу до seq: старіші події по зростанню, hasMore; доступ — лише версія й членство", async () => {
+    const before = await mustLoad();
+
+    const last = before.scene.eventSeq;
+
+    const page = await loadEventsBefore(prisma, ids.battle, { before: last, limit: 3 });
+
+    expect(page.events.map((e) => e.actionIndex)).toEqual([last - 3, last - 2, last - 1]);
+    expect(page.hasMore).toBe(true);
+    expect(page.events[0]).toMatchObject({ battleId: ids.battle, resultText: expect.any(String) });
+
+    const first = await loadEventsBefore(prisma, ids.battle, { before: 3, limit: 50 });
+
+    expect(first.events.every((e) => e.actionIndex < 3 && !e.isCancelled)).toBe(true);
+    expect(first.hasMore).toBe(false);
+
+    expect(await loadBattleAccess(prisma, { battleId: ids.battle, campaignId: ids.campaign, userId: ids.user })).toEqual({ version: before.scene.version, isMember: true });
+    expect(await loadBattleAccess(prisma, { battleId: ids.battle, campaignId: ids.campaign, userId: "stranger" })).toEqual({ version: before.scene.version, isMember: false });
+    expect(await loadBattleAccess(prisma, { battleId: ids.battle, campaignId: "other", userId: ids.user })).toBeNull();
   });
 
   it("clear: журнал і знімки порожні, eventSeq = 0", async () => {

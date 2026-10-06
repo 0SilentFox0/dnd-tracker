@@ -3,12 +3,14 @@
 import { createContext, useCallback, useContext, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
+import { type BattleLogHistory, useBattleLogHistory } from "./useBattleLogHistory";
 import { type BattleToastApi, useBattleToast } from "./useBattleToast";
 import { type PusherConnectionState, usePusherBattleSync } from "./usePusherBattleSync";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import {
+  battleQueryKey,
   useAddBattleParticipant,
   useAttack,
   useBattle,
@@ -76,6 +78,7 @@ export interface BattleSceneValue {
   openLog(focus?: number | null): void;
   closeLog(): void;
   readBattle(): BattleScene | undefined;
+  logHistory: BattleLogHistory;
   actions: BattleSceneActions;
   anyPending: boolean;
 }
@@ -172,9 +175,11 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
   };
 
   const readBattle = useCallback(
-    () => queryClient.getQueryData<BattleScene>(["battle", campaignId, battleId]),
+    () => queryClient.getQueryData<BattleScene>(battleQueryKey(campaignId, battleId)),
     [queryClient, campaignId, battleId],
   );
+
+  const logHistory = useBattleLogHistory(campaignId, battleId, battle?.battleLog);
 
   if (!battle) return { value: null, loading: isLoading };
 
@@ -207,6 +212,7 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
     openLog,
     closeLog,
     readBattle,
+    logHistory,
     actions,
     anyPending: Object.values(actions).some((m) => m.isPending),
   };

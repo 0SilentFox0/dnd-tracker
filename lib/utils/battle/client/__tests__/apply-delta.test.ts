@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
-import { acceptFullBattle, applyBattleDelta } from "@/lib/utils/battle/client/apply-delta";
+import { acceptFullBattle, applyBattleDelta, prependBattleLog } from "@/lib/utils/battle/client/apply-delta";
 import type { BattleScene, ClientBattleDelta } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -50,6 +50,28 @@ describe("applyBattleDelta", () => {
     expect(next.initiativeOrder[1]).toBe(b2);
     expect(next.battleLog.map((e) => e.actionIndex)).toEqual([1, 2, 3]);
     expect(next).toMatchObject({ isDM: true, userRole: "dm", campaign: { id: "c1", friendlyFire: false } });
+  });
+
+  it("patched — мердж розділів поверх кешованого учасника; незмінені розділи й учасники зберігають посилання", () => {
+    const effects = [{ id: "e1", name: "Кровотеча" }] as unknown as BattleParticipant["battleData"]["activeEffects"];
+
+    const next = applyBattleDelta(
+      cached,
+      delta({ patched: [{ id: "b", combatStats: { currentHp: 2 }, battleData: { activeEffects: effects } }] }),
+    ) as BattleScene;
+
+    const merged = next.initiativeOrder[1];
+
+    expect(next.initiativeOrder[0]).toBe(a);
+    expect(merged.combatStats).toEqual({ ...b.combatStats, currentHp: 2 });
+    expect(merged.battleData.activeEffects).toBe(effects);
+    expect(merged.battleData.attacks).toBe(b.battleData.attacks);
+    expect(merged.abilities).toBe(b.abilities);
+    expect(merged.actionFlags).toBe(b.actionFlags);
+  });
+
+  it("patched на невідомий id — refetch", () => {
+    expect(applyBattleDelta(cached, delta({ patched: [{ id: "ghost", combatStats: { currentHp: 1 } }] }))).toBe("refetch");
   });
 
   it("order + removed + pending", () => {
@@ -135,5 +157,18 @@ describe("acceptFullBattle — інший запуск бою", () => {
     const rerun = { ...cached, version: 9, startedAt: "2026-01-02T00:00:00.000Z", battleLog: [3, 4].map(entry) };
 
     expect(acceptFullBattle(old, rerun).battleLog.map((e) => e.actionIndex)).toEqual([3, 4]);
+  });
+});
+
+describe("prependBattleLog", () => {
+  it("старіші події стають на початок журналу; дублікати не повторюються; решта кешу без змін", () => {
+    const withLog = { ...cached, battleLog: [entry(4), entry(5)] };
+
+    const next = prependBattleLog(withLog, [entry(2), entry(3), entry(4)]);
+
+    expect(next.battleLog.map((e) => e.actionIndex)).toEqual([2, 3, 4, 5]);
+    expect(next.battleLog[2]).toBe(withLog.battleLog[0]);
+    expect(next.initiativeOrder).toBe(withLog.initiativeOrder);
+    expect(next.version).toBe(withLog.version);
   });
 });

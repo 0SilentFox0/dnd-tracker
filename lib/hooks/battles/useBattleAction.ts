@@ -1,5 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { battleQueryKey } from "./keys";
+
 import { ApiError } from "@/lib/api/client";
 import { applyBattleDelta } from "@/lib/utils/battle/client/apply-delta";
 import type { BattleMutationResponse, BattleScene } from "@/types/api";
@@ -18,7 +20,7 @@ export function useBattleAction<TVars extends object, TResp = Record<string, unk
 ) {
   const queryClient = useQueryClient();
 
-  const key = ["battle", campaignId, battleId];
+  const key = battleQueryKey(campaignId, battleId);
 
   return useMutation({
     mutationFn: async (vars: TVars) => {

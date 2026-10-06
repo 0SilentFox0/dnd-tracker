@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { BattleLogLoadEarlier } from "@/components/battle/panels/BattleLogLoadEarlier";
 import { LogEntryDetails } from "@/components/battle/panels/LogEntryDetails";
 import { useBattleScene } from "@/lib/hooks/battle";
 import { getLogEntryDetailLines } from "@/lib/utils/battle/battle-log-format";
@@ -39,6 +40,7 @@ export function BattleLog() {
           </div>
         );
       })}
+      <BattleLogLoadEarlier />
     </div>
   );
 }

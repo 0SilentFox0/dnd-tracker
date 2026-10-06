@@ -76,6 +76,10 @@ export interface BattleScene {
   knowledge?: BattleKnowledge;
 }
 
+export type BattleParticipantPatch = { id: string } & {
+  [K in keyof BattleParticipant]?: Partial<BattleParticipant[K]>;
+};
+
 export interface ClientBattleDelta {
   battleId: string;
   version: number;
@@ -88,12 +92,22 @@ export interface ClientBattleDelta {
     completedAt?: string;
   };
   upserted: BattleParticipant[];
+  patched?: BattleParticipantPatch[];
   removed: string[];
   order?: string[];
   pending?: BattleParticipant[];
   setup?: BattlePreparationParticipant[];
   log: BattleAction[];
   cancelledFrom?: number;
+}
+
+export interface BattleEventsPage {
+  events: BattleAction[];
+  hasMore: boolean;
+}
+
+export interface BattleVersion {
+  version: number;
 }
 
 export interface BattleRefetchSignal {

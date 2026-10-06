@@ -86,3 +86,14 @@ export const ParticipantSourceType = {
 } as const;
 
 export type ParticipantSourceTypeValue = (typeof ParticipantSourceType)[keyof typeof ParticipantSourceType];
+
+export const BATTLE_VERSION_ONLY_PARAM = "versionOnly";
+
+export const BATTLE_LOG_RECENT_EVENTS = 30;
+
+export const BATTLE_LOG_PAGE_SIZE = 50;
+
+export const BATTLE_LOG_PAGE_MAX = 100;
+
+// відкат дозволено й для завершеного бою, тож знімки лишаються, але не всі
+export const BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE = 20;
