@@ -7,10 +7,4 @@ export { calculateAttackBonus, hasAdvantage, hasDisadvantage, predictAttackNumbe
 export { applyCriticalEffect } from "./critical";
 export type { ProcessAttackParams, ProcessAttackResult } from "./process";
 export { processAttack } from "./process";
-export {
-  canPerformReaction,
-  getCounterDamagePercent,
-  getReactionDamageAmount,
-  performReaction,
-} from "./reaction";
 export { calculateAttackRoll } from "./roll";

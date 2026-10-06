@@ -16,6 +16,7 @@ import {
 } from "../run-attack-phase";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
+import { resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -378,5 +379,84 @@ describe("runAttackPhase — happy path smoke", () => {
         isDM: false,
       }),
     ).not.toThrow();
+  });
+});
+
+function armed(id: string, attacks: BattleAttack[], over: Partial<BattleParticipant> = {}): BattleParticipant {
+  const p = createMockParticipant({ basicInfo: { ...createMockParticipant().basicInfo, id, name: id, side: ParticipantSide.ENEMY }, ...over });
+
+  return { ...p, battleData: { ...p.battleData, attacks } };
+}
+
+const bowAttack = meleeAttack({ type: AttackType.RANGED, id: "bow", name: "Лук" });
+
+const rangedCounter = resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "counterAttack", attackKinds: ["ranged"], bonusPercent: 0 }] });
+
+describe("runAttackPhase — відсіч", () => {
+  it("влучання по основній цілі → подія відсічі одразу після атаки", () => {
+    const r = runAttackPhase(makeInput({ battle: { initiativeOrder: [makeAttacker(), armed("tgt", [meleeAttack()])], battleLog: [], currentRound: 1, currentTurnIndex: 0 }, rng: seq(0.85) }));
+
+    expect(r.allBattleActions.map((a) => a.actionType)).toEqual(["attack", "retaliation"]);
+    expect(r.allBattleActions.map((a) => a.actionIndex)).toEqual([0, 1]);
+  });
+
+  it("звичайний промах теж викликає відсіч; критичний промах — ні", () => {
+    const order = () => [makeAttacker(), armed("tgt", [meleeAttack()])];
+
+    const miss = runAttackPhase(makeInput({ battle: { initiativeOrder: order(), battleLog: [], currentRound: 1, currentTurnIndex: 0 }, data: { ...makeInput().data, d20Roll: 2 }, rng: seq(0.85) }));
+
+    expect(miss.allBattleActions.map((a) => a.actionType)).toEqual(["attack", "retaliation"]);
+
+    const fumble = runAttackPhase(makeInput({ battle: { initiativeOrder: order(), battleLog: [], currentRound: 1, currentTurnIndex: 0 }, data: { ...makeInput().data, d20Roll: 1 }, rng: seq(0.85) }));
+
+    expect(fumble.allBattleActions.map((a) => a.actionType)).toEqual(["attack"]);
+  });
+
+  it("лише основна ціль відповідає, без ланцюжка", () => {
+    const aoe = meleeAttack({ targetType: "aoe", maxTargets: 2 } as Partial<BattleAttack>);
+
+    const base = makeAttacker();
+
+    const attacker = { ...base, battleData: { ...base.battleData, attacks: [aoe] } };
+
+    const r = runAttackPhase({
+      battle: { initiativeOrder: [attacker, armed("t1", [meleeAttack()]), armed("t2", [meleeAttack()])], battleLog: [], currentRound: 1, currentTurnIndex: 0 },
+      data: { attackerId: "atk", targetIds: ["t1", "t2"], d20Roll: 15, damageRolls: [3] },
+      battleId: "b1",
+      userId: "user-1",
+      isDM: false,
+      rng: seq(0.85),
+    });
+
+    const retaliations = r.allBattleActions.filter((a) => a.actionType === "retaliation");
+
+    expect(retaliations).toHaveLength(1);
+    expect(retaliations[0].actorId).toBe("t1");
+  });
+
+  it("атакувальник упав від відсічі — решта ударів скасовано", () => {
+    const base = makeAttacker();
+
+    const attacker: BattleParticipant = {
+      ...base,
+      combatStats: { ...base.combatStats, maxTargets: 2, currentHp: 1 },
+      battleData: { ...base.battleData, attacks: [bowAttack] },
+    };
+
+    const t1 = armed("t1", [bowAttack], { battleData: { ...createMockParticipant().battleData, attacks: [bowAttack], resolvedAbilities: [rangedCounter] } });
+
+    const t2 = armed("t2", [bowAttack]);
+
+    const r = runAttackPhase({
+      battle: { initiativeOrder: [attacker, t1, t2], battleLog: [], currentRound: 1, currentTurnIndex: 0 },
+      data: { attackerId: "atk", targetIds: ["t1", "t2"], attackRolls: [12, 14], damageRolls: [4, 5] },
+      battleId: "b1",
+      userId: "user-1",
+      isDM: false,
+      rng: seq(0.85),
+    });
+
+    expect(r.allBattleActions.map((a) => a.actionType)).toEqual(["attack", "retaliation"]);
+    expect(r.finalInitiativeOrder.find((p) => p.basicInfo.id === "t2")?.combatStats.currentHp).toBe(t2.combatStats.currentHp);
   });
 });

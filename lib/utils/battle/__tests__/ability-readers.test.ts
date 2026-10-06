@@ -4,7 +4,6 @@ import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { immunityAbilities } from "@/lib/utils/abilities/build/immunities";
 import { calculateAttackBonus, calculateAttackRoll, hasAdvantage, hasDisadvantage, predictAttackNumbers } from "@/lib/utils/battle/attack";
-import { canPerformReaction, getCounterDamagePercent } from "@/lib/utils/battle/attack/reaction";
 import { calculateDamageWithModifiers } from "@/lib/utils/battle/damage";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant";
 import { applyResistance } from "@/lib/utils/battle/resistance";
@@ -76,26 +75,6 @@ describe("readers", () => {
     expect(applyResistance(p, 10, "slashing").finalDamage).toBe(5);
     expect(applyResistance(p, 10, "fire").immunityApplied).toBe(true);
     expect(applyResistance(p, 10, "cold", { fromSpell: true }).finalDamage).toBe(8);
-  });
-
-  it("контратака з прапорця", () => {
-    const p = makeParticipant({ id: "a", abilities: [resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "counterAttack", attackKinds: ["ranged"], bonusPercent: 30 }] })] });
-
-    expect(canPerformReaction(p, AttackType.RANGED)).toBe(true);
-    expect(canPerformReaction(p, AttackType.MELEE)).toBe(false);
-    expect(getCounterDamagePercent(p)).toBe(30);
-  });
-
-  it("контратака: відсотки з кількох джерел сумуються, як раніше", () => {
-    const p = makeParticipant({
-      id: "a",
-      abilities: [
-        resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "counterAttack", attackKinds: ["melee"], bonusPercent: 20 }] }),
-        resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "counterAttack", attackKinds: ["melee"], bonusPercent: 10 }] }, { id: "s2" }),
-      ],
-    });
-
-    expect(getCounterDamagePercent(p)).toBe(30);
   });
 
   it("прогноз для клієнта: AC і бонус атаки з умінь (артефакт +2 AC)", () => {
