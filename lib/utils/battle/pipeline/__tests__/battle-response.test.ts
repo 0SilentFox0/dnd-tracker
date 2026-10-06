@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
-import { buildPusherMessages, toLegacyBattle } from "@/lib/utils/battle/pipeline/legacy-battle";
+import { buildPusherMessages, toBattleResponse } from "@/lib/utils/battle/pipeline/battle-response";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 
 const scene: BattleSceneState = {
@@ -16,9 +16,9 @@ const hero = createMockParticipant({ basicInfo: { ...createMockParticipant().bas
 
 const goblin = createMockParticipant({ basicInfo: { ...createMockParticipant().basicInfo, id: "gob", controlledBy: "dm" } });
 
-describe("toLegacyBattle", () => {
+describe("toBattleResponse", () => {
   it("payload для інших клієнтів не містить isDM/userRole", () => {
-    const b = toLegacyBattle({ meta }, scene, [hero], [], { mode: "append", entries: [] });
+    const b = toBattleResponse({ meta }, scene, [hero], [], { mode: "append", entries: [] });
 
     expect(b).not.toHaveProperty("isDM");
     expect(b).not.toHaveProperty("userRole");
@@ -27,12 +27,12 @@ describe("toLegacyBattle", () => {
   });
 
   it("для того, хто діяв, — з isDM/userRole; лобі видно лише в prepared", () => {
-    const active = toLegacyBattle({ meta }, scene, [hero], [], { mode: "full", entries: [] }, { isDM: true });
+    const active = toBattleResponse({ meta }, scene, [hero], [], { mode: "full", entries: [] }, { isDM: true });
 
     expect(active).toMatchObject({ isDM: true, userRole: "dm", participants: [] });
     expect(active.battleLogMode).toBeUndefined();
 
-    const prepared = toLegacyBattle({ meta }, { ...scene, status: "prepared" }, [], [], { mode: "full", entries: [] }, { isDM: false });
+    const prepared = toBattleResponse({ meta }, { ...scene, status: "prepared" }, [], [], { mode: "full", entries: [] }, { isDM: false });
 
     expect(prepared.participants).toEqual(meta.setup);
     expect(prepared.userRole).toBe("player");

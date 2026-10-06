@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import type { ZodType } from "zod";
 
+import type { PusherMessage } from "./battle-response";
+import { buildPusherMessages, toBattleResponse } from "./battle-response";
 import { buildClientDelta } from "./client-delta";
 import { defaultPipelineDeps } from "./default-deps";
-import type { PusherMessage } from "./legacy-battle";
-import { buildPusherMessages, toLegacyBattle } from "./legacy-battle";
 
 import type { Rng } from "@/lib/utils/abilities/engine/types";
 import type { BATTLE_RATE_LIMITS, RateLimitResult } from "@/lib/utils/api/rate-limit";
@@ -228,7 +228,7 @@ export async function runBattleMutation<TBody>(
         options.includeKnowledge && !loaded.isDM ? deps.loadKnowledge?.(battleId) : undefined,
       ]);
 
-      const battle = toLegacyBattle(
+      const battle = toBattleResponse(
         loaded,
         loaded.scene,
         result.participants,
