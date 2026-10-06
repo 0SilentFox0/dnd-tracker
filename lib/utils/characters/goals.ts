@@ -1,6 +1,8 @@
 import { type GoalInput, MAX_GOALS } from "@/lib/schemas/character-goals";
 import type { CharacterGoal } from "@/types/characters";
 
+const uniqueById = (goals: CharacterGoal[]) => goals.filter((g, i) => goals.findIndex((x) => x.id === g.id) === i);
+
 export function mergePlayerGoals(current: CharacterGoal[], incoming: GoalInput[]): CharacterGoal[] {
   const dmGoals = current.filter((g) => g.author === "dm");
 
@@ -10,7 +12,7 @@ export function mergePlayerGoals(current: CharacterGoal[], incoming: GoalInput[]
     .filter((g) => !dmIds.has(g.id))
     .map((g): CharacterGoal => ({ id: g.id, text: g.text, status: g.status, author: "player" }));
 
-  return [...dmGoals, ...own].slice(0, MAX_GOALS);
+  return uniqueById([...dmGoals, ...own]).slice(0, MAX_GOALS);
 }
 
 // A DM writing from a stale cache must not drop player goals added since: keep those the client never saw.
@@ -19,5 +21,5 @@ export function mergeDmGoals(current: CharacterGoal[], incoming: GoalInput[], se
 
   const known = new Set([...seen, ...next.map((g) => g.id)]);
 
-  return [...next, ...current.filter((g) => g.author === "player" && !known.has(g.id))].slice(0, MAX_GOALS);
+  return uniqueById([...next, ...current.filter((g) => g.author === "player" && !known.has(g.id))]).slice(0, MAX_GOALS);
 }

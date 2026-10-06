@@ -3,7 +3,7 @@
  */
 
 import type { CampaignSpellContext, CharacterFromPrisma } from "../types/participant";
-import { loadEquippedArtifactRows, toEquippedArtifacts } from "./extract-artifacts";
+import { type EquippedArtifactRow, loadEquippedArtifactRows, toEquippedArtifacts } from "./extract-artifacts";
 import { extractAttacksFromCharacter } from "./extract-attacks";
 import { resolveCharacterSkillEntries } from "./extract-skills";
 import { resolveLearnedSpellsFromCharacter } from "./from-character-learned-spells";
@@ -31,6 +31,7 @@ export async function createBattleParticipantFromCharacter(
   side: ParticipantSide,
   instanceNumber?: number,
   context?: CampaignSpellContext,
+  preloaded?: { artifactRows?: EquippedArtifactRow[] },
 ): Promise<BattleParticipant> {
   const modifiers = {
     strength: getAbilityModifier(character.strength),
@@ -51,16 +52,15 @@ export async function createBattleParticipantFromCharacter(
     context ? (context.skillTreeByRace[character.race] ?? null) : undefined,
   );
 
-  const artifactRows = await loadEquippedArtifactRows(character, context?.artifactsById);
+  const artifactRows = preloaded?.artifactRows ?? (await loadEquippedArtifactRows(character, context?.artifactsById));
+
+  const artifactsById = context?.artifactsById ?? (preloaded?.artifactRows ? Object.fromEntries(preloaded.artifactRows.map(({ row }) => [row.id, row])) : undefined);
 
   const equippedArtifacts = toEquippedArtifacts(artifactRows);
 
   const completed = await findCompletedSets(equippedArtifacts, character.campaignId, context);
 
-  const attacks = await extractAttacksFromCharacter(
-    character,
-    context?.artifactsById,
-  );
+  const attacks = await extractAttacksFromCharacter(character, artifactsById);
 
   const race = await loadRace(character.race, character.campaignId, context ? (context.racesByName[character.race] ?? null) : undefined);
 

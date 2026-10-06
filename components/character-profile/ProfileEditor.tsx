@@ -10,6 +10,7 @@ import { useProfile } from "./ProfileContext";
 import { ProfileHero } from "./ProfileHero";
 import { type ProfileTabId, ProfileTabs } from "./ProfileTabs";
 import { SkillsTab } from "./SkillsTab";
+import { SPELL_ABILITY_OPTIONS, toSpellcastingAbility } from "./spellcasting-ability";
 
 import { CharacterAbilitiesSection } from "@/components/characters/abilities/CharacterAbilitiesSection";
 import { CharacterArtifactsSection } from "@/components/characters/artifacts/CharacterArtifactsSection";
@@ -23,11 +24,6 @@ import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
 import { useDmCharacterEditor } from "@/lib/hooks/characters";
 
-const SPELL_ABILITIES = [
-  { value: "intelligence", label: "Інтелект" },
-  { value: "wisdom", label: "Мудрість" },
-  { value: "charisma", label: "Харизма" },
-];
 
 const EDIT_PANEL = "rounded-lg bg-background p-3 text-foreground";
 
@@ -92,9 +88,9 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
                 <Label htmlFor="spellcastingAbility">Характеристика заклинань</Label>
                 <SelectField
                   id="spellcastingAbility"
-                  value={spellcasting.spellcastingAbility ?? "none"}
-                  onValueChange={(v) => spellcasting.setters.setSpellcastingAbility(v === "none" ? undefined : (v as "intelligence" | "wisdom" | "charisma"))}
-                  options={SPELL_ABILITIES}
+                  value={spellcasting.spellcastingAbility ?? ""}
+                  onValueChange={(v) => spellcasting.setters.setSpellcastingAbility(toSpellcastingAbility(v))}
+                  options={SPELL_ABILITY_OPTIONS}
                   allowNone
                   noneLabel="Немає"
                 />

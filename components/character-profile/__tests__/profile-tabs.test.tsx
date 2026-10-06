@@ -54,4 +54,22 @@ describe("таби профілю", () => {
     expect(screen.getByText("Око яструба")).toBeTruthy();
     expect(screen.getByText("прокачка")).toBeTruthy();
   });
+
+  it("Речі: однакові ефекти показуються обидва, а шторка під час закриття зберігає назву", () => {
+    mockMatchMedia(true);
+
+    const twin = { ...sheetFixture.items.artifacts[0], effects: ["AC +1", "AC +1"] };
+
+    inProfile(<ItemsTab />, withSheet({ items: { ...sheetFixture.items, grid: { armor: twin }, artifacts: [twin] } }));
+
+    expect(screen.getAllByText("AC +1 · AC +1")).toHaveLength(1);
+    fireEvent.click(screen.getByRole("button", { name: "Броня: Кольчуга ельфів" }));
+    expect(screen.getAllByRole("listitem").filter((li) => li.textContent === "AC +1")).toHaveLength(2);
+    fireEvent.keyDown(document.activeElement ?? document.body, { key: "Escape" });
+
+    const sheet = document.querySelector("[data-slot=sheet]");
+
+    expect(sheet).toHaveAttribute("data-state", "closed");
+    expect(sheet?.textContent).toContain("Кольчуга ельфів");
+  });
 });

@@ -51,13 +51,15 @@ export function attackSheet(p: BattleParticipant, attack: BattleAttack): SheetAt
     ...hitMods.entries.filter((e) => e.flat).map((e) => ({ label: e.label, value: signed(e.flat), source: asSource(e.sourceType) })),
   ];
 
+  const damageSources = new Map(collectModifiers([p], p.basicInfo.id, { damage: { kind: type === AttackType.RANGED ? "ranged" : "melee" } }).entries.map((e) => [e.label, asSource(e.sourceType)]));
+
   const damageLines: SheetLine[] = [
     ...(attack.damageDice ? [{ label: `Зброя ${attack.damageDice}`, value: avg.weaponAvg.toFixed(1), source: "dice" as const }] : []),
     ...(avg.heroPart ? [{ label: `Рівень + ${avg.heroDice}`, value: avg.heroPart.toFixed(1), source: "level" as const }] : []),
     { label: avg.statLabel, value: signed(statMod), source: "ability" },
     ...avg.steps
       .filter((s) => s.kind === "percent" || (s.kind === "flat" && s.label !== avg.statLabel && s.label !== "Рівень героя"))
-      .map((s) => ({ label: s.label, value: s.kind === "percent" ? `${signed(s.value)}%` : signed(s.value), source: "skill" as const })),
+      .map((s) => ({ label: s.label, value: s.kind === "percent" ? `${signed(s.value)}%` : signed(s.value), source: damageSources.get(s.label) ?? ("skill" as const) })),
     ...(avg.multiplier !== 1 ? [{ label: "Коеф. ДМа", value: `×${avg.multiplier}`, source: "multiplier" as const }] : []),
   ];
 

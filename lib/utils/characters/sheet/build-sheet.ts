@@ -27,7 +27,6 @@ export interface SheetInput {
     skills: unknown;
     languages: unknown;
     proficiencies: unknown;
-    immunities: unknown;
     spellcastingAbility: string | null;
     hpMultiplier: number | null;
     primaryAbility: string | null;
@@ -35,6 +34,7 @@ export interface SheetInput {
     goals: unknown;
   };
   raceIcon: string | null;
+  immunities: string[];
   artifacts: SheetArtifact[];
   sets: SheetSet[];
   spells: BookSpell[];
@@ -94,7 +94,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
     speed: p.combatStats.speed,
     morale: p.combatStats.morale,
     targets: { min: p.combatStats.minTargets ?? 1, max: p.combatStats.maxTargets ?? 1 },
-    immunities: strings(c.immunities),
+    immunities: input.immunities,
     languages: strings(c.languages),
     proficiencies: proficiencyList(c.proficiencies),
     attacks,

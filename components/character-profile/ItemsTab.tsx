@@ -27,6 +27,13 @@ export function ItemsTab() {
 
   const [shown, setShown] = useState<SheetArtifact | null>(null);
 
+  const [open, setOpen] = useState(false);
+
+  const show = (a: SheetArtifact) => {
+    setShown(a);
+    setOpen(true);
+  };
+
   return (
     <>
       <div className="mx-auto grid w-[216px] max-w-full grid-cols-3 gap-1.5">
@@ -34,7 +41,7 @@ export function ItemsTab() {
           const a = sheet.items.grid[cell.key];
 
           return a ? (
-            <button key={cell.key} type="button" aria-label={`${cell.label}: ${a.name}`} onClick={() => setShown(a)} className={cn("flex aspect-square items-center justify-center overflow-hidden rounded-lg border-2 bg-[#1a140f]", RARITY_RING[a.rarity ?? ""] ?? "border-[#4a3c2c]")}>
+            <button key={cell.key} type="button" aria-label={`${cell.label}: ${a.name}`} onClick={() => show(a)} className={cn("flex aspect-square items-center justify-center overflow-hidden rounded-lg border-2 bg-[#1a140f]", RARITY_RING[a.rarity ?? ""] ?? "border-[#4a3c2c]")}>
               <Icon a={a} size={68} />
             </button>
           ) : (
@@ -49,7 +56,7 @@ export function ItemsTab() {
         <ul>
           {sheet.items.artifacts.map((a) => (
             <li key={a.id}>
-              <button type="button" onClick={() => setShown(a)} className="flex min-h-11 w-full items-start gap-2 border-b border-[#2a2218] py-2 text-left">
+              <button type="button" onClick={() => show(a)} className="flex min-h-11 w-full items-start gap-2 border-b border-[#2a2218] py-2 text-left">
                 <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md border border-[#4a3c2c]">
                   <Icon a={a} size={32} />
                 </span>
@@ -70,12 +77,12 @@ export function ItemsTab() {
           ))}
         </ul>
       </Section>
-      <ResponsiveDialog open={!!shown} onOpenChange={(o) => !o && setShown(null)} title={shown?.name ?? ""}>
+      <ResponsiveDialog open={open} onOpenChange={setOpen} title={shown?.name ?? ""}>
         {shown?.description && <p className="text-sm">{shown.description}</p>}
         {shown && shown.effects.length > 0 ? (
           <ul className="mt-2 list-disc pl-5 text-sm">
-            {shown.effects.map((e) => (
-              <li key={e}>{e}</li>
+            {shown.effects.map((e, i) => (
+              <li key={`${i}-${e}`}>{e}</li>
             ))}
           </ul>
         ) : (

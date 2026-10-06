@@ -79,8 +79,15 @@ describe("CharacterProfile — перегляд", () => {
 
     expect(screen.queryByRole("button", { name: "Редагувати" })).toBeNull();
     unmount();
+    h.sheetQuery.data = withSheet({ viewer: { isDM: true, isOwner: false } });
     renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit />);
     expect(screen.getByRole("button", { name: "Редагувати" })).toBeTruthy();
+  });
+
+  it("гравець, що відкрив сторінку ДМа для свого персонажа, не бачить «Редагувати»", () => {
+    renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit />);
+
+    expect(screen.queryByRole("button", { name: "Редагувати" })).toBeNull();
   });
 });
 

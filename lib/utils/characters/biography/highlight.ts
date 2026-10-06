@@ -40,9 +40,28 @@ export function toggleHighlight(src: string, start: number, end: number): { text
 
   if (s === e) return { text: src, start, end };
 
+  for (const m of src.matchAll(MARK)) {
+    const mEnd = m.index + m[0].length;
+
+    if (m.index < e && mEnd > s) {
+      s = Math.min(s, m.index);
+      e = Math.max(e, mEnd);
+    }
+  }
+
   const inner = src.slice(s, e).replaceAll("==", "");
 
-  return { text: `${src.slice(0, s)}==${inner}==${src.slice(e)}`, start: s + 2, end: s + 2 + inner.length };
+  if (!inner.includes("\n")) {
+    return { text: `${src.slice(0, s)}==${inner}==${src.slice(e)}`, start: s + 2, end: s + 2 + inner.length };
+  }
+
+  // marks never span lines (parseHighlights works per paragraph), so wrap each line on its own
+  const wrapped = inner
+    .split("\n")
+    .map((line) => line.replace(/^(\s*)(\S(?:.*\S)?)(\s*)$/, "$1==$2==$3"))
+    .join("\n");
+
+  return { text: src.slice(0, s) + wrapped + src.slice(e), start: s, end: s + wrapped.length };
 }
 
 export function paragraphs(src: string): string[] {

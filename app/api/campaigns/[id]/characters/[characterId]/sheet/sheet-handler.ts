@@ -5,9 +5,10 @@ import { abilitySummary } from "@/lib/utils/abilities/summary";
 import { loadArtifactSetBattleMaps } from "@/lib/utils/battle/artifact-sets/load-maps";
 import { createBattleParticipantFromCharacter } from "@/lib/utils/battle/participant";
 import { loadEquippedArtifactRows } from "@/lib/utils/battle/participant/extract-artifacts";
+import { getCharacterImmunities } from "@/lib/utils/characters/character-race-effects";
 import { buildCharacterSheet } from "@/lib/utils/characters/sheet";
+import { toBookSpell } from "@/lib/utils/spells/to-book-spell";
 import type { CharacterSheet, SheetArtifact, SheetSet } from "@/types/characters";
-import type { BookSpell } from "@/types/spells";
 
 export const loadSheetCharacter = (characterId: string) => prisma.character.findUnique({ where: { id: characterId }, include: { inventory: true } });
 
@@ -33,11 +34,11 @@ const SPELL_SELECT = {
 } as const;
 
 export async function buildSheetFor(character: SheetCharacter, viewer: CharacterSheet["viewer"]): Promise<CharacterSheet> {
-  const built = await createBattleParticipantFromCharacter(character, "", ParticipantSide.ALLY);
+  const rows = await loadEquippedArtifactRows(character);
+
+  const built = await createBattleParticipantFromCharacter(character, "", ParticipantSide.ALLY, undefined, undefined, { artifactRows: rows });
 
   const [participant] = applyBakedAuras([built], new Set([built.basicInfo.id]));
-
-  const rows = await loadEquippedArtifactRows(character);
 
   const setIds = [...new Set(rows.map((r) => r.row.setId).filter((x): x is string => !!x))];
 
@@ -45,7 +46,7 @@ export async function buildSheetFor(character: SheetCharacter, viewer: Character
 
   const [maps, race, spells, personal] = await Promise.all([
     loadArtifactSetBattleMaps(character.campaignId, setIds),
-    prisma.race.findFirst({ where: { campaignId: character.campaignId, name: character.race }, select: { icon: true } }),
+    prisma.race.findFirst({ where: { campaignId: character.campaignId, name: character.race }, select: { icon: true, passiveAbility: true } }),
     known.length ? prisma.spell.findMany({ where: { campaignId: character.campaignId, id: { in: known } }, select: SPELL_SELECT }) : Promise.resolve([]),
     character.personalSkillId
       ? prisma.skill.findFirst({ where: { id: character.personalSkillId, campaignId: character.campaignId }, select: { id: true, name: true, icon: true, description: true } })
@@ -73,9 +74,10 @@ export async function buildSheetFor(character: SheetCharacter, viewer: Character
     viewer,
     character,
     raceIcon: race?.icon ?? null,
+    immunities: getCharacterImmunities(character, race as never),
     artifacts,
     sets,
-    spells: spells as unknown as BookSpell[],
+    spells: spells.map(toBookSpell),
     personalSkill: personal,
   });
 }

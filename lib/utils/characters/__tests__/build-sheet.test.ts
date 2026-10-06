@@ -25,11 +25,12 @@ function lira(over: Partial<SheetInput["character"]> = {}, attacks: BattleAttack
       id: "lira", name: "Ліра", avatar: null, level: 30, class: "Ranger", subclass: null, race: "Ельф", alignment: null,
       strength: 10, dexterity: 18, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10,
       armorClass: 14, savingThrows: { dexterity: true }, skills: { stealth: true, perception: true },
-      languages: ["Ельфійська"], proficiencies: {}, immunities: [], spellcastingAbility: null, hpMultiplier: null,
+      languages: ["Ельфійська"], proficiencies: {}, spellcastingAbility: null, hpMultiplier: null,
       primaryAbility: null, background: "Вона ==вірить== у брата", goals: [{ id: "g", text: "Знайти брата", status: "active", author: "dm" }],
       ...over,
     },
     raceIcon: null,
+    immunities: [],
     artifacts: [{ id: "a1", name: "Кольчуга ельфів", icon: null, slot: "armor", rarity: "rare", description: null, effects: ["AC +2"] }],
     sets: [],
     spells: [],
@@ -107,5 +108,27 @@ describe("buildCharacterSheet", () => {
     input.participant.spellcasting = { ...input.participant.spellcasting, spellSaveDC: 17, spellAttackBonus: 9 };
 
     expect(buildCharacterSheet(input).magic).toEqual({ ability: "Інтелект", saveDC: 17, attackBonus: 9 });
+  });
+
+  it("імунітети — зібрані з персонажа й раси (як у бою)", () => {
+    const input = lira();
+
+    input.immunities = ["отрута", "сон"];
+
+    expect(buildCharacterSheet(input).immunities).toEqual(["отрута", "сон"]);
+  });
+
+  it("рядки шкоди підписані своїм джерелом: артефакт, а не вміння", () => {
+    const input = lira();
+
+    input.participant.battleData.resolvedAbilities = [
+      { key: "bow", name: "Лук вітру", trigger: { event: "passive" }, effects: [{ kind: "damageBonus", filter: { kind: "ranged" }, flat: 3 }], source: { type: "artifact", id: "a", name: "Лук вітру" } },
+      { key: "arch", name: "Стрільба", trigger: { event: "passive" }, effects: [{ kind: "damageBonus", filter: { kind: "ranged" }, percent: 10 }], source: { type: "skill", id: "s", name: "Стрільба" } },
+    ] as never;
+
+    const lines = buildCharacterSheet(input).attacks.find((a) => a.id === "bow")?.avgDamage.lines ?? [];
+
+    expect(lines.find((l) => l.label === "Лук вітру")?.source).toBe("artifact");
+    expect(lines.find((l) => l.label === "Стрільба")?.source).toBe("skill");
   });
 });

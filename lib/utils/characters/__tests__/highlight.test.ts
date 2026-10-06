@@ -39,4 +39,24 @@ describe("biography highlights", () => {
   it("абзаци за порожнім рядком", () => {
     expect(paragraphs("а\nб\n\nв\n\n\n")).toEqual(["а\nб", "в"]);
   });
+
+  it("часткове перетинання з наявним виділенням зливає їх в одне без зайвих ==", () => {
+    const src = "а ==брат зник== біля брами";
+
+    const start = src.indexOf("зник");
+
+    const out = toggleHighlight(src, start, src.indexOf("брами") + "брами".length).text;
+
+    expect(out).toBe("а ==брат зник біля брами==");
+    expect(parseHighlights(out).filter((s) => s.marked).map((s) => s.text)).toEqual(["брат зник біля брами"]);
+  });
+
+  it("виділення через кілька рядків підсвічує кожен рядок окремо", () => {
+    const src = "перший рядок\n\nдругий рядок";
+
+    const out = toggleHighlight(src, 0, src.length).text;
+
+    expect(out).toBe("==перший рядок==\n\n==другий рядок==");
+    expect(paragraphs(out).map((p) => parseHighlights(p).some((s) => s.marked))).toEqual([true, true]);
+  });
 });

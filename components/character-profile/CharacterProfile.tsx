@@ -81,7 +81,7 @@ export function CharacterProfile({ campaignId, characterId, canEdit, initialTab 
   return (
     <QueryState query={query}>
       {(sheet) => (
-        <ProfileContext.Provider value={{ campaignId, characterId, sheet, canEdit }}>
+        <ProfileContext.Provider value={{ campaignId, characterId, sheet, canEdit: canEdit && sheet.viewer.isDM }}>
           <ProfileShell>
             {editing ? (
               <ProfileEditor onDone={() => setEditing(false)} />
@@ -90,7 +90,7 @@ export function CharacterProfile({ campaignId, characterId, canEdit, initialTab 
                 <ProfileHero
                   ref={hero.ref}
                   actions={
-                    canEdit ? (
+                    canEdit && sheet.viewer.isDM ? (
                       <Button type="button" size="sm" variant="outline" onClick={() => setEditing(true)}>
                         Редагувати
                       </Button>
