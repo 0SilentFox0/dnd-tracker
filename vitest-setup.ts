@@ -1,6 +1,6 @@
-import "@testing-library/jest-dom/vitest";
-
 import { vi } from "vitest";
+
+import "@testing-library/jest-dom/vitest";
 
 // next/font only works inside the Next compiler; components that import components/hud/fonts need a stub
 vi.mock("next/font/google", () => ({
