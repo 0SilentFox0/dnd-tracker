@@ -37,7 +37,7 @@ export function BattleScreen() {
 
   return (
     <div className={cn("battle-hud", hudFontClassName)}>
-      {wide ? <DesktopBattleLayout onComplete={() => setCompleteOpen(true)} /> : <MobileBattleLayout />}
+      {wide ? <DesktopBattleLayout height={height} onComplete={() => setCompleteOpen(true)} /> : <MobileBattleLayout height={height} />}
       <ResultOverlay />
       <BattleToast />
       <CompleteBattleDialog open={completeOpen} onOpenChange={setCompleteOpen} />

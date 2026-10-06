@@ -9,7 +9,7 @@ import { BattleLog } from "@/components/battle/scene/BattleLog";
 import { InitiativeTrack } from "@/components/battle/scene/InitiativeTrack";
 import { ParticipantList } from "@/components/battle/scene/ParticipantList";
 import { ParticipantSide } from "@/lib/constants/battle";
-import { BattleSceneContext, type BattleSceneValue } from "@/lib/hooks/battle";
+import { BattleSceneContext, BattleSceneDataContext, type BattleSceneValue } from "@/lib/hooks/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 import { turnQueue } from "@/lib/utils/battle/view";
 import type { BattleScene } from "@/types/api";
@@ -46,7 +46,11 @@ function scene(isDM = false) {
 
 function wrap(value: BattleSceneValue) {
   return function Wrapper({ children }: { children: ReactNode }) {
-    return <BattleSceneContext.Provider value={value}>{children}</BattleSceneContext.Provider>;
+    return (
+      <BattleSceneDataContext.Provider value={value}>
+        <BattleSceneContext.Provider value={value}>{children}</BattleSceneContext.Provider>
+      </BattleSceneDataContext.Provider>
+    );
   };
 }
 

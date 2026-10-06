@@ -2,8 +2,14 @@
 
 import type { ReactNode } from "react";
 
-import { BattleSceneContext, type BattleSceneValue } from "@/lib/hooks/battle";
+import { BattleSceneContext, BattleSceneDataContext, type BattleSceneValue, useBattleSceneDataValue } from "@/lib/hooks/battle";
 
 export function BattleSceneProvider({ value, children }: { value: BattleSceneValue; children: ReactNode }) {
-  return <BattleSceneContext.Provider value={value}>{children}</BattleSceneContext.Provider>;
+  const data = useBattleSceneDataValue(value);
+
+  return (
+    <BattleSceneDataContext.Provider value={data}>
+      <BattleSceneContext.Provider value={value}>{children}</BattleSceneContext.Provider>
+    </BattleSceneDataContext.Provider>
+  );
 }

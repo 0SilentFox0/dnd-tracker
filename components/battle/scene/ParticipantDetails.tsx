@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import Image from "next/image";
 
 import { HealthBar, HealthLabel, Portrait } from "@/components/battle/hud";
-import { useBattleScene } from "@/lib/hooks/battle";
+import { useBattleSceneData } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
 import { canSeeExactStats, formatKnownArmorClass, resolveKnownArmorClass, resolveObservedTraits } from "@/lib/utils/battle/view";
@@ -20,7 +20,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 }
 
 export function ParticipantDetails({ participant }: { participant: BattleParticipant }) {
-  const { battle, viewer } = useBattleScene();
+  const { battle, viewer } = useBattleSceneData();
 
   const exact = canSeeExactStats(participant, viewer);
 

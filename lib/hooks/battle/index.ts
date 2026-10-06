@@ -5,10 +5,14 @@ export {
   type BattleLogState,
   type BattleSceneActions,
   BattleSceneContext,
+  type BattleSceneData,
+  BattleSceneDataContext,
   type BattleSceneValue,
   deriveTurn,
   type ResultFx,
   useBattleScene,
+  useBattleSceneData,
+  useBattleSceneDataValue,
   useBattleSceneValue,
 } from "./useBattleScene";
 export { type BattleToastApi, useBattleToast } from "./useBattleToast";
