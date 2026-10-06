@@ -9,20 +9,19 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { CardDescription, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 import { getSkillId } from "@/lib/utils/skills/skill-helpers";
 import type { GroupedSkill, Skill } from "@/types/skills";
 
 export interface SkillGroupAccordionItemProps {
   groupName: string;
-  /** Колір фону (наприклад rgba з hexToRgba) */
-  accordionBg?: string;
+  accent?: string;
   totalSkills: number;
   isUngrouped: boolean;
   groupId: string | undefined;
@@ -38,7 +37,7 @@ export interface SkillGroupAccordionItemProps {
 
 export function SkillGroupAccordionItem({
   groupName,
-  accordionBg,
+  accent,
   totalSkills,
   isUngrouped,
   groupId,
@@ -53,17 +52,15 @@ export function SkillGroupAccordionItem({
     <AccordionItem
       value={groupName}
       key={groupName}
-      className="rounded-lg overflow-hidden"
-      style={accordionBg ? { backgroundColor: accordionBg } : undefined}
+      className={cn("rounded-lg overflow-hidden", accent && "border-l-[3px]")}
+      style={accent ? { borderLeftColor: accent } : undefined}
     >
       <div className="relative">
         <AccordionTrigger className="px-4 sm:px-6">
           <div className="flex items-center gap-3 sm:gap-4 text-left w-full">
             <div className="flex-1 min-w-0">
-              <CardTitle className="text-lg truncate">{groupName}</CardTitle>
-              <CardDescription className="mt-1">
-                {totalSkills} скілів
-              </CardDescription>
+              <h3 className="hud-sc truncate text-lg text-[#efe5d2]">{groupName}</h3>
+              <p className="mt-1 text-sm text-[#8f8473]">{totalSkills} скілів</p>
             </div>
           </div>
         </AccordionTrigger>

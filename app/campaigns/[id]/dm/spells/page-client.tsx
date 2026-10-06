@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { Wand2 } from "lucide-react";
 
 import { EmptyState, LoadingState } from "@/components/common/states";
+import { HudPage } from "@/components/hud/page";
 import { SpellGroupAccordion } from "@/components/spells/list/SpellGroupAccordion";
 import { SpellsPageHeader } from "@/components/spells/ui/SpellsPageHeader";
 import { Accordion } from "@/components/ui/accordion";
@@ -69,7 +70,7 @@ export function DMSpellsPageClient({
   }, [spells]);
 
   return (
-    <div className="container mx-auto p-2 sm:p-4 space-y-4 sm:space-y-6 max-w-full">
+    <HudPage>
       <SpellsPageHeader
         campaignId={campaignId}
         spellsCount={spells.length}
@@ -84,7 +85,7 @@ export function DMSpellsPageClient({
         <Accordion
           type="multiple"
           defaultValue={sortedGroupedSpells.map(([groupName]) => groupName)}
-          className="space-y-2 sm:space-y-4"
+          className="space-y-2"
         >
           {sortedGroupedSpells.map(([groupName, levels]) => (
             <SpellGroupAccordion
@@ -99,7 +100,6 @@ export function DMSpellsPageClient({
           ))}
         </Accordion>
       )}
-
-    </div>
+    </HudPage>
   );
 }

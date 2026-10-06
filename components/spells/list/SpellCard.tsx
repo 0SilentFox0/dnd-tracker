@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import Link from "next/link";
 import { Copy, Move, Sparkles, X, Zap } from "lucide-react";
 
 import { OptimizedImage } from "@/components/common/OptimizedImage";
+import { HudCard } from "@/components/hud/page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +23,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { getDamageElementLabel } from "@/lib/constants/damage";
 import { getDamageModifierLabel, getHealModifierLabel, getSpellTargetLabel } from "@/lib/constants/spells";
+import { cn } from "@/lib/utils";
 import {
   getSpellDamageTypeIcon,
   getSpellGroupIcon,
@@ -39,6 +41,13 @@ interface SpellCardProps {
   printMode?: boolean;
 }
 
+function SpellCardShell({ printMode, children }: { printMode: boolean; children: ReactNode }) {
+  return printMode ? (
+    <Card className="hover:shadow-md transition-shadow h-full flex flex-col">{children}</Card>
+  ) : (
+    <HudCard className="flex h-full flex-col gap-4 px-0 py-4">{children}</HudCard>
+  );
+}
 
 export function SpellCard({
   spell,
@@ -67,10 +76,10 @@ export function SpellCard({
   };
 
   return (
-    <Card className="hover:shadow-md transition-shadow h-full flex flex-col">
+    <SpellCardShell printMode={printMode}>
       <CardHeader className="pb-3">
         <div className="flex items-start gap-3 mb-2">
-          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden bg-muted flex items-center justify-center shrink-0 relative">
+          <div className={cn("w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden flex items-center justify-center shrink-0 relative", printMode ? "bg-muted" : "border border-[#4a3c2c] bg-[#1a140f]")}>
             {spell.icon ? (
               <OptimizedImage
                 src={spell.icon}
@@ -274,6 +283,6 @@ export function SpellCard({
           </div>
         )}
       </CardContent>
-    </Card>
+    </SpellCardShell>
   );
 }

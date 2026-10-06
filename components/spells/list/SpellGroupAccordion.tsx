@@ -11,7 +11,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { CardDescription, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -60,12 +59,10 @@ export function SpellGroupAccordion({
         <div className="relative">
           <AccordionTrigger className="px-4 sm:px-6">
             <div className="flex items-center gap-3 sm:gap-4 text-left w-full">
-              <GroupIcon className="h-6 w-6 sm:h-7 sm:w-7 shrink-0" />
+              <GroupIcon className="h-6 w-6 sm:h-7 sm:w-7 shrink-0 text-[#c9b37a]" />
               <div className="flex-1 min-w-0">
-                <CardTitle className="text-lg truncate">{groupName}</CardTitle>
-                <CardDescription className="mt-1">
-                  {totalSpells} заклинань
-                </CardDescription>
+                <h3 className="hud-sc truncate text-lg text-[#efe5d2]">{groupName}</h3>
+                <p className="mt-1 text-sm text-[#8f8473]">{totalSpells} заклинань</p>
               </div>
             </div>
           </AccordionTrigger>
