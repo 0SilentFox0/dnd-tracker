@@ -6,7 +6,7 @@ import { CombatTab } from "./CombatTab";
 import { ItemsTab } from "./ItemsTab";
 import { LevelUpBadge } from "./LevelUpBadge";
 import { MagicTab } from "./MagicTab";
-import { ProfileContext } from "./ProfileContext";
+import { ProfileProvider } from "./ProfileContext";
 import { ProfileEditor } from "./ProfileEditor";
 import { CompactHero, ProfileHero } from "./ProfileHero";
 import { type ProfileTab, type ProfileTabId, ProfileTabs } from "./ProfileTabs";
@@ -78,11 +78,10 @@ export function CharacterProfile({ campaignId, characterId, canEdit, initialTab 
 
   const [editing, setEditing] = useState(false);
 
-
   return (
     <QueryState query={query}>
       {(sheet) => (
-        <ProfileContext.Provider value={{ campaignId, characterId, sheet, canEdit: canEdit && sheet.viewer.isDM }}>
+        <ProfileProvider campaignId={campaignId} characterId={characterId} sheet={sheet} canEdit={canEdit && sheet.viewer.isDM}>
           <ProfileShell>
             {editing ? (
               <ProfileEditor onDone={() => setEditing(false)} />
@@ -104,7 +103,7 @@ export function CharacterProfile({ campaignId, characterId, canEdit, initialTab 
               </>
             )}
           </ProfileShell>
-        </ProfileContext.Provider>
+        </ProfileProvider>
       )}
     </QueryState>
   );
