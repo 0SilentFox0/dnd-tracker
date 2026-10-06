@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { AbilityListEditor, withAbilityErrors } from "@/components/abilities";
 import { ActionBar } from "@/components/common/ActionBar";
+import { IconUrlField } from "@/components/common/IconUrlField";
 import { LoadingState, QueryState } from "@/components/common/states";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,7 +17,6 @@ import {
 } from "@/components/ui/card";
 import { UnitAbilityScores } from "@/components/units/form/UnitAbilityScores";
 import { UnitAttacks } from "@/components/units/form/UnitAttacks";
-import { UnitAvatarInput } from "@/components/units/form/UnitAvatarInput";
 import { UnitBasicInfo } from "@/components/units/form/UnitBasicInfo";
 import { UnitDamageModifier } from "@/components/units/form/UnitDamageModifier";
 import { UnitImmunities } from "@/components/units/form/UnitImmunities";
@@ -67,10 +67,7 @@ export default function EditUnitPage({
               onChange={change}
             />
 
-            <UnitAvatarInput
-              formData={formData}
-              onChange={change}
-            />
+            <IconUrlField id="avatar" label="Посилання на картинку" value={formData.avatar ?? ""} onChange={(avatar) => change({ avatar: avatar || null })} fallbackText={formData.name ?? ""} />
 
             <UnitDamageModifier
               formData={formData}

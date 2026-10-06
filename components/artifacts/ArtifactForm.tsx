@@ -3,11 +3,11 @@
 import { useRouter } from "next/navigation";
 
 import type { ArtifactSetOption } from "./ArtifactEditForm-types";
-import { ArtifactIconUrlPreview } from "./ArtifactIconUrlPreview";
 import { ArtifactWeaponFields } from "./ArtifactWeaponFields";
 
 import { AbilityListEditor, withAbilityErrors } from "@/components/abilities";
 import { ActionBar } from "@/components/common/ActionBar";
+import { IconUrlField } from "@/components/common/IconUrlField";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -154,15 +154,8 @@ export function ArtifactForm({
           </div>
 
           <div className="space-y-2">
-            <LabeledInput
-              id="artifact-icon"
-              label="Іконка (URL з інтернету)"
-              value={fields.icon}
-              onChange={(e) => setField("icon", e.target.value)}
-              placeholder="https://example.com/icon.png"
-            />
+            <IconUrlField id="artifact-icon" label="Іконка (URL з інтернету)" value={fields.icon} onChange={(v) => setField("icon", v)} fallbackText={fields.name} />
             <p className="text-xs text-muted-foreground">{iconHint}</p>
-            <ArtifactIconUrlPreview key={fields.icon.trim()} url={fields.icon} />
           </div>
 
           {isWeaponSlot(fields.slot) && <ArtifactWeaponFields value={fields.weapon} onChange={(w) => setField("weapon", w)} />}

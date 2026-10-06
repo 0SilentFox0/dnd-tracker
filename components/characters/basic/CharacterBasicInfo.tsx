@@ -194,13 +194,7 @@ export function CharacterBasicInfo({
       />
       {!isPlayerView && (
         <div className="w-full min-w-0 md:col-span-2">
-          <ImageUpload
-            label="Картинка персонажа"
-            value={avatar || ""}
-            onChange={setters.setAvatar}
-            placeholder="Посилання на картинку (URL)"
-            previewAlt="Аватар"
-          />
+          <ImageUpload label="Картинка персонажа" value={avatar || ""} onChange={setters.setAvatar} fallbackText={name} />
         </div>
       )}
     </div>

@@ -36,7 +36,7 @@ describe("RaceFormFields", () => {
   it("іконка раси: URL записується у форму", () => {
     renderWithConfirm(<Harness />);
 
-    fireEvent.change(screen.getByPlaceholderText("URL іконки раси"), { target: { value: "https://x/elf.png" } });
+    fireEvent.change(screen.getByLabelText("Іконка раси"), { target: { value: "https://x/elf.png" } });
 
     expect(screen.getByTestId("icon").textContent).toBe("https://x/elf.png");
   });

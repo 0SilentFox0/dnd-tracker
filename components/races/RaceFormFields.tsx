@@ -56,14 +56,7 @@ export function RaceFormFields({
         />
       </div>
 
-      <ImageUpload
-        value={formData.icon ?? ""}
-        onChange={(v) => setFormData((prev) => ({ ...prev, icon: v }))}
-        label="Іконка раси"
-        placeholder="URL іконки раси"
-        previewAlt="Іконка раси"
-        allowFile={false}
-      />
+      <ImageUpload value={formData.icon ?? ""} onChange={(v) => setFormData((prev) => ({ ...prev, icon: v }))} label="Іконка раси" fallbackText={formData.name} allowFile={false} />
 
       <div className="space-y-2">
         <Label htmlFor="passiveDescription">Опис пасивної здібності</Label>

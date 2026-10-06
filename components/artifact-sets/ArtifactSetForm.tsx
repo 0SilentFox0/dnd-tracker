@@ -85,13 +85,7 @@ export function ArtifactSetForm({
       </div>
 
       <div className="space-y-2">
-        <ImageUpload
-          value={fields.icon}
-          onChange={(v) => setField("icon", v)}
-          label="Іконка для бою"
-          placeholder="URL зображення або завантажте файл з комп’ютера"
-          previewAlt="Іконка сету в бою"
-        />
+        <ImageUpload value={fields.icon} onChange={(v) => setField("icon", v)} label="Іконка для бою" fallbackText={fields.name} />
         <p className="text-xs text-muted-foreground">
           Показується біля портрета в битві при повному сеті. Завантажений файл
           зберігається в сховищі кампанії (як іконки артефактів), у базі лишається
