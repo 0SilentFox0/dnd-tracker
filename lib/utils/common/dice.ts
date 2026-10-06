@@ -1,11 +1,6 @@
-export type DiceFormula = {
-  groups: Array<{ count: number; size: number }>;
-  flat: number;
-};
+export type DiceGroup = { count: number; size: number };
 
-type DiceValidation =
-  | { ok: true }
-  | { ok: false; reason: "invalid_formula" | "count_mismatch" | "out_of_range" };
+export type DiceFormula = { groups: DiceGroup[]; flat: number };
 
 const TERM = /^([+-]?)(\d*)d(\d+)$|^([+-]?)(\d+)$/;
 
@@ -45,31 +40,15 @@ export function parseDice(formula: string): DiceFormula | null {
   return result;
 }
 
-export function validateDiceRolls(
-  formula: string,
-  rolls: number[],
-  opts: { critical?: boolean } = {},
-): DiceValidation {
+export function diceAverage(formula: string): number {
   const parsed = parseDice(formula);
 
-  if (!parsed) return { ok: false, reason: "invalid_formula" };
+  if (!parsed) return 0;
 
-  const multiplier = opts.critical ? 2 : 1;
-
-  const sizes = parsed.groups.flatMap((g) =>
-    Array.from({ length: g.count * multiplier }, () => g.size),
-  );
-
-  if (sizes.length !== rolls.length) return { ok: false, reason: "count_mismatch" };
-
-  const inRange = rolls.every(
-    (roll, i) => Number.isInteger(roll) && roll >= 1 && roll <= sizes[i],
-  );
-
-  return inRange ? { ok: true } : { ok: false, reason: "out_of_range" };
+  return parsed.groups.reduce((sum, g) => sum + (g.count * (g.size + 1)) / 2, parsed.flat);
 }
 
-export function maxRoll(formula: string): number {
+export function diceMax(formula: string): number {
   const parsed = parseDice(formula);
 
   if (!parsed) return 0;
@@ -77,13 +56,53 @@ export function maxRoll(formula: string): number {
   return parsed.groups.reduce((sum, g) => sum + g.count * g.size, parsed.flat);
 }
 
-export function averageRoll(formula: string): number {
+export function diceCount(formula: string): number {
+  return parseDice(formula)?.groups.reduce((sum, g) => sum + g.count, 0) ?? 0;
+}
+
+function mergedGroups(formulas: string[]): DiceGroup[] {
+  const bySize = new Map<number, number>();
+
+  for (const formula of formulas) {
+    for (const g of parseDice(formula)?.groups ?? []) bySize.set(g.size, (bySize.get(g.size) ?? 0) + g.count);
+  }
+
+  return [...bySize].sort(([a], [b]) => a - b).map(([size, count]) => ({ count, size }));
+}
+
+export function mergeDiceFormulas(...formulas: string[]): string {
+  return mergedGroups(formulas)
+    .map((g) => `${g.count}d${g.size}`)
+    .join("+");
+}
+
+export function diceSlots(formula: string): number[] {
+  return mergedGroups([formula]).flatMap((g) => Array.from({ length: g.count }, () => g.size));
+}
+
+/** Імпорт пише кубики вільним текстом («2d8 + MOD»), тому береться лише перша група. */
+export function leadingDice(text: string): DiceGroup | null {
+  const m = /^\s*(\d*)\s*d(\d+)/i.exec(text);
+
+  if (!m) return null;
+
+  const count = m[1] === "" ? 1 : Number(m[1]);
+
+  const size = Number(m[2]);
+
+  return count >= 1 && size >= 1 ? { count, size } : null;
+}
+
+export function rollDiceList(formula: string, rng: () => number = Math.random): number[] {
+  return (parseDice(formula)?.groups ?? []).flatMap((g) =>
+    Array.from({ length: g.count }, () => 1 + Math.floor(rng() * g.size)),
+  );
+}
+
+export function rollDice(formula: string, rng: () => number = Math.random): number {
   const parsed = parseDice(formula);
 
   if (!parsed) return 0;
 
-  return parsed.groups.reduce(
-    (sum, g) => sum + (g.count * (g.size + 1)) / 2,
-    parsed.flat,
-  );
+  return Math.max(0, rollDiceList(formula, rng).reduce((sum, roll) => sum + roll, parsed.flat));
 }
