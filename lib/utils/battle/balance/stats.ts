@@ -5,13 +5,11 @@
 import { getNonMagicBranchDpr, getSpellDprFromBranchLevels } from "./dpr";
 
 import { AttackType } from "@/lib/constants/battle";
-import {
-  getHeroDamageDiceForLevel,
-  getHeroMaxHp,
-} from "@/lib/constants/hero-scaling";
+import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { diceAverage } from "@/lib/utils/common/dice";
 import type { BranchLevel } from "@/lib/utils/skills/progression";
+import type { BattleAttack, BattleParticipant } from "@/types/battle";
 import type { CharacterDprBreakdown, SuggestedEnemy } from "@/types/battle-setup";
 
 export type DifficultyRatio = "easy" | "medium" | "hard";
@@ -34,16 +32,7 @@ export interface UnitStats {
 }
 
 export interface GetCharacterStatsParams {
-  id: string;
-  name: string;
-  level: number;
-  strength: number;
-  dexterity?: number;
-  attacks?: Array<{
-    damageDice?: string;
-    type?: string;
-    attackBonus?: number;
-  }>;
+  participant: BattleParticipant;
   branchLevels?: Record<string, BranchLevel> | null;
   magicMainSkillIds?: Set<string> | null;
 }
@@ -108,90 +97,41 @@ export function getUnitStats(unit: {
   };
 }
 
-export function getCharacterStats(character: GetCharacterStatsParams): {
+const round1 = (n: number) => Math.round(n * 10) / 10;
+
+function bestAverage(p: BattleParticipant, type: AttackType): number {
+  const own = p.battleData.attacks.filter((a) => (a.type === AttackType.RANGED ? AttackType.RANGED : AttackType.MELEE) === type);
+
+  const options: BattleAttack[] = own.length > 0 ? own : [{ name: "", type, attackBonus: 0, damageDice: "", damageType: "physical" } as BattleAttack];
+
+  return Math.max(...options.map((a) => averageAttackDamage(p, a, [p]).total));
+}
+
+export function getCharacterStats({ participant, branchLevels, magicMainSkillIds }: GetCharacterStatsParams): {
   dpr: number;
   hp: number;
   kpi: number;
   spellDpr: number;
   dprBreakdown: CharacterDprBreakdown;
 } {
-  const level = character.level;
+  const meleeAvg = bestAverage(participant, AttackType.MELEE);
 
-  const strMod = getAbilityModifier(character.strength);
-
-  const dexMod = getAbilityModifier(character.dexterity ?? 10);
-
-  const logLines: string[] = [];
-
-  const meleeDice = getHeroDamageDiceForLevel(level, AttackType.MELEE);
-
-  const rangedDice = getHeroDamageDiceForLevel(level, AttackType.RANGED);
-
-  const heroMeleeBase = level + strMod + diceAverage(meleeDice);
-
-  const heroRangedBase = level + dexMod + diceAverage(rangedDice);
-
-  logLines.push(
-    `Рівень ${level}: база melee = ${level} + ${strMod}(STR) + кубики(${meleeDice}) = ${Math.round(heroMeleeBase * 10) / 10}`,
-  );
-  logLines.push(
-    `Рівень ${level}: база ranged = ${level} + ${dexMod}(DEX) + кубики(${rangedDice}) = ${Math.round(heroRangedBase * 10) / 10}`,
-  );
-
-  let meleeWeapon = 0;
-
-  let rangedWeapon = 0;
-
-  const attacks = character.attacks ?? [];
-
-  for (const a of attacks) {
-    const dice = (a.damageDice as string) || "";
-
-    const avg = dice ? diceAverage(dice) : 0;
-
-    const isRanged = (a.type as string) === AttackType.RANGED;
-
-    if (isRanged) rangedWeapon += avg;
-    else meleeWeapon += avg;
-  }
-
-  if (meleeWeapon > 0 || rangedWeapon > 0) {
-    logLines.push(
-      `Зброя: melee +${Math.round(meleeWeapon * 10) / 10}, ranged +${Math.round(rangedWeapon * 10) / 10}`,
-    );
-  }
-
-  const meleeAvg = heroMeleeBase + meleeWeapon;
-
-  const rangedAvg = heroRangedBase + rangedWeapon;
+  const rangedAvg = bestAverage(participant, AttackType.RANGED);
 
   const physicalDpr = Math.max(meleeAvg, rangedAvg);
 
-  logLines.push(
-    `Melee total = ${Math.round(meleeAvg * 10) / 10}, Ranged total = ${Math.round(rangedAvg * 10) / 10} → фізичний DPR = max = ${Math.round(physicalDpr * 10) / 10}`,
-  );
+  const spellDpr = getSpellDprFromBranchLevels(branchLevels ?? {}, magicMainSkillIds);
 
-  const spellDpr = getSpellDprFromBranchLevels(character.branchLevels ?? {}, character.magicMainSkillIds);
-
-  const nonMagicDpr = getNonMagicBranchDpr(character.branchLevels ?? {}, character.magicMainSkillIds);
-
-  logLines.push(`Школа магії (найвищий рівень): +${spellDpr} DPR`);
-  logLines.push(`Немагічні основні навички (сума): +${nonMagicDpr} DPR`);
+  const nonMagicDpr = getNonMagicBranchDpr(branchLevels ?? {}, magicMainSkillIds);
 
   const dpr = physicalDpr + spellDpr + nonMagicDpr;
 
-  logLines.push(
-    `Разом DPR = ${Math.round(physicalDpr * 10) / 10} + ${spellDpr} + ${nonMagicDpr} = ${Math.round(dpr * 10) / 10}`,
-  );
-
-  const hp = getHeroMaxHp(level, character.strength);
-
-  const kpi = hp > 0 ? dpr / hp : 0;
+  const hp = participant.combatStats.maxHp;
 
   return {
     dpr,
     hp,
-    kpi,
+    kpi: hp > 0 ? dpr / hp : 0,
     spellDpr,
     dprBreakdown: {
       physicalDpr,
@@ -199,7 +139,12 @@ export function getCharacterStats(character: GetCharacterStatsParams): {
       rangedAvg,
       spellDpr,
       nonMagicDpr,
-      logLines,
+      logLines: [
+        `Ближній бій ${round1(meleeAvg)}, дальній ${round1(rangedAvg)} → фізичний DPR = ${round1(physicalDpr)}`,
+        `Школа магії (найвищий рівень): +${spellDpr} DPR`,
+        `Немагічні основні навички (сума): +${nonMagicDpr} DPR`,
+        `Разом DPR = ${round1(physicalDpr)} + ${spellDpr} + ${nonMagicDpr} = ${round1(dpr)}`,
+      ],
     },
   };
 }
