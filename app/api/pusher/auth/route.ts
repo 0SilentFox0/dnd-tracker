@@ -32,12 +32,7 @@ export async function POST(request: Request) {
 
     const userId = authUser.id;
 
-    const body = await request.json();
-
-    const { socket_id, channel_name } = body as {
-      socket_id?: string;
-      channel_name?: string;
-    };
+    const { socket_id, channel_name } = await readAuthParams(request);
 
     if (typeof socket_id !== "string" || typeof channel_name !== "string") {
       return NextResponse.json(
@@ -68,6 +63,17 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
+}
+
+// pusher-js (ajax transport) шле форму, а не JSON
+async function readAuthParams(request: Request): Promise<{ socket_id?: unknown; channel_name?: unknown }> {
+  if (request.headers.get("content-type")?.includes("application/x-www-form-urlencoded")) {
+    const form = new URLSearchParams(await request.text());
+
+    return { socket_id: form.get("socket_id") ?? undefined, channel_name: form.get("channel_name") ?? undefined };
+  }
+
+  return (await request.json()) as { socket_id?: unknown; channel_name?: unknown };
 }
 
 async function isChannelAllowedForUser(

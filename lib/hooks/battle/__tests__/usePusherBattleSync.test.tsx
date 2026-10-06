@@ -4,7 +4,7 @@
  * Тест: два гравці, підписані на канал бою, отримують однаковий стан після battle-delta.
  */
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, cleanup, render, waitFor } from "@testing-library/react";
+import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { RESYNC_AFTER_HIDDEN_MS, usePusherBattleSync } from "../usePusherBattleSync";
@@ -270,6 +270,36 @@ describe("usePusherBattleSync — two players receive same battle state", () => 
 
     expect(invalidate).toHaveBeenCalledWith({ queryKey: key });
     expect(qc.getQueryData<BattleScene>(key)?.version).toBe(1);
+  });
+
+  it("помилка авторизації каналу бою — не вважаємо себе підключеними, щоб працював polling", async () => {
+    const qc = new QueryClient();
+
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    function StateProbe() {
+      const { connectionState } = usePusherBattleSync(campaignId, battleId, "user-1", vi.fn());
+
+      return <span data-testid="state">{String(connectionState)}</span>;
+    }
+
+    render(
+      <QueryClientProvider client={qc}>
+        <StateProbe />
+      </QueryClientProvider>,
+    );
+
+    await waitFor(() => expect(screen.getByTestId("state").textContent).toBe("connected"));
+    await waitFor(() => expect(channelBindings.get(channelName)?.has("pusher:subscription_error")).toBe(true));
+
+    act(() => simulateTrigger(channelName, "pusher:subscription_error", { status: 404 }));
+
+    expect(screen.getByTestId("state").textContent).toBe("unavailable");
+    expect(warn).toHaveBeenCalled();
+
+    act(() => changeState("connecting", "connected"));
+    expect(screen.getByTestId("state").textContent).toBe("unavailable");
+    warn.mockRestore();
   });
 
   describe("ресинхронізація після розриву", () => {

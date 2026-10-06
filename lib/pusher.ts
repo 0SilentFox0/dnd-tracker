@@ -1,6 +1,7 @@
 import Pusher from "pusher";
 import PusherClient from "pusher-js";
 
+import { PUSHER_AUTH_ENDPOINT } from "@/lib/pusher-channels";
 import { getPusherCluster } from "@/lib/pusher-config";
 
 export const pusherServer = new Pusher({
@@ -35,6 +36,7 @@ export function getPusherClient(): PusherClient | null {
   if (!clientInstance) {
     clientInstance = new PusherClient(key, {
       cluster: getPusherCluster(),
+      channelAuthorization: { endpoint: PUSHER_AUTH_ENDPOINT, transport: "ajax" },
     });
   }
 

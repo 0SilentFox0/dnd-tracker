@@ -68,6 +68,15 @@ describe("POST /api/pusher/auth", () => {
     expect((await auth("presence-anything")).status).toBe(403);
   });
 
+  it("форма від pusher-js (ajax, x-www-form-urlencoded) — підписує канал", async () => {
+    const body = new URLSearchParams({ socket_id: "1.2", channel_name: battleChannelName("b-own") });
+
+    const res = await POST(new Request("http://x", { method: "POST", body, headers: { "Content-Type": "application/x-www-form-urlencoded" } }));
+
+    expect(res.status).toBe(200);
+    expect(authorizeChannel).toHaveBeenCalledWith("1.2", battleChannelName("b-own"), expect.anything());
+  });
+
   it("без socket_id — 400", async () => {
     const res = await POST(new Request("http://x", { method: "POST", body: JSON.stringify({ channel_name: "x" }) }));
 

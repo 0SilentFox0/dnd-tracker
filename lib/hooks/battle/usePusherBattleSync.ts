@@ -40,6 +40,8 @@ export function usePusherBattleSync(
 
   const wasDisconnectedRef = useRef(false);
 
+  const subscriptionFailedRef = useRef(false);
+
   const cleanupRef = useRef<(() => void) | null>(null);
 
   const onTurnStartedRef = useRef(onTurnStarted);
@@ -140,6 +142,13 @@ export function usePusherBattleSync(
 
         const state = pusher.connection.state;
 
+        // з'єднання живе, але канал бою не підписаний — дельт не буде, хай працює polling
+        if (subscriptionFailedRef.current) {
+          setConnectionState("unavailable");
+
+          return;
+        }
+
         if (state === "connected" || state === "connecting" || state === "disconnected" || state === "unavailable") {
           setConnectionState(state);
         }
@@ -165,8 +174,27 @@ export function usePusherBattleSync(
       debugLog("subscribed battle channel", { channel });
       battleChannel.bind("battle-delta", onDelta);
 
+      const onSubscriptionError = (error: unknown) => {
+        console.warn("[battle-sync] battle channel subscription failed, falling back to polling", error);
+        subscriptionFailedRef.current = true;
+        updateConnectionState();
+      };
+
+      const onSubscribed = () => {
+        if (!subscriptionFailedRef.current) return;
+
+        subscriptionFailedRef.current = false;
+        updateConnectionState();
+        void resync();
+      };
+
+      battleChannel.bind("pusher:subscription_error", onSubscriptionError);
+      battleChannel.bind("pusher:subscription_succeeded", onSubscribed);
+
       cleanupRef.current = () => {
         battleChannel.unbind("battle-delta", onDelta);
+        battleChannel.unbind("pusher:subscription_error", onSubscriptionError);
+        battleChannel.unbind("pusher:subscription_succeeded", onSubscribed);
         pusher.connection.unbind("state_change", onState);
       };
     });
@@ -178,6 +206,7 @@ export function usePusherBattleSync(
 
       cleanupRef.current?.();
       cleanupRef.current = null;
+      subscriptionFailedRef.current = false;
 
       if (p) {
         debugLog("cleanup battle channel only");
