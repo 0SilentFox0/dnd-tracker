@@ -5,13 +5,12 @@ import { Info } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { ABILITY_SCORES } from "@/lib/constants/abilities";
+import { ABILITY_SCORES, CORE_ABILITY_SCORES } from "@/lib/constants/abilities";
 
 export function AbbreviationsInfoDialog() {
   const [open, setOpen] = useState(false);
 
-  // Витягуємо тільки основні характеристики (перші 6)
-  const mainAbilities = ABILITY_SCORES.slice(0, 6);
+  const mainAbilities = CORE_ABILITY_SCORES;
 
   return (
     <>

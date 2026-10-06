@@ -1,6 +1,7 @@
 import { abilityLabel, abilityLines, armorTotal, attackSheet, checkBonus } from "./lines";
 
 import { DND_SKILL_META, DND_SKILLS } from "@/lib/constants";
+import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { ARTIFACT_GRID_9 } from "@/lib/constants/artifacts";
 import { getHeroMaxHpBreakdown } from "@/lib/constants/hero-scaling";
 import { parseGoals } from "@/lib/schemas/character-goals";
@@ -8,7 +9,7 @@ import { slotLevels } from "@/lib/utils/battle/view";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { signed } from "@/lib/utils/format";
 import type { BattleParticipant } from "@/types/battle";
-import { ABILITY_KEYS, type AbilityKey, type CharacterSheet, type SheetArtifact, type SheetSet } from "@/types/characters";
+import type { CharacterSheet, SheetArtifact, SheetSet } from "@/types/characters";
 import type { BookSpell } from "@/types/spells";
 
 export interface SheetInput {

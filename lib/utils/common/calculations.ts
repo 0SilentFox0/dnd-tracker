@@ -1,6 +1,6 @@
 // Утиліти для розрахунків D&D
 
-import { CORE_ABILITY_SCORES } from "@/lib/constants/abilities";
+import { ABILITY_LABELS } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
 import type { AbilityKey } from "@/types/characters";
 
@@ -153,7 +153,7 @@ export function attackAbilityKey(abilities: { primaryAbility?: AbilityKey | null
 export function attackAbilityLabel(abilities: { primaryAbility?: AbilityKey | null }, attackType: AttackType | string): string {
   const key = attackAbilityKey(abilities, attackType);
 
-  return CORE_ABILITY_SCORES.find((a) => a.key === key)?.label ?? key;
+  return ABILITY_LABELS[key];
 }
 
 export function getAttackAbilityModifier(abilities: AttackAbilities, attackType: AttackType | string): number {

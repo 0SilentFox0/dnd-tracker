@@ -1,3 +1,4 @@
+import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { resolveFlat } from "@/lib/utils/abilities/engine/amount";
 import { resolvedAbilitiesOf } from "@/lib/utils/abilities/engine/participants";
 import { type Effect, isBakedStat } from "@/lib/utils/abilities/schema";
@@ -6,8 +7,6 @@ import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
 
 type ModifyStat = Extract<Effect, { kind: "modifyStat" }>;
-
-const SCORES = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"] as const;
 
 function bakeOne(p: BattleParticipant, e: ModifyStat, owner: BattleParticipant): BattleParticipant {
   const flat = e.flat !== undefined ? resolveFlat(e.flat, owner) : 0;
@@ -43,9 +42,9 @@ function bakeOne(p: BattleParticipant, e: ModifyStat, owner: BattleParticipant):
       return { ...p, spellcasting: { ...p.spellcasting, spellSlots: slots } };
     }
     default: {
-      if (!(SCORES as readonly string[]).includes(e.stat)) return p;
+      if (!(ABILITY_KEYS as readonly string[]).includes(e.stat)) return p;
 
-      const stat = e.stat as (typeof SCORES)[number];
+      const stat = e.stat as (typeof ABILITY_KEYS)[number];
 
       const score = p.abilities[stat] + flat;
 

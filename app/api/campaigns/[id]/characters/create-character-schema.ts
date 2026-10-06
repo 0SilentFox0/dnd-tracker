@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { ABILITY_KEYS } from "@/types/characters";
+import { ABILITY_KEYS } from "@/lib/constants/abilities";
 
 export const createCharacterSchema = z.object({
   name: z.string().min(1).max(100),

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
+import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { prisma } from "@/lib/db";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
@@ -39,16 +40,7 @@ const importSpellSchema = z.object({
       return false;
     }),
   damageDice: z.string().optional(),
-  savingThrowAbility: z
-    .enum([
-      "strength",
-      "dexterity",
-      "constitution",
-      "intelligence",
-      "wisdom",
-      "charisma",
-    ])
-    .optional(),
+  savingThrowAbility: z.enum(ABILITY_KEYS).optional(),
   savingThrowOnSuccess: z.enum(["half", "none"]).optional(),
   description: z.string().min(1),
   groupId: z.string().optional(),

@@ -1,3 +1,4 @@
+import { CORE_ABILITY_SCORES } from "./abilities";
 /**
  * Єдині константи, типи та enum для артефактів.
  * Використовувати цей файл у формах, API та сітці слотів.
@@ -123,12 +124,7 @@ export const ARTIFACT_COMBAT_BONUS_OPTIONS: ReadonlyArray<{
   key: string;
   label: string;
 }> = [
-  { key: "strength", label: "Сила" },
-  { key: "dexterity", label: "Спритність" },
-  { key: "constitution", label: "Статура" },
-  { key: "intelligence", label: "Інтелект" },
-  { key: "wisdom", label: "Мудрість" },
-  { key: "charisma", label: "Харизма" },
+  ...CORE_ABILITY_SCORES.map(({ key, label }) => ({ key, label })),
   { key: "armorClass", label: "Клас броні" },
   { key: "speed", label: "Швидкість" },
   { key: "initiative", label: "Ініціатива" },

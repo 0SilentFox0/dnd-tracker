@@ -1,4 +1,4 @@
-import { CORE_ABILITY_SCORES } from "@/lib/constants/abilities";
+import { ABILITY_LABELS } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
 import { bakedStatSources } from "@/lib/utils/abilities/build/bake";
 import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
@@ -9,7 +9,7 @@ import { signed } from "@/lib/utils/format";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 import type { AbilityKey, SheetAttack, SheetLine, SheetLineSource, SheetTotal } from "@/types/characters";
 
-export const abilityLabel = (key: AbilityKey) => CORE_ABILITY_SCORES.find((a) => a.key === key)?.label ?? key;
+export const abilityLabel = (key: AbilityKey) => ABILITY_LABELS[key];
 
 
 const asSource = (t: string): SheetLineSource => t as SheetLineSource;

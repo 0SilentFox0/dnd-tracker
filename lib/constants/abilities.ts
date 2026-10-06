@@ -2,6 +2,10 @@
  * Константи для характеристик D&D 5e
  */
 
+export const ABILITY_KEYS = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"] as const;
+
+export type AbilityKey = (typeof ABILITY_KEYS)[number];
+
 export const CORE_ABILITY_SCORES = [
   { key: "strength", label: "Сила", abbreviation: "STR" },
   { key: "dexterity", label: "Спритність", abbreviation: "DEX" },
@@ -10,6 +14,17 @@ export const CORE_ABILITY_SCORES = [
   { key: "wisdom", label: "Мудрість", abbreviation: "WIS" },
   { key: "charisma", label: "Харизма", abbreviation: "CHA" },
 ] as const;
+
+export const ABILITY_LABELS = Object.fromEntries(CORE_ABILITY_SCORES.map((a) => [a.key, a.label])) as Record<AbilityKey, string>;
+
+export const ABILITY_SHORT_LABELS: Record<AbilityKey, string> = {
+  strength: "СИЛ",
+  dexterity: "СПР",
+  constitution: "ТІЛ",
+  intelligence: "ІНТ",
+  wisdom: "МУД",
+  charisma: "ХАР",
+};
 
 export const ABILITY_SCORES = [
   ...CORE_ABILITY_SCORES,

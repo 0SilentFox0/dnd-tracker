@@ -1,3 +1,4 @@
+import { ABILITY_LABELS } from "@/lib/constants/abilities";
 import type { AbilityTarget, Amount, CONDITION_KEYS, DamageFilterKind, Flat, Limits, StatKey } from "@/lib/utils/abilities/schema";
 import { signed } from "@/lib/utils/format";
 import { pluralUk } from "@/lib/utils/plural";
@@ -13,12 +14,7 @@ export const STAT_LABELS: Record<StatKey, string> = {
   minTargets: "мін. цілей",
   maxTargets: "макс. цілей",
   spellSlots: "слоти заклинань",
-  strength: "Сила",
-  dexterity: "Спритність",
-  constitution: "Статура",
-  intelligence: "Інтелект",
-  wisdom: "Мудрість",
-  charisma: "Харизма",
+  ...ABILITY_LABELS,
 };
 
 export const DAMAGE_FILTER_LABELS: Record<DamageFilterKind, string> = {

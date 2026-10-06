@@ -1,3 +1,4 @@
+import { CORE_ABILITY_SCORES } from "@/lib/constants/abilities";
 import type { SpellFormData } from "@/types/spells";
 
 export type { SpellFormData };
@@ -59,14 +60,7 @@ export const CASTING_TIME_OPTIONS = [
   { value: "1 bonus action", label: "1 bonus action" },
 ] as const;
 
-export const SAVE_ABILITY_OPTIONS = [
-  { value: "strength", label: "Сила" },
-  { value: "dexterity", label: "Спритність" },
-  { value: "constitution", label: "Статура" },
-  { value: "intelligence", label: "Інтелект" },
-  { value: "wisdom", label: "Мудрість" },
-  { value: "charisma", label: "Харизма" },
-] as const;
+export const SAVE_ABILITY_OPTIONS = CORE_ABILITY_SCORES.map(({ key, label }) => ({ value: key, label }));
 
 export const SAVE_ON_SUCCESS_OPTIONS = [
   { value: "half", label: "Половина шкоди" },

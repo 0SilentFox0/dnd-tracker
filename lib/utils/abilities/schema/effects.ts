@@ -10,6 +10,8 @@ import {
   FlatSchema,
 } from "./common";
 
+import { ABILITY_KEYS } from "@/lib/constants/abilities";
+
 export const DYNAMIC_STATS = ["armor", "attackBonus", "critThreshold"] as const;
 
 export const BAKED_STATS = [
@@ -20,12 +22,7 @@ export const BAKED_STATS = [
   "minTargets",
   "maxTargets",
   "spellSlots",
-  "strength",
-  "dexterity",
-  "constitution",
-  "intelligence",
-  "wisdom",
-  "charisma",
+  ...ABILITY_KEYS,
 ] as const;
 
 export const STAT_KEYS = [...DYNAMIC_STATS, ...BAKED_STATS] as const;

@@ -5,9 +5,9 @@
 import type { EquippedItems, InventoryItem } from "./inventory";
 import type { BookSpell } from "./spells";
 
-export const ABILITY_KEYS = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"] as const;
+import type { AbilityKey } from "@/lib/constants/abilities";
 
-export type AbilityKey = (typeof ABILITY_KEYS)[number];
+export type { AbilityKey };
 
 export type GoalStatus = "active" | "done" | "failed";
 

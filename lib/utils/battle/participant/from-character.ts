@@ -11,6 +11,7 @@ import { resolveSpellSlotsFromCharacter } from "./from-character-spell-slots";
 import { loadRace } from "./load-race";
 import { buildSpellEnhancers } from "./spell-enhancers";
 
+import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { getHeroMaxHp } from "@/lib/constants/hero-scaling";
 import { bakePassives } from "@/lib/utils/abilities/build/bake";
@@ -20,7 +21,6 @@ import { findCompletedSets } from "@/lib/utils/battle/artifact-sets";
 import { getCharacterImmunities } from "@/lib/utils/characters/character-race-effects";
 import { getAbilityModifier, getProficiencyBonus, spellcastingDerived } from "@/lib/utils/common/calculations";
 import type { BattleParticipant } from "@/types/battle";
-import { ABILITY_KEYS, type AbilityKey } from "@/types/characters";
 
 /**
  * Створює BattleParticipant з Character. Завантажує скіли, артефакти, заклинання.
