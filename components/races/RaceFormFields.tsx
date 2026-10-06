@@ -123,15 +123,13 @@ export function RaceFormFields({
       label: "Вміння",
       invalid: (abilityIssues?.length ?? 0) > 0,
       content: (
-        <HudSection title="Вміння в бою" className="space-y-2">
-          <AbilityListEditor
-            campaignId={campaignId}
-            value={formData.abilities}
-            onChange={(abilities) => setFormData((prev) => ({ ...prev, abilities }))}
-            issues={abilityIssues}
-            onValidityChange={onAbilitiesValidityChange}
-          />
-        </HudSection>
+        <AbilityListEditor
+          campaignId={campaignId}
+          value={formData.abilities}
+          onChange={(abilities) => setFormData((prev) => ({ ...prev, abilities }))}
+          issues={abilityIssues}
+          onValidityChange={onAbilitiesValidityChange}
+        />
       ),
     },
   ];

@@ -13,6 +13,8 @@ const SIZE_CLASS = { sm: "sm:max-w-sm", md: "sm:max-w-lg", lg: "sm:max-w-2xl" } 
 
 const InsideSheet = createContext(false);
 
+const HUD_TITLE = "hud-sc font-normal text-[#efe5d2]";
+
 const LAYOUT_TOKEN = /^(sm:|md:|lg:|fixed$|absolute$|inset-|top-|bottom-|left-|right-|-?translate-|w-|max-w-|max-h-|min-h-|overflow-)/;
 
 // callers style the desktop modal; the sheet keeps only colours/borders
@@ -62,7 +64,7 @@ export function ResponsiveDialog({ open, onOpenChange, title, description, foote
           <Drawer.Content ref={setContentEl} data-slot="sheet" className={cn("fixed inset-x-0 bottom-0 z-50 flex max-h-[90dvh] flex-col rounded-t-xl border-t bg-background outline-none data-[state=closed]:pointer-events-none!", hudClass, sheetClasses(className))}>
             <div data-slot="sheet-handle" aria-hidden className="mx-auto mt-3 h-1.5 w-12 shrink-0 rounded-full bg-muted" />
             <div className="space-y-1 px-4 pt-3 pb-2">
-              <Drawer.Title className="text-lg font-semibold leading-tight">{title}</Drawer.Title>
+              <Drawer.Title className={cn("text-lg font-semibold leading-tight", hud && HUD_TITLE)}>{title}</Drawer.Title>
               {description ? <Drawer.Description className="text-sm text-muted-foreground">{description}</Drawer.Description> : null}
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
@@ -93,7 +95,7 @@ export function ResponsiveDialog({ open, onOpenChange, title, description, foote
         onInteractOutside={block}
       >
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle className={cn(hud && HUD_TITLE)}>{title}</DialogTitle>
           {description ? <DialogDescription>{description}</DialogDescription> : null}
         </DialogHeader>
         <div className="-mx-1 min-h-0 flex-1 overflow-y-auto px-1">{body}</div>

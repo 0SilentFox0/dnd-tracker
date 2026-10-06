@@ -33,6 +33,7 @@ export function AbilityTemplatePicker({ open, onOpenChange, onPick }: AbilityTem
 
   return (
     <ResponsiveDialog
+      hud
       open={open}
       onOpenChange={(o) => (o ? onOpenChange(true) : close())}
       title={<>{copying ? "Скопіювати вміння з…" : "Додати вміння"}</>}

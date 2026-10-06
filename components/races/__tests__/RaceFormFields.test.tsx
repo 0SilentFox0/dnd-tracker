@@ -24,10 +24,10 @@ function Harness() {
 describe("RaceFormFields", () => {
   afterEach(cleanup);
 
-  it("секція «Вміння в бою» додає вміння з шаблону", () => {
+  it("редактор вмінь додає вміння з шаблону", () => {
     renderWithConfirm(<Harness />);
 
-    expect(screen.getByText("Вміння в бою")).toBeInTheDocument();
+    expect(screen.getByText(/Вміння · 0/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "+ Вміння" }));
     fireEvent.click(screen.getByText("Опір / імунітет"));
 
