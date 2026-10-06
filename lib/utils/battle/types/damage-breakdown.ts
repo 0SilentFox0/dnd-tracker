@@ -20,17 +20,3 @@ export interface ComputeDamageBreakdownParams {
   allParticipants: BattleParticipant[];
   isCritical?: boolean;
 }
-
-export interface DamageBreakdownTargetResult {
-  targetId: string;
-  targetName: string;
-  targetBreakdown: string[];
-  finalDamage: number;
-  steps: DamageStep[];
-}
-
-export interface DamageBreakdownMultiTargetResult {
-  breakdown: string[];
-  totalDamage: number;
-  targets: DamageBreakdownTargetResult[];
-}

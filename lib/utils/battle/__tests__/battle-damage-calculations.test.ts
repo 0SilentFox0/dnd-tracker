@@ -5,10 +5,10 @@
 
 import { describe, expect, it } from "vitest";
 
-import { applyResistance, calculateDamageWithModifiers } from "../damage";
+import { calculateDamageWithModifiers } from "../damage";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
-import { grantPassive, withConvertedSkills } from "@/lib/utils/battle/__tests__/mock-participant";
+import { withConvertedSkills } from "@/lib/utils/battle/__tests__/mock-participant";
 import type {
   BattleParticipant,
   SkillEffect,
@@ -220,51 +220,6 @@ describe("battle-damage-calculations", () => {
 
       expect(diceLine).toBeDefined();
       expect(diceLine).toContain("10");
-    });
-  });
-
-  describe("applyResistance", () => {
-    it("returns damage unchanged when defender has no resistances in extras", () => {
-      const defender = createBaseParticipant();
-
-      const r = applyResistance(100, defender, "physical");
-
-      expect(r.finalDamage).toBe(100);
-      expect(r.resistPercent).toBe(0);
-      expect(r.resistMessage).toBeNull();
-    });
-
-    it("reduces damage by physical resistance percent when extras.resistances.physical is set", () => {
-      const defender = createBaseParticipant();
-
-      grantPassive(defender, [{ kind: "flag", flag: "resistance", damageType: "physical", percent: 25 }]);
-
-      const r = applyResistance(100, defender, "physical");
-
-      expect(r.resistPercent).toBe(25);
-      expect(r.finalDamage).toBe(75);
-      expect(r.resistMessage).toContain("25%");
-    });
-
-    it("uses spell resistance when damageCategory is spell", () => {
-      const defender = createBaseParticipant();
-
-      grantPassive(defender, [{ kind: "flag", flag: "resistance", damageType: "spell", percent: 50 }]);
-
-      const r = applyResistance(100, defender, "spell");
-
-      expect(r.resistPercent).toBe(50);
-      expect(r.finalDamage).toBe(50);
-    });
-
-    it("returns finalDamage at least 0 when resistance is high", () => {
-      const defender = createBaseParticipant();
-
-      grantPassive(defender, [{ kind: "flag", flag: "resistance", damageType: "physical", percent: 100 }]);
-
-      const r = applyResistance(10, defender, "physical");
-
-      expect(r.finalDamage).toBe(0);
     });
   });
 });

@@ -11,16 +11,10 @@ import type { BattleParticipant } from "@/types/battle";
 
 export type {
   ComputeDamageBreakdownParams,
-  DamageBreakdownMultiTargetResult,
   DamageBreakdownResult,
-  DamageBreakdownTargetResult,
 } from "../types/damage-breakdown";
 export type { DamageCalculationResult } from "../types/damage-calculations";
-export {
-  computeDamageBreakdown,
-  computeDamageBreakdownMultiTarget,
-} from "./breakdown";
-export { applyResistance } from "./resist";
+export { computeDamageBreakdown } from "./breakdown";
 
 export function calculateDamageWithModifiers(
   attacker: BattleParticipant,
