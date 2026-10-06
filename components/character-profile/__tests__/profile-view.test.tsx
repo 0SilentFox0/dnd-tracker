@@ -22,6 +22,7 @@ vi.mock("@/lib/hooks/characters", async (orig) => ({
 vi.mock("@/components/character-profile/BasicEditTab", () => ({ BasicEditTab: () => <div>основне</div> }));
 
 import { CharacterProfile } from "@/components/character-profile";
+import { mockMatchMedia } from "@/components/ui/__tests__/match-media";
 import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
 
 describe("CharacterProfile — перегляд", () => {
@@ -108,5 +109,17 @@ describe("CharacterProfile — редагування ДМа", () => {
     expect(screen.getByRole("button", { name: "Зберегти" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Скасувати" }));
     expect(screen.getByRole("button", { name: "Редагувати" })).toBeTruthy();
+  });
+
+  it("«Магія» в редакторі показує книгу заклинань з листа", () => {
+    mockMatchMedia(false);
+    renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Редагувати" }));
+    fireEvent.mouseDown(screen.getByRole("tab", { name: "Магія" }));
+    fireEvent.click(screen.getByRole("button", { name: "Книга заклинань" }));
+
+    expect(screen.getByRole("dialog")).toHaveAccessibleName("Книга заклинань");
+    expect(screen.getByText("Мітка мисливця")).toBeTruthy();
   });
 });

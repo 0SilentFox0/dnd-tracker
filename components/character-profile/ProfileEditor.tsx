@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { BasicEditTab } from "./BasicEditTab";
 import { BiographyEditor } from "./BiographyEditor";
 import { GoalList } from "./GoalList";
+import { MagicTab } from "./MagicTab";
 import { useProfile } from "./ProfileContext";
 import { ProfileHero } from "./ProfileHero";
 import { type ProfileTabId, ProfileTabs } from "./ProfileTabs";
@@ -84,17 +85,20 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
             id: "magic",
             label: "Магія",
             content: (
-              <div className={`${EDIT_PANEL} space-y-2`}>
-                <Label htmlFor="spellcastingAbility">Характеристика заклинань</Label>
-                <SelectField
-                  id="spellcastingAbility"
-                  value={spellcasting.spellcastingAbility ?? ""}
-                  onValueChange={(v) => spellcasting.setters.setSpellcastingAbility(toSpellcastingAbility(v))}
-                  options={SPELL_ABILITY_OPTIONS}
-                  allowNone
-                  noneLabel="Немає"
-                />
-                <p className="text-xs text-muted-foreground">Від неї СЛ і атака заклинанням у профілі.</p>
+              <div className="space-y-4">
+                <div className={`${EDIT_PANEL} space-y-2`}>
+                  <Label htmlFor="spellcastingAbility">Характеристика заклинань</Label>
+                  <SelectField
+                    id="spellcastingAbility"
+                    value={spellcasting.spellcastingAbility ?? ""}
+                    onValueChange={(v) => spellcasting.setters.setSpellcastingAbility(toSpellcastingAbility(v))}
+                    options={SPELL_ABILITY_OPTIONS}
+                    allowNone
+                    noneLabel="Немає"
+                  />
+                  <p className="text-xs text-muted-foreground">Від неї СЛ і атака заклинанням у профілі.</p>
+                </div>
+                <MagicTab />
               </div>
             ),
           },

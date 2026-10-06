@@ -13,6 +13,8 @@ const LEVELS = [0, 1, 2, 3, 4, 5] as const;
 
 export const CIRCLE = ["Замовляння", "Перше коло", "Друге коло", "Третє коло", "Четверте коло", "П'яте коло"];
 
+const PAPER = "hud-book relative bg-[#e9dec5] text-[#2a2018] shadow-[inset_14px_0_18px_-10px_rgba(60,40,20,.55)]";
+
 const METAL = ["залізне", "бронзове", "срібне", "золоте", "міфрилове", "платинове"];
 
 export interface SpellBookPagesProps {
@@ -44,7 +46,7 @@ export function SpellBookPages({ byLevel, slotOf, level, pickedId, wide, showDet
           </button>
         ))}
       </div>
-      <div className={cn("hud-book relative min-h-[70dvh] bg-[#e9dec5] text-[#2a2018] shadow-[inset_14px_0_18px_-10px_rgba(60,40,20,.55)]", wide && "grid grid-cols-2")}>
+      <div className={cn(PAPER, "min-h-[70dvh]", wide && "grid grid-cols-2")}>
         {(wide || !showDetail) && (
           <div className="px-5 pb-12 pt-4">
             <div className="text-[13px] italic text-[#7a6650]">Книга заклинань</div>
@@ -70,6 +72,15 @@ export function SpellBookPages({ byLevel, slotOf, level, pickedId, wide, showDet
         )}
         {(wide || showDetail) && (detail ?? (wide && <div className="flex items-center justify-center italic text-[#7a6650]">Оберіть заклинання</div>))}
       </div>
+    </div>
+  );
+}
+
+export function EmptySpellBook({ text }: { text: string }) {
+  return (
+    <div className={cn(PAPER, "flex min-h-56 flex-col items-center justify-center gap-2 px-6 py-10 text-center")}>
+      <div className="text-[13px] italic text-[#7a6650]">Книга заклинань</div>
+      <p className="hud-sc text-lg leading-6">{text}</p>
     </div>
   );
 }
