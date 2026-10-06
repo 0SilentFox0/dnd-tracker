@@ -4,7 +4,6 @@ import { useState } from "react";
 
 import { EntityIcon } from "@/components/common/EntityIcon";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { CardDescription, CardTitle } from "@/components/ui/card";
 import { UnitCard } from "@/components/units/list/UnitCard";
 import { parseUnitDragPayload, planUnitDrop, UNIT_DRAG_TYPE, type UnitDropTarget } from "@/lib/utils/units/drag";
 import { raceIdOfGroup, type UnitRaceGroup } from "@/lib/utils/units/group-units";
@@ -45,7 +44,7 @@ export function UnitGroupAccordion({ group, campaignId, onDeleteUnit, onDrop }: 
     onDrop(payload.unitId, data);
   };
 
-  const highlight = (key: string) => (over === key ? "bg-primary/15 ring-2 ring-primary/50" : "");
+  const highlight = (key: string) => (over === key ? "bg-[rgba(230,194,90,.08)] ring-1 ring-[#e6c25a]/60" : "");
 
   return (
     <AccordionItem value={group.key} className="border-l-4" style={group.race?.color ? { borderLeftColor: group.race.color } : undefined}>
@@ -59,15 +58,15 @@ export function UnitGroupAccordion({ group, campaignId, onDeleteUnit, onDrop }: 
         >
           <EntityIcon src={group.race?.icon ?? null} name={title} className="h-9 w-9 shrink-0" />
           <div className="min-w-0 flex-1">
-            <CardTitle className="truncate text-lg">{title}</CardTitle>
-            <CardDescription className="mt-1">{group.total} юнітів</CardDescription>
+            <h3 className="hud-sc truncate text-lg text-[#efe5d2]">{title}</h3>
+            <p className="mt-1 text-sm text-[#8f8473]">{group.total} юнітів</p>
           </div>
         </div>
       </AccordionTrigger>
       <AccordionContent>
         <div className="px-1 pb-4 sm:px-2">
           {group.tiers.length === 0 ? (
-            <p className="px-2 text-sm text-muted-foreground">Перетягніть сюди юніта, щоб призначити расу</p>
+            <p className="px-2 text-sm text-[#8f8473]">Перетягніть сюди юніта, щоб призначити расу</p>
           ) : (
             <Accordion type="multiple" defaultValue={group.tiers.map((t) => `level-${t.level}`)} className="w-full">
               {group.tiers.map((tier) => (

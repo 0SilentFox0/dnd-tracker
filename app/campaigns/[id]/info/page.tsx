@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { InfoReferenceClient } from "@/components/campaigns/info/InfoReferenceClient";
+import { HudPage, HudPageHeader } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { requireCampaignMember } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
@@ -69,29 +70,25 @@ export default async function CampaignInfoPage({
   }));
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-background via-background to-muted/20">
-      <div className="container mx-auto px-3 py-4 sm:px-4 sm:py-6 max-w-4xl space-y-4 sm:space-y-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0">
-            <h1 className="text-xl font-bold sm:text-2xl">Інформація — Довідник</h1>
-            <p className="text-muted-foreground text-sm mt-1">
-              Усі скіли та заклинання кампанії: як діють, опис вигляду. Для гравців — ознайомлення з механіками.
-            </p>
-          </div>
+    <HudPage width="md">
+      <HudPageHeader
+        title="Інформація — Довідник"
+        subtitle="Усі скіли та заклинання кампанії: як діють, опис вигляду. Для гравців — ознайомлення з механіками."
+        actions={
           <Link href={`/campaigns/${campaignId}`} className="shrink-0">
-            <Button variant="outline" className="w-full sm:w-auto min-h-11 sm:min-h-9 touch-manipulation">
+            <Button variant="outline" className="min-h-11 touch-manipulation sm:min-h-9">
               Назад до кампанії
             </Button>
           </Link>
-        </div>
+        }
+      />
 
-        <InfoReferenceClient
+      <InfoReferenceClient
         campaignId={campaignId}
         skills={skillsForClient}
         spells={spellsForClient}
         isDM={isDM}
-        />
-      </div>
-    </div>
+      />
+    </HudPage>
   );
 }

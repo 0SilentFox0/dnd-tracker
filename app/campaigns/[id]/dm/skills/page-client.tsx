@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Printer, Sparkles } from "lucide-react";
 
 import { EmptyState, LoadingState } from "@/components/common/states";
+import { HudPage, HudPageHeader } from "@/components/hud/page";
 import { SkillGroupAccordion } from "@/components/skills/list/SkillGroupAccordion";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -79,54 +80,36 @@ export function DMSkillsPageClient({
   };
 
   return (
-    <div className="container mx-auto p-2 sm:p-4 space-y-4 sm:space-y-6 max-w-full">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex flex-col">
-          <h1 className="text-2xl sm:text-3xl font-bold">Бібліотека Скілів</h1>
-          <p className="text-sm sm:text-base text-muted-foreground mt-1">
-            Управління скілами та їх ефектами
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2 shrink-0">
-          <Link href={`/campaigns/${campaignId}/dm/main-skills`}>
-            <Button
-              variant="outline"
-              className="whitespace-nowrap text-xs sm:text-sm"
-            >
-              + Основний навик
-            </Button>
-          </Link>
-          <Link href={`/campaigns/${campaignId}/dm/skills/new`}>
-            <Button className="whitespace-nowrap text-xs sm:text-sm">
-              + Створити скіл
-            </Button>
-          </Link>
-          {skills.length > 0 && (
-            <Link
-              href={`/campaigns/${campaignId}/dm/print/skills`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button
-                variant="outline"
-                className="whitespace-nowrap text-xs sm:text-sm"
-              >
-                <Printer className="h-4 w-4 mr-1" />
-                Версія для друку
+    <HudPage>
+      <HudPageHeader
+        title="Бібліотека Скілів"
+        subtitle="Управління скілами та їх ефектами"
+        actions={
+          <>
+            <Link href={`/campaigns/${campaignId}/dm/main-skills`}>
+              <Button variant="outline" className="whitespace-nowrap text-xs sm:text-sm">
+                + Основний навик
               </Button>
             </Link>
-          )}
-          {skills.length > 0 && (
-            <Button
-              variant="destructive"
-              className="whitespace-nowrap text-xs sm:text-sm"
-              onClick={() => void handleDeleteAll()}
-            >
-              Видалити всі
-            </Button>
-          )}
-        </div>
-      </div>
+            <Link href={`/campaigns/${campaignId}/dm/skills/new`}>
+              <Button className="whitespace-nowrap text-xs sm:text-sm">+ Створити скіл</Button>
+            </Link>
+            {skills.length > 0 && (
+              <Link href={`/campaigns/${campaignId}/dm/print/skills`} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" className="whitespace-nowrap text-xs sm:text-sm">
+                  <Printer className="h-4 w-4 mr-1" />
+                  Версія для друку
+                </Button>
+              </Link>
+            )}
+            {skills.length > 0 && (
+              <Button variant="destructive" className="whitespace-nowrap text-xs sm:text-sm" onClick={() => void handleDeleteAll()}>
+                Видалити всі
+              </Button>
+            )}
+          </>
+        }
+      />
 
       {skillsLoading && skills.length === 0 ? (
         <LoadingState rows={6} label="Завантаження скілів…" />
@@ -136,7 +119,7 @@ export function DMSkillsPageClient({
         <Accordion
           type="multiple"
           defaultValue={groupedSkills.map(([groupName]) => groupName)}
-          className="space-y-2 sm:space-y-4"
+          className="space-y-2"
         >
           {groupedSkills.map(([groupName, groupSkills]) => {
             const mainSkill = mainSkills.find((ms) => ms.name === groupName);
@@ -156,7 +139,6 @@ export function DMSkillsPageClient({
           })}
         </Accordion>
       )}
-
-    </div>
+    </HudPage>
   );
 }

@@ -2,10 +2,11 @@
 
 import { Heart, LogIn, Trash2 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 import type { BattleParticipant } from "@/types/battle";
+
+const ICON = "flex size-8 items-center justify-center border border-transparent bg-black/40 transition-colors";
 
 interface DmParticipantRowProps {
   participant: BattleParticipant;
@@ -28,55 +29,40 @@ export function DmParticipantRow({
 
   const close = () => onActionDone?.();
 
+  const controlled = dmControlledParticipantId === participant.basicInfo.id;
+
   return (
-    <div className="flex items-center gap-1 rounded-lg bg-white/5 border border-white/5 p-2">
-      <span
-        className={cn(
-          "flex-1 min-w-0 truncate text-sm font-medium",
-          participant.basicInfo.side === "ally"
-            ? "text-blue-300"
-            : "text-red-300",
-        )}
-      >
+    <div className={cn("flex min-h-10 items-center gap-2 border-b border-white/[.08] py-1", controlled && "bg-[var(--gold)]/[.08]")}>
+      <i className="size-2 shrink-0 rounded-full" style={{ background: participant.basicInfo.side === "ally" ? "var(--ally)" : "var(--enemy)" }} />
+      <span className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--ink)]">
         {participant.basicInfo.name}
       </span>
-      <div className="flex items-center gap-0.5 shrink-0">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-green-400 hover:bg-green-500/20"
+      <div className="flex shrink-0 items-center gap-0.5">
+        <button
+          type="button"
+          className={cn(ICON, "text-[#9fc48a] hover:border-[#9fc48a]/40")}
           title="Збільшити HP"
           onClick={() => {
             onIncreaseHp(participant);
             close();
           }}
         >
-          <Heart className="h-3.5 w-3.5" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-amber-400 hover:bg-amber-500/20"
-          title={
-            dmControlledParticipantId === participant.basicInfo.id
-              ? "Відпустити керування"
-              : "Взяти керування"
-          }
+          <Heart className="size-3.5" />
+        </button>
+        <button
+          type="button"
+          className={cn(ICON, "text-[var(--gold)] hover:border-[var(--gold)]/40", controlled && "border-[var(--gold)]/60")}
+          title={controlled ? "Відпустити керування" : "Взяти керування"}
           onClick={() => {
-            onTakeControl(
-              dmControlledParticipantId === participant.basicInfo.id
-                ? null
-                : participant,
-            );
+            onTakeControl(controlled ? null : participant);
             close();
           }}
         >
-          <LogIn className="h-3.5 w-3.5" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-red-400 hover:bg-red-500/20"
+          <LogIn className="size-3.5" />
+        </button>
+        <button
+          type="button"
+          className={cn(ICON, "text-[#d0705c] hover:border-[#d0705c]/40")}
           title="Видалити з бою"
           onClick={async () => {
             if (
@@ -88,8 +74,8 @@ export function DmParticipantRow({
             }
           }}
         >
-          <Trash2 className="h-3.5 w-3.5" />
-        </Button>
+          <Trash2 className="size-3.5" />
+        </button>
       </div>
     </div>
   );

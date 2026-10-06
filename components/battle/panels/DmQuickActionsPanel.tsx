@@ -6,12 +6,14 @@ import { ChevronLeft, ScrollText, Sparkles, Trophy, UserPlus } from "lucide-reac
 import { BattleLogPanel } from "./BattleLogPanel";
 import { DmParticipantRow } from "./DmParticipantRow";
 
-import { Button } from "@/components/ui/button";
+import { HUD_SURFACE } from "@/components/battle/hud";
 import { cn } from "@/lib/utils";
 import type { BattleScene } from "@/types/api";
 import type { BattleParticipant } from "@/types/battle";
 
 const PANEL_WIDTH = 320;
+
+const ACTION = "hud-sc flex h-10 w-full items-center gap-2.5 border border-white/25 bg-black/55 px-3 text-left text-[15px] text-[var(--ink)] transition-colors hover:border-[var(--gold)]/60 hover:bg-[var(--gold)]/[.06]";
 
 export interface DmQuickActionsPanelProps {
   battle: BattleScene;
@@ -60,20 +62,21 @@ export function DmQuickActionsPanel({
         type="button"
         onClick={() => setOpen(true)}
         className={cn(
-          "fixed right-0 top-1/2 -translate-y-1/2 z-50 w-10 h-24 flex items-center justify-center",
-          "bg-white/10 hover:bg-white/20 border border-white/20 border-r-0 rounded-l-xl",
+          "fixed right-0 top-1/2 z-50 flex h-24 w-10 -translate-y-1/2 items-center justify-center",
+          "border border-r-0 border-[#4a3c2c] bg-[#14100c]/90 text-[var(--gold)] shadow-[0_0_18px_rgba(0,0,0,.6)] hover:border-[var(--gold)]/60",
           "transition-all duration-200",
-          open && "opacity-0 pointer-events-none",
+          open && "pointer-events-none opacity-0",
         )}
         aria-label="Відкрити швидкі дії DM"
       >
-        <ChevronLeft className="h-6 w-6 text-white" />
+        <ChevronLeft className="size-6" />
       </button>
 
       <div
         className={cn(
-          "fixed top-0 bottom-0 z-50 flex flex-col",
-          "bg-slate-900/98 backdrop-blur-xl border-l border-white/10 shadow-2xl",
+          HUD_SURFACE,
+          "fixed bottom-0 top-0 z-50 flex max-w-full flex-col",
+          "border-l border-[#4a3c2c] bg-[#14100c]/[.97] shadow-[-12px_0_40px_rgba(0,0,0,.7)] backdrop-blur-xl",
           "transition-transform duration-300 ease-out",
         )}
         style={{
@@ -81,33 +84,25 @@ export function DmQuickActionsPanel({
           right: open ? 0 : -PANEL_WIDTH,
         }}
       >
-        <div className="shrink-0 flex items-center justify-between gap-2 p-3 border-b border-white/10">
-          <span className="font-bold text-white uppercase tracking-wider text-sm">
+        <div className="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-[#3a2e22] px-4">
+          <span className="hud-sc text-[15px] font-bold tracking-[.1em] text-[var(--gold)]">
             Швидкі дії DM
           </span>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-white/70 hover:text-white hover:bg-white/10 rounded-full"
+          <button
+            type="button"
+            className="flex size-8 items-center justify-center text-[var(--hud-muted)] hover:text-[var(--ink)]"
             onClick={closePanel}
             aria-label="Закрити"
           >
-            <ChevronLeft className="h-5 w-5 rotate-180" />
-          </Button>
+            <ChevronLeft className="size-5 rotate-180" />
+          </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-3 space-y-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full justify-start gap-2 border-white/20 text-white hover:bg-white/10"
-            onClick={() => {
-              onOpenLog();
-            }}
-          >
-            <ScrollText className="h-4 w-4" />
+        <div className="flex-1 space-y-2 overflow-y-auto p-4">
+          <button type="button" className={ACTION} onClick={() => onOpenLog()}>
+            <ScrollText className="size-4 shrink-0 text-[var(--gold)]" />
             {logPanelOpen ? "Лог битви відкрито нижче" : "Відкрити лог битви"}
-          </Button>
+          </button>
 
           {logPanelOpen && setLogPanelOpen && (
             <BattleLogPanel
@@ -120,41 +115,39 @@ export function DmQuickActionsPanel({
             />
           )}
 
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full justify-start gap-2 border-white/20 text-white hover:bg-white/10"
+          <button
+            type="button"
+            className={ACTION}
             onClick={() => {
               onAddParticipant();
               closePanel();
             }}
           >
-            <UserPlus className="h-4 w-4" />
+            <UserPlus className="size-4 shrink-0 text-[var(--gold)]" />
             Додати героя / юніта
-          </Button>
+          </button>
 
           {onOpenCastSpell && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full justify-start gap-2 border-violet-500/50 text-violet-300 hover:bg-violet-500/20"
+            <button
+              type="button"
+              className={ACTION}
               onClick={() => {
                 onOpenCastSpell();
                 closePanel();
               }}
             >
-              <Sparkles className="h-4 w-4" />
+              <Sparkles className="size-4 shrink-0 text-[#8fd0e8]" />
               Накласти заклинання
-            </Button>
+            </button>
           )}
 
-          <div className="pt-2 border-t border-white/10">
-            <p className="text-xs text-white/50 uppercase tracking-wider mb-2 px-1">
+          <section className="pt-2">
+            <h4 className="hud-sc flex h-7 items-center border-b border-white/[.14] text-[13px] tracking-[.08em] text-[var(--hud-muted)]">
               Учасники бою
-            </p>
-            <div className="space-y-1 max-h-48 overflow-y-auto">
+            </h4>
+            <div className="max-h-48 overflow-y-auto">
               {participants.length === 0 ? (
-                <p className="text-xs text-white/40 italic py-2">
+                <p className="py-2 text-sm italic text-[var(--hud-muted)]">
                   Нікого на полі
                 </p>
               ) : (
@@ -171,21 +164,20 @@ export function DmQuickActionsPanel({
                 ))
               )}
             </div>
-          </div>
+          </section>
 
           {battle.status === "active" && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full justify-start gap-2 border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/20"
+            <button
+              type="button"
+              className="metal-gold metal-fill hud-sc flex h-11 w-full items-center justify-center gap-2 text-[15px] font-bold tracking-[.08em]"
               onClick={() => {
                 onCompleteBattle();
                 closePanel();
               }}
             >
-              <Trophy className="h-4 w-4" />
+              <Trophy className="size-4" />
               Завершити бій
-            </Button>
+            </button>
           )}
         </div>
       </div>
@@ -193,7 +185,7 @@ export function DmQuickActionsPanel({
       {open && (
         <button
           type="button"
-          className="fixed inset-0 z-30 bg-black/30 backdrop-blur-[1px]"
+          className="fixed inset-0 z-30 bg-black/50 backdrop-blur-[1px]"
           aria-label="Закрити"
           onClick={closePanel}
         />

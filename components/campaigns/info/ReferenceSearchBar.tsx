@@ -10,6 +10,7 @@ import {
   X,
 } from "lucide-react";
 
+import { HudChipTabs } from "@/components/hud/page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -84,10 +85,10 @@ export function ReferenceSearchBar({
   showSpellsFilter,
 }: ReferenceSearchBarProps) {
   return (
-    <div className="sticky top-0 z-10 -mx-4 px-4 py-3 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80 border-b shadow-sm md:mx-0 md:rounded-lg md:border md:p-4">
+    <div className="sticky top-0 z-10 rounded-xl border border-[#3a2e22] bg-[rgba(17,14,11,.92)] p-3 backdrop-blur-[2px] sm:p-4">
       <div className="space-y-3">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+          <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[#8f8473]" />
           <Input
             type="search"
             placeholder="Пошук за назвою, описом, механікою..."
@@ -100,7 +101,7 @@ export function ReferenceSearchBar({
             <button
               type="button"
               onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1 rounded"
+              className="absolute top-1/2 right-3 -translate-y-1/2 rounded p-1 text-[#8f8473] hover:text-[#efe5d2]"
               aria-label="Очистити пошук"
             >
               <X className="h-4 w-4" />
@@ -108,30 +109,26 @@ export function ReferenceSearchBar({
           )}
         </div>
 
-        <div className="flex gap-2 flex-wrap">
-          {SECTION_TABS.map(({ value, label, icon: Icon }) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => setSection(value)}
-              className={cn(
-                "inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium transition-colors min-h-11 touch-manipulation md:min-h-9",
-                section === value
-                  ? "text-primary-foreground border-primary"
-                  : "border-input",
-              )}
-            >
-              <Icon className="h-4 w-4 shrink-0" />
-              {label}
-            </button>
-          ))}
-        </div>
+        <HudChipTabs
+          ariaLabel="Розділ довідника"
+          items={SECTION_TABS.map(({ value, label, icon: Icon }) => ({
+            key: value,
+            label: (
+              <span className="inline-flex items-center gap-1.5">
+                <Icon className="h-4 w-4 shrink-0" />
+                {label}
+              </span>
+            ),
+            active: section === value,
+            onSelect: () => setSection(value),
+          }))}
+        />
 
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => setFiltersOpen((o) => !o)}
-            className="md:hidden inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm min-h-11 touch-manipulation bg-muted/50 hover:bg-muted border-input"
+            className="inline-flex min-h-11 touch-manipulation items-center gap-2 rounded-full px-3 py-2 text-sm text-[#c9b37a] shadow-[inset_0_0_0_1px_#4a3c2c] hover:shadow-[inset_0_0_0_1px_#c9b37a] md:hidden"
           >
             <Filter className="h-4 w-4" />
             Фільтри
@@ -152,7 +149,7 @@ export function ReferenceSearchBar({
               variant="ghost"
               size="sm"
               onClick={clearAllFilters}
-              className="text-muted-foreground hover:text-foreground"
+              className="text-[#8f8473] hover:text-[#efe5d2]"
             >
               <X className="h-4 w-4 mr-1" />
               Скинути фільтри
@@ -171,7 +168,7 @@ export function ReferenceSearchBar({
           <div className="min-h-0 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-4 items-end">
             {showSkillsFilter && mainSkillOptions.length > 0 && (
               <div className="space-y-1.5 w-full min-w-0">
-                <Label className="text-xs text-muted-foreground">
+                <Label className="text-xs text-[#8f8473]">
                   Гілка скілу
                 </Label>
                 <Select
@@ -196,7 +193,7 @@ export function ReferenceSearchBar({
             )}
             {showSpellsFilter && spellLevelOptions.length > 0 && (
               <div className="space-y-1.5 w-full min-w-0">
-                <Label className="text-xs text-muted-foreground">
+                <Label className="text-xs text-[#8f8473]">
                   Рівень заклинання
                 </Label>
                 <Select
@@ -223,7 +220,7 @@ export function ReferenceSearchBar({
             )}
             {showSpellsFilter && spellGroupOptions.length > 0 && (
               <div className="space-y-1.5 w-full min-w-0">
-                <Label className="text-xs text-muted-foreground">
+                <Label className="text-xs text-[#8f8473]">
                   Група заклинань
                 </Label>
                 <Select
@@ -248,7 +245,7 @@ export function ReferenceSearchBar({
             )}
             {showSpellsFilter && spellTypeOptions.length > 0 && (
               <div className="space-y-1.5 w-full min-w-0">
-                <Label className="text-xs text-muted-foreground">
+                <Label className="text-xs text-[#8f8473]">
                   Тип заклинання
                 </Label>
                 <Select

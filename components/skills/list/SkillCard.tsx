@@ -1,11 +1,13 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Link from "next/link";
 
 import { SkillCardActionsMenu } from "./SkillCardActionsMenu";
 
 import { AbilitySummary } from "@/components/abilities";
 import { EntityIcon } from "@/components/common/EntityIcon";
+import { HudCard } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/lib/hooks/common";
 import { useMainSkills, useUpdateSkill } from "@/lib/hooks/skills";
@@ -27,6 +29,14 @@ export interface SkillCardProps {
   onDuplicate?: (skillId: string) => void;
   /** Режим версії для друку: ховає інтерактивні елементи, розкриває обрізаний опис */
   printMode?: boolean;
+}
+
+function SkillCardShell({ printMode, children }: { printMode: boolean; children: ReactNode }) {
+  return printMode ? (
+    <div className="border rounded-lg bg-card hover:shadow-lg transition-shadow flex flex-col justify-between h-full p-2">{children}</div>
+  ) : (
+    <HudCard className="flex h-full flex-col justify-between p-4">{children}</HudCard>
+  );
 }
 
 export function SkillCard({
@@ -68,14 +78,16 @@ export function SkillCard({
     });
 
   return (
-    <div
-      className={`border rounded-lg bg-card hover:shadow-lg transition-shadow flex flex-col justify-between h-full ${
-        printMode ? "p-2" : "p-4"
-      }`}
-    >
+    <SkillCardShell printMode={printMode}>
       <div>
         <div className={`flex items-start gap-2 ${printMode ? "mb-1.5" : "mb-3"}`}>
-          {skillIcon && <EntityIcon src={skillIcon} name={skillName} size={64} className={`rounded-lg text-xl ${printMode ? "size-9" : "size-12 sm:size-16"}`} />}
+          {printMode ? (
+            skillIcon && <EntityIcon src={skillIcon} name={skillName} size={64} className="size-9 rounded-lg text-xl" />
+          ) : (
+            <span className="metal-bronze flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-md bg-[radial-gradient(#2c2219,#0f0c09)] p-0.5 shadow-[inset_0_0_0_2px_var(--m2)] sm:size-14">
+              <EntityIcon src={skillIcon} name={skillName} size={56} className="hud-sc size-full rounded-[4px] bg-transparent text-lg text-[#e8d6b0]" />
+            </span>
+          )}
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
               <h3
@@ -142,6 +154,6 @@ export function SkillCard({
 
         </>
       )}
-    </div>
+    </SkillCardShell>
   );
 }

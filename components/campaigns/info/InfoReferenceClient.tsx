@@ -3,8 +3,8 @@
 import { ReferenceSearchBar } from "./ReferenceSearchBar";
 import { ReferenceSectionAccordion } from "./ReferenceSectionAccordion";
 
+import { EmptyState } from "@/components/common/states";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { useInfoReferenceFilters } from "@/lib/hooks/common";
 import type { SkillForReference, SpellForReference } from "@/lib/types/info-reference";
 
@@ -24,7 +24,7 @@ export function InfoReferenceClient({
   const filters = useInfoReferenceFilters(skills, spells);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       <ReferenceSearchBar
         searchQuery={filters.filters.searchQuery}
         setSearchQuery={filters.filters.setSearchQuery}
@@ -50,25 +50,25 @@ export function InfoReferenceClient({
         showSpellsFilter={filters.filters.section === "all" || filters.filters.section === "spells"}
       />
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg bg-[rgba(17,14,11,.82)] px-3 py-2 text-sm text-[#8f8473]">
         {filters.ui.showSkills && filters.ui.showSpells && (
           <>
             <span>
               Скілів:{" "}
-              <strong className="text-foreground">
+              <strong className="text-[#efe5d2]">
                 {filters.results.filteredSkills.length}
               </strong>
             </span>
             <span>
               Заклинань:{" "}
-              <strong className="text-foreground">
+              <strong className="text-[#efe5d2]">
                 {filters.results.filteredSpells.length}
               </strong>
             </span>
             {!filters.ui.skillsEmpty && (
               <a
                 href="#ref-skills"
-                className="text-primary underline-offset-2 hover:underline touch-manipulation"
+                className="touch-manipulation text-[#c9b37a] underline-offset-2 hover:text-[#e6c25a] hover:underline"
               >
                 До скілів
               </a>
@@ -76,25 +76,25 @@ export function InfoReferenceClient({
             {!filters.ui.spellsEmpty && (
               <a
                 href="#ref-spells"
-                className="text-primary underline-offset-2 hover:underline touch-manipulation"
+                className="touch-manipulation text-[#c9b37a] underline-offset-2 hover:text-[#e6c25a] hover:underline"
               >
                 До заклинань
               </a>
             )}
           </>
         )}
-{filters.filters.section === "skills" && (
+        {filters.filters.section === "skills" && (
           <>
             Показано скілів:{" "}
-              <strong className="text-foreground">
+            <strong className="text-[#efe5d2]">
                 {filters.results.filteredSkills.length}
               </strong>
           </>
         )}
-{filters.filters.section === "spells" && (
+        {filters.filters.section === "spells" && (
           <>
             Показано заклинань:{" "}
-              <strong className="text-foreground">
+            <strong className="text-[#efe5d2]">
                 {filters.results.filteredSpells.length}
               </strong>
           </>
@@ -102,23 +102,16 @@ export function InfoReferenceClient({
       </div>
 
       {filters.ui.nothingFound && (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <p className="text-muted-foreground font-medium">
-              Нічого не знайдено
-            </p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Змініть пошук або фільтри, або скиньте їх.
-            </p>
-            <Button
-              variant="outline"
-              className="mt-4"
-              onClick={filters.results.clearAllFilters}
-            >
+        <EmptyState
+          className="bg-[rgba(17,14,11,.82)]"
+          title="Нічого не знайдено"
+          description="Змініть пошук або фільтри, або скиньте їх."
+          action={
+            <Button variant="outline" onClick={filters.results.clearAllFilters}>
               Скинути фільтри та пошук
             </Button>
-          </CardContent>
-        </Card>
+          }
+        />
       )}
 
       <ReferenceSectionAccordion
@@ -136,20 +129,12 @@ export function InfoReferenceClient({
       {filters.filters.section === "skills" &&
         filters.ui.skillsEmpty &&
         !filters.ui.nothingFound && (
-          <Card className="border-dashed">
-            <CardContent className="py-8 text-center text-muted-foreground text-sm">
-              Скілів за цими фільтрами не знайдено.
-            </CardContent>
-          </Card>
+          <EmptyState title="Скілів за цими фільтрами не знайдено." />
         )}
       {filters.filters.section === "spells" &&
         filters.ui.spellsEmpty &&
         !filters.ui.nothingFound && (
-          <Card className="border-dashed">
-            <CardContent className="py-8 text-center text-muted-foreground text-sm">
-              Заклинань за цими фільтрами не знайдено.
-            </CardContent>
-          </Card>
+          <EmptyState title="Заклинань за цими фільтрами не знайдено." />
         )}
     </div>
   );

@@ -22,7 +22,6 @@ const placeholderIconClass = {
   lg: "h-7 w-7",
 } as const;
 
-/** Плашка іконки сету в картці списку (URL з БД / Supabase). */
 export function ArtifactSetCardIcon({
   url,
   name,
@@ -35,7 +34,7 @@ export function ArtifactSetCardIcon({
     return (
       <div
         className={cn(
-          "flex shrink-0 items-center justify-center rounded-lg border bg-muted text-muted-foreground",
+          "flex shrink-0 items-center justify-center rounded-lg border border-[#4a3c2c] bg-[#1a140f] text-[#8f8473]",
           frameClass[size],
           className,
         )}
@@ -49,7 +48,7 @@ export function ArtifactSetCardIcon({
   return (
     <div
       className={cn(
-        "shrink-0 overflow-hidden rounded-lg border bg-muted",
+        "shrink-0 overflow-hidden rounded-lg border border-[#4a3c2c] bg-[#1a140f]",
         frameClass[size],
         className,
       )}

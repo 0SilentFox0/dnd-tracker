@@ -24,32 +24,23 @@ function GroupHeader({
   title,
   icon,
   count,
-  hasAccent,
   className,
 }: {
   title: string;
   icon?: string | null;
   count?: number;
-  hasAccent: boolean;
-  bgStyle: React.CSSProperties | undefined;
   className?: string;
 }) {
   return (
-    <div
-      className={cn(
-        "flex items-center gap-3 min-h-[52px] w-full text-left bg-transparent",
-        hasAccent && "border-l-4",
-        className,
-      )}
-    >
+    <div className={cn("flex w-full min-w-0 items-center gap-3 text-left", className)}>
       {isValidImageSrc(icon) ? (
-        <div className="relative h-8 w-8 shrink-0 rounded-lg overflow-hidden bg-muted">
+        <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-lg border border-[#4a3c2c] bg-[#1a140f]">
           <Image src={icon} alt="" fill className="object-cover" sizes="32px" />
         </div>
       ) : null}
-      <span className="font-semibold text-base truncate flex-1">{title}</span>
+      <span className="hud-sc flex-1 truncate text-base">{title}</span>
       {count != null && (
-        <span className="text-muted-foreground text-sm tabular-nums shrink-0">
+        <span className="shrink-0 text-sm tabular-nums text-[#8f8473]">
           {count}
         </span>
       )}
@@ -71,46 +62,23 @@ export function ReferenceGroupSection({
       ? accentColor
       : undefined;
 
-  const hasAccent = Boolean(accent);
-
-  const bgStyle = accent
-    ? { backgroundColor: `${accent}18`, borderLeftColor: accent }
-    : undefined;
-
-  const headerClass = "px-4 py-3 border-b border-border/60 bg-transparent";
-
-  const header = (
-    <GroupHeader
-      title={title}
-      icon={icon}
-      count={count}
-      hasAccent={hasAccent}
-      bgStyle={bgStyle}
-      className={headerClass}
-    />
+  const frameClass = cn(
+    "overflow-hidden rounded-xl border",
+    accent && "border-l-[3px]",
+    className,
   );
+
+  const accentStyle = accent ? { borderLeftColor: accent } : undefined;
 
   if (accordionValue != null) {
     return (
       <AccordionItem
         value={accordionValue}
-        className={cn(
-          "rounded-xl border border-border/80 overflow-hidden",
-          "bg-card/80 backdrop-blur-sm",
-          hasAccent && "border-l-4",
-          className,
-        )}
-        style={bgStyle}
+        className={cn(frameClass, "last:border-b")}
+        style={accentStyle}
       >
-        <AccordionTrigger className="hover:no-underline px-4 py-3 data-[state=open]:border-b data-[state=open]:border-border/60">
-          <GroupHeader
-            title={title}
-            icon={icon}
-            count={count}
-            hasAccent={hasAccent}
-            bgStyle={bgStyle}
-            className="flex-1 border-0 bg-muted/30 min-h-0 py-0"
-          />
+        <AccordionTrigger className="px-4 py-3 hover:no-underline data-[state=open]:border-b data-[state=open]:border-[#4a3c2c]">
+          <GroupHeader title={title} icon={icon} count={count} />
         </AccordionTrigger>
         <AccordionContent className="p-0">
           <div className="p-3 sm:p-4">{children}</div>
@@ -121,15 +89,17 @@ export function ReferenceGroupSection({
 
   return (
     <section
-      className={cn(
-        "rounded-xl border border-border/80 overflow-hidden",
-        "bg-card/80 backdrop-blur-sm",
-        hasAccent && "border-l-4",
-        className,
-      )}
-      style={bgStyle}
+      className={cn(frameClass, "border-[#4a3c2c] bg-[rgba(20,16,12,.85)]")}
+      style={accentStyle}
     >
-      <header>{header}</header>
+      <header>
+        <GroupHeader
+          title={title}
+          icon={icon}
+          count={count}
+          className="border-b border-[#4a3c2c] px-4 py-3 text-[#c9b37a]"
+        />
+      </header>
       <div className="p-3 sm:p-4">{children}</div>
     </section>
   );

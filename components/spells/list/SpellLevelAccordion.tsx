@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Trash2 } from "lucide-react";
 
+import { metalClass } from "@/components/battle/hud";
 import { SpellCard } from "@/components/spells/list/SpellCard";
 import {
   AccordionContent,
@@ -13,6 +14,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/lib/hooks/common";
 import { useDeleteSpellsByLevel } from "@/lib/hooks/spells";
+import { cn } from "@/lib/utils";
+import { spellTier } from "@/lib/utils/battle/view";
 import { pluralUk } from "@/lib/utils/plural";
 import type { Spell, SpellGroup } from "@/types/spells";
 
@@ -55,7 +58,12 @@ export function SpellLevelAccordion({
         <div className="relative">
           <AccordionTrigger className="px-3 sm:px-5 pr-12 sm:pr-14">
             <div className="flex items-center justify-between w-full min-w-0 gap-2 sm:gap-3">
-              <span className="font-medium text-sm sm:text-base truncate">{levelName}</span>
+              <span className="flex min-w-0 items-center gap-3">
+                <span aria-hidden className={cn("metal-fill flex size-6 shrink-0 rotate-45 items-center justify-center rounded-[3px]", metalClass(spellTier(level)))}>
+                  <span className="-rotate-45 text-[11px] font-semibold">{level}</span>
+                </span>
+                <span className="font-medium text-sm sm:text-base truncate">{levelName}</span>
+              </span>
               <Badge variant="secondary" className="ml-2 shrink-0">
                 {spells.length}
               </Badge>
@@ -80,7 +88,7 @@ export function SpellLevelAccordion({
           )}
         </div>
         <AccordionContent>
-          <div className="grid gap-2 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid auto-rows-fr grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
             {spells.map((spell) => (
               <SpellCard
                 key={spell.id}

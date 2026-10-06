@@ -24,7 +24,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 
     if (!isDM && !isOwner) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-    return NextResponse.json(await buildSheetFor(character, { isDM, isOwner }));
+    return NextResponse.json(await buildSheetFor(character, { isDM, isOwner }, access.campaign.maxLevel));
   } catch (error) {
     return handleApiError(error, { action: "fetch character sheet" });
   }

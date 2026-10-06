@@ -7,27 +7,11 @@ import { calculateTotalSkillsInGroup } from "@/lib/utils/skills/skills";
 import type { GroupedSkill, Skill } from "@/types/skills";
 import type { SpellGroup } from "@/types/spells";
 
-/** hex #RRGGBB → rgba(..., 0.4) */
-function hexToRgba(hex: string, alpha: number): string {
-  const h = hex.replace(/^#/, "");
-
-  if (h.length !== 6) return hex;
-
-  const r = parseInt(h.slice(0, 2), 16);
-
-  const g = parseInt(h.slice(2, 4), 16);
-
-  const b = parseInt(h.slice(4, 6), 16);
-
-  return `rgba(${r},${g},${b},${alpha})`;
-}
-
 interface SkillGroupAccordionProps {
   groupName: string;
   skills: (Skill | GroupedSkill)[];
   campaignId: string;
   spellGroups: SpellGroup[];
-  /** Колір основного навику для підсвітки акордеону (40% opacity) */
   mainSkillColor?: string | null;
   /** Викликається при видаленні одного скіла (DM) */
   onDeleteSkill?: (skillId: string) => Promise<unknown> | void;
@@ -44,11 +28,6 @@ export function SkillGroupAccordion({
   onDeleteSkill,
   onDuplicateSkill,
 }: SkillGroupAccordionProps) {
-  const accordionBg =
-    mainSkillColor != null && mainSkillColor
-      ? hexToRgba(mainSkillColor, 0.6)
-      : undefined;
-
   const groupId = spellGroups.find((g) => g.name === groupName)?.id;
 
   const isUngrouped =
@@ -66,7 +45,7 @@ export function SkillGroupAccordion({
     <>
       <SkillGroupAccordionItem
         groupName={groupName}
-        accordionBg={accordionBg}
+        accent={mainSkillColor || undefined}
         totalSkills={totalSkills}
         isUngrouped={isUngrouped}
         groupId={groupId}

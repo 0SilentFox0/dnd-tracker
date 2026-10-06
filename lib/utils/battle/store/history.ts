@@ -1,9 +1,12 @@
+import { Prisma } from "@prisma/client";
+
 import { eventToBattleAction } from "./event-mapping";
 import type { BattleDb } from "./load-battle";
 import type { SnapshotState } from "./snapshot-state";
 import { joinParticipant, splitParticipant } from "./split-participant";
 import type { LoadedBattle, ParticipantSnapshot, StoredBattleEvent } from "./types";
 
+import { KNOWLEDGE_EVENT_TYPES } from "@/lib/utils/battle/view/knowledge";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 export async function loadRecentEvents(db: BattleDb, battleId: string, limit = 100): Promise<BattleAction[]> {
@@ -79,4 +82,28 @@ export function restoreParticipantsAt(
     participants: restored.filter((r) => !r.isPending).sort(byOrder).map((r) => r.p),
     pending: restored.filter((r) => r.isPending).sort(byOrder).map((r) => r.p),
   };
+}
+
+type KnowledgeEventRow = Pick<StoredBattleEvent, "seq" | "round" | "type" | "actorId" | "targets" | "details">;
+
+// лише поля, які читають knownArmorClass / observedTraits — без повного details на кожен GET
+export async function loadKnowledgeEvents(db: BattleDb, battleId: string): Promise<BattleAction[]> {
+  const rows = await db.$queryRaw<KnowledgeEventRow[]>(Prisma.sql`
+    SELECT seq, round, type, "actorId", targets,
+      jsonb_strip_nulls(jsonb_build_object(
+        'actorName', details->'actorName',
+        'actionDetails', jsonb_build_object(
+          'totalAttackValue', details->'actionDetails'->'totalAttackValue',
+          'isHit', details->'actionDetails'->'isHit',
+          'isCritical', details->'actionDetails'->'isCritical',
+          'isCriticalFail', details->'actionDetails'->'isCriticalFail',
+          'damageSteps', details->'actionDetails'->'damageSteps'
+        )
+      )) AS details
+    FROM battle_events
+    WHERE "battleId" = ${battleId} AND "cancelledAt" IS NULL AND type IN (${Prisma.join(KNOWLEDGE_EVENT_TYPES)})
+    ORDER BY seq ASC
+  `);
+
+  return rows.map((r) => eventToBattleAction({ ...r, hpChanges: [], resultText: "" } as unknown as StoredBattleEvent, battleId));
 }

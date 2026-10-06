@@ -67,3 +67,9 @@ export function getSpellTargetLabel(value?: string | null): string {
 
   return SPELL_TARGET_LABELS[value] || value;
 }
+
+const SPELL_DAMAGE_TYPE_LABELS: Record<string, string> = { damage: "Шкода", heal: "Лікування", buff: "Баф", debuff: "Дебаф" };
+
+export function getSpellDamageTypeLabel(value: string): string {
+  return SPELL_DAMAGE_TYPE_LABELS[value] ?? value;
+}

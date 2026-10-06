@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Network } from "lucide-react";
 
 import { EmptyState } from "@/components/common/states";
+import { HudPage } from "@/components/hud/page";
 import { CreateMainSkillDialog } from "@/components/main-skills/CreateMainSkillDialog";
 import { MainSkillCard } from "@/components/main-skills/MainSkillCard";
 import { MainSkillsPageHeader } from "@/components/main-skills/MainSkillsPageHeader";
@@ -44,7 +45,7 @@ export function DMMainSkillsPageClient({
   };
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
+    <HudPage>
       <MainSkillsPageHeader
         mainSkillsCount={mainSkills.length}
         onCreateClick={() => setCreateDialogOpen(true)}
@@ -53,7 +54,7 @@ export function DMMainSkillsPageClient({
       {mainSkills.length === 0 ? (
         <EmptyState icon={Network} title="Ще немає основних навиків" description="Створіть перший основний навик — він групує скіли в дереві прокачки." />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {mainSkills.map((mainSkill) => (
             <MainSkillCard
               key={mainSkill.id}
@@ -70,6 +71,6 @@ export function DMMainSkillsPageClient({
         onOpenChange={setCreateDialogOpen}
         campaignId={campaignId}
       />
-    </div>
+    </HudPage>
   );
 }

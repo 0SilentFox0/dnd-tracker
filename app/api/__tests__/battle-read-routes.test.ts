@@ -15,6 +15,7 @@ vi.mock("@/lib/utils/battle/pipeline/default-deps", () => ({
     saveBattle: vi.fn(),
     publish: vi.fn(),
     loadRecentEvents: vi.fn(),
+    loadKnowledge: vi.fn(),
   },
 }));
 
@@ -25,6 +26,8 @@ vi.mock("@/lib/db", () => ({ prisma: { battleScene: { findUnique: vi.fn(), updat
 const params = { params: Promise.resolve({ id: "c1", battleId: "b1" }) };
 
 const deps = vi.mocked(defaultPipelineDeps);
+
+const loadKnowledge = vi.mocked(defaultPipelineDeps.loadKnowledge as NonNullable<typeof defaultPipelineDeps.loadKnowledge>);
 
 function loaded(isDM = false) {
   const ctx = context({ isDM });
@@ -53,6 +56,35 @@ describe("GET /battles/[battleId]", () => {
     expect(json.battleLogMode).toBeUndefined();
     expect(deps.loadRecentEvents).toHaveBeenCalledWith("b1", 100);
     expect(deps.saveBattle).not.toHaveBeenCalled();
+  });
+
+  it("гравцю віддає підсумок знань; ДМу — ні і не читає його з БД", async () => {
+    const knowledge = { x: { ac: { min: 13, max: 15, evidence: [] }, traits: [] } };
+
+    loadKnowledge.mockResolvedValue(knowledge);
+
+    const { GET } = await import("@/app/api/campaigns/[id]/battles/[battleId]/route");
+
+    expect((await (await GET(new Request("http://x/api"), params)).json()).knowledge).toEqual(knowledge);
+
+    deps.loadBattle.mockResolvedValue(loaded(true) as never);
+    loadKnowledge.mockClear();
+
+    expect((await (await GET(new Request("http://x/api"), params)).json()).knowledge).toBeUndefined();
+    expect(loadKnowledge).not.toHaveBeenCalled();
+  });
+
+  it("гравець, що бачить HP ворогів (seeEnemyHp), не читає знання з БД", async () => {
+    const ability = { key: "k", name: "Пильне око", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "seeEnemyHp" }], source: { type: "skill", id: "s", name: "Пильне око" } };
+
+    const seer = { ...hero, battleData: { ...hero.battleData, resolvedAbilities: [ability] } };
+
+    deps.loadBattle.mockResolvedValue({ ...loaded(), participants: [seer, goblin] } as never);
+
+    const { GET } = await import("@/app/api/campaigns/[id]/battles/[battleId]/route");
+
+    expect((await (await GET(new Request("http://x/api"), params)).json()).knowledge).toBeUndefined();
+    expect(loadKnowledge).not.toHaveBeenCalled();
   });
 
   it("немає бою — 404; не учасник — 403", async () => {

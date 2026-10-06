@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 
 import { createSkillSchema } from "./create-skill-schema";
 import { formatSkillsListResponse } from "./format-skills-response";
+import { listSkillsQuerySchema } from "./list-skills-query";
 
 import { prisma } from "@/lib/db";
 import { abilitiesJson } from "@/lib/utils/abilities/read";
@@ -92,6 +93,18 @@ export async function GET(
 
     if (accessResult instanceof NextResponse) {
       return accessResult;
+    }
+
+    const { mainSkillId } = listSkillsQuerySchema.parse(Object.fromEntries(new URL(request.url).searchParams));
+
+    if (mainSkillId) {
+      const options = await prisma.skill.findMany({
+        where: { campaignId: id, mainSkillId },
+        select: { id: true, name: true, icon: true, description: true },
+        orderBy: { createdAt: "desc" },
+      });
+
+      return NextResponse.json(options);
     }
 
     const skills = await prisma.skill.findMany({

@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import type { ZodType } from "zod";
 
+import type { PusherMessage } from "./battle-response";
+import { buildPusherMessages, toBattleResponse } from "./battle-response";
 import { buildClientDelta } from "./client-delta";
 import { defaultPipelineDeps } from "./default-deps";
-import type { PusherMessage } from "./legacy-battle";
-import { buildPusherMessages, toLegacyBattle } from "./legacy-battle";
 
 import type { Rng } from "@/lib/utils/abilities/engine/types";
 import type { BATTLE_RATE_LIMITS, RateLimitResult } from "@/lib/utils/api/rate-limit";
@@ -25,6 +25,8 @@ import {
   BattleRuleError,
   eventToBattleAction,
 } from "@/lib/utils/battle/store";
+import type { BattleKnowledge } from "@/lib/utils/battle/view/knowledge";
+import { alwaysSeesEnemyStats } from "@/lib/utils/battle/view/visibility";
 import type { BattleScene } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -55,6 +57,7 @@ export interface PipelineDeps {
   saveBattle(before: LoadedBattle, outcome: BattleMutationOutcome): Promise<BattleDelta>;
   publish(messages: PusherMessage[]): void;
   loadRecentEvents(battleId: string, limit: number): Promise<BattleAction[]>;
+  loadKnowledge?(battleId: string): Promise<BattleKnowledge>;
   rng?: Rng;
 }
 
@@ -67,6 +70,7 @@ export interface RunBattleMutationOptions<TBody> {
   dryRun?: (body: TBody) => boolean;
   respond?: "battle" | "wrapped" | "response";
   includeRecentEvents?: number;
+  includeKnowledge?: boolean;
   mutate(ctx: BattleMutationContext, body: TBody): MutationResult | Promise<MutationResult>;
 }
 
@@ -220,11 +224,14 @@ export async function runBattleMutation<TBody>(
     const result = withVictory(loaded.scene, await options.mutate(ctx, parsed.body));
 
     if (options.dryRun?.(parsed.body)) {
-      const entries = options.includeRecentEvents
-        ? await deps.loadRecentEvents(battleId, options.includeRecentEvents)
-        : [];
+      const needsKnowledge = options.includeKnowledge && !loaded.isDM && !alwaysSeesEnemyStats(loaded.participants, userId);
 
-      const battle = toLegacyBattle(
+      const [entries, knowledge] = await Promise.all([
+        options.includeRecentEvents ? deps.loadRecentEvents(battleId, options.includeRecentEvents) : [],
+        needsKnowledge ? deps.loadKnowledge?.(battleId) : undefined,
+      ]);
+
+      const battle = toBattleResponse(
         loaded,
         loaded.scene,
         result.participants,
@@ -233,7 +240,7 @@ export async function runBattleMutation<TBody>(
         { isDM: loaded.isDM },
       );
 
-      return respondWith(options.respond, battle, result.response);
+      return respondWith(options.respond, knowledge ? { ...battle, knowledge } : battle, result.response);
     }
 
     const delta = await deps.saveBattle(loaded, result);

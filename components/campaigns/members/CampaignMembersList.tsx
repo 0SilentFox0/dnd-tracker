@@ -2,11 +2,16 @@
 
 import { X } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CampaignRole } from "@/lib/constants/campaigns";
 import { useRemoveCampaignMember } from "@/lib/hooks/campaigns";
 import { useConfirm } from "@/lib/hooks/common";
+
+const CHIP = "rounded-full px-2 text-[11px]";
+
+const DM_CHIP = `${CHIP} bg-[linear-gradient(135deg,#8a6414,#e6c25a_55%,#8a6414)] text-[#2a1d05]`;
+
+const PLAYER_CHIP = `${CHIP} text-[#e6dccb] shadow-[inset_0_0_0_1px_#4a3c2c]`;
 
 interface CampaignMember {
   id: string;
@@ -47,13 +52,13 @@ export function CampaignMembersList({
       {members.map((member) => (
         <div
           key={member.id}
-          className="flex items-center justify-between p-2 border rounded"
+          className="flex items-center justify-between border-b border-[#2a2218] p-2 last:border-b-0"
         >
           <div className="flex items-center gap-2">
-            <span>{member.user.displayName}</span>
-            <Badge variant={member.role === CampaignRole.DM ? "default" : "secondary"}>
+            <span className="text-[#e6dccb]">{member.user.displayName}</span>
+            <span className={member.role === CampaignRole.DM ? DM_CHIP : PLAYER_CHIP}>
               {member.role === CampaignRole.DM ? "DM" : "Player"}
-            </Badge>
+            </span>
           </div>
           {isDM && member.role === CampaignRole.PLAYER && (
             <Button

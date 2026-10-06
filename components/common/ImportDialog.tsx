@@ -67,6 +67,7 @@ export function ImportDialog({
           {triggerLabel}
         </Button>
     <ResponsiveDialog
+      hud
       open={isOpen}
       onOpenChange={handleDialogOpenChange}
       title={title}

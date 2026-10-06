@@ -5,21 +5,7 @@ import { useMemo } from "react";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
 import { MAIN_SKILL_BY_CATEGORY } from "@/lib/constants/main-skills";
-import { useMainSkills, useSkills } from "@/lib/hooks/skills";
-import { getSkillMainSkillId } from "@/lib/utils/skills/skill-helpers";
-
-/** Назва скіла: підтримка basicInfo.name та name в корені */
-function getSkillDisplayName(skill: { id: string; basicInfo?: { name?: string }; name?: string }): string {
-  if (
-    skill.basicInfo &&
-    typeof skill.basicInfo === "object" &&
-    "name" in skill.basicInfo
-  ) {
-    return String((skill.basicInfo as { name?: string }).name ?? "");
-  }
-
-  return (skill as { name?: string }).name ?? skill.id;
-}
+import { useMainSkills, usePersonalSkills } from "@/lib/hooks/skills";
 
 interface CharacterAbilitiesSectionProps {
   campaignId: string;
@@ -35,32 +21,13 @@ export function CharacterAbilitiesSection({
   campaignId,
   abilities,
 }: CharacterAbilitiesSectionProps) {
-  const { data: skills = [] } = useSkills(campaignId);
-
   const { data: mainSkills = [] } = useMainSkills(campaignId);
 
-  const personalMainSkill = useMemo(() => {
-    const name = MAIN_SKILL_BY_CATEGORY.Personal;
+  const personalMainSkillId = mainSkills.find((ms) => ms.name === MAIN_SKILL_BY_CATEGORY.Personal)?.id;
 
-    return mainSkills.find((ms) => ms.name === name) ?? null;
-  }, [mainSkills]);
+  const { data: personalSkills = [] } = usePersonalSkills(campaignId, personalMainSkillId);
 
-  const personalSkills = useMemo(() => {
-    if (!personalMainSkill) return [];
-
-    return skills.filter((skill) => {
-      const mainSkillId = getSkillMainSkillId(skill as Parameters<typeof getSkillMainSkillId>[0]);
-
-      return mainSkillId === personalMainSkill.id;
-    });
-  }, [skills, personalMainSkill]);
-
-  const options = useMemo(() => {
-    return personalSkills.map((s) => ({
-      value: s.id,
-      label: getSkillDisplayName(s as Parameters<typeof getSkillDisplayName>[0]),
-    }));
-  }, [personalSkills]);
+  const options = useMemo(() => personalSkills.map((s) => ({ value: s.id, label: s.name })), [personalSkills]);
 
   return (
     <div className="space-y-4 w-full">

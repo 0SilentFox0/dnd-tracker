@@ -19,6 +19,12 @@ const SEGMENT_LABELS: Record<string, string> = {
   edit: "Редагувати",
   sets: "Сети",
   groups: "Групи",
+  skills: "Скіли",
+  races: "Раси",
+  "main-skills": "Основні навики",
+  "skill-trees": "Дерева прокачки",
+  info: "Довідник",
+  print: "Друк",
 };
 
 const ID_LABELS_BY_PARENT: Record<string, string> = {
@@ -56,7 +62,6 @@ export function Breadcrumbs() {
 
   if (allSegments.length === 0) return null;
 
-  // Build crumbs, skipping 'dm' and 'battles' segments but keeping them in hrefs
   const crumbs: Array<{ href: string; label: string; isLast: boolean }> = [];
 
   let previousDisplaySegment: string | undefined;
@@ -64,25 +69,18 @@ export function Breadcrumbs() {
   for (let i = 0; i < allSegments.length; i++) {
     const segment = allSegments[i];
 
-    // Skip 'dm' segments - don't create breadcrumb for them
-    if (segment === "dm") {
+    const isLastSegment = i === allSegments.length - 1;
+
+    // dm/battles stay in hrefs but only get their own crumb when they are the page itself
+    if (segment === "dm" || (segment === "battles" && !isLastSegment)) {
+      previousDisplaySegment = segment;
       continue;
     }
-
-    // Skip 'battles' segments - don't create breadcrumb for them
-    if (segment === "battles") {
-      continue;
-    }
-
-    // Build href using all segments up to this point (including any 'dm' or 'battles' segments)
-    const href = `/${allSegments.slice(0, i + 1).join("/")}`;
-
-    const label = getLabel(segment, previousDisplaySegment);
 
     crumbs.push({
-      href,
-      label,
-      isLast: i === allSegments.length - 1,
+      href: `/${allSegments.slice(0, i + 1).join("/")}`,
+      label: getLabel(segment, previousDisplaySegment),
+      isLast: isLastSegment,
     });
 
     previousDisplaySegment = segment;
@@ -93,22 +91,22 @@ export function Breadcrumbs() {
   return (
     <nav
       aria-label="Breadcrumb"
-      className="text-xs sm:text-sm text-muted-foreground"
+      className="text-xs text-[#8f8473]"
     >
       <ol className="flex flex-wrap items-center gap-1">
         {crumbs.map((crumb) => (
           <li key={crumb.href} className="flex items-center gap-1">
             {crumb.isLast ? (
-              <span className="text-foreground">{crumb.label}</span>
+              <span className="text-[#efe5d2]">{crumb.label}</span>
             ) : (
               <Link
                 href={crumb.href}
-                className="hover:text-foreground transition-colors"
+                className="transition-colors hover:text-[#efe5d2]"
               >
                 {crumb.label}
               </Link>
             )}
-            {!crumb.isLast && <ChevronRight className="h-3 w-3" />}
+            {!crumb.isLast && <ChevronRight className="h-3 w-3 text-[#4a3c2c]" />}
           </li>
         ))}
       </ol>

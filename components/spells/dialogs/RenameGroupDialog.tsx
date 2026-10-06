@@ -28,6 +28,7 @@ export function RenameGroupDialog({
 }: RenameGroupDialogProps) {
   return (
     <ResponsiveDialog
+      hud
       open={open}
       onOpenChange={onOpenChange}
       title="Перейменувати групу"

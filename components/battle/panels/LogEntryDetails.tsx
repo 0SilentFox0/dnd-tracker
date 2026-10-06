@@ -13,7 +13,7 @@ export function LogEntryDetails({ action }: LogEntryDetailsProps) {
   if (lines.length === 0) return null;
 
   return (
-    <div className="mt-1.5 pl-4 border-l-2 border-white/20 text-xs text-white/70 space-y-0.5">
+    <div className="mt-1.5 space-y-0.5 border-l-2 border-[#4a3c2c] pl-4 text-xs text-[#a89c88]">
       {lines.map((line, i) => (
         <div key={i}>{line}</div>
       ))}

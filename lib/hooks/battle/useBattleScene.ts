@@ -22,9 +22,7 @@ import {
   useStartBattle,
   useUpdateBattleParticipant,
 } from "@/lib/hooks/battles";
-import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { withSelf } from "@/lib/utils/abilities/engine/participants";
-import { type QueueEntry, type RetaliationOutcome, turnQueue, type Viewer } from "@/lib/utils/battle/view";
+import { canSeeEnemyHp, type QueueEntry, type RetaliationOutcome, turnQueue, type Viewer } from "@/lib/utils/battle/view";
 import type { BattleScene } from "@/types/api";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -116,12 +114,6 @@ export function deriveTurn(battle: BattleScene, userId: string | null, isDM: boo
   const hero = (isMyTurn ? current : null) ?? dmHero ?? nextMine ?? myParticipants[0] ?? (isDM ? current : null);
 
   return { current, isMyTurn, myParticipants, hero };
-}
-
-export function canSeeEnemyHp(hero: BattleParticipant | null, order: BattleParticipant[]): boolean {
-  if (!hero) return false;
-
-  return findFlags(withSelf(order, hero), hero.basicInfo.id, "seeEnemyHp").length > 0;
 }
 
 export function useBattleSceneValue(campaignId: string, battleId: string, userId: string | null) {

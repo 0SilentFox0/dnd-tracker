@@ -2,8 +2,6 @@
 
 import { motion } from "framer-motion";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { BattleScene } from "@/types/api";
 
@@ -36,16 +34,13 @@ export function BattlePreparationView({
         className="max-w-2xl w-full space-y-8 relative z-10"
       >
         <div className="space-y-4">
-          <Badge
-            variant="outline"
-            className="rounded-full px-4 py-1 border-primary/50 text-primary font-black uppercase tracking-[0.3em] animate-pulse bg-primary/5"
-          >
+          <span className="hud-sc inline-flex h-8 items-center border-y border-[var(--gold)]/60 bg-[var(--gold)]/[.08] px-5 text-sm tracking-[.2em] text-[var(--gold)]">
             Підготовка до битви
-          </Badge>
-          <h2 className="text-4xl sm:text-7xl font-black italic uppercase tracking-tighter text-white drop-shadow-2xl">
+          </span>
+          <h2 className="hud-sc text-4xl font-extrabold tracking-[.12em] text-[var(--ink)] drop-shadow-2xl sm:text-7xl">
             АРЕНА ГОТОВА
           </h2>
-          <p className="text-lg sm:text-2xl text-white/60 font-medium italic max-w-lg mx-auto leading-relaxed">
+          <p className="hud-book mx-auto max-w-lg text-lg italic leading-relaxed text-[#b8ab95] sm:text-2xl">
             Кожен воїн на своїй позиції. Час вирішити долю цієї сутички.
           </p>
         </div>
@@ -55,24 +50,24 @@ export function BattlePreparationView({
             {
               label: "Союзники",
               value: alliesCount,
-              color: "text-blue-400",
+              color: "text-[#8fb0d0]",
             },
             {
               label: "Вороги",
               value: enemiesCount,
-              color: "text-red-500",
+              color: "text-[#d0705c]",
             },
           ].map((stat, idx) => (
             <div
               key={idx}
-              className="glass-card rounded-2xl p-4 sm:p-6 border-white/5 flex flex-col items-center gap-1 group hover:border-white/20 transition-all"
+              className="flex flex-col items-center gap-1 border border-[#4a3c2c] bg-[rgba(17,14,11,.82)] p-4 sm:p-6"
             >
-              <span className="text-[10px] font-black uppercase tracking-widest text-white/40 group-hover:text-white/60 transition-colors">
+              <span className="hud-sc text-[13px] tracking-[.1em] text-[var(--hud-muted)]">
                 {stat.label}
               </span>
               <span
                 className={cn(
-                  "text-3xl sm:text-4xl font-black italic tabular-nums drop-shadow-lg",
+                  "hud-sc text-3xl font-extrabold tabular-nums sm:text-4xl",
                   stat.color,
                 )}
               >
@@ -84,17 +79,16 @@ export function BattlePreparationView({
 
         <div className="pt-4 sm:pt-8">
           {isDM ? (
-            <Button
-              size="lg"
-              className="w-full sm:w-80 text-xl sm:text-2xl py-8 sm:py-10 rounded-full font-black italic uppercase tracking-[0.2em] bg-primary hover:bg-primary/90 shadow-[0_0_50px_rgba(var(--primary),0.6)] transition-all duration-500 transform hover:scale-105 active:scale-95 group overflow-hidden relative"
+            <button
+              type="button"
+              className="metal-gold metal-fill hud-sc h-16 w-full text-xl font-extrabold tracking-[.2em] shadow-[0_0_40px_rgba(230,194,90,.35)] transition-transform active:scale-95 disabled:opacity-70 sm:w-80 sm:text-2xl"
               onClick={onStartBattle}
               disabled={isStarting}
             >
-              <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 rotate-12" />
               {isStarting ? "ЗБІР ВІЙСЬКА..." : "ДО БОЮ!"}
-            </Button>
+            </button>
           ) : (
-            <div className="glass-card rounded-full px-6 sm:px-8 py-4 sm:py-6 text-lg sm:text-xl font-bold italic tracking-wide text-white/80 animate-pulse border-white/10 shadow-xl inline-block mx-auto">
+            <div className="mx-auto inline-block animate-[hud-pulse_2.4s_infinite] border-y border-[#4a3c2c] bg-black/55 px-6 py-4 text-lg italic text-[#d6cbb7] sm:px-8 sm:text-xl">
               🗡️ Очікуйте наказу DM...
             </div>
           )}

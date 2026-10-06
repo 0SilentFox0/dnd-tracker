@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { BasicEditTab } from "./BasicEditTab";
 import { BiographyEditor } from "./BiographyEditor";
 import { GoalList } from "./GoalList";
+import { LevelUpAction } from "./LevelUpAction";
 import { MagicTab } from "./MagicTab";
 import { useProfile } from "./ProfileContext";
 import { ProfileHero } from "./ProfileHero";
@@ -45,11 +46,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
   return (
     <form id="profile-edit" className="hud-form" onSubmit={form.handleSubmit}>
       <ProfileHero
-        actions={
-          <Button type="button" size="sm" variant="outline" onClick={() => void editor.levelUp()}>
-            + рівень
-          </Button>
-        }
+        actions={<LevelUpAction level={formData.basicInfo.level} maxLevel={sheet.maxLevel} onLevelUp={() => void editor.levelUp()} />}
       />
       {form.error && (
         <p role="alert" className="mx-4 rounded-md border border-[#d0705c]/50 bg-[#d0705c]/10 px-3 py-2 text-sm text-[#f0b4a6]">

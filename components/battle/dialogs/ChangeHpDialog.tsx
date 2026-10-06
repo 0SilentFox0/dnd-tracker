@@ -6,6 +6,7 @@ import {
   BattleDialog,
   ConfirmCancelFooter,
 } from "@/components/battle/dialogs/shared";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -53,16 +54,15 @@ function ChangeHpFormInner({
   return (
     <div className="space-y-4 py-2">
       <div className="space-y-2">
-        <Label className="text-slate-200">
+        <Label>
           Нове значення HP (0 … {maxHp})
         </Label>
-        <input
+        <Input
           type="number"
           min={0}
           max={maxHp}
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          className="flex h-9 w-full rounded-md border border-slate-600 bg-slate-800 px-3 py-1 text-sm text-white"
         />
       </div>
       <ConfirmCancelFooter
@@ -97,7 +97,6 @@ export function ChangeHpDialog({
           {participant.combatStats.currentHp} / {participant.combatStats.maxHp}
         </>
       }
-      contentClassName="bg-slate-900 border-slate-700 text-white"
     >
       <ChangeHpFormInner
         key={participant.basicInfo.id}

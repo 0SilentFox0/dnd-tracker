@@ -6,17 +6,26 @@ import {
   duplicateSkill,
   getSkill,
   getSkills,
+  getSkillsByMainSkill,
   updateSkill,
 } from "@/lib/api/skills";
 import { useCrudMutation } from "@/lib/hooks/common";
 import type { SkillUpdatePayload } from "@/types/api";
-import type { Skill } from "@/types/skills";
+import type { PersonalSkillOption, Skill } from "@/types/skills";
 
 export function useSkills(campaignId: string, initialData?: Skill[]) {
   return useQuery<Skill[]>({
     queryKey: ["skills", campaignId],
     queryFn: () => getSkills(campaignId),
     initialData,
+  });
+}
+
+export function usePersonalSkills(campaignId: string, mainSkillId: string | undefined) {
+  return useQuery<PersonalSkillOption[]>({
+    queryKey: ["skills", campaignId, "by-main-skill", mainSkillId],
+    queryFn: () => getSkillsByMainSkill(campaignId, mainSkillId as string),
+    enabled: !!mainSkillId,
   });
 }
 

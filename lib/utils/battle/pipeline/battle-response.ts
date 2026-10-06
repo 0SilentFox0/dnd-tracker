@@ -7,7 +7,7 @@ import type { BattleSceneState, LoadedBattle } from "@/lib/utils/battle/store";
 import type { BattleRefetchSignal, BattleScene, ClientBattleDelta } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
-export interface LegacyView {
+export interface BattleResponseView {
   isDM?: boolean;
 }
 
@@ -17,13 +17,13 @@ export interface PusherMessage {
   payload: unknown;
 }
 
-export function toLegacyBattle(
+export function toBattleResponse(
   loaded: Pick<LoadedBattle, "meta">,
   scene: BattleSceneState,
   participants: BattleParticipant[],
   pending: BattleParticipant[],
   log: { mode: "append" | "full"; entries: BattleAction[]; cancelledFrom?: number },
-  view?: LegacyView,
+  view?: BattleResponseView,
 ): BattleScene {
   const { meta } = loaded;
 
