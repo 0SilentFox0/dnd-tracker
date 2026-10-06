@@ -1,8 +1,7 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ArtifactSetForm } from "@/components/artifact-sets/ArtifactSetForm";
-import { Button } from "@/components/ui/button";
+import { HudFormPage } from "@/components/hud/form";
 import { requireCampaignDM } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
 import { readAbilities } from "@/lib/utils/abilities/read";
@@ -34,16 +33,7 @@ export default async function EditArtifactSetPage({
   const bonus = (setRow.setBonus ?? {}) as { name?: unknown; description?: unknown };
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
-      <div className="flex items-center gap-2">
-        <Button variant="ghost" size="sm" asChild>
-          <Link href={`/campaigns/${id}/dm/artifact-sets`}>← Назад</Link>
-        </Button>
-      </div>
-      <div>
-        <h1 className="text-3xl font-bold">Редагувати сет</h1>
-        <p className="text-muted-foreground mt-1">{setRow.name}</p>
-      </div>
+    <HudFormPage title="Редагувати сет" aside={setRow.name}>
       <ArtifactSetForm
         campaignId={id}
         setId={setRow.id}
@@ -58,6 +48,6 @@ export default async function EditArtifactSetPage({
         initialAbilityIssues={issues}
         initialArtifactIds={initialArtifactIds}
       />
-    </div>
+    </HudFormPage>
   );
 }
