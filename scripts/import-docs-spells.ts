@@ -13,31 +13,13 @@ import * as fs from "fs";
 import * as path from "path";
 
 import { DEFAULT_CAMPAIGN_ID } from "../lib/constants/campaigns";
+import { leadingDice } from "../lib/utils/common/dice";
 import {
   type DocsSpellRow,
   parseDocsSpellRow,
 } from "../lib/utils/spells/spell-csv-docs-parser";
 
 const prisma = new PrismaClient();
-
-function parseDiceFromDamageDice(damageDice: string | undefined): {
-  diceCount: number | null;
-  diceType: string | null;
-} {
-  if (!damageDice || !damageDice.trim()) {
-    return { diceCount: null, diceType: null };
-  }
-
-  const match = damageDice.trim().match(/^(\d+)\s*d(\d+)/i);
-
-  if (!match) return { diceCount: null, diceType: null };
-
-  const count = parseInt(match[1], 10);
-
-  const type = `d${match[2]}`;
-
-  return { diceCount: count, diceType: type };
-}
 
 async function getOrCreateSpellGroup(
   campaignId: string,
@@ -100,7 +82,11 @@ async function main() {
   const toCreate = spells
     .filter((s) => !existingSet.has(s.name))
     .map((s) => {
-      const { diceCount, diceType } = parseDiceFromDamageDice(s.damageDice);
+      const dice = s.damageDice ? leadingDice(s.damageDice) : null;
+
+      const diceCount = dice?.count ?? null;
+
+      const diceType = dice ? `d${dice.size}` : null;
 
       return {
         campaignId,

@@ -5,6 +5,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { leadingDice } from "@/lib/utils/common/dice";
 
 // Схема для одного заклинання в імпорті
 const importSpellSchema = z.object({
@@ -126,32 +127,13 @@ export async function POST(
 
     const existingNamesSet = new Set(existingSpellNames.map((s) => s.name));
 
-    function parseDiceFromDamageDice(damageDice: string | undefined): {
-      diceCount: number | null;
-      diceType: string | null;
-    } {
-      if (!damageDice || !damageDice.trim()) {
-        return { diceCount: null, diceType: null };
-      }
-
-      const match = damageDice.trim().match(/^(\d+)\s*d(\d+)/i);
-
-      if (!match) return { diceCount: null, diceType: null };
-
-      const count = parseInt(match[1], 10);
-
-      const type = `d${match[2]}`;
-
-      return { diceCount: count, diceType: type };
-    }
-
     // Фільтруємо заклинання, які ще не існують
     const spellsToCreate = data.spells
       .filter((spell) => !existingNamesSet.has(spell.name))
       .map((spell) => {
         const schoolKey = spell.school ?? (spell as Record<string, unknown>).School as string | undefined;
 
-        const { diceCount, diceType } = parseDiceFromDamageDice(spell.damageDice);
+        const dice = spell.damageDice ? leadingDice(spell.damageDice) : null;
 
         return {
           campaignId: id,
@@ -165,8 +147,8 @@ export async function POST(
           components: spell.components || null,
           duration: spell.duration || null,
           concentration: spell.concentration ?? false,
-          diceCount,
-          diceType,
+          diceCount: dice?.count ?? null,
+          diceType: dice ? `d${dice.size}` : null,
           savingThrow: spell.savingThrowAbility
             ? ({
                 ability: spell.savingThrowAbility,

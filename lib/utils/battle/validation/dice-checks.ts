@@ -1,5 +1,5 @@
 import { BattleRuleError } from "@/lib/utils/battle/store";
-import { parseDice } from "@/lib/utils/common/dice";
+import { diceCount, parseDice } from "@/lib/utils/common/dice";
 
 function invalid(message: string): never {
   throw new BattleRuleError("invalid_dice", message);
@@ -18,10 +18,6 @@ export function assertRollsWithinFormula(formula: string, rolls: number[], maxCo
   for (const roll of rolls) {
     if (!Number.isInteger(roll) || roll < 1 || roll > largest) invalid(`Кидок ${roll} неможливий для ${formula}`);
   }
-}
-
-function diceCount(formula: string): number {
-  return parseDice(formula)?.groups.reduce((sum, g) => sum + g.count, 0) ?? 0;
 }
 
 /** formula — те, що реально кидає клієнт (для героя — зброя плюс кубики рівня). */

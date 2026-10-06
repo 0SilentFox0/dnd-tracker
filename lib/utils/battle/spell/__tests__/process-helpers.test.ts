@@ -37,8 +37,8 @@ describe("getDiceSize", () => {
     expect(getDiceSize("123")).toBe(6);
   });
 
-  it("clamps minimum to 1", () => {
-    expect(getDiceSize("d0")).toBe(1);
+  it("d0 — невалідний тип, кубик за замовчуванням", () => {
+    expect(getDiceSize("d0")).toBe(6);
   });
 });
 

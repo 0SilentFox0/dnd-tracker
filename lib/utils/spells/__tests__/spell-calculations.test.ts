@@ -15,6 +15,12 @@ describe("spell-calculations", () => {
       expect(calculateAverageSpellEffect(undefined, undefined)).toBe(0);
     });
 
+    it("тип кубика без «d» і нестандартні значення", () => {
+      expect(calculateAverageSpellEffect(2, "6")).toBe(7);
+      expect(calculateAverageSpellEffect(3, "d10")).toBe(16.5);
+      expect(calculateAverageSpellEffect(2, "dX")).toBe(0);
+    });
+
     it("рахує середнє для d6: (6+1)/2 = 3.5 на кубик", () => {
       expect(calculateAverageSpellEffect(1, "d6")).toBe(3.5);
       expect(calculateAverageSpellEffect(2, "d6")).toBe(7);
