@@ -48,17 +48,18 @@ describe("buildSheetFor", () => {
   });
 
   it("читає вдягнені артефакти з БД один раз", async () => {
-    const sheet = await buildSheetFor(character as never, { isDM: false, isOwner: true });
+    const sheet = await buildSheetFor(character as never, { isDM: false, isOwner: true }, 20);
 
     expect(sheet.items.artifacts.map((a) => a.name)).toEqual(["Кольчуга"]);
     expect(db.calls["artifact.findMany"]).toBe(1);
+    expect(sheet.maxLevel).toBe(20);
   });
 
   it("сети — з учасника; таблиця сетів читається один раз", async () => {
     db.artifacts = [{ ...armor, setId: "s1" }];
     db.sets = [{ id: "s1", name: "Мисливець", setBonus: null, icon: null, abilities: [rage] }];
 
-    const sheet = await buildSheetFor(character as never, { isDM: false, isOwner: true });
+    const sheet = await buildSheetFor(character as never, { isDM: false, isOwner: true }, 20);
 
     expect(sheet.items.sets).toEqual([{ setId: "s1", name: "Мисливець", have: 1, total: 1, complete: true, effects: [expect.stringMatching(/шкода \(ближня\) \+10%/)] }]);
     expect(db.calls["artifactSet.findMany"]).toBe(1);

@@ -21,6 +21,7 @@ function lira(over: Partial<SheetInput["character"]> = {}, attacks: BattleAttack
   return {
     participant: p,
     viewer: { isDM: false, isOwner: true },
+    maxLevel: 20,
     character: {
       id: "lira", name: "Ліра", avatar: null, level: 30, class: "Ranger", subclass: null, race: "Ельф", alignment: null,
       strength: 10, dexterity: 18, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10,
