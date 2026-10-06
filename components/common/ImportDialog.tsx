@@ -101,11 +101,19 @@ export function ImportDialog({
           )}
 
           {success && (
-            <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md text-sm text-green-700 dark:text-green-400">
-              <CheckCircle2 className="h-4 w-4 shrink-0" />
-              <span>
-                Успішно імпортовано {success.imported} з {success.total} записів
-              </span>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md text-sm text-green-700 dark:text-green-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0" />
+                <span>
+                  Успішно імпортовано {success.imported} з {success.total} записів
+                </span>
+              </div>
+              {success.warnings?.map((warning) => (
+                <p key={warning} className="flex items-center gap-2 p-3 rounded-md border border-amber-200 bg-amber-50 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  {warning}
+                </p>
+              ))}
             </div>
           )}
 

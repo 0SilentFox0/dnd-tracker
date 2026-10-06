@@ -68,11 +68,16 @@ export interface CSVUnitRow {
 
 export interface UnitAttack {
   name: string;
+  type?: "melee" | "ranged";
+  targetType?: "target" | "aoe";
   attackBonus: number;
   damageType: string;
   damageDice: string;
   range?: string;
   properties?: string;
+  maxTargets?: number;
+  damageDistribution?: number[];
+  guaranteedDamage?: number;
 }
 
 export interface UnitSpecialAbility {
@@ -84,7 +89,7 @@ export interface UnitSpecialAbility {
 
 export interface ImportUnit {
   name: string;
-  groupId?: string;
+  raceName?: string;
   level: number;
   strength: number;
   dexterity: number;
@@ -101,13 +106,13 @@ export interface ImportUnit {
   specialAbilities: UnitSpecialAbility[];
   knownSpells: string[];
   avatar?: string;
-  damageModifier?: string;
 }
 
 export interface UnitImportResult {
   imported: number;
   total: number;
   skipped: number;
+  unknownRaces: string[];
 }
 
 // Spell Import

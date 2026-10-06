@@ -1,27 +1,26 @@
 import { useState } from "react";
 
 export interface UseFileImportOptions<T> {
-  onImport: (data: T[]) => Promise<{ imported: number; total: number; skipped?: number }>;
+  onImport: (data: T[]) => Promise<{ imported: number; total: number; skipped?: number; warnings?: string[] }>;
   parseCSV?: (file: File) => Promise<T[]>;
   parseJSON?: (file: File) => Promise<T[]>;
 }
 
+export type FileImportSuccess = { imported: number; total: number; warnings?: string[] };
+
 export interface UseFileImportReturn {
   file: File | null;
   error: string | null;
-  success: { imported: number; total: number } | null;
+  success: FileImportSuccess | null;
   isLoading: boolean;
   setFile: (file: File | null) => void;
   setError: (error: string | null) => void;
-  setSuccess: (success: { imported: number; total: number } | null) => void;
+  setSuccess: (success: FileImportSuccess | null) => void;
   handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleImport: () => Promise<void>;
   reset: () => void;
 }
 
-/**
- * Загальний хук для імпорту файлів
- */
 export function useFileImport<T>({
   onImport,
   parseCSV,
@@ -31,7 +30,7 @@ export function useFileImport<T>({
 
   const [error, setError] = useState<string | null>(null);
 
-  const [success, setSuccess] = useState<{ imported: number; total: number } | null>(null);
+  const [success, setSuccess] = useState<FileImportSuccess | null>(null);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -96,6 +95,7 @@ export function useFileImport<T>({
       setSuccess({
         imported: result.imported,
         total: result.total,
+        warnings: result.warnings,
       });
     } catch (err) {
       const errorMessage =

@@ -5,6 +5,7 @@ import {
   campaignPost,
   campaignRequest,
 } from "@/lib/api/client";
+import type { ImportUnit, UnitImportResult } from "@/types/import";
 import type { Unit, UnitGroup } from "@/types/units";
 
 export async function getUnits(campaignId: string): Promise<Unit[]> {
@@ -94,9 +95,6 @@ export async function updateUnit(
   return campaignPatch<Unit>(campaignId, `/units/${unitId}`, data);
 }
 
-export async function importUnits(
-  campaignId: string,
-  body: { units: unknown[]; groupName?: string },
-): Promise<{ imported: number }> {
-  return campaignPost<{ imported: number }>(campaignId, "/units/import", body);
+export async function importUnits(campaignId: string, body: { units: ImportUnit[] }): Promise<UnitImportResult> {
+  return campaignPost<UnitImportResult>(campaignId, "/units/import", body);
 }

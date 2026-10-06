@@ -1,5 +1,5 @@
 import { getProficiencyBonus } from "@/lib/utils/common/calculations";
-import type { CSVUnitRow, UnitAttack, UnitSpecialAbility } from "@/types/import";
+import type { CSVUnitRow, ImportUnit, UnitAttack, UnitSpecialAbility } from "@/types/import";
 
 /**
  * Парсить значення ability score з рядка
@@ -183,72 +183,39 @@ export function parseSpecialAbilities(value: string): UnitSpecialAbility[] {
 /**
  * Конвертує CSV рядок юніта в формат для імпорту
  */
-export function convertCSVRowToUnit(row: CSVUnitRow): {
-  unit: Omit<import("@/types/import").ImportUnit, "groupId">;
-  groupName: string | undefined;
-} {
+export function convertCSVRowToUnit(row: CSVUnitRow): ImportUnit {
   const name = (row.Назва || row.name || row.Name || "").trim();
 
   const tier = parseLevel(row.Tier || row.tier || "1");
-
-  const armorClass = parseArmorClass(row.КД || row.ac || row.AC || "10");
-
-  const maxHp = parseMaxHp(row.ХП || row.hp || row.HP || "10");
-
-  const speed = parseSpeed(row.Швидкість || row.speed || row.Speed || "30");
-  
-  const strength = parseAbilityScore(row.СИЛ || row.str || row.STR || "10");
-
-  const dexterity = parseAbilityScore(row.ЛОВ || row.dex || row.DEX || "10");
-
-  const constitution = parseAbilityScore(row.ТІЛ || row.con || row.CON || "10");
-
-  const intelligence = parseAbilityScore(row.ІНТ || row.int || row.INT || "10");
-
-  const wisdom = parseAbilityScore(row.МДР || row.wis || row.WIS || "10");
-
-  const charisma = parseAbilityScore(row.ХАР || row.cha || row.CHA || "10");
-
-  const attacks = parseAttacks(row.Атаки || row.attacks || row.Attacks || "");
-
-  const specialAbilities = parseSpecialAbilities(
-    (row["Навички/Здібності"] || row.abilities || row.Abilities || "") + 
-    (row.Особливості || row.features || row.Features ? ". " + (row.Особливості || row.features || row.Features) : "")
-  );
-
-  const groupName = (row.Група || row.group || row.Group || "").trim() || undefined;
 
   const initiativeRaw = (row.Initiative ?? row.initiative ?? "").trim();
 
   const initiative = initiativeRaw ? parseInt(initiativeRaw, 10) : 10;
 
-  const initiativeValue = Number.isNaN(initiative) ? 10 : initiative;
-
   const avatar = (row.Image ?? row.image ?? row.URL ?? "").trim() || undefined;
 
-  // Розраховуємо proficiency bonus на основі рівня
-  const proficiencyBonus = getProficiencyBonus(tier);
+  const raceName = (row.Група || row.group || row.Group || "").trim() || undefined;
+
+  const features = row.Особливості || row.features || row.Features;
 
   return {
-    unit: {
-      name,
-      level: tier,
-      strength,
-      dexterity,
-      constitution,
-      intelligence,
-      wisdom,
-      charisma,
-      armorClass,
-      initiative: initiativeValue,
-      speed,
-      maxHp,
-      proficiencyBonus,
-      attacks,
-      specialAbilities,
-      knownSpells: [],
-      ...(avatar && { avatar }),
-    },
-    groupName,
+    name,
+    level: tier,
+    strength: parseAbilityScore(row.СИЛ || row.str || row.STR || "10"),
+    dexterity: parseAbilityScore(row.ЛОВ || row.dex || row.DEX || "10"),
+    constitution: parseAbilityScore(row.ТІЛ || row.con || row.CON || "10"),
+    intelligence: parseAbilityScore(row.ІНТ || row.int || row.INT || "10"),
+    wisdom: parseAbilityScore(row.МДР || row.wis || row.WIS || "10"),
+    charisma: parseAbilityScore(row.ХАР || row.cha || row.CHA || "10"),
+    armorClass: parseArmorClass(row.КД || row.ac || row.AC || "10"),
+    initiative: Number.isNaN(initiative) ? 10 : initiative,
+    speed: parseSpeed(row.Швидкість || row.speed || row.Speed || "30"),
+    maxHp: parseMaxHp(row.ХП || row.hp || row.HP || "10"),
+    proficiencyBonus: getProficiencyBonus(tier),
+    attacks: parseAttacks(row.Атаки || row.attacks || row.Attacks || ""),
+    specialAbilities: parseSpecialAbilities((row["Навички/Здібності"] || row.abilities || row.Abilities || "") + (features ? ". " + features : "")),
+    knownSpells: [],
+    ...(avatar && { avatar }),
+    ...(raceName && { raceName }),
   };
 }

@@ -106,3 +106,37 @@ export const deleteUnitsByLevelSchema = z.object({
 });
 
 export type DeleteUnitsByLevelInput = z.infer<typeof deleteUnitsByLevelSchema>;
+
+export const importUnitSchema = z.object({
+  name: z.string().trim().min(1),
+  raceName: z.string().trim().optional(),
+  level: z.number().min(1).max(30).default(1),
+  strength: z.number().min(1).max(30).default(10),
+  dexterity: z.number().min(1).max(30).default(10),
+  constitution: z.number().min(1).max(30).default(10),
+  intelligence: z.number().min(1).max(30).default(10),
+  wisdom: z.number().min(1).max(30).default(10),
+  charisma: z.number().min(1).max(30).default(10),
+  armorClass: z.number().min(0).default(10),
+  initiative: z.number().default(0),
+  speed: z.number().min(0).default(30),
+  maxHp: z.number().min(1).default(10),
+  proficiencyBonus: z.number().min(0).default(2),
+  attacks: z.array(unitAttackSchema).default([]),
+  specialAbilities: z
+    .array(
+      z.object({
+        name: z.string(),
+        description: z.string(),
+        type: z.enum(["passive", "active"]),
+        effect: z.record(z.string(), z.unknown()).optional(),
+      }),
+    )
+    .default([]),
+  knownSpells: z.array(z.string()).default([]),
+  avatar: unitAvatarSchema,
+});
+
+export type ImportUnitRow = z.infer<typeof importUnitSchema>;
+
+export const importUnitsSchema = z.object({ units: z.array(importUnitSchema) });

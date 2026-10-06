@@ -18,4 +18,14 @@ describe("ImportDialog", () => {
 
     expect(screen.getByText("Імпорт юнітів")).toBeInTheDocument();
   });
+
+  it("показує попередження звіту імпорту", () => {
+    mockMatchMedia(false);
+
+    const hook = { ...(importHook as object), success: { imported: 2, total: 2, warnings: ["Раси не знайдено — юніти створено без раси: Нежить"] } } as never;
+
+    render(<ImportDialog triggerLabel="Імпортувати юніти" title="Імпорт юнітів" importHook={hook} open />);
+
+    expect(screen.getByText("Раси не знайдено — юніти створено без раси: Нежить")).toBeInTheDocument();
+  });
 });

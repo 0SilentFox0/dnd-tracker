@@ -6,33 +6,28 @@ import { importUnits } from "@/lib/api/units";
 import { useFileImport } from "@/lib/hooks/common";
 import { parseCSVFile, parseJSONFile } from "@/lib/utils/common/file-import";
 import { convertCSVRowToUnit } from "@/lib/utils/common/unit-parsing";
-import type { CSVUnitRow, ImportUnit, UnitImportResult } from "@/types/import";
-
-type ImportUnitRow = ImportUnit & { groupName?: string };
+import type { CSVUnitRow, ImportUnit } from "@/types/import";
 
 export function useUnitImport(campaignId: string) {
   const queryClient = useQueryClient();
 
   const importMutation = useMutation({
-    mutationFn: (units: ImportUnitRow[]) => importUnits(campaignId, { units }) as Promise<UnitImportResult>,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["units", campaignId] });
-      void queryClient.invalidateQueries({ queryKey: ["unitGroups", campaignId] });
-    },
+    mutationFn: (units: ImportUnit[]) => importUnits(campaignId, { units }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["units", campaignId] }),
   });
 
-  return useFileImport<ImportUnitRow>({
+  return useFileImport<ImportUnit>({
     onImport: async (units) => {
-      const { imported, total, skipped } = await importMutation.mutateAsync(units);
+      const { imported, total, skipped, unknownRaces } = await importMutation.mutateAsync(units);
 
-      return { imported, total, skipped };
+      return {
+        imported,
+        total,
+        skipped,
+        warnings: unknownRaces.length > 0 ? [`Раси не знайдено — юніти створено без раси: ${unknownRaces.join(", ")}`] : [],
+      };
     },
-    parseCSV: async (file) =>
-      (await parseCSVFile<CSVUnitRow>(file, ";")).map((row) => {
-        const { unit, groupName } = convertCSVRowToUnit(row);
-
-        return { ...unit, groupName };
-      }),
-    parseJSON: async (file) => (await parseJSONFile<ImportUnit>(file)).map((u) => ({ ...u, groupName: undefined })),
+    parseCSV: async (file) => (await parseCSVFile<CSVUnitRow>(file, ";")).map(convertCSVRowToUnit),
+    parseJSON: (file) => parseJSONFile<ImportUnit>(file),
   });
 }
