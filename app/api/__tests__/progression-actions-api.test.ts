@@ -89,12 +89,29 @@ describe("progression actions", () => {
 
   it("unlearn і reset — лише DM", async () => {
     vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("owner", "player"));
-    expect((await post("unlearn", { nodeId: "attack_basic_level" })).status).toBe(403);
+    expect((await post("unlearn", { nodeIds: ["attack_basic_level"] })).status).toBe(403);
     expect((await post("reset")).status).toBe(403);
 
     vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("dm", "dm"));
-    expect(await getResponseJson(await post("unlearn", { nodeId: "attack_basic_level" }))).toEqual({ unlocked: [] });
+    expect(await getResponseJson(await post("unlearn", { nodeIds: ["attack_basic_level"] }))).toEqual({ unlocked: [] });
     expect(await getResponseJson(await post("reset"))).toEqual({ unlocked: [] });
+  });
+
+  it("DM прибирає кілька вузлів (сироти) одним запитом", async () => {
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("dm", "dm"));
+    vi.mocked(prisma.character.findFirst).mockResolvedValue({ ...CHAR, skillTreeProgress: { "json-id": { unlockedSkills: ["attack_basic_level", "gone-1", "gone-2"] } } } as never);
+
+    const res = await post("unlearn", { nodeIds: ["gone-1", "gone-2"] });
+
+    expect(await getResponseJson(res)).toEqual({ unlocked: ["attack_basic_level"] });
+    expect(prisma.character.updateMany).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(prisma.character.updateMany).mock.calls[0][0].data).toEqual({ skillTreeProgress: { "row-id": { unlockedSkills: ["attack_basic_level"] } } });
+  });
+
+  it("unlearn: порожній список — 400", async () => {
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("dm", "dm"));
+
+    expect((await post("unlearn", { nodeIds: [] })).status).toBe(400);
   });
 
   it("seen-level — лише власник, ставить поточний рівень", async () => {

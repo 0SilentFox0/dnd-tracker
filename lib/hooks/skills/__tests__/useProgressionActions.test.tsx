@@ -58,6 +58,16 @@ describe("useProgressionActions", () => {
     });
   });
 
+  it("unlearn шле всі вузли одним запитом", async () => {
+    vi.mocked(api.unlearnNodes).mockResolvedValue({ unlocked: [] });
+
+    const { result } = setup();
+
+    await act(() => result.current.unlearn(["x", "y"]));
+
+    expect(api.unlearnNodes).toHaveBeenCalledWith("camp", "ch", ["x", "y"]);
+  });
+
   it("409 → інвалідує прогрес і повідомляє", async () => {
     vi.mocked(api.learnNode).mockRejectedValue(new ApiError("conflict", 409, "/x", {}));
 

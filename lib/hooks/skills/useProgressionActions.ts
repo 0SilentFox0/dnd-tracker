@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { progressionKey } from "./progression-keys";
 
-import { learnNode, resetProgression, unlearnNode } from "@/lib/api/character-progression";
+import { learnNode, resetProgression, unlearnNodes } from "@/lib/api/character-progression";
 import { ApiError } from "@/lib/api/client";
 import { characterSheetKey } from "@/lib/hooks/characters";
 import { useNotify } from "@/lib/hooks/common";
@@ -68,7 +68,7 @@ export function useProgressionActions(campaignId: string, characterId: string) {
 
   return {
     learn: (nodeId: string) => run(nodeId, () => learnNode(campaignId, characterId, nodeId)),
-    unlearn: (nodeId: string) => run(nodeId, () => unlearnNode(campaignId, characterId, nodeId)),
+    unlearn: (nodeIds: string[]) => run(nodeIds.length === 1 ? nodeIds[0] : "orphans", () => unlearnNodes(campaignId, characterId, nodeIds)),
     reset: () => run("reset", () => resetProgression(campaignId, characterId)),
     pendingNodeId,
   };
