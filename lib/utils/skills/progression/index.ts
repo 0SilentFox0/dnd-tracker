@@ -1,6 +1,7 @@
 export * from "./edit";
 export * from "./ids";
 export * from "./normalize";
+export * from "./placement";
 export * from "./progress";
 export * from "./resolve";
 export * from "./rules";

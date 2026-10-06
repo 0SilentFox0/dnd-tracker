@@ -53,7 +53,8 @@
 | `api/campaigns/[id]/units` | Юніти та групи |
 | `api/campaigns/[id]/artifacts` | Артефакти |
 | `api/campaigns/[id]/main-skills` | Основні навички (MainSkill) |
-| `api/campaigns/[id]/skill-trees` | Дерева прокачки |
+| `api/campaigns/[id]/skill-trees` | Дерева прокачки (PATCH валідує дерево) |
+| `api/campaigns/[id]/characters/[characterId]/progression` | Прокачка персонажа: GET, `learn` / `unlearn` / `reset` / `seen-level` (правила перевіряє сервер) |
 | `api/campaigns/[id]/members/[memberId]` | Учасники кампанії |
 | `api/pusher/auth` | Авторизація каналів Pusher для real-time |
 
@@ -89,7 +90,7 @@
 | **`campaigns/`** | Кампанія: join, members, info, settings. |
 | **`abilities/`** | Редактор умінь для всіх власників: акордеон (`AbilityListEditor`), секції «Коли / Умова / Ліміти / Що робить», поля з реєстру (`fields/`), шаблони й «Скопіювати з…», `AbilitySummary` для карток. |
 | **`skills/`** | Скіли: форми створення/редагування (`form/`), списки, картки, діалоги (наприклад CreateGroupDialog). |
-| **`skill-tree/`** | Дерево прокачки: `core/` (CircularSkillTree, SkillTreeCard, SkillTreeContent), `elements/`, `ui/`, `utils/`. |
+| **`skill-tree/`** | Прокачка: `progression/` (панель гравця — рядки гілок, пропозиції, шторка вузла, анімація нового рівня), `editor/` (таблиця-редактор дерева для DM). |
 | **`spells/`** | Заклинання: списки, групи, діалоги, форми. |
 | **`races/`** | Раси: форми редагування, стати, слоти заклинань. |
 | **`main-skills/`** | Основні навички (MainSkill): картки, діалог створення. |
@@ -120,8 +121,8 @@ React-хуки згруповані по папках за доменом; ко�
 - **`lib/hooks/battles/`** — список і CRUD боїв: `useBattles` (useBattle, useStartBattle, useUpdateBattle, …); усі мутації бою — через `useBattleAction` (`expectedVersion`, застосування дельти, 409 → рефетч і тост).
 - **`lib/hooks/battle/`** — логіка одного бою: `useBattleSceneValue`/`useBattleScene` (контекст сцени), `usePusherBattleSync` (`battle-delta`), `useAttackWizard`, `useSpellBook`, `usePlayerTurn`, `useBattleToast`, `useHpChange`, `useBattlePageDialogs` (DM-діалоги).
 - **`lib/hooks/campaigns/`** — `useCampaignMembers`.
-- **`lib/hooks/characters/`** — персонажі та форма: `useCharacterForm`, `useCharacterView`, `useCharacters`, `useInventory`, `useDamageCalculator`, `useHeroScalingCoefficients`; типи `SkillTreeProgress`, `Character`.
-- **`lib/hooks/skills/`** — скіли та дерево: `useSkills`, `useMainSkills`, `useSkillForm`, `useSkillTreePage`, `useSkillTreeEnrichment`, `useSkillTreeFilters`, `useSkillTreeSave`, `useSkillTreeClear`, `useSkillTreeAssignment`; тип `SkillFromLibrary`.
+- **`lib/hooks/characters/`** — персонажі та форма: `useCharacterForm`, `useCharacterView`, `useCharacters`, `useInventory`, `useDamageCalculator`, `useHeroScalingCoefficients`; тип `Character`.
+- **`lib/hooks/skills/`** — скіли та прокачка: `useSkills`, `useMainSkills`, `useSkillForm`, `useCharacterProgression`, `useProgressionActions`, `useCharacterLearnedSpellIds`, `useLevelUpCelebration`, `useSkillTreeEditor`; тип `SkillFromLibrary`.
 - **`lib/hooks/spells/`** — заклинання: `useSpells`, `useSpellGroups`, `useSpellGroupActions`, `useSpellSelection` та мутації (create, update, delete, move, …).
 - **`lib/hooks/units/`** — юніти: `useUnits`, `useUnit`, `useUnitGroups`, `useCreateUnitGroup` та мутації.
 - **`lib/hooks/races/`** — раси: `useRaces`, `useCreateRace`, `useUpdateRace`, `useDeleteRace`.
@@ -161,7 +162,8 @@ React-хуки згруповані по папках за доменом; ко�
 
 #### `lib/utils/skills/`
 
-- **`skill-helpers.ts`**, **`skill-tree-mock.ts`** тощо — допоміжні функції для дерева скілів і форм.
+- **`progression/`** — єдиний рушій прокачки: `normalizeTree` (вузли дерева), `canLearn`/`canUnlearn` (правила), `progressionView`/`rankOffers` (UI гравця), `resolveLearned` (бій, баланс, заклинання), `validateTree` і редагування JSON для DM.
+- **`skill-helpers.ts`** тощо — допоміжні функції для скілів і форм.
 
 #### `lib/utils/spells/`
 
@@ -207,7 +209,8 @@ React-провайдери: **`query-provider.tsx`** (TanStack Query), можл�
 - **`battle.ts`** — BattleParticipant, BattleAction, SkillEffect, ActiveSkill тощо (бойова модель).
 - **`api.ts`** — типи для API (BattleScene тощо).
 - **`characters.ts`**, **`campaigns.ts`**, **`races.ts`**, **`skills.ts`**, **`spells.ts`**, **`units.ts`**, **`artifacts.ts`**, **`inventory.ts`** — сутності відповідних доменів.
-- **`skill-tree.ts`** — SkillTree, MainSkill, Skill, UltimateSkill, SkillLevel, SkillLevelType.
+- **`skill-tree.ts`** — `SkillLevel`, `SkillLevelType`; формат дерева — `RawTree` у `lib/utils/skills/progression`.
+- **`progression.ts`** — `CharacterProgressionDto`.
 - **`main-skills.ts`** — MainSkill (API/форма), MainSkillFormData.
 - **`skill-triggers.ts`** — типи тригерів скілів.
 - **`hooks.ts`** — типи для хуків (GroupedSkillPayload, SkillEffect тощо).
@@ -277,7 +280,7 @@ React-провайдери: **`query-provider.tsx`** (TanStack Query), можл�
 1. **Відкриття бою:** серверна сторінка `app/campaigns/[id]/battles/[battleId]/page.tsx` (userId) → `BattlePageClient` → `useBattleSceneValue` + `BattleSceneProvider` → `BattleScreen`; мутації через `useBattleAction`, оновлення — дельтами (відповідь і Pusher `battle-delta`).
 2. **Атака:** «Атака» → `AttackWizard` + `useAttackWizard` (редʼюсер `flows/attack-flow`: зброя → ціль → кидок → шкода → підсумок) → API `attack` → `lib/utils/battle/attack*` та **`damage/`** на сервері (кроки шкоди пишуться в `actionDetails.damageSteps`) → дельта в кеш → `ResultOverlay`.
 3. **Форма скіла:** сторінка DM → **`useSkillForm`** → **`SkillCreateForm`** / **`SkillEditForm`** → **`buildSkillFormPayload`** → API **PATCH/POST** skills.
-4. **Дерево прокачки:** **`useSkillTreePage`** → **`useSkillTreeFilters`**, **`useSkillTreeEnrichment`**, **`useSkillTreePage-handlers`** → збереження через **`useSkillTreeSave`** до API skill-trees / characters.
+4. **Прокачка:** гравець — **`ProgressionPanel`** → **`useCharacterProgression`** (GET `…/progression`) і **`useProgressionActions`** (`learn` тощо, патч кешу без рефетчу); DM — **`SkillTreeEditor`** → **`useSkillTreeEditor`** → PATCH `skill-trees`.
 
 Орієнтуйтесь на імена хуків і файлів у `lib/hooks/` та `lib/utils/battle/` — вони відповідають цим потокам.
 

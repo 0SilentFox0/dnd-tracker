@@ -111,21 +111,3 @@ export interface GroupedSkill {
     name: string;
   } | null;
 }
-
-export interface UnlockedSkill {
-  id: string;
-  name: string;
-  bonus?: number;
-}
-
-export interface CharacterSkill {
-  id: string;
-  characterId: string;
-  skillTreeId: string;
-  unlockedSkills: UnlockedSkill[];
-  updatedAt: Date;
-  skillTree?: {
-    id: string;
-    race: string;
-  } | null;
-}

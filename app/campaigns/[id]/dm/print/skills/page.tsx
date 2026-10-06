@@ -30,7 +30,7 @@ export default async function PrintSkillsPage({
     }),
     prisma.skillTree.findMany({
       where: { campaignId: id },
-      select: { skills: true },
+      select: { id: true, skills: true },
     }),
   ]);
 

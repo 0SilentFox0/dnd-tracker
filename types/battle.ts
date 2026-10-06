@@ -7,7 +7,7 @@ import type { AbilityUsageCounter, ResolvedAbility, SpellEnhancer, StaticEffect 
 import type { ArtifactEffectAudience } from "@/lib/constants/artifact-effect-scope";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
-import { SkillLevel } from "@/lib/types/skill-tree";
+import { SkillLevel } from "@/types/skill-tree";
 
 export type { CriticalEffect };
 export { AttackType, ParticipantSide };

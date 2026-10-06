@@ -8,12 +8,12 @@ import { describe, expect, it } from "vitest";
 import { applyResistance, calculateDamageWithModifiers } from "../damage";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
-import { SkillLevel } from "@/lib/types/skill-tree";
 import { grantPassive, withConvertedSkills } from "@/lib/utils/battle/__tests__/mock-participant";
 import type {
   BattleParticipant,
   SkillEffect,
 } from "@/types/battle";
+import { SkillLevel } from "@/types/skill-tree";
 
 function createBaseParticipant(
   overrides?: Partial<BattleParticipant>,

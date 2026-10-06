@@ -3,7 +3,7 @@
  * Редагуйте значення тут для зміни внеску магії та немагічних навичок у DPR.
  */
 
-import { SkillLevel } from "@/lib/types/skill-tree";
+import { SkillLevel } from "@/types/skill-tree";
 
 /** ID (slug) основних навичок, які вважаються школами магії */
 export const MAGIC_MAIN_SKILL_IDS = [
