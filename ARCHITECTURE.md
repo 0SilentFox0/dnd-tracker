@@ -158,7 +158,7 @@ React-хуки згруповані по папках за доменом; ко�
 - **`registry/`** — реєстр тригерів, умов і ефектів: `matches` / `evaluate` / `apply`, `describe`, `fields` для UI.
 - **`engine/`** — `runAbilities` (один виконавець подій бою з лімітами й шансом), `resolveDowned` (летальна шкода → вбивство), `collectModifiers` (постійні модифікатори: пасивки, аури, таймові ефекти).
 - **`build/`** — збирання умінь учасника («найвищий рівень у лінії», школа магії) і запікання статів при побудові.
-- **`legacy/`** — конвертер старих форматів (`skillTriggers`, `combatStats`, `passiveAbility`, `setBonus`, `specialAbilities`, старі snapshot), читання колонки `abilities` із запасним варіантом (`readAbilities`) і звіт `pnpm convert-abilities`. Форми пишуть `abilities` напряму; `summary.ts` рахує короткі описи для списків.
+- **`read.ts`** — єдине читання колонки `abilities` (`skillAbilities` / `raceAbilities` / … для бою, `readAbilities` для редакторів; `NULL` → `[]`, невалідні записи відкидаються з попередженням). Форми пишуть `abilities` напряму; `summary.ts` рахує короткі описи для списків. Конвертери старих форматів — лише в `scripts/legacy-convert/` (для `convert-abilities` і `import-skills-library`).
 
 #### `lib/utils/skills/`
 
@@ -222,7 +222,7 @@ React-провайдери: **`query-provider.tsx`** (TanStack Query), можл�
 
 ## 5. `prisma/`
 
-- **`schema.prisma`** — повна схема БД (User, Campaign, CampaignMember, Character, Unit, UnitGroup, Spell, SpellGroup, Artifact, ArtifactSet, CharacterInventory, SkillTree, CharacterSkills, BattleScene, StatusEffect, RacialAbility, Skill, Race, MainSkill тощо).
+- **`schema.prisma`** — повна схема БД (User, Campaign, CampaignMember, Character, Unit, Spell, SpellGroup, Artifact, ArtifactSet, CharacterInventory, SkillTree, CharacterSkills, BattleScene, StatusEffect, Skill, Race, MainSkill тощо).
 - **`migrations/`** — історія міграцій. Після зміни схеми: `npx prisma migrate dev --name опис`.
 
 Після змін обов’язково: `npx prisma generate` (часто виконується в `postinstall` та перед build).
@@ -235,10 +235,10 @@ React-провайдери: **`query-provider.tsx`** (TanStack Query), можл�
 
 - **Імпорт:** `import-docs-spells.ts`, `import-units.ts`, `import-skills-library.ts` (та допоміжні parse/triggers/types).
 - **Міграції зберігання:** `migrate-spell-icons-to-supabase.ts`, `migrate-skill-icons-to-supabase.ts`, `migrate-unit-icons-to-supabase.ts`.
-- **Дані:** `seed-artifacts.ts`, `seed-mock-battle-data.ts`, `seed-mock-battles.ts`, `reset-mock-battle-data.ts`, `delete-mock-battle-data.ts`, `redistribute-character-spell-slots.ts`.
+- **Дані:** `seed-artifacts.ts`, `seed-mock-battle-data.ts`, `reset-mock-battle-data.ts`, `delete-mock-battle-data.ts`, `redistribute-character-spell-slots.ts`.
 - **Тести/симуляції:** `run-spells-testing.ts`, `simulate-battle.ts`.
-- **Конвертація умінь:** `pnpm convert-abilities` (dry-run зі звітом у `docs/reports/`; `--apply` / `--force`).
-- **Симуляція бою:** `pnpm simulate-battle` — лише на локальній БД: створює окрему кампанію (персонажі з різними прокачками й артефактами, юніти з уміннями, частина даних у старому форматі) і проганяє бій через ті самі mutation-функції, що й API, з перевірками ефектів.
+- **Конвертація умінь:** `pnpm convert-abilities` (dry-run зі звітом у `docs/reports/`; `--apply` / `--force`; до контрактної міграції) і `pnpm check-contract` — передумови контрактної міграції (лише читання).
+- **Симуляція бою:** `pnpm simulate-battle` — лише на локальній БД: створює окрему кампанію (персонажі з різними прокачками й артефактами, юніти з уміннями) і проганяє бій через ті самі mutation-функції, що й API, з перевірками ефектів.
 - **Інше:** `artifact-icon-map.ts`, `update-artifact-icons.ts`.
 
 Детальніший опис mock-даних — у **`scripts/README-MOCK-DATA.md`**.

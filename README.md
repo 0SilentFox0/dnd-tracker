@@ -249,7 +249,6 @@ const { formData, updateField, handleSubmit } = useCharacterForm({
 - **Character** - Персонаж (гравець або NPC герой)
 - **CharacterInventory** - Інвентар персонажа
 - **Unit** - NPC юніт для боїв
-- **UnitGroup** - Група юнітів
 - **Spell** - Заклинання
 - **SpellGroup** - Група заклинань
 - **Artifact** - Артефакт
@@ -257,7 +256,6 @@ const { formData, updateField, handleSubmit } = useCharacterForm({
 - **BattleScene** - Сцена бою
 - **SkillTree** - Дерево прокачки для раси
 - **CharacterSkills** - Прогрес персонажа по дереву скілів
-- **RacialAbility** - Расові здібності
 
 ## 🔐 Аутентифікація
 

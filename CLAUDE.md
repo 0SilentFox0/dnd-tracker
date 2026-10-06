@@ -29,7 +29,7 @@ pnpm migrate:deploy                    # apply migrations against DIRECT_URL fro
 pnpm exec prisma studio
 ```
 
-Many one-off ops live in `scripts/` and run via `tsx` (e.g. `pnpm import-spells`, `pnpm seed-mock-battle`, `pnpm migrate-spell-icons-to-supabase`). Check `package.json` scripts before writing new tooling.
+Many one-off ops live in `scripts/` and run via `tsx` (e.g. `pnpm import-docs-spells`, `pnpm seed-mock-battle`, `pnpm migrate-spell-icons-to-supabase`). Check `package.json` scripts before writing new tooling.
 
 ## Architecture
 
@@ -39,7 +39,7 @@ Many one-off ops live in `scripts/` and run via `tsx` (e.g. `pnpm import-spells`
 2. **`app/api/campaigns/[id]/...`** — route handlers. `route.ts` should stay thin: Zod validation, session check, then delegate to a sibling handler/helper file (e.g. `attack-handler.ts`, `build-character-update-data.ts`). Heavy logic does **not** belong in `route.ts`.
 3. **`lib/api/<domain>.ts`** — thin client wrappers (`get`/`create`/`update`/`delete`) used by client components/hooks. Do not call `fetch` directly from components — extend the matching `lib/api` module.
 4. **`lib/hooks/<domain>/`** — TanStack Query hooks and form/state hooks per domain (`battles`, `battle` (single-battle scene), `characters`, `skills`, `spells`, `units`, `races`, `campaigns`, `common`). Each domain folder has an `index.ts` barrel; import from the folder, not deep paths.
-5. **`lib/utils/<domain>/`** — pure domain logic (esp. `battle/` for attacks, damage, spells, participants, balance; `abilities/` for the unified ability model (schema, registry, `runAbilities`, `collectModifiers`, legacy converters); `spells/` for learning rules). Tests sit in sibling `__tests__/` folders.
+5. **`lib/utils/<domain>/`** — pure domain logic (esp. `battle/` for attacks, damage, spells, participants, balance; `abilities/` for the unified ability model (schema, registry, `runAbilities`, `collectModifiers`, `read.ts` — the only reader of `abilities` columns); `spells/` for learning rules). Tests sit in sibling `__tests__/` folders.
 
 ### Key cross-cutting modules
 
@@ -57,8 +57,7 @@ Page `app/campaigns/[id]/battles/[battleId]/page.tsx` (server: `userId` from `ge
 - **Turn advance** has one engine: `lib/utils/battle/turn/advanceTurn` (used by next-turn and attack with `endTurn`).
 - **Client cache:** `applyBattleDelta` (`lib/utils/battle/client`) patches the cached `BattleScene` (old version ignored, gap → one GET). `useBattleAction` sends `expectedVersion`; 409 → refetch + battle toast. `actionIndex` in the client log is the event `seq` (rollback target).
 - **Player UI logic:** wizards (attack, spellbook, player turn) are reducers in `lib/utils/battle/flows` driven by hooks in `lib/hooks/battle`; what a player may see (health states instead of enemy HP, AC known from attacks, observed traits from `actionDetails.damageSteps`, turn queue with morale extra turns) is `lib/utils/battle/view`. Hiding is client-side.
-- **Legacy JSON columns** on `battle_scenes` (`initiativeOrder`, `battleLog`, `pendingSummons`) are no longer read or written; they will be dropped by a contract migration.
-- **Abilities** (skills, races, artifacts, sets, units) share one model in `lib/utils/abilities/`: engine code fires typed events into `runAbilities` (limits, chance, `lethalDamage` → `kill`) and reads every stat/damage/resistance/flag bonus via `collectModifiers` — never from raw skill JSON. Owners have an `abilities JSONB` column; edit forms write `abilities` directly through `AbilityListEditor` (`components/abilities`); `NULL` falls back to `legacy/read` converters until the contract migration.
+- **Abilities** (skills, races, artifacts, sets, units) share one model in `lib/utils/abilities/`: engine code fires typed events into `runAbilities` (limits, chance, `lethalDamage` → `kill`) and reads every stat/damage/resistance/flag bonus via `collectModifiers` — never from raw skill JSON. Owners have an `abilities JSONB` column; edit forms write `abilities` directly through `AbilityListEditor` (`components/abilities`); read them with `lib/utils/abilities/read.ts` (`NULL` → `[]`). Old-format converters live only in `scripts/legacy-convert/` (for `convert-abilities` and `import-skills-library`).
 - When changing battle behavior, expect to touch the mutation, the engine util, and possibly the hook and UI under `components/battle/`.
 
 ### Path alias & imports
@@ -94,6 +93,7 @@ These trip people up repeatedly — read before touching the DB or `vercel.json`
 - **`DIRECT_URL` (port 5432) is required in Vercel Production** — without it the build fails with an explanatory error.
 - **Production builds from a branch other than `main`** (`vercel --prod` from a branch, CLI without git ref) fail on purpose, so an unmerged migration never reaches the prod DB. Override with `ALLOW_PROD_MIGRATE=1` only deliberately.
 - **Migrations must be expand-only** (add columns/tables, backfill, drop later): `migrate deploy` runs before `next build`, and a Vercel rollback does not revert the schema.
+- **Contract pending (item 9).** Columns/tables from `docs/superpowers/specs/2026-10-06-dedup-design.md` §6.5 are gone from `schema.prisma` but still exist in the DB until migration `20261012000000_contract` (branch `feat/dedup-contract`, merged only after release 1 runs in prod). Until then `prisma migrate dev` proposes `DROP`s for them — create migrations with `--create-only` and remove those `DROP`s by hand. `pnpm check-contract [--env .env.production-db.local]` checks the merge preconditions.
 - **Every `CREATE TABLE` migration must also `ALTER TABLE … ENABLE ROW LEVEL SECURITY`** — Supabase exposes `public` tables to the anon key otherwise. `prisma/__tests__/migrations-rls.test.ts` enforces it.
 - **Regions:** Supabase `eu-central-1`, Vercel functions `fra1`, Pusher cluster `eu`. Don't move one without the others — every DB round trip across continents adds ~100 ms.
 - **`DATABASE_URL` for Vercel = Transaction pooler (port 6543) with `?pgbouncer=true&sslmode=require`.** The Direct connection (port 5432) is only for one-off DDL/backups (`scripts/backup-database.sh`, manual migrations).
