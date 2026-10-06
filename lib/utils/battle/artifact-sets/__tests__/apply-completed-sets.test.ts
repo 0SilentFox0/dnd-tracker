@@ -25,6 +25,10 @@ describe("findCompletedSets", () => {
     expect((await findCompletedSets(equipped, "c1", context(null, null))).sets).toEqual([]);
   });
 
+  it("порожній список умінь без setBonus — сет не застосовується", async () => {
+    expect((await findCompletedSets(equipped, "c1", context(null, []))).sets).toEqual([]);
+  });
+
   it("неповний сет не застосовується", async () => {
     expect((await findCompletedSets([{ artifactId: "a1", setId: "s1" }] as never, "c1", context({ name: "x" }, []))).sets).toEqual([]);
   });
