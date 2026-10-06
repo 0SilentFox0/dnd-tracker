@@ -3,21 +3,16 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { MainSkillFormFields } from "./MainSkillFormFields";
+
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useNotify } from "@/lib/hooks/common";
 import { useCreateMainSkill } from "@/lib/hooks/skills";
 import { useSpellGroups } from "@/lib/hooks/spells";
 import type { MainSkillFormData } from "@/types/main-skills";
+
+const EMPTY: MainSkillFormData = { name: "", color: "#000000", icon: "", isEnableInSkillTree: false, spellGroupId: null };
 
 interface CreateMainSkillDialogProps {
   open: boolean;
@@ -25,11 +20,7 @@ interface CreateMainSkillDialogProps {
   campaignId: string;
 }
 
-export function CreateMainSkillDialog({
-  open,
-  onOpenChange,
-  campaignId,
-}: CreateMainSkillDialogProps) {
+export function CreateMainSkillDialog({ open, onOpenChange, campaignId }: CreateMainSkillDialogProps) {
   const notify = useNotify();
 
   const router = useRouter();
@@ -38,34 +29,18 @@ export function CreateMainSkillDialog({
 
   const { data: spellGroups = [] } = useSpellGroups(campaignId, { enabled: open });
 
-  const [formData, setFormData] = useState<MainSkillFormData>({
-    name: "",
-    color: "#000000",
-    icon: "",
-    isEnableInSkillTree: false,
-    spellGroupId: null,
-  });
+  const [formData, setFormData] = useState<MainSkillFormData>(EMPTY);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Відправляємо undefined замість порожнього рядка для icon
-      const dataToSend = {
-        ...formData,
-        icon: formData.icon?.trim() || undefined,
-      };
-
-      await createMainSkillMutation.mutateAsync(dataToSend);
-      setFormData({ name: "", color: "#000000", icon: "", isEnableInSkillTree: false, spellGroupId: null });
+      await createMainSkillMutation.mutateAsync({ ...formData, icon: formData.icon?.trim() || undefined });
+      setFormData(EMPTY);
       onOpenChange(false);
       router.refresh();
     } catch (error) {
       console.error("Error creating main skill:", error);
-
-      const errorMessage =
-        error instanceof Error ? error.message : "Помилка при створенні основного навику";
-
-      void notify(errorMessage);
+      void notify(error instanceof Error ? error.message : "Помилка при створенні основного навику");
     }
   };
 
@@ -88,77 +63,7 @@ export function CreateMainSkillDialog({
       }
     >
       <form id="create-main-skill-form" onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="name">Назва *</Label>
-          <Input
-            id="name"
-            value={formData.name}
-            onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-            required
-            placeholder="Наприклад: Напад, Захист, Магія"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="color">Колір сегменту *</Label>
-          <div className="flex items-center gap-2">
-            <Input
-              id="color"
-              type="color"
-              value={formData.color}
-              onChange={(e) => setFormData((prev) => ({ ...prev, color: e.target.value }))}
-              className="w-20 h-10"
-            />
-            <Input
-              type="text"
-              value={formData.color}
-              onChange={(e) => setFormData((prev) => ({ ...prev, color: e.target.value }))}
-              placeholder="#000000"
-              className="flex-1"
-            />
-          </div>
-          <p className="text-xs text-muted-foreground">Колір використовується для відображення сегменту в дереві прокачки</p>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="icon">Іконка (URL)</Label>
-          <Input
-            id="icon"
-            type="url"
-            value={formData.icon || ""}
-            onChange={(e) => setFormData((prev) => ({ ...prev, icon: e.target.value }))}
-            placeholder="https://example.com/icon.png"
-          />
-        </div>
-
-        {spellGroups.length > 0 && (
-          <div className="space-y-2">
-            <Label htmlFor="spellGroupId">Група заклинань (школа магії)</Label>
-            <Select
-              value={formData.spellGroupId || "__none__"}
-              onValueChange={(value) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  spellGroupId: value === "__none__" ? null : value,
-                }))
-              }
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Оберіть групу заклинань" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__none__">— Без групи —</SelectItem>
-                {spellGroups.map((group) => (
-                  <SelectItem key={group.id} value={group.id}>
-                    {group.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground">При вивченні рівня цієї навички герой отримає заклинання обраної групи</p>
-          </div>
-        )}
-
+        <MainSkillFormFields form={formData} onChange={(patch) => setFormData((prev) => ({ ...prev, ...patch }))} spellGroups={spellGroups} />
       </form>
     </ResponsiveDialog>
   );
