@@ -44,7 +44,7 @@ export function SpellBookPages({ byLevel, slotOf, level, pickedId, wide, showDet
           </button>
         ))}
       </div>
-      <div className={cn("hud-book relative min-h-[70dvh] bg-[#e9dec5] shadow-[inset_14px_0_18px_-10px_rgba(60,40,20,.55)]", wide && "grid grid-cols-2")}>
+      <div className={cn("hud-book relative min-h-[70dvh] bg-[#e9dec5] text-[#2a2018] shadow-[inset_14px_0_18px_-10px_rgba(60,40,20,.55)]", wide && "grid grid-cols-2")}>
         {(wide || !showDetail) && (
           <div className="px-5 pb-12 pt-4">
             <div className="text-[13px] italic text-[#7a6650]">Книга заклинань</div>
