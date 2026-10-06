@@ -6,7 +6,6 @@ import type { Prisma } from "@prisma/client";
 
 import type { CharacterFromPrisma } from "../types/participant";
 
-import { parseEffectScopeObject } from "@/lib/constants/artifact-effect-scope";
 import { prisma } from "@/lib/db";
 import type { EquippedArtifact } from "@/types/battle";
 
@@ -38,21 +37,12 @@ export async function loadEquippedArtifactRows(
 }
 
 export function toEquippedArtifacts(rows: EquippedArtifactRow[]): EquippedArtifact[] {
-  return rows.map(({ row: artifact, slot }) => {
-    const passiveRecord = artifact.passiveAbility ? (artifact.passiveAbility as Record<string, unknown>) : undefined;
-
-    const scope = passiveRecord ? parseEffectScopeObject(passiveRecord.effectScope) : {};
-
-    return {
-      artifactId: artifact.id,
-      name: artifact.name,
-      slot,
-      setId: artifact.setId ?? undefined,
-      bonuses: (artifact.bonuses as Record<string, number>) || {},
-      modifiers: (artifact.modifiers as EquippedArtifact["modifiers"]) || [],
-      passiveAbility: passiveRecord,
-      effectAudience: scope.effectAudience,
-      immuneSpellIds: scope.immuneSpellIds && scope.immuneSpellIds.length > 0 ? scope.immuneSpellIds : undefined,
-    };
-  });
+  return rows.map(({ row: artifact, slot }) => ({
+    artifactId: artifact.id,
+    name: artifact.name,
+    slot,
+    setId: artifact.setId ?? undefined,
+    bonuses: (artifact.bonuses as Record<string, number>) || {},
+    modifiers: (artifact.modifiers as EquippedArtifact["modifiers"]) || [],
+  }));
 }

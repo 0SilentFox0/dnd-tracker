@@ -4,7 +4,6 @@
 
 import type { AbilityUsageCounter, ResolvedAbility, SpellEnhancer, StaticEffect } from "./abilities";
 
-import type { ArtifactEffectAudience } from "@/lib/constants/artifact-effect-scope";
 import { AttackType, ParticipantSide, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { AbilityKey, SetProgress } from "@/types/characters";
@@ -87,10 +86,6 @@ export interface EquippedArtifact {
     value: number | string;
     isPercentage?: boolean;
   }>;
-  passiveAbility?: Record<string, unknown>; // пасивна здібність артефакту
-  /** З `passiveAbility.effectScope` — поза `self` бонус чергується на роздачу після збору всіх учасників. */
-  effectAudience?: ArtifactEffectAudience;
-  immuneSpellIds?: string[];
 }
 
 

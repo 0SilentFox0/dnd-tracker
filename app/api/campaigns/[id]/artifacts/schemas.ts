@@ -4,39 +4,6 @@ import { ARTIFACT_RARITY_VALUES, ARTIFACT_SLOT_VALUES } from "@/lib/constants/ar
 import { AbilitiesSchema } from "@/lib/utils/abilities/schema";
 import { WeaponStatsSchema } from "@/lib/utils/artifacts/weapon-stats";
 
-export const artifactSkillEffectSchema = z.object({
-  stat: z.string(),
-  type: z.string(),
-  value: z.union([z.number(), z.string(), z.boolean()]),
-  isPercentage: z.boolean().optional(),
-  duration: z.number().optional(),
-  target: z.string().optional(),
-  maxTriggers: z.number().nullable().optional(),
-});
-
-export const artifactModifierSchema = z.object({
-  type: z.string(),
-  value: z.union([z.number(), z.string()]),
-  isPercentage: z.boolean().optional().default(false),
-  element: z.string().optional(),
-});
-
-const artifactEffectScopeSchema = z
-  .object({
-    audience: z.enum(["self", "all_allies", "all_enemies"]).optional(),
-    immuneSpellIds: z.array(z.string()).optional(),
-  })
-  .strict();
-
-export const artifactPassiveAbilitySchema = z.object({
-  name: z.string().optional(),
-  description: z.string().optional(),
-  effect: z.record(z.string(), z.unknown()).optional(),
-  trigger: z.record(z.string(), z.unknown()).optional(),
-  effects: z.array(artifactSkillEffectSchema).optional(),
-  effectScope: artifactEffectScopeSchema.optional(),
-});
-
 export const createArtifactSchema = z.object({
   name: z.string().min(1).max(100),
   description: z.string().optional(),

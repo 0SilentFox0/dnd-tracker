@@ -1,8 +1,6 @@
 /**
- * Синхронізація складу сету: artifactIds у ArtifactSet + setId у Artifact.
+ * Синхронізація складу сету: setId у Artifact.
  */
-
-import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
 
@@ -14,7 +12,7 @@ export class SyncArtifactSetError extends Error {
 }
 
 /**
- * Очищає setId у всіх артефактів цього сету, призначає setId обраним id, оновлює artifactIds у сеті.
+ * Очищає setId у всіх артефактів цього сету і призначає setId обраним id.
  */
 export async function syncArtifactSetMembers(
   campaignId: string,
@@ -47,12 +45,5 @@ export async function syncArtifactSetMembers(
         data: { setId },
       });
     }
-
-    await tx.artifactSet.update({
-      where: { id: setId },
-      data: {
-        artifactIds: unique as unknown as Prisma.InputJsonValue,
-      },
-    });
   });
 }

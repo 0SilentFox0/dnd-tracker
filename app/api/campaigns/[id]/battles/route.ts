@@ -26,7 +26,6 @@ export async function POST(
 
     const data = createBattleSchema.parse(body);
 
-    // Створюємо сцену бою
     const battle = await prisma.battleScene.create({
       data: {
         campaignId: id,
@@ -36,8 +35,6 @@ export async function POST(
         participants: data.participants,
         currentRound: 1,
         currentTurnIndex: 0,
-        initiativeOrder: [],
-        battleLog: [],
       },
     });
 

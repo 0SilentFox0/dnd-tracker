@@ -14,7 +14,6 @@ export interface ArtifactSetRow {
   campaignId: string;
   name: string;
   description: string | null;
-  artifactIds: unknown;
   setBonus: unknown;
   /** URL іконки для HUD бою (статус повного сету). */
   icon?: string | null;
