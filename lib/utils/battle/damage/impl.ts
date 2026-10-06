@@ -34,6 +34,7 @@ export function calculateDamageWithModifiersImpl(
     heroDiceNotation?: string;
     weaponDiceNotation?: string;
     actionModifiers?: StaticEffect[];
+    statLabel?: string;
   },
 ): DamageCalculationResult {
   const breakdown: string[] = [];
@@ -44,7 +45,7 @@ export function calculateDamageWithModifiersImpl(
 
   const heroDiceNotation = context?.heroDiceNotation;
 
-  const statLabel = attackType === AttackType.MELEE ? "STR" : "DEX";
+  const statLabel = context?.statLabel ?? (attackType === AttackType.MELEE ? "Сила" : "Спритність");
 
   const baseWithStat = Math.max(
     BATTLE_CONSTANTS.MIN_DAMAGE,
@@ -109,7 +110,7 @@ export function calculateDamageWithModifiersImpl(
 
   if (statModifier !== 0) {
     running += statModifier;
-    steps.push({ label: attackType === AttackType.MELEE ? "Сила" : "Спритність", side: "attacker", kind: "flat", value: statModifier, after: running });
+    steps.push({ label: statLabel, side: "attacker", kind: "flat", value: statModifier, after: running });
   }
 
   if (heroLevelPart + heroDicePart > 0) {

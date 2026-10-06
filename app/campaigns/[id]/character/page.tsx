@@ -1,50 +1,25 @@
-import { CharacterViewClient } from "./character-view-client";
-
-import { Card, CardContent } from "@/components/ui/card";
+import { CharacterProfile } from "@/components/character-profile";
+import { EmptyState } from "@/components/common/states";
 import { requireCampaignMember } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
 
-export default async function CharacterPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
+export default async function CharacterPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ tab?: string }> }) {
+  const [{ id }, { tab }] = await Promise.all([params, searchParams]);
 
-  const { userId, isDM, campaign } = await requireCampaignMember(id);
+  const { userId, isDM } = await requireCampaignMember(id);
 
-  // Знаходимо персонажа гравця
   const character = await prisma.character.findFirst({
-    where: {
-      campaignId: id,
-      controlledBy: userId,
-      type: "player",
-    },
-    include: {
-      inventory: true,
-    },
+    where: { campaignId: id, controlledBy: userId, type: "player" },
+    select: { id: true },
   });
 
   if (!character) {
     return (
       <div className="container mx-auto p-4">
-        <Card>
-          <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground mb-4">
-              У вас поки немає персонажа в цій кампанії
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState title="У вас поки немає персонажа в цій кампанії" />
       </div>
     );
   }
 
-  return (
-    <CharacterViewClient
-      campaignId={id}
-      characterId={character.id}
-      allowPlayerEdit={campaign.allowPlayerEdit ?? false}
-      isDM={isDM}
-    />
-  );
+  return <CharacterProfile campaignId={id} characterId={character.id} canEdit={isDM} initialTab={tab} />;
 }

@@ -77,6 +77,32 @@ describe("ResponsiveDialog", () => {
     expect(sheetOf("Раса")).toHaveAttribute("data-state", "open");
   });
 
+  it("телефон: шторка й оверлей, що зникають, пропускають тапи (перший тап після закриття не губиться)", () => {
+    mockMatchMedia(true);
+
+    function Closable() {
+      const [open, setOpen] = useState(true);
+
+      return (
+        <ResponsiveDialog open={open} onOpenChange={setOpen} title="Довгий лук">
+          <Button onClick={() => setOpen(false)}>Закрити шторку</Button>
+        </ResponsiveDialog>
+      );
+    }
+
+    render(<Closable />);
+    fireEvent.click(screen.getByRole("button", { name: "Закрити шторку" }));
+
+    const sheet = document.querySelector("[data-slot=sheet]");
+
+    const overlay = document.querySelector("[data-vaul-overlay]");
+
+    expect(sheet).toHaveAttribute("data-state", "closed");
+    expect(overlay).toHaveAttribute("data-state", "closed");
+    expect(overlay?.className).toContain("data-[state=closed]:pointer-events-none!");
+    expect(sheet?.className).toContain("data-[state=closed]:pointer-events-none!");
+  });
+
   it("телефон: вибір у Select всередині шторки не закриває її", async () => {
     mockMatchMedia(true);
 

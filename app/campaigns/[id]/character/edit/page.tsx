@@ -1,39 +1,14 @@
 import { redirect } from "next/navigation";
 
-import { PlayerCharacterEditClient } from "./edit-client";
-
 import { requireCampaignMember } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
 
-export default async function PlayerCharacterEditPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function PlayerCharacterEditPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
-  const { authUser: user, isDM } = await requireCampaignMember(id);
+  const { userId, isDM } = await requireCampaignMember(id);
 
-  if (!isDM) {
-    redirect(`/campaigns/${id}/character`);
-  }
+  const character = isDM ? await prisma.character.findFirst({ where: { campaignId: id, controlledBy: userId, type: "player" }, select: { id: true } }) : null;
 
-  const character = await prisma.character.findFirst({
-    where: {
-      campaignId: id,
-      controlledBy: user.id,
-      type: "player",
-    },
-  });
-
-  if (!character) {
-    redirect(`/campaigns/${id}/character`);
-  }
-
-  return (
-    <PlayerCharacterEditClient
-      campaignId={id}
-      characterId={character.id}
-    />
-  );
+  redirect(character ? `/campaigns/${id}/dm/characters/${character.id}` : `/campaigns/${id}/character`);
 }

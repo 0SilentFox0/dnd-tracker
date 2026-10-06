@@ -43,6 +43,7 @@ export function characterToFormData(
       intelligence: character.intelligence || 10,
       wisdom: character.wisdom || 10,
       charisma: character.charisma || 10,
+      primaryAbility: character.primaryAbility ?? null,
     },
     combatStats: {
       armorClass: character.armorClass || 10,
@@ -51,7 +52,6 @@ export function characterToFormData(
       maxHp: character.maxHp || 10,
       currentHp: character.currentHp || 10,
       tempHp: character.tempHp || 0,
-      hitDice: character.hitDice || "1d8",
       minTargets: character.minTargets || 1,
       maxTargets: character.maxTargets || 1,
       morale: (character as { morale?: number }).morale ?? 0,
@@ -62,7 +62,7 @@ export function characterToFormData(
     },
     spellcasting: {
       spellcastingClass: character.spellcastingClass,
-      spellcastingAbility: character.spellcastingAbility,
+      spellcastingAbility: character.spellcastingAbility ?? undefined,
       spellSlots: (() => {
         const raw = character.spellSlots as
           | Record<string, { max: number; current: number }>
@@ -79,10 +79,6 @@ export function characterToFormData(
       proficiencies:
         (character.proficiencies as Record<string, string[]>) || {},
       immunities: (character.immunities as string[]) || [],
-      personalityTraits: character.personalityTraits,
-      ideals: character.ideals,
-      bonds: character.bonds,
-      flaws: character.flaws,
     },
     abilities: {
       personalSkillId: (character as { personalSkillId?: string | null }).personalSkillId ?? "",
@@ -124,29 +120,25 @@ export function formDataToCharacter(
     intelligence: formData.abilityScores.intelligence,
     wisdom: formData.abilityScores.wisdom,
     charisma: formData.abilityScores.charisma,
+    primaryAbility: formData.abilityScores.primaryAbility,
     armorClass: formData.combatStats.armorClass,
     initiative: formData.combatStats.initiative,
     speed: formData.combatStats.speed,
     maxHp: formData.combatStats.maxHp,
     currentHp: formData.combatStats.currentHp,
     tempHp: formData.combatStats.tempHp,
-    hitDice: formData.combatStats.hitDice,
     minTargets: formData.combatStats.minTargets,
     maxTargets: formData.combatStats.maxTargets,
     savingThrows: formData.skills.savingThrows,
     skills: formData.skills.skills,
     spellcastingClass: formData.spellcasting.spellcastingClass,
-    spellcastingAbility: formData.spellcasting.spellcastingAbility,
+    spellcastingAbility: formData.spellcasting.spellcastingAbility ?? null,
     spellSlots: formData.spellcasting.spellSlots,
     knownSpells: formData.spellcasting.knownSpells,
     languages: formData.roleplay.languages,
     proficiencies: formData.roleplay.proficiencies,
     immunities: formData.roleplay.immunities,
     morale: formData.combatStats.morale,
-    personalityTraits: formData.roleplay.personalityTraits,
-    ideals: formData.roleplay.ideals,
-    bonds: formData.roleplay.bonds,
-    flaws: formData.roleplay.flaws,
     personalSkillId: formData.abilities.personalSkillId?.trim() || null,
     ...(formData.scalingCoefficients != null && {
       hpMultiplier: formData.scalingCoefficients.hpMultiplier,

@@ -14,6 +14,7 @@ export interface CharacterProgressionDto {
   treeId: string | null;
   tree: RawTree | null;
   race: string;
+  raceIcon: string | null;
   level: number;
   seenLevel: number | null;
   isOwner: boolean;

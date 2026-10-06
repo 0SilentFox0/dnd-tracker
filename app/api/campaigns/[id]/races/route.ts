@@ -58,6 +58,7 @@ export async function POST(
       data: {
         campaignId: id,
         name: data.name,
+        icon: data.icon ?? null,
         availableSkills: data.availableSkills as Prisma.InputJsonValue,
         disabledSkills: data.disabledSkills as Prisma.InputJsonValue,
         passiveAbility: data.passiveAbility 

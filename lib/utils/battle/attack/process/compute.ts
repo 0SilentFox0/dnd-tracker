@@ -18,7 +18,7 @@ import { AttackType } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
-import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
+import { attackAbilityLabel, getAttackAbilityModifier } from "@/lib/utils/common/calculations";
 import type { BattleParticipant, DamageStep } from "@/types/battle";
 import type { BattleAttack } from "@/types/battle";
 
@@ -110,6 +110,7 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
       heroDiceNotation: heroDiceNotationForBreakdown,
       weaponDiceNotation: weaponDiceNotationForBreakdown || attack.damageDice || undefined,
       actionModifiers: params.actionModifiers,
+      statLabel: attackAbilityLabel(updatedAttacker.abilities, attack.type),
     },
   );
 

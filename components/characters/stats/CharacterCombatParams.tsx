@@ -24,7 +24,6 @@ interface CharacterCombatParamsProps {
     armorClass: number;
     initiative: number;
     speed: number;
-    hitDice: string;
     minTargets: number;
     maxTargets: number;
     morale: number;
@@ -32,7 +31,6 @@ interface CharacterCombatParamsProps {
       setArmorClass: (value: number) => void;
       setInitiative: (value: number) => void;
       setSpeed: (value: number) => void;
-      setHitDice: (value: string) => void;
       setMinTargets: (value: number) => void;
       setMaxTargets: (value: number) => void;
       setMorale: (value: number) => void;
@@ -48,7 +46,6 @@ export function CharacterCombatParams({
     armorClass,
     initiative,
     speed,
-    hitDice,
     minTargets,
     maxTargets,
     morale,
@@ -105,15 +102,6 @@ export function CharacterCombatParams({
         min="0"
         value={speed}
         onChange={(e) => setters.setSpeed(parseInt(e.target.value) || 30)}
-        containerClassName="w-full min-w-0"
-        className="w-full"
-      />
-      <LabeledInput
-        id="hitDice"
-        label="Кістки Здоров'я"
-        value={hitDice}
-        onChange={(e) => setters.setHitDice(e.target.value)}
-        placeholder="1d8"
         containerClassName="w-full min-w-0"
         className="w-full"
       />

@@ -38,9 +38,7 @@ export function useProgressionActions(campaignId: string, characterId: string) {
 
         return old && treeId ? { ...old, skillTreeProgress: { [treeId]: { unlockedSkills: unlocked } } } : old;
       });
-      for (const prefix of ["character-damage-preview", "damage-calculator-melee-ranged", "damage-calculator-magic-spell"]) {
-        void queryClient.invalidateQueries({ queryKey: [prefix, campaignId, characterId] });
-      }
+      void queryClient.invalidateQueries({ queryKey: ["character-sheet", campaignId, characterId] });
       void queryClient.invalidateQueries({ queryKey: ["battle-balance"], refetchType: "none" });
 
       return true;

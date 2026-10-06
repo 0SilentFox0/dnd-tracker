@@ -5,7 +5,6 @@ import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useReadOnly } from "@/components/ui/read-only-context";
 import { useNotify } from "@/lib/hooks/common";
 import { normalizeImageUrl } from "@/lib/utils/common/image-url";
 
@@ -22,6 +21,7 @@ export interface ImageUploadProps {
   accept?: string;
   previewAlt?: string;
   className?: string;
+  allowFile?: boolean;
 }
 
 export function ImageUpload({
@@ -33,44 +33,17 @@ export function ImageUpload({
   accept = DEFAULT_ACCEPT,
   previewAlt = "Попередній перегляд",
   className,
+  allowFile = true,
 }: ImageUploadProps) {
   const notify = useNotify();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const readOnly = useReadOnly();
 
   const previewSrc = value?.startsWith("data:")
     ? value
     : value
       ? normalizeImageUrl(value)
       : "";
-
-  if (readOnly) {
-    return (
-      <div className={className}>
-        {label && <Label>{label}</Label>}
-        {value ? (
-          <div className="mt-2">
-            <div className="w-24 h-24 rounded-lg overflow-hidden bg-muted border shrink-0">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={previewSrc}
-                alt={previewAlt}
-                className="w-full h-full object-cover"
-                referrerPolicy="no-referrer"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = "none";
-                }}
-              />
-            </div>
-          </div>
-        ) : (
-          <p className="mt-2 text-sm text-muted-foreground">—</p>
-        )}
-      </div>
-    );
-  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -103,29 +76,31 @@ export function ImageUpload({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
         />
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-sm text-muted-foreground">або</span>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept={accept}
-            className="hidden"
-            onChange={handleFileChange}
-          />
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            Завантажити з комп&apos;ютера
-          </Button>
-          {value?.startsWith("data:") && (
-            <span className="text-xs text-muted-foreground">
-              (завантажено з файлу)
-            </span>
-          )}
-        </div>
+        {allowFile && (
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-sm text-muted-foreground">або</span>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept={accept}
+              className="hidden"
+              onChange={handleFileChange}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              Завантажити з комп&apos;ютера
+            </Button>
+            {value?.startsWith("data:") && (
+              <span className="text-xs text-muted-foreground">
+                (завантажено з файлу)
+              </span>
+            )}
+          </div>
+        )}
       </div>
       {value && (
         <div className="mt-2">

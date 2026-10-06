@@ -6,6 +6,7 @@ import { AttackType } from "@/lib/constants/battle";
 import { collectModifiers, findFlags, statWithModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
+import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 function attackKindOf(attack: BattleAttack): "melee" | "ranged" {
@@ -18,8 +19,7 @@ export function calculateAttackBonus(
   participants: BattleParticipant[] = [attacker],
   extra?: StaticEffect[],
 ): number {
-  const statModifier =
-    attack.type === AttackType.MELEE ? attacker.abilities.modifiers.strength : attacker.abilities.modifiers.dexterity;
+  const statModifier = getAttackAbilityModifier(attacker.abilities, attack.type);
 
   const base = (attack.attackBonus || 0) + statModifier + attacker.abilities.proficiencyBonus;
 

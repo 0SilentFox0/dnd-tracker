@@ -13,7 +13,7 @@ afterEach(cleanup);
 
 describe("useLevelUpCelebration", () => {
   it("після закриття оверлея кеш прогресу має seenLevel = level, тож повторне відкриття не показує анімацію", async () => {
-    const dto = { treeId: null, tree: null, race: "Ельф", level: 5, seenLevel: 3, isOwner: true, isDM: false, unlocked: [], skills: {}, branches: {} };
+    const dto = { treeId: null, tree: null, race: "Ельф", raceIcon: null, level: 5, seenLevel: 3, isOwner: true, isDM: false, unlocked: [], skills: {}, branches: {} };
 
     vi.mocked(api.getCharacterProgression).mockResolvedValue(dto);
     vi.mocked(api.markLevelSeen).mockResolvedValue({ seenLevel: 5 });

@@ -1,11 +1,8 @@
 // Утиліти для розрахунків D&D
 
-import {
-  Artifact,
-  ArtifactBonus,
-  ArtifactModifier,
-} from "@/types/artifacts";
-import { EquippedItems } from "@/types/inventory";
+import { CORE_ABILITY_SCORES } from "@/lib/constants/abilities";
+import { AttackType } from "@/lib/constants/battle";
+import type { AbilityKey } from "@/types/characters";
 
 /**
  * Розраховує модифікатор з ability score
@@ -146,108 +143,33 @@ export function isHit(attackRoll: number, targetAC: number): boolean {
   return attackRoll >= targetAC;
 }
 
-import { AttackType } from "@/lib/constants/battle";
 
-/**
- * Розраховує модифікатор атаки на основі типу атаки та характеристик
- * @param attackType - AttackType enum (MELEE або RANGED)
- * @param strength - Сила персонажа
- * @param dexterity - Спритність персонажа
- * @returns Модифікатор для додавання до урону
- */
-export function getAttackDamageModifier(
-  attackType: AttackType,
-  strength: number,
-  dexterity: number
-): number {
-  if (attackType === AttackType.MELEE) {
-    return getAbilityModifier(strength);
-  } else {
-    return getAbilityModifier(dexterity);
-  }
+type AttackAbilities = { strength: number; dexterity: number; primaryAbility?: AbilityKey | null } & Partial<Record<AbilityKey, number>>;
+
+export function attackAbilityKey(abilities: { primaryAbility?: AbilityKey | null }, attackType: AttackType | string): AbilityKey {
+  return abilities.primaryAbility ?? (attackType === AttackType.MELEE ? "strength" : "dexterity");
 }
 
-/**
- * Розраховує бонус до урону з артефактів
- * @param equipped - Об'єкт з екіпірованими артефактами { slot: artifactId }
- * @param artifacts - Масив артефактів кампанії
- * @returns Бонус до урону
- */
-export function getArtifactDamageBonus(
-  equipped: EquippedItems,
-  artifacts: Artifact[]
-): number {
-  let bonus = 0;
+export function attackAbilityLabel(abilities: { primaryAbility?: AbilityKey | null }, attackType: AttackType | string): string {
+  const key = attackAbilityKey(abilities, attackType);
 
-  // Перевіряємо екіпіровані артефакти
-  Object.values(equipped).forEach((artifactId) => {
-    if (typeof artifactId === "string" && artifactId) {
-      const artifact = artifacts.find((a) => a.id === artifactId);
-
-      if (artifact) {
-        // Додаємо бонуси з bonuses (наприклад { damage: 2 })
-        const bonuses = artifact.bonuses as ArtifactBonus;
-
-        if (bonuses?.damage) {
-          bonus += Number(bonuses.damage) || 0;
-        }
-
-        // Додаємо модифікатори з modifiers
-        if (Array.isArray(artifact.modifiers)) {
-          artifact.modifiers.forEach((modifier: ArtifactModifier) => {
-            if (modifier.type === "damage" && modifier.value) {
-              bonus += Number(modifier.value) || 0;
-            }
-          });
-        }
-      }
-    }
-  });
-
-  return bonus;
+  return CORE_ABILITY_SCORES.find((a) => a.key === key)?.label ?? key;
 }
 
-/**
- * Розраховує бонус до атаки з артефактів
- * @param equipped - Об'єкт з екіпірованими артефактами
- * @param artifacts - Масив артефактів кампанії
- * @returns Бонус до атаки
- */
-export function getArtifactAttackBonus(
-  equipped: EquippedItems,
-  artifacts: Artifact[]
-): number {
-  let bonus = 0;
-
-  Object.values(equipped).forEach((artifactId) => {
-    if (typeof artifactId === "string" && artifactId) {
-      const artifact = artifacts.find((a) => a.id === artifactId);
-
-      if (artifact) {
-        const bonuses = artifact.bonuses as ArtifactBonus;
-
-        if (bonuses?.attack) {
-          bonus += Number(bonuses.attack) || 0;
-        }
-
-        if (Array.isArray(artifact.modifiers)) {
-          artifact.modifiers.forEach((modifier: ArtifactModifier) => {
-            if (modifier.type === "attack" && modifier.value) {
-              bonus += Number(modifier.value) || 0;
-            }
-          });
-        }
-      }
-    }
-  });
-
-  return bonus;
+export function getAttackAbilityModifier(abilities: AttackAbilities, attackType: AttackType | string): number {
+  return getAbilityModifier(abilities[attackAbilityKey(abilities, attackType)] ?? 10);
 }
 
+export function spellcastingDerived(
+  level: number,
+  ability: string | null | undefined,
+  scores: Record<AbilityKey, number>,
+): { saveDC: number; attackBonus: number } | null {
+  if (!ability || !(ability in scores)) return null;
 
-export function getAttackAbilityModifier(
-  abilities: { strength: number; dexterity: number },
-  attackType: AttackType | string,
-): number {
-  return getAbilityModifier(attackType === AttackType.MELEE ? abilities.strength : abilities.dexterity);
+  const prof = getProficiencyBonus(level);
+
+  const mod = getAbilityModifier(scores[ability as AbilityKey]);
+
+  return { saveDC: getSpellSaveDC(prof, mod), attackBonus: getSpellAttackBonus(prof, mod) };
 }

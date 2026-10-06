@@ -4,14 +4,7 @@ import { prisma } from "@/lib/db";
 import { requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { seenLevelOnLevelChange } from "@/lib/utils/characters/seen-level";
-import {
-  calculateHPGain,
-  getAbilityModifier,
-  getPassiveScore,
-  getProficiencyBonus,
-  getSpellAttackBonus,
-  getSpellSaveDC,
-} from "@/lib/utils/common/calculations";
+import { calculateHPGain, getAbilityModifier } from "@/lib/utils/common/calculations";
 import { calculateSpellSlotGain } from "@/lib/utils/spells/spell-slots";
 import type { SpellSlotProgression } from "@/types/races";
 
@@ -103,12 +96,6 @@ export async function POST(
     updatedAbilities[randomAbility] = (character[randomAbility as keyof typeof character] as number) + 1;
 
 
-    const newIntMod = getAbilityModifier(updatedAbilities.intelligence);
-
-    const newWisMod = getAbilityModifier(updatedAbilities.wisdom);
-
-    const newChaMod = getAbilityModifier(updatedAbilities.charisma);
-
     // Збільшуємо HP
     const hitDice = character.hitDice;
 
@@ -117,46 +104,6 @@ export async function POST(
     const newMaxHp = character.maxHp + hpGain;
 
     const newCurrentHp = character.currentHp + hpGain; // Автоматично лікуємо при прокачці
-
-    // Розраховуємо нові автоматичні значення
-    const proficiencyBonus = getProficiencyBonus(newLevel);
-
-    const skills = (character.skills || {}) as Record<string, boolean>;
-
-    const passivePerception = getPassiveScore(
-      newWisMod,
-      skills.perception || false,
-      proficiencyBonus
-    );
-
-    const passiveInvestigation = getPassiveScore(
-      newIntMod,
-      skills.investigation || false,
-      proficiencyBonus
-    );
-
-    const passiveInsight = getPassiveScore(
-      newWisMod,
-      skills.insight || false,
-      proficiencyBonus
-    );
-
-    // Розраховуємо spellcasting параметри якщо є
-    let spellSaveDC: number | null = character.spellSaveDC;
-
-    let spellAttackBonus: number | null = character.spellAttackBonus;
-
-    if (character.spellcastingAbility) {
-      const abilityMod =
-        character.spellcastingAbility === "intelligence"
-          ? newIntMod
-          : character.spellcastingAbility === "wisdom"
-          ? newWisMod
-          : newChaMod;
-
-      spellSaveDC = getSpellSaveDC(proficiencyBonus, abilityMod);
-      spellAttackBonus = getSpellAttackBonus(proficiencyBonus, abilityMod);
-    }
 
     // Розраховуємо нові магічні слоти
     const currentSpellSlots = (character.spellSlots ||
@@ -197,12 +144,6 @@ export async function POST(
         ...updatedAbilities,
         maxHp: newMaxHp,
         currentHp: newCurrentHp,
-        proficiencyBonus,
-        passivePerception,
-        passiveInvestigation,
-        passiveInsight,
-        spellSaveDC,
-        spellAttackBonus,
         spellSlots: newSpellSlots,
       },
       include: {

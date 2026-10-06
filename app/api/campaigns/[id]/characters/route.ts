@@ -6,13 +6,6 @@ import { createCharacterSchema } from "./create-character-schema";
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
-import {
-  getAbilityModifier,
-  getPassiveScore,
-  getProficiencyBonus,
-  getSpellAttackBonus,
-  getSpellSaveDC,
-} from "@/lib/utils/common/calculations";
 import { calculateCharacterSpellSlots } from "@/lib/utils/spells/spell-slots";
 
 export async function POST(
@@ -80,54 +73,9 @@ export async function POST(
       controlledBy = ownerId;
     }
 
-    // Розраховуємо автоматичні значення
-    const proficiencyBonus = getProficiencyBonus(data.level);
-
-    const intMod = getAbilityModifier(data.intelligence);
-
-    const wisMod = getAbilityModifier(data.wisdom);
-
-    const chaMod = getAbilityModifier(data.charisma);
-
-    // Розраховуємо пасивні значення
     const savingThrows = data.savingThrows as Record<string, boolean>;
 
     const skills = data.skills as Record<string, boolean>;
-    
-    const passivePerception = getPassiveScore(
-      wisMod,
-      skills.perception || false,
-      proficiencyBonus
-    );
-
-    const passiveInvestigation = getPassiveScore(
-      intMod,
-      skills.investigation || false,
-      proficiencyBonus
-    );
-
-    const passiveInsight = getPassiveScore(
-      wisMod,
-      skills.insight || false,
-      proficiencyBonus
-    );
-
-    // Розраховуємо spellcasting параметри якщо є
-    let spellSaveDC: number | null = null;
-
-    let spellAttackBonus: number | null = null;
-
-    if (data.spellcastingAbility) {
-      const abilityMod =
-        data.spellcastingAbility === "intelligence"
-          ? intMod
-          : data.spellcastingAbility === "wisdom"
-            ? wisMod
-            : chaMod;
-
-      spellSaveDC = getSpellSaveDC(proficiencyBonus, abilityMod);
-      spellAttackBonus = getSpellAttackBonus(proficiencyBonus, abilityMod);
-    }
 
     // Якщо магічні слоти порожні — обчислюємо за рівнем
     let spellSlotsToCreate = data.spellSlots;
@@ -177,20 +125,13 @@ export async function POST(
         maxHp: data.maxHp,
         currentHp: data.currentHp,
         tempHp: data.tempHp,
-        hitDice: data.hitDice,
-        proficiencyBonus,
         
         savingThrows: savingThrows,
         skills: skills,
         
-        passivePerception,
-        passiveInvestigation,
-        passiveInsight,
         
         spellcastingClass: data.spellcastingClass,
         spellcastingAbility: data.spellcastingAbility,
-        spellSaveDC,
-        spellAttackBonus,
         spellSlots: spellSlotsToCreate,
         knownSpells: data.knownSpells,
         
@@ -198,12 +139,9 @@ export async function POST(
         immunities: data.immunities || [],
         proficiencies: data.proficiencies,
         
-        personalityTraits: data.personalityTraits,
-        ideals: data.ideals,
-        bonds: data.bonds,
-        flaws: data.flaws,
 
         personalSkillId: data.personalSkillId ?? null,
+        primaryAbility: data.primaryAbility ?? null,
 
         skillTreeProgress: {},
       },

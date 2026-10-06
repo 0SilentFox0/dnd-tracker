@@ -14,7 +14,7 @@ import {
   isHit,
   rollDamage,
 } from "../calculations";
-import { getAttackAbilityModifier, getAttackDamageModifier } from "../calculations";
+import { getAttackAbilityModifier } from "../calculations";
 
 import { AttackType } from "@/lib/constants/battle";
 
@@ -120,14 +120,6 @@ describe("calculations", () => {
     });
   });
 
-  describe("getAttackDamageModifier", () => {
-    it("MELEE використовує силу", () => {
-      expect(getAttackDamageModifier(AttackType.MELEE, 14, 10)).toBe(2);
-    });
-    it("RANGED використовує спритність", () => {
-      expect(getAttackDamageModifier(AttackType.RANGED, 10, 16)).toBe(3);
-    });
-  });
 });
 
 describe("getAttackAbilityModifier", () => {

@@ -26,6 +26,7 @@ export const defaultCharacterFormData: CharacterFormData = {
     intelligence: 10,
     wisdom: 10,
     charisma: 10,
+    primaryAbility: null,
   },
   combatStats: {
     armorClass: 10,
@@ -34,7 +35,6 @@ export const defaultCharacterFormData: CharacterFormData = {
     maxHp: 10,
     currentHp: 10,
     tempHp: 0,
-    hitDice: "1d8",
     minTargets: 1,
     maxTargets: 1,
     morale: 0,
@@ -53,10 +53,6 @@ export const defaultCharacterFormData: CharacterFormData = {
     languages: [],
     proficiencies: {},
     immunities: [],
-    personalityTraits: "",
-    ideals: "",
-    bonds: "",
-    flaws: "",
   },
   abilities: {
     personalSkillId: "",

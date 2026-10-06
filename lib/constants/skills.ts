@@ -38,3 +38,24 @@ export const DND_SAVING_THROWS = [
 
 export type DndSkill = (typeof DND_SKILLS)[number];
 export type DndSavingThrow = (typeof DND_SAVING_THROWS)[number];
+
+export const DND_SKILL_META: Record<DndSkill, { label: string; ability: "strength" | "dexterity" | "intelligence" | "wisdom" | "charisma" }> = {
+  acrobatics: { label: "Акробатика", ability: "dexterity" },
+  animalHandling: { label: "Поводження з тваринами", ability: "wisdom" },
+  arcana: { label: "Магія", ability: "intelligence" },
+  athletics: { label: "Атлетика", ability: "strength" },
+  deception: { label: "Обман", ability: "charisma" },
+  history: { label: "Історія", ability: "intelligence" },
+  insight: { label: "Проникливість", ability: "wisdom" },
+  intimidation: { label: "Залякування", ability: "charisma" },
+  investigation: { label: "Розслідування", ability: "intelligence" },
+  medicine: { label: "Медицина", ability: "wisdom" },
+  nature: { label: "Природа", ability: "intelligence" },
+  perception: { label: "Сприйняття", ability: "wisdom" },
+  performance: { label: "Виступ", ability: "charisma" },
+  persuasion: { label: "Переконання", ability: "charisma" },
+  religion: { label: "Релігія", ability: "intelligence" },
+  sleightOfHand: { label: "Спритність рук", ability: "dexterity" },
+  stealth: { label: "Скритність", ability: "dexterity" },
+  survival: { label: "Виживання", ability: "wisdom" },
+};

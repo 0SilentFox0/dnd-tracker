@@ -52,3 +52,22 @@ export interface SpellGroup {
 }
 
 export type SpellFormData = Partial<Spell> & { effects?: string[] };
+
+export type BookSpell = {
+  id: string;
+  name: string;
+  level: number;
+  type: "target" | "aoe" | "no_target";
+  damageType: "damage" | "heal" | "all";
+  diceCount?: number | null;
+  diceType?: string | null;
+  savingThrow?: { ability: string; onSuccess: "half" | "none"; dc?: number } | null;
+  hitCheck?: { ability: string; dc: number } | null;
+  description?: string | null;
+  icon?: string | null;
+  range?: string | null;
+  duration?: string | null;
+  concentration?: boolean;
+  damageElement?: string | null;
+  spellGroup?: { id: string; name: string } | null;
+};

@@ -1,9 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-
 import { useCharacterEditor } from "./useCharacterEditor";
-import { useLevelUpCharacter } from "./useCharacters";
+import { useDeleteCharacter, useLevelUpCharacter } from "./useCharacters";
 
 import { useArtifactSetsList } from "@/lib/hooks/artifact-sets";
 import { useArtifactsList } from "@/lib/hooks/artifacts";
@@ -11,14 +9,12 @@ import { useConfirm, useNotify } from "@/lib/hooks/common";
 import { characterToFormData } from "@/lib/utils/characters/character-form";
 import type { ArtifactSetRow } from "@/types/artifact-sets";
 
-export function useDmCharacterEditor({ campaignId, characterId }: { campaignId: string; characterId: string }) {
-  const router = useRouter();
-
+export function useDmCharacterEditor({ campaignId, characterId, onSaved }: { campaignId: string; characterId: string; onSaved: () => void }) {
   const confirm = useConfirm();
 
   const notify = useNotify();
 
-  const editor = useCharacterEditor({ campaignId, characterId, onSaved: () => router.push(`/campaigns/${campaignId}/dm/characters`) });
+  const editor = useCharacterEditor({ campaignId, characterId, onSaved });
 
   const loaded = !!editor.query.data;
 
@@ -27,6 +23,16 @@ export function useDmCharacterEditor({ campaignId, characterId }: { campaignId: 
   const { data: artifactSets = [] } = useArtifactSetsList(campaignId, { enabled: loaded });
 
   const levelUpMutation = useLevelUpCharacter(campaignId);
+
+  const deleteMutation = useDeleteCharacter(campaignId);
+
+  const remove = () =>
+    confirm({
+      title: `Видалити персонажа ${editor.form.basicInfo.name}?`,
+      description: "Персонаж, його інвентар і прогрес зникнуть назавжди.",
+      confirmLabel: "Видалити",
+      onConfirm: () => deleteMutation.mutateAsync(characterId),
+    });
 
   const levelUp = async () => {
     const { name, level } = editor.form.basicInfo;
@@ -49,7 +55,7 @@ export function useDmCharacterEditor({ campaignId, characterId }: { campaignId: 
     }
   };
 
-  return { ...editor, campaignId, characterId, artifacts, artifactSets: artifactSets as ArtifactSetRow[], levelUp };
+  return { ...editor, campaignId, characterId, artifacts, artifactSets: artifactSets as ArtifactSetRow[], levelUp, remove };
 }
 
 export type DmCharacterEditor = ReturnType<typeof useDmCharacterEditor>;

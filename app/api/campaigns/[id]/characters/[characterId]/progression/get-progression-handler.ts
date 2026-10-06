@@ -11,7 +11,9 @@ import type { CharacterProgressionDto } from "@/types/progression";
 export async function buildProgressionDto(campaignId: string, ctx: ProgressionContext): Promise<CharacterProgressionDto> {
   const { character, treeRow, isDM, isOwner } = ctx;
 
-  const base = { race: character.race, level: character.level, seenLevel: character.seenLevel, isOwner, isDM };
+  const race = await prisma.race.findFirst({ where: { campaignId, name: character.race }, select: { icon: true } });
+
+  const base = { race: character.race, raceIcon: race?.icon ?? null, level: character.level, seenLevel: character.seenLevel, isOwner, isDM };
 
   if (!treeRow) return { ...base, treeId: null, tree: null, unlocked: [], skills: {}, branches: {} };
 

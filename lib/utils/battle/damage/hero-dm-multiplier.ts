@@ -1,5 +1,5 @@
 /**
- * Коефіцієнти melee/ranged DM для героїв (збіг з damage-preview API).
+ * Коефіцієнти melee/ranged DM для героїв (ті самі в бою і в листі персонажа).
  */
 
 import { AttackType } from "@/lib/constants/battle";

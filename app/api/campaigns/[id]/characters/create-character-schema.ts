@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { ABILITY_KEYS } from "@/types/characters";
+
 export const createCharacterSchema = z.object({
   name: z.string().min(1).max(100),
   type: z.enum(["player", "npc_hero"]),
@@ -29,7 +31,6 @@ export const createCharacterSchema = z.object({
   maxHp: z.number().min(1).default(10),
   currentHp: z.number().min(0).default(10),
   tempHp: z.number().min(0).default(0),
-  hitDice: z.string().default("1d8"),
 
   // Saving Throws & Skills
   savingThrows: z.record(z.string(), z.boolean()).default({}),
@@ -39,6 +40,7 @@ export const createCharacterSchema = z.object({
   spellcastingClass: z.string().optional(),
   spellcastingAbility: z
     .enum(["intelligence", "wisdom", "charisma"])
+    .nullable()
     .optional(),
   spellSlots: z
     .record(
@@ -58,11 +60,8 @@ export const createCharacterSchema = z.object({
   morale: z.number().min(-3).max(3).default(0),
 
   // Roleplay
-  personalityTraits: z.string().optional(),
-  ideals: z.string().optional(),
-  bonds: z.string().optional(),
-  flaws: z.string().optional(),
 
   // Уміння (персональний скіл з групи «Персональні»)
   personalSkillId: z.string().optional().nullable(),
+  primaryAbility: z.enum(ABILITY_KEYS).nullable().optional(),
 });

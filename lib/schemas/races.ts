@@ -28,8 +28,14 @@ const spellSlotProgressionSchema = z
   )
   .optional();
 
+const raceIconSchema = z.preprocess(
+  (v) => (v === "" ? null : v),
+  z.string().max(2000).refine((v) => !v.startsWith("data:"), "Іконка раси — лише посилання на зображення").nullable().optional(),
+);
+
 export const createRaceSchema = z.object({
   name: z.string().min(1).max(100),
+  icon: raceIconSchema,
   availableSkills: z.array(z.string()).default([]),
   disabledSkills: z.array(z.string()).default([]),
   passiveAbility: passiveAbilitySchema,
@@ -41,6 +47,7 @@ export type CreateRaceInput = z.infer<typeof createRaceSchema>;
 
 export const updateRaceSchema = z.object({
   name: z.string().min(1).max(100).optional(),
+  icon: raceIconSchema,
   availableSkills: z.array(z.string()).optional(),
   disabledSkills: z.array(z.string()).optional(),
   passiveAbility: passiveAbilitySchema,

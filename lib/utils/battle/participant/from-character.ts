@@ -3,7 +3,7 @@
  */
 
 import type { CampaignSpellContext, CharacterFromPrisma } from "../types/participant";
-import { loadEquippedArtifactRows, toEquippedArtifacts } from "./extract-artifacts";
+import { type EquippedArtifactRow, loadEquippedArtifactRows, toEquippedArtifacts } from "./extract-artifacts";
 import { extractAttacksFromCharacter } from "./extract-attacks";
 import { resolveCharacterSkillEntries } from "./extract-skills";
 import { resolveLearnedSpellsFromCharacter } from "./from-character-learned-spells";
@@ -18,8 +18,9 @@ import { collectCharacterAbilities } from "@/lib/utils/abilities/build/collect";
 import { immunityAbilities } from "@/lib/utils/abilities/build/immunities";
 import { findCompletedSets } from "@/lib/utils/battle/artifact-sets";
 import { getCharacterImmunities } from "@/lib/utils/characters/character-race-effects";
-import { getAbilityModifier } from "@/lib/utils/common/calculations";
+import { getAbilityModifier, getProficiencyBonus, spellcastingDerived } from "@/lib/utils/common/calculations";
 import type { BattleParticipant } from "@/types/battle";
+import { ABILITY_KEYS, type AbilityKey } from "@/types/characters";
 
 /**
  * Створює BattleParticipant з Character. Завантажує скіли, артефакти, заклинання.
@@ -30,6 +31,7 @@ export async function createBattleParticipantFromCharacter(
   side: ParticipantSide,
   instanceNumber?: number,
   context?: CampaignSpellContext,
+  preloaded?: { artifactRows?: EquippedArtifactRow[] },
 ): Promise<BattleParticipant> {
   const modifiers = {
     strength: getAbilityModifier(character.strength),
@@ -50,16 +52,15 @@ export async function createBattleParticipantFromCharacter(
     context ? (context.skillTreeByRace[character.race] ?? null) : undefined,
   );
 
-  const artifactRows = await loadEquippedArtifactRows(character, context?.artifactsById);
+  const artifactRows = preloaded?.artifactRows ?? (await loadEquippedArtifactRows(character, context?.artifactsById));
+
+  const artifactsById = context?.artifactsById ?? (preloaded?.artifactRows ? Object.fromEntries(preloaded.artifactRows.map(({ row }) => [row.id, row])) : undefined);
 
   const equippedArtifacts = toEquippedArtifacts(artifactRows);
 
   const completed = await findCompletedSets(equippedArtifacts, character.campaignId, context);
 
-  const attacks = await extractAttacksFromCharacter(
-    character,
-    context?.artifactsById,
-  );
+  const attacks = await extractAttacksFromCharacter(character, artifactsById);
 
   const race = await loadRace(character.race, character.campaignId, context ? (context.racesByName[character.race] ?? null) : undefined);
 
@@ -84,6 +85,14 @@ export async function createBattleParticipantFromCharacter(
 
   const rangedMult =
     (character as { rangedMultiplier?: number | null }).rangedMultiplier ?? 1;
+
+  const proficiencyBonus = getProficiencyBonus(character.level);
+
+  const scores = { strength: character.strength, dexterity: character.dexterity, constitution: character.constitution, intelligence: character.intelligence, wisdom: character.wisdom, charisma: character.charisma };
+
+  const primaryAbility = (ABILITY_KEYS as readonly string[]).includes(character.primaryAbility ?? "") ? (character.primaryAbility as AbilityKey) : undefined;
+
+  const spell = spellcastingDerived(character.level, character.spellcastingAbility, scores);
 
   const computedMaxHp = getHeroMaxHp(character.level, character.strength, {
     hpMultiplier: hpMult,
@@ -123,8 +132,9 @@ export async function createBattleParticipantFromCharacter(
       wisdom: character.wisdom,
       charisma: character.charisma,
       modifiers,
-      proficiencyBonus: character.proficiencyBonus,
+      proficiencyBonus,
       race: character.race,
+      primaryAbility,
       meleeMultiplier: meleeMult,
       rangedMultiplier: rangedMult,
     },
@@ -146,8 +156,8 @@ export async function createBattleParticipantFromCharacter(
         | "wisdom"
         | "charisma"
         | undefined,
-      spellSaveDC: character.spellSaveDC || undefined,
-      spellAttackBonus: character.spellAttackBonus || undefined,
+      spellSaveDC: spell?.saveDC,
+      spellAttackBonus: spell?.attackBonus,
       spellSlots: resolvedSpellSlots,
       knownSpells,
     },
