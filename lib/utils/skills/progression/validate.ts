@@ -5,7 +5,7 @@ import { BRANCH_LEVELS, CIRCLES, RACIAL_BRANCH_ID, ULTIMATE_BRANCH_ID } from "./
 
 export type TreeErrorCode = "duplicateSkill" | "unknownBranch" | "unknownSkill" | "duplicateBranch";
 
-export interface TreeError { code: TreeErrorCode; ref: string }
+export interface TreeError { code: TreeErrorCode; ref: string; label?: string }
 
 export const TREE_ERROR_TEXT: Record<TreeErrorCode, string> = {
   duplicateSkill: "Цей скіл уже стоїть в іншому місці дерева",
@@ -37,13 +37,13 @@ export function validateTree(raw: RawTree, ctx: { mainSkillIds: Set<string>; ski
     const pseudo = b.id === RACIAL_BRANCH_ID || b.id === ULTIMATE_BRANCH_ID;
 
     if (branches.has(b.id)) {
-      errors.push({ code: "duplicateBranch", ref: b.id });
+      errors.push({ code: "duplicateBranch", ref: b.id, label: b.name });
       continue;
     }
 
     branches.add(b.id);
 
-    if (!pseudo && !ctx.mainSkillIds.has(b.id)) errors.push({ code: "unknownBranch", ref: b.id });
+    if (!pseudo && !ctx.mainSkillIds.has(b.id)) errors.push({ code: "unknownBranch", ref: b.id, label: b.name });
 
     BRANCH_LEVELS.forEach((l) => addSkill(b.levelSkillIds?.[l]));
     CIRCLES.forEach((c) => (b.levels?.basic?.[CIRCLE_KEY[c]] ?? []).forEach((s) => addSkill(s?.id)));

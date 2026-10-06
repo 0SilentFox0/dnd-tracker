@@ -12,7 +12,7 @@ const actions = { setCell: vi.fn(), addBranch: vi.fn(), createBranch: vi.fn(), r
 
 const raw = buildTreeJson({ id: "row", race: "Ельф", branches: [{ id: "attack", name: "Напад", color: "red", outer: ["o1"] }] });
 
-let errors: Array<{ code: string; ref: string }> = [];
+let errors: Array<{ code: string; ref: string; label?: string }> = [];
 
 let loading = false;
 
@@ -97,5 +97,13 @@ describe("SkillTreeEditor", () => {
     fireEvent.submit(screen.getByPlaceholderText("Назва нової гілки").closest("form") as HTMLFormElement);
 
     await waitFor(() => expect(screen.queryByPlaceholderText("Назва нової гілки")).toBeNull());
+  });
+
+  it("помилка невідомої гілки показує її назву, а не id", () => {
+    errors = [{ code: "unknownBranch", ref: "cm-ghost-id", label: "Тінь" }];
+    renderWithConfirm(<SkillTreeEditor campaignId="c" />);
+
+    expect(screen.getByText("Гілки немає серед основних навичок кампанії: Тінь")).toBeTruthy();
+    expect(screen.queryByText(/cm-ghost-id/)).toBeNull();
   });
 });

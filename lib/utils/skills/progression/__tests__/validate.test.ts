@@ -24,6 +24,7 @@ describe("validateTree", () => {
     const codes = validateTree(raw, { ...CTX, skillIds: new Set([...ALL_SKILLS].filter((id) => id !== "ult")) }).map((e) => `${e.code}:${e.ref}`);
 
     expect(codes).toEqual(expect.arrayContaining(["unknownBranch:ghost", "duplicateBranch:attack", "unknownSkill:ult"]));
+    expect(validateTree(raw, CTX)).toContainEqual({ code: "unknownBranch", ref: "ghost", label: "?" });
   });
 
   it("плейсхолдери ігноруються", () => {
