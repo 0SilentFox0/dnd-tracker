@@ -1,6 +1,6 @@
 "use client";
 
-import type { AbilitySectionProps } from "../AbilityRow";
+import type { AbilitySectionProps } from "../AbilityPanel";
 import { useFieldErrors } from "../editor-context";
 import { FieldRenderer } from "../fields/FieldRenderer";
 import { SectionTitle } from "./SectionTitle";

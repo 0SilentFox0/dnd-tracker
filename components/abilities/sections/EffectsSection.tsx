@@ -1,6 +1,6 @@
 "use client";
 
-import type { AbilitySectionProps } from "../AbilityRow";
+import type { AbilitySectionProps } from "../AbilityPanel";
 import { useAbilityEditor } from "../editor-context";
 import { EffectCard } from "../EffectCard";
 import { SectionTitle } from "./SectionTitle";
