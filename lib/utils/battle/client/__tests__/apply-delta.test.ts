@@ -61,6 +61,16 @@ describe("applyBattleDelta", () => {
     expect(next.pendingSummons).toEqual([]);
   });
 
+  it("cancelledFrom скидає знання з сервера (бо воно могло спиратися на скасовані події), звичайна дельта — зберігає", () => {
+    const knowledge = { b: { ac: { min: 12, max: 15, evidence: [] }, traits: [] } };
+
+    const withKnowledge = { ...cached, knowledge };
+
+    expect((applyBattleDelta(withKnowledge, delta()) as BattleScene).knowledge).toBe(knowledge);
+    expect(applyBattleDelta(withKnowledge, delta({ cancelledFrom: 2 }))).not.toHaveProperty("knowledge");
+    expect(applyBattleDelta(withKnowledge, delta({ cancelledFrom: 0 }))).not.toHaveProperty("knowledge");
+  });
+
   it("cancelledFrom обрізає журнал; повторне застосування тієї ж дельти — без змін", () => {
     const d = delta({ cancelledFrom: 2, log: [entry(2)] });
 
