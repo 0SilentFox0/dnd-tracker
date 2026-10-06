@@ -6,11 +6,15 @@ import Link from "next/link";
 import { AvailableCharactersCard } from "./AvailableCharactersCard";
 import { AvailableUnitsCard } from "./AvailableUnitsCard";
 import { EditBattleBasicInfoCard } from "./EditBattleBasicInfoCard";
-import { EditBattlePageHeader } from "./EditBattlePageHeader";
 import { ParticipantSideCard } from "./ParticipantSideCard";
 
+import { BATTLE_FORM_TAB, type BattleFormTabId } from "@/app/campaigns/[id]/dm/battles/new/battle-form-tabs";
+import { LoadingState } from "@/components/common/states";
+import { HudForm, HudFormPage, type HudTab } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { useEditBattleData } from "@/lib/hooks/battles";
+
+const TITLE = "Редагувати сцену бою";
 
 export default function EditBattlePage({
   params,
@@ -42,29 +46,55 @@ export default function EditBattlePage({
 
   if (loading) {
     return (
-      <div className="container mx-auto p-4">
-        <p>Завантаження...</p>
-      </div>
+      <HudFormPage title={TITLE} className="max-w-6xl">
+        <div className="px-4 py-3">
+          <LoadingState label="Завантаження..." />
+        </div>
+      </HudFormPage>
     );
   }
 
-  return (
-    <div className="container mx-auto p-4 max-w-6xl space-y-6">
-      <EditBattlePageHeader
-        campaignId={campaignId}
-        onDelete={handleDelete}
-        isDeleting={deleteBattleMutation.isPending}
-      />
-
-      <form onSubmit={handleSubmit} className="space-y-6">
+  const tabs: HudTab<BattleFormTabId>[] = [
+    {
+      id: BATTLE_FORM_TAB.basic,
+      label: "Основне",
+      content: (
         <EditBattleBasicInfoCard
           formData={formData}
-          onChange={(data) =>
-            setFormData((prev) => ({ ...prev, ...data }))
-          }
+          onChange={(data) => setFormData((prev) => ({ ...prev, ...data }))}
         />
-
-        <div className="grid gap-6 md:grid-cols-2">
+      ),
+    },
+    {
+      id: BATTLE_FORM_TAB.heroes,
+      label: "Герої",
+      content: (
+        <AvailableCharactersCard
+          playerCharacters={playerCharacters}
+          npcCharacters={npcCharacters}
+          isParticipantSelected={isParticipantSelected}
+          onParticipantToggle={handleParticipantToggle}
+        />
+      ),
+    },
+    {
+      id: BATTLE_FORM_TAB.units,
+      label: "Юніти",
+      content: (
+        <AvailableUnitsCard
+          units={units}
+          isParticipantSelected={isParticipantSelected}
+          getParticipantQuantity={getParticipantQuantity}
+          onParticipantToggle={handleParticipantToggle}
+          onQuantityChange={handleQuantityChange}
+        />
+      ),
+    },
+    {
+      id: BATTLE_FORM_TAB.roster,
+      label: `Склад · ${participants.length}`,
+      content: (
+        <div className="grid gap-4 md:grid-cols-2">
           <ParticipantSideCard
             side="ally"
             participants={participants}
@@ -80,36 +110,35 @@ export default function EditBattlePage({
             onSideChange={handleSideChange}
           />
         </div>
+      ),
+    },
+  ];
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <AvailableCharactersCard
-            playerCharacters={playerCharacters}
-            npcCharacters={npcCharacters}
-            isParticipantSelected={isParticipantSelected}
-            onParticipantToggle={handleParticipantToggle}
-          />
-          <AvailableUnitsCard
-            units={units}
-            isParticipantSelected={isParticipantSelected}
-            getParticipantQuantity={getParticipantQuantity}
-            onParticipantToggle={handleParticipantToggle}
-            onQuantityChange={handleQuantityChange}
-          />
-        </div>
-
-        <div className="flex gap-4 justify-end">
-          <Link href={`/campaigns/${campaignId}/dm/battles`}>
-            <Button type="button" variant="outline">
-              Скасувати
+  return (
+    <HudFormPage title={TITLE} aside="Оновіть учасників та їх ролі в битві" className="max-w-6xl">
+      <HudForm
+        id="battle-edit-form"
+        onSubmit={handleSubmit}
+        tabs={tabs}
+        actions={
+          <>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={deleteBattleMutation.isPending}
+            >
+              {deleteBattleMutation.isPending ? "Видалення..." : "Видалити"}
             </Button>
-          </Link>
-          <Button type="submit" disabled={updateBattleMutation.isPending}>
-            {updateBattleMutation.isPending
-              ? "Збереження..."
-              : "Зберегти зміни"}
-          </Button>
-        </div>
-      </form>
-    </div>
+            <Button type="button" variant="outline" asChild>
+              <Link href={`/campaigns/${campaignId}/dm/battles`}>Скасувати</Link>
+            </Button>
+            <Button type="submit" disabled={updateBattleMutation.isPending}>
+              {updateBattleMutation.isPending ? "Збереження..." : "Зберегти зміни"}
+            </Button>
+          </>
+        }
+      />
+    </HudFormPage>
   );
 }

@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { HudSection } from "@/components/hud/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,11 +15,7 @@ export function EditBattleBasicInfoCard({
   onChange,
 }: EditBattleBasicInfoCardProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Основна інформація</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <HudSection title="Основна інформація" className="space-y-4">
         <div>
           <Label htmlFor="name">Назва битви *</Label>
           <Input
@@ -45,7 +36,6 @@ export function EditBattleBasicInfoCard({
             rows={3}
           />
         </div>
-      </CardContent>
-    </Card>
+    </HudSection>
   );
 }

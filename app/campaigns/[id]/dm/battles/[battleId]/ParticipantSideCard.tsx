@@ -2,14 +2,8 @@
 
 import Image from "next/image";
 
+import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import type { BattlePreparationParticipant } from "@/types/battle";
 import type { EditBattleCharacter } from "@/types/battle-setup";
@@ -28,16 +22,16 @@ interface ParticipantSideCardProps {
 
 const SIDE_CONFIG = {
   ally: {
-    title: "✅ Союзники",
+    title: "Союзники",
     description: "Учасники на вашій стороні",
-    cardClass: "bg-green-50 dark:bg-green-950/20",
+    rowClass: "border-l-[3px] border-l-[color:var(--ally)]",
     switchTo: ParticipantSide.ENEMY,
     switchLabel: "→",
   },
   enemy: {
-    title: "⚔️ Вороги",
+    title: "Вороги",
     description: "Противники в битві",
-    cardClass: "bg-red-50 dark:bg-red-950/20",
+    rowClass: "border-l-[3px] border-l-[color:var(--enemy)]",
     switchTo: ParticipantSide.ALLY,
     switchLabel: "←",
   },
@@ -70,7 +64,7 @@ export function ParticipantSideCard({
     return (
       <div
         key={participant.id}
-        className={`flex items-center justify-between p-2 border rounded ${config.cardClass}`}
+        className={`flex items-center justify-between rounded border border-[#4a3c2c] bg-[#1a140f] p-2 ${config.rowClass}`}
       >
         <div className="flex items-center gap-2">
           {entity.avatar && (
@@ -102,20 +96,8 @@ export function ParticipantSideCard({
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle
-          className={
-            side === "ally"
-              ? "text-green-600 dark:text-green-400"
-              : "text-red-600 dark:text-red-400"
-          }
-        >
-          {config.title}
-        </CardTitle>
-        <CardDescription>{config.description}</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-3 max-h-[500px] overflow-y-auto">
+    <HudSection title={config.title} className="max-h-[500px] space-y-3 overflow-y-auto">
+        <p className="text-xs text-muted-foreground">{config.description}</p>
         <div>
           <h4 className="text-xs font-semibold text-muted-foreground mb-2 uppercase">
             Персонажі
@@ -151,7 +133,6 @@ export function ParticipantSideCard({
               : "Немає обраних ворогів"}
           </p>
         )}
-      </CardContent>
-    </Card>
+    </HudSection>
   );
 }
