@@ -154,6 +154,24 @@ describe("acceptFullBattle — журнал за межами вікна GET", (
   });
 });
 
+describe("acceptFullBattle — дірки в журналі", () => {
+  const withLog = (version: number, idx: number[]) => ({ ...cached, version, battleLog: idx.map(entry) });
+
+  it("кеш відстав більше ніж на вікно — старіші записи не доклеюються (їх дотягне пагінація)", () => {
+    expect(acceptFullBattle(withLog(5, [1, 2, 3]), withLog(9, [20, 21])).battleLog.map((e) => e.actionIndex)).toEqual([20, 21]);
+  });
+
+  it("кеш закінчується впритул до вікна, але без перекриття — між ними міг бути відкат, не доклеюємо", () => {
+    expect(acceptFullBattle(withLog(5, [1, 2, 3]), withLog(9, [4, 5])).battleLog.map((e) => e.actionIndex)).toEqual([4, 5]);
+  });
+
+  it("скасовані записи з кешу не доклеюються", () => {
+    const log = [entry(1), { ...entry(2), isCancelled: true }, entry(3)];
+
+    expect(acceptFullBattle({ ...cached, version: 5, battleLog: log }, withLog(9, [3, 4])).battleLog.map((e) => e.actionIndex)).toEqual([1, 3, 4]);
+  });
+});
+
 describe("acceptFullBattle — інший запуск бою", () => {
   it("після reset (інший startedAt) старі записи з кешу не доклеюються", () => {
     const old = { ...cached, version: 5, startedAt: "2026-01-01T00:00:00.000Z", battleLog: [1, 2, 3].map(entry) };

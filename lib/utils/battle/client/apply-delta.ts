@@ -86,10 +86,12 @@ export function acceptFullBattle(cached: BattleScene | undefined, incoming: Batt
 
   const windowStart = Math.min(...incomingLog.map((e) => e.actionIndex));
 
-  // GET віддає лише останні події: старіші з кешу лишаються, щоб не губити відомий AC і помічене в бою
-  const sameRun = cached?.startedAt === incoming.startedAt;
+  const cachedLog = cached?.startedAt === incoming.startedAt ? (cached?.battleLog ?? []) : [];
 
-  const older = incomingLog.length && sameRun ? (cached?.battleLog ?? []).filter((e) => e.actionIndex < windowStart) : [];
+  // seq монотонні й після відкату, тож сусідство не доводить відсутність скасованої дірки — потрібне перекриття з вікном
+  const overlaps = cachedLog.some((e) => e.actionIndex === windowStart);
+
+  const older = overlaps ? cachedLog.filter((e) => e.actionIndex < windowStart && !e.isCancelled) : [];
 
   return {
     ...incoming,
