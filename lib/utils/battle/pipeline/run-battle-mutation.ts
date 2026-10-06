@@ -26,6 +26,7 @@ import {
   eventToBattleAction,
 } from "@/lib/utils/battle/store";
 import type { BattleKnowledge } from "@/lib/utils/battle/view/knowledge";
+import { alwaysSeesEnemyStats } from "@/lib/utils/battle/view/visibility";
 import type { BattleScene } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -223,9 +224,11 @@ export async function runBattleMutation<TBody>(
     const result = withVictory(loaded.scene, await options.mutate(ctx, parsed.body));
 
     if (options.dryRun?.(parsed.body)) {
+      const needsKnowledge = options.includeKnowledge && !loaded.isDM && !alwaysSeesEnemyStats(loaded.participants, userId);
+
       const [entries, knowledge] = await Promise.all([
         options.includeRecentEvents ? deps.loadRecentEvents(battleId, options.includeRecentEvents) : [],
-        options.includeKnowledge && !loaded.isDM ? deps.loadKnowledge?.(battleId) : undefined,
+        needsKnowledge ? deps.loadKnowledge?.(battleId) : undefined,
       ]);
 
       const battle = toBattleResponse(

@@ -5,7 +5,6 @@ export {
   type BattleSceneActions,
   BattleSceneContext,
   type BattleSceneValue,
-  canSeeEnemyHp,
   deriveTurn,
   type ResultFx,
   useBattleScene,

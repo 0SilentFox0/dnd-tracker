@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { describe, expect, it } from "vitest";
 
-import { canSeeEnemyHp, deriveTurn } from "../useBattleScene";
+import { deriveTurn } from "../useBattleScene";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
@@ -41,24 +41,6 @@ describe("deriveTurn", () => {
     expect(deriveTurn(battle(0), "dm-user", true, null).isMyTurn).toBe(true);
     expect(deriveTurn(battle(3), "dm-user", true, null)).toMatchObject({ isMyTurn: false, hero: { basicInfo: { id: "other" } } });
     expect(deriveTurn(battle(3), "dm-user", true, "other")).toMatchObject({ isMyTurn: true, hero: { basicInfo: { id: "other" } } });
-  });
-});
-
-describe("canSeeEnemyHp", () => {
-  const withAbility = (name: string, effects: unknown[]) => {
-    const h = p("h1", "u1");
-
-    return { ...h, battleData: { ...h.battleData, resolvedAbilities: [{ key: "k", name, trigger: { event: "passive" }, effects, source: { type: "skill", id: "s", name } }] } } as never;
-  };
-
-  it("лише прапорець seeEnemyHp, а не назва вміння", () => {
-    const detectMagic = withAbility("Detect Magic", [{ kind: "modifyStat", stat: "armor", flat: 1 }]);
-
-    const trueSight = withAbility("Пильне око", [{ kind: "flag", flag: "seeEnemyHp" }]);
-
-    expect(canSeeEnemyHp(detectMagic, [detectMagic])).toBe(false);
-    expect(canSeeEnemyHp(trueSight, [trueSight])).toBe(true);
-    expect(canSeeEnemyHp(null, [])).toBe(false);
   });
 });
 

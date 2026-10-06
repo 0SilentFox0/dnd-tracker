@@ -74,6 +74,19 @@ describe("GET /battles/[battleId]", () => {
     expect(loadKnowledge).not.toHaveBeenCalled();
   });
 
+  it("гравець, що бачить HP ворогів (seeEnemyHp), не читає знання з БД", async () => {
+    const ability = { key: "k", name: "Пильне око", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "seeEnemyHp" }], source: { type: "skill", id: "s", name: "Пильне око" } };
+
+    const seer = { ...hero, battleData: { ...hero.battleData, resolvedAbilities: [ability] } };
+
+    deps.loadBattle.mockResolvedValue({ ...loaded(), participants: [seer, goblin] } as never);
+
+    const { GET } = await import("@/app/api/campaigns/[id]/battles/[battleId]/route");
+
+    expect((await (await GET(new Request("http://x/api"), params)).json()).knowledge).toBeUndefined();
+    expect(loadKnowledge).not.toHaveBeenCalled();
+  });
+
   it("немає бою — 404; не учасник — 403", async () => {
     const { GET } = await import("@/app/api/campaigns/[id]/battles/[battleId]/route");
 

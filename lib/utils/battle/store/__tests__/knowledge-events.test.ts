@@ -1,8 +1,9 @@
+import type { Prisma } from "@prisma/client";
 import { describe, expect, it, vi } from "vitest";
 
 import { loadKnowledgeEvents, loadRecentEvents } from "@/lib/utils/battle/store/history";
 import type { BattleDb } from "@/lib/utils/battle/store/load-battle";
-import { summarizeKnowledge } from "@/lib/utils/battle/view/knowledge";
+import { KNOWLEDGE_EVENT_TYPES, summarizeKnowledge } from "@/lib/utils/battle/view/knowledge";
 
 type Row = { seq: number; round: number; type: string; actorId: string; targets: unknown; details: unknown; cancelledAt: Date | null; createdAt: Date; hpChanges: unknown; resultText: string };
 
@@ -22,15 +23,20 @@ const attack = (seq: number, target: string, total: number, hit: boolean): Row =
 const filler = (seq: number): Row => ({ ...attack(seq, "other", 0, false), type: "end_turn", details: { actionDetails: {} } });
 
 function fakeDb(rows: Row[]) {
-  const findMany = vi.fn(async (args: { where: { type?: { in: string[] }; cancelledAt: null }; orderBy: { seq: "asc" | "desc" }; take?: number }) => {
-    let list = rows.filter((r) => r.cancelledAt === null && (!args.where.type || args.where.type.in.includes(r.type)));
-
-    list = [...list].sort((a, b) => (args.orderBy.seq === "asc" ? a.seq - b.seq : b.seq - a.seq));
+  const findMany = vi.fn(async (args: { where: { cancelledAt: null }; orderBy: { seq: "asc" | "desc" }; take?: number }) => {
+    const list = rows.filter((r) => r.cancelledAt === null).sort((a, b) => (args.orderBy.seq === "asc" ? a.seq - b.seq : b.seq - a.seq));
 
     return args.take ? list.slice(0, args.take) : list;
   });
 
-  return { db: { battleEvent: { findMany } } as unknown as BattleDb, findMany };
+  const queryRaw = vi.fn(async (query: Prisma.Sql) =>
+    rows
+      .filter((r) => r.cancelledAt === null && query.values.includes(r.type))
+      .sort((a, b) => a.seq - b.seq)
+      .map(({ seq, round, type, targets, details }) => ({ seq, round, type, targets, details })),
+  );
+
+  return { db: { battleEvent: { findMany }, $queryRaw: queryRaw } as unknown as BattleDb, findMany, queryRaw };
 }
 
 describe("знання про ціль з усієї історії бою", () => {
@@ -47,12 +53,20 @@ describe("знання про ціль з усієї історії бою", () 
     expect(knowledge.other).toBeUndefined();
   });
 
-  it("читає лише потрібні колонки й типи, без скасованих", async () => {
-    const { db, findMany } = fakeDb([{ ...attack(1, "X", 15, true), cancelledAt: new Date() }, attack(2, "X", 12, false)]);
+  it("читає лише потрібні шляхи details, параметризовано, без скасованих", async () => {
+    const { db, queryRaw } = fakeDb([{ ...attack(1, "X", 15, true), cancelledAt: new Date() }, attack(2, "X", 12, false)]);
 
     const knowledge = summarizeKnowledge(await loadKnowledgeEvents(db, "b1"));
 
-    expect(findMany.mock.calls[0][0]).toMatchObject({ select: { seq: true, round: true, type: true, actorId: true, targets: true, details: true } });
+    const query = queryRaw.mock.calls[0][0];
+
+    const sql = query.sql.replace(/\s+/g, " ");
+
+    expect(sql).not.toMatch(/SELECT[^]*\bdetails\b\s*,/);
+    expect(sql).toContain("'actionDetails'");
+    expect(sql).toContain("'damageSteps'");
+    expect(sql).toContain('"cancelledAt" IS NULL');
+    expect(query.values).toEqual(expect.arrayContaining(["b1", ...KNOWLEDGE_EVENT_TYPES]));
     expect(knowledge.X.ac).toMatchObject({ min: 13, max: undefined });
   });
 });
