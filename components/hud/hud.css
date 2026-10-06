@@ -99,3 +99,4 @@
 .hud-form input[type="number"]::-webkit-outer-spin-button,
 .hud-page input[type="number"]::-webkit-inner-spin-button,
 .hud-page input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.hud-page [data-slot="empty-state"] { background: rgba(17, 14, 11, 0.82); }

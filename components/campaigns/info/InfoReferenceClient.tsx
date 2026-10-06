@@ -129,12 +129,12 @@ export function InfoReferenceClient({
       {filters.filters.section === "skills" &&
         filters.ui.skillsEmpty &&
         !filters.ui.nothingFound && (
-          <EmptyState className="bg-[rgba(17,14,11,.82)]" title="Скілів за цими фільтрами не знайдено." />
+          <EmptyState title="Скілів за цими фільтрами не знайдено." />
         )}
       {filters.filters.section === "spells" &&
         filters.ui.spellsEmpty &&
         !filters.ui.nothingFound && (
-          <EmptyState className="bg-[rgba(17,14,11,.82)]" title="Заклинань за цими фільтрами не знайдено." />
+          <EmptyState title="Заклинань за цими фільтрами не знайдено." />
         )}
     </div>
   );
