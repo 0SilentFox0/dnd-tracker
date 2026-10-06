@@ -105,4 +105,12 @@ describe("ProgressionPanel", () => {
 
     expect(screen.getByRole("button", { name: "Скіл o1" }).textContent).toBe("С");
   });
+
+  it("тап по рамці гілки відкриває вивчений рівень гілки", () => {
+    renderWithConfirm(<ProgressionPanel campaignId="c" characterId="ch" />);
+    fireEvent.click(screen.getByRole("button", { name: "Рівень гілки: Напад · Основи" }));
+
+    expect(screen.getByRole("dialog")).toBeTruthy();
+    expect(within(screen.getByRole("dialog")).getByText("Напад → Основи")).toBeTruthy();
+  });
 });
