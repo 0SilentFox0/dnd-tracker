@@ -25,6 +25,22 @@ export function resolveLearned(tree: TreeNodes, progress: unknown): LearnedNode[
   });
 }
 
+const rank = (n: LearnedNode) => (n.level ? BRANCH_LEVELS.indexOf(n.level) : -1);
+
+export function uniqueSkills(learned: LearnedNode[]): LearnedNode[] {
+  const best = new Map<string, LearnedNode>();
+
+  for (const n of learned) {
+    if (!n.skillId) continue;
+
+    const prev = best.get(n.skillId);
+
+    if (!prev || rank(n) > rank(prev)) best.set(n.skillId, n);
+  }
+
+  return learned.filter((n) => !n.skillId || best.get(n.skillId) === n);
+}
+
 export function branchLevels(learned: LearnedNode[]): Record<string, BranchLevel> {
   const out: Record<string, BranchLevel> = {};
 

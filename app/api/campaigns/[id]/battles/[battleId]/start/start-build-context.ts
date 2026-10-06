@@ -121,10 +121,7 @@ export async function buildCampaignContextForStart(
       if (!(rn in skillTreeByRace)) skillTreeByRace[rn] = null;
     }
 
-    // skillsById === allSkills, проіндексований за id. Раніше робилось
-    // двома додатковими DB-запитами (id IN + mainSkillId IN), але це
-    // підмножина allSkills — extract-skills.ts усе одно фільтрує
-    // по directIds + mainSkillIdsFromLevels всередині.
+    // allSkills за id: extract-skills бере з нього лише вивчені вузли дерева й personalSkillId
     const skillsById: Record<string, Prisma.SkillGetPayload<object>> = {};
 
     const allSkillsArr = Array.isArray(allSkills) ? allSkills : [];

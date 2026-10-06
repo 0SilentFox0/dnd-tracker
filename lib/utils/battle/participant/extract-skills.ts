@@ -4,7 +4,7 @@ import type { CharacterFromPrisma } from "../types/participant";
 
 import { prisma } from "@/lib/db";
 import type { SkillEntry } from "@/lib/utils/abilities/build/collect";
-import { normalizeTree, resolveLearned } from "@/lib/utils/skills/progression";
+import { normalizeTree, resolveLearned, uniqueSkills } from "@/lib/utils/skills/progression";
 
 export type SkillRowEntry = SkillEntry & { row: Prisma.SkillGetPayload<object> };
 
@@ -18,7 +18,7 @@ export async function resolveCharacterSkillEntries(
 ): Promise<SkillRowEntry[]> {
   const treeRow = preloadedTree !== undefined ? preloadedTree : await prisma.skillTree.findFirst({ where: { campaignId, race: character.race } });
 
-  const learned = treeRow ? resolveLearned(normalizeTree(treeRow), character.skillTreeProgress).flatMap((n) => (n.skillId ? [{ ...n, skillId: n.skillId }] : [])) : [];
+  const learned = treeRow ? uniqueSkills(resolveLearned(normalizeTree(treeRow), character.skillTreeProgress)).flatMap((n) => (n.skillId ? [{ ...n, skillId: n.skillId }] : [])) : [];
 
   const personalSkillId = (character as { personalSkillId?: string | null }).personalSkillId?.trim() || null;
 
