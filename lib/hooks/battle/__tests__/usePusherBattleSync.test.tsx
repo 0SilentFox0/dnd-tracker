@@ -319,6 +319,28 @@ describe("usePusherBattleSync — two players receive same battle state", () => 
       return invalidate;
     }
 
+    it("перша успішна підписка — одна перевірка версії: дельти між серверним HTML і підпискою не губляться", async () => {
+      vi.mocked(getBattleVersion).mockResolvedValue({ version: 6 });
+
+      const invalidate = await mounted();
+
+      await act(async () => simulateTrigger(channelName, "pusher:subscription_succeeded", {}));
+      await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: key }));
+
+      await act(async () => simulateTrigger(channelName, "pusher:subscription_succeeded", {}));
+      expect(getBattleVersion).toHaveBeenCalledTimes(1);
+    });
+
+    it("перша підписка з актуальним кешем — без повного GET", async () => {
+      vi.mocked(getBattleVersion).mockResolvedValue({ version: 5 });
+
+      const invalidate = await mounted();
+
+      await act(async () => simulateTrigger(channelName, "pusher:subscription_succeeded", {}));
+      await waitFor(() => expect(getBattleVersion).toHaveBeenCalledTimes(1));
+      expect(invalidate).not.toHaveBeenCalled();
+    });
+
     it("будь-який вихід із connected і повернення — запит версії; новіша → повний GET", async () => {
       vi.mocked(getBattleVersion).mockResolvedValue({ version: 6 });
 

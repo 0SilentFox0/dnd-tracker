@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 
 import { defaultReadDeps } from "./default-deps";
-import { battleErrorResponse } from "./run-battle-mutation";
+import { BattleAccess, battleErrorResponse, runBattleMutation } from "./run-battle-mutation";
 
+import { BATTLE_LOG_RECENT_EVENTS } from "@/lib/constants/battle";
 import { BattleAccessError } from "@/lib/utils/battle/store";
 import type { BattleEventsPage, BattleVersion } from "@/types/api";
 
@@ -26,6 +27,18 @@ async function authorize(params: BattleParams, deps: BattleReadDeps) {
   if (!access.isMember) throw new BattleAccessError(403, "Forbidden");
 
   return access;
+}
+
+/** Full scene for a member, as `GET /battles/[battleId]` answers it; the battle page reuses it for the first HTML. */
+export function readBattleScene(params: BattleParams): Promise<NextResponse> {
+  return runBattleMutation(new Request("http://internal/battle"), {
+    params,
+    access: BattleAccess.MEMBER,
+    dryRun: () => true,
+    includeRecentEvents: BATTLE_LOG_RECENT_EVENTS,
+    includeKnowledge: true,
+    mutate: (ctx) => ({ participants: ctx.participants, pending: ctx.pending, events: [] }),
+  });
 }
 
 export async function readBattleVersion(params: BattleParams, deps: BattleReadDeps = defaultReadDeps): Promise<NextResponse> {

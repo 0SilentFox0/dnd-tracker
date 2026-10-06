@@ -19,7 +19,7 @@ export const RESYNC_AFTER_HIDDEN_MS = 15_000;
  * Підписка на Pusher-канали бою: оновлення битви, старт, завершення, turn-started для поточного юзера.
  * Застосовує battle-delta до кешу; refetch-сигнал або пропуск версії — одна інвалідація.
  * Канал battle-* підписується окремо від currentUserId, щоб не втрачати події під час завантаження userId.
- * Після будь-якого розриву або довго схованої вкладки питає лише версію; повний GET — коли вона новіша за кеш.
+ * Після першої підписки, будь-якого розриву або довго схованої вкладки питає лише версію; повний GET — коли вона новіша за кеш.
  * Повертає connectionState для індикатора з'єднання.
  */
 export function usePusherBattleSync(
@@ -180,11 +180,19 @@ export function usePusherBattleSync(
         updateConnectionState();
       };
 
-      const onSubscribed = () => {
-        if (!subscriptionFailedRef.current) return;
+      let firstSubscription = true;
 
+      // the cached scene (server HTML or GET) predates the subscription: deltas in between would be lost
+      const onSubscribed = () => {
+        const recovered = subscriptionFailedRef.current;
+
+        if (!recovered && !firstSubscription) return;
+
+        firstSubscription = false;
         subscriptionFailedRef.current = false;
-        updateConnectionState();
+
+        if (recovered) updateConnectionState();
+
         void resync();
       };
 

@@ -2,9 +2,9 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { getCharacterSheet } from "@/lib/api/characters";
+import { characterSheetKey } from "./keys";
 
-export const characterSheetKey = (campaignId: string, characterId?: string) => (characterId ? ["character-sheet", campaignId, characterId] : ["character-sheet", campaignId]);
+import { getCharacterSheet } from "@/lib/api/characters";
 
 export function useCharacterSheet(campaignId: string, characterId: string) {
   return useQuery({
