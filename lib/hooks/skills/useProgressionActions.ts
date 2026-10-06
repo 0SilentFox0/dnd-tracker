@@ -10,8 +10,11 @@ import { ApiError } from "@/lib/api/client";
 import { characterSheetKey } from "@/lib/hooks/characters";
 import { useNotify } from "@/lib/hooks/common";
 import type { LearnBlockReason, UnlearnBlockReason } from "@/lib/utils/skills/progression";
-import { LEARN_BLOCK_TEXT, UNLEARN_BLOCK_TEXT } from "@/lib/utils/skills/progression";
+import { LEARN_BLOCK_TEXT, normalizeTree, skillPoints, UNLEARN_BLOCK_TEXT } from "@/lib/utils/skills/progression";
+import type { CharacterSheet } from "@/types/characters";
 import type { CharacterProgressionDto } from "@/types/progression";
+
+const SHEET_REFRESH_DELAY_MS = 1000;
 
 export function useProgressionActions(campaignId: string, characterId: string) {
   const queryClient = useQueryClient();
@@ -22,7 +25,25 @@ export function useProgressionActions(campaignId: string, characterId: string) {
 
   const inFlight = useRef(false);
 
+  const sheetRefresh = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const key = progressionKey(campaignId, characterId);
+
+  const sheetKey = characterSheetKey(campaignId, characterId);
+
+  const patchSheet = (unlocked: string[]) => {
+    const dto = queryClient.getQueryData<CharacterProgressionDto>(key);
+
+    if (dto?.treeId && dto.tree) {
+      const free = skillPoints(normalizeTree({ id: dto.treeId, race: dto.race, skills: dto.tree }), unlocked, dto.level).free;
+
+      queryClient.setQueryData<CharacterSheet>(sheetKey, (old) => (old ? { ...old, progression: { ...old.progression, freePoints: free } } : old));
+    }
+
+    if (sheetRefresh.current) clearTimeout(sheetRefresh.current);
+
+    sheetRefresh.current = setTimeout(() => void queryClient.invalidateQueries({ queryKey: sheetKey }), SHEET_REFRESH_DELAY_MS);
+  };
 
   const run = async (nodeId: string, call: () => Promise<{ unlocked: string[] }>): Promise<boolean> => {
     // подвійний тап приходить раніше, ніж React вимкне кнопку
@@ -43,7 +64,7 @@ export function useProgressionActions(campaignId: string, characterId: string) {
 
         return { ...old, skillTreeProgress: { ...progress, [treeId]: { ...progress[treeId], unlockedSkills: unlocked } } };
       });
-      void queryClient.invalidateQueries({ queryKey: characterSheetKey(campaignId, characterId) });
+      patchSheet(unlocked);
       void queryClient.invalidateQueries({ queryKey: ["battle-balance"], refetchType: "none" });
 
       return true;
