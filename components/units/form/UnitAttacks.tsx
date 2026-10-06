@@ -1,7 +1,7 @@
 "use client";
 
+import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { UnitAttack, type UnitAttackItem } from "@/components/units/form/UnitAttack";
 import type { Unit } from "@/types/units";
 
@@ -45,14 +45,15 @@ export function UnitAttacks({ formData, onChange }: UnitAttacksProps) {
   };
 
   return (
-    <div className="space-y-4 border-t pt-4">
-      <div className="flex items-center justify-between">
-        <Label className="text-base font-semibold">Атаки (шкода)</Label>
+    <HudSection
+      title="Атаки (шкода)"
+      className="space-y-4"
+      action={
         <Button type="button" variant="outline" size="sm" onClick={handleAdd}>
           + Додати атаку
         </Button>
-      </div>
-
+      }
+    >
       {attacks.length > 0 ? (
         <div className="space-y-3">
           {attacks.map((attack, index) => (
@@ -70,6 +71,6 @@ export function UnitAttacks({ formData, onChange }: UnitAttacksProps) {
           Немає доданих атак. Натисніть &quot;Додати атаку&quot; щоб вказати урон (назва, кубики шкоди, тип шкоди тощо).
         </p>
       )}
-    </div>
+    </HudSection>
   );
 }

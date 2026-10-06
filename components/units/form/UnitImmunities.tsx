@@ -1,3 +1,4 @@
+import { HudSection } from "@/components/hud/form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -45,14 +46,15 @@ export function UnitImmunities({
   };
 
   return (
-    <div className="space-y-4 border-t pt-4">
-      <div className="flex items-center justify-between">
-        <Label className="text-base font-semibold">Імунітети</Label>
+    <HudSection
+      title="Імунітети"
+      className="space-y-4"
+      action={
         <Button type="button" variant="outline" size="sm" onClick={handleAdd}>
           + Додати імунітет
         </Button>
-      </div>
-
+      }
+    >
       {raceImmunities.length > 0 && (
         <div className="space-y-2">
           <Label className="text-sm text-muted-foreground">
@@ -116,6 +118,6 @@ export function UnitImmunities({
           новий.
         </p>
       )}
-    </div>
+    </HudSection>
   );
 }
