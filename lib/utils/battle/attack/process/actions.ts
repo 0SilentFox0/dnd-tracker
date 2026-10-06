@@ -4,6 +4,7 @@
 
 import type { DamageCalculationResult } from "../../types/damage-calculations";
 import type { AttackRollResult } from "..";
+import type { ComputeHitDamageResult } from "./compute";
 
 import { AttackType } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
@@ -273,6 +274,64 @@ export function buildAbortedAttackAction(
     targets: [{ participantId: target.basicInfo.id, participantName: target.basicInfo.name }],
     actionDetails: { weaponName: attack.name, attackKind: attack.type === AttackType.RANGED ? "ranged" : "melee", isHit: false },
     resultText: [`${attacker.basicInfo.name} → ${target.basicInfo.name}: ціль загинула до атаки`, ...messages].join(" | "),
+    hpChanges: [],
+    isCancelled: false,
+  };
+}
+
+export interface BuildRetaliationParams {
+  retaliator: BattleParticipant;
+  target: BattleParticipant;
+  attack: BattleAttack;
+  attackRoll: AttackRollResult;
+  targetAC: number;
+  hit: { damageRolls: number[]; hitDamage: ComputeHitDamageResult } | null;
+  messages: string[];
+  battleId: string;
+  currentRound: number;
+}
+
+export function buildRetaliationAction(p: BuildRetaliationParams): BattleAction {
+  const { retaliator, target, attack, attackRoll, hit } = p;
+
+  const d20 = attackRoll.totalAttackValue - attackRoll.attackBonus;
+
+  const crit = hit?.hitDamage.criticalEffectApplied;
+
+  const summary = `Відсіч: ${retaliator.basicInfo.name} → ${target.basicInfo.name}: d20 ${d20}, ${
+    hit ? `${hit.hitDamage.totalFinalDamage} урону${attackRoll.isCritical ? " (КРИТИЧНЕ ПОПАДАННЯ!)" : ""}` : "промах"
+  }`;
+
+  return {
+    id: `retaliation-${retaliator.basicInfo.id}-${Date.now()}`,
+    battleId: p.battleId,
+    round: p.currentRound,
+    actionIndex: 0,
+    timestamp: new Date(),
+    actorId: retaliator.basicInfo.id,
+    actorName: retaliator.basicInfo.name,
+    actorSide: retaliator.basicInfo.side,
+    actionType: "retaliation",
+    targets: [{ participantId: target.basicInfo.id, participantName: target.basicInfo.name }],
+    actionDetails: {
+      weaponName: attack.name,
+      attackKind: attack.type === AttackType.RANGED ? "ranged" : "melee",
+      attackRoll: d20,
+      attackBonus: attackRoll.attackBonus,
+      totalAttackValue: attackRoll.totalAttackValue,
+      targetAC: p.targetAC,
+      isHit: !!hit,
+      isCritical: !!hit && attackRoll.isCritical,
+      isCriticalFail: attackRoll.isCriticalFail,
+      ...(crit && { criticalEffect: { id: crit.id, name: crit.name, description: crit.description, type: crit.type } }),
+      ...(hit && {
+        damageRolls: hit.damageRolls.map((roll) => ({ dice: attack.damageDice, results: [roll], total: roll, damageType: attack.damageType })),
+        totalDamage: hit.hitDamage.physicalDamage,
+        damageBreakdown: hit.hitDamage.damageCalculation.breakdown.join("; "),
+        damageSteps: { [target.basicInfo.id]: hit.hitDamage.damageSteps },
+      }),
+    },
+    resultText: [summary, ...p.messages].filter(Boolean).join(" | "),
     hpChanges: [],
     isCancelled: false,
   };

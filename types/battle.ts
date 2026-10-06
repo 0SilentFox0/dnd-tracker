@@ -274,7 +274,8 @@ export interface BattleAction {
     | "ability"
     | "end_turn"
     | "skip_turn"
-    | "morale_skip";
+    | "morale_skip"
+    | "retaliation";
   targets: Array<{
     participantId: string;
     participantName: string;

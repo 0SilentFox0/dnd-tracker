@@ -11,6 +11,12 @@ const atk = (actorName: string, total: number, isHit: boolean, round = 1, extra:
   }) as unknown as BattleAction;
 
 describe("knownArmorClass", () => {
+  it("кидок відсічі теж доказ AC того, по кому вона била", () => {
+    const ret = { ...atk("Гоблін", 15, true), actionType: "retaliation" } as BattleAction;
+
+    expect(knownArmorClass([ret], "t")).toMatchObject({ max: 15 });
+  });
+
   it("нічого не відомо — ?", () => {
     expect(formatKnownArmorClass(knownArmorClass([], "t"))).toBe("?");
   });

@@ -30,7 +30,7 @@ function bounds(evidence: KnownArmorClass["evidence"]): Pick<KnownArmorClass, "m
 
 export function knownArmorClass(log: BattleAction[], targetId: string): KnownArmorClass {
   const evidence = log
-    .filter((e) => e.actionType === "attack" && targets(e, targetId))
+    .filter((e) => (e.actionType === "attack" || e.actionType === "retaliation") && targets(e, targetId))
     .filter((e) => typeof e.actionDetails?.totalAttackValue === "number" && typeof e.actionDetails.isHit === "boolean")
     .filter((e) => !e.actionDetails.isCritical && !e.actionDetails.isCriticalFail)
     .map((e) => ({ actorName: e.actorName, total: e.actionDetails.totalAttackValue as number, hit: e.actionDetails.isHit as boolean, round: e.round }));
