@@ -15,7 +15,7 @@ import { CharacterFormData } from "@/types/characters";
 export interface UseCharacterFormOptions {
   initialData?: Partial<Character> | Partial<CharacterFormData>;
   type?: CharacterTypeValue;
-  onSubmit: (data: CharacterFormData) => Promise<void>;
+  onSubmit: (data: CharacterFormData) => Promise<CharacterFormData | void>;
   onCancel?: () => void;
 }
 
@@ -91,7 +91,9 @@ export function useCharacterForm(options: UseCharacterFormOptions) {
 
       setLoading(true);
       try {
-        await options.onSubmit(formData);
+        const next = await options.onSubmit(formData);
+
+        if (next) setFormData(next);
       } catch (err) {
         setError((err as Error).message);
       } finally {

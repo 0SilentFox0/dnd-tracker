@@ -59,6 +59,7 @@ export function useUpdateCharacter(campaignId: string, characterId: string) {
       ["character", campaignId, characterId],
       ["character-progression", campaignId, characterId],
       ["character-sheet", campaignId, characterId],
+      ["battle-balance"],
     ],
   });
 }
