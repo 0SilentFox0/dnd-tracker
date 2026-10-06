@@ -2,13 +2,7 @@
 
 import Image from "next/image";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { HudSection } from "@/components/hud/form";
 import {
   Tooltip,
   TooltipContent,
@@ -145,12 +139,8 @@ export function CharactersListCard({
   onParticipantToggle,
 }: CharactersListCardProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>👥 Персонажі</CardTitle>
-        <CardDescription>Гравці та NPC герої</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4 max-h-[600px] overflow-y-auto">
+    <HudSection title="Персонажі" className="max-h-[600px] space-y-4 overflow-y-auto">
+        <p className="text-xs text-muted-foreground">Гравці та NPC герої</p>
         {playerCharacters.length > 0 && (
           <div>
             <h3 className="font-semibold mb-2 text-sm text-muted-foreground">
@@ -196,7 +186,6 @@ export function CharactersListCard({
             Немає доступних персонажів
           </p>
         )}
-      </CardContent>
-    </Card>
+    </HudSection>
   );
 }

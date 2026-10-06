@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 
+import { HudSection } from "@/components/hud/form";
 import {
   Accordion,
   AccordionContent,
@@ -9,13 +10,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ParticipantSourceType } from "@/lib/constants/battle";
 import type { EntityStats, SetupUnit } from "@/types/battle-setup";
@@ -198,19 +192,14 @@ export function UnitsListCard({
 }: UnitsListCardProps) {
   if (units.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>⚔️ Юніти</CardTitle>
-          <CardDescription>
-            NPC юніти. Клік — до союзників, «До ворогів» — у колонку ворогів.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground text-center py-4">
-            Немає доступних юнітів
-          </p>
-        </CardContent>
-      </Card>
+      <HudSection title="Юніти">
+        <p className="text-xs text-muted-foreground">
+          NPC юніти. Клік — до союзників, «До ворогів» — у колонку ворогів.
+        </p>
+        <p className="text-sm text-muted-foreground text-center py-4">
+          Немає доступних юнітів
+        </p>
+      </HudSection>
     );
   }
 
@@ -221,14 +210,10 @@ export function UnitsListCard({
   );
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>⚔️ Юніти</CardTitle>
-        <CardDescription>
-          Клік по картці — додати до союзників або прибрати. «До ворогів» — одразу в колонку ворогів.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4 max-h-[600px] overflow-y-auto">
+    <HudSection title="Юніти" className="max-h-[600px] space-y-4 overflow-y-auto">
+      <p className="text-xs text-muted-foreground">
+        Клік по картці — додати до союзників або прибрати. «До ворогів» — одразу в колонку ворогів.
+      </p>
         <Accordion
           type="multiple"
           defaultValue={raceOrder}
@@ -283,7 +268,6 @@ export function UnitsListCard({
             );
           })}
         </Accordion>
-      </CardContent>
-    </Card>
+    </HudSection>
   );
 }

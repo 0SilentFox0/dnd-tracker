@@ -2,13 +2,7 @@
 
 import { ParticipantRow } from "./ParticipantRow";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { HudSection } from "@/components/hud/form";
 import { ParticipantSourceType } from "@/lib/constants/battle";
 import type { SetupCharacter, SetupParticipant, SetupUnit } from "@/types/battle-setup";
 
@@ -23,14 +17,12 @@ interface SidePanelCardProps {
 
 const SIDE_CONFIG = {
   ally: {
-    title: "✅ Союзники",
+    title: "Союзники",
     description: "Учасники на вашій стороні",
-    titleClass: "text-green-600 dark:text-green-400",
   },
   enemy: {
-    title: "⚔️ Вороги",
+    title: "Вороги",
     description: "Противники в битві",
-    titleClass: "text-red-600 dark:text-red-400",
   },
 } as const;
 
@@ -57,12 +49,8 @@ export function SidePanelCard({
   const isEmpty = participants.filter((p) => p.side === side).length === 0;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className={config.titleClass}>{config.title}</CardTitle>
-        <CardDescription>{config.description}</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-3 max-h-[500px] overflow-y-auto">
+    <HudSection title={config.title} className="max-h-[500px] space-y-3 overflow-y-auto">
+        <p className="text-xs text-muted-foreground">{config.description}</p>
         {characterParticipants.length > 0 && (
           <div>
             <h4 className="text-xs font-semibold text-muted-foreground mb-2 uppercase">
@@ -119,7 +107,6 @@ export function SidePanelCard({
             Оберіть учасників зі списку нижче
           </p>
         )}
-      </CardContent>
-    </Card>
+    </HudSection>
   );
 }
