@@ -52,6 +52,20 @@ describe("GET progression", () => {
     expect(vi.mocked(prisma.skill.findMany).mock.calls[0][0]).toMatchObject({ where: { campaignId: "camp", id: { in: ["o1"] } } });
   });
 
+  it("скіли дерева читаються лише колонками, потрібними DTO (egress)", async () => {
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("owner", "player"));
+
+    const { GET } = await import("@/app/api/campaigns/[id]/characters/[characterId]/progression/route");
+
+    await GET(new Request("http://x"), params);
+
+    const { select } = vi.mocked(prisma.skill.findMany).mock.calls[0][0] as { select?: Record<string, boolean> };
+
+    expect(Object.keys(select ?? {}).sort()).toEqual([
+      "abilities", "bonuses", "combatStats", "description", "icon", "id", "name", "skillTriggers", "spellData", "spellEnhancementData", "spellGroupId", "spellNewSpellId",
+    ]);
+  });
+
   it("чужий гравець — 403", async () => {
     vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("stranger", "player"));
 
