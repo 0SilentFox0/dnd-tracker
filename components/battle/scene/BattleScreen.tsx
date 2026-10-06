@@ -1,18 +1,24 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 
 import { BattleToast } from "./BattleToast";
-import { CompleteBattleDialog } from "./CompleteBattleDialog";
-import { DesktopBattleLayout } from "./DesktopBattleLayout";
 import { MobileBattleLayout } from "./MobileBattleLayout";
 
-import { ResultOverlay } from "@/components/battle/fx/ResultOverlay";
 import { hudFontClassName } from "@/components/battle/hud";
-import { BattlePreparationView } from "@/components/battle/views/BattlePreparationView";
 import { useBattleScene, useBelowHeaderHeight, useSpellBookPrefetch } from "@/lib/hooks/battle";
 import { useMediaQuery } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
+
+// телефони завжди на мобільному макеті: він у entry-чанку, решта підвантажується
+const DesktopBattleLayout = dynamic(() => import("./DesktopBattleLayout").then((m) => m.DesktopBattleLayout), { ssr: false });
+
+const CompleteBattleDialog = dynamic(() => import("./CompleteBattleDialog").then((m) => m.CompleteBattleDialog), { ssr: false });
+
+const ResultOverlay = dynamic(() => import("@/components/battle/fx/ResultOverlay").then((m) => m.ResultOverlay), { ssr: false });
+
+const BattlePreparationView = dynamic(() => import("@/components/battle/views/BattlePreparationView").then((m) => m.BattlePreparationView));
 
 export function BattleScreen() {
   const { battle, isDM, actions } = useBattleScene();
@@ -40,7 +46,7 @@ export function BattleScreen() {
       {wide ? <DesktopBattleLayout height={height} onComplete={() => setCompleteOpen(true)} /> : <MobileBattleLayout height={height} />}
       <ResultOverlay />
       <BattleToast />
-      <CompleteBattleDialog open={completeOpen} onOpenChange={setCompleteOpen} />
+      {wide && <CompleteBattleDialog open={completeOpen} onOpenChange={setCompleteOpen} />}
     </div>
   );
 }

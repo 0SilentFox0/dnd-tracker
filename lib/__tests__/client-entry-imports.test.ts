@@ -77,4 +77,28 @@ describe("entry-чанки гравця", () => {
   it("профіль не тягне zod", () => {
     expect(importers(profile, "zod")).toEqual([]);
   });
+
+  it("десктоп, DM-UI, майстри й оверлеї бою вантажаться окремо", () => {
+    const lazy = [
+      "components/battle/scene/DesktopBattleLayout.tsx",
+      "components/battle/scene/DmPanel.tsx",
+      "components/battle/scene/CompleteBattleDialog.tsx",
+      "components/battle/dialogs/AddParticipantDialog.tsx",
+      "components/battle/dialogs/ChangeHpDialog.tsx",
+      "components/battle/dialogs/DmCasterPickerDialog.tsx",
+      "components/battle/views/BattlePreparationView.tsx",
+      "components/battle/fx/ResultOverlay.tsx",
+      "components/battle/wizards/AttackWizard.tsx",
+      "components/battle/wizards/SpellBook.tsx",
+      "components/battle/wizards/BonusActionPicker.tsx",
+    ];
+
+    expect(lazy.filter((f) => battle.files.has(f))).toEqual([]);
+    expect(battle.files).toContain("components/battle/scene/MobileBattleLayout.tsx");
+    expect(importers(battle, "framer-motion")).toEqual([]);
+  });
+
+  it("редактор профілю вантажиться окремо", () => {
+    expect(profile.files.has("components/character-profile/ProfileEditor.tsx")).toBe(false);
+  });
 });

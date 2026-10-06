@@ -1,10 +1,11 @@
 "use client";
 
+import dynamic from "next/dynamic";
+
 import { BattleLog } from "./BattleLog";
 import { BattleOverBanner } from "./BattleOverBanner";
 import { BattleTopBar } from "./BattleTopBar";
 import { ConnectionBanner } from "./ConnectionBanner";
-import { DmPanel } from "./DmPanel";
 import { InitiativeTrack } from "./InitiativeTrack";
 import { LastActionTicker } from "./LastActionTicker";
 import { MyHeroPanel } from "./MyHeroPanel";
@@ -13,6 +14,8 @@ import { ParticipantDetails } from "./ParticipantDetails";
 import { ParticipantList } from "./ParticipantList";
 
 import { useBattleScene } from "@/lib/hooks/battle";
+
+const DmPanel = dynamic(() => import("./DmPanel").then((m) => m.DmPanel), { ssr: false });
 
 const H3 = ({ color, children }: { color: string; children: React.ReactNode }) => (
   <h3 className="hud-sc flex h-8 items-center gap-2 border-b border-white/[.14] text-[15px] font-bold tracking-[.1em] text-[#a89c88]">
