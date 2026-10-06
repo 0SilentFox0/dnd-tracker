@@ -38,7 +38,7 @@
      (немає `resolvedAbilities` або є `activeSkills`/`racialAbilities`/`passiveAbilities`/`skillUsageCounts`); інакше —
      одноразовий backfill перед мерджем.
   3. `skills.basicInfo`/`spellData`/`mainSkillData` збігаються з пласкими колонками (інакше спершу backfill пласких).
-- **Реліз 2 (`feat/dedup-contract`, гілка від `feat/dedup`).** Одна міграція `20261011000000_contract`: повторний
+- **Реліз 2 (`feat/dedup-contract`, гілка від `feat/dedup`).** Одна міграція `20261012000000_contract`: повторний
   ідемпотентний backfill `units.raceId` (`WHERE "raceId" IS NULL AND race IS NOT NULL`) для юнітів, записаних старим
   деплоєм під час білду; `DROP COLUMN` (спершу `units.groupId` з FK `units_groupId_fkey`, потім `DROP TABLE unit_groups`),
   `DROP TABLE racial_abilities`; `abilities` backfill `'[]'` + `SET NOT NULL`; `schema.prisma`: `abilities Json`.
