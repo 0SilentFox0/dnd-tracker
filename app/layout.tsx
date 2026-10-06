@@ -7,6 +7,7 @@ import { Header } from "@/components/layout/Header";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { ConfirmProvider } from "@/components/ui/confirm-dialog";
 import { QueryProvider } from "@/lib/providers/query-provider";
+import { createClient } from "@/lib/supabase/server";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,17 +20,27 @@ export const metadata: Metadata = {
   description: "Combat tracker for D&D 5e campaigns",
 };
 
-export default function RootLayout({
+async function getSessionEmail(): Promise<string | null> {
+  const supabase = await createClient();
+
+  const { data } = await supabase.auth.getClaims();
+
+  return data?.claims?.email ?? null;
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const email = await getSessionEmail();
+
   return (
     <html lang="uk" className="dark">
       <body className={`${geistSans.variable} ${hudFontClassName} antialiased`}>
         <QueryProvider>
           <ConfirmProvider>
-            <Header />
+            <Header email={email} />
             <PageTransition>{children}</PageTransition>
           </ConfirmProvider>
         </QueryProvider>

@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useRef } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { Home, LogOut,Menu, User } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Home, LogOut, Menu, User } from "lucide-react";
 
 import { AbbreviationsInfoDialog } from "@/components/common/AbbreviationsInfoDialog";
 import { HUD_SURFACE } from "@/components/hud";
@@ -17,29 +17,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { HudPortalClassProvider } from "@/components/ui/portal-class";
-import { createClient } from "@/lib/supabase/client";
 
-export function Header() {
+export function Header({ email }: { email: string | null }) {
   const pathname = usePathname();
 
-  const router = useRouter();
-
-  const [userEmail, setUserEmail] = useState<string | null>(null);
-
-  useEffect(() => {
-    const supabase = createClient();
-
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUserEmail(user?.email || null);
-    });
-  }, []);
-
-  const handleSignOut = async () => {
-    const supabase = createClient();
-
-    await supabase.auth.signOut();
-    router.push("/sign-in");
-  };
+  const signOutForm = useRef<HTMLFormElement>(null);
 
   // Не показуємо хедер на сторінках авторизації
   if (
@@ -62,7 +44,7 @@ export function Header() {
   const isPlayerPage = !isDMPage && isCampaignPage;
 
   return (
-    <header className={`sticky top-0 z-50 w-full border-b border-[#3a2e22] bg-[#0b0908]/90 backdrop-blur`}>
+    <header className="sticky top-0 z-50 w-full border-b border-[#3a2e22] bg-[#0b0908]/90 backdrop-blur">
       <HudPortalClassProvider value={HUD_SURFACE}>
       <div className="container mx-auto flex h-14 items-center justify-between px-4">
         <div className="flex items-center gap-2">
@@ -147,9 +129,9 @@ export function Header() {
         {/* Інформація про користувача та вихід */}
         <div className="flex items-center gap-2">
           <AbbreviationsInfoDialog />
-          {userEmail && (
+          {email && (
             <span className="hidden sm:inline text-sm text-[#8f8473]">
-              {userEmail}
+              {email}
             </span>
           )}
           <DropdownMenu>
@@ -160,15 +142,15 @@ export function Header() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {userEmail && (
+              {email && (
                 <>
                   <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                    {userEmail}
+                    {email}
                   </div>
                   <DropdownMenuSeparator />
                 </>
               )}
-              <DropdownMenuItem onClick={handleSignOut}>
+              <DropdownMenuItem onSelect={() => signOutForm.current?.requestSubmit()}>
                 <LogOut className="h-4 w-4 mr-2" />
                 Вийти
               </DropdownMenuItem>
@@ -179,6 +161,7 @@ export function Header() {
       <div className="container mx-auto px-4 pb-2">
         <Breadcrumbs />
       </div>
+      <form ref={signOutForm} action="/auth/signout" method="post" hidden />
       </HudPortalClassProvider>
     </header>
   );
