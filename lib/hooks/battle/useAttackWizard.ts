@@ -90,12 +90,12 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
   const send = useEffectEvent(async () => {
     if (!attacker) return;
 
-    const before = new Map(order.map((p) => [p.basicInfo.id, p.combatStats.currentHp]));
-
     const seen = new Set((scene.battle.battleLog ?? []).map((e) => e.actionIndex));
 
     try {
-      await scene.actions.attack.mutateAsync(attackPayload(state, attacker.basicInfo.id));
+      const res = await scene.actions.attack.mutateAsync(attackPayload(state, attacker.basicInfo.id));
+
+      const hpChanges = res?.hpChanges ?? [];
 
       const after = scene.readBattle()?.initiativeOrder ?? order;
 
@@ -107,7 +107,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
         return {
           kind: (s.outcome === "crit" ? "crit" : hit ? "hit" : "miss") as "crit" | "hit" | "miss",
           targetId: s.targetId,
-          damage: Math.max(0, (before.get(s.targetId) ?? 0) - (now?.combatStats.currentHp ?? 0)),
+          damage: hpChanges.filter((h) => h.participantId === s.targetId).reduce((sum, h) => sum + Math.max(0, h.change), 0),
           downed: !!now && !isUp(now),
         };
       });

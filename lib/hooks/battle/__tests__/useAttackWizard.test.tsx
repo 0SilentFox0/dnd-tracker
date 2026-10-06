@@ -10,6 +10,8 @@ import type { BattleAction } from "@/types/battle";
 function start() {
   const scene = fakeScene();
 
+  scene.mutateAsync.mockResolvedValue({ hpChanges: [{ participantId: "gob", participantName: "Гоблін", oldHp: 20, newHp: 11, change: 9 }] });
+
   const onDone = vi.fn();
 
   const hook = renderHook(() => useAttackWizard(scene.me, onDone), { wrapper: scene.wrapper });
@@ -39,6 +41,23 @@ describe("useAttackWizard", () => {
     expect(mutateAsync).toHaveBeenCalledWith(expect.objectContaining({ targetIds: ["gob"], attackRoll: 14, damageRolls: [6] }));
     expect(showResult).toHaveBeenCalledWith(expect.objectContaining({ kind: "hit", damage: 9, downed: false }));
     expect(onDone).toHaveBeenCalled();
+  });
+
+  it("шкода — з hpChanges відповіді по цілі, а не з різниці кешу; відсіч по атакувальнику не рахується", async () => {
+    const { result, mutateAsync, showResult } = start();
+
+    mutateAsync.mockResolvedValueOnce({
+      hpChanges: [
+        { participantId: "gob", participantName: "Гоблін", oldHp: 20, newHp: 13, change: 7 },
+        { participantId: "me", participantName: "Фрейда", oldHp: 20, newHp: 16, change: 4 },
+      ],
+    });
+
+    act(() => result.current.roll(14));
+    act(() => result.current.damage([6]));
+    act(() => result.current.submit());
+
+    await waitFor(() => expect(showResult).toHaveBeenCalledWith(expect.objectContaining({ kind: "hit", damage: 7 })));
   });
 
   it("промах — відправка одразу, результат «miss»", async () => {

@@ -31,6 +31,7 @@ import type {
   MoraleCheckData,
   SpellCastData,
 } from "@/types/api";
+import type { BattleAction } from "@/types/battle";
 
 /** Fallback-polling для активного бою. 30s — знижує egress; оновлення йдуть через Pusher та мутації. */
 export const BATTLE_ACTIVE_REFETCH_INTERVAL_MS = 30_000;
@@ -118,8 +119,21 @@ type ActionOpts = { onConflict?: () => void; onFailure?: (message: string) => vo
 export const useNextTurn = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<object>(c, b, (body) => nextTurn(c, b, body), { ...o, invalidate: ["battles"] });
 
+export interface AttackResponse {
+  hpChanges: BattleAction["hpChanges"];
+}
+
 export const useAttack = (c: string, b: string, o: ActionOpts = {}) =>
-  useBattleAction<AttackData & { endTurn?: boolean }>(c, b, (data) => attack(c, b, data), { ...o, invalidate: ["battles"] });
+  useBattleAction<AttackData & { endTurn?: boolean }, AttackResponse>(
+    c,
+    b,
+    async (data) => {
+      const res = await attack(c, b, data);
+
+      return { ...res, response: { hpChanges: res.delta.log.flatMap((a) => a.hpChanges ?? []) } };
+    },
+    { ...o, invalidate: ["battles"] },
+  );
 
 export const useMoraleCheck = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<MoraleCheckData, { moraleResult: MoraleCheckResult }>(c, b, (data) => moraleCheck(c, b, data), o);
