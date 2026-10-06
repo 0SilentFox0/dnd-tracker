@@ -22,6 +22,7 @@ import {
   updateBattle,
   updateBattleParticipant,
 } from "@/lib/api/battles";
+import { BattleSceneStatus, type BattleSceneStatusValue } from "@/lib/constants/battle";
 import type { MoraleCheckResult } from "@/lib/utils/battle/battle-morale";
 import { acceptFullBattle } from "@/lib/utils/battle/client/apply-delta";
 import type {
@@ -33,8 +34,14 @@ import type {
 } from "@/types/api";
 import type { BattleAction } from "@/types/battle";
 
-/** Fallback-polling для активного бою. 30s — знижує egress; оновлення йдуть через Pusher та мутації. */
+/** Fallback-polling без Pusher. 30s — знижує egress; оновлення йдуть через Pusher та мутації. */
 export const BATTLE_ACTIVE_REFETCH_INTERVAL_MS = 30_000;
+
+// prepared теж: інакше гравці без Pusher не побачать старту бою.
+const POLLED_BATTLE_STATUSES: ReadonlySet<BattleSceneStatusValue> = new Set([
+  BattleSceneStatus.PREPARED,
+  BattleSceneStatus.ACTIVE,
+]);
 
 export function useBattle(
   campaignId: string,
@@ -59,7 +66,7 @@ export function useBattle(
 
       const data = query.state.data as BattleScene | undefined;
 
-      if (data?.status === "active") return BATTLE_ACTIVE_REFETCH_INTERVAL_MS;
+      if (data && POLLED_BATTLE_STATUSES.has(data.status)) return BATTLE_ACTIVE_REFETCH_INTERVAL_MS;
 
       return false;
     },

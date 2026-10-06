@@ -17,7 +17,7 @@
  */
 import { PrismaClient } from "@prisma/client";
 
-import { DEFAULT_CAMPAIGN_ID } from "../lib/constants/campaigns";
+import { DEFAULT_CAMPAIGN_ID } from "./default-campaign";
 
 const prisma = new PrismaClient();
 

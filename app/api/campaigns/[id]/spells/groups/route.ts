@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import { createSpellGroupSchema } from "@/lib/schemas";
 import { requireCampaignAccess,requireDM } from "@/lib/utils/api/api-auth";
@@ -12,7 +13,6 @@ export async function POST(
   try {
     const { id } = await params;
     
-    // Перевіряємо права DM
     const accessResult = await requireDM(id);
 
     if (accessResult instanceof NextResponse) {
@@ -30,6 +30,8 @@ export async function POST(
       },
     });
 
+    invalidateReference(ReferenceKind.SPELLS, id);
+
     return NextResponse.json(spellGroup);
   } catch (error) {
     return handleApiError(error, { action: "create spell group" });
@@ -43,7 +45,6 @@ export async function GET(
   try {
     const { id } = await params;
     
-    // Перевіряємо доступ до кампанії (не обов'язково DM)
     const accessResult = await requireCampaignAccess(id, false);
 
     if (accessResult instanceof NextResponse) {

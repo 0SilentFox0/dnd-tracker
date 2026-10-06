@@ -1,6 +1,6 @@
-import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 
+import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import { updateMainSkillSchema } from "@/lib/schemas";
 import { requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
@@ -13,7 +13,6 @@ export async function GET(
   try {
     const { id, mainSkillId } = await params;
 
-    // Перевіряємо права DM
     const accessResult = await requireDM(id);
 
     if (accessResult instanceof NextResponse) {
@@ -43,7 +42,6 @@ export async function PATCH(
   try {
     const { id, mainSkillId } = await params;
 
-    // Перевіряємо права DM
     const accessResult = await requireDM(id);
 
     if (accessResult instanceof NextResponse) {
@@ -81,7 +79,7 @@ export async function PATCH(
       },
     });
 
-    revalidateTag(`main-skills-${id}`, "max");
+    invalidateReference([ReferenceKind.MAIN_SKILLS, ReferenceKind.SKILLS], id);
 
     return NextResponse.json(updatedMainSkill);
   } catch (error) {
@@ -96,7 +94,6 @@ export async function DELETE(
   try {
     const { id, mainSkillId } = await params;
 
-    // Перевіряємо права DM
     const accessResult = await requireDM(id);
 
     if (accessResult instanceof NextResponse) {
@@ -117,7 +114,7 @@ export async function DELETE(
       where: { id: mainSkillId },
     });
 
-    revalidateTag(`main-skills-${id}`, "max");
+    invalidateReference([ReferenceKind.MAIN_SKILLS, ReferenceKind.SKILLS], id);
 
     return NextResponse.json({ success: true });
   } catch (error) {

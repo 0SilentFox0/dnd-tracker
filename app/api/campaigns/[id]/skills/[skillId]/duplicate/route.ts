@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
+import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import { abilitiesJson, skillAbilities } from "@/lib/utils/abilities/read";
 import { requireDM } from "@/lib/utils/api/api-auth";
@@ -63,6 +64,8 @@ export async function POST(
         mainSkill: true,
       },
     });
+
+    invalidateReference(ReferenceKind.SKILLS, id);
 
     return NextResponse.json(skill);
   } catch (error) {

@@ -5,6 +5,7 @@ import { CampaignRole } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { createCampaignSchema } from "@/lib/schemas";
 import { requireAuth } from "@/lib/utils/api/api-auth";
+import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 
 // Генерує унікальний код запрошення
@@ -89,11 +90,7 @@ export async function GET() {
     const cached = await kvGet<unknown[]>(cacheKey);
 
     if (cached) {
-      return NextResponse.json(cached, {
-        headers: {
-          "Cache-Control": "private, s-maxage=30, stale-while-revalidate=60",
-        },
-      });
+      return NextResponse.json(cached, { headers: PRIVATE_NO_STORE_HEADERS });
     }
 
     const campaigns = await prisma.campaign.findMany({
@@ -118,11 +115,7 @@ export async function GET() {
 
     await kvSet(cacheKey, campaigns);
 
-    return NextResponse.json(campaigns, {
-      headers: {
-        "Cache-Control": "private, s-maxage=30, stale-while-revalidate=60",
-      },
-    });
+    return NextResponse.json(campaigns, { headers: PRIVATE_NO_STORE_HEADERS });
   } catch (error) {
     return handleApiError(error, { action: "list campaigns" });
   }

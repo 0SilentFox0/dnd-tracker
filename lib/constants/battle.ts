@@ -27,6 +27,14 @@ export const CombatStatus = {
   DEAD: "dead",
 } as const;
 
+export const BattleSceneStatus = {
+  PREPARED: "prepared",
+  ACTIVE: "active",
+  COMPLETED: "completed",
+} as const;
+
+export type BattleSceneStatusValue = (typeof BattleSceneStatus)[keyof typeof BattleSceneStatus];
+
 export const BattleActionType = {
   ATTACK: "attack",
   SPELL: "spell",

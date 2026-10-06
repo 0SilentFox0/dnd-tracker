@@ -12,12 +12,12 @@ import { parse } from "csv-parse/sync";
 import * as fs from "fs";
 import * as path from "path";
 
-import { DEFAULT_CAMPAIGN_ID } from "../lib/constants/campaigns";
 import { leadingDice } from "../lib/utils/common/dice";
 import {
   type DocsSpellRow,
   parseDocsSpellRow,
 } from "../lib/utils/spells/spell-csv-docs-parser";
+import { DEFAULT_CAMPAIGN_ID } from "./default-campaign";
 
 const prisma = new PrismaClient();
 

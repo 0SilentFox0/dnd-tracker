@@ -1,36 +1,9 @@
-/**
- * Хелпери для роботи з API
- */
+export function getCampaignId(paramsId?: string | null): string {
+  if (!paramsId) throw new Error("Campaign ID is required");
 
-import { DEFAULT_CAMPAIGN_ID } from "@/lib/constants/campaigns";
-
-/**
- * Отримує ID кампанії з параметрів або використовує дефолтний
- * Корисно для тестування та розробки
- */
-export function getCampaignId(
-  paramsId?: string | null,
-  useDefault: boolean = true
-): string {
-  if (paramsId) {
-    return paramsId;
-  }
-
-  if (useDefault) {
-    return DEFAULT_CAMPAIGN_ID;
-  }
-
-  throw new Error("Campaign ID is required");
+  return paramsId;
 }
 
-/**
- * Створює URL для API endpoint кампанії
- */
-export function getCampaignApiUrl(
-  endpoint: string,
-  campaignId?: string | null
-): string {
-  const id = getCampaignId(campaignId);
-
-  return `/api/campaigns/${id}${endpoint}`;
+export function getCampaignApiUrl(endpoint: string, campaignId?: string | null): string {
+  return `/api/campaigns/${getCampaignId(campaignId)}${endpoint}`;
 }

@@ -1,6 +1,6 @@
-import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 
+import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import { importUnitsSchema } from "@/lib/schemas/units";
 import { requireDM } from "@/lib/utils/api/api-auth";
@@ -24,7 +24,7 @@ export async function POST(
 
     const report = await importUnitsIntoCampaign(prisma, id, units);
 
-    revalidateTag(`units-${id}`, { expire: 0 });
+    invalidateReference(ReferenceKind.UNITS, id);
 
     return NextResponse.json(report);
   } catch (error) {

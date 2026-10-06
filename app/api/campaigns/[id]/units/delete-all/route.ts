@@ -1,6 +1,6 @@
-import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 
+import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
@@ -20,7 +20,7 @@ export async function DELETE(
 
     const result = await prisma.unit.deleteMany({ where: { campaignId: id } });
 
-    revalidateTag(`units-${id}`, { expire: 0 });
+    invalidateReference(ReferenceKind.UNITS, id);
 
     return NextResponse.json({ success: true, deleted: result.count });
   } catch (error) {

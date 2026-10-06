@@ -1,13 +1,14 @@
-import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
 import { listSpellsQuerySchema } from "./list-spells-query";
 
 import { getCachedSpells } from "@/lib/cache/reference-data";
+import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import { createSpellSchema } from "@/lib/schemas";
 import { requireCampaignAccess,requireDM } from "@/lib/utils/api/api-auth";
+import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { loadBookSpellsByIds } from "@/lib/utils/spells/book-spells-by-ids";
 
@@ -18,13 +19,11 @@ export async function POST(
   try {
     const { id } = await params;
     
-    // Перевіряємо права DM
     const accessResult = await requireDM(id);
 
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
-
 
     const body = await request.json();
 
@@ -67,7 +66,7 @@ export async function POST(
       },
     });
 
-    revalidateTag(`spells-${id}`, "max");
+    invalidateReference(ReferenceKind.SPELLS, id);
 
     return NextResponse.json(spell);
   } catch (error) {
@@ -82,7 +81,6 @@ export async function GET(
   try {
     const { id } = await params;
     
-    // Перевіряємо доступ до кампанії (не обов'язково DM)
     const accessResult = await requireCampaignAccess(id, false);
 
     if (accessResult instanceof NextResponse) {
@@ -95,12 +93,7 @@ export async function GET(
 
     const spells = await getCachedSpells(id);
 
-    return NextResponse.json(spells, {
-      headers: {
-        "Cache-Control":
-          "public, s-maxage=60, stale-while-revalidate=300",
-      },
-    });
+    return NextResponse.json(spells, { headers: PRIVATE_NO_STORE_HEADERS });
   } catch (error) {
     return handleApiError(error, { action: "list spells" });
   }

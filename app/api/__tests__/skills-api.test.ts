@@ -13,6 +13,8 @@ vi.mock("@/lib/utils/api/api-auth", () => ({
   validateCampaignOwnership: vi.fn(),
 }));
 
+vi.mock("next/cache", () => ({ revalidateTag: vi.fn() }));
+
 vi.mock("@/lib/db", () => ({
   prisma: {
     skill: {
