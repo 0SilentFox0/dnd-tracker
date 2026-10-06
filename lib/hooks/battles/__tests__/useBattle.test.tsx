@@ -53,7 +53,7 @@ describe("useBattle — опитування без Pusher", () => {
 
     const query = qc.getQueryCache().find({ queryKey: ["battle", "c1", "b1"] });
 
-    const interval = query?.options.refetchInterval;
+    const interval = query?.observers[0]?.options.refetchInterval;
 
     return typeof interval === "function" ? interval(query as never) : interval;
   };
