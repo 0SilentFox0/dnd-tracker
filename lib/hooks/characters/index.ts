@@ -13,6 +13,7 @@ export {
   useLevelUpCharacter,
   useUpdateCharacter,
 } from "./useCharacters";
+export { characterSheetKey, useCharacterSheet } from "./useCharacterSheet";
 export { useCharacterView } from "./useCharacterView";
 export type { UseDamageCalculatorProps } from "./useDamageCalculator";
 export { useDamageCalculator } from "./useDamageCalculator";

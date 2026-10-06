@@ -10,7 +10,7 @@ import {
   campaignRequest,
 } from "@/lib/api/client";
 import { formDataToCharacter } from "@/lib/utils/characters/character-form";
-import type { Character, CharacterFormData, DamagePreviewResponse } from "@/types/characters";
+import type { Character, CharacterFormData, CharacterSheet, DamagePreviewResponse } from "@/types/characters";
 
 export type { DamagePreviewResponse };
 
@@ -26,6 +26,8 @@ export async function getCharacter(
     `/characters/${characterId}`,
   );
 }
+
+export const getCharacterSheet = (campaignId: string, characterId: string) => campaignGet<CharacterSheet>(campaignId, `/characters/${characterId}/sheet`);
 
 /**
  * Отримує превʼю шкоди персонажа (melee/ranged total).
