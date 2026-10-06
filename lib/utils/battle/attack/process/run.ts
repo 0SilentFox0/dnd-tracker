@@ -11,12 +11,10 @@ import type {
   ProcessAttackResult,
 } from "../../types/attack-process";
 import { calculateAttackRoll } from "..";
-import { appendHpChanges, type AttackFlow, fire, getP, put, settleDowned } from "./ability-flow";
+import { appendHpChanges, type AttackFlow, fire, getP, put } from "./ability-flow";
 import { buildAbortedAttackAction, buildBattleActionForHit } from "./actions";
-import { computeHitDamage } from "./compute";
 import { handleCriticalFail } from "./critical-fail";
-import { applyDamageToTarget } from "./damage";
-import { applyReaction, applyVampirism } from "./hit-effects";
+import { resolveHit } from "./hit";
 import { handleMiss } from "./miss";
 
 import { AttackType } from "@/lib/constants/battle";
@@ -38,7 +36,6 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     currentRound,
     battleId,
     damageMultiplier,
-    reactionDamageOverride,
   } = params;
 
   const attackerId = attacker.basicInfo.id;
@@ -66,7 +63,6 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
       targetUpdated: getP(flow, targetId),
       attackerUpdated: getP(flow, attackerId),
       allParticipantsUpdated: flow.ps,
-      reactionTriggered: false,
       battleAction,
     };
   }
@@ -102,20 +98,17 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     return r;
   }
 
-  const hitDamage = computeHitDamage({
-    attacker: getP(flow, attackerId),
-    target: getP(flow, targetId),
+  const { hitDamage, vampirismHeal } = resolveHit({
+    flow,
+    attackerId,
+    targetId,
     attack,
     damageRolls,
-    allParticipants: flow.ps,
     attackRoll,
     damageMultiplier,
     currentRound,
     actionModifiers: actionModifiers[attackerId],
   });
-
-  put(flow, hitDamage.updatedAttacker);
-  put(flow, hitDamage.updatedTarget);
 
   const {
     damageCalculation,
@@ -128,28 +121,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     oldHp,
   } = hitDamage;
 
-  put(flow, applyDamageToTarget(getP(flow, targetId), totalFinalDamage).updatedTarget);
-  settleDowned(flow, targetId, attackerId);
-
-  fire(flow, { type: "hit", actorId: attackerId, targetId, attackKind, damage: resistanceResult.finalDamage });
-
-  const vampirismResult = applyVampirism(getP(flow, attackerId), totalFinalDamage, attack.type);
-
-  put(flow, vampirismResult.updatedAttacker);
-
   fire(flow, { type: "attack", phase: "after", actorId: attackerId, targetId, attackKind });
-
-  const ignoreReactions = criticalEffectApplied?.effect.type === "ignore_reactions";
-
-  const reactionResult = isUp(getP(flow, targetId))
-    ? applyReaction(getP(flow, targetId), getP(flow, attackerId), !!ignoreReactions, reactionDamageOverride, attack.type, flow.ps)
-    : null;
-
-  if (reactionResult) {
-    put(flow, reactionResult.updatedDefender);
-    put(flow, reactionResult.updatedAttacker);
-    settleDowned(flow, attackerId, targetId);
-  }
 
   put(flow, applyMainActionUsed(getP(flow, attackerId)));
 
@@ -169,12 +141,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     damageSteps,
     beforeMessages: [],
     afterMessages: flow.messages,
-    vampirismHeal: vampirismResult.vampirismHeal,
-    reactionTriggered: reactionResult?.reactionTriggered ?? false,
-    reactionDamage: reactionResult?.reactionDamage ?? 0,
-    reactionBaseDamage: reactionResult?.reactionBaseDamage ?? 0,
-    reactionBonusPercent: reactionResult?.reactionBonusPercent ?? 0,
-    reactionAttackerHpChange: reactionResult?.reactionAttackerHpChange ?? null,
+    vampirismHeal,
     oldHp,
     battleId,
     currentRound,
@@ -196,8 +163,6 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     attackerUpdated: getP(flow, attackerId),
     allParticipantsUpdated: flow.ps,
     criticalEffectApplied,
-    reactionTriggered: reactionResult?.reactionTriggered ?? false,
-    reactionDamage: reactionResult?.reactionDamage ?? 0,
     battleAction,
   };
 }

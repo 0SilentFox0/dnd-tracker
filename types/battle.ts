@@ -355,10 +355,6 @@ export interface BattleAction {
       description: string;
       type: "success" | "fail";
     };
-    // Контр-атака (reaction):
-    counterReactionDamage?: number;
-    counterReactionBaseDamage?: number;
-    counterReactionBonusPercent?: number;
   };
   resultText: string; // текстовий опис для лога
   hpChanges: Array<{

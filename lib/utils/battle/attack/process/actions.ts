@@ -151,11 +151,6 @@ export interface BuildHitActionParams {
   beforeMessages: string[];
   afterMessages: string[];
   vampirismHeal: number;
-  reactionTriggered: boolean;
-  reactionDamage: number;
-  reactionBaseDamage: number;
-  reactionBonusPercent: number;
-  reactionAttackerHpChange: { oldHp: number; newHp: number } | null;
   oldHp: number;
   battleId: string;
   currentRound: number;
@@ -178,11 +173,6 @@ export function buildBattleActionForHit(params: BuildHitActionParams): BattleAct
     beforeMessages,
     afterMessages,
     vampirismHeal,
-    reactionTriggered,
-    reactionDamage,
-    reactionBaseDamage,
-    reactionBonusPercent,
-    reactionAttackerHpChange,
     oldHp,
     battleId,
     currentRound,
@@ -231,14 +221,9 @@ export function buildBattleActionForHit(params: BuildHitActionParams): BattleAct
       totalDamage: physicalDamage,
       damageBreakdown: damageCalculation.breakdown.join("; "),
       damageSteps: { [target.basicInfo.id]: damageSteps },
-      ...(reactionTriggered && {
-        counterReactionDamage: reactionDamage,
-        counterReactionBaseDamage: reactionBaseDamage,
-        counterReactionBonusPercent: reactionBonusPercent,
-      }),
     },
     resultText: [
-      `${attacker.basicInfo.name} завдав ${totalFinalDamage} урону ${target.basicInfo.name}${attackRoll.isCritical ? " (КРИТИЧНЕ ПОПАДАННЯ!)" : ""}${criticalEffectApplied ? ` [d10: ${criticalEffectApplied.id}] ${criticalEffectApplied.name}` : ""}${vampirismHeal > 0 ? ` | Вампіризм: ${attacker.basicInfo.name} відновив ${vampirismHeal} HP` : ""}${reactionTriggered ? ` | ${target.basicInfo.name} виконав контр-удар на ${reactionDamage} урону` : ""}`,
+      `${attacker.basicInfo.name} завдав ${totalFinalDamage} урону ${target.basicInfo.name}${attackRoll.isCritical ? " (КРИТИЧНЕ ПОПАДАННЯ!)" : ""}${criticalEffectApplied ? ` [d10: ${criticalEffectApplied.id}] ${criticalEffectApplied.name}` : ""}${vampirismHeal > 0 ? ` | Вампіризм: ${attacker.basicInfo.name} відновив ${vampirismHeal} HP` : ""}`,
       ...beforeMessages,
       ...afterMessages,
     ].filter(Boolean).join(" | "),
@@ -258,17 +243,6 @@ export function buildBattleActionForHit(params: BuildHitActionParams): BattleAct
               oldHp: attacker.combatStats.currentHp - vampirismHeal,
               newHp: params.attacker.combatStats.currentHp,
               change: -vampirismHeal,
-            },
-          ]
-        : []),
-      ...(reactionTriggered && reactionAttackerHpChange
-        ? [
-            {
-              participantId: attacker.basicInfo.id,
-              participantName: attacker.basicInfo.name,
-              oldHp: reactionAttackerHpChange.oldHp,
-              newHp: reactionAttackerHpChange.newHp,
-              change: reactionDamage,
             },
           ]
         : []),

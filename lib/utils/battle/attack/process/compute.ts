@@ -28,6 +28,7 @@ export interface ComputeHitDamageParams {
   damageMultiplier?: number;
   currentRound: number;
   actionModifiers?: StaticEffect[];
+  bonusPercent?: number;
 }
 
 export interface ComputeHitDamageResult {
@@ -138,6 +139,13 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
     damageCalculation.breakdown.push("──────────");
     damageCalculation.breakdown.push(heroDm.breakdownLine);
     damageSteps.push({ label: "Коефіцієнт DM", side: "attacker", kind: "multiplier", value: heroDm.multiplier, after: physicalDamage });
+  }
+
+  if (params.bonusPercent) {
+    const factor = 1 + params.bonusPercent / 100;
+
+    physicalDamage = Math.floor(physicalDamage * factor);
+    damageSteps.push({ label: "Контратака", side: "attacker", kind: "multiplier", value: factor, after: physicalDamage });
   }
 
   const dmgMult =

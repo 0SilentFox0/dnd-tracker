@@ -72,7 +72,6 @@ export function handleMiss(params: HandleMissParams): ProcessAttackResult {
     targetUpdated: getP(flow, targetId),
     attackerUpdated: getP(flow, attackerId),
     allParticipantsUpdated: flow.ps,
-    reactionTriggered: false,
     battleAction,
   };
 }
