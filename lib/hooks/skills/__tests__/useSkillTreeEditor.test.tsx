@@ -14,7 +14,7 @@ let races: Array<{ id: string; name: string; availableSkills: string[] }> = [{ i
 
 vi.mock("@/lib/hooks/races", () => ({ useRaces: () => ({ data: races }) }));
 vi.mock("@/lib/hooks/skills/useMainSkills", () => ({ useMainSkills: () => ({ data: [{ id: "attack", name: "Напад", color: "red" }, { id: "defense", name: "Захист", color: "blue" }] }) }));
-vi.mock("@/lib/hooks/skills/useSkills", () => ({ useSkills: () => ({ data: [{ id: "o1", name: "Кровопуск", mainSkillId: "attack" }, { id: "o2", name: "Шквал", mainSkillId: "attack" }] }) }));
+vi.mock("@/lib/hooks/skills/useSkills", () => ({ useSkills: () => ({ data: [{ id: "o1", name: "Кровопуск", mainSkillId: "attack" }, { id: "o2", name: "Шквал", mainSkillId: "attack" }, { id: "api", basicInfo: { name: "З API", icon: "/i.png" }, mainSkillData: { mainSkillId: "attack" } }] }) }));
 vi.mock("@/lib/hooks/common", () => ({ useNotify: () => vi.fn(), useConfirm: () => vi.fn(async () => true) }));
 
 afterEach(cleanup);
@@ -107,5 +107,15 @@ describe("useSkillTreeEditor", () => {
 
     await waitFor(() => expect(seeded.result.current.tree).not.toBeNull());
     expect(seeded.result.current.dirty).toBe(true);
+  });
+
+  it("гілка й іконка скіла з формату API (mainSkillData, basicInfo)", async () => {
+    vi.mocked(treesApi.getSkillTrees).mockResolvedValue([rowWith([])] as never);
+
+    const { result } = setup();
+
+    await waitFor(() => expect(result.current.librarySkills.length).toBe(3));
+
+    expect(result.current.librarySkills.find((s) => s.id === "api")).toMatchObject({ name: "З API", icon: "/i.png", mainSkillId: "attack" });
   });
 });

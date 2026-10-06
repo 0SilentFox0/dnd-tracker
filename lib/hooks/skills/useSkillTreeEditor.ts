@@ -13,6 +13,7 @@ import { useRaces } from "@/lib/hooks/races";
 import type { CellRef, RawTree } from "@/lib/utils/skills/progression";
 import { RACIAL_BRANCH_ID } from "@/lib/utils/skills/progression";
 import * as edit from "@/lib/utils/skills/progression";
+import { getSkillMainSkillId } from "@/lib/utils/skills/skill-helpers";
 
 export function useSkillTreeEditor(campaignId: string) {
   const queryClient = useQueryClient();
@@ -70,6 +71,8 @@ export function useSkillTreeEditor(campaignId: string) {
     [raw, mainSkills, skills],
   );
 
+  const skillIcon = (s: (typeof skills)[number]) => s.icon || (s as { basicInfo?: { icon?: string } }).basicInfo?.icon || null;
+
   const skillName = (s: (typeof skills)[number]) => (s as { basicInfo?: { name?: string } }).basicInfo?.name ?? s.name ?? s.id;
 
   const save = async () => {
@@ -105,13 +108,13 @@ export function useSkillTreeEditor(campaignId: string) {
       (draft?.key === seedKey ? JSON.stringify(current.raw) !== baseline : baseline === null && current.raw.mainSkills.some((b) => b.id !== RACIAL_BRANCH_ID)),
     saving,
     locations: raw ? edit.skillLocations(raw) : new Map<string, CellRef[]>(),
-    librarySkills: skills.map((s) => ({ id: s.id, name: skillName(s), icon: s.icon ?? null, mainSkillId: s.mainSkillId ?? null, summary: (s as { abilitySummary?: string[] }).abilitySummary ?? [] })),
+    librarySkills: skills.map((s) => ({ id: s.id, name: skillName(s), icon: skillIcon(s), mainSkillId: getSkillMainSkillId(s) ?? null, summary: (s as { abilitySummary?: string[] }).abilitySummary ?? [] })),
     availableBranches: mainSkills.filter((m) => !tree?.branches.some((b) => b.id === m.id)).map((m) => ({ id: m.id, name: m.name, color: m.color, icon: m.icon ?? null })),
     actions: {
       setCell: (ref: CellRef, skillId: string | null) => {
         const skill = skillId ? skills.find((s) => s.id === skillId) : null;
 
-        update((r) => edit.setCellSkill(r, ref, skill ? { id: skill.id, name: skillName(skill), icon: skill.icon ?? null } : null));
+        update((r) => edit.setCellSkill(r, ref, skill ? { id: skill.id, name: skillName(skill), icon: skillIcon(skill) } : null));
       },
       addBranch: (mainSkillId: string) => {
         const m = mainSkills.find((x) => x.id === mainSkillId);

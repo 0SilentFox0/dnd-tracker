@@ -115,12 +115,12 @@ export function formatSkillsListResponse(
             spellNewSpellId: skill.spellNewSpellId || undefined,
           };
 
-    const mainSkillData =
-      skill.mainSkillData &&
-      typeof skill.mainSkillData === "object" &&
-      !Array.isArray(skill.mainSkillData)
+    const storedMainSkillData =
+      skill.mainSkillData && typeof skill.mainSkillData === "object" && !Array.isArray(skill.mainSkillData)
         ? (skill.mainSkillData as Record<string, unknown>)
-        : { mainSkillId: skill.mainSkillId || undefined };
+        : {};
+
+    const mainSkillData = { ...storedMainSkillData, mainSkillId: storedMainSkillData.mainSkillId ?? (skill.mainSkillId || undefined) };
 
     return {
       id: skill.id,
