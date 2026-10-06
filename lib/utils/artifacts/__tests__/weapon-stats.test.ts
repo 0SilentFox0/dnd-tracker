@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 
-import { convertLegacyArtifact } from "@/lib/utils/abilities/legacy/convert-artifact";
 import { isWeaponSlot, weaponStatsColumns, weaponStatsFromRow } from "@/lib/utils/artifacts/weapon-stats";
 
 describe("weapon stats", () => {
@@ -30,11 +29,5 @@ describe("weapon stats", () => {
     expect(isWeaponSlot("weapon")).toBe(true);
     expect(isWeaponSlot("range_weapon")).toBe(true);
     expect(isWeaponSlot("ring")).toBe(false);
-  });
-
-  it("конвертер не рахує бонус атаки зброї втратою", () => {
-    const r = convertLegacyArtifact({ id: "w", name: "Меч", slot: "weapon", bonuses: { attackBonus: 2 }, modifiers: [{ type: "damageDice", value: "1d8" }], passiveAbility: null } as never);
-
-    expect(r.issues.filter((i) => /attackBonus/.test(i.message))).toEqual([]);
   });
 });

@@ -9,7 +9,7 @@ import { ImageUpload } from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import type { ConversionIssue } from "@/lib/utils/abilities/legacy/types";
+import type { ConversionIssue } from "@/lib/utils/abilities/schema";
 import type { MainSkill } from "@/types/main-skills";
 import type { RaceFormData } from "@/types/races";
 

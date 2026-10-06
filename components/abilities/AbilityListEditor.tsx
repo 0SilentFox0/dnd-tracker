@@ -9,7 +9,7 @@ import { AbilityEditorProvider } from "./editor-context";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { validateAbilities, withFreshIds } from "@/lib/utils/abilities/editor";
-import type { ConversionIssue } from "@/lib/utils/abilities/legacy/types";
+import type { ConversionIssue } from "@/lib/utils/abilities/schema";
 import type { Ability } from "@/lib/utils/abilities/schema";
 
 interface AbilityListEditorProps {

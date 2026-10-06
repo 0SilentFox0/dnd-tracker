@@ -1,4 +1,4 @@
-import { readAbilities } from "@/lib/utils/abilities/legacy/read";
+import { readAbilities } from "@/lib/utils/abilities/read";
 
 /** Форматує один скіл з Prisma у згруповану структуру для фронтенду */
 export function formatSkillResponse(skill: {

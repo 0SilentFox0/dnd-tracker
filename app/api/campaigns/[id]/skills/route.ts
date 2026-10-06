@@ -5,7 +5,7 @@ import { createSkillSchema } from "./create-skill-schema";
 import { formatSkillsListResponse } from "./format-skills-response";
 
 import { prisma } from "@/lib/db";
-import { abilitiesJson } from "@/lib/utils/abilities/legacy/read";
+import { abilitiesJson } from "@/lib/utils/abilities/read";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 

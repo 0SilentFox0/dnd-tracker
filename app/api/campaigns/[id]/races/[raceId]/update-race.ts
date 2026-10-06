@@ -2,7 +2,7 @@ import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
 import type { UpdateRaceInput } from "@/lib/schemas";
-import { abilitiesJson } from "@/lib/utils/abilities/legacy/read";
+import { abilitiesJson } from "@/lib/utils/abilities/read";
 
 // characters.race and skill_trees.race reference the race by name
 export async function updateRaceCascade(campaignId: string, current: { id: string; name: string }, data: UpdateRaceInput) {

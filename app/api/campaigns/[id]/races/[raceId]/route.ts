@@ -6,7 +6,7 @@ import { updateRaceCascade } from "./update-race";
 
 import { prisma } from "@/lib/db";
 import { updateRaceSchema } from "@/lib/schemas";
-import { readAbilities } from "@/lib/utils/abilities/legacy/read";
+import { readAbilities } from "@/lib/utils/abilities/read";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 

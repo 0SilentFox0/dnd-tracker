@@ -7,7 +7,7 @@ import {
   mirrorArtifactIconToSupabase,
   shouldMirrorArtifactIconUrl,
 } from "@/lib/supabase/artifact-icon-storage";
-import { abilitiesJson, artifactAbilities } from "@/lib/utils/abilities/legacy/read";
+import { abilitiesJson, artifactAbilities } from "@/lib/utils/abilities/read";
 import { sheetStatBonuses } from "@/lib/utils/abilities/sheet-bonuses";
 import { abilitySummary } from "@/lib/utils/abilities/summary";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";

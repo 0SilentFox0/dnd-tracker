@@ -1,4 +1,4 @@
-import type { DamageFilterKind } from "@/lib/utils/abilities/schema";
+import type { DamageFilterKind } from "./common";
 
 export function legacyDamageKindOf(type: string): DamageFilterKind | null {
   const s = type.toLowerCase();

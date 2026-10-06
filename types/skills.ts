@@ -4,7 +4,7 @@
 import type { SkillEffect } from "./battle";
 import type { SkillTriggers } from "./skill-triggers";
 
-import type { ConversionIssue } from "@/lib/utils/abilities/legacy/types";
+import type { ConversionIssue } from "@/lib/utils/abilities/schema";
 import type { Ability } from "@/lib/utils/abilities/schema";
 
 export interface Skill {

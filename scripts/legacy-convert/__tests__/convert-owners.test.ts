@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { convertLegacyArtifact } from "@/lib/utils/abilities/legacy/convert-artifact";
-import { convertLegacyArtifactSet } from "@/lib/utils/abilities/legacy/convert-artifact-set";
-import { convertLegacyRace } from "@/lib/utils/abilities/legacy/convert-race";
-import { convertLegacyUnit } from "@/lib/utils/abilities/legacy/convert-unit";
+import { convertLegacyArtifact } from "../convert-artifact";
+import { convertLegacyArtifactSet } from "../convert-artifact-set";
+import { convertLegacyRace } from "../convert-race";
+
 import { AbilitiesSchema } from "@/lib/utils/abilities/schema";
 
 describe("convertLegacyArtifact", () => {
@@ -52,9 +52,15 @@ describe("convertLegacyArtifact", () => {
 
     expect(r.abilities[0].effects).toEqual([{ kind: "damageBonus", filter: { kind: "melee" }, flat: 2 }]);
   });
+
+  it("конвертер не рахує бонус атаки зброї втратою", () => {
+    const r = convertLegacyArtifact({ id: "w", name: "Меч", slot: "weapon", bonuses: { attackBonus: 2 }, modifiers: [{ type: "damageDice", value: "1d8" }], passiveAbility: null } as never);
+
+    expect(r.issues.filter((i) => /attackBonus/.test(i.message))).toEqual([]);
+  });
 });
 
-describe("convertLegacyArtifactSet / Race / Unit", () => {
+describe("convertLegacyArtifactSet / Race", () => {
   it("сет: слоти, імунітет до спелів, аура на ворогів", () => {
     const r = convertLegacyArtifactSet({ id: "set", name: "Сет", setBonus: { spellSlotBonus: { "2": 1 }, effectScope: { audience: "all_enemies", immuneSpellIds: ["sp1"] }, modifiers: [{ type: "all_damage", value: -5, isPercentage: true }] } });
 
@@ -72,12 +78,5 @@ describe("convertLegacyArtifactSet / Race / Unit", () => {
 
     expect(r.abilities[0].effects).toEqual([{ kind: "modifyStat", stat: "maxTargets", flat: 1 }]);
     expect(r.issues[0].message).toContain("вручну");
-  });
-
-  it("юніт: пасивні нотатки і бонусна дія", () => {
-    const r = convertLegacyUnit({ id: "u", name: "Шаман", specialAbilities: [{ name: "Тотем", description: "Ставить тотем", type: "active", actionType: "bonus_action", spellId: "sp" }, { name: "Шкіра", type: "passive" }] });
-
-    expect(r.abilities.map((a) => a.trigger.event)).toEqual(["bonusAction", "passive"]);
-    expect(AbilitiesSchema.safeParse(r.abilities).success).toBe(true);
   });
 });

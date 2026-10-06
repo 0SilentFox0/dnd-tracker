@@ -8,7 +8,7 @@ import { getCachedRaces } from "@/lib/cache/reference-data";
 import { raceColorAt } from "@/lib/constants/race-colors";
 import { prisma } from "@/lib/db";
 import { createRaceSchema } from "@/lib/schemas";
-import { abilitiesJson } from "@/lib/utils/abilities/legacy/read";
+import { abilitiesJson } from "@/lib/utils/abilities/read";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 

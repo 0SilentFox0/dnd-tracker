@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildConversionReport } from "@/lib/utils/abilities/legacy/report";
+import { buildConversionReport } from "../report";
 
 describe("buildConversionReport", () => {
   it("групує за статусами", () => {

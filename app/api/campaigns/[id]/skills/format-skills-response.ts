@@ -2,7 +2,7 @@
  * Форматує список скілів з Prisma у згруповану структуру для фронтенду.
  */
 
-import { skillAbilities } from "@/lib/utils/abilities/legacy/read";
+import { skillAbilities } from "@/lib/utils/abilities/read";
 import { damageAffinity } from "@/lib/utils/abilities/sheet-bonuses";
 import { abilitySummary } from "@/lib/utils/abilities/summary";
 

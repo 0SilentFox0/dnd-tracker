@@ -5,7 +5,7 @@
 import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
-import { abilitiesJson } from "@/lib/utils/abilities/legacy/read";
+import { abilitiesJson } from "@/lib/utils/abilities/read";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import { withAbilitySummary } from "@/lib/utils/abilities/summary";
 

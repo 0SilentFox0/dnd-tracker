@@ -3,7 +3,7 @@ import type { Prisma } from "@prisma/client";
 import type { ProgressionContext } from "./load-progression-context";
 
 import { prisma } from "@/lib/db";
-import { skillAbilities } from "@/lib/utils/abilities/legacy/read";
+import { skillAbilities } from "@/lib/utils/abilities/read";
 import { damageAffinity } from "@/lib/utils/abilities/sheet-bonuses";
 import { abilitySummary } from "@/lib/utils/abilities/summary";
 import { normalizeTree, readTreeJson, readUnlocked, stripTreeForClient } from "@/lib/utils/skills/progression";

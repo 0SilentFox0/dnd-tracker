@@ -9,7 +9,7 @@ import { UnitKnownSpells } from "./UnitKnownSpells";
 import { AbilityListEditor } from "@/components/abilities";
 import { IconUrlField } from "@/components/common/IconUrlField";
 import type { UnitFormFieldsState } from "@/lib/hooks/units";
-import type { ConversionIssue } from "@/lib/utils/abilities/legacy/types";
+import type { ConversionIssue } from "@/lib/utils/abilities/schema";
 
 interface UnitFormFieldsProps {
   campaignId: string;

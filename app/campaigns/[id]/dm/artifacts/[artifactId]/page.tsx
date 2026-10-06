@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { ArtifactEditForm } from "@/components/artifacts/ArtifactEditForm";
 import { requireCampaignDM } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
-import { readAbilities } from "@/lib/utils/abilities/legacy/read";
+import { readAbilities } from "@/lib/utils/abilities/read";
 import { weaponStatsFromRow } from "@/lib/utils/artifacts/weapon-stats";
 
 export default async function EditArtifactPage({

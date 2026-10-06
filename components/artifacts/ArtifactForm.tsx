@@ -25,7 +25,7 @@ import {
   ARTIFACT_SLOT_OPTIONS,
 } from "@/lib/constants/artifacts";
 import { useArtifactForm } from "@/lib/hooks/artifacts";
-import type { ConversionIssue } from "@/lib/utils/abilities/legacy/types";
+import type { ConversionIssue } from "@/lib/utils/abilities/schema";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import type { ArtifactFormSubmitPayload } from "@/lib/utils/artifacts/artifact-form";
 import { isWeaponSlot, type WeaponStats } from "@/lib/utils/artifacts/weapon-stats";

@@ -6,7 +6,7 @@ import { invalidUnitRace } from "../unit-race";
 
 import { prisma } from "@/lib/db";
 import { updateUnitSchema } from "@/lib/schemas";
-import { abilitiesJson, readAbilities } from "@/lib/utils/abilities/legacy/read";
+import { abilitiesJson, readAbilities } from "@/lib/utils/abilities/read";
 import { requireCampaignAccess, requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { toUnit } from "@/lib/utils/units/to-unit";

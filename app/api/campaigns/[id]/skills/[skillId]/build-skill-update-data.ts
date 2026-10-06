@@ -7,7 +7,7 @@ import type { z } from "zod";
 
 import type { updateSkillSchema } from "./update-skill-schema";
 
-import { abilitiesJson } from "@/lib/utils/abilities/legacy/read";
+import { abilitiesJson } from "@/lib/utils/abilities/read";
 
 export type UpdateSkillData = z.infer<typeof updateSkillSchema>;
 

@@ -39,17 +39,15 @@ describe("abilities API", () => {
     expect(vi.mocked(prisma.skill.findMany)).toHaveBeenCalledWith(expect.objectContaining({ select: { id: true, name: true } }));
   });
 
-  it("GET skill detail з NULL у колонці — сконвертовані abilities + abilityIssues", async () => {
-    vi.mocked(prisma.skill.findUnique).mockResolvedValue({
-      id: "s1", campaignId: "c1", name: "Лють", abilities: null, combatStats: { effects: [{ stat: "weird", type: "flat", value: 1 }] }, bonuses: {}, skillTriggers: [],
-    } as never);
+  it("GET skill detail з NULL у колонці — порожні abilities без abilityIssues", async () => {
+    vi.mocked(prisma.skill.findUnique).mockResolvedValue({ id: "s1", campaignId: "c1", name: "Лють", abilities: null } as never);
 
     const { GET } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
 
     const body = await (await GET(req("/api/campaigns/c1/skills/s1"), ctx({ skillId: "s1" }))).json();
 
-    expect(body.abilities[0].effects[0]).toEqual({ kind: "note", text: "weird: 1" });
-    expect(body.abilityIssues.length).toBeGreaterThan(0);
+    expect(body.abilities).toEqual([]);
+    expect(body.abilityIssues).toEqual([]);
   });
 
   it("PATCH skill з abilities пише колонку; без abilities — не чіпає", async () => {

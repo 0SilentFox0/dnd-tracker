@@ -3,8 +3,8 @@ import type { ConversionIssue, ConversionResult, ConvertOptions, LegacyEffect } 
 
 import { parseEffectScopeObject } from "@/lib/constants/artifact-effect-scope";
 import { AttackType } from "@/lib/constants/battle";
-import { legacyDamageKindOf } from "@/lib/utils/abilities/legacy/damage-kind";
 import type { AbilityTarget, Effect, StatKey } from "@/lib/utils/abilities/schema";
+import { legacyDamageKindOf } from "@/lib/utils/abilities/schema";
 import { matchesAttackBonusModifier } from "@/lib/utils/battle/common/modifiers";
 
 const BONUS_STATS: Record<string, StatKey> = {

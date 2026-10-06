@@ -1,8 +1,8 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
 
 import type { ImportUnitRow } from "@/lib/schemas/units";
-import { convertLegacyUnit } from "@/lib/utils/abilities/legacy/convert-unit";
-import { abilitiesJson } from "@/lib/utils/abilities/legacy/read";
+import { abilitiesJson } from "@/lib/utils/abilities/read";
+import { specialAbilitiesToAbilities } from "@/lib/utils/units/special-abilities";
 import type { UnitImportResult } from "@/types/import";
 
 export interface ImportDb {
@@ -49,7 +49,7 @@ export function toUnitCreateData(campaignId: string, unit: ImportUnitRow, raceId
     maxHp: unit.maxHp,
     proficiencyBonus: unit.proficiencyBonus,
     attacks: unit.attacks as Prisma.InputJsonValue,
-    abilities: abilitiesJson(convertLegacyUnit({ id: unit.name, name: unit.name, specialAbilities: unit.specialAbilities }).abilities),
+    abilities: abilitiesJson(specialAbilitiesToAbilities(unit.specialAbilities)),
     knownSpells: unit.knownSpells,
     avatar: unit.avatar ?? null,
   };

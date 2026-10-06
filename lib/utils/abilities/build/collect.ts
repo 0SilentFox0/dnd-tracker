@@ -1,11 +1,16 @@
 import { pickHighestPerLine, resolveAbilities } from "./resolve";
 
-import type { LegacySkillRow } from "@/lib/utils/abilities/legacy/convert-skill";
-import { artifactAbilities, artifactSetAbilities, raceAbilities, skillAbilities, unitAbilities } from "@/lib/utils/abilities/legacy/read";
+import { artifactAbilities, artifactSetAbilities, raceAbilities, skillAbilities, unitAbilities } from "@/lib/utils/abilities/read";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import type { AbilitySource, ResolvedAbility } from "@/types/abilities";
 
-export type SkillRowLike = LegacySkillRow & { abilities?: unknown; icon?: string | null };
+export interface SkillRowLike {
+  id: string;
+  name: string;
+  icon?: string | null;
+  spellGroupId?: string | null;
+  abilities?: unknown;
+}
 
 export interface SkillEntry {
   row: SkillRowLike;
@@ -18,7 +23,6 @@ export interface SkillEntry {
 export interface RaceRowLike {
   id: string;
   name: string;
-  passiveAbility: unknown;
   abilities?: unknown;
 }
 
@@ -27,9 +31,6 @@ export interface ArtifactRowLike {
   name: string;
   slot?: string | null;
   icon?: string | null;
-  bonuses: unknown;
-  modifiers: unknown;
-  passiveAbility: unknown;
   abilities?: unknown;
 }
 
@@ -37,14 +38,13 @@ export interface ArtifactSetRowLike {
   id: string;
   name: string;
   icon?: string | null;
-  setBonus: unknown;
+  setBonus?: unknown;
   abilities?: unknown;
 }
 
 export interface UnitRowLike {
   id: string;
   name: string;
-  specialAbilities: unknown;
   abilities?: unknown;
 }
 

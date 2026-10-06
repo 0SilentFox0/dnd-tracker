@@ -17,7 +17,7 @@ import {
   getCanonicalMainSkillName,
   getMainSkillNameVariants,
 } from "../lib/constants/main-skills";
-import { convertLegacySkill } from "../lib/utils/abilities/legacy/convert-skill";
+import { convertLegacySkill } from "./legacy-convert/convert-skill";
 import { loadSkillsFromDoc } from "./import-skills-library-parse";
 import { triggerStringToSkillTriggers } from "./import-skills-library-triggers";
 import type { LibraryEffect, LibrarySkill } from "./import-skills-library-types";

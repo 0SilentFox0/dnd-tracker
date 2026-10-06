@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { convertLegacySkill } from "@/lib/utils/abilities/legacy/convert-skill";
+import { convertLegacySkill } from "../convert-skill";
+
 import { AbilitiesSchema } from "@/lib/utils/abilities/schema";
 
 const row = (over: Partial<Parameters<typeof convertLegacySkill>[0]>) => ({ id: "s1", name: "Скіл", combatStats: {}, bonuses: {}, skillTriggers: [], ...over });

@@ -43,7 +43,13 @@ describe("bake", () => {
 
 describe("collectCharacterAbilities", () => {
   it("найвищий у лінії, школа з mainSkill, сет лише повний", () => {
-    const skillRow = (id: string, name: string, pct: number) => ({ id, name, icon: null, abilities: null, combatStats: { effects: [{ stat: "magic_damage", type: "percent", value: pct }] }, bonuses: {}, skillTriggers: [{ type: "simple", trigger: "passive" }], spellGroupId: null });
+    const skillRow = (id: string, name: string, pct: number) => ({
+      id,
+      name,
+      icon: null,
+      spellGroupId: null,
+      abilities: [{ id: "t0", name, trigger: { event: "passive" }, effects: [{ kind: "damageBonus", filter: { kind: "magic" }, percent: pct }] }],
+    });
 
     const list = collectCharacterAbilities({
       skills: [

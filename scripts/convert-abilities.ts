@@ -1,16 +1,16 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { config } from "dotenv";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { convertLegacyArtifact } from "../lib/utils/abilities/legacy/convert-artifact";
-import { convertLegacyArtifactSet } from "../lib/utils/abilities/legacy/convert-artifact-set";
-import { convertLegacyRace } from "../lib/utils/abilities/legacy/convert-race";
-import { convertLegacySkill } from "../lib/utils/abilities/legacy/convert-skill";
-import { convertLegacyUnit } from "../lib/utils/abilities/legacy/convert-unit";
-import { buildConversionReport, type ReportRow } from "../lib/utils/abilities/legacy/report";
-import type { ConversionResult } from "../lib/utils/abilities/legacy/types";
 import { AbilitiesSchema } from "../lib/utils/abilities/schema";
+import { specialAbilitiesToAbilities } from "../lib/utils/units/special-abilities";
+import { convertLegacyArtifact } from "./legacy-convert/convert-artifact";
+import { convertLegacyArtifactSet } from "./legacy-convert/convert-artifact-set";
+import { convertLegacyRace } from "./legacy-convert/convert-race";
+import { convertLegacySkill } from "./legacy-convert/convert-skill";
+import { buildConversionReport, type ReportRow } from "./legacy-convert/report";
+import type { ConversionResult } from "./legacy-convert/types";
 
 const args = process.argv.slice(2);
 
@@ -23,25 +23,43 @@ const campaignId = args.includes("--campaign") ? args[args.indexOf("--campaign")
 
 const mode = args.includes("--force") ? "force" : args.includes("--apply") ? "apply" : "dry-run";
 
-const where = campaignId ? { campaignId } : {};
+// legacy-колонок уже немає в schema.prisma, але в БД вони є до релізу 2
+const byCampaign = campaignId ? Prisma.sql`WHERE "campaignId" = ${campaignId}` : Prisma.empty;
 
 type Model = "skill" | "race" | "artifact" | "artifactSet" | "unit";
+
+type Base = { id: string; name: string; campaignId: string; abilities: unknown };
 
 async function main() {
   const rows: (ReportRow & { hasAbilities: boolean })[] = [];
 
-  const push = (kind: Model, row: { id: string; name: string; campaignId: string; abilities: unknown }, result: ConversionResult) =>
+  const push = (kind: Model, row: Base, result: ConversionResult) =>
     rows.push({ kind, id: row.id, name: row.name, campaignId: row.campaignId, result, valid: AbilitiesSchema.safeParse(result.abilities).success, hasAbilities: row.abilities !== null });
 
-  for (const r of await prisma.skill.findMany({ where, select: { id: true, name: true, campaignId: true, abilities: true, combatStats: true, bonuses: true, skillTriggers: true, spellGroupId: true } })) push("skill", r, convertLegacySkill(r));
+  const skills = await prisma.$queryRaw<(Base & { combatStats: unknown; bonuses: unknown; skillTriggers: unknown; spellGroupId: string | null })[]>`
+    SELECT id, name, "campaignId", abilities, "combatStats", bonuses, "skillTriggers", "spellGroupId" FROM skills ${byCampaign}`;
 
-  for (const r of await prisma.race.findMany({ where, select: { id: true, name: true, campaignId: true, abilities: true, passiveAbility: true } })) push("race", r, convertLegacyRace(r));
+  for (const r of skills) push("skill", r, convertLegacySkill(r));
 
-  for (const r of await prisma.artifact.findMany({ where, select: { id: true, name: true, campaignId: true, abilities: true, bonuses: true, modifiers: true, passiveAbility: true, slot: true } })) push("artifact", r, convertLegacyArtifact(r));
+  const races = await prisma.$queryRaw<(Base & { passiveAbility: unknown })[]>`
+    SELECT id, name, "campaignId", abilities, "passiveAbility" FROM races ${byCampaign}`;
 
-  for (const r of await prisma.artifactSet.findMany({ where, select: { id: true, name: true, campaignId: true, abilities: true, setBonus: true } })) push("artifactSet", r, convertLegacyArtifactSet(r));
+  for (const r of races) push("race", r, convertLegacyRace(r));
 
-  for (const r of await prisma.unit.findMany({ where, select: { id: true, name: true, campaignId: true, abilities: true, specialAbilities: true } })) push("unit", r, convertLegacyUnit(r));
+  const artifacts = await prisma.$queryRaw<(Base & { bonuses: unknown; modifiers: unknown; passiveAbility: unknown; slot: string })[]>`
+    SELECT id, name, "campaignId", abilities, bonuses, modifiers, "passiveAbility", slot FROM artifacts ${byCampaign}`;
+
+  for (const r of artifacts) push("artifact", r, convertLegacyArtifact(r));
+
+  const sets = await prisma.$queryRaw<(Base & { setBonus: unknown })[]>`
+    SELECT id, name, "campaignId", abilities, "setBonus" FROM artifact_sets ${byCampaign}`;
+
+  for (const r of sets) push("artifactSet", r, convertLegacyArtifactSet(r));
+
+  const units = await prisma.$queryRaw<(Base & { specialAbilities: unknown })[]>`
+    SELECT id, name, "campaignId", abilities, "specialAbilities" FROM units ${byCampaign}`;
+
+  for (const r of units) push("unit", r, { abilities: specialAbilitiesToAbilities(r.specialAbilities), issues: [] });
 
   const date = new Date().toISOString().slice(0, 10);
 

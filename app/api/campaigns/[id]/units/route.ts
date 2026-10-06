@@ -7,7 +7,7 @@ import { invalidUnitRace } from "./unit-race";
 import { getCachedUnits } from "@/lib/cache/reference-data";
 import { prisma } from "@/lib/db";
 import { createUnitSchema } from "@/lib/schemas";
-import { abilitiesJson } from "@/lib/utils/abilities/legacy/read";
+import { abilitiesJson } from "@/lib/utils/abilities/read";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { getProficiencyBonus } from "@/lib/utils/common/calculations";
