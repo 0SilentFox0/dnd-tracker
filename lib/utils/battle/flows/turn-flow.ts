@@ -1,12 +1,20 @@
+import type { MoraleCheckResult } from "@/lib/utils/battle/battle-morale";
+
+export type MoraleOutcome = "extra" | "skip" | "none";
+
+export function moraleOutcome(r: Pick<MoraleCheckResult, "hasExtraTurn" | "shouldSkipTurn"> | null | undefined): MoraleOutcome {
+  return r?.hasExtraTurn ? "extra" : r?.shouldSkipTurn ? "skip" : "none";
+}
+
 export interface TurnFlowState {
   phase: "waiting" | "morale" | "acting" | "countdown" | "ended";
   stayed: boolean;
-  moraleResult?: "extra" | "skip" | "none";
+  moraleResult?: MoraleOutcome;
 }
 
 export type TurnFlowAction =
   | { type: "BEGIN"; needsMorale: boolean }
-  | { type: "MORALE_RESULT"; result: "extra" | "skip" | "none" }
+  | { type: "MORALE_RESULT"; result: MoraleOutcome }
   | { type: "EXHAUSTED" }
   | { type: "STAY" }
   | { type: "END" }
