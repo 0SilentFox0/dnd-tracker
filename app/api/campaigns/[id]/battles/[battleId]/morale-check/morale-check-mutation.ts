@@ -19,7 +19,7 @@ export function moraleCheckMutation(ctx: BattleMutationContext, data: MoraleChec
     throw new BattleRuleError("action_used", "Мораль цього учасника вже перевірено в цьому ході");
   }
 
-  const moraleResult = checkMorale(participant, data.d10Roll);
+  const moraleResult = checkMorale(participant, data.d10Roll, ctx.participants);
 
   const pendingMoraleCheck: PendingMoraleCheckPayload = {
     participantId: data.participantId,

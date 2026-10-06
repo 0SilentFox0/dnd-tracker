@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import { applyEffect, describeEffect } from "@/lib/utils/abilities/registry/effects";
+import { applyEffect, describeEffect, FLAG_FIELDS } from "@/lib/utils/abilities/registry/effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
 
 function run(effect: Effect, targetIds: string[], ps = [makeParticipant({ id: "o" }), makeParticipant({ id: "t", side: ParticipantSide.ENEMY })]) {
@@ -80,5 +80,22 @@ describe("effects", () => {
   it("describe", () => {
     expect(describeEffect({ kind: "damageBonus", filter: { kind: "melee" }, percent: 10 })).toBe("шкода (ближня) +10%");
     expect(describeEffect({ kind: "dot", damagePerRound: "1d4", damageType: "bleed", duration: { rounds: 3 } })).toBe("bleed 1d4/раунд × 3 р.");
+  });
+});
+
+describe("counterAttack у редакторі", () => {
+  it("на вибір лише ближня і дальня; опис згадує дальні", () => {
+    expect(FLAG_FIELDS.counterAttack[0].options?.map((o) => o.value)).toEqual(["melee", "ranged"]);
+    expect(describeEffect({ kind: "flag", flag: "counterAttack", attackKinds: ["ranged"], bonusPercent: 20 })).toBe("відсіч (і на дальні) +20%");
+    expect(describeEffect({ kind: "flag", flag: "counterAttack", attackKinds: ["melee"], bonusPercent: 15 })).toBe("відсіч +15%");
+  });
+});
+
+describe("прапорці моралі", () => {
+  it("мітки й описи", () => {
+    expect(describeEffect({ kind: "flag", flag: "noNegativeMorale" })).toBe("від'ємна мораль = 0");
+    expect(describeEffect({ kind: "flag", flag: "ignoreMorale" })).toBe("мораль не діє");
+    expect(FLAG_FIELDS.noNegativeMorale).toEqual([]);
+    expect(FLAG_FIELDS.ignoreMorale).toEqual([]);
   });
 });

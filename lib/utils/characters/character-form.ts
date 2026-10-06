@@ -2,6 +2,8 @@
  * Утиліти для конвертації між CharacterFormData (згрупована) та Character (плоска)
  */
 
+import { ABILITY_KEYS } from "@/lib/constants/abilities";
+import { CharacterType, type CharacterTypeValue } from "@/lib/constants/characters";
 import { calculateCharacterSpellSlots } from "@/lib/utils/spells/spell-slots";
 import type { Character, CharacterFormData } from "@/types/characters";
 
@@ -24,7 +26,7 @@ export function characterToFormData(
   return {
     basicInfo: {
       name: character.name || "",
-      type: (character.type as "player" | "npc_hero") || "player",
+      type: (character.type as CharacterTypeValue) || CharacterType.PLAYER,
       controlledBy: character.controlledBy || "",
       level: character.level || 1,
       class: character.class || "",
@@ -49,9 +51,6 @@ export function characterToFormData(
       armorClass: character.armorClass || 10,
       initiative: character.initiative || 0,
       speed: character.speed || 30,
-      maxHp: character.maxHp || 10,
-      currentHp: character.currentHp || 10,
-      tempHp: character.tempHp || 0,
       minTargets: character.minTargets || 1,
       maxTargets: character.maxTargets || 1,
       morale: (character as { morale?: number }).morale ?? 0,
@@ -61,7 +60,6 @@ export function characterToFormData(
       skills: (character.skills as Record<string, boolean>) || {},
     },
     spellcasting: {
-      spellcastingClass: character.spellcastingClass,
       spellcastingAbility: character.spellcastingAbility ?? undefined,
       spellSlots: (() => {
         const raw = character.spellSlots as
@@ -88,6 +86,18 @@ export function characterToFormData(
       meleeMultiplier: (character as { meleeMultiplier?: number | null }).meleeMultiplier ?? 1,
       rangedMultiplier: (character as { rangedMultiplier?: number | null }).rangedMultiplier ?? 1,
     },
+  };
+}
+
+/** Після підняття рівня оновлюються лише рівень, характеристики й слоти — решта правок форми лишається. */
+export function mergeLevelUpIntoForm(prev: CharacterFormData, updated: Partial<Character>): CharacterFormData {
+  const next = characterToFormData(updated);
+
+  return {
+    ...prev,
+    basicInfo: { ...prev.basicInfo, level: next.basicInfo.level },
+    abilityScores: { ...prev.abilityScores, ...Object.fromEntries(ABILITY_KEYS.map((k) => [k, next.abilityScores[k]])) },
+    spellcasting: { ...prev.spellcasting, spellSlots: next.spellcasting.spellSlots },
   };
 }
 
@@ -124,14 +134,10 @@ export function formDataToCharacter(
     armorClass: formData.combatStats.armorClass,
     initiative: formData.combatStats.initiative,
     speed: formData.combatStats.speed,
-    maxHp: formData.combatStats.maxHp,
-    currentHp: formData.combatStats.currentHp,
-    tempHp: formData.combatStats.tempHp,
     minTargets: formData.combatStats.minTargets,
     maxTargets: formData.combatStats.maxTargets,
     savingThrows: formData.skills.savingThrows,
     skills: formData.skills.skills,
-    spellcastingClass: formData.spellcasting.spellcastingClass,
     spellcastingAbility: formData.spellcasting.spellcastingAbility ?? null,
     spellSlots: formData.spellcasting.spellSlots,
     knownSpells: formData.spellcasting.knownSpells,

@@ -8,7 +8,8 @@ const h = vi.hoisted(() => ({ replace: vi.fn(), editorMounts: 0, sheetQuery: { d
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: h.replace, push: vi.fn() }) }));
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "", HUD_SURFACE: "hud-surface" }));
-vi.mock("@/components/skill-tree/progression", () => ({ ProgressionPanel: () => <div>прокачка</div>, LevelUpOverlay: () => null, FreePointBadge: () => null }));
+vi.mock("@/components/skill-tree/progression", () => ({ ProgressionPanel: () => <div>прокачка</div>, LevelUpOverlay: () => null }));
+vi.mock("@/lib/hooks/skills", () => ({ useCharacterProgression: () => ({ view: null }) }));
 vi.mock("@/lib/hooks/characters", async (orig) => ({
   ...(await orig<object>()),
   useCharacterSheet: () => h.sheetQuery,
@@ -16,12 +17,13 @@ vi.mock("@/lib/hooks/characters", async (orig) => ({
   useDmCharacterEditor: () => {
     h.editorMounts += 1;
 
-    return { ready: true, form: { formData: { basicInfo: {}, spellcasting: {} }, basicInfo: { level: 30 }, abilityScores: { strength: 10, setters: {} }, combatStats: {}, skills: {}, abilities: {}, spellcasting: { knownSpells: [], setters: {} }, handleSubmit: vi.fn(), setFormData: vi.fn(), loading: false, error: null }, equipped: {}, setEquipped: vi.fn(), artifacts: [], artifactSets: [], members: [], races: [], membersLoading: false, levelUp: vi.fn(), remove: vi.fn() };
+    return { ready: true, form: { formData: { basicInfo: {}, spellcasting: {} }, basicInfo: { level: 30 }, abilityScores: { strength: 10, setters: {} }, combatStats: {}, skills: {}, abilities: {}, spellcasting: { knownSpells: [], setters: {} }, handleSubmit: vi.fn(), setFormData: vi.fn(), loading: false, error: null }, equipped: {}, setEquipped: vi.fn(), artifacts: [], members: [], races: [], membersLoading: false, levelUp: vi.fn(), remove: vi.fn() };
   },
 }));
 vi.mock("@/components/character-profile/BasicEditTab", () => ({ BasicEditTab: () => <div>основне</div> }));
 
 import { CharacterProfile } from "@/components/character-profile";
+import { mockMatchMedia } from "@/components/ui/__tests__/match-media";
 import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
 
 describe("CharacterProfile — перегляд", () => {
@@ -40,6 +42,14 @@ describe("CharacterProfile — перегляд", () => {
     expect(screen.getByLabelText("AC")).toHaveTextContent("17");
     expect(screen.getByLabelText("Влучання")).toHaveTextContent("+13");
     expect(screen.getByLabelText("Майстерність")).toHaveTextContent("+9");
+    expect(screen.getByLabelText("Ініціатива")).toHaveTextContent("4");
+    expect(screen.getByLabelText("Ініціатива")).not.toHaveTextContent("+4");
+  });
+
+  it("бойова вкладка: ініціатива без знака", () => {
+    renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit={false} initialTab="combat" />);
+
+    expect(screen.getByText("Ініціатива").parentElement).toHaveTextContent(/^Ініціатива4$/);
   });
 
   it("таба з URL; перемикання пише ?tab= без запиту на сервер", () => {
@@ -108,5 +118,17 @@ describe("CharacterProfile — редагування ДМа", () => {
     expect(screen.getByRole("button", { name: "Зберегти" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Скасувати" }));
     expect(screen.getByRole("button", { name: "Редагувати" })).toBeTruthy();
+  });
+
+  it("«Магія» в редакторі показує книгу заклинань з листа", () => {
+    mockMatchMedia(false);
+    renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Редагувати" }));
+    fireEvent.mouseDown(screen.getByRole("tab", { name: "Магія" }));
+    fireEvent.click(screen.getByRole("button", { name: "Книга заклинань" }));
+
+    expect(screen.getByRole("dialog")).toHaveAccessibleName("Книга заклинань");
+    expect(screen.getByText("Мітка мисливця")).toBeTruthy();
   });
 });

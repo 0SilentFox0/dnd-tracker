@@ -5,20 +5,16 @@
 
 import { describe, expect, it } from "vitest";
 
-import { applyResistance, calculateDamageWithModifiers } from "../damage";
+import { calculateDamageWithModifiers } from "../damage";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
-import { grantPassive, withConvertedSkills } from "@/lib/utils/battle/__tests__/mock-participant";
-import type {
-  BattleParticipant,
-  SkillEffect,
-} from "@/types/battle";
-import { SkillLevel } from "@/types/skill-tree";
+import { grantPassive } from "@/lib/utils/battle/__tests__/mock-participant";
+import type { BattleParticipant } from "@/types/battle";
 
 function createBaseParticipant(
   overrides?: Partial<BattleParticipant>,
 ): BattleParticipant {
-  return withConvertedSkills({
+  return {
     basicInfo: {
       id: "p1",
       battleId: "b1",
@@ -75,15 +71,7 @@ function createBaseParticipant(
       hasExtraTurn: false,
     },
     ...overrides,
-  });
-}
-
-function createSkillEffect(
-  stat: string,
-  value: number,
-  isPercentage: boolean,
-): SkillEffect {
-  return { stat, type: isPercentage ? "percent" : "flat", value, isPercentage };
+  };
 }
 
 describe("battle-damage-calculations", () => {
@@ -109,20 +97,7 @@ describe("battle-damage-calculations", () => {
     });
 
     it("applies skill percent bonus to base and sets totalDamage", () => {
-      const attacker = createBaseParticipant({
-        battleData: {
-          ...createBaseParticipant().battleData,
-          activeSkills: [
-            {
-              skillId: "s1",
-              name: "Напад",
-              mainSkillId: "ms1",
-              level: SkillLevel.EXPERT,
-              effects: [createSkillEffect("melee_damage", 30, true)],
-            },
-          ],
-        } as unknown as BattleParticipant["battleData"],
-      });
+      const attacker = grantPassive(createBaseParticipant(), [{ kind: "damageBonus", filter: { kind: "melee" }, percent: 30 }], "Напад");
 
       const result = calculateDamageWithModifiers(
         attacker,
@@ -156,20 +131,7 @@ describe("battle-damage-calculations", () => {
     });
 
     it("breakdown includes skill bonus line when skill percent is non-zero", () => {
-      const attacker = createBaseParticipant({
-        battleData: {
-          ...createBaseParticipant().battleData,
-          activeSkills: [
-            {
-              skillId: "s1",
-              name: "Експертна стрільба",
-              mainSkillId: "ms1",
-              level: SkillLevel.EXPERT,
-              effects: [createSkillEffect("ranged_damage", 30, true)],
-            },
-          ],
-        } as unknown as BattleParticipant["battleData"],
-      });
+      const attacker = grantPassive(createBaseParticipant(), [{ kind: "damageBonus", filter: { kind: "ranged" }, percent: 30 }], "Експертна стрільба");
 
       const result = calculateDamageWithModifiers(
         attacker,
@@ -220,51 +182,6 @@ describe("battle-damage-calculations", () => {
 
       expect(diceLine).toBeDefined();
       expect(diceLine).toContain("10");
-    });
-  });
-
-  describe("applyResistance", () => {
-    it("returns damage unchanged when defender has no resistances in extras", () => {
-      const defender = createBaseParticipant();
-
-      const r = applyResistance(100, defender, "physical");
-
-      expect(r.finalDamage).toBe(100);
-      expect(r.resistPercent).toBe(0);
-      expect(r.resistMessage).toBeNull();
-    });
-
-    it("reduces damage by physical resistance percent when extras.resistances.physical is set", () => {
-      const defender = createBaseParticipant();
-
-      grantPassive(defender, [{ kind: "flag", flag: "resistance", damageType: "physical", percent: 25 }]);
-
-      const r = applyResistance(100, defender, "physical");
-
-      expect(r.resistPercent).toBe(25);
-      expect(r.finalDamage).toBe(75);
-      expect(r.resistMessage).toContain("25%");
-    });
-
-    it("uses spell resistance when damageCategory is spell", () => {
-      const defender = createBaseParticipant();
-
-      grantPassive(defender, [{ kind: "flag", flag: "resistance", damageType: "spell", percent: 50 }]);
-
-      const r = applyResistance(100, defender, "spell");
-
-      expect(r.resistPercent).toBe(50);
-      expect(r.finalDamage).toBe(50);
-    });
-
-    it("returns finalDamage at least 0 when resistance is high", () => {
-      const defender = createBaseParticipant();
-
-      grantPassive(defender, [{ kind: "flag", flag: "resistance", damageType: "physical", percent: 100 }]);
-
-      const r = applyResistance(10, defender, "physical");
-
-      expect(r.finalDamage).toBe(0);
     });
   });
 });

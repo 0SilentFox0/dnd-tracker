@@ -1,6 +1,6 @@
 import { completeBattleSchema, completeMutation } from "./complete-mutation";
 
-import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { BattleAccess, runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 
 export async function POST(
   req: Request,
@@ -8,7 +8,7 @@ export async function POST(
 ) {
   return runBattleMutation(req, {
     params: await params,
-    access: "dm",
+    access: BattleAccess.DM,
     requireStatus: "active",
     schema: completeBattleSchema,
     mutate: completeMutation,

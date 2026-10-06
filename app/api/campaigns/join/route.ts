@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { kvDel } from "@/lib/cache/kv";
+import { CampaignRole } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { joinCampaignSchema } from "@/lib/schemas";
 import { requireAuth } from "@/lib/utils/api/api-auth";
@@ -78,7 +79,7 @@ export async function POST(request: Request) {
       data: {
         campaignId: campaign.id,
         userId: userId,
-        role: "player",
+        role: CampaignRole.PLAYER,
       },
       include: {
         campaign: true,

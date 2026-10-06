@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CampaignRole } from "@/lib/constants/campaigns";
 import { useRemoveCampaignMember } from "@/lib/hooks/campaigns";
 import { useConfirm } from "@/lib/hooks/common";
 
@@ -50,11 +51,11 @@ export function CampaignMembersList({
         >
           <div className="flex items-center gap-2">
             <span>{member.user.displayName}</span>
-            <Badge variant={member.role === "dm" ? "default" : "secondary"}>
-              {member.role === "dm" ? "DM" : "Player"}
+            <Badge variant={member.role === CampaignRole.DM ? "default" : "secondary"}>
+              {member.role === CampaignRole.DM ? "DM" : "Player"}
             </Badge>
           </div>
-          {isDM && member.role === "player" && (
+          {isDM && member.role === CampaignRole.PLAYER && (
             <Button
               variant="ghost"
               size="sm"

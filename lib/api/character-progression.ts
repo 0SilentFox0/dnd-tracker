@@ -7,7 +7,7 @@ export const getCharacterProgression = (campaignId: string, characterId: string)
 
 export const learnNode = (campaignId: string, characterId: string, nodeId: string) => campaignPost<{ unlocked: string[] }>(campaignId, `${base(characterId)}/learn`, { nodeId });
 
-export const unlearnNode = (campaignId: string, characterId: string, nodeId: string) => campaignPost<{ unlocked: string[] }>(campaignId, `${base(characterId)}/unlearn`, { nodeId });
+export const unlearnNodes = (campaignId: string, characterId: string, nodeIds: string[]) => campaignPost<{ unlocked: string[] }>(campaignId, `${base(characterId)}/unlearn`, { nodeIds });
 
 export const resetProgression = (campaignId: string, characterId: string) => campaignPost<{ unlocked: string[] }>(campaignId, `${base(characterId)}/reset`, {});
 

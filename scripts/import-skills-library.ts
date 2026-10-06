@@ -17,7 +17,7 @@ import {
   getCanonicalMainSkillName,
   getMainSkillNameVariants,
 } from "../lib/constants/main-skills";
-import { convertLegacySkill } from "../lib/utils/abilities/legacy/convert-skill";
+import { convertLegacySkill } from "./legacy-convert/convert-skill";
 import { loadSkillsFromDoc } from "./import-skills-library-parse";
 import { triggerStringToSkillTriggers } from "./import-skills-library-triggers";
 import type { LibraryEffect, LibrarySkill } from "./import-skills-library-types";
@@ -169,75 +169,42 @@ async function upsertSkill(
         .join(". ")
     : "";
 
-  const canonicalMainSkillName = getCanonicalMainSkillName(lib.category, lib.mainSkill);
-
-  const basicInfo = {
-    name: lib.name,
-    description: description || null,
-    icon: null as string | null,
-    libraryId: lib.id,
-    category: lib.category,
-    mainSkill: canonicalMainSkillName,
-    tier: lib.tier,
-    triggerString: lib.trigger,
-  };
-
-  const bonuses = effectsToBonuses(lib.effects);
-
   const skillTriggers = triggerStringToSkillTriggers(lib.trigger);
 
-  // Логуємо тригери для дебагу
   if (skillTriggers.length === 0) {
     console.log(`  ⚠️  Не вдалося розпарсити тригер: "${lib.trigger}" для ${lib.name}`);
   }
 
   const existing = await prisma.skill.findFirst({
-    where: {
-      campaignId,
-      basicInfo: { path: ["libraryId"], equals: lib.id },
-    },
+    where: { campaignId, name: lib.name },
   });
 
-  const payload = {
-    campaignId,
+  // формат бібліотеки — старий (ефекти + тригери), у БД іде лише abilities
+  const abilities = convertLegacySkill({
+    id: existing?.id ?? lib.name,
+    name: lib.name,
+    combatStats: { effects: lib.effects },
+    bonuses: effectsToBonuses(lib.effects),
+    skillTriggers,
+    spellGroupId: null,
+  }).abilities as unknown as object[];
+
+  const data = {
     name: lib.name,
     description: description || null,
     image: lib.image ?? null,
     mainSkillId,
-    bonuses: bonuses as object,
-    basicInfo: basicInfo as object,
-    combatStats: { effects: lib.effects } as object,
-    mainSkillData: mainSkillId ? { mainSkillId } : ({} as object),
-    spellData: { spellNames: lib.spells } as object,
-    spellEnhancementData: {},
-    skillTriggers: skillTriggers as object[],
+    abilities,
   };
 
-  const abilities = convertLegacySkill({ id: existing?.id ?? lib.name, name: payload.name, combatStats: payload.combatStats, bonuses: payload.bonuses, skillTriggers: payload.skillTriggers, spellGroupId: null }).abilities as unknown as object[];
+  const triggersLog = skillTriggers.map((t) => (t.type === "simple" ? t.trigger : "complex")).join(", ");
 
   if (existing) {
-    await prisma.skill.update({
-      where: { id: existing.id },
-      data: {
-        name: payload.name,
-        description: payload.description,
-        image: payload.image,
-        mainSkillId: payload.mainSkillId,
-        bonuses: payload.bonuses,
-        basicInfo: payload.basicInfo,
-        combatStats: payload.combatStats,
-        mainSkillData: payload.mainSkillData,
-        spellData: payload.spellData,
-        skillTriggers: payload.skillTriggers,
-        abilities,
-      },
-    });
-    console.log(`  Updated: ${lib.name} [${skillTriggers.map(t => t.type === "simple" ? t.trigger : "complex").join(", ")}]`);
+    await prisma.skill.update({ where: { id: existing.id }, data });
+    console.log(`  Updated: ${lib.name} [${triggersLog}]`);
   } else {
-    await prisma.skill.create({
-      data: { ...payload, abilities },
-    });
-    console.log(`  Created: ${lib.name} [${skillTriggers.map(t => t.type === "simple" ? t.trigger : "complex").join(", ")}]`);
+    await prisma.skill.create({ data: { campaignId, ...data } });
+    console.log(`  Created: ${lib.name} [${triggersLog}]`);
   }
 }
 

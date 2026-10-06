@@ -10,6 +10,7 @@ import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { rollDie, type useAttackWizard } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import type { AttackMode } from "@/lib/utils/battle/flows";
+import { signed } from "@/lib/utils/format";
 
 type Wizard = ReturnType<typeof useAttackWizard>;
 
@@ -62,7 +63,7 @@ export function AttackWizard({ wizard }: { wizard: Wizard }) {
                 <span className="hud-sc block text-[17px] font-bold">{a.name}</span>
                 <span className="block text-[13px] text-[#a89c88]">{a.type === "melee" ? "ближній" : "дальній"} · +{a.attackBonus} до влучання</span>
                 <span className="mt-1 flex flex-wrap gap-x-2.5 text-xs text-[#cdb87e]">
-                  {wizard.previews[a.id ?? a.name]?.bonuses.map((b) => <span key={b.label}>{b.label} {b.percent ? `${b.percent > 0 ? "+" : ""}${b.percent}%` : `${b.flat > 0 ? "+" : ""}${b.flat}`}</span>)}
+                  {wizard.previews[a.id ?? a.name]?.bonuses.map((b) => <span key={b.label}>{b.label} {b.percent ? `${signed(b.percent)}%` : signed(b.flat)}</span>)}
                 </span>
               </span>
               <span className="w-[72px] text-right text-[15px]">{a.damageDice}<small className="block text-xs text-[var(--muted)]">≈ {wizard.previews[a.id ?? a.name]?.estimate}</small></span>
@@ -145,7 +146,7 @@ export function AttackWizard({ wizard }: { wizard: Wizard }) {
               {list.map((s, i) => (
                 <div key={i} className={cn("flex min-h-9 items-center justify-between border-b border-white/[.06] text-sm", s.side === "attacker" && s.kind === "percent" && s.value > 0 && "text-[#cdb87e]", s.side === "target" && "text-[#d0705c]")}>
                   <span>{s.label}</span>
-                  <span>{s.kind === "percent" ? `${s.value > 0 ? "+" : ""}${s.value}%` : s.kind === "multiplier" ? `×${s.value}` : s.kind === "immunity" ? "імунітет" : s.kind === "flat" ? `${s.value > 0 ? "+" : ""}${s.value}` : s.value} → {s.after}</span>
+                  <span>{s.kind === "percent" ? `${signed(s.value)}%` : s.kind === "multiplier" ? `×${s.value}` : s.kind === "immunity" ? "імунітет" : s.kind === "flat" ? signed(s.value) : s.value} → {s.after}</span>
                 </div>
               ))}
             </div>

@@ -2,77 +2,21 @@
  * GET balance: DPR, HP, KPI для персонажів та юнітів кампанії.
  */
 
-import { getCharacterAttacks } from "./balance-helpers";
+import { loadCharacterBalanceStats } from "./character-stats";
 
-import {
-  MAGIC_MAIN_SKILL_IDS,
-  MAGIC_MAIN_SKILL_NAME_ALIASES,
-} from "@/lib/constants/dpr-by-main-skill";
 import { prisma } from "@/lib/db";
-import type { CharacterDprBreakdown } from "@/lib/utils/battle/balance";
-import { getCharacterStats, getUnitStats } from "@/lib/utils/battle/balance";
-import { branchLevels, normalizeTree, resolveLearned } from "@/lib/utils/skills/progression";
+import { getUnitStats } from "@/lib/utils/battle/balance";
+import type { CharacterDprBreakdown } from "@/types/battle-setup";
 
 export async function getBalancePayload(campaignId: string) {
-  const [trees, mainSkills] = await Promise.all([
-    prisma.skillTree.findMany({ where: { campaignId } }),
-    prisma.mainSkill.findMany({
-      where: { campaignId },
-      select: { id: true, name: true },
-    }),
-  ]);
-
-  const mainSkillsList = mainSkills.map((ms) => ({ id: ms.id, name: ms.name }));
-
-  console.log("[Balance GET] Main skills кампанії (id, name):", mainSkillsList);
-
-  const magicMainSkillIds = new Set(
-    mainSkills
-      .filter((ms) => {
-        const nameNorm = ms.name.toLowerCase().trim().replace(/\s+/g, "_");
-
-        const byId = MAGIC_MAIN_SKILL_IDS.some((slug) => ms.id === slug);
-
-        const byName = MAGIC_MAIN_SKILL_NAME_ALIASES.some(
-          (alias) => alias.toLowerCase().replace(/\s+/g, "_") === nameNorm,
-        );
-
-        return byId || byName;
-      })
-      .map((ms) => ms.id),
-  );
-
-  const treesByRace = new Map(trees.map((t) => [t.race, normalizeTree(t)]));
+  const characters = await loadCharacterBalanceStats(campaignId);
 
   const characterStats: Record<
     string,
     { dpr: number; hp: number; kpi: number; dprBreakdown?: CharacterDprBreakdown }
   > = {};
 
-  const characters = await prisma.character.findMany({
-    where: { campaignId },
-  });
-
-  for (const character of characters) {
-    const attacks = await getCharacterAttacks(character.id, campaignId);
-
-    const tree = treesByRace.get(character.race);
-
-    const levels = tree ? branchLevels(resolveLearned(tree, character.skillTreeProgress)) : {};
-
-    console.log(`[Balance GET] Персонаж "${character.name}" (${character.id}): рівні гілок`, levels);
-
-    const stats = getCharacterStats({
-      id: character.id,
-      name: character.name,
-      level: character.level,
-      strength: character.strength,
-      dexterity: character.dexterity,
-      attacks: attacks.map((a) => ({ damageDice: a.damageDice, type: a.type })),
-      branchLevels: levels,
-      magicMainSkillIds,
-    });
-
+  for (const { character, stats } of characters) {
     characterStats[character.id] = {
       dpr: Math.round(stats.dpr * 10) / 10,
       hp: stats.hp,
@@ -94,8 +38,7 @@ export async function getBalancePayload(campaignId: string) {
       name: unit.name,
       maxHp: unit.maxHp,
       level: unit.level,
-      groupId: unit.groupId,
-      race: unit.race,
+      raceId: unit.raceId,
       strength: unit.strength,
       dexterity: unit.dexterity,
       attacks:
@@ -112,13 +55,9 @@ export async function getBalancePayload(campaignId: string) {
   const payload: Record<string, unknown> = { characterStats, unitStats };
 
   if (process.env.NODE_ENV === "development") {
-    const characterSkillProgress = characters.map((c) => {
-      const tree = treesByRace.get(c.race);
-
-      return { characterId: c.id, characterName: c.name, branchLevels: tree ? branchLevels(resolveLearned(tree, c.skillTreeProgress)) : {} };
-    });
-
-    payload._debug = { mainSkills: mainSkillsList, characterSkillProgress };
+    payload._debug = {
+      characterSkillProgress: characters.map(({ character, levels }) => ({ characterId: character.id, characterName: character.name, branchLevels: levels })),
+    };
   }
 
   return payload;

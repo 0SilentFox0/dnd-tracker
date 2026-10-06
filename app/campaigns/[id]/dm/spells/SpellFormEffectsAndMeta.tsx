@@ -6,10 +6,9 @@ import Link from "next/link";
 import type { SpellFormData } from "./spell-form-defaults";
 import { SpellDamageDistributionField } from "./SpellDamageDistributionField";
 
-import { OptimizedImage } from "@/components/common/OptimizedImage";
+import { IconUrlField } from "@/components/common/IconUrlField";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
 import { Textarea } from "@/components/ui/textarea";
@@ -197,36 +196,7 @@ export function SpellFormEffectsAndMeta({
         />
       </div>
 
-      <div>
-        <Label htmlFor="icon">Посилання на картинку</Label>
-        <Input
-          id="icon"
-          type="text"
-          value={formData.icon || ""}
-          onChange={(e) =>
-            setFormData({ ...formData, icon: e.target.value || null })
-          }
-          placeholder="https://example.com/spell-icon.png"
-        />
-        <p className="text-xs text-muted-foreground mt-1">
-          Введіть URL картинки з інтернету
-        </p>
-        {formData.icon && (
-          <div className="mt-3">
-            <Label>Попередній перегляд:</Label>
-            <div className="mt-2 w-32 h-32 rounded-lg overflow-hidden bg-muted border">
-              <OptimizedImage
-                src={formData.icon}
-                alt="Preview"
-                width={128}
-                height={128}
-                className="w-full h-full object-cover"
-                fallback={null}
-              />
-            </div>
-          </div>
-        )}
-      </div>
+      <IconUrlField id="icon" label="Посилання на картинку" value={formData.icon ?? ""} onChange={(icon) => setFormData({ ...formData, icon: icon || null })} fallbackText={formData.name ?? ""} />
 
       <div className="flex gap-2 pt-4">
         <Button type="submit" disabled={isSubmitting}>

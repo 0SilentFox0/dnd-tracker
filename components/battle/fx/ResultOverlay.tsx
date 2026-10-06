@@ -5,13 +5,25 @@ import { useEffect } from "react";
 import { useBattleScene } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { MORALE_SKIP_MS } from "@/lib/utils/battle/flows";
+import type { RetaliationOutcome } from "@/lib/utils/battle/view";
+import { signed } from "@/lib/utils/format";
 
 const die = "hud-sc flex items-center justify-center font-extrabold [clip-path:polygon(50%_0,100%_38%,82%_100%,18%_100%,0_38%)] animate-[hud-dropin_.7s_cubic-bezier(.16,1,.3,1)_both]";
 
 const cta = "hud-sc mt-8 flex h-[52px] w-full max-w-xs items-center justify-center text-[17px] font-bold tracking-[.06em]";
 
+function RetaliationLine({ retaliation }: { retaliation?: RetaliationOutcome }) {
+  if (!retaliation) return null;
+
+  return (
+    <div className="relative mt-1.5 text-sm text-[#e9a08f]">
+      Відповідь цілі: {retaliation.name} {retaliation.damage > 0 ? `−${retaliation.damage}` : "промах"}
+    </div>
+  );
+}
+
 export function ResultOverlay() {
-  const { result, showResult } = useBattleScene();
+  const { result, showResult, battle, openLog } = useBattleScene();
 
   useEffect(() => {
     if (result?.kind !== "morale-skip") return;
@@ -34,7 +46,7 @@ export function ResultOverlay() {
         <div className={cn(die, "relative mb-5 size-[88px] bg-[#e8c77a] text-[40px] text-[#2a1d05]")}>{result.d10}</div>
         <div className="hud-sc relative text-[40px] font-extrabold leading-[44px] tracking-[.08em] text-[#f3dc9a] [text-shadow:0_0_24px_rgba(232,199,122,.6)] animate-[hud-rise_.7s_.25s_both]">Бойовий дух</div>
         <div className="relative mt-3 text-base animate-[hud-fade_.5s_.6s_both]">{result.name} отримує додатковий хід наприкінці раунду</div>
-        <div className="relative mt-1.5 text-sm text-[#a89c88]">d10 = {result.d10} · мораль {result.morale > 0 ? `+${result.morale}` : result.morale}</div>
+        <div className="relative mt-1.5 text-sm text-[#a89c88]">d10 = {result.d10} · мораль {signed(result.morale)}</div>
         <button type="button" onClick={close} className={cn(cta, "relative border border-[#e6c25a] bg-[#8a6414] text-[#fff3d1]")}>До бою</button>
       </div>
     );
@@ -64,6 +76,7 @@ export function ResultOverlay() {
         <div className="hud-sc text-[40px] font-extrabold tracking-[.2em] text-[#8f8f96]">Промах</div>
         <div className="mt-3 text-base">повз {result.targetName}</div>
         <div className="mt-1.5 text-sm text-[#a89c88]">ваш результат {result.d20} · тепер відомо: AC {result.known}</div>
+        <RetaliationLine retaliation={result.retaliation} />
         <button type="button" onClick={close} className={cn(cta, "border border-[#555] text-[#c9c9cf]")}>Далі</button>
       </div>
     );
@@ -80,7 +93,17 @@ export function ResultOverlay() {
       <div className={cn("hud-sc relative mt-4 font-extrabold animate-[hud-pop_.45s_.65s_cubic-bezier(.16,1,.3,1)_both]", crit ? "text-[64px] text-[#ff6a4d] [text-shadow:0_0_30px_rgba(255,90,60,.7)]" : "text-[52px] text-[#e9705a]")}>−{result.damage}</div>
       <div className="relative mt-3 text-[15px] text-[#d9cfbd]">{result.targetName}{result.downed ? " · повалений" : ""}</div>
       <div className="relative mt-1.5 text-sm text-[#a89c88]">d20 = {result.d20}{result.weapon ? ` · ${result.weapon}` : ""}</div>
-      <button type="button" onClick={close} className={cn(cta, "relative border border-[#a8473a] bg-[#7a2a1f] text-[#f3e7cc]")}>Деталі шкоди</button>
+      <RetaliationLine retaliation={result.retaliation} />
+      <button
+        type="button"
+        onClick={() => {
+          close();
+          openLog(battle.battleLog?.at(-1)?.actionIndex ?? null);
+        }}
+        className={cn(cta, "relative border border-[#a8473a] bg-[#7a2a1f] text-[#f3e7cc]")}
+      >
+        Деталі шкоди
+      </button>
     </div>
   );
 }

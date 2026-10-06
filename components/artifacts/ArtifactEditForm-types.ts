@@ -1,4 +1,4 @@
-import type { ConversionIssue } from "@/lib/utils/abilities/legacy/types";
+import type { ConversionIssue } from "@/lib/utils/abilities/schema";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import type { WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
 

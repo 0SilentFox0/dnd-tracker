@@ -7,6 +7,7 @@ import { useProfile } from "./ProfileContext";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { GoalAuthor } from "@/lib/constants/characters";
 import { useCharacterGoals } from "@/lib/hooks/characters";
 import { useConfirm } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
@@ -46,7 +47,7 @@ export function GoalList() {
 
     const next = draft.id
       ? all.map((g) => (g.id === draft.id ? { ...g, text } : g))
-      : [...all, { id: newId(), text, status: "active" as const, author: isDM ? ("dm" as const) : ("player" as const) }];
+      : [...all, { id: newId(), text, status: "active" as const, author: isDM ? GoalAuthor.DM : GoalAuthor.PLAYER }];
 
     if (await send(next)) setDraft(null);
   };

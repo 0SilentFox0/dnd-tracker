@@ -30,11 +30,22 @@ describe("таби профілю", () => {
     expect(screen.getByText("Мітка мисливця")).toBeTruthy();
   });
 
-  it("Магія без заклинань і слотів — порожній стан", () => {
+  it("Магія без заклинань — порожня книга з написом, без кнопки книги", () => {
     inProfile(<MagicTab />, withSheet({ magic: null, slots: [], spells: [] }));
 
-    expect(screen.getByText("Магії поки немає")).toBeTruthy();
+    expect(screen.getByText("Поки що Герой більше довіряє своєму мечу і луку")).toBeTruthy();
+    expect(screen.queryByText("Магії поки немає")).toBeNull();
     expect(screen.queryByRole("button", { name: "Книга заклинань" })).toBeNull();
+  });
+
+  it("Магія без заклинань, але зі слотами — слоти над порожньою книгою", () => {
+    inProfile(<MagicTab />, withSheet({ spells: [] }));
+
+    const slot = screen.getByLabelText("I коло: 4 слоти");
+
+    const book = screen.getByText("Поки що Герой більше довіряє своєму мечу і луку");
+
+    expect(slot.compareDocumentPosition(book) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   it("Речі: список по артефактах з ефектами і сетом have/total; тап — шторка", () => {

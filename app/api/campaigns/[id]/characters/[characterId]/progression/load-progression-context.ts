@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
-import type { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
+import { CampaignRole } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 
 export interface ProgressionContext {
   character: { id: string; level: number; race: string; skillTreeProgress: unknown; seenLevel: number | null; controlledBy: string };
+  progressRead: Prisma.InputJsonValue | typeof Prisma.JsonNull;
   treeRow: Prisma.SkillTreeGetPayload<object> | null;
   isDM: boolean;
   isOwner: boolean;
@@ -23,7 +25,7 @@ export async function loadProgressionContext(campaignId: string, characterId: st
 
   if (!character) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const isDM = access.campaign.members[0]?.role === "dm";
+  const isDM = access.campaign.members[0]?.role === CampaignRole.DM;
 
   const isOwner = character.controlledBy === access.userId;
 
@@ -31,5 +33,14 @@ export async function loadProgressionContext(campaignId: string, characterId: st
 
   const treeRow = await prisma.skillTree.findFirst({ where: { campaignId, race: character.race } });
 
-  return { character, treeRow, isDM, isOwner };
+  const read = character.skillTreeProgress;
+
+  return {
+    character: { ...character, skillTreeProgress: read ?? {} },
+    // колонка NOT NULL, але JSON-значення null можливе; умова має збігтися з прочитаним
+    progressRead: read === null ? Prisma.JsonNull : (read as Prisma.InputJsonValue),
+    treeRow,
+    isDM,
+    isOwner,
+  };
 }

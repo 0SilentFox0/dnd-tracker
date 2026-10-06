@@ -77,4 +77,16 @@ describe("BattleScreen", () => {
     expect(screen.getByRole("button", { name: "Скинути" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Наступний хід" })).toBeNull();
   });
+
+  it("телефон: журнал відкривається станом сцени (openLog)", () => {
+    media.wide = false;
+
+    const s = fakeScene({ isMyTurn: false });
+
+    s.value.log = { open: true, focus: null };
+
+    render(<BattleScreen />, { wrapper: s.wrapper });
+
+    expect(screen.getByRole("dialog")).toHaveTextContent("Журнал");
+  });
 });

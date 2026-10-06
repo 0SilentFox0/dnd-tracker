@@ -7,7 +7,7 @@ import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 export function AddBranchSheet({ open, branches, actions }: {
   open: boolean;
   branches: Array<{ id: string; name: string; color: string }>;
-  actions: { onClose: () => void; onAdd: (id: string) => void; onCreate: (input: { name: string; color: string }) => Promise<void> };
+  actions: { onClose: () => void; onAdd: (id: string) => void; onCreate: (input: { name: string; color: string }) => Promise<boolean> };
 }) {
   const [name, setName] = useState("");
 
@@ -33,8 +33,8 @@ export function AddBranchSheet({ open, branches, actions }: {
         className="mt-4 flex gap-2"
         onSubmit={async (e) => {
           e.preventDefault();
-          await actions.onCreate({ name: name.trim(), color });
-          setName("");
+
+          if (await actions.onCreate({ name: name.trim(), color })) setName("");
         }}
       >
         <Input placeholder="Назва нової гілки" value={name} onChange={(e) => setName(e.target.value)} />

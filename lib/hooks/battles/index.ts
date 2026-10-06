@@ -2,6 +2,7 @@ export { useEditBattleData } from "./setup/useEditBattleData";
 export { useNewBattlePage } from "./setup/useNewBattlePage";
 export { type BattleActionOptions, useBattleAction } from "./useBattleAction";
 export {
+  type AttackResponse,
   BATTLE_ACTIVE_REFETCH_INTERVAL_MS,
   useAddBattleParticipant,
   useAttack,

@@ -2,176 +2,100 @@
 
 import { useState } from "react";
 
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { EntityIcon } from "@/components/common/EntityIcon";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { CardDescription, CardTitle } from "@/components/ui/card";
-import {
-  parseUnitDragPayload,
-  UnitCard,
-} from "@/components/units/list/UnitCard";
+import { UnitCard } from "@/components/units/list/UnitCard";
+import { parseUnitDragPayload, planUnitDrop, UNIT_DRAG_TYPE, type UnitDropTarget } from "@/lib/utils/units/drag";
+import { raceIdOfGroup, type UnitRaceGroup } from "@/lib/utils/units/group-units";
 import type { Race } from "@/types/races";
 import type { Unit } from "@/types/units";
 
-const DRAG_TYPE = "application/x-unit-id";
-
 interface UnitGroupAccordionProps {
-  groupName: string;
-  units: Unit[];
+  group: UnitRaceGroup<Race>;
   campaignId: string;
-  races?: Race[];
   onDeleteUnit: (unitId: string) => void;
-  onDropOnGroup?: (unitId: string, targetRaceName: string) => void;
-  onDropOnLevel?: (unitId: string, targetLevel: number) => void;
+  onDrop: (unitId: string, data: Partial<Unit>) => void;
 }
 
-export function UnitGroupAccordion({
-  groupName,
-  units,
-  campaignId,
-  races = [],
-  onDeleteUnit,
-  onDropOnGroup,
-  onDropOnLevel,
-}: UnitGroupAccordionProps) {
-  const [dragOverGroup, setDragOverGroup] = useState(false);
+const carriesUnit = (e: React.DragEvent) => e.dataTransfer.types.includes(UNIT_DRAG_TYPE);
 
-  const [dragOverLevel, setDragOverLevel] = useState<number | null>(null);
+export function UnitGroupAccordion({ group, campaignId, onDeleteUnit, onDrop }: UnitGroupAccordionProps) {
+  const [over, setOver] = useState<string | null>(null);
 
-  const handleDragOver = (e: React.DragEvent) => {
-    if (e.dataTransfer.types.includes(DRAG_TYPE)) {
-      e.preventDefault();
+  const title = group.race?.name ?? "Без раси";
 
-      e.dataTransfer.dropEffect = "move";
-    }
+  const allowDrop = (e: React.DragEvent) => {
+    if (!carriesUnit(e)) return;
+
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
   };
 
-  const handleDropOnGroup = (e: React.DragEvent) => {
-    setDragOverGroup(false);
+  const dropOn = (target: UnitDropTarget) => (e: React.DragEvent) => {
+    setOver(null);
 
-    const raw = e.dataTransfer.getData(DRAG_TYPE);
+    const payload = parseUnitDragPayload(e.dataTransfer.getData(UNIT_DRAG_TYPE));
 
-    if (!raw || !onDropOnGroup) return;
+    const data = payload && planUnitDrop(payload, target);
 
-    const payload = parseUnitDragPayload(raw);
+    if (!payload || !data) return;
 
-    if (payload && payload.currentRace !== groupName) {
-      e.preventDefault();
-
-      onDropOnGroup(payload.unitId, groupName);
-    }
+    e.preventDefault();
+    onDrop(payload.unitId, data);
   };
 
-  const handleDropOnLevel = (e: React.DragEvent, level: number) => {
-    setDragOverLevel(null);
-
-    const raw = e.dataTransfer.getData(DRAG_TYPE);
-
-    if (!raw || !onDropOnLevel) return;
-
-    const payload = parseUnitDragPayload(raw);
-
-    if (payload && payload.currentLevel !== level) {
-      e.preventDefault();
-
-      onDropOnLevel(payload.unitId, level);
-    }
-  };
+  const highlight = (key: string) => (over === key ? "bg-primary/15 ring-2 ring-primary/50" : "");
 
   return (
-    <>
-      <AccordionItem value={groupName} key={groupName}>
-        <AccordionTrigger className="px-4 sm:px-6">
-          <div
-            className={`flex items-center gap-3 sm:gap-4 text-left w-full rounded-md transition-colors ${dragOverGroup ? "bg-primary/15 ring-2 ring-primary/50" : ""}`}
-            onDragOver={handleDragOver}
-            onDragLeave={() => setDragOverGroup(false)}
-            onDrop={handleDropOnGroup}
-            onDragEnter={(e) => e.dataTransfer.types.includes(DRAG_TYPE) && setDragOverGroup(true)}
-          >
-            <div
-              className="flex-1 min-w-0"
-              onDragOver={(e) => {
-                if (e.dataTransfer.types.includes(DRAG_TYPE)) {
-                  e.preventDefault();
-                  setDragOverGroup(true);
-                }
-              }}
-            >
-              <CardTitle className="text-lg truncate">{groupName}</CardTitle>
-              <CardDescription className="mt-1">
-                {units.length} юнітів
-              </CardDescription>
-            </div>
+    <AccordionItem value={group.key} className="border-l-4" style={group.race?.color ? { borderLeftColor: group.race.color } : undefined}>
+      <AccordionTrigger className="px-4 sm:px-6">
+        <div
+          className={`flex w-full items-center gap-3 rounded-md text-left transition-colors sm:gap-4 ${highlight("race")}`}
+          onDragOver={allowDrop}
+          onDragEnter={(e) => carriesUnit(e) && setOver("race")}
+          onDragLeave={() => setOver(null)}
+          onDrop={dropOn({ raceId: raceIdOfGroup(group.key) })}
+        >
+          <EntityIcon src={group.race?.icon ?? null} name={title} className="h-9 w-9 shrink-0" />
+          <div className="min-w-0 flex-1">
+            <CardTitle className="truncate text-lg">{title}</CardTitle>
+            <CardDescription className="mt-1">{group.total} юнітів</CardDescription>
           </div>
-        </AccordionTrigger>
-        <AccordionContent>
-          <div className="px-1 sm:px-2 pb-4">
-            {(() => {
-              const unitsByLevel: Record<number, Unit[]> = {};
-
-              units.forEach((unit) => {
-                if (!unitsByLevel[unit.level]) {
-                  unitsByLevel[unit.level] = [];
-                }
-
-                unitsByLevel[unit.level].push(unit);
-              });
-
-              const sortedLevels = Object.keys(unitsByLevel)
-                .map(Number)
-                .sort((a, b) => a - b);
-
-              return (
-                <Accordion
-                  type="multiple"
-                  defaultValue={sortedLevels.map((level) => `level-${level}`)}
-                  className="w-full"
-                >
-                  {sortedLevels.map((level) => (
-                    <AccordionItem value={`level-${level}`} key={level}>
-                      <AccordionTrigger className="px-2 py-2 text-sm font-semibold">
-                        <div
-                          className={`w-full text-left rounded px-1 -mx-1 transition-colors ${dragOverLevel === level ? "bg-primary/15 ring-2 ring-primary/50" : ""}`}
-                          onDragOver={handleDragOver}
-                          onDragLeave={() => setDragOverLevel(null)}
-                          onDrop={(e) => handleDropOnLevel(e, level)}
-                          onDragEnter={() => setDragOverLevel(level)}
-                        >
-                          Рівень {level} ({unitsByLevel[level].length} юнітів)
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 pt-2">
-                          {unitsByLevel[level].map((unit) => {
-                            const unitRace =
-                              unit.race && races
-                                ? races.find((r) => r.name === unit.race) || null
-                                : null;
-
-                            return (
-                              <UnitCard
-                                key={unit.id}
-                                unit={unit}
-                                campaignId={campaignId}
-                                race={unitRace}
-                                onDelete={onDeleteUnit}
-                              />
-                            );
-                          })}
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-              );
-            })()}
-          </div>
-        </AccordionContent>
-      </AccordionItem>
-    </>
+        </div>
+      </AccordionTrigger>
+      <AccordionContent>
+        <div className="px-1 pb-4 sm:px-2">
+          {group.tiers.length === 0 ? (
+            <p className="px-2 text-sm text-muted-foreground">Перетягніть сюди юніта, щоб призначити расу</p>
+          ) : (
+            <Accordion type="multiple" defaultValue={group.tiers.map((t) => `level-${t.level}`)} className="w-full">
+              {group.tiers.map((tier) => (
+                <AccordionItem value={`level-${tier.level}`} key={tier.level}>
+                  <AccordionTrigger className="px-2 py-2 text-sm font-semibold">
+                    <div
+                      className={`-mx-1 w-full rounded px-1 text-left transition-colors ${highlight(`level-${tier.level}`)}`}
+                      onDragOver={allowDrop}
+                      onDragEnter={(e) => carriesUnit(e) && setOver(`level-${tier.level}`)}
+                      onDragLeave={() => setOver(null)}
+                      onDrop={dropOn({ level: tier.level })}
+                    >
+                      Рівень {tier.level} ({tier.units.length} юнітів)
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="grid gap-4 pt-2 md:grid-cols-2 lg:grid-cols-3">
+                      {tier.units.map((unit) => (
+                        <UnitCard key={unit.id} unit={unit} campaignId={campaignId} race={group.race} onDelete={onDeleteUnit} />
+                      ))}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          )}
+        </div>
+      </AccordionContent>
+    </AccordionItem>
   );
 }

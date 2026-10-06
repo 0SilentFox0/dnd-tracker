@@ -6,7 +6,8 @@ import Image from "next/image";
 import { HealthBar, HealthLabel, Portrait } from "@/components/battle/hud";
 import { useBattleScene } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
-import { canSeeExactStats, effectiveArmorClass, formatKnownArmorClass, knownArmorClass, observedTraits } from "@/lib/utils/battle/view";
+import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
+import { canSeeExactStats, formatKnownArmorClass, knownArmorClass, observedTraits } from "@/lib/utils/battle/view";
 import type { BattleParticipant } from "@/types/battle";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
@@ -42,7 +43,7 @@ export function ParticipantDetails({ participant }: { participant: BattlePartici
       <Section title="Броня">
         <div className="flex min-h-10 items-center justify-between border-b border-white/[.08]">
           <span>{exact ? "AC" : "AC між"}</span>
-          <span className="font-medium text-[var(--ink)]">{exact ? effectiveArmorClass(participant, battle.initiativeOrder) : formatKnownArmorClass(known)}</span>
+          <span className="font-medium text-[var(--ink)]">{exact ? getEffectiveArmorClass(participant, battle.initiativeOrder) : formatKnownArmorClass(known)}</span>
         </div>
         {!exact && known.evidence.map((e, i) => (
           <div key={i} className="flex min-h-8 items-center text-[13px] text-[var(--muted)]">

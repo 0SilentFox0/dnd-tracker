@@ -10,6 +10,13 @@ import { useCrudMutation } from "@/lib/hooks/common";
 import { REFERENCE_STALE_MS } from "@/lib/providers/query-provider";
 import type { Race, RaceFormData } from "@/types/races";
 
+const raceDependentKeys = (campaignId: string) => [
+  ["races", campaignId],
+  ["units", campaignId],
+  ["characters", campaignId],
+  ["skill-trees", campaignId],
+];
+
 export function useRaces(campaignId: string, initialRaces?: Race[]) {
   return useQuery<Race[]>({
     queryKey: ["races", campaignId],
@@ -37,13 +44,13 @@ export function useUpdateRace(campaignId: string) {
       raceId: string;
       data: Partial<RaceFormData>;
     }) => updateRace(campaignId, raceId, data),
-    invalidateKeys: [["races", campaignId]],
+    invalidateKeys: raceDependentKeys(campaignId),
   });
 }
 
 export function useDeleteRace(campaignId: string) {
   return useCrudMutation({
     mutationFn: (raceId: string) => deleteRace(campaignId, raceId),
-    invalidateKeys: [["races", campaignId]],
+    invalidateKeys: raceDependentKeys(campaignId),
   });
 }

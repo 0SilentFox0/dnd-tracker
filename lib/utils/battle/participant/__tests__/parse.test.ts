@@ -1,60 +1,8 @@
-/**
- * Тести для участникових ID-парсерів.
- *
- * Покриває обидва експорти `parse.ts`:
- *  - parseMainSkillLevelId  — формат `${mainSkillId}_(basic|advanced|expert)_level`
- *  - inferLevelFromSkillName — UA/EN heuristic за назвою скіла
- */
+/** Тести евристики рівня скіла за назвою (inferLevelFromSkillName). */
 
 import { describe, expect, it } from "vitest";
 
-import {
-  inferLevelFromSkillName,
-  parseMainSkillLevelId,
-} from "../parse";
-
-describe("parseMainSkillLevelId", () => {
-  it("parses expert level id", () => {
-    expect(parseMainSkillLevelId("uuid-abc_expert_level")).toEqual({
-      mainSkillId: "uuid-abc",
-      level: "expert",
-    });
-  });
-
-  it("parses advanced level id", () => {
-    expect(parseMainSkillLevelId("ms-1_advanced_level")).toEqual({
-      mainSkillId: "ms-1",
-      level: "advanced",
-    });
-  });
-
-  it("parses basic level id", () => {
-    expect(parseMainSkillLevelId("ms-1_basic_level")).toEqual({
-      mainSkillId: "ms-1",
-      level: "basic",
-    });
-  });
-
-  it("returns null for non-matching id", () => {
-    expect(parseMainSkillLevelId("just-a-skill-id")).toBeNull();
-  });
-
-  it("returns null for unknown level keyword", () => {
-    expect(parseMainSkillLevelId("ms-1_master_level")).toBeNull();
-  });
-
-  it("returns null when mainSkillId would be empty", () => {
-    // `_basic_level` без префіксу — match є, але mainSkillId порожній
-    expect(parseMainSkillLevelId("_basic_level")).toBeNull();
-  });
-
-  it("preserves mainSkillId with underscores", () => {
-    expect(parseMainSkillLevelId("school_of_fire_expert_level")).toEqual({
-      mainSkillId: "school_of_fire",
-      level: "expert",
-    });
-  });
-});
+import { inferLevelFromSkillName } from "../parse";
 
 describe("inferLevelFromSkillName", () => {
   it("detects expert (Ukrainian)", () => {

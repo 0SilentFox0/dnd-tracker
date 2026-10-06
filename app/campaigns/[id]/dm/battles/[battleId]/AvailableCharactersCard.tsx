@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ParticipantSourceType } from "@/lib/constants/battle";
 import type { EditBattleCharacter } from "@/types/battle-setup";
 
 interface AvailableCharactersCardProps {
@@ -18,7 +19,7 @@ interface AvailableCharactersCardProps {
   isParticipantSelected: (id: string) => boolean;
   onParticipantToggle: (
     id: string,
-    type: "character",
+    type: typeof ParticipantSourceType.CHARACTER,
     checked: boolean,
   ) => void;
 }
@@ -41,7 +42,7 @@ export function AvailableCharactersCard({
           <Checkbox
             checked={isParticipantSelected(character.id)}
             onCheckedChange={(checked) =>
-              onParticipantToggle(character.id, "character", checked as boolean)
+              onParticipantToggle(character.id, ParticipantSourceType.CHARACTER, checked as boolean)
             }
           />
           {character.avatar && (

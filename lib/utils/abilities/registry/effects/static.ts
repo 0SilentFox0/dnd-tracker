@@ -1,10 +1,11 @@
 import { DURATION_FIELD, type FieldMeta, TARGET_FIELD } from "../fields";
-import { CONDITION_LABELS, DAMAGE_FILTER_LABELS, flatLabel, signed, STAT_LABELS } from "../labels";
+import { CONDITION_LABELS, DAMAGE_FILTER_LABELS, flatLabel, STAT_LABELS } from "../labels";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/participants";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/timed-effects";
 import type { Effect, FlagKey, StaticEffect } from "@/lib/utils/abilities/schema";
+import { signed } from "@/lib/utils/format";
 
 export function stripTiming(effect: StaticEffect): StaticEffect {
   const { duration: _d, target: _t, ...rest } = effect;
@@ -111,9 +112,13 @@ export function describeFlag(e: Extract<Effect, { kind: "flag" }>): string {
     case "spellImmunity":
       return `імунітет до заклинань (${e.spellIds.length})`;
     case "counterAttack":
-      return `контратака +${e.bonusPercent}%`;
+      return `відсіч${e.attackKinds.includes("ranged") ? " (і на дальні)" : ""} +${e.bonusPercent}%`;
     case "seeEnemyHp":
       return "бачить HP ворогів";
+    case "noNegativeMorale":
+      return "від'ємна мораль = 0";
+    case "ignoreMorale":
+      return "мораль не діє";
     case "conditionImmunity":
       return e.conditions === "all" ? "імунітет до контролю" : `імунітет: ${e.conditions.map((c) => (c === "fear" ? "страх" : c)).join(", ")}`;
   }
@@ -128,6 +133,8 @@ export const FLAG_LABELS: Record<FlagKey, string> = {
   spellImmunity: "Імунітет до заклинань",
   counterAttack: "Контратака",
   seeEnemyHp: "Бачить HP ворогів",
+  noNegativeMorale: "Мораль не нижче 0",
+  ignoreMorale: "Мораль не діє",
   conditionImmunity: "Імунітет до станів",
 };
 
@@ -137,10 +144,9 @@ const ATTACK_KIND_ALL = [
   { value: "ranged", label: "дальні" },
 ] as const;
 
-const DAMAGE_KIND_OPTIONS = [
+const COUNTER_KIND_OPTIONS = [
   { value: "melee", label: "ближня" },
   { value: "ranged", label: "дальня" },
-  { value: "magic", label: "магія" },
 ] as const;
 
 export const FLAG_FIELDS: Record<FlagKey, readonly FieldMeta[]> = {
@@ -154,10 +160,12 @@ export const FLAG_FIELDS: Record<FlagKey, readonly FieldMeta[]> = {
   ],
   spellImmunity: [{ name: "spellIds", label: "Заклинання", input: "spells" }],
   counterAttack: [
-    { name: "attackKinds", label: "На атаки", input: "multiselect", options: DAMAGE_KIND_OPTIONS },
+    { name: "attackKinds", label: "На атаки", input: "multiselect", options: COUNTER_KIND_OPTIONS },
     { name: "bonusPercent", label: "Бонус шкоди, %", input: "number" },
   ],
   seeEnemyHp: [],
+  noNegativeMorale: [],
+  ignoreMorale: [],
   conditionImmunity: [
     {
       name: "conditions",

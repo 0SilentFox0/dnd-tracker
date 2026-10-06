@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Printer } from "lucide-react";
 
 import { PageHeader } from "@/components/common/PageHeader";
-import { CreateGroupDialog } from "@/components/skills/dialogs/CreateGroupDialog";
+import { CreateSpellGroupDialog } from "@/components/skills/dialogs/CreateSpellGroupDialog";
 import { SpellImportDialog } from "@/components/spells/dialogs/SpellImportDialog";
 import { Button } from "@/components/ui/button";
 
@@ -25,7 +25,7 @@ export function SpellsPageHeader({
     >
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 shrink-0">
         <SpellImportDialog campaignId={campaignId} />
-        <CreateGroupDialog campaignId={campaignId} />
+        <CreateSpellGroupDialog campaignId={campaignId} />
         <Link href={`/campaigns/${campaignId}/dm/spells/new`}>
           <Button className="whitespace-nowrap text-xs sm:text-sm w-full">
             + Створити заклинання

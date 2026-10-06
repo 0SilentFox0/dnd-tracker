@@ -30,14 +30,6 @@ export const CombatStatus = {
 export type CombatStatusType = (typeof CombatStatus)[keyof typeof CombatStatus];
 
 /**
- * Раси з особливою логікою в бою (мораль, перевірки)
- */
-export const BATTLE_RACE = {
-  HUMAN: "human",
-  NECROMANCER: "necromancer",
-} as const;
-
-/**
  * Глобальні константи бою
  */
 export const BATTLE_CONSTANTS = {
@@ -52,9 +44,6 @@ export const BATTLE_CONSTANTS = {
   
   /** За замовчуванням опір (якщо не вказано значення) */
   DEFAULT_RESISTANCE_PERCENT: 50,
-  
-  /** За замовчуванням поріг низького HP для пасивних здібностей (якщо не вказано) */
-  DEFAULT_LOW_HP_THRESHOLD_PERCENT: 15,
   
   /** Мінімальний відсоток HP (0%) */
   MIN_HP_PERCENT: 0,
@@ -71,3 +60,10 @@ export const BATTLE_CONSTANTS = {
   /** Множник для конвертації fraction → percent (e.g. 0.25 → 25). */
   FRACTION_TO_PERCENT: 100,
 } as const;
+
+export const ParticipantSourceType = {
+  CHARACTER: "character",
+  UNIT: "unit",
+} as const;
+
+export type ParticipantSourceTypeValue = (typeof ParticipantSourceType)[keyof typeof ParticipantSourceType];

@@ -95,7 +95,7 @@ export function Header() {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href={`/campaigns/${campaignId}/dm/npc-heroes`}>
+                      <Link href={`/campaigns/${campaignId}/dm/characters?type=npc_hero`}>
                         NPC Герої
                       </Link>
                     </DropdownMenuItem>

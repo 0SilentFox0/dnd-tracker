@@ -47,4 +47,16 @@ describe("resolveCharacterSkillEntries", () => {
 
     expect(entries.map((e) => e.row.id)).toEqual(["pers"]);
   });
+
+  it("один скіл у кількох вивчених вузлах — один запис із найвищим рівнем", async () => {
+    const tree = {
+      id: "row-tree",
+      race: "Ельф",
+      skills: buildTreeJson({ race: "Ельф", branches: [{ id: "attack", name: "Напад", color: "red", levels: { basic: "lvl-b", advanced: "lvl-b" } }] }),
+    } as never;
+
+    const entries = await resolveCharacterSkillEntries(character(["attack_basic_level", "attack_advanced_level"]), "camp", SKILLS, new Map([["attack", null]]), tree);
+
+    expect(entries.map((e) => [e.row.id, e.level])).toEqual([["lvl-b", "advanced"]]);
+  });
 });

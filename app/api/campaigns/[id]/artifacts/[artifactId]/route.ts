@@ -7,8 +7,8 @@ import {
   mirrorArtifactIconToSupabase,
   shouldMirrorArtifactIconUrl,
 } from "@/lib/supabase/artifact-icon-storage";
-import { readAbilities } from "@/lib/utils/abilities/legacy/read";
-import { abilitiesJson } from "@/lib/utils/abilities/legacy/read";
+import { readAbilities } from "@/lib/utils/abilities/read";
+import { abilitiesJson } from "@/lib/utils/abilities/read";
 import { requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { weaponStatsColumns } from "@/lib/utils/artifacts/weapon-stats";

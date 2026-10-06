@@ -2,56 +2,34 @@
 
 import { useRef } from "react";
 
+import { IconUrlField } from "@/components/common/IconUrlField";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useNotify } from "@/lib/hooks/common";
-import { normalizeImageUrl } from "@/lib/utils/common/image-url";
 
-const DEFAULT_MAX_SIZE_BYTES = 3 * 1024 * 1024; // 3 MB
+const MAX_SIZE_BYTES = 3 * 1024 * 1024;
 
-const DEFAULT_ACCEPT = "image/jpeg,image/png,image/webp,image/gif";
+const ACCEPT = "image/jpeg,image/png,image/webp,image/gif";
 
 export interface ImageUploadProps {
   value: string;
   onChange: (value: string) => void;
   label?: string;
-  placeholder?: string;
-  maxSizeBytes?: number;
-  accept?: string;
-  previewAlt?: string;
-  className?: string;
+  fallbackText?: string;
   allowFile?: boolean;
 }
 
-export function ImageUpload({
-  value,
-  onChange,
-  label = "Картинка",
-  placeholder = "Посилання на картинку (URL)",
-  maxSizeBytes = DEFAULT_MAX_SIZE_BYTES,
-  accept = DEFAULT_ACCEPT,
-  previewAlt = "Попередній перегляд",
-  className,
-  allowFile = true,
-}: ImageUploadProps) {
+export function ImageUpload({ value, onChange, label = "Картинка", fallbackText = "?", allowFile = true }: ImageUploadProps) {
   const notify = useNotify();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const previewSrc = value?.startsWith("data:")
-    ? value
-    : value
-      ? normalizeImageUrl(value)
-      : "";
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
 
     if (!file) return;
 
-    if (file.size > maxSizeBytes) {
-      void notify(`Файл завеликий. Максимум ${maxSizeBytes / 1024 / 1024} МБ.`);
+    if (file.size > MAX_SIZE_BYTES) {
+      void notify(`Файл завеликий. Максимум ${MAX_SIZE_BYTES / 1024 / 1024} МБ.`);
       e.target.value = "";
 
       return;
@@ -59,66 +37,22 @@ export function ImageUpload({
 
     const reader = new FileReader();
 
-    reader.onload = () => {
-      onChange(reader.result as string);
-    };
+    reader.onload = () => onChange(reader.result as string);
     reader.readAsDataURL(file);
     e.target.value = "";
   };
 
   return (
-    <div className={className}>
-      {label && <Label>{label}</Label>}
-      <div className="mt-2 flex flex-col gap-2">
-        <Input
-          type="url"
-          value={value?.startsWith("data:") ? "" : value || ""}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-        />
-        {allowFile && (
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm text-muted-foreground">або</span>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept={accept}
-              className="hidden"
-              onChange={handleFileChange}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              Завантажити з комп&apos;ютера
-            </Button>
-            {value?.startsWith("data:") && (
-              <span className="text-xs text-muted-foreground">
-                (завантажено з файлу)
-              </span>
-            )}
-          </div>
-        )}
-      </div>
-      {value && (
-        <div className="mt-2">
-          <Label className="text-xs text-muted-foreground">
-            Попередній перегляд
-          </Label>
-          <div className="mt-1 w-24 h-24 rounded-lg overflow-hidden bg-muted border shrink-0">
-            {/* eslint-disable-next-line @next/next/no-img-element -- preview supports data URLs and any external URL */}
-            <img
-              src={previewSrc}
-              alt={previewAlt}
-              className="w-full h-full object-cover"
-              referrerPolicy="no-referrer"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = "none";
-              }}
-            />
-          </div>
+    <div className="space-y-2">
+      <IconUrlField label={label} value={value} onChange={onChange} fallbackText={fallbackText} />
+      {allowFile && (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm text-muted-foreground">або</span>
+          <input ref={fileInputRef} type="file" accept={ACCEPT} className="hidden" onChange={handleFileChange} />
+          <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+            Завантажити з комп&apos;ютера
+          </Button>
+          {value.startsWith("data:") && <span className="text-xs text-muted-foreground">(завантажено з файлу)</span>}
         </div>
       )}
     </div>

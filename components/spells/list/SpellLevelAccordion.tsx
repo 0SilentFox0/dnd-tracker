@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/lib/hooks/common";
 import { useDeleteSpellsByLevel } from "@/lib/hooks/spells";
+import { pluralUk } from "@/lib/utils/plural";
 import type { Spell, SpellGroup } from "@/types/spells";
 
 
@@ -42,7 +43,7 @@ export function SpellLevelAccordion({
   const handleDelete = () =>
     confirm({
       title: "Видалити всі заклинання рівня?",
-      description: `Ви впевнені, що хочете видалити всі заклинання рівня "${levelName}"? Ця дія незворотна. Буде видалено ${spells.length} заклинань.`,
+      description: `Ви впевнені, що хочете видалити всі заклинання рівня "${levelName}"? Ця дія незворотна. Буде видалено ${spells.length} ${pluralUk(spells.length, ["заклинання", "заклинання", "заклинань"])}.`,
       confirmLabel: "Видалити",
       destructive: true,
       onConfirm: () => deleteSpellsByLevelMutation.mutateAsync(level),

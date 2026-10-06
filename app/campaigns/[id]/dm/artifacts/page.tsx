@@ -25,6 +25,7 @@ import { requireCampaignDM } from "@/lib/campaigns/access";
 import { ARTIFACT_SLOT_OPTIONS } from "@/lib/constants/artifacts";
 import { prisma } from "@/lib/db";
 import { abilitySummary } from "@/lib/utils/abilities/summary";
+import { pluralUk } from "@/lib/utils/plural";
 
 export default async function DMArtifactsPage({
   params,
@@ -110,7 +111,7 @@ export default async function DMArtifactsPage({
                       <div className="min-w-0 flex-1 space-y-1">
                         <CardTitle className="leading-tight">{set.name}</CardTitle>
                         <CardDescription>
-                          {set.artifacts.length} артефактів в сеті
+                          {set.artifacts.length} {pluralUk(set.artifacts.length, ["артефакт", "артефакти", "артефактів"])} в сеті
                         </CardDescription>
                       </div>
                     </div>

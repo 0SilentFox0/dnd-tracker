@@ -1,6 +1,6 @@
 import { addParticipantSchema, createAddParticipantMutation } from "./add-participant-mutation";
 
-import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { BattleAccess, runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 
 const mutate = createAddParticipantMutation();
 
@@ -10,7 +10,7 @@ export async function POST(
 ) {
   return runBattleMutation(req, {
     params: await params,
-    access: "dm",
+    access: BattleAccess.DM,
     requireStatus: "active",
     schema: addParticipantSchema,
     mutate,

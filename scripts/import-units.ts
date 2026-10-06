@@ -1,9 +1,11 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import * as fs from "fs";
 import * as path from "path";
 
 import { DEFAULT_CAMPAIGN_ID } from "../lib/constants/campaigns";
+import { importUnitsSchema } from "../lib/schemas/units";
 import { convertCSVRowToUnit } from "../lib/utils/common/unit-parsing";
+import { importUnitsIntoCampaign } from "../lib/utils/units/import-units";
 import type { CSVUnitRow } from "../types/import";
 
 const prisma = new PrismaClient();
@@ -138,176 +140,17 @@ async function main() {
 
   console.log(`Знайдено ${csvRows.length} рядків у CSV файлі`);
 
-  // Конвертуємо в формат для імпорту
-  const unitsWithGroups = csvRows.map((row) => {
-    // Беремо групу напряму з CSV рядка - це остання колонка
-    // Перевіряємо різні варіанти назв колонки
-    const rawGroup = (row.Група || row.group || row.Group || "").trim();
+  const { units } = importUnitsSchema.parse({ units: csvRows.map(convertCSVRowToUnit) });
 
-    const { unit, groupName } = convertCSVRowToUnit(row);
+  const report = await importUnitsIntoCampaign(prisma, campaignId, units);
 
-    // Використовуємо rawGroup якщо він є, інакше groupName з парсера
-    const finalGroupName = rawGroup || groupName || undefined;
+  console.log(`✅ Імпортовано: ${report.imported}`);
+  console.log(`   - Пропущено (така назва вже є): ${report.skipped}`);
+  console.log(`   - Всього: ${report.total}`);
 
-    if (!finalGroupName) {
-      console.warn(`⚠️  Для юніта "${unit.name}" група не знайдена`);
-    }
-
-    return {
-      ...unit,
-      groupName: finalGroupName,
-    };
-  });
-
-  // Створюємо або отримуємо групи юнітів
-  const unitGroups: Record<string, string> = {};
-
-  const uniqueGroupNames = new Set<string>();
-
-  for (const unit of unitsWithGroups) {
-    const groupName = unit.groupName;
-
-    if (groupName) {
-      uniqueGroupNames.add(groupName.trim());
-    }
+  if (report.unknownRaces.length > 0) {
+    console.warn(`⚠️  Раси не знайдено (юніти без раси): ${report.unknownRaces.join(", ")}`);
   }
-
-  console.log(`Знайдені групи: ${Array.from(uniqueGroupNames).join(", ")}`);
-
-  console.log(`Створення/отримання ${uniqueGroupNames.size} груп...`);
-
-  for (const groupName of uniqueGroupNames) {
-    const existing = await prisma.unitGroup.findFirst({
-      where: { campaignId, name: groupName },
-    });
-
-    if (existing) {
-      unitGroups[groupName] = existing.id;
-      console.log(`  Група "${groupName}" вже існує`);
-    } else {
-      // Генеруємо колір для групи
-      const colors = [
-        "#ef4444", // red
-        "#f97316", // orange
-        "#eab308", // yellow
-        "#22c55e", // green
-        "#3b82f6", // blue
-        "#8b5cf6", // purple
-        "#ec4899", // pink
-      ];
-
-      const colorIndex = Array.from(uniqueGroupNames).indexOf(groupName);
-
-      const color = colors[colorIndex % colors.length];
-
-      const group = await prisma.unitGroup.create({
-        data: { campaignId, name: groupName, color },
-      });
-
-      unitGroups[groupName] = group.id;
-      console.log(`  Створено групу "${groupName}" з кольором ${color}`);
-    }
-  }
-
-  // Перевіряємо існуючі юніти для уникнення дублікатів
-  const existingUnitNames = await prisma.unit.findMany({
-    where: {
-      campaignId,
-      name: {
-        in: unitsWithGroups.map((u) => u.name),
-      },
-    },
-    select: {
-      name: true,
-    },
-  });
-
-  const existingNamesSet = new Set(existingUnitNames.map((u) => u.name));
-
-  const unitsToCreate = unitsWithGroups.filter(
-    (unit) => !existingNamesSet.has(unit.name),
-  );
-
-  if (unitsToCreate.length === 0) {
-    console.log("Всі юніти вже існують в кампанії");
-
-    return;
-  }
-
-  console.log(
-    `Створення ${unitsToCreate.length} нових юнітів (пропущено ${
-      unitsWithGroups.length - unitsToCreate.length
-    } дублікатів)...`,
-  );
-
-  // Отримуємо кольори груп один раз
-  const groupColors: Record<string, string> = {};
-
-  for (const [groupName, groupId] of Object.entries(unitGroups)) {
-    const group = await prisma.unitGroup.findUnique({
-      where: { id: groupId },
-    });
-
-    if (group) {
-      groupColors[groupName] = group.color;
-    }
-  }
-
-  // Підготовлюємо дані для масового створення
-  const unitsData = unitsToCreate.map((unit) => {
-    const groupName = unit.groupName;
-
-    const groupId = groupName ? unitGroups[groupName] : undefined;
-
-    const groupColor = groupName ? groupColors[groupName] || null : null;
-
-    return {
-      campaignId,
-      name: unit.name,
-      groupId: groupId || null,
-      groupColor,
-      level: unit.level,
-      strength: unit.strength,
-      dexterity: unit.dexterity,
-      constitution: unit.constitution,
-      intelligence: unit.intelligence,
-      wisdom: unit.wisdom,
-      charisma: unit.charisma,
-      armorClass: unit.armorClass,
-      initiative: unit.initiative,
-      speed: unit.speed,
-      maxHp: unit.maxHp,
-      proficiencyBonus: unit.proficiencyBonus,
-      attacks: unit.attacks as unknown as Prisma.InputJsonValue,
-      specialAbilities: unit.specialAbilities as unknown as Prisma.InputJsonValue,
-      knownSpells: unit.knownSpells,
-      avatar: unit.avatar || null,
-    };
-  });
-
-  // Створюємо юніти масово
-  const result = await prisma.unit.createMany({
-    data: unitsData,
-    skipDuplicates: true,
-  });
-
-  // Отримуємо створені юніти для повернення
-  await prisma.unit.findMany({
-    where: {
-      campaignId,
-      name: {
-        in: unitsToCreate.map((u) => u.name),
-      },
-    },
-    include: {
-      unitGroup: true,
-    },
-  });
-
-  console.log(`✅ Успішно створено ${result.count} юнітів`);
-  console.log(`   - Імпортовано: ${result.count}`);
-  console.log(`   - Пропущено: ${unitsWithGroups.length - result.count}`);
-  console.log(`   - Всього: ${unitsWithGroups.length}`);
 }
 
 main()

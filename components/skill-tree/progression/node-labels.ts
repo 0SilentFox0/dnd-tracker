@@ -1,3 +1,4 @@
+import { pluralUk } from "@/lib/utils/plural";
 import type { ProgressionNode } from "@/lib/utils/skills/progression";
 import { BRANCH_LEVEL_LABEL, CIRCLE_LABEL } from "@/lib/utils/skills/progression";
 import type { CharacterProgressionDto } from "@/types/progression";
@@ -21,11 +22,5 @@ export function nodeLabel(node: ProgressionNode, dto: CharacterProgressionDto): 
 }
 
 export function pointsText(free: number): string {
-  const mod10 = free % 10;
-
-  const mod100 = free % 100;
-
-  const word = mod10 === 1 && mod100 !== 11 ? "вільне очко" : mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14) ? "вільні очки" : "вільних очок";
-
-  return `${free} ${word}`;
+  return `${free} ${pluralUk(free, ["вільне очко", "вільні очки", "вільних очок"])}`;
 }

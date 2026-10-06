@@ -2,7 +2,8 @@
  * Утиліти для перевірки моралі в бою
  */
 
-import { BattleParticipant } from "@/types/battle";
+import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
+import type { BattleParticipant } from "@/types/battle";
 
 /**
  * Результат перевірки моралі
@@ -15,39 +16,23 @@ export interface MoraleCheckResult {
   moralePositive: boolean;
 }
 
-/**
- * Перевіряє мораль учасника та визначає наслідки
- * @param participant - учасник бою
- * @param d10Roll - результат кидка 1d10 (від 1 до 10)
- * @returns результат перевірки моралі
- */
+/** Перевіряє мораль учасника (d10Roll — кидок 1d10) та визначає наслідки. */
 export function checkMorale(
   participant: BattleParticipant,
-  d10Roll: number
+  d10Roll: number,
+  participants: BattleParticipant[] = [participant],
 ): MoraleCheckResult {
-  const rawMorale = participant.combatStats.morale;
+  const { value: currentMorale, ignored } = effectiveMorale(participant, participants);
 
   const result: MoraleCheckResult = {
     shouldSkipTurn: false,
     hasExtraTurn: false,
     message: "",
-    moralePositive: rawMorale > 0,
+    moralePositive: currentMorale > 0,
   };
 
-  // Расові модифікатори
-  let currentMorale = rawMorale;
-
-  // Люди: негативна мораль завжди = 0
-  if (participant.abilities.race === "human" && currentMorale < 0) {
-    currentMorale = 0;
-  }
-
-  // Некроманти: мораль завжди = 0 (пропускають перевірку)
-  if (participant.abilities.race === "necromancer") {
-    return {
-      ...result,
-      message: `${participant.basicInfo.name} (Некромант) - мораль не впливає`,
-    };
+  if (ignored) {
+    return { ...result, message: `${participant.basicInfo.name}: мораль не діє` };
   }
 
   // Якщо мораль = 0, перевірка не потрібна
@@ -90,66 +75,4 @@ export function checkMorale(
   }
 
   return result;
-}
-
-/** Тексти для overlay результату моралі (4 варіанти) */
-export function getMoraleOverlayText(result: MoraleCheckResult): string {
-  const positive = result.moralePositive;
-
-  if (positive && result.hasExtraTurn) {
-    return "Ти відчуваєш натхнення і робиш ще один хід в раунді";
-  }
-
-  if (positive && !result.hasExtraTurn) {
-    return "Бій іде! Надихай своєю хоробрістю";
-  }
-
-  if (!positive && !result.shouldSkipTurn) {
-    return "Ти відчуваєш що бій нерівний і втрачаєш віру";
-  }
-
-  return "Бій іде! Надихай своєю хоробрістю";
-}
-
-/**
- * Валідує результат кидка 1d10
- * @param roll - результат кидка
- * @returns true якщо валідний
- */
-export function validateD10Roll(roll: number): boolean {
-  return roll >= 1 && roll <= 10 && Number.isInteger(roll);
-}
-
-/**
- * Отримує текст для UI з описом перевірки моралі
- * @param participant - учасник бою
- * @returns текст для відображення
- */
-export function getMoraleCheckDescription(
-  participant: BattleParticipant
-): string {
-  let currentMorale = participant.combatStats.morale;
-
-  // Расові модифікатори
-  if (participant.abilities.race === "human" && currentMorale < 0) {
-    currentMorale = 0;
-  }
-
-  if (participant.abilities.race === "necromancer") {
-    return "Некромант - мораль не впливає";
-  }
-
-  if (currentMorale === 0) {
-    return "Нейтральна мораль - немає ефекту";
-  }
-
-  const moraleValue = Math.abs(currentMorale);
-
-  const chance = moraleValue * 10;
-
-  if (currentMorale > 0) {
-    return `Мораль: +${currentMorale} | Шанс додаткового ходу: ${chance}%`;
-  } else {
-    return `Мораль: ${currentMorale} | Шанс пропуску ходу: ${chance}%`;
-  }
 }

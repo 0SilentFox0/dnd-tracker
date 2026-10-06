@@ -4,10 +4,9 @@
 
 import type { AbilityUsageCounter, ResolvedAbility, SpellEnhancer, StaticEffect } from "./abilities";
 
-import type { ArtifactEffectAudience } from "@/lib/constants/artifact-effect-scope";
-import { AttackType, ParticipantSide } from "@/lib/constants/battle";
+import { AttackType, ParticipantSide, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
-import type { AbilityKey } from "@/types/characters";
+import type { AbilityKey, SetProgress } from "@/types/characters";
 import { SkillLevel } from "@/types/skill-tree";
 
 export type { CriticalEffect };
@@ -87,17 +86,6 @@ export interface EquippedArtifact {
     value: number | string;
     isPercentage?: boolean;
   }>;
-  passiveAbility?: Record<string, unknown>; // пасивна здібність артефакту
-  /** З `passiveAbility.effectScope` — поза `self` бонус чергується на роздачу після збору всіх учасників. */
-  effectAudience?: ArtifactEffectAudience;
-  immuneSpellIds?: string[];
-}
-
-/** Іконка в HUD бою: активний бонус повного сету (носій або одержувач scoped). */
-export interface ArtifactSetHudMarker {
-  setId: string;
-  name: string;
-  icon?: string | null;
 }
 
 
@@ -134,13 +122,13 @@ export interface BattleParticipantBasicInfo {
   id: string; // унікальний ID учасника В ЦІЙ БИТВІ
   battleId: string; // ID битви
   sourceId: string; // оригінальний ID character/unit
-  sourceType: "character" | "unit";
+  sourceType: ParticipantSourceTypeValue;
   instanceNumber?: number; // номер копії (для units: 1, 2, 3...)
   instanceId?: string; // унікальний ID інстансу (для units)
   name: string;
   avatar?: string;
   side: ParticipantSide;
-  controlledBy: string; // userId (для players) або "dm" (для NPC/units)
+  controlledBy: string; // userId (для players) або CONTROLLED_BY_DM (для NPC/units)
   isExtraTurnSlot?: boolean; // чи є цей слот додатковим ходом
 }
 
@@ -195,7 +183,6 @@ export interface BattleParticipantCombatStats {
  * Дані про заклинання учасника
  */
 export interface BattleParticipantSpellcasting {
-  spellcastingClass?: string;
   spellcastingAbility?: "intelligence" | "wisdom" | "charisma";
   spellSaveDC?: number;
   spellAttackBonus?: number;
@@ -210,8 +197,7 @@ export interface BattleParticipantBattleData {
   attacks: BattleAttack[];
   activeEffects: ActiveEffect[];
   equippedArtifacts: EquippedArtifact[];
-  /** Маркери повних сетів для HUD (іконка сету). */
-  artifactSetHudMarkers?: ArtifactSetHudMarker[];
+  artifactSets?: SetProgress[];
   /** Пул додаткових дій (ефект «actions»): накопичується при спрацюванні, споживається при використанні основної дії, діє до кінця бою */
   pendingExtraActions?: number;
   /** Учасник зараз робить додатковий хід від моралі (наприкінці раунду) */
@@ -248,7 +234,7 @@ export interface BattleParticipant {
  */
 export interface BattlePreparationParticipant {
   id: string;
-  type: "character" | "unit";
+  type: ParticipantSourceTypeValue;
   side: ParticipantSide;
   quantity?: number;
 }
@@ -282,7 +268,8 @@ export interface BattleAction {
     | "ability"
     | "end_turn"
     | "skip_turn"
-    | "morale_skip";
+    | "morale_skip"
+    | "retaliation";
   targets: Array<{
     participantId: string;
     participantName: string;
@@ -363,10 +350,6 @@ export interface BattleAction {
       description: string;
       type: "success" | "fail";
     };
-    // Контр-атака (reaction):
-    counterReactionDamage?: number;
-    counterReactionBaseDamage?: number;
-    counterReactionBonusPercent?: number;
   };
   resultText: string; // текстовий опис для лога
   hpChanges: Array<{
@@ -388,7 +371,7 @@ export interface BattleAction {
 
 export type AddParticipantData = {
   sourceId: string;
-  type: "character" | "unit";
+  type: ParticipantSourceTypeValue;
   side: "ally" | "enemy";
   quantity?: number;
 };

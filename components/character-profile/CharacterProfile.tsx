@@ -4,6 +4,7 @@ import { type ReactNode, useEffect, useRef, useState } from "react";
 
 import { CombatTab } from "./CombatTab";
 import { ItemsTab } from "./ItemsTab";
+import { LevelUpBadge } from "./LevelUpBadge";
 import { MagicTab } from "./MagicTab";
 import { ProfileContext } from "./ProfileContext";
 import { ProfileEditor } from "./ProfileEditor";
@@ -15,7 +16,7 @@ import { StoryTab } from "./StoryTab";
 import "@/components/hud/hud.css";
 import { HUD_SURFACE } from "@/components/battle/hud";
 import { QueryState } from "@/components/common/states";
-import { FreePointBadge, LevelUpOverlay } from "@/components/skill-tree/progression";
+import { LevelUpOverlay } from "@/components/skill-tree/progression";
 import { Button } from "@/components/ui/button";
 import { useCharacterSheet } from "@/lib/hooks/characters";
 import { cn } from "@/lib/utils";
@@ -89,6 +90,7 @@ export function CharacterProfile({ campaignId, characterId, canEdit, initialTab 
               <>
                 <ProfileHero
                   ref={hero.ref}
+                  badge={<LevelUpBadge campaignId={campaignId} characterId={characterId} onOpen={() => setTab("skills")} />}
                   actions={
                     canEdit && sheet.viewer.isDM ? (
                       <Button type="button" size="sm" variant="outline" onClick={() => setEditing(true)}>
@@ -97,9 +99,6 @@ export function CharacterProfile({ campaignId, characterId, canEdit, initialTab 
                     ) : null
                   }
                 />
-                <div className="px-4 empty:hidden">
-                  <FreePointBadge campaignId={campaignId} characterId={characterId} />
-                </div>
                 <ProfileTabs value={tab} onValueChange={setTab} tabs={viewTabs()} header={hero.past ? <CompactHero /> : null} />
                 <LevelUpOverlay campaignId={campaignId} characterId={characterId} name={sheet.identity.name} />
               </>

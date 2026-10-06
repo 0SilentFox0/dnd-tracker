@@ -1,10 +1,11 @@
 import { z } from "zod";
 
-import { ABILITY_KEYS } from "@/types/characters";
+import { ABILITY_KEYS } from "@/lib/constants/abilities";
+import { CharacterType } from "@/lib/constants/characters";
 
 export const createCharacterSchema = z.object({
   name: z.string().min(1).max(100),
-  type: z.enum(["player", "npc_hero"]),
+  type: z.enum([CharacterType.PLAYER, CharacterType.NPC_HERO]),
   controlledBy: z.string(),
   level: z.number().min(1).max(30).default(1),
   class: z.string().min(1),
@@ -28,16 +29,12 @@ export const createCharacterSchema = z.object({
   armorClass: z.number().min(0).default(10),
   initiative: z.number().default(0),
   speed: z.number().min(0).default(30),
-  maxHp: z.number().min(1).default(10),
-  currentHp: z.number().min(0).default(10),
-  tempHp: z.number().min(0).default(0),
 
   // Saving Throws & Skills
   savingThrows: z.record(z.string(), z.boolean()).default({}),
   skills: z.record(z.string(), z.boolean()).default({}),
 
   // Заклинання
-  spellcastingClass: z.string().optional(),
   spellcastingAbility: z
     .enum(["intelligence", "wisdom", "charisma"])
     .nullable()

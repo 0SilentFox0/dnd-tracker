@@ -7,6 +7,7 @@ import { RaceFormFields } from "./RaceFormFields";
 import { withAbilityErrors } from "@/components/abilities";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
+import { DEFAULT_SPELL_SLOT_PROGRESSION } from "@/lib/constants/spells";
 import { useMainSkills } from "@/lib/hooks/skills";
 import type { RaceFormData } from "@/types/races";
 
@@ -19,6 +20,7 @@ interface CreateRaceDialogProps {
 
 const EMPTY_FORM: RaceFormData = {
   name: "",
+  color: "",
   availableSkills: [],
   disabledSkills: [],
   passiveAbility: {
@@ -26,13 +28,7 @@ const EMPTY_FORM: RaceFormData = {
     statImprovements: "",
     statModifiers: {},
   },
-  spellSlotProgression: [
-    { level: 1, slots: 0 },
-    { level: 2, slots: 0 },
-    { level: 3, slots: 0 },
-    { level: 4, slots: 0 },
-    { level: 5, slots: 0 },
-  ],
+  spellSlotProgression: DEFAULT_SPELL_SLOT_PROGRESSION,
   abilities: [],
 };
 

@@ -8,7 +8,7 @@
  *   if (!campaign) redirect("/campaigns");
  *   const member = campaign.members.find(m => m.userId === user.id);
  *   if (!member) redirect("/campaigns");
- *   const isDM = member.role === "dm";
+ *   const isDM = member.role === CampaignRole.DM;
  *
  * 25+ файлів з варіаціями. Тепер:
  *   const { campaign, userId, isDM } = await requireCampaignMember(id);
@@ -30,6 +30,7 @@ import { redirect } from "next/navigation";
 import type { Campaign, CampaignMember, User } from "@prisma/client";
 
 import { getAuthUser } from "@/lib/auth";
+import { CampaignRole } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 
 type SlimMembership = {
@@ -78,7 +79,7 @@ export async function requireCampaignMember(campaignId: string): Promise<{
     campaign: campaign as Campaign,
     userId,
     role: member.role,
-    isDM: member.role === "dm",
+    isDM: member.role === CampaignRole.DM,
     authUser,
   };
 }
@@ -146,7 +147,7 @@ export async function requireCampaignWithMembers(
     campaign,
     userId,
     role: member.role,
-    isDM: member.role === "dm",
+    isDM: member.role === CampaignRole.DM,
     ownMembership: { userId: member.userId, role: member.role },
     authUser,
   };

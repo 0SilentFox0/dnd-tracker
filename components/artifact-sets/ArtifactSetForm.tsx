@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useArtifactSetForm } from "@/lib/hooks/artifact-sets";
-import type { ConversionIssue } from "@/lib/utils/abilities/legacy/types";
+import type { ConversionIssue } from "@/lib/utils/abilities/schema";
 import type { Ability } from "@/lib/utils/abilities/schema";
 
 export interface ArtifactSetFormProps {
@@ -85,13 +85,7 @@ export function ArtifactSetForm({
       </div>
 
       <div className="space-y-2">
-        <ImageUpload
-          value={fields.icon}
-          onChange={(v) => setField("icon", v)}
-          label="Іконка для бою"
-          placeholder="URL зображення або завантажте файл з комп’ютера"
-          previewAlt="Іконка сету в бою"
-        />
+        <ImageUpload value={fields.icon} onChange={(v) => setField("icon", v)} label="Іконка для бою" fallbackText={fields.name} />
         <p className="text-xs text-muted-foreground">
           Показується біля портрета в битві при повному сеті. Завантажений файл
           зберігається в сховищі кампанії (як іконки артефактів), у базі лишається

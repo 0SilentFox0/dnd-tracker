@@ -9,7 +9,7 @@ import { AbilityEditorProvider } from "./editor-context";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { validateAbilities, withFreshIds } from "@/lib/utils/abilities/editor";
-import type { ConversionIssue } from "@/lib/utils/abilities/legacy/types";
+import type { ConversionIssue } from "@/lib/utils/abilities/schema";
 import type { Ability } from "@/lib/utils/abilities/schema";
 
 interface AbilityListEditorProps {
@@ -53,7 +53,7 @@ export function AbilityListEditor({ campaignId, value, onChange, issues = [], on
         </div>
         {issues.length > 0 && (
           <div className="rounded-md border border-amber-500/50 bg-amber-500/10 p-2 text-xs">
-            <p className="font-medium">Перенесено зі старого формату — перевірте перед збереженням:</p>
+            <p className="font-medium">Збережені вміння мають невалідні дані — перевірте перед збереженням:</p>
             <ul className="list-disc pl-4">
               {issues.map((i, idx) => (
                 <li key={`${idx}-${i.message}`}>{i.message}</li>

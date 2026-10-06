@@ -33,27 +33,20 @@ export default async function CampaignInfoPage({
     }),
   ]);
 
-  const skillsForClient = skills.map((s) => {
-    const basicInfo =
-      s.basicInfo && typeof s.basicInfo === "object" && !Array.isArray(s.basicInfo)
-        ? (s.basicInfo as Record<string, unknown>)
-        : {};
-
-    return {
-      id: s.id,
-      name: (basicInfo.name as string) || s.name,
-      description: (basicInfo.description as string) || s.description,
-      appearanceDescription: (s as { appearanceDescription?: string | null }).appearanceDescription ?? null,
-      abilitySummary: abilitySummary("skill", s),
-      mainSkillId: s.mainSkill?.id ?? null,
-      mainSkillName: s.mainSkill?.name ?? null,
-      mainSkillIcon: s.mainSkill?.icon ?? null,
-      mainSkillColor: s.mainSkill?.color ?? null,
-      grantedSpellName: s.grantedSpell?.name ?? null,
-      icon: s.icon ?? null,
-      image: s.image ?? null,
-    };
-  });
+  const skillsForClient = skills.map((s) => ({
+    id: s.id,
+    name: s.name,
+    description: s.description,
+    appearanceDescription: s.appearanceDescription ?? null,
+    abilitySummary: abilitySummary("skill", s),
+    mainSkillId: s.mainSkill?.id ?? null,
+    mainSkillName: s.mainSkill?.name ?? null,
+    mainSkillIcon: s.mainSkill?.icon ?? null,
+    mainSkillColor: s.mainSkill?.color ?? null,
+    grantedSpellName: s.grantedSpell?.name ?? null,
+    icon: s.icon ?? null,
+    image: s.image ?? null,
+  }));
 
   const spellsForClient = spells.map((s) => ({
     id: s.id,

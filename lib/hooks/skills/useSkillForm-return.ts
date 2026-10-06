@@ -5,7 +5,7 @@
 import type React from "react";
 
 import { SpellEnhancementType } from "@/lib/constants/spell-enhancement";
-import type { ConversionIssue } from "@/lib/utils/abilities/legacy/types";
+import type { ConversionIssue } from "@/lib/utils/abilities/schema";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import type { MainSkill } from "@/types/main-skills";
 

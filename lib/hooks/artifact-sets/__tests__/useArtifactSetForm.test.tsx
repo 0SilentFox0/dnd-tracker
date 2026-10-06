@@ -6,9 +6,11 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ConfirmProvider } from "@/components/ui/confirm-dialog";
 
-const push = vi.fn();
+const nav: string[] = [];
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push, refresh: vi.fn() }) }));
+const push = vi.fn((href: string) => nav.push(`push ${href}`));
+
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push, refresh: () => nav.push("refresh") }) }));
 vi.mock("@/lib/api/artifacts", () => ({
   getArtifacts: vi.fn(async () => [
     { id: "a1", name: "Шолом", slot: "helmet", setId: null },
@@ -20,7 +22,6 @@ vi.mock("@/lib/api/artifact-sets", () => ({
   updateArtifactSet: vi.fn(async () => ({})),
   createArtifactSet: vi.fn(async () => ({})),
   deleteArtifactSet: vi.fn(),
-  getArtifactSets: vi.fn(),
 }));
 
 import { updateArtifactSet } from "@/lib/api/artifact-sets";
@@ -42,12 +43,14 @@ describe("useArtifactSetForm", () => {
   });
 
   it("saves the selected members and trimmed bonus, then returns to the list", async () => {
+    nav.length = 0;
+
     const { result } = renderHook(() => useArtifactSetForm({ campaignId: "c1", setId: "s1", initial: { name: "Дракон", artifactIds: ["a3"], setBonus: { name: " Кров " } } }), { wrapper });
 
     act(() => result.current.toggleArtifact("a1"));
     await act(() => result.current.submit({ preventDefault: () => {} } as React.FormEvent));
 
     expect(updateArtifactSet).toHaveBeenCalledWith("c1", "s1", expect.objectContaining({ name: "Дракон", description: null, artifactIds: ["a3", "a1"], setBonus: { name: "Кров", description: undefined }, icon: null }));
-    expect(push).toHaveBeenCalledWith("/campaigns/c1/dm/artifact-sets");
+    expect(nav).toEqual(["push /campaigns/c1/dm/artifact-sets", "refresh"]);
   });
 });

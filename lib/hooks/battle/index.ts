@@ -1,6 +1,7 @@
 export { rollDie, useAttackWizard } from "./useAttackWizard";
 export { useBattlePageDialogs } from "./useBattlePageDialogs";
 export {
+  type BattleLogState,
   type BattleSceneActions,
   BattleSceneContext,
   type BattleSceneValue,

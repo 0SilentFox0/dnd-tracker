@@ -136,4 +136,40 @@ describe("usePlayerTurn", () => {
 
     vi.useRealTimers();
   });
+
+  it("паніка: «Завершити хід» без питання «дію не використано»", async () => {
+    vi.useFakeTimers();
+
+    const scene = fakeScene({ morale: -1, confirmAnswer: false });
+
+    scene.moraleCheck.mockResolvedValue({ moraleResult: { hasExtraTurn: false, shouldSkipTurn: true, moralePositive: false, message: "" } });
+
+    (scene.value.actions.nextTurn.mutate as ReturnType<typeof vi.fn>).mockImplementation((_vars: unknown, opts?: { onError?: () => void }) => opts?.onError?.());
+
+    const { result } = renderHook(() => usePlayerTurn(scene.me), { wrapper: scene.wrapper });
+
+    await act(async () => result.current.rollMorale(2));
+    act(() => vi.advanceTimersByTime(4_100));
+    vi.useRealTimers();
+
+    await act(async () => result.current.endTurn());
+
+    expect(scene.confirm).not.toHaveBeenCalled();
+    expect(scene.nextTurn).toHaveBeenCalledWith({});
+  });
+
+  it("результат моралі: без перевірки — undefined; уже перевірена в цьому ході — з pendingMoraleCheck", () => {
+    const plain = fakeScene();
+
+    expect(renderHook(() => usePlayerTurn(plain.me), { wrapper: plain.wrapper }).result.current.moraleResult).toBeUndefined();
+
+    const checked = fakeScene({ morale: 2 });
+
+    checked.battle.pendingMoraleCheck = { participantId: "me", d10Roll: 9, moraleResult: { hasExtraTurn: true, shouldSkipTurn: false, moralePositive: true, message: "" } };
+
+    const { result } = renderHook(() => usePlayerTurn(checked.me), { wrapper: checked.wrapper });
+
+    expect(result.current.phase).toBe("acting");
+    expect(result.current.moraleResult).toBe("extra");
+  });
 });

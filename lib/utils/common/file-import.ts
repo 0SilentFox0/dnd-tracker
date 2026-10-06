@@ -2,9 +2,7 @@
  * Загальні утиліти для імпорту файлів (CSV та JSON)
  */
 
-export interface CSVRow {
-  [key: string]: string | undefined;
-}
+import type { CSVRow } from "@/types/import";
 
 /**
  * Парсить CSV рядок з підтримкою лапок та різних роздільників
@@ -150,20 +148,4 @@ export async function parseJSONFile<T>(file: File): Promise<T[]> {
   const data = JSON.parse(text) as T | T[];
 
   return Array.isArray(data) ? data : [data];
-}
-
-/**
- * Валідує файл перед імпортом
- */
-export function validateImportFile(file: File): { valid: boolean; error?: string } {
-  const ext = file.name.split(".").pop()?.toLowerCase();
-  
-  if (ext !== "csv" && ext !== "json") {
-    return {
-      valid: false,
-      error: "Підтримуються тільки CSV та JSON файли",
-    };
-  }
-
-  return { valid: true };
 }

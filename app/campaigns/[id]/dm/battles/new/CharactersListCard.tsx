@@ -15,6 +15,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ParticipantSourceType } from "@/lib/constants/battle";
 import type { EntityStats, SetupCharacter } from "@/types/battle-setup";
 
 interface CharactersListCardProps {
@@ -24,7 +25,7 @@ interface CharactersListCardProps {
   isParticipantSelected: (id: string) => boolean;
   onParticipantToggle: (
     id: string,
-    type: "character",
+    type: typeof ParticipantSourceType.CHARACTER,
     checked: boolean,
   ) => void;
 }
@@ -163,7 +164,7 @@ export function CharactersListCard({
                   stats={entityStats?.[character.id]}
                   isSelected={isParticipantSelected(character.id)}
                   onToggle={(checked) =>
-                    onParticipantToggle(character.id, "character", checked)
+                    onParticipantToggle(character.id, ParticipantSourceType.CHARACTER, checked)
                   }
                 />
               ))}
@@ -183,7 +184,7 @@ export function CharactersListCard({
                   stats={entityStats?.[character.id]}
                   isSelected={isParticipantSelected(character.id)}
                   onToggle={(checked) =>
-                    onParticipantToggle(character.id, "character", checked)
+                    onParticipantToggle(character.id, ParticipantSourceType.CHARACTER, checked)
                   }
                 />
               ))}

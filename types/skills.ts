@@ -1,11 +1,7 @@
 /**
  * Типи для скілів
  */
-import type { SkillEffect } from "./battle";
-import type { SkillTriggers } from "./skill-triggers";
-
-import type { ConversionIssue } from "@/lib/utils/abilities/legacy/types";
-import type { Ability } from "@/lib/utils/abilities/schema";
+import type { Ability, ConversionIssue } from "@/lib/utils/abilities/schema";
 
 export interface Skill {
   abilities?: Ability[];
@@ -16,12 +12,6 @@ export interface Skill {
   name: string;
   description: string | null;
   icon: string | null;
-  bonuses: Record<string, number>;
-  damage: number | null;
-  armor: number | null;
-  speed: number | null;
-  physicalResistance: number | null;
-  magicalResistance: number | null;
   min_targets?: number | null;
   max_targets?: number | null;
   spellId: string | null;
@@ -36,7 +26,6 @@ export interface Skill {
     duration?: number;
   } | null;
   spellNewSpellId?: string | null;
-  skillTriggers?: SkillTriggers;
   createdAt: Date;
   spell?: {
     id: string;
@@ -62,21 +51,6 @@ export interface GroupedSkill {
     description?: string;
     icon?: string;
   };
-  bonuses: Record<string, number>;
-  combatStats: {
-    damage?: number;
-    armor?: number;
-    speed?: number;
-    physicalResistance?: number;
-    magicalResistance?: number;
-    min_targets?: number;
-    max_targets?: number;
-    effects?: SkillEffect[];
-    /** Чекбокс: скіл впливає на розрахунок шкоди */
-    affectsDamage?: boolean;
-    /** Тип шкоди: melee / ranged / magic */
-    damageType?: "melee" | "ranged" | "magic" | null;
-  };
   spellData: {
     spellId?: string;
     spellGroupId?: string;
@@ -100,7 +74,6 @@ export interface GroupedSkill {
   mainSkillData: {
     mainSkillId?: string;
   };
-  skillTriggers?: SkillTriggers;
   createdAt: Date;
   spell?: {
     id: string;

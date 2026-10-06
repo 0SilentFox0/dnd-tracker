@@ -1,10 +1,12 @@
 /**
- * Runs the attack phase: validation, processAttack per target, morale updates.
+ * Runs the attack phase: validation, processAttack per target, primary-target retaliation.
  * Used by attack-and-next-turn route (and can be reused by attack route).
  */
 
+import type { Rng } from "@/lib/utils/abilities/engine/types";
 import { processAttack } from "@/lib/utils/battle/attack";
-import { getTotalDiceCount } from "@/lib/utils/battle/balance";
+import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
+import { diceCount } from "@/lib/utils/common/dice";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 export type AttackPhaseInput = {
@@ -26,11 +28,11 @@ export type AttackPhaseInput = {
     advantageRoll?: number;
     disadvantageRoll?: number;
     damageRolls: number[];
-    reactionDamage?: number;
   };
   battleId: string;
   userId: string;
   isDM: boolean;
+  rng?: Rng;
 };
 
 export type AttackPhaseResult = {
@@ -51,6 +53,8 @@ export class AttackPhaseError extends Error {
 
 export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
   const { battle, data, battleId, userId, isDM } = input;
+
+  const rng = input.rng ?? Math.random;
 
   const initiativeOrder = battle.initiativeOrder as BattleParticipant[];
 
@@ -174,7 +178,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const dicePerTarget =
     isMultiTargetRanged && targets.length > 1
-      ? getTotalDiceCount(attack.damageDice ?? "")
+      ? diceCount(attack.damageDice ?? "")
       : 0;
 
   for (let i = 0; i < targets.length; i++) {
@@ -203,11 +207,6 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
         ? data.damageRolls.slice(i * dicePerTarget, (i + 1) * dicePerTarget)
         : data.damageRolls;
 
-    const reactionOverride =
-      targets.length === 1 && data.reactionDamage != null
-        ? data.reactionDamage
-        : undefined;
-
     const freshTarget = currentInitiativeOrder.find((p) => p.basicInfo.id === target.basicInfo.id) ?? target;
 
     const attackResult = processAttack({
@@ -222,7 +221,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       currentRound: battle.currentRound,
       battleId,
       damageMultiplier,
-      reactionDamageOverride: reactionOverride,
+      rng,
     });
 
     const updatedMap = new Map((attackResult.allParticipantsUpdated ?? []).map((p) => [p.basicInfo.id, p]));
@@ -234,6 +233,33 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       ...attackResult.battleAction,
       actionIndex: baseBattleLog.length + allBattleActions.length,
     });
+
+    if (i === 0) {
+      const retaliation = resolveRetaliation({
+        participants: currentInitiativeOrder,
+        attackerId: attacker.basicInfo.id,
+        defenderId: target.basicInfo.id,
+        attack,
+        attackRoll: attackResult.attackRoll,
+        criticalEffect: attackResult.criticalEffectApplied,
+        round: battle.currentRound,
+        battleId,
+        rng,
+      });
+
+      if (retaliation) {
+        const byId = new Map(retaliation.participants.map((p) => [p.basicInfo.id, p]));
+
+        currentInitiativeOrder = currentInitiativeOrder.map((p) => byId.get(p.basicInfo.id) ?? p);
+        currentAttacker = byId.get(attacker.basicInfo.id) ?? currentAttacker;
+        allBattleActions.push({
+          ...retaliation.battleAction,
+          actionIndex: baseBattleLog.length + allBattleActions.length,
+        });
+      }
+    }
+
+    if (currentAttacker.combatStats.status !== "active") break;
   }
 
   const finalInitiativeOrder = currentInitiativeOrder;

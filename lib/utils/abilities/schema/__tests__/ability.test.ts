@@ -110,3 +110,22 @@ describe("AbilitySchema", () => {
     expect(parseAbilities([])).toEqual([]);
   });
 });
+
+describe("counterAttack", () => {
+  it("magic відкидається: заклинання відсічі не викликають", () => {
+    const r = AbilitySchema.safeParse({
+      ...base,
+      trigger: { event: "passive" },
+      effects: [{ kind: "flag", flag: "counterAttack", attackKinds: ["melee", "magic"], bonusPercent: 15 }],
+    });
+
+    expect(r.success).toBe(true);
+    expect(r.success && r.data.effects[0]).toEqual({ kind: "flag", flag: "counterAttack", attackKinds: ["melee"], bonusPercent: 15 });
+  });
+
+  it("збережене лише magic не губить вміння: лишається бонус без розширення на дальні", () => {
+    const r = AbilitySchema.safeParse({ ...base, trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "counterAttack", attackKinds: ["magic"], bonusPercent: 10 }] });
+
+    expect(r.success && r.data.effects[0]).toMatchObject({ attackKinds: [], bonusPercent: 10 });
+  });
+});

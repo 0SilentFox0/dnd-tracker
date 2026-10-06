@@ -9,13 +9,14 @@ import { Label } from "@/components/ui/label";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { SelectField } from "@/components/ui/select-field";
 import { ALIGNMENTS } from "@/lib/constants";
+import { CharacterType, type CharacterTypeValue } from "@/lib/constants/characters";
 import { CampaignMember } from "@/types/campaigns";
 import type { Race } from "@/types/races";
 
 interface CharacterBasicInfoProps {
   basicInfo: {
     name: string;
-    type: "player" | "npc_hero";
+    type: CharacterTypeValue;
     controlledBy: string;
     level: number;
     class: string;
@@ -28,7 +29,7 @@ interface CharacterBasicInfoProps {
     avatar?: string;
     setters: {
       setName: (value: string) => void;
-      setType: (value: "player" | "npc_hero") => void;
+      setType: (value: CharacterTypeValue) => void;
       setControlledBy: (value: string) => void;
       setLevel: (value: number) => void;
       setClass: (value: string) => void;
@@ -86,19 +87,19 @@ export function CharacterBasicInfo({
           id="type"
           value={type}
           onValueChange={(value) =>
-            setters.setType(value as "player" | "npc_hero")
+            setters.setType(value as CharacterTypeValue)
           }
           placeholder="Виберіть тип"
           options={[
-            { value: "player", label: "Гравець" },
-            { value: "npc_hero", label: "NPC Герой" },
+            { value: CharacterType.PLAYER, label: "Гравець" },
+            { value: CharacterType.NPC_HERO, label: "NPC Герой" },
           ]}
           required
           triggerClassName="w-full"
         />
       </div>
 
-      {type === "player" && (
+      {type === CharacterType.PLAYER && (
         <div className="w-full min-w-0">
           <Label htmlFor="controlledBy">Контролюється *</Label>
           <SelectField
@@ -194,13 +195,7 @@ export function CharacterBasicInfo({
       />
       {!isPlayerView && (
         <div className="w-full min-w-0 md:col-span-2">
-          <ImageUpload
-            label="Картинка персонажа"
-            value={avatar || ""}
-            onChange={setters.setAvatar}
-            placeholder="Посилання на картинку (URL)"
-            previewAlt="Аватар"
-          />
+          <ImageUpload label="Картинка персонажа" value={avatar || ""} onChange={setters.setAvatar} fallbackText={name} />
         </div>
       )}
     </div>

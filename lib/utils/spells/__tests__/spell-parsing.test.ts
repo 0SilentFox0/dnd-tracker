@@ -8,7 +8,6 @@ import {
   determineSpellType,
   extractDamageDice,
   normalizeSchoolName,
-  parseDiceString,
 } from "../spell-parsing";
 
 import { SpellDamageType, SpellType } from "@/lib/constants/spell-abilities";
@@ -51,27 +50,6 @@ describe("spell-parsing", () => {
     it("повертає undefined якщо немає кубиків", () => {
       expect(extractDamageDice("None")).toBeUndefined();
       expect(extractDamageDice("Speed halved")).toBeUndefined();
-    });
-  });
-
-  describe("parseDiceString", () => {
-    it("парсить 2d6, 1d8 тощо", () => {
-      expect(parseDiceString("2d6")).toEqual({ diceCount: 2, diceType: "d6" });
-      expect(parseDiceString("1d8")).toEqual({ diceCount: 1, diceType: "d8" });
-      expect(parseDiceString("4d6")).toEqual({ diceCount: 4, diceType: "d6" });
-    });
-
-    it("повертає null для невалідного типу кубика", () => {
-      expect(parseDiceString("1d3")).toEqual({ diceCount: null, diceType: null });
-    });
-
-    it("повертає null для порожнього або undefined", () => {
-      expect(parseDiceString("")).toEqual({ diceCount: null, diceType: null });
-      expect(parseDiceString(undefined)).toEqual({ diceCount: null, diceType: null });
-    });
-
-    it("повертає null для count > 10 або < 0", () => {
-      expect(parseDiceString("11d6").diceCount).toBeNull();
     });
   });
 

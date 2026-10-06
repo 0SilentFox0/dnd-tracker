@@ -16,6 +16,7 @@ import {
   useMainSkills,
   useSkills,
 } from "@/lib/hooks/skills";
+import { pluralUk } from "@/lib/utils/plural";
 import {
   convertGroupedSkillsToArray,
   groupSkillsByMainSkill,
@@ -60,7 +61,7 @@ export function DMSkillsPageClient({
   const handleDeleteAll = () =>
     confirm({
       title: "Видалити всі скіли?",
-      description: `Ця дія видалить всі скіли з бібліотеки (${skills.length} скілів). Цю дію неможливо скасувати.`,
+      description: `Ця дія видалить всі скіли з бібліотеки (${skills.length} ${pluralUk(skills.length, ["скіл", "скіли", "скілів"])}). Цю дію неможливо скасувати.`,
       confirmLabel: "Видалити всі",
       destructive: true,
       onConfirm: () => deleteAllSkillsMutation.mutateAsync(),

@@ -7,6 +7,7 @@ import { type BattleToastApi, useBattleToast } from "./useBattleToast";
 import { type PusherConnectionState, usePusherBattleSync } from "./usePusherBattleSync";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import {
   useAddBattleParticipant,
   useAttack,
@@ -23,14 +24,19 @@ import {
 } from "@/lib/hooks/battles";
 import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
-import { type QueueEntry, turnQueue, type Viewer } from "@/lib/utils/battle/view";
+import { type QueueEntry, type RetaliationOutcome, turnQueue, type Viewer } from "@/lib/utils/battle/view";
 import type { BattleScene } from "@/types/api";
 import type { BattleParticipant } from "@/types/battle";
 
 export type ResultFx =
-  | { kind: "hit" | "crit"; targetName: string; damage: number; downed: boolean; d20: number; weapon?: string }
-  | { kind: "miss"; targetName: string; d20: number; known: string }
+  | { kind: "hit" | "crit"; targetName: string; damage: number; downed: boolean; d20: number; weapon?: string; retaliation?: RetaliationOutcome }
+  | { kind: "miss"; targetName: string; d20: number; known: string; retaliation?: RetaliationOutcome }
   | { kind: "morale-extra" | "morale-skip"; name: string; d10: number; morale: number };
+
+export interface BattleLogState {
+  open: boolean;
+  focus: number | null;
+}
 
 export interface BattleSceneActions {
   nextTurn: ReturnType<typeof useNextTurn>;
@@ -68,6 +74,9 @@ export interface BattleSceneValue {
   toast: BattleToastApi;
   result: ResultFx | null;
   showResult(fx: ResultFx | null): void;
+  log: BattleLogState;
+  openLog(focus?: number | null): void;
+  closeLog(): void;
   readBattle(): BattleScene | undefined;
   actions: BattleSceneActions;
   anyPending: boolean;
@@ -92,7 +101,7 @@ export function deriveTurn(battle: BattleScene, userId: string | null, isDM: boo
 
   const controls = (p: BattleParticipant) =>
     p.basicInfo.controlledBy === userId ||
-    (isDM && (p.basicInfo.id === dmControlledId || p.basicInfo.controlledBy === "dm" || p.basicInfo.side === ParticipantSide.ENEMY));
+    (isDM && (p.basicInfo.id === dmControlledId || p.basicInfo.controlledBy === CONTROLLED_BY_DM || p.basicInfo.side === ParticipantSide.ENEMY));
 
   const isMyTurn = battle.status === "active" && !!current && !!userId && controls(current);
 
@@ -127,6 +136,15 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
   const [selectedId, select] = useState<string | null>(null);
 
   const [result, showResult] = useState<ResultFx | null>(null);
+
+  const [log, setLog] = useState<BattleLogState>({ open: false, focus: null });
+
+  const openLog = useCallback((focus: number | null = null) => {
+    select(null);
+    setLog({ open: true, focus });
+  }, []);
+
+  const closeLog = useCallback(() => setLog({ open: false, focus: null }), []);
 
   const onTurnStarted = useCallback(
     (message: string) => {
@@ -193,6 +211,9 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
     toast,
     result,
     showResult,
+    log,
+    openLog,
+    closeLog,
     readBattle,
     actions,
     anyPending: Object.values(actions).some((m) => m.isPending),

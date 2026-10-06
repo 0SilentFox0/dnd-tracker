@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { RaceEditForm } from "@/components/races/RaceEditForm";
 import { requireCampaignDM } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
-import { readAbilities } from "@/lib/utils/abilities/legacy/read";
+import { readAbilities } from "@/lib/utils/abilities/read";
 import type { Race } from "@/types/races";
 
 export default async function EditRacePage({

@@ -6,9 +6,6 @@
 import { AttackType } from "@/lib/constants/battle";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 
-/** Допустимі кубики для шкоди героя */
-export const HERO_DAMAGE_DICE_SIDES = [4, 6, 8] as const;
-
 /** Коефіцієнти масштабування (можна перевизначити на рівні кампанії) */
 export interface HeroScalingOptions {
   /** HP: level * (hpBasePerLevel + strMod * hpStrCoefficient) * hpMultiplier */
@@ -131,21 +128,6 @@ export function getHeroDamageDiceForLevel(
   options?: HeroScalingOptions | null
 ): string {
   return getDiceForLevel(level, attackType, options);
-}
-
-/**
- * Компоненти базового урону героя "з руки": level + statMod + кубики(level).
- * Для підсумку: baseDamage = weaponDiceAverage + level + diceAverage + statMod.
- * Повертає level, нотацію кубиків та середнє по кубиках (обчислює викликач через getDiceAverage).
- */
-export function getHeroDamageComponents(
-  level: number,
-  attackType: AttackType,
-  options?: HeroScalingOptions | null
-): { levelPart: number; diceNotation: string } {
-  const diceNotation = getHeroDamageDiceForLevel(level, attackType, options);
-
-  return { levelPart: level, diceNotation };
 }
 
 export { DEFAULTS as HERO_SCALING_DEFAULTS };

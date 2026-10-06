@@ -28,6 +28,9 @@ import {
   SPELLS_DATA,
 } from "./seed-mock-battle-data-data";
 
+import { CampaignRole } from "@/lib/constants/campaigns";
+import { CharacterType } from "@/lib/constants/characters";
+
 const prisma = new PrismaClient();
 
 // ID кампанії (потрібно передати як аргумент або змінити вручну)
@@ -167,7 +170,7 @@ async function seedMockData() {
           campaignId: CAMPAIGN_ID,
           name: skillData.name,
           description: skillData.description,
-          bonuses: skillData.bonuses as Prisma.InputJsonValue,
+          abilities: (skillData.abilities ?? []) as unknown as Prisma.InputJsonValue,
           mainSkillId: skillData.mainSkillId,
           spellEffectIncrease: skillData.spellEffectIncrease || null,
         },
@@ -206,7 +209,7 @@ async function seedMockData() {
           campaignId: CAMPAIGN_ID,
           name: skillData.name,
           description: skillData.description,
-          bonuses: skillData.bonuses as Prisma.InputJsonValue,
+          abilities: (skillData.abilities ?? []) as unknown as Prisma.InputJsonValue,
           mainSkillId: skillData.mainSkillId,
           spellId: skillData.spellId || null,
           spellAdditionalModifier: skillData.spellAdditionalModifier
@@ -239,10 +242,7 @@ async function seedMockData() {
           name: "human",
           availableSkills: createdHumanSkills.map((s) => s.id) as Prisma.InputJsonValue,
           disabledSkills: [] as Prisma.InputJsonValue,
-          passiveAbility: {
-            type: "morale_modifier",
-            description: "Мораль не може бути нижче 0",
-          } as Prisma.InputJsonValue,
+          abilities: [{ id: "race", name: "human", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "noNegativeMorale" }] }] as Prisma.InputJsonValue,
         },
       });
       console.log(`  ✅ Створено: ${humanRace.name}`);
@@ -264,10 +264,7 @@ async function seedMockData() {
           name: "elf",
           availableSkills: createdElfSkills.map((s) => s.id) as Prisma.InputJsonValue,
           disabledSkills: [] as Prisma.InputJsonValue,
-          passiveAbility: {
-            type: "advantage_ranged",
-            description: "Advantage на дальні атаки",
-          } as Prisma.InputJsonValue,
+          abilities: [{ id: "race", name: "elf", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "advantage", attackKind: "ranged" }] }] as Prisma.InputJsonValue,
         },
       });
       console.log(`  ✅ Створено: ${elfRace.name}`);
@@ -348,7 +345,7 @@ async function seedMockData() {
 
     // Отримуємо першого користувача кампанії як DM
     const campaignMember = await prisma.campaignMember.findFirst({
-      where: { campaignId: CAMPAIGN_ID, role: "dm" },
+      where: { campaignId: CAMPAIGN_ID, role: CampaignRole.DM },
     });
 
     if (!campaignMember) {
@@ -362,7 +359,7 @@ async function seedMockData() {
     const humanCharacters = [
       {
         name: "Годрик Воїн",
-        type: "player",
+        type: CharacterType.PLAYER,
         controlledBy: dmUserId,
         level: 5,
         class: "Fighter",
@@ -376,11 +373,6 @@ async function seedMockData() {
         armorClass: 18,
         initiative: 2,
         speed: 30,
-        maxHp: 45,
-        currentHp: 45,
-        tempHp: 0,
-        hitDice: "1d10",
-        proficiencyBonus: 3,
         morale: 1,
         spellSlots: {},
         knownSpells: [],
@@ -388,7 +380,7 @@ async function seedMockData() {
       },
       {
         name: "Айра Маг",
-        type: "player",
+        type: CharacterType.PLAYER,
         controlledBy: dmUserId,
         level: 5,
         class: "Wizard",
@@ -402,16 +394,8 @@ async function seedMockData() {
         armorClass: 12,
         initiative: 2,
         speed: 30,
-        maxHp: 32,
-        currentHp: 32,
-        tempHp: 0,
-        hitDice: "1d6",
-        proficiencyBonus: 3,
         morale: 0,
-        spellcastingClass: "wizard",
         spellcastingAbility: "intelligence",
-        spellSaveDC: 15,
-        spellAttackBonus: 7,
         spellSlots: {
           "1": { max: 4, current: 4 },
           "2": { max: 3, current: 3 },
@@ -430,7 +414,7 @@ async function seedMockData() {
     const elfCharacters = [
       {
         name: "Ліра Стрілець",
-        type: "player",
+        type: CharacterType.PLAYER,
         controlledBy: dmUserId,
         level: 5,
         class: "Ranger",
@@ -444,11 +428,6 @@ async function seedMockData() {
         armorClass: 16,
         initiative: 4,
         speed: 30,
-        maxHp: 38,
-        currentHp: 38,
-        tempHp: 0,
-        hitDice: "1d10",
-        proficiencyBonus: 3,
         morale: 1,
         spellSlots: {
           "1": { max: 3, current: 3 },
@@ -459,7 +438,7 @@ async function seedMockData() {
       },
       {
         name: "Елвін Чарівник",
-        type: "player",
+        type: CharacterType.PLAYER,
         controlledBy: dmUserId,
         level: 5,
         class: "Sorcerer",
@@ -473,16 +452,8 @@ async function seedMockData() {
         armorClass: 13,
         initiative: 3,
         speed: 30,
-        maxHp: 35,
-        currentHp: 35,
-        tempHp: 0,
-        hitDice: "1d6",
-        proficiencyBonus: 3,
         morale: 0,
-        spellcastingClass: "sorcerer",
         spellcastingAbility: "charisma",
-        spellSaveDC: 16,
-        spellAttackBonus: 8,
         spellSlots: {
           "1": { max: 4, current: 4 },
           "2": { max: 3, current: 3 },

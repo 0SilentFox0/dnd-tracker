@@ -1,13 +1,11 @@
 import { z } from "zod";
 
-import type { AttackType } from "@/lib/constants/battle";
-import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
 import { runAttackPhase } from "@/lib/utils/battle/attack-and-next-turn/run-attack-phase";
-import { mergeDiceFormulas } from "@/lib/utils/battle/balance/dice";
+import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { toPipelineError } from "@/lib/utils/battle/pipeline/compat-errors";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { battleActionToEvent } from "@/lib/utils/battle/store";
-import { advanceTurn } from "@/lib/utils/battle/turn";
+import { advanceTurn, assertNotPanicking } from "@/lib/utils/battle/turn";
 import { assertAttackRolls } from "@/lib/utils/battle/validation/dice-checks";
 
 export const attackBodySchema = z
@@ -22,7 +20,6 @@ export const attackBodySchema = z
     advantageRoll: z.number().min(1).max(20).optional(),
     disadvantageRoll: z.number().min(1).max(20).optional(),
     damageRolls: z.array(z.number()).default([]),
-    reactionDamage: z.number().min(0).optional(),
     endTurn: z.boolean().default(false),
   })
   .refine(
@@ -49,18 +46,14 @@ function assertAttackInput(ctx: BattleMutationContext, data: Omit<AttackBody, "e
   const targetIds = data.targetIds?.length ? data.targetIds : data.targetId ? [data.targetId] : [];
 
   // клієнт героя кидає кубики зброї разом із кубиками рівня (PlayerTurnViewDialogs)
-  const formula =
-    attacker.basicInfo.sourceType === "character"
-      ? mergeDiceFormulas(attack.damageDice ?? "", getHeroDamageDiceForLevel(attacker.abilities.level, attack.type as AttackType))
-      : (attack.damageDice ?? "");
-
-  assertAttackRolls(formula, { damageRolls: data.damageRolls, targetCount: targetIds.length });
+  assertAttackRolls(heroAttackDamageParts(attacker, attack).formula, { damageRolls: data.damageRolls, targetCount: targetIds.length });
 }
 
 export function attackMutation(ctx: BattleMutationContext, body: AttackBody): MutationResult {
   const { endTurn, ...data } = body;
 
   assertAttackInput(ctx, data);
+  assertNotPanicking(ctx.scene.pendingMoraleCheck, data.attackerId);
 
   let phase: ReturnType<typeof runAttackPhase>;
 
@@ -71,6 +64,7 @@ export function attackMutation(ctx: BattleMutationContext, body: AttackBody): Mu
       battleId: ctx.scene.id,
       userId: ctx.userId,
       isDM: ctx.isDM,
+      rng: ctx.rng,
     });
   } catch (e) {
     toPipelineError(e);

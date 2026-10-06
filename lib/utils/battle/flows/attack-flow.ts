@@ -29,7 +29,6 @@ export interface AttackFlowState {
   mode: AttackMode;
   strikes: Strike[];
   index: number;
-  reactionDamage?: number;
   error?: string;
   results: AttackOutcomeSummary[];
 }
@@ -41,7 +40,7 @@ export type AttackFlowAction =
   | { type: "CONFIRM_TARGETS" }
   | { type: "SET_MODE"; mode: AttackMode }
   | { type: "ROLL"; d20: number; second?: number; outcome: RollOutcome }
-  | { type: "DAMAGE"; values: number[]; reactionDamage?: number }
+  | { type: "DAMAGE"; values: number[] }
   | { type: "BACK" }
   | { type: "SUBMIT" }
   | { type: "SUCCESS"; results: AttackOutcomeSummary[] }
@@ -95,9 +94,7 @@ export function attackFlow(s: AttackFlowState, a: AttackFlowAction): AttackFlowS
 
       const next = nextHit(strikes, s.index + 1);
 
-      return next === -1
-        ? { ...s, strikes, reactionDamage: a.reactionDamage ?? s.reactionDamage, step: "summary" }
-        : { ...s, strikes, reactionDamage: a.reactionDamage ?? s.reactionDamage, index: next };
+      return next === -1 ? { ...s, strikes, step: "summary" } : { ...s, strikes, index: next };
     }
     case "BACK": {
       if (s.step === "summary") return { ...s, step: "damage", index: prevHit(s.strikes, s.strikes.length), error: undefined };
@@ -146,7 +143,6 @@ export function attackPayload(s: AttackFlowState, attackerId: string): AttackDat
       ...(st.second !== undefined && s.mode === "advantage" && { advantageRoll: st.second }),
       ...(st.second !== undefined && s.mode === "disadvantage" && { disadvantageRoll: st.second }),
       damageRolls: isHit(st) ? st.damage : [],
-      ...(isHit(st) && s.reactionDamage !== undefined && { reactionDamage: s.reactionDamage }),
     } as AttackData & { endTurn: boolean };
   }
 

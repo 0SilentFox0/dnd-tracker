@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
+import { damageDiceColumns } from "./damage-dice-columns";
+
+import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { prisma } from "@/lib/db";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
@@ -38,16 +41,7 @@ const importSpellSchema = z.object({
       return false;
     }),
   damageDice: z.string().optional(),
-  savingThrowAbility: z
-    .enum([
-      "strength",
-      "dexterity",
-      "constitution",
-      "intelligence",
-      "wisdom",
-      "charisma",
-    ])
-    .optional(),
+  savingThrowAbility: z.enum(ABILITY_KEYS).optional(),
   savingThrowOnSuccess: z.enum(["half", "none"]).optional(),
   description: z.string().min(1),
   groupId: z.string().optional(),
@@ -126,32 +120,13 @@ export async function POST(
 
     const existingNamesSet = new Set(existingSpellNames.map((s) => s.name));
 
-    function parseDiceFromDamageDice(damageDice: string | undefined): {
-      diceCount: number | null;
-      diceType: string | null;
-    } {
-      if (!damageDice || !damageDice.trim()) {
-        return { diceCount: null, diceType: null };
-      }
-
-      const match = damageDice.trim().match(/^(\d+)\s*d(\d+)/i);
-
-      if (!match) return { diceCount: null, diceType: null };
-
-      const count = parseInt(match[1], 10);
-
-      const type = `d${match[2]}`;
-
-      return { diceCount: count, diceType: type };
-    }
-
     // Фільтруємо заклинання, які ще не існують
     const spellsToCreate = data.spells
       .filter((spell) => !existingNamesSet.has(spell.name))
       .map((spell) => {
         const schoolKey = spell.school ?? (spell as Record<string, unknown>).School as string | undefined;
 
-        const { diceCount, diceType } = parseDiceFromDamageDice(spell.damageDice);
+        const { diceCount, diceType } = damageDiceColumns(spell.damageDice);
 
         return {
           campaignId: id,

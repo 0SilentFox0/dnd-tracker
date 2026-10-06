@@ -34,4 +34,23 @@ describe("useLevelUpCelebration", () => {
     expect(qc.getQueryData<{ seenLevel: number }>(progressionKey("c", "ch"))?.seenLevel).toBe(5);
     expect(result.current.celebration).toBeNull();
   });
+
+  it("ДМ, що сам власник персонажа, не бачить оверлея й не скидає seenLevel", async () => {
+    const dto = { treeId: null, tree: null, race: "Ельф", raceIcon: null, level: 5, seenLevel: 3, isOwner: true, isDM: true, unlocked: [], skills: {}, branches: {} };
+
+    vi.mocked(api.getCharacterProgression).mockResolvedValue(dto);
+    vi.mocked(api.markLevelSeen).mockClear();
+
+    const qc = new QueryClient();
+
+    qc.setQueryData(progressionKey("c", "ch"), dto);
+
+    const wrapper = ({ children }: { children: ReactNode }) => <QueryClientProvider client={qc}>{children}</QueryClientProvider>;
+
+    const { result } = renderHook(() => useLevelUpCelebration("c", "ch"), { wrapper });
+
+    expect(result.current.celebration).toBeNull();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(api.markLevelSeen).not.toHaveBeenCalled();
+  });
 });

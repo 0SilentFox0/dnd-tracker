@@ -1,18 +1,36 @@
 import { describe, expect, it } from "vitest";
 
+import { formatSkillResponse } from "@/app/api/campaigns/[id]/skills/[skillId]/format-skill-response";
 import { formatSkillsListResponse } from "@/app/api/campaigns/[id]/skills/format-skills-response";
 
-const row = (mainSkillData: unknown) =>
-  ({
-    id: "s1", campaignId: "c", name: "Скіл", description: null, icon: null, bonuses: {}, damage: null, armor: null, speed: null,
-    physicalResistance: null, magicalResistance: null, spellId: null, spellGroupId: null, mainSkillId: "attack", spellEnhancementTypes: [],
-    spellEffectIncrease: null, spellTargetChange: null, spellAdditionalModifier: null, spellNewSpellId: null, basicInfo: {}, combatStats: {},
-    mainSkillData, spellData: {}, spellEnhancementData: {}, skillTriggers: [], image: null, createdAt: new Date(),
-  }) as never;
+const row = {
+  id: "s1", campaignId: "c", name: "Скіл", description: null, icon: "https://x/i.png", spellId: "sp1", spellGroupId: null, grantedSpellId: null,
+  mainSkillId: "attack", spellEnhancementTypes: [], spellEffectIncrease: null, spellTargetChange: null, spellAdditionalModifier: null,
+  spellNewSpellId: null, spellEnhancementData: {}, image: null, createdAt: new Date(), abilities: null,
+};
 
 describe("formatSkillsListResponse", () => {
-  it("mainSkillData несе mainSkillId колонки навіть коли JSON порожній", () => {
-    expect(formatSkillsListResponse([row({})])[0].mainSkillData).toMatchObject({ mainSkillId: "attack" });
-    expect(formatSkillsListResponse([row(null)])[0].mainSkillData).toMatchObject({ mainSkillId: "attack" });
+  it("згруповані поля будуються з пласких колонок", () => {
+    const [s] = formatSkillsListResponse([row]);
+
+    expect(s.basicInfo).toEqual({ name: "Скіл", description: "", icon: "https://x/i.png" });
+    expect(s.spellData).toEqual({ spellId: "sp1", spellGroupId: undefined, grantedSpellId: undefined });
+    expect(s.mainSkillData).toEqual({ mainSkillId: "attack" });
+  });
+
+  it("legacy-полів у відповіді немає", () => {
+    const [s] = formatSkillsListResponse([row]);
+
+    for (const key of ["bonuses", "combatStats", "skillTriggers"]) expect(s).not.toHaveProperty(key);
+  });
+});
+
+describe("formatSkillResponse", () => {
+  it("NULL abilities → порожній список без плашки", () => {
+    const s = formatSkillResponse(row);
+
+    expect(s.abilities).toEqual([]);
+    expect(s.abilityIssues).toEqual([]);
+    expect(s.basicInfo.name).toBe("Скіл");
   });
 });

@@ -58,7 +58,7 @@ export function ProgressionPanel({ campaignId, characterId, canManage = false }:
   };
 
   const unlearn = async (nodeId: string) => {
-    if (await actions.unlearn(nodeId)) setTarget(null);
+    if (await actions.unlearn([nodeId])) setTarget(null);
   };
 
   const reset = async () => {
@@ -85,7 +85,7 @@ export function ProgressionPanel({ campaignId, characterId, canManage = false }:
               {canManage && (
                 <div className="flex flex-wrap gap-2 px-4 py-3">
                   {view.orphans.length > 0 && (
-                    <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs text-[#d6cbb7]" onClick={async () => { for (const id of view.orphans) await actions.unlearn(id); }}>
+                    <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs text-[#d6cbb7]" onClick={() => void actions.unlearn(view.orphans)}>
                       Застарілі вузли: {view.orphans.length} · Прибрати
                     </Button>
                   )}

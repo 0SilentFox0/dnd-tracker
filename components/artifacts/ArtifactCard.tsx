@@ -5,7 +5,7 @@ import Link from "next/link";
 
 import { AbilitySummary } from "@/components/abilities";
 import { ArtifactDeleteButton } from "@/components/artifacts/ArtifactDeleteButton";
-import { OptimizedImage } from "@/components/common/OptimizedImage";
+import { EntityIcon } from "@/components/common/EntityIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -100,26 +100,7 @@ export function ArtifactCard({
     return (
       <div className="rounded-md border p-3">
         <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-md overflow-hidden bg-muted flex items-center justify-center shrink-0">
-            {artifact.icon ? (
-              <OptimizedImage
-                src={artifact.icon}
-                alt={artifact.name}
-                width={40}
-                height={40}
-                className="w-full h-full object-cover"
-                fallback={
-                  <span className="text-sm text-muted-foreground">
-                    {artifact.name[0]?.toUpperCase() || "?"}
-                  </span>
-                }
-              />
-            ) : (
-              <span className="text-sm text-muted-foreground">
-                {artifact.name[0]?.toUpperCase() || "?"}
-              </span>
-            )}
-          </div>
+          <EntityIcon src={artifact.icon} name={artifact.name} size={40} className="text-sm" />
           <div className="min-w-0 flex-1">
             <p className="font-semibold text-sm truncate">{artifact.name}</p>
             <div className="flex gap-2 flex-wrap items-center mt-1">
@@ -161,30 +142,7 @@ export function ArtifactCard({
     <Card className="hover:shadow-lg transition-shadow">
       <CardHeader>
         <div className="flex items-start gap-3 mb-2">
-          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden bg-muted flex items-center justify-center shrink-0 relative">
-            {artifact.icon ? (
-              <OptimizedImage
-                src={artifact.icon}
-                alt={artifact.name}
-                width={64}
-                height={64}
-                className="w-full h-full object-cover"
-                fallback={
-                  <div className="w-full h-full flex items-center justify-center bg-muted">
-                    <span className="text-xl text-muted-foreground">
-                      {artifact.name[0]?.toUpperCase() || "?"}
-                    </span>
-                  </div>
-                }
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-muted">
-                <span className="text-xl text-muted-foreground">
-                  {artifact.name[0]?.toUpperCase() || "?"}
-                </span>
-              </div>
-            )}
-          </div>
+          <EntityIcon src={artifact.icon} name={artifact.name} size={64} className="size-12 rounded-lg text-xl sm:size-16" />
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
               <CardTitle className="text-base flex-1 min-w-0 truncate">

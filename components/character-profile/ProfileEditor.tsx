@@ -6,9 +6,12 @@ import { useRouter } from "next/navigation";
 import { BasicEditTab } from "./BasicEditTab";
 import { BiographyEditor } from "./BiographyEditor";
 import { GoalList } from "./GoalList";
+import { MagicTab } from "./MagicTab";
 import { useProfile } from "./ProfileContext";
 import { ProfileHero } from "./ProfileHero";
 import { type ProfileTabId, ProfileTabs } from "./ProfileTabs";
+import { Section } from "./Section";
+import { SetList } from "./SetList";
 import { SkillsTab } from "./SkillsTab";
 import { SPELL_ABILITY_OPTIONS, toSpellcastingAbility } from "./spellcasting-ability";
 
@@ -28,7 +31,7 @@ import { useDmCharacterEditor } from "@/lib/hooks/characters";
 const EDIT_PANEL = "rounded-lg bg-background p-3 text-foreground";
 
 export function ProfileEditor({ onDone }: { onDone: () => void }) {
-  const { campaignId, characterId } = useProfile();
+  const { campaignId, characterId, sheet } = useProfile();
 
   const router = useRouter();
 
@@ -38,7 +41,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
 
   if (!editor.ready) return <LoadingState rows={6} label="Завантаження редактора…" />;
 
-  const { form, equipped, setEquipped, artifacts, artifactSets } = editor;
+  const { form, equipped, setEquipped, artifacts } = editor;
 
   const { formData, setFormData, abilityScores, combatStats, skills, abilities, spellcasting } = form;
 
@@ -84,17 +87,20 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
             id: "magic",
             label: "Магія",
             content: (
-              <div className={`${EDIT_PANEL} space-y-2`}>
-                <Label htmlFor="spellcastingAbility">Характеристика заклинань</Label>
-                <SelectField
-                  id="spellcastingAbility"
-                  value={spellcasting.spellcastingAbility ?? ""}
-                  onValueChange={(v) => spellcasting.setters.setSpellcastingAbility(toSpellcastingAbility(v))}
-                  options={SPELL_ABILITY_OPTIONS}
-                  allowNone
-                  noneLabel="Немає"
-                />
-                <p className="text-xs text-muted-foreground">Від неї СЛ і атака заклинанням у профілі.</p>
+              <div className="space-y-4">
+                <div className={`${EDIT_PANEL} space-y-2`}>
+                  <Label htmlFor="spellcastingAbility">Характеристика заклинань</Label>
+                  <SelectField
+                    id="spellcastingAbility"
+                    value={spellcasting.spellcastingAbility ?? ""}
+                    onValueChange={(v) => spellcasting.setters.setSpellcastingAbility(toSpellcastingAbility(v))}
+                    options={SPELL_ABILITY_OPTIONS}
+                    allowNone
+                    noneLabel="Немає"
+                  />
+                  <p className="text-xs text-muted-foreground">Від неї СЛ і атака заклинанням у профілі.</p>
+                </div>
+                <MagicTab />
               </div>
             ),
           },
@@ -102,18 +108,21 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
             id: "items",
             label: "Речі",
             content: (
-              <div className={EDIT_PANEL}>
-                <CharacterArtifactsSection
-                  knownSpellIds={spellcasting.knownSpells}
-                  campaignId={campaignId}
-                  characterId={characterId}
-                  progressionCharacterId={characterId}
-                  equipped={equipped}
-                  artifacts={artifacts.map((a) => ({ id: a.id, name: a.name, slot: a.slot ?? "item", icon: a.icon ?? null }))}
-                  artifactSets={artifactSets}
-                  onEquippedChange={setEquipped}
-                  spellSlots={formData.spellcasting.spellSlots}
-                />
+              <div className="space-y-4">
+                <div className={EDIT_PANEL}>
+                  <CharacterArtifactsSection
+                    campaignId={campaignId}
+                    characterId={characterId}
+                    equipped={equipped}
+                    artifacts={artifacts.map((a) => ({ id: a.id, name: a.name, slot: a.slot ?? "item", icon: a.icon ?? null }))}
+                    onEquippedChange={setEquipped}
+                  />
+                </div>
+                {sheet.items.sets.length > 0 && (
+                  <Section title="СЕТИ">
+                    <SetList sets={sheet.items.sets} />
+                  </Section>
+                )}
               </div>
             ),
           },

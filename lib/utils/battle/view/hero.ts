@@ -1,10 +1,9 @@
-import type { AttackType } from "@/lib/constants/battle";
-import { BATTLE_RACE } from "@/lib/constants/battle";
-import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
-import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
+import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
-import { getDiceSlots, mergeDiceFormulas } from "@/lib/utils/battle/balance/dice";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
+import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
+import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
+import { diceSlots } from "@/lib/utils/common/dice";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleAction, BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -51,10 +50,6 @@ export function abilityCharges(p: BattleParticipant): AbilityCharge[] {
   });
 }
 
-export function effectiveArmorClass(p: BattleParticipant, all: BattleParticipant[]): number {
-  return statWithModifiers(withSelf(all, p), p.basicInfo.id, "armor", p.combatStats.armorClass);
-}
-
 const HOSTILE = new Set(["dealDamage", "dot", "applyCondition"]);
 
 export function bonusTargetSide(a: ResolvedAbility): "ally" | "enemy" | null {
@@ -77,24 +72,10 @@ export function lastAction(log: BattleAction[]): BattleAction | null {
   return null;
 }
 
-export function needsMoraleCheck(p: BattleParticipant, pendingMoraleCheck: unknown): boolean {
+export function needsMoraleCheck(p: BattleParticipant, participants: BattleParticipant[], pendingMoraleCheck: unknown): boolean {
   if ((pendingMoraleCheck as { participantId?: string } | null)?.participantId === p.basicInfo.id) return false;
 
-  const race = p.abilities.race?.toLowerCase() ?? "";
-
-  if (race === BATTLE_RACE.NECROMANCER) return false;
-
-  const morale = race === BATTLE_RACE.HUMAN && p.combatStats.morale < 0 ? 0 : p.combatStats.morale;
-
-  return morale !== 0;
-}
-
-export function attackDamageFormula(p: BattleParticipant, attack: BattleAttack): string {
-  const weapon = attack.damageDice ?? "";
-
-  return p.basicInfo.sourceType === "character"
-    ? mergeDiceFormulas(weapon, getHeroDamageDiceForLevel(p.abilities.level, attack.type as AttackType))
-    : weapon;
+  return effectiveMorale(p, participants).value !== 0;
 }
 
 export function weaponPreview(p: BattleParticipant, attack: BattleAttack, all: BattleParticipant[]) {
@@ -108,7 +89,7 @@ export function weaponPreview(p: BattleParticipant, attack: BattleAttack, all: B
 }
 
 export function damageDiceSlots(p: BattleParticipant, attack: BattleAttack): number[] {
-  const slots = getDiceSlots(attackDamageFormula(p, attack) || "1d6").filter((s) => Number.isFinite(s) && s >= 1);
+  const slots = diceSlots(heroAttackDamageParts(p, attack).formula);
 
   return slots.length ? slots : [6];
 }

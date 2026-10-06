@@ -4,10 +4,9 @@ import { attackBodySchema, attackMutation } from "@/app/api/campaigns/[id]/battl
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
-import { mergeDiceFormulas } from "@/lib/utils/battle/balance/dice";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
-import { parseDice } from "@/lib/utils/common/dice";
+import { mergeDiceFormulas, parseDice } from "@/lib/utils/common/dice";
 
 const base = createMockParticipant();
 
@@ -85,15 +84,19 @@ describe("attack mutation", () => {
     );
   });
 
-  it("підказана клієнтом шкода реакції (більша за подвоєну зброю захисника) приймається", () => {
-    expect(() => attackMutation(ctx, body({ reactionDamage: 37 }))).not.toThrow(expect.objectContaining({ code: "invalid_dice" }));
-  });
-
   it("нестандартний запис кубиків зброї (\"1d8 piercing\") не блокує атаку", () => {
     const odd = { ...hero, basicInfo: { ...hero.basicInfo, sourceType: "unit" as const }, battleData: { ...hero.battleData, attacks: [{ id: "sword", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d8 piercing", damageType: "piercing" }] } };
 
     expect(() => attackMutation({ ...ctx, participants: [odd, goblin] } as never, body({ damageRolls: [5] }))).not.toThrow(
       expect.objectContaining({ code: "invalid_dice" }),
+    );
+  });
+
+  it("атакувальник у паніці (pendingMoraleCheck із пропуском) — action_used", () => {
+    const panic = { participantId: "hero", d10Roll: 1, moraleResult: { shouldSkipTurn: true, hasExtraTurn: false, moralePositive: false, message: "" } };
+
+    expect(() => attackMutation({ ...ctx, scene: { ...ctx.scene, pendingMoraleCheck: panic } } as BattleMutationContext, body())).toThrow(
+      expect.objectContaining({ code: "action_used" }),
     );
   });
 });

@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { createMainSkill } from "@/lib/api/main-skills";
 import * as treesApi from "@/lib/api/skill-trees";
 import { useSkillTreeEditor } from "@/lib/hooks/skills";
 import { buildTreeJson } from "@/lib/utils/skills/progression";
@@ -18,7 +19,9 @@ vi.mock("@/lib/hooks/skills/useSkills", () => ({ useSkills: () => ({ data: [{ id
 
 const notify = vi.fn(async () => {});
 
-vi.mock("@/lib/hooks/common", () => ({ useNotify: () => notify, useConfirm: () => vi.fn(async () => true) }));
+const confirm = vi.fn(async () => true);
+
+vi.mock("@/lib/hooks/common", () => ({ useNotify: () => notify, useConfirm: () => confirm }));
 
 vi.mock("@/lib/api/main-skills", () => ({ createMainSkill: vi.fn(async () => { throw new Error("Назва зайнята"); }) }));
 
@@ -130,8 +133,69 @@ describe("useSkillTreeEditor", () => {
     const { result } = setup();
 
     await waitFor(() => expect(result.current.tree).not.toBeNull());
-    await act(() => result.current.actions.createBranch({ name: "Нова", color: "#fff" }));
 
+    let ok = true;
+
+    await act(async () => {
+      ok = await result.current.actions.createBranch({ name: "Нова", color: "#fff" });
+    });
+
+    expect(ok).toBe(false);
     expect(notify).toHaveBeenCalledWith("Назва зайнята");
+  });
+
+  it("вдале створення гілки повертає true і додає її", async () => {
+    vi.mocked(treesApi.getSkillTrees).mockResolvedValue([rowWith([])] as never);
+    vi.mocked(createMainSkill).mockResolvedValueOnce({ id: "shadow", name: "Тінь", color: "#000", icon: null } as never);
+
+    const { result } = setup();
+
+    await waitFor(() => expect(result.current.tree).not.toBeNull());
+
+    let ok = false;
+
+    await act(async () => {
+      ok = await result.current.actions.createBranch({ name: "Тінь", color: "#000" });
+    });
+
+    expect(ok).toBe(true);
+    expect(result.current.tree?.branches.map((b) => b.id)).toContain("shadow");
+  });
+
+  it("зміна раси з незбереженими правками питає; «ні» — лишаємося з правками", async () => {
+    races = [{ id: "r1", name: "Ельф", availableSkills: ["attack"] }, { id: "r2", name: "Орк", availableSkills: [] }];
+    vi.mocked(treesApi.getSkillTrees).mockResolvedValue([rowWith(["o1"])] as never);
+
+    const { result } = setup();
+
+    await waitFor(() => expect(result.current.tree).not.toBeNull());
+
+    act(() => result.current.actions.setCell({ kind: "slot", branchId: "attack", circle: "outer", index: 1 }, "o2"));
+
+    confirm.mockResolvedValueOnce(false);
+    await act(() => result.current.setRace("Орк"));
+
+    expect(confirm).toHaveBeenCalledTimes(1);
+    expect(result.current.race).toBe("Ельф");
+    expect(result.current.dirty).toBe(true);
+
+    await act(() => result.current.setRace("Орк"));
+
+    expect(result.current.race).toBe("Орк");
+    races = [{ id: "r1", name: "Ельф", availableSkills: ["attack"] }];
+  });
+
+  it("без правок раса змінюється без питання", async () => {
+    races = [{ id: "r1", name: "Ельф", availableSkills: ["attack"] }, { id: "r2", name: "Орк", availableSkills: [] }];
+    vi.mocked(treesApi.getSkillTrees).mockResolvedValue([rowWith(["o1"])] as never);
+
+    const { result } = setup();
+
+    await waitFor(() => expect(result.current.tree).not.toBeNull());
+    await act(() => result.current.setRace("Орк"));
+
+    expect(confirm).not.toHaveBeenCalled();
+    expect(result.current.race).toBe("Орк");
+    races = [{ id: "r1", name: "Ельф", availableSkills: ["attack"] }];
   });
 });

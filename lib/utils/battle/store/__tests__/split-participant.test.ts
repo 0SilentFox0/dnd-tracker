@@ -57,39 +57,6 @@ describe("splitParticipant / joinParticipant", () => {
     expect(stableStringify(stored.snapshot)).not.toContain("abilityUsage");
   });
 
-  it("рядок до 3a: snapshot з activeSkills і state зі skillUsageCounts апгрейдиться", () => {
-    const stored = splitParticipant(richParticipant(), { orderIndex: 0, isPending: false });
-
-    const bd = stored.snapshot.battleData as Record<string, unknown>;
-
-    delete bd.resolvedAbilities;
-    bd.activeSkills = [
-      { skillId: "sk1", name: "Лють", mainSkillId: "m", level: "basic", effects: [{ stat: "melee_damage", type: "percent", value: 50, isPercentage: true }], skillTriggers: [{ type: "simple", trigger: "passive", modifiers: { oncePerBattle: true } }] },
-    ];
-
-    const legacy = { ...stored, state: { ...stored.state, abilityUsage: undefined, skillUsageCounts: { sk1: 1 } } };
-
-    const p = joinParticipant(legacy, "b1");
-
-    expect(p.battleData.resolvedAbilities?.map((a) => a.key)).toEqual(["skill:sk1:t0", "skill:legacy-extras:extras"]);
-    expect(p.battleData.abilityUsage?.["skill:sk1:t0"]).toEqual({ battle: 1, round: 0, turn: 0 });
-    expect("activeSkills" in p.battleData).toBe(false);
-  });
-
-  it("відкат: новий heavy snapshot + state до 3a зі skillUsageCounts → лічильники зберігаються", () => {
-    const p = richParticipant();
-
-    p.battleData.resolvedAbilities = [
-      { id: "t0", name: "Шип", trigger: { event: "lethalDamage" }, limits: { perBattle: 1 }, effects: [{ kind: "heal", amount: 1, revive: true }], key: "skill:sk1:t0", source: { type: "skill", id: "sk1", name: "Шип" } },
-    ];
-
-    const stored = splitParticipant(p, { orderIndex: 0, isPending: false });
-
-    const legacyState = { ...stored, state: { ...stored.state, abilityUsage: undefined, skillUsageCounts: { sk1: 1 } } };
-
-    expect(joinParticipant(legacyState, "b1").battleData.abilityUsage?.["skill:sk1:t0"]).toEqual({ battle: 1, round: 0, turn: 0 });
-  });
-
   it("гарячі поля — у колонках", () => {
     const stored = splitParticipant(richParticipant(), { orderIndex: 3, isPending: true });
 

@@ -5,7 +5,7 @@ import { createSkillSchema } from "./create-skill-schema";
 import { formatSkillsListResponse } from "./format-skills-response";
 
 import { prisma } from "@/lib/db";
-import { abilitiesJson } from "@/lib/utils/abilities/legacy/read";
+import { abilitiesJson } from "@/lib/utils/abilities/read";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 
@@ -27,7 +27,6 @@ export async function POST(
 
     const data = createSkillSchema.parse(body);
 
-    // Витягуємо значення для зворотної сумісності (для relations)
     const basicInfo = data.basicInfo as Record<string, unknown>;
 
     const spellData = data.spellData as Record<string, unknown>;
@@ -43,14 +42,9 @@ export async function POST(
       data: {
         campaignId: id,
         image: data.image ?? null,
-        // Згруповані дані
-        basicInfo: data.basicInfo as Prisma.InputJsonValue,
-        spellData: data.spellData as Prisma.InputJsonValue,
         spellEnhancementData:
           data.spellEnhancementData as Prisma.InputJsonValue,
-        mainSkillData: data.mainSkillData as Prisma.InputJsonValue,
         ...(data.abilities && { abilities: abilitiesJson(data.abilities) }),
-        // Старі поля для зворотної сумісності (relations)
         name: (basicInfo.name as string) || "",
         description: (basicInfo.description as string) || null,
         icon: (basicInfo.icon as string) || null,

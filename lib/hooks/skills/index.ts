@@ -1,5 +1,4 @@
 export { progressionKey } from "./progression-keys";
-export { useCharacterLearnedSpellIds } from "./useCharacterLearnedSpellIds";
 export { useCharacterProgression } from "./useCharacterProgression";
 export { useLevelUpCelebration } from "./useLevelUpCelebration";
 export {
@@ -10,7 +9,6 @@ export {
 } from "./useMainSkills";
 export { useProgressionActions } from "./useProgressionActions";
 export { useSkillForm } from "./useSkillForm";
-export type { SkillFromLibrary } from "./useSkills";
 export {
   useDeleteAllSkills,
   useDeleteSkill,
@@ -20,4 +18,3 @@ export {
   useUpdateSkill,
 } from "./useSkills";
 export { useSkillTreeEditor } from "./useSkillTreeEditor";
-export { useSkillTrees } from "./useSkillTrees";

@@ -2,7 +2,7 @@
  * Додає учасника-юніта в кінець initiativeOrder після касту заклинання.
  */
 
-import { ParticipantSide } from "@/lib/constants/battle";
+import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { calculateInitiative } from "@/lib/utils/battle/battle-start";
@@ -33,7 +33,7 @@ export async function appendSummonedUnitToInitiativeEnd(params: {
   const instanceNumber =
     orderAfterSpell.filter(
       (p) =>
-        p.basicInfo.sourceType === "unit" &&
+        p.basicInfo.sourceType === ParticipantSourceType.UNIT &&
         p.basicInfo.sourceId === unit.id,
     ).length + 1;
 

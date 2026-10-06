@@ -29,5 +29,4 @@ export interface AttackResult {
     newTempHp: number;
   };
   criticalEffectApplied?: CriticalEffect;
-  reactionTriggered: boolean;
 }

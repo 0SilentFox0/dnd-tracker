@@ -3,8 +3,9 @@
  */
 
 import type { GroupedSkillPayload } from "./hooks";
-import type { SkillTriggers } from "./skill-triggers";
 
+import { type ParticipantSourceTypeValue } from "@/lib/constants/battle";
+import { type CampaignRoleValue } from "@/lib/constants/campaigns";
 import type { SpellEnhancementType } from "@/lib/constants/spell-enhancement";
 
 // Skills API
@@ -17,16 +18,6 @@ export interface SkillUpdatePayload {
     icon?: string | null;
     races?: string[];
     isRacial?: boolean;
-  };
-  bonuses?: Record<string, number>;
-  combatStats?: {
-    damage?: number;
-    armor?: number;
-    speed?: number;
-    physicalResistance?: number;
-    magicalResistance?: number;
-    affectsDamage?: boolean;
-    damageType?: "melee" | "ranged" | "magic" | null;
   };
   spellData?: {
     spellId?: string | null;
@@ -46,7 +37,6 @@ export interface SkillUpdatePayload {
   mainSkillData?: {
     mainSkillId?: string | null;
   };
-  skillTriggers?: SkillTriggers;
 }
 
 // Battles API
@@ -72,7 +62,7 @@ export interface BattleScene {
     id: string;
     friendlyFire: boolean;
   };
-  userRole?: "dm" | "player";
+  userRole?: CampaignRoleValue;
   isDM?: boolean;
   version?: number;
   /** Журнал у цій відповіді — лише нові записи, які треба доклеїти до кешу */
@@ -115,10 +105,10 @@ export interface BattleMutationResponse<R = Record<string, unknown>> {
 
 export interface AttackData {
   attackerId: string;
-  attackerType?: "character" | "unit";
+  attackerType?: ParticipantSourceTypeValue;
   targetId?: string;
   targetIds?: string[];
-  targetType?: "character" | "unit";
+  targetType?: ParticipantSourceTypeValue;
   attackRoll?: number;
   /** Один кидок на ціль (multi-target); якщо передано, використовується замість attackRoll */
   attackRolls?: number[];
@@ -126,8 +116,6 @@ export interface AttackData {
   disadvantageRoll?: number;
   damageRolls: number[];
   attackId?: string;
-  /** Урон відповіді цілі (контратака), для однієї цілі */
-  reactionDamage?: number;
 }
 
 export interface MoraleCheckData {

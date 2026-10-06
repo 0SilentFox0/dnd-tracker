@@ -82,6 +82,7 @@ export function useArtifactSetForm({ campaignId, setId, initial }: { campaignId:
         icon: fields.icon.trim() ? fields.icon : null,
       });
       router.push(listHref);
+      router.refresh();
     } catch (err) {
       setError(abilitySaveError(err, "Помилка збереження"));
     }
@@ -97,7 +98,10 @@ export function useArtifactSetForm({ campaignId, setId, initial }: { campaignId:
       onConfirm: () => del.mutateAsync(setId),
     });
 
-    if (ok) router.push(listHref);
+    if (ok) {
+      router.push(listHref);
+      router.refresh();
+    }
   };
 
   return {

@@ -1,64 +1,11 @@
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
-import { z } from "zod";
 
 import { prisma } from "@/lib/db";
-import { convertLegacyUnit } from "@/lib/utils/abilities/legacy/convert-unit";
-import { abilitiesJson } from "@/lib/utils/abilities/legacy/read";
+import { importUnitsSchema } from "@/lib/schemas/units";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
-import type { ImportUnit } from "@/types/import";
-
-// Схема для одного юніта в імпорті
-const importUnitSchema = z.object({
-  name: z.string().min(1),
-  groupId: z.string().optional(),
-  damageModifier: z.string().optional(),
-  level: z.number().min(1).max(30).default(1),
-  strength: z.number().min(1).max(30).default(10),
-  dexterity: z.number().min(1).max(30).default(10),
-  constitution: z.number().min(1).max(30).default(10),
-  intelligence: z.number().min(1).max(30).default(10),
-  wisdom: z.number().min(1).max(30).default(10),
-  charisma: z.number().min(1).max(30).default(10),
-  armorClass: z.number().min(0).default(10),
-  initiative: z.number().default(0),
-  speed: z.number().min(0).default(30),
-  maxHp: z.number().min(1).default(10),
-  proficiencyBonus: z.number().min(0).default(2),
-  attacks: z
-    .array(
-      z.object({
-        name: z.string(),
-        attackBonus: z.number(),
-        damageType: z.string(),
-        damageDice: z.string(),
-        range: z.string().optional(),
-        properties: z.string().optional(),
-      })
-    )
-    .default([]),
-  specialAbilities: z
-    .array(
-      z.object({
-        name: z.string(),
-        description: z.string(),
-        type: z.enum(["passive", "active"]),
-        effect: z.record(z.string(), z.unknown()).optional(),
-      })
-    )
-    .default([]),
-  knownSpells: z.array(z.string()).default([]),
-  avatar: z.string().optional(),
-});
-
-// Схема для масового імпорту
-const importUnitsSchema = z.object({
-  units: z.array(importUnitSchema.extend({
-    groupName: z.string().optional(),
-  })),
-  groupName: z.string().optional(), // Опціональна група для всіх юнітів
-});
+import { importUnitsIntoCampaign } from "@/lib/utils/units/import-units";
 
 export async function POST(
   request: Request,
@@ -66,179 +13,20 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    
-    // Перевіряємо права DM
+
     const accessResult = await requireDM(id);
 
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
 
-    const body = await request.json();
+    const { units } = importUnitsSchema.parse(await request.json());
 
-    const rawUnits = body.units as Array<ImportUnit & { groupName?: string }>;
+    const report = await importUnitsIntoCampaign(prisma, id, units);
 
-    const defaultGroupName = body.groupName as string | undefined;
+    revalidateTag(`units-${id}`, { expire: 0 });
 
-    // Валідуємо units без groupName
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const unitsForValidation = rawUnits.map(({ groupName: _groupName, ...unit }) => unit);
-
-    const validationResult = importUnitsSchema.parse({
-      units: unitsForValidation,
-      groupName: defaultGroupName,
-    });
-
-    // Об'єднуємо валідовані дані з groupName
-    const validatedUnitsWithGroups = validationResult.units.map((unit, index) => ({
-      ...unit,
-      groupName: rawUnits[index]?.groupName || defaultGroupName,
-    }));
-
-    // Створюємо або отримуємо групи юнітів
-    const unitGroups: Record<string, string> = {};
-
-    const uniqueGroupNames = new Set<string>();
-
-    // Збираємо всі унікальні групи з юнітів
-    for (const unit of validatedUnitsWithGroups) {
-      const groupName = unit.groupName;
-
-      if (groupName) {
-        uniqueGroupNames.add(groupName);
-      }
-    }
-
-    // Створюємо або отримуємо групи
-    for (const groupName of uniqueGroupNames) {
-      const existing = await prisma.unitGroup.findFirst({
-        where: { campaignId: id, name: groupName },
-      });
-
-      if (existing) {
-        unitGroups[groupName] = existing.id;
-      } else {
-        // Генеруємо колір для групи
-        const colors = [
-          "#ef4444", // red
-          "#f97316", // orange
-          "#eab308", // yellow
-          "#22c55e", // green
-          "#3b82f6", // blue
-          "#8b5cf6", // purple
-          "#ec4899", // pink
-        ];
-
-        const colorIndex = Array.from(uniqueGroupNames).indexOf(groupName);
-
-        const color = colors[colorIndex % colors.length];
-
-        const group = await prisma.unitGroup.create({
-          data: { campaignId: id, name: groupName, color },
-        });
-
-        unitGroups[groupName] = group.id;
-      }
-    }
-
-    // Перевіряємо існуючі юніти для уникнення дублікатів
-    const existingUnitNames = await prisma.unit.findMany({
-      where: {
-        campaignId: id,
-        name: {
-          in: validatedUnitsWithGroups.map((u) => u.name),
-        },
-      },
-      select: {
-        name: true,
-      },
-    });
-
-    const existingNamesSet = new Set(existingUnitNames.map((u) => u.name));
-
-    // Фільтруємо юніти, які ще не існують та отримуємо кольори груп
-    const unitsToCreate = await Promise.all(
-      validatedUnitsWithGroups
-        .filter((unit) => !existingNamesSet.has(unit.name))
-        .map(async (unit) => {
-          const groupName = unit.groupName;
-
-          const groupId = groupName ? unitGroups[groupName] : undefined;
-          
-          let groupColor: string | null = null;
-
-          if (groupId) {
-            const group = await prisma.unitGroup.findUnique({
-              where: { id: groupId },
-            });
-
-            groupColor = group?.color || null;
-          }
-
-          return {
-            campaignId: id,
-            name: unit.name,
-            groupId: groupId || null,
-            groupColor,
-            damageModifier: unit.damageModifier || null,
-            level: unit.level,
-            strength: unit.strength,
-            dexterity: unit.dexterity,
-            constitution: unit.constitution,
-            intelligence: unit.intelligence,
-            wisdom: unit.wisdom,
-            charisma: unit.charisma,
-            armorClass: unit.armorClass,
-            initiative: unit.initiative,
-            speed: unit.speed,
-            maxHp: unit.maxHp,
-            proficiencyBonus: unit.proficiencyBonus,
-            attacks: unit.attacks as Prisma.InputJsonValue,
-            specialAbilities: unit.specialAbilities as Prisma.InputJsonValue,
-            abilities: abilitiesJson(convertLegacyUnit({ id: unit.name, name: unit.name, specialAbilities: unit.specialAbilities }).abilities),
-            knownSpells: unit.knownSpells,
-            avatar: unit.avatar || null,
-          };
-        })
-    );
-
-    // Створюємо тільки нові юніти
-    let result;
-
-    if (unitsToCreate.length > 0) {
-      result = await prisma.unit.createMany({
-        data: unitsToCreate,
-        skipDuplicates: true,
-      });
-    } else {
-      result = { count: 0 };
-    }
-
-    // Отримуємо створені юніти для повернення
-    const createdUnits = await prisma.unit.findMany({ omit: { abilities: true },
-      where: {
-        campaignId: id,
-        name: {
-          in: validatedUnitsWithGroups.map((u) => u.name),
-        },
-      },
-      include: {
-        unitGroup: true,
-      },
-      orderBy: {
-        level: "asc",
-      },
-    });
-
-    const skipped = validatedUnitsWithGroups.length - unitsToCreate.length;
-
-    return NextResponse.json({
-      success: true,
-      imported: result.count,
-      total: validatedUnitsWithGroups.length,
-      skipped,
-      units: createdUnits,
-    });
+    return NextResponse.json(report);
   } catch (error) {
     return handleApiError(error, { action: "import units" });
   }

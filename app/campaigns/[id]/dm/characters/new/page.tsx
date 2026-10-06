@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { CharacterAbilitiesSection } from "@/components/characters/abilities/CharacterAbilitiesSection";
-import { CharacterArtifactsSection } from "@/components/characters/artifacts/CharacterArtifactsSection";
 import { CharacterBasicInfo } from "@/components/characters/basic/CharacterBasicInfo";
 import { CharacterSkillsSection } from "@/components/characters/skills/CharacterSkillsSection";
 import { CharacterAbilityScores } from "@/components/characters/stats/CharacterAbilityScores";
@@ -24,16 +23,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { CharacterType, type CharacterTypeValue } from "@/lib/constants/characters";
 import { useCampaignMembers } from "@/lib/hooks/campaigns";
 import { useCharacterForm, useCreateCharacter } from "@/lib/hooks/characters";
 import { useRaces } from "@/lib/hooks/races";
 
-export default function NewCharacterPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function NewCharacterPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ type?: string }> }) {
   const { id } = use(params);
+
+  const { type } = use(searchParams);
+
+  const characterType: CharacterTypeValue = type === CharacterType.NPC_HERO ? CharacterType.NPC_HERO : CharacterType.PLAYER;
 
   const router = useRouter();
 
@@ -44,7 +44,6 @@ export default function NewCharacterPage({
   const { data: races = [] } = useRaces(id);
 
   const {
-    formData,
     loading,
     error,
     basicInfo,
@@ -52,12 +51,12 @@ export default function NewCharacterPage({
     combatStats,
     skills,
     abilities,
-    spellcasting,
     handleSubmit,
   } = useCharacterForm({
+    type: characterType,
     onSubmit: async (data) => {
       await create.mutateAsync(data);
-      router.push(`/campaigns/${id}/dm/characters`);
+      router.push(`/campaigns/${id}/dm/characters?type=${data.basicInfo.type}`);
     },
   });
 
@@ -128,18 +127,6 @@ export default function NewCharacterPage({
                   <CharacterAbilitiesSection
                     campaignId={id}
                     abilities={abilities}
-                  />
-                </AccordionContent>
-              </AccordionItem>
-
-              {/* Етап 6: Артефакти */}
-              <AccordionItem value="item-6">
-                <AccordionTrigger>6. Артефакти</AccordionTrigger>
-                <AccordionContent>
-                  <CharacterArtifactsSection
-                    knownSpellIds={spellcasting.knownSpells}
-                    campaignId={id}
-                    spellSlots={formData.spellcasting.spellSlots}
                   />
                 </AccordionContent>
               </AccordionItem>

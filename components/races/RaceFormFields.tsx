@@ -1,23 +1,15 @@
 "use client";
 
-/**
- * Спільні поля форми Race для обох контекстів:
- * - CreateRaceDialog (модальне вікно)
- * - RaceEditForm (повноцінна сторінка з FormCard)
- *
- * Обгортки різні (Dialog vs FormCard), а поля — однакові.
- * Цей компонент видаляє ~80 рядків дублю.
- */
-
 import { RaceEditFormSpellSlots } from "./RaceEditFormSpellSlots";
 import { RaceEditFormStatModifiers } from "./RaceEditFormStatModifiers";
 
 import { AbilityListEditor } from "@/components/abilities";
+import { ColorField } from "@/components/common/ColorField";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import type { ConversionIssue } from "@/lib/utils/abilities/legacy/types";
+import type { ConversionIssue } from "@/lib/utils/abilities/schema";
 import type { MainSkill } from "@/types/main-skills";
 import type { RaceFormData } from "@/types/races";
 
@@ -25,9 +17,7 @@ export interface RaceFormFieldsProps {
   campaignId: string;
   formData: RaceFormData;
   setFormData: React.Dispatch<React.SetStateAction<RaceFormData>>;
-  /** Не використовується: набір гілок раси тепер задає дерево прокачки. */
   mainSkills?: MainSkill[];
-  /** Compact (Dialog) — менший max-h, опис тоншим. */
   compact?: boolean;
   abilityIssues?: ConversionIssue[];
   onAbilitiesValidityChange?: (ok: boolean, errorCount: number) => void;
@@ -56,13 +46,14 @@ export function RaceFormFields({
         />
       </div>
 
-      <ImageUpload
-        value={formData.icon ?? ""}
-        onChange={(v) => setFormData((prev) => ({ ...prev, icon: v }))}
-        label="Іконка раси"
-        placeholder="URL іконки раси"
-        previewAlt="Іконка раси"
-        allowFile={false}
+      <ImageUpload value={formData.icon ?? ""} onChange={(v) => setFormData((prev) => ({ ...prev, icon: v }))} label="Іконка раси" fallbackText={formData.name} allowFile={false} />
+
+      <ColorField
+        id="race-color"
+        label="Колір раси"
+        value={formData.color ?? ""}
+        onChange={(color) => setFormData((prev) => ({ ...prev, color }))}
+        description="Смуга й чіп раси у списку юнітів; порожньо — колір із палітри"
       />
 
       <div className="space-y-2">

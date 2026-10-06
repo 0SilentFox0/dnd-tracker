@@ -12,6 +12,7 @@ export const BATTLE_ACTION_LABELS: Record<string, string> = {
   end_turn: "Кінець ходу",
   skip_turn: "Пропуск ходу",
   morale_skip: "Пропуск (мораль)",
+  retaliation: "Відсіч",
 };
 
 const ATTACK_KIND_LABELS: Record<string, string> = {
@@ -45,6 +46,8 @@ function getActionSubLabel(action: BattleAction): string {
  * Приклад: "Аграїл → Айвен: [Ближня] 23 урону"
  */
 export function formatLogEntry(action: BattleAction): string {
+  if (action.actionType === "retaliation") return action.resultText;
+
   const targets =
     action.targets?.length > 0
       ? action.targets.map((t) => t.participantName).join(", ")

@@ -2,11 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import { resolveAmount, rollDice } from "@/lib/utils/abilities/engine/amount";
+import { resolveAmount } from "@/lib/utils/abilities/engine/amount";
 import { applyRawDamage } from "@/lib/utils/abilities/engine/hp";
 import { resolveTargetIds } from "@/lib/utils/abilities/engine/targets";
 import { upsertTimedEffect } from "@/lib/utils/abilities/engine/timed-effects";
 import { recordUse, resetUsage, withinLimits } from "@/lib/utils/abilities/engine/usage";
+import { rollDice } from "@/lib/utils/common/dice";
 
 describe("amount", () => {
   it("кидає кубики через rng", () => {

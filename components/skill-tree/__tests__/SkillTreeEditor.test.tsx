@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, screen, within } from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { SkillTreeEditor } from "@/components/skill-tree/editor";
@@ -12,7 +12,7 @@ const actions = { setCell: vi.fn(), addBranch: vi.fn(), createBranch: vi.fn(), r
 
 const raw = buildTreeJson({ id: "row", race: "Ельф", branches: [{ id: "attack", name: "Напад", color: "red", outer: ["o1"] }] });
 
-let errors: Array<{ code: string; ref: string }> = [];
+let errors: Array<{ code: string; ref: string; label?: string }> = [];
 
 let loading = false;
 
@@ -79,5 +79,31 @@ describe("SkillTreeEditor", () => {
 
     expect(screen.queryByText(/Додайте расу/)).toBeNull();
     expect(screen.getByText("Завантаження…")).toBeTruthy();
+  });
+
+  it("невдале створення гілки лишає шторку відкритою; вдале — закриває", async () => {
+    actions.createBranch.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+    renderWithConfirm(<SkillTreeEditor campaignId="c" />);
+    fireEvent.click(screen.getByRole("button", { name: "+ Додати гілку" }));
+
+    const input = screen.getByPlaceholderText("Назва нової гілки");
+
+    fireEvent.change(input, { target: { value: "Тінь" } });
+    fireEvent.submit(input.closest("form") as HTMLFormElement);
+
+    await waitFor(() => expect(actions.createBranch).toHaveBeenCalledWith({ name: "Тінь", color: "#8a6414" }));
+    expect(screen.getByPlaceholderText("Назва нової гілки")).toBeTruthy();
+
+    fireEvent.submit(screen.getByPlaceholderText("Назва нової гілки").closest("form") as HTMLFormElement);
+
+    await waitFor(() => expect(screen.queryByPlaceholderText("Назва нової гілки")).toBeNull());
+  });
+
+  it("помилка невідомої гілки показує її назву, а не id", () => {
+    errors = [{ code: "unknownBranch", ref: "cm-ghost-id", label: "Тінь" }];
+    renderWithConfirm(<SkillTreeEditor campaignId="c" />);
+
+    expect(screen.getByText("Гілки немає серед основних навичок кампанії: Тінь")).toBeTruthy();
+    expect(screen.queryByText(/cm-ghost-id/)).toBeNull();
   });
 });

@@ -5,8 +5,12 @@ import { describe, expect, it, vi } from "vitest";
 import { useAttackWizard } from "../useAttackWizard";
 import { fakeScene } from "./fake-scene";
 
+import type { BattleAction } from "@/types/battle";
+
 function start() {
   const scene = fakeScene();
+
+  scene.mutateAsync.mockResolvedValue({ hpChanges: [{ participantId: "gob", participantName: "Гоблін", oldHp: 20, newHp: 11, change: 9 }] });
 
   const onDone = vi.fn();
 
@@ -39,6 +43,23 @@ describe("useAttackWizard", () => {
     expect(onDone).toHaveBeenCalled();
   });
 
+  it("шкода — з hpChanges відповіді по цілі, а не з різниці кешу; відсіч по атакувальнику не рахується", async () => {
+    const { result, mutateAsync, showResult } = start();
+
+    mutateAsync.mockResolvedValueOnce({
+      hpChanges: [
+        { participantId: "gob", participantName: "Гоблін", oldHp: 20, newHp: 13, change: 7 },
+        { participantId: "me", participantName: "Фрейда", oldHp: 20, newHp: 16, change: 4 },
+      ],
+    });
+
+    act(() => result.current.roll(14));
+    act(() => result.current.damage([6]));
+    act(() => result.current.submit());
+
+    await waitFor(() => expect(showResult).toHaveBeenCalledWith(expect.objectContaining({ kind: "hit", damage: 7 })));
+  });
+
   it("промах — відправка одразу, результат «miss»", async () => {
     const { result, mutateAsync, showResult } = start();
 
@@ -64,5 +85,24 @@ describe("useAttackWizard", () => {
     const { result } = start();
 
     expect(result.current.previews.rapier.estimate).toBeGreaterThan(0);
+  });
+
+  it("відсіч цілі потрапляє в результат", async () => {
+    const afterLog = [
+      { actionIndex: 9, actionType: "retaliation", actorName: "Гоблін", targets: [{ participantId: "me", participantName: "Фрейда" }], hpChanges: [{ participantId: "me", participantName: "Фрейда", oldHp: 20, newHp: 16, change: 4 }], actionDetails: { isHit: true } },
+    ] as unknown as BattleAction[];
+
+    const scene = fakeScene({ afterLog });
+
+    const { result } = renderHook(() => useAttackWizard(scene.me), { wrapper: scene.wrapper });
+
+    act(() => result.current.open());
+    act(() => result.current.toggleTarget("gob"));
+    act(() => result.current.confirmTargets());
+    act(() => result.current.roll(14));
+    act(() => result.current.damage([6]));
+    act(() => result.current.submit());
+
+    await waitFor(() => expect(scene.showResult).toHaveBeenCalledWith(expect.objectContaining({ kind: "hit", retaliation: { name: "Гоблін", damage: 4 } })));
   });
 });

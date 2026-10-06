@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { buildSheetFor, loadSheetCharacter } from "./sheet-handler";
 
+import { CampaignRole } from "@/lib/constants/campaigns";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 
@@ -17,7 +18,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 
     if (!character || character.campaignId !== id) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    const isDM = access.campaign.members[0]?.role === "dm";
+    const isDM = access.campaign.members[0]?.role === CampaignRole.DM;
 
     const isOwner = character.controlledBy === access.userId;
 

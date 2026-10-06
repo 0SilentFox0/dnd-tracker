@@ -1,6 +1,6 @@
 import { describe, expect,it } from "vitest";
 
-import { isSupabaseStorageUrl, normalizeImageUrl } from "../image-url";
+import { isHttpUrl, isSupabaseStorageUrl, normalizeImageUrl } from "../image-url";
 
 describe("normalizeImageUrl", () => {
   it("повертає той самий URL для не-wikia", () => {
@@ -62,5 +62,20 @@ describe("isSupabaseStorageUrl", () => {
   it("false для відносного шляху і data URL", () => {
     expect(isSupabaseStorageUrl("/screen-bg/battle-bg.jpg")).toBe(false);
     expect(isSupabaseStorageUrl("data:image/png;base64,AAAA")).toBe(false);
+  });
+});
+
+describe("isHttpUrl", () => {
+  it("true для http(s) з хостом", () => {
+    expect(isHttpUrl("https://example.com/a.png")).toBe(true);
+    expect(isHttpUrl(" http://example.com/a.png ")).toBe(true);
+  });
+
+  it("false для порожнього, відносного, data: і без хоста", () => {
+    expect(isHttpUrl("")).toBe(false);
+    expect(isHttpUrl("/screen-bg/a.jpg")).toBe(false);
+    expect(isHttpUrl("data:image/png;base64,AAAA")).toBe(false);
+    expect(isHttpUrl("https://")).toBe(false);
+    expect(isHttpUrl("abc")).toBe(false);
   });
 });

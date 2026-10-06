@@ -18,7 +18,7 @@ export function calculateAttackRoll(
   d20Roll: number,
   advantageRoll?: number,
   disadvantageRoll?: number,
-  opts: { participants?: BattleParticipant[]; extra?: StaticEffect[]; targetId?: string; targetExtra?: StaticEffect[] } = {},
+  opts: { participants?: BattleParticipant[]; extra?: StaticEffect[]; targetId?: string; targetExtra?: StaticEffect[]; rng?: () => number } = {},
 ): AttackRollResult {
   const participants = withSelf(opts.participants ?? [], attacker);
 
@@ -58,9 +58,9 @@ export function calculateAttackRoll(
   let criticalEffect: CriticalEffect | undefined;
 
   if (isCritical) {
-    criticalEffect = getRandomCriticalEffect("success");
+    criticalEffect = getRandomCriticalEffect("success", opts.rng);
   } else if (isCriticalFail) {
-    criticalEffect = getRandomCriticalEffect("fail");
+    criticalEffect = getRandomCriticalEffect("fail", opts.rng);
   }
 
   return {

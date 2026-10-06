@@ -2,13 +2,9 @@
  * База ефектів заклинань — вибір лише з цього списку (дропдаун).
  *
  * Згруповано по категоріях для UX (через `SelectField groups`).
- * `SPELL_EFFECT_OPTIONS` — flatten для legacy callers (validation, lookup).
  */
 
-import type {
-  SelectOption,
-  SelectOptionGroup,
-} from "@/components/ui/select-field";
+import type { SelectOptionGroup } from "@/components/ui/select-field";
 
 export const SPELL_EFFECT_GROUPS: SelectOptionGroup[] = [
   {
@@ -248,13 +244,3 @@ export const SPELL_EFFECT_GROUPS: SelectOptionGroup[] = [
     ],
   },
 ];
-
-/** Плаский масив для legacy callers (lookup, validation). */
-export const SPELL_EFFECT_OPTIONS: SelectOption[] = SPELL_EFFECT_GROUPS.flatMap(
-  (g) => g.options,
-);
-
-/** Чи є рядок ефектом з бази (для відображення кастомних) */
-export function isKnownSpellEffect(effect: string): boolean {
-  return SPELL_EFFECT_OPTIONS.some((o) => o.value === effect);
-}

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
-import { healthSegments, healthState } from "@/lib/utils/battle/view";
+import { healthSegments, healthState, hpRatio } from "@/lib/utils/battle/view";
 
 const at = (currentHp: number, maxHp = 40, status: "active" | "unconscious" | "dead" = "active") => {
   const p = createMockParticipant();
@@ -22,5 +22,17 @@ describe("healthState", () => {
 
   it("сегменти", () => {
     expect([healthSegments("unhurt"), healthSegments("bloodied"), healthSegments("down")]).toEqual([4, 2, 0]);
+  });
+});
+
+describe("hpRatio", () => {
+  it("частка в межах [0, 1]", () => {
+    expect(hpRatio(at(10))).toBe(0.25);
+    expect(hpRatio(at(50))).toBe(1);
+    expect(hpRatio(at(-5))).toBe(0);
+  });
+
+  it("maxHp 0 → 0", () => {
+    expect(hpRatio(at(5, 0))).toBe(0);
   });
 });

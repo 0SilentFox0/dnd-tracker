@@ -1,20 +1,9 @@
 import type { Rng } from "./types";
 
-import { type Amount, DICE_RE, type Flat } from "@/lib/utils/abilities/schema";
+import { type Amount, type Flat } from "@/lib/utils/abilities/schema";
 import { evaluateFormula } from "@/lib/utils/battle/common/formula-evaluator";
+import { rollDice } from "@/lib/utils/common/dice";
 import type { BattleParticipant } from "@/types/battle";
-
-export function rollDice(notation: string, rng: Rng): number {
-  const m = DICE_RE.exec(notation);
-
-  if (!m) return 0;
-
-  let total = Number(m[3] ?? 0);
-
-  for (let i = 0; i < Number(m[1]); i++) total += 1 + Math.floor(rng() * Number(m[2]));
-
-  return Math.max(0, total);
-}
 
 export function formulaContext(p: BattleParticipant): Record<string, number> {
   const { maxHp, currentHp, morale } = p.combatStats;

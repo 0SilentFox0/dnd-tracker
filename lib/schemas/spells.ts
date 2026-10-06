@@ -1,13 +1,8 @@
 import { z } from "zod";
 
-const abilityEnum = z.enum([
-  "strength",
-  "dexterity",
-  "constitution",
-  "intelligence",
-  "wisdom",
-  "charisma",
-]);
+import { ABILITY_KEYS } from "@/lib/constants/abilities";
+
+const abilityEnum = z.enum(ABILITY_KEYS);
 
 const damageTypeEnum = z.enum(["damage", "heal", "all", "buff", "debuff"]);
 

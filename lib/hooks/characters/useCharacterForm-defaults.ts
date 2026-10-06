@@ -2,12 +2,13 @@
  * Дефолтні значення форми персонажа для useCharacterForm
  */
 
+import { CharacterType } from "@/lib/constants/characters";
 import type { CharacterFormData } from "@/types/characters";
 
 export const defaultCharacterFormData: CharacterFormData = {
   basicInfo: {
     name: "",
-    type: "player",
+    type: CharacterType.PLAYER,
     controlledBy: "",
     level: 1,
     class: "",
@@ -32,9 +33,6 @@ export const defaultCharacterFormData: CharacterFormData = {
     armorClass: 10,
     initiative: 0,
     speed: 30,
-    maxHp: 10,
-    currentHp: 10,
-    tempHp: 0,
     minTargets: 1,
     maxTargets: 1,
     morale: 0,
@@ -44,7 +42,6 @@ export const defaultCharacterFormData: CharacterFormData = {
     skills: {},
   },
   spellcasting: {
-    spellcastingClass: "",
     spellcastingAbility: undefined,
     spellSlots: {},
     knownSpells: [],

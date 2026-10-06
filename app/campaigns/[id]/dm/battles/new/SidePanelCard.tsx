@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { ParticipantSourceType } from "@/lib/constants/battle";
 import type { SetupCharacter, SetupParticipant, SetupUnit } from "@/types/battle-setup";
 
 interface SidePanelCardProps {
@@ -46,11 +47,11 @@ export function SidePanelCard({
   const otherSide = side === "ally" ? "enemy" : "ally";
 
   const characterParticipants = participants.filter(
-    (p) => p.side === side && p.type === "character",
+    (p) => p.side === side && p.type === ParticipantSourceType.CHARACTER,
   );
 
   const unitParticipants = participants.filter(
-    (p) => p.side === side && p.type === "unit",
+    (p) => p.side === side && p.type === ParticipantSourceType.UNIT,
   );
 
   const isEmpty = participants.filter((p) => p.side === side).length === 0;

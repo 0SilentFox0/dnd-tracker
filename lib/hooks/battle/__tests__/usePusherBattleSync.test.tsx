@@ -1,7 +1,7 @@
 /**
  * @vitest-environment happy-dom
  *
- * Тест: два гравці, підписані на канал бою, отримують однаковий стан після battle-updated.
+ * Тест: два гравці, підписані на канал бою, отримують однаковий стан після battle-delta.
  */
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, render, waitFor } from "@testing-library/react";

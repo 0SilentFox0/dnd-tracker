@@ -4,9 +4,9 @@ import { createMockParticipant } from "./mock-participant";
 
 import { AttackType } from "@/lib/constants/battle";
 import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
-import { getDiceAverage } from "@/lib/utils/battle/balance";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
 import { weaponPreview } from "@/lib/utils/battle/view";
+import { diceAverage } from "@/lib/utils/common/dice";
 import type { BattleAttack } from "@/types/battle";
 
 const sword = { id: "s", name: "Меч", type: AttackType.MELEE, attackBonus: 0, damageDice: "1d8" } as BattleAttack;
@@ -17,7 +17,7 @@ describe("averageAttackDamage", () => {
 
     p.abilities = { ...p.abilities, level: 10, strength: 14, meleeMultiplier: 1 };
 
-    const expected = Math.floor(4.5 + 10 + getDiceAverage(getHeroDamageDiceForLevel(10, AttackType.MELEE)) + 2);
+    const expected = Math.floor(4.5 + 10 + diceAverage(getHeroDamageDiceForLevel(10, AttackType.MELEE)) + 2);
 
     expect(averageAttackDamage(p, sword, [p]).total).toBe(expected);
 

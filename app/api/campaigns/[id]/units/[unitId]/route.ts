@@ -2,12 +2,14 @@ import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
+import { invalidUnitRace } from "../unit-race";
+
 import { prisma } from "@/lib/db";
 import { updateUnitSchema } from "@/lib/schemas";
-import { readAbilities } from "@/lib/utils/abilities/legacy/read";
-import { abilitiesJson } from "@/lib/utils/abilities/legacy/read";
+import { abilitiesJson, readAbilities } from "@/lib/utils/abilities/read";
 import { requireCampaignAccess, requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { toUnit } from "@/lib/utils/units/to-unit";
 
 export async function GET(
   request: Request,
@@ -15,8 +17,7 @@ export async function GET(
 ) {
   try {
     const { id, unitId } = await params;
-    
-    // Перевіряємо доступ до кампанії (не обов'язково DM)
+
     const accessResult = await requireCampaignAccess(id, false);
 
     if (accessResult instanceof NextResponse) {
@@ -25,9 +26,6 @@ export async function GET(
 
     const unit = await prisma.unit.findUnique({
       where: { id: unitId },
-      include: {
-        unitGroup: true,
-      },
     });
 
     const validationError = validateCampaignOwnership(unit, id);
@@ -36,9 +34,11 @@ export async function GET(
       return validationError;
     }
 
-    const { abilities, issues: abilityIssues } = readAbilities("unit", unit as NonNullable<typeof unit>);
+    const row = unit as NonNullable<typeof unit>;
 
-    return NextResponse.json({ ...unit, abilities, abilityIssues });
+    const { abilities, issues: abilityIssues } = readAbilities("unit", row);
+
+    return NextResponse.json({ ...toUnit(row), abilities, abilityIssues });
   } catch (error) {
     return handleApiError(error, { action: "fetch unit" });
   }
@@ -50,8 +50,7 @@ export async function DELETE(
 ) {
   try {
     const { id, unitId } = await params;
-    
-    // Перевіряємо права DM
+
     const accessResult = await requireDM(id);
 
     if (accessResult instanceof NextResponse) {
@@ -72,7 +71,7 @@ export async function DELETE(
       where: { id: unitId },
     });
 
-    revalidateTag(`units-${id}`, "max");
+    revalidateTag(`units-${id}`, { expire: 0 });
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -86,8 +85,7 @@ export async function PATCH(
 ) {
   try {
     const { id, unitId } = await params;
-    
-    // Перевіряємо права DM
+
     const accessResult = await requireDM(id);
 
     if (accessResult instanceof NextResponse) {
@@ -104,34 +102,17 @@ export async function PATCH(
       return validationError;
     }
 
-    const body = await request.json();
+    const data = updateUnitSchema.parse(await request.json());
 
-    const data = updateUnitSchema.parse(body);
+    const raceError = await invalidUnitRace(id, data.raceId);
 
-    // Отримуємо колір групи якщо змінюється groupId
-    let groupColor: string | null = null;
-
-    if (data.groupId !== undefined) {
-      if (data.groupId) {
-        const group = await prisma.unitGroup.findUnique({
-          where: { id: data.groupId },
-        });
-
-        groupColor = group?.color || null;
-      } else {
-        groupColor = null;
-      }
-    }
+    if (raceError) return raceError;
 
     const updatedUnit = await prisma.unit.update({
       where: { id: unitId },
       data: {
         name: data.name,
-        race: data.race !== undefined ? data.race : undefined,
-        groupId: data.groupId !== undefined ? data.groupId : undefined,
-        groupColor: data.groupId !== undefined ? groupColor : undefined,
-        damageModifier:
-          data.damageModifier !== undefined ? data.damageModifier : undefined,
+        raceId: data.raceId,
         level: data.level,
         strength: data.strength,
         dexterity: data.dexterity,
@@ -144,31 +125,19 @@ export async function PATCH(
         speed: data.speed,
         maxHp: data.maxHp,
         proficiencyBonus: data.proficiencyBonus,
-        attacks:
-          data.attacks !== undefined
-            ? (data.attacks as Prisma.InputJsonValue)
-            : undefined,
+        attacks: data.attacks !== undefined ? (data.attacks as Prisma.InputJsonValue) : undefined,
         abilities: data.abilities !== undefined ? abilitiesJson(data.abilities) : undefined,
-        immunities:
-          data.immunities !== undefined
-            ? (data.immunities as Prisma.InputJsonValue)
-            : undefined,
-        knownSpells:
-          data.knownSpells !== undefined
-            ? (data.knownSpells as Prisma.InputJsonValue)
-            : undefined,
-        minTargets: data.minTargets !== undefined ? data.minTargets : undefined,
-        maxTargets: data.maxTargets !== undefined ? data.maxTargets : undefined,
-        avatar: data.avatar !== undefined ? (data.avatar || null) : undefined,
-      },
-      include: {
-        unitGroup: true,
+        immunities: data.immunities !== undefined ? (data.immunities as Prisma.InputJsonValue) : undefined,
+        knownSpells: data.knownSpells !== undefined ? (data.knownSpells as Prisma.InputJsonValue) : undefined,
+        minTargets: data.minTargets,
+        maxTargets: data.maxTargets,
+        avatar: data.avatar,
       },
     });
 
-    revalidateTag(`units-${id}`, "max");
+    revalidateTag(`units-${id}`, { expire: 0 });
 
-    return NextResponse.json(updatedUnit);
+    return NextResponse.json(toUnit(updatedUnit));
   } catch (error) {
     return handleApiError(error, { action: "update unit" });
   }

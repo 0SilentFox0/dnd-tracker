@@ -4,15 +4,14 @@ import { useState } from "react";
 import { Crosshair, Swords } from "lucide-react";
 
 import { Breakdown } from "./Breakdown";
-import { signed } from "./format";
 import { useProfile } from "./ProfileContext";
 import { Section } from "./Section";
 
 import { EmptyState } from "@/components/common/states";
+import { ABILITY_SHORT_LABELS } from "@/lib/constants/abilities";
 import { cn } from "@/lib/utils";
+import { signed } from "@/lib/utils/format";
 import type { SheetLine } from "@/types/characters";
-
-const SHORT: Record<string, string> = { strength: "СИЛ", dexterity: "СПР", constitution: "ТІЛ", intelligence: "ІНТ", wisdom: "МУД", charisma: "ХАР" };
 
 function Row({ label, value, lines }: { label: string; value: string; lines?: SheetLine[] }) {
   const [open, setOpen] = useState(false);
@@ -42,11 +41,11 @@ export function CombatTab() {
           {sheet.abilities.map((a) => (
             <div key={a.key} className={cn("min-w-0 rounded-lg border bg-[#1a140f] py-1 text-center", a.isPrimary ? "border-[#c9b37a] shadow-[inset_0_0_0_1px_#c9b37a]" : "border-[#4a3c2c]")}>
               <small className="block text-[10px] text-[#8f8473]">
-                {SHORT[a.key]}
+                {ABILITY_SHORT_LABELS[a.key]}
                 {a.isPrimary ? " ★" : ""}
               </small>
               <b className="block text-[17px] leading-5">{a.score}</b>
-              <small className={cn("text-[11px]", a.isPrimary ? "text-[#c9b37a]" : "text-[#8f8473]")}>{signed(a.mod)}</small>
+              <span className={cn("block text-[15px] font-semibold leading-5 tabular-nums", a.isPrimary ? "text-[#c9b37a]" : "text-[#8f8473]")}>{signed(a.mod)}</span>
             </div>
           ))}
         </div>
@@ -81,7 +80,7 @@ export function CombatTab() {
       </Section>
       <Section title="ЗАХИСТ І ПАРАМЕТРИ">
         <Row label="AC" value={String(sheet.armorClass.total)} lines={sheet.armorClass.lines} />
-        <Row label="Ініціатива" value={signed(sheet.initiative)} />
+        <Row label="Ініціатива" value={String(sheet.initiative)} />
         <Row label="Швидкість" value={String(sheet.speed)} />
         <Row label="Мораль" value={signed(sheet.morale)} />
         <Row label="Цілей за атаку" value={sheet.targets.min === sheet.targets.max ? String(sheet.targets.max) : `${sheet.targets.min}–${sheet.targets.max}`} />

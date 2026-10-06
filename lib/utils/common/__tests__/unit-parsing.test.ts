@@ -1,6 +1,7 @@
-import { describe, expect,it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import {
+  convertCSVRowToUnit,
   parseAbilityScore,
   parseArmorClass,
   parseLevel,
@@ -57,6 +58,16 @@ describe("unit-parsing", () => {
     });
     it("повертає 1 за замовчуванням", () => {
       expect(parseLevel("")).toBe(1);
+    });
+  });
+
+  describe("convertCSVRowToUnit", () => {
+    it("колонка «Група» стає назвою раси", () => {
+      expect(convertCSVRowToUnit({ Назва: "Гоблін", Група: " Гобліни " })).toMatchObject({ name: "Гоблін", raceName: "Гобліни" });
+    });
+
+    it("без групи — без raceName", () => {
+      expect(convertCSVRowToUnit({ Назва: "Вовк" })).not.toHaveProperty("raceName");
     });
   });
 });

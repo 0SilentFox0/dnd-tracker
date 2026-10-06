@@ -38,7 +38,7 @@ export const sheetFixture: CharacterSheet = {
   items: {
     grid: { armor: { id: "a1", name: "Кольчуга ельфів", icon: null, slot: "armor", rarity: "rare", description: "Легка і тиха.", effects: ["AC +2"] } },
     artifacts: [{ id: "a1", name: "Кольчуга ельфів", icon: null, slot: "armor", rarity: "rare", description: "Легка і тиха.", effects: ["AC +2"] }],
-    sets: [{ id: "s1", name: "Мисливець", have: 2, total: 3, complete: false, effects: ["Ініціатива +1"] }],
+    sets: [{ setId: "s1", name: "Мисливець", have: 2, total: 3, complete: false, effects: ["Ініціатива +1"] }],
   },
   personalSkill: null,
   story: {

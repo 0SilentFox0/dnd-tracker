@@ -15,6 +15,8 @@ const DEFAULTS: Record<FlagKey, Record<string, unknown>> = {
   spellImmunity: { spellIds: [] },
   counterAttack: { attackKinds: ["melee"], bonusPercent: 15 },
   seeEnemyHp: {},
+  noNegativeMorale: {},
+  ignoreMorale: {},
   conditionImmunity: { conditions: "all" },
 };
 

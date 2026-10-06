@@ -1,12 +1,8 @@
-/**
- * Server-side кеш для довідкових даних кампанії.
- * Зменшує навантаження на БД при частих читаннях spells, units, races, main-skills.
- */
-
 import { unstable_cache } from "next/cache";
+import type { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
-import { withAbilitySummary } from "@/lib/utils/abilities/summary";
+import { toUnit } from "@/lib/utils/units/to-unit";
 
 const REFERENCE_REVALIDATE_SECONDS = 300; // 5 хвилин
 
@@ -26,16 +22,14 @@ export async function getCachedSpells(campaignId: string) {
   )();
 }
 
+const UNIT_LIST_ORDER: Prisma.UnitOrderByWithRelationInput[] = [{ level: "asc" }, { name: "asc" }];
+
 export async function getCachedUnits(campaignId: string) {
   return unstable_cache(
     async () =>
       prisma.unit
-        .findMany({
-          where: { campaignId },
-          include: { unitGroup: true },
-          orderBy: { createdAt: "desc" },
-        })
-        .then((units) => units.map((u) => withAbilitySummary("unit", u))),
+        .findMany({ where: { campaignId }, orderBy: UNIT_LIST_ORDER })
+        .then((units) => units.map(toUnit)),
     [`units`, campaignId],
     {
       tags: [`units-${campaignId}`],

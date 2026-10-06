@@ -7,31 +7,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 
-/**
- * Generic mutation hook з автоматичним `invalidateQueries` (CODE_AUDIT 2.4).
- *
- * Усуває ~15 повторів того самого `useMutation` з ручним
- * `queryClient.invalidateQueries` у lib/hooks/{units,battles,skills,characters,
- * artifacts,spells,races,campaigns}.
- *
- * Використання:
- *   const mutation = useCrudMutation({
- *     mutationFn: (id: string) => deleteUnit(campaignId, id),
- *     invalidateKeys: [["units", campaignId]],
- *   });
- *
- * Багатоключова інвалідація:
- *   useCrudMutation({
- *     mutationFn: () => deleteAllUnits(campaignId),
- *     invalidateKeys: [
- *       ["units", campaignId],
- *       ["unitGroups", campaignId],
- *     ],
- *   });
- *
- * Додатковий onSuccess/onError — викликається ПІСЛЯ invalidate (можна
- * додати toast, navigate, тощо).
- */
+// useMutation + invalidateQueries for every key; extra onSuccess runs after invalidation
 export function useCrudMutation<
   TData = unknown,
   TVariables = void,

@@ -3,22 +3,25 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { progressionCampaignKey } from "./progression-keys";
 import { useMainSkills } from "./useMainSkills";
 import { useSkills } from "./useSkills";
 
 import { createMainSkill } from "@/lib/api/main-skills";
 import { getSkillTrees, updateSkillTree } from "@/lib/api/skill-trees";
-import { useNotify } from "@/lib/hooks/common";
+import { useConfirm, useNotify } from "@/lib/hooks/common";
 import { useRaces } from "@/lib/hooks/races";
 import type { CellRef, RawTree } from "@/lib/utils/skills/progression";
 import { RACIAL_BRANCH_ID } from "@/lib/utils/skills/progression";
 import * as edit from "@/lib/utils/skills/progression";
-import { getSkillMainSkillId } from "@/lib/utils/skills/skill-helpers";
+import { getSkillMainSkillId, getSkillName } from "@/lib/utils/skills/skill-helpers";
 
 export function useSkillTreeEditor(campaignId: string) {
   const queryClient = useQueryClient();
 
   const notify = useNotify();
+
+  const confirm = useConfirm();
 
   const { data: races = [], isPending: racesPending } = useRaces(campaignId);
 
@@ -73,7 +76,7 @@ export function useSkillTreeEditor(campaignId: string) {
 
   const skillIcon = (s: (typeof skills)[number]) => s.icon || (s as { basicInfo?: { icon?: string } }).basicInfo?.icon || null;
 
-  const skillName = (s: (typeof skills)[number]) => (s as { basicInfo?: { name?: string } }).basicInfo?.name ?? s.name ?? s.id;
+  const skillName = (s: (typeof skills)[number]) => getSkillName(s) || s.id;
 
   const save = async () => {
     if (!current || !activeRace || errors.length > 0) return;
@@ -84,7 +87,7 @@ export function useSkillTreeEditor(campaignId: string) {
 
       setDraft({ key: `${activeRace}:${saved.id}`, treeId: saved.id, raw: edit.readTreeJson(saved.skills) });
       await queryClient.invalidateQueries({ queryKey: ["skill-trees", campaignId] });
-      void queryClient.invalidateQueries({ queryKey: ["character-progression", campaignId] });
+      void queryClient.invalidateQueries({ queryKey: progressionCampaignKey(campaignId) });
     } catch (error) {
       await notify((error as Error).message);
     } finally {
@@ -92,10 +95,18 @@ export function useSkillTreeEditor(campaignId: string) {
     }
   };
 
+  const dirty =
+    !!current &&
+    (draft?.key === seedKey ? JSON.stringify(current.raw) !== baseline : baseline === null && current.raw.mainSkills.some((b) => b.id !== RACIAL_BRANCH_ID));
+
   return {
     races: races.map((r) => ({ id: r.id, name: r.name })),
     race: activeRace,
-    setRace: (next: string) => {
+    setRace: async (next: string) => {
+      if (next === activeRace) return;
+
+      if (dirty && !(await confirm({ title: "Перейти до іншої раси?", description: "Незбережені зміни дерева буде втрачено.", confirmLabel: "Перейти", destructive: true }))) return;
+
       setRace(next);
       setDraft(null);
     },
@@ -103,9 +114,7 @@ export function useSkillTreeEditor(campaignId: string) {
     tree,
     errors,
     loading: racesPending || trees.isPending,
-    dirty:
-      !!current &&
-      (draft?.key === seedKey ? JSON.stringify(current.raw) !== baseline : baseline === null && current.raw.mainSkills.some((b) => b.id !== RACIAL_BRANCH_ID)),
+    dirty,
     saving,
     locations: raw ? edit.skillLocations(raw) : new Map<string, CellRef[]>(),
     librarySkills: skills.map((s) => ({ id: s.id, name: skillName(s), icon: skillIcon(s), mainSkillId: getSkillMainSkillId(s) ?? null, summary: (s as { abilitySummary?: string[] }).abilitySummary ?? [] })),
@@ -121,14 +130,18 @@ export function useSkillTreeEditor(campaignId: string) {
 
         if (m) update((r) => edit.addBranch(r, { id: m.id, name: m.name, color: m.color, icon: m.icon ?? null, spellGroupId: m.spellGroupId ?? null }));
       },
-      createBranch: async (input: { name: string; color: string; icon?: string | null }) => {
+      createBranch: async (input: { name: string; color: string; icon?: string | null }): Promise<boolean> => {
         try {
           const created = await createMainSkill(campaignId, { name: input.name, color: input.color, ...(input.icon && { icon: input.icon }) });
 
           await queryClient.invalidateQueries({ queryKey: ["main-skills", campaignId] });
           update((r) => edit.addBranch(r, { id: created.id, name: created.name, color: created.color, icon: created.icon ?? null }));
+
+          return true;
         } catch (error) {
           await notify((error as Error).message);
+
+          return false;
         }
       },
       removeBranch: (branchId: string) => update((r) => edit.removeBranch(r, branchId)),

@@ -1,5 +1,5 @@
 import { campaignGet } from "@/lib/api/client";
-import type { OwnerKind } from "@/lib/utils/abilities/legacy/read";
+import type { OwnerKind } from "@/lib/utils/abilities/read";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import type { AbilitySourceRef } from "@/types/abilities";
 

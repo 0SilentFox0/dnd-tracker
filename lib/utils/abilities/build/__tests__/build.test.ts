@@ -4,7 +4,6 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { applyBakedAuras, bakePassives } from "@/lib/utils/abilities/build/bake";
 import { collectCharacterAbilities } from "@/lib/utils/abilities/build/collect";
-import { upgradeLegacyParticipant } from "@/lib/utils/battle/store/split-participant";
 
 describe("bake", () => {
   it("запікає maxHp, ініціативу, Силу (з модифікатором) і слоти", () => {
@@ -44,7 +43,13 @@ describe("bake", () => {
 
 describe("collectCharacterAbilities", () => {
   it("найвищий у лінії, школа з mainSkill, сет лише повний", () => {
-    const skillRow = (id: string, name: string, pct: number) => ({ id, name, icon: null, abilities: null, combatStats: { effects: [{ stat: "magic_damage", type: "percent", value: pct }] }, bonuses: {}, skillTriggers: [{ type: "simple", trigger: "passive" }], spellGroupId: null });
+    const skillRow = (id: string, name: string, pct: number) => ({
+      id,
+      name,
+      icon: null,
+      spellGroupId: null,
+      abilities: [{ id: "t0", name, trigger: { event: "passive" }, effects: [{ kind: "damageBonus", filter: { kind: "magic" }, percent: pct }] }],
+    });
 
     const list = collectCharacterAbilities({
       skills: [
@@ -58,29 +63,5 @@ describe("collectCharacterAbilities", () => {
 
     expect(list).toHaveLength(1);
     expect(list[0].effects[0]).toEqual({ kind: "damageBonus", filter: { kind: "magic", school: "chaos" }, percent: 30 });
-  });
-});
-
-describe("upgradeLegacyParticipant", () => {
-  it("бій до деплою: старі поля → resolvedAbilities + abilityUsage", () => {
-    const base = makeParticipant({ id: "a" });
-
-    const legacy = {
-      ...base,
-      battleData: {
-        ...base.battleData,
-        resolvedAbilities: undefined,
-        activeSkills: [{ skillId: "s3", name: "Шип", mainSkillId: "m", level: "basic", effects: [{ stat: "survive_lethal", type: "flag", value: true, isPercentage: false }], skillTriggers: [{ type: "simple", trigger: "onLethalDamage", modifiers: { oncePerBattle: true } }] }],
-        racialAbilities: [],
-        passiveAbilities: [],
-        skillUsageCounts: { s3: 1 },
-      },
-    } as unknown as typeof base;
-
-    const up = upgradeLegacyParticipant(legacy);
-
-    expect(up.battleData.resolvedAbilities?.map((a) => a.key)).toEqual(["skill:s3:t0"]);
-    expect(up.battleData.abilityUsage?.["skill:s3:t0"].battle).toBe(1);
-    expect("activeSkills" in up.battleData).toBe(false);
   });
 });

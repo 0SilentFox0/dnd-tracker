@@ -258,12 +258,13 @@ export function getCriticalEffect(
  * Отримати випадковий критичний ефект (для автоматичної генерації)
  */
 export function getRandomCriticalEffect(
-  type: "success" | "fail"
+  type: "success" | "fail",
+  rng: () => number = Math.random,
 ): CriticalEffect {
   const effects =
     type === "success" ? CRITICAL_SUCCESS_EFFECTS : CRITICAL_FAIL_EFFECTS;
 
-  const randomId = Math.floor(Math.random() * effects.length) + 1;
+  const randomId = Math.floor(rng() * effects.length) + 1;
 
   return getCriticalEffect(randomId, type) || effects[0];
 }

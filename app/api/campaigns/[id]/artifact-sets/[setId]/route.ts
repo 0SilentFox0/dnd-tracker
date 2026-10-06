@@ -5,7 +5,7 @@ import { toArtifactSetErrorResponse } from "../route-errors";
 import { patchArtifactSetSchema } from "../schemas";
 
 import { resolveArtifactIconForPersistence } from "@/lib/supabase/artifact-icon-storage";
-import { readAbilities } from "@/lib/utils/abilities/legacy/read";
+import { readAbilities } from "@/lib/utils/abilities/read";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import {

@@ -113,4 +113,14 @@ describe("ProgressionPanel", () => {
     expect(screen.getByRole("dialog")).toBeTruthy();
     expect(within(screen.getByRole("dialog")).getByText("Напад → Основи")).toBeTruthy();
   });
+
+  it("«Застарілі вузли · Прибрати» — один виклик з усіма сиротами", () => {
+    unlocked = ["attack_basic_level", "o1", "gone-1", "gone-2"];
+    renderWithConfirm(<ProgressionPanel campaignId="c" characterId="ch" canManage />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Застарілі вузли: 2/ }));
+
+    expect(unlearn).toHaveBeenCalledTimes(1);
+    expect(unlearn).toHaveBeenCalledWith(["gone-1", "gone-2"]);
+  });
 });

@@ -5,9 +5,10 @@
 import type { EquippedItems, InventoryItem } from "./inventory";
 import type { BookSpell } from "./spells";
 
-export const ABILITY_KEYS = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"] as const;
+import type { AbilityKey } from "@/lib/constants/abilities";
+import { type CharacterTypeValue, type GoalAuthorValue } from "@/lib/constants/characters";
 
-export type AbilityKey = (typeof ABILITY_KEYS)[number];
+export type { AbilityKey };
 
 export type GoalStatus = "active" | "done" | "failed";
 
@@ -15,7 +16,7 @@ export interface CharacterGoal {
   id: string;
   text: string;
   status: GoalStatus;
-  author: "dm" | "player";
+  author: GoalAuthorValue;
 }
 
 /**
@@ -24,7 +25,7 @@ export interface CharacterGoal {
 export interface CharacterFormData {
   basicInfo: {
     name: string;
-    type: "player" | "npc_hero";
+    type: CharacterTypeValue;
     controlledBy: string;
     level: number;
     class: string;
@@ -49,9 +50,6 @@ export interface CharacterFormData {
     armorClass: number;
     initiative: number;
     speed: number;
-    maxHp: number;
-    currentHp: number;
-    tempHp: number;
     minTargets: number;
     maxTargets: number;
     morale: number;
@@ -61,7 +59,6 @@ export interface CharacterFormData {
     skills: Record<string, boolean>;
   };
   spellcasting: {
-    spellcastingClass?: string;
     spellcastingAbility?: "intelligence" | "wisdom" | "charisma";
     spellSlots?: Record<string, { max: number; current: number }>;
     knownSpells: string[];
@@ -110,12 +107,8 @@ export interface Character {
   armorClass: number;
   initiative: number;
   speed: number;
-  maxHp: number;
-  currentHp: number;
-  tempHp: number;
   savingThrows: Record<string, boolean>;
   skills: Record<string, boolean>;
-  spellcastingClass?: string;
   spellcastingAbility?: "intelligence" | "wisdom" | "charisma" | null;
   spellSlots?: Record<string, { max: number; current: number }>;
   knownSpells: string[];
@@ -207,8 +200,8 @@ export interface SheetArtifact {
   effects: string[];
 }
 
-export interface SheetSet {
-  id: string;
+export interface SetProgress {
+  setId: string;
   name: string;
   have: number;
   total: number;
@@ -239,7 +232,7 @@ export interface CharacterSheet {
   magic: { ability: string; saveDC: number; attackBonus: number } | null;
   slots: { level: number; count: number }[];
   spells: BookSpell[];
-  items: { grid: Record<string, SheetArtifact | null>; artifacts: SheetArtifact[]; sets: SheetSet[] };
+  items: { grid: Record<string, SheetArtifact | null>; artifacts: SheetArtifact[]; sets: SetProgress[] };
   personalSkill: { id: string; name: string; icon: string | null; description: string | null } | null;
   story: { biography: string | null; goals: CharacterGoal[] };
 }

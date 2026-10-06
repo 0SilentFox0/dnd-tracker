@@ -76,7 +76,7 @@ describe.skipIf(missing.length > 0)("DB integration (Prisma → Supabase)", () =
       select: {
         id: true,
         name: true,
-        combatStats: true,
+        abilities: true,
       },
     });
 
@@ -85,8 +85,7 @@ describe.skipIf(missing.length > 0)("DB integration (Prisma → Supabase)", () =
     for (const skill of skills) {
       expect(typeof skill.id).toBe("string");
       expect(typeof skill.name).toBe("string");
-      // combatStats — Json-поле, очікуємо object/null/array
-      expect(["object", "string"]).toContain(typeof skill.combatStats);
+      expect(["object", "string"]).toContain(typeof skill.abilities);
     }
   });
   it("усі таблиці public мають увімкнений RLS", async (ctx) => {

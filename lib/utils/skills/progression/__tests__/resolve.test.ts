@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { branchLevels, resolveLearned } from "..";
+import { type BranchLevel, branchLevels, resolveLearned, uniqueSkills } from "..";
 import { lvl, TREE } from "./fixtures";
 
 describe("resolveLearned", () => {
@@ -22,5 +22,13 @@ describe("resolveLearned", () => {
     const learned = resolveLearned(TREE, { "row-tree": { unlockedSkills: [lvl("attack", "basic"), lvl("attack", "advanced"), lvl("light", "basic")] } });
 
     expect(branchLevels(learned)).toEqual({ attack: "advanced", light: "basic" });
+  });
+});
+
+describe("uniqueSkills", () => {
+  it("один запис на скіл із найвищим рівнем; вузли без скіла лишаються", () => {
+    const n = (nodeId: string, skillId: string | null, level: BranchLevel | null) => ({ nodeId, kind: "branchLevel" as const, skillId, branchId: "attack", level, circle: null });
+
+    expect(uniqueSkills([n("a", "s", "basic"), n("b", "s", "expert"), n("c", null, "basic"), n("d", "t", null), n("e", "t", "advanced")]).map((x) => x.nodeId)).toEqual(["b", "c", "e"]);
   });
 });

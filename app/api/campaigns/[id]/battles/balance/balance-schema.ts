@@ -15,6 +15,5 @@ export const balanceSchema = z.object({
   difficulty: z.enum(["easy", "medium", "hard"]).optional(),
   minTier: z.number().min(1).max(30).optional(),
   maxTier: z.number().min(1).max(30).optional(),
-  groupId: z.string().optional(),
-  race: z.string().optional(),
+  raceId: z.string().optional(),
 });

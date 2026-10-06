@@ -3,26 +3,22 @@
 import { useState } from "react";
 import { BookOpen } from "lucide-react";
 
-import { signed } from "./format";
 import { useProfile } from "./ProfileContext";
 import { ProfileSpellBook } from "./ProfileSpellBook";
 import { Section } from "./Section";
 
 import { metalClass } from "@/components/battle/hud";
-import { EmptyState } from "@/components/common/states";
+import { EmptySpellBook } from "@/components/battle/wizards/SpellBookPages";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ROMAN, spellTier } from "@/lib/utils/battle/view";
+import { signed } from "@/lib/utils/format";
 import { pluralUk } from "@/lib/utils/plural";
 
 export function MagicTab() {
   const { sheet } = useProfile();
 
   const [open, setOpen] = useState(false);
-
-  if (!sheet.magic && sheet.slots.length === 0 && sheet.spells.length === 0) {
-    return <EmptyState title="Магії поки немає" className="border-[#3a2e22] py-6 text-[#8f8473]" />;
-  }
 
   return (
     <>
@@ -48,7 +44,7 @@ export function MagicTab() {
           </div>
         </Section>
       )}
-      {sheet.spells.length > 0 && (
+      {sheet.spells.length > 0 ? (
         <>
           <Button type="button" className="hud-sc mt-4 h-12 w-full gap-2 bg-[#7a2a1f] text-[#f3e7cc] hover:bg-[#8a3427]" onClick={() => setOpen(true)}>
             <BookOpen className="size-5" />
@@ -56,6 +52,10 @@ export function MagicTab() {
           </Button>
           <ProfileSpellBook spells={sheet.spells} slots={sheet.slots} open={open} onOpenChange={setOpen} />
         </>
+      ) : (
+        <div className="mt-4 first:mt-0">
+          <EmptySpellBook text="Поки що Герой більше довіряє своєму мечу і луку" />
+        </div>
       )}
     </>
   );

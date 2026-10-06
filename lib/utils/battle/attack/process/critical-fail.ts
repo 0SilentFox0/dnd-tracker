@@ -68,7 +68,6 @@ export function handleCriticalFail(params: HandleCriticalFailParams): ProcessAtt
     attackerUpdated: getP(flow, attackerId),
     allParticipantsUpdated: flow.ps,
     criticalEffectApplied,
-    reactionTriggered: false,
     battleAction,
   };
 }

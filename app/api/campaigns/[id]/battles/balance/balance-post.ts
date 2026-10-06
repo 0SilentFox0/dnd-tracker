@@ -4,27 +4,17 @@
 
 import type { z } from "zod";
 
-import { getCharacterAttacks } from "./balance-helpers";
 import type { balanceSchema } from "./balance-schema";
+import { loadCharacterBalanceStats } from "./character-stats";
 
-import {
-  MAGIC_MAIN_SKILL_IDS,
-  MAGIC_MAIN_SKILL_NAME_ALIASES,
-} from "@/lib/constants/dpr-by-main-skill";
 import { prisma } from "@/lib/db";
-import type {
-  AllyStats,
-  DifficultyRatio,
-  SuggestedEnemy,
-  UnitStats,
-} from "@/lib/utils/battle/balance";
+import type { DifficultyRatio, UnitStats } from "@/lib/utils/battle/balance";
 import {
   DIFFICULTY_DPR_HP_RATIOS,
-  getCharacterStats,
   getUnitStats,
   suggestEnemyUnits,
 } from "@/lib/utils/battle/balance";
-import { branchLevels, normalizeTree, resolveLearned, type TreeNodes } from "@/lib/utils/skills/progression";
+import type { AllyStats, SuggestedEnemy } from "@/types/battle-setup";
 
 type BalancePostData = z.infer<typeof balanceSchema>;
 
@@ -32,8 +22,7 @@ export async function postBalanceResponse(
   campaignId: string,
   data: BalancePostData,
 ) {
-  const { allyParticipants, difficulty, minTier, maxTier, groupId, race } =
-    data;
+  const { allyParticipants, difficulty, minTier, maxTier, raceId } = data;
 
   let totalDpr = 0;
 
@@ -41,64 +30,12 @@ export async function postBalanceResponse(
 
   let allyCount = 0;
 
-  let treesByRace = new Map<string, TreeNodes>();
-
-  let magicMainSkillIds = new Set<string>();
-
   if (allyParticipants.characterIds.length > 0) {
-    const [trees, mainSkills] = await Promise.all([
-      prisma.skillTree.findMany({ where: { campaignId } }),
-      prisma.mainSkill.findMany({
-        where: { campaignId },
-        select: { id: true, name: true },
-      }),
-    ]);
-
-    magicMainSkillIds = new Set(
-      mainSkills
-        .filter((ms) => {
-          const nameNorm = ms.name.toLowerCase().trim().replace(/\s+/g, "_");
-
-          const byId = MAGIC_MAIN_SKILL_IDS.some((slug) => ms.id === slug);
-
-          const byName = MAGIC_MAIN_SKILL_NAME_ALIASES.some(
-            (alias) =>
-              alias.toLowerCase().replace(/\s+/g, "_") === nameNorm,
-          );
-
-          return byId || byName;
-        })
-        .map((ms) => ms.id),
-    );
-
-    treesByRace = new Map(trees.map((t) => [t.race, normalizeTree(t)]));
-  }
-
-  for (const cid of allyParticipants.characterIds) {
-    const character = await prisma.character.findUnique({
-      where: { id: cid, campaignId },
-    });
-
-    if (!character) continue;
-
-    const attacks = await getCharacterAttacks(cid, campaignId);
-
-    const tree = treesByRace.get(character.race);
-
-    const stats = getCharacterStats({
-      id: character.id,
-      name: character.name,
-      level: character.level,
-      strength: character.strength,
-      dexterity: character.dexterity,
-      attacks: attacks.map((a) => ({ damageDice: a.damageDice, type: a.type })),
-      branchLevels: tree ? branchLevels(resolveLearned(tree, character.skillTreeProgress)) : {},
-      magicMainSkillIds,
-    });
-
-    totalDpr += stats.dpr;
-    totalHp += stats.hp;
-    allyCount += 1;
+    for (const { stats } of await loadCharacterBalanceStats(campaignId, allyParticipants.characterIds)) {
+      totalDpr += stats.dpr;
+      totalHp += stats.hp;
+      allyCount += 1;
+    }
   }
 
   for (const { id: unitId, quantity } of allyParticipants.units) {
@@ -113,8 +50,7 @@ export async function postBalanceResponse(
       name: unit.name,
       maxHp: unit.maxHp,
       level: unit.level,
-      groupId: unit.groupId,
-      race: unit.race,
+      raceId: unit.raceId,
       strength: unit.strength,
       dexterity: unit.dexterity,
       attacks:
@@ -148,17 +84,14 @@ export async function postBalanceResponse(
     const where: {
       campaignId: string;
       level?: { gte?: number; lte?: number };
-      groupId?: string | null;
-      race?: string;
+      raceId?: string;
     } = { campaignId };
 
     if (minTier != null) where.level = { ...where.level, gte: minTier };
 
     if (maxTier != null) where.level = { ...where.level, lte: maxTier };
 
-    if (groupId != null) where.groupId = groupId;
-
-    if (race != null && race !== "") where.race = race;
+    if (raceId) where.raceId = raceId;
 
     const units = await prisma.unit.findMany({ where });
 
@@ -168,8 +101,7 @@ export async function postBalanceResponse(
         name: u.name,
         maxHp: u.maxHp,
         level: u.level,
-        groupId: u.groupId,
-        race: u.race,
+        raceId: u.raceId,
         strength: u.strength,
         dexterity: u.dexterity,
         attacks:

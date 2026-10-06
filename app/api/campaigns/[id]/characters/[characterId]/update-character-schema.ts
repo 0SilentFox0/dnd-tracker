@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { ABILITY_KEYS } from "@/types/characters";
+import { ABILITY_KEYS } from "@/lib/constants/abilities";
 
 export const updateCharacterSchema = z.object({
   name: z.string().min(1).max(100).optional(),
@@ -29,16 +29,12 @@ export const updateCharacterSchema = z.object({
   armorClass: z.number().min(0).optional(),
   initiative: z.number().optional(),
   speed: z.number().min(0).optional(),
-  maxHp: z.number().min(1).optional(),
-  currentHp: z.number().min(0).optional(),
-  tempHp: z.number().min(0).optional(),
 
   // Saving Throws & Skills
   savingThrows: z.record(z.string(), z.boolean()).optional(),
   skills: z.record(z.string(), z.boolean()).optional(),
 
   // Заклинання
-  spellcastingClass: z.string().nullable().optional(),
   spellcastingAbility: z.preprocess(
     (v) => (v === "" ? null : v),
     z.enum(["intelligence", "wisdom", "charisma"]).nullable().optional(),

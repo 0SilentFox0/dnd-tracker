@@ -2,23 +2,19 @@
  * Розрахунок урону при попаданні: база, модифікатори, критичний ефект, опір
  */
 
-import {
-  getDiceAverage,
-  getTotalDiceCount,
-  mergeDiceFormulas,
-} from "../../balance";
 import { calculateDamageWithModifiers } from "../../damage";
+import { heroAttackDamageParts, heroDamageContext } from "../../damage/hero-damage";
 import { applyHeroDmDamageMultiplier } from "../../damage/hero-dm-multiplier";
 import { applyResistance } from "../../resistance";
 import type { DamageCalculationResult } from "../../types/damage-calculations";
 import { applyCriticalEffect } from "..";
 import { applyResistanceForAdditional } from "./damage";
 
-import { AttackType } from "@/lib/constants/battle";
+import { AttackType, ParticipantSourceType } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
-import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { attackAbilityLabel, getAttackAbilityModifier } from "@/lib/utils/common/calculations";
+import { maxOf, parseDice, parseDiceLenient, rollGroups } from "@/lib/utils/common/dice";
 import type { BattleParticipant, DamageStep } from "@/types/battle";
 import type { BattleAttack } from "@/types/battle";
 
@@ -32,6 +28,8 @@ export interface ComputeHitDamageParams {
   damageMultiplier?: number;
   currentRound: number;
   actionModifiers?: StaticEffect[];
+  bonusPercent?: number;
+  rng?: () => number;
 }
 
 export interface ComputeHitDamageResult {
@@ -70,32 +68,7 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
   const statModifier =
     getAttackAbilityModifier(updatedAttacker.abilities, attack.type);
 
-  const isHero = updatedAttacker.basicInfo.sourceType === "character";
-
-  const heroLevelPart = isHero ? updatedAttacker.abilities.level : 0;
-
-  const heroDiceNotation = isHero
-    ? getHeroDamageDiceForLevel(updatedAttacker.abilities.level, attack.type as AttackType)
-    : "";
-
-  const weaponDiceCount = getTotalDiceCount(attack.damageDice ?? "");
-
-  const heroDiceCount = getTotalDiceCount(heroDiceNotation);
-
-  const fullDiceCount = weaponDiceCount + heroDiceCount;
-
-  const clientSentFullRolls = isHero && fullDiceCount > 0 && damageRolls.length === fullDiceCount;
-
-  const heroDicePart =
-    heroDiceNotation && !clientSentFullRolls ? getDiceAverage(heroDiceNotation) : 0;
-
   const additionalDamageModifiers: Array<{ type: string; value: number }> = [];
-
-  const weaponDiceNotationForBreakdown = clientSentFullRolls
-    ? mergeDiceFormulas(attack.damageDice ?? "", heroDiceNotation)
-    : undefined;
-
-  const heroDiceNotationForBreakdown = clientSentFullRolls ? "" : heroDiceNotation;
 
   const damageCalculation = calculateDamageWithModifiers(
     updatedAttacker,
@@ -105,10 +78,7 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
     {
       allParticipants,
       additionalDamage: additionalDamageModifiers,
-      heroLevelPart,
-      heroDicePart,
-      heroDiceNotation: heroDiceNotationForBreakdown,
-      weaponDiceNotation: weaponDiceNotationForBreakdown || attack.damageDice || undefined,
+      ...heroDamageContext(updatedAttacker, attack, damageRolls),
       actionModifiers: params.actionModifiers,
       statLabel: attackAbilityLabel(updatedAttacker.abilities, attack.type),
     },
@@ -145,22 +115,18 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
   }
 
   if (criticalEffectApplied?.effect.type === "max_damage") {
-    const diceMatch = attack.damageDice?.match(/(\d+)d(\d+)([+-]\d+)?/);
-
-    const count = diceMatch ? parseInt(diceMatch[1], 10) : 1;
-
-    const size = diceMatch ? parseInt(diceMatch[2], 10) : 6;
-
-    const diceMod = diceMatch?.[3] ? parseInt(diceMatch[3], 10) : 0;
-
     const before = physicalDamage;
 
-    physicalDamage = count * size + diceMod + statModifier;
+    const { formula, weaponDice } = heroAttackDamageParts(updatedAttacker, attack);
+
+    const weaponFlat = updatedAttacker.basicInfo.sourceType === ParticipantSourceType.CHARACTER ? (parseDice(weaponDice)?.flat ?? 0) : 0;
+
+    physicalDamage = maxOf(parseDiceLenient(formula)) + weaponFlat + statModifier;
     damageSteps.push({ label: criticalEffectApplied.name, side: "attacker", kind: "flat", value: physicalDamage - before, after: physicalDamage });
   }
 
   if (criticalEffectApplied?.effect.type === "additional_damage") {
-    const extra = Math.floor(Math.random() * 6) + 1;
+    const extra = rollGroups([{ count: 1, size: 6 }], params.rng)[0];
 
     physicalDamage += extra;
     damageSteps.push({ label: criticalEffectApplied.name, side: "attacker", kind: "flat", value: extra, after: physicalDamage });
@@ -178,6 +144,13 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
     damageCalculation.breakdown.push("──────────");
     damageCalculation.breakdown.push(heroDm.breakdownLine);
     damageSteps.push({ label: "Коефіцієнт DM", side: "attacker", kind: "multiplier", value: heroDm.multiplier, after: physicalDamage });
+  }
+
+  if (params.bonusPercent) {
+    const factor = 1 + params.bonusPercent / 100;
+
+    physicalDamage = Math.floor(physicalDamage * factor);
+    damageSteps.push({ label: "Контратака", side: "attacker", kind: "multiplier", value: factor, after: physicalDamage });
   }
 
   const dmgMult =

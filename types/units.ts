@@ -1,8 +1,5 @@
-import type { ConversionIssue } from "@/lib/utils/abilities/legacy/types";
+import type { ConversionIssue } from "@/lib/utils/abilities/schema";
 import type { Ability } from "@/lib/utils/abilities/schema";
-/**
- * Типи для юнітів
- */
 
 export interface Unit {
   abilities?: Ability[];
@@ -11,10 +8,7 @@ export interface Unit {
   id: string;
   campaignId: string;
   name: string;
-  race: string | null;
-  groupId: string | null;
-  groupColor: string | null;
-  damageModifier: string | null;
+  raceId: string | null;
   level: number;
   strength: number;
   dexterity: number;
@@ -31,43 +25,20 @@ export interface Unit {
   maxTargets: number;
   attacks: Array<{
     name: string;
-    type?: "melee" | "ranged"; // вид атаки: ближня / дальня
-    targetType?: "target" | "aoe"; // одна ціль або область
+    type?: "melee" | "ranged";
+    targetType?: "target" | "aoe";
     attackBonus: number;
     damageType: string;
     damageDice: string;
     range?: string;
     properties?: string;
-    maxTargets?: number; // для AOE: макс. кількість цілей
-    /** Розподіл шкоди по цілях (%): [50, 30, 20] — перша 50%, друга 30%, третя 20% */
+    maxTargets?: number;
+    // per-target damage share in %, e.g. [50, 30, 20]
     damageDistribution?: number[];
-    /** Гарантована шкода — застосовується навіть при промаху */
+    // applied even on a miss
     guaranteedDamage?: number;
-  }>;
-  specialAbilities: Array<{
-    name: string;
-    description?: string;
-    type: "passive" | "active";
-    spellId?: string;
-    actionType?: "action" | "bonus_action";
-    effect?: Record<string, unknown>;
   }>;
   immunities: string[];
   knownSpells: string[];
   avatar: string | null;
-  unitGroup?: {
-    id: string;
-    name: string;
-    color: string;
-    damageModifier: string | null;
-  } | null;
-}
-
-export interface UnitGroup {
-  id: string;
-  campaignId: string;
-  name: string;
-  color: string;
-  damageModifier: string | null;
-  createdAt: string;
 }

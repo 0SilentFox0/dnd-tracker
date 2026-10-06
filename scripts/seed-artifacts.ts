@@ -355,8 +355,7 @@ async function main() {
         description: item.description,
         slot: item.slot,
         rarity: item.rarity,
-        bonuses: {},
-        modifiers: [],
+        abilities: [],
         icon: ARTIFACT_ICONS[item.name] ?? null,
       },
     });

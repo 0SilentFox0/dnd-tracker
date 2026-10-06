@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { kvDel, kvGet, kvSet } from "@/lib/cache/kv";
+import { CampaignRole } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { createCampaignSchema } from "@/lib/schemas";
 import { requireAuth } from "@/lib/utils/api/api-auth";
@@ -55,7 +56,7 @@ export async function POST(request: Request) {
         members: {
           create: {
             userId: userId,
-            role: "dm",
+            role: CampaignRole.DM,
           },
         },
       },

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { ParticipantSide } from "@/lib/constants/battle";
+import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { calculateInitiative } from "@/lib/utils/battle/battle-start";
@@ -14,7 +14,7 @@ import type { BattleParticipant } from "@/types/battle";
 
 export const addParticipantSchema = z.object({
   sourceId: z.string(),
-  type: z.enum(["character", "unit"]),
+  type: z.enum([ParticipantSourceType.CHARACTER, ParticipantSourceType.UNIT]),
   side: z.enum(["ally", "enemy"]),
   quantity: z.number().int().min(1).max(10).optional().default(1),
 });
@@ -51,7 +51,7 @@ export function createAddParticipantMutation(deps: AddParticipantDeps = defaultD
 
     const added: BattleParticipant[] = [];
 
-    if (data.type === "character") {
+    if (data.type === ParticipantSourceType.CHARACTER) {
       const character = await deps.loadCharacter(data.sourceId);
 
       if (!character || character.campaignId !== ctx.scene.campaignId) {

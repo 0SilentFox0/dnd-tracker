@@ -1,114 +1,81 @@
-/**
- * Побудова об'єкта оновлення персонажа: рівень, HP, пасивні скіли, spell slots тощо.
- */
-
 import { Prisma } from "@prisma/client";
 
+import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
+import { applyLevelGain } from "@/lib/utils/characters/level-up/apply-level-gain";
 import { seenLevelOnLevelChange } from "@/lib/utils/characters/seen-level";
-import { calculateHPGain, getAbilityModifier, getLevelFromXP } from "@/lib/utils/common/calculations";
-import { calculateCharacterSpellSlots } from "@/lib/utils/spells/spell-slots";
+import { getLevelFromXP } from "@/lib/utils/common/calculations";
+import { calculateCharacterSpellSlots, type SpellSlots } from "@/lib/utils/spells/spell-slots";
+
+type AbilityScores = Record<AbilityKey, number>;
 
 export interface BuildCharacterUpdateDataParams {
-  character: {
-    level: number;
-    constitution: number;
-    maxHp: number;
-    currentHp: number;
-    hitDice: string | null;
-    spellSlots: unknown;
-    immunities: unknown;
-    [key: string]: unknown;
-  };
-  data: Record<string, unknown> & {
-    level?: number;
-    experience?: number;
-    constitution?: number;
-    maxHp?: number;
-    currentHp?: number;
-    spellSlots?: Record<string, { max: number; current: number }>;
-    immunities?: unknown;
-    [key: string]: unknown;
-  };
+  character: AbilityScores & { level: number; experience: number; spellSlots: unknown; seenLevel?: number | null };
+  data: Partial<AbilityScores> & { level?: number; experience?: number; spellSlots?: SpellSlots; [key: string]: unknown };
   xpMultiplier: number;
+  campaign: { maxLevel: number };
+  race: { spellSlotProgression: unknown } | null;
+  rng?: () => number;
 }
 
-export function buildCharacterUpdateData({
-  character,
-  data,
-  xpMultiplier,
-}: BuildCharacterUpdateDataParams): {
+export interface CharacterUpdateComputed {
   finalLevel: number;
-  maxHp: number;
-  currentHp: number;
-  spellSlotsToSave: Record<string, { max: number; current: number }>;
+  abilityScores?: AbilityScores;
+  spellSlots?: SpellSlots;
+  gained: AbilityKey[];
   skillTreeProgressUpdate: Prisma.InputJsonValue | undefined;
   seenLevel: number | undefined;
-} {
-  const level = (data.level ?? character.level) as number;
+}
 
-  const experience = (data.experience ?? character.experience) as number;
+export function resolveFinalLevel(
+  character: { level: number; experience: number },
+  data: { level?: number; experience?: number },
+  xpMultiplier: number,
+  maxLevel: number = Number.POSITIVE_INFINITY,
+): number {
+  const explicit = data.level ?? character.level;
 
-  const constitution = (data.constitution ?? character.constitution) as number;
+  if (data.experience === undefined || data.experience === character.experience) return explicit;
 
-  const hitDice = character.hitDice as string;
+  return Math.max(explicit, Math.min(getLevelFromXP(data.experience, xpMultiplier), maxLevel));
+}
 
-  const newLevelFromXP = getLevelFromXP(experience, xpMultiplier);
+function tableSlots(level: number, existing: SpellSlots | null | undefined): SpellSlots {
+  const slots: SpellSlots = Object.fromEntries(
+    Object.entries(calculateCharacterSpellSlots(level)).map(([k, v]) => {
+      const current = existing?.[k]?.current;
 
-  const finalLevel = Math.max(level, newLevelFromXP);
+      return [k, { max: v.max, current: current !== undefined ? Math.min(current, v.max) : v.max }];
+    }),
+  );
 
-  const conMod = getAbilityModifier(constitution);
+  if (existing?.universal?.max !== undefined) slots.universal = existing.universal;
 
-  let maxHp = (data.maxHp ?? character.maxHp) as number;
+  return slots;
+}
 
-  let currentHp = (data.currentHp ?? character.currentHp) as number;
+export function buildCharacterUpdateData({ character, data, xpMultiplier, campaign, race, rng }: BuildCharacterUpdateDataParams): CharacterUpdateComputed {
+  const finalLevel = resolveFinalLevel(character, data, xpMultiplier, campaign.maxLevel);
+
+  const existingSlots = (data.spellSlots ?? character.spellSlots) as SpellSlots | null | undefined;
+
+  const common = {
+    finalLevel,
+    gained: [] as AbilityKey[],
+    seenLevel: seenLevelOnLevelChange(character.level, finalLevel, character.seenLevel ?? null),
+    skillTreeProgressUpdate: undefined as Prisma.InputJsonValue | undefined,
+  };
 
   if (finalLevel > character.level) {
-    const levelsGained = finalLevel - character.level;
+    const scores = Object.fromEntries(ABILITY_KEYS.map((k) => [k, data[k] ?? character[k]])) as AbilityScores;
 
-    for (let i = 0; i < levelsGained; i++) {
-      const hpGain = calculateHPGain(hitDice ?? "1d8", conMod);
+    const gain = applyLevelGain({ character: { ...scores, spellSlots: existingSlots ?? {} }, race, campaign, fromLevel: character.level, toLevel: finalLevel, rng });
 
-      maxHp += hpGain;
-      currentHp += hpGain;
-    }
+    return { ...common, abilityScores: gain.abilityScores, spellSlots: gain.spellSlots, gained: gain.gained };
   }
 
-  const computedSlots = calculateCharacterSpellSlots(finalLevel);
-
-  const existingSlots = (data.spellSlots ?? character.spellSlots) as
-    | Record<string, { max: number; current: number }>
-    | null
-    | undefined;
-
-  const spellSlotsToSave: Record<string, { max: number; current: number }> =
-    Object.fromEntries(
-      Object.entries(computedSlots).map(([k, v]) => {
-        const existing = existingSlots?.[k]?.current;
-
-        const current = existing !== undefined ? Math.min(existing, v.max) : v.max;
-
-        return [k, { max: v.max, current }];
-      }),
-    );
-
-  if (
-    existingSlots?.universal &&
-    typeof existingSlots.universal === "object" &&
-    (existingSlots.universal as { max?: number }).max !== undefined
-  ) {
-    spellSlotsToSave.universal = existingSlots.universal as { max: number; current: number };
+  if (finalLevel < character.level) {
+    return { ...common, spellSlots: tableSlots(finalLevel, existingSlots), skillTreeProgressUpdate: {} as Prisma.InputJsonValue };
   }
 
-  const skillTreeProgressUpdate = finalLevel < character.level ? ({} as Prisma.InputJsonValue) : undefined;
-
-  const seenLevel = seenLevelOnLevelChange(character.level, finalLevel, (character.seenLevel as number | null | undefined) ?? null);
-
-  return {
-    finalLevel,
-    maxHp,
-    currentHp,
-    spellSlotsToSave,
-    skillTreeProgressUpdate,
-    seenLevel,
-  };
+  return common;
 }

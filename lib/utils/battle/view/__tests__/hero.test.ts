@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
+import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
+import type { FlagEffect } from "@/lib/utils/abilities/schema";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
-import { abilityCharges, bonusTargetSide, effectiveArmorClass, lastAction, needsMoraleCheck, slotLevels, spellTier, weaponPreview } from "@/lib/utils/battle/view";
+import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
+import { abilityCharges, bonusTargetSide, lastAction, needsMoraleCheck, slotLevels, spellTier, weaponPreview } from "@/lib/utils/battle/view";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleAction } from "@/types/battle";
 
@@ -38,7 +41,7 @@ describe("мій герой", () => {
     expect(charges).toEqual([{ key: "sw", name: "Друге дихання", icon: undefined, left: 0, limit: 1, per: "battle" }]);
   });
 
-  it("effectiveArmorClass враховує ауру союзника", () => {
+  it("getEffectiveArmorClass враховує ауру союзника", () => {
     const base = createMockParticipant();
 
     const me = { ...base, basicInfo: { ...base.basicInfo, id: "me" }, combatStats: { ...base.combatStats, armorClass: 16 } };
@@ -49,7 +52,7 @@ describe("мій герой", () => {
       battleData: { ...base.battleData, resolvedAbilities: [ability({ key: "aura", trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "armor", flat: 4, target: "allAllies" }] as ResolvedAbility["effects"] })] },
     };
 
-    expect(effectiveArmorClass(me, [me, paladin])).toBe(20);
+    expect(getEffectiveArmorClass(me, [me, paladin])).toBe(20);
   });
 
   it("bonusTargetSide", () => {
@@ -65,16 +68,22 @@ describe("мій герой", () => {
     expect(lastAction([])).toBeNull();
   });
 
-  it("needsMoraleCheck: мораль ≠ 0, не некромант, людина з від'ємною — ні, вже перевірено — ні", () => {
+  it("needsMoraleCheck: мораль ≠ 0; noNegativeMorale гасить від'ємну; ignoreMorale — ніколи; назва раси не важить; вже перевірено — ні", () => {
     const p = createMockParticipant();
 
-    const m = (morale: number, race = "elf") => ({ ...p, abilities: { ...p.abilities, race }, combatStats: { ...p.combatStats, morale } });
+    const m = (morale: number, flags: FlagEffect[] = [], race = "Людина") => ({
+      ...p,
+      abilities: { ...p.abilities, race },
+      combatStats: { ...p.combatStats, morale },
+      battleData: { ...p.battleData, resolvedAbilities: flags.length ? [resolved({ trigger: { event: "passive" }, effects: flags })] : [] },
+    });
 
-    expect(needsMoraleCheck(m(1), null)).toBe(true);
-    expect(needsMoraleCheck(m(0), null)).toBe(false);
-    expect(needsMoraleCheck(m(-1, "human"), null)).toBe(false);
-    expect(needsMoraleCheck(m(2, "necromancer"), null)).toBe(false);
-    expect(needsMoraleCheck(m(1), { participantId: p.basicInfo.id })).toBe(false);
+    expect(needsMoraleCheck(m(1), [], null)).toBe(true);
+    expect(needsMoraleCheck(m(0), [], null)).toBe(false);
+    expect(needsMoraleCheck(m(-1, [], "human"), [], null)).toBe(true);
+    expect(needsMoraleCheck(m(-1, [{ kind: "flag", flag: "noNegativeMorale" }]), [], null)).toBe(false);
+    expect(needsMoraleCheck(m(2, [{ kind: "flag", flag: "ignoreMorale" }], "necromancer"), [], null)).toBe(false);
+    expect(needsMoraleCheck(m(1), [], { participantId: p.basicInfo.id })).toBe(false);
   });
 
   it("weaponPreview: бонус ближнього бою видно на мечі, але не на луку; оцінка з бонусом", () => {

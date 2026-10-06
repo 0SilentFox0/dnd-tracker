@@ -1,6 +1,7 @@
 import { CharacterProfile } from "@/components/character-profile";
 import { EmptyState } from "@/components/common/states";
 import { requireCampaignMember } from "@/lib/campaigns/access";
+import { CharacterType } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 
 export default async function CharacterPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ tab?: string }> }) {
@@ -9,7 +10,7 @@ export default async function CharacterPage({ params, searchParams }: { params: 
   const { userId, isDM } = await requireCampaignMember(id);
 
   const character = await prisma.character.findFirst({
-    where: { campaignId: id, controlledBy: userId, type: "player" },
+    where: { campaignId: id, controlledBy: userId, type: CharacterType.PLAYER },
     select: { id: true },
   });
 

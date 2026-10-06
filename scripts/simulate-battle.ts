@@ -10,6 +10,7 @@ import type { Prisma } from "@prisma/client";
 
 import { attackBodySchema, attackMutation } from "../app/api/campaigns/[id]/battles/[battleId]/attack/attack-mutation";
 import { bonusActionMutation, bonusActionSchema } from "../app/api/campaigns/[id]/battles/[battleId]/bonus-action/bonus-action-mutation";
+import { moraleCheckMutation } from "../app/api/campaigns/[id]/battles/[battleId]/morale-check/morale-check-mutation";
 import { nextTurnMutation } from "../app/api/campaigns/[id]/battles/[battleId]/next-turn/next-turn-mutation";
 import { patchParticipantMutation } from "../app/api/campaigns/[id]/battles/[battleId]/participants/[participantId]/patch-participant-mutation";
 import { patchParticipantSchema } from "../app/api/campaigns/[id]/battles/[battleId]/participants/[participantId]/patch-participant-schema";
@@ -18,13 +19,18 @@ import { spellSchema } from "../app/api/campaigns/[id]/battles/[battleId]/spell/
 import { createSpellMutation } from "../app/api/campaigns/[id]/battles/[battleId]/spell/spell-mutation";
 import { createStartMutation } from "../app/api/campaigns/[id]/battles/[battleId]/start/start-mutation";
 import { prisma } from "../lib/db";
+import { moraleCheckSchema } from "../lib/schemas";
 import { applyBattleDelta } from "../lib/utils/battle/client/apply-delta";
 import { type PipelineDeps, runBattleMutation, type RunBattleMutationOptions } from "../lib/utils/battle/pipeline/run-battle-mutation";
 import { loadBattle, loadRecentEvents, saveBattle } from "../lib/utils/battle/store";
+import { needsMoraleCheck } from "../lib/utils/battle/view";
 import { branchLevelNodeId, buildTreeJson, racialNodeId } from "../lib/utils/skills/progression";
 import type { BattleMutationResponse, BattleScene } from "../types/api";
 import type { BattleAction, BattleParticipant } from "../types/battle";
 import { artifactRows, DRAGON_SET, RACES, SIM_CAMPAIGN_NAME, SIM_PLAYER, SIM_USER, SKILLS, UNITS } from "./simulate-battle-scenario";
+
+import { ParticipantSourceType } from "@/lib/constants/battle";
+import { CampaignRole } from "@/lib/constants/campaigns";
 
 
 const url = process.env.DATABASE_URL ?? "";
@@ -36,6 +42,10 @@ if (!/@(localhost|127\.0\.0\.1)[:/]/.test(url)) {
 
 let actingUser = SIM_USER.id;
 
+const rolls: number[] = [];
+
+const die = (face: number, sides: number) => (face - 0.5) / sides;
+
 const deps: PipelineDeps = {
   getUserId: async () => actingUser,
   rateLimit: async () => ({ allowed: true, count: 0, limit: 1_000, resetInSeconds: 0 }) as never,
@@ -43,6 +53,7 @@ const deps: PipelineDeps = {
   saveBattle: (before, outcome) => saveBattle(prisma, before, outcome),
   loadRecentEvents: (battleId, limit) => loadRecentEvents(prisma, battleId, limit),
   publish: () => {},
+  rng: () => rolls.shift() ?? 0.5,
 };
 
 // ---------- перевірки ----------
@@ -65,10 +76,14 @@ async function seed() {
 
   const campaignId = campaign.id;
 
-  await prisma.campaignMember.create({ data: { campaignId, userId: SIM_USER.id, role: "dm" } });
-  await prisma.campaignMember.create({ data: { campaignId, userId: SIM_PLAYER.id, role: "player" } });
+  await prisma.campaignMember.create({ data: { campaignId, userId: SIM_USER.id, role: CampaignRole.DM } });
+  await prisma.campaignMember.create({ data: { campaignId, userId: SIM_PLAYER.id, role: CampaignRole.PLAYER } });
 
-  for (const r of Object.values(RACES)) await prisma.race.create({ data: { campaignId, ...r } as Prisma.RaceUncheckedCreateInput });
+  const raceIds: Record<string, string> = {};
+
+  for (const [key, r] of Object.entries(RACES)) {
+    raceIds[key] = (await prisma.race.create({ data: { campaignId, ...r } as Prisma.RaceUncheckedCreateInput })).id;
+  }
 
   const mainSkill = await prisma.mainSkill.create({ data: { campaignId, name: "Бойове мистецтво", color: "#c00" } });
 
@@ -76,7 +91,7 @@ async function seed() {
 
   for (const [key, s] of Object.entries(SKILLS)) {
     const row = await prisma.skill.create({
-      data: { campaignId, mainSkillId: mainSkill.id, name: s.name, ...("abilities" in s ? { abilities: s.abilities as unknown as Prisma.InputJsonValue } : {}), ...("combatStats" in s ? { combatStats: s.combatStats, skillTriggers: s.skillTriggers } : {}) } as Prisma.SkillUncheckedCreateInput,
+      data: { campaignId, mainSkillId: mainSkill.id, name: s.name, abilities: s.abilities as unknown as Prisma.InputJsonValue },
     });
 
     skills[key] = row.id;
@@ -104,7 +119,7 @@ async function seed() {
     return row.id;
   };
 
-  const dwarfTree = await treeFor("Дварф", { outer: [skills.rage, skills.undying, skills.ironSkin], middle: [skills.legacyGuard] });
+  const dwarfTree = await treeFor("Дварф", { outer: [skills.rage, skills.undying, skills.ironSkin] });
 
   const elfTree = await treeFor("Ельф", { levels: { basic: skills.hunterEye }, outer: [skills.bleed, skills.secondWind] }, { basic: skills.forestStep });
 
@@ -112,17 +127,17 @@ async function seed() {
 
   const progress = (treeId: string, ids: string[]) => ({ [treeId]: { unlockedSkills: [...levels, ...ids] } });
 
-  const base = { campaignId, type: "player", controlledBy: SIM_PLAYER.id, class: "Fighter", proficiencyBonus: 2 };
+  const base = { campaignId, type: "player", controlledBy: SIM_PLAYER.id, class: "Fighter" };
 
   const chars = {
     thorin: await prisma.character.create({
-      data: { ...base, name: "Торін", race: "Дварф", level: 5, strength: 16, dexterity: 12, constitution: 16, armorClass: 16, maxHp: 40, currentHp: 40, initiative: 1, skillTreeProgress: progress(dwarfTree, [skills.rage, skills.undying, skills.ironSkin, skills.legacyGuard]) },
+      data: { ...base, name: "Торін", race: "Дварф", level: 5, strength: 16, dexterity: 12, constitution: 16, armorClass: 16, initiative: 1, skillTreeProgress: progress(dwarfTree, [skills.rage, skills.undying, skills.ironSkin]) },
     }),
     lyra: await prisma.character.create({
-      data: { ...base, class: "Ranger", name: "Ліра", race: "Ельф", level: 4, dexterity: 18, armorClass: 14, maxHp: 28, currentHp: 28, initiative: 4, skillTreeProgress: progress(elfTree, [skills.bleed, skills.secondWind, racialNodeId("basic")]) },
+      data: { ...base, class: "Ranger", name: "Ліра", race: "Ельф", level: 4, morale: 2, dexterity: 18, armorClass: 14, initiative: 4, skillTreeProgress: progress(elfTree, [skills.bleed, skills.secondWind, racialNodeId("basic")]) },
     }),
     myron: await prisma.character.create({
-      data: { ...base, class: "Wizard", name: "Мирон", race: "Людина", level: 3, intelligence: 17, armorClass: 12, maxHp: 18, currentHp: 18, initiative: 2, immunities: ["контроль"], knownSpells: [spell.id], spellSlots: { "1": { max: 2, current: 2 } } },
+      data: { ...base, class: "Wizard", name: "Мирон", race: "Людина", level: 3, morale: -2, intelligence: 17, armorClass: 12, initiative: 2, immunities: ["контроль"], knownSpells: [spell.id], spellSlots: { "1": { max: 2, current: 2 } } },
     }),
   };
 
@@ -132,8 +147,8 @@ async function seed() {
 
   const units: Record<string, string> = {};
 
-  for (const [key, u] of Object.entries(UNITS)) {
-    units[key] = (await prisma.unit.create({ data: { campaignId, ...u } as Prisma.UnitUncheckedCreateInput })).id;
+  for (const [key, { raceKey, ...u }] of Object.entries(UNITS)) {
+    units[key] = (await prisma.unit.create({ data: { campaignId, ...u, raceId: raceKey ? raceIds[raceKey] : null } as Prisma.UnitUncheckedCreateInput })).id;
   }
 
   const battle = await prisma.battleScene.create({
@@ -142,17 +157,15 @@ async function seed() {
       name: "Засідка в ущелині",
       status: "prepared",
       participants: [
-        { id: chars.thorin.id, type: "character", side: "ally" },
-        { id: chars.lyra.id, type: "character", side: "ally" },
-        { id: chars.myron.id, type: "character", side: "ally" },
-        { id: units.goblin, type: "unit", side: "enemy", quantity: 2 },
-        { id: units.shaman, type: "unit", side: "enemy" },
-        { id: units.golem, type: "unit", side: "enemy" },
+        { id: chars.thorin.id, type: ParticipantSourceType.CHARACTER, side: "ally" },
+        { id: chars.lyra.id, type: ParticipantSourceType.CHARACTER, side: "ally" },
+        { id: chars.myron.id, type: ParticipantSourceType.CHARACTER, side: "ally" },
+        { id: units.goblin, type: ParticipantSourceType.UNIT, side: "enemy", quantity: 2 },
+        { id: units.shaman, type: ParticipantSourceType.UNIT, side: "enemy" },
+        { id: units.golem, type: ParticipantSourceType.UNIT, side: "enemy" },
       ],
       currentRound: 1,
       currentTurnIndex: 0,
-      initiativeOrder: [],
-      battleLog: [],
     },
   });
 
@@ -210,6 +223,8 @@ async function call<T>(label: string, options: Omit<RunBattleMutationOptions<T>,
 
       console.info(`   📜 [р${e.round}] ${e.resultText}`);
     }
+  } else if (res.status === 200) {
+    state = await readState();
   } else {
     console.info(`   ⛔ ${label}: ${res.status} ${JSON.stringify(json).slice(0, 200)}`);
   }
@@ -255,6 +270,8 @@ const BONUS = { access: "member" as const, requireStatus: "active" as const, sch
 const SPELL = { access: "member" as const, requireStatus: "active" as const, schema: spellSchema, dryRun: (b: { preview?: boolean }) => b.preview === true, mutate: createSpellMutation() };
 
 const ROLLBACK = { access: "dm" as const, schema: rollbackSchema, mutate: createRollbackMutation() };
+
+const MORALE = { access: "member" as const, requireStatus: "active" as const, schema: moraleCheckSchema, respond: "wrapped" as const, mutate: moraleCheckMutation };
 
 async function main() {
   console.info("🌱 Створюю тестову кампанію…");
@@ -304,7 +321,7 @@ async function attack(attacker: string, target: string, d20: number, damageRolls
 
   const ev = logSince(before).find((e) => e.actionType === "attack");
 
-  return { status: r.status, ev, details: ev?.actionDetails };
+  return { status: r.status, ev, details: ev?.actionDetails, events: logSince(before) };
 }
 
 const abilityKeysOf = (p: BattleParticipant) => (p.battleData.resolvedAbilities ?? []).map((a) => `${a.name}:${a.trigger.event}`);
@@ -317,11 +334,7 @@ async function scenario() {
   check("Кільце сили запечене в силу Торіна (16 → 18)", thorin.abilities.strength === 18, `STR ${thorin.abilities.strength}`);
   check("Торін має скіли з нового формату", ["Лють берсерка:passive", "Невмирущий:lethalDamage", "Залізна шкіра:passive"].every((k) => abilityKeysOf(thorin).includes(k)), abilityKeysOf(thorin).join(", "));
   check(
-    "Legacy-скіл Торіна (abilities = NULL) сконвертовано в бою",
-    (thorin.battleData.resolvedAbilities ?? []).some((a) => a.effects.some((e) => e.kind === "modifyStat" && e.stat === "armor" && e.flat === 1)),
-  );
-  check(
-    "Раса Дварф (legacy опис) дає імунітет до отрути як resistance 100",
+    "Раса Дварф (опис пасивки) дає імунітет до отрути як resistance 100",
     (thorin.battleData.resolvedAbilities ?? []).some((a) => a.effects.some((e) => e.kind === "flag" && e.flag === "resistance" && /poison|отру/i.test(e.damageType) && e.percent === 100)),
     abilityKeysOf(thorin).join(", "),
   );
@@ -333,10 +346,17 @@ async function scenario() {
     abilityKeysOf(by("Ліра")).join(", "),
   );
   check("Голем: імунітети стали прапорцями", (by("Кам'яний голем #1").battleData.resolvedAbilities ?? []).some((a) => a.effects.some((e) => e.kind === "flag" && e.flag === "conditionImmunity")));
+  check("Раса юніта — з races за raceId", by("Гоблін-лучник #1").abilities.race === "Орк" && by("Кам'яний голем #1").abilities.race === "", `${by("Гоблін-лучник #1").abilities.race} / ${by("Кам'яний голем #1").abilities.race}`);
   check("Атака зброї Торіна з артефакту (1d8 slashing)", by("Торін").battleData.attacks.some((a) => a.damageDice === "1d8" && a.damageType === "slashing"), JSON.stringify(by("Торін").battleData.attacks.map((a) => [a.name, a.damageDice, a.damageType])));
 
   console.info("\n🎲 Раунд 1");
   await until("Ліра");
+
+  check("ignoreMorale: Лірі з моральлю +2 перевірка не потрібна", !needsMoraleCheck(by("Ліра"), state.initiativeOrder, state.pendingMoraleCheck), `мораль ${by("Ліра").combatStats.morale}`);
+
+  const lyraMorale = await call("morale-check", MORALE, { participantId: by("Ліра").basicInfo.id, d10Roll: 10 });
+
+  check("ignoreMorale: d10 = 10 не дає додаткового ходу", ((lyraMorale.body.response as { moraleResult?: unknown } | undefined)?.moraleResult as { hasExtraTurn?: boolean } | undefined)?.hasExtraTurn === false, JSON.stringify(lyraMorale.body.response ?? lyraMorale.body).slice(0, 200));
 
   const lyraHit = await attack("Ліра", "Орк-шаман #1", 17, [5]);
 
@@ -345,6 +365,12 @@ async function scenario() {
   check("Кровопускання наклало DOT на шамана", effectNames(by("Орк-шаман #1")).length > 0, JSON.stringify(by("Орк-шаман #1").battleData.activeEffects.map((e) => [e.name, e.duration])));
 
   await until("Мирон");
+
+  check("noNegativeMorale: Мирону з моральлю −2 перевірка не потрібна", !needsMoraleCheck(by("Мирон"), state.initiativeOrder, state.pendingMoraleCheck), `мораль ${by("Мирон").combatStats.morale}`);
+
+  const myronMorale = await call("morale-check", MORALE, { participantId: by("Мирон").basicInfo.id, d10Roll: 10 });
+
+  check("noNegativeMorale: d10 = 10 не дає паніки", ((myronMorale.body.response as { moraleResult?: unknown } | undefined)?.moraleResult as { shouldSkipTurn?: boolean } | undefined)?.shouldSkipTurn === false, JSON.stringify(myronMorale.body.response ?? myronMorale.body).slice(0, 200));
 
   const golemHpBefore = hp(by("Кам'яний голем #1"));
 
@@ -367,8 +393,8 @@ async function scenario() {
 
   const g1 = await attack("Гоблін-лучник #1", "Торін", 12, [4]);
 
-  check("AC Торіна в атаці = 16 + 2 (шкіра) + 1 (legacy) + 1 (аура сету) = 20", g1.details?.targetAC === 20, `targetAC ${g1.details?.targetAC}`);
-  check("Гоблін промахується по Торіну (16 < 20)", g1.details?.isHit === false, g1.ev?.resultText ?? "");
+  check("AC Торіна в атаці = 16 + 2 (шкіра) + 1 (аура сету) = 19", g1.details?.targetAC === 19, `targetAC ${g1.details?.targetAC}`);
+  check("Гоблін промахується по Торіну (16 < 19)", g1.details?.isHit === false, g1.ev?.resultText ?? "");
 
   await until("Гоблін-лучник #2");
 
@@ -383,7 +409,19 @@ async function scenario() {
 
   const golemHp1 = hp(by("Кам'яний голем #1"));
 
+  const torinHp0 = hp(by("Торін"));
+
+  rolls.push(die(18, 20), die(18, 20), die(6, 6), die(6, 6));
+
   const t1 = await attack("Торін", "Кам'яний голем #1", 18, [8]);
+
+  const golemRet = t1.events.find((e) => e.actionType === "retaliation");
+
+  check(
+    "Відсіч при влучанні: голем відповідає Торіну",
+    golemRet?.actorName === "Кам'яний голем #1" && golemRet.actionDetails.isHit === true && hp(by("Торін")) < torinHp0,
+    `${golemRet?.resultText ?? "немає події"} → HP ${torinHp0} → ${hp(by("Торін"))}`,
+  );
 
   const dealt = golemHp1 - hp(by("Кам'яний голем #1"));
 
@@ -395,7 +433,19 @@ async function scenario() {
   const shamanTurn = logSince(0).filter((e) => e.round === 1).map((e) => e.resultText);
 
   check("На початку ходу шамана тікнув DOT і спрацювало зцілення", shamanTurn.some((t) => /bleed|кров/i.test(t)) && shamanTurn.some((t) => /зцілення|Шаманське/i.test(t)), shamanTurn.slice(-4).join(" | "));
-  await attack("Орк-шаман #1", "Мирон", 14, [3]);
+  rolls.push(die(15, 20), die(15, 20));
+
+  const shamanSwing = await attack("Орк-шаман #1", "Мирон", 2, [3]);
+
+  const myronRet = shamanSwing.events.filter((e) => e.actionType === "retaliation");
+
+  check("Відсіч при промаху: Мирон відповідає шаману", shamanSwing.details?.isHit === false && myronRet[0]?.actorName === "Мирон", myronRet.map((e) => e.resultText).join(" | ") || "немає події");
+  check(
+    "Контратака людини +50% у кроках шкоди відсічі",
+    Object.values(myronRet[0]?.actionDetails.damageSteps ?? {}).flat().some((s) => s.label === "Контратака" && s.value === 1.5),
+    JSON.stringify(myronRet[0]?.actionDetails.damageSteps ?? {}).slice(0, 200),
+  );
+  check("Без ланцюжка: на відсіч ніхто не відповідає", myronRet.length === 1, `${myronRet.length} подій відсічі`);
 
   await until("Кам'яний голем #1");
   await setHp("Торін", 5);

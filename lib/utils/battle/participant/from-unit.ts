@@ -1,14 +1,11 @@
-/**
- * Створення BattleParticipant з Unit
- */
-
 import type { Prisma } from "@prisma/client";
 
 import type { UnitFromPrisma } from "../types/participant";
-import { loadRace } from "./load-race";
+import { loadUnitRace } from "./load-race";
 
-import { AttackType } from "@/lib/constants/battle";
+import { AttackType, ParticipantSourceType } from "@/lib/constants/battle";
 import { ParticipantSide } from "@/lib/constants/battle";
+import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import { bakePassives } from "@/lib/utils/abilities/build/bake";
 import { collectUnitAbilities } from "@/lib/utils/abilities/build/collect";
 import { immunityAbilities } from "@/lib/utils/abilities/build/immunities";
@@ -19,15 +16,12 @@ import type { BattleParticipant } from "@/types/battle";
 import type { Race } from "@/types/races";
 import type { Unit } from "@/types/units";
 
-/**
- * Створює BattleParticipant з Unit
- */
 export async function createBattleParticipantFromUnit(
   unit: UnitFromPrisma,
   battleId: string,
   side: ParticipantSide,
   instanceNumber: number,
-  racesByName?: Record<string, Prisma.RaceGetPayload<object> | null>,
+  racesById?: Record<string, Prisma.RaceGetPayload<object> | null>,
 ): Promise<BattleParticipant> {
   const modifiers = {
     strength: getAbilityModifier(unit.strength),
@@ -89,12 +83,12 @@ export async function createBattleParticipantFromUnit(
     };
   });
 
-  let race: Awaited<ReturnType<typeof loadRace>> = null;
+  let race: Awaited<ReturnType<typeof loadUnitRace>> = null;
 
   try {
-    race = await loadRace(unit.race, unit.campaignId, racesByName ? (racesByName[unit.race ?? ""] ?? null) : undefined);
+    race = await loadUnitRace(unit.raceId, unit.campaignId, racesById ? (racesById[unit.raceId ?? ""] ?? null) : undefined);
   } catch (error) {
-    logger.error("[battle/from-unit] load race failed", { unitId: unit.id, race: unit.race, campaignId: unit.campaignId }, error);
+    logger.error("[battle/from-unit] load race failed", { unitId: unit.id, raceId: unit.raceId, campaignId: unit.campaignId }, error);
   }
 
   const participant: BattleParticipant = {
@@ -102,13 +96,13 @@ export async function createBattleParticipantFromUnit(
       id: `${unit.id}-${instanceNumber}-${Date.now()}`,
       battleId,
       sourceId: unit.id,
-      sourceType: "unit",
+      sourceType: ParticipantSourceType.UNIT,
       instanceNumber,
       instanceId: `${unit.id}-${instanceNumber - 1}`,
       name: `${unit.name} #${instanceNumber}`,
       avatar: unit.avatar || undefined,
       side,
-      controlledBy: "dm",
+      controlledBy: CONTROLLED_BY_DM,
     },
     abilities: {
       level: unit.level,
@@ -122,7 +116,7 @@ export async function createBattleParticipantFromUnit(
       charisma: unit.charisma,
       modifiers,
       proficiencyBonus: unit.proficiencyBonus,
-      race: unit.race || "",
+      race: race?.name ?? "",
     },
     combatStats: {
       maxHp: unit.maxHp,
@@ -136,7 +130,6 @@ export async function createBattleParticipantFromUnit(
       maxTargets: unit.maxTargets ?? 1,
     },
     spellcasting: {
-      spellcastingClass: undefined,
       spellcastingAbility: undefined,
       spellSaveDC: undefined,
       spellAttackBonus: undefined,

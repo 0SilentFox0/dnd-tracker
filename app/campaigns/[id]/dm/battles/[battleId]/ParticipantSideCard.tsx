@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ParticipantSide } from "@/lib/constants/battle";
+import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import type { BattlePreparationParticipant } from "@/types/battle";
 import type { EditBattleCharacter } from "@/types/battle-setup";
 import type { EditBattleUnit } from "@/types/battle-setup";
@@ -55,10 +55,10 @@ export function ParticipantSideCard({
   const sideParticipants = participants.filter((p) => p.side === side);
 
   const characterParticipants = sideParticipants.filter(
-    (p) => p.type === "character",
+    (p) => p.type === ParticipantSourceType.CHARACTER,
   );
 
-  const unitParticipants = sideParticipants.filter((p) => p.type === "unit");
+  const unitParticipants = sideParticipants.filter((p) => p.type === ParticipantSourceType.UNIT);
 
   const renderRow = (
     participant: BattlePreparationParticipant,

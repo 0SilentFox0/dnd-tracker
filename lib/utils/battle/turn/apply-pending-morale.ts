@@ -61,6 +61,15 @@ export function applyPendingMoraleCheck(
     );
   }
 
+  // паніка: до власного наступного ходу не відповідає на удари (скидання — на початку ходу)
+  if (moraleResult.shouldSkipTurn) {
+    updatedInitiativeOrder = updatedInitiativeOrder.map((p) =>
+      p.basicInfo.id === participant.basicInfo.id
+        ? { ...p, actionFlags: { ...p.actionFlags, hasUsedReaction: true } }
+        : p,
+    );
+  }
+
   const moraleSuccess = moraleResult.hasExtraTurn || !moraleResult.shouldSkipTurn;
 
   const run = runAbilities(

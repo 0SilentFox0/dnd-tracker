@@ -11,7 +11,7 @@
 
 import { buildCampaignContextForStart } from "./start-build-context";
 
-import { ParticipantSide } from "@/lib/constants/battle";
+import { ParticipantSide, ParticipantSourceType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
@@ -32,7 +32,7 @@ export async function buildStartOrder(
 ): Promise<{ order: BattleParticipant[]; triggerLogEntries: BattleAction[] }> {
   const participantsRaw = setup as Array<{
     id: string;
-    type: "character" | "unit";
+    type: ParticipantSourceTypeValue;
     side: string;
     quantity?: number;
   }>;
@@ -46,7 +46,7 @@ export async function buildStartOrder(
 
   const { charIds, unitIds } = participants.reduce(
     (acc, p) => {
-      if (p.type === "character") acc.charIds.push(p.id);
+      if (p.type === ParticipantSourceType.CHARACTER) acc.charIds.push(p.id);
       else acc.unitIds.push(p.id);
 
       return acc;
@@ -74,13 +74,12 @@ export async function buildStartOrder(
 
   const unitMap = new Map(units.map((u) => [u.id, u]));
 
-  const { campaignContext, racesByName, uniqueRaceNames } =
-    await buildCampaignContextForStart(campaignId, characters, units);
+  const { campaignContext, racesById } = await buildCampaignContextForStart(campaignId, characters, units);
 
   type ParticipantSlot =
-    | { type: "character"; character: (typeof characters)[number]; side: ParticipantSide }
+    | { type: typeof ParticipantSourceType.CHARACTER; character: (typeof characters)[number]; side: ParticipantSide }
     | {
-        type: "unit";
+        type: typeof ParticipantSourceType.UNIT;
         unit: (typeof units)[number];
         side: ParticipantSide;
         instanceNumber: number;
@@ -89,13 +88,13 @@ export async function buildStartOrder(
   const slots: ParticipantSlot[] = [];
 
   for (const participant of participants) {
-    if (participant.type === "character") {
+    if (participant.type === ParticipantSourceType.CHARACTER) {
       const character = characterMap.get(participant.id);
 
       if (character) {
-        slots.push({ type: "character", character, side: participant.side });
+        slots.push({ type: ParticipantSourceType.CHARACTER, character, side: participant.side });
       }
-    } else if (participant.type === "unit") {
+    } else if (participant.type === ParticipantSourceType.UNIT) {
       const unit = unitMap.get(participant.id);
 
       if (unit) {
@@ -103,7 +102,7 @@ export async function buildStartOrder(
 
         for (let i = 0; i < quantity; i++) {
           slots.push({
-            type: "unit",
+            type: ParticipantSourceType.UNIT,
             unit,
             side: participant.side,
             instanceNumber: i + 1,
@@ -115,7 +114,7 @@ export async function buildStartOrder(
 
   const built = await Promise.all(
     slots.map((slot) =>
-      slot.type === "character"
+      slot.type === ParticipantSourceType.CHARACTER
         ? createBattleParticipantFromCharacter(
             slot.character,
             battleId,
@@ -123,13 +122,7 @@ export async function buildStartOrder(
             undefined,
             campaignContext,
           )
-        : createBattleParticipantFromUnit(
-            slot.unit,
-            battleId,
-            slot.side,
-            slot.instanceNumber,
-            uniqueRaceNames.length > 0 ? racesByName : undefined,
-          ),
+        : createBattleParticipantFromUnit(slot.unit, battleId, slot.side, slot.instanceNumber, racesById),
     ),
   );
 

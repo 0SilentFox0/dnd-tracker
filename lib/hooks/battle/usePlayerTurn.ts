@@ -5,7 +5,8 @@ import { useEffect, useReducer, useRef } from "react";
 import { useBattleScene } from "./useBattleScene";
 
 import { useConfirm } from "@/lib/hooks/common";
-import { initialTurnFlow, MORALE_SKIP_MS, turnFlow } from "@/lib/utils/battle/flows";
+import { initialTurnFlow, MORALE_SKIP_MS, moraleOutcome, turnFlow } from "@/lib/utils/battle/flows";
+import type { PendingMoraleCheckPayload } from "@/lib/utils/battle/turn";
 import { needsMoraleCheck } from "@/lib/utils/battle/view";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -21,10 +22,14 @@ export function usePlayerTurn(participant: BattleParticipant) {
   const confirm = useConfirm();
 
   const [state, dispatch] = useReducer(turnFlow, initialTurnFlow, (s) =>
-    turnFlow(s, { type: "BEGIN", needsMorale: needsMoraleCheck(participant, scene.battle.pendingMoraleCheck) }),
+    turnFlow(s, { type: "BEGIN", needsMorale: needsMoraleCheck(participant, scene.battle.initiativeOrder, scene.battle.pendingMoraleCheck) }),
   );
 
   const id = participant.basicInfo.id;
+
+  const pending = scene.battle.pendingMoraleCheck as PendingMoraleCheckPayload | null;
+
+  const moraleResult = state.moraleResult ?? (pending?.participantId === id ? moraleOutcome(pending.moraleResult) : undefined);
 
   const skipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -38,7 +43,7 @@ export function usePlayerTurn(participant: BattleParticipant) {
   const fresh = () => scene.readBattle()?.initiativeOrder.find((p) => p.basicInfo.id === id) ?? participant;
 
   const endTurn = async () => {
-    if (!participant.actionFlags.hasUsedAction) {
+    if (!participant.actionFlags.hasUsedAction && moraleResult !== "skip") {
       const ok = await confirm({ title: "Завершити хід?", description: "Дію ще не використано.", confirmLabel: "Завершити" });
 
       if (!ok) return;
@@ -57,7 +62,8 @@ export function usePlayerTurn(participant: BattleParticipant) {
     phase: state.phase,
     actionUsed: participant.actionFlags.hasUsedAction,
     bonusAvailable: !participant.actionFlags.hasUsedBonusAction,
-    skipped: state.moraleResult === "skip",
+    skipped: moraleResult === "skip",
+    moraleResult,
     afterAction: () => {
       if (scene.readBattle()?.status !== "active") return;
 
@@ -72,9 +78,7 @@ export function usePlayerTurn(participant: BattleParticipant) {
         return;
       }
 
-      const r = res?.moraleResult;
-
-      const result = r?.hasExtraTurn ? "extra" : r?.shouldSkipTurn ? "skip" : "none";
+      const result = moraleOutcome(res?.moraleResult);
 
       dispatch({ type: "MORALE_RESULT", result });
 

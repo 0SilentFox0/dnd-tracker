@@ -63,11 +63,11 @@ describe("AbilityListEditor", () => {
     expect(json()).toEqual([]);
   });
 
-  it("плашка втрат конвертера", () => {
-    render(<Harness issues={[{ severity: "loss", message: "weird: невідомий стат" }]} />);
+  it("плашка невалідних збережених даних", () => {
+    render(<Harness issues={[{ severity: "loss", message: "Частина збережених вмінь має невалідні дані" }]} />);
 
-    expect(screen.getByText(/Перенесено зі старого формату/)).toBeInTheDocument();
-    expect(screen.getByText("weird: невідомий стат")).toBeInTheDocument();
+    expect(screen.getByText(/Збережені вміння мають невалідні дані/)).toBeInTheDocument();
+    expect(screen.queryByText(/Перенесено зі старого формату/)).not.toBeInTheDocument();
   });
 
   it("скопіювати двічі → унікальні id", async () => {

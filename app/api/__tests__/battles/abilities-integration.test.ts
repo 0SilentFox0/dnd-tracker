@@ -6,9 +6,8 @@ import { attackBodySchema, attackMutation } from "@/app/api/campaigns/[id]/battl
 import { bonusActionMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/bonus-action/bonus-action-mutation";
 import { nextTurnMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/next-turn/next-turn-mutation";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
-import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
+import { resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { joinParticipant, splitParticipant } from "@/lib/utils/battle/store/split-participant";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -57,20 +56,21 @@ describe("abilities through mutations", () => {
     expect(next.events.some((e) => e.resultText.includes("bleed"))).toBe(true);
   });
 
-  it("контратака цілі — один раз за раунд", () => {
-    const counter = resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "counterAttack", attackKinds: ["melee"], bonusPercent: 0 }] });
+  it("відсіч цілі — один раз між її ходами", () => {
+    const base = makeGoblin("gob", 100);
 
-    const gob = { ...makeGoblin("gob", 100, [counter]), battleData: { ...makeGoblin("gob", 100, [counter]).battleData, attacks: [sword] } };
+    const gob = { ...base, battleData: { ...base.battleData, attacks: [sword] } };
 
-    const first = attack(context({ participants: [makeHero(), gob] }));
+    const first = attack(context({ participants: [makeHero(), gob], rng: seq(0.85) }));
 
     const heroHp = find(first.participants, "hero").combatStats.currentHp;
 
     expect(heroHp).toBeLessThan(20);
+    expect(first.events.map((e) => e.type)).toEqual(["attack", "retaliation"]);
 
     const refreshed = first.participants.map((p) => (p.basicInfo.id === "hero" ? { ...p, actionFlags: { ...p.actionFlags, hasUsedAction: false } } : p));
 
-    const second = attack(context({ participants: refreshed }));
+    const second = attack(context({ participants: refreshed, rng: seq(0.85) }));
 
     expect(find(second.participants, "hero").combatStats.currentHp).toBe(heroHp);
   });
@@ -111,25 +111,5 @@ describe("abilities through mutations", () => {
     const back = nextTurnMutation({ ...ctxGoblinTurn, scene: { ...ctxGoblinTurn.scene, turnIndex: 1 } });
 
     expect(find(back.participants, "hero").battleData.abilityUsage?.[rally.key].turn).toBe(0);
-  });
-
-  it("учасник зі старим snapshot (activeSkills) отримує бонус шкоди після апгрейду", () => {
-    const plain = attack(context({ participants: [makeHero(), makeGoblin("gob", 100)] }));
-
-    const stored = splitParticipant(makeHero(), { orderIndex: 0, isPending: false });
-
-    const bd = stored.snapshot.battleData as Record<string, unknown>;
-
-    delete bd.resolvedAbilities;
-    delete bd.spellEnhancers;
-    bd.activeSkills = [
-      { skillId: "fury", name: "Лють", mainSkillId: "m", level: "basic", effects: [{ stat: "melee_damage", type: "percent", value: 50, isPercentage: true }], skillTriggers: [{ type: "simple", trigger: "passive" }] },
-    ];
-
-    const legacyHero = joinParticipant(stored, "b1");
-
-    const boosted = attack(context({ participants: [legacyHero, makeGoblin("gob", 100)] }));
-
-    expect(find(boosted.participants, "gob").combatStats.currentHp).toBeLessThan(find(plain.participants, "gob").combatStats.currentHp);
   });
 });

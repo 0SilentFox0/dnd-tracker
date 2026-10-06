@@ -10,7 +10,7 @@ import {
   SpellSavingThrowOnSuccess,
   SpellType,
 } from "@/lib/constants/spell-abilities";
-import type { ImportSpell } from "@/lib/types/spell-import";
+import type { ImportSpell } from "@/types/import";
 
 const SAVE_TYPE_MAP: Record<string, SpellSavingThrowAbility> = {
   Constitution: SpellSavingThrowAbility.CONSTITUTION,

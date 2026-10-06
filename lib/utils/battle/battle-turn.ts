@@ -3,7 +3,7 @@
  */
 
 import { applyDOTEffects, decreaseEffectDurations } from "./battle-effects";
-import { calculateInitiative } from "./battle-start";
+import { calculateInitiative, sortByInitiative } from "./battle-start";
 
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { findParticipant, isUp, replaceParticipant } from "@/lib/utils/abilities/engine/participants";
@@ -235,15 +235,9 @@ export function processStartOfRound(
 
   messages.push(...round.messages);
 
-  const sortedOrder = round.participants
-    .map((p) => ({ ...p, abilities: { ...p.abilities, initiative: calculateInitiative(p, round.participants) } }))
-    .sort((a, b) => {
-      if (b.abilities.initiative !== a.abilities.initiative) return b.abilities.initiative - a.abilities.initiative;
-
-      if (b.abilities.baseInitiative !== a.abilities.baseInitiative) return b.abilities.baseInitiative - a.abilities.baseInitiative;
-
-      return b.abilities.dexterity - a.abilities.dexterity;
-    });
+  const sortedOrder = sortByInitiative(
+    round.participants.map((p) => ({ ...p, abilities: { ...p.abilities, initiative: calculateInitiative(p, round.participants) } })),
+  );
 
   // DoT і зменшення тривалості ефектів тепер на початку ходу кожного учасника (processStartOfTurn)
   return {

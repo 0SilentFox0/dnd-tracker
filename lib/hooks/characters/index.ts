@@ -18,6 +18,4 @@ export { characterSheetKey, useCharacterSheet } from "./useCharacterSheet";
 export { type DmCharacterEditor, useDmCharacterEditor } from "./useDmCharacterEditor";
 export { useDmCharactersPage } from "./useDmCharactersPage";
 export { useEquipArtifact } from "./useEquipArtifact";
-export type { UseInventoryOptions } from "./useInventory";
-export { useInventory } from "./useInventory";
 export { useSpellBrowser } from "./useSpellBrowser";

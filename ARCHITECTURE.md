@@ -66,9 +66,9 @@
 - **`battles/[battleId]/`** — сторінка активного бою (черга, учасники, атаки, заклинання).
 - **`info/`** — інформаційні сторінки кампанії.
 - **`dm/`** — панель DM:
-  - `dm/characters` — список персонажів; `[characterId]` — редагування; `new` — створення.
+  - `dm/characters` — список персонажів із вкладками «Усі / Гравці / NPC-герої» (`?type=player|npc_hero`); `[characterId]` — редагування; `new?type=` — створення.
   - `dm/battles` — список боїв; `[battleId]` — редагування; `new` — створення.
-  - `dm/spells`, `dm/units`, `dm/races`, `dm/artifacts`, `dm/main-skills`, `dm/skill-trees`, `dm/npc-heroes` — відповідні розділи налаштувань.
+  - `dm/spells`, `dm/units`, `dm/races`, `dm/artifacts`, `dm/main-skills`, `dm/skill-trees` — відповідні розділи налаштувань.
 
 Сторінки часто розділені: `page.tsx` (серверний компонент, дані) + `*-client` / `page-client` (клієнтський UI з `"use client"`).
 
@@ -89,7 +89,7 @@
 | **`characters/`** | Персонаж: basic info, ability scores, combat params, skills, spells, artifacts, stats (damage calculator, HP preview). |
 | **`campaigns/`** | Кампанія: join, members, info, settings. |
 | **`abilities/`** | Редактор умінь для всіх власників: акордеон (`AbilityListEditor`), секції «Коли / Умова / Ліміти / Що робить», поля з реєстру (`fields/`), шаблони й «Скопіювати з…», `AbilitySummary` для карток. |
-| **`skills/`** | Скіли: форми створення/редагування (`form/`), списки, картки, діалоги (наприклад CreateGroupDialog). |
+| **`skills/`** | Скіли: форми створення/редагування (`form/`), списки, картки, діалоги (наприклад CreateSpellGroupDialog). |
 | **`skill-tree/`** | Прокачка: `progression/` (панель гравця — рядки гілок, пропозиції, шторка вузла, анімація нового рівня), `editor/` (таблиця-редактор дерева для DM). |
 | **`spells/`** | Заклинання: списки, групи, діалоги, форми. |
 | **`races/`** | Раси: форми редагування, стати, слоти заклинань. |
@@ -121,8 +121,8 @@ React-хуки згруповані по папках за доменом; ко�
 - **`lib/hooks/battles/`** — список і CRUD боїв: `useBattles` (useBattle, useStartBattle, useUpdateBattle, …); усі мутації бою — через `useBattleAction` (`expectedVersion`, застосування дельти, 409 → рефетч і тост).
 - **`lib/hooks/battle/`** — логіка одного бою: `useBattleSceneValue`/`useBattleScene` (контекст сцени), `usePusherBattleSync` (`battle-delta`), `useAttackWizard`, `useSpellBook`, `usePlayerTurn`, `useBattleToast`, `useHpChange`, `useBattlePageDialogs` (DM-діалоги).
 - **`lib/hooks/campaigns/`** — `useCampaignMembers`.
-- **`lib/hooks/characters/`** — персонажі та форма: `useCharacterForm`, `useCharacterView`, `useCharacters`, `useInventory`, `useDamageCalculator`, `useHeroScalingCoefficients`; тип `Character`.
-- **`lib/hooks/skills/`** — скіли та прокачка: `useSkills`, `useMainSkills`, `useSkillForm`, `useCharacterProgression`, `useProgressionActions`, `useCharacterLearnedSpellIds`, `useLevelUpCelebration`, `useSkillTreeEditor`; тип `SkillFromLibrary`.
+- **`lib/hooks/characters/`** — персонажі та форма: `useCharacterForm`, `useCharacterView`, `useCharacters`, `useDamageCalculator`, `useHeroScalingCoefficients`; тип `Character`.
+- **`lib/hooks/skills/`** — скіли та прокачка: `useSkills`, `useMainSkills`, `useSkillForm`, `useCharacterProgression`, `useProgressionActions`, `useLevelUpCelebration`, `useSkillTreeEditor`; тип `SkillFromLibrary`.
 - **`lib/hooks/spells/`** — заклинання: `useSpells`, `useSpellGroups`, `useSpellGroupActions`, `useSpellSelection` та мутації (create, update, delete, move, …).
 - **`lib/hooks/units/`** — юніти: `useUnits`, `useUnit`, `useUnitGroups`, `useCreateUnitGroup` та мутації.
 - **`lib/hooks/races/`** — раси: `useRaces`, `useCreateRace`, `useUpdateRace`, `useDeleteRace`.
@@ -158,7 +158,7 @@ React-хуки згруповані по папках за доменом; ко�
 - **`registry/`** — реєстр тригерів, умов і ефектів: `matches` / `evaluate` / `apply`, `describe`, `fields` для UI.
 - **`engine/`** — `runAbilities` (один виконавець подій бою з лімітами й шансом), `resolveDowned` (летальна шкода → вбивство), `collectModifiers` (постійні модифікатори: пасивки, аури, таймові ефекти).
 - **`build/`** — збирання умінь учасника («найвищий рівень у лінії», школа магії) і запікання статів при побудові.
-- **`legacy/`** — конвертер старих форматів (`skillTriggers`, `combatStats`, `passiveAbility`, `setBonus`, `specialAbilities`, старі snapshot), читання колонки `abilities` із запасним варіантом (`readAbilities`) і звіт `pnpm convert-abilities`. Форми пишуть `abilities` напряму; `summary.ts` рахує короткі описи для списків.
+- **`read.ts`** — єдине читання колонки `abilities` (`skillAbilities` / `raceAbilities` / … для бою, `readAbilities` для редакторів; `NULL` → `[]`, невалідні записи відкидаються з попередженням). Форми пишуть `abilities` напряму; `summary.ts` рахує короткі описи для списків. Конвертери старих форматів — лише в `scripts/legacy-convert/` (для `convert-abilities` і `import-skills-library`).
 
 #### `lib/utils/skills/`
 
@@ -222,7 +222,7 @@ React-провайдери: **`query-provider.tsx`** (TanStack Query), можл�
 
 ## 5. `prisma/`
 
-- **`schema.prisma`** — повна схема БД (User, Campaign, CampaignMember, Character, Unit, UnitGroup, Spell, SpellGroup, Artifact, ArtifactSet, CharacterInventory, SkillTree, CharacterSkills, BattleScene, StatusEffect, RacialAbility, Skill, Race, MainSkill тощо).
+- **`schema.prisma`** — повна схема БД (User, Campaign, CampaignMember, Character, Unit, Spell, SpellGroup, Artifact, ArtifactSet, CharacterInventory, SkillTree, CharacterSkills, BattleScene, StatusEffect, Skill, Race, MainSkill тощо).
 - **`migrations/`** — історія міграцій. Після зміни схеми: `npx prisma migrate dev --name опис`.
 
 Після змін обов’язково: `npx prisma generate` (часто виконується в `postinstall` та перед build).
@@ -233,13 +233,13 @@ React-провайдери: **`query-provider.tsx`** (TanStack Query), можл�
 
 Скрипти для CLI та одноразових операцій (запуск: `pnpm run <script>` або `tsx scripts/імʼя.ts`).
 
-- **Імпорт:** `import-spells.ts`, `import-docs-spells.ts`, `import-units.ts`, `import-skills-library.ts` (та допоміжні parse/triggers/types).
+- **Імпорт:** `import-docs-spells.ts`, `import-units.ts`, `import-skills-library.ts` (та допоміжні parse/triggers/types).
 - **Міграції зберігання:** `migrate-spell-icons-to-supabase.ts`, `migrate-skill-icons-to-supabase.ts`, `migrate-unit-icons-to-supabase.ts`.
-- **Дані:** `seed-artifacts.ts`, `seed-mock-battle-data.ts`, `seed-mock-battles.ts`, `reset-mock-battle-data.ts`, `delete-mock-battle-data.ts`, `redistribute-character-spell-slots.ts`.
-- **Тести/симуляції:** `run-spells-testing.ts`, `setup-battle-test-3v5.ts`.
-- **Конвертація умінь:** `pnpm convert-abilities` (dry-run зі звітом у `docs/reports/`; `--apply` / `--force`).
-- **Симуляція бою:** `pnpm simulate-battle` — лише на локальній БД: створює окрему кампанію (персонажі з різними прокачками й артефактами, юніти з уміннями, частина даних у старому форматі) і проганяє бій через ті самі mutation-функції, що й API, з перевірками ефектів.
-- **Інше:** `fetch-skill-structure.ts`, `artifact-icon-map.ts`, `update-artifact-icons.ts`, `import-spells-from-csv.ts`.
+- **Дані:** `seed-artifacts.ts`, `seed-mock-battle-data.ts`, `reset-mock-battle-data.ts`, `delete-mock-battle-data.ts`, `redistribute-character-spell-slots.ts`.
+- **Тести/симуляції:** `run-spells-testing.ts`, `simulate-battle.ts`.
+- **Конвертація умінь:** `pnpm convert-abilities` (dry-run зі звітом у `docs/reports/`; `--apply` / `--force`; до контрактної міграції) і `pnpm check-contract` — передумови контрактної міграції (лише читання).
+- **Симуляція бою:** `pnpm simulate-battle` — лише на локальній БД: створює окрему кампанію (персонажі з різними прокачками й артефактами, юніти з уміннями) і проганяє бій через ті самі mutation-функції, що й API, з перевірками ефектів.
+- **Інше:** `artifact-icon-map.ts`, `update-artifact-icons.ts`.
 
 Детальніший опис mock-даних — у **`scripts/README-MOCK-DATA.md`**.
 

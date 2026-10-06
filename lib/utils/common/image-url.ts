@@ -44,3 +44,13 @@ export function isSupabaseStorageUrl(src: string): boolean {
     return false;
   }
 }
+
+export function isHttpUrl(src: string): boolean {
+  try {
+    const { protocol } = new URL(src.trim());
+
+    return protocol === "https:" || protocol === "http:";
+  } catch {
+    return false;
+  }
+}

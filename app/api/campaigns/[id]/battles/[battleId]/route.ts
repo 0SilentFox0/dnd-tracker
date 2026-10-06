@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db";
 import { createBattleSchema } from "@/lib/schemas";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
-import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { BattleAccess, runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 
 type Params = { params: Promise<{ id: string; battleId: string }> };
 
@@ -20,7 +20,7 @@ const patchBattleSchema = z
 function readBattle(params: { id: string; battleId: string }) {
   return runBattleMutation(new Request("http://internal/battle"), {
     params,
-    access: "member",
+    access: BattleAccess.MEMBER,
     dryRun: () => true,
     includeRecentEvents: 100,
     mutate: (ctx) => ({ participants: ctx.participants, pending: ctx.pending, events: [] }),

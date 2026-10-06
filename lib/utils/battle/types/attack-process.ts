@@ -20,8 +20,6 @@ export interface ProcessAttackParams {
   currentRound: number;
   battleId: string;
   damageMultiplier?: number;
-  /** Урон відповіді цілі (контратака), якщо передано з клієнта */
-  reactionDamageOverride?: number;
   rng?: () => number;
 }
 
@@ -40,7 +38,5 @@ export interface ProcessAttackResult {
   attackerUpdated: BattleParticipant;
   allParticipantsUpdated?: BattleParticipant[];
   criticalEffectApplied?: CriticalEffect;
-  reactionTriggered: boolean;
-  reactionDamage?: number;
   battleAction: BattleAction;
 }

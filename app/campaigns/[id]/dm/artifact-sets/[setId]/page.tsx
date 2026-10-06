@@ -5,7 +5,7 @@ import { ArtifactSetForm } from "@/components/artifact-sets/ArtifactSetForm";
 import { Button } from "@/components/ui/button";
 import { requireCampaignDM } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
-import { readAbilities } from "@/lib/utils/abilities/legacy/read";
+import { readAbilities } from "@/lib/utils/abilities/read";
 
 export default async function EditArtifactSetPage({
   params,

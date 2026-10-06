@@ -8,7 +8,7 @@ import { predictAttackNumbers } from "@/lib/utils/battle/attack";
 import { resolveAttackRoll } from "@/lib/utils/battle/common/attack-roll-helpers";
 import { computeDamageBreakdown } from "@/lib/utils/battle/damage";
 import { attackFlow, type AttackMode, attackPayload, effectiveD20, initialAttackFlow, type RollOutcome } from "@/lib/utils/battle/flows";
-import { canSeeExactStats, damageDiceSlots, formatKnownArmorClass, hiddenTargetSteps, knownArmorClass, weaponPreview } from "@/lib/utils/battle/view";
+import { canSeeExactStats, damageDiceSlots, formatKnownArmorClass, hiddenTargetSteps, knownArmorClass, retaliationOutcome, weaponPreview } from "@/lib/utils/battle/view";
 import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
 
 export function rollDie(sides: number): number {
@@ -90,10 +90,12 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
   const send = useEffectEvent(async () => {
     if (!attacker) return;
 
-    const before = new Map(order.map((p) => [p.basicInfo.id, p.combatStats.currentHp]));
+    const seen = new Set((scene.battle.battleLog ?? []).map((e) => e.actionIndex));
 
     try {
-      await scene.actions.attack.mutateAsync(attackPayload(state, attacker.basicInfo.id));
+      const res = await scene.actions.attack.mutateAsync(attackPayload(state, attacker.basicInfo.id));
+
+      const hpChanges = res?.hpChanges ?? [];
 
       const after = scene.readBattle()?.initiativeOrder ?? order;
 
@@ -105,7 +107,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
         return {
           kind: (s.outcome === "crit" ? "crit" : hit ? "hit" : "miss") as "crit" | "hit" | "miss",
           targetId: s.targetId,
-          damage: Math.max(0, (before.get(s.targetId) ?? 0) - (now?.combatStats.currentHp ?? 0)),
+          damage: hpChanges.filter((h) => h.participantId === s.targetId).reduce((sum, h) => sum + Math.max(0, h.change), 0),
           downed: !!now && !isUp(now),
         };
       });
@@ -118,12 +120,14 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
       const target = byId(first.targetId);
 
+      const retaliation = retaliationOutcome(scene.readBattle()?.battleLog ?? [], seen);
+
       if (first.kind === "miss") {
         const log = scene.readBattle()?.battleLog ?? [];
 
-        scene.showResult({ kind: "miss", targetName: target?.basicInfo.name ?? "", d20: effectiveD20(strike, state.mode), known: formatKnownArmorClass(knownArmorClass(log, first.targetId)) });
+        scene.showResult({ kind: "miss", targetName: target?.basicInfo.name ?? "", d20: effectiveD20(strike, state.mode), known: formatKnownArmorClass(knownArmorClass(log, first.targetId)), ...(retaliation && { retaliation }) });
       } else {
-        scene.showResult({ kind: first.kind, targetName: target?.basicInfo.name ?? "", damage: results.reduce((s, r) => s + r.damage, 0), downed: first.downed, d20: effectiveD20(strike, state.mode), weapon: attack?.name });
+        scene.showResult({ kind: first.kind, targetName: target?.basicInfo.name ?? "", damage: results.reduce((s, r) => s + r.damage, 0), downed: first.downed, d20: effectiveD20(strike, state.mode), weapon: attack?.name, ...(retaliation && { retaliation }) });
       }
 
       onDone?.();
@@ -155,7 +159,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
       dispatch({ type: "ROLL", d20, second, outcome: outcomeOf(d20, second) });
     },
-    damage: (values: number[], reaction?: number) => dispatch({ type: "DAMAGE", values, reactionDamage: reaction }),
+    damage: (values: number[]) => dispatch({ type: "DAMAGE", values }),
     back: () => dispatch({ type: "BACK" }),
     submit: () => dispatch({ type: "SUBMIT" }),
     close: () => dispatch({ type: "CLOSE" }),

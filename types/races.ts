@@ -1,4 +1,4 @@
-import type { ConversionIssue } from "@/lib/utils/abilities/legacy/types";
+import type { ConversionIssue } from "@/lib/utils/abilities/schema";
 import type { Ability } from "@/lib/utils/abilities/schema";
 /**
  * Типи для системи рас
@@ -18,6 +18,7 @@ export interface SpellSlotProgression {
 export interface Race {
   abilities?: Ability[];
   icon?: string | null;
+  color?: string | null;
   abilityIssues?: ConversionIssue[];
   id: string;
   campaignId: string;
@@ -37,6 +38,7 @@ export interface Race {
 export interface RaceFormData {
   name: string;
   icon?: string;
+  color?: string;
   availableSkills: string[];
   disabledSkills: string[];
   passiveAbility?: {

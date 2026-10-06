@@ -1,3 +1,7 @@
+import type { SpellSlotProgression } from "@/types/races";
+
+export const DEFAULT_SPELL_SLOT_PROGRESSION: SpellSlotProgression[] = [1, 2, 3, 4, 5].map((level) => ({ level, slots: 0 }));
+
 export const SPELL_TARGET_OPTIONS = [
   { value: "enemies", label: "Вороги" },
   { value: "allies", label: "Союзники" },
@@ -62,21 +66,4 @@ export function getSpellTargetLabel(value?: string | null): string {
   if (!value) return "";
 
   return SPELL_TARGET_LABELS[value] || value;
-}
-
-/** Колір для кожної школи магії (D&D 5e + custom) */
-export const SPELL_SCHOOL_COLORS: Record<string, string> = {
-  Abjuration: "bg-blue-500/80",
-  Conjuration: "bg-emerald-500/80",
-  Divination: "bg-violet-500/80",
-  Enchantment: "bg-pink-500/80",
-  Evocation: "bg-red-500/80",
-  Illusion: "bg-amber-500/80",
-  Necromancy: "bg-purple-700/80",
-  Transmutation: "bg-cyan-500/80",
-  "Без школи": "bg-slate-500/80",
-};
-
-export function getSpellSchoolColor(schoolName: string): string {
-  return SPELL_SCHOOL_COLORS[schoolName] ?? "bg-slate-500/80";
 }

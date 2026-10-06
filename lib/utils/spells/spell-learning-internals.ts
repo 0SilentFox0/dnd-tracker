@@ -5,14 +5,14 @@
 import { SkillLevel, type SkillLevelType } from "@/types/skill-tree";
 import type { Skill } from "@/types/skills";
 
-export type SkillLike = Skill & {
+type SkillLike = Skill & {
   spellData?: { spellGroupId?: string };
   basicInfo?: { name?: string };
   spellEnhancementData?: { spellNewSpellId?: string };
   spellGroup?: { id: string; name?: string } | null;
 };
 
-export function getSkillSpellGroupId(skill: SkillLike): string | null | undefined {
+function getSkillSpellGroupId(skill: SkillLike): string | null | undefined {
   return (
     skill.spellGroupId ??
     skill.spellData?.spellGroupId ??
@@ -20,11 +20,7 @@ export function getSkillSpellGroupId(skill: SkillLike): string | null | undefine
   );
 }
 
-export function getSkillName(skill: SkillLike): string {
-  return skill.name ?? skill.basicInfo?.name ?? "";
-}
-
-export function getSkillSpellNewSpellId(skill: SkillLike): string | null | undefined {
+function getSkillSpellNewSpellId(skill: SkillLike): string | null | undefined {
   return skill.spellNewSpellId ?? skill.spellEnhancementData?.spellNewSpellId;
 }
 
@@ -33,9 +29,6 @@ export const SKILL_LEVEL_ORDER: Record<SkillLevelType, number> = {
   [SkillLevel.ADVANCED]: 2,
   [SkillLevel.EXPERT]: 3,
 };
-
-/** Формат ID рівня основної навички: ${mainSkillId}_${level}_level */
-export const MAIN_SKILL_LEVEL_RE = /_(basic|advanced|expert)_level$/;
 
 /**
  * Рівні магії (кумулятивно) за рівнем школи.

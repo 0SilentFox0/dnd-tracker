@@ -1,6 +1,6 @@
 // Утиліти для розрахунків D&D
 
-import { CORE_ABILITY_SCORES } from "@/lib/constants/abilities";
+import { ABILITY_LABELS } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
 import type { AbilityKey } from "@/types/characters";
 
@@ -17,18 +17,6 @@ export function getAbilityModifier(score: number): number {
  */
 export function getProficiencyBonus(level: number): number {
   return Math.ceil(level / 4) + 1;
-}
-
-/**
- * Розраховує пасивне значення (perception, investigation, insight)
- * Формула: 10 + ability modifier + (proficiency bonus якщо є proficiency)
- */
-export function getPassiveScore(
-  abilityModifier: number,
-  hasProficiency: boolean,
-  proficiencyBonus: number
-): number {
-  return 10 + abilityModifier + (hasProficiency ? proficiencyBonus : 0);
 }
 
 /**
@@ -81,62 +69,6 @@ export function getLevelFromXP(xp: number, multiplier: number = 2.5): number {
 }
 
 /**
- * Розраховує HP при прокачці
- * Формула: hitDice середнє значення + CON modifier
- */
-export function calculateHPGain(
-  hitDice: string,
-  constitutionModifier: number
-): number {
-  // Парсимо hitDice (наприклад "1d8" -> 8)
-  const match = hitDice.match(/(\d+)d(\d+)/);
-
-  if (!match) return 0;
-
-  const diceSize = parseInt(match[2]);
-
-  const averageRoll = Math.ceil(diceSize / 2) + 0.5; // Середнє значення для dN
-
-  return Math.floor(averageRoll) + constitutionModifier;
-}
-
-/**
- * Розраховує урон з кубиків
- * Підтримує формати: "2d4", "3d8+4", "1d6-1"
- */
-export function rollDamage(dice: string, modifier: number = 0): number {
-  const match = dice.match(/(\d+)d(\d+)([+-]\d+)?/);
-
-  if (!match) return 0;
-
-  const count = parseInt(match[1]);
-
-  const size = parseInt(match[2]);
-
-  const diceModifier = match[3] ? parseInt(match[3]) : 0;
-
-  // В реальному застосунку тут буде генерація випадкових чисел
-  // Для тестування повертаємо середнє значення
-  const averageRoll = (count * (size + 1)) / 2;
-
-  return Math.floor(averageRoll) + diceModifier + modifier;
-}
-
-/**
- * Перевіряє чи є критичне попадання (20 на d20)
- */
-export function isCriticalHit(roll: number): boolean {
-  return roll === 20;
-}
-
-/**
- * Перевіряє чи є критичний промах (1 на d20)
- */
-export function isCriticalMiss(roll: number): boolean {
-  return roll === 1;
-}
-
-/**
  * Розраховує чи попадання успішне
  */
 export function isHit(attackRoll: number, targetAC: number): boolean {
@@ -153,7 +85,7 @@ export function attackAbilityKey(abilities: { primaryAbility?: AbilityKey | null
 export function attackAbilityLabel(abilities: { primaryAbility?: AbilityKey | null }, attackType: AttackType | string): string {
   const key = attackAbilityKey(abilities, attackType);
 
-  return CORE_ABILITY_SCORES.find((a) => a.key === key)?.label ?? key;
+  return ABILITY_LABELS[key];
 }
 
 export function getAttackAbilityModifier(abilities: AttackAbilities, attackType: AttackType | string): number {

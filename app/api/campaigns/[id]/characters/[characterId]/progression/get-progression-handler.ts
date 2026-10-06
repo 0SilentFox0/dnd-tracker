@@ -1,12 +1,25 @@
+import type { Prisma } from "@prisma/client";
+
 import type { ProgressionContext } from "./load-progression-context";
 
 import { prisma } from "@/lib/db";
-import { skillAbilities } from "@/lib/utils/abilities/legacy/read";
+import { skillAbilities } from "@/lib/utils/abilities/read";
 import { damageAffinity } from "@/lib/utils/abilities/sheet-bonuses";
 import { abilitySummary } from "@/lib/utils/abilities/summary";
 import { normalizeTree, readTreeJson, readUnlocked, stripTreeForClient } from "@/lib/utils/skills/progression";
 import { toSpellSkillInfo } from "@/lib/utils/spells";
 import type { CharacterProgressionDto } from "@/types/progression";
+
+export const PROGRESSION_SKILL_SELECT = {
+  id: true,
+  name: true,
+  icon: true,
+  description: true,
+  abilities: true,
+  spellGroupId: true,
+  spellNewSpellId: true,
+  spellEnhancementData: true,
+} satisfies Prisma.SkillSelect;
 
 export async function buildProgressionDto(campaignId: string, ctx: ProgressionContext): Promise<CharacterProgressionDto> {
   const { character, treeRow, isDM, isOwner } = ctx;
@@ -22,7 +35,7 @@ export async function buildProgressionDto(campaignId: string, ctx: ProgressionCo
   const skillIds = [...new Set([...tree.nodes.values()].map((n) => n.skillId).filter((id): id is string => !!id))];
 
   const [skills, mainSkills] = await Promise.all([
-    skillIds.length ? prisma.skill.findMany({ where: { campaignId, id: { in: skillIds } } }) : [],
+    skillIds.length ? prisma.skill.findMany({ where: { campaignId, id: { in: skillIds } }, select: PROGRESSION_SKILL_SELECT }) : [],
     prisma.mainSkill.findMany({ where: { campaignId, id: { in: tree.branches.map((b) => b.id) } }, select: { id: true, name: true, color: true, icon: true, spellGroupId: true } }),
   ]);
 

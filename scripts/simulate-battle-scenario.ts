@@ -1,6 +1,6 @@
 /**
  * Дані сценарію для `pnpm simulate-battle`: персонажі з різними прокачками й артефактами,
- * юніти з різними вміннями. Частина записів навмисно в старому форматі (abilities = NULL).
+ * юніти з різними вміннями.
  */
 import type { Prisma } from "@prisma/client";
 
@@ -18,13 +18,22 @@ const ab = (id: string, name: string, rest: Omit<Ability, "id" | "name">): Abili
 const json = (v: unknown) => v as Prisma.InputJsonValue;
 
 export const RACES = {
-  human: { name: "Людина", abilities: json([]) },
+  human: {
+    name: "Людина",
+    abilities: json([
+      ab("human-counter", "Контратака", { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "counterAttack", attackKinds: ["melee"], bonusPercent: 50 }] }),
+      ab("human-steady", "Незламність", { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "noNegativeMorale" }] }),
+    ]),
+  },
   elf: {
     name: "Ельф",
-    abilities: json([ab("elf-magic", "Ельфійська стійкість", { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "resistance", damageType: "spell", percent: 25 }] })]),
+    abilities: json([
+      ab("elf-magic", "Ельфійська стійкість", { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "resistance", damageType: "spell", percent: 25 }] }),
+      ab("elf-calm", "Ельфійський спокій", { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "ignoreMorale" }] }),
+    ]),
   },
-  // старий формат: імунітет з опису, abilities = NULL
-  dwarf: { name: "Дварф", passiveAbility: json({ description: "Міцні як камінь. Імунітет до отруєння." }) },
+  // імунітет до отрути — з опису пасивки раси (race-effects)
+  dwarf: { name: "Дварф", abilities: json([]), passiveAbility: json({ description: "Міцні як камінь. Імунітет до отруєння." }) },
   orc: { name: "Орк", abilities: json([]) },
 };
 
@@ -39,8 +48,6 @@ export const SKILLS = {
   hunterEye: { name: "Око мисливця", abilities: [ab("hunter-eye", "Око мисливця", { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "resistance", damageType: "psychic", percent: 10 }] })] },
   forestStep: { name: "Лісовий крок", abilities: [ab("forest-step", "Лісовий крок", { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "resistance", damageType: "necrotic", percent: 10 }] })] },
   ironSkin: { name: "Залізна шкіра", abilities: [ab("iron-skin", "Залізна шкіра", { trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "armor", flat: 2 }] })] },
-  // старий формат: abilities = NULL, ефект у combatStats
-  legacyGuard: { name: "Стара стійкість (legacy)", combatStats: json({ effects: [{ stat: "armor", type: "flat", value: 1 }] }), skillTriggers: json([{ type: "simple", trigger: "passive" }]) },
 };
 
 export function artifactRows(campaignId: string, setId: string) {
@@ -68,7 +75,7 @@ export const DRAGON_SET = {
 export const UNITS = {
   goblin: {
     name: "Гоблін-лучник",
-    race: "Орк",
+    raceKey: "orc",
     maxHp: 14,
     armorClass: 12,
     initiative: 2,
@@ -78,7 +85,7 @@ export const UNITS = {
   },
   shaman: {
     name: "Орк-шаман",
-    race: "Орк",
+    raceKey: "orc",
     maxHp: 45,
     armorClass: 11,
     initiative: 1,
@@ -91,7 +98,7 @@ export const UNITS = {
   },
   golem: {
     name: "Кам'яний голем",
-    race: null,
+    raceKey: null,
     maxHp: 50,
     armorClass: 14,
     initiative: 0,

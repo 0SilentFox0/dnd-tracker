@@ -1,3 +1,5 @@
+import { type ParticipantSourceTypeValue } from "@/lib/constants/battle";
+
 export interface SetupCharacter {
   id: string;
   name: string;
@@ -9,9 +11,9 @@ export interface SetupCharacter {
 export interface SetupUnit {
   id: string;
   name: string;
-  groupId: string | null;
+  raceId: string | null;
+  raceName: string | null;
   avatar: string | null;
-  race: string | null;
   level: number;
 }
 
@@ -34,7 +36,7 @@ export interface SuggestedEnemy {
 
 export interface SetupParticipant {
   id: string;
-  type: "character" | "unit";
+  type: ParticipantSourceTypeValue;
   side: "ally" | "enemy";
   quantity?: number;
 }
@@ -69,6 +71,5 @@ export interface EditBattleCharacter {
 export interface EditBattleUnit {
   id: string;
   name: string;
-  groupId: string | null;
   avatar: string | null;
 }

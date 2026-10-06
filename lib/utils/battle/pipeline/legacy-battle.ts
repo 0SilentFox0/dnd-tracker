@@ -1,5 +1,7 @@
 import { PUSHER_DELTA_LIMIT_BYTES } from "./limits";
 
+import { CampaignRole } from "@/lib/constants/campaigns";
+import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import { battleChannelName, userChannelName } from "@/lib/pusher-channels";
 import type { BattleSceneState, LoadedBattle } from "@/lib/utils/battle/store";
 import type { BattleRefetchSignal, BattleScene, ClientBattleDelta } from "@/types/api";
@@ -45,7 +47,7 @@ export function toLegacyBattle(
     startedAt: scene.startedAt?.toISOString(),
     completedAt: scene.completedAt?.toISOString(),
     campaign: { id: scene.campaignId, friendlyFire: meta.friendlyFire },
-    ...(view && { isDM: Boolean(view.isDM), userRole: view.isDM ? ("dm" as const) : ("player" as const) }),
+    ...(view && { isDM: Boolean(view.isDM), userRole: view.isDM ? CampaignRole.DM : CampaignRole.PLAYER }),
   };
 }
 
@@ -63,17 +65,13 @@ export function buildPusherMessages(args: {
 
   const payload: ClientBattleDelta | BattleRefetchSignal = fits ? delta : { battleId: delta.battleId, version: delta.version, refetch: true };
 
-  const messages: PusherMessage[] = [
-    { channel, event: "battle-delta", payload },
-    // TODO(після наступного релізу): прибрати — вкладки зі старим клієнтом сприймають це як «перечитай бій»
-    { channel, event: "battle-updated", payload: { type: "battle-updated", battleId: delta.battleId, version: delta.version } },
-  ];
+  const messages: PusherMessage[] = [{ channel, event: "battle-delta", payload }];
 
   const turnMoved = before.round !== after.round || before.turnIndex !== after.turnIndex || before.status !== after.status;
 
   const active = participants[after.turnIndex];
 
-  if (after.status === "active" && turnMoved && active && active.basicInfo.controlledBy !== "dm") {
+  if (after.status === "active" && turnMoved && active && active.basicInfo.controlledBy !== CONTROLLED_BY_DM) {
     messages.push({
       channel: userChannelName(active.basicInfo.controlledBy),
       event: "turn-started",

@@ -6,15 +6,14 @@ import { describe, expect, it } from "vitest";
 
 import {
   computeDamageBreakdown,
-  computeDamageBreakdownMultiTarget,
 } from "../damage";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
-import { grantPassive, withConvertedSkills } from "@/lib/utils/battle/__tests__/mock-participant";
+import { grantPassive } from "@/lib/utils/battle/__tests__/mock-participant";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 function createBaseParticipant(overrides?: Partial<BattleParticipant>): BattleParticipant {
-  return withConvertedSkills({
+  return {
     basicInfo: {
       id: "p1",
       battleId: "b1",
@@ -71,7 +70,7 @@ function createBaseParticipant(overrides?: Partial<BattleParticipant>): BattlePa
       hasExtraTurn: false,
     },
     ...overrides,
-  });
+  };
 }
 
 function createMeleeAttack(): BattleAttack {
@@ -208,46 +207,6 @@ describe("battle-damage-breakdown", () => {
       );
 
       expect(hasResistLine).toBe(true);
-    });
-  });
-
-  describe("computeDamageBreakdownMultiTarget", () => {
-    it("returns one entry per target with targetBreakdown and finalDamage", () => {
-      const attacker = createBaseParticipant();
-
-      const target1 = createBaseParticipant({
-        basicInfo: {
-          ...createBaseParticipant().basicInfo,
-          id: "t1",
-          name: "Enemy 1",
-          side: ParticipantSide.ENEMY,
-        },
-      });
-
-      const target2 = createBaseParticipant({
-        basicInfo: {
-          ...createBaseParticipant().basicInfo,
-          id: "t2",
-          name: "Enemy 2",
-          side: ParticipantSide.ENEMY,
-        },
-      });
-
-      const result = computeDamageBreakdownMultiTarget({
-        attacker,
-        targets: [target1, target2],
-        attack: createMeleeAttack(),
-        damageRolls: [4, 4],
-        allParticipants: [attacker, target1, target2],
-      });
-
-      expect(result.targets).toHaveLength(2);
-      expect(result.targets[0].targetName).toBe("Enemy 1");
-      expect(result.targets[1].targetName).toBe("Enemy 2");
-      expect(result.targets[0].targetBreakdown.length).toBeGreaterThanOrEqual(0);
-      expect(typeof result.targets[0].finalDamage).toBe("number");
-      expect(result.breakdown.length).toBeGreaterThan(0);
-      expect(result.totalDamage).toBeGreaterThanOrEqual(0);
     });
   });
 });

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { initialTurnFlow, turnFlow, type TurnFlowAction, type TurnFlowState } from "@/lib/utils/battle/flows";
+import { initialTurnFlow, moraleOutcome, turnFlow, type TurnFlowAction, type TurnFlowState } from "@/lib/utils/battle/flows";
 
 const run = (...a: TurnFlowAction[]) => a.reduce<TurnFlowState>(turnFlow, initialTurnFlow);
 
@@ -38,5 +38,14 @@ describe("turnFlow — RECOVER", () => {
 
     expect(turnFlow(ended, { type: "RECOVER" })).toMatchObject({ phase: "acting", stayed: true });
     expect(turnFlow(initialTurnFlow, { type: "RECOVER" })).toBe(initialTurnFlow);
+  });
+});
+
+describe("moraleOutcome", () => {
+  it("extra / skip / none", () => {
+    expect(moraleOutcome({ hasExtraTurn: true, shouldSkipTurn: false })).toBe("extra");
+    expect(moraleOutcome({ hasExtraTurn: false, shouldSkipTurn: true })).toBe("skip");
+    expect(moraleOutcome({ hasExtraTurn: false, shouldSkipTurn: false })).toBe("none");
+    expect(moraleOutcome(null)).toBe("none");
   });
 });

@@ -78,37 +78,6 @@ export function extractDamageDice(effect: string): string | undefined {
 }
 
 /**
- * Парсить рядок кубиків (наприклад "2d6" або "1d8") на diceCount та diceType
- */
-export function parseDiceString(diceString: string | undefined): { diceCount: number | null; diceType: string | null } {
-  if (!diceString) {
-    return { diceCount: null, diceType: null };
-  }
-  
-  const match = diceString.match(/(\d+)d(\d+)/i);
-
-  if (!match) {
-    return { diceCount: null, diceType: null };
-  }
-  
-  const count = parseInt(match[1], 10);
-
-  const type = `d${match[2]}`;
-  
-  // Перевіряємо чи тип кубика валідний
-  const validTypes = ["d4", "d6", "d8", "d10", "d12", "d20", "d100"];
-
-  if (!validTypes.includes(type)) {
-    return { diceCount: null, diceType: null };
-  }
-  
-  return { 
-    diceCount: isNaN(count) || count < 0 || count > 10 ? null : count,
-    diceType: type 
-  };
-}
-
-/**
  * Визначає характеристику збереження на основі опису ефекту
  */
 export function determineSavingThrowAbility(

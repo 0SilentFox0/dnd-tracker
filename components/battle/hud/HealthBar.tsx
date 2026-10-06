@@ -1,12 +1,10 @@
 import { cn } from "@/lib/utils";
-import { HEALTH_LABEL, healthSegments, healthState } from "@/lib/utils/battle/view";
+import { HEALTH_LABEL, healthSegments, healthState, hpRatio } from "@/lib/utils/battle/view";
 import type { BattleParticipant } from "@/types/battle";
 
 export function HealthBar({ participant, exact, className }: { participant: BattleParticipant; exact: boolean; className?: string }) {
-  const { currentHp, maxHp } = participant.combatStats;
-
   if (exact) {
-    const ratio = maxHp > 0 ? Math.max(0, Math.min(1, currentHp / maxHp)) : 0;
+    const ratio = hpRatio(participant);
 
     const low = ratio <= 0.25;
 

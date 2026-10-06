@@ -11,6 +11,7 @@ import { calculatePercentBonus } from "../common";
 import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
+import { signed } from "@/lib/utils/format";
 import { logger } from "@/lib/utils/logger";
 import type { SpellEnhancer } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
@@ -171,7 +172,7 @@ export function calculateSpellDamageWithEnhancements(
     running += spellMod;
 
     breakdown.push(
-      `+ модифікатор ${spellAbbr} (${spellMod >= 0 ? "+" : ""}${spellMod})`,
+      `+ модифікатор ${spellAbbr} (${signed(spellMod)})`,
     );
   }
 
@@ -182,7 +183,7 @@ export function calculateSpellDamageWithEnhancements(
   running += mods.flat;
 
   for (const e of mods.entries) {
-    if (e.flat) breakdown.push(`+ бонус flat: ${e.label} (${e.flat >= 0 ? "+" : ""}${e.flat})`);
+    if (e.flat) breakdown.push(`+ бонус flat: ${e.label} (${signed(e.flat)})`);
   }
 
   // %-бонуси масштабують лише суму кубиків, не рівень героя і flat-надбавки
@@ -190,7 +191,7 @@ export function calculateSpellDamageWithEnhancements(
     running += Math.floor((baseDamage * mods.percent) / 100);
 
     for (const e of mods.entries) {
-      if (e.percent) breakdown.push(`+ бонус ${e.label}: ${e.percent}% від ${baseDamage} (${e.percent >= 0 ? "+" : ""}${Math.floor((baseDamage * e.percent) / 100)})`);
+      if (e.percent) breakdown.push(`+ бонус ${e.label}: ${e.percent}% від ${baseDamage} (${signed(Math.floor((baseDamage * e.percent) / 100))})`);
     }
   }
 

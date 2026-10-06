@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
-import { processStartOfTurn } from "@/lib/utils/battle/battle-turn";
+import { processStartOfRound, processStartOfTurn } from "@/lib/utils/battle/battle-turn";
 import type { ActiveEffect } from "@/types/battle";
 
 const debuff = (type: string, duration: number): ActiveEffect => ({
@@ -34,5 +34,18 @@ describe("processStartOfTurn", () => {
     const out = processStartOfTurn(p, 2, [p]);
 
     expect(out.participant.actionFlags).toMatchObject({ hasUsedAction: false, hasUsedBonusAction: false, hasUsedReaction: false });
+  });
+});
+
+describe("processStartOfRound", () => {
+  it("сортує за ініціативою, далі базовою ініціативою, далі спритністю", () => {
+    const base = createMockParticipant();
+
+    const make = (id: string, baseInitiative: number, dexterity: number) =>
+      createMockParticipant({ basicInfo: { ...base.basicInfo, id }, abilities: { ...base.abilities, initiative: baseInitiative, baseInitiative, dexterity } });
+
+    const out = processStartOfRound([make("a", 10, 12), make("b", 15, 10), make("c", 10, 16)], 2);
+
+    expect(out.updatedInitiativeOrder.map((p) => p.basicInfo.id)).toEqual(["b", "c", "a"]);
   });
 });

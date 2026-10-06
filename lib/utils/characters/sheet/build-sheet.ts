@@ -1,13 +1,15 @@
 import { abilityLabel, abilityLines, armorTotal, attackSheet, checkBonus } from "./lines";
 
 import { DND_SKILL_META, DND_SKILLS } from "@/lib/constants";
+import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { ARTIFACT_GRID_9 } from "@/lib/constants/artifacts";
-import { getHeroMaxHpBreakdown } from "@/lib/constants/hero-scaling";
 import { parseGoals } from "@/lib/schemas/character-goals";
 import { slotLevels } from "@/lib/utils/battle/view";
+import { heroBaseHp } from "@/lib/utils/characters/hero-hp";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
+import { signed } from "@/lib/utils/format";
 import type { BattleParticipant } from "@/types/battle";
-import { ABILITY_KEYS, type AbilityKey, type CharacterSheet, type SheetArtifact, type SheetSet } from "@/types/characters";
+import type { CharacterSheet, SheetArtifact } from "@/types/characters";
 import type { BookSpell } from "@/types/spells";
 
 export interface SheetInput {
@@ -36,7 +38,6 @@ export interface SheetInput {
   raceIcon: string | null;
   immunities: string[];
   artifacts: SheetArtifact[];
-  sets: SheetSet[];
   spells: BookSpell[];
   personalSkill: CharacterSheet["personalSkill"];
 }
@@ -71,7 +72,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
 
   const attacks = p.battleData.attacks.map((a) => attackSheet(p, a));
 
-  const hp = getHeroMaxHpBreakdown(c.level, c.strength, { hpMultiplier: c.hpMultiplier ?? 1 });
+  const hp = heroBaseHp(c);
 
   const hpBonus = p.combatStats.maxHp - hp.total;
 
@@ -87,7 +88,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
     proficiency: prof,
     hp: {
       total: p.combatStats.maxHp,
-      lines: [...hp.breakdown.map((b) => ({ label: b, value: "", source: "level" as const })), ...(hpBonus ? [{ label: "Бонуси", value: hpBonus > 0 ? `+${hpBonus}` : String(hpBonus) }] : [])],
+      lines: [...hp.breakdown.map((b) => ({ label: b, value: "", source: "level" as const })), ...(hpBonus ? [{ label: "Бонуси", value: signed(hpBonus) }] : [])],
     },
     armorClass: armorTotal(p),
     initiative: p.abilities.initiative,
@@ -105,7 +106,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
     magic: c.spellcastingAbility && spellSaveDC != null && spellAttackBonus != null ? { ability: abilityLabel(c.spellcastingAbility as AbilityKey), saveDC: spellSaveDC, attackBonus: spellAttackBonus } : null,
     slots: slotLevels(p).filter((s) => s.max > 0).map((s) => ({ level: s.level, count: s.max })),
     spells: input.spells,
-    items: { grid, artifacts: input.artifacts, sets: input.sets },
+    items: { grid, artifacts: input.artifacts, sets: p.battleData.artifactSets ?? [] },
     personalSkill: input.personalSkill,
     story: { biography: c.background?.trim() ? c.background : null, goals: parseGoals(c.goals) },
   };

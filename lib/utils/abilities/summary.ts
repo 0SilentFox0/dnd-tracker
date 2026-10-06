@@ -1,5 +1,5 @@
-import { type OwnerKind, readAbilities } from "./legacy/read";
 import { describeAbility } from "./registry/effects";
+import { type OwnerKind, readAbilities } from "./read";
 import { AbilitySchema } from "./schema";
 
 export function abilitySummary(kind: OwnerKind, row: { id: string; abilities?: unknown }): string[] {

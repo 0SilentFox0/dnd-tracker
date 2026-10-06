@@ -42,8 +42,6 @@ export type ParticipantSnapshot = Record<string, unknown>;
 export interface ParticipantState {
   activeEffects: unknown[];
   abilityUsage?: Record<string, AbilityUsageCounter>;
-  /** лише в рядках, збережених до 3a */
-  skillUsageCounts?: Record<string, number>;
   pendingExtraActions?: number;
   spellSlotsCurrent: Record<string, number>;
 }

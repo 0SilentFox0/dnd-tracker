@@ -7,22 +7,44 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { attachArtifactSetsToSpellContext } from "@/lib/utils/battle/artifact-sets";
 import type { CampaignSpellContext } from "@/lib/utils/battle/types/participant";
+import { normalizeTree, resolveLearned } from "@/lib/utils/skills/progression";
 
 type CharacterWithRelations = Prisma.CharacterGetPayload<{
   include: { inventory: true };
 }> & { skillTreeProgress?: unknown; personalSkillId?: string | null };
-type UnitRow = { id: string; race: string | null };
+type UnitRow = { id: string; raceId: string | null };
 
 export interface BuildContextResult {
   campaignContext: CampaignSpellContext | undefined;
-  racesByName: Record<string, Prisma.RaceGetPayload<object> | null>;
-  uniqueRaceNames: string[];
+  racesById: Record<string, Prisma.RaceGetPayload<object> | null>;
 }
 
+function referencedSkillIds(characters: CharacterWithRelations[], trees: Array<Prisma.SkillTreeGetPayload<object>>): string[] {
+  const treeByRace = new Map(trees.map((t) => [t.race, t]));
+
+  const ids = new Set<string>();
+
+  for (const c of characters) {
+    const tree = treeByRace.get(c.race);
+
+    if (tree) {
+      for (const n of resolveLearned(normalizeTree(tree), c.skillTreeProgress)) if (n.skillId) ids.add(n.skillId);
+    }
+
+    const personal = c.personalSkillId?.trim();
+
+    if (personal) ids.add(personal);
+  }
+
+  return [...ids];
+}
+
+/** forBalance: лише скіли, на які посилаються персонажі, і спел-рядки без описів (економія egress). */
 export async function buildCampaignContextForStart(
   campaignId: string,
   characters: CharacterWithRelations[],
   units: UnitRow[],
+  options: { forBalance?: boolean } = {},
 ): Promise<BuildContextResult> {
   const allArtifactIds = new Set<string>();
 
@@ -35,46 +57,42 @@ export async function buildCampaignContextForStart(
     }
   }
 
-  const uniqueRaces = new Set<string>();
+  const uniqueRaceNames = [...new Set(characters.map((c) => c.race).filter(Boolean))];
 
-  for (const c of characters) {
-    if (c.race) uniqueRaces.add(c.race);
-  }
-  for (const u of units) {
-    if (u.race) uniqueRaces.add(u.race);
-  }
+  const unitRaceIds = [...new Set(units.map((u) => u.raceId).filter((id): id is string => !!id))];
 
-  const uniqueRaceNames = Array.from(uniqueRaces);
+  const raceFilters = [
+    ...(uniqueRaceNames.length > 0 ? [{ name: { in: uniqueRaceNames } }] : []),
+    ...(unitRaceIds.length > 0 ? [{ id: { in: unitRaceIds } }] : []),
+  ];
+
+  const treeWhere = { campaignId, race: { in: uniqueRaceNames } };
+
+  const balanceTrees = options.forBalance && characters.length > 0 && uniqueRaceNames.length > 0 ? await prisma.skillTree.findMany({ where: treeWhere }) : undefined;
+
+  const balanceSkillIds = options.forBalance ? referencedSkillIds(characters, balanceTrees ?? []) : [];
 
   const [races, campaign, ...characterContext] = await Promise.all([
-    uniqueRaceNames.length > 0
-      ? prisma.race.findMany({
-          where: { campaignId, name: { in: uniqueRaceNames } },
-        })
-      : [],
+    raceFilters.length > 0 ? prisma.race.findMany({ where: { campaignId, OR: raceFilters } }) : [],
     prisma.campaign.findUnique({
       where: { id: campaignId },
       select: { maxLevel: true },
     }),
     ...(characters.length > 0
       ? [
-          uniqueRaceNames.length > 0
-            ? prisma.skillTree.findMany({
-                where: { campaignId, race: { in: uniqueRaceNames } },
-              })
-            : [],
+          balanceTrees ?? (uniqueRaceNames.length > 0 ? prisma.skillTree.findMany({ where: treeWhere }) : []),
           prisma.mainSkill.findMany({
             where: { campaignId },
             select: { id: true, spellGroupId: true, name: true },
           }),
-          prisma.spell.findMany({
-            where: { campaignId },
-            include: { spellGroup: { select: { id: true } } },
-          }),
-          prisma.skill.findMany({
-            where: { campaignId },
-            include: { spellGroup: { select: { id: true } } },
-          }),
+          options.forBalance
+            ? prisma.spell.findMany({ where: { campaignId }, select: { id: true, level: true, spellGroup: { select: { id: true } } } })
+            : prisma.spell.findMany({ where: { campaignId }, include: { spellGroup: { select: { id: true } } } }),
+          options.forBalance
+            ? balanceSkillIds.length > 0
+              ? prisma.skill.findMany({ where: { campaignId, id: { in: balanceSkillIds } }, include: { spellGroup: { select: { id: true } } } })
+              : []
+            : prisma.skill.findMany({ where: { campaignId }, include: { spellGroup: { select: { id: true } } } }),
           allArtifactIds.size > 0
             ? prisma.artifact.findMany({
                 where: { id: { in: Array.from(allArtifactIds) }, campaignId },
@@ -86,11 +104,18 @@ export async function buildCampaignContextForStart(
 
   const racesByName: Record<string, (typeof races)[0] | null> = {};
 
+  const racesById: Record<string, (typeof races)[0] | null> = {};
+
   for (const r of races) {
-    racesByName[r.name] = r;
+    if (uniqueRaceNames.includes(r.name)) racesByName[r.name] = r;
+
+    if (unitRaceIds.includes(r.id)) racesById[r.id] = r;
   }
   for (const rn of uniqueRaceNames) {
     if (!(rn in racesByName)) racesByName[rn] = null;
+  }
+  for (const id of unitRaceIds) {
+    if (!(id in racesById)) racesById[id] = null;
   }
 
   let campaignContext: CampaignSpellContext | undefined;
@@ -121,10 +146,7 @@ export async function buildCampaignContextForStart(
       if (!(rn in skillTreeByRace)) skillTreeByRace[rn] = null;
     }
 
-    // skillsById === allSkills, проіндексований за id. Раніше робилось
-    // двома додатковими DB-запитами (id IN + mainSkillId IN), але це
-    // підмножина allSkills — extract-skills.ts усе одно фільтрує
-    // по directIds + mainSkillIdsFromLevels всередині.
+    // allSkills за id: extract-skills бере з нього лише вивчені вузли дерева й personalSkillId
     const skillsById: Record<string, Prisma.SkillGetPayload<object>> = {};
 
     const allSkillsArr = Array.isArray(allSkills) ? allSkills : [];
@@ -164,5 +186,5 @@ export async function buildCampaignContextForStart(
     await attachArtifactSetsToSpellContext(campaignId, campaignContext);
   }
 
-  return { campaignContext, racesByName, uniqueRaceNames };
+  return { campaignContext, racesById };
 }

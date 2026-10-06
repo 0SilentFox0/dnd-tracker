@@ -23,8 +23,11 @@ export function useCharacterEditor({ campaignId, characterId, onSaved }: { campa
 
   const form = useCharacterForm({
     onSubmit: async (data) => {
-      await update.mutateAsync(data);
+      const saved = await update.mutateAsync(data);
+
       onSaved();
+
+      return characterToFormData(saved);
     },
   });
 

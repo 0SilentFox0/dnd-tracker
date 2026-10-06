@@ -4,38 +4,13 @@
 
 import { PrimaryAbilityPicker } from "./PrimaryAbilityPicker";
 
-import { ArtifactDeltaBadge } from "@/components/characters/stats/ArtifactDeltaBadge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ABILITY_SCORES } from "@/lib/constants";
+import { type AbilityKey, CORE_ABILITY_SCORES } from "@/lib/constants/abilities";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
-import type { AbilityKey } from "@/types/characters";
-
-const signed = (n: number) => (n >= 0 ? `+${n}` : `${n}`);
-
-export type CharacterAbilityArtifactBonuses = Partial<
-  Record<
-    | "strength"
-    | "dexterity"
-    | "constitution"
-    | "intelligence"
-    | "wisdom"
-    | "charisma",
-    number
-  >
->;
-
-const CORE_ABILITY_KEYS = [
-  "strength",
-  "dexterity",
-  "constitution",
-  "intelligence",
-  "wisdom",
-  "charisma",
-] as const satisfies ReadonlyArray<keyof CharacterAbilityArtifactBonuses>;
+import { signed } from "@/lib/utils/format";
 
 interface CharacterAbilityScoresProps {
-  artifactBonuses?: CharacterAbilityArtifactBonuses;
   primary?: { value: AbilityKey | null; onChange: (v: AbilityKey | null) => void };
   abilityScores: {
     strength: number;
@@ -56,13 +31,12 @@ interface CharacterAbilityScoresProps {
 }
 
 export function CharacterAbilityScores({
-  artifactBonuses,
   abilityScores,
   primary,
 }: CharacterAbilityScoresProps) {
   const { strength, dexterity, constitution, intelligence, wisdom, charisma, setters } = abilityScores;
   
-  const abilityMap: Record<string, { value: number; setter: (value: number) => void }> = {
+  const abilityMap: Record<AbilityKey, { value: number; setter: (value: number) => void }> = {
     strength: { value: strength, setter: setters.setStrength },
     dexterity: { value: dexterity, setter: setters.setDexterity },
     constitution: { value: constitution, setter: setters.setConstitution },
@@ -74,23 +48,14 @@ export function CharacterAbilityScores({
   return (
     <div className="w-full space-y-4">
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 w-full">
-      {CORE_ABILITY_KEYS.map((key) => {
-        const meta = ABILITY_SCORES.find((a) => a.key === key);
-
-        const label = meta?.label ?? key;
-
+      {CORE_ABILITY_SCORES.map(({ key, label }) => {
         const ability = abilityMap[key];
-
-        if (!ability) return null;
 
         return (
           <div key={key} className="w-full min-w-0">
             <Label htmlFor={key}>
               {label}
               <span className="text-muted-foreground"> ({signed(getAbilityModifier(ability.value))})</span>
-              {artifactBonuses ? (
-                <ArtifactDeltaBadge value={artifactBonuses[key] ?? 0} />
-              ) : null}
             </Label>
             <Input
               id={key}

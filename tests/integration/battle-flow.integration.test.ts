@@ -12,6 +12,7 @@ import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-partici
 import type { PipelineDeps } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { loadBattle, loadRecentEvents, loadSnapshotsFrom, saveBattle } from "@/lib/utils/battle/store";
+import type { ClientBattleDelta } from "@/types/api";
 
 const url = process.env.DATABASE_URL ?? "";
 
@@ -101,14 +102,14 @@ describe.skipIf(!isLocal)("battle flow (local DB)", () => {
       player,
     );
 
-    const attacked = await attackRes.json();
+    const { delta } = (await attackRes.json()) as { delta: ClientBattleDelta };
 
     expect(attackRes.status).toBe(200);
-    expect(attacked.currentTurnIndex).toBe(1);
-    expect(attacked.battleLogMode).toBe("append");
-    expect(player.publish.mock.calls[0][0][0]).toMatchObject({ event: "battle-updated" });
+    expect(delta.scene.turnIndex).toBe(1);
+    expect(delta.cancelledFrom).toBeUndefined();
+    expect(player.publish.mock.calls[0][0].map((m) => m.event)).toEqual(["battle-delta"]);
 
-    const attackSeq = attacked.battleLog[0].actionIndex as number;
+    const attackSeq = delta.log[0].actionIndex as number;
 
     const dm = deps(ids.dm);
 

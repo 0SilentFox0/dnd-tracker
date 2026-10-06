@@ -1,7 +1,6 @@
 /**
  * Створення BattleParticipant з Character
  */
-
 import type { CampaignSpellContext, CharacterFromPrisma } from "../types/participant";
 import { type EquippedArtifactRow, loadEquippedArtifactRows, toEquippedArtifacts } from "./extract-artifacts";
 import { extractAttacksFromCharacter } from "./extract-attacks";
@@ -11,16 +10,17 @@ import { resolveSpellSlotsFromCharacter } from "./from-character-spell-slots";
 import { loadRace } from "./load-race";
 import { buildSpellEnhancers } from "./spell-enhancers";
 
-import { ParticipantSide } from "@/lib/constants/battle";
-import { getHeroMaxHp } from "@/lib/constants/hero-scaling";
+import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
+import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import { bakePassives } from "@/lib/utils/abilities/build/bake";
 import { collectCharacterAbilities } from "@/lib/utils/abilities/build/collect";
 import { immunityAbilities } from "@/lib/utils/abilities/build/immunities";
 import { findCompletedSets } from "@/lib/utils/battle/artifact-sets";
 import { getCharacterImmunities } from "@/lib/utils/characters/character-race-effects";
+import { heroBaseHp } from "@/lib/utils/characters/hero-hp";
 import { getAbilityModifier, getProficiencyBonus, spellcastingDerived } from "@/lib/utils/common/calculations";
 import type { BattleParticipant } from "@/types/battle";
-import { ABILITY_KEYS, type AbilityKey } from "@/types/characters";
 
 /**
  * Створює BattleParticipant з Character. Завантажує скіли, артефакти, заклинання.
@@ -78,8 +78,6 @@ export async function createBattleParticipantFromCharacter(
 
   const resolvedSpellSlots = await resolveSpellSlotsFromCharacter(character, context);
 
-  const hpMult = (character as { hpMultiplier?: number | null }).hpMultiplier ?? 1;
-
   const meleeMult =
     (character as { meleeMultiplier?: number | null }).meleeMultiplier ?? 1;
 
@@ -94,9 +92,7 @@ export async function createBattleParticipantFromCharacter(
 
   const spell = spellcastingDerived(character.level, character.spellcastingAbility, scores);
 
-  const computedMaxHp = getHeroMaxHp(character.level, character.strength, {
-    hpMultiplier: hpMult,
-  });
+  const computedMaxHp = heroBaseHp(character).total;
 
   const resolvedAbilities = [
     ...collectCharacterAbilities({
@@ -113,13 +109,13 @@ export async function createBattleParticipantFromCharacter(
       id: `${character.id}-${instanceNumber || 0}-${Date.now()}`,
       battleId,
       sourceId: character.id,
-      sourceType: "character",
+      sourceType: ParticipantSourceType.CHARACTER,
       instanceNumber: instanceNumber || undefined,
       instanceId: instanceNumber ? `${character.id}-${instanceNumber - 1}` : undefined,
       name: character.name,
       avatar: character.avatar || undefined,
       side,
-      controlledBy: character.controlledBy || "dm",
+      controlledBy: character.controlledBy || CONTROLLED_BY_DM,
     },
     abilities: {
       level: character.level,
@@ -150,7 +146,6 @@ export async function createBattleParticipantFromCharacter(
       maxTargets: character.maxTargets ?? 1,
     },
     spellcasting: {
-      spellcastingClass: character.spellcastingClass || undefined,
       spellcastingAbility: character.spellcastingAbility as
         | "intelligence"
         | "wisdom"
@@ -165,7 +160,7 @@ export async function createBattleParticipantFromCharacter(
       attacks,
       activeEffects: [],
       equippedArtifacts,
-      artifactSetHudMarkers: completed.hudMarkers,
+      artifactSets: completed.progress,
       resolvedAbilities,
       spellEnhancers: buildSpellEnhancers(skills),
       abilityUsage: {},

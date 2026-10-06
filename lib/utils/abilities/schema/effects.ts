@@ -5,10 +5,11 @@ import {
   AmountSchema,
   ATTACK_KINDS,
   DAMAGE_FILTER_KINDS,
-  DAMAGE_KINDS,
   DurationSchema,
   FlatSchema,
 } from "./common";
+
+import { ABILITY_KEYS } from "@/lib/constants/abilities";
 
 export const DYNAMIC_STATS = ["armor", "attackBonus", "critThreshold"] as const;
 
@@ -20,12 +21,7 @@ export const BAKED_STATS = [
   "minTargets",
   "maxTargets",
   "spellSlots",
-  "strength",
-  "dexterity",
-  "constitution",
-  "intelligence",
-  "wisdom",
-  "charisma",
+  ...ABILITY_KEYS,
 ] as const;
 
 export const STAT_KEYS = [...DYNAMIC_STATS, ...BAKED_STATS] as const;
@@ -89,10 +85,13 @@ const FlagSchema = z.discriminatedUnion("flag", [
   z.object({
     ...flagBase,
     flag: z.literal("counterAttack"),
-    attackKinds: z.array(z.enum(DAMAGE_KINDS)).min(1),
+    // old records may hold "magic" — spells never trigger retaliation
+    attackKinds: z.preprocess((v) => (Array.isArray(v) ? v.filter((k) => k !== "magic") : v), z.array(z.enum(ATTACK_KINDS))),
     bonusPercent: z.number().min(0),
   }),
   z.object({ ...flagBase, flag: z.literal("seeEnemyHp") }),
+  z.object({ ...flagBase, flag: z.literal("noNegativeMorale") }),
+  z.object({ ...flagBase, flag: z.literal("ignoreMorale") }),
   z.object({
     ...flagBase,
     flag: z.literal("conditionImmunity"),

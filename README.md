@@ -152,7 +152,7 @@ dnd-combat-tracker/
 │   │       │   ├── spells/       # Управління заклинаннями
 │   │       │   ├── units/        # Управління юнітами
 │   │       │   ├── artifacts/    # Управління артефактами
-│   │       │   └── npc-heroes/   # Управління NPC героями
+│   │       │   └── npc-heroes/   # Редирект на characters?type=npc_hero
 │   │       ├── battles/          # Сторінка бою
 │   │       │   └── [battleId]/
 │   │       └── character/        # Сторінка персонажа гравця
@@ -178,13 +178,10 @@ dnd-combat-tracker/
 │   │   └── inventory.ts         # API для інвентаря
 │   ├── hooks/                   # Кастомні React хуки
 │   │   ├── useCharacterForm.ts  # Хук для форми персонажа
-│   │   ├── useCampaignMembers.ts # Хук для учасників кампанії
-│   │   └── useInventory.ts      # Хук для інвентаря
+│   │   └── useCampaignMembers.ts # Хук для учасників кампанії
 │   ├── constants/               # Константи D&D 5e
 │   │   ├── skills.ts            # Навички та збереження
 │   │   ├── alignment.ts         # Світогляди
-│   │   ├── spellcasting.ts     # Заклинання
-│   │   ├── equipment.ts        # Обладнання
 │   │   ├── abilities.ts        # Характеристики
 │   │   └── index.ts            # Центральний експорт
 │   ├── types/                   # TypeScript типи
@@ -252,7 +249,6 @@ const { formData, updateField, handleSubmit } = useCharacterForm({
 - **Character** - Персонаж (гравець або NPC герой)
 - **CharacterInventory** - Інвентар персонажа
 - **Unit** - NPC юніт для боїв
-- **UnitGroup** - Група юнітів
 - **Spell** - Заклинання
 - **SpellGroup** - Група заклинань
 - **Artifact** - Артефакт
@@ -260,7 +256,6 @@ const { formData, updateField, handleSubmit } = useCharacterForm({
 - **BattleScene** - Сцена бою
 - **SkillTree** - Дерево прокачки для раси
 - **CharacterSkills** - Прогрес персонажа по дереву скілів
-- **RacialAbility** - Расові здібності
 
 ## 🔐 Аутентифікація
 

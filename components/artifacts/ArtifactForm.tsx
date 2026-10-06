@@ -2,11 +2,12 @@
 
 import { useRouter } from "next/navigation";
 
-import { ArtifactIconUrlPreview } from "./ArtifactIconUrlPreview";
+import type { ArtifactSetOption } from "./ArtifactEditForm-types";
 import { ArtifactWeaponFields } from "./ArtifactWeaponFields";
 
 import { AbilityListEditor, withAbilityErrors } from "@/components/abilities";
 import { ActionBar } from "@/components/common/ActionBar";
+import { IconUrlField } from "@/components/common/IconUrlField";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -24,17 +25,12 @@ import {
   ARTIFACT_SLOT_OPTIONS,
 } from "@/lib/constants/artifacts";
 import { useArtifactForm } from "@/lib/hooks/artifacts";
-import type { ConversionIssue } from "@/lib/utils/abilities/legacy/types";
+import type { ConversionIssue } from "@/lib/utils/abilities/schema";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import type { ArtifactFormSubmitPayload } from "@/lib/utils/artifacts/artifact-form";
 import { isWeaponSlot, type WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
 
 export type { ArtifactFormSubmitPayload };
-
-export interface ArtifactSetOption {
-  id: string;
-  name: string;
-}
 
 export interface ArtifactFormInitial {
   name: string;
@@ -158,15 +154,8 @@ export function ArtifactForm({
           </div>
 
           <div className="space-y-2">
-            <LabeledInput
-              id="artifact-icon"
-              label="Іконка (URL з інтернету)"
-              value={fields.icon}
-              onChange={(e) => setField("icon", e.target.value)}
-              placeholder="https://example.com/icon.png"
-            />
+            <IconUrlField id="artifact-icon" label="Іконка (URL з інтернету)" value={fields.icon} onChange={(v) => setField("icon", v)} fallbackText={fields.name} />
             <p className="text-xs text-muted-foreground">{iconHint}</p>
-            <ArtifactIconUrlPreview key={fields.icon.trim()} url={fields.icon} />
           </div>
 
           {isWeaponSlot(fields.slot) && <ArtifactWeaponFields value={fields.weapon} onChange={(w) => setField("weapon", w)} />}

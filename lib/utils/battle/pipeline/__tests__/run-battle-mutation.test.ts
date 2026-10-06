@@ -68,6 +68,16 @@ const req = (body: unknown = {}) =>
 const noop = vi.fn((ctx) => ({ participants: ctx.participants, pending: ctx.pending, events: [] }));
 
 describe("runBattleMutation", () => {
+  it("rng із залежностей потрапляє в контекст мутації", async () => {
+    const rng = () => 0.42;
+
+    const mutate = vi.fn((ctx: BattleMutationContext) => ({ participants: ctx.participants, pending: ctx.pending, events: [] }));
+
+    await runBattleMutation(req(), { params, access: "member", mutate }, deps({ rng }));
+
+    expect(mutate.mock.calls[0][0].rng).toBe(rng);
+  });
+
   it("без сесії — 401, БД не чіпаємо", async () => {
     const d = deps({ getUserId: vi.fn(async () => null) });
 

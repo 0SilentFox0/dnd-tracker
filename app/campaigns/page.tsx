@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { getAuthUser } from "@/lib/auth";
+import { CampaignRole } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 
 export default async function CampaignsPage() {
@@ -114,7 +115,7 @@ export default async function CampaignsPage() {
         {campaigns.map((campaign) => {
           const userMember = campaign.members.find((m) => m.userId === userId);
 
-          const isDM = userMember?.role === "dm";
+          const isDM = userMember?.role === CampaignRole.DM;
 
           return (
             <Link key={campaign.id} href={`/campaigns/${campaign.id}`}>
@@ -134,7 +135,7 @@ export default async function CampaignsPage() {
                     <p>
                       Гравців:{" "}
                       {
-                        campaign.members.filter((m) => m.role === "player")
+                        campaign.members.filter((m) => m.role === CampaignRole.PLAYER)
                           .length
                       }
                     </p>

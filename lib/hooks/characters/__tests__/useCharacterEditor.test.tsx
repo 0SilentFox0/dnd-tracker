@@ -61,3 +61,25 @@ describe("useCharacterEditor fresh seed", () => {
     expect(result.current.form.formData.basicInfo.name).toBe("Нове ім'я");
   });
 });
+
+describe("useCharacterEditor після збереження", () => {
+  it("форма бере значення з відповіді PATCH (+1 від рівня не відкотиться наступним збереженням)", async () => {
+    const { getCharacter, updateCharacter } = await import("@/lib/api/characters");
+
+    vi.mocked(getCharacter).mockResolvedValue({ id: "ch3", name: "Боромир", controlledBy: "u1", level: 3, strength: 12, inventory: {} } as never);
+    vi.mocked(updateCharacter).mockResolvedValueOnce({ id: "ch3", name: "Боромир", controlledBy: "u1", level: 4, strength: 13, inventory: {} } as never);
+
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
+    const { result } = renderHook(() => useCharacterEditor({ campaignId: "c1", characterId: "ch3", onSaved: vi.fn() }), {
+      wrapper: ({ children }: { children: ReactNode }) => <QueryClientProvider client={qc}>{children}</QueryClientProvider>,
+    });
+
+    await waitFor(() => expect(result.current.ready).toBe(true));
+
+    await act(() => result.current.form.handleSubmit({ preventDefault: () => {} } as never));
+
+    expect(result.current.form.formData.basicInfo.level).toBe(4);
+    expect(result.current.form.formData.abilityScores.strength).toBe(13);
+  });
+});

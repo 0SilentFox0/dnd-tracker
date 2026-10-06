@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import { useBattle, useDeleteBattle, useUpdateBattle } from "../useBattles";
 import { useSetupRoster } from "../useBattleSetupQueries";
 
-import { ParticipantSide } from "@/lib/constants/battle";
+import { ParticipantSide, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
+import { CharacterType } from "@/lib/constants/characters";
 import { useConfirm, useNotify } from "@/lib/hooks/common";
 import type { BattlePreparationParticipant } from "@/types/battle";
 import type { EditBattleCharacter, EditBattleUnit } from "@/types/battle-setup";
@@ -52,7 +53,7 @@ export function useEditBattleData(campaignId: string, battleId: string) {
 
   const handleParticipantToggle = (
     participantId: string,
-    type: "character" | "unit",
+    type: ParticipantSourceTypeValue,
     checked: boolean,
   ) => {
     if (checked) {
@@ -124,10 +125,10 @@ export function useEditBattleData(campaignId: string, battleId: string) {
     participants.find((p) => p.id === id)?.quantity ?? 1;
 
   const playerCharacters = characters.filter(
-    (c) => c.type === "player" && c.controlledBy !== null,
+    (c) => c.type === CharacterType.PLAYER && c.controlledBy !== null,
   );
 
-  const npcCharacters = characters.filter((c) => c.type === "npc_hero");
+  const npcCharacters = characters.filter((c) => c.type === CharacterType.NPC_HERO);
 
   return {
     campaignId,
