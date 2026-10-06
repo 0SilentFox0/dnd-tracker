@@ -7,7 +7,6 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -244,25 +243,36 @@
   }
   body {
     @apply text-foreground;
-    background-image: var(--background-image-url, url("/screen-bg/tavern.png"));
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    background-repeat: no-repeat;
+    background-color: #0b0908;
     min-height: 100vh;
     position: relative;
   }
-  body::before {
+  body::before,
+  body::after {
     content: "";
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.75);
-    z-index: -1;
     pointer-events: none;
   }
+  body::before {
+    background: url("/screen-bg/tavern.webp") center / cover no-repeat;
+    z-index: -2;
+  }
+  body::after {
+    background-color: rgba(0, 0, 0, 0.75);
+    z-index: -1;
+  }
+  body:has([data-screen-bg="artifacts"])::before { background-image: url("/screen-bg/artefacts-bg.webp"); }
+  body:has([data-screen-bg="battle"])::before { background-image: url("/screen-bg/battle-bg.webp"); }
+  body:has([data-screen-bg="character"])::before { background-image: url("/screen-bg/character-bg.webp"); }
+  body:has([data-screen-bg="races"])::before { background-image: url("/screen-bg/races-bg.webp"); }
+  body:has([data-screen-bg="skill-tree"])::before { background-image: url("/screen-bg/skill-tree-bg.webp"); }
+  body:has([data-screen-bg="skills"])::before { background-image: url("/screen-bg/skills-bg.webp"); }
+  body:has([data-screen-bg="spells"])::before { background-image: url("/screen-bg/spell-lab.webp"); }
+  body:has([data-screen-bg="units"])::before { background-image: url("/screen-bg/units-bg.webp"); }
   /* Контент має бути поверх затемнення */
   main,
   [role="main"],

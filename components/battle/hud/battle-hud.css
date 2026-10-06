@@ -1,6 +1,6 @@
 .battle-hud {
   position: relative;
-  background: #0b0908 url("/screen-bg/battle-bg.jpg") center 70% / cover;
+  background: #0b0908 url("/screen-bg/battle-bg.webp") center 70% / cover;
 }
 
 .battle-hud::before {

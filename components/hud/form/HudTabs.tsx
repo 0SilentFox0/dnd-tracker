@@ -25,7 +25,7 @@ interface HudTabsProps<T extends string> {
 export function HudTabs<T extends string>({ tabs, value, onValueChange, header, keepMounted = false, contentClassName, triggerClassName }: HudTabsProps<T>) {
   return (
     <Tabs value={value} onValueChange={(v) => onValueChange(v as T)}>
-      <div className="sticky top-[env(safe-area-inset-top,0px)] z-20 border-b border-[#3a2e22] bg-[#110e0b]/95 backdrop-blur">
+      <div className="sticky top-[env(safe-area-inset-top,0px)] z-20 border-b border-[#3a2e22] bg-[#110e0b]/[.97]">
         {header}
         <TabsList className="hud-scroll-x flex h-auto w-full justify-start gap-1 overflow-x-auto rounded-none bg-transparent p-1.5">
           {tabs.map((t) => (
