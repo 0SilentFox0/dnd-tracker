@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
-import { buildCharacterUpdateData } from "./build-character-update-data";
+import { buildCharacterUpdateData, resolveFinalLevel } from "./build-character-update-data";
+import { loadRaceProgression } from "./load-race-progression";
 import { updateCharacterSchema } from "./update-character-schema";
 
 import { CampaignRole } from "@/lib/constants/campaigns";
@@ -119,25 +120,32 @@ export async function PATCH(
     if (!isDM) {
       data = {
         ...data,
+        level: undefined,
+        experience: undefined,
         controlledBy: character.controlledBy,
         type: character.type,
       } as typeof data;
     }
 
-    const computed = buildCharacterUpdateData({
-      character,
-      data,
-      xpMultiplier: campaign.xpMultiplier ?? 1,
-    });
+    const xpMultiplier = campaign.xpMultiplier ?? 1;
+
+    const finalLevel = resolveFinalLevel(character, data, xpMultiplier);
+
+    if (finalLevel > character.level && finalLevel > campaign.maxLevel) {
+      return NextResponse.json({ error: `Максимальний рівень кампанії — ${campaign.maxLevel}` }, { status: 422 });
+    }
+
+    const race = finalLevel > character.level ? await loadRaceProgression(id, data.race ?? character.race) : null;
+
+    const computed = buildCharacterUpdateData({ character, data, xpMultiplier, campaign, race });
 
     const updatedCharacter = await prisma.character.update({
       where: { id: characterId },
       data: {
         ...data,
         level: computed.finalLevel,
-        spellSlots: computed.spellSlotsToSave as Prisma.InputJsonValue,
-        maxHp: computed.maxHp,
-        currentHp: computed.currentHp,
+        ...computed.abilityScores,
+        ...(computed.spellSlots && { spellSlots: computed.spellSlots as Prisma.InputJsonValue }),
         immunities: data.immunities !== undefined
           ? (data.immunities as Prisma.InputJsonValue)
           : (character.immunities as Prisma.InputJsonValue | undefined),

@@ -69,26 +69,6 @@ export function getLevelFromXP(xp: number, multiplier: number = 2.5): number {
 }
 
 /**
- * Розраховує HP при прокачці
- * Формула: hitDice середнє значення + CON modifier
- */
-export function calculateHPGain(
-  hitDice: string,
-  constitutionModifier: number
-): number {
-  // Парсимо hitDice (наприклад "1d8" -> 8)
-  const match = hitDice.match(/(\d+)d(\d+)/);
-
-  if (!match) return 0;
-
-  const diceSize = parseInt(match[2]);
-
-  const averageRoll = Math.ceil(diceSize / 2) + 0.5; // Середнє значення для dN
-
-  return Math.floor(averageRoll) + constitutionModifier;
-}
-
-/**
  * Розраховує чи попадання успішне
  */
 export function isHit(attackRoll: number, targetAC: number): boolean {

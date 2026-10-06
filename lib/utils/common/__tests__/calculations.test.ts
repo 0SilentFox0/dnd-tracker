@@ -1,7 +1,6 @@
 import { describe, expect,it } from "vitest";
 
 import {
-  calculateHPGain,
   getAbilityModifier,
   getLevelFromXP,
   getProficiencyBonus,
@@ -63,17 +62,6 @@ describe("calculations", () => {
     });
     it("1000+ XP = рівень 2", () => {
       expect(getLevelFromXP(1000)).toBe(2);
-    });
-  });
-
-  describe("calculateHPGain", () => {
-    it("парсить 1d8 і повертає середнє + CON modifier", () => {
-      const gain = calculateHPGain("1d8", 1);
-
-      expect(gain).toBeGreaterThan(0);
-    });
-    it("повертає 0 для невалідного hitDice", () => {
-      expect(calculateHPGain("invalid", 0)).toBe(0);
     });
   });
 
