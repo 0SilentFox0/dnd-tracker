@@ -141,32 +141,3 @@ export function extractRaceDamageModifiers(
   return modifiers;
 }
 
-/**
- * Отримує всі модифікатори урону юніта, включаючи модифікатори з раси
- */
-export function getUnitDamageModifiers(
-  unit: Unit,
-  race: Race | null | undefined
-): string[] {
-  const unitModifiers: string[] = [];
-
-  if (unit.damageModifier) {
-    unitModifiers.push(unit.damageModifier);
-  }
-
-  const raceModifiers = extractRaceDamageModifiers(race);
-
-  // Об'єднуємо та видаляємо дублікати
-  const allModifiers = [...unitModifiers, ...raceModifiers];
-
-  return Array.from(
-    new Set(allModifiers.map((m) => m.toLowerCase().trim()))
-  ).map((m) => {
-    // Знаходимо оригінальну назву (з правильним регістром)
-    return (
-      unitModifiers.find((um) => um.toLowerCase().trim() === m) ||
-      raceModifiers.find((rm) => rm.toLowerCase().trim() === m) ||
-      m
-    );
-  });
-}

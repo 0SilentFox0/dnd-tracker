@@ -16,7 +16,6 @@ const unit = {
   name: "Гоблін",
   level: 1,
   attacks: [],
-  specialAbilities: [],
 } as unknown as Unit;
 
 function render(ui: ReactElement) {

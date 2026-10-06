@@ -9,15 +9,11 @@ import { AbilitySummary } from "@/components/abilities";
 import { EntityIcon } from "@/components/common/EntityIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { getDamageElementLabel } from "@/lib/constants/damage";
 import { useConfirm } from "@/lib/hooks/common";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { diceAverage } from "@/lib/utils/common/dice";
 import { pluralUk } from "@/lib/utils/plural";
-import {
-  getUnitDamageModifiers,
-  getUnitImmunities,
-} from "@/lib/utils/races/race-effects";
+import { getUnitImmunities } from "@/lib/utils/races/race-effects";
 import { UNIT_DRAG_TYPE, unitDragPayload } from "@/lib/utils/units/drag";
 import type { Race } from "@/types/races";
 import type { Unit } from "@/types/units";
@@ -54,12 +50,6 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
 
   const abilitySummary = unit.abilitySummary ?? [];
 
-  const allDamageModifiers = getUnitDamageModifiers(unit, race);
-
-  const damageModifiers = allDamageModifiers
-    .map((modifier) => getDamageElementLabel(modifier))
-    .filter(Boolean);
-
   const allImmunities = getUnitImmunities(unit, race);
 
   const strMod = getAbilityModifier(unit.strength);
@@ -94,19 +84,6 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
           <EntityIcon src={unit.avatar} name={unit.name} size={80} className="size-16 rounded-lg text-2xl sm:size-20" />
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-base">{unit.name}</h3>
-            {damageModifiers.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-1">
-                {damageModifiers.map((modifier, dmIdx) => (
-                  <Badge
-                    key={`dm-${dmIdx}-${modifier}`}
-                    variant="outline"
-                    className="text-xs"
-                  >
-                    {modifier}
-                  </Badge>
-                ))}
-              </div>
-            )}
             <div className="text-sm text-muted-foreground space-y-1">
               <div>
                 Рівень {unit.level} • HP {unit.maxHp}

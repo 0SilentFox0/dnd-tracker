@@ -81,31 +81,8 @@ export const updateUnitSchema = z.object({
 
 export type UpdateUnitInput = z.infer<typeof updateUnitSchema>;
 
-export const createUnitGroupSchema = z.object({
-  name: z.string().min(1).max(100),
-  damageModifier: z.preprocess(
-    (val) => (val === "" ? null : val),
-    z.string().nullable().optional(),
-  ),
-});
 
-export type CreateUnitGroupInput = z.infer<typeof createUnitGroupSchema>;
 
-export const updateUnitGroupSchema = z.object({
-  name: z.string().min(1).max(100),
-  damageModifier: z.preprocess(
-    (val) => (val === "" ? null : val),
-    z.string().nullable().optional(),
-  ),
-});
-
-export type UpdateUnitGroupInput = z.infer<typeof updateUnitGroupSchema>;
-
-export const deleteUnitsByLevelSchema = z.object({
-  level: z.number().int().min(1).max(30),
-});
-
-export type DeleteUnitsByLevelInput = z.infer<typeof deleteUnitsByLevelSchema>;
 
 export const importUnitSchema = z.object({
   name: z.string().trim().min(1),

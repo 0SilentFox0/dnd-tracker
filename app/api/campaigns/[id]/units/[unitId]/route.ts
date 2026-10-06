@@ -9,6 +9,7 @@ import { updateUnitSchema } from "@/lib/schemas";
 import { abilitiesJson, readAbilities } from "@/lib/utils/abilities/legacy/read";
 import { requireCampaignAccess, requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { toUnit } from "@/lib/utils/units/to-unit";
 
 export async function GET(
   request: Request,
@@ -33,9 +34,11 @@ export async function GET(
       return validationError;
     }
 
-    const { abilities, issues: abilityIssues } = readAbilities("unit", unit as NonNullable<typeof unit>);
+    const row = unit as NonNullable<typeof unit>;
 
-    return NextResponse.json({ ...unit, abilities, abilityIssues });
+    const { abilities, issues: abilityIssues } = readAbilities("unit", row);
+
+    return NextResponse.json({ ...toUnit(row), abilities, abilityIssues });
   } catch (error) {
     return handleApiError(error, { action: "fetch unit" });
   }
@@ -134,7 +137,7 @@ export async function PATCH(
 
     revalidateTag(`units-${id}`, { expire: 0 });
 
-    return NextResponse.json(updatedUnit);
+    return NextResponse.json(toUnit(updatedUnit));
   } catch (error) {
     return handleApiError(error, { action: "update unit" });
   }

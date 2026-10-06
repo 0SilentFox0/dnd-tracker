@@ -11,6 +11,7 @@ import { abilitiesJson } from "@/lib/utils/abilities/legacy/read";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { getProficiencyBonus } from "@/lib/utils/common/calculations";
+import { toUnit } from "@/lib/utils/units/to-unit";
 
 export async function POST(
   request: Request,
@@ -61,7 +62,7 @@ export async function POST(
 
     revalidateTag(`units-${id}`, { expire: 0 });
 
-    return NextResponse.json(unit, { status: 201 });
+    return NextResponse.json(toUnit(unit), { status: 201 });
   } catch (error) {
     return handleApiError(error, { action: "create unit" });
   }
