@@ -142,21 +142,6 @@ export function buildCharacterFormBindings(
           ...prev,
           combatStats: { ...prev.combatStats, speed: value },
         })),
-      setMaxHp: (value: number) =>
-        setFormData((prev) => ({
-          ...prev,
-          combatStats: { ...prev.combatStats, maxHp: value },
-        })),
-      setCurrentHp: (value: number) =>
-        setFormData((prev) => ({
-          ...prev,
-          combatStats: { ...prev.combatStats, currentHp: value },
-        })),
-      setTempHp: (value: number) =>
-        setFormData((prev) => ({
-          ...prev,
-          combatStats: { ...prev.combatStats, tempHp: value },
-        })),
       setMinTargets: (value: number) =>
         setFormData((prev) => ({
           ...prev,
@@ -183,11 +168,6 @@ export function buildCharacterFormBindings(
   const spellcasting = {
     ...formData.spellcasting,
     setters: {
-      setSpellcastingClass: (value: string) =>
-        setFormData((prev) => ({
-          ...prev,
-          spellcasting: { ...prev.spellcasting, spellcastingClass: value },
-        })),
       setSpellcastingAbility: (
         value: "intelligence" | "wisdom" | "charisma" | undefined,
       ) =>

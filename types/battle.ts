@@ -188,7 +188,6 @@ export interface BattleParticipantCombatStats {
  * Дані про заклинання учасника
  */
 export interface BattleParticipantSpellcasting {
-  spellcastingClass?: string;
   spellcastingAbility?: "intelligence" | "wisdom" | "charisma";
   spellSaveDC?: number;
   spellAttackBonus?: number;

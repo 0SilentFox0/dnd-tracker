@@ -129,7 +129,6 @@ export async function createBattleParticipantFromUnit(
       maxTargets: unit.maxTargets ?? 1,
     },
     spellcasting: {
-      spellcastingClass: undefined,
       spellcastingAbility: undefined,
       spellSaveDC: undefined,
       spellAttackBonus: undefined,

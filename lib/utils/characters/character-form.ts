@@ -50,9 +50,6 @@ export function characterToFormData(
       armorClass: character.armorClass || 10,
       initiative: character.initiative || 0,
       speed: character.speed || 30,
-      maxHp: character.maxHp || 10,
-      currentHp: character.currentHp || 10,
-      tempHp: character.tempHp || 0,
       minTargets: character.minTargets || 1,
       maxTargets: character.maxTargets || 1,
       morale: (character as { morale?: number }).morale ?? 0,
@@ -62,7 +59,6 @@ export function characterToFormData(
       skills: (character.skills as Record<string, boolean>) || {},
     },
     spellcasting: {
-      spellcastingClass: character.spellcastingClass,
       spellcastingAbility: character.spellcastingAbility ?? undefined,
       spellSlots: (() => {
         const raw = character.spellSlots as
@@ -125,14 +121,10 @@ export function formDataToCharacter(
     armorClass: formData.combatStats.armorClass,
     initiative: formData.combatStats.initiative,
     speed: formData.combatStats.speed,
-    maxHp: formData.combatStats.maxHp,
-    currentHp: formData.combatStats.currentHp,
-    tempHp: formData.combatStats.tempHp,
     minTargets: formData.combatStats.minTargets,
     maxTargets: formData.combatStats.maxTargets,
     savingThrows: formData.skills.savingThrows,
     skills: formData.skills.skills,
-    spellcastingClass: formData.spellcasting.spellcastingClass,
     spellcastingAbility: formData.spellcasting.spellcastingAbility ?? null,
     spellSlots: formData.spellcasting.spellSlots,
     knownSpells: formData.spellcasting.knownSpells,

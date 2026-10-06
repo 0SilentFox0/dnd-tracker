@@ -146,7 +146,6 @@ export async function createBattleParticipantFromCharacter(
       maxTargets: character.maxTargets ?? 1,
     },
     spellcasting: {
-      spellcastingClass: character.spellcastingClass || undefined,
       spellcastingAbility: character.spellcastingAbility as
         | "intelligence"
         | "wisdom"

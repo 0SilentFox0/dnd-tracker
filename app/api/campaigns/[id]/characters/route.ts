@@ -123,15 +123,11 @@ export async function POST(
         armorClass: data.armorClass,
         initiative: data.initiative,
         speed: data.speed,
-        maxHp: data.maxHp,
-        currentHp: data.currentHp,
-        tempHp: data.tempHp,
         
         savingThrows: savingThrows,
         skills: skills,
         
         
-        spellcastingClass: data.spellcastingClass,
         spellcastingAbility: data.spellcastingAbility,
         spellSlots: spellSlotsToCreate,
         knownSpells: data.knownSpells,

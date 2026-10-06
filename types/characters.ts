@@ -50,9 +50,6 @@ export interface CharacterFormData {
     armorClass: number;
     initiative: number;
     speed: number;
-    maxHp: number;
-    currentHp: number;
-    tempHp: number;
     minTargets: number;
     maxTargets: number;
     morale: number;
@@ -62,7 +59,6 @@ export interface CharacterFormData {
     skills: Record<string, boolean>;
   };
   spellcasting: {
-    spellcastingClass?: string;
     spellcastingAbility?: "intelligence" | "wisdom" | "charisma";
     spellSlots?: Record<string, { max: number; current: number }>;
     knownSpells: string[];
@@ -111,12 +107,8 @@ export interface Character {
   armorClass: number;
   initiative: number;
   speed: number;
-  maxHp: number;
-  currentHp: number;
-  tempHp: number;
   savingThrows: Record<string, boolean>;
   skills: Record<string, boolean>;
-  spellcastingClass?: string;
   spellcastingAbility?: "intelligence" | "wisdom" | "charisma" | null;
   spellSlots?: Record<string, { max: number; current: number }>;
   knownSpells: string[];

@@ -90,7 +90,6 @@ export function createMockCaster(
       maxTargets: 1,
     },
     spellcasting: {
-      spellcastingClass: "wizard",
       spellcastingAbility: "intelligence",
       spellSaveDC: 14,
       spellAttackBonus: 5,

@@ -29,16 +29,12 @@ export const createCharacterSchema = z.object({
   armorClass: z.number().min(0).default(10),
   initiative: z.number().default(0),
   speed: z.number().min(0).default(30),
-  maxHp: z.number().min(1).default(10),
-  currentHp: z.number().min(0).default(10),
-  tempHp: z.number().min(0).default(0),
 
   // Saving Throws & Skills
   savingThrows: z.record(z.string(), z.boolean()).default({}),
   skills: z.record(z.string(), z.boolean()).default({}),
 
   // Заклинання
-  spellcastingClass: z.string().optional(),
   spellcastingAbility: z
     .enum(["intelligence", "wisdom", "charisma"])
     .nullable()
