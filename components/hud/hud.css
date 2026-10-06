@@ -66,13 +66,30 @@
   --ring: #c9b37a;
 }
 .hud-form [data-slot="input"],
+.hud-page [data-slot="input"],
 .hud-form [data-slot="textarea"],
-.hud-form [data-slot="select-trigger"] { background-color: #1a140f; color: #efe5d2; }
+.hud-page [data-slot="textarea"],
+.hud-form [data-slot="select-trigger"],
+.hud-page [data-slot="select-trigger"] { background-color: #1a140f; color: #efe5d2; }
 .hud-form [data-slot="input"]:focus-visible,
+.hud-page [data-slot="input"]:focus-visible,
 .hud-form [data-slot="textarea"]:focus-visible,
-.hud-form [data-slot="select-trigger"]:focus-visible { border-color: #c9b37a; box-shadow: 0 0 0 2px rgba(201, 179, 122, 0.25); }
-.hud-form [data-slot="button"][data-variant="default"] { background: linear-gradient(135deg, #8a6414, #e6c25a 55%, #8a6414); color: #2a1d05; font-weight: 700; }
-.hud-form [data-slot="button"][data-variant="default"]:disabled { filter: grayscale(0.6); opacity: 0.6; }
+.hud-page [data-slot="textarea"]:focus-visible,
+.hud-form [data-slot="select-trigger"]:focus-visible,
+.hud-page [data-slot="select-trigger"]:focus-visible { border-color: #c9b37a; box-shadow: 0 0 0 2px rgba(201, 179, 122, 0.25); }
+.hud-form [data-slot="button"][data-variant="default"],
+.hud-page [data-slot="button"][data-variant="default"] { background: linear-gradient(135deg, #8a6414, #e6c25a 55%, #8a6414); color: #2a1d05; font-weight: 700; }
+.hud-form [data-slot="button"][data-variant="default"]:disabled,
+.hud-page [data-slot="button"][data-variant="default"]:disabled { filter: grayscale(0.6); opacity: 0.6; }
 .hud-form-page { background: radial-gradient(120% 80% at 50% 0, #1d1611, #0b0908); }
 .hud-scroll-x { scrollbar-width: none; }
 .hud-scroll-x::-webkit-scrollbar { display: none; }
+.hud-surface [data-slot="accordion-item"] { background: rgba(20, 16, 12, 0.85); border-color: #4a3c2c; }
+.hud-surface [data-slot="accordion-trigger"] { font-family: var(--font-hud-sc), serif; letter-spacing: 0.04em; color: #c9b37a; }
+.hud-surface [data-slot="accordion-trigger"]:hover { background: rgba(230, 194, 90, 0.06); text-decoration: none; }
+.hud-surface [data-slot="accordion-trigger"] svg { color: #8f8473; }
+.hud-surface [data-slot="empty-state"] { border-color: #4a3c2c; }
+.hud-surface [data-slot="empty-state"] [data-slot="empty-state-title"] { font-family: var(--font-hud-sc), serif; color: #efe5d2; }
+.hud-surface [data-slot="error-state"] { border-color: rgba(208, 112, 92, 0.5); }
+.hud-surface [data-slot="skeleton-row"] { background: #1c1610; }
+.hud-page { color: #e6dccb; }
