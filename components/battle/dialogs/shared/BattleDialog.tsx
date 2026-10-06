@@ -28,6 +28,7 @@ export function BattleDialog({ open, onOpenChange, title, description, contentCl
       title={title ?? <span className="sr-only">Дія в бою</span>}
       description={description}
       size="md"
+      hud
       className={contentClassName}
     >
       {children}
