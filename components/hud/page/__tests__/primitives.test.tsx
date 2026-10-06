@@ -28,7 +28,7 @@ describe("HUD page primitives", () => {
     const el = container.firstElementChild as HTMLElement;
 
     expect(el.dataset.tone).toBe("active");
-    expect(el.style.borderLeftColor).toBe("rgb(255, 0, 0)");
+    expect(el.style.borderLeftColor).toMatch(/^(#ff0000|rgb\(255, 0, 0\))$/);
   });
 
   it("HudChipTabs: buttons expose aria-pressed and links aria-current", () => {
