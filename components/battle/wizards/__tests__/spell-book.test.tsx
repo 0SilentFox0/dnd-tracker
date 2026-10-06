@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@/components/battle/hud/fonts", () => ({ hudFontClassName: "" }));
+vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 vi.mock("@/lib/hooks/spells", () => ({
   useSpells: () => ({
     data: [

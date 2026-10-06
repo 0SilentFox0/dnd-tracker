@@ -31,8 +31,6 @@ export interface CharacterDamageCalculatorProps {
     meleeMultiplier?: number;
     rangedMultiplier?: number;
   };
-  skillTreeProgress: import("@/lib/hooks/characters").SkillTreeProgress;
-  characterRace?: string;
   knownSpellIds: string[];
 }
 

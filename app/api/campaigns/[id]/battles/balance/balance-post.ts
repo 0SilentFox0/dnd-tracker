@@ -4,10 +4,7 @@
 
 import type { z } from "zod";
 
-import {
-  enrichSkillTreeProgressWithInferredLevels,
-  getCharacterAttacks,
-} from "./balance-helpers";
+import { getCharacterAttacks } from "./balance-helpers";
 import type { balanceSchema } from "./balance-schema";
 
 import {
@@ -19,7 +16,6 @@ import type {
   AllyStats,
   DifficultyRatio,
   SuggestedEnemy,
-  TreeIdToMainSkillIds,
   UnitStats,
 } from "@/lib/utils/battle/balance";
 import {
@@ -28,6 +24,7 @@ import {
   getUnitStats,
   suggestEnemyUnits,
 } from "@/lib/utils/battle/balance";
+import { branchLevels, normalizeTree, resolveLearned, type TreeNodes } from "@/lib/utils/skills/progression";
 
 type BalancePostData = z.infer<typeof balanceSchema>;
 
@@ -44,7 +41,7 @@ export async function postBalanceResponse(
 
   let allyCount = 0;
 
-  const treeIdToMainSkillIds: TreeIdToMainSkillIds = {};
+  let treesByRace = new Map<string, TreeNodes>();
 
   let magicMainSkillIds = new Set<string>();
 
@@ -74,11 +71,7 @@ export async function postBalanceResponse(
         .map((ms) => ms.id),
     );
 
-    for (const t of trees) {
-      const skills = t.skills as { mainSkills?: Array<{ id: string }> } | null;
-
-      treeIdToMainSkillIds[t.id] = skills?.mainSkills?.map((ms) => ms.id) ?? [];
-    }
+    treesByRace = new Map(trees.map((t) => [t.race, normalizeTree(t)]));
   }
 
   for (const cid of allyParticipants.characterIds) {
@@ -90,14 +83,7 @@ export async function postBalanceResponse(
 
     const attacks = await getCharacterAttacks(cid, campaignId);
 
-    const rawProgress =
-      (character.skillTreeProgress as Record<
-        string,
-        { level?: string; unlockedSkills?: string[] }
-      >) ?? undefined;
-
-    const skillTreeProgress =
-      enrichSkillTreeProgressWithInferredLevels(rawProgress) ?? rawProgress;
+    const tree = treesByRace.get(character.race);
 
     const stats = getCharacterStats({
       id: character.id,
@@ -106,8 +92,7 @@ export async function postBalanceResponse(
       strength: character.strength,
       dexterity: character.dexterity,
       attacks: attacks.map((a) => ({ damageDice: a.damageDice, type: a.type })),
-      skillTreeProgress,
-      treeIdToMainSkillIds,
+      branchLevels: tree ? branchLevels(resolveLearned(tree, character.skillTreeProgress)) : {},
       magicMainSkillIds,
     });
 

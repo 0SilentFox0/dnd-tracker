@@ -139,8 +139,6 @@ export default function NewCharacterPage({
                   <CharacterArtifactsSection
                     knownSpellIds={spellcasting.knownSpells}
                     campaignId={id}
-                    characterRace={basicInfo.race}
-                    skillTreeProgress={formData.skillTreeProgress ?? {}}
                     spellSlots={formData.spellcasting.spellSlots}
                   />
                 </AccordionContent>

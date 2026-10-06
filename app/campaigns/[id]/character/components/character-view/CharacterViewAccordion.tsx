@@ -13,7 +13,6 @@ import type { CharacterAbilityArtifactBonuses } from "@/components/characters/st
 import type { CharacterCombatArtifactBonuses } from "@/components/characters/stats/CharacterCombatParams";
 import { Accordion } from "@/components/ui/accordion";
 import { Card, CardContent } from "@/components/ui/card";
-import type { SkillTreeProgress } from "@/lib/hooks/characters";
 import type { ArtifactSetRow } from "@/types/artifact-sets";
 import type { CampaignMember } from "@/types/campaigns";
 import type { EquippedItems } from "@/types/inventory";
@@ -32,7 +31,6 @@ export interface CharacterViewAccordionProps {
     spellSlots?: Record<string, { max: number; current: number }>;
   };
   formData: {
-    skillTreeProgress?: SkillTreeProgress;
     scalingCoefficients?: {
       hpMultiplier?: number;
       meleeMultiplier?: number;
@@ -52,13 +50,8 @@ export interface CharacterViewAccordionProps {
   members: CampaignMember[];
   races: Race[];
   isPlayerView: boolean;
-  lastSavedSkillTreeProgress: SkillTreeProgress;
-  onSkillTreeProgressChange: (next: SkillTreeProgress) => void;
-  onResetSkillTree: () => void;
-  savingTree: boolean;
-  handleSaveSkillTree: () => Promise<void>;
+  canManage: boolean;
   error: string | null;
-  saveError: string | null;
 }
 
 export function CharacterViewAccordion({
@@ -79,20 +72,15 @@ export function CharacterViewAccordion({
   members,
   races,
   isPlayerView,
-  lastSavedSkillTreeProgress,
-  onSkillTreeProgressChange,
-  onResetSkillTree,
-  savingTree,
-  handleSaveSkillTree,
+  canManage,
   error,
-  saveError,
 }: CharacterViewAccordionProps) {
   return (
     <Card className="overflow-hidden">
       <CardContent className="w-full overflow-x-auto pt-4 sm:pt-6">
-        {(error || saveError) && (
+        {error && (
           <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-            <strong>Помилка:</strong> {error ?? saveError}
+            <strong>Помилка:</strong> {error}
           </div>
         )}
 
@@ -122,23 +110,11 @@ export function CharacterViewAccordion({
             artifactCombatBonuses={artifactCombatBonuses}
           />
           <SkillsAccordion skills={skills} />
-          <AbilitiesAccordion
-            campaignId={campaignId}
-            basicInfo={basicInfo}
-            abilities={abilities}
-            formData={formData}
-            isPlayerView={isPlayerView}
-            lastSavedSkillTreeProgress={lastSavedSkillTreeProgress}
-            onSkillTreeProgressChange={onSkillTreeProgressChange}
-            onResetSkillTree={onResetSkillTree}
-            savingTree={savingTree}
-            handleSaveSkillTree={handleSaveSkillTree}
-          />
+          <AbilitiesAccordion campaignId={campaignId} characterId={characterId} abilities={abilities} canManage={canManage} />
           <ArtifactsAccordion
             campaignId={campaignId}
-            basicInfo={basicInfo}
+            characterId={characterId}
             spellcasting={spellcasting}
-            skillTreeProgress={formData.skillTreeProgress ?? {}}
             equipped={equipped}
             artifactSets={artifactSets}
             artifactOptions={artifactOptions}

@@ -115,6 +115,7 @@ model Character {
   bonds                String?
   flaws                String?
   skillTreeProgress    Json                @default("{}")
+  seenLevel            Int?
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
   immunities           Json                @default("[]")

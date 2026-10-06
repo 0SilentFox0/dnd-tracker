@@ -12,14 +12,20 @@ export function resolveAbilities(source: AbilitySource, abilities: Ability[]): R
   return abilities.map((a) => ({ ...a, source, key: abilityKey(source, a.id) }));
 }
 
-// «Найвищий рівень у лінії»: level-скіли (рівень у назві) групуються за mainSkillId, leaf-скіли — за власним id.
+function isLevelLine(source: AbilitySource): boolean {
+  if (!source.line) return false;
+
+  return source.line.levelNode ?? inferLevelFromSkillName(source.name) !== null;
+}
+
+// «Найвищий рівень у лінії»: рівні гілки групуються за mainSkillId, решта — за власним id; знімки до levelNode — за назвою.
 export function pickHighestPerLine<T>(items: { item: T; source: AbilitySource }[]): { item: T; source: AbilitySource }[] {
   const byKey = new Map<string, { item: T; source: AbilitySource }>();
 
   for (const entry of items) {
     const line = entry.source.line;
 
-    const key = line && inferLevelFromSkillName(entry.source.name) !== null ? `line:${line.mainSkillId}` : `skill:${entry.source.id}`;
+    const key = line && isLevelLine(entry.source) ? `line:${line.mainSkillId}` : `skill:${entry.source.id}`;
 
     const existing = byKey.get(key);
 

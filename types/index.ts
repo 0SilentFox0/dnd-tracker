@@ -19,24 +19,12 @@ export * from "./skills";
 export * from "./spells";
 export * from "./units";
 
-// Skill tree та Main skills - експортуємо з уточненням, щоб уникнути конфліктів
+// Main skills і рівні гілки — з уточненням, щоб уникнути конфліктів
 export type {
   MainSkill,
   MainSkillFormData,
 } from "./main-skills";
-export type {
-  CentralSkill,
-  CharacterSkillProgress,
-  SkillCircle,
-  SkillCircleType,
-  SkillLevel,
-  SkillLevelType,
-  SkillTree,
-  MainSkill as SkillTreeMainSkill,
-  Skill as SkillTreeSkill,
-  UltimateSkill,
-} from "./skill-tree";
-export { SKILL_CIRCLES,SKILL_LEVELS } from "./skill-tree";
+export { SkillLevel, type SkillLevelType } from "./skill-tree";
 
 // API типи
 export * from "./api";
@@ -45,4 +33,5 @@ export * from "./api";
 export * from "./hooks";
 
 // Utility типи
+export type * from "./progression";
 export * from "./utils";

@@ -53,3 +53,9 @@ export function getSpellLevelsForSkillLevel(skillLevel: SkillLevelType): number[
       return [];
   }
 }
+
+export interface SpellSkillInfo { spellGroupId: string | null; newSpellId: string | null }
+
+export function toSpellSkillInfo(skill: SkillLike): SpellSkillInfo {
+  return { spellGroupId: getSkillSpellGroupId(skill) ?? null, newSpellId: getSkillSpellNewSpellId(skill) ?? null };
+}

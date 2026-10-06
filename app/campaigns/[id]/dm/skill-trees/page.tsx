@@ -1,89 +1,11 @@
 import { SkillTreePageClient } from "./page-client";
 
 import { requireCampaignDM } from "@/lib/campaigns/access";
-import { prisma } from "@/lib/db";
-import { createMockSkillTree } from "@/lib/utils/skills/skill-tree-mock";
-import type { Race } from "@/types/races";
 
-export default async function SkillTreesPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function SkillTreesPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
   await requireCampaignDM(id);
 
-  // Отримуємо існуючі дерева прокачки
-  const skillTreesData = await prisma.skillTree.findMany({
-    where: { campaignId: id },
-  });
-
-  // Отримуємо раси з кампанії
-  const racesData = await prisma.race.findMany({ omit: { abilities: true },
-    where: { campaignId: id },
-    orderBy: { createdAt: "desc" },
-  });
-
-  // Конвертуємо Prisma дані в формат Race
-  const races: Race[] = racesData.map((race) => ({
-    ...race,
-    availableSkills: Array.isArray(race.availableSkills)
-      ? (race.availableSkills as string[])
-      : [],
-    disabledSkills: Array.isArray(race.disabledSkills)
-      ? (race.disabledSkills as string[])
-      : [],
-    passiveAbility: race.passiveAbility
-      ? typeof race.passiveAbility === "object" &&
-        race.passiveAbility !== null &&
-        !Array.isArray(race.passiveAbility)
-        ? (race.passiveAbility as unknown as Race["passiveAbility"])
-        : null
-      : null,
-    spellSlotProgression: Array.isArray(race.spellSlotProgression)
-      ? (race.spellSlotProgression as unknown as Race["spellSlotProgression"])
-      : undefined,
-    createdAt: race.createdAt,
-    updatedAt: race.updatedAt,
-  }));
-
-  // Отримуємо основні навики з кампанії
-  const mainSkillsData = await prisma.mainSkill.findMany({
-    where: { campaignId: id },
-    orderBy: { createdAt: "asc" },
-  });
-
-  // Якщо немає дерев, створюємо моки для демонстрації
-  // Конвертуємо mainSkills з Prisma Date в string
-  const mainSkillsForMock = mainSkillsData.map((skill) => ({
-    ...skill,
-    createdAt: skill.createdAt.toISOString(),
-    updatedAt: skill.updatedAt.toISOString(),
-  }));
-
-  const mockSkillTrees =
-    races.length > 0
-      ? races.map((race) => createMockSkillTree(id, race.name, mainSkillsForMock))
-      : [];
-
-  // Використовуємо моки якщо немає даних в БД
-  const skillTrees =
-    skillTreesData.length > 0
-      ? skillTreesData.map((st) => ({
-          id: st.id,
-          campaignId: st.campaignId,
-          race: st.race,
-          skills: st.skills,
-          createdAt: st.createdAt,
-        }))
-      : mockSkillTrees;
-
-  return (
-    <SkillTreePageClient
-      campaignId={id}
-      skillTrees={skillTrees}
-      races={races}
-    />
-  );
+  return <SkillTreePageClient campaignId={id} />;
 }

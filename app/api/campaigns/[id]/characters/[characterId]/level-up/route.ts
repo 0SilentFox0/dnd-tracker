@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { seenLevelOnLevelChange } from "@/lib/utils/characters/seen-level";
 import {
   calculateHPGain,
   getAbilityModifier,
@@ -69,6 +70,8 @@ export async function POST(
 
     // Новий рівень
     const newLevel = character.level + 1;
+
+    const seenLevel = seenLevelOnLevelChange(character.level, newLevel, character.seenLevel);
 
     // Розраховуємо модифікатор конституції для розрахунку HP
     const conMod = getAbilityModifier(character.constitution);
@@ -190,6 +193,7 @@ export async function POST(
       where: { id: characterId },
       data: {
         level: newLevel,
+        ...(seenLevel !== undefined && { seenLevel }),
         ...updatedAbilities,
         maxHp: newMaxHp,
         currentHp: newCurrentHp,

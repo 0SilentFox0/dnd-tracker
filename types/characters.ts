@@ -71,11 +71,6 @@ export interface CharacterFormData {
     meleeMultiplier: number;
     rangedMultiplier: number;
   };
-  /** Прогрес по деревах прокачки: skillTreeId → { unlockedSkills } */
-  skillTreeProgress?: Record<
-    string,
-    { level?: string; unlockedSkills?: string[] }
-  >;
 }
 
 /**
@@ -137,6 +132,7 @@ export interface Character {
     string,
     { level?: string; unlockedSkills?: string[] }
   >;
+  seenLevel?: number | null;
   createdAt: string;
   updatedAt: string;
   user?: {

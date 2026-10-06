@@ -3,34 +3,14 @@
  */
 
 import { campaignGet, campaignPatch } from "@/lib/api/client";
-import type {
-  UpdateSkillTreeParams,
-  UpdateSkillTreeResponse,
-} from "@/types/api";
+import type { RawTree } from "@/lib/utils/skills/progression";
 
-export interface SkillTree {
-  id: string;
-  campaignId: string;
-  [key: string]: unknown;
+export interface SkillTreeRow { id: string; campaignId: string; race: string; skills: unknown; createdAt: string }
+
+export async function getSkillTrees(campaignId: string): Promise<SkillTreeRow[]> {
+  return campaignGet<SkillTreeRow[]>(campaignId, "/skill-trees");
 }
 
-export async function getSkillTrees(
-  campaignId: string,
-): Promise<SkillTree[]> {
-  return campaignGet<SkillTree[]>(campaignId, "/skill-trees");
-}
-
-/**
- * Оновлює дерево навиків
- */
-export async function updateSkillTree({
-  campaignId,
-  treeId,
-  skills,
-}: UpdateSkillTreeParams): Promise<UpdateSkillTreeResponse> {
-  return campaignPatch<UpdateSkillTreeResponse>(
-    campaignId,
-    `/skill-trees/${treeId}`,
-    { skills },
-  );
+export async function updateSkillTree(params: { campaignId: string; treeId: string; race: string; skills: RawTree }): Promise<{ id: string; race: string; skills: RawTree }> {
+  return campaignPatch(params.campaignId, `/skill-trees/${params.treeId}`, { race: params.race, skills: params.skills });
 }

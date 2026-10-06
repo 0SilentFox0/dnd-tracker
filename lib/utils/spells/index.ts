@@ -4,12 +4,8 @@
  */
 
 export {
-  calculateSpellsToAdd,
   getSpellsForLevels,
   getSpellsToAddForSkill,
 } from "./spell-learning";
-export {
-  getLearnedSpellIdsFromProgress,
-  getLearnedSpellIdsFromTree,
-} from "./spell-learning-from-tree";
-export { getSpellLevelsForSkillLevel } from "./spell-learning-internals";
+export { learnedSpellIdsFromNodes } from "./spell-learning-from-tree";
+export { getSpellLevelsForSkillLevel, type SpellSkillInfo, toSpellSkillInfo } from "./spell-learning-internals";

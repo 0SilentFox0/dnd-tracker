@@ -20,6 +20,7 @@ import { Prisma, PrismaClient } from "@prisma/client";
 
 import { AttackType } from "../lib/constants/battle";
 import { DEFAULT_CAMPAIGN_ID } from "../lib/constants/campaigns";
+import { buildTreeJson } from "../lib/utils/skills/progression";
 import {
   getElfSkillsData,
   getHumanSkillsData,
@@ -295,23 +296,14 @@ async function seedMockData() {
         data: {
           campaignId: CAMPAIGN_ID,
           race: "human",
-          skills: [
-            {
-              mainSkillId: createdMainSkills[0].id,
-              skills: [
-                { skillId: createdHumanSkills[0].id, level: "basic" },
-                { skillId: createdHumanSkills[1].id, level: "advanced" },
-              ],
-            },
-            {
-              mainSkillId: createdMainSkills[1].id,
-              skills: [{ skillId: createdHumanSkills[3].id, level: "basic" }],
-            },
-            {
-              mainSkillId: createdMainSkills[2].id,
-              skills: [{ skillId: createdHumanSkills[2].id, level: "basic" }],
-            },
-          ] as Prisma.InputJsonValue,
+          skills: buildTreeJson({
+            race: "human",
+            branches: [
+              { id: createdMainSkills[0].id, name: createdMainSkills[0].name, color: createdMainSkills[0].color, outer: [createdHumanSkills[0].id, createdHumanSkills[1].id] },
+              { id: createdMainSkills[1].id, name: createdMainSkills[1].name, color: createdMainSkills[1].color, outer: [createdHumanSkills[3].id] },
+              { id: createdMainSkills[2].id, name: createdMainSkills[2].name, color: createdMainSkills[2].color, outer: [createdHumanSkills[2].id] },
+            ],
+          }) as unknown as Prisma.InputJsonValue,
         },
       });
       console.log(`  ✅ Створено дерево для: human`);
@@ -332,22 +324,13 @@ async function seedMockData() {
         data: {
           campaignId: CAMPAIGN_ID,
           race: "elf",
-          skills: [
-            {
-              mainSkillId: createdMainSkills[0].id,
-              skills: [
-                { skillId: createdElfSkills[0].id, level: "basic" },
-                { skillId: createdElfSkills[1].id, level: "advanced" },
-              ],
-            },
-            {
-              mainSkillId: createdMainSkills[1].id,
-              skills: [
-                { skillId: createdElfSkills[2].id, level: "basic" },
-                { skillId: createdElfSkills[3].id, level: "advanced" },
-              ],
-            },
-          ] as Prisma.InputJsonValue,
+          skills: buildTreeJson({
+            race: "elf",
+            branches: [
+              { id: createdMainSkills[0].id, name: createdMainSkills[0].name, color: createdMainSkills[0].color, outer: [createdElfSkills[0].id, createdElfSkills[1].id] },
+              { id: createdMainSkills[1].id, name: createdMainSkills[1].name, color: createdMainSkills[1].color, outer: [createdElfSkills[2].id, createdElfSkills[3].id] },
+            ],
+          }) as unknown as Prisma.InputJsonValue,
         },
       });
       console.log(`  ✅ Створено дерево для: elf`);
@@ -573,14 +556,6 @@ async function seedMockData() {
               unlockedSkills,
             },
           } as Prisma.InputJsonValue,
-        },
-      });
-
-      await prisma.characterSkills.create({
-        data: {
-          characterId: character.id,
-          skillTreeId: skillTreeId,
-          unlockedSkills: unlockedSkills as Prisma.InputJsonValue,
         },
       });
 

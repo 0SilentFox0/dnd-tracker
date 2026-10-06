@@ -2,7 +2,7 @@
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@/components/battle/hud/fonts", () => ({ hudFontClassName: "" }));
+vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 
 import { ResultOverlay } from "@/components/battle/fx/ResultOverlay";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";

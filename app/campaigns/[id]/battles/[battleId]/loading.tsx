@@ -1,3 +1,4 @@
+import "@/components/hud/hud.css";
 import "@/components/battle/hud/battle-hud.css";
 import { LoadingState } from "@/components/common/states";
 

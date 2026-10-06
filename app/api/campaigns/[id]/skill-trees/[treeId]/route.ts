@@ -1,67 +1,26 @@
 import { NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
-import { prisma } from "@/lib/db";
+import { saveSkillTree } from "./save-skill-tree-handler";
+
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
-import type { SkillTree } from "@/types/skill-tree";
 
-const updateSkillTreeSchema = z.object({
-  skills: z.unknown(), // SkillTree structure
-});
+const bodySchema = z.object({ race: z.string().min(1), skills: z.object({ mainSkills: z.array(z.object({ id: z.string() }).passthrough()) }).passthrough() });
 
-export async function PATCH(
-  request: Request,
-  { params }: { params: Promise<{ id: string; treeId: string }> }
-) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string; treeId: string }> }) {
   try {
     const { id, treeId } = await params;
-    
-    // Перевіряємо права DM
-    const accessResult = await requireDM(id);
 
-    if (accessResult instanceof NextResponse) {
-      return accessResult;
-    }
+    const access = await requireDM(id);
 
-    const body = await request.json();
+    if (access instanceof NextResponse) return access;
 
-    const data = updateSkillTreeSchema.parse(body);
+    const parsed = bodySchema.safeParse(await request.json().catch(() => null));
 
-    // Перевіряємо чи існує skill tree
-    const existingTree = await prisma.skillTree.findUnique({
-      where: { id: treeId },
-    });
+    if (!parsed.success) return NextResponse.json({ error: "Невалідне дерево" }, { status: 400 });
 
-    let updatedTree;
-    
-    if (!existingTree || existingTree.campaignId !== id) {
-      // Якщо skill tree не існує - створюємо новий
-      // Витягуємо race з skills (якщо це SkillTree об'єкт)
-      const skillsData = data.skills as SkillTree;
-
-      const race = skillsData.race || existingTree?.race || "unknown";
-      
-      updatedTree = await prisma.skillTree.create({
-        data: {
-          id: treeId,
-          campaignId: id,
-          race: race,
-          skills: data.skills as Prisma.InputJsonValue,
-        },
-      });
-    } else {
-      // Оновлюємо існуючий skill tree
-      updatedTree = await prisma.skillTree.update({
-        where: { id: treeId },
-        data: {
-          skills: data.skills as Prisma.InputJsonValue,
-        },
-      });
-    }
-
-    return NextResponse.json(updatedTree);
+    return await saveSkillTree(id, treeId, parsed.data.race, parsed.data.skills);
   } catch (error) {
     return handleApiError(error, { action: "update skill tree" });
   }

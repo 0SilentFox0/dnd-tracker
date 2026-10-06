@@ -5,11 +5,7 @@ import { Printer } from "lucide-react";
 
 import { SkillCard } from "@/components/skills/list/SkillCard";
 import { Button } from "@/components/ui/button";
-import {
-  buildSkillPositionMap,
-  groupSkillsByLevel,
-  type SkillLevelKey,
-} from "@/lib/utils/skills/skill-tree-positions";
+import { PLACEMENT_UNPLACED, skillPlacements } from "@/lib/utils/skills/progression";
 import {
   convertGroupedSkillsToArray,
   groupSkillsByMainSkill,
@@ -26,15 +22,8 @@ interface PrintSkillsPageClientProps {
   campaignName: string;
   initialSkills: Skill[];
   mainSkills: MainSkillForPrint[];
-  skillTrees: Array<{ skills: unknown }>;
+  skillTrees: Array<{ id: string; skills: unknown }>;
 }
-
-const LEVEL_ORDER: (SkillLevelKey | "other")[] = [
-  "basic",
-  "advanced",
-  "expert",
-  "other",
-];
 
 export function PrintSkillsPageClient({
   campaignId,
@@ -44,7 +33,7 @@ export function PrintSkillsPageClient({
   skillTrees,
 }: PrintSkillsPageClientProps) {
   const positions = useMemo(
-    () => buildSkillPositionMap(skillTrees),
+    () => skillPlacements(skillTrees),
     [skillTrees]
   );
 
@@ -89,7 +78,16 @@ export function PrintSkillsPageClient({
         groupedByMainSkill.map(([groupName, groupSkills]) => {
           const mainSkill = mainSkills.find((ms) => ms.name === groupName);
 
-          const byLevel = groupSkillsByLevel(groupSkills, positions);
+          const byGroup = new Map<number, { label: string; skills: typeof groupSkills }>();
+
+          for (const skill of groupSkills) {
+            const place = positions.get(skill.id) ?? PLACEMENT_UNPLACED;
+
+            const entry = byGroup.get(place.group) ?? { label: place.label.split(" · ")[0], skills: [] };
+
+            entry.skills.push(skill);
+            byGroup.set(place.group, entry);
+          }
 
           return (
             <section
@@ -112,13 +110,10 @@ export function PrintSkillsPageClient({
                 </div>
               </div>
 
-              {LEVEL_ORDER.map((levelKey) => {
-                const levelSkills = byLevel[levelKey];
-
-                if (!levelSkills.length) return null;
-
+              {[...byGroup.entries()].sort(([a], [b]) => a - b).map(([group, { label, skills: levelSkills }]) => {
                 return (
-                  <div key={levelKey} className="mb-2">
+                  <div key={group} className="mb-2">
+                    <p className="mb-1 text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                       {levelSkills.map((skill) => (
                         <div key={skill.id} className="print-card">

@@ -153,18 +153,4 @@ export interface SpellCastData {
 }
 
 // Skill Trees API
-import type { SkillTree } from "./skill-tree";
 
-export interface UpdateSkillTreeParams {
-  campaignId: string;
-  treeId: string;
-  skills: SkillTree;
-}
-
-export interface UpdateSkillTreeResponse {
-  id: string;
-  campaignId: string;
-  race: string;
-  skills: SkillTree | { mainSkills?: SkillTree["mainSkills"] };
-  createdAt: string;
-}

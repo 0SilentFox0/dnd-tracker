@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
@@ -160,21 +159,6 @@ export function CreateMainSkillDialog({
           </div>
         )}
 
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="isEnableInSkillTree"
-            checked={formData.isEnableInSkillTree ?? false}
-            onCheckedChange={(checked) =>
-              setFormData((prev) => ({
-                ...prev,
-                isEnableInSkillTree: checked === true,
-              }))
-            }
-          />
-          <Label htmlFor="isEnableInSkillTree" className="text-sm font-normal cursor-pointer">
-            Не показувати в дереві прокачки
-          </Label>
-        </div>
       </form>
     </ResponsiveDialog>
   );

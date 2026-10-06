@@ -11,6 +11,7 @@ export interface SkillEntry {
   row: SkillRowLike;
   mainSkillId: string | null;
   level: string | null;
+  levelNode?: boolean;
   mainSkillSpellGroupId: string | null;
 }
 
@@ -66,7 +67,7 @@ export function skillSource(entry: SkillEntry): AbilitySource {
     id: row.id,
     name: row.name,
     icon: row.icon ?? null,
-    ...(mainSkillId && level && { line: { mainSkillId, level } }),
+    ...(mainSkillId && level && { line: { mainSkillId, level, ...(entry.levelNode !== undefined && { levelNode: entry.levelNode }) } }),
   };
 }
 

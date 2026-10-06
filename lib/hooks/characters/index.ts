@@ -13,7 +13,6 @@ export {
   useLevelUpCharacter,
   useUpdateCharacter,
 } from "./useCharacters";
-export type { SkillTreeProgress } from "./useCharacterView";
 export { useCharacterView } from "./useCharacterView";
 export type { UseDamageCalculatorProps } from "./useDamageCalculator";
 export { useDamageCalculator } from "./useDamageCalculator";
@@ -25,5 +24,3 @@ export type { HeroScalingCoefficients } from "./useHeroScalingCoefficients";
 export { useHeroScalingCoefficients } from "./useHeroScalingCoefficients";
 export type { UseInventoryOptions } from "./useInventory";
 export { useInventory } from "./useInventory";
-export type { UseLearnedSpellIdsOptions } from "./useLearnedSpellIds";
-export { useLearnedSpellIds } from "./useLearnedSpellIds";

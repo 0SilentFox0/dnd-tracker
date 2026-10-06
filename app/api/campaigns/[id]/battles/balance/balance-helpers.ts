@@ -5,7 +5,6 @@
 import { ArtifactModifierType } from "@/lib/constants/artifacts";
 import { AttackType } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
-import { SkillLevel } from "@/lib/types/skill-tree";
 import { type ArtifactModifier, getModifierValue } from "@/lib/utils/battle/participant/artifact-utils";
 
 export { type ArtifactModifier, getModifierValue };
@@ -91,40 +90,4 @@ export async function getCharacterAttacks(
   }
 
   return inlineAttacks;
-}
-
-export function inferLevelFromUnlockedSkillIds(
-  unlockedSkills: string[] | undefined,
-): SkillLevel {
-  if (!unlockedSkills?.length) return SkillLevel.BASIC;
-
-  const joined = unlockedSkills.join(" ").toLowerCase();
-
-  if (joined.includes("expert")) return SkillLevel.EXPERT;
-
-  if (joined.includes("advanced")) return SkillLevel.ADVANCED;
-
-  return SkillLevel.BASIC;
-}
-
-export function enrichSkillTreeProgressWithInferredLevels(
-  progress:
-    | Record<string, { level?: string; unlockedSkills?: string[] }>
-    | null
-    | undefined,
-): Record<string, { level?: string; unlockedSkills?: string[] }> | undefined {
-  if (!progress || typeof progress !== "object") return undefined;
-
-  const out: Record<string, { level?: string; unlockedSkills?: string[] }> = {};
-
-  for (const [key, entry] of Object.entries(progress)) {
-    const level =
-      entry?.level != null && entry.level !== ""
-        ? entry.level
-        : (inferLevelFromUnlockedSkillIds(entry?.unlockedSkills) as string);
-
-    out[key] = { ...entry, level };
-  }
-
-  return out;
 }

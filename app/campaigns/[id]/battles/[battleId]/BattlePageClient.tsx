@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 
+import "@/components/hud/hud.css";
 import "@/components/battle/hud/battle-hud.css";
 import { BattleSceneProvider } from "@/components/battle/scene/BattleSceneProvider";
 import { BattleScreen } from "@/components/battle/scene/BattleScreen";

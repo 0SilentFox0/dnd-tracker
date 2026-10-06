@@ -5,7 +5,6 @@
 import type { ResolvedAbility } from "./abilities";
 import type { AttackData, BattleScene } from "./api";
 import type { BattleParticipant } from "./battle";
-import type { SkillCircle as SkillCircleEnum, SkillLevel } from "./skill-tree";
 
 import { SpellDamageType, SpellType } from "@/lib/constants/spell-abilities";
 
@@ -24,19 +23,6 @@ export interface SpellCastData {
   savingThrows?: Array<{ participantId: string; roll: number }>;
   additionalRollResult?: number;
   hitRoll?: number;
-}
-
-/**
- * Слот скіла
- */
-export interface SkillSlot {
-  mainSkillId: string;
-  circle: SkillCircleEnum;
-  level: SkillLevel;
-  index: number;
-  isMainSkillLevel?: boolean;
-  isRacial?: boolean;
-  skillName?: string;
 }
 
 /**

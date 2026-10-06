@@ -24,7 +24,8 @@ export interface RaceFormFieldsProps {
   campaignId: string;
   formData: RaceFormData;
   setFormData: React.Dispatch<React.SetStateAction<RaceFormData>>;
-  mainSkills: MainSkill[];
+  /** Не використовується: набір гілок раси тепер задає дерево прокачки. */
+  mainSkills?: MainSkill[];
   /** Compact (Dialog) — менший max-h, опис тоншим. */
   compact?: boolean;
   abilityIssues?: ConversionIssue[];
@@ -35,30 +36,10 @@ export function RaceFormFields({
   campaignId,
   formData,
   setFormData,
-  mainSkills,
   compact = false,
   abilityIssues,
   onAbilitiesValidityChange,
 }: RaceFormFieldsProps) {
-  const toggleAvailableSkill = (skillId: string) => {
-    setFormData((prev) => {
-      const isSelected = prev.availableSkills.includes(skillId);
-
-      const newAvailable = isSelected
-        ? prev.availableSkills.filter((id) => id !== skillId)
-        : [...prev.availableSkills, skillId];
-
-      return {
-        ...prev,
-        availableSkills: newAvailable,
-        // disabledSkills завжди порожній — всі невказані автоматично недоступні.
-        disabledSkills: [],
-      };
-    });
-  };
-
-  const skillsListMaxH = compact ? "max-h-40" : "max-h-60";
-
   return (
     <>
       <div className="space-y-2">
@@ -72,39 +53,6 @@ export function RaceFormFields({
           required
           placeholder={compact ? "Наприклад: Люди, Ельфи, Демони" : undefined}
         />
-      </div>
-
-      <div className="space-y-2">
-        <Label>Доступні скіли для прокачки</Label>
-        <p className="text-xs text-muted-foreground">
-          Виберіть основні навики, які будуть доступні для прокачки цієї
-          раси. Всі невказані навики будуть недоступні.
-        </p>
-        <div className={`border rounded-md p-3 ${skillsListMaxH} overflow-y-auto`}>
-          {mainSkills.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              Немає доступних основних навиків. Створіть їх в розділі
-              &quot;Основні Навики&quot;.
-            </p>
-          ) : (
-            <div className="space-y-2">
-              {mainSkills.map((mainSkill) => (
-                <label
-                  key={mainSkill.id}
-                  className="flex items-center gap-2 cursor-pointer"
-                >
-                  <input
-                    type="checkbox"
-                    checked={formData.availableSkills.includes(mainSkill.id)}
-                    onChange={() => toggleAvailableSkill(mainSkill.id)}
-                    className="rounded"
-                  />
-                  <span className="text-sm">{mainSkill.name}</span>
-                </label>
-              ))}
-            </div>
-          )}
-        </div>
       </div>
 
       <div className="space-y-2">

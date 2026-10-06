@@ -21,11 +21,6 @@ import { getCompletedArtifactSetsPreview } from "@/lib/utils/artifacts/get-compl
 import type { ArtifactSetRow } from "@/types/artifact-sets";
 import type { EquippedItems } from "@/types/inventory";
 
-type SkillTreeProgress = Record<
-  string,
-  { level?: string; unlockedSkills?: string[] }
->;
-
 export interface ArtifactOption {
   id: string;
   name: string;
@@ -39,8 +34,8 @@ type SpellSlotsData = Record<string, { max: number; current: number }>;
 interface CharacterArtifactsSectionProps {
   knownSpellIds: string[];
   campaignId: string;
-  characterRace?: string;
-  skillTreeProgress?: SkillTreeProgress;
+  /** Персонаж, чиє дерево прокачки додає заклинання до книги */
+  progressionCharacterId?: string;
   /** Режим редагування слотів: якщо передано — клік по комірці відкриває меню вибору артефакта */
   characterId?: string;
   equipped?: EquippedItems;
@@ -55,8 +50,7 @@ interface CharacterArtifactsSectionProps {
 export function CharacterArtifactsSection({
   knownSpellIds,
   campaignId,
-  characterRace,
-  skillTreeProgress = {},
+  progressionCharacterId,
   characterId,
   equipped = {},
   artifacts = [],
@@ -240,8 +234,7 @@ export function CharacterArtifactsSection({
           <CharacterSpellbook
             knownSpellIds={knownSpellIds}
             campaignId={campaignId}
-            characterRace={characterRace}
-            skillTreeProgress={skillTreeProgress}
+            characterId={progressionCharacterId}
           />
         </div>
       </div>

@@ -1,0 +1,27 @@
+.level-up { background: rgba(5, 4, 3, 0.92); color: #e6dccb; cursor: pointer; }
+.level-up .lu-title { font-weight: 700; font-size: 22px; letter-spacing: 0.24em; color: #c9b37a; opacity: 0; animation: lu-fade 0.6s 0.1s forwards; }
+.level-up .lu-name { margin-top: 6px; font-size: 16px; font-style: italic; color: #b8ab95; opacity: 0; animation: lu-fade 0.6s 0.3s forwards; }
+.level-up .lu-num { position: relative; width: 240px; height: 200px; margin: 24px 0; }
+.level-up .lu-num > span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 168px; line-height: 1; }
+.level-up .lu-old { color: #8a8d92; text-shadow: 0 4px 0 #3a3c40; animation: lu-old-out 0.5s 1.4s cubic-bezier(0.6, 0, 0.8, 0.4) forwards; }
+.level-up .lu-new { opacity: 0; background: linear-gradient(160deg, #8a6414 10%, #ffe9a8 45%, #e6c25a 60%, #8a6414 90%); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0 18px rgba(230, 194, 90, 0.55)); animation: lu-new-in 0.7s 1.85s cubic-bezier(0.2, 1.4, 0.4, 1) forwards; }
+.level-up .lu-glow { position: absolute; left: 50%; top: 50%; width: 420px; height: 420px; margin: -210px 0 0 -210px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 217, 140, 0.55), rgba(230, 194, 90, 0.18) 35%, transparent 65%); opacity: 0; transform: scale(0.3); animation: lu-burst 1.6s 1.85s ease-out forwards; }
+.level-up .lu-rays { position: absolute; left: 50%; top: 50%; width: 520px; height: 520px; margin: -260px 0 0 -260px; background: repeating-conic-gradient(from 0deg, rgba(255, 220, 150, 0.16) 0 4deg, transparent 4deg 18deg); -webkit-mask: radial-gradient(circle, #000 20%, transparent 62%); mask: radial-gradient(circle, #000 20%, transparent 62%); opacity: 0; animation: lu-rays 4s 1.9s ease-out forwards; }
+.level-up .lu-spark { position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; border-radius: 50%; background: #ffe9a8; box-shadow: 0 0 8px #e6c25a; opacity: 0; animation: lu-spark 1.4s 1.9s ease-out forwards; }
+.level-up .lu-info { text-align: center; opacity: 0; animation: lu-fade 0.6s 2.6s forwards; }
+.level-up .lu-info b { font-size: 18px; color: #ffd9a8; letter-spacing: 0.04em; }
+.level-up .lu-info p { margin-top: 6px; font-size: 15px; color: #b8ab95; }
+.level-up .lu-cta { position: absolute; left: 24px; right: 24px; bottom: 40px; height: 52px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 17px; letter-spacing: 0.06em; opacity: 0; animation: lu-fade 0.5s 2.9s forwards; }
+.level-up .lu-skip { position: absolute; bottom: 14px; width: 100%; text-align: center; font-size: 13px; color: #6b5f50; opacity: 0; animation: lu-fade 0.5s 3s forwards; }
+@media (min-width: 640px) { .level-up .lu-cta { left: 50%; right: auto; width: 320px; margin-left: -160px; } }
+@keyframes lu-fade { to { opacity: 1; } }
+@keyframes lu-old-out { to { opacity: 0; transform: translateY(-40px) scale(0.85); filter: blur(4px); } }
+@keyframes lu-new-in { 0% { opacity: 0; transform: scale(0.4); } 100% { opacity: 1; transform: scale(1); } }
+@keyframes lu-burst { 0% { opacity: 0; transform: scale(0.3); } 25% { opacity: 1; } 100% { opacity: 0.55; transform: scale(1); } }
+@keyframes lu-rays { 0% { opacity: 0; transform: rotate(0); } 20% { opacity: 1; } 100% { opacity: 0.6; transform: rotate(25deg); } }
+@keyframes lu-spark { 0% { opacity: 1; transform: translate(0, 0); } 100% { opacity: 0; transform: translate(var(--x), var(--y)); } }
+@media (prefers-reduced-motion: reduce) {
+  .level-up *, .level-up { animation: none !important; }
+  .level-up .lu-old, .level-up .lu-rays, .level-up .lu-spark { display: none; }
+  .level-up .lu-new, .level-up .lu-glow, .level-up .lu-title, .level-up .lu-name, .level-up .lu-info, .level-up .lu-cta, .level-up .lu-skip { opacity: 1; transform: none; }
+}
