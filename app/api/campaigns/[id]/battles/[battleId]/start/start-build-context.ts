@@ -6,8 +6,8 @@ import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
 import { attachArtifactSetsToSpellContext } from "@/lib/utils/battle/artifact-sets";
+import { referencedSkillIds } from "@/lib/utils/battle/participant/extract-skills";
 import type { CampaignSpellContext } from "@/lib/utils/battle/types/participant";
-import { normalizeTree, resolveLearned } from "@/lib/utils/skills/progression";
 
 type CharacterWithRelations = Prisma.CharacterGetPayload<{
   include: { inventory: true };
@@ -17,26 +17,6 @@ type UnitRow = { id: string; raceId: string | null };
 export interface BuildContextResult {
   campaignContext: CampaignSpellContext | undefined;
   racesById: Record<string, Prisma.RaceGetPayload<object> | null>;
-}
-
-function referencedSkillIds(characters: CharacterWithRelations[], trees: Array<Prisma.SkillTreeGetPayload<object>>): string[] {
-  const treeByRace = new Map(trees.map((t) => [t.race, t]));
-
-  const ids = new Set<string>();
-
-  for (const c of characters) {
-    const tree = treeByRace.get(c.race);
-
-    if (tree) {
-      for (const n of resolveLearned(normalizeTree(tree), c.skillTreeProgress)) if (n.skillId) ids.add(n.skillId);
-    }
-
-    const personal = c.personalSkillId?.trim();
-
-    if (personal) ids.add(personal);
-  }
-
-  return [...ids];
 }
 
 /** forBalance: лише скіли, на які посилаються персонажі, і спел-рядки без описів (економія egress). */

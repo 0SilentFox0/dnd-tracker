@@ -38,6 +38,12 @@ function touches(tree: TreeNodes, learned: Set<string>, branchId: string): boole
   return false;
 }
 
+export function skillPoints(tree: TreeNodes, unlocked: string[], characterLevel: number): ProgressionView["points"] {
+  const spent = learnedInTree(tree, unlocked).length;
+
+  return { spent, total: characterLevel, free: Math.max(0, characterLevel - spent) };
+}
+
 export function progressionView(tree: TreeNodes, unlocked: string[], characterLevel: number): ProgressionView {
   const inTree = learnedInTree(tree, unlocked);
 
@@ -56,7 +62,7 @@ export function progressionView(tree: TreeNodes, unlocked: string[], characterLe
   const rows = tree.branches.filter((b) => touches(tree, learned, b.id));
 
   return {
-    points: { spent: inTree.length, total: characterLevel, free: Math.max(0, characterLevel - inTree.length) },
+    points: skillPoints(tree, unlocked, characterLevel),
     racial: BRANCH_LEVELS.map((l) => state(racialNodeId(l))),
     branches: rows.map((b) => {
       const cells = tree.grid.get(b.id) ?? NO_CELLS;

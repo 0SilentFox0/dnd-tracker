@@ -35,6 +35,7 @@ function lira(over: Partial<SheetInput["character"]> = {}, attacks: BattleAttack
     artifacts: [{ id: "a1", name: "Кольчуга ельфів", icon: null, slot: "armor", rarity: "rare", description: null, effects: ["AC +2"] }],
     spells: [],
     personalSkill: null,
+    progression: { freePoints: 0, level: 5, seenLevel: null },
   };
 }
 

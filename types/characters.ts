@@ -236,4 +236,5 @@ export interface CharacterSheet {
   items: { grid: Record<string, SheetArtifact | null>; artifacts: SheetArtifact[]; sets: SetProgress[] };
   personalSkill: { id: string; name: string; icon: string | null; description: string | null } | null;
   story: { biography: string | null; goals: CharacterGoal[] };
+  progression: { freePoints: number; level: number; seenLevel: number | null };
 }
