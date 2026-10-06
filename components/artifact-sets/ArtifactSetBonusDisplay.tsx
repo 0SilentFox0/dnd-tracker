@@ -19,10 +19,10 @@ export function ArtifactSetBonusDisplay({
   if (!title && !desc && abilitySummary.length === 0) return null;
 
   return (
-    <div className={cn("rounded-lg border border-border/80 bg-linear-to-b from-muted/40 to-muted/20 p-3 shadow-sm", className)}>
-      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Ефект сету</p>
-      {title && <p className="mt-1.5 text-sm font-medium text-foreground">{title}</p>}
-      {desc && <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{desc}</p>}
+    <div className={cn("rounded-md bg-[#1a140f] p-3 shadow-[inset_0_0_0_1px_#4a3c2c]", className)}>
+      <p className="hud-sc text-xs tracking-[.06em] text-[#c9b37a]">Ефект сету</p>
+      {title && <p className="mt-1.5 text-sm font-medium text-[#efe5d2]">{title}</p>}
+      {desc && <p className="mt-1.5 text-xs leading-relaxed text-[#8f8473]">{desc}</p>}
       {abilitySummary.length > 0 && (
         <div className="mt-2">
           <AbilitySummary lines={abilitySummary} />
