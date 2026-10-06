@@ -3,8 +3,9 @@
 import { Suspense,useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { AuthCard } from "@/components/auth/AuthCard";
+import { HudPage, HudPanel } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNotify } from "@/lib/hooks/common";
 import { createClient } from "@/lib/supabase/client";
 
@@ -79,45 +80,28 @@ function SignInForm() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl">Вхід в D&D Combat Tracker</CardTitle>
-          <CardDescription>
-            Увійдіть щоб продовжити
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {error && (
-            <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
-              Помилка: {error}
-            </div>
-          )}
-          <Button
-            onClick={handleGoogleSignIn}
-            disabled={loading}
-            className="w-full"
-            size="lg"
-          >
-            {loading ? "Вхід..." : "Вхід через Google"}
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
+    <AuthCard title="Вхід в D&D Combat Tracker" description="Увійдіть щоб продовжити" error={error}>
+      <Button
+        onClick={handleGoogleSignIn}
+        disabled={loading}
+        className="w-full"
+        size="lg"
+      >
+        {loading ? "Вхід..." : "Вхід через Google"}
+      </Button>
+    </AuthCard>
   );
 }
 
 export default function SignInPage() {
   return (
-    <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="p-6">
-            <div className="text-center">Завантаження...</div>
-          </CardContent>
-        </Card>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <HudPage width="md" className="flex min-h-[80vh] items-center justify-center">
+          <HudPanel className="w-full max-w-sm text-center">Завантаження...</HudPanel>
+        </HudPage>
+      }
+    >
       <SignInForm />
     </Suspense>
   );
