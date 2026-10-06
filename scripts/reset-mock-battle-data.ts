@@ -9,7 +9,7 @@
  */
 import { execSync } from "child_process";
 
-import { DEFAULT_CAMPAIGN_ID } from "../lib/constants/campaigns";
+import { DEFAULT_CAMPAIGN_ID } from "./default-campaign";
 
 const CAMPAIGN_ID = process.argv[2] || DEFAULT_CAMPAIGN_ID;
 

@@ -2,11 +2,11 @@ import { PrismaClient } from "@prisma/client";
 import * as fs from "fs";
 import * as path from "path";
 
-import { DEFAULT_CAMPAIGN_ID } from "../lib/constants/campaigns";
 import { importUnitsSchema } from "../lib/schemas/units";
 import { convertCSVRowToUnit } from "../lib/utils/common/unit-parsing";
 import { importUnitsIntoCampaign } from "../lib/utils/units/import-units";
 import type { CSVUnitRow } from "../types/import";
+import { DEFAULT_CAMPAIGN_ID } from "./default-campaign";
 
 const prisma = new PrismaClient();
 

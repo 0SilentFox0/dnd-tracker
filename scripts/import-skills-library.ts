@@ -12,12 +12,12 @@
 
 import { PrismaClient } from "@prisma/client";
 
-import { DEFAULT_CAMPAIGN_ID } from "../lib/constants/campaigns";
 import {
   getCanonicalMainSkillName,
   getMainSkillNameVariants,
 } from "../lib/constants/main-skills";
 import { convertLegacySkill } from "./legacy-convert/convert-skill";
+import { DEFAULT_CAMPAIGN_ID } from "./default-campaign";
 import { loadSkillsFromDoc } from "./import-skills-library-parse";
 import { triggerStringToSkillTriggers } from "./import-skills-library-triggers";
 import type { LibraryEffect, LibrarySkill } from "./import-skills-library-types";

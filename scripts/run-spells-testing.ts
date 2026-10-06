@@ -18,6 +18,7 @@ import { Prisma } from "@prisma/client";
 import * as fs from "fs";
 import * as path from "path";
 
+import { DEFAULT_CAMPAIGN_ID } from "./default-campaign";
 import {
   buildDescriptionFromTestCase,
   formatEffect,
@@ -37,7 +38,6 @@ import {
   mod,
 } from "./run-spells-testing-mocks";
 
-import { DEFAULT_CAMPAIGN_ID } from "@/lib/constants";
 import { prisma } from "@/lib/db";
 import type { BattleSpell } from "@/lib/utils/battle/spell";
 import { processSpell } from "@/lib/utils/battle/spell";
