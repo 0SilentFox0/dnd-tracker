@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getResponseJson } from "./helpers";
@@ -53,6 +54,21 @@ describe("progression actions", () => {
 
     expect(call.where).toEqual({ id: "ch", level: 3, skillTreeProgress: { equals: CHAR.skillTreeProgress } });
     expect(call.data).toEqual({ skillTreeProgress: { "row-id": { unlockedSkills: ["attack_basic_level", "o1"] } } });
+  });
+
+  it("JSON null у прогресі ('null'::jsonb): вивчення працює, guard порівнює з JsonNull", async () => {
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("owner", "player"));
+    vi.mocked(prisma.character.findFirst).mockResolvedValue({ ...CHAR, skillTreeProgress: null } as never);
+
+    const res = await post("learn", { nodeId: "attack_basic_level" });
+
+    expect(res.status).toBe(200);
+    expect(await getResponseJson(res)).toEqual({ unlocked: ["attack_basic_level"] });
+
+    const call = vi.mocked(prisma.character.updateMany).mock.calls[0][0];
+
+    expect(call.where).toEqual({ id: "ch", level: 3, skillTreeProgress: { equals: Prisma.JsonNull } });
+    expect(call.data).toEqual({ skillTreeProgress: { "row-id": { unlockedSkills: ["attack_basic_level"] } } });
   });
 
   it("порушення правил → 422 з reason", async () => {

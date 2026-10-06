@@ -13,7 +13,7 @@ export async function runProgressionAction(campaignId: string, characterId: stri
 
   if (ctx instanceof NextResponse) return ctx;
 
-  const { character, treeRow, isDM } = ctx;
+  const { character, treeRow, isDM, progressRead } = ctx;
 
   if (action.type !== "learn" && !isDM) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
@@ -40,7 +40,7 @@ export async function runProgressionAction(campaignId: string, characterId: stri
   }
 
   const { count } = await prisma.character.updateMany({
-    where: { id: character.id, level: character.level, skillTreeProgress: { equals: character.skillTreeProgress as Prisma.InputJsonValue } },
+    where: { id: character.id, level: character.level, skillTreeProgress: { equals: progressRead } },
     data: { skillTreeProgress: nextProgress },
   });
 
