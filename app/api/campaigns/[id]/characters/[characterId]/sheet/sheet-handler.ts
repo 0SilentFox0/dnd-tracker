@@ -8,31 +8,12 @@ import { loadCharacterContext } from "@/lib/utils/battle/participant/load-charac
 import { getCharacterImmunities } from "@/lib/utils/characters/character-race-effects";
 import { buildCharacterSheet } from "@/lib/utils/characters/sheet";
 import { normalizeTree, readUnlocked, skillPoints } from "@/lib/utils/skills/progression";
-import { toBookSpell } from "@/lib/utils/spells/to-book-spell";
+import { loadBookSpellsByIds } from "@/lib/utils/spells/book-spells-by-ids";
 import type { CharacterSheet, SheetArtifact } from "@/types/characters";
 
 export const loadSheetCharacter = (characterId: string) => prisma.character.findUnique({ where: { id: characterId }, include: { inventory: true } });
 
 export type SheetCharacter = NonNullable<Awaited<ReturnType<typeof loadSheetCharacter>>>;
-
-const SPELL_SELECT = {
-  id: true,
-  name: true,
-  level: true,
-  type: true,
-  damageType: true,
-  diceCount: true,
-  diceType: true,
-  savingThrow: true,
-  hitCheck: true,
-  description: true,
-  icon: true,
-  range: true,
-  duration: true,
-  concentration: true,
-  damageElement: true,
-  spellGroup: { select: { id: true, name: true } },
-} as const;
 
 export async function buildSheetFor(character: SheetCharacter, viewer: CharacterSheet["viewer"], maxLevel: number): Promise<CharacterSheet> {
   const { context, race, tree } = await loadCharacterContext(character, maxLevel);
@@ -43,7 +24,7 @@ export async function buildSheetFor(character: SheetCharacter, viewer: Character
 
   const known = participant.spellcasting.knownSpells ?? [];
 
-  const spells = known.length ? await prisma.spell.findMany({ where: { campaignId: character.campaignId, id: { in: known } }, select: SPELL_SELECT }) : [];
+  const spells = await loadBookSpellsByIds(character.campaignId, known);
 
   const rows = await loadEquippedArtifactRows(character, context.artifactsById);
 
@@ -61,7 +42,7 @@ export async function buildSheetFor(character: SheetCharacter, viewer: Character
     raceIcon: race?.icon ?? null,
     immunities: getCharacterImmunities(character, race as never),
     artifacts,
-    spells: spells.map(toBookSpell),
+    spells,
     personalSkill: personal ? { id: personal.id, name: personal.name, icon: personal.icon, description: personal.description } : null,
     progression: {
       freePoints: normalized ? skillPoints(normalized, readUnlocked(normalized, character.skillTreeProgress), character.level).free : 0,

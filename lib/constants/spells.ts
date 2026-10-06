@@ -73,3 +73,5 @@ const SPELL_DAMAGE_TYPE_LABELS: Record<string, string> = { damage: "Шкода",
 export function getSpellDamageTypeLabel(value: string): string {
   return SPELL_DAMAGE_TYPE_LABELS[value] ?? value;
 }
+
+export const SPELL_IDS_QUERY_MAX = 200;

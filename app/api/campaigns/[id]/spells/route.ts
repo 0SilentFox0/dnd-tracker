@@ -2,11 +2,14 @@ import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
+import { listSpellsQuerySchema } from "./list-spells-query";
+
 import { getCachedSpells } from "@/lib/cache/reference-data";
 import { prisma } from "@/lib/db";
 import { createSpellSchema } from "@/lib/schemas";
 import { requireCampaignAccess,requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { loadBookSpellsByIds } from "@/lib/utils/spells/book-spells-by-ids";
 
 export async function POST(
   request: Request,
@@ -85,6 +88,10 @@ export async function GET(
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
+
+    const { ids } = listSpellsQuerySchema.parse(Object.fromEntries(new URL(request.url).searchParams));
+
+    if (ids) return NextResponse.json(await loadBookSpellsByIds(id, ids), { headers: { "Cache-Control": "private, no-store" } });
 
     const spells = await getCachedSpells(id);
 
