@@ -6,7 +6,7 @@ import { GripVertical, X } from "lucide-react";
 import { UnitQuickStatsEditor } from "./UnitQuickStatsEditor";
 
 import { AbilitySummary } from "@/components/abilities";
-import { OptimizedImage } from "@/components/common/OptimizedImage";
+import { EntityIcon } from "@/components/common/EntityIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getDamageElementLabel } from "@/lib/constants/damage";
@@ -135,30 +135,7 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
       </div>
       <div className="pl-5">
         <div className="flex items-start gap-3">
-          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-muted flex items-center justify-center shrink-0 relative">
-            {unit.avatar ? (
-              <OptimizedImage
-                src={unit.avatar}
-                alt={unit.name}
-                width={80}
-                height={80}
-                className="w-full h-full object-cover"
-                fallback={
-                  <div className="w-full h-full flex items-center justify-center bg-muted">
-                    <span className="text-2xl text-muted-foreground">
-                      {unit.name[0]?.toUpperCase() || "?"}
-                    </span>
-                  </div>
-                }
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-muted">
-                <span className="text-2xl text-muted-foreground">
-                  {unit.name[0]?.toUpperCase() || "?"}
-                </span>
-              </div>
-            )}
-          </div>
+          <EntityIcon src={unit.avatar} name={unit.name} size={80} className="size-16 rounded-lg text-2xl sm:size-20" />
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-base">{unit.name}</h3>
             {damageModifiers.length > 0 && (

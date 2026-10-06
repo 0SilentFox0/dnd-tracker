@@ -15,6 +15,16 @@ Object.assign(Element.prototype, { hasPointerCapture: () => false, releasePointe
 const withQuery = (ui: React.ReactElement) => <QueryClientProvider client={new QueryClient()}>{ui}</QueryClientProvider>;
 
 describe("картки артефактів", () => {
+  it("ArtifactCard без іконки — літера назви в повній і компактній картці", () => {
+    const artifact = { id: "a1", name: "меч зорі", slot: "weapon", rarity: null, icon: null, description: null, abilitySummary: [] };
+
+    renderWithConfirm(withQuery(<ArtifactCard campaignId="c1" artifact={artifact} />));
+    expect(screen.getByText("М")).toBeInTheDocument();
+    cleanup();
+    renderWithConfirm(withQuery(<ArtifactCard campaignId="c1" artifact={artifact} variant="compact" />));
+    expect(screen.getByText("М")).toBeInTheDocument();
+  });
+
   afterEach(cleanup);
 
   it("ArtifactCard показує опис умінь", () => {

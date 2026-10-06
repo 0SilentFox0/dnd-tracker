@@ -5,7 +5,7 @@ import Link from "next/link";
 import { SkillCardActionsMenu } from "./SkillCardActionsMenu";
 
 import { AbilitySummary } from "@/components/abilities";
-import { OptimizedImage } from "@/components/common/OptimizedImage";
+import { EntityIcon } from "@/components/common/EntityIcon";
 import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/lib/hooks/common";
 import { useMainSkills, useUpdateSkill } from "@/lib/hooks/skills";
@@ -75,28 +75,7 @@ export function SkillCard({
     >
       <div>
         <div className={`flex items-start gap-2 ${printMode ? "mb-1.5" : "mb-3"}`}>
-          {skillIcon && (
-            <div
-              className={`rounded-lg overflow-hidden bg-muted flex items-center justify-center shrink-0 ${
-                printMode ? "w-9 h-9" : "w-12 h-12 sm:w-16 sm:h-16"
-              }`}
-            >
-              <OptimizedImage
-                src={skillIcon}
-                alt={skillName}
-                width={64}
-                height={64}
-                className="w-full h-full object-cover"
-                fallback={
-                  <div className="w-full h-full flex items-center justify-center bg-muted">
-                    <span className="text-xl text-muted-foreground">
-                      {skillName[0]?.toUpperCase() || "?"}
-                    </span>
-                  </div>
-                }
-              />
-            </div>
-          )}
+          {skillIcon && <EntityIcon src={skillIcon} name={skillName} size={64} className={`rounded-lg text-xl ${printMode ? "size-9" : "size-12 sm:size-16"}`} />}
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
               <h3

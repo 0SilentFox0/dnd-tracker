@@ -5,6 +5,7 @@ import { type ReactNode, type Ref, useState } from "react";
 import { Breakdown } from "./Breakdown";
 import { useProfile } from "./ProfileContext";
 
+import { EntityIcon } from "@/components/common/EntityIcon";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { signed } from "@/lib/utils/format";
 
@@ -27,9 +28,7 @@ export function ProfileHero({ actions, ref }: { actions?: ReactNode; ref?: Ref<H
   return (
     <header ref={ref} className="px-4 pt-4 pb-3">
       <div className="flex items-center gap-3">
-        <div className="size-14 shrink-0 overflow-hidden rounded-full border-2 border-[#c9b37a] bg-[#2a2016]">
-          {id.avatar ? <OptimizedImage src={id.avatar} alt="" width={56} height={56} className="size-full object-cover" /> : <span className="hud-sc flex size-full items-center justify-center text-2xl">{id.name[0]}</span>}
-        </div>
+        <EntityIcon src={id.avatar} name={id.name} size={56} className="hud-sc size-14 rounded-full border-2 border-[#c9b37a] bg-[#2a2016] text-2xl text-inherit" />
         <div className="min-w-0 flex-1">
           <h1 className="hud-sc truncate text-xl leading-7 text-[#efe5d2]">{id.name}</h1>
           <p className="flex min-w-0 items-center gap-1.5 text-xs text-[#8f8473]">

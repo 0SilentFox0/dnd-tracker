@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { MoreVertical, Pencil, Trash2, TrendingUp } from "lucide-react";
 
-import { OptimizedImage } from "@/components/common/OptimizedImage";
+import { EntityIcon } from "@/components/common/EntityIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,22 +30,8 @@ export function DmCharacterCard({ character, campaignId, busy, actions }: DmChar
       className="overflow-hidden hover:shadow-lg transition-shadow pt-0"
     >
       <div className="relative aspect-square h-full w-full bg-muted">
-        {character.avatar ? (
-          <>
-            <OptimizedImage
-              src={character.avatar}
-              alt=""
-              className="absolute inset-0 h-full w-full object-cover"
-              width={100}
-              height={100}
-            />
-            <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/30 to-transparent" />
-          </>
-        ) : (
-          <div className="absolute inset-0 bg-muted flex items-center justify-center text-4xl font-bold text-muted-foreground">
-            {character.name.charAt(0).toUpperCase()}
-          </div>
-        )}
+        <EntityIcon src={character.avatar} name={character.name} size={100} className="absolute inset-0 size-full rounded-none text-4xl font-bold" />
+        {character.avatar && <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/30 to-transparent" />}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
