@@ -34,10 +34,14 @@ export function useProgressionActions(campaignId: string, characterId: string) {
       const { unlocked } = await call();
 
       queryClient.setQueryData<CharacterProgressionDto>(key, (old) => (old ? { ...old, unlocked } : old));
-      queryClient.setQueryData<{ skillTreeProgress?: unknown }>(["character", campaignId, characterId], (old) => {
+      queryClient.setQueryData<{ skillTreeProgress?: Record<string, object> | null }>(["character", campaignId, characterId], (old) => {
         const treeId = queryClient.getQueryData<CharacterProgressionDto>(key)?.treeId;
 
-        return old && treeId ? { ...old, skillTreeProgress: { [treeId]: { unlockedSkills: unlocked } } } : old;
+        if (!old || !treeId) return old;
+
+        const progress = old.skillTreeProgress ?? {};
+
+        return { ...old, skillTreeProgress: { ...progress, [treeId]: { ...progress[treeId], unlockedSkills: unlocked } } };
       });
       void queryClient.invalidateQueries({ queryKey: characterSheetKey(campaignId, characterId) });
       void queryClient.invalidateQueries({ queryKey: ["battle-balance"], refetchType: "none" });

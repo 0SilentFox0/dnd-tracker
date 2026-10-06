@@ -42,6 +42,22 @@ describe("useProgressionActions", () => {
     expect(invalidate).not.toHaveBeenCalledWith(expect.objectContaining({ queryKey: progressionKey("camp", "ch") }));
   });
 
+  it("learn зливає skillTreeProgress[treeId] у кеші персонажа, не стираючи інші дерева й поля", async () => {
+    vi.mocked(api.learnNode).mockResolvedValue({ unlocked: ["a", "b"] });
+
+    const { qc, result } = setup();
+
+    qc.setQueryData(progressionKey("camp", "ch"), { treeId: "t1", unlocked: ["a"], level: 3 });
+    qc.setQueryData(["character", "camp", "ch"], { id: "ch", skillTreeProgress: { other: { unlockedSkills: ["x"] }, t1: { level: "basic", unlockedSkills: ["a"] } } });
+
+    await act(() => result.current.learn("b"));
+
+    expect(qc.getQueryData<{ skillTreeProgress: unknown }>(["character", "camp", "ch"])?.skillTreeProgress).toEqual({
+      other: { unlockedSkills: ["x"] },
+      t1: { level: "basic", unlockedSkills: ["a", "b"] },
+    });
+  });
+
   it("409 → інвалідує прогрес і повідомляє", async () => {
     vi.mocked(api.learnNode).mockRejectedValue(new ApiError("conflict", 409, "/x", {}));
 

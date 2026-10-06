@@ -18,7 +18,7 @@ export function useLevelUpCelebration(campaignId: string, characterId: string) {
 
   const markedFor = useRef<number | null>(null);
 
-  const pending = !!data?.isOwner && data.seenLevel !== null && data.level > data.seenLevel;
+  const pending = !!data?.isOwner && !data.isDM && data.seenLevel !== null && data.level > data.seenLevel;
 
   useEffect(() => {
     if (!pending || !data || markedFor.current === data.level) return;

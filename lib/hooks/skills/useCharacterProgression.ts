@@ -13,6 +13,7 @@ export function useCharacterProgression(campaignId: string, characterId: string 
     queryKey: progressionKey(campaignId, characterId ?? ""),
     queryFn: () => getCharacterProgression(campaignId, characterId ?? ""),
     enabled: !!campaignId && !!characterId,
+    staleTime: 0,
   });
 
   const { data } = query;
