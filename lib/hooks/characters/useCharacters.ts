@@ -22,7 +22,7 @@ export type { Character };
 /** Без `opts` — усі персонажі кампанії (гравці та npc_hero). `compact` — без важких JSON/інвентаря (менший egress). */
 export function useCharacters(
   campaignId: string,
-  opts?: { type?: CharacterTypeValue; compact?: boolean },
+  opts?: { type?: CharacterTypeValue; compact?: boolean; enabled?: boolean },
 ) {
   return useQuery<Character[]>({
     queryKey: [
@@ -31,9 +31,9 @@ export function useCharacters(
       opts?.type ?? "all",
       opts?.compact ? "compact" : "full",
     ],
-    queryFn: () => getCharacters(campaignId, opts),
+    queryFn: () => getCharacters(campaignId, { type: opts?.type, compact: opts?.compact }),
     staleTime: ENTITY_STALE_MS,
-    enabled: !!campaignId,
+    enabled: !!campaignId && (opts?.enabled ?? true),
   });
 }
 

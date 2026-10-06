@@ -7,13 +7,13 @@ import type { Unit } from "@/types/units";
 
 export type { Unit };
 
-export function useUnits(campaignId: string, initialUnits?: Unit[]) {
+export function useUnits(campaignId: string, initialUnits?: Unit[], opts?: { enabled?: boolean }) {
   return useQuery<Unit[]>({
     queryKey: ["units", campaignId],
     queryFn: () => getUnits(campaignId),
     staleTime: REFERENCE_STALE_MS,
     ...(initialUnits !== undefined && { initialData: initialUnits }),
-    enabled: !!campaignId,
+    enabled: !!campaignId && (opts?.enabled ?? true),
   });
 }
 
