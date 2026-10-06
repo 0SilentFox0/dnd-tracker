@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { NumberInput } from "@/components/ui/number-input";
 import { SelectField } from "@/components/ui/select-field";
 import type { WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
 
@@ -28,28 +28,6 @@ const ATTACK_TYPE_OPTIONS = [
   { value: "melee", label: "Ближня" },
   { value: "ranged", label: "Дальня" },
 ];
-
-function NumberInput({ id, value, onChange }: { id: string; value: number | undefined; onChange: (v: number | undefined) => void }) {
-  const [text, setText] = useState(value === undefined ? "" : String(value));
-
-  return (
-    <Input
-      id={id}
-      inputMode="numeric"
-      value={text}
-      onChange={(e) => {
-        const next = e.target.value;
-
-        setText(next);
-
-        const n = Number(next);
-
-        if (next.trim() === "") onChange(undefined);
-        else if (Number.isFinite(n)) onChange(Math.trunc(n));
-      }}
-    />
-  );
-}
 
 export function ArtifactWeaponFields({ value, onChange }: { value: WeaponStats; onChange: (next: WeaponStats) => void }) {
   const set = <K extends keyof WeaponStats>(key: K, v: WeaponStats[K]) => {

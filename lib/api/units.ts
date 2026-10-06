@@ -31,6 +31,10 @@ export async function getUnit(
   return campaignGet<Unit>(campaignId, `/units/${unitId}`);
 }
 
+export async function createUnit(campaignId: string, data: Partial<Unit>): Promise<Unit> {
+  return campaignPost<Unit>(campaignId, "/units", data);
+}
+
 export async function deleteAllUnits(
   campaignId: string,
 ): Promise<{ success: boolean; deleted: number }> {

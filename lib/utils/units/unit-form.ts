@@ -1,14 +1,9 @@
 import type { Unit } from "@/types/units";
 
 export function buildUnitFormData(unit: Unit): Partial<Unit> {
-  const raceValue =
-    (unit.race && unit.race.trim()) ||
-    (unit.unitGroup?.name as string | undefined) ||
-    null;
-
   return {
     name: unit.name,
-    race: raceValue,
+    raceId: unit.raceId ?? null,
     level: unit.level,
     strength: unit.strength,
     dexterity: unit.dexterity,
@@ -25,9 +20,7 @@ export function buildUnitFormData(unit: Unit): Partial<Unit> {
     abilities: unit.abilities ?? [],
     immunities: Array.isArray(unit.immunities) ? unit.immunities : [],
     knownSpells: Array.isArray(unit.knownSpells) ? unit.knownSpells : [],
-    groupId: unit.groupId || null,
     avatar: unit.avatar || null,
-    damageModifier: unit.damageModifier || null,
     minTargets: unit.minTargets,
     maxTargets: unit.maxTargets,
   };
@@ -36,6 +29,7 @@ export function buildUnitFormData(unit: Unit): Partial<Unit> {
 export function emptyUnitFormDefaults(): Partial<Unit> {
   return {
     name: "",
+    raceId: null,
     level: 1,
     strength: 10,
     dexterity: 10,
@@ -53,22 +47,24 @@ export function emptyUnitFormDefaults(): Partial<Unit> {
     immunities: [],
     knownSpells: [],
     avatar: null,
-    damageModifier: null,
-    race: null,
     minTargets: 1,
     maxTargets: 1,
   };
 }
 
+const cleanAvatar = (avatar: string | null | undefined) => avatar?.trim() || null;
+
+// Stored avatars may predate the avatar schema; resending them unchanged would fail the whole PATCH
 export function buildUnitUpdatePayload(form: Partial<Unit>, unit: Unit | undefined): Partial<Unit> {
-  return {
-    ...form,
-    knownSpells: form.knownSpells !== undefined ? form.knownSpells : unit?.knownSpells ?? [],
-    race:
-      form.race !== undefined
-        ? String(form.race ?? "").trim() || null
-        : (unit?.race?.trim() ?? null),
-    avatar: form.avatar === undefined ? undefined : form.avatar || null,
-    damageModifier: form.damageModifier === undefined ? undefined : form.damageModifier,
-  };
+  const { avatar, ...rest } = form;
+
+  const payload: Partial<Unit> = { ...rest, knownSpells: form.knownSpells ?? unit?.knownSpells ?? [] };
+
+  if (avatar === undefined || cleanAvatar(avatar) === (unit?.avatar ?? null)) return payload;
+
+  return { ...payload, avatar: cleanAvatar(avatar) };
+}
+
+export function buildUnitCreatePayload(form: Partial<Unit>): Partial<Unit> {
+  return { ...form, avatar: cleanAvatar(form.avatar) };
 }

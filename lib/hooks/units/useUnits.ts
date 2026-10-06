@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
+  createUnit,
   createUnitGroup,
   deleteAllUnits,
   deleteUnit,
@@ -47,6 +48,13 @@ export function useUnit(campaignId: string, unitId: string) {
     queryKey: ["unit", campaignId, unitId],
     queryFn: () => getUnit(campaignId, unitId),
     staleTime: REFERENCE_STALE_MS,
+  });
+}
+
+export function useCreateUnit(campaignId: string) {
+  return useCrudMutation({
+    mutationFn: (data: Partial<Unit>) => createUnit(campaignId, data),
+    invalidateKeys: [["units", campaignId]],
   });
 }
 
