@@ -31,6 +31,7 @@ describe("Історія", () => {
     renderWithConfirm(<BiographyText text={"Мати ==загинула== <b>давно</b>"} />);
 
     expect(screen.getByText("загинула").tagName).toBe("MARK");
+    expect(screen.getByText("загинула").className).toContain("bg-transparent");
     expect(screen.getByText(/<b>давно<\/b>/)).toBeTruthy();
   });
 

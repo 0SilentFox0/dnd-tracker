@@ -7,7 +7,7 @@ export function BiographyText({ text }: { text: string }) {
         <p key={i} className="whitespace-pre-line">
           {parseHighlights(p).map((s, j) =>
             s.marked ? (
-              <mark key={j} className="bg-[linear-gradient(transparent_55%,rgba(201,179,122,.45)_55%)] text-[#efe5d2]">
+              <mark key={j} className="bg-transparent bg-[linear-gradient(transparent_55%,rgba(201,179,122,.45)_55%)] text-[#efe5d2]">
                 {s.text}
               </mark>
             ) : (

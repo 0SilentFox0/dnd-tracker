@@ -25,4 +25,11 @@ describe("updateCharacterSchema", () => {
     expect(parsed.ideals).toBeUndefined();
     expect(parsed.hitDice).toBeUndefined();
   });
+
+  it("порожні nullable-колонки з БД (null) не ламають збереження", () => {
+    const parsed = updateCharacterSchema.parse({ subclass: null, subrace: null, alignment: null, background: null, avatar: null, spellcastingClass: null });
+
+    expect(parsed.subclass).toBeNull();
+    expect(parsed.background).toBeNull();
+  });
 });

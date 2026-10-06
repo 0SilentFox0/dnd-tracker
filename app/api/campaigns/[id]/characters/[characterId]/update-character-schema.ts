@@ -7,16 +7,16 @@ export const updateCharacterSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   level: z.number().min(1).max(30).optional(),
   class: z.string().min(1).optional(),
-  subclass: z.string().optional(),
+  subclass: z.string().nullable().optional(),
   race: z.preprocess(
     (v) => (v === "" || v === null ? undefined : v),
     z.string().min(1).optional(),
   ),
-  subrace: z.string().optional(),
-  alignment: z.string().optional(),
-  background: z.string().max(20000).optional(),
+  subrace: z.string().nullable().optional(),
+  alignment: z.string().nullable().optional(),
+  background: z.string().max(20000).nullable().optional(),
   experience: z.number().min(0).optional(),
-  avatar: z.string().optional(),
+  avatar: z.string().nullable().optional(),
 
   // Ability Scores
   strength: z.number().min(1).max(30).optional(),
@@ -39,7 +39,7 @@ export const updateCharacterSchema = z.object({
   skills: z.record(z.string(), z.boolean()).optional(),
 
   // Заклинання
-  spellcastingClass: z.string().optional(),
+  spellcastingClass: z.string().nullable().optional(),
   spellcastingAbility: z.preprocess(
     (v) => (v === "" ? null : v),
     z.enum(["intelligence", "wisdom", "charisma"]).nullable().optional(),
