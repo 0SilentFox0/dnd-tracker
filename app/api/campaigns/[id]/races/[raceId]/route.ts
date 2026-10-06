@@ -1,9 +1,9 @@
-import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 
 import { raceNameConflict } from "../race-name";
 import { updateRaceCascade } from "./update-race";
 
+import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import { updateRaceSchema } from "@/lib/schemas";
 import { readAbilities } from "@/lib/utils/abilities/read";
@@ -76,8 +76,7 @@ export async function PATCH(
 
     const updatedRace = await updateRaceCascade(id, race, data);
 
-    revalidateTag(`races-${id}`, { expire: 0 });
-    revalidateTag(`units-${id}`, { expire: 0 });
+    invalidateReference([ReferenceKind.RACES, ReferenceKind.UNITS], id);
 
     return NextResponse.json(updatedRace);
   } catch (error) {
@@ -115,8 +114,7 @@ export async function DELETE(
       },
     });
 
-    revalidateTag(`races-${id}`, { expire: 0 });
-    revalidateTag(`units-${id}`, { expire: 0 });
+    invalidateReference([ReferenceKind.RACES, ReferenceKind.UNITS], id);
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -1,10 +1,11 @@
-import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 
 import { getCachedMainSkills } from "@/lib/cache/reference-data";
+import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import { createMainSkillSchema } from "@/lib/schemas";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
+import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 
 export async function GET(
@@ -23,12 +24,7 @@ export async function GET(
 
     const mainSkills = await getCachedMainSkills(id);
 
-    return NextResponse.json(mainSkills, {
-      headers: {
-        "Cache-Control":
-          "public, s-maxage=60, stale-while-revalidate=300",
-      },
-    });
+    return NextResponse.json(mainSkills, { headers: PRIVATE_NO_STORE_HEADERS });
   } catch (error) {
     return handleApiError(error, { action: "list main skills" });
   }
@@ -41,7 +37,6 @@ export async function POST(
   try {
     const { id } = await params;
     
-    // Перевіряємо права DM
     const accessResult = await requireDM(id);
 
     if (accessResult instanceof NextResponse) {
@@ -63,7 +58,7 @@ export async function POST(
       },
     });
 
-    revalidateTag(`main-skills-${id}`, "max");
+    invalidateReference([ReferenceKind.MAIN_SKILLS, ReferenceKind.SKILLS], id);
 
     return NextResponse.json(mainSkill);
   } catch (error) {

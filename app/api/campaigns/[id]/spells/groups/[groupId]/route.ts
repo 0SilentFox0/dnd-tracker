@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import { updateSpellGroupSchema } from "@/lib/schemas";
 import { requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
@@ -12,7 +13,6 @@ export async function PATCH(
   try {
     const { id, groupId } = await params;
     
-    // Перевіряємо права DM
     const accessResult = await requireDM(id);
 
     if (accessResult instanceof NextResponse) {
@@ -40,6 +40,8 @@ export async function PATCH(
       },
     });
 
+    invalidateReference(ReferenceKind.SPELLS, id);
+
     return NextResponse.json(updatedGroup);
   } catch (error) {
     return handleApiError(error, { action: "update spell group" });
@@ -53,7 +55,6 @@ export async function DELETE(
   try {
     const { id, groupId } = await params;
     
-    // Перевіряємо права DM
     const accessResult = await requireDM(id);
 
     if (accessResult instanceof NextResponse) {
@@ -74,6 +75,8 @@ export async function DELETE(
     await prisma.spellGroup.delete({
       where: { id: groupId },
     });
+
+    invalidateReference(ReferenceKind.SPELLS, id);
 
     return NextResponse.json({ success: true });
   } catch (error) {

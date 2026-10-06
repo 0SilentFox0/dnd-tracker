@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import { requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
@@ -11,7 +12,6 @@ export async function POST(
   try {
     const { id, spellId } = await params;
     
-    // Перевіряємо права DM
     const accessResult = await requireDM(id);
 
     if (accessResult instanceof NextResponse) {
@@ -37,6 +37,8 @@ export async function POST(
         spellGroup: true,
       },
     });
+
+    invalidateReference(ReferenceKind.SPELLS, id);
 
     return NextResponse.json(updatedSpell);
   } catch (error) {
