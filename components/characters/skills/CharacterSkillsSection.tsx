@@ -1,7 +1,4 @@
-/**
- * Компонент для навичок та збережень персонажа
- */
-
+import { HudSection } from "@/components/hud/form";
 import { DND_SAVING_THROWS, DND_SKILL_META, DND_SKILLS } from "@/lib/constants";
 import { CORE_ABILITY_SCORES } from "@/lib/constants/abilities";
 
@@ -22,9 +19,8 @@ export function CharacterSkillsSection({
   const { savingThrows, skills, handlers } = skillsGroup;
   
   return (
-    <div className="space-y-6 w-full">
-      <div>
-        <h4 className="font-semibold mb-3">Рятівні кидки</h4>
+    <div className="w-full">
+      <HudSection title="Рятівні кидки">
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
           {DND_SAVING_THROWS.map((ability) => (
             <label key={ability} className="flex h-11 items-center space-x-2 cursor-pointer">
@@ -38,10 +34,9 @@ export function CharacterSkillsSection({
             </label>
           ))}
         </div>
-      </div>
+      </HudSection>
 
-      <div>
-        <h4 className="font-semibold mb-3">Навички</h4>
+      <HudSection title="Навички">
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
           {DND_SKILLS.map((skill) => (
             <label key={skill} className="flex h-11 items-center space-x-2 cursor-pointer">
@@ -55,7 +50,7 @@ export function CharacterSkillsSection({
             </label>
           ))}
         </div>
-      </div>
+      </HudSection>
     </div>
   );
 }
