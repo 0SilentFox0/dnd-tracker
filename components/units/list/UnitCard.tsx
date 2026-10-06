@@ -18,10 +18,10 @@ import {
   getUnitDamageModifiers,
   getUnitImmunities,
 } from "@/lib/utils/races/race-effects";
+import { UNIT_DRAG_TYPE, unitDragPayload } from "@/lib/utils/units/drag";
 import type { Race } from "@/types/races";
 import type { Unit } from "@/types/units";
 
-/** Індекс атаки для швидкого редагування кубиків: ближня, інакше перша */
 function primaryAttackIndex(attacks: Unit["attacks"]): number {
   if (!attacks.length) return -1;
 
@@ -30,47 +30,6 @@ function primaryAttackIndex(attacks: Unit["attacks"]): number {
   );
 
   return meleeIdx >= 0 ? meleeIdx : 0;
-}
-
-const DRAG_TYPE = "application/x-unit-id";
-
-export function getUnitDragPayload(unit: Unit): string {
-  return JSON.stringify({
-    unitId: unit.id,
-    unitName: unit.name,
-    currentRace: unit.race ?? "",
-    currentLevel: unit.level,
-  });
-}
-
-export function parseUnitDragPayload(data: string): {
-  unitId: string;
-  unitName: string;
-  currentRace: string;
-  currentLevel: number;
-} | null {
-  try {
-    const parsed = JSON.parse(data) as {
-      unitId?: string;
-      unitName?: string;
-      currentRace?: string;
-      currentLevel?: number;
-    };
-
-    if (parsed?.unitId) {
-      return {
-        unitId: parsed.unitId,
-        unitName: parsed.unitName ?? "",
-        currentRace: parsed.currentRace ?? "",
-        currentLevel:
-          typeof parsed.currentLevel === "number" ? parsed.currentLevel : 1,
-      };
-    }
-  } catch {
-    // ignore
-  }
-
-  return null;
 }
 
 interface UnitCardProps {
@@ -84,7 +43,7 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
   const confirm = useConfirm();
 
   const handleDragStart = (e: React.DragEvent) => {
-    e.dataTransfer.setData(DRAG_TYPE, getUnitDragPayload(unit));
+    e.dataTransfer.setData(UNIT_DRAG_TYPE, unitDragPayload(unit));
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("text/plain", unit.name);
   };
@@ -95,17 +54,14 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
 
   const abilitySummary = unit.abilitySummary ?? [];
 
-  // Отримуємо модифікатори урону з раси та юніта
   const allDamageModifiers = getUnitDamageModifiers(unit, race);
 
   const damageModifiers = allDamageModifiers
     .map((modifier) => getDamageElementLabel(modifier))
     .filter(Boolean);
 
-  // Отримуємо імунітети з раси та юніта
   const allImmunities = getUnitImmunities(unit, race);
 
-  // Середній урон: max серед атак (dice avg + мод. сили для melee)
   const strMod = getAbilityModifier(unit.strength);
 
   const avgDamage =
@@ -129,7 +85,7 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
         draggable
         onDragStart={handleDragStart}
         className="absolute left-1 top-2 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground touch-none"
-        title="Перетягніть для зміни групи або рівня"
+        title="Перетягніть на расу або рівень"
       >
         <GripVertical className="h-4 w-4" />
       </div>
