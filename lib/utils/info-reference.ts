@@ -80,7 +80,6 @@ export function matchSearch(text: string, query: string): boolean {
 
 const SHORT_SUMMARY_LENGTH = 72;
 
-/** One-line summary for skill (list/preview). */
 export function getShortSkillSummary(s: SkillForReference): string {
   if (s.description?.trim()) {
     const first = s.description.split(/\n/)[0]?.trim() ?? "";
@@ -97,7 +96,6 @@ export function getShortSkillSummary(s: SkillForReference): string {
   return mechanics.slice(0, SHORT_SUMMARY_LENGTH - 2) + "…";
 }
 
-/** One-line summary for spell (list/preview). */
 export function getShortSpellSummary(s: SpellForReference): string {
   if (s.description?.trim()) {
     const first = s.description.split(/\n/)[0]?.trim() ?? "";

@@ -1,7 +1,3 @@
-/**
- * Утиліти для розрахунку урону з урахуванням всіх модифікаторів та breakdown
- */
-
 import type { DamageCalculationResult } from "../types/damage-calculations";
 import { calculateDamageWithModifiersImpl } from "./impl";
 

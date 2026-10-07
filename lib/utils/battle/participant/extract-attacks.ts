@@ -1,7 +1,3 @@
-/**
- * Витягування атак з екіпірованої зброї (артефактів)
- */
-
 import type { Prisma } from "@prisma/client";
 
 import type {

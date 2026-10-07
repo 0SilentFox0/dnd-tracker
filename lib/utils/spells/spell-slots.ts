@@ -1,7 +1,3 @@
-/**
- * Утиліти для розрахунку магічних слотів при прокачці рівня
- */
-
 import type { SpellSlotProgression } from "@/types/races";
 
 export interface SpellSlots {
@@ -150,7 +146,6 @@ export function calculateSpellSlotGain(
     spellSlotProgression
   );
 
-  // Обчислюємо різницю (збільшення)
   const gain: SpellSlots = {};
   
   for (let level = 1; level <= 5; level++) {

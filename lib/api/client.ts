@@ -202,24 +202,8 @@ export async function campaignDelete<T>(
 }
 
 /**
- * Стандартний 5-метод CRUD для campaign-scoped ресурсу (CODE_AUDIT 2.12).
- *
- * Замість 5 однотипних wrapper-функцій на домен — фабрика з єдиним
- * `basePath` (наприклад "/races", "/main-skills"). Кожен експорт у
- * `lib/api/<domain>.ts` стає однорядковим re-export, лишаючи місце
- * лише для домен-специфічних ендпоінтів.
- *
- * Приклад:
- * ```ts
- * const racesApi = createCampaignCrudApi<Race, RaceFormData>("/races");
- * export const getRaces = racesApi.list;
- * export const createRace = racesApi.create;
- * // …
- * ```
- *
- * Для не-стандартних кешів передавайте options.listCache / getCache.
- * Для нестандартних DELETE return-shape (`{ deleted: number }`) —
- * визначте `TDeleteResult` як 3-й generic.
+ * CRUD-фабрика для campaign-scoped ресурсу з єдиним `basePath` ("/races"); у `lib/api/<domain>.ts` її методи — однорядкові re-export.
+ * Нестандартні кеші — `options.listCache` / `getCache`, нестандартний результат DELETE — 3-й generic `TDeleteResult`.
  */
 export interface CampaignCrudApi<
   TEntity,

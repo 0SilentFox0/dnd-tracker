@@ -1,8 +1,3 @@
-/**
- * Утиліти для старту бою
- */
-
-
 import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
 import { BattleParticipant } from "@/types/battle";
@@ -43,17 +38,14 @@ export function sortByInitiative(
   participants: BattleParticipant[]
 ): BattleParticipant[] {
   return [...participants].sort((a, b) => {
-    // Спочатку за поточною initiative
     if (b.abilities.initiative !== a.abilities.initiative) {
       return b.abilities.initiative - a.abilities.initiative;
     }
 
-    // Якщо однакова, за baseInitiative
     if (b.abilities.baseInitiative !== a.abilities.baseInitiative) {
       return b.abilities.baseInitiative - a.abilities.baseInitiative;
     }
 
-    // Якщо однакова, за dexterity
     return b.abilities.dexterity - a.abilities.dexterity;
   });
 }

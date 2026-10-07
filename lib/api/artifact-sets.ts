@@ -1,7 +1,3 @@
-/**
- * Клієнт API — сети артефактів
- */
-
 import { createCampaignCrudApi } from "@/lib/api/client";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import type { ArtifactSetRow } from "@/types/artifact-sets";

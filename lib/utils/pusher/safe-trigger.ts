@@ -1,22 +1,6 @@
 /**
- * Безпечний Pusher trigger з structured-лог при failure (CODE_AUDIT 4.3).
- *
- * Замінює ~17 fire-and-forget викликів виду:
- *   void pusherServer.trigger(channel, event, payload)
- *     .catch((err) => console.error("Pusher trigger failed:", err))
- *
- * Покращення:
- *  - structured лог із контекстом (channel, event, action, ids),
- *  - не змінює API контракту з клієнтом — клієнт продовжує invalidate
- *    query при reconnect, тому втрачена подія підхопиться сама.
- *
- * Повертає проміс, який ніколи не відхиляється: старі виклики лишаються fire-and-forget,
- * а `after(() => safePusherTrigger(...))` дочікується відправки до заморожування функції.
- *
- * Використання:
- *   safePusherTrigger(pusherServer, battleChannel, "battle-delta", payload, {
- *     campaignId, battleId, action: "complete battle",
- *   });
+ * Pusher trigger, що ніколи не відхиляється й логує збій з контекстом: втрачену подію клієнт
+ * підхопить сам при reconnect. `after(() => safePusherTrigger(...))` дочікується відправки до заморожування функції.
  */
 
 import type Pusher from "pusher";

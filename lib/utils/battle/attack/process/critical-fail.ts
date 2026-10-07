@@ -1,7 +1,3 @@
-/**
- * Обробка гілки критичного промаху атаки
- */
-
 import { applyMainActionUsed } from "../../participant";
 import type { ProcessAttackResult } from "../../types/attack-process";
 import type { AttackRollResult } from "..";

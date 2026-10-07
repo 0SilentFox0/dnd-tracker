@@ -22,17 +22,14 @@ export function useSpellSelection({
 }: UseSpellSelectionProps) {
   const [open, setOpen] = useState(false);
 
-  // Групуємо заклинання по групах
   const groupedSpells = useMemo(() => {
     return Array.from(groupSpellsByGroup(spells).entries());
   }, [spells]);
 
-  // Фільтруємо вибрані заклинання
   const selectedSpells = useMemo(() => {
     return filterSelectedSpells(spells, selectedSpellIds);
   }, [spells, selectedSpellIds]);
 
-  // Перемикає вибір заклинання
   const toggleSpell = useCallback(
     (spellId: string) => {
       if (selectedSpellIds.includes(spellId)) {
@@ -44,7 +41,6 @@ export function useSpellSelection({
     [selectedSpellIds, onSelectionChange]
   );
 
-  // Видаляє заклинання з вибраних
   const removeSpell = useCallback(
     (spellId: string) => {
       onSelectionChange(selectedSpellIds.filter((id) => id !== spellId));

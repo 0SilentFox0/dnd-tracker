@@ -1,7 +1,3 @@
-/**
- * Допоміжні функції для роботи з BattleParticipant
- */
-
 import { statWithModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";

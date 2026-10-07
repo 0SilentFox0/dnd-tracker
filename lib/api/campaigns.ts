@@ -1,7 +1,3 @@
-/**
- * API сервіс для роботи з кампаніями
- */
-
 import {
   campaignDelete,
   campaignGet,

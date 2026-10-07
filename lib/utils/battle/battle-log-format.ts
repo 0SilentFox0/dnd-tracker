@@ -1,7 +1,3 @@
-/**
- * Утиліти форматування логу бою (BattleLog)
- */
-
 import type { BattleAction } from "@/types/battle";
 
 export const BATTLE_ACTION_LABELS: Record<string, string> = {

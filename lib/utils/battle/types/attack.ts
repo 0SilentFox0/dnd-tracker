@@ -1,7 +1,3 @@
-/**
- * Типи для результатів атаки (Attack Roll, повна атака)
- */
-
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 
 export interface AttackRollResult {

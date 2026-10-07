@@ -52,7 +52,6 @@ export function ImportDialog({
   const handleImportClick = async () => {
     await handleImport();
 
-    // Закриваємо діалог через 2 секунди після успішного імпорту
     if (success) {
       setTimeout(() => {
         handleDialogOpenChange(false);

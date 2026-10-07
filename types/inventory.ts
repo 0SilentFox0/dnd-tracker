@@ -1,7 +1,3 @@
-/**
- * Типи для інвентаря
- */
-
 export interface InventoryItem {
   name: string;
   quantity?: number;

@@ -1,7 +1,3 @@
-/**
- * Логіка циклу переходу ходу: пошук наступного живого учасника, endRound/startOfRound, processStartOfTurn, логи.
- */
-
 import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import {
   processEndOfTurn,
@@ -56,7 +52,6 @@ export function runAdvanceTurnLoop(
 
   const newLogEntries: BattleAction[] = [];
 
-  // відкат тепер через battle_snapshots, stateBefore у записах не потрібен
   const getStateBeforeForEntry = () => undefined;
 
   let clearedPendingSummons = false;

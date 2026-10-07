@@ -1,7 +1,3 @@
-/**
- * Типи для кампаній
- */
-
 export interface Campaign {
   id: string;
   name: string;

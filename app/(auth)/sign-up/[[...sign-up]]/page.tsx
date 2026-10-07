@@ -22,7 +22,6 @@ function SignUpForm() {
 
   const supabase = createClient();
 
-  // Перевіряємо чи користувач вже авторизований
   useEffect(() => {
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -35,7 +34,6 @@ function SignUpForm() {
     checkUser();
   }, [router, supabase]);
 
-  // Перевіряємо помилки з URL
   useEffect(() => {
     const errorParam = searchParams.get("error");
 

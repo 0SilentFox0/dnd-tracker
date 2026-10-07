@@ -1,18 +1,6 @@
 /**
- * Структурований логер з контекстом (CODE_AUDIT 3.3).
- *
- * Замість `console.error("Error creating campaign:", error)` (без
- * контексту, ~30 місць) — `logger.error("create campaign failed",
- * { campaignId, userId }, error)`.
- *
- * Контракт:
- *  - первий аргумент — короткий event-style message (не "Error: ...").
- *  - другий — bag довільних key/value (id-ки, params, durations).
- *  - третій (для warn/error) — error object; серіалізується безпечно
- *    (ZodError → issues; Prisma → code/meta; Error → name/message/stack).
- *
- * Виводиться через console.{info,warn,error} — у dev це stdout/stderr,
- * у Vercel runtime потрапляє в Functions logs з метаданими реквесту.
+ * `logger.error("event", { ids }, error)`: короткий event-style message, bag контексту, error для warn/error.
+ * Помилки серіалізуються безпечно (ZodError → issues, Prisma → code/meta, Error → name/message/stack).
  */
 
 import { Prisma } from "@prisma/client";

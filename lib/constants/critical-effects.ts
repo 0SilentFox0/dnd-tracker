@@ -1,7 +1,3 @@
-/**
- * Константи для критичних ефектів (Natural 20 та Natural 1)
- */
-
 export interface CriticalEffect {
   id: number; // 1-10 для d10
   name: string;

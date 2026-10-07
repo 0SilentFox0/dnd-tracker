@@ -1,7 +1,3 @@
-/**
- * Утиліти для роботи зі скілами (підтримка обох структур)
- */
-
 import type { GroupedSkill, Skill } from "@/types/skills";
 
 /**
@@ -44,7 +40,6 @@ export function getSkillMainSkillId(skill: Skill | GroupedSkill): string | null 
     return skill.mainSkillData?.mainSkillId;
   }
 
-  // TypeScript тепер знає, що це Skill
   return (skill as Skill).mainSkillId;
 }
 

@@ -23,7 +23,6 @@ export function Header({ email }: { email: string | null }) {
 
   const signOutForm = useRef<HTMLFormElement>(null);
 
-  // Не показуємо хедер на сторінках авторизації
   if (
     pathname?.startsWith("/sign-in") ||
     pathname?.startsWith("/sign-up") ||
@@ -32,7 +31,6 @@ export function Header({ email }: { email: string | null }) {
     return null;
   }
 
-  // Визначаємо чи ми на сторінці кампанії
   const campaignMatch = pathname?.match(/^\/campaigns\/([^/]+)/);
 
   const campaignId = campaignMatch?.[1];

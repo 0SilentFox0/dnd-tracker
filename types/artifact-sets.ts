@@ -1,7 +1,3 @@
-/**
- * Сети артефактів (кампанія)
- */
-
 export interface ArtifactSetSummaryArtifact {
   id: string;
   name: string;

@@ -1,7 +1,3 @@
-/**
- * Статистика героїв і юнітів (DPR / HP)
- */
-
 import { getNonMagicBranchDpr, getSpellDprFromBranchLevels } from "./dpr";
 
 import { AttackType } from "@/lib/constants/battle";

@@ -1,7 +1,3 @@
-/**
- * Типи для артефактів
- */
-
 export interface ArtifactListItem {
   id: string;
   name: string;

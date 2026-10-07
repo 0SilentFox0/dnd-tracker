@@ -1,7 +1,3 @@
-/**
- * Типи для боїв
- */
-
 import type { AbilityUsageCounter, ResolvedAbility, SpellEnhancer, StaticEffect } from "./abilities";
 
 import { AttackType, ParticipantSide, type ParticipantSourceTypeValue } from "@/lib/constants/battle";

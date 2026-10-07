@@ -1,7 +1,3 @@
-/**
- * API сервіс для роботи з інвентарем персонажа
- */
-
 import { campaignPatch } from "@/lib/api/client";
 import type { Inventory, InventoryFormData } from "@/types/inventory";
 

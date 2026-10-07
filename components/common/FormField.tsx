@@ -1,7 +1,3 @@
-/**
- * Універсальний компонент для полів форми
- */
-
 import { ReactNode } from "react";
 
 import { Label } from "@/components/ui/label";

@@ -1,7 +1,3 @@
-/**
- * Побудова BattleAction для різних результатів атаки (критичний промах, промах, попадання)
- */
-
 import type { DamageCalculationResult } from "../../types/damage-calculations";
 import type { AttackRollResult } from "..";
 import type { ComputeHitDamageResult } from "./compute";

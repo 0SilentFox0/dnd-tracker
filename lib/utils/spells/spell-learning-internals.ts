@@ -1,7 +1,3 @@
-/**
- * Внутрішні типи та константи для spell-learning
- */
-
 import { SkillLevel, type SkillLevelType } from "@/types/skill-tree";
 import type { Skill } from "@/types/skills";
 

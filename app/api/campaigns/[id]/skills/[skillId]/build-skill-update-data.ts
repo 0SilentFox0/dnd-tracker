@@ -1,7 +1,3 @@
-/**
- * Перетворення тіла PATCH-запиту в Prisma.SkillUpdateInput.
- */
-
 import { Prisma } from "@prisma/client";
 import type { z } from "zod";
 

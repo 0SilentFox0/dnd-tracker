@@ -1,7 +1,3 @@
-/**
- * Типи для API payloads та responses
- */
-
 import type { GroupedSkillPayload } from "./hooks";
 
 import { type ParticipantSourceTypeValue } from "@/lib/constants/battle";

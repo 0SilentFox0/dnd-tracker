@@ -1,7 +1,3 @@
-/**
- * Додає до CampaignSpellContext дані сетів за екіпірованими артефактами.
- */
-
 import type { CampaignSpellContext } from "../types/participant";
 import { loadArtifactSetBattleMaps } from "./load-maps";
 

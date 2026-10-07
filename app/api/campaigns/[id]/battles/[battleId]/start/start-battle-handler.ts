@@ -1,13 +1,6 @@
 /**
- * Бізнес-логіка POST /start — винесена з route.ts (CODE_AUDIT 1.5).
- *
- * route.ts: тонка (auth + battle fetch + status check) → executeStartBattle
- *
- * Тут: завантаження учасників, побудова slot-ів, паралельне створення
- * BattleParticipant, ефекти/тригери на старт бою, розрахунок ініціативи,
- * сортування. Запис і Pusher — у runBattleMutation.
+ * Логіка POST /start: учасники, слоти, ефекти/тригери на старті, ініціатива. Запис і Pusher — у runBattleMutation.
  */
-
 
 import { buildCampaignContextForStart } from "./start-build-context";
 import { scaleEnemiesForFairBattle } from "./start-fair-scaling";

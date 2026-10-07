@@ -1,7 +1,3 @@
-/**
- * Синхронізація складу сету: setId у Artifact.
- */
-
 import { prisma } from "@/lib/db";
 
 export class SyncArtifactSetError extends Error {

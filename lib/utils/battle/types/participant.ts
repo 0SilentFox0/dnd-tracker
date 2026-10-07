@@ -1,19 +1,13 @@
-/**
- * Типи для створення та роботи з BattleParticipant
- */
-
 import type { Prisma } from "@prisma/client";
 
 import type { AttackType } from "@/lib/constants/battle";
 
-/** Модифікатор артефакта */
 export type ArtifactModifier = {
   type: string;
   value: number;
   isPercentage?: boolean;
 };
 
-/** Атака, витягнута з екіпірованої зброї */
 export type ExtractedAttack = {
   id: string;
   name: string;
@@ -27,14 +21,12 @@ export type ExtractedAttack = {
   maxTargets?: number;
 };
 
-/** Character з Prisma (з include для inventory) */
 export type CharacterFromPrisma = Prisma.CharacterGetPayload<{
   include: {
     inventory?: true;
   };
 }>;
 
-/** Unit з Prisma */
 export type UnitFromPrisma = Prisma.UnitGetPayload<Record<string, never>>;
 
 /** Опціональний контекст для batch-завантаження (спільні дані кампанії) */

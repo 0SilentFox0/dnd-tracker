@@ -1,7 +1,3 @@
-/**
- * Утиліти для конвертації між CharacterFormData (згрупована) та Character (плоска)
- */
-
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { CharacterType, type CharacterTypeValue } from "@/lib/constants/characters";
 import { calculateCharacterSpellSlots } from "@/lib/utils/spells/spell-slots";

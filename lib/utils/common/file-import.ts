@@ -1,7 +1,3 @@
-/**
- * Загальні утиліти для імпорту файлів (CSV та JSON)
- */
-
 import type { CSVRow } from "@/types/import";
 
 /**
@@ -17,9 +13,7 @@ export function parseCSVLine(
 
   let inQuotes = false;
 
-  // Якщо delimiter - це регулярний вираз, використовуємо більш складну логіку
   if (delimiter instanceof RegExp) {
-    // Для regex використовуємо простий підхід з перевіркою лапок
     for (let i = 0; i < line.length; i++) {
       const char = line[i];
 
@@ -27,14 +21,12 @@ export function parseCSVLine(
 
       if (char === '"') {
         if (inQuotes && nextChar === '"') {
-          // Подвійні лапки - екранована лапка
           current += '"';
           i++; // Пропускаємо наступну лапку
         } else {
           inQuotes = !inQuotes;
         }
       } else if (!inQuotes) {
-        // Перевіряємо чи поточний символ відповідає delimiter
         const remaining = line.substring(i);
 
         const match = remaining.match(delimiter);
@@ -50,7 +42,6 @@ export function parseCSVLine(
       current += char;
     }
   } else {
-    // Для простого рядкового delimiter
     for (let i = 0; i < line.length; i++) {
       const char = line[i];
 
@@ -58,7 +49,6 @@ export function parseCSVLine(
 
       if (char === '"') {
         if (inQuotes && nextChar === '"') {
-          // Подвійні лапки - екранована лапка
           current += '"';
           i++; // Пропускаємо наступну лапку
         } else {
@@ -93,7 +83,6 @@ export async function parseCSVFile<T extends CSVRow>(
     throw new Error("CSV файл порожній");
   }
 
-  // Парсимо заголовки
   const headers = parseCSVLine(lines[0], delimiter);
 
   const rows: T[] = [];
@@ -101,7 +90,6 @@ export async function parseCSVFile<T extends CSVRow>(
   for (let i = 1; i < lines.length; i++) {
     const values = parseCSVLine(lines[i], delimiter);
 
-    // Якщо кількість колонок не співпадає, об'єднуємо зайві колонки в останнє поле
     if (values.length > headers.length) {
       const lastIndex = headers.length - 1;
 
@@ -115,7 +103,6 @@ export async function parseCSVFile<T extends CSVRow>(
     }
 
     if (values.length < headers.length) {
-      // Додаємо порожні значення для відсутніх колонок
       while (values.length < headers.length) {
         values.push("");
       }
@@ -124,7 +111,6 @@ export async function parseCSVFile<T extends CSVRow>(
     const row: Record<string, string> = {};
 
     headers.forEach((header, index) => {
-      // Видаляємо лапки якщо є
       let value = values[index] || "";
 
       if (value.startsWith('"') && value.endsWith('"')) {

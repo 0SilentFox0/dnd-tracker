@@ -1,7 +1,3 @@
-/**
- * Утиліта для обчислення breakdown урону (для превью в UI).
- */
-
 import type {
   ComputeDamageBreakdownParams,
   DamageBreakdownResult,

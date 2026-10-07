@@ -1,7 +1,3 @@
-/**
- * Утиліти для перевірки перемоги та завершення бою
- */
-
 import { ParticipantSide } from "@/lib/constants/battle";
 import { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -27,12 +23,10 @@ export function checkVictoryConditions(
 
   const enemies = real.filter((p) => p.basicInfo.side === ParticipantSide.ENEMY);
 
-  // Перевіряємо чи всі вороги мертві або непритомні
   const allEnemiesDefeated = enemies.every(
     (enemy) => enemy.combatStats.status === "dead" || enemy.combatStats.status === "unconscious"
   );
 
-  // Перевіряємо чи всі союзники мертві або непритомні
   const allAlliesDefeated = allies.every(
     (ally) => ally.combatStats.status === "dead" || ally.combatStats.status === "unconscious"
   );
@@ -79,7 +73,6 @@ export function completeBattle(
   battleAction: BattleAction;
 } {
   const updatedParticipants = initiativeOrder.map((participant) => {
-    // Якщо перемога - відновлюємо HP всіх unconscious союзників
     if (
       result === "victory" &&
       participant.basicInfo.side === ParticipantSide.ALLY &&

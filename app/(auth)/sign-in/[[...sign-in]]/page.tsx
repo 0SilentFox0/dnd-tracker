@@ -22,7 +22,6 @@ function SignInForm() {
 
   const supabase = createClient();
 
-  // Перевіряємо чи користувач вже авторизований
   useEffect(() => {
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -35,7 +34,6 @@ function SignInForm() {
     checkUser();
   }, [router, supabase]);
 
-  // Перевіряємо помилки з URL
   useEffect(() => {
     const errorParam = searchParams.get('error');
 
@@ -67,7 +65,6 @@ function SignInForm() {
         return;
       }
       
-      // Якщо все добре, redirect відбудеться автоматично
     } catch (error) {
       console.error("Error signing in:", error);
 

@@ -1,29 +1,6 @@
 /**
- * Server-page helpers для access-check кампанії (CODE_AUDIT 1.2).
- *
- * Раніше у кожному `app/campaigns/[id]/**\/page.tsx` повторювалась
- * inline-логіка:
- *   const user = await getAuthUser();
- *   const campaign = await prisma.campaign.findUnique({...});
- *   if (!campaign) redirect("/campaigns");
- *   const member = campaign.members.find(m => m.userId === user.id);
- *   if (!member) redirect("/campaigns");
- *   const isDM = member.role === CampaignRole.DM;
- *
- * 25+ файлів з варіаціями. Тепер:
- *   const { campaign, userId, isDM } = await requireCampaignMember(id);
- *   const { campaign, userId } = await requireCampaignDM(id);
- *   const { campaign, userId, isDM } = await requireCampaignWithMembers(id);
- *
- * Семантика:
- *  - не залогінений → redirect("/sign-in") (через getAuthUser)
- *  - кампанія не існує → redirect("/campaigns")
- *  - user не member → redirect("/campaigns")
- *  - DM-only access, але user player → redirect(`/campaigns/${id}`)
- *
- * NB: цей хелпер для **server-pages**. Для API-routes —
- * `requireCampaignAccess` / `requireDM` у `lib/utils/api/api-auth.ts`,
- * які повертають NextResponse замість redirect-у.
+ * Access-check кампанії для server-pages: не залогінений → /sign-in, немає кампанії чи членства → /campaigns,
+ * DM-only для гравця → /campaigns/[id]. Для API-routes — `requireCampaignAccess` / `requireDM` у `lib/utils/api/api-auth.ts`.
  */
 
 import { redirect } from "next/navigation";

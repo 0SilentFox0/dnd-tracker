@@ -1,7 +1,3 @@
-/**
- * Імунітети та опір у бою — з прапорців resistance уніфікованих умінь.
- */
-
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
 import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";

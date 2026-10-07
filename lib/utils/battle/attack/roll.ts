@@ -1,7 +1,3 @@
-/**
- * Розрахунок Attack Roll (d20 + бонус, критики, ефект)
- */
-
 import type { AttackRollResult } from "../types/attack";
 import { calculateAttackBonus, hasAdvantage, hasDisadvantage } from "./bonus";
 
@@ -35,7 +31,6 @@ export function calculateAttackRoll(
   let advantageUsed = false;
 
   if (hasAdv && hasDisadv) {
-    // нормальний кидок
   } else if (hasAdv) {
     if (advantageRoll !== undefined) {
       finalRoll = Math.max(d20Roll, advantageRoll);

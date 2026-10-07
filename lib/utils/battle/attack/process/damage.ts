@@ -1,7 +1,3 @@
-/**
- * Розрахунок урону атаки та застосування до цілі (опір, tempHp, статус)
- */
-
 import { applyResistance } from "../../resistance";
 
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";

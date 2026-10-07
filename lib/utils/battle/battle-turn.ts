@@ -1,7 +1,3 @@
-/**
- * Утиліти для обробки ходу в бою
- */
-
 import { applyDOTEffects, decreaseEffectDurations } from "./battle-effects";
 import { calculateInitiative, sortByInitiative } from "./battle-start";
 
@@ -164,13 +160,11 @@ export function processEndOfTurn(
     nextTurnIndex += 1;
     attempts += 1;
 
-    // Якщо досягли кінця черги, переходимо до наступного раунду
     if (nextTurnIndex >= initiativeOrder.length) {
       nextTurnIndex = 0;
       nextRound += 1;
     }
 
-    // Перевіряємо, чи може наступний учасник ходити (не мертвий і не непритомний)
     const nextParticipant = initiativeOrder[nextTurnIndex];
 
     if (
@@ -211,7 +205,6 @@ export function processStartOfRound(
   // 0. Видаляємо тимчасові слоти додаткових ходів з попереднього раунду
   const baseOrder = (initiativeOrder || []).filter((p) => !p.basicInfo?.isExtraTurnSlot);
 
-  // Додаємо призваних істот до baseOrder
   const updatedOrder = [...baseOrder, ...pendingSummons];
 
   const newSummonIds = new Set(pendingSummons.map((p) => p.basicInfo.id));
@@ -239,7 +232,6 @@ export function processStartOfRound(
     round.participants.map((p) => ({ ...p, abilities: { ...p.abilities, initiative: calculateInitiative(p, round.participants) } })),
   );
 
-  // DoT і зменшення тривалості ефектів тепер на початку ходу кожного учасника (processStartOfTurn)
   return {
     updatedInitiativeOrder: sortedOrder,
     message: `🔁 Початок Раунду ${currentRound}`,

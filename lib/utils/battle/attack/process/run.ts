@@ -1,7 +1,3 @@
-/**
- * Повна обробка атаки з усіма модифікаторами, вміннями та ефектами
- */
-
 import {
   applyMainActionUsed,
   getEffectiveArmorClass,

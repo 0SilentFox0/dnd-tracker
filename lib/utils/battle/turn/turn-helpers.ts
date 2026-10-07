@@ -1,7 +1,3 @@
-/**
- * Допоміжні функції для next-turn API: логування, перемога
- */
-
 import { ParticipantSide } from "@/lib/constants/battle";
 import {
   calculateAllyHpChangesOnVictory,

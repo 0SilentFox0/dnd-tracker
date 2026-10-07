@@ -38,7 +38,6 @@ export function DMSpellsPageClient({
 
   const { data: spellGroups = [] } = useSpellGroups(campaignId);
 
-  // Мутації
   const removeSpellFromGroupMutation = useRemoveSpellFromGroup(campaignId);
 
   const moveSpellMutation = useMoveSpellToGroup(campaignId);
@@ -62,7 +61,6 @@ export function DMSpellsPageClient({
       onConfirm: () => deleteAllSpellsMutation.mutateAsync(),
     });
 
-  // Групуємо заклинання спочатку по групах, потім по рівнях
   const sortedGroupedSpells = useMemo(() => {
     const groupedSpellsMap = groupSpellsByGroupAndLevel(spells);
 

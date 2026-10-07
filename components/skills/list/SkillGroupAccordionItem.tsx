@@ -27,9 +27,7 @@ export interface SkillGroupAccordionItemProps {
   groupId: string | undefined;
   onRenameClick: () => void;
   onRemoveAllClick: () => void;
-  /** Викликається при видаленні одного скіла (DM) */
   onDeleteSkill?: (skillId: string) => Promise<unknown> | void;
-  /** Викликається при дублюванні скіла (DM) */
   onDuplicateSkill?: (skillId: string) => void;
   skills: (Skill | GroupedSkill)[];
   campaignId: string;

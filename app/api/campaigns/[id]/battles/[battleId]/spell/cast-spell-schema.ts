@@ -1,9 +1,5 @@
 import { z } from "zod";
 
-/**
- * Схема валідації для POST /spell.
- * Переходить з route.ts у власний модуль, щоб route.ts стала тонкою (CODE_AUDIT 1.3).
- */
 export const spellSchema = z.object({
   casterId: z.string(), // ID BattleParticipant з initiativeOrder
   casterType: z.string().optional(), // опціонально для сумісності

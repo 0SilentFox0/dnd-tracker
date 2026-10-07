@@ -1,6 +1,3 @@
-/**
- * Створення BattleParticipant з Character
- */
 import type { CampaignSpellContext, CharacterFromPrisma } from "../types/participant";
 import { type EquippedArtifactRow, loadEquippedArtifactRows, toEquippedArtifacts } from "./extract-artifacts";
 import { extractAttacksFromCharacter } from "./extract-attacks";

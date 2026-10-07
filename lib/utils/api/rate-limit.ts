@@ -1,19 +1,6 @@
 /**
- * Rate limiting на API endpoints через `@upstash/ratelimit` (CODE_AUDIT 4.2).
- *
- * Алгоритм: sliding window (точніший за fixed window — не дозволяє
- * спайки на межі вікна).
- *
- * Fail-open: якщо Upstash недоступний (env vars не встановлені) —
- * пропускає запит. Це навмисно: тимчасова недоступність кешу не
- * блокує користувачів.
- *
- * Використання у route handler:
- *   const rl = await checkRateLimit({
- *     userId, scope: "attack", battleId,
- *     ...BATTLE_RATE_LIMITS.attack,
- *   });
- *   if (!rl.allowed) return rateLimitResponse(rl);
+ * Rate limiting через `@upstash/ratelimit` (sliding window).
+ * Fail-open: без Upstash (немає env vars) запит пропускається — недоступність кешу не блокує користувачів.
  */
 
 import { NextResponse } from "next/server";
