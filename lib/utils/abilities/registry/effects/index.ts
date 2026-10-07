@@ -1,6 +1,6 @@
 import { DURATION_FIELD, type FieldMeta, TARGET_FIELD } from "../fields";
 import { limitsLabel } from "../labels";
-import { TRIGGER_REGISTRY } from "../triggers";
+import { describeTrigger } from "../triggers";
 import { applyDealDamage, applyDot, applyHeal, describeDealDamage, describeDot, describeHeal } from "./hp";
 import {
   applyChangeMorale,
@@ -110,5 +110,5 @@ export function describeEffect(effect: Effect): string {
 export { FLAG_FIELDS, FLAG_LABELS };
 
 export function describeAbility(a: Ability): string {
-  return [TRIGGER_REGISTRY[a.trigger.event].label, ...limitsLabel(a.limits), ...a.effects.map(describeEffect)].join(" · ");
+  return [...describeTrigger(a.trigger), ...limitsLabel(a.limits), ...a.effects.map(describeEffect)].join(" · ");
 }

@@ -71,9 +71,11 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
 
   const casterId = caster.basicInfo.id;
 
+  const spellInfo = { spellId: spell.id, school: spell.groupId, level: spell.level };
+
   const flow: AttackFlow = { ps: withSelf(allParticipants, caster), messages: [], ctx: { round: currentRound, rng: params.rng ?? Math.random } };
 
-  const { actionModifiers } = fire(flow, { type: "spellCast", phase: "before", actorId: casterId, targetIds });
+  const { actionModifiers } = fire(flow, { type: "spellCast", phase: "before", actorId: casterId, targetIds, ...spellInfo });
 
   let updatedCaster = getP(flow, casterId);
 
@@ -86,7 +88,7 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
 
     for (const t of result.targetsUpdated) put(flow, t);
 
-    if (opts.after) fire(flow, { type: "spellCast", phase: "after", actorId: casterId, targetIds });
+    if (opts.after) fire(flow, { type: "spellCast", phase: "after", actorId: casterId, targetIds, ...spellInfo });
 
     if (flow.messages.length > 0) {
       result.battleAction.resultText = [result.battleAction.resultText, ...flow.messages].filter(Boolean).join(" | ");
