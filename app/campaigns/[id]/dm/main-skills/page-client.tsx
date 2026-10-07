@@ -4,10 +4,10 @@ import { useState } from "react";
 import { Network } from "lucide-react";
 
 import { EmptyState } from "@/components/common/states";
-import { HudPage } from "@/components/hud/page";
+import { HudPage, HudPageHeader } from "@/components/hud/page";
 import { CreateMainSkillDialog } from "@/components/main-skills/CreateMainSkillDialog";
 import { MainSkillCard } from "@/components/main-skills/MainSkillCard";
-import { MainSkillsPageHeader } from "@/components/main-skills/MainSkillsPageHeader";
+import { Button } from "@/components/ui/button";
 import { useConfirm, useNotify } from "@/lib/hooks/common";
 import { useDeleteMainSkill, useMainSkills } from "@/lib/hooks/skills";
 import type { MainSkill } from "@/types/main-skills";
@@ -46,9 +46,10 @@ export function DMMainSkillsPageClient({
 
   return (
     <HudPage>
-      <MainSkillsPageHeader
-        mainSkillsCount={mainSkills.length}
-        onCreateClick={() => setCreateDialogOpen(true)}
+      <HudPageHeader
+        title="Основні Навики"
+        subtitle={`Управління основними навиками для дерев прокачки Всього: ${mainSkills.length}`}
+        actions={<Button onClick={() => setCreateDialogOpen(true)}>Створити основний навик</Button>}
       />
 
       {mainSkills.length === 0 ? (

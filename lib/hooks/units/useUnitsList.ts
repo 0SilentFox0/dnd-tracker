@@ -4,14 +4,11 @@ import { useMemo, useState } from "react";
 
 import { useDeleteAllUnits, useDeleteUnit, useUnits, useUpdateUnitAny } from "./useUnits";
 
-import { useConfirm } from "@/lib/hooks/common";
 import { useRaces } from "@/lib/hooks/races";
 import { groupUnitsByRace, raceChips } from "@/lib/utils/units/group-units";
 import type { Unit } from "@/types/units";
 
 export function useUnitsList(campaignId: string, initialUnits: Unit[]) {
-  const confirm = useConfirm();
-
   const { data: units = initialUnits, isLoading } = useUnits(campaignId, initialUnits);
 
   const { data: races = [] } = useRaces(campaignId);
@@ -42,14 +39,7 @@ export function useUnitsList(campaignId: string, initialUnits: Unit[]) {
   const toggleRace = (key: string) =>
     setRaceFilter((current) => (current.includes(key) ? current.filter((k) => k !== key) : [...current, key]));
 
-  const removeAll = () =>
-    confirm({
-      title: "Видалити всі юніти?",
-      description: `Ви впевнені, що хочете видалити всі юніти з кампанії? Ця дія незворотна. Буде видалено ${units.length} юнітів.`,
-      confirmLabel: "Видалити всі юніти",
-      destructive: true,
-      onConfirm: () => deleteAll.mutateAsync(),
-    });
+  const removeAll = () => deleteAll.mutateAsync();
 
   return {
     units,

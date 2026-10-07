@@ -31,20 +31,13 @@ export function useDmCharactersPage(campaignId: string, type?: CharacterTypeValu
       onConfirm: () => deleteOne.mutateAsync(character.id),
     });
 
-  const confirmDeleteAll = () =>
-    confirm({
-      title: "Видалити всіх персонажів?",
-      description: "Буде видалено всіх персонажів гравців у цій кампанії. Цю дію не можна скасувати.",
-      confirmLabel: "Видалити всіх",
-      destructive: true,
-      onConfirm: () => deleteAll.mutateAsync(),
-    });
+  const removeAll = () => deleteAll.mutateAsync();
 
   return {
     query,
     levelUp,
     confirmDelete,
-    confirmDeleteAll,
+    removeAll,
     isDeletingAll: deleteAll.isPending,
     levelingUpId: levelUpMutation.isPending ? levelUpMutation.variables : undefined,
   };

@@ -5,6 +5,7 @@ import { Trash2, Users } from "lucide-react";
 
 import { DmCharacterCard } from "./DmCharacterCard";
 
+import { DeleteAllButton } from "@/components/common/DeleteAllButton";
 import { EmptyState, LoadingState, QueryState } from "@/components/common/states";
 import { HudChipTabs, HudPage, HudPageHeader } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
@@ -39,17 +40,16 @@ export function DMCharactersClient({ campaignId, type, maxLevel }: DMCharactersC
         subtitle="Гравці та NPC герої"
         actions={
           <>
-            {characterCount > 0 && (
-              <Button
-                variant="destructive"
-                className="whitespace-nowrap"
-                onClick={() => void page.confirmDeleteAll()}
-                disabled={page.isDeletingAll}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Видалити всіх
-              </Button>
-            )}
+            <DeleteAllButton
+              count={characterCount}
+              nouns={["персонаж", "персонажі", "персонажів"]}
+              title="Видалити всіх персонажів?"
+              label="Видалити всіх"
+              description="Буде видалено всіх персонажів гравців у цій кампанії. Цю дію не можна скасувати."
+              icon={<Trash2 className="mr-2 h-4 w-4" />}
+              pending={page.isDeletingAll}
+              onConfirm={page.removeAll}
+            />
             <Link href={newHref}>
               <Button className="whitespace-nowrap">
                 + Створити персонажа
