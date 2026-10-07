@@ -31,9 +31,13 @@ export function screenBackgroundFor(pathname: string | null): ScreenBackgroundNa
   const [root, , section, sub, printed] = (pathname ?? "").split("/").filter(Boolean);
 
   if (root !== "campaigns") return null;
+
   if (section === "character") return SCREEN_BACKGROUND.character;
+
   if (section === "battles") return SCREEN_BACKGROUND.battle;
+
   if (section !== "dm") return null;
+
   if (sub === "print") return printed === "spells" || printed === "skills" ? DM_SECTIONS[printed] : null;
 
   return sub ? (DM_SECTIONS[sub] ?? null) : null;
