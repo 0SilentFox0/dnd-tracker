@@ -27,6 +27,22 @@ function branchEntries(): [string, string][] {
 
 export const BRANCH_ICONS: Record<string, string> = Object.fromEntries(branchEntries());
 
+const RACIAL_LEVELS = ["basic", "advanced", "expert", "ultimate"] as const;
+
+const H5_RACIAL: Record<string, string> = {
+  humans: "Counterstrike",
+  demons: "Gating",
+  elves: "Avenger",
+  necromancers: "Necromancy",
+  mages: "Artificer",
+  "dark-elves": "IrresistibleMagic",
+  dwarves: "Runelore",
+};
+
+const RACIAL_ICONS: [string, string][] = Object.entries(H5_RACIAL).flatMap(([race, h5]) =>
+  RACIAL_LEVELS.map((level): [string, string] => [`racial-${race}-${level}`, `H5${level[0].toUpperCase()}${level.slice(1)}${h5}.png`]),
+);
+
 export const SKILL_ICONS: Record<string, string> = {
   "cleaving-strike": "H5ExcruciatingStrike.png",
   "stunning-strike": "H5StunningBlow.PNG",
@@ -86,6 +102,7 @@ export const SKILL_ICONS: Record<string, string> = {
   inspiration: "H5BattleCommander.png",
   vengeance: "H5HeraldOfDeath.PNG",
   success: "H5BattleElation.PNG",
+  ...Object.fromEntries(RACIAL_ICONS),
 };
 
 export function iconBucket(key: string): "skill-icons" | "main-skill-icons" {

@@ -19,6 +19,17 @@ describe("skill icons map", () => {
     expect(Object.keys(BRANCH_ICONS)).toHaveLength(32);
   });
 
+  it("has 28 racial icons from H5 racial skills in the skill bucket", () => {
+    const racial = Object.entries(SKILL_ICONS).filter(([k]) => k.startsWith("racial-"));
+
+    expect(racial).toHaveLength(28);
+
+    for (const [key, file] of racial) {
+      expect(file).toMatch(/^H5(Basic|Advanced|Expert|Ultimate)[A-Za-z]+\.png$/);
+      expect(iconBucket(key)).toBe("skill-icons");
+    }
+  });
+
   it("builds a public storage url per bucket", () => {
     expect(iconBucket("attack")).toBe("main-skill-icons");
     expect(iconBucket("cleaving-strike")).toBe("skill-icons");
