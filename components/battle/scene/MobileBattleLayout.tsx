@@ -18,7 +18,7 @@ import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { useBattleScene } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 
-export function MobileBattleLayout({ height }: { height: string }) {
+export function MobileBattleLayout() {
   const { battle, current, hero, isMyTurn, allies, enemies, selectedId, select, log, openLog, closeLog } = useBattleScene();
 
   const [tab, setTab] = useState<"ally" | "enemy">("enemy");
@@ -34,7 +34,7 @@ export function MobileBattleLayout({ height }: { height: string }) {
   );
 
   return (
-    <div className="flex flex-col overflow-hidden" style={{ height }}>
+    <div className="below-header flex flex-col overflow-hidden">
       <ConnectionBanner />
       <BattleTopBar />
       <InitiativeTrack />

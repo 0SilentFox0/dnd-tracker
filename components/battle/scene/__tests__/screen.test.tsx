@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import { renderToString } from "react-dom/server";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -13,6 +14,17 @@ import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
 
 describe("BattleScreen", () => {
   afterEach(cleanup);
+
+  it("серверний HTML не містить обчисленої висоти шапки", () => {
+    media.wide = false;
+
+    const { wrapper: Wrapper } = fakeScene({ isMyTurn: false });
+
+    const html = renderToString(<Wrapper><BattleScreen /></Wrapper>);
+
+    expect(html).not.toContain("- 0px)");
+    expect(html).toContain("below-header");
+  });
 
   it("телефон, не мій хід: вкладки, «ходить», мій герой, без кнопок дій", () => {
     media.wide = false;

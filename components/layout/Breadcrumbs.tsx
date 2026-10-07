@@ -91,9 +91,9 @@ export function Breadcrumbs() {
   return (
     <nav
       aria-label="Breadcrumb"
-      className="text-xs text-[#8f8473]"
+      className="h-6 text-xs text-[#8f8473]"
     >
-      <ol className="flex flex-wrap items-center gap-1">
+      <ol className="flex h-full flex-nowrap items-center gap-1 overflow-x-auto whitespace-nowrap">
         {crumbs.map((crumb) => (
           <li key={crumb.href} className="flex items-center gap-1">
             {crumb.isLast ? (

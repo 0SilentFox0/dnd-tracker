@@ -241,6 +241,16 @@
   html {
     min-height: 100vh;
   }
+  /* header: border 1 + h-14 (56) + pb-2 (8) + breadcrumbs h-6 (24) */
+  body {
+    --app-header-h: 0px;
+  }
+  body:has(header) {
+    --app-header-h: 89px;
+  }
+  .below-header {
+    height: calc(100dvh - var(--app-header-h));
+  }
   body {
     @apply text-foreground;
     background-color: #0b0908;

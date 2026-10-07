@@ -24,13 +24,13 @@ const H3 = ({ color, children }: { color: string; children: React.ReactNode }) =
   </h3>
 );
 
-export function DesktopBattleLayout({ height, onComplete }: { height: string; onComplete: () => void }) {
+export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) {
   const { battle, hero, isMyTurn, isDM, allies, enemies, selectedId, select, log } = useBattleScene();
 
   const selected = battle.initiativeOrder.find((p) => p.basicInfo.id === selectedId) ?? null;
 
   return (
-    <div className="flex flex-col overflow-hidden" style={{ height }}>
+    <div className="below-header flex flex-col overflow-hidden">
       <ConnectionBanner />
       <BattleTopBar onComplete={onComplete} />
       {battle.status === "completed" && <BattleOverBanner />}

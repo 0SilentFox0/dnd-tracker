@@ -4,6 +4,7 @@ import { Geist } from "next/font/google";
 import "./globals.css";
 import { hudFontClassName } from "@/components/hud";
 import { Header } from "@/components/layout/Header";
+import { ScreenBackground } from "@/components/layout/screen-background";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { ConfirmProvider } from "@/components/ui/confirm-dialog";
 import { QueryProvider } from "@/lib/providers/query-provider";
@@ -38,6 +39,7 @@ export default async function RootLayout({
   return (
     <html lang="uk" className="dark">
       <body className={`${geistSans.variable} ${hudFontClassName} antialiased`}>
+        <ScreenBackground />
         <QueryProvider>
           <ConfirmProvider>
             <Header email={email} />
