@@ -1,7 +1,7 @@
 "use client";
 
+import { HudPanel } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { SelectField } from "@/components/ui/select-field";
@@ -35,7 +35,7 @@ export function UnitAttack({
   onRemove,
 }: UnitAttackProps) {
   return (
-    <Card className="p-4">
+    <HudPanel as="div" className="p-4">
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-2">
           <Label className="text-sm font-medium">Атака #{index + 1}</Label>
@@ -209,6 +209,6 @@ export function UnitAttack({
           </div>
         )}
       </div>
-    </Card>
+    </HudPanel>
   );
 }
