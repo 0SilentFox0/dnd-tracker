@@ -81,6 +81,16 @@ describe("multi-target advantage resolution", () => {
       expect(["t2", "t3"].every((id) => lost(r, id) > 0)).toBe(true);
     });
 
+    it("missing damage dice are rolled by the server, never reduced damage", () => {
+      const r = run([sweeper(true), ...enemies()], { targetIds: ["t1"], attackRolls: [17], damageRolls: [4, 4] });
+
+      const losses = ["t1", "t2", "t3"].map((id) => lost(r, id));
+
+      expect(losses.every((l) => l > 0)).toBe(true);
+      expect(losses[1]).toBe(losses[2]);
+      expect(r.allBattleActions.filter((e) => e.actionType === "attack").slice(1).every((e) => e.resultText.includes("кубики шкоди кинув сервер"))).toBe(true);
+    });
+
     it("without the flag melee is still one target", () => {
       expect(() => run([sweeper(false), ...enemies()], { targetIds: ["t1", "t2", "t3"], attackRolls: [17, 17, 17], damageRolls: [4, 4, 4] })).toThrow(/Забагато цілей/);
 

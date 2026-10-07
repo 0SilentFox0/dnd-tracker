@@ -10,7 +10,7 @@ import { processAttack } from "@/lib/utils/battle/attack";
 import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
-import { diceCount } from "@/lib/utils/common/dice";
+import { diceCount, rollDiceList } from "@/lib/utils/common/dice";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 export type AttackPhaseInput = {
@@ -182,7 +182,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
   const allBattleActions: BattleAction[] = [];
 
   const dicePerTarget =
-    isMultiTargetRanged && targets.length > 1
+    isMultiTargetRanged && (targets.length > 1 || hitsAllEnemies)
       ? diceCount(hitsAllEnemies ? heroAttackDamageParts(attacker, attack).formula : (attack.damageDice ?? ""))
       : 0;
 
@@ -206,8 +206,14 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
     const damageMultiplier =
       targets.length > 1 ? damageFractions[i] : undefined;
 
+    const sentRolls = hitsAllEnemies ? data.damageRolls.slice(damageCursor, damageCursor + dicePerTarget) : [];
+
+    const rolledByServer = hitsAllEnemies && sentRolls.length < dicePerTarget;
+
     const damageRollsForTarget = hitsAllEnemies
-      ? data.damageRolls.slice(damageCursor, damageCursor + dicePerTarget)
+      ? rolledByServer
+        ? [...sentRolls, ...rollDiceList(heroAttackDamageParts(attacker, attack).formula, rng).slice(sentRolls.length)]
+        : sentRolls
       : isMultiTargetRanged &&
           targets.length > 1 &&
           dicePerTarget > 0 &&
@@ -238,6 +244,10 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
     currentInitiativeOrder = currentInitiativeOrder.map((p) => updatedMap.get(p.basicInfo.id) ?? p);
     currentAttacker = attackResult.attackerUpdated;
+
+    if (rolledByServer && attackResult.success) {
+      attackResult.battleAction.resultText = `${attackResult.battleAction.resultText} | 🎲 кубики шкоди кинув сервер: ${damageRollsForTarget.slice(sentRolls.length).join(", ")}`;
+    }
 
     allBattleActions.push({
       ...attackResult.battleAction,
