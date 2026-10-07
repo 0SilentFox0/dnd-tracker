@@ -1,3 +1,4 @@
+import { ownMorale } from "./morale";
 import type { Rng } from "./types";
 
 import type { Amount, Flat } from "@/lib/utils/abilities/schema";
@@ -7,12 +8,12 @@ import { rollDice } from "@/lib/utils/common/dice";
 import type { BattleParticipant } from "@/types/battle";
 
 export function formulaContext(p: BattleParticipant): Record<string, number> {
-  const { maxHp, currentHp, morale } = p.combatStats;
+  const { maxHp, currentHp } = p.combatStats;
 
   return {
     hero_level: p.abilities.level,
     lost_hp_percent: maxHp > 0 ? ((maxHp - currentHp) / maxHp) * 100 : 0,
-    morale,
+    morale: ownMorale(p),
   };
 }
 
