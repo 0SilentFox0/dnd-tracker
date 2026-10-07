@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
 
@@ -13,9 +13,9 @@ function Reader({ queryFn }: { queryFn: () => Promise<{ name: string }> }) {
   return <p>{data?.name ?? "loading"}</p>;
 }
 
-const renderWith = (data: { name: string } | null, queryFn: () => Promise<{ name: string }>) =>
+const renderWith = (data: { name: string } | null, queryFn: () => Promise<{ name: string }>, client = new QueryClient()) =>
   render(
-    <QueryClientProvider client={new QueryClient()}>
+    <QueryClientProvider client={client}>
       <PrefetchedQuery queryKey={KEY} data={data}>
         <Reader queryFn={queryFn} />
       </PrefetchedQuery>
@@ -23,6 +23,18 @@ const renderWith = (data: { name: string } | null, queryFn: () => Promise<{ name
   );
 
 describe("PrefetchedQuery", () => {
+  afterEach(() => vi.useRealTimers());
+
+  it("дані датуються годинником клієнта, а не сервера", () => {
+    vi.useFakeTimers({ now: 5_000_000 });
+
+    const client = new QueryClient();
+
+    renderWith({ name: "x" }, async () => ({ name: "client" }), client);
+
+    expect(client.getQueryState(KEY)?.dataUpdatedAt).toBe(5_000_000);
+  });
+
   it("дані з сервера видно одразу, а свіжий кеш не перезапитується на mount", () => {
     const queryFn = vi.fn(async () => ({ name: "client" }));
 
