@@ -1,13 +1,13 @@
 "use client";
 
-import { type ReactNode, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Copy, Move, Pencil, Sparkles, X, Zap } from "lucide-react";
 
 import { SpellPrintCard } from "./SpellPrintCard";
 
 import { OptimizedImage } from "@/components/common/OptimizedImage";
-import { HudCard } from "@/components/hud/page";
+import { HudCard, HudPill } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -31,15 +31,6 @@ interface SpellCardProps {
 }
 
 const ICON_BTN = "size-7 shrink-0 text-[#8f8473] hover:text-[#efe5d2]";
-
-function Fact({ icon, children }: { icon?: ReactNode; children: ReactNode }) {
-  return (
-    <span className="inline-flex items-center gap-1 rounded-full px-1.5 text-[11px] leading-5 text-[#c9bfae] shadow-[inset_0_0_0_1px_#4a3c2c]">
-      {icon}
-      {children}
-    </span>
-  );
-}
 
 export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, onMoveToGroup, printMode = false }: SpellCardProps) {
   const [copied, setCopied] = useState(false);
@@ -77,27 +68,27 @@ export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, o
         <div className="min-w-0 flex-1">
           <h3 className="hud-sc truncate text-[15px] text-[#efe5d2]">{spell.name}</h3>
           <div className="mt-1 flex flex-wrap gap-1">
-            <Fact icon={<Sparkles className="size-3" />}>{spell.level === 0 ? "Cantrip" : spell.level}</Fact>
+            <HudPill icon={<Sparkles className="size-3" />}>{spell.level === 0 ? "Cantrip" : spell.level}</HudPill>
             {spell.type === "aoe" && spell.damageType === "damage" ? (
-              <Fact icon={<Zap className="size-3" />}>AOE Демедж</Fact>
+              <HudPill icon={<Zap className="size-3" />}>AOE Демедж</HudPill>
             ) : (
               <>
-                <Fact icon={<TypeIcon className="size-3" />}>{spell.type === "target" ? "Цільове" : "AoE"}</Fact>
-                <Fact icon={<DamageTypeIcon className="size-3" />}>{getSpellDamageTypeLabel(spell.damageType)}</Fact>
+                <HudPill icon={<TypeIcon className="size-3" />}>{spell.type === "target" ? "Цільове" : "AoE"}</HudPill>
+                <HudPill icon={<DamageTypeIcon className="size-3" />}>{getSpellDamageTypeLabel(spell.damageType)}</HudPill>
               </>
             )}
             {spell.diceCount && spell.diceType ? (
-              <Fact>
+              <HudPill>
                 {spell.diceCount}
                 {spell.diceType}
-              </Fact>
+              </HudPill>
             ) : null}
-            {spell.damageElement && <Fact>{getDamageElementLabel(spell.damageElement)}</Fact>}
-            {spell.damageModifier && <Fact>{getDamageModifierLabel(spell.damageModifier)}</Fact>}
-            {spell.healModifier && <Fact>{getHealModifierLabel(spell.healModifier)}</Fact>}
-            {spell.target && <Fact>{getSpellTargetLabel(spell.target)}</Fact>}
-            {spell.range && <Fact>{spell.range}</Fact>}
-            {spell.castingTime && <Fact>{spell.castingTime}</Fact>}
+            {spell.damageElement && <HudPill>{getDamageElementLabel(spell.damageElement)}</HudPill>}
+            {spell.damageModifier && <HudPill>{getDamageModifierLabel(spell.damageModifier)}</HudPill>}
+            {spell.healModifier && <HudPill>{getHealModifierLabel(spell.healModifier)}</HudPill>}
+            {spell.target && <HudPill>{getSpellTargetLabel(spell.target)}</HudPill>}
+            {spell.range && <HudPill>{spell.range}</HudPill>}
+            {spell.castingTime && <HudPill>{spell.castingTime}</HudPill>}
           </div>
         </div>
         <div className="-mr-1 -mt-1 flex shrink-0">
