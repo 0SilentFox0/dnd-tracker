@@ -12,6 +12,7 @@ import { useBattleScene } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { withinLimits } from "@/lib/utils/abilities/engine/usage";
 import { describeEffect } from "@/lib/utils/abilities/registry/effects";
+import { abilityMaxTargets, toggleAbilityTarget } from "@/lib/utils/battle/validation/ability-targets";
 import { bonusTargetCandidates, bonusTargetSide, needsBonusTarget } from "@/lib/utils/battle/view";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
@@ -23,28 +24,38 @@ export function BonusActionPicker({ participant, open, onOpenChange, onDone, tri
 
   const abilities = (participant.battleData.resolvedAbilities ?? []).filter((a) => a.trigger.event === trigger && withinLimits(participant, a));
 
-  const fire = async (a: ResolvedAbility, targetId?: string) => {
+  const [picked, setPicked] = useState<string[]>([]);
+
+  const fire = async (a: ResolvedAbility, targetIds: string[] = []) => {
     try {
       if (trigger === "action") {
-        await actions.abilityAction.mutateAsync({ participantId: participant.basicInfo.id, abilityKey: a.key, ...(targetId && { targetParticipantIds: [targetId] }) });
+        await actions.abilityAction.mutateAsync({ participantId: participant.basicInfo.id, abilityKey: a.key, ...(targetIds.length > 0 && { targetParticipantIds: targetIds }) });
+      } else if (targetIds.length > 1) {
+        await actions.bonusAction.mutateAsync({ participantId: participant.basicInfo.id, abilityKey: a.key, targetParticipantIds: targetIds });
       } else {
-        await actions.bonusAction.mutateAsync({ participantId: participant.basicInfo.id, abilityKey: a.key, ...(targetId && { targetParticipantId: targetId }) });
+        await actions.bonusAction.mutateAsync({ participantId: participant.basicInfo.id, abilityKey: a.key, ...(targetIds[0] && { targetParticipantId: targetIds[0] }) });
       }
     } catch {
       return;
     }
 
     setAiming(null);
+    setPicked([]);
     onOpenChange(false);
     onDone();
   };
 
   const side = aiming ? bonusTargetSide(aiming) : null;
 
+  const max = aiming ? abilityMaxTargets(aiming) : 1;
+
   const candidates = aiming ? bonusTargetCandidates(aiming, allies, enemies, participant.basicInfo.id) : [];
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={(o) => { if (!o) setAiming(null);
+    <ResponsiveDialog open={open} onOpenChange={(o) => { if (!o) {
+      setAiming(null);
+      setPicked([]);
+    }
 
  onOpenChange(o); }} title={aiming ? `${aiming.name} · ціль` : trigger === "action" ? "Вміння" : "Бонусна дія"} className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
       <div className="space-y-2">
@@ -58,12 +69,17 @@ export function BonusActionPicker({ participant, open, onOpenChange, onDone, tri
           </button>
         ))}
         {aiming && candidates.map((t) => (
-          <button key={t.basicInfo.id} type="button" disabled={actions.bonusAction.isPending || actions.abilityAction.isPending} onClick={() => void fire(aiming, t.basicInfo.id)} className="flex h-14 w-full items-center gap-3 border border-white/15 px-3 text-left">
+          <button key={t.basicInfo.id} type="button" disabled={actions.bonusAction.isPending || actions.abilityAction.isPending} onClick={() => (max === 1 ? void fire(aiming, [t.basicInfo.id]) : setPicked(toggleAbilityTarget(picked, t.basicInfo.id, max)))} className={cn("flex h-14 w-full items-center gap-3 border px-3 text-left", picked.includes(t.basicInfo.id) ? "border-[var(--gold)] bg-[var(--gold)]/10" : "border-white/15")}>
             <Portrait participant={t} size={36} />
             <span className="hud-sc font-bold">{t.basicInfo.name}</span>
             {side === ParticipantSide.ENEMY ? <HealthLabel participant={t} /> : <span className="ml-auto text-sm text-[#d6cbb7]">{t.combatStats.currentHp} / {t.combatStats.maxHp}</span>}
           </button>
         ))}
+        {aiming && max > 1 && (
+          <button type="button" disabled={picked.length === 0 || actions.bonusAction.isPending || actions.abilityAction.isPending} onClick={() => void fire(aiming, picked)} className="hud-sc flex h-12 w-full items-center justify-center border border-[var(--gold)] disabled:opacity-40">
+            Підтвердити · {picked.length}/{max}
+          </button>
+        )}
       </div>
     </ResponsiveDialog>
   );

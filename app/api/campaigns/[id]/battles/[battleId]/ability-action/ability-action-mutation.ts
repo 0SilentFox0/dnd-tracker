@@ -1,14 +1,14 @@
 import { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { findParticipant, isActive, updateParticipant } from "@/lib/utils/abilities/engine/participants";
+import { findParticipant, updateParticipant } from "@/lib/utils/abilities/engine/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import { withinLimits } from "@/lib/utils/abilities/engine/usage";
-import { conditionRequiresDeadTarget } from "@/lib/utils/abilities/registry/conditions";
 import { applyMainActionUsed } from "@/lib/utils/battle/participant";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
 import { assertNotPanicking } from "@/lib/utils/battle/turn";
+import { assertAbilityTargets } from "@/lib/utils/battle/validation/ability-targets";
 
 export const abilityActionSchema = z.object({
   participantId: z.string(),
@@ -37,13 +37,7 @@ export function abilityActionMutation(ctx: BattleMutationContext, data: AbilityA
 
   const targetIds = data.targetParticipantIds ?? [];
 
-  if (targetIds.length > 1) throw new BattleRuleError("invalid_target", API_ERRORS.ABILITY_TOO_MANY_TARGETS);
-
-  if (conditionRequiresDeadTarget(ability.condition)) {
-    const target = targetIds[0] ? findParticipant(ctx.participants, targetIds[0]) : undefined;
-
-    if (!target || isActive(target)) throw new BattleRuleError("invalid_target", API_ERRORS.BONUS_TARGET_MUST_BE_DEAD);
-  }
+  assertAbilityTargets(ability, ctx.participants, targetIds);
 
   const run = runAbilities(
     ctx.participants,

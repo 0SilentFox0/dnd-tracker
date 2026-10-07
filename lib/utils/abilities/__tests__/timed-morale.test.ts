@@ -6,7 +6,7 @@ import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import { AbilitySchema } from "@/lib/utils/abilities/schema";
 import type { AbilityEvent } from "@/types/abilities";
 
-const bonusAction = (key: string) => ({ type: "bonusAction", actorId: "a", abilityKey: key, targetId: "t" }) as AbilityEvent;
+const bonusAction = (key: string) => ({ type: "bonusAction", actorId: "a", abilityKey: key, targetIds: ["t"] }) as AbilityEvent;
 
 const timedMorale = (flat: number) =>
   resolved({ trigger: { event: "bonusAction" }, effects: [{ kind: "modifyStat", stat: "morale", flat, duration: { rounds: 2 }, target: "eventTarget" }] });

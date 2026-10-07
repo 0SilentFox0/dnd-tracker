@@ -48,7 +48,7 @@ export type AbilityEvent =
   | { type: "lethalDamage"; actorId: string | null; targetId: string }
   | { type: "spellCast"; phase: "before" | "after"; actorId: string; targetIds: string[]; spellId?: string; school?: string | null; level?: number }
   | { type: "moraleCheck"; actorId: string; result: "success" | "fail" }
-  | { type: "bonusAction"; actorId: string; abilityKey: string; targetId?: string }
+  | { type: "bonusAction"; actorId: string; abilityKey: string; targetIds?: string[] }
   | { type: "action"; actorId: string; abilityKey: string; targetIds?: string[] };
 
 export type AbilityDamageKind = DamageKind;

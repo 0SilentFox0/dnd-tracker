@@ -114,6 +114,8 @@ export function describeFlag(e: Extract<Effect, { kind: "flag" }>): string {
       return e.attackKind === "all" ? "перевага на атаки" : `перевага на ${e.attackKind === AttackType.MELEE ? "ближні" : "дальні"} атаки`;
     case "disadvantage":
       return "недолік на атаки";
+    case "advantageForAttackers":
+      return "атакуючі цю ціль мають перевагу";
     case "disadvantageForAttackers":
       return "недолік для атакувальників";
     case "guaranteedHit":
@@ -146,6 +148,7 @@ export const FLAG_LABELS: Record<FlagKey, string> = {
   advantage: "Перевага",
   disadvantage: "Недолік на свої атаки",
   disadvantageForAttackers: "Недолік для атакувальників",
+  advantageForAttackers: "Перевага для атакувальників",
   guaranteedHit: "Гарантоване влучання",
   resistance: "Опір / імунітет до шкоди",
   spellImmunity: "Імунітет до заклинань",
@@ -173,6 +176,7 @@ export const FLAG_FIELDS: Record<FlagKey, readonly FieldMeta[]> = {
   advantage: [{ name: "attackKind", label: "Атаки", input: "select", options: ATTACK_KIND_ALL }],
   disadvantage: [],
   disadvantageForAttackers: [],
+  advantageForAttackers: [],
   guaranteedHit: [],
   resistance: [
     { name: "damageType", label: "Тип шкоди (all, physical, spell, fire…)", input: "text" },

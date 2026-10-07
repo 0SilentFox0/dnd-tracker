@@ -15,7 +15,6 @@ export function eventTargetIds(e: AbilityEvent): string[] {
     case "spellCast":
       return e.targetIds;
     case "bonusAction":
-      return [e.targetId ?? e.actorId];
     case "action":
       return e.targetIds?.length ? e.targetIds : [e.actorId];
     default:

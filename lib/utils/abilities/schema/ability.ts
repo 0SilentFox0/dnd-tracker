@@ -64,6 +64,7 @@ export const AbilitySchema = z
     effects: z.array(EffectSchema).min(1),
     stackable: z.boolean().optional(),
     maxStacks: z.number().int().min(1).optional(),
+    maxTargets: z.number().int().min(1).optional(),
   })
   .superRefine((a, ctx) => {
     if (a.trigger.event === "passive" && a.limits) {
@@ -72,6 +73,10 @@ export const AbilitySchema = z
 
     if (a.maxStacks !== undefined && !a.stackable) {
       ctx.addIssue({ code: "custom", path: ["maxStacks"], message: "maxStacks має сенс лише зі stackable" });
+    }
+
+    if (a.maxTargets !== undefined && a.trigger.event !== "bonusAction" && a.trigger.event !== "action") {
+      ctx.addIssue({ code: "custom", path: ["maxTargets"], message: "maxTargets доступний лише для бонусної дії та дії" });
     }
 
     a.effects.forEach((effect, i) => {

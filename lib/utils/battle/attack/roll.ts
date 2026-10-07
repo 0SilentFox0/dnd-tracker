@@ -20,7 +20,7 @@ export function calculateAttackRoll(
 
   const attackBonus = calculateAttackBonus(attacker, attack, participants, opts.extra);
 
-  const hasAdv = hasAdvantage(attacker, attack, participants, opts.extra);
+  const hasAdv = hasAdvantage(attacker, attack, participants, opts.extra, opts);
 
   const hasDisadv = hasDisadvantage(attacker, attack, participants, opts);
 

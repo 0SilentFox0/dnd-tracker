@@ -50,6 +50,7 @@ const FlagSchema = z.discriminatedUnion("flag", [
   z.object({ ...flagBase, flag: z.literal("advantage"), attackKind: z.enum([...ATTACK_KINDS, "all"]) }),
   z.object({ ...flagBase, flag: z.literal("disadvantage") }),
   z.object({ ...flagBase, flag: z.literal("disadvantageForAttackers") }),
+  z.object({ ...flagBase, flag: z.literal("advantageForAttackers") }),
   z.object({ ...flagBase, flag: z.literal("guaranteedHit") }),
   z.object({
     ...flagBase,

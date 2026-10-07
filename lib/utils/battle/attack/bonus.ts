@@ -24,14 +24,17 @@ export function hasAdvantage(
   attack: BattleAttack,
   participants: BattleParticipant[] = [attacker],
   extra?: StaticEffect[],
+  opts: { targetId?: string; targetExtra?: StaticEffect[] } = {},
 ): boolean {
   const kind = attackKindOf(attack.type);
 
   if (attacker.abilities.race?.toLowerCase().includes("elf") && kind === AttackType.RANGED) return true;
 
-  return findFlags(withSelf(participants, attacker), attacker.basicInfo.id, "advantage", extra).some(
-    (f) => f.attackKind === "all" || f.attackKind === kind,
-  );
+  const ps = withSelf(participants, attacker);
+
+  if (findFlags(ps, attacker.basicInfo.id, "advantage", extra).some((f) => f.attackKind === "all" || f.attackKind === kind)) return true;
+
+  return !!opts.targetId && findFlags(ps, opts.targetId, "advantageForAttackers", opts.targetExtra).length > 0;
 }
 
 export function hasDisadvantage(

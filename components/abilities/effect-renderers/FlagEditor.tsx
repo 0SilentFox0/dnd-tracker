@@ -11,6 +11,7 @@ const DEFAULTS: Record<FlagKey, Record<string, unknown>> = {
   advantage: { attackKind: "all" },
   disadvantage: {},
   disadvantageForAttackers: {},
+  advantageForAttackers: {},
   guaranteedHit: {},
   resistance: { damageType: "physical", percent: 25 },
   spellImmunity: { spellIds: [] },

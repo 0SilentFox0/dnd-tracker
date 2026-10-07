@@ -1,18 +1,19 @@
 import { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { isActive, updateParticipant } from "@/lib/utils/abilities/engine/participants";
+import { updateParticipant } from "@/lib/utils/abilities/engine/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import { withinLimits } from "@/lib/utils/abilities/engine/usage";
-import { conditionRequiresDeadTarget } from "@/lib/utils/abilities/registry/conditions";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
 import { assertNotPanicking } from "@/lib/utils/battle/turn";
+import { assertAbilityTargets } from "@/lib/utils/battle/validation/ability-targets";
 
 export const bonusActionSchema = z.object({
   participantId: z.string(),
   abilityKey: z.string(),
   targetParticipantId: z.string().optional(),
+  targetParticipantIds: z.array(z.string()).optional(),
 });
 
 export type BonusActionBody = z.infer<typeof bonusActionSchema>;
@@ -34,15 +35,13 @@ export function bonusActionMutation(ctx: BattleMutationContext, data: BonusActio
 
   if (!withinLimits(participant, ability)) throw new BattleRuleError("ability_limit", "Ліміт використань вичерпано");
 
-  if (conditionRequiresDeadTarget(ability.condition)) {
-    const target = ctx.participants.find((p) => p.basicInfo.id === data.targetParticipantId);
+  const targetIds = data.targetParticipantIds ?? (data.targetParticipantId ? [data.targetParticipantId] : []);
 
-    if (!target || isActive(target)) throw new BattleRuleError("invalid_target", API_ERRORS.BONUS_TARGET_MUST_BE_DEAD);
-  }
+  assertAbilityTargets(ability, ctx.participants, targetIds);
 
   const run = runAbilities(
     ctx.participants,
-    { type: "bonusAction", actorId: participant.basicInfo.id, abilityKey: ability.key, targetId: data.targetParticipantId },
+    { type: "bonusAction", actorId: participant.basicInfo.id, abilityKey: ability.key, targetIds },
     { round: ctx.scene.round, rng: Math.random },
   );
 

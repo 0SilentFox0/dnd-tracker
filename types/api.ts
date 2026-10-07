@@ -144,6 +144,7 @@ export interface BonusActionData {
   participantId: string;
   abilityKey: string;
   targetParticipantId?: string;
+  targetParticipantIds?: string[];
 }
 
 export interface AbilityActionData {
