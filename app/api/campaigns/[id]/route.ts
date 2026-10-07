@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { kvDel } from "@/lib/cache/kv";
+import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CampaignRole } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
@@ -118,5 +119,38 @@ export async function PATCH(
     return NextResponse.json(updatedCampaign);
   } catch (error) {
     return handleApiError(error, { action: "update campaign" });
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+
+    const accessResult = await requireDM(id);
+
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
+    }
+
+    const members = await prisma.campaignMember.findMany({
+      where: { campaignId: id },
+      select: { userId: true },
+    });
+
+    // Усі залежні таблиці мають onDelete: Cascade (або SetNull всередині кампанії).
+    await prisma.campaign.delete({ where: { id } });
+
+    for (const m of members) {
+      await kvDel(`campaigns:${m.userId}`);
+    }
+
+    invalidateReference(Object.values(ReferenceKind), id);
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return handleApiError(error, { action: "delete campaign" });
   }
 }

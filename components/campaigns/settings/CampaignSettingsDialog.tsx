@@ -10,7 +10,8 @@ import { LabeledInput } from "@/components/ui/labeled-input";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { CampaignStatus } from "@/lib/constants/campaigns";
-import { useUpdateCampaign } from "@/lib/hooks/campaigns";
+import { useDeleteCampaign, useUpdateCampaign } from "@/lib/hooks/campaigns";
+import { useConfirm } from "@/lib/hooks/common";
 import type { CampaignSettings } from "@/types/campaigns";
 
 interface CampaignSettingsDialogProps {
@@ -25,11 +26,15 @@ const toFields = (c: CampaignSettings) => ({ ...c, description: c.description ||
 export function CampaignSettingsDialog({ campaignId, campaign, open, onOpenChange }: CampaignSettingsDialogProps) {
   const update = useUpdateCampaign(campaignId);
 
+  const remove = useDeleteCampaign(campaignId);
+
+  const confirm = useConfirm();
+
   const [fields, setFields] = useState(() => toFields(campaign));
 
   const [error, setError] = useState<string | null>(null);
 
-  const isSaving = update.isPending;
+  const isSaving = update.isPending || remove.isPending;
 
   const set = <K extends keyof typeof fields>(key: K, value: (typeof fields)[K]) => setFields((prev) => ({ ...prev, [key]: value }));
 
@@ -42,6 +47,22 @@ export function CampaignSettingsDialog({ campaignId, campaign, open, onOpenChang
         onError: (err) => setError(err instanceof Error ? err.message : "Помилка збереження"),
       },
     );
+  };
+
+  const handleDelete = async () => {
+    const ok = await confirm({
+      title: `Видалити кампанію «${campaign.name}»?`,
+      description: "Усі персонажі, бої, юніти та бібліотеку кампанії буде видалено назавжди.",
+      confirmLabel: "Видалити",
+      destructive: true,
+    });
+
+    if (!ok) return;
+
+    setError(null);
+    remove.mutate(undefined, {
+      onError: (err) => setError(err instanceof Error ? err.message : "Помилка видалення"),
+    });
   };
 
   return (
@@ -107,6 +128,11 @@ export function CampaignSettingsDialog({ campaignId, campaign, open, onOpenChang
             <Label htmlFor="campaign-status">Кампанія активна</Label>
           </div>
         </div>
+      </HudSection>
+      <HudSection title="Небезпечна зона">
+        <Button variant="destructive" onClick={handleDelete} disabled={isSaving}>
+          {remove.isPending ? "Видалення..." : "Видалити кампанію"}
+        </Button>
       </HudSection>
       {error && (
         <p role="alert" className="mt-4 rounded-md border border-hud-danger/50 bg-hud-danger/10 px-3 py-2 text-sm text-[#f0b4a6]">
