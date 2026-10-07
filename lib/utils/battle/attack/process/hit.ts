@@ -2,6 +2,7 @@ import type { AttackRollResult } from "../../types/attack";
 import { type AttackFlow, fire, getP, put, settleDowned } from "./ability-flow";
 import { computeHitDamage, type ComputeHitDamageResult } from "./compute";
 import { applyDamageToTarget } from "./damage";
+import { splitGuardedDamage } from "./guard";
 import { applyVampirism } from "./hit-effects";
 
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
@@ -40,7 +41,17 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
 
   put(flow, hitDamage.updatedAttacker);
   put(flow, hitDamage.updatedTarget);
-  put(flow, applyDamageToTarget(getP(flow, targetId), hitDamage.totalFinalDamage).updatedTarget);
+
+  const guarded = splitGuardedDamage(flow.ps, targetId, hitDamage.totalFinalDamage);
+
+  put(flow, applyDamageToTarget(getP(flow, targetId), guarded.targetDamage).updatedTarget);
+
+  if (guarded.guardianId) {
+    put(flow, applyDamageToTarget(getP(flow, guarded.guardianId), guarded.guardianDamage).updatedTarget);
+    flow.messages.push(`🛡 ${getP(flow, guarded.guardianId).basicInfo.name} приймає ${guarded.guardianDamage} шкоди за ${getP(flow, targetId).basicInfo.name}`);
+    settleDowned(flow, guarded.guardianId, attackerId);
+  }
+
   settleDowned(flow, targetId, attackerId);
 
   fire(flow, {

@@ -133,6 +133,8 @@ const ChangeMoraleSchema = z.object({
 
 const CleanseSchema = z.object({ kind: z.literal("cleanse"), ...target });
 
+const GuardSchema = z.object({ kind: z.literal("guard"), percent: z.number().min(1).max(100), duration: DurationSchema, ...target });
+
 const MarkSchema = z.object({ kind: z.literal("mark"), markId: z.string().min(1), duration: DurationSchema, ...target });
 
 const BASE_EFFECTS = [
@@ -149,6 +151,7 @@ const BASE_EFFECTS = [
   ChangeMoraleSchema,
   CleanseSchema,
   MarkSchema,
+  GuardSchema,
 ] as const;
 
 export const NonRandomEffectSchema = z.discriminatedUnion("kind", [...BASE_EFFECTS]);

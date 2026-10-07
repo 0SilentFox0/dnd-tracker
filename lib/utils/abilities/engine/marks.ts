@@ -1,5 +1,7 @@
 import type { BattleParticipant } from "@/types/battle";
 
+export const GUARD_KEY = "guard";
+
 export const markKey = (markId: string) => `mark:${markId}`;
 
 export function countMarks(target: BattleParticipant | undefined, markId: string, sourceId: string): number {

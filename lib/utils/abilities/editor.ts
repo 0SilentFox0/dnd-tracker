@@ -37,6 +37,8 @@ function baseEffect(kind: EffectKind): Effect {
       return { kind, delta: 1 };
     case "cleanse":
       return { kind };
+    case "guard":
+      return { kind, percent: 50, duration: { rounds: 2 }, target: "eventTarget" };
     case "mark":
       return { kind, markId: "mark", duration: { rounds: 2 }, target: "eventTarget" };
     case "randomOf":

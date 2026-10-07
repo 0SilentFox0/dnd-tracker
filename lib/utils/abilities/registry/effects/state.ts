@@ -2,7 +2,7 @@ import { CONDITION_LABELS } from "../labels";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { markKey } from "@/lib/utils/abilities/engine/marks";
+import { countMarks, GUARD_KEY, markKey } from "@/lib/utils/abilities/engine/marks";
 import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/participants";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/timed-effects";
 import type { ConditionImmunityKey, Effect } from "@/lib/utils/abilities/schema";
@@ -168,9 +168,9 @@ export function applyMark(input: EffectApplyInput<Of<"mark">>): EffectApplyResul
 
   const owner = findParticipant(input.participants, input.ownerId);
 
-  let count = 0;
+  const counts: number[] = [];
 
-  const result = each(
+  return each(
     input,
     (p) => {
       const next = upsertTimedEffect(
@@ -179,12 +179,35 @@ export function applyMark(input: EffectApplyInput<Of<"mark">>): EffectApplyResul
         ctx.round,
       );
 
-      count = next.battleData.activeEffects.filter((e) => e.abilityKey === markKey(effect.markId) && e.source?.participantId === input.ownerId).length;
+      counts.push(countMarks(next, effect.markId, input.ownerId));
 
       return next;
     },
-    (names) => `🎯 ${ability.name}: ${names} — мітка (${count})`,
+    (names) => `🎯 ${ability.name}: ${names} — мітка${counts.length === 1 ? ` (${counts[0]})` : ""}`,
   );
+}
 
-  return result;
+export function applyGuard(input: EffectApplyInput<Of<"guard">>): EffectApplyResult {
+  const { ability, effect, ctx } = input;
+
+  const owner = findParticipant(input.participants, input.ownerId);
+
+  return each(
+    input,
+    (p) =>
+      upsertTimedEffect(
+        p,
+        {
+          timedKey: GUARD_KEY,
+          source: effectSource(owner, ability),
+          name: ability.name,
+          type: "buff",
+          rounds: effect.duration.rounds,
+          stackable: false,
+          effects: [{ type: "guard", value: effect.percent }],
+        },
+        ctx.round,
+      ),
+    (names) => `🛡 ${ability.name}: ${names} — захист ${effect.percent}% (${effect.duration.rounds} р.)`,
+  );
 }
