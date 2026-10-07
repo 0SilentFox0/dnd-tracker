@@ -36,4 +36,21 @@ describe("EntityIcon", () => {
     expect(container.firstElementChild?.className).toContain("size-16");
     expect(container.firstElementChild?.className).not.toContain("size-10");
   });
+
+  it("fallback замість літери, коли src немає, не URL або не завантажився", () => {
+    const { container, rerender } = render(<EntityIcon src={null} name="Меч" fallback={<i data-testid="fb" />} />);
+
+    expect(screen.getByTestId("fb")).toBeInTheDocument();
+
+    rerender(<EntityIcon src="⚔️" name="Меч" fallback={<i data-testid="fb" />} />);
+    expect(container.querySelector("img")).toBeNull();
+    expect(screen.getByTestId("fb")).toBeInTheDocument();
+  });
+
+  it("emoji: рядок, що не є URL, показується як текст", () => {
+    const { container } = render(<EntityIcon src="⚔️" name="Меч" emoji />);
+
+    expect(container.querySelector("img")).toBeNull();
+    expect(screen.getByText("⚔️")).toBeInTheDocument();
+  });
 });

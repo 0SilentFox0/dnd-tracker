@@ -1,4 +1,5 @@
-import type { SkillForReference, SpellForReference } from "@/lib/types/info-reference";
+import { spellLevelName } from "@/lib/constants/spells";
+import type { SkillForReference, SpellForReference } from "@/types/info-reference";
 
 export function formatMechanicsSkill(s: SkillForReference): string {
   const parts: string[] = [];
@@ -15,7 +16,7 @@ export function formatMechanicsSkill(s: SkillForReference): string {
 export function formatMechanicsSpell(s: SpellForReference): string {
   const parts: string[] = [];
 
-  parts.push(`Рівень ${s.level}, ${s.type}, ${s.damageType}`);
+  parts.push(`${spellLevelName(s.level)}, ${s.type}, ${s.damageType}`);
 
   if (s.castingTime) parts.push(`Час: ${s.castingTime}`);
 
@@ -80,7 +81,6 @@ export function matchSearch(text: string, query: string): boolean {
 
 const SHORT_SUMMARY_LENGTH = 72;
 
-/** One-line summary for skill (list/preview). */
 export function getShortSkillSummary(s: SkillForReference): string {
   if (s.description?.trim()) {
     const first = s.description.split(/\n/)[0]?.trim() ?? "";
@@ -97,7 +97,6 @@ export function getShortSkillSummary(s: SkillForReference): string {
   return mechanics.slice(0, SHORT_SUMMARY_LENGTH - 2) + "…";
 }
 
-/** One-line summary for spell (list/preview). */
 export function getShortSpellSummary(s: SpellForReference): string {
   if (s.description?.trim()) {
     const first = s.description.split(/\n/)[0]?.trim() ?? "";

@@ -1,10 +1,6 @@
-/**
- * Розрахунок урону атаки та застосування до цілі (опір, tempHp, статус)
- */
-
 import { applyResistance } from "../../resistance";
 
-import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
+import { BATTLE_CONSTANTS, CombatStatus } from "@/lib/constants/battle";
 import type { BattleParticipant } from "@/types/battle";
 
 export interface ApplyDamageToTargetResult {
@@ -24,7 +20,7 @@ export function applyDamageToTarget(target: BattleParticipant, totalFinalDamage:
         ...target.combatStats,
         tempHp: target.combatStats.tempHp - fromTemp,
         currentHp,
-        status: currentHp <= 0 ? (currentHp < 0 ? "dead" : "unconscious") : target.combatStats.status,
+        status: currentHp <= 0 ? (currentHp < 0 ? CombatStatus.DEAD : CombatStatus.UNCONSCIOUS) : target.combatStats.status,
       },
     },
   };

@@ -3,6 +3,7 @@ import type { PendingMoraleCheckPayload } from "./pending-morale";
 import { runAdvanceTurnLoop } from "./run-advance-turn-loop";
 import { applyVictoryCompletion } from "./turn-helpers";
 
+import { isActive } from "@/lib/utils/abilities/engine/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import type { BattleSceneState, ScenePatch } from "@/lib/utils/battle/store";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
@@ -35,7 +36,7 @@ export function advanceTurn({ participants, pending, scene }: AdvanceTurnInput):
 
   const ending = order[scene.turnIndex];
 
-  if (ending && isAlive(ending)) {
+  if (ending && isActive(ending)) {
     const ended = runAbilities(order, { type: "turnEnd", actorId: ending.basicInfo.id }, { round: scene.round, rng: Math.random });
 
     order = ended.participants;
@@ -53,9 +54,9 @@ export function advanceTurn({ participants, pending, scene }: AdvanceTurnInput):
     );
   }
 
-  const roundIsOver = endingExtraTurn || !order.slice(scene.turnIndex + 1).some(isAlive);
+  const roundIsOver = endingExtraTurn || !order.slice(scene.turnIndex + 1).some(isActive);
 
-  const extraIndex = roundIsOver ? order.findIndex((p) => isAlive(p) && p.actionFlags.hasExtraTurn) : -1;
+  const extraIndex = roundIsOver ? order.findIndex((p) => isActive(p) && p.actionFlags.hasExtraTurn) : -1;
 
   if (extraIndex >= 0) {
     const taker = order[extraIndex];
@@ -114,10 +115,6 @@ export function advanceTurn({ participants, pending, scene }: AdvanceTurnInput):
     },
     actions: [...actions, ...newLogEntries],
   };
-}
-
-function isAlive(p: BattleParticipant): boolean {
-  return p.combatStats.status !== "dead" && p.combatStats.status !== "unconscious";
 }
 
 function extraTurnAction(p: BattleParticipant, scene: BattleSceneState): BattleAction {

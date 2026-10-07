@@ -6,6 +6,7 @@ import { balanceSchema } from "./balance-schema";
 
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { parseBody } from "@/lib/utils/api/parse-body";
 
 /** GET: DPR, HP, KPI для кожного персонажа та юніта кампанії. */
 export async function GET(
@@ -39,9 +40,9 @@ export async function POST(
 
     if (accessResult instanceof NextResponse) return accessResult;
 
-    const body = await request.json();
+    const data = await parseBody(balanceSchema, request);
 
-    const data = balanceSchema.parse(body);
+    if (data instanceof NextResponse) return data;
 
     const response = await postBalanceResponse(campaignId, data);
 

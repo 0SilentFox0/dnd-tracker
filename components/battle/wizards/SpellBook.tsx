@@ -5,13 +5,14 @@ import { Loader2, Sparkles, Swords } from "lucide-react";
 import { AiRollButton, DamageDice, DiceGrid } from "./DiceInput";
 import { SpellBookPages, SpellDetail } from "./SpellBookPages";
 
-import { HUD_SURFACE, Portrait } from "@/components/battle/hud";
+import { Portrait } from "@/components/battle/hud";
+import { HUD_SURFACE } from "@/components/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
+import { spellLevelRoman } from "@/lib/constants/spells";
 import type { useSpellBook } from "@/lib/hooks/battle";
 import { useMediaQuery } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 import { rollsComplete } from "@/lib/utils/battle/flows";
-import { ROMAN } from "@/lib/utils/battle/view";
 
 type Book = ReturnType<typeof useSpellBook>;
 
@@ -91,7 +92,7 @@ export function SpellBook({ book }: { book: Book }) {
             {state.hitRoll && <p>Влучання: d20 = {state.hitRoll}</p>}
             {state.damage.length > 0 && <p>Кубики шкоди: {state.damage.join(" + ")} = {state.damage.reduce<number>((a, b) => a + (b ?? 0), 0)}</p>}
             <p className="mt-2 text-sm italic text-[#7a6650]">Остаточну шкоду порахує бій з урахуванням захисту цілей.</p>
-            {selected.level > 0 && <p className="text-sm italic text-[#7a6650]">Витратить слот {ROMAN[selected.level]} кола.</p>}
+            {selected.level > 0 && <p className="text-sm italic text-[#7a6650]">Витратить слот {spellLevelRoman(selected.level)} кола.</p>}
           </div>
           {state.error && <p className="mt-2 text-sm text-[#9c2a1d]">{state.error}</p>}
           <button type="button" disabled={state.step === "submitting"} onClick={book.submit} className={cn(seal, "mt-auto")}>
@@ -107,7 +108,7 @@ export function SpellBook({ book }: { book: Book }) {
   return (
     <ResponsiveDialog open={open} onOpenChange={(o) => !o && book.close()} title={showDetail && !wide ? "← До списку" : "Книга заклинань"} size="lg" className={cn(HUD_SURFACE, "max-w-[980px] border-none bg-[#3a2016] p-2.5 text-[#2a2018] shadow-[0_30px_80px_rgba(0,0,0,.9),inset_0_0_0_2px_#2a160f]")}>
       <SpellBookPages byLevel={byLevel} slotOf={slotOf} level={state.level} pickedId={state.pick?.spellId ?? null} wide={wide} showDetail={showDetail} onLevel={book.setLevel} onPick={book.pick} detail={detailPage || null} />
-      {showDetail && !wide && <button type="button" onClick={book.back} className="hud-sc mt-2 h-10 w-full text-sm text-[#e6dccb]">← Назад</button>}
+      {showDetail && !wide && <button type="button" onClick={book.back} className="hud-sc mt-2 h-10 w-full text-sm text-hud-bone">← Назад</button>}
     </ResponsiveDialog>
   );
 }

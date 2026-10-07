@@ -1,4 +1,5 @@
 import { CORE_ABILITY_SCORES } from "@/lib/constants/abilities";
+import { spellLevelName } from "@/lib/constants/spells";
 import type { SpellFormData } from "@/types/spells";
 
 export type { SpellFormData };
@@ -28,18 +29,7 @@ export function getDefaultSpellFormData(): SpellFormData {
   };
 }
 
-export const SPELL_LEVEL_OPTIONS = [
-  { value: "0", label: "Cantrip" },
-  { value: "1", label: "1" },
-  { value: "2", label: "2" },
-  { value: "3", label: "3" },
-  { value: "4", label: "4" },
-  { value: "5", label: "5" },
-  { value: "6", label: "6" },
-  { value: "7", label: "7" },
-  { value: "8", label: "8" },
-  { value: "9", label: "9" },
-] as const;
+export const SPELL_LEVEL_OPTIONS = Array.from({ length: 10 }, (_, level) => ({ value: String(level), label: spellLevelName(level) }));
 
 export const SPELL_TYPE_OPTIONS = [
   { value: "target", label: "Цільове" },

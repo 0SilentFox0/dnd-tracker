@@ -1,6 +1,7 @@
 export { progressionKey } from "./progression-keys";
 export { useCharacterProgression } from "./useCharacterProgression";
 export { useLevelUpCelebration } from "./useLevelUpCelebration";
+export { useMainSkillForm } from "./useMainSkillForm";
 export {
   useCreateMainSkill,
   useDeleteMainSkill,

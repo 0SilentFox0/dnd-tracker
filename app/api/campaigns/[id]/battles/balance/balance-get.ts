@@ -1,7 +1,3 @@
-/**
- * GET balance: DPR, HP, KPI для персонажів та юнітів кампанії.
- */
-
 import { loadCharacterBalanceStats } from "./character-stats";
 
 import { loadUnitLibraryStats } from "@/lib/utils/battle/balance/unit-library";

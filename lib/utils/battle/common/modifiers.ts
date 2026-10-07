@@ -1,7 +1,3 @@
-/**
- * Спільна логіка для розрахунку модифікаторів урону
- */
-
 import { AttackType, BATTLE_CONSTANTS } from "@/lib/constants/battle";
 
 /**
@@ -19,9 +15,9 @@ export function matchesAttackBonusModifier(
 
   if (!s.includes("attack")) return false;
 
-  if (s.includes("ranged")) return attackType === AttackType.RANGED;
+  if (s.includes(AttackType.RANGED)) return attackType === AttackType.RANGED;
 
-  if (s.includes("melee")) return attackType === AttackType.MELEE;
+  if (s.includes(AttackType.MELEE)) return attackType === AttackType.MELEE;
 
   return true;
 }

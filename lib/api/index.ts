@@ -7,14 +7,5 @@
  * (наприклад, у QueryProvider або layout).
  */
 
-export type { ApiErrorPayload, CampaignRequestOptions } from "./client";
-export {
-  ApiError,
-  campaignDelete,
-  campaignGet,
-  campaignPatch,
-  campaignPost,
-  campaignRequest,
-  request,
-  setGlobalApiErrorHandler,
-} from "./client";
+export type { ApiErrorPayload } from "./client";
+export { setGlobalApiErrorHandler } from "./client";

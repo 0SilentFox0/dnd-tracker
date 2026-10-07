@@ -23,7 +23,6 @@ export function Header({ email }: { email: string | null }) {
 
   const signOutForm = useRef<HTMLFormElement>(null);
 
-  // Не показуємо хедер на сторінках авторизації
   if (
     pathname?.startsWith("/sign-in") ||
     pathname?.startsWith("/sign-up") ||
@@ -32,7 +31,6 @@ export function Header({ email }: { email: string | null }) {
     return null;
   }
 
-  // Визначаємо чи ми на сторінці кампанії
   const campaignMatch = pathname?.match(/^\/campaigns\/([^/]+)/);
 
   const campaignId = campaignMatch?.[1];
@@ -44,13 +42,13 @@ export function Header({ email }: { email: string | null }) {
   const isPlayerPage = !isDMPage && isCampaignPage;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-[#3a2e22] bg-[#0b0908]/[.97]">
+    <header className="sticky top-0 z-50 w-full border-b border-hud-rule bg-[#0b0908]/[.97]">
       <HudPortalClassProvider value={HUD_SURFACE}>
       <div className="container mx-auto flex h-14 items-center justify-between px-4">
         <div className="flex items-center gap-2">
           {/* Кнопка "На головну" */}
           <Link href="/campaigns">
-            <Button variant="ghost" size="icon" className="h-9 w-9 text-[#c9b37a] hover:bg-transparent hover:text-[#e6c25a]">
+            <Button variant="ghost" size="icon" className="h-9 w-9 text-hud-gold hover:bg-transparent hover:text-[#e6c25a]">
               <Home className="h-4 w-4" />
               <span className="sr-only">На головну</span>
             </Button>
@@ -60,7 +58,7 @@ export function Header({ email }: { email: string | null }) {
           {isCampaignPage && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-9 w-9 text-[#c9b37a] hover:bg-transparent hover:text-[#e6c25a]">
+                <Button variant="ghost" size="icon" className="h-9 w-9 text-hud-gold hover:bg-transparent hover:text-[#e6c25a]">
                   <Menu className="h-4 w-4" />
                   <span className="sr-only">Меню кампанії</span>
                 </Button>
@@ -130,13 +128,13 @@ export function Header({ email }: { email: string | null }) {
         <div className="flex items-center gap-2">
           <AbbreviationsInfoDialog />
           {email && (
-            <span className="hidden sm:inline text-sm text-[#8f8473]">
+            <span className="hidden sm:inline text-sm text-hud-muted">
               {email}
             </span>
           )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-9 w-9 text-[#c9b37a] hover:bg-transparent hover:text-[#e6c25a]">
+              <Button variant="ghost" size="icon" className="h-9 w-9 text-hud-gold hover:bg-transparent hover:text-[#e6c25a]">
                 <User className="h-4 w-4" />
                 <span className="sr-only">Профіль</span>
               </Button>

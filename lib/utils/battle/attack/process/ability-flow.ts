@@ -1,4 +1,4 @@
-import { findParticipant, isUp, replaceParticipant } from "@/lib/utils/abilities/engine/participants";
+import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/participants";
 import { resolveDowned, runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import type { AbilityRunContext, AbilityRunResult } from "@/lib/utils/abilities/engine/types";
 import type { AbilityEvent } from "@/types/abilities";
@@ -36,7 +36,7 @@ export function fire(flow: AttackFlow, event: AbilityEvent): AbilityRunResult {
 export function settleDowned(flow: AttackFlow, victimId: string, actorId: string | null): void {
   const victim = findParticipant(flow.ps, victimId);
 
-  if (!victim || isUp(victim)) return;
+  if (!victim || isActive(victim)) return;
 
   const r = resolveDowned(flow.ps, { victimId, actorId }, flow.ctx);
 

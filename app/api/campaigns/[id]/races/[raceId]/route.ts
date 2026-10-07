@@ -4,11 +4,14 @@ import { raceNameConflict } from "../race-name";
 import { updateRaceCascade } from "./update-race";
 
 import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { updateRaceSchema } from "@/lib/schemas";
 import { readAbilities } from "@/lib/utils/abilities/read";
 import { requireDM } from "@/lib/utils/api/api-auth";
+import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { parseBody } from "@/lib/utils/api/parse-body";
 
 export async function GET(
   request: Request,
@@ -31,7 +34,7 @@ export async function GET(
     });
 
     if (!race) {
-      return NextResponse.json({ error: "Race not found" }, { status: 404 });
+      return errorResponse(API_ERRORS.RACE_NOT_FOUND, 404);
     }
 
     const { abilities, issues: abilityIssues } = readAbilities("race", race);
@@ -63,10 +66,12 @@ export async function PATCH(
     });
 
     if (!race) {
-      return NextResponse.json({ error: "Race not found" }, { status: 404 });
+      return errorResponse(API_ERRORS.RACE_NOT_FOUND, 404);
     }
 
-    const data = updateRaceSchema.parse(await request.json());
+    const data = await parseBody(updateRaceSchema, request);
+
+    if (data instanceof NextResponse) return data;
 
     if (data.name !== undefined) {
       const conflict = await raceNameConflict(id, data.name, raceId);
@@ -106,7 +111,7 @@ export async function DELETE(
     });
 
     if (!race) {
-      return NextResponse.json({ error: "Race not found" }, { status: 404 });
+      return errorResponse(API_ERRORS.RACE_NOT_FOUND, 404);
     }
 
     await prisma.race.deleteMany({

@@ -1,7 +1,3 @@
-/**
- * Додає учасника-юніта в кінець initiativeOrder після касту заклинання.
- */
-
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";

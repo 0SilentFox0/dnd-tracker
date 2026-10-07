@@ -2,7 +2,7 @@ import { DMRacesPageClient } from "./page-client";
 
 import { requireCampaignDM } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
-import type { Race } from "@/types/races";
+import { toRace } from "@/lib/utils/races/to-race";
 
 export default async function DMRacesPage({
   params,
@@ -22,28 +22,7 @@ export default async function DMRacesPage({
     },
   });
 
-  // Конвертуємо Prisma дані в формат Race
-  const races: Race[] = racesData.map((race) => ({
-    ...race,
-    availableSkills: Array.isArray(race.availableSkills)
-      ? (race.availableSkills as string[])
-      : [],
-    disabledSkills: Array.isArray(race.disabledSkills)
-      ? (race.disabledSkills as string[])
-      : [],
-    passiveAbility: race.passiveAbility
-      ? typeof race.passiveAbility === "object" &&
-        race.passiveAbility !== null &&
-        !Array.isArray(race.passiveAbility)
-        ? (race.passiveAbility as unknown as Race["passiveAbility"])
-        : null
-      : null,
-    spellSlotProgression: Array.isArray(race.spellSlotProgression)
-      ? (race.spellSlotProgression as unknown as Race["spellSlotProgression"])
-      : undefined,
-    createdAt: race.createdAt,
-    updatedAt: race.updatedAt,
-  }));
+  const races = racesData.map((race) => toRace(race));
 
   return <DMRacesPageClient campaignId={id} initialRaces={races} />;
 }

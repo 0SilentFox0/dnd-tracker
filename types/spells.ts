@@ -1,7 +1,3 @@
-/**
- * Типи для заклинань
- */
-
 export interface Spell {
   id: string;
   name: string;

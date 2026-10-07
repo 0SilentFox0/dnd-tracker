@@ -3,10 +3,10 @@
 import { memo } from "react";
 
 import { Portrait } from "@/components/battle/hud";
+import { ROMAN_NUMERALS } from "@/lib/constants/spells";
 import { useBattleSceneData } from "@/lib/hooks/battle";
-import { ROMAN } from "@/lib/utils/battle/view";
 
-const roman = (n: number) => (n <= 5 ? ROMAN[n] : n <= 10 ? `${["V", "VI", "VII", "VIII", "IX", "X"][n - 5]}` : String(n));
+const roman = (n: number) => ROMAN_NUMERALS[n] ?? String(n);
 
 export const InitiativeTrack = memo(function InitiativeTrack() {
   const { queue, myParticipants, select } = useBattleSceneData();

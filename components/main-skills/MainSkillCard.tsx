@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { Edit,MoreVertical, Trash2 } from "lucide-react";
 
+import { EntityIcon } from "@/components/common/EntityIcon";
 import { HudCard } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,14 +30,14 @@ export function MainSkillCard({
       <div>
         <div className="flex items-start justify-between">
           <div className="min-w-0 flex-1">
-            <h3 className="hud-sc flex items-center gap-2 text-[#efe5d2]">
+            <h3 className="hud-sc flex items-center gap-2 text-hud-ink">
               <div
-                className="h-4 w-4 shrink-0 rounded-full border-2 border-[#4a3c2c]"
+                className="h-4 w-4 shrink-0 rounded-full border-2 border-hud-line"
                 style={{ backgroundColor: mainSkill.color }}
               />
               {mainSkill.name}
             </h3>
-            <p className="mt-2 break-all text-sm text-[#8f8473]">ID: {mainSkill.id}</p>
+            <p className="mt-2 break-all text-sm text-hud-muted">ID: {mainSkill.id}</p>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -69,10 +69,10 @@ export function MainSkillCard({
             <span className="text-sm font-semibold">Колір сегменту:</span>
             <div className="flex items-center gap-2 mt-1">
               <div
-                className="h-8 w-8 rounded border-2 border-[#4a3c2c]"
+                className="h-8 w-8 rounded border-2 border-hud-line"
                 style={{ backgroundColor: mainSkill.color }}
               />
-              <span className="rounded-full px-2 text-xs text-[#e6dccb]" style={{ boxShadow: `inset 0 0 0 1px ${mainSkill.color}` }}>
+              <span className="rounded-full px-2 text-xs text-hud-bone" style={{ boxShadow: `inset 0 0 0 1px ${mainSkill.color}` }}>
                 {mainSkill.color}
               </span>
             </div>
@@ -80,26 +80,7 @@ export function MainSkillCard({
           {mainSkill.icon && (
             <div>
               <span className="text-sm font-semibold">Іконка:</span>
-              <div className="mt-1 flex items-center justify-center w-8 h-8 rounded bg-[#1a140f]">
-                {mainSkill.icon.startsWith("http://") ||
-                mainSkill.icon.startsWith("https://") ||
-                mainSkill.icon.startsWith("/") ? (
-                  <Image
-                    src={mainSkill.icon}
-                    alt={mainSkill.name}
-                    width={32}
-                    height={32}
-                    className="w-8 h-8 object-cover rounded"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = "none";
-                    }}
-                  />
-                ) : (
-                  <span className="text-xl" title={mainSkill.name}>
-                    {mainSkill.icon}
-                  </span>
-                )}
-              </div>
+              <EntityIcon src={mainSkill.icon} name={mainSkill.name} size={32} emoji className="mt-1 size-8 rounded bg-hud-field text-xl text-inherit" />
             </div>
           )}
         </div>

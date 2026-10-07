@@ -207,14 +207,13 @@ React-провайдери: **`query-provider.tsx`** (TanStack Query), можл�
 
 Централізовані інтерфейси та типи для всього проекту.
 
-- **`index.ts`** — реекспорт усього з types (artifacts, battle, campaigns, characters, hooks, inventory, races, skill-triggers, skills, spells, units, api, main-skills, skill-tree, utils).
+- **`index.ts`** — реекспорт усього з types (artifacts, battle, campaigns, characters, hooks, inventory, races, skills, spells, units, api, main-skills, skill-tree, utils).
 - **`battle.ts`** — BattleParticipant, BattleAction, SkillEffect, ActiveSkill тощо (бойова модель).
 - **`api.ts`** — типи для API (BattleScene тощо).
 - **`characters.ts`**, **`campaigns.ts`**, **`races.ts`**, **`skills.ts`**, **`spells.ts`**, **`units.ts`**, **`artifacts.ts`**, **`inventory.ts`** — сутності відповідних доменів.
 - **`skill-tree.ts`** — `SkillLevel`, `SkillLevelType`; формат дерева — `RawTree` у `lib/utils/skills/progression`.
 - **`progression.ts`** — `CharacterProgressionDto`.
 - **`main-skills.ts`** — MainSkill (API/форма), MainSkillFormData.
-- **`skill-triggers.ts`** — типи тригерів скілів.
 - **`hooks.ts`** — типи для хуків (GroupedSkillPayload, SkillEffect тощо).
 - **`utils.ts`** — допоміжні типи.
 
@@ -236,11 +235,10 @@ React-провайдери: **`query-provider.tsx`** (TanStack Query), можл�
 Скрипти для CLI та одноразових операцій (запуск: `pnpm run <script>` або `tsx scripts/імʼя.ts`).
 
 - **Імпорт:** `import-docs-spells.ts`, `import-units.ts`, `import-skills-library.ts` (та допоміжні parse/triggers/types).
-- **Міграції зберігання:** `migrate-spell-icons-to-supabase.ts`, `migrate-skill-icons-to-supabase.ts`, `migrate-unit-icons-to-supabase.ts`.
 - **Дані:** `seed-artifacts.ts`, `seed-mock-battle-data.ts`, `reset-mock-battle-data.ts`, `delete-mock-battle-data.ts`, `redistribute-character-spell-slots.ts`.
-- **Тести/симуляції:** `run-spells-testing.ts`, `simulate-battle.ts`.
+- **Тести/симуляції:** `simulate-battle.ts`.
 - **Симуляція бою:** `pnpm simulate-battle` — лише на локальній БД: створює окрему кампанію (персонажі з різними прокачками й артефактами, юніти з уміннями) і проганяє бій через ті самі mutation-функції, що й API, з перевірками ефектів.
-- **Інше:** `artifact-icon-map.ts`, `update-artifact-icons.ts`.
+- **Інше:** `artifact-icon-map.ts`.
 
 Детальніший опис mock-даних — у **`scripts/README-MOCK-DATA.md`**.
 

@@ -1,7 +1,3 @@
-/**
- * API функції для роботи з деревом навиків
- */
-
 import { campaignGet, campaignPatch } from "@/lib/api/client";
 import type { RawTree } from "@/lib/utils/skills/progression";
 

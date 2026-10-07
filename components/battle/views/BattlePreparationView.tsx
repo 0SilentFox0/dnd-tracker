@@ -1,10 +1,8 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import type { BattleScene } from "@/types/api";
 
 interface BattlePreparationViewProps {
-  battle: BattleScene;
   alliesCount: number;
   enemiesCount: number;
   isDM: boolean;
@@ -13,15 +11,12 @@ interface BattlePreparationViewProps {
 }
 
 export function BattlePreparationView({
-  battle: _battle,
   alliesCount,
   enemiesCount,
   isDM,
   onStartBattle,
   isStarting,
 }: BattlePreparationViewProps) {
-  void _battle;
-
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-12 animate-in fade-in duration-1000 relative">
       <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)]" />
@@ -49,12 +44,12 @@ export function BattlePreparationView({
             {
               label: "Вороги",
               value: enemiesCount,
-              color: "text-[#d0705c]",
+              color: "text-hud-danger",
             },
           ].map((stat, idx) => (
             <div
               key={idx}
-              className="flex flex-col items-center gap-1 border border-[#4a3c2c] bg-[rgba(17,14,11,.82)] p-4 sm:p-6"
+              className="flex flex-col items-center gap-1 border border-hud-line bg-hud-panel p-4 sm:p-6"
             >
               <span className="hud-sc text-[13px] tracking-[.1em] text-[var(--hud-muted)]">
                 {stat.label}
@@ -82,7 +77,7 @@ export function BattlePreparationView({
               {isStarting ? "ЗБІР ВІЙСЬКА..." : "ДО БОЮ!"}
             </button>
           ) : (
-            <div className="mx-auto inline-block animate-[hud-pulse_2.4s_infinite] border-y border-[#4a3c2c] bg-black/55 px-6 py-4 text-lg italic text-[#d6cbb7] sm:px-8 sm:text-xl">
+            <div className="mx-auto inline-block animate-[hud-pulse_2.4s_infinite] border-y border-hud-line bg-black/55 px-6 py-4 text-lg italic text-[#d6cbb7] sm:px-8 sm:text-xl">
               🗡️ Очікуйте наказу DM...
             </div>
           )}

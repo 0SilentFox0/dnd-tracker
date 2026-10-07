@@ -1,7 +1,3 @@
-/**
- * Типи для артефактів
- */
-
 export interface ArtifactListItem {
   id: string;
   name: string;
@@ -10,3 +6,5 @@ export interface ArtifactListItem {
   setId?: string | null;
   [key: string]: unknown;
 }
+
+export type Artifact = ArtifactListItem & Record<string, unknown>;

@@ -13,9 +13,7 @@ interface SkillGroupAccordionProps {
   campaignId: string;
   spellGroups: SpellGroup[];
   mainSkillColor?: string | null;
-  /** Викликається при видаленні одного скіла (DM) */
   onDeleteSkill?: (skillId: string) => Promise<unknown> | void;
-  /** Викликається при дублюванні скіла (DM) */
   onDuplicateSkill?: (skillId: string) => void;
 }
 

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { skillKeys } from "./keys";
 import { progressionCampaignKey } from "./progression-keys";
 import { useMainSkills } from "./useMainSkills";
 import { useSkills } from "./useSkills";
@@ -29,7 +30,7 @@ export function useSkillTreeEditor(campaignId: string) {
 
   const { data: skills = [] } = useSkills(campaignId);
 
-  const trees = useQuery({ queryKey: ["skill-trees", campaignId], queryFn: () => getSkillTrees(campaignId), enabled: !!campaignId });
+  const trees = useQuery({ queryKey: skillKeys.trees(campaignId), queryFn: () => getSkillTrees(campaignId), enabled: !!campaignId });
 
   const [race, setRace] = useState<string | null>(null);
 
@@ -86,7 +87,7 @@ export function useSkillTreeEditor(campaignId: string) {
       const saved = await updateSkillTree({ campaignId, treeId: current.treeId, race: activeRace, skills: current.raw });
 
       setDraft({ key: `${activeRace}:${saved.id}`, treeId: saved.id, raw: edit.readTreeJson(saved.skills) });
-      await queryClient.invalidateQueries({ queryKey: ["skill-trees", campaignId] });
+      await queryClient.invalidateQueries({ queryKey: skillKeys.trees(campaignId) });
       void queryClient.invalidateQueries({ queryKey: progressionCampaignKey(campaignId) });
     } catch (error) {
       await notify((error as Error).message);
@@ -134,7 +135,7 @@ export function useSkillTreeEditor(campaignId: string) {
         try {
           const created = await createMainSkill(campaignId, { name: input.name, color: input.color, ...(input.icon && { icon: input.icon }) });
 
-          await queryClient.invalidateQueries({ queryKey: ["main-skills", campaignId] });
+          await queryClient.invalidateQueries({ queryKey: skillKeys.mainSkills(campaignId) });
           update((r) => edit.addBranch(r, { id: created.id, name: created.name, color: created.color, icon: created.icon ?? null }));
 
           return true;

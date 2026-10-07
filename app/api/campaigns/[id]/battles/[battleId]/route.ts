@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BATTLE_VERSION_ONLY_PARAM } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { createBattleSchema } from "@/lib/schemas";
 import { requireDM } from "@/lib/utils/api/api-auth";
+import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { parseBody } from "@/lib/utils/api/parse-body";
 import { readBattleScene, readBattleVersion } from "@/lib/utils/battle/pipeline/read-battle";
 
 type Params = { params: Promise<{ id: string; battleId: string }> };
@@ -32,19 +35,17 @@ export async function PATCH(request: Request, { params }: Params) {
 
     if (accessResult instanceof NextResponse) return accessResult;
 
-    const parsed = patchBattleSchema.safeParse(await request.json().catch(() => undefined));
+    const parsed = await parseBody(patchBattleSchema, request);
 
-    if (!parsed.success) {
-      return NextResponse.json({ error: "invalid_body", issues: parsed.error.issues }, { status: 400 });
-    }
+    if (parsed instanceof NextResponse) return parsed;
 
     const battle = await prisma.battleScene.findUnique({ where: { id: battleId }, select: { campaignId: true } });
 
     if (!battle || battle.campaignId !== id) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+      return errorResponse(API_ERRORS.NOT_FOUND, 404);
     }
 
-    await prisma.battleScene.update({ where: { id: battleId }, data: { ...parsed.data, version: { increment: 1 } } });
+    await prisma.battleScene.update({ where: { id: battleId }, data: { ...parsed, version: { increment: 1 } } });
 
     return readBattleScene({ id, battleId });
   } catch (error) {
@@ -71,7 +72,7 @@ export async function DELETE(
     });
 
     if (!battle || battle.campaignId !== id) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+      return errorResponse(API_ERRORS.NOT_FOUND, 404);
     }
 
     await prisma.battleScene.deleteMany({

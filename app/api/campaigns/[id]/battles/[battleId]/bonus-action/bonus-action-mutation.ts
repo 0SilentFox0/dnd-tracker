@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { updateParticipant } from "@/lib/utils/abilities/engine/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import { withinLimits } from "@/lib/utils/abilities/engine/usage";
@@ -20,7 +21,7 @@ export function bonusActionMutation(ctx: BattleMutationContext, data: BonusActio
 
   if (!participant) throw new BattleAccessError(404, "Учасника немає в бою");
 
-  if (!ctx.isDM && participant.basicInfo.controlledBy !== ctx.userId) throw new BattleAccessError(403, "Forbidden");
+  if (!ctx.isDM && participant.basicInfo.controlledBy !== ctx.userId) throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
 
   assertNotPanicking(ctx.scene.pendingMoraleCheck, participant.basicInfo.id);
 

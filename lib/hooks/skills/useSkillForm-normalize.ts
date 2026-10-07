@@ -1,7 +1,3 @@
-/**
- * Типи та функції нормалізації/парсингу початкових даних для форми скіла
- */
-
 import { SpellEnhancementType } from "@/lib/constants/spell-enhancement";
 import type { ConversionIssue } from "@/lib/utils/abilities/schema";
 import type { Ability } from "@/lib/utils/abilities/schema";

@@ -2,16 +2,17 @@ import type { Effect, StaticEffect } from "./effects";
 import type { Trigger } from "./triggers";
 
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
+import { AttackType } from "@/lib/constants/battle";
 
 export const DICE_RE = /^(\d+)d(\d+)([+-]\d+)?$/;
 
 export const ABILITY_TARGETS = ["self", "eventTarget", "eventActor", "allAllies", "allEnemies"] as const;
 
-export const ATTACK_KINDS = ["melee", "ranged"] as const;
+export const ATTACK_KINDS = [AttackType.MELEE, AttackType.RANGED] as const;
 
-export const DAMAGE_KINDS = ["melee", "ranged", "magic"] as const;
+export const DAMAGE_KINDS = [AttackType.MELEE, AttackType.RANGED, "magic"] as const;
 
-export const DAMAGE_FILTER_KINDS = ["melee", "ranged", "magic", "physical", "all"] as const;
+export const DAMAGE_FILTER_KINDS = [AttackType.MELEE, AttackType.RANGED, "magic", "physical", "all"] as const;
 
 export const CONDITION_SUBJECTS = ["self", "eventTarget", "eventActor", "anyAlly", "anyEnemy"] as const;
 

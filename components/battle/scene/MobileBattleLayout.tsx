@@ -13,21 +13,22 @@ import { MyTurnControls } from "./MyTurnControls";
 import { ParticipantDetails } from "./ParticipantDetails";
 import { ParticipantList } from "./ParticipantList";
 
-import { HUD_SURFACE } from "@/components/battle/hud";
+import { HUD_SURFACE } from "@/components/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
+import { BattleStatus,ParticipantSide } from "@/lib/constants/battle";
 import { useBattleScene } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 
 export function MobileBattleLayout() {
   const { battle, current, hero, isMyTurn, allies, enemies, selectedId, select, log, openLog, closeLog } = useBattleScene();
 
-  const [tab, setTab] = useState<"ally" | "enemy">("enemy");
+  const [tab, setTab] = useState<ParticipantSide>(ParticipantSide.ENEMY);
 
   const openLatestLog = useCallback(() => openLog(), [openLog]);
 
   const selected = battle.initiativeOrder.find((p) => p.basicInfo.id === selectedId) ?? null;
 
-  const tabBtn = (side: "ally" | "enemy", label: string, n: number) => (
+  const tabBtn = (side: ParticipantSide, label: string, n: number) => (
     <button role="tab" aria-selected={tab === side} type="button" onClick={() => setTab(side)} className={cn("hud-sc flex flex-1 items-center justify-center gap-2 text-[15px] tracking-[.08em]", tab === side ? "text-[var(--ink)] shadow-[inset_0_-2px_0_var(--enemy)]" : "text-[var(--hud-muted)]")}>
       {label} {n}
     </button>
@@ -39,7 +40,7 @@ export function MobileBattleLayout() {
       <BattleTopBar />
       <InitiativeTrack />
       <LastActionTicker onOpenLog={openLatestLog} />
-      {battle.status === "completed" ? (
+      {battle.status === BattleStatus.COMPLETED ? (
         <BattleOverBanner />
       ) : isMyTurn ? (
         <div className="hud-sc mx-4 mt-2 flex h-10 items-center justify-center gap-3 border-y border-[var(--enemy)] bg-[var(--enemy)]/20 text-[17px] tracking-[.12em] text-[var(--ink)]">Твій хід</div>
@@ -47,8 +48,8 @@ export function MobileBattleLayout() {
         <div className="flex h-8 items-center gap-2 px-4 text-[15px] italic text-[#b8ab95]">ходить <b className="hud-sc not-italic text-[var(--ink)]">{current?.basicInfo.name}</b></div>
       )}
       <div role="tablist" className="mx-4 flex h-11 border-b border-white/[.18]">
-        {tabBtn("ally", "Союзники", allies.length)}
-        {tabBtn("enemy", "Вороги", enemies.length)}
+        {tabBtn(ParticipantSide.ALLY, "Союзники", allies.length)}
+        {tabBtn(ParticipantSide.ENEMY, "Вороги", enemies.length)}
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto">
         <ParticipantList side={tab} />

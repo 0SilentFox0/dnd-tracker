@@ -1,15 +1,17 @@
 "use client";
 
+import { HudPanel } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { SelectField } from "@/components/ui/select-field";
+import { AttackType } from "@/lib/constants/battle";
 import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
+import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 
 export interface UnitAttackItem {
   name: string;
-  type?: "melee" | "ranged";
+  type?: AttackType;
   targetType?: "target" | "aoe";
   attackBonus: number;
   damageDice: string;
@@ -35,7 +37,7 @@ export function UnitAttack({
   onRemove,
 }: UnitAttackProps) {
   return (
-    <Card className="p-4">
+    <HudPanel as="div" className="p-4">
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-2">
           <Label className="text-sm font-medium">Атака #{index + 1}</Label>
@@ -55,17 +57,17 @@ export function UnitAttack({
             <Label htmlFor={`attack-type-${index}`}>Вид атаки</Label>
             <SelectField
               id={`attack-type-${index}`}
-              value={attack.type ?? (attack.range && !/^5\s*(фт|ft)/i.test(attack.range) ? "ranged" : "melee")}
+              value={attack.type ?? (attack.range && !/^5\s*(фт|ft)/i.test(attack.range) ? AttackType.RANGED : AttackType.MELEE)}
               onValueChange={(value) =>
                 onChange({
                   ...attack,
-                  type: (value === "ranged" ? "ranged" : "melee") as "melee" | "ranged",
+                  type: attackKindOf(value),
                 })
               }
               placeholder="Виберіть вид"
               options={[
-                { value: "melee", label: "Ближня (melee)" },
-                { value: "ranged", label: "Дальня (ranged)" },
+                { value: AttackType.MELEE, label: "Ближня (melee)" },
+                { value: AttackType.RANGED, label: "Дальня (ranged)" },
               ]}
             />
           </div>
@@ -209,6 +211,6 @@ export function UnitAttack({
           </div>
         )}
       </div>
-    </Card>
+    </HudPanel>
   );
 }

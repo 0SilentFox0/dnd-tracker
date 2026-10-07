@@ -1,7 +1,3 @@
-/**
- * Спільні утиліти battle: модифікатори урону, формули, кидки атаки
- */
-
 export type { AttackRollData, ResolveAttackRollResult } from "./attack-roll-helpers";
 export {
   getEffectiveD20,

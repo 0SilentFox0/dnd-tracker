@@ -99,8 +99,6 @@ describe("buildClientDelta", () => {
 
     const { abilityUsage: _drop, ...bData } = { ...b.battleData, abilityUsage: {} };
 
-    void _drop;
-
     const d = buildClientDelta({
       before: { scene, meta, participants: [a, { ...b, battleData: { ...b.battleData, abilityUsage: {} } }, c], pending: [] },
       after: { ...scene, version: 8 },

@@ -12,6 +12,7 @@ import { sheetStatBonuses } from "@/lib/utils/abilities/sheet-bonuses";
 import { abilitySummary } from "@/lib/utils/abilities/summary";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { parseBody } from "@/lib/utils/api/parse-body";
 import { weaponStatsColumns } from "@/lib/utils/artifacts/weapon-stats";
 
 export async function POST(
@@ -28,9 +29,9 @@ export async function POST(
       return accessResult;
     }
 
-    const body = await request.json();
+    const data = await parseBody(createArtifactSchema, request);
 
-    const data = createArtifactSchema.parse(body);
+    if (data instanceof NextResponse) return data;
 
     let icon = data.icon;
 

@@ -1,3 +1,4 @@
+import { AttackType } from "@/lib/constants/battle";
 import type { Ability, DamageKind, StaticEffect } from "@/lib/utils/abilities/schema";
 
 export type { Ability, StaticEffect };
@@ -41,8 +42,8 @@ export type AbilityEvent =
   | { type: "roundEnd" }
   | { type: "turnStart"; actorId: string }
   | { type: "turnEnd"; actorId: string }
-  | { type: "attack"; phase: "before" | "after"; actorId: string; targetId: string; attackKind: "melee" | "ranged" }
-  | { type: "hit"; actorId: string; targetId: string; attackKind: "melee" | "ranged"; damage: number }
+  | { type: "attack"; phase: "before" | "after"; actorId: string; targetId: string; attackKind: AttackType }
+  | { type: "hit"; actorId: string; targetId: string; attackKind: AttackType; damage: number }
   | { type: "kill"; actorId: string | null; targetId: string }
   | { type: "lethalDamage"; actorId: string | null; targetId: string }
   | { type: "spellCast"; phase: "before" | "after"; actorId: string; targetIds: string[] }

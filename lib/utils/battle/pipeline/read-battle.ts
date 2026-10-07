@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { defaultReadDeps } from "./default-deps";
 import { BattleAccess, battleErrorResponse, runBattleMutation } from "./run-battle-mutation";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BATTLE_LOG_RECENT_EVENTS } from "@/lib/constants/battle";
 import { BattleAccessError } from "@/lib/utils/battle/store";
 import type { BattleEventsPage, BattleVersion } from "@/types/api";
@@ -18,13 +19,13 @@ export interface BattleReadDeps {
 async function authorize(params: BattleParams, deps: BattleReadDeps) {
   const userId = await deps.getUserId();
 
-  if (!userId) throw new BattleAccessError(401, "Unauthorized");
+  if (!userId) throw new BattleAccessError(401, API_ERRORS.UNAUTHORIZED);
 
   const access = await deps.loadAccess({ battleId: params.battleId, campaignId: params.id, userId });
 
-  if (!access) throw new BattleAccessError(404, "Not found");
+  if (!access) throw new BattleAccessError(404, API_ERRORS.NOT_FOUND);
 
-  if (!access.isMember) throw new BattleAccessError(403, "Forbidden");
+  if (!access.isMember) throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
 
   return access;
 }

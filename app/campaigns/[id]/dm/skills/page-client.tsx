@@ -4,12 +4,13 @@ import { useMemo } from "react";
 import Link from "next/link";
 import { Printer, Sparkles } from "lucide-react";
 
+import { DeleteAllButton } from "@/components/common/DeleteAllButton";
 import { EmptyState, LoadingState } from "@/components/common/states";
 import { HudPage, HudPageHeader } from "@/components/hud/page";
 import { SkillGroupAccordion } from "@/components/skills/list/SkillGroupAccordion";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { useConfirm, useNotify } from "@/lib/hooks/common";
+import { useNotify } from "@/lib/hooks/common";
 import {
   useDeleteAllSkills,
   useDeleteSkill,
@@ -35,9 +36,6 @@ export function DMSkillsPageClient({
 }: DMSkillsPageClientProps) {
   const notify = useNotify();
 
-  const confirm = useConfirm();
-
-  // Запити для скілів та основних навиків
   const { data: skills = initialSkills, isLoading: skillsLoading } = useSkills(
     campaignId,
     initialSkills
@@ -45,28 +43,17 @@ export function DMSkillsPageClient({
 
   const { data: mainSkills = [] } = useMainSkills(campaignId);
 
-  // Мутації видалення
   const deleteAllSkillsMutation = useDeleteAllSkills(campaignId);
 
   const deleteSkillMutation = useDeleteSkill(campaignId);
 
   const duplicateSkillMutation = useDuplicateSkill(campaignId);
 
-  // Групуємо скіли по основним навикам
   const groupedSkills = useMemo(() => {
     const groupedSkillsMap = groupSkillsByMainSkill(skills, mainSkills);
 
     return convertGroupedSkillsToArray(groupedSkillsMap);
   }, [skills, mainSkills]);
-
-  const handleDeleteAll = () =>
-    confirm({
-      title: "Видалити всі скіли?",
-      description: `Ця дія видалить всі скіли з бібліотеки (${skills.length} ${pluralUk(skills.length, ["скіл", "скіли", "скілів"])}). Цю дію неможливо скасувати.`,
-      confirmLabel: "Видалити всі",
-      destructive: true,
-      onConfirm: () => deleteAllSkillsMutation.mutateAsync(),
-    });
 
   const handleDeleteSkill = (skillId: string) => deleteSkillMutation.mutateAsync(skillId);
 
@@ -102,11 +89,12 @@ export function DMSkillsPageClient({
                 </Button>
               </Link>
             )}
-            {skills.length > 0 && (
-              <Button variant="destructive" className="whitespace-nowrap text-xs sm:text-sm" onClick={() => void handleDeleteAll()}>
-                Видалити всі
-              </Button>
-            )}
+            <DeleteAllButton
+              count={skills.length}
+              nouns={["скіл", "скіли", "скілів"]}
+              description={`Ця дія видалить всі скіли з бібліотеки (${skills.length} ${pluralUk(skills.length, ["скіл", "скіли", "скілів"])}). Цю дію неможливо скасувати.`}
+              onConfirm={() => deleteAllSkillsMutation.mutateAsync()}
+            />
           </>
         }
       />

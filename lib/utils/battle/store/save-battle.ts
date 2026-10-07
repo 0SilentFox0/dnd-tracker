@@ -16,7 +16,7 @@ import type {
   StoredParticipant,
 } from "./types";
 
-import { BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE } from "@/lib/constants/battle";
+import { BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE, BattleStatus } from "@/lib/constants/battle";
 import type { BattleParticipant } from "@/types/battle";
 
 type UpdatableColumn = Exclude<keyof ParticipantColumns, "id">;
@@ -150,7 +150,7 @@ export async function saveBattle(
 
   const { beforeStored, diff, events, clearHistory, delta } = prepareSave(before, outcome);
 
-  const completing = patch.status === "completed" && scene.status !== "completed";
+  const completing = patch.status === BattleStatus.COMPLETED && scene.status !== BattleStatus.COMPLETED;
 
   await db.$transaction(async (tx) => {
     const { count } = await tx.battleScene.updateMany({

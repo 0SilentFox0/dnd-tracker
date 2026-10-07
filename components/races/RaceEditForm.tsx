@@ -1,16 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-
 import { getInitialRaceFormData } from "./RaceEditFormUtils";
 import { RaceFormFields } from "./RaceFormFields";
 
 import { withAbilityErrors } from "@/components/abilities";
-import { FormCard } from "@/components/common/FormCard";
-import { useUpdateRace } from "@/lib/hooks/races";
-import { useMainSkills } from "@/lib/hooks/skills";
-import type { Race, RaceFormData } from "@/types/races";
+import { HudForm, HudFormPage } from "@/components/hud/form";
+import { Button } from "@/components/ui/button";
+import { useRaceForm } from "@/lib/hooks/races";
+import type { Race } from "@/types/races";
 
 interface RaceEditFormProps {
   campaignId: string;
@@ -18,63 +15,35 @@ interface RaceEditFormProps {
 }
 
 export function RaceEditForm({ campaignId, race }: RaceEditFormProps) {
-  const router = useRouter();
-
-  const updateRaceMutation = useUpdateRace(campaignId);
-
-  const { data: mainSkills = [] } = useMainSkills(campaignId);
-
-  const [formData, setFormData] = useState<RaceFormData>(() =>
-    getInitialRaceFormData(race),
-  );
-
-  const [abilityErrors, setAbilityErrors] = useState(0);
-
-  const abilitiesValid = abilityErrors === 0;
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!abilitiesValid) return;
-
-    const dataToSave: RaceFormData = {
-      ...formData,
-      passiveAbility: {
-        description: formData.passiveAbility?.description || "",
-        statImprovements: formData.passiveAbility?.statImprovements || "",
-        statModifiers: formData.passiveAbility?.statModifiers || {},
-      },
-    };
-
-    updateRaceMutation.mutate(
-      { raceId: race.id, data: dataToSave },
-      {
-        onSuccess: () => {
-          router.push(`/campaigns/${campaignId}/dm/races`);
-          router.refresh();
-        },
-      },
-    );
-  };
+  const form = useRaceForm(campaignId, race.id, getInitialRaceFormData(race));
 
   return (
-    <FormCard
-      title="Редагувати расу"
-      description="Оновіть інформацію про расу"
-      onSubmit={handleSubmit}
-      isSubmitting={updateRaceMutation.isPending}
-      submitDisabled={!abilitiesValid}
-      onCancel={() => router.push(`/campaigns/${campaignId}/dm/races`)}
-      submitLabel={withAbilityErrors("Зберегти", abilityErrors)}
-    >
-      <RaceFormFields
-        campaignId={campaignId}
-        formData={formData}
-        setFormData={setFormData}
-        mainSkills={mainSkills}
-        abilityIssues={race.abilityIssues}
-        onAbilitiesValidityChange={(_, n) => setAbilityErrors(n)}
-      />
-    </FormCard>
+    <HudFormPage title="Редагувати расу" aside="Оновіть інформацію про расу">
+      <HudForm
+        id="race-form"
+        onSubmit={form.submit}
+        actions={
+          <>
+            <Button type="button" variant="outline" onClick={form.cancel}>
+              Скасувати
+            </Button>
+            <Button type="submit" disabled={form.isSaving || !form.abilitiesValid}>
+              {form.isSaving ? "Збереження..." : withAbilityErrors("Зберегти", form.abilityErrors)}
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-6">
+          <RaceFormFields
+            campaignId={campaignId}
+            formData={form.formData}
+            setFormData={form.setFormData}
+            mainSkills={form.mainSkills}
+            abilityIssues={race.abilityIssues}
+            onAbilitiesValidityChange={(_, n) => form.setAbilityErrors(n)}
+          />
+        </div>
+      </HudForm>
+    </HudFormPage>
   );
 }

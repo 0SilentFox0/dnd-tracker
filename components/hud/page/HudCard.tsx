@@ -24,7 +24,7 @@ export function HudCard({ tone = "default", accent, asChild = false, className, 
     <Comp
       data-tone={tone}
       style={accent ? { borderLeftColor: accent } : undefined}
-      className={cn("block rounded-lg bg-[rgba(20,16,12,.85)] p-3 text-[#e6dccb] transition-shadow", accent && "border-l-[3px]", TONE[tone], className)}
+      className={cn("block rounded-lg bg-[rgba(20,16,12,.85)] p-3 text-hud-bone transition-shadow", accent && "border-l-[3px]", TONE[tone], className)}
     >
       {children}
     </Comp>

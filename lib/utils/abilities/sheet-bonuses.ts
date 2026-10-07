@@ -1,5 +1,7 @@
 import type { Ability, StatKey } from "./schema";
 
+import { AttackType } from "@/lib/constants/battle";
+
 export type SheetStatKey =
   | "strength"
   | "dexterity"
@@ -63,7 +65,7 @@ export function sheetStatBonuses(abilities: Ability[]): SheetStatBonuses {
   return out;
 }
 
-export type DamageAffinityType = "melee" | "ranged" | "magic";
+export type DamageAffinityType = AttackType | "magic";
 
 export function damageAffinity(abilities: Ability[]): { affectsDamage: boolean; damageType: DamageAffinityType | null } {
   const kinds = new Set<string>();
@@ -76,5 +78,5 @@ export function damageAffinity(abilities: Ability[]): { affectsDamage: boolean; 
 
   const [only] = [...kinds];
 
-  return { affectsDamage: true, damageType: kinds.size === 1 && (only === "melee" || only === "ranged" || only === "magic") ? only : null };
+  return { affectsDamage: true, damageType: kinds.size === 1 && (only === AttackType.MELEE || only === AttackType.RANGED || only === "magic") ? only : null };
 }

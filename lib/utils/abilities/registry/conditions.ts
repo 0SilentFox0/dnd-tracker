@@ -1,7 +1,8 @@
 import type { FieldMeta } from "./fields";
 
+import { AttackType } from "@/lib/constants/battle";
 import { eventActorId, eventAttackKind, eventTargetIds } from "@/lib/utils/abilities/engine/events";
-import { findParticipant, isUp } from "@/lib/utils/abilities/engine/participants";
+import { findParticipant, isActive } from "@/lib/utils/abilities/engine/participants";
 import type { Condition, ConditionSubject } from "@/lib/utils/abilities/schema";
 import { hpRatio } from "@/lib/utils/battle/view/health";
 import type { AbilityEvent } from "@/types/abilities";
@@ -29,7 +30,7 @@ const WHO: FieldMeta = {
 export const CONDITION_REGISTRY: Record<Condition["type"], { label: string; fields: readonly FieldMeta[] }> = {
   hpBelow: { label: "HP ≤ %", fields: [WHO, { name: "percent", label: "%", input: "number" }] },
   hpAbove: { label: "HP ≥ %", fields: [WHO, { name: "percent", label: "%", input: "number" }] },
-  attackKind: { label: "Тип атаки", fields: [{ name: "kind", label: "Тип", input: "select", options: [{ value: "melee", label: "ближня" }, { value: "ranged", label: "дальня" }, { value: "magic", label: "магія" }] }] },
+  attackKind: { label: "Тип атаки", fields: [{ name: "kind", label: "Тип", input: "select", options: [{ value: AttackType.MELEE, label: "ближня" }, { value: AttackType.RANGED, label: "дальня" }, { value: "magic", label: "магія" }] }] },
   targetHasCondition: { label: "Ціль має стан", fields: [{ name: "condition", label: "Стан", input: "text" }] },
   all: { label: "Усі умови", fields: [{ name: "conditions", label: "Умови", input: "effects" }] },
   any: { label: "Будь-яка умова", fields: [{ name: "conditions", label: "Умови", input: "effects" }] },
@@ -51,9 +52,9 @@ function subjects(who: ConditionSubject, ctx: ConditionContext): BattleParticipa
       return actor ? byIds([actor]) : [];
     }
     case "anyAlly":
-      return ps.filter((p) => isUp(p) && p.basicInfo.side === owner.basicInfo.side && p.basicInfo.id !== owner.basicInfo.id);
+      return ps.filter((p) => isActive(p) && p.basicInfo.side === owner.basicInfo.side && p.basicInfo.id !== owner.basicInfo.id);
     case "anyEnemy":
-      return ps.filter((p) => isUp(p) && p.basicInfo.side !== owner.basicInfo.side);
+      return ps.filter((p) => isActive(p) && p.basicInfo.side !== owner.basicInfo.side);
   }
 }
 

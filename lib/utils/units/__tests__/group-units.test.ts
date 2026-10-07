@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { groupUnitsByRace, NO_RACE, raceChips, raceIdOfGroup } from "@/lib/utils/units/group-units";
+import { groupUnitsByRace, groupUnitsByRaceName, NO_RACE, raceChips, raceIdOfGroup } from "@/lib/utils/units/group-units";
 import type { Unit } from "@/types/units";
 
 const races = [
@@ -45,5 +45,21 @@ describe("groupUnitsByRace", () => {
       { key: "r2", label: "Орки", color: "#ef4444", count: 3 },
       { key: NO_RACE, label: "Без раси", color: null, count: 2 },
     ]);
+  });
+});
+
+describe("groupUnitsByRaceName", () => {
+  it("groups by race name, falls back to «Без раси» and sorts each group by level", () => {
+    const list = [
+      { id: "a", level: 3, raceName: "Орки" },
+      { id: "b", level: 1, raceName: " Орки " },
+      { id: "c", level: 2, raceName: null },
+    ];
+
+    const grouped = groupUnitsByRaceName(list);
+
+    expect([...grouped.keys()].sort()).toEqual(["Без раси", "Орки"]);
+    expect(grouped.get("Орки")?.map((x) => x.id)).toEqual(["b", "a"]);
+    expect(grouped.get("Без раси")?.map((x) => x.id)).toEqual(["c"]);
   });
 });

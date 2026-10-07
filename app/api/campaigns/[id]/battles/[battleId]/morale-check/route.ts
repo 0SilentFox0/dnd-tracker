@@ -1,5 +1,6 @@
 import { moraleCheckMutation } from "./morale-check-mutation";
 
+import { BattleStatus } from "@/lib/constants/battle";
 import { moraleCheckSchema } from "@/lib/schemas";
 import { BattleAccess, runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 
@@ -10,7 +11,7 @@ export async function POST(
   return runBattleMutation(req, {
     params: await params,
     access: BattleAccess.MEMBER,
-    requireStatus: "active",
+    requireStatus: BattleStatus.ACTIVE,
     schema: moraleCheckSchema,
     respond: "wrapped",
     mutate: moraleCheckMutation,

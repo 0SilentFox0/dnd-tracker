@@ -1,7 +1,3 @@
-/**
- * Визначення spell slots для participant з character (існуючі або з race/campaign)
- */
-
 import type { CampaignSpellContext, CharacterFromPrisma } from "../types/participant";
 
 import { prisma } from "@/lib/db";

@@ -1,7 +1,3 @@
-/**
- * DPR (Damage per Round) від скілів: магія та немагічні основні навички
- */
-
 import { DPR_BY_LEVEL_MAGIC, DPR_BY_LEVEL_NON_MAGIC } from "@/lib/constants/dpr-by-main-skill";
 import { isMagicMainSkill } from "@/lib/utils/battle/balance/magic-school";
 import type { BranchLevel } from "@/lib/utils/skills/progression";

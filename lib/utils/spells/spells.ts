@@ -1,11 +1,5 @@
+import { spellLevelFromName, spellLevelName } from "@/lib/constants/spells";
 import type { Spell } from "@/types/spells";
-
-/**
- * Форматує рівень заклинання для відображення
- */
-export function formatSpellLevel(level: number): string {
-  return level === 0 ? "Cantrip" : `Рівень ${level}`;
-}
 
 /**
  * Групує заклинання по групах
@@ -27,7 +21,6 @@ export function groupSpellsByGroup(spells: Spell[]): Map<string, Spell[]> {
     }
   });
 
-  // Сортуємо заклинання всередині кожної групи по рівню та назві
   grouped.forEach((groupSpells) => {
     groupSpells.sort((a, b) => {
       if (a.level !== b.level) return a.level - b.level;
@@ -50,7 +43,7 @@ export function groupSpellsByGroupAndLevel(
   spells.forEach((spell) => {
     const groupName = spell.spellGroup?.name || "Без групи";
 
-    const levelKey = formatSpellLevel(spell.level);
+    const levelKey = spellLevelName(spell.level);
 
     if (!groupedSpellsMap.has(groupName)) {
       groupedSpellsMap.set(groupName, new Map<string, Spell[]>());
@@ -73,7 +66,6 @@ export function groupSpellsByGroupAndLevel(
     }
   });
 
-  // Сортуємо заклинання всередині кожного рівня
   groupedSpellsMap.forEach((levelMap) => {
     levelMap.forEach((levelSpells) => {
       levelSpells.sort((a, b) => a.name.localeCompare(b.name));
@@ -89,19 +81,7 @@ export function groupSpellsByGroupAndLevel(
 export function sortSpellLevels(
   levels: [string, Spell[]][],
 ): [string, Spell[]][] {
-  return [...levels].sort(([levelA], [levelB]) => {
-    // Cantrip завжди перший
-    if (levelA === "Cantrip") return -1;
-
-    if (levelB === "Cantrip") return 1;
-
-    // Інші рівні сортуються числово
-    const numA = parseInt(levelA.replace("Рівень ", "")) || 0;
-
-    const numB = parseInt(levelB.replace("Рівень ", "")) || 0;
-
-    return numA - numB;
-  });
+  return [...levels].sort(([levelA], [levelB]) => spellLevelFromName(levelA) - spellLevelFromName(levelB));
 }
 
 /**

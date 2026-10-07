@@ -1,20 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { Zap } from "lucide-react";
 
-import { HealthLabel, HUD_SURFACE,Portrait } from "@/components/battle/hud";
+import { HealthLabel, Portrait } from "@/components/battle/hud";
+import { OptimizedImage } from "@/components/common/OptimizedImage";
+import { HUD_SURFACE } from "@/components/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
+import { ParticipantSide } from "@/lib/constants/battle";
 import { useBattleScene } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { withinLimits } from "@/lib/utils/abilities/engine/usage";
 import { describeEffect } from "@/lib/utils/abilities/registry/effects";
+import { isUp } from "@/lib/utils/battle/participant/state";
 import { bonusTargetSide } from "@/lib/utils/battle/view";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
-
-const isUp = (p: BattleParticipant) => p.combatStats.status === "active" && p.combatStats.currentHp > 0;
 
 export function BonusActionPicker({ participant, open, onOpenChange, onDone }: { participant: BattleParticipant; open: boolean; onOpenChange: (o: boolean) => void; onDone: () => void }) {
   const { allies, enemies, actions } = useBattleScene();
@@ -37,7 +38,7 @@ export function BonusActionPicker({ participant, open, onOpenChange, onDone }: {
 
   const side = aiming ? bonusTargetSide(aiming) : null;
 
-  const candidates = (side === "enemy" ? enemies : allies).filter(isUp);
+  const candidates = (side === ParticipantSide.ENEMY ? enemies : allies).filter(isUp);
 
   return (
     <ResponsiveDialog open={open} onOpenChange={(o) => { if (!o) setAiming(null);
@@ -46,7 +47,7 @@ export function BonusActionPicker({ participant, open, onOpenChange, onDone }: {
       <div className="space-y-2">
         {!aiming && abilities.map((a) => (
           <button key={a.key} type="button" disabled={actions.bonusAction.isPending} onClick={() => (bonusTargetSide(a) ? setAiming(a) : void fire(a))} className="flex min-h-14 w-full items-center gap-3 border border-white/15 px-3 py-2.5 text-left">
-            {a.source.icon ? <Image src={a.source.icon} alt="" width={40} height={40} className="size-10 rounded object-cover" /> : <Zap className="size-10 p-2 text-[var(--gold)]" />}
+            {a.source.icon ? <OptimizedImage src={a.source.icon} alt="" width={40} height={40} className="size-10 rounded object-cover" /> : <Zap className="size-10 p-2 text-[var(--gold)]" />}
             <span className="min-w-0">
               <span className="hud-sc block font-bold">{a.name}</span>
               <span className="line-clamp-2 block text-xs text-[#a89c88]">{a.description ?? a.effects.map(describeEffect).join(", ")}</span>
@@ -57,7 +58,7 @@ export function BonusActionPicker({ participant, open, onOpenChange, onDone }: {
           <button key={t.basicInfo.id} type="button" disabled={actions.bonusAction.isPending} onClick={() => void fire(aiming, t.basicInfo.id)} className="flex h-14 w-full items-center gap-3 border border-white/15 px-3 text-left">
             <Portrait participant={t} size={36} />
             <span className="hud-sc font-bold">{t.basicInfo.name}</span>
-            {side === "enemy" ? <HealthLabel participant={t} /> : <span className="ml-auto text-sm text-[#d6cbb7]">{t.combatStats.currentHp} / {t.combatStats.maxHp}</span>}
+            {side === ParticipantSide.ENEMY ? <HealthLabel participant={t} /> : <span className="ml-auto text-sm text-[#d6cbb7]">{t.combatStats.currentHp} / {t.combatStats.maxHp}</span>}
           </button>
         ))}
       </div>

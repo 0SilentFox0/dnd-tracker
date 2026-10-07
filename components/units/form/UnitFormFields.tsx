@@ -23,7 +23,7 @@ export function UnitFormError({ error }: { error: Error | null }) {
   if (!error) return null;
 
   return (
-    <p role="alert" className="mx-4 mt-3 rounded-md border border-[#d0705c]/50 bg-[#d0705c]/10 px-3 py-2 text-sm text-[#f0b4a6]">
+    <p role="alert" className="mx-4 mt-3 rounded-md border border-hud-danger/50 bg-hud-danger/10 px-3 py-2 text-sm text-[#f0b4a6]">
       <strong>Помилка:</strong> {error.message || "Помилка"}
     </p>
   );

@@ -3,8 +3,10 @@ import { NextResponse } from "next/server";
 import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import { updateSpellGroupSchema } from "@/lib/schemas";
-import { requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
+import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { loadOwned } from "@/lib/utils/api/load-owned";
+import { parseBody } from "@/lib/utils/api/parse-body";
 
 export async function PATCH(
   request: Request,
@@ -19,19 +21,18 @@ export async function PATCH(
       return accessResult;
     }
 
-    const spellGroup = await prisma.spellGroup.findUnique({
-      where: { id: groupId },
-    });
+    const spellGroup = await loadOwned(
+      prisma.spellGroup.findUnique({
+        where: { id: groupId },
+      }),
+      id,
+    );
 
-    const validationError = validateCampaignOwnership(spellGroup, id);
+    if (spellGroup instanceof NextResponse) return spellGroup;
 
-    if (validationError) {
-      return validationError;
-    }
+    const data = await parseBody(updateSpellGroupSchema, request);
 
-    const body = await request.json();
-
-    const data = updateSpellGroupSchema.parse(body);
+    if (data instanceof NextResponse) return data;
 
     const updatedGroup = await prisma.spellGroup.update({
       where: { id: groupId },
@@ -61,16 +62,15 @@ export async function DELETE(
       return accessResult;
     }
 
-    const spellGroup = await prisma.spellGroup.findUnique({
-      where: { id: groupId },
-      select: { campaignId: true },
-    });
+    const spellGroup = await loadOwned(
+      prisma.spellGroup.findUnique({
+        where: { id: groupId },
+        select: { campaignId: true },
+      }),
+      id,
+    );
 
-    const validationError = validateCampaignOwnership(spellGroup, id);
-
-    if (validationError) {
-      return validationError;
-    }
+    if (spellGroup instanceof NextResponse) return spellGroup;
 
     // Видаляємо групу (заклинання автоматично втратять зв'язок через onDelete: SetNull в схемі)
     await prisma.spellGroup.deleteMany({

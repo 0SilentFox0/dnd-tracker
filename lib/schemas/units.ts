@@ -1,10 +1,11 @@
 import { z } from "zod";
 
+import { AttackType } from "@/lib/constants/battle";
 import { AbilitiesSchema } from "@/lib/utils/abilities/schema";
 
 export const unitAttackSchema = z.object({
   name: z.string(),
-  type: z.enum(["melee", "ranged"]).optional(),
+  type: z.enum([AttackType.MELEE, AttackType.RANGED]).optional(),
   targetType: z.enum(["target", "aoe"]).optional(),
   attackBonus: z.number(),
   damageType: z.string(),

@@ -35,13 +35,13 @@ export function NodeSheet({ target, dto, actions }: {
     <ResponsiveDialog open onOpenChange={(open) => !open && actions.onClose()} title={title} description={tag} footer={footer} className={HUD_SURFACE}>
       {skill ? (
         <div className="space-y-2 text-sm">
-          {skill.summary.length > 0 && <p className="text-[#c9b37a]">{skill.summary.join(" · ")}</p>}
+          {skill.summary.length > 0 && <p className="text-hud-gold">{skill.summary.join(" · ")}</p>}
           {skill.description && <p className="whitespace-pre-line">{skill.description}</p>}
         </div>
       ) : (
         !skillName && (node.kind === "branchLevel" || node.kind === "racial") && <p className="text-sm italic">Майстер ще не призначив скіл цьому рівню</p>
       )}
-      {state === "locked" && reason && <p className="mt-3 text-sm text-[#d0705c]">{LEARN_BLOCK_TEXT[reason]}</p>}
+      {state === "locked" && reason && <p className="mt-3 text-sm text-hud-danger">{LEARN_BLOCK_TEXT[reason]}</p>}
     </ResponsiveDialog>
   );
 }

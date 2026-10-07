@@ -1,7 +1,3 @@
-/**
- * Розрахунок урону при попаданні: база, модифікатори, критичний ефект, опір
- */
-
 import { calculateDamageWithModifiers } from "../../damage";
 import { applyBalanceDamageMultiplier, scaleAdditionalDamage } from "../../damage/balance-multiplier";
 import { heroAttackDamageParts, heroDamageContext } from "../../damage/hero-damage";

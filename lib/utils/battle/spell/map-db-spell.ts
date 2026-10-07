@@ -2,7 +2,6 @@ import type { Spell } from "@prisma/client";
 
 import type { BattleSpell } from "@/lib/utils/battle/spell";
 
-/** Перетворює DB Spell row на runtime BattleSpell для processSpell. */
 export function mapDbSpellToBattleSpell(
   spellData: Spell,
 ): BattleSpell {

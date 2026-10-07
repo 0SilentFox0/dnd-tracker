@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { BattleStatus } from "@/lib/constants/battle";
 import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/battle-victory";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { battleActionToEvent } from "@/lib/utils/battle/store";
@@ -14,7 +15,7 @@ export function completeMutation(ctx: BattleMutationContext, body: z.infer<typeo
   return {
     participants: updatedParticipants,
     pending: ctx.pending,
-    scene: { status: "completed", completedAt: new Date() },
+    scene: { status: BattleStatus.COMPLETED, completedAt: new Date() },
     events: [battleActionToEvent(battleAction)],
   };
 }

@@ -12,6 +12,7 @@ export default defineConfig({
       "**/node_modules/**",
       "**/dist/**",
       "**/.next/**",
+      ".claude/**",
       "**/*.integration.test.ts",
     ],
     coverage: {

@@ -1,7 +1,3 @@
-/**
- * Витягування атак з екіпірованої зброї (артефактів)
- */
-
 import type { Prisma } from "@prisma/client";
 
 import type {
@@ -144,7 +140,7 @@ export async function extractAttacksFromCharacter(
 
     if (
       attackType !== AttackType.RANGED &&
-      (attackType?.toLowerCase() === "ranged" ||
+      (attackType?.toLowerCase() === AttackType.RANGED ||
         /лук|bow|арбалет|crossbow/i.test(weapon.name) ||
         (rangeVal && rangeVal.trim() !== "" && rangeVal !== "5 ft"))
     ) {

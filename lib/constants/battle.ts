@@ -1,39 +1,36 @@
-/**
- * Константи для бою
- */
+export const AttackType = {
+  MELEE: "melee",
+  RANGED: "ranged",
+} as const;
 
-/**
- * Enum для типів атаки
- */
-export enum AttackType {
-  MELEE = "melee",
-  RANGED = "ranged",
-}
+export type AttackType = (typeof AttackType)[keyof typeof AttackType];
 
-/**
- * Enum для сторін учасника бою
- */
-export enum ParticipantSide {
-  ALLY = "ally",
-  ENEMY = "enemy",
-}
+export const ParticipantSide = {
+  ALLY: "ally",
+  ENEMY: "enemy",
+} as const;
 
-/**
- * Статус учасника в бою (combatStats.status)
- */
+export type ParticipantSide = (typeof ParticipantSide)[keyof typeof ParticipantSide];
+
 export const CombatStatus = {
   ACTIVE: "active",
   UNCONSCIOUS: "unconscious",
   DEAD: "dead",
 } as const;
 
-export const BattleSceneStatus = {
+export type CombatStatusType = (typeof CombatStatus)[keyof typeof CombatStatus];
+
+export const BattleStatus = {
   PREPARED: "prepared",
   ACTIVE: "active",
   COMPLETED: "completed",
 } as const;
 
-export type BattleSceneStatusValue = (typeof BattleSceneStatus)[keyof typeof BattleSceneStatus];
+export type BattleStatus = (typeof BattleStatus)[keyof typeof BattleStatus];
+
+export const DM_ACTOR = { actorId: "dm", actorName: "DM", actorSide: ParticipantSide.ALLY } as const;
+
+export const SYSTEM_ACTOR = { actorId: "system", actorName: "Система", actorSide: ParticipantSide.ALLY } as const;
 
 export const BattleActionType = {
   ATTACK: "attack",
@@ -46,28 +43,20 @@ export const BattleActionType = {
   RETALIATION: "retaliation",
 } as const;
 
-export type CombatStatusType = (typeof CombatStatus)[keyof typeof CombatStatus];
-
 /**
  * Глобальні константи бою
  */
 export const BATTLE_CONSTANTS = {
-  /** Мінімальне значення урону */
   MIN_DAMAGE: 0,
   
-  /** Максимальне значення імунітету/опору (1.0 = 100%) */
   MAX_RESISTANCE: 1.0,
   
-  /** Мінімальне значення опору */
   MIN_RESISTANCE: 0,
   
-  /** За замовчуванням опір (якщо не вказано значення) */
   DEFAULT_RESISTANCE_PERCENT: 50,
   
-  /** Мінімальний відсоток HP (0%) */
   MIN_HP_PERCENT: 0,
   
-  /** Максимальний відсоток HP (100%) */
   MAX_HP_PERCENT: 100,
 
   /** Загальний дільник для percent → fraction (e.g. 25% → 0.25). */

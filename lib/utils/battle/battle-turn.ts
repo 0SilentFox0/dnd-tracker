@@ -1,12 +1,9 @@
-/**
- * Утиліти для обробки ходу в бою
- */
-
 import { applyDOTEffects, decreaseEffectDurations } from "./battle-effects";
 import { calculateInitiative, sortByInitiative } from "./battle-start";
 
+import { CombatStatus } from "@/lib/constants/battle";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
-import { findParticipant, isUp, replaceParticipant } from "@/lib/utils/abilities/engine/participants";
+import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/participants";
 import { resolveDowned, runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import type { Rng } from "@/lib/utils/abilities/engine/types";
 import { BattleParticipant } from "@/types/battle";
@@ -53,8 +50,8 @@ export function processStartOfTurn(
 
   // DoT і зменшення тривалості ефектів — на початку ходу цієї цілі (Decay тощо)
   if (
-    updatedParticipant.combatStats.status !== "dead" &&
-    updatedParticipant.combatStats.status !== "unconscious"
+    updatedParticipant.combatStats.status !== CombatStatus.DEAD &&
+    updatedParticipant.combatStats.status !== CombatStatus.UNCONSCIOUS
   ) {
     const dotResult = applyDOTEffects(updatedParticipant);
 
@@ -84,14 +81,14 @@ export function processStartOfTurn(
 
   if (
     updatedParticipant.combatStats.currentHp <= 0 &&
-    updatedParticipant.combatStats.status !== "dead"
+    updatedParticipant.combatStats.status !== CombatStatus.DEAD
   ) {
     updatedParticipant = {
       ...updatedParticipant,
       combatStats: {
         ...updatedParticipant.combatStats,
         status:
-          updatedParticipant.combatStats.currentHp < 0 ? "dead" : "unconscious",
+          updatedParticipant.combatStats.currentHp < 0 ? CombatStatus.DEAD : CombatStatus.UNCONSCIOUS,
       },
     };
     statusChanged = true;
@@ -123,7 +120,7 @@ export function processStartOfTurn(
 
     participants = r.participants;
     abilityMessages.push(...r.messages);
-  } else if (isUp(updatedParticipant)) {
+  } else if (isActive(updatedParticipant)) {
     const r = runAbilities(participants, { type: "turnStart", actorId: id }, ctx);
 
     participants = r.participants;
@@ -164,19 +161,17 @@ export function processEndOfTurn(
     nextTurnIndex += 1;
     attempts += 1;
 
-    // Якщо досягли кінця черги, переходимо до наступного раунду
     if (nextTurnIndex >= initiativeOrder.length) {
       nextTurnIndex = 0;
       nextRound += 1;
     }
 
-    // Перевіряємо, чи може наступний учасник ходити (не мертвий і не непритомний)
     const nextParticipant = initiativeOrder[nextTurnIndex];
 
     if (
       nextParticipant &&
-      nextParticipant.combatStats.status !== "dead" &&
-      nextParticipant.combatStats.status !== "unconscious"
+      nextParticipant.combatStats.status !== CombatStatus.DEAD &&
+      nextParticipant.combatStats.status !== CombatStatus.UNCONSCIOUS
     ) {
       break;
     }
@@ -211,7 +206,6 @@ export function processStartOfRound(
   // 0. Видаляємо тимчасові слоти додаткових ходів з попереднього раунду
   const baseOrder = (initiativeOrder || []).filter((p) => !p.basicInfo?.isExtraTurnSlot);
 
-  // Додаємо призваних істот до baseOrder
   const updatedOrder = [...baseOrder, ...pendingSummons];
 
   const newSummonIds = new Set(pendingSummons.map((p) => p.basicInfo.id));
@@ -239,7 +233,6 @@ export function processStartOfRound(
     round.participants.map((p) => ({ ...p, abilities: { ...p.abilities, initiative: calculateInitiative(p, round.participants) } })),
   );
 
-  // DoT і зменшення тривалості ефектів тепер на початку ходу кожного учасника (processStartOfTurn)
   return {
     updatedInitiativeOrder: sortedOrder,
     message: `🔁 Початок Раунду ${currentRound}`,

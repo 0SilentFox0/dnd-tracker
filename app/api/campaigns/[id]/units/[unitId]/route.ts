@@ -7,8 +7,10 @@ import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import { updateUnitSchema } from "@/lib/schemas";
 import { abilitiesJson, readAbilities } from "@/lib/utils/abilities/read";
-import { requireCampaignAccess, requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
+import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { loadOwned } from "@/lib/utils/api/load-owned";
+import { parseBody } from "@/lib/utils/api/parse-body";
 import { toUnit } from "@/lib/utils/units/to-unit";
 
 export async function GET(
@@ -24,15 +26,14 @@ export async function GET(
       return accessResult;
     }
 
-    const unit = await prisma.unit.findUnique({
-      where: { id: unitId },
-    });
+    const unit = await loadOwned(
+      prisma.unit.findUnique({
+        where: { id: unitId },
+      }),
+      id,
+    );
 
-    const validationError = validateCampaignOwnership(unit, id);
-
-    if (validationError) {
-      return validationError;
-    }
+    if (unit instanceof NextResponse) return unit;
 
     const row = unit as NonNullable<typeof unit>;
 
@@ -57,16 +58,15 @@ export async function DELETE(
       return accessResult;
     }
 
-    const unit = await prisma.unit.findUnique({
-      where: { id: unitId },
-      select: { campaignId: true },
-    });
+    const unit = await loadOwned(
+      prisma.unit.findUnique({
+        where: { id: unitId },
+        select: { campaignId: true },
+      }),
+      id,
+    );
 
-    const validationError = validateCampaignOwnership(unit, id);
-
-    if (validationError) {
-      return validationError;
-    }
+    if (unit instanceof NextResponse) return unit;
 
     await prisma.unit.deleteMany({
       where: { id: unitId },
@@ -93,17 +93,18 @@ export async function PATCH(
       return accessResult;
     }
 
-    const unit = await prisma.unit.findUnique({
-      where: { id: unitId },
-    });
+    const unit = await loadOwned(
+      prisma.unit.findUnique({
+        where: { id: unitId },
+      }),
+      id,
+    );
 
-    const validationError = validateCampaignOwnership(unit, id);
+    if (unit instanceof NextResponse) return unit;
 
-    if (validationError) {
-      return validationError;
-    }
+    const data = await parseBody(updateUnitSchema, request);
 
-    const data = updateUnitSchema.parse(await request.json());
+    if (data instanceof NextResponse) return data;
 
     const raceError = await invalidUnitRace(id, data.raceId);
 

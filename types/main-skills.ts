@@ -1,7 +1,3 @@
-/**
- * Типи для основних навиків
- */
-
 export interface MainSkill {
   id: string;
   campaignId: string;

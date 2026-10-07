@@ -1,24 +1,9 @@
-/**
- * Допоміжні функції для next-turn API: логування, перемога
- */
-
-import { ParticipantSide } from "@/lib/constants/battle";
+import { BattleStatus, CombatStatus, ParticipantSide, SYSTEM_ACTOR } from "@/lib/constants/battle";
 import {
   calculateAllyHpChangesOnVictory,
   checkVictoryConditions,
 } from "@/lib/utils/battle/battle-victory";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
-
-export function logTurnTiming(
-  _label?: string,
-  _startMs?: number,
-  _extra?: Record<string, number | string>,
-) {
-  void _label;
-  void _startMs;
-  void _extra;
-  // Логування вимкнено
-}
 
 export interface ApplyVictoryParams {
   updatedInitiativeOrder: BattleParticipant[];
@@ -63,22 +48,22 @@ export function applyVictoryCompletion(params: ApplyVictoryParams): ApplyVictory
 
   let updatedInitiativeOrder = order;
 
-  if (victoryCheck.result && battleStatus === "active") {
-    finalStatus = "completed";
+  if (victoryCheck.result && battleStatus === BattleStatus.ACTIVE) {
+    finalStatus = BattleStatus.COMPLETED;
     completedAt = new Date();
 
     if (victoryCheck.result === "victory") {
       updatedInitiativeOrder = order.map((participant) => {
         if (
           participant.basicInfo.side === ParticipantSide.ALLY &&
-          participant.combatStats.status === "unconscious"
+          participant.combatStats.status === CombatStatus.UNCONSCIOUS
         ) {
           return {
             ...participant,
             combatStats: {
               ...participant.combatStats,
               currentHp: participant.combatStats.maxHp,
-              status: "active" as const,
+              status: CombatStatus.ACTIVE,
             },
           };
         }
@@ -93,9 +78,7 @@ export function applyVictoryCompletion(params: ApplyVictoryParams): ApplyVictory
       round: nextRound,
       actionIndex: currentBattleLogLength + newLogEntries.length,
       timestamp: new Date(),
-      actorId: "system",
-      actorName: "Система",
-      actorSide: "ally",
+      ...SYSTEM_ACTOR,
       actionType: "end_turn",
       targets: [],
       actionDetails: {},

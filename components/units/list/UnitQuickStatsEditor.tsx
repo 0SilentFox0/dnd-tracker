@@ -37,7 +37,7 @@ function QuickStatInput({
 
   return (
     <div className="min-w-0 space-y-1">
-      <Label htmlFor={field.id} className="block truncate text-[11px] font-normal text-[#8f8473]">
+      <Label htmlFor={field.id} className="block truncate text-[11px] font-normal text-hud-muted">
         {label}
       </Label>
       <div className="flex items-center gap-1">
@@ -62,7 +62,7 @@ function QuickStatInput({
           variant="ghost"
           size="icon"
           aria-label="Зберегти"
-          className="size-7 shrink-0 text-[#c9b37a] hover:text-[#e6c25a]"
+          className="size-7 shrink-0 text-hud-gold hover:text-[#e6c25a]"
           disabled={disabled}
           onClick={(e) => {
             e.preventDefault();
@@ -100,7 +100,7 @@ export function UnitQuickStatsEditor({
           inputProps={{ placeholder: "2d6+3", title: "Enter, ✓ або втрата фокусу" }}
         />
       ) : (
-        <p className="self-end text-[11px] leading-tight text-[#8f8473]">Немає атак — кубики в повному редакторі</p>
+        <p className="self-end text-[11px] leading-tight text-hud-muted">Немає атак — кубики в повному редакторі</p>
       )}
     </div>
   );

@@ -1,7 +1,3 @@
-/**
- * Заклинання, вивчені через вузли дерева прокачки.
- */
-
 import { getSpellLevelsForSkillLevel, SKILL_LEVEL_ORDER, type SpellSkillInfo } from "./spell-learning-internals";
 
 import type { BranchLevel, LearnedNode } from "@/lib/utils/skills/progression";

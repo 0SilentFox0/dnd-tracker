@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { ParticipantSourceType } from "@/lib/constants/battle";
+import { ParticipantSide,ParticipantSourceType } from "@/lib/constants/battle";
 
 export const createBattleSchema = z.object({
   name: z.string().min(1).max(100),
@@ -9,7 +9,7 @@ export const createBattleSchema = z.object({
     z.object({
       id: z.string(),
       type: z.enum([ParticipantSourceType.CHARACTER, ParticipantSourceType.UNIT]),
-      side: z.enum(["ally", "enemy"]),
+      side: z.enum([ParticipantSide.ALLY, ParticipantSide.ENEMY]),
       quantity: z.number().min(1).optional(),
     }),
   ),

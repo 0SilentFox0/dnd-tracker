@@ -4,8 +4,8 @@ import type { Prisma } from "@prisma/client";
 import { REFERENCE_REVALIDATE_SECONDS } from "@/lib/cache/reference-data";
 import { cacheTags } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
-import type { SkillForReference, SpellForReference } from "@/lib/types/info-reference";
 import { abilitySummary } from "@/lib/utils/abilities/summary";
+import type { SkillForReference, SpellForReference } from "@/types/info-reference";
 
 const SKILL_SELECT = {
   id: true,

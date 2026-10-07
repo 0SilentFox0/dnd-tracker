@@ -7,6 +7,7 @@ import { createArtifactSetSchema } from "./schemas";
 import { resolveArtifactIconForPersistence } from "@/lib/supabase/artifact-icon-storage";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { parseBody } from "@/lib/utils/api/parse-body";
 import {
   insertArtifactSet,
   listArtifactSets,
@@ -48,7 +49,9 @@ export async function POST(
       return accessResult;
     }
 
-    const data = createArtifactSetSchema.parse(await request.json());
+    const data = await parseBody(createArtifactSetSchema, request);
+
+    if (data instanceof NextResponse) return data;
 
     let icon: string | null | undefined = data.icon;
 

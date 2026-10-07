@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CampaignRole } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
-import { requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
+import { requireDM } from "@/lib/utils/api/api-auth";
+import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { loadOwned } from "@/lib/utils/api/load-owned";
 
 export async function DELETE(
   request: Request,
@@ -20,28 +23,19 @@ export async function DELETE(
     }
 
     // Перевіряємо чи учасник існує та належить до цієї кампанії
-    const member = await prisma.campaignMember.findUnique({
-      where: { id: memberId },
-      select: { campaignId: true, role: true },
-    });
+    const member = await loadOwned(
+      prisma.campaignMember.findUnique({
+        where: { id: memberId },
+        select: { campaignId: true, role: true },
+      }),
+      id,
+    );
 
-    const validationError = validateCampaignOwnership(member, id);
-
-    if (validationError) {
-      return validationError;
-    }
-
-    // Після перевірки member гарантовано не null
-    if (!member) {
-      return NextResponse.json({ error: "Member not found" }, { status: 404 });
-    }
+    if (member instanceof NextResponse) return member;
 
     // Не дозволяємо видаляти DM
     if (member.role === CampaignRole.DM) {
-      return NextResponse.json(
-        { error: "Cannot remove DM from campaign" },
-        { status: 400 }
-      );
+      return errorResponse(API_ERRORS.CANNOT_REMOVE_DM, 400);
     }
 
     // Видаляємо учасника

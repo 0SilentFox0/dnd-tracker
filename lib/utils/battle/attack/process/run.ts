@@ -1,7 +1,3 @@
-/**
- * Повна обробка атаки з усіма модифікаторами, вміннями та ефектами
- */
-
 import {
   applyMainActionUsed,
   getEffectiveArmorClass,
@@ -17,9 +13,9 @@ import { handleCriticalFail } from "./critical-fail";
 import { resolveHit } from "./hit";
 import { handleMiss } from "./miss";
 
-import { AttackType } from "@/lib/constants/battle";
 import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { isUp, withSelf } from "@/lib/utils/abilities/engine/participants";
+import { isActive, withSelf } from "@/lib/utils/abilities/engine/participants";
+import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 
 export type { ProcessAttackParams, ProcessAttackResult };
 
@@ -42,7 +38,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   const targetId = target.basicInfo.id;
 
-  const attackKind = attack.type === AttackType.RANGED ? "ranged" : "melee";
+  const attackKind = attackKindOf(attack.type);
 
   const before = withSelf(withSelf(allParticipants, target), attacker);
 
@@ -50,7 +46,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   const { actionModifiers } = fire(flow, { type: "attack", phase: "before", actorId: attackerId, targetId, attackKind });
 
-  if (!isUp(getP(flow, targetId))) {
+  if (!isActive(getP(flow, targetId))) {
     put(flow, applyMainActionUsed(getP(flow, attackerId)));
 
     const battleAction = buildAbortedAttackAction(getP(flow, attackerId), target, attack, flow.messages, battleId, currentRound);

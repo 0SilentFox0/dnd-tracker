@@ -1,6 +1,8 @@
 import Image from "next/image";
 
+import { ParticipantSide } from "@/lib/constants/battle";
 import { cn } from "@/lib/utils";
+import { isDown } from "@/lib/utils/battle/participant/state";
 import type { BattleParticipant } from "@/types/battle";
 
 export function Portrait({ participant, size = 40, current, me, extra, className }: {
@@ -13,9 +15,9 @@ export function Portrait({ participant, size = 40, current, me, extra, className
 }) {
   const { avatar, name, side } = participant.basicInfo;
 
-  const down = participant.combatStats.status !== "active" || participant.combatStats.currentHp <= 0;
+  const down = isDown(participant);
 
-  const ring = side === "ally" ? "var(--ally)" : "var(--enemy)";
+  const ring = side === ParticipantSide.ALLY ? "var(--ally)" : "var(--enemy)";
 
   return (
     <span

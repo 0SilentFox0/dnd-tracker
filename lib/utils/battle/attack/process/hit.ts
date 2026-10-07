@@ -4,8 +4,8 @@ import { computeHitDamage, type ComputeHitDamageResult } from "./compute";
 import { applyDamageToTarget } from "./damage";
 import { applyVampirism } from "./hit-effects";
 
-import { AttackType } from "@/lib/constants/battle";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
+import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import type { BattleAttack } from "@/types/battle";
 
 export interface ResolveHitParams {
@@ -47,7 +47,7 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
     type: "hit",
     actorId: attackerId,
     targetId,
-    attackKind: attack.type === AttackType.RANGED ? "ranged" : "melee",
+    attackKind: attackKindOf(attack.type),
     damage: hitDamage.resistanceResult.finalDamage,
   });
 

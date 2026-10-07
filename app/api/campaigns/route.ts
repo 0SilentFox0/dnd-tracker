@@ -7,6 +7,7 @@ import { createCampaignSchema } from "@/lib/schemas";
 import { requireAuth, requireAuthUser } from "@/lib/utils/api/api-auth";
 import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { parseBody } from "@/lib/utils/api/parse-body";
 
 // Генерує унікальний код запрошення
 function generateInviteCode(): string {
@@ -23,9 +24,9 @@ export async function POST(request: Request) {
 
     const { userId, authUser } = authResult;
 
-    const body = await request.json();
+    const data = await parseBody(createCampaignSchema, request);
 
-    const data = createCampaignSchema.parse(body);
+    if (data instanceof NextResponse) return data;
 
     // Перевіряємо чи юзер існує в базі, якщо ні - створюємо
     let user = await prisma.user.findUnique({

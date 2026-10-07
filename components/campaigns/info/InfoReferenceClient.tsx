@@ -6,7 +6,7 @@ import { ReferenceSectionAccordion } from "./ReferenceSectionAccordion";
 import { EmptyState } from "@/components/common/states";
 import { Button } from "@/components/ui/button";
 import { useInfoReferenceFilters } from "@/lib/hooks/common";
-import type { SkillForReference, SpellForReference } from "@/lib/types/info-reference";
+import type { SkillForReference, SpellForReference } from "@/types/info-reference";
 
 export interface InfoReferenceClientProps {
   campaignId: string;
@@ -50,25 +50,25 @@ export function InfoReferenceClient({
         showSpellsFilter={filters.filters.section === "all" || filters.filters.section === "spells"}
       />
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg bg-[rgba(17,14,11,.82)] px-3 py-2 text-sm text-[#8f8473]">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg bg-hud-panel px-3 py-2 text-sm text-hud-muted">
         {filters.ui.showSkills && filters.ui.showSpells && (
           <>
             <span>
               Скілів:{" "}
-              <strong className="text-[#efe5d2]">
+              <strong className="text-hud-ink">
                 {filters.results.filteredSkills.length}
               </strong>
             </span>
             <span>
               Заклинань:{" "}
-              <strong className="text-[#efe5d2]">
+              <strong className="text-hud-ink">
                 {filters.results.filteredSpells.length}
               </strong>
             </span>
             {!filters.ui.skillsEmpty && (
               <a
                 href="#ref-skills"
-                className="touch-manipulation text-[#c9b37a] underline-offset-2 hover:text-[#e6c25a] hover:underline"
+                className="touch-manipulation text-hud-gold underline-offset-2 hover:text-[#e6c25a] hover:underline"
               >
                 До скілів
               </a>
@@ -76,7 +76,7 @@ export function InfoReferenceClient({
             {!filters.ui.spellsEmpty && (
               <a
                 href="#ref-spells"
-                className="touch-manipulation text-[#c9b37a] underline-offset-2 hover:text-[#e6c25a] hover:underline"
+                className="touch-manipulation text-hud-gold underline-offset-2 hover:text-[#e6c25a] hover:underline"
               >
                 До заклинань
               </a>
@@ -86,7 +86,7 @@ export function InfoReferenceClient({
         {filters.filters.section === "skills" && (
           <>
             Показано скілів:{" "}
-            <strong className="text-[#efe5d2]">
+            <strong className="text-hud-ink">
                 {filters.results.filteredSkills.length}
               </strong>
           </>
@@ -94,7 +94,7 @@ export function InfoReferenceClient({
         {filters.filters.section === "spells" && (
           <>
             Показано заклинань:{" "}
-            <strong className="text-[#efe5d2]">
+            <strong className="text-hud-ink">
                 {filters.results.filteredSpells.length}
               </strong>
           </>
@@ -103,7 +103,7 @@ export function InfoReferenceClient({
 
       {filters.ui.nothingFound && (
         <EmptyState
-          className="bg-[rgba(17,14,11,.82)]"
+          className="bg-hud-panel"
           title="Нічого не знайдено"
           description="Змініть пошук або фільтри, або скиньте їх."
           action={

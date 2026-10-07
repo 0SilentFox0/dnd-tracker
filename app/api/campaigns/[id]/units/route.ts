@@ -11,6 +11,7 @@ import { abilitiesJson } from "@/lib/utils/abilities/read";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { parseBody } from "@/lib/utils/api/parse-body";
 import { getProficiencyBonus } from "@/lib/utils/common/calculations";
 import { toUnit } from "@/lib/utils/units/to-unit";
 
@@ -27,7 +28,9 @@ export async function POST(
       return accessResult;
     }
 
-    const data = createUnitSchema.parse(await request.json());
+    const data = await parseBody(createUnitSchema, request);
+
+    if (data instanceof NextResponse) return data;
 
     const raceError = await invalidUnitRace(id, data.raceId);
 

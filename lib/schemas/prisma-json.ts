@@ -1,16 +1,7 @@
 /**
- * Runtime-парсери для JSON-полів Prisma (CODE_AUDIT 3.1).
- *
- * Поля типу Json у Prisma не валідуються при читанні — у бізнес-логіку
- * тече `unknown` через `as unknown as Foo` cast (~20 місць).
- * Тут — Zod-схеми для найбільш чутливих JSON-колонок:
- *  - Skill.spellEnhancementData — апгрейди заклинань,
- *  - Character.skillTreeProgress — прогрес у дереві скілів,
- *  - Spell.effects (string[]) — список ефектів.
- *
- * Кожний парсер має `safeParseOrDefault` — повертає типізоване значення
- * або дефолт при invalid (з лог-викликом). Не throw'ає, бо часто
- * викликається в hot path і throw зламає весь request.
+ * Runtime-парсери для JSON-полів Prisma, які не валідуються при читанні (Skill.spellEnhancementData,
+ * Character.skillTreeProgress, Spell.effects). `safeParseOrDefault` повертає дефолт з логом і не кидає:
+ * його викликають у hot path, де throw зламав би весь request.
  */
 
 import { z } from "zod";

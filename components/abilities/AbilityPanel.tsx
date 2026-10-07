@@ -37,7 +37,7 @@ export function AbilityPanel({ ability, path, actions }: { ability: Ability; pat
           <Input id={`${path}.name`} value={ability.name} onChange={(e) => actions.onChange({ ...ability, name: e.target.value })} />
           <FieldErrors errors={nameErrors} testId={`field-errors-${path}.name`} />
         </div>
-        <Button type="button" size="icon" variant="ghost" className="mt-5 text-[#d0705c]" aria-label={`Видалити вміння ${ability.name}`} onClick={actions.onRemove}>
+        <Button type="button" size="icon" variant="ghost" className="mt-5 text-hud-danger" aria-label={`Видалити вміння ${ability.name}`} onClick={actions.onRemove}>
           <X className="h-4 w-4" />
         </Button>
       </div>
@@ -53,7 +53,6 @@ export function AbilityPanel({ ability, path, actions }: { ability: Ability; pat
           onChange={(e) => {
             const { description: _d, ...rest } = ability;
 
-            void _d;
             actions.onChange(e.target.value ? { ...rest, description: e.target.value } : rest);
           }}
         />

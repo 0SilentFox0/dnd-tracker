@@ -2,7 +2,8 @@ import { heroAttackDamageParts } from "./hero-damage";
 import { applyHeroDmDamageMultiplier } from "./hero-dm-multiplier";
 import { calculateDamageWithModifiers } from "./index";
 
-import { AttackType, ParticipantSourceType } from "@/lib/constants/battle";
+import { ParticipantSourceType } from "@/lib/constants/battle";
+import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { attackAbilityLabel, getAttackAbilityModifier } from "@/lib/utils/common/calculations";
 import { diceAverage } from "@/lib/utils/common/dice";
 import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
@@ -19,7 +20,7 @@ export interface AverageDamage {
 }
 
 export function averageAttackDamage(p: BattleParticipant, attack: BattleAttack, all: BattleParticipant[]): AverageDamage {
-  const type = attack.type === AttackType.RANGED ? AttackType.RANGED : AttackType.MELEE;
+  const type = attackKindOf(attack.type);
 
   const isHero = p.basicInfo.sourceType === ParticipantSourceType.CHARACTER;
 

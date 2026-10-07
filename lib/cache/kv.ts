@@ -1,12 +1,5 @@
 /**
- * Опціональний кеш через Upstash Redis (REST API).
- *
- * Використовує спільний клієнт із `lib/redis.ts` — той самий, що й
- * rate-limit. Підтримує кілька env-prefix варіантів (UPSTASH_REDIS_REST_*,
- * KV_REST_API_*, dnd_KV_REST_API_*) — див. `lib/redis.ts`.
- *
- * Якщо Redis недоступний — kv* функції стають no-op (повертають null /
- * нічого не зберігають). Застосунок працює без кешу.
+ * Опціональний кеш на спільному клієнті `lib/redis.ts`; без Redis kv* функції — no-op.
  */
 
 import { getRedisClient } from "@/lib/redis";

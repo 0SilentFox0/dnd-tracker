@@ -1,18 +1,11 @@
 /**
- * Бізнес-логіка POST /start — винесена з route.ts (CODE_AUDIT 1.5).
- *
- * route.ts: тонка (auth + battle fetch + status check) → executeStartBattle
- *
- * Тут: завантаження учасників, побудова slot-ів, паралельне створення
- * BattleParticipant, ефекти/тригери на старт бою, розрахунок ініціативи,
- * сортування. Запис і Pusher — у runBattleMutation.
+ * Логіка POST /start: учасники, слоти, ефекти/тригери на старті, ініціатива. Запис і Pusher — у runBattleMutation.
  */
-
 
 import { buildCampaignContextForStart } from "./start-build-context";
 import { scaleEnemiesForFairBattle } from "./start-fair-scaling";
 
-import { ParticipantSide, ParticipantSourceType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
+import { ParticipantSide, ParticipantSourceType, type ParticipantSourceTypeValue, SYSTEM_ACTOR } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
@@ -179,9 +172,7 @@ function applyStartOfBattleAndSort(
       round: 1,
       actionIndex: 0,
       timestamp: new Date(),
-      actorId: "system",
-      actorName: "Система",
-      actorSide: "ally",
+      ...SYSTEM_ACTOR,
       actionType: "ability",
       targets: [],
       actionDetails: { triggeredAbilities: [] },

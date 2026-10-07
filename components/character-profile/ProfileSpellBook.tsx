@@ -1,7 +1,7 @@
 "use client";
 
-import { HUD_SURFACE } from "@/components/battle/hud";
 import { SpellBookPages, SpellDetail } from "@/components/battle/wizards/SpellBookPages";
+import { HUD_SURFACE } from "@/components/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { useSpellBrowser } from "@/lib/hooks/characters";
 import { useMediaQuery } from "@/lib/hooks/common";
@@ -35,7 +35,7 @@ export function ProfileSpellBook({ spells, slots, open, onOpenChange }: { spells
         detail={book.selected && <div className="relative flex h-full flex-col px-5 pb-5 pt-6"><SpellDetail spell={book.selected} /></div>}
       />
       {showDetail && !wide && (
-        <button type="button" onClick={book.back} className="hud-sc mt-2 h-10 w-full text-sm text-[#e6dccb]">
+        <button type="button" onClick={book.back} className="hud-sc mt-2 h-10 w-full text-sm text-hud-bone">
           ← Назад
         </button>
       )}

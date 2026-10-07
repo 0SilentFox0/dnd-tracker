@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { ABILITY_KEYS } from "@/lib/constants/abilities";
+import { ABILITY_KEYS, SPELLCASTING_ABILITIES } from "@/lib/constants/abilities";
 
 export const updateCharacterSchema = z.object({
   name: z.string().min(1).max(100).optional(),
@@ -17,7 +17,6 @@ export const updateCharacterSchema = z.object({
   experience: z.number().min(0).optional(),
   avatar: z.string().nullable().optional(),
 
-  // Ability Scores
   strength: z.number().min(1).max(30).optional(),
   dexterity: z.number().min(1).max(30).optional(),
   constitution: z.number().min(1).max(30).optional(),
@@ -25,19 +24,16 @@ export const updateCharacterSchema = z.object({
   wisdom: z.number().min(1).max(30).optional(),
   charisma: z.number().min(1).max(30).optional(),
 
-  // Бойові параметри
   armorClass: z.number().min(0).optional(),
   initiative: z.number().optional(),
   speed: z.number().min(0).optional(),
 
-  // Saving Throws & Skills
   savingThrows: z.record(z.string(), z.boolean()).optional(),
   skills: z.record(z.string(), z.boolean()).optional(),
 
-  // Заклинання
   spellcastingAbility: z.preprocess(
     (v) => (v === "" ? null : v),
-    z.enum(["intelligence", "wisdom", "charisma"]).nullable().optional(),
+    z.enum(SPELLCASTING_ABILITIES).nullable().optional(),
   ),
   spellSlots: z
     .record(
@@ -50,7 +46,6 @@ export const updateCharacterSchema = z.object({
     .optional(),
   knownSpells: z.array(z.string()).optional(),
 
-  // Інше
   languages: z.array(z.string()).optional(),
   proficiencies: z.record(z.string(), z.array(z.string())).optional(),
   immunities: z.array(z.string()).optional(),

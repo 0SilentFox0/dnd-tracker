@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { deleteSpellsByLevelSchema } from "@/lib/schemas";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { parseBody } from "@/lib/utils/api/parse-body";
 
 export async function DELETE(
   request: Request,
@@ -19,9 +20,11 @@ export async function DELETE(
       return accessResult;
     }
 
-    const body = await request.json();
+    const parsedBody = await parseBody(deleteSpellsByLevelSchema, request);
 
-    const { level } = deleteSpellsByLevelSchema.parse(body);
+    if (parsedBody instanceof NextResponse) return parsedBody;
+
+    const { level } = parsedBody;
 
     // Видаляємо всі заклинання рівня в кампанії
     const result = await prisma.spell.deleteMany({

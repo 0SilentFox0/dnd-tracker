@@ -1,6 +1,7 @@
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { battleKeys } from "./keys";
 import { battleQueryKey } from "./keys";
 import { useBattleAction } from "./useBattleAction";
 
@@ -23,7 +24,7 @@ import {
   updateBattle,
   updateBattleParticipant,
 } from "@/lib/api/battles";
-import { BattleSceneStatus, type BattleSceneStatusValue } from "@/lib/constants/battle";
+import { BattleStatus } from "@/lib/constants/battle";
 import type { MoraleCheckResult } from "@/lib/utils/battle/battle-morale";
 import { acceptFullBattle } from "@/lib/utils/battle/client/apply-delta";
 import type {
@@ -39,9 +40,9 @@ import type { BattleAction } from "@/types/battle";
 export const BATTLE_ACTIVE_REFETCH_INTERVAL_MS = 30_000;
 
 // prepared теж: інакше гравці без Pusher не побачать старту бою.
-const POLLED_BATTLE_STATUSES: ReadonlySet<BattleSceneStatusValue> = new Set([
-  BattleSceneStatus.PREPARED,
-  BattleSceneStatus.ACTIVE,
+const POLLED_BATTLE_STATUSES: ReadonlySet<BattleStatus> = new Set([
+  BattleStatus.PREPARED,
+  BattleStatus.ACTIVE,
 ]);
 
 export function useBattle(
@@ -83,7 +84,7 @@ export function useUpdateBattle(campaignId: string, battleId: string) {
     mutationFn: (data: Partial<BattleScene>) => updateBattle(campaignId, battleId, data),
     onSuccess: (data) => {
       queryClient.setQueryData(key, acceptFullBattle(queryClient.getQueryData<BattleScene>(key), data));
-      void queryClient.invalidateQueries({ queryKey: ["battles", campaignId] });
+      void queryClient.invalidateQueries({ queryKey: battleKeys.list(campaignId) });
     },
   });
 }
@@ -94,7 +95,7 @@ export function useDeleteBattle(campaignId: string) {
   return useMutation({
     mutationFn: (battleId: string) => deleteBattle(campaignId, battleId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["battles", campaignId] });
+      queryClient.invalidateQueries({ queryKey: battleKeys.list(campaignId) });
     },
   });
 }
@@ -104,7 +105,7 @@ export function useCreateBattle(campaignId: string) {
 
   return useMutation({
     mutationFn: (data: CreateBattleData) => createBattle(campaignId, data),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["battles", campaignId] }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: battleKeys.list(campaignId) }),
   });
 }
 
@@ -116,7 +117,7 @@ export function useDeleteAllBattles(campaignId: string) {
   return useMutation({
     mutationFn: () => deleteAllBattles(campaignId),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["battles", campaignId] });
+      void queryClient.invalidateQueries({ queryKey: battleKeys.list(campaignId) });
       router.refresh();
     },
   });

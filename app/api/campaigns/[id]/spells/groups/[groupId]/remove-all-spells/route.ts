@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 
 import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
-import { requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
+import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { loadOwned } from "@/lib/utils/api/load-owned";
 
 export async function POST(
   request: Request,
@@ -18,15 +19,14 @@ export async function POST(
       return accessResult;
     }
 
-    const spellGroup = await prisma.spellGroup.findUnique({
-      where: { id: groupId },
-    });
+    const spellGroup = await loadOwned(
+      prisma.spellGroup.findUnique({
+        where: { id: groupId },
+      }),
+      id,
+    );
 
-    const validationError = validateCampaignOwnership(spellGroup, id);
-
-    if (validationError) {
-      return validationError;
-    }
+    if (spellGroup instanceof NextResponse) return spellGroup;
 
     // Видаляємо всі заклинання з групи
     await prisma.spell.updateMany({

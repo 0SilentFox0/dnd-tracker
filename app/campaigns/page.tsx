@@ -6,7 +6,7 @@ import { EmptyState, ErrorState } from "@/components/common/states";
 import { HudCard, HudPage, HudPageHeader, HudPanel } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { getAuthUser } from "@/lib/auth";
-import { CampaignRole } from "@/lib/constants/campaigns";
+import { CampaignRole, CampaignStatus } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 
 export default async function CampaignsPage() {
@@ -14,7 +14,6 @@ export default async function CampaignsPage() {
 
   const userId = user.id;
 
-  // Отримуємо кампанії де юзер є учасником
   type CampaignWithMembers = Awaited<
     ReturnType<
       typeof prisma.campaign.findMany<{
@@ -39,7 +38,7 @@ export default async function CampaignsPage() {
             userId: userId,
           },
         },
-        status: "active",
+        status: CampaignStatus.ACTIVE,
       },
       include: {
         members: {
@@ -55,7 +54,6 @@ export default async function CampaignsPage() {
   } catch (error: unknown) {
     console.error("Error fetching campaigns:", error);
 
-    // Якщо помилка підключення до бази - показуємо повідомлення
     const prismaError = error as { code?: string; message?: string };
 
     if (
@@ -65,11 +63,11 @@ export default async function CampaignsPage() {
       return (
         <HudPage>
           <HudPanel className="space-y-3">
-            <h2 className="hud-sc text-xl text-[#efe5d2]">Помилка підключення до бази даних</h2>
+            <h2 className="hud-sc text-xl text-hud-ink">Помилка підключення до бази даних</h2>
             <ErrorState error={new Error("Не вдається підключитися до бази даних. Перевірте DATABASE_URL в .env файлі.")} />
-            <div className="rounded-lg bg-[#1a140f] p-4">
-              <p className="mb-2 text-sm font-semibold text-[#c9b37a]">Як виправити:</p>
-              <ol className="list-inside list-decimal space-y-1 text-sm text-[#e6dccb]">
+            <div className="rounded-lg bg-hud-field p-4">
+              <p className="mb-2 text-sm font-semibold text-hud-gold">Як виправити:</p>
+              <ol className="list-inside list-decimal space-y-1 text-sm text-hud-bone">
                 <li>Відкрийте Supabase Dashboard → Settings → Database</li>
                 <li>Скопіюйте Connection Pooling URI (порт 6543)</li>
                 <li>Оновіть DATABASE_URL в .env файлі</li>
@@ -108,17 +106,17 @@ export default async function CampaignsPage() {
             <HudCard key={campaign.id} asChild className="space-y-2">
               <Link href={`/campaigns/${campaign.id}`}>
                 <div className="flex items-start justify-between gap-2">
-                  <h2 className="hud-sc text-lg text-[#efe5d2]">{campaign.name}</h2>
+                  <h2 className="hud-sc text-lg text-hud-ink">{campaign.name}</h2>
                   {isDM && (
                     <span className="shrink-0 rounded-full bg-[linear-gradient(135deg,#8a6414,#e6c25a_55%,#8a6414)] px-2 text-[11px] text-[#2a1d05]">DM</span>
                   )}
                 </div>
-                {campaign.description && <p className="text-sm text-[#8f8473]">{campaign.description}</p>}
-                <div className="space-y-1 text-sm text-[#8f8473]">
+                {campaign.description && <p className="text-sm text-hud-muted">{campaign.description}</p>}
+                <div className="space-y-1 text-sm text-hud-muted">
                   <p>Рівень: до {campaign.maxLevel}</p>
                   <p>Гравців: {campaign.members.filter((m) => m.role === CampaignRole.PLAYER).length}</p>
                   <p>
-                    Код запрошення: <code className="rounded bg-[#1a140f] px-1.5 font-mono text-[#e6dccb]">{campaign.inviteCode}</code>
+                    Код запрошення: <code className="rounded bg-hud-field px-1.5 font-mono text-hud-bone">{campaign.inviteCode}</code>
                   </p>
                 </div>
               </Link>

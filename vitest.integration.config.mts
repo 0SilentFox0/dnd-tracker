@@ -25,6 +25,7 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["**/*.integration.test.ts"],
+    exclude: ["**/node_modules/**", ".claude/**"],
     // Реальні мережеві виклики — даємо більше часу.
     testTimeout: 30_000,
     hookTimeout: 30_000,

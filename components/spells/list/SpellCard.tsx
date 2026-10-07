@@ -1,13 +1,13 @@
 "use client";
 
-import { type ReactNode, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Copy, Move, Pencil, Sparkles, X, Zap } from "lucide-react";
 
 import { SpellPrintCard } from "./SpellPrintCard";
 
 import { OptimizedImage } from "@/components/common/OptimizedImage";
-import { HudCard } from "@/components/hud/page";
+import { HudCard, HudPill } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -16,7 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getDamageElementLabel } from "@/lib/constants/damage";
-import { getDamageModifierLabel, getHealModifierLabel, getSpellDamageTypeLabel, getSpellTargetLabel } from "@/lib/constants/spells";
+import { getDamageModifierLabel, getHealModifierLabel, getSpellDamageTypeLabel, getSpellTargetLabel, spellLevelName } from "@/lib/constants/spells";
 import { getSpellDamageTypeIcon, getSpellGroupIcon, getSpellTypeIcon } from "@/lib/utils/spells/spell-icons";
 import type { Spell, SpellGroup } from "@/types/spells";
 
@@ -30,16 +30,7 @@ interface SpellCardProps {
   printMode?: boolean;
 }
 
-const ICON_BTN = "size-7 shrink-0 text-[#8f8473] hover:text-[#efe5d2]";
-
-function Fact({ icon, children }: { icon?: ReactNode; children: ReactNode }) {
-  return (
-    <span className="inline-flex items-center gap-1 rounded-full px-1.5 text-[11px] leading-5 text-[#c9bfae] shadow-[inset_0_0_0_1px_#4a3c2c]">
-      {icon}
-      {children}
-    </span>
-  );
-}
+const ICON_BTN = "size-7 shrink-0 text-hud-muted hover:text-hud-ink";
 
 export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, onMoveToGroup, printMode = false }: SpellCardProps) {
   const [copied, setCopied] = useState(false);
@@ -62,7 +53,7 @@ export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, o
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const fallbackIcon = <Sparkles className="size-5 text-[#8f8473]" />;
+  const fallbackIcon = <Sparkles className="size-5 text-hud-muted" />;
 
   return (
     <HudCard className="flex h-full flex-col gap-2">
@@ -75,29 +66,29 @@ export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, o
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="hud-sc truncate text-[15px] text-[#efe5d2]">{spell.name}</h3>
+          <h3 className="hud-sc truncate text-[15px] text-hud-ink">{spell.name}</h3>
           <div className="mt-1 flex flex-wrap gap-1">
-            <Fact icon={<Sparkles className="size-3" />}>{spell.level === 0 ? "Cantrip" : spell.level}</Fact>
+            <HudPill icon={<Sparkles className="size-3" />}>{spellLevelName(spell.level)}</HudPill>
             {spell.type === "aoe" && spell.damageType === "damage" ? (
-              <Fact icon={<Zap className="size-3" />}>AOE Демедж</Fact>
+              <HudPill icon={<Zap className="size-3" />}>AOE Демедж</HudPill>
             ) : (
               <>
-                <Fact icon={<TypeIcon className="size-3" />}>{spell.type === "target" ? "Цільове" : "AoE"}</Fact>
-                <Fact icon={<DamageTypeIcon className="size-3" />}>{getSpellDamageTypeLabel(spell.damageType)}</Fact>
+                <HudPill icon={<TypeIcon className="size-3" />}>{spell.type === "target" ? "Цільове" : "AoE"}</HudPill>
+                <HudPill icon={<DamageTypeIcon className="size-3" />}>{getSpellDamageTypeLabel(spell.damageType)}</HudPill>
               </>
             )}
             {spell.diceCount && spell.diceType ? (
-              <Fact>
+              <HudPill>
                 {spell.diceCount}
                 {spell.diceType}
-              </Fact>
+              </HudPill>
             ) : null}
-            {spell.damageElement && <Fact>{getDamageElementLabel(spell.damageElement)}</Fact>}
-            {spell.damageModifier && <Fact>{getDamageModifierLabel(spell.damageModifier)}</Fact>}
-            {spell.healModifier && <Fact>{getHealModifierLabel(spell.healModifier)}</Fact>}
-            {spell.target && <Fact>{getSpellTargetLabel(spell.target)}</Fact>}
-            {spell.range && <Fact>{spell.range}</Fact>}
-            {spell.castingTime && <Fact>{spell.castingTime}</Fact>}
+            {spell.damageElement && <HudPill>{getDamageElementLabel(spell.damageElement)}</HudPill>}
+            {spell.damageModifier && <HudPill>{getDamageModifierLabel(spell.damageModifier)}</HudPill>}
+            {spell.healModifier && <HudPill>{getHealModifierLabel(spell.healModifier)}</HudPill>}
+            {spell.target && <HudPill>{getSpellTargetLabel(spell.target)}</HudPill>}
+            {spell.range && <HudPill>{spell.range}</HudPill>}
+            {spell.castingTime && <HudPill>{spell.castingTime}</HudPill>}
           </div>
         </div>
         <div className="-mr-1 -mt-1 flex shrink-0">
@@ -129,16 +120,16 @@ export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, o
         </div>
       </div>
 
-      <p className="line-clamp-2 flex-1 text-xs text-[#8f8473]">{description}</p>
+      <p className="line-clamp-2 flex-1 text-xs text-hud-muted">{description}</p>
 
-      <div className="flex min-w-0 items-center gap-1.5 border-t border-[#2a2218] pt-1.5 text-[11px] text-[#8f8473]">
+      <div className="flex min-w-0 items-center gap-1.5 border-t border-[#2a2218] pt-1.5 text-[11px] text-hud-muted">
         <GroupIcon className="size-3 shrink-0" />
         <span className="truncate">{groupName}</span>
         {/* Тимчасово: ID заклинання та копіювання */}
         <code className="ml-auto max-w-[45%] truncate font-mono text-[10px]" title={spell.id}>
           {copied ? "Скопійовано" : spell.id}
         </code>
-        <Button variant="ghost" size="icon" className="size-6 shrink-0 text-[#8f8473]" onClick={handleCopyId} aria-label={copied ? "Скопійовано" : "Копіювати ID"} title={copied ? "Скопійовано" : "Копіювати ID"}>
+        <Button variant="ghost" size="icon" className="size-6 shrink-0 text-hud-muted" onClick={handleCopyId} aria-label={copied ? "Скопійовано" : "Копіювати ID"} title={copied ? "Скопійовано" : "Копіювати ID"}>
           <Copy className="size-3" />
         </Button>
       </div>

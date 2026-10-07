@@ -2,6 +2,7 @@ import { type FormEvent,useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 
+import { skillKeys } from "./keys";
 import { useMainSkills } from "./useMainSkills";
 import {
   type InitialSkillFormData,
@@ -40,14 +41,12 @@ export function useSkillForm(
 
   const isEdit = !!initialData;
 
-  // Нормалізуємо initialData
   const normalizedData = normalizeInitialSkillData(initialData);
 
   const [isSaving, setIsSaving] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
 
-  // Basic info
   const [name, setName] = useState(normalizedData?.name || "");
 
   const [description, setDescription] = useState(
@@ -62,7 +61,6 @@ export function useSkillForm(
 
   const abilitiesValid = abilityErrors === 0;
 
-  // Spell and main skill
   const [spellId, setSpellId] = useState<string | null>(
     normalizedData?.spellId || null,
   );
@@ -79,7 +77,6 @@ export function useSkillForm(
     normalizedData?.mainSkillId || null,
   );
 
-  // Spell enhancement
   const [spellEnhancementTypes, setSpellEnhancementTypes] = useState<
     SpellEnhancementType[]
   >(() => {
@@ -145,7 +142,6 @@ export function useSkillForm(
     });
   }, [spellAoeSpellIds]);
 
-  // Handlers
   const handleEnhancementTypeToggle = useCallback(
     (type: SpellEnhancementType) => {
       setSpellEnhancementTypes((prev) => {
@@ -217,12 +213,11 @@ export function useSkillForm(
           await createSkill(campaignId, payload);
         }
 
-        // Інвалідуємо кеш для скілів
         await queryClient.invalidateQueries({
-          queryKey: ["skills", campaignId],
+          queryKey: skillKeys.list(campaignId),
         });
         await queryClient.refetchQueries({
-          queryKey: ["skills", campaignId],
+          queryKey: skillKeys.list(campaignId),
         });
         router.push(`/campaigns/${campaignId}/dm/skills`);
       } catch (err) {

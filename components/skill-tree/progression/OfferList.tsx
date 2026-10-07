@@ -17,7 +17,7 @@ export function OfferList({ offers, dto, filter, onClearFilter, onSelect }: { of
 
   return (
     <section id="progression-offers" className="pb-2">
-      <h3 className="hud-sc mx-4 mb-1.5 mt-3.5 text-[13px] uppercase tracking-[.12em] text-[#8f8473]">Вивчити (1 очко)</h3>
+      <h3 className="hud-sc mx-4 mb-1.5 mt-3.5 text-[13px] uppercase tracking-[.12em] text-hud-muted">Вивчити (1 очко)</h3>
       {filter && (
         <Button type="button" variant="ghost" size="sm" onClick={onClearFilter} className="mx-4 mb-2 h-auto rounded-full border border-[#4a4036] px-3 py-1 text-xs text-[#d6cbb7]">
           {filter.label} ✕
@@ -38,8 +38,8 @@ export function OfferList({ offers, dto, filter, onClearFilter, onSelect }: { of
                   {icon ? <OptimizedImage src={icon} alt="" width={48} height={48} className="h-full w-full object-cover" fallback={<span className="hud-sc">{title[0]}</span>} /> : <span className="hud-sc">{title[0]}</span>}
                 </span>
                 <span className="min-w-0 text-left">
-                  <span className="hud-sc block text-base text-[#efe5d2]">{title}</span>
-                  <span className="block text-xs text-[#c9b37a]">{tag}</span>
+                  <span className="hud-sc block text-base text-hud-ink">{title}</span>
+                  <span className="block text-xs text-hud-gold">{tag}</span>
                   {skill?.summary[0] && <span className="mt-1 block text-[13px] leading-snug text-[#b8ab95]">{skill.summary.join(" · ")}</span>}
                 </span>
               </Button>
@@ -48,7 +48,7 @@ export function OfferList({ offers, dto, filter, onClearFilter, onSelect }: { of
         })}
       </ul>
       {!filter && !expanded && list.length > 3 && (
-        <Button type="button" variant="link" size="sm" onClick={() => setExpanded(true)} className="mx-4 mt-2 h-auto p-0 text-xs text-[#8f8473]">
+        <Button type="button" variant="link" size="sm" onClick={() => setExpanded(true)} className="mx-4 mt-2 h-auto p-0 text-xs text-hud-muted">
           Ще {list.length - 3} {pluralUk(list.length - 3, ["варіант", "варіанти", "варіантів"])} ▾
         </Button>
       )}

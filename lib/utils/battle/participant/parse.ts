@@ -1,7 +1,3 @@
-/**
- * Визначення рівня скіла за назвою
- */
-
 /** Визначає рівень скіла за назвою (Напад — Експерт → expert) */
 export function inferLevelFromSkillName(name: string | null): string | null {
   const n = (name ?? "").toLowerCase();

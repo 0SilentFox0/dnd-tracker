@@ -11,7 +11,7 @@ vi.mock("@/app/api/campaigns/[id]/characters/[characterId]/sheet/sheet-handler",
   buildSheetFor: vi.fn().mockResolvedValue({ identity: { name: "Ліра" } }),
 }));
 
-const access = (userId: string, role: "dm" | "player") => ({ userId, campaign: { id: "camp", maxLevel: 20, members: [{ userId, role }] } }) as never;
+const access = (userId: string, role: "dm" | "player") => ({ userId, isDM: role === "dm", campaign: { id: "camp", maxLevel: 20, members: [{ userId, role }] } }) as never;
 
 const get = async (characterId = "ch") => {
   const mod = await import("@/app/api/campaigns/[id]/characters/[characterId]/sheet/route");

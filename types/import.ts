@@ -1,7 +1,4 @@
-/**
- * Типи для імпорту даних
- */
-
+import { AttackType } from "@/lib/constants/battle";
 import {
   SpellDamageType,
   SpellSavingThrowAbility,
@@ -68,7 +65,7 @@ export interface CSVUnitRow {
 
 export interface UnitAttack {
   name: string;
-  type?: "melee" | "ranged";
+  type?: AttackType;
   targetType?: "target" | "aoe";
   attackBonus: number;
   damageType: string;

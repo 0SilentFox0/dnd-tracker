@@ -49,7 +49,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
         actions={<LevelUpAction level={formData.basicInfo.level} maxLevel={sheet.maxLevel} onLevelUp={() => void editor.levelUp()} />}
       />
       {form.error && (
-        <p role="alert" className="mx-4 rounded-md border border-[#d0705c]/50 bg-[#d0705c]/10 px-3 py-2 text-sm text-[#f0b4a6]">
+        <p role="alert" className="mx-4 rounded-md border border-hud-danger/50 bg-hud-danger/10 px-3 py-2 text-sm text-[#f0b4a6]">
           {form.error}
         </p>
       )}

@@ -1,6 +1,3 @@
-/**
- * Enum для характеристик збереження заклинань
- */
 export enum SpellSavingThrowAbility {
   STRENGTH = "strength",
   DEXTERITY = "dexterity",

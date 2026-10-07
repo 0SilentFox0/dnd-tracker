@@ -2,9 +2,11 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
 import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { abilitiesJson, skillAbilities } from "@/lib/utils/abilities/read";
 import { requireDM } from "@/lib/utils/api/api-auth";
+import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 
 /**
@@ -27,7 +29,7 @@ export async function POST(
     });
 
     if (!source || source.campaignId !== id) {
-      return NextResponse.json({ error: "Skill not found" }, { status: 404 });
+      return errorResponse(API_ERRORS.SKILL_NOT_FOUND, 404);
     }
 
     const name = source.name.trim() ? `${source.name} (копія)` : "Скіл (копія)";

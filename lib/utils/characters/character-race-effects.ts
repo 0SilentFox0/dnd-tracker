@@ -1,12 +1,7 @@
-/**
- * Утиліти для роботи з ефектами рас для персонажів
- */
-
 import { extractRaceImmunities } from "@/lib/utils/races/race-effects";
 import type { Character } from "@/types/characters";
 import type { Race } from "@/types/races";
 
-// Тип для Race з Prisma (JSON поля)
 type RaceFromPrisma = Omit<Race, "availableSkills" | "disabledSkills" | "spellSlotProgression" | "passiveAbility"> & {
   availableSkills?: unknown;
   disabledSkills?: unknown;
@@ -27,12 +22,10 @@ export function getCharacterImmunities(
 
   const raceImmunities = extractRaceImmunities(race);
 
-  // Об'єднуємо та видаляємо дублікати
   const allImmunities = [...characterImmunities, ...raceImmunities];
 
   return Array.from(new Set(allImmunities.map((i) => i.toLowerCase().trim())))
     .map((i) => {
-      // Знаходимо оригінальну назву (з правильним регістром)
       return (
         characterImmunities.find(
           (ci) => ci.toLowerCase().trim() === i

@@ -75,7 +75,7 @@ export function ProgressionPanel({ campaignId, characterId, canManage = false }:
             <>
               <PointsHeader level={dto.level} spent={view.points.spent} free={view.points.free} />
               <RacialRow states={view.racial} tree={tree} dto={dto} onSelect={select} />
-              {view.branches.length > 0 && <h3 className="hud-sc mx-4 mb-1.5 mt-3.5 text-[13px] uppercase tracking-[.12em] text-[#8f8473]">Гілки</h3>}
+              {view.branches.length > 0 && <h3 className="hud-sc mx-4 mb-1.5 mt-3.5 text-[13px] uppercase tracking-[.12em] text-hud-muted">Гілки</h3>}
               {view.branches.map((row) => <BranchRow key={row.branchId} row={row} dto={dto} onSelect={select} />)}
               {view.points.free > 0 && view.untouchedBranchCount > 0 && (
                 <NewBranchRow count={view.untouchedBranchCount} onSelect={() => setFilter({ label: "Нові гілки", match: (n) => n.kind === "branchLevel" && n.level === "basic" })} />
@@ -89,7 +89,7 @@ export function ProgressionPanel({ campaignId, characterId, canManage = false }:
                       Застарілі вузли: {view.orphans.length} · Прибрати
                     </Button>
                   )}
-                  <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs text-[#d0705c]" onClick={reset}>Скинути дерево</Button>
+                  <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs text-hud-danger" onClick={reset}>Скинути дерево</Button>
                 </div>
               )}
               <NodeSheet

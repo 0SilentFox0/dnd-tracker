@@ -12,7 +12,6 @@ vi.mock("@/lib/utils/api/api-auth", () => ({
   requireCampaignAccess: vi.fn(),
   requireAuth: vi.fn(),
   requireDM: vi.fn(),
-  validateCampaignOwnership: vi.fn(() => null),
 }));
 
 vi.mock("@/lib/db", () => ({
@@ -27,7 +26,7 @@ vi.mock("@/lib/db", () => ({
 }));
 
 const access = (userId: string, role: "dm" | "player") =>
-  ({ userId, campaign: { id: "camp", maxLevel: 20, xpMultiplier: 1, members: [{ userId, role }] } }) as never;
+  ({ userId, isDM: role === "dm", campaign: { id: "camp", maxLevel: 20, xpMultiplier: 1, members: [{ userId, role }] } }) as never;
 
 const CHAR = { id: "ch", level: 3, race: "Ельф", skillTreeProgress: { "json-id": { unlockedSkills: ["attack_basic_level"] } }, seenLevel: 2, controlledBy: "owner" };
 

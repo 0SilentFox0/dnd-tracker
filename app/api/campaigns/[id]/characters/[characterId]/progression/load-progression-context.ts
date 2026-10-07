@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
-import { CampaignRole } from "@/lib/constants/campaigns";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
+import { errorResponse } from "@/lib/utils/api/api-response";
 
 export interface ProgressionContext {
   character: { id: string; level: number; race: string; skillTreeProgress: unknown; seenLevel: number | null; controlledBy: string };
@@ -23,13 +24,13 @@ export async function loadProgressionContext(campaignId: string, characterId: st
     select: { id: true, level: true, race: true, skillTreeProgress: true, seenLevel: true, controlledBy: true },
   });
 
-  if (!character) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!character) return errorResponse(API_ERRORS.NOT_FOUND, 404);
 
-  const isDM = access.campaign.members[0]?.role === CampaignRole.DM;
+  const isDM = access.isDM;
 
   const isOwner = character.controlledBy === access.userId;
 
-  if (!isDM && !isOwner) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!isDM && !isOwner) return errorResponse(API_ERRORS.FORBIDDEN, 403);
 
   const treeRow = await prisma.skillTree.findFirst({ where: { campaignId, race: character.race } });
 

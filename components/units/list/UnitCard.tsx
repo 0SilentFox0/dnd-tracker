@@ -10,6 +10,7 @@ import { EntityIcon } from "@/components/common/EntityIcon";
 import { HudCard } from "@/components/hud/page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { AttackType } from "@/lib/constants/battle";
 import { useConfirm } from "@/lib/hooks/common";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { diceAverage } from "@/lib/utils/common/dice";
@@ -23,7 +24,7 @@ function primaryAttackIndex(attacks: Unit["attacks"]): number {
   if (!attacks.length) return -1;
 
   const meleeIdx = attacks.findIndex(
-    (a) => (a as { type?: string }).type === "melee" || !a.type,
+    (a) => (a as { type?: string }).type === AttackType.MELEE || !a.type,
   );
 
   return meleeIdx >= 0 ? meleeIdx : 0;
@@ -84,7 +85,7 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
         <div className="flex items-start gap-3">
           <EntityIcon src={unit.avatar} name={unit.name} size={80} className="size-16 rounded-lg text-2xl sm:size-20" />
           <div className="flex-1 min-w-0">
-            <h3 className="text-base font-semibold text-[#efe5d2]">{unit.name}</h3>
+            <h3 className="text-base font-semibold text-hud-ink">{unit.name}</h3>
             <div className="text-sm text-muted-foreground space-y-1">
               <div>
                 Рівень {unit.level} • HP {unit.maxHp}

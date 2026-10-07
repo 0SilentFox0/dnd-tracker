@@ -1,7 +1,3 @@
-/**
- * Типи для інвентаря
- */
-
 export interface InventoryItem {
   name: string;
   quantity?: number;
@@ -33,4 +29,16 @@ export interface InventoryFormData {
   equipped: EquippedItems;
   backpack: InventoryItem[];
   items: InventoryItem[];
+}
+
+export interface Inventory {
+  id: string;
+  characterId: string;
+  equipped: EquippedItems;
+  backpack: InventoryItem[];
+  gold: number;
+  silver: number;
+  copper: number;
+  items: InventoryItem[];
+  updatedAt: string;
 }

@@ -17,7 +17,7 @@ export function AbbreviationsInfoDialog() {
       <Button onClick={() => setOpen(true)}
           variant="ghost"
           size="icon"
-          className="h-8 w-8 text-[#c9b37a] hover:bg-transparent hover:text-[#e6c25a]"
+          className="h-8 w-8 text-hud-gold hover:bg-transparent hover:text-[#e6c25a]"
           title="Довідка про абревіатури"
         >
           <Info className="h-4 w-4" />

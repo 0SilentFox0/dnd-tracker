@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
+import { skillKeys } from "./keys";
+
 import {
   deleteAllSkills,
   deleteSkill,
@@ -15,7 +17,7 @@ import type { PersonalSkillOption, Skill } from "@/types/skills";
 
 export function useSkills(campaignId: string, initialData?: Skill[]) {
   return useQuery<Skill[]>({
-    queryKey: ["skills", campaignId],
+    queryKey: skillKeys.list(campaignId),
     queryFn: () => getSkills(campaignId),
     initialData,
   });
@@ -23,7 +25,7 @@ export function useSkills(campaignId: string, initialData?: Skill[]) {
 
 export function usePersonalSkills(campaignId: string, mainSkillId: string | undefined) {
   return useQuery<PersonalSkillOption[]>({
-    queryKey: ["skills", campaignId, "by-main-skill", mainSkillId],
+    queryKey: skillKeys.byMainSkill(campaignId, mainSkillId ?? ""),
     queryFn: () => getSkillsByMainSkill(campaignId, mainSkillId as string),
     enabled: !!mainSkillId,
   });
@@ -31,7 +33,7 @@ export function usePersonalSkills(campaignId: string, mainSkillId: string | unde
 
 export function useSkill(campaignId: string, skillId: string) {
   return useQuery({
-    queryKey: ["skill", campaignId, skillId],
+    queryKey: skillKeys.detail(campaignId, skillId),
     queryFn: () => getSkill(campaignId, skillId),
     staleTime: 0,
   });
@@ -41,7 +43,7 @@ export function useSkill(campaignId: string, skillId: string) {
 export function useDeleteSkill(campaignId: string) {
   return useCrudMutation({
     mutationFn: (skillId: string) => deleteSkill(campaignId, skillId),
-    invalidateKeys: [["skills", campaignId]],
+    invalidateKeys: [skillKeys.list(campaignId)],
   });
 }
 
@@ -49,7 +51,7 @@ export function useDeleteSkill(campaignId: string) {
 export function useDuplicateSkill(campaignId: string) {
   return useCrudMutation({
     mutationFn: (skillId: string) => duplicateSkill(campaignId, skillId),
-    invalidateKeys: [["skills", campaignId]],
+    invalidateKeys: [skillKeys.list(campaignId)],
   });
 }
 
@@ -63,7 +65,7 @@ export function useUpdateSkill(campaignId: string) {
       skillId: string;
       data: SkillUpdatePayload;
     }) => updateSkill(campaignId, skillId, data),
-    invalidateKeys: [["skills", campaignId]],
+    invalidateKeys: [skillKeys.list(campaignId)],
   });
 }
 
@@ -71,6 +73,6 @@ export function useUpdateSkill(campaignId: string) {
 export function useDeleteAllSkills(campaignId: string) {
   return useCrudMutation({
     mutationFn: () => deleteAllSkills(campaignId),
-    invalidateKeys: [["skills", campaignId]],
+    invalidateKeys: [skillKeys.list(campaignId)],
   });
 }

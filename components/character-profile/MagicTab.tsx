@@ -7,11 +7,11 @@ import { useProfile } from "./ProfileContext";
 import { ProfileSpellBook } from "./ProfileSpellBook";
 import { Section } from "./Section";
 
-import { metalClass } from "@/components/battle/hud";
 import { EmptySpellBook } from "@/components/battle/wizards/SpellBookPages";
+import { spellLevelMetal } from "@/components/hud";
 import { Button } from "@/components/ui/button";
+import { spellLevelRoman } from "@/lib/constants/spells";
 import { cn } from "@/lib/utils";
-import { ROMAN, spellTier } from "@/lib/utils/battle/view";
 import { signed } from "@/lib/utils/format";
 import { pluralUk } from "@/lib/utils/plural";
 
@@ -23,12 +23,12 @@ export function MagicTab() {
   return (
     <>
       {sheet.magic && (
-        <div className="mb-4 flex flex-wrap justify-between gap-2 text-sm text-[#8f8473]">
+        <div className="mb-4 flex flex-wrap justify-between gap-2 text-sm text-hud-muted">
           <span>
-            СЛ заклинань <b className="text-lg text-[#efe5d2]">{sheet.magic.saveDC}</b>
+            СЛ заклинань <b className="text-lg text-hud-ink">{sheet.magic.saveDC}</b>
           </span>
           <span>
-            Атака закл. <b className="text-lg text-[#efe5d2]">{signed(sheet.magic.attackBonus)}</b>
+            Атака закл. <b className="text-lg text-hud-ink">{signed(sheet.magic.attackBonus)}</b>
           </span>
           <span>{sheet.magic.ability}</span>
         </div>
@@ -37,8 +37,8 @@ export function MagicTab() {
         <Section title="СЛОТИ">
           <div className="flex flex-wrap gap-1.5">
             {sheet.slots.map((s) => (
-              <span key={s.level} aria-label={`${ROMAN[s.level]} коло: ${s.count} ${pluralUk(s.count, ["слот", "слоти", "слотів"])}`} className={cn("hud-sc metal-fill rounded-md px-3 py-1.5 text-sm", metalClass(spellTier(s.level)))}>
-                {ROMAN[s.level]} · {s.count}
+              <span key={s.level} aria-label={`${spellLevelRoman(s.level)} коло: ${s.count} ${pluralUk(s.count, ["слот", "слоти", "слотів"])}`} className={cn("hud-sc metal-fill rounded-md px-3 py-1.5 text-sm", spellLevelMetal(s.level))}>
+                {spellLevelRoman(s.level)} · {s.count}
               </span>
             ))}
           </div>

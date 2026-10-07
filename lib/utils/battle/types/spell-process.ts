@@ -1,10 +1,5 @@
-/**
- * Типи для обробки заклинання в бою
- */
-
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
-/** Інтерфейс заклинання для бою */
 export interface BattleSpell {
   id: string;
   name: string;
@@ -54,7 +49,6 @@ export interface BattleSpell {
   icon?: string | null;
 }
 
-/** Параметри для обробки заклинання */
 export interface ProcessSpellParams {
   caster: BattleParticipant;
   spell: BattleSpell;
@@ -74,7 +68,6 @@ export interface ProcessSpellParams {
   rng?: () => number;
 }
 
-/** Результат обробки заклинання */
 export interface ProcessSpellResult {
   success: boolean;
   spellCalculation?: {

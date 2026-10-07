@@ -1,291 +1,46 @@
 import { NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
 
-import { createCharacterSchema } from "./create-character-schema";
+import { createCharacter } from "./create-character";
+import { listCharacters } from "./list-characters";
 
-import { CharacterType, type CharacterTypeValue } from "@/lib/constants/characters";
+import { CharacterType } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
-import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
+import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
-import { calculateCharacterSpellSlots } from "@/lib/utils/spells/spell-slots";
 
-export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+type RouteContext = { params: Promise<{ id: string }> };
+
+export async function POST(request: Request, { params }: RouteContext) {
   try {
     const { id } = await params;
-    
-    // Перевіряємо права DM
-    const accessResult = await requireDM(id);
 
-    if (accessResult instanceof NextResponse) {
-      return accessResult;
-    }
-
-    const { userId: dmUserId } = accessResult;
-
-    const body = await request.json();
-
-    const data = createCharacterSchema.parse(body);
-
-    // controlledBy — FK на users.id. Для NPC героя в UI поле не показується і часто лишається "".
-    let controlledBy: string;
-
-    if (data.type === CharacterType.NPC_HERO) {
-      controlledBy = dmUserId;
-    } else {
-      const ownerId = data.controlledBy.trim();
-
-      if (!ownerId) {
-        return NextResponse.json(
-          { error: "Оберіть гравця для персонажа типу «Гравець»." },
-          { status: 400 },
-        );
-      }
-
-      const owner = await prisma.user.findUnique({
-        where: { id: ownerId },
-        select: { id: true },
-      });
-
-      if (!owner) {
-        return NextResponse.json(
-          {
-            error:
-              "Користувача з обраним ID немає в базі (наприклад, після зміни Supabase або міграції). Оновіть сторінку та оберіть гравця знову.",
-          },
-          { status: 400 },
-        );
-      }
-
-      const membership = await prisma.campaignMember.findFirst({
-        where: { campaignId: id, userId: ownerId },
-        select: { id: true },
-      });
-
-      if (!membership) {
-        return NextResponse.json(
-          { error: "Обраний користувач не є учасником цієї кампанії." },
-          { status: 400 },
-        );
-      }
-
-      controlledBy = ownerId;
-    }
-
-    const savingThrows = data.savingThrows as Record<string, boolean>;
-
-    const skills = data.skills as Record<string, boolean>;
-
-    // Якщо магічні слоти порожні — обчислюємо за рівнем
-    let spellSlotsToCreate = data.spellSlots;
-
-    if (
-      !spellSlotsToCreate ||
-      typeof spellSlotsToCreate !== "object" ||
-      Object.keys(spellSlotsToCreate).length === 0
-    ) {
-      const computed = calculateCharacterSpellSlots(data.level);
-
-      spellSlotsToCreate = Object.fromEntries(
-        Object.entries(computed).map(([k, v]) => [
-          k,
-          { max: v.max, current: v.max },
-        ]),
-      );
-    }
-
-    // Створюємо персонажа
-    const character = await prisma.character.create({
-      data: {
-        campaignId: id,
-        type: data.type,
-        controlledBy,
-        name: data.name,
-        level: data.level,
-        class: data.class,
-        subclass: data.subclass,
-        race: data.race,
-        subrace: data.subrace,
-        alignment: data.alignment,
-        background: data.background,
-        experience: data.experience,
-        avatar: data.avatar,
-        
-        strength: data.strength,
-        dexterity: data.dexterity,
-        constitution: data.constitution,
-        intelligence: data.intelligence,
-        wisdom: data.wisdom,
-        charisma: data.charisma,
-        
-        armorClass: data.armorClass,
-        initiative: data.initiative,
-        speed: data.speed,
-        
-        savingThrows: savingThrows,
-        skills: skills,
-        
-        
-        spellcastingAbility: data.spellcastingAbility,
-        spellSlots: spellSlotsToCreate,
-        knownSpells: data.knownSpells,
-        
-        languages: data.languages,
-        immunities: data.immunities || [],
-        proficiencies: data.proficiencies,
-        
-
-        personalSkillId: data.personalSkillId ?? null,
-        primaryAbility: data.primaryAbility ?? null,
-
-        skillTreeProgress: {},
-      },
-      include: {
-        user: true,
-      },
-    });
-
-    // Створюємо інвентар для персонажа
-    await prisma.characterInventory.create({
-      data: {
-        characterId: character.id,
-        equipped: {},
-        backpack: [],
-        gold: 0,
-        silver: 0,
-        copper: 0,
-        items: [],
-      },
-    });
-
-    return NextResponse.json(character);
+    return await createCharacter(request, id);
   } catch (error) {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2003"
-    ) {
-      return NextResponse.json(
-        {
-          error:
-            "Невірне посилання на користувача (controlledBy). Переконайтесь, що обраний гравець існує в users і є учасником кампанії.",
-        },
-        { status: 400 },
-      );
-    }
-
     return handleApiError(error, { action: "create character" });
   }
 }
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: Request, { params }: RouteContext) {
   try {
     const { id } = await params;
 
-    const { searchParams } = new URL(request.url);
-
-    const type = searchParams.get("type"); // CharacterTypeValue | null = all
-
-    const compact =
-      searchParams.get("compact") === "1" ||
-      searchParams.get("compact") === "true";
-
-    // Перевіряємо доступ до кампанії (не обов'язково DM)
-    const accessResult = await requireCampaignAccess(id, false);
-
-    if (accessResult instanceof NextResponse) {
-      return accessResult;
-    }
-
-    const where: { campaignId: string; type?: CharacterTypeValue } = {
-      campaignId: id,
-    };
-
-    if (type === CharacterType.PLAYER || type === CharacterType.NPC_HERO) {
-      where.type = type;
-    }
-
-    if (compact) {
-      const characters = await prisma.character.findMany({
-        where,
-        select: {
-          id: true,
-          campaignId: true,
-          type: true,
-          controlledBy: true,
-          name: true,
-          level: true,
-          class: true,
-          race: true,
-          avatar: true,
-        },
-        orderBy: {
-          createdAt: "desc",
-        },
-      });
-
-      return NextResponse.json(characters);
-    }
-
-    const characters = await prisma.character.findMany({
-      where,
-      select: {
-        id: true,
-        campaignId: true,
-        type: true,
-        controlledBy: true,
-        name: true,
-        level: true,
-        class: true,
-        race: true,
-        subrace: true,
-        avatar: true,
-        strength: true,
-        hpMultiplier: true,
-        armorClass: true,
-        initiative: true,
-        experience: true,
-        user: { select: { displayName: true } },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-
-    return NextResponse.json(characters);
+    return await listCharacters(request, id);
   } catch (error) {
     return handleApiError(error, { action: "list characters" });
   }
 }
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(_request: Request, { params }: RouteContext) {
   try {
     const { id } = await params;
 
     const accessResult = await requireDM(id);
 
-    if (accessResult instanceof NextResponse) {
-      return accessResult;
-    }
+    if (accessResult instanceof NextResponse) return accessResult;
 
-    const result = await prisma.character.deleteMany({
-      where: {
-        campaignId: id,
-        type: CharacterType.PLAYER,
-      },
-    });
+    const result = await prisma.character.deleteMany({ where: { campaignId: id, type: CharacterType.PLAYER } });
 
-    return NextResponse.json({
-      success: true,
-      deleted: result.count,
-    });
+    return NextResponse.json({ success: true, deleted: result.count });
   } catch (error) {
     return handleApiError(error, { action: "delete all characters" });
   }

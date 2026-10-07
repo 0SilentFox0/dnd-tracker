@@ -1,10 +1,10 @@
-/**
- * Константи для характеристик D&D 5e
- */
-
 export const ABILITY_KEYS = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"] as const;
 
 export type AbilityKey = (typeof ABILITY_KEYS)[number];
+
+export const SPELLCASTING_ABILITIES = ["intelligence", "wisdom", "charisma"] as const;
+
+export type SpellcastingAbility = (typeof SPELLCASTING_ABILITIES)[number];
 
 export const CORE_ABILITY_SCORES = [
   { key: "strength", label: "Сила", abbreviation: "STR" },

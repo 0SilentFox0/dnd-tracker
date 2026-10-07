@@ -1,8 +1,3 @@
-/**
- * Утиліти для розрахунку урону з урахуванням всіх модифікаторів та breakdown
- */
-
-import { measureTiming } from "../battle-timing";
 import type { DamageCalculationResult } from "../types/damage-calculations";
 import { calculateDamageWithModifiersImpl } from "./impl";
 
@@ -23,16 +18,11 @@ export function calculateDamageWithModifiers(
   attackType: AttackType,
   context?: Parameters<typeof calculateDamageWithModifiersImpl>[4],
 ): DamageCalculationResult {
-  return measureTiming(
-    "calculateDamageWithModifiers",
-    () =>
-      calculateDamageWithModifiersImpl(
-        attacker,
-        baseDamage,
-        statModifier,
-        attackType,
-        context,
-      ),
-    { attackType },
+  return calculateDamageWithModifiersImpl(
+    attacker,
+    baseDamage,
+    statModifier,
+    attackType,
+    context,
   );
 }

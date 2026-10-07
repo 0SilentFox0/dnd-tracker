@@ -1,3 +1,5 @@
-export const progressionCampaignKey = (campaignId: string) => ["character-progression", campaignId] as const;
+import { skillKeys } from "./keys";
 
-export const progressionKey = (campaignId: string, characterId: string) => [...progressionCampaignKey(campaignId), characterId] as const;
+export const progressionCampaignKey = skillKeys.progressionOf;
+
+export const progressionKey = skillKeys.progression;

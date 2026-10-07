@@ -1,9 +1,5 @@
-/**
- * Логіка циклу переходу ходу: пошук наступного живого учасника, endRound/startOfRound, processStartOfTurn, логи.
- */
-
-import { logTurnTiming } from "./turn-helpers";
-
+import { SYSTEM_ACTOR } from "@/lib/constants/battle";
+import { isActive } from "@/lib/utils/abilities/engine/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import {
   processEndOfTurn,
@@ -58,7 +54,6 @@ export function runAdvanceTurnLoop(
 
   const newLogEntries: BattleAction[] = [];
 
-  // відкат тепер через battle_snapshots, stateBefore у записах не потрібен
   const getStateBeforeForEntry = () => undefined;
 
   let clearedPendingSummons = false;
@@ -69,9 +64,7 @@ export function runAdvanceTurnLoop(
     round,
     actionIndex: currentBattleLogLength + newLogEntries.length,
     timestamp: new Date(),
-    actorId: "system",
-    actorName: "Система",
-    actorSide: "ally",
+    ...SYSTEM_ACTOR,
     actionType: "ability",
     targets: [],
     actionDetails: {},
@@ -84,8 +77,6 @@ export function runAdvanceTurnLoop(
   while (!activeParticipantFound && attempts < maxAttempts) {
     attempts++;
 
-    const tStep = Date.now();
-
     const turnTransition = processEndOfTurn(
       nextTurnIndex,
       updatedInitiativeOrder,
@@ -96,11 +87,6 @@ export function runAdvanceTurnLoop(
 
     nextTurnIndex = turnTransition.nextTurnIndex;
     nextRound = turnTransition.nextRound;
-    logTurnTiming("processEndOfTurn (переключення на наступного гравця)", tStep, {
-      attempt: attempts,
-      nextTurnIndex,
-      nextRound,
-    });
 
     if (nextRound > previousRound) {
       const roundEnd = runAbilities(updatedInitiativeOrder, { type: "roundEnd" }, { round: previousRound, rng });
@@ -132,9 +118,7 @@ export function runAdvanceTurnLoop(
           round: nextRound,
           actionIndex: currentBattleLogLength + newLogEntries.length,
           timestamp: new Date(),
-          actorId: "system",
-          actorName: "Система",
-          actorSide: "ally",
+          ...SYSTEM_ACTOR,
           actionType: "ability",
           targets: [],
           actionDetails: {},
@@ -150,19 +134,12 @@ export function runAdvanceTurnLoop(
 
     if (!nextParticipant) break;
 
-    const tStartTurn = Date.now();
-
     const turnResult = processStartOfTurn(
       nextParticipant,
       nextRound,
       updatedInitiativeOrder,
       rng,
     );
-
-    logTurnTiming("processStartOfTurn (початок ходу)", tStartTurn, {
-      participantId: nextParticipant.basicInfo.id,
-      participantName: nextParticipant.basicInfo.name,
-    });
 
     updatedInitiativeOrder = turnResult.participants;
 
@@ -249,11 +226,7 @@ export function runAdvanceTurnLoop(
       });
     }
 
-    const isAlive =
-      turnResult.participant.combatStats.status !== "dead" &&
-      turnResult.participant.combatStats.status !== "unconscious";
-
-    if (isAlive) activeParticipantFound = true;
+    if (isActive(turnResult.participant)) activeParticipantFound = true;
 
     const victoryCheck = checkVictoryConditions(updatedInitiativeOrder);
 

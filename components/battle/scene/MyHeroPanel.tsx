@@ -4,6 +4,7 @@ import { memo } from "react";
 import { Heart, Shield } from "lucide-react";
 
 import { EffectLine, HealthBar, Portrait, SlotGrid } from "@/components/battle/hud";
+import { BattleStatus } from "@/lib/constants/battle";
 import { useBattleSceneData, useHpChange } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
@@ -31,7 +32,7 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero, compact = false }: 
           <div className="hud-sc flex h-6 items-center justify-between text-[19px] font-bold text-[var(--ink)]">
             <span className="truncate">{hero.basicInfo.name}</span>
             <span className="shrink-0 whitespace-nowrap pl-2 font-sans text-sm font-normal italic tracking-normal text-[#b8ab95]">
-              {compact ? `${hero.combatStats.currentHp} / ${hero.combatStats.maxHp} · AC ${getEffectiveArmorClass(hero, battle.initiativeOrder)}` : battle.status !== "active" ? "" : isMyTurn ? "твій хід" : until === 0 ? "ходить" : until !== null ? `хід через ${until}` : ""}
+              {compact ? `${hero.combatStats.currentHp} / ${hero.combatStats.maxHp} · AC ${getEffectiveArmorClass(hero, battle.initiativeOrder)}` : battle.status !== BattleStatus.ACTIVE ? "" : isMyTurn ? "твій хід" : until === 0 ? "ходить" : until !== null ? `хід через ${until}` : ""}
             </span>
           </div>
           <HealthBar participant={hero} exact className="h-1.5" />
@@ -46,7 +47,7 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero, compact = false }: 
       {!compact && <SlotGrid participant={hero} />}
       {!compact && (morale !== 0 || charges.length > 0) && (
         <div className="mt-2.5 flex h-6 items-center gap-4 text-sm text-[#d6cbb7]">
-          {morale !== 0 && <span>Мораль <span className={morale > 0 ? "text-[#9fc48a]" : "text-[#d0705c]"}>{signed(morale)}</span></span>}
+          {morale !== 0 && <span>Мораль <span className={morale > 0 ? "text-[#9fc48a]" : "text-hud-danger"}>{signed(morale)}</span></span>}
           {charges.map((c) => <span key={c.key}>{c.name} {c.left}/{c.limit}</span>)}
         </div>
       )}

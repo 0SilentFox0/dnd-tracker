@@ -1,7 +1,3 @@
-/**
- * Утиліта для обчислення breakdown урону (для превью в UI).
- */
-
 import type {
   ComputeDamageBreakdownParams,
   DamageBreakdownResult,
@@ -37,7 +33,7 @@ export function computeDamageBreakdown(
 
   const typeStr = String(attack.type ?? "").toLowerCase();
 
-  const isMelee = typeStr === "melee";
+  const isMelee = typeStr === AttackType.MELEE;
 
   const attackTypeSafe: AttackType = isMelee
     ? AttackType.MELEE

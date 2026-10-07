@@ -7,11 +7,12 @@ import { InviteCodeDisplay } from "@/components/campaigns/settings/InviteCodeDis
 import { HudSection } from "@/components/hud/form";
 import { HudPage, HudPageHeader, HudPanel, HudTile } from "@/components/hud/page";
 import { requireCampaignWithMembers } from "@/lib/campaigns/access";
+import { CampaignStatus } from "@/lib/constants/campaigns";
 import { pluralUk } from "@/lib/utils/plural";
 
 const TILES_GRID = "grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3";
 
-const LABEL = "text-sm text-[#8f8473]";
+const LABEL = "text-sm text-hud-muted";
 
 export default async function CampaignDetailPage({
   params,
@@ -38,7 +39,7 @@ export default async function CampaignDetailPage({
       <HudPageHeader
         title={campaign.name}
         subtitle={campaign.description}
-        actions={<span className="self-center break-all text-sm text-[#8f8473]">{user.email}</span>}
+        actions={<span className="self-center break-all text-sm text-hud-muted">{user.email}</span>}
       />
 
       <HudPanel>
@@ -66,11 +67,11 @@ export default async function CampaignDetailPage({
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             <div>
               <p className={LABEL}>Макс. рівень</p>
-              <p className="text-lg font-semibold text-[#efe5d2]">{campaign.maxLevel}</p>
+              <p className="text-lg font-semibold text-hud-ink">{campaign.maxLevel}</p>
             </div>
             <div>
               <p className={LABEL}>Множник XP</p>
-              <p className="text-lg font-semibold text-[#efe5d2]">{campaign.xpMultiplier}</p>
+              <p className="text-lg font-semibold text-hud-ink">{campaign.xpMultiplier}</p>
             </div>
             <div>
               <p className={`${LABEL} mb-2`}>Код запрошення</p>
@@ -78,8 +79,8 @@ export default async function CampaignDetailPage({
             </div>
             <div>
               <p className={LABEL}>Статус</p>
-              <span className="inline-block rounded-full px-2 text-xs text-[#e6dccb] shadow-[inset_0_0_0_1px_#4a3c2c]">
-                {campaign.status === "active" ? "Активна" : "Архівована"}
+              <span className="inline-block rounded-full px-2 text-xs text-hud-bone shadow-[inset_0_0_0_1px_var(--color-hud-line)]">
+                {campaign.status === CampaignStatus.ACTIVE ? "Активна" : "Архівована"}
               </span>
             </div>
           </div>

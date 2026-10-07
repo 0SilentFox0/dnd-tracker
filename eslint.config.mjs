@@ -19,7 +19,7 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   {
-    ignores: ["**/dist/**", "**/*.gen.ts", ".next/**", "out/**", "build/**", "next-env.d.ts"],
+    ignores: [".claude/**", "**/dist/**", "**/*.gen.ts", ".next/**", "out/**", "build/**", "next-env.d.ts"],
     files: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
     languageOptions: {
       ecmaVersion: "latest",
@@ -65,6 +65,10 @@ const eslintConfig = defineConfig([
         },
       ],
       "@typescript-eslint/no-namespace": "off",
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_", ignoreRestSiblings: true },
+      ],
       "@typescript-eslint/no-restricted-types": "warn",
       "simple-import-sort/imports": [
         "error",

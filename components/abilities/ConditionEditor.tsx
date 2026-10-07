@@ -6,6 +6,7 @@ import { FieldRenderer } from "./fields/FieldRenderer";
 
 import { Button } from "@/components/ui/button";
 import { SelectField } from "@/components/ui/select-field";
+import { AttackType } from "@/lib/constants/battle";
 import { getAtPath, setAtPath } from "@/lib/utils/abilities/editor";
 import { CONDITION_REGISTRY } from "@/lib/utils/abilities/registry/conditions";
 import type { Condition } from "@/lib/utils/abilities/schema";
@@ -20,7 +21,7 @@ function defaultFor(type: Condition["type"]): Condition {
     case "hpAbove":
       return { type, who: "self", percent: 50 };
     case "attackKind":
-      return { type, kind: "melee" };
+      return { type, kind: AttackType.MELEE };
     case "targetHasCondition":
       return { type, condition: "no_reaction" };
     case "all":

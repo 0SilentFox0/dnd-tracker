@@ -6,6 +6,7 @@ import { AttackType } from "@/lib/constants/battle";
 import type { AbilityTarget, Effect, StatKey } from "@/lib/utils/abilities/schema";
 import { legacyDamageKindOf } from "@/lib/utils/abilities/schema";
 import { matchesAttackBonusModifier } from "@/lib/utils/battle/common/modifiers";
+import { isRecord } from "@/lib/utils/common/is-record";
 
 const BONUS_STATS: Record<string, StatKey> = {
   strength: "strength",
@@ -22,7 +23,6 @@ const BONUS_STATS: Record<string, StatKey> = {
   maxTargets: "maxTargets",
 };
 
-const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
 
 export function scopeOf(effectScope: unknown): { target?: AbilityTarget; immuneSpellIds: string[] } {
   const { effectAudience, immuneSpellIds } = parseEffectScopeObject(effectScope);

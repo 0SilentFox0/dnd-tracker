@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 
 import { kvDel } from "@/lib/cache/kv";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CampaignRole } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { updateCampaignSchema } from "@/lib/schemas";
 import { requireAuth, requireDM } from "@/lib/utils/api/api-auth";
+import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { parseBody } from "@/lib/utils/api/parse-body";
 
 export async function GET(
   request: Request,
@@ -36,14 +39,14 @@ export async function GET(
     });
 
     if (!campaign) {
-      return NextResponse.json({ error: "Campaign not found" }, { status: 404 });
+      return errorResponse(API_ERRORS.CAMPAIGN_NOT_FOUND, 404);
     }
 
     // Перевіряємо чи юзер є учасником кампанії
     const userMember = campaign.members.find(m => m.userId === userId);
 
     if (!userMember) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return errorResponse(API_ERRORS.FORBIDDEN, 403);
     }
 
     return NextResponse.json(campaign);
@@ -76,18 +79,18 @@ export async function PATCH(
     });
 
     if (!campaign) {
-      return NextResponse.json({ error: "Campaign not found" }, { status: 404 });
+      return errorResponse(API_ERRORS.CAMPAIGN_NOT_FOUND, 404);
     }
 
     const userMember = campaign.members.find((m) => m.userId === userId);
 
     if (!userMember || userMember.role !== CampaignRole.DM) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return errorResponse(API_ERRORS.FORBIDDEN, 403);
     }
 
-    const body = await request.json();
+    const data = await parseBody(updateCampaignSchema, request);
 
-    const data = updateCampaignSchema.parse(body);
+    if (data instanceof NextResponse) return data;
 
     const updatedCampaign = await prisma.campaign.update({
       where: { id },

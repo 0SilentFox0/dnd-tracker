@@ -1,5 +1,5 @@
 import { eventActorId, eventTargetIds } from "./events";
-import { findParticipant, isUp } from "./participants";
+import { findParticipant, isActive } from "./participants";
 
 import type { AbilityTarget } from "@/lib/utils/abilities/schema";
 import type { AbilityEvent } from "@/types/abilities";
@@ -28,8 +28,8 @@ export function resolveTargetIds(
       return actor ? [actor] : [];
     }
     case "allAllies":
-      return ps.filter((p) => isUp(p) && p.basicInfo.side === side).map((p) => p.basicInfo.id);
+      return ps.filter((p) => isActive(p) && p.basicInfo.side === side).map((p) => p.basicInfo.id);
     case "allEnemies":
-      return ps.filter((p) => isUp(p) && p.basicInfo.side !== side).map((p) => p.basicInfo.id);
+      return ps.filter((p) => isActive(p) && p.basicInfo.side !== side).map((p) => p.basicInfo.id);
   }
 }

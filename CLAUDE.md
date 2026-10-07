@@ -11,7 +11,7 @@ The README, ARCHITECTURE.md, and most in-repo docs are written in Ukrainian. Mat
 ## Common commands
 
 ```bash
-pnpm dev                       # next dev with BATTLE_TURN_TIMING=1 (extra battle timing logs)
+pnpm dev                       # next dev
 pnpm build                     # prisma generate && next build (Vercel uses scripts/vercel-build.mjs — see gotchas)
 pnpm lint                      # eslint
 pnpm test                      # vitest watch
@@ -29,16 +29,16 @@ pnpm migrate:deploy                    # apply migrations against DIRECT_URL fro
 pnpm exec prisma studio
 ```
 
-Many one-off ops live in `scripts/` and run via `tsx` (e.g. `pnpm import-docs-spells`, `pnpm seed-mock-battle`, `pnpm migrate-spell-icons-to-supabase`). Check `package.json` scripts before writing new tooling.
+Many one-off ops live in `scripts/` and run via `tsx` (e.g. `pnpm import-docs-spells`, `pnpm seed-mock-battle`, `pnpm upload-assets-to-supabase`). Check `package.json` scripts before writing new tooling.
 
 ## Architecture
 
 ### Layering (request flow)
 
 1. **`app/campaigns/[id]/...`** — pages. Server component (`page.tsx`) fetches/forwards data, then renders a `*-client.tsx` (or `page-client.tsx`) marked `"use client"` for interactive UI. DM-only pages live under `app/campaigns/[id]/dm/`.
-2. **`app/api/campaigns/[id]/...`** — route handlers. `route.ts` should stay thin: Zod validation, session check, then delegate to a sibling handler/helper file (e.g. `attack-handler.ts`, `build-character-update-data.ts`). Heavy logic does **not** belong in `route.ts`.
+2. **`app/api/campaigns/[id]/...`** — route handlers. `route.ts` should stay thin: Zod validation, session check, then delegate to a sibling handler/helper file (e.g. `attack-handler.ts`, `build-character-update-data.ts`). Heavy logic does **not** belong in `route.ts`. Shared helpers in `lib/utils/api`: `parseBody(schema, req)` (400 on malformed JSON or a Zod error), `loadOwned(query, campaignId)` (404/403 for entities of another campaign), `requireCampaignAccess`/`requireDM` (`isDM` on the result), `errorResponse` — every error is `{ error: string, issues? }` with the Ukrainian texts from `lib/constants/api-errors.ts`.
 3. **`lib/api/<domain>.ts`** — thin client wrappers (`get`/`create`/`update`/`delete`) used by client components/hooks. Do not call `fetch` directly from components — extend the matching `lib/api` module.
-4. **`lib/hooks/<domain>/`** — TanStack Query hooks and form/state hooks per domain (`battles`, `battle` (single-battle scene), `characters`, `skills`, `spells`, `units`, `races`, `campaigns`, `common`). Each domain folder has an `index.ts` barrel; import from the folder, not deep paths.
+4. **`lib/hooks/<domain>/`** — TanStack Query hooks and form/state hooks per domain (`battles`, `battle` (single-battle scene), `characters`, `skills`, `spells`, `units`, `races`, `campaigns`, `common`). Each domain folder has an `index.ts` barrel; import from the folder, not deep paths. Query keys are factories in the domain's `keys.ts` (`spellKeys.list(campaignId)`, kebab-case names) — never inline arrays.
 5. **`lib/utils/<domain>/`** — pure domain logic (esp. `battle/` for attacks, damage, spells, participants, balance; `abilities/` for the unified ability model (schema, registry, `runAbilities`, `collectModifiers`, `read.ts` — the only reader of `abilities` columns); `spells/` for learning rules). Tests sit in sibling `__tests__/` folders.
 
 ### Key cross-cutting modules

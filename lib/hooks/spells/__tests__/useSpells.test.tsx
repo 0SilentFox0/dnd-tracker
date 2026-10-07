@@ -25,6 +25,6 @@ describe("useCreateSpellGroup", () => {
 
     await act(() => result.current.mutateAsync("Вогонь"));
 
-    expect(spy.mock.calls.map(([filters]) => filters?.queryKey)).toEqual([["spellGroups", "c1"]]);
+    expect(spy.mock.calls.map(([filters]) => filters?.queryKey)).toEqual([["spell-groups", "c1"]]);
   });
 });

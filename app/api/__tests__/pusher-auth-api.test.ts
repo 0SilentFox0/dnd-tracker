@@ -79,4 +79,11 @@ describe("POST /api/pusher/auth", () => {
 
     expect(res.status).toBe(400);
   });
+
+  it("кривий JSON — 400, а не 500", async () => {
+    const res = await POST(new Request("http://x", { method: "POST", body: "{oops" }));
+
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ error: "Некоректний JSON у тілі запиту" });
+  });
 });

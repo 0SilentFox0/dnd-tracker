@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { BattleStatus } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { createBattleSchema } from "@/lib/schemas";
 import {
@@ -7,6 +8,7 @@ import {
   requireDM,
 } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { parseBody } from "@/lib/utils/api/parse-body";
 import { battleSceneListSelect } from "@/lib/utils/battle/battle-scene-list-select";
 
 export async function POST(
@@ -22,16 +24,16 @@ export async function POST(
       return accessResult;
     }
 
-    const body = await request.json();
+    const data = await parseBody(createBattleSchema, request);
 
-    const data = createBattleSchema.parse(body);
+    if (data instanceof NextResponse) return data;
 
     const battle = await prisma.battleScene.create({
       data: {
         campaignId: id,
         name: data.name,
         description: data.description,
-        status: "prepared",
+        status: BattleStatus.PREPARED,
         participants: data.participants,
         currentRound: 1,
         currentTurnIndex: 0,

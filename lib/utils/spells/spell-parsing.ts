@@ -68,13 +68,16 @@ export function determineSpellDamageType(effect: string): SpellDamageType {
   return isHeal ? SpellDamageType.HEAL : SpellDamageType.DAMAGE;
 }
 
-/**
- * Витягує кубики шкоди з опису ефекту (старий формат, для backward compatibility)
- */
 export function extractDamageDice(effect: string): string | undefined {
-  const damageDiceMatch = effect.match(/(\d+d\d+[\s\+]*[\w]*)/i);
+  const match = effect.match(/(\d+)\s*d\s*(\d+)(?:\s*\+\s*\d+)?/i);
 
-  return damageDiceMatch ? damageDiceMatch[1].trim() : undefined;
+  if (!match) return undefined;
+
+  const plus = effect.includes("+") ? effect.match(/\+\s*(\d+)/)?.[1] : null;
+
+  const base = `${match[1]}d${match[2]}`;
+
+  return plus ? `${base}+${plus}` : base;
 }
 
 /**

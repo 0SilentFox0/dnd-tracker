@@ -33,9 +33,6 @@ export function sanitizeLogEntry(e: BattleAction, viewer: Viewer): BattleAction 
 
   const { targetAC: _ac, damageBreakdown: _b, ...rest } = e.actionDetails ?? {};
 
-  void _ac;
-  void _b;
-
   return { ...e, actionDetails: rest };
 }
 
