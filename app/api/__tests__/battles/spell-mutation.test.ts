@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import { context, goblin, hero, participant } from "./fixtures";
 
 import { createSpellMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/spell/spell-mutation";
+import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
 
 const spellRow = {
@@ -117,5 +118,39 @@ describe("spell mutation", () => {
     const ctx = context({ participants: [caster, goblin] });
 
     await expect(mutation()({ ...ctx, scene: { ...ctx.scene, pendingMoraleCheck: panic } }, body() as never)).rejects.toMatchObject({ code: "action_used" });
+  });
+
+  describe("spellTargeting", () => {
+    const withFlag = (mode: "area" | "all", extra: Partial<{ maxTargets: number }> = {}) => ({
+      ...caster,
+      battleData: { ...caster.battleData, resolvedAbilities: [resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "spellTargeting", mode, ...extra }] })] },
+    });
+
+    const gob2 = participant("gob2", { side: goblin.basicInfo.side, controlledBy: "dm", name: "Гоблін 2" });
+
+    const hpOf = (out: { participants: { basicInfo: { id: string }; combatStats: { currentHp: number } }[] }, id: string) =>
+      out.participants.find((p) => p.basicInfo.id === id)?.combatStats.currentHp;
+
+    it("all розширює цілі звичайного закляття на всю сторону", async () => {
+      const out = await mutation()(context({ participants: [withFlag("all"), goblin, gob2] }), body({ damageRolls: [6, 6] }) as never);
+
+      expect(hpOf(out, "gob2")).toBeLessThan(gob2.combatStats.currentHp);
+    });
+
+    it("aoe-закляття лишається з вибраними цілями попри all", async () => {
+      const aoe = { ...spellRow, type: "aoe" } as Spell;
+
+      const out = await mutation(aoe)(context({ participants: [withFlag("all"), goblin, gob2] }), body() as never);
+
+      expect(hpOf(out, "gob2")).toBe(gob2.combatStats.currentHp);
+    });
+
+    it("більше цілей, ніж дозволяє область — 422 (BattleRuleError)", async () => {
+      const ctx = context({ participants: [withFlag("area", { maxTargets: 2 }), goblin, gob2, participant("gob3", { side: goblin.basicInfo.side })] });
+
+      await expect(mutation()(ctx, body({ targetIds: ["gob", "gob2", "gob3"], damageRolls: [6, 6, 6] }) as never)).rejects.toThrow(
+        expect.objectContaining({ code: "invalid_target", message: "Забагато цілей для цього закляття" }),
+      );
+    });
   });
 });

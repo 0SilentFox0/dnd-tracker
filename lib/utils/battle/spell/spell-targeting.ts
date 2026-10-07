@@ -8,6 +8,7 @@ export interface SpellRef {
   id: string;
   groupId: string | null;
   level: number;
+  type?: string;
 }
 
 export interface SpellTargeting {
@@ -16,6 +17,8 @@ export interface SpellTargeting {
 }
 
 export function spellTargetingFor(ps: BattleParticipant[], casterId: string, spell: SpellRef): SpellTargeting {
+  if (spell.type === "aoe") return { mode: "single", maxTargets: 1 };
+
   const flags = findFlags(ps, casterId, "spellTargeting").filter(
     (f) =>
       (f.maxLevel === undefined || spell.level <= f.maxLevel) &&
@@ -39,7 +42,9 @@ export function expandSpellTargets(ps: BattleParticipant[], casterId: string, sp
 
   if (!first) return chosenIds;
 
-  return ps.filter((p) => isActive(p) && p.basicInfo.side === first.basicInfo.side).map((p) => p.basicInfo.id);
+  const side = ps.filter((p) => isActive(p) && p.basicInfo.side === first.basicInfo.side).map((p) => p.basicInfo.id);
+
+  return [...new Set([...chosenIds, ...side])];
 }
 
 export function validateSpellTargetCount(targeting: SpellTargeting, count: number, spellType: string, legacyMulti = false): boolean {

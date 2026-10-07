@@ -8,6 +8,7 @@ import { useBattleScene } from "./useBattleScene";
 import { usePrefetchSpellsByIds, useSpells, useSpellsByIds } from "@/lib/hooks/spells";
 import { initialSpellFlow, spellFlow, spellPayload,type SpellPick } from "@/lib/utils/battle/flows";
 import { isUp } from "@/lib/utils/battle/participant/state";
+import { participantSpellAllowsMultipleTargets } from "@/lib/utils/battle/spell/participant-spell-target-mode";
 import { expandSpellTargets, spellAllowsMultipleTargets, spellTargetingFor } from "@/lib/utils/battle/spell/spell-targeting";
 import { slotLevels } from "@/lib/utils/battle/view";
 import { diceSlots } from "@/lib/utils/common/dice";
@@ -47,6 +48,16 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
   const targets = order.filter((p) => isUp(p) || selected?.damageType === "heal");
 
+  const specOf = (s: BookSpell) => ({ id: s.id, groupId: s.spellGroup?.id ?? null, level: s.level, type: s.type });
+
+  const maxTargetsOf = (s: BookSpell): number | undefined => {
+    if (!caster || s.type === "aoe" || participantSpellAllowsMultipleTargets(caster, s.id)) return undefined;
+
+    const targeting = spellTargetingFor(order, caster.basicInfo.id, specOf(s));
+
+    return targeting.mode === "area" ? targeting.maxTargets : undefined;
+  };
+
   const targetModeOf = (s: BookSpell): SpellPick["targetMode"] => {
     if (s.type === "no_target") return "none";
 
@@ -54,7 +65,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
     if (!caster) return "single";
 
-    const spell = { id: s.id, groupId: s.spellGroup?.id ?? null, level: s.level };
+    const spell = specOf(s);
 
     if (spellTargetingFor(order, caster.basicInfo.id, spell).mode === "all") return "all";
 
@@ -65,6 +76,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
     spellId: s.id,
     level: s.level,
     targetMode: targetModeOf(s),
+    maxTargets: maxTargetsOf(s),
     needsHit: !!s.hitCheck,
     needsSaves: !!s.savingThrow,
     diceSlots: s.diceCount && s.diceType ? diceSlots(`${s.diceCount}${s.diceType}`) : [],
@@ -103,7 +115,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
     toggleTarget: (id: string) => {
       const expanded =
         state.pick?.targetMode === "all" && caster && selected
-          ? expandSpellTargets(order, caster.basicInfo.id, { id: selected.id, groupId: selected.spellGroup?.id ?? null, level: selected.level }, [id])
+          ? expandSpellTargets(order, caster.basicInfo.id, specOf(selected), [id])
           : undefined;
 
       dispatch({ type: "TOGGLE_TARGET", id, expanded });

@@ -61,4 +61,14 @@ describe("spell targeting", () => {
     expect(validateSpellTargetCount({ mode: "single", maxTargets: 1 }, 2, "single_target")).toBe(false);
     expect(validateSpellTargetCount({ mode: "single", maxTargets: 1 }, 5, "aoe")).toBe(true);
   });
+
+  it("all не діє на aoe і лишає обрану ціль, навіть якщо вона впала", () => {
+    const c = caster([{ kind: "flag", flag: "spellTargeting", mode: "all" }]);
+
+    const ps = [c, ally("a1"), downedAlly("a3")];
+
+    expect(spellTargetingFor(ps, "c", { ...spell, type: "aoe" }).mode).toBe("single");
+    expect(expandSpellTargets(ps, "c", { ...spell, type: "aoe" }, ["a1"])).toEqual(["a1"]);
+    expect(expandSpellTargets(ps, "c", spell, ["a3"]).sort()).toEqual(["a1", "a3", "c"]);
+  });
 });

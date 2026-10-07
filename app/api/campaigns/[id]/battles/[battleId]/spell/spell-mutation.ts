@@ -64,7 +64,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
       }
     }
 
-    const spellRef = { id: spellRow.id, groupId: spellRow.groupId, level: spellRow.level };
+    const spellRef = { id: spellRow.id, groupId: spellRow.groupId, level: spellRow.level, type: spellRow.type };
 
     const targeting = spellTargetingFor(order, caster.basicInfo.id, spellRef);
 

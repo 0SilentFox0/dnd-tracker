@@ -6,6 +6,7 @@ export interface SpellPick {
   spellId: string;
   level: number;
   targetMode: SpellTargetMode;
+  maxTargets?: number;
   needsHit: boolean;
   needsSaves: boolean;
   diceSlots: number[];
@@ -77,6 +78,8 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
 
         return { ...s, targetIds: s.targetIds.filter((id) => id !== a.id), saves };
       }
+
+      if (s.pick?.maxTargets !== undefined && s.targetIds.length >= s.pick.maxTargets) return s;
 
       return { ...s, targetIds: [...s.targetIds, a.id] };
     }

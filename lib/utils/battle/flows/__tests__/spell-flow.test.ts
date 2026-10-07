@@ -93,4 +93,10 @@ describe("spellFlow", () => {
     expect([...s.targetIds].sort()).toEqual(["a1", "a2", "me"]);
     expect(spellFlow(s, { type: "CONFIRM_TARGETS" }).step).toBe("rolls");
   });
+
+  it("область: вибір понад maxTargets ігнорується", () => {
+    const s = run({ type: "OPEN", casterId: "me", level: 1 }, { type: "PICK", pick: { ...cloud, maxTargets: 2 } }, { type: "TO_TARGETS" }, { type: "TOGGLE_TARGET", id: "a" }, { type: "TOGGLE_TARGET", id: "b" }, { type: "TOGGLE_TARGET", id: "c" });
+
+    expect(s.targetIds).toEqual(["a", "b"]);
+  });
 });
