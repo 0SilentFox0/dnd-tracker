@@ -51,4 +51,39 @@ describe("multi-target advantage resolution", () => {
 
     expect(hits(r)).toEqual([true]);
   });
+
+  describe("attackHitsAllEnemies", () => {
+    const melee: BattleAttack = { id: "m", name: "Клинок", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d6", damageType: "slashing" };
+
+    const sweeper = (flag: boolean) => {
+      const p = makeParticipant({ id: "a", abilities: flag ? [resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "attackHitsAllEnemies" }] })] : [] });
+
+      return { ...p, battleData: { ...p.battleData, attacks: [melee] } };
+    };
+
+    const enemies = () => [foe("t1"), foe("t2"), foe("t3")];
+
+    const lost = (r: ReturnType<typeof run>, id: string) => 50 - (r.finalInitiativeOrder.find((p) => p.basicInfo.id === id)?.combatStats.currentHp ?? 0);
+
+    it("a melee attacker with the flag hits every living enemy for full damage", () => {
+      const r = run([sweeper(true), ...enemies()], { targetIds: ["t1", "t2", "t3"], attackRolls: [17, 17, 17], damageRolls: Array(12).fill(4) });
+
+      expect(["t1", "t2", "t3"].map((id) => lost(r, id))).toEqual([lost(r, "t1"), lost(r, "t1"), lost(r, "t1")]);
+      expect(lost(r, "t1")).toBeGreaterThanOrEqual(4);
+    });
+
+    it("the server expands a partial selection to all enemies", () => {
+      const r = run([sweeper(true), ...enemies()], { targetIds: ["t1"], attackRolls: [17], damageRolls: Array(12).fill(4) });
+
+      expect(["t2", "t3"].every((id) => lost(r, id) > 0)).toBe(true);
+    });
+
+    it("without the flag melee is still one target", () => {
+      expect(() => run([sweeper(false), ...enemies()], { targetIds: ["t1", "t2", "t3"], attackRolls: [17, 17, 17], damageRolls: [4, 4, 4] })).toThrow(/Забагато цілей/);
+
+      const r = run([sweeper(false), ...enemies()], { targetId: "t1", attackRoll: 17, damageRolls: [4] });
+
+      expect(["t2", "t3"].every((id) => lost(r, id) === 0)).toBe(true);
+    });
+  });
 });

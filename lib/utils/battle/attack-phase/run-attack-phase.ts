@@ -1,5 +1,6 @@
 import { AttackType } from "@/lib/constants/battle";
-import { isActive } from "@/lib/utils/abilities/engine/participants";
+import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
+import { isActive, withSelf } from "@/lib/utils/abilities/engine/participants";
 /**
  * Runs the attack phase: validation, processAttack per target, primary-target retaliation.
  * Used by the attack route.
@@ -7,6 +8,7 @@ import { isActive } from "@/lib/utils/abilities/engine/participants";
 import type { Rng } from "@/lib/utils/abilities/engine/types";
 import { processAttack } from "@/lib/utils/battle/attack";
 import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
+import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
 import { diceCount } from "@/lib/utils/common/dice";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
@@ -58,13 +60,13 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const targetIds = data.targetIds || (data.targetId ? [data.targetId] : []);
 
-  const targets = initiativeOrder.filter((p) =>
+  const chosenTargets = initiativeOrder.filter((p) =>
     targetIds.includes(p.basicInfo.id),
   );
 
   const usePerTargetRolls =
     Array.isArray(data.attackRolls) &&
-    data.attackRolls.length === targets.length;
+    data.attackRolls.length === chosenTargets.length;
 
   if (!singleRoll && !usePerTargetRolls) {
     throw new BattleRuleError("action_rejected", "Потрібен кидок d20 (d20Roll, attackRoll або attackRolls)");
@@ -89,7 +91,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
     throw new BattleAccessError(403, "Атакувати може лише DM або той, хто зараз ходить");
   }
 
-  if (targets.length === 0) {
+  if (chosenTargets.length === 0) {
     throw new BattleAccessError(404, "Цілей немає в бою");
   }
 
@@ -122,16 +124,34 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const isAoe = attack.targetType === "aoe";
 
-  const isMultiTargetRanged =
-    !isAoe &&
-    attack.type === AttackType.RANGED &&
-    (attacker.combatStats.maxTargets ?? 1) > 1;
+  const hitsAllEnemies = findFlags(withSelf(initiativeOrder, attacker), attacker.basicInfo.id, "attackHitsAllEnemies").length > 0;
 
-  const maxPossibleTargets = isAoe
-    ? attack.maxTargets || attacker.combatStats.maxTargets || 1
-    : isMultiTargetRanged
-      ? attacker.combatStats.maxTargets || 1
-      : 1;
+  const targets = hitsAllEnemies
+    ? [
+        ...chosenTargets.filter((t) => t.basicInfo.side !== attacker.basicInfo.side && isActive(t)),
+        ...initiativeOrder.filter((t) => t.basicInfo.side !== attacker.basicInfo.side && isActive(t) && !targetIds.includes(t.basicInfo.id)),
+      ]
+    : chosenTargets;
+
+  if (targets.length === 0) {
+    throw new BattleAccessError(404, "Цілей немає в бою");
+  }
+
+  const isMultiTargetRanged =
+    hitsAllEnemies ||
+    (!isAoe &&
+      attack.type === AttackType.RANGED &&
+      (attacker.combatStats.maxTargets ?? 1) > 1);
+
+  const maxPossibleTargets = hitsAllEnemies
+    ? targets.length
+    : isAoe
+      ? attack.maxTargets || attacker.combatStats.maxTargets || 1
+      : isMultiTargetRanged
+        ? attacker.combatStats.maxTargets || 1
+        : 1;
+
+  const chosenIndex = (id: string) => chosenTargets.findIndex((t) => t.basicInfo.id === id);
 
   if (targets.length > maxPossibleTargets) {
     throw new BattleRuleError("action_rejected", `Забагато цілей. Максимум: ${maxPossibleTargets}`);
@@ -163,14 +183,19 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const dicePerTarget =
     isMultiTargetRanged && targets.length > 1
-      ? diceCount(attack.damageDice ?? "")
+      ? diceCount(hitsAllEnemies ? heroAttackDamageParts(attacker, attack).formula : (attack.damageDice ?? ""))
       : 0;
+
+  let damageCursor = 0;
 
   for (let i = 0; i < targets.length; i++) {
     const target = targets[i];
 
-    const d20Roll =
-      usePerTargetRolls && data.attackRolls
+    const chosenAt = hitsAllEnemies ? chosenIndex(target.basicInfo.id) : i;
+
+    const d20Roll = hitsAllEnemies
+      ? ((usePerTargetRolls && chosenAt >= 0 ? data.attackRolls?.[chosenAt] : singleRoll) ?? Math.floor(rng() * 20) + 1)
+      : usePerTargetRolls && data.attackRolls
         ? data.attackRolls[i]
         : singleRoll;
 
@@ -181,11 +206,12 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
     const damageMultiplier =
       targets.length > 1 ? damageFractions[i] : undefined;
 
-    const damageRollsForTarget =
-      isMultiTargetRanged &&
-      targets.length > 1 &&
-      dicePerTarget > 0 &&
-      data.damageRolls.length >= (i + 1) * dicePerTarget
+    const damageRollsForTarget = hitsAllEnemies
+      ? data.damageRolls.slice(damageCursor, damageCursor + dicePerTarget)
+      : isMultiTargetRanged &&
+          targets.length > 1 &&
+          dicePerTarget > 0 &&
+          data.damageRolls.length >= (i + 1) * dicePerTarget
         ? data.damageRolls.slice(i * dicePerTarget, (i + 1) * dicePerTarget)
         : data.damageRolls;
 
@@ -196,8 +222,8 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       target: freshTarget,
       attack,
       d20Roll,
-      advantageRoll: data.secondRolls?.[i] ?? data.advantageRoll,
-      disadvantageRoll: data.secondRolls?.[i] ?? data.disadvantageRoll,
+      advantageRoll: data.secondRolls?.[chosenAt] ?? data.advantageRoll,
+      disadvantageRoll: data.secondRolls?.[chosenAt] ?? data.disadvantageRoll,
       damageRolls: damageRollsForTarget,
       allParticipants: currentInitiativeOrder,
       currentRound: battle.currentRound,
@@ -205,6 +231,8 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       damageMultiplier,
       rng,
     });
+
+    if (hitsAllEnemies && attackResult.success) damageCursor += dicePerTarget;
 
     const updatedMap = new Map((attackResult.allParticipantsUpdated ?? []).map((p) => [p.basicInfo.id, p]));
 

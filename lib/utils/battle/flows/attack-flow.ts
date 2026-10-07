@@ -133,7 +133,7 @@ export function effectiveD20(strike: Strike, mode: AttackMode): number {
   return mode === "advantage" ? Math.max(d, strike.second) : Math.min(d, strike.second);
 }
 
-export function attackPayload(s: AttackFlowState, attackerId: string): AttackData & { endTurn: boolean } {
+export function attackPayload(s: AttackFlowState, attackerId: string, opts: { allStrikes?: boolean } = {}): AttackData & { endTurn: boolean } {
   const base = { attackerId, attackId: s.attackId, endTurn: false };
 
   if (s.strikes.length === 1) {
@@ -151,7 +151,7 @@ export function attackPayload(s: AttackFlowState, attackerId: string): AttackDat
 
   const hits = s.strikes.filter(isHit);
 
-  const used = hits.length ? hits : s.strikes;
+  const used = hits.length && !opts.allStrikes ? hits : s.strikes;
 
   return {
     ...base,

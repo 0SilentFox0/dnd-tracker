@@ -75,6 +75,7 @@ const FlagSchema = z.discriminatedUnion("flag", [
     maxTargets: z.number().int().min(2).optional(),
     maxLevel: z.number().int().min(1).max(9).optional(),
   }),
+  z.object({ ...flagBase, flag: z.literal("attackHitsAllEnemies") }),
   z.object({ ...flagBase, flag: z.literal("seeEnemyHp") }),
   z.object({ ...flagBase, flag: z.literal("noNegativeMorale") }),
   z.object({ ...flagBase, flag: z.literal("ignoreMorale") }),

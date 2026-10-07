@@ -17,6 +17,7 @@ const DEFAULTS: Record<FlagKey, Record<string, unknown>> = {
   spellImmunity: { spellIds: [] },
   spellTargeting: { mode: "area" },
   counterAttack: { attackKinds: [AttackType.MELEE], bonusPercent: 15 },
+  attackHitsAllEnemies: {},
   seeEnemyHp: {},
   noNegativeMorale: {},
   ignoreMorale: {},

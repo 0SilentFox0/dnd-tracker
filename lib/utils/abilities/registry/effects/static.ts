@@ -131,6 +131,8 @@ export function describeFlag(e: Extract<Effect, { kind: "flag" }>): string {
     }
     case "counterAttack":
       return `відсіч${e.attackKinds.includes(AttackType.RANGED) ? " (і на дальні)" : ""} +${e.bonusPercent}%`;
+    case "attackHitsAllEnemies":
+      return "кожна атака б'є всіх ворогів";
     case "seeEnemyHp":
       return "бачить HP ворогів";
     case "noNegativeMorale":
@@ -154,6 +156,7 @@ export const FLAG_LABELS: Record<FlagKey, string> = {
   spellImmunity: "Імунітет до заклинань",
   spellTargeting: "Режим цілей заклять",
   counterAttack: "Контратака",
+  attackHitsAllEnemies: "Атака б'є всіх ворогів",
   seeEnemyHp: "Бачить HP ворогів",
   noNegativeMorale: "Мораль не нижче 0",
   ignoreMorale: "Мораль не діє",
@@ -194,6 +197,7 @@ export const FLAG_FIELDS: Record<FlagKey, readonly FieldMeta[]> = {
     { name: "attackKinds", label: "На атаки", input: "multiselect", options: COUNTER_KIND_OPTIONS },
     { name: "bonusPercent", label: "Бонус шкоди, %", input: "number" },
   ],
+  attackHitsAllEnemies: [],
   seeEnemyHp: [],
   noNegativeMorale: [],
   ignoreMorale: [],

@@ -112,4 +112,18 @@ describe("attackFlow", () => {
 
     expect(attackPayload(s, "me")).toMatchObject({ targetIds: ["b"], attackRolls: [15], secondRolls: [18] });
   });
+
+  it("allStrikes: payload carries misses too, so the server never rerolls them", () => {
+    const s = run(
+      open(1, 2),
+      { type: "TOGGLE_TARGET", id: "a" },
+      { type: "TOGGLE_TARGET", id: "b" },
+      { type: "CONFIRM_TARGETS" },
+      { type: "ROLL", d20: 4, outcome: "miss" },
+      { type: "ROLL", d20: 17, outcome: "hit" },
+      { type: "DAMAGE", values: [5] },
+    );
+
+    expect(attackPayload(s, "me", { allStrikes: true })).toMatchObject({ targetIds: ["a", "b"], attackRolls: [4, 17], damageRolls: [5] });
+  });
 });
