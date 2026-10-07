@@ -1,7 +1,3 @@
-/**
- * Хелпери для авторизації та перевірки прав доступу в API routes
- */
-
 import { NextResponse } from "next/server";
 
 import { getSessionUserId } from "@/lib/auth";
@@ -67,17 +63,10 @@ export async function requireAuthUser(): Promise<AuthUserResult | NextResponse> 
   };
 }
 
-/**
- * Перевіряє авторизацію та доступ до кампанії
- * @param campaignId ID кампанії
- * @param requireDM Якщо true, перевіряє що користувач є DM
- * @returns CampaignAccessResult або NextResponse з помилкою
- */
 export async function requireCampaignAccess(
   campaignId: string,
   requireDM: boolean = false
 ): Promise<CampaignAccessResult | NextResponse> {
-  // Перевіряємо авторизацію
   const authResult = await requireAuth();
 
   if (authResult instanceof NextResponse) {
@@ -86,7 +75,6 @@ export async function requireCampaignAccess(
 
   const { userId } = authResult;
 
-  // Перевіряємо доступ до кампанії
   const campaign = await prisma.campaign.findUnique({
     where: { id: campaignId },
     include: {
@@ -125,11 +113,6 @@ export async function requireCampaignAccess(
   };
 }
 
-/**
- * Перевіряє авторизацію та що користувач є DM кампанії
- * @param campaignId ID кампанії
- * @returns CampaignAccessResult або NextResponse з помилкою
- */
 export async function requireDM(
   campaignId: string
 ): Promise<CampaignAccessResult | NextResponse> {
