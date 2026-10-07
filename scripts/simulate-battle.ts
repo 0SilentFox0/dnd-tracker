@@ -28,10 +28,11 @@ import { needsMoraleCheck } from "../lib/utils/battle/view";
 import { branchLevelNodeId, buildTreeJson, racialNodeId } from "../lib/utils/skills/progression";
 import type { BattleMutationResponse, BattleScene } from "../types/api";
 import type { BattleAction, BattleParticipant } from "../types/battle";
-import { artifactRows, DRAGON_SET, FAIR_CAMPAIGN_NAME, FAIR_HEROES, FAIR_UNITS, FAIR_WEAPONS, RACES, SIM_CAMPAIGN_NAME, SIM_PLAYER, SIM_USER, SKILLS, UNITS } from "./simulate-battle-scenario";
+import { artifactRows, DRAGON_SET, FAIR_CAMPAIGN_NAME, FAIR_HEROES, FAIR_UNITS, FAIR_WEAPONS, MECHANICS_CAMPAIGN_NAME, MECHANICS_UNITS, RACES, SIM_CAMPAIGN_NAME, SIM_PLAYER, SIM_USER, SKILLS, UNITS } from "./simulate-battle-scenario";
 
 import { BATTLE_LOG_RECENT_EVENTS, ParticipantSourceType } from "@/lib/constants/battle";
 import { CampaignRole } from "@/lib/constants/campaigns";
+import { countMarks } from "@/lib/utils/abilities/engine/marks";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { PUSHER_DELTA_LIMIT_BYTES } from "@/lib/utils/battle/pipeline/limits";
 import { PATCHABLE_PARTICIPANT_FIELDS } from "@/lib/utils/battle/store/participant-patch";
@@ -299,6 +300,8 @@ async function main() {
   await scenario();
 
   await fairBattleRuns();
+
+  await newMechanics();
 
   const failed = results.filter((r) => !r.ok);
 
@@ -681,6 +684,128 @@ async function fairBattleRuns() {
   check("Підібраний склад: ворогам виставлено множники HP і шкоди", runs[0].scaled.length > 0 && runs[0].scaled.every((p) => (p.battleData.damageMultiplier ?? 0) > 0 && (p.battleData.hpMultiplier ?? 0) > 0), `${runs[0].scaled.length} ворогів`);
   check("Рівний бій: щонайбільше один прогін поза 2–6 раундами", inRange >= need, `${inRange}/${runs.length}, раунди: ${runs.map((r) => r.rounds).join(", ")}`);
   check("Рівний бій: герої перемагають, лишивши ≥ 40% HP (щонайбільше один виняток)", wins >= need, `${wins}/${runs.length}`);
+}
+
+// ---------- нові механіки вмінь ----------
+
+async function newMechanics() {
+  const u = (name: string) => `${name} #1`;
+
+  console.info("\n🧪 Нові механіки: мітки, захист, світло на всіх, випереджальний удар, шанс у логу");
+  quiet = true;
+  log.length = 0;
+
+  await prisma.campaign.deleteMany({ where: { name: MECHANICS_CAMPAIGN_NAME, dmUserId: SIM_USER.id } });
+
+  const campaign = await prisma.campaign.create({ data: { name: MECHANICS_CAMPAIGN_NAME, inviteCode: `SIMM-${Date.now()}`, dmUserId: SIM_USER.id } });
+
+  const campaignId = campaign.id;
+
+  await prisma.campaignMember.create({ data: { campaignId, userId: SIM_USER.id, role: CampaignRole.DM } });
+
+  const group = await prisma.spellGroup.create({ data: { campaignId, name: "Світло" } });
+
+  const light = await prisma.spell.create({
+    data: { campaignId, name: "Благословення світла", level: 1, type: "target", target: "allies", damageType: "heal", diceCount: 1, diceType: "d4", groupId: group.id },
+  });
+
+  const setup: Array<Record<string, unknown>> = [];
+
+  for (const { side, ...u } of MECHANICS_UNITS(group.id)) {
+    const row = await prisma.unit.create({ data: { campaignId, ...u } as Prisma.UnitUncheckedCreateInput });
+
+    setup.push({ id: row.id, type: ParticipantSourceType.UNIT, side });
+  }
+
+  const battle = await prisma.battleScene.create({ data: { campaignId, name: "Нові механіки", status: "prepared", participants: setup as Prisma.InputJsonValue, currentRound: 1, currentTurnIndex: 0 } });
+
+  ctx = { ...ctx, campaignId, battleId: battle.id };
+  state = await readState();
+  await call("start", START, {}, SIM_USER.id);
+
+  const reach = async (name: string) => {
+    for (let i = 0; i < 14 && current()?.basicInfo.name !== name; i++) await call("next-turn", NEXT, {}, SIM_USER.id);
+
+    if (current()?.basicInfo.name !== name) throw new Error(`Не дійшли до ходу ${name}`);
+  };
+
+  const hit = async (attacker: string, target: string, endTurn = false) => {
+    await reach(attacker);
+
+    const before = lastIndex();
+
+    const targetHp = hp(by(target));
+
+    const r = await call("attack", ATTACK, { attackerId: by(attacker).basicInfo.id, targetId: by(target).basicInfo.id, d20Roll: 18, damageRolls: [4], endTurn }, SIM_USER.id);
+
+    return { status: r.status, dealt: targetHp - hp(by(target)), events: logSince(before) };
+  };
+
+  const hunterId = by(u("Мисливець")).basicInfo.id;
+
+  const h1 = await hit(u("Мисливець"), u("Опудало"), true);
+
+  const h2 = await hit(u("Мисливець"), u("Опудало"), true);
+
+  const h3 = await hit(u("Мисливець"), u("Опудало"));
+
+  quiet = false;
+  check("Мітки складаються: три влучання — три мітки на цілі", countMarks(by(u("Опудало")), "seq", hunterId) === 3, `міток: ${countMarks(by(u("Опудало")), "seq", hunterId)}`);
+  check("Шкода росте з кількістю міток", h1.dealt > 0 && h2.dealt > h1.dealt && h3.dealt > h2.dealt, `${h1.dealt} → ${h2.dealt} → ${h3.dealt}`);
+  check("У лозі видно шанс спрацювання («шанс 100 %»)", log.some((e) => /Азарт.*\(шанс 100 %\)/.test(e.resultText)), log.filter((e) => /шанс/.test(e.resultText)).map((e) => e.resultText).join(" | ") || "немає");
+  quiet = true;
+
+  await reach(u("Страж"));
+
+  const guardKey = (by(u("Страж")).battleData.resolvedAbilities ?? []).find((a) => a.trigger.event === "bonusAction")?.key ?? "";
+
+  await call("bonus-action", BONUS, { participantId: by(u("Страж")).basicInfo.id, abilityKey: guardKey, targetParticipantId: by(u("Підопічний")).basicInfo.id }, SIM_USER.id);
+
+  const guardianHp = hp(by(u("Страж")));
+
+  const wardHp = hp(by(u("Підопічний")));
+
+  const beforeGuard = lastIndex();
+
+  await reach(u("Опудало"));
+  await call("attack", ATTACK, { attackerId: by(u("Опудало")).basicInfo.id, targetId: by(u("Підопічний")).basicInfo.id, d20Roll: 18, damageRolls: [8], endTurn: true }, SIM_USER.id);
+
+  quiet = false;
+  check(
+    "Захист ділить шкоду між підопічним і стражем",
+    hp(by(u("Страж"))) < guardianHp && hp(by(u("Підопічний"))) < wardHp && logSince(beforeGuard).some((e) => /🛡/.test(e.resultText)),
+    `страж ${guardianHp} → ${hp(by(u("Страж")))}, підопічний ${wardHp} → ${hp(by(u("Підопічний")))}`,
+  );
+  quiet = true;
+
+  const allies = state.initiativeOrder.filter((p) => p.basicInfo.side === "ally");
+
+  for (const p of allies) await setHp(p.basicInfo.name, 5);
+
+  await reach(u("Жрець"));
+
+  const hpBefore = new Map(allies.map((p) => [p.basicInfo.id, hp(by(p.basicInfo.name))]));
+
+  const cast = await call("spell", SPELL, { casterId: by(u("Жрець")).basicInfo.id, spellId: light.id, targetIds: [by(u("Підопічний")).basicInfo.id], damageRolls: allies.map(() => 3) }, SIM_USER.id);
+
+  quiet = false;
+  check(
+    "Світло з режимом «на всіх» зцілює кожного союзника",
+    cast.status === 200 && allies.every((p) => hp(by(p.basicInfo.name)) > (hpBefore.get(p.basicInfo.id) ?? 0)),
+    `статус ${cast.status}; ${allies.map((p) => `${p.basicInfo.name} ${hpBefore.get(p.basicInfo.id)} → ${hp(by(p.basicInfo.name))}`).join(", ")}`,
+  );
+  quiet = true;
+
+  const duelistHp = hp(by(u("Дуелянт")));
+
+  const strike = await hit(u("Новачок"), u("Дуелянт"));
+
+  quiet = false;
+  check(
+    "Випереджальний удар вбиває нападника і скасовує атаку",
+    strike.status === 200 && by(u("Новачок")).combatStats.status !== "active" && hp(by(u("Дуелянт"))) === duelistHp && strike.events.some((e) => /Випереджальний удар/.test(e.resultText)),
+    `Новачок ${by(u("Новачок")).combatStats.status}, Дуелянт HP ${duelistHp} → ${hp(by(u("Дуелянт")))}`,
+  );
 }
 
 main().catch(async (e) => {

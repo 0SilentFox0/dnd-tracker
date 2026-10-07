@@ -132,3 +132,55 @@ export const FAIR_WEAPONS = {
   bow: { name: "Лук", slot: "range_weapon", ...weaponStatsColumns({ damageDice: "1d6", damageType: "piercing", attackType: "ranged", range: "150 ft", attackBonus: 1 }) },
   dagger: { name: "Кинджал", slot: "weapon", ...weaponStatsColumns({ damageDice: "1d4", damageType: "piercing", attackType: "melee" }) },
 };
+
+export const MECHANICS_CAMPAIGN_NAME = "SIM: нові механіки вмінь";
+
+const melee = (name: string, bonus = 5, dice = "1d6") => json([{ name, type: "melee", attackBonus: bonus, damageType: "slashing", damageDice: dice }]);
+
+export const MECHANICS_UNITS = (lightGroupId: string) => [
+  {
+    name: "Мисливець",
+    side: "ally",
+    maxHp: 60,
+    armorClass: 14,
+    initiative: 10,
+    attacks: melee("Спис"),
+    abilities: json([
+      ab("hunter-mark", "Послідовний удар", { trigger: { event: "hit", role: "attacker" }, effects: [{ kind: "mark", markId: "seq", duration: { rounds: 5 }, target: "eventTarget" }] }),
+      ab("hunter-bonus", "Зосередження", { trigger: { event: "passive" }, effects: [{ kind: "damageBonus", filter: { kind: "melee" }, percent: 50, perMark: "seq" }] }),
+      ab("hunter-chance", "Азарт", { trigger: { event: "hit", role: "attacker" }, limits: { chance: 100 }, effects: [{ kind: "changeMorale", delta: 1 }] }),
+    ]),
+  },
+  {
+    name: "Страж",
+    side: "ally",
+    maxHp: 40,
+    armorClass: 16,
+    initiative: 8,
+    attacks: melee("Щит"),
+    abilities: json([ab("guard-bonus", "Прикрити", { trigger: { event: "bonusAction" }, effects: [{ kind: "guard", percent: 50, duration: { rounds: 5 }, target: "eventTarget" }] })]),
+  },
+  { name: "Підопічний", side: "ally", maxHp: 40, armorClass: 10, initiative: 6, attacks: melee("Кинджал"), abilities: json([]) },
+  {
+    name: "Жрець",
+    side: "ally",
+    maxHp: 30,
+    armorClass: 12,
+    initiative: 4,
+    attacks: melee("Булава"),
+    abilities: json([ab("priest-light", "Світло для всіх", { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "spellTargeting", mode: "all", school: lightGroupId }] })]),
+  },
+  { name: "Новачок", side: "ally", maxHp: 30, armorClass: 12, initiative: 2, attacks: melee("Меч"), abilities: json([]) },
+  { name: "Опудало", side: "enemy", maxHp: 500, armorClass: 10, initiative: 0, attacks: melee("Удар", 5, "1d8"), abilities: json([]) },
+  {
+    name: "Дуелянт",
+    side: "enemy",
+    maxHp: 40,
+    armorClass: 10,
+    initiative: 1,
+    attacks: melee("Рапіра"),
+    abilities: json([
+      ab("duelist-riposte", "Випереджальний удар", { trigger: { event: "attack", phase: "before", role: "target", attackKind: "melee" }, limits: { perRound: 1 }, effects: [{ kind: "dealDamage", amount: 1000, target: "eventActor" }] }),
+    ]),
+  },
+];
