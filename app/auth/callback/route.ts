@@ -1,26 +1,9 @@
 import { NextResponse } from 'next/server'
 
+import { getRedirectOrigin } from './redirect-origin'
+
 import { prisma } from '@/lib/db'
 import { createClient } from '@/lib/supabase/server'
-
-/** Origin для редиректів: на Vercel використовуємо VERCEL_URL, щоб не потрапляти на localhost. */
-function getRedirectOrigin(request: Request): string {
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`
-  }
-
-  const forwardedHost = request.headers.get('x-forwarded-host')
-
-  const forwardedProto = request.headers.get('x-forwarded-proto')
-
-  if (forwardedHost) {
-    const proto = forwardedProto === 'http' ? 'http' : 'https'
-
-    return `${proto}://${forwardedHost}`
-  }
-
-  return new URL(request.url).origin
-}
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
