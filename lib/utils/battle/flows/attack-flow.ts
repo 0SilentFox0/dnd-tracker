@@ -156,7 +156,8 @@ export function attackPayload(s: AttackFlowState, attackerId: string): AttackDat
   return {
     ...base,
     targetIds: used.map((st) => st.targetId),
-    attackRolls: used.map((st) => effectiveD20(st, s.mode)),
+    attackRolls: used.map((st) => st.d20 ?? 0),
+    ...(s.mode !== "normal" && used.every((st) => st.second !== undefined) && { secondRolls: used.map((st) => st.second as number) }),
     damageRolls: hits.flatMap((st) => st.damage),
   } as AttackData & { endTurn: boolean };
 }

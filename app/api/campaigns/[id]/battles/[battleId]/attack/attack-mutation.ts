@@ -16,6 +16,7 @@ export const attackBodySchema = z
     d20Roll: z.number().min(1).max(20).optional(),
     attackRoll: z.number().min(1).max(20).optional(),
     attackRolls: z.array(z.number().min(1).max(20)).optional(),
+    secondRolls: z.array(z.number().min(1).max(20)).optional(),
     advantageRoll: z.number().min(1).max(20).optional(),
     disadvantageRoll: z.number().min(1).max(20).optional(),
     damageRolls: z.array(z.number()).default([]),

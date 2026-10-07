@@ -129,6 +129,8 @@ export interface AttackData {
   attackRoll?: number;
   /** Один кидок на ціль (multi-target); якщо передано, використовується замість attackRoll */
   attackRolls?: number[];
+  /** Другий d20 на ціль (multi-target), у тому ж порядку, що й attackRolls; сервер сам вирішує перевагу/недолік */
+  secondRolls?: number[];
   advantageRoll?: number;
   disadvantageRoll?: number;
   damageRolls: number[];
