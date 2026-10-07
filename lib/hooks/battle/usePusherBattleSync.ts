@@ -55,12 +55,14 @@ export function usePusherBattleSync(
   // видимість і перепідключення часто приходять разом: один запит версії на обидва
   const resync = useCallback(() => {
     resyncRef.current ??= (async () => {
+      if (queryClient.getQueryData<BattleScene>(queryKey()) === undefined) return;
+
       try {
         const { version } = await getBattleVersion(campaignId, battleId);
 
         const cached = queryClient.getQueryData<BattleScene>(queryKey())?.version;
 
-        if (cached !== undefined && version <= cached) return;
+        if (cached === undefined || version <= cached) return;
       } catch {
         // без версії безпечніше перечитати бій
       }

@@ -331,6 +331,20 @@ describe("usePusherBattleSync — two players receive same battle state", () => 
       expect(getBattleVersion).toHaveBeenCalledTimes(1);
     });
 
+    it("перша підписка без кешу сцени — нічого не перечитуємо", async () => {
+      vi.mocked(getBattleVersion).mockResolvedValue({ version: 6 });
+
+      const qc = new QueryClient();
+
+      const invalidate = vi.spyOn(qc, "invalidateQueries");
+
+      render(<PlayerSync campaignId={campaignId} battleId={battleId} userId="user-1" client={qc} />);
+      await subscribed();
+      await act(async () => simulateTrigger(channelName, "pusher:subscription_succeeded", {}));
+
+      expect(invalidate).not.toHaveBeenCalled();
+    });
+
     it("перша підписка з актуальним кешем — без повного GET", async () => {
       vi.mocked(getBattleVersion).mockResolvedValue({ version: 5 });
 
