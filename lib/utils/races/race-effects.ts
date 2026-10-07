@@ -1,12 +1,7 @@
-/**
- * Утиліти для роботи з ефектами рас
- */
-
 import { COMMON_IMMUNITIES, IMMUNITY_PATTERNS } from "@/lib/constants/immunities";
 import type { Race } from "@/types/races";
 import type { Unit } from "@/types/units";
 
-// Тип для Race з Prisma (JSON поля)
 type RaceFromPrisma = Omit<Race, "availableSkills" | "disabledSkills" | "spellSlotProgression" | "passiveAbility"> & {
   availableSkills?: unknown;
   disabledSkills?: unknown;
@@ -35,7 +30,6 @@ export function extractRaceImmunities(race: Race | RaceFromPrisma | null | undef
 
   const descriptionLower = description.toLowerCase();
 
-  // Перевіряємо загальні імунітети з констант
   for (const common of COMMON_IMMUNITIES) {
     if (descriptionLower.includes(`імунітет до ${common}`) ||
         descriptionLower.includes(`імунітет на ${common}`) ||
@@ -47,7 +41,6 @@ export function extractRaceImmunities(race: Race | RaceFromPrisma | null | undef
     }
   }
 
-  // Шукаємо фрази типу "імунітет до X" за допомогою патернів
   for (const pattern of IMMUNITY_PATTERNS) {
     const matches = description.matchAll(pattern);
 
@@ -78,12 +71,10 @@ export function getUnitImmunities(
 
   const raceImmunities = extractRaceImmunities(race);
 
-  // Об'єднуємо та видаляємо дублікати
   const allImmunities = [...unitImmunities, ...raceImmunities];
 
   return Array.from(new Set(allImmunities.map((i) => i.toLowerCase().trim())))
     .map((i) => {
-      // Знаходимо оригінальну назву (з правильним регістром)
       return (
         unitImmunities.find(
           (ui) => ui.toLowerCase().trim() === i
@@ -117,7 +108,6 @@ export function extractRaceDamageModifiers(
 
   const modifiers: string[] = [];
 
-  // Шукаємо фрази типу "модифікатор атаки - X"
   const modifierPatterns = [
     /модифікатор атаки[:\s-]+([^,\.;]+)/gi,
     /модифікатор урону[:\s-]+([^,\.;]+)/gi,

@@ -22,7 +22,6 @@ export default async function DMRacesPage({
     },
   });
 
-  // Конвертуємо Prisma дані в формат Race
   const races: Race[] = racesData.map((race) => ({
     ...race,
     availableSkills: Array.isArray(race.availableSkills)

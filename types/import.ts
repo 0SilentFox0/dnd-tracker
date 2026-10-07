@@ -1,7 +1,3 @@
-/**
- * Типи для імпорту даних
- */
-
 import {
   SpellDamageType,
   SpellSavingThrowAbility,

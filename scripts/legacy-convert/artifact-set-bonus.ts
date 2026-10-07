@@ -5,6 +5,7 @@
 
 import type { ArtifactEffectAudience } from "@/lib/constants/artifact-effect-scope";
 import { parseEffectScopeObject } from "@/lib/constants/artifact-effect-scope";
+import { isRecord } from "@/lib/utils/common/is-record";
 
 export interface ArtifactSetModifier {
   type: string;
@@ -31,10 +32,6 @@ export interface ParsedArtifactSetBonus {
   effectAudience?: ArtifactEffectAudience;
   /** ID заклинань кампанії, до яких ціль імунна (після застосування бонусу). */
   immuneSpellIds?: string[];
-}
-
-function isRecord(v: unknown): v is Record<string, unknown> {
-  return typeof v === "object" && v !== null && !Array.isArray(v);
 }
 
 function parseNumericRecord(raw: unknown): Record<string, number> {

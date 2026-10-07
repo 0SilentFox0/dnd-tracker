@@ -1,7 +1,3 @@
-/**
- * Завантаження мап сетів для бою (старт бою / participant без контексту).
- */
-
 import type { CampaignSpellContext } from "../types/participant";
 
 import { prisma } from "@/lib/db";

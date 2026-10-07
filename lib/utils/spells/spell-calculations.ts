@@ -1,7 +1,3 @@
-/**
- * Утиліти для розрахунків заклинань
- */
-
 import { diceAverage } from "@/lib/utils/common/dice";
 
 /**

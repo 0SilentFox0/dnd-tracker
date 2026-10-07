@@ -1,7 +1,3 @@
-/**
- * Формування об'єкта return для useSkillForm.
- */
-
 import type React from "react";
 
 import { SpellEnhancementType } from "@/lib/constants/spell-enhancement";

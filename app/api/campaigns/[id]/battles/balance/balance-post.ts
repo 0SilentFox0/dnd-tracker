@@ -1,7 +1,3 @@
-/**
- * POST balance: сила союзників і (за `suggest`) підбір складу ворогів для рівного бою.
- */
-
 import type { z } from "zod";
 
 import type { balanceSchema } from "./balance-schema";

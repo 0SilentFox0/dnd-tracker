@@ -25,7 +25,6 @@ export interface SkillCardProps {
   skill: Skill | GroupedSkill;
   campaignId: string;
   onRemove?: (skillId: string) => Promise<unknown> | void;
-  /** Викликається при дублюванні скіла (створює копію з новим id) */
   onDuplicate?: (skillId: string) => void;
   /** Режим версії для друку: ховає інтерактивні елементи, розкриває обрізаний опис */
   printMode?: boolean;

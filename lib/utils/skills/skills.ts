@@ -22,7 +22,6 @@ export function groupSkillsByMainSkill(
   const grouped = new Map<string, (Skill | GroupedSkill)[]>();
 
   skills.forEach((skill) => {
-    // Перевіряємо чи є mainSkillId (підтримуємо обидві структури)
     let groupName = "Без основного навику";
 
     const mainSkillId = getMainSkillId(skill);
@@ -46,10 +45,8 @@ export function groupSkillsByMainSkill(
     }
   });
 
-  // Сортуємо скіли всередині кожної групи по назві
   grouped.forEach((groupSkills) => {
     groupSkills.sort((a, b) => {
-      // Підтримуємо обидві структури
       const nameA = ('basicInfo' in a ? a.basicInfo?.name : a.name) || "";
 
       const nameB = ('basicInfo' in b ? b.basicInfo?.name : b.name) || "";

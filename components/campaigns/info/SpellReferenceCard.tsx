@@ -13,11 +13,11 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAppearanceSave } from "@/lib/hooks/common";
-import type { SpellForReference } from "@/lib/types/info-reference";
 import {
   formatMechanicsSpell,
   getShortSpellSummary,
 } from "@/lib/utils/info-reference";
+import type { SpellForReference } from "@/types/info-reference";
 
 interface SpellReferenceCardProps {
   campaignId: string;

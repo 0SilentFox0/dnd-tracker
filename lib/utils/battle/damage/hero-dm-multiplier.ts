@@ -1,7 +1,3 @@
-/**
- * Коефіцієнти melee/ranged DM для героїв (ті самі в бою і в листі персонажа).
- */
-
 import { AttackType, ParticipantSourceType } from "@/lib/constants/battle";
 import type { BattleParticipant } from "@/types/battle";
 

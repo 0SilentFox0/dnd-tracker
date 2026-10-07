@@ -2,19 +2,9 @@ import { type NextRequest,NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
 /**
- * CSRF defense for mutating /api/* requests (CODE_AUDIT 4.4).
- *
- * Next.js залежить на `SameSite=Lax` cookie за замовчуванням (Supabase
- * sets these), що блокує більшість cross-site CSRF. Цей middleware
- * додає явну перевірку: на POST/PATCH/PUT/DELETE до /api/* перевіряємо,
- * що Origin (або Sec-Fetch-Site) вказує на same-origin.
- *
- * Виняток — `/api/pusher/auth` має дозволяти безпечний cross-origin
- * fetch не потрібен (клієнт завжди same-origin), тому не виключаємо.
- *
- * Якщо Origin відсутній (типово для server-side fetch або сторонніх
- * API клієнтів) — пропускаємо, оскільки auth cookie все одно
- * захистить (без cookie немає сесії).
+ * CSRF defense for mutating /api/* requests: Origin (або Sec-Fetch-Site) POST/PATCH/PUT/DELETE має бути same-origin.
+ * Без Origin (server-side fetch, сторонні клієнти) запит пропускається — auth cookie все одно потрібна.
+ * `/api/pusher/auth` не виключено: клієнт завжди same-origin.
  */
 const SIGN_OUT_PATH = "/auth/signout";
 
@@ -105,8 +95,6 @@ export async function updateSession(request: NextRequest) {
 
   const user = data?.claims?.sub ?? null
 
-  // Захищаємо приватні маршрути
-  // Виключаємо публічні маршрути та callback
   const publicPaths = ['/sign-in', '/sign-up', '/auth/callback']
 
   const isPublicPath = publicPaths.some(path => request.nextUrl.pathname.startsWith(path))

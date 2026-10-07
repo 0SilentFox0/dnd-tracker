@@ -32,7 +32,6 @@ export function SpellDamageDistributionField({
       return;
     }
 
-    // Запропонуємо нове значення на основі останнього (-25%, нижня межа 0).
     const last = dist[dist.length - 1];
 
     const suggested = Math.max(0, last - 25);

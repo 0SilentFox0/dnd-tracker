@@ -14,7 +14,6 @@ export default async function CampaignsPage() {
 
   const userId = user.id;
 
-  // Отримуємо кампанії де юзер є учасником
   type CampaignWithMembers = Awaited<
     ReturnType<
       typeof prisma.campaign.findMany<{
@@ -55,7 +54,6 @@ export default async function CampaignsPage() {
   } catch (error: unknown) {
     console.error("Error fetching campaigns:", error);
 
-    // Якщо помилка підключення до бази - показуємо повідомлення
     const prismaError = error as { code?: string; message?: string };
 
     if (

@@ -1,7 +1,3 @@
-/**
- * Застосування критичних ефектів до учасника бою
- */
-
 import { addActiveEffect } from "../battle-effects";
 
 import type { CriticalEffect } from "@/lib/constants/critical-effects";

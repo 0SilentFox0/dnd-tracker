@@ -1,7 +1,3 @@
-/**
- * Типи для персонажів
- */
-
 import type { EquippedItems, InventoryItem } from "./inventory";
 import type { BookSpell } from "./spells";
 

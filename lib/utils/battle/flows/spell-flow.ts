@@ -73,8 +73,6 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
       if (s.targetIds.includes(a.id)) {
         const { [a.id]: _gone, ...saves } = s.saves;
 
-        void _gone;
-
         return { ...s, targetIds: s.targetIds.filter((id) => id !== a.id), saves };
       }
 

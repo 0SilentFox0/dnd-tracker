@@ -27,7 +27,6 @@ export function groupSpellsByGroup(spells: Spell[]): Map<string, Spell[]> {
     }
   });
 
-  // Сортуємо заклинання всередині кожної групи по рівню та назві
   grouped.forEach((groupSpells) => {
     groupSpells.sort((a, b) => {
       if (a.level !== b.level) return a.level - b.level;
@@ -73,7 +72,6 @@ export function groupSpellsByGroupAndLevel(
     }
   });
 
-  // Сортуємо заклинання всередині кожного рівня
   groupedSpellsMap.forEach((levelMap) => {
     levelMap.forEach((levelSpells) => {
       levelSpells.sort((a, b) => a.name.localeCompare(b.name));
@@ -90,12 +88,10 @@ export function sortSpellLevels(
   levels: [string, Spell[]][],
 ): [string, Spell[]][] {
   return [...levels].sort(([levelA], [levelB]) => {
-    // Cantrip завжди перший
     if (levelA === "Cantrip") return -1;
 
     if (levelB === "Cantrip") return 1;
 
-    // Інші рівні сортуються числово
     const numA = parseInt(levelA.replace("Рівень ", "")) || 0;
 
     const numB = parseInt(levelB.replace("Рівень ", "")) || 0;

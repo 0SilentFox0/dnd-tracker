@@ -22,8 +22,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { SectionTab } from "@/lib/types/info-reference";
 import { cn } from "@/lib/utils";
+import type { SectionTab } from "@/types/info-reference";
 
 interface ReferenceSearchBarProps {
   searchQuery: string;

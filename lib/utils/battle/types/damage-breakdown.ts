@@ -1,7 +1,3 @@
-/**
- * Типи для breakdown урону
- */
-
 import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
 
 export interface DamageBreakdownResult {

@@ -1,5 +1,7 @@
 import type { LegacyEffect } from "./types";
 
+import { isRecord } from "@/lib/utils/common/is-record";
+
 const PERCENT_DAMAGE_KEYS = ["melee_damage", "ranged_damage", "counter_damage"];
 
 type RawEffect = {
@@ -12,7 +14,6 @@ type RawEffect = {
   isPercentage?: boolean;
 };
 
-const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
 
 export function parseLegacyEffects(combatStats: unknown, bonuses: unknown): LegacyEffect[] {
   const raw = isRecord(combatStats) && Array.isArray(combatStats.effects) ? (combatStats.effects as RawEffect[]) : [];

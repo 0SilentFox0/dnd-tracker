@@ -1,7 +1,3 @@
-/**
- * Обробка гілки промаху атаки (з опційною гарантованою шкодою)
- */
-
 import { applyBalanceDamageMultiplier } from "../../damage/balance-multiplier";
 import { applyMainActionUsed } from "../../participant";
 import { applyResistance } from "../../resistance";

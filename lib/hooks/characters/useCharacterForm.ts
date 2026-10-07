@@ -1,7 +1,3 @@
-/**
- * Хук для управління формою персонажа
- */
-
 import { useCallback, useMemo, useState } from "react";
 
 import { buildCharacterFormBindings } from "./useCharacterForm-bindings";
@@ -20,7 +16,6 @@ export interface UseCharacterFormOptions {
 }
 
 export function useCharacterForm(options: UseCharacterFormOptions) {
-  // Конвертуємо initialData в CharacterFormData якщо це Character
   const base = options.initialData
     ? "basicInfo" in options.initialData
       ? { ...defaultCharacterFormData, ...options.initialData }

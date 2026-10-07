@@ -1,7 +1,3 @@
-/**
- * Реалізація повного розрахунку урону з усіма модифікаторами
- */
-
 import type { DamageCalculationResult } from "../types/damage-calculations";
 
 import { AttackType, BATTLE_CONSTANTS } from "@/lib/constants/battle";

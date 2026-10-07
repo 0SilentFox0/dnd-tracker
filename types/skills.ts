@@ -1,6 +1,3 @@
-/**
- * Типи для скілів
- */
 import type { Ability, ConversionIssue } from "@/lib/utils/abilities/schema";
 
 export interface Skill {

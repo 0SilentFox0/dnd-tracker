@@ -37,7 +37,6 @@ export function DMSkillsPageClient({
 
   const confirm = useConfirm();
 
-  // Запити для скілів та основних навиків
   const { data: skills = initialSkills, isLoading: skillsLoading } = useSkills(
     campaignId,
     initialSkills
@@ -45,14 +44,12 @@ export function DMSkillsPageClient({
 
   const { data: mainSkills = [] } = useMainSkills(campaignId);
 
-  // Мутації видалення
   const deleteAllSkillsMutation = useDeleteAllSkills(campaignId);
 
   const deleteSkillMutation = useDeleteSkill(campaignId);
 
   const duplicateSkillMutation = useDuplicateSkill(campaignId);
 
-  // Групуємо скіли по основним навикам
   const groupedSkills = useMemo(() => {
     const groupedSkillsMap = groupSkillsByMainSkill(skills, mainSkills);
 

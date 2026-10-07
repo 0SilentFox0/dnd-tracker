@@ -1,7 +1,3 @@
-/**
- * Визначення списку вивчених заклинань з дерева прокачки персонажа
- */
-
 import type { CampaignSpellContext, CharacterFromPrisma } from "../types/participant";
 
 import { prisma } from "@/lib/db";

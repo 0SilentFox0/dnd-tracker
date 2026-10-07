@@ -6,7 +6,7 @@ import { ReferenceSectionAccordion } from "./ReferenceSectionAccordion";
 import { EmptyState } from "@/components/common/states";
 import { Button } from "@/components/ui/button";
 import { useInfoReferenceFilters } from "@/lib/hooks/common";
-import type { SkillForReference, SpellForReference } from "@/lib/types/info-reference";
+import type { SkillForReference, SpellForReference } from "@/types/info-reference";
 
 export interface InfoReferenceClientProps {
   campaignId: string;

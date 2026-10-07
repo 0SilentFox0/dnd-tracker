@@ -1,7 +1,3 @@
-/**
- * Компонент для характеристик персонажа
- */
-
 import { PrimaryAbilityPicker } from "./PrimaryAbilityPicker";
 
 import { Input } from "@/components/ui/input";

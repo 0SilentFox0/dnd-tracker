@@ -1,8 +1,8 @@
 import type { ConversionIssue, ConversionResult, ConvertOptions } from "./types";
 
 import type { Effect } from "@/lib/utils/abilities/schema";
+import { isRecord } from "@/lib/utils/common/is-record";
 
-const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
 
 const TARGET_KEYS = [
   ["min_targets", "minTargets"],

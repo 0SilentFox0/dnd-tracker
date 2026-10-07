@@ -179,9 +179,6 @@ type Memory = ReturnType<typeof memoryBattle>;
 function visible(scene: BattleScene, { withKnowledge = false } = {}) {
   const { battleLogMode: _m, battleLogCancelledFrom: _c, knowledge, ...rest } = wire(scene);
 
-  void _m;
-  void _c;
-
   return {
     ...rest,
     battleLog: rest.battleLog.map((e) => ({ ...e, timestamp: null })),

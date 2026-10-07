@@ -1,7 +1,3 @@
-/**
- * Збір payload для створення/оновлення скіла з даних форми useSkillForm.
- */
-
 import { SpellEnhancementType } from "@/lib/constants/spell-enhancement";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import type { GroupedSkillPayload } from "@/types/hooks";

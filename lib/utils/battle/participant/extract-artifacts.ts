@@ -1,7 +1,3 @@
-/**
- * Витягування екіпірованих артефактів з character.inventory
- */
-
 import type { Prisma } from "@prisma/client";
 
 import type { CharacterFromPrisma } from "../types/participant";

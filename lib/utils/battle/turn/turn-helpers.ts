@@ -1,24 +1,9 @@
-/**
- * Допоміжні функції для next-turn API: логування, перемога
- */
-
 import { ParticipantSide } from "@/lib/constants/battle";
 import {
   calculateAllyHpChangesOnVictory,
   checkVictoryConditions,
 } from "@/lib/utils/battle/battle-victory";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
-
-export function logTurnTiming(
-  _label?: string,
-  _startMs?: number,
-  _extra?: Record<string, number | string>,
-) {
-  void _label;
-  void _startMs;
-  void _extra;
-  // Логування вимкнено
-}
 
 export interface ApplyVictoryParams {
   updatedInitiativeOrder: BattleParticipant[];

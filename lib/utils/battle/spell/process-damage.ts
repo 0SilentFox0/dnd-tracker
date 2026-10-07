@@ -1,7 +1,3 @@
-/**
- * Розрахунок урону/лікування заклинання та застосування до цілей
- */
-
 import { applyBalanceDamageMultiplier } from "../damage/balance-multiplier";
 import { applyResistance } from "../resistance";
 import type { BattleSpell } from "../types/spell-process";

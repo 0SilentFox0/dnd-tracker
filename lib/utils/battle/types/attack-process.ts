@@ -1,13 +1,8 @@
-/**
- * Типи для обробки атаки в бою
- */
-
 import type { AttackRollResult } from "./attack";
 
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { BattleAction, BattleAttack, BattleParticipant } from "@/types/battle";
 
-/** Параметри для обробки атаки */
 export interface ProcessAttackParams {
   attacker: BattleParticipant;
   target: BattleParticipant;
@@ -23,7 +18,6 @@ export interface ProcessAttackParams {
   rng?: () => number;
 }
 
-/** Результат обробки атаки */
 export interface ProcessAttackResult {
   success: boolean;
   attackRoll: AttackRollResult;

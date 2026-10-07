@@ -1,7 +1,3 @@
-/**
- * Спільна логіка для розрахунку модифікаторів урону
- */
-
 import { AttackType, BATTLE_CONSTANTS } from "@/lib/constants/battle";
 
 /**

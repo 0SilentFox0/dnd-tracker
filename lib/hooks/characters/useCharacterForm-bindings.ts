@@ -1,7 +1,3 @@
-/**
- * Побудова об'єктів basicInfo, abilityScores, combatStats тощо для useCharacterForm.
- */
-
 import { type CharacterTypeValue } from "@/lib/constants/characters";
 import type { AbilityKey, CharacterFormData } from "@/types/characters";
 

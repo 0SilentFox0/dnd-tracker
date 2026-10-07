@@ -1,7 +1,3 @@
-/**
- * Утиліти для обробки атак в бою
- */
-
 export type { AttackResult, AttackRollResult } from "../types/attack";
 export { calculateAttackBonus, hasAdvantage, hasDisadvantage, predictAttackNumbers } from "./bonus";
 export { applyCriticalEffect } from "./critical";

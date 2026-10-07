@@ -53,7 +53,6 @@ export function AbilityPanel({ ability, path, actions }: { ability: Ability; pat
           onChange={(e) => {
             const { description: _d, ...rest } = ability;
 
-            void _d;
             actions.onChange(e.target.value ? { ...rest, description: e.target.value } : rest);
           }}
         />

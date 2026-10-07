@@ -62,7 +62,7 @@ Pusher app має бути в кластері `eu` (поруч із Vercel `fra
 Що зробити в новому проєкті:
 
 1. **Бакети:** `pnpm run upload-assets-to-supabase` створює `unit-icons`, `spell-icons`, `skill-icons`, `artifact-icons` і завантажує вміст `assets/`.
-2. **Перенести файли:** зі старого проєкту (якщо він ще доступний) через Dashboard — експорт/завантаження, або скриптом через Supabase Storage API (list objects у старому → download → upload у новому). Якщо є локальна папка **`assets/`** з підпапками `unit-icons`, `spell-icons`, `skill-icons`, можна створити бакети і завантажити її вміст однією командою: `pnpm run upload-assets-to-supabase`. Інакше — `pnpm run migrate-unit-icons-to-supabase`, `migrate-spell-icons-to-supabase`, `migrate-skill-icons-to-supabase` для нового проєкту (якщо в БД є зовнішні URL).
+2. **Перенести файли:** зі старого проєкту (якщо він ще доступний) через Dashboard — експорт/завантаження, або скриптом через Supabase Storage API (list objects у старому → download → upload у новому). Якщо є локальна папка **`assets/`** з підпапками `unit-icons`, `spell-icons`, `skill-icons`, можна створити бакети і завантажити її вміст однією командою: `pnpm run upload-assets-to-supabase`. Інакше завантажте файли в бакети вручну.
 
 ## 6. (Опційно) Відновити дані з бекапу
 

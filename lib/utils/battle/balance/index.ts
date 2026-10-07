@@ -1,7 +1,3 @@
-/**
- * Баланс боїв: DPR/HP героїв і юнітів, масштабування ворогів, підбір складу.
- */
-
 export type { MagicMainSkillId } from "./dpr";
 export { getNonMagicBranchDpr, getSpellDprFromBranchLevels, MAGIC_MAIN_SKILL_IDS } from "./dpr";
 export type {

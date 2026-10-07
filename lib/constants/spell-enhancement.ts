@@ -1,6 +1,3 @@
-/**
- * Enum для типів покращення заклинання
- */
 export enum SpellEnhancementType {
   EFFECT_INCREASE = "effect_increase",
   TARGET_CHANGE = "target_change",

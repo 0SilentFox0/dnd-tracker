@@ -1,7 +1,3 @@
-/**
- * Обробка гілок заклинання: немає слота, no_target, dispel, промах по hit check
- */
-
 import { applyMainActionUsed } from "../participant";
 import type { BattleSpell,ProcessSpellResult } from "../types/spell-process";
 import {

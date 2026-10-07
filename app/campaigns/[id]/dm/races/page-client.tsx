@@ -29,13 +29,11 @@ export function DMRacesPageClient({
 
   const [createRaceDialogOpen, setCreateRaceDialogOpen] = useState(false);
 
-  // Запити для рас
   const { data: races = initialRaces, isLoading: racesLoading } = useRaces(
     campaignId,
     initialRaces
   );
 
-  // Мутації
   const createRaceMutation = useCreateRace(campaignId);
 
   const deleteRaceMutation = useDeleteRace(campaignId);

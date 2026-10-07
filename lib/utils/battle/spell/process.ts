@@ -1,7 +1,3 @@
-/**
- * Повна обробка заклинання з усіма модифікаторами та ефектами
- */
-
 import { type AttackFlow, fire, getP, put, settleDowned } from "../attack/process/ability-flow";
 import { applyMainActionUsed } from "../participant";
 import type {

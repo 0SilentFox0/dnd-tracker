@@ -1,7 +1,3 @@
-/**
- * Утиліти для роботи з активними ефектами в бою
- */
-
 import { ActiveEffect, BattleParticipant } from "@/types/battle";
 
 /**

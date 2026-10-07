@@ -1,7 +1,3 @@
-/**
- * Утиліти для роботи з модифікаторами артефактів
- */
-
 import type { ArtifactModifier } from "../types/participant";
 
 import {
@@ -11,7 +7,6 @@ import {
 
 export type { ArtifactModifier };
 
-/** Отримує значення модифікатора артефакта як рядок */
 export function getModifierValue(
   modifiers: ArtifactModifier[],
   modifierType: ArtifactModifierType,
@@ -23,7 +18,6 @@ export function getModifierValue(
   );
 }
 
-/** Отримує опціональне значення модифікатора артефакта */
 export function getOptionalModifierValue(
   modifiers: ArtifactModifier[],
   modifierType: ArtifactModifierType,

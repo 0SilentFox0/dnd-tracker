@@ -1,7 +1,3 @@
-/**
- * React Query hooks для роботи з основними навиками
- */
-
 import { useQuery } from "@tanstack/react-query";
 
 import {

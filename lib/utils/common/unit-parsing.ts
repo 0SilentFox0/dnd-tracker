@@ -26,7 +26,6 @@ export function parseArmorClass(value: string): number {
  * Формат: "18 (4к6 + 4)" або просто "18"
  */
 export function parseMaxHp(value: string): number {
-  // Спочатку шукаємо число перед дужками
   const beforeParentheses = value.match(/^(\d+)\s*\(/);
 
   if (beforeParentheses) {
@@ -70,24 +69,19 @@ export function parseAttacks(value: string): UnitAttack[] {
 
   const attacks: UnitAttack[] = [];
   
-  // Розділяємо по крапках з пробілом (різні атаки) або по комах якщо це одна атака з кількома частинами
-  // Спочатку пробуємо розділити по крапках
   let attackStrings = value.split(/\.\s+/).map((s) => s.trim()).filter(Boolean);
   
   // Якщо не знайшли крапок, розділяємо по комах
   if (attackStrings.length === 1 && value.includes(",")) {
-    // Може бути одна атака з кількома частинами через кому
     attackStrings = [value];
   }
 
   for (const attackStr of attackStrings) {
-    // Шукаємо назву атаки, бонус, урон та тип
     // Формат: "Назва +бонус, урон тип" або "Назва +бонус, урон"
     const bonusMatch = attackStr.match(/\+(\d+)/);
 
     const damageMatch = attackStr.match(/(\d+[кk]?\d+[\+\-]?\d*)/i);
     
-    // Назва - все до першого "+" або до першої коми
     let name = "";
 
     const plusIndex = attackStr.indexOf("+");
@@ -106,7 +100,6 @@ export function parseAttacks(value: string): UnitAttack[] {
 
     const attackBonus = bonusMatch ? parseInt(bonusMatch[1], 10) : 0;
     
-    // Визначаємо тип урону
     let damageType = "bludgeoning";
 
     const lowerStr = attackStr.toLowerCase();
@@ -123,7 +116,6 @@ export function parseAttacks(value: string): UnitAttack[] {
       damageType = "cold";
     }
 
-    // Нормалізуємо формат кубиків (к -> d)
     const damageDice = damageMatch ? damageMatch[1].replace(/к/g, "d").replace(/k/g, "d") : "1d4";
 
     attacks.push({
@@ -147,14 +139,12 @@ export function parseSpecialAbilities(value: string): UnitSpecialAbility[] {
 
   const abilities: UnitSpecialAbility[] = [];
   
-  // Розділяємо по крапках або нових рядках
   const abilityStrings = value
     .split(/[.;]\s+/)
     .map((s) => s.trim())
     .filter(Boolean);
 
   for (const abilityStr of abilityStrings) {
-    // Шукаємо назву та опис
     const colonIndex = abilityStr.indexOf(":");
 
     if (colonIndex > 0) {
@@ -168,7 +158,6 @@ export function parseSpecialAbilities(value: string): UnitSpecialAbility[] {
         type: "passive",
       });
     } else {
-      // Якщо немає двокрапки, весь рядок - це опис
       abilities.push({
         name: abilityStr.substring(0, 50) + (abilityStr.length > 50 ? "..." : ""),
         description: abilityStr,

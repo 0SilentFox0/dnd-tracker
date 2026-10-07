@@ -1,17 +1,6 @@
 /**
- * Спільний обробник помилок для API routes.
- *
- * Замінює ~94 однотипні catch-блоки у `app/api/**` (CODE_AUDIT 2.1, 3.3):
- *  - structured лог з контекстом замість `console.error("Error X:", error)`,
- *  - ZodError → 400 з `error.issues`,
- *  - Prisma P2025 (not found) → 404,
- *  - Prisma P2003 (FK violation) → 400 (generic; domain-specific повідомлення
- *    залишаються у route — можна перевіряти Prisma error раніше і повертати
- *    кастомну відповідь, перш ніж делегувати сюди),
- *  - інше → 500 з generic повідомленням (без витоку деталей у відповідь).
- *
- * Усі error details (stack, message, prisma code) логуються; назовні
- * відправляється лише generic статус, щоб не витікали внутрішні деталі.
+ * Спільний обробник помилок API routes: ZodError → 400 з `issues`, Prisma P2025 → 404, P2003 → 400,
+ * інше → 500 з generic повідомленням. Деталі (stack, message, prisma code) лише в лозі, не у відповіді.
  */
 
 import { NextResponse } from "next/server";

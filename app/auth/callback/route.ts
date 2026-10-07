@@ -31,7 +31,6 @@ export async function GET(request: Request) {
 
   const error = requestUrl.searchParams.get('error')
 
-  // Якщо є помилка від OAuth провайдера
   if (error) {
     console.error('OAuth error:', error)
 
@@ -47,7 +46,6 @@ export async function GET(request: Request) {
   try {
     const supabase = await createClient()
     
-    // Обмінюємо код на сесію
     const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
     
     if (exchangeError) {
@@ -56,7 +54,6 @@ export async function GET(request: Request) {
       return NextResponse.redirect(`${origin}/sign-in?error=exchange_failed`)
     }
 
-    // Отримуємо користувача після обміну
     const {
       data: { user },
       error: userError,
@@ -68,14 +65,12 @@ export async function GET(request: Request) {
       return NextResponse.redirect(`${origin}/sign-in?error=user_not_found`)
     }
 
-    // Створюємо або оновлюємо користувача в базі даних
     try {
       let dbUser = await prisma.user.findUnique({
         where: { id: user.id },
       })
 
       if (!dbUser) {
-        // Створюємо нового користувача
         dbUser = await prisma.user.create({
           data: {
             id: user.id,
@@ -85,7 +80,6 @@ export async function GET(request: Request) {
           },
         })
       } else {
-        // Оновлюємо існуючого користувача
         dbUser = await prisma.user.update({
           where: { id: user.id },
           data: {
@@ -100,7 +94,6 @@ export async function GET(request: Request) {
       // Продовжуємо навіть якщо є помилка з базою - користувач все одно авторизований
     }
 
-    // Перенаправляємо на campaigns
     return NextResponse.redirect(`${origin}/campaigns`)
   } catch (error) {
     console.error('Unexpected error in callback:', error)

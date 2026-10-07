@@ -1,7 +1,3 @@
-/**
- * Дефолтні значення форми персонажа для useCharacterForm
- */
-
 import { CharacterType } from "@/lib/constants/characters";
 import type { CharacterFormData } from "@/types/characters";
 

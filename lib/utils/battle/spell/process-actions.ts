@@ -1,7 +1,3 @@
-/**
- * Побудова BattleAction для різних результатів заклинання
- */
-
 import type { BattleSpell } from "../types/spell-process";
 import type { SpellCalculation } from "./process-damage";
 

@@ -46,18 +46,7 @@ export function useDeleteUnit(campaignId: string) {
   });
 }
 
-export function useUpdateUnit(campaignId: string, unitId: string) {
-  return useCrudMutation({
-    mutationFn: (data: Partial<Unit>) => updateUnit(campaignId, unitId, data),
-    invalidateKeys: [
-      ["units", campaignId],
-      ["unit", campaignId, unitId],
-    ],
-  });
-}
-
-// invalidates ["unit", campaignId, unitId] from variables, so not useCrudMutation
-export function useUpdateUnitAny(campaignId: string) {
+export function useUpdateUnit(campaignId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({

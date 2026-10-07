@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 
-import { useUpdateUnitAny } from "./useUnits";
+import { useUpdateUnit } from "./useUnits";
 
 import { planQuickStatUpdate, type QuickStatField } from "@/lib/utils/units/quick-stats";
 import type { Unit } from "@/types/units";
 
 export function useUnitQuickStats(unit: Unit, campaignId: string, primaryAttackIndex: number) {
-  const update = useUpdateUnitAny(campaignId);
+  const update = useUpdateUnit(campaignId);
 
   // Uncontrolled inputs reset to the server value by bumping their key, so typing keeps focus.
   const [epochs, setEpochs] = useState<Record<QuickStatField, number>>({ ac: 0, init: 0, dice: 0 });

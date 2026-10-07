@@ -1,7 +1,6 @@
 export { useSpellFormSync } from "./useSpellFormSync";
 export { useSpellGroupActions } from "./useSpellGroupActions";
 export { useSpellImport } from "./useSpellImport";
-export type { Spell, SpellGroup } from "./useSpells";
 export {
   useCreateSpell,
   useCreateSpellGroup,
@@ -9,9 +8,7 @@ export {
   useDeleteSpell,
   useDeleteSpellsByLevel,
   useMoveSpellToGroup,
-  useRemoveAllSpellsFromGroup,
   useRemoveSpellFromGroup,
-  useRenameSpellGroup,
   useSpell,
   useSpellGroups,
   useSpells,

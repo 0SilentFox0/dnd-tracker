@@ -1,7 +1,3 @@
-/**
- * API сервіс для роботи з основними навиками
- */
-
 import { createCampaignCrudApi } from "@/lib/api/client";
 import type { MainSkill, MainSkillFormData } from "@/types/main-skills";
 

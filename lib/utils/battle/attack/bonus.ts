@@ -1,7 +1,3 @@
-/**
- * Бонус до атаки, Advantage, Disadvantage
- */
-
 import { AttackType } from "@/lib/constants/battle";
 import { collectModifiers, findFlags, statWithModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
@@ -47,7 +43,6 @@ export function hasDisadvantage(
   participants: BattleParticipant[] = [attacker],
   opts: { extra?: StaticEffect[]; targetId?: string; targetExtra?: StaticEffect[] } = {},
 ): boolean {
-  void _attack;
 
   const ps = withSelf(participants, attacker);
 

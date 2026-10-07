@@ -65,6 +65,10 @@ const eslintConfig = defineConfig([
         },
       ],
       "@typescript-eslint/no-namespace": "off",
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_", ignoreRestSiblings: true },
+      ],
       "@typescript-eslint/no-restricted-types": "warn",
       "simple-import-sort/imports": [
         "error",

@@ -26,7 +26,6 @@ export default async function DMSkillsPage({
     },
   });
 
-  // Перетворюємо дані з Prisma у правильний тип Skill
   const transformedSkills = skills.map((row) => withAbilitySummary("skill", row)).map((skill) => ({
     ...skill,
     spellEnhancementTypes: Array.isArray(skill.spellEnhancementTypes)

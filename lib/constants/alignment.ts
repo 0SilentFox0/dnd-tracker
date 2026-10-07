@@ -1,7 +1,3 @@
-/**
- * Константи для світоглядів D&D 5e
- */
-
 export const ALIGNMENTS = [
   "Lawful Good",
   "Neutral Good",

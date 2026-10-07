@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import { useDeleteAllUnits, useDeleteUnit, useUnits, useUpdateUnitAny } from "./useUnits";
+import { useDeleteAllUnits, useDeleteUnit, useUnits, useUpdateUnit } from "./useUnits";
 
 import { useConfirm } from "@/lib/hooks/common";
 import { useRaces } from "@/lib/hooks/races";
@@ -20,7 +20,7 @@ export function useUnitsList(campaignId: string, initialUnits: Unit[]) {
 
   const deleteOne = useDeleteUnit(campaignId);
 
-  const update = useUpdateUnitAny(campaignId);
+  const update = useUpdateUnit(campaignId);
 
   const [query, setQuery] = useState("");
 

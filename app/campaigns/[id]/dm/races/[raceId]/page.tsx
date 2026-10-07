@@ -26,7 +26,6 @@ export default async function EditRacePage({
     redirect(`/campaigns/${id}/dm/races`);
   }
 
-  // Конвертуємо Prisma дані в формат Race
   const { abilities, issues: abilityIssues } = readAbilities("race", raceData);
 
   const race: Race = {

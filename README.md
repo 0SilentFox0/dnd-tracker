@@ -302,11 +302,6 @@ npx prisma generate      # Генерація Prisma Client
 npx prisma migrate dev   # Створення нової міграції (тільки локально)
 pnpm migrate:deploy      # Застосування міграцій вручну (DIRECT_URL з .env.local); production-збірка з main робить це сама
 npx prisma studio        # Відкриття Prisma Studio
-
-# Icons in Supabase Storage (потрібен SUPABASE_SERVICE_ROLE_KEY)
-pnpm run migrate-spell-icons-to-supabase [campaignId]   # Іконки заклинань → bucket spell-icons
-pnpm run migrate-skill-icons-to-supabase [campaignId] # Іконки скілів і main skills → bucket skill-icons
-pnpm run migrate-unit-icons-to-supabase [campaignId]  # Аватари юнітів → bucket unit-icons
 ```
 
 **Примітка**: Vercel запускає `node scripts/vercel-build.mjs`: `prisma migrate deploy` виконується лише в production-збірці з `main` (через `DIRECT_URL`). Деталі: `docs/VERCEL.md`.

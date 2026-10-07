@@ -1,7 +1,3 @@
-/**
- * Типи для React hooks
- */
-
 import type { SpellEnhancementType } from "@/lib/constants/spell-enhancement";
 import type { Ability } from "@/lib/utils/abilities/schema";
 

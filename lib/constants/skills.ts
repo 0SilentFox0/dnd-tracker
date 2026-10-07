@@ -1,6 +1,3 @@
-/**
- * Константи для навичок D&D 5e
- */
 import { CORE_ABILITY_SCORES } from "./abilities";
 
 export const DND_SKILLS = [
@@ -24,7 +21,6 @@ export const DND_SKILLS = [
   "survival",
 ] as const;
 
-// Витягуємо основні характеристики для saving throws (перші 6 елементів)
 const BASE_ABILITIES = CORE_ABILITY_SCORES;
 
 export const DND_SAVING_THROWS = [

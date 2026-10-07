@@ -1,7 +1,3 @@
-/**
- * Експорт всіх констант D&D 5e
- */
-
 export * from "./abilities";
 export * from "./alignment";
 export * from "./artifacts";

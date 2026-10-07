@@ -1,7 +1,3 @@
-/**
- * Допоміжні функції для breakdown урону: резист скіли, рядки по цілі
- */
-
 import {
   applyResistance,
   getCombinedResistancePercent,

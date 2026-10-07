@@ -118,7 +118,6 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
                     const modifiers =
                       passiveAbility.statModifiers?.[ability.key];
 
-                    // Визначаємо яку іконку показувати (тільки одну)
                     let iconToShow:
                       | "bonus"
                       | "nonNegative"

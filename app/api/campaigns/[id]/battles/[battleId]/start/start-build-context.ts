@@ -1,7 +1,3 @@
-/**
- * Побудова campaign context для start battle: збір skill/artifact IDs, batch load, мапи
- */
-
 import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/db";

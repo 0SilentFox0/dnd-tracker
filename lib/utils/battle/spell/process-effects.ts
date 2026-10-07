@@ -1,6 +1,3 @@
-/**
- * Застосування ефектів заклинання: DOT, дебафи/бафи з тривалістю, крадіжка мани
- */
 import { addActiveEffect } from "../battle-effects";
 import type { BattleSpell } from "../types/spell-process";
 

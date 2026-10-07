@@ -1,6 +1,7 @@
 import type { ConversionIssue } from "./types";
 
 import type { AttackKind, Condition, Limits, Trigger } from "@/lib/utils/abilities/schema";
+import { isRecord } from "@/lib/utils/common/is-record";
 
 export interface MappedTrigger {
   trigger: Trigger;
@@ -39,7 +40,6 @@ const SIMPLE: Record<string, Trigger> = {
 
 const SEMANTIC_CHANGE = new Set(["beforeEnemyAttack", "afterEnemyAttack", "beforeEnemySpellCast", "afterEnemySpellCast"]);
 
-const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
 
 function mapModifiers(m: unknown, out: MappedTrigger) {
   if (!isRecord(m)) return;

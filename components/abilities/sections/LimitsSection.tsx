@@ -31,7 +31,6 @@ export function LimitsSection({ ability, path, onChange }: AbilitySectionProps) 
 
     const { limits: _l, ...rest } = ability;
 
-    void _l;
     onChange(Object.keys(next).length ? { ...rest, limits: next } : rest);
   };
 
