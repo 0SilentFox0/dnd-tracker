@@ -44,6 +44,15 @@ describe("updateSession", () => {
     expect(res.status).toBe(403);
   });
 
+  it("/auth/signout — без redirect на /sign-in, CSRF-перевірка діє", async () => {
+    signedOut();
+
+    const ok = await updateSession(request("/auth/signout", { method: "POST", origin: "http://app.test" }));
+
+    expect(ok.headers.get("location")).toBeNull();
+    expect((await updateSession(request("/auth/signout", { method: "POST", origin: "http://evil.test" }))).status).toBe(403);
+  });
+
   it("сторінка без сесії — redirect на /sign-in", async () => {
     signedOut();
 

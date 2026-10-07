@@ -16,6 +16,8 @@ import { createServerClient } from '@supabase/ssr'
  * API клієнтів) — пропускаємо, оскільки auth cookie все одно
  * захистить (без cookie немає сесії).
  */
+const SIGN_OUT_PATH = "/auth/signout";
+
 export function rejectCrossOriginMutation(request: NextRequest): NextResponse | null {
   const method = request.method.toUpperCase();
 
@@ -23,7 +25,9 @@ export function rejectCrossOriginMutation(request: NextRequest): NextResponse | 
     return null;
   }
 
-  if (!request.nextUrl.pathname.startsWith("/api/")) return null;
+  const { pathname } = request.nextUrl;
+
+  if (!pathname.startsWith("/api/") && pathname !== SIGN_OUT_PATH) return null;
 
   const origin = request.headers.get("origin");
 
@@ -58,7 +62,8 @@ export async function updateSession(request: NextRequest) {
   if (csrfReject) return csrfReject;
 
   // Routes check the session themselves (401) and refresh the token through their own server client.
-  if (request.nextUrl.pathname.startsWith('/api/')) return NextResponse.next()
+  // The sign-out route must receive its POST as is (a redirect to /sign-in would downgrade it) and clears the cookies itself.
+  if (request.nextUrl.pathname.startsWith('/api/') || request.nextUrl.pathname === SIGN_OUT_PATH) return NextResponse.next()
 
   let supabaseResponse = NextResponse.next({
     request,
