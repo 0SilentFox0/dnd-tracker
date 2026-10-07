@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { useBattle, useDeleteBattle, useUpdateBattle } from "../useBattles";
@@ -10,6 +10,7 @@ import { useFairBalance } from "./useFairBalance";
 import { ParticipantSide, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import { CharacterType } from "@/lib/constants/characters";
 import { useConfirm, useNotify } from "@/lib/hooks/common";
+import { sharedEnemyRace } from "@/lib/utils/battle/balance/setup";
 import type { BattlePreparationParticipant } from "@/types/battle";
 import type { EditBattleCharacter, EditBattleUnit } from "@/types/battle-setup";
 
@@ -124,7 +125,9 @@ export function useEditBattleData(campaignId: string, battleId: string) {
 
   const { data: entityStats } = useBattleBalanceStats(campaignId);
 
-  const fair = useFairBalance(participants, entityStats);
+  const enemyRaceId = useMemo(() => sharedEnemyRace(participants, entityStats), [participants, entityStats]);
+
+  const fair = useFairBalance(participants, entityStats, enemyRaceId);
 
   const playerCharacters = characters.filter(
     (c) => c.type === CharacterType.PLAYER && c.controlledBy !== null,

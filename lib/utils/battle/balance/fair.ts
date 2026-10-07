@@ -53,6 +53,7 @@ export interface FairScaling {
   hpScale: number;
   dmgScale: number;
   units: Record<string, UnitScale>;
+  fixed: Power;
   hint: BalanceHint | null;
 }
 
@@ -167,15 +168,17 @@ function withDelta(entries: Entry[], unit: UnitStats, delta: number): Entry[] {
   return next;
 }
 
-function suggestHint(kind: "weak" | "excess", target: Power, entries: Entry[], pool: UnitStats[], weakest: TierCeilings): BalanceHint | null {
+type ScaleFn = (entries: Entry[]) => ReturnType<typeof scaleEntries>;
+
+function suggestHint(kind: "weak" | "excess", target: Power, entries: Entry[], pool: UnitStats[], scale: ScaleFn): BalanceHint | null {
   let current = entries;
 
-  let fit = misfit(target, scaleEntries(target, current, weakest).reached);
+  let fit = misfit(target, scale(current).reached);
 
   const changes = new Map<string, BalanceHintChange>();
 
   for (let step = 0; step < HINT_MAX_STEPS; step++) {
-    const verdict = verdictOf(target, scaleEntries(target, current, weakest).reached);
+    const verdict = verdictOf(target, scale(current).reached);
 
     if (verdict !== kind) break;
 
@@ -195,7 +198,7 @@ function suggestHint(kind: "weak" | "excess", target: Power, entries: Entry[], p
 
         const entries = withDelta(current, unit, delta);
 
-        const f = misfit(target, scaleEntries(target, entries, weakest).reached);
+        const f = misfit(target, scale(entries).reached);
 
         if (f < fit - 1e-9 && (!best || f < best.fit)) best = { unit, entries, fit: f };
       }
@@ -218,7 +221,10 @@ function suggestHint(kind: "weak" | "excess", target: Power, entries: Entry[], p
   return list.length > 0 ? { kind, changes: list } : null;
 }
 
-export function computeFairScaling(party: PartyPower, roster: RosterEntry[], library: UnitStats[], hintPool: UnitStats[] = library): FairScaling {
+const ZERO: Power = { hp: 0, dpr: 0 };
+
+/** `fixed` — сила ворогів, що не масштабуються (NPC-персонажі): входить у базу й досягнуту силу, а масштабовані юніти добирають решту цілі. */
+export function computeFairScaling(party: PartyPower, roster: RosterEntry[], library: UnitStats[], hintPool: UnitStats[] = library, fixed: Power = ZERO): FairScaling {
   const target = targetEnemyPower(party);
 
   const byId = new Map(library.map((u) => [u.unitId, u]));
@@ -226,16 +232,24 @@ export function computeFairScaling(party: PartyPower, roster: RosterEntry[], lib
   const entries = resolveEntries(roster, byId);
 
   if (entries.length === 0 || party.dpr <= 0 || party.hp <= 0) {
-    return { verdict: "empty", target, base: { hp: 0, dpr: 0 }, reached: { hp: 0, dpr: 0 }, hpScale: 1, dmgScale: 1, units: {}, hint: null };
+    return { verdict: "empty", target, base: { hp: 0, dpr: 0 }, reached: { hp: 0, dpr: 0 }, hpScale: 1, dmgScale: 1, units: {}, fixed, hint: null };
   }
 
   const weakest = weakestPerTier(library);
 
-  const { base, hpScale, dmgScale, units, reached } = scaleEntries(target, entries, weakest);
+  const scalable: Power = { hp: Math.max(0, target.hp - fixed.hp), dpr: Math.max(0, target.dpr - fixed.dpr) };
+
+  const scale: ScaleFn = (list) => {
+    const r = scaleEntries(scalable, list, weakest);
+
+    return { ...r, base: { hp: r.base.hp + fixed.hp, dpr: r.base.dpr + fixed.dpr }, reached: { hp: r.reached.hp + fixed.hp, dpr: r.reached.dpr + fixed.dpr } };
+  };
+
+  const { base, hpScale, dmgScale, units, reached } = scale(entries);
 
   const verdict = verdictOf(target, reached);
 
-  const hint = verdict === "weak" || verdict === "excess" ? suggestHint(verdict, target, entries, hintPool, weakest) : null;
+  const hint = verdict === "weak" || verdict === "excess" ? suggestHint(verdict, target, entries, hintPool, scale) : null;
 
-  return { verdict, target, base, reached, hpScale, dmgScale, units, hint };
+  return { verdict, target, base, reached, hpScale, dmgScale, units, fixed, hint };
 }

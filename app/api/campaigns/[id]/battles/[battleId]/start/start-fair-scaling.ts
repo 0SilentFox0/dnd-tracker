@@ -1,5 +1,5 @@
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
-import { computeFairScaling, type PartyPower } from "@/lib/utils/battle/balance";
+import { computeFairScaling, type PartyPower, type Power } from "@/lib/utils/battle/balance";
 import { heroPower } from "@/lib/utils/battle/balance/hero-power";
 import { loadUnitLibraryStats } from "@/lib/utils/battle/balance/unit-library";
 import type { CampaignSpellContext } from "@/lib/utils/battle/types/participant";
@@ -21,6 +21,8 @@ export async function scaleEnemiesForFairBattle(campaignId: string, slots: Start
 
   const party: PartyPower = { dpr: 0, hp: 0, heroCount: 0 };
 
+  const fixed: Power = { hp: 0, dpr: 0 };
+
   const roster = new Map<string, number>();
 
   slots.forEach((slot, i) => {
@@ -30,18 +32,28 @@ export async function scaleEnemiesForFairBattle(campaignId: string, slots: Start
       return;
     }
 
-    if (slot.side !== ParticipantSide.ALLY) return;
+    if (slot.side !== ParticipantSide.ALLY) {
+      if (slot.type === ParticipantSourceType.CHARACTER) {
+        const { dpr, hp } = heroPower(built[i], slot.character, campaignContext).stats;
+
+        fixed.dpr += dpr;
+        fixed.hp += hp;
+      }
+
+      return;
+    }
 
     const stats = slot.type === ParticipantSourceType.CHARACTER ? heroPower(built[i], slot.character, campaignContext).stats : byId.get(slot.unit.id);
 
     if (stats) {
       party.dpr += stats.dpr;
       party.hp += "hp" in stats ? stats.hp : 0;
+
       if (slot.type === ParticipantSourceType.CHARACTER) party.heroCount += 1;
     }
   });
 
-  const scaling = computeFairScaling(party, [...roster].map(([unitId, quantity]) => ({ unitId, quantity })), library);
+  const scaling = computeFairScaling(party, [...roster].map(([unitId, quantity]) => ({ unitId, quantity })), library, library, fixed);
 
   if (scaling.verdict === "empty") return built;
 

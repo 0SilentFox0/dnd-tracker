@@ -1,4 +1,4 @@
-import { computeFairScaling, type FairScaling, type PartyPower } from "./fair";
+import { computeFairScaling, type FairScaling, type PartyPower, type Power } from "./fair";
 import type { UnitStats } from "./stats";
 
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
@@ -48,7 +48,24 @@ export function setupFairScaling(participants: SetupBalanceParticipant[], stats:
 
   const roster = participants.filter((p) => p.side === ParticipantSide.ENEMY && p.type === ParticipantSourceType.UNIT).map((p) => ({ unitId: p.id, quantity: p.quantity ?? 1 }));
 
+  const fixed = participants.reduce<Power>((a, p) => {
+    const s = p.side === ParticipantSide.ENEMY && p.type !== ParticipantSourceType.UNIT ? stats.characterStats[p.id] : undefined;
+
+    return s ? { hp: a.hp + s.hp, dpr: a.dpr + s.dpr } : a;
+  }, { hp: 0, dpr: 0 });
+
   const pool = raceId ? library.filter((u) => u.raceId === raceId) : library;
 
-  return { party, scaling: computeFairScaling(party, roster, library, pool) };
+  return { party, scaling: computeFairScaling(party, roster, library, pool, fixed) };
+}
+
+/** The edit page has no race picker: hints follow the race when every enemy unit shares it. */
+export function sharedEnemyRace(participants: SetupBalanceParticipant[], stats: SetupBalanceStats | null | undefined): string | null {
+  const races = new Set<string | null>();
+
+  for (const p of participants) if (p.side === ParticipantSide.ENEMY && p.type === ParticipantSourceType.UNIT) races.add(stats?.unitStats[p.id]?.raceId ?? null);
+
+  const [only] = races;
+
+  return races.size === 1 ? (only ?? null) : null;
 }

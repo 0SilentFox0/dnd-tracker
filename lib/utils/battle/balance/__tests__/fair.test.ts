@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { HERO_EDGE, HIT_RATE, MAX_PICK_TOTAL, SCALE_MAX, SCALE_MIN, TARGET_ROUNDS } from "@/lib/constants/battle-balance";
 import { computeFairScaling, type PartyPower, pickEnemyRoster, type UnitStats } from "@/lib/utils/battle/balance";
+import { sharedEnemyRace } from "@/lib/utils/battle/balance/setup";
 
 const unit = (unitId: string, level: number, hp: number, dpr: number, raceId: string | null = null): UnitStats => ({ unitId, name: unitId, level, hp, dpr, kpi: dpr / hp, raceId });
 
@@ -187,5 +188,24 @@ describe("pickEnemyRoster: межі та чесність", () => {
 
     expect(pick).not.toBeNull();
     expect(Math.abs((pick?.hpScale ?? 0) - 1) <= 0.25 && Math.abs((pick?.dmgScale ?? 0) - 1) <= 0.25).toBe(pick?.withinTolerance);
+  });
+});
+
+describe("sharedEnemyRace", () => {
+  const stats = {
+    characterStats: {},
+    unitStats: {
+      a: { dpr: 5, hp: 10, kpi: 0.5, name: "a", level: 1, raceId: "undead" },
+      b: { dpr: 5, hp: 10, kpi: 0.5, name: "b", level: 1, raceId: "undead" },
+      c: { dpr: 5, hp: 10, kpi: 0.5, name: "c", level: 1, raceId: "orc" },
+    },
+  };
+
+  const enemy = (id: string) => ({ id, type: "unit", side: "enemy", quantity: 1 });
+
+  it("спільна раса ворогів → вона; різні раси або жодних → null", () => {
+    expect(sharedEnemyRace([enemy("a"), enemy("b")], stats)).toBe("undead");
+    expect(sharedEnemyRace([enemy("a"), enemy("c")], stats)).toBeNull();
+    expect(sharedEnemyRace([], stats)).toBeNull();
   });
 });
