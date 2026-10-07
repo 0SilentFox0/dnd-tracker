@@ -2,6 +2,7 @@
  * Обробка гілки промаху атаки (з опційною гарантованою шкодою)
  */
 
+import { applyBalanceDamageMultiplier } from "../../damage/balance-multiplier";
 import { applyMainActionUsed } from "../../participant";
 import { applyResistance } from "../../resistance";
 import type { ProcessAttackResult } from "../../types/attack-process";
@@ -30,7 +31,7 @@ export function handleMiss(params: HandleMissParams): ProcessAttackResult {
 
   const target = getP(flow, targetId);
 
-  const guaranteedDamage = attack.guaranteedDamage ?? 0;
+  const guaranteedDamage = applyBalanceDamageMultiplier(getP(flow, attackerId), attack.guaranteedDamage ?? 0).damage;
 
   let actualGuaranteedDamage = 0;
 

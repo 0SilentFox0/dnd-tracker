@@ -3,7 +3,7 @@
  */
 
 import { calculateDamageWithModifiers } from "../../damage";
-import { applyBalanceDamageMultiplier } from "../../damage/balance-multiplier";
+import { applyBalanceDamageMultiplier, scaleAdditionalDamage } from "../../damage/balance-multiplier";
 import { heroAttackDamageParts, heroDamageContext } from "../../damage/hero-damage";
 import { applyHeroDmDamageMultiplier } from "../../damage/hero-dm-multiplier";
 import { applyResistance } from "../../resistance";
@@ -177,7 +177,7 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
 
   const { totalAdditionalDamage, additionalDamageBreakdown } = applyResistanceForAdditional(
     updatedTarget,
-    damageCalculation.additionalDamage,
+    scaleAdditionalDamage(updatedAttacker, damageCalculation.additionalDamage),
     dmgMult,
     allParticipants,
   );

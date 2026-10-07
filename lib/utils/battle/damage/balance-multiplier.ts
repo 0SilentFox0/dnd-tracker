@@ -12,3 +12,9 @@ export function applyBalanceDamageMultiplier(attacker: BattleParticipant, damage
 
   return multiplier === 1 ? { damage, multiplier } : { damage: Math.round(damage * multiplier), multiplier };
 }
+
+export function scaleAdditionalDamage(attacker: BattleParticipant, list: Array<{ type: string; value: number }>): Array<{ type: string; value: number }> {
+  const multiplier = balanceDamageMultiplier(attacker);
+
+  return multiplier === 1 ? list : list.map((d) => ({ ...d, value: Math.round(d.value * multiplier) }));
+}
