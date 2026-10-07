@@ -14,7 +14,7 @@ import {
 } from "@/lib/utils/abilities/editor";
 import { EFFECT_REGISTRY } from "@/lib/utils/abilities/registry/effects";
 import { TRIGGER_REGISTRY } from "@/lib/utils/abilities/registry/triggers";
-import { AbilitySchema, type EffectKind, type TriggerEvent } from "@/lib/utils/abilities/schema";
+import { type Ability, AbilitySchema, type EffectKind, type TriggerEvent } from "@/lib/utils/abilities/schema";
 
 const EVENTS = Object.keys(TRIGGER_REGISTRY) as TriggerEvent[];
 
@@ -83,5 +83,23 @@ describe("editor helpers", () => {
     const out = withFreshIds([{ id: "a1", ...base }, { id: "a1", ...base }], ["a1", "a2"]);
 
     expect(out.map((a) => a.id)).toEqual(["a3", "a4"]);
+  });
+
+  it("changeTriggerEvent: maxTargets живе лише на бонусній дії та дії, стаки не на пасивці", () => {
+    const a = { id: "a", name: "Т", trigger: { event: "bonusAction" }, maxTargets: 3, stackable: true, maxStacks: 2, effects: [{ kind: "note", text: "x" }] } as Ability;
+
+    expect(changeTriggerEvent(a, "action")).toMatchObject({ maxTargets: 3, stackable: true, maxStacks: 2 });
+
+    const hit = changeTriggerEvent(a, "hit");
+
+    expect(hit.maxTargets).toBeUndefined();
+    expect(hit.stackable).toBe(true);
+    expect(AbilitySchema.safeParse(hit).success).toBe(true);
+
+    const passive = changeTriggerEvent(a, "passive");
+
+    expect(passive).not.toHaveProperty("stackable");
+    expect(passive).not.toHaveProperty("maxStacks");
+    expect(AbilitySchema.safeParse(passive).success).toBe(true);
   });
 });

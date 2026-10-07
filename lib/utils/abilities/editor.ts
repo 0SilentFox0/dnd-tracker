@@ -105,9 +105,18 @@ export function newTrigger(event: TriggerEvent): Trigger {
 export function changeTriggerEvent(ability: Ability, event: TriggerEvent): Ability {
   const trigger = newTrigger(event);
 
-  const { limits, ...rest } = ability;
+  const { limits, maxTargets, stackable, maxStacks, ...rest } = ability;
 
-  return { ...rest, ...(event !== "passive" && limits && { limits }), trigger, effects: ability.effects.map((e) => fitToTrigger(e, trigger)) };
+  const button = event === "bonusAction" || event === "action";
+
+  return {
+    ...rest,
+    ...(event !== "passive" && limits && { limits }),
+    ...(event !== "passive" && stackable && { stackable }),
+    ...(event !== "passive" && stackable && maxStacks !== undefined && { maxStacks }),
+    ...(button && maxTargets !== undefined && { maxTargets }),
+    trigger, effects: ability.effects.map((e) => fitToTrigger(e, trigger)),
+  };
 }
 
 const segs = (path: string) => path.split(".").filter(Boolean);
