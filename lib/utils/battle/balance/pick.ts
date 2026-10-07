@@ -45,7 +45,7 @@ function* combinations<T>(items: T[], size: number, start = 0): Generator<T[]> {
  * Пріоритет: юніти тіру, близького до сили одного героя → кількість у [⌈N/2⌉, 2N] → менше різних юнітів.
  */
 export function pickEnemyRoster(party: PartyPower, library: UnitStats[], raceId?: string | null): PickResult | null {
-  const pool = raceId ? library.filter((u) => u.raceId === raceId) : library;
+  const pool = (raceId ? library.filter((u) => u.raceId === raceId) : library).filter((u) => u.hp > 0 && u.dpr > 0);
 
   const heroes = Math.max(1, party.heroCount);
 

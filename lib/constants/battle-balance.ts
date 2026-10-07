@@ -24,3 +24,15 @@ export const PICK_CANDIDATE_UNITS = 8;
 export const HINT_MAX_STEPS = 6;
 
 export const MAX_UNIT_QUANTITY = 20;
+
+/** Скільки цілей у середньому зачіпає дальня атака або AoE-заклинання юніта. */
+export const TYPICAL_TARGETS = 2;
+
+/** Нижня межа DPR і HP юніта, щоб нульові значення не ламали множники. */
+export const MIN_UNIT_STAT = 1;
+
+/** Верхня межа кількості ворогів у підібраному складі. */
+export const MAX_PICK_TOTAL = 14;
+
+/** Верхня межа розміру партії у запиті балансу. */
+export const MAX_BALANCE_ALLIES = 50;

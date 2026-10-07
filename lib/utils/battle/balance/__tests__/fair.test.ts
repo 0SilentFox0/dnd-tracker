@@ -145,3 +145,15 @@ describe("pickEnemyRoster", () => {
     expect(pick?.roster).toHaveLength(1);
   });
 });
+
+describe("юніти з нульовими значеннями", () => {
+  it("не псують стелі тіру та підбір", () => {
+    const lib = [unit("rat", 1, 8, 6), unit("ghost", 2, 0, 0), unit("orc", 3, 50, 22)];
+
+    const s = computeFairScaling({ dpr: 14, hp: 60, heroCount: 1 }, [{ unitId: "rat", quantity: 1 }], lib);
+
+    expect(s.units.rat.hpMult).toBeLessThanOrEqual(50 / 8);
+    expect(Number.isFinite(s.units.rat.dmgMult)).toBe(true);
+    expect(pickEnemyRoster({ dpr: 14, hp: 60, heroCount: 1 }, lib)?.roster.every((r) => r.unitId !== "ghost")).toBe(true);
+  });
+});

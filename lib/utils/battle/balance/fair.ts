@@ -69,6 +69,8 @@ export function weakestPerTier(library: UnitStats[]): TierCeilings {
   const byTier: TierCeilings = new Map();
 
   for (const u of library) {
+    if (u.hp <= 0 || u.dpr <= 0) continue;
+
     const cur = byTier.get(u.level);
 
     byTier.set(u.level, cur ? { hp: Math.min(cur.hp, u.hp), dpr: Math.min(cur.dpr, u.dpr) } : { hp: u.hp, dpr: u.dpr });
