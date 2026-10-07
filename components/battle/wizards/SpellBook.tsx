@@ -47,6 +47,7 @@ export function SpellBook({ book }: { book: Book }) {
               </button>
             ))}
           </div>
+          {book.allCount > 0 && <div className="hud-sc mt-3 text-sm">на всіх: {book.allCount}</div>}
           <button type="button" disabled={state.targetIds.length === 0} onClick={book.confirmTargets} className={cn(seal, "mt-auto")}>Далі · кидки</button>
         </>
       )}

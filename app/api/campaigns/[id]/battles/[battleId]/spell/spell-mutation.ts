@@ -2,12 +2,15 @@ import type { Spell } from "@prisma/client";
 
 import type { SpellRequestData } from "./cast-spell-schema";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { isActive } from "@/lib/utils/abilities/engine/participants";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { processSpell } from "@/lib/utils/battle/spell";
 import { appendSummonedUnitToInitiativeEnd } from "@/lib/utils/battle/spell/append-summoned-unit";
 import { mapDbSpellToBattleSpell } from "@/lib/utils/battle/spell/map-db-spell";
+import { participantSpellAllowsMultipleTargets } from "@/lib/utils/battle/spell/participant-spell-target-mode";
+import { expandSpellTargets, spellTargetingFor, validateSpellTargetCount } from "@/lib/utils/battle/spell/spell-targeting";
 import { BattleAccessError, battleActionToEvent, BattleRuleError } from "@/lib/utils/battle/store";
 import { assertNotPanicking } from "@/lib/utils/battle/turn";
 import { assertSpellRolls } from "@/lib/utils/battle/validation/dice-checks";
@@ -61,12 +64,24 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
       }
     }
 
-    assertSpellRolls(spellRow, data.damageRolls, data.targetIds.length);
+    const spellRef = { id: spellRow.id, groupId: spellRow.groupId, level: spellRow.level };
+
+    const targeting = spellTargetingFor(order, caster.basicInfo.id, spellRef);
+
+    const legacyMulti = participantSpellAllowsMultipleTargets(caster, spellRow.id);
+
+    if (!validateSpellTargetCount(targeting, data.targetIds.length, spellRow.type, legacyMulti)) {
+      throw new BattleRuleError("invalid_target", API_ERRORS.SPELL_TOO_MANY_TARGETS);
+    }
+
+    const targetIds = expandSpellTargets(order, caster.basicInfo.id, spellRef, data.targetIds);
+
+    assertSpellRolls(spellRow, data.damageRolls, targetIds.length);
 
     const result = processSpell({
       caster,
       spell: mapDbSpellToBattleSpell(spellRow),
-      targetIds: data.targetIds,
+      targetIds,
       allParticipants: order,
       currentRound: ctx.scene.round,
       battleId: ctx.scene.id,

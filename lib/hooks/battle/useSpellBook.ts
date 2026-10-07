@@ -8,7 +8,7 @@ import { useBattleScene } from "./useBattleScene";
 import { usePrefetchSpellsByIds, useSpells, useSpellsByIds } from "@/lib/hooks/spells";
 import { initialSpellFlow, spellFlow, spellPayload,type SpellPick } from "@/lib/utils/battle/flows";
 import { isUp } from "@/lib/utils/battle/participant/state";
-import { participantSpellAllowsMultipleTargets } from "@/lib/utils/battle/spell/participant-spell-target-mode";
+import { spellAllowsMultipleTargets, spellTargetingFor } from "@/lib/utils/battle/spell/spell-targeting";
 import { slotLevels } from "@/lib/utils/battle/view";
 import { diceSlots } from "@/lib/utils/common/dice";
 import { groupSpellsByLevel } from "@/lib/utils/spells/group-by-level";
@@ -47,14 +47,33 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
   const targets = order.filter((p) => isUp(p) || selected?.damageType === "heal");
 
+  const targetModeOf = (s: BookSpell): SpellPick["targetMode"] => {
+    if (s.type === "no_target") return "none";
+
+    if (s.type === "aoe") return "multi";
+
+    if (!caster) return "single";
+
+    const spell = { id: s.id, groupId: s.spellGroup?.id ?? null, level: s.level };
+
+    if (spellTargetingFor(order, caster.basicInfo.id, spell).mode === "all") return "all";
+
+    return spellAllowsMultipleTargets(caster, order, spell) ? "multi" : "single";
+  };
+
   const pickOf = (s: BookSpell): SpellPick => ({
     spellId: s.id,
     level: s.level,
-    targetMode: s.type === "no_target" ? "none" : s.type === "aoe" || (caster && participantSpellAllowsMultipleTargets(caster, s.id)) ? "multi" : "single",
+    targetMode: targetModeOf(s),
     needsHit: !!s.hitCheck,
     needsSaves: !!s.savingThrow,
     diceSlots: s.diceCount && s.diceType ? diceSlots(`${s.diceCount}${s.diceType}`) : [],
   });
+
+  const firstTarget = order.find((p) => p.basicInfo.id === state.targetIds[0]);
+
+  const allCount =
+    state.pick?.targetMode === "all" && firstTarget ? order.filter((p) => isUp(p) && p.basicInfo.side === firstTarget.basicInfo.side).length : 0;
 
   const send = useEffectEvent(async () => {
     if (!caster) return;
@@ -75,7 +94,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
   const firstUsable = (who: BattleParticipant) => slotLevels(who).find((l) => l.current > 0)?.level ?? 0;
 
   return {
-    state, spells, byLevel, selected, targets, slots: caster ? slotLevels(caster) : [],
+    state, spells, byLevel, selected, targets, allCount, slots: caster ? slotLevels(caster) : [],
     open: (level?: number, casterOverride?: BattleParticipant) => {
       const who = casterOverride ?? caster;
 

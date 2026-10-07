@@ -14,6 +14,7 @@ const DEFAULTS: Record<FlagKey, Record<string, unknown>> = {
   guaranteedHit: {},
   resistance: { damageType: "physical", percent: 25 },
   spellImmunity: { spellIds: [] },
+  spellTargeting: { mode: "area" },
   counterAttack: { attackKinds: [AttackType.MELEE], bonusPercent: 15 },
   seeEnemyHp: {},
   noNegativeMorale: {},

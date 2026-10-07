@@ -1,6 +1,6 @@
 import type { SpellCastData } from "@/types/api";
 
-export type SpellTargetMode = "none" | "single" | "multi";
+export type SpellTargetMode = "none" | "single" | "multi" | "all";
 
 export interface SpellPick {
   spellId: string;
@@ -68,7 +68,7 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
 
       return s.pick.targetMode === "none" ? afterTargets(s) : { ...s, step: "targets" };
     case "TOGGLE_TARGET": {
-      if (s.pick?.targetMode === "single") return { ...s, targetIds: [a.id], saves: {} };
+      if (s.pick?.targetMode === "single" || s.pick?.targetMode === "all") return { ...s, targetIds: [a.id], saves: {} };
 
       if (s.targetIds.includes(a.id)) {
         const { [a.id]: _gone, ...saves } = s.saves;

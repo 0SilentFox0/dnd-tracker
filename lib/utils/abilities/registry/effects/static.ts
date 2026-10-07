@@ -2,6 +2,7 @@ import { DURATION_FIELD, type FieldMeta, TARGET_FIELD } from "../fields";
 import { CONDITION_LABELS, DAMAGE_FILTER_LABELS, flatLabel, STAT_LABELS } from "../labels";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
+import { DEFAULT_AREA_TARGETS } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
 import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/participants";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/timed-effects";
@@ -109,6 +110,11 @@ export function describeFlag(e: Extract<Effect, { kind: "flag" }>): string {
       return e.percent >= 100 ? `імунітет: ${e.damageType}` : `опір ${e.damageType} ${e.percent}%`;
     case "spellImmunity":
       return `імунітет до заклинань (${e.spellIds.length})`;
+    case "spellTargeting": {
+      const scope = e.school ? `закляття школи ${e.school}` : e.spellIds ? `закляття (${e.spellIds.length})` : "закляття";
+
+      return e.mode === "all" ? `${scope} — на всіх` : `${scope} — по області (до ${e.maxTargets ?? DEFAULT_AREA_TARGETS} цілей)`;
+    }
     case "counterAttack":
       return `відсіч${e.attackKinds.includes(AttackType.RANGED) ? " (і на дальні)" : ""} +${e.bonusPercent}%`;
     case "seeEnemyHp":
@@ -129,6 +135,7 @@ export const FLAG_LABELS: Record<FlagKey, string> = {
   guaranteedHit: "Гарантоване влучання",
   resistance: "Опір / імунітет до шкоди",
   spellImmunity: "Імунітет до заклинань",
+  spellTargeting: "Режим цілей заклять",
   counterAttack: "Контратака",
   seeEnemyHp: "Бачить HP ворогів",
   noNegativeMorale: "Мораль не нижче 0",
@@ -157,6 +164,13 @@ export const FLAG_FIELDS: Record<FlagKey, readonly FieldMeta[]> = {
     { name: "percent", label: "%, 100 = імунітет", input: "number" },
   ],
   spellImmunity: [{ name: "spellIds", label: "Заклинання", input: "spells" }],
+  spellTargeting: [
+    { name: "mode", label: "Режим", input: "select", options: [{ value: "area", label: "по області" }, { value: "all", label: "на всіх" }] },
+    { name: "spellIds", label: "Заклинання", input: "spells", optional: true },
+    { name: "school", label: "Школа", input: "text", optional: true },
+    { name: "maxTargets", label: "Макс. цілей (область)", input: "number", optional: true },
+    { name: "maxLevel", label: "Макс. рівень закляття", input: "number", optional: true },
+  ],
   counterAttack: [
     { name: "attackKinds", label: "На атаки", input: "multiselect", options: COUNTER_KIND_OPTIONS },
     { name: "bonusPercent", label: "Бонус шкоди, %", input: "number" },

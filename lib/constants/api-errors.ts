@@ -11,6 +11,7 @@ export const API_ERRORS = {
   INVALID_QUERY: "Некоректні параметри запиту",
   INVALID_JSON: "Некоректний JSON у тілі запиту",
   TOO_MANY_REQUESTS: "Забагато запитів, спробуйте трохи згодом",
+  SPELL_TOO_MANY_TARGETS: "Забагато цілей для цього закляття",
   INTERNAL: "Внутрішня помилка сервера",
   FOREIGN_KEY: "Пов'язаний запис не існує",
   CAMPAIGN_NOT_ACTIVE: "Кампанія не активна",
