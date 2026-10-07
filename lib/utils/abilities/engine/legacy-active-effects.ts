@@ -2,6 +2,7 @@ import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { legacyDamageKindOf } from "@/lib/utils/abilities/schema/damage-kind";
 import type { ActiveEffect } from "@/types/battle";
 
+// Spell effects and snapshots of old battles still store `effects` as { type, value }; abilityEffects (e.g. from critical.ts) take precedence.
 export function legacyActiveEffectModifiers(ae: ActiveEffect): StaticEffect[] {
   const out: StaticEffect[] = [];
 
