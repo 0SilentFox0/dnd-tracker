@@ -117,6 +117,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
         battleId: ctx.scene.id,
         summonUnitId,
         casterSide: caster.basicInfo.side,
+        casterControlledBy: caster.basicInfo.controlledBy,
         orderAfterSpell: nextOrder,
       });
 

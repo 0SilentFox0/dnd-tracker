@@ -51,7 +51,7 @@ export async function applyAbilitySummons(
 
       const built = await createBattleParticipantFromUnit(unit as UnitFromPrisma, opts.battleId, owner.basicInfo.side, nextInstanceNumber(next, unit.id), racesById as Record<string, RaceRow>);
 
-      const withOwner = { ...built, battleData: { ...built.battleData, summonedBy: req.ownerId } };
+      const withOwner = { ...built, basicInfo: { ...built.basicInfo, controlledBy: owner.basicInfo.controlledBy }, battleData: { ...built.battleData, summonedBy: req.ownerId } };
 
       const { finalOrder, added } = appendToInitiativeEnd(next, withOwner);
 

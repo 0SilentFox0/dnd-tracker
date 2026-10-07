@@ -7,6 +7,7 @@ import { createAbilityActionMutation } from "@/app/api/campaigns/[id]/battles/[b
 import { createBonusActionMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/bonus-action/bonus-action-mutation";
 import { ParticipantSide, ParticipantSourceType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
+import { assertAccess, BattleAccess } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { joinParticipant, splitParticipant } from "@/lib/utils/battle/store/split-participant";
 import type { SummonDeps } from "@/lib/utils/battle/summon/ability-summons";
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
@@ -130,5 +131,32 @@ describe("raiseDead", () => {
     const c = { ...caster, battleData: { ...caster.battleData, resolvedAbilities: [angel] } };
 
     await expect(action(context({ participants: [c, dead("d1")] }), { participantId: "hero", abilityKey: angel.key, targetParticipantIds: ["d1"] })).rejects.toThrow(expect.objectContaining({ code: "invalid_target" }));
+  });
+});
+
+describe("summoned units are controlled by the summoner's player", () => {
+  const playerCaster: BattleParticipant = { ...caster, basicInfo: { ...caster.basicInfo, controlledBy: "user-1" } };
+
+  it("summon and raiseDead inherit controlledBy, so the player is the current controller", async () => {
+    const summoned = await bonus(context({ participants: [playerCaster, goblin] }), { participantId: "hero", abilityKey: gate.key });
+
+    const imp = summoned.participants.find((p) => p.basicInfo.sourceId === "u-imp") as BattleParticipant;
+
+    expect(imp.basicInfo.controlledBy).toBe("user-1");
+
+    const raised = await action(context({ participants: [playerCaster, dead("d1")] }), { participantId: "hero", abilityKey: raise.key, targetParticipantIds: ["d1"] });
+
+    expect(find(raised.participants, "d1").basicInfo.controlledBy).toBe("user-1");
+
+    const turn = context({ participants: [playerCaster, imp], userId: "user-1" });
+
+    expect(() => assertAccess(BattleAccess.CURRENT_CONTROLLER, { ...turn, scene: { ...turn.scene, turnIndex: 1 } })).not.toThrow();
+    expect(() => assertAccess(BattleAccess.CURRENT_CONTROLLER, { ...turn, userId: "someone", scene: { ...turn.scene, turnIndex: 1 } })).toThrow();
+  });
+
+  it("a DM-controlled summoner keeps DM control", async () => {
+    const out = await bonus(context({ participants: [caster, goblin] }), { participantId: "hero", abilityKey: gate.key });
+
+    expect((out.participants.find((p) => p.basicInfo.sourceId === "u-imp") as BattleParticipant).basicInfo.controlledBy).toBe(caster.basicInfo.controlledBy);
   });
 });

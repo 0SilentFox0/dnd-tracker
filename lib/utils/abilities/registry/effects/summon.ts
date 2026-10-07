@@ -38,7 +38,7 @@ export function applyRaiseDead(input: EffectApplyInput<Of<"raiseDead">>): Effect
 
     ps = updateParticipant(ps, id, (t) => ({
       ...t,
-      basicInfo: { ...t.basicInfo, side: owner.basicInfo.side },
+      basicInfo: { ...t.basicInfo, side: owner.basicInfo.side, controlledBy: owner.basicInfo.controlledBy },
       combatStats: { ...t.combatStats, status: CombatStatus.ACTIVE, currentHp: Math.max(1, Math.floor((t.combatStats.maxHp * effect.hpPercent) / 100)) },
       battleData: { ...t.battleData, activeEffects: [], summonedBy: ownerId },
       actionFlags: { hasUsedAction: false, hasUsedBonusAction: false, hasUsedReaction: false, hasExtraTurn: false },

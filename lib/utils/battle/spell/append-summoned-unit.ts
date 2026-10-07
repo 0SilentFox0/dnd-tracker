@@ -10,12 +10,13 @@ export async function appendSummonedUnitToInitiativeEnd(params: {
   battleId: string;
   summonUnitId: string;
   casterSide: ParticipantSide;
+  casterControlledBy?: string;
   orderAfterSpell: BattleParticipant[];
 }): Promise<{
   finalOrder: BattleParticipant[];
   summoned: BattleParticipant | null;
 }> {
-  const { campaignId, battleId, summonUnitId, casterSide, orderAfterSpell } =
+  const { campaignId, battleId, summonUnitId, casterSide, casterControlledBy, orderAfterSpell } =
     params;
 
   const unit = await prisma.unit.findUnique({
@@ -35,7 +36,9 @@ export async function appendSummonedUnitToInitiativeEnd(params: {
     instanceNumber,
   );
 
-  const { finalOrder, added } = appendToInitiativeEnd(orderAfterSpell, built);
+  const owned = casterControlledBy ? { ...built, basicInfo: { ...built.basicInfo, controlledBy: casterControlledBy } } : built;
+
+  const { finalOrder, added } = appendToInitiativeEnd(orderAfterSpell, owned);
 
   return { finalOrder, summoned: added };
 }

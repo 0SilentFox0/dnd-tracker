@@ -120,6 +120,16 @@ describe("spell mutation", () => {
     await expect(mutation()({ ...ctx, scene: { ...ctx.scene, pendingMoraleCheck: panic } }, body() as never)).rejects.toMatchObject({ code: "action_used" });
   });
 
+  it("spell summon gets the caster's controller", async () => {
+    const summon = vi.fn(async (params: { orderAfterSpell: unknown[] }) => ({ finalOrder: params.orderAfterSpell as never[], summoned: null }));
+
+    const m = createSpellMutation({ loadSpell: vi.fn(async () => ({ ...spellRow, summonUnitId: "u1" }) as Spell), summon: summon as never });
+
+    await m(context({ participants: [caster, goblin] }), body() as never);
+
+    expect(summon).toHaveBeenCalledWith(expect.objectContaining({ casterControlledBy: "user-1" }));
+  });
+
   describe("spellTargeting", () => {
     const withFlag = (mode: "area" | "all", extra: Partial<{ maxTargets: number }> = {}) => ({
       ...caster,

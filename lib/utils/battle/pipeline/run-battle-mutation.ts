@@ -76,7 +76,7 @@ export interface RunBattleMutationOptions<TBody> {
   mutate(ctx: BattleMutationContext, body: TBody): MutationResult | Promise<MutationResult>;
 }
 
-function assertAccess(access: BattleAccess, ctx: BattleMutationContext): void {
+export function assertAccess(access: BattleAccess, ctx: BattleMutationContext): void {
   if (access === BattleAccess.MEMBER || ctx.isDM) return;
 
   if (access === BattleAccess.DM) throw new BattleAccessError(403, "Лише DM");
