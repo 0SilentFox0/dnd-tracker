@@ -10,9 +10,6 @@ import { signed } from "@/lib/utils/format";
 export function stripTiming(effect: StaticEffect): StaticEffect {
   const { duration: _d, target: _t, ...rest } = effect;
 
-  void _d;
-  void _t;
-
   return rest as StaticEffect;
 }
 

@@ -1,6 +1,6 @@
 import type { Ability } from "@/lib/utils/abilities/schema";
+import { isRecord } from "@/lib/utils/common/is-record";
 
-const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
 
 /** CSV «Навички/Здібності» юніта → вміння-нотатки; бонусна дія не виконується автоматично. */
 export function specialAbilitiesToAbilities(list: unknown): Ability[] {

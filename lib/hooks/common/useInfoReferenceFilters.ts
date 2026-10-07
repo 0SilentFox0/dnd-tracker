@@ -2,12 +2,12 @@
 
 import { useDeferredValue, useMemo, useState } from "react";
 
-import type { SectionTab, SkillForReference, SpellForReference } from "@/types/info-reference";
 import {
   matchSearch,
   skillSearchText,
   spellSearchText,
 } from "@/lib/utils/info-reference";
+import type { SectionTab, SkillForReference, SpellForReference } from "@/types/info-reference";
 
 export function useInfoReferenceFilters(skills: SkillForReference[], spells: SpellForReference[]) {
   const [searchQuery, setSearchQuery] = useState("");

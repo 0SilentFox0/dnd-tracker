@@ -13,11 +13,11 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAppearanceSave } from "@/lib/hooks/common";
-import type { SkillForReference } from "@/types/info-reference";
 import {
   formatMechanicsSkill,
   getShortSkillSummary,
 } from "@/lib/utils/info-reference";
+import type { SkillForReference } from "@/types/info-reference";
 
 interface SkillReferenceCardProps {
   campaignId: string;

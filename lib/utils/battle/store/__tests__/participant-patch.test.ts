@@ -38,8 +38,6 @@ describe("buildParticipantPatch", () => {
 
     const { pendingExtraActions: _gone, ...battleData } = withExtra.battleData;
 
-    void _gone;
-
     expect(buildParticipantPatch(withExtra, { ...withExtra, battleData })).toBe(FULL_PARTICIPANT);
   });
 

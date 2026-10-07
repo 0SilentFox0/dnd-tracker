@@ -47,7 +47,6 @@ export function hasDisadvantage(
   participants: BattleParticipant[] = [attacker],
   opts: { extra?: StaticEffect[]; targetId?: string; targetExtra?: StaticEffect[] } = {},
 ): boolean {
-  void _attack;
 
   const ps = withSelf(participants, attacker);
 

@@ -1,10 +1,10 @@
+import { parseArtifactSetBonus } from "./artifact-set-bonus";
 import { mapBonuses, mapModifiers, mapPassiveEffects, scopeOf, withTarget } from "./convert-artifact";
 import type { ConversionIssue, ConversionResult, ConvertOptions } from "./types";
 
-import { parseArtifactSetBonus } from "./artifact-set-bonus";
 import type { Effect } from "@/lib/utils/abilities/schema";
+import { isRecord } from "@/lib/utils/common/is-record";
 
-const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
 
 export function convertLegacyArtifactSet(row: { id: string; name: string; setBonus: unknown }, opts: ConvertOptions = {}): ConversionResult {
   const issues: ConversionIssue[] = [];
