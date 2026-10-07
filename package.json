@@ -2,6 +2,7 @@
   "name": "dnd-combat-tracker",
   "version": "0.1.0",
   "private": true,
+  "sideEffects": ["*.css"],
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
