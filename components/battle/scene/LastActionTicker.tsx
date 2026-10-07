@@ -1,11 +1,13 @@
 "use client";
 
+import { memo } from "react";
+
 import { Portrait } from "@/components/battle/hud";
-import { useBattleScene } from "@/lib/hooks/battle";
+import { useBattleSceneData } from "@/lib/hooks/battle";
 import { lastAction } from "@/lib/utils/battle/view";
 
-export function LastActionTicker({ onOpenLog }: { onOpenLog?: () => void }) {
-  const { battle } = useBattleScene();
+export const LastActionTicker = memo(function LastActionTicker({ onOpenLog }: { onOpenLog?: () => void }) {
+  const { battle } = useBattleSceneData();
 
   const last = lastAction(battle.battleLog ?? []);
 
@@ -29,4 +31,4 @@ export function LastActionTicker({ onOpenLog }: { onOpenLog?: () => void }) {
       {onOpenLog && <span className="ml-auto shrink-0 text-[13px] text-[var(--hud-muted)]">журнал ›</span>}
     </button>
   );
-}
+});

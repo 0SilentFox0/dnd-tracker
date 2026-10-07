@@ -1,13 +1,15 @@
 "use client";
 
+import { memo } from "react";
+
 import { Portrait } from "@/components/battle/hud";
-import { useBattleScene } from "@/lib/hooks/battle";
+import { useBattleSceneData } from "@/lib/hooks/battle";
 import { ROMAN } from "@/lib/utils/battle/view";
 
 const roman = (n: number) => (n <= 5 ? ROMAN[n] : n <= 10 ? `${["V", "VI", "VII", "VIII", "IX", "X"][n - 5]}` : String(n));
 
-export function InitiativeTrack() {
-  const { queue, myParticipants, select } = useBattleScene();
+export const InitiativeTrack = memo(function InitiativeTrack() {
+  const { queue, myParticipants, select } = useBattleSceneData();
 
   const mine = new Set(myParticipants.map((p) => p.basicInfo.id));
 
@@ -26,4 +28,4 @@ export function InitiativeTrack() {
       )}
     </div>
   );
-}
+});

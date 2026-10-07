@@ -1,28 +1,38 @@
 "use client";
 
+import { memo, useMemo } from "react";
+
 import { ParticipantRow } from "./ParticipantRow";
 
-import { useBattleScene } from "@/lib/hooks/battle";
+import { useBattleSceneData } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
 import { canSeeExactStats, formatKnownArmorClass, resolveKnownArmorClass } from "@/lib/utils/battle/view";
 
-export function ParticipantList({ side, className }: { side: "ally" | "enemy"; className?: string }) {
-  const { allies, enemies, battle, viewer, current, select } = useBattleScene();
+export const ParticipantList = memo(function ParticipantList({ side, className }: { side: "ally" | "enemy"; className?: string }) {
+  const { allies, enemies, battle, viewer, current, select } = useBattleSceneData();
 
   const list = side === "ally" ? allies : enemies;
 
-  const order = battle.initiativeOrder;
+  const { initiativeOrder: order, battleLog, knowledge } = battle;
+
+  const rows = useMemo(
+    () =>
+      list.map((p) => {
+        const exact = canSeeExactStats(p, viewer);
+
+        const acText = exact ? String(getEffectiveArmorClass(p, order)) : formatKnownArmorClass(resolveKnownArmorClass(battleLog ?? [], p.basicInfo.id, knowledge));
+
+        return { participant: p, exact, acText };
+      }),
+    [list, viewer, order, battleLog, knowledge],
+  );
 
   return (
     <div className={cn("px-4", className)}>
-      {list.map((p) => {
-        const exact = canSeeExactStats(p, viewer);
-
-        const acText = exact ? String(getEffectiveArmorClass(p, order)) : formatKnownArmorClass(resolveKnownArmorClass(battle.battleLog ?? [], p.basicInfo.id, battle.knowledge));
-
-        return <ParticipantRow key={p.basicInfo.id} participant={p} exact={exact} acText={acText} current={current?.basicInfo.id === p.basicInfo.id} onSelect={select} />;
-      })}
+      {rows.map(({ participant, exact, acText }) => (
+        <ParticipantRow key={participant.basicInfo.id} participant={participant} exact={exact} acText={acText} current={current?.basicInfo.id === participant.basicInfo.id} onSelect={select} />
+      ))}
     </div>
   );
-}
+});

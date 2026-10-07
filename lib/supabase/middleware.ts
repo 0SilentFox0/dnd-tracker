@@ -16,6 +16,8 @@ import { createServerClient } from '@supabase/ssr'
  * API клієнтів) — пропускаємо, оскільки auth cookie все одно
  * захистить (без cookie немає сесії).
  */
+const SIGN_OUT_PATH = "/auth/signout";
+
 export function rejectCrossOriginMutation(request: NextRequest): NextResponse | null {
   const method = request.method.toUpperCase();
 
@@ -23,7 +25,9 @@ export function rejectCrossOriginMutation(request: NextRequest): NextResponse | 
     return null;
   }
 
-  if (!request.nextUrl.pathname.startsWith("/api/")) return null;
+  const { pathname } = request.nextUrl;
+
+  if (!pathname.startsWith("/api/") && pathname !== SIGN_OUT_PATH) return null;
 
   const origin = request.headers.get("origin");
 
@@ -56,6 +60,10 @@ export async function updateSession(request: NextRequest) {
   const csrfReject = rejectCrossOriginMutation(request);
 
   if (csrfReject) return csrfReject;
+
+  // Routes check the session themselves (401) and refresh the token through their own server client.
+  // The sign-out route must receive its POST as is (a redirect to /sign-in would downgrade it) and clears the cookies itself.
+  if (request.nextUrl.pathname.startsWith('/api/') || request.nextUrl.pathname === SIGN_OUT_PATH) return NextResponse.next()
 
   let supabaseResponse = NextResponse.next({
     request,
@@ -92,10 +100,10 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // Оновлюємо сесію користувача
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // getClaims refreshes an expired session and verifies the JWT locally against the cached JWKS
+  const { data } = await supabase.auth.getClaims()
+
+  const user = data?.claims?.sub ?? null
 
   // Захищаємо приватні маршрути
   // Виключаємо публічні маршрути та callback

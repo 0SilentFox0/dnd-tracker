@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { type BattleLogHistory, useBattleLogHistory } from "./useBattleLogHistory";
@@ -52,7 +52,8 @@ export interface BattleSceneActions {
   updateParticipant: ReturnType<typeof useUpdateBattleParticipant>;
 }
 
-export interface BattleSceneValue {
+/** Змінюється лише разом з даними бою — список учасників, черга, герой. */
+export interface BattleSceneData {
   campaignId: string;
   battleId: string;
   battle: BattleScene;
@@ -66,18 +67,21 @@ export interface BattleSceneValue {
   queue: QueueEntry[];
   allies: BattleParticipant[];
   enemies: BattleParticipant[];
-  connection: PusherConnectionState;
   dmControlledId: string | null;
   setDmControlledId(id: string | null): void;
-  selectedId: string | null;
   select(id: string | null): void;
+  readBattle(): BattleScene | undefined;
+}
+
+export interface BattleSceneValue extends BattleSceneData {
+  connection: PusherConnectionState;
+  selectedId: string | null;
   toast: BattleToastApi;
   result: ResultFx | null;
   showResult(fx: ResultFx | null): void;
   log: BattleLogState;
   openLog(focus?: number | null): void;
   closeLog(): void;
-  readBattle(): BattleScene | undefined;
   logHistory: BattleLogHistory;
   actions: BattleSceneActions;
   anyPending: boolean;
@@ -85,12 +89,49 @@ export interface BattleSceneValue {
 
 export const BattleSceneContext = createContext<BattleSceneValue | null>(null);
 
+export const BattleSceneDataContext = createContext<BattleSceneData | null>(null);
+
 export function useBattleScene(): BattleSceneValue {
   const value = useContext(BattleSceneContext);
 
   if (!value) throw new Error("useBattleScene потребує BattleSceneProvider");
 
   return value;
+}
+
+/** Без тостів, журналу, вибору й стану мутацій: компонент не перемальовується, поки не змінився бій. */
+export function useBattleSceneData(): BattleSceneData {
+  const value = useContext(BattleSceneDataContext);
+
+  if (!value) throw new Error("useBattleSceneData потребує BattleSceneProvider");
+
+  return value;
+}
+
+export function useBattleSceneDataValue(value: BattleSceneValue): BattleSceneData {
+  const { campaignId, battleId, battle, userId, isDM, viewer, current, myParticipants, hero, isMyTurn, queue, allies, enemies, dmControlledId, setDmControlledId, select, readBattle } = value;
+
+  return useMemo(
+    () => ({ campaignId, battleId, battle, userId, isDM, viewer, current, myParticipants, hero, isMyTurn, queue, allies, enemies, dmControlledId, setDmControlledId, select, readBattle }),
+    [campaignId, battleId, battle, userId, isDM, viewer, current, myParticipants, hero, isMyTurn, queue, allies, enemies, dmControlledId, setDmControlledId, select, readBattle],
+  );
+}
+
+function deriveScene(battle: BattleScene, userId: string | null, dmControlledId: string | null) {
+  const isDM = battle.isDM === true;
+
+  const turn = deriveTurn(battle, userId, isDM, dmControlledId);
+
+  const order = battle.initiativeOrder ?? [];
+
+  return {
+    isDM,
+    ...turn,
+    viewer: { userId, isDM, canSeeEnemyHp: canSeeEnemyHp(turn.hero, order) },
+    queue: turnQueue(order, battle.currentTurnIndex, battle.currentRound),
+    allies: order.filter((p) => p.basicInfo.side === ParticipantSide.ALLY),
+    enemies: order.filter((p) => p.basicInfo.side === ParticipantSide.ENEMY),
+  };
 }
 
 export function deriveTurn(battle: BattleScene, userId: string | null, isDM: boolean, dmControlledId: string | null) {
@@ -181,25 +222,16 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
 
   const logHistory = useBattleLogHistory(campaignId, battleId, battle?.battleLog);
 
-  if (!battle) return { value: null, loading: isLoading };
+  const derived = useMemo(() => (battle ? deriveScene(battle, userId, dmControlledId) : null), [battle, userId, dmControlledId]);
 
-  const isDM = battle.isDM === true;
-
-  const turn = deriveTurn(battle, userId, isDM, dmControlledId);
-
-  const order = battle.initiativeOrder ?? [];
+  if (!battle || !derived) return { value: null, loading: isLoading };
 
   const value: BattleSceneValue = {
     campaignId,
     battleId,
     battle,
     userId,
-    isDM,
-    viewer: { userId, isDM, canSeeEnemyHp: canSeeEnemyHp(turn.hero, order) },
-    ...turn,
-    queue: turnQueue(order, battle.currentTurnIndex, battle.currentRound),
-    allies: order.filter((p) => p.basicInfo.side === ParticipantSide.ALLY),
-    enemies: order.filter((p) => p.basicInfo.side === ParticipantSide.ENEMY),
+    ...derived,
     connection: connectionState,
     dmControlledId,
     setDmControlledId,

@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { vi } from "vitest";
 
-import { BattleSceneContext, type BattleSceneValue, type ResultFx } from "../useBattleScene";
+import { BattleSceneContext, BattleSceneDataContext, type BattleSceneValue, type ResultFx } from "../useBattleScene";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { ConfirmContext } from "@/lib/hooks/common";
@@ -129,7 +129,9 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
   const wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>
       <ConfirmContext.Provider value={confirm}>
-        <BattleSceneContext.Provider value={value}>{children}</BattleSceneContext.Provider>
+        <BattleSceneDataContext.Provider value={value}>
+          <BattleSceneContext.Provider value={value}>{children}</BattleSceneContext.Provider>
+        </BattleSceneDataContext.Provider>
       </ConfirmContext.Provider>
     </QueryClientProvider>
   );

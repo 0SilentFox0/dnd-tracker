@@ -2,9 +2,7 @@ import { z } from "zod";
 
 import { ArtifactModifierType } from "@/lib/constants/artifacts";
 
-const WEAPON_SLOTS = new Set(["weapon", "mainHand", "offHand", "range_weapon"]);
-
-export const isWeaponSlot = (slot: string | null | undefined) => !!slot && WEAPON_SLOTS.has(slot);
+export { isWeaponSlot } from "@/lib/utils/artifacts/weapon-slot";
 
 export const WeaponStatsSchema = z.object({
   damageDice: z.string().trim().max(30).optional(),

@@ -76,7 +76,7 @@ export function DmQuickActionsPanel({
         className={cn(
           HUD_SURFACE,
           "fixed bottom-0 top-0 z-50 flex max-w-full flex-col",
-          "border-l border-[#4a3c2c] bg-[#14100c]/[.97] shadow-[-12px_0_40px_rgba(0,0,0,.7)] backdrop-blur-xl",
+          "border-l border-[#4a3c2c] bg-[#14100c]/[.97] shadow-[-12px_0_40px_rgba(0,0,0,.7)]",
           "transition-transform duration-300 ease-out",
         )}
         style={{

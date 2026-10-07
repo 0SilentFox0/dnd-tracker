@@ -1,12 +1,13 @@
 "use client";
 
+import { memo } from "react";
 import { Trophy } from "lucide-react";
 
-import { useBattleScene } from "@/lib/hooks/battle";
+import { useBattleSceneData } from "@/lib/hooks/battle";
 import { lastAction } from "@/lib/utils/battle/view";
 
-export function BattleOverBanner() {
-  const { battle } = useBattleScene();
+export const BattleOverBanner = memo(function BattleOverBanner() {
+  const { battle } = useBattleSceneData();
 
   const last = lastAction(battle.battleLog ?? []);
 
@@ -17,4 +18,4 @@ export function BattleOverBanner() {
       {last && <span className="truncate text-sm text-[#b8ab95]">{last.resultText}</span>}
     </div>
   );
-}
+});

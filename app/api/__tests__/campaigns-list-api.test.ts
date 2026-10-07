@@ -5,7 +5,7 @@ const kv = vi.hoisted(() => ({ kvGet: vi.fn(), kvSet: vi.fn(), kvDel: vi.fn() })
 vi.mock("@/lib/cache/kv", () => kv);
 vi.mock("@/lib/db", () => ({ prisma: { campaign: { findMany: vi.fn(async () => []) } } }));
 vi.mock("@/lib/utils/api/api-auth", () => ({
-  requireAuth: vi.fn(async () => ({ userId: "u1", authUser: { id: "u1" } })),
+  requireAuth: vi.fn(async () => ({ userId: "u1" })),
 }));
 
 import { GET } from "@/app/api/campaigns/route";

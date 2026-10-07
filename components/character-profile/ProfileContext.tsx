@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext } from "react";
+import { createContext, type ReactNode, useContext, useMemo } from "react";
 
 import type { CharacterSheet } from "@/types/characters";
 
@@ -19,4 +19,10 @@ export function useProfile(): ProfileContextValue {
   if (!ctx) throw new Error("useProfile поза ProfileContext");
 
   return ctx;
+}
+
+export function ProfileProvider({ campaignId, characterId, sheet, canEdit, children }: ProfileContextValue & { children: ReactNode }) {
+  const value = useMemo(() => ({ campaignId, characterId, sheet, canEdit }), [campaignId, characterId, sheet, canEdit]);
+
+  return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;
 }

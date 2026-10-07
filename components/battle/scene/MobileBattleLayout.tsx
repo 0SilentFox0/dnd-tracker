@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import { BattleLog } from "./BattleLog";
 import { BattleOverBanner } from "./BattleOverBanner";
@@ -15,7 +15,7 @@ import { ParticipantList } from "./ParticipantList";
 
 import { HUD_SURFACE } from "@/components/battle/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { useBattleScene, useBelowHeaderHeight } from "@/lib/hooks/battle";
+import { useBattleScene } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 
 export function MobileBattleLayout() {
@@ -23,7 +23,7 @@ export function MobileBattleLayout() {
 
   const [tab, setTab] = useState<"ally" | "enemy">("enemy");
 
-  const height = useBelowHeaderHeight();
+  const openLatestLog = useCallback(() => openLog(), [openLog]);
 
   const selected = battle.initiativeOrder.find((p) => p.basicInfo.id === selectedId) ?? null;
 
@@ -34,11 +34,11 @@ export function MobileBattleLayout() {
   );
 
   return (
-    <div className="flex flex-col overflow-hidden" style={{ height }}>
+    <div className="below-header flex flex-col overflow-hidden">
       <ConnectionBanner />
       <BattleTopBar />
       <InitiativeTrack />
-      <LastActionTicker onOpenLog={() => openLog()} />
+      <LastActionTicker onOpenLog={openLatestLog} />
       {battle.status === "completed" ? (
         <BattleOverBanner />
       ) : isMyTurn ? (

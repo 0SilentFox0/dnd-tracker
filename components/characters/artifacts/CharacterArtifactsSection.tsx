@@ -50,7 +50,7 @@ export function CharacterArtifactsSection({ campaignId, characterId, equipped, a
   return (
     <div className="relative mx-auto aspect-square w-full max-w-md overflow-hidden rounded-lg border border-amber-900/50 bg-[#2a2520] shadow-xl">
       <div className="absolute inset-0">
-        <Image src="/screen-bg/artefacts-bg.jpg" alt="" fill className="object-cover opacity-40 sepia" sizes="(max-width: 448px) 100vw, 448px" />
+        <Image src="/screen-bg/artefacts-bg.webp" alt="" fill className="object-cover opacity-40 sepia" sizes="(max-width: 448px) 100vw, 448px" />
         <div className="absolute inset-0 bg-gradient-to-b from-stone-900/30 to-stone-950/50" />
       </div>
       <div className="absolute inset-0 flex items-center justify-center p-4">

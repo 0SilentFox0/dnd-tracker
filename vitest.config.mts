@@ -24,6 +24,8 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./"),
+      // Next aliases this itself; vitest needs the same no-op marker module
+      "server-only": "next/dist/compiled/server-only/empty.js",
     },
   },
 });

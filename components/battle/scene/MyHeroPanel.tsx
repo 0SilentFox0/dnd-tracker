@@ -1,17 +1,18 @@
 "use client";
 
+import { memo } from "react";
 import { Heart, Shield } from "lucide-react";
 
 import { EffectLine, HealthBar, Portrait, SlotGrid } from "@/components/battle/hud";
-import { useBattleScene, useHpChange } from "@/lib/hooks/battle";
+import { useBattleSceneData, useHpChange } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
 import { abilityCharges, turnsUntil } from "@/lib/utils/battle/view";
 import { signed } from "@/lib/utils/format";
 import type { BattleParticipant } from "@/types/battle";
 
-export function MyHeroPanel({ hero, compact = false }: { hero: BattleParticipant; compact?: boolean }) {
-  const { battle, queue, isMyTurn } = useBattleScene();
+export const MyHeroPanel = memo(function MyHeroPanel({ hero, compact = false }: { hero: BattleParticipant; compact?: boolean }) {
+  const { battle, queue, isMyTurn } = useBattleSceneData();
 
   const change = useHpChange(hero.combatStats.currentHp);
 
@@ -52,4 +53,4 @@ export function MyHeroPanel({ hero, compact = false }: { hero: BattleParticipant
       {!compact && <EffectLine effects={hero.battleData.activeEffects} />}
     </div>
   );
-}
+});

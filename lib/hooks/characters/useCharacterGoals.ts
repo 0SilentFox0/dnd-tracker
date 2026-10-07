@@ -2,7 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { characterSheetKey } from "./useCharacterSheet";
+import { characterSheetKey } from "./keys";
 
 import { putCharacterGoals } from "@/lib/api/characters";
 import { GoalAuthor } from "@/lib/constants/characters";

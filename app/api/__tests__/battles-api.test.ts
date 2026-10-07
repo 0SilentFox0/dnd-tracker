@@ -49,7 +49,6 @@ describe("GET /api/campaigns/[id]/battles", () => {
   it("повертає 200 та масив битв при успішному доступі", async () => {
     vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
       userId: "user-1",
-      authUser: { id: "user-1", email: null, user_metadata: null },
       campaign: {
         id: "c1",
         maxLevel: 20,
@@ -133,7 +132,6 @@ describe("POST /api/campaigns/[id]/battles", () => {
 
     vi.mocked(apiAuth.requireDM).mockResolvedValue({
       userId: "dm-1",
-      authUser: { id: "dm-1", email: null, user_metadata: null },
       campaign: {
         id: "c1",
         maxLevel: 20,
@@ -161,7 +159,6 @@ describe("POST /api/campaigns/[id]/battles", () => {
   it("повертає 200 та створену битву при валідному body", async () => {
     vi.mocked(apiAuth.requireDM).mockResolvedValue({
       userId: "dm-1",
-      authUser: { id: "dm-1", email: null, user_metadata: null },
       campaign: {
         id: "c1",
         maxLevel: 20,

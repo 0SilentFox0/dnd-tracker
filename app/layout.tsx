@@ -1,21 +1,19 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist } from "next/font/google";
 
 import "./globals.css";
-import { BackgroundImage } from "@/components/layout/BackgroundImage";
+import { hudFontClassName } from "@/components/hud";
 import { Header } from "@/components/layout/Header";
 import { PageTransition } from "@/components/layout/PageTransition";
+import { ScreenBackground } from "@/components/layout/screen-background";
 import { ConfirmProvider } from "@/components/ui/confirm-dialog";
 import { QueryProvider } from "@/lib/providers/query-provider";
+import { createClient } from "@/lib/supabase/server";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  subsets: ["latin", "cyrillic"],
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -23,20 +21,28 @@ export const metadata: Metadata = {
   description: "Combat tracker for D&D 5e campaigns",
 };
 
-export default function RootLayout({
+async function getSessionEmail(): Promise<string | null> {
+  const supabase = await createClient();
+
+  const { data } = await supabase.auth.getClaims();
+
+  return data?.claims?.email ?? null;
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const email = await getSessionEmail();
+
   return (
     <html lang="uk" className="dark">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${hudFontClassName} antialiased`}>
+        <ScreenBackground />
         <QueryProvider>
           <ConfirmProvider>
-            <BackgroundImage />
-            <Header />
+            <Header email={email} />
             <PageTransition>{children}</PageTransition>
           </ConfirmProvider>
         </QueryProvider>

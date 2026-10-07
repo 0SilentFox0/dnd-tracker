@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import { renderToString } from "react-dom/server";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -13,6 +14,17 @@ import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
 
 describe("BattleScreen", () => {
   afterEach(cleanup);
+
+  it("серверний HTML не містить обчисленої висоти шапки", () => {
+    media.wide = false;
+
+    const { wrapper: Wrapper } = fakeScene({ isMyTurn: false });
+
+    const html = renderToString(<Wrapper><BattleScreen /></Wrapper>);
+
+    expect(html).not.toContain("- 0px)");
+    expect(html).toContain("below-header");
+  });
 
   it("телефон, не мій хід: вкладки, «ходить», мій герой, без кнопок дій", () => {
     media.wide = false;
@@ -37,20 +49,20 @@ describe("BattleScreen", () => {
     expect(screen.getByRole("button", { name: /Атака/ })).toBeTruthy();
   });
 
-  it("десктоп: союзники і вороги поруч, журнал праворуч", () => {
+  it("десктоп: союзники і вороги поруч, журнал праворуч", async () => {
     media.wide = true;
 
     const { wrapper } = fakeScene({ isMyTurn: false });
 
     render(<BattleScreen />, { wrapper });
 
+    expect(await screen.findByText(/Союзники ·/)).toBeTruthy();
     expect(screen.queryByRole("tab")).toBeNull();
-    expect(screen.getByText(/Союзники ·/)).toBeTruthy();
     expect(screen.getByText(/Вороги ·/)).toBeTruthy();
     expect(screen.getByText("Журнал")).toBeTruthy();
   });
 
-  it("завершений бій: банер «Бій завершено» замість «ходить», без дій — на телефоні й десктопі", () => {
+  it("завершений бій: банер «Бій завершено» замість «ходить», без дій — на телефоні й десктопі", async () => {
     for (const wide of [false, true]) {
       media.wide = wide;
 
@@ -58,7 +70,7 @@ describe("BattleScreen", () => {
 
       render(<BattleScreen />, { wrapper });
 
-      expect(screen.getAllByText("Бій завершено").length).toBeGreaterThan(0);
+      expect((await screen.findAllByText("Бій завершено")).length).toBeGreaterThan(0);
       expect(screen.queryByText(/ходить/)).toBeNull();
       expect(screen.queryByRole("button", { name: /Атака/ })).toBeNull();
       expect(screen.queryByText(/хід через|Дії стануть доступні/)).toBeNull();
@@ -67,14 +79,14 @@ describe("BattleScreen", () => {
     }
   });
 
-  it("DM може скинути завершений бій, але не передати хід", () => {
+  it("DM може скинути завершений бій, але не передати хід", async () => {
     media.wide = true;
 
     const { wrapper } = fakeScene({ isDM: true, isMyTurn: false, status: "completed" });
 
     render(<BattleScreen />, { wrapper });
 
-    expect(screen.getByRole("button", { name: "Скинути" })).toBeTruthy();
+    expect(await screen.findByRole("button", { name: "Скинути" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Наступний хід" })).toBeNull();
   });
 

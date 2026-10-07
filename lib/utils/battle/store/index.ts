@@ -5,6 +5,7 @@ export * from "./history";
 export * from "./load-battle";
 export * from "./participant-patch";
 export * from "./save-battle";
+export * from "./snapshot-cache";
 export * from "./snapshot-state";
 export * from "./split-participant";
 export * from "./types";

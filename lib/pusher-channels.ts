@@ -1,6 +1,6 @@
 /**
- * Channel naming для Pusher — спільне між server (lib/pusher.ts) і client
- * (lib/hooks/battle/usePusherBattleSync.ts). Файл нічого не імпортує з
+ * Channel naming для Pusher — спільне між server (lib/pusher-server.ts) і client
+ * (lib/pusher-client.ts). Файл нічого не імпортує з
  * `pusher` / `pusher-js` бібліотек, тому безпечний для прямого `import` як
  * з server-кампонентів, так і з `"use client"` коду.
  *

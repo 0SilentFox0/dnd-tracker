@@ -76,12 +76,13 @@
 }
 
 @media print {
-  /* Прибираємо глобальний хедер і дарковий оверлей body */
+  /* Прибираємо глобальний хедер, фон і дарковий оверлей body */
   body > header {
     display: none !important;
   }
 
-  body::before {
+  body::before,
+  body::after {
     display: none !important;
   }
 

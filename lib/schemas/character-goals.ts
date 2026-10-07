@@ -1,9 +1,7 @@
 import { z } from "zod";
 
-import { GoalAuthor } from "@/lib/constants/characters";
+import { GoalAuthor, MAX_GOALS } from "@/lib/constants/characters";
 import type { CharacterGoal } from "@/types/characters";
-
-export const MAX_GOALS = 30;
 
 export const goalInputSchema = z.object({
   id: z.string().min(1).max(40),

@@ -1,10 +1,8 @@
 import { z } from "zod";
 
-import { DAMAGE_KINDS, type DamageKind } from "./common";
+import { CONDITION_SUBJECTS, type ConditionSubject, DAMAGE_KINDS, type DamageKind } from "./kinds";
 
-export const CONDITION_SUBJECTS = ["self", "eventTarget", "eventActor", "anyAlly", "anyEnemy"] as const;
-
-export type ConditionSubject = (typeof CONDITION_SUBJECTS)[number];
+export { CONDITION_SUBJECTS, type ConditionSubject } from "./kinds";
 
 export type Condition =
   | { type: "hpBelow"; who: ConditionSubject; percent: number }

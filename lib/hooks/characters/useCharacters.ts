@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { characterSheetKey } from "./useCharacterSheet";
+import { characterSheetKey } from "./keys";
 
 import {
   createCharacter,

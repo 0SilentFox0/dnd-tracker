@@ -113,19 +113,19 @@ describe("CharacterProfile — редагування ДМа", () => {
 
     expect(h.editorMounts).toBe(0);
     fireEvent.click(screen.getByRole("button", { name: "Редагувати" }));
+    expect(await screen.findByRole("tab", { name: "Основне" })).toHaveAttribute("data-state", "active");
     expect(h.editorMounts).toBeGreaterThan(0);
-    expect(screen.getByRole("tab", { name: "Основне" })).toHaveAttribute("data-state", "active");
     expect(screen.getByRole("button", { name: "Зберегти" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Скасувати" }));
     expect(screen.getByRole("button", { name: "Редагувати" })).toBeTruthy();
   });
 
-  it("«Магія» в редакторі показує книгу заклинань з листа", () => {
+  it("«Магія» в редакторі показує книгу заклинань з листа", async () => {
     mockMatchMedia(false);
     renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit />);
 
     fireEvent.click(screen.getByRole("button", { name: "Редагувати" }));
-    fireEvent.mouseDown(screen.getByRole("tab", { name: "Магія" }));
+    fireEvent.mouseDown(await screen.findByRole("tab", { name: "Магія" }));
     fireEvent.click(screen.getByRole("button", { name: "Книга заклинань" }));
 
     expect(screen.getByRole("dialog")).toHaveAccessibleName("Книга заклинань");

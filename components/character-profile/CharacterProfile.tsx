@@ -1,13 +1,13 @@
 "use client";
 
 import { type ReactNode, useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 
 import { CombatTab } from "./CombatTab";
 import { ItemsTab } from "./ItemsTab";
 import { LevelUpBadge } from "./LevelUpBadge";
 import { MagicTab } from "./MagicTab";
-import { ProfileContext } from "./ProfileContext";
-import { ProfileEditor } from "./ProfileEditor";
+import { ProfileProvider } from "./ProfileContext";
 import { CompactHero, ProfileHero } from "./ProfileHero";
 import { type ProfileTab, type ProfileTabId, ProfileTabs } from "./ProfileTabs";
 import { SkillsTab } from "./SkillsTab";
@@ -15,11 +15,13 @@ import { StoryTab } from "./StoryTab";
 
 import "@/components/hud/hud.css";
 import { HUD_SURFACE } from "@/components/battle/hud";
-import { QueryState } from "@/components/common/states";
+import { LoadingState, QueryState } from "@/components/common/states";
 import { LevelUpOverlay } from "@/components/skill-tree/progression";
 import { Button } from "@/components/ui/button";
 import { useCharacterSheet } from "@/lib/hooks/characters";
 import { cn } from "@/lib/utils";
+
+const ProfileEditor = dynamic(() => import("./ProfileEditor").then((m) => m.ProfileEditor), { ssr: false, loading: () => <LoadingState /> });
 
 const VIEW_TABS: ProfileTabId[] = ["combat", "skills", "magic", "items", "story"];
 
@@ -78,11 +80,10 @@ export function CharacterProfile({ campaignId, characterId, canEdit, initialTab 
 
   const [editing, setEditing] = useState(false);
 
-
   return (
     <QueryState query={query}>
       {(sheet) => (
-        <ProfileContext.Provider value={{ campaignId, characterId, sheet, canEdit: canEdit && sheet.viewer.isDM }}>
+        <ProfileProvider campaignId={campaignId} characterId={characterId} sheet={sheet} canEdit={canEdit && sheet.viewer.isDM}>
           <ProfileShell>
             {editing ? (
               <ProfileEditor onDone={() => setEditing(false)} />
@@ -104,7 +105,7 @@ export function CharacterProfile({ campaignId, characterId, canEdit, initialTab 
               </>
             )}
           </ProfileShell>
-        </ProfileContext.Provider>
+        </ProfileProvider>
       )}
     </QueryState>
   );

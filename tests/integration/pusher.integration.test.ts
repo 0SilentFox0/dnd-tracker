@@ -13,11 +13,8 @@ import { describe, expect, it } from "vitest";
 
 import { findMissing, TEST_RUN_ID } from "./_helpers";
 
-import {
-  battleChannelName,
-  pusherServer,
-  userChannelName,
-} from "@/lib/pusher";
+import { battleChannelName, userChannelName } from "@/lib/pusher-channels";
+import { pusherServer } from "@/lib/pusher-server";
 import { safePusherTrigger } from "@/lib/utils/pusher/safe-trigger";
 
 const missing = findMissing(

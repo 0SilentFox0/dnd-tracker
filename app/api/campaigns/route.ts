@@ -4,7 +4,7 @@ import { kvDel, kvGet, kvSet } from "@/lib/cache/kv";
 import { CampaignRole } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { createCampaignSchema } from "@/lib/schemas";
-import { requireAuth } from "@/lib/utils/api/api-auth";
+import { requireAuth, requireAuthUser } from "@/lib/utils/api/api-auth";
 import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 
@@ -15,8 +15,7 @@ function generateInviteCode(): string {
 
 export async function POST(request: Request) {
   try {
-    // Перевіряємо авторизацію
-    const authResult = await requireAuth();
+    const authResult = await requireAuthUser();
 
     if (authResult instanceof NextResponse) {
       return authResult;
@@ -76,7 +75,6 @@ export async function POST(request: Request) {
 
 export async function GET() {
   try {
-    // Перевіряємо авторизацію
     const authResult = await requireAuth();
 
     if (authResult instanceof NextResponse) {
