@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { Edit,MoreVertical, Trash2 } from "lucide-react";
 
+import { EntityIcon } from "@/components/common/EntityIcon";
 import { HudCard } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import {
@@ -80,26 +80,7 @@ export function MainSkillCard({
           {mainSkill.icon && (
             <div>
               <span className="text-sm font-semibold">Іконка:</span>
-              <div className="mt-1 flex items-center justify-center w-8 h-8 rounded bg-[#1a140f]">
-                {mainSkill.icon.startsWith("http://") ||
-                mainSkill.icon.startsWith("https://") ||
-                mainSkill.icon.startsWith("/") ? (
-                  <Image
-                    src={mainSkill.icon}
-                    alt={mainSkill.name}
-                    width={32}
-                    height={32}
-                    className="w-8 h-8 object-cover rounded"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = "none";
-                    }}
-                  />
-                ) : (
-                  <span className="text-xl" title={mainSkill.name}>
-                    {mainSkill.icon}
-                  </span>
-                )}
-              </div>
+              <EntityIcon src={mainSkill.icon} name={mainSkill.name} size={32} emoji className="mt-1 size-8 rounded bg-[#1a140f] text-xl text-inherit" />
             </div>
           )}
         </div>

@@ -1,7 +1,6 @@
 "use client";
 
-import Image from "next/image";
-
+import { EntityIcon } from "@/components/common/EntityIcon";
 import { HudSection } from "@/components/hud/form";
 import {
   Tooltip,
@@ -47,19 +46,7 @@ function CharacterRow({
           : "border-border hover:border-primary/50"
       }`}
     >
-      <div className="shrink-0 w-14 h-14 rounded-lg overflow-hidden bg-muted flex items-center justify-center">
-        {character.avatar ? (
-          <Image
-            src={character.avatar}
-            alt={character.name}
-            width={56}
-            height={56}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <span className="text-xl text-muted-foreground">👤</span>
-        )}
-      </div>
+      <EntityIcon src={character.avatar} name={character.name} alt={character.name} size={56} className="size-14 rounded-lg" fallback={<span className="text-xl text-muted-foreground">👤</span>} />
       <div className="flex flex-col min-w-0 flex-1 gap-0.5">
         <span className="text-base font-semibold truncate">
           {character.name}

@@ -1,7 +1,6 @@
 "use client";
 
-import Image from "next/image";
-
+import { EntityIcon } from "@/components/common/EntityIcon";
 import { HudSection } from "@/components/hud/form";
 import {
   Accordion,
@@ -67,19 +66,7 @@ function UnitRow({
         onClick={onToggle}
         className="w-full text-left flex items-center gap-4 p-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-t-xl"
       >
-        <div className="shrink-0 w-14 h-14 rounded-lg overflow-hidden bg-muted flex items-center justify-center">
-          {unit.avatar ? (
-            <Image
-              src={unit.avatar}
-              alt={unit.name}
-              width={56}
-              height={56}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <span className="text-xl text-muted-foreground">⚔️</span>
-          )}
-        </div>
+        <EntityIcon src={unit.avatar} name={unit.name} alt={unit.name} size={56} className="size-14 rounded-lg" fallback={<span className="text-xl text-muted-foreground">⚔️</span>} />
         <div className="flex flex-col min-w-0 flex-1 gap-0.5">
           <span className="text-base font-semibold truncate">
             {unit.name}

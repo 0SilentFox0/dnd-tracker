@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { Zap } from "lucide-react";
 
 import { HealthLabel, Portrait } from "@/components/battle/hud";
+import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { HUD_SURFACE } from "@/components/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { useBattleScene } from "@/lib/hooks/battle";
@@ -47,7 +47,7 @@ export function BonusActionPicker({ participant, open, onOpenChange, onDone }: {
       <div className="space-y-2">
         {!aiming && abilities.map((a) => (
           <button key={a.key} type="button" disabled={actions.bonusAction.isPending} onClick={() => (bonusTargetSide(a) ? setAiming(a) : void fire(a))} className="flex min-h-14 w-full items-center gap-3 border border-white/15 px-3 py-2.5 text-left">
-            {a.source.icon ? <Image src={a.source.icon} alt="" width={40} height={40} className="size-10 rounded object-cover" /> : <Zap className="size-10 p-2 text-[var(--gold)]" />}
+            {a.source.icon ? <OptimizedImage src={a.source.icon} alt="" width={40} height={40} className="size-10 rounded object-cover" /> : <Zap className="size-10 p-2 text-[var(--gold)]" />}
             <span className="min-w-0">
               <span className="hud-sc block font-bold">{a.name}</span>
               <span className="line-clamp-2 block text-xs text-[#a89c88]">{a.description ?? a.effects.map(describeEffect).join(", ")}</span>

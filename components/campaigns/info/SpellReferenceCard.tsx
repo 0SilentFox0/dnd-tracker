@@ -1,9 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { Loader2, Sparkles } from "lucide-react";
 
-import { isValidImageSrc } from "@/components/campaigns/info/image-url";
+import { EntityIcon } from "@/components/common/EntityIcon";
 import {
   AccordionContent,
   AccordionItem,
@@ -51,19 +50,7 @@ export function SpellReferenceCard({
     >
       <AccordionTrigger className="p-0 hover:no-underline [&[data-state=open]>div]:border-b flex items-center gap-3">
         <div className="flex w-full min-w-0 flex-1 items-start gap-3 p-3 text-left tracking-normal [font-family:var(--font-hud-sans)]">
-          <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[#4a3c2c] bg-[#1a140f]">
-            {isValidImageSrc(spell.icon) ? (
-              <Image
-                src={spell.icon}
-                alt=""
-                width={40}
-                height={40}
-                className="object-cover size-full"
-              />
-            ) : (
-              <Sparkles className="size-5 text-[#8f8473]" />
-            )}
-          </div>
+          <EntityIcon src={spell.icon} name={spell.name} size={40} className="size-10 rounded-lg border border-[#4a3c2c] bg-[#1a140f] text-[#8f8473]" fallback={<Sparkles className="size-5" />} />
           <div className="flex-1 min-w-0">
             <span className="hud-sc block text-sm leading-tight text-[#efe5d2]">
               {spell.name}

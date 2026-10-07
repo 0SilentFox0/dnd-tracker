@@ -1,8 +1,7 @@
 "use client";
 
-import Image from "next/image";
 
-import { isValidImageSrc } from "@/components/campaigns/info/image-url";
+import { EntityIcon } from "@/components/common/EntityIcon";
 import {
   AccordionContent,
   AccordionItem,
@@ -33,11 +32,7 @@ function GroupHeader({
 }) {
   return (
     <div className={cn("flex w-full min-w-0 items-center gap-3 text-left", className)}>
-      {isValidImageSrc(icon) ? (
-        <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-lg border border-[#4a3c2c] bg-[#1a140f]">
-          <Image src={icon} alt="" fill className="object-cover" sizes="32px" />
-        </div>
-      ) : null}
+      {icon && <EntityIcon src={icon} name={title} size={32} className="size-8 rounded-lg border border-[#4a3c2c] bg-[#1a140f]" />}
       <span className="hud-sc flex-1 truncate text-base">{title}</span>
       {count != null && (
         <span className="shrink-0 text-sm tabular-nums text-[#8f8473]">
