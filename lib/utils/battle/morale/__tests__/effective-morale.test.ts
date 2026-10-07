@@ -61,4 +61,13 @@ describe("effectiveMorale", () => {
 
     expect(effectiveMorale(p, [p, aura]).ignored).toBe(true);
   });
+
+  it("minMorale: після clamp і noNegativeMorale; ignoreMorale перемагає", () => {
+    const min: FlagEffect = { kind: "flag", flag: "minMorale", value: 1 };
+
+    expect(effectiveMorale(withMorale(-2, [min]), []).value).toBe(1);
+    expect(effectiveMorale(withMorale(3, [min]), []).value).toBe(3);
+    expect(effectiveMorale(withMorale(-2, [min, { kind: "flag", flag: "noNegativeMorale" }]), []).value).toBe(1);
+    expect(effectiveMorale(withMorale(-2, [min, { kind: "flag", flag: "ignoreMorale" }]), [])).toEqual({ value: 0, ignored: true });
+  });
 });

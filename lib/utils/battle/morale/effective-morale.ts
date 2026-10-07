@@ -8,8 +8,11 @@ export function effectiveMorale(p: BattleParticipant, participants: BattlePartic
 
   const id = p.basicInfo.id;
 
+  const mins = findFlags(all, id, "minMorale").map((f) => f.value);
+
   return combineMorale(p.combatStats.morale, ownTimedMoraleFlat(p), {
     ignored: findFlags(all, id, "ignoreMorale").length > 0,
     noNegative: findFlags(all, id, "noNegativeMorale").length > 0,
+    min: mins.length ? Math.max(...mins) : undefined,
   });
 }

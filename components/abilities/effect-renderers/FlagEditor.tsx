@@ -19,6 +19,7 @@ const DEFAULTS: Record<FlagKey, Record<string, unknown>> = {
   seeEnemyHp: {},
   noNegativeMorale: {},
   ignoreMorale: {},
+  minMorale: { value: 1 },
   conditionImmunity: { conditions: "all" },
 };
 

@@ -134,6 +134,8 @@ export function describeFlag(e: Extract<Effect, { kind: "flag" }>): string {
       return "від'ємна мораль = 0";
     case "ignoreMorale":
       return "мораль не діє";
+    case "minMorale":
+      return `мораль не нижче ${signed(e.value)}`;
     case "conditionImmunity":
       return e.conditions === "all" ? "імунітет до контролю" : `імунітет: ${e.conditions.map((c) => (c === "fear" ? "страх" : c)).join(", ")}`;
   }
@@ -151,6 +153,7 @@ export const FLAG_LABELS: Record<FlagKey, string> = {
   seeEnemyHp: "Бачить HP ворогів",
   noNegativeMorale: "Мораль не нижче 0",
   ignoreMorale: "Мораль не діє",
+  minMorale: "Мінімальна мораль",
   conditionImmunity: "Імунітет до станів",
 };
 
@@ -189,6 +192,7 @@ export const FLAG_FIELDS: Record<FlagKey, readonly FieldMeta[]> = {
   seeEnemyHp: [],
   noNegativeMorale: [],
   ignoreMorale: [],
+  minMorale: [{ name: "value", label: "Мінімум (−3…3)", input: "number" }],
   conditionImmunity: [
     {
       name: "conditions",

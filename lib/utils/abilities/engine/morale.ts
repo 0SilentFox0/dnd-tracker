@@ -17,6 +17,15 @@ export function ownTimedMoraleFlat(p: BattleParticipant): number {
   return sum;
 }
 
+function ownMinMorale(p: BattleParticipant): number | undefined {
+  const values = [
+    ...resolvedAbilitiesOf(p).flatMap((a) => (a.trigger.event === "passive" ? a.effects : [])),
+    ...p.battleData.activeEffects.flatMap((ae) => ae.abilityEffects ?? []),
+  ].flatMap((e) => (e.kind === "flag" && e.flag === "minMorale" && (e.target ?? "self") === "self" ? [e.value] : []));
+
+  return values.length ? Math.max(...values) : undefined;
+}
+
 // Лише власні прапорці без аур союзників: формули не можуть викликати collectModifiers (рекурсія).
 function ownHasFlag(p: BattleParticipant, flag: FlagKey): boolean {
   const passive = resolvedAbilitiesOf(p).some(
@@ -26,14 +35,16 @@ function ownHasFlag(p: BattleParticipant, flag: FlagKey): boolean {
   return passive || p.battleData.activeEffects.some((ae) => (ae.abilityEffects ?? []).some((e) => e.kind === "flag" && e.flag === flag));
 }
 
-export function combineMorale(base: number, timedFlat: number, flags: { ignored: boolean; noNegative: boolean }): { value: number; ignored: boolean } {
+export function combineMorale(base: number, timedFlat: number, flags: { ignored: boolean; noNegative: boolean; min?: number }): { value: number; ignored: boolean } {
   if (flags.ignored) return { value: 0, ignored: true };
 
   const raw = clampMorale(base + timedFlat);
 
-  return { value: raw < 0 && flags.noNegative ? 0 : raw, ignored: false };
+  const value = raw < 0 && flags.noNegative ? 0 : raw;
+
+  return { value: flags.min === undefined ? value : Math.max(flags.min, value), ignored: false };
 }
 
 export function ownMorale(p: BattleParticipant): number {
-  return combineMorale(p.combatStats.morale, ownTimedMoraleFlat(p), { ignored: ownHasFlag(p, "ignoreMorale"), noNegative: ownHasFlag(p, "noNegativeMorale") }).value;
+  return combineMorale(p.combatStats.morale, ownTimedMoraleFlat(p), { ignored: ownHasFlag(p, "ignoreMorale"), noNegative: ownHasFlag(p, "noNegativeMorale"), min: ownMinMorale(p) }).value;
 }

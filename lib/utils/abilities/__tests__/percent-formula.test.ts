@@ -51,4 +51,15 @@ describe("formula in percent", () => {
 
     expect(query(steady)).toBe(0);
   });
+
+  it("morale у формулі враховує minMorale власника", () => {
+    const base = hero(-2);
+
+    const withMin = {
+      ...base,
+      battleData: { ...base.battleData, resolvedAbilities: [...(base.battleData.resolvedAbilities ?? []), resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "minMorale", value: 1 }] }, { id: "m" })] },
+    };
+
+    expect(collectModifiers([withMin], "h", { damage: { kind: "melee" } }).percent).toBe(3);
+  });
 });
