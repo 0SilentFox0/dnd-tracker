@@ -5,6 +5,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ConfirmProvider } from "@/components/ui/confirm-dialog";
+import { battleQueryKey } from "@/lib/hooks/battles";
 
 const battle = { id: "b1", name: "Засідка", description: "Ніч", status: "prepared", participants: [{ id: "ch1", type: "character", side: "ally" }] };
 
@@ -78,8 +79,8 @@ describe("BattleSetupForm", () => {
     expect(screen.queryByText("Підбір ворогів")).toBeNull();
 
     fireEvent.change(name, { target: { value: "Нова" } });
-    client.setQueryData(["battle", "c1", "b1"], { ...battle, name: "Серверна", updatedAt: "2026-10-05T12:00:00Z" });
-    await waitFor(() => expect(client.getQueryData<{ updatedAt?: string }>(["battle", "c1", "b1"])?.updatedAt).toBeDefined());
+    client.setQueryData(battleQueryKey("c1", "b1"), { ...battle, name: "Серверна", updatedAt: "2026-10-05T12:00:00Z" });
+    await waitFor(() => expect(client.getQueryData<{ updatedAt?: string }>(battleQueryKey("c1", "b1"))?.updatedAt).toBeDefined());
 
     expect((screen.getByLabelText("Назва битви *") as HTMLInputElement).value).toBe("Нова");
   });
@@ -89,7 +90,7 @@ describe("BattleSetupForm", () => {
 
     await screen.findByLabelText("Назва битви *");
 
-    const query = client.getQueryCache().find({ queryKey: ["battle", "c1", "b1"] });
+    const query = client.getQueryCache().find({ queryKey: battleQueryKey("c1", "b1") });
 
     const interval = query?.observers[0]?.options.refetchInterval;
 

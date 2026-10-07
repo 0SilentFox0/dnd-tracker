@@ -2,8 +2,9 @@ import Link from "next/link";
 
 import { HudCard, HudPill } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
+import { BattleStatus } from "@/lib/constants/battle";
 
-export type BattleListKind = "active" | "prepared" | "completed";
+export type BattleListKind = BattleStatus;
 
 interface BattleListCardProps {
   battle: { id: string; name: string; description: string | null; currentRound: number; participants: unknown };
@@ -12,9 +13,9 @@ interface BattleListCardProps {
 }
 
 const KIND = {
-  active: { tone: "active", badge: <HudPill tone="gold">Активний</HudPill> },
-  prepared: { tone: "default", badge: <HudPill tone="accent">Підготовлено</HudPill> },
-  completed: { tone: "muted", badge: <HudPill tone="muted">Завершено</HudPill> },
+  [BattleStatus.ACTIVE]: { tone: "active", badge: <HudPill tone="gold">Активний</HudPill> },
+  [BattleStatus.PREPARED]: { tone: "default", badge: <HudPill tone="accent">Підготовлено</HudPill> },
+  [BattleStatus.COMPLETED]: { tone: "muted", badge: <HudPill tone="muted">Завершено</HudPill> },
 } as const;
 
 export function BattleListCard({ battle, campaignId, kind }: BattleListCardProps) {
@@ -35,7 +36,7 @@ export function BattleListCard({ battle, campaignId, kind }: BattleListCardProps
       </div>
 
       <div className="text-sm text-hud-muted">
-        {kind === "active" && (
+        {kind === BattleStatus.ACTIVE && (
           <p>
             Раунд: <span className="font-semibold text-hud-bone">{battle.currentRound}</span>
           </p>
@@ -45,12 +46,12 @@ export function BattleListCard({ battle, campaignId, kind }: BattleListCardProps
         </p>
       </div>
 
-      {kind === "active" && (
+      {kind === BattleStatus.ACTIVE && (
         <Link href={playHref} className="block">
           <Button className="w-full">Перейти до бою</Button>
         </Link>
       )}
-      {kind === "prepared" && (
+      {kind === BattleStatus.PREPARED && (
         <div className="flex gap-2">
           <Link href={editHref} className="flex-1">
             <Button variant="outline" className="w-full" size="sm">
@@ -64,7 +65,7 @@ export function BattleListCard({ battle, campaignId, kind }: BattleListCardProps
           </Link>
         </div>
       )}
-      {kind === "completed" && (
+      {kind === BattleStatus.COMPLETED && (
         <Link href={editHref} className="block">
           <Button variant="outline" size="sm" className="w-full">
             Переглянути
