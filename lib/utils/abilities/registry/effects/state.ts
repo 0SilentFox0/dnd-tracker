@@ -139,16 +139,16 @@ export function applyChangeMorale(input: EffectApplyInput<Of<"changeMorale">>): 
 }
 
 export function applyCleanse(input: EffectApplyInput<Of<"cleanse">>): EffectApplyResult {
-  const { ability } = input;
+  const { ability, effect } = input;
 
   return each(
     input,
     (p) => {
-      const kept = p.battleData.activeEffects.filter((e) => e.type !== "debuff");
+      const kept = p.battleData.activeEffects.filter((e) => e.type !== "debuff" && !(effect.includeConditions && e.type === "condition"));
 
       return kept.length === p.battleData.activeEffects.length ? null : { ...p, battleData: { ...p.battleData, activeEffects: kept } };
     },
-    (names) => `✨ ${ability.name}: з ${names} знято дебафи`,
+    (names) => `✨ ${ability.name}: з ${names} знято ${effect.includeConditions ? "дебафи та стани" : "дебафи"}`,
   );
 }
 

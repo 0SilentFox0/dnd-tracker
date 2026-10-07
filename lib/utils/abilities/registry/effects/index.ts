@@ -84,7 +84,7 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
   changeMorale: { kind: "changeMorale", label: "Змінити мораль", static: false, fields: [{ name: "delta", label: "Зміна", input: "number" }, TARGET_FIELD], describe: (e) => `мораль ${signed(e.delta)}`, apply: applyChangeMorale },
   mark: { kind: "mark", label: "Мітка на ціль", static: false, fields: [{ name: "markId", label: "Ідентифікатор мітки", input: "text" }, TARGET_FIELD, REQUIRED_DURATION], describe: (e) => `мітка «${e.markId}» × ${e.duration.rounds} р.`, apply: applyMark },
   guard: { kind: "guard", label: "Захист союзника", static: false, fields: [{ name: "percent", label: "% шкоди від атак, що бере на себе", input: "number" }, TARGET_FIELD, REQUIRED_DURATION], describe: (e) => `захист: ${e.percent}% шкоди від атак × ${e.duration.rounds} р.`, apply: applyGuard },
-  cleanse: { kind: "cleanse", label: "Зняти дебафи", static: false, fields: [TARGET_FIELD], describe: () => "зняття дебафів", apply: applyCleanse },
+  cleanse: { kind: "cleanse", label: "Зняти дебафи", static: false, fields: [{ name: "includeConditions", label: "Зняти й стани", input: "toggle", optional: true }, TARGET_FIELD], describe: (e) => (e.includeConditions ? "зняття дебафів і станів" : "зняття дебафів"), apply: applyCleanse },
   randomOf: {
     kind: "randomOf",
     label: "Випадковий з варіантів",
