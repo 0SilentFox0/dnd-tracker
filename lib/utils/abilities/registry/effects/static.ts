@@ -60,7 +60,7 @@ export function applyStatic(input: EffectApplyInput<StaticEffect>, describe: (e:
 
 const VALUE_FIELDS: readonly FieldMeta[] = [
   { name: "flat", label: "Число / формула", input: "flat", optional: true },
-  { name: "percent", label: "%", input: "number", optional: true },
+  { name: "percent", label: "% (число / формула)", input: "flat", optional: true },
 ];
 
 export const modifyStatFields: readonly FieldMeta[] = [
@@ -81,8 +81,10 @@ export const damageBonusFields: readonly FieldMeta[] = [
   DURATION_FIELD,
 ];
 
-function valueLabel(e: { flat?: Parameters<typeof flatLabel>[0]; percent?: number }): string {
-  return [e.flat !== undefined ? flatLabel(e.flat) : null, e.percent !== undefined ? `${signed(e.percent)}%` : null]
+const percentLabel = (p: Parameters<typeof flatLabel>[0]) => (typeof p === "number" ? `${signed(p)}%` : `(${p.formula})%`);
+
+function valueLabel(e: { flat?: Parameters<typeof flatLabel>[0]; percent?: Parameters<typeof flatLabel>[0] }): string {
+  return [e.flat !== undefined ? flatLabel(e.flat) : null, e.percent !== undefined ? percentLabel(e.percent) : null]
     .filter(Boolean)
     .join(" ");
 }

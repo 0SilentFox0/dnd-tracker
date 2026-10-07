@@ -101,7 +101,7 @@ export function collectModifiers(
 
     const flat = (effect.flat !== undefined ? resolveFlat(effect.flat, owner) : 0) * multiplier;
 
-    const percent = (effect.percent ?? 0) * multiplier;
+    const percent = (effect.percent !== undefined ? resolveFlat(effect.percent, owner) : 0) * multiplier;
 
     result.flat += flat;
     result.percent += percent;

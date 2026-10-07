@@ -26,7 +26,7 @@ const ModifyStatSchema = z
     kind: z.literal("modifyStat"),
     stat: z.enum(STAT_KEYS),
     flat: FlatSchema.optional(),
-    percent: z.number().optional(),
+    percent: FlatSchema.optional(),
     attackKind: z.enum(ATTACK_KINDS).optional(),
     spellLevels: z.array(z.number().int().min(1).max(9)).min(1).optional(),
     ...timed,
@@ -38,7 +38,7 @@ const DamageBonusSchema = z
     kind: z.literal("damageBonus"),
     filter: z.object({ kind: z.enum(DAMAGE_FILTER_KINDS), school: z.string().min(1).optional() }),
     flat: FlatSchema.optional(),
-    percent: z.number().optional(),
+    percent: FlatSchema.optional(),
     perMark: z.string().min(1).optional(),
     ...timed,
   })
