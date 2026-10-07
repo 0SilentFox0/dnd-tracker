@@ -91,22 +91,22 @@ export function Breadcrumbs() {
   return (
     <nav
       aria-label="Breadcrumb"
-      className="h-6 text-xs text-[#8f8473]"
+      className="h-6 text-xs text-hud-muted"
     >
       <ol className="flex h-full flex-nowrap items-center gap-1 overflow-x-auto whitespace-nowrap">
         {crumbs.map((crumb) => (
           <li key={crumb.href} className="flex items-center gap-1">
             {crumb.isLast ? (
-              <span className="text-[#efe5d2]">{crumb.label}</span>
+              <span className="text-hud-ink">{crumb.label}</span>
             ) : (
               <Link
                 href={crumb.href}
-                className="transition-colors hover:text-[#efe5d2]"
+                className="transition-colors hover:text-hud-ink"
               >
                 {crumb.label}
               </Link>
             )}
-            {!crumb.isLast && <ChevronRight className="h-3 w-3 text-[#4a3c2c]" />}
+            {!crumb.isLast && <ChevronRight className="h-3 w-3 text-hud-line" />}
           </li>
         ))}
       </ol>

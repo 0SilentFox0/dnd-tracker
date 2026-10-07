@@ -11,7 +11,7 @@ export function StoryTab() {
   return (
     <>
       <GoalList />
-      <Section title="БІОГРАФІЯ">{sheet.story.biography ? <BiographyText text={sheet.story.biography} /> : <p className="text-sm text-[#8f8473]">Біографію ще не написано</p>}</Section>
+      <Section title="БІОГРАФІЯ">{sheet.story.biography ? <BiographyText text={sheet.story.biography} /> : <p className="text-sm text-hud-muted">Біографію ще не написано</p>}</Section>
     </>
   );
 }

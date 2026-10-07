@@ -1,6 +1,6 @@
 export { battleQueryKey } from "./keys";
-export { useEditBattleData } from "./setup/useEditBattleData";
-export { useNewBattlePage } from "./setup/useNewBattlePage";
+export { type BattleSetup, type BattleSetupInitial, useBattleSetup, useBattleSetupInitial } from "./setup/useBattleSetup";
+export { type BattleActionOptions, useBattleAction } from "./useBattleAction";
 export {
   useAddBattleParticipant,
   useAttack,

@@ -1,9 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { Loader2, Sparkles } from "lucide-react";
 
-import { isValidImageSrc } from "@/components/campaigns/info/image-url";
+import { EntityIcon } from "@/components/common/EntityIcon";
 import {
   AccordionContent,
   AccordionItem,
@@ -51,48 +50,36 @@ export function SpellReferenceCard({
     >
       <AccordionTrigger className="p-0 hover:no-underline [&[data-state=open]>div]:border-b flex items-center gap-3">
         <div className="flex w-full min-w-0 flex-1 items-start gap-3 p-3 text-left tracking-normal [font-family:var(--font-hud-sans)]">
-          <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[#4a3c2c] bg-[#1a140f]">
-            {isValidImageSrc(spell.icon) ? (
-              <Image
-                src={spell.icon}
-                alt=""
-                width={40}
-                height={40}
-                className="object-cover size-full"
-              />
-            ) : (
-              <Sparkles className="size-5 text-[#8f8473]" />
-            )}
-          </div>
+          <EntityIcon src={spell.icon} name={spell.name} size={40} className="size-10 rounded-lg border border-hud-line bg-hud-field text-hud-muted" fallback={<Sparkles className="size-5" />} />
           <div className="flex-1 min-w-0">
-            <span className="hud-sc block text-sm leading-tight text-[#efe5d2]">
+            <span className="hud-sc block text-sm leading-tight text-hud-ink">
               {spell.name}
             </span>
-            <span className="text-xs text-[#8f8473]">
+            <span className="text-xs text-hud-muted">
               рів. {spell.level}
               {spell.groupName ? ` · ${spell.groupName}` : ""}
             </span>
-            <p className="mt-1.5 line-clamp-2 text-xs text-[#8f8473]">
+            <p className="mt-1.5 line-clamp-2 text-xs text-hud-muted">
               {appearance.trim() ? appearance : shortSummary}
             </p>
           </div>
         </div>
       </AccordionTrigger>
       <AccordionContent>
-        <div className="space-y-3 border-t border-[#4a3c2c] px-3 pt-2 pb-3 text-[#e6dccb]">
+        <div className="space-y-3 border-t border-hud-line px-3 pt-2 pb-3 text-hud-bone">
           <div>
-            <Label className="hud-sc text-xs text-[#c9b37a]">Механіка</Label>
+            <Label className="hud-sc text-xs text-hud-gold">Механіка</Label>
             <p className="text-sm mt-0.5">{formatMechanicsSpell(spell)}</p>
           </div>
           {spell.description && (
             <div>
-              <Label className="hud-sc text-xs text-[#c9b37a]">Опис</Label>
+              <Label className="hud-sc text-xs text-hud-gold">Опис</Label>
               <p className="text-sm mt-0.5">{spell.description}</p>
             </div>
           )}
           {spell.effects.length > 0 && (
             <div>
-              <Label className="hud-sc text-xs text-[#c9b37a]">Ефекти</Label>
+              <Label className="hud-sc text-xs text-hud-gold">Ефекти</Label>
               <ul className="list-disc list-inside text-sm mt-0.5 space-y-0.5">
                 {spell.effects.map((e, i) => (
                   <li key={i}>{e}</li>
@@ -101,7 +88,7 @@ export function SpellReferenceCard({
             </div>
           )}
           <div>
-            <Label className="hud-sc text-xs text-[#c9b37a]">
+            <Label className="hud-sc text-xs text-hud-gold">
               Опис вигляду (як виглядає заклинання)
             </Label>
             {isDM ? (

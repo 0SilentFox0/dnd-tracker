@@ -1,12 +1,12 @@
 "use client";
 
 import type { ReactNode } from "react";
-import Image from "next/image";
 import { Sparkles } from "lucide-react";
 
-import { metalClass } from "@/components/battle/hud";
+import { OptimizedImage } from "@/components/common/OptimizedImage";
+import { spellLevelMetal } from "@/components/hud";
 import { cn } from "@/lib/utils";
-import { ROMAN, spellTier } from "@/lib/utils/battle/view";
+import { ROMAN } from "@/lib/utils/battle/view";
 import type { BookSpell } from "@/types/spells";
 
 const LEVELS = [0, 1, 2, 3, 4, 5] as const;
@@ -39,7 +39,7 @@ export function SpellBookPages({ byLevel, slotOf, level, pickedId, wide, showDet
             type="button"
             aria-label={`${ROMAN[l]} коло, слотів ${l === 0 ? "∞" : slotOf(l)}`}
             onClick={() => onLevel(l)}
-            className={cn("hud-sc flex h-14 flex-col items-center justify-center gap-1 pb-1.5 text-[13px] [clip-path:polygon(0_0,100%_0,100%_100%,50%_86%,0_100%)]", metalClass(spellTier(l)), "metal-fill", level === l ? "-ml-2 w-10" : "w-8", l > 0 && slotOf(l) === 0 && "opacity-55 grayscale")}
+            className={cn("hud-sc flex h-14 flex-col items-center justify-center gap-1 pb-1.5 text-[13px] [clip-path:polygon(0_0,100%_0,100%_100%,50%_86%,0_100%)]", spellLevelMetal(l), "metal-fill", level === l ? "-ml-2 w-10" : "w-8", l > 0 && slotOf(l) === 0 && "opacity-55 grayscale")}
           >
             {ROMAN[l]}
             <span className="font-sans text-[11px] opacity-85">{l === 0 ? "∞" : slotOf(l)}</span>
@@ -59,7 +59,7 @@ export function SpellBookPages({ byLevel, slotOf, level, pickedId, wide, showDet
             {(byLevel[level] ?? []).map((s) => (
               <button key={s.id} type="button" onClick={() => onPick(s)} className={cn("flex h-[72px] w-full items-center gap-3 border-b border-[#2a2018]/15 text-left", pickedId === s.id && "-mx-3 w-[calc(100%+1.5rem)] bg-[#9c2a1d]/10 px-3 shadow-[inset_3px_0_0_#9c2a1d]")}>
                 <span className="flex size-10 shrink-0 items-center justify-center border border-[#2a2018] bg-[#2a2018]/5">
-                  {s.icon ? <Image src={s.icon} alt="" width={26} height={26} className="size-[26px] object-contain" /> : <Sparkles className="size-5" />}
+                  {s.icon ? <OptimizedImage src={s.icon} alt="" width={26} height={26} className="size-[26px] object-contain" /> : <Sparkles className="size-5" />}
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="hud-sc block truncate text-[17px] font-bold">{s.name}</span>
@@ -90,7 +90,7 @@ export function SpellDetail({ spell, children }: { spell: BookSpell; children?: 
     <>
       <div className="flex items-center gap-4">
         <span className="flex size-16 items-center justify-center border border-[#2a2018] bg-[#7a2a1f]/10 text-[#7a2a1f]">
-          {spell.icon ? <Image src={spell.icon} alt="" width={44} height={44} /> : <Sparkles className="size-10" />}
+          {spell.icon ? <OptimizedImage src={spell.icon} alt="" width={44} height={44} /> : <Sparkles className="size-10" />}
         </span>
         <div>
           <div className="hud-sc text-[26px] font-bold leading-[30px]">{spell.name}</div>

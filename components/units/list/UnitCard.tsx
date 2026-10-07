@@ -84,7 +84,7 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
         <div className="flex items-start gap-3">
           <EntityIcon src={unit.avatar} name={unit.name} size={80} className="size-16 rounded-lg text-2xl sm:size-20" />
           <div className="flex-1 min-w-0">
-            <h3 className="text-base font-semibold text-[#efe5d2]">{unit.name}</h3>
+            <h3 className="text-base font-semibold text-hud-ink">{unit.name}</h3>
             <div className="text-sm text-muted-foreground space-y-1">
               <div>
                 Рівень {unit.level} • HP {unit.maxHp}

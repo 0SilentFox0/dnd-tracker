@@ -30,7 +30,7 @@ export function BattleTopBar({ onComplete }: { onComplete?: () => void }) {
       {isDM && battle.status !== "prepared" && (
         <span className="hidden gap-2 lg:flex">
           {onComplete && battle.status === "active" && <button type="button" onClick={onComplete} className="hud-sc h-8 w-32 border border-[var(--gold)]/60 text-sm text-[var(--gold)] hover:bg-[var(--gold)]/10">Завершити</button>}
-          <button type="button" onClick={() => void reset()} className="hud-sc h-8 w-28 border border-[#d0705c]/50 text-sm text-[#d0705c] hover:bg-[#d0705c]/10">Скинути</button>
+          <button type="button" onClick={() => void reset()} className="hud-sc h-8 w-28 border border-hud-danger/50 text-sm text-hud-danger hover:bg-hud-danger/10">Скинути</button>
           {battle.status === "active" && <button type="button" disabled={nextPending} onClick={() => actions.nextTurn.mutate({})} className="hud-sc flex h-8 w-36 items-center justify-center bg-[var(--enemy)] text-sm text-[var(--ink)] disabled:opacity-70">
             {nextPending ? <Loader2 className="size-4 animate-spin" /> : "Наступний хід"}
           </button>}

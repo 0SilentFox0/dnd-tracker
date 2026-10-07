@@ -1,7 +1,6 @@
 "use client";
 
-import Image from "next/image";
-
+import { EntityIcon } from "@/components/common/EntityIcon";
 import { HudSection } from "@/components/hud/form";
 import {
   Accordion,
@@ -11,14 +10,15 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ParticipantSourceType } from "@/lib/constants/battle";
+import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { groupUnitsByRaceName } from "@/lib/utils/units/group-units";
 import type { EntityStats, SetupUnit } from "@/types/battle-setup";
 
 interface UnitsListCardProps {
   units: SetupUnit[];
   entityStats: Record<string, EntityStats> | null;
   isParticipantSelected: (id: string) => boolean;
-  getParticipantSide: (id: string) => "ally" | "enemy" | null;
+  getParticipantSide: (id: string) => ParticipantSide | null;
   getParticipantQuantity: (id: string) => number;
   onParticipantToggle: (id: string, type: typeof ParticipantSourceType.UNIT, checked: boolean) => void;
   /** Додати юніта до ворогів (або перемістити з союзників). */
@@ -26,23 +26,6 @@ interface UnitsListCardProps {
   /** Перемістити в союзники (якщо зараз у ворогах). */
   onMoveToAllies: (id: string) => void;
   onQuantityChange: (id: string, quantity: number) => void;
-}
-
-function groupUnitsByRace(units: SetupUnit[]): Map<string, SetupUnit[]> {
-  const byRace = new Map<string, SetupUnit[]>();
-
-  for (const u of units) {
-    const raceKey = u.raceName?.trim() || "Без раси";
-
-    if (!byRace.has(raceKey)) byRace.set(raceKey, []);
-
-    byRace.get(raceKey)?.push(u);
-  }
-  for (const arr of byRace.values()) {
-    arr.sort((a, b) => (a.level ?? 0) - (b.level ?? 0));
-  }
-
-  return byRace;
 }
 
 function UnitRow({
@@ -58,15 +41,15 @@ function UnitRow({
   unit: SetupUnit;
   stats: EntityStats | undefined;
   isSelected: boolean;
-  side: "ally" | "enemy" | null;
+  side: ParticipantSide | null;
   quantity: number;
   onToggle: () => void;
   onAddToEnemies: () => void;
   onQuantityChange: (value: number) => void;
 }) {
-  const isAlly = side === "ally";
+  const isAlly = side === ParticipantSide.ALLY;
 
-  const isEnemy = side === "enemy";
+  const isEnemy = side === ParticipantSide.ENEMY;
 
   return (
     <div
@@ -83,19 +66,7 @@ function UnitRow({
         onClick={onToggle}
         className="w-full text-left flex items-center gap-4 p-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-t-xl"
       >
-        <div className="shrink-0 w-14 h-14 rounded-lg overflow-hidden bg-muted flex items-center justify-center">
-          {unit.avatar ? (
-            <Image
-              src={unit.avatar}
-              alt={unit.name}
-              width={56}
-              height={56}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <span className="text-xl text-muted-foreground">⚔️</span>
-          )}
-        </div>
+        <EntityIcon src={unit.avatar} name={unit.name} alt={unit.name} size={56} className="size-14 rounded-lg" fallback={<span className="text-xl text-muted-foreground">⚔️</span>} />
         <div className="flex flex-col min-w-0 flex-1 gap-0.5">
           <span className="text-base font-semibold truncate">
             {unit.name}
@@ -203,7 +174,7 @@ export function UnitsListCard({
     );
   }
 
-  const byRace = groupUnitsByRace(units);
+  const byRace = groupUnitsByRaceName(units);
 
   const raceOrder = [...byRace.keys()].sort((a, b) =>
     a.localeCompare(b, "uk"),
@@ -248,14 +219,14 @@ export function UnitsListCard({
                         onToggle={() => {
                           if (!isSelected) {
                             onParticipantToggle(unit.id, ParticipantSourceType.UNIT, true);
-                          } else if (side === "ally") {
+                          } else if (side === ParticipantSide.ALLY) {
                             onParticipantToggle(unit.id, ParticipantSourceType.UNIT, false);
                           } else {
                             onMoveToAllies(unit.id);
                           }
                         }}
                         onAddToEnemies={() => {
-                          if (side !== "enemy") onAddToEnemies(unit.id, quantity);
+                          if (side !== ParticipantSide.ENEMY) onAddToEnemies(unit.id, quantity);
                         }}
                         onQuantityChange={(value) =>
                           onQuantityChange(unit.id, value)

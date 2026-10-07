@@ -1,12 +1,12 @@
 "use client";
 
-import { useCallback,useState } from "react";
+import { useCallback, useState } from "react";
 
-import { ParticipantSourceType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
-import type { SetupParticipant } from "@/types/battle-setup";
+import { ParticipantSide, ParticipantSourceType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
+import type { BattlePreparationParticipant } from "@/types/battle";
 
-export function useBattleParticipants() {
-  const [participants, setParticipants] = useState<SetupParticipant[]>([]);
+export function useBattleParticipants(initial: BattlePreparationParticipant[] = []) {
+  const [participants, setParticipants] = useState<BattlePreparationParticipant[]>(initial);
 
   const handleParticipantToggle = useCallback(
     (
@@ -16,7 +16,7 @@ export function useBattleParticipants() {
     ) => {
       setParticipants((prev) => {
         if (checked) {
-          return [...prev, { id: participantId, type, side: "ally" as const }];
+          return [...prev, { id: participantId, type, side: ParticipantSide.ALLY }];
         }
 
         return prev.filter((p) => p.id !== participantId);
@@ -26,7 +26,7 @@ export function useBattleParticipants() {
   );
 
   const handleSideChange = useCallback(
-    (participantId: string, side: "ally" | "enemy") => {
+    (participantId: string, side: ParticipantSide) => {
       setParticipants((prev) =>
         prev.map((p) => (p.id === participantId ? { ...p, side } : p)),
       );
@@ -34,12 +34,11 @@ export function useBattleParticipants() {
     [],
   );
 
-  /** Додати учасника до вказаної сторони або перемістити існуючого. */
   const handleAddToSide = useCallback(
     (
       participantId: string,
       type: ParticipantSourceTypeValue,
-      side: "ally" | "enemy",
+      side: ParticipantSide,
       quantity?: number,
     ) => {
       setParticipants((prev) => {
@@ -73,7 +72,6 @@ export function useBattleParticipants() {
     [],
   );
 
-  /** Повністю видалити учасника зі списку. */
   const handleRemoveParticipant = useCallback((participantId: string) => {
     setParticipants((prev) => prev.filter((p) => p.id !== participantId));
   }, []);
@@ -102,17 +100,17 @@ export function useBattleParticipants() {
   );
 
   const getParticipantSide = useCallback(
-    (participantId: string): "ally" | "enemy" | null =>
+    (participantId: string): ParticipantSide | null =>
       participants.find((p) => p.id === participantId)?.side ?? null,
     [participants],
   );
 
   const allyParticipants = {
     characterIds: participants
-      .filter((p) => p.side === "ally" && p.type === ParticipantSourceType.CHARACTER)
+      .filter((p) => p.side === ParticipantSide.ALLY && p.type === ParticipantSourceType.CHARACTER)
       .map((p) => p.id),
     units: participants
-      .filter((p) => p.side === "ally" && p.type === ParticipantSourceType.UNIT)
+      .filter((p) => p.side === ParticipantSide.ALLY && p.type === ParticipantSourceType.UNIT)
       .map((p) => ({ id: p.id, quantity: p.quantity ?? 1 })),
   };
 

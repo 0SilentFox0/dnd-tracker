@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { HudPanel } from "@/components/hud/page";
 import { Input } from "@/components/ui/input";
 import type { SheetTotal } from "@/types/characters";
 
@@ -12,12 +12,12 @@ interface CharacterHpPreviewProps {
 
 export function CharacterHpPreview({ hp, coefficient, onCoefficientChange }: CharacterHpPreviewProps) {
   return (
-    <Card>
-      <CardHeader className="pb-2">
+    <HudPanel as="div" className="space-y-3">
+      <div>
         <div className="flex items-start justify-between gap-2">
           <div className="space-y-1.5">
-            <CardTitle className="text-base">Здоровʼя (HP)</CardTitle>
-            <CardDescription>Як у бою: рівень, сила, коефіцієнт і бонуси. Оновлюється після збереження.</CardDescription>
+            <h3 className="text-base font-semibold leading-none">Здоровʼя (HP)</h3>
+            <p className="text-sm text-muted-foreground">Як у бою: рівень, сила, коефіцієнт і бонуси. Оновлюється після збереження.</p>
           </div>
           <div className="flex shrink-0 items-center gap-1.5">
             <span className="whitespace-nowrap text-xs text-muted-foreground">×</span>
@@ -37,8 +37,8 @@ export function CharacterHpPreview({ hp, coefficient, onCoefficientChange }: Cha
             />
           </div>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-2">
+      </div>
+      <div className="space-y-2">
         <p className="text-2xl font-semibold tabular-nums">{hp.total}</p>
         {hp.lines.length > 0 && (
           <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
@@ -47,7 +47,7 @@ export function CharacterHpPreview({ hp, coefficient, onCoefficientChange }: Cha
             ))}
           </ul>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </HudPanel>
   );
 }

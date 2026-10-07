@@ -34,13 +34,13 @@ export function ArtifactSetCard(props: ArtifactSetCardProps) {
         <div className="flex min-w-0 flex-1 gap-3">
           <ArtifactSetCardIcon url={set.icon} name={set.name} size={props.variant === "summary" ? "lg" : "md"} />
           <div className="min-w-0 space-y-1">
-            <h3 className="hud-sc text-lg leading-tight text-[#efe5d2]">{set.name}</h3>
+            <h3 className="hud-sc text-lg leading-tight text-hud-ink">{set.name}</h3>
             {props.variant === "withArtifacts" && (
-              <p className="text-sm text-[#8f8473]">
+              <p className="text-sm text-hud-muted">
                 {count} {pluralUk(count, ["артефакт", "артефакти", "артефактів"])} в сеті
               </p>
             )}
-            {props.variant === "summary" && set.description && <p className="text-sm text-[#8f8473]">{set.description}</p>}
+            {props.variant === "summary" && set.description && <p className="text-sm text-hud-muted">{set.description}</p>}
           </div>
         </div>
         {props.variant === "summary" && (
@@ -50,7 +50,7 @@ export function ArtifactSetCard(props: ArtifactSetCardProps) {
         )}
       </div>
 
-      {props.variant === "withArtifacts" && set.description && <p className="text-sm text-[#8f8473]">{set.description}</p>}
+      {props.variant === "withArtifacts" && set.description && <p className="text-sm text-hud-muted">{set.description}</p>}
 
       <ArtifactSetBonusDisplay setBonus={set.setBonus} abilitySummary={set.abilitySummary} />
 
@@ -69,10 +69,10 @@ export function ArtifactSetCard(props: ArtifactSetCardProps) {
         </>
       ) : (
         <div>
-          <p className="mb-1.5 text-xs text-[#8f8473]">Частин: {count}</p>
+          <p className="mb-1.5 text-xs text-hud-muted">Частин: {count}</p>
           <div className="flex flex-wrap gap-1">
             {props.artifacts.map((a) => (
-              <span key={a.id} className="rounded-full px-2 py-0.5 text-xs text-[#e6dccb] shadow-[inset_0_0_0_1px_#4a3c2c]">
+              <span key={a.id} className="rounded-full px-2 py-0.5 text-xs text-hud-bone shadow-[inset_0_0_0_1px_var(--color-hud-line)]">
                 {a.name}
               </span>
             ))}

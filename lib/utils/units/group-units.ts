@@ -58,3 +58,16 @@ export function raceIdOfGroup(key: string): string | null {
 export function raceChips(groups: UnitRaceGroup[]): UnitRaceChip[] {
   return groups.map((g) => ({ key: g.key, label: g.race?.name ?? "Без раси", color: g.race?.color ?? null, count: g.total }));
 }
+
+export function groupUnitsByRaceName<U extends { raceName: string | null; level: number }>(units: U[]): Map<string, U[]> {
+  const byRace = new Map<string, U[]>();
+
+  for (const unit of units) {
+    const key = unit.raceName?.trim() || "Без раси";
+
+    byRace.set(key, [...(byRace.get(key) ?? []), unit]);
+  }
+  for (const list of byRace.values()) list.sort((a, b) => a.level - b.level);
+
+  return byRace;
+}

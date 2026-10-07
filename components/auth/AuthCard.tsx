@@ -15,11 +15,11 @@ export function AuthCard({ title, description, error, children, footer }: AuthCa
     <HudPage width="md" className="flex min-h-[80vh] items-center justify-center">
       <HudPanel className="w-full max-w-sm space-y-4">
         <div className="space-y-1">
-          <h1 className="hud-sc text-2xl text-[#efe5d2]">{title}</h1>
-          {description && <p className="text-sm text-[#8f8473]">{description}</p>}
+          <h1 className="hud-sc text-2xl text-hud-ink">{title}</h1>
+          {description && <p className="text-sm text-hud-muted">{description}</p>}
         </div>
         {error && (
-          <div role="alert" className="rounded-md border border-[#d0705c] bg-[rgba(208,112,92,.1)] p-3 text-sm text-[#d0705c]">
+          <div role="alert" className="rounded-md border border-hud-danger bg-[rgba(208,112,92,.1)] p-3 text-sm text-hud-danger">
             Помилка: {error}
           </div>
         )}

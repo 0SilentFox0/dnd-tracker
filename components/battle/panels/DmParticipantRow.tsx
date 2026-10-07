@@ -73,7 +73,7 @@ export function DmParticipantRow({
         </button>
         <button
           type="button"
-          className={cn(ICON, "text-[#d0705c] hover:border-[#d0705c]/40")}
+          className={cn(ICON, "text-hud-danger hover:border-hud-danger/40")}
           title="Видалити з бою"
           onClick={async () => {
             if (

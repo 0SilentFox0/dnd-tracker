@@ -48,7 +48,7 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
       <div>
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <h3 className="hud-sc truncate text-lg text-[#efe5d2]">{race.name}</h3>
+            <h3 className="hud-sc truncate text-lg text-hud-ink">{race.name}</h3>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -81,7 +81,7 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
             {availableMainSkillsForDisplay.map((ms) => (
               <span
                 key={ms.id}
-                className="inline-flex items-center rounded-full px-2 text-xs text-[#e6dccb]"
+                className="inline-flex items-center rounded-full px-2 text-xs text-hud-bone"
                 style={{ boxShadow: `inset 0 0 0 1px ${ms.color}` }}
                 title={ms.name}
               >
@@ -135,7 +135,7 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
                     return (
                       <div
                         key={ability.key}
-                        className="flex items-center gap-1.5 rounded-md bg-[#1a140f] px-2 py-1"
+                        className="flex items-center gap-1.5 rounded-md bg-hud-field px-2 py-1"
                         title={ability.label}
                       >
                         <span className="text-xs font-semibold">
@@ -160,7 +160,7 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
                             )}
                             {iconToShow === "alwaysZero" && (
                               <Circle
-                                className="h-3 w-3 text-[#d0705c]"
+                                className="h-3 w-3 text-hud-danger"
                                 strokeWidth={2}
                                 fill="none"
                               />

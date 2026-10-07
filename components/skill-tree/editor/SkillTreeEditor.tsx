@@ -51,17 +51,17 @@ export function SkillTreeEditor({ campaignId }: { campaignId: string }) {
   return (
     <div className={`${HUD_SURFACE} skill-tree-editor rounded-xl p-4`}>
       <div className="mb-3 flex flex-wrap items-center gap-3">
-        <span className="hud-sc text-xl text-[#efe5d2]">Дерево прокачки</span>
+        <span className="hud-sc text-xl text-hud-ink">Дерево прокачки</span>
         <SelectField value={editor.race ?? ""} onValueChange={(v) => void editor.setRace(v)} triggerClassName="w-40">
           {editor.races.map((r) => <SelectItem key={r.id} value={r.name}>{r.name}</SelectItem>)}
         </SelectField>
-        {editor.dirty && <span className="text-xs italic text-[#c9b37a]">Незбережені зміни</span>}
+        {editor.dirty && <span className="text-xs italic text-hud-gold">Незбережені зміни</span>}
         <span className="flex-1" />
         <Button variant="outline" onClick={editor.actions.cancel} disabled={!editor.dirty}>Скасувати</Button>
         <Button onClick={() => void editor.actions.save()} disabled={!editor.dirty || editor.saving || editor.errors.length > 0}>Зберегти</Button>
       </div>
       {editor.errors.length > 0 && (
-        <ul className="mb-3 text-sm text-[#d0705c]">
+        <ul className="mb-3 text-sm text-hud-danger">
           {editor.errors.map((e) => <li key={`${e.code}:${e.ref}`}>{TREE_ERROR_TEXT[e.code]}: {e.label ?? skillsById.get(e.ref)?.name ?? e.ref}</li>)}
         </ul>
       )}

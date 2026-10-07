@@ -5,7 +5,8 @@ import { Loader2, Swords } from "lucide-react";
 
 import { AiRollButton, DamageDice, DiceGrid } from "./DiceInput";
 
-import { HealthLabel, HUD_SURFACE,Portrait } from "@/components/battle/hud";
+import { HealthLabel, Portrait } from "@/components/battle/hud";
+import { HUD_SURFACE } from "@/components/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { rollDie, type useAttackWizard } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
@@ -144,7 +145,7 @@ export function AttackWizard({ wizard }: { wizard: Wizard }) {
           {steps.map((list, k) => (
             <div key={k} className="mt-1">
               {list.map((s, i) => (
-                <div key={i} className={cn("flex min-h-9 items-center justify-between border-b border-white/[.06] text-sm", s.side === "attacker" && s.kind === "percent" && s.value > 0 && "text-[#cdb87e]", s.side === "target" && "text-[#d0705c]")}>
+                <div key={i} className={cn("flex min-h-9 items-center justify-between border-b border-white/[.06] text-sm", s.side === "attacker" && s.kind === "percent" && s.value > 0 && "text-[#cdb87e]", s.side === "target" && "text-hud-danger")}>
                   <span>{s.label}</span>
                   <span>{s.kind === "percent" ? `${signed(s.value)}%` : s.kind === "multiplier" ? `×${s.value}` : s.kind === "immunity" ? "імунітет" : s.kind === "flat" ? signed(s.value) : s.value} → {s.after}</span>
                 </div>

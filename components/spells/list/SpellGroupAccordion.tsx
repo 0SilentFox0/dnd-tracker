@@ -59,10 +59,10 @@ export function SpellGroupAccordion({
         <div className="relative">
           <AccordionTrigger className="px-4 sm:px-6">
             <div className="flex items-center gap-3 sm:gap-4 text-left w-full">
-              <GroupIcon className="h-6 w-6 sm:h-7 sm:w-7 shrink-0 text-[#c9b37a]" />
+              <GroupIcon className="h-6 w-6 sm:h-7 sm:w-7 shrink-0 text-hud-gold" />
               <div className="flex-1 min-w-0">
-                <h3 className="hud-sc truncate text-lg text-[#efe5d2]">{groupName}</h3>
-                <p className="mt-1 text-sm text-[#8f8473]">{totalSpells} заклинань</p>
+                <h3 className="hud-sc truncate text-lg text-hud-ink">{groupName}</h3>
+                <p className="mt-1 text-sm text-hud-muted">{totalSpells} заклинань</p>
               </div>
             </div>
           </AccordionTrigger>

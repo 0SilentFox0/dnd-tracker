@@ -34,7 +34,7 @@ export function HudForm<T extends string>({ id, onSubmit, tabs, tab, onTabChange
   return (
     <form id={id} onSubmit={onSubmit} onInvalidCapture={onInvalidCapture} className={cn("flex flex-1 flex-col", className)}>
       {tabs && active ? <HudTabs tabs={tabs} value={active} onValueChange={setActive} keepMounted /> : <div className="px-4 py-3">{children}</div>}
-      <ActionBar className="mt-auto flex-wrap [&>*]:min-w-fit border-[#3a2e22] bg-[#110e0b]/95 px-4 sm:px-4 sm:pb-4">{actions}</ActionBar>
+      <ActionBar className="mt-auto flex-wrap [&>*]:min-w-fit border-hud-rule bg-[#110e0b]/95 px-4 sm:px-4 sm:pb-4">{actions}</ActionBar>
     </form>
   );
 }

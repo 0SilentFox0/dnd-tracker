@@ -1,9 +1,9 @@
 "use client";
 
 import type { ReactNode } from "react";
-import Image from "next/image";
 
 import { HealthBar, HealthLabel, Portrait } from "@/components/battle/hud";
+import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { useBattleSceneData } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
@@ -58,8 +58,8 @@ export function ParticipantDetails({ participant }: { participant: BattlePartici
 
           return (
             <div key={e.id} className="flex gap-3 border-b border-white/[.08] py-2.5">
-              <span className={cn("flex size-9 shrink-0 items-center justify-center border", e.type === "buff" ? "border-[#cdb87e]" : "border-[#d0705c]")}>
-                {icon && <Image src={icon} alt="" width={24} height={24} className="size-6 object-contain" />}
+              <span className={cn("flex size-9 shrink-0 items-center justify-center border", e.type === "buff" ? "border-[#cdb87e]" : "border-hud-danger")}>
+                {icon && <OptimizedImage src={icon} alt="" width={24} height={24} className="size-6 object-contain" />}
               </span>
               <div className="min-w-0 flex-1">
                 <div className="flex justify-between text-[15px] font-medium text-[var(--ink)]"><span>{e.name}</span><span className="text-[13px] font-normal text-[var(--hud-muted)]">{e.duration} р.</span></div>

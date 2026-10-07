@@ -1,19 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { Dna } from "lucide-react";
+import { Dna, Plus } from "lucide-react";
 
 import { EmptyState, LoadingState } from "@/components/common/states";
-import { HudPage } from "@/components/hud/page";
+import { HudPage, HudPageHeader } from "@/components/hud/page";
 import { CreateRaceDialog } from "@/components/races/CreateRaceDialog";
 import { RaceCard } from "@/components/races/RaceCard";
-import { RacesPageHeader } from "@/components/races/RacesPageHeader";
+import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/lib/hooks/common";
 import {
   useCreateRace,
   useDeleteRace,
   useRaces,
 } from "@/lib/hooks/races";
+import { pluralUk } from "@/lib/utils/plural";
 import type { Race } from "@/types/races";
 
 interface DMRacesPageClientProps {
@@ -46,10 +47,15 @@ export function DMRacesPageClient({
 
   return (
     <HudPage>
-      <RacesPageHeader
-        campaignId={campaignId}
-        racesCount={races.length}
-        onCreateRace={() => setCreateRaceDialogOpen(true)}
+      <HudPageHeader
+        title="Ігрові Раси"
+        subtitle={`${races.length} ${pluralUk(races.length, ["раса", "раси", "рас"])}`}
+        actions={
+          <Button onClick={() => setCreateRaceDialogOpen(true)} className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Створити расу
+          </Button>
+        }
       />
 
       {racesLoading && races.length === 0 ? (

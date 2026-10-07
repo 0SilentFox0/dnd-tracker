@@ -1,5 +1,3 @@
-import { type ParticipantSourceTypeValue } from "@/lib/constants/battle";
-
 export interface SetupCharacter {
   id: string;
   name: string;
@@ -36,13 +34,6 @@ export interface SuggestedEnemy {
   dmgMult?: number;
 }
 
-export interface SetupParticipant {
-  id: string;
-  type: ParticipantSourceTypeValue;
-  side: "ally" | "enemy";
-  quantity?: number;
-}
-
 /** Детальний розклад DPR персонажа (з balance API) */
 export interface CharacterDprBreakdown {
   physicalDpr: number;
@@ -64,18 +55,4 @@ export interface UnitEntityStats extends EntityStats {
   name: string;
   level: number;
   raceId: string | null;
-}
-
-export interface EditBattleCharacter {
-  id: string;
-  name: string;
-  type: string;
-  controlledBy: string | null;
-  avatar: string | null;
-}
-
-export interface EditBattleUnit {
-  id: string;
-  name: string;
-  avatar: string | null;
 }

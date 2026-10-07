@@ -5,7 +5,8 @@ import { Loader2, Sparkles, Swords } from "lucide-react";
 import { AiRollButton, DamageDice, DiceGrid } from "./DiceInput";
 import { SpellBookPages, SpellDetail } from "./SpellBookPages";
 
-import { HUD_SURFACE, Portrait } from "@/components/battle/hud";
+import { Portrait } from "@/components/battle/hud";
+import { HUD_SURFACE } from "@/components/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import type { useSpellBook } from "@/lib/hooks/battle";
 import { useMediaQuery } from "@/lib/hooks/common";
@@ -107,7 +108,7 @@ export function SpellBook({ book }: { book: Book }) {
   return (
     <ResponsiveDialog open={open} onOpenChange={(o) => !o && book.close()} title={showDetail && !wide ? "← До списку" : "Книга заклинань"} size="lg" className={cn(HUD_SURFACE, "max-w-[980px] border-none bg-[#3a2016] p-2.5 text-[#2a2018] shadow-[0_30px_80px_rgba(0,0,0,.9),inset_0_0_0_2px_#2a160f]")}>
       <SpellBookPages byLevel={byLevel} slotOf={slotOf} level={state.level} pickedId={state.pick?.spellId ?? null} wide={wide} showDetail={showDetail} onLevel={book.setLevel} onPick={book.pick} detail={detailPage || null} />
-      {showDetail && !wide && <button type="button" onClick={book.back} className="hud-sc mt-2 h-10 w-full text-sm text-[#e6dccb]">← Назад</button>}
+      {showDetail && !wide && <button type="button" onClick={book.back} className="hud-sc mt-2 h-10 w-full text-sm text-hud-bone">← Назад</button>}
     </ResponsiveDialog>
   );
 }

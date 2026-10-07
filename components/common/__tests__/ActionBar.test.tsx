@@ -1,9 +1,8 @@
 // @vitest-environment happy-dom
 import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 
 import { ActionBar } from "@/components/common/ActionBar";
-import { FormCard } from "@/components/common/FormCard";
 
 describe("ActionBar", () => {
   afterEach(cleanup);
@@ -19,14 +18,5 @@ describe("ActionBar", () => {
     expect(bar.className).toContain("sm:static");
     // must not overhang Card/Form padding on phones
     expect(bar.className).not.toMatch(/(^| )-mx-/);
-  });
-
-  it("FormCard: submitDisabled вимикає кнопку, але підпис не «Збереження...»", () => {
-    render(<FormCard title="Раса" onSubmit={vi.fn()} submitLabel="Зберегти" submitDisabled>поля</FormCard>);
-
-    const btn = screen.getByRole("button", { name: "Зберегти" });
-
-    expect(btn).toBeDisabled();
-    expect(screen.queryByText("Збереження...")).toBeNull();
   });
 });

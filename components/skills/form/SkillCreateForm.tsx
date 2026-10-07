@@ -97,7 +97,7 @@ export function SkillCreateForm({
       aside={isEdit ? "Оновіть інформацію про скіл" : "Додайте новий скіл з його характеристиками та ефектами"}
     >
       {error && (
-        <p role="alert" className="mx-4 mt-3 rounded-md border border-[#d0705c]/50 bg-[#d0705c]/10 px-3 py-2 text-sm text-[#f0b4a6]">
+        <p role="alert" className="mx-4 mt-3 rounded-md border border-hud-danger/50 bg-hud-danger/10 px-3 py-2 text-sm text-[#f0b4a6]">
           {error}
         </p>
       )}

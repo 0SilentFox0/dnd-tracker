@@ -1,14 +1,14 @@
-import { metalClass } from "./theme";
 
+import { spellLevelMetal } from "@/components/hud";
 import { cn } from "@/lib/utils";
-import { ROMAN, slotLevels, spellTier } from "@/lib/utils/battle/view";
+import { ROMAN, slotLevels } from "@/lib/utils/battle/view";
 import type { BattleParticipant } from "@/types/battle";
 
 export function SlotGrid({ participant }: { participant: BattleParticipant }) {
   return (
     <div className="mt-3 grid h-10 grid-cols-5 border border-white/15">
       {slotLevels(participant).map(({ level, max, current }) => (
-        <div key={level} aria-label={`${ROMAN[level]} коло: ${current} з ${max}`} className={cn("flex flex-col items-center justify-center gap-1 border-l border-white/15 first:border-l-0", metalClass(spellTier(level)))}>
+        <div key={level} aria-label={`${ROMAN[level]} коло: ${current} з ${max}`} className={cn("flex flex-col items-center justify-center gap-1 border-l border-white/15 first:border-l-0", spellLevelMetal(level))}>
           <span className={cn("hud-sc text-xs leading-3", max === 0 ? "text-white/25" : "text-[var(--m2)]")}>{ROMAN[level]}</span>
           <span className="flex h-2 gap-1">
             {Array.from({ length: max }, (_, i) => (

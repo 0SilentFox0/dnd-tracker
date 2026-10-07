@@ -14,8 +14,8 @@ import { SkillsTab } from "./SkillsTab";
 import { StoryTab } from "./StoryTab";
 
 import "@/components/hud/hud.css";
-import { HUD_SURFACE } from "@/components/battle/hud";
 import { LoadingState, QueryState } from "@/components/common/states";
+import { HUD_SURFACE } from "@/components/hud";
 import { LevelUpOverlay } from "@/components/skill-tree/progression";
 import { Button } from "@/components/ui/button";
 import { useCharacterSheet } from "@/lib/hooks/characters";

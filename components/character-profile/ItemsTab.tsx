@@ -38,26 +38,26 @@ export function ItemsTab() {
           const a = sheet.items.grid[cell.key];
 
           return a ? (
-            <button key={cell.key} type="button" aria-label={`${cell.label}: ${a.name}`} onClick={() => show(a)} className={cn("flex aspect-square items-center justify-center overflow-hidden rounded-lg border-2 bg-[#1a140f]", RARITY_RING[a.rarity ?? ""] ?? "border-[#4a3c2c]")}>
+            <button key={cell.key} type="button" aria-label={`${cell.label}: ${a.name}`} onClick={() => show(a)} className={cn("flex aspect-square items-center justify-center overflow-hidden rounded-lg border-2 bg-hud-field", RARITY_RING[a.rarity ?? ""] ?? "border-hud-line")}>
               <EntityIcon src={a.icon} name={a.name} size={68} className="hud-sc size-full rounded-none bg-transparent text-inherit" />
             </button>
           ) : (
-            <span key={cell.key} className="flex aspect-square items-center justify-center rounded-lg border border-dashed border-[#3a2e22] text-center text-[10px] leading-tight text-[#5d5346]">
+            <span key={cell.key} className="flex aspect-square items-center justify-center rounded-lg border border-dashed border-hud-rule text-center text-[10px] leading-tight text-[#5d5346]">
               {cell.label}
             </span>
           );
         })}
       </div>
       <Section title="ЩО ДАЮТЬ РЕЧІ">
-        {sheet.items.artifacts.length === 0 && <p className="text-sm text-[#8f8473]">Нічого не вдягнено.</p>}
+        {sheet.items.artifacts.length === 0 && <p className="text-sm text-hud-muted">Нічого не вдягнено.</p>}
         <ul>
           {sheet.items.artifacts.map((a) => (
             <li key={a.id}>
               <button type="button" onClick={() => show(a)} className="flex min-h-11 w-full items-start gap-2 border-b border-[#2a2218] py-2 text-left">
-                <EntityIcon src={a.icon} name={a.name} size={32} className="hud-sc size-8 rounded-md border border-[#4a3c2c] bg-transparent text-inherit" />
+                <EntityIcon src={a.icon} name={a.name} size={32} className="hud-sc size-8 rounded-md border border-hud-line bg-transparent text-inherit" />
                 <span className="min-w-0">
-                  <span className="block text-sm text-[#efe5d2]">{a.name}</span>
-                  <span className="block text-xs text-[#8f8473]">{a.effects.length ? a.effects.join(" · ") : "без ефектів"}</span>
+                  <span className="block text-sm text-hud-ink">{a.name}</span>
+                  <span className="block text-xs text-hud-muted">{a.effects.length ? a.effects.join(" · ") : "без ефектів"}</span>
                 </span>
               </button>
             </li>

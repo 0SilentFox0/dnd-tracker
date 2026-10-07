@@ -97,14 +97,14 @@ export function JoinCampaignDialog() {
           </div>
 
           {error && (
-            <div className="flex items-center gap-2 p-3 rounded-md bg-[#1a140f] text-sm text-[#d0705c] shadow-[inset_0_0_0_1px_#d0705c]">
+            <div className="flex items-center gap-2 p-3 rounded-md bg-hud-field text-sm text-hud-danger shadow-[inset_0_0_0_1px_var(--color-hud-danger)]">
               <AlertCircle className="h-4 w-4 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           {success && (
-            <div className="flex items-center gap-2 p-3 rounded-md bg-[#1a140f] text-sm text-[#c9b37a] shadow-[inset_0_0_0_1px_#c9b37a]">
+            <div className="flex items-center gap-2 p-3 rounded-md bg-hud-field text-sm text-hud-gold shadow-[inset_0_0_0_1px_var(--color-hud-gold)]">
               <CheckCircle2 className="h-4 w-4 shrink-0" />
               <span>Успішно приєднано! Перенаправлення...</span>
             </div>

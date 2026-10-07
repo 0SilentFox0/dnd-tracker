@@ -1,26 +1,27 @@
 "use client";
 
-import { ParticipantRow } from "./ParticipantRow";
+import { SetupParticipantRow } from "./SetupParticipantRow";
 
 import { HudSection } from "@/components/hud/form";
-import { ParticipantSourceType } from "@/lib/constants/battle";
-import type { SetupCharacter, SetupParticipant, SetupUnit } from "@/types/battle-setup";
+import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import type { BattlePreparationParticipant } from "@/types/battle";
+import type { SetupCharacter, SetupUnit } from "@/types/battle-setup";
 
 interface SidePanelCardProps {
-  side: "ally" | "enemy";
-  participants: SetupParticipant[];
+  side: ParticipantSide;
+  participants: BattlePreparationParticipant[];
   characters: SetupCharacter[];
   units: SetupUnit[];
-  onSideChange: (participantId: string, newSide: "ally" | "enemy") => void;
+  onSideChange: (participantId: string, newSide: ParticipantSide) => void;
   onRemove: (participantId: string) => void;
 }
 
 const SIDE_CONFIG = {
-  ally: {
+  [ParticipantSide.ALLY]: {
     title: "Союзники",
     description: "Учасники на вашій стороні",
   },
-  enemy: {
+  [ParticipantSide.ENEMY]: {
     title: "Вороги",
     description: "Противники в битві",
   },
@@ -36,7 +37,7 @@ export function SidePanelCard({
 }: SidePanelCardProps) {
   const config = SIDE_CONFIG[side];
 
-  const otherSide = side === "ally" ? "enemy" : "ally";
+  const otherSide = side === ParticipantSide.ALLY ? ParticipantSide.ENEMY : ParticipantSide.ALLY;
 
   const characterParticipants = participants.filter(
     (p) => p.side === side && p.type === ParticipantSourceType.CHARACTER,
@@ -63,7 +64,7 @@ export function SidePanelCard({
                 if (!entity) return null;
 
                 return (
-                  <ParticipantRow
+                  <SetupParticipantRow
                     key={participant.id}
                     name={entity.name}
                     avatar={entity.avatar}
@@ -88,7 +89,7 @@ export function SidePanelCard({
                 if (!entity) return null;
 
                 return (
-                  <ParticipantRow
+                  <SetupParticipantRow
                     key={participant.id}
                     name={entity.name}
                     avatar={entity.avatar}

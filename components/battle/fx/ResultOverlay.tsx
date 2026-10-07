@@ -88,7 +88,7 @@ export function ResultOverlay() {
 
   return (
     <div onClick={close} className={cn(shell, crit ? "bg-[radial-gradient(circle_at_50%_40%,rgba(192,57,43,.45),rgba(8,6,5,.94)_60%)]" : "bg-[radial-gradient(circle_at_50%_42%,rgba(156,42,29,.32),rgba(8,6,5,.93)_58%)]")}>
-      <div className={cn("absolute left-[-10%] right-[-10%] top-[40%] animate-[hud-slash_.3s_ease-out_both]", crit ? "h-1.5 rotate-[-24deg] bg-gradient-to-r from-transparent via-white to-transparent shadow-[0_0_24px_#ff9a6a]" : "h-[3px] rotate-[-18deg] bg-gradient-to-r from-transparent via-[#e6dccb] to-transparent opacity-80")} />
+      <div className={cn("absolute left-[-10%] right-[-10%] top-[40%] animate-[hud-slash_.3s_ease-out_both]", crit ? "h-1.5 rotate-[-24deg] bg-gradient-to-r from-transparent via-white to-transparent shadow-[0_0_24px_#ff9a6a]" : "h-[3px] rotate-[-18deg] bg-gradient-to-r from-transparent via-hud-bone to-transparent opacity-80")} />
       <div className={cn("hud-sc relative font-extrabold tracking-[.12em] animate-[hud-rise_.5s_.35s_both]", crit ? "text-[34px] leading-10 text-[#ffd9a8]" : "text-[34px] text-[var(--ink)]")}>{crit ? "Критичне влучання" : "Влучання"}</div>
       <div className={cn("hud-sc relative mt-4 font-extrabold animate-[hud-pop_.45s_.65s_cubic-bezier(.16,1,.3,1)_both]", crit ? "text-[64px] text-[#ff6a4d] [text-shadow:0_0_30px_rgba(255,90,60,.7)]" : "text-[52px] text-[#e9705a]")}>−{result.damage}</div>
       <div className="relative mt-3 text-[15px] text-[#d9cfbd]">{result.targetName}{result.downed ? " · повалений" : ""}</div>
