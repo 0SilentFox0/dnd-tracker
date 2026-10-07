@@ -4,6 +4,7 @@ import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getDamageElementLabel } from "@/lib/constants/damage";
+import { spellLevelName, spellLevelRoman } from "@/lib/constants/spells";
 import { getDamageModifierLabel, getHealModifierLabel, getSpellDamageTypeLabel, getSpellTargetLabel } from "@/lib/constants/spells";
 import { getSpellDamageTypeIcon, getSpellGroupIcon, getSpellTypeIcon } from "@/lib/utils/spells/spell-icons";
 import type { Spell } from "@/types/spells";
@@ -44,17 +45,8 @@ export function SpellPrintCard({ spell }: { spell: Spell }) {
               <CardTitle className="text-sm sm:text-base truncate flex-1 min-w-0">{spell.name}</CardTitle>
               <Badge variant={spell.level === 0 ? "secondary" : "default"} className="flex items-center gap-1 shrink-0 text-xs">
                 <Sparkles className="h-3 w-3" />
-                {spell.level === 0 ? (
-                  <>
-                    <span className="hidden sm:inline">Cantrip</span>
-                    <span className="sm:hidden">C</span>
-                  </>
-                ) : (
-                  <>
-                    <span className="hidden sm:inline">{spell.level}</span>
-                    <span className="sm:hidden">{spell.level}</span>
-                  </>
-                )}
+                <span className="hidden sm:inline">{spellLevelName(spell.level)}</span>
+                <span className="sm:hidden">{spellLevelRoman(spell.level)}</span>
               </Badge>
             </div>
             {spell.damageElement && (

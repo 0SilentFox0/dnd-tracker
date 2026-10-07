@@ -13,8 +13,6 @@ export type SpellTier = "iron" | "bronze" | "silver" | "gold" | "mithril" | "pla
 
 const TIERS: SpellTier[] = ["iron", "bronze", "silver", "gold", "mithril", "platinum"];
 
-export const ROMAN = ["0", "I", "II", "III", "IV", "V"] as const;
-
 export function spellTier(level: number): SpellTier {
   return TIERS[Math.max(0, Math.min(5, level))];
 }

@@ -7,11 +7,11 @@ import { SpellBookPages, SpellDetail } from "./SpellBookPages";
 
 import { HUD_SURFACE, Portrait } from "@/components/battle/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
+import { spellLevelRoman } from "@/lib/constants/spells";
 import type { useSpellBook } from "@/lib/hooks/battle";
 import { useMediaQuery } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 import { rollsComplete } from "@/lib/utils/battle/flows";
-import { ROMAN } from "@/lib/utils/battle/view";
 
 type Book = ReturnType<typeof useSpellBook>;
 
@@ -91,7 +91,7 @@ export function SpellBook({ book }: { book: Book }) {
             {state.hitRoll && <p>Влучання: d20 = {state.hitRoll}</p>}
             {state.damage.length > 0 && <p>Кубики шкоди: {state.damage.join(" + ")} = {state.damage.reduce<number>((a, b) => a + (b ?? 0), 0)}</p>}
             <p className="mt-2 text-sm italic text-[#7a6650]">Остаточну шкоду порахує бій з урахуванням захисту цілей.</p>
-            {selected.level > 0 && <p className="text-sm italic text-[#7a6650]">Витратить слот {ROMAN[selected.level]} кола.</p>}
+            {selected.level > 0 && <p className="text-sm italic text-[#7a6650]">Витратить слот {spellLevelRoman(selected.level)} кола.</p>}
           </div>
           {state.error && <p className="mt-2 text-sm text-[#9c2a1d]">{state.error}</p>}
           <button type="button" disabled={state.step === "submitting"} onClick={book.submit} className={cn(seal, "mt-auto")}>
