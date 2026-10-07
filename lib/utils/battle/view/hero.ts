@@ -1,6 +1,7 @@
 import { ParticipantSide } from "@/lib/constants/battle";
 import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { isActive, withSelf } from "@/lib/utils/abilities/engine/participants";
+import { withinLimits } from "@/lib/utils/abilities/engine/usage";
 import { conditionRequiresDeadTarget } from "@/lib/utils/abilities/registry/conditions";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
@@ -64,6 +65,10 @@ export function bonusTargetSide(a: ResolvedAbility): ParticipantSide | null {
   );
 
   return hostile ? ParticipantSide.ENEMY : ParticipantSide.ALLY;
+}
+
+export function usableAbilities(p: BattleParticipant, trigger: "bonusAction" | "action"): ResolvedAbility[] {
+  return (p.battleData.resolvedAbilities ?? []).filter((a) => a.trigger.event === trigger && withinLimits(p, a));
 }
 
 export function needsBonusTarget(a: ResolvedAbility): boolean {

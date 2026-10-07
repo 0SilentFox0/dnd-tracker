@@ -9,6 +9,7 @@ import { TurnCountdown } from "./TurnCountdown";
 import { AiRollButton, DiceGrid } from "@/components/battle/wizards/DiceInput";
 import { rollDie, useAttackWizard, useBattleScene, usePlayerTurn, useSpellBook } from "@/lib/hooks/battle";
 import { COUNTDOWN_SECONDS } from "@/lib/utils/battle/flows";
+import { usableAbilities } from "@/lib/utils/battle/view";
 import type { BattleParticipant } from "@/types/battle";
 
 const AttackWizard = dynamic(() => import("@/components/battle/wizards/AttackWizard").then((m) => m.AttackWizard), { ssr: false });
@@ -30,9 +31,9 @@ export function MyTurnControls({ hero }: { hero: BattleParticipant }) {
 
   const [abilityOpen, setAbilityOpen] = useState(false);
 
-  const bonusAbilities = (hero.battleData.resolvedAbilities ?? []).filter((a) => a.trigger.event === "bonusAction");
+  const bonusAbilities = usableAbilities(hero, "bonusAction");
 
-  const actionAbilities = (hero.battleData.resolvedAbilities ?? []).filter((a) => a.trigger.event === "action");
+  const actionAbilities = usableAbilities(hero, "action");
 
   const hasMagic = Object.values(hero.spellcasting?.spellSlots ?? {}).some((s) => s.current > 0) || (hero.spellcasting?.knownSpells.length ?? 0) > 0;
 

@@ -69,4 +69,24 @@ describe("abilityActionMutation", () => {
 
     expect(() => run([h, goblin], bonus.key)).toThrow(expect.objectContaining({ code: "action_rejected" }));
   });
+
+  it("uses up the extra-action pool instead of the main action", () => {
+    const pooled = { ...hero, battleData: { ...hero.battleData, pendingExtraActions: 1 } };
+
+    const h = find(run([pooled, goblin], strike.key).participants, "hero");
+
+    expect(h.battleData.pendingExtraActions).toBe(0);
+    expect(h.actionFlags.hasUsedAction).toBe(false);
+  });
+
+  it("panicking participant is rejected, non-controller gets 403", () => {
+    const panic = { participantId: "hero", d10Roll: 1, moraleResult: { shouldSkipTurn: true, hasExtraTurn: false, moralePositive: false, message: "" } };
+
+    const ctx = context({ participants: [hero, goblin] });
+
+    const body = { participantId: "hero", abilityKey: strike.key };
+
+    expect(() => abilityActionMutation({ ...ctx, scene: { ...ctx.scene, pendingMoraleCheck: panic } }, body)).toThrow(expect.objectContaining({ code: "action_used" }));
+    expect(() => abilityActionMutation(context({ participants: [hero, goblin], userId: "someone" }), body)).toThrow(expect.objectContaining({ status: 403 }));
+  });
 });
