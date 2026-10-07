@@ -1,7 +1,7 @@
-import { type PartyPower, type RosterEntry, targetEnemyPower } from "./fair";
+import { type Entry, type PartyPower, type RosterEntry, scaleEntries, targetEnemyPower, weakestPerTier } from "./fair";
 import type { UnitStats } from "./stats";
 
-import { PICK_CANDIDATE_UNITS, PICK_MAX_DISTINCT_UNITS, PICK_TOLERANCE, SCALE_MAX, SCALE_MIN } from "@/lib/constants/battle-balance";
+import { MAX_PICK_TOTAL, PICK_CANDIDATE_UNITS, PICK_MAX_DISTINCT_UNITS, PICK_TOLERANCE, SCALE_MAX, SCALE_MIN } from "@/lib/constants/battle-balance";
 
 export interface PickedEnemy extends RosterEntry {
   name: string;
@@ -59,24 +59,32 @@ export function pickEnemyRoster(party: PartyPower, library: UnitStats[], raceId?
 
   const candidates = [...pool].sort((a, b) => closeness(a) - closeness(b)).slice(0, PICK_CANDIDATE_UNITS);
 
-  const minTotal = Math.ceil(heroes / 2);
+  const maxTotal = Math.min(heroes * 2, MAX_PICK_TOTAL);
 
-  const maxTotal = heroes * 2;
+  const minTotal = Math.min(Math.ceil(heroes / 2), maxTotal);
+
+  const weakest = weakestPerTier(library);
 
   const found: { best: { score: [number, number, number, number]; roster: PickedEnemy[]; hpScale: number; dmgScale: number; within: boolean } | null } = { best: null };
 
   const consider = (units: UnitStats[], quantities: number[]) => {
-    const base = units.reduce((a, u, i) => ({ hp: a.hp + u.hp * quantities[i], dpr: a.dpr + u.dpr * quantities[i] }), { hp: 0, dpr: 0 });
+    const entries: Entry[] = units.map((unit, i) => ({ unit, quantity: quantities[i] }));
+
+    const { base, reached } = scaleEntries(target, entries, weakest);
 
     if (base.hp <= 0 || base.dpr <= 0) return;
 
-    const hpScale = target.hp / base.hp;
+    const rawHp = target.hp / base.hp;
 
-    const dmgScale = target.dpr / base.dpr;
+    const rawDmg = target.dpr / base.dpr;
+
+    const hpScale = reached.hp / base.hp;
+
+    const dmgScale = reached.dpr / base.dpr;
 
     const within = Math.abs(hpScale - 1) <= PICK_TOLERANCE && Math.abs(dmgScale - 1) <= PICK_TOLERANCE;
 
-    const inRange = hpScale >= SCALE_MIN && hpScale <= SCALE_MAX && dmgScale >= SCALE_MIN && dmgScale <= SCALE_MAX;
+    const inRange = rawHp >= SCALE_MIN && rawHp <= SCALE_MAX && rawDmg >= SCALE_MIN && rawDmg <= SCALE_MAX;
 
     const total = quantities.reduce((a, b) => a + b, 0);
 

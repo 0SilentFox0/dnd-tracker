@@ -27,7 +27,7 @@ export async function GET(
   }
 }
 
-/** POST: поради по ворогах за складністю та учасниках. */
+/** POST: сила союзників і (за `suggest`) підібраний склад ворогів. */
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> },

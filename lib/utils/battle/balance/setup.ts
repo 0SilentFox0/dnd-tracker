@@ -33,7 +33,8 @@ export function setupPartyPower(participants: SetupBalanceParticipant[], stats: 
 
     party.dpr += s.dpr * quantity;
     party.hp += s.hp * quantity;
-    party.heroCount += quantity;
+
+    if (p.type !== ParticipantSourceType.UNIT) party.heroCount += 1;
   }
 
   return party;

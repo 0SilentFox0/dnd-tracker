@@ -37,7 +37,7 @@ export async function scaleEnemiesForFairBattle(campaignId: string, slots: Start
     if (stats) {
       party.dpr += stats.dpr;
       party.hp += "hp" in stats ? stats.hp : 0;
-      party.heroCount += 1;
+      if (slot.type === ParticipantSourceType.CHARACTER) party.heroCount += 1;
     }
   });
 

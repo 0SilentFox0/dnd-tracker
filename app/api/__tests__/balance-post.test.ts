@@ -61,4 +61,20 @@ describe("POST balance", () => {
     expect(total).toBeLessThanOrEqual(8);
     expect(res.suggestedEnemies?.every((e) => (e.hpMult ?? 0) > 0 && (e.dmgMult ?? 0) > 0)).toBe(true);
   });
+
+  it("схема обмежує розмір партії", () => {
+    const ids = Array.from({ length: 51 }, (_, i) => `c${i}`);
+
+    expect(balanceSchema.safeParse({ allyParticipants: { characterIds: ids, units: [] } }).success).toBe(false);
+    expect(balanceSchema.safeParse({ allyParticipants: { characterIds: [], units: ids.map((id) => ({ id, quantity: 1 })) } }).success).toBe(false);
+  });
+
+  it("союзні юніти не збільшують N для діапазону кількості ворогів", async () => {
+    const res = await postBalanceResponse("camp", balanceSchema.parse({ allyParticipants: { characterIds: ["h1"], units: [{ id: "ogre", quantity: 10 }] }, suggest: true }));
+
+    const total = (res.suggestedEnemies ?? []).reduce((a, e) => a + e.quantity, 0);
+
+    expect(total).toBeLessThanOrEqual(2);
+    expect(res.allyStats.allyCount).toBe(11);
+  });
 });

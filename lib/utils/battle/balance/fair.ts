@@ -94,12 +94,12 @@ function cappedScale(scale: number, unitValue: number, ceilValue: number | undef
   return Math.min(scale, Math.max(1, ceilValue / unitValue));
 }
 
-interface Entry {
+export interface Entry {
   unit: UnitStats;
   quantity: number;
 }
 
-function scaleEntries(target: Power, entries: Entry[], weakest: TierCeilings) {
+export function scaleEntries(target: Power, entries: Entry[], weakest: TierCeilings) {
   const base = entries.reduce<Power>((a, e) => ({ hp: a.hp + e.unit.hp * e.quantity, dpr: a.dpr + e.unit.dpr * e.quantity }), { hp: 0, dpr: 0 });
 
   const hpScale = base.hp > 0 ? clampScale(target.hp / base.hp) : 1;

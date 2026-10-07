@@ -22,11 +22,14 @@ export async function postBalanceResponse(campaignId: string, data: BalancePostD
 
   const party: PartyPower = { dpr: 0, hp: 0, heroCount: 0 };
 
+  let allyCount = 0;
+
   if (allyParticipants.characterIds.length > 0) {
     for (const { stats } of await loadCharacterBalanceStats(campaignId, allyParticipants.characterIds)) {
       party.dpr += stats.dpr;
       party.hp += stats.hp;
       party.heroCount += 1;
+      allyCount += 1;
     }
   }
 
@@ -39,14 +42,14 @@ export async function postBalanceResponse(campaignId: string, data: BalancePostD
 
     party.dpr += stats.dpr * quantity;
     party.hp += stats.hp * quantity;
-    party.heroCount += quantity;
+    allyCount += quantity;
   }
 
   const allyStats: AllyStats = {
     dpr: round1(party.dpr),
     totalHp: party.hp,
     kpi: party.hp > 0 ? Math.round((party.dpr / party.hp) * 100) / 100 : 0,
-    allyCount: party.heroCount,
+    allyCount,
   };
 
   const response: { allyStats: AllyStats; suggestedEnemies?: SuggestedEnemy[] } = { allyStats };

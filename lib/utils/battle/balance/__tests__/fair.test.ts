@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { HERO_EDGE, HIT_RATE, SCALE_MAX, SCALE_MIN, TARGET_ROUNDS } from "@/lib/constants/battle-balance";
+import { HERO_EDGE, HIT_RATE, MAX_PICK_TOTAL, SCALE_MAX, SCALE_MIN, TARGET_ROUNDS } from "@/lib/constants/battle-balance";
 import { computeFairScaling, type PartyPower, pickEnemyRoster, type UnitStats } from "@/lib/utils/battle/balance";
 
 const unit = (unitId: string, level: number, hp: number, dpr: number, raceId: string | null = null): UnitStats => ({ unitId, name: unitId, level, hp, dpr, kpi: dpr / hp, raceId });
@@ -155,5 +155,37 @@ describe("юніти з нульовими значеннями", () => {
     expect(s.units.rat.hpMult).toBeLessThanOrEqual(50 / 8);
     expect(Number.isFinite(s.units.rat.dmgMult)).toBe(true);
     expect(pickEnemyRoster({ dpr: 14, hp: 60, heroCount: 1 }, lib)?.roster.every((r) => r.unitId !== "ghost")).toBe(true);
+  });
+});
+
+describe("pickEnemyRoster: межі та чесність", () => {
+  it("N = лише герої: союзні юніти не розширюють діапазон кількості", () => {
+    const withAllyUnits = { dpr: 14 * 1 + 40, hp: 60 + 200, heroCount: 1 };
+
+    const pick = pickEnemyRoster(withAllyUnits, LIBRARY);
+
+    const total = pick?.roster.reduce((a, r) => a + r.quantity, 0) ?? 0;
+
+    expect(total).toBeLessThanOrEqual(2);
+  });
+
+  it("велика партія: стеля MAX_PICK_TOTAL і відповідь швидше за 200 мс", () => {
+    const lib = [...LIBRARY, unit("kobold", 1, 6, 4), unit("bandit", 2, 20, 10), unit("archer", 2, 18, 12), unit("mage", 3, 30, 20)];
+
+    const started = performance.now();
+
+    const pick = pickEnemyRoster(party(100), lib);
+
+    expect(performance.now() - started).toBeLessThan(200);
+    expect(pick?.roster.reduce((a, r) => a + r.quantity, 0) ?? 0).toBeLessThanOrEqual(MAX_PICK_TOTAL);
+  });
+
+  it("withinTolerance чесний: стеля тіру, що урізає множник, не вважається в межах", () => {
+    const lib = [unit("small", 1, 10, 6), unit("big", 2, 12, 7)];
+
+    const pick = pickEnemyRoster({ dpr: 200, hp: 800, heroCount: 4 }, lib);
+
+    expect(pick).not.toBeNull();
+    expect(Math.abs((pick?.hpScale ?? 0) - 1) <= 0.25 && Math.abs((pick?.dmgScale ?? 0) - 1) <= 0.25).toBe(pick?.withinTolerance);
   });
 });
