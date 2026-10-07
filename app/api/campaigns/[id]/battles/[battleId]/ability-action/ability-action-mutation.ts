@@ -35,9 +35,7 @@ export function abilityActionMutation(ctx: BattleMutationContext, data: AbilityA
 
   if (!withinLimits(participant, ability)) throw new BattleRuleError("ability_limit", "Ліміт використань вичерпано");
 
-  const targetIds = data.targetParticipantIds ?? [];
-
-  assertAbilityTargets(ability, ctx.participants, targetIds);
+  const targetIds = assertAbilityTargets(ability, ctx.participants, data.targetParticipantIds ?? []);
 
   const run = runAbilities(
     ctx.participants,

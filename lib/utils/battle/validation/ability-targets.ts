@@ -7,7 +7,9 @@ import type { BattleParticipant } from "@/types/battle";
 
 export const abilityMaxTargets = (a: ResolvedAbility): number => a.maxTargets ?? 1;
 
-export function assertAbilityTargets(ability: ResolvedAbility, ps: BattleParticipant[], targetIds: string[]): void {
+export function assertAbilityTargets(ability: ResolvedAbility, ps: BattleParticipant[], rawTargetIds: string[]): string[] {
+  const targetIds = [...new Set(rawTargetIds)];
+
   if (targetIds.length > abilityMaxTargets(ability)) throw new BattleRuleError("invalid_target", API_ERRORS.ABILITY_TOO_MANY_TARGETS);
 
   const targets = targetIds.map((id) => findParticipant(ps, id));
@@ -17,6 +19,8 @@ export function assertAbilityTargets(ability: ResolvedAbility, ps: BattlePartici
   if (conditionRequiresDeadTarget(ability.condition) && (targets.length === 0 || targets.some((t) => t && isActive(t)))) {
     throw new BattleRuleError("invalid_target", API_ERRORS.BONUS_TARGET_MUST_BE_DEAD);
   }
+
+  return targetIds;
 }
 
 export function toggleAbilityTarget(selected: string[], id: string, max: number): string[] {

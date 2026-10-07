@@ -62,6 +62,12 @@ describe("multi-target abilities", () => {
     expect(roll(slowed).advantageUsed).toBe(false);
   });
 
+  it("duplicate ids count as one target", () => {
+    const out = run(["f1", "f1", "f1", "f1"]);
+
+    expect(out.participants.find((p) => p.basicInfo.id === "f1")?.battleData.activeEffects).toHaveLength(1);
+  });
+
   it("toggleAbilityTarget caps the selection", () => {
     expect(toggleAbilityTarget(["a", "b"], "c", 2)).toEqual(["a", "b"]);
     expect(toggleAbilityTarget(["a", "b"], "a", 2)).toEqual(["b"]);
