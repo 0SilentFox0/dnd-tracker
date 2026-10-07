@@ -3,23 +3,7 @@
  */
 
 import { campaignPatch } from "@/lib/api/client";
-import type {
-  EquippedItems,
-  InventoryFormData,
-  InventoryItem,
-} from "@/types/inventory";
-
-export interface Inventory {
-  id: string;
-  characterId: string;
-  equipped: EquippedItems;
-  backpack: InventoryItem[];
-  gold: number;
-  silver: number;
-  copper: number;
-  items: InventoryItem[];
-  updatedAt: string;
-}
+import type { Inventory, InventoryFormData } from "@/types/inventory";
 
 /**
  * Оновлює інвентар персонажа

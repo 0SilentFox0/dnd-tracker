@@ -2,7 +2,7 @@
 
 import { useDeferredValue, useMemo, useState } from "react";
 
-import type { SectionTab, SkillForReference, SpellForReference } from "@/lib/types/info-reference";
+import type { SectionTab, SkillForReference, SpellForReference } from "@/types/info-reference";
 import {
   matchSearch,
   skillSearchText,

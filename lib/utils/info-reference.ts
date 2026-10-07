@@ -1,4 +1,4 @@
-import type { SkillForReference, SpellForReference } from "@/lib/types/info-reference";
+import type { SkillForReference, SpellForReference } from "@/types/info-reference";
 
 export function formatMechanicsSkill(s: SkillForReference): string {
   const parts: string[] = [];

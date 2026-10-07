@@ -1,11 +1,7 @@
 import { campaignDelete, createCampaignCrudApi } from "@/lib/api/client";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import type { WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
-import type { ArtifactListItem } from "@/types/artifacts";
-
-export type { ArtifactListItem };
-
-export type Artifact = ArtifactListItem & Record<string, unknown>;
+import type { Artifact, ArtifactListItem } from "@/types/artifacts";
 
 export type CreateArtifactData = {
   name: string;

@@ -1,7 +1,7 @@
 import { mapBonuses, mapModifiers, mapPassiveEffects, scopeOf, withTarget } from "./convert-artifact";
 import type { ConversionIssue, ConversionResult, ConvertOptions } from "./types";
 
-import { parseArtifactSetBonus } from "@/lib/types/artifact-set-bonus";
+import { parseArtifactSetBonus } from "./artifact-set-bonus";
 import type { Effect } from "@/lib/utils/abilities/schema";
 
 const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);

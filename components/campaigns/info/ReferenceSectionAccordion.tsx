@@ -8,7 +8,7 @@ import { SpellReferenceCard } from "./SpellReferenceCard";
 
 import { HudPanel } from "@/components/hud/page";
 import { Accordion } from "@/components/ui/accordion";
-import type { SkillForReference, SpellForReference } from "@/lib/types/info-reference";
+import type { SkillForReference, SpellForReference } from "@/types/info-reference";
 
 const NO_MAIN_SKILL_LABEL = "Без гілки";
 
