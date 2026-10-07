@@ -1,0 +1,229 @@
+[page] Скіли ✅
+  [sub_header] Напад
+  [text] Базовий + 15% до мілі атак
+Просунутий  + 25% до мілі атак
+Експерт + 40% до мілі атак
+  [sub_sub_header] 1 рівень
+  [bulleted_list] Рублячий удар - з шансом 40% удар завдає рани яка кровить наступні 2 раунди з 1д4 урону
+  [bulleted_list] Оглушаючий удар - з шансом 40% удар зменшує ініціативу жертви на 2 на 1 раунд
+  [bulleted_list] Пошкодження броні - з шансом 40%  удар зменшує 1 броню цілі
+  [sub_sub_header] Рівень 2
+  [bulleted_list] Пробивний удар - ігнорування опору шкоди цілі
+  [bulleted_list] Послідовність - кожен удар по цілі навішує на неї 1 стак, кожен стак + 2 шкоди по цілі від цього героя
+  [sub_sub_header] Рівень 3
+  [bulleted_list] Нагорода - Вбивство ворога дає додаткову дію
+  [divider]
+  [sub_header] Стрільба
+  [text] Базовий + 15% до рендж атак
+Просунутий  + 25% до рендж атак
+Експерт + 40% до рендж атак
+  [sub_header] Рівень 1
+  [bulleted_list] Травмуючий постріл - з шаносом 40% зменшує швидкість на 50%
+  [bulleted_list] Бронебійний снаряд - з шансом 40% Постріл по цілі зменшує броню цілі на 1 на 1 раунд
+  [bulleted_list] Відбиваюча стріла - з шаносом 40%
+зменшує ініціативу на 2 на 1 раунд
+  [sub_header] Рівень 2
+  [bulleted_list] В яблучко - гарантоване попадання по цілі 1 раз за бій
+  [bulleted_list] Хмара стріл -  40% шкоди по 9 клітинкам
+  [sub_header] Рівень 3
+  [bulleted_list] Постріл по 2 цілям
+  [divider]
+  [sub_header] Захист
+  [text] Базовий + 10% до опору фізичної шкоди
+Просунутий  + 20% до опору фізичної шкоди
+Експерт + 30%до опору фізичної шкоди
+  [sub_header] Рівень 1
+  [bulleted_list] Стійкість - додає {2 * рівень героя} HP
+  [bulleted_list] Супротив - якщо у героя <= 15% HP
+знімає всі негативні ефекти  1 раз за бій
+  [bulleted_list] Перенаправлення - бонус дія - накладає ефект на союзного героя і якщо цей герой отримує фізичну шкоду забирає 50% цієї шкоди на себе
+  [sub_header] Рівень 2
+  [bulleted_list] Битва до останнього - 1 раз за бій якщо герой втрачає всі життя - заишає йому 1 HP
+  [bulleted_list] Магічний захист Дає 15% опору від шкоди заклинань
+  [sub_header] Рівень 3
+  [bulleted_list] Готовність - проводить атаку на ворога перед атакою ворога
+  [divider]
+  [sub_header] Магія Світла
+  [text] Базовий - дає заклинання 1-2 рівня
+Просунутий - дає заклинання 3-4 рівня
+Експерт - дає заклинання 5 рівня
+  [sub_header] Рівень 1
+  [bulleted_list] Гнів праведний - заклинання караючий удар та прискорення - діє по області
+  [bulleted_list] Даруючий захист - ухилення та камяна шкіра діють по області
+  [bulleted_list] Даруючий Благословення - божественна сила та Зняття чар діють по області
+  [sub_header] Рівень 2
+  [bulleted_list] Вічне світло - додає заклинанння 
+яке лікує на 2д6 + рівень героя
+  [bulleted_list] Вигнання - забирає 50% всім ворожим призваним істотам
+  [sub_header] Рівень 3
+  [bulleted_list] Благословення - Всі заклиання світла діють на всіх союзників
+  [divider]
+  [sub_header] Магія Темряви
+  [text] Базовий - дає заклинання 1-2 рівня
+Просунутий - дає заклинання 3-4 рівня
+Експерт - дає заклинання 5 рівня
+  [sub_header] Рівень 1
+  [bulleted_list] Повелитель болі - заклинання Чема та  Промінь Розрухи діють на область
+  [bulleted_list] Повелитель розуму - сповільнення та розсіяність діють по області
+  [bulleted_list] Повелитель Проклять - Ослабелння та Немічність діють по області
+  [sub_header] Рівень 2
+  [bulleted_list] Поступ смерті - посилення заклиань темряви на 25%
+  [bulleted_list]  Пожирач - бонус дія - герой пожирає душу мертвого юніта і відновлює 1 спел слот
+  [sub_header] Рівень 3
+  [bulleted_list] Майстер темряви - Заклинання 4 та 5 рівня діють на 2 істоти
+  [divider]
+  [sub_header] Магія Хаосу
+  [text] Базовий - дає заклинання 1-2 рівня
+Просунутий - дає заклинання 3-4 рівня
+Експерт - дає заклинання 5 рівня
+  [sub_header] Рівень 1
+  [bulleted_list] Повелитель бурі - заклинання Блискавка та  Ланцюгова блискавка зменшують ініціативу ворога на 5 на 1 раунд
+  [bulleted_list] Повелитель вогню - заклинання Вогняний шар, Стіна Вогню та Армагедон знімають 30% захисту на 1 раунд
+  [bulleted_list] Повелитель Холоду - заклинаня Льодяна Брила, Кільце Холоду та Зупиняючий холод зменшує швидкість істот на 50% на 1 раунд
+  [sub_header] Рівень 2
+  [bulleted_list] Вибух мани- бонус дія Ворожий заклинатель отримують з шансом 50% отримує шкоду свого заклинання (2 рази за бій)
+  [bulleted_list] Пекельна сила -всі заклинання хаосу наносять на 25% більше шкоди
+  [sub_header] Рівень 3
+  [bulleted_list] Пірокінез - всі заклинання накладають модифікатор підпал на 3 раунди який наносить 2к6 шкоди
+  [divider]
+  [sub_header] Магія Призиву
+  [text] Базовий - дає заклинання 1-2 рівня
+Просунутий - дає заклинання 3-4 рівня
+Експерт - дає заклинання 5 рівня
+  [sub_header] Рівень 1
+  [bulleted_list] Повелитель чар- заклинання призив Фенікса та призив елементалів прикликають сумонів з + 25% HP + 25% шкоди
+  [bulleted_list] Повелитель Холоду - заклинаня Магічний Кристал та Стіна Мечів та Вогяна пастка отримують +25% до шкоди і HP
+  [sub_header] Рівень 2
+  [bulleted_list] Вигнання - забирає 50% всім ворожим призваним істотам
+  [bulleted_list] Обраний елементаль - додає нове заклиання - призив обраного елементалю
+  [bulleted_list] Корені лісу - Додає нове заклиання “Корені”
+  [sub_header] Рівень 3
+  [bulleted_list] Вічні воіни - прикликає по 2 елементаля
+  [divider]
+  [sub_header] Лідерство
+  [text] Базовий - дає + 1 моралі
+Просунутий - дає ще + 1 моралі
+Експерт - дає ще + 1 моралі
+  [sub_header] Рівень 1
+  [bulleted_list] Співпереживання - Кожного разу коли союзний герой проходить перевірку на мораль отримує +1 ініціативи на 1 раунд (ефект скається)
+  [bulleted_list] Відновлення - якщо мораль опускається до відємного значення - в наступному раунді відовлюється до 0
+  [bulleted_list] Відплата - завдає {5% * мораль} більше фізичної шкоди
+  [sub_header] Рівень 2
+  [bulleted_list] Натхнення -бонус дія дає +1 моралі союзнику на 3 раунд
+  [bulleted_list]
+  [bulleted_list] Помста - за кожного вбитого ворога отримує +1 моралі до кінця бою за кожного вбитого союзника -2 моралі
+  [sub_header] Рівень 3
+  [bulleted_list] Успіх - за кожен успішний кидок моралі отримує +5 шкоди до кінця бою
+  [divider]
+  [text]
+  [sub_sub_header] Напад
+  [table]
+    [table_row] Умова спрацювання | Як змінюється | Заклинання що покращуються | Атрибут що змінюється | Назва
+    [table_row] passive | +15% | - | melee_damage | Базовий
+    [table_row] passive | +25% | - | melee_damage | Просунутий
+    [table_row] passive | +40% | - | melee_damage | Експерт
+    [table_row] onHit && rand() < 0.4 | 1d4 протягом 2 раундів | - | bleed_damage | Рублячий удар
+    [table_row] onHit && rand() < 0.4 | -2 на 1 раунд | - | initiative | Оглушаючий удар
+    [table_row] onHit && rand() < 0.4 | -1 | - | armor | Пошкодження броні
+    [table_row] bonusAction | +3 damage, -1 armor на 1 раунд | - | damage, armor | Завзятість
+    [table_row] onHit | ignore | - | damage_resistance | Пробивний удар
+    [table_row] onHit | +2 за стак | - | damage | Послідовність
+    [table_row] onKill | +1 | - | actions | Нагорода
+  [divider]
+  [sub_sub_header] Стрільба
+  [table]
+    [table_row] Назва | Заклинання що покращуються | Як змінюється | Атрибут що змінюється | Умова спрацювання
+    [table_row] Базовий | - | +15% | ranged_damage | passive
+    [table_row] Просунутий | - | +25% | ranged_damage | passive
+    [table_row] Експерт | - | +40% | ranged_damage | passive
+    [table_row] Травмуючий постріл | - | -50% | speed | onHit && rand() < 0.4
+    [table_row] Бронебійний снаряд | - | -1 на 1 раунд | armor | onHit && rand() < 0.4
+    [table_row] Відбиваюча стріла | - | -2 на 1 раунд | initiative | onHit && rand() < 0.4
+    [table_row] Стріла сили | - | 50% по цілі за нею | damage | onHit && hasEnemyBehind
+    [table_row] В яблучко | - | 100% | hit_chance | oncePerBattle
+    [table_row] Хмара стріл | - | 40% у 9 клітинках | area_damage | onCast
+    [table_row] Постріл по 2 цілям | - | +1 | targets | onAttack
+  [divider]
+  [sub_sub_header] Захист
+  [table]
+    [table_row] Заклинання що покращуються | Атрибут що змінюється | Умова спрацювання | Назва | Як змінюється
+    [table_row] - | physical_resistance | passive | Базовий | +10%
+    [table_row] - | physical_resistance | passive | Просунутий | +20%
+    [table_row] - | physical_resistance | passive | Експерт | +30%
+    [table_row] - | max_hp | passive | Стійкість | +2 * hero_level
+    [table_row] - | debuffs | currentHP <= 0.15 * maxHP && oncePerBattle | Супротив | remove all
+    [table_row] - | damage_taken | bonusAction && allyHit | Перенаправлення | 50% redirect
+    [table_row] - | hp | onDeath && oncePerBattle | Битва до останнього | set to 1
+    [table_row] - | magic_resistance | passive | Магічний захист | +15%
+    [table_row] - | reflect_damage | bonusAction && nextPhysicalHit && oncePerBattle | Колюча броня | 100%
+    [table_row] - | initiative | onEnemyAttack | Готовність | preemptive attack
+  [divider]
+  [sub_sub_header] Магія Світла
+  [table]
+    [table_row] Атрибут що змінюється | Назва | Умова спрацювання | Заклинання що покращуються | Як змінюється
+    [table_row] spell_access | Базовий | passive | - | 1–2 рівень
+    [table_row] spell_access | Просунутий | passive | - | 3–4 рівень
+    [table_row] spell_access | Експерт | passive | - | 5 рівень
+    [table_row] area_effect | Гнів праведний | onCast | Караючий удар, Прискорення | enabled
+    [table_row] area_effect | Даруючий захист | onCast | Ухилення, Кам’яна шкіра | enabled
+    [table_row] area_effect | Даруючий благословення | onCast | Божественна сила, Зняття чар | enabled
+    [table_row] spell_power | Божа сила | passive | всі світлі | +25%
+    [table_row] healing | Вічне світло | onCast | нове заклинання | 2d6 + hero_level
+    [table_row] summon_hp | Вигнання | onCast | - | -50%
+    [table_row] targets | Всі заклинання | onCast | всі світлі | all allies
+  [divider]
+  [sub_sub_header] Магія Темряви
+  [table]
+    [table_row] Умова спрацювання | Назва | Атрибут що змінюється | Як змінюється | Заклинання що покращуються
+    [table_row] passive | Базовий | spell_access | 1–2 рівень | -
+    [table_row] passive | Просунутий | spell_access | 3–4 рівень | -
+    [table_row] passive | Експерт | spell_access | 5 рівень | -
+    [table_row] onCast | Повелитель болі | area_effect | enabled | Чума, Промінь розрухи
+    [table_row] onCast | Повелитель розуму | area_effect | enabled | Сповільнення, Розсіяність
+    [table_row] onCast | Повелитель проклять | area_effect | enabled | Ослаблення, Немічність
+    [table_row] passive | Поступ смерті | spell_power | +25% | всі темні
+    [table_row] onAttack | Компенсація | random_spell | 1–3 рівень | -
+    [table_row] bonusAction && onUnitDeath | Пожирач | spell_slots | +1 | -
+    [table_row] onCast | Майстер темряви | targets | +1 | 4–5 рівень
+  [divider]
+  [sub_sub_header] Магія Хаосу
+  [table]
+    [table_row] Заклинання що покращуються | Умова спрацювання | Як змінюється | Назва | Атрибут що змінюється
+    [table_row] - | passive | 1–2 рівень | Базовий | spell_access
+    [table_row] - | passive | 3–4 рівень | Просунутий | spell_access
+    [table_row] - | passive | 5 рівень | Експерт | spell_access
+    [table_row] Блискавка, Ланцюгова блискавка | onCast | -5 на 1 раунд | Повелитель бурі | initiative
+    [table_row] Вогняний шар, Стіна вогню, Армагедон | onCast | -30% на 1 раунд | Повелитель вогню | defense
+    [table_row] Льодяна брила, Кільце холоду, Зупиняючий холод | onCast | -50% на 1 раунд | Повелитель холоду | speed
+    [table_row] - | bonusAction && enemyCasts && rand() < 0.5 | 100% | Вибух мани | reflect_spell
+    [table_row] всі хаосу | passive | +25% | Пекельна сила | spell_damage
+    [table_row] - | onAttack | +1d6 | Вогняна атака | fire_damage
+    [table_row] всі хаосу | onCast | 2d6 протягом 3 раундів | Пірокінез | burn_damage
+  [divider]
+  [sub_sub_header] Магія Призиву
+  [table]
+    [table_row] Як змінюється | Заклинання що покращуються | Назва | Умова спрацювання | Атрибут що змінюється
+    [table_row] 1–2 рівень | - | Базовий | passive | spell_access
+    [table_row] 3–4 рівень | - | Просунутий | passive | spell_access
+    [table_row] 5 рівень | - | Експерт | passive | spell_access
+    [table_row] +25% | Магічний кулак, Підняття мертвих | Повелитель життя | passive | spell_power
+    [table_row] +25% HP, +25% dmg | Фенікс, Елементалі | Повелитель чар | passive | summon_stats
+    [table_row] +25% | Магічний кристал, Стіна мечів, Вогняна пастка | Повелитель холоду | passive | summon_damage, summon_hp
+    [table_row] -50% | - | Вигнання | onCast | summon_hp
+    [table_row] enabled | Призив обраного елементаля | Обраний елементаль | passive | new_spell
+    [table_row] enabled | Корені | Корені лісу | passive | new_spell
+    [table_row] +2 | Елементалі | Вічні воїни | onCast | summon_count
+  [divider]
+  [sub_sub_header] Лідерство
+  [table]
+    [table_row] Назва | Заклинання що покращуються | Як змінюється | Атрибут що змінюється | Умова спрацювання
+    [table_row] Базовий | - | +1 | morale | passive
+    [table_row] Просунутий | - | +1 | morale | passive
+    [table_row] Експерт | - | +1 | morale | passive
+    [table_row] Співпереживання | - | +1 на 1 раунд (stack) | initiative | onAllyMoraleSuccess
+    [table_row] Відновлення | - | set to 0 | morale | morale < 0
+    [table_row] Відплата | - | +5% * morale | physical_damage | passive
+    [table_row] Натхнення | - | +1 на 1 раунд | morale | bonusAction
+    [table_row] Успіх | - | +5 | damage | onMoraleSuccess
+    [table_row] Помста | - | +1 per kill, -2 per allyDeath | morale | onUnitDeath
+    [table_row] Вічні воїни | Елементалі | +2 | summon_count | onCast
