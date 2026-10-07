@@ -5,6 +5,7 @@ import { use, useState } from "react";
 import { useBalanceSuggestions } from "./useBalanceSuggestions";
 import { useBattleForm } from "./useBattleForm";
 import { useBattleParticipants } from "./useBattleParticipants";
+import { useFairBalance } from "./useFairBalance";
 import { useNewBattleData } from "./useNewBattleData";
 
 import { CharacterType } from "@/lib/constants/characters";
@@ -33,6 +34,8 @@ export function useNewBattlePage(params: Promise<{ id: string }>) {
     setParticipants: participantsBag.setParticipants,
   });
 
+  const fair = useFairBalance(participantsBag.participants, entityStats, balanceBag.balanceRace);
+
   const playerCharacters = characters.filter(
     (c) => c.type === CharacterType.PLAYER && c.controlledBy !== null,
   );
@@ -51,6 +54,7 @@ export function useNewBattlePage(params: Promise<{ id: string }>) {
     entityStats,
     ...participantsBag,
     ...balanceBag,
+    fair,
     handleSubmit,
     playerCharacters,
     npcCharacters,

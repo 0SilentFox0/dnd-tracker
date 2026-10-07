@@ -106,7 +106,7 @@ function UnitRow({
           </span>
           {stats && (
             <span className="text-sm text-muted-foreground">
-              DPR {stats.dpr} · HP {stats.hp} · KPI {stats.kpi}
+              DPR {Math.round(stats.dpr * 10) / 10} · HP {stats.hp} · KPI {stats.kpi}
             </span>
           )}
         </div>

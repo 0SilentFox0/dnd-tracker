@@ -9,6 +9,7 @@ import { EditBattleBasicInfoCard } from "./EditBattleBasicInfoCard";
 import { ParticipantSideCard } from "./ParticipantSideCard";
 
 import { BATTLE_FORM_TAB, type BattleFormTabId } from "@/components/battle/battle-form-tabs";
+import { BalanceSummary } from "@/components/battle/setup/BalanceSummary";
 import { LoadingState } from "@/components/common/states";
 import { HudForm, HudFormPage, type HudTab } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ export default function EditBattlePage({
     units,
     playerCharacters,
     npcCharacters,
+    fair,
     handleParticipantToggle,
     handleSideChange,
     handleQuantityChange,
@@ -94,21 +96,24 @@ export default function EditBattlePage({
       id: BATTLE_FORM_TAB.roster,
       label: `Склад · ${participants.length}`,
       content: (
-        <div className="grid gap-4 md:grid-cols-2">
-          <ParticipantSideCard
-            side="ally"
-            participants={participants}
-            characters={characters}
-            units={units}
-            onSideChange={handleSideChange}
-          />
-          <ParticipantSideCard
-            side="enemy"
-            participants={participants}
-            characters={characters}
-            units={units}
-            onSideChange={handleSideChange}
-          />
+        <div>
+          <BalanceSummary fair={fair} />
+          <div className="grid gap-4 md:grid-cols-2">
+            <ParticipantSideCard
+              side="ally"
+              participants={participants}
+              characters={characters}
+              units={units}
+              onSideChange={handleSideChange}
+            />
+            <ParticipantSideCard
+              side="enemy"
+              participants={participants}
+              characters={characters}
+              units={units}
+              onSideChange={handleSideChange}
+            />
+          </div>
         </div>
       ),
     },

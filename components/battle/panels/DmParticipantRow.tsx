@@ -6,6 +6,16 @@ import { useConfirm } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 import type { BattleParticipant } from "@/types/battle";
 
+const mult = (n: number) => `×${Math.round(n * 100) / 100}`;
+
+function scaleLabel({ battleData }: BattleParticipant): string | null {
+  const parts = [battleData.hpMultiplier, battleData.damageMultiplier].map((m) => (m !== undefined && m !== 1 ? m : null));
+
+  if (parts[0] === null && parts[1] === null) return null;
+
+  return [parts[0] !== null && `${mult(parts[0])} HP`, parts[1] !== null && `${mult(parts[1])} шкода`].filter(Boolean).join(" · ");
+}
+
 const ICON = "flex size-8 items-center justify-center border border-transparent bg-black/40 transition-colors";
 
 interface DmParticipantRowProps {
@@ -36,6 +46,7 @@ export function DmParticipantRow({
       <i className="size-2 shrink-0 rounded-full" style={{ background: participant.basicInfo.side === "ally" ? "var(--ally)" : "var(--enemy)" }} />
       <span className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--ink)]">
         {participant.basicInfo.name}
+        {scaleLabel(participant) && <span className="ml-2 text-xs font-normal text-[var(--hud-muted)]" data-testid="balance-scale">{scaleLabel(participant)}</span>}
       </span>
       <div className="flex shrink-0 items-center gap-0.5">
         <button

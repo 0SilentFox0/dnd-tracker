@@ -5,7 +5,7 @@ import { useCallback, useState } from "react";
 import { useBattleBalance } from "../useBattleSetupQueries";
 
 import { ParticipantSourceType } from "@/lib/constants/battle";
-import type { AllyStats, Difficulty, SetupParticipant, SuggestedEnemy } from "@/types/battle-setup";
+import type { SetupParticipant, SuggestedEnemy } from "@/types/battle-setup";
 
 interface AllyParticipants {
   characterIds: string[];
@@ -21,8 +21,8 @@ interface UseBalanceSuggestionsParams {
 }
 
 export function useBalanceSuggestions({
-  campaignId,
   participants,
+  campaignId,
   allyParticipants,
   hasAllies,
   setParticipants,
@@ -31,38 +31,27 @@ export function useBalanceSuggestions({
 
   const { mutate: requestBalance } = balance;
 
-  const [allyStats, setAllyStats] = useState<AllyStats | null>(null);
-
   const [suggestedEnemies, setSuggestedEnemies] = useState<SuggestedEnemy[]>([]);
 
-  const [difficulty, setDifficulty] = useState<Difficulty>("medium");
-
-  const [minTier, setMinTier] = useState(1);
-
-  const [maxTier, setMaxTier] = useState(10);
+  const [suggestDone, setSuggestDone] = useState(false);
 
   const [balanceRace, setBalanceRace] = useState("");
-
-  const fetchAllyStats = useCallback(() => {
-    if (!hasAllies) return;
-
-    requestBalance({ allyParticipants }, { onSuccess: (data) => setAllyStats((data.allyStats ?? null) as AllyStats | null) });
-  }, [requestBalance, allyParticipants, hasAllies]);
 
   const suggestEnemies = useCallback(() => {
     if (!hasAllies) return;
 
     setSuggestedEnemies([]);
+    setSuggestDone(false);
     requestBalance(
-      { allyParticipants, difficulty, minTier, maxTier, raceId: balanceRace || undefined },
+      { allyParticipants, suggest: true, raceId: balanceRace || undefined },
       {
         onSuccess: (data) => {
-          setAllyStats((data.allyStats ?? null) as AllyStats | null);
           setSuggestedEnemies((data.suggestedEnemies ?? []) as SuggestedEnemy[]);
+          setSuggestDone(true);
         },
       },
     );
-  }, [requestBalance, allyParticipants, hasAllies, difficulty, minTier, maxTier, balanceRace]);
+  }, [requestBalance, allyParticipants, hasAllies, balanceRace]);
 
   const applySuggestedEnemies = useCallback(() => {
     const allies = participants.filter((p) => p.side === "ally");
@@ -79,18 +68,11 @@ export function useBalanceSuggestions({
   }, [participants, suggestedEnemies, setParticipants]);
 
   return {
-    allyStats,
     balanceLoading: balance.isPending,
     suggestedEnemies,
-    difficulty,
-    setDifficulty,
-    minTier,
-    setMinTier,
-    maxTier,
-    setMaxTier,
+    suggestDone,
     balanceRace,
     setBalanceRace,
-    fetchAllyStats,
     suggestEnemies,
     applySuggestedEnemies,
   };

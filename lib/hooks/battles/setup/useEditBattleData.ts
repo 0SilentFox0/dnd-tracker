@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { useBattle, useDeleteBattle, useUpdateBattle } from "../useBattles";
-import { useSetupRoster } from "../useBattleSetupQueries";
+import { useBattleBalanceStats, useSetupRoster } from "../useBattleSetupQueries";
+import { useFairBalance } from "./useFairBalance";
 
 import { ParticipantSide, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import { CharacterType } from "@/lib/constants/characters";
@@ -121,6 +122,10 @@ export function useEditBattleData(campaignId: string, battleId: string) {
   const getParticipantQuantity = (id: string): number =>
     participants.find((p) => p.id === id)?.quantity ?? 1;
 
+  const { data: entityStats } = useBattleBalanceStats(campaignId);
+
+  const fair = useFairBalance(participants, entityStats);
+
   const playerCharacters = characters.filter(
     (c) => c.type === CharacterType.PLAYER && c.controlledBy !== null,
   );
@@ -139,6 +144,7 @@ export function useEditBattleData(campaignId: string, battleId: string) {
     units,
     playerCharacters,
     npcCharacters,
+    fair,
     handleParticipantToggle,
     handleSideChange,
     handleQuantityChange,
