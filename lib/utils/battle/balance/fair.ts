@@ -4,6 +4,7 @@ import {
   BALANCE_TOLERANCE,
   HERO_EDGE,
   HINT_MAX_STEPS,
+  HIT_RATE,
   MAX_UNIT_QUANTITY,
   SCALE_MAX,
   SCALE_MIN,
@@ -60,7 +61,7 @@ export type TierCeilings = Map<number, Power>;
 const clampScale = (x: number) => Math.min(SCALE_MAX, Math.max(SCALE_MIN, x));
 
 export function targetEnemyPower(party: PartyPower): Power {
-  return { hp: party.dpr * TARGET_ROUNDS, dpr: (HERO_EDGE * party.hp) / TARGET_ROUNDS };
+  return { hp: party.dpr * HIT_RATE * TARGET_ROUNDS, dpr: (HERO_EDGE * party.hp) / TARGET_ROUNDS };
 }
 
 /** Найслабший юніт (за HP і за DPR окремо) кожного тіру бібліотеки. */

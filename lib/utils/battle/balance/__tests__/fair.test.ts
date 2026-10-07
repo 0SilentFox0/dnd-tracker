@@ -1,17 +1,17 @@
 import { describe, expect, it } from "vitest";
 
-import { HERO_EDGE, SCALE_MAX, SCALE_MIN, TARGET_ROUNDS } from "@/lib/constants/battle-balance";
+import { HERO_EDGE, HIT_RATE, SCALE_MAX, SCALE_MIN, TARGET_ROUNDS } from "@/lib/constants/battle-balance";
 import { computeFairScaling, type PartyPower, pickEnemyRoster, type UnitStats } from "@/lib/utils/battle/balance";
 
 const unit = (unitId: string, level: number, hp: number, dpr: number, raceId: string | null = null): UnitStats => ({ unitId, name: unitId, level, hp, dpr, kpi: dpr / hp, raceId });
 
 const LIBRARY: UnitStats[] = [
-  unit("rat", 1, 8, 3),
-  unit("goblin", 1, 15, 5),
-  unit("wolf", 2, 30, 8),
-  unit("orc", 3, 55, 12),
-  unit("ogre", 4, 110, 20),
-  unit("troll", 5, 180, 30),
+  unit("rat", 1, 8, 6),
+  unit("goblin", 1, 15, 9),
+  unit("wolf", 2, 28, 15),
+  unit("orc", 3, 50, 22),
+  unit("ogre", 4, 110, 45),
+  unit("troll", 5, 180, 70),
 ];
 
 const party = (heroes: number): PartyPower => ({ dpr: heroes * 14, hp: heroes * 60, heroCount: heroes });
@@ -20,20 +20,20 @@ describe("computeFairScaling", () => {
   it("цілі: HP = partyDpr × раунди, DPR = перевага × partyHp / раунди", () => {
     const s = computeFairScaling({ dpr: 20, hp: 100, heroCount: 1 }, [{ unitId: "orc", quantity: 1 }], LIBRARY);
 
-    expect(s.target.hp).toBeCloseTo(20 * TARGET_ROUNDS);
+    expect(s.target.hp).toBeCloseTo(20 * HIT_RATE * TARGET_ROUNDS);
     expect(s.target.dpr).toBeCloseTo((HERO_EDGE * 100) / TARGET_ROUNDS);
   });
 
   it("множники = ціль / база, у межах діапазону", () => {
-    const s = computeFairScaling({ dpr: 20, hp: 100, heroCount: 1 }, [{ unitId: "ogre", quantity: 1 }], LIBRARY);
+    const s = computeFairScaling({ dpr: 60, hp: 400, heroCount: 4 }, [{ unitId: "ogre", quantity: 1 }], LIBRARY);
 
-    expect(s.hpScale).toBeCloseTo(70 / 110);
-    expect(s.dmgScale).toBeCloseTo(25.714 / 20, 2);
+    expect(s.hpScale).toBeCloseTo((60 * HIT_RATE * TARGET_ROUNDS) / 110);
+    expect(s.dmgScale).toBeCloseTo((HERO_EDGE * 400) / TARGET_ROUNDS / 45);
     expect(s.units.ogre.hpMult).toBeCloseTo(s.hpScale);
   });
 
   it("обрізає множники до [SCALE_MIN, SCALE_MAX]", () => {
-    const tiny = computeFairScaling({ dpr: 2, hp: 5, heroCount: 1 }, [{ unitId: "troll", quantity: 1 }], LIBRARY);
+    const tiny = computeFairScaling({ dpr: 1, hp: 2, heroCount: 1 }, [{ unitId: "troll", quantity: 1 }], LIBRARY);
 
     expect(tiny.hpScale).toBe(SCALE_MIN);
     expect(tiny.dmgScale).toBe(SCALE_MIN);
@@ -48,13 +48,13 @@ describe("computeFairScaling", () => {
     const s = computeFairScaling({ dpr: 100, hp: 1000, heroCount: 4 }, [{ unitId: "goblin", quantity: 1 }], LIBRARY);
 
     expect(s.hpScale).toBe(SCALE_MAX);
-    expect(15 * s.units.goblin.hpMult).toBeLessThanOrEqual(30 + 1e-9);
-    expect(5 * s.units.goblin.dmgMult).toBeLessThanOrEqual(8 + 1e-9);
+    expect(15 * s.units.goblin.hpMult).toBeLessThanOrEqual(28 + 1e-9);
+    expect(9 * s.units.goblin.dmgMult).toBeLessThanOrEqual(15 + 1e-9);
     expect(s.verdict).toBe("weak");
   });
 
   it("стеля не обмежує масштаб униз", () => {
-    const s = computeFairScaling({ dpr: 4, hp: 20, heroCount: 1 }, [{ unitId: "goblin", quantity: 1 }], LIBRARY);
+    const s = computeFairScaling({ dpr: 2, hp: 20, heroCount: 1 }, [{ unitId: "goblin", quantity: 1 }], LIBRARY);
 
     expect(s.units.goblin.hpMult).toBeCloseTo(s.hpScale);
     expect(s.units.goblin.hpMult).toBeLessThan(1);

@@ -4,6 +4,9 @@ export const TARGET_ROUNDS = 3.5;
 
 export const HERO_EDGE = 0.9;
 
+/** Частка номінального DPR героїв, що реально долітає (промахи, перевбивство); підібрано за `pnpm simulate-battle`. */
+export const HIT_RATE = 0.55;
+
 export const SCALE_MIN = 0.5;
 
 export const SCALE_MAX = 3;

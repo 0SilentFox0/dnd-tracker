@@ -18,6 +18,7 @@ import { createRollbackMutation, rollbackSchema } from "../app/api/campaigns/[id
 import { spellSchema } from "../app/api/campaigns/[id]/battles/[battleId]/spell/cast-spell-schema";
 import { createSpellMutation } from "../app/api/campaigns/[id]/battles/[battleId]/spell/spell-mutation";
 import { createStartMutation } from "../app/api/campaigns/[id]/battles/[battleId]/start/start-mutation";
+import { postBalanceResponse } from "../app/api/campaigns/[id]/battles/balance/balance-post";
 import { prisma } from "../lib/db";
 import { moraleCheckSchema } from "../lib/schemas";
 import { applyBattleDelta } from "../lib/utils/battle/client/apply-delta";
@@ -27,13 +28,15 @@ import { needsMoraleCheck } from "../lib/utils/battle/view";
 import { branchLevelNodeId, buildTreeJson, racialNodeId } from "../lib/utils/skills/progression";
 import type { BattleMutationResponse, BattleScene } from "../types/api";
 import type { BattleAction, BattleParticipant } from "../types/battle";
-import { artifactRows, DRAGON_SET, RACES, SIM_CAMPAIGN_NAME, SIM_PLAYER, SIM_USER, SKILLS, UNITS } from "./simulate-battle-scenario";
+import { artifactRows, DRAGON_SET, FAIR_CAMPAIGN_NAME, FAIR_HEROES, FAIR_UNITS, FAIR_WEAPONS, RACES, SIM_CAMPAIGN_NAME, SIM_PLAYER, SIM_USER, SKILLS, UNITS } from "./simulate-battle-scenario";
 
 import { BATTLE_LOG_RECENT_EVENTS, ParticipantSourceType } from "@/lib/constants/battle";
 import { CampaignRole } from "@/lib/constants/campaigns";
+import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { PUSHER_DELTA_LIMIT_BYTES } from "@/lib/utils/battle/pipeline/limits";
 import { PATCHABLE_PARTICIPANT_FIELDS } from "@/lib/utils/battle/store/participant-patch";
 import { stableStringify } from "@/lib/utils/battle/store/stable-json";
+import { rollDiceList } from "@/lib/utils/common/dice";
 
 
 const url = process.env.DATABASE_URL ?? "";
@@ -44,6 +47,8 @@ if (!/@(localhost|127\.0\.0\.1)[:/]/.test(url)) {
 }
 
 let actingUser = SIM_USER.id;
+
+let quiet = false;
 
 const rolls: number[] = [];
 
@@ -228,12 +233,12 @@ async function call<T>(label: string, options: Omit<RunBattleMutationOptions<T>,
     for (const e of delta.log) {
       if (!log.some((l) => l.actionIndex === e.actionIndex)) log.push(e);
 
-      console.info(`   📜 [р${e.round}] ${e.resultText}`);
+      if (!quiet) console.info(`   📜 [р${e.round}] ${e.resultText}`);
     }
   } else if (res.status === 200) {
     state = await readState();
   } else {
-    console.info(`   ⛔ ${label}: ${res.status} ${JSON.stringify(json).slice(0, 200)}`);
+    if (!quiet) console.info(`   ⛔ ${label}: ${res.status} ${JSON.stringify(json).slice(0, 200)}`);
   }
 
   return { status: res.status, body: json };
@@ -292,6 +297,8 @@ async function main() {
   printState("Після старту");
 
   await scenario();
+
+  await fairBattleRuns();
 
   const failed = results.filter((r) => !r.ok);
 
@@ -550,6 +557,128 @@ async function scenario() {
   );
   printState("Фінал");
   void lastEvent;
+}
+
+// ---------- рівні бої ----------
+
+const FAIR_SEEDS = [11, 23, 37, 41, 58, 64, 79];
+
+const mulberry32 = (seed: number) => () => {
+  seed = (seed + 0x6d2b79f5) | 0;
+
+  let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+
+  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+};
+
+async function seedFair() {
+  await prisma.campaign.deleteMany({ where: { name: FAIR_CAMPAIGN_NAME, dmUserId: SIM_USER.id } });
+
+  const campaign = await prisma.campaign.create({ data: { name: FAIR_CAMPAIGN_NAME, inviteCode: `SIMF-${Date.now()}`, dmUserId: SIM_USER.id } });
+
+  const campaignId = campaign.id;
+
+  await prisma.campaignMember.create({ data: { campaignId, userId: SIM_USER.id, role: CampaignRole.DM } });
+  await prisma.campaignMember.create({ data: { campaignId, userId: SIM_PLAYER.id, role: CampaignRole.PLAYER } });
+
+  const weapons: Record<string, string> = {};
+
+  for (const [key, w] of Object.entries(FAIR_WEAPONS)) {
+    weapons[key] = (await prisma.artifact.create({ data: { campaignId, abilities: [], ...w } as Prisma.ArtifactUncheckedCreateInput })).id;
+  }
+
+  const heroIds: string[] = [];
+
+  for (const { weapon, ...h } of FAIR_HEROES) {
+    const row = await prisma.character.create({ data: { campaignId, type: "player", controlledBy: SIM_PLAYER.id, race: "Людина", level: 4, initiative: 1, ...h } });
+
+    await prisma.characterInventory.create({ data: { characterId: row.id, equipped: { mainHand: weapons[weapon] } } });
+    heroIds.push(row.id);
+  }
+
+  for (const u of FAIR_UNITS) await prisma.unit.create({ data: { campaignId, ...u } as Prisma.UnitUncheckedCreateInput });
+
+  return { campaignId, heroIds };
+}
+
+async function fairRun(seed: number, setup: Array<Record<string, unknown>>, campaignId: string) {
+  const rng = mulberry32(seed);
+
+  const battle = await prisma.battleScene.create({ data: { campaignId, name: `Рівний бій ${seed}`, status: "prepared", participants: setup as Prisma.InputJsonValue, currentRound: 1, currentTurnIndex: 0 } });
+
+  ctx = { ...ctx, campaignId, battleId: battle.id };
+  state = await readState();
+  await call("start", START);
+
+  const scaled = state.initiativeOrder.filter((p) => p.basicInfo.side === "enemy");
+
+  for (let step = 0; step < 400 && state.status === "active"; step++) {
+    const actor = current();
+
+    const foes = state.initiativeOrder.filter((p) => p.basicInfo.side !== actor.basicInfo.side && p.combatStats.status === "active" && hp(p) > 0);
+
+    const weapon = actor.battleData.attacks[0];
+
+    if (actor.combatStats.status !== "active" || !weapon || foes.length === 0) {
+      await call("next-turn", NEXT);
+      continue;
+    }
+
+    const formula = heroAttackDamageParts(actor, weapon).formula;
+
+    const d20 = 1 + Math.floor(rng() * 20);
+
+    const res = await call("attack", ATTACK, { attackerId: actor.basicInfo.id, targetId: foes[0].basicInfo.id, d20Roll: d20, damageRolls: rollDiceList(formula, rng), endTurn: true });
+
+    if (res.status !== 200) await call("next-turn", NEXT);
+  }
+
+  const heroesWon = state.initiativeOrder.some((p) => p.basicInfo.side === "ally" && hp(p) > 0);
+
+  const lost = state.initiativeOrder.filter((p) => p.basicInfo.side === "ally" && hp(p) <= 0).length;
+
+  const heroes = state.initiativeOrder.filter((p) => p.basicInfo.side === "ally");
+
+  const hpLeft = Math.round((100 * heroes.reduce((n, p) => n + Math.max(0, hp(p)), 0)) / heroes.reduce((n, p) => n + p.combatStats.maxHp, 0));
+
+  return { rounds: state.currentRound, completed: state.status === "completed", heroesWon, lost, hpLeft, scaled };
+}
+
+async function fairBattleRuns() {
+  console.info("\n⚖️  Рівні бої: 4 героя проти підібраного складу");
+  quiet = true;
+
+  const { campaignId, heroIds } = await seedFair();
+
+  const suggestion = await postBalanceResponse(campaignId, { allyParticipants: { characterIds: heroIds, units: [] }, suggest: true });
+
+  const roster = suggestion.suggestedEnemies ?? [];
+
+  console.info(`   сила героїв: DPR ${suggestion.allyStats.dpr} · HP ${suggestion.allyStats.totalHp}`);
+  console.info(`   склад: ${roster.map((r) => `${r.name} ×${r.quantity} (×${r.hpMult} HP, ×${r.dmgMult} шкода)`).join(", ")}`);
+
+  const setup = [
+    ...heroIds.map((id) => ({ id, type: ParticipantSourceType.CHARACTER, side: "ally" })),
+    ...roster.map((r) => ({ id: r.unitId, type: ParticipantSourceType.UNIT, side: "enemy", quantity: r.quantity })),
+  ];
+
+  const runs = [];
+
+  for (const seed of FAIR_SEEDS) runs.push(await fairRun(seed, setup, campaignId));
+
+  quiet = false;
+
+  for (const [i, r] of runs.entries()) console.info(`   сід ${FAIR_SEEDS[i]}: ${r.rounds} р., ${r.completed ? (r.heroesWon ? "перемога героїв" : "поразка героїв") : "не завершено"}, полеглих героїв: ${r.lost}, HP героїв лишилось ${r.hpLeft}%`);
+
+  const inRange = runs.filter((r) => r.completed && r.rounds >= 2 && r.rounds <= 6).length;
+
+  const wins = runs.filter((r) => r.completed && r.heroesWon).length;
+
+  check("Підібраний склад: ворогам виставлено множники HP і шкоди", runs[0].scaled.length > 0 && runs[0].scaled.every((p) => (p.battleData.damageMultiplier ?? 0) > 0 && (p.battleData.hpMultiplier ?? 0) > 0), `${runs[0].scaled.length} ворогів`);
+  check("Рівний бій: більшість прогонів закінчується за 2–6 раундів", inRange > runs.length / 2, `${inRange}/${runs.length}, раунди: ${runs.map((r) => r.rounds).join(", ")}`);
+  check("Рівний бій: герої зазвичай перемагають", wins > runs.length / 2, `${wins}/${runs.length}`);
 }
 
 main().catch(async (e) => {
