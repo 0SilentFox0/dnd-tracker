@@ -7,6 +7,7 @@ export interface TimedEffectInput {
   type: ActiveEffect["type"];
   rounds: number;
   stackable: boolean;
+  maxStacks?: number;
   abilityEffects?: StaticEffect[];
   effects?: ActiveEffect["effects"];
   dotDamage?: ActiveEffect["dotDamage"];
@@ -39,6 +40,17 @@ export function upsertTimedEffect(p: BattleParticipant, input: TimedEffectInput,
     ...(input.dotDamage && { dotDamage: input.dotDamage }),
     ...(input.source && { source: input.source }),
   };
+
+  const sameKey = current.filter((e) => e.abilityKey === input.timedKey);
+
+  if (input.stackable && input.maxStacks !== undefined && sameKey.length >= input.maxStacks) {
+    const oldest = sameKey[0];
+
+    return {
+      ...p,
+      battleData: { ...p.battleData, activeEffects: current.map((e) => (e === oldest ? { ...e, duration: input.rounds, appliedAt: effect.appliedAt } : e)) },
+    };
+  }
 
   const next = existing >= 0 ? current.map((e, i) => (i === existing ? effect : e)) : [...current, effect];
 

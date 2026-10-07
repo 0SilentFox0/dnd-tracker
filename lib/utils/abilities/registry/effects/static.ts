@@ -50,6 +50,7 @@ export function applyStatic(input: EffectApplyInput<StaticEffect>, describe: (e:
           type: p.basicInfo.side === owner?.basicInfo.side ? "buff" : "debuff",
           rounds,
           stackable: ability.stackable === true,
+          maxStacks: ability.maxStacks,
           abilityEffects: [stripped],
         },
         ctx.round,

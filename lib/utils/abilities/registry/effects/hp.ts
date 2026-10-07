@@ -119,6 +119,7 @@ export function applyDot(input: EffectApplyInput<Of<"dot">>): EffectApplyResult 
           type: "debuff",
           rounds: effect.duration.rounds,
           stackable: ability.stackable === true,
+          maxStacks: ability.maxStacks,
           dotDamage: { damagePerRound: dmg, damageType: effect.damageType },
         },
         ctx.round,

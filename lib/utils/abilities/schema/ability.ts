@@ -63,10 +63,15 @@ export const AbilitySchema = z
     limits: LimitsSchema.optional(),
     effects: z.array(EffectSchema).min(1),
     stackable: z.boolean().optional(),
+    maxStacks: z.number().int().min(1).optional(),
   })
   .superRefine((a, ctx) => {
     if (a.trigger.event === "passive" && a.limits) {
       ctx.addIssue({ code: "custom", path: ["limits"], message: "Пасивка без лімітів" });
+    }
+
+    if (a.maxStacks !== undefined && !a.stackable) {
+      ctx.addIssue({ code: "custom", path: ["maxStacks"], message: "maxStacks має сенс лише зі stackable" });
     }
 
     a.effects.forEach((effect, i) => {
