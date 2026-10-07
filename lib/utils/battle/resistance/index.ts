@@ -28,7 +28,7 @@ function matchesDamageType(flagType: string, damageType: string, fromSpell: bool
 
   const f = flagType.toLowerCase();
 
-  return f === t || (f === "physical" && PHYSICAL_DAMAGE_TYPES.includes(t)) || (f === "spell" && (fromSpell || t === "spell" || t === "magic"));
+  return f === "all" || f === t || (f === "physical" && PHYSICAL_DAMAGE_TYPES.includes(t)) || (f === "spell" && (fromSpell || t === "spell" || t === "magic"));
 }
 
 function matchingResistances(target: BattleParticipant, damageType: string, opts: ResistanceOptions = {}) {

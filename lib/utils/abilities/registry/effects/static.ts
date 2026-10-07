@@ -171,7 +171,7 @@ export const FLAG_FIELDS: Record<FlagKey, readonly FieldMeta[]> = {
   disadvantageForAttackers: [],
   guaranteedHit: [],
   resistance: [
-    { name: "damageType", label: "Тип шкоди (physical, spell, fire…)", input: "text" },
+    { name: "damageType", label: "Тип шкоди (all, physical, spell, fire…)", input: "text" },
     { name: "percent", label: "%, 100 = імунітет", input: "number" },
   ],
   spellImmunity: [{ name: "spellIds", label: "Заклинання", input: "spells" }],
