@@ -4,8 +4,9 @@ import { useCallback, useState } from "react";
 
 import { useBattleBalance } from "../useBattleSetupQueries";
 
-import { ParticipantSourceType } from "@/lib/constants/battle";
-import type { SetupParticipant, SuggestedEnemy } from "@/types/battle-setup";
+import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import type { BattlePreparationParticipant } from "@/types/battle";
+import type { SuggestedEnemy } from "@/types/battle-setup";
 
 interface AllyParticipants {
   characterIds: string[];
@@ -14,10 +15,10 @@ interface AllyParticipants {
 
 interface UseBalanceSuggestionsParams {
   campaignId: string;
-  participants: SetupParticipant[];
+  participants: BattlePreparationParticipant[];
   allyParticipants: AllyParticipants;
   hasAllies: boolean;
-  setParticipants: React.Dispatch<React.SetStateAction<SetupParticipant[]>>;
+  setParticipants: React.Dispatch<React.SetStateAction<BattlePreparationParticipant[]>>;
 }
 
 export function useBalanceSuggestions({
@@ -54,12 +55,12 @@ export function useBalanceSuggestions({
   }, [requestBalance, allyParticipants, hasAllies, balanceRace]);
 
   const applySuggestedEnemies = useCallback(() => {
-    const allies = participants.filter((p) => p.side === "ally");
+    const allies = participants.filter((p) => p.side === ParticipantSide.ALLY);
 
-    const newEnemies: SetupParticipant[] = suggestedEnemies.map((s) => ({
+    const newEnemies: BattlePreparationParticipant[] = suggestedEnemies.map((s) => ({
       id: s.unitId,
       type: ParticipantSourceType.UNIT,
-      side: "enemy",
+      side: ParticipantSide.ENEMY,
       quantity: s.quantity,
     }));
 

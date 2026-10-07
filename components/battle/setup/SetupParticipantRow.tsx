@@ -3,25 +3,26 @@
 import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
+import { ParticipantSide } from "@/lib/constants/battle";
 
-interface ParticipantRowProps {
+interface SetupParticipantRowProps {
   name: string;
   avatar: string | null;
   quantity?: number;
-  side: "ally" | "enemy";
+  side: ParticipantSide;
   onMoveToOtherSide: () => void;
   onRemove: () => void;
 }
 
-export function ParticipantRow({
+export function SetupParticipantRow({
   name,
   avatar,
   quantity,
   side,
   onMoveToOtherSide,
   onRemove,
-}: ParticipantRowProps) {
-  const isAlly = side === "ally";
+}: SetupParticipantRowProps) {
+  const isAlly = side === ParticipantSide.ALLY;
 
   const bgClass = isAlly
     ? "bg-green-50 dark:bg-green-950/20"
@@ -42,7 +43,7 @@ export function ParticipantRow({
           />
         ) : (
           <div className="w-9 h-9 rounded bg-muted shrink-0 flex items-center justify-center text-muted-foreground">
-            {side === "ally" ? "👤" : "⚔️"}
+            {side === ParticipantSide.ALLY ? "👤" : "⚔️"}
           </div>
         )}
         <span className="text-sm font-medium truncate">{name}</span>
