@@ -23,6 +23,7 @@ import {
   FLAG_LABELS,
   modifyStatFields,
 } from "./static";
+import { applyRaiseDead, applySummon, describeRaiseDead, describeSummon } from "./summon";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import type { Ability, Effect, EffectKind } from "@/lib/utils/abilities/schema";
@@ -84,6 +85,15 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
   changeMorale: { kind: "changeMorale", label: "Змінити мораль", static: false, fields: [{ name: "delta", label: "Зміна", input: "number" }, TARGET_FIELD], describe: (e) => `мораль ${signed(e.delta)}`, apply: applyChangeMorale },
   mark: { kind: "mark", label: "Мітка на ціль", static: false, fields: [{ name: "markId", label: "Ідентифікатор мітки", input: "text" }, TARGET_FIELD, REQUIRED_DURATION], describe: (e) => `мітка «${e.markId}» × ${e.duration.rounds} р.`, apply: applyMark },
   guard: { kind: "guard", label: "Захист союзника", static: false, fields: [{ name: "percent", label: "% шкоди від атак, що бере на себе", input: "number" }, TARGET_FIELD, REQUIRED_DURATION], describe: (e) => `захист: ${e.percent}% шкоди від атак × ${e.duration.rounds} р.`, apply: applyGuard },
+  summon: {
+    kind: "summon",
+    label: "Прикликати юнітів",
+    static: false,
+    fields: [{ name: "group", label: "Група (раса юнітів)", input: "text" }, { name: "tier", label: "Tier (рівень юніта 1–7)", input: "number" }, { name: "count", label: "Кількість", input: "number", optional: true }],
+    describe: describeSummon,
+    apply: applySummon,
+  },
+  raiseDead: { kind: "raiseDead", label: "Підняти мертвих", static: false, fields: [{ name: "hpPercent", label: "HP, %", input: "number" }, TARGET_FIELD], describe: describeRaiseDead, apply: applyRaiseDead },
   cleanse: { kind: "cleanse", label: "Зняти дебафи", static: false, fields: [{ name: "includeConditions", label: "Зняти й стани", input: "toggle", optional: true }, TARGET_FIELD], describe: (e) => (e.includeConditions ? "зняття дебафів і станів" : "зняття дебафів"), apply: applyCleanse },
   randomOf: {
     kind: "randomOf",

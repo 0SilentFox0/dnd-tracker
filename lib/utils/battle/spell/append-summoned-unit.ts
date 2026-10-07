@@ -40,14 +40,20 @@ export async function appendSummonedUnitToInitiativeEnd(params: {
     instanceNumber,
   );
 
-  const finalOrder = applyBakedAuras([...orderAfterSpell, built], new Set([built.basicInfo.id]));
+  const { finalOrder, added } = appendToInitiativeEnd(orderAfterSpell, built);
 
-  const newParticipant = finalOrder[finalOrder.length - 1];
+  return { finalOrder, summoned: added };
+}
 
-  const calc = calculateInitiative(newParticipant);
+export function appendToInitiativeEnd(order: BattleParticipant[], built: BattleParticipant): { finalOrder: BattleParticipant[]; added: BattleParticipant } {
+  const finalOrder = applyBakedAuras([...order, built], new Set([built.basicInfo.id]));
 
-  newParticipant.abilities.initiative = calc;
-  newParticipant.abilities.baseInitiative = calc;
+  const added = finalOrder[finalOrder.length - 1];
 
-  return { finalOrder, summoned: newParticipant };
+  const calc = calculateInitiative(added);
+
+  added.abilities.initiative = calc;
+  added.abilities.baseInitiative = calc;
+
+  return { finalOrder, added };
 }

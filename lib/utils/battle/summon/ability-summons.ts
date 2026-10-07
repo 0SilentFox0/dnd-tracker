@@ -1,0 +1,69 @@
+import type { Prisma } from "@prisma/client";
+
+import { ParticipantSourceType } from "@/lib/constants/battle";
+import type { SummonRequest } from "@/lib/utils/abilities/engine/types";
+import { createBattleParticipantFromUnit } from "@/lib/utils/battle/participant";
+import { appendToInitiativeEnd } from "@/lib/utils/battle/spell/append-summoned-unit";
+import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
+import type { BattleParticipant } from "@/types/battle";
+
+type RaceRow = Prisma.RaceGetPayload<object>;
+
+export interface SummonPool {
+  units: UnitFromPrisma[];
+  races: RaceRow[];
+}
+
+export interface SummonDeps {
+  loadPool(campaignId: string): Promise<SummonPool>;
+}
+
+export async function applyAbilitySummons(
+  requests: SummonRequest[],
+  order: BattleParticipant[],
+  opts: { campaignId: string; battleId: string; rng: () => number; deps: SummonDeps },
+): Promise<{ order: BattleParticipant[]; messages: string[] }> {
+  if (requests.length === 0) return { order, messages: [] };
+
+  const pool = await opts.deps.loadPool(opts.campaignId);
+
+  const racesById = Object.fromEntries(pool.races.map((r) => [r.id, r]));
+
+  const messages: string[] = [];
+
+  let next = order;
+
+  for (const req of requests) {
+    const owner = next.find((p) => p.basicInfo.id === req.ownerId);
+
+    const group = req.group.trim().toLowerCase();
+
+    const candidates = pool.units.filter((u) => u.level === req.tier && (racesById[u.raceId ?? ""]?.name ?? "").trim().toLowerCase() === group);
+
+    if (!owner || candidates.length === 0) {
+      messages.push(`немає юніта групи ${req.group} Tier ${req.tier}`);
+      continue;
+    }
+
+    const names: string[] = [];
+
+    for (let i = 0; i < req.count; i++) {
+      const unit = candidates[Math.min(candidates.length - 1, Math.floor(opts.rng() * candidates.length))];
+
+      const instance = next.filter((p) => p.basicInfo.sourceType === ParticipantSourceType.UNIT && p.basicInfo.sourceId === unit.id).length + 1;
+
+      const built = await createBattleParticipantFromUnit(unit, opts.battleId, owner.basicInfo.side, instance, racesById);
+
+      const withOwner = { ...built, battleData: { ...built.battleData, summonedBy: req.ownerId } };
+
+      const { finalOrder, added } = appendToInitiativeEnd(next, withOwner);
+
+      next = finalOrder;
+      names.push(added.basicInfo.name);
+    }
+
+    messages.push(`🌀 прикликано: ${names.join(", ")}`);
+  }
+
+  return { order: next, messages };
+}

@@ -1,11 +1,13 @@
 import { z } from "zod";
 
+import { getCachedSummonPool } from "@/lib/cache/reference-data";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { updateParticipant } from "@/lib/utils/abilities/engine/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import { withinLimits } from "@/lib/utils/abilities/engine/usage";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
+import { applyAbilitySummons, type SummonDeps } from "@/lib/utils/battle/summon/ability-summons";
 import { assertNotPanicking } from "@/lib/utils/battle/turn";
 import { assertAbilityTargets } from "@/lib/utils/battle/validation/ability-targets";
 
@@ -18,7 +20,10 @@ export const bonusActionSchema = z.object({
 
 export type BonusActionBody = z.infer<typeof bonusActionSchema>;
 
-export function bonusActionMutation(ctx: BattleMutationContext, data: BonusActionBody): MutationResult {
+const defaultDeps: SummonDeps = { loadPool: getCachedSummonPool };
+
+export function createBonusActionMutation(deps: SummonDeps = defaultDeps) {
+  return async (ctx: BattleMutationContext, data: BonusActionBody): Promise<MutationResult> => {
   const participant = ctx.participants.find((p) => p.basicInfo.id === data.participantId);
 
   if (!participant) throw new BattleAccessError(404, "Учасника немає в бою");
@@ -43,9 +48,11 @@ export function bonusActionMutation(ctx: BattleMutationContext, data: BonusActio
     { round: ctx.scene.round, rng: Math.random },
   );
 
-  const participants = updateParticipant(run.participants, participant.basicInfo.id, (p) => ({ ...p, actionFlags: { ...p.actionFlags, hasUsedBonusAction: true } }));
+  const summoned = await applyAbilitySummons(run.summons, run.participants, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng: Math.random, deps });
 
-  const text = run.fired.length ? run.messages.join(" | ") : `${ability.name}: не спрацювало`;
+  const participants = updateParticipant(summoned.order, participant.basicInfo.id, (p) => ({ ...p, actionFlags: { ...p.actionFlags, hasUsedBonusAction: true } }));
+
+  const text = run.fired.length ? [...run.messages, ...summoned.messages].join(" | ") : `${ability.name}: не спрацювало`;
 
   return {
     participants,
@@ -60,4 +67,7 @@ export function bonusActionMutation(ctx: BattleMutationContext, data: BonusActio
       },
     ],
   };
+  };
 }
+
+export const bonusActionMutation = createBonusActionMutation();

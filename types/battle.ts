@@ -179,6 +179,8 @@ export interface BattleParticipantBattleData {
   artifactSets?: SetProgress[];
   /** Пул додаткових дій (ефект «actions»): накопичується при спрацюванні, споживається при використанні основної дії, діє до кінця бою */
   pendingExtraActions?: number;
+  /** Хто прикликав або підняв учасника здібністю */
+  summonedBy?: string;
   /** Учасник зараз робить додатковий хід від моралі (наприкінці раунду) */
   extraTurnActive?: boolean;
   resolvedAbilities: ResolvedAbility[];

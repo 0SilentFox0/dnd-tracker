@@ -69,3 +69,19 @@ export async function getCachedMainSkills(campaignId: string) {
     },
   )();
 }
+
+/** Сирі юніти й раси кампанії (з abilities) для прикликання в бою; та сама інвалідація тегами units/races. */
+export async function getCachedSummonPool(campaignId: string) {
+  return unstable_cache(
+    async () => {
+      const [units, races] = await Promise.all([prisma.unit.findMany({ where: { campaignId } }), prisma.race.findMany({ where: { campaignId } })]);
+
+      return { units, races };
+    },
+    [cacheTags.units(campaignId), "summon-pool"],
+    {
+      tags: [cacheTags.units(campaignId), cacheTags.races(campaignId)],
+      revalidate: REFERENCE_REVALIDATE_SECONDS,
+    },
+  )();
+}

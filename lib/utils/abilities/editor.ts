@@ -8,7 +8,9 @@ const ALL_KINDS = Object.keys(EFFECT_REGISTRY) as EffectKind[];
 const PASSIVE_TARGETS = new Set(["self", "allAllies", "allEnemies"]);
 
 export function allowedEffectKinds(trigger: Trigger): EffectKind[] {
-  return trigger.event === "passive" ? STATIC_KINDS : ALL_KINDS;
+  if (trigger.event === "passive") return STATIC_KINDS;
+
+  return trigger.event === "bonusAction" || trigger.event === "action" ? ALL_KINDS : ALL_KINDS.filter((k) => k !== "summon");
 }
 
 function baseEffect(kind: EffectKind): Effect {
@@ -37,6 +39,10 @@ function baseEffect(kind: EffectKind): Effect {
       return { kind, delta: 1 };
     case "cleanse":
       return { kind };
+    case "summon":
+      return { kind, group: "Демони", tier: 1 };
+    case "raiseDead":
+      return { kind, hpPercent: 50, target: "eventTarget" };
     case "guard":
       return { kind, percent: 50, duration: { rounds: 2 }, target: "eventTarget" };
     case "mark":

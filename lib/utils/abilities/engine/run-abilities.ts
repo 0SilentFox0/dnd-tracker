@@ -1,6 +1,6 @@
 import { findParticipant, isActive, resolvedAbilitiesOf, updateParticipant } from "./participants";
 import { resolveTargetIds } from "./targets";
-import type { AbilityRunContext, AbilityRunResult, Downed } from "./types";
+import type { AbilityRunContext, AbilityRunResult, Downed, SummonRequest } from "./types";
 import { recordUse, resetUsage, withinLimits } from "./usage";
 
 import { evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
@@ -32,6 +32,8 @@ export function runAbilities(participants: BattleParticipant[], event: AbilityEv
   const fired: string[] = [];
 
   const downed: Downed[] = [];
+
+  const summons: SummonRequest[] = [];
 
   for (const start of participants) {
     const ownerId = start.basicInfo.id;
@@ -65,6 +67,7 @@ export function runAbilities(participants: BattleParticipant[], event: AbilityEv
         for (const m of r.actionModifiers ?? []) (actionModifiers[m.participantId] ??= []).push(m.effect);
 
         downed.push(...(r.downed ?? []));
+        summons.push(...(r.summons ?? []));
       }
     }
   }
@@ -78,7 +81,7 @@ export function runAbilities(participants: BattleParticipant[], event: AbilityEv
     }
   }
 
-  return { participants: ps, messages, actionModifiers, fired };
+  return { participants: ps, messages, actionModifiers, fired, summons };
 }
 
 export function resolveDowned(

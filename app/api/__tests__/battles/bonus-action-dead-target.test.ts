@@ -33,17 +33,17 @@ const run = (ps: BattleParticipant[], targetParticipantId?: string) =>
 const rejected = expect.objectContaining({ code: "invalid_target", message: API_ERRORS.BONUS_TARGET_MUST_BE_DEAD });
 
 describe("bonus action with targetDead", () => {
-  it("dead target → effect applies, use recorded", () => {
-    const h = run([hero, corpse], "gob").participants.find((p) => p.basicInfo.id === "hero");
+  it("dead target → effect applies, use recorded", async () => {
+    const h = (await run([hero, corpse], "gob")).participants.find((p) => p.basicInfo.id === "hero");
 
     expect(h?.spellcasting.spellSlots["1"].current).toBe(1);
     expect(h?.battleData.abilityUsage?.[feast.key].battle).toBe(1);
     expect(h?.actionFlags.hasUsedBonusAction).toBe(true);
   });
 
-  it("living target and missing target are rejected before anything is spent", () => {
-    expect(() => run([hero, goblin], "gob")).toThrow(rejected);
-    expect(() => run([hero, corpse])).toThrow(rejected);
+  it("living target and missing target are rejected before anything is spent", async () => {
+    await expect(run([hero, goblin], "gob")).rejects.toThrow(rejected);
+    await expect(run([hero, corpse])).rejects.toThrow(rejected);
     expect(hero.spellcasting.spellSlots["1"].current).toBe(0);
     expect(hero.actionFlags.hasUsedBonusAction).toBe(false);
   });

@@ -9,11 +9,19 @@ export interface AbilityRunContext {
   depth?: number;
 }
 
+export interface SummonRequest {
+  ownerId: string;
+  group: string;
+  tier: number;
+  count: number;
+}
+
 export interface AbilityRunResult {
   participants: BattleParticipant[];
   messages: string[];
   actionModifiers: Record<string, StaticEffect[]>;
   fired: string[];
+  summons: SummonRequest[];
 }
 
 export interface Downed {

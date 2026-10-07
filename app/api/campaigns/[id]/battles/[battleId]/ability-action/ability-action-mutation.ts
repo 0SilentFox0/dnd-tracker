@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { getCachedSummonPool } from "@/lib/cache/reference-data";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { findParticipant, updateParticipant } from "@/lib/utils/abilities/engine/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
@@ -7,6 +8,7 @@ import { withinLimits } from "@/lib/utils/abilities/engine/usage";
 import { applyMainActionUsed } from "@/lib/utils/battle/participant";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
+import { applyAbilitySummons, type SummonDeps } from "@/lib/utils/battle/summon/ability-summons";
 import { assertNotPanicking } from "@/lib/utils/battle/turn";
 import { assertAbilityTargets } from "@/lib/utils/battle/validation/ability-targets";
 
@@ -18,7 +20,10 @@ export const abilityActionSchema = z.object({
 
 export type AbilityActionBody = z.infer<typeof abilityActionSchema>;
 
-export function abilityActionMutation(ctx: BattleMutationContext, data: AbilityActionBody): MutationResult {
+const defaultDeps: SummonDeps = { loadPool: getCachedSummonPool };
+
+export function createAbilityActionMutation(deps: SummonDeps = defaultDeps) {
+  return async (ctx: BattleMutationContext, data: AbilityActionBody): Promise<MutationResult> => {
   const participant = findParticipant(ctx.participants, data.participantId);
 
   if (!participant) throw new BattleAccessError(404, "Учасника немає в бою");
@@ -43,9 +48,11 @@ export function abilityActionMutation(ctx: BattleMutationContext, data: AbilityA
     { round: ctx.scene.round, rng: Math.random },
   );
 
-  const participants = updateParticipant(run.participants, participant.basicInfo.id, applyMainActionUsed);
+  const summoned = await applyAbilitySummons(run.summons, run.participants, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng: Math.random, deps });
 
-  const text = run.fired.length ? run.messages.join(" | ") : `${ability.name}: не спрацювало`;
+  const participants = updateParticipant(summoned.order, participant.basicInfo.id, applyMainActionUsed);
+
+  const text = run.fired.length ? [...run.messages, ...summoned.messages].join(" | ") : `${ability.name}: не спрацювало`;
 
   return {
     participants,
@@ -60,4 +67,7 @@ export function abilityActionMutation(ctx: BattleMutationContext, data: AbilityA
       },
     ],
   };
+  };
 }
+
+export const abilityActionMutation = createAbilityActionMutation();
