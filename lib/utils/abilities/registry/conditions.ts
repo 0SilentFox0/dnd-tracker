@@ -32,6 +32,7 @@ export const CONDITION_REGISTRY: Record<Condition["type"], { label: string; fiel
   hpAbove: { label: "HP ≥ %", fields: [WHO, { name: "percent", label: "%", input: "number" }] },
   attackKind: { label: "Тип атаки", fields: [{ name: "kind", label: "Тип", input: "select", options: [{ value: AttackType.MELEE, label: "ближня" }, { value: AttackType.RANGED, label: "дальня" }, { value: "magic", label: "магія" }] }] },
   targetHasCondition: { label: "Ціль має стан", fields: [{ name: "condition", label: "Стан", input: "text" }] },
+  targetDead: { label: "Ціль мертва", fields: [] },
   all: { label: "Усі умови", fields: [{ name: "conditions", label: "Умови", input: "effects" }] },
   any: { label: "Будь-яка умова", fields: [{ name: "conditions", label: "Умови", input: "effects" }] },
 };
@@ -72,9 +73,21 @@ export function evaluateCondition(c: Condition, ctx: ConditionContext): boolean 
       return subjects("eventTarget", ctx).some((p) =>
         p.battleData.activeEffects.some((e) => e.effects.some((d) => d.type === c.condition)),
       );
+    case "targetDead":
+      return subjects("eventTarget", ctx).some((p) => !isActive(p));
     case "all":
       return c.conditions.every((x) => evaluateCondition(x, ctx));
     case "any":
       return c.conditions.some((x) => evaluateCondition(x, ctx));
   }
+}
+
+export function conditionRequiresDeadTarget(c?: Condition): boolean {
+  if (!c) return false;
+
+  if (c.type === "targetDead") return true;
+
+  if (c.type === "all") return c.conditions.some(conditionRequiresDeadTarget);
+
+  return c.type === "any" && c.conditions.every(conditionRequiresDeadTarget);
 }

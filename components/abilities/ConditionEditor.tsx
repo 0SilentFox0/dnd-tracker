@@ -24,6 +24,8 @@ function defaultFor(type: Condition["type"]): Condition {
       return { type, kind: AttackType.MELEE };
     case "targetHasCondition":
       return { type, condition: "no_reaction" };
+    case "targetDead":
+      return { type };
     case "all":
     case "any":
       return { type, conditions: [DEFAULT_CONDITION] };

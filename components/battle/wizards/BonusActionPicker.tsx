@@ -12,8 +12,7 @@ import { useBattleScene } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { withinLimits } from "@/lib/utils/abilities/engine/usage";
 import { describeEffect } from "@/lib/utils/abilities/registry/effects";
-import { isUp } from "@/lib/utils/battle/participant/state";
-import { bonusTargetSide } from "@/lib/utils/battle/view";
+import { bonusTargetCandidates, bonusTargetSide, needsBonusTarget } from "@/lib/utils/battle/view";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -38,7 +37,7 @@ export function BonusActionPicker({ participant, open, onOpenChange, onDone }: {
 
   const side = aiming ? bonusTargetSide(aiming) : null;
 
-  const candidates = (side === ParticipantSide.ENEMY ? enemies : allies).filter(isUp);
+  const candidates = aiming ? bonusTargetCandidates(aiming, allies, enemies) : [];
 
   return (
     <ResponsiveDialog open={open} onOpenChange={(o) => { if (!o) setAiming(null);
@@ -46,7 +45,7 @@ export function BonusActionPicker({ participant, open, onOpenChange, onDone }: {
  onOpenChange(o); }} title={aiming ? `${aiming.name} · ціль` : "Бонусна дія"} className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
       <div className="space-y-2">
         {!aiming && abilities.map((a) => (
-          <button key={a.key} type="button" disabled={actions.bonusAction.isPending} onClick={() => (bonusTargetSide(a) ? setAiming(a) : void fire(a))} className="flex min-h-14 w-full items-center gap-3 border border-white/15 px-3 py-2.5 text-left">
+          <button key={a.key} type="button" disabled={actions.bonusAction.isPending} onClick={() => (needsBonusTarget(a) ? setAiming(a) : void fire(a))} className="flex min-h-14 w-full items-center gap-3 border border-white/15 px-3 py-2.5 text-left">
             {a.source.icon ? <OptimizedImage src={a.source.icon} alt="" width={40} height={40} className="size-10 rounded object-cover" /> : <Zap className="size-10 p-2 text-[var(--gold)]" />}
             <span className="min-w-0">
               <span className="hud-sc block font-bold">{a.name}</span>

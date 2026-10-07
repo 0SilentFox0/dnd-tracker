@@ -1,10 +1,12 @@
 import { ParticipantSide } from "@/lib/constants/battle";
 import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { withSelf } from "@/lib/utils/abilities/engine/participants";
+import { isActive, withSelf } from "@/lib/utils/abilities/engine/participants";
+import { conditionRequiresDeadTarget } from "@/lib/utils/abilities/registry/conditions";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
+import { isUp } from "@/lib/utils/battle/participant/state";
 import { diceSlots } from "@/lib/utils/common/dice";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleAction, BattleAttack, BattleParticipant } from "@/types/battle";
@@ -62,6 +64,16 @@ export function bonusTargetSide(a: ResolvedAbility): ParticipantSide | null {
   );
 
   return hostile ? ParticipantSide.ENEMY : ParticipantSide.ALLY;
+}
+
+export function needsBonusTarget(a: ResolvedAbility): boolean {
+  return bonusTargetSide(a) !== null || conditionRequiresDeadTarget(a.condition);
+}
+
+export function bonusTargetCandidates(a: ResolvedAbility, allies: BattleParticipant[], enemies: BattleParticipant[]): BattleParticipant[] {
+  if (conditionRequiresDeadTarget(a.condition)) return [...allies, ...enemies].filter((p) => !isActive(p));
+
+  return (bonusTargetSide(a) === ParticipantSide.ENEMY ? enemies : allies).filter(isUp);
 }
 
 export function lastAction(log: BattleAction[]): BattleAction | null {
