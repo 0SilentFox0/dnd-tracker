@@ -2,6 +2,7 @@ import { CONDITION_LABELS } from "../labels";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
+import { markKey } from "@/lib/utils/abilities/engine/marks";
 import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/participants";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/timed-effects";
 import type { ConditionImmunityKey, Effect } from "@/lib/utils/abilities/schema";
@@ -160,4 +161,30 @@ export function describeGrantAction(e: Of<"grantAction">): string {
   ]
     .filter(Boolean)
     .join(", ");
+}
+
+export function applyMark(input: EffectApplyInput<Of<"mark">>): EffectApplyResult {
+  const { ability, effect, ctx } = input;
+
+  const owner = findParticipant(input.participants, input.ownerId);
+
+  let count = 0;
+
+  const result = each(
+    input,
+    (p) => {
+      const next = upsertTimedEffect(
+        p,
+        { timedKey: markKey(effect.markId), source: effectSource(owner, ability), name: ability.name, type: "debuff", rounds: effect.duration.rounds, stackable: true },
+        ctx.round,
+      );
+
+      count = next.battleData.activeEffects.filter((e) => e.abilityKey === markKey(effect.markId) && e.source?.participantId === input.ownerId).length;
+
+      return next;
+    },
+    (names) => `🎯 ${ability.name}: ${names} — мітка (${count})`,
+  );
+
+  return result;
 }

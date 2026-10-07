@@ -76,6 +76,7 @@ export const damageBonusFields: readonly FieldMeta[] = [
   { name: "filter.kind", label: "Тип шкоди", input: "select", options: Object.entries(DAMAGE_FILTER_LABELS).map(([value, label]) => ({ value, label })) },
   { name: "filter.school", label: "Школа магії", input: "text", optional: true },
   ...VALUE_FIELDS,
+  { name: "perMark", label: "За кожну мітку (id мітки)", input: "text", optional: true },
   TARGET_FIELD,
   DURATION_FIELD,
 ];
@@ -93,7 +94,7 @@ export function describeModifyStat(e: Extract<Effect, { kind: "modifyStat" }>): 
 }
 
 export function describeDamageBonus(e: Extract<Effect, { kind: "damageBonus" }>): string {
-  return `шкода (${DAMAGE_FILTER_LABELS[e.filter.kind]}${e.filter.school ? ", школа" : ""}) ${valueLabel(e)}`;
+  return `шкода (${DAMAGE_FILTER_LABELS[e.filter.kind]}${e.filter.school ? ", школа" : ""}) ${valueLabel(e)}${e.perMark ? ` за мітку «${e.perMark}»` : ""}`;
 }
 
 export function describeFlag(e: Extract<Effect, { kind: "flag" }>): string {

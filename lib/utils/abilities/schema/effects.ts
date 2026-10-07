@@ -39,6 +39,7 @@ const DamageBonusSchema = z
     filter: z.object({ kind: z.enum(DAMAGE_FILTER_KINDS), school: z.string().min(1).optional() }),
     flat: FlatSchema.optional(),
     percent: z.number().optional(),
+    perMark: z.string().min(1).optional(),
     ...timed,
   })
   .refine(hasValue, { message: "Потрібен flat або percent" });
@@ -132,6 +133,8 @@ const ChangeMoraleSchema = z.object({
 
 const CleanseSchema = z.object({ kind: z.literal("cleanse"), ...target });
 
+const MarkSchema = z.object({ kind: z.literal("mark"), markId: z.string().min(1), duration: DurationSchema, ...target });
+
 const BASE_EFFECTS = [
   ModifyStatSchema,
   DamageBonusSchema,
@@ -145,6 +148,7 @@ const BASE_EFFECTS = [
   RestoreSpellSlotSchema,
   ChangeMoraleSchema,
   CleanseSchema,
+  MarkSchema,
 ] as const;
 
 export const NonRandomEffectSchema = z.discriminatedUnion("kind", [...BASE_EFFECTS]);

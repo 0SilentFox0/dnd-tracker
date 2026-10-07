@@ -74,6 +74,7 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
     attack.type as AttackType,
     {
       allParticipants,
+      targetId: target.basicInfo.id,
       additionalDamage: additionalDamageModifiers,
       ...heroDamageContext(updatedAttacker, attack, damageRolls),
       actionModifiers: params.actionModifiers,

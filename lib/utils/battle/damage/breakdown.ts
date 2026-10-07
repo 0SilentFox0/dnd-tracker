@@ -50,6 +50,7 @@ export function computeDamageBreakdown(
     attackTypeSafe,
     {
       allParticipants,
+      targetId: target.basicInfo.id,
       additionalDamage: additionalDamageModifiers,
       ...heroDamageContext(attacker, attack, damageRolls),
     },

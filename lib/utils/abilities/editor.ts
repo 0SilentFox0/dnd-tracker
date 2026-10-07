@@ -37,6 +37,8 @@ function baseEffect(kind: EffectKind): Effect {
       return { kind, delta: 1 };
     case "cleanse":
       return { kind };
+    case "mark":
+      return { kind, markId: "mark", duration: { rounds: 2 }, target: "eventTarget" };
     case "randomOf":
       return { kind, options: [{ kind: "heal", amount: "1d4" }, { kind: "changeMorale", delta: 1 }] };
   }

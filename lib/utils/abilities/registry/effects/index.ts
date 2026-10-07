@@ -7,6 +7,7 @@ import {
   applyCleanse,
   applyCondition,
   applyGrantAction,
+  applyMark,
   applyRestoreSpellSlot,
   CONDITION_LABELS,
   describeGrantAction,
@@ -80,6 +81,7 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
     ], describe: describeGrantAction, apply: applyGrantAction },
   restoreSpellSlot: { kind: "restoreSpellSlot", label: "Відновити слот", static: false, fields: [{ name: "count", label: "Скільки", input: "number" }, TARGET_FIELD], describe: (e) => `+${e.count} слот`, apply: applyRestoreSpellSlot },
   changeMorale: { kind: "changeMorale", label: "Змінити мораль", static: false, fields: [{ name: "delta", label: "Зміна", input: "number" }, TARGET_FIELD], describe: (e) => `мораль ${signed(e.delta)}`, apply: applyChangeMorale },
+  mark: { kind: "mark", label: "Мітка на ціль", static: false, fields: [{ name: "markId", label: "Ідентифікатор мітки", input: "text" }, TARGET_FIELD, REQUIRED_DURATION], describe: (e) => `мітка «${e.markId}» × ${e.duration.rounds} р.`, apply: applyMark },
   cleanse: { kind: "cleanse", label: "Зняти дебафи", static: false, fields: [TARGET_FIELD], describe: () => "зняття дебафів", apply: applyCleanse },
   randomOf: {
     kind: "randomOf",
