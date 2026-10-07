@@ -1,3 +1,4 @@
+import { AttackType } from "@/lib/constants/battle";
 import type { RawTree } from "@/lib/utils/skills/progression";
 
 export interface ProgressionSkillDto {
@@ -7,7 +8,7 @@ export interface ProgressionSkillDto {
   description: string;
   spellGroupId: string | null;
   newSpellId: string | null;
-  damageAffinity: { affectsDamage: boolean; damageType: "melee" | "ranged" | "magic" | null };
+  damageAffinity: { affectsDamage: boolean; damageType: AttackType | "magic" | null };
 }
 export interface ProgressionBranchDto { name: string; color: string; icon: string | null; spellGroupId: string | null }
 export interface CharacterProgressionDto {

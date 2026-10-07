@@ -1,5 +1,6 @@
 import { PUSHER_DELTA_LIMIT_BYTES } from "./limits";
 
+import { BattleStatus } from "@/lib/constants/battle";
 import { CampaignRole } from "@/lib/constants/campaigns";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import { battleChannelName, userChannelName } from "@/lib/pusher-channels";
@@ -33,7 +34,7 @@ export function toBattleResponse(
     name: meta.name,
     description: meta.description ?? undefined,
     status: scene.status,
-    participants: scene.status === "prepared" ? meta.setup : [],
+    participants: scene.status === BattleStatus.PREPARED ? meta.setup : [],
     currentRound: scene.round,
     currentTurnIndex: scene.turnIndex,
     initiativeOrder: participants,
@@ -71,7 +72,7 @@ export function buildPusherMessages(args: {
 
   const active = participants[after.turnIndex];
 
-  if (after.status === "active" && turnMoved && active && active.basicInfo.controlledBy !== CONTROLLED_BY_DM) {
+  if (after.status === BattleStatus.ACTIVE && turnMoved && active && active.basicInfo.controlledBy !== CONTROLLED_BY_DM) {
     messages.push({
       channel: userChannelName(active.basicInfo.controlledBy),
       event: "turn-started",

@@ -1,10 +1,10 @@
 /**
  * Утиліти для обробки ходу в бою
  */
-
 import { applyDOTEffects, decreaseEffectDurations } from "./battle-effects";
 import { calculateInitiative, sortByInitiative } from "./battle-start";
 
+import { CombatStatus } from "@/lib/constants/battle";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { findParticipant, isUp, replaceParticipant } from "@/lib/utils/abilities/engine/participants";
 import { resolveDowned, runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
@@ -53,8 +53,8 @@ export function processStartOfTurn(
 
   // DoT і зменшення тривалості ефектів — на початку ходу цієї цілі (Decay тощо)
   if (
-    updatedParticipant.combatStats.status !== "dead" &&
-    updatedParticipant.combatStats.status !== "unconscious"
+    updatedParticipant.combatStats.status !== CombatStatus.DEAD &&
+    updatedParticipant.combatStats.status !== CombatStatus.UNCONSCIOUS
   ) {
     const dotResult = applyDOTEffects(updatedParticipant);
 
@@ -84,14 +84,14 @@ export function processStartOfTurn(
 
   if (
     updatedParticipant.combatStats.currentHp <= 0 &&
-    updatedParticipant.combatStats.status !== "dead"
+    updatedParticipant.combatStats.status !== CombatStatus.DEAD
   ) {
     updatedParticipant = {
       ...updatedParticipant,
       combatStats: {
         ...updatedParticipant.combatStats,
         status:
-          updatedParticipant.combatStats.currentHp < 0 ? "dead" : "unconscious",
+          updatedParticipant.combatStats.currentHp < 0 ? CombatStatus.DEAD : CombatStatus.UNCONSCIOUS,
       },
     };
     statusChanged = true;
@@ -175,8 +175,8 @@ export function processEndOfTurn(
 
     if (
       nextParticipant &&
-      nextParticipant.combatStats.status !== "dead" &&
-      nextParticipant.combatStats.status !== "unconscious"
+      nextParticipant.combatStats.status !== CombatStatus.DEAD &&
+      nextParticipant.combatStats.status !== CombatStatus.UNCONSCIOUS
     ) {
       break;
     }

@@ -2,6 +2,7 @@ import { DURATION_FIELD, type FieldMeta, TARGET_FIELD } from "../fields";
 import { CONDITION_LABELS, DAMAGE_FILTER_LABELS, flatLabel, STAT_LABELS } from "../labels";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
+import { AttackType } from "@/lib/constants/battle";
 import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/participants";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/timed-effects";
 import type { Effect, FlagKey, StaticEffect } from "@/lib/utils/abilities/schema";
@@ -67,7 +68,7 @@ const VALUE_FIELDS: readonly FieldMeta[] = [
 export const modifyStatFields: readonly FieldMeta[] = [
   { name: "stat", label: "Стат", input: "select", options: Object.entries(STAT_LABELS).map(([value, label]) => ({ value, label })) },
   ...VALUE_FIELDS,
-  { name: "attackKind", label: "Тип атаки", input: "select", optional: true, options: [{ value: "melee", label: "ближня" }, { value: "ranged", label: "дальня" }], visibleWhen: (e) => e.stat === "attackBonus" },
+  { name: "attackKind", label: "Тип атаки", input: "select", optional: true, options: [{ value: AttackType.MELEE, label: "ближня" }, { value: AttackType.RANGED, label: "дальня" }], visibleWhen: (e) => e.stat === "attackBonus" },
   { name: "spellLevels", label: "Рівні слотів", input: "numberList", visibleWhen: (e) => e.stat === "spellSlots" },
   TARGET_FIELD,
   DURATION_FIELD,
@@ -100,7 +101,7 @@ export function describeDamageBonus(e: Extract<Effect, { kind: "damageBonus" }>)
 export function describeFlag(e: Extract<Effect, { kind: "flag" }>): string {
   switch (e.flag) {
     case "advantage":
-      return e.attackKind === "all" ? "перевага на атаки" : `перевага на ${e.attackKind === "melee" ? "ближні" : "дальні"} атаки`;
+      return e.attackKind === "all" ? "перевага на атаки" : `перевага на ${e.attackKind === AttackType.MELEE ? "ближні" : "дальні"} атаки`;
     case "disadvantage":
       return "недолік на атаки";
     case "disadvantageForAttackers":
@@ -112,7 +113,7 @@ export function describeFlag(e: Extract<Effect, { kind: "flag" }>): string {
     case "spellImmunity":
       return `імунітет до заклинань (${e.spellIds.length})`;
     case "counterAttack":
-      return `відсіч${e.attackKinds.includes("ranged") ? " (і на дальні)" : ""} +${e.bonusPercent}%`;
+      return `відсіч${e.attackKinds.includes(AttackType.RANGED) ? " (і на дальні)" : ""} +${e.bonusPercent}%`;
     case "seeEnemyHp":
       return "бачить HP ворогів";
     case "noNegativeMorale":
@@ -140,13 +141,13 @@ export const FLAG_LABELS: Record<FlagKey, string> = {
 
 const ATTACK_KIND_ALL = [
   { value: "all", label: "усі" },
-  { value: "melee", label: "ближні" },
-  { value: "ranged", label: "дальні" },
+  { value: AttackType.MELEE, label: "ближні" },
+  { value: AttackType.RANGED, label: "дальні" },
 ] as const;
 
 const COUNTER_KIND_OPTIONS = [
-  { value: "melee", label: "ближня" },
-  { value: "ranged", label: "дальня" },
+  { value: AttackType.MELEE, label: "ближня" },
+  { value: AttackType.RANGED, label: "дальня" },
 ] as const;
 
 export const FLAG_FIELDS: Record<FlagKey, readonly FieldMeta[]> = {

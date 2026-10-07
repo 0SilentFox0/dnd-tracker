@@ -7,7 +7,7 @@ import { type BattleLogHistory, useBattleLogHistory } from "./useBattleLogHistor
 import { type BattleToastApi, useBattleToast } from "./useBattleToast";
 import { type PusherConnectionState, usePusherBattleSync } from "./usePusherBattleSync";
 
-import { ParticipantSide } from "@/lib/constants/battle";
+import { BattleStatus,ParticipantSide } from "@/lib/constants/battle";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import {
   battleQueryKey,
@@ -145,7 +145,7 @@ export function deriveTurn(battle: BattleScene, userId: string | null, isDM: boo
     p.basicInfo.controlledBy === userId ||
     (isDM && (p.basicInfo.id === dmControlledId || p.basicInfo.controlledBy === CONTROLLED_BY_DM || p.basicInfo.side === ParticipantSide.ENEMY));
 
-  const isMyTurn = battle.status === "active" && !!current && !!userId && controls(current);
+  const isMyTurn = battle.status === BattleStatus.ACTIVE && !!current && !!userId && controls(current);
 
   const dmHero = isDM && dmControlledId ? order.find((p) => p.basicInfo.id === dmControlledId) ?? null : null;
 

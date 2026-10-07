@@ -7,6 +7,7 @@ import { BattleLogPanel } from "./BattleLogPanel";
 import { DmParticipantRow } from "./DmParticipantRow";
 
 import { HUD_SURFACE } from "@/components/battle/hud";
+import { BattleStatus } from "@/lib/constants/battle";
 import { cn } from "@/lib/utils";
 import type { BattleScene } from "@/types/api";
 import type { BattleParticipant } from "@/types/battle";
@@ -50,7 +51,7 @@ export function DmQuickActionsPanel({
 }: DmQuickActionsPanelProps) {
   const [open, setOpen] = useState(false);
 
-  if (!isDM || battle.status === "prepared") return null;
+  if (!isDM || battle.status === BattleStatus.PREPARED) return null;
 
   const participants = (battle.initiativeOrder ?? []) as BattleParticipant[];
 
@@ -166,7 +167,7 @@ export function DmQuickActionsPanel({
             </div>
           </section>
 
-          {battle.status === "active" && (
+          {battle.status === BattleStatus.ACTIVE && (
             <button
               type="button"
               className="metal-gold metal-fill hud-sc flex h-11 w-full items-center justify-center gap-2 text-[15px] font-bold tracking-[.08em]"

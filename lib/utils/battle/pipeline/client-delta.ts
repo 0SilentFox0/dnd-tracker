@@ -1,3 +1,4 @@
+import { BattleStatus } from "@/lib/constants/battle";
 import type { BattleMeta, BattleSceneState } from "@/lib/utils/battle/store";
 import { buildParticipantPatch, FULL_PARTICIPANT } from "@/lib/utils/battle/store";
 import type { BattleKnowledge } from "@/lib/utils/battle/view/knowledge";
@@ -78,7 +79,7 @@ export function buildClientDelta(args: {
     removed: [...beforeOrder, ...beforePending].filter((id) => !afterIds.has(id)),
     ...(!sameIds(beforeOrder, afterOrder) && { order: afterOrder }),
     ...(pendingChanged && { pending: storedPending }),
-    ...(after.status === "prepared" && { setup: before.meta.setup }),
+    ...(after.status === BattleStatus.PREPARED && { setup: before.meta.setup }),
     log,
     ...(cancelledFrom !== undefined && { cancelledFrom }),
     ...(knowledge && { knowledge }),

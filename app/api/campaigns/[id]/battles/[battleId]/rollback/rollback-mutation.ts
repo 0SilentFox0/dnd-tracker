@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE } from "@/lib/constants/battle";
+import { BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE, BattleStatus } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { SnapshotState } from "@/lib/utils/battle/store";
@@ -47,7 +47,7 @@ export function createRollbackMutation(load: LoadSnapshots = defaultLoad, isActi
         turnIndex: scene.turnIndex,
         status: scene.status,
         pendingMoraleCheck: scene.pendingMoraleCheck,
-        ...(scene.status !== "completed" && { completedAt: null }),
+        ...(scene.status !== BattleStatus.COMPLETED && { completedAt: null }),
       },
       events: [],
       history: { cancelFromSeq: first.seq },

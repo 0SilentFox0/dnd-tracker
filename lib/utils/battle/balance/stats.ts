@@ -1,11 +1,11 @@
 /**
  * Статистика героїв і юнітів (DPR / HP)
  */
-
 import { getNonMagicBranchDpr, getSpellDprFromBranchLevels } from "./dpr";
 
 import { AttackType } from "@/lib/constants/battle";
 import { MIN_UNIT_STAT, TYPICAL_TARGETS } from "@/lib/constants/battle-balance";
+import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { averageOf, diceAverage, parseDiceLenient } from "@/lib/utils/common/dice";
@@ -126,7 +126,7 @@ export function getUnitStats(unit: UnitStatsInput): UnitStats {
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
 function bestAverage(p: BattleParticipant, type: AttackType): number {
-  const own = p.battleData.attacks.filter((a) => (a.type === AttackType.RANGED ? AttackType.RANGED : AttackType.MELEE) === type);
+  const own = p.battleData.attacks.filter((a) => attackKindOf(a.type) === type);
 
   const options: BattleAttack[] = own.length > 0 ? own : [{ name: "", type, attackBonus: 0, damageDice: "", damageType: "physical" } as BattleAttack];
 

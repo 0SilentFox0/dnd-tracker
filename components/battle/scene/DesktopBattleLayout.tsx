@@ -13,6 +13,7 @@ import { MyTurnControls } from "./MyTurnControls";
 import { ParticipantDetails } from "./ParticipantDetails";
 import { ParticipantList } from "./ParticipantList";
 
+import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
 import { useBattleScene } from "@/lib/hooks/battle";
 
 const DmPanel = dynamic(() => import("./DmPanel").then((m) => m.DmPanel), { ssr: false });
@@ -33,7 +34,7 @@ export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) 
     <div className="below-header flex flex-col overflow-hidden">
       <ConnectionBanner />
       <BattleTopBar onComplete={onComplete} />
-      {battle.status === "completed" && <BattleOverBanner />}
+      {battle.status === BattleStatus.COMPLETED && <BattleOverBanner />}
       <div className="flex h-20 items-center border-y border-white/[.08]">
         <div className="min-w-0 flex-1"><InitiativeTrack /></div>
         <div className="w-[420px] shrink-0"><LastActionTicker /></div>
@@ -42,12 +43,12 @@ export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) 
         <aside className="flex flex-col gap-3 overflow-y-auto border-r border-white/10 p-5">
           {hero && <MyHeroPanel hero={hero} />}
           {isMyTurn && hero && <MyTurnControls key={`${hero.basicInfo.id}-${battle.currentRound}-${hero.battleData.extraTurnActive ? "x" : "n"}`} hero={hero} />}
-          {!isMyTurn && !isDM && battle.status === "active" && <div className="flex h-11 items-center justify-center border border-dashed border-white/[.18] text-sm italic text-[var(--hud-muted)]">Дії стануть доступні у твій хід</div>}
+          {!isMyTurn && !isDM && battle.status === BattleStatus.ACTIVE && <div className="flex h-11 items-center justify-center border border-dashed border-white/[.18] text-sm italic text-[var(--hud-muted)]">Дії стануть доступні у твій хід</div>}
           {isDM && <DmPanel />}
         </aside>
         <main className="grid min-h-0 grid-cols-2 gap-6 overflow-y-auto px-6 py-4">
-          <div className="min-w-0"><H3 color="var(--ally)">Союзники · {allies.length}</H3><ParticipantList side="ally" className="px-0" /></div>
-          <div className="min-w-0"><H3 color="var(--enemy)">Вороги · {enemies.length}</H3><ParticipantList side="enemy" className="px-0" /></div>
+          <div className="min-w-0"><H3 color="var(--ally)">Союзники · {allies.length}</H3><ParticipantList side={ParticipantSide.ALLY} className="px-0" /></div>
+          <div className="min-w-0"><H3 color="var(--enemy)">Вороги · {enemies.length}</H3><ParticipantList side={ParticipantSide.ENEMY} className="px-0" /></div>
         </main>
         <aside className="flex min-h-0 flex-col overflow-y-auto border-l border-white/10 px-5 py-4">
           <h3 className="hud-sc flex h-8 items-center justify-between border-b border-white/[.14] text-[15px] font-bold tracking-[.1em] text-[#a89c88]">

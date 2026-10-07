@@ -1,3 +1,4 @@
+import { AttackType } from "@/lib/constants/battle";
 import type { ConversionIssue } from "@/lib/utils/abilities/schema";
 import type { Ability } from "@/lib/utils/abilities/schema";
 
@@ -25,7 +26,7 @@ export interface Unit {
   maxTargets: number;
   attacks: Array<{
     name: string;
-    type?: "melee" | "ranged";
+    type?: AttackType;
     targetType?: "target" | "aoe";
     attackBonus: number;
     damageType: string;

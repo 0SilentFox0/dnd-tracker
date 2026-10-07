@@ -6,6 +6,7 @@ import { buildPusherMessages, toBattleResponse } from "./battle-response";
 import { buildClientDelta } from "./client-delta";
 import { defaultPipelineDeps } from "./default-deps";
 
+import { BattleStatus,CombatStatus } from "@/lib/constants/battle";
 import type { Rng } from "@/lib/utils/abilities/engine/types";
 import type { BATTLE_RATE_LIMITS, RateLimitResult } from "@/lib/utils/api/rate-limit";
 import { rateLimitResponse } from "@/lib/utils/api/rate-limit";
@@ -15,7 +16,6 @@ import type {
   BattleMeta,
   BattleMutationOutcome,
   BattleSceneState,
-  BattleStatus,
   LoadedBattle,
 } from "@/lib/utils/battle/store";
 import {
@@ -93,7 +93,7 @@ function assertAccess(access: BattleAccess, ctx: BattleMutationContext): void {
     throw new BattleRuleError("not_your_turn", "Зараз не ваш хід");
   }
 
-  if (current.combatStats.status !== "active") {
+  if (current.combatStats.status !== CombatStatus.ACTIVE) {
     throw new BattleRuleError("participant_dead", "Учасник не може діяти");
   }
 }
@@ -101,7 +101,7 @@ function assertAccess(access: BattleAccess, ctx: BattleMutationContext): void {
 function withVictory(scene: BattleSceneState, result: MutationResult): MutationResult {
   const status = result.scene?.status ?? scene.status;
 
-  if (status !== "active") return result;
+  if (status !== BattleStatus.ACTIVE) return result;
 
   const victory = checkVictoryConditions(result.participants);
 
@@ -114,7 +114,7 @@ function withVictory(scene: BattleSceneState, result: MutationResult): MutationR
   return {
     ...result,
     participants: updatedParticipants,
-    scene: { ...result.scene, status: "completed", completedAt: new Date() },
+    scene: { ...result.scene, status: BattleStatus.COMPLETED, completedAt: new Date() },
     events: [...result.events, battleActionToEvent({ ...battleAction, round })],
   };
 }

@@ -23,7 +23,7 @@ import {
   updateBattle,
   updateBattleParticipant,
 } from "@/lib/api/battles";
-import { BattleSceneStatus, type BattleSceneStatusValue } from "@/lib/constants/battle";
+import { BattleStatus } from "@/lib/constants/battle";
 import type { MoraleCheckResult } from "@/lib/utils/battle/battle-morale";
 import { acceptFullBattle } from "@/lib/utils/battle/client/apply-delta";
 import type {
@@ -39,9 +39,9 @@ import type { BattleAction } from "@/types/battle";
 export const BATTLE_ACTIVE_REFETCH_INTERVAL_MS = 30_000;
 
 // prepared теж: інакше гравці без Pusher не побачать старту бою.
-const POLLED_BATTLE_STATUSES: ReadonlySet<BattleSceneStatusValue> = new Set([
-  BattleSceneStatus.PREPARED,
-  BattleSceneStatus.ACTIVE,
+const POLLED_BATTLE_STATUSES: ReadonlySet<BattleStatus> = new Set([
+  BattleStatus.PREPARED,
+  BattleStatus.ACTIVE,
 ]);
 
 export function useBattle(

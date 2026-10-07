@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { BattleStatus } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { createBattleSchema } from "@/lib/schemas";
 import {
@@ -31,7 +32,7 @@ export async function POST(
         campaignId: id,
         name: data.name,
         description: data.description,
-        status: "prepared",
+        status: BattleStatus.PREPARED,
         participants: data.participants,
         currentRound: 1,
         currentTurnIndex: 0,

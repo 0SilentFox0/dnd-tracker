@@ -1,3 +1,4 @@
+import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 /**
  * Типи для тригерів скілів
  */
@@ -92,7 +93,7 @@ export interface SkillTriggerModifiers {
    * - ranged: лише дальня атака
    * - magic: лише магія
    */
-  responseType?: "melee" | "ranged" | "magic";
+  responseType?: AttackType | "magic";
 }
 
 /**
@@ -102,7 +103,7 @@ export interface SkillTriggerModifiers {
  */
 export interface ComplexSkillTrigger {
   type: "complex";
-  target: "ally" | "enemy" | "self";
+  target: ParticipantSide | "self";
   operator: ComparisonOperator;
   value: number;
   valueType: ValueType;

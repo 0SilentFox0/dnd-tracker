@@ -4,6 +4,7 @@ import { useEffect, useEffectEvent, useMemo, useReducer } from "react";
 
 import { useBattleScene } from "./useBattleScene";
 
+import { CombatStatus } from "@/lib/constants/battle";
 import { predictAttackNumbers } from "@/lib/utils/battle/attack/bonus";
 import { resolveAttackRoll } from "@/lib/utils/battle/common/attack-roll-helpers";
 import { computeDamageBreakdown } from "@/lib/utils/battle/damage";
@@ -19,7 +20,7 @@ export function rollDie(sides: number): number {
   return (buf[0] % sides) + 1;
 }
 
-const isUp = (p: BattleParticipant) => p.combatStats.status === "active" && p.combatStats.currentHp > 0;
+const isUp = (p: BattleParticipant) => p.combatStats.status === CombatStatus.ACTIVE && p.combatStats.currentHp > 0;
 
 export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () => void) {
   const scene = useBattleScene();

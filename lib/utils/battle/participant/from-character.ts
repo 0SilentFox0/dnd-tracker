@@ -11,7 +11,7 @@ import { loadRace } from "./load-race";
 import { buildSpellEnhancers } from "./spell-enhancers";
 
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
-import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { CombatStatus,ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import { bakePassives } from "@/lib/utils/abilities/build/bake";
 import { collectCharacterAbilities } from "@/lib/utils/abilities/build/collect";
@@ -141,7 +141,7 @@ export async function createBattleParticipantFromCharacter(
       armorClass: character.armorClass,
       speed: character.speed,
       morale: (character as { morale?: number }).morale || 0,
-      status: computedMaxHp <= 0 ? "dead" : "active",
+      status: computedMaxHp <= 0 ? CombatStatus.DEAD : CombatStatus.ACTIVE,
       minTargets: character.minTargets ?? 1,
       maxTargets: character.maxTargets ?? 1,
     },

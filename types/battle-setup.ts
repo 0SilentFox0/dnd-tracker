@@ -1,4 +1,4 @@
-import { type ParticipantSourceTypeValue } from "@/lib/constants/battle";
+import { ParticipantSide,type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 
 export interface SetupCharacter {
   id: string;
@@ -39,7 +39,7 @@ export interface SuggestedEnemy {
 export interface SetupParticipant {
   id: string;
   type: ParticipantSourceTypeValue;
-  side: "ally" | "enemy";
+  side: ParticipantSide;
   quantity?: number;
 }
 

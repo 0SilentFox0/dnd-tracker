@@ -9,6 +9,7 @@ import { Section } from "./Section";
 
 import { EmptyState } from "@/components/common/states";
 import { ABILITY_SHORT_LABELS } from "@/lib/constants/abilities";
+import { AttackType } from "@/lib/constants/battle";
 import { cn } from "@/lib/utils";
 import { signed } from "@/lib/utils/format";
 import type { SheetLine } from "@/types/characters";
@@ -59,7 +60,7 @@ export function CombatTab() {
             <div key={a.id} className="mb-1.5 rounded-[10px] border border-[#4a3c2c] bg-[#1a140f] px-2.5 py-2">
               <button type="button" aria-expanded={openAttack === a.id} onClick={() => setOpenAttack((v) => (v === a.id ? null : a.id))} className="flex min-h-10 w-full flex-wrap items-center justify-between gap-x-2 text-left">
                 <span className="flex min-w-0 items-center gap-1.5 truncate">
-                  {a.kind === "ranged" ? <Crosshair className="size-4 shrink-0" /> : <Swords className="size-4 shrink-0" />}
+                  {a.kind === AttackType.RANGED ? <Crosshair className="size-4 shrink-0" /> : <Swords className="size-4 shrink-0" />}
                   {a.name}
                 </span>
                 <span className="shrink-0 whitespace-nowrap text-sm text-[#8f8473]">

@@ -1,3 +1,4 @@
+import { BattleStatus } from "@/lib/constants/battle";
 import type { BattleParticipantPatch, BattleScene, ClientBattleDelta } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -68,7 +69,7 @@ export function applyBattleDelta(cached: BattleScene, delta: ClientBattleDelta):
     completedAt: scene.completedAt === null ? undefined : (scene.completedAt ?? cached.completedAt),
     initiativeOrder,
     pendingSummons: delta.pending ?? cached.pendingSummons,
-    participants: delta.setup ?? (scene.status === "prepared" ? cached.participants : []),
+    participants: delta.setup ?? (scene.status === BattleStatus.PREPARED ? cached.participants : []),
     battleLog: mergeLog(cached.battleLog ?? [], delta.log, delta.cancelledFrom),
     battleLogMode: undefined,
     battleLogCancelledFrom: undefined,

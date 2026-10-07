@@ -1,9 +1,9 @@
 /**
  * Логіка циклу переходу ходу: пошук наступного живого учасника, endRound/startOfRound, processStartOfTurn, логи.
  */
-
 import { logTurnTiming } from "./turn-helpers";
 
+import { CombatStatus, SYSTEM_ACTOR } from "@/lib/constants/battle";
 import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import {
   processEndOfTurn,
@@ -69,9 +69,7 @@ export function runAdvanceTurnLoop(
     round,
     actionIndex: currentBattleLogLength + newLogEntries.length,
     timestamp: new Date(),
-    actorId: "system",
-    actorName: "Система",
-    actorSide: "ally",
+    ...SYSTEM_ACTOR,
     actionType: "ability",
     targets: [],
     actionDetails: {},
@@ -132,9 +130,7 @@ export function runAdvanceTurnLoop(
           round: nextRound,
           actionIndex: currentBattleLogLength + newLogEntries.length,
           timestamp: new Date(),
-          actorId: "system",
-          actorName: "Система",
-          actorSide: "ally",
+          ...SYSTEM_ACTOR,
           actionType: "ability",
           targets: [],
           actionDetails: {},
@@ -250,8 +246,8 @@ export function runAdvanceTurnLoop(
     }
 
     const isAlive =
-      turnResult.participant.combatStats.status !== "dead" &&
-      turnResult.participant.combatStats.status !== "unconscious";
+      turnResult.participant.combatStats.status !== CombatStatus.DEAD &&
+      turnResult.participant.combatStats.status !== CombatStatus.UNCONSCIOUS;
 
     if (isAlive) activeParticipantFound = true;
 

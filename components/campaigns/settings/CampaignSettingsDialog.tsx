@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { CampaignStatus } from "@/lib/constants/campaigns";
 import { useUpdateCampaign } from "@/lib/hooks/campaigns";
 import type { CampaignSettings } from "@/types/campaigns";
 
@@ -102,7 +103,7 @@ export function CampaignSettingsDialog({ campaignId, campaign, open, onOpenChang
             <Label htmlFor="allow-player-edit">Дозволити гравцям редагувати своїх персонажів</Label>
           </div>
           <div className="flex items-center space-x-2">
-            <Checkbox id="campaign-status" checked={fields.status === "active"} onCheckedChange={(v) => set("status", v === true ? "active" : "archived")} disabled={isSaving} />
+            <Checkbox id="campaign-status" checked={fields.status === CampaignStatus.ACTIVE} onCheckedChange={(v) => set("status", v === true ? CampaignStatus.ACTIVE : CampaignStatus.ARCHIVED)} disabled={isSaving} />
             <Label htmlFor="campaign-status">Кампанія активна</Label>
           </div>
         </div>

@@ -1,3 +1,4 @@
+import { BattleStatus } from "@/lib/constants/battle";
 import type { BattleParticipant } from "@/types/battle";
 
 export type HealthState = "unhurt" | "wounded" | "bloodied" | "dying" | "down";
@@ -19,7 +20,7 @@ export function hpRatio(p: Pick<BattleParticipant, "combatStats">): number {
 export function healthState(p: BattleParticipant): HealthState {
   const { currentHp, status } = p.combatStats;
 
-  if (status !== "active" || currentHp <= 0) return "down";
+  if (status !== BattleStatus.ACTIVE || currentHp <= 0) return "down";
 
   const ratio = hpRatio(p);
 

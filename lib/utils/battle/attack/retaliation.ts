@@ -11,13 +11,14 @@ import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { findParticipant, isUp, withSelf } from "@/lib/utils/abilities/engine/participants";
 import type { Rng } from "@/lib/utils/abilities/engine/types";
+import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { parseDiceLenient, rollGroups } from "@/lib/utils/common/dice";
 import type { BattleAction, BattleAttack, BattleParticipant } from "@/types/battle";
 
-type Kind = "melee" | "ranged";
+type Kind = AttackType;
 
-const kindOf = (a: Pick<BattleAttack, "type">): Kind => (a.type === AttackType.RANGED ? "ranged" : "melee");
+const kindOf = (a: Pick<BattleAttack, "type">): Kind => attackKindOf(a.type);
 
 const rollD20 = (rng: Rng) => 1 + Math.floor(rng() * 20);
 
@@ -41,7 +42,7 @@ export interface RetaliationResult {
 function weaponFor(defender: BattleParticipant, participants: BattleParticipant[], kind: Kind): { attack: BattleAttack; bonusPercent: number } | null {
   const flags = findFlags(withSelf(participants, defender), defender.basicInfo.id, "counterAttack");
 
-  if (kind === "ranged" && !flags.some((f) => f.attackKinds.includes("ranged"))) return null;
+  if (kind === AttackType.RANGED && !flags.some((f) => f.attackKinds.includes(AttackType.RANGED))) return null;
 
   if (getDisabledAttackKinds(defender)[kind]) return null;
 

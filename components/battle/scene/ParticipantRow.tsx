@@ -4,6 +4,7 @@ import { memo } from "react";
 import { Shield } from "lucide-react";
 
 import { EffectLine, HealthBar, HealthLabel, Portrait } from "@/components/battle/hud";
+import { CombatStatus } from "@/lib/constants/battle";
 import { useHpChange } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { hpRatio } from "@/lib/utils/battle/view";
@@ -20,7 +21,7 @@ export const ParticipantRow = memo(function ParticipantRow({ participant, exact,
 
   const change = useHpChange(currentHp);
 
-  const down = status !== "active" || currentHp <= 0;
+  const down = status !== CombatStatus.ACTIVE || currentHp <= 0;
 
   return (
     <button

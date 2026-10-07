@@ -6,6 +6,7 @@ import { Zap } from "lucide-react";
 
 import { HealthLabel, HUD_SURFACE,Portrait } from "@/components/battle/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
+import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { useBattleScene } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { withinLimits } from "@/lib/utils/abilities/engine/usage";
@@ -14,7 +15,7 @@ import { bonusTargetSide } from "@/lib/utils/battle/view";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
 
-const isUp = (p: BattleParticipant) => p.combatStats.status === "active" && p.combatStats.currentHp > 0;
+const isUp = (p: BattleParticipant) => p.combatStats.status === CombatStatus.ACTIVE && p.combatStats.currentHp > 0;
 
 export function BonusActionPicker({ participant, open, onOpenChange, onDone }: { participant: BattleParticipant; open: boolean; onOpenChange: (o: boolean) => void; onDone: () => void }) {
   const { allies, enemies, actions } = useBattleScene();
@@ -37,7 +38,7 @@ export function BonusActionPicker({ participant, open, onOpenChange, onDone }: {
 
   const side = aiming ? bonusTargetSide(aiming) : null;
 
-  const candidates = (side === "enemy" ? enemies : allies).filter(isUp);
+  const candidates = (side === ParticipantSide.ENEMY ? enemies : allies).filter(isUp);
 
   return (
     <ResponsiveDialog open={open} onOpenChange={(o) => { if (!o) setAiming(null);
@@ -57,7 +58,7 @@ export function BonusActionPicker({ participant, open, onOpenChange, onDone }: {
           <button key={t.basicInfo.id} type="button" disabled={actions.bonusAction.isPending} onClick={() => void fire(aiming, t.basicInfo.id)} className="flex h-14 w-full items-center gap-3 border border-white/15 px-3 text-left">
             <Portrait participant={t} size={36} />
             <span className="hud-sc font-bold">{t.basicInfo.name}</span>
-            {side === "enemy" ? <HealthLabel participant={t} /> : <span className="ml-auto text-sm text-[#d6cbb7]">{t.combatStats.currentHp} / {t.combatStats.maxHp}</span>}
+            {side === ParticipantSide.ENEMY ? <HealthLabel participant={t} /> : <span className="ml-auto text-sm text-[#d6cbb7]">{t.combatStats.currentHp} / {t.combatStats.maxHp}</span>}
           </button>
         ))}
       </div>

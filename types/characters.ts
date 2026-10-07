@@ -1,16 +1,15 @@
 /**
  * Типи для персонажів
  */
-
 import type { EquippedItems, InventoryItem } from "./inventory";
 import type { BookSpell } from "./spells";
 
 import type { AbilityKey } from "@/lib/constants/abilities";
-import { type CharacterTypeValue, type GoalAuthorValue } from "@/lib/constants/characters";
+import { AttackType } from "@/lib/constants/battle";
+import { type CharacterTypeValue, type GoalAuthorValue, type GoalStatus } from "@/lib/constants/characters";
 
 export type { AbilityKey };
 
-export type GoalStatus = "active" | "done" | "failed";
 
 export interface CharacterGoal {
   id: string;
@@ -181,7 +180,7 @@ export interface SheetAbility {
 export interface SheetAttack {
   id: string;
   name: string;
-  kind: "melee" | "ranged";
+  kind: AttackType;
   toHit: SheetTotal;
   avgDamage: SheetTotal;
 }

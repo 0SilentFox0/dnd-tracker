@@ -1,13 +1,12 @@
 /**
  * Побудова BattleAction для різних результатів атаки (критичний промах, промах, попадання)
  */
-
 import type { DamageCalculationResult } from "../../types/damage-calculations";
 import type { AttackRollResult } from "..";
 import type { ComputeHitDamageResult } from "./compute";
 
-import { AttackType } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
+import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import type { BattleAction, BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
 
 export function buildBattleActionForCriticalFail(
@@ -41,7 +40,7 @@ export function buildBattleActionForCriticalFail(
     ],
     actionDetails: {
       weaponName: attack.name,
-      attackKind: (attack.type === AttackType.MELEE ? "melee" : "ranged") as "melee" | "ranged",
+      attackKind: attackKindOf(attack.type),
       attackRoll: d20Roll,
       attackBonus: attackRoll.attackBonus,
       totalAttackValue: attackRoll.totalAttackValue,
@@ -102,7 +101,7 @@ export function buildBattleActionForMiss(
     ],
     actionDetails: {
       weaponName: attack.name,
-      attackKind: (attack.type === AttackType.MELEE ? "melee" : "ranged") as "melee" | "ranged",
+      attackKind: attackKindOf(attack.type),
       attackRoll: d20Roll,
       attackBonus: attackRoll.attackBonus,
       totalAttackValue: attackRoll.totalAttackValue,
@@ -197,7 +196,7 @@ export function buildBattleActionForHit(params: BuildHitActionParams): BattleAct
     ],
     actionDetails: {
       weaponName: attack.name,
-      attackKind: (attack.type === AttackType.MELEE ? "melee" : "ranged") as "melee" | "ranged",
+      attackKind: attackKindOf(attack.type),
       attackRoll: d20Roll,
       attackBonus: attackRoll.attackBonus,
       totalAttackValue: attackRoll.totalAttackValue,
@@ -272,7 +271,7 @@ export function buildAbortedAttackAction(
     actorSide: attacker.basicInfo.side,
     actionType: "attack",
     targets: [{ participantId: target.basicInfo.id, participantName: target.basicInfo.name }],
-    actionDetails: { weaponName: attack.name, attackKind: attack.type === AttackType.RANGED ? "ranged" : "melee", isHit: false },
+    actionDetails: { weaponName: attack.name, attackKind: attackKindOf(attack.type), isHit: false },
     resultText: [`${attacker.basicInfo.name} → ${target.basicInfo.name}: ціль загинула до атаки`, ...messages].join(" | "),
     hpChanges: [],
     isCancelled: false,
@@ -315,7 +314,7 @@ export function buildRetaliationAction(p: BuildRetaliationParams): BattleAction 
     targets: [{ participantId: target.basicInfo.id, participantName: target.basicInfo.name }],
     actionDetails: {
       weaponName: attack.name,
-      attackKind: attack.type === AttackType.RANGED ? "ranged" : "melee",
+      attackKind: attackKindOf(attack.type),
       attackRoll: d20,
       attackBonus: attackRoll.attackBonus,
       totalAttackValue: attackRoll.totalAttackValue,

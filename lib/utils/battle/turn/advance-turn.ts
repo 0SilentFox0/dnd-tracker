@@ -3,6 +3,7 @@ import type { PendingMoraleCheckPayload } from "./pending-morale";
 import { runAdvanceTurnLoop } from "./run-advance-turn-loop";
 import { applyVictoryCompletion } from "./turn-helpers";
 
+import { CombatStatus } from "@/lib/constants/battle";
 import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import type { BattleSceneState, ScenePatch } from "@/lib/utils/battle/store";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
@@ -117,7 +118,7 @@ export function advanceTurn({ participants, pending, scene }: AdvanceTurnInput):
 }
 
 function isAlive(p: BattleParticipant): boolean {
-  return p.combatStats.status !== "dead" && p.combatStats.status !== "unconscious";
+  return p.combatStats.status !== CombatStatus.DEAD && p.combatStats.status !== CombatStatus.UNCONSCIOUS;
 }
 
 function extraTurnAction(p: BattleParticipant, scene: BattleSceneState): BattleAction {

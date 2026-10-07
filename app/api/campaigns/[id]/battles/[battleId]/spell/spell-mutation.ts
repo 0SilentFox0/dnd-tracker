@@ -2,7 +2,7 @@ import type { Spell } from "@prisma/client";
 
 import type { SpellRequestData } from "./cast-spell-schema";
 
-import { ParticipantSide } from "@/lib/constants/battle";
+import { CombatStatus } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { processSpell } from "@/lib/utils/battle/spell";
@@ -37,7 +37,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
 
     if (!canCast) throw new BattleAccessError(403, "Заклинання може кастувати лише DM або контролер поточного ходу");
 
-    if (caster.combatStats.status !== "active") {
+    if (caster.combatStats.status !== CombatStatus.ACTIVE) {
       throw new BattleRuleError("participant_dead", "Кастер непритомний або мертвий");
     }
 
@@ -101,7 +101,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
         campaignId: ctx.scene.campaignId,
         battleId: ctx.scene.id,
         summonUnitId,
-        casterSide: caster.basicInfo.side === "enemy" ? ParticipantSide.ENEMY : ParticipantSide.ALLY,
+        casterSide: caster.basicInfo.side,
         orderAfterSpell: nextOrder,
       });
 

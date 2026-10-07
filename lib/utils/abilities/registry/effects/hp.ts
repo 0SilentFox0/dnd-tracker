@@ -1,6 +1,7 @@
 import { amountLabel } from "../labels";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
+import { CombatStatus } from "@/lib/constants/battle";
 import { resolveAmount } from "@/lib/utils/abilities/engine/amount";
 import { eventDamage } from "@/lib/utils/abilities/engine/events";
 import { applyRawDamage } from "@/lib/utils/abilities/engine/hp";
@@ -70,7 +71,7 @@ export function applyHeal(input: EffectApplyInput<Of<"heal">>): EffectApplyResul
 
     ps = replaceParticipant(ps, {
       ...t,
-      combatStats: { ...t.combatStats, currentHp: hp, status: hp > 0 ? "active" : t.combatStats.status },
+      combatStats: { ...t.combatStats, currentHp: hp, status: hp > 0 ? CombatStatus.ACTIVE : t.combatStats.status },
     });
     messages.push(
       isUp(t)

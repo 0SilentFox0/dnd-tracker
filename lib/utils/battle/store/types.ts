@@ -1,7 +1,6 @@
+import type { BattleStatus } from "@/lib/constants/battle";
 import type { AbilityUsageCounter } from "@/types/abilities";
 import type { BattleParticipant, BattlePreparationParticipant } from "@/types/battle";
-
-export type BattleStatus = "prepared" | "active" | "completed";
 
 export interface BattleSceneState {
   id: string;

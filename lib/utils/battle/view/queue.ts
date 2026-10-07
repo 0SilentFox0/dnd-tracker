@@ -1,10 +1,11 @@
+import { CombatStatus } from "@/lib/constants/battle";
 import type { BattleParticipant } from "@/types/battle";
 
 export type QueueEntry =
   | { kind: "turn" | "extra"; participant: BattleParticipant; current: boolean; down: boolean }
   | { kind: "round"; round: number };
 
-const isDown = (p: BattleParticipant) => p.combatStats.status !== "active" || p.combatStats.currentHp <= 0;
+const isDown = (p: BattleParticipant) => p.combatStats.status !== CombatStatus.ACTIVE || p.combatStats.currentHp <= 0;
 
 const item = (kind: "turn" | "extra", participant: BattleParticipant, current = false): QueueEntry => ({
   kind, participant, current, down: isDown(participant),

@@ -1,5 +1,7 @@
 import type { DamageFilterKind } from "./common";
 
+import { AttackType } from "@/lib/constants/battle";
+
 export function legacyDamageKindOf(type: string): DamageFilterKind | null {
   const s = type.toLowerCase();
 
@@ -7,9 +9,9 @@ export function legacyDamageKindOf(type: string): DamageFilterKind | null {
 
   if (!s.includes("damage") || s.includes("reduction")) return null;
 
-  if (s.includes("melee")) return "melee";
+  if (s.includes(AttackType.MELEE)) return AttackType.MELEE;
 
-  if (s.includes("ranged")) return "ranged";
+  if (s.includes(AttackType.RANGED)) return AttackType.RANGED;
 
   if (s.includes("physical")) return "physical";
 

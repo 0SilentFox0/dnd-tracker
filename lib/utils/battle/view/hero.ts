@@ -1,5 +1,7 @@
+import { ParticipantSide } from "@/lib/constants/battle";
 import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
+import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
@@ -52,7 +54,7 @@ export function abilityCharges(p: BattleParticipant): AbilityCharge[] {
 
 const HOSTILE = new Set(["dealDamage", "dot", "applyCondition"]);
 
-export function bonusTargetSide(a: ResolvedAbility): "ally" | "enemy" | null {
+export function bonusTargetSide(a: ResolvedAbility): ParticipantSide | null {
   const aimed = a.effects.filter((e) => "target" in e && e.target === "eventTarget");
 
   if (aimed.length === 0) return null;
@@ -61,7 +63,7 @@ export function bonusTargetSide(a: ResolvedAbility): "ally" | "enemy" | null {
     HOSTILE.has(e.kind) || (("flat" in e && typeof e.flat === "number" && e.flat < 0) || ("percent" in e && typeof e.percent === "number" && e.percent < 0)),
   );
 
-  return hostile ? "enemy" : "ally";
+  return hostile ? ParticipantSide.ENEMY : ParticipantSide.ALLY;
 }
 
 export function lastAction(log: BattleAction[]): BattleAction | null {
@@ -79,7 +81,7 @@ export function needsMoraleCheck(p: BattleParticipant, participants: BattleParti
 }
 
 export function weaponPreview(p: BattleParticipant, attack: BattleAttack, all: BattleParticipant[]) {
-  const mods = collectModifiers(withSelf(all, p), p.basicInfo.id, { damage: { kind: attack.type === "melee" ? "melee" : "ranged" } });
+  const mods = collectModifiers(withSelf(all, p), p.basicInfo.id, { damage: { kind: attackKindOf(attack.type) } });
 
   const bonuses = mods.entries.filter((e) => e.percent || e.flat).map((e) => ({ label: e.label, percent: e.percent, flat: e.flat, icon: e.icon }));
 

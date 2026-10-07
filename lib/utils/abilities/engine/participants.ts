@@ -1,3 +1,4 @@
+import { CombatStatus } from "@/lib/constants/battle";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -18,7 +19,7 @@ export function updateParticipant(
 }
 
 export function isUp(p: BattleParticipant): boolean {
-  return p.combatStats.status === "active";
+  return p.combatStats.status === CombatStatus.ACTIVE;
 }
 
 export function resolvedAbilitiesOf(p: BattleParticipant): ResolvedAbility[] {

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { CampaignStatus } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
@@ -28,7 +29,7 @@ export async function GET() {
             },
           },
         },
-        status: "active",
+        status: CampaignStatus.ACTIVE,
       },
       select: {
         id: true,

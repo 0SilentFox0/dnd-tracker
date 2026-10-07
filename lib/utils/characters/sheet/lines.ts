@@ -1,8 +1,8 @@
 import { ABILITY_LABELS } from "@/lib/constants/abilities";
-import { AttackType } from "@/lib/constants/battle";
 import { bakedStatSources } from "@/lib/utils/abilities/build/bake";
 import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { calculateAttackBonus } from "@/lib/utils/battle/attack";
+import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
 import { getAbilityModifier, getAttackAbilityModifier } from "@/lib/utils/common/calculations";
 import { signed } from "@/lib/utils/format";
@@ -34,7 +34,7 @@ export function armorTotal(p: BattleParticipant): SheetTotal {
 }
 
 export function attackSheet(p: BattleParticipant, attack: BattleAttack): SheetAttack {
-  const type = attack.type === AttackType.RANGED ? AttackType.RANGED : AttackType.MELEE;
+  const type = attackKindOf(attack.type);
 
   const statMod = getAttackAbilityModifier(p.abilities, type);
 
@@ -42,7 +42,7 @@ export function attackSheet(p: BattleParticipant, attack: BattleAttack): SheetAt
 
   const star = p.abilities.primaryAbility ? " ★" : "";
 
-  const hitMods = collectModifiers([p], p.basicInfo.id, { stat: "attackBonus", attackKind: type === AttackType.RANGED ? "ranged" : "melee" });
+  const hitMods = collectModifiers([p], p.basicInfo.id, { stat: "attackBonus", attackKind: type });
 
   const toHitLines: SheetLine[] = [
     { label: `${avg.statLabel}${star}`, value: signed(statMod), source: "ability" },
@@ -51,7 +51,7 @@ export function attackSheet(p: BattleParticipant, attack: BattleAttack): SheetAt
     ...hitMods.entries.filter((e) => e.flat).map((e) => ({ label: e.label, value: signed(e.flat), source: asSource(e.sourceType) })),
   ];
 
-  const damageSources = new Map(collectModifiers([p], p.basicInfo.id, { damage: { kind: type === AttackType.RANGED ? "ranged" : "melee" } }).entries.map((e) => [e.label, asSource(e.sourceType)]));
+  const damageSources = new Map(collectModifiers([p], p.basicInfo.id, { damage: { kind: type } }).entries.map((e) => [e.label, asSource(e.sourceType)]));
 
   const damageLines: SheetLine[] = [
     ...(attack.damageDice ? [{ label: `Зброя ${attack.damageDice}`, value: avg.weaponAvg.toFixed(1), source: "dice" as const }] : []),
@@ -66,7 +66,7 @@ export function attackSheet(p: BattleParticipant, attack: BattleAttack): SheetAt
   return {
     id: attack.id ?? attack.name,
     name: attack.name,
-    kind: type === AttackType.RANGED ? "ranged" : "melee",
+    kind: type,
     toHit: { total: calculateAttackBonus(p, attack), lines: toHitLines },
     avgDamage: { total: avg.total, lines: damageLines },
   };

@@ -7,6 +7,7 @@ import { BattleToast } from "./BattleToast";
 import { MobileBattleLayout } from "./MobileBattleLayout";
 
 import { hudFontClassName } from "@/components/battle/hud";
+import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
 import { useBattleScene, useSpellBookPrefetch } from "@/lib/hooks/battle";
 import { useMediaQuery } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
@@ -56,12 +57,12 @@ export function BattleScreen() {
 
   useSpellBookPrefetch();
 
-  if (battle.status === "prepared") {
+  if (battle.status === BattleStatus.PREPARED) {
     const count = (side: string) => battle.participants.filter((p) => p.side === side).reduce((s, p) => s + (p.quantity ?? 1), 0);
 
     return (
       <div className={cn("battle-hud below-header overflow-y-auto", hudFontClassName)} >
-        <BattlePreparationView battle={battle} alliesCount={count("ally")} enemiesCount={count("enemy")} isDM={isDM} onStartBattle={() => actions.start.mutate({})} isStarting={actions.start.isPending} />
+        <BattlePreparationView battle={battle} alliesCount={count(ParticipantSide.ALLY)} enemiesCount={count(ParticipantSide.ENEMY)} isDM={isDM} onStartBattle={() => actions.start.mutate({})} isStarting={actions.start.isPending} />
       </div>
     );
   }

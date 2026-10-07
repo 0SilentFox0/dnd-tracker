@@ -8,7 +8,7 @@ import type { BattleSpell } from "../types/spell-process";
 import { calculateSpellDamageWithEnhancements } from "./calculations";
 import { participantImmuneToSpell } from "./spell-immunity";
 
-import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
+import { BATTLE_CONSTANTS, CombatStatus } from "@/lib/constants/battle";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import type { BattleParticipant, DamageStep } from "@/types/battle";
 
@@ -154,7 +154,7 @@ export function computeSpellDamageAndApply(
     );
 
     const status =
-      newCurrentHp <= 0 ? (newCurrentHp < 0 ? "dead" : "unconscious") : current.combatStats.status;
+      newCurrentHp <= 0 ? (newCurrentHp < 0 ? CombatStatus.DEAD : CombatStatus.UNCONSCIOUS) : current.combatStats.status;
 
     resultTargets[targetIndex] = {
       ...current,
@@ -249,14 +249,14 @@ export function computeSpellHealAndApply(
     };
 
     if (
-      resultTargets[targetIndex].combatStats.status === "unconscious" &&
+      resultTargets[targetIndex].combatStats.status === CombatStatus.UNCONSCIOUS &&
       resultTargets[targetIndex].combatStats.currentHp > 0
     ) {
       resultTargets[targetIndex] = {
         ...resultTargets[targetIndex],
         combatStats: {
           ...resultTargets[targetIndex].combatStats,
-          status: "active",
+          status: CombatStatus.ACTIVE,
         },
       };
     }

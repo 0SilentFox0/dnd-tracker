@@ -1,8 +1,8 @@
+import { AttackType,CombatStatus } from "@/lib/constants/battle";
 /**
  * Runs the attack phase: validation, processAttack per target, primary-target retaliation.
  * Used by attack-and-next-turn route (and can be reused by attack route).
  */
-
 import type { Rng } from "@/lib/utils/abilities/engine/types";
 import { processAttack } from "@/lib/utils/battle/attack";
 import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
@@ -113,7 +113,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
     throw new AttackPhaseError("Attacker has already used their action", 400);
   }
 
-  if (attacker.combatStats.status !== "active") {
+  if (attacker.combatStats.status !== CombatStatus.ACTIVE) {
     throw new AttackPhaseError(
       "Attacker is not active (unconscious or dead)",
       400,
@@ -136,7 +136,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const isMultiTargetRanged =
     !isAoe &&
-    attack.type === "ranged" &&
+    attack.type === AttackType.RANGED &&
     (attacker.combatStats.maxTargets ?? 1) > 1;
 
   const maxPossibleTargets = isAoe
@@ -259,7 +259,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       }
     }
 
-    if (currentAttacker.combatStats.status !== "active") break;
+    if (currentAttacker.combatStats.status !== CombatStatus.ACTIVE) break;
   }
 
   const finalInitiativeOrder = currentInitiativeOrder;

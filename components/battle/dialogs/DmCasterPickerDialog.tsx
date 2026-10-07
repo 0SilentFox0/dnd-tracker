@@ -3,6 +3,7 @@
 import { BattleDialog } from "./shared";
 
 import { Button } from "@/components/ui/button";
+import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import type { BattleParticipant } from "@/types/battle";
 
 export interface DmCasterPickerDialogProps {
@@ -19,7 +20,7 @@ export function DmCasterPickerDialog({
   onSelectCaster,
 }: DmCasterPickerDialogProps) {
   const activeParticipants = participants.filter(
-    (p) => p.combatStats?.status === "active",
+    (p) => p.combatStats?.status === CombatStatus.ACTIVE,
   );
 
   return (
@@ -46,11 +47,11 @@ export function DmCasterPickerDialog({
                 onSelectCaster(p);
               }}
             >
-              <i className="size-2 shrink-0 rounded-full" style={{ background: p.basicInfo.side === "ally" ? "var(--ally)" : "var(--enemy)" }} />
+              <i className="size-2 shrink-0 rounded-full" style={{ background: p.basicInfo.side === ParticipantSide.ALLY ? "var(--ally)" : "var(--enemy)" }} />
               <span className="font-medium">{p.basicInfo.name}</span>
               {p.basicInfo.side && (
                 <span className="text-muted-foreground text-xs">
-                  {p.basicInfo.side === "ally" ? "союзник" : "ворог"}
+                  {p.basicInfo.side === ParticipantSide.ALLY ? "союзник" : "ворог"}
                 </span>
               )}
             </Button>

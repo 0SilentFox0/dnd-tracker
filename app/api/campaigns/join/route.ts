@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { kvDel } from "@/lib/cache/kv";
-import { CampaignRole } from "@/lib/constants/campaigns";
+import { CampaignRole, CampaignStatus } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { joinCampaignSchema } from "@/lib/schemas";
 import { requireAuthUser } from "@/lib/utils/api/api-auth";
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (campaign.status !== "active") {
+    if (campaign.status !== CampaignStatus.ACTIVE) {
       return NextResponse.json(
         { error: "Campaign is not active" },
         { status: 400 }

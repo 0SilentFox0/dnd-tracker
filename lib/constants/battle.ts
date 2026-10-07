@@ -1,39 +1,36 @@
-/**
- * Константи для бою
- */
+export const AttackType = {
+  MELEE: "melee",
+  RANGED: "ranged",
+} as const;
 
-/**
- * Enum для типів атаки
- */
-export enum AttackType {
-  MELEE = "melee",
-  RANGED = "ranged",
-}
+export type AttackType = (typeof AttackType)[keyof typeof AttackType];
 
-/**
- * Enum для сторін учасника бою
- */
-export enum ParticipantSide {
-  ALLY = "ally",
-  ENEMY = "enemy",
-}
+export const ParticipantSide = {
+  ALLY: "ally",
+  ENEMY: "enemy",
+} as const;
 
-/**
- * Статус учасника в бою (combatStats.status)
- */
+export type ParticipantSide = (typeof ParticipantSide)[keyof typeof ParticipantSide];
+
 export const CombatStatus = {
   ACTIVE: "active",
   UNCONSCIOUS: "unconscious",
   DEAD: "dead",
 } as const;
 
-export const BattleSceneStatus = {
+export type CombatStatusType = (typeof CombatStatus)[keyof typeof CombatStatus];
+
+export const BattleStatus = {
   PREPARED: "prepared",
   ACTIVE: "active",
   COMPLETED: "completed",
 } as const;
 
-export type BattleSceneStatusValue = (typeof BattleSceneStatus)[keyof typeof BattleSceneStatus];
+export type BattleStatus = (typeof BattleStatus)[keyof typeof BattleStatus];
+
+export const DM_ACTOR = { actorId: "dm", actorName: "DM", actorSide: ParticipantSide.ALLY } as const;
+
+export const SYSTEM_ACTOR = { actorId: "system", actorName: "Система", actorSide: ParticipantSide.ALLY } as const;
 
 export const BattleActionType = {
   ATTACK: "attack",
@@ -45,8 +42,6 @@ export const BattleActionType = {
   MORALE_SKIP: "morale_skip",
   RETALIATION: "retaliation",
 } as const;
-
-export type CombatStatusType = (typeof CombatStatus)[keyof typeof CombatStatus];
 
 /**
  * Глобальні константи бою

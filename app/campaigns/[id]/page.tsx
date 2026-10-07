@@ -7,6 +7,7 @@ import { InviteCodeDisplay } from "@/components/campaigns/settings/InviteCodeDis
 import { HudSection } from "@/components/hud/form";
 import { HudPage, HudPageHeader, HudPanel, HudTile } from "@/components/hud/page";
 import { requireCampaignWithMembers } from "@/lib/campaigns/access";
+import { CampaignStatus } from "@/lib/constants/campaigns";
 import { pluralUk } from "@/lib/utils/plural";
 
 const TILES_GRID = "grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3";
@@ -79,7 +80,7 @@ export default async function CampaignDetailPage({
             <div>
               <p className={LABEL}>Статус</p>
               <span className="inline-block rounded-full px-2 text-xs text-[#e6dccb] shadow-[inset_0_0_0_1px_#4a3c2c]">
-                {campaign.status === "active" ? "Активна" : "Архівована"}
+                {campaign.status === CampaignStatus.ACTIVE ? "Активна" : "Архівована"}
               </span>
             </div>
           </div>

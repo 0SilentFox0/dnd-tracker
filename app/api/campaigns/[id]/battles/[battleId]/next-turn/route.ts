@@ -1,5 +1,6 @@
 import { nextTurnMutation } from "./next-turn-mutation";
 
+import { BattleStatus } from "@/lib/constants/battle";
 import { BattleAccess, runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 
 export async function POST(
@@ -9,7 +10,7 @@ export async function POST(
   return runBattleMutation(req, {
     params: await params,
     access: BattleAccess.CURRENT_CONTROLLER,
-    requireStatus: "active",
+    requireStatus: BattleStatus.ACTIVE,
     rateLimitScope: "nextTurn",
     mutate: nextTurnMutation,
   });

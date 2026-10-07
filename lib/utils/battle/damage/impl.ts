@@ -1,13 +1,13 @@
 /**
  * Реалізація повного розрахунку урону з усіма модифікаторами
  */
-
 import type { DamageCalculationResult } from "../types/damage-calculations";
 
 import { AttackType, BATTLE_CONSTANTS } from "@/lib/constants/battle";
 import { collectModifiers, type ModifierEntry } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
+import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { signed } from "@/lib/utils/format";
 import type { BattleParticipant, DamageStep } from "@/types/battle";
 
@@ -74,7 +74,7 @@ export function calculateDamageWithModifiersImpl(
     breakdown.push(`= ${baseWithStat} (база)`);
   }
 
-  const kind = attackType === AttackType.MELEE ? "melee" : "ranged";
+  const kind = attackKindOf(attackType);
 
   const mods = collectModifiers(
     withSelf(context?.allParticipants ?? [], attacker),

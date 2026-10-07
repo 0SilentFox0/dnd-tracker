@@ -2,7 +2,7 @@
  * Утиліти для перевірки перемоги та завершення бою
  */
 
-import { ParticipantSide } from "@/lib/constants/battle";
+import { CombatStatus, ParticipantSide, SYSTEM_ACTOR } from "@/lib/constants/battle";
 import { BattleAction, BattleParticipant } from "@/types/battle";
 
 /**
@@ -29,12 +29,12 @@ export function checkVictoryConditions(
 
   // Перевіряємо чи всі вороги мертві або непритомні
   const allEnemiesDefeated = enemies.every(
-    (enemy) => enemy.combatStats.status === "dead" || enemy.combatStats.status === "unconscious"
+    (enemy) => enemy.combatStats.status === CombatStatus.DEAD || enemy.combatStats.status === CombatStatus.UNCONSCIOUS
   );
 
   // Перевіряємо чи всі союзники мертві або непритомні
   const allAlliesDefeated = allies.every(
-    (ally) => ally.combatStats.status === "dead" || ally.combatStats.status === "unconscious"
+    (ally) => ally.combatStats.status === CombatStatus.DEAD || ally.combatStats.status === CombatStatus.UNCONSCIOUS
   );
 
   if (allEnemiesDefeated && enemies.length > 0) {
@@ -83,14 +83,14 @@ export function completeBattle(
     if (
       result === "victory" &&
       participant.basicInfo.side === ParticipantSide.ALLY &&
-      participant.combatStats.status === "unconscious"
+      participant.combatStats.status === CombatStatus.UNCONSCIOUS
     ) {
       return {
         ...participant,
         combatStats: {
           ...participant.combatStats,
           currentHp: participant.combatStats.maxHp,
-          status: "active" as const,
+          status: CombatStatus.ACTIVE,
         },
       };
     }
@@ -104,9 +104,7 @@ export function completeBattle(
     round: currentRound,
     actionIndex: 0, // буде встановлено в route
     timestamp: new Date(),
-    actorId: "system",
-    actorName: "Система",
-    actorSide: "ally",
+    ...SYSTEM_ACTOR,
     actionType: "end_turn",
     targets: [],
     actionDetails: {},
@@ -120,7 +118,7 @@ export function completeBattle(
         (p) =>
           result === "victory" &&
           p.basicInfo.side === ParticipantSide.ALLY &&
-          p.combatStats.status === "unconscious",
+          p.combatStats.status === CombatStatus.UNCONSCIOUS,
       )
       .map((p) => ({
         participantId: p.basicInfo.id,

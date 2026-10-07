@@ -1,7 +1,6 @@
 /**
  * Повна обробка атаки з усіма модифікаторами, вміннями та ефектами
  */
-
 import {
   applyMainActionUsed,
   getEffectiveArmorClass,
@@ -17,9 +16,9 @@ import { handleCriticalFail } from "./critical-fail";
 import { resolveHit } from "./hit";
 import { handleMiss } from "./miss";
 
-import { AttackType } from "@/lib/constants/battle";
 import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { isUp, withSelf } from "@/lib/utils/abilities/engine/participants";
+import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 
 export type { ProcessAttackParams, ProcessAttackResult };
 
@@ -42,7 +41,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   const targetId = target.basicInfo.id;
 
-  const attackKind = attack.type === AttackType.RANGED ? "ranged" : "melee";
+  const attackKind = attackKindOf(attack.type);
 
   const before = withSelf(withSelf(allParticipants, target), attacker);
 
