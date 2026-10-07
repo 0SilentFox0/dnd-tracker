@@ -13,7 +13,9 @@ describe("attack before cancels when the attacker falls", () => {
       { name: "Випад", trigger: { event: "attack", phase: "before", role: "target", attackKind: "melee" }, limits: { perRound: 1 }, effects: [{ kind: "dealDamage", amount: 1000, target: "eventActor" }] },
     );
 
-    const attacker = { ...makeParticipant({ id: "a" }), battleData: { ...makeParticipant({ id: "a" }).battleData, attacks: [sword] } };
+    const base = makeParticipant({ id: "a" });
+
+    const attacker = { ...base, battleData: { ...base.battleData, attacks: [sword] } };
 
     const target = makeParticipant({ id: "e", side: ParticipantSide.ENEMY, hp: 50, maxHp: 50, abilities: [riposte] });
 
@@ -23,5 +25,7 @@ describe("attack before cancels when the attacker falls", () => {
     expect(r.targetUpdated.combatStats.currentHp).toBe(50);
     expect(r.attackerUpdated.combatStats.status).not.toBe("active");
     expect(r.battleAction.resultText).toContain("Випад");
+    expect(r.attackerUpdated.actionFlags.hasUsedAction).toBe(true);
+    expect(r.battleAction.hpChanges.find((c) => c.participantId === "a")).toBeDefined();
   });
 });
