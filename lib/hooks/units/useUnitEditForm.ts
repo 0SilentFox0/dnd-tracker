@@ -17,7 +17,7 @@ export function useUnitEditForm(campaignId: string, unitId: string) {
 
   const query = useUnit(campaignId, unitId);
 
-  const update = useUpdateUnit(campaignId, unitId);
+  const update = useUpdateUnit(campaignId);
 
   const del = useDeleteUnit(campaignId);
 
@@ -40,7 +40,7 @@ export function useUnitEditForm(campaignId: string, unitId: string) {
 
     if (!fields.abilitiesValid) return;
 
-    update.mutate(buildUnitUpdatePayload(fields.formData, unit), { onSuccess: () => router.push(listHref) });
+    update.mutate({ unitId, data: buildUnitUpdatePayload(fields.formData, unit) }, { onSuccess: () => router.push(listHref) });
   };
 
   const remove = async () => {
