@@ -8,8 +8,9 @@
  */
 import type { Prisma } from "@prisma/client";
 
+import { abilityActionSchema, createAbilityActionMutation } from "../app/api/campaigns/[id]/battles/[battleId]/ability-action/ability-action-mutation";
 import { attackBodySchema, attackMutation } from "../app/api/campaigns/[id]/battles/[battleId]/attack/attack-mutation";
-import { bonusActionMutation, bonusActionSchema } from "../app/api/campaigns/[id]/battles/[battleId]/bonus-action/bonus-action-mutation";
+import { bonusActionSchema, createBonusActionMutation } from "../app/api/campaigns/[id]/battles/[battleId]/bonus-action/bonus-action-mutation";
 import { moraleCheckMutation } from "../app/api/campaigns/[id]/battles/[battleId]/morale-check/morale-check-mutation";
 import { nextTurnMutation } from "../app/api/campaigns/[id]/battles/[battleId]/next-turn/next-turn-mutation";
 import { patchParticipantMutation } from "../app/api/campaigns/[id]/battles/[battleId]/participants/[participantId]/patch-participant-mutation";
@@ -28,7 +29,7 @@ import { needsMoraleCheck } from "../lib/utils/battle/view";
 import { branchLevelNodeId, buildTreeJson, racialNodeId } from "../lib/utils/skills/progression";
 import type { BattleMutationResponse, BattleScene } from "../types/api";
 import type { BattleAction, BattleParticipant } from "../types/battle";
-import { artifactRows, DRAGON_SET, FAIR_CAMPAIGN_NAME, FAIR_HEROES, FAIR_UNITS, FAIR_WEAPONS, MECHANICS_CAMPAIGN_NAME, MECHANICS_UNITS, RACES, SIM_CAMPAIGN_NAME, SIM_PLAYER, SIM_USER, SKILLS, UNITS } from "./simulate-battle-scenario";
+import { artifactRows, DEMON_RACE, DEMON_UNIT, DRAGON_SET, FAIR_CAMPAIGN_NAME, FAIR_HEROES, FAIR_UNITS, FAIR_WEAPONS, MECHANICS_CAMPAIGN_NAME, MECHANICS_UNITS, RACES, RACIAL_CAMPAIGN_NAME, RACIAL_UNITS, SIM_CAMPAIGN_NAME, SIM_PLAYER, SIM_USER, SKILLS, UNITS } from "./simulate-battle-scenario";
 
 import { BATTLE_LOG_RECENT_EVENTS, ParticipantSourceType } from "@/lib/constants/battle";
 import { CampaignRole } from "@/lib/constants/campaigns";
@@ -278,7 +279,11 @@ const ATTACK = { access: "member" as const, requireStatus: "active" as const, sc
 
 const NEXT = { access: "currentController" as const, requireStatus: "active" as const, mutate: nextTurnMutation };
 
-const BONUS = { access: "member" as const, requireStatus: "active" as const, schema: bonusActionSchema, mutate: bonusActionMutation };
+const summonDeps = { loadPool: async (campaignId: string) => ({ units: await prisma.unit.findMany({ where: { campaignId } }), races: await prisma.race.findMany({ where: { campaignId } }) }) };
+
+const BONUS = { access: "member" as const, requireStatus: "active" as const, schema: bonusActionSchema, mutate: createBonusActionMutation(summonDeps) };
+
+const ABILITY = { access: "member" as const, requireStatus: "active" as const, schema: abilityActionSchema, mutate: createAbilityActionMutation(summonDeps) };
 
 const SPELL = { access: "member" as const, requireStatus: "active" as const, schema: spellSchema, dryRun: (b: { preview?: boolean }) => b.preview === true, mutate: createSpellMutation() };
 
@@ -302,6 +307,8 @@ async function main() {
   await fairBattleRuns();
 
   await newMechanics();
+
+  await racialMechanics();
 
   const failed = results.filter((r) => !r.ok);
 
@@ -806,6 +813,143 @@ async function newMechanics() {
     strike.status === 200 && by(u("Новачок")).combatStats.status !== "active" && hp(by(u("Дуелянт"))) === duelistHp && strike.events.some((e) => /Випереджальний удар/.test(e.resultText)),
     `Новачок ${by(u("Новачок")).combatStats.status}, Дуелянт HP ${duelistHp} → ${hp(by(u("Дуелянт")))}`,
   );
+}
+
+// ---------- расові механіки ----------
+
+async function racialMechanics() {
+  console.info("\n🧬 Расові механіки: ульта, прикликання, підняття, перевага, жага крові, Семгрун, рунна броня");
+  quiet = true;
+  log.length = 0;
+
+  await prisma.campaign.deleteMany({ where: { name: RACIAL_CAMPAIGN_NAME, dmUserId: SIM_USER.id } });
+
+  const campaign = await prisma.campaign.create({ data: { name: RACIAL_CAMPAIGN_NAME, inviteCode: `SIMR-${Date.now()}`, dmUserId: SIM_USER.id } });
+
+  const campaignId = campaign.id;
+
+  await prisma.campaignMember.create({ data: { campaignId, userId: SIM_USER.id, role: CampaignRole.DM } });
+
+  const demons = await prisma.race.create({ data: { campaignId, ...DEMON_RACE } as Prisma.RaceUncheckedCreateInput });
+
+  await prisma.unit.create({ data: { campaignId, raceId: demons.id, ...DEMON_UNIT } as Prisma.UnitUncheckedCreateInput });
+
+  const setup: Array<Record<string, unknown>> = [];
+
+  for (const { side, ...u } of RACIAL_UNITS) {
+    const row = await prisma.unit.create({ data: { campaignId, ...u } as Prisma.UnitUncheckedCreateInput });
+
+    setup.push({ id: row.id, type: ParticipantSourceType.UNIT, side, ...(u.name === "Кістяк" || u.name === "Слабак" ? { quantity: 2 } : {}) });
+  }
+
+  const battle = await prisma.battleScene.create({ data: { campaignId, name: "Расові механіки", status: "prepared", participants: setup as Prisma.InputJsonValue, currentRound: 1, currentTurnIndex: 0 } });
+
+  ctx = { ...ctx, campaignId, battleId: battle.id };
+  state = await readState();
+  await call("start", START, {}, SIM_USER.id);
+
+  const u = (name: string) => `${name} #1`;
+
+  const reach = async (name: string) => {
+    for (let i = 0; i < 20 && current()?.basicInfo.name !== name; i++) await call("next-turn", NEXT, {}, SIM_USER.id);
+
+    if (current()?.basicInfo.name !== name) throw new Error(`Не дійшли до ходу ${name}`);
+  };
+
+  const again = async (name: string) => {
+    await call("next-turn", NEXT, {}, SIM_USER.id);
+    await reach(name);
+  };
+
+  const keyOf = (name: string, event: string, ability: string) => (by(name).battleData.resolvedAbilities ?? []).find((a) => a.trigger.event === event && a.name === ability)?.key ?? "";
+
+  const idOf = (name: string) => by(name).basicInfo.id;
+
+  const swing = async (attacker: string, target: string, d20: number, extra: { advantageRoll?: number; disadvantageRoll?: number } = {}, endTurn = false) => {
+    const before = lastIndex();
+
+    await call("attack", ATTACK, { attackerId: idOf(attacker), targetId: idOf(target), d20Roll: d20, damageRolls: [4], endTurn, ...extra }, SIM_USER.id);
+
+    const ev = logSince(before).find((e) => e.actionType === "attack");
+
+    return { details: ev?.actionDetails, text: ev?.resultText ?? "" };
+  };
+
+  for (const name of ["Кістяк #1", "Кістяк #2", "Жертва #1"]) await setHp(name, 0);
+
+  const deadOk = ["Кістяк #1", "Кістяк #2", "Жертва #1"].every((n) => by(n).combatStats.status !== "active");
+
+  await reach(u("Некромант"));
+
+  await call("ability-action", ABILITY, { participantId: idOf(u("Некромант")), abilityKey: keyOf(u("Некромант"), "action", "Підняття мертвих"), targetParticipantIds: [idOf("Кістяк #1"), idOf("Кістяк #2")] }, SIM_USER.id);
+
+  const raised = ["Кістяк #1", "Кістяк #2"].map(by);
+
+  quiet = false;
+  check(
+    "Підняття мертвих: два полеглі вороги стають союзниками на 90 % HP",
+    deadOk && raised.every((p) => p.basicInfo.side === "ally" && p.combatStats.status === "active" && p.combatStats.currentHp === Math.floor((p.combatStats.maxHp * 90) / 100) && p.battleData.summonedBy === idOf(u("Некромант"))),
+    raised.map((p) => `${p.basicInfo.name} ${p.basicInfo.side} ${hp(p)}/${p.combatStats.maxHp}`).join(", "),
+  );
+  quiet = true;
+
+  await again(u("Некромант"));
+
+  await call("ability-action", ABILITY, { participantId: idOf(u("Некромант")), abilityKey: keyOf(u("Некромант"), "action", "Ангел Хранитель"), targetParticipantIds: [idOf("Жертва #1")] }, SIM_USER.id);
+
+  const victim = by("Жертва #1");
+
+  quiet = false;
+  check("Ангел Хранитель воскрешає полеглого союзника на 50 % HP", victim.combatStats.status === "active" && hp(victim) === Math.floor(victim.combatStats.maxHp / 2), `HP ${hp(victim)}/${victim.combatStats.maxHp}, ${victim.combatStats.status}`);
+  quiet = true;
+
+  const before = state.initiativeOrder.length;
+
+  await call("bonus-action", BONUS, { participantId: idOf(u("Некромант")), abilityKey: keyOf(u("Некромант"), "bonusAction", "Відкриття воріт") }, SIM_USER.id);
+
+  const imp = state.initiativeOrder.find((p) => p.basicInfo.name.startsWith("Біс"));
+
+  quiet = false;
+  check("Відкриття воріт прикликає біса на бік некроманта з посиланням на власника", state.initiativeOrder.length === before + 1 && imp?.basicInfo.side === "ally" && imp.battleData.summonedBy === idOf(u("Некромант")), `${imp?.basicInfo.name ?? "немає"} ${imp?.basicInfo.side ?? ""}`);
+  quiet = true;
+
+  await reach(u("Мисливець"));
+  await call("bonus-action", BONUS, { participantId: idOf(u("Мисливець")), abilityKey: keyOf(u("Мисливець"), "bonusAction", "Полювання"), targetParticipantIds: [idOf(u("Опудало"))] }, SIM_USER.id);
+
+  const lucky = await swing(u("Мисливець"), u("Опудало"), 3, { advantageRoll: 19 });
+
+  quiet = false;
+  check("Полювання: атакуючі мічену ціль мають перевагу (d20 3 + перевага 19 влучає)", lucky.details?.isHit === true, lucky.text);
+  quiet = true;
+
+  await again(u("Мисливець"));
+  await setHp(u("Слабак"), 1);
+  await swing(u("Мисливець"), u("Слабак"), 18, {}, true);
+  await reach(u("Мисливець"));
+  await setHp("Слабак #2", 1);
+  await swing(u("Мисливець"), "Слабак #2", 18, {}, true);
+  await reach(u("Мисливець"));
+
+  quiet = false;
+  check("Жага крові: два вбивства дають 2 додаткові дії на початку наступного ходу", by(u("Мисливець")).battleData.pendingExtraActions === 2, `пул ${by(u("Мисливець")).battleData.pendingExtraActions}`);
+  quiet = true;
+
+  const firstSwing = await swing(u("Мисливець"), u("Семгрун"), 18, { disadvantageRoll: 2 });
+
+  const secondSwing = await swing(u("Мисливець"), u("Семгрун"), 18, { disadvantageRoll: 2 });
+
+  quiet = false;
+  check("Семгрун: перша атака за раунд з недоліком (промах), друга без нього (влучання)", firstSwing.details?.isHit === false && secondSwing.details?.isHit === true, `${firstSwing.details?.isHit} → ${secondSwing.details?.isHit}`);
+  quiet = true;
+
+  await reach(u("Опудало"));
+
+  const bash = await swing(u("Опудало"), u("Некромант"), 18);
+
+  const steps = JSON.stringify(bash.details?.damageSteps ?? {});
+
+  quiet = false;
+  check("Рунна броня: опір до всієї шкоди видно в кроках урону", bash.details?.isHit === true && steps.includes("Рунна броня"), steps.slice(0, 160));
 }
 
 main().catch(async (e) => {

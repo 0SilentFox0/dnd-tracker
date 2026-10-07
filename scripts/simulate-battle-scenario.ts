@@ -184,3 +184,53 @@ export const MECHANICS_UNITS = (lightGroupId: string) => [
     ]),
   },
 ];
+
+export const RACIAL_CAMPAIGN_NAME = "SIM: расові механіки";
+
+export const DEMON_RACE = { name: "Демони", abilities: json([]) };
+
+export const DEMON_UNIT = { name: "Біс", level: 5, maxHp: 30, armorClass: 12, initiative: 3, attacks: melee("Кіготь"), abilities: json([]) };
+
+export const RACIAL_UNITS = [
+  {
+    name: "Некромант",
+    side: "ally",
+    maxHp: 50,
+    armorClass: 12,
+    initiative: 10,
+    attacks: melee("Посох"),
+    abilities: json([
+      ab("nec-raise", "Підняття мертвих", { trigger: { event: "action" }, condition: { type: "targetDead" }, limits: { perBattle: 1 }, maxTargets: 2, effects: [{ kind: "raiseDead", hpPercent: 90, target: "eventTarget" }] }),
+      ab("nec-gate", "Відкриття воріт", { trigger: { event: "bonusAction" }, limits: { perBattle: 1 }, effects: [{ kind: "summon", group: "Демони", tier: 5 }] }),
+      ab("nec-angel", "Ангел Хранитель", { trigger: { event: "action" }, condition: { type: "targetDead" }, limits: { perBattle: 1 }, effects: [{ kind: "heal", amount: { percentOf: "maxHp", value: 50 }, revive: true, target: "eventTarget" }] }),
+      ab("nec-armor", "Рунна броня", { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "resistance", damageType: "all", percent: 25 }] }),
+    ]),
+  },
+  {
+    name: "Мисливець",
+    side: "ally",
+    maxHp: 60,
+    armorClass: 14,
+    initiative: 8,
+    attacks: melee("Спис"),
+    abilities: json([
+      ab("hunt", "Полювання", { trigger: { event: "bonusAction" }, maxTargets: 3, effects: [{ kind: "flag", flag: "advantageForAttackers", duration: { rounds: 1 }, target: "eventTarget" }] }),
+      ab("bloodlust", "Жага крові", { trigger: { event: "kill", role: "killer" }, stackable: true, maxStacks: 2, effects: [{ kind: "modifyStat", stat: "actionsPerTurn", flat: 1, duration: { rounds: 99 }, target: "self" }] }),
+    ]),
+  },
+  { name: "Жертва", side: "ally", maxHp: 40, armorClass: 10, initiative: 5, attacks: melee("Кинджал"), abilities: json([]) },
+  { name: "Опудало", side: "enemy", maxHp: 500, armorClass: 10, initiative: 0, attacks: melee("Удар", 5, "1d8"), abilities: json([]) },
+  { name: "Слабак", side: "enemy", maxHp: 10, armorClass: 8, initiative: 1, attacks: melee("Укус"), abilities: json([]) },
+  { name: "Кістяк", side: "enemy", maxHp: 30, armorClass: 8, initiative: -1, attacks: melee("Кістка"), abilities: json([]) },
+  {
+    name: "Семгрун",
+    side: "enemy",
+    maxHp: 80,
+    armorClass: 10,
+    initiative: 2,
+    attacks: melee("Лапа"),
+    abilities: json([
+      ab("semgrun", "Семгрун", { trigger: { event: "attack", phase: "before", role: "target" }, condition: { type: "not", condition: { type: "hasMark", who: "eventActor", markId: "semgrun", bySelf: true } }, effects: [{ kind: "flag", flag: "disadvantage", target: "eventActor" }, { kind: "mark", markId: "semgrun", duration: { rounds: 1 }, target: "eventActor" }] }),
+    ]),
+  },
+];
