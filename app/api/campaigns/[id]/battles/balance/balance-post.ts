@@ -1,5 +1,5 @@
 /**
- * POST balance: поради по ворогах за складністю та учасниках.
+ * POST balance: сила союзників і (за `suggest`) підбір складу ворогів для рівного бою.
  */
 
 import type { z } from "zod";
@@ -7,115 +7,77 @@ import type { z } from "zod";
 import type { balanceSchema } from "./balance-schema";
 import { loadCharacterBalanceStats } from "./character-stats";
 
-import { prisma } from "@/lib/db";
-import type { DifficultyRatio, UnitStats } from "@/lib/utils/battle/balance";
-import {
-  DIFFICULTY_DPR_HP_RATIOS,
-  getUnitStats,
-  suggestEnemyUnits,
-} from "@/lib/utils/battle/balance";
+import { computeFairScaling, type PartyPower, pickEnemyRoster } from "@/lib/utils/battle/balance";
+import { loadUnitLibraryStats } from "@/lib/utils/battle/balance/unit-library";
 import type { AllyStats, SuggestedEnemy } from "@/types/battle-setup";
 
 type BalancePostData = z.infer<typeof balanceSchema>;
 
-export async function postBalanceResponse(
-  campaignId: string,
-  data: BalancePostData,
-) {
-  const { allyParticipants, difficulty, minTier, maxTier, raceId } = data;
+const round1 = (n: number) => Math.round(n * 10) / 10;
 
-  let totalDpr = 0;
+export async function postBalanceResponse(campaignId: string, data: BalancePostData) {
+  const { allyParticipants, suggest, raceId } = data;
 
-  let totalHp = 0;
+  const library = await loadUnitLibraryStats(campaignId);
+
+  const party: PartyPower = { dpr: 0, hp: 0, heroCount: 0 };
 
   let allyCount = 0;
 
   if (allyParticipants.characterIds.length > 0) {
     for (const { stats } of await loadCharacterBalanceStats(campaignId, allyParticipants.characterIds)) {
-      totalDpr += stats.dpr;
-      totalHp += stats.hp;
+      party.dpr += stats.dpr;
+      party.hp += stats.hp;
+      party.heroCount += 1;
       allyCount += 1;
     }
   }
 
-  for (const { id: unitId, quantity } of allyParticipants.units) {
-    const unit = await prisma.unit.findUnique({
-      where: { id: unitId, campaignId },
-    });
+  const byId = new Map(library.map((u) => [u.unitId, u]));
 
-    if (!unit) continue;
+  for (const { id, quantity } of allyParticipants.units) {
+    const stats = byId.get(id);
 
-    const stats = getUnitStats({
-      id: unit.id,
-      name: unit.name,
-      maxHp: unit.maxHp,
-      level: unit.level,
-      raceId: unit.raceId,
-      strength: unit.strength,
-      dexterity: unit.dexterity,
-      attacks:
-        (unit.attacks as Array<{ damageDice?: string; type?: string }>) || [],
-    });
+    if (!stats) continue;
 
-    totalDpr += stats.dpr * quantity;
-    totalHp += stats.hp * quantity;
+    party.dpr += stats.dpr * quantity;
+    party.hp += stats.hp * quantity;
     allyCount += quantity;
   }
 
   const allyStats: AllyStats = {
-    dpr: Math.round(totalDpr * 10) / 10,
-    totalHp: totalHp,
-    kpi: totalHp > 0 ? Math.round((totalDpr / totalHp) * 100) / 100 : 0,
+    dpr: round1(party.dpr),
+    totalHp: party.hp,
+    kpi: party.hp > 0 ? Math.round((party.dpr / party.hp) * 100) / 100 : 0,
     allyCount,
   };
 
-  const response: {
-    allyStats: AllyStats;
-    suggestedEnemies?: SuggestedEnemy[];
-  } = { allyStats };
+  const response: { allyStats: AllyStats; suggestedEnemies?: SuggestedEnemy[] } = { allyStats };
 
-  if (difficulty != null) {
-    const ratio = DIFFICULTY_DPR_HP_RATIOS[difficulty as DifficultyRatio];
+  if (suggest) {
+    const pick = pickEnemyRoster(party, library, raceId);
 
-    const targetDpr = totalDpr * ratio;
+    const roster = pick?.roster ?? [];
 
-    const targetHp = totalHp * ratio;
+    const scaling = computeFairScaling(party, roster, library);
 
-    const where: {
-      campaignId: string;
-      level?: { gte?: number; lte?: number };
-      raceId?: string;
-    } = { campaignId };
+    response.suggestedEnemies = roster.map((r) => {
+      const u = byId.get(r.unitId);
 
-    if (minTier != null) where.level = { ...where.level, gte: minTier };
+      const scale = scaling.units[r.unitId];
 
-    if (maxTier != null) where.level = { ...where.level, lte: maxTier };
-
-    if (raceId) where.raceId = raceId;
-
-    const units = await prisma.unit.findMany({ where });
-
-    const unitsWithStats: UnitStats[] = units.map((u) =>
-      getUnitStats({
-        id: u.id,
-        name: u.name,
-        maxHp: u.maxHp,
-        level: u.level,
-        raceId: u.raceId,
-        strength: u.strength,
-        dexterity: u.dexterity,
-        attacks:
-          (u.attacks as Array<{ damageDice?: string; type?: string }>) || [],
-      }),
-    );
-
-    const suggested = suggestEnemyUnits(unitsWithStats, targetDpr, targetHp);
-
-    response.suggestedEnemies = suggested.map((s) => ({
-      ...s,
-      totalDpr: Math.round(s.totalDpr * 10) / 10,
-      totalHp: s.totalHp,
-    }));
+      return {
+        unitId: r.unitId,
+        name: r.name,
+        quantity: r.quantity,
+        dpr: u?.dpr ?? 0,
+        hp: u?.hp ?? 0,
+        totalDpr: round1((u?.dpr ?? 0) * r.quantity),
+        totalHp: (u?.hp ?? 0) * r.quantity,
+        hpMult: Math.round((scale?.hpMult ?? 1) * 100) / 100,
+        dmgMult: Math.round((scale?.dmgMult ?? 1) * 100) / 100,
+      };
+    });
   }
 
   return response;

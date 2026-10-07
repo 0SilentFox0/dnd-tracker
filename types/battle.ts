@@ -205,6 +205,10 @@ export interface BattleParticipantBattleData {
   resolvedAbilities: ResolvedAbility[];
   spellEnhancers: SpellEnhancer[];
   abilityUsage?: Record<string, AbilityUsageCounter>;
+  /** Масштаб шкоди ворога-юніта для рівного бою (старт бою); немає = ×1 */
+  damageMultiplier?: number;
+  /** Масштаб HP ворога-юніта для рівного бою; лише для показу ДМу */
+  hpMultiplier?: number;
 }
 
 /**

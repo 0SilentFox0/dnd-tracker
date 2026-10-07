@@ -1,19 +1,21 @@
 import { z } from "zod";
 
+import { MAX_BALANCE_ALLIES } from "@/lib/constants/battle-balance";
+
 export const balanceSchema = z.object({
-  /** Якщо тіло порожнє / лише фільтри — вважаємо союзників порожніми (статистика по всіх сутностях кампанії). */
+  /** Якщо тіло порожнє — вважаємо союзників порожніми. */
   allyParticipants: z
     .object({
-      characterIds: z.array(z.string()).default([]),
+      characterIds: z.array(z.string()).max(MAX_BALANCE_ALLIES).default([]),
       units: z
         .array(
           z.object({ id: z.string(), quantity: z.number().min(1).max(20) }),
         )
+        .max(MAX_BALANCE_ALLIES)
         .default([]),
     })
     .default({ characterIds: [], units: [] }),
-  difficulty: z.enum(["easy", "medium", "hard"]).optional(),
-  minTier: z.number().min(1).max(30).optional(),
-  maxTier: z.number().min(1).max(30).optional(),
+  /** Підібрати склад ворогів; без прапорця повертаються лише сила союзників. */
+  suggest: z.boolean().optional(),
   raceId: z.string().optional(),
 });

@@ -21,9 +21,7 @@ export interface BattleBalanceBody {
     characterIds?: string[];
     units?: Array<{ id: string; quantity: number }>;
   };
-  difficulty?: "easy" | "medium" | "hard";
-  minTier?: number;
-  maxTier?: number;
+  suggest?: boolean;
   raceId?: string;
 }
 
@@ -31,7 +29,7 @@ export interface BattleBalanceResponse {
   allyStats?: unknown;
   suggestedEnemies?: unknown[];
   characterStats?: Record<string, { dpr: number; hp: number; kpi: number }>;
-  unitStats?: Record<string, { dpr: number; hp: number; kpi: number }>;
+  unitStats?: Record<string, { dpr: number; hp: number; kpi: number; name: string; level: number; raceId: string | null }>;
   _debug?: { mainSkills?: unknown; characterSkillProgress?: unknown };
 }
 

@@ -32,6 +32,8 @@ export interface SuggestedEnemy {
   hp: number;
   totalDpr: number;
   totalHp: number;
+  hpMult?: number;
+  dmgMult?: number;
 }
 
 export interface SetupParticipant {
@@ -58,7 +60,11 @@ export interface EntityStats {
   dprBreakdown?: CharacterDprBreakdown;
 }
 
-export type Difficulty = "easy" | "medium" | "hard";
+export interface UnitEntityStats extends EntityStats {
+  name: string;
+  level: number;
+  raceId: string | null;
+}
 
 export interface EditBattleCharacter {
   id: string;

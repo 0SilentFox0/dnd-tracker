@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { AttackType } from "@/lib/constants/battle";
+import { MIN_UNIT_STAT, TYPICAL_TARGETS } from "@/lib/constants/battle-balance";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { getCharacterStats, getUnitStats } from "@/lib/utils/battle/balance";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
@@ -53,5 +54,63 @@ describe("баланс: середня шкода з кубиків", () => {
 
   it("«d6» без кількості — це 1d6 (§4.5)", () => {
     expect(unit([{ damageDice: "d6", type: "ranged" }]).dpr).toBe(4.5);
+  });
+});
+
+
+describe("getUnitStats: модель DPR юніта", () => {
+  const base = { id: "u", name: "u", maxHp: 20, level: 1, strength: 10, dexterity: 10 };
+
+  it("найкраща одна атака, а не сума ближніх", () => {
+    const dpr = getUnitStats({ ...base, attacks: [{ damageDice: "1d8", type: "melee" }, { damageDice: "1d6", type: "melee" }] }).dpr;
+
+    expect(dpr).toBe(4.5);
+  });
+
+  it("дальня атака з кількома цілями множиться на min(цілі, TYPICAL_TARGETS)", () => {
+    const attacks = [{ damageDice: "1d8", type: "ranged", maxTargets: 5 }];
+
+    expect(getUnitStats({ ...base, attacks }).dpr).toBe(4.5);
+    expect(getUnitStats({ ...base, maxTargets: 3, attacks }).dpr).toBe(4.5 * TYPICAL_TARGETS);
+    expect(getUnitStats({ ...base, maxTargets: 1, attacks: [{ damageDice: "1d8", type: "ranged", targetType: "aoe", maxTargets: 5 }] }).dpr).toBe(4.5 * TYPICAL_TARGETS);
+    expect(getUnitStats({ ...base, attacks: [{ damageDice: "1d8", type: "ranged", targetType: "aoe", maxTargets: 1 }] }).dpr).toBe(4.5);
+  });
+
+  it("ближня атака з кількома цілями лишається ×1", () => {
+    expect(getUnitStats({ ...base, maxTargets: 4, attacks: [{ damageDice: "1d8", type: "melee", maxTargets: 4 }] }).dpr).toBe(4.5);
+  });
+
+  it("DPR із заклинання: кубики + рівень × цілі AoE, якщо воно сильніше за зброю", () => {
+    const stats = getUnitStats({
+      ...base,
+      level: 3,
+      attacks: [{ damageDice: "1d4", type: "melee" }],
+      spells: [
+        { diceCount: 8, diceType: "d6", type: "aoe", damageType: "damage", target: "enemies" },
+        { diceCount: 1, diceType: "d4", type: "target", damageType: "damage" },
+        { diceCount: 9, diceType: "d12", type: "target", damageType: "heal" },
+      ],
+    });
+
+    expect(stats.dpr).toBe((28 + 3) * TYPICAL_TARGETS);
+  });
+
+  it("розподіл шкоди AoE зменшує очікувані цілі", () => {
+    const spells = [{ diceCount: 2, diceType: "d6", type: "aoe", damageType: "damage", damageDistribution: [100, 50, 25] }];
+
+    expect(getUnitStats({ ...base, attacks: [], spells }).dpr).toBe((7 + 1) * 1.5);
+  });
+
+  it("слабке заклинання не знижує DPR зброї", () => {
+    const stats = getUnitStats({ ...base, attacks: [{ damageDice: "2d6", type: "melee" }], spells: [{ diceCount: 1, diceType: "d4", type: "target", damageType: "damage" }] });
+
+    expect(stats.dpr).toBe(7);
+  });
+
+  it("DPR і HP не нижчі за мінімум", () => {
+    const stats = getUnitStats({ ...base, maxHp: 0, strength: 1, attacks: [{ damageDice: "0", type: "melee" }] });
+
+    expect(stats.hp).toBe(MIN_UNIT_STAT);
+    expect(stats.dpr).toBeGreaterThanOrEqual(MIN_UNIT_STAT);
   });
 });

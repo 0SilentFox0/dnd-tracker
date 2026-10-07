@@ -9,6 +9,7 @@ import { SidePanelCard } from "./SidePanelCard";
 import { UnitsListCard } from "./UnitsListCard";
 
 import { BATTLE_FORM_TAB, type BattleFormTabId } from "@/components/battle/battle-form-tabs";
+import { BalanceSummary } from "@/components/battle/setup/BalanceSummary";
 import { LoadingState } from "@/components/common/states";
 import { HudForm, HudFormPage, type HudTab } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
@@ -30,15 +31,10 @@ export default function NewBattlePage({
     characters,
     units,
     races,
-    allyStats,
     balanceLoading,
     suggestedEnemies,
-    difficulty,
-    setDifficulty,
-    minTier,
-    setMinTier,
-    maxTier,
-    setMaxTier,
+    suggestDone,
+    fair,
     balanceRace,
     setBalanceRace,
     entityStats,
@@ -52,7 +48,6 @@ export default function NewBattlePage({
     getParticipantQuantity,
     getParticipantSide,
     hasAllies,
-    fetchAllyStats,
     suggestEnemies,
     applySuggestedEnemies,
     playerCharacters,
@@ -102,21 +97,12 @@ export default function NewBattlePage({
         <div className="space-y-4">
           <AutopickCard
             hasAllies={hasAllies}
-            allyStats={allyStats}
             balanceLoading={balanceLoading}
-            difficulty={difficulty}
-            minTier={minTier}
-            maxTier={maxTier}
             balanceRace={balanceRace}
             races={races}
             suggestedEnemies={suggestedEnemies}
-            onDifficultyChange={setDifficulty}
-            onMinTierChange={setMinTier}
-            onMaxTierChange={setMaxTier}
-            onBalanceRaceChange={setBalanceRace}
-            onFetchAllyStats={fetchAllyStats}
-            onSuggestEnemies={suggestEnemies}
-            onApplySuggestedEnemies={applySuggestedEnemies}
+            suggestDone={suggestDone}
+            actions={{ onBalanceRaceChange: setBalanceRace, onSuggestEnemies: suggestEnemies, onApplySuggestedEnemies: applySuggestedEnemies }}
           />
           <UnitsListCard
             units={units}
@@ -136,23 +122,26 @@ export default function NewBattlePage({
       id: BATTLE_FORM_TAB.roster,
       label: `Склад · ${participants.length}`,
       content: (
-        <div className="grid gap-4 md:grid-cols-2">
-          <SidePanelCard
-            side="ally"
-            participants={participants}
-            characters={characters}
-            units={units}
-            onSideChange={handleSideChange}
-            onRemove={handleRemoveParticipant}
-          />
-          <SidePanelCard
-            side="enemy"
-            participants={participants}
-            characters={characters}
-            units={units}
-            onSideChange={handleSideChange}
-            onRemove={handleRemoveParticipant}
-          />
+        <div>
+          <BalanceSummary fair={fair} />
+          <div className="grid gap-4 md:grid-cols-2">
+            <SidePanelCard
+              side="ally"
+              participants={participants}
+              characters={characters}
+              units={units}
+              onSideChange={handleSideChange}
+              onRemove={handleRemoveParticipant}
+            />
+            <SidePanelCard
+              side="enemy"
+              participants={participants}
+              characters={characters}
+              units={units}
+              onSideChange={handleSideChange}
+              onRemove={handleRemoveParticipant}
+            />
+          </div>
         </div>
       ),
     },

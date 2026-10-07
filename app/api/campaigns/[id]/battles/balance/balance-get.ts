@@ -4,8 +4,7 @@
 
 import { loadCharacterBalanceStats } from "./character-stats";
 
-import { prisma } from "@/lib/db";
-import { getUnitStats } from "@/lib/utils/battle/balance";
+import { loadUnitLibraryStats } from "@/lib/utils/battle/balance/unit-library";
 import type { CharacterDprBreakdown } from "@/types/battle-setup";
 
 export async function getBalancePayload(campaignId: string) {
@@ -18,38 +17,17 @@ export async function getBalancePayload(campaignId: string) {
 
   for (const { character, stats } of characters) {
     characterStats[character.id] = {
-      dpr: Math.round(stats.dpr * 10) / 10,
+      dpr: stats.dpr,
       hp: stats.hp,
       kpi: Math.round(stats.kpi * 100) / 100,
       dprBreakdown: stats.dprBreakdown,
     };
   }
 
-  const unitStats: Record<string, { dpr: number; hp: number; kpi: number }> =
-    {};
+  const unitStats: Record<string, { dpr: number; hp: number; kpi: number; name: string; level: number; raceId: string | null }> = {};
 
-  const units = await prisma.unit.findMany({
-    where: { campaignId },
-  });
-
-  for (const unit of units) {
-    const stats = getUnitStats({
-      id: unit.id,
-      name: unit.name,
-      maxHp: unit.maxHp,
-      level: unit.level,
-      raceId: unit.raceId,
-      strength: unit.strength,
-      dexterity: unit.dexterity,
-      attacks:
-        (unit.attacks as Array<{ damageDice?: string; type?: string }>) || [],
-    });
-
-    unitStats[unit.id] = {
-      dpr: Math.round(stats.dpr * 10) / 10,
-      hp: stats.hp,
-      kpi: Math.round(stats.kpi * 100) / 100,
-    };
+  for (const u of await loadUnitLibraryStats(campaignId)) {
+    unitStats[u.unitId] = { dpr: u.dpr, hp: u.hp, kpi: Math.round(u.kpi * 100) / 100, name: u.name, level: u.level, raceId: u.raceId };
   }
 
   const payload: Record<string, unknown> = { characterStats, unitStats };

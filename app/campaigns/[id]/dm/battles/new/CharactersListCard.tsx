@@ -67,7 +67,7 @@ function CharacterRow({
         {stats && (
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm text-muted-foreground">
-              DPR {stats.dpr} · HP {stats.hp} · KPI {stats.kpi}
+              DPR {Math.round(stats.dpr * 10) / 10} · HP {stats.hp} · KPI {stats.kpi}
             </span>
             {breakdown && (
               <TooltipProvider delayDuration={200}>

@@ -1,24 +1,18 @@
 /**
- * Статистика союзників/ворогів та підбір юнітів за DPR/HP
+ * Статистика героїв і юнітів (DPR / HP)
  */
 
 import { getNonMagicBranchDpr, getSpellDprFromBranchLevels } from "./dpr";
 
 import { AttackType } from "@/lib/constants/battle";
+import { MIN_UNIT_STAT, TYPICAL_TARGETS } from "@/lib/constants/battle-balance";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { averageOf, diceAverage, parseDiceLenient } from "@/lib/utils/common/dice";
 import type { BranchLevel } from "@/lib/utils/skills/progression";
+import { formatSpellDamageDiceRoll } from "@/lib/utils/spells/spell-calculations";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
-import type { CharacterDprBreakdown, SuggestedEnemy } from "@/types/battle-setup";
-
-export type DifficultyRatio = "easy" | "medium" | "hard";
-
-export const DIFFICULTY_DPR_HP_RATIOS: Record<DifficultyRatio, number> = {
-  easy: 0.5,
-  medium: 1,
-  hard: 1.5,
-};
+import type { CharacterDprBreakdown } from "@/types/battle-setup";
 
 export interface UnitStats {
   unitId: string;
@@ -36,7 +30,16 @@ export interface GetCharacterStatsParams {
   magicMainSkillIds?: Set<string> | null;
 }
 
-export function getUnitStats(unit: {
+export interface UnitSpellInput {
+  diceCount?: number | null;
+  diceType?: string | null;
+  type?: string | null;
+  damageType?: string | null;
+  target?: string | null;
+  damageDistribution?: unknown;
+}
+
+export interface UnitStatsInput {
   id: string;
   name: string;
   maxHp: number;
@@ -44,51 +47,77 @@ export function getUnitStats(unit: {
   raceId?: string | null;
   strength?: number;
   dexterity?: number;
+  maxTargets?: number | null;
   attacks: Array<{
     damageDice?: string;
     damageType?: string;
     type?: string;
     attackBonus?: number;
+    targetType?: string;
+    maxTargets?: number;
   }>;
-}): UnitStats {
+  spells?: UnitSpellInput[];
+}
+
+function spellTargets(spell: UnitSpellInput): number {
+  if (spell.type !== "aoe") return 1;
+
+  const dist = Array.isArray(spell.damageDistribution) ? (spell.damageDistribution as unknown[]).filter((x): x is number => typeof x === "number") : [];
+
+  if (dist.length === 0) return TYPICAL_TARGETS;
+
+  return dist.slice(0, TYPICAL_TARGETS).reduce((a, b) => a + b, 0) / 100;
+}
+
+function bestSpellDpr(spells: UnitSpellInput[], level: number): number {
+  let best = 0;
+
+  for (const s of spells) {
+    if (s.damageType !== "damage" && s.damageType !== "all") continue;
+
+    if (s.target === "allies") continue;
+
+    const dice = formatSpellDamageDiceRoll(s.diceCount, s.diceType);
+
+    if (!dice) continue;
+
+    best = Math.max(best, (diceAverage(dice) + level) * spellTargets(s));
+  }
+
+  return best;
+}
+
+export function getUnitStats(unit: UnitStatsInput): UnitStats {
   const strMod = getAbilityModifier(unit.strength ?? 10);
 
   const dexMod = getAbilityModifier(unit.dexterity ?? 10);
 
-  let meleeAvg = 0;
-
-  let rangedAvg = 0;
-
   const attacks = Array.isArray(unit.attacks) ? unit.attacks : [];
 
+  let weaponDpr = 0;
+
   for (const a of attacks) {
-    const dice = (a.damageDice as string) || "1d6";
-
-    const avg = averageOf(parseDiceLenient(dice));
-
     const isRanged = (a.type as string) === AttackType.RANGED;
 
-    const mod = isRanged ? dexMod : strMod;
+    const avg = averageOf(parseDiceLenient((a.damageDice as string) || "1d6")) + (isRanged ? dexMod : strMod);
 
-    const total = avg + mod;
+    const reach = a.targetType === "aoe" ? a.maxTargets || unit.maxTargets || 1 : unit.maxTargets || 1;
 
-    if (isRanged) rangedAvg += total;
-    else meleeAvg += total;
+    const targets = isRanged ? Math.min(reach, TYPICAL_TARGETS) : 1;
+
+    weaponDpr = Math.max(weaponDpr, avg * targets);
   }
 
-  const dpr =
-    Math.max(meleeAvg, rangedAvg) || diceAverage("1d6");
+  const dpr = Math.max(MIN_UNIT_STAT, Math.max(weaponDpr, bestSpellDpr(unit.spells ?? [], unit.level)) || diceAverage("1d6"));
 
-  const hp = unit.maxHp;
-
-  const kpi = hp > 0 ? dpr / hp : 0;
+  const hp = Math.max(MIN_UNIT_STAT, unit.maxHp);
 
   return {
     unitId: unit.id,
     name: unit.name,
     dpr,
     hp,
-    kpi,
+    kpi: dpr / hp,
     level: unit.level,
     raceId: unit.raceId ?? null,
   };
@@ -144,87 +173,4 @@ export function getCharacterStats({ participant, branchLevels, magicMainSkillIds
       ],
     },
   };
-}
-
-export function suggestEnemyUnits(
-  unitsWithStats: UnitStats[],
-  targetDpr: number,
-  targetHp: number,
-): SuggestedEnemy[] {
-  if (unitsWithStats.length === 0) return [];
-
-  const byTier = new Map<number, UnitStats[]>();
-
-  for (const u of unitsWithStats) {
-    const tier = u.level;
-
-    if (!byTier.has(tier)) byTier.set(tier, []);
-
-    byTier.get(tier)?.push(u);
-  }
-
-  const tiersDesc = [...byTier.keys()].sort((a, b) => b - a);
-
-  const targetRatio = targetHp > 0 ? targetDpr / targetHp : 0;
-
-  const result: SuggestedEnemy[] = [];
-
-  let totalDpr = 0;
-
-  let totalHp = 0;
-
-  for (const tier of tiersDesc) {
-    const units = byTier.get(tier) ?? [];
-
-    if (units.length === 0) continue;
-
-    const best = units.reduce((a, b) => {
-      const ar = a.hp > 0 ? a.dpr / a.hp : 0;
-
-      const br = b.hp > 0 ? b.dpr / b.hp : 0;
-
-      return Math.abs(ar - targetRatio) <= Math.abs(br - targetRatio) ? a : b;
-    });
-
-    result.push({
-      unitId: best.unitId,
-      name: best.name,
-      quantity: 1,
-      dpr: best.dpr,
-      hp: best.hp,
-      totalDpr: best.dpr,
-      totalHp: best.hp,
-    });
-    totalDpr += best.dpr;
-    totalHp += best.hp;
-  }
-
-  const targetDprMin = targetDpr * 0.9;
-
-  const targetHpMin = targetHp * 0.9;
-
-  let index = 0;
-
-  while (
-    result.length > 0 &&
-    (totalDpr < targetDprMin || totalHp < targetHpMin)
-  ) {
-    if (result.every((e) => e.quantity >= 10)) break;
-
-    const entry = result[index % result.length];
-
-    if (entry.quantity >= 10) {
-      index++;
-      continue;
-    }
-
-    entry.quantity += 1;
-    entry.totalDpr = entry.dpr * entry.quantity;
-    entry.totalHp = entry.hp * entry.quantity;
-    totalDpr += entry.dpr;
-    totalHp += entry.hp;
-    index++;
-  }
-
-  return result;
 }

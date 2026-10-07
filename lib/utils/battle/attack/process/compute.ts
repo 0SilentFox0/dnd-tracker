@@ -3,6 +3,7 @@
  */
 
 import { calculateDamageWithModifiers } from "../../damage";
+import { applyBalanceDamageMultiplier, scaleAdditionalDamage } from "../../damage/balance-multiplier";
 import { heroAttackDamageParts, heroDamageContext } from "../../damage/hero-damage";
 import { applyHeroDmDamageMultiplier } from "../../damage/hero-dm-multiplier";
 import { applyResistance } from "../../resistance";
@@ -146,6 +147,15 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
     damageSteps.push({ label: "Коефіцієнт DM", side: "attacker", kind: "multiplier", value: heroDm.multiplier, after: physicalDamage });
   }
 
+  const balance = applyBalanceDamageMultiplier(updatedAttacker, physicalDamage);
+
+  if (balance.multiplier !== 1) {
+    physicalDamage = balance.damage;
+    damageCalculation.breakdown.push("──────────");
+    damageCalculation.breakdown.push(`× ${balance.multiplier.toFixed(2)} (рівний бій) = ${physicalDamage}`);
+    damageSteps.push({ label: "Рівний бій", side: "attacker", kind: "multiplier", value: balance.multiplier, after: physicalDamage });
+  }
+
   if (params.bonusPercent) {
     const factor = 1 + params.bonusPercent / 100;
 
@@ -167,7 +177,7 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
 
   const { totalAdditionalDamage, additionalDamageBreakdown } = applyResistanceForAdditional(
     updatedTarget,
-    damageCalculation.additionalDamage,
+    scaleAdditionalDamage(updatedAttacker, damageCalculation.additionalDamage),
     dmgMult,
     allParticipants,
   );

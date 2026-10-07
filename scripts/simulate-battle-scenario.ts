@@ -107,3 +107,28 @@ export const UNITS = {
     abilities: json([ab("golem-stone", "Кам'яне тіло", { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "resistance", damageType: "physical", percent: 50 }] })]),
   },
 };
+
+export const FAIR_CAMPAIGN_NAME = "SIM: рівні бої";
+
+/** Бібліотека юнітів кількох тірів без особливих умінь: масштабування видно в чистому вигляді. */
+export const FAIR_UNITS = [
+  { name: "Щур-мутант", level: 1, maxHp: 6, armorClass: 11, attacks: json([{ name: "Укус", type: "melee", attackBonus: 3, damageType: "piercing", damageDice: "1d6" }]) },
+  { name: "Гоблін", level: 1, maxHp: 12, armorClass: 12, attacks: json([{ name: "Ніж", type: "melee", attackBonus: 3, damageType: "piercing", damageDice: "1d8" }]) },
+  { name: "Вовк", level: 2, maxHp: 22, armorClass: 12, attacks: json([{ name: "Укус", type: "melee", attackBonus: 4, damageType: "piercing", damageDice: "2d6" }]) },
+  { name: "Орк-воїн", level: 3, maxHp: 32, armorClass: 13, attacks: json([{ name: "Сокира", type: "melee", attackBonus: 5, damageType: "slashing", damageDice: "2d8" }]) },
+  { name: "Огр", level: 4, maxHp: 60, armorClass: 11, attacks: json([{ name: "Дубина", type: "melee", attackBonus: 6, damageType: "bludgeoning", damageDice: "3d8" }]) },
+  { name: "Троль", level: 5, maxHp: 90, armorClass: 14, attacks: json([{ name: "Кігті", type: "melee", attackBonus: 7, damageType: "slashing", damageDice: "4d8" }]) },
+];
+
+export const FAIR_HEROES = [
+  { name: "Гарольд", class: "Fighter", strength: 16, dexterity: 12, constitution: 14, armorClass: 16, weapon: "sword" },
+  { name: "Ельза", class: "Ranger", strength: 10, dexterity: 17, constitution: 12, armorClass: 14, weapon: "bow" },
+  { name: "Бранд", class: "Barbarian", strength: 17, dexterity: 11, constitution: 15, armorClass: 14, weapon: "sword" },
+  { name: "Мелітта", class: "Rogue", strength: 10, dexterity: 17, constitution: 11, armorClass: 14, weapon: "dagger" },
+];
+
+export const FAIR_WEAPONS = {
+  sword: { name: "Меч", slot: "weapon", ...weaponStatsColumns({ damageDice: "1d8", damageType: "slashing", attackType: "melee", attackBonus: 2 }) },
+  bow: { name: "Лук", slot: "range_weapon", ...weaponStatsColumns({ damageDice: "1d6", damageType: "piercing", attackType: "ranged", range: "150 ft", attackBonus: 1 }) },
+  dagger: { name: "Кинджал", slot: "weapon", ...weaponStatsColumns({ damageDice: "1d4", damageType: "piercing", attackType: "melee" }) },
+};
