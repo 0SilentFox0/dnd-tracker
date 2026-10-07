@@ -1,9 +1,9 @@
 /**
  * Типи для боїв
  */
-
 import type { AbilityUsageCounter, ResolvedAbility, SpellEnhancer, StaticEffect } from "./abilities";
 
+import { type SpellcastingAbility } from "@/lib/constants/abilities";
 import { AttackType, type CombatStatusType,ParticipantSide, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { AbilityKey, SetProgress } from "@/types/characters";
@@ -183,7 +183,7 @@ export interface BattleParticipantCombatStats {
  * Дані про заклинання учасника
  */
 export interface BattleParticipantSpellcasting {
-  spellcastingAbility?: "intelligence" | "wisdom" | "charisma";
+  spellcastingAbility?: SpellcastingAbility;
   spellSaveDC?: number;
   spellAttackBonus?: number;
   spellSlots: Record<string, { max: number; current: number }>; // "1" до "5"

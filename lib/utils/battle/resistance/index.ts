@@ -1,14 +1,12 @@
 /**
  * Імунітети та опір у бою — з прапорців resistance уніфікованих умінь.
  */
-
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
+import { PHYSICAL_DAMAGE_TYPES } from "@/lib/constants/damage";
 import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import type { BattleParticipant, DamageStep } from "@/types/battle";
-
-const PHYSICAL_DAMAGE_TYPES = ["slashing", "piercing", "bludgeoning", "physical"];
 
 export interface ResistanceOptions {
   participants?: BattleParticipant[];

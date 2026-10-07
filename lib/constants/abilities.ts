@@ -6,6 +6,10 @@ export const ABILITY_KEYS = ["strength", "dexterity", "constitution", "intellige
 
 export type AbilityKey = (typeof ABILITY_KEYS)[number];
 
+export const SPELLCASTING_ABILITIES = ["intelligence", "wisdom", "charisma"] as const;
+
+export type SpellcastingAbility = (typeof SPELLCASTING_ABILITIES)[number];
+
 export const CORE_ABILITY_SCORES = [
   { key: "strength", label: "Сила", abbreviation: "STR" },
   { key: "dexterity", label: "Спритність", abbreviation: "DEX" },

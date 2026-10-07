@@ -10,6 +10,7 @@ import {
   SpellSavingThrowOnSuccess,
   SpellType,
 } from "@/lib/constants/spell-abilities";
+import { extractDamageDice } from "@/lib/utils/spells/spell-parsing";
 import type { ImportSpell } from "@/types/import";
 
 const SAVE_TYPE_MAP: Record<string, SpellSavingThrowAbility> = {
@@ -58,20 +59,6 @@ function getDamageTypeFromDamageHeal(damageHeal: string): SpellDamageType {
     return SpellDamageType.HEAL;
 
   return SpellDamageType.DAMAGE;
-}
-
-function extractDamageDice(damageHeal: string): string | undefined {
-  const match = damageHeal.match(/(\d+)\s*d\s*(\d+)(?:\s*\+\s*\d+)?/i);
-
-  if (!match) return undefined;
-
-  void damageHeal.slice(damageHeal.indexOf(match[0]) + match[0].length);
-
-  const plus = damageHeal.includes("+") ? damageHeal.match(/\+\s*(\d+)/)?.[1] : null;
-
-  const base = `${match[1]}d${match[2]}`;
-
-  return plus ? `${base}+${plus}` : base;
 }
 
 function extractDamageElement(damageHeal: string, additionalEffects: string): string | undefined {

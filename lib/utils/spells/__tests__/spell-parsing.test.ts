@@ -42,7 +42,8 @@ describe("spell-parsing", () => {
 
   describe("extractDamageDice", () => {
     it("витягує NdM з опису", () => {
-      expect(extractDamageDice("8d6 fire")).toBeDefined();
+      expect(extractDamageDice("8d6 fire")).toBe("8d6");
+      expect(extractDamageDice("2d8 + 4 HP")).toBe("2d8+4");
       expect(extractDamageDice("3d8 necrotic")).toMatch(/\d+d\d+/);
       expect(extractDamageDice("2d8+4 HP")).toBeDefined();
     });

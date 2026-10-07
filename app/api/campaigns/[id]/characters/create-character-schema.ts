@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { ABILITY_KEYS } from "@/lib/constants/abilities";
+import { ABILITY_KEYS, SPELLCASTING_ABILITIES } from "@/lib/constants/abilities";
 import { CharacterType } from "@/lib/constants/characters";
 
 export const createCharacterSchema = z.object({
@@ -36,7 +36,7 @@ export const createCharacterSchema = z.object({
 
   // Заклинання
   spellcastingAbility: z
-    .enum(["intelligence", "wisdom", "charisma"])
+    .enum(SPELLCASTING_ABILITIES)
     .nullable()
     .optional(),
   spellSlots: z

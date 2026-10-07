@@ -47,29 +47,29 @@ import * as units from "@/app/api/campaigns/[id]/units/route";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CampaignRole } from "@/lib/constants/campaigns";
 
-type Handler = (req: Request, ctx: { params: Promise<Record<string, string>> }) => Promise<Response>;
+type Handler = (req: Request, ctx: never) => Promise<Response>;
 
 const ids = { id: "c1", memberId: "m1", mainSkillId: "ms1", spellId: "sp1", setId: "as1", characterId: "ch1", skillId: "sk1" };
 
 const cases: Array<[string, Handler]> = [
-  ["DELETE members/:memberId", member.DELETE as Handler],
-  ["POST main-skills", mainSkills.POST as Handler],
-  ["PATCH main-skills/:mainSkillId", mainSkillOne.PATCH as Handler],
-  ["DELETE main-skills/:mainSkillId", mainSkillOne.DELETE as Handler],
-  ["POST spells", spells.POST as Handler],
-  ["PATCH spells/:spellId", spellOne.PATCH as Handler],
-  ["DELETE spells/:spellId", spellOne.DELETE as Handler],
-  ["POST spells/import", importSpells.POST as Handler],
-  ["POST artifact-sets", artifactSets.POST as Handler],
-  ["PATCH artifact-sets/:setId", artifactSetOne.PATCH as Handler],
-  ["DELETE artifact-sets/:setId", artifactSetOne.DELETE as Handler],
-  ["POST artifacts", artifacts.POST as Handler],
-  ["PATCH characters/:characterId/inventory", inventory.PATCH as Handler],
-  ["POST characters/:characterId/level-up", levelUp.POST as Handler],
-  ["POST characters", characters.POST as Handler],
-  ["POST skills/:skillId/duplicate", duplicateSkill.POST as Handler],
-  ["POST races", races.POST as Handler],
-  ["POST units", units.POST as Handler],
+  ["DELETE members/:memberId", member.DELETE],
+  ["POST main-skills", mainSkills.POST],
+  ["PATCH main-skills/:mainSkillId", mainSkillOne.PATCH],
+  ["DELETE main-skills/:mainSkillId", mainSkillOne.DELETE],
+  ["POST spells", spells.POST],
+  ["PATCH spells/:spellId", spellOne.PATCH],
+  ["DELETE spells/:spellId", spellOne.DELETE],
+  ["POST spells/import", importSpells.POST],
+  ["POST artifact-sets", artifactSets.POST],
+  ["PATCH artifact-sets/:setId", artifactSetOne.PATCH],
+  ["DELETE artifact-sets/:setId", artifactSetOne.DELETE],
+  ["POST artifacts", artifacts.POST],
+  ["PATCH characters/:characterId/inventory", inventory.PATCH],
+  ["POST characters/:characterId/level-up", levelUp.POST],
+  ["POST characters", characters.POST],
+  ["POST skills/:skillId/duplicate", duplicateSkill.POST],
+  ["POST races", races.POST],
+  ["POST units", units.POST],
 ];
 
 const asRole = (role: string | null) => {
@@ -91,7 +91,7 @@ describe("DM-операції: гравець і сторонній отриму
   it.each(cases)("%s — гравцю 403", async (_name, handler) => {
     asRole(CampaignRole.PLAYER);
 
-    const res = await handler(new Request("http://x", { method: "POST", body: "{}" }), { params: Promise.resolve(ids) });
+    const res = await handler(new Request("http://x", { method: "POST", body: "{}" }), { params: Promise.resolve(ids) } as never);
 
     expect(res.status).toBe(403);
     expect(await res.json()).toEqual({ error: API_ERRORS.FORBIDDEN });
@@ -101,7 +101,7 @@ describe("DM-операції: гравець і сторонній отриму
   it.each(cases)("%s — не учаснику 403", async (_name, handler) => {
     asRole(null);
 
-    const res = await handler(new Request("http://x", { method: "POST", body: "{}" }), { params: Promise.resolve(ids) });
+    const res = await handler(new Request("http://x", { method: "POST", body: "{}" }), { params: Promise.resolve(ids) } as never);
 
     expect(res.status).toBe(403);
   });
@@ -109,7 +109,7 @@ describe("DM-операції: гравець і сторонній отриму
   it("DM з кривим JSON — 400 { error }, а не 500", async () => {
     asRole(CampaignRole.DM);
 
-    const res = await races.POST(new Request("http://x", { method: "POST", body: "{oops" }), { params: Promise.resolve({ id: "c1" }) });
+    const res = await races.POST(new Request("http://x", { method: "POST", body: "{oops" }), { params: Promise.resolve({ id: "c1" }) } as never);
 
     expect(res.status).toBe(400);
     expect(await res.json()).toEqual({ error: API_ERRORS.INVALID_JSON });
@@ -118,7 +118,7 @@ describe("DM-операції: гравець і сторонній отриму
   it("DM з невалідним тілом — 400 з error і issues", async () => {
     asRole(CampaignRole.DM);
 
-    const res = await races.POST(new Request("http://x", { method: "POST", body: "{}" }), { params: Promise.resolve({ id: "c1" }) });
+    const res = await races.POST(new Request("http://x", { method: "POST", body: "{}" }), { params: Promise.resolve({ id: "c1" }) } as never);
 
     const body = await res.json();
 
@@ -130,7 +130,7 @@ describe("DM-операції: гравець і сторонній отриму
   it.each(cases)("%s — без сесії 401", async (_name, handler) => {
     getClaims.mockResolvedValue({ data: null, error: null });
 
-    const res = await handler(new Request("http://x", { method: "POST", body: "{}" }), { params: Promise.resolve(ids) });
+    const res = await handler(new Request("http://x", { method: "POST", body: "{}" }), { params: Promise.resolve(ids) } as never);
 
     expect(res.status).toBe(401);
     expect(await res.json()).toEqual({ error: API_ERRORS.UNAUTHORIZED });

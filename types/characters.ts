@@ -5,6 +5,7 @@ import type { EquippedItems, InventoryItem } from "./inventory";
 import type { BookSpell } from "./spells";
 
 import type { AbilityKey } from "@/lib/constants/abilities";
+import { type SpellcastingAbility } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
 import { type CharacterTypeValue, type GoalAuthorValue, type GoalStatus } from "@/lib/constants/characters";
 
@@ -58,7 +59,7 @@ export interface CharacterFormData {
     skills: Record<string, boolean>;
   };
   spellcasting: {
-    spellcastingAbility?: "intelligence" | "wisdom" | "charisma";
+    spellcastingAbility?: SpellcastingAbility;
     spellSlots?: Record<string, { max: number; current: number }>;
     knownSpells: string[];
   };
@@ -108,7 +109,7 @@ export interface Character {
   speed: number;
   savingThrows: Record<string, boolean>;
   skills: Record<string, boolean>;
-  spellcastingAbility?: "intelligence" | "wisdom" | "charisma" | null;
+  spellcastingAbility?: SpellcastingAbility | null;
   spellSlots?: Record<string, { max: number; current: number }>;
   knownSpells: string[];
   languages: string[];

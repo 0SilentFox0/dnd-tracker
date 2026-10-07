@@ -1,7 +1,7 @@
+import { type SpellcastingAbility } from "@/lib/constants/abilities";
 /**
  * Побудова об'єктів basicInfo, abilityScores, combatStats тощо для useCharacterForm.
  */
-
 import { type CharacterTypeValue } from "@/lib/constants/characters";
 import type { AbilityKey, CharacterFormData } from "@/types/characters";
 
@@ -169,7 +169,7 @@ export function buildCharacterFormBindings(
     ...formData.spellcasting,
     setters: {
       setSpellcastingAbility: (
-        value: "intelligence" | "wisdom" | "charisma" | undefined,
+        value: SpellcastingAbility | undefined,
       ) =>
         setFormData((prev) => ({
           ...prev,
