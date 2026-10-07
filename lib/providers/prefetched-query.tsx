@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useRef } from "react";
+import { type ReactNode, useState } from "react";
 import { type QueryKey, useQueryClient } from "@tanstack/react-query";
 
 /**
@@ -11,10 +11,10 @@ import { type QueryKey, useQueryClient } from "@tanstack/react-query";
 export function PrefetchedQuery({ queryKey, data, children }: { queryKey: QueryKey; data: unknown; children: ReactNode }) {
   const queryClient = useQueryClient();
 
-  const seeded = useRef<unknown>(undefined);
+  const [seeded, setSeeded] = useState<unknown>(undefined);
 
-  if (data != null && seeded.current !== data) {
-    seeded.current = data;
+  if (data != null && seeded !== data) {
+    setSeeded(data);
     queryClient.setQueryData(queryKey, data);
   }
 
