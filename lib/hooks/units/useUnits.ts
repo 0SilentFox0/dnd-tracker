@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { unitKeys } from "./keys";
+
 import { createUnit, deleteAllUnits, deleteUnit, getUnit, getUnits, updateUnit } from "@/lib/api/units";
 import { useCrudMutation } from "@/lib/hooks/common";
 import { REFERENCE_STALE_MS } from "@/lib/providers/query-provider";
@@ -9,7 +11,7 @@ export type { Unit };
 
 export function useUnits(campaignId: string, initialUnits?: Unit[], opts?: { enabled?: boolean }) {
   return useQuery<Unit[]>({
-    queryKey: ["units", campaignId],
+    queryKey: unitKeys.list(campaignId),
     queryFn: () => getUnits(campaignId),
     staleTime: REFERENCE_STALE_MS,
     ...(initialUnits !== undefined && { initialData: initialUnits }),
@@ -19,7 +21,7 @@ export function useUnits(campaignId: string, initialUnits?: Unit[], opts?: { ena
 
 export function useUnit(campaignId: string, unitId: string) {
   return useQuery<Unit>({
-    queryKey: ["unit", campaignId, unitId],
+    queryKey: unitKeys.detail(campaignId, unitId),
     queryFn: () => getUnit(campaignId, unitId),
     staleTime: REFERENCE_STALE_MS,
   });
@@ -28,21 +30,21 @@ export function useUnit(campaignId: string, unitId: string) {
 export function useCreateUnit(campaignId: string) {
   return useCrudMutation({
     mutationFn: (data: Partial<Unit>) => createUnit(campaignId, data),
-    invalidateKeys: [["units", campaignId]],
+    invalidateKeys: [unitKeys.list(campaignId)],
   });
 }
 
 export function useDeleteAllUnits(campaignId: string) {
   return useCrudMutation({
     mutationFn: () => deleteAllUnits(campaignId),
-    invalidateKeys: [["units", campaignId]],
+    invalidateKeys: [unitKeys.list(campaignId)],
   });
 }
 
 export function useDeleteUnit(campaignId: string) {
   return useCrudMutation({
     mutationFn: (unitId: string) => deleteUnit(campaignId, unitId),
-    invalidateKeys: [["units", campaignId]],
+    invalidateKeys: [unitKeys.list(campaignId)],
   });
 }
 
@@ -50,13 +52,13 @@ export function useUpdateUnit(campaignId: string, unitId: string) {
   return useCrudMutation({
     mutationFn: (data: Partial<Unit>) => updateUnit(campaignId, unitId, data),
     invalidateKeys: [
-      ["units", campaignId],
-      ["unit", campaignId, unitId],
+      unitKeys.list(campaignId),
+      unitKeys.detail(campaignId, unitId),
     ],
   });
 }
 
-// invalidates ["unit", campaignId, unitId] from variables, so not useCrudMutation
+// invalidates unitKeys.detail(campaignId, unitId) from variables, so not useCrudMutation
 export function useUpdateUnitAny(campaignId: string) {
   const queryClient = useQueryClient();
 
@@ -69,9 +71,9 @@ export function useUpdateUnitAny(campaignId: string) {
       data: Partial<Unit>;
     }) => updateUnit(campaignId, unitId, data),
     onSuccess: (_, { unitId }) => {
-      queryClient.invalidateQueries({ queryKey: ["units", campaignId] });
+      queryClient.invalidateQueries({ queryKey: unitKeys.list(campaignId) });
       queryClient.invalidateQueries({
-        queryKey: ["unit", campaignId, unitId],
+        queryKey: unitKeys.detail(campaignId, unitId),
       });
     },
   });

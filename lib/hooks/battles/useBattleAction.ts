@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { battleKeys } from "./keys";
 import { battleQueryKey } from "./keys";
 
 import { ApiError } from "@/lib/api/client";
@@ -38,7 +39,7 @@ export function useBattleAction<TVars extends object, TResp = Record<string, unk
       else queryClient.setQueryData(key, next);
 
       for (const list of options.invalidate ?? []) {
-        void queryClient.invalidateQueries({ queryKey: list === "battles" ? ["battles", campaignId] : ["active-battles"] });
+        void queryClient.invalidateQueries({ queryKey: list === "battles" ? battleKeys.list(campaignId) : battleKeys.active() });
       }
 
       return response;

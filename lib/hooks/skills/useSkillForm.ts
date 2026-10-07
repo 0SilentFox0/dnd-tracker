@@ -2,6 +2,7 @@ import { type FormEvent,useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 
+import { skillKeys } from "./keys";
 import { useMainSkills } from "./useMainSkills";
 import {
   type InitialSkillFormData,
@@ -219,10 +220,10 @@ export function useSkillForm(
 
         // Інвалідуємо кеш для скілів
         await queryClient.invalidateQueries({
-          queryKey: ["skills", campaignId],
+          queryKey: skillKeys.list(campaignId),
         });
         await queryClient.refetchQueries({
-          queryKey: ["skills", campaignId],
+          queryKey: skillKeys.list(campaignId),
         });
         router.push(`/campaigns/${campaignId}/dm/skills`);
       } catch (err) {

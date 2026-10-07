@@ -2,6 +2,8 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { spellKeys } from "./keys";
+
 import { importSpells } from "@/lib/api/spells";
 import { useFileImport } from "@/lib/hooks/common";
 import { parseCSVFile, parseJSONFile } from "@/lib/utils/common/file-import";
@@ -14,8 +16,8 @@ export function useSpellImport(campaignId: string) {
   const importMutation = useMutation({
     mutationFn: (spells: ImportSpell[]) => importSpells(campaignId, { spells }) as Promise<SpellImportResult>,
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["spells", campaignId] });
-      void queryClient.invalidateQueries({ queryKey: ["spellGroups", campaignId] });
+      void queryClient.invalidateQueries({ queryKey: spellKeys.list(campaignId) });
+      void queryClient.invalidateQueries({ queryKey: spellKeys.groups(campaignId) });
     },
   });
 

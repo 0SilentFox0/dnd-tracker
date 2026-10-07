@@ -1,6 +1,7 @@
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { battleKeys } from "./keys";
 import { battleQueryKey } from "./keys";
 import { useBattleAction } from "./useBattleAction";
 
@@ -83,7 +84,7 @@ export function useUpdateBattle(campaignId: string, battleId: string) {
     mutationFn: (data: Partial<BattleScene>) => updateBattle(campaignId, battleId, data),
     onSuccess: (data) => {
       queryClient.setQueryData(key, acceptFullBattle(queryClient.getQueryData<BattleScene>(key), data));
-      void queryClient.invalidateQueries({ queryKey: ["battles", campaignId] });
+      void queryClient.invalidateQueries({ queryKey: battleKeys.list(campaignId) });
     },
   });
 }
@@ -94,7 +95,7 @@ export function useDeleteBattle(campaignId: string) {
   return useMutation({
     mutationFn: (battleId: string) => deleteBattle(campaignId, battleId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["battles", campaignId] });
+      queryClient.invalidateQueries({ queryKey: battleKeys.list(campaignId) });
     },
   });
 }
@@ -104,7 +105,7 @@ export function useCreateBattle(campaignId: string) {
 
   return useMutation({
     mutationFn: (data: CreateBattleData) => createBattle(campaignId, data),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["battles", campaignId] }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: battleKeys.list(campaignId) }),
   });
 }
 
@@ -116,7 +117,7 @@ export function useDeleteAllBattles(campaignId: string) {
   return useMutation({
     mutationFn: () => deleteAllBattles(campaignId),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["battles", campaignId] });
+      void queryClient.invalidateQueries({ queryKey: battleKeys.list(campaignId) });
       router.refresh();
     },
   });

@@ -2,6 +2,8 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { unitKeys } from "./keys";
+
 import { importUnits } from "@/lib/api/units";
 import { useFileImport } from "@/lib/hooks/common";
 import { parseCSVFile, parseJSONFile } from "@/lib/utils/common/file-import";
@@ -13,7 +15,7 @@ export function useUnitImport(campaignId: string) {
 
   const importMutation = useMutation({
     mutationFn: (units: ImportUnit[]) => importUnits(campaignId, { units }),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["units", campaignId] }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: unitKeys.list(campaignId) }),
   });
 
   return useFileImport<ImportUnit>({

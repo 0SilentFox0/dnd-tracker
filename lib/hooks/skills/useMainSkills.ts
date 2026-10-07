@@ -1,8 +1,9 @@
 /**
  * React Query hooks для роботи з основними навиками
  */
-
 import { useQuery } from "@tanstack/react-query";
+
+import { skillKeys } from "./keys";
 
 import {
   createMainSkill,
@@ -23,7 +24,7 @@ export function useMainSkills(
   options?: { enabled?: boolean },
 ) {
   return useQuery({
-    queryKey: ["main-skills", campaignId],
+    queryKey: skillKeys.mainSkills(campaignId),
     queryFn: () => getMainSkills(campaignId),
     staleTime: REFERENCE_STALE_MS,
     enabled: options?.enabled !== false,
@@ -34,7 +35,7 @@ export function useMainSkills(
 export function useCreateMainSkill(campaignId: string) {
   return useCrudMutation({
     mutationFn: (data: MainSkillFormData) => createMainSkill(campaignId, data),
-    invalidateKeys: [["main-skills", campaignId]],
+    invalidateKeys: [skillKeys.mainSkills(campaignId)],
   });
 }
 
@@ -48,7 +49,7 @@ export function useUpdateMainSkill(campaignId: string) {
       mainSkillId: string;
       data: Partial<MainSkillFormData>;
     }) => updateMainSkill(campaignId, mainSkillId, data),
-    invalidateKeys: [["main-skills", campaignId]],
+    invalidateKeys: [skillKeys.mainSkills(campaignId)],
   });
 }
 
@@ -59,8 +60,8 @@ export function useDeleteMainSkill(campaignId: string) {
       deleteMainSkill(campaignId, mainSkillId),
     // Також оновлюємо скіли, оскільки вони можуть посилатися на видалений mainSkill.
     invalidateKeys: [
-      ["main-skills", campaignId],
-      ["skills", campaignId],
+      skillKeys.mainSkills(campaignId),
+      skillKeys.list(campaignId),
     ],
   });
 }

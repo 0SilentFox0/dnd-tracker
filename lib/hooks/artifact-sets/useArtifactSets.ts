@@ -1,16 +1,19 @@
 "use client";
 
+import { artifactSetKeys } from "./keys";
+
 import {
   type ArtifactSetCreatePayload,
   createArtifactSet,
   deleteArtifactSet,
   updateArtifactSet,
 } from "@/lib/api/artifact-sets";
+import { artifactKeys } from "@/lib/hooks/artifacts/keys";
 import { useCrudMutation } from "@/lib/hooks/common";
 
 const keys = (campaignId: string) => [
-  ["artifact-sets", campaignId],
-  ["artifacts", campaignId],
+  artifactSetKeys.list(campaignId),
+  artifactKeys.list(campaignId),
 ];
 
 export function useSaveArtifactSet(campaignId: string, setId?: string) {

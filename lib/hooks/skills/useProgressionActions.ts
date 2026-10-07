@@ -7,7 +7,9 @@ import { progressionKey } from "./progression-keys";
 
 import { learnNode, resetProgression, unlearnNodes } from "@/lib/api/character-progression";
 import { ApiError } from "@/lib/api/client";
+import { battleKeys } from "@/lib/hooks/battles/keys";
 import { characterSheetKey } from "@/lib/hooks/characters";
+import { characterKeys } from "@/lib/hooks/characters/keys";
 import { useNotify } from "@/lib/hooks/common";
 import type { LearnBlockReason, UnlearnBlockReason } from "@/lib/utils/skills/progression";
 import { LEARN_BLOCK_TEXT, normalizeTree, skillPoints, UNLEARN_BLOCK_TEXT } from "@/lib/utils/skills/progression";
@@ -55,7 +57,7 @@ export function useProgressionActions(campaignId: string, characterId: string) {
       const { unlocked } = await call();
 
       queryClient.setQueryData<CharacterProgressionDto>(key, (old) => (old ? { ...old, unlocked } : old));
-      queryClient.setQueryData<{ skillTreeProgress?: Record<string, object> | null }>(["character", campaignId, characterId], (old) => {
+      queryClient.setQueryData<{ skillTreeProgress?: Record<string, object> | null }>(characterKeys.detail(campaignId, characterId), (old) => {
         const treeId = queryClient.getQueryData<CharacterProgressionDto>(key)?.treeId;
 
         if (!old || !treeId) return old;
@@ -65,7 +67,7 @@ export function useProgressionActions(campaignId: string, characterId: string) {
         return { ...old, skillTreeProgress: { ...progress, [treeId]: { ...progress[treeId], unlockedSkills: unlocked } } };
       });
       patchSheet(unlocked);
-      void queryClient.invalidateQueries({ queryKey: ["battle-balance"], refetchType: "none" });
+      void queryClient.invalidateQueries({ queryKey: battleKeys.balanceAll(), refetchType: "none" });
 
       return true;
     } catch (error) {

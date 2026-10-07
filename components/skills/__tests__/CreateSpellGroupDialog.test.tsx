@@ -105,7 +105,7 @@ describe("CreateSpellGroupDialog", () => {
     fireEvent.click(screen.getByRole("button", { name: /Створити групу/i }));
 
     await vi.waitFor(() => {
-      expect(invalidate).toHaveBeenCalledWith({ queryKey: ["spellGroups", "camp-1"] });
+      expect(invalidate).toHaveBeenCalledWith({ queryKey: ["spell-groups", "camp-1"] });
     });
   });
 });
