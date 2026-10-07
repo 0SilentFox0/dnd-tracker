@@ -81,7 +81,7 @@ export function createAddParticipantMutation(deps: AddParticipantDeps = defaultD
         throw new BattleAccessError(404, "Юніта не знайдено");
       }
 
-      const twin = side === ParticipantSide.ENEMY ? ctx.participants.find((p) => p.basicInfo.sourceId === unit.id && p.side === ParticipantSide.ENEMY) : undefined;
+      const twin = side === ParticipantSide.ENEMY ? ctx.participants.find((p) => p.basicInfo.sourceId === unit.id && p.basicInfo.side === ParticipantSide.ENEMY) : undefined;
 
       for (let i = 0; i < (data.quantity ?? 1); i++) {
         const fresh = await deps.fromUnit(unit, battleId, side, i + 1);
