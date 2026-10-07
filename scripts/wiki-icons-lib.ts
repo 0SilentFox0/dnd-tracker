@@ -18,9 +18,9 @@ export function planMissing(existing: Set<string>): PlannedIcon[] {
 }
 
 export function decodeImageDataUrl(dataUrl: string): Buffer {
-  const match = /^data:image\/[a-z0-9.+-]+;base64,([A-Za-z0-9+/=]+)$/i.exec(dataUrl);
+  const match = /^data:image\/webp;base64,([A-Za-z0-9+/=]+)$/i.exec(dataUrl);
 
-  if (!match) throw new Error("Not a base64 image data URL");
+  if (!match) throw new Error("Not a base64 webp data URL");
 
   return Buffer.from(match[1], "base64");
 }

@@ -20,9 +20,10 @@ describe("wiki-icons lib", () => {
     expect(decodeImageDataUrl("data:image/webp;base64,aGVsbG8=").toString()).toBe("hello");
   });
 
-  it("rejects non-image data URLs", () => {
+  it("rejects non-webp data URLs", () => {
     expect(() => decodeImageDataUrl("data:text/html;base64,aGVsbG8=")).toThrow();
     expect(() => decodeImageDataUrl("hello")).toThrow();
+    expect(() => decodeImageDataUrl("data:image/png;base64,aGVsbG8=")).toThrow();
   });
 
   it("finds keys whose wiki file is absent from the bundle", () => {

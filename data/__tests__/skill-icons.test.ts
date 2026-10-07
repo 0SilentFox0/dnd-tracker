@@ -9,7 +9,7 @@ describe("skill icons map", () => {
     expect(overlap).toEqual([]);
   });
 
-  it("uses only H5 wiki png files", () => {
+  it("uses only H5 wiki source files", () => {
     for (const file of [...Object.values(SKILL_ICONS), ...Object.values(BRANCH_ICONS)]) {
       expect(file).toMatch(/^H5[A-Za-z]+\.(png|PNG)$/);
     }
