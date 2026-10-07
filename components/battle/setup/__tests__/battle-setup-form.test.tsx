@@ -23,6 +23,7 @@ vi.mock("@/lib/api/battles", async (orig) => {
     ...api,
     getBattle: vi.fn(async () => battle),
     getBattleBalance: vi.fn(async () => ({})),
+    getBattleBalanceStats: vi.fn(async () => ({ characterStats: {}, unitStats: {} })),
   };
 });
 vi.mock("@/lib/api/characters", () => ({ getCharacters: vi.fn(async () => [{ id: "ch1", name: "Арвен", type: "player", controlledBy: "u1", avatar: null }]) }));

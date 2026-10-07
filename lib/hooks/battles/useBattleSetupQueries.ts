@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { battleKeys } from "./keys";
 
-import { getBattleBalance } from "@/lib/api/battles";
+import { getBattleBalance, getBattleBalanceStats } from "@/lib/api/battles";
 import type { BattleBalanceBody } from "@/lib/api/battles-types";
 import { useCharacters } from "@/lib/hooks/characters";
 import { useUnits } from "@/lib/hooks/units";
@@ -25,7 +25,7 @@ export function useSetupRoster(campaignId: string) {
 export function useBattleBalanceStats(campaignId: string) {
   return useQuery({
     queryKey: battleKeys.balance(campaignId),
-    queryFn: () => getBattleBalance(campaignId, {}),
+    queryFn: () => getBattleBalanceStats(campaignId),
     select: (d): { characterStats: Record<string, EntityStats>; unitStats: Record<string, UnitEntityStats> } | null =>
       d.characterStats != null || d.unitStats != null ? { characterStats: d.characterStats ?? {}, unitStats: d.unitStats ?? {} } : null,
     enabled: !!campaignId,

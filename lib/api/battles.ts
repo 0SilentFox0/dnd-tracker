@@ -60,6 +60,10 @@ export async function getBattleBalance(
   );
 }
 
+export async function getBattleBalanceStats(campaignId: string): Promise<BattleBalanceResponse> {
+  return campaignGet<BattleBalanceResponse>(campaignId, "/battles/balance");
+}
+
 export async function getBattle(
   campaignId: string,
   battleId: string,
