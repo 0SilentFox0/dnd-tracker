@@ -70,11 +70,11 @@ describe("POST balance", () => {
   });
 
   it("союзні юніти не збільшують N для діапазону кількості ворогів", async () => {
-    const res = await postBalanceResponse("camp", balanceSchema.parse({ allyParticipants: { characterIds: ["h1"], units: [{ id: "ogre", quantity: 10 }] }, suggest: true }));
+    const res = await postBalanceResponse("camp", balanceSchema.parse({ allyParticipants: { characterIds: ["h1", "h2", "h3", "h4"], units: [{ id: "ogre", quantity: 10 }] }, suggest: true }));
 
     const total = (res.suggestedEnemies ?? []).reduce((a, e) => a + e.quantity, 0);
 
-    expect(total).toBeLessThanOrEqual(2);
-    expect(res.allyStats.allyCount).toBe(11);
+    expect(total).toBeLessThanOrEqual(8);
+    expect(res.allyStats.allyCount).toBe(14);
   });
 });
