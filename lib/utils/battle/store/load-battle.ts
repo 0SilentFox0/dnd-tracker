@@ -61,6 +61,8 @@ const PARTICIPANT_ROW_SELECT = {
 async function withSnapshots(db: BattleDb, rows: Array<Omit<ParticipantRow, "snapshot">>): Promise<ParticipantRow[]> {
   const known = new Map(rows.map((r) => [r.id, snapshotCache.get(r.snapshotHash)]));
 
+  const hashes = new Map(rows.map((r) => [r.id, r.snapshotHash]));
+
   const missing = rows.filter((r) => known.get(r.id) === undefined).map((r) => r.id);
 
   const fetched = missing.length
@@ -70,13 +72,14 @@ async function withSnapshots(db: BattleDb, rows: Array<Omit<ParticipantRow, "sna
   for (const f of fetched) {
     snapshotCache.remember(f.snapshotHash, f.snapshot);
     known.set(f.id, f.snapshot as ParticipantSnapshot);
+    hashes.set(f.id, f.snapshotHash);
   }
 
   // a participant deleted between the two reads is dropped, like a row the scene query missed
   return rows.flatMap((r) => {
     const snapshot = known.get(r.id);
 
-    return snapshot === undefined ? [] : [{ ...r, snapshot }];
+    return snapshot === undefined ? [] : [{ ...r, snapshot, snapshotHash: hashes.get(r.id) ?? r.snapshotHash }];
   });
 }
 

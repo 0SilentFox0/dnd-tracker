@@ -89,6 +89,26 @@ describe("loadBattle: снапшоти учасників", () => {
     expect(loaded?.participants[1].combatStats.armorClass).toBe(19);
   });
 
+  it("якщо дочитаний снапшот має інший хеш, пара (хеш, снапшот) береться з дочитаного", async () => {
+    const buffed = splitParticipant({ ...goblin, combatStats: { ...goblin.combatStats, armorClass: 19 } }, { orderIndex: 1, isPending: false });
+
+    const { db, findMany } = fakeDb();
+
+    findMany.mockImplementationOnce(async () => [
+      { id: hero.basicInfo.id, snapshot: stored[0].snapshot, snapshotHash: stored[0].snapshotHash },
+      { id: goblin.basicInfo.id, snapshot: buffed.snapshot, snapshotHash: buffed.snapshotHash },
+    ]);
+
+    const loaded = await load(db);
+
+    expect(loaded?.participants[1].combatStats.armorClass).toBe(19);
+
+    findMany.mockClear();
+    await load(fakeDb([stored[0], buffed]).db);
+
+    expect(findMany).not.toHaveBeenCalled();
+  });
+
   it("зміни учасника рушієм не псують кеш", async () => {
     const { db } = fakeDb();
 
