@@ -18,11 +18,11 @@ const withAttack = (id: string, abilities = [] as ReturnType<typeof resolved>[])
 };
 
 describe("percentOf ownerAttack", () => {
+  const owner = withAttack("h");
+
   const amount = { percentOf: "ownerAttack" as const, value: 50 };
 
   it("is a share of the average primary attack", () => {
-    const owner = withAttack("h");
-
     const total = averageAttackDamage(owner, sword, [owner]).total;
 
     expect(total).toBeGreaterThan(0);
@@ -30,7 +30,7 @@ describe("percentOf ownerAttack", () => {
   });
 
   it("is 0 without attacks", () => {
-    expect(resolveAmount(amount, { owner: { ...withAttack("h"), battleData: { ...withAttack("h").battleData, attacks: [] } }, rng: seq(0) })).toBe(0);
+    expect(resolveAmount(amount, { owner: { ...owner, battleData: { ...owner.battleData, attacks: [] } }, rng: seq(0) })).toBe(0);
   });
 
   it("dot stores the resolved per-round damage", () => {
