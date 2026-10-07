@@ -46,7 +46,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   const { actionModifiers } = fire(flow, { type: "attack", phase: "before", actorId: attackerId, targetId, attackKind });
 
-  if (!isActive(getP(flow, targetId))) {
+  if (!isActive(getP(flow, targetId)) || !isActive(getP(flow, attackerId))) {
     put(flow, applyMainActionUsed(getP(flow, attackerId)));
 
     const battleAction = buildAbortedAttackAction(getP(flow, attackerId), target, attack, flow.messages, battleId, currentRound);
