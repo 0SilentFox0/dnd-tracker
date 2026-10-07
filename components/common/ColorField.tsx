@@ -1,5 +1,5 @@
-import { FormField } from "@/components/common/FormField";
 import { Input } from "@/components/ui/input";
+import { FormField } from "@/components/ui/labeled-input";
 
 interface ColorFieldProps {
   id: string;

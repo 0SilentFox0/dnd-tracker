@@ -56,7 +56,6 @@ export function ArtifactCreateForm({
           setId: payload.setId ?? undefined,
         });
         router.push(`/campaigns/${campaignId}/dm/artifacts`);
-        router.refresh();
       }}
     />
   );

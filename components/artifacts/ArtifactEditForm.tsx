@@ -56,12 +56,10 @@ export function ArtifactEditForm({
       onSubmit={async (payload) => {
         await update.mutateAsync({ artifactId: artifact.id, data: payload });
         router.push(`/campaigns/${campaignId}/dm/artifacts`);
-        router.refresh();
       }}
       onDelete={async () => {
         await remove.mutateAsync(artifact.id);
         router.push(`/campaigns/${campaignId}/dm/artifacts`);
-        router.refresh();
       }}
     />
   );

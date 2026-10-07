@@ -1,3 +1,4 @@
+export { useRaceForm } from "./useRaceForm";
 export {
   useCreateRace,
   useDeleteRace,

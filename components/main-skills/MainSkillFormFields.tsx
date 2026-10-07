@@ -1,10 +1,10 @@
 "use client";
 
 import { ColorField } from "@/components/common/ColorField";
-import { FormField } from "@/components/common/FormField";
 import { IconUrlField } from "@/components/common/IconUrlField";
 import { HudSection } from "@/components/hud/form";
 import { Input } from "@/components/ui/input";
+import { FormField } from "@/components/ui/labeled-input";
 import { SelectField } from "@/components/ui/select-field";
 import type { MainSkillFormData } from "@/types/main-skills";
 
