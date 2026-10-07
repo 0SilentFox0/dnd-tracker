@@ -2,7 +2,7 @@
 
 import { ChevronsUp } from "lucide-react";
 
-import { metalClass } from "@/components/battle/hud";
+import { metalClass } from "@/components/hud";
 import { cn } from "@/lib/utils";
 
 export function LevelUpBadge({ free, onOpen }: { free: number; onOpen: () => void }) {

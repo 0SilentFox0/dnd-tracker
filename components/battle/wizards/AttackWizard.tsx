@@ -5,7 +5,8 @@ import { Loader2, Swords } from "lucide-react";
 
 import { AiRollButton, DamageDice, DiceGrid } from "./DiceInput";
 
-import { HealthLabel, HUD_SURFACE,Portrait } from "@/components/battle/hud";
+import { HealthLabel, Portrait } from "@/components/battle/hud";
+import { HUD_SURFACE } from "@/components/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { rollDie, type useAttackWizard } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";

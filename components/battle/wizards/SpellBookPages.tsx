@@ -4,9 +4,9 @@ import type { ReactNode } from "react";
 import Image from "next/image";
 import { Sparkles } from "lucide-react";
 
-import { metalClass } from "@/components/battle/hud";
+import { spellLevelMetal } from "@/components/hud";
 import { cn } from "@/lib/utils";
-import { ROMAN, spellTier } from "@/lib/utils/battle/view";
+import { ROMAN } from "@/lib/utils/battle/view";
 import type { BookSpell } from "@/types/spells";
 
 const LEVELS = [0, 1, 2, 3, 4, 5] as const;
@@ -39,7 +39,7 @@ export function SpellBookPages({ byLevel, slotOf, level, pickedId, wide, showDet
             type="button"
             aria-label={`${ROMAN[l]} коло, слотів ${l === 0 ? "∞" : slotOf(l)}`}
             onClick={() => onLevel(l)}
-            className={cn("hud-sc flex h-14 flex-col items-center justify-center gap-1 pb-1.5 text-[13px] [clip-path:polygon(0_0,100%_0,100%_100%,50%_86%,0_100%)]", metalClass(spellTier(l)), "metal-fill", level === l ? "-ml-2 w-10" : "w-8", l > 0 && slotOf(l) === 0 && "opacity-55 grayscale")}
+            className={cn("hud-sc flex h-14 flex-col items-center justify-center gap-1 pb-1.5 text-[13px] [clip-path:polygon(0_0,100%_0,100%_100%,50%_86%,0_100%)]", spellLevelMetal(l), "metal-fill", level === l ? "-ml-2 w-10" : "w-8", l > 0 && slotOf(l) === 0 && "opacity-55 grayscale")}
           >
             {ROMAN[l]}
             <span className="font-sans text-[11px] opacity-85">{l === 0 ? "∞" : slotOf(l)}</span>

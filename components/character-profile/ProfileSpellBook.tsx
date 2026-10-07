@@ -1,7 +1,7 @@
 "use client";
 
-import { HUD_SURFACE } from "@/components/battle/hud";
 import { SpellBookPages, SpellDetail } from "@/components/battle/wizards/SpellBookPages";
+import { HUD_SURFACE } from "@/components/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { useSpellBrowser } from "@/lib/hooks/characters";
 import { useMediaQuery } from "@/lib/hooks/common";

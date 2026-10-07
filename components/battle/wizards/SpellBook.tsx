@@ -5,7 +5,8 @@ import { Loader2, Sparkles, Swords } from "lucide-react";
 import { AiRollButton, DamageDice, DiceGrid } from "./DiceInput";
 import { SpellBookPages, SpellDetail } from "./SpellBookPages";
 
-import { HUD_SURFACE, Portrait } from "@/components/battle/hud";
+import { Portrait } from "@/components/battle/hud";
+import { HUD_SURFACE } from "@/components/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import type { useSpellBook } from "@/lib/hooks/battle";
 import { useMediaQuery } from "@/lib/hooks/common";

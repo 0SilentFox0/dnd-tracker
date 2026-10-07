@@ -6,7 +6,7 @@ import { ChevronLeft, ScrollText, Sparkles, Trophy, UserPlus } from "lucide-reac
 import { BattleLogPanel } from "./BattleLogPanel";
 import { DmParticipantRow } from "./DmParticipantRow";
 
-import { HUD_SURFACE } from "@/components/battle/hud";
+import { HUD_SURFACE } from "@/components/hud";
 import { cn } from "@/lib/utils";
 import type { BattleScene } from "@/types/api";
 import type { BattleParticipant } from "@/types/battle";

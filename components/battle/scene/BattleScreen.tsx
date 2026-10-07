@@ -6,7 +6,7 @@ import dynamic from "next/dynamic";
 import { BattleToast } from "./BattleToast";
 import { MobileBattleLayout } from "./MobileBattleLayout";
 
-import { hudFontClassName } from "@/components/battle/hud";
+import { hudFontClassName } from "@/components/hud";
 import { useBattleScene, useSpellBookPrefetch } from "@/lib/hooks/battle";
 import { useMediaQuery } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";

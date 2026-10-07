@@ -4,7 +4,8 @@ import { useState } from "react";
 import Image from "next/image";
 import { Zap } from "lucide-react";
 
-import { HealthLabel, HUD_SURFACE,Portrait } from "@/components/battle/hud";
+import { HealthLabel, Portrait } from "@/components/battle/hud";
+import { HUD_SURFACE } from "@/components/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { useBattleScene } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";

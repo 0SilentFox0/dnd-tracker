@@ -13,7 +13,7 @@ import { MyTurnControls } from "./MyTurnControls";
 import { ParticipantDetails } from "./ParticipantDetails";
 import { ParticipantList } from "./ParticipantList";
 
-import { HUD_SURFACE } from "@/components/battle/hud";
+import { HUD_SURFACE } from "@/components/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { useBattleScene } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";

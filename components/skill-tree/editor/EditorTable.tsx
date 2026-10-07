@@ -2,6 +2,7 @@ import { ArrowDown, ArrowUp, X } from "lucide-react";
 
 import { EditorCell } from "./EditorCell";
 
+import { BRANCH_LEVEL_METAL, CIRCLE_METAL } from "@/components/hud";
 import { Button } from "@/components/ui/button";
 import type { CellRef, RawTree, TreeNodes } from "@/lib/utils/skills/progression";
 import { BRANCH_LEVEL_LABEL, BRANCH_LEVELS, cellSkillId } from "@/lib/utils/skills/progression";
@@ -14,10 +15,6 @@ const COLUMNS: Array<{ circle: "outer" | "middle" | "inner"; index: number; titl
   { circle: "middle", index: 1, title: "Середнє 2" },
   { circle: "inner", index: 0, title: "Внутрішнє" },
 ];
-
-const LEVEL_METAL = { basic: "metal-bronze", advanced: "metal-silver", expert: "metal-gold" } as const;
-
-const CIRCLE_METAL = { outer: "metal-bronze", middle: "metal-silver", inner: "metal-gold" } as const;
 
 export function EditorTable({ raw, tree, skillsById, errorIds, actions }: {
   raw: RawTree;
@@ -45,7 +42,7 @@ export function EditorTable({ raw, tree, skillsById, errorIds, actions }: {
         <tbody>
           <tr>
             <th scope="row" className="editor-branch">Раса <small>рівень 5 / 10 / 15</small></th>
-            {BRANCH_LEVELS.map((l) => <td key={l}>{cell({ kind: "racial", level: l }, `Раса · ${BRANCH_LEVEL_LABEL[l]}`, LEVEL_METAL[l])}</td>)}
+            {BRANCH_LEVELS.map((l) => <td key={l}>{cell({ kind: "racial", level: l }, `Раса · ${BRANCH_LEVEL_LABEL[l]}`, BRANCH_LEVEL_METAL[l])}</td>)}
             <td colSpan={COLUMNS.length} />
           </tr>
           {tree.branches.map((b, i) => (
@@ -58,7 +55,7 @@ export function EditorTable({ raw, tree, skillsById, errorIds, actions }: {
                   <Button type="button" variant="ghost" size="icon-sm" aria-label={`Прибрати гілку ${b.name}`} onClick={() => actions.onRemove(b.id, b.name)}><X /></Button>
                 </span>
               </th>
-              {BRANCH_LEVELS.map((l) => <td key={l}>{cell({ kind: "level", branchId: b.id, level: l }, `${b.name} · ${BRANCH_LEVEL_LABEL[l]}`, LEVEL_METAL[l])}</td>)}
+              {BRANCH_LEVELS.map((l) => <td key={l}>{cell({ kind: "level", branchId: b.id, level: l }, `${b.name} · ${BRANCH_LEVEL_LABEL[l]}`, BRANCH_LEVEL_METAL[l])}</td>)}
               {COLUMNS.map((c) => <td key={c.title}>{cell({ kind: "slot", branchId: b.id, circle: c.circle, index: c.index }, `${b.name} · ${c.title}`, CIRCLE_METAL[c.circle])}</td>)}
             </tr>
           ))}
