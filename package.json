@@ -23,7 +23,7 @@
     "import-units": "tsx scripts/import-units.ts",
     "seed-artifacts": "tsx scripts/seed-artifacts.ts",
     "import-skills-library": "tsx scripts/import-skills-library.ts",
-    "fetch-wiki-icons": "tsx scripts/fetch-wiki-icons.ts",
+    "import-wiki-icons": "tsx scripts/import-wiki-icon-bundle.ts",
     "simulate-battle": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/simulate-battle.ts",
     "seed-mock-battle": "tsx scripts/seed-mock-battle-data.ts",
     "delete-mock-battle": "tsx scripts/delete-mock-battle-data.ts",

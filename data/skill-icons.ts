@@ -93,5 +93,5 @@ export function iconBucket(key: string): "skill-icons" | "main-skill-icons" {
 }
 
 export function iconPublicUrl(supabaseUrl: string, key: string): string {
-  return `${supabaseUrl}/storage/v1/object/public/${iconBucket(key)}/${key}.png`;
+  return `${supabaseUrl}/storage/v1/object/public/${iconBucket(key)}/${key}.webp`;
 }

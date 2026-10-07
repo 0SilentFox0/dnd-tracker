@@ -23,7 +23,7 @@ describe("skill icons map", () => {
     expect(iconBucket("attack")).toBe("main-skill-icons");
     expect(iconBucket("cleaving-strike")).toBe("skill-icons");
     expect(iconPublicUrl("https://x.supabase.co", "cleaving-strike")).toBe(
-      "https://x.supabase.co/storage/v1/object/public/skill-icons/cleaving-strike.png",
+      "https://x.supabase.co/storage/v1/object/public/skill-icons/cleaving-strike.webp",
     );
   });
 });
