@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { campaignKeys } from "./keys";
 
-import { createCampaign, joinCampaign, removeCampaignMember, updateCampaign } from "@/lib/api/campaigns";
+import { createCampaign, deleteCampaign, joinCampaign, removeCampaignMember, updateCampaign } from "@/lib/api/campaigns";
 
 export function useCreateCampaign() {
   return useMutation({ mutationFn: createCampaign });
@@ -33,6 +33,21 @@ export function useRemoveCampaignMember(campaignId: string) {
     mutationFn: (memberId: string) => removeCampaignMember(campaignId, memberId),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: campaignKeys.members(campaignId) });
+      router.refresh();
+    },
+  });
+}
+
+export function useDeleteCampaign(campaignId: string) {
+  const router = useRouter();
+
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => deleteCampaign(campaignId),
+    onSuccess: () => {
+      queryClient.removeQueries({ predicate: (q) => q.queryKey.includes(campaignId) });
+      router.push("/campaigns");
       router.refresh();
     },
   });

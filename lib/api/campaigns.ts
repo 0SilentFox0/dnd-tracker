@@ -95,3 +95,7 @@ export async function removeCampaignMember(
     `/members/${memberId}`,
   );
 }
+
+export async function deleteCampaign(campaignId: string): Promise<{ success: boolean }> {
+  return campaignDelete<{ success: boolean }>(campaignId, "");
+}
