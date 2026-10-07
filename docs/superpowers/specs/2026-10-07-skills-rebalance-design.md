@@ -165,7 +165,8 @@ B отримує власний spec після окремого brainstorming. 
 4. **Варта.** Ефект `guard { percent, filter, duration }` на союзника з `guardianId`; після опорів частина шкоди
    переходить на вартового; окремий рядок у лозі.
 5. **Скасування атаки.** Після `attack before` перевіряти, що атакуючий живий (`battle/attack/process/run.ts:49`).
-6. **Тимчасова мораль.** `changeMorale.duration?` через timed-effects.
+6. **Тимчасова мораль.** `morale` додається до `TIMED_STATS`; `effectiveMorale` враховує тимчасові `modifyStat morale`
+   з `activeEffects` (кап ±3). Натхнення = `modifyStat morale +1` на союзника з `duration`.
 7. **Формула в `percent`.** `damageBonus.percent` / `modifyStat.percent` приймають `Flat` (Відплата: `3*morale`).
 8. **`percentOf: "ownerAttack"`.** Середня шкода основної атаки власника (кубики + модифікатори; спільна функція з
    attack-розрахунків) — `engine/amount.ts`.
