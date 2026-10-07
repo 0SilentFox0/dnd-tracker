@@ -1,8 +1,19 @@
 {
-  "entry": ["scripts/**/*.{ts,mjs}", "tests/**/*.ts"],
-  "project": ["**/*.{ts,tsx,mjs,mts}"],
-  "ignoreDependencies": ["tailwindcss", "tw-animate-css", "server-only"],
-  "ignoreBinaries": ["vercel"],
+  "entry": [
+    "scripts/**/*.{ts,mjs}",
+    "tests/**/*.ts"
+  ],
+  "project": [
+    "**/*.{ts,tsx,mjs,mts}"
+  ],
+  "ignoreDependencies": [
+    "tailwindcss",
+    "tw-animate-css",
+    "server-only"
+  ],
+  "ignoreBinaries": [
+    "vercel"
+  ],
   "rules": {
     "exports": "off",
     "types": "off",
@@ -11,5 +22,8 @@
     "enumMembers": "off",
     "classMembers": "off",
     "duplicates": "off"
-  }
+  },
+  "ignore": [
+    ".claude/**"
+  ]
 }
