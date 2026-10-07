@@ -11,7 +11,7 @@ The README, ARCHITECTURE.md, and most in-repo docs are written in Ukrainian. Mat
 ## Common commands
 
 ```bash
-pnpm dev                       # next dev with BATTLE_TURN_TIMING=1 (extra battle timing logs)
+pnpm dev                       # next dev
 pnpm build                     # prisma generate && next build (Vercel uses scripts/vercel-build.mjs — see gotchas)
 pnpm lint                      # eslint
 pnpm test                      # vitest watch
@@ -29,7 +29,7 @@ pnpm migrate:deploy                    # apply migrations against DIRECT_URL fro
 pnpm exec prisma studio
 ```
 
-Many one-off ops live in `scripts/` and run via `tsx` (e.g. `pnpm import-docs-spells`, `pnpm seed-mock-battle`, `pnpm migrate-spell-icons-to-supabase`). Check `package.json` scripts before writing new tooling.
+Many one-off ops live in `scripts/` and run via `tsx` (e.g. `pnpm import-docs-spells`, `pnpm seed-mock-battle`, `pnpm upload-assets-to-supabase`). Check `package.json` scripts before writing new tooling.
 
 ## Architecture
 

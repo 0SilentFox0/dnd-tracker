@@ -54,24 +54,6 @@ export interface ActiveEffect {
 }
 
 /**
- * Один ефект скіла (збагачений формат)
- */
-export interface SkillEffect {
-  stat: string;           // "counter_damage", "hp_bonus", "bleed_damage", "melee_damage" тощо
-  type: string;           // "percent", "flat", "formula", "dice", "flag", "ignore", "stack", "min"
-  value: number | string | boolean;  // 25, "2*hero_level", "1d4", true
-  isPercentage: boolean;  // зручний прапорець (type === "percent")
-  duration?: number;      // тривалість у раундах
-  target?: "self" | "enemy" | "all_enemies" | "all_allies" | "all";
-  /** Скільки разів може спрацювати: undefined/null = постійно, 1–100 = обмеження */
-  maxTriggers?: number | null;
-}
-
-/** Тип шкоди для фільтрації скілів при розрахунку урону */
-export type SkillDamageType = "melee" | "ranged" | "magic";
-
-
-/**
  * Типи для екіпірованих артефактів
  */
 export interface EquippedArtifact {
