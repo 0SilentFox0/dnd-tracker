@@ -43,6 +43,21 @@ const defaultDeps: AddParticipantDeps = {
   fromUnit: createBattleParticipantFromUnit,
 };
 
+/** A unit added mid-battle copies the multipliers of a same-source enemy already on the field; none there means ×1. */
+function matchScaling(fresh: BattleParticipant, twin: BattleParticipant): BattleParticipant {
+  const { hpMultiplier, damageMultiplier } = twin.battleData;
+
+  if (hpMultiplier === undefined && damageMultiplier === undefined) return fresh;
+
+  const maxHp = Math.max(1, Math.round(fresh.combatStats.maxHp * (hpMultiplier ?? 1)));
+
+  return {
+    ...fresh,
+    combatStats: { ...fresh.combatStats, maxHp, currentHp: maxHp },
+    battleData: { ...fresh.battleData, hpMultiplier, damageMultiplier },
+  };
+}
+
 export function createAddParticipantMutation(deps: AddParticipantDeps = defaultDeps) {
   return async (ctx: BattleMutationContext, data: AddParticipantBody): Promise<MutationResult> => {
     const side = data.side === "ally" ? ParticipantSide.ALLY : ParticipantSide.ENEMY;
@@ -66,8 +81,12 @@ export function createAddParticipantMutation(deps: AddParticipantDeps = defaultD
         throw new BattleAccessError(404, "Юніта не знайдено");
       }
 
+      const twin = side === ParticipantSide.ENEMY ? ctx.participants.find((p) => p.basicInfo.sourceId === unit.id && p.side === ParticipantSide.ENEMY) : undefined;
+
       for (let i = 0; i < (data.quantity ?? 1); i++) {
-        added.push(await deps.fromUnit(unit, battleId, side, i + 1));
+        const fresh = await deps.fromUnit(unit, battleId, side, i + 1);
+
+        added.push(twin ? matchScaling(fresh, twin) : fresh);
       }
     }
 
