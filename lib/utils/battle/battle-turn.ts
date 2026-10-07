@@ -3,7 +3,8 @@ import { calculateInitiative, sortByInitiative } from "./battle-start";
 
 import { CombatStatus } from "@/lib/constants/battle";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
-import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/participants";
+import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
+import { findParticipant, isActive, replaceParticipant, withSelf } from "@/lib/utils/abilities/engine/participants";
 import { resolveDowned, runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import type { Rng } from "@/lib/utils/abilities/engine/types";
 import { BattleParticipant } from "@/types/battle";
@@ -106,6 +107,13 @@ export function processStartOfTurn(
   };
 
   const id = participant.basicInfo.id;
+
+  // скидання перед нарахуванням: залишок пулу з минулого ходу не подвоює бонус
+  const perTurn = Math.floor(collectModifiers(withSelf(allParticipants, updatedParticipant), id, { stat: "actionsPerTurn" }).flat);
+
+  if (perTurn > 0 && isActive(updatedParticipant)) {
+    updatedParticipant = { ...updatedParticipant, battleData: { ...updatedParticipant.battleData, pendingExtraActions: perTurn } };
+  }
 
   const ctx = { round: currentRound, rng };
 

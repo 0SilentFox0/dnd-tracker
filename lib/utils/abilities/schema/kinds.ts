@@ -16,7 +16,7 @@ export const DAMAGE_FILTER_KINDS = [AttackType.MELEE, AttackType.RANGED, "magic"
 
 export const CONDITION_SUBJECTS = ["self", "eventTarget", "eventActor", "anyAlly", "anyEnemy"] as const;
 
-export const DYNAMIC_STATS = ["armor", "attackBonus", "critThreshold"] as const;
+export const DYNAMIC_STATS = ["armor", "attackBonus", "critThreshold", "actionsPerTurn"] as const;
 
 export const BAKED_STATS = [
   "initiative",
@@ -31,7 +31,7 @@ export const BAKED_STATS = [
 
 export const STAT_KEYS = [...DYNAMIC_STATS, ...BAKED_STATS] as const;
 
-export const TIMED_STATS = ["armor", "attackBonus", "critThreshold", "initiative", "morale"] as const;
+export const TIMED_STATS = ["armor", "attackBonus", "critThreshold", "initiative", "morale", "actionsPerTurn"] as const;
 
 export const CONDITION_KEYS = [
   "no_bonus_action",

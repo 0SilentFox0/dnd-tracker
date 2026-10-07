@@ -7,6 +7,7 @@ export const STAT_LABELS: Record<StatKey, string> = {
   armor: "AC",
   attackBonus: "бонус атаки",
   critThreshold: "поріг криту",
+  actionsPerTurn: "дії за хід",
   initiative: "ініціатива",
   maxHp: "макс. HP",
   speed: "швидкість",
