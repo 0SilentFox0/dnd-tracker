@@ -26,6 +26,10 @@ function defaultFor(type: Condition["type"]): Condition {
       return { type, condition: "no_reaction" };
     case "targetDead":
       return { type };
+    case "hasMark":
+      return { type, who: "eventActor", markId: "mark" };
+    case "not":
+      return { type, condition: DEFAULT_CONDITION };
     case "all":
     case "any":
       return { type, conditions: [DEFAULT_CONDITION] };
@@ -45,7 +49,15 @@ export function ConditionEditor({ condition, path, actions }: { condition: Condi
           <X className="h-4 w-4" />
         </Button>
       </div>
-      {isGroup ? (
+      {condition.type === "not" ? (
+        <div className="pl-2">
+          <ConditionEditor
+            condition={condition.condition}
+            path={`${path}.condition`}
+            actions={{ onChange: (next) => actions.onChange({ ...condition, condition: next }), onRemove: actions.onRemove }}
+          />
+        </div>
+      ) : isGroup ? (
         <div className="space-y-2 pl-2">
           {condition.conditions.map((c, i) => (
             <ConditionEditor
