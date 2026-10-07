@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { getCachedSummonPool } from "@/lib/cache/reference-data";
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { updateParticipant } from "@/lib/utils/abilities/engine/participants";
+import { isActive, updateParticipant } from "@/lib/utils/abilities/engine/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import { withinLimits } from "@/lib/utils/abilities/engine/usage";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
@@ -24,48 +24,50 @@ const defaultDeps: SummonDeps = { loadPool: getCachedSummonPool };
 
 export function createBonusActionMutation(deps: SummonDeps = defaultDeps) {
   return async (ctx: BattleMutationContext, data: BonusActionBody): Promise<MutationResult> => {
-  const participant = ctx.participants.find((p) => p.basicInfo.id === data.participantId);
+    const participant = ctx.participants.find((p) => p.basicInfo.id === data.participantId);
 
-  if (!participant) throw new BattleAccessError(404, "Учасника немає в бою");
+    if (!participant) throw new BattleAccessError(404, "Учасника немає в бою");
 
-  if (!ctx.isDM && participant.basicInfo.controlledBy !== ctx.userId) throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
+    if (!ctx.isDM && participant.basicInfo.controlledBy !== ctx.userId) throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
 
-  assertNotPanicking(ctx.scene.pendingMoraleCheck, participant.basicInfo.id);
+    if (!isActive(participant)) throw new BattleRuleError("participant_dead", "Учасник не може діяти");
 
-  const ability = (participant.battleData.resolvedAbilities ?? []).find((a) => a.key === data.abilityKey && a.trigger.event === "bonusAction");
+    assertNotPanicking(ctx.scene.pendingMoraleCheck, participant.basicInfo.id);
 
-  if (!ability) throw new BattleRuleError("action_rejected", "У учасника немає такого вміння");
+    const ability = (participant.battleData.resolvedAbilities ?? []).find((a) => a.key === data.abilityKey && a.trigger.event === "bonusAction");
 
-  if (participant.actionFlags.hasUsedBonusAction) throw new BattleRuleError("action_used", "Бонусну дію вже використано цього ходу");
+    if (!ability) throw new BattleRuleError("action_rejected", "У учасника немає такого вміння");
 
-  if (!withinLimits(participant, ability)) throw new BattleRuleError("ability_limit", "Ліміт використань вичерпано");
+    if (participant.actionFlags.hasUsedBonusAction) throw new BattleRuleError("action_used", "Бонусну дію вже використано цього ходу");
 
-  const targetIds = assertAbilityTargets(ability, ctx.participants, data.targetParticipantIds ?? (data.targetParticipantId ? [data.targetParticipantId] : []));
+    if (!withinLimits(participant, ability)) throw new BattleRuleError("ability_limit", "Ліміт використань вичерпано");
 
-  const run = runAbilities(
-    ctx.participants,
-    { type: "bonusAction", actorId: participant.basicInfo.id, abilityKey: ability.key, targetIds },
-    { round: ctx.scene.round, rng: Math.random },
-  );
+    const targetIds = assertAbilityTargets(ability, ctx.participants, data.targetParticipantIds ?? (data.targetParticipantId ? [data.targetParticipantId] : []), participant);
 
-  const summoned = await applyAbilitySummons(run.summons, run.participants, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng: Math.random, deps });
+    const run = runAbilities(
+      ctx.participants,
+      { type: "bonusAction", actorId: participant.basicInfo.id, abilityKey: ability.key, targetIds },
+      { round: ctx.scene.round, rng: ctx.rng ?? Math.random },
+    );
 
-  const participants = updateParticipant(summoned.order, participant.basicInfo.id, (p) => ({ ...p, actionFlags: { ...p.actionFlags, hasUsedBonusAction: true } }));
+    const summoned = await applyAbilitySummons(run.summons, run.participants, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng: ctx.rng ?? Math.random, deps });
 
-  const text = run.fired.length ? [...run.messages, ...summoned.messages].join(" | ") : `${ability.name}: не спрацювало`;
+    const participants = updateParticipant(summoned.order, participant.basicInfo.id, (p) => ({ ...p, actionFlags: { ...p.actionFlags, hasUsedBonusAction: true } }));
 
-  return {
-    participants,
-    pending: ctx.pending,
-    events: [
-      {
-        type: "ability",
-        round: ctx.scene.round,
-        actorId: participant.basicInfo.id,
-        resultText: text || ability.name,
-        details: { actorName: participant.basicInfo.name, actorSide: participant.basicInfo.side, actionDetails: { abilityKey: ability.key, skillName: ability.name } },
-      },
-    ],
+    const text = run.fired.length ? [...run.messages, ...summoned.messages].join(" | ") : `${ability.name}: не спрацювало`;
+
+    return {
+      participants,
+      pending: ctx.pending,
+      events: [
+        {
+          type: "ability",
+          round: ctx.scene.round,
+          actorId: participant.basicInfo.id,
+          resultText: text || ability.name,
+          details: { actorName: participant.basicInfo.name, actorSide: participant.basicInfo.side, actionDetails: { abilityKey: ability.key, skillName: ability.name } },
+        },
+      ],
   };
   };
 }

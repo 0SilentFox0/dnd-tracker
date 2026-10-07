@@ -1,8 +1,8 @@
 import { ParticipantSide } from "@/lib/constants/battle";
 import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { isActive, withSelf } from "@/lib/utils/abilities/engine/participants";
+import { withSelf } from "@/lib/utils/abilities/engine/participants";
 import { withinLimits } from "@/lib/utils/abilities/engine/usage";
-import { conditionRequiresDeadTarget } from "@/lib/utils/abilities/registry/conditions";
+import { deadTargetRules, isEligibleDeadTarget } from "@/lib/utils/abilities/target-rules";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
@@ -72,11 +72,15 @@ export function usableAbilities(p: BattleParticipant, trigger: "bonusAction" | "
 }
 
 export function needsBonusTarget(a: ResolvedAbility): boolean {
-  return bonusTargetSide(a) !== null || conditionRequiresDeadTarget(a.condition);
+  return bonusTargetSide(a) !== null || deadTargetRules(a).requiresDead;
 }
 
-export function bonusTargetCandidates(a: ResolvedAbility, allies: BattleParticipant[], enemies: BattleParticipant[], selfId?: string): BattleParticipant[] {
-  if (conditionRequiresDeadTarget(a.condition)) return [...allies, ...enemies].filter((p) => !isActive(p));
+export function bonusTargetCandidates(a: ResolvedAbility, allies: BattleParticipant[], enemies: BattleParticipant[], owner?: BattleParticipant): BattleParticipant[] {
+  const rules = deadTargetRules(a);
+
+  if (rules.requiresDead) return [...allies, ...enemies].filter((p) => isEligibleDeadTarget(rules, p, owner));
+
+  const selfId = owner?.basicInfo.id;
 
   const pool = (bonusTargetSide(a) === ParticipantSide.ENEMY ? enemies : allies).filter(isUp);
 

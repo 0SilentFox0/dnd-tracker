@@ -14,7 +14,7 @@ const heroWith = { ...hero, battleData: { ...hero.battleData, resolvedAbilities:
 
 describe("bonusActionMutation", () => {
   it("виконує обране вміння, витрачає бонусну дію і ліміт", async () => {
-    const r = await bonusActionMutation(context({ participants: [heroWith, goblin] }), { participantId: "hero", abilityKey: rally.key });
+    const r = await bonusActionMutation(context({ participants: [heroWith, goblin] }), { participantId: "hero", abilityKey: rally.key, targetParticipantId: "hero" });
 
     const h = r.participants.find((p) => p.basicInfo.id === "hero");
 

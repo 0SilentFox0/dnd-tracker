@@ -49,7 +49,7 @@ export function BonusActionPicker({ participant, open, onOpenChange, onDone, tri
 
   const max = aiming ? abilityMaxTargets(aiming) : 1;
 
-  const candidates = aiming ? bonusTargetCandidates(aiming, allies, enemies, participant.basicInfo.id) : [];
+  const candidates = aiming ? bonusTargetCandidates(aiming, allies, enemies, participant) : [];
 
   return (
     <ResponsiveDialog open={open} onOpenChange={(o) => { if (!o) {

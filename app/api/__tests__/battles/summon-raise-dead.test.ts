@@ -105,13 +105,30 @@ describe("raiseDead", () => {
     }
   });
 
-  it("refuses a dead hero and a third target", async () => {
-    const out = await action(context({ participants: [caster, dead("h1", ParticipantSourceType.CHARACTER)] }), { participantId: "hero", abilityKey: raise.key, targetParticipantIds: ["h1"] });
+  it("rejects a dead hero before anything is consumed, plus a third target", async () => {
+    const ps = [caster, dead("h1", ParticipantSourceType.CHARACTER)];
 
-    expect(find(out.participants, "h1").combatStats.status).toBe("dead");
-    expect(out.events[0].resultText).toContain("⛔");
+    await expect(action(context({ participants: ps }), { participantId: "hero", abilityKey: raise.key, targetParticipantIds: ["h1"] })).rejects.toThrow(expect.objectContaining({ code: "invalid_target" }));
+    expect(caster.actionFlags.hasUsedAction).toBe(false);
+    expect(caster.battleData.abilityUsage?.[raise.key]).toBeUndefined();
     await expect(action(context({ participants: [caster, dead("d1"), dead("d2"), dead("d3")] }), { participantId: "hero", abilityKey: raise.key, targetParticipantIds: ["d1", "d2", "d3"] })).rejects.toThrow(
       expect.objectContaining({ code: "invalid_target" }),
     );
+  });
+
+  it("raiseDead implies a dead target even without a targetDead condition", async () => {
+    const bare = resolved({ id: "bare", trigger: { event: "action" }, effects: [{ kind: "raiseDead", hpPercent: 50, target: "eventTarget" }] });
+
+    const c = { ...caster, battleData: { ...caster.battleData, resolvedAbilities: [bare] } };
+
+    await expect(action(context({ participants: [c, goblin] }), { participantId: "hero", abilityKey: bare.key, targetParticipantIds: ["gob"] })).rejects.toThrow(expect.objectContaining({ code: "invalid_target" }));
+  });
+
+  it("a reviving heal only accepts fallen allies of the owner's side", async () => {
+    const angel = resolved({ id: "angel", trigger: { event: "action" }, condition: { type: "targetDead" }, effects: [{ kind: "heal", amount: 10, revive: true, target: "eventTarget" }] });
+
+    const c = { ...caster, battleData: { ...caster.battleData, resolvedAbilities: [angel] } };
+
+    await expect(action(context({ participants: [c, dead("d1")] }), { participantId: "hero", abilityKey: angel.key, targetParticipantIds: ["d1"] })).rejects.toThrow(expect.objectContaining({ code: "invalid_target" }));
   });
 });
