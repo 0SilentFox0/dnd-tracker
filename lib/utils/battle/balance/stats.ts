@@ -1,5 +1,5 @@
 /**
- * Статистика союзників/ворогів та підбір юнітів за DPR/HP
+ * Статистика героїв і юнітів (DPR / HP)
  */
 
 import { getNonMagicBranchDpr, getSpellDprFromBranchLevels } from "./dpr";
@@ -10,15 +10,7 @@ import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { averageOf, diceAverage, parseDiceLenient } from "@/lib/utils/common/dice";
 import type { BranchLevel } from "@/lib/utils/skills/progression";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
-import type { CharacterDprBreakdown, SuggestedEnemy } from "@/types/battle-setup";
-
-export type DifficultyRatio = "easy" | "medium" | "hard";
-
-export const DIFFICULTY_DPR_HP_RATIOS: Record<DifficultyRatio, number> = {
-  easy: 0.5,
-  medium: 1,
-  hard: 1.5,
-};
+import type { CharacterDprBreakdown } from "@/types/battle-setup";
 
 export interface UnitStats {
   unitId: string;
@@ -144,87 +136,4 @@ export function getCharacterStats({ participant, branchLevels, magicMainSkillIds
       ],
     },
   };
-}
-
-export function suggestEnemyUnits(
-  unitsWithStats: UnitStats[],
-  targetDpr: number,
-  targetHp: number,
-): SuggestedEnemy[] {
-  if (unitsWithStats.length === 0) return [];
-
-  const byTier = new Map<number, UnitStats[]>();
-
-  for (const u of unitsWithStats) {
-    const tier = u.level;
-
-    if (!byTier.has(tier)) byTier.set(tier, []);
-
-    byTier.get(tier)?.push(u);
-  }
-
-  const tiersDesc = [...byTier.keys()].sort((a, b) => b - a);
-
-  const targetRatio = targetHp > 0 ? targetDpr / targetHp : 0;
-
-  const result: SuggestedEnemy[] = [];
-
-  let totalDpr = 0;
-
-  let totalHp = 0;
-
-  for (const tier of tiersDesc) {
-    const units = byTier.get(tier) ?? [];
-
-    if (units.length === 0) continue;
-
-    const best = units.reduce((a, b) => {
-      const ar = a.hp > 0 ? a.dpr / a.hp : 0;
-
-      const br = b.hp > 0 ? b.dpr / b.hp : 0;
-
-      return Math.abs(ar - targetRatio) <= Math.abs(br - targetRatio) ? a : b;
-    });
-
-    result.push({
-      unitId: best.unitId,
-      name: best.name,
-      quantity: 1,
-      dpr: best.dpr,
-      hp: best.hp,
-      totalDpr: best.dpr,
-      totalHp: best.hp,
-    });
-    totalDpr += best.dpr;
-    totalHp += best.hp;
-  }
-
-  const targetDprMin = targetDpr * 0.9;
-
-  const targetHpMin = targetHp * 0.9;
-
-  let index = 0;
-
-  while (
-    result.length > 0 &&
-    (totalDpr < targetDprMin || totalHp < targetHpMin)
-  ) {
-    if (result.every((e) => e.quantity >= 10)) break;
-
-    const entry = result[index % result.length];
-
-    if (entry.quantity >= 10) {
-      index++;
-      continue;
-    }
-
-    entry.quantity += 1;
-    entry.totalDpr = entry.dpr * entry.quantity;
-    entry.totalHp = entry.hp * entry.quantity;
-    totalDpr += entry.dpr;
-    totalHp += entry.hp;
-    index++;
-  }
-
-  return result;
 }

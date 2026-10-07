@@ -1,19 +1,22 @@
 /**
- * Розрахунки для автопідбору ворогів за KPI (DPR / Total HP).
- * Реекспорт з модулів: dpr, stats.
+ * Баланс боїв: DPR/HP героїв і юнітів, масштабування ворогів, підбір складу.
  */
 
 export type { MagicMainSkillId } from "./dpr";
 export { getNonMagicBranchDpr, getSpellDprFromBranchLevels, MAGIC_MAIN_SKILL_IDS } from "./dpr";
-export { isMagicMainSkill, magicMainSkillIds } from "./magic-school";
 export type {
-  DifficultyRatio,
-  GetCharacterStatsParams,
-  UnitStats,
-} from "./stats";
-export {
-  DIFFICULTY_DPR_HP_RATIOS,
-  getCharacterStats,
-  getUnitStats,
-  suggestEnemyUnits,
-} from "./stats";
+  BalanceHint,
+  BalanceHintChange,
+  BalanceVerdict,
+  FairScaling,
+  PartyPower,
+  Power,
+  RosterEntry,
+  UnitScale,
+} from "./fair";
+export { computeFairScaling, targetEnemyPower } from "./fair";
+export { isMagicMainSkill, magicMainSkillIds } from "./magic-school";
+export type { PickedEnemy, PickResult } from "./pick";
+export { pickEnemyRoster } from "./pick";
+export type { GetCharacterStatsParams, UnitStats } from "./stats";
+export { getCharacterStats, getUnitStats } from "./stats";
