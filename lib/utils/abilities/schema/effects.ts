@@ -137,7 +137,7 @@ const CleanseSchema = z.object({ kind: z.literal("cleanse"), includeConditions: 
 
 const GuardSchema = z.object({ kind: z.literal("guard"), percent: z.number().int().min(1).max(100), duration: DurationSchema, ...target });
 
-const SummonSchema = z.object({ kind: z.literal("summon"), group: z.string().min(1), tier: z.number().int().min(1).max(7), count: z.number().int().min(1).optional() });
+const SummonSchema = z.object({ kind: z.literal("summon"), group: z.string().min(1), tier: z.number().int().min(1).max(7), count: z.number().int().min(1).max(10).optional() });
 
 const RaiseDeadSchema = z.object({ kind: z.literal("raiseDead"), hpPercent: z.number().int().min(1).max(100), ...target });
 

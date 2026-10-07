@@ -44,7 +44,7 @@ export function upsertTimedEffect(p: BattleParticipant, input: TimedEffectInput,
   const sameKey = current.filter((e) => e.abilityKey === input.timedKey);
 
   if (input.stackable && input.maxStacks !== undefined && sameKey.length >= input.maxStacks) {
-    const oldest = sameKey[0];
+    const oldest = sameKey.reduce((least, e) => (e.duration < least.duration ? e : least));
 
     return {
       ...p,

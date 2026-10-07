@@ -177,7 +177,7 @@ export interface BattleParticipantBattleData {
   activeEffects: ActiveEffect[];
   equippedArtifacts: EquippedArtifact[];
   artifactSets?: SetProgress[];
-  /** Пул додаткових дій (ефект «actions»): накопичується при спрацюванні, споживається при використанні основної дії, діє до кінця бою */
+  /** Пул додаткових дій: поповнюється ефектом grantAction, а на початку власного ходу скидається до суми actionsPerTurn; споживається при використанні основної дії */
   pendingExtraActions?: number;
   /** Хто прикликав або підняв учасника здібністю */
   summonedBy?: string;

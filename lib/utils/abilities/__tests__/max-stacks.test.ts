@@ -30,4 +30,14 @@ describe("maxStacks", () => {
     expect(AbilitySchema.safeParse({ ...base, stackable: true, maxStacks: 2 }).success).toBe(true);
     expect(AbilitySchema.safeParse({ ...base, maxStacks: 2 }).success).toBe(false);
   });
+
+  it("refreshes the stack with the least time left", () => {
+    let p = makeParticipant({ id: "p" });
+
+    p = apply(p, 1, 5);
+    p = apply(p, 2, 1);
+    p = apply(p, 3, 4);
+
+    expect(p.battleData.activeEffects.map((e) => e.duration)).toEqual([5, 4]);
+  });
 });
