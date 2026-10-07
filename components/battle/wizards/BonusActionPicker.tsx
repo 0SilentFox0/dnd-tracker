@@ -37,7 +37,7 @@ export function BonusActionPicker({ participant, open, onOpenChange, onDone }: {
 
   const side = aiming ? bonusTargetSide(aiming) : null;
 
-  const candidates = aiming ? bonusTargetCandidates(aiming, allies, enemies) : [];
+  const candidates = aiming ? bonusTargetCandidates(aiming, allies, enemies, participant.basicInfo.id) : [];
 
   return (
     <ResponsiveDialog open={open} onOpenChange={(o) => { if (!o) setAiming(null);

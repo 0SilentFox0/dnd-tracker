@@ -1,5 +1,6 @@
 import { DURATION_FIELD, type FieldMeta, TARGET_FIELD } from "../fields";
 import { CONDITION_LABELS, DAMAGE_FILTER_LABELS, flatLabel, STAT_LABELS } from "../labels";
+import { immuneTo } from "./state";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { DEFAULT_AREA_TARGETS } from "@/lib/constants/abilities";
@@ -34,7 +35,11 @@ export function applyStatic(input: EffectApplyInput<StaticEffect>, describe: (e:
 
   let ps = input.participants;
 
-  for (const id of targetIds) {
+  const fearBlocked = effect.kind === "modifyStat" && effect.stat === "morale" && typeof effect.flat === "number" && effect.flat < 0;
+
+  const blocked = fearBlocked ? targetIds.filter((id) => immuneTo(input.participants, id, "fear")) : [];
+
+  for (const id of targetIds.filter((t) => !blocked.includes(t))) {
     ps = updateParticipant(ps, id, (p) =>
       upsertTimedEffect(
         p,
@@ -52,10 +57,13 @@ export function applyStatic(input: EffectApplyInput<StaticEffect>, describe: (e:
     );
   }
 
-  return {
-    participants: ps,
-    messages: [`✨ ${ability.name}: ${describe(effect)} → ${participantNames(ps, targetIds)} (${rounds} р.)`],
-  };
+  const applied = targetIds.filter((t) => !blocked.includes(t));
+
+  const messages = applied.length ? [`✨ ${ability.name}: ${describe(effect)} → ${participantNames(ps, applied)} (${rounds} р.)`] : [];
+
+  if (blocked.length) messages.push(`⛔ ${ability.name}: ${participantNames(ps, blocked)} — імунітет`);
+
+  return { participants: ps, messages };
 }
 
 const VALUE_FIELDS: readonly FieldMeta[] = [

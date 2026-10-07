@@ -47,7 +47,7 @@ function each(
   return { participants: ps, messages };
 }
 
-function immuneTo(ps: BattleParticipant[], id: string, key: ConditionImmunityKey): boolean {
+export function immuneTo(ps: BattleParticipant[], id: string, key: ConditionImmunityKey): boolean {
   return findFlags(ps, id, "conditionImmunity").some((f) => f.conditions === "all" || f.conditions.includes(key));
 }
 
@@ -209,5 +209,6 @@ export function applyGuard(input: EffectApplyInput<Of<"guard">>): EffectApplyRes
         ctx.round,
       ),
     (names) => `🛡 ${ability.name}: ${names} — захист ${effect.percent}% (${effect.duration.rounds} р.)`,
+    (p) => p.basicInfo.id === input.ownerId || p.basicInfo.side !== owner?.basicInfo.side,
   );
 }

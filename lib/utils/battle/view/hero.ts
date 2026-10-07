@@ -70,10 +70,12 @@ export function needsBonusTarget(a: ResolvedAbility): boolean {
   return bonusTargetSide(a) !== null || conditionRequiresDeadTarget(a.condition);
 }
 
-export function bonusTargetCandidates(a: ResolvedAbility, allies: BattleParticipant[], enemies: BattleParticipant[]): BattleParticipant[] {
+export function bonusTargetCandidates(a: ResolvedAbility, allies: BattleParticipant[], enemies: BattleParticipant[], selfId?: string): BattleParticipant[] {
   if (conditionRequiresDeadTarget(a.condition)) return [...allies, ...enemies].filter((p) => !isActive(p));
 
-  return (bonusTargetSide(a) === ParticipantSide.ENEMY ? enemies : allies).filter(isUp);
+  const pool = (bonusTargetSide(a) === ParticipantSide.ENEMY ? enemies : allies).filter(isUp);
+
+  return a.effects.some((e) => e.kind === "guard") ? pool.filter((p) => p.basicInfo.id !== selfId) : pool;
 }
 
 export function lastAction(log: BattleAction[]): BattleAction | null {

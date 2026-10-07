@@ -38,6 +38,10 @@ function effectIssues(effect: Effect, trigger: Trigger, hasCondition: boolean): 
     issues.push(`${effect.stat} змінюється лише пасивкою`);
   }
 
+  if (effect.kind === "modifyStat" && effect.stat === "morale" && !effect.duration) {
+    issues.push("Тимчасова мораль потребує duration");
+  }
+
   if (isStaticEffect(effect) && !effect.duration && !isActionScopedTrigger(trigger)) {
     issues.push("Потрібна duration (без неї — лише у фазі before)");
   }
