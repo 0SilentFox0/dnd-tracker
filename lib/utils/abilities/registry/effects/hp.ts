@@ -30,7 +30,7 @@ export function applyDealDamage(input: EffectApplyInput<Of<"dealDamage">>): Effe
 
     if (!t || !isActive(t)) continue;
 
-    const amount = resolveAmount(effect.amount, { owner, target: t, eventDamage: eventDamage(input.event), rng: ctx.rng });
+    const amount = resolveAmount(effect.amount, { owner, target: t, eventDamage: eventDamage(input.event), rng: ctx.rng, participants: input.participants });
 
     if (amount <= 0) continue;
 
@@ -61,7 +61,7 @@ export function applyHeal(input: EffectApplyInput<Of<"heal">>): EffectApplyResul
 
     if (!t || (!isActive(t) && !effect.revive)) continue;
 
-    const amount = resolveAmount(effect.amount, { owner, target: t, eventDamage: eventDamage(input.event), rng: ctx.rng });
+    const amount = resolveAmount(effect.amount, { owner, target: t, eventDamage: eventDamage(input.event), rng: ctx.rng, participants: input.participants });
 
     const before = Math.max(0, t.combatStats.currentHp);
 
@@ -104,7 +104,7 @@ export function applyDot(input: EffectApplyInput<Of<"dot">>): EffectApplyResult 
       continue;
     }
 
-    const dmg = resolveAmount(effect.damagePerRound, { owner, target: t, eventDamage: eventDamage(input.event), rng: ctx.rng });
+    const dmg = resolveAmount(effect.damagePerRound, { owner, target: t, eventDamage: eventDamage(input.event), rng: ctx.rng, participants: input.participants });
 
     if (dmg <= 0) continue;
 

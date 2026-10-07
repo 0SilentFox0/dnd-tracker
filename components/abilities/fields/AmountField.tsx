@@ -9,7 +9,7 @@ import { SelectField } from "@/components/ui/select-field";
 import type { Amount } from "@/lib/utils/abilities/schema";
 import { DICE_RE } from "@/lib/utils/abilities/schema/kinds";
 
-type Mode = "number" | "dice" | "formula" | "eventDamage" | "maxHp";
+type Mode = "number" | "dice" | "formula" | "eventDamage" | "maxHp" | "ownerAttack";
 
 const MODES = [
   { value: "number", label: "число" },
@@ -17,6 +17,7 @@ const MODES = [
   { value: "formula", label: "формула" },
   { value: "eventDamage", label: "% від шкоди" },
   { value: "maxHp", label: "% від макс. HP" },
+  { value: "ownerAttack", label: "% шкоди моєї атаки" },
 ];
 
 function modeOf(v: Amount | undefined): Mode {

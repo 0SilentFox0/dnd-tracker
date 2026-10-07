@@ -26,7 +26,7 @@ export const AmountSchema = z.union([
   z.number().nonnegative(),
   z.string().regex(DICE_RE),
   FormulaSchema,
-  z.object({ percentOf: z.enum(["eventDamage", "maxHp"]), value: z.number().positive() }),
+  z.object({ percentOf: z.enum(["eventDamage", "maxHp", "ownerAttack"]), value: z.number().positive() }),
 ]);
 
 export type Duration = z.infer<typeof DurationSchema>;

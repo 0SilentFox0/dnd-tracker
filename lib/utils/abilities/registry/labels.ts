@@ -34,6 +34,8 @@ export function amountLabel(amount: Amount): string {
 
   if ("formula" in amount) return `(${amount.formula})`;
 
+  if (amount.percentOf === "ownerAttack") return `${amount.value} % шкоди атаки`;
+
   return `${amount.value}% від ${amount.percentOf === "eventDamage" ? "завданої шкоди" : "макс. HP"}`;
 }
 
