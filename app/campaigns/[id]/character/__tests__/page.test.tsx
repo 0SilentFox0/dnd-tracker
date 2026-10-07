@@ -26,7 +26,7 @@ const render = () =>
 describe("CharacterPage (server)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    requireCampaignMember.mockResolvedValue({ userId: "u1", isDM: false });
+    requireCampaignMember.mockResolvedValue({ userId: "u1", isDM: false, campaign: { maxLevel: 20 } });
     findFirst.mockResolvedValue({ id: "ch1" });
   });
 
@@ -37,7 +37,7 @@ describe("CharacterPage (server)", () => {
 
     const el = await render();
 
-    expect(readCharacterSheet).toHaveBeenCalledWith({ id: "c1", characterId: "ch1" });
+    expect(readCharacterSheet).toHaveBeenCalledWith({ id: "c1", characterId: "ch1", known: { userId: "u1", isDM: false, maxLevel: 20 } });
     expect(el.type).toBe(PrefetchedQuery);
     expect(el.props.queryKey).toEqual(characterSheetKey("c1", "ch1"));
     expect(el.props.data).toEqual(sheet);

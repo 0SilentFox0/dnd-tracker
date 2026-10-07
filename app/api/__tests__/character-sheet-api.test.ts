@@ -45,4 +45,14 @@ describe("GET sheet", () => {
     vi.mocked(prisma.character.findUnique).mockResolvedValue({ id: "ch", campaignId: "other", controlledBy: "owner" } as never);
     expect((await get()).status).toBe(404);
   });
+
+  it("відомий доступ сторінки — без повторного запиту членства", async () => {
+    const { readCharacterSheet } = await import("@/app/api/campaigns/[id]/characters/[characterId]/sheet/read-sheet");
+
+    const res = await readCharacterSheet({ id: "camp", characterId: "ch", known: { userId: "owner", isDM: false, maxLevel: 20 } });
+
+    expect(res.status).toBe(200);
+    expect(apiAuth.requireCampaignAccess).not.toHaveBeenCalled();
+    expect((await readCharacterSheet({ id: "camp", characterId: "ch", known: { userId: "other", isDM: false, maxLevel: 20 } })).status).toBe(403);
+  });
 });
