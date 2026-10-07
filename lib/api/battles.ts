@@ -14,6 +14,7 @@ import {
 import { BATTLE_LOG_PAGE_SIZE, BATTLE_VERSION_ONLY_PARAM } from "@/lib/constants/battle";
 import type { MoraleCheckResult } from "@/lib/utils/battle/battle-morale";
 import type {
+  AbilityActionData,
   AttackData,
   BattleEventsPage,
   BattleMutationResponse,
@@ -97,6 +98,11 @@ export async function attack(
   data: WithVersion<AttackData & { endTurn?: boolean }>,
 ): Promise<BattleMutationResponse> {
   return campaignPost<BattleMutationResponse>(campaignId, `/battles/${battleId}/attack`, data);
+}
+
+/** Attack and advance to next turn in one request (one fetch, one write). */
+export async function abilityAction(campaignId: string, battleId: string, data: WithVersion<AbilityActionData>): Promise<BattleMutationResponse> {
+  return campaignPost<BattleMutationResponse>(campaignId, `/battles/${battleId}/ability-action`, data);
 }
 
 /** Attack and advance to next turn in one request (one fetch, one write). */

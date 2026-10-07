@@ -33,6 +33,7 @@ export const TriggerSchema = z.discriminatedUnion("event", [
     whose: z.enum(["self", "ally"]),
   }),
   z.object({ event: z.literal("bonusAction") }),
+  z.object({ event: z.literal("action") }),
 ]);
 
 export type Trigger = z.infer<typeof TriggerSchema>;

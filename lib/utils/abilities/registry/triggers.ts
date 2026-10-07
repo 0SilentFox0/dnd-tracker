@@ -119,6 +119,7 @@ export const TRIGGER_REGISTRY: { [E in TriggerEvent]: TriggerDefinition<E> } = {
       return t.whose === "self" ? e.actorId === id(o) : e.actorId !== id(o) && sameSide(findParticipant(ps, e.actorId), o);
     },
   },
+  action: { event: "action", label: "Основна дія (кнопка)", fields: [], matches: (_t, e, o) => e.type === "action" && e.actorId === id(o) },
   bonusAction: { event: "bonusAction", label: "Бонусна дія (кнопка)", fields: [], matches: (_t, e, o) => e.type === "bonusAction" && e.actorId === id(o) },
 };
 

@@ -7,6 +7,7 @@ import { useBattleAction } from "./useBattleAction";
 
 import type { AddParticipantData, CreateBattleData } from "@/lib/api/battles";
 import {
+  abilityAction,
   addBattleParticipant,
   attack,
   bonusAction,
@@ -28,6 +29,7 @@ import { BattleStatus } from "@/lib/constants/battle";
 import type { MoraleCheckResult } from "@/lib/utils/battle/battle-morale";
 import { acceptFullBattle } from "@/lib/utils/battle/client/apply-delta";
 import type {
+  AbilityActionData,
   AttackData,
   BattleScene,
   BonusActionData,
@@ -146,6 +148,9 @@ export const useAttack = (c: string, b: string, o: ActionOpts = {}) =>
 
 export const useMoraleCheck = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<MoraleCheckData, { moraleResult: MoraleCheckResult }>(c, b, (data) => moraleCheck(c, b, data), o);
+
+export const useAbilityAction = (c: string, b: string, o: ActionOpts = {}) =>
+  useBattleAction<AbilityActionData>(c, b, (data) => abilityAction(c, b, data), o);
 
 export const useBonusAction = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<BonusActionData>(c, b, (data) => bonusAction(c, b, data), o);

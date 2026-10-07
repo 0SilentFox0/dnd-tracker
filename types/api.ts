@@ -146,6 +146,12 @@ export interface BonusActionData {
   targetParticipantId?: string;
 }
 
+export interface AbilityActionData {
+  participantId: string;
+  abilityKey: string;
+  targetParticipantIds?: string[];
+}
+
 export interface SpellCastData {
   casterId: string;
   casterType: string;

@@ -16,6 +16,8 @@ export function eventTargetIds(e: AbilityEvent): string[] {
       return e.targetIds;
     case "bonusAction":
       return [e.targetId ?? e.actorId];
+    case "action":
+      return e.targetIds?.length ? e.targetIds : [e.actorId];
     default:
       return [];
   }

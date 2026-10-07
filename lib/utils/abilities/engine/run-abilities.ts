@@ -41,7 +41,7 @@ export function runAbilities(participants: BattleParticipant[], event: AbilityEv
 
       if (!owner || !canAct(owner, event)) break;
 
-      if (event.type === "bonusAction" && ability.key !== event.abilityKey) continue;
+      if ((event.type === "bonusAction" || event.type === "action") && ability.key !== event.abilityKey) continue;
 
       if (!triggerMatches(ability.trigger, event, owner, ps)) continue;
 

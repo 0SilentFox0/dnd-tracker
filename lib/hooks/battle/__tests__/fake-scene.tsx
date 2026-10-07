@@ -73,6 +73,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
     attack: mutation(),
     castSpell: mutation(),
     bonusAction: mutation(),
+    abilityAction: mutation(),
     nextTurn: mutation(),
     moraleCheck: mutation(async () => ({ moraleResult: { hasExtraTurn: true, shouldSkipTurn: false, moralePositive: true, message: "" } })),
     start: mutation(),
@@ -141,6 +142,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
     mutateAsync: actions.attack.mutateAsync,
     castSpell: actions.castSpell.mutateAsync,
     bonusAction: actions.bonusAction.mutateAsync,
+    abilityAction: actions.abilityAction.mutateAsync,
     nextTurn: actions.nextTurn.mutateAsync,
     moraleCheck: actions.moraleCheck.mutateAsync,
   };

@@ -36,9 +36,9 @@ export interface AbilityCharge {
   per: "battle" | "round" | "turn";
 }
 
-export function abilityCharges(p: BattleParticipant): AbilityCharge[] {
+export function abilityCharges(p: BattleParticipant, triggers: readonly string[] = ["bonusAction", "action"]): AbilityCharge[] {
   return (p.battleData.resolvedAbilities ?? []).flatMap((a) => {
-    if (a.trigger.event !== "bonusAction" || !a.limits) return [];
+    if (!triggers.includes(a.trigger.event) || !a.limits) return [];
 
     const per = a.limits.perBattle ? "battle" : a.limits.perRound ? "round" : a.limits.perTurn ? "turn" : null;
 
