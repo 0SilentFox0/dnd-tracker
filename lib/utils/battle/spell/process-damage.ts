@@ -2,6 +2,7 @@
  * Розрахунок урону/лікування заклинання та застосування до цілей
  */
 
+import { applyBalanceDamageMultiplier } from "../damage/balance-multiplier";
 import { applyResistance } from "../resistance";
 import type { BattleSpell } from "../types/spell-process";
 import { calculateSpellDamageWithEnhancements } from "./calculations";
@@ -54,6 +55,10 @@ export function computeSpellDamageAndApply(
     { groupId: spell.groupId ?? null },
   );
 
+  const balance = applyBalanceDamageMultiplier(caster, damageCalc.totalDamage);
+
+  const scaledTotal = balance.damage;
+
   const allResistanceBreakdown: string[] = [];
 
   const damageSteps: Record<string, DamageStep[]> = {};
@@ -73,11 +78,11 @@ export function computeSpellDamageAndApply(
 
     const distPct = dist ? (dist[i] ?? 0) : 100;
 
-    let damageToApply = Math.floor((damageCalc.totalDamage * distPct) / 100);
+    let damageToApply = Math.floor((scaledTotal * distPct) / 100);
 
     if (dist && distPct !== 100) {
       allResistanceBreakdown.push(
-        `${target.basicInfo.name}: ${distPct}% від ${damageCalc.totalDamage} = ${damageToApply}`,
+        `${target.basicInfo.name}: ${distPct}% від ${scaledTotal} = ${damageToApply}`,
       );
     }
 
@@ -164,8 +169,8 @@ export function computeSpellDamageAndApply(
 
   return {
     spellCalculation: {
-      totalDamage: damageCalc.totalDamage,
-      breakdown: damageCalc.breakdown,
+      totalDamage: scaledTotal,
+      breakdown: balance.multiplier === 1 ? damageCalc.breakdown : [...damageCalc.breakdown, `× ${balance.multiplier.toFixed(2)} (рівний бій) = ${scaledTotal}`],
       resistanceBreakdown: allResistanceBreakdown,
       damageSteps,
     },

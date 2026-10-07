@@ -4,6 +4,7 @@
 
 import { calculateDamageWithModifiers } from "../../damage";
 import { heroAttackDamageParts, heroDamageContext } from "../../damage/hero-damage";
+import { applyBalanceDamageMultiplier } from "../../damage/balance-multiplier";
 import { applyHeroDmDamageMultiplier } from "../../damage/hero-dm-multiplier";
 import { applyResistance } from "../../resistance";
 import type { DamageCalculationResult } from "../../types/damage-calculations";
@@ -144,6 +145,15 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
     damageCalculation.breakdown.push("──────────");
     damageCalculation.breakdown.push(heroDm.breakdownLine);
     damageSteps.push({ label: "Коефіцієнт DM", side: "attacker", kind: "multiplier", value: heroDm.multiplier, after: physicalDamage });
+  }
+
+  const balance = applyBalanceDamageMultiplier(updatedAttacker, physicalDamage);
+
+  if (balance.multiplier !== 1) {
+    physicalDamage = balance.damage;
+    damageCalculation.breakdown.push("──────────");
+    damageCalculation.breakdown.push(`× ${balance.multiplier.toFixed(2)} (рівний бій) = ${physicalDamage}`);
+    damageSteps.push({ label: "Рівний бій", side: "attacker", kind: "multiplier", value: balance.multiplier, after: physicalDamage });
   }
 
   if (params.bonusPercent) {

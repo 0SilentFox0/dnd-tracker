@@ -6,6 +6,7 @@ import type {
   ComputeDamageBreakdownParams,
   DamageBreakdownResult,
 } from "../types/damage-breakdown";
+import { applyBalanceDamageMultiplier } from "./balance-multiplier";
 import { getDefenderResistanceBreakdown } from "./breakdown-helpers";
 import { heroDamageContext } from "./hero-damage";
 import { applyHeroDmDamageMultiplier } from "./hero-dm-multiplier";
@@ -83,6 +84,15 @@ export function computeDamageBreakdown(
     breakdown.push(`──────────`);
     breakdown.push(heroDm.breakdownLine);
     steps.push({ label: "Коефіцієнт DM", side: "attacker", kind: "multiplier", value: heroDm.multiplier, after: totalDamage });
+  }
+
+  const balance = applyBalanceDamageMultiplier(attacker, totalDamage);
+
+  if (balance.multiplier !== 1) {
+    totalDamage = balance.damage;
+    breakdown.push(`──────────`);
+    breakdown.push(`× ${balance.multiplier.toFixed(2)} (рівний бій) = ${totalDamage}`);
+    steps.push({ label: "Рівний бій", side: "attacker", kind: "multiplier", value: balance.multiplier, after: totalDamage });
   }
 
   const damageType = attack.damageType ?? "physical";
