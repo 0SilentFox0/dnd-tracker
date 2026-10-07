@@ -3,6 +3,18 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@theme static {
+  --color-hud-muted: #8f8473;
+  --color-hud-gold: #c9b37a;
+  --color-hud-ink: #efe5d2;
+  --color-hud-bone: #e6dccb;
+  --color-hud-line: #4a3c2c;
+  --color-hud-field: #1a140f;
+  --color-hud-rule: #3a2e22;
+  --color-hud-danger: #d0705c;
+  --color-hud-panel: rgba(17, 14, 11, 0.82);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

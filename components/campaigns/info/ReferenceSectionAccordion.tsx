@@ -80,11 +80,11 @@ export function ReferenceSectionAccordion({
       {showSkills && !skillsEmpty && (
         <HudPanel className="space-y-3">
           {showBoth && (
-            <h2 className="hud-sc scroll-mt-4 text-lg text-[#c9b37a]" id="ref-skills">
+            <h2 className="hud-sc scroll-mt-4 text-lg text-hud-gold" id="ref-skills">
               Скіли
             </h2>
           )}
-          <p className="text-sm text-[#8f8473]">
+          <p className="text-sm text-hud-muted">
             Як діють скіли та як вони виглядають у грі. Опис вигляду може
             редагувати лише DM.
           </p>
@@ -136,11 +136,11 @@ export function ReferenceSectionAccordion({
       {showSpells && !spellsEmpty && (
         <HudPanel className="space-y-3">
           {showBoth && (
-            <h2 className="hud-sc scroll-mt-4 text-lg text-[#c9b37a]" id="ref-spells">
+            <h2 className="hud-sc scroll-mt-4 text-lg text-hud-gold" id="ref-spells">
               Заклинання
             </h2>
           )}
-          <p className="text-sm text-[#8f8473]">
+          <p className="text-sm text-hud-muted">
             Як діють заклинання та як вони виглядають. Опис вигляду може
             редагувати лише DM.
           </p>

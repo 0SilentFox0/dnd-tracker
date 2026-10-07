@@ -56,7 +56,7 @@ export function DMUnitsPageClient({ campaignId, initialUnits }: DMUnitsPageClien
       ) : list.units.length === 0 ? (
         <EmptyState icon={Skull} title="Ще немає юнітів" description="Створіть першого юніта або імпортуйте їх з файлу." />
       ) : list.groups.length === 0 ? (
-        <p className="text-sm text-[#8f8473]">Нічого не знайдено</p>
+        <p className="text-sm text-hud-muted">Нічого не знайдено</p>
       ) : (
         <Accordion type="multiple" value={list.open} onValueChange={list.setOpen} className="space-y-2">
           {list.groups.map((group) => (

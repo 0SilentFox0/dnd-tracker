@@ -50,7 +50,7 @@ export function CampaignMembersList({
           className="flex items-center justify-between border-b border-[#2a2218] p-2 last:border-b-0"
         >
           <div className="flex items-center gap-2">
-            <span className="text-[#e6dccb]">{member.user.displayName}</span>
+            <span className="text-hud-bone">{member.user.displayName}</span>
             <HudPill tone={member.role === CampaignRole.DM ? "gold" : "bone"}>{member.role === CampaignRole.DM ? "DM" : "Player"}</HudPill>
           </div>
           {isDM && member.role === CampaignRole.PLAYER && (

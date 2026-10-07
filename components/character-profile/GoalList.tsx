@@ -58,8 +58,8 @@ export function GoalList() {
 
   return (
     <section>
-      <h2 className="hud-sc mb-1.5 text-[13px] tracking-[.06em] text-[#c9b37a]">ЦІЛІ</h2>
-      {goals.length === 0 && <p className="text-sm text-[#8f8473]">Цілей поки немає.</p>}
+      <h2 className="hud-sc mb-1.5 text-[13px] tracking-[.06em] text-hud-gold">ЦІЛІ</h2>
+      {goals.length === 0 && <p className="text-sm text-hud-muted">Цілей поки немає.</p>}
       <ul>
         {goals.map((g) => (
           <li key={g.id} className="flex items-start gap-2 border-b border-[#2a2218] py-1.5 text-sm">
@@ -68,11 +68,11 @@ export function GoalList() {
               disabled={!isDM || isPending}
               aria-label={`Статус «${g.text}»: ${STATUS_LABEL[g.status]}`}
               onClick={() => void send(all.map((x) => (x.id === g.id ? { ...x, status: NEXT[x.status] } : x)))}
-              className="flex size-8 shrink-0 items-center justify-center text-[#c9b37a] disabled:cursor-default"
+              className="flex size-8 shrink-0 items-center justify-center text-hud-gold disabled:cursor-default"
             >
               {g.status === "done" ? <Check className="size-4" /> : g.status === "failed" ? <X className="size-4" /> : "◆"}
             </button>
-            <span className={cn("min-w-0 flex-1 pt-1.5", g.status !== "active" && "text-[#8f8473] line-through")}>
+            <span className={cn("min-w-0 flex-1 pt-1.5", g.status !== "active" && "text-hud-muted line-through")}>
               {g.text}
               {g.author === "player" && <span className="ml-1.5 inline-block rounded border border-[#6f8fb0] px-1 text-[10px] text-[#6f8fb0]">від гравця</span>}
             </span>
@@ -110,7 +110,7 @@ export function GoalList() {
         </div>
       ) : (
         (isDM || sheet.viewer.isOwner) && (
-          <Button type="button" variant="ghost" className="mt-1 h-11 gap-1 px-0 text-[#c9b37a]" onClick={() => setDraft({ id: null, text: "" })}>
+          <Button type="button" variant="ghost" className="mt-1 h-11 gap-1 px-0 text-hud-gold" onClick={() => setDraft({ id: null, text: "" })}>
             <Plus className="size-4" />
             Додати ціль
           </Button>

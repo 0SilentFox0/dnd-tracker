@@ -24,7 +24,7 @@ export function CompleteBattleDialog({ open, onOpenChange }: { open: boolean; on
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Скасувати
           </Button>
-          <Button variant="outline" disabled={actions.complete.isPending} className="border-[#d0705c]/50 text-[#d0705c] hover:bg-[#d0705c]/15" onClick={() => finish("defeat")}>
+          <Button variant="outline" disabled={actions.complete.isPending} className="border-hud-danger/50 text-hud-danger hover:bg-hud-danger/15" onClick={() => finish("defeat")}>
             Поразка
           </Button>
           <Button variant="outline" disabled={actions.complete.isPending} className="border-[var(--gold)]/50 text-[var(--gold)] hover:bg-[var(--gold)]/10" onClick={() => finish()}>

@@ -18,7 +18,7 @@ export function UnitsToolbar({ query, onSearch, chips, selected, onToggle }: Uni
   return (
     <div className="space-y-2">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8f8473]" aria-hidden />
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-hud-muted" aria-hidden />
         <Input
           type="search"
           aria-label="Пошук юнітів"
@@ -36,7 +36,7 @@ export function UnitsToolbar({ query, onSearch, chips, selected, onToggle }: Uni
           onSelect: () => onToggle(chip.key),
           label: (
             <span className="inline-flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-[#8f8473]" style={chip.color ? { backgroundColor: chip.color } : undefined} aria-hidden />
+              <span className="h-2.5 w-2.5 rounded-full bg-hud-muted" style={chip.color ? { backgroundColor: chip.color } : undefined} aria-hidden />
               {chip.label} · {chip.count}
             </span>
           ),

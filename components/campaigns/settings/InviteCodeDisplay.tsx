@@ -24,7 +24,7 @@ export function InviteCodeDisplay({ inviteCode }: InviteCodeDisplayProps) {
 
   return (
     <div className="flex items-center gap-2">
-      <code className="rounded bg-[#1a140f] px-2 py-1 font-mono text-lg font-semibold text-[#efe5d2]">
+      <code className="rounded bg-hud-field px-2 py-1 font-mono text-lg font-semibold text-hud-ink">
         {inviteCode}
       </code>
       <Button
@@ -35,7 +35,7 @@ export function InviteCodeDisplay({ inviteCode }: InviteCodeDisplayProps) {
         title="Скопіювати код"
       >
         {copied ? (
-          <Check className="h-4 w-4 text-[#c9b37a]" />
+          <Check className="h-4 w-4 text-hud-gold" />
         ) : (
           <Copy className="h-4 w-4" />
         )}

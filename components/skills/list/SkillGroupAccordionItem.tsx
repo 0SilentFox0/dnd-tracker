@@ -59,8 +59,8 @@ export function SkillGroupAccordionItem({
         <AccordionTrigger className="px-4 sm:px-6">
           <div className="flex items-center gap-3 sm:gap-4 text-left w-full">
             <div className="flex-1 min-w-0">
-              <h3 className="hud-sc truncate text-lg text-[#efe5d2]">{groupName}</h3>
-              <p className="mt-1 text-sm text-[#8f8473]">{totalSkills} скілів</p>
+              <h3 className="hud-sc truncate text-lg text-hud-ink">{groupName}</h3>
+              <p className="mt-1 text-sm text-hud-muted">{totalSkills} скілів</p>
             </div>
           </div>
         </AccordionTrigger>

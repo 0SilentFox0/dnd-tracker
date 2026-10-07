@@ -49,12 +49,12 @@ export function BattlePreparationView({
             {
               label: "Вороги",
               value: enemiesCount,
-              color: "text-[#d0705c]",
+              color: "text-hud-danger",
             },
           ].map((stat, idx) => (
             <div
               key={idx}
-              className="flex flex-col items-center gap-1 border border-[#4a3c2c] bg-[rgba(17,14,11,.82)] p-4 sm:p-6"
+              className="flex flex-col items-center gap-1 border border-hud-line bg-hud-panel p-4 sm:p-6"
             >
               <span className="hud-sc text-[13px] tracking-[.1em] text-[var(--hud-muted)]">
                 {stat.label}
@@ -82,7 +82,7 @@ export function BattlePreparationView({
               {isStarting ? "ЗБІР ВІЙСЬКА..." : "ДО БОЮ!"}
             </button>
           ) : (
-            <div className="mx-auto inline-block animate-[hud-pulse_2.4s_infinite] border-y border-[#4a3c2c] bg-black/55 px-6 py-4 text-lg italic text-[#d6cbb7] sm:px-8 sm:text-xl">
+            <div className="mx-auto inline-block animate-[hud-pulse_2.4s_infinite] border-y border-hud-line bg-black/55 px-6 py-4 text-lg italic text-[#d6cbb7] sm:px-8 sm:text-xl">
               🗡️ Очікуйте наказу DM...
             </div>
           )}

@@ -5,10 +5,10 @@ import { cn } from "@/lib/utils";
 const TONE = {
   gold: "metal-gold metal-fill font-semibold",
   silver: "metal-silver metal-fill font-semibold",
-  bone: "text-[#e6dccb] shadow-[inset_0_0_0_1px_#4a3c2c]",
-  accent: "text-[#e6dccb] shadow-[inset_0_0_0_1px_#c9b37a]",
-  muted: "text-[#8f8473] shadow-[inset_0_0_0_1px_#4a3c2c]",
-  fact: "text-[#c9bfae] shadow-[inset_0_0_0_1px_#4a3c2c]",
+  bone: "text-hud-bone shadow-[inset_0_0_0_1px_var(--color-hud-line)]",
+  accent: "text-hud-bone shadow-[inset_0_0_0_1px_var(--color-hud-gold)]",
+  muted: "text-hud-muted shadow-[inset_0_0_0_1px_var(--color-hud-line)]",
+  fact: "text-[#c9bfae] shadow-[inset_0_0_0_1px_var(--color-hud-line)]",
 } as const;
 
 interface HudPillProps {

@@ -145,7 +145,7 @@ export function AttackWizard({ wizard }: { wizard: Wizard }) {
           {steps.map((list, k) => (
             <div key={k} className="mt-1">
               {list.map((s, i) => (
-                <div key={i} className={cn("flex min-h-9 items-center justify-between border-b border-white/[.06] text-sm", s.side === "attacker" && s.kind === "percent" && s.value > 0 && "text-[#cdb87e]", s.side === "target" && "text-[#d0705c]")}>
+                <div key={i} className={cn("flex min-h-9 items-center justify-between border-b border-white/[.06] text-sm", s.side === "attacker" && s.kind === "percent" && s.value > 0 && "text-[#cdb87e]", s.side === "target" && "text-hud-danger")}>
                   <span>{s.label}</span>
                   <span>{s.kind === "percent" ? `${signed(s.value)}%` : s.kind === "multiplier" ? `×${s.value}` : s.kind === "immunity" ? "імунітет" : s.kind === "flat" ? signed(s.value) : s.value} → {s.after}</span>
                 </div>

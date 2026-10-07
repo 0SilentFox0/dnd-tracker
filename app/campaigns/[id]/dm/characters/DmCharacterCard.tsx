@@ -30,16 +30,16 @@ export function DmCharacterCard({ character, campaignId, busy, actions }: DmChar
   return (
     <HudCard className="space-y-3 p-3">
       <div className="flex items-start gap-3">
-        <EntityIcon src={character.avatar} name={character.name} size={56} className="hud-sc size-14 shrink-0 rounded-full border-2 border-[#c9b37a] bg-[#2a2016] text-2xl text-inherit" />
+        <EntityIcon src={character.avatar} name={character.name} size={56} className="hud-sc size-14 shrink-0 rounded-full border-2 border-hud-gold bg-[#2a2016] text-2xl text-inherit" />
         <div className="min-w-0 flex-1 space-y-1">
-          <p className="hud-sc truncate text-lg leading-6 text-[#efe5d2]">{character.name}</p>
-          <p className="truncate text-xs text-[#8f8473]">
+          <p className="hud-sc truncate text-lg leading-6 text-hud-ink">{character.name}</p>
+          <p className="truncate text-xs text-hud-muted">
             {character.race}
             {character.subrace ? ` (${character.subrace})` : ""} · {character.class}
           </p>
           <div className="flex min-w-0 items-center gap-1.5">
             <HudPill tone={isNpc ? "silver" : "gold"}>{isNpc ? "NPC герой" : "Гравець"}</HudPill>
-            {!isNpc && <span className="truncate text-xs text-[#8f8473]">{character.user?.displayName || "Не призначено"}</span>}
+            {!isNpc && <span className="truncate text-xs text-hud-muted">{character.user?.displayName || "Не призначено"}</span>}
           </div>
         </div>
         <DropdownMenu>
@@ -47,7 +47,7 @@ export function DmCharacterCard({ character, campaignId, busy, actions }: DmChar
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 shrink-0 rounded-full text-[#c9b37a] hover:bg-transparent hover:text-[#e6c25a]"
+              className="h-8 w-8 shrink-0 rounded-full text-hud-gold hover:bg-transparent hover:text-[#e6c25a]"
               aria-label="Дії персонажа"
               onClick={(e) => e.preventDefault()}
             >

@@ -50,43 +50,43 @@ export function SkillReferenceCard({
     >
       <AccordionTrigger className="p-0 hover:no-underline [&[data-state=open]>div]:border-b flex items-center gap-3">
         <div className="flex w-full min-w-0 flex-1 items-start gap-3 p-3 text-left tracking-normal [font-family:var(--font-hud-sans)]">
-          <EntityIcon src={skill.icon} name={skill.name} size={40} className="size-10 rounded-lg border border-[#4a3c2c] bg-[#1a140f] text-[#8f8473]" fallback={<Sparkles className="size-5" />} />
+          <EntityIcon src={skill.icon} name={skill.name} size={40} className="size-10 rounded-lg border border-hud-line bg-hud-field text-hud-muted" fallback={<Sparkles className="size-5" />} />
           <div className="flex-1 min-w-0">
-            <span className="hud-sc block text-sm leading-tight text-[#efe5d2]">
+            <span className="hud-sc block text-sm leading-tight text-hud-ink">
               {skill.name}
             </span>
             {skill.mainSkillName && (
               <span
-                className="mt-1 inline-block rounded-full px-2 text-xs text-[#e6dccb] shadow-[inset_0_0_0_1px_#4a3c2c]"
+                className="mt-1 inline-block rounded-full px-2 text-xs text-hud-bone shadow-[inset_0_0_0_1px_var(--color-hud-line)]"
                 style={skill.mainSkillColor ? { boxShadow: `inset 0 0 0 1px ${skill.mainSkillColor}` } : undefined}
               >
                 {skill.mainSkillName}
               </span>
             )}
-            <p className="mt-1.5 line-clamp-2 text-xs text-[#8f8473]">
+            <p className="mt-1.5 line-clamp-2 text-xs text-hud-muted">
               {appearance.trim() ? appearance : shortSummary}
             </p>
           </div>
         </div>
       </AccordionTrigger>
       <AccordionContent>
-        <div className="space-y-3 border-t border-[#4a3c2c] px-3 pt-2 pb-3 text-[#e6dccb]">
+        <div className="space-y-3 border-t border-hud-line px-3 pt-2 pb-3 text-hud-bone">
           {skill.description && (
             <div>
-              <Label className="hud-sc text-xs text-[#c9b37a]">
+              <Label className="hud-sc text-xs text-hud-gold">
                 Опис / механіка
               </Label>
               <p className="text-sm mt-0.5">{skill.description}</p>
             </div>
           )}
           <div>
-            <Label className="hud-sc text-xs text-[#c9b37a]">
+            <Label className="hud-sc text-xs text-hud-gold">
               Як діє (бонуси, ефекти, тригери)
             </Label>
             <p className="text-sm mt-0.5">{formatMechanicsSkill(skill)}</p>
           </div>
           <div>
-            <Label className="hud-sc text-xs text-[#c9b37a]">
+            <Label className="hud-sc text-xs text-hud-gold">
               Опис вигляду (як виглядає в грі)
             </Label>
             {isDM ? (

@@ -28,20 +28,20 @@ export function BattleListCard({ battle, campaignId, kind }: BattleListCardProps
     <HudCard tone={KIND[kind].tone} className="space-y-3 p-4">
       <div className="space-y-1">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="hud-sc min-w-0 text-lg leading-tight text-[#efe5d2]">{battle.name}</h3>
+          <h3 className="hud-sc min-w-0 text-lg leading-tight text-hud-ink">{battle.name}</h3>
           {KIND[kind].badge}
         </div>
-        {battle.description && <p className="text-sm text-[#8f8473]">{battle.description}</p>}
+        {battle.description && <p className="text-sm text-hud-muted">{battle.description}</p>}
       </div>
 
-      <div className="text-sm text-[#8f8473]">
+      <div className="text-sm text-hud-muted">
         {kind === "active" && (
           <p>
-            Раунд: <span className="font-semibold text-[#e6dccb]">{battle.currentRound}</span>
+            Раунд: <span className="font-semibold text-hud-bone">{battle.currentRound}</span>
           </p>
         )}
         <p>
-          Учасників: <span className="font-semibold text-[#e6dccb]">{participantCount}</span>
+          Учасників: <span className="font-semibold text-hud-bone">{participantCount}</span>
         </p>
       </div>
 

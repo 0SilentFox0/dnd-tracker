@@ -72,7 +72,7 @@ export default async function DMBattlesPage({
 
       {battles.length === 0 && (
         <EmptyState
-          className="bg-[rgba(17,14,11,.82)]"
+          className="bg-hud-panel"
           icon={Swords}
           title="Поки немає сцен боїв"
           action={

@@ -20,10 +20,10 @@ export function ProfileHero({ actions, badge, ref }: { actions?: ReactNode; badg
   return (
     <header ref={ref} className="px-4 pt-4 pb-3">
       <div className="flex items-center gap-3">
-        <EntityIcon src={id.avatar} name={id.name} size={56} className="hud-sc size-14 rounded-full border-2 border-[#c9b37a] bg-[#2a2016] text-2xl text-inherit" />
+        <EntityIcon src={id.avatar} name={id.name} size={56} className="hud-sc size-14 rounded-full border-2 border-hud-gold bg-[#2a2016] text-2xl text-inherit" />
         <div className="min-w-0 flex-1">
-          <h1 className="hud-sc truncate text-xl leading-7 text-[#efe5d2]">{id.name}</h1>
-          <p className="flex min-w-0 items-center gap-1.5 text-xs text-[#8f8473]">
+          <h1 className="hud-sc truncate text-xl leading-7 text-hud-ink">{id.name}</h1>
+          <p className="flex min-w-0 items-center gap-1.5 text-xs text-hud-muted">
             <span className="truncate">
               {id.level} рів. · {id.className}
               {id.subclass ? ` (${id.subclass})` : ""} ·
@@ -35,7 +35,7 @@ export function ProfileHero({ actions, badge, ref }: { actions?: ReactNode; badg
               {id.alignment ? ` · ${id.alignment}` : ""}
             </span>
           </p>
-          <button type="button" aria-expanded={hpOpen} onClick={() => setHpOpen((v) => !v)} className="mt-1 text-sm text-[#e6dccb] underline-offset-2 hover:underline">
+          <button type="button" aria-expanded={hpOpen} onClick={() => setHpOpen((v) => !v)} className="mt-1 text-sm text-hud-bone underline-offset-2 hover:underline">
             HP {sheet.hp.total}
           </button>
         </div>
@@ -57,8 +57,8 @@ export function CompactHero() {
   const { sheet } = useProfile();
 
   return (
-    <div className="flex items-center justify-between gap-2 px-4 pt-2 text-xs text-[#8f8473]">
-      <span className="hud-sc truncate text-sm text-[#efe5d2]">
+    <div className="flex items-center justify-between gap-2 px-4 pt-2 text-xs text-hud-muted">
+      <span className="hud-sc truncate text-sm text-hud-ink">
         {sheet.identity.name} · {sheet.identity.level}
       </span>
       <span className="shrink-0 tabular-nums">

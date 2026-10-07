@@ -26,7 +26,7 @@ export function ArtifactSetCardIcon({ url, name, className, size = "md" }: Artif
       name={name}
       alt={`Іконка сету «${name}»`}
       size={px}
-      className={cn("rounded-lg border border-[#4a3c2c] bg-[#1a140f] text-[#8f8473]", frame, className)}
+      className={cn("rounded-lg border border-hud-line bg-hud-field text-hud-muted", frame, className)}
       fallback={<Layers className={glyph} aria-hidden />}
     />
   );

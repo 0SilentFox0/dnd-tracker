@@ -30,7 +30,7 @@ interface SpellCardProps {
   printMode?: boolean;
 }
 
-const ICON_BTN = "size-7 shrink-0 text-[#8f8473] hover:text-[#efe5d2]";
+const ICON_BTN = "size-7 shrink-0 text-hud-muted hover:text-hud-ink";
 
 export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, onMoveToGroup, printMode = false }: SpellCardProps) {
   const [copied, setCopied] = useState(false);
@@ -53,7 +53,7 @@ export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, o
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const fallbackIcon = <Sparkles className="size-5 text-[#8f8473]" />;
+  const fallbackIcon = <Sparkles className="size-5 text-hud-muted" />;
 
   return (
     <HudCard className="flex h-full flex-col gap-2">
@@ -66,7 +66,7 @@ export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, o
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="hud-sc truncate text-[15px] text-[#efe5d2]">{spell.name}</h3>
+          <h3 className="hud-sc truncate text-[15px] text-hud-ink">{spell.name}</h3>
           <div className="mt-1 flex flex-wrap gap-1">
             <HudPill icon={<Sparkles className="size-3" />}>{spell.level === 0 ? "Cantrip" : spell.level}</HudPill>
             {spell.type === "aoe" && spell.damageType === "damage" ? (
@@ -120,16 +120,16 @@ export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, o
         </div>
       </div>
 
-      <p className="line-clamp-2 flex-1 text-xs text-[#8f8473]">{description}</p>
+      <p className="line-clamp-2 flex-1 text-xs text-hud-muted">{description}</p>
 
-      <div className="flex min-w-0 items-center gap-1.5 border-t border-[#2a2218] pt-1.5 text-[11px] text-[#8f8473]">
+      <div className="flex min-w-0 items-center gap-1.5 border-t border-[#2a2218] pt-1.5 text-[11px] text-hud-muted">
         <GroupIcon className="size-3 shrink-0" />
         <span className="truncate">{groupName}</span>
         {/* Тимчасово: ID заклинання та копіювання */}
         <code className="ml-auto max-w-[45%] truncate font-mono text-[10px]" title={spell.id}>
           {copied ? "Скопійовано" : spell.id}
         </code>
-        <Button variant="ghost" size="icon" className="size-6 shrink-0 text-[#8f8473]" onClick={handleCopyId} aria-label={copied ? "Скопійовано" : "Копіювати ID"} title={copied ? "Скопійовано" : "Копіювати ID"}>
+        <Button variant="ghost" size="icon" className="size-6 shrink-0 text-hud-muted" onClick={handleCopyId} aria-label={copied ? "Скопійовано" : "Копіювати ID"} title={copied ? "Скопійовано" : "Копіювати ID"}>
           <Copy className="size-3" />
         </Button>
       </div>

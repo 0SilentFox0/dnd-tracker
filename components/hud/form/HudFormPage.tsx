@@ -11,8 +11,8 @@ export function HudFormPage({ title, aside, children, className }: { title: Reac
   return (
     <div className={cn(HUD_SURFACE, "hud-form hud-form-page mx-auto flex min-h-dvh w-full max-w-3xl flex-col sm:my-4 sm:min-h-0 sm:rounded-xl", className)}>
       <header className="flex flex-col gap-1 border-b border-[rgba(230,220,203,.14)] px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-        <h1 className="hud-sc text-[17px] text-[#efe5d2]">{title}</h1>
-        {aside && <span className="text-xs text-[#8f8473] sm:text-sm sm:text-[#b8ab95]">{aside}</span>}
+        <h1 className="hud-sc text-[17px] text-hud-ink">{title}</h1>
+        {aside && <span className="text-xs text-hud-muted sm:text-sm sm:text-[#b8ab95]">{aside}</span>}
       </header>
       <HudPortalClassProvider value={HUD_SURFACE}>{children}</HudPortalClassProvider>
     </div>

@@ -62,7 +62,7 @@ export function BattleLogPanel({
     <div
       className={cn(
         "overflow-y-auto custom-scrollbar",
-        embedInSidebar ? "h-[min(50vh,400px)] border border-[#3a2e22] bg-black/40" : "max-h-48 border-t border-[#3a2e22]",
+        embedInSidebar ? "h-[min(50vh,400px)] border border-hud-rule bg-black/40" : "max-h-48 border-t border-hud-rule",
       )}
     >
           <ul className="px-2 py-1 text-sm text-[#cfc5b2]">
@@ -111,7 +111,7 @@ export function BattleLogPanel({
                             "shrink-0 font-medium",
                             entry.actorSide === "ally"
                               ? "text-[#8fb0d0]"
-                              : "text-[#d0705c]",
+                              : "text-hud-danger",
                           )}
                         >
                           {entry.actorName}
@@ -123,7 +123,7 @@ export function BattleLogPanel({
                       {isDM && onRollback && canRollbackEntry(battle, entry) && (
                         <button
                           type="button"
-                          className="flex size-8 shrink-0 items-center justify-center text-[#d0705c] transition-colors hover:bg-[#d0705c]/15"
+                          className="flex size-8 shrink-0 items-center justify-center text-hud-danger transition-colors hover:bg-hud-danger/15"
                           title="Відмінити дію (відкотити до стану перед нею)"
                           onClick={async () => {
                             if (
@@ -181,7 +181,7 @@ export function BattleLogPanel({
   return (
     <div
       className={cn(
-        "z-30 shrink-0 overflow-hidden border-t border-[#3a2e22] bg-[#14100c]/[.97]",
+        "z-30 shrink-0 overflow-hidden border-t border-hud-rule bg-[#14100c]/[.97]",
         className,
       )}
     >

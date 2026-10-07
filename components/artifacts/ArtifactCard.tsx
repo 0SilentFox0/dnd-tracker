@@ -92,11 +92,11 @@ export function ArtifactCard({
 
   if (variant === "compact") {
     return (
-      <div className="rounded-md bg-[#1a140f] p-2 shadow-[inset_0_0_0_1px_#4a3c2c]">
+      <div className="rounded-md bg-hud-field p-2 shadow-[inset_0_0_0_1px_var(--color-hud-line)]">
         <div className="flex items-center gap-2">
           <EntityIcon src={artifact.icon} name={artifact.name} size={40} className="text-sm" />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-[#efe5d2]">{artifact.name}</p>
+            <p className="truncate text-sm font-semibold text-hud-ink">{artifact.name}</p>
             <div className="flex gap-2 flex-wrap items-center mt-1">
               {artifact.rarity && (
                 <Badge variant="outline" className="text-xs">
@@ -119,7 +119,7 @@ export function ArtifactCard({
           </div>
         </div>
         {artifact.description && (
-          <p className="mt-2 text-xs text-[#8f8473]">
+          <p className="mt-2 text-xs text-hud-muted">
             {artifact.description}
           </p>
         )}
@@ -137,7 +137,7 @@ export function ArtifactCard({
       <div className="flex items-start gap-3">
         <EntityIcon src={artifact.icon} name={artifact.name} size={64} className="size-12 rounded-lg text-xl sm:size-16" />
         <div className="flex min-w-0 flex-1 items-start justify-between gap-2">
-          <h3 className="hud-sc min-w-0 flex-1 truncate text-base text-[#efe5d2]">{artifact.name}</h3>
+          <h3 className="hud-sc min-w-0 flex-1 truncate text-base text-hud-ink">{artifact.name}</h3>
           {artifact.rarity && (
             <Badge variant="outline" className="shrink-0">
               {artifact.rarity}
@@ -152,7 +152,7 @@ export function ArtifactCard({
         )}
       </div>
       {artifact.description && (
-        <p className="line-clamp-2 text-sm text-[#8f8473]">
+        <p className="line-clamp-2 text-sm text-hud-muted">
           {artifact.description}
         </p>
       )}

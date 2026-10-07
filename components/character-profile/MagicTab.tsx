@@ -23,12 +23,12 @@ export function MagicTab() {
   return (
     <>
       {sheet.magic && (
-        <div className="mb-4 flex flex-wrap justify-between gap-2 text-sm text-[#8f8473]">
+        <div className="mb-4 flex flex-wrap justify-between gap-2 text-sm text-hud-muted">
           <span>
-            СЛ заклинань <b className="text-lg text-[#efe5d2]">{sheet.magic.saveDC}</b>
+            СЛ заклинань <b className="text-lg text-hud-ink">{sheet.magic.saveDC}</b>
           </span>
           <span>
-            Атака закл. <b className="text-lg text-[#efe5d2]">{signed(sheet.magic.attackBonus)}</b>
+            Атака закл. <b className="text-lg text-hud-ink">{signed(sheet.magic.attackBonus)}</b>
           </span>
           <span>{sheet.magic.ability}</span>
         </div>

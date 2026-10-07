@@ -108,7 +108,7 @@ export function CampaignSettingsDialog({ campaignId, campaign, open, onOpenChang
         </div>
       </HudSection>
       {error && (
-        <p role="alert" className="mt-4 rounded-md border border-[#d0705c]/50 bg-[#d0705c]/10 px-3 py-2 text-sm text-[#f0b4a6]">
+        <p role="alert" className="mt-4 rounded-md border border-hud-danger/50 bg-hud-danger/10 px-3 py-2 text-sm text-[#f0b4a6]">
           {error}
         </p>
       )}

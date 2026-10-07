@@ -67,12 +67,12 @@ export function AbilityListEditor({ campaignId, value, onChange, issues = [], on
         title={
           <>
             Вміння · {value.length}
-            {errorCount > 0 && <span className="ml-2 text-[#d0705c]">помилок: {errorCount}</span>}
+            {errorCount > 0 && <span className="ml-2 text-hud-danger">помилок: {errorCount}</span>}
           </>
         }
       >
         {issues.length > 0 && (
-          <div className="mb-2 rounded-md border border-[#c9a04a]/50 bg-[#c9a04a]/10 p-2 text-xs text-[#efe5d2]">
+          <div className="mb-2 rounded-md border border-[#c9a04a]/50 bg-[#c9a04a]/10 p-2 text-xs text-hud-ink">
             <p className="font-medium">Збережені вміння мають невалідні дані — перевірте перед збереженням:</p>
             <ul className="list-disc pl-4">
               {issues.map((i, idx) => (
@@ -90,7 +90,7 @@ export function AbilityListEditor({ campaignId, value, onChange, issues = [], on
             actions={{ onChange: (next) => onChange(value.map((a, i) => (i === index ? next : a))), onRemove: remove }}
           />
         ) : (
-          <p className="py-2 text-sm text-[#8f8473]">Вмінь ще немає</p>
+          <p className="py-2 text-sm text-hud-muted">Вмінь ще немає</p>
         )}
       </HudSection>
       <AbilityTemplatePicker open={pickerOpen} onOpenChange={setPickerOpen} onPick={add} />

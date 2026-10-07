@@ -58,7 +58,7 @@ export function ParticipantDetails({ participant }: { participant: BattlePartici
 
           return (
             <div key={e.id} className="flex gap-3 border-b border-white/[.08] py-2.5">
-              <span className={cn("flex size-9 shrink-0 items-center justify-center border", e.type === "buff" ? "border-[#cdb87e]" : "border-[#d0705c]")}>
+              <span className={cn("flex size-9 shrink-0 items-center justify-center border", e.type === "buff" ? "border-[#cdb87e]" : "border-hud-danger")}>
                 {icon && <OptimizedImage src={icon} alt="" width={24} height={24} className="size-6 object-contain" />}
               </span>
               <div className="min-w-0 flex-1">

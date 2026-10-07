@@ -14,7 +14,7 @@ const SIZE_CLASS = { sm: "sm:max-w-sm", md: "sm:max-w-lg", lg: "sm:max-w-2xl" } 
 
 const InsideSheet = createContext(false);
 
-const HUD_TITLE = "hud-sc font-normal text-[#efe5d2]";
+const HUD_TITLE = "hud-sc font-normal text-hud-ink";
 
 const LAYOUT_TOKEN = /^(sm:|md:|lg:|fixed$|absolute$|inset-|top-|bottom-|left-|right-|-?translate-|w-|max-w-|max-h-|min-h-|overflow-)/;
 
@@ -70,7 +70,7 @@ export function ResponsiveDialog({ open, onOpenChange, title, description, foote
               <InsideSheet.Provider value={true}>{body}</InsideSheet.Provider>
             </div>
             {footer ? (
-              <div data-slot="sheet-footer" className={cn("flex gap-2 border-t bg-background px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] [&>*]:flex-1", hud && "border-[#3a2e22] bg-[#110e0b]/95")}>
+              <div data-slot="sheet-footer" className={cn("flex gap-2 border-t bg-background px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] [&>*]:flex-1", hud && "border-hud-rule bg-[#110e0b]/95")}>
                 {footer}
               </div>
             ) : null}
@@ -98,7 +98,7 @@ export function ResponsiveDialog({ open, onOpenChange, title, description, foote
           {description ? <DialogDescription>{description}</DialogDescription> : null}
         </DialogHeader>
         <div className="-mx-1 min-h-0 flex-1 overflow-y-auto px-1">{body}</div>
-        {footer ? <DialogFooter className={cn(hud && "border-[#3a2e22] bg-[#110e0b]/95")}>{footer}</DialogFooter> : null}
+        {footer ? <DialogFooter className={cn(hud && "border-hud-rule bg-[#110e0b]/95")}>{footer}</DialogFooter> : null}
       </DialogContent>
     </Dialog>
   );

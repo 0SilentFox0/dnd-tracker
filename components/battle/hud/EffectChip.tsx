@@ -4,7 +4,7 @@ import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { cn } from "@/lib/utils";
 import type { ActiveEffect } from "@/types/battle";
 
-const tone = (e: ActiveEffect) => (e.type === "buff" ? "text-[#cdb87e]" : "text-[#d0705c]");
+const tone = (e: ActiveEffect) => (e.type === "buff" ? "text-[#cdb87e]" : "text-hud-danger");
 
 function EffectChip({ effect }: { effect: ActiveEffect }) {
   const icon = effect.icon ?? effect.source?.icon;

@@ -162,7 +162,7 @@ export default async function DMArtifactsPage({
 
       {artifacts.length === 0 && artifactSets.length === 0 && (
         <EmptyState
-          className="bg-[rgba(17,14,11,.82)]"
+          className="bg-hud-panel"
           icon={Gem}
           title="Ще немає артефактів"
           action={

@@ -30,12 +30,12 @@ export function AbilityChips({ abilities, selectedId, invalidIds, onSelect, onAd
             aria-selected={on}
             onClick={() => onSelect(a.id)}
             className={cn(
-              "flex h-8 shrink-0 items-center rounded-full px-3 text-[13px] text-[#8f8473] shadow-[inset_0_0_0_1px_#4a3c2c]",
+              "flex h-8 shrink-0 items-center rounded-full px-3 text-[13px] text-hud-muted shadow-[inset_0_0_0_1px_var(--color-hud-line)]",
               on && "text-[#ffd9a8] shadow-[inset_0_0_0_1px_#e6c25a,0_0_8px_rgba(230,194,90,.3)]",
             )}
           >
             <span className="max-w-[10rem] truncate">{a.name || "Без назви"}</span>
-            {invalidIds.has(a.id) && <span data-invalid-dot aria-label="є помилки" className="ml-1.5 h-1.5 w-1.5 rounded-full bg-[#d0705c]" />}
+            {invalidIds.has(a.id) && <span data-invalid-dot aria-label="є помилки" className="ml-1.5 h-1.5 w-1.5 rounded-full bg-hud-danger" />}
           </button>
         );
       })}

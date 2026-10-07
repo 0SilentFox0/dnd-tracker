@@ -47,7 +47,7 @@ export default async function DMArtifactSetsPage({
 
       {sets.length === 0 ? (
         <EmptyState
-          className="bg-[rgba(17,14,11,.82)]"
+          className="bg-hud-panel"
           icon={Layers}
           title="Ще немає сетів"
           description="Сет дає бонус, коли персонаж носить усі його артефакти."

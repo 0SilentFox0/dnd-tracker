@@ -26,7 +26,7 @@ export function RacialRow({ states, tree, dto, onSelect }: { states: NodeState[]
           return (
             <div key={level} className="flex flex-col items-center">
               <SlotButton state={state} label={skill?.name ?? `Расове · ${BRANCH_LEVEL_LABEL[level]}`} icon={skill?.icon ?? null} onSelect={() => onSelect(state)} />
-              {state.reason === "racialLevel" && <span className="text-[10px] text-[#8f8473]">рівень {RACIAL_MIN_LEVEL[level]}+</span>}
+              {state.reason === "racialLevel" && <span className="text-[10px] text-hud-muted">рівень {RACIAL_MIN_LEVEL[level]}+</span>}
             </div>
           );
         })}
