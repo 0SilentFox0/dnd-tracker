@@ -271,6 +271,9 @@ export interface BattleAction {
     isHit?: boolean;
     isCritical?: boolean;
     isCriticalFail?: boolean;
+    /** Другий d20 (перевага/недолік) і кубик, що пішов у розрахунок */
+    secondRoll?: { mode: "advantage" | "disadvantage"; value: number; serverRolled: boolean };
+    chosenD20?: number;
     // Для урону:
     damageRolls?: Array<{
       dice: string;

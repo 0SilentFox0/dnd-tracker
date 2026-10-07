@@ -71,9 +71,17 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     rng: flow.ctx.rng,
   });
 
-  if (attackRoll.secondRoll?.serverRolled) {
-    flow.messages.push(`🎲 ${attackRoll.secondRoll.mode === "advantage" ? "перевага" : "недолік"}: другий d20 = ${attackRoll.secondRoll.value}`);
+  const second = attackRoll.secondRoll;
+
+  if (second) {
+    flow.messages.push(`🎲 ${second.mode === "advantage" ? "перевага" : "недолік"}: другий d20 = ${second.value}${second.serverRolled ? " (сервер)" : ""}, обрано ${attackRoll.chosenD20}`);
   }
+
+  const withRollDetails = <T extends { actionDetails: object }>(action: T): T => {
+    if (second) Object.assign(action.actionDetails, { secondRoll: second, chosenD20: attackRoll.chosenD20 });
+
+    return action;
+  };
 
   const targetAC = getEffectiveArmorClass(getP(flow, targetId), flow.ps, actionModifiers[targetId]);
 
@@ -86,6 +94,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
   if (attackRoll.isCriticalFail && attackRoll.criticalEffect) {
     const r = handleCriticalFail(branch);
 
+    withRollDetails(r.battleAction);
     appendHpChanges(r.battleAction, before, flow.ps);
 
     return r;
@@ -94,6 +103,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
   if (!isHit) {
     const r = handleMiss(branch);
 
+    withRollDetails(r.battleAction);
     appendHpChanges(r.battleAction, before, flow.ps);
 
     return r;
@@ -148,6 +158,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     currentRound,
   });
 
+  withRollDetails(battleAction);
   appendHpChanges(battleAction, before, flow.ps);
 
   return {

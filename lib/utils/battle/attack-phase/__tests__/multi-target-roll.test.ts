@@ -33,7 +33,8 @@ describe("multi-target advantage resolution", () => {
   it("without client second rolls the server rolls once per affected target", () => {
     const r = run([attacker, foe("t1", [hindering]), foe("t2")], { targetIds: ["t1", "t2"], attackRolls: [17, 17] });
 
-    expect(r.allBattleActions[0].resultText).toContain("недолік: другий d20 = 11");
+    expect(r.allBattleActions[0].resultText).toContain("недолік: другий d20 = 11 (сервер), обрано 11");
+    expect(r.allBattleActions[0].actionDetails).toMatchObject({ chosenD20: 11, secondRoll: { serverRolled: true } });
     expect(r.allBattleActions[1].resultText).not.toContain("другий d20");
   });
 
@@ -41,7 +42,9 @@ describe("multi-target advantage resolution", () => {
     const r = run([attacker, foe("t1", [hindering])], { targetId: "t1", attackRoll: 17, disadvantageRoll: 2 });
 
     expect(hits(r)).toEqual([false]);
-    expect(r.allBattleActions[0].resultText).not.toContain("другий d20");
+    expect(r.allBattleActions[0].resultText).toContain("другий d20 = 2, обрано 2");
+    expect(r.allBattleActions[0].resultText).not.toContain("(сервер)");
+    expect(r.allBattleActions[0].actionDetails).toMatchObject({ chosenD20: 2, secondRoll: { mode: "disadvantage", value: 2, serverRolled: false } });
   });
 
   it("advantage and disadvantage cancel out", () => {

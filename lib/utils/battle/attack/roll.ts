@@ -71,6 +71,7 @@ export function calculateAttackRoll(
     attackBonus,
     criticalEffect,
     advantageUsed,
+    chosenD20: finalRoll,
     ...(secondRoll && { secondRoll }),
   };
 }
