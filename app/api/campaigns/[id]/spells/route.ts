@@ -10,6 +10,7 @@ import { createSpellSchema } from "@/lib/schemas";
 import { requireCampaignAccess,requireDM } from "@/lib/utils/api/api-auth";
 import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { parseBody } from "@/lib/utils/api/parse-body";
 import { loadBookSpellsByIds } from "@/lib/utils/spells/book-spells-by-ids";
 
 export async function POST(
@@ -25,9 +26,9 @@ export async function POST(
       return accessResult;
     }
 
-    const body = await request.json();
+    const data = await parseBody(createSpellSchema, request);
 
-    const data = createSpellSchema.parse(body);
+    if (data instanceof NextResponse) return data;
 
     const spell = await prisma.spell.create({
       data: {

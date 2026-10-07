@@ -3,7 +3,9 @@ import type { Prisma } from "@prisma/client";
 
 import { loadProgressionContext } from "./load-progression-context";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import { errorResponse } from "@/lib/utils/api/api-response";
 import { canLearn, canUnlearn, normalizeTree, readUnlocked, type TreeNodes, writeUnlocked } from "@/lib/utils/skills/progression";
 
 export type ProgressionAction = { type: "learn"; nodeId: string } | { type: "unlearn"; nodeIds: string[] } | { type: "reset" };
@@ -37,7 +39,7 @@ export async function runProgressionAction(campaignId: string, characterId: stri
 
   const { character, treeRow, isDM, progressRead } = ctx;
 
-  if (action.type !== "learn" && !isDM) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (action.type !== "learn" && !isDM) return errorResponse(API_ERRORS.FORBIDDEN, 403);
 
   let nextProgress: Prisma.InputJsonValue;
 
@@ -76,7 +78,7 @@ export async function markLevelSeen(campaignId: string, characterId: string): Pr
 
   if (ctx instanceof NextResponse) return ctx;
 
-  if (!ctx.isOwner) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!ctx.isOwner) return errorResponse(API_ERRORS.FORBIDDEN, 403);
 
   await prisma.character.updateMany({ where: { id: ctx.character.id }, data: { seenLevel: ctx.character.level } });
 

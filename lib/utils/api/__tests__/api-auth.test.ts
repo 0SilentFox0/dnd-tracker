@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { requireAuth, requireAuthUser, requireCampaignAccess, requireDM, validateCampaignOwnership } from "../api-auth";
+import { requireAuth, requireAuthUser, requireCampaignAccess, requireDM } from "../api-auth";
 
 import { CampaignRole, type CampaignRoleValue } from "@/lib/constants/campaigns";
 
@@ -124,17 +124,4 @@ describe("api-auth", () => {
     });
   });
 
-  describe("validateCampaignOwnership", () => {
-    it("немає запису — 404", () => {
-      expect(validateCampaignOwnership(null, "c1")?.status).toBe(404);
-    });
-
-    it("запис іншої кампанії — 403", () => {
-      expect(validateCampaignOwnership({ campaignId: "c2" }, "c1")?.status).toBe(403);
-    });
-
-    it("запис цієї кампанії — null", () => {
-      expect(validateCampaignOwnership({ campaignId: "c1" }, "c1")).toBeNull();
-    });
-  });
 });

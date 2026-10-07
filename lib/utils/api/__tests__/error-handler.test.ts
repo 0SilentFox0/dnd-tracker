@@ -35,7 +35,8 @@ describe("handleApiError", () => {
 
     const body = await res.json();
 
-    expect(Array.isArray(body.error)).toBe(true);
+    expect(body.error).toBe("Некоректні дані запиту");
+    expect(Array.isArray(body.issues)).toBe(true);
   });
 
   it("Prisma P2025 → 404", async () => {
@@ -50,7 +51,7 @@ describe("handleApiError", () => {
 
     const body = await res.json();
 
-    expect(body.error).toBe("Not found");
+    expect(body.error).toBe("Не знайдено");
   });
 
   it("Prisma P2003 → 400 (FK violation)", async () => {
@@ -65,7 +66,7 @@ describe("handleApiError", () => {
 
     const body = await res.json();
 
-    expect(body.error).toBe("Foreign key constraint failed");
+    expect(body.error).toBe("Пов'язаний запис не існує");
   });
 
   it("Прочий Prisma код → 500", async () => {
@@ -88,7 +89,7 @@ describe("handleApiError", () => {
 
     const body = await res.json();
 
-    expect(body.error).toBe("Internal server error");
+    expect(body.error).toBe("Внутрішня помилка сервера");
     expect(JSON.stringify(body)).not.toContain("internal database secret leak");
   });
 

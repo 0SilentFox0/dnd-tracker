@@ -4,8 +4,10 @@ import { Prisma } from "@prisma/client";
 import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import { updateSpellSchema } from "@/lib/schemas";
-import { requireCampaignAccess, requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
+import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { loadOwned } from "@/lib/utils/api/load-owned";
+import { parseBody } from "@/lib/utils/api/parse-body";
 
 export async function GET(
   request: Request,
@@ -20,18 +22,17 @@ export async function GET(
       return accessResult;
     }
 
-    const spell = await prisma.spell.findUnique({
-      where: { id: spellId },
-      include: {
-        spellGroup: true,
-      },
-    });
+    const spell = await loadOwned(
+      prisma.spell.findUnique({
+        where: { id: spellId },
+        include: {
+          spellGroup: true,
+        },
+      }),
+      id,
+    );
 
-    const validationError = validateCampaignOwnership(spell, id);
-
-    if (validationError) {
-      return validationError;
-    }
+    if (spell instanceof NextResponse) return spell;
 
     return NextResponse.json(spell);
   } catch (error) {
@@ -52,19 +53,18 @@ export async function PATCH(
       return accessResult;
     }
 
-    const spell = await prisma.spell.findUnique({
-      where: { id: spellId },
-    });
+    const spell = await loadOwned(
+      prisma.spell.findUnique({
+        where: { id: spellId },
+      }),
+      id,
+    );
 
-    const validationError = validateCampaignOwnership(spell, id);
+    if (spell instanceof NextResponse) return spell;
 
-    if (validationError) {
-      return validationError;
-    }
+    const data = await parseBody(updateSpellSchema, request);
 
-    const body = await request.json();
-
-    const data = updateSpellSchema.parse(body);
+    if (data instanceof NextResponse) return data;
 
     const updatedSpell = await prisma.spell.update({
       where: { id: spellId },
@@ -138,16 +138,15 @@ export async function DELETE(
       return accessResult;
     }
 
-    const spell = await prisma.spell.findUnique({
-      where: { id: spellId },
-      select: { campaignId: true },
-    });
+    const spell = await loadOwned(
+      prisma.spell.findUnique({
+        where: { id: spellId },
+        select: { campaignId: true },
+      }),
+      id,
+    );
 
-    const validationError = validateCampaignOwnership(spell, id);
-
-    if (validationError) {
-      return validationError;
-    }
+    if (spell instanceof NextResponse) return spell;
 
     await prisma.spell.deleteMany({
       where: { id: spellId },

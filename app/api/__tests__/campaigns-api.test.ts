@@ -63,7 +63,7 @@ describe("GET /api/campaigns/[id]", () => {
 
     const data = await getResponseJson<{ error: string }>(response);
 
-    expect(data.error).toBe("Campaign not found");
+    expect(data.error).toBe("Кампанію не знайдено");
   });
 
   it("повертає 403, якщо користувач не учасник кампанії", async () => {
@@ -99,7 +99,7 @@ describe("GET /api/campaigns/[id]", () => {
 
     const data = await getResponseJson<{ error: string }>(response);
 
-    expect(data.error).toBe("Forbidden");
+    expect(data.error).toBe("Недостатньо прав");
   });
 
   it("повертає 200 та кампанію, якщо користувач — учасник", async () => {
@@ -185,6 +185,7 @@ describe("PATCH /api/campaigns/[id]", () => {
 
     vi.mocked(apiAuth.requireDM).mockResolvedValue({
       userId: "dm-1",
+      isDM: false,
       campaign: {
         id: campaignId,
         maxLevel: 20,

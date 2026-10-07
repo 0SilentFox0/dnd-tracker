@@ -14,8 +14,6 @@ vi.mock("@/lib/cache/reference-data", () => ({ getCachedUnits: vi.fn(async () =>
 vi.mock("@/lib/utils/api/api-auth", () => ({
   requireDM: vi.fn(async () => ({ userId: "dm" })),
   requireCampaignAccess: vi.fn(async () => ({ userId: "dm" })),
-  validateCampaignOwnership: (item: { campaignId: string } | null, campaignId: string) =>
-    !item ? NextResponse.json({ error: "Not found" }, { status: 404 }) : item.campaignId !== campaignId ? NextResponse.json({ error: "Forbidden" }, { status: 403 }) : null,
 }));
 
 import * as one from "@/app/api/campaigns/[id]/units/[unitId]/route";

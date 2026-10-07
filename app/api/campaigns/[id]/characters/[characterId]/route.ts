@@ -1,199 +1,48 @@
 import { NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
 
-import { buildCharacterUpdateData, resolveFinalLevel } from "./build-character-update-data";
-import { loadRaceProgression } from "./load-race-progression";
-import { updateCharacterSchema } from "./update-character-schema";
+import { patchCharacter } from "./patch-character";
+import { readCharacter } from "./read-character";
 
-import { CampaignRole } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
-import { requireAuth, requireCampaignAccess, requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
+import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { loadOwned } from "@/lib/utils/api/load-owned";
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string; characterId: string }> }
-) {
+type RouteContext = { params: Promise<{ id: string; characterId: string }> };
+
+export async function GET(_request: Request, { params }: RouteContext) {
   try {
     const { id, characterId } = await params;
-    
-    // Перевіряємо авторизацію
-    const authResult = await requireAuth();
 
-    if (authResult instanceof NextResponse) {
-      return authResult;
-    }
-
-    const { userId } = authResult;
-
-    const character = await prisma.character.findUnique({
-      where: { id: characterId },
-      include: {
-        user: true,
-        inventory: true,
-        campaign: {
-          include: {
-            members: {
-              where: { userId },
-            },
-          },
-        },
-      },
-    });
-
-    if (!character || character.campaignId !== id) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
-    }
-
-    // Перевіряємо права доступу (DM або власник)
-    const isDM = character.campaign.members[0]?.role === CampaignRole.DM;
-
-    const isOwner = character.controlledBy === userId;
-
-    if (!isDM && !isOwner) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
-    // Нормалізуємо knownSpells до масиву для коректного відображення у формі
-    const knownSpells = Array.isArray(character.knownSpells)
-      ? character.knownSpells
-      : [];
-
-    return NextResponse.json({
-      ...character,
-      knownSpells,
-    });
+    return await readCharacter(id, characterId);
   } catch (error) {
     return handleApiError(error, { action: "fetch character" });
   }
 }
 
-export async function PATCH(
-  request: Request,
-  { params }: { params: Promise<{ id: string; characterId: string }> }
-) {
+export async function PATCH(request: Request, { params }: RouteContext) {
   try {
     const { id, characterId } = await params;
 
-    const accessResult = await requireCampaignAccess(id, false);
-
-    if (accessResult instanceof NextResponse) {
-      return accessResult;
-    }
-
-    const { userId, campaign } = accessResult;
-
-    const character = await prisma.character.findUnique({
-      where: { id: characterId },
-    });
-
-    const validationError = validateCampaignOwnership(character, id);
-
-    if (validationError) {
-      return validationError;
-    }
-
-    if (!character) {
-      return NextResponse.json({ error: "Character not found" }, { status: 404 });
-    }
-
-    const isDM = campaign.members[0]?.role === CampaignRole.DM;
-
-    const isOwner = character.controlledBy === userId;
-
-    const campaignWithAllow = await prisma.campaign.findUnique({
-      where: { id },
-      select: { allowPlayerEdit: true },
-    });
-
-    const allowPlayerEdit = campaignWithAllow?.allowPlayerEdit ?? false;
-
-    // Дозволити оновлення: DM завжди, або власник персонажа якщо allowPlayerEdit
-    if (!isDM && !(isOwner && allowPlayerEdit)) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
-    const body = await request.json();
-
-    let data = updateCharacterSchema.parse(body);
-
-    if (!isDM) {
-      data = {
-        ...data,
-        level: undefined,
-        experience: undefined,
-        controlledBy: character.controlledBy,
-        type: character.type,
-      } as typeof data;
-    }
-
-    const xpMultiplier = campaign.xpMultiplier ?? 1;
-
-    const finalLevel = resolveFinalLevel(character, data, xpMultiplier, campaign.maxLevel);
-
-    if (finalLevel > character.level && finalLevel > campaign.maxLevel) {
-      return NextResponse.json({ error: `Максимальний рівень кампанії — ${campaign.maxLevel}` }, { status: 422 });
-    }
-
-    const race = finalLevel > character.level ? await loadRaceProgression(id, data.race ?? character.race) : null;
-
-    const computed = buildCharacterUpdateData({ character, data, xpMultiplier, campaign, race });
-
-    const updatedCharacter = await prisma.character.update({
-      where: { id: characterId },
-      data: {
-        ...data,
-        level: computed.finalLevel,
-        ...computed.abilityScores,
-        ...(computed.spellSlots && { spellSlots: computed.spellSlots as Prisma.InputJsonValue }),
-        immunities: data.immunities !== undefined
-          ? (data.immunities as Prisma.InputJsonValue)
-          : (character.immunities as Prisma.InputJsonValue | undefined),
-        ...(computed.skillTreeProgressUpdate !== undefined && {
-          skillTreeProgress: computed.skillTreeProgressUpdate,
-        }),
-        ...(computed.seenLevel !== undefined && { seenLevel: computed.seenLevel }),
-      },
-      include: {
-        user: true,
-        inventory: true,
-      },
-    });
-
-    return NextResponse.json(updatedCharacter);
+    return await patchCharacter(request, id, characterId);
   } catch (error) {
     return handleApiError(error, { action: "update character" });
   }
 }
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string; characterId: string }> }
-) {
+export async function DELETE(_request: Request, { params }: RouteContext) {
   try {
     const { id, characterId } = await params;
-    
-    // Перевіряємо права DM
+
     const accessResult = await requireDM(id);
 
-    if (accessResult instanceof NextResponse) {
-      return accessResult;
-    }
+    if (accessResult instanceof NextResponse) return accessResult;
 
-    const character = await prisma.character.findUnique({
-      where: { id: characterId },
-      select: { campaignId: true },
-    });
+    const character = await loadOwned(prisma.character.findUnique({ where: { id: characterId }, select: { campaignId: true } }), id);
 
-    const validationError = validateCampaignOwnership(character, id);
+    if (character instanceof NextResponse) return character;
 
-    if (validationError) {
-      return validationError;
-    }
-
-    await prisma.character.deleteMany({
-      where: { id: characterId },
-    });
+    await prisma.character.deleteMany({ where: { id: characterId } });
 
     return NextResponse.json({ success: true });
   } catch (error) {

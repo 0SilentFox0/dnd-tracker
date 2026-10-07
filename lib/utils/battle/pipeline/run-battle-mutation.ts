@@ -6,6 +6,7 @@ import { buildPusherMessages, toBattleResponse } from "./battle-response";
 import { buildClientDelta } from "./client-delta";
 import { defaultPipelineDeps } from "./default-deps";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BattleStatus } from "@/lib/constants/battle";
 import { isActive } from "@/lib/utils/abilities/engine/participants";
 import type { Rng } from "@/lib/utils/abilities/engine/types";
@@ -147,7 +148,7 @@ export function battleErrorResponse(err: unknown): NextResponse {
 
   console.error("[battle-pipeline] unexpected error", err);
 
-  return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  return NextResponse.json({ error: API_ERRORS.INTERNAL }, { status: 500 });
 }
 
 async function readBody<TBody>(req: Request, schema?: ZodType<TBody>) {
@@ -178,7 +179,7 @@ export async function runBattleMutation<TBody>(
 
     const userId = await deps.getUserId();
 
-    if (!userId) throw new BattleAccessError(401, "Unauthorized");
+    if (!userId) throw new BattleAccessError(401, API_ERRORS.UNAUTHORIZED);
 
     const [rate, loaded, parsed] = await Promise.all([
       options.rateLimitScope ? deps.rateLimit({ userId, scope: options.rateLimitScope, battleId }) : null,
@@ -189,12 +190,12 @@ export async function runBattleMutation<TBody>(
     if (rate && !rate.allowed) return rateLimitResponse(rate);
 
     if (!parsed.ok) {
-      return NextResponse.json({ error: "invalid_body", issues: parsed.issues }, { status: 400 });
+      return NextResponse.json({ error: API_ERRORS.INVALID_BODY, issues: parsed.issues }, { status: 400 });
     }
 
-    if (!loaded) throw new BattleAccessError(404, "Not found");
+    if (!loaded) throw new BattleAccessError(404, API_ERRORS.NOT_FOUND);
 
-    if (!loaded.isMember) throw new BattleAccessError(403, "Forbidden");
+    if (!loaded.isMember) throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
 
     const ctx: BattleMutationContext = {
       scene: loaded.scene,

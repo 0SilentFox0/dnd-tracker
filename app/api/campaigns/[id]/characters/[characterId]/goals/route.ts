@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
 
-import { CampaignRole } from "@/lib/constants/campaigns";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { parseGoals, putGoalsSchema } from "@/lib/schemas/character-goals";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
+import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { parseBody } from "@/lib/utils/api/parse-body";
 import { mergeDmGoals, mergePlayerGoals } from "@/lib/utils/characters/goals";
 import type { CharacterGoal } from "@/types/characters";
 
@@ -19,19 +21,19 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
     const character = await prisma.character.findUnique({ where: { id: characterId }, select: { id: true, campaignId: true, controlledBy: true, goals: true } });
 
-    if (!character || character.campaignId !== id) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (!character || character.campaignId !== id) return errorResponse(API_ERRORS.NOT_FOUND, 404);
 
-    const isDM = access.campaign.members[0]?.role === CampaignRole.DM;
+    const isDM = access.isDM;
 
-    if (!isDM && character.controlledBy !== access.userId) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!isDM && character.controlledBy !== access.userId) return errorResponse(API_ERRORS.FORBIDDEN, 403);
 
-    const parsed = putGoalsSchema.safeParse(await request.json().catch(() => null));
+    const parsed = await parseBody(putGoalsSchema, request, "Некоректні цілі");
 
-    if (!parsed.success) return NextResponse.json({ error: "Некоректні цілі" }, { status: 400 });
+    if (parsed instanceof NextResponse) return parsed;
 
     const current = parseGoals(character.goals);
 
-    const goals: CharacterGoal[] = isDM ? mergeDmGoals(current, parsed.data.goals, parsed.data.seen) : mergePlayerGoals(current, parsed.data.goals);
+    const goals: CharacterGoal[] = isDM ? mergeDmGoals(current, parsed.goals, parsed.seen) : mergePlayerGoals(current, parsed.goals);
 
     const updated = await prisma.character.update({ where: { id: characterId }, data: { goals: goals as unknown as Prisma.InputJsonValue }, select: { goals: true } });
 

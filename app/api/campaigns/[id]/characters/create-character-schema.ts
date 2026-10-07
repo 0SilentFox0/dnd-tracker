@@ -62,3 +62,5 @@ export const createCharacterSchema = z.object({
   personalSkillId: z.string().optional().nullable(),
   primaryAbility: z.enum(ABILITY_KEYS).nullable().optional(),
 });
+
+export type CreateCharacterInput = z.infer<typeof createCharacterSchema>;

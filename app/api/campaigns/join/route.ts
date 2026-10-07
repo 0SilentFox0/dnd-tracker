@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 
 import { kvDel } from "@/lib/cache/kv";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CampaignRole, CampaignStatus } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { joinCampaignSchema } from "@/lib/schemas";
 import { requireAuthUser } from "@/lib/utils/api/api-auth";
+import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { parseBody } from "@/lib/utils/api/parse-body";
 
 export async function POST(request: Request) {
   try {
@@ -17,9 +20,11 @@ export async function POST(request: Request) {
 
     const { userId, authUser } = authResult;
 
-    const body = await request.json();
+    const parsedBody = await parseBody(joinCampaignSchema, request);
 
-    const { inviteCode } = joinCampaignSchema.parse(body);
+    if (parsedBody instanceof NextResponse) return parsedBody;
+
+    const { inviteCode } = parsedBody;
 
     // Знаходимо кампанію за кодом
     const campaign = await prisma.campaign.findUnique({
@@ -30,24 +35,18 @@ export async function POST(request: Request) {
     });
 
     if (!campaign) {
-      return NextResponse.json(
-        { error: "Campaign not found" },
-        { status: 404 }
-      );
+      return errorResponse(API_ERRORS.CAMPAIGN_NOT_FOUND, 404);
     }
 
     if (campaign.status !== CampaignStatus.ACTIVE) {
-      return NextResponse.json(
-        { error: "Campaign is not active" },
-        { status: 400 }
-      );
+      return errorResponse(API_ERRORS.CAMPAIGN_NOT_ACTIVE, 400);
     }
 
     // Перевіряємо чи юзер вже є учасником
     const existingMember = campaign.members.find((m) => m.userId === userId);
 
     if (existingMember) {
-      return NextResponse.json({ error: "Already a member" }, { status: 400 });
+      return errorResponse(API_ERRORS.ALREADY_MEMBER, 400);
     }
 
     // Перевіряємо чи юзер існує в базі

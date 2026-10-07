@@ -15,10 +15,10 @@
  *   });
  *   if (!rl.allowed) return rateLimitResponse(rl);
  */
-
 import { NextResponse } from "next/server";
 import { Ratelimit } from "@upstash/ratelimit";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { getRedisClient } from "@/lib/redis";
 
 export interface RateLimitInput {
@@ -127,7 +127,7 @@ export async function checkRateLimit(
 export function rateLimitResponse(rl: RateLimitResult): NextResponse {
   return NextResponse.json(
     {
-      error: "Too many requests",
+      error: API_ERRORS.TOO_MANY_REQUESTS,
       retryAfterSeconds: rl.retryAfterSeconds,
     },
     {

@@ -12,6 +12,7 @@ import { abilitiesJson } from "@/lib/utils/abilities/read";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { parseBody } from "@/lib/utils/api/parse-body";
 
 export async function GET(
   request: Request,
@@ -48,7 +49,9 @@ export async function POST(
       return accessResult;
     }
 
-    const data = createRaceSchema.parse(await request.json());
+    const data = await parseBody(createRaceSchema, request);
+
+    if (data instanceof NextResponse) return data;
 
     const conflict = await raceNameConflict(id, data.name);
 

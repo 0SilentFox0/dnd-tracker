@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/utils/api/api-auth", () => ({
   requireDM: vi.fn(async () => ({ userId: "u1" })),
   requireCampaignAccess: vi.fn(async () => ({ userId: "u1" })),
-  validateCampaignOwnership: vi.fn(() => null),
 }));
 
 vi.mock("@/lib/db", () => ({

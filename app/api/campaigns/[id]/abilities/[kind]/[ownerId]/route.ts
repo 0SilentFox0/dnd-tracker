@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { OwnerKind, readAbilities } from "@/lib/utils/abilities/read";
 import { requireDM } from "@/lib/utils/api/api-auth";
+import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 
 async function findOwner(kind: OwnerKind, campaignId: string, id: string) {
@@ -32,11 +34,11 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
 
     if (auth instanceof NextResponse) return auth;
 
-    if (!KINDS.has(kind as OwnerKind)) return NextResponse.json({ error: "Unknown owner kind" }, { status: 400 });
+    if (!KINDS.has(kind as OwnerKind)) return errorResponse(API_ERRORS.UNKNOWN_OWNER_KIND, 400);
 
     const row = await findOwner(kind as OwnerKind, id, ownerId);
 
-    if (!row) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (!row) return errorResponse(API_ERRORS.NOT_FOUND, 404);
 
     return NextResponse.json({ abilities: readAbilities(kind as OwnerKind, row).abilities });
   } catch (error) {

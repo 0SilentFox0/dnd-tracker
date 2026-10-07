@@ -4,8 +4,9 @@ import type { Prisma } from "@prisma/client";
 import { loadRaceProgression } from "../load-race-progression";
 
 import { prisma } from "@/lib/db";
-import { requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
+import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { loadOwned } from "@/lib/utils/api/load-owned";
 import { applyLevelGain } from "@/lib/utils/characters/level-up/apply-level-gain";
 import { seenLevelOnLevelChange } from "@/lib/utils/characters/seen-level";
 
@@ -24,19 +25,14 @@ export async function POST(
 
     const { campaign } = accessResult;
 
-    const character = await prisma.character.findUnique({
-      where: { id: characterId },
-    });
+    const character = await loadOwned(
+      prisma.character.findUnique({
+        where: { id: characterId },
+      }),
+      id,
+    );
 
-    const validationError = validateCampaignOwnership(character, id);
-
-    if (validationError) {
-      return validationError;
-    }
-
-    if (!character) {
-      return NextResponse.json({ error: "Character not found" }, { status: 404 });
-    }
+    if (character instanceof NextResponse) return character;
 
     const newLevel = character.level + 1;
 

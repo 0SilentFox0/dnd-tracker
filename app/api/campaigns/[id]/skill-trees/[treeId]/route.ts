@@ -5,6 +5,7 @@ import { saveSkillTree } from "./save-skill-tree-handler";
 
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { parseBody } from "@/lib/utils/api/parse-body";
 
 const bodySchema = z.object({ race: z.string().min(1), skills: z.object({ mainSkills: z.array(z.object({ id: z.string() }).passthrough()) }).passthrough() });
 
@@ -16,11 +17,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
     if (access instanceof NextResponse) return access;
 
-    const parsed = bodySchema.safeParse(await request.json().catch(() => null));
+    const parsed = await parseBody(bodySchema, request, "Невалідне дерево");
 
-    if (!parsed.success) return NextResponse.json({ error: "Невалідне дерево" }, { status: 400 });
+    if (parsed instanceof NextResponse) return parsed;
 
-    return await saveSkillTree(id, treeId, parsed.data.race, parsed.data.skills);
+    return await saveSkillTree(id, treeId, parsed.race, parsed.skills);
   } catch (error) {
     return handleApiError(error, { action: "update skill tree" });
   }
