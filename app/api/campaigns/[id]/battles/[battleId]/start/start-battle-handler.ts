@@ -10,6 +10,7 @@
 
 
 import { buildCampaignContextForStart } from "./start-build-context";
+import { scaleEnemiesForFairBattle } from "./start-fair-scaling";
 
 import { ParticipantSide, ParticipantSourceType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
@@ -112,7 +113,7 @@ export async function buildStartOrder(
     }
   }
 
-  const built = await Promise.all(
+  const builtRaw = await Promise.all(
     slots.map((slot) =>
       slot.type === ParticipantSourceType.CHARACTER
         ? createBattleParticipantFromCharacter(
@@ -125,6 +126,8 @@ export async function buildStartOrder(
         : createBattleParticipantFromUnit(slot.unit, battleId, slot.side, slot.instanceNumber, racesById),
     ),
   );
+
+  const built = await scaleEnemiesForFairBattle(campaignId, slots, builtRaw, campaignContext);
 
   const initiativeOrder = applyBakedAuras(built, new Set(built.map((p) => p.basicInfo.id)));
 

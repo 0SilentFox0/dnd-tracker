@@ -3,8 +3,8 @@
  */
 
 import { calculateDamageWithModifiers } from "../../damage";
-import { heroAttackDamageParts, heroDamageContext } from "../../damage/hero-damage";
 import { applyBalanceDamageMultiplier } from "../../damage/balance-multiplier";
+import { heroAttackDamageParts, heroDamageContext } from "../../damage/hero-damage";
 import { applyHeroDmDamageMultiplier } from "../../damage/hero-dm-multiplier";
 import { applyResistance } from "../../resistance";
 import type { DamageCalculationResult } from "../../types/damage-calculations";

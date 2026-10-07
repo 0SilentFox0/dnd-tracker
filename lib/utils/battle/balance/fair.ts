@@ -232,7 +232,7 @@ export function computeFairScaling(party: PartyPower, roster: RosterEntry[], lib
 
   const verdict = verdictOf(target, reached);
 
-  const hint = verdict === "even" ? null : suggestHint(verdict, target, entries, hintPool, weakest);
+  const hint = verdict === "weak" || verdict === "excess" ? suggestHint(verdict, target, entries, hintPool, weakest) : null;
 
   return { verdict, target, base, reached, hpScale, dmgScale, units, hint };
 }
