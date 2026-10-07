@@ -6,6 +6,7 @@ import { Shield } from "lucide-react";
 import { EffectLine, HealthBar, HealthLabel, Portrait } from "@/components/battle/hud";
 import { useHpChange } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
+import { isDown } from "@/lib/utils/battle/participant/state";
 import { hpRatio } from "@/lib/utils/battle/view";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -16,11 +17,11 @@ export const ParticipantRow = memo(function ParticipantRow({ participant, exact,
   current: boolean;
   onSelect: (id: string) => void;
 }) {
-  const { currentHp, maxHp, status } = participant.combatStats;
+  const { currentHp, maxHp } = participant.combatStats;
 
   const change = useHpChange(currentHp);
 
-  const down = status !== "active" || currentHp <= 0;
+  const down = isDown(participant);
 
   return (
     <button

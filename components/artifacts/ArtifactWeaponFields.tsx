@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NumberInput } from "@/components/ui/number-input";
 import { SelectField } from "@/components/ui/select-field";
+import { AttackType } from "@/lib/constants/battle";
 import type { WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
 
 type NumberKey = "attackBonus" | "minTargets" | "maxTargets";
@@ -25,8 +26,8 @@ const NUMBER_FIELDS: Array<{ key: NumberKey; label: string }> = [
 ];
 
 const ATTACK_TYPE_OPTIONS = [
-  { value: "melee", label: "Ближня" },
-  { value: "ranged", label: "Дальня" },
+  { value: AttackType.MELEE, label: "Ближня" },
+  { value: AttackType.RANGED, label: "Дальня" },
 ];
 
 export function ArtifactWeaponFields({ value, onChange }: { value: WeaponStats; onChange: (next: WeaponStats) => void }) {

@@ -2,9 +2,9 @@
  * Застосовує збережену перевірку моралі (pendingMoraleCheck) при next-turn:
  * екстра-хід, подія moraleCheck для вмінь, запис у battleLog.
  */
-
 import type { PendingMoraleCheckPayload } from "./pending-morale";
 
+import { ParticipantSide } from "@/lib/constants/battle";
 import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -38,7 +38,7 @@ export function applyPendingMoraleCheck(
         timestamp: new Date(),
         actorId: participantId,
         actorName: "?",
-        actorSide: "ally",
+        actorSide: ParticipantSide.ALLY,
         actionType: "ability",
         targets: [],
         actionDetails: { d10Roll, morale: 0 },

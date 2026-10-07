@@ -1,8 +1,7 @@
 import { z } from "zod";
 
-import { runAttackPhase } from "@/lib/utils/battle/attack-and-next-turn/run-attack-phase";
+import { runAttackPhase } from "@/lib/utils/battle/attack-phase/run-attack-phase";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
-import { toPipelineError } from "@/lib/utils/battle/pipeline/compat-errors";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { battleActionToEvent } from "@/lib/utils/battle/store";
 import { advanceTurn, assertNotPanicking } from "@/lib/utils/battle/turn";
@@ -55,20 +54,14 @@ export function attackMutation(ctx: BattleMutationContext, body: AttackBody): Mu
   assertAttackInput(ctx, data);
   assertNotPanicking(ctx.scene.pendingMoraleCheck, data.attackerId);
 
-  let phase: ReturnType<typeof runAttackPhase>;
-
-  try {
-    phase = runAttackPhase({
-      battle: { initiativeOrder: ctx.participants, battleLog: [], currentRound: ctx.scene.round, currentTurnIndex: ctx.scene.turnIndex },
-      data,
-      battleId: ctx.scene.id,
-      userId: ctx.userId,
-      isDM: ctx.isDM,
-      rng: ctx.rng,
-    });
-  } catch (e) {
-    toPipelineError(e);
-  }
+  const phase = runAttackPhase({
+    battle: { initiativeOrder: ctx.participants, battleLog: [], currentRound: ctx.scene.round, currentTurnIndex: ctx.scene.turnIndex },
+    data,
+    battleId: ctx.scene.id,
+    userId: ctx.userId,
+    isDM: ctx.isDM,
+    rng: ctx.rng,
+  });
 
   const order = phase.finalInitiativeOrder;
 

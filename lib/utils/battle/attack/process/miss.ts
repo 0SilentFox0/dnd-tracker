@@ -7,7 +7,7 @@ import { type AttackFlow, fire, getP, put, settleDowned } from "./ability-flow";
 import { buildBattleActionForMiss } from "./actions";
 import { applyDamageToTarget } from "./damage";
 
-import { AttackType } from "@/lib/constants/battle";
+import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import type { BattleAttack } from "@/types/battle";
 
 export interface HandleMissParams {
@@ -43,7 +43,7 @@ export function handleMiss(params: HandleMissParams): ProcessAttackResult {
     phase: "after",
     actorId: attackerId,
     targetId,
-    attackKind: attack.type === AttackType.RANGED ? "ranged" : "melee",
+    attackKind: attackKindOf(attack.type),
   });
 
   put(flow, applyMainActionUsed(getP(flow, attackerId)));

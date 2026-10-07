@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import {
   getDamageModifierLabel,
   getHealModifierLabel,
+  spellLevelName,
 } from "@/lib/constants/spells";
 import {
   calculateAverageSpellEffect,
@@ -99,7 +100,7 @@ export function SelectedSpellsList({
                     </Badge>
                     {spell.level !== undefined && (
                       <Badge variant="secondary" className="text-xs">
-                        Рівень {spell.level === 0 ? "Cantrip" : spell.level}
+                        {spellLevelName(spell.level)}
                       </Badge>
                     )}
                   </div>

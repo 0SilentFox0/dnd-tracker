@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
+import { spellKeys } from "./keys";
+
 import {
   createSpell,
   createSpellGroup,
@@ -23,7 +25,7 @@ export type { Spell, SpellGroup };
 
 export function useSpells(campaignId: string, opts?: { initialData?: Spell[]; enabled?: boolean }) {
   return useQuery<Spell[]>({
-    queryKey: ["spells", campaignId],
+    queryKey: spellKeys.list(campaignId),
     queryFn: () => getSpells(campaignId),
     staleTime: REFERENCE_STALE_MS,
     ...(opts?.initialData !== undefined && { initialData: opts.initialData }),
@@ -33,7 +35,7 @@ export function useSpells(campaignId: string, opts?: { initialData?: Spell[]; en
 
 export function useSpellGroups(campaignId: string, opts?: { enabled?: boolean }) {
   return useQuery<SpellGroup[]>({
-    queryKey: ["spellGroups", campaignId],
+    queryKey: spellKeys.groups(campaignId),
     queryFn: () => getSpellGroups(campaignId),
     staleTime: REFERENCE_STALE_MS,
     enabled: opts?.enabled ?? true,
@@ -43,7 +45,7 @@ export function useSpellGroups(campaignId: string, opts?: { enabled?: boolean })
 export function useCreateSpellGroup(campaignId: string) {
   return useCrudMutation({
     mutationFn: (name: string) => createSpellGroup(campaignId, { name }),
-    invalidateKeys: [["spellGroups", campaignId]],
+    invalidateKeys: [spellKeys.groups(campaignId)],
   });
 }
 
@@ -52,8 +54,8 @@ export function useRenameSpellGroup(campaignId: string) {
     mutationFn: (data: { groupId: string; name: string }) =>
       renameSpellGroup(campaignId, data.groupId, data.name),
     invalidateKeys: [
-      ["spells", campaignId],
-      ["spellGroups", campaignId],
+      spellKeys.list(campaignId),
+      spellKeys.groups(campaignId),
     ],
   });
 }
@@ -62,14 +64,14 @@ export function useRemoveAllSpellsFromGroup(campaignId: string) {
   return useCrudMutation({
     mutationFn: (groupId: string) =>
       removeAllSpellsFromGroup(campaignId, groupId),
-    invalidateKeys: [["spells", campaignId]],
+    invalidateKeys: [spellKeys.list(campaignId)],
   });
 }
 
 export function useRemoveSpellFromGroup(campaignId: string) {
   return useCrudMutation({
     mutationFn: (spellId: string) => removeSpellFromGroup(campaignId, spellId),
-    invalidateKeys: [["spells", campaignId]],
+    invalidateKeys: [spellKeys.list(campaignId)],
   });
 }
 
@@ -77,7 +79,7 @@ export function useMoveSpellToGroup(campaignId: string) {
   return useCrudMutation({
     mutationFn: (data: { spellId: string; groupId: string | null }) =>
       moveSpellToGroup(campaignId, data.spellId, data.groupId),
-    invalidateKeys: [["spells", campaignId]],
+    invalidateKeys: [spellKeys.list(campaignId)],
   });
 }
 
@@ -85,15 +87,15 @@ export function useDeleteAllSpells(campaignId: string) {
   return useCrudMutation({
     mutationFn: () => deleteAllSpells(campaignId),
     invalidateKeys: [
-      ["spells", campaignId],
-      ["spellGroups", campaignId],
+      spellKeys.list(campaignId),
+      spellKeys.groups(campaignId),
     ],
   });
 }
 
 export function useSpell(campaignId: string, spellId: string) {
   return useQuery<Spell>({
-    queryKey: ["spell", campaignId, spellId],
+    queryKey: spellKeys.detail(campaignId, spellId),
     queryFn: () => getSpell(campaignId, spellId),
   });
 }
@@ -108,7 +110,7 @@ export function useCreateSpell(campaignId: string) {
         damageType: string;
       },
     ) => createSpell(campaignId, data),
-    invalidateKeys: [["spells", campaignId]],
+    invalidateKeys: [spellKeys.list(campaignId)],
   });
 }
 
@@ -116,8 +118,8 @@ export function useUpdateSpell(campaignId: string, spellId: string) {
   return useCrudMutation({
     mutationFn: (data: Partial<Spell>) => updateSpell(campaignId, spellId, data),
     invalidateKeys: [
-      ["spell", campaignId, spellId],
-      ["spells", campaignId],
+      spellKeys.detail(campaignId, spellId),
+      spellKeys.list(campaignId),
     ],
   });
 }
@@ -125,13 +127,13 @@ export function useUpdateSpell(campaignId: string, spellId: string) {
 export function useDeleteSpell(campaignId: string, spellId: string) {
   return useCrudMutation({
     mutationFn: () => deleteSpell(campaignId, spellId),
-    invalidateKeys: [["spells", campaignId]],
+    invalidateKeys: [spellKeys.list(campaignId)],
   });
 }
 
 export function useDeleteSpellsByLevel(campaignId: string) {
   return useCrudMutation({
     mutationFn: (level: number) => deleteSpellsByLevel(campaignId, level),
-    invalidateKeys: [["spells", campaignId]],
+    invalidateKeys: [spellKeys.list(campaignId)],
   });
 }

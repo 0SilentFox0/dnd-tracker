@@ -3,7 +3,7 @@ import type { Prisma } from "@prisma/client";
 import type { UnitFromPrisma } from "../types/participant";
 import { loadUnitRace } from "./load-race";
 
-import { AttackType, ParticipantSourceType } from "@/lib/constants/battle";
+import { AttackType, CombatStatus,ParticipantSourceType } from "@/lib/constants/battle";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import { bakePassives } from "@/lib/utils/abilities/build/bake";
@@ -47,9 +47,9 @@ export async function createBattleParticipantFromUnit(
     const rawType = (attack as { type?: string }).type;
 
     const attackType: AttackType =
-      rawType === "ranged"
+      rawType === AttackType.RANGED
         ? AttackType.RANGED
-        : rawType === "melee"
+        : rawType === AttackType.MELEE
           ? AttackType.MELEE
           : attack.range && !/^5\s*(фт|ft)/i.test(attack.range)
             ? AttackType.RANGED
@@ -125,7 +125,7 @@ export async function createBattleParticipantFromUnit(
       armorClass: unit.armorClass,
       speed: unit.speed,
       morale: (unit as { morale?: number }).morale || 0,
-      status: "active",
+      status: CombatStatus.ACTIVE,
       minTargets: unit.minTargets ?? 1,
       maxTargets: unit.maxTargets ?? 1,
     },

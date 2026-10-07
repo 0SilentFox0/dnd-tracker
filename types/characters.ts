@@ -2,11 +2,12 @@ import type { EquippedItems, InventoryItem } from "./inventory";
 import type { BookSpell } from "./spells";
 
 import type { AbilityKey } from "@/lib/constants/abilities";
-import { type CharacterTypeValue, type GoalAuthorValue } from "@/lib/constants/characters";
+import { type SpellcastingAbility } from "@/lib/constants/abilities";
+import { AttackType } from "@/lib/constants/battle";
+import { type CharacterTypeValue, type GoalAuthorValue, type GoalStatus } from "@/lib/constants/characters";
 
 export type { AbilityKey };
 
-export type GoalStatus = "active" | "done" | "failed";
 
 export interface CharacterGoal {
   id: string;
@@ -55,7 +56,7 @@ export interface CharacterFormData {
     skills: Record<string, boolean>;
   };
   spellcasting: {
-    spellcastingAbility?: "intelligence" | "wisdom" | "charisma";
+    spellcastingAbility?: SpellcastingAbility;
     spellSlots?: Record<string, { max: number; current: number }>;
     knownSpells: string[];
   };
@@ -105,7 +106,7 @@ export interface Character {
   speed: number;
   savingThrows: Record<string, boolean>;
   skills: Record<string, boolean>;
-  spellcastingAbility?: "intelligence" | "wisdom" | "charisma" | null;
+  spellcastingAbility?: SpellcastingAbility | null;
   spellSlots?: Record<string, { max: number; current: number }>;
   knownSpells: string[];
   languages: string[];
@@ -177,7 +178,7 @@ export interface SheetAbility {
 export interface SheetAttack {
   id: string;
   name: string;
-  kind: "melee" | "ranged";
+  kind: AttackType;
   toHit: SheetTotal;
   avgDamage: SheetTotal;
 }

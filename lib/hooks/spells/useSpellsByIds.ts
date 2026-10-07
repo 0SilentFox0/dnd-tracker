@@ -3,6 +3,8 @@
 import { useEffect } from "react";
 import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { spellKeys } from "./keys";
+
 import { getSpellsByIds } from "@/lib/api/spells";
 import { REFERENCE_STALE_MS } from "@/lib/providers/query-provider";
 
@@ -12,7 +14,7 @@ const idsKey = (ids: string[]) => [...new Set(ids)].sort().join(",");
 
 const spellsByIdsQuery = (campaignId: string, key: string) =>
   queryOptions({
-    queryKey: ["spells", campaignId, "by-ids", key],
+    queryKey: spellKeys.byIds(campaignId, key),
     queryFn: () => getSpellsByIds(campaignId, key.split(",")),
     staleTime: REFERENCE_STALE_MS,
   });

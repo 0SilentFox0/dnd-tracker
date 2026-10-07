@@ -8,6 +8,7 @@ import { AiRollButton, DamageDice, DiceGrid } from "./DiceInput";
 import { HealthLabel, Portrait } from "@/components/battle/hud";
 import { HUD_SURFACE } from "@/components/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
+import { AttackType } from "@/lib/constants/battle";
 import { rollDie, type useAttackWizard } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import type { AttackMode } from "@/lib/utils/battle/flows";
@@ -62,7 +63,7 @@ export function AttackWizard({ wizard }: { wizard: Wizard }) {
               <Swords className="size-7 text-[var(--gold)]" />
               <span className="min-w-0 flex-1">
                 <span className="hud-sc block text-[17px] font-bold">{a.name}</span>
-                <span className="block text-[13px] text-[#a89c88]">{a.type === "melee" ? "ближній" : "дальній"} · +{a.attackBonus} до влучання</span>
+                <span className="block text-[13px] text-[#a89c88]">{a.type === AttackType.MELEE ? "ближній" : "дальній"} · +{a.attackBonus} до влучання</span>
                 <span className="mt-1 flex flex-wrap gap-x-2.5 text-xs text-[#cdb87e]">
                   {wizard.previews[a.id ?? a.name]?.bonuses.map((b) => <span key={b.label}>{b.label} {b.percent ? `${signed(b.percent)}%` : signed(b.flat)}</span>)}
                 </span>

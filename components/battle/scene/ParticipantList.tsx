@@ -4,15 +4,16 @@ import { memo, useMemo } from "react";
 
 import { ParticipantRow } from "./ParticipantRow";
 
+import { ParticipantSide } from "@/lib/constants/battle";
 import { useBattleSceneData } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
 import { canSeeExactStats, formatKnownArmorClass, resolveKnownArmorClass } from "@/lib/utils/battle/view";
 
-export const ParticipantList = memo(function ParticipantList({ side, className }: { side: "ally" | "enemy"; className?: string }) {
+export const ParticipantList = memo(function ParticipantList({ side, className }: { side: ParticipantSide; className?: string }) {
   const { allies, enemies, battle, viewer, current, select } = useBattleSceneData();
 
-  const list = side === "ally" ? allies : enemies;
+  const list = side === ParticipantSide.ALLY ? allies : enemies;
 
   const { initiativeOrder: order, battleLog, knowledge } = battle;
 

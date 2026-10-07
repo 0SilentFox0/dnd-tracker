@@ -1,13 +1,14 @@
 import { z } from "zod";
 
 import { ArtifactModifierType } from "@/lib/constants/artifacts";
+import { AttackType } from "@/lib/constants/battle";
 
 export { isWeaponSlot } from "@/lib/utils/artifacts/weapon-slot";
 
 export const WeaponStatsSchema = z.object({
   damageDice: z.string().trim().max(30).optional(),
   damageType: z.string().trim().max(30).optional(),
-  attackType: z.enum(["melee", "ranged"]).optional(),
+  attackType: z.enum([AttackType.MELEE, AttackType.RANGED]).optional(),
   range: z.string().trim().max(30).optional(),
   properties: z.string().trim().max(200).optional(),
   attackBonus: z.number().int().min(-20).max(20).optional(),

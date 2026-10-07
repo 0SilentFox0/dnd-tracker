@@ -1,6 +1,6 @@
 import type { GroupedSkillPayload } from "./hooks";
 
-import { type ParticipantSourceTypeValue } from "@/lib/constants/battle";
+import { BattleStatus,type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import { type CampaignRoleValue } from "@/lib/constants/campaigns";
 import type { SpellEnhancementType } from "@/lib/constants/spell-enhancement";
 
@@ -45,7 +45,7 @@ export interface BattleScene {
   campaignId: string;
   name: string;
   description?: string;
-  status: "prepared" | "active" | "completed";
+  status: BattleStatus;
   participants: BattlePreparationParticipant[];
   currentRound: number;
   currentTurnIndex: number;

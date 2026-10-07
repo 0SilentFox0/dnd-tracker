@@ -2,8 +2,9 @@ import type { PrismaClient } from "@prisma/client";
 
 import { snapshotCache } from "./snapshot-cache";
 import { joinParticipant } from "./split-participant";
-import type { BattleSceneState, BattleStatus, LoadedBattle, ParticipantColumns, ParticipantSnapshot, ParticipantState } from "./types";
+import type { BattleSceneState, LoadedBattle, ParticipantColumns, ParticipantSnapshot, ParticipantState } from "./types";
 
+import { BattleStatus } from "@/lib/constants/battle";
 import { CampaignRole } from "@/lib/constants/campaigns";
 import type { BattleParticipant, BattlePreparationParticipant } from "@/types/battle";
 

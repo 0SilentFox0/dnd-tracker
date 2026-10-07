@@ -10,6 +10,7 @@ import { EntityIcon } from "@/components/common/EntityIcon";
 import { HudCard } from "@/components/hud/page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { AttackType } from "@/lib/constants/battle";
 import { useConfirm } from "@/lib/hooks/common";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { diceAverage } from "@/lib/utils/common/dice";
@@ -23,7 +24,7 @@ function primaryAttackIndex(attacks: Unit["attacks"]): number {
   if (!attacks.length) return -1;
 
   const meleeIdx = attacks.findIndex(
-    (a) => (a as { type?: string }).type === "melee" || !a.type,
+    (a) => (a as { type?: string }).type === AttackType.MELEE || !a.type,
   );
 
   return meleeIdx >= 0 ? meleeIdx : 0;

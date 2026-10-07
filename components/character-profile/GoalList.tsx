@@ -7,17 +7,17 @@ import { useProfile } from "./ProfileContext";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { GoalAuthor } from "@/lib/constants/characters";
+import { GoalAuthor, GoalStatus } from "@/lib/constants/characters";
 import { useCharacterGoals } from "@/lib/hooks/characters";
 import { useConfirm } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
-import type { CharacterGoal, GoalStatus } from "@/types/characters";
+import type { CharacterGoal } from "@/types/characters";
 
-const ORDER: Record<GoalStatus, number> = { active: 0, done: 1, failed: 2 };
+const ORDER: Record<GoalStatus, number> = { [GoalStatus.ACTIVE]: 0, [GoalStatus.DONE]: 1, [GoalStatus.FAILED]: 2 };
 
-const NEXT: Record<GoalStatus, GoalStatus> = { active: "done", done: "failed", failed: "active" };
+const NEXT: Record<GoalStatus, GoalStatus> = { [GoalStatus.ACTIVE]: GoalStatus.DONE, [GoalStatus.DONE]: GoalStatus.FAILED, [GoalStatus.FAILED]: GoalStatus.ACTIVE };
 
-const STATUS_LABEL: Record<GoalStatus, string> = { active: "активна", done: "виконана", failed: "провалена" };
+const STATUS_LABEL: Record<GoalStatus, string> = { [GoalStatus.ACTIVE]: "активна", [GoalStatus.DONE]: "виконана", [GoalStatus.FAILED]: "провалена" };
 
 const newId = () => `g${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
 
@@ -34,11 +34,11 @@ export function GoalList() {
 
   const goals = [...all].sort((a, b) => ORDER[a.status] - ORDER[b.status]);
 
-  const canEdit = (g: CharacterGoal) => isDM || (sheet.viewer.isOwner && g.author === "player");
+  const canEdit = (g: CharacterGoal) => isDM || (sheet.viewer.isOwner && g.author === GoalAuthor.PLAYER);
 
   const [draft, setDraft] = useState<{ id: string | null; text: string } | null>(null);
 
-  const send = (next: CharacterGoal[]) => (isDM ? save(next, all.map((g) => g.id)) : save(next.filter((g) => g.author === "player")));
+  const send = (next: CharacterGoal[]) => (isDM ? save(next, all.map((g) => g.id)) : save(next.filter((g) => g.author === GoalAuthor.PLAYER)));
 
   const commit = async () => {
     const text = draft?.text.trim().slice(0, 300);
@@ -47,7 +47,7 @@ export function GoalList() {
 
     const next = draft.id
       ? all.map((g) => (g.id === draft.id ? { ...g, text } : g))
-      : [...all, { id: newId(), text, status: "active" as const, author: isDM ? GoalAuthor.DM : GoalAuthor.PLAYER }];
+      : [...all, { id: newId(), text, status: GoalStatus.ACTIVE, author: isDM ? GoalAuthor.DM : GoalAuthor.PLAYER }];
 
     if (await send(next)) setDraft(null);
   };
@@ -72,9 +72,9 @@ export function GoalList() {
             >
               {g.status === "done" ? <Check className="size-4" /> : g.status === "failed" ? <X className="size-4" /> : "◆"}
             </button>
-            <span className={cn("min-w-0 flex-1 pt-1.5", g.status !== "active" && "text-hud-muted line-through")}>
+            <span className={cn("min-w-0 flex-1 pt-1.5", g.status !== GoalStatus.ACTIVE && "text-hud-muted line-through")}>
               {g.text}
-              {g.author === "player" && <span className="ml-1.5 inline-block rounded border border-[#6f8fb0] px-1 text-[10px] text-[#6f8fb0]">від гравця</span>}
+              {g.author === GoalAuthor.PLAYER && <span className="ml-1.5 inline-block rounded border border-[#6f8fb0] px-1 text-[10px] text-[#6f8fb0]">від гравця</span>}
             </span>
             {canEdit(g) && (
               <>

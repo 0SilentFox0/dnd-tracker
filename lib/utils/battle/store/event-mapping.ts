@@ -1,5 +1,6 @@
 import type { NewBattleEvent, StoredBattleEvent } from "./types";
 
+import { SYSTEM_ACTOR } from "@/lib/constants/battle";
 import type { BattleAction } from "@/types/battle";
 
 type EventDetails = {
@@ -24,9 +25,9 @@ export function systemEvent(round: number, resultText: string): NewBattleEvent {
   return {
     type: "ability",
     round,
-    actorId: "system",
+    actorId: SYSTEM_ACTOR.actorId,
     resultText,
-    details: { actorName: "Система", actorSide: "ally", actionDetails: {} },
+    details: { actorName: SYSTEM_ACTOR.actorName, actorSide: SYSTEM_ACTOR.actorSide, actionDetails: {} },
   };
 }
 
@@ -43,9 +44,9 @@ export function eventToBattleAction(
     round: e.round,
     actionIndex: e.seq,
     timestamp: meta.createdAt ?? new Date(),
-    actorId: e.actorId ?? "system",
-    actorName: d.actorName ?? "Система",
-    actorSide: d.actorSide ?? "ally",
+    actorId: e.actorId ?? SYSTEM_ACTOR.actorId,
+    actorName: d.actorName ?? SYSTEM_ACTOR.actorName,
+    actorSide: d.actorSide ?? SYSTEM_ACTOR.actorSide,
     actionType: e.type as BattleAction["actionType"],
     targets: e.targets as BattleAction["targets"],
     actionDetails: d.actionDetails ?? {},

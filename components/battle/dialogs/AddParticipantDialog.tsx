@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ParticipantSourceType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
+import { ParticipantSide,ParticipantSourceType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import { useCharacters } from "@/lib/hooks/characters";
 import { useUnits } from "@/lib/hooks/units";
 import type { AddParticipantData } from "@/types/battle";
@@ -37,7 +37,7 @@ export function AddParticipantDialog({
 }: AddParticipantDialogProps) {
   const [type, setType] = useState<ParticipantSourceTypeValue>(ParticipantSourceType.CHARACTER);
 
-  const [side, setSide] = useState<"ally" | "enemy">("ally");
+  const [side, setSide] = useState<ParticipantSide>(ParticipantSide.ALLY);
 
   const [characterId, setCharacterId] = useState("");
 
@@ -82,14 +82,14 @@ export function AddParticipantDialog({
           <Label>Сторона</Label>
           <Select
             value={side}
-            onValueChange={(v) => setSide(v as "ally" | "enemy")}
+            onValueChange={(v) => setSide(v as ParticipantSide)}
           >
             <SelectTrigger className="w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ally">Союзник</SelectItem>
-              <SelectItem value="enemy">Ворог</SelectItem>
+              <SelectItem value={ParticipantSide.ALLY}>Союзник</SelectItem>
+              <SelectItem value={ParticipantSide.ENEMY}>Ворог</SelectItem>
             </SelectContent>
           </Select>
         </div>

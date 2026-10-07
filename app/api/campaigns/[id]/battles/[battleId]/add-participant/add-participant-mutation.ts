@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { DM_ACTOR,ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { calculateInitiative } from "@/lib/utils/battle/battle-start";
@@ -15,7 +15,7 @@ import type { BattleParticipant } from "@/types/battle";
 export const addParticipantSchema = z.object({
   sourceId: z.string(),
   type: z.enum([ParticipantSourceType.CHARACTER, ParticipantSourceType.UNIT]),
-  side: z.enum(["ally", "enemy"]),
+  side: z.enum([ParticipantSide.ALLY, ParticipantSide.ENEMY]),
   quantity: z.number().int().min(1).max(10).optional().default(1),
 });
 
@@ -60,7 +60,7 @@ function matchScaling(fresh: BattleParticipant, twin: BattleParticipant): Battle
 
 export function createAddParticipantMutation(deps: AddParticipantDeps = defaultDeps) {
   return async (ctx: BattleMutationContext, data: AddParticipantBody): Promise<MutationResult> => {
-    const side = data.side === "ally" ? ParticipantSide.ALLY : ParticipantSide.ENEMY;
+    const side = data.side;
 
     const battleId = ctx.scene.id;
 
@@ -114,10 +114,10 @@ export function createAddParticipantMutation(deps: AddParticipantDeps = defaultD
         {
           type: "ability",
           round: ctx.scene.round,
-          actorId: "dm",
+          actorId: DM_ACTOR.actorId,
           targets: added.map((p) => ({ participantId: p.basicInfo.id, participantName: p.basicInfo.name })),
           resultText: `DM додав на поле: ${added.map((p) => p.basicInfo.name).join(", ")}`,
-          details: { actorName: "DM", actorSide: "ally", actionDetails: {} },
+          details: { actorName: DM_ACTOR.actorName, actorSide: DM_ACTOR.actorSide, actionDetails: {} },
         },
       ],
     };

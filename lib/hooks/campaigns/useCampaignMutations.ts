@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { campaignKeys } from "./keys";
+
 import { createCampaign, joinCampaign, removeCampaignMember, updateCampaign } from "@/lib/api/campaigns";
 
 export function useCreateCampaign() {
@@ -30,7 +32,7 @@ export function useRemoveCampaignMember(campaignId: string) {
   return useMutation({
     mutationFn: (memberId: string) => removeCampaignMember(campaignId, memberId),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["campaign-members", campaignId] });
+      void queryClient.invalidateQueries({ queryKey: campaignKeys.members(campaignId) });
       router.refresh();
     },
   });

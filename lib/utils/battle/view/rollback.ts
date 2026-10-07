@@ -1,4 +1,4 @@
-import { BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE } from "@/lib/constants/battle";
+import { BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE, BattleStatus } from "@/lib/constants/battle";
 import type { BattleScene } from "@/types/api";
 import type { BattleAction } from "@/types/battle";
 
@@ -9,7 +9,7 @@ import type { BattleAction } from "@/types/battle";
 export function canRollbackEntry(battle: Pick<BattleScene, "status" | "battleLog">, entry: BattleAction): boolean {
   if (entry.isCancelled) return false;
 
-  if (battle.status !== "completed") return true;
+  if (battle.status !== BattleStatus.COMPLETED) return true;
 
   const active = (battle.battleLog ?? []).filter((e) => !e.isCancelled).map((e) => e.actionIndex).sort((a, b) => b - a);
 

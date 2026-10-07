@@ -9,7 +9,7 @@ import * as apiAuth from "@/lib/utils/api/api-auth";
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireCampaignAccess: vi.fn() }));
 vi.mock("@/lib/db", () => ({ prisma: { character: { findUnique: vi.fn(), update: vi.fn() } } }));
 
-const access = (userId: string, role: "dm" | "player") => ({ userId, campaign: { id: "camp", members: [{ userId, role }] } }) as never;
+const access = (userId: string, role: "dm" | "player") => ({ userId, isDM: role === "dm", campaign: { id: "camp", members: [{ userId, role }] } }) as never;
 
 const DM_GOAL = { id: "d1", text: "Знайти брата", status: "active", author: "dm" };
 

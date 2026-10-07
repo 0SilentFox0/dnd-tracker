@@ -5,9 +5,13 @@ import { formatSkillResponse } from "./format-skill-response";
 import { updateSkillSchema } from "./update-skill-schema";
 
 import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
-import { requireCampaignAccess, requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
+import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
+import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { loadOwned } from "@/lib/utils/api/load-owned";
+import { parseBody } from "@/lib/utils/api/parse-body";
 
 export async function GET(
   request: Request,
@@ -26,7 +30,7 @@ export async function GET(
     });
 
     if (!skill || skill.campaignId !== id) {
-      return NextResponse.json({ error: "Skill not found" }, { status: 404 });
+      return errorResponse(API_ERRORS.SKILL_NOT_FOUND, 404);
     }
 
     return NextResponse.json(formatSkillResponse(skill));
@@ -48,19 +52,15 @@ export async function PATCH(
       return accessResult;
     }
 
-    const skill = await prisma.skill.findUnique({
+    const skill = await loadOwned(prisma.skill.findUnique({
       where: { id: skillId },
-    });
+    }), id);
 
-    const validationError = validateCampaignOwnership(skill, id);
+    if (skill instanceof NextResponse) return skill;
 
-    if (validationError) {
-      return validationError;
-    }
+    const data = await parseBody(updateSkillSchema, request);
 
-    const body = await request.json();
-
-    const data = updateSkillSchema.parse(body);
+    if (data instanceof NextResponse) return data;
 
     const updateData = buildSkillUpdateData(data);
 
@@ -96,16 +96,12 @@ export async function DELETE(
       return accessResult;
     }
 
-    const skill = await prisma.skill.findUnique({
+    const skill = await loadOwned(prisma.skill.findUnique({
       where: { id: skillId },
       select: { campaignId: true },
-    });
+    }), id);
 
-    const validationError = validateCampaignOwnership(skill, id);
-
-    if (validationError) {
-      return validationError;
-    }
+    if (skill instanceof NextResponse) return skill;
 
     await prisma.skill.deleteMany({
       where: { id: skillId },

@@ -2,12 +2,9 @@ import { AttackType } from "@/lib/constants/battle";
 import { collectModifiers, findFlags, statWithModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
+import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
-
-function attackKindOf(attack: BattleAttack): "melee" | "ranged" {
-  return attack.type === AttackType.RANGED ? "ranged" : "melee";
-}
 
 export function calculateAttackBonus(
   attacker: BattleParticipant,
@@ -19,7 +16,7 @@ export function calculateAttackBonus(
 
   const base = (attack.attackBonus || 0) + statModifier + attacker.abilities.proficiencyBonus;
 
-  return base + collectModifiers(withSelf(participants, attacker), attacker.basicInfo.id, { stat: "attackBonus", attackKind: attackKindOf(attack) }, extra).flat;
+  return base + collectModifiers(withSelf(participants, attacker), attacker.basicInfo.id, { stat: "attackBonus", attackKind: attackKindOf(attack.type) }, extra).flat;
 }
 
 export function hasAdvantage(
@@ -28,9 +25,9 @@ export function hasAdvantage(
   participants: BattleParticipant[] = [attacker],
   extra?: StaticEffect[],
 ): boolean {
-  const kind = attackKindOf(attack);
+  const kind = attackKindOf(attack.type);
 
-  if (attacker.abilities.race?.toLowerCase().includes("elf") && kind === "ranged") return true;
+  if (attacker.abilities.race?.toLowerCase().includes("elf") && kind === AttackType.RANGED) return true;
 
   return findFlags(withSelf(participants, attacker), attacker.basicInfo.id, "advantage", extra).some(
     (f) => f.attackKind === "all" || f.attackKind === kind,

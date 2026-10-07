@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BATTLE_LOG_PAGE_MAX, BATTLE_LOG_PAGE_SIZE } from "@/lib/constants/battle";
+import { errorResponse } from "@/lib/utils/api/api-response";
 import { readBattleEvents } from "@/lib/utils/battle/pipeline/read-battle";
 
 const eventsQuerySchema = z.object({
@@ -13,7 +14,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const parsed = eventsQuerySchema.safeParse(Object.fromEntries(new URL(req.url).searchParams));
 
   if (!parsed.success) {
-    return NextResponse.json({ error: "invalid_query", issues: parsed.error.issues }, { status: 400 });
+    return errorResponse(API_ERRORS.INVALID_QUERY, 400, parsed.error.issues);
   }
 
   return readBattleEvents(await params, parsed.data);

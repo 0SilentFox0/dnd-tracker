@@ -17,6 +17,25 @@ export class ApiError extends Error {
   }
 }
 
+const issueMessage = (issue: unknown): string =>
+  issue && typeof issue === "object" && "message" in issue && typeof (issue as { message: unknown }).message === "string"
+    ? (issue as { message: string }).message
+    : JSON.stringify(issue);
+
+export function errorMessage(body: unknown, fallback: string): string {
+  const { error, issues } = (body ?? {}) as { error?: unknown; issues?: unknown };
+
+  const details = Array.isArray(issues) ? issues.map(issueMessage).join("; ") : "";
+
+  if (typeof error === "string") return details ? `${error}: ${details}` : error;
+
+  if (Array.isArray(error)) return error.map(issueMessage).join("; ");
+
+  if (error != null && typeof error === "object") return JSON.stringify(error);
+
+  return fallback;
+}
+
 export interface ApiErrorPayload {
   status: number;
   message: string;
@@ -71,28 +90,7 @@ export async function request<T>(
   }
 
   if (!response.ok) {
-    const errField = (body as { error?: unknown })?.error;
-
-    let message: string;
-
-    if (typeof errField === "string") {
-      message = errField;
-    } else if (Array.isArray(errField)) {
-      message = errField
-        .map((issue: unknown) =>
-          issue &&
-          typeof issue === "object" &&
-          "message" in issue &&
-          typeof (issue as { message: unknown }).message === "string"
-            ? (issue as { message: string }).message
-            : JSON.stringify(issue),
-        )
-        .join("; ");
-    } else if (errField != null && typeof errField === "object") {
-      message = JSON.stringify(errField);
-    } else {
-      message = response.statusText;
-    }
+    let message = errorMessage(body, response.statusText);
 
     if (!message.trim()) {
       message = `Помилка ${response.status}`;

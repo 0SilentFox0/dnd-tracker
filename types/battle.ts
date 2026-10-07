@@ -1,6 +1,7 @@
 import type { AbilityUsageCounter, ResolvedAbility, SpellEnhancer, StaticEffect } from "./abilities";
 
-import { AttackType, ParticipantSide, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
+import { type SpellcastingAbility } from "@/lib/constants/abilities";
+import { AttackType, type CombatStatusType,ParticipantSide, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { AbilityKey, SetProgress } from "@/types/characters";
 import { SkillLevel } from "@/types/skill-tree";
@@ -152,7 +153,7 @@ export interface BattleParticipantCombatStats {
   armorClass: number;
   speed: number; // швидкість переміщення
   morale: number; // від -3 до +3, default 0
-  status: "active" | "unconscious" | "dead";
+  status: CombatStatusType;
   minTargets: number;
   maxTargets: number;
 }
@@ -161,7 +162,7 @@ export interface BattleParticipantCombatStats {
  * Дані про заклинання учасника
  */
 export interface BattleParticipantSpellcasting {
-  spellcastingAbility?: "intelligence" | "wisdom" | "charisma";
+  spellcastingAbility?: SpellcastingAbility;
   spellSaveDC?: number;
   spellAttackBonus?: number;
   spellSlots: Record<string, { max: number; current: number }>; // "1" до "5"
@@ -242,7 +243,7 @@ export interface BattleAction {
   timestamp: Date; // час виконання
   actorId: string; // ID учасника що виконав дію
   actorName: string; // ім'я актора
-  actorSide: "ally" | "enemy";
+  actorSide: ParticipantSide;
   actionType:
     | "attack"
     | "spell"
@@ -260,7 +261,7 @@ export interface BattleAction {
     // Для атак:
     weaponName?: string;
     /** Тип атаки: melee / ranged */
-    attackKind?: "melee" | "ranged";
+    attackKind?: AttackType;
     attackRoll?: number;
     attackBonus?: number;
     totalAttackValue?: number;
@@ -354,6 +355,6 @@ export interface BattleAction {
 export type AddParticipantData = {
   sourceId: string;
   type: ParticipantSourceTypeValue;
-  side: "ally" | "enemy";
+  side: ParticipantSide;
   quantity?: number;
 };

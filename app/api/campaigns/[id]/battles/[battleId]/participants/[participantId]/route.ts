@@ -1,6 +1,7 @@
 import { patchParticipantMutation } from "./patch-participant-mutation";
 import { patchParticipantSchema } from "./patch-participant-schema";
 
+import { BattleStatus } from "@/lib/constants/battle";
 import { BattleAccess, runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 
 export async function PATCH(
@@ -12,7 +13,7 @@ export async function PATCH(
   return runBattleMutation(req, {
     params: { id, battleId },
     access: BattleAccess.DM,
-    requireStatus: "active",
+    requireStatus: BattleStatus.ACTIVE,
     rateLimitScope: "participantPatch",
     schema: patchParticipantSchema,
     mutate: (ctx, body) => patchParticipantMutation(ctx, participantId, body),

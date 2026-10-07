@@ -166,7 +166,7 @@ describe("rateLimitResponse", () => {
 
     const body = await res.json();
 
-    expect(body.error).toBe("Too many requests");
+    expect(body.error).toBe("Забагато запитів, спробуйте трохи згодом");
     expect(body.retryAfterSeconds).toBe(7);
   });
 });

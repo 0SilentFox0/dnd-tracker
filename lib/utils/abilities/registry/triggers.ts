@@ -1,5 +1,6 @@
 import type { FieldMeta } from "./fields";
 
+import { AttackType } from "@/lib/constants/battle";
 import { findParticipant } from "@/lib/utils/abilities/engine/participants";
 import type { Trigger, TriggerEvent } from "@/lib/utils/abilities/schema";
 import type { AbilityEvent } from "@/types/abilities";
@@ -21,7 +22,7 @@ interface TriggerDefinition<E extends TriggerEvent> {
 
 const PHASE: FieldMeta = { name: "phase", label: "Фаза", input: "select", options: [{ value: "before", label: "до" }, { value: "after", label: "після" }] };
 
-const ATTACK_KIND: FieldMeta = { name: "attackKind", label: "Тип атаки", input: "select", optional: true, options: [{ value: "melee", label: "ближня" }, { value: "ranged", label: "дальня" }] };
+const ATTACK_KIND: FieldMeta = { name: "attackKind", label: "Тип атаки", input: "select", optional: true, options: [{ value: AttackType.MELEE, label: "ближня" }, { value: AttackType.RANGED, label: "дальня" }] };
 
 const ATTACK_ROLE: FieldMeta = { name: "role", label: "Роль", input: "select", options: [{ value: "attacker", label: "атакую я" }, { value: "target", label: "атакують мене" }] };
 

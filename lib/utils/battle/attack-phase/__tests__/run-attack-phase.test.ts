@@ -1,6 +1,6 @@
 /**
  * Тести для runAttackPhase (CODE_AUDIT 5.9) — фокус на validation
- * branches, які кидають AttackPhaseError з відповідним status code.
+ * branches, які кидають BattleRuleError (400-ті) або BattleAccessError (403/404).
  *
  * Сам processAttack не мокається — у success-path він запуститься,
  * але це лише 1 simple smoke-test. Решта 10 — validation-only,
@@ -10,7 +10,6 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  AttackPhaseError,
   type AttackPhaseInput,
   runAttackPhase,
 } from "../run-attack-phase";
@@ -18,6 +17,7 @@ import {
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
+import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 function meleeAttack(over: Partial<BattleAttack> = {}): BattleAttack {
@@ -102,7 +102,7 @@ describe("runAttackPhase — error path validation", () => {
           },
         }),
       ),
-    ).toThrow(AttackPhaseError);
+    ).toThrow(BattleRuleError);
 
     try {
       runAttackPhase(
@@ -115,9 +115,8 @@ describe("runAttackPhase — error path validation", () => {
         }),
       );
     } catch (e) {
-      expect(e).toBeInstanceOf(AttackPhaseError);
-      expect((e as AttackPhaseError).status).toBe(400);
-      expect((e as AttackPhaseError).message).toContain("d20Roll");
+      expect(e).toBeInstanceOf(BattleRuleError);
+      expect((e as Error).message).toContain("d20Roll");
     }
   });
 
@@ -135,8 +134,9 @@ describe("runAttackPhase — error path validation", () => {
       );
       throw new Error("should not reach");
     } catch (e) {
-      expect((e as AttackPhaseError).status).toBe(404);
-      expect((e as AttackPhaseError).message).toContain("Attacker not found");
+      expect(e).toBeInstanceOf(BattleAccessError);
+      expect((e as BattleAccessError).status).toBe(404);
+      expect((e as Error).message).toContain("Атакуючого немає");
     }
   });
 
@@ -145,7 +145,8 @@ describe("runAttackPhase — error path validation", () => {
       runAttackPhase(makeInput({ userId: "wrong-user" }));
       throw new Error("should not reach");
     } catch (e) {
-      expect((e as AttackPhaseError).status).toBe(403);
+      expect(e).toBeInstanceOf(BattleAccessError);
+      expect((e as BattleAccessError).status).toBe(403);
     }
   });
 
@@ -170,8 +171,9 @@ describe("runAttackPhase — error path validation", () => {
       );
       throw new Error("should not reach");
     } catch (e) {
-      expect((e as AttackPhaseError).status).toBe(404);
-      expect((e as AttackPhaseError).message).toContain("No targets");
+      expect(e).toBeInstanceOf(BattleAccessError);
+      expect((e as BattleAccessError).status).toBe(404);
+      expect((e as Error).message).toContain("Цілей немає");
     }
   });
 
@@ -190,8 +192,8 @@ describe("runAttackPhase — error path validation", () => {
       );
       throw new Error("should not reach");
     } catch (e) {
-      expect((e as AttackPhaseError).status).toBe(400);
-      expect((e as AttackPhaseError).message).toContain("not attacker's turn");
+      expect(e).toBeInstanceOf(BattleRuleError);
+      expect((e as Error).message).toContain("не хід атакуючого");
     }
   });
 
@@ -218,8 +220,8 @@ describe("runAttackPhase — error path validation", () => {
       );
       throw new Error("should not reach");
     } catch (e) {
-      expect((e as AttackPhaseError).status).toBe(400);
-      expect((e as AttackPhaseError).message).toContain("already used");
+      expect(e).toBeInstanceOf(BattleRuleError);
+      expect((e as Error).message).toContain("уже використав");
     }
   });
 
@@ -241,8 +243,8 @@ describe("runAttackPhase — error path validation", () => {
       );
       throw new Error("should not reach");
     } catch (e) {
-      expect((e as AttackPhaseError).status).toBe(400);
-      expect((e as AttackPhaseError).message).toContain("not active");
+      expect(e).toBeInstanceOf(BattleRuleError);
+      expect((e as Error).message).toContain("не може діяти");
     }
   });
 
@@ -268,8 +270,8 @@ describe("runAttackPhase — error path validation", () => {
       );
       throw new Error("should not reach");
     } catch (e) {
-      expect((e as AttackPhaseError).status).toBe(400);
-      expect((e as AttackPhaseError).message).toContain("No attack available");
+      expect(e).toBeInstanceOf(BattleRuleError);
+      expect((e as Error).message).toContain("немає доступної атаки");
     }
   });
 
@@ -302,8 +304,8 @@ describe("runAttackPhase — error path validation", () => {
       );
       throw new Error("should not reach");
     } catch (e) {
-      expect((e as AttackPhaseError).status).toBe(400);
-      expect((e as AttackPhaseError).message).toContain("Too many targets");
+      expect(e).toBeInstanceOf(BattleRuleError);
+      expect((e as Error).message).toContain("Забагато цілей");
     }
   });
 
@@ -312,8 +314,8 @@ describe("runAttackPhase — error path validation", () => {
       runAttackPhase(makeInput({ data: { ...makeInput().data, d20Roll: 25 } }));
       throw new Error("should not reach");
     } catch (e) {
-      expect((e as AttackPhaseError).status).toBe(400);
-      expect((e as AttackPhaseError).message).toContain("Invalid attack roll");
+      expect(e).toBeInstanceOf(BattleRuleError);
+      expect((e as Error).message).toContain("Некоректний кидок");
     }
   });
 
@@ -324,7 +326,7 @@ describe("runAttackPhase — error path validation", () => {
     } catch (e) {
       // d20Roll=0 → falsy → перший check спрацює (немає d20Roll)
       // Або loop range check. У будь-якому випадку — 400.
-      expect((e as AttackPhaseError).status).toBe(400);
+      expect(e).toBeInstanceOf(BattleRuleError);
     }
   });
 });

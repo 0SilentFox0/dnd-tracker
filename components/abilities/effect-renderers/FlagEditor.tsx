@@ -1,6 +1,7 @@
 "use client";
 
 import { FieldRenderer } from "@/components/abilities/fields/FieldRenderer";
+import { AttackType } from "@/lib/constants/battle";
 import { getAtPath, setAtPath } from "@/lib/utils/abilities/editor";
 import { FLAG_FIELDS, FLAG_LABELS } from "@/lib/utils/abilities/registry/effects";
 import { DURATION_FIELD, type FieldMeta, TARGET_FIELD } from "@/lib/utils/abilities/registry/fields";
@@ -13,7 +14,7 @@ const DEFAULTS: Record<FlagKey, Record<string, unknown>> = {
   guaranteedHit: {},
   resistance: { damageType: "physical", percent: 25 },
   spellImmunity: { spellIds: [] },
-  counterAttack: { attackKinds: ["melee"], bonusPercent: 15 },
+  counterAttack: { attackKinds: [AttackType.MELEE], bonusPercent: 15 },
   seeEnemyHp: {},
   noNegativeMorale: {},
   ignoreMorale: {},

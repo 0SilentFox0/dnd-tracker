@@ -1,12 +1,13 @@
 import type { PatchParticipantData } from "./patch-participant-schema";
 
+import { CombatStatus, DM_ACTOR } from "@/lib/constants/battle";
 import { resolveDowned } from "@/lib/utils/abilities/engine/run-abilities";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, battleActionToEvent, BattleRuleError, systemEvent } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";
 import type { BattleParticipant } from "@/types/battle";
 
-const DM_DETAILS = { actorName: "DM", actorSide: "ally", actionDetails: {} };
+const DM_DETAILS = { actorName: DM_ACTOR.actorName, actorSide: DM_ACTOR.actorSide, actionDetails: {} };
 
 export function patchParticipantMutation(
   ctx: BattleMutationContext,
@@ -32,7 +33,7 @@ function removeParticipant(ctx: BattleMutationContext, participantId: string): M
   const removalEvent: MutationResult["events"][number] = {
     type: "ability",
     round: ctx.scene.round,
-    actorId: "dm",
+    actorId: DM_ACTOR.actorId,
     resultText: `DM видалив з бою: ${removed.basicInfo.name}`,
     details: DM_DETAILS,
   };
@@ -91,11 +92,11 @@ function updateHp(ctx: BattleMutationContext, participantId: string, requestedHp
       currentHp: newHp,
       status:
         newHp <= 0
-          ? participant.combatStats.status === "dead"
-            ? "dead"
-            : "unconscious"
-          : participant.combatStats.status === "unconscious"
-            ? "active"
+          ? participant.combatStats.status === CombatStatus.DEAD
+            ? CombatStatus.DEAD
+            : CombatStatus.UNCONSCIOUS
+          : participant.combatStats.status === CombatStatus.UNCONSCIOUS
+            ? CombatStatus.ACTIVE
             : participant.combatStats.status,
     },
   };
@@ -114,7 +115,7 @@ function updateHp(ctx: BattleMutationContext, participantId: string, requestedHp
     {
       type: "ability",
       round: ctx.scene.round,
-      actorId: "dm",
+      actorId: DM_ACTOR.actorId,
       targets: [{ participantId, participantName: name }],
       hpChanges: [{ participantId, participantName: name, oldHp, newHp, change: oldHp - newHp }],
       resultText: `DM змінив HP ${name}: ${oldHp} → ${newHp}`,

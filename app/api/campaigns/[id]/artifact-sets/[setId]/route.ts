@@ -4,10 +4,13 @@ import { randomUUID } from "crypto";
 import { toArtifactSetErrorResponse } from "../route-errors";
 import { patchArtifactSetSchema } from "../schemas";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { resolveArtifactIconForPersistence } from "@/lib/supabase/artifact-icon-storage";
 import { readAbilities } from "@/lib/utils/abilities/read";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
+import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { parseBody } from "@/lib/utils/api/parse-body";
 import {
   buildArtifactSetPatchInput,
   deleteArtifactSetAndClearArtifacts,
@@ -33,7 +36,7 @@ export async function GET(
     const setRow = await findArtifactSetInCampaign(id, setId);
 
     if (!setRow) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+      return errorResponse(API_ERRORS.NOT_FOUND, 404);
     }
 
     const { abilities, issues: abilityIssues } = readAbilities("artifactSet", setRow);
@@ -60,10 +63,12 @@ export async function PATCH(
     const existing = await findArtifactSetInCampaign(id, setId);
 
     if (!existing) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+      return errorResponse(API_ERRORS.NOT_FOUND, 404);
     }
 
-    const data = patchArtifactSetSchema.parse(await request.json());
+    const data = await parseBody(patchArtifactSetSchema, request);
+
+    if (data instanceof NextResponse) return data;
 
     let patch = data;
 
@@ -121,7 +126,7 @@ export async function DELETE(
     const existing = await findArtifactSetInCampaign(id, setId);
 
     if (!existing) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+      return errorResponse(API_ERRORS.NOT_FOUND, 404);
     }
 
     await deleteArtifactSetAndClearArtifacts(id, setId);

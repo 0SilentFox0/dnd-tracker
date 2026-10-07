@@ -7,7 +7,7 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 import type { BattleScene } from "@/types/api";
 
-const p = (id: string, controlledBy: string, side = ParticipantSide.ALLY) => {
+const p = (id: string, controlledBy: string, side: ParticipantSide = ParticipantSide.ALLY) => {
   const b = createMockParticipant();
 
   return { ...b, basicInfo: { ...b.basicInfo, id, controlledBy, side } };

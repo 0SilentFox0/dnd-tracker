@@ -8,6 +8,7 @@ import { predictAttackNumbers } from "@/lib/utils/battle/attack/bonus";
 import { resolveAttackRoll } from "@/lib/utils/battle/common/attack-roll-helpers";
 import { computeDamageBreakdown } from "@/lib/utils/battle/damage";
 import { attackFlow, type AttackMode, attackPayload, effectiveD20, initialAttackFlow, type RollOutcome } from "@/lib/utils/battle/flows";
+import { isUp } from "@/lib/utils/battle/participant/state";
 import { canSeeExactStats, damageDiceSlots, formatKnownArmorClass, hiddenTargetSteps, resolveKnownArmorClass, retaliationOutcome, weaponPreview } from "@/lib/utils/battle/view";
 import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
 
@@ -18,8 +19,6 @@ export function rollDie(sides: number): number {
 
   return (buf[0] % sides) + 1;
 }
-
-const isUp = (p: BattleParticipant) => p.combatStats.status === "active" && p.combatStats.currentHp > 0;
 
 export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () => void) {
   const scene = useBattleScene();

@@ -1,12 +1,13 @@
 import { z } from "zod";
 
+import { GoalStatus } from "@/lib/constants/characters";
 import { GoalAuthor, MAX_GOALS } from "@/lib/constants/characters";
 import type { CharacterGoal } from "@/types/characters";
 
 export const goalInputSchema = z.object({
   id: z.string().min(1).max(40),
   text: z.string().trim().min(1).max(300),
-  status: z.enum(["active", "done", "failed"]),
+  status: z.enum([GoalStatus.ACTIVE, GoalStatus.DONE, GoalStatus.FAILED]),
   author: z.nativeEnum(GoalAuthor).optional(),
 });
 

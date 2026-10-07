@@ -1,7 +1,8 @@
+import { CombatStatus } from "@/lib/constants/battle";
 import type { BattleParticipant, BattleParticipantCombatStats } from "@/types/battle";
 
 export function downStatus(hp: number): BattleParticipantCombatStats["status"] {
-  return hp < 0 ? "dead" : "unconscious";
+  return hp < 0 ? CombatStatus.DEAD : CombatStatus.UNCONSCIOUS;
 }
 
 export function applyRawDamage(p: BattleParticipant, amount: number): BattleParticipant {

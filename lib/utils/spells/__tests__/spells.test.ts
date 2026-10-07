@@ -2,7 +2,6 @@ import { describe, expect,it } from "vitest";
 
 import {
   calculateTotalSpellsInGroup,
-  formatSpellLevel,
   groupSpellsByGroup,
   sortSpellLevels,
 } from "../spells";
@@ -22,17 +21,6 @@ function makeSpell(overrides: Partial<Spell> = {}): Spell {
 }
 
 describe("spells", () => {
-  describe("formatSpellLevel", () => {
-    it("повертає Cantrip для рівня 0", () => {
-      expect(formatSpellLevel(0)).toBe("Cantrip");
-    });
-
-    it("повертає Рівень N для N > 0", () => {
-      expect(formatSpellLevel(1)).toBe("Рівень 1");
-      expect(formatSpellLevel(5)).toBe("Рівень 5");
-    });
-  });
-
   describe("groupSpellsByGroup", () => {
     it("групує за spellGroup.name", () => {
       const spells: Spell[] = [
@@ -59,8 +47,8 @@ describe("spells", () => {
   describe("calculateTotalSpellsInGroup", () => {
     it("рахує суму заклинань по рівнях", () => {
       const levels: [string, Spell[]][] = [
-        ["Рівень 1", [makeSpell(), makeSpell()]],
-        ["Рівень 2", [makeSpell()]],
+        ["Перше коло", [makeSpell(), makeSpell()]],
+        ["Друге коло", [makeSpell()]],
       ];
 
       expect(calculateTotalSpellsInGroup(levels)).toBe(3);
@@ -70,25 +58,25 @@ describe("spells", () => {
   describe("sortSpellLevels", () => {
     it("ставить Cantrip першим", () => {
       const levels: [string, Spell[]][] = [
-        ["Рівень 1", []],
-        ["Cantrip", []],
+        ["Перше коло", []],
+        ["Замовляння", []],
       ];
 
       const sorted = sortSpellLevels(levels);
 
-      expect(sorted[0][0]).toBe("Cantrip");
+      expect(sorted[0][0]).toBe("Замовляння");
     });
 
-    it("сортує Рівень N за зростанням", () => {
+    it("сортує кола за зростанням", () => {
       const levels: [string, Spell[]][] = [
-        ["Рівень 3", []],
-        ["Рівень 1", []],
-        ["Рівень 2", []],
+        ["Третє коло", []],
+        ["Перше коло", []],
+        ["Друге коло", []],
       ];
 
       const sorted = sortSpellLevels(levels);
 
-      expect(sorted.map(([l]) => l)).toEqual(["Рівень 1", "Рівень 2", "Рівень 3"]);
+      expect(sorted.map(([l]) => l)).toEqual(["Перше коло", "Друге коло", "Третє коло"]);
     });
   });
 });

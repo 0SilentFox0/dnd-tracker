@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/utils/api/api-auth";
+import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 
 /**
@@ -33,7 +35,7 @@ export async function GET(
     });
 
     if (!campaign || campaign.members.length === 0) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+      return errorResponse(API_ERRORS.NOT_FOUND, 404);
     }
 
     const skillTrees = await prisma.skillTree.findMany({

@@ -5,7 +5,7 @@
 import { buildCampaignContextForStart } from "./start-build-context";
 import { scaleEnemiesForFairBattle } from "./start-fair-scaling";
 
-import { ParticipantSide, ParticipantSourceType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
+import { ParticipantSide, ParticipantSourceType, type ParticipantSourceTypeValue, SYSTEM_ACTOR } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
@@ -172,9 +172,7 @@ function applyStartOfBattleAndSort(
       round: 1,
       actionIndex: 0,
       timestamp: new Date(),
-      actorId: "system",
-      actorName: "Система",
-      actorSide: "ally",
+      ...SYSTEM_ACTOR,
       actionType: "ability",
       targets: [],
       actionDetails: { triggeredAbilities: [] },

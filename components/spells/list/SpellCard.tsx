@@ -16,7 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getDamageElementLabel } from "@/lib/constants/damage";
-import { getDamageModifierLabel, getHealModifierLabel, getSpellDamageTypeLabel, getSpellTargetLabel } from "@/lib/constants/spells";
+import { getDamageModifierLabel, getHealModifierLabel, getSpellDamageTypeLabel, getSpellTargetLabel, spellLevelName } from "@/lib/constants/spells";
 import { getSpellDamageTypeIcon, getSpellGroupIcon, getSpellTypeIcon } from "@/lib/utils/spells/spell-icons";
 import type { Spell, SpellGroup } from "@/types/spells";
 
@@ -68,7 +68,7 @@ export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, o
         <div className="min-w-0 flex-1">
           <h3 className="hud-sc truncate text-[15px] text-hud-ink">{spell.name}</h3>
           <div className="mt-1 flex flex-wrap gap-1">
-            <HudPill icon={<Sparkles className="size-3" />}>{spell.level === 0 ? "Cantrip" : spell.level}</HudPill>
+            <HudPill icon={<Sparkles className="size-3" />}>{spellLevelName(spell.level)}</HudPill>
             {spell.type === "aoe" && spell.damageType === "damage" ? (
               <HudPill icon={<Zap className="size-3" />}>AOE Демедж</HudPill>
             ) : (

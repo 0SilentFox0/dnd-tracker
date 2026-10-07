@@ -21,7 +21,7 @@ const row = { id: "s1", name: "Іскра", level: 1, type: "target", damageType
 describe("GET /spells?ids=", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({ userId: "u", campaign: { id: "camp", maxLevel: 20, members: [{ role: "player" }] } } as never);
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({ userId: "u", isDM: false, campaign: { id: "camp", maxLevel: 20, members: [{ role: "player" }] } } as never);
     vi.mocked(prisma.spell.findMany).mockResolvedValue([row] as never);
   });
 

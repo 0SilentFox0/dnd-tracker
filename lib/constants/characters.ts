@@ -9,3 +9,7 @@ export const GoalAuthor = { DM: "dm", PLAYER: "player" } as const;
 export type GoalAuthorValue = (typeof GoalAuthor)[keyof typeof GoalAuthor];
 
 export const MAX_GOALS = 30;
+
+export const GoalStatus = { ACTIVE: "active", DONE: "done", FAILED: "failed" } as const;
+
+export type GoalStatus = (typeof GoalStatus)[keyof typeof GoalStatus];

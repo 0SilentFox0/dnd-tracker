@@ -1,4 +1,4 @@
-import { type ParticipantSourceTypeValue } from "@/lib/constants/battle";
+import { ParticipantSide,type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 
 /**
  * Типи для API битв (request/response)
@@ -11,7 +11,7 @@ export interface CreateBattleData {
   participants: Array<{
     id: string;
     type: ParticipantSourceTypeValue;
-    side: "ally" | "enemy";
+    side: ParticipantSide;
     quantity?: number;
   }>;
 }

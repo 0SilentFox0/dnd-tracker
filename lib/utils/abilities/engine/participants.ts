@@ -1,3 +1,4 @@
+import { CombatStatus } from "@/lib/constants/battle";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -17,8 +18,8 @@ export function updateParticipant(
   return ps.map((p) => (p.basicInfo.id === id ? fn(p) : p));
 }
 
-export function isUp(p: BattleParticipant): boolean {
-  return p.combatStats.status === "active";
+export function isActive(p: BattleParticipant): boolean {
+  return p.combatStats.status === CombatStatus.ACTIVE;
 }
 
 export function resolvedAbilitiesOf(p: BattleParticipant): ResolvedAbility[] {

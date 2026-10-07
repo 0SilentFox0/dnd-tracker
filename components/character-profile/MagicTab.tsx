@@ -10,8 +10,8 @@ import { Section } from "./Section";
 import { EmptySpellBook } from "@/components/battle/wizards/SpellBookPages";
 import { spellLevelMetal } from "@/components/hud";
 import { Button } from "@/components/ui/button";
+import { spellLevelRoman } from "@/lib/constants/spells";
 import { cn } from "@/lib/utils";
-import { ROMAN } from "@/lib/utils/battle/view";
 import { signed } from "@/lib/utils/format";
 import { pluralUk } from "@/lib/utils/plural";
 
@@ -37,8 +37,8 @@ export function MagicTab() {
         <Section title="СЛОТИ">
           <div className="flex flex-wrap gap-1.5">
             {sheet.slots.map((s) => (
-              <span key={s.level} aria-label={`${ROMAN[s.level]} коло: ${s.count} ${pluralUk(s.count, ["слот", "слоти", "слотів"])}`} className={cn("hud-sc metal-fill rounded-md px-3 py-1.5 text-sm", spellLevelMetal(s.level))}>
-                {ROMAN[s.level]} · {s.count}
+              <span key={s.level} aria-label={`${spellLevelRoman(s.level)} коло: ${s.count} ${pluralUk(s.count, ["слот", "слоти", "слотів"])}`} className={cn("hud-sc metal-fill rounded-md px-3 py-1.5 text-sm", spellLevelMetal(s.level))}>
+                {spellLevelRoman(s.level)} · {s.count}
               </span>
             ))}
           </div>

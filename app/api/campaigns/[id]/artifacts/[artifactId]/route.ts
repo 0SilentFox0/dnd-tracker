@@ -9,8 +9,10 @@ import {
 } from "@/lib/supabase/artifact-icon-storage";
 import { readAbilities } from "@/lib/utils/abilities/read";
 import { abilitiesJson } from "@/lib/utils/abilities/read";
-import { requireDM, validateCampaignOwnership } from "@/lib/utils/api/api-auth";
+import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { loadOwned } from "@/lib/utils/api/load-owned";
+import { parseBody } from "@/lib/utils/api/parse-body";
 import { weaponStatsColumns } from "@/lib/utils/artifacts/weapon-stats";
 
 export async function GET(
@@ -26,16 +28,15 @@ export async function GET(
       return accessResult;
     }
 
-    const artifact = await prisma.artifact.findUnique({
-      where: { id: artifactId },
-      include: { artifactSet: true },
-    });
+    const artifact = await loadOwned(
+      prisma.artifact.findUnique({
+        where: { id: artifactId },
+        include: { artifactSet: true },
+      }),
+      id,
+    );
 
-    const validationError = validateCampaignOwnership(artifact, id);
-
-    if (validationError) {
-      return validationError;
-    }
+    if (artifact instanceof NextResponse) return artifact;
 
     const { abilities, issues: abilityIssues } = readAbilities("artifact", artifact as NonNullable<typeof artifact>);
 
@@ -58,19 +59,18 @@ export async function PATCH(
       return accessResult;
     }
 
-    const artifact = await prisma.artifact.findUnique({
-      where: { id: artifactId },
-    });
+    const artifact = await loadOwned(
+      prisma.artifact.findUnique({
+        where: { id: artifactId },
+      }),
+      id,
+    );
 
-    const validationError = validateCampaignOwnership(artifact, id);
+    if (artifact instanceof NextResponse) return artifact;
 
-    if (validationError) {
-      return validationError;
-    }
+    const data = await parseBody(patchArtifactSchema, request);
 
-    const body = await request.json();
-
-    const data = patchArtifactSchema.parse(body);
+    if (data instanceof NextResponse) return data;
 
     let resolvedIcon = data.icon;
 
@@ -127,16 +127,15 @@ export async function DELETE(
       return accessResult;
     }
 
-    const artifact = await prisma.artifact.findUnique({
-      where: { id: artifactId },
-      select: { campaignId: true },
-    });
+    const artifact = await loadOwned(
+      prisma.artifact.findUnique({
+        where: { id: artifactId },
+        select: { campaignId: true },
+      }),
+      id,
+    );
 
-    const validationError = validateCampaignOwnership(artifact, id);
-
-    if (validationError) {
-      return validationError;
-    }
+    if (artifact instanceof NextResponse) return artifact;
 
     await prisma.artifact.deleteMany({
       where: { id: artifactId },

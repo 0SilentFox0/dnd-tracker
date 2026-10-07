@@ -6,7 +6,7 @@ import { EmptyState, ErrorState } from "@/components/common/states";
 import { HudCard, HudPage, HudPageHeader, HudPanel } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { getAuthUser } from "@/lib/auth";
-import { CampaignRole } from "@/lib/constants/campaigns";
+import { CampaignRole, CampaignStatus } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 
 export default async function CampaignsPage() {
@@ -38,7 +38,7 @@ export default async function CampaignsPage() {
             userId: userId,
           },
         },
-        status: "active",
+        status: CampaignStatus.ACTIVE,
       },
       include: {
         members: {

@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { createSpellGroupSchema } from "@/lib/schemas";
 import { requireCampaignAccess,requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { parseBody } from "@/lib/utils/api/parse-body";
 
 export async function POST(
   request: Request,
@@ -19,9 +20,9 @@ export async function POST(
       return accessResult;
     }
 
-    const body = await request.json();
+    const data = await parseBody(createSpellGroupSchema, request);
 
-    const data = createSpellGroupSchema.parse(body);
+    if (data instanceof NextResponse) return data;
 
     const spellGroup = await prisma.spellGroup.create({
       data: {

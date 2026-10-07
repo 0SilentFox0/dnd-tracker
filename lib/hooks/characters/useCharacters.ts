@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { characterSheetKey } from "./keys";
+import { characterKeys } from "./keys";
 
 import {
   createCharacter,
@@ -12,6 +12,7 @@ import {
   updateCharacter,
 } from "@/lib/api/characters";
 import { type CharacterTypeValue } from "@/lib/constants/characters";
+import { battleKeys } from "@/lib/hooks/battles/keys";
 import { useCrudMutation } from "@/lib/hooks/common";
 import { progressionCampaignKey, progressionKey } from "@/lib/hooks/skills/progression-keys";
 import { ENTITY_STALE_MS } from "@/lib/providers/query-provider";
@@ -25,12 +26,7 @@ export function useCharacters(
   opts?: { type?: CharacterTypeValue; compact?: boolean; enabled?: boolean },
 ) {
   return useQuery<CharacterListItem[]>({
-    queryKey: [
-      "characters",
-      campaignId,
-      opts?.type ?? "all",
-      opts?.compact ? "compact" : "full",
-    ],
+    queryKey: characterKeys.list(campaignId, opts?.type ?? "all", !!opts?.compact),
     queryFn: () => getCharacters(campaignId, opts),
     staleTime: ENTITY_STALE_MS,
     enabled: !!campaignId && (opts?.enabled ?? true),
@@ -39,7 +35,7 @@ export function useCharacters(
 
 export function useCharacter(campaignId: string, characterId: string) {
   return useQuery<Character>({
-    queryKey: ["character", campaignId, characterId],
+    queryKey: characterKeys.detail(campaignId, characterId),
     queryFn: () => getCharacter(campaignId, characterId),
     // Editors seed a form from this; other writers (profile, battles) don't invalidate it.
     staleTime: 0,
@@ -50,7 +46,7 @@ export function useCharacter(campaignId: string, characterId: string) {
 export function useCreateCharacter(campaignId: string) {
   return useCrudMutation({
     mutationFn: (data: CharacterFormData) => createCharacter(campaignId, data),
-    invalidateKeys: [["characters", campaignId]],
+    invalidateKeys: [characterKeys.lists(campaignId)],
   });
 }
 
@@ -58,11 +54,11 @@ export function useUpdateCharacter(campaignId: string, characterId: string) {
   return useCrudMutation({
     mutationFn: (data: CharacterFormData) => updateCharacter(campaignId, characterId, data),
     invalidateKeys: [
-      ["characters", campaignId],
-      ["character", campaignId, characterId],
+      characterKeys.lists(campaignId),
+      characterKeys.detail(campaignId, characterId),
       progressionKey(campaignId, characterId),
-      characterSheetKey(campaignId, characterId),
-      ["battle-balance"],
+      characterKeys.sheet(campaignId, characterId),
+      battleKeys.balanceAll(),
     ],
   });
 }
@@ -72,11 +68,11 @@ export function useLevelUpCharacter(campaignId: string) {
     mutationFn: (characterId: string) =>
       levelUpCharacter(campaignId, characterId),
     invalidateKeys: [
-      ["characters", campaignId],
-      ["character", campaignId],
-      characterSheetKey(campaignId),
+      characterKeys.lists(campaignId),
+      characterKeys.details(campaignId),
+      characterKeys.sheet(campaignId),
       progressionCampaignKey(campaignId),
-      ["battle-balance"],
+      battleKeys.balanceAll(),
     ],
   });
 }
@@ -85,13 +81,13 @@ export function useDeleteCharacter(campaignId: string) {
   return useCrudMutation({
     mutationFn: (characterId: string) =>
       deleteCharacter(campaignId, characterId),
-    invalidateKeys: [["characters", campaignId]],
+    invalidateKeys: [characterKeys.lists(campaignId)],
   });
 }
 
 export function useDeleteAllCharacters(campaignId: string) {
   return useCrudMutation({
     mutationFn: () => deleteAllCharacters(campaignId),
-    invalidateKeys: [["characters", campaignId]],
+    invalidateKeys: [characterKeys.lists(campaignId)],
   });
 }

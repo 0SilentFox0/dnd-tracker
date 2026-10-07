@@ -12,6 +12,7 @@ import {
 import { BattleLogLoadEarlier } from "./BattleLogLoadEarlier";
 import { LogEntryDetails } from "./LogEntryDetails";
 
+import { ParticipantSide } from "@/lib/constants/battle";
 import { useConfirm } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 import { formatLogEntry } from "@/lib/utils/battle/battle-log-format";
@@ -109,7 +110,7 @@ export function BattleLogPanel({
                         <span
                           className={cn(
                             "shrink-0 font-medium",
-                            entry.actorSide === "ally"
+                            entry.actorSide === ParticipantSide.ALLY
                               ? "text-[#8fb0d0]"
                               : "text-hud-danger",
                           )}

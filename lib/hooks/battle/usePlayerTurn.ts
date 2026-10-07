@@ -4,6 +4,7 @@ import { useEffect, useReducer, useRef } from "react";
 
 import { useBattleScene } from "./useBattleScene";
 
+import { BattleStatus } from "@/lib/constants/battle";
 import { useConfirm } from "@/lib/hooks/common";
 import { initialTurnFlow, MORALE_SKIP_MS, moraleOutcome, turnFlow } from "@/lib/utils/battle/flows";
 import type { PendingMoraleCheckPayload } from "@/lib/utils/battle/turn";
@@ -65,7 +66,7 @@ export function usePlayerTurn(participant: BattleParticipant) {
     skipped: moraleResult === "skip",
     moraleResult,
     afterAction: () => {
-      if (scene.readBattle()?.status !== "active") return;
+      if (scene.readBattle()?.status !== BattleStatus.ACTIVE) return;
 
       if (exhausted(fresh())) dispatch({ type: "EXHAUSTED" });
     },

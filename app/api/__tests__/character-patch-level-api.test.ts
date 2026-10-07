@@ -8,7 +8,6 @@ vi.mock("@/lib/utils/api/api-auth", () => ({
   requireAuth: vi.fn(),
   requireCampaignAccess: vi.fn(),
   requireDM: vi.fn(),
-  validateCampaignOwnership: vi.fn(() => null),
 }));
 vi.mock("@/lib/db", () => ({
   prisma: {
@@ -19,7 +18,7 @@ vi.mock("@/lib/db", () => ({
 }));
 
 const access = (role: "dm" | "player", maxLevel = 20) =>
-  ({ userId: role === "dm" ? "dm" : "owner", campaign: { id: "camp", maxLevel, xpMultiplier: 2.5, members: [{ userId: role === "dm" ? "dm" : "owner", role }] } }) as never;
+  ({ userId: role === "dm" ? "dm" : "owner", isDM: role === "dm", campaign: { id: "camp", maxLevel, xpMultiplier: 2.5, members: [{ userId: role === "dm" ? "dm" : "owner", role }] } }) as never;
 
 const CHARACTER = {
   id: "ch", campaignId: "camp", controlledBy: "owner", type: "player", race: "Ельф", level: 3, experience: 0, seenLevel: 3,

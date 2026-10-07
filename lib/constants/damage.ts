@@ -27,3 +27,5 @@ export function getDamageElementLabel(value?: string | null): string {
 
   return DAMAGE_ELEMENT_LABELS[value] || value;
 }
+
+export const PHYSICAL_DAMAGE_TYPES: readonly string[] = ["slashing", "piercing", "bludgeoning", "physical"];

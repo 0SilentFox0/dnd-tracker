@@ -1,10 +1,11 @@
 import { amountLabel } from "../labels";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
+import { CombatStatus } from "@/lib/constants/battle";
 import { resolveAmount } from "@/lib/utils/abilities/engine/amount";
 import { eventDamage } from "@/lib/utils/abilities/engine/events";
 import { applyRawDamage } from "@/lib/utils/abilities/engine/hp";
-import { findParticipant, isUp, replaceParticipant } from "@/lib/utils/abilities/engine/participants";
+import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/participants";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/timed-effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import { hasImmunity } from "@/lib/utils/battle/resistance";
@@ -27,7 +28,7 @@ export function applyDealDamage(input: EffectApplyInput<Of<"dealDamage">>): Effe
   for (const id of input.targetIds) {
     const t = findParticipant(ps, id);
 
-    if (!t || !isUp(t)) continue;
+    if (!t || !isActive(t)) continue;
 
     const amount = resolveAmount(effect.amount, { owner, target: t, eventDamage: eventDamage(input.event), rng: ctx.rng });
 
@@ -38,7 +39,7 @@ export function applyDealDamage(input: EffectApplyInput<Of<"dealDamage">>): Effe
     ps = replaceParticipant(ps, updated);
     messages.push(`💥 ${ability.name}: ${t.basicInfo.name} −${amount} HP`);
 
-    if (!isUp(updated)) downed.push({ victimId: id, actorId: input.ownerId });
+    if (!isActive(updated)) downed.push({ victimId: id, actorId: input.ownerId });
   }
 
   return { participants: ps, messages, downed };
@@ -58,7 +59,7 @@ export function applyHeal(input: EffectApplyInput<Of<"heal">>): EffectApplyResul
   for (const id of input.targetIds) {
     const t = findParticipant(ps, id);
 
-    if (!t || (!isUp(t) && !effect.revive)) continue;
+    if (!t || (!isActive(t) && !effect.revive)) continue;
 
     const amount = resolveAmount(effect.amount, { owner, target: t, eventDamage: eventDamage(input.event), rng: ctx.rng });
 
@@ -66,14 +67,14 @@ export function applyHeal(input: EffectApplyInput<Of<"heal">>): EffectApplyResul
 
     const hp = Math.min(t.combatStats.maxHp, before + amount);
 
-    if (hp <= before && isUp(t)) continue;
+    if (hp <= before && isActive(t)) continue;
 
     ps = replaceParticipant(ps, {
       ...t,
-      combatStats: { ...t.combatStats, currentHp: hp, status: hp > 0 ? "active" : t.combatStats.status },
+      combatStats: { ...t.combatStats, currentHp: hp, status: hp > 0 ? CombatStatus.ACTIVE : t.combatStats.status },
     });
     messages.push(
-      isUp(t)
+      isActive(t)
         ? `💚 ${ability.name}: ${t.basicInfo.name} +${hp - before} HP`
         : `✝️ ${ability.name}: ${t.basicInfo.name} повертається з ${hp} HP`,
     );
@@ -96,7 +97,7 @@ export function applyDot(input: EffectApplyInput<Of<"dot">>): EffectApplyResult 
   for (const id of input.targetIds) {
     const t = findParticipant(ps, id);
 
-    if (!t || !isUp(t)) continue;
+    if (!t || !isActive(t)) continue;
 
     if (hasImmunity(t, effect.damageType, { participants: ps })) {
       messages.push(`⛔ ${ability.name}: ${t.basicInfo.name} — імунітет до ${effect.damageType}`);

@@ -1,6 +1,6 @@
-const ABILITIES = ["intelligence", "wisdom", "charisma"] as const;
+import { SPELLCASTING_ABILITIES, type SpellcastingAbility } from "@/lib/constants/abilities";
 
-export type SpellcastingAbility = (typeof ABILITIES)[number];
+export type { SpellcastingAbility };
 
 export const SPELL_ABILITY_OPTIONS = [
   { value: "intelligence", label: "Інтелект" },
@@ -9,5 +9,5 @@ export const SPELL_ABILITY_OPTIONS = [
 ];
 
 export function toSpellcastingAbility(value: string): SpellcastingAbility | undefined {
-  return (ABILITIES as readonly string[]).includes(value) ? (value as SpellcastingAbility) : undefined;
+  return (SPELLCASTING_ABILITIES as readonly string[]).includes(value) ? (value as SpellcastingAbility) : undefined;
 }

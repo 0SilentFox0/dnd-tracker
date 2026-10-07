@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { ABILITY_KEYS } from "@/lib/constants/abilities";
+import { ABILITY_KEYS, SPELLCASTING_ABILITIES } from "@/lib/constants/abilities";
 
 export const updateCharacterSchema = z.object({
   name: z.string().min(1).max(100).optional(),
@@ -33,7 +33,7 @@ export const updateCharacterSchema = z.object({
 
   spellcastingAbility: z.preprocess(
     (v) => (v === "" ? null : v),
-    z.enum(["intelligence", "wisdom", "charisma"]).nullable().optional(),
+    z.enum(SPELLCASTING_ABILITIES).nullable().optional(),
   ),
   spellSlots: z
     .record(

@@ -1,3 +1,4 @@
+import { spellLevelName } from "@/lib/constants/spells";
 import type { SkillForReference, SpellForReference } from "@/types/info-reference";
 
 export function formatMechanicsSkill(s: SkillForReference): string {
@@ -15,7 +16,7 @@ export function formatMechanicsSkill(s: SkillForReference): string {
 export function formatMechanicsSpell(s: SpellForReference): string {
   const parts: string[] = [];
 
-  parts.push(`Рівень ${s.level}, ${s.type}, ${s.damageType}`);
+  parts.push(`${spellLevelName(s.level)}, ${s.type}, ${s.damageType}`);
 
   if (s.castingTime) parts.push(`Час: ${s.castingTime}`);
 

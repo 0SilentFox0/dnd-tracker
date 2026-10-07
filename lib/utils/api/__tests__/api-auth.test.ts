@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { requireAuth, requireAuthUser, requireCampaignAccess, requireDM, validateCampaignOwnership } from "../api-auth";
+import { requireAuth, requireAuthUser, requireCampaignAccess, requireDM } from "../api-auth";
 
 import { CampaignRole, type CampaignRoleValue } from "@/lib/constants/campaigns";
 
@@ -94,6 +94,22 @@ describe("api-auth", () => {
       expect(statusOf(await requireCampaignAccess("c1"))).toBe(403);
     });
 
+    it("isDM: true для DM, false для гравця", async () => {
+      findCampaign.mockResolvedValue(campaign(CampaignRole.DM));
+      expect(await requireCampaignAccess("c1")).toMatchObject({ isDM: true });
+
+      findCampaign.mockResolvedValue(campaign(CampaignRole.PLAYER));
+      expect(await requireCampaignAccess("c1")).toMatchObject({ isDM: false });
+    });
+
+    it("відмови мають форму { error } українською", async () => {
+      findCampaign.mockResolvedValue(null);
+      expect(await (await requireCampaignAccess("c1") as NextResponse).json()).toEqual({ error: "Кампанію не знайдено" });
+
+      findCampaign.mockResolvedValue(campaign());
+      expect(await (await requireCampaignAccess("c1") as NextResponse).json()).toEqual({ error: "Недостатньо прав" });
+    });
+
     it("гравець — доступ і дані кампанії", async () => {
       findCampaign.mockResolvedValue(campaign(CampaignRole.PLAYER));
 
@@ -124,17 +140,4 @@ describe("api-auth", () => {
     });
   });
 
-  describe("validateCampaignOwnership", () => {
-    it("немає запису — 404", () => {
-      expect(validateCampaignOwnership(null, "c1")?.status).toBe(404);
-    });
-
-    it("запис іншої кампанії — 403", () => {
-      expect(validateCampaignOwnership({ campaignId: "c2" }, "c1")?.status).toBe(403);
-    });
-
-    it("запис цієї кампанії — null", () => {
-      expect(validateCampaignOwnership({ campaignId: "c1" }, "c1")).toBeNull();
-    });
-  });
 });
