@@ -7,6 +7,7 @@ import { EffectLine, HealthBar, Portrait, SlotGrid } from "@/components/battle/h
 import { BattleStatus } from "@/lib/constants/battle";
 import { useBattleSceneData, useHpChange } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
+import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
 import { abilityCharges, turnsUntil } from "@/lib/utils/battle/view";
 import { signed } from "@/lib/utils/format";
@@ -21,7 +22,7 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero, compact = false }: 
 
   const charges = abilityCharges(hero);
 
-  const morale = hero.combatStats.morale;
+  const morale = effectiveMorale(hero, battle.initiativeOrder).value;
 
   return (
     <div key={change?.id} className={cn("relative", change && change.delta < 0 && "animate-[hud-shake_.35s]")}>
