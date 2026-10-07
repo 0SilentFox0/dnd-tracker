@@ -133,7 +133,7 @@ const ChangeMoraleSchema = z.object({
 
 const CleanseSchema = z.object({ kind: z.literal("cleanse"), ...target });
 
-const GuardSchema = z.object({ kind: z.literal("guard"), percent: z.number().min(1).max(100), duration: DurationSchema, ...target });
+const GuardSchema = z.object({ kind: z.literal("guard"), percent: z.number().int().min(1).max(100), duration: DurationSchema, ...target });
 
 const MarkSchema = z.object({ kind: z.literal("mark"), markId: z.string().min(1), duration: DurationSchema, ...target });
 

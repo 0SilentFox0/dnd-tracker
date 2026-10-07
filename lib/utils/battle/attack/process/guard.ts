@@ -28,6 +28,8 @@ export function splitGuardedDamage(ps: BattleParticipant[], targetId: string, da
 
     const guardianDamage = Math.floor((damage * percent) / 100);
 
+    if (guardianDamage === 0) continue;
+
     return { targetDamage: damage - guardianDamage, guardianId, guardianDamage };
   }
 
