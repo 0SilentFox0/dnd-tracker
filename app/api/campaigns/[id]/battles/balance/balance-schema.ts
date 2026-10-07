@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const balanceSchema = z.object({
-  /** Якщо тіло порожнє / лише фільтри — вважаємо союзників порожніми (статистика по всіх сутностях кампанії). */
+  /** Якщо тіло порожнє — вважаємо союзників порожніми. */
   allyParticipants: z
     .object({
       characterIds: z.array(z.string()).default([]),
@@ -12,8 +12,7 @@ export const balanceSchema = z.object({
         .default([]),
     })
     .default({ characterIds: [], units: [] }),
-  difficulty: z.enum(["easy", "medium", "hard"]).optional(),
-  minTier: z.number().min(1).max(30).optional(),
-  maxTier: z.number().min(1).max(30).optional(),
+  /** Підібрати склад ворогів; без прапорця повертаються лише сила союзників. */
+  suggest: z.boolean().optional(),
   raceId: z.string().optional(),
 });
