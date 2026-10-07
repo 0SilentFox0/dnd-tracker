@@ -2,10 +2,9 @@ import { describe, expect, it, vi } from "vitest";
 
 import { context, goblin, hero, participant } from "./fixtures";
 
+import { createAddParticipantMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/add-participant/add-participant-mutation";
 import { ParticipantSide } from "@/lib/constants/battle";
 import type { BattleParticipant } from "@/types/battle";
-
-import { createAddParticipantMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/add-participant/add-participant-mutation";
 
 function deps(over = {}) {
   return {

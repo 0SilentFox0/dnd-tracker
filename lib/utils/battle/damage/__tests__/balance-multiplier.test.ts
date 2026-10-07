@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
-import { handleMiss } from "@/lib/utils/battle/attack/process/miss";
 import { computeHitDamage } from "@/lib/utils/battle/attack/process/compute";
+import { handleMiss } from "@/lib/utils/battle/attack/process/miss";
 import { applyBalanceDamageMultiplier, balanceDamageMultiplier, scaleAdditionalDamage } from "@/lib/utils/battle/damage/balance-multiplier";
 import { computeSpellDamageAndApply } from "@/lib/utils/battle/spell/process-damage";
 import type { BattleSpell } from "@/lib/utils/battle/types/spell-process";

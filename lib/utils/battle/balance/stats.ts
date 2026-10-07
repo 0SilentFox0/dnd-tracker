@@ -6,11 +6,11 @@ import { getNonMagicBranchDpr, getSpellDprFromBranchLevels } from "./dpr";
 
 import { AttackType } from "@/lib/constants/battle";
 import { MIN_UNIT_STAT, TYPICAL_TARGETS } from "@/lib/constants/battle-balance";
-import { formatSpellDamageDiceRoll } from "@/lib/utils/spells/spell-calculations";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { averageOf, diceAverage, parseDiceLenient } from "@/lib/utils/common/dice";
 import type { BranchLevel } from "@/lib/utils/skills/progression";
+import { formatSpellDamageDiceRoll } from "@/lib/utils/spells/spell-calculations";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 import type { CharacterDprBreakdown } from "@/types/battle-setup";
 

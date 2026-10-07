@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { MIN_UNIT_STAT, TYPICAL_TARGETS } from "@/lib/constants/battle-balance";
 import { AttackType } from "@/lib/constants/battle";
+import { MIN_UNIT_STAT, TYPICAL_TARGETS } from "@/lib/constants/battle-balance";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { getCharacterStats, getUnitStats } from "@/lib/utils/battle/balance";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
