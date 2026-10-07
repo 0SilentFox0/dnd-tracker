@@ -674,11 +674,13 @@ async function fairBattleRuns() {
 
   const inRange = runs.filter((r) => r.completed && r.rounds >= 2 && r.rounds <= 6).length;
 
-  const wins = runs.filter((r) => r.completed && r.heroesWon).length;
+  const wins = runs.filter((r) => r.completed && r.heroesWon && r.hpLeft >= 40).length;
+
+  const need = runs.length - 1;
 
   check("Підібраний склад: ворогам виставлено множники HP і шкоди", runs[0].scaled.length > 0 && runs[0].scaled.every((p) => (p.battleData.damageMultiplier ?? 0) > 0 && (p.battleData.hpMultiplier ?? 0) > 0), `${runs[0].scaled.length} ворогів`);
-  check("Рівний бій: більшість прогонів закінчується за 2–6 раундів", inRange > runs.length / 2, `${inRange}/${runs.length}, раунди: ${runs.map((r) => r.rounds).join(", ")}`);
-  check("Рівний бій: герої зазвичай перемагають", wins > runs.length / 2, `${wins}/${runs.length}`);
+  check("Рівний бій: щонайбільше один прогін поза 2–6 раундами", inRange >= need, `${inRange}/${runs.length}, раунди: ${runs.map((r) => r.rounds).join(", ")}`);
+  check("Рівний бій: герої перемагають, лишивши ≥ 40% HP (щонайбільше один виняток)", wins >= need, `${wins}/${runs.length}`);
 }
 
 main().catch(async (e) => {
