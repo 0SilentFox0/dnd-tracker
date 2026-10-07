@@ -42,16 +42,23 @@ export function BalanceSummary({ fair }: { fair: { party: PartyPower; scaling: F
                   DPR {round1(scaling.base.dpr)} → {round1(scaling.reached.dpr)} · HP {Math.round(scaling.base.hp)} → {Math.round(scaling.reached.hp)}
                 </span>
               </Stat>
+              {scaling.fixed.hp > 0 && (
+                <Stat label="NPC-вороги (без масштабу)">
+                  <span data-testid="fixed-enemy-power">
+                    DPR {round1(scaling.fixed.dpr)} · HP {Math.round(scaling.fixed.hp)}
+                  </span>
+                </Stat>
+              )}
             </div>
             <div className="flex flex-wrap items-center gap-2 text-xs">
-              <span className="rounded border border-[#4a3c2c] bg-[#1a140f] px-2 py-0.5">{mult(scaling.hpScale)} HP</span>
-              <span className="rounded border border-[#4a3c2c] bg-[#1a140f] px-2 py-0.5">{mult(scaling.dmgScale)} шкода</span>
+              <span className="rounded border border-border bg-card px-2 py-0.5">{mult(scaling.hpScale)} HP</span>
+              <span className="rounded border border-border bg-card px-2 py-0.5">{mult(scaling.dmgScale)} шкода</span>
               {scaling.verdict === "even" ? (
                 <span className="rounded border border-[#6f8f4e] bg-[#1d2615] px-2 py-0.5 text-[#b7d68f]" data-testid="balance-verdict">
                   рівний бій ✓
                 </span>
               ) : (
-                <span className="rounded border border-[#a5683a] bg-[#2a1a10] px-2 py-0.5 text-[#e9b07a]" data-testid="balance-verdict">
+                <span className="rounded border border-destructive/70 bg-secondary px-2 py-0.5 text-destructive" data-testid="balance-verdict">
                   {scaling.hint ? describeHint(scaling.hint) : scaling.verdict === "weak" ? "Слабко" : "Забагато"}
                 </span>
               )}

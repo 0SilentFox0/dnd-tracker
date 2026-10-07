@@ -52,4 +52,17 @@ describe("BalanceSummary", () => {
 
     expect(screen.getByText(/Додайте героїв/)).toBeTruthy();
   });
+
+  it("NPC-вороги показані окремо й входять у силу ворогів", () => {
+    const withNpc: SetupBalanceStats = { ...stats, characterStats: { ...stats.characterStats, npc: { dpr: 10, hp: 80 } } };
+
+    const list: SetupBalanceParticipant[] = [...heroes, { id: "npc", type: "character", side: "enemy" }, ...enemies(3)];
+
+    const { result } = renderHook(() => useFairBalance(list, withNpc));
+
+    render(<BalanceSummary fair={result.current} />);
+
+    expect(screen.getByTestId("fixed-enemy-power").textContent).toContain("HP 80");
+    expect(Number((screen.getByTestId("enemy-power").textContent ?? "").match(/HP (\d+) →/)?.[1])).toBeGreaterThanOrEqual(80 + 3 * 55);
+  });
 });

@@ -41,13 +41,13 @@ export function DmParticipantRow({
 
   const controlled = dmControlledParticipantId === participant.basicInfo.id;
 
+  const label = scaleLabel(participant);
+
   return (
     <div className={cn("flex min-h-10 items-center gap-2 border-b border-white/[.08] py-1", controlled && "bg-[var(--gold)]/[.08]")}>
       <i className="size-2 shrink-0 rounded-full" style={{ background: participant.basicInfo.side === "ally" ? "var(--ally)" : "var(--enemy)" }} />
-      <span className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--ink)]">
-        {participant.basicInfo.name}
-        {scaleLabel(participant) && <span className="ml-2 text-xs font-normal text-[var(--hud-muted)]" data-testid="balance-scale">{scaleLabel(participant)}</span>}
-      </span>
+      <span className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--ink)]">{participant.basicInfo.name}</span>
+      {label && <span className="shrink-0 text-xs text-[var(--hud-muted)]" data-testid="balance-scale">{label}</span>}
       <div className="flex shrink-0 items-center gap-0.5">
         <button
           type="button"
