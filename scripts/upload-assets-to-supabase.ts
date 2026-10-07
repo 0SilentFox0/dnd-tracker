@@ -4,6 +4,7 @@
  * - assets/unit-icons/* → bucket unit-icons
  * - assets/spell-icons/* → bucket spell-icons
  * - assets/skill-icons/* → bucket skill-icons
+ * - assets/main-skill-icons/* → bucket main-skill-icons
  * - assets/artifact-icons/* → bucket artifact-icons (іконки з UI також потрапляють сюди через API)
  *
  * Потрібно: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (з .env.local або env)
@@ -40,6 +41,7 @@ const BUCKET_FOLDERS = [
   { bucket: "unit-icons", folder: "unit-icons" },
   { bucket: "spell-icons", folder: "spell-icons" },
   { bucket: "skill-icons", folder: "skill-icons" },
+  { bucket: "main-skill-icons", folder: "main-skill-icons" },
   { bucket: "artifact-icons", folder: "artifact-icons" },
 ] as const;
 
