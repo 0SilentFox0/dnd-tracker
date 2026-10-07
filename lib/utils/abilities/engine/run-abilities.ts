@@ -60,7 +60,7 @@ export function runAbilities(participants: BattleParticipant[], event: AbilityEv
         const r = applyEffect({ participants: ps, ability, effectIndex, ownerId, effect, targetIds, event, ctx });
 
         ps = r.participants;
-        messages.push(...r.messages);
+        messages.push(...r.messages.map((m) => (ability.limits?.chance !== undefined ? `${m} (шанс ${ability.limits.chance} %)` : m)));
 
         for (const m of r.actionModifiers ?? []) (actionModifiers[m.participantId] ??= []).push(m.effect);
 
