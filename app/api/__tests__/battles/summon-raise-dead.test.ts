@@ -30,6 +30,8 @@ const gate = resolved({ id: "gate", name: "Відкриття воріт", trigg
 
 const missing = resolved({ id: "none", name: "Поклик", trigger: { event: "bonusAction" }, effects: [{ kind: "summon", group: "Демони", tier: 7 }] });
 
+const legion = resolved({ id: "legion", name: "Легіон", trigger: { event: "bonusAction" }, effects: [{ kind: "summon", group: "дЕмОни", tier: 5, count: 2 }] });
+
 const raise = resolved({
   id: "raise",
   name: "Підняття мертвих",
@@ -42,12 +44,12 @@ const raise = resolved({
 
 const base = participant("hero", { controlledBy: "user-1" }, {});
 
-const caster: BattleParticipant = { ...base, battleData: { ...base.battleData, resolvedAbilities: [gate, missing, raise] } };
+const caster: BattleParticipant = { ...base, battleData: { ...base.battleData, resolvedAbilities: [gate, missing, legion, raise] } };
 
 const dead = (id: string, sourceType: ParticipantSourceTypeValue = ParticipantSourceType.UNIT): BattleParticipant => {
   const p = participant(id, { side: ParticipantSide.ENEMY, controlledBy: "dm", sourceType }, {});
 
-  return { ...p, combatStats: { ...p.combatStats, currentHp: 0, maxHp: 50, status: "dead" } } as BattleParticipant;
+  return { ...p, actionFlags: { ...p.actionFlags, hasUsedAction: true }, combatStats: { ...p.combatStats, currentHp: 0, maxHp: 50, status: "dead" } } as BattleParticipant;
 };
 
 const bonus = createBonusActionMutation(deps);
@@ -73,6 +75,14 @@ describe("summon", () => {
     expect(restored.basicInfo.side).toBe(added.basicInfo.side);
   });
 
+  it("count 2 adds two numbered instances; group match ignores case", async () => {
+    const out = await bonus(context({ participants: [caster, goblin] }), { participantId: "hero", abilityKey: legion.key });
+
+    const imps = out.participants.filter((p) => p.basicInfo.sourceId === "u-imp");
+
+    expect(imps.map((p) => p.basicInfo.name)).toEqual(["Біс #1", "Біс #2"]);
+  });
+
   it("no matching unit: a message and nothing added", async () => {
     const out = await bonus(context({ participants: [caster, goblin] }), { participantId: "hero", abilityKey: missing.key });
 
@@ -91,6 +101,7 @@ describe("raiseDead", () => {
       expect(p.basicInfo.side).toBe(caster.basicInfo.side);
       expect(p.combatStats).toMatchObject({ status: "active", currentHp: 45 });
       expect(p.battleData.summonedBy).toBe("hero");
+      expect(p.actionFlags.hasUsedAction).toBe(false);
     }
   });
 

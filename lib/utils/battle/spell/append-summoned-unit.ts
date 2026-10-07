@@ -26,12 +26,7 @@ export async function appendSummonedUnitToInitiativeEnd(params: {
     return { finalOrder: orderAfterSpell, summoned: null };
   }
 
-  const instanceNumber =
-    orderAfterSpell.filter(
-      (p) =>
-        p.basicInfo.sourceType === ParticipantSourceType.UNIT &&
-        p.basicInfo.sourceId === unit.id,
-    ).length + 1;
+  const instanceNumber = nextInstanceNumber(orderAfterSpell, unit.id);
 
   const built = await createBattleParticipantFromUnit(
     unit,
@@ -43,6 +38,10 @@ export async function appendSummonedUnitToInitiativeEnd(params: {
   const { finalOrder, added } = appendToInitiativeEnd(orderAfterSpell, built);
 
   return { finalOrder, summoned: added };
+}
+
+export function nextInstanceNumber(order: BattleParticipant[], unitId: string): number {
+  return order.filter((p) => p.basicInfo.sourceType === ParticipantSourceType.UNIT && p.basicInfo.sourceId === unitId).length + 1;
 }
 
 export function appendToInitiativeEnd(order: BattleParticipant[], built: BattleParticipant): { finalOrder: BattleParticipant[]; added: BattleParticipant } {

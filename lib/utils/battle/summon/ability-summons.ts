@@ -1,17 +1,16 @@
 import type { Prisma } from "@prisma/client";
 
-import { ParticipantSourceType } from "@/lib/constants/battle";
 import type { SummonRequest } from "@/lib/utils/abilities/engine/types";
 import { createBattleParticipantFromUnit } from "@/lib/utils/battle/participant";
-import { appendToInitiativeEnd } from "@/lib/utils/battle/spell/append-summoned-unit";
+import { appendToInitiativeEnd, nextInstanceNumber } from "@/lib/utils/battle/spell/append-summoned-unit";
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
 import type { BattleParticipant } from "@/types/battle";
 
 type RaceRow = Prisma.RaceGetPayload<object>;
 
 export interface SummonPool {
-  units: UnitFromPrisma[];
-  races: RaceRow[];
+  units: Omit<UnitFromPrisma, "createdAt">[];
+  races: Pick<RaceRow, "id" | "campaignId" | "name" | "abilities" | "passiveAbility">[];
 }
 
 export interface SummonDeps {
@@ -50,9 +49,7 @@ export async function applyAbilitySummons(
     for (let i = 0; i < req.count; i++) {
       const unit = candidates[Math.min(candidates.length - 1, Math.floor(opts.rng() * candidates.length))];
 
-      const instance = next.filter((p) => p.basicInfo.sourceType === ParticipantSourceType.UNIT && p.basicInfo.sourceId === unit.id).length + 1;
-
-      const built = await createBattleParticipantFromUnit(unit, opts.battleId, owner.basicInfo.side, instance, racesById);
+      const built = await createBattleParticipantFromUnit(unit as UnitFromPrisma, opts.battleId, owner.basicInfo.side, nextInstanceNumber(next, unit.id), racesById as Record<string, RaceRow>);
 
       const withOwner = { ...built, battleData: { ...built.battleData, summonedBy: req.ownerId } };
 

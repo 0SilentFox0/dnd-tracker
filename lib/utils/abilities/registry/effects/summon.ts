@@ -1,6 +1,7 @@
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { CombatStatus, ParticipantSourceType } from "@/lib/constants/battle";
+import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/participants";
 import type { Effect } from "@/lib/utils/abilities/schema";
 
@@ -40,9 +41,12 @@ export function applyRaiseDead(input: EffectApplyInput<Of<"raiseDead">>): Effect
       basicInfo: { ...t.basicInfo, side: owner.basicInfo.side },
       combatStats: { ...t.combatStats, status: CombatStatus.ACTIVE, currentHp: Math.max(1, Math.floor((t.combatStats.maxHp * effect.hpPercent) / 100)) },
       battleData: { ...t.battleData, activeEffects: [], summonedBy: ownerId },
+      actionFlags: { hasUsedAction: false, hasUsedBonusAction: false, hasUsedReaction: false, hasExtraTurn: false },
     }));
     raised.push(id);
   }
+
+  if (raised.length) ps = applyBakedAuras(ps, new Set(raised));
 
   const messages = raised.length ? [`💀 ${ability.name}: ${participantNames(ps, raised)} повстали (${effect.hpPercent}% HP)`] : [];
 
