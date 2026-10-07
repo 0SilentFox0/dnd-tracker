@@ -3,7 +3,8 @@
  */
 import { logTurnTiming } from "./turn-helpers";
 
-import { CombatStatus, SYSTEM_ACTOR } from "@/lib/constants/battle";
+import { SYSTEM_ACTOR } from "@/lib/constants/battle";
+import { isActive } from "@/lib/utils/abilities/engine/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import {
   processEndOfTurn,
@@ -245,11 +246,7 @@ export function runAdvanceTurnLoop(
       });
     }
 
-    const isAlive =
-      turnResult.participant.combatStats.status !== CombatStatus.DEAD &&
-      turnResult.participant.combatStats.status !== CombatStatus.UNCONSCIOUS;
-
-    if (isAlive) activeParticipantFound = true;
+    if (isActive(turnResult.participant)) activeParticipantFound = true;
 
     const victoryCheck = checkVictoryConditions(updatedInitiativeOrder);
 

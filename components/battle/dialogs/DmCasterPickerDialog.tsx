@@ -3,7 +3,8 @@
 import { BattleDialog } from "./shared";
 
 import { Button } from "@/components/ui/button";
-import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
+import { ParticipantSide } from "@/lib/constants/battle";
+import { isActive } from "@/lib/utils/abilities/engine/participants";
 import type { BattleParticipant } from "@/types/battle";
 
 export interface DmCasterPickerDialogProps {
@@ -20,7 +21,7 @@ export function DmCasterPickerDialog({
   onSelectCaster,
 }: DmCasterPickerDialogProps) {
   const activeParticipants = participants.filter(
-    (p) => p.combatStats?.status === CombatStatus.ACTIVE,
+    isActive,
   );
 
   return (

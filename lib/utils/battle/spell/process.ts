@@ -31,7 +31,7 @@ import {
 import { generateSpellDamageRolls } from "./process-helpers";
 
 import { ParticipantSourceType } from "@/lib/constants/battle";
-import { isUp, withSelf } from "@/lib/utils/abilities/engine/participants";
+import { isActive, withSelf } from "@/lib/utils/abilities/engine/participants";
 export type { BattleSpell, ProcessSpellParams, ProcessSpellResult };
 
 /**
@@ -294,7 +294,7 @@ export function processSpell(params: ProcessSpellParams): ProcessSpellResult {
   for (const t of updatedTargets) put(flow, t);
 
   for (const orig of targets) {
-    if (isUp(orig)) settleDowned(flow, orig.basicInfo.id, casterId);
+    if (isActive(orig)) settleDowned(flow, orig.basicInfo.id, casterId);
   }
 
   const battleAction = buildSpellSuccessAction(

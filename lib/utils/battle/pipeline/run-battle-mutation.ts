@@ -6,7 +6,8 @@ import { buildPusherMessages, toBattleResponse } from "./battle-response";
 import { buildClientDelta } from "./client-delta";
 import { defaultPipelineDeps } from "./default-deps";
 
-import { BattleStatus,CombatStatus } from "@/lib/constants/battle";
+import { BattleStatus } from "@/lib/constants/battle";
+import { isActive } from "@/lib/utils/abilities/engine/participants";
 import type { Rng } from "@/lib/utils/abilities/engine/types";
 import type { BATTLE_RATE_LIMITS, RateLimitResult } from "@/lib/utils/api/rate-limit";
 import { rateLimitResponse } from "@/lib/utils/api/rate-limit";
@@ -93,7 +94,7 @@ function assertAccess(access: BattleAccess, ctx: BattleMutationContext): void {
     throw new BattleRuleError("not_your_turn", "Зараз не ваш хід");
   }
 
-  if (current.combatStats.status !== CombatStatus.ACTIVE) {
+  if (!isActive(current)) {
     throw new BattleRuleError("participant_dead", "Учасник не може діяти");
   }
 }

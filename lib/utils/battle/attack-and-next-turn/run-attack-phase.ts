@@ -1,4 +1,5 @@
-import { AttackType,CombatStatus } from "@/lib/constants/battle";
+import { AttackType } from "@/lib/constants/battle";
+import { isActive } from "@/lib/utils/abilities/engine/participants";
 /**
  * Runs the attack phase: validation, processAttack per target, primary-target retaliation.
  * Used by attack-and-next-turn route (and can be reused by attack route).
@@ -113,7 +114,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
     throw new AttackPhaseError("Attacker has already used their action", 400);
   }
 
-  if (attacker.combatStats.status !== CombatStatus.ACTIVE) {
+  if (!isActive(attacker)) {
     throw new AttackPhaseError(
       "Attacker is not active (unconscious or dead)",
       400,
@@ -259,7 +260,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       }
     }
 
-    if (currentAttacker.combatStats.status !== CombatStatus.ACTIVE) break;
+    if (!isActive(currentAttacker)) break;
   }
 
   const finalInitiativeOrder = currentInitiativeOrder;

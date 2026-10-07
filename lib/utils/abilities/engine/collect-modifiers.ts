@@ -1,6 +1,6 @@
 import { resolveFlat } from "./amount";
 import { legacyActiveEffectModifiers } from "./legacy-active-effects";
-import { findParticipant, isUp, resolvedAbilitiesOf } from "./participants";
+import { findParticipant, isActive, resolvedAbilitiesOf } from "./participants";
 
 import { evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
 import type { AttackKind, DamageKind, FlagEffect, FlagKey, StaticEffect, StatKey } from "@/lib/utils/abilities/schema";
@@ -101,7 +101,7 @@ export function collectModifiers(
 
   if (!skipPassive) {
     for (const source of participants) {
-      if (source !== subject && !isUp(source)) continue;
+      if (source !== subject && !isActive(source)) continue;
 
       for (const ability of resolvedAbilitiesOf(source)) {
         if (ability.trigger.event !== "passive") continue;

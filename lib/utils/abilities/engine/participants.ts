@@ -18,7 +18,7 @@ export function updateParticipant(
   return ps.map((p) => (p.basicInfo.id === id ? fn(p) : p));
 }
 
-export function isUp(p: BattleParticipant): boolean {
+export function isActive(p: BattleParticipant): boolean {
   return p.combatStats.status === CombatStatus.ACTIVE;
 }
 

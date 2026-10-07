@@ -6,16 +6,15 @@ import { Zap } from "lucide-react";
 
 import { HealthLabel, HUD_SURFACE,Portrait } from "@/components/battle/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
+import { ParticipantSide } from "@/lib/constants/battle";
 import { useBattleScene } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { withinLimits } from "@/lib/utils/abilities/engine/usage";
 import { describeEffect } from "@/lib/utils/abilities/registry/effects";
+import { isUp } from "@/lib/utils/battle/participant/state";
 import { bonusTargetSide } from "@/lib/utils/battle/view";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
-
-const isUp = (p: BattleParticipant) => p.combatStats.status === CombatStatus.ACTIVE && p.combatStats.currentHp > 0;
 
 export function BonusActionPicker({ participant, open, onOpenChange, onDone }: { participant: BattleParticipant; open: boolean; onOpenChange: (o: boolean) => void; onDone: () => void }) {
   const { allies, enemies, actions } = useBattleScene();

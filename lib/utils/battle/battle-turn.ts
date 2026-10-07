@@ -6,7 +6,7 @@ import { calculateInitiative, sortByInitiative } from "./battle-start";
 
 import { CombatStatus } from "@/lib/constants/battle";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
-import { findParticipant, isUp, replaceParticipant } from "@/lib/utils/abilities/engine/participants";
+import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/participants";
 import { resolveDowned, runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import type { Rng } from "@/lib/utils/abilities/engine/types";
 import { BattleParticipant } from "@/types/battle";
@@ -123,7 +123,7 @@ export function processStartOfTurn(
 
     participants = r.participants;
     abilityMessages.push(...r.messages);
-  } else if (isUp(updatedParticipant)) {
+  } else if (isActive(updatedParticipant)) {
     const r = runAbilities(participants, { type: "turnStart", actorId: id }, ctx);
 
     participants = r.participants;

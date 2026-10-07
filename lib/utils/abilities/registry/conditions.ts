@@ -2,7 +2,7 @@ import type { FieldMeta } from "./fields";
 
 import { AttackType } from "@/lib/constants/battle";
 import { eventActorId, eventAttackKind, eventTargetIds } from "@/lib/utils/abilities/engine/events";
-import { findParticipant, isUp } from "@/lib/utils/abilities/engine/participants";
+import { findParticipant, isActive } from "@/lib/utils/abilities/engine/participants";
 import type { Condition, ConditionSubject } from "@/lib/utils/abilities/schema";
 import { hpRatio } from "@/lib/utils/battle/view/health";
 import type { AbilityEvent } from "@/types/abilities";
@@ -52,9 +52,9 @@ function subjects(who: ConditionSubject, ctx: ConditionContext): BattleParticipa
       return actor ? byIds([actor]) : [];
     }
     case "anyAlly":
-      return ps.filter((p) => isUp(p) && p.basicInfo.side === owner.basicInfo.side && p.basicInfo.id !== owner.basicInfo.id);
+      return ps.filter((p) => isActive(p) && p.basicInfo.side === owner.basicInfo.side && p.basicInfo.id !== owner.basicInfo.id);
     case "anyEnemy":
-      return ps.filter((p) => isUp(p) && p.basicInfo.side !== owner.basicInfo.side);
+      return ps.filter((p) => isActive(p) && p.basicInfo.side !== owner.basicInfo.side);
   }
 }
 

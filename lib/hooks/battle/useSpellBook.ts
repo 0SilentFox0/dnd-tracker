@@ -7,6 +7,7 @@ import { useBattleScene } from "./useBattleScene";
 
 import { usePrefetchSpellsByIds, useSpells, useSpellsByIds } from "@/lib/hooks/spells";
 import { initialSpellFlow, spellFlow, spellPayload,type SpellPick } from "@/lib/utils/battle/flows";
+import { isUp } from "@/lib/utils/battle/participant/state";
 import { participantSpellAllowsMultipleTargets } from "@/lib/utils/battle/spell/participant-spell-target-mode";
 import { slotLevels } from "@/lib/utils/battle/view";
 import { diceSlots } from "@/lib/utils/common/dice";
@@ -15,8 +16,6 @@ import type { BattleParticipant } from "@/types/battle";
 import type { BookSpell } from "@/types/spells";
 
 export type { BookSpell };
-
-const isUp = (p: BattleParticipant) => p.combatStats.status === "active" && p.combatStats.currentHp > 0;
 
 const NO_SPELLS: string[] = [];
 

@@ -1,4 +1,4 @@
-import { findParticipant, isUp, resolvedAbilitiesOf, updateParticipant } from "./participants";
+import { findParticipant, isActive, resolvedAbilitiesOf, updateParticipant } from "./participants";
 import { resolveTargetIds } from "./targets";
 import type { AbilityRunContext, AbilityRunResult, Downed } from "./types";
 import { recordUse, resetUsage, withinLimits } from "./usage";
@@ -19,7 +19,7 @@ function applyUsageResets(ps: BattleParticipant[], event: AbilityEvent): BattleP
 }
 
 function canAct(owner: BattleParticipant, event: AbilityEvent): boolean {
-  return isUp(owner) || (event.type === "lethalDamage" && event.targetId === owner.basicInfo.id);
+  return isActive(owner) || (event.type === "lethalDamage" && event.targetId === owner.basicInfo.id);
 }
 
 export function runAbilities(participants: BattleParticipant[], event: AbilityEvent, ctx: AbilityRunContext): AbilityRunResult {
@@ -89,7 +89,7 @@ export function resolveDowned(
 ): { participants: BattleParticipant[]; messages: string[]; survived: boolean } {
   const victim = findParticipant(participants, downed.victimId);
 
-  if (!victim || isUp(victim)) return { participants, messages: [], survived: true };
+  if (!victim || isActive(victim)) return { participants, messages: [], survived: true };
 
   const deep = { ...ctx, depth: 1 };
 
@@ -105,7 +105,7 @@ export function resolveDowned(
 
     const after = findParticipant(ps, downed.victimId);
 
-    if (after && isUp(after)) return { participants: ps, messages, survived: true };
+    if (after && isActive(after)) return { participants: ps, messages, survived: true };
   }
 
   const kill = runAbilities(ps, { type: "kill", actorId: downed.actorId, targetId: downed.victimId }, deep);

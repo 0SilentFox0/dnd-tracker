@@ -9,7 +9,7 @@ import { calculateAttackRoll } from "./roll";
 import { AttackType } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { findParticipant, isUp, withSelf } from "@/lib/utils/abilities/engine/participants";
+import { findParticipant, isActive, withSelf } from "@/lib/utils/abilities/engine/participants";
 import type { Rng } from "@/lib/utils/abilities/engine/types";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
@@ -61,7 +61,7 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
 
   const attacker = findParticipant(participants, attackerId);
 
-  if (!defender || !attacker || !isUp(defender) || !isUp(attacker) || defender.actionFlags.hasUsedReaction) return null;
+  if (!defender || !attacker || !isActive(defender) || !isActive(attacker) || defender.actionFlags.hasUsedReaction) return null;
 
   const weapon = weaponFor(defender, participants, kindOf(input.attack));
 
