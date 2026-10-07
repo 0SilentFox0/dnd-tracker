@@ -181,7 +181,7 @@ export function UnitsListCard({
   );
 
   return (
-    <HudSection title="Юніти" className="max-h-[600px] space-y-4 overflow-y-auto">
+    <HudSection title="Юніти" className="mt-0 max-h-[600px] space-y-4 overflow-y-auto">
       <p className="text-xs text-muted-foreground">
         Клік по картці — додати до союзників або прибрати. «До ворогів» — одразу в колонку ворогів.
       </p>

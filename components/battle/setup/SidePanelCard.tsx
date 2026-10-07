@@ -50,7 +50,7 @@ export function SidePanelCard({
   const isEmpty = participants.filter((p) => p.side === side).length === 0;
 
   return (
-    <HudSection title={config.title} className="max-h-[500px] space-y-3 overflow-y-auto">
+    <HudSection title={config.title} className="mt-0 max-h-[500px] space-y-3 overflow-y-auto">
         <p className="text-xs text-muted-foreground">{config.description}</p>
         {characterParticipants.length > 0 && (
           <div>
