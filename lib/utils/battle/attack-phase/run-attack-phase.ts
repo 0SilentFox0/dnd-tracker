@@ -2,11 +2,12 @@ import { AttackType } from "@/lib/constants/battle";
 import { isActive } from "@/lib/utils/abilities/engine/participants";
 /**
  * Runs the attack phase: validation, processAttack per target, primary-target retaliation.
- * Used by attack-and-next-turn route (and can be reused by attack route).
+ * Used by the attack route.
  */
 import type { Rng } from "@/lib/utils/abilities/engine/types";
 import { processAttack } from "@/lib/utils/battle/attack";
 import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
+import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
 import { diceCount } from "@/lib/utils/common/dice";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -42,16 +43,6 @@ export type AttackPhaseResult = {
   baseBattleLog: BattleAction[];
 };
 
-export class AttackPhaseError extends Error {
-  constructor(
-    message: string,
-    public status: number,
-  ) {
-    super(message);
-    this.name = "AttackPhaseError";
-  }
-}
-
 export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
   const { battle, data, battleId, userId, isDM } = input;
 
@@ -74,7 +65,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
     data.attackRolls.length === targets.length;
 
   if (!singleRoll && !usePerTargetRolls) {
-    throw new AttackPhaseError("d20Roll, attackRoll or attackRolls required", 400);
+    throw new BattleRuleError("action_rejected", "Потрібен кидок d20 (d20Roll, attackRoll або attackRolls)");
   }
 
   const attacker = initiativeOrder.find(
@@ -82,7 +73,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
   );
 
   if (!attacker) {
-    throw new AttackPhaseError("Attacker not found in battle", 404);
+    throw new BattleAccessError(404, "Атакуючого немає в бою");
   }
 
   const currentParticipant = initiativeOrder[battle.currentTurnIndex];
@@ -93,32 +84,26 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       attacker.basicInfo.controlledBy === userId);
 
   if (!canAttack) {
-    throw new AttackPhaseError(
-      "Forbidden: only DM or current turn controller can attack",
-      403,
-    );
+    throw new BattleAccessError(403, "Атакувати може лише DM або той, хто зараз ходить");
   }
 
   if (targets.length === 0) {
-    throw new AttackPhaseError("No targets found in battle", 404);
+    throw new BattleAccessError(404, "Цілей немає в бою");
   }
 
   if (
     !currentParticipant ||
     currentParticipant.basicInfo.id !== attacker.basicInfo.id
   ) {
-    throw new AttackPhaseError("It is not attacker's turn", 400);
+    throw new BattleRuleError("action_rejected", "Зараз не хід атакуючого");
   }
 
   if (attacker.actionFlags.hasUsedAction) {
-    throw new AttackPhaseError("Attacker has already used their action", 400);
+    throw new BattleRuleError("action_rejected", "Атакуючий уже використав дію");
   }
 
   if (!isActive(attacker)) {
-    throw new AttackPhaseError(
-      "Attacker is not active (unconscious or dead)",
-      400,
-    );
+    throw new BattleRuleError("action_rejected", "Атакуючий не може діяти (непритомний або мертвий)");
   }
 
   let attack = data.attackId
@@ -130,7 +115,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
   if (!attack) attack = attacker.battleData.attacks[0];
 
   if (!attack) {
-    throw new AttackPhaseError("No attack available", 400);
+    throw new BattleRuleError("action_rejected", "У атакуючого немає доступної атаки");
   }
 
   const isAoe = attack.targetType === "aoe";
@@ -147,10 +132,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       : 1;
 
   if (targets.length > maxPossibleTargets) {
-    throw new AttackPhaseError(
-      `Too many targets. Max allowed: ${maxPossibleTargets}`,
-      400,
-    );
+    throw new BattleRuleError("action_rejected", `Забагато цілей. Максимум: ${maxPossibleTargets}`);
   }
 
   const dist = attack.damageDistribution;
@@ -191,10 +173,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
         : singleRoll;
 
     if (d20Roll == null || d20Roll < 1 || d20Roll > 20) {
-      throw new AttackPhaseError(
-        `Invalid attack roll for target ${i + 1}`,
-        400,
-      );
+      throw new BattleRuleError("action_rejected", `Некоректний кидок атаки для цілі ${i + 1}`);
     }
 
     const damageMultiplier =

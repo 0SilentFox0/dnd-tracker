@@ -54,7 +54,7 @@ describe("attack mutation", () => {
     expect(() => attackMutation(ctx, body({ targetId: "nobody" }))).toThrow(Error);
   });
 
-  it("помилки AttackPhaseError мапляться на помилки пайплайну", () => {
+  it("помилки фази атаки — це помилки пайплайну", () => {
     try {
       attackMutation(ctx, body({ attackerId: "gob" }));
     } catch (e) {
