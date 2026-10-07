@@ -65,3 +65,13 @@ export function predictAttackNumbers(
     targetAC: statWithModifiers(ps, target.basicInfo.id, "armor", target.combatStats.armorClass),
   };
 }
+
+export function predictRollMode(attacker: BattleParticipant, target: BattleParticipant, attack: BattleAttack, participants: BattleParticipant[]): "advantage" | "disadvantage" | "normal" {
+  const ps = withSelf(withSelf(participants, target), attacker);
+
+  const adv = hasAdvantage(attacker, attack, ps, undefined, { targetId: target.basicInfo.id });
+
+  const dis = hasDisadvantage(attacker, attack, ps, { targetId: target.basicInfo.id });
+
+  return adv === dis ? "normal" : adv ? "advantage" : "disadvantage";
+}

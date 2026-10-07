@@ -4,7 +4,7 @@ import { useEffect, useEffectEvent, useMemo, useReducer } from "react";
 
 import { useBattleScene } from "./useBattleScene";
 
-import { predictAttackNumbers } from "@/lib/utils/battle/attack/bonus";
+import { predictAttackNumbers, predictRollMode } from "@/lib/utils/battle/attack/bonus";
 import { resolveAttackRoll } from "@/lib/utils/battle/common/attack-roll-helpers";
 import { computeDamageBreakdown } from "@/lib/utils/battle/damage";
 import { attackFlow, type AttackMode, attackPayload, effectiveD20, initialAttackFlow, type RollOutcome } from "@/lib/utils/battle/flows";
@@ -34,6 +34,8 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
   const targets = order.filter(
     (p) => isUp(p) && p !== attacker && (p.basicInfo.side !== attacker?.basicInfo.side || scene.battle.campaign?.friendlyFire === true),
   );
+
+  const enemyTargets = targets.filter((p) => p.basicInfo.side !== attacker?.basicInfo.side);
 
   const byId = (id: string) => order.find((p) => p.basicInfo.id === id);
 
@@ -150,7 +152,15 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     },
     selectWeapon: (a: BattleAttack) => dispatch({ type: "SELECT_WEAPON", ...describe(a) }),
     toggleTarget: (id: string) => dispatch({ type: "TOGGLE_TARGET", id }),
-    confirmTargets: () => dispatch({ type: "CONFIRM_TARGETS" }),
+    confirmTargets: () => {
+      const first = byId(state.targetIds[0]);
+
+      if (attacker && attack && first) dispatch({ type: "SET_MODE", mode: predictRollMode(attacker, first, attack, order) });
+
+      dispatch({ type: "CONFIRM_TARGETS" });
+    },
+    canSelectAllEnemies: enemyTargets.length > 1 && state.maxTargets >= enemyTargets.length,
+    selectAllEnemies: () => dispatch({ type: "SET_TARGETS", ids: enemyTargets.map((p) => p.basicInfo.id) }),
     setMode: (mode: AttackMode) => dispatch({ type: "SET_MODE", mode }),
     roll: (d20: number, second?: number) => dispatch({ type: "ROLL", d20, second, outcome: outcomeOf(d20, second) }),
     aiRoll: () => {

@@ -84,6 +84,9 @@ export function AttackWizard({ wizard }: { wizard: Wizard }) {
               </button>
             ))}
           </div>
+          {wizard.canSelectAllEnemies && (
+            <button type="button" onClick={wizard.selectAllEnemies} className={cn(btn, "mt-3 w-full border-white/25")}>Усі вороги</button>
+          )}
           <div className="mt-3 grid grid-cols-2 gap-2">
             <button type="button" onClick={wizard.close} className={cn(btn, "border-white/25")}>Скасувати</button>
             <button type="button" disabled={state.targetIds.length === 0} onClick={wizard.confirmTargets} className={cn(btn, "border-[#a8473a] bg-[#7a2a1f] text-[#f3e7cc] disabled:opacity-50")}>Далі · кидок</button>

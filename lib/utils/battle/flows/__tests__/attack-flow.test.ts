@@ -93,4 +93,8 @@ describe("attackFlow", () => {
     expect(ok.step).toBe("result");
     expect(attackFlow(ok, { type: "CLOSE" })).toEqual(initialAttackFlow);
   });
+
+  it("SET_TARGETS вибирає всіх ворогів, але не більше maxTargets", () => {
+    expect(run(open(1, 3), { type: "SET_TARGETS", ids: ["a", "b", "c", "d"] }).targetIds).toEqual(["a", "b", "c"]);
+  });
 });

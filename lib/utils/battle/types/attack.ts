@@ -8,6 +8,8 @@ export interface AttackRollResult {
   attackBonus: number;
   criticalEffect?: CriticalEffect;
   advantageUsed: boolean;
+  /** другий d20 для переваги/недоліку; serverRolled — якщо клієнт його не надіслав */
+  secondRoll?: { mode: "advantage" | "disadvantage"; value: number; serverRolled: boolean };
 }
 
 export interface AttackResult {

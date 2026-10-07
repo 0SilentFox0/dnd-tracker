@@ -37,6 +37,7 @@ export type AttackFlowAction =
   | { type: "OPEN"; weaponCount: number; attackId: string; maxTargets: number; diceSlots: number[] }
   | { type: "SELECT_WEAPON"; attackId: string; maxTargets: number; diceSlots: number[] }
   | { type: "TOGGLE_TARGET"; id: string }
+  | { type: "SET_TARGETS"; ids: string[] }
   | { type: "CONFIRM_TARGETS" }
   | { type: "SET_MODE"; mode: AttackMode }
   | { type: "ROLL"; d20: number; second?: number; outcome: RollOutcome }
@@ -74,6 +75,8 @@ export function attackFlow(s: AttackFlowState, a: AttackFlowAction): AttackFlowS
 
       return s.targetIds.length >= s.maxTargets ? s : { ...s, targetIds: [...s.targetIds, a.id] };
     }
+    case "SET_TARGETS":
+      return { ...s, targetIds: a.ids.slice(0, s.maxTargets) };
     case "CONFIRM_TARGETS":
       return s.targetIds.length === 0
         ? s

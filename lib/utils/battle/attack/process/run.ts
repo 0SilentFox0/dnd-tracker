@@ -71,6 +71,10 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     rng: flow.ctx.rng,
   });
 
+  if (attackRoll.secondRoll?.serverRolled) {
+    flow.messages.push(`🎲 ${attackRoll.secondRoll.mode === "advantage" ? "перевага" : "недолік"}: другий d20 = ${attackRoll.secondRoll.value}`);
+  }
+
   const targetAC = getEffectiveArmorClass(getP(flow, targetId), flow.ps, actionModifiers[targetId]);
 
   const guaranteedHit = findFlags(flow.ps, attackerId, "guaranteedHit", actionModifiers[attackerId]).length > 0;
