@@ -8,7 +8,7 @@ import { useBattleScene } from "./useBattleScene";
 import { usePrefetchSpellsByIds, useSpells, useSpellsByIds } from "@/lib/hooks/spells";
 import { initialSpellFlow, spellFlow, spellPayload,type SpellPick } from "@/lib/utils/battle/flows";
 import { isUp } from "@/lib/utils/battle/participant/state";
-import { spellAllowsMultipleTargets, spellTargetingFor } from "@/lib/utils/battle/spell/spell-targeting";
+import { expandSpellTargets, spellAllowsMultipleTargets, spellTargetingFor } from "@/lib/utils/battle/spell/spell-targeting";
 import { slotLevels } from "@/lib/utils/battle/view";
 import { diceSlots } from "@/lib/utils/common/dice";
 import { groupSpellsByLevel } from "@/lib/utils/spells/group-by-level";
@@ -70,10 +70,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
     diceSlots: s.diceCount && s.diceType ? diceSlots(`${s.diceCount}${s.diceType}`) : [],
   });
 
-  const firstTarget = order.find((p) => p.basicInfo.id === state.targetIds[0]);
-
-  const allCount =
-    state.pick?.targetMode === "all" && firstTarget ? order.filter((p) => isUp(p) && p.basicInfo.side === firstTarget.basicInfo.side).length : 0;
+  const allCount = state.pick?.targetMode === "all" ? state.targetIds.length : 0;
 
   const send = useEffectEvent(async () => {
     if (!caster) return;
@@ -103,7 +100,14 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
     setLevel: (level: number) => dispatch({ type: "SET_LEVEL", level }),
     pick: (s: BookSpell) => dispatch({ type: "PICK", pick: pickOf(s) }),
     toTargets: () => dispatch({ type: "TO_TARGETS" }),
-    toggleTarget: (id: string) => dispatch({ type: "TOGGLE_TARGET", id }),
+    toggleTarget: (id: string) => {
+      const expanded =
+        state.pick?.targetMode === "all" && caster && selected
+          ? expandSpellTargets(order, caster.basicInfo.id, { id: selected.id, groupId: selected.spellGroup?.id ?? null, level: selected.level }, [id])
+          : undefined;
+
+      dispatch({ type: "TOGGLE_TARGET", id, expanded });
+    },
     confirmTargets: () => dispatch({ type: "CONFIRM_TARGETS" }),
     setHit: (v: number) => dispatch({ type: "SET_HIT", value: v }),
     aiHit: () => dispatch({ type: "SET_HIT", value: rollDie(20) }),

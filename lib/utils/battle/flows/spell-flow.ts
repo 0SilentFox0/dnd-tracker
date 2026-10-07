@@ -28,7 +28,7 @@ export type SpellFlowAction =
   | { type: "SET_LEVEL"; level: number }
   | { type: "PICK"; pick: SpellPick }
   | { type: "TO_TARGETS" }
-  | { type: "TOGGLE_TARGET"; id: string }
+  | { type: "TOGGLE_TARGET"; id: string; expanded?: string[] }
   | { type: "CONFIRM_TARGETS" }
   | { type: "SET_HIT"; value: number }
   | { type: "SET_SAVE"; id: string; value: number }
@@ -68,7 +68,9 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
 
       return s.pick.targetMode === "none" ? afterTargets(s) : { ...s, step: "targets" };
     case "TOGGLE_TARGET": {
-      if (s.pick?.targetMode === "single" || s.pick?.targetMode === "all") return { ...s, targetIds: [a.id], saves: {} };
+      if (s.pick?.targetMode === "single") return { ...s, targetIds: [a.id], saves: {} };
+
+      if (s.pick?.targetMode === "all") return { ...s, targetIds: a.expanded ?? [a.id], saves: {} };
 
       if (s.targetIds.includes(a.id)) {
         const { [a.id]: _gone, ...saves } = s.saves;

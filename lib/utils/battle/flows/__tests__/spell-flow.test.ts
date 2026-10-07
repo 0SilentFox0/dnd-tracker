@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
+import { ParticipantSide } from "@/lib/constants/battle";
+import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { initialSpellFlow, rollsComplete, spellFlow, type SpellFlowAction, type SpellFlowState, spellPayload, type SpellPick } from "@/lib/utils/battle/flows";
+import { expandSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 
 const run = (...a: SpellFlowAction[]) => a.reduce<SpellFlowState>(spellFlow, initialSpellFlow);
 
@@ -72,5 +75,22 @@ describe("spellFlow", () => {
 
     expect(turned).toMatchObject({ step: "book", level: 4 });
     expect(turned.pick).toBeUndefined();
+  });
+
+  it("all: перша ціль обирає сторону, мертві не потрапляють у цілі", () => {
+    const caster = makeParticipant({ id: "me", abilities: [resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "spellTargeting", mode: "all" }] })] });
+
+    const dead = { ...makeParticipant({ id: "a3" }), combatStats: { ...makeParticipant({ id: "a3" }).combatStats, status: "dead" } } as ReturnType<typeof makeParticipant>;
+
+    const ps = [caster, makeParticipant({ id: "a1" }), makeParticipant({ id: "a2" }), dead, makeParticipant({ id: "e1", side: ParticipantSide.ENEMY })];
+
+    const expanded = expandSpellTargets(ps, "me", { id: "bless", groupId: null, level: 1 }, ["a1"]);
+
+    const pick: SpellPick = { ...cloud, targetMode: "all" };
+
+    const s = run({ type: "OPEN", casterId: "me", level: 1 }, { type: "PICK", pick }, { type: "TO_TARGETS" }, { type: "TOGGLE_TARGET", id: "a1", expanded });
+
+    expect([...s.targetIds].sort()).toEqual(["a1", "a2", "me"]);
+    expect(spellFlow(s, { type: "CONFIRM_TARGETS" }).step).toBe("rolls");
   });
 });
