@@ -131,6 +131,8 @@ const ApplyConditionSchema = z.object({
   kind: z.literal("applyCondition"),
   condition: z.enum(CONDITION_KEYS),
   duration: DurationSchema,
+  percent: z.number().int().min(1).max(100).optional(),
+  breakOnDamage: z.boolean().optional(),
   ...target,
 });
 

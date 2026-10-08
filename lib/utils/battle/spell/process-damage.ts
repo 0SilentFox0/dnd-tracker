@@ -5,6 +5,7 @@ import { calculateSpellDamageWithEnhancements } from "./calculations";
 import { participantImmuneToSpell } from "./spell-immunity";
 
 import { BATTLE_CONSTANTS, CombatStatus } from "@/lib/constants/battle";
+import { dropBreakOnDamage } from "@/lib/utils/abilities/engine/hp";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import type { BattleParticipant, DamageStep } from "@/types/battle";
 
@@ -152,15 +153,18 @@ export function computeSpellDamageAndApply(
     const status =
       newCurrentHp <= 0 ? (newCurrentHp < 0 ? CombatStatus.DEAD : CombatStatus.UNCONSCIOUS) : current.combatStats.status;
 
-    resultTargets[targetIndex] = {
-      ...current,
-      combatStats: {
-        ...current.combatStats,
-        tempHp: newTempHp,
-        currentHp: newCurrentHp,
-        status,
+    resultTargets[targetIndex] = dropBreakOnDamage(
+      {
+        ...current,
+        combatStats: {
+          ...current.combatStats,
+          tempHp: newTempHp,
+          currentHp: newCurrentHp,
+          status,
+        },
       },
-    };
+      finalDamage,
+    );
   }
 
   return {

@@ -48,6 +48,7 @@ export interface ActiveEffect {
   hotHeal?: {
     healPerRound: number;
   };
+  breakOnDamage?: boolean;
   abilityKey?: string;
   abilityEffects?: StaticEffect[];
   source?: { participantId: string; name: string; abilityName?: string; icon?: string | null };

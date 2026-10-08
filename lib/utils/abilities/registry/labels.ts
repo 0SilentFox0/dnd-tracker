@@ -54,6 +54,7 @@ export const CONDITION_LABELS: Record<(typeof CONDITION_KEYS)[number], string> =
   disable_melee_attacks: "без ближніх атак",
   disable_ranged_attacks: "без дальніх атак",
   disable_spell_casting: "без заклинань",
+  skip_action: "втрата дії",
 };
 
 export function limitsLabel(l: Limits | undefined): string[] {

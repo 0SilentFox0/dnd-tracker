@@ -39,6 +39,7 @@ export const CONDITION_KEYS = [
   "disable_melee_attacks",
   "disable_ranged_attacks",
   "disable_spell_casting",
+  "skip_action",
 ] as const;
 
 export type AbilityTarget = (typeof ABILITY_TARGETS)[number];

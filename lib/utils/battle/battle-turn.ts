@@ -45,6 +45,8 @@ export function processStartOfTurn(
 
   const hasNoReaction = restrictedBy("no_reaction");
 
+  const skipChances = participant.battleData.activeEffects.flatMap((e) => e.effects.filter((d) => d.type === "skip_action").map((d) => ({ name: e.name, percent: d.value })));
+
   const damageMessages: string[] = [];
 
   let expiredEffects: string[] = [];
@@ -102,12 +104,14 @@ export function processStartOfTurn(
     statusChanged = true;
   }
 
+  const skippedBy = isActive(updatedParticipant) ? skipChances.find((s) => rng() * 100 < s.percent) : undefined;
+
   // 5. Скидаємо флаги дій; ефекти no_bonus_action / no_reaction блокують відповідні дії
   updatedParticipant = {
     ...updatedParticipant,
     actionFlags: {
       ...updatedParticipant.actionFlags,
-      hasUsedAction: false,
+      hasUsedAction: skippedBy !== undefined,
       hasUsedBonusAction: hasNoBonusAction,
       hasUsedReaction: hasNoReaction,
     },
@@ -129,6 +133,8 @@ export function processStartOfTurn(
     : [updatedParticipant];
 
   const abilityMessages: string[] = [...healMessages];
+
+  if (skippedBy) abilityMessages.push(`💫 ${participant.basicInfo.name} втрачає дію (${skippedBy.name})`);
 
   if (statusChanged) {
     const r = resolveDowned(participants, { victimId: id, actorId: null }, ctx);

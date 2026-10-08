@@ -12,6 +12,7 @@ export interface TimedEffectInput {
   effects?: ActiveEffect["effects"];
   dotDamage?: ActiveEffect["dotDamage"];
   hotHeal?: ActiveEffect["hotHeal"];
+  breakOnDamage?: boolean;
   source?: ActiveEffect["source"];
 }
 
@@ -40,6 +41,7 @@ export function upsertTimedEffect(p: BattleParticipant, input: TimedEffectInput,
     ...(input.abilityEffects && { abilityEffects: input.abilityEffects }),
     ...(input.dotDamage && { dotDamage: input.dotDamage }),
     ...(input.hotHeal && { hotHeal: input.hotHeal }),
+    ...(input.breakOnDamage && { breakOnDamage: true }),
     ...(input.source && { source: input.source }),
   };
 

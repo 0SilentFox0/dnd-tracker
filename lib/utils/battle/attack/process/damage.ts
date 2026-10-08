@@ -1,6 +1,7 @@
 import { applyResistance } from "../../resistance";
 
 import { BATTLE_CONSTANTS, CombatStatus } from "@/lib/constants/battle";
+import { dropBreakOnDamage } from "@/lib/utils/abilities/engine/hp";
 import type { AttackKind } from "@/lib/utils/abilities/schema";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -15,15 +16,18 @@ export function applyDamageToTarget(target: BattleParticipant, totalFinalDamage:
   const currentHp = Math.max(BATTLE_CONSTANTS.MIN_DAMAGE, target.combatStats.currentHp - (totalFinalDamage - fromTemp));
 
   return {
-    updatedTarget: {
-      ...target,
-      combatStats: {
-        ...target.combatStats,
-        tempHp: target.combatStats.tempHp - fromTemp,
-        currentHp,
-        status: currentHp <= 0 ? (currentHp < 0 ? CombatStatus.DEAD : CombatStatus.UNCONSCIOUS) : target.combatStats.status,
+    updatedTarget: dropBreakOnDamage(
+      {
+        ...target,
+        combatStats: {
+          ...target.combatStats,
+          tempHp: target.combatStats.tempHp - fromTemp,
+          currentHp,
+          status: currentHp <= 0 ? (currentHp < 0 ? CombatStatus.DEAD : CombatStatus.UNCONSCIOUS) : target.combatStats.status,
+        },
       },
-    },
+      totalFinalDamage,
+    ),
   };
 }
 
