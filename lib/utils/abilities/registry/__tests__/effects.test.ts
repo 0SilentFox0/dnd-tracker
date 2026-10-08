@@ -79,7 +79,7 @@ describe("effects", () => {
 
   it("describe", () => {
     expect(describeEffect({ kind: "damageBonus", filter: { kind: "melee" }, percent: 10 })).toBe("шкода (ближня) +10%");
-    expect(describeEffect({ kind: "dot", damagePerRound: "1d4", damageType: "bleed", duration: { rounds: 3 } })).toBe("bleed 1d4/раунд × 3 р.");
+    expect(describeEffect({ kind: "dot", damagePerRound: "1d4", damageType: "bleed", duration: { rounds: 3 } })).toBe("Кровотеча 1d4/раунд × 3 р.");
   });
 });
 

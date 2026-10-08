@@ -63,7 +63,7 @@ describe("fields contract", () => {
   it("describeAbility", () => {
     expect(
       describeAbility({ id: "a", name: "Кровотеча", trigger: { event: "hit", role: "attacker" }, limits: { perBattle: 1, chance: 30 }, effects: [{ kind: "dot", damagePerRound: "1d4", damageType: "bleed", duration: { rounds: 2 }, target: "eventTarget" }] }),
-    ).toBe("Влучання · 1 раз за бій · 30% · bleed 1d4/раунд × 2 р.");
+    ).toBe("Влучання · 1 раз за бій · 30% · Кровотеча 1d4/раунд × 2 р.");
   });
 
   it("ліміт за бій узгоджується з числом", () => {
