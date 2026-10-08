@@ -35,12 +35,17 @@ const PERSONAL_BRANCH = { name: "Персональні", color: "#8e6bbf" };
 
 const json = (v: unknown) => v as Prisma.InputJsonValue;
 
+const hasSummon = (effects: unknown) => Array.isArray(effects) && effects.some((e) => typeof e === "object" && e !== null && (e as { kind?: string }).kind === "summon");
+
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
 
   const host = assertSeedTarget(process.env.DATABASE_URL, opts.allowRemote);
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+  if (!supabaseUrl) throw new Error("NEXT_PUBLIC_SUPABASE_URL не задано: іконки отримали б биті URL");
+
 
   const library = buildLibrary();
 
@@ -114,7 +119,7 @@ async function main() {
     }));
   }
 
-  const spellRows = await prisma.spell.findMany({ where: { campaignId }, select: { id: true, name: true } });
+  const spellRows = await prisma.spell.findMany({ where: { campaignId }, select: { id: true, name: true, spellEffects: true } });
 
   const spells = new Map<string, string>();
 
@@ -138,11 +143,19 @@ async function main() {
       raceModifiers: json(mapRaceModifiers(spell.raceModifiers, races)),
     };
 
-    const created = () => prisma.spell.create({ data: { campaignId, type: "target", damageType: "damage", ...data }, select: { id: true, name: true } });
+    const { spellEffects: _libraryEffects, ...dataKeepingEffects } = data;
+
+    void _libraryEffects;
+
+    const existing = findByName(spellRows, spell.name);
+
+    const keepEffects = hasSummon(existing?.spellEffects);
+
+    const created = () => prisma.spell.create({ data: { campaignId, type: "target", damageType: "damage", ...data }, select: { id: true, name: true, spellEffects: true } });
 
     spells.set(spell.key, await upsert("закляття", spellRows, spell.name, {
       create: created,
-      update: (id) => prisma.spell.update({ where: { id }, data, select: { id: true, name: true } }),
+      update: (id) => prisma.spell.update({ where: { id }, data: keepEffects ? dataKeepingEffects : data, select: { id: true, name: true, spellEffects: true } }),
     }));
   }
 
@@ -186,8 +199,8 @@ async function main() {
       image: iconUrl,
       mainSkillId: mainSkillId.startsWith("new:") ? undefined : mainSkillId,
       abilities: json(remapRefs(skill.abilities, maps)),
-      spellNewSpellId: skill.newSpellKey ? spells.get(skill.newSpellKey) : null,
-      grantedSpellId: skill.grantedSpellKey ? spells.get(skill.grantedSpellKey) : null,
+      spellNewSpellId: skill.newSpellKey ? spells.get(skill.newSpellKey) : undefined,
+      grantedSpellId: skill.grantedSpellKey ? spells.get(skill.grantedSpellKey) : undefined,
     };
 
     skills.set(skill.key, await upsert("скіли", skillRows, skill.name, {
