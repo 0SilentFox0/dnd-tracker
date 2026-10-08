@@ -5,26 +5,26 @@ import { UNITS } from "../units";
 import { diceAverage } from "@/lib/utils/common/dice";
 
 const BUDGET: Record<number, { hp: number; damage: number }> = {
-  1: { hp: 12, damage: 4.5 },
-  2: { hp: 22, damage: 7 },
-  3: { hp: 36, damage: 10 },
-  4: { hp: 58, damage: 14 },
-  5: { hp: 90, damage: 20 },
-  6: { hp: 140, damage: 28 },
+  1: { hp: 28, damage: 3.6 },
+  2: { hp: 41, damage: 6 },
+  3: { hp: 55, damage: 8.8 },
+  4: { hp: 76, damage: 12.6 },
+  5: { hp: 107, damage: 18.6 },
+  6: { hp: 154, damage: 27.2 },
   7: { hp: 220, damage: 40 },
 };
 
 const TOLERANCE = 0.25;
 
 const BUDGET_EXCEPTIONS: Record<string, string> = {
-  "dark-elves-assassin": "1d6+2 (5.5) трохи вище порога T1-upgrade ranged: малі числа; сила в отруті (DoT не рахується)",
-  "dark-elves-stalker": "1d8+2 (6.5) трохи вище порога T1-alt: малі числа, ще й Отрута та Засідка",
-  "mages-senior-gremlin": "1d6+2 (5.5) трохи вище порога T1-upgrade ranged: малі числа; сила в Ремонті",
-  "mages-gremlin-saboteur": "1d6+2 (5.5) трохи вище порога T1-alt ranged: малі числа; сила в Саботажі",
-  "humans-brute": "1d8+2 (6.5) на 3 % вище порога T1-alt: вузький допуск на малих числах, сила в Броньобійності",
-  "necromancers-skeleton-archer": "1d6+2 (5.5) трохи вище порога T1-upgrade ranged: малі числа таблиці 4.7; ціна — 12 HP і КД 12",
-  "demons-fire-demon": "1d6+3 + 1d6 вогнем (10) на 2 % вище порога T2-upgrade: числа таблиці 4.4; сила в імунітеті до вогню",
-  "demons-elder-demon": "1d8+3 + 1d4 вогнем (10) на 2 % вище порога T2-alt: числа таблиці 4.4; ціна — Лють",
+  "dark-elves-assassin": "1d6+1 (4.5) вище порога T1-upgrade ranged: найменший крок кубика на малих числах; сила в отруті (DoT не рахується)",
+  "dark-elves-stalker": "1d8+1 (5.5) вище порога T1-alt: найменший крок кубика на малих числах, ще й Отрута та Засідка",
+  "mages-senior-gremlin": "1d6+1 (4.5) вище порога T1-upgrade ranged: найменший крок кубика на малих числах; сила в Ремонті",
+  "mages-gremlin-saboteur": "1d6+1 (4.5) вище порога T1-alt ranged: найменший крок кубика на малих числах; сила в Саботажі",
+  "humans-brute": "1d8+1 (5.5) вище порога T1-alt: найменший крок кубика на малих числах, сила в Броньобійності",
+  "necromancers-skeleton-archer": "1d6+1 (4.5) вище порога T1-upgrade ranged: найменший крок кубика на малих числах; ціна — найменше HP серед T1-покращень",
+  "demons-fire-demon": "1d6+2 + 1d6 вогнем (9) вище порога T2-upgrade: друга група кубиків таблиці 4.4; сила в імунітеті до вогню",
+  "demons-elder-demon": "1d8+2 + 1d4 вогнем (9) вище порога T2-alt: друга група кубиків таблиці 4.4; ціна — Лють",
 };
 
 function averageHit(unit: (typeof UNITS)[number]): number {
