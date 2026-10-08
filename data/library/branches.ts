@@ -1068,13 +1068,14 @@ const nature: LibraryBranch = {
     [
       {
         key: "call-of-the-beast",
-        name: "Поклик звіра",
+        name: "Призив Фенікса",
+        formerNames: ["Поклик звіра"],
         iconKey: "call-of-the-beast",
         newSpellKey: "call-of-the-beast",
         description: "Відкриває нове закляття «Призив Фенікса» — призив Фенікса, що зростає з рівнем заклинателя й раз за бій відроджується.",
         appearanceDescription:
           "Друїд сурмить у ріг, вирізаний з оленячого рогу, і ліс відповідає не ревом, а тріском полум'я. Над деревами здіймається вогняний птах, що пам'ятає ще стародавні присяги.",
-        abilities: [passive("call-of-the-beast", "Поклик звіра", [{ kind: "note", text: "Дає закляття «Призив Фенікса»." }])],
+        abilities: [passive("call-of-the-beast", "Призив Фенікса", [{ kind: "note", text: "Дає закляття «Призив Фенікса»." }])],
       },
       {
         key: "natures-poison",
