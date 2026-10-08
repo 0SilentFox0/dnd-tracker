@@ -1,5 +1,5 @@
 import type { LibraryUnit } from "../types";
-import { bigShield,deathBlow, debuff, drainMana, enemiesRoundDamage, falloff, fearAura, incorporeal, lifeDrain, noRetaliation, raiseOnKill, stun, undead, undyingOnce } from "../unit-abilities";
+import { bigShield, deathBlow, debuff, drainMana, enemiesRoundDamage, falloff, fearAura, incorporeal, lifeDrain, noRetaliation, raiseOnKill, stun, undead, undyingOnce } from "../unit-abilities";
 
 import type { Ability } from "@/lib/utils/abilities/schema";
 
@@ -84,6 +84,6 @@ export const NECROMANCER_UNITS: LibraryUnit[] = [
   { ...base, key: "necromancers-death-herald", name: "Вісник смерті", tier: 6, role: "upgrade", hp: 171, ac: 17, attackBonus: 8, initiative: 11, attacks: [{ name: "Коса смерті", type: "melee", dice: "3d8+11", damageType: "necrotic" }], abilities: [undead(), deathBlow("Смертельний дотик", 20), fingerOfDeath()] },
   { ...base, key: "necromancers-banshee", name: "Баньші", tier: 6, role: "alt", hp: 165, ac: 16, attackBonus: 8, initiative: 12, attacks: [{ name: "Крижані кігті", type: "melee", dice: "3d8+11", damageType: "necrotic" }], abilities: [undead(), wail()], flying: true },
   { ...base, key: "necromancers-bone-dragon", name: "Костяний дракон", tier: 7, role: "base", hp: 220, ac: 15, attackBonus: 8, initiative: 10, attacks: [{ name: "Кістяні пазурі", type: "melee", dice: "4d10+16", damageType: "slashing" }], abilities: [undead(), fearAura()], flying: true },
-  { ...base, key: "necromancers-sorrow-dragon", name: "Дракон скроботи", tier: 7, role: "upgrade", hp: 245, ac: 16, attackBonus: 9, initiative: 10, attacks: [{ name: "Пазурі скорботи", type: "melee", dice: "4d10+20", damageType: "necrotic" }], abilities: [undead(), fearAura(), deathGaze()], flying: true },
+  { ...base, key: "necromancers-sorrow-dragon", name: "Дракон скорботи", tier: 7, role: "upgrade", hp: 245, ac: 16, attackBonus: 9, initiative: 10, attacks: [{ name: "Пазурі скорботи", type: "melee", dice: "4d10+20", damageType: "necrotic" }], abilities: [undead(), fearAura(), deathGaze()], flying: true },
   { ...base, key: "necromancers-spectral-dragon", name: "Драко-привид", tier: 7, role: "alt", hp: 240, ac: 15, attackBonus: 9, initiative: 10, attacks: [{ name: "Примарні пазурі", type: "melee", dice: "4d10+18", damageType: "necrotic" }], abilities: [undead(), fearAura(), enemiesRoundDamage("Отруйна аура", 10)], flying: true },
 ];
