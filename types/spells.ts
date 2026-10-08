@@ -1,3 +1,7 @@
+import type { SpellDefinition } from "@/lib/utils/spells/model/schema";
+
+export type { RaceModifier, SpellCost, SpellDefinition, SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
+
 export interface Spell {
   id: string;
   name: string;
@@ -41,6 +45,8 @@ export interface Spell {
     name: string;
   } | null;
 }
+
+export type SpellWithDefinition = Spell & { definition: SpellDefinition };
 
 export interface SpellGroup {
   id: string;
