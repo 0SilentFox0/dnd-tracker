@@ -111,17 +111,22 @@ export function remapSummonUnits<T>(value: T, unitIds: ReadonlyMap<string, strin
 export const unitAbilities = (unit: LibraryUnit) => [...unit.abilities, ...(unit.flying ? [flavor("Літає")] : [])];
 
 export function unitRow(unit: LibraryUnit, maps: Pick<IdMaps, "groups" | "spells">, races: ReadonlyMap<string, string>): Omit<Prisma.UnitUncheckedCreateInput, "campaignId"> {
+  const scores = abilityScores(unit);
+
+  // Рушій додає до attackBonus атаки модифікатор характеристики й майстерність, а `unit.attackBonus` — уже повний бонус влучання.
+  const weaponBonus = (type: string) => unit.attackBonus - proficiencyForTier(unit.tier) - Math.floor(((type === "melee" ? scores.strength : scores.dexterity) - 10) / 2);
+
   return {
     name: unit.name,
     raceId: unit.raceKey === null ? null : lookup(races, unit.raceKey, "расу"),
     level: unit.tier,
-    ...abilityScores(unit),
+    ...scores,
     armorClass: unit.ac,
     initiative: unit.initiative,
     speed: 30,
     maxHp: unit.hp,
     proficiencyBonus: proficiencyForTier(unit.tier),
-    attacks: unit.attacks.map((a) => ({ name: a.name, type: a.type, attackBonus: unit.attackBonus, damageDice: a.dice, damageType: a.damageType, maxTargets: a.targets })),
+    attacks: unit.attacks.map((a) => ({ name: a.name, type: a.type, attackBonus: weaponBonus(a.type), damageDice: a.dice, damageType: a.damageType, maxTargets: a.targets })),
     knownSpells: (unit.spellKeys ?? []).map((key) => lookup(maps.spells, key, "заклинання")),
     abilities: remapRefs(unitAbilities(unit), maps) as unknown as Prisma.InputJsonValue,
     morale: 1,

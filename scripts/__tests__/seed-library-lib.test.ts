@@ -6,6 +6,7 @@ import { falloff, raiseOnKill } from "../../data/library/unit-abilities";
 import { artifactRows, assertSeedTarget, findByName, mapRaceModifiers, parseArgs, racePassiveData, remapRefs, remapSummonUnits, treeInput, unitRow } from "../seed-library-lib";
 
 import { AbilitySchema } from "@/lib/utils/abilities/schema";
+import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
 
 describe("seed-library-lib", () => {
   it("parses args", () => {
@@ -152,10 +153,20 @@ describe("seed-library-lib", () => {
       expect(row.constitution).toBe(14);
       expect(row.knownSpells).toEqual(["sp1", "sp2"]);
       expect(row.attacks).toEqual([
-        { name: "Залп", type: "ranged", attackBonus: 5, damageDice: "1d8+2", damageType: "piercing", maxTargets: 3 },
-        { name: "Ніж", type: "melee", attackBonus: 5, damageDice: "1d4", damageType: "piercing", maxTargets: undefined },
+        { name: "Залп", type: "ranged", attackBonus: 0, damageDice: "1d8+2", damageType: "piercing", maxTargets: 3 },
+        { name: "Ніж", type: "melee", attackBonus: 3, damageDice: "1d4", damageType: "piercing", maxTargets: undefined },
       ]);
       expect(row).not.toHaveProperty("avatar");
+    });
+
+    it("total to-hit of every attack equals the unit attack bonus", () => {
+      const row = unitRow(base, maps, races);
+
+      const scores = { strength: row.strength as number, dexterity: row.dexterity as number };
+
+      for (const a of row.attacks as Array<{ type: string; attackBonus: number }>) {
+        expect(a.attackBonus + getAttackAbilityModifier(scores, a.type) + (row.proficiencyBonus as number)).toBe(base.attackBonus);
+      }
     });
 
     it("defaults for a plain neutral unit and adds flavor for flying", () => {
