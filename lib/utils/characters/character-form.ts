@@ -1,16 +1,14 @@
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { CharacterType, type CharacterTypeValue } from "@/lib/constants/characters";
-import { calculateCharacterSpellSlots } from "@/lib/utils/spells/spell-slots";
+import { fullSpellSlots } from "@/lib/utils/spells/spell-slots";
 import type { Character, CharacterFormData } from "@/types/characters";
+import type { SpellSlotProgression } from "@/types/races";
 
 function getDefaultSpellSlotsForLevel(
   level: number,
+  progression?: SpellSlotProgression[],
 ): Record<string, { max: number; current: number }> {
-  const slots = calculateCharacterSpellSlots(level);
-
-  return Object.fromEntries(
-    Object.entries(slots).map(([k, v]) => [k, { max: v.max, current: v.max }]),
-  );
+  return fullSpellSlots(level, progression);
 }
 
 /**
@@ -18,6 +16,7 @@ function getDefaultSpellSlotsForLevel(
  */
 export function characterToFormData(
   character: Partial<Character>,
+  raceProgression?: SpellSlotProgression[],
 ): CharacterFormData {
   return {
     basicInfo: {
@@ -64,7 +63,7 @@ export function characterToFormData(
 
         if (raw && Object.keys(raw).length > 0) return raw;
 
-        return getDefaultSpellSlotsForLevel(character.level || 1);
+        return getDefaultSpellSlotsForLevel(character.level || 1, raceProgression);
       })(),
       knownSpells: (character.knownSpells as string[]) || [],
     },

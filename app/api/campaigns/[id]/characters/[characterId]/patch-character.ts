@@ -47,7 +47,7 @@ export async function patchCharacter(request: Request, campaignId: string, chara
     return errorResponse(`Максимальний рівень кампанії — ${campaign.maxLevel}`, 422);
   }
 
-  const race = finalLevel > character.level ? await loadRaceProgression(campaignId, data.race ?? character.race) : null;
+  const race = finalLevel !== character.level ? await loadRaceProgression(campaignId, data.race ?? character.race) : null;
 
   const computed = buildCharacterUpdateData({ character, data, xpMultiplier, campaign, race });
 
