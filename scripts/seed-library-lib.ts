@@ -70,6 +70,16 @@ export function findByName<T extends { name: string }>(rows: readonly T[], name:
   return rows.find((r) => r.name.toLowerCase() === lower);
 }
 
+export function findByNames<T extends { name: string }>(rows: readonly T[], name: string, formerNames: readonly string[] = []): T | undefined {
+  for (const n of [name, ...formerNames]) {
+    const found = findByName(rows, n);
+
+    if (found) return found;
+  }
+
+  return undefined;
+}
+
 function lookup(map: ReadonlyMap<string, string>, key: string, what: string): string {
   const id = map.get(key);
 

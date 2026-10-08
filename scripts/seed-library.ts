@@ -18,7 +18,7 @@ import {
   artifactRows,
   assertSeedTarget,
   emptyTally,
-  findByName,
+  findByNames,
   formatSummary,
   type IdMaps,
   mapRaceModifiers,
@@ -89,8 +89,9 @@ async function main() {
     existing: T[],
     name: string,
     write: { create: () => Promise<T>; update: (id: string) => Promise<T> },
+    formerNames: readonly string[] = [],
   ): Promise<string> => {
-    const found = findByName(existing, name);
+    const found = findByNames(existing, name, formerNames);
 
     if (found) {
       tallies[kind].updated++;
@@ -163,7 +164,7 @@ async function main() {
 
     void _libraryEffects;
 
-    const existing = findByName(spellRows, spell.name);
+    const existing = findByNames(spellRows, spell.name, spell.formerNames);
 
     const deferEffects = hasLibrarySummon(d.effects);
 
@@ -174,7 +175,7 @@ async function main() {
     spells.set(spell.key, await upsert("закляття", spellRows, spell.name, {
       create: created,
       update: (id) => prisma.spell.update({ where: { id }, data: keepEffects ? dataKeepingEffects : data, select: { id: true, name: true, spellEffects: true } }),
-    }));
+    }, spell.formerNames));
   }
 
   const maps: IdMaps = { groups, spells, races };
