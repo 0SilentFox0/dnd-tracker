@@ -16,6 +16,10 @@ describe("ResultOverlay", () => {
     [{ kind: "miss", targetName: "Гоблін", d20: 13, known: "≥ 14" }, "Промах", "тепер відомо: AC ≥ 14"],
     [{ kind: "hit", targetName: "Циклоп", damage: 10, downed: false, d20: 14, retaliation: { name: "Циклоп", damage: 4 } }, "Влучання", "Відповідь цілі: Циклоп −4"],
     [{ kind: "miss", targetName: "Гоблін", d20: 13, known: "≥ 14", retaliation: { name: "Гоблін", damage: 0 } }, "Промах", "Відповідь цілі: Гоблін промах"],
+    [{ kind: "crit", targetName: "Циклоп", damage: 24, downed: false, d20: 20, critEffect: { name: "Безкоштовна атака", flavor: "Вихор сталі: Айвен одразу ж б'є знову." } }, "Критичне влучання", "Безкоштовна атака"],
+    [{ kind: "crit", targetName: "Циклоп", damage: 24, downed: false, d20: 20, critEffect: { name: "Безкоштовна атака", flavor: "Вихор сталі: Айвен одразу ж б'є знову." } }, "Критичне влучання", "Вихор сталі: Айвен"],
+    [{ kind: "miss", targetName: "Гоблін", d20: 1, known: "≥ 14", critFail: { name: "Падіння", flavor: "Ви спотикаєтесь." } }, "Критична невдача", "Падіння"],
+    [{ kind: "miss", targetName: "Гоблін", d20: 1, known: "≥ 14", critFail: { name: "Падіння", flavor: "Ви спотикаєтесь." } }, "Критична невдача", "Ви спотикаєтесь"],
     [{ kind: "morale-extra", name: "Фрейда", d10: 9, morale: 2 }, "Бойовий дух", "додатковий хід"],
     [{ kind: "morale-skip", name: "Фрейда", d10: 2, morale: -1 }, "Паніка", "втрачає хід"],
   ] as const)("%o", (fx, title, detail) => {
@@ -25,6 +29,19 @@ describe("ResultOverlay", () => {
 
     expect(screen.getByText(title)).toBeTruthy();
     expect(screen.getByText(new RegExp(detail))).toBeTruthy();
+  });
+
+  it("крит без ефекту (старі записи) — лише заголовок; критична невдача без «Промах»", () => {
+    const a = fakeScene({ result: { kind: "crit", targetName: "Циклоп", damage: 24, downed: false, d20: 20 } });
+
+    render(<ResultOverlay />, { wrapper: a.wrapper });
+    expect(screen.getByText("Критичне влучання")).toBeTruthy();
+    cleanup();
+
+    const b = fakeScene({ result: { kind: "miss", targetName: "Гоблін", d20: 1, known: "?", critFail: { name: "Падіння" } } });
+
+    render(<ResultOverlay />, { wrapper: b.wrapper });
+    expect(screen.queryByText("Промах")).toBeNull();
   });
 
   it("закривається кнопкою; паніка — сама через 4 с", () => {

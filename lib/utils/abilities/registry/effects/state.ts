@@ -58,8 +58,8 @@ export function applyCondition(input: EffectApplyInput<Of<"applyCondition">>): E
 
   return each(
     input,
-    (p) =>
-      upsertTimedEffect(
+    (p) => {
+      const next = upsertTimedEffect(
         p,
         {
           timedKey: `${ability.key}#${input.effectIndex}`,
@@ -72,7 +72,10 @@ export function applyCondition(input: EffectApplyInput<Of<"applyCondition">>): E
           breakOnDamage: effect.breakOnDamage,
         },
         ctx.round,
-      ),
+      );
+
+      return effect.condition === "no_reaction" ? { ...next, actionFlags: { ...next.actionFlags, hasUsedReaction: true } } : next;
+    },
     (names) => `⛓ ${ability.name}: ${names} — ${CONDITION_LABELS[effect.condition]} (${effect.duration.rounds} р.)`,
     (p) => immuneTo(input.participants, p.basicInfo.id, effect.condition),
   );

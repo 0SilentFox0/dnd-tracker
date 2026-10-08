@@ -1,5 +1,7 @@
 import { racePassiveAbilities, racePassiveStatModifiers } from "../data/library/build";
-import type { LibraryBranch, LibraryRace } from "../data/library/types";
+import type { LibraryArtifactSet, LibraryBranch, LibraryRace } from "../data/library/types";
+import { ARTIFACT_GRID_9 } from "../lib/constants/artifacts";
+import type { Ability } from "../lib/utils/abilities/schema";
 import { type BuildTreeInput } from "../lib/utils/skills/progression/tree-json";
 
 export interface SeedOptions {
@@ -131,4 +133,27 @@ export function formatSummary(tallies: Record<string, Tally>): string {
   return Object.entries(tallies)
     .map(([kind, t]) => `${kind.padEnd(12)} створено ${t.created}, оновлено ${t.updated}${t.skipped ? `, пропущено ${t.skipped}` : ""}`)
     .join("\n");
+}
+
+export function artifactDescription(entry: { description: string; appearanceDescription: string }): string {
+  return `${entry.description}\n\n${entry.appearanceDescription}`;
+}
+
+export function artifactRows(set: LibraryArtifactSet, maps: Pick<IdMaps, "groups" | "spells">, icon: (key?: string) => string | undefined) {
+  return {
+    set: { name: set.name, description: artifactDescription(set), icon: icon(set.iconKey), abilities: remapRefs(set.abilities, maps) as Ability[] },
+    artifacts: set.artifacts.map((a) => ({
+      name: a.name,
+      description: artifactDescription(a),
+      slot: (ARTIFACT_GRID_9.find((s) => s.key === a.slot) ?? failSlot(a.slot)).slotType as string,
+      rarity: a.rarity as string,
+      icon: icon(a.iconKey),
+      abilities: remapRefs(a.abilities, maps) as Ability[],
+      modifiers: a.modifiers ?? [],
+    })),
+  };
+}
+
+function failSlot(key: string): never {
+  throw new Error(`Невідомий слот артефакту «${key}»`);
 }

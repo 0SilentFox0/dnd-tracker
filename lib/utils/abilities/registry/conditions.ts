@@ -5,6 +5,7 @@ import { eventActorId, eventAttackKind, eventTargetIds } from "@/lib/utils/abili
 import { countMarks, markKey } from "@/lib/utils/abilities/engine/marks";
 import { findParticipant, isActive } from "@/lib/utils/abilities/engine/participants";
 import type { Condition, ConditionSubject } from "@/lib/utils/abilities/schema";
+import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import { hpRatio } from "@/lib/utils/battle/view/health";
 import type { AbilityEvent } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
@@ -77,9 +78,7 @@ export function evaluateCondition(c: Condition, ctx: ConditionContext): boolean 
     case "attackKind":
       return eventAttackKind(ctx.event) === c.kind;
     case "targetHasCondition":
-      return subjects("eventTarget", ctx).some((p) =>
-        p.battleData.activeEffects.some((e) => e.effects.some((d) => d.type === c.condition)),
-      );
+      return subjects("eventTarget", ctx).some((p) => hasEffectMarker(p, c.condition));
     case "targetDead":
       return subjects("eventTarget", ctx).some((p) => !isActive(p));
     case "actorIsEnemy":

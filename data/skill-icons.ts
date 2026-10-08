@@ -122,10 +122,12 @@ export const SKILL_ICONS: Record<string, string> = {
   ...Object.fromEntries(Object.entries(RACE_FLAGS).map(([race, file]) => [`race-flag-${race}`, file])),
 };
 
-export type IconKind = "skill" | "spell";
+export type IconKind = "skill" | "spell" | "artifact";
 
-export function iconBucket(key: string, kind: IconKind = "skill"): "skill-icons" | "main-skill-icons" | "spell-icons" {
+export function iconBucket(key: string, kind: IconKind = "skill"): "skill-icons" | "main-skill-icons" | "spell-icons" | "artifact-icons" {
   if (kind === "spell") return "spell-icons";
+
+  if (kind === "artifact") return "artifact-icons";
 
   return key in BRANCH_ICONS ? "main-skill-icons" : "skill-icons";
 }

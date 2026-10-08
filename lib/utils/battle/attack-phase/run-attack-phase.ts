@@ -1,17 +1,16 @@
+import { holdBackNewEffects, restoreHeldBack } from "./hold-back";
+
 import { AttackType } from "@/lib/constants/battle";
 import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { isActive, withSelf } from "@/lib/utils/abilities/engine/participants";
-/**
- * Runs the attack phase: validation, processAttack per target, primary-target retaliation.
- * Used by the attack route.
- */
+import { isActive, mergeParticipants, updateParticipant, withSelf } from "@/lib/utils/abilities/engine/participants";
 import type { Rng } from "@/lib/utils/abilities/engine/types";
 import { processAttack } from "@/lib/utils/battle/attack";
+import { activeEffectIds } from "@/lib/utils/battle/attack/consume-effects";
 import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
 import { diceCount, rollDiceList } from "@/lib/utils/common/dice";
-import type { BattleAction, BattleParticipant } from "@/types/battle";
+import type { ActiveEffect, BattleAction, BattleParticipant } from "@/types/battle";
 
 export type AttackPhaseInput = {
   battle: {
@@ -47,6 +46,7 @@ export type AttackPhaseResult = {
   baseBattleLog: BattleAction[];
 };
 
+// Фаза атаки: валідація, processAttack на ціль, відповідний удар по основній цілі.
 export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
   const { battle, data, battleId, userId, isDM } = input;
 
@@ -60,9 +60,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const targetIds = data.targetIds || (data.targetId ? [data.targetId] : []);
 
-  const chosenTargets = initiativeOrder.filter((p) =>
-    targetIds.includes(p.basicInfo.id),
-  );
+  const chosenTargets = [...new Set(targetIds)].flatMap((id) => initiativeOrder.find((p) => p.basicInfo.id === id) ?? []);
 
   const usePerTargetRolls =
     Array.isArray(data.attackRolls) &&
@@ -159,10 +157,16 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const dist = attack.damageDistribution;
 
-  // Для multi-target ranged: кожна ціль отримує повний урон (окремий кидок на ціль)
+  const falloffPercents = hitsAllEnemies ? [] : findFlags(withSelf(initiativeOrder, attacker), attacker.basicInfo.id, "multiTargetFalloff").map((f) => f.percent);
+
+  const falloff = falloffPercents.length > 0 ? Math.min(...falloffPercents) / 100 : 1;
+
+  const sequentialDice = falloffPercents.length > 0 && isMultiTargetRanged;
+
+  // Для multi-target ranged: окремий кидок на ціль; основна ціль — повна шкода, додаткові — за falloff
   const damageFractions: number[] =
     isMultiTargetRanged
-      ? targets.map(() => 1)
+      ? targets.map((_, i) => (i === 0 ? 1 : falloff))
       : dist &&
           dist.length === targets.length &&
           dist.every((n) => typeof n === "number" && n >= 0 && n <= 100)
@@ -187,6 +191,12 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       : 0;
 
   let damageCursor = 0;
+
+  let grantedExtra = false;
+
+  const effectsBeforeVolley = activeEffectIds([attacker]);
+
+  const heldBack: ActiveEffect[] = [];
 
   for (let i = 0; i < targets.length; i++) {
     const target = targets[i];
@@ -217,8 +227,10 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       : isMultiTargetRanged &&
           targets.length > 1 &&
           dicePerTarget > 0 &&
-          data.damageRolls.length >= (i + 1) * dicePerTarget
-        ? data.damageRolls.slice(i * dicePerTarget, (i + 1) * dicePerTarget)
+          data.damageRolls.length >= (sequentialDice ? damageCursor + dicePerTarget : (i + 1) * dicePerTarget)
+        ? sequentialDice
+          ? data.damageRolls.slice(damageCursor, damageCursor + dicePerTarget)
+          : data.damageRolls.slice(i * dicePerTarget, (i + 1) * dicePerTarget)
         : data.damageRolls;
 
     const freshTarget = currentInitiativeOrder.find((p) => p.basicInfo.id === target.basicInfo.id) ?? target;
@@ -238,12 +250,14 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       rng,
     });
 
-    if (hitsAllEnemies && attackResult.success) damageCursor += dicePerTarget;
+    if ((hitsAllEnemies || sequentialDice) && attackResult.success) damageCursor += dicePerTarget;
 
-    const updatedMap = new Map((attackResult.allParticipantsUpdated ?? []).map((p) => [p.basicInfo.id, p]));
-
-    currentInitiativeOrder = currentInitiativeOrder.map((p) => updatedMap.get(p.basicInfo.id) ?? p);
+    currentInitiativeOrder = mergeParticipants(currentInitiativeOrder, attackResult.allParticipantsUpdated ?? []);
     currentAttacker = attackResult.attackerUpdated;
+
+    const critType = attackResult.criticalEffectApplied?.effect.type;
+
+    if (critType === "free_attack" || critType === "combo_attack") grantedExtra = true;
 
     if (rolledByServer && attackResult.success) {
       attackResult.battleAction.resultText = `${attackResult.battleAction.resultText} | 🎲 кубики шкоди кинув сервер: ${damageRollsForTarget.slice(sentRolls.length).join(", ")}`;
@@ -254,7 +268,9 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       actionIndex: baseBattleLog.length + allBattleActions.length,
     });
 
-    if (i === 0) {
+    const provoked = critType === "provoke_opportunity_attack";
+
+    if (i === 0 || provoked) {
       const retaliation = resolveRetaliation({
         participants: currentInitiativeOrder,
         attackerId: attacker.basicInfo.id,
@@ -262,16 +278,15 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
         attack,
         attackRoll: attackResult.attackRoll,
         criticalEffect: attackResult.criticalEffectApplied,
+        provoked,
         round: battle.currentRound,
         battleId,
         rng,
       });
 
       if (retaliation) {
-        const byId = new Map(retaliation.participants.map((p) => [p.basicInfo.id, p]));
-
-        currentInitiativeOrder = currentInitiativeOrder.map((p) => byId.get(p.basicInfo.id) ?? p);
-        currentAttacker = byId.get(attacker.basicInfo.id) ?? currentAttacker;
+        currentInitiativeOrder = mergeParticipants(currentInitiativeOrder, retaliation.participants);
+        currentAttacker = retaliation.participants.find((p) => p.basicInfo.id === attacker.basicInfo.id) ?? currentAttacker;
         allBattleActions.push({
           ...retaliation.battleAction,
           actionIndex: baseBattleLog.length + allBattleActions.length,
@@ -279,7 +294,19 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       }
     }
 
+    const held = holdBackNewEffects(currentInitiativeOrder, currentAttacker, effectsBeforeVolley);
+
+    currentInitiativeOrder = held.order;
+    currentAttacker = held.attacker;
+    heldBack.push(...held.held);
+
     if (!isActive(currentAttacker)) break;
+  }
+
+  currentInitiativeOrder = restoreHeldBack(currentInitiativeOrder, attacker.basicInfo.id, heldBack);
+
+  if (grantedExtra) {
+    currentInitiativeOrder = updateParticipant(currentInitiativeOrder, attacker.basicInfo.id, (p) => ({ ...p, actionFlags: { ...p.actionFlags, hasUsedAction: false } }));
   }
 
   const finalInitiativeOrder = currentInitiativeOrder;

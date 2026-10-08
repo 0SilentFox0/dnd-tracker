@@ -59,3 +59,21 @@
 **Перевірка scoped (`all_allies` / `all_enemies`):** при старті бою після `Promise.all(createBattleParticipantFromCharacter…)` для всіх слотів викликається `distributePendingScopedArtifactBonuses(initiativeOrder)` — з усіх учасників збирається черга `pendingScopedArtifactBonuses`, черга очищується, і кожен запис застосовується до **усіх** одержувачів на відповідному боці (`distribute-scoped-artifact-bonuses.ts`). Те саме при **додаванні учасника** в активний бій (`add-participant/route.ts`). Для одного героя в прев’ю шкоди — `distributePendingScopedArtifactBonuses([participant])`.
 
 **Іконка сету (`artifact_sets.icon`):** URL для HUD — у битві біля портрета показується маркер повного сету (`battleData.artifactSetHudMarkers`), зокрема для носія scoped-сету та для кожного союзника після роздачі. Задається в формі редагування сету (DM).
+
+## Бібліотечні сети героїв
+
+Шість готових сетів для героїв кампанії лежать у бібліотеці, а не створюються вручну через UI.
+
+- **Дані:** `data/library/artifacts.ts` — сет (`key`, `name`, `heroName`, `iconKey`) і його артефакти.
+- **Посів у БД:** `pnpm seed-library <id>` (для віддаленої БД додатково `--allow-remote`, змінні з `.env.production-db.local`).
+- **Іконки:** `pnpm import-artifact-icons`, потім `pnpm upload-assets-to-supabase` (bucket `artifact-icons`).
+- **Бонуси — це `abilities`, а не `setBonus`:** бонус повного комплекту сету та ефекти кожного артефакта описані в уніфікованій моделі здібностей (`lib/utils/abilities/`), тому старий формат `setBonus` для бібліотечних сетів не використовується.
+
+| Сет | Герой |
+|-----|-------|
+| Мрія лучника | Айвен |
+| Обладунки гномських королів | Семгрун |
+| Регалії Сар-Іссуса | Зехір |
+| Дух лева | Годрик |
+| Регалії світанку | Ізабель |
+| Кігті Ігг-Шайла | Раїлаг |

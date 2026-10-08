@@ -461,4 +461,23 @@ describe("runAttackPhase — відсіч", () => {
     expect(r.allBattleActions.map((a) => a.actionType)).toEqual(["attack", "retaliation"]);
     expect(r.finalInitiativeOrder.find((p) => p.basicInfo.id === "t2")?.combatStats.currentHp).toBe(t2.combatStats.currentHp);
   });
+
+  it("нат.1 з провокацією: відповідає і друга ціль", () => {
+    const aoe = meleeAttack({ targetType: "aoe", maxTargets: 2 } as Partial<BattleAttack>);
+
+    const base = makeAttacker();
+
+    const attacker = { ...base, battleData: { ...base.battleData, attacks: [aoe] } };
+
+    const r = runAttackPhase({
+      battle: { initiativeOrder: [attacker, armed("t1", [meleeAttack()]), armed("t2", [meleeAttack()])], battleLog: [], currentRound: 1, currentTurnIndex: 0 },
+      data: { attackerId: "atk", targetIds: ["t1", "t2"], attackRolls: [15, 1], damageRolls: [3, 3] },
+      battleId: "b1",
+      userId: "user-1",
+      isDM: false,
+      rng: seq(0.65, 0.85),
+    });
+
+    expect(r.allBattleActions.filter((a) => a.actionType === "retaliation").map((a) => a.actorId)).toEqual(["t1", "t2"]);
+  });
 });

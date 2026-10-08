@@ -3,7 +3,7 @@
  * Баланс бібліотеки скілів і заклять: автобої героїв (3 побудови × рівні 3/6/10) проти складів Tier 1/4/7 з imports/units-import.csv.
  * Лише локальна БД. Кампанія «SIM: баланс бібліотеки» створюється разом із сідом бібліотеки й імпортом юнітів.
  *
- *   pnpm balance-library [--runs=6] [--levels=3,6,10] [--parties=mixed,martial,caster,leader] [--reuse]
+ *   pnpm balance-library [--runs=6] [--levels=3,6,10] [--parties=mixed,martial,caster,leader] [--reuse] [--sets] [--fixed-roster]
  */
 import type { Prisma } from "@prisma/client";
 import { execFileSync } from "node:child_process";
@@ -15,16 +15,20 @@ import { spellSchema } from "../app/api/campaigns/[id]/battles/[battleId]/spell/
 import { createSpellMutation } from "../app/api/campaigns/[id]/battles/[battleId]/spell/spell-mutation";
 import { createStartMutation } from "../app/api/campaigns/[id]/battles/[battleId]/start/start-mutation";
 import { loadCharacterBalanceStats } from "../app/api/campaigns/[id]/battles/balance/character-stats";
+import { LIBRARY_ARTIFACT_SETS } from "../data/library/artifacts";
 import { BATTLE_LOG_RECENT_EVENTS, ParticipantSourceType } from "../lib/constants/battle";
 import { CampaignRole } from "../lib/constants/campaigns";
 import { prisma } from "../lib/db";
 import { moraleCheckSchema } from "../lib/schemas";
+import { findCompletedSets } from "../lib/utils/battle/artifact-sets";
 import { computeFairScaling, pickEnemyRoster } from "../lib/utils/battle/balance";
 import { loadUnitLibraryStats } from "../lib/utils/battle/balance/unit-library";
 import { applyBattleDelta } from "../lib/utils/battle/client/apply-delta";
 import { heroAttackDamageParts } from "../lib/utils/battle/damage/hero-damage";
+import { loadEquippedArtifactRows, toEquippedArtifacts } from "../lib/utils/battle/participant/extract-artifacts";
 import { type PipelineDeps, runBattleMutation, type RunBattleMutationOptions } from "../lib/utils/battle/pipeline/run-battle-mutation";
 import { casterSpellDice } from "../lib/utils/battle/spell/caster-dice";
+import { spellTargetingFor } from "../lib/utils/battle/spell/spell-targeting";
 import { loadBattle, loadRecentEvents, saveBattle } from "../lib/utils/battle/store";
 import { needsMoraleCheck } from "../lib/utils/battle/view";
 import { rollDiceList } from "../lib/utils/common/dice";
@@ -52,6 +56,12 @@ const LEVELS = arg("levels", "3,6,10").split(",").map(Number);
 const TIER_OF_LEVEL: Record<number, number> = { 3: 1, 6: 4, 10: 7 };
 
 const REUSE = process.argv.includes("--reuse");
+
+const SETS = process.argv.includes("--sets");
+
+const FIXED_ROSTER = process.argv.includes("--fixed-roster");
+
+const BUILD_SET: Record<string, string> = { martial: "Дух лева", caster: "Регалії Сар-Іссуса", leader: "Мрія лучника" };
 
 const STEP_LIMIT = 500;
 
@@ -190,7 +200,7 @@ function pickSpell(actor: BattleParticipant, foes: BattleParticipant[]): { spell
 
     let targets: BattleParticipant[];
 
-    if (targeting.kind === "enemy") targets = sorted.slice(0, 1);
+    if (targeting.kind === "enemy") targets = sorted.slice(0, spellTargetingFor(state.initiativeOrder, actor.basicInfo.id, spell).maxTargets);
     else if (targeting.kind === "area" && targeting.side === "enemy") targets = sorted.slice(0, targeting.maxTargets ?? 1);
     else if (targeting.kind === "allEnemies") targets = sorted;
     else continue;
@@ -256,11 +266,19 @@ async function playTurn(actor: BattleParticipant, foes: BattleParticipant[]) {
     return;
   }
 
-  const target = [...foes].sort((a, b) => hp(a) - hp(b))[0];
+  const weakest = [...foes].sort((a, b) => hp(a) - hp(b));
+
+  const targets = weapon.type === "ranged" ? weakest.slice(0, Math.max(1, actor.combatStats.maxTargets ?? 1)) : weakest.slice(0, 1);
 
   const formula = heroAttackDamageParts(actor, weapon).formula;
 
-  const status = await call("attack", ATTACK, { attackerId: actor.basicInfo.id, targetId: target.basicInfo.id, d20Roll: 1 + Math.floor(rng() * 20), damageRolls: rollDiceList(formula, rng), endTurn: true });
+  const status = await call("attack", ATTACK, {
+    attackerId: actor.basicInfo.id,
+    targetIds: targets.map((t) => t.basicInfo.id),
+    attackRolls: targets.map(() => 1 + Math.floor(rng() * 20)),
+    damageRolls: targets.flatMap(() => rollDiceList(formula, rng)),
+    endTurn: true,
+  });
 
   if (status !== 200) await call("next-turn", NEXT);
 }
@@ -290,7 +308,7 @@ async function fight(seed: number, setup: Array<Record<string, unknown>>): Promi
   await call("start", START);
 
   if (process.argv.includes("--dump") && seed < 200) {
-    for (const p of state.initiativeOrder) console.info(`   ${p.basicInfo.name}: HP ${p.combatStats.maxHp} AC ${p.combatStats.armorClass} init ${p.abilities.initiative} slots ${JSON.stringify(p.spellcasting.spellSlots)} spells ${p.spellcasting.knownSpells.map((id) => `${spellById.get(id)?.name}(${spellById.get(id)?.level})`).join(",")}`);
+    for (const p of state.initiativeOrder) console.info(`   ${p.basicInfo.name}: HP ${p.combatStats.maxHp} AC ${p.combatStats.armorClass} maxT ${p.combatStats.maxTargets} init ${p.abilities.initiative} slots ${JSON.stringify(p.spellcasting.spellSlots)} spells ${p.spellcasting.knownSpells.map((id) => `${spellById.get(id)?.name}(${spellById.get(id)?.level})`).join(",")}`);
   }
 
   for (let step = 0; step < STEP_LIMIT && state.status === "active"; step++) {
@@ -398,7 +416,7 @@ function dumpPlan(tree: TreeNodes, ids: string[], skillNames: Map<string, string
   console.info(`${label}: ${names.join(", ")}`);
 }
 
-async function createParty(partyKey: string, level: number, trees: Map<string, TreeNodes>, weapons: Record<string, string>, skillNames: Map<string, string>) {
+async function createParty(partyKey: string, level: number, trees: Map<string, TreeNodes>, weapons: Record<string, string>, skillNames: Map<string, string>, withSets = SETS) {
   const ids: string[] = [];
 
   for (const [i, buildKey] of PARTIES[partyKey].entries()) {
@@ -433,7 +451,30 @@ async function createParty(partyKey: string, level: number, trees: Map<string, T
       },
     });
 
-    await prisma.characterInventory.create({ data: { characterId: row.id, equipped: { mainHand: weapons[b.weapon] } } });
+    let equipped: Record<string, string> = { mainHand: weapons[b.weapon] };
+
+    if (withSets) {
+      const librarySet = LIBRARY_ARTIFACT_SETS.find((s) => s.name === BUILD_SET[b.key])!;
+
+      const rows = await prisma.artifact.findMany({ where: { campaignId, name: { in: librarySet.artifacts.map((a) => a.name) } }, select: { id: true, name: true } });
+
+      const idByName = new Map(rows.map((r) => [r.name, r.id]));
+
+      const setSlots = Object.fromEntries(librarySet.artifacts.map((a) => [a.slot, idByName.get(a.name)!]));
+
+      equipped = b.key === "leader" ? setSlots : { ...equipped, ...setSlots };
+    }
+
+    await prisma.characterInventory.create({ data: { characterId: row.id, equipped } });
+
+    if (withSets && process.argv.includes("--debug") && i === 0) {
+      const eq = toEquippedArtifacts(await loadEquippedArtifactRows({ ...row, inventory: { equipped } } as never));
+
+      const { progress } = await findCompletedSets(eq, campaignId);
+
+      console.info(`   set check ${buildKey}: ${JSON.stringify(progress.map((p) => ({ n: p.name, have: p.have, total: p.total, complete: p.complete })))}`);
+    }
+
     ids.push(row.id);
   }
 
@@ -474,7 +515,7 @@ async function main() {
 
       const tier = TIER_OF_LEVEL[level] ?? 1;
 
-      const stats = await loadCharacterBalanceStats(campaignId, heroIds);
+      const stats = await loadCharacterBalanceStats(campaignId, SETS && FIXED_ROSTER ? await createParty(partyKey, level, trees, weapons, skillNames, false) : heroIds);
 
       const party = { dpr: 0, hp: 0, heroCount: stats.length };
 

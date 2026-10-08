@@ -1,17 +1,13 @@
 import { describe, expect, it } from "vitest";
 
+import type { CriticalEffect, CriticalEffectType } from "@/lib/constants/critical-effects";
+import { makeEffect } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
+import { applyCriticalEffect } from "@/lib/utils/battle/attack";
 import { processStartOfRound, processStartOfTurn } from "@/lib/utils/battle/battle-turn";
 import type { ActiveEffect } from "@/types/battle";
 
-const debuff = (type: string, duration: number): ActiveEffect => ({
-  id: `e-${type}`,
-  name: type,
-  type: "debuff",
-  duration,
-  appliedAt: { round: 1, timestamp: new Date() },
-  effects: [{ type, value: 0 }],
-});
+const debuff = (type: string, duration: number): ActiveEffect => makeEffect(`e-${type}`, { name: type, type: "debuff", duration, effects: [{ type, value: 0 }] });
 
 describe("processStartOfTurn", () => {
   it("дебаф на 1 раунд діє в цей хід і лише потім спливає", () => {
@@ -34,6 +30,31 @@ describe("processStartOfTurn", () => {
     const out = processStartOfTurn(p, 2, [p]);
 
     expect(out.participant.actionFlags).toMatchObject({ hasUsedAction: false, hasUsedBonusAction: false, hasUsedReaction: false });
+  });
+});
+
+describe("critical effects at the start of turn", () => {
+  const crit = (type: CriticalEffectType): CriticalEffect => ({ id: 1, name: "Е", description: "о", type: "success", flavor: [], effect: { type, duration: type === "lose_action" ? 1 : 2 } });
+
+  const hit = (type: CriticalEffectType) => applyCriticalEffect(createMockParticipant(), crit(type), 1);
+
+  it("lose_action takes the action on the next turn", () => {
+    const p = hit("lose_action");
+
+    expect(processStartOfTurn(p, 2, [p], () => 0.5).participant.actionFlags.hasUsedAction).toBe(true);
+  });
+
+  it("lose_reaction is spent at once and restored next turn", () => {
+    const p = hit("lose_reaction");
+
+    expect(p.actionFlags.hasUsedReaction).toBe(true);
+    expect(processStartOfTurn(p, 2, [p]).participant.actionFlags.hasUsedReaction).toBe(false);
+  });
+
+  it("block_bonus_action takes the bonus action on the next turn", () => {
+    const p = hit("block_bonus_action");
+
+    expect(processStartOfTurn(p, 2, [p]).participant.actionFlags.hasUsedBonusAction).toBe(true);
   });
 });
 

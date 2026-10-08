@@ -5,7 +5,7 @@ import { buildLibrary, LIBRARY_COMPLETE, LIBRARY_SOURCE, MIN_APPEARANCE_LENGTH, 
 import { PERSONAL } from "../personal";
 import { RACES } from "../races";
 import { SPELLS } from "../spells";
-import type { LibraryBranch, LibraryRace, LibrarySkill, LibrarySource, LibrarySpell } from "../types";
+import type { LibraryArtifact, LibraryArtifactSet, LibraryBranch, LibraryRace, LibrarySkill, LibrarySource, LibrarySpell } from "../types";
 
 import { BRANCH_ICONS, SKILL_ICONS, SPELL_ICONS } from "@/data/skill-icons";
 
@@ -72,8 +72,26 @@ function branch(key: string, over: Partial<LibraryBranch> = {}): LibraryBranch {
   };
 }
 
+function artifact(key: string, over: Partial<LibraryArtifact> = {}): LibraryArtifact {
+  return { key, name: `Артефакт ${key}`, description: "опис", appearanceDescription: APPEARANCE, iconKey: "unicorn-horn-bow", slot: "ring1", rarity: "epic", abilities: [], ...over };
+}
+
+function set(key: string, over: Partial<LibraryArtifactSet> = {}): LibraryArtifactSet {
+  return {
+    key,
+    name: `Сет ${key}`,
+    description: "опис",
+    appearanceDescription: APPEARANCE,
+    iconKey: "unicorn-horn-bow",
+    heroName: "Айвен",
+    artifacts: [artifact(`${key}-a`, { slot: "ring1" }), artifact(`${key}-b`, { slot: "helmet" }), artifact(`${key}-c`, { slot: "cape" })],
+    abilities: [],
+    ...over,
+  };
+}
+
 function source(over: Partial<LibrarySource> = {}): LibrarySource {
-  return { spells: [], branches: [], races: [], personal: [], ...over };
+  return { spells: [], branches: [], races: [], personal: [], artifactSets: [], ...over };
 }
 
 describe("buildLibrary validation", () => {
@@ -109,6 +127,42 @@ describe("buildLibrary validation", () => {
     const bad = skill("bad", { abilities: [{ id: "x", name: "x", trigger: { event: "passive" }, effects: [] }] });
 
     expect(() => buildLibrary(source({ personal: [bad] }))).toThrow(/Скіл «bad»/);
+  });
+
+  it("rejects a set with fewer than 3 artifacts", () => {
+    expect(() => buildLibrary(source({ artifactSets: [set("s", { artifacts: [artifact("a"), artifact("b", { slot: "helmet" })] })] }))).toThrow(/менше 3/);
+  });
+
+  it("rejects repeated slots inside a set", () => {
+    const s = set("s", { artifacts: [artifact("a"), artifact("b"), artifact("c", { slot: "cape" })] });
+
+    expect(() => buildLibrary(source({ artifactSets: [s] }))).toThrow(/слот «ring1» повторюється/);
+  });
+
+  it("rejects an unknown artifact iconKey", () => {
+    const s = set("s");
+
+    s.artifacts[0].iconKey = "nope";
+
+    expect(() => buildLibrary(source({ artifactSets: [s] }))).toThrow(/невідомий iconKey/);
+  });
+
+  it("rejects an invalid artifact ability", () => {
+    const s = set("s");
+
+    s.artifacts[0].abilities = [{ id: "x", name: "x", trigger: { event: "passive" }, effects: [] } as never];
+
+    expect(() => buildLibrary(source({ artifactSets: [s] }))).toThrow(/Артефакт «s-a»/);
+  });
+
+  it("rejects an unknown spell key in artifact abilities", () => {
+    const s = set("s", { abilities: [{ id: "i", name: "i", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "spellImmunity", spellIds: ["nope"], target: "allAllies" }] }] });
+
+    expect(() => buildLibrary(source({ artifactSets: [s] }))).toThrow(/nope/);
+  });
+
+  it("rejects duplicate artifact keys across sets", () => {
+    expect(() => buildLibrary(source({ artifactSets: [set("s"), set("t", { artifacts: set("s").artifacts })] }))).toThrow(/дублікат key/);
   });
 
   it("rejects invalid spell definitions", () => {

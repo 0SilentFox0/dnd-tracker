@@ -105,4 +105,23 @@ describe("useAttackWizard", () => {
 
     await waitFor(() => expect(scene.showResult).toHaveBeenCalledWith(expect.objectContaining({ kind: "hit", retaliation: { name: "Гоблін", damage: 4 } })));
   });
+
+  it("критична невдача з серверного логу дає miss з critFail, хоч прогноз бачив влучання", async () => {
+    const afterLog = [
+      { actionIndex: 9, actionType: "attack", actorId: "me", targets: [{ participantId: "gob", participantName: "Гоблін" }], hpChanges: [], actionDetails: { criticalEffect: { id: 3, name: "Падіння", description: "", type: "fail", flavor: "Ви спотикаєтесь." } } },
+    ] as unknown as BattleAction[];
+
+    const scene = fakeScene({ afterLog });
+
+    const { result } = renderHook(() => useAttackWizard(scene.me), { wrapper: scene.wrapper });
+
+    act(() => result.current.open());
+    act(() => result.current.toggleTarget("gob"));
+    act(() => result.current.confirmTargets());
+    act(() => result.current.roll(14));
+    act(() => result.current.damage([6]));
+    act(() => result.current.submit());
+
+    await waitFor(() => expect(scene.showResult).toHaveBeenCalledWith(expect.objectContaining({ kind: "miss", critFail: expect.objectContaining({ name: "Падіння", flavor: "Ви спотикаєтесь." }) })));
+  });
 });

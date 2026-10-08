@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import Link from "next/link";
 import { Circle, Edit, MoreVertical, Plus, Shield, Trash2 } from "lucide-react";
 
-import { RacePassiveBlock, RacialSkillsBlock } from "./RaceInnateSections";
+import { RacePassiveBlock } from "./RaceInnateSections";
 
 import { HudCard } from "@/components/hud/page";
 import { Badge } from "@/components/ui/badge";
@@ -185,7 +185,6 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
           </div>
         )}
 
-        <RacialSkillsBlock campaignId={campaignId} raceName={race.name} />
 
         {!passiveAbility && (
           <p className="text-sm text-muted-foreground italic">

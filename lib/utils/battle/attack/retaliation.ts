@@ -1,8 +1,10 @@
 import { getEffectiveArmorClass } from "../participant";
 import type { AttackRollResult } from "../types/attack";
 import { appendHpChanges, type AttackFlow, getP, put } from "./process/ability-flow";
-import { buildRetaliationAction,type BuildRetaliationParams } from "./process/actions";
+import { buildRetaliationAction, type BuildRetaliationParams } from "./process/actions";
 import { resolveHit } from "./process/hit";
+import { activeEffectIds, consumeAttackEffects } from "./consume-effects";
+import { applyCriticalEffect, critFlavorFor } from "./critical";
 import { getDisabledAttackKinds } from "./disabled-attacks";
 import { calculateAttackRoll } from "./roll";
 
@@ -13,6 +15,7 @@ import { findParticipant, isActive, withSelf } from "@/lib/utils/abilities/engin
 import type { Rng } from "@/lib/utils/abilities/engine/types";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
+import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import { parseDiceLenient, rollGroups } from "@/lib/utils/common/dice";
 import type { BattleAction, BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -29,6 +32,7 @@ export interface RetaliationInput {
   attack: BattleAttack;
   attackRoll: Pick<AttackRollResult, "isCriticalFail">;
   criticalEffect?: CriticalEffect;
+  provoked?: boolean;
   round: number;
   battleId: string;
   rng: Rng;
@@ -55,21 +59,27 @@ function weaponFor(defender: BattleParticipant, participants: BattleParticipant[
 export function resolveRetaliation(input: RetaliationInput): RetaliationResult | null {
   const { participants, attackerId, defenderId, round, battleId, rng } = input;
 
-  if (input.attackRoll.isCriticalFail || input.criticalEffect?.effect.type === "ignore_reactions") return null;
+  const { provoked } = input;
+
+  if ((!provoked && input.attackRoll.isCriticalFail) || input.criticalEffect?.effect.type === "ignore_reactions") return null;
 
   const defender = findParticipant(participants, defenderId);
 
   const attacker = findParticipant(participants, attackerId);
 
-  if (!defender || !attacker || !isActive(defender) || !isActive(attacker) || defender.actionFlags.hasUsedReaction) return null;
+  if (!defender || !attacker || !isActive(defender) || !isActive(attacker)) return null;
+
+  if (provoked ? hasEffectMarker(defender, "no_reaction") : defender.actionFlags.hasUsedReaction) return null;
 
   const weapon = weaponFor(defender, participants, kindOf(input.attack));
 
   if (!weapon) return null;
 
+  const existedBefore = activeEffectIds(participants);
+
   const flow: AttackFlow = { ps: participants, messages: [], ctx: { round, rng } };
 
-  put(flow, { ...defender, actionFlags: { ...defender.actionFlags, hasUsedReaction: true } });
+  if (!provoked) put(flow, { ...defender, actionFlags: { ...defender.actionFlags, hasUsedReaction: true } });
 
   const first = rollD20(rng);
 
@@ -78,6 +88,8 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
   const roll = calculateAttackRoll(getP(flow, defenderId), weapon.attack, first, second, second, { participants: flow.ps, targetId: attackerId, rng });
 
   if (roll.secondRoll) flow.messages.push(`🎲 відсіч, ${roll.secondRoll.mode === "advantage" ? "перевага" : "недолік"}: другий d20 = ${roll.secondRoll.value}`);
+
+  if (roll.isCriticalFail && roll.criticalEffect) put(flow, applyCriticalEffect(getP(flow, defenderId), roll.criticalEffect, round, { offTurn: true }));
 
   const targetAC = getEffectiveArmorClass(getP(flow, attackerId), flow.ps);
 
@@ -99,10 +111,23 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
       attackRoll: roll,
       currentRound: round,
       bonusPercent: weapon.bonusPercent,
+      offTurn: true,
     });
 
     hit = { damageRolls, hitDamage };
   }
+
+  const retaliationCrit = roll.isCriticalFail ? roll.criticalEffect : hit?.hitDamage.criticalEffectApplied;
+
+  const critFlavorText = retaliationCrit
+    ? critFlavorFor(retaliationCrit, getP(flow, defenderId).basicInfo.name, getP(flow, attackerId).basicInfo.name, {
+        battleId,
+        round,
+        attackerId: defenderId,
+        targetId: attackerId,
+        suffix: "r",
+      })
+    : undefined;
 
   const battleAction = buildRetaliationAction({
     retaliator: getP(flow, defenderId),
@@ -114,9 +139,10 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
     messages: flow.messages,
     battleId,
     currentRound: round,
+    critFlavorText,
   });
 
   appendHpChanges(battleAction, participants, flow.ps);
 
-  return { participants: flow.ps, battleAction };
+  return { participants: consumeAttackEffects(flow.ps, { attackerId: defenderId, targetId: attackerId, hit: isHit, existedBefore }), battleAction };
 }

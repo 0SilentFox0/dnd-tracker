@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
+import type { CriticalEffectType } from "@/lib/constants/critical-effects";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { computeHitDamage } from "@/lib/utils/battle/attack/process/compute";
 import { handleMiss } from "@/lib/utils/battle/attack/process/miss";
@@ -94,14 +95,14 @@ describe("множник застосовується рівно раз на к�
 
   const timesMultiplier = (r: ReturnType<typeof hit>) => r.damageCalculation.breakdown.filter((l) => l.includes("рівний бій")).length;
 
-  const crit = (effectType: string, a: BattleParticipant, t: BattleParticipant = target, extra: Partial<Parameters<typeof computeHitDamage>[0]> = {}) =>
+  const crit = (effectType: CriticalEffectType, a: BattleParticipant, t: BattleParticipant = target, extra: Partial<Parameters<typeof computeHitDamage>[0]> = {}) =>
     computeHitDamage({
       attacker: a,
       target: t,
       attack: club,
       damageRolls: [3, 3],
       allParticipants: [a, t],
-      attackRoll: { isCritical: true, criticalEffect: { id: 1, name: "Крит", description: "", type: "success", effect: { type: effectType } } },
+      attackRoll: { isCritical: true, criticalEffect: { id: 1, name: "Крит", description: "", type: "success", flavor: [], effect: { type: effectType } } },
       currentRound: 1,
       ...extra,
     });

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { makeEffect } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";
@@ -95,7 +96,7 @@ describe("advanceTurn", () => {
       ...p,
       battleData: {
         ...p.battleData,
-        activeEffects: [{ id: "e1", name: "Отрута", type: "debuff" as const, duration: 2, appliedAt: { round: 1, timestamp: new Date() }, effects: [], dotDamage: { damagePerRound: 1, damageType: "poison" } }],
+        activeEffects: [makeEffect("e1", { name: "Отрута", type: "debuff", dotDamage: { damagePerRound: 1, damageType: "poison" } })],
       },
     });
 
@@ -132,5 +133,14 @@ describe("advanceTurn", () => {
       expect(second.scene.round).toBe(2);
       expect(second.participants.every((p) => p.actionFlags.hasExtraTurn === false)).toBe(true);
     });
+  });
+
+  it("expireAtTurnEnd effects end with the owner's last turn", () => {
+    const e = (duration: number) => makeEffect("x", { type: "debuff", duration, expireAtTurnEnd: true });
+
+    const withE = (duration: number) => ({ ...hero, battleData: { ...hero.battleData, activeEffects: [e(duration)] } });
+
+    expect(advanceTurn({ participants: [withE(1), goblin], pending: [], scene }).participants[0].battleData.activeEffects).toEqual([]);
+    expect(advanceTurn({ participants: [withE(2), goblin], pending: [], scene }).participants[0].battleData.activeEffects).toHaveLength(1);
   });
 });

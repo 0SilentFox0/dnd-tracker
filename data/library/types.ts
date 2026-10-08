@@ -1,3 +1,4 @@
+import type { ArtifactGridSlotKey } from "@/lib/constants/artifacts";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import type { SpellDefinition } from "@/lib/utils/spells/model/schema";
 
@@ -57,11 +58,25 @@ export interface LibraryRace extends LibraryEntry {
   ultimate: LibrarySkill;
 }
 
+export interface LibraryArtifact extends LibraryEntry {
+  slot: ArtifactGridSlotKey;
+  rarity: "epic" | "legendary";
+  abilities: Ability[];
+  modifiers?: Array<{ type: string; value: string }>;
+}
+
+export interface LibraryArtifactSet extends LibraryEntry {
+  heroName: string;
+  artifacts: LibraryArtifact[];
+  abilities: Ability[];
+}
+
 export interface LibrarySource {
   spells: LibrarySpell[];
   branches: LibraryBranch[];
   races: LibraryRace[];
   personal: LibraryPersonal[];
+  artifactSets: LibraryArtifactSet[];
 }
 
 export interface Library extends LibrarySource {

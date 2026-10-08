@@ -11,7 +11,7 @@ import { resolveAttackRoll } from "@/lib/utils/battle/common/attack-roll-helpers
 import { computeDamageBreakdown } from "@/lib/utils/battle/damage";
 import { attackFlow, type AttackMode, attackPayload, effectiveD20, initialAttackFlow, type RollOutcome } from "@/lib/utils/battle/flows";
 import { isUp } from "@/lib/utils/battle/participant/state";
-import { canSeeExactStats, damageDiceSlots, formatKnownArmorClass, hiddenTargetSteps, resolveKnownArmorClass, retaliationOutcome, weaponPreview } from "@/lib/utils/battle/view";
+import { canSeeExactStats, critOutcome, damageDiceSlots, formatKnownArmorClass, hiddenTargetSteps, resolveKnownArmorClass, retaliationOutcome, weaponPreview } from "@/lib/utils/battle/view";
 import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
 
 export function rollDie(sides: number): number {
@@ -74,6 +74,8 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
   const hitsAll = !!attacker && findFlags(withSelf(order, attacker), attacker.basicInfo.id, "attackHitsAllEnemies").length > 0;
 
+  const hasFalloff = !!attacker && findFlags(withSelf(order, attacker), attacker.basicInfo.id, "multiTargetFalloff").length > 0;
+
   const describe = (a: BattleAttack) => {
     const maxTargets = Math.max(1, a.maxTargets ?? attacker?.combatStats.maxTargets ?? 1);
 
@@ -106,11 +108,15 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     const seen = new Set((scene.battle.battleLog ?? []).map((e) => e.actionIndex));
 
     try {
-      const res = await scene.actions.attack.mutateAsync(attackPayload(state, attacker.basicInfo.id, { allStrikes: hitsAll }));
+      const res = await scene.actions.attack.mutateAsync(attackPayload(state, attacker.basicInfo.id, { allStrikes: hitsAll || hasFalloff }));
 
       const hpChanges = res?.hpChanges ?? [];
 
-      const after = scene.readBattle()?.initiativeOrder ?? order;
+      const current = scene.readBattle();
+
+      const log = current?.battleLog ?? [];
+
+      const after = current?.initiativeOrder ?? order;
 
       const results = state.strikes.map((s) => {
         const now = after.find((p) => p.basicInfo.id === s.targetId);
@@ -133,16 +139,36 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
       const target = byId(first.targetId);
 
-      const retaliation = retaliationOutcome(scene.readBattle()?.battleLog ?? [], seen);
+      const retaliation = retaliationOutcome(log, seen);
 
-      if (first.kind === "miss") {
-        const current = scene.readBattle();
+      const crit = critOutcome(log, seen, attacker.basicInfo.id, first.targetId);
 
-        const log = current?.battleLog ?? [];
+      const targetName = target?.basicInfo.name ?? "";
 
-        scene.showResult({ kind: "miss", targetName: target?.basicInfo.name ?? "", d20: effectiveD20(strike, state.mode), known: formatKnownArmorClass(resolveKnownArmorClass(log, first.targetId, current?.knowledge)), ...(retaliation && { retaliation }) });
+      const d20 = effectiveD20(strike, state.mode);
+
+      if (first.kind === "miss" || crit?.type === "fail") {
+        const known = formatKnownArmorClass(resolveKnownArmorClass(log, first.targetId, current?.knowledge));
+
+        scene.showResult({
+          kind: "miss",
+          targetName,
+          d20,
+          known,
+          ...(retaliation && { retaliation }),
+          ...(crit?.type === "fail" && { critFail: crit }),
+        });
       } else {
-        scene.showResult({ kind: first.kind, targetName: target?.basicInfo.name ?? "", damage: results.reduce((s, r) => s + r.damage, 0), downed: first.downed, d20: effectiveD20(strike, state.mode), weapon: attack?.name, ...(retaliation && { retaliation }) });
+        scene.showResult({
+          kind: first.kind,
+          targetName,
+          damage: results.reduce((s, r) => s + r.damage, 0),
+          downed: first.downed,
+          d20,
+          weapon: attack?.name,
+          ...(retaliation && { retaliation }),
+          ...(crit?.type === "success" && { critEffect: crit }),
+        });
       }
 
       onDone?.();

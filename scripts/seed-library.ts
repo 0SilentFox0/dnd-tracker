@@ -15,6 +15,7 @@ import { iconPublicUrl } from "../data/skill-icons";
 import { prisma } from "../lib/db";
 import { buildTreeJson } from "../lib/utils/skills/progression";
 import {
+  artifactRows,
   assertSeedTarget,
   emptyTally,
   findByName,
@@ -71,6 +72,8 @@ async function main() {
     гілки: emptyTally(),
     скіли: emptyTally(),
     дерева: emptyTally(),
+    "сети артефактів": emptyTally(),
+    артефакти: emptyTally(),
   };
 
   const icon = (key?: string) => (key ? iconPublicUrl(supabaseUrl, key) : undefined);
@@ -233,6 +236,32 @@ async function main() {
   }
 
   for (const p of library.personal) await putSkill(p, personalMain);
+
+  const setRows = await prisma.artifactSet.findMany({ where: { campaignId }, select: { id: true, name: true } });
+
+  const artifactRowsDb = await prisma.artifact.findMany({ where: { campaignId }, select: { id: true, name: true } });
+
+  const artifactIcon = (key?: string) => (key ? iconPublicUrl(supabaseUrl, key, "artifact") : undefined);
+
+  for (const librarySet of library.artifactSets) {
+    const rows = artifactRows(librarySet, maps, artifactIcon);
+
+    const setData = { name: rows.set.name, description: rows.set.description, icon: rows.set.icon, abilities: json(rows.set.abilities) };
+
+    const setId = await upsert("сети артефактів", setRows, rows.set.name, {
+      create: () => prisma.artifactSet.create({ data: { campaignId, ...setData }, select: { id: true, name: true } }),
+      update: (id) => prisma.artifactSet.update({ where: { id }, data: setData, select: { id: true, name: true } }),
+    });
+
+    for (const a of rows.artifacts) {
+      const data = { ...a, abilities: json(a.abilities), modifiers: json(a.modifiers), setId: dryRun ? undefined : setId };
+
+      await upsert("артефакти", artifactRowsDb, a.name, {
+        create: () => prisma.artifact.create({ data: { campaignId, ...data }, select: { id: true, name: true } }),
+        update: (id) => prisma.artifact.update({ where: { id }, data, select: { id: true, name: true } }),
+      });
+    }
+  }
 
   const treeRows = await prisma.skillTree.findMany({ where: { campaignId }, select: { id: true, race: true } });
 

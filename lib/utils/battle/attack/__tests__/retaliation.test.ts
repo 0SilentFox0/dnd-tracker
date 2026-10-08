@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { AttackType, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
-import { CRITICAL_SUCCESS_EFFECTS, type CriticalEffect } from "@/lib/constants/critical-effects";
-import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
+import { CRITICAL_FAIL_EFFECTS, CRITICAL_SUCCESS_EFFECTS, type CriticalEffect } from "@/lib/constants/critical-effects";
+import { makeEffect, makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { resolveRetaliation, type RetaliationInput } from "@/lib/utils/battle/attack/retaliation";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
@@ -139,5 +139,78 @@ describe("resolveRetaliation", () => {
     };
 
     expect(calls("2d6 + STR") - calls("1d6")).toBe(1);
+  });
+
+  it("consumes the defender's ownAttack effect and the attacker's attackAgainst effect", () => {
+    const e = (id: string, consumeOn: "ownAttack" | "attackAgainst") => makeEffect(id, { consumeOn });
+
+    const a = attacker();
+
+    const d = defender();
+
+    const r = retaliate(
+      { ...a, battleData: { ...a.battleData, activeEffects: [e("mark", "attackAgainst")] } },
+      { ...d, battleData: { ...d.battleData, activeEffects: [e("adv", "ownAttack")] } },
+    );
+
+    expect(find(r?.participants, "d")?.battleData.activeEffects).toEqual([]);
+    expect(find(r?.participants, "a")?.battleData.activeEffects).toEqual([]);
+  });
+
+  describe("провокація та нат.1 на відсічі", () => {
+    const provoke = CRITICAL_FAIL_EFFECTS.find((e) => e.effect.type === "provoke_opportunity_attack") as CriticalEffect;
+
+    const provoked = { attackRoll: { isCriticalFail: true }, criticalEffect: provoke, provoked: true };
+
+    const withFlags = (d: BattleParticipant, flags: Partial<BattleParticipant["actionFlags"]>) => ({ ...d, actionFlags: { ...d.actionFlags, ...flags } });
+
+    it("нат.1 з провокацією: відсіч є, реакцію не витрачено, навіть якщо вона вже була", () => {
+      const r = retaliate(attacker(), defender(), provoked);
+
+      expect(r).not.toBeNull();
+      expect(find(r?.participants, "d")?.actionFlags.hasUsedReaction).toBe(false);
+      expect(retaliate(attacker(), withFlags(defender(), { hasUsedReaction: true }), provoked)).not.toBeNull();
+    });
+
+    it("без provoked нат.1 атакувальника відсічі не дає", () => {
+      expect(retaliate(attacker(), defender(), { attackRoll: { isCriticalFail: true }, criticalEffect: provoke })).toBeNull();
+    });
+
+    it("маркер no_reaction, відсутня атака потрібного виду або мертвий атакувальник — відсічі немає", () => {
+      const d = defender();
+
+      const silenced = { ...d, battleData: { ...d.battleData, activeEffects: [{ id: "n", name: "Без реакції", type: "debuff", duration: 1, effects: [{ type: "no_reaction" }] } as never] } };
+
+      expect(retaliate(attacker(), silenced, provoked)).toBeNull();
+      expect(retaliate(attacker(), defender({ attacks: [bow] }), provoked)).toBeNull();
+
+      const dead = attacker();
+
+      expect(retaliate({ ...dead, combatStats: { ...dead.combatStats, status: "dead", currentHp: 0 } }, defender(), provoked)).toBeNull();
+    });
+
+    it("нат.1 на відсічі: ефект падіння на захиснику і подія з критичним ефектом", () => {
+      const r = retaliate(attacker(), defender(), { rng: seq(0, 0.5, 0.15) });
+
+      expect(find(r?.participants, "d")?.battleData.activeEffects.some((e) => e.name === "Падіння")).toBe(true);
+      expect(r?.battleAction.actionDetails.criticalEffect).toMatchObject({ id: 2, type: "fail" });
+    });
+
+    it("нат.1 на відсічі з ефектом 7 нової відсічі не викликає", () => {
+      const r = retaliate(attacker(), defender(), { rng: seq(0, 0.5, 0.65) });
+
+      expect(r?.battleAction.actionDetails.criticalEffect).toMatchObject({ id: 7 });
+      expect(find(r?.participants, "d")?.battleData.activeEffects).toEqual([]);
+      expect(find(r?.participants, "a")?.combatStats.currentHp).toBe(30);
+    });
+
+    it("крит-успіх «вільна атака» на відсічі не додає захиснику додаткових дій", () => {
+      const free = CRITICAL_SUCCESS_EFFECTS.find((e) => e.effect.type === "free_attack") as CriticalEffect;
+
+      const r = retaliate(attacker(), defender(), { rng: seq(0.95, 0.5, (free.id - 0.5) / 10) });
+
+      expect(r?.battleAction.actionDetails).toMatchObject({ isCritical: true, criticalEffect: { id: free.id } });
+      expect(find(r?.participants, "d")?.battleData.pendingExtraActions ?? 0).toBe(0);
+    });
   });
 });

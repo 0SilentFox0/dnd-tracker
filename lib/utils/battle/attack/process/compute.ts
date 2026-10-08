@@ -11,6 +11,7 @@ import { AttackType, ParticipantSourceType } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
+import { findEffectMarker } from "@/lib/utils/battle/participant/state";
 import { attackAbilityLabel, getAttackAbilityModifier } from "@/lib/utils/common/calculations";
 import { maxOf, parseDice, parseDiceLenient, rollGroups } from "@/lib/utils/common/dice";
 import type { BattleParticipant, DamageStep } from "@/types/battle";
@@ -28,6 +29,7 @@ export interface ComputeHitDamageParams {
   actionModifiers?: StaticEffect[];
   bonusPercent?: number;
   bonusLabel?: string;
+  offTurn?: boolean;
   rng?: () => number;
 }
 
@@ -90,18 +92,9 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
     criticalEffectApplied = attackRoll.criticalEffect;
 
     if (criticalEffectApplied.effect.target === "target") {
-      updatedTarget = applyCriticalEffect(
-        updatedTarget,
-        criticalEffectApplied,
-        currentRound,
-        updatedTarget,
-      );
+      updatedTarget = applyCriticalEffect(updatedTarget, criticalEffectApplied, currentRound, { offTurn: params.offTurn });
     } else if (criticalEffectApplied.effect.target === "self") {
-      updatedAttacker = applyCriticalEffect(
-        updatedAttacker,
-        criticalEffectApplied,
-        currentRound,
-      );
+      updatedAttacker = applyCriticalEffect(updatedAttacker, criticalEffectApplied, currentRound, { offTurn: params.offTurn });
     }
   }
 
@@ -130,6 +123,13 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
 
     physicalDamage += extra;
     damageSteps.push({ label: criticalEffectApplied.name, side: "attacker", kind: "flat", value: extra, after: physicalDamage });
+  }
+
+  const weakened = findEffectMarker(attacker, "weakened_next_hit");
+
+  if (weakened) {
+    physicalDamage = Math.floor(physicalDamage * weakened.value);
+    damageSteps.push({ label: weakened.effect.name, side: "attacker", kind: "multiplier", value: weakened.value, after: physicalDamage });
   }
 
   const heroDm = applyHeroDmDamageMultiplier(

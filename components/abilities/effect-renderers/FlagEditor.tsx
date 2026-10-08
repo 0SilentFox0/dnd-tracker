@@ -19,6 +19,7 @@ const DEFAULTS: Record<FlagKey, Record<string, unknown>> = {
   counterAttack: { attackKinds: [AttackType.MELEE], bonusPercent: 15 },
   attackHitsAllEnemies: {},
   seeEnemyHp: {},
+  multiTargetFalloff: { percent: 50 },
   lifesteal: { percent: 50 },
   moraleChance: { percent: 10 },
   noNegativeMorale: {},

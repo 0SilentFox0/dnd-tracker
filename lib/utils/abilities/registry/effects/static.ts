@@ -137,6 +137,8 @@ export function describeFlag(e: Extract<Effect, { kind: "flag" }>): string {
       return `шанс додаткового ходу від моралі +${e.percent}%`;
     case "lifesteal":
       return `атаки лікують на ${e.percent}% завданої шкоди`;
+    case "multiTargetFalloff":
+      return `додаткові цілі дальньої атаки отримують ${e.percent}% шкоди`;
     case "seeEnemyHp":
       return "бачить HP ворогів";
     case "noNegativeMorale":
@@ -162,6 +164,7 @@ export const FLAG_LABELS: Record<FlagKey, string> = {
   counterAttack: "Контратака",
   attackHitsAllEnemies: "Атака б'є всіх ворогів",
   seeEnemyHp: "Бачить HP ворогів",
+  multiTargetFalloff: "Шкода додаткових цілей дальньої атаки",
   lifesteal: "Вампіризм (лікування від шкоди атак)",
   moraleChance: "Шанс додаткового ходу від моралі",
   noNegativeMorale: "Мораль не нижче 0",
@@ -206,6 +209,7 @@ export const FLAG_FIELDS: Record<FlagKey, readonly FieldMeta[]> = {
   ],
   attackHitsAllEnemies: [],
   seeEnemyHp: [],
+  multiTargetFalloff: [{ name: "percent", label: "% шкоди додаткових цілей", input: "number" }],
   lifesteal: [{ name: "percent", label: "% завданої шкоди", input: "number" }],
   moraleChance: [{ name: "percent", label: "+% до шансу додаткового ходу", input: "number" }],
   noNegativeMorale: [],

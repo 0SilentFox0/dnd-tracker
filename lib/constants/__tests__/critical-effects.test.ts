@@ -1,0 +1,33 @@
+import { describe, expect, it } from "vitest";
+
+import {
+  CRITICAL_FAIL_EFFECTS,
+  CRITICAL_SUCCESS_EFFECTS,
+  type CriticalEffect,
+  getCriticalEffect,
+} from "@/lib/constants/critical-effects";
+
+describe("critical effect flavor", () => {
+  it("every effect has 3 phrases naming a participant", () => {
+    for (const e of [...CRITICAL_SUCCESS_EFFECTS, ...CRITICAL_FAIL_EFFECTS]) {
+      expect(e.flavor).toHaveLength(3);
+
+      for (const f of e.flavor) {
+        expect(f.includes("{attacker}") || f.includes("{target}")).toBe(true);
+      }
+    }
+  });
+
+  it("provoke phrases do not promise a retaliation", () => {
+    const provoke = CRITICAL_FAIL_EFFECTS.find((e) => e.effect.type === "provoke_opportunity_attack") as CriticalEffect;
+
+    for (const f of provoke.flavor) expect(f).not.toMatch(/відповід|карає|б'є/);
+  });
+
+  it("replaces half damage with a slipping weapon", () => {
+    expect(getCriticalEffect(5, "fail")).toMatchObject({
+      name: "Зброя вислизає",
+      effect: { type: "weakened_next_hit" },
+    });
+  });
+});
