@@ -5,7 +5,7 @@ import { SkillTreeEditor } from "@/components/skill-tree/editor";
 
 export function SkillTreePageClient({ campaignId }: { campaignId: string }) {
   return (
-    <HudPage className="max-w-7xl">
+    <HudPage className="max-w-[1600px]">
       <SkillTreeEditor campaignId={campaignId} />
     </HudPage>
   );
