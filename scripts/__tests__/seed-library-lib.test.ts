@@ -57,4 +57,30 @@ describe("seed-library-lib", () => {
       expect(input.race).toBe(race.name);
     }
   });
+
+  it("leaves no school name or spell key where an id is expected", () => {
+    const lib = buildLibrary();
+
+    const maps = { groups: new Map(lib.schools.map((s) => [s, `gid:${s}`])), spells: new Map(lib.spells.map((s) => [s.key, `sid:${s.key}`])) };
+
+    const bad: string[] = [];
+
+    const walk = (value: unknown, where: string) => {
+      if (Array.isArray(value)) return value.forEach((v, i) => walk(v, `${where}[${i}]`));
+
+      if (typeof value !== "object" || value === null) return;
+
+      for (const [k, v] of Object.entries(value)) {
+        if (k === "school" && !String(v).startsWith("gid:")) bad.push(`${where}.school=${String(v)}`);
+
+        if (k === "spellIds") for (const id of v as string[]) if (!id.startsWith("sid:")) bad.push(`${where}.spellIds=${id}`);
+
+        walk(v, `${where}.${k}`);
+      }
+    };
+
+    for (const skill of lib.skills) walk(remapRefs(skill.abilities, maps), skill.key);
+
+    expect(bad).toEqual([]);
+  });
 });

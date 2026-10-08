@@ -150,8 +150,8 @@ async function main() {
 
   const mainSkills = new Map<string, string>();
 
-  const mainSkill = (kind: string, name: string, color: string, extra: { icon?: string; spellGroupId?: string; tree: boolean }) => {
-    const data = { name, color, icon: extra.icon, spellGroupId: extra.spellGroupId, isEnableInSkillTree: extra.tree };
+  const mainSkill = (kind: string, name: string, color: string, extra: { icon?: string; spellGroupId?: string }) => {
+    const data = { name, color, icon: extra.icon, spellGroupId: extra.spellGroupId, isEnableInSkillTree: false };
 
     return upsert(kind, mainRows, name, {
       create: () => prisma.mainSkill.create({ data: { campaignId, ...data }, select: { id: true, name: true } }),
@@ -160,14 +160,14 @@ async function main() {
   };
 
   for (const b of library.branches) {
-    mainSkills.set(b.key, await mainSkill("гілки", b.name, b.color, { icon: icon(b.iconKey), spellGroupId: b.spellSchool ? groups.get(b.spellSchool) : undefined, tree: true }));
+    mainSkills.set(b.key, await mainSkill("гілки", b.name, b.color, { icon: icon(b.iconKey), spellGroupId: b.spellSchool ? groups.get(b.spellSchool) : undefined }));
   }
 
-  const raceMain = await mainSkill("гілки", RACE_BRANCH.name, RACE_BRANCH.color, { tree: false });
+  const raceMain = await mainSkill("гілки", RACE_BRANCH.name, RACE_BRANCH.color, {});
 
-  const ultimateMain = await mainSkill("гілки", ULTIMATE_BRANCH.name, ULTIMATE_BRANCH.color, { tree: false });
+  const ultimateMain = await mainSkill("гілки", ULTIMATE_BRANCH.name, ULTIMATE_BRANCH.color, {});
 
-  const personalMain = await mainSkill("гілки", PERSONAL_BRANCH.name, PERSONAL_BRANCH.color, { tree: false });
+  const personalMain = await mainSkill("гілки", PERSONAL_BRANCH.name, PERSONAL_BRANCH.color, {});
 
   const skillRows = await prisma.skill.findMany({ where: { campaignId }, select: { id: true, name: true } });
 
