@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AttackType } from "@/lib/constants/battle";
 import { useConfirm } from "@/lib/hooks/common";
-import { getAbilityModifier } from "@/lib/utils/common/calculations";
+import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
 import { diceAverage } from "@/lib/utils/common/dice";
 import { pluralUk } from "@/lib/utils/plural";
 import { getUnitImmunities } from "@/lib/utils/races/race-effects";
@@ -54,14 +54,12 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
 
   const allImmunities = getUnitImmunities(unit, race);
 
-  const strMod = getAbilityModifier(unit.strength);
-
   const avgDamage =
     attacks.length > 0
       ? Math.round(
           Math.max(
             ...attacks.map(
-              (a) => diceAverage(a.damageDice || "1d6") + strMod,
+              (a) => diceAverage(a.damageDice || "1d6") + getAttackAbilityModifier(unit, a.type ?? AttackType.MELEE),
             ),
           ),
         )

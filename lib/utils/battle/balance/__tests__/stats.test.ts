@@ -52,6 +52,26 @@ describe("баланс: середня шкода з кубиків", () => {
     expect(unit([{ damageDice: "1d8+2", type: "melee" }]).dpr).toBe(8.5);
   });
 
+  it("оцінка юніта збігається з рушієм: бій теж додає модифікатор Сили/Спритності юнітам", () => {
+    const base = makeParticipant({ id: "u" });
+
+    for (const attack of [sword, bow]) {
+      const p: BattleParticipant = {
+        ...base,
+        basicInfo: { ...base.basicInfo, sourceType: "unit" },
+        abilities: { ...base.abilities, strength: 18, dexterity: 14 },
+        battleData: { ...base.battleData, attacks: [attack], resolvedAbilities: [] },
+      };
+
+      const estimate = getUnitStats({ id: "u", name: "u", maxHp: 20, level: 1, strength: 18, dexterity: 14, attacks: [attack] }).dpr;
+
+      const engine = averageAttackDamage(p, attack, [p]);
+
+      expect(engine.statMod).toBe(attack === sword ? 4 : 2);
+      expect(estimate).toBe(engine.weaponAvg + engine.statMod);
+    }
+  });
+
   it("«d6» без кількості — це 1d6 (§4.5)", () => {
     expect(unit([{ damageDice: "d6", type: "ranged" }]).dpr).toBe(4.5);
   });
