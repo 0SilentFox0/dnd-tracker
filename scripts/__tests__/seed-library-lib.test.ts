@@ -6,6 +6,7 @@ import { falloff, raiseOnKill } from "../../data/library/unit-abilities";
 import { artifactRows, assertSeedTarget, findByName, findByNames, mapRaceModifiers, parseArgs, racePassiveData, remapRefs, remapSummonUnits, treeInput, unitAvatar, unitRow } from "../seed-library-lib";
 
 import { AbilitySchema } from "@/lib/utils/abilities/schema";
+import { unitRowStats, type UnitStatsRow } from "@/lib/utils/battle/balance/unit-library";
 import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
 
 describe("seed-library-lib", () => {
@@ -175,6 +176,14 @@ describe("seed-library-lib", () => {
       for (const a of row.attacks as Array<{ type: string; attackBonus: number }>) {
         expect(a.attackBonus + getAttackAbilityModifier(scores, a.type) + (row.proficiencyBonus as number)).toBe(base.attackBonus);
       }
+    });
+
+    it("fair balance reads the unit's AC and full to-hit from the seeded row", () => {
+      const row = unitRow({ ...base, spellKeys: undefined }, maps, races);
+
+      const stats = unitRowStats({ ...row, id: "u", raceId: null, attacks: row.attacks } as UnitStatsRow);
+
+      expect(stats).toMatchObject({ ac: base.ac, attackBonus: base.attackBonus });
     });
 
     it("defaults for a plain neutral unit and adds flavor for flying", () => {

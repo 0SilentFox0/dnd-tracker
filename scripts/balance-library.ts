@@ -24,7 +24,7 @@ import { CampaignRole } from "../lib/constants/campaigns";
 import { prisma } from "../lib/db";
 import { moraleCheckSchema } from "../lib/schemas";
 import { findCompletedSets } from "../lib/utils/battle/artifact-sets";
-import { computeFairScaling, pickEnemyRoster } from "../lib/utils/battle/balance";
+import { buildPartyPower, computeFairScaling, heroMember, pickEnemyRoster } from "../lib/utils/battle/balance";
 import { loadUnitLibraryStats } from "../lib/utils/battle/balance/unit-library";
 import { applyBattleDelta } from "../lib/utils/battle/client/apply-delta";
 import { heroAttackDamageParts } from "../lib/utils/battle/damage/hero-damage";
@@ -584,12 +584,9 @@ async function main() {
 
       const stats = await loadCharacterBalanceStats(campaignId, SETS && FIXED_ROSTER ? await createParty(partyKey, level, trees, weapons, skillNames, false) : heroIds);
 
-      const party = { dpr: 0, hp: 0, heroCount: stats.length };
+      const party = buildPartyPower(stats.map(({ stats: s }) => ({ stats: heroMember(s), hero: true })));
 
-      for (const { stats: s } of stats) {
-        party.dpr += s.dpr;
-        party.hp += s.hp;
-      }
+      console.info(`${partyKey} L${level}: влучання +${party.toHit?.toFixed(1)} (частка зброї ${party.weaponShare?.toFixed(2)}), КД ${party.ac?.toFixed(1)}`);
 
       for (const raceKey of RACE_KEYS) {
         const raceId = raceIds.get(raceKey);

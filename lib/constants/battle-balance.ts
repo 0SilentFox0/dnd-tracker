@@ -36,3 +36,14 @@ export const MAX_PICK_TOTAL = 14;
 
 /** Верхня межа розміру партії у запиті балансу. */
 export const MAX_BALANCE_ALLIES = 50;
+
+/** Шанс влучання героя в «середньому» бою: партії `balance-library` L3/6/10 (+7.5…+12) проти медіанного КД тірів 1/4/7 (13/14/16). */
+export const REF_HERO_HIT = 0.82;
+
+/** Шанс влучання юніта в «середньому» бою: медіанна атака тірів 1/4/7 (+6/+8/+9) проти КД героїв тих партій (12…17). */
+export const REF_UNIT_HIT = 0.65;
+
+/** Межі поправки сили юніта за КД і влучанням. */
+export const ARMOR_FACTOR_MIN = 0.5;
+
+export const ARMOR_FACTOR_MAX = 2;

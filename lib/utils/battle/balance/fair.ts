@@ -1,3 +1,4 @@
+import { armorFactors } from "./hit-chance";
 import type { UnitStats } from "./stats";
 
 import {
@@ -15,6 +16,80 @@ export interface PartyPower {
   dpr: number;
   hp: number;
   heroCount: number;
+  /** Weapon to-hit of the party, weighted by weapon DPR. */
+  toHit?: number;
+  ac?: number;
+  /** Share of party DPR that comes from weapon attacks (rolled against AC). */
+  weaponShare?: number;
+}
+
+export interface PartyMember {
+  dpr: number;
+  hp: number;
+  toHit?: number;
+  ac?: number;
+  weaponDpr?: number;
+}
+
+export function unitMember(u: { dpr: number; hp: number; ac?: number; attackBonus?: number }): PartyMember {
+  return { dpr: u.dpr, hp: u.hp, ac: u.ac, toHit: u.attackBonus, weaponDpr: u.attackBonus === undefined ? 0 : u.dpr };
+}
+
+export function heroMember(s: { dpr: number; hp: number; toHit: number; ac: number; weaponDpr: number }): PartyMember {
+  return { dpr: s.dpr, hp: s.hp, toHit: s.toHit, ac: s.ac, weaponDpr: s.weaponDpr };
+}
+
+export function buildPartyPower(members: Array<{ stats: PartyMember; quantity?: number; hero: boolean }>): PartyPower {
+  const party: PartyPower = { dpr: 0, hp: 0, heroCount: 0 };
+
+  let hitWeight = 0;
+
+  let hitSum = 0;
+
+  let acCount = 0;
+
+  let acSum = 0;
+
+  for (const { stats, quantity = 1, hero } of members) {
+    party.dpr += stats.dpr * quantity;
+    party.hp += stats.hp * quantity;
+
+    if (hero) party.heroCount += 1;
+
+    const weaponDpr = (stats.weaponDpr ?? stats.dpr) * quantity;
+
+    if (stats.toHit !== undefined && weaponDpr > 0) {
+      hitWeight += weaponDpr;
+      hitSum += stats.toHit * weaponDpr;
+    }
+
+    if (stats.ac !== undefined) {
+      acCount += quantity;
+      acSum += stats.ac * quantity;
+    }
+  }
+
+  if (hitWeight > 0) {
+    party.toHit = hitSum / hitWeight;
+    party.weaponShare = party.dpr > 0 ? Math.min(1, hitWeight / party.dpr) : 1;
+  }
+
+  if (acCount > 0) party.ac = acSum / acCount;
+
+  return party;
+}
+
+/** The unit as this party feels it: HP scaled by how hard it is to hit, DPR by how easily it hits the party. */
+export function effectiveUnit(unit: UnitStats, party: PartyPower): UnitStats {
+  const f = armorFactors(unit, party);
+
+  if (f.hp === 1 && f.dpr === 1) return unit;
+
+  const hp = unit.hp * f.hp;
+
+  const dpr = unit.dpr * f.dpr;
+
+  return { ...unit, hp, dpr, kpi: dpr / hp };
 }
 
 export interface RosterEntry {
@@ -224,8 +299,14 @@ function suggestHint(kind: "weak" | "excess", target: Power, entries: Entry[], p
 const ZERO: Power = { hp: 0, dpr: 0 };
 
 /** `fixed` — сила ворогів, що не масштабуються (NPC-персонажі): входить у базу й досягнуту силу, а масштабовані юніти добирають решту цілі. */
-export function computeFairScaling(party: PartyPower, roster: RosterEntry[], library: UnitStats[], hintPool: UnitStats[] = library, fixed: Power = ZERO): FairScaling {
+export function computeFairScaling(party: PartyPower, roster: RosterEntry[], rawLibrary: UnitStats[], rawHintPool: UnitStats[] = rawLibrary, fixed: Power = ZERO): FairScaling {
   const target = targetEnemyPower(party);
+
+  const felt = (list: UnitStats[]) => list.map((u) => effectiveUnit(u, party));
+
+  const library = felt(rawLibrary);
+
+  const hintPool = rawHintPool === rawLibrary ? library : felt(rawHintPool);
 
   const byId = new Map(library.map((u) => [u.unitId, u]));
 

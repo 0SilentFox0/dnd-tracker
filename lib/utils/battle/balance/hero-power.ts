@@ -13,7 +13,11 @@ export function heroPower(built: BattleParticipant, character: { race: string; s
 
   const levels = treeRow ? branchLevels(resolveLearned(normalizeTree(treeRow), character.skillTreeProgress)) : {};
 
-  const magic = magicMainSkillIds(campaignContext?.mainSkills ?? []);
+  const mainSkills = campaignContext?.mainSkills ?? [];
 
-  return { levels, stats: getCharacterStats({ participant, branchLevels: levels, magicMainSkillIds: magic }) };
+  const magic = magicMainSkillIds(mainSkills);
+
+  const spellSchoolIds = new Set(mainSkills.filter((m) => m.spellGroupId).map((m) => m.id));
+
+  return { levels, stats: getCharacterStats({ participant, branchLevels: levels, magicMainSkillIds: magic, spellSchoolIds }) };
 }

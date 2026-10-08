@@ -3,7 +3,7 @@ import type { z } from "zod";
 import type { balanceSchema } from "./balance-schema";
 import { loadCharacterBalanceStats } from "./character-stats";
 
-import { computeFairScaling, type PartyPower, pickEnemyRoster } from "@/lib/utils/battle/balance";
+import { buildPartyPower, computeFairScaling, heroMember, pickEnemyRoster, unitMember } from "@/lib/utils/battle/balance";
 import { loadUnitLibraryStats } from "@/lib/utils/battle/balance/unit-library";
 import type { AllyStats, SuggestedEnemy } from "@/types/battle-setup";
 
@@ -16,15 +16,13 @@ export async function postBalanceResponse(campaignId: string, data: BalancePostD
 
   const library = await loadUnitLibraryStats(campaignId);
 
-  const party: PartyPower = { dpr: 0, hp: 0, heroCount: 0 };
+  const members: Parameters<typeof buildPartyPower>[0] = [];
 
   let allyCount = 0;
 
   if (allyParticipants.characterIds.length > 0) {
     for (const { stats } of await loadCharacterBalanceStats(campaignId, allyParticipants.characterIds)) {
-      party.dpr += stats.dpr;
-      party.hp += stats.hp;
-      party.heroCount += 1;
+      members.push({ stats: heroMember(stats), hero: true });
       allyCount += 1;
     }
   }
@@ -36,10 +34,11 @@ export async function postBalanceResponse(campaignId: string, data: BalancePostD
 
     if (!stats) continue;
 
-    party.dpr += stats.dpr * quantity;
-    party.hp += stats.hp * quantity;
+    members.push({ stats: unitMember(stats), quantity, hero: false });
     allyCount += quantity;
   }
+
+  const party = buildPartyPower(members);
 
   const allyStats: AllyStats = {
     dpr: round1(party.dpr),

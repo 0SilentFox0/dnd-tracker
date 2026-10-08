@@ -2,8 +2,10 @@ import { getNonMagicBranchDpr, getSpellDprFromBranchLevels } from "./dpr";
 
 import { AttackType } from "@/lib/constants/battle";
 import { MIN_UNIT_STAT, TYPICAL_TARGETS } from "@/lib/constants/battle-balance";
+import { calculateAttackBonus } from "@/lib/utils/battle/attack/bonus";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
+import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { averageOf, diceAverage, parseDiceLenient } from "@/lib/utils/common/dice";
 import type { BranchLevel } from "@/lib/utils/skills/progression";
@@ -21,12 +23,16 @@ export interface UnitStats {
   kpi: number;
   level: number;
   raceId: string | null;
+  ac?: number;
+  attackBonus?: number;
 }
 
 export interface GetCharacterStatsParams {
   participant: BattleParticipant;
   branchLevels?: Record<string, BranchLevel> | null;
   magicMainSkillIds?: Set<string> | null;
+  /** Branches tied to a spell school: their DPR comes from spells, which ignore AC. */
+  spellSchoolIds?: Set<string> | null;
 }
 
 export interface UnitSpellInput {
@@ -44,6 +50,8 @@ export interface UnitStatsInput {
   strength?: number;
   dexterity?: number;
   maxTargets?: number | null;
+  armorClass?: number;
+  proficiencyBonus?: number;
   attacks: Array<{
     damageDice?: string;
     damageType?: string;
@@ -100,6 +108,8 @@ export function getUnitStats(unit: UnitStatsInput): UnitStats {
 
   let weaponDpr = 0;
 
+  let weaponToHit: number | undefined;
+
   for (const a of attacks) {
     const isRanged = (a.type as string) === AttackType.RANGED;
 
@@ -109,10 +119,17 @@ export function getUnitStats(unit: UnitStatsInput): UnitStats {
 
     const targets = isRanged ? Math.min(reach, TYPICAL_TARGETS) : 1;
 
-    weaponDpr = Math.max(weaponDpr, avg * targets);
+    if (weaponToHit === undefined || avg * targets > weaponDpr) {
+      weaponDpr = Math.max(weaponDpr, avg * targets);
+      weaponToHit = (a.attackBonus ?? 0) + (isRanged ? dexMod : strMod) + (unit.proficiencyBonus ?? 0);
+    }
   }
 
-  const dpr = Math.max(MIN_UNIT_STAT, Math.max(weaponDpr, bestSpellDpr(unit.spells ?? [], unit.level)) || diceAverage("1d6"));
+  const spellDpr = bestSpellDpr(unit.spells ?? [], unit.level);
+
+  const dpr = Math.max(MIN_UNIT_STAT, Math.max(weaponDpr, spellDpr) || diceAverage("1d6"));
+
+  const attackBonus = unit.proficiencyBonus !== undefined && weaponToHit !== undefined && weaponDpr >= spellDpr ? weaponToHit : undefined;
 
   const hp = Math.max(MIN_UNIT_STAT, unit.maxHp);
 
@@ -124,37 +141,52 @@ export function getUnitStats(unit: UnitStatsInput): UnitStats {
     kpi: dpr / hp,
     level: unit.level,
     raceId: unit.raceId ?? null,
+    ...(unit.armorClass !== undefined && { ac: unit.armorClass }),
+    ...(attackBonus !== undefined && { attackBonus }),
   };
 }
 
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
-function bestAverage(p: BattleParticipant, type: AttackType): number {
+function bestAttack(p: BattleParticipant, type: AttackType): { avg: number; attack: BattleAttack } {
   const own = p.battleData.attacks.filter((a) => attackKindOf(a.type) === type);
 
   const options: BattleAttack[] = own.length > 0 ? own : [{ name: "", type, attackBonus: 0, damageDice: "", damageType: "physical" } as BattleAttack];
 
-  return Math.max(...options.map((a) => averageAttackDamage(p, a, [p]).total));
+  return options.map((attack) => ({ avg: averageAttackDamage(p, attack, [p]).total, attack })).reduce((best, o) => (o.avg > best.avg ? o : best));
 }
 
-export function getCharacterStats({ participant, branchLevels, magicMainSkillIds }: GetCharacterStatsParams): {
+export function getCharacterStats({ participant, branchLevels, magicMainSkillIds, spellSchoolIds }: GetCharacterStatsParams): {
   dpr: number;
   hp: number;
   kpi: number;
   spellDpr: number;
+  toHit: number;
+  ac: number;
+  weaponDpr: number;
   dprBreakdown: CharacterDprBreakdown;
 } {
-  const meleeAvg = bestAverage(participant, AttackType.MELEE);
+  const melee = bestAttack(participant, AttackType.MELEE);
 
-  const rangedAvg = bestAverage(participant, AttackType.RANGED);
+  const ranged = bestAttack(participant, AttackType.RANGED);
+
+  const meleeAvg = melee.avg;
+
+  const rangedAvg = ranged.avg;
 
   const physicalDpr = Math.max(meleeAvg, rangedAvg);
+
+  const toHit = calculateAttackBonus(participant, (rangedAvg > meleeAvg ? ranged : melee).attack, [participant]);
 
   const spellDpr = getSpellDprFromBranchLevels(branchLevels ?? {}, magicMainSkillIds);
 
   const nonMagicDpr = getNonMagicBranchDpr(branchLevels ?? {}, magicMainSkillIds);
 
   const dpr = physicalDpr + spellDpr + nonMagicDpr;
+
+  const weaponBranches = Object.fromEntries(Object.entries(branchLevels ?? {}).filter(([id]) => !spellSchoolIds?.has(id)));
+
+  const weaponDpr = physicalDpr + getNonMagicBranchDpr(weaponBranches, magicMainSkillIds);
 
   const hp = participant.combatStats.maxHp;
 
@@ -163,6 +195,9 @@ export function getCharacterStats({ participant, branchLevels, magicMainSkillIds
     hp,
     kpi: hp > 0 ? dpr / hp : 0,
     spellDpr,
+    toHit,
+    ac: getEffectiveArmorClass(participant),
+    weaponDpr,
     dprBreakdown: {
       physicalDpr,
       meleeAvg,

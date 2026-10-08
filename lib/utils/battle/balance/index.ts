@@ -5,12 +5,14 @@ export type {
   BalanceHintChange,
   BalanceVerdict,
   FairScaling,
+  PartyMember,
   PartyPower,
   Power,
   RosterEntry,
   UnitScale,
 } from "./fair";
-export { computeFairScaling, targetEnemyPower } from "./fair";
+export { buildPartyPower, computeFairScaling, effectiveUnit, heroMember, targetEnemyPower, unitMember } from "./fair";
+export { armorFactors, hitChance } from "./hit-chance";
 export { isMagicMainSkill, magicMainSkillIds } from "./magic-school";
 export type { PickedEnemy, PickResult } from "./pick";
 export { pickEnemyRoster } from "./pick";
