@@ -4,6 +4,8 @@ import { useMemo } from "react";
 import Link from "next/link";
 import { Circle, Edit, MoreVertical, Plus, Shield, Trash2 } from "lucide-react";
 
+import { RacePassiveBlock, RacialSkillsBlock } from "./RaceInnateSections";
+
 import { HudCard } from "@/components/hud/page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -104,10 +106,7 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
 
         {passiveAbility && (
           <div className="space-y-2">
-            <p className="text-sm font-medium">Пасивна здібність:</p>
-            <p className="text-sm text-muted-foreground">
-              {passiveAbility.description}
-            </p>
+            <RacePassiveBlock passive={passiveAbility} />
             {modifiedAbilities.length > 0 && (
               <div className="mt-2">
                 <p className="text-sm font-medium mb-2">
@@ -183,6 +182,8 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
             )}
           </div>
         )}
+
+        <RacialSkillsBlock campaignId={campaignId} raceName={race.name} />
 
         {!passiveAbility && (
           <p className="text-sm text-muted-foreground italic">
