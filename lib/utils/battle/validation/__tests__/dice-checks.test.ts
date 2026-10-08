@@ -21,17 +21,15 @@ describe("dice checks", () => {
     expect(() => assertAttackRolls("2d6", { damageRolls: [1, 2, 3, 4, 5, 6], targetCount: 3 })).not.toThrow();
   });
 
-  it("заклинання: d10 — до 10", () => {
-    expect(() => assertSpellRolls({ diceCount: 2, diceType: "d10" }, [10, 1], 1)).not.toThrow();
-    expect(() => assertSpellRolls({ diceCount: 2, diceType: "d10" }, [11], 1)).toThrow(expect.objectContaining({ code: "invalid_dice" }));
+  it("заклинання: кількість і грані мають збігатися з формулою", () => {
+    expect(() => assertSpellRolls({ count: 2, sides: 10 }, [10, 1])).not.toThrow();
+    expect(() => assertSpellRolls({ count: 2, sides: 10 }, [11, 1])).toThrow(expect.objectContaining({ code: "invalid_dice" }));
+    expect(() => assertSpellRolls({ count: 2, sides: 10 }, [5])).toThrow(expect.objectContaining({ code: "invalid_dice" }));
+    expect(() => assertSpellRolls({ count: 2, sides: 10 }, [5, 5, 5])).toThrow(expect.objectContaining({ code: "invalid_dice" }));
   });
 
-
-  it("diceType без префікса d (\"10\") теж розуміється", () => {
-    expect(() => assertSpellRolls({ diceCount: 1, diceType: "10" }, [10], 1)).not.toThrow();
-  });
-
-  it("заклинання без diceCount: один кидок, який показує клієнт, не блокується", () => {
-    expect(() => assertSpellRolls({ diceCount: null, diceType: null }, [3], 1)).not.toThrow();
+  it("заклинання без кубиків: кидків немає", () => {
+    expect(() => assertSpellRolls({ count: 0, sides: 6 }, [])).not.toThrow();
+    expect(() => assertSpellRolls({ count: 0, sides: 6 }, [3])).toThrow(expect.objectContaining({ code: "invalid_dice" }));
   });
 });

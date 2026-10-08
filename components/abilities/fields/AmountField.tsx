@@ -9,12 +9,13 @@ import { SelectField } from "@/components/ui/select-field";
 import type { Amount } from "@/lib/utils/abilities/schema";
 import { DICE_RE } from "@/lib/utils/abilities/schema/kinds";
 
-type Mode = "number" | "dice" | "formula" | "eventDamage" | "maxHp" | "ownerAttack";
+type Mode = "number" | "dice" | "formula" | "spellRoll" | "eventDamage" | "maxHp" | "ownerAttack";
 
 const MODES = [
   { value: "number", label: "число" },
   { value: "dice", label: "кубики" },
   { value: "formula", label: "формула" },
+  { value: "spellRoll", label: "% кидка заклинання" },
   { value: "eventDamage", label: "% від шкоди" },
   { value: "maxHp", label: "% від макс. HP" },
   { value: "ownerAttack", label: "% шкоди моєї атаки" },
@@ -23,7 +24,7 @@ const MODES = [
 function modeOf(v: Amount | undefined): Mode {
   if (typeof v === "string") return "dice";
 
-  if (v && typeof v === "object") return "formula" in v ? "formula" : v.percentOf;
+  if (v && typeof v === "object") return "formula" in v ? "formula" : "spellRoll" in v ? "spellRoll" : v.percentOf;
 
   return "number";
 }
@@ -33,7 +34,9 @@ function textOf(v: Amount | undefined): string {
 
   if (typeof v === "number" || typeof v === "string") return String(v);
 
-  return "formula" in v ? v.formula : String(v.value);
+  if ("formula" in v) return v.formula;
+
+  return "spellRoll" in v ? String(v.spellRoll) : String(v.value);
 }
 
 /** `null` means "not a number yet" (e.g. a lone "-") — keep the previous value. */
@@ -47,6 +50,8 @@ function build(mode: Mode, text: string): Amount | undefined | null {
       return DICE_RE.test(text.trim()) ? text.trim() : text;
     case "formula":
       return { formula: text };
+    case "spellRoll":
+      return Number.isFinite(Number(text)) && Number(text) > 0 ? { spellRoll: Number(text) } : null;
     default:
       return Number.isFinite(Number(text)) ? { percentOf: mode, value: Number(text) } : null;
   }

@@ -115,16 +115,14 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
   }
 }
 
-export function spellPayload(s: SpellFlowState, casterType: string): SpellCastData {
+export function spellPayload(s: SpellFlowState): SpellCastData {
   const saves = Object.entries(s.saves).map(([participantId, roll]) => ({ participantId, roll }));
 
   return {
     casterId: s.casterId as string,
-    casterType,
     spellId: s.pick?.spellId as string,
     targetIds: s.pick?.targetMode === "none" ? [] : s.targetIds,
-    damageRolls: s.damage.filter((v): v is number => typeof v === "number"),
-    ...(saves.length > 0 && { savingThrows: saves }),
-    ...(s.pick?.needsHit && s.hitRoll !== undefined && { hitRoll: s.hitRoll }),
+    diceRolls: s.damage.filter((v): v is number => typeof v === "number"),
+    ...(saves.length > 0 && { saveRolls: saves }),
   };
 }

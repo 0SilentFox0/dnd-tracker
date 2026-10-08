@@ -8,8 +8,7 @@ import { useBattleScene } from "./useBattleScene";
 import { usePrefetchSpellsByIds, useSpells, useSpellsByIds } from "@/lib/hooks/spells";
 import { initialSpellFlow, spellFlow, spellPayload,type SpellPick } from "@/lib/utils/battle/flows";
 import { isUp } from "@/lib/utils/battle/participant/state";
-import { participantSpellAllowsMultipleTargets } from "@/lib/utils/battle/spell/participant-spell-target-mode";
-import { expandSpellTargets, spellAllowsMultipleTargets, spellTargetingFor } from "@/lib/utils/battle/spell/spell-targeting";
+import { expandSpellTargets, spellTargetingFor } from "@/lib/utils/battle/spell/spell-targeting";
 import { slotLevels } from "@/lib/utils/battle/view";
 import { diceSlots } from "@/lib/utils/common/dice";
 import { groupSpellsByLevel } from "@/lib/utils/spells/group-by-level";
@@ -51,7 +50,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
   const specOf = (s: BookSpell) => ({ id: s.id, groupId: s.spellGroup?.id ?? null, level: s.level, type: s.type });
 
   const maxTargetsOf = (s: BookSpell): number | undefined => {
-    if (!caster || s.type === "aoe" || participantSpellAllowsMultipleTargets(caster, s.id)) return undefined;
+    if (!caster || s.type === "aoe") return undefined;
 
     const targeting = spellTargetingFor(order, caster.basicInfo.id, specOf(s));
 
@@ -69,7 +68,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
     if (spellTargetingFor(order, caster.basicInfo.id, spell).mode === "all") return "all";
 
-    return spellAllowsMultipleTargets(caster, order, spell) ? "multi" : "single";
+    return spellTargetingFor(order, caster.basicInfo.id, spell).mode !== "single" ? "multi" : "single";
   };
 
   const pickOf = (s: BookSpell): SpellPick => ({
@@ -88,7 +87,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
     if (!caster) return;
 
     try {
-      await scene.actions.castSpell.mutateAsync(spellPayload(state, caster.basicInfo.sourceType));
+      await scene.actions.castSpell.mutateAsync(spellPayload(state));
       dispatch({ type: "SUCCESS" });
       options.onDone?.();
     } catch (e) {

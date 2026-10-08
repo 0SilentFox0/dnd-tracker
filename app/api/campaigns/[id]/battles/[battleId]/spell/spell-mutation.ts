@@ -2,27 +2,27 @@ import type { Spell } from "@prisma/client";
 
 import type { SpellRequestData } from "./cast-spell-schema";
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
+import { getCachedSummonPool } from "@/lib/cache/reference-data";
 import { prisma } from "@/lib/db";
 import { isActive } from "@/lib/utils/abilities/engine/participants";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { processSpell } from "@/lib/utils/battle/spell";
-import { appendSummonedUnitToInitiativeEnd } from "@/lib/utils/battle/spell/append-summoned-unit";
-import { mapDbSpellToBattleSpell } from "@/lib/utils/battle/spell/map-db-spell";
-import { participantSpellAllowsMultipleTargets } from "@/lib/utils/battle/spell/participant-spell-target-mode";
-import { expandSpellTargets, spellTargetingFor, validateSpellTargetCount } from "@/lib/utils/battle/spell/spell-targeting";
+import { castSpell } from "@/lib/utils/battle/spell";
+import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
+import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
+import { toCastableSpell } from "@/lib/utils/battle/spell/to-castable";
 import { BattleAccessError, battleActionToEvent, BattleRuleError } from "@/lib/utils/battle/store";
+import { applyAbilitySummons, type SummonDeps } from "@/lib/utils/battle/summon/ability-summons";
 import { assertNotPanicking } from "@/lib/utils/battle/turn";
 import { assertSpellRolls } from "@/lib/utils/battle/validation/dice-checks";
+import { rollDiceList } from "@/lib/utils/common/dice";
 
-export interface SpellMutationDeps {
+export interface SpellMutationDeps extends SummonDeps {
   loadSpell(spellId: string): Promise<Spell | null>;
-  summon: typeof appendSummonedUnitToInitiativeEnd;
 }
 
 const defaultDeps: SpellMutationDeps = {
   loadSpell: (id) => prisma.spell.findUnique({ where: { id } }),
-  summon: appendSummonedUnitToInitiativeEnd,
+  loadPool: getCachedSummonPool,
 };
 
 export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
@@ -35,14 +35,11 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
 
     const current = order[ctx.scene.turnIndex];
 
-    const canCast =
-      ctx.isDM || (current?.basicInfo.id === caster.basicInfo.id && caster.basicInfo.controlledBy === ctx.userId);
+    const canCast = ctx.isDM || (current?.basicInfo.id === caster.basicInfo.id && caster.basicInfo.controlledBy === ctx.userId);
 
     if (!canCast) throw new BattleAccessError(403, "Заклинання може кастувати лише DM або контролер поточного ходу");
 
-    if (!isActive(caster)) {
-      throw new BattleRuleError("participant_dead", "Кастер непритомний або мертвий");
-    }
+    if (!isActive(caster)) throw new BattleRuleError("participant_dead", "Кастер непритомний або мертвий");
 
     if (!ctx.isDM && !caster.spellcasting.knownSpells.includes(data.spellId)) {
       throw new BattleRuleError("action_rejected", "Кастер не знає цього заклинання");
@@ -50,46 +47,50 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
 
     const spellRow = await deps.loadSpell(data.spellId);
 
-    if (!spellRow || spellRow.campaignId !== ctx.scene.campaignId) {
-      throw new BattleAccessError(404, "Заклинання не знайдено");
-    }
+    if (!spellRow || spellRow.campaignId !== ctx.scene.campaignId) throw new BattleAccessError(404, "Заклинання не знайдено");
+
+    const spell = toCastableSpell(spellRow);
+
+    const { definition } = spell;
 
     if (!data.preview) {
       assertNotPanicking(ctx.scene.pendingMoraleCheck, caster.basicInfo.id);
 
-      const isBonus = spellRow.castingTime?.toLowerCase().includes("bonus") ?? false;
+      const isBonus = definition.cost === "bonusAction";
 
       if (isBonus ? caster.actionFlags.hasUsedBonusAction : caster.actionFlags.hasUsedAction) {
         throw new BattleRuleError("action_used", isBonus ? "Бонусну дію вже використано" : "Дію вже використано");
       }
     }
 
-    const spellRef = { id: spellRow.id, groupId: spellRow.groupId, level: spellRow.level, type: spellRow.type };
-
-    const targeting = spellTargetingFor(order, caster.basicInfo.id, spellRef);
-
-    const legacyMulti = participantSpellAllowsMultipleTargets(caster, spellRow.id);
-
-    if (!validateSpellTargetCount(targeting, data.targetIds.length, spellRow.type, legacyMulti)) {
-      throw new BattleRuleError("invalid_target", API_ERRORS.SPELL_TOO_MANY_TARGETS);
+    if (caster.battleData.activeEffects.some((e) => e.effects.some((d) => d.type === "disable_spell_casting"))) {
+      throw new BattleRuleError("action_rejected", "Кастер не може чаклувати");
     }
 
-    const targetIds = expandSpellTargets(order, caster.basicInfo.id, spellRef, data.targetIds);
+    const resolution = resolveSpellTargets(order, caster, spell, definition.targeting, data.targetIds);
 
-    assertSpellRolls(spellRow, data.damageRolls, targetIds.length);
+    if (!resolution.ok) throw new BattleRuleError("invalid_target", resolution.error);
 
-    const result = processSpell({
+    const rng = ctx.rng ?? Math.random;
+
+    const expected = casterSpellDice(caster, { dice: definition.dice, groupId: spell.groupId });
+
+    // прев'ю без кидків: сервер кидає сам, щоб показати орієнтовний результат
+    const diceRolls = data.preview && data.diceRolls.length === 0 ? rollDiceList(`${expected.count}d${expected.sides}`, rng) : data.diceRolls;
+
+    assertSpellRolls(expected, diceRolls);
+
+    const result = castSpell({
       caster,
-      spell: mapDbSpellToBattleSpell(spellRow),
-      targetIds,
+      spell,
+      targetIds: resolution.targetIds,
       allParticipants: order,
       currentRound: ctx.scene.round,
       battleId: ctx.scene.id,
-      damageRolls: data.damageRolls,
-      savingThrows: data.savingThrows,
-      additionalRollResult: data.additionalRollResult,
-      hitRoll: data.hitRoll,
+      diceRolls,
+      saveRolls: data.saveRolls,
       isDMCast: ctx.isDM,
+      rng,
     });
 
     if (data.preview) {
@@ -101,41 +102,10 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
       };
     }
 
-    const updatedById = new Map(
-      (result.allParticipantsUpdated ?? [result.casterUpdated, ...result.targetsUpdated]).map((p) => [p.basicInfo.id, p]),
-    );
+    const summoned = await applyAbilitySummons(result.summons, result.allParticipantsUpdated, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng, deps });
 
-    let nextOrder = order.map((p) => updatedById.get(p.basicInfo.id) ?? p);
+    const action = summoned.messages.length > 0 ? { ...result.battleAction, resultText: [result.battleAction.resultText, ...summoned.messages].join(" | ") } : result.battleAction;
 
-    let action = result.battleAction;
-
-    const summonUnitId = spellRow.summonUnitId?.trim() || null;
-
-    if (result.success && action.actionDetails?.hitCheckMiss !== true && summonUnitId) {
-      const { finalOrder, summoned } = await deps.summon({
-        campaignId: ctx.scene.campaignId,
-        battleId: ctx.scene.id,
-        summonUnitId,
-        casterSide: caster.basicInfo.side,
-        casterControlledBy: caster.basicInfo.controlledBy,
-        orderAfterSpell: nextOrder,
-      });
-
-      if (summoned) {
-        nextOrder = finalOrder;
-        action = {
-          ...action,
-          targets: [...action.targets, { participantId: summoned.basicInfo.id, participantName: summoned.basicInfo.name }],
-          actionDetails: {
-            ...action.actionDetails,
-            summonedUnitTemplateId: summoned.basicInfo.sourceId,
-            summonedParticipantId: summoned.basicInfo.id,
-          },
-          resultText: `${action.resultText} Прикликано: ${summoned.basicInfo.name}.`,
-        };
-      }
-    }
-
-    return { participants: nextOrder, pending: ctx.pending, events: [battleActionToEvent(action)] };
+    return { participants: summoned.order, pending: ctx.pending, events: [battleActionToEvent(action)] };
   };
 }

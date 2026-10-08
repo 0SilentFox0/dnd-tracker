@@ -35,6 +35,8 @@ export function amountLabel(amount: Amount): string {
 
   if ("formula" in amount) return `(${amount.formula})`;
 
+  if ("spellRoll" in amount) return amount.spellRoll === 100 ? "кидок заклинання" : `${amount.spellRoll}% кидка заклинання`;
+
   if (amount.percentOf === "ownerAttack") return `${amount.value} % шкоди першої атаки`;
 
   return `${amount.value}% від ${amount.percentOf === "eventDamage" ? "завданої шкоди" : "макс. HP"}`;

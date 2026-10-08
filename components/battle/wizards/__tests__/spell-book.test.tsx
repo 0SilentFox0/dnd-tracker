@@ -50,7 +50,7 @@ describe("SpellBook", () => {
     fireEvent.click(screen.getByRole("button", { name: "Далі · підсумок" }));
     fireEvent.click(screen.getByRole("button", { name: /Застосувати/ }));
 
-    await waitFor(() => expect(castSpell).toHaveBeenCalledWith(expect.objectContaining({ spellId: "ray", targetIds: ["gob"], hitRoll: 15, damageRolls: [4, 5] })));
+    await waitFor(() => expect(castSpell).toHaveBeenCalledWith(expect.objectContaining({ spellId: "ray", targetIds: ["gob"], diceRolls: [4, 5] })));
   });
 
   it("гортання на I коло показує його заклинання", async () => {

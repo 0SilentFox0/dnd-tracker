@@ -2,7 +2,7 @@ import type { CampaignSpellContext, CharacterFromPrisma } from "../types/partici
 import { type EquippedArtifactRow, loadEquippedArtifactRows, toEquippedArtifacts } from "./extract-artifacts";
 import { extractAttacksFromCharacter } from "./extract-attacks";
 import { resolveCharacterSkillEntries } from "./extract-skills";
-import { resolveLearnedSpellsFromCharacter } from "./from-character-learned-spells";
+import { resolveLearnedSpellsAndMastery } from "./from-character-learned-spells";
 import { resolveSpellSlotsFromCharacter } from "./from-character-spell-slots";
 import { loadRace } from "./load-race";
 import { buildSpellEnhancers } from "./spell-enhancers";
@@ -67,7 +67,7 @@ export async function createBattleParticipantFromCharacter(
     ? (rawKnown as unknown[]).map((id) => String(id)).filter(Boolean)
     : [];
 
-  const knownSpells = await resolveLearnedSpellsFromCharacter(
+  const { knownSpells, schoolMastery } = await resolveLearnedSpellsAndMastery(
     character,
     baseKnownSpells,
     context,
@@ -127,6 +127,7 @@ export async function createBattleParticipantFromCharacter(
       modifiers,
       proficiencyBonus,
       race: character.race,
+      raceId: (race as { id?: string } | null)?.id,
       primaryAbility,
       meleeMultiplier: meleeMult,
       rangedMultiplier: rangedMult,
@@ -160,6 +161,7 @@ export async function createBattleParticipantFromCharacter(
       artifactSets: completed.progress,
       resolvedAbilities,
       spellEnhancers: buildSpellEnhancers(skills),
+      schoolMastery,
       abilityUsage: {},
       pendingExtraActions: 0,
     },

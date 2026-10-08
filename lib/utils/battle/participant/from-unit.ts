@@ -117,6 +117,7 @@ export async function createBattleParticipantFromUnit(
       modifiers,
       proficiencyBonus: unit.proficiencyBonus,
       race: race?.name ?? "",
+      raceId: race?.id,
     },
     combatStats: {
       maxHp: unit.maxHp,

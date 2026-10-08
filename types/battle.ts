@@ -139,6 +139,8 @@ export interface BattleParticipantAbilities {
   };
   proficiencyBonus: number;
   race: string;
+  /** Race.id для расових модифікаторів заклинань */
+  raceId?: string;
   primaryAbility?: AbilityKey;
   /** Коеф. DM для фіз. шкоди ближнього бою (лише character); як у калькуляторі персонажа */
   meleeMultiplier?: number;
@@ -193,6 +195,8 @@ export interface BattleParticipantBattleData {
   abilityUsage?: Record<string, AbilityUsageCounter>;
   /** Чарм скінчився: сторона й контролер повертаються наприкінці цього ходу */
   charmReturn?: { side: ParticipantSide; controlledBy: string };
+  /** Рівень майстерності героя у гілці кожної школи заклинань (groupId → рівень) */
+  schoolMastery?: Record<string, "basic" | "advanced" | "expert">;
   /** Масштаб шкоди ворога-юніта для рівного бою (старт бою); немає = ×1 */
   damageMultiplier?: number;
   /** Масштаб HP ворога-юніта для рівного бою; лише для показу ДМу */

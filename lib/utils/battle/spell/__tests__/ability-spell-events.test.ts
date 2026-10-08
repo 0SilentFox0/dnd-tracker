@@ -2,32 +2,24 @@ import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import { type BattleSpell, processSpell } from "@/lib/utils/battle/spell";
+import { castSpell } from "@/lib/utils/battle/spell";
+import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 
-const firebolt = {
+const firebolt: CastableSpell = {
   id: "s1",
   name: "Вогняна стріла",
   level: 1,
-  type: "target",
-  target: "enemies",
-  damageType: "damage",
-  damageElement: "fire",
   groupId: null,
-  damageModifier: null,
-  healModifier: null,
-  diceCount: 1,
-  diceType: "d10",
-  savingThrow: null,
-  description: "",
-  duration: null,
-  castingTime: "1 action",
-} as unknown as BattleSpell;
+  definition: { dice: 1, cost: "action", targeting: { kind: "enemy" }, resolution: { kind: "auto" }, effects: [{ kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" }], raceModifiers: [] },
+};
 
 function cast(caster = makeParticipant({ id: "c" }), others = [makeParticipant({ id: "e", side: ParticipantSide.ENEMY, hp: 3 })]) {
   const withSlots = { ...caster, spellcasting: { ...caster.spellcasting, spellSlots: { "1": { max: 2, current: 2 } } } };
 
-  return processSpell({ caster: withSlots, spell: firebolt, targetIds: ["e"], allParticipants: [withSlots, ...others], currentRound: 1, battleId: "b1", damageRolls: [8], rng: seq(0) });
+  return castSpell({ caster: withSlots, spell: firebolt, targetIds: ["e"], allParticipants: [withSlots, ...others], currentRound: 1, battleId: "b1", diceRolls: [5], rng: seq(0) });
 }
+
+const hpOf = (r: ReturnType<typeof cast>, id: string) => r.allParticipantsUpdated.find((p) => p.basicInfo.id === id)?.combatStats.currentHp as number;
 
 describe("spell ability events", () => {
   it("spellCast after спрацьовує і пише в лог", () => {
@@ -62,7 +54,7 @@ describe("spell ability events", () => {
 
     const boosted = cast(makeParticipant({ id: "c", abilities: [focus] }), tank());
 
-    expect(boosted.spellCalculation?.totalDamage ?? 0).toBeGreaterThan(plain.spellCalculation?.totalDamage ?? 0);
+    expect(hpOf(boosted, "e")).toBeLessThan(hpOf(plain, "e"));
   });
 
   it("опір цілі з spellCast/before (role target) зменшує шкоду цього заклинання", () => {
@@ -70,6 +62,6 @@ describe("spell ability events", () => {
 
     const r = cast(makeParticipant({ id: "c" }), [makeParticipant({ id: "e", side: ParticipantSide.ENEMY, hp: 100, maxHp: 100, abilities: [ward] })]);
 
-    expect(r.targetsUpdated[0].combatStats.currentHp).toBe(100);
+    expect(hpOf(r, "e")).toBe(100);
   });
 });

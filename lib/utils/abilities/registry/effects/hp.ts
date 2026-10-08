@@ -3,7 +3,7 @@ import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { CombatStatus } from "@/lib/constants/battle";
 import { resolveAmount } from "@/lib/utils/abilities/engine/amount";
-import { eventDamage } from "@/lib/utils/abilities/engine/events";
+import { eventDamage, eventSpellRoll } from "@/lib/utils/abilities/engine/events";
 import { applyRawDamage } from "@/lib/utils/abilities/engine/hp";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/participants";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/timed-effects";
@@ -30,7 +30,7 @@ export function applyDealDamage(input: EffectApplyInput<Of<"dealDamage">>): Effe
 
     if (!t || !isActive(t)) continue;
 
-    const rolled = resolveAmount(effect.amount, { owner, target: t, eventDamage: eventDamage(input.event), rng: ctx.rng, participants: input.participants });
+    const rolled = resolveAmount(effect.amount, { owner, target: t, eventDamage: eventDamage(input.event), spellRoll: eventSpellRoll(input.event), rng: ctx.rng, participants: input.participants });
 
     const amount = effect.falloff ? Math.floor((rolled * effect.falloff[Math.min(index, effect.falloff.length - 1)]) / 100) : rolled;
 
@@ -63,7 +63,7 @@ export function applyHeal(input: EffectApplyInput<Of<"heal">>): EffectApplyResul
 
     if (!t || (!isActive(t) && !effect.revive)) continue;
 
-    const amount = resolveAmount(effect.amount, { owner, target: t, eventDamage: eventDamage(input.event), rng: ctx.rng, participants: input.participants });
+    const amount = resolveAmount(effect.amount, { owner, target: t, eventDamage: eventDamage(input.event), spellRoll: eventSpellRoll(input.event), rng: ctx.rng, participants: input.participants });
 
     const before = Math.max(0, t.combatStats.currentHp);
 
@@ -106,7 +106,7 @@ export function applyDot(input: EffectApplyInput<Of<"dot">>): EffectApplyResult 
       continue;
     }
 
-    const dmg = resolveAmount(effect.damagePerRound, { owner, target: t, eventDamage: eventDamage(input.event), rng: ctx.rng, participants: input.participants });
+    const dmg = resolveAmount(effect.damagePerRound, { owner, target: t, eventDamage: eventDamage(input.event), spellRoll: eventSpellRoll(input.event), rng: ctx.rng, participants: input.participants });
 
     if (dmg <= 0) continue;
 
@@ -149,7 +149,7 @@ export function applyHot(input: EffectApplyInput<Of<"hot">>): EffectApplyResult 
 
     if (!t || !isActive(t)) continue;
 
-    const heal = resolveAmount(effect.healPerRound, { owner, target: t, eventDamage: eventDamage(input.event), rng: ctx.rng, participants: input.participants });
+    const heal = resolveAmount(effect.healPerRound, { owner, target: t, eventDamage: eventDamage(input.event), spellRoll: eventSpellRoll(input.event), rng: ctx.rng, participants: input.participants });
 
     if (heal <= 0) continue;
 

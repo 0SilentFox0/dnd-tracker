@@ -51,7 +51,7 @@ describe("spellFlow", () => {
     expect(rollsComplete(done)).toBe(true);
     expect(spellFlow(s, { type: "TO_SUMMARY" }).step).toBe("rolls");
     expect(spellFlow(done, { type: "TO_SUMMARY" }).step).toBe("summary");
-    expect(spellPayload(done, "character")).toEqual({ casterId: "me", casterType: "character", spellId: "ray", targetIds: ["a"], damageRolls: [4, 6], hitRoll: 15 });
+    expect(spellPayload(done)).toEqual({ casterId: "me", spellId: "ray", targetIds: ["a"], diceRolls: [4, 6] });
   });
 
   it("рятівні кидки потрапляють у payload; зняття цілі прибирає її кидок", () => {
@@ -59,7 +59,7 @@ describe("spellFlow", () => {
 
     s = ([{ type: "SET_SAVE", id: "a", value: 12 }, { type: "SET_SAVE", id: "b", value: 7 }, { type: "SET_DAMAGE", index: 0, value: 5 }] as SpellFlowAction[]).reduce(spellFlow, s);
 
-    expect(spellPayload(s, "unit").savingThrows).toEqual([{ participantId: "a", roll: 12 }, { participantId: "b", roll: 7 }]);
+    expect(spellPayload(s).saveRolls).toEqual([{ participantId: "a", roll: 12 }, { participantId: "b", roll: 7 }]);
 
     const back = spellFlow(spellFlow(s, { type: "BACK" }), { type: "TOGGLE_TARGET", id: "b" });
 

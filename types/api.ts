@@ -157,13 +157,10 @@ export interface AbilityActionData {
 
 export interface SpellCastData {
   casterId: string;
-  casterType: string;
   spellId: string;
   targetIds: string[];
-  damageRolls: number[];
-  savingThrows?: Array<{ participantId: string; roll: number }>;
-  additionalRollResult?: number;
-  hitRoll?: number;
+  diceRolls: number[];
+  saveRolls?: Array<{ participantId: string; roll: number }>;
 }
 
 // Skill Trees API
