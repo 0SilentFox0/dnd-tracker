@@ -5,7 +5,7 @@ export const spellSchema = z.object({
   spellId: z.string(),
   targetIds: z.array(z.string()).default([]),
   diceRolls: z.array(z.number()).default([]),
-  saveRolls: z.array(z.object({ participantId: z.string(), roll: z.number().min(1).max(20) })).optional(),
+  saveRolls: z.array(z.object({ participantId: z.string(), roll: z.number().int().min(1).max(20) })).optional(),
   preview: z.boolean().optional(),
 });
 
