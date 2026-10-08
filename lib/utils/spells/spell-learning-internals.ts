@@ -4,7 +4,6 @@ import type { Skill } from "@/types/skills";
 type SkillLike = Skill & {
   spellData?: { spellGroupId?: string };
   basicInfo?: { name?: string };
-  spellEnhancementData?: { spellNewSpellId?: string };
   spellGroup?: { id: string; name?: string } | null;
 };
 
@@ -17,7 +16,7 @@ function getSkillSpellGroupId(skill: SkillLike): string | null | undefined {
 }
 
 function getSkillSpellNewSpellId(skill: SkillLike): string | null | undefined {
-  return skill.spellNewSpellId ?? skill.spellEnhancementData?.spellNewSpellId;
+  return skill.spellNewSpellId;
 }
 
 export const SKILL_LEVEL_ORDER: Record<SkillLevelType, number> = {

@@ -5,7 +5,6 @@ import { resolveCharacterSkillEntries } from "./extract-skills";
 import { resolveLearnedSpellsAndMastery } from "./from-character-learned-spells";
 import { resolveSpellSlotsFromCharacter } from "./from-character-spell-slots";
 import { loadRace } from "./load-race";
-import { buildSpellEnhancers } from "./spell-enhancers";
 
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { CombatStatus,ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
@@ -160,7 +159,6 @@ export async function createBattleParticipantFromCharacter(
       equippedArtifacts,
       artifactSets: completed.progress,
       resolvedAbilities,
-      spellEnhancers: buildSpellEnhancers(skills),
       schoolMastery,
       abilityUsage: {},
       pendingExtraActions: 0,

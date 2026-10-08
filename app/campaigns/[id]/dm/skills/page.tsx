@@ -26,31 +26,7 @@ export default async function DMSkillsPage({
     },
   });
 
-  const transformedSkills = skills.map((row) => withAbilitySummary("skill", row)).map((skill) => ({
-    ...skill,
-    spellEnhancementTypes: Array.isArray(skill.spellEnhancementTypes)
-      ? (skill.spellEnhancementTypes as string[])
-      : undefined,
-    spellTargetChange:
-      skill.spellTargetChange &&
-      typeof skill.spellTargetChange === "object" &&
-      skill.spellTargetChange !== null &&
-      !Array.isArray(skill.spellTargetChange) &&
-      "target" in skill.spellTargetChange
-        ? (skill.spellTargetChange as { target: string })
-        : null,
-    spellAdditionalModifier:
-      skill.spellAdditionalModifier &&
-      typeof skill.spellAdditionalModifier === "object" &&
-      skill.spellAdditionalModifier !== null &&
-      !Array.isArray(skill.spellAdditionalModifier)
-        ? (skill.spellAdditionalModifier as {
-            modifier?: string;
-            damageDice?: string;
-            duration?: number;
-          })
-        : null,
-  }));
+  const transformedSkills = skills.map((row) => withAbilitySummary("skill", row));
 
   return (
     <DMSkillsPageClient

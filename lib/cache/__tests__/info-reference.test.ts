@@ -21,7 +21,7 @@ describe("довідник кампанії", () => {
       { id: "k", name: "Удар", description: null, appearanceDescription: null, abilities: [], icon: null, image: null, mainSkill: { id: "m", name: "Напад", icon: null, color: "red" }, grantedSpell: { name: "Іскра" } },
     ] as never);
     vi.mocked(prisma.spell.findMany).mockResolvedValue([
-      { id: "s", name: "Іскра", level: 1, type: "target", damageType: "damage", castingTime: null, range: null, duration: null, description: "опис", effects: ["x", 1], savingThrow: null, diceCount: 1, diceType: "d6", damageElement: "fire", appearanceDescription: null, icon: null, spellGroup: { name: "Вогонь" } },
+      { id: "s", name: "Іскра", level: 1, description: "опис", dice: 1, cost: "action", targeting: { kind: "enemy" }, resolution: { kind: "auto" }, spellEffects: [{ kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" }], appearanceDescription: null, icon: null, spellGroup: { name: "Вогонь" } },
     ] as never);
   });
 
@@ -37,13 +37,14 @@ describe("довідник кампанії", () => {
     expect(skillArgs.select.spellEnhancementData).toBeUndefined();
     expect(spellArgs.include).toBeUndefined();
     expect(spellArgs.select.damageDistribution).toBeUndefined();
+    expect(spellArgs.select.diceCount).toBeUndefined();
   });
 
   it("мапить у пропси клієнта", async () => {
     const { skills, spells } = await getCachedInfoReference("c");
 
     expect(skills[0]).toMatchObject({ id: "k", mainSkillName: "Напад", mainSkillColor: "red", grantedSpellName: "Іскра", abilitySummary: [] });
-    expect(spells[0]).toMatchObject({ id: "s", groupName: "Вогонь", effects: ["x"] });
+    expect(spells[0]).toMatchObject({ id: "s", groupName: "Вогонь", type: "ворог", dice: 1, effects: [expect.stringContaining("шкода")] });
   });
 
   it("кеш позначено тегами скілів, основних навиків і заклинань", async () => {

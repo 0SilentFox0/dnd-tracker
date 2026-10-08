@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
 
 import { createSkillSchema } from "./create-skill-schema";
 import { formatSkillsListResponse } from "./format-skills-response";
@@ -35,17 +34,10 @@ export async function POST(
 
     const mainSkillData = data.mainSkillData as Record<string, unknown>;
 
-    const spellEnhancementData = data.spellEnhancementData as Record<
-      string,
-      unknown
-    >;
-
     const skill = await prisma.skill.create({
       data: {
         campaignId: id,
         image: data.image ?? null,
-        spellEnhancementData:
-          data.spellEnhancementData as Prisma.InputJsonValue,
         ...(data.abilities && { abilities: abilitiesJson(data.abilities) }),
         name: (basicInfo.name as string) || "",
         description: (basicInfo.description as string) || null,
@@ -55,19 +47,7 @@ export async function POST(
         grantedSpellId:
           (spellData.grantedSpellId as string) || null,
         mainSkillId: (mainSkillData.mainSkillId as string) || null,
-        spellEnhancementTypes: spellEnhancementData.spellEnhancementTypes
-          ? (spellEnhancementData.spellEnhancementTypes as Prisma.InputJsonValue)
-          : [],
-        spellEffectIncrease:
-          (spellEnhancementData.spellEffectIncrease as number) || null,
-        spellTargetChange: spellEnhancementData.spellTargetChange
-          ? (spellEnhancementData.spellTargetChange as Prisma.InputJsonValue)
-          : undefined,
-        spellAdditionalModifier: spellEnhancementData.spellAdditionalModifier
-          ? (spellEnhancementData.spellAdditionalModifier as Prisma.InputJsonValue)
-          : undefined,
-        spellNewSpellId:
-          (spellEnhancementData.spellNewSpellId as string) || null,
+        spellNewSpellId: (spellData.grantedSpellId as string) || null,
       },
       include: {
         spell: true,

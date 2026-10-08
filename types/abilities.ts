@@ -19,23 +19,6 @@ export interface AbilityUsageCounter {
   turn: number;
 }
 
-export interface SpellEnhancer {
-  skillId: string;
-  name: string;
-  mainSkillId: string | null;
-  level: string | null;
-  linkedSpellId: string | null;
-  spellGroupId: string | null;
-  spellEnhancements: {
-    spellEffectIncrease?: number;
-    spellTargetChange?: { target: string };
-    spellAdditionalModifier?: { modifier?: string; damageDice?: string; duration?: number };
-    spellNewSpellId?: string;
-    spellAllowMultipleTargets?: boolean;
-    spellAoeSpellIds?: string[];
-  };
-}
-
 export type AbilityEvent =
   | { type: "battleStart"; newcomerIds?: string[] }
   | { type: "roundStart" }

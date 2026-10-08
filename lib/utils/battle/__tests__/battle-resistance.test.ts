@@ -60,7 +60,6 @@ function createParticipant(
       activeEffects: [],
       equippedArtifacts: [],
       resolvedAbilities: [],
-      spellEnhancers: [],
     },
     actionFlags: {
       hasUsedAction: false,

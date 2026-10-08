@@ -61,7 +61,6 @@ function createBaseParticipant(overrides?: Partial<BattleParticipant>): BattlePa
       activeEffects: [],
       equippedArtifacts: [],
       resolvedAbilities: [],
-      spellEnhancers: [],
     },
     actionFlags: {
       hasUsedAction: false,

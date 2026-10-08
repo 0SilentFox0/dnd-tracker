@@ -17,35 +17,6 @@ export const createSkillSchema = z.object({
     spellGroupId: z.string().nullable().optional(),
     grantedSpellId: z.string().nullable().optional(),
   }),
-  spellEnhancementData: z.object({
-    spellEnhancementTypes: z
-      .array(
-        z.enum([
-          "effect_increase",
-          "target_change",
-          "additional_modifier",
-          "new_spell",
-          "aoe_spell_unlock",
-        ]),
-      )
-      .optional(),
-    spellEffectIncrease: z.number().min(0).max(200).optional(),
-    spellTargetChange: z
-      .object({
-        target: z.enum(["enemies", "allies", "all"]),
-      })
-      .optional(),
-    spellAdditionalModifier: z
-      .object({
-        modifier: z.string().optional(),
-        damageDice: z.string().optional(),
-        duration: z.number().optional(),
-      })
-      .optional(),
-    spellNewSpellId: z.string().optional(),
-    spellAllowMultipleTargets: z.boolean().optional(),
-    spellAoeSpellIds: z.array(z.string()).optional(),
-  }),
   abilities: AbilitiesSchema.optional(),
   mainSkillData: z.object({
     mainSkillId: z.string().nullable().optional(),

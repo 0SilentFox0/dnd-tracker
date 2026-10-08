@@ -6,5 +6,4 @@ export * from "./dice";
 export * from "./dpr-by-main-skill";
 export * from "./hero-scaling";
 export * from "./skills";
-export * from "./spell-enhancement";
 export * from "./spells";

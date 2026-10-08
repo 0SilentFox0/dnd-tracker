@@ -145,7 +145,6 @@ export async function createBattleParticipantFromUnit(
         ...collectUnitAbilities(unit, race),
         ...immunityAbilities(getUnitImmunities(unit as unknown as Unit, race as unknown as Race | null), { type: "unit", id: unit.id }),
       ],
-      spellEnhancers: [],
       abilityUsage: {},
       pendingExtraActions: 0,
     },

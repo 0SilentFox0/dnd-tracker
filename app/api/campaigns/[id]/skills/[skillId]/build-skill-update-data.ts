@@ -48,45 +48,7 @@ export function buildSkillUpdateData(
         spellData.grantedSpellId === null
           ? { disconnect: true }
           : { connect: { id: spellData.grantedSpellId as string } };
-    }
-  }
-
-  if (data.spellEnhancementData !== undefined) {
-    updateData.spellEnhancementData =
-      data.spellEnhancementData as Prisma.InputJsonValue;
-
-    const spellEnhancementData = data.spellEnhancementData as Record<
-      string,
-      unknown
-    >;
-
-    if (spellEnhancementData.spellEnhancementTypes !== undefined)
-      updateData.spellEnhancementTypes =
-        spellEnhancementData.spellEnhancementTypes as Prisma.InputJsonValue;
-
-    if (spellEnhancementData.spellEffectIncrease !== undefined)
-      updateData.spellEffectIncrease =
-        spellEnhancementData.spellEffectIncrease;
-
-    if (spellEnhancementData.spellTargetChange !== undefined) {
-      updateData.spellTargetChange =
-        spellEnhancementData.spellTargetChange === null
-          ? Prisma.JsonNull
-          : (spellEnhancementData.spellTargetChange as Prisma.InputJsonValue);
-    }
-
-    if (spellEnhancementData.spellAdditionalModifier !== undefined) {
-      updateData.spellAdditionalModifier =
-        spellEnhancementData.spellAdditionalModifier === null
-          ? Prisma.JsonNull
-          : (spellEnhancementData.spellAdditionalModifier as Prisma.InputJsonValue);
-    }
-
-    if (spellEnhancementData.spellNewSpellId !== undefined) {
-      updateData.spellNewSpell =
-        spellEnhancementData.spellNewSpellId === null
-          ? { disconnect: true }
-          : { connect: { id: spellEnhancementData.spellNewSpellId as string } };
+      updateData.spellNewSpell = updateData.grantedSpell;
     }
   }
 
