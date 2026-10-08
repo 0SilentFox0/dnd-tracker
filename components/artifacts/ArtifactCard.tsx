@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ARTIFACT_SLOT_OPTIONS } from "@/lib/constants/artifacts";
+import { ARTIFACT_RARITY_OPTIONS, ARTIFACT_SLOT_OPTIONS } from "@/lib/constants/artifacts";
 import { useUpdateArtifact } from "@/lib/hooks/artifacts";
 import { useNotify } from "@/lib/hooks/common";
 
@@ -36,6 +36,8 @@ interface ArtifactCardProps {
   artifact: ArtifactCardData;
   variant?: "full" | "compact";
 }
+
+const rarityLabel = (rarity: string) => ARTIFACT_RARITY_OPTIONS.find((o) => o.value === rarity)?.label ?? rarity;
 
 export function ArtifactCard({
   campaignId,
@@ -92,30 +94,29 @@ export function ArtifactCard({
 
   if (variant === "compact") {
     return (
-      <div className="rounded-md bg-hud-field p-2 shadow-[inset_0_0_0_1px_var(--color-hud-line)]">
-        <div className="flex items-center gap-2">
-          <EntityIcon src={artifact.icon} name={artifact.name} size={40} className="text-sm" />
+      <div className="h-full rounded-md bg-hud-field p-2 shadow-[inset_0_0_0_1px_var(--color-hud-line)]">
+        <div className="flex items-start gap-3">
+          <EntityIcon src={artifact.icon} name={artifact.name} size={64} className="size-16 rounded-lg text-xl" />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-hud-ink">{artifact.name}</p>
-            <div className="flex gap-2 flex-wrap items-center mt-1">
+            <div className="flex items-start justify-between gap-2">
+              <p className="min-w-0 flex-1 truncate text-sm font-semibold leading-8 text-hud-ink">{artifact.name}</p>
+              <div className="flex shrink-0 items-center gap-1">
+                <Link href={`/campaigns/${campaignId}/dm/artifacts/${artifact.id}`}>
+                  <Button variant="ghost" size="sm">
+                    Редагувати
+                  </Button>
+                </Link>
+                <ArtifactDeleteButton campaignId={campaignId} artifactId={artifact.id} />
+              </div>
+            </div>
+            <div className="mt-1 flex flex-wrap items-center gap-2">
               {artifact.rarity && (
                 <Badge variant="outline" className="text-xs">
-                  {artifact.rarity}
+                  {rarityLabel(artifact.rarity)}
                 </Badge>
               )}
               {slotSelect}
             </div>
-          </div>
-          <div className="flex items-center gap-1 shrink-0">
-            <Link href={`/campaigns/${campaignId}/dm/artifacts/${artifact.id}`}>
-              <Button variant="ghost" size="sm">
-                Редагувати
-              </Button>
-            </Link>
-            <ArtifactDeleteButton
-              campaignId={campaignId}
-              artifactId={artifact.id}
-            />
           </div>
         </div>
         {artifact.description && (
@@ -140,7 +141,7 @@ export function ArtifactCard({
           <h3 className="hud-sc min-w-0 flex-1 truncate text-base text-hud-ink">{artifact.name}</h3>
           {artifact.rarity && (
             <Badge variant="outline" className="shrink-0">
-              {artifact.rarity}
+              {rarityLabel(artifact.rarity)}
             </Badge>
           )}
         </div>

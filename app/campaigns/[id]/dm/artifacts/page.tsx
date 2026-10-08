@@ -90,7 +90,7 @@ export default async function DMArtifactsPage({
       {artifactSets.length > 0 && (
         <HudPanel>
           <HudSection title="Сети артефактів">
-            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            <div className="space-y-4">
               {artifactSets.map((set) => (
                 <ArtifactSetCard
                   key={set.id}

@@ -27,6 +27,13 @@ describe("ArtifactSetCard", () => {
     expect(screen.getByRole("link", { name: "Редагувати сет" }).getAttribute("href")).toBe("/campaigns/c1/dm/artifact-sets/s1");
   });
 
+  it("рідкість показується українською", () => {
+    renderWithConfirm(withQuery(<ArtifactSetCard variant="withArtifacts" campaignId="c1" set={set} artifacts={[{ ...artifact, rarity: "legendary" }]} />));
+
+    expect(screen.getByText("Легендарний")).toBeInTheDocument();
+    expect(screen.queryByText("legendary")).toBeNull();
+  });
+
   it("summary: назва, бонус і назви артефактів без карток", () => {
     renderWithConfirm(withQuery(<ArtifactSetCard variant="summary" campaignId="c1" set={set} artifacts={[{ id: "a1", name: "Шолом зорі" }]} />));
 
