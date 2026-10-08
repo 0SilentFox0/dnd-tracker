@@ -234,6 +234,7 @@ export function runAdvanceTurnLoop(
       const berserk = runBerserkTurn({
         participants: updatedInitiativeOrder,
         participantId: turnResult.participant.basicInfo.id,
+        restrictedBy: nextParticipant,
         bonusPercent: berserkBonus,
         round: nextRound,
         battleId,
@@ -242,7 +243,7 @@ export function runAdvanceTurnLoop(
       });
 
       updatedInitiativeOrder = berserk.participants;
-      newLogEntries.push(...berserk.actions);
+      newLogEntries.push(...berserk.actions.map((a, i) => ({ ...a, actionIndex: currentBattleLogLength + newLogEntries.length + i, stateBefore: getStateBeforeForEntry() })));
 
       if (checkVictoryConditions(updatedInitiativeOrder).result) break;
 

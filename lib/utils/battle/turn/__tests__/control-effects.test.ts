@@ -185,3 +185,49 @@ describe("імунітет до станів", () => {
     expect(t.basicInfo.side).toBe(ParticipantSide.ALLY);
   });
 });
+
+describe("автоматичний хід шалу", () => {
+  const berserk: Effect = { kind: "berserk", damageBonusPercent: 50, duration: { rounds: 2 }, target: "eventTarget" };
+
+  const withEffects = (extra: BattleParticipant["battleData"]["activeEffects"], abilities: BattleParticipant["battleData"]["resolvedAbilities"] = []) => {
+    const ogre = unitOf("ogre", ParticipantSide.ENEMY);
+
+    const raged = cast(berserk, ogre).participants[1];
+
+    return { ...raged, battleData: { ...raged.battleData, resolvedAbilities: abilities, activeEffects: [...raged.battleData.activeEffects, ...extra] } };
+  };
+
+  const condition = (type: string, value = 1) => ({ id: type, name: type, type: "condition" as const, duration: 2, appliedAt: { round: 1, timestamp: new Date() }, effects: [{ type, value }] });
+
+  const run = (ogre: BattleParticipant, rng = seq(0, 0.9)) => {
+    const victim = unitOf("victim", ParticipantSide.ENEMY);
+
+    const out = runAdvanceTurnLoop({ initiativeOrder: [caster(), ogre, victim], currentTurnIndex: 0, currentRound: 1, battleId: "b1", currentBattleLogLength: 0, pendingSummons: [], rng });
+
+    return { out, victimHp: out.updatedInitiativeOrder.find((p) => p.basicInfo.id === "victim")?.combatStats.currentHp as number };
+  };
+
+  it("заборона ближніх атак: шал нікого не б'є", () => {
+    const { out, victimHp } = run(withEffects([condition("disable_melee_attacks")]), seq(0.99, 0.9));
+
+    expect(victimHp).toBe(40);
+    expect(out.newLogEntries.some((e) => e.resultText.includes("нікого не може атакувати"))).toBe(true);
+  });
+
+  it("втрата дії від skip_action: шал не б'є", () => {
+    const { out, victimHp } = run(withEffects([condition("skip_action", 100)]), seq(0, 0.9));
+
+    expect(victimHp).toBe(40);
+    expect(out.newLogEntries.some((e) => e.resultText.includes("втрачає дію"))).toBe(true);
+  });
+
+  it("наприкінці автоходу спрацьовує turnEnd, записи лога мають stateBefore", () => {
+    const focus = resolved({ trigger: { event: "turnEnd" }, effects: [{ kind: "changeMorale", delta: 1 }] });
+
+    const { out } = run(withEffects([], [focus]), seq(0.99, 0.9));
+
+    expect(out.updatedInitiativeOrder.find((p) => p.basicInfo.id === "ogre")?.combatStats.morale).toBe(1);
+    expect(out.newLogEntries.every((e) => "stateBefore" in e)).toBe(true);
+    expect(out.newLogEntries.some((e) => e.resultText.includes("Кінець ходу"))).toBe(true);
+  });
+});
