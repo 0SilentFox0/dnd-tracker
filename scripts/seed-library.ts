@@ -130,6 +130,8 @@ async function main() {
       appearanceDescription: spell.appearanceDescription,
       dice: d.dice,
       cost: d.cost,
+      stackable: d.stackable ?? false,
+      maxStacks: d.maxStacks ?? null,
       targeting: json(d.targeting),
       resolution: json(d.resolution),
       spellEffects: json(d.effects),
