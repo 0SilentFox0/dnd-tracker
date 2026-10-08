@@ -1,3 +1,24 @@
+export type CriticalEffectType =
+  | "double_damage"
+  | "max_damage"
+  | "advantage_next_attack"
+  | "ac_debuff"
+  | "additional_damage"
+  | "free_attack"
+  | "block_bonus_action"
+  | "ignore_reactions"
+  | "advantage_on_target"
+  | "combo_attack"
+  | "simple_miss"
+  | "prone"
+  | "disadvantage_next_attack"
+  | "lose_bonus_action"
+  | "weakened_next_hit"
+  | "provoke_opportunity_attack"
+  | "lose_reaction"
+  | "advantage_on_self"
+  | "lose_action";
+
 export interface CriticalEffect {
   id: number; // 1-10 для d10
   name: string;
@@ -5,7 +26,7 @@ export interface CriticalEffect {
   type: "success" | "fail";
   flavor: string[];
   effect: {
-    type: string;
+    type: CriticalEffectType;
     value?: number | string;
     duration?: number;
     target?: "self" | "target" | "next_turn";

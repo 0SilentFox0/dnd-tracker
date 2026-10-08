@@ -48,8 +48,18 @@ function specFor(effect: CriticalEffect): EffectSpec | null {
       return { idPart: "weakened", type: "debuff", legacy: "weakened_next_hit", legacyValue: 0.5, consumeOn: "ownHit", expireAtTurnEnd: true };
     case "lose_action":
       return { idPart: "no-action", type: "debuff", legacy: "skip_action", legacyValue: 100, duration: 1 };
-    default:
+    case "double_damage":
+    case "max_damage":
+    case "additional_damage":
+    case "free_attack":
+    case "ignore_reactions":
+    case "simple_miss":
+    case "lose_bonus_action":
+    case "provoke_opportunity_attack":
+    case "lose_reaction":
       return null;
+    default:
+      return effect.effect.type satisfies never;
   }
 }
 

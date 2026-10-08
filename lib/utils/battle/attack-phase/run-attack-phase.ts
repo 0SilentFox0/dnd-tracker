@@ -261,7 +261,9 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
     currentInitiativeOrder = currentInitiativeOrder.map((p) => updatedMap.get(p.basicInfo.id) ?? p);
     currentAttacker = attackResult.attackerUpdated;
 
-    if (["free_attack", "combo_attack"].includes(attackResult.criticalEffectApplied?.effect.type ?? "")) grantedExtra = true;
+    const critType = attackResult.criticalEffectApplied?.effect.type;
+
+    if (critType === "free_attack" || critType === "combo_attack") grantedExtra = true;
 
     if (rolledByServer && attackResult.success) {
       attackResult.battleAction.resultText = `${attackResult.battleAction.resultText} | 🎲 кубики шкоди кинув сервер: ${damageRollsForTarget.slice(sentRolls.length).join(", ")}`;
@@ -272,7 +274,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       actionIndex: baseBattleLog.length + allBattleActions.length,
     });
 
-    const provoked = attackResult.criticalEffectApplied?.effect.type === "provoke_opportunity_attack";
+    const provoked = critType === "provoke_opportunity_attack";
 
     if (i === 0 || provoked) {
       const retaliation = resolveRetaliation({

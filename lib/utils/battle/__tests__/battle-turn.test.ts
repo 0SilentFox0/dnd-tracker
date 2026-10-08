@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { CriticalEffect } from "@/lib/constants/critical-effects";
+import type { CriticalEffect, CriticalEffectType } from "@/lib/constants/critical-effects";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 import { applyCriticalEffect } from "@/lib/utils/battle/attack";
 import { processStartOfRound, processStartOfTurn } from "@/lib/utils/battle/battle-turn";
@@ -40,9 +40,9 @@ describe("processStartOfTurn", () => {
 });
 
 describe("critical effects at the start of turn", () => {
-  const crit = (type: string): CriticalEffect => ({ id: 1, name: "Е", description: "о", type: "success", flavor: [], effect: { type, duration: type === "lose_action" ? 1 : 2 } });
+  const crit = (type: CriticalEffectType): CriticalEffect => ({ id: 1, name: "Е", description: "о", type: "success", flavor: [], effect: { type, duration: type === "lose_action" ? 1 : 2 } });
 
-  const hit = (type: string) => applyCriticalEffect(createMockParticipant(), crit(type), 1);
+  const hit = (type: CriticalEffectType) => applyCriticalEffect(createMockParticipant(), crit(type), 1);
 
   it("lose_action takes the action on the next turn", () => {
     const p = hit("lose_action");

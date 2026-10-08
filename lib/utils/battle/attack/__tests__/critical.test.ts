@@ -2,11 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import { applyCriticalEffect } from "../critical";
 
-import type { CriticalEffect } from "@/lib/constants/critical-effects";
+import type { CriticalEffect, CriticalEffectType } from "@/lib/constants/critical-effects";
 import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 
-const crit = (type: string, extra: Partial<CriticalEffect["effect"]> = {}): CriticalEffect => ({
+const crit = (type: CriticalEffectType, extra: Partial<CriticalEffect["effect"]> = {}): CriticalEffect => ({
   id: 1,
   name: "Тест-ефект",
   description: "опис",
@@ -15,7 +15,7 @@ const crit = (type: string, extra: Partial<CriticalEffect["effect"]> = {}): Crit
   effect: { type, duration: 1, ...extra },
 });
 
-const apply = (type: string, extra: Partial<CriticalEffect["effect"]> = {}) =>
+const apply = (type: CriticalEffectType, extra: Partial<CriticalEffect["effect"]> = {}) =>
   applyCriticalEffect(createMockParticipant(), crit(type, extra), 3);
 
 const effectTypes = (p: ReturnType<typeof apply>) => p.battleData.activeEffects.flatMap((e) => e.effects.map((d) => d.type));
@@ -71,7 +71,7 @@ describe("applyCriticalEffect", () => {
   });
 
   it("marks on target and self make attackers roll with advantage", () => {
-    for (const type of ["advantage_on_target", "advantage_on_self"]) {
+    for (const type of ["advantage_on_target", "advantage_on_self"] as const) {
       expect(collectModifiers([apply(type)], "p1", { flag: "advantageForAttackers" }).flags.length).toBeGreaterThan(0);
     }
   });
@@ -113,7 +113,7 @@ describe("applyCriticalEffect", () => {
   it("ефекти урону й побічні (double_damage, simple_miss…) не змінюють учасника", () => {
     const base = createMockParticipant();
 
-    for (const type of ["double_damage", "max_damage", "extra_damage", "simple_miss", "half_damage", "disarm"]) {
+    for (const type of ["double_damage", "max_damage", "additional_damage", "simple_miss", "ignore_reactions", "provoke_opportunity_attack"] as const) {
       expect(applyCriticalEffect(base, crit(type), 1)).toEqual(base);
     }
   });
