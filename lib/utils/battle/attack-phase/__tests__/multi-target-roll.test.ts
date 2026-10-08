@@ -133,3 +133,33 @@ describe("free attack crit on a multi-target attack", () => {
     expect(r.finalInitiativeOrder.find((p) => p.basicInfo.id === "a")?.actionFlags.hasUsedAction).toBe(false);
   });
 });
+
+describe("crit effects on the attacker are for the next attack", () => {
+  const effectsOf = (r: ReturnType<typeof run>) => r.finalInitiativeOrder.find((p) => p.basicInfo.id === "a")?.battleData.activeEffects ?? [];
+
+  const volley = (critRng: number) =>
+    runAttackPhase({
+      battle: { initiativeOrder: [attacker, foe("t1"), foe("t2")], battleLog: [], currentRound: 1, currentTurnIndex: 0 },
+      data: { attackerId: "a", damageRolls: [4, 4], targetIds: ["t1", "t2"], attackRolls: [20, 15] } as never,
+      battleId: "b",
+      userId: "u",
+      isDM: true,
+      rng: seq(critRng, 0.5),
+    });
+
+  it("S3 advantage from the crit on target 1 is not used by target 2 and survives the action", () => {
+    const r = volley(0.25);
+
+    expect(r.allBattleActions[0].resultText).toContain("Advantage на наступну");
+    expect(r.allBattleActions[1].actionDetails.secondRoll).toBeUndefined();
+    expect(effectsOf(r).map((e) => e.consumeOn)).toEqual(["ownAttack"]);
+  });
+
+  it("S10 combo disadvantage is not applied to target 2 and the extra action stays", () => {
+    const r = volley(0.95);
+
+    expect(r.allBattleActions[1].actionDetails.secondRoll).toBeUndefined();
+    expect(effectsOf(r).map((e) => e.consumeOn)).toEqual(["ownAttack"]);
+    expect(r.finalInitiativeOrder.find((p) => p.basicInfo.id === "a")?.actionFlags.hasUsedAction).toBe(false);
+  });
+});

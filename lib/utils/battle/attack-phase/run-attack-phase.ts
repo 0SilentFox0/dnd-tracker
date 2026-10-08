@@ -11,7 +11,13 @@ import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
 import { diceCount, rollDiceList } from "@/lib/utils/common/dice";
-import type { BattleAction, BattleParticipant } from "@/types/battle";
+import type { ActiveEffect, BattleAction, BattleParticipant } from "@/types/battle";
+
+// Effects a crit puts on the attacker are for the next attack: they sit out the rest of the volley.
+const withoutEffects = (p: BattleParticipant, drop: ActiveEffect[]): BattleParticipant => ({
+  ...p,
+  battleData: { ...p.battleData, activeEffects: p.battleData.activeEffects.filter((e) => !drop.includes(e)) },
+});
 
 export type AttackPhaseInput = {
   battle: {
@@ -190,6 +196,10 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   let grantedExtra = false;
 
+  const effectsBeforeVolley = new Set(attacker.battleData.activeEffects.map((e) => e.id));
+
+  const heldBack: ActiveEffect[] = [];
+
   for (let i = 0; i < targets.length; i++) {
     const target = targets[i];
 
@@ -286,7 +296,21 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       }
     }
 
+    const created = currentAttacker.battleData.activeEffects.filter((e) => !effectsBeforeVolley.has(e.id) && !heldBack.includes(e));
+
+    if (created.length > 0) {
+      heldBack.push(...created);
+      currentInitiativeOrder = currentInitiativeOrder.map((p) => (p.basicInfo.id === attacker.basicInfo.id ? withoutEffects(p, created) : p));
+      currentAttacker = withoutEffects(currentAttacker, created);
+    }
+
     if (!isActive(currentAttacker)) break;
+  }
+
+  if (heldBack.length > 0) {
+    currentInitiativeOrder = currentInitiativeOrder.map((p) =>
+      p.basicInfo.id === attacker.basicInfo.id ? { ...p, battleData: { ...p.battleData, activeEffects: [...p.battleData.activeEffects, ...heldBack] } } : p,
+    );
   }
 
   if (grantedExtra) {
