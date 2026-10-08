@@ -35,10 +35,12 @@ export function spellDice(caster: SpellCaster, spell: SpellDiceSource, masteryOf
 
   const mastery = caster.kind === "hero" ? masteryOf(spell.groupId) : null;
 
+  const count = spell.dice > 0 ? spell.dice + Math.floor(level / 3) : 0;
+
   return {
-    count: spell.dice + Math.floor(level / 3),
+    count,
     sides: mastery ? SIDES_BY_MASTERY[mastery] : 6,
-    flat: level,
+    flat: count > 0 ? level : 0,
   };
 }
 

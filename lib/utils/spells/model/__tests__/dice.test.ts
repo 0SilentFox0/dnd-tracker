@@ -29,6 +29,26 @@ describe("spellDice", () => {
   });
 });
 
+describe("spellDice без кубиків", () => {
+  it("dice 0: без кубиків і бонусу рівня для героя і юніта", () => {
+    const buff = { dice: 0, groupId: "light" };
+
+    expect(spellDice({ kind: "hero", level: 6 }, buff, mastery)).toMatchObject({ count: 0, flat: 0 });
+    expect(spellDice({ kind: "unit", level: 6 }, buff, mastery)).toMatchObject({ count: 0, flat: 0 });
+  });
+});
+
+describe("schoolMasteryFromLearned", () => {
+  it("расові й ультимативні вузли не впливають на майстерність", () => {
+    const nodes: LearnedNode[] = [
+      { nodeId: "r", kind: "racial", skillId: null, branchId: "b-chaos", level: "expert", circle: null },
+      { nodeId: "u", kind: "ultimate", skillId: "s", branchId: "b-chaos", level: "expert", circle: null },
+    ];
+
+    expect(schoolMasteryFromLearned(nodes, { "b-chaos": "chaos" })("chaos")).toBeNull();
+  });
+});
+
 describe("assertSpellDice", () => {
   const expected = { count: 6, sides: 10 };
 
