@@ -133,4 +133,13 @@ describe("advanceTurn", () => {
       expect(second.participants.every((p) => p.actionFlags.hasExtraTurn === false)).toBe(true);
     });
   });
+
+  it("expireAtTurnEnd effects end with the owner's last turn", () => {
+    const e = (duration: number) => ({ id: "x", name: "x", type: "debuff", duration, appliedAt: { round: 1, timestamp: new Date(0) }, effects: [], expireAtTurnEnd: true }) as never;
+
+    const withE = (duration: number) => ({ ...hero, battleData: { ...hero.battleData, activeEffects: [e(duration)] } });
+
+    expect(advanceTurn({ participants: [withE(1), goblin], pending: [], scene }).participants[0].battleData.activeEffects).toEqual([]);
+    expect(advanceTurn({ participants: [withE(2), goblin], pending: [], scene }).participants[0].battleData.activeEffects).toHaveLength(1);
+  });
 });

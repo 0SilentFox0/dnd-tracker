@@ -140,4 +140,20 @@ describe("resolveRetaliation", () => {
 
     expect(calls("2d6 + STR") - calls("1d6")).toBe(1);
   });
+
+  it("consumes the defender's ownAttack effect and the attacker's attackAgainst effect", () => {
+    const e = (id: string, consumeOn: "ownAttack" | "attackAgainst") => ({ id, name: id, type: "buff", duration: 2, appliedAt: { round: 1, timestamp: new Date(0) }, effects: [], consumeOn }) as never;
+
+    const a = attacker();
+
+    const d = defender();
+
+    const r = retaliate(
+      { ...a, battleData: { ...a.battleData, activeEffects: [e("mark", "attackAgainst")] } },
+      { ...d, battleData: { ...d.battleData, activeEffects: [e("adv", "ownAttack")] } },
+    );
+
+    expect(find(r?.participants, "d")?.battleData.activeEffects).toEqual([]);
+    expect(find(r?.participants, "a")?.battleData.activeEffects).toEqual([]);
+  });
 });

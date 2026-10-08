@@ -73,7 +73,7 @@ export function applyCriticalEffect(
       activeEffects: addActiveEffect(
         updated,
         {
-          id: `critical-${spec.idPart}-${Date.now()}`,
+          id: `critical-${spec.idPart}-${Date.now()}-${updated.battleData.activeEffects.length}`,
           name: effect.name,
           type: spec.type,
           description: effect.description,

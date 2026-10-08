@@ -3,6 +3,7 @@ import type { AttackRollResult } from "../types/attack";
 import { appendHpChanges, type AttackFlow, getP, put } from "./process/ability-flow";
 import { buildRetaliationAction,type BuildRetaliationParams } from "./process/actions";
 import { resolveHit } from "./process/hit";
+import { activeEffectIds, consumeAttackEffects } from "./consume-effects";
 import { getDisabledAttackKinds } from "./disabled-attacks";
 import { calculateAttackRoll } from "./roll";
 
@@ -67,6 +68,8 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
 
   if (!weapon) return null;
 
+  const existedBefore = activeEffectIds(participants);
+
   const flow: AttackFlow = { ps: participants, messages: [], ctx: { round, rng } };
 
   put(flow, { ...defender, actionFlags: { ...defender.actionFlags, hasUsedReaction: true } });
@@ -118,5 +121,5 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
 
   appendHpChanges(battleAction, participants, flow.ps);
 
-  return { participants: flow.ps, battleAction };
+  return { participants: consumeAttackEffects(flow.ps, { attackerId: defenderId, targetId: attackerId, hit: isHit, existedBefore }), battleAction };
 }
