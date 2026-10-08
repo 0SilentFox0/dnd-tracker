@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { BRANCHES } from "../branches";
-import { buildLibrary, LIBRARY_COMPLETE, LIBRARY_SOURCE, MIN_APPEARANCE_LENGTH, raceSkills } from "../build";
+import { buildLibrary, LIBRARY_COMPLETE, LIBRARY_SOURCE, MIN_APPEARANCE_LENGTH, racePassiveAbilities, racePassiveStatModifiers, raceSkills } from "../build";
 import { PERSONAL } from "../personal";
 import { RACES } from "../races";
 import { SPELLS } from "../spells";
@@ -43,6 +43,14 @@ function race(key: string): LibraryRace {
     name: `Раса ${key}`,
     description: "Опис раси.",
     appearanceDescription: APPEARANCE,
+    passive: {
+      iconKey: "race-flag-humans",
+      name: "Пасивка",
+      description: "+1 до Сили.",
+      appearanceDescription: APPEARANCE,
+      stats: { strength: 1 },
+      trait: [{ id: `${key}-trait`, name: "Риса", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "noNegativeMorale" }] }],
+    },
     branchKeys: ["b"],
     spellSlotProgression: [],
     levels: [skill(`${key}-1`), skill(`${key}-2`), skill(`${key}-3`)],
@@ -69,6 +77,17 @@ function source(over: Partial<LibrarySource> = {}): LibrarySource {
 }
 
 describe("buildLibrary validation", () => {
+  it("rejects races with invalid or empty passives", () => {
+    const base = race("r");
+
+    const withPassive = (over: Partial<LibraryRace["passive"]>) => source({ branches: [branch("b")], races: [{ ...base, passive: { ...base.passive, ...over } }] });
+
+    expect(() => buildLibrary(withPassive({ description: " " }))).toThrow(/порожнє passive.description/);
+    expect(() => buildLibrary(withPassive({ appearanceDescription: "коротко" }))).toThrow(/пасивки коротший/);
+    expect(() => buildLibrary(withPassive({ trait: [] }))).toThrow(/порожній passive.trait/);
+    expect(() => buildLibrary(withPassive({ trait: [{ id: "x", name: "x", trigger: { event: "passive" }, effects: [{ kind: "heal", amount: { flat: 1 } } as never] }] }))).toThrow(/пасивка/);
+  });
+
   it("accepts a valid source", () => {
     const lib = buildLibrary(source({ spells: [spell("s")], branches: [branch("b", { spellSchool: "Світло" })], races: [race("r")] }));
 
@@ -149,6 +168,25 @@ describe("library content", () => {
     for (const b of BRANCHES) {
       expect(b.levels, b.key).toHaveLength(3);
       expect(b.slots.map((s) => s.length), b.key).toEqual([3, 2, 1]);
+    }
+  });
+
+  content("gives every race a passive with stat bonuses and one trait", () => {
+    const expected: Record<string, Record<string, number>> = {
+      humans: { strength: 1, dexterity: 1, constitution: 1, intelligence: 1, wisdom: 1, charisma: 1 },
+      demons: { strength: 2, charisma: 1 },
+      elves: { dexterity: 2, wisdom: 1 },
+      necromancers: { intelligence: 2, constitution: 1 },
+      mages: { intelligence: 2, wisdom: 1 },
+      "dark-elves": { dexterity: 2, charisma: 1 },
+      dwarves: { constitution: 2, strength: 1 },
+    };
+
+    for (const r of RACES) {
+      expect(r.passive.stats, r.key).toEqual(expected[r.key]);
+      expect(r.passive.trait, r.key).toHaveLength(1);
+      expect(racePassiveAbilities(r)[0].id, r.key).toBe(`${r.key}-stats`);
+      expect(Object.keys(racePassiveStatModifiers(r)), r.key).toEqual(Object.keys(expected[r.key]));
     }
   });
 

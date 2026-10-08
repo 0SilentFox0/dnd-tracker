@@ -5,7 +5,10 @@ import type { Race, StatModifier } from "@/types/races";
 import type { Skill } from "@/types/skills";
 
 export interface RacePassiveAbility {
+  name?: string;
+  icon?: string;
   description: string;
+  appearanceDescription?: string;
   statImprovements?: string;
   statModifiers?: Record<string, StatModifier>;
 }
@@ -43,7 +46,12 @@ export function normalizePassiveAbility(race: { passiveAbility?: unknown }): Rac
 
   const mods = obj.statModifiers;
 
+  const text = (v: unknown) => (typeof v === "string" && v !== "" ? v : undefined);
+
   return {
+    ...(text(obj.name) && { name: text(obj.name) }),
+    ...(text(obj.icon) && { icon: text(obj.icon) }),
+    ...(text(obj.appearanceDescription) && { appearanceDescription: text(obj.appearanceDescription) }),
     description: String(obj.description || ""),
     statImprovements: "statImprovements" in obj ? String(obj.statImprovements || "") : undefined,
     statModifiers: mods && typeof mods === "object" && !Array.isArray(mods) ? (mods as Record<string, StatModifier>) : undefined,

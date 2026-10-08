@@ -15,6 +15,8 @@ type RaceFromPrisma = Omit<Race, "availableSkills" | "disabledSkills" | "spellSl
 export function extractRaceImmunities(race: Race | RaceFromPrisma | null | undefined): string[] {
   if (!race?.passiveAbility) return [];
 
+  if (Array.isArray((race as { abilities?: unknown }).abilities) && ((race as { abilities: unknown[] }).abilities.length > 0)) return [];
+
   const passiveAbility = race.passiveAbility;
 
   const description =

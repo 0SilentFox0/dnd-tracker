@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import { buildLibrary } from "../../data/library/build";
-import { assertSeedTarget, findByName, mapRaceModifiers, parseArgs, remapRefs, treeInput } from "../seed-library-lib";
+import { assertSeedTarget, findByName, mapRaceModifiers, parseArgs, racePassiveData, remapRefs, treeInput } from "../seed-library-lib";
+
+import { AbilitySchema } from "@/lib/utils/abilities/schema";
 
 describe("seed-library-lib", () => {
   it("parses args", () => {
@@ -28,6 +30,23 @@ describe("seed-library-lib", () => {
 
     expect(remapRefs(input, maps)).toEqual([{ trigger: { school: "g1", spellIds: ["s1"] }, effects: [{ filter: { school: "g1" } }] }]);
     expect(() => remapRefs({ spellIds: ["zz"] }, maps)).toThrow(/zz/);
+  });
+
+  it("builds race passive data: display modifiers match applying stat abilities", () => {
+    for (const race of buildLibrary().races) {
+      const { passiveAbility, abilities } = racePassiveData(race);
+
+      expect(passiveAbility.description).toBe(race.passive.description);
+      expect(passiveAbility.name).toBe(race.passive.name);
+      expect(abilities.every((a) => AbilitySchema.safeParse(a).success)).toBe(true);
+
+      const applied = abilities.flatMap((a) => a.effects).flatMap((e) => (e.kind === "modifyStat" && typeof e.flat === "number" ? [[e.stat, e.flat] as const] : []));
+
+      for (const [stat, flat] of Object.entries(race.passive.stats)) expect(applied).toContainEqual([stat, flat]);
+
+      expect(Object.keys(passiveAbility.statModifiers).sort()).toEqual(Object.keys(race.passive.stats).sort());
+      expect(racePassiveData(race)).toEqual(racePassiveData(race));
+    }
   });
 
   it("maps race modifiers to ids", () => {

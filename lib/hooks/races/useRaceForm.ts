@@ -29,6 +29,7 @@ export function useRaceForm(campaignId: string, raceId: string, initial: RaceFor
     const data: RaceFormData = {
       ...formData,
       passiveAbility: {
+        ...formData.passiveAbility,
         description: formData.passiveAbility?.description || "",
         statImprovements: formData.passiveAbility?.statImprovements || "",
         statModifiers: formData.passiveAbility?.statModifiers || {},

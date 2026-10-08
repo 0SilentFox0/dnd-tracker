@@ -24,7 +24,7 @@ export function getInitialRaceFormData(race: {
     color: race.color ?? "",
     availableSkills: Array.isArray(race.availableSkills) ? race.availableSkills : [],
     disabledSkills: [],
-    passiveAbility: { description: passive?.description ?? "", statImprovements: passive?.statImprovements ?? "", statModifiers: passive?.statModifiers ?? {} },
+    passiveAbility: { ...passive, description: passive?.description ?? "", statImprovements: passive?.statImprovements ?? "", statModifiers: passive?.statModifiers ?? {} },
     spellSlotProgression:
       progression.length > 0 ? progression : DEFAULT_SPELL_SLOT_PROGRESSION,
     abilities: race.abilities ?? [],

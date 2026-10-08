@@ -1,3 +1,4 @@
+import { racePassiveAbilities, racePassiveStatModifiers } from "../data/library/build";
 import type { LibraryBranch, LibraryRace } from "../data/library/types";
 import { type BuildTreeInput } from "../lib/utils/skills/progression/tree-json";
 
@@ -46,6 +47,15 @@ export function assertSeedTarget(url: string | undefined, allowRemote: boolean):
   }
 
   return host;
+}
+
+export function racePassiveData(race: LibraryRace, iconUrl?: string) {
+  const { name, description, appearanceDescription } = race.passive;
+
+  return {
+    passiveAbility: { name, ...(iconUrl && { icon: iconUrl }), description, appearanceDescription, statModifiers: racePassiveStatModifiers(race) },
+    abilities: racePassiveAbilities(race),
+  };
 }
 
 export function findByName<T extends { name: string }>(rows: readonly T[], name: string): T | undefined {

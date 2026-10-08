@@ -1,3 +1,4 @@
+import { RACE_PASSIVES } from "./race-passives";
 import type { LibraryRace, LibrarySkill } from "./types";
 
 import type { Ability } from "@/lib/utils/abilities/schema";
@@ -62,6 +63,7 @@ const RUNE_ARMOR = [10, 15, 20];
 
 const humans: LibraryRace = {
   key: "humans",
+  passive: RACE_PASSIVES["humans"],
   branchKeys: ["leadership", "ranged", "attack", "defense", "light"],
   spellSlotProgression: STANDARD_SLOTS,
   name: "Люди",
@@ -107,6 +109,7 @@ const humans: LibraryRace = {
 
 const demons: LibraryRace = {
   key: "demons",
+  passive: RACE_PASSIVES["demons"],
   branchKeys: ["attack", "defense", "ranged", "dark", "leadership", "chaos"],
   spellSlotProgression: STANDARD_SLOTS,
   name: "Демони",
@@ -152,6 +155,7 @@ const demons: LibraryRace = {
 
 const elves: LibraryRace = {
   key: "elves",
+  passive: RACE_PASSIVES["elves"],
   branchKeys: ["leadership", "ranged", "attack", "defense", "nature"],
   spellSlotProgression: STANDARD_SLOTS,
   name: "Ельфи",
@@ -196,6 +200,7 @@ const elves: LibraryRace = {
 
 const necromancers: LibraryRace = {
   key: "necromancers",
+  passive: RACE_PASSIVES["necromancers"],
   branchKeys: ["ranged", "attack", "defense", "dark"],
   spellSlotProgression: STANDARD_SLOTS,
   name: "Некроманти",
@@ -243,6 +248,7 @@ const necromancers: LibraryRace = {
 
 const mages: LibraryRace = {
   key: "mages",
+  passive: RACE_PASSIVES["mages"],
   branchKeys: ["light", "dark", "chaos", "nature", "defense", "leadership"],
   spellSlotProgression: STANDARD_SLOTS,
   name: "Маги",
@@ -287,6 +293,7 @@ const mages: LibraryRace = {
 
 const darkElves: LibraryRace = {
   key: "dark-elves",
+  passive: RACE_PASSIVES["dark-elves"],
   branchKeys: ["attack", "defense", "ranged", "dark", "chaos"],
   spellSlotProgression: STANDARD_SLOTS,
   name: "Темні ельфи",
@@ -342,6 +349,7 @@ const darkElves: LibraryRace = {
 
 const dwarves: LibraryRace = {
   key: "dwarves",
+  passive: RACE_PASSIVES["dwarves"],
   branchKeys: ["leadership", "ranged", "attack", "defense", "light"],
   spellSlotProgression: STANDARD_SLOTS,
   name: "Гноми",

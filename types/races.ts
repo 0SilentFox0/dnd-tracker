@@ -26,7 +26,10 @@ export interface Race {
   availableSkills: string[];
   disabledSkills: string[];
   passiveAbility?: {
+    name?: string;
+    icon?: string;
     description: string;
+    appearanceDescription?: string;
     statImprovements?: string;
     statModifiers?: Record<string, StatModifier>; // Ключ - назва характеристики (strength, dexterity, etc.)
   } | null;
@@ -42,7 +45,10 @@ export interface RaceFormData {
   availableSkills: string[];
   disabledSkills: string[];
   passiveAbility?: {
+    name?: string;
+    icon?: string;
     description: string;
+    appearanceDescription?: string;
     statImprovements?: string;
     statModifiers?: Record<string, StatModifier>;
   };

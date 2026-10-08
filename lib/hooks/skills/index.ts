@@ -9,6 +9,7 @@ export {
   useUpdateMainSkill,
 } from "./useMainSkills";
 export { useProgressionActions } from "./useProgressionActions";
+export { useRacialSkills } from "./useRacialSkills";
 export { useSkillForm } from "./useSkillForm";
 export {
   useDeleteAllSkills,
