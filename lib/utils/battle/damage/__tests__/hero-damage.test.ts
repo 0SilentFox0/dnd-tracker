@@ -20,7 +20,7 @@ const target = createMockParticipant({ basicInfo: { ...base.basicInfo, id: "t1",
 
 const sword: BattleAttack = { id: "s", name: "Меч", type: AttackType.MELEE, attackBonus: 0, damageDice: "1d8+2", damageType: "slashing" };
 
-const maxDamage: CriticalEffect = { id: 2, name: "Максимальний урон", description: "", type: "success", effect: { type: "max_damage" } };
+const maxDamage: CriticalEffect = { id: 2, name: "Максимальний урон", description: "", type: "success", flavor: [], effect: { type: "max_damage" } };
 
 const hit = (attacker: BattleParticipant, attack: BattleAttack, rolls: number[], crit = false) =>
   computeHitDamage({

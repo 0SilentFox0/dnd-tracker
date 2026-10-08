@@ -11,6 +11,7 @@ const crit = (type: string, extra: Partial<CriticalEffect["effect"]> = {}): Crit
   name: "Тест-ефект",
   description: "опис",
   type: "success",
+  flavor: [],
   effect: { type, duration: 1, ...extra },
 });
 
