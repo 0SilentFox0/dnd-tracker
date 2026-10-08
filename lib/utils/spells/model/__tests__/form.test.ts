@@ -17,6 +17,8 @@ const row: Spell = {
   resolution: { kind: "save", ability: "dexterity", onSuccess: "half" },
   spellEffects: [{ kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" }],
   raceModifiers: [{ raceId: "human", percent: -100 }],
+  stackable: true,
+  maxStacks: 3,
 };
 
 describe("форма заклинання", () => {
@@ -35,7 +37,10 @@ describe("форма заклинання", () => {
       resolution: row.resolution,
       spellEffects: row.spellEffects,
       raceModifiers: row.raceModifiers,
+      stackable: true,
+      maxStacks: 3,
     });
+    expect(formToPayload({ ...spellToForm(row), stackable: false })).toMatchObject({ stackable: false, maxStacks: null });
   });
 
   it("порожня форма: за замовчуванням ворог, auto, без ефектів; потрібна назва", () => {

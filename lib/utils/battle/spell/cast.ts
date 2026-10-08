@@ -61,6 +61,8 @@ function abilityOf(spell: CastableSpell): ResolvedAbility {
     name: spell.name,
     trigger: { event: "spellCast", phase: "after", role: "caster" },
     effects: spell.definition.effects,
+    stackable: spell.definition.stackable === true,
+    maxStacks: spell.definition.maxStacks,
     key: `spell:${spell.id}`,
     source: { type: "skill", id: spell.id, name: spell.name, icon: spell.icon },
   } as ResolvedAbility;

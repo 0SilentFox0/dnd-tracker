@@ -8,7 +8,9 @@ import { AbilityEditorProvider } from "@/components/abilities/editor-context";
 import { EffectCard } from "@/components/abilities/EffectCard";
 import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
 import { useRaces } from "@/lib/hooks/races";
 import { allowedEffectKinds, newEffect } from "@/lib/utils/abilities/editor";
@@ -52,6 +54,19 @@ export function SpellFormEffects({ campaignId, formData, setFormData }: SpellFor
         <Button type="button" size="sm" variant="outline" className="mt-2" onClick={() => setFormData({ ...formData, spellEffects: [...formData.spellEffects, newEffect(allowedEffectKinds(TRIGGER)[0], TRIGGER)] })}>
           + ефект
         </Button>
+      </HudSection>
+
+      <HudSection title="Накладання">
+        <div className="flex items-center gap-3">
+          <Checkbox id="spell-stackable" checked={formData.stackable} onCheckedChange={(checked) => setFormData({ ...formData, stackable: checked === true, maxStacks: checked === true ? (formData.maxStacks ?? 3) : null })} />
+          <Label htmlFor="spell-stackable" className="cursor-pointer font-medium">
+            Ефекти складаються при повторному касті
+          </Label>
+          {formData.stackable && (
+            <Input aria-label="Макс. накладань" type="number" min={1} max={10} value={formData.maxStacks ?? 3} onChange={(e) => setFormData({ ...formData, maxStacks: Math.max(1, Math.min(10, parseInt(e.target.value) || 1)) })} className="w-20" />
+          )}
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">На ліміті оновлюється накладання з найменшою тривалістю.</p>
       </HudSection>
 
       <HudSection title="Расові модифікатори шкоди">

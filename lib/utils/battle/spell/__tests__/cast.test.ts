@@ -235,4 +235,34 @@ describe("castSpell", () => {
     expect(none.success).toBe(false);
     expect(hp(none, "e1")).toBe(200);
   });
+
+  it("Немічність: −2 AC складається до maxStacks, далі оновлюється найкоротший стак", () => {
+    const frail = spellOf({ dice: 0, stackable: true, maxStacks: 3, effects: [{ kind: "modifyStat", stat: "armor", flat: -2, duration: { rounds: 3 } }] });
+
+    const c = caster();
+
+    let target = enemy("e1");
+
+    for (let i = 0; i < 4; i++) {
+      const r = castSpell({ caster: c, spell: frail, targetIds: ["e1"], allParticipants: [c, target], currentRound: i + 1, battleId: "b", diceRolls: [], rng: seq(0.5) });
+
+      target = r.allParticipantsUpdated.find((p) => p.basicInfo.id === "e1") as BattleParticipant;
+    }
+
+    expect(target.battleData.activeEffects).toHaveLength(3);
+  });
+
+  it("без stackable повторний каст оновлює один ефект", () => {
+    const frail = spellOf({ dice: 0, effects: [{ kind: "modifyStat", stat: "armor", flat: -2, duration: { rounds: 3 } }] });
+
+    const c = caster();
+
+    let target = enemy("e1");
+
+    for (let i = 0; i < 3; i++) {
+      target = castSpell({ caster: c, spell: frail, targetIds: ["e1"], allParticipants: [c, target], currentRound: 1, battleId: "b", diceRolls: [], rng: seq(0.5) }).allParticipantsUpdated.find((p) => p.basicInfo.id === "e1") as BattleParticipant;
+    }
+
+    expect(target.battleData.activeEffects).toHaveLength(1);
+  });
 });

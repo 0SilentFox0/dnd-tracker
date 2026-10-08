@@ -38,6 +38,8 @@ export const SpellDefinitionSchema = z.object({
   resolution: SpellResolutionSchema,
   effects: z.array(EffectSchema),
   raceModifiers: z.array(RaceModifierSchema),
+  stackable: z.boolean().optional(),
+  maxStacks: z.number().int().min(1).max(10).optional(),
 });
 
 export type SpellCost = z.infer<typeof SpellCostSchema>;

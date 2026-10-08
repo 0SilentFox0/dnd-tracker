@@ -77,6 +77,7 @@ describe("readSpellDefinition", () => {
       resolution: { kind: "auto" },
       effects: [],
       raceModifiers: [],
+      stackable: false,
     });
   });
 
@@ -122,7 +123,7 @@ describe("readSpellDefinition", () => {
 
     const def = readSpellDefinition({ id: "s", dice: null, cost: null, targeting: null, resolution: null, spellEffects: null, raceModifiers: null });
 
-    expect(def).toEqual({ dice: 0, cost: "action", targeting: { kind: "enemy" }, resolution: { kind: "auto" }, effects: [], raceModifiers: [] });
+    expect(def).toEqual({ dice: 0, cost: "action", targeting: { kind: "enemy" }, resolution: { kind: "auto" }, effects: [], raceModifiers: [], stackable: false });
     expect(warn).not.toHaveBeenCalled();
   });
 
@@ -134,5 +135,11 @@ describe("readSpellDefinition", () => {
     expect(def.dice).toBe(0);
     expect(def.cost).toBe("action");
     expect(warn).toHaveBeenCalledTimes(2);
+  });
+
+  it("стаки: maxStacks читається лише для stackable і в межах 1–10", () => {
+    expect(readSpellDefinition({ id: "s", stackable: true, maxStacks: 3 })).toMatchObject({ stackable: true, maxStacks: 3 });
+    expect(readSpellDefinition({ id: "s", stackable: false, maxStacks: 3 }).maxStacks).toBeUndefined();
+    expect(readSpellDefinition({ id: "s", stackable: true, maxStacks: 99 }).maxStacks).toBeUndefined();
   });
 });

@@ -83,6 +83,8 @@ export async function PATCH(
         resolution: asJson(data.resolution),
         spellEffects: asJson(data.spellEffects),
         raceModifiers: asJson(data.raceModifiers),
+        stackable: data.stackable,
+        maxStacks: data.stackable === false ? null : data.maxStacks,
       },
       include: {
         spellGroup: true,

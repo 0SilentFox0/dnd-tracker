@@ -190,6 +190,8 @@ model Spell {
   resolution            Json        @default("{\"kind\":\"auto\"}")
   spellEffects          Json        @default("[]")
   raceModifiers         Json        @default("[]")
+  stackable             Boolean     @default(false)
+  maxStacks             Int?
   summonUnitId          String?
   summonUnit            Unit?       @relation("SpellSummonUnit", fields: [summonUnitId], references: [id], onDelete: SetNull)
   skills                Skill[]
