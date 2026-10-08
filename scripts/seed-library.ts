@@ -265,7 +265,7 @@ async function main() {
     skills.set(skill.key, await upsert("скіли", skillRows, skill.name, {
       create: () => prisma.skill.create({ data: { campaignId, ...data }, select: { id: true, name: true } }),
       update: (id) => prisma.skill.update({ where: { id }, data, select: { id: true, name: true } }),
-    }));
+    }, skill.formerNames));
   };
 
   for (const b of library.branches) {
