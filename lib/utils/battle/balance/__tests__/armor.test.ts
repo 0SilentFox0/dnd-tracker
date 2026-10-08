@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { AttackType } from "@/lib/constants/battle";
-import { ARMOR_FACTOR_MAX, ARMOR_FACTOR_MIN, REF_HERO_HIT, REF_UNIT_HIT } from "@/lib/constants/battle-balance";
+import { ARMOR_FACTOR_MIN, DEFENSE_FACTOR_MAX, REF_HERO_HIT, REF_UNIT_HIT } from "@/lib/constants/battle-balance";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { calculateAttackBonus } from "@/lib/utils/battle/attack/bonus";
 import {
@@ -47,15 +47,36 @@ describe("armorFactors", () => {
     expect(f.dpr).toBeCloseTo(hitChance(6, 14) / REF_UNIT_HIT);
   });
 
-  it("обрізає до [ARMOR_FACTOR_MIN, ARMOR_FACTOR_MAX]", () => {
-    expect(armorFactors({ ac: 30, attackBonus: -10 }, { toHit: 0, ac: 30 })).toEqual({ hp: ARMOR_FACTOR_MAX, dpr: ARMOR_FACTOR_MIN });
+  it("обрізає HP до [ARMOR_FACTOR_MIN, DEFENSE_FACTOR_MAX]", () => {
+    expect(armorFactors({ ac: 30, attackBonus: -10 }, { toHit: 0, ac: 30 })).toEqual({ hp: DEFENSE_FACTOR_MAX, dpr: ARMOR_FACTOR_MIN });
+    expect(armorFactors({ ac: 2 }, { toHit: 30 }).hp).toBeCloseTo(REF_HERO_HIT / 0.95);
   });
 
   it("закляття не кидають проти КД: діє лише частка зброї в шкоді партії", () => {
-    const full = armorFactors({ ac: 18 }, { toHit: 5 }).hp;
+    const hit = hitChance(5, 18) / REF_HERO_HIT;
 
     expect(armorFactors({ ac: 18 }, { toHit: 5, weaponShare: 0 }).hp).toBe(1);
-    expect(armorFactors({ ac: 18 }, { toHit: 5, weaponShare: 0.5 }).hp).toBeCloseTo(1 + 0.5 * (full - 1));
+    expect(armorFactors({ ac: 18 }, { toHit: 5, weaponShare: 0.5 }).hp).toBeCloseTo(1 / (0.5 * hit + 0.5));
+  });
+
+  it("опір типу і виду шкоди партії зменшує шкоду зброєю, вразливість — збільшує", () => {
+    const resist = { "ranged:piercing": 80, "melee:bludgeoning": -25 };
+
+    expect(armorFactors({ resist }, { weaponShare: 1, damageProfile: { "ranged:piercing": 1 } }).hp).toBe(DEFENSE_FACTOR_MAX);
+    expect(armorFactors({ resist }, { weaponShare: 1, damageProfile: { "ranged:piercing": 0.5, "melee:slashing": 0.5 } }).hp).toBeCloseTo(1 / 0.6);
+    expect(armorFactors({ resist }, { weaponShare: 1, damageProfile: { "melee:bludgeoning": 1 } }).hp).toBeCloseTo(0.8);
+  });
+
+  it("закляття бачать лише опір `spell`: імунітет до магії проти заклиначів", () => {
+    const casters = { weaponShare: 0.3, damageProfile: { "melee:piercing": 0.3 } };
+
+    expect(armorFactors({ resist: { spell: 100 } }, casters).hp).toBe(DEFENSE_FACTOR_MAX);
+    expect(armorFactors({ resist: { spell: 50 } }, casters).hp).toBeCloseTo(1 / (0.3 + 0.7 * 0.5));
+    expect(armorFactors({ resist: { "melee:fire": 100 } }, casters).hp).toBe(1);
+  });
+
+  it("без даних партії опори нічого не змінюють", () => {
+    expect(armorFactors({ resist: { spell: 100, "ranged:piercing": 50 } }, {})).toEqual({ hp: 1, dpr: 1 });
   });
 });
 
@@ -134,6 +155,24 @@ describe("чесний баланс з КД", () => {
     const size = (lib: UnitStats[]) => (pickEnemyRoster(p, lib)?.roster ?? []).reduce((a, r) => a + r.quantity, 0);
 
     expect(size(tough)).toBeLessThan(size(soft));
+  });
+
+  it("юніт з імунітетом до магії: проти заклиначів менший hpMult, ніж такий самий без імунітету", () => {
+    const casters = party({ toHit: 4, weaponShare: 0.3, damageProfile: { "melee:piercing": 0.3 } });
+
+    const roster = [{ unitId: "x", quantity: 3 }];
+
+    const immune = computeFairScaling(casters, roster, [unit("x", 30, 8, { resist: { spell: 100 } })]).units.x.hpMult;
+
+    expect(immune).toBeLessThan(computeFairScaling(casters, roster, [unit("x", 30, 8)]).units.x.hpMult);
+  });
+
+  it("опори без профілю партії — результат як раніше", () => {
+    const roster = [{ unitId: "a", quantity: 3 }];
+
+    const resisting = plain.map((u) => ({ ...u, resist: { spell: 100, "ranged:piercing": 50 } }));
+
+    expect(computeFairScaling(party(), roster, resisting)).toEqual(computeFairScaling(party(), roster, plain));
   });
 
   it("партія з високим влучанням бачить менше ефективного HP юніта", () => {

@@ -3,9 +3,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const db = vi.hoisted(() => ({
   unitFindMany: vi.fn(),
   spellFindMany: vi.fn(),
+  raceFindMany: vi.fn(async () => []),
 }));
 
-vi.mock("@/lib/db", () => ({ prisma: { unit: { findMany: db.unitFindMany }, spell: { findMany: db.spellFindMany } } }));
+vi.mock("@/lib/db", () => ({ prisma: { unit: { findMany: db.unitFindMany }, spell: { findMany: db.spellFindMany }, race: { findMany: db.raceFindMany } } }));
 
 import { computeFairScaling } from "../fair";
 import { loadUnitLibraryStats } from "../unit-library";

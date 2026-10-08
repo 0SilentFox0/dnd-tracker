@@ -1,4 +1,5 @@
 import { getNonMagicBranchDpr, getSpellDprFromBranchLevels } from "./dpr";
+import { damageKey } from "./resist";
 
 import { AttackType } from "@/lib/constants/battle";
 import { MIN_UNIT_STAT, TYPICAL_TARGETS } from "@/lib/constants/battle-balance";
@@ -25,6 +26,9 @@ export interface UnitStats {
   raceId: string | null;
   ac?: number;
   attackBonus?: number;
+  /** Best weapon's `kind:damageType` (party profile when the unit is an ally). */
+  damageKey?: string;
+  resist?: Record<string, number>;
 }
 
 export interface GetCharacterStatsParams {
@@ -110,6 +114,8 @@ export function getUnitStats(unit: UnitStatsInput): UnitStats {
 
   let weaponToHit: number | undefined;
 
+  let weaponKey: string | undefined;
+
   for (const a of attacks) {
     const isRanged = (a.type as string) === AttackType.RANGED;
 
@@ -122,6 +128,7 @@ export function getUnitStats(unit: UnitStatsInput): UnitStats {
     if (weaponToHit === undefined || avg * targets > weaponDpr) {
       weaponDpr = Math.max(weaponDpr, avg * targets);
       weaponToHit = (a.attackBonus ?? 0) + (isRanged ? dexMod : strMod) + (unit.proficiencyBonus ?? 0);
+      weaponKey = damageKey(isRanged ? AttackType.RANGED : AttackType.MELEE, a.damageType);
     }
   }
 
@@ -129,7 +136,9 @@ export function getUnitStats(unit: UnitStatsInput): UnitStats {
 
   const dpr = Math.max(MIN_UNIT_STAT, Math.max(weaponDpr, spellDpr) || diceAverage("1d6"));
 
-  const attackBonus = unit.proficiencyBonus !== undefined && weaponToHit !== undefined && weaponDpr >= spellDpr ? weaponToHit : undefined;
+  const weaponLeads = weaponToHit !== undefined && weaponDpr >= spellDpr;
+
+  const attackBonus = unit.proficiencyBonus !== undefined && weaponLeads ? weaponToHit : undefined;
 
   const hp = Math.max(MIN_UNIT_STAT, unit.maxHp);
 
@@ -143,6 +152,7 @@ export function getUnitStats(unit: UnitStatsInput): UnitStats {
     raceId: unit.raceId ?? null,
     ...(unit.armorClass !== undefined && { ac: unit.armorClass }),
     ...(attackBonus !== undefined && { attackBonus }),
+    ...(weaponLeads && weaponKey && { damageKey: weaponKey }),
   };
 }
 
@@ -164,6 +174,7 @@ export function getCharacterStats({ participant, branchLevels, magicMainSkillIds
   toHit: number;
   ac: number;
   weaponDpr: number;
+  damageKey: string;
   dprBreakdown: CharacterDprBreakdown;
 } {
   const melee = bestAttack(participant, AttackType.MELEE);
@@ -176,7 +187,9 @@ export function getCharacterStats({ participant, branchLevels, magicMainSkillIds
 
   const physicalDpr = Math.max(meleeAvg, rangedAvg);
 
-  const toHit = calculateAttackBonus(participant, (rangedAvg > meleeAvg ? ranged : melee).attack, [participant]);
+  const best = (rangedAvg > meleeAvg ? ranged : melee).attack;
+
+  const toHit = calculateAttackBonus(participant, best, [participant]);
 
   const spellDpr = getSpellDprFromBranchLevels(branchLevels ?? {}, magicMainSkillIds);
 
@@ -198,6 +211,7 @@ export function getCharacterStats({ participant, branchLevels, magicMainSkillIds
     toHit,
     ac: getEffectiveArmorClass(participant),
     weaponDpr,
+    damageKey: damageKey(attackKindOf(best.type), best.damageType),
     dprBreakdown: {
       physicalDpr,
       meleeAvg,

@@ -21,6 +21,8 @@ export interface PartyPower {
   ac?: number;
   /** Share of party DPR that comes from weapon attacks (rolled against AC). */
   weaponShare?: number;
+  /** Weapon DPR share of party DPR by `kind:damageType`. */
+  damageProfile?: Record<string, number>;
 }
 
 export interface PartyMember {
@@ -29,14 +31,15 @@ export interface PartyMember {
   toHit?: number;
   ac?: number;
   weaponDpr?: number;
+  damageKey?: string;
 }
 
-export function unitMember(u: { dpr: number; hp: number; ac?: number; attackBonus?: number }): PartyMember {
-  return { dpr: u.dpr, hp: u.hp, ac: u.ac, toHit: u.attackBonus, weaponDpr: u.attackBonus === undefined ? 0 : u.dpr };
+export function unitMember(u: { dpr: number; hp: number; ac?: number; attackBonus?: number; damageKey?: string }): PartyMember {
+  return { dpr: u.dpr, hp: u.hp, ac: u.ac, toHit: u.attackBonus, weaponDpr: u.attackBonus === undefined ? 0 : u.dpr, damageKey: u.damageKey };
 }
 
-export function heroMember(s: { dpr: number; hp: number; toHit: number; ac: number; weaponDpr: number }): PartyMember {
-  return { dpr: s.dpr, hp: s.hp, toHit: s.toHit, ac: s.ac, weaponDpr: s.weaponDpr };
+export function heroMember(s: { dpr: number; hp: number; toHit: number; ac: number; weaponDpr: number; damageKey: string }): PartyMember {
+  return { dpr: s.dpr, hp: s.hp, toHit: s.toHit, ac: s.ac, weaponDpr: s.weaponDpr, damageKey: s.damageKey };
 }
 
 export function buildPartyPower(members: Array<{ stats: PartyMember; quantity?: number; hero: boolean }>): PartyPower {
@@ -50,6 +53,8 @@ export function buildPartyPower(members: Array<{ stats: PartyMember; quantity?: 
 
   let acSum = 0;
 
+  const byKey: Record<string, number> = {};
+
   for (const { stats, quantity = 1, hero } of members) {
     party.dpr += stats.dpr * quantity;
     party.hp += stats.hp * quantity;
@@ -61,6 +66,8 @@ export function buildPartyPower(members: Array<{ stats: PartyMember; quantity?: 
     if (stats.toHit !== undefined && weaponDpr > 0) {
       hitWeight += weaponDpr;
       hitSum += stats.toHit * weaponDpr;
+
+      if (stats.damageKey) byKey[stats.damageKey] = (byKey[stats.damageKey] ?? 0) + weaponDpr;
     }
 
     if (stats.ac !== undefined) {
@@ -72,6 +79,8 @@ export function buildPartyPower(members: Array<{ stats: PartyMember; quantity?: 
   if (hitWeight > 0) {
     party.toHit = hitSum / hitWeight;
     party.weaponShare = party.dpr > 0 ? Math.min(1, hitWeight / party.dpr) : 1;
+
+    if (Object.keys(byKey).length > 0 && party.dpr > 0) party.damageProfile = Object.fromEntries(Object.entries(byKey).map(([k, v]) => [k, Math.min(1, v / party.dpr)]));
   }
 
   if (acCount > 0) party.ac = acSum / acCount;
@@ -79,7 +88,7 @@ export function buildPartyPower(members: Array<{ stats: PartyMember; quantity?: 
   return party;
 }
 
-/** The unit as this party feels it: HP scaled by how hard it is to hit, DPR by how easily it hits the party. */
+/** The unit as this party feels it: HP scaled by how much party damage lands (AC, resistances), DPR by how easily it hits the party. */
 export function effectiveUnit(unit: UnitStats, party: PartyPower): UnitStats {
   const f = armorFactors(unit, party);
 

@@ -51,6 +51,7 @@ export interface EntityStats {
   toHit?: number;
   ac?: number;
   weaponDpr?: number;
+  damageKey?: string;
   dprBreakdown?: CharacterDprBreakdown;
 }
 
@@ -59,4 +60,5 @@ export interface UnitEntityStats extends EntityStats {
   level: number;
   raceId: string | null;
   attackBonus?: number;
+  resist?: Record<string, number>;
 }

@@ -38,12 +38,15 @@ export const MAX_PICK_TOTAL = 14;
 export const MAX_BALANCE_ALLIES = 50;
 
 /** Шанс влучання героя в «середньому» бою: партії `balance-library` L3/6/10 (+7.5…+12) проти медіанного КД тірів 1/4/7 (13/14/16). */
-export const REF_HERO_HIT = 0.82;
+export const REF_HERO_HIT = 0.8;
 
 /** Шанс влучання юніта в «середньому» бою: медіанна атака тірів 1/4/7 (+6/+8/+9) проти КД героїв тих партій (12…17). */
-export const REF_UNIT_HIT = 0.65;
+export const REF_UNIT_HIT = 0.67;
 
-/** Межі поправки сили юніта за КД і влучанням. */
+/** Межі поправки сили юніта за КД, влучанням і опорами. */
 export const ARMOR_FACTOR_MIN = 0.5;
 
 export const ARMOR_FACTOR_MAX = 2;
+
+/** Верхня межа поправки HP: юніт з імунітетом до магії проти партії заклиначів (≈ 2/3 шкоди — закляття) справді втричі міцніший. */
+export const DEFENSE_FACTOR_MAX = 3;
