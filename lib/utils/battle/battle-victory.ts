@@ -1,4 +1,5 @@
 import { CombatStatus, ParticipantSide, SYSTEM_ACTOR } from "@/lib/constants/battle";
+import { restoreCharm } from "@/lib/utils/abilities/engine/charm";
 import { BattleAction, BattleParticipant } from "@/types/battle";
 
 /**
@@ -13,15 +14,22 @@ export interface VictoryCheckResult {
   message: string;
 }
 
+/** Зачарований юніт у переможних умовах лишається на своєму початковому боці. */
+function originalSide(p: BattleParticipant): ParticipantSide {
+  const origin = p.battleData.charmReturn ?? p.battleData.activeEffects.find((e) => e.charmOrigin)?.charmOrigin;
+
+  return origin?.side ?? p.basicInfo.side;
+}
+
 export function checkVictoryConditions(
   initiativeOrder: BattleParticipant[]
 ): VictoryCheckResult {
   // слот екстра-ходу — не окремий учасник
   const real = initiativeOrder.filter((p) => !p.basicInfo.isExtraTurnSlot);
 
-  const allies = real.filter((p) => p.basicInfo.side === ParticipantSide.ALLY);
+  const allies = real.filter((p) => originalSide(p) === ParticipantSide.ALLY);
 
-  const enemies = real.filter((p) => p.basicInfo.side === ParticipantSide.ENEMY);
+  const enemies = real.filter((p) => originalSide(p) === ParticipantSide.ENEMY);
 
   const allEnemiesDefeated = enemies.every(
     (enemy) => enemy.combatStats.status === CombatStatus.DEAD || enemy.combatStats.status === CombatStatus.UNCONSCIOUS
@@ -72,7 +80,9 @@ export function completeBattle(
   updatedParticipants: BattleParticipant[];
   battleAction: BattleAction;
 } {
-  const updatedParticipants = initiativeOrder.map((participant) => {
+  const restored = initiativeOrder.map(restoreCharm);
+
+  const updatedParticipants = restored.map((participant) => {
     if (
       result === "victory" &&
       participant.basicInfo.side === ParticipantSide.ALLY &&
@@ -106,7 +116,7 @@ export function completeBattle(
         ? "🎉 Бій завершено! Перемога союзників!"
         : "💀 Бій завершено! Поразка союзників!",
     // з учасників до відродження: після нього вони вже active
-    hpChanges: initiativeOrder
+    hpChanges: restored
       .filter(
         (p) =>
           result === "victory" &&

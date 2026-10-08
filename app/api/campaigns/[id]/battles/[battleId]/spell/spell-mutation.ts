@@ -80,6 +80,11 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
 
     assertSpellRolls(expected, diceRolls);
 
+    // клієнтські рятівні кидки приймаються лише від DM або за цілі, якими керує користувач; решту кидає сервер
+    const trusted = (data.saveRolls ?? []).filter((s) => ctx.isDM || order.find((p) => p.basicInfo.id === s.participantId)?.basicInfo.controlledBy === ctx.userId);
+
+    const serverRolled = definition.resolution.kind === "save" ? resolution.targetIds.filter((id) => !trusted.some((s) => s.participantId === id)) : [];
+
     const result = castSpell({
       caster,
       spell,
@@ -88,10 +93,16 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
       currentRound: ctx.scene.round,
       battleId: ctx.scene.id,
       diceRolls,
-      saveRolls: data.saveRolls,
+      saveRolls: trusted,
       isDMCast: ctx.isDM,
       rng,
     });
+
+    if (!result.success) throw new BattleRuleError("action_rejected", "Немає вільного слота для цього заклинання");
+
+    if (serverRolled.length > 0) {
+      result.battleAction.resultText = [result.battleAction.resultText, `🎲 рятівні кидки кинув сервер: ${serverRolled.map((id) => order.find((p) => p.basicInfo.id === id)?.basicInfo.name ?? id).join(", ")}`].join(" | ");
+    }
 
     if (data.preview) {
       return {

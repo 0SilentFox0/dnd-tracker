@@ -61,6 +61,39 @@ describe("spell mutation", () => {
     expect(slots?.["1"].current).toBe(1);
   });
 
+  it("без вільного слота — 422 і нічого не зберігається", async () => {
+    const empty = { ...caster, spellcasting: { ...caster.spellcasting, spellSlots: { "1": { max: 2, current: 0 } } } };
+
+    await expect(mutation()(context({ participants: [empty, goblin] }), body() as never)).rejects.toMatchObject({ code: "action_rejected" });
+  });
+
+  describe("рятівні кидки з клієнта", () => {
+    const save = { ...spellRow, resolution: { kind: "save", ability: "dexterity", onSuccess: "half" } } as unknown as Spell;
+
+    const saveBody = (roll: number) => body({ saveRolls: [{ participantId: "gob", roll }] });
+
+    const dealt = (out: { participants: BattleParticipant[] }) => goblin.combatStats.currentHp - (hpOf(out, "gob") as number);
+
+    it("гравець не може підкинути збереження чужій цілі: кидає сервер і це видно в лозі", async () => {
+      const out = await mutation(save)(context({ participants: [caster, goblin], rng: () => 0.99 }), saveBody(1) as never);
+
+      expect(dealt(out)).toBe(2);
+      expect(out.events[0].resultText).toContain("рятівні кидки кинув сервер");
+    });
+
+    it("DM може передати кидок цілі", async () => {
+      const out = await mutation(save)(context({ participants: [caster, goblin], isDM: true, userId: "dm", rng: () => 0.99 }), saveBody(1) as never);
+
+      expect(dealt(out)).toBe(5);
+    });
+
+    it("нецілий кидок відхиляє схема", async () => {
+      const { spellSchema } = await import("@/app/api/campaigns/[id]/battles/[battleId]/spell/cast-spell-schema");
+
+      expect(spellSchema.safeParse(saveBody(10.5)).success).toBe(false);
+    });
+  });
+
   it("preview: учасники не змінюються, у response — battleAction", async () => {
     const ctx = context({ participants: [caster, goblin] });
 

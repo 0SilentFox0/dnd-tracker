@@ -144,7 +144,7 @@ export function describeFlag(e: Extract<Effect, { kind: "flag" }>): string {
     case "minMorale":
       return `мораль не нижче ${signed(e.value)}`;
     case "conditionImmunity":
-      return e.conditions === "all" ? "імунітет до контролю" : `імунітет: ${e.conditions.map((c) => (c === "fear" ? "страх" : c)).join(", ")}`;
+      return e.conditions === "all" ? "імунітет до контролю" : `імунітет: ${e.conditions.map((c) => (c === "fear" ? "страх" : c === "berserk" ? "шал" : c === "charm" ? "чарування" : c)).join(", ")}`;
   }
 }
 
@@ -215,6 +215,8 @@ export const FLAG_FIELDS: Record<FlagKey, readonly FieldMeta[]> = {
       options: [
         { value: "all", label: "усі (контроль)" },
         { value: "fear", label: "страх" },
+        { value: "berserk", label: "шал" },
+        { value: "charm", label: "чарування (Ляльковод)" },
         ...Object.entries(CONDITION_LABELS).map(([value, label]) => ({ value, label })),
       ],
     },

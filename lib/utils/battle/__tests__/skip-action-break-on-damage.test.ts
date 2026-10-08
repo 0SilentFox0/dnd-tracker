@@ -73,6 +73,16 @@ describe("breakOnDamage", () => {
     expect(applyDamageToTarget(blind(), 0).updatedTarget.battleData.activeEffects).toHaveLength(1);
   });
 
+  it("Сліпота ендиться після тіку отрути на початку ходу", () => {
+    const poisoned = blind();
+
+    const withDot = { ...poisoned, battleData: { ...poisoned.battleData, activeEffects: [...poisoned.battleData.activeEffects, { id: "poison", name: "Чума", type: "debuff" as const, duration: 3, appliedAt: { round: 1, timestamp: new Date() }, effects: [], dotDamage: { damagePerRound: 3, damageType: "poison" } }] } };
+
+    const out = processStartOfTurn(withDot, 2, [withDot], seq(0.5));
+
+    expect(out.participant.battleData.activeEffects.map((e) => e.name)).toEqual(["Чума"]);
+  });
+
   it("стани без breakOnDamage лишаються", () => {
     const t = cast({ kind: "applyCondition", condition: "no_reaction", duration: { rounds: 2 }, target: "eventTarget" });
 

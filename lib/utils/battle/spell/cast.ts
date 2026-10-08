@@ -41,7 +41,7 @@ const usesRoll = (e: Effect) => {
 
 const isDamageEffect = (e: Effect) => e.kind === "dealDamage" || e.kind === "dot";
 
-const NO_TARGET_KINDS = new Set<Effect["kind"]>(["note", "summon", "randomOf"]);
+const NO_TARGET_KINDS = new Set<Effect["kind"]>(["note", "summon"]);
 
 const targetOf = (e: Effect) => (NO_TARGET_KINDS.has(e.kind) ? undefined : (e as { target?: string }).target);
 
@@ -160,29 +160,39 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     const resisted = applyResistance(target, planned, effect.damageType ?? "magic", { participants: flow.ps, fromSpell: true, extra: actionModifiers[id] });
 
     put(flow, applyRawDamage(target, resisted.finalDamage));
-    damageSteps[id] = resisted.steps;
+    damageSteps[id] = [...(damageSteps[id] ?? []), ...resisted.steps];
   };
 
-  for (const [index, id] of targetIds.entries()) {
+  interface Outcome {
+    skip: boolean;
+    factor: number;
+    raceMultiplier: number;
+  }
+
+  const SKIPPED: Outcome = { skip: true, factor: 0, raceMultiplier: 0 };
+
+  const resolveOutcome = (id: string, withSave: boolean): Outcome => {
     const target = findParticipant(flow.ps, id);
 
-    if (!target) continue;
+    if (!target) return SKIPPED;
 
     if (participantImmuneToSpell(target, spell.id, flow.ps, actionModifiers[id])) {
       flow.messages.push(`⛔ ${target.basicInfo.name}: імунітет до цього заклинання`);
-      continue;
+
+      return SKIPPED;
     }
 
     const race = raceEffect(def.raceModifiers, target);
 
     if (race.immune) {
       flow.messages.push(`⛔ ${target.basicInfo.name}: імунітет раси до ${spell.name}`);
-      continue;
+
+      return SKIPPED;
     }
 
     let factor = 1;
 
-    if (def.resolution.kind === "save") {
+    if (withSave && def.resolution.kind === "save") {
       const { ability: saveAbility, onSuccess } = def.resolution;
 
       const roll = saveRolls.find((s) => s.participantId === id)?.roll ?? Math.floor(rng() * 20) + 1;
@@ -195,17 +205,49 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
       if (factor === 0) {
         flow.messages.push(`🛡 ${target.basicInfo.name} уникає ${spell.name}`);
-        continue;
+
+        return SKIPPED;
       }
     }
 
+    return { skip: false, factor, raceMultiplier: race.multiplier };
+  };
+
+  const outcomes = new Map<string, Outcome>();
+
+  for (const id of targetIds) outcomes.set(id, resolveOutcome(id, true));
+
+  // ефекти не на цілі заклинання (всі вороги тощо): імунітети ворожих цілей діють і тут, збереження — лише для цілей каста
+  const outcomeFor = (id: string): Outcome => {
+    const known = outcomes.get(id);
+
+    if (known) return known;
+
+    const target = findParticipant(flow.ps, id);
+
+    const outcome = target && target.basicInfo.side !== caster.basicInfo.side ? resolveOutcome(id, false) : { skip: false, factor: 1, raceMultiplier: 1 };
+
+    outcomes.set(id, outcome);
+
+    return outcome;
+  };
+
+  const applyTo = (effect: Effect, effectIndex: number, id: string, index: number) => {
+    if (NO_TARGET_KINDS.has(effect.kind)) return run(effect, effectIndex, [id], baseFor(effect));
+
+    const outcome = outcomeFor(id);
+
+    if (outcome.skip || (outcome.factor < 1 && !usesRoll(effect))) return;
+
+    const roll = Math.floor(baseFor(effect) * outcome.factor * (isDamageEffect(effect) ? outcome.raceMultiplier : 1));
+
+    if (effect.kind === "dealDamage") dealDamage(effect, id, roll, index);
+    else run(effect, effectIndex, [id], roll);
+  };
+
+  for (const [index, id] of targetIds.entries()) {
     def.effects.forEach((effect, effectIndex) => {
-      if (!isPerTarget(effect) || (factor < 1 && !usesRoll(effect))) return;
-
-      const roll = Math.floor(baseFor(effect) * factor * (isDamageEffect(effect) ? race.multiplier : 1));
-
-      if (effect.kind === "dealDamage") dealDamage(effect, id, roll, index);
-      else run(effect, effectIndex, [id], roll);
+      if (isPerTarget(effect)) applyTo(effect, effectIndex, id, index);
     });
   }
 
@@ -214,9 +256,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
     const event: AbilityEvent = { type: "spellCast", phase: "after", actorId: casterId, targetIds, ...info };
 
-    const ids = resolveTargetIds(targetOf(effect) as Parameters<typeof resolveTargetIds>[0], casterId, event, flow.ps);
-
-    run(effect, effectIndex, ids, baseFor(effect));
+    resolveTargetIds(targetOf(effect) as Parameters<typeof resolveTargetIds>[0], casterId, event, flow.ps).forEach((id, index) => applyTo(effect, effectIndex, id, index));
   });
 
   updatedCaster = getP(flow, casterId);
