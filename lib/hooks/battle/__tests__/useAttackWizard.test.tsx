@@ -122,6 +122,6 @@ describe("useAttackWizard", () => {
     act(() => result.current.damage([6]));
     act(() => result.current.submit());
 
-    await waitFor(() => expect(scene.showResult).toHaveBeenCalledWith(expect.objectContaining({ kind: "miss", critFail: { name: "Падіння", flavor: "Ви спотикаєтесь." } })));
+    await waitFor(() => expect(scene.showResult).toHaveBeenCalledWith(expect.objectContaining({ kind: "miss", critFail: expect.objectContaining({ name: "Падіння", flavor: "Ви спотикаєтесь." }) })));
   });
 });

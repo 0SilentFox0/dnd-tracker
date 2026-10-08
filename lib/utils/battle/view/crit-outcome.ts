@@ -6,6 +6,8 @@ export interface CritOutcome {
   type: "success" | "fail";
 }
 
+export type CritEffectFx = Omit<CritOutcome, "type">;
+
 export function critOutcome(log: BattleAction[], seen: ReadonlySet<number>, attackerId: string, targetId: string): CritOutcome | undefined {
   const e = log.find((x) => !seen.has(x.actionIndex) && x.actionType === "attack" && x.actorId === attackerId && x.targets[0]?.participantId === targetId && x.actionDetails.criticalEffect);
 
