@@ -1,23 +1,20 @@
+import { holdBackNewEffects, restoreHeldBack } from "./hold-back";
+
 import { AttackType } from "@/lib/constants/battle";
 import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { isActive, withSelf } from "@/lib/utils/abilities/engine/participants";
+import { isActive, mergeParticipants, updateParticipant, withSelf } from "@/lib/utils/abilities/engine/participants";
 /**
  * Runs the attack phase: validation, processAttack per target, primary-target retaliation.
  * Used by the attack route.
  */
 import type { Rng } from "@/lib/utils/abilities/engine/types";
 import { processAttack } from "@/lib/utils/battle/attack";
+import { activeEffectIds } from "@/lib/utils/battle/attack/consume-effects";
 import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
 import { diceCount, rollDiceList } from "@/lib/utils/common/dice";
 import type { ActiveEffect, BattleAction, BattleParticipant } from "@/types/battle";
-
-// Effects a crit puts on the attacker are for the next attack: they sit out the rest of the volley.
-const withoutEffects = (p: BattleParticipant, drop: ActiveEffect[]): BattleParticipant => ({
-  ...p,
-  battleData: { ...p.battleData, activeEffects: p.battleData.activeEffects.filter((e) => !drop.includes(e)) },
-});
 
 export type AttackPhaseInput = {
   battle: {
@@ -200,7 +197,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   let grantedExtra = false;
 
-  const effectsBeforeVolley = new Set(attacker.battleData.activeEffects.map((e) => e.id));
+  const effectsBeforeVolley = activeEffectIds([attacker]);
 
   const heldBack: ActiveEffect[] = [];
 
@@ -256,9 +253,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
     if (hitsAllEnemies && attackResult.success) damageCursor += dicePerTarget;
 
-    const updatedMap = new Map((attackResult.allParticipantsUpdated ?? []).map((p) => [p.basicInfo.id, p]));
-
-    currentInitiativeOrder = currentInitiativeOrder.map((p) => updatedMap.get(p.basicInfo.id) ?? p);
+    currentInitiativeOrder = mergeParticipants(currentInitiativeOrder, attackResult.allParticipantsUpdated ?? []);
     currentAttacker = attackResult.attackerUpdated;
 
     const critType = attackResult.criticalEffectApplied?.effect.type;
@@ -291,10 +286,8 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       });
 
       if (retaliation) {
-        const byId = new Map(retaliation.participants.map((p) => [p.basicInfo.id, p]));
-
-        currentInitiativeOrder = currentInitiativeOrder.map((p) => byId.get(p.basicInfo.id) ?? p);
-        currentAttacker = byId.get(attacker.basicInfo.id) ?? currentAttacker;
+        currentInitiativeOrder = mergeParticipants(currentInitiativeOrder, retaliation.participants);
+        currentAttacker = retaliation.participants.find((p) => p.basicInfo.id === attacker.basicInfo.id) ?? currentAttacker;
         allBattleActions.push({
           ...retaliation.battleAction,
           actionIndex: baseBattleLog.length + allBattleActions.length,
@@ -302,29 +295,19 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       }
     }
 
-    const created = currentAttacker.battleData.activeEffects.filter(
-      (e) => !effectsBeforeVolley.has(e.id) && !heldBack.includes(e) && e.id.startsWith("critical-") && e.consumeOn,
-    );
+    const held = holdBackNewEffects(currentInitiativeOrder, currentAttacker, effectsBeforeVolley);
 
-    if (created.length > 0) {
-      heldBack.push(...created);
-      currentInitiativeOrder = currentInitiativeOrder.map((p) => (p.basicInfo.id === attacker.basicInfo.id ? withoutEffects(p, created) : p));
-      currentAttacker = withoutEffects(currentAttacker, created);
-    }
+    currentInitiativeOrder = held.order;
+    currentAttacker = held.attacker;
+    heldBack.push(...held.held);
 
     if (!isActive(currentAttacker)) break;
   }
 
-  if (heldBack.length > 0) {
-    currentInitiativeOrder = currentInitiativeOrder.map((p) =>
-      p.basicInfo.id === attacker.basicInfo.id ? { ...p, battleData: { ...p.battleData, activeEffects: [...p.battleData.activeEffects, ...heldBack] } } : p,
-    );
-  }
+  currentInitiativeOrder = restoreHeldBack(currentInitiativeOrder, attacker.basicInfo.id, heldBack);
 
   if (grantedExtra) {
-    currentInitiativeOrder = currentInitiativeOrder.map((p) =>
-      p.basicInfo.id === attacker.basicInfo.id ? { ...p, actionFlags: { ...p.actionFlags, hasUsedAction: false } } : p,
-    );
+    currentInitiativeOrder = updateParticipant(currentInitiativeOrder, attacker.basicInfo.id, (p) => ({ ...p, actionFlags: { ...p.actionFlags, hasUsedAction: false } }));
   }
 
   const finalInitiativeOrder = currentInitiativeOrder;

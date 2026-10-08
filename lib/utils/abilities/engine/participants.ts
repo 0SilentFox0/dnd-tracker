@@ -18,6 +18,12 @@ export function updateParticipant(
   return ps.map((p) => (p.basicInfo.id === id ? fn(p) : p));
 }
 
+export function mergeParticipants(ps: BattleParticipant[], updated: BattleParticipant[]): BattleParticipant[] {
+  const byId = new Map(updated.map((p) => [p.basicInfo.id, p]));
+
+  return ps.map((p) => byId.get(p.basicInfo.id) ?? p);
+}
+
 export function isActive(p: BattleParticipant): boolean {
   return p.combatStats.status === CombatStatus.ACTIVE;
 }

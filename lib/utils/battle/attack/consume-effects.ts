@@ -1,12 +1,12 @@
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
-const effectKey = (participantId: string, effectId: string) => `${participantId}:${effectId}`;
+export const effectKey = (participantId: string, effectId: string) => `${participantId}:${effectId}`;
 
 export function activeEffectIds(ps: BattleParticipant[]): Set<string> {
   return new Set(ps.flatMap((p) => p.battleData.activeEffects.map((e) => effectKey(p.basicInfo.id, e.id))));
 }
 
-const withoutEffects = (p: BattleParticipant, drop: (e: ActiveEffect) => boolean): BattleParticipant => {
+export const withoutEffects = (p: BattleParticipant, drop: (e: ActiveEffect) => boolean): BattleParticipant => {
   if (!p.battleData.activeEffects.some(drop)) return p;
 
   return { ...p, battleData: { ...p.battleData, activeEffects: p.battleData.activeEffects.filter((e) => !drop(e)) } };
