@@ -49,6 +49,7 @@ export interface ActiveEffect {
     healPerRound: number;
   };
   breakOnDamage?: boolean;
+  charmOrigin?: { side: ParticipantSide; controlledBy: string };
   abilityKey?: string;
   abilityEffects?: StaticEffect[];
   source?: { participantId: string; name: string; abilityName?: string; icon?: string | null };
@@ -190,6 +191,8 @@ export interface BattleParticipantBattleData {
   resolvedAbilities: ResolvedAbility[];
   spellEnhancers: SpellEnhancer[];
   abilityUsage?: Record<string, AbilityUsageCounter>;
+  /** Чарм скінчився: сторона й контролер повертаються наприкінці цього ходу */
+  charmReturn?: { side: ParticipantSide; controlledBy: string };
   /** Масштаб шкоди ворога-юніта для рівного бою (старт бою); немає = ×1 */
   damageMultiplier?: number;
   /** Масштаб HP ворога-юніта для рівного бою; лише для показу ДМу */

@@ -20,6 +20,7 @@ export interface ResolveHitParams {
   currentRound: number;
   actionModifiers?: StaticEffect[];
   bonusPercent?: number;
+  bonusLabel?: string;
 }
 
 export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageResult; vampirismHeal: number } {
@@ -36,6 +37,7 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
     currentRound: p.currentRound,
     actionModifiers: p.actionModifiers,
     bonusPercent: p.bonusPercent,
+    bonusLabel: p.bonusLabel,
     rng: flow.ctx.rng,
   });
 

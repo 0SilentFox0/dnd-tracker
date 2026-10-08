@@ -77,11 +77,15 @@ export function processStartOfTurn(
     const durationResult = decreaseEffectDurations(updatedParticipant);
 
     expiredEffects = durationResult.expiredEffects;
+
+    const charmEnded = updatedParticipant.battleData.activeEffects.find((e) => e.charmOrigin && !durationResult.updatedEffects.some((u) => u.id === e.id));
+
     updatedParticipant = {
       ...updatedParticipant,
       battleData: {
         ...updatedParticipant.battleData,
         activeEffects: durationResult.updatedEffects,
+        ...(charmEnded?.charmOrigin && { charmReturn: charmEnded.charmOrigin }),
       },
     };
   }

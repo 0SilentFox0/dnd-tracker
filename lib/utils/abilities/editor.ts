@@ -33,6 +33,10 @@ function baseEffect(kind: EffectKind): Effect {
       return { kind, damagePerRound: "1d4", damageType: "bleed", duration: { rounds: 2 }, target: "eventTarget" };
     case "hot":
       return { kind, healPerRound: "1d4", duration: { rounds: 2 }, target: "eventTarget" };
+    case "berserk":
+      return { kind, damageBonusPercent: 50, duration: { rounds: 1 }, target: "eventTarget" };
+    case "charm":
+      return { kind, duration: { rounds: 1 }, target: "eventTarget" };
     case "applyCondition":
       return { kind, condition: "no_reaction", duration: { rounds: 1 }, target: "eventTarget" };
     case "restoreSpellSlot":

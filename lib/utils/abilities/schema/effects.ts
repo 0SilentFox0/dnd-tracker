@@ -128,6 +128,15 @@ const HotSchema = z.object({
   ...target,
 });
 
+const BerserkSchema = z.object({
+  kind: z.literal("berserk"),
+  damageBonusPercent: z.number().min(0).max(300),
+  duration: DurationSchema,
+  ...target,
+});
+
+const CharmSchema = z.object({ kind: z.literal("charm"), duration: DurationSchema, ...target });
+
 const ApplyConditionSchema = z.object({
   kind: z.literal("applyCondition"),
   condition: z.enum(CONDITION_KEYS),
@@ -173,6 +182,8 @@ const BASE_EFFECTS = [
   HealSchema,
   DotSchema,
   HotSchema,
+  BerserkSchema,
+  CharmSchema,
   ApplyConditionSchema,
   RestoreSpellSlotSchema,
   ChangeMoraleSchema,

@@ -15,6 +15,8 @@ export interface ProcessAttackParams {
   currentRound: number;
   battleId: string;
   damageMultiplier?: number;
+  bonusPercent?: number;
+  bonusLabel?: string;
   rng?: () => number;
 }
 

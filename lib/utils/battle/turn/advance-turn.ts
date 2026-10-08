@@ -3,12 +3,14 @@ import type { PendingMoraleCheckPayload } from "./pending-morale";
 import { runAdvanceTurnLoop } from "./run-advance-turn-loop";
 import { applyVictoryCompletion } from "./turn-helpers";
 
+import { restoreCharm } from "@/lib/utils/abilities/engine/charm";
 import { isActive } from "@/lib/utils/abilities/engine/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import type { BattleSceneState, ScenePatch } from "@/lib/utils/battle/store";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 export interface AdvanceTurnInput {
+  rng?: () => number;
   participants: BattleParticipant[];
   pending: BattleParticipant[];
   scene: BattleSceneState;
@@ -21,7 +23,7 @@ export interface AdvanceTurnOutput {
   actions: BattleAction[];
 }
 
-export function advanceTurn({ participants, pending, scene }: AdvanceTurnInput): AdvanceTurnOutput {
+export function advanceTurn({ participants, pending, scene, rng }: AdvanceTurnInput): AdvanceTurnOutput {
   let order = participants;
 
   const actions: BattleAction[] = [];
@@ -42,6 +44,8 @@ export function advanceTurn({ participants, pending, scene }: AdvanceTurnInput):
     order = ended.participants;
 
     if (ended.messages.length > 0) actions.push(turnEndAction(ending, scene, ended.messages));
+
+    order = order.map((p) => (p.basicInfo.id === ending.basicInfo.id && p.battleData.charmReturn ? restoreCharm(p) : p));
   }
 
   const current = order[scene.turnIndex];
@@ -88,6 +92,7 @@ export function advanceTurn({ participants, pending, scene }: AdvanceTurnInput):
     battleId: scene.id,
     currentBattleLogLength: scene.eventSeq + actions.length,
     pendingSummons: pending,
+    rng,
   });
 
   const newLogEntries = [...loop.newLogEntries];

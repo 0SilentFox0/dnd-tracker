@@ -119,6 +119,8 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     damageMultiplier,
     currentRound,
     actionModifiers: actionModifiers[attackerId],
+    bonusPercent: params.bonusPercent,
+    bonusLabel: params.bonusLabel,
   });
 
   const {

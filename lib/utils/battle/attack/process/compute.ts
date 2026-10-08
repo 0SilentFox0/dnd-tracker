@@ -27,6 +27,7 @@ export interface ComputeHitDamageParams {
   currentRound: number;
   actionModifiers?: StaticEffect[];
   bonusPercent?: number;
+  bonusLabel?: string;
   rng?: () => number;
 }
 
@@ -158,7 +159,7 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
     const factor = 1 + params.bonusPercent / 100;
 
     physicalDamage = Math.floor(physicalDamage * factor);
-    damageSteps.push({ label: "Контратака", side: "attacker", kind: "multiplier", value: factor, after: physicalDamage });
+    damageSteps.push({ label: params.bonusLabel ?? "Контратака", side: "attacker", kind: "multiplier", value: factor, after: physicalDamage });
   }
 
   const dmgMult =

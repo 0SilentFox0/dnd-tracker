@@ -1,4 +1,5 @@
-import { findParticipant, isActive, resolvedAbilitiesOf, updateParticipant } from "./participants";
+import { restoreCharm } from "./charm";
+import { findParticipant, isActive, replaceParticipant, resolvedAbilitiesOf, updateParticipant } from "./participants";
 import { resolveTargetIds } from "./targets";
 import type { AbilityRunContext, AbilityRunResult, Downed, SummonRequest } from "./types";
 import { recordUse, resetUsage, withinLimits } from "./usage";
@@ -96,7 +97,7 @@ export function resolveDowned(
 
   const deep = { ...ctx, depth: 1 };
 
-  let ps = participants;
+  let ps = replaceParticipant(participants, restoreCharm(victim));
 
   const messages: string[] = [];
 
