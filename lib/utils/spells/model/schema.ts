@@ -28,8 +28,10 @@ export const RaceModifierSchema = z.object({
   percent: z.number().min(-100).max(200),
 });
 
+export const SpellDiceSchema = z.number().int().min(0).max(20);
+
 export const SpellDefinitionSchema = z.object({
-  dice: z.number().int().min(0).max(20),
+  dice: SpellDiceSchema,
   cost: SpellCostSchema,
   targeting: SpellTargetingSchema,
   resolution: SpellResolutionSchema,

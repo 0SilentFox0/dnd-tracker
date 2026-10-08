@@ -112,4 +112,23 @@ describe("readSpellDefinition", () => {
     expect(def.effects).toHaveLength(1);
     expect(def.raceModifiers).toEqual([]);
   });
+
+  it("явні null у колонках -> значення за замовчуванням без попереджень", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    const def = readSpellDefinition({ id: "s", dice: null, cost: null, targeting: null, resolution: null, spellEffects: null, raceModifiers: null });
+
+    expect(def).toEqual({ dice: 0, cost: "action", targeting: { kind: "enemy" }, resolution: { kind: "auto" }, effects: [], raceModifiers: [] });
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it("невалідні dice і cost -> за замовчуванням з попередженням", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    const def = readSpellDefinition({ id: "s", dice: 25, cost: "reaction" });
+
+    expect(def.dice).toBe(0);
+    expect(def.cost).toBe("action");
+    expect(warn).toHaveBeenCalledTimes(2);
+  });
 });

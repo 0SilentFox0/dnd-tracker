@@ -6,6 +6,7 @@ import {
   type SpellCost,
   SpellCostSchema,
   type SpellDefinition,
+  SpellDiceSchema,
   type SpellResolution,
   SpellResolutionSchema,
   type SpellTargeting,
@@ -64,11 +65,9 @@ export const spellTargeting = (row: SpellRow): SpellTargeting => readOne(SpellTa
 
 export const spellResolution = (row: SpellRow): SpellResolution => readOne(SpellResolutionSchema, row.resolution, DEFAULT_RESOLUTION, "resolution", row.id);
 
-export const spellCost = (row: SpellRow): SpellCost => {
-  const parsed = SpellCostSchema.safeParse(row.cost);
+export const spellCost = (row: SpellRow): SpellCost => readOne(SpellCostSchema, row.cost, "action", "cost", row.id);
 
-  return parsed.success ? parsed.data : "action";
-};
+export const spellDiceCount = (row: SpellRow): number => readOne(SpellDiceSchema, row.dice, 0, "dice", row.id);
 
 export const spellEffects = (row: SpellRow): Effect[] => readList<Effect>(EffectSchema, row.spellEffects, "effects", row.id);
 
@@ -76,7 +75,7 @@ export const spellRaceModifiers = (row: SpellRow): RaceModifier[] => readList<Ra
 
 export function readSpellDefinition(row: SpellRow): SpellDefinition {
   return {
-    dice: typeof row.dice === "number" && row.dice >= 0 ? row.dice : 0,
+    dice: spellDiceCount(row),
     cost: spellCost(row),
     targeting: spellTargeting(row),
     resolution: spellResolution(row),
