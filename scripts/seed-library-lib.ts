@@ -70,6 +70,16 @@ export function findByName<T extends { name: string }>(rows: readonly T[], name:
   return rows.find((r) => r.name.toLowerCase() === lower);
 }
 
+export function findByNames<T extends { name: string }>(rows: readonly T[], name: string, formerNames: readonly string[] = []): T | undefined {
+  for (const n of [name, ...formerNames]) {
+    const found = findByName(rows, n);
+
+    if (found) return found;
+  }
+
+  return undefined;
+}
+
 function lookup(map: ReadonlyMap<string, string>, key: string, what: string): string {
   const id = map.get(key);
 
@@ -133,6 +143,11 @@ export function unitRow(unit: LibraryUnit, maps: Pick<IdMaps, "groups" | "spells
     maxTargets: Math.max(1, ...unit.attacks.map((a) => a.targets ?? 1)),
     levelScaling: unit.levelScaling ? { ...unit.levelScaling } : Prisma.DbNull,
   };
+}
+
+/** Library icon on create; on update only fills an empty avatar so a DM-set one survives. */
+export function unitAvatar(iconUrl: string, existingAvatar?: string | null): { avatar?: string } {
+  return existingAvatar ? {} : { avatar: iconUrl };
 }
 
 export function mapRaceModifiers(modifiers: { raceKey: string; percent: number }[], races: ReadonlyMap<string, string>) {

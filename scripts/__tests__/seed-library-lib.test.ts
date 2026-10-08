@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { buildLibrary } from "../../data/library/build";
 import type { LibraryUnit } from "../../data/library/types";
 import { falloff, raiseOnKill } from "../../data/library/unit-abilities";
-import { artifactRows, assertSeedTarget, findByName, mapRaceModifiers, parseArgs, racePassiveData, remapRefs, remapSummonUnits, treeInput, unitRow } from "../seed-library-lib";
+import { artifactRows, assertSeedTarget, findByName, findByNames, mapRaceModifiers, parseArgs, racePassiveData, remapRefs, remapSummonUnits, treeInput, unitAvatar, unitRow } from "../seed-library-lib";
 
 import { AbilitySchema } from "@/lib/utils/abilities/schema";
 import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
@@ -24,6 +24,14 @@ describe("seed-library-lib", () => {
   it("finds rows by name case-insensitively", () => {
     expect(findByName([{ name: "Люди", id: "1" }], "люди")?.id).toBe("1");
     expect(findByName([{ name: "Люди" }], "Ельфи")).toBeUndefined();
+  });
+
+  it("finds a renamed row by a former name, preferring the current name", () => {
+    const rows = [{ name: "Поклик звіра", id: "old" }];
+
+    expect(findByNames(rows, "Призив Фенікса", ["Поклик звіра"])?.id).toBe("old");
+    expect(findByNames([...rows, { name: "призив фенікса", id: "new" }], "Призив Фенікса", ["Поклик звіра"])?.id).toBe("new");
+    expect(findByNames(rows, "Призив Фенікса")).toBeUndefined();
   });
 
   it("remaps school and spell references everywhere", () => {
@@ -174,6 +182,15 @@ describe("seed-library-lib", () => {
 
       expect(row).toMatchObject({ raceId: null, knownSpells: [], maxTargets: 1 });
       expect(row.abilities).toEqual([expect.objectContaining({ trigger: { event: "passive" }, effects: [{ kind: "note", text: "Літає" }] })]);
+    });
+
+    it("unitAvatar sets the library icon on create and fills only an empty avatar on update", () => {
+      const url = "https://x.supabase.co/storage/v1/object/public/unit-icons/humans-marksman.webp";
+
+      expect(unitAvatar(url)).toEqual({ avatar: url });
+      expect(unitAvatar(url, null)).toEqual({ avatar: url });
+      expect(unitAvatar(url, "")).toEqual({ avatar: url });
+      expect(unitAvatar(url, "https://dm.example/custom.png")).toEqual({});
     });
 
     it("fails on an unknown race", () => {

@@ -52,3 +52,10 @@ describe("artifact icons", () => {
     expect(iconPublicUrl("https://x.supabase.co", "moonblade", "artifact")).toBe("https://x.supabase.co/storage/v1/object/public/artifact-icons/moonblade.webp");
   });
 });
+
+describe("unit icons", () => {
+  it("uses the unit-icons bucket", () => {
+    expect(iconBucket("humans-peasant", "unit")).toBe("unit-icons");
+    expect(iconPublicUrl("https://x.supabase.co", "humans-peasant", "unit")).toBe("https://x.supabase.co/storage/v1/object/public/unit-icons/humans-peasant.webp");
+  });
+});

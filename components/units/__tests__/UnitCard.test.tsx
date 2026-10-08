@@ -63,3 +63,16 @@ describe("UnitCard вміння", () => {
     expect(screen.getByText("Влучання · bleed 1d4/раунд × 2 р.")).toBeInTheDocument();
   });
 });
+
+describe("UnitCard середня шкода", () => {
+  afterEach(cleanup);
+
+  it("як у бою: кубики + Сила для ближньої, + Спритність для дальньої", () => {
+    const archer = { ...unit, strength: 10, dexterity: 16, attacks: [{ name: "Лук", type: "ranged", attackBonus: 0, damageDice: "1d8", damageType: "piercing" }] } as unknown as Unit;
+
+    render(<UnitCard unit={archer} campaignId="c1" onDelete={vi.fn()} />);
+
+    expect(screen.getByText(/Урон ~8/)).toBeInTheDocument();
+    expect(screen.getByText("(1d8 +3 СПР)")).toBeInTheDocument();
+  });
+});

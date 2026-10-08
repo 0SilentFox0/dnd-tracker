@@ -356,6 +356,24 @@ describe("library content", () => {
     }
   });
 
+  content("«Призив Фенікса» summons the scaling Phoenix that is reborn once at half HP", () => {
+    const spell = SPELLS.find((sp) => sp.key === "call-of-the-beast")!;
+
+    expect(spell.name).toBe("Призив Фенікса");
+    expect(spell.formerNames).toEqual(["Поклик звіра"]);
+    expect(spell.level).toBe(5);
+    expect(spell.definition.effects).toEqual([{ kind: "summon", unitId: "neutral-phoenix" }]);
+
+    const phoenix = UNITS.find((u) => u.key === "neutral-phoenix")!;
+
+    expect(phoenix).toMatchObject({ name: "Фенікс", raceKey: null, tier: 7, flying: true, levelScaling: { hpPerLevel: 10, damagePerLevel: 1, attackPerTwoLevels: 1 } });
+
+    const rebirth = phoenix.abilities.find((a) => a.trigger.event === "lethalDamage");
+
+    expect(rebirth?.limits).toEqual({ perBattle: 1 });
+    expect(rebirth?.effects).toEqual([{ kind: "heal", amount: { percentOf: "maxHp", value: 50 }, revive: true, target: "self" }]);
+  });
+
   content("scales the earth elemental to 73 HP at level 6", () => {
     const earth = UNITS.find((u) => u.key === "neutral-earth-elemental")!;
 

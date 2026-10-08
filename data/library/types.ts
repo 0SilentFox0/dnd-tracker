@@ -21,6 +21,8 @@ export interface LibrarySpell extends LibraryEntry {
   level: number;
   definition: Omit<SpellDefinition, "raceModifiers">;
   raceModifiers: LibrarySpellRaceModifier[];
+  /** Seed matches spells by name; old names let a rename update the existing row instead of duplicating it. */
+  formerNames?: string[];
 }
 
 export interface LibrarySkill extends LibraryEntry {
