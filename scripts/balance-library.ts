@@ -1,14 +1,16 @@
 #!/usr/bin/env tsx
 /**
- * Баланс бібліотеки скілів і заклять: автобої героїв (3 побудови × рівні 3/6/10) проти складів Tier 1/4/7 з imports/units-import.csv.
- * Лише локальна БД. Кампанія «SIM: баланс бібліотеки» створюється разом із сідом бібліотеки й імпортом юнітів.
+ * Баланс бібліотеки: автобої героїв (3 побудови × рівні 3/6/10) проти складів Tier 1/4/7 кожної раси з бібліотечних юнітів.
+ * Лише локальна БД. Кампанія «SIM: баланс бібліотеки» створюється разом із сідом бібліотеки (юніти теж із нього).
  *
- *   pnpm balance-library [--runs=6] [--levels=3,6,10] [--parties=mixed,martial,caster,leader] [--reuse] [--sets] [--fixed-roster]
+ *   pnpm balance-library [--runs=6] [--levels=3,6,10] [--parties=mixed,martial,caster,leader] [--races=humans,demons,…] [--reuse] [--sets] [--fixed-roster]
  */
 import type { Prisma } from "@prisma/client";
 import { execFileSync } from "node:child_process";
 
+import { abilityActionSchema, createAbilityActionMutation } from "../app/api/campaigns/[id]/battles/[battleId]/ability-action/ability-action-mutation";
 import { attackBodySchema, attackMutation } from "../app/api/campaigns/[id]/battles/[battleId]/attack/attack-mutation";
+import { bonusActionSchema, createBonusActionMutation } from "../app/api/campaigns/[id]/battles/[battleId]/bonus-action/bonus-action-mutation";
 import { moraleCheckMutation } from "../app/api/campaigns/[id]/battles/[battleId]/morale-check/morale-check-mutation";
 import { nextTurnMutation } from "../app/api/campaigns/[id]/battles/[battleId]/next-turn/next-turn-mutation";
 import { spellSchema } from "../app/api/campaigns/[id]/battles/[battleId]/spell/cast-spell-schema";
@@ -16,6 +18,7 @@ import { createSpellMutation } from "../app/api/campaigns/[id]/battles/[battleId
 import { createStartMutation } from "../app/api/campaigns/[id]/battles/[battleId]/start/start-mutation";
 import { loadCharacterBalanceStats } from "../app/api/campaigns/[id]/battles/balance/character-stats";
 import { LIBRARY_ARTIFACT_SETS } from "../data/library/artifacts";
+import { RACES } from "../data/library/races";
 import { BATTLE_LOG_RECENT_EVENTS, ParticipantSourceType } from "../lib/constants/battle";
 import { CampaignRole } from "../lib/constants/campaigns";
 import { prisma } from "../lib/db";
@@ -30,9 +33,10 @@ import { type PipelineDeps, runBattleMutation, type RunBattleMutationOptions } f
 import { casterSpellDice } from "../lib/utils/battle/spell/caster-dice";
 import { spellTargetingFor } from "../lib/utils/battle/spell/spell-targeting";
 import { loadBattle, loadRecentEvents, saveBattle } from "../lib/utils/battle/store";
-import { needsMoraleCheck } from "../lib/utils/battle/view";
+import { bonusTargetCandidates, needsBonusTarget, needsMoraleCheck, usableAbilities } from "../lib/utils/battle/view";
 import { rollDiceList } from "../lib/utils/common/dice";
 import { branchLevelNodeId, canLearn, normalizeTree, racialNodeId, type TreeNodes } from "../lib/utils/skills/progression";
+import type { ResolvedAbility } from "../types/abilities";
 import type { BattleMutationResponse, BattleScene } from "../types/api";
 import type { BattleParticipant } from "../types/battle";
 import { SIM_PLAYER, SIM_USER } from "./simulate-battle-scenario";
@@ -54,6 +58,8 @@ const RUNS = Number(arg("runs", "6"));
 const LEVELS = arg("levels", "3,6,10").split(",").map(Number);
 
 const TIER_OF_LEVEL: Record<number, number> = { 3: 1, 6: 4, 10: 7 };
+
+const RACE_KEYS = arg("races", RACES.map((r) => r.key).join(",")).split(",");
 
 const REUSE = process.argv.includes("--reuse");
 
@@ -111,6 +117,8 @@ let lastBody: Record<string, unknown> = {};
 let moraleExtra = 0;
 
 const castLog: Record<string, number> = {};
+
+const abilityLog: Record<string, number> = {};
 
 let dealt: Record<string, { dmg: number; turns: number }> = {};
 
@@ -170,6 +178,10 @@ const NEXT = { access: "currentController" as const, requireStatus: "active" as 
 
 const summonDeps = { loadPool: async (id: string) => ({ units: await prisma.unit.findMany({ where: { campaignId: id } }), races: await prisma.race.findMany({ where: { campaignId: id } }) }) };
 
+const BONUS = { access: "member" as const, requireStatus: "active" as const, schema: bonusActionSchema, mutate: createBonusActionMutation(summonDeps) };
+
+const ABILITY = { access: "member" as const, requireStatus: "active" as const, schema: abilityActionSchema, mutate: createAbilityActionMutation(summonDeps) };
+
 const SPELL = { access: "member" as const, requireStatus: "active" as const, schema: spellSchema, dryRun: (b: { preview?: boolean }) => b.preview === true, mutate: createSpellMutation({ loadSpell: (id) => prisma.spell.findUnique({ where: { id } }), ...summonDeps }) };
 
 type SpellRow = Awaited<ReturnType<typeof prisma.spell.findMany>>[number];
@@ -186,7 +198,7 @@ function pickSpell(actor: BattleParticipant, foes: BattleParticipant[]): { spell
   for (const id of actor.spellcasting.knownSpells) {
     const spell = spellById.get(id);
 
-    const slot = spell && actor.spellcasting.spellSlots[String(spell.level)];
+    const slot = spell && (actor.spellcasting.spellSlots[String(spell.level)] ?? actor.spellcasting.spellSlots.universal);
 
     if (!spell || !slot || slot.current <= 0) continue;
 
@@ -219,6 +231,46 @@ function pickSpell(actor: BattleParticipant, foes: BattleParticipant[]): { spell
   return best;
 }
 
+function abilityTargets(actor: BattleParticipant, ability: ResolvedAbility, foes: BattleParticipant[]): string[] | null {
+  if (!needsBonusTarget(ability)) return [];
+
+  const side = (p: BattleParticipant) => p.basicInfo.side === actor.basicInfo.side;
+
+  const ratio = (p: BattleParticipant) => hp(p) / Math.max(1, p.combatStats.maxHp);
+
+  const candidates = bonusTargetCandidates(ability, state.initiativeOrder.filter(side), foes, actor).sort((a, b) => ratio(a) - ratio(b));
+
+  const picked = candidates.slice(0, ability.maxTargets ?? 1).map((p) => p.basicInfo.id);
+
+  return picked.length ? picked : null;
+}
+
+// Автоплей юнітів: бонусні дії щоходу, дії здібностей лише «раз за бій» (замість атаки), коли є ціль.
+async function playUnitAbilities(actor: BattleParticipant, foes: BattleParticipant[]): Promise<boolean> {
+  for (const ability of usableAbilities(actor, "bonusAction")) {
+    const targets = abilityTargets(actor, ability, foes);
+
+    if (targets) await call("bonus-action", BONUS, { participantId: actor.basicInfo.id, abilityKey: ability.key, targetParticipantIds: targets });
+  }
+
+  for (const ability of usableAbilities(actor, "action").filter((a) => a.limits?.perBattle)) {
+    const targets = abilityTargets(actor, ability, foes.filter(alive));
+
+    if (!targets) continue;
+
+    const status = await call("ability-action", ABILITY, { participantId: actor.basicInfo.id, abilityKey: ability.key, targetParticipantIds: targets });
+
+    if (status === 200) {
+      abilityLog[ability.name] = (abilityLog[ability.name] ?? 0) + 1;
+      await call("next-turn", NEXT);
+
+      return true;
+    }
+  }
+
+  return false;
+}
+
 async function playTurn(actor: BattleParticipant, foes: BattleParticipant[]) {
   if (needsMoraleCheck(actor, state.initiativeOrder, state.pendingMoraleCheck)) {
     const status = await call("morale-check", MORALE, { participantId: actor.basicInfo.id, d10Roll: 1 + Math.floor(rng() * 10) });
@@ -234,9 +286,20 @@ async function playTurn(actor: BattleParticipant, foes: BattleParticipant[]) {
     }
   }
 
+  if (actor.basicInfo.sourceType === ParticipantSourceType.UNIT && (await playUnitAbilities(actor, foes))) return;
+
+  actor = state.initiativeOrder.find((p) => p.basicInfo.id === actor.basicInfo.id) ?? actor;
+  foes = foes.map((f) => state.initiativeOrder.find((p) => p.basicInfo.id === f.basicInfo.id) ?? f).filter(alive);
+
+  if (foes.length === 0) {
+    await call("next-turn", NEXT);
+
+    return;
+  }
+
   const weapon = actor.battleData.attacks[0];
 
-  if (actor.basicInfo.sourceType === ParticipantSourceType.CHARACTER) {
+  if (actor.spellcasting.knownSpells.length > 0) {
     const pick = pickSpell(actor, foes);
 
     if (pick) {
@@ -251,7 +314,8 @@ async function playTurn(actor: BattleParticipant, foes: BattleParticipant[]) {
       if (status !== 200 && process.argv.includes("--debug")) console.info(`   cast ${pick.spell.name} -> ${status} ${JSON.stringify(lastBody).slice(0, 200)}`);
 
       if (status === 200) {
-        casts++;
+        if (actor.basicInfo.side === "ally") casts++;
+
         castLog[pick.spell.name] = (castLog[pick.spell.name] ?? 0) + 1;
         await call("next-turn", NEXT);
 
@@ -401,7 +465,6 @@ async function setupCampaign() {
   const run = (script: string, ...args: string[]) => execFileSync("pnpm", ["exec", "tsx", "--env-file=.env.local", "--tsconfig", "tsconfig.scripts.json", script, ...args], { stdio: "inherit" });
 
   run("scripts/seed-library.ts", campaign.id);
-  run("scripts/import-units.ts", "imports/units-import.csv", campaign.id);
 
   return campaign.id;
 }
@@ -504,8 +567,12 @@ async function main() {
 
   const library = await loadUnitLibraryStats(campaignId);
 
+  const raceRows = await prisma.race.findMany({ where: { campaignId }, select: { id: true, name: true } });
+
+  const raceIds = new Map(RACES.map((r) => [r.key, raceRows.find((row) => row.name === r.name)?.id]));
+
   console.info(`Кампанія ${campaignId}, прогонів на зв'язку: ${RUNS}`);
-  console.info("party | рівень | tier | склад | сер. раундів | перемоги | полеглі | HP лишилось | незавершені");
+  console.info("раса | party | рівень | tier | склад | сер. раундів | перемоги | полеглі | HP лишилось | незавершені");
 
   const rows: string[] = [];
 
@@ -524,50 +591,57 @@ async function main() {
         party.hp += s.hp;
       }
 
-      const pick = pickEnemyRoster(party, library.filter((u) => u.level === tier));
+      for (const raceKey of RACE_KEYS) {
+        const raceId = raceIds.get(raceKey);
 
-      if (!pick) {
-        rows.push(`${partyKey} | ${level} | ${tier} | не вдалося підібрати склад`);
-        continue;
+        if (!raceId) throw new Error(`Раси «${raceKey}» немає в кампанії`);
+
+        const pick = pickEnemyRoster(party, library.filter((u) => u.level === tier && u.raceId === raceId));
+
+        if (!pick) {
+          rows.push(`${raceKey} | ${partyKey} | L${level} | T${tier} | не вдалося підібрати склад`);
+          continue;
+        }
+
+        const scaling = computeFairScaling(party, pick.roster, library);
+
+        const setup = [
+          ...heroIds.map((id) => ({ id, type: ParticipantSourceType.CHARACTER, side: "ally" })),
+          ...pick.roster.map((r) => ({ id: r.unitId, type: ParticipantSourceType.UNIT, side: "enemy", quantity: r.quantity })),
+        ];
+
+        const results: FightResult[] = [];
+
+        for (let seed = 1; seed <= RUNS; seed++) results.push(await fight(seed * 101 + level, setup));
+
+        const rosterText = pick.roster.map((r) => `${r.name}×${r.quantity}`).join("+");
+
+        const mults = Object.values(scaling.units).map((u) => `${u.hpMult.toFixed(2)}/${u.dmgMult.toFixed(2)}`).join(",");
+
+        const perBuild = Object.entries(
+          results.reduce<Record<string, { dmg: number; turns: number }>>((acc, r) => {
+            for (const [k, v] of Object.entries(r.dealt)) {
+              acc[k] ??= { dmg: 0, turns: 0 };
+              acc[k].dmg += v.dmg;
+              acc[k].turns += v.turns;
+            }
+
+            return acc;
+          }, {}),
+        )
+          .map(([k, v]) => `${k} ${(v.dmg / Math.max(1, v.turns)).toFixed(1)}/хід`)
+          .join(" ");
+
+        const row = `${raceKey} | ${partyKey} | L${level} | T${tier} | ${rosterText} (hp/дмг ${mults}) | ${avg(results.map((r) => r.rounds))} | ${results.filter((r) => r.completed && r.heroesWon).length}/${RUNS} | ${avg(results.map((r) => r.deaths))} | ${avg(results.map((r) => r.hpLeft))}% | ${results.filter((r) => !r.completed).length} | casts ${avg(results.map((r) => r.casts))} | extra ${avg(results.map((r) => r.extras))} | ${perBuild}`;
+
+        rows.push(row);
+        console.info(row);
       }
-
-      const scaling = computeFairScaling(party, pick.roster, library);
-
-      const setup = [
-        ...heroIds.map((id) => ({ id, type: ParticipantSourceType.CHARACTER, side: "ally" })),
-        ...pick.roster.map((r) => ({ id: r.unitId, type: ParticipantSourceType.UNIT, side: "enemy", quantity: r.quantity })),
-      ];
-
-      const results: FightResult[] = [];
-
-      for (let seed = 1; seed <= RUNS; seed++) results.push(await fight(seed * 101 + level, setup));
-
-      const rosterText = pick.roster.map((r) => `${r.name}×${r.quantity}`).join("+");
-
-      const mults = Object.values(scaling.units).map((u) => `${u.hpMult.toFixed(2)}/${u.dmgMult.toFixed(2)}`).join(",");
-
-      const perBuild = Object.entries(
-        results.reduce<Record<string, { dmg: number; turns: number }>>((acc, r) => {
-          for (const [k, v] of Object.entries(r.dealt)) {
-            acc[k] ??= { dmg: 0, turns: 0 };
-            acc[k].dmg += v.dmg;
-            acc[k].turns += v.turns;
-          }
-
-          return acc;
-        }, {}),
-      )
-        .map(([k, v]) => `${k} ${(v.dmg / Math.max(1, v.turns)).toFixed(1)}/хід`)
-        .join(" ");
-
-      const row = `${partyKey} | L${level} | T${tier} | ${rosterText} (hp/дмг ${mults}) | ${avg(results.map((r) => r.rounds))} | ${results.filter((r) => r.completed && r.heroesWon).length}/${RUNS} | ${avg(results.map((r) => r.deaths))} | ${avg(results.map((r) => r.hpLeft))}% | ${results.filter((r) => !r.completed).length} | casts ${avg(results.map((r) => r.casts))} | extra ${avg(results.map((r) => r.extras))} | ${perBuild}`;
-
-      rows.push(row);
-      console.info(row);
     }
   }
 
   console.info("\n" + rows.join("\n"));
+  console.info(`Вміння юнітів: ${Object.entries(abilityLog).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v}`).join(", ")}`);
   console.info(`Касти: ${Object.entries(castLog).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v}`).join(", ")}`);
   await prisma.$disconnect();
 }

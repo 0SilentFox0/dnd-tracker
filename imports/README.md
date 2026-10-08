@@ -5,7 +5,7 @@
 ## Файли
 
 - `spells-import.csv` - заклинання для імпорту
-- `units-import.csv` - юніти для імпорту
+- `units-import.csv` - приклад CSV юнітів для ручного імпорту (не бібліотека)
 
 ## Використання
 
@@ -13,10 +13,18 @@
 
 У застосунку: ДМ → Заклинання → «Імпорт» (CSV або JSON).
 
-### Імпорт юнітів
+### Юніти
+
+Бібліотечні юніти (7 рас × 21 + нейтрали) — джерело `data/library/units`, сідяться разом з бібліотекою:
 
 ```bash
-npm run import-units <campaignId> imports/units-import.csv
+pnpm seed-library <campaignId>
+```
+
+`import-units` лишається ручним інструментом для власних CSV DM, але не для бібліотеки:
+
+```bash
+pnpm import-units imports/units-import.csv <campaignId>
 ```
 
 ## Формат файлів
