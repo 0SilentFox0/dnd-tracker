@@ -24,6 +24,18 @@ export function LimitsSection({ ability, path, onChange }: AbilitySectionProps) 
     );
   }
 
+  const isButton = ability.trigger.event === "bonusAction" || ability.trigger.event === "action";
+
+  const setTop = (name: "stackable" | "maxStacks" | "maxTargets", v: unknown) => {
+    const next = { ...ability, [name]: v } as typeof ability;
+
+    if (v === undefined || v === false) delete next[name];
+
+    if (name === "stackable" && v !== true) delete next.maxStacks;
+
+    onChange(next);
+  };
+
   const set = (name: keyof Limits, v: unknown) => {
     const next: Limits = { ...ability.limits, [name]: v };
 
@@ -41,6 +53,15 @@ export function LimitsSection({ ability, path, onChange }: AbilitySectionProps) 
         {LIMIT_FIELDS.map((f) => (
           <FieldRenderer key={f.name} meta={f} path={`${path}.limits.${f.name}`} value={ability.limits?.[f.name as keyof Limits]} onChange={(v) => set(f.name as keyof Limits, v)} />
         ))}
+      </div>
+      <div className="grid grid-cols-6 items-end gap-2 [&>*]:min-w-0">
+        <FieldRenderer meta={{ name: "stackable", label: "Ефекти складаються", input: "toggle", optional: true }} path={`${path}.stackable`} value={ability.stackable} onChange={(v) => setTop("stackable", v)} />
+        {ability.stackable && (
+          <FieldRenderer meta={{ name: "maxStacks", label: "Макс. стаків", input: "number", optional: true }} path={`${path}.maxStacks`} value={ability.maxStacks} onChange={(v) => setTop("maxStacks", v)} />
+        )}
+        {isButton && (
+          <FieldRenderer meta={{ name: "maxTargets", label: "Макс. цілей", input: "number", optional: true }} path={`${path}.maxTargets`} value={ability.maxTargets} onChange={(v) => setTop("maxTargets", v)} />
+        )}
       </div>
     </div>
   );

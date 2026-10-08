@@ -4,7 +4,9 @@ import { useEffect, useEffectEvent, useMemo, useReducer } from "react";
 
 import { useBattleScene } from "./useBattleScene";
 
-import { predictAttackNumbers } from "@/lib/utils/battle/attack/bonus";
+import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
+import { withSelf } from "@/lib/utils/abilities/engine/participants";
+import { predictAttackNumbers, predictRollMode } from "@/lib/utils/battle/attack/bonus";
 import { resolveAttackRoll } from "@/lib/utils/battle/common/attack-roll-helpers";
 import { computeDamageBreakdown } from "@/lib/utils/battle/damage";
 import { attackFlow, type AttackMode, attackPayload, effectiveD20, initialAttackFlow, type RollOutcome } from "@/lib/utils/battle/flows";
@@ -34,6 +36,8 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
   const targets = order.filter(
     (p) => isUp(p) && p !== attacker && (p.basicInfo.side !== attacker?.basicInfo.side || scene.battle.campaign?.friendlyFire === true),
   );
+
+  const enemyTargets = targets.filter((p) => p.basicInfo.side !== attacker?.basicInfo.side);
 
   const byId = (id: string) => order.find((p) => p.basicInfo.id === id);
 
@@ -68,7 +72,17 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     return (s.outcome === "hit" || s.outcome === "crit") && !!t && !canSeeExactStats(t, scene.viewer);
   });
 
-  const describe = (a: BattleAttack) => ({ attackId: a.id ?? a.name, maxTargets: Math.max(1, a.maxTargets ?? attacker?.combatStats.maxTargets ?? 1), diceSlots: attacker ? damageDiceSlots(attacker, a) : [6] });
+  const hitsAll = !!attacker && findFlags(withSelf(order, attacker), attacker.basicInfo.id, "attackHitsAllEnemies").length > 0;
+
+  const describe = (a: BattleAttack) => {
+    const maxTargets = Math.max(1, a.maxTargets ?? attacker?.combatStats.maxTargets ?? 1);
+
+    return { attackId: a.id ?? a.name, maxTargets: hitsAll ? Math.max(maxTargets, enemyTargets.length) : maxTargets, diceSlots: attacker ? damageDiceSlots(attacker, a) : [6] };
+  };
+
+  const preselectAll = () => {
+    if (hitsAll) dispatch({ type: "SET_TARGETS", ids: enemyTargets.map((p) => p.basicInfo.id) });
+  };
 
   const outcomeOf = (d20: number, second?: number): RollOutcome => {
     const target = byId(state.strikes[state.index]?.targetId ?? "");
@@ -92,7 +106,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     const seen = new Set((scene.battle.battleLog ?? []).map((e) => e.actionIndex));
 
     try {
-      const res = await scene.actions.attack.mutateAsync(attackPayload(state, attacker.basicInfo.id));
+      const res = await scene.actions.attack.mutateAsync(attackPayload(state, attacker.basicInfo.id, { allStrikes: hitsAll }));
 
       const hpChanges = res?.hpChanges ?? [];
 
@@ -146,11 +160,25 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     open: () => {
       const first = attacks[0];
 
-      if (first) dispatch({ type: "OPEN", weaponCount: attacks.length, ...describe(first) });
+      if (!first) return;
+
+      dispatch({ type: "OPEN", weaponCount: attacks.length, ...describe(first) });
+      preselectAll();
     },
-    selectWeapon: (a: BattleAttack) => dispatch({ type: "SELECT_WEAPON", ...describe(a) }),
+    selectWeapon: (a: BattleAttack) => {
+      dispatch({ type: "SELECT_WEAPON", ...describe(a) });
+      preselectAll();
+    },
     toggleTarget: (id: string) => dispatch({ type: "TOGGLE_TARGET", id }),
-    confirmTargets: () => dispatch({ type: "CONFIRM_TARGETS" }),
+    confirmTargets: () => {
+      const first = byId(state.targetIds[0]);
+
+      if (attacker && attack && first) dispatch({ type: "SET_MODE", mode: predictRollMode(attacker, first, attack, order) });
+
+      dispatch({ type: "CONFIRM_TARGETS" });
+    },
+    canSelectAllEnemies: enemyTargets.length > 1 && state.maxTargets >= enemyTargets.length,
+    selectAllEnemies: () => dispatch({ type: "SET_TARGETS", ids: enemyTargets.map((p) => p.basicInfo.id) }),
     setMode: (mode: AttackMode) => dispatch({ type: "SET_MODE", mode }),
     roll: (d20: number, second?: number) => dispatch({ type: "ROLL", d20, second, outcome: outcomeOf(d20, second) }),
     aiRoll: () => {

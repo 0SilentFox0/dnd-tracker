@@ -1,58 +1,37 @@
 import { CORE_ABILITY_SCORES } from "@/lib/constants/abilities";
 import { spellLevelName } from "@/lib/constants/spells";
+import { defaultSpellForm } from "@/lib/utils/spells/model/form";
 import type { SpellFormData } from "@/types/spells";
 
 export type { SpellFormData };
 
-export function getDefaultSpellFormData(): SpellFormData {
-  return {
-    name: "",
-    level: 0,
-    type: "target",
-    target: null,
-    damageType: "damage",
-    damageElement: null,
-    damageModifier: null,
-    healModifier: null,
-    castingTime: null,
-    range: "",
-    duration: "",
-    diceCount: null,
-    diceType: null,
-    savingThrow: null,
-    description: null,
-    effects: [],
-    groupId: null,
-    icon: null,
-    summonUnitId: null,
-    damageDistribution: null,
-  };
-}
+export const getDefaultSpellFormData = defaultSpellForm;
 
-export const SPELL_LEVEL_OPTIONS = Array.from({ length: 10 }, (_, level) => ({ value: String(level), label: spellLevelName(level) }));
+const levelOption = (level: number) => ({ value: String(level), label: spellLevelName(level) });
 
-export const SPELL_TYPE_OPTIONS = [
-  { value: "target", label: "Цільове" },
-  { value: "aoe", label: "Область дії" },
-  { value: "no_target", label: "Без цілі" },
+/** Нові заклинання — рівні 1–5; старе заклинання 0-го рівня лишає свій рівень у списку, поки його не змінять. */
+export const spellLevelOptions = (current?: number) => [...(current === 0 ? [0] : []), 1, 2, 3, 4, 5].map(levelOption);
+
+export const SPELL_COST_OPTIONS = [
+  { value: "action", label: "Дія" },
+  { value: "bonusAction", label: "Бонусна дія" },
 ] as const;
 
-export const SPELL_DAMAGE_TYPE_OPTIONS = [
-  { value: "damage", label: "Шкода" },
-  { value: "heal", label: "Лікування" },
-  { value: "all", label: "Усі" },
-  { value: "buff", label: "Баф (можна розвіяти)" },
-  { value: "debuff", label: "Дебаф (можна розвіяти)" },
-] as const;
-
-export const CASTING_TIME_OPTIONS = [
-  { value: "1 action", label: "1 action" },
-  { value: "1 bonus action", label: "1 bonus action" },
+export const TARGETING_KIND_OPTIONS = [
+  { value: "enemy", label: "Один ворог" },
+  { value: "ally", label: "Один союзник" },
+  { value: "self", label: "Заклинатель" },
+  { value: "allyDead", label: "Полеглий союзник" },
+  { value: "allAlliesDead", label: "Усі полеглі союзники" },
+  { value: "area", label: "Область (до N цілей)" },
+  { value: "allAllies", label: "Усі союзники" },
+  { value: "allEnemies", label: "Усі вороги" },
+  { value: "everyone", label: "Усі учасники" },
 ] as const;
 
 export const SAVE_ABILITY_OPTIONS = CORE_ABILITY_SCORES.map(({ key, label }) => ({ value: key, label }));
 
 export const SAVE_ON_SUCCESS_OPTIONS = [
   { value: "half", label: "Половина шкоди" },
-  { value: "none", label: "Без урону" },
+  { value: "none", label: "Без ефекту" },
 ] as const;

@@ -25,17 +25,17 @@ describe("loadUnitLibraryStats: заклинання юнітів", () => {
       row("mage", 3, 30, [{ damageDice: "1d4", type: "melee" }], ["fireball"]),
       row("orc", 3, 30, [{ damageDice: "1d12+3", type: "melee" }]),
     ]);
-    db.spellFindMany.mockResolvedValue([{ id: "fireball", type: "aoe", damageType: "damage", target: "enemies", diceCount: 8, diceType: "d6", damageDistribution: null }]);
+    db.spellFindMany.mockResolvedValue([{ id: "fireball", dice: 7, targeting: { kind: "allEnemies" }, spellEffects: [{ kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" }] }]);
 
     const library = await loadUnitLibraryStats("camp");
 
     expect(db.spellFindMany).toHaveBeenCalledTimes(1);
-    expect(db.spellFindMany.mock.calls[0][0].select).toEqual(expect.objectContaining({ diceCount: true, diceType: true, type: true, damageDistribution: true }));
+    expect(db.spellFindMany.mock.calls[0][0].select).toEqual(expect.objectContaining({ dice: true, targeting: true, spellEffects: true }));
     expect(db.spellFindMany.mock.calls[0][0].where.id.in).toEqual(["fireball"]);
 
     const mage = library.find((u) => u.unitId === "mage");
 
-    expect(mage?.dpr).toBe((28 + 3) * 2);
+    expect(mage?.dpr).toBe(8 * 3.5 * 2);
 
     const party = { dpr: 4 * 12, hp: 4 * 40, heroCount: 4 };
 

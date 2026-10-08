@@ -1,12 +1,14 @@
 import type { SpellCastData } from "@/types/api";
 
-export type SpellTargetMode = "none" | "single" | "multi";
+export type SpellTargetMode = "none" | "single" | "multi" | "all";
 
 export interface SpellPick {
   spellId: string;
   level: number;
   targetMode: SpellTargetMode;
-  needsHit: boolean;
+  /** кого можна обирати: союзник, ворог або полеглий союзник */
+  targetSide?: "ally" | "enemy" | "dead";
+  maxTargets?: number;
   needsSaves: boolean;
   diceSlots: number[];
 }
@@ -17,7 +19,6 @@ export interface SpellFlowState {
   level: number;
   pick?: SpellPick;
   targetIds: string[];
-  hitRoll?: number;
   saves: Record<string, number>;
   damage: (number | undefined)[];
   error?: string;
@@ -28,9 +29,8 @@ export type SpellFlowAction =
   | { type: "SET_LEVEL"; level: number }
   | { type: "PICK"; pick: SpellPick }
   | { type: "TO_TARGETS" }
-  | { type: "TOGGLE_TARGET"; id: string }
+  | { type: "TOGGLE_TARGET"; id: string; expanded?: string[] }
   | { type: "CONFIRM_TARGETS" }
-  | { type: "SET_HIT"; value: number }
   | { type: "SET_SAVE"; id: string; value: number }
   | { type: "SET_DAMAGE"; index: number; value: number }
   | { type: "TO_SUMMARY" }
@@ -42,12 +42,10 @@ export type SpellFlowAction =
 
 export const initialSpellFlow: SpellFlowState = { step: "closed", level: 0, targetIds: [], saves: {}, damage: [] };
 
-const needsRolls = (p: SpellPick) => p.needsHit || p.needsSaves || p.diceSlots.length > 0;
+const needsRolls = (p: SpellPick) => p.needsSaves || p.diceSlots.length > 0;
 
 export function rollsComplete(s: SpellFlowState): boolean {
   if (!s.pick) return false;
-
-  if (s.pick.needsHit && !(s.hitRoll && s.hitRoll >= 1 && s.hitRoll <= 20)) return false;
 
   return s.pick.diceSlots.every((_, i) => typeof s.damage[i] === "number");
 }
@@ -62,7 +60,7 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
     case "SET_LEVEL":
       return { ...initialSpellFlow, step: "book", casterId: s.casterId, level: a.level };
     case "PICK":
-      return { ...s, step: "spell", pick: a.pick, targetIds: [], saves: {}, hitRoll: undefined, damage: a.pick.diceSlots.map(() => undefined), error: undefined };
+      return { ...s, step: "spell", pick: a.pick, targetIds: [], saves: {}, damage: a.pick.diceSlots.map(() => undefined), error: undefined };
     case "TO_TARGETS":
       if (!s.pick) return s;
 
@@ -70,18 +68,20 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
     case "TOGGLE_TARGET": {
       if (s.pick?.targetMode === "single") return { ...s, targetIds: [a.id], saves: {} };
 
+      if (s.pick?.targetMode === "all") return { ...s, targetIds: a.expanded ?? [a.id], saves: {} };
+
       if (s.targetIds.includes(a.id)) {
         const { [a.id]: _gone, ...saves } = s.saves;
 
         return { ...s, targetIds: s.targetIds.filter((id) => id !== a.id), saves };
       }
 
+      if (s.pick?.maxTargets !== undefined && s.targetIds.length >= s.pick.maxTargets) return s;
+
       return { ...s, targetIds: [...s.targetIds, a.id] };
     }
     case "CONFIRM_TARGETS":
       return s.targetIds.length === 0 ? s : afterTargets(s);
-    case "SET_HIT":
-      return { ...s, hitRoll: a.value };
     case "SET_SAVE":
       return { ...s, saves: { ...s.saves, [a.id]: a.value } };
     case "SET_DAMAGE":
@@ -110,16 +110,14 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
   }
 }
 
-export function spellPayload(s: SpellFlowState, casterType: string): SpellCastData {
+export function spellPayload(s: SpellFlowState): SpellCastData {
   const saves = Object.entries(s.saves).map(([participantId, roll]) => ({ participantId, roll }));
 
   return {
     casterId: s.casterId as string,
-    casterType,
     spellId: s.pick?.spellId as string,
     targetIds: s.pick?.targetMode === "none" ? [] : s.targetIds,
-    damageRolls: s.damage.filter((v): v is number => typeof v === "number"),
-    ...(saves.length > 0 && { savingThrows: saves }),
-    ...(s.pick?.needsHit && s.hitRoll !== undefined && { hitRoll: s.hitRoll }),
+    diceRolls: s.damage.filter((v): v is number => typeof v === "number"),
+    ...(saves.length > 0 && { saveRolls: saves }),
   };
 }

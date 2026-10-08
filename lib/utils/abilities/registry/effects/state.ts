@@ -2,6 +2,7 @@ import { CONDITION_LABELS } from "../labels";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
+import { countMarks, GUARD_KEY, markKey } from "@/lib/utils/abilities/engine/marks";
 import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/participants";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/timed-effects";
 import type { ConditionImmunityKey, Effect } from "@/lib/utils/abilities/schema";
@@ -46,7 +47,7 @@ function each(
   return { participants: ps, messages };
 }
 
-function immuneTo(ps: BattleParticipant[], id: string, key: ConditionImmunityKey): boolean {
+export function immuneTo(ps: BattleParticipant[], id: string, key: ConditionImmunityKey): boolean {
   return findFlags(ps, id, "conditionImmunity").some((f) => f.conditions === "all" || f.conditions.includes(key));
 }
 
@@ -67,7 +68,8 @@ export function applyCondition(input: EffectApplyInput<Of<"applyCondition">>): E
           type: "condition",
           rounds: effect.duration.rounds,
           stackable: false,
-          effects: [{ type: effect.condition, value: 1 }],
+          effects: [{ type: effect.condition, value: effect.condition === "skip_action" ? (effect.percent ?? 100) : 1 }],
+          breakOnDamage: effect.breakOnDamage,
         },
         ctx.round,
       ),
@@ -138,16 +140,16 @@ export function applyChangeMorale(input: EffectApplyInput<Of<"changeMorale">>): 
 }
 
 export function applyCleanse(input: EffectApplyInput<Of<"cleanse">>): EffectApplyResult {
-  const { ability } = input;
+  const { ability, effect } = input;
 
   return each(
     input,
     (p) => {
-      const kept = p.battleData.activeEffects.filter((e) => e.type !== "debuff");
+      const kept = p.battleData.activeEffects.filter((e) => e.type !== "debuff" && !(effect.includeConditions && e.type === "condition"));
 
       return kept.length === p.battleData.activeEffects.length ? null : { ...p, battleData: { ...p.battleData, activeEffects: kept } };
     },
-    (names) => `✨ ${ability.name}: з ${names} знято дебафи`,
+    (names) => `✨ ${ability.name}: з ${names} знято ${effect.includeConditions ? "дебафи та стани" : "дебафи"}`,
   );
 }
 
@@ -160,4 +162,54 @@ export function describeGrantAction(e: Of<"grantAction">): string {
   ]
     .filter(Boolean)
     .join(", ");
+}
+
+export function applyMark(input: EffectApplyInput<Of<"mark">>): EffectApplyResult {
+  const { ability, effect, ctx } = input;
+
+  const owner = findParticipant(input.participants, input.ownerId);
+
+  const counts: number[] = [];
+
+  return each(
+    input,
+    (p) => {
+      const next = upsertTimedEffect(
+        p,
+        { timedKey: markKey(effect.markId), source: effectSource(owner, ability), name: ability.name, type: "debuff", rounds: effect.duration.rounds, stackable: true },
+        ctx.round,
+      );
+
+      counts.push(countMarks(next, effect.markId, input.ownerId));
+
+      return next;
+    },
+    (names) => `🎯 ${ability.name}: ${names} — мітка${counts.length === 1 ? ` (${counts[0]})` : ""}`,
+  );
+}
+
+export function applyGuard(input: EffectApplyInput<Of<"guard">>): EffectApplyResult {
+  const { ability, effect, ctx } = input;
+
+  const owner = findParticipant(input.participants, input.ownerId);
+
+  return each(
+    input,
+    (p) =>
+      upsertTimedEffect(
+        p,
+        {
+          timedKey: GUARD_KEY,
+          source: effectSource(owner, ability),
+          name: ability.name,
+          type: "buff",
+          rounds: effect.duration.rounds,
+          stackable: false,
+          effects: [{ type: "guard", value: effect.percent }],
+        },
+        ctx.round,
+      ),
+    (names) => `🛡 ${ability.name}: ${names} — захист ${effect.percent}% (${effect.duration.rounds} р.)`,
+    (p) => p.basicInfo.id === input.ownerId || p.basicInfo.side !== owner?.basicInfo.side,
+  );
 }

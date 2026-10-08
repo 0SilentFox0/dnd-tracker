@@ -2,20 +2,31 @@ import type { CampaignSpellContext, CharacterFromPrisma } from "../types/partici
 
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/utils/logger";
-import { normalizeTree, resolveLearned } from "@/lib/utils/skills/progression";
+import { type BranchLevel, normalizeTree, resolveLearned } from "@/lib/utils/skills/progression";
 import { learnedSpellIdsFromNodes, toSpellSkillInfo } from "@/lib/utils/spells";
+import { schoolMasteryFromLearned } from "@/lib/utils/spells/model/dice";
 
 export async function resolveLearnedSpellsFromCharacter(character: CharacterFromPrisma, baseKnownSpells: string[], context?: CampaignSpellContext): Promise<string[]> {
+  return (await resolveLearnedSpellsAndMastery(character, baseKnownSpells, context)).knownSpells;
+}
+
+export async function resolveLearnedSpellsAndMastery(
+  character: CharacterFromPrisma,
+  baseKnownSpells: string[],
+  context?: CampaignSpellContext,
+): Promise<{ knownSpells: string[]; schoolMastery: Record<string, BranchLevel> }> {
+  const none = { knownSpells: baseKnownSpells, schoolMastery: {} };
+
   try {
     const treeRow = context ? (context.skillTreeByRace[character.race] ?? null) : await prisma.skillTree.findFirst({ where: { campaignId: character.campaignId, race: character.race } });
 
-    if (!treeRow) return baseKnownSpells;
+    if (!treeRow) return none;
 
     const tree = normalizeTree(treeRow);
 
     const learned = resolveLearned(tree, character.skillTreeProgress);
 
-    if (learned.length === 0) return baseKnownSpells;
+    if (learned.length === 0) return none;
 
     const skillIds = learned.map((n) => n.skillId).filter((id): id is string => !!id);
 
@@ -37,10 +48,20 @@ export async function resolveLearnedSpellsFromCharacter(character: CharacterFrom
       spells,
     });
 
-    return [...new Set([...baseKnownSpells, ...fromTree])];
+    const masteryOf = schoolMasteryFromLearned(learned, branchSpellGroup);
+
+    const schoolMastery: Record<string, BranchLevel> = {};
+
+    for (const group of new Set(Object.values(branchSpellGroup))) {
+      const level = group ? masteryOf(group) : null;
+
+      if (group && level) schoolMastery[group] = level;
+    }
+
+    return { knownSpells: [...new Set([...baseKnownSpells, ...fromTree])], schoolMastery };
   } catch (e) {
     logger.error("[battle/learned-spells] load from tree failed", { characterId: character.id, race: character.race }, e);
 
-    return baseKnownSpells;
+    return none;
   }
 }

@@ -8,7 +8,8 @@ import { prisma } from "@/lib/db";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { parseBody } from "@/lib/utils/api/parse-body";
-import { calculateCharacterSpellSlots } from "@/lib/utils/spells/spell-slots";
+import { fullSpellSlots } from "@/lib/utils/spells/spell-slots";
+import type { SpellSlotProgression } from "@/types/races";
 
 const INVALID_OWNER_REFERENCE =
   "Невірне посилання на користувача (controlledBy). Переконайтесь, що обраний гравець існує в users і є учасником кампанії.";
@@ -29,9 +30,9 @@ export async function createCharacter(request: Request, campaignId: string): Pro
   let spellSlots = data.spellSlots;
 
   if (!spellSlots || typeof spellSlots !== "object" || Object.keys(spellSlots).length === 0) {
-    spellSlots = Object.fromEntries(
-      Object.entries(calculateCharacterSpellSlots(data.level)).map(([k, v]) => [k, { max: v.max, current: v.max }]),
-    );
+    const race = await prisma.race.findFirst({ where: { campaignId, name: data.race }, select: { spellSlotProgression: true } });
+
+    spellSlots = fullSpellSlots(data.level, Array.isArray(race?.spellSlotProgression) ? (race.spellSlotProgression as unknown as SpellSlotProgression[]) : null);
   }
 
   try {

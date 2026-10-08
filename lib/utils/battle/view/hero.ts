@@ -1,10 +1,13 @@
 import { ParticipantSide } from "@/lib/constants/battle";
 import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
+import { withinLimits } from "@/lib/utils/abilities/engine/usage";
+import { deadTargetRules, isEligibleDeadTarget } from "@/lib/utils/abilities/target-rules";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
+import { isUp } from "@/lib/utils/battle/participant/state";
 import { diceSlots } from "@/lib/utils/common/dice";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleAction, BattleAttack, BattleParticipant } from "@/types/battle";
@@ -34,9 +37,9 @@ export interface AbilityCharge {
   per: "battle" | "round" | "turn";
 }
 
-export function abilityCharges(p: BattleParticipant): AbilityCharge[] {
+export function abilityCharges(p: BattleParticipant, triggers: readonly string[] = ["bonusAction", "action"]): AbilityCharge[] {
   return (p.battleData.resolvedAbilities ?? []).flatMap((a) => {
-    if (a.trigger.event !== "bonusAction" || !a.limits) return [];
+    if (!triggers.includes(a.trigger.event) || !a.limits) return [];
 
     const per = a.limits.perBattle ? "battle" : a.limits.perRound ? "round" : a.limits.perTurn ? "turn" : null;
 
@@ -62,6 +65,26 @@ export function bonusTargetSide(a: ResolvedAbility): ParticipantSide | null {
   );
 
   return hostile ? ParticipantSide.ENEMY : ParticipantSide.ALLY;
+}
+
+export function usableAbilities(p: BattleParticipant, trigger: "bonusAction" | "action"): ResolvedAbility[] {
+  return (p.battleData.resolvedAbilities ?? []).filter((a) => a.trigger.event === trigger && withinLimits(p, a));
+}
+
+export function needsBonusTarget(a: ResolvedAbility): boolean {
+  return bonusTargetSide(a) !== null || deadTargetRules(a).requiresDead;
+}
+
+export function bonusTargetCandidates(a: ResolvedAbility, allies: BattleParticipant[], enemies: BattleParticipant[], owner?: BattleParticipant): BattleParticipant[] {
+  const rules = deadTargetRules(a);
+
+  if (rules.requiresDead) return [...allies, ...enemies].filter((p) => isEligibleDeadTarget(rules, p, owner));
+
+  const selfId = owner?.basicInfo.id;
+
+  const pool = (bonusTargetSide(a) === ParticipantSide.ENEMY ? enemies : allies).filter(isUp);
+
+  return a.effects.some((e) => e.kind === "guard") ? pool.filter((p) => p.basicInfo.id !== selfId) : pool;
 }
 
 export function lastAction(log: BattleAction[]): BattleAction | null {

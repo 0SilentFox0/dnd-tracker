@@ -38,6 +38,14 @@ function effectIssues(effect: Effect, trigger: Trigger, hasCondition: boolean): 
     issues.push(`${effect.stat} змінюється лише пасивкою`);
   }
 
+  if (effect.kind === "summon" && trigger.event !== "bonusAction" && trigger.event !== "action") {
+    issues.push("Прикликання доступне лише для бонусної дії та дії");
+  }
+
+  if (effect.kind === "modifyStat" && effect.stat === "morale" && !effect.duration) {
+    issues.push("Тимчасова мораль потребує duration");
+  }
+
   if (isStaticEffect(effect) && !effect.duration && !isActionScopedTrigger(trigger)) {
     issues.push("Потрібна duration (без неї — лише у фазі before)");
   }
@@ -59,10 +67,20 @@ export const AbilitySchema = z
     limits: LimitsSchema.optional(),
     effects: z.array(EffectSchema).min(1),
     stackable: z.boolean().optional(),
+    maxStacks: z.number().int().min(1).optional(),
+    maxTargets: z.number().int().min(1).optional(),
   })
   .superRefine((a, ctx) => {
     if (a.trigger.event === "passive" && a.limits) {
       ctx.addIssue({ code: "custom", path: ["limits"], message: "Пасивка без лімітів" });
+    }
+
+    if (a.maxStacks !== undefined && !a.stackable) {
+      ctx.addIssue({ code: "custom", path: ["maxStacks"], message: "maxStacks має сенс лише зі stackable" });
+    }
+
+    if (a.maxTargets !== undefined && a.trigger.event !== "bonusAction" && a.trigger.event !== "action") {
+      ctx.addIssue({ code: "custom", path: ["maxTargets"], message: "maxTargets доступний лише для бонусної дії та дії" });
     }
 
     a.effects.forEach((effect, i) => {

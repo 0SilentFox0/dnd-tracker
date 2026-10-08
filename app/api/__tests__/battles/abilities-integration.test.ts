@@ -41,7 +41,7 @@ const find = (ps: BattleParticipant[], id: string) => {
 };
 
 describe("abilities through mutations", () => {
-  it("DOT на влучання тікає на початку ходу цілі", () => {
+  it("DOT на влучання тікає на початку ходу цілі", async () => {
     const bleed = resolved({ trigger: { event: "hit", role: "attacker" }, effects: [{ kind: "dot", damagePerRound: 3, damageType: "bleed", duration: { rounds: 2 }, target: "eventTarget" }] });
 
     const hit = attack(context({ participants: [makeHero([bleed]), makeGoblin("gob", 100)] }));
@@ -56,7 +56,7 @@ describe("abilities through mutations", () => {
     expect(next.events.some((e) => e.resultText.includes("bleed"))).toBe(true);
   });
 
-  it("відсіч цілі — один раз між її ходами", () => {
+  it("відсіч цілі — один раз між її ходами", async () => {
     const base = makeGoblin("gob", 100);
 
     const gob = { ...base, battleData: { ...base.battleData, attacks: [sword] } };
@@ -75,7 +75,7 @@ describe("abilities through mutations", () => {
     expect(find(second.participants, "hero").combatStats.currentHp).toBe(heroHp);
   });
 
-  it("виживання з 1 HP один раз за бій", () => {
+  it("виживання з 1 HP один раз за бій", async () => {
     const survive = resolved({ trigger: { event: "lethalDamage" }, limits: { perBattle: 1 }, effects: [{ kind: "heal", amount: 1, revive: true }] });
 
     const first = attack(context({ participants: [makeHero(), makeGoblin("gob", 2, [survive])] }));
@@ -89,7 +89,7 @@ describe("abilities through mutations", () => {
     expect(find(second.participants, "gob").combatStats.status).not.toBe("active");
   });
 
-  it("смерть ворога знижує мораль його союзників рівно раз", () => {
+  it("смерть ворога знижує мораль його союзників рівно раз", async () => {
     const mourn = resolved({ trigger: { event: "kill", role: "victimSide" }, effects: [{ kind: "changeMorale", delta: -1 }] });
 
     const out = attack(context({ participants: [makeHero(), makeGoblin("gob", 2), makeGoblin("gob2", 20, [mourn])] }));
@@ -97,10 +97,10 @@ describe("abilities through mutations", () => {
     expect(find(out.participants, "gob2").combatStats.morale).toBe(-1);
   });
 
-  it("бонусна дія з perTurn скидається на наступному ході власника", () => {
+  it("бонусна дія з perTurn скидається на наступному ході власника", async () => {
     const rally = resolved({ id: "r", trigger: { event: "bonusAction" }, limits: { perTurn: 1 }, effects: [{ kind: "changeMorale", delta: 1 }] });
 
-    const used = bonusActionMutation(context({ participants: [makeHero([rally]), makeGoblin("gob", 100)] }), { participantId: "hero", abilityKey: rally.key });
+    const used = await bonusActionMutation(context({ participants: [makeHero([rally]), makeGoblin("gob", 100)] }), { participantId: "hero", abilityKey: rally.key });
 
     expect(find(used.participants, "hero").battleData.abilityUsage?.[rally.key].turn).toBe(1);
 

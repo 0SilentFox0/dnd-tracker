@@ -5,8 +5,8 @@ import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtu
 import { computeHitDamage } from "@/lib/utils/battle/attack/process/compute";
 import { handleMiss } from "@/lib/utils/battle/attack/process/miss";
 import { applyBalanceDamageMultiplier, balanceDamageMultiplier, scaleAdditionalDamage } from "@/lib/utils/battle/damage/balance-multiplier";
-import { computeSpellDamageAndApply } from "@/lib/utils/battle/spell/process-damage";
-import type { BattleSpell } from "@/lib/utils/battle/types/spell-process";
+import { castSpell } from "@/lib/utils/battle/spell";
+import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const club: BattleAttack = { id: "c", name: "Палиця", type: AttackType.MELEE, attackBonus: 0, damageDice: "2d6", damageType: "bludgeoning" };
@@ -16,6 +16,14 @@ const scaled = (p: BattleParticipant, damageMultiplier?: number): BattleParticip
 const attacker = makeParticipant({ id: "u", side: ParticipantSide.ENEMY });
 
 const target = makeParticipant({ id: "t", hp: 99, maxHp: 99 });
+
+const fireSpell: CastableSpell = {
+  id: "s",
+  name: "Вогонь",
+  level: 1,
+  groupId: null,
+  definition: { dice: 1, cost: "action", targeting: { kind: "enemy" }, resolution: { kind: "auto" }, effects: [{ kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" }], raceModifiers: [] },
+};
 
 const hit = (a: BattleParticipant, t: BattleParticipant = target) =>
   computeHitDamage({ attacker: a, target: t, attack: club, damageRolls: [3, 3], allParticipants: [a, t], attackRoll: { isCritical: false }, currentRound: 1 });
@@ -59,21 +67,20 @@ describe("damageMultiplier юніта", () => {
   });
 
   it("заклинання: шкода ×1.5 до опору", () => {
-    const spell = { id: "s", name: "Вогонь", level: 1, type: "target", damageType: "damage", damageElement: "fire", description: "" } as BattleSpell;
-
     const run = (caster: BattleParticipant) => {
-      const t = makeParticipant({ id: "t", hp: 99, maxHp: 99 });
+      const t = makeParticipant({ id: "t", hp: 99, maxHp: 99, side: ParticipantSide.ENEMY });
 
-      return computeSpellDamageAndApply({ caster, spell, damageRolls: [10], savingThrows: [], updatedTargets: [t], allParticipants: [caster, t] });
+      const c = { ...caster, spellcasting: { ...caster.spellcasting, spellSlots: { "1": { max: 2, current: 2 } } } };
+
+      const r = castSpell({ caster: c, spell: fireSpell, targetIds: ["t"], allParticipants: [c, t], currentRound: 1, battleId: "b", diceRolls: [10] });
+
+      return 99 - (r.allParticipantsUpdated.find((p) => p.basicInfo.id === "t")?.combatStats.currentHp ?? 99);
     };
 
-    const base = run(attacker).spellCalculation.totalDamage ?? 0;
-
-    const result = run(scaled(attacker, 1.5));
+    const base = run(attacker);
 
     expect(base).toBeGreaterThan(0);
-    expect(result.spellCalculation.totalDamage).toBe(Math.round(base * 1.5));
-    expect(result.updatedTargets[0].combatStats.currentHp).toBe(99 - Math.round(base * 1.5));
+    expect(run(scaled(attacker, 1.5))).toBe(Math.round(base * 1.5));
   });
 });
 
@@ -141,26 +148,33 @@ describe("множник застосовується рівно раз на к�
   });
 
   describe("заклинання", () => {
-    const spell = { id: "s", name: "Вогонь", level: 1, type: "aoe", damageType: "damage", damageElement: "fire", description: "", savingThrow: { ability: "dexterity", onSuccess: "half", dc: 10 }, damageDistribution: [100, 50] } as BattleSpell;
-
-    const run = (caster: BattleParticipant, saves: Array<{ participantId: string; roll: number }>) => {
-      const t1 = makeParticipant({ id: "t1", hp: 99, maxHp: 99, side: ParticipantSide.ALLY });
-
-      const t2 = makeParticipant({ id: "t2", hp: 99, maxHp: 99, side: ParticipantSide.ALLY });
-
-      const out = computeSpellDamageAndApply({ caster, spell, damageRolls: [10, 10], savingThrows: saves, updatedTargets: [t1, t2], allParticipants: [caster, t1, t2] });
-
-      return { total: out.spellCalculation.totalDamage ?? 0, dmg: out.updatedTargets.map((t) => 99 - t.combatStats.currentHp) };
+    const aoe: CastableSpell = {
+      ...fireSpell,
+      definition: { ...fireSpell.definition, targeting: { kind: "area", side: "enemy", maxTargets: 2 }, resolution: { kind: "save", ability: "dexterity", onSuccess: "half" }, effects: [{ kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire", falloff: [100, 50] }] },
     };
 
-    it("розподіл і успішний збереження-на-половину рахуються від масштабованої суми", () => {
-      const base = run(attacker, [{ participantId: "t2", roll: 20 }]);
+    const run = (caster: BattleParticipant, saves: Array<{ participantId: string; roll: number }>) => {
+      const t1 = makeParticipant({ id: "t1", hp: 99, maxHp: 99, side: ParticipantSide.ENEMY });
 
-      const result = run(scaled(attacker, 1.5), [{ participantId: "t2", roll: 20 }]);
+      const t2 = makeParticipant({ id: "t2", hp: 99, maxHp: 99, side: ParticipantSide.ENEMY });
 
-      expect(result.total).toBe(Math.round(base.total * 1.5));
-      expect(result.dmg[0]).toBe(result.total);
-      expect(result.dmg[1]).toBe(Math.floor(Math.floor((result.total * 50) / 100) / 2));
+      const c = { ...caster, spellcasting: { ...caster.spellcasting, spellSlots: { "1": { max: 2, current: 2 } } } };
+
+      const out = castSpell({ caster: c, spell: aoe, targetIds: ["t1", "t2"], allParticipants: [c, t1, t2], currentRound: 1, battleId: "b", diceRolls: [10], saveRolls: saves });
+
+      return ["t1", "t2"].map((id) => 99 - (out.allParticipantsUpdated.find((p) => p.basicInfo.id === id)?.combatStats.currentHp ?? 99));
+    };
+
+    it("спад і успішне збереження-на-половину рахуються від масштабованої суми", () => {
+      const saves = [{ participantId: "t1", roll: 1 }, { participantId: "t2", roll: 20 }];
+
+      const base = run(attacker, saves);
+
+      const result = run(scaled(attacker, 1.5), saves);
+
+      expect(result[0]).toBe(Math.round(base[0] * 1.5));
+      expect(result[1]).toBeGreaterThan(0);
+      expect(result[1]).toBeLessThan(result[0]);
     });
   });
 

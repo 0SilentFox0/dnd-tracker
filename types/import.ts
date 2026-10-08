@@ -1,10 +1,4 @@
 import { AttackType } from "@/lib/constants/battle";
-import {
-  SpellDamageType,
-  SpellSavingThrowAbility,
-  SpellSavingThrowOnSuccess,
-  SpellType,
-} from "@/lib/constants/spell-abilities";
 
 // Unit Import
 export interface CSVUnitRow {
@@ -110,47 +104,6 @@ export interface UnitImportResult {
   total: number;
   skipped: number;
   unknownRaces: string[];
-}
-
-// Spell Import
-export interface CSVSpellRow {
-  [key: string]: string | undefined;
-  Level?: string;
-  level?: string;
-  Effect?: string;
-  effect?: string;
-  School?: string;
-  school?: string;
-  "UA Name"?: string;
-  name?: string;
-  Name?: string;
-  "Original Name"?: string;
-  originalName?: string;
-}
-
-export interface ImportSpell {
-  name: string;
-  level: number;
-  school?: string;
-  type: SpellType;
-  damageType: SpellDamageType;
-  damageElement?: string;
-  castingTime?: string;
-  range?: string;
-  components?: string;
-  duration?: string;
-  concentration: boolean;
-  damageDice?: string;
-  savingThrowAbility?: SpellSavingThrowAbility;
-  savingThrowOnSuccess?: SpellSavingThrowOnSuccess;
-  description: string;
-  groupId?: string;
-  icon?: string | null;
-}
-
-export interface SpellImportResult {
-  imported: number;
-  total: number;
 }
 
 // CSV Row

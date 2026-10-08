@@ -77,6 +77,8 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
 
   const roll = calculateAttackRoll(getP(flow, defenderId), weapon.attack, first, second, second, { participants: flow.ps, targetId: attackerId, rng });
 
+  if (roll.secondRoll) flow.messages.push(`🎲 відсіч, ${roll.secondRoll.mode === "advantage" ? "перевага" : "недолік"}: другий d20 = ${roll.secondRoll.value}`);
+
   const targetAC = getEffectiveArmorClass(getP(flow, attackerId), flow.ps);
 
   const guaranteedHit = findFlags(flow.ps, defenderId, "guaranteedHit").length > 0;

@@ -1,5 +1,6 @@
 import { resolveFlat } from "./amount";
 import { legacyActiveEffectModifiers } from "./legacy-active-effects";
+import { countMarks } from "./marks";
 import { findParticipant, isActive, resolvedAbilitiesOf } from "./participants";
 
 import { evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
@@ -10,7 +11,7 @@ import type { BattleParticipant } from "@/types/battle";
 
 export type ModifierQuery =
   | { stat: StatKey; attackKind?: AttackKind }
-  | { damage: { kind: DamageKind; school?: string | null } }
+  | { damage: { kind: DamageKind; school?: string | null; targetId?: string } }
   | { flag: FlagKey };
 
 export interface ModifierEntry {
@@ -88,9 +89,19 @@ export function collectModifiers(
       return;
     }
 
-    const flat = effect.flat !== undefined ? resolveFlat(effect.flat, owner) : 0;
+    let multiplier = 1;
 
-    const percent = effect.percent ?? 0;
+    if (effect.kind === "damageBonus" && effect.perMark) {
+      const targetId = "damage" in query ? query.damage.targetId : undefined;
+
+      multiplier = targetId ? countMarks(findParticipant(participants, targetId), effect.perMark, owner.basicInfo.id) : 0;
+
+      if (multiplier === 0) return;
+    }
+
+    const flat = (effect.flat !== undefined ? resolveFlat(effect.flat, owner) : 0) * multiplier;
+
+    const percent = (effect.percent !== undefined ? resolveFlat(effect.percent, owner) : 0) * multiplier;
 
     result.flat += flat;
     result.percent += percent;

@@ -38,7 +38,6 @@ import * as deleteByLevel from "@/app/api/campaigns/[id]/spells/delete-by-level/
 import * as removeAllSpells from "@/app/api/campaigns/[id]/spells/groups/[groupId]/remove-all-spells/route";
 import * as group from "@/app/api/campaigns/[id]/spells/groups/[groupId]/route";
 import * as groups from "@/app/api/campaigns/[id]/spells/groups/route";
-import * as importRoute from "@/app/api/campaigns/[id]/spells/import/route";
 import * as list from "@/app/api/campaigns/[id]/spells/route";
 
 const ctx = { params: Promise.resolve({ id: "c1" }) };
@@ -52,7 +51,7 @@ const req = (method: string, body?: unknown) =>
 
 const forbidden = () => NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-const spellBody = { name: "Вогняна куля", level: 3, type: "aoe", damageType: "damage" };
+const spellBody = { name: "Вогняна куля", level: 3, dice: 4, targeting: { kind: "area", side: "enemy", maxTargets: 4 }, resolution: { kind: "save", ability: "dexterity", onSuccess: "half" }, spellEffects: [{ kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" }] };
 
 const writes: Array<[string, () => Promise<Response>]> = [
   ["POST /spells", () => list.POST(req("POST", spellBody), ctx)],
@@ -61,7 +60,6 @@ const writes: Array<[string, () => Promise<Response>]> = [
   ["DELETE /spells/delete-all", () => deleteAll.DELETE(req("DELETE"), ctx)],
   ["DELETE /spells/delete-by-level", () => deleteByLevel.DELETE(req("DELETE", { level: 2 }), ctx)],
   ["POST /spells/:id/remove-from-group", () => removeFromGroup.POST(req("POST"), ctxSpell)],
-  ["POST /spells/import", () => importRoute.POST(req("POST", { spells: [{ name: "Іскра", description: "d" }] }), ctx)],
   ["POST /spells/groups", () => groups.POST(req("POST", { name: "Вогонь" }), ctx)],
   ["PATCH /spells/groups/:id", () => group.PATCH(req("PATCH", { name: "Лід" }), ctxGroup)],
   ["DELETE /spells/groups/:id", () => group.DELETE(req("DELETE"), ctxGroup)],
@@ -102,6 +100,44 @@ describe("spells API", () => {
     auth.requireCampaignAccess.mockResolvedValue(forbidden());
 
     expect((await list.GET(req("GET"), ctx)).status).toBe(403);
+  });
+
+  it("POST зберігає нову модель в окремих колонках і не пише старі поля", async () => {
+    await list.POST(req("POST", spellBody), ctx);
+
+    const data = db.spell.create.mock.calls[0][0].data;
+
+    expect(data).toMatchObject({ campaignId: "c1", name: "Вогняна куля", level: 3, dice: 4, cost: "action", targeting: { kind: "area", side: "enemy", maxTargets: 4 }, resolution: { kind: "save", ability: "dexterity", onSuccess: "half" }, spellEffects: spellBody.spellEffects, raceModifiers: [] });
+    expect(data).not.toHaveProperty("diceCount");
+    expect(data).not.toHaveProperty("savingThrow");
+  });
+
+  it("POST відхиляє area без side, невалідний ефект і кубики поза межами", async () => {
+    for (const bad of [{ targeting: { kind: "area", maxTargets: 2 } }, { spellEffects: [{ kind: "teleport" }] }, { dice: 99 }]) {
+      expect((await list.POST(req("POST", { ...spellBody, ...bad }), ctx)).status).toBe(400);
+    }
+
+    expect(db.spell.create).not.toHaveBeenCalled();
+  });
+
+  it("POST: нове заклинання лише 1–5 рівня", async () => {
+    for (const level of [0, 6]) expect((await list.POST(req("POST", { ...spellBody, level }), ctx)).status).toBe(400);
+
+    expect(db.spell.create).not.toHaveBeenCalled();
+  });
+
+  it("PATCH дозволяє лишити старий 0-й рівень", async () => {
+    expect((await one.PATCH(req("PATCH", { level: 0 }), ctxSpell)).status).toBe(200);
+  });
+
+  it("PATCH оновлює лише передані поля нової моделі", async () => {
+    await one.PATCH(req("PATCH", { dice: 5, resolution: { kind: "auto" } }), ctxSpell);
+
+    const data = db.spell.update.mock.calls[0][0].data;
+
+    expect(data).toMatchObject({ dice: 5, resolution: { kind: "auto" } });
+    expect(data.targeting).toBeUndefined();
+    expect(data.name).toBeUndefined();
   });
 
   it.each(writes)("%s скидає кеш заклинань одразу", async (_name, call) => {

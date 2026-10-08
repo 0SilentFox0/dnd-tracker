@@ -26,7 +26,7 @@ const ModifyStatSchema = z
     kind: z.literal("modifyStat"),
     stat: z.enum(STAT_KEYS),
     flat: FlatSchema.optional(),
-    percent: z.number().optional(),
+    percent: FlatSchema.optional(),
     attackKind: z.enum(ATTACK_KINDS).optional(),
     spellLevels: z.array(z.number().int().min(1).max(9)).min(1).optional(),
     ...timed,
@@ -38,7 +38,8 @@ const DamageBonusSchema = z
     kind: z.literal("damageBonus"),
     filter: z.object({ kind: z.enum(DAMAGE_FILTER_KINDS), school: z.string().min(1).optional() }),
     flat: FlatSchema.optional(),
-    percent: z.number().optional(),
+    percent: FlatSchema.optional(),
+    perMark: z.string().min(1).optional(),
     ...timed,
   })
   .refine(hasValue, { message: "Потрібен flat або percent" });
@@ -49,12 +50,14 @@ const FlagSchema = z.discriminatedUnion("flag", [
   z.object({ ...flagBase, flag: z.literal("advantage"), attackKind: z.enum([...ATTACK_KINDS, "all"]) }),
   z.object({ ...flagBase, flag: z.literal("disadvantage") }),
   z.object({ ...flagBase, flag: z.literal("disadvantageForAttackers") }),
+  z.object({ ...flagBase, flag: z.literal("advantageForAttackers") }),
   z.object({ ...flagBase, flag: z.literal("guaranteedHit") }),
   z.object({
     ...flagBase,
     flag: z.literal("resistance"),
     damageType: z.string().min(1),
     percent: z.number().min(1).max(100),
+    attackKind: z.enum(ATTACK_KINDS).optional(),
   }),
   z.object({ ...flagBase, flag: z.literal("spellImmunity"), spellIds: z.array(z.string().min(1)).min(1) }),
   z.object({
@@ -64,13 +67,26 @@ const FlagSchema = z.discriminatedUnion("flag", [
     attackKinds: z.preprocess((v) => (Array.isArray(v) ? v.filter((k) => k !== "magic") : v), z.array(z.enum(ATTACK_KINDS))),
     bonusPercent: z.number().min(0),
   }),
+  z.object({
+    ...flagBase,
+    flag: z.literal("spellTargeting"),
+    mode: z.enum(["area", "all"]),
+    spellIds: z.array(z.string().min(1)).min(1).optional(),
+    school: z.string().min(1).optional(),
+    maxTargets: z.number().int().min(2).optional(),
+    maxLevel: z.number().int().min(1).max(9).optional(),
+  }),
+  z.object({ ...flagBase, flag: z.literal("attackHitsAllEnemies") }),
   z.object({ ...flagBase, flag: z.literal("seeEnemyHp") }),
+  z.object({ ...flagBase, flag: z.literal("moraleChance"), percent: z.number().int().min(1).max(100) }),
+  z.object({ ...flagBase, flag: z.literal("lifesteal"), percent: z.number().int().min(1).max(100) }),
   z.object({ ...flagBase, flag: z.literal("noNegativeMorale") }),
   z.object({ ...flagBase, flag: z.literal("ignoreMorale") }),
+  z.object({ ...flagBase, flag: z.literal("minMorale"), value: z.number().int().min(-3).max(3) }),
   z.object({
     ...flagBase,
     flag: z.literal("conditionImmunity"),
-    conditions: z.union([z.literal("all"), z.array(z.enum([...CONDITION_KEYS, "fear"])).min(1)]),
+    conditions: z.union([z.literal("all"), z.array(z.enum([...CONDITION_KEYS, "fear", "berserk", "charm"])).min(1)]),
   }),
 ]);
 
@@ -93,6 +109,7 @@ const DealDamageSchema = z.object({
   kind: z.literal("dealDamage"),
   amount: AmountSchema,
   damageType: z.string().min(1).optional(),
+  falloff: z.array(z.number().min(0).max(100)).min(1).optional(),
   ...target,
 });
 
@@ -106,10 +123,28 @@ const DotSchema = z.object({
   ...target,
 });
 
+const HotSchema = z.object({
+  kind: z.literal("hot"),
+  healPerRound: AmountSchema,
+  duration: DurationSchema,
+  ...target,
+});
+
+const BerserkSchema = z.object({
+  kind: z.literal("berserk"),
+  damageBonusPercent: z.number().min(0).max(300),
+  duration: DurationSchema,
+  ...target,
+});
+
+const CharmSchema = z.object({ kind: z.literal("charm"), duration: DurationSchema, ...target });
+
 const ApplyConditionSchema = z.object({
   kind: z.literal("applyCondition"),
   condition: z.enum(CONDITION_KEYS),
   duration: DurationSchema,
+  percent: z.number().int().min(1).max(100).optional(),
+  breakOnDamage: z.boolean().optional(),
   ...target,
 });
 
@@ -121,7 +156,23 @@ const ChangeMoraleSchema = z.object({
   ...target,
 });
 
-const CleanseSchema = z.object({ kind: z.literal("cleanse"), ...target });
+const CleanseSchema = z.object({ kind: z.literal("cleanse"), includeConditions: z.boolean().optional(), ...target });
+
+const GuardSchema = z.object({ kind: z.literal("guard"), percent: z.number().int().min(1).max(100), duration: DurationSchema, ...target });
+
+const SummonSchema = z
+  .object({
+    kind: z.literal("summon"),
+    group: z.string().min(1).optional(),
+    tier: z.number().int().min(1).max(7).optional(),
+    unitId: z.string().min(1).optional(),
+    count: z.number().int().min(1).max(10).optional(),
+  })
+  .refine((e) => !!e.unitId || (!!e.group && e.tier !== undefined), { message: "Потрібен unitId або group і tier" });
+
+const RaiseDeadSchema = z.object({ kind: z.literal("raiseDead"), hpPercent: z.number().int().min(1).max(100), ...target });
+
+const MarkSchema = z.object({ kind: z.literal("mark"), markId: z.string().min(1), duration: DurationSchema, ...target });
 
 const BASE_EFFECTS = [
   ModifyStatSchema,
@@ -132,10 +183,17 @@ const BASE_EFFECTS = [
   DealDamageSchema,
   HealSchema,
   DotSchema,
+  HotSchema,
+  BerserkSchema,
+  CharmSchema,
   ApplyConditionSchema,
   RestoreSpellSlotSchema,
   ChangeMoraleSchema,
   CleanseSchema,
+  MarkSchema,
+  GuardSchema,
+  SummonSchema,
+  RaiseDeadSchema,
 ] as const;
 
 export const NonRandomEffectSchema = z.discriminatedUnion("kind", [...BASE_EFFECTS]);

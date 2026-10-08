@@ -7,9 +7,13 @@ export interface TimedEffectInput {
   type: ActiveEffect["type"];
   rounds: number;
   stackable: boolean;
+  maxStacks?: number;
   abilityEffects?: StaticEffect[];
   effects?: ActiveEffect["effects"];
   dotDamage?: ActiveEffect["dotDamage"];
+  hotHeal?: ActiveEffect["hotHeal"];
+  breakOnDamage?: boolean;
+  charmOrigin?: ActiveEffect["charmOrigin"];
   source?: ActiveEffect["source"];
 }
 
@@ -37,8 +41,22 @@ export function upsertTimedEffect(p: BattleParticipant, input: TimedEffectInput,
     abilityKey: input.timedKey,
     ...(input.abilityEffects && { abilityEffects: input.abilityEffects }),
     ...(input.dotDamage && { dotDamage: input.dotDamage }),
+    ...(input.hotHeal && { hotHeal: input.hotHeal }),
+    ...(input.breakOnDamage && { breakOnDamage: true }),
+    ...(input.charmOrigin && { charmOrigin: input.charmOrigin }),
     ...(input.source && { source: input.source }),
   };
+
+  const sameKey = current.filter((e) => e.abilityKey === input.timedKey);
+
+  if (input.stackable && input.maxStacks !== undefined && sameKey.length >= input.maxStacks) {
+    const oldest = sameKey.reduce((least, e) => (e.duration < least.duration ? e : least));
+
+    return {
+      ...p,
+      battleData: { ...p.battleData, activeEffects: current.map((e) => (e === oldest ? { ...e, duration: input.rounds, appliedAt: effect.appliedAt } : e)) },
+    };
+  }
 
   const next = existing >= 0 ? current.map((e, i) => (i === existing ? effect : e)) : [...current, effect];
 

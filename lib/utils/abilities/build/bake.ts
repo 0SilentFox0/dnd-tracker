@@ -12,7 +12,7 @@ type ModifyStat = Extract<Effect, { kind: "modifyStat" }>;
 function bakeOne(p: BattleParticipant, e: ModifyStat, owner: BattleParticipant): BattleParticipant {
   const flat = e.flat !== undefined ? resolveFlat(e.flat, owner) : 0;
 
-  const pct = (base: number) => flat + Math.floor((base * (e.percent ?? 0)) / 100);
+  const pct = (base: number) => flat + Math.floor((base * (e.percent !== undefined ? resolveFlat(e.percent, owner) : 0)) / 100);
 
   const cs = p.combatStats;
 

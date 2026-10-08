@@ -5,85 +5,60 @@
 type SpellSeedItem = {
   name: string;
   level: number;
-  type: string;
-  target: string;
-  damageType: string;
-  damageElement?: string;
-  damageModifier?: string;
-  diceCount: number;
-  diceType: string;
-  savingThrow?: { ability: string; onSuccess: string };
   description: string;
-  concentration: boolean;
+  dice: number;
+  targeting: unknown;
+  resolution: unknown;
+  spellEffects: unknown[];
 };
+
+const fire = (damageType: string, extra: object = {}) => ({ kind: "dealDamage", amount: { spellRoll: 100 }, damageType, ...extra });
 
 export const SPELLS_DATA: SpellSeedItem[] = [
   {
     name: "Fireball",
     level: 3,
-    type: "aoe",
-    target: "enemies",
-    damageType: "damage",
-    damageElement: "fire",
-    diceCount: 8,
-    diceType: "d6",
-    savingThrow: {
-      ability: "dexterity",
-      onSuccess: "half",
-    },
-    description: "Вибух вогню, що вражає всіх ворогів в радіусі",
-    concentration: false,
+    dice: 4,
+    targeting: { kind: "area", side: "enemy", maxTargets: 4 },
+    resolution: { kind: "save", ability: "dexterity", onSuccess: "half" },
+    spellEffects: [fire("fire")],
+    description: "Вибух вогню, що вражає до чотирьох ворогів",
   },
   {
     name: "Heal",
     level: 3,
-    type: "target",
-    target: "allies",
-    damageType: "heal",
-    diceCount: 4,
-    diceType: "d8",
+    dice: 2,
+    targeting: { kind: "ally" },
+    resolution: { kind: "auto" },
+    spellEffects: [{ kind: "heal", amount: { spellRoll: 100 } }],
     description: "Лікує союзника",
-    concentration: false,
   },
   {
     name: "Magic Missile",
     level: 1,
-    type: "target",
-    target: "enemies",
-    damageType: "damage",
-    damageElement: "force",
-    diceCount: 3,
-    diceType: "d4",
-    description: "Три магічні стріли, що завжди попадають",
-    concentration: false,
+    dice: 1,
+    targeting: { kind: "enemy" },
+    resolution: { kind: "auto" },
+    spellEffects: [fire("force")],
+    description: "Магічна стріла, що завжди влучає",
   },
   {
     name: "Cure Wounds",
     level: 1,
-    type: "target",
-    target: "allies",
-    damageType: "heal",
-    diceCount: 1,
-    diceType: "d8",
+    dice: 1,
+    targeting: { kind: "ally" },
+    resolution: { kind: "auto" },
+    spellEffects: [{ kind: "heal", amount: { spellRoll: 100 } }],
     description: "Базове лікування",
-    concentration: false,
   },
   {
     name: "Poison Spray",
-    level: 0,
-    type: "target",
-    target: "enemies",
-    damageType: "damage",
-    damageElement: "poison",
-    damageModifier: "poison",
-    diceCount: 1,
-    diceType: "d12",
-    savingThrow: {
-      ability: "constitution",
-      onSuccess: "none",
-    },
+    level: 1,
+    dice: 1,
+    targeting: { kind: "enemy" },
+    resolution: { kind: "save", ability: "constitution", onSuccess: "none" },
+    spellEffects: [{ kind: "dot", damagePerRound: { spellRoll: 50 }, damageType: "poison", duration: { rounds: 3 } }],
     description: "Отруйний спрей з DOT ефектом",
-    concentration: false,
   },
 ];
 
@@ -116,9 +91,8 @@ export function getHumanSkillsData(mainSkillIds: { id: string }[]) {
     },
     {
       name: "Базове Заклинання",
-      description: "+10% до ефекту заклинань",
-      abilities: [],
-      spellEffectIncrease: 10,
+      description: "+10% до шкоди заклинань",
+      abilities: [{ id: "a1", name: "Базове Заклинання", trigger: { event: "passive" }, effects: [{ kind: "damageBonus", filter: { kind: "magic" }, percent: 10 }] }],
       mainSkillId: mainSkillIds[1].id,
     },
   ];
@@ -143,19 +117,15 @@ export function getElfSkillsData(
     },
     {
       name: "Покращене Заклинання",
-      description: "+25% до ефекту заклинань",
-      spellEffectIncrease: 25,
+      description: "+25% до шкоди заклинань",
+      abilities: [{ id: "a1", name: "Покращене Заклинання", trigger: { event: "passive" }, effects: [{ kind: "damageBonus", filter: { kind: "magic" }, percent: 25 }] }],
       mainSkillId: mainSkillIds[1].id,
     },
     {
       name: "Отруйна Стріла",
-      description: "Додає отруту до заклинання",
+      description: "Отруйна стріла",
+      abilities: [],
       spellId: spells[4].id,
-      spellAdditionalModifier: {
-        modifier: "poison",
-        damageDice: "1d6",
-        duration: 3,
-      },
       mainSkillId: mainSkillIds[1].id,
     },
   ];

@@ -18,6 +18,7 @@ export function RaceEditFormSpellSlots({
         <div>Рівень магії</div>
         <div>Максимальна кількість слотів</div>
       </div>
+      <p className="mb-2 text-xs text-muted-foreground">Це максимум на кожному рівні магії; слоти відкриваються з ростом рівня героя (за кривою заклинача 5e). Усі нулі — стандартна таблиця персонажів.</p>
       <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
       {[1, 2, 3, 4, 5].map((level) => {
         const progression = formData.spellSlotProgression?.find(

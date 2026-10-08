@@ -1,20 +1,15 @@
-import { Sparkles, Zap } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getDamageElementLabel } from "@/lib/constants/damage";
 import { spellLevelName, spellLevelRoman } from "@/lib/constants/spells";
-import { getDamageModifierLabel, getHealModifierLabel, getSpellDamageTypeLabel, getSpellTargetLabel } from "@/lib/constants/spells";
-import { getSpellDamageTypeIcon, getSpellGroupIcon, getSpellTypeIcon } from "@/lib/utils/spells/spell-icons";
+import { spellMechanicsLabels } from "@/lib/utils/spells/model/summary";
+import { getSpellGroupIcon } from "@/lib/utils/spells/spell-icons";
 import type { Spell } from "@/types/spells";
 
 export function SpellPrintCard({ spell }: { spell: Spell }) {
   const SpellGroupIcon = getSpellGroupIcon(spell.spellGroup?.name || "Без групи");
-
-  const TypeIcon = getSpellTypeIcon(spell.type);
-
-  const DamageTypeIcon = getSpellDamageTypeIcon(spell.damageType);
 
   return (
     <Card className="hover:shadow-md transition-shadow h-full flex flex-col">
@@ -49,26 +44,6 @@ export function SpellPrintCard({ spell }: { spell: Spell }) {
                 <span className="sm:hidden">{spellLevelRoman(spell.level)}</span>
               </Badge>
             </div>
-            {spell.damageElement && (
-              <Badge variant="outline" className="mt-2 text-xs">
-                {getDamageElementLabel(spell.damageElement)}
-              </Badge>
-            )}
-            {spell.damageModifier && (
-              <Badge variant="outline" className="mt-2 text-xs">
-                {getDamageModifierLabel(spell.damageModifier)}
-              </Badge>
-            )}
-            {spell.healModifier && (
-              <Badge variant="outline" className="mt-2 text-xs">
-                {getHealModifierLabel(spell.healModifier)}
-              </Badge>
-            )}
-            {spell.target && (
-              <Badge variant="outline" className="mt-2 text-xs">
-                {getSpellTargetLabel(spell.target)}
-              </Badge>
-            )}
           </div>
         </div>
         <CardDescription className="flex flex-wrap gap-1 sm:gap-2 mt-2">
@@ -77,43 +52,15 @@ export function SpellPrintCard({ spell }: { spell: Spell }) {
             <span className="hidden sm:inline">{spell.spellGroup?.name || "Без групи"}</span>
             <span className="sm:hidden truncate max-w-[60px]">{spell.spellGroup?.name?.[0] || "-"}</span>
           </Badge>
-          {spell.type === "aoe" && spell.damageType === "damage" ? (
-            <Badge variant="outline" className="flex items-center gap-1 text-xs">
-              <Zap className="h-3 w-3" />
-              <span className="hidden sm:inline">AOE Демедж</span>
-              <span className="sm:hidden">AOE</span>
+          {spellMechanicsLabels(spell).map((label) => (
+            <Badge key={label} variant="outline" className="text-xs">
+              {label}
             </Badge>
-          ) : (
-            <>
-              <Badge variant="outline" className="flex items-center gap-1 text-xs">
-                <TypeIcon className="h-3 w-3" />
-                <span className="hidden sm:inline">{spell.type === "target" ? "Цільове" : "AoE"}</span>
-              </Badge>
-              <Badge variant="outline" className="flex items-center gap-1 text-xs">
-                <DamageTypeIcon className="h-3 w-3" />
-                <span className="hidden sm:inline">{getSpellDamageTypeLabel(spell.damageType)}</span>
-              </Badge>
-            </>
-          )}
+          ))}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col">
-        <div className="text-xs sm:text-sm text-muted-foreground flex-1">
-          {Array.isArray(spell.effects) && spell.effects.length > 0 ? (
-            <ul className="list-disc list-inside space-y-0.5">
-              {spell.effects.map((effect, i) => (
-                <li key={i}>{effect}</li>
-              ))}
-            </ul>
-          ) : spell.description ? (
-            <p>{spell.description}</p>
-          ) : null}
-        </div>
-        {spell.diceCount && spell.diceType && (
-          <div className="text-xs sm:text-sm mt-2 font-medium">
-            Шкода: {spell.diceCount}{spell.diceType}
-          </div>
-        )}
+        <div className="text-xs sm:text-sm text-muted-foreground flex-1">{spell.description && <p>{spell.description}</p>}</div>
       </CardContent>
     </Card>
   );

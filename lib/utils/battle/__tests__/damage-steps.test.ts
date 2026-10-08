@@ -8,8 +8,9 @@ import { processAttack } from "@/lib/utils/battle/attack/process";
 import { computeDamageBreakdown } from "@/lib/utils/battle/damage/breakdown";
 import { calculateDamageWithModifiersImpl } from "@/lib/utils/battle/damage/impl";
 import { applyResistance } from "@/lib/utils/battle/resistance";
-import { type BattleSpell, processSpell } from "@/lib/utils/battle/spell";
+import { castSpell } from "@/lib/utils/battle/spell";
 import { battleActionToEvent, eventToBattleAction } from "@/lib/utils/battle/store";
+import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -111,9 +112,15 @@ describe("кроки шкоди в подіях", () => {
 
     const t = wall("e", "fire", 50);
 
-    const spell = { id: "s1", name: "Вогняна стріла", level: 1, type: "target", target: "enemies", damageType: "damage", damageElement: "fire", diceCount: 1, diceType: "d10", savingThrow: null, description: "" } as unknown as BattleSpell;
+    const spell: CastableSpell = {
+      id: "s1",
+      name: "Вогняна стріла",
+      level: 1,
+      groupId: null,
+      definition: { dice: 1, cost: "action", targeting: { kind: "enemy" }, resolution: { kind: "auto" }, effects: [{ kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" }], raceModifiers: [] },
+    };
 
-    const r = processSpell({ caster, spell, targetIds: ["e"], allParticipants: [caster, t], currentRound: 1, battleId: "b1", damageRolls: [8], rng: seq(0) });
+    const r = castSpell({ caster, spell, targetIds: ["e"], allParticipants: [caster, t], currentRound: 1, battleId: "b1", diceRolls: [8], rng: seq(0) });
 
     expect(r.battleAction.actionDetails.damageSteps?.e?.[0]).toMatchObject({ side: "target", label: "Кам'яна шкіра", value: -50 });
   });

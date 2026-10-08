@@ -60,7 +60,6 @@ function createParticipant(
       activeEffects: [],
       equippedArtifacts: [],
       resolvedAbilities: [],
-      spellEnhancers: [],
     },
     actionFlags: {
       hasUsedAction: false,
@@ -126,6 +125,18 @@ describe("battle-resistance", () => {
       expect(
         result.breakdown.some((s) => s.includes("30") && s.includes("опір")),
       ).toBe(true);
+    });
+  });
+
+  describe("resistance all", () => {
+    it("reduces fire, slashing and spell damage by 20%", () => {
+      const target = createParticipant();
+
+      grantPassive(target, [{ kind: "flag", flag: "resistance", damageType: "all", percent: 20 }]);
+
+      for (const type of ["fire", "slashing", "spell"]) {
+        expect(applyResistance(target, 10, type, { fromSpell: type === "spell" }).finalDamage).toBe(8);
+      }
     });
   });
 });

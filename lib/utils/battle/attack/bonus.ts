@@ -24,14 +24,17 @@ export function hasAdvantage(
   attack: BattleAttack,
   participants: BattleParticipant[] = [attacker],
   extra?: StaticEffect[],
+  opts: { targetId?: string; targetExtra?: StaticEffect[] } = {},
 ): boolean {
   const kind = attackKindOf(attack.type);
 
   if (attacker.abilities.race?.toLowerCase().includes("elf") && kind === AttackType.RANGED) return true;
 
-  return findFlags(withSelf(participants, attacker), attacker.basicInfo.id, "advantage", extra).some(
-    (f) => f.attackKind === "all" || f.attackKind === kind,
-  );
+  const ps = withSelf(participants, attacker);
+
+  if (findFlags(ps, attacker.basicInfo.id, "advantage", extra).some((f) => f.attackKind === "all" || f.attackKind === kind)) return true;
+
+  return !!opts.targetId && findFlags(ps, opts.targetId, "advantageForAttackers", opts.targetExtra).length > 0;
 }
 
 export function hasDisadvantage(
@@ -61,4 +64,14 @@ export function predictAttackNumbers(
     totalBonus: calculateAttackBonus(attacker, attack, ps),
     targetAC: statWithModifiers(ps, target.basicInfo.id, "armor", target.combatStats.armorClass),
   };
+}
+
+export function predictRollMode(attacker: BattleParticipant, target: BattleParticipant, attack: BattleAttack, participants: BattleParticipant[]): "advantage" | "disadvantage" | "normal" {
+  const ps = withSelf(withSelf(participants, target), attacker);
+
+  const adv = hasAdvantage(attacker, attack, ps, undefined, { targetId: target.basicInfo.id });
+
+  const dis = hasDisadvantage(attacker, attack, ps, { targetId: target.basicInfo.id });
+
+  return adv === dis ? "normal" : adv ? "advantage" : "disadvantage";
 }

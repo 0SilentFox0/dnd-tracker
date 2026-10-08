@@ -1,7 +1,7 @@
 import type { FieldMeta } from "./fields";
 
 import { AttackType } from "@/lib/constants/battle";
-import { findParticipant } from "@/lib/utils/abilities/engine/participants";
+import { findParticipant, isActive } from "@/lib/utils/abilities/engine/participants";
 import type { Trigger, TriggerEvent } from "@/lib/utils/abilities/schema";
 import type { AbilityEvent } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
@@ -18,6 +18,7 @@ interface TriggerDefinition<E extends TriggerEvent> {
   label: string;
   fields: readonly FieldMeta[];
   matches: Matcher<E>;
+  describe?: (trigger: Extract<Trigger, { event: E }>) => string[];
 }
 
 const PHASE: FieldMeta = { name: "phase", label: "Фаза", input: "select", options: [{ value: "before", label: "до" }, { value: "after", label: "після" }] };
@@ -55,9 +56,23 @@ export const TRIGGER_REGISTRY: { [E in TriggerEvent]: TriggerDefinition<E> } = {
   hit: {
     event: "hit",
     label: "Влучання",
-    fields: [ATTACK_ROLE, ATTACK_KIND],
-    matches: (t, e, o) =>
-      e.type === "hit" && (!t.attackKind || t.attackKind === e.attackKind) && (t.role === "attacker" ? e.actorId : e.targetId) === id(o),
+    fields: [
+      ATTACK_ROLE,
+      { name: "whose", label: "Чия роль", input: "select", optional: true, options: [{ value: "self", label: "моя" }, { value: "ally", label: "іншого союзника" }] },
+      ATTACK_KIND,
+    ],
+    matches: (t, e, o, ps) => {
+      if (e.type !== "hit" || (t.attackKind && t.attackKind !== e.attackKind)) return false;
+
+      const subject = t.role === "attacker" ? e.actorId : e.targetId;
+
+      if (t.whose !== "ally") return subject === id(o);
+
+      const other = findParticipant(ps, subject);
+
+      return subject !== id(o) && !!other && isActive(other) && sameSide(other, o);
+    },
+    describe: (t) => (t.whose === "ally" ? ["іншого союзника"] : []),
   },
   kill: {
     event: "kill",
@@ -84,9 +99,26 @@ export const TRIGGER_REGISTRY: { [E in TriggerEvent]: TriggerDefinition<E> } = {
   spellCast: {
     event: "spellCast",
     label: "Заклинання",
-    fields: [PHASE, { name: "role", label: "Роль", input: "select", options: [{ value: "caster", label: "кастую я" }, { value: "target", label: "ціль — я" }] }],
+    fields: [
+      PHASE,
+      { name: "role", label: "Роль", input: "select", options: [{ value: "caster", label: "кастую я" }, { value: "target", label: "ціль — я" }] },
+      { name: "spellIds", label: "Закляття", input: "spells", optional: true },
+      { name: "school", label: "Школа", input: "text", optional: true },
+      { name: "spellLevels", label: "Рівні закляття", input: "numberList", optional: true },
+    ],
     matches: (t, e, o) =>
-      e.type === "spellCast" && e.phase === t.phase && (t.role === "caster" ? e.actorId === id(o) : e.targetIds.includes(id(o))),
+      e.type === "spellCast" &&
+      e.phase === t.phase &&
+      (t.role === "caster" ? e.actorId === id(o) : e.targetIds.includes(id(o))) &&
+      (!t.spellIds || (!!e.spellId && t.spellIds.includes(e.spellId))) &&
+      (!t.school || e.school === t.school) &&
+      (!t.spellLevels || (e.level !== undefined && t.spellLevels.includes(e.level))),
+    describe: (t) =>
+      [
+        t.spellIds && `закляття: ${t.spellIds.length}`,
+        t.school && `школа ${t.school}`,
+        t.spellLevels && `рівні ${t.spellLevels.join(", ")}`,
+      ].filter(Boolean) as string[],
   },
   moraleCheck: {
     event: "moraleCheck",
@@ -101,8 +133,15 @@ export const TRIGGER_REGISTRY: { [E in TriggerEvent]: TriggerDefinition<E> } = {
       return t.whose === "self" ? e.actorId === id(o) : e.actorId !== id(o) && sameSide(findParticipant(ps, e.actorId), o);
     },
   },
+  action: { event: "action", label: "Основна дія (кнопка)", fields: [], matches: (_t, e, o) => e.type === "action" && e.actorId === id(o) },
   bonusAction: { event: "bonusAction", label: "Бонусна дія (кнопка)", fields: [], matches: (_t, e, o) => e.type === "bonusAction" && e.actorId === id(o) },
 };
+
+export function describeTrigger(trigger: Trigger): string[] {
+  const def = TRIGGER_REGISTRY[trigger.event] as TriggerDefinition<TriggerEvent>;
+
+  return [def.label, ...(def.describe?.(trigger as never) ?? [])];
+}
 
 export function triggerMatches(trigger: Trigger, event: AbilityEvent, owner: BattleParticipant, ps: BattleParticipant[]): boolean {
   const def = TRIGGER_REGISTRY[trigger.event] as TriggerDefinition<TriggerEvent>;

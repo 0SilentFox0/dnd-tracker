@@ -49,7 +49,6 @@ export function SkillCreateForm({
     basicInfo,
     abilitiesGroup,
     spell,
-    spellEnhancement,
     mainSkill,
     handleSubmit,
   } = useSkillForm(
@@ -73,7 +72,7 @@ export function SkillCreateForm({
     {
       id: SKILL_FORM_TAB.spell,
       label: "Заклинання",
-      content: <SkillSpellSection campaignId={campaignId} spell={spell} spellEnhancement={spellEnhancement} spells={spells} />,
+      content: <SkillSpellSection spell={spell} spells={spells} />,
     },
     {
       id: SKILL_FORM_TAB.abilities,

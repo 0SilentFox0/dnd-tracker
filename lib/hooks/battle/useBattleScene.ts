@@ -11,6 +11,7 @@ import { BattleStatus,ParticipantSide } from "@/lib/constants/battle";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import {
   battleQueryKey,
+  useAbilityAction,
   useAddBattleParticipant,
   useAttack,
   useBattle,
@@ -43,6 +44,7 @@ export interface BattleSceneActions {
   attack: ReturnType<typeof useAttack>;
   moraleCheck: ReturnType<typeof useMoraleCheck>;
   bonusAction: ReturnType<typeof useBonusAction>;
+  abilityAction: ReturnType<typeof useAbilityAction>;
   castSpell: ReturnType<typeof useCastSpell>;
   start: ReturnType<typeof useStartBattle>;
   reset: ReturnType<typeof useResetBattle>;
@@ -206,6 +208,7 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
     attack: useAttack(campaignId, battleId, o),
     moraleCheck: useMoraleCheck(campaignId, battleId, o),
     bonusAction: useBonusAction(campaignId, battleId, o),
+    abilityAction: useAbilityAction(campaignId, battleId, o),
     castSpell: useCastSpell(campaignId, battleId, o),
     start: useStartBattle(campaignId, battleId, o),
     reset: useResetBattle(campaignId, battleId, o),

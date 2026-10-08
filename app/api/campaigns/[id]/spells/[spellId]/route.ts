@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 
 import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
@@ -8,6 +8,8 @@ import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { loadOwned } from "@/lib/utils/api/load-owned";
 import { parseBody } from "@/lib/utils/api/parse-body";
+
+const asJson = (v: unknown) => (v === undefined ? undefined : (v as Prisma.InputJsonValue));
 
 export async function GET(
   request: Request,
@@ -71,46 +73,18 @@ export async function PATCH(
       data: {
         name: data.name,
         level: data.level,
-        type: data.type,
-        target: data.target !== undefined ? data.target : undefined,
-        damageType: data.damageType,
-        damageElement: data.damageElement !== undefined ? data.damageElement : undefined,
-        damageModifier: data.damageModifier !== undefined ? data.damageModifier : undefined,
-        healModifier: data.healModifier !== undefined ? data.healModifier : undefined,
-        castingTime: data.castingTime !== undefined ? data.castingTime : undefined,
-        range: data.range !== undefined ? data.range : undefined,
-        duration: data.duration !== undefined ? data.duration : undefined,
-        diceCount: data.diceCount !== undefined ? data.diceCount : undefined,
-        diceType: data.diceType !== undefined ? data.diceType : undefined,
-        savingThrow:
-          data.savingThrow === null
-            ? Prisma.JsonNull
-            : data.savingThrow
-            ? (data.savingThrow as unknown as Prisma.InputJsonValue)
-            : undefined,
-        hitCheck:
-          data.hitCheck !== undefined
-            ? data.hitCheck === null
-              ? Prisma.JsonNull
-              : (data.hitCheck as unknown as Prisma.InputJsonValue)
-            : undefined,
-        description: data.description !== undefined ? data.description : undefined,
-        effects: data.effects !== undefined ? (data.effects as unknown as Prisma.InputJsonValue) : undefined,
-        groupId: data.groupId !== undefined ? data.groupId : undefined,
-        icon: data.icon !== undefined ? (data.icon || null) : undefined,
-        appearanceDescription: data.appearanceDescription !== undefined ? data.appearanceDescription : undefined,
-        summonUnitId:
-          data.summonUnitId !== undefined
-            ? data.summonUnitId === null || data.summonUnitId === ""
-              ? null
-              : data.summonUnitId
-            : undefined,
-        damageDistribution:
-          data.damageDistribution !== undefined
-            ? data.damageDistribution === null
-              ? Prisma.JsonNull
-              : (data.damageDistribution as unknown as Prisma.InputJsonValue)
-            : undefined,
+        groupId: data.groupId,
+        icon: data.icon !== undefined ? data.icon || null : undefined,
+        description: data.description,
+        appearanceDescription: data.appearanceDescription,
+        dice: data.dice,
+        cost: data.cost,
+        targeting: asJson(data.targeting),
+        resolution: asJson(data.resolution),
+        spellEffects: asJson(data.spellEffects),
+        raceModifiers: asJson(data.raceModifiers),
+        stackable: data.stackable,
+        maxStacks: data.stackable === false ? null : data.maxStacks,
       },
       include: {
         spellGroup: true,

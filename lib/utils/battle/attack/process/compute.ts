@@ -10,6 +10,7 @@ import { applyResistanceForAdditional } from "./damage";
 import { AttackType, ParticipantSourceType } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
+import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { attackAbilityLabel, getAttackAbilityModifier } from "@/lib/utils/common/calculations";
 import { maxOf, parseDice, parseDiceLenient, rollGroups } from "@/lib/utils/common/dice";
 import type { BattleParticipant, DamageStep } from "@/types/battle";
@@ -26,6 +27,7 @@ export interface ComputeHitDamageParams {
   currentRound: number;
   actionModifiers?: StaticEffect[];
   bonusPercent?: number;
+  bonusLabel?: string;
   rng?: () => number;
 }
 
@@ -74,6 +76,7 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
     attack.type as AttackType,
     {
       allParticipants,
+      targetId: target.basicInfo.id,
       additionalDamage: additionalDamageModifiers,
       ...heroDamageContext(updatedAttacker, attack, damageRolls),
       actionModifiers: params.actionModifiers,
@@ -156,7 +159,7 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
     const factor = 1 + params.bonusPercent / 100;
 
     physicalDamage = Math.floor(physicalDamage * factor);
-    damageSteps.push({ label: "Контратака", side: "attacker", kind: "multiplier", value: factor, after: physicalDamage });
+    damageSteps.push({ label: params.bonusLabel ?? "Контратака", side: "attacker", kind: "multiplier", value: factor, after: physicalDamage });
   }
 
   const dmgMult =
@@ -168,7 +171,7 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
     updatedTarget,
     physicalDamageForTarget,
     attack.damageType ?? "physical",
-    { participants: allParticipants },
+    { participants: allParticipants, attackKind: attackKindOf(attack.type) },
   );
 
   const { totalAdditionalDamage, additionalDamageBreakdown } = applyResistanceForAdditional(
@@ -176,6 +179,7 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
     scaleAdditionalDamage(updatedAttacker, damageCalculation.additionalDamage),
     dmgMult,
     allParticipants,
+    attackKindOf(attack.type),
   );
 
   const totalFinalDamage = resistanceResult.finalDamage + totalAdditionalDamage;

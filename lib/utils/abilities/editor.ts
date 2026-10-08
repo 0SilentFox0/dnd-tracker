@@ -8,7 +8,9 @@ const ALL_KINDS = Object.keys(EFFECT_REGISTRY) as EffectKind[];
 const PASSIVE_TARGETS = new Set(["self", "allAllies", "allEnemies"]);
 
 export function allowedEffectKinds(trigger: Trigger): EffectKind[] {
-  return trigger.event === "passive" ? STATIC_KINDS : ALL_KINDS;
+  if (trigger.event === "passive") return STATIC_KINDS;
+
+  return trigger.event === "bonusAction" || trigger.event === "action" ? ALL_KINDS : ALL_KINDS.filter((k) => k !== "summon");
 }
 
 function baseEffect(kind: EffectKind): Effect {
@@ -29,6 +31,12 @@ function baseEffect(kind: EffectKind): Effect {
       return { kind, amount: "1d8" };
     case "dot":
       return { kind, damagePerRound: "1d4", damageType: "bleed", duration: { rounds: 2 }, target: "eventTarget" };
+    case "hot":
+      return { kind, healPerRound: "1d4", duration: { rounds: 2 }, target: "eventTarget" };
+    case "berserk":
+      return { kind, damageBonusPercent: 50, duration: { rounds: 1 }, target: "eventTarget" };
+    case "charm":
+      return { kind, duration: { rounds: 1 }, target: "eventTarget" };
     case "applyCondition":
       return { kind, condition: "no_reaction", duration: { rounds: 1 }, target: "eventTarget" };
     case "restoreSpellSlot":
@@ -37,6 +45,14 @@ function baseEffect(kind: EffectKind): Effect {
       return { kind, delta: 1 };
     case "cleanse":
       return { kind };
+    case "summon":
+      return { kind, group: "Демони", tier: 1 };
+    case "raiseDead":
+      return { kind, hpPercent: 50, target: "eventTarget" };
+    case "guard":
+      return { kind, percent: 50, duration: { rounds: 2 }, target: "eventTarget" };
+    case "mark":
+      return { kind, markId: "mark", duration: { rounds: 2 }, target: "eventTarget" };
     case "randomOf":
       return { kind, options: [{ kind: "heal", amount: "1d4" }, { kind: "changeMorale", delta: 1 }] };
   }
@@ -95,9 +111,18 @@ export function newTrigger(event: TriggerEvent): Trigger {
 export function changeTriggerEvent(ability: Ability, event: TriggerEvent): Ability {
   const trigger = newTrigger(event);
 
-  const { limits, ...rest } = ability;
+  const { limits, maxTargets, stackable, maxStacks, ...rest } = ability;
 
-  return { ...rest, ...(event !== "passive" && limits && { limits }), trigger, effects: ability.effects.map((e) => fitToTrigger(e, trigger)) };
+  const button = event === "bonusAction" || event === "action";
+
+  return {
+    ...rest,
+    ...(event !== "passive" && limits && { limits }),
+    ...(event !== "passive" && stackable && { stackable }),
+    ...(event !== "passive" && stackable && maxStacks !== undefined && { maxStacks }),
+    ...(button && maxTargets !== undefined && { maxTargets }),
+    trigger, effects: ability.effects.map((e) => fitToTrigger(e, trigger)),
+  };
 }
 
 const segs = (path: string) => path.split(".").filter(Boolean);

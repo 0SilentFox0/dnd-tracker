@@ -19,6 +19,8 @@ export function useCharacterEditor({ campaignId, characterId, onSaved }: { campa
 
   const { data: races = [] } = useRaces(campaignId);
 
+  const progressionOf = (race: string) => races.find((r) => r.name === race)?.spellSlotProgression;
+
   const [equipped, setEquipped] = useState<EquippedItems>({});
 
   const form = useCharacterForm({
@@ -27,7 +29,7 @@ export function useCharacterEditor({ campaignId, characterId, onSaved }: { campa
 
       onSaved();
 
-      return characterToFormData(saved);
+      return characterToFormData(saved, progressionOf(saved.race));
     },
   });
 
@@ -42,10 +44,10 @@ export function useCharacterEditor({ campaignId, characterId, onSaved }: { campa
   useEffect(() => {
     if (!freshData || seededFor === characterId) return;
 
-    setFormData(characterToFormData(freshData));
+    setFormData(characterToFormData(freshData, progressionOf(freshData.race)));
     setEquipped((freshData.inventory?.equipped as EquippedItems) ?? {}); // eslint-disable-line react-hooks/set-state-in-effect -- seed from the first server snapshot
     setSeededFor(characterId);
-  }, [freshData, characterId, seededFor, setFormData]);
+  }, [freshData, characterId, seededFor, setFormData]); // eslint-disable-line react-hooks/exhaustive-deps -- races only inform the default of an empty slot table
 
   return { query, ready: seededFor === characterId, form, equipped, setEquipped, members, membersLoading, races };
 }

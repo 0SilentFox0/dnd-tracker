@@ -3,7 +3,7 @@ import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { CombatStatus } from "@/lib/constants/battle";
 import { resolveAmount } from "@/lib/utils/abilities/engine/amount";
-import { eventDamage } from "@/lib/utils/abilities/engine/events";
+import { eventDamage, eventSpellRoll } from "@/lib/utils/abilities/engine/events";
 import { applyRawDamage } from "@/lib/utils/abilities/engine/hp";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/participants";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/timed-effects";
@@ -25,12 +25,14 @@ export function applyDealDamage(input: EffectApplyInput<Of<"dealDamage">>): Effe
 
   const downed: EffectApplyResult["downed"] = [];
 
-  for (const id of input.targetIds) {
+  for (const [index, id] of input.targetIds.entries()) {
     const t = findParticipant(ps, id);
 
     if (!t || !isActive(t)) continue;
 
-    const amount = resolveAmount(effect.amount, { owner, target: t, eventDamage: eventDamage(input.event), rng: ctx.rng });
+    const rolled = resolveAmount(effect.amount, { owner, target: t, eventDamage: eventDamage(input.event), spellRoll: eventSpellRoll(input.event), rng: ctx.rng, participants: input.participants });
+
+    const amount = effect.falloff ? Math.floor((rolled * effect.falloff[Math.min(index, effect.falloff.length - 1)]) / 100) : rolled;
 
     if (amount <= 0) continue;
 
@@ -61,7 +63,7 @@ export function applyHeal(input: EffectApplyInput<Of<"heal">>): EffectApplyResul
 
     if (!t || (!isActive(t) && !effect.revive)) continue;
 
-    const amount = resolveAmount(effect.amount, { owner, target: t, eventDamage: eventDamage(input.event), rng: ctx.rng });
+    const amount = resolveAmount(effect.amount, { owner, target: t, eventDamage: eventDamage(input.event), spellRoll: eventSpellRoll(input.event), rng: ctx.rng, participants: input.participants });
 
     const before = Math.max(0, t.combatStats.currentHp);
 
@@ -104,7 +106,7 @@ export function applyDot(input: EffectApplyInput<Of<"dot">>): EffectApplyResult 
       continue;
     }
 
-    const dmg = resolveAmount(effect.damagePerRound, { owner, target: t, eventDamage: eventDamage(input.event), rng: ctx.rng });
+    const dmg = resolveAmount(effect.damagePerRound, { owner, target: t, eventDamage: eventDamage(input.event), spellRoll: eventSpellRoll(input.event), rng: ctx.rng, participants: input.participants });
 
     if (dmg <= 0) continue;
 
@@ -119,6 +121,7 @@ export function applyDot(input: EffectApplyInput<Of<"dot">>): EffectApplyResult 
           type: "debuff",
           rounds: effect.duration.rounds,
           stackable: ability.stackable === true,
+          maxStacks: ability.maxStacks,
           dotDamage: { damagePerRound: dmg, damageType: effect.damageType },
         },
         ctx.round,
@@ -130,8 +133,53 @@ export function applyDot(input: EffectApplyInput<Of<"dot">>): EffectApplyResult 
   return { participants: ps, messages };
 }
 
-export const describeDealDamage = (e: Of<"dealDamage">) => `шкода ${amountLabel(e.amount)}${e.damageType ? ` ${e.damageType}` : ""}`;
+export function applyHot(input: EffectApplyInput<Of<"hot">>): EffectApplyResult {
+  const { ability, effect, ctx } = input;
+
+  let ps = input.participants;
+
+  const owner = findParticipant(ps, input.ownerId);
+
+  if (!owner) return { participants: ps, messages: [] };
+
+  const messages: string[] = [];
+
+  for (const id of input.targetIds) {
+    const t = findParticipant(ps, id);
+
+    if (!t || !isActive(t)) continue;
+
+    const heal = resolveAmount(effect.healPerRound, { owner, target: t, eventDamage: eventDamage(input.event), spellRoll: eventSpellRoll(input.event), rng: ctx.rng, participants: input.participants });
+
+    if (heal <= 0) continue;
+
+    ps = replaceParticipant(
+      ps,
+      upsertTimedEffect(
+        t,
+        {
+          timedKey: `${ability.key}#${input.effectIndex}`,
+          source: effectSource(owner, ability),
+          name: ability.name,
+          type: "buff",
+          rounds: effect.duration.rounds,
+          stackable: ability.stackable === true,
+          maxStacks: ability.maxStacks,
+          hotHeal: { healPerRound: heal },
+        },
+        ctx.round,
+      ),
+    );
+    messages.push(`💚 ${ability.name}: +${heal} HP/раунд → ${t.basicInfo.name} (${effect.duration.rounds} р.)`);
+  }
+
+  return { participants: ps, messages };
+}
+
+export const describeDealDamage = (e: Of<"dealDamage">) => `шкода ${amountLabel(e.amount)}${e.damageType ? ` ${e.damageType}` : ""}${e.falloff ? ` (${e.falloff.join("% → ")}%)` : ""}`;
 
 export const describeHeal = (e: Of<"heal">) => `${e.revive ? "воскресіння" : "лікування"} ${amountLabel(e.amount)}`;
 
 export const describeDot = (e: Of<"dot">) => `${e.damageType} ${amountLabel(e.damagePerRound)}/раунд × ${e.duration?.rounds ?? "?"} р.`;
+
+export const describeHot = (e: Of<"hot">) => `лікування ${amountLabel(e.healPerRound)}/раунд × ${e.duration?.rounds ?? "?"} р.`;

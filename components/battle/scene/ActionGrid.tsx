@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, Hourglass, Sparkles, Swords } from "lucide-react";
+import { BookOpen, Hourglass, Sparkles, Swords, Zap } from "lucide-react";
 
 import type { usePlayerTurn } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
@@ -20,15 +20,16 @@ const Tile = ({ icon: Icon, label, sub, used, primary, onClick }: { icon: typeof
 export function ActionGrid({ turn, pending, labels, available, actions }: {
   turn: Turn;
   pending: boolean;
-  labels: { attack: string; magic: string; bonus: string };
-  available: { magic: boolean; bonus: boolean };
-  actions: { attack(): void; magic(): void; bonus(): void };
+  labels: { attack: string; magic: string; bonus: string; ability?: string };
+  available: { magic: boolean; bonus: boolean; ability?: boolean };
+  actions: { attack(): void; magic(): void; bonus(): void; ability?(): void };
 }) {
   return (
     <>
       <div className="grid grid-cols-2 gap-2 pt-3">
         <Tile icon={Swords} label="Атака" sub={turn.actionUsed ? "використано" : labels.attack} used={turn.actionUsed || turn.skipped || pending} primary onClick={actions.attack} />
         <Tile icon={BookOpen} label="Магія" sub={turn.actionUsed ? "дію використано" : labels.magic} used={turn.actionUsed || turn.skipped || !available.magic || pending} onClick={actions.magic} />
+        {available.ability && <Tile icon={Zap} label="Вміння" sub={turn.actionUsed ? "дію використано" : (labels.ability ?? "")} used={turn.actionUsed || turn.skipped || pending} onClick={actions.ability} />}
         <Tile icon={Sparkles} label="Бонус" sub={labels.bonus} used={!turn.bonusAvailable || turn.skipped || !available.bonus || pending} onClick={actions.bonus} />
         <Tile icon={Hourglass} label="Мораль" sub={turn.moraleResult ? MORALE_SUB[turn.moraleResult] : "не потрібна"} used />
       </div>

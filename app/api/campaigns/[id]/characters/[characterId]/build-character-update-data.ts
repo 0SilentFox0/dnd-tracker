@@ -4,7 +4,8 @@ import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { applyLevelGain } from "@/lib/utils/characters/level-up/apply-level-gain";
 import { seenLevelOnLevelChange } from "@/lib/utils/characters/seen-level";
 import { getLevelFromXP } from "@/lib/utils/common/calculations";
-import { calculateCharacterSpellSlots, type SpellSlots } from "@/lib/utils/spells/spell-slots";
+import { fullSpellSlots, type SpellSlots } from "@/lib/utils/spells/spell-slots";
+import type { SpellSlotProgression } from "@/types/races";
 
 type AbilityScores = Record<AbilityKey, number>;
 
@@ -39,9 +40,9 @@ export function resolveFinalLevel(
   return Math.max(explicit, Math.min(getLevelFromXP(data.experience, xpMultiplier), maxLevel));
 }
 
-function tableSlots(level: number, existing: SpellSlots | null | undefined): SpellSlots {
+function tableSlots(level: number, existing: SpellSlots | null | undefined, progression: SpellSlotProgression[] | null, maxLevel: number): SpellSlots {
   const slots: SpellSlots = Object.fromEntries(
-    Object.entries(calculateCharacterSpellSlots(level)).map(([k, v]) => {
+    Object.entries(fullSpellSlots(level, progression, maxLevel)).map(([k, v]) => {
       const current = existing?.[k]?.current;
 
       return [k, { max: v.max, current: current !== undefined ? Math.min(current, v.max) : v.max }];
@@ -74,7 +75,7 @@ export function buildCharacterUpdateData({ character, data, xpMultiplier, campai
   }
 
   if (finalLevel < character.level) {
-    return { ...common, spellSlots: tableSlots(finalLevel, existingSlots), skillTreeProgressUpdate: {} as Prisma.InputJsonValue };
+    return { ...common, spellSlots: tableSlots(finalLevel, existingSlots, Array.isArray(race?.spellSlotProgression) ? (race.spellSlotProgression as SpellSlotProgression[]) : null, campaign.maxLevel), skillTreeProgressUpdate: {} as Prisma.InputJsonValue };
   }
 
   return common;

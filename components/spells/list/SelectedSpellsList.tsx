@@ -7,15 +7,8 @@ import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { HudCard } from "@/components/hud/page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  getDamageModifierLabel,
-  getHealModifierLabel,
-  spellLevelName,
-} from "@/lib/constants/spells";
-import {
-  calculateAverageSpellEffect,
-  formatSpellAverage,
-} from "@/lib/utils/spells/spell-calculations";
+import { spellLevelName } from "@/lib/constants/spells";
+import { spellMechanicsLabels } from "@/lib/utils/spells/model/summary";
 import type { Spell } from "@/types/spells";
 
 interface SelectedSpellsListProps {
@@ -40,16 +33,6 @@ export function SelectedSpellsList({
       <p className="text-sm font-medium">Магічна Книга:</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {selectedSpells.map((spell) => {
-          const averageEffect = calculateAverageSpellEffect(
-            spell.diceCount,
-            spell.diceType
-          );
-
-          const formattedAverage = formatSpellAverage(
-            spell.damageType,
-            averageEffect
-          );
-
           return (
             <HudCard key={spell.id} className="relative">
               <div className="flex items-start gap-3">
@@ -89,44 +72,16 @@ export function SelectedSpellsList({
                     </Button>
                   </div>
 
-                  {/* Тип заклинання */}
                   <div className="flex items-center gap-1 flex-wrap">
-                    <Badge variant="outline" className="text-xs">
-                      {spell.damageType === "damage"
-                        ? "Шкода"
-                        : spell.damageType === "heal"
-                        ? "Лікування"
-                        : "Усі"}
+                    <Badge variant="secondary" className="text-xs">
+                      {spellLevelName(spell.level)}
                     </Badge>
-                    {spell.level !== undefined && (
-                      <Badge variant="secondary" className="text-xs">
-                        {spellLevelName(spell.level)}
+                    {spellMechanicsLabels(spell).map((label) => (
+                      <Badge key={label} variant="outline" className="text-xs">
+                        {label}
                       </Badge>
-                    )}
+                    ))}
                   </div>
-
-                  {/* Середня шкода/лікування */}
-                  {formattedAverage && (
-                    <p className="text-xs text-muted-foreground">
-                      {formattedAverage}
-                    </p>
-                  )}
-
-                  {/* Модифікатори */}
-                  {(spell.damageModifier || spell.healModifier) && (
-                    <div className="flex items-center gap-1 flex-wrap mt-1">
-                      {spell.damageModifier && (
-                        <Badge variant="outline" className="text-xs">
-                          {getDamageModifierLabel(spell.damageModifier)}
-                        </Badge>
-                      )}
-                      {spell.healModifier && (
-                        <Badge variant="outline" className="text-xs">
-                          {getHealModifierLabel(spell.healModifier)}
-                        </Badge>
-                      )}
-                    </div>
-                  )}
                 </div>
               </div>
             </HudCard>

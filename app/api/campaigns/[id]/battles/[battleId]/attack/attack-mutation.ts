@@ -16,6 +16,7 @@ export const attackBodySchema = z
     d20Roll: z.number().min(1).max(20).optional(),
     attackRoll: z.number().min(1).max(20).optional(),
     attackRolls: z.array(z.number().min(1).max(20)).optional(),
+    secondRolls: z.array(z.number().min(1).max(20)).optional(),
     advantageRoll: z.number().min(1).max(20).optional(),
     disadvantageRoll: z.number().min(1).max(20).optional(),
     damageRolls: z.array(z.number()).default([]),
@@ -69,7 +70,7 @@ export function attackMutation(ctx: BattleMutationContext, body: AttackBody): Mu
 
   if (!endTurn) return { participants: order, pending: ctx.pending, events };
 
-  const advanced = advanceTurn({ participants: order, pending: ctx.pending, scene: ctx.scene });
+  const advanced = advanceTurn({ participants: order, pending: ctx.pending, scene: ctx.scene, rng: ctx.rng });
 
   return {
     participants: advanced.participants,

@@ -119,4 +119,16 @@ describe("resolveDowned", () => {
 
     expect(resolveDowned([again], { victimId: "v", actorId: null }, ctx).survived).toBe(false);
   });
+
+  it("повідомлення вміння з chance позначає шанс", () => {
+    const lucky = resolved({ trigger: { event: "hit", role: "attacker" }, limits: { chance: 40 }, effects: [{ kind: "changeMorale", delta: 1 }] });
+
+    const plain = resolved({ trigger: { event: "hit", role: "attacker" }, effects: [{ kind: "changeMorale", delta: 1 }] }, { id: "p" });
+
+    const run = (a: typeof lucky) => runAbilities([makeParticipant({ id: "a", abilities: [a] }), makeParticipant({ id: "e", side: ParticipantSide.ENEMY })], hit, { round: 1, rng: () => 0 }).messages;
+
+    expect(run(lucky).every((m) => m.endsWith(" (шанс 40 %)"))).toBe(true);
+    expect(run(lucky).length).toBeGreaterThan(0);
+    expect(run(plain).some((m) => m.includes("шанс"))).toBe(false);
+  });
 });

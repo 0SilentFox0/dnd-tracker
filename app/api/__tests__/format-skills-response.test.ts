@@ -5,8 +5,8 @@ import { formatSkillsListResponse } from "@/app/api/campaigns/[id]/skills/format
 
 const row = {
   id: "s1", campaignId: "c", name: "Скіл", description: null, icon: "https://x/i.png", spellId: "sp1", spellGroupId: null, grantedSpellId: null,
-  mainSkillId: "attack", spellEnhancementTypes: [], spellEffectIncrease: null, spellTargetChange: null, spellAdditionalModifier: null,
-  spellNewSpellId: null, spellEnhancementData: {}, image: null, createdAt: new Date(), abilities: null,
+  mainSkillId: "attack",
+  spellNewSpellId: null, image: null, createdAt: new Date(), abilities: null,
 };
 
 describe("formatSkillsListResponse", () => {

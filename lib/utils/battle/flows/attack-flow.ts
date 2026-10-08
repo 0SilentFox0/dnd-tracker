@@ -37,6 +37,7 @@ export type AttackFlowAction =
   | { type: "OPEN"; weaponCount: number; attackId: string; maxTargets: number; diceSlots: number[] }
   | { type: "SELECT_WEAPON"; attackId: string; maxTargets: number; diceSlots: number[] }
   | { type: "TOGGLE_TARGET"; id: string }
+  | { type: "SET_TARGETS"; ids: string[] }
   | { type: "CONFIRM_TARGETS" }
   | { type: "SET_MODE"; mode: AttackMode }
   | { type: "ROLL"; d20: number; second?: number; outcome: RollOutcome }
@@ -74,6 +75,8 @@ export function attackFlow(s: AttackFlowState, a: AttackFlowAction): AttackFlowS
 
       return s.targetIds.length >= s.maxTargets ? s : { ...s, targetIds: [...s.targetIds, a.id] };
     }
+    case "SET_TARGETS":
+      return { ...s, targetIds: a.ids.slice(0, s.maxTargets) };
     case "CONFIRM_TARGETS":
       return s.targetIds.length === 0
         ? s
@@ -130,7 +133,7 @@ export function effectiveD20(strike: Strike, mode: AttackMode): number {
   return mode === "advantage" ? Math.max(d, strike.second) : Math.min(d, strike.second);
 }
 
-export function attackPayload(s: AttackFlowState, attackerId: string): AttackData & { endTurn: boolean } {
+export function attackPayload(s: AttackFlowState, attackerId: string, opts: { allStrikes?: boolean } = {}): AttackData & { endTurn: boolean } {
   const base = { attackerId, attackId: s.attackId, endTurn: false };
 
   if (s.strikes.length === 1) {
@@ -148,12 +151,13 @@ export function attackPayload(s: AttackFlowState, attackerId: string): AttackDat
 
   const hits = s.strikes.filter(isHit);
 
-  const used = hits.length ? hits : s.strikes;
+  const used = hits.length && !opts.allStrikes ? hits : s.strikes;
 
   return {
     ...base,
     targetIds: used.map((st) => st.targetId),
-    attackRolls: used.map((st) => effectiveD20(st, s.mode)),
+    attackRolls: used.map((st) => st.d20 ?? 0),
+    ...(s.mode !== "normal" && used.every((st) => st.second !== undefined) && { secondRolls: used.map((st) => st.second as number) }),
     damageRolls: hits.flatMap((st) => st.damage),
   } as AttackData & { endTurn: boolean };
 }

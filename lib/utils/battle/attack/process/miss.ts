@@ -32,7 +32,7 @@ export function handleMiss(params: HandleMissParams): ProcessAttackResult {
   let actualGuaranteedDamage = 0;
 
   if (guaranteedDamage > 0) {
-    actualGuaranteedDamage = applyResistance(target, guaranteedDamage, attack.damageType ?? "physical", { participants: flow.ps }).finalDamage;
+    actualGuaranteedDamage = applyResistance(target, guaranteedDamage, attack.damageType ?? "physical", { participants: flow.ps, attackKind: attackKindOf(attack.type) }).finalDamage;
 
     put(flow, applyDamageToTarget(target, actualGuaranteedDamage).updatedTarget);
     settleDowned(flow, targetId, attackerId);

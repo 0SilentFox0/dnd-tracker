@@ -20,7 +20,7 @@ export function calculateAttackRoll(
 
   const attackBonus = calculateAttackBonus(attacker, attack, participants, opts.extra);
 
-  const hasAdv = hasAdvantage(attacker, attack, participants, opts.extra);
+  const hasAdv = hasAdvantage(attacker, attack, participants, opts.extra, opts);
 
   const hasDisadv = hasDisadvantage(attacker, attack, participants, opts);
 
@@ -30,16 +30,21 @@ export function calculateAttackRoll(
 
   let advantageUsed = false;
 
-  if (hasAdv && hasDisadv) {
-  } else if (hasAdv) {
-    if (advantageRoll !== undefined) {
-      finalRoll = Math.max(d20Roll, advantageRoll);
-      advantageUsed = true;
-    }
-  } else if (hasDisadv) {
-    if (disadvantageRoll !== undefined) {
-      finalRoll = Math.min(d20Roll, disadvantageRoll);
-    }
+  let secondRoll: AttackRollResult["secondRoll"];
+
+  const rollSecond = () => Math.floor((opts.rng ?? Math.random)() * 20) + 1;
+
+  if (hasAdv && !hasDisadv) {
+    const value = advantageRoll ?? rollSecond();
+
+    secondRoll = { mode: "advantage", value, serverRolled: advantageRoll === undefined };
+    finalRoll = Math.max(d20Roll, value);
+    advantageUsed = true;
+  } else if (hasDisadv && !hasAdv) {
+    const value = disadvantageRoll ?? rollSecond();
+
+    secondRoll = { mode: "disadvantage", value, serverRolled: disadvantageRoll === undefined };
+    finalRoll = Math.min(d20Roll, value);
   }
 
   const totalAttackValue = finalRoll + attackBonus;
@@ -66,5 +71,7 @@ export function calculateAttackRoll(
     attackBonus,
     criticalEffect,
     advantageUsed,
+    chosenD20: finalRoll,
+    ...(secondRoll && { secondRoll }),
   };
 }

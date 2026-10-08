@@ -16,16 +16,24 @@ export const TriggerSchema = z.discriminatedUnion("event", [
   z.object({ event: z.literal("turnStart") }),
   z.object({ event: z.literal("turnEnd") }),
   z.object({ event: z.literal("attack"), phase, role: attackRole, attackKind: z.enum(ATTACK_KINDS).optional() }),
-  z.object({ event: z.literal("hit"), role: attackRole, attackKind: z.enum(ATTACK_KINDS).optional() }),
+  z.object({ event: z.literal("hit"), role: attackRole, whose: z.enum(["self", "ally"]).optional(), attackKind: z.enum(ATTACK_KINDS).optional() }),
   z.object({ event: z.literal("kill"), role: z.enum(["killer", "killerSide", "victimSide"]) }),
   z.object({ event: z.literal("lethalDamage") }),
-  z.object({ event: z.literal("spellCast"), phase, role: z.enum(["caster", "target"]) }),
+  z.object({
+    event: z.literal("spellCast"),
+    phase,
+    role: z.enum(["caster", "target"]),
+    spellIds: z.array(z.string().min(1)).min(1).optional(),
+    school: z.string().min(1).optional(),
+    spellLevels: z.array(z.number().int().min(1).max(9)).min(1).optional(),
+  }),
   z.object({
     event: z.literal("moraleCheck"),
     result: z.enum(["success", "fail", "any"]),
     whose: z.enum(["self", "ally"]),
   }),
   z.object({ event: z.literal("bonusAction") }),
+  z.object({ event: z.literal("action") }),
 ]);
 
 export type Trigger = z.infer<typeof TriggerSchema>;

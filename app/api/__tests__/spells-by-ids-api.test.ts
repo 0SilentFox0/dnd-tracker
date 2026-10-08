@@ -36,7 +36,7 @@ describe("GET /spells?ids=", () => {
     expect(args.where).toEqual({ campaignId: "camp", id: { in: ["s1", "s2"] } });
     expect(args.select.effects).toBeUndefined();
     expect(args.select.name).toBe(true);
-    expect(await res.json()).toEqual([{ ...row, savingThrow: { ability: "dexterity", onSuccess: "none" } }]);
+    expect(await res.json()).toEqual([{ ...row, savingThrow: { ability: "dexterity", onSuccess: "none" }, dice: 0, cost: "action", targeting: { kind: "enemy" }, resolution: { kind: "auto" } }]);
     expect(res.headers.get("Cache-Control")).toBe("private, no-store");
   });
 

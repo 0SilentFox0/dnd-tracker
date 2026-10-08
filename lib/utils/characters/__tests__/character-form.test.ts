@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { RACES } from "@/data/library/races";
 import { characterToFormData, mergeLevelUpIntoForm } from "@/lib/utils/characters/character-form";
 import type { Character } from "@/types/characters";
 
@@ -15,5 +16,13 @@ describe("mergeLevelUpIntoForm", () => {
     expect(merged.abilityScores.strength).toBe(11);
     expect(merged.spellcasting.spellSlots).toEqual({ "1": { max: 3, current: 3 } });
     expect(merged.combatStats.armorClass).toBe(18);
+  });
+});
+
+describe("characterToFormData: слоти за прогресією раси", () => {
+  it("порожня таблиця слотів добудовується з прогресії раси, а не з таблиці персонажів", () => {
+    const form = characterToFormData({ level: 9, spellSlots: {} }, RACES[0].spellSlotProgression);
+
+    expect(Object.fromEntries(Object.entries(form.spellcasting.spellSlots ?? {}).map(([k, v]) => [k, v.max]))).toEqual({ "1": 4, "2": 3, "3": 3, "4": 2, "5": 1 });
   });
 });

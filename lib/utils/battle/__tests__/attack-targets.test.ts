@@ -56,7 +56,6 @@ describe("Multi-target Attack Logic", () => {
       activeEffects: [],
       equippedArtifacts: [],
       resolvedAbilities: [],
-      spellEnhancers: [],
     },
     actionFlags: {
       hasUsedAction: false,

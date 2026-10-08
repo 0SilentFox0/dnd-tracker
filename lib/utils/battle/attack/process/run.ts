@@ -46,7 +46,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   const { actionModifiers } = fire(flow, { type: "attack", phase: "before", actorId: attackerId, targetId, attackKind });
 
-  if (!isActive(getP(flow, targetId))) {
+  if (!isActive(getP(flow, targetId)) || !isActive(getP(flow, attackerId))) {
     put(flow, applyMainActionUsed(getP(flow, attackerId)));
 
     const battleAction = buildAbortedAttackAction(getP(flow, attackerId), target, attack, flow.messages, battleId, currentRound);
@@ -71,6 +71,18 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     rng: flow.ctx.rng,
   });
 
+  const second = attackRoll.secondRoll;
+
+  if (second) {
+    flow.messages.push(`🎲 ${second.mode === "advantage" ? "перевага" : "недолік"}: другий d20 = ${second.value}${second.serverRolled ? " (сервер)" : ""}, обрано ${attackRoll.chosenD20}`);
+  }
+
+  const withRollDetails = <T extends { actionDetails: object }>(action: T): T => {
+    if (second) Object.assign(action.actionDetails, { secondRoll: second, chosenD20: attackRoll.chosenD20 });
+
+    return action;
+  };
+
   const targetAC = getEffectiveArmorClass(getP(flow, targetId), flow.ps, actionModifiers[targetId]);
 
   const guaranteedHit = findFlags(flow.ps, attackerId, "guaranteedHit", actionModifiers[attackerId]).length > 0;
@@ -82,6 +94,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
   if (attackRoll.isCriticalFail && attackRoll.criticalEffect) {
     const r = handleCriticalFail(branch);
 
+    withRollDetails(r.battleAction);
     appendHpChanges(r.battleAction, before, flow.ps);
 
     return r;
@@ -90,6 +103,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
   if (!isHit) {
     const r = handleMiss(branch);
 
+    withRollDetails(r.battleAction);
     appendHpChanges(r.battleAction, before, flow.ps);
 
     return r;
@@ -105,6 +119,8 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     damageMultiplier,
     currentRound,
     actionModifiers: actionModifiers[attackerId],
+    bonusPercent: params.bonusPercent,
+    bonusLabel: params.bonusLabel,
   });
 
   const {
@@ -144,6 +160,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     currentRound,
   });
 
+  withRollDetails(battleAction);
   appendHpChanges(battleAction, before, flow.ps);
 
   return {

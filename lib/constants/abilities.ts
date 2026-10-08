@@ -39,3 +39,5 @@ export const ABILITY_SCORES = [
 ] as const;
 
 export type AbilityScore = (typeof ABILITY_SCORES)[number]["key"];
+
+export const DEFAULT_AREA_TARGETS = 3;

@@ -33,6 +33,7 @@ export function calculateDamageWithModifiersImpl(
     weaponDiceNotation?: string;
     actionModifiers?: StaticEffect[];
     statLabel?: string;
+    targetId?: string;
   },
 ): DamageCalculationResult {
   const breakdown: string[] = [];
@@ -76,7 +77,7 @@ export function calculateDamageWithModifiersImpl(
   const mods = collectModifiers(
     withSelf(context?.allParticipants ?? [], attacker),
     attacker.basicInfo.id,
-    { damage: { kind } },
+    { damage: { kind, targetId: context?.targetId } },
     context?.actionModifiers,
   );
 

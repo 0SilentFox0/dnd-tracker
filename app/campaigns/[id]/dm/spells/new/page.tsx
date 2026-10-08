@@ -10,6 +10,7 @@ import { SpellFormBody } from "../SpellFormBody";
 import { HudFormPage } from "@/components/hud/form";
 import { useNotify } from "@/lib/hooks/common";
 import { useCreateSpell, useSpellGroups } from "@/lib/hooks/spells";
+import { formToPayload, spellFormError } from "@/lib/utils/spells/model/form";
 
 export default function NewSpellPage({
   params,
@@ -31,39 +32,18 @@ export default function NewSpellPage({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.name) {
-      void notify("Будь ласка, вкажіть назву заклинання");
+    const problem = spellFormError(formData);
+
+    if (problem) {
+      void notify(problem);
 
       return;
     }
 
-    createSpellMutation.mutate(
-      {
-        ...formData,
-        name: formData.name ?? "",
-        description: formData.description ?? "",
-        effects: formData.effects ?? null,
-        type: formData.type || "target",
-        damageType: formData.damageType || "damage",
-        target: formData.target || null,
-        damageElement: formData.damageElement || null,
-        damageModifier: formData.damageModifier || null,
-        healModifier: formData.healModifier || null,
-        castingTime: formData.castingTime || null,
-        range: formData.range || null,
-        duration: formData.duration || null,
-        diceCount: formData.diceCount || null,
-        diceType: formData.diceType || null,
-        savingThrow: formData.savingThrow || null,
-        groupId: formData.groupId || null,
-        icon: formData.icon || null,
-        summonUnitId: formData.summonUnitId || null,
-      },
-      {
-        onSuccess: () => router.push(`/campaigns/${id}/dm/spells`),
-        onError: (error) => console.error("Error creating spell:", error),
-      },
-    );
+    createSpellMutation.mutate(formToPayload(formData), {
+      onSuccess: () => router.push(`/campaigns/${id}/dm/spells`),
+      onError: (error) => console.error("Error creating spell:", error),
+    });
   };
 
   return (

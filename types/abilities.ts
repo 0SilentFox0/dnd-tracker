@@ -19,23 +19,6 @@ export interface AbilityUsageCounter {
   turn: number;
 }
 
-export interface SpellEnhancer {
-  skillId: string;
-  name: string;
-  mainSkillId: string | null;
-  level: string | null;
-  linkedSpellId: string | null;
-  spellGroupId: string | null;
-  spellEnhancements: {
-    spellEffectIncrease?: number;
-    spellTargetChange?: { target: string };
-    spellAdditionalModifier?: { modifier?: string; damageDice?: string; duration?: number };
-    spellNewSpellId?: string;
-    spellAllowMultipleTargets?: boolean;
-    spellAoeSpellIds?: string[];
-  };
-}
-
 export type AbilityEvent =
   | { type: "battleStart"; newcomerIds?: string[] }
   | { type: "roundStart" }
@@ -46,9 +29,10 @@ export type AbilityEvent =
   | { type: "hit"; actorId: string; targetId: string; attackKind: AttackType; damage: number }
   | { type: "kill"; actorId: string | null; targetId: string }
   | { type: "lethalDamage"; actorId: string | null; targetId: string }
-  | { type: "spellCast"; phase: "before" | "after"; actorId: string; targetIds: string[] }
+  | { type: "spellCast"; phase: "before" | "after"; actorId: string; targetIds: string[]; spellId?: string; school?: string | null; level?: number; roll?: number }
   | { type: "moraleCheck"; actorId: string; result: "success" | "fail" }
-  | { type: "bonusAction"; actorId: string; abilityKey: string; targetId?: string };
+  | { type: "bonusAction"; actorId: string; abilityKey: string; targetIds?: string[] }
+  | { type: "action"; actorId: string; abilityKey: string; targetIds?: string[] };
 
 export type AbilityDamageKind = DamageKind;
 

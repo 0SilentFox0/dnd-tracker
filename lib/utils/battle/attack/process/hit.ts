@@ -2,6 +2,7 @@ import type { AttackRollResult } from "../../types/attack";
 import { type AttackFlow, fire, getP, put, settleDowned } from "./ability-flow";
 import { computeHitDamage, type ComputeHitDamageResult } from "./compute";
 import { applyDamageToTarget } from "./damage";
+import { splitGuardedDamage } from "./guard";
 import { applyVampirism } from "./hit-effects";
 
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
@@ -19,6 +20,7 @@ export interface ResolveHitParams {
   currentRound: number;
   actionModifiers?: StaticEffect[];
   bonusPercent?: number;
+  bonusLabel?: string;
 }
 
 export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageResult; vampirismHeal: number } {
@@ -35,12 +37,25 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
     currentRound: p.currentRound,
     actionModifiers: p.actionModifiers,
     bonusPercent: p.bonusPercent,
+    bonusLabel: p.bonusLabel,
     rng: flow.ctx.rng,
   });
 
   put(flow, hitDamage.updatedAttacker);
   put(flow, hitDamage.updatedTarget);
-  put(flow, applyDamageToTarget(getP(flow, targetId), hitDamage.totalFinalDamage).updatedTarget);
+
+  const guarded = splitGuardedDamage(flow.ps, targetId, hitDamage.totalFinalDamage);
+
+  put(flow, applyDamageToTarget(getP(flow, targetId), guarded.targetDamage).updatedTarget);
+
+  if (guarded.guardianId) {
+    const guardian = getP(flow, guarded.guardianId);
+
+    put(flow, applyDamageToTarget(guardian, guarded.guardianDamage).updatedTarget);
+    flow.messages.push(`🛡 ${guardian.basicInfo.name} приймає ${guarded.guardianDamage} шкоди за ${getP(flow, targetId).basicInfo.name}`);
+    settleDowned(flow, guarded.guardianId, attackerId);
+  }
+
   settleDowned(flow, targetId, attackerId);
 
   fire(flow, {
@@ -51,9 +66,9 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
     damage: hitDamage.resistanceResult.finalDamage,
   });
 
-  const vampirism = applyVampirism(getP(flow, attackerId), hitDamage.totalFinalDamage, attack.type);
+  const vampirism = applyVampirism(flow.ps, attackerId, hitDamage.totalFinalDamage, attack.type);
 
-  put(flow, vampirism.updatedAttacker);
+  if (vampirism.updatedAttacker) put(flow, vampirism.updatedAttacker);
 
   return { hitDamage, vampirismHeal: vampirism.vampirismHeal };
 }

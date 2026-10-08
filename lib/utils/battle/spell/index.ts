@@ -1,2 +1,2 @@
-export type { BattleSpell, ProcessSpellParams, ProcessSpellResult } from "./process";
-export { processSpell } from "./process";
+export type { CastableSpell, CastSpellParams, CastSpellResult } from "../types/spell-process";
+export { castSpell } from "./cast";

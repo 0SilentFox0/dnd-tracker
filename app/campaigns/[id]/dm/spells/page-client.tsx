@@ -8,7 +8,6 @@ import { DeleteAllButton } from "@/components/common/DeleteAllButton";
 import { EmptyState, LoadingState } from "@/components/common/states";
 import { HudPage, HudPageHeader } from "@/components/hud/page";
 import { CreateSpellGroupDialog } from "@/components/skills/dialogs/CreateSpellGroupDialog";
-import { SpellImportDialog } from "@/components/spells/dialogs/SpellImportDialog";
 import { SpellGroupAccordion } from "@/components/spells/list/SpellGroupAccordion";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -66,7 +65,6 @@ export function DMSpellsPageClient({
         subtitle={`База заклинань кампанії Всього: ${spells.length}`}
         actions={
           <>
-            <SpellImportDialog campaignId={campaignId} />
             <CreateSpellGroupDialog campaignId={campaignId} />
             <Link href={`/campaigns/${campaignId}/dm/spells/new`}>
               <Button className="whitespace-nowrap text-xs sm:text-sm">+ Створити заклинання</Button>

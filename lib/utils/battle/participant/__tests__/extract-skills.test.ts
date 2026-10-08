@@ -24,7 +24,7 @@ const character = (unlocked: string[], extra: Record<string, unknown> = {}) =>
 describe("resolveCharacterSkillEntries", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("рівні гілки — зі levelSkillIds (назва без слова рівня), з levelNode; слот — basic без levelNode; расовий — без лінії", async () => {
+  it("рівні гілки — зі levelSkillIds (назва без слова рівня), з levelNode; слот — basic без levelNode; расовий — лінія racial", async () => {
     const entries = await resolveCharacterSkillEntries(
       character(["attack_basic_level", "attack_advanced_level", "o1", "racial_basic_racial"], { personalSkillId: "pers" }),
       "camp",
@@ -37,7 +37,7 @@ describe("resolveCharacterSkillEntries", () => {
       ["lvl-b", "attack", "basic", true],
       ["lvl-a", "attack", "advanced", true],
       ["o1", "attack", "basic", false],
-      ["rac", null, "basic", false],
+      ["rac", "racial", "basic", true],
       ["pers", null, "basic", false],
     ]);
   });

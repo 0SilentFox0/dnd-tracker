@@ -31,5 +31,7 @@ export function resolveTargetIds(
       return ps.filter((p) => isActive(p) && p.basicInfo.side === side).map((p) => p.basicInfo.id);
     case "allEnemies":
       return ps.filter((p) => isActive(p) && p.basicInfo.side !== side).map((p) => p.basicInfo.id);
+    case "everyone":
+      return ps.filter(isActive).map((p) => p.basicInfo.id);
   }
 }

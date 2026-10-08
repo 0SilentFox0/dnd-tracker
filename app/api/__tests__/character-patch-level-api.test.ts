@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { RACES } from "@/data/library/races";
 import { prisma } from "@/lib/db";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 
@@ -42,7 +43,7 @@ describe("PATCH персонажа: рівень і слоти", () => {
     random.mockReturnValue(0);
     vi.mocked(prisma.character.findUnique).mockResolvedValue(CHARACTER as never);
     vi.mocked(prisma.campaign.findUnique).mockResolvedValue({ allowPlayerEdit: true } as never);
-    vi.mocked(prisma.race.findFirst).mockResolvedValue({ spellSlotProgression: [{ level: 1, slots: 20 }] } as never);
+    vi.mocked(prisma.race.findFirst).mockResolvedValue({ spellSlotProgression: [{ level: 1, slots: 4 }, { level: 2, slots: 3 }, { level: 3, slots: 3 }] } as never);
     vi.mocked(prisma.character.update).mockImplementation(((args: { data: object }) => Promise.resolve(args.data)) as never);
   });
 
@@ -108,9 +109,19 @@ describe("PATCH персонажа: рівень і слоти", () => {
     expect(written()).toMatchObject({
       level: 5,
       strength: 14,
-      spellSlots: { "1": { max: 4, current: 2 }, "4": { max: 1, current: 1 }, universal: { max: 2, current: 2 } },
+      spellSlots: { "1": { max: 3, current: 1 }, "2": { max: 1, current: 1 }, "3": { max: 2, current: 2 }, universal: { max: 2, current: 2 } },
     });
     expect(written()).not.toHaveProperty("maxHp");
     expect(written()).not.toHaveProperty("currentHp");
+  });
+
+  it("ДМ: зниження рівня 9→5 — слоти за прогресією раси бібліотеки: 4/3/2", async () => {
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("dm"));
+    vi.mocked(prisma.character.findUnique).mockResolvedValue({ ...CHARACTER, level: 9, seenLevel: 9, spellSlots: { "1": { max: 4, current: 1 }, "2": { max: 3, current: 3 }, "3": { max: 3, current: 3 }, "4": { max: 2, current: 2 }, "5": { max: 1, current: 1 } } } as never);
+    vi.mocked(prisma.race.findFirst).mockResolvedValue({ spellSlotProgression: RACES[0].spellSlotProgression } as never);
+
+    await patch({ level: 5 });
+
+    expect(written().spellSlots).toEqual({ "1": { max: 4, current: 1 }, "2": { max: 3, current: 3 }, "3": { max: 2, current: 2 } });
   });
 });

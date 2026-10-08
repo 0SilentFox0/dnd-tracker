@@ -7,6 +7,7 @@ export const STAT_LABELS: Record<StatKey, string> = {
   armor: "AC",
   attackBonus: "бонус атаки",
   critThreshold: "поріг криту",
+  actionsPerTurn: "дії за хід",
   initiative: "ініціатива",
   maxHp: "макс. HP",
   speed: "швидкість",
@@ -34,6 +35,14 @@ export function amountLabel(amount: Amount): string {
 
   if ("formula" in amount) return `(${amount.formula})`;
 
+  if ("spellRoll" in amount) {
+    if (typeof amount.spellRoll !== "number") return `(${amount.spellRoll.formula})% кидка заклинання`;
+
+    return amount.spellRoll === 100 ? "кидок заклинання" : `${amount.spellRoll}% кидка заклинання`;
+  }
+
+  if (amount.percentOf === "ownerAttack") return `${amount.value} % шкоди першої атаки`;
+
   return `${amount.value}% від ${amount.percentOf === "eventDamage" ? "завданої шкоди" : "макс. HP"}`;
 }
 
@@ -43,6 +52,7 @@ export const TARGET_LABELS: Record<AbilityTarget, string> = {
   eventActor: "виконавець події",
   allAllies: "усі союзники",
   allEnemies: "усі вороги",
+  everyone: "усі учасники",
 };
 
 export const CONDITION_LABELS: Record<(typeof CONDITION_KEYS)[number], string> = {
@@ -51,6 +61,7 @@ export const CONDITION_LABELS: Record<(typeof CONDITION_KEYS)[number], string> =
   disable_melee_attacks: "без ближніх атак",
   disable_ranged_attacks: "без дальніх атак",
   disable_spell_casting: "без заклинань",
+  skip_action: "втрата дії",
 };
 
 export function limitsLabel(l: Limits | undefined): string[] {

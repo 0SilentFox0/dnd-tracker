@@ -1,6 +1,7 @@
-import { findParticipant, isActive, resolvedAbilitiesOf, updateParticipant } from "./participants";
+import { restoreCharm } from "./charm";
+import { findParticipant, isActive, replaceParticipant, resolvedAbilitiesOf, updateParticipant } from "./participants";
 import { resolveTargetIds } from "./targets";
-import type { AbilityRunContext, AbilityRunResult, Downed } from "./types";
+import type { AbilityRunContext, AbilityRunResult, Downed, SummonRequest } from "./types";
 import { recordUse, resetUsage, withinLimits } from "./usage";
 
 import { evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
@@ -33,6 +34,8 @@ export function runAbilities(participants: BattleParticipant[], event: AbilityEv
 
   const downed: Downed[] = [];
 
+  const summons: SummonRequest[] = [];
+
   for (const start of participants) {
     const ownerId = start.basicInfo.id;
 
@@ -41,7 +44,7 @@ export function runAbilities(participants: BattleParticipant[], event: AbilityEv
 
       if (!owner || !canAct(owner, event)) break;
 
-      if (event.type === "bonusAction" && ability.key !== event.abilityKey) continue;
+      if ((event.type === "bonusAction" || event.type === "action") && ability.key !== event.abilityKey) continue;
 
       if (!triggerMatches(ability.trigger, event, owner, ps)) continue;
 
@@ -60,11 +63,12 @@ export function runAbilities(participants: BattleParticipant[], event: AbilityEv
         const r = applyEffect({ participants: ps, ability, effectIndex, ownerId, effect, targetIds, event, ctx });
 
         ps = r.participants;
-        messages.push(...r.messages);
+        messages.push(...r.messages.map((m) => (ability.limits?.chance !== undefined ? `${m} (шанс ${ability.limits.chance} %)` : m)));
 
         for (const m of r.actionModifiers ?? []) (actionModifiers[m.participantId] ??= []).push(m.effect);
 
         downed.push(...(r.downed ?? []));
+        summons.push(...(r.summons ?? []));
       }
     }
   }
@@ -78,7 +82,7 @@ export function runAbilities(participants: BattleParticipant[], event: AbilityEv
     }
   }
 
-  return { participants: ps, messages, actionModifiers, fired };
+  return { participants: ps, messages, actionModifiers, fired, summons };
 }
 
 export function resolveDowned(
@@ -93,7 +97,7 @@ export function resolveDowned(
 
   const deep = { ...ctx, depth: 1 };
 
-  let ps = participants;
+  let ps = replaceParticipant(participants, restoreCharm(victim));
 
   const messages: string[] = [];
 

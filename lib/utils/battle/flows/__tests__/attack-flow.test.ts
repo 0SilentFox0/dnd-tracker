@@ -93,4 +93,37 @@ describe("attackFlow", () => {
     expect(ok.step).toBe("result");
     expect(attackFlow(ok, { type: "CLOSE" })).toEqual(initialAttackFlow);
   });
+
+  it("SET_TARGETS вибирає всіх ворогів, але не більше maxTargets", () => {
+    expect(run(open(1, 3), { type: "SET_TARGETS", ids: ["a", "b", "c", "d"] }).targetIds).toEqual(["a", "b", "c"]);
+  });
+
+  it("multi-target payload sends raw d20 and raw second rolls, never a pre-folded value", () => {
+    const s = run(
+      open(1, 2),
+      { type: "TOGGLE_TARGET", id: "a" },
+      { type: "TOGGLE_TARGET", id: "b" },
+      { type: "CONFIRM_TARGETS" },
+      { type: "SET_MODE", mode: "disadvantage" },
+      { type: "ROLL", d20: 17, second: 3, outcome: "miss" },
+      { type: "ROLL", d20: 15, second: 18, outcome: "hit" },
+      { type: "DAMAGE", values: [5] },
+    );
+
+    expect(attackPayload(s, "me")).toMatchObject({ targetIds: ["b"], attackRolls: [15], secondRolls: [18] });
+  });
+
+  it("allStrikes: payload carries misses too, so the server never rerolls them", () => {
+    const s = run(
+      open(1, 2),
+      { type: "TOGGLE_TARGET", id: "a" },
+      { type: "TOGGLE_TARGET", id: "b" },
+      { type: "CONFIRM_TARGETS" },
+      { type: "ROLL", d20: 4, outcome: "miss" },
+      { type: "ROLL", d20: 17, outcome: "hit" },
+      { type: "DAMAGE", values: [5] },
+    );
+
+    expect(attackPayload(s, "me", { allStrikes: true })).toMatchObject({ targetIds: ["a", "b"], attackRolls: [4, 17], damageRolls: [5] });
+  });
 });

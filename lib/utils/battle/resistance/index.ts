@@ -2,12 +2,14 @@ import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
 import { PHYSICAL_DAMAGE_TYPES } from "@/lib/constants/damage";
 import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
-import type { StaticEffect } from "@/lib/utils/abilities/schema";
+import type { AttackKind, StaticEffect } from "@/lib/utils/abilities/schema";
 import type { BattleParticipant, DamageStep } from "@/types/battle";
 
 export interface ResistanceOptions {
   participants?: BattleParticipant[];
   fromSpell?: boolean;
+  /** вид атаки, що завдає шкоди; опір з attackKind діє лише на нього */
+  attackKind?: AttackKind;
   /** модифікатори поточної дії для цілі (фаза before) */
   extra?: StaticEffect[];
 }
@@ -28,14 +30,16 @@ function matchesDamageType(flagType: string, damageType: string, fromSpell: bool
 
   const f = flagType.toLowerCase();
 
-  return f === t || (f === "physical" && PHYSICAL_DAMAGE_TYPES.includes(t)) || (f === "spell" && (fromSpell || t === "spell" || t === "magic"));
+  return f === "all" || f === t || (f === "physical" && PHYSICAL_DAMAGE_TYPES.includes(t)) || (f === "spell" && (fromSpell || t === "spell" || t === "magic"));
 }
 
 function matchingResistances(target: BattleParticipant, damageType: string, opts: ResistanceOptions = {}) {
   const { entries } = collectModifiers(withSelf(opts.participants ?? [], target), target.basicInfo.id, { flag: "resistance" }, opts.extra);
 
   return entries.flatMap((e) =>
-    e.flag?.flag === "resistance" && matchesDamageType(e.flag.damageType, damageType, opts.fromSpell === true)
+    e.flag?.flag === "resistance" &&
+    (!e.flag.attackKind || e.flag.attackKind === opts.attackKind) &&
+    matchesDamageType(e.flag.damageType, damageType, opts.fromSpell === true)
       ? [{ label: e.label, percent: e.flag.percent, icon: e.icon }]
       : [],
   );

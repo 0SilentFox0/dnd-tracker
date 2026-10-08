@@ -4,7 +4,7 @@ import type { CharacterFromPrisma } from "../types/participant";
 
 import { prisma } from "@/lib/db";
 import type { SkillEntry } from "@/lib/utils/abilities/build/collect";
-import { normalizeTree, resolveLearned, uniqueSkills } from "@/lib/utils/skills/progression";
+import { normalizeTree, RACIAL_BRANCH_ID, resolveLearned, uniqueSkills } from "@/lib/utils/skills/progression";
 
 /** Скіли, на які посилаються вивчені вузли дерева раси персонажів і їхні personalSkillId. */
 export function referencedSkillIds(
@@ -65,13 +65,13 @@ export async function resolveCharacterSkillEntries(
 
     if (!row) continue;
 
-    const mainSkillId = n.kind === "branchLevel" || n.kind === "slot" ? n.branchId : null;
+    const mainSkillId = n.kind === "branchLevel" || n.kind === "slot" ? n.branchId : n.kind === "racial" ? RACIAL_BRANCH_ID : null;
 
     entries.push({
       row,
       mainSkillId,
       level: n.level ?? "basic",
-      levelNode: n.kind === "branchLevel",
+      levelNode: n.kind === "branchLevel" || n.kind === "racial",
       mainSkillSpellGroupId: mainSkillId ? (groups.get(mainSkillId) ?? null) : null,
     });
   }

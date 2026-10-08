@@ -1,3 +1,5 @@
+import { berserkBonusOf, runBerserkTurn } from "./berserk";
+
 import { SYSTEM_ACTOR } from "@/lib/constants/battle";
 import { isActive } from "@/lib/utils/abilities/engine/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
@@ -224,6 +226,28 @@ export function runAdvanceTurnLoop(
         isCancelled: false,
         stateBefore: getStateBeforeForEntry(),
       });
+    }
+
+    const berserkBonus = berserkBonusOf(nextParticipant);
+
+    if (berserkBonus !== undefined && isActive(turnResult.participant)) {
+      const berserk = runBerserkTurn({
+        participants: updatedInitiativeOrder,
+        participantId: turnResult.participant.basicInfo.id,
+        restrictedBy: nextParticipant,
+        bonusPercent: berserkBonus,
+        round: nextRound,
+        battleId,
+        actionIndex: currentBattleLogLength + newLogEntries.length,
+        rng,
+      });
+
+      updatedInitiativeOrder = berserk.participants;
+      newLogEntries.push(...berserk.actions.map((a, i) => ({ ...a, actionIndex: currentBattleLogLength + newLogEntries.length + i, stateBefore: getStateBeforeForEntry() })));
+
+      if (checkVictoryConditions(updatedInitiativeOrder).result) break;
+
+      continue;
     }
 
     if (isActive(turnResult.participant)) activeParticipantFound = true;

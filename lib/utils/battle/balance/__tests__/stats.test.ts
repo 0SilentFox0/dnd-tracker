@@ -80,29 +80,31 @@ describe("getUnitStats: модель DPR юніта", () => {
     expect(getUnitStats({ ...base, maxTargets: 4, attacks: [{ damageDice: "1d8", type: "melee", maxTargets: 4 }] }).dpr).toBe(4.5);
   });
 
-  it("DPR із заклинання: кубики + рівень × цілі AoE, якщо воно сильніше за зброю", () => {
+  const fire = { kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" };
+
+  it("DPR із заклинання: формула кубиків (база + ⌊рівень/3⌋, d6) × цілі, якщо воно сильніше за зброю", () => {
     const stats = getUnitStats({
       ...base,
       level: 3,
       attacks: [{ damageDice: "1d4", type: "melee" }],
       spells: [
-        { diceCount: 8, diceType: "d6", type: "aoe", damageType: "damage", target: "enemies" },
-        { diceCount: 1, diceType: "d4", type: "target", damageType: "damage" },
-        { diceCount: 9, diceType: "d12", type: "target", damageType: "heal" },
+        { dice: 7, targeting: { kind: "allEnemies" }, spellEffects: [fire] },
+        { dice: 1, targeting: { kind: "enemy" }, spellEffects: [fire] },
+        { dice: 9, targeting: { kind: "ally" }, spellEffects: [{ kind: "heal", amount: { spellRoll: 100 } }] },
       ],
     });
 
-    expect(stats.dpr).toBe((28 + 3) * TYPICAL_TARGETS);
+    expect(stats.dpr).toBe(8 * 3.5 * TYPICAL_TARGETS);
   });
 
-  it("розподіл шкоди AoE зменшує очікувані цілі", () => {
-    const spells = [{ diceCount: 2, diceType: "d6", type: "aoe", damageType: "damage", damageDistribution: [100, 50, 25] }];
+  it("спад шкоди по цілях зменшує очікувані цілі", () => {
+    const spells = [{ dice: 2, targeting: { kind: "area", side: "enemy", maxTargets: 3 }, spellEffects: [{ ...fire, falloff: [100, 50, 25] }] }];
 
-    expect(getUnitStats({ ...base, attacks: [], spells }).dpr).toBe((7 + 1) * 1.5);
+    expect(getUnitStats({ ...base, attacks: [], spells }).dpr).toBe(7 * 1.5);
   });
 
   it("слабке заклинання не знижує DPR зброї", () => {
-    const stats = getUnitStats({ ...base, attacks: [{ damageDice: "2d6", type: "melee" }], spells: [{ diceCount: 1, diceType: "d4", type: "target", damageType: "damage" }] });
+    const stats = getUnitStats({ ...base, attacks: [{ damageDice: "2d6", type: "melee" }], spells: [{ dice: 1, targeting: { kind: "enemy" }, spellEffects: [fire] }] });
 
     expect(stats.dpr).toBe(7);
   });

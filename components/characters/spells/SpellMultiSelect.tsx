@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import { ChevronDown } from "lucide-react";
 
 import { SelectedSpellsList } from "@/components/spells/list/SelectedSpellsList";
@@ -11,35 +10,23 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useSpells, useSpellSelection } from "@/lib/hooks/spells";
-import type { Spell } from "@/types/spells";
 
 interface SpellMultiSelectProps {
   campaignId: string;
   selectedSpellIds: string[];
   onSelectionChange: (spellIds: string[]) => void;
-  /** Обмежити список заклинань за полем `type` (наприклад лише `target`) */
-  allowedSpellTypes?: Spell["type"][];
 }
 
 export function SpellMultiSelect({
   campaignId,
   selectedSpellIds,
   onSelectionChange,
-  allowedSpellTypes,
 }: SpellMultiSelectProps) {
   const {
     data: spells = [],
     isLoading: spellsLoading,
     error: spellsError,
   } = useSpells(campaignId);
-
-  const spellsFiltered = useMemo(() => {
-    if (!allowedSpellTypes?.length) return spells;
-
-    const allow = new Set(allowedSpellTypes);
-
-    return spells.filter((s) => allow.has(s.type));
-  }, [spells, allowedSpellTypes]);
 
   const {
     open,
@@ -49,7 +36,7 @@ export function SpellMultiSelect({
     toggleSpell,
     removeSpell,
   } = useSpellSelection({
-    spells: spellsFiltered,
+    spells,
     selectedSpellIds,
     onSelectionChange,
   });

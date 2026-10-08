@@ -141,6 +141,8 @@ export const BATTLE_RATE_LIMITS = {
   spell: { limit: 30, windowSeconds: 10 },
   /** Бонус-дія. */
   bonusAction: { limit: 30, windowSeconds: 10 },
+  /** Вміння як основна дія. */
+  abilityAction: { limit: 30, windowSeconds: 10 },
   /** Next-turn — DM advance, рідше викликається. */
   nextTurn: { limit: 20, windowSeconds: 10 },
   /** PATCH HP / remove participant — DM-only, частіше OK. */

@@ -229,16 +229,16 @@ describe("інваріант: GET(до) + дельта = GET(після)", () =>
 
   it("заклинання", async () => {
     const spell = {
-      id: "s1", campaignId: "c1", name: "Вогняна стріла", level: 1, type: "target", target: "enemies",
-      damageType: "damage", damageElement: "fire", diceCount: 1, diceType: "d10", effects: [], summonUnitId: null,
+      id: "s1", campaignId: "c1", name: "Вогняна стріла", level: 1, groupId: null, icon: null, dice: 1, cost: "action",
+      targeting: { kind: "enemy" }, resolution: { kind: "auto" }, spellEffects: [{ kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" }], raceModifiers: [],
     } as unknown as Spell;
 
     const caster: BattleParticipant = { ...armedHero, spellcasting: { spellSlots: { "1": { max: 2, current: 2 } }, knownSpells: ["s1"] } };
 
-    const mutate = createSpellMutation({ loadSpell: vi.fn(async () => spell), summon: vi.fn() });
+    const mutate = createSpellMutation({ loadSpell: vi.fn(async () => spell), loadPool: async () => ({ units: [], races: [] }) });
 
     await expectDeltaMatchesGet(memoryBattle({ participants: [caster, sturdyGoblin, orc] }), (b) =>
-      b.act(PLAYER, { access: BattleAccess.MEMBER, schema: spellSchema, mutate }, { casterId: "hero", spellId: "s1", targetIds: ["gob"], damageRolls: [7] }),
+      b.act(PLAYER, { access: BattleAccess.MEMBER, schema: spellSchema, mutate }, { casterId: "hero", spellId: "s1", targetIds: ["gob"], diceRolls: [5] }),
     );
   });
 

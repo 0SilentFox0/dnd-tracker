@@ -1,40 +1,9 @@
 /**
- * Runtime-парсери для JSON-полів Prisma, які не валідуються при читанні (Skill.spellEnhancementData,
- * Character.skillTreeProgress, Spell.effects). `safeParseOrDefault` повертає дефолт з логом і не кидає:
+ * Runtime-парсери для JSON-полів Prisma, які не валідуються при читанні (Character.skillTreeProgress). `safeParseOrDefault` повертає дефолт з логом і не кидає:
  * його викликають у hot path, де throw зламав би весь request.
  */
 
 import { z } from "zod";
-
-// ─────────────────────────────────────────────────────────────────────
-// Skill.spellEnhancementData
-// ─────────────────────────────────────────────────────────────────────
-
-export const skillSpellEnhancementDataSchema = z
-  .object({
-    spellEnhancementTypes: z.array(z.string()).optional(),
-    spellEffectIncrease: z.number().nullable().optional(),
-    spellTargetChange: z
-      .object({ target: z.string() })
-      .nullable()
-      .optional(),
-    spellAdditionalModifier: z
-      .object({
-        modifier: z.string().optional(),
-        damageDice: z.string().optional(),
-        duration: z.number().optional(),
-      })
-      .nullable()
-      .optional(),
-    spellNewSpellId: z.string().nullable().optional(),
-    spellAllowMultipleTargets: z.boolean().optional(),
-    spellAoeSpellIds: z.array(z.string()).optional(),
-  })
-  .passthrough();
-
-export type SkillSpellEnhancementData = z.infer<
-  typeof skillSpellEnhancementDataSchema
->;
 
 // ─────────────────────────────────────────────────────────────────────
 // Character.skillTreeProgress
@@ -51,14 +20,6 @@ export const skillTreeProgressSchema = z.record(
 export type SkillTreeProgress = z.infer<typeof skillTreeProgressSchema>;
 
 // ─────────────────────────────────────────────────────────────────────
-// Spell.effects
-// ─────────────────────────────────────────────────────────────────────
-
-export const spellEffectsListSchema = z.array(z.string());
-
-export type SpellEffectsList = z.infer<typeof spellEffectsListSchema>;
-
-// ─────────────────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────────────────
 
@@ -66,7 +27,7 @@ export type SpellEffectsList = z.infer<typeof spellEffectsListSchema>;
  * Парсить `unknown` через схему. На success повертає типізоване значення;
  * на failure логує + повертає `defaultValue`.
  *
- * Не throw — використовується в hot path (extract-skills, processSpell, тощо)
+ * Не throw — використовується в hot path (extract-skills, тощо)
  * де throw зруйнував би request.
  */
 export function safeParseOrDefault<TSchema extends z.ZodTypeAny>(

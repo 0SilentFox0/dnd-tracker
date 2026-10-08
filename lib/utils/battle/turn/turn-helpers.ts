@@ -1,4 +1,5 @@
 import { BattleStatus, CombatStatus, ParticipantSide, SYSTEM_ACTOR } from "@/lib/constants/battle";
+import { restoreCharm } from "@/lib/utils/abilities/engine/charm";
 import {
   calculateAllyHpChangesOnVictory,
   checkVictoryConditions,
@@ -52,8 +53,10 @@ export function applyVictoryCompletion(params: ApplyVictoryParams): ApplyVictory
     finalStatus = BattleStatus.COMPLETED;
     completedAt = new Date();
 
+    updatedInitiativeOrder = order.map(restoreCharm);
+
     if (victoryCheck.result === "victory") {
-      updatedInitiativeOrder = order.map((participant) => {
+      updatedInitiativeOrder = updatedInitiativeOrder.map((participant) => {
         if (
           participant.basicInfo.side === ParticipantSide.ALLY &&
           participant.combatStats.status === CombatStatus.UNCONSCIOUS

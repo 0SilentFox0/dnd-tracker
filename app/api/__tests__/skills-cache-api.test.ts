@@ -35,11 +35,6 @@ const row = {
   spellGroupId: null,
   grantedSpellId: null,
   mainSkillId: null,
-  spellEnhancementData: {},
-  spellEnhancementTypes: [],
-  spellEffectIncrease: null,
-  spellTargetChange: null,
-  spellAdditionalModifier: null,
   spellNewSpellId: null,
   abilities: [],
   spell: null,
@@ -51,7 +46,7 @@ const row = {
 };
 
 const writes: Array<[string, () => Promise<Response>]> = [
-  ["POST /skills", () => list.POST(req("POST", { basicInfo: { name: "Удар" }, spellData: {}, spellEnhancementData: {}, mainSkillData: {} }), ctx)],
+  ["POST /skills", () => list.POST(req("POST", { basicInfo: { name: "Удар" }, spellData: {}, mainSkillData: {} }), ctx)],
   ["DELETE /skills", () => list.DELETE(req("DELETE"), ctx)],
   ["PATCH /skills/:id", () => one.PATCH(req("PATCH", { basicInfo: { name: "Новий" } }), ctxOne)],
   ["DELETE /skills/:id", () => one.DELETE(req("DELETE"), ctxOne)],

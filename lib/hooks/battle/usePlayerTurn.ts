@@ -7,6 +7,7 @@ import { useBattleScene } from "./useBattleScene";
 import { BattleStatus } from "@/lib/constants/battle";
 import { useConfirm } from "@/lib/hooks/common";
 import { initialTurnFlow, MORALE_SKIP_MS, moraleOutcome, turnFlow } from "@/lib/utils/battle/flows";
+import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import type { PendingMoraleCheckPayload } from "@/lib/utils/battle/turn";
 import { needsMoraleCheck } from "@/lib/utils/battle/view";
 import type { BattleParticipant } from "@/types/battle";
@@ -83,7 +84,7 @@ export function usePlayerTurn(participant: BattleParticipant) {
 
       dispatch({ type: "MORALE_RESULT", result });
 
-      const base = { name: participant.basicInfo.name, d10, morale: participant.combatStats.morale };
+      const base = { name: participant.basicInfo.name, d10, morale: effectiveMorale(participant, scene.readBattle()?.initiativeOrder ?? []).value };
 
       if (result === "extra") scene.showResult({ kind: "morale-extra", ...base });
       else if (result === "skip") {

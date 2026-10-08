@@ -1,15 +1,23 @@
 import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
+import { combineMorale, ownTimedMoraleFlat } from "@/lib/utils/abilities/engine/morale";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
 import type { BattleParticipant } from "@/types/battle";
+
+/** Лідерські бонуси до шансу додаткового ходу (прапорець moraleChance), %. */
+export function moraleChanceBonus(p: BattleParticipant, participants: BattleParticipant[]): number {
+  return findFlags(withSelf(participants, p), p.basicInfo.id, "moraleChance").reduce((sum, f) => sum + f.percent, 0);
+}
 
 export function effectiveMorale(p: BattleParticipant, participants: BattleParticipant[]): { value: number; ignored: boolean } {
   const all = withSelf(participants, p);
 
   const id = p.basicInfo.id;
 
-  if (findFlags(all, id, "ignoreMorale").length > 0) return { value: 0, ignored: true };
+  const mins = findFlags(all, id, "minMorale").map((f) => f.value);
 
-  const raw = p.combatStats.morale;
-
-  return { value: raw < 0 && findFlags(all, id, "noNegativeMorale").length > 0 ? 0 : raw, ignored: false };
+  return combineMorale(p.combatStats.morale, ownTimedMoraleFlat(p), {
+    ignored: findFlags(all, id, "ignoreMorale").length > 0,
+    noNegative: findFlags(all, id, "noNegativeMorale").length > 0,
+    min: mins.length ? Math.max(...mins) : undefined,
+  });
 }

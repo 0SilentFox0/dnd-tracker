@@ -2,7 +2,6 @@ import type { GroupedSkillPayload } from "./hooks";
 
 import { BattleStatus,type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import { type CampaignRoleValue } from "@/lib/constants/campaigns";
-import type { SpellEnhancementType } from "@/lib/constants/spell-enhancement";
 
 // Skills API
 export type SkillPayload = GroupedSkillPayload;
@@ -18,17 +17,6 @@ export interface SkillUpdatePayload {
   spellData?: {
     spellId?: string | null;
     spellGroupId?: string | null;
-  };
-  spellEnhancementData?: {
-    spellEnhancementTypes?: SpellEnhancementType[];
-    spellEffectIncrease?: number | null;
-    spellTargetChange?: { target: "enemies" | "allies" | "all" } | null;
-    spellAdditionalModifier?: {
-      modifier?: string;
-      damageDice?: string;
-      duration?: number;
-    } | null;
-    spellNewSpellId?: string | null;
   };
   mainSkillData?: {
     mainSkillId?: string | null;
@@ -129,6 +117,8 @@ export interface AttackData {
   attackRoll?: number;
   /** Один кидок на ціль (multi-target); якщо передано, використовується замість attackRoll */
   attackRolls?: number[];
+  /** Другий d20 на ціль (multi-target), у тому ж порядку, що й attackRolls; сервер сам вирішує перевагу/недолік */
+  secondRolls?: number[];
   advantageRoll?: number;
   disadvantageRoll?: number;
   damageRolls: number[];
@@ -144,17 +134,21 @@ export interface BonusActionData {
   participantId: string;
   abilityKey: string;
   targetParticipantId?: string;
+  targetParticipantIds?: string[];
+}
+
+export interface AbilityActionData {
+  participantId: string;
+  abilityKey: string;
+  targetParticipantIds?: string[];
 }
 
 export interface SpellCastData {
   casterId: string;
-  casterType: string;
   spellId: string;
   targetIds: string[];
-  damageRolls: number[];
-  savingThrows?: Array<{ participantId: string; roll: number }>;
-  additionalRollResult?: number;
-  hitRoll?: number;
+  diceRolls: number[];
+  saveRolls?: Array<{ participantId: string; roll: number }>;
 }
 
 // Skill Trees API

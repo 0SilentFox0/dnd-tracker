@@ -15,7 +15,8 @@ export function eventTargetIds(e: AbilityEvent): string[] {
     case "spellCast":
       return e.targetIds;
     case "bonusAction":
-      return [e.targetId ?? e.actorId];
+    case "action":
+      return e.targetIds?.length ? e.targetIds : [e.actorId];
     default:
       return [];
   }
@@ -27,6 +28,10 @@ export function eventAttackKind(e: AbilityEvent | null): DamageKind | null {
   if (e.type === "attack" || e.type === "hit") return e.attackKind;
 
   return e.type === "spellCast" ? "magic" : null;
+}
+
+export function eventSpellRoll(e: AbilityEvent): number | undefined {
+  return e.type === "spellCast" ? e.roll : undefined;
 }
 
 export function eventDamage(e: AbilityEvent): number | undefined {

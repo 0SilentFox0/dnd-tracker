@@ -6,7 +6,7 @@ import { AttackType } from "@/lib/constants/battle";
 
 export const DICE_RE = /^(\d+)d(\d+)([+-]\d+)?$/;
 
-export const ABILITY_TARGETS = ["self", "eventTarget", "eventActor", "allAllies", "allEnemies"] as const;
+export const ABILITY_TARGETS = ["self", "eventTarget", "eventActor", "allAllies", "allEnemies", "everyone"] as const;
 
 export const ATTACK_KINDS = [AttackType.MELEE, AttackType.RANGED] as const;
 
@@ -16,7 +16,7 @@ export const DAMAGE_FILTER_KINDS = [AttackType.MELEE, AttackType.RANGED, "magic"
 
 export const CONDITION_SUBJECTS = ["self", "eventTarget", "eventActor", "anyAlly", "anyEnemy"] as const;
 
-export const DYNAMIC_STATS = ["armor", "attackBonus", "critThreshold"] as const;
+export const DYNAMIC_STATS = ["armor", "attackBonus", "critThreshold", "actionsPerTurn"] as const;
 
 export const BAKED_STATS = [
   "initiative",
@@ -31,7 +31,7 @@ export const BAKED_STATS = [
 
 export const STAT_KEYS = [...DYNAMIC_STATS, ...BAKED_STATS] as const;
 
-export const TIMED_STATS = ["armor", "attackBonus", "critThreshold", "initiative"] as const;
+export const TIMED_STATS = ["armor", "attackBonus", "critThreshold", "initiative", "morale", "actionsPerTurn"] as const;
 
 export const CONDITION_KEYS = [
   "no_bonus_action",
@@ -39,6 +39,7 @@ export const CONDITION_KEYS = [
   "disable_melee_attacks",
   "disable_ranged_attacks",
   "disable_spell_casting",
+  "skip_action",
 ] as const;
 
 export type AbilityTarget = (typeof ABILITY_TARGETS)[number];
@@ -53,7 +54,7 @@ export type ConditionSubject = (typeof CONDITION_SUBJECTS)[number];
 
 export type StatKey = (typeof STAT_KEYS)[number];
 
-export type ConditionImmunityKey = (typeof CONDITION_KEYS)[number] | "fear";
+export type ConditionImmunityKey = (typeof CONDITION_KEYS)[number] | "fear" | "berserk" | "charm";
 
 export function isStaticEffect(e: Effect): e is StaticEffect {
   return e.kind === "modifyStat" || e.kind === "damageBonus" || e.kind === "flag";

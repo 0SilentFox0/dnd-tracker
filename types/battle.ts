@@ -1,4 +1,4 @@
-import type { AbilityUsageCounter, ResolvedAbility, SpellEnhancer, StaticEffect } from "./abilities";
+import type { AbilityUsageCounter, ResolvedAbility, StaticEffect } from "./abilities";
 
 import { type SpellcastingAbility } from "@/lib/constants/abilities";
 import { AttackType, type CombatStatusType,ParticipantSide, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
@@ -45,6 +45,11 @@ export interface ActiveEffect {
     damagePerRound: number;
     damageType: string;
   };
+  hotHeal?: {
+    healPerRound: number;
+  };
+  breakOnDamage?: boolean;
+  charmOrigin?: { side: ParticipantSide; controlledBy: string };
   abilityKey?: string;
   abilityEffects?: StaticEffect[];
   source?: { participantId: string; name: string; abilityName?: string; icon?: string | null };
@@ -134,6 +139,8 @@ export interface BattleParticipantAbilities {
   };
   proficiencyBonus: number;
   race: string;
+  /** Race.id для расових модифікаторів заклинань */
+  raceId?: string;
   primaryAbility?: AbilityKey;
   /** Коеф. DM для фіз. шкоди ближнього бою (лише character); як у калькуляторі персонажа */
   meleeMultiplier?: number;
@@ -177,13 +184,18 @@ export interface BattleParticipantBattleData {
   activeEffects: ActiveEffect[];
   equippedArtifacts: EquippedArtifact[];
   artifactSets?: SetProgress[];
-  /** Пул додаткових дій (ефект «actions»): накопичується при спрацюванні, споживається при використанні основної дії, діє до кінця бою */
+  /** Пул додаткових дій: поповнюється ефектом grantAction, а на початку власного ходу скидається до суми actionsPerTurn; споживається при використанні основної дії */
   pendingExtraActions?: number;
+  /** Хто прикликав або підняв учасника здібністю */
+  summonedBy?: string;
   /** Учасник зараз робить додатковий хід від моралі (наприкінці раунду) */
   extraTurnActive?: boolean;
   resolvedAbilities: ResolvedAbility[];
-  spellEnhancers: SpellEnhancer[];
   abilityUsage?: Record<string, AbilityUsageCounter>;
+  /** Чарм скінчився: сторона й контролер повертаються наприкінці цього ходу */
+  charmReturn?: { side: ParticipantSide; controlledBy: string };
+  /** Рівень майстерності героя у гілці кожної школи заклинань (groupId → рівень) */
+  schoolMastery?: Record<string, "basic" | "advanced" | "expert">;
   /** Масштаб шкоди ворога-юніта для рівного бою (старт бою); немає = ×1 */
   damageMultiplier?: number;
   /** Масштаб HP ворога-юніта для рівного бою; лише для показу ДМу */
@@ -269,6 +281,9 @@ export interface BattleAction {
     isHit?: boolean;
     isCritical?: boolean;
     isCriticalFail?: boolean;
+    /** Другий d20 (перевага/недолік) і кубик, що пішов у розрахунок */
+    secondRoll?: { mode: "advantage" | "disadvantage"; value: number; serverRolled: boolean };
+    chosenD20?: number;
     // Для урону:
     damageRolls?: Array<{
       dice: string;
@@ -284,8 +299,6 @@ export interface BattleAction {
     spellName?: string;
     spellLevel?: number;
     spellSlotUsed?: number;
-    /** Промах по перевірці попадання заклинання — без приклику тощо */
-    hitCheckMiss?: boolean;
     /** Приклик юніта після касту */
     summonedUnitTemplateId?: string;
     summonedParticipantId?: string;

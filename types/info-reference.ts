@@ -17,17 +17,14 @@ export interface SpellForReference {
   id: string;
   name: string;
   level: number;
+  /** підпис цілей заклинання (фільтр у довіднику) */
   type: string;
-  damageType: string;
-  castingTime: string | null;
-  range: string | null;
-  duration: string | null;
+  cost: string;
+  resolution: string;
+  dice: number;
   description: string | null;
+  /** описи ефектів із моделі вмінь, порахував сервер */
   effects: string[];
-  savingThrow: unknown;
-  diceCount: number | null;
-  diceType: string | null;
-  damageElement: string | null;
   appearanceDescription: string | null;
   groupName: string | null;
   icon: string | null;

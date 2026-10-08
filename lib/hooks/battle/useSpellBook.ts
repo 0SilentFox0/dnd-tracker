@@ -8,9 +8,9 @@ import { useBattleScene } from "./useBattleScene";
 import { usePrefetchSpellsByIds, useSpells, useSpellsByIds } from "@/lib/hooks/spells";
 import { initialSpellFlow, spellFlow, spellPayload,type SpellPick } from "@/lib/utils/battle/flows";
 import { isUp } from "@/lib/utils/battle/participant/state";
-import { participantSpellAllowsMultipleTargets } from "@/lib/utils/battle/spell/participant-spell-target-mode";
+import { casterSpellDice, spellFormulaLabel } from "@/lib/utils/battle/spell/caster-dice";
+import { expandSpellTargets, spellTargetingFor } from "@/lib/utils/battle/spell/spell-targeting";
 import { slotLevels } from "@/lib/utils/battle/view";
-import { diceSlots } from "@/lib/utils/common/dice";
 import { groupSpellsByLevel } from "@/lib/utils/spells/group-by-level";
 import type { BattleParticipant } from "@/types/battle";
 import type { BookSpell } from "@/types/spells";
@@ -45,22 +45,72 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
   const order = scene.battle.initiativeOrder;
 
-  const targets = order.filter((p) => isUp(p) || selected?.damageType === "heal");
-
-  const pickOf = (s: BookSpell): SpellPick => ({
-    spellId: s.id,
-    level: s.level,
-    targetMode: s.type === "no_target" ? "none" : s.type === "aoe" || (caster && participantSpellAllowsMultipleTargets(caster, s.id)) ? "multi" : "single",
-    needsHit: !!s.hitCheck,
-    needsSaves: !!s.savingThrow,
-    diceSlots: s.diceCount && s.diceType ? diceSlots(`${s.diceCount}${s.diceType}`) : [],
+  const definitionOf = (s: BookSpell) => ({
+    dice: s.dice ?? 0,
+    cost: s.cost ?? "action",
+    targeting: s.targeting ?? ({ kind: "enemy" } as const),
+    resolution: s.resolution ?? ({ kind: "auto" } as const),
   });
+
+  const specOf = (s: BookSpell) => ({ id: s.id, groupId: s.spellGroup?.id ?? null, level: s.level });
+
+  const targetSide = (s: BookSpell | null): SpellPick["targetSide"] => {
+    const t = s ? definitionOf(s).targeting : null;
+
+    if (!t) return undefined;
+
+    if (t.kind === "allyDead") return "dead";
+
+    return t.kind === "ally" ? "ally" : t.kind === "enemy" ? "enemy" : t.kind === "area" ? t.side : undefined;
+  };
+
+  const targets = order.filter((p) => {
+    const side = state.pick?.targetSide;
+
+    if (!side || !caster) return isUp(p);
+
+    const mine = p.basicInfo.side === caster.basicInfo.side;
+
+    return side === "dead" ? mine && !isUp(p) : isUp(p) && (side === "ally" ? mine : !mine);
+  });
+
+  const pickOf = (s: BookSpell): SpellPick => {
+    const def = definitionOf(s);
+
+    const { targeting } = def;
+
+    const skill = caster && (targeting.kind === "ally" || targeting.kind === "enemy") ? spellTargetingFor(order, caster.basicInfo.id, specOf(s)) : { mode: "single" as const, maxTargets: 1 };
+
+    const auto = ["self", "allAllies", "allAlliesDead", "allEnemies", "everyone"].includes(targeting.kind);
+
+    const targetMode: SpellPick["targetMode"] = auto ? "none" : targeting.kind === "area" ? "multi" : skill.mode === "all" ? "all" : skill.mode === "area" ? "multi" : "single";
+
+    const maxTargets = targeting.kind === "area" ? targeting.maxTargets : skill.mode === "area" ? skill.maxTargets : undefined;
+
+    const dice = caster ? casterSpellDice(caster, { dice: def.dice, groupId: s.spellGroup?.id ?? null }) : { count: def.dice, sides: 6 };
+
+    return {
+      spellId: s.id,
+      level: s.level,
+      targetMode,
+      targetSide: targetSide(s),
+      maxTargets,
+      needsSaves: def.resolution.kind === "save" && !auto,
+      diceSlots: Array.from({ length: dice.count }, () => dice.sides),
+    };
+  };
+
+  const formulaOf = (s: BookSpell): string => (caster ? spellFormulaLabel(caster, { dice: definitionOf(s).dice, groupId: s.spellGroup?.id ?? null }) : "");
+
+  const saveTargets = state.pick?.needsSaves ? targets.filter((t) => state.targetIds.includes(t.basicInfo.id) && (scene.isDM || t.basicInfo.controlledBy === scene.userId)) : [];
+
+  const allCount = state.pick?.targetMode === "all" ? state.targetIds.length : 0;
 
   const send = useEffectEvent(async () => {
     if (!caster) return;
 
     try {
-      await scene.actions.castSpell.mutateAsync(spellPayload(state, caster.basicInfo.sourceType));
+      await scene.actions.castSpell.mutateAsync(spellPayload(state));
       dispatch({ type: "SUCCESS" });
       options.onDone?.();
     } catch (e) {
@@ -75,7 +125,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
   const firstUsable = (who: BattleParticipant) => slotLevels(who).find((l) => l.current > 0)?.level ?? 0;
 
   return {
-    state, spells, byLevel, selected, targets, slots: caster ? slotLevels(caster) : [],
+    state, spells, byLevel, selected, targets, saveTargets, allCount, formulaOf, definitionOf, slots: caster ? slotLevels(caster) : [],
     open: (level?: number, casterOverride?: BattleParticipant) => {
       const who = casterOverride ?? caster;
 
@@ -84,10 +134,15 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
     setLevel: (level: number) => dispatch({ type: "SET_LEVEL", level }),
     pick: (s: BookSpell) => dispatch({ type: "PICK", pick: pickOf(s) }),
     toTargets: () => dispatch({ type: "TO_TARGETS" }),
-    toggleTarget: (id: string) => dispatch({ type: "TOGGLE_TARGET", id }),
+    toggleTarget: (id: string) => {
+      const expanded =
+        state.pick?.targetMode === "all" && caster && selected
+          ? expandSpellTargets(order, caster.basicInfo.id, specOf(selected), [id])
+          : undefined;
+
+      dispatch({ type: "TOGGLE_TARGET", id, expanded });
+    },
     confirmTargets: () => dispatch({ type: "CONFIRM_TARGETS" }),
-    setHit: (v: number) => dispatch({ type: "SET_HIT", value: v }),
-    aiHit: () => dispatch({ type: "SET_HIT", value: rollDie(20) }),
     setSave: (id: string, v: number) => dispatch({ type: "SET_SAVE", id, value: v }),
     setDamage: (i: number, v: number) => dispatch({ type: "SET_DAMAGE", index: i, value: v }),
     aiDamage: () => state.pick?.diceSlots.forEach((sides, i) => dispatch({ type: "SET_DAMAGE", index: i, value: rollDie(sides) })),

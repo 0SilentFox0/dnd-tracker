@@ -6,6 +6,7 @@ import type { PendingMoraleCheckPayload } from "./pending-morale";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
+import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 export interface ApplyPendingMoraleResult {
@@ -99,7 +100,7 @@ export function applyPendingMoraleCheck(
     targets: [],
     actionDetails: {
       d10Roll,
-      morale: participantForLog?.combatStats.morale ?? participant.combatStats.morale,
+      morale: effectiveMorale(participantForLog ?? participant, updatedInitiativeOrder).value,
     },
     resultText: [moraleResult.message, ...triggerMessages]
       .filter(Boolean)
