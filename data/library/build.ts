@@ -1,10 +1,13 @@
+import { LIBRARY_ARTIFACT_SETS } from "./artifacts";
 import { BRANCHES } from "./branches";
 import { PERSONAL } from "./personal";
 import { RACES } from "./races";
 import { SPELLS } from "./spells";
 import type { AbilityScoreKey, Library, LibraryEntry, LibraryRace, LibrarySkill, LibrarySource } from "./types";
 
+import { ARTIFACT_ICON_FILES } from "@/data/artifact-icons-map";
 import { BRANCH_ICONS, SKILL_ICONS, SPELL_ICONS } from "@/data/skill-icons";
+import { ARTIFACT_GRID_9 } from "@/lib/constants/artifacts";
 import { type Ability, AbilitySchema } from "@/lib/utils/abilities/schema";
 import { SpellDefinitionSchema } from "@/lib/utils/spells/model/schema";
 
@@ -12,7 +15,7 @@ export const LIBRARY_COMPLETE = true;
 
 export const MIN_APPEARANCE_LENGTH = 80;
 
-export const LIBRARY_SOURCE: LibrarySource = { spells: SPELLS, branches: BRANCHES, races: RACES, personal: PERSONAL };
+export const LIBRARY_SOURCE: LibrarySource = { spells: SPELLS, branches: BRANCHES, races: RACES, personal: PERSONAL, artifactSets: LIBRARY_ARTIFACT_SETS };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -71,6 +74,8 @@ export function buildLibrary(source: LibrarySource = LIBRARY_SOURCE): Library {
 
   const icons = new Set([...Object.keys(SKILL_ICONS), ...Object.keys(BRANCH_ICONS)]);
 
+  const artifactIcons = new Set(Object.keys(ARTIFACT_ICON_FILES));
+
   const spellIcons = new Set(Object.keys(SPELL_ICONS));
 
   const checkEntry = (kind: string, entry: LibraryEntry, iconSet: Set<string> = icons) => {
@@ -104,6 +109,24 @@ export function buildLibrary(source: LibrarySource = LIBRARY_SOURCE): Library {
   const raceByKey = new Map(source.races.map((r) => [r.key, r]));
 
   const schools = [...new Set(source.spells.map((s) => s.school))];
+
+  const checkRefs = (label: string, abilities: Ability[]) => {
+    for (const ref of refs(abilities)) {
+      if (ref.kind === "spellIds" && !spellByKey.has(String(ref.value))) issues.push(`${label}: заклинання «${String(ref.value)}» не знайдено`);
+
+      if (ref.kind === "school" && !schools.includes(String(ref.value))) issues.push(`${label}: невідома школа «${String(ref.value)}»`);
+    }
+  };
+
+  const checkAbilities = (prefix: string, abilities: Ability[]) => {
+    abilities.forEach((ability, i) => {
+      const parsed = AbilitySchema.safeParse(ability);
+
+      if (!parsed.success) {
+        for (const issue of parsed.error.issues) issues.push(`${prefix} [${i}]: ${issue.path.join(".")} ${issue.message}`);
+      }
+    });
+  };
 
   for (const spell of source.spells) {
     checkEntry("Заклинання", spell, spellIcons);
@@ -179,12 +202,34 @@ export function buildLibrary(source: LibrarySource = LIBRARY_SOURCE): Library {
       if (ref !== undefined && !spellByKey.has(ref)) issues.push(`Скіл «${skill.key}»: ${field} «${ref}» не знайдено`);
     }
 
-    for (const ref of refs(skill.abilities)) {
-      if (ref.kind === "spellIds" && !spellByKey.has(String(ref.value))) issues.push(`Скіл «${skill.key}»: заклинання «${String(ref.value)}» не знайдено`);
-
-      if (ref.kind === "school" && !schools.includes(String(ref.value))) issues.push(`Скіл «${skill.key}»: невідома школа «${String(ref.value)}»`);
-    }
+    checkRefs(`Скіл «${skill.key}»`, skill.abilities);
   }
+
+  const slotKeys: string[] = ARTIFACT_GRID_9.map((slot) => slot.key);
+
+  for (const set of source.artifactSets) {
+    checkEntry("Сет артефактів", set, artifactIcons);
+
+    if (set.artifacts.length < 3) issues.push(`Сет «${set.key}»: менше 3 артефактів`);
+
+    const slots = new Set<string>();
+
+    for (const a of set.artifacts) {
+      if (!slotKeys.includes(a.slot)) issues.push(`Сет «${set.key}»: невідомий слот «${a.slot}»`);
+      else if (slots.has(a.slot)) issues.push(`Сет «${set.key}»: слот «${a.slot}» повторюється`);
+
+      slots.add(a.slot);
+
+      checkEntry("Артефакт", a, artifactIcons);
+      checkAbilities(`Артефакт «${a.key}»`, a.abilities);
+      checkRefs(`Артефакт «${a.key}»`, a.abilities);
+    }
+
+    checkAbilities(`Сет «${set.key}»`, set.abilities);
+    checkRefs(`Сет «${set.key}»`, set.abilities);
+  }
+
+  const allArtifacts = source.artifactSets.flatMap((set) => set.artifacts);
 
   checkUnique("Заклинання", "key", source.spells);
   checkUnique("Заклинання", "name", source.spells);
@@ -194,6 +239,10 @@ export function buildLibrary(source: LibrarySource = LIBRARY_SOURCE): Library {
   checkUnique("Раси", "name", source.races);
   checkUnique("Скіли", "key", skills);
   checkUnique("Скіли", "name", skills);
+  checkUnique("Артефакти", "key", allArtifacts);
+  checkUnique("Артефакти", "name", allArtifacts);
+  checkUnique("Сети артефактів", "key", source.artifactSets);
+  checkUnique("Сети артефактів", "name", source.artifactSets);
 
   if (issues.length > 0) throw new Error(`Бібліотека невалідна:\n${issues.map((i) => `- ${i}`).join("\n")}`);
 
