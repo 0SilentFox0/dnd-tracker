@@ -102,6 +102,8 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
   const formulaOf = (s: BookSpell): string => (caster ? spellFormulaLabel(caster, { dice: definitionOf(s).dice, groupId: s.spellGroup?.id ?? null }) : "");
 
+  const saveTargets = state.pick?.needsSaves ? targets.filter((t) => state.targetIds.includes(t.basicInfo.id) && (scene.isDM || t.basicInfo.controlledBy === scene.userId)) : [];
+
   const allCount = state.pick?.targetMode === "all" ? state.targetIds.length : 0;
 
   const send = useEffectEvent(async () => {
@@ -123,7 +125,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
   const firstUsable = (who: BattleParticipant) => slotLevels(who).find((l) => l.current > 0)?.level ?? 0;
 
   return {
-    state, spells, byLevel, selected, targets, allCount, formulaOf, definitionOf, slots: caster ? slotLevels(caster) : [],
+    state, spells, byLevel, selected, targets, saveTargets, allCount, formulaOf, definitionOf, slots: caster ? slotLevels(caster) : [],
     open: (level?: number, casterOverride?: BattleParticipant) => {
       const who = casterOverride ?? caster;
 
