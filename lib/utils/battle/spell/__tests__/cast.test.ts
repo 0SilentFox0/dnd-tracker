@@ -71,6 +71,15 @@ describe("targeting kinds", () => {
     expect(resolve({ kind: "allyDead" }, ["a"]).ok).toBe(false);
   });
 
+  it("allAlliesDead: усі полеглі союзники заклинателя, чужі й живі — ні", () => {
+    const fallenEnemy = { ...enemy("fe"), combatStats: { ...enemy("fe").combatStats, currentHp: 0, status: "dead" as const } };
+
+    const all = [...ps, fallenEnemy, { ...dead, basicInfo: { ...dead.basicInfo, id: "d2" } }];
+
+    expect(resolveSpellTargets(all, c, { id: "sp", groupId: "chaos", level: 1 }, { kind: "allAlliesDead" }, [])).toEqual({ ok: true, targetIds: ["d", "d2"] });
+    expect(resolveSpellTargets([c, ally, e1], c, { id: "sp", groupId: "chaos", level: 1 }, { kind: "allAlliesDead" }, []).ok).toBe(false);
+  });
+
   it("area: до maxTargets цілей зазначеної сторони", () => {
     expect(resolve({ kind: "area", side: "enemy", maxTargets: 2 }, ["e1", "e2"])).toEqual({ ok: true, targetIds: ["e1", "e2"] });
     expect(resolve({ kind: "area", side: "enemy", maxTargets: 1 }, ["e1", "e2"]).ok).toBe(false);
@@ -174,6 +183,16 @@ describe("castSpell", () => {
     const r = cast(spellOf(), ["e1"], [resistant]);
 
     expect(hp(r, "e1")).toBe(200 - 3);
+  });
+
+  it("Відродження лісу: усі полеглі союзники повертаються з 30 % HP", () => {
+    const fallen = (id: string) => ({ ...makeParticipant({ id, hp: 0, maxHp: 50 }), combatStats: { ...makeParticipant({ id, maxHp: 50 }).combatStats, currentHp: 0, maxHp: 50, status: "dead" as const } });
+
+    const rebirth = spellOf({ dice: 0, targeting: { kind: "allAlliesDead" }, effects: [{ kind: "heal", amount: { percentOf: "maxHp", value: 30 }, revive: true }] });
+
+    const r = cast(rebirth, ["d1", "d2"], [fallen("d1"), fallen("d2")], { diceRolls: [] });
+
+    expect(["d1", "d2"].map((id) => r.allParticipantsUpdated.find((p) => p.basicInfo.id === id)?.combatStats)).toEqual([expect.objectContaining({ currentHp: 15, status: "active" }), expect.objectContaining({ currentHp: 15, status: "active" })]);
   });
 
   it("лікування й Воскресіння (allyDead) через heal з revive", () => {

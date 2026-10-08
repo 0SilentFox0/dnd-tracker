@@ -11,6 +11,7 @@ const lib = vi.hoisted(() => ({
     { id: "bolt", name: "Крижаний спис", level: 1, dice: 3, cost: "action", targeting: { kind: "enemy" }, resolution: { kind: "auto" } },
     { id: "ball", name: "Вогняна куля", level: 2, dice: 4, cost: "action", targeting: { kind: "area", side: "enemy", maxTargets: 2 }, resolution: { kind: "save", ability: "dexterity", onSuccess: "half" }, spellGroup: { id: "chaos", name: "Хаос" } },
     { id: "light", name: "Слово світла", level: 2, dice: 2, cost: "action", targeting: { kind: "allEnemies" }, resolution: { kind: "auto" } },
+    { id: "rebirth", name: "Відродження лісу", level: 2, dice: 0, cost: "action", targeting: { kind: "allAlliesDead" }, resolution: { kind: "auto" } },
     { id: "revive", name: "Воскресіння", level: 2, dice: 0, cost: "action", targeting: { kind: "allyDead" }, resolution: { kind: "auto" } },
   ],
 }));
@@ -37,7 +38,7 @@ describe("SpellBook", () => {
   afterEach(cleanup);
 
   it("стрічки кіл зі слотами; сторінка кола; спел → цілі → кидки → підсумок → застосувати", async () => {
-    const { wrapper, caster, castSpell } = fakeScene({ knownSpells: ["ray", "bolt", "ball", "light", "revive"], slots: { "1": { max: 3, current: 3 }, "2": { max: 3, current: 1 } } });
+    const { wrapper, caster, castSpell } = fakeScene({ knownSpells: ["ray", "bolt", "ball", "light", "revive", "rebirth"], slots: { "1": { max: 3, current: 3 }, "2": { max: 3, current: 1 } } });
 
     render(<Harness caster={caster} />, { wrapper });
 
@@ -132,5 +133,15 @@ describe("SpellBook", () => {
 
     expect(screen.getByRole("button", { name: /Гоблін/ })).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Годрік/ })).toBeNull();
+  });
+
+  it("усі полеглі союзники: автоціль, кроку вибору цілей немає", async () => {
+    const { wrapper, caster } = fakeScene({ knownSpells: ["rebirth"], slots: { "2": { max: 3, current: 3 } } });
+
+    render(<Harness caster={caster} />, { wrapper });
+
+    fireEvent.click(await screen.findByText("Відродження лісу"));
+    expect(screen.getByRole("button", { name: "Далі" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /Обрати цілі/ })).toBeNull();
   });
 });

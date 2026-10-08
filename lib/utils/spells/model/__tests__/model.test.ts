@@ -20,6 +20,10 @@ describe("SpellDefinitionSchema", () => {
     expect(SpellDefinitionSchema.safeParse({ ...base, dice: 0, targeting: { kind: "allyDead" } }).success).toBe(true);
   });
 
+  it("Відродження лісу: allAlliesDead", () => {
+    expect(SpellDefinitionSchema.safeParse({ ...base, dice: 0, targeting: { kind: "allAlliesDead" } }).success).toBe(true);
+  });
+
   it("Армагеддон: everyone", () => {
     expect(SpellDefinitionSchema.safeParse({ ...base, dice: 4, targeting: { kind: "everyone" } }).success).toBe(true);
   });
