@@ -2,24 +2,22 @@ import { describe, expect, it } from "vitest";
 
 import { toBookSpell } from "@/lib/utils/spells/to-book-spell";
 
-const row = {
-  id: "s", name: "Мітка", level: 1, type: "target", damageType: "damage", diceCount: 1, diceType: "d6", savingThrow: null, hitCheck: null,
-  description: null, icon: null, range: "27 м", duration: null, concentration: true, damageElement: null, spellGroup: { id: "g", name: "Віщування" },
-};
+const row = { id: "s", name: "Мітка", level: 1, description: null, icon: null, spellGroup: { id: "g", name: "Віщування" } };
 
 describe("toBookSpell", () => {
-  it("коректний рядок проходить як є", () => {
-    expect(toBookSpell({ ...row, savingThrow: { ability: "dex", onSuccess: "half" } })).toMatchObject({ id: "s", savingThrow: { ability: "dex", onSuccess: "half" }, spellGroup: { name: "Віщування" } });
+  it("коректний рядок проходить, нова модель зчитується", () => {
+    expect(toBookSpell({ ...row, dice: 3, cost: "bonusAction", targeting: { kind: "area", side: "enemy", maxTargets: 2 }, resolution: { kind: "save", ability: "dexterity", onSuccess: "half" } })).toMatchObject({
+      id: "s",
+      dice: 3,
+      cost: "bonusAction",
+      targeting: { kind: "area", side: "enemy", maxTargets: 2 },
+      resolution: { kind: "save", ability: "dexterity", onSuccess: "half" },
+      spellGroup: { name: "Віщування" },
+    });
   });
 
-  it("зіпсований JSON рятівного кидка чи атаки — null, а не сміття в UI", () => {
-    const out = toBookSpell({ ...row, savingThrow: "dex", hitCheck: { dc: 12 } });
-
-    expect(out.savingThrow).toBeNull();
-    expect(out.hitCheck).toBeNull();
-  });
-
-  it("невідомий тип заклинання — target, невідомий тип шкоди — damage", () => {
-    expect(toBookSpell({ ...row, type: "weird", damageType: "x" })).toMatchObject({ type: "target", damageType: "damage" });
+  it("порожні й зіпсовані колонки — значення за замовчуванням, а не сміття в UI", () => {
+    expect(toBookSpell(row)).toMatchObject({ dice: 0, cost: "action", targeting: { kind: "enemy" }, resolution: { kind: "auto" } });
+    expect(toBookSpell({ ...row, targeting: { kind: "area" }, resolution: "dex", cost: "x" })).toMatchObject({ targeting: { kind: "enemy" }, resolution: { kind: "auto" }, cost: "action" });
   });
 });

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Copy, Move, Pencil, Sparkles, X, Zap } from "lucide-react";
+import { Copy, Move, Pencil, Sparkles, X } from "lucide-react";
 
 import { SpellPrintCard } from "./SpellPrintCard";
 
@@ -15,9 +15,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { getDamageElementLabel } from "@/lib/constants/damage";
-import { getDamageModifierLabel, getHealModifierLabel, getSpellDamageTypeLabel, getSpellTargetLabel, spellLevelName } from "@/lib/constants/spells";
-import { getSpellDamageTypeIcon, getSpellGroupIcon, getSpellTypeIcon } from "@/lib/utils/spells/spell-icons";
+import { spellLevelName } from "@/lib/constants/spells";
+import { spellMechanicsLabels } from "@/lib/utils/spells/model/summary";
+import { getSpellGroupIcon } from "@/lib/utils/spells/spell-icons";
 import type { Spell, SpellGroup } from "@/types/spells";
 
 interface SpellCardProps {
@@ -41,11 +41,6 @@ export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, o
 
   const GroupIcon = getSpellGroupIcon(groupName);
 
-  const TypeIcon = getSpellTypeIcon(spell.type);
-
-  const DamageTypeIcon = getSpellDamageTypeIcon(spell.damageType);
-
-  const description = Array.isArray(spell.effects) && spell.effects.length > 0 ? spell.effects.join(" · ") : spell.description;
 
   const handleCopyId = async () => {
     await navigator.clipboard.writeText(spell.id);
@@ -69,26 +64,9 @@ export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, o
           <h3 className="hud-sc truncate text-[15px] text-hud-ink">{spell.name}</h3>
           <div className="mt-1 flex flex-wrap gap-1">
             <HudPill icon={<Sparkles className="size-3" />}>{spellLevelName(spell.level)}</HudPill>
-            {spell.type === "aoe" && spell.damageType === "damage" ? (
-              <HudPill icon={<Zap className="size-3" />}>AOE Демедж</HudPill>
-            ) : (
-              <>
-                <HudPill icon={<TypeIcon className="size-3" />}>{spell.type === "target" ? "Цільове" : "AoE"}</HudPill>
-                <HudPill icon={<DamageTypeIcon className="size-3" />}>{getSpellDamageTypeLabel(spell.damageType)}</HudPill>
-              </>
-            )}
-            {spell.diceCount && spell.diceType ? (
-              <HudPill>
-                {spell.diceCount}
-                {spell.diceType}
-              </HudPill>
-            ) : null}
-            {spell.damageElement && <HudPill>{getDamageElementLabel(spell.damageElement)}</HudPill>}
-            {spell.damageModifier && <HudPill>{getDamageModifierLabel(spell.damageModifier)}</HudPill>}
-            {spell.healModifier && <HudPill>{getHealModifierLabel(spell.healModifier)}</HudPill>}
-            {spell.target && <HudPill>{getSpellTargetLabel(spell.target)}</HudPill>}
-            {spell.range && <HudPill>{spell.range}</HudPill>}
-            {spell.castingTime && <HudPill>{spell.castingTime}</HudPill>}
+            {spellMechanicsLabels(spell).map((label) => (
+              <HudPill key={label}>{label}</HudPill>
+            ))}
           </div>
         </div>
         <div className="-mr-1 -mt-1 flex shrink-0">
@@ -120,7 +98,7 @@ export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, o
         </div>
       </div>
 
-      <p className="line-clamp-2 flex-1 text-xs text-hud-muted">{description}</p>
+      <p className="line-clamp-2 flex-1 text-xs text-hud-muted">{spell.description}</p>
 
       <div className="flex min-w-0 items-center gap-1.5 border-t border-[#2a2218] pt-1.5 text-[11px] text-hud-muted">
         <GroupIcon className="size-3 shrink-0" />

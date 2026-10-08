@@ -9,7 +9,7 @@ import { SpellFormBody } from "../SpellFormBody";
 
 import { LoadingState } from "@/components/common/states";
 import { HudFormPage } from "@/components/hud/form";
-import { useConfirm } from "@/lib/hooks/common";
+import { useConfirm, useNotify } from "@/lib/hooks/common";
 import {
   useDeleteSpell,
   useSpell,
@@ -17,6 +17,7 @@ import {
   useSpellGroups,
   useUpdateSpell,
 } from "@/lib/hooks/spells";
+import { formToPayload, spellFormError, spellToForm } from "@/lib/utils/spells/model/form";
 
 export default function EditSpellPage({
   params,
@@ -24,6 +25,8 @@ export default function EditSpellPage({
   params: Promise<{ id: string; spellId: string }>;
 }) {
   const confirm = useConfirm();
+
+  const notify = useNotify();
 
   const { id, spellId } = use(params);
 
@@ -39,39 +42,23 @@ export default function EditSpellPage({
 
   const deleteSpellMutation = useDeleteSpell(id, spellId);
 
-  useSpellFormSync(spell, setFormData);
+  useSpellFormSync(spell, setFormData, spellToForm);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    updateSpellMutation.mutate(
-      {
-        ...formData,
-        target: formData.target || null,
-        damageElement: formData.damageElement || null,
-        damageModifier: formData.damageModifier || null,
-        healModifier: formData.healModifier || null,
-        castingTime: formData.castingTime || null,
-        range: formData.range || null,
-        duration: formData.duration || null,
-        diceCount: formData.diceCount || null,
-        diceType: formData.diceType || null,
-        savingThrow: formData.savingThrow || null,
-        description: formData.description ?? null,
-        effects: formData.effects ?? null,
-        groupId: formData.groupId || null,
-        icon: formData.icon || null,
-        summonUnitId: formData.summonUnitId || null,
-      },
-      {
-        onSuccess: () => {
-          router.push(`/campaigns/${id}/dm/spells`);
-        },
-        onError: (error) => {
-          console.error("Error updating spell:", error);
-        },
-      },
-    );
+    const problem = spellFormError(formData);
+
+    if (problem) {
+      void notify(problem);
+
+      return;
+    }
+
+    updateSpellMutation.mutate(formToPayload(formData), {
+      onSuccess: () => router.push(`/campaigns/${id}/dm/spells`),
+      onError: (error) => console.error("Error updating spell:", error),
+    });
   };
 
   const handleDelete = async () => {

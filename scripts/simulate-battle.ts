@@ -29,13 +29,14 @@ import { needsMoraleCheck } from "../lib/utils/battle/view";
 import { branchLevelNodeId, buildTreeJson, racialNodeId } from "../lib/utils/skills/progression";
 import type { BattleMutationResponse, BattleScene } from "../types/api";
 import type { BattleAction, BattleParticipant } from "../types/battle";
-import { artifactRows, DEMON_RACE, DEMON_UNIT, DRAGON_SET, FAIR_CAMPAIGN_NAME, FAIR_HEROES, FAIR_UNITS, FAIR_WEAPONS, MECHANICS_CAMPAIGN_NAME, MECHANICS_UNITS, RACES, RACIAL_CAMPAIGN_NAME, RACIAL_UNITS, SIM_CAMPAIGN_NAME, SIM_PLAYER, SIM_USER, SKILLS, UNITS } from "./simulate-battle-scenario";
+import { artifactRows, DEMON_RACE, DEMON_UNIT, DRAGON_SET, FAIR_CAMPAIGN_NAME, FAIR_HEROES, FAIR_UNITS, FAIR_WEAPONS, MECHANICS_CAMPAIGN_NAME, MECHANICS_UNITS, RACES, RACIAL_CAMPAIGN_NAME, RACIAL_UNITS, SIM_CAMPAIGN_NAME, SIM_PLAYER, SIM_USER, SKILLS, SPELL_MODEL_CAMPAIGN_NAME, SPELL_MODEL_UNITS, UNITS } from "./simulate-battle-scenario";
 
 import { BATTLE_LOG_RECENT_EVENTS, ParticipantSourceType } from "@/lib/constants/battle";
 import { CampaignRole } from "@/lib/constants/campaigns";
 import { countMarks } from "@/lib/utils/abilities/engine/marks";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { PUSHER_DELTA_LIMIT_BYTES } from "@/lib/utils/battle/pipeline/limits";
+import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { PATCHABLE_PARTICIPANT_FIELDS } from "@/lib/utils/battle/store/participant-patch";
 import { stableStringify } from "@/lib/utils/battle/store/stable-json";
 import { rollDiceList } from "@/lib/utils/common/dice";
@@ -108,7 +109,7 @@ async function seed() {
   }
 
   const spell = await prisma.spell.create({
-    data: { campaignId, name: "Вогняна стріла", level: 1, type: "target", target: "enemies", damageType: "damage", damageElement: "fire", diceCount: 2, diceType: "d6" },
+    data: { campaignId, name: "Вогняна стріла", level: 1, type: "target", damageType: "damage", dice: 1, targeting: { kind: "enemy" }, resolution: { kind: "auto" }, spellEffects: [{ kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" }] },
   });
 
   const set = await prisma.artifactSet.create({ data: { campaignId, ...DRAGON_SET } });
@@ -285,7 +286,7 @@ const BONUS = { access: "member" as const, requireStatus: "active" as const, sch
 
 const ABILITY = { access: "member" as const, requireStatus: "active" as const, schema: abilityActionSchema, mutate: createAbilityActionMutation(summonDeps) };
 
-const SPELL = { access: "member" as const, requireStatus: "active" as const, schema: spellSchema, dryRun: (b: { preview?: boolean }) => b.preview === true, mutate: createSpellMutation() };
+const SPELL = { access: "member" as const, requireStatus: "active" as const, schema: spellSchema, dryRun: (b: { preview?: boolean }) => b.preview === true, mutate: createSpellMutation({ loadSpell: (id) => prisma.spell.findUnique({ where: { id } }), ...summonDeps }) };
 
 const ROLLBACK = { access: "dm" as const, schema: rollbackSchema, mutate: createRollbackMutation() };
 
@@ -309,6 +310,8 @@ async function main() {
   await newMechanics();
 
   await racialMechanics();
+
+  await spellModel();
 
   const failed = results.filter((r) => !r.ok);
 
@@ -400,12 +403,12 @@ async function scenario() {
 
   const beforeSpell = lastIndex();
 
-  const sp = await call("spell", SPELL, { casterId: by("Мирон").basicInfo.id, spellId: ctx.spellId, targetIds: [by("Кам'яний голем #1").basicInfo.id], damageRolls: [5, 6] });
+  const sp = await call("spell", SPELL, { casterId: by("Мирон").basicInfo.id, spellId: ctx.spellId, targetIds: [by("Кам'яний голем #1").basicInfo.id], diceRolls: [5, 6] });
 
   const spellEv = logSince(beforeSpell).find((e) => e.actionType === "spell");
 
   check("Мирон (гравець) кастує Вогняну стрілу", sp.status === 200, spellEv?.resultText ?? "");
-  check("Лог закляття не показує шкоду, якої не було", /завдавши 0 урону/.test(spellEv?.resultText ?? ""), spellEv?.resultText ?? "");
+  check("Лог закляття не показує шкоду, якої не було", !/завдавши/.test(spellEv?.resultText ?? ""), spellEv?.resultText ?? "");
   check("Голем з імунітетом до вогню не отримує шкоди", hp(by("Кам'яний голем #1")) === golemHpBefore, `HP ${golemHpBefore} → ${hp(by("Кам'яний голем #1"))}`);
   check("Слот 1 рівня витрачено (каст гравця)", by("Мирон").spellcasting.spellSlots["1"]?.current === 1, JSON.stringify(by("Мирон").spellcasting.spellSlots));
 
@@ -713,7 +716,7 @@ async function newMechanics() {
   const group = await prisma.spellGroup.create({ data: { campaignId, name: "Світло" } });
 
   const light = await prisma.spell.create({
-    data: { campaignId, name: "Благословення світла", level: 1, type: "target", target: "allies", damageType: "heal", diceCount: 1, diceType: "d4", groupId: group.id },
+    data: { campaignId, name: "Благословення світла", level: 1, type: "target", damageType: "damage", dice: 1, groupId: group.id, targeting: { kind: "ally" }, resolution: { kind: "auto" }, spellEffects: [{ kind: "heal", amount: { spellRoll: 100 } }] },
   });
 
   const setup: Array<Record<string, unknown>> = [];
@@ -793,7 +796,7 @@ async function newMechanics() {
 
   const hpBefore = new Map(allies.map((p) => [p.basicInfo.id, hp(by(p.basicInfo.name))]));
 
-  const cast = await call("spell", SPELL, { casterId: by(u("Жрець")).basicInfo.id, spellId: light.id, targetIds: [by(u("Підопічний")).basicInfo.id], damageRolls: allies.map(() => 3) }, SIM_USER.id);
+  const cast = await call("spell", SPELL, { casterId: by(u("Жрець")).basicInfo.id, spellId: light.id, targetIds: [by(u("Підопічний")).basicInfo.id], diceRolls: [3] }, SIM_USER.id);
 
   quiet = false;
   check(
@@ -957,3 +960,172 @@ main().catch(async (e) => {
   await prisma.$disconnect();
   process.exit(1);
 });
+
+// ---------- нова модель заклинань ----------
+
+async function spellModel() {
+  console.info("\n🔮 Нова модель заклинань: кубики за рівнем, рятівний кидок, раси, усі учасники, HOT, Шал, Ляльковод");
+  quiet = true;
+  log.length = 0;
+
+  await prisma.campaign.deleteMany({ where: { name: SPELL_MODEL_CAMPAIGN_NAME, dmUserId: SIM_USER.id } });
+
+  const campaign = await prisma.campaign.create({ data: { name: SPELL_MODEL_CAMPAIGN_NAME, inviteCode: `SIMS-${Date.now()}`, dmUserId: SIM_USER.id } });
+
+  const campaignId = campaign.id;
+
+  await prisma.campaignMember.create({ data: { campaignId, userId: SIM_USER.id, role: CampaignRole.DM } });
+
+  const human = await prisma.race.create({ data: { campaignId, name: "Люди", abilities: [] } });
+
+  const spell = (name: string, level: number, dice: number, targeting: object, spellEffects: object[], extra: { resolution?: object; raceModifiers?: object[] } = {}) =>
+    prisma.spell.create({
+      data: { campaignId, name, level, type: "target", damageType: "damage", dice, targeting, resolution: extra.resolution ?? { kind: "auto" }, spellEffects, raceModifiers: extra.raceModifiers ?? [] } as Prisma.SpellUncheckedCreateInput,
+    });
+
+  const dmg = (damageType: string, extra: object = {}) => ({ kind: "dealDamage", amount: { spellRoll: 100 }, damageType, ...extra });
+
+  const spells = {
+    fireball: await spell("Вогняна куля", 3, 2, { kind: "area", side: "enemy", maxTargets: 4 }, [dmg("fire")], { resolution: { kind: "save", ability: "dexterity", onSuccess: "half" } }),
+    wordOfLight: await spell("Слово світла", 5, 2, { kind: "allEnemies" }, [dmg("radiant")], { raceModifiers: [{ raceId: human.id, percent: -100 }] }),
+    armageddon: await spell("Армагеддон", 5, 4, { kind: "everyone" }, [dmg("fire")]),
+    regeneration: await spell("Регенерація", 2, 1, { kind: "ally" }, [{ kind: "hot", healPerRound: { spellRoll: 100 }, duration: { rounds: 3 } }]),
+    frenzy: await spell("Шал", 4, 0, { kind: "enemy" }, [{ kind: "berserk", damageBonusPercent: 50, duration: { rounds: 1 } }]),
+    puppeteer: await spell("Ляльковод", 5, 0, { kind: "enemy" }, [{ kind: "charm", duration: { rounds: 1 } }]),
+  };
+
+  const setup: Array<Record<string, unknown>> = [];
+
+  for (const { side, ...u } of SPELL_MODEL_UNITS(human.id)) {
+    const row = await prisma.unit.create({ data: { campaignId, ...u } as Prisma.UnitUncheckedCreateInput });
+
+    setup.push({ id: row.id, type: ParticipantSourceType.UNIT, side });
+  }
+
+  const battle = await prisma.battleScene.create({ data: { campaignId, name: "Нова модель заклинань", status: "prepared", participants: setup as Prisma.InputJsonValue, currentRound: 1, currentTurnIndex: 0 } });
+
+  ctx = { ...ctx, campaignId, battleId: battle.id };
+  state = await readState();
+  await call("start", START, {}, SIM_USER.id);
+
+  const P = (name: string) => by(`${name} #1`);
+
+  const cast = (caster: string, spellId: string, targets: string[], diceRolls: number[], extra: object = {}) =>
+    call("spell", SPELL, { casterId: P(caster).basicInfo.id, spellId, targetIds: targets.map((t) => P(t).basicInfo.id), diceRolls, ...extra }, SIM_USER.id);
+
+  const dice = (caster: string, id: string) => {
+    const row = Object.values(spells).find((s) => s.id === id);
+
+    return casterSpellDice(P(caster), { dice: row?.dice ?? 0, groupId: null });
+  };
+
+  const hpOf = (name: string) => hp(P(name));
+
+  const nextTurn = () => call("next-turn", NEXT, {}, SIM_USER.id);
+
+  const reachTurn = async (name: string) => {
+    for (let i = 0; i < 30 && current()?.basicInfo.name !== `${name} #1`; i++) await nextTurn();
+
+    if (current()?.basicInfo.name !== `${name} #1`) throw new Error(`Не дійшли до ходу ${name}`);
+  };
+
+  // кубики: формула залежить від рівня кастера (Архімаг L6: 2 + ⌊6/3⌋ = 4к6 + 6)
+  const fireDice = dice("Архімаг", spells.fireball.id);
+
+  const wrongCount = await cast("Архімаг", spells.fireball.id, ["Гоблін А"], [3, 3]);
+
+  const wrongSides = await cast("Архімаг", spells.fireball.id, ["Гоблін А"], Array.from({ length: fireDice.count }, () => 7));
+
+  quiet = false;
+  check("Кубики заклинання: неправильна кількість відхиляється (422 invalid_dice)", wrongCount.status === 422 && wrongCount.body.code === "invalid_dice", JSON.stringify(wrongCount.body));
+  check("Кубики заклинання: невірні грані відхиляються (422 invalid_dice)", wrongSides.status === 422 && wrongSides.body.code === "invalid_dice", JSON.stringify(wrongSides.body));
+  check("Формула кубиків Архімага L6: 4к6 + 6", fireDice.count === 4 && fireDice.sides === 6 && fireDice.flat === 6, JSON.stringify(fireDice));
+  quiet = true;
+
+  const goblins = ["Гоблін А", "Гоблін Б", "Гоблін В"];
+
+  const before = new Map(goblins.map((g) => [g, hpOf(g)]));
+
+  const fire = await cast("Архімаг", spells.fireball.id, goblins, [4, 4, 4, 4], { saveRolls: [{ participantId: P("Гоблін А").basicInfo.id, roll: 1 }, { participantId: P("Гоблін Б").basicInfo.id, roll: 20 }, { participantId: P("Гоблін В").basicInfo.id, roll: 1 }] });
+
+  const dealt = (g: string) => (before.get(g) ?? 0) - hpOf(g);
+
+  quiet = false;
+  check("Вогняна куля: два провалені збереження — повна шкода 22, успішне — половина", fire.status === 200 && dealt("Гоблін А") === 22 && dealt("Гоблін В") === 22 && dealt("Гоблін Б") === 11, `${goblins.map((g) => `${g} −${dealt(g)}`).join(", ")}`);
+  quiet = true;
+
+  const enemyHp = new Map(["Гоблін А", "Гоблін Б", "Воїн"].map((g) => [g, hpOf(g)]));
+
+  const word = await cast("Жрець", spells.wordOfLight.id, [], [3, 3, 3]);
+
+  quiet = false;
+  check("Слово світла: людина має імунітет, гобліни отримують шкоду", word.status === 200 && hpOf("Воїн") === enemyHp.get("Воїн") && hpOf("Гоблін А") === (enemyHp.get("Гоблін А") ?? 0) - 14, `Воїн ${enemyHp.get("Воїн")} → ${hpOf("Воїн")}, Гоблін А ${enemyHp.get("Гоблін А")} → ${hpOf("Гоблін А")}`);
+  check("Слово світла: у логу видно імунітет раси", log.some((e) => /імунітет раси/.test(e.resultText)), log.find((e) => e.actionType === "spell" && /Слово світла/.test(e.resultText))?.resultText ?? "");
+  quiet = true;
+
+  const sides = ["Хаотик", "Паладин", "Гоблін А"].map((n) => [n, hpOf(n)] as const);
+
+  const armageddon = await cast("Хаотик", spells.armageddon.id, [], [3, 3, 3, 3, 3]);
+
+  quiet = false;
+  check("Армагеддон б'є всіх учасників, включно із заклинателем і його стороною", armageddon.status === 200 && sides.every(([n, h]) => hpOf(n) === h - 20), sides.map(([n, h]) => `${n} ${h} → ${hpOf(n)}`).join(", "));
+  quiet = true;
+
+  await setHp("Паладин #1", 10);
+
+  const regen = await cast("Друїд", spells.regeneration.id, ["Паладин"], Array.from({ length: dice("Друїд", spells.regeneration.id).count }, () => 3));
+
+  const hotEffect = P("Паладин").battleData.activeEffects.find((e) => e.hotHeal);
+
+  await reachTurn("Паладин");
+
+  quiet = false;
+  check("Регенерація вішає HOT і лікує на початку ходу цілі", regen.status === 200 && !!hotEffect && hpOf("Паладин") === 10 + (hotEffect?.hotHeal?.healPerRound ?? 0), `HOT ${hotEffect?.hotHeal?.healPerRound}, HP ${hpOf("Паладин")}`);
+  quiet = true;
+
+  const frenzy = await cast("Чорнокнижник", spells.frenzy.id, ["Лиходій"], []);
+
+  const frenzied = P("Лиходій").battleData.activeEffects.some((e) => e.effects.some((d) => d.type === "berserk"));
+
+  const victims = () => state.initiativeOrder.filter((p) => p.basicInfo.id !== P("Лиходій").basicInfo.id && p.combatStats.status === "active");
+
+  const target = "Воїн";
+
+  const turnBefore = state.initiativeOrder[(state.initiativeOrder.findIndex((p) => p.basicInfo.name === "Лиходій #1") + state.initiativeOrder.length - 1) % state.initiativeOrder.length].basicInfo.name.replace(/ #1$/, "");
+
+  await reachTurn(turnBefore);
+
+  const victimIndex = victims().findIndex((p) => p.basicInfo.name === `${target} #1`);
+
+  const targetHp = hpOf(target);
+
+  rolls.length = 0;
+  rolls.push((victimIndex + 0.5) / victims().length, 0.9);
+
+  const beforeFrenzy = lastIndex();
+
+  await nextTurn();
+
+  quiet = false;
+  check("Шал: ворог під шалом б'є свого союзника в свій хід", frenzy.status === 200 && frenzied && hpOf(target) < targetHp && logSince(beforeFrenzy).some((e) => /Шал/.test(e.resultText)), `${target} ${targetHp} → ${hpOf(target)}; ${logSince(beforeFrenzy).map((e) => e.resultText).join(" | ").slice(0, 160)}`);
+  quiet = true;
+
+  const puppet = await cast("Лялькар", spells.puppeteer.id, ["Маріонетка"], []);
+
+  const charmed = P("Маріонетка").basicInfo;
+
+  // каст посеред ходу діє з наступного ходу цілі
+  await nextTurn();
+  await reachTurn("Маріонетка");
+
+  const duringTurn = P("Маріонетка").basicInfo.side;
+
+
+  await nextTurn();
+
+  const returned = P("Маріонетка");
+
+  quiet = false;
+  check("Ляльковод: ворог переходить на бік заклинателя під контроль його гравця", puppet.status === 200 && charmed.side === "ally" && charmed.controlledBy === P("Лялькар").basicInfo.controlledBy && duringTurn === "ally", `side ${charmed.side}, controlledBy ${charmed.controlledBy}, у свій хід ${duringTurn}`);
+  check("Ляльковод: після 1 раунду юніт повертається на свій бік і до DM", returned.basicInfo.side === "enemy" && returned.basicInfo.controlledBy === "dm" && !returned.battleData.charmReturn && !returned.battleData.activeEffects.some((e) => e.charmOrigin), `side ${returned.basicInfo.side}, controlledBy ${returned.basicInfo.controlledBy}`);
+}

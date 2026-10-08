@@ -18,7 +18,7 @@ const DATA = vi.hoisted(() => {
   return {
     characters: [hero("h1", 40), hero("h2", 45), hero("h3", 50), hero("h4", 38), hero("npc", 70), hero("bystander", 99)],
     units: [unit("rat", 1, 6, "1d4"), unit("wolf", 2, 40, "2d6"), unit("mage", 3, 30, "1d4", ["fireball"]), unit("ally-guard", 2, 30, "1d8")],
-    spells: [{ id: "fireball", type: "aoe", damageType: "damage", target: "enemies", diceCount: 8, diceType: "d6", damageDistribution: null }],
+    spells: [{ id: "fireball", dice: 7, targeting: { kind: "allEnemies" }, spellEffects: [{ kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" }] }],
   };
 });
 

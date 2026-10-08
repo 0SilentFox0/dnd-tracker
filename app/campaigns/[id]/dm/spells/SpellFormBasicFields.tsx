@@ -1,290 +1,45 @@
 "use client";
 
-import type { SpellFormData } from "./spell-form-defaults";
-import {
-  CASTING_TIME_OPTIONS,
-  SPELL_DAMAGE_TYPE_OPTIONS,
-  SPELL_LEVEL_OPTIONS,
-  SPELL_TYPE_OPTIONS,
-} from "./spell-form-defaults";
+import { SPELL_COST_OPTIONS, SPELL_LEVEL_OPTIONS, type SpellFormData } from "./spell-form-defaults";
 
 import { IconUrlField } from "@/components/common/IconUrlField";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { SelectField } from "@/components/ui/select-field";
 import { Textarea } from "@/components/ui/textarea";
-import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
-import { DICE_OPTIONS } from "@/lib/constants/dice";
-import {
-  DAMAGE_MODIFIER_OPTIONS,
-  HEAL_MODIFIER_OPTIONS,
-  SPELL_TARGET_OPTIONS,
-} from "@/lib/constants/spells";
+import type { SpellCost } from "@/types/spells";
 
-export interface SpellFormBasicFieldsProps {
+export interface SpellFormFieldsProps {
   formData: SpellFormData;
-  setFormData: (data: SpellFormData | ((prev: SpellFormData) => SpellFormData)) => void;
-  spellGroups: { id: string; name: string }[];
+  setFormData: (data: SpellFormData) => void;
 }
 
-export function SpellFormBasicFields({
-  formData,
-  setFormData,
-  spellGroups,
-}: SpellFormBasicFieldsProps) {
+export function SpellFormBasicFields({ formData, setFormData, spellGroups }: SpellFormFieldsProps & { spellGroups: { id: string; name: string }[] }) {
   return (
     <div className="grid grid-cols-2 gap-4 [&>*]:min-w-0">
-      <LabeledInput
-        containerClassName="col-span-2"
-        id="name"
-        label="Назва заклинання"
-        value={formData.name || ""}
-        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-        required
-        placeholder="Назва заклинання"
-      />
+      <LabeledInput containerClassName="col-span-2" id="name" label="Назва заклинання" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required placeholder="Назва заклинання" />
       <div>
-        <Label htmlFor="level">Рівень *</Label>
-        <SelectField
-          id="level"
-          value={formData.level?.toString() || "0"}
-          onValueChange={(value) =>
-            setFormData({ ...formData, level: parseInt(value) })
-          }
-          placeholder="Виберіть рівень"
-          options={SPELL_LEVEL_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
-        />
+        <Label htmlFor="level">Рівень (слот) *</Label>
+        <SelectField id="level" value={String(formData.level)} onValueChange={(value) => setFormData({ ...formData, level: parseInt(value) })} placeholder="Виберіть рівень" options={SPELL_LEVEL_OPTIONS.map((o) => ({ value: o.value, label: o.label }))} />
+      </div>
+      <div>
+        <Label htmlFor="cost">Вартість</Label>
+        <SelectField id="cost" value={formData.cost} onValueChange={(value) => setFormData({ ...formData, cost: value as SpellCost })} placeholder="Вартість" options={SPELL_COST_OPTIONS.map((o) => ({ value: o.value, label: o.label }))} />
       </div>
       <div className="col-span-2">
-        <Label htmlFor="groupId">Група заклинань</Label>
-        <SelectField
-          id="groupId"
-          value={formData.groupId || ""}
-          onValueChange={(value) =>
-            setFormData({ ...formData, groupId: value || null })
-          }
-          placeholder="Виберіть групу"
-          options={spellGroups.map((g) => ({ value: g.id, label: g.name }))}
-          allowNone
-          noneLabel="Без групи"
-        />
-      </div>
-      <div>
-        <Label htmlFor="type">Тип *</Label>
-        <SelectField
-          id="type"
-          value={formData.type || "target"}
-          onValueChange={(value) =>
-            setFormData({
-              ...formData,
-              type: value as "target" | "aoe" | "no_target",
-            })
-          }
-          placeholder="Виберіть тип"
-          options={SPELL_TYPE_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
-        />
-      </div>
-      <div>
-        <Label htmlFor="target">Ціль</Label>
-        <SelectField
-          id="target"
-          value={formData.target || ""}
-          onValueChange={(value) =>
-            setFormData({ ...formData, target: value || null })
-          }
-          placeholder="Виберіть ціль"
-          options={SPELL_TARGET_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
-          allowNone
-          noneLabel="Не вказано"
-        />
-      </div>
-      <div>
-        <Label htmlFor="castingTime">Час створення</Label>
-        <SelectField
-          id="castingTime"
-          value={formData.castingTime || ""}
-          onValueChange={(value) =>
-            setFormData({ ...formData, castingTime: value || null })
-          }
-          placeholder="Виберіть"
-          options={CASTING_TIME_OPTIONS.map((o) => ({
-            value: o.value,
-            label: o.label,
-          }))}
-          allowNone
-          noneLabel="Не вказано"
-        />
-      </div>
-      <div>
-        <Label htmlFor="range">Дальність</Label>
-        <Input
-          id="range"
-          value={formData.range || ""}
-          onChange={(e) =>
-            setFormData({ ...formData, range: e.target.value })
-          }
-          placeholder="60 feet"
-        />
-      </div>
-      <div>
-        <Label htmlFor="duration">Тривалість</Label>
-        <Input
-          id="duration"
-          value={formData.duration || ""}
-          onChange={(e) =>
-            setFormData({ ...formData, duration: e.target.value })
-          }
-          placeholder="Instantaneous"
-        />
+        <Label htmlFor="groupId">Школа</Label>
+        <SelectField id="groupId" value={formData.groupId ?? ""} onValueChange={(value) => setFormData({ ...formData, groupId: value || null })} placeholder="Виберіть школу" options={spellGroups.map((g) => ({ value: g.id, label: g.name }))} allowNone noneLabel="Без школи" />
       </div>
       <div className="col-span-2">
-        <Label htmlFor="description">Опис (опційно)</Label>
-        <Textarea
-          id="description"
-          value={formData.description ?? ""}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value || null })}
-          placeholder="Додатковий опис за потреби"
-          rows={2}
-        />
+        <Label htmlFor="description">Що робить (точна механіка)</Label>
+        <Textarea id="description" value={formData.description ?? ""} onChange={(e) => setFormData({ ...formData, description: e.target.value || null })} placeholder="Живою мовою, з числами" rows={3} />
       </div>
       <div className="col-span-2">
-        <IconUrlField id="icon" label="Посилання на картинку" value={formData.icon ?? ""} onChange={(icon) => setFormData({ ...formData, icon: icon || null })} fallbackText={formData.name ?? ""} />
+        <Label htmlFor="appearanceDescription">Як це виглядає</Label>
+        <Textarea id="appearanceDescription" value={formData.appearanceDescription ?? ""} onChange={(e) => setFormData({ ...formData, appearanceDescription: e.target.value || null })} placeholder="Атмосферний опис, 2–4 речення" rows={3} />
       </div>
-    </div>
-  );
-}
-
-export function SpellFormRollFields({ formData, setFormData }: Omit<SpellFormBasicFieldsProps, "spellGroups">) {
-  return (
-    <div className="grid grid-cols-2 gap-4 [&>*]:min-w-0">
-      <div>
-        <Label htmlFor="damageType">Тип шкоди/ефекту *</Label>
-        <SelectField
-          id="damageType"
-          value={formData.damageType || "damage"}
-          onValueChange={(value: string) => {
-            const newValue = value as
-              | "damage"
-              | "heal"
-              | "all"
-              | "buff"
-              | "debuff";
-
-            setFormData({
-              ...formData,
-              damageType: newValue,
-              damageModifier:
-                newValue === "damage" || newValue === "all"
-                  ? formData.damageModifier
-                  : null,
-              healModifier: newValue === "heal" ? formData.healModifier : null,
-            });
-          }}
-          placeholder="Виберіть тип"
-          options={SPELL_DAMAGE_TYPE_OPTIONS.map((o) => ({
-            value: o.value,
-            label: o.label,
-          }))}
-        />
-      </div>
-
-      {(formData.damageType === "damage" || formData.damageType === "all") && (
-        <>
-          <div>
-            <Label>Елемент шкоди</Label>
-            <SelectField
-              value={formData.damageElement || ""}
-              onValueChange={(value) =>
-                setFormData({ ...formData, damageElement: value || null })
-              }
-              placeholder="Без елементу"
-              options={DAMAGE_ELEMENT_OPTIONS.map((o) => ({
-                value: o.value,
-                label: o.label,
-              }))}
-              allowNone
-              noneLabel="Без елементу"
-            />
-          </div>
-          <div>
-            <Label>Модифікатор шкоди</Label>
-            <SelectField
-              value={formData.damageModifier || ""}
-              onValueChange={(value) =>
-                setFormData({ ...formData, damageModifier: value || null })
-              }
-              placeholder="Без модифікатора"
-              options={DAMAGE_MODIFIER_OPTIONS.map((o) => ({
-                value: o.value,
-                label: o.label,
-              }))}
-              allowNone
-              noneLabel="Без модифікатора"
-            />
-          </div>
-        </>
-      )}
-
-      {formData.damageType === "heal" && (
-        <div>
-          <Label>Модифікатор лікування</Label>
-          <SelectField
-            value={formData.healModifier || ""}
-            onValueChange={(value) =>
-              setFormData({ ...formData, healModifier: value || null })
-            }
-            placeholder="Без модифікатора"
-            options={HEAL_MODIFIER_OPTIONS.map((o) => ({
-              value: o.value,
-              label: o.label,
-            }))}
-            allowNone
-            noneLabel="Без модифікатора"
-          />
-        </div>
-      )}
-
       <div className="col-span-2">
-        <Label htmlFor="dice">
-          {formData.damageType === "heal"
-            ? "Кубики лікування"
-            : "Кубики шкоди"}
-        </Label>
-        <div className="flex gap-2">
-          <Input
-            id="diceCount"
-            type="number"
-            min={0}
-            max={10}
-            value={formData.diceCount ?? ""}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                diceCount:
-                  e.target.value === ""
-                    ? null
-                    : parseInt(e.target.value) || 0,
-              })
-            }
-            placeholder="0"
-            className="w-20"
-          />
-          <SelectField
-            value={formData.diceType || ""}
-            onValueChange={(value) =>
-              setFormData({ ...formData, diceType: value || null })
-            }
-            placeholder="Тип кубика"
-            options={DICE_OPTIONS.map((o) => ({
-              value: o.value,
-              label: o.label,
-            }))}
-            allowNone
-            noneLabel="Без кубиків"
-            triggerClassName="flex-1"
-          />
-        </div>
+        <IconUrlField id="icon" label="Посилання на картинку" value={formData.icon ?? ""} onChange={(icon) => setFormData({ ...formData, icon: icon || null })} fallbackText={formData.name} />
       </div>
     </div>
   );

@@ -1,102 +1,42 @@
 import { z } from "zod";
 
-import { ABILITY_KEYS } from "@/lib/constants/abilities";
+import { EffectSchema } from "@/lib/utils/abilities/schema";
+import { RaceModifierSchema, SpellCostSchema, SpellDiceSchema, SpellResolutionSchema, SpellTargetingSchema } from "@/lib/utils/spells/model/schema";
 
-const abilityEnum = z.enum(ABILITY_KEYS);
+const nullableString = z.preprocess((val) => (val === "" ? null : val), z.string().nullable().optional());
 
-const damageTypeEnum = z.enum(["damage", "heal", "all", "buff", "debuff"]);
-
-const damageModifierEnum = z.enum([
-  "control",
-  "charm",
-  "sleep",
-  "state",
-  "burning",
-  "poison",
-  "freezing",
-]);
-
-const healModifierEnum = z.enum([
-  "heal",
-  "regeneration",
-  "dispel",
-  "shield",
-  "vampirism",
-]);
-
-const diceTypeEnum = z.enum(["d4", "d6", "d8", "d10", "d12", "d20", "d100"]);
-
-const savingThrowSchema = z.object({
-  ability: abilityEnum,
-  onSuccess: z.enum(["half", "none"]),
-  dc: z.number().min(1).max(30).optional().nullable(),
-});
-
-const hitCheckSchema = z.object({
-  ability: abilityEnum,
-  dc: z.number().min(1).max(30),
-});
-
-const nullableString = z.preprocess(
-  (val) => (val === "" ? null : val),
-  z.string().nullable().optional(),
-);
+const spellFields = {
+  name: z.string().min(1).max(100),
+  level: z.number().int().min(0).max(9),
+  groupId: z.string().nullable(),
+  icon: nullableString,
+  description: z.string().nullable(),
+  appearanceDescription: z.string().nullable(),
+  cost: SpellCostSchema,
+  dice: SpellDiceSchema,
+  targeting: SpellTargetingSchema,
+  resolution: SpellResolutionSchema,
+  spellEffects: z.array(EffectSchema),
+  raceModifiers: z.array(RaceModifierSchema),
+};
 
 export const createSpellSchema = z.object({
-  name: z.string().min(1).max(100),
-  level: z.number().min(0).max(9).default(0),
-  type: z.enum(["target", "aoe"]),
-  target: z.enum(["enemies", "allies", "all"]).optional(),
-  damageType: damageTypeEnum,
-  damageElement: nullableString,
-  damageModifier: damageModifierEnum.optional().nullable(),
-  healModifier: healModifierEnum.optional().nullable(),
-  castingTime: z.string().optional().nullable(),
-  range: z.string().optional().nullable(),
-  duration: z.string().optional().nullable(),
-  diceCount: z.number().min(0).max(10).optional().nullable(),
-  diceType: diceTypeEnum.optional().nullable(),
-  savingThrow: savingThrowSchema.optional().nullable(),
-  description: z.string().optional().nullable(),
-  effects: z.array(z.string()).optional().nullable(),
-  groupId: z.string().optional().nullable(),
-  icon: nullableString,
-  summonUnitId: z.string().optional().nullable(),
-  damageDistribution: z
-    .array(z.number().min(0).max(100))
-    .optional()
-    .nullable(),
+  ...spellFields,
+  level: spellFields.level.default(0),
+  groupId: spellFields.groupId.optional(),
+  description: spellFields.description.optional(),
+  appearanceDescription: spellFields.appearanceDescription.optional(),
+  cost: spellFields.cost.default("action"),
+  dice: spellFields.dice.default(0),
+  targeting: spellFields.targeting.default({ kind: "enemy" }),
+  resolution: spellFields.resolution.default({ kind: "auto" }),
+  spellEffects: spellFields.spellEffects.default([]),
+  raceModifiers: spellFields.raceModifiers.default([]),
 });
 
 export type CreateSpellInput = z.infer<typeof createSpellSchema>;
 
-export const updateSpellSchema = z.object({
-  name: z.string().min(1).max(100).optional(),
-  level: z.number().min(0).max(9).optional(),
-  type: z.enum(["target", "aoe"]).optional(),
-  target: z.enum(["enemies", "allies", "all"]).optional().nullable(),
-  damageType: damageTypeEnum.optional(),
-  damageElement: nullableString,
-  damageModifier: damageModifierEnum.optional().nullable(),
-  healModifier: healModifierEnum.optional().nullable(),
-  castingTime: z.string().optional().nullable(),
-  range: z.string().optional().nullable(),
-  duration: z.string().optional().nullable(),
-  diceCount: z.number().min(0).max(10).optional().nullable(),
-  diceType: diceTypeEnum.optional().nullable(),
-  savingThrow: savingThrowSchema.optional().nullable(),
-  hitCheck: hitCheckSchema.optional().nullable(),
-  description: z.string().optional().nullable(),
-  effects: z.array(z.string()).optional().nullable(),
-  groupId: z.string().optional().nullable(),
-  icon: nullableString,
-  appearanceDescription: z.string().nullable().optional(),
-  summonUnitId: z.string().nullable().optional(),
-  damageDistribution: z
-    .array(z.number().min(0).max(100))
-    .nullable()
-    .optional(),
-});
+export const updateSpellSchema = z.object(spellFields).partial();
 
 export type UpdateSpellInput = z.infer<typeof updateSpellSchema>;
 

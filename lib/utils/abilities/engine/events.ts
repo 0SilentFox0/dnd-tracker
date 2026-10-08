@@ -30,6 +30,10 @@ export function eventAttackKind(e: AbilityEvent | null): DamageKind | null {
   return e.type === "spellCast" ? "magic" : null;
 }
 
+export function eventSpellRoll(e: AbilityEvent): number | undefined {
+  return e.type === "spellCast" ? e.roll : undefined;
+}
+
 export function eventDamage(e: AbilityEvent): number | undefined {
   return e.type === "hit" ? e.damage : undefined;
 }

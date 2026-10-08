@@ -19,6 +19,7 @@ import {
 } from "@/lib/api/spells";
 import { useCrudMutation } from "@/lib/hooks/common";
 import { REFERENCE_STALE_MS } from "@/lib/providers/query-provider";
+import type { CreateSpellInput, UpdateSpellInput } from "@/lib/schemas/spells";
 import type { Spell, SpellGroup } from "@/types/spells";
 
 export type { Spell, SpellGroup };
@@ -102,21 +103,14 @@ export function useSpell(campaignId: string, spellId: string) {
 
 export function useCreateSpell(campaignId: string) {
   return useCrudMutation({
-    mutationFn: (
-      data: Partial<Spell> & {
-        name: string;
-        description: string;
-        type: string;
-        damageType: string;
-      },
-    ) => createSpell(campaignId, data),
+    mutationFn: (data: CreateSpellInput) => createSpell(campaignId, data),
     invalidateKeys: [spellKeys.list(campaignId)],
   });
 }
 
 export function useUpdateSpell(campaignId: string, spellId: string) {
   return useCrudMutation({
-    mutationFn: (data: Partial<Spell>) => updateSpell(campaignId, spellId, data),
+    mutationFn: (data: UpdateSpellInput) => updateSpell(campaignId, spellId, data),
     invalidateKeys: [
       spellKeys.detail(campaignId, spellId),
       spellKeys.list(campaignId),

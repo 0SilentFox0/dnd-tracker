@@ -14,14 +14,6 @@ export interface Skill {
   spellId: string | null;
   spellGroupId: string | null;
   mainSkillId?: string | null;
-  spellEnhancementTypes?: string[];
-  spellEffectIncrease?: number | null;
-  spellTargetChange?: { target: string } | null;
-  spellAdditionalModifier?: {
-    modifier?: string;
-    damageDice?: string;
-    duration?: number;
-  } | null;
   spellNewSpellId?: string | null;
   createdAt: Date;
   spell?: {
@@ -52,21 +44,6 @@ export interface GroupedSkill {
     spellId?: string;
     spellGroupId?: string;
     grantedSpellId?: string;
-  };
-  spellEnhancementData: {
-    spellEnhancementTypes?: string[];
-    spellEffectIncrease?: number;
-    spellTargetChange?: { target: string } | null;
-    spellAdditionalModifier?: {
-      modifier?: string;
-      damageDice?: string;
-      duration?: number;
-    } | null;
-    spellNewSpellId?: string;
-    /** UI касту: дозволити кілька цілей для spellData.spellId */
-    spellAllowMultipleTargets?: boolean;
-    /** Заклинання з довідника (зазвичай target), що стають AOE у бою */
-    spellAoeSpellIds?: string[];
   };
   mainSkillData: {
     mainSkillId?: string;

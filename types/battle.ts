@@ -1,4 +1,4 @@
-import type { AbilityUsageCounter, ResolvedAbility, SpellEnhancer, StaticEffect } from "./abilities";
+import type { AbilityUsageCounter, ResolvedAbility, StaticEffect } from "./abilities";
 
 import { type SpellcastingAbility } from "@/lib/constants/abilities";
 import { AttackType, type CombatStatusType,ParticipantSide, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
@@ -139,6 +139,8 @@ export interface BattleParticipantAbilities {
   };
   proficiencyBonus: number;
   race: string;
+  /** Race.id для расових модифікаторів заклинань */
+  raceId?: string;
   primaryAbility?: AbilityKey;
   /** Коеф. DM для фіз. шкоди ближнього бою (лише character); як у калькуляторі персонажа */
   meleeMultiplier?: number;
@@ -189,10 +191,11 @@ export interface BattleParticipantBattleData {
   /** Учасник зараз робить додатковий хід від моралі (наприкінці раунду) */
   extraTurnActive?: boolean;
   resolvedAbilities: ResolvedAbility[];
-  spellEnhancers: SpellEnhancer[];
   abilityUsage?: Record<string, AbilityUsageCounter>;
   /** Чарм скінчився: сторона й контролер повертаються наприкінці цього ходу */
   charmReturn?: { side: ParticipantSide; controlledBy: string };
+  /** Рівень майстерності героя у гілці кожної школи заклинань (groupId → рівень) */
+  schoolMastery?: Record<string, "basic" | "advanced" | "expert">;
   /** Масштаб шкоди ворога-юніта для рівного бою (старт бою); немає = ×1 */
   damageMultiplier?: number;
   /** Масштаб HP ворога-юніта для рівного бою; лише для показу ДМу */
@@ -296,8 +299,6 @@ export interface BattleAction {
     spellName?: string;
     spellLevel?: number;
     spellSlotUsed?: number;
-    /** Промах по перевірці попадання заклинання — без приклику тощо */
-    hitCheckMiss?: boolean;
     /** Приклик юніта після касту */
     summonedUnitTemplateId?: string;
     summonedParticipantId?: string;

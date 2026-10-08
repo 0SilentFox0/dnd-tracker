@@ -13,7 +13,7 @@ import type { GroupedSkill, Skill } from "@/types/skills";
 describe("skill-helpers", () => {
   describe("getSkillId", () => {
     it("повертає id з GroupedSkill", () => {
-      const skill: GroupedSkill = { id: "s1", campaignId: "c1", basicInfo: { name: "X" }, spellData: {}, spellEnhancementData: {}, mainSkillData: {}, createdAt: new Date(), spell: null, spellGroup: null };
+      const skill: GroupedSkill = { id: "s1", campaignId: "c1", basicInfo: { name: "X" }, spellData: {}, mainSkillData: {}, createdAt: new Date(), spell: null, spellGroup: null };
 
       expect(getSkillId(skill)).toBe("s1");
     });
@@ -26,7 +26,7 @@ describe("skill-helpers", () => {
 
   describe("getSkillName", () => {
     it("повертає basicInfo.name з GroupedSkill", () => {
-      const skill = { id: "s1", campaignId: "c1", basicInfo: { name: "Вогняна куля" }, spellData: {}, spellEnhancementData: {}, mainSkillData: {}, createdAt: new Date(), spell: null, spellGroup: null } as GroupedSkill;
+      const skill = { id: "s1", campaignId: "c1", basicInfo: { name: "Вогняна куля" }, spellData: {}, mainSkillData: {}, createdAt: new Date(), spell: null, spellGroup: null } as GroupedSkill;
 
       expect(getSkillName(skill)).toBe("Вогняна куля");
     });
@@ -39,7 +39,7 @@ describe("skill-helpers", () => {
 
   describe("getSkillDescription", () => {
     it("повертає basicInfo.description з GroupedSkill або null", () => {
-      const withDesc = { id: "s1", campaignId: "c1", basicInfo: { name: "X", description: "Опис" }, spellData: {}, spellEnhancementData: {}, mainSkillData: {}, createdAt: new Date(), spell: null, spellGroup: null } as GroupedSkill;
+      const withDesc = { id: "s1", campaignId: "c1", basicInfo: { name: "X", description: "Опис" }, spellData: {}, mainSkillData: {}, createdAt: new Date(), spell: null, spellGroup: null } as GroupedSkill;
 
       expect(getSkillDescription(withDesc)).toBe("Опис");
 
@@ -51,7 +51,7 @@ describe("skill-helpers", () => {
 
   describe("getSkillSpell", () => {
     it("повертає spell або null", () => {
-      const skill = { id: "s1", campaignId: "c1", basicInfo: { name: "X" }, spellData: {}, spellEnhancementData: {}, mainSkillData: {}, createdAt: new Date(), spell: { id: "sp1", name: "Fireball" }, spellGroup: null } as GroupedSkill;
+      const skill = { id: "s1", campaignId: "c1", basicInfo: { name: "X" }, spellData: {}, mainSkillData: {}, createdAt: new Date(), spell: { id: "sp1", name: "Fireball" }, spellGroup: null } as GroupedSkill;
 
       expect(getSkillSpell(skill)).toEqual({ id: "sp1", name: "Fireball" });
       expect(getSkillSpell({ ...skill, spell: null })).toBeNull();
@@ -60,7 +60,7 @@ describe("skill-helpers", () => {
 
   describe("getSkillMainSkillId", () => {
     it("повертає mainSkillData.mainSkillId з GroupedSkill", () => {
-      const skill = { id: "s1", campaignId: "c1", basicInfo: { name: "X" }, spellData: {}, spellEnhancementData: {}, mainSkillData: { mainSkillId: "ms1" }, createdAt: new Date(), spell: null, spellGroup: null } as GroupedSkill;
+      const skill = { id: "s1", campaignId: "c1", basicInfo: { name: "X" }, spellData: {}, mainSkillData: { mainSkillId: "ms1" }, createdAt: new Date(), spell: null, spellGroup: null } as GroupedSkill;
 
       expect(getSkillMainSkillId(skill)).toBe("ms1");
     });

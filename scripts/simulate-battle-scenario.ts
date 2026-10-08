@@ -234,3 +234,23 @@ export const RACIAL_UNITS = [
     ]),
   },
 ];
+
+export const SPELL_MODEL_CAMPAIGN_NAME = "SIM: нова модель заклинань";
+
+const strike = (name: string, dice = "1d6") => melee(name, 8, dice);
+
+export const SPELL_MODEL_UNITS = (humanRaceId: string) => [
+  { name: "Архімаг", side: "ally", level: 6, maxHp: 100, armorClass: 12, initiative: 20, attacks: strike("Посох"), abilities: json([]) },
+  { name: "Паладин", side: "ally", level: 4, maxHp: 60, armorClass: 18, initiative: 18, attacks: strike("Молот"), abilities: json([]) },
+  { name: "Жрець", side: "ally", level: 5, maxHp: 80, armorClass: 12, initiative: 16, attacks: strike("Булава"), abilities: json([]) },
+  { name: "Хаотик", side: "ally", level: 5, maxHp: 100, armorClass: 12, initiative: 15, attacks: strike("Жезл"), abilities: json([]) },
+  { name: "Друїд", side: "ally", level: 3, maxHp: 60, armorClass: 12, initiative: 14, attacks: strike("Ціпок"), abilities: json([]) },
+  { name: "Чорнокнижник", side: "ally", level: 5, maxHp: 80, armorClass: 12, initiative: 13, attacks: strike("Кинджал"), abilities: json([]) },
+  { name: "Лялькар", side: "ally", level: 5, maxHp: 80, armorClass: 12, initiative: 12, attacks: strike("Нитки"), abilities: json([]) },
+  { name: "Гоблін А", side: "enemy", level: 1, maxHp: 300, armorClass: 10, initiative: 10, attacks: strike("Ніж"), abilities: json([]) },
+  { name: "Гоблін Б", side: "enemy", level: 1, maxHp: 300, armorClass: 10, initiative: 9, attacks: strike("Ніж"), abilities: json([]) },
+  { name: "Гоблін В", side: "enemy", level: 1, maxHp: 300, armorClass: 10, initiative: 8, attacks: strike("Ніж"), abilities: json([]) },
+  { name: "Воїн", side: "enemy", level: 1, maxHp: 300, armorClass: 10, initiative: 7, attacks: strike("Меч"), abilities: json([]), raceId: humanRaceId },
+  { name: "Лиходій", side: "enemy", level: 2, maxHp: 300, armorClass: 10, initiative: 5, attacks: strike("Сокира", "1d8"), abilities: json([]) },
+  { name: "Маріонетка", side: "enemy", level: 2, maxHp: 300, armorClass: 10, initiative: 3, attacks: strike("Кігті"), abilities: json([]) },
+];

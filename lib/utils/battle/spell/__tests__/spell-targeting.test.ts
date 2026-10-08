@@ -57,18 +57,16 @@ describe("spell targeting", () => {
   });
 
   it("rejects more targets than the skill allows", () => {
-    expect(validateSpellTargetCount({ mode: "area", maxTargets: 3 }, 4, "single_target")).toBe(false);
-    expect(validateSpellTargetCount({ mode: "single", maxTargets: 1 }, 2, "single_target")).toBe(false);
-    expect(validateSpellTargetCount({ mode: "single", maxTargets: 1 }, 5, "aoe")).toBe(true);
+    expect(validateSpellTargetCount({ mode: "area", maxTargets: 3 }, 4)).toBe(false);
+    expect(validateSpellTargetCount({ mode: "single", maxTargets: 1 }, 2)).toBe(false);
+    expect(validateSpellTargetCount({ mode: "all", maxTargets: Infinity }, 5)).toBe(true);
   });
 
-  it("all не діє на aoe і лишає обрану ціль, навіть якщо вона впала", () => {
+  it("all лишає обрану ціль, навіть якщо вона впала", () => {
     const c = caster([{ kind: "flag", flag: "spellTargeting", mode: "all" }]);
 
     const ps = [c, ally("a1"), downedAlly("a3")];
 
-    expect(spellTargetingFor(ps, "c", { ...spell, type: "aoe" }).mode).toBe("single");
-    expect(expandSpellTargets(ps, "c", { ...spell, type: "aoe" }, ["a1"])).toEqual(["a1"]);
     expect(expandSpellTargets(ps, "c", spell, ["a3"]).sort()).toEqual(["a1", "a3", "c"]);
   });
 });

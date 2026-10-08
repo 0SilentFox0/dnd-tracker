@@ -7,6 +7,7 @@ import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { spellLevelMetal } from "@/components/hud";
 import { spellLevelName, spellLevelRoman } from "@/lib/constants/spells";
 import { cn } from "@/lib/utils";
+import { costLabel, resolutionLabel, targetingLabel } from "@/lib/utils/spells/model/labels";
 import type { BookSpell } from "@/types/spells";
 
 const LEVELS = [0, 1, 2, 3, 4, 5] as const;
@@ -25,9 +26,10 @@ export interface SpellBookPagesProps {
   onLevel: (level: number) => void;
   onPick: (spell: BookSpell) => void;
   detail: ReactNode;
+  formulaOf?: (spell: BookSpell) => string;
 }
 
-export function SpellBookPages({ byLevel, slotOf, level, pickedId, wide, showDetail, onLevel, onPick, detail }: SpellBookPagesProps) {
+export function SpellBookPages({ byLevel, slotOf, level, pickedId, wide, showDetail, onLevel, onPick, detail, formulaOf }: SpellBookPagesProps) {
   return (
     <div className="relative pr-11">
       <div className="absolute right-1.5 top-6 z-10 flex flex-col gap-1.5">
@@ -61,9 +63,9 @@ export function SpellBookPages({ byLevel, slotOf, level, pickedId, wide, showDet
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="hud-sc block truncate text-[17px] font-bold">{s.name}</span>
-                  <span className="block truncate text-sm italic text-[#6b5a45]">{[s.savingThrow && `рятівний кидок ${s.savingThrow.ability}`, s.hitCheck && "атака заклинанням", s.range].filter(Boolean).join(" · ")}</span>
+                  <span className="block truncate text-sm italic text-[#6b5a45]">{[s.resolution?.kind === "save" && "рятівний кидок", s.targeting && targetingLabel(s.targeting), s.cost === "bonusAction" && "бонусна дія"].filter(Boolean).join(" · ")}</span>
                 </span>
-                {s.diceCount && s.diceType && <span className="w-11 text-right text-[15px] text-[#7a2a1f]">{s.diceCount}{s.diceType}</span>}
+                {formulaOf && s.dice ? <span className="w-20 text-right text-[15px] text-[#7a2a1f]">{formulaOf(s)}</span> : null}
               </button>
             ))}
           </div>
@@ -83,7 +85,7 @@ export function EmptySpellBook({ text }: { text: string }) {
   );
 }
 
-export function SpellDetail({ spell, children }: { spell: BookSpell; children?: ReactNode }) {
+export function SpellDetail({ spell, formula, children }: { spell: BookSpell; formula?: string; children?: ReactNode }) {
   return (
     <>
       <div className="flex items-center gap-4">
@@ -92,12 +94,12 @@ export function SpellDetail({ spell, children }: { spell: BookSpell; children?: 
         </span>
         <div>
           <div className="hud-sc text-[26px] font-bold leading-[30px]">{spell.name}</div>
-          <div className="text-sm italic text-[#7a6650]">{spell.spellGroup?.name ?? "Без школи"} · {spellLevelName(spell.level).toLowerCase()}{spell.concentration ? " · концентрація" : ""}</div>
+          <div className="text-sm italic text-[#7a6650]">{spell.spellGroup?.name ?? "Без школи"} · {spellLevelName(spell.level).toLowerCase()}</div>
         </div>
       </div>
       {spell.description && <p className="mt-4 text-[17px] leading-6 first-letter:float-left first-letter:pr-1.5 first-letter:pt-1 first-letter:font-[family-name:var(--font-hud-sc)] first-letter:text-[52px] first-letter:leading-[44px] first-letter:text-[#7a2a1f]">{spell.description}</p>}
       <div className="mt-4 grid grid-cols-2 border-t border-[#2a2018]/25">
-        {[["Шкода", spell.diceCount && spell.diceType ? `${spell.diceCount}${spell.diceType} ${spell.damageElement ?? ""}` : "—"], ["Дальність", spell.range ?? "—"], ["Влучання", spell.hitCheck ? "атака заклинанням" : spell.savingThrow ? `рятівний ${spell.savingThrow.ability}` : "автоматично"], ["Тривалість", spell.duration ?? "миттєво"]].map(([a, b]) => (
+        {[["Сила", formula ?? (spell.dice ? `${spell.dice} баз. кубиків` : "—")], ["Ціль", spell.targeting ? targetingLabel(spell.targeting) : "—"], ["Перевірка", spell.resolution ? resolutionLabel(spell.resolution) : "автоматично"], ["Вартість", costLabel(spell.cost ?? "action")]].map(([a, b]) => (
           <div key={a} className="flex h-12 flex-col justify-center border-b border-[#2a2018]/15 odd:border-r odd:pr-3 even:pl-3">
             <span className="text-xs italic text-[#7a6650]">{a}</span>
             <span className="text-base">{b}</span>

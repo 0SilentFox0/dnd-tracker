@@ -70,7 +70,7 @@ export function attackMutation(ctx: BattleMutationContext, body: AttackBody): Mu
 
   if (!endTurn) return { participants: order, pending: ctx.pending, events };
 
-  const advanced = advanceTurn({ participants: order, pending: ctx.pending, scene: ctx.scene });
+  const advanced = advanceTurn({ participants: order, pending: ctx.pending, scene: ctx.scene, rng: ctx.rng });
 
   return {
     participants: advanced.participants,

@@ -1,83 +1,34 @@
+import type { SummonRequest } from "@/lib/utils/abilities/engine/types";
+import type { SpellDefinition } from "@/lib/utils/spells/model/schema";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
-export interface BattleSpell {
+export interface CastableSpell {
   id: string;
   name: string;
   level: number;
-  type: "target" | "aoe" | "no_target";
-  target?: "enemies" | "allies" | "all";
-  damageType: "damage" | "heal" | "all";
-  damageElement?: string | null;
-  /** ID групи (школи) заклинання — використовується magic pipeline для school-scope фільтра. */
-  groupId?: string | null;
-  damageModifier?: string | null;
-  healModifier?: string | null;
-  diceCount?: number | null;
-  diceType?: string | null;
-  savingThrow?: {
-    ability: string;
-    onSuccess: "half" | "none";
-    dc?: number;
-  } | null;
-  hitCheck?: { ability: string; dc: number } | null;
-  description: string;
-  duration?: string | null;
-  castingTime?: string | null;
-  effects?: string[] | null;
-  /**
-   * AoE per-target damage distribution у відсотках. Напр. `[100, 75, 50, 25]`
-   * — перша ціль отримує 100%, друга 75%, третя 50%, четверта 25%, 5-та і
-   * далі — 0%. `null`/відсутнє → всі цілі отримують 100%.
-   */
-  damageDistribution?: number[] | null;
-  effectDetails?: {
-    duration?: number;
-    effects?: Array<{
-      type: string;
-      value: number;
-      isPercentage?: boolean;
-      /** Явно: шкідливий ефект (дебаф), навіть якщо value ≥ 0 */
-      harmful?: boolean;
-    }>;
-    /** DoT з самого заклинання (напр. Decay): урон протягом кількох раундів */
-    additionalModifier?: {
-      modifier?: string;
-      duration?: number;
-      damage?: number;
-    };
-  } | null;
+  groupId: string | null;
   icon?: string | null;
+  definition: SpellDefinition;
 }
 
-export interface ProcessSpellParams {
+export interface CastSpellParams {
   caster: BattleParticipant;
-  spell: BattleSpell;
+  spell: CastableSpell;
   targetIds: string[];
   allParticipants: BattleParticipant[];
   currentRound: number;
   battleId: string;
-  damageRolls: number[];
-  savingThrows?: Array<{
-    participantId: string;
-    roll: number;
-  }>;
-  additionalRollResult?: number;
-  hitRoll?: number;
-  /** DM накладає з сайдбару — не витрачати spell slot, ігнорувати перевірку слотів */
+  diceRolls: number[];
+  saveRolls?: Array<{ participantId: string; roll: number }>;
+  /** DM накладає з сайдбару — не витрачати spell slot */
   isDMCast?: boolean;
   rng?: () => number;
 }
 
-export interface ProcessSpellResult {
+export interface CastSpellResult {
   success: boolean;
-  spellCalculation?: {
-    totalDamage?: number;
-    totalHealing?: number;
-    breakdown: string[];
-    resistanceBreakdown: string[];
-  };
-  targetsUpdated: BattleParticipant[];
-  allParticipantsUpdated?: BattleParticipant[];
   casterUpdated: BattleParticipant;
+  allParticipantsUpdated: BattleParticipant[];
   battleAction: BattleAction;
+  summons: SummonRequest[];
 }

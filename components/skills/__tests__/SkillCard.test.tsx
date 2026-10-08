@@ -41,7 +41,7 @@ function minimalGroupedSkill(overrides: Partial<GroupedSkill> = {}): GroupedSkil
     campaignId: "c1",
     basicInfo: { name: "Тестовий скіл", description: "Опис", icon: undefined },
     spellData: {},
-    spellEnhancementData: {},
+   
     mainSkillData: {},
     createdAt: new Date(),
     spell: null,

@@ -7,16 +7,12 @@ import { useMainSkills } from "./useMainSkills";
 import {
   type InitialSkillFormData,
   normalizeInitialSkillData,
-  parseInitialSpellAdditionalModifier,
-  parseInitialSpellEnhancementTypes,
-  parseInitialSpellTargetChange,
   type SpellOption,
 } from "./useSkillForm-normalize";
 import { buildSkillFormPayload } from "./useSkillForm-payload";
 import { buildSkillFormReturn } from "./useSkillForm-return";
 
 import { createSkill, updateSkill } from "@/lib/api/skills";
-import { SpellEnhancementType } from "@/lib/constants/spell-enhancement";
 import { abilitySaveError } from "@/lib/hooks/abilities";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import type { GroupedSkillPayload } from "@/types/hooks";
@@ -70,93 +66,11 @@ export function useSkillForm(
   );
 
   const [grantedSpellId, setGrantedSpellId] = useState<string | null>(
-    normalizedData?.grantedSpellId ?? null,
+    normalizedData?.grantedSpellId ?? normalizedData?.spellNewSpellId ?? null,
   );
 
   const [mainSkillId, setMainSkillId] = useState<string | null>(
     normalizedData?.mainSkillId || null,
-  );
-
-  const [spellEnhancementTypes, setSpellEnhancementTypes] = useState<
-    SpellEnhancementType[]
-  >(() => {
-    const base = parseInitialSpellEnhancementTypes(
-      normalizedData?.spellEnhancementTypes,
-    );
-
-    const aoeIds = normalizedData?.spellAoeSpellIds ?? [];
-
-    if (
-      aoeIds.length > 0 &&
-      !base.includes(SpellEnhancementType.AOE_SPELL_UNLOCK)
-    ) {
-      return [...base, SpellEnhancementType.AOE_SPELL_UNLOCK];
-    }
-
-    return base;
-  });
-
-  const [spellEffectIncrease, setSpellEffectIncrease] = useState(
-    normalizedData?.spellEffectIncrease?.toString() || "",
-  );
-
-  const [spellTargetChange, setSpellTargetChange] = useState<string | null>(
-    () => parseInitialSpellTargetChange(normalizedData?.spellTargetChange),
-  );
-
-  const [spellAdditionalModifier, setSpellAdditionalModifier] = useState<{
-    modifier?: string;
-    damageDice?: string;
-    duration?: number;
-  }>(() =>
-    parseInitialSpellAdditionalModifier(
-      normalizedData?.spellAdditionalModifier,
-    ),
-  );
-
-  const [spellNewSpellId, setSpellNewSpellId] = useState<string | null>(
-    normalizedData?.spellNewSpellId || null,
-  );
-
-  const [spellAllowMultipleTargets] = useState(
-    normalizedData?.spellAllowMultipleTargets === true,
-  );
-
-  const [spellAoeSpellIds, setSpellAoeSpellIds] = useState<string[]>(
-    () => normalizedData?.spellAoeSpellIds ?? [],
-  );
-
-  useEffect(() => {
-    setSpellEnhancementTypes((types) => {
-      const hasAoe = types.includes(SpellEnhancementType.AOE_SPELL_UNLOCK);
-
-      if (spellAoeSpellIds.length > 0 && !hasAoe) {
-        return [...types, SpellEnhancementType.AOE_SPELL_UNLOCK];
-      }
-
-      if (spellAoeSpellIds.length === 0 && hasAoe) {
-        return types.filter((t) => t !== SpellEnhancementType.AOE_SPELL_UNLOCK);
-      }
-
-      return types;
-    });
-  }, [spellAoeSpellIds]);
-
-  const handleEnhancementTypeToggle = useCallback(
-    (type: SpellEnhancementType) => {
-      setSpellEnhancementTypes((prev) => {
-        if (prev.includes(type)) {
-          if (type === SpellEnhancementType.AOE_SPELL_UNLOCK) {
-            setSpellAoeSpellIds([]);
-          }
-
-          return prev.filter((t) => t !== type);
-        }
-
-        return [...prev, type];
-      });
-    },
-    [],
   );
 
   const createPayload = useCallback((): GroupedSkillPayload => {
@@ -169,13 +83,6 @@ export function useSkillForm(
       spellGroupId,
       grantedSpellId,
       mainSkillId,
-      spellEnhancementTypes,
-      spellEffectIncrease,
-      spellTargetChange,
-      spellAdditionalModifier,
-      spellNewSpellId,
-      spellAllowMultipleTargets,
-      spellAoeSpellIds,
     });
   }, [
     name,
@@ -186,13 +93,6 @@ export function useSkillForm(
     spellGroupId,
     grantedSpellId,
     mainSkillId,
-    spellEnhancementTypes,
-    spellEffectIncrease,
-    spellTargetChange,
-    spellAdditionalModifier,
-    spellNewSpellId,
-    spellAllowMultipleTargets,
-    spellAoeSpellIds,
   ]);
 
   const handleSubmit = useCallback(
@@ -261,19 +161,6 @@ export function useSkillForm(
     setSpellId,
     setSpellGroupId,
     setGrantedSpellId,
-    spellEnhancementTypes,
-    spellEffectIncrease,
-    spellTargetChange,
-    spellAdditionalModifier,
-    spellNewSpellId,
-    spellAllowMultipleTargets,
-    spellAoeSpellIds,
-    setSpellEffectIncrease,
-    setSpellTargetChange,
-    setSpellAdditionalModifier,
-    setSpellNewSpellId,
-    setSpellAoeSpellIds,
-    handleEnhancementTypeToggle,
     mainSkillId,
     setMainSkillId,
     handleSubmit,

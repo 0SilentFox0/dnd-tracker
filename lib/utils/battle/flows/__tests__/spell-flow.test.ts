@@ -7,11 +7,11 @@ import { expandSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 
 const run = (...a: SpellFlowAction[]) => a.reduce<SpellFlowState>(spellFlow, initialSpellFlow);
 
-const ray: SpellPick = { spellId: "ray", level: 2, targetMode: "single", needsHit: true, needsSaves: false, diceSlots: [6, 6] };
+const ray: SpellPick = { spellId: "ray", level: 2, targetMode: "single", needsSaves: false, diceSlots: [6, 6] };
 
-const cloud: SpellPick = { spellId: "cloud", level: 1, targetMode: "multi", needsHit: false, needsSaves: true, diceSlots: [8] };
+const cloud: SpellPick = { spellId: "cloud", level: 1, targetMode: "multi", needsSaves: true, diceSlots: [8] };
 
-const aura: SpellPick = { spellId: "aura", level: 3, targetMode: "none", needsHit: false, needsSaves: false, diceSlots: [] };
+const aura: SpellPick = { spellId: "aura", level: 3, targetMode: "none", needsSaves: false, diceSlots: [] };
 
 describe("spellFlow", () => {
   it("відкривається на сторінці кола; вибір спела → сторінка спела; TO_TARGETS → цілі", () => {
@@ -38,20 +38,20 @@ describe("spellFlow", () => {
     expect(run({ type: "OPEN", casterId: "me", level: 1 }, { type: "PICK", pick: cloud }, { type: "TO_TARGETS" }, { type: "CONFIRM_TARGETS" }).step).toBe("targets");
   });
 
-  it("кидки: потрібні влучання й усі кубики; рятівні — необов'язкові", () => {
+  it("кидки: потрібні всі кубики; рятівні — необов'язкові", () => {
     const s = run({ type: "OPEN", casterId: "me", level: 2 }, { type: "PICK", pick: ray }, { type: "TO_TARGETS" }, { type: "TOGGLE_TARGET", id: "a" }, { type: "CONFIRM_TARGETS" });
 
     expect(s.step).toBe("rolls");
     expect(rollsComplete(s)).toBe(false);
 
-    const filled = [{ type: "SET_HIT", value: 15 }, { type: "SET_DAMAGE", index: 0, value: 4 }, { type: "SET_DAMAGE", index: 1, value: 6 }] as SpellFlowAction[];
+    const filled = [{ type: "SET_DAMAGE", index: 0, value: 4 }, { type: "SET_DAMAGE", index: 1, value: 6 }] as SpellFlowAction[];
 
     const done = filled.reduce(spellFlow, s);
 
     expect(rollsComplete(done)).toBe(true);
     expect(spellFlow(s, { type: "TO_SUMMARY" }).step).toBe("rolls");
     expect(spellFlow(done, { type: "TO_SUMMARY" }).step).toBe("summary");
-    expect(spellPayload(done, "character")).toEqual({ casterId: "me", casterType: "character", spellId: "ray", targetIds: ["a"], damageRolls: [4, 6], hitRoll: 15 });
+    expect(spellPayload(done)).toEqual({ casterId: "me", spellId: "ray", targetIds: ["a"], diceRolls: [4, 6] });
   });
 
   it("рятівні кидки потрапляють у payload; зняття цілі прибирає її кидок", () => {
@@ -59,7 +59,7 @@ describe("spellFlow", () => {
 
     s = ([{ type: "SET_SAVE", id: "a", value: 12 }, { type: "SET_SAVE", id: "b", value: 7 }, { type: "SET_DAMAGE", index: 0, value: 5 }] as SpellFlowAction[]).reduce(spellFlow, s);
 
-    expect(spellPayload(s, "unit").savingThrows).toEqual([{ participantId: "a", roll: 12 }, { participantId: "b", roll: 7 }]);
+    expect(spellPayload(s).saveRolls).toEqual([{ participantId: "a", roll: 12 }, { participantId: "b", roll: 7 }]);
 
     const back = spellFlow(spellFlow(s, { type: "BACK" }), { type: "TOGGLE_TARGET", id: "b" });
 
@@ -92,6 +92,15 @@ describe("spellFlow", () => {
 
     expect([...s.targetIds].sort()).toEqual(["a1", "a2", "me"]);
     expect(spellFlow(s, { type: "CONFIRM_TARGETS" }).step).toBe("rolls");
+  });
+
+  it("самі кубики без цілей: заклинання без цілей з кубиками йде на кидки", () => {
+    const self: SpellPick = { ...aura, diceSlots: [6, 6, 6] };
+
+    const s = run({ type: "OPEN", casterId: "me", level: 3 }, { type: "PICK", pick: self }, { type: "TO_TARGETS" });
+
+    expect(s.step).toBe("rolls");
+    expect(s.damage).toHaveLength(3);
   });
 
   it("область: вибір понад maxTargets ігнорується", () => {

@@ -97,10 +97,15 @@ async function seedMockData() {
       const spell = await prisma.spell.create({
         data: {
           campaignId: CAMPAIGN_ID,
-          ...spellData,
-          savingThrow: spellData.savingThrow
-            ? (spellData.savingThrow as Prisma.InputJsonValue)
-            : Prisma.JsonNull,
+          name: spellData.name,
+          level: spellData.level,
+          description: spellData.description,
+          type: "target",
+          damageType: "damage",
+          dice: spellData.dice,
+          targeting: spellData.targeting as Prisma.InputJsonValue,
+          resolution: spellData.resolution as Prisma.InputJsonValue,
+          spellEffects: spellData.spellEffects as Prisma.InputJsonValue,
         },
       });
 
@@ -172,7 +177,6 @@ async function seedMockData() {
           description: skillData.description,
           abilities: (skillData.abilities ?? []) as unknown as Prisma.InputJsonValue,
           mainSkillId: skillData.mainSkillId,
-          spellEffectIncrease: skillData.spellEffectIncrease || null,
         },
       });
 
@@ -212,10 +216,6 @@ async function seedMockData() {
           abilities: (skillData.abilities ?? []) as unknown as Prisma.InputJsonValue,
           mainSkillId: skillData.mainSkillId,
           spellId: skillData.spellId || null,
-          spellAdditionalModifier: skillData.spellAdditionalModifier
-            ? (skillData.spellAdditionalModifier as Prisma.InputJsonValue)
-            : Prisma.JsonNull,
-          spellEffectIncrease: skillData.spellEffectIncrease || null,
         },
       });
 

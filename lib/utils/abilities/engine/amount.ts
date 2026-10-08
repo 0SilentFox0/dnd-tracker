@@ -36,13 +36,15 @@ function percentBase(
 
 export function resolveAmount(
   amount: Amount,
-  input: { owner: BattleParticipant; target?: BattleParticipant; eventDamage?: number; rng: Rng; participants?: BattleParticipant[] },
+  input: { owner: BattleParticipant; target?: BattleParticipant; eventDamage?: number; spellRoll?: number; rng: Rng; participants?: BattleParticipant[] },
 ): number {
   if (typeof amount === "number") return amount;
 
   if (typeof amount === "string") return rollDice(amount, input.rng);
 
   if ("formula" in amount) return Math.max(0, Math.floor(evaluateFormula(amount.formula, formulaContext(input.owner))));
+
+  if ("spellRoll" in amount) return Math.floor(((input.spellRoll ?? 0) * amount.spellRoll) / 100);
 
   const base = percentBase(amount.percentOf, input);
 

@@ -4,7 +4,10 @@ import type { Prisma } from "@prisma/client";
 import { REFERENCE_REVALIDATE_SECONDS } from "@/lib/cache/reference-data";
 import { cacheTags } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
+import { describeEffect } from "@/lib/utils/abilities/registry/effects";
 import { abilitySummary } from "@/lib/utils/abilities/summary";
+import { costLabel, resolutionLabel, targetingLabel } from "@/lib/utils/spells/model/labels";
+import { readSpellDefinition } from "@/lib/utils/spells/model/read";
 import type { SkillForReference, SpellForReference } from "@/types/info-reference";
 
 const SKILL_SELECT = {
@@ -23,17 +26,12 @@ const SPELL_SELECT = {
   id: true,
   name: true,
   level: true,
-  type: true,
-  damageType: true,
-  castingTime: true,
-  range: true,
-  duration: true,
   description: true,
-  effects: true,
-  savingThrow: true,
-  diceCount: true,
-  diceType: true,
-  damageElement: true,
+  dice: true,
+  cost: true,
+  targeting: true,
+  resolution: true,
+  spellEffects: true,
   appearanceDescription: true,
   icon: true,
   spellGroup: { select: { name: true } },
@@ -65,13 +63,24 @@ export async function loadInfoReference(campaignId: string): Promise<InfoReferen
       icon: s.icon ?? null,
       image: s.image ?? null,
     })),
-    spells: spells.map(({ spellGroup, effects, ...s }) => ({
-      ...s,
-      effects: Array.isArray(effects) ? effects.filter((e): e is string => typeof e === "string") : [],
-      appearanceDescription: s.appearanceDescription ?? null,
-      groupName: spellGroup?.name ?? null,
-      icon: s.icon ?? null,
-    })),
+    spells: spells.map((s) => {
+      const def = readSpellDefinition(s);
+
+      return {
+        id: s.id,
+        name: s.name,
+        level: s.level,
+        type: targetingLabel(def.targeting),
+        cost: costLabel(def.cost),
+        resolution: resolutionLabel(def.resolution),
+        dice: def.dice,
+        description: s.description,
+        effects: def.effects.map(describeEffect),
+        appearanceDescription: s.appearanceDescription ?? null,
+        groupName: s.spellGroup?.name ?? null,
+        icon: s.icon ?? null,
+      };
+    }),
   };
 }
 

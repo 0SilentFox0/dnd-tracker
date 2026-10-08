@@ -39,7 +39,7 @@ describe("useSpellsByIds", () => {
   it("префетч у простої кладе дані в той самий кеш, що читає книга", async () => {
     const qc = new QueryClient();
 
-    vi.mocked(api.getSpellsByIds).mockResolvedValue([{ id: "a", name: "Іскра", level: 1, type: "target", damageType: "damage" }]);
+    vi.mocked(api.getSpellsByIds).mockResolvedValue([{ id: "a", name: "Іскра", level: 1, dice: 1 }]);
     renderHook(() => usePrefetchSpellsByIds("c", ["a"]), { wrapper: wrap(qc) });
 
     await waitFor(() => expect(api.getSpellsByIds).toHaveBeenCalledTimes(1), { timeout: 3000 });

@@ -1,6 +1,5 @@
 import type React from "react";
 
-import { SpellEnhancementType } from "@/lib/constants/spell-enhancement";
 import type { ConversionIssue } from "@/lib/utils/abilities/schema";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import type { MainSkill } from "@/types/main-skills";
@@ -28,19 +27,6 @@ export interface SkillFormReturnParams {
   setSpellId: (v: string | null) => void;
   setSpellGroupId: (v: string | null) => void;
   setGrantedSpellId: (v: string | null) => void;
-  spellEnhancementTypes: SpellEnhancementType[];
-  spellEffectIncrease: string;
-  spellTargetChange: string | null;
-  spellAdditionalModifier: { modifier?: string; damageDice?: string; duration?: number };
-  spellNewSpellId: string | null;
-  spellAllowMultipleTargets: boolean;
-  spellAoeSpellIds: string[];
-  setSpellEffectIncrease: (v: string) => void;
-  setSpellTargetChange: (v: string | null) => void;
-  setSpellAdditionalModifier: (v: { modifier?: string; damageDice?: string; duration?: number }) => void;
-  setSpellNewSpellId: (v: string | null) => void;
-  setSpellAoeSpellIds: React.Dispatch<React.SetStateAction<string[]>>;
-  handleEnhancementTypeToggle: (type: SpellEnhancementType) => void;
   mainSkillId: string | null;
   setMainSkillId: (v: string | null) => void;
   handleSubmit: (e: React.FormEvent) => Promise<void>;
@@ -71,23 +57,6 @@ export function buildSkillFormReturn(p: SkillFormReturnParams) {
       spellGroupId: p.spellGroupId,
       grantedSpellId: p.grantedSpellId,
       setters: { setSpellId: p.setSpellId, setSpellGroupId: p.setSpellGroupId, setGrantedSpellId: p.setGrantedSpellId },
-    },
-    spellEnhancement: {
-      spellEnhancementTypes: p.spellEnhancementTypes,
-      spellEffectIncrease: p.spellEffectIncrease,
-      spellTargetChange: p.spellTargetChange,
-      spellAdditionalModifier: p.spellAdditionalModifier,
-      spellNewSpellId: p.spellNewSpellId,
-      spellAllowMultipleTargets: p.spellAllowMultipleTargets,
-      spellAoeSpellIds: p.spellAoeSpellIds,
-      setters: {
-        setSpellEffectIncrease: p.setSpellEffectIncrease,
-        setSpellTargetChange: p.setSpellTargetChange,
-        setSpellAdditionalModifier: p.setSpellAdditionalModifier,
-        setSpellNewSpellId: p.setSpellNewSpellId,
-        setSpellAoeSpellIds: p.setSpellAoeSpellIds,
-      },
-      handlers: { handleEnhancementTypeToggle: p.handleEnhancementTypeToggle },
     },
     mainSkill: {
       mainSkillId: p.mainSkillId,

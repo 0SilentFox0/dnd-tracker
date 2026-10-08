@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 
+import { ParticipantSide } from "@/lib/constants/battle";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/timed-effects";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
-import { applySpellAdditionalModifier } from "@/lib/utils/battle/spell/process-effects";
+import { castSpell } from "@/lib/utils/battle/spell";
+import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 
 const owner = (() => {
   const b = createMockParticipant();
@@ -29,17 +31,24 @@ describe("джерело ефекту", () => {
     expect(next.battleData.activeEffects.at(-1)?.source).toMatchObject({ participantId: "fin", abilityName: "Отруйний клинок" });
   });
 
-  it("модифікатор спела отримує кастера як джерело", () => {
-    const target = createMockParticipant();
+  it("ефект спела отримує кастера як джерело", () => {
+    const target = createMockParticipant({ basicInfo: { ...createMockParticipant().basicInfo, id: "t", side: ParticipantSide.ENEMY } });
 
-    const [t] = applySpellAdditionalModifier(
-      { id: "s1", name: "Отруйна хмара", icon: "/s.png" } as never,
-      [target],
-      { modifier: "poison", duration: 2, damage: 3 },
-      1,
-      owner,
-    );
+    const caster = { ...owner, spellcasting: { ...owner.spellcasting, spellSlots: { "1": { max: 1, current: 1 } } } };
 
-    expect(t.battleData.activeEffects.at(-1)?.source).toMatchObject({ participantId: "fin", abilityName: "Отруйна хмара", icon: "/s.png" });
+    const spell: CastableSpell = {
+      id: "s1",
+      name: "Отруйна хмара",
+      level: 1,
+      groupId: null,
+      icon: "/s.png",
+      definition: { dice: 0, cost: "action", targeting: { kind: "enemy" }, resolution: { kind: "auto" }, effects: [{ kind: "dot", damagePerRound: 3, damageType: "poison", duration: { rounds: 2 } }], raceModifiers: [] },
+    };
+
+    const r = castSpell({ caster, spell, targetIds: ["t"], allParticipants: [caster, target], currentRound: 1, battleId: "b", diceRolls: [] });
+
+    const t = r.allParticipantsUpdated.find((p) => p.basicInfo.id === "t");
+
+    expect(t?.battleData.activeEffects.at(-1)?.source).toMatchObject({ participantId: "fin", abilityName: "Отруйна хмара", icon: "/s.png" });
   });
 });

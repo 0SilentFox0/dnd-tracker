@@ -62,7 +62,6 @@ function createBaseParticipant(
       activeEffects: [],
       equippedArtifacts: [],
       resolvedAbilities: [],
-      spellEnhancers: [],
     },
     actionFlags: {
       hasUsedAction: false,

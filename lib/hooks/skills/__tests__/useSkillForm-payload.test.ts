@@ -15,13 +15,6 @@ describe("buildSkillFormPayload", () => {
       spellGroupId: "",
       grantedSpellId: "",
       mainSkillId: "",
-      spellEnhancementTypes: [],
-      spellEffectIncrease: "",
-      spellTargetChange: "",
-      spellAdditionalModifier: { modifier: "", damageDice: "" },
-      spellNewSpellId: "",
-      spellAllowMultipleTargets: false,
-      spellAoeSpellIds: [],
     });
 
     expect(p.abilities).toEqual(abilities);
@@ -29,5 +22,6 @@ describe("buildSkillFormPayload", () => {
     expect(p.mainSkillData).toEqual({ mainSkillId: null });
     expect(p).not.toHaveProperty("combatStats");
     expect(p).not.toHaveProperty("skillTriggers");
+    expect(p).not.toHaveProperty("spellEnhancementData");
   });
 });

@@ -25,15 +25,11 @@ export function assertAttackRolls(formula: string, body: { damageRolls: number[]
   assertRollsWithinFormula(formula, body.damageRolls, diceCount(formula) * Math.max(1, body.targetCount) * 2);
 }
 
-export function assertSpellRolls(
-  spell: { diceCount: number | null; diceType: string | null },
-  rolls: number[],
-  targetCount: number,
-): void {
-  if (!spell.diceCount || !spell.diceType) return;
+/** Гравець кидає рівно кубики формули заклинання для свого касту: кількість і грані мусять збігатися. */
+export function assertSpellRolls(expected: { count: number; sides: number }, rolls: number[]): void {
+  if (rolls.length !== expected.count) invalid(`Потрібно ${expected.count} кубиків заклинання, отримано ${rolls.length}`);
 
-  const die = spell.diceType.startsWith("d") ? spell.diceType : `d${spell.diceType}`;
-
-  assertRollsWithinFormula(`${spell.diceCount}${die}`, rolls, spell.diceCount * Math.max(1, targetCount) * 2);
+  for (const roll of rolls) {
+    if (!Number.isInteger(roll) || roll < 1 || roll > expected.sides) invalid(`Кидок ${roll} неможливий для d${expected.sides}`);
+  }
 }
-

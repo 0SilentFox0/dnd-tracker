@@ -58,7 +58,7 @@ const character = {
   inventory: { id: "inv", characterId: "ch", equipped: { armor: "a1" }, backpack: [], gold: 0, silver: 0, copper: 0, items: [] },
 };
 
-const bookSpell = { id: "sp1", name: "Іскра", level: 1, type: "target", damageType: "damage", diceCount: 1, diceType: "d6", savingThrow: null, hitCheck: true, description: "", icon: null, range: null, duration: null, concentration: false, damageElement: null, spellGroup: null };
+const bookSpell = { id: "sp1", name: "Іскра", level: 1, description: "", icon: null, dice: 1, cost: "action", targeting: { kind: "enemy" }, resolution: { kind: "auto" }, spellGroup: null };
 
 const total = () => Object.values(db.calls).reduce((a, b) => a + b, 0);
 

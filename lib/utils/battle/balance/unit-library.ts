@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 
 type UnitAttacks = Array<{ damageDice?: string; type?: string; targetType?: string; maxTargets?: number }>;
 
-export const UNIT_SPELL_SELECT = { id: true, type: true, damageType: true, target: true, diceCount: true, diceType: true, damageDistribution: true } as const;
+export const UNIT_SPELL_SELECT = { id: true, dice: true, targeting: true, spellEffects: true } as const;
 
 export interface UnitStatsRow {
   id: string;

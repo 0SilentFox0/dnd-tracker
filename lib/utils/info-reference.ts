@@ -14,31 +14,11 @@ export function formatMechanicsSkill(s: SkillForReference): string {
 }
 
 export function formatMechanicsSpell(s: SpellForReference): string {
-  const parts: string[] = [];
+  const parts: string[] = [`${spellLevelName(s.level)}, ${s.type}`];
 
-  parts.push(`${spellLevelName(s.level)}, ${s.type}, ${s.damageType}`);
+  if (s.dice > 0) parts.push(`Кубики: ${s.dice}к`);
 
-  if (s.castingTime) parts.push(`Час: ${s.castingTime}`);
-
-  if (s.range) parts.push(`Дальність: ${s.range}`);
-
-  if (s.duration) parts.push(`Тривалість: ${s.duration}`);
-
-  if (s.diceCount != null && s.diceType)
-    parts.push(`Кубики: ${s.diceCount}${s.diceType}`);
-
-  if (s.damageElement) parts.push(`Елемент: ${s.damageElement}`);
-
-  const st = s.savingThrow as {
-    ability?: string;
-    onSuccess?: string;
-    dc?: number;
-  } | null;
-
-  if (st?.ability)
-    parts.push(
-      `Save: ${st.ability}${st.dc != null ? ` DC ${st.dc}` : ""}, при успіху: ${st.onSuccess ?? "—"}`
-    );
+  parts.push(`Перевірка: ${s.resolution}`, `Вартість: ${s.cost}`);
 
   return parts.join(". ");
 }
@@ -63,7 +43,6 @@ export function spellSearchText(s: SpellForReference): string {
     s.appearanceDescription ?? "",
     s.groupName ?? "",
     s.type,
-    s.damageType,
     formatMechanicsSpell(s),
     (s.effects || []).join(" "),
   ]

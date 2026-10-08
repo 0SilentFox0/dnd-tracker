@@ -11,13 +11,8 @@ export interface SkillRowForResponse {
   spellId: string | null;
   spellGroupId: string | null;
   mainSkillId: string | null;
-  spellEnhancementTypes: unknown;
-  spellEffectIncrease: number | null;
-  spellTargetChange: unknown;
-  spellAdditionalModifier: unknown;
   spellNewSpellId: string | null;
   grantedSpellId?: string | null;
-  spellEnhancementData: unknown;
   abilities?: unknown;
   image: string | null;
   appearanceDescription?: string | null;
@@ -28,17 +23,6 @@ export interface SkillRowForResponse {
 }
 
 export function groupSkillRow(skill: SkillRowForResponse) {
-  const spellEnhancementData =
-    skill.spellEnhancementData && typeof skill.spellEnhancementData === "object" && !Array.isArray(skill.spellEnhancementData)
-      ? (skill.spellEnhancementData as Record<string, unknown>)
-      : {
-          spellEnhancementTypes: Array.isArray(skill.spellEnhancementTypes) ? skill.spellEnhancementTypes : [],
-          spellEffectIncrease: skill.spellEffectIncrease || undefined,
-          spellTargetChange: skill.spellTargetChange || undefined,
-          spellAdditionalModifier: skill.spellAdditionalModifier || undefined,
-          spellNewSpellId: skill.spellNewSpellId || undefined,
-        };
-
   return {
     id: skill.id,
     campaignId: skill.campaignId,
@@ -48,9 +32,8 @@ export function groupSkillRow(skill: SkillRowForResponse) {
     spellData: {
       spellId: skill.spellId || undefined,
       spellGroupId: skill.spellGroupId || undefined,
-      grantedSpellId: skill.grantedSpellId || undefined,
+      grantedSpellId: skill.grantedSpellId || skill.spellNewSpellId || undefined,
     },
-    spellEnhancementData,
     mainSkillData: { mainSkillId: skill.mainSkillId || undefined },
     createdAt: skill.createdAt,
     spell: skill.spell ? { id: skill.spell.id, name: skill.spell.name } : null,

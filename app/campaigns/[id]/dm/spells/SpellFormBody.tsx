@@ -4,10 +4,9 @@ import Link from "next/link";
 
 import type { SpellFormData } from "./spell-form-defaults";
 import { SPELL_FORM_TAB, type SpellFormTabId } from "./spell-form-tabs";
-import { SpellDamageDistributionField } from "./SpellDamageDistributionField";
-import { SpellFormBasicFields, SpellFormRollFields } from "./SpellFormBasicFields";
-import { SpellFormEffectsAndMeta } from "./SpellFormEffectsAndMeta";
-import { SpellFormSavingThrow } from "./SpellFormSavingThrow";
+import { SpellFormBasicFields } from "./SpellFormBasicFields";
+import { SpellFormEffects } from "./SpellFormEffects";
+import { SpellFormPowerFields } from "./SpellFormPowerFields";
 
 import { HudForm, type HudTab } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
@@ -15,7 +14,7 @@ import { Button } from "@/components/ui/button";
 export interface SpellFormBodyProps {
   campaignId: string;
   formData: SpellFormData;
-  setFormData: (data: SpellFormData | ((prev: SpellFormData) => SpellFormData)) => void;
+  setFormData: (data: SpellFormData) => void;
   spellGroups: { id: string; name: string }[];
   onSubmit: (e: React.FormEvent) => void;
   isSubmitting: boolean;
@@ -45,24 +44,15 @@ export function SpellFormBody({
     },
     {
       id: SPELL_FORM_TAB.roll,
-      label: "Кидок",
-      content: (
-        <div className="space-y-4">
-          <SpellFormRollFields formData={formData} setFormData={setFormData} />
-          <SpellDamageDistributionField
-            damageDistribution={formData.damageDistribution}
-            onChange={(next) => setFormData({ ...formData, damageDistribution: next })}
-          />
-          <SpellFormSavingThrow formData={formData} setFormData={setFormData} />
-        </div>
-      ),
+      label: "Сила",
+      content: <SpellFormPowerFields formData={formData} setFormData={setFormData} />,
     },
     {
       id: SPELL_FORM_TAB.effects,
       label: "Ефекти",
       content: (
         <div className="space-y-4">
-          <SpellFormEffectsAndMeta campaignId={campaignId} formData={formData} setFormData={setFormData} />
+          <SpellFormEffects campaignId={campaignId} formData={formData} setFormData={setFormData} />
         </div>
       ),
     },

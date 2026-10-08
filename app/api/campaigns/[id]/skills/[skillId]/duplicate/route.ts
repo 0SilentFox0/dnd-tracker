@@ -45,17 +45,6 @@ export async function POST(
         spellGroupId: source.spellGroupId,
         grantedSpellId: source.grantedSpellId,
         mainSkillId: source.mainSkillId,
-        spellEnhancementData: (source.spellEnhancementData as Prisma.InputJsonValue) ?? {},
-        spellEnhancementTypes: Array.isArray(source.spellEnhancementTypes)
-          ? (source.spellEnhancementTypes as Prisma.InputJsonValue)
-          : [],
-        spellEffectIncrease: source.spellEffectIncrease ?? null,
-        spellTargetChange: source.spellTargetChange
-          ? (source.spellTargetChange as Prisma.InputJsonValue)
-          : undefined,
-        spellAdditionalModifier: source.spellAdditionalModifier
-          ? (source.spellAdditionalModifier as Prisma.InputJsonValue)
-          : undefined,
         spellNewSpellId: source.spellNewSpellId ?? null,
         abilities: abilitiesJson(skillAbilities(source)),
       },

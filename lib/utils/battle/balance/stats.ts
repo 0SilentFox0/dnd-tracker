@@ -7,7 +7,9 @@ import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { averageOf, diceAverage, parseDiceLenient } from "@/lib/utils/common/dice";
 import type { BranchLevel } from "@/lib/utils/skills/progression";
-import { formatSpellDamageDiceRoll } from "@/lib/utils/spells/spell-calculations";
+import { spellDice } from "@/lib/utils/spells/model/dice";
+import { readSpellDefinition, spellEffects, spellTargeting } from "@/lib/utils/spells/model/read";
+import type { SpellTargeting } from "@/lib/utils/spells/model/schema";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 import type { CharacterDprBreakdown } from "@/types/battle-setup";
 
@@ -28,12 +30,9 @@ export interface GetCharacterStatsParams {
 }
 
 export interface UnitSpellInput {
-  diceCount?: number | null;
-  diceType?: string | null;
-  type?: string | null;
-  damageType?: string | null;
-  target?: string | null;
-  damageDistribution?: unknown;
+  dice?: number | null;
+  targeting?: unknown;
+  spellEffects?: unknown;
 }
 
 export interface UnitStatsInput {
@@ -56,29 +55,37 @@ export interface UnitStatsInput {
   spells?: UnitSpellInput[];
 }
 
-function spellTargets(spell: UnitSpellInput): number {
-  if (spell.type !== "aoe") return 1;
-
-  const dist = Array.isArray(spell.damageDistribution) ? (spell.damageDistribution as unknown[]).filter((x): x is number => typeof x === "number") : [];
-
-  if (dist.length === 0) return TYPICAL_TARGETS;
-
-  return dist.slice(0, TYPICAL_TARGETS).reduce((a, b) => a + b, 0) / 100;
+function spellTargets(targeting: SpellTargeting): number {
+  switch (targeting.kind) {
+    case "enemy":
+      return 1;
+    case "area":
+      return targeting.side === "enemy" ? Math.min(targeting.maxTargets, TYPICAL_TARGETS) : 0;
+    case "allEnemies":
+    case "everyone":
+      return TYPICAL_TARGETS;
+    default:
+      return 0;
+  }
 }
 
 function bestSpellDpr(spells: UnitSpellInput[], level: number): number {
   let best = 0;
 
-  for (const s of spells) {
-    if (s.damageType !== "damage" && s.damageType !== "all") continue;
+  for (const [index, s] of spells.entries()) {
+    const row = { id: String(index), dice: s.dice, targeting: s.targeting, spellEffects: s.spellEffects };
 
-    if (s.target === "allies") continue;
+    const targets = spellTargets(spellTargeting(row));
 
-    const dice = formatSpellDamageDiceRoll(s.diceCount, s.diceType);
+    const damage = spellEffects(row).find((e) => e.kind === "dealDamage");
 
-    if (!dice) continue;
+    const dice = spellDice({ kind: "unit", level }, { dice: readSpellDefinition(row).dice, groupId: null }, () => null);
 
-    best = Math.max(best, (diceAverage(dice) + level) * spellTargets(s));
+    if (!damage || targets === 0 || dice.count === 0) continue;
+
+    const share = damage.falloff ? damage.falloff.slice(0, targets).reduce((a, b) => a + b, 0) / 100 : targets;
+
+    best = Math.max(best, (dice.count * 3.5 + dice.flat) * share);
   }
 
   return best;

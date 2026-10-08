@@ -39,7 +39,7 @@ export function advanceTurn({ participants, pending, scene, rng }: AdvanceTurnIn
   const ending = order[scene.turnIndex];
 
   if (ending && isActive(ending)) {
-    const ended = runAbilities(order, { type: "turnEnd", actorId: ending.basicInfo.id }, { round: scene.round, rng: Math.random });
+    const ended = runAbilities(order, { type: "turnEnd", actorId: ending.basicInfo.id }, { round: scene.round, rng: rng ?? Math.random });
 
     order = ended.participants;
 

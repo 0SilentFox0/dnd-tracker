@@ -21,7 +21,7 @@ describe("skills utils", () => {
       campaignId: "c1",
       basicInfo: { name },
       spellData: {},
-      spellEnhancementData: {},
+     
       mainSkillData: { mainSkillId },
       createdAt: new Date(),
       spell: null,

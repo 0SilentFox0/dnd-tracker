@@ -53,7 +53,6 @@ export function createMockParticipant(
       activeEffects: [],
       equippedArtifacts: [],
       resolvedAbilities: [],
-      spellEnhancers: [],
     },
     actionFlags: {
       hasUsedAction: false,
