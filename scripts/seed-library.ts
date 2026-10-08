@@ -10,7 +10,7 @@
 import type { Prisma } from "@prisma/client";
 
 import { branchSkills, buildLibrary } from "../data/library/build";
-import type { LibraryBranch, LibrarySkill } from "../data/library/types";
+import type { LibraryBranch, LibraryRace, LibrarySkill } from "../data/library/types";
 import { iconPublicUrl } from "../data/skill-icons";
 import { prisma } from "../lib/db";
 import { buildTreeJson } from "../lib/utils/skills/progression";
@@ -22,6 +22,7 @@ import {
   type IdMaps,
   mapRaceModifiers,
   parseArgs,
+  racePassiveData,
   remapRefs,
   type Tally,
   treeInput,
@@ -34,6 +35,12 @@ const ULTIMATE_BRANCH = { name: "Ультимат", color: "#b3261e" };
 const PERSONAL_BRANCH = { name: "Персональні", color: "#8e6bbf" };
 
 const json = (v: unknown) => v as Prisma.InputJsonValue;
+
+const passiveJson = (race: LibraryRace) => {
+  const p = racePassiveData(race);
+
+  return { passiveAbility: json(p.passiveAbility), abilities: json(p.abilities) };
+};
 
 const hasSummon = (effects: unknown) => Array.isArray(effects) && effects.some((e) => typeof e === "object" && e !== null && (e as { kind?: string }).kind === "summon");
 
@@ -111,7 +118,7 @@ async function main() {
   const races = new Map<string, string>();
 
   for (const race of library.races) {
-    const data = { name: race.name, icon: icon(race.iconKey ?? race.levels[0].iconKey), color: race.color, spellSlotProgression: json(race.spellSlotProgression) };
+    const data = { name: race.name, icon: icon(race.iconKey ?? race.levels[0].iconKey), color: race.color, spellSlotProgression: json(race.spellSlotProgression), ...passiveJson(race) };
 
     races.set(race.key, await upsert("раси", raceRows, race.name, {
       create: () => prisma.race.create({ data: { campaignId, ...data }, select: { id: true, name: true } }),
