@@ -1,9 +1,10 @@
 import { getEffectiveArmorClass } from "../participant";
 import type { AttackRollResult } from "../types/attack";
 import { appendHpChanges, type AttackFlow, getP, put } from "./process/ability-flow";
-import { buildRetaliationAction,type BuildRetaliationParams } from "./process/actions";
+import { buildRetaliationAction, type BuildRetaliationParams } from "./process/actions";
 import { resolveHit } from "./process/hit";
 import { activeEffectIds, consumeAttackEffects } from "./consume-effects";
+import { applyCriticalEffect } from "./critical";
 import { getDisabledAttackKinds } from "./disabled-attacks";
 import { calculateAttackRoll } from "./roll";
 
@@ -30,6 +31,7 @@ export interface RetaliationInput {
   attack: BattleAttack;
   attackRoll: Pick<AttackRollResult, "isCriticalFail">;
   criticalEffect?: CriticalEffect;
+  provoked?: boolean;
   round: number;
   battleId: string;
   rng: Rng;
@@ -56,13 +58,17 @@ function weaponFor(defender: BattleParticipant, participants: BattleParticipant[
 export function resolveRetaliation(input: RetaliationInput): RetaliationResult | null {
   const { participants, attackerId, defenderId, round, battleId, rng } = input;
 
-  if (input.attackRoll.isCriticalFail || input.criticalEffect?.effect.type === "ignore_reactions") return null;
+  const { provoked } = input;
+
+  if ((!provoked && input.attackRoll.isCriticalFail) || input.criticalEffect?.effect.type === "ignore_reactions") return null;
 
   const defender = findParticipant(participants, defenderId);
 
   const attacker = findParticipant(participants, attackerId);
 
-  if (!defender || !attacker || !isActive(defender) || !isActive(attacker) || defender.actionFlags.hasUsedReaction) return null;
+  if (!defender || !attacker || !isActive(defender) || !isActive(attacker)) return null;
+
+  if (provoked ? defender.battleData.activeEffects.some((e) => e.effects.some((d) => d.type === "no_reaction")) : defender.actionFlags.hasUsedReaction) return null;
 
   const weapon = weaponFor(defender, participants, kindOf(input.attack));
 
@@ -72,7 +78,7 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
 
   const flow: AttackFlow = { ps: participants, messages: [], ctx: { round, rng } };
 
-  put(flow, { ...defender, actionFlags: { ...defender.actionFlags, hasUsedReaction: true } });
+  if (!provoked) put(flow, { ...defender, actionFlags: { ...defender.actionFlags, hasUsedReaction: true } });
 
   const first = rollD20(rng);
 
@@ -81,6 +87,8 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
   const roll = calculateAttackRoll(getP(flow, defenderId), weapon.attack, first, second, second, { participants: flow.ps, targetId: attackerId, rng });
 
   if (roll.secondRoll) flow.messages.push(`🎲 відсіч, ${roll.secondRoll.mode === "advantage" ? "перевага" : "недолік"}: другий d20 = ${roll.secondRoll.value}`);
+
+  if (roll.isCriticalFail && roll.criticalEffect) put(flow, applyCriticalEffect(getP(flow, defenderId), roll.criticalEffect, round, undefined, { offTurn: true }));
 
   const targetAC = getEffectiveArmorClass(getP(flow, attackerId), flow.ps);
 

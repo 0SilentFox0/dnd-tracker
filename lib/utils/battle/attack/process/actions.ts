@@ -292,7 +292,7 @@ export function buildRetaliationAction(p: BuildRetaliationParams): BattleAction 
 
   const d20 = attackRoll.totalAttackValue - attackRoll.attackBonus;
 
-  const crit = hit?.hitDamage.criticalEffectApplied;
+  const crit = attackRoll.isCriticalFail ? attackRoll.criticalEffect : hit?.hitDamage.criticalEffectApplied;
 
   const summary = `Відсіч: ${retaliator.basicInfo.name} → ${target.basicInfo.name}: d20 ${d20}, ${
     hit ? `${hit.hitDamage.totalFinalDamage} урону${attackRoll.isCritical ? " (КРИТИЧНЕ ПОПАДАННЯ!)" : ""}` : "промах"

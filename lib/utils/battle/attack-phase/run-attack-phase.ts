@@ -258,7 +258,9 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       actionIndex: baseBattleLog.length + allBattleActions.length,
     });
 
-    if (i === 0) {
+    const provoked = attackResult.criticalEffectApplied?.effect.type === "provoke_opportunity_attack";
+
+    if (i === 0 || provoked) {
       const retaliation = resolveRetaliation({
         participants: currentInitiativeOrder,
         attackerId: attacker.basicInfo.id,
@@ -266,6 +268,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
         attack,
         attackRoll: attackResult.attackRoll,
         criticalEffect: attackResult.criticalEffectApplied,
+        provoked,
         round: battle.currentRound,
         battleId,
         rng,
