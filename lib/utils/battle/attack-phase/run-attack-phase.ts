@@ -165,10 +165,14 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const dist = attack.damageDistribution;
 
-  // Для multi-target ranged: кожна ціль отримує повний урон (окремий кидок на ціль)
+  const falloffPercents = hitsAllEnemies ? [] : findFlags(withSelf(initiativeOrder, attacker), attacker.basicInfo.id, "multiTargetFalloff").map((f) => f.percent);
+
+  const falloff = falloffPercents.length > 0 ? Math.min(...falloffPercents) / 100 : 1;
+
+  // Для multi-target ranged: окремий кидок на ціль; основна ціль — повна шкода, додаткові — за falloff
   const damageFractions: number[] =
     isMultiTargetRanged
-      ? targets.map(() => 1)
+      ? targets.map((_, i) => (i === 0 ? 1 : falloff))
       : dist &&
           dist.length === targets.length &&
           dist.every((n) => typeof n === "number" && n >= 0 && n <= 100)

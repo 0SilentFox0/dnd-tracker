@@ -15,10 +15,10 @@ export const LIBRARY_ARTIFACT_SETS: LibraryArtifactSet[] = [
   ],
   artifacts: [
     { key: "unicorn-horn-bow", name: "Лук з рогу єдинорога", slot: "range_weapon", rarity: "legendary", iconKey: "unicorn-horn-bow",
-      description: "Дальня атака може вразити 2 цілі; для кожної — окремий кидок влучання й шкоди.",
+      description: "Дальня атака може вразити ще 1 ціль; основна ціль отримує повну шкоду, кожна додаткова — 50 %; для кожної — окремий кидок влучання.",
       appearanceDescription: "Тятива сплетена з гриви єдинорога, а плечі лука вирізані з його рогу, що сам віддав його лісу. Стріла з нього не летить — вона ковзає між краплинами дощу і знаходить дві цілі там, де інший лучник бачить одну.",
       modifiers: [{ type: "damageDice", value: "1d8" }, { type: "damageType", value: "piercing" }, { type: "attackType", value: "ranged" }],
-      abilities: [{ id: "unicorn-horn-bow-two-targets", name: "Подвійний постріл", trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "maxTargets", flat: 1 }] }] },
+      abilities: [{ id: "unicorn-horn-bow-two-targets", name: "Подвійний постріл", trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "maxTargets", flat: 1 }, { kind: "flag", flag: "multiTargetFalloff", percent: 50 }] }] },
     { key: "treeborn-quiver", name: "Сагайдак Деревородних", slot: "cape", rarity: "epic", iconKey: "treeborn-quiver",
       description: "Вбивство повертає бонусну дію (1 раз за раунд).",
       appearanceDescription: "Сагайдак виріс, а не був зшитий: Деревородні виплекали його з кори старого дуба, і в ньому завжди пахне живицею. Щойно ворог падає, сагайдак тихо шелестить — і рука лучника вже тягнеться по наступну стрілу.",

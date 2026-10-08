@@ -59,6 +59,40 @@ describe("Мрія лучника", () => {
     expect(attacks.map((e) => e.actionDetails.isHit)).toEqual([true, false]);
   });
 
+  describe("спад шкоди додаткових цілей", () => {
+    const volley = (abilities: ReturnType<typeof asArtifact>) => {
+      const baked = bakePassives(makeParticipant({ id: "ivan", abilities }));
+
+      const attacker = { ...baked, combatStats: { ...baked.combatStats, maxTargets: 2 }, battleData: { ...baked.battleData, attacks: [shot] } };
+
+      const r = runAttackPhase({
+        battle: { initiativeOrder: [attacker, foe("t1"), foe("t2")], battleLog: [], currentRound: 1, currentTurnIndex: 0 },
+        data: { attackerId: "ivan", targetIds: ["t1", "t2"], attackRolls: [15, 15], damageRolls: [8, 8] } as never,
+        battleId: "b",
+        userId: "u",
+        isDM: true,
+        rng: seq(0.5),
+      });
+
+      const lost = (id: string) => 50 - (r.finalInitiativeOrder.find((p) => p.basicInfo.id === id)?.combatStats.currentHp ?? 50);
+
+      return [lost("t1"), lost("t2")];
+    };
+
+    it("з луком основна ціль отримує повну шкоду, друга — 50 %", () => {
+      const [first, second] = volley(bow);
+
+      expect(first).toBeGreaterThan(1);
+      expect(second).toBe(Math.floor(first / 2));
+    });
+
+    it("без прапора обидві цілі отримують повну шкоду", () => {
+      const [first, second] = volley([]);
+
+      expect(second).toBe(first);
+    });
+  });
+
   it("сагайдак: вбивство повертає бонусну дію раз за раунд", () => {
     const ivan = withFlags(makeParticipant({ id: "ivan", abilities: asArtifact(pieces["treeborn-quiver"]) }), { hasUsedBonusAction: true });
 

@@ -52,7 +52,7 @@
 
 | Артефакт (файл вікі) | Слот | Механіка | Реалізація |
 |---|---|---|---|
-| Лук з рогу єдинорога (`UnicornHornBow.png`) | `range_weapon` | Дальня атака може вразити 2 цілі; кожна — окремий кидок влучання й шкоди | `passive` → `modifyStat maxTargets flat 1`; рушій уже робить окремі кидки й повну шкоду для multi-target ranged (`run-attack-phase.ts:139`) |
+| Лук з рогу єдинорога (`UnicornHornBow.png`) | `range_weapon` | Дальня атака може вразити ще 1 ціль; основна ціль — повна шкода, кожна додаткова — 50 %; для кожної окремий кидок влучання | `passive` → `modifyStat maxTargets flat 1` + `flag multiTargetFalloff 50` (частки шкоди `[1, 0.5, …]` у `run-attack-phase.ts`) |
 | Сагайдак Деревородних (`TreebornQuiver.png`) | `cape` | Вбивство повертає бонусну дію (щоб одразу позначити нову ціль «Мисливцем») | `kill role killer` → `grantAction refreshBonusAction`, `perRound 1` |
 | Перстень стрімкості (`RingOfCelerity.png`) | `ring1` | +15 % шкоди по цілі з повним HP | `attack before attacker`, умова `hpAbove eventTarget 99` → `damageBonus all 15 %` |
 | **Сет** | | Дальнє влучання вішає «Здобич» на 2 р.; дальні атаки по «Здобичі» +15 % (не стакається) | `hit attacker ranged` → `mark ivan-prey 2 р. eventTarget`; `attack before ranged` + `hasMark eventTarget bySelf` → `damageBonus ranged 15 %` |
