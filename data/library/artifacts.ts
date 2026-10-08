@@ -7,7 +7,7 @@ const IVAN_PREY = "ivan-prey";
 export const LIBRARY_ARTIFACT_SETS: LibraryArtifactSet[] = [
 {
   key: "set-archers-dream", name: "Мрія лучника", heroName: "Айвен", iconKey: "archers-dream",
-  description: "Повний комплект: дальнє влучання позначає ціль «Здобиччю» на 2 раунди; дальні атаки Айвена по «Здобичі» завдають +15 % шкоди.",
+  description: "Повний комплект: дальнє влучання позначає ціль «Здобиччю» на 2 раунди; дальні атаки власника по «Здобичі» завдають +15 % шкоди.",
   appearanceDescription: "Сильванські лучники кажуть, що єдиноріг сам обирає, чий лук носитиме його ріг, а Деревородні — чий сагайдак ніколи не спорожніє. Коли обидва дари зустрічаються в одних руках, ліс замовкає: кожна стріла вже знає свою жертву.",
   abilities: [
     { id: "archers-dream-prey", name: "Здобич", trigger: { event: "hit", role: "attacker", attackKind: "ranged" }, effects: [{ kind: "mark", markId: IVAN_PREY, duration: { rounds: 2 }, target: "eventTarget" }] },
@@ -31,7 +31,7 @@ export const LIBRARY_ARTIFACT_SETS: LibraryArtifactSet[] = [
 },
 {
   key: "set-dwarven-kings", name: "Обладунки гномських королів", heroName: "Семгрун", iconKey: "dwarven-kings",
-  description: "Повний комплект: коли Семгрун влучають, з шансом 30 % (не частіше 1 разу за раунд) союзникам на 1 раунд дістається випадкова руна: +10 % шкоди, +1 AC, +2 ініціативи або лікування 5 % max HP.",
+  description: "Повний комплект: коли по власнику влучають, з шансом 30 % (не частіше 1 разу за раунд) союзникам на 1 раунд дістається випадкова руна: +10 % шкоди, +1 AC, +2 ініціативи або лікування 5 % max HP.",
   appearanceDescription: "Чотири частини обладунку куті в горнилах Гробниць гномських королів, і на кожній вибита руна предка, що загинув, тримаючи стрій. Поки хоч один лицар у цій броні стоїть на ногах, руни шепочуть його побратимам: «Ми з вами».",
   abilities: [
     { id: "dwarven-kings-runes", name: "Руни королів", trigger: { event: "hit", role: "target" }, limits: { chance: 30, perRound: 1 }, effects: [{ kind: "randomOf", options: [
@@ -47,11 +47,11 @@ export const LIBRARY_ARTIFACT_SETS: LibraryArtifactSet[] = [
       appearanceDescription: "Шолом королів пам'ятає кожен погляд, що намагався його засліпити, і кожне закляття, що прагнуло скувати ноги його носія. Тепер ця пам'ять береже всіх, хто стоїть з ним в одному строю.",
       abilities: [{ id: "helm-of-the-dwarven-kings-ward", name: "Пильність королів", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "spellImmunity", spellIds: ["blindness", "slow"], target: "allAllies" }] }] },
     { key: "cuirass-of-the-dwarven-kings", name: "Кіраса гномських королів", slot: "armor", rarity: "epic", iconKey: "cuirass-of-the-dwarven-kings",
-      description: "Коли Семгрун влучають, усі атакують кривдника з перевагою 1 раунд.",
+      description: "Коли по власнику влучають, усі атакують кривдника з перевагою 1 раунд.",
       appearanceDescription: "Від удару по цій кірасі лунає гул, як від вечірнього дзвону в Грімгейті. Почувши його, побратими розвертаються до того, хто посмів ударити, — і стають безжальними.",
       abilities: [{ id: "cuirass-of-the-dwarven-kings-toll", name: "Дзвін кіраси", trigger: { event: "hit", role: "target" }, effects: [{ kind: "flag", flag: "advantageForAttackers", duration: { rounds: 1 }, target: "eventActor" }] }] },
     { key: "shield-of-the-dwarven-kings", name: "Щит гномських королів", slot: "shield", rarity: "legendary", iconKey: "shield-of-the-dwarven-kings",
-      description: "На початку бою Семгрун бере під варту союзників: 20 % їхньої шкоди переходить на неї.",
+      description: "На початку бою Семгрун бере союзників під варту: 20 % їхньої шкоди переходить на носія.",
       appearanceDescription: "Король, що носив цей щит, ні разу не відступив і ні разу не дозволив упасти побратиму поруч. Щит досі пам'ятає ту клятву й тягне на себе удари, призначені іншим.",
       abilities: [{ id: "shield-of-the-dwarven-kings-guard", name: "Клятва щита", trigger: { event: "battleStart" }, effects: [{ kind: "guard", percent: 20, duration: { rounds: 99 }, target: "allAllies" }] }] },
     { key: "greaves-of-the-dwarven-kings", name: "Поножі гномських королів", slot: "boots", rarity: "epic", iconKey: "greaves-of-the-dwarven-kings",
@@ -95,7 +95,7 @@ export const LIBRARY_ARTIFACT_SETS: LibraryArtifactSet[] = [
   abilities: [{ id: "lions-spirit-roar", name: "Лев'ячий рик", trigger: { event: "hit", role: "attacker" }, limits: { perRound: 1 }, effects: [{ kind: "changeMorale", delta: -1, target: "eventTarget" }] }],
   artifacts: [
     { key: "cape-of-the-lions-mane", name: "Плащ левової гриви", slot: "cape", rarity: "epic", iconKey: "cape-of-the-lions-mane",
-      description: "Хто влучив союзника, стає «Кривдником» на 2 раунди; атаки Годрика по «Кривднику» завдають +10 % шкоди.",
+      description: "Хто влучив союзника, стає «Кривдником» на 2 раунди; атаки власника по «Кривднику» завдають +10 % шкоди.",
       appearanceDescription: "Плащ пошитий з гриви лева, що загинув, захищаючи свій прайд. Кожного разу, коли когось із побратимів поранено, грива на плечах власника настовбурчується — і він уже знає, кого карати.",
       abilities: [
         { id: "cape-of-the-lions-mane-mark", name: "Кривдник", trigger: { event: "hit", role: "target", whose: "ally" }, effects: [{ kind: "mark", markId: GODRIC_OFFENDER, duration: { rounds: 2 }, target: "eventActor" }] },
@@ -130,7 +130,7 @@ export const LIBRARY_ARTIFACT_SETS: LibraryArtifactSet[] = [
       abilities: [{ id: "crown-of-leadership-spark", name: "Іскра відваги", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "moraleChance", percent: 5, target: "allAllies" }] }] },
     { key: "necklace-of-victory", name: "Намисто перемоги", slot: "necklace", rarity: "epic", iconKey: "necklace-of-victory",
       description: "Вбивство ворога будь-ким із партії дає союзникам +1 моралі (1 раз за раунд).",
-      appearanceDescription: "Цим орденом Айвен Грифон нагороджував Маршалів Перемоги у війні Четвертого затемнення. Кожна здобута перемога відбивається в його золоті, і військо поруч з ним стає трохи сміливішим.",
+      appearanceDescription: "Орден Маршалів Перемоги, заснований у війні Четвертого затемнення (засновник — Айвен Грифон). Кожна здобута перемога відбивається в золоті ордена, і військо поруч з носієм стає трохи сміливішим.",
       abilities: [{ id: "necklace-of-victory-glory", name: "Слава", trigger: { event: "kill", role: "killerSide" }, limits: { perRound: 1 }, effects: [{ kind: "changeMorale", delta: 1, target: "allAllies" }] }] },
     { key: "armor-of-valor", name: "Обладунок звитяги", slot: "armor", rarity: "epic", iconKey: "armor-of-valor",
       description: "Коли союзник падає нижче 30 % HP, усі союзники лікуються на 5 % max HP щораунду 2 раунди (1 раз за бій).",
@@ -149,11 +149,11 @@ export const LIBRARY_ARTIFACT_SETS: LibraryArtifactSet[] = [
       appearanceDescription: "Тонке, як серп молодого місяця, лезо для другої руки. Воно майже не блищить у темряві Підземелля, зате безпомильно знаходить уже поранену плоть — так хижак добиває ослаблу здобич.",
       abilities: [{ id: "moonblade-finisher", name: "Добивання", trigger: { event: "attack", phase: "before", role: "attacker" }, condition: { type: "hpBelow", who: "eventTarget", percent: 50 }, effects: [{ kind: "damageBonus", filter: { kind: "all" }, percent: 15 }] }] },
     { key: "necklace-of-the-bloody-claw", name: "Намисто кривавого кігтя", slot: "necklace", rarity: "epic", iconKey: "necklace-of-the-bloody-claw",
-      description: "Вбивство лікує Раїлага на 15 % max HP.",
+      description: "Вбивство лікує власника на 15 % max HP.",
       appearanceDescription: "Ікла перевертня Кривавого Кігтя, що спустошував села біля Талонгарда, доки його не зарубав Лицар Дракона. Звірина спрага досі живе в них і віддає власнику силу кожного поваленого ворога.",
       abilities: [{ id: "necklace-of-the-bloody-claw-feast", name: "Кривава спрага", trigger: { event: "kill", role: "killer" }, effects: [{ kind: "heal", amount: { percentOf: "maxHp", value: 15 }, target: "self" }] }] },
     { key: "cursed-ring", name: "Проклятий перстень", slot: "ring1", rarity: "epic", iconKey: "cursed-ring",
-      description: "Вбивство вивільняє отруйну хмару: усі вороги отруєні на 15 % шкоди атаки Раїлага щораунду, 2 раунди (1 раз за раунд).",
+      description: "Вбивство вивільняє отруйну хмару: усі вороги отруєні на 15 % шкоди атаки власника щораунду, 2 раунди (1 раз за раунд).",
       appearanceDescription: "Злодії виколупали діамант з персня вбитого некроманта Фанка — і прокляття все одно їх знайшло. Тепер перстень видихає отруйний туман щоразу, коли поруч обривається чиєсь життя.",
       abilities: [{ id: "cursed-ring-cloud", name: "Отруйна хмара", trigger: { event: "kill", role: "killer" }, limits: { perRound: 1 }, effects: [{ kind: "dot", damagePerRound: { percentOf: "ownerAttack", value: 15 }, damageType: "poison", duration: { rounds: 2 }, target: "allEnemies" }] }] },
   ],

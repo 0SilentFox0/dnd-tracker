@@ -37,7 +37,7 @@ describe("hot", () => {
     const out = processStartOfTurn(target, 2, [target]);
 
     expect(out.participant.combatStats.currentHp).toBe(20);
-    expect(out.abilityMessages.some((m) => m.includes("відновив 1 HP"))).toBe(true);
+    expect(out.abilityMessages.some((m) => m.includes("+1 HP"))).toBe(true);
     expect(out.participant.battleData.activeEffects[0].duration).toBe(2);
   });
 

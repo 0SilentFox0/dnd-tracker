@@ -25,7 +25,7 @@ export function useDmCharactersPage(campaignId: string, type?: CharacterTypeValu
   const confirmDelete = (character: CharacterListItem) =>
     confirm({
       title: "Видалити персонажа?",
-      description: `Персонажа "${character.name}" буде видалено. Цю дію не можна скасувати.`,
+      description: `Персонаж "${character.name}" буде видалено. Цю дію не можна скасувати.`,
       confirmLabel: "Видалити",
       destructive: true,
       onConfirm: () => deleteOne.mutateAsync(character.id),

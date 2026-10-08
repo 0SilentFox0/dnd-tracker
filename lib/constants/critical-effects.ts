@@ -44,8 +44,8 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
     type: "success",
     flavor: [
       "{attacker} вкладає в удар усю вагу тіла — {target} аж відкидає назад!",
-      "Сталь {attacker} проходить крізь захист {target}, мов крізь вологий папір!",
-      "Удар {attacker} лунає, як грім над Асханом, — {target} хитається від болю!",
+      "{attacker} проходить крізь захист, мов крізь вологий папір, — {target} не встигає закритися!",
+      "{attacker} б'є, і удар лунає, як грім над Асханом, — {target} хитається від болю!",
     ],
     effect: {
       type: "double_damage",
@@ -58,9 +58,9 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
     description: "Урон = максимальне значення кубиків",
     type: "success",
     flavor: [
-      "Ідеальний удар! {attacker} знаходить найвразливіше місце {target}.",
-      "Доля на боці {attacker}: кожна грань кубиків показує максимум.",
-      "{attacker} б'є з холодною точністю майстра — {target} нічим не пом'якшити удар.",
+      "Ідеальний удар! {attacker} знаходить найвразливіше місце — {target} це відчуває.",
+      "{attacker} — улюбленець долі: кожна грань кубиків показує максимум.",
+      "{attacker} б'є з холодною точністю майстра — {target} не має чим пом'якшити удар.",
     ],
     effect: {
       type: "max_damage",
@@ -73,7 +73,7 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
     type: "success",
     flavor: [
       "{attacker} відчуває ритм бою — наступний удар буде ще влучнішим.",
-      "Очі {attacker} спалахують: тепер кожен рух {target} як на долоні.",
+      "{attacker} спалахує поглядом: кожен рух ворога тепер як на долоні. Ціль: {target}.",
       "Кров кипить, рука певна — {attacker} уже готує наступний удар.",
     ],
     effect: {
@@ -88,9 +88,9 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
     description: "Ціль отримує −2 AC до початку її наступного ходу",
     type: "success",
     flavor: [
-      "Удар {attacker} розколює обладунок {target} — у броні зяє щілина!",
-      "Ремені лопаються, і щит {target} провисає на руці.",
-      "{attacker} вибиває {target} з рівноваги — захист розсипається.",
+      "{attacker} розколює обладунок — {target} відчуває, як у броні зяє щілина!",
+      "{target} не втримує щит: ремені лопаються, і він провисає на руці.",
+      "{attacker} б'є — {target} втрачає рівновагу, і захист розсипається.",
     ],
     effect: {
       type: "ac_debuff",
@@ -105,9 +105,9 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
     description: "Додатковий урон +1d6",
     type: "success",
     flavor: [
-      "Лезо {attacker} прокручується в рані — {target} кричить від болю!",
+      "{attacker} прокручує лезо в рані — {target} кричить від болю!",
       "{attacker} додає до удару ще й лікоть — підступно, але дієво.",
-      "Друга хвиля болю накриває {target}: удар {attacker} зачіпає кістку.",
+      "{target} відчуває другу хвилю болю: {attacker} зачіпає кістку.",
     ],
     effect: {
       type: "additional_damage",
@@ -120,7 +120,7 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
     description: "Безкоштовна додаткова атака (1 раз)",
     type: "success",
     flavor: [
-      "Клинок {attacker} ще не встиг зупинитися, а вже шукає нову щілину в обороні {target}!",
+      "{target} не встигає закритися: {attacker} б'є знову!",
       "{attacker} рухається швидше за думку — ще одна атака напоготові!",
       "Вихор сталі: {attacker} одразу ж б'є знову.",
     ],
@@ -136,9 +136,9 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
     description: "Ворог втрачає Bonus Action наступного ходу",
     type: "success",
     flavor: [
-      "Удар {attacker} оглушує {target} — наступного ходу не до хитрощів.",
+      "Оглушення: {attacker} б'є так, що наступного ходу не до хитрощів. Ціль: {target}.",
       "{target} хапається за рану й забуває про все, крім неї.",
-      "У вухах {target} дзвенить — дрібні маневри доведеться відкласти.",
+      "{target} чує лише дзвін у вухах — дрібні маневри доведеться відкласти.",
     ],
     effect: {
       type: "block_bonus_action",
@@ -154,7 +154,7 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
     flavor: [
       "{attacker} б'є так раптово, що {target} навіть не встигає замахнутися у відповідь.",
       "Удар зі сліпої зони — {target} не бачить, звідки прийшла смерть.",
-      "{attacker} прослизає під захистом {target}, не лишаючи шансу на відсіч.",
+      "{attacker} прослизає під захистом — {target} не має шансу на відсіч.",
     ],
     effect: {
       type: "ignore_reactions",
@@ -167,8 +167,8 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
     description: "Наступна атака по цілі з Advantage",
     type: "success",
     flavor: [
-      "{target} розкривається після удару — союзники {attacker} бачать слабке місце!",
-      "Кров виказує рану {target} — по ній легко влучити ще раз.",
+      "{target} розкривається після удару — {attacker} і союзники бачать слабке місце!",
+      "{target} стікає кров'ю — по такій рані легко влучити ще раз.",
       "{attacker} позначає ціль: тепер {target} — легка здобич.",
     ],
     effect: {
@@ -185,7 +185,7 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
     flavor: [
       "{attacker} не зупиняється — розворот і ще один, відчайдушний удар!",
       "Комбо! {attacker} продовжує атаку, хоч і втрачаючи рівновагу.",
-      "Інерція несе {attacker} далі — ще один удар, грубий, але небезпечний.",
+      "{attacker} не може зупинитися — інерція несе далі: ще один удар, грубий, але небезпечний.",
     ],
     effect: {
       type: "combo_attack",
@@ -207,7 +207,7 @@ export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
     type: "fail",
     flavor: [
       "{attacker} розсікає порожнечу — {target} навіть не здригається.",
-      "Удар {attacker} іде вбік. Буває й таке.",
+      "{attacker} б'є вбік. Буває й таке.",
       "{attacker} промахується так, що аж соромно перед побратимами.",
     ],
     effect: {
@@ -236,9 +236,9 @@ export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
     description: "Disadvantage на наступну атаку",
     type: "fail",
     flavor: [
-      "Пил засліплює {attacker} — наступний удар буде наосліп.",
-      "Рука {attacker} тремтить після невдалого замаху.",
-      "Піт заливає очі {attacker}, і ціль розпливається.",
+      "Пил в очах — {attacker} наступним ударом б'є наосліп.",
+      "Після невдалого замаху рука тремтить — {attacker} втрачає певність.",
+      "{attacker} майже нічого не бачить: піт заливає очі, і ціль розпливається.",
     ],
     effect: {
       type: "disadvantage_next_attack",
@@ -254,7 +254,7 @@ export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
     flavor: [
       "{attacker} гарячково виправляє хват — на дрібниці часу вже немає.",
       "Ремінь заплутується — {attacker} втрачає дорогоцінну мить.",
-      "Збентеження після промаху змушує {attacker} забути про задум.",
+      "Збентеження після промаху — {attacker} забуває про задум.",
     ],
     effect: {
       type: "lose_bonus_action",
@@ -268,9 +268,9 @@ export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
     description: "Наступне влучання завдає ×0.5 шкоди",
     type: "fail",
     flavor: [
-      "Руків'я вислизає з пітної долоні {attacker} — наступний удар буде слабким.",
-      "Зброя ледь не випадає з рук {attacker}, і тепер хват незграбний.",
-      "Лезо {attacker} б'ється об каміння й тупиться.",
+      "Руків'я вислизає з пітної долоні: {attacker} наступним ударом б'є слабко.",
+      "{attacker} ледь не впускає зброю, і тепер хват незграбний.",
+      "{attacker} б'є об каміння — лезо тупиться.",
     ],
     effect: {
       type: "weakened_next_hit",
@@ -286,8 +286,8 @@ export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
     type: "fail",
     flavor: [
       "{attacker} надто розкривається після замаху — захист нікудишній.",
-      "Пряжка нагрудника {attacker} лопається, броня з'їжджає набік.",
-      "Інерція розвертає {attacker} спиною до ворогів.",
+      "Пряжка лопається, броня з'їжджає набік — {attacker} лишається без захисту.",
+      "{attacker} розвертається спиною до ворогів: інерція замаху робить своє.",
     ],
     effect: {
       type: "ac_debuff",
@@ -302,9 +302,9 @@ export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
     description: "Провокує Opportunity Attack",
     type: "fail",
     flavor: [
-      "{attacker} спотикається просто перед {target} і відкривається для удару.",
-      "Невдалий випад залишає {attacker} без прикриття перед {target}.",
-      "{target} помічає помилку {attacker}: захист відкрито.",
+      "{attacker} спотикається і відкривається для удару. Поруч: {target}.",
+      "Невдалий випад — {attacker} лишається без прикриття. Поруч: {target}.",
+      "{attacker} помиляється, а {target} це помічає: захист відкрито.",
     ],
     effect: {
       type: "provoke_opportunity_attack",
@@ -317,8 +317,8 @@ export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
     description: "Втрата реакції до наступного ходу",
     type: "fail",
     flavor: [
-      "Після промаху {attacker} не встигне відповісти на удар.",
-      "Увага {attacker} розсіяна: ворог може бити без остраху відсічі.",
+      "Після промаху {attacker} не встигає відповісти на удар.",
+      "{attacker} розсіює увагу: ворог може бити без остраху відсічі.",
       "{attacker} надто зосереджується на власній помилці, щоб стежити за ворогом.",
     ],
     effect: {
@@ -334,7 +334,7 @@ export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
     type: "fail",
     flavor: [
       "{attacker} розкривається — тепер кожен ворог бачить слабке місце.",
-      "Промах лишає {attacker} без захисту, і вороги це помічають.",
+      "{attacker} лишається без захисту після промаху, і вороги це помічають.",
       "{attacker} стоїть як мішень посеред поля бою.",
     ],
     effect: {
@@ -349,9 +349,9 @@ export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
     description: "Втрата дії (Action)",
     type: "fail",
     flavor: [
-      "Невдалий удар виснажує {attacker} — наступний хід піде на відновлення сил.",
-      "Зброя {attacker} застрягає — наступного ходу доведеться її виколупувати.",
-      "У голові {attacker} паморочиться — наступного ходу з бійця користі мало.",
+      "Невдалий удар виснажує — {attacker} наступного ходу відновлює сили.",
+      "Зброя застрягає — {attacker} наступного ходу виколупує її.",
+      "{attacker} втрачає орієнтир: у голові паморочиться, і наступного ходу з бійця користі мало.",
     ],
     effect: {
       type: "lose_action",

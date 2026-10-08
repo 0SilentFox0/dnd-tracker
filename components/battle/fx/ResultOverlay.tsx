@@ -87,7 +87,7 @@ export function ResultOverlay() {
         <div className={cn(die, "relative mb-5 size-[88px] bg-[#4a1a17] text-[40px] text-[#d9a39c]")}>1</div>
         <div className="hud-sc relative text-[34px] font-extrabold tracking-[.12em] text-[#c0564a] animate-[hud-shake-title_.5s_.45s_both]">Критична невдача</div>
         <CritEffectLine effect={result.critFail} tone="text-[#e0a39b]" />
-        <div className="relative mt-3 text-base">повз {result.targetName}</div>
+        <div className="relative mt-3 text-base">Ціль: {result.targetName}</div>
         <RetaliationLine retaliation={result.retaliation} />
         <button type="button" onClick={close} className={cn(cta, "relative border border-[#7a3a33] text-[#e0a39b]")}>Далі</button>
       </div>
@@ -101,7 +101,7 @@ export function ResultOverlay() {
           {[180, 220, 150].map((w, i) => <i key={i} className="absolute left-0 h-0.5 rounded bg-gradient-to-r from-transparent to-[#9a9aa2] animate-[hud-whoosh_.45s_ease-out_both]" style={{ top: 8 + i * 12, width: w, animationDelay: `${i * 60}ms` }} />)}
         </div>
         <div className="hud-sc text-[40px] font-extrabold tracking-[.2em] text-[#8f8f96]">Промах</div>
-        <div className="mt-3 text-base">повз {result.targetName}</div>
+        <div className="mt-3 text-base">Ціль: {result.targetName}</div>
         <div className="mt-1.5 text-sm text-[#a89c88]">ваш результат {result.d20} · тепер відомо: AC {result.known}</div>
         <RetaliationLine retaliation={result.retaliation} />
         <button type="button" onClick={close} className={cn(cta, "border border-[#555] text-[#c9c9cf]")}>Далі</button>

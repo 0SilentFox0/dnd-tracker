@@ -54,7 +54,7 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
     const guardian = getP(flow, guarded.guardianId);
 
     put(flow, applyDamageToTarget(guardian, guarded.guardianDamage).updatedTarget);
-    flow.messages.push(`🛡 ${guardian.basicInfo.name} приймає ${guarded.guardianDamage} шкоди за ${getP(flow, targetId).basicInfo.name}`);
+    flow.messages.push(`🛡 ${guardian.basicInfo.name} приймає ${guarded.guardianDamage} шкоди — захищає: ${getP(flow, targetId).basicInfo.name}`);
     settleDowned(flow, guarded.guardianId, attackerId);
   }
 

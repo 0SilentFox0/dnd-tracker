@@ -96,7 +96,7 @@ describe("SpellBook", () => {
 
     expect(screen.getByLabelText("Кубик 6 (d10)")).toBeTruthy();
     expect(screen.queryByLabelText("Кубик 7 (d10)")).toBeNull();
-    expect(screen.queryByLabelText("Рятівний кидок Гоблін")).toBeNull();
+    expect(screen.queryByLabelText("Рятівний кидок: Гоблін")).toBeNull();
   });
 
   it("DM вводить рятівні кидки за всі цілі", async () => {
@@ -109,7 +109,7 @@ describe("SpellBook", () => {
     fireEvent.click(screen.getByRole("button", { name: /Гоблін/ }));
     fireEvent.click(screen.getByRole("button", { name: "Далі · кидки" }));
 
-    expect(screen.getByLabelText("Рятівний кидок Гоблін")).toBeTruthy();
+    expect(screen.getByLabelText("Рятівний кидок: Гоблін")).toBeTruthy();
   });
 
   it("автоціль (усі вороги): кроку вибору цілей немає, одразу кидки", async () => {

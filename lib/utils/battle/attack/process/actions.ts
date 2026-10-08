@@ -111,9 +111,9 @@ export function buildBattleActionForMiss(
       isCriticalFail: attackRoll.isCriticalFail,
     },
     resultText: [
-      `${attacker.basicInfo.name} промахнувся по ${target.basicInfo.name}`,
+      `${attacker.basicInfo.name} → ${target.basicInfo.name}: промах`,
       ...(guaranteedDamage > 0
-        ? [`але завдав ${actualGuaranteedDamage} гарантованої шкоди`]
+        ? [`гарантована шкода: ${actualGuaranteedDamage}`]
         : []),
       ...beforeMessages,
       ...afterMessages,
@@ -218,7 +218,7 @@ export function buildBattleActionForHit(params: BuildHitActionParams): BattleAct
       damageSteps: { [target.basicInfo.id]: damageSteps },
     },
     resultText: [
-      `${attacker.basicInfo.name} завдав ${totalFinalDamage} урону ${target.basicInfo.name}${criticalEffectApplied ? `. ${critSummary(criticalEffectApplied, critFlavorText, false)}` : attackRoll.isCritical ? " (КРИТИЧНЕ ПОПАДАННЯ!)" : ""}${vampirismHeal > 0 ? ` | Вампіризм: ${attacker.basicInfo.name} відновив ${vampirismHeal} HP` : ""}`,
+      `${attacker.basicInfo.name} → ${target.basicInfo.name}: ${totalFinalDamage} шкоди${criticalEffectApplied ? `. ${critSummary(criticalEffectApplied, critFlavorText, false)}` : attackRoll.isCritical ? " (КРИТИЧНЕ ПОПАДАННЯ!)" : ""}${vampirismHeal > 0 ? ` | Вампіризм: ${attacker.basicInfo.name} +${vampirismHeal} HP` : ""}`,
       ...beforeMessages,
       ...afterMessages,
     ].filter(Boolean).join(" | "),
@@ -296,7 +296,7 @@ export function buildRetaliationAction(p: BuildRetaliationParams): BattleAction 
   const critText = crit ? `. ${critSummary(crit, p.critFlavorText, attackRoll.isCriticalFail)}` : "";
 
   const summary = `Відсіч: ${retaliator.basicInfo.name} → ${target.basicInfo.name}: d20 ${d20}, ${
-    hit ? `${hit.hitDamage.totalFinalDamage} урону${!crit && attackRoll.isCritical ? " (КРИТИЧНЕ ПОПАДАННЯ!)" : ""}` : "промах"
+    hit ? `${hit.hitDamage.totalFinalDamage} шкоди${!crit && attackRoll.isCritical ? " (КРИТИЧНЕ ПОПАДАННЯ!)" : ""}` : "промах"
   }${critText}`;
 
   return {
