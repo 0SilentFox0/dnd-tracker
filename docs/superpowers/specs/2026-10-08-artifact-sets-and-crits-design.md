@@ -55,7 +55,7 @@
 | Лук з рогу єдинорога (`UnicornHornBow.png`) | `range_weapon` | Дальня атака може вразити 2 цілі; кожна — окремий кидок влучання й шкоди | `passive` → `modifyStat maxTargets flat 1`; рушій уже робить окремі кидки й повну шкоду для multi-target ranged (`run-attack-phase.ts:139`) |
 | Сагайдак Деревородних (`TreebornQuiver.png`) | `cape` | Вбивство повертає бонусну дію (щоб одразу позначити нову ціль «Мисливцем») | `kill role killer` → `grantAction refreshBonusAction`, `perRound 1` |
 | Перстень стрімкості (`RingOfCelerity.png`) | `ring1` | +15 % шкоди по цілі з повним HP | `attack before attacker`, умова `hpAbove eventTarget 99` → `damageBonus all 15 %` |
-| **Сет** | | Дальнє влучання вішає «Здобич» на 2 р.; +10 % дальньої шкоди за кожну свою мітку на цілі | `hit attacker ranged` → `mark ivan-prey 2 р. eventTarget`; `passive` → `damageBonus ranged percent 10 perMark ivan-prey` |
+| **Сет** | | Дальнє влучання вішає «Здобич» на 2 р.; дальні атаки по «Здобичі» +15 % (не стакається) | `hit attacker ranged` → `mark ivan-prey 2 р. eventTarget`; `attack before ranged` + `hasMark eventTarget bySelf` → `damageBonus ranged 15 %` |
 
 #### Семгрун (гном, танк і бафер) — «Обладунки гномських королів»
 
@@ -65,7 +65,7 @@
 | Кіраса гномських королів (`CuirassOfTheDwarvenKings.png`) | `armor` | Коли Семгрун влучають, усі атакують кривдника з перевагою 1 р. | `hit role target` → `flag advantageForAttackers 1 р. target eventActor` |
 | Щит гномських королів (`ShieldOfTheDwarvenKings.png`) | `shield` | На старті бою бере під варту всіх союзників: 20 % їхньої шкоди переходить на неї | `battleStart` → `guard 20 % 99 р. target allAllies` |
 | Поножі гномських королів (`GreavesOfTheDwarvenKings.png`) | `boots` | Смертельний удар: лишається з 30 % HP, мораль союзників +1 | `lethalDamage` `perBattle 1` → `heal percentOf maxHp 30 revive` (рушій уже рятує, якщо після `lethalDamage` власник активний — `run-abilities.ts:105`) + `changeMorale +1 allAllies` |
-| **Сет** | | Коли Семгрун влучають — 30 %: союзникам випадкова руна на 1 р. | `hit role target` `chance 30` → `randomOf`: `damageBonus all 10 %` / `modifyStat armor +1` / `modifyStat initiative +2` / `heal 5 % maxHp`; усе `allAllies`, 1 р. |
+| **Сет** | | Коли Семгрун влучають — 30 %: союзникам випадкова руна на 1 р. | `hit role target` `chance 30` → `randomOf` (точкова правка: `randomOf` поважає `target` варіанта): `damageBonus all 10 %` / `modifyStat armor +1` / `modifyStat initiative +2` / `heal 5 % maxHp`; усе `allAllies`, 1 р. |
 
 #### Зехір (маг усіх шкіл) — «Регалії Сар-Іссуса»
 
@@ -83,8 +83,8 @@
 
 | Артефакт | Слот | Механіка | Реалізація |
 |---|---|---|---|
-| Плащ левової гриви (`CapeOfTheLionsMane.png`) | `cape` | Хто влучив союзника — «Кривдник» на 2 р.; Годрик б'є його на +15 % | `hit role target whose ally` → `mark godric-offender 2 р. eventActor`; `passive` → `damageBonus all 15 % perMark godric-offender` |
-| Левова корона (`LionCrown.png`) | `helmet` | Успішна перевірка моралі лікує Годрика на 10 % | `moraleCheck success self` → `heal percentOf maxHp 10 self` |
+| Плащ левової гриви (`CapeOfTheLionsMane.png`) | `cape` | Хто влучив союзника — «Кривдник» на 2 р.; Годрик б'є його на +15 % (не стакається) | `hit role target whose ally` → `mark godric-offender 2 р. eventActor`; `attack before` + `hasMark eventTarget bySelf` → `damageBonus all 15 %` |
+| Левова корона (`LionCrown.png`) | `helmet` | +10 % до шансу додаткового ходу від моралі | `passive` → `flag moraleChance 10` (`moraleCheck success` спрацьовує майже щоходу — «не запанікував», тому не тригер) |
 | Намисто лева (`NecklaceOfTheLion.png`) | `necklace` | Смертельний удар: встає з 25 % HP, мораль союзників +1 | як поножі Семгрун, 25 % |
 | **Сет** | | Кожне влучання знижує мораль цілі на 1 (канонічний бонус лицаря) | `hit attacker` → `changeMorale −1 eventTarget`, `perRound 1` |
 
@@ -92,10 +92,10 @@
 
 | Артефакт | Слот | Механіка | Реалізація |
 |---|---|---|---|
-| Корона лідерства (`CrownOfLeadership.png`) | `helmet` | Союзник з успішною мораллю отримує +10 % шкоди на 1 р. | `moraleCheck success ally` → `damageBonus all 10 % 1 р. eventActor` |
+| Корона лідерства (`CrownOfLeadership.png`) | `helmet` | Усі союзники +5 % до шансу додаткового ходу від моралі | `passive` → `flag moraleChance 5 allAllies` |
 | Намисто перемоги (`NecklaceOfVictory.png`) | `necklace` | Вбивство ворога будь-ким із партії — мораль союзників +1 | `kill killerSide` → `changeMorale +1 allAllies`, `perRound 1` |
-| Обладунок звитяги (`ArmorOfValor.png`) | `armor` | Союзник нижче 30 % — усім союзникам лікування 5 %/р. на 2 р. | `roundStart`, умова `hpBelow anyAlly 30` → `hot percentOf maxHp 5 2 р. allAllies`, `perBattle 1` |
-| **Сет** | | «Другий поклик сурм»: союзник нижче 50 % — повтор «Сурм світанку» + мораль +1 | `roundStart`, умова `hpBelow anyAlly 50` `perBattle 1` → `modifyStat initiative +2 2 р.`, `damageBonus all 10 % 2 р.`, `changeMorale +1`; усе `allAllies` |
+| Обладунок звитяги (`ArmorOfValor.png`) | `armor` | Союзник нижче 30 % — усім союзникам лікування 5 %/р. на 2 р. | `roundStart`, умова `any[hpBelow self 30, hpBelow anyAlly 30]` (`anyAlly` не включає власника) → `hot percentOf maxHp 5 2 р. allAllies`, `perBattle 1` |
+| **Сет** | | «Другий поклик сурм»: союзник нижче 50 % — повтор «Сурм світанку» + мораль +1 | `roundStart`, умова `any[hpBelow self 50, hpBelow anyAlly 50]` `perBattle 1` → `modifyStat initiative +2 2 р.`, `damageBonus all 10 % 2 р.`, `changeMorale +1`; усе `allAllies` |
 
 #### Раїлаг (темний ельф, отруйник) — «Кігті Ігг-Шайла»
 
@@ -103,8 +103,8 @@
 |---|---|---|---|
 | Місячний клинок (`Moonblade.png`) | `shield` (друга рука) | +15 % шкоди по цілі нижче 50 % (синергія з «Кривавим ритуалом») | `attack before attacker`, умова `hpBelow eventTarget 50` → `damageBonus all 15 %` |
 | Намисто кривавого кігтя (`NecklaceOfTheBloodyClaw.png`) | `necklace` | Вбивство лікує на 15 % max HP | `kill killer` → `heal percentOf maxHp 15 self` |
-| Проклятий перстень (`CursedRing.png`) | `ring1` | Вбивство — отруйна хмара: усі вороги отруєні на 5 % атаки Раїлага, 2 р. | `kill killer` → `dot percentOf ownerAttack 5 poison 2 р. allEnemies`, `perRound 1` |
-| **Сет** | | Влучання — 25 %: ціль без реакції 1 р. (не відповість відсіччю) | `hit attacker` `chance 25` → `applyCondition no_reaction 1 р. eventTarget` |
+| Проклятий перстень (`CursedRing.png`) | `ring1` | Вбивство — отруйна хмара: усі вороги отруєні на 15 % атаки Раїлага, 2 р. | `kill killer` → `dot percentOf ownerAttack 15 poison 2 р. allEnemies`, `perRound 1` |
+| **Сет** | | Влучання — 25 %: ціль без реакції 1 р. (не відповість відсіччю) | `hit attacker` `chance 25` → `applyCondition no_reaction 1 р. eventTarget` (точкова правка: `no_reaction` одразу ставить `hasUsedReaction`) |
 
 Лор: канонічна «История» з російської вікі (є для Намиста кривавого кігтя, Проклятого персня, Мантії Сар-Іссуса
 тощо) — переписати українською своїми словами; для решти — власний лор у дусі Асхану (Грифонова імперія для

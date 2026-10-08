@@ -13,6 +13,7 @@
 ## Global Constraints
 
 - Жодного переписування рушію. Механіка, що не працює на наявному рушії, — точкова правка з тестом і окремою згадкою у звіті, або заміна на еквівалентну механіку (погодити в звіті).
+- Відомі точкові правки рушію (з тестами): `randomOf` поважає `target` варіанта (Task 4), `applyCondition no_reaction` одразу ставить `hasUsedReaction` (Task 6). Інших змін рушію не планується.
 - Бонус сету — лише за повний комплект (`lib/utils/battle/artifact-sets/`), без часткових бонусів.
 - Без міграцій: лор іде в `description` артефакта / сету окремим абзацом після механіки.
 - Слоти — ключі `ARTIFACT_GRID_9` (`lib/constants/artifacts.ts:82`): `ring1, helmet, necklace, range_weapon, armor, shield, weapon, boots, cape`; у межах сету не повторюються; ≥ 3 артефакти в сеті.
@@ -26,7 +27,7 @@
 2. `spellIds`/`school` у здібностях артефактів не перетворені в DB id при сидингу → імунітет шолома / тригери Зехіра ніколи не спрацюють. Тест `artifactRows` з `remapRefs` (Task 3).
 3. Повторний сидинг дублює артефакти або губить `setId` — upsert за назвою, тест на ідемпотентність даних (Task 3).
 4. Здібності з `target: "allAllies"` (варта щита, імунітет шолома) зачіпають і власника — перевірити, що Семгрун не «вартує» сама себе (Task 4).
-5. Мітки «Здобич»/«Кривдник» стакаються без меж — бойовий тест фіксує фактичний стелю/поведінку, симуляція (Task 7) показує, чи не імба.
+5. Мітки стакаються без меж (`state.ts:179`), тому бонуси «Здобичі»/«Кривдника» перевіряють наявність мітки (`hasMark`), а не кількість — тести фіксують, що після кількох влучань бонус не росте (Tasks 4–5).
 
 ---
 
@@ -43,15 +44,15 @@
 - Produces:
   ```ts
   // data/library/types.ts
-  export interface LibraryArtifact extends LibraryEntry { slot: ArtifactGridSlotKey; rarity: "epic" | "legendary"; abilities: Ability[] }
+  export interface LibraryArtifact extends LibraryEntry { slot: ArtifactGridSlotKey; rarity: "epic" | "legendary"; abilities: Ability[]; modifiers?: Array<{ type: string; value: string }> }
   export interface LibraryArtifactSet extends LibraryEntry { heroName: string; artifacts: LibraryArtifact[]; abilities: Ability[] }
   // LibrarySource += artifactSets: LibraryArtifactSet[]
   // data/artifact-icons-map.ts
-  export const ARTIFACT_ICONS: Record<string, string>; // iconKey -> wiki file name
+  export const ARTIFACT_ICON_FILES: Record<string, string>; // iconKey -> wiki file name
   // data/library/artifacts.ts
   export const LIBRARY_ARTIFACT_SETS: LibraryArtifactSet[];
   ```
-  `appearanceDescription` (≥ 80 символів, з `LibraryEntry`) — це лор; `description` — механіка.
+  `appearanceDescription` (≥ 80 символів, з `LibraryEntry`) — це лор; `description` — механіка. `modifiers` — для зброї (формат `Artifact.modifiers`, типи з `ArtifactModifierType`: `damageDice`, `damageType`, `attackType`), інакше `extract-attacks.ts` дасть зброї 1d6 за замовчуванням.
 
 - [ ] **Step 1: Failing tests** — у `library.test.ts` додати фабрики й кейси в `describe("buildLibrary validation")`:
 
@@ -98,10 +99,10 @@ it("rejects duplicate artifact keys across sets", () => {
 
 - [ ] **Step 3: Implement.**
   - `types.ts`: інтерфейси вище, `LibrarySource.artifactSets`. Імпорт `ArtifactGridSlotKey` з `@/lib/constants/artifacts`.
-  - `data/artifact-icons-map.ts`: мапа всіх 25 iconKey (Task 2 копіює її в скрипт). Вміст:
+  - `data/artifact-icons-map.ts`: мапа всіх 26 iconKey (6 сетів + 20 артефактів; назва не `ARTIFACT_ICONS`, щоб не плутати з `scripts/artifact-icon-map.ts`) (Task 2 копіює її в скрипт). Вміст:
 
 ```ts
-export const ARTIFACT_ICONS: Record<string, string> = {
+export const ARTIFACT_ICON_FILES: Record<string, string> = {
   "archers-dream": "UnicornHornBow.png",
   "unicorn-horn-bow": "UnicornHornBow.png",
   "treeborn-quiver": "TreebornQuiver.png",
@@ -132,10 +133,10 @@ export const ARTIFACT_ICONS: Record<string, string> = {
 ```
 
   - `build.ts`: `LIBRARY_SOURCE.artifactSets = LIBRARY_ARTIFACT_SETS`; у `buildLibrary`:
-    - `const artifactIcons = new Set(Object.keys(ARTIFACT_ICONS));`
+    - `const artifactIcons = new Set(Object.keys(ARTIFACT_ICON_FILES));`
     - для кожного сету: `checkEntry("Сет артефактів", set, artifactIcons)`; `if (set.artifacts.length < 3) issues.push(\`Сет «${set.key}»: менше 3 артефактів\`)`; слоти — `Set`, при повторі `issues.push(\`Сет «${set.key}»: слот «${a.slot}» повторюється\`)`; слот поза `ARTIFACT_GRID_9.map((s) => s.key)` — `невідомий слот`.
     - для кожного артефакта: `checkEntry("Артефакт", a, artifactIcons)`; здібності — той самий шаблон `AbilitySchema.safeParse`, префікс `Артефакт «${a.key}» [${i}]:`; для здібностей сету — `Сет «${set.key}» [${i}]:`.
-    - винести перевірку посилань `refs()` (`build.ts:~182`) у функцію `checkRefs(label: string, abilities: Ability[])` і викликати її для скілів (як було), артефактів і сетів.
+    - винести перевірку посилань `refs()` (`build.ts:~182`) у функцію `checkRefs(label: string, abilities: Ability[])` і викликати її для скілів (як було), артефактів і сетів; формат повідомлень для скілів лишити дослівно (`Скіл «k»: заклинання «x» не знайдено` — на нього матчаться `library.test.ts:145,149`).
     - `checkUnique("Артефакти", "key" | "name", allArtifacts)`, `checkUnique("Сети артефактів", "key" | "name", sets)`.
   - `artifacts.ts`: `export const LIBRARY_ARTIFACT_SETS: LibraryArtifactSet[] = [];`
 
@@ -153,7 +154,7 @@ export const ARTIFACT_ICONS: Record<string, string> = {
 - Test: `data/__tests__/skill-icons.test.ts` (створити, якщо немає; інакше доповнити наявний тест `iconPublicUrl`)
 
 **Interfaces:**
-- Consumes: `ARTIFACT_ICONS` (Task 1).
+- Consumes: `ARTIFACT_ICON_FILES` (Task 1).
 - Produces: `IconKind = "skill" | "spell" | "artifact"`; `iconPublicUrl(url, key, "artifact")` → `${url}/storage/v1/object/public/artifact-icons/${key}.webp`.
 
 - [ ] **Step 1: Failing test**
@@ -180,7 +181,7 @@ describe("artifact icons", () => {
 import * as fs from "fs";
 import * as path from "path";
 
-import { ARTIFACT_ICONS } from "../data/artifact-icons-map";
+import { ARTIFACT_ICON_FILES } from "../data/artifact-icons-map";
 
 const DIR = path.join(process.cwd(), "assets", "artifact-icons");
 const API = "https://mightandmagic.fandom.com/api.php";
@@ -202,7 +203,7 @@ async function fileUrls(files: string[]): Promise<Record<string, string>> {
 async function main() {
   fs.mkdirSync(DIR, { recursive: true });
 
-  const todo = Object.entries(ARTIFACT_ICONS).filter(([key]) => !fs.existsSync(path.join(DIR, `${key}.webp`)));
+  const todo = Object.entries(ARTIFACT_ICON_FILES).filter(([key]) => !fs.existsSync(path.join(DIR, `${key}.webp`)));
 
   if (todo.length === 0) return console.info("Усі іконки артефактів уже є");
 
@@ -228,7 +229,7 @@ main();
 ```
 
   `package.json`: `"import-artifact-icons": "tsx scripts/import-artifact-icons.ts"`.
-- [ ] **Step 4: Run** тест — PASS. Запустити `pnpm import-artifact-icons`; перевірити `ls assets/artifact-icons | wc -l` = 25 і `file assets/artifact-icons/moonblade.webp` → `RIFF … WEBP` (якщо CDN віддав PNG — конвертувати через `sharp`, якщо він є в `node_modules`, інакше зберегти як є й зазначити у звіті). **Не** запускати `upload-assets-to-supabase` (Storage — прод; це окремий крок користувача).
+- [ ] **Step 4: Run** тест — PASS. Запустити `pnpm import-artifact-icons`; перевірити `ls assets/artifact-icons | wc -l` = 26 і `file assets/artifact-icons/moonblade.webp` → `RIFF … WEBP` (якщо CDN віддав PNG — конвертувати через `sharp`, якщо він є в `node_modules`, інакше зберегти як є й зазначити у звіті). **Не** запускати `upload-assets-to-supabase` (Storage — прод; це окремий крок користувача).
 - [ ] **Step 5: Commit** `feat(icons): artifact icons from the H5 wiki` (разом з `assets/artifact-icons/*.webp`).
 
 ---
@@ -245,19 +246,19 @@ main();
 - Produces:
   ```ts
   export function artifactDescription(entry: { description: string; appearanceDescription: string }): string; // `${description}\n\n${appearanceDescription}`
-  export function artifactRows(set: LibraryArtifactSet, maps: RefMaps, icon: (key?: string) => string | undefined): {
+  export function artifactRows(set: LibraryArtifactSet, maps: Pick<IdMaps, "groups" | "spells">, icon: (key?: string) => string | undefined): {
     set: { name: string; description: string; icon?: string; abilities: Ability[] };
-    artifacts: Array<{ name: string; description: string; slot: string; rarity: string; icon?: string; abilities: Ability[] }>;
+    artifacts: Array<{ name: string; description: string; slot: string; rarity: string; icon?: string; abilities: Ability[]; modifiers: Array<{ type: string; value: string }> }>;
   };
   ```
-  (`RefMaps` — тип, який уже приймає `remapRefs`; використати його назву з `seed-library-lib.ts`.)
+  (Тип мап — `Pick<IdMaps, "groups" | "spells">`, як у `remapRefs` (`seed-library-lib.ts:75`); у сигнатурі вище замість `RefMaps` писати саме його.)
   `slot` у рядку БД — **тип слоту** (`ArtifactSlot`: `ring`, `cloak`, `amulet`…), бо так його зберігає форма DM: `ARTIFACT_GRID_9.find((s) => s.key === a.slot)!.slotType`. Ключ сітки (`ring1`, `cape`, `necklace`) лишається тільки в бібліотеці й у `equipped`.
 
 - [ ] **Step 1: Failing test**
 
 ```ts
 it("artifactRows remaps spell keys and schools and joins lore", () => {
-  const maps = { spells: new Map([["blindness", "sp1"], ["slow", "sp2"]]), schools: new Map([["Світло", "g1"]]) } as never;
+  const maps = { spells: new Map([["blindness", "sp1"], ["slow", "sp2"]]), groups: new Map([["Світло", "g1"]]) } as never;
   const set = {
     key: "s", name: "Сет", description: "Механіка сету.", appearanceDescription: "Лор сету.", iconKey: "sar-issus", heroName: "Зехір",
     abilities: [{ id: "a", name: "a", trigger: { event: "spellCast", phase: "after", role: "caster", school: "Світло" }, effects: [{ kind: "heal", amount: 1, target: "allAllies" }] }],
@@ -275,9 +276,8 @@ it("artifactRows remaps spell keys and schools and joins lore", () => {
 });
 ```
 
-  (Підлаштувати форму `maps` під фактичну сигнатуру `remapRefs` — прочитати `seed-library-lib.ts:75` перед написанням.)
 - [ ] **Step 2: Run** `pnpm test:run scripts/__tests__/seed-library-lib.test.ts` — FAIL.
-- [ ] **Step 3: Implement** `artifactDescription`, `artifactRows` у `seed-library-lib.ts`. У `seed-library.ts` після блоку рас:
+- [ ] **Step 3: Implement** `artifactDescription`, `artifactRows` у `seed-library-lib.ts`. У `seed-library.ts` — **після блоку персональних скілів (~L235), перед деревами**: `maps` визначено лише на ~L169, після заклять. Додати ключі `"сети артефактів"` і `"артефакти"` у `tallies` (~L67), інакше `upsert` впаде на `tallies[kind]`:
 
 ```ts
 const setRows = await prisma.artifactSet.findMany({ where: { campaignId }, select: { id: true, name: true } });
@@ -293,7 +293,7 @@ for (const librarySet of library.artifactSets) {
   });
 
   for (const a of rows.artifacts) {
-    const data = { ...a, abilities: json(a.abilities), setId: dryRun ? undefined : setId };
+    const data = { ...a, abilities: json(a.abilities), modifiers: json(a.modifiers), setId: dryRun ? undefined : setId };
     await upsert("артефакти", artifactRowsDb, a.name, {
       create: () => prisma.artifact.create({ data: { campaignId, ...data }, select: { id: true, name: true } }),
       update: (id) => prisma.artifact.update({ where: { id }, data, select: { id: true, name: true } }),
@@ -302,7 +302,6 @@ for (const librarySet of library.artifactSets) {
 }
 ```
 
-  Додати `tallies` для двох нових видів (як для рас). `maps` — те саме значення, що вже передається в `remapRefs` для скілів.
 - [ ] **Step 4: Run** тест — PASS. Локально: `pnpm db:local` (якщо не запущено), `pnpm seed-library <локальна кампанія> --dry-run` — у зведенні з'являються «сети артефактів» і «артефакти» (поки 0, бо `LIBRARY_ARTIFACT_SETS` порожній).
 - [ ] **Step 5: Commit** `feat(seed): seed artifact sets from the library`.
 
@@ -312,10 +311,11 @@ for (const librarySet of library.artifactSets) {
 
 **Files:**
 - Modify: `data/library/artifacts.ts`
-- Test: `lib/utils/battle/artifact-sets/__tests__/hero-sets.test.ts` (створити)
+- Modify: `lib/utils/abilities/registry/effects/index.ts:~115` (`randomOf.apply`: якщо в обраного варіанта є `target`, перерахувати цілі через `resolveTargetIds(option.target, i.ownerId, i.event, i.participants)`; без `target` — лишити `i.targetIds`, на це спираються касти, `cast.test.ts:325`)
+- Test: `lib/utils/battle/artifact-sets/__tests__/hero-sets.test.ts` (створити), `lib/utils/abilities/registry/__tests__/` (тест `randomOf` з `target: "allAllies"` у варіанті)
 
 **Interfaces:**
-- Consumes: `LIBRARY_ARTIFACT_SETS`, `makeParticipant`, `resolved`, `seq` з `@/lib/utils/abilities/__tests__/fixtures`, `runAbilities`, `collectModifiers`, `findFlags` (`@/lib/utils/abilities/engine/collect-modifiers`), `isSpellImmune` / функція з `lib/utils/battle/spell/spell-immunity.ts`, `runAttackPhase` + білдери з `lib/utils/battle/attack-phase/__tests__/run-attack-phase.test.ts` (скопіювати потрібні в тест — не імпортувати з тест-файлу).
+- Consumes: `LIBRARY_ARTIFACT_SETS`, `makeParticipant`, `resolved`, `seq` з `@/lib/utils/abilities/__tests__/fixtures`, `runAbilities`, `collectModifiers`, `findFlags` (`@/lib/utils/abilities/engine/collect-modifiers`), `participantImmuneToSpell(p, spellId, ps)` (`lib/utils/battle/spell/spell-immunity.ts:6`), `bakePassives` (`lib/utils/abilities/build/bake.ts:29`), `splitGuardedDamage` (`lib/utils/battle/attack/process/guard.ts:11`), `runAttackPhase` + білдери з `lib/utils/battle/attack-phase/__tests__/multi-target-roll.test.ts` (скопіювати потрібні — не імпортувати з тест-файлу). Бонуси фази `attack before` живуть лише в `extra`: `collectModifiers(ps, id, { damage: { kind, targetId } }, run.actionModifiers[id])` (`static.ts:24-29`).
 - Produces: хелпер у тесті `abilitiesOf(setKey: string): { pieces: Record<string, Ability[]>; set: Ability[] }` — шукає в `LIBRARY_ARTIFACT_SETS` за `key`; Tasks 5–6 додають кейси в той самий файл.
 
 Дані (додати в масив; `description` — механіка, `appearanceDescription` — лор):
@@ -325,16 +325,17 @@ const IVAN_PREY = "ivan-prey";
 
 {
   key: "set-archers-dream", name: "Мрія лучника", heroName: "Айвен", iconKey: "archers-dream",
-  description: "Повний комплект: дальнє влучання позначає ціль «Здобиччю» на 2 раунди; +10 % дальньої шкоди за кожну мітку Айвена на цілі.",
+  description: "Повний комплект: дальнє влучання позначає ціль «Здобиччю» на 2 раунди; дальні атаки Айвена по «Здобичі» завдають +15 % шкоди.",
   appearanceDescription: "Сильванські лучники кажуть, що єдиноріг сам обирає, чий лук носитиме його ріг, а Деревородні — чий сагайдак ніколи не спорожніє. Коли обидва дари зустрічаються в одних руках, ліс замовкає: кожна стріла вже знає свою жертву.",
   abilities: [
     { id: "archers-dream-prey", name: "Здобич", trigger: { event: "hit", role: "attacker", attackKind: "ranged" }, effects: [{ kind: "mark", markId: IVAN_PREY, duration: { rounds: 2 }, target: "eventTarget" }] },
-    { id: "archers-dream-prey-bonus", name: "Здобич: шкода", trigger: { event: "passive" }, effects: [{ kind: "damageBonus", filter: { kind: "ranged" }, percent: 10, perMark: IVAN_PREY }] },
+    { id: "archers-dream-prey-bonus", name: "Здобич: шкода", trigger: { event: "attack", phase: "before", role: "attacker", attackKind: "ranged" }, condition: { type: "hasMark", who: "eventTarget", markId: IVAN_PREY, bySelf: true }, effects: [{ kind: "damageBonus", filter: { kind: "ranged" }, percent: 15 }] },
   ],
   artifacts: [
     { key: "unicorn-horn-bow", name: "Лук з рогу єдинорога", slot: "range_weapon", rarity: "legendary", iconKey: "unicorn-horn-bow",
       description: "Дальня атака може вразити 2 цілі; для кожної — окремий кидок влучання й шкоди.",
       appearanceDescription: "Тятива сплетена з гриви єдинорога, а плечі лука вирізані з його рогу, що сам віддав його лісу. Стріла з нього не летить — вона ковзає між краплинами дощу і знаходить дві цілі там, де інший лучник бачить одну.",
+      modifiers: [{ type: "damageDice", value: "1d8" }, { type: "damageType", value: "piercing" }, { type: "attackType", value: "ranged" }],
       abilities: [{ id: "unicorn-horn-bow-two-targets", name: "Подвійний постріл", trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "maxTargets", flat: 1 }] }] },
     { key: "treeborn-quiver", name: "Сагайдак Деревородних", slot: "cape", rarity: "epic", iconKey: "treeborn-quiver",
       description: "Вбивство повертає бонусну дію (1 раз за раунд).",
@@ -383,18 +384,18 @@ const IVAN_PREY = "ivan-prey";
 ```
 
 - [ ] **Step 1: Failing tests** у `hero-sets.test.ts` (усі беруть здібності з `abilitiesOf`, обгортаючи в `resolved(a, { type: "artifact" })`):
-  - **Лук:** `runAttackPhase` з дальньою атакою, атакер має `combatStats.maxTargets` = 1 + пасивка лука (зібрати через наявний шлях: `collectCharacterAbilities` або виставити `combatStats.maxTargets: 2`, як це робить baked-стат — спершу знайти, де baked `maxTargets` потрапляє в `combatStats`, і використати той самий шлях). Дві цілі, `attackRolls: [15, 2]` → перша влучила, друга ні; у лозі два окремих записи.
+  - **Лук:** `bakePassives(makeParticipant({ id: "ivan", abilities: [bow] }))` → `combatStats.maxTargets === 2`; далі `runAttackPhase` (шаблон `multi-target-roll.test.ts`) з дальньою атакою по двох цілях, `attackRolls: [15, 2]` → перша влучила, друга ні; два окремі записи логу.
   - **Сагайдак:** `runAbilities` з подією `{ type: "kill", actorId: "ivan", targetId: "e" }`, у Айвена `actionFlags.hasUsedBonusAction = true` → стає `false`; друга подія в тому ж раунді — лишається `true`.
   - **Перстень:** `collectModifiers` через `runAbilities` події `attack before` по цілі з `hp === maxHp` дає +15 %; по цілі з 50 % — 0.
-  - **Сет «Здобич»:** два `hit` ranged → `collectModifiers(ps, "ivan", { damage: { kind: "ranged", targetId: "e" } }).percent` = 20.
-  - **Шолом:** Семгрун зі здібністю, союзник `a`: імунітет `a` до DB-id закляття — у тесті `spellIds` лишаються ключами `"blindness"`, перевіряти ключем.
+  - **Сет «Здобич»:** `hit` ranged → мітка на `e`; `runAbilities` події `attack before` ranged по `e` → бонус 15 % в `actionModifiers`; три `hit` поспіль → бонус усе одно 15 % (не стакається); атака по цілі без мітки → 0.
+  - **Шолом:** Семгрун зі здібністю, союзник `a`: `participantImmuneToSpell(a, "blindness", ps)` і `"slow"` → `true` (у тесті `spellIds` — ключі бібліотеки), `"roots"` → `false`.
   - **Кіраса:** `hit` з `targetId: "semgrun", actorId: "e"` → `findFlags(ps, "e", "advantageForAttackers")` непорожній.
-  - **Щит:** `battleStart` → у союзника `a` є `guard` з `guardianId` Семгрун, **у самої Семгрун немає guard на себе** (якщо є — точкова правка в обробнику `guard`: пропускати власника, з тестом; згадати у звіті).
-  - **Поножі:** Семгрун з 0 HP через `lethalDamage` → активна з `Math.floor(maxHp * 0.3)` HP; мораль союзника +1; вдруге в бою — гине.
-  - **Руни:** `rng: seq(0)` (шанс пройде, перша опція) → у союзників `damageBonus` 10 %.
+  - **Щит:** `battleStart` → у союзника `a` активний ефект з `abilityKey: "guard"` і `source.participantId === "semgrun"`; `splitGuardedDamage(ps, "a", 10).guardianId === "semgrun"`; у самої Семгрун guard на себе немає (рушій уже блокує, лише пише в лог «імунітет» — прийнятний шум).
+  - **Поножі:** Семгрун з 0 HP через `lethalDamage` → активна з `Math.floor(maxHp * 0.3)` HP; `combatStats.morale` союзника +1; вдруге в бою — гине.
+  - **Руни:** `rng: seq(0)` (шанс пройде, перша опція) → у **союзників** (не лише Семгрун) `damageBonus` 10 %. Падає до правки `randomOf` — це очікувано; правка + тест реєстру в цій же задачі.
   - **Бібліотека:** `buildLibrary(LIBRARY_SOURCE)` не кидає (уже є в `library content`).
 - [ ] **Step 2: Run** `pnpm test:run lib/utils/battle/artifact-sets/__tests__/hero-sets.test.ts` — FAIL (даних немає).
-- [ ] **Step 3: Implement** — додати дані вище в `artifacts.ts`. Якщо якийсь тест падає через рушій — точкова правка або заміна механіки (див. Global Constraints), з тестом.
+- [ ] **Step 3: Implement** — правка `randomOf.apply` (див. Files) і дані вище в `artifacts.ts`. Якщо ще якийсь тест падає через рушій — точкова правка або заміна механіки (див. Global Constraints), з тестом і згадкою у звіті.
 - [ ] **Step 4: Run** той самий тест + `pnpm test:run data/library` — PASS.
 - [ ] **Step 5: Commit** `feat(library): Ivan and Semgrun artifact sets`.
 
@@ -431,6 +432,7 @@ const GODRIC_OFFENDER = "godric-offender";
     { key: "staff-of-sar-issus", name: "Посох Сар-Іссуса", slot: "weapon", rarity: "legendary", iconKey: "staff-of-sar-issus",
       description: "Закляття Хаосу підпалюють усіх ворогів: 1d6 вогнем щораунду, 2 раунди (1 раз за раунд).",
       appearanceDescription: "Навершя посоху — кристал, у якому застигла іскра первісного вогню. Кожне закляття Хаосу розбурхує її, і тоді полум'я зісковзує з кристала й шукає ворогів саме.",
+      modifiers: [{ type: "damageDice", value: "1d6" }, { type: "damageType", value: "bludgeoning" }, { type: "attackType", value: "melee" }],
       abilities: [{ id: "staff-of-sar-issus-chaos", name: "Іскра Хаосу", trigger: { event: "spellCast", phase: "after", role: "caster", school: "Хаос" }, limits: { perRound: 1 }, effects: [{ kind: "dot", damagePerRound: "1d6", damageType: "fire", duration: { rounds: 2 }, target: "allEnemies" }] }] },
     { key: "ring-of-sar-issus", name: "Перстень Сар-Іссуса", slot: "ring1", rarity: "epic", iconKey: "ring-of-sar-issus",
       description: "Закляття Природи повертає 1 слот закляття (1 раз за бій).",
@@ -445,16 +447,16 @@ const GODRIC_OFFENDER = "godric-offender";
   abilities: [{ id: "lions-spirit-roar", name: "Лев'ячий рик", trigger: { event: "hit", role: "attacker" }, limits: { perRound: 1 }, effects: [{ kind: "changeMorale", delta: -1, target: "eventTarget" }] }],
   artifacts: [
     { key: "cape-of-the-lions-mane", name: "Плащ левової гриви", slot: "cape", rarity: "epic", iconKey: "cape-of-the-lions-mane",
-      description: "Хто влучив союзника, стає «Кривдником» на 2 раунди; Годрик б'є його на +15 %.",
+      description: "Хто влучив союзника, стає «Кривдником» на 2 раунди; атаки Годрика по «Кривднику» завдають +15 % шкоди.",
       appearanceDescription: "Плащ пошитий з гриви лева, що загинув, захищаючи свій прайд. Кожного разу, коли когось із побратимів поранено, грива на плечах власника настовбурчується — і він уже знає, кого карати.",
       abilities: [
         { id: "cape-of-the-lions-mane-mark", name: "Кривдник", trigger: { event: "hit", role: "target", whose: "ally" }, effects: [{ kind: "mark", markId: GODRIC_OFFENDER, duration: { rounds: 2 }, target: "eventActor" }] },
-        { id: "cape-of-the-lions-mane-bonus", name: "Кривдник: шкода", trigger: { event: "passive" }, effects: [{ kind: "damageBonus", filter: { kind: "all" }, percent: 15, perMark: GODRIC_OFFENDER }] },
+        { id: "cape-of-the-lions-mane-bonus", name: "Кривдник: шкода", trigger: { event: "attack", phase: "before", role: "attacker" }, condition: { type: "hasMark", who: "eventTarget", markId: GODRIC_OFFENDER, bySelf: true }, effects: [{ kind: "damageBonus", filter: { kind: "all" }, percent: 15 }] },
       ] },
     { key: "lion-crown", name: "Левова корона", slot: "helmet", rarity: "epic", iconKey: "lion-crown",
-      description: "Успішна перевірка моралі лікує Годрика на 10 % max HP.",
-      appearanceDescription: "Золота корона з левовою пащею на чолі не прикрашає — вона надихає. Щоразу, коли дух власника злітає вгору, корона ділиться з ним силою, і рани затягуються на очах.",
-      abilities: [{ id: "lion-crown-heal", name: "Відвага лева", trigger: { event: "moraleCheck", result: "success", whose: "self" }, effects: [{ kind: "heal", amount: { percentOf: "maxHp", value: 10 }, target: "self" }] }] },
+      description: "+10 % до шансу додаткового ходу від моралі.",
+      appearanceDescription: "Золота корона з левовою пащею на чолі не прикрашає — вона надихає. Лицар у ній відчуває, як у грудях прокидається лев, і кидається в бій раніше, ніж ворог устигає підняти щит.",
+      abilities: [{ id: "lion-crown-courage", name: "Відвага лева", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "moraleChance", percent: 10 }] }] },
     { key: "necklace-of-the-lion", name: "Намисто лева", slot: "necklace", rarity: "epic", iconKey: "necklace-of-the-lion",
       description: "Смертельний удар (1 раз за бій): Годрик встає з 25 % HP, мораль союзників +1.",
       appearanceDescription: "Ікло лева на важкому ланцюзі гріє груди, як друге серце. Коли перше серце вже готове зупинитися, друге б'є за нього — і лицар підводиться, на подив і жах ворогів.",
@@ -468,14 +470,14 @@ const GODRIC_OFFENDER = "godric-offender";
 
 - [ ] **Step 1: Failing tests:**
   - **Корона:** `spellCast` школи `"Світло"` (у тесті — назва, бо `remapRefs` не застосовано) → союзник з 50/100 HP має 55; третій каст — без лікування.
-  - **Мантія:** `spellCast` `"Темрява"` → `battleData.morale` (або поле, яке міняє `changeMorale` — перевірити в `registry/effects/state.ts`) ворога −1; вдруге — без змін.
+  - **Мантія:** `spellCast` `"Темрява"` → `combatStats.morale` ворога −1; вдруге — без змін.
   - **Посох:** `spellCast` `"Хаос"` → у ворогів активний ефект з `dotDamage`.
   - **Перстень:** `spellCast` `"Природа"` → слот повертається (поле, яке міняє `restoreSpellSlot`).
-  - **Сет Зехіра:** `findFlags(ps, "zehir", "spellTargeting")` містить `{ maxTargets: 2, maxLevel: 2 }`; наявний споживач `spell/participant-spell-target-mode.ts` дає мультивибір для закляття 2 рівня і не дає для 3 рівня (тест через функцію з цього файла).
-  - **Плащ:** `hit` з `targetId: "ally", actorId: "e"` → мітка на `e` від Годрика; `collectModifiers(ps, "godric", { damage: { kind: "melee", targetId: "e" } }).percent` = 15; `hit` по самому Годрику мітки **не** ставить (`whose: "ally"`).
-  - **Корона лева:** `moraleCheck success` для Годрика → +10 % HP.
+  - **Сет Зехіра:** `spellTargetingFor(ps, "zehir", { id, groupId, level: 2 })` (`lib/utils/battle/spell/spell-targeting.ts:18`) → режим `area`, до 2 цілей; для `level: 3` — без зміни.
+  - **Плащ:** `hit` з `targetId: "ally", actorId: "e"` → мітка на `e` від Годрика; `attack before` Годрика по `e` → +15 % в `actionModifiers`; після трьох влучань по союзниках — усе одно +15 %; `hit` по самому Годрику мітки **не** ставить (`whose: "ally"`).
+  - **Корона лева:** `findFlags(ps, "godric", "moraleChance")` дає 10.
   - **Намисто лева:** як поножі, 25 %.
-  - **Сет Годрика:** два `hit` в одному раунді → мораль цілі −1 один раз.
+  - **Сет Годрика:** два `hit` в одному раунді → `combatStats.morale` цілі −1 один раз.
 - [ ] **Step 2: Run** — FAIL.
 - [ ] **Step 3: Implement** дані.
 - [ ] **Step 4: Run** тест + `pnpm test:run data/library` — PASS.
@@ -487,6 +489,7 @@ const GODRIC_OFFENDER = "godric-offender";
 
 **Files:**
 - Modify: `data/library/artifacts.ts`
+- Modify: `lib/utils/abilities/registry/effects/state.ts:~56` (`applyCondition`: для `no_reaction` одразу `actionFlags.hasUsedReaction = true`, бо відсіч перевіряє лише цей прапорець, `retaliation.ts:64`, а умова інакше діє тільки з наступного ходу цілі)
 - Test: `lib/utils/battle/artifact-sets/__tests__/hero-sets.test.ts`
 
 Дані:
@@ -496,16 +499,16 @@ const GODRIC_OFFENDER = "godric-offender";
   key: "set-dawn-regalia", name: "Регалії світанку", heroName: "Ізабель", iconKey: "dawn-regalia",
   description: "Повний комплект: коли будь-який союзник падає нижче 50 % HP, «Сурми світанку» звучать удруге — усі союзники +2 ініціативи і +10 % шкоди на 2 раунди та +1 моралі (1 раз за бій).",
   appearanceDescription: "Корона, намисто й обладунок належали полководцям Грифонової імперії, що вели війська на світанку. Зібрані разом, вони пам'ятають той ранковий клич — і повторюють його саме тоді, коли стрій починає хитатися.",
-  abilities: [{ id: "dawn-regalia-second-call", name: "Другий поклик сурм", trigger: { event: "roundStart" }, condition: { type: "hpBelow", who: "anyAlly", percent: 50 }, limits: { perBattle: 1 }, effects: [
+  abilities: [{ id: "dawn-regalia-second-call", name: "Другий поклик сурм", trigger: { event: "roundStart" }, condition: { type: "any", conditions: [{ type: "hpBelow", who: "self", percent: 50 }, { type: "hpBelow", who: "anyAlly", percent: 50 }] }, limits: { perBattle: 1 }, effects: [
     { kind: "modifyStat", stat: "initiative", flat: 2, duration: { rounds: 2 }, target: "allAllies" },
     { kind: "damageBonus", filter: { kind: "all" }, percent: 10, duration: { rounds: 2 }, target: "allAllies" },
     { kind: "changeMorale", delta: 1, target: "allAllies" },
   ] }],
   artifacts: [
     { key: "crown-of-leadership", name: "Корона лідерства", slot: "helmet", rarity: "epic", iconKey: "crown-of-leadership",
-      description: "Союзник, у якого спрацювала мораль, отримує +10 % шкоди на 1 раунд.",
-      appearanceDescription: "Скромний золотий обруч без жодного каменя — справжній полководець не потребує прикрас. Та варто бійцю поруч відчути приплив відваги, як корона спалахує, і його наступний удар стає вдвічі впевненішим.",
-      abilities: [{ id: "crown-of-leadership-spark", name: "Іскра відваги", trigger: { event: "moraleCheck", result: "success", whose: "ally" }, effects: [{ kind: "damageBonus", filter: { kind: "all" }, percent: 10, duration: { rounds: 1 }, target: "eventActor" }] }] },
+      description: "Усі союзники отримують +5 % до шансу додаткового ходу від моралі.",
+      appearanceDescription: "Скромний золотий обруч без жодного каменя — справжній полководець не потребує прикрас. Досить того, що його бачать над строєм: воїни поруч стають сміливішими й частіше кидаються вперед, не чекаючи наказу.",
+      abilities: [{ id: "crown-of-leadership-spark", name: "Іскра відваги", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "moraleChance", percent: 5, target: "allAllies" }] }] },
     { key: "necklace-of-victory", name: "Намисто перемоги", slot: "necklace", rarity: "epic", iconKey: "necklace-of-victory",
       description: "Вбивство ворога будь-ким із партії дає союзникам +1 моралі (1 раз за раунд).",
       appearanceDescription: "Цим орденом Айвен Грифон нагороджував Маршалів Перемоги у війні Четвертого затемнення. Кожна здобута перемога відбивається в його золоті, і військо поруч з ним стає трохи сміливішим.",
@@ -513,7 +516,7 @@ const GODRIC_OFFENDER = "godric-offender";
     { key: "armor-of-valor", name: "Обладунок звитяги", slot: "armor", rarity: "epic", iconKey: "armor-of-valor",
       description: "Коли союзник падає нижче 30 % HP, усі союзники лікуються на 5 % max HP щораунду 2 раунди (1 раз за бій).",
       appearanceDescription: "Обладунок освячений у соборі Ельрата, і на нагруднику викарбувано грифона, що закриває крилами пташенят. Коли хтось із побратимів стікає кров'ю, крила наче розгортаються над усім загоном.",
-      abilities: [{ id: "armor-of-valor-wings", name: "Крила грифона", trigger: { event: "roundStart" }, condition: { type: "hpBelow", who: "anyAlly", percent: 30 }, limits: { perBattle: 1 }, effects: [{ kind: "hot", healPerRound: { percentOf: "maxHp", value: 5 }, duration: { rounds: 2 }, target: "allAllies" }] }] },
+      abilities: [{ id: "armor-of-valor-wings", name: "Крила грифона", trigger: { event: "roundStart" }, condition: { type: "any", conditions: [{ type: "hpBelow", who: "self", percent: 30 }, { type: "hpBelow", who: "anyAlly", percent: 30 }] }, limits: { perBattle: 1 }, effects: [{ kind: "hot", healPerRound: { percentOf: "maxHp", value: 5 }, duration: { rounds: 2 }, target: "allAllies" }] }] },
   ],
 },
 {
@@ -531,25 +534,25 @@ const GODRIC_OFFENDER = "godric-offender";
       appearanceDescription: "Ікла перевертня Кривавого Кігтя, що спустошував села біля Талонгарда, доки його не зарубав Лицар Дракона. Звірина спрага досі живе в них і віддає власнику силу кожного поваленого ворога.",
       abilities: [{ id: "necklace-of-the-bloody-claw-feast", name: "Кривава спрага", trigger: { event: "kill", role: "killer" }, effects: [{ kind: "heal", amount: { percentOf: "maxHp", value: 15 }, target: "self" }] }] },
     { key: "cursed-ring", name: "Проклятий перстень", slot: "ring1", rarity: "epic", iconKey: "cursed-ring",
-      description: "Вбивство вивільняє отруйну хмару: усі вороги отруєні на 5 % шкоди атаки Раїлага щораунду, 2 раунди (1 раз за раунд).",
+      description: "Вбивство вивільняє отруйну хмару: усі вороги отруєні на 15 % шкоди атаки Раїлага щораунду, 2 раунди (1 раз за раунд).",
       appearanceDescription: "Злодії виколупали діамант з персня вбитого некроманта Фанка — і прокляття все одно їх знайшло. Тепер перстень видихає отруйний туман щоразу, коли поруч обривається чиєсь життя.",
-      abilities: [{ id: "cursed-ring-cloud", name: "Отруйна хмара", trigger: { event: "kill", role: "killer" }, limits: { perRound: 1 }, effects: [{ kind: "dot", damagePerRound: { percentOf: "ownerAttack", value: 5 }, damageType: "poison", duration: { rounds: 2 }, target: "allEnemies" }] }] },
+      abilities: [{ id: "cursed-ring-cloud", name: "Отруйна хмара", trigger: { event: "kill", role: "killer" }, limits: { perRound: 1 }, effects: [{ kind: "dot", damagePerRound: { percentOf: "ownerAttack", value: 15 }, damageType: "poison", duration: { rounds: 2 }, target: "allEnemies" }] }] },
   ],
 },
 ```
 
 - [ ] **Step 1: Failing tests:**
-  - **Корона лідерства:** `moraleCheck success` з `actorId: "ally"` → у `ally` `damageBonus` 10 %; власний успіх Ізабель — нічого (`whose: "ally"`).
-  - **Намисто перемоги:** `kill` союзником → мораль усіх союзників +1; друге вбивство в раунді — без змін.
-  - **Обладунок звитяги:** `roundStart`, союзник 20/100 → у всіх союзників активний `hotHeal`; наступний `roundStart` — без нового.
+  - **Корона лідерства:** `findFlags(ps, "ally", "moraleChance")` і `findFlags(ps, "isabel", "moraleChance")` дають 5.
+  - **Намисто перемоги:** `kill` союзником → `combatStats.morale` усіх союзників +1; друге вбивство в раунді — без змін.
+  - **Обладунок звитяги:** `roundStart`, союзник 20/100 → у всіх союзників активний `hotHeal`; наступний `roundStart` — без нового; окремо: сама Ізабель 20/100 при здорових союзниках → теж спрацьовує.
   - **Сет Ізабель:** `roundStart` союзник 40/100 → `collectModifiers` ініціатива +2 і шкода +10 %; повтор — не спрацьовує.
   - **Місячний клинок:** `attack before` по цілі 40/100 → +15 %; по 60/100 — 0.
   - **Намисто кривавого кігтя:** `kill` → Раїлаг +15 % max HP.
-  - **Проклятий перстень:** `kill` → у всіх живих ворогів `dotDamage`.
-  - **Сет Раїлага:** `hit`, `rng: seq(0)` → у цілі умова `no_reaction`; `rng: seq(0.99)` → немає.
+  - **Проклятий перстень:** `kill`, атака власника в середньому ≥ 20 → у всіх живих ворогів `dotDamage` ≥ 3 (15 % з округленням вниз; 5 % давало б 0, `amount.ts:55`, `hp.ts:111`).
+  - **Сет Раїлага:** `hit`, `rng: seq(0)` → у цілі умова `no_reaction` і `actionFlags.hasUsedReaction === true`; `rng: seq(0.99)` → немає. Плюс `runAttackPhase`: Раїлаг б'є ціль з `counterAttack`, сет спрацьовує (`seq(0)`) → відсічі немає.
 - [ ] **Step 2: Run** — FAIL.
-- [ ] **Step 3: Implement** дані.
-- [ ] **Step 4: Run** `pnpm test:run lib/utils/battle/artifact-sets data/library` — PASS.
+- [ ] **Step 3: Implement** правка `applyCondition` і дані.
+- [ ] **Step 4: Run** `pnpm test:run lib/utils/battle lib/utils/abilities data/library` — PASS.
 - [ ] **Step 5: Commit** `feat(library): Isabel and Raelag artifact sets`.
 
 ---
@@ -572,11 +575,14 @@ const GODRIC_OFFENDER = "godric-offender";
   const idByName = new Map(rows.map((r) => [r.name, r.id]));
   const equipped = { mainHand: weapons[b.weapon], ...Object.fromEntries(librarySet.artifacts.map((a) => [a.slot, idByName.get(a.name)!])) };
   ```
-  Ключі `equipped` — ключі сітки з бібліотеки (`ring1`, `cape`…), як їх читає `extract-artifacts.ts:16`. Перед прогоном переконатися на одному персонажі (`--debug`), що `findCompletedSets` бачить сет повним.
+  Ключі `equipped` — ключі сітки з бібліотеки (`ring1`, `cape`…), як їх читає `extract-artifacts.ts:16`. Для білду `leader` з `--sets` **не** класти `mainHand` (лук єдинорога — його зброя; інакше `attacks[0]` залежить від порядку в БД). Перед прогоном переконатися на одному персонажі (`--debug`), що `findCompletedSets` бачить сет повним.
+  Ще дві правки автоплею, без яких сет Айвена й Зехіра не виміряти:
+  - дальня атака: `targetIds` / `attackRolls` — до `actor.combatStats.maxTargets` найслабших ворогів (зараз один `targetId`, `balance-library.ts:263`);
+  - закляття `kind: "enemy"`: брати кількість цілей з `spellTargetingFor(...)` (`pickSpell`, `balance-library.ts:193`).
 - [ ] **Step 2:** прогнати локально (Docker-БД):
-  `pnpm balance-library --runs=12 --levels=3,6,10 --parties=mixed,martial,caster,leader` і те саме з `--sets --reuse`. Зберегти обидві таблиці.
+  `pnpm balance-library --runs=12 --levels=3,6,10 --parties=mixed,martial,caster,leader` і те саме з `--sets` (без `--reuse`, щоб засіялися актуальні здібності; після правок цифр — так само без `--reuse`). Зберегти обидві таблиці.
 - [ ] **Step 3:** порівняти: сер. раунди, перемоги, HP лишилось, шкода за хід на роль. Ціль — приріст ефективності героя з сетом ≤ ~15–20 %. Якщо сет вище — урізати відсотки / шанси / ліміти в `artifacts.ts` (оновити описи й тести), прогнати знову.
-- [ ] **Step 4:** записати `docs/reports/2026-10-08-artifact-sets-balance.md`: обидві таблиці, висновки по кожному з трьох змодельованих сетів, аргументований висновок для трьох незмодельованих (Семгрун, Ізабель, Раїлаг — немає відповідних білдів у симуляторі), зміни цифр, якщо були.
+- [ ] **Step 4:** записати `docs/reports/2026-10-08-artifact-sets-balance.md`: обидві таблиці, висновки по кожному з трьох змодельованих сетів, аргументований висновок для трьох незмодельованих (Семгрун, Ізабель, Раїлаг — немає відповідних білдів у симуляторі), зміни цифр, якщо були, і відоме обмеження: майстер атаки дозволяє вибрати кілька цілей і для ближньої атаки, сервер таку відхиляє (`useAttackWizard.ts:78`, `run-attack-phase.ts:149`) — з луком помітніше.
 - [ ] **Step 5:** `pnpm lint` і `pnpm test:run` — чисто. Commit `chore(balance): artifact sets simulation report`.
 
 ---
