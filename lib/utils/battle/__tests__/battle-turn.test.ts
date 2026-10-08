@@ -1,19 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import type { CriticalEffect, CriticalEffectType } from "@/lib/constants/critical-effects";
+import { makeEffect } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 import { applyCriticalEffect } from "@/lib/utils/battle/attack";
 import { processStartOfRound, processStartOfTurn } from "@/lib/utils/battle/battle-turn";
 import type { ActiveEffect } from "@/types/battle";
 
-const debuff = (type: string, duration: number): ActiveEffect => ({
-  id: `e-${type}`,
-  name: type,
-  type: "debuff",
-  duration,
-  appliedAt: { round: 1, timestamp: new Date() },
-  effects: [{ type, value: 0 }],
-});
+const debuff = (type: string, duration: number): ActiveEffect => makeEffect(`e-${type}`, { name: type, type: "debuff", duration, effects: [{ type, value: 0 }] });
 
 describe("processStartOfTurn", () => {
   it("дебаф на 1 раунд діє в цей хід і лише потім спливає", () => {

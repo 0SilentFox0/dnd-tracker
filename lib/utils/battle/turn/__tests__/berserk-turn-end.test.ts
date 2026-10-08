@@ -2,10 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import { runBerserkTurn } from "../berserk";
 
-import { makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import type { ActiveEffect } from "@/types/battle";
+import { makeEffect, makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 
-const lastTurnEffect = { id: "adv", name: "adv", type: "buff", duration: 1, expireAtTurnEnd: true, appliedAt: { round: 1, timestamp: new Date(0) }, effects: [] } as ActiveEffect;
+const lastTurnEffect = makeEffect("adv", { duration: 1, expireAtTurnEnd: true });
 
 describe("berserk turn end", () => {
   it("expires turn-end effects of the berserker like a normal turn end", () => {

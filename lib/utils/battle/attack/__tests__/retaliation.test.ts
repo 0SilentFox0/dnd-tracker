@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { AttackType, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { CRITICAL_FAIL_EFFECTS, CRITICAL_SUCCESS_EFFECTS, type CriticalEffect } from "@/lib/constants/critical-effects";
-import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
+import { makeEffect, makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { resolveRetaliation, type RetaliationInput } from "@/lib/utils/battle/attack/retaliation";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
@@ -142,7 +142,7 @@ describe("resolveRetaliation", () => {
   });
 
   it("consumes the defender's ownAttack effect and the attacker's attackAgainst effect", () => {
-    const e = (id: string, consumeOn: "ownAttack" | "attackAgainst") => ({ id, name: id, type: "buff", duration: 2, appliedAt: { round: 1, timestamp: new Date(0) }, effects: [], consumeOn }) as never;
+    const e = (id: string, consumeOn: "ownAttack" | "attackAgainst") => makeEffect(id, { consumeOn });
 
     const a = attacker();
 
