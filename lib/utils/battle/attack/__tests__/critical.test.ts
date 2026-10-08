@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { applyCriticalEffect } from "../critical";
+import { applyCriticalEffect, critFlavorFor } from "../critical";
 
-import type { CriticalEffect, CriticalEffectType } from "@/lib/constants/critical-effects";
+import { type CriticalEffect, type CriticalEffectType, getCriticalEffect } from "@/lib/constants/critical-effects";
 import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 
@@ -127,5 +127,25 @@ describe("applyCriticalEffect", () => {
 
     expect(out.basicInfo.id).toBe("t1");
     expect(collectModifiers([out], "t1", { stat: "armor" }).flat).toBe(-2);
+  });
+});
+
+describe("critFlavorFor", () => {
+  const effect = getCriticalEffect(6, "success") as CriticalEffect;
+
+  const seed = { battleId: "b1", round: 2, attackerId: "x", targetId: "y" };
+
+  it("substitutes names and is deterministic for a seed", () => {
+    const a = critFlavorFor(effect, "Семгрун", "Бес", seed);
+
+    expect(a).toBe(critFlavorFor(effect, "Семгрун", "Бес", seed));
+    expect(a).toContain("Семгрун");
+    expect(a).not.toContain("{");
+  });
+
+  it("the suffix is part of the seed", () => {
+    const phrases = new Set(["a", "b", "c", "d", "e", "f"].map((suffix) => critFlavorFor(effect, "A", "B", { ...seed, suffix })));
+
+    expect(phrases.size).toBeGreaterThan(1);
   });
 });

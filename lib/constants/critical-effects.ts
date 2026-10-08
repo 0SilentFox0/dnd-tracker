@@ -388,17 +388,3 @@ export function getRandomCriticalEffect(
 
   return getCriticalEffect(randomId, type) || effects[0];
 }
-
-export function critFlavor(
-  effect: CriticalEffect,
-  names: { attacker: string; target: string },
-  seed: string,
-): string {
-  let sum = 0;
-
-  for (let i = 0; i < seed.length; i++) sum += seed.charCodeAt(i);
-
-  return effect.flavor[sum % effect.flavor.length]
-    .replaceAll("{attacker}", names.attacker)
-    .replaceAll("{target}", names.target);
-}

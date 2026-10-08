@@ -65,6 +65,21 @@ function specFor(effect: CriticalEffect): EffectSpec | null {
   }
 }
 
+export function critFlavorFor(
+  effect: CriticalEffect,
+  attackerName: string,
+  targetName: string,
+  seed: { battleId: string; round: number; attackerId: string; targetId: string; suffix?: string },
+): string {
+  const key = `${seed.battleId}:${seed.round}:${seed.attackerId}:${seed.targetId}${seed.suffix ? `:${seed.suffix}` : ""}`;
+
+  let sum = 0;
+
+  for (let i = 0; i < key.length; i++) sum += key.charCodeAt(i);
+
+  return effect.flavor[sum % effect.flavor.length].replaceAll("{attacker}", attackerName).replaceAll("{target}", targetName);
+}
+
 export function applyCriticalEffect(
   participant: BattleParticipant,
   effect: CriticalEffect,

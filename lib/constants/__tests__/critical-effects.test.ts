@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  critFlavor,
   CRITICAL_FAIL_EFFECTS,
   CRITICAL_SUCCESS_EFFECTS,
   type CriticalEffect,
@@ -23,16 +22,6 @@ describe("critical effect flavor", () => {
     const provoke = CRITICAL_FAIL_EFFECTS.find((e) => e.effect.type === "provoke_opportunity_attack") as CriticalEffect;
 
     for (const f of provoke.flavor) expect(f).not.toMatch(/відповід|карає|б'є/);
-  });
-
-  it("substitutes names and is deterministic for a seed", () => {
-    const e = getCriticalEffect(6, "success") as CriticalEffect;
-
-    const a = critFlavor(e, { attacker: "Семгрун", target: "Бес" }, "b1:2:x:y");
-
-    expect(a).toBe(critFlavor(e, { attacker: "Семгрун", target: "Бес" }, "b1:2:x:y"));
-    expect(a).toContain("Семгрун");
-    expect(a).not.toContain("{");
   });
 
   it("replaces half damage with a slipping weapon", () => {

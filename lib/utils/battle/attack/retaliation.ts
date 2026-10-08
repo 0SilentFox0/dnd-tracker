@@ -4,12 +4,12 @@ import { appendHpChanges, type AttackFlow, getP, put } from "./process/ability-f
 import { buildRetaliationAction, type BuildRetaliationParams } from "./process/actions";
 import { resolveHit } from "./process/hit";
 import { activeEffectIds, consumeAttackEffects } from "./consume-effects";
-import { applyCriticalEffect } from "./critical";
+import { applyCriticalEffect, critFlavorFor } from "./critical";
 import { getDisabledAttackKinds } from "./disabled-attacks";
 import { calculateAttackRoll } from "./roll";
 
 import { AttackType } from "@/lib/constants/battle";
-import { critFlavor, type CriticalEffect } from "@/lib/constants/critical-effects";
+import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { findParticipant, isActive, withSelf } from "@/lib/utils/abilities/engine/participants";
 import type { Rng } from "@/lib/utils/abilities/engine/types";
@@ -120,11 +120,13 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
   const retaliationCrit = roll.isCriticalFail ? roll.criticalEffect : hit?.hitDamage.criticalEffectApplied;
 
   const critFlavorText = retaliationCrit
-    ? critFlavor(
-        retaliationCrit,
-        { attacker: getP(flow, defenderId).basicInfo.name, target: getP(flow, attackerId).basicInfo.name },
-        `${battleId}:${round}:${defenderId}:${attackerId}:r`,
-      )
+    ? critFlavorFor(retaliationCrit, getP(flow, defenderId).basicInfo.name, getP(flow, attackerId).basicInfo.name, {
+        battleId,
+        round,
+        attackerId: defenderId,
+        targetId: attackerId,
+        suffix: "r",
+      })
     : undefined;
 
   const battleAction = buildRetaliationAction({
