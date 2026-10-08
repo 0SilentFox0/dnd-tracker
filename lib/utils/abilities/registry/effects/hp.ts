@@ -2,6 +2,7 @@ import { amountLabel } from "../labels";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { CombatStatus } from "@/lib/constants/battle";
+import { DAMAGE_ELEMENT_LABELS } from "@/lib/constants/damage";
 import { resolveAmount } from "@/lib/utils/abilities/engine/amount";
 import { eventDamage, eventSpellRoll } from "@/lib/utils/abilities/engine/events";
 import { applyRawDamage } from "@/lib/utils/abilities/engine/hp";
@@ -176,10 +177,12 @@ export function applyHot(input: EffectApplyInput<Of<"hot">>): EffectApplyResult 
   return { participants: ps, messages };
 }
 
-export const describeDealDamage = (e: Of<"dealDamage">) => `шкода ${amountLabel(e.amount)}${e.damageType ? ` ${e.damageType}` : ""}${e.falloff ? ` (${e.falloff.join("% → ")}%)` : ""}`;
+const damageTypeLabel = (type: string) => DAMAGE_ELEMENT_LABELS[type] ?? type;
+
+export const describeDealDamage = (e: Of<"dealDamage">) => `шкода ${amountLabel(e.amount)}${e.damageType ? ` ${damageTypeLabel(e.damageType)}` : ""}${e.falloff ? ` (${e.falloff.join("% → ")}%)` : ""}`;
 
 export const describeHeal = (e: Of<"heal">) => `${e.revive ? "воскресіння" : "лікування"} ${amountLabel(e.amount)}`;
 
-export const describeDot = (e: Of<"dot">) => `${e.damageType} ${amountLabel(e.damagePerRound)}/раунд × ${e.duration?.rounds ?? "?"} р.`;
+export const describeDot = (e: Of<"dot">) => `${damageTypeLabel(e.damageType)} ${amountLabel(e.damagePerRound)}/раунд × ${e.duration?.rounds ?? "?"} р.`;
 
 export const describeHot = (e: Of<"hot">) => `лікування ${amountLabel(e.healPerRound)}/раунд × ${e.duration?.rounds ?? "?"} р.`;

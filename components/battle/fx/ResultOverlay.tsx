@@ -22,13 +22,13 @@ function RetaliationLine({ retaliation }: { retaliation?: RetaliationOutcome }) 
   );
 }
 
-function CritEffectLine({ effect }: { effect?: CritEffectFx }) {
+function CritEffectLine({ effect, tone = "text-[#ffd9a8]" }: { effect?: CritEffectFx; tone?: string }) {
   if (!effect) return null;
 
   return (
     <div className="relative mt-3 max-w-xs">
-      <div className="hud-sc text-base font-bold text-[#ffd9a8]">{effect.name}</div>
-      {effect.flavor && <div className="mt-1 text-sm italic text-[#a89c88]">{effect.flavor}</div>}
+      <div className={cn("hud-sc text-base font-bold", tone)}>{effect.name}</div>
+      {effect.flavor && <div className="mt-1 text-sm italic text-[#a89c88] animate-[hud-fade_.6s_.5s_both]">{effect.flavor}</div>}
     </div>
   );
 }
@@ -78,14 +78,30 @@ export function ResultOverlay() {
     );
   }
 
+  if (result.kind === "miss" && result.critFail) {
+    return (
+      <div className={cn(shell, "bg-[radial-gradient(circle_at_50%_42%,rgba(110,24,20,.45),rgba(10,5,5,.94)_60%)]")}>
+        <svg className="pointer-events-none absolute inset-0 size-full" viewBox="0 0 390 812" preserveAspectRatio="none" aria-hidden>
+          <path d="M210 0 L190 120 L225 190 L180 300 L205 360 L170 470" fill="none" stroke="rgba(190,70,60,.45)" strokeWidth="2" className="[stroke-dasharray:400] [stroke-dashoffset:400] animate-[hud-crack_.35s_.45s_forwards]" />
+        </svg>
+        <div className={cn(die, "relative mb-5 size-[88px] bg-[#4a1a17] text-[40px] text-[#d9a39c]")}>1</div>
+        <div className="hud-sc relative text-[34px] font-extrabold tracking-[.12em] text-[#c0564a] animate-[hud-shake-title_.5s_.45s_both]">Критична невдача</div>
+        <CritEffectLine effect={result.critFail} tone="text-[#e0a39b]" />
+        <div className="relative mt-3 text-base">повз {result.targetName}</div>
+        <div className="relative mt-1.5 text-sm text-[#a89c88]">ваш результат {result.d20} · тепер відомо: AC {result.known}</div>
+        <RetaliationLine retaliation={result.retaliation} />
+        <button type="button" onClick={close} className={cn(cta, "relative border border-[#7a3a33] text-[#e0a39b]")}>Далі</button>
+      </div>
+    );
+  }
+
   if (result.kind === "miss") {
     return (
       <div className={cn(shell, "bg-[rgba(8,8,10,.86)]")}>
         <div className="relative mb-6 h-10 w-56" aria-hidden>
           {[180, 220, 150].map((w, i) => <i key={i} className="absolute left-0 h-0.5 rounded bg-gradient-to-r from-transparent to-[#9a9aa2] animate-[hud-whoosh_.45s_ease-out_both]" style={{ top: 8 + i * 12, width: w, animationDelay: `${i * 60}ms` }} />)}
         </div>
-        <div className="hud-sc text-[40px] font-extrabold tracking-[.2em] text-[#8f8f96]">{result.critFail ? "Критична невдача" : "Промах"}</div>
-        <CritEffectLine effect={result.critFail} />
+        <div className="hud-sc text-[40px] font-extrabold tracking-[.2em] text-[#8f8f96]">Промах</div>
         <div className="mt-3 text-base">повз {result.targetName}</div>
         <div className="mt-1.5 text-sm text-[#a89c88]">ваш результат {result.d20} · тепер відомо: AC {result.known}</div>
         <RetaliationLine retaliation={result.retaliation} />
@@ -100,8 +116,10 @@ export function ResultOverlay() {
 
   return (
     <div onClick={close} className={cn(shell, crit ? "bg-[radial-gradient(circle_at_50%_40%,rgba(192,57,43,.45),rgba(8,6,5,.94)_60%)]" : "bg-[radial-gradient(circle_at_50%_42%,rgba(156,42,29,.32),rgba(8,6,5,.93)_58%)]")}>
-      <div className={cn("absolute left-[-10%] right-[-10%] top-[40%] animate-[hud-slash_.3s_ease-out_both]", crit ? "h-1.5 rotate-[-24deg] bg-gradient-to-r from-transparent via-white to-transparent shadow-[0_0_24px_#ff9a6a]" : "h-[3px] rotate-[-18deg] bg-gradient-to-r from-transparent via-hud-bone to-transparent opacity-80")} />
-      <div className={cn("hud-sc relative font-extrabold tracking-[.12em] animate-[hud-rise_.5s_.35s_both]", crit ? "text-[34px] leading-10 text-[#ffd9a8]" : "text-[34px] text-[var(--ink)]")}>{crit ? "Критичне влучання" : "Влучання"}</div>
+      {crit && <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(255,230,200,.55),transparent_60%)] animate-[hud-fade_.6s_.6s_reverse_both]" />}
+      {crit && <div className={cn(die, "relative mb-4 size-[88px] bg-[#c0392b] text-[40px] text-[#fff3d1]")}>{result.d20}</div>}
+      <div className={cn("absolute left-[-10%] right-[-10%] top-[40%] animate-[hud-slash_.3s_ease-out_both]", crit ? "[animation-delay:.6s] h-1.5 rotate-[-24deg] bg-gradient-to-r from-transparent via-white to-transparent shadow-[0_0_24px_#ff9a6a]" : "h-[3px] rotate-[-18deg] bg-gradient-to-r from-transparent via-hud-bone to-transparent opacity-80")} />
+      <div className={cn("hud-sc relative font-extrabold tracking-[.12em] animate-[hud-rise_.5s_both]", crit ? "text-[34px] leading-10 text-[#ffd9a8]" : "text-[34px] text-[var(--ink)]")}>{crit ? "Критичне влучання" : "Влучання"}</div>
       <div className={cn("hud-sc relative mt-4 font-extrabold animate-[hud-pop_.45s_.65s_cubic-bezier(.16,1,.3,1)_both]", crit ? "text-[64px] text-[#ff6a4d] [text-shadow:0_0_30px_rgba(255,90,60,.7)]" : "text-[52px] text-[#e9705a]")}>−{result.damage}</div>
       {crit && <CritEffectLine effect={result.critEffect} />}
       <div className="relative mt-3 text-[15px] text-[#d9cfbd]">{result.targetName}{result.downed ? " · повалений" : ""}</div>

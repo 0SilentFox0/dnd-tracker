@@ -44,6 +44,31 @@ describe("ResultOverlay", () => {
     expect(screen.queryByText("Промах")).toBeNull();
   });
 
+  it("критична невдача — кубик «1», без плоского «Промах»; звичайний промах без кубика", () => {
+    const a = fakeScene({ result: { kind: "miss", targetName: "Гоблін", d20: 1, known: "?", critFail: { name: "Падіння", flavor: "Ви спотикаєтесь." } } });
+
+    const { container } = render(<ResultOverlay />, { wrapper: a.wrapper });
+
+    expect(screen.getByText("Падіння")).toBeTruthy();
+    expect(within(container).getByText("1", { selector: "div" })).toBeTruthy();
+    cleanup();
+
+    const b = fakeScene({ result: { kind: "miss", targetName: "Гоблін", d20: 13, known: "?" } });
+
+    const plain = render(<ResultOverlay />, { wrapper: b.wrapper });
+
+    expect(screen.getByText("Промах")).toBeTruthy();
+    expect(within(plain.container).queryByText("13", { selector: "div" })).toBeNull();
+  });
+
+  it("критичне влучання показує кубик з d20", () => {
+    const { wrapper } = fakeScene({ result: { kind: "crit", targetName: "Циклоп", damage: 24, downed: false, d20: 20 } });
+
+    const { container } = render(<ResultOverlay />, { wrapper });
+
+    expect(within(container).getByText("20", { selector: "div" })).toBeTruthy();
+  });
+
   it("закривається кнопкою; паніка — сама через 4 с", () => {
     vi.useFakeTimers();
 
