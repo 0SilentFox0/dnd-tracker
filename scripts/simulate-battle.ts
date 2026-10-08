@@ -9,7 +9,7 @@
 import type { Prisma } from "@prisma/client";
 
 import { abilityActionSchema, createAbilityActionMutation } from "../app/api/campaigns/[id]/battles/[battleId]/ability-action/ability-action-mutation";
-import { attackBodySchema, attackMutation } from "../app/api/campaigns/[id]/battles/[battleId]/attack/attack-mutation";
+import { attackBodySchema, createAttackMutation } from "../app/api/campaigns/[id]/battles/[battleId]/attack/attack-mutation";
 import { bonusActionSchema, createBonusActionMutation } from "../app/api/campaigns/[id]/battles/[battleId]/bonus-action/bonus-action-mutation";
 import { moraleCheckMutation } from "../app/api/campaigns/[id]/battles/[battleId]/morale-check/morale-check-mutation";
 import { nextTurnMutation } from "../app/api/campaigns/[id]/battles/[battleId]/next-turn/next-turn-mutation";
@@ -283,11 +283,11 @@ function printState(title: string) {
 
 const START = { access: "dm" as const, requireStatus: "prepared" as const, mutate: createStartMutation() };
 
-const ATTACK = { access: "member" as const, requireStatus: "active" as const, schema: attackBodySchema, mutate: attackMutation };
-
 const NEXT = { access: "currentController" as const, requireStatus: "active" as const, mutate: nextTurnMutation };
 
 const summonDeps = { loadPool: async (campaignId: string) => ({ units: await prisma.unit.findMany({ where: { campaignId } }), races: await prisma.race.findMany({ where: { campaignId } }) }) };
+
+const ATTACK = { access: "member" as const, requireStatus: "active" as const, schema: attackBodySchema, mutate: createAttackMutation(summonDeps) };
 
 const BONUS = { access: "member" as const, requireStatus: "active" as const, schema: bonusActionSchema, mutate: createBonusActionMutation(summonDeps) };
 
