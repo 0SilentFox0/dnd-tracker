@@ -7,7 +7,7 @@ const AVATAR_SPELL = "avatar";
 // Беатріс: control spells from the spells spec §2 «Спеціальні»
 const CONTROL_SPELLS = ["roots", "entangle", "slow", "blindness", "confusion", "berserk", "puppet-master"];
 
-// seed maps school keys to SpellGroup ids
+// school = LibrarySpell.school; the seed maps it to the SpellGroup id like branch spellSchool
 const SPELL_SCHOOLS = [
   { key: "light", name: "Світло" },
   { key: "dark", name: "Темрява" },
@@ -20,7 +20,7 @@ const SEMGRUN_MARK = "semgrun-evaded";
 const zehirSchoolAbilities: Ability[] = SPELL_SCHOOLS.map(({ key, name }) => ({
   id: `zehir-school-${key}`,
   name: `Учень усіх шкіл: ${name}`,
-  trigger: { event: "spellCast", phase: "after", role: "caster", school: key },
+  trigger: { event: "spellCast", phase: "after", role: "caster", school: name },
   limits: { perBattle: 1 },
   effects: [{ kind: "damageBonus", filter: { kind: "magic" }, percent: 15, duration: { rounds: 99 }, target: "self" }],
 }));
