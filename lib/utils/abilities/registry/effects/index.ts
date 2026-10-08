@@ -100,7 +100,7 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
     kind: "summon",
     label: "Прикликати юнітів",
     static: false,
-    fields: [{ name: "unitId", label: "Конкретний юніт (id, замість групи і Tier)", input: "text", optional: true }, { name: "group", label: "Група (раса юнітів)", input: "text", optional: true }, { name: "tier", label: "Tier (рівень юніта 1–7)", input: "number", optional: true }, { name: "count", label: "Кількість", input: "number", optional: true }],
+    fields: [{ name: "unitId", label: "Конкретний юніт (замість групи і Tier)", input: "unit", optional: true }, { name: "group", label: "Група (раса юнітів)", input: "text", optional: true }, { name: "tier", label: "Tier (рівень юніта 1–7)", input: "number", optional: true }, { name: "count", label: "Кількість", input: "number", optional: true }],
     describe: describeSummon,
     apply: applySummon,
   },

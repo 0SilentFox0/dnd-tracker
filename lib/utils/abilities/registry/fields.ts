@@ -11,7 +11,8 @@ export type FieldInput =
   | "strings"
   | "toggle"
   | "numberList"
-  | "spells";
+  | "spells"
+  | "unit";
 
 export interface FieldMeta {
   name: string;
