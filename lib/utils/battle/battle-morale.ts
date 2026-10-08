@@ -57,7 +57,7 @@ export function checkMorale(
       result.hasExtraTurn = true;
       result.message = `⭐ ${participant.basicInfo.name} отримав додатковий хід! (Мораль +${currentMorale}, кидок: ${d10Roll}, потрібно: >=${Math.ceil(minRoll)}${bonusHit ? `, бонус лідерства +${bonus}%` : ""})`;
     } else {
-      result.message = `${participant.basicInfo.name} не отримав додатковий хід (Мораль +${currentMorale}, кидок: ${d10Roll}, потрібно: >=${Math.ceil(minRoll)})`;
+      result.message = `${participant.basicInfo.name} не отримав додатковий хід (Мораль +${currentMorale}, кидок: ${d10Roll}, потрібно: >=${Math.ceil(minRoll)}${bonus > 0 ? `; бонус лідерства +${bonus}% не спрацював` : ""})`;
     }
   } else {
     if (d10Roll >= minRoll) {

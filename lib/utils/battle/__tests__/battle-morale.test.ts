@@ -33,6 +33,8 @@ describe("checkMorale з прапорцями", () => {
 
     expect(checkMorale(p(1, lead), 1, undefined, () => 0).hasExtraTurn).toBe(true);
     expect(checkMorale(p(1, lead), 1, undefined, () => 0.99).hasExtraTurn).toBe(false);
+    expect(checkMorale(p(1, lead), 1, undefined, () => 0.99).message).toContain("бонус лідерства +15% не спрацював");
+    expect(checkMorale(p(1), 1, undefined, () => 0.99).message).not.toContain("лідерства");
     expect(checkMorale(p(1), 1, undefined, () => 0).hasExtraTurn).toBe(false);
     expect(checkMorale(p(-2, lead), 1, undefined, () => 0).shouldSkipTurn).toBe(false);
     expect(checkMorale(p(-2, lead), 9, undefined, () => 0).shouldSkipTurn).toBe(true);
