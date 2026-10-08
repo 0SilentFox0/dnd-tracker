@@ -215,7 +215,7 @@ export const SPELLS: LibrarySpell[] = [
     description: "Повертає до бою полеглого союзника з 50 % максимального HP.",
     appearanceDescription:
       "Над тілом полеглого опускається колона м'якого світла, і в ній кружляють пелюстки білих лілій. Груди здіймаються в першому подиху, а очі відкриваються, сповнені тихого подиву.",
-    definition: def(0, { kind: "allyDead" }, [{ kind: "raiseDead", hpPercent: 50 }]),
+    definition: def(0, { kind: "allyDead" }, [{ kind: "heal", amount: { percentOf: "maxHp", value: 50 }, revive: true }]),
     raceModifiers: [],
   },
   {
@@ -627,7 +627,7 @@ export const SPELLS: LibrarySpell[] = [
     description: "Повертає до бою полеглих союзників з 30 % максимального HP.",
     appearanceDescription:
       "Над полеглими проростають молоді паростки, що за мить стають квітучими кущами. Коли пелюстки опадають, на їхньому місці підводяться воїни, з волоссям, у якому заплуталося листя.",
-    definition: def(0, { kind: "allAlliesDead" }, [{ kind: "raiseDead", hpPercent: 30 }]),
+    definition: def(0, { kind: "allAlliesDead" }, [{ kind: "heal", amount: { percentOf: "maxHp", value: 30 }, revive: true }]),
     raceModifiers: [],
   },
   {
