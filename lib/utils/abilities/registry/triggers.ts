@@ -1,7 +1,7 @@
 import type { FieldMeta } from "./fields";
 
 import { AttackType } from "@/lib/constants/battle";
-import { findParticipant } from "@/lib/utils/abilities/engine/participants";
+import { findParticipant, isActive } from "@/lib/utils/abilities/engine/participants";
 import type { Trigger, TriggerEvent } from "@/lib/utils/abilities/schema";
 import type { AbilityEvent } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
@@ -56,9 +56,23 @@ export const TRIGGER_REGISTRY: { [E in TriggerEvent]: TriggerDefinition<E> } = {
   hit: {
     event: "hit",
     label: "Влучання",
-    fields: [ATTACK_ROLE, ATTACK_KIND],
-    matches: (t, e, o) =>
-      e.type === "hit" && (!t.attackKind || t.attackKind === e.attackKind) && (t.role === "attacker" ? e.actorId : e.targetId) === id(o),
+    fields: [
+      ATTACK_ROLE,
+      { name: "whose", label: "Чия роль", input: "select", optional: true, options: [{ value: "self", label: "моя" }, { value: "ally", label: "іншого союзника" }] },
+      ATTACK_KIND,
+    ],
+    matches: (t, e, o, ps) => {
+      if (e.type !== "hit" || (t.attackKind && t.attackKind !== e.attackKind)) return false;
+
+      const subject = t.role === "attacker" ? e.actorId : e.targetId;
+
+      if (t.whose !== "ally") return subject === id(o);
+
+      const other = findParticipant(ps, subject);
+
+      return subject !== id(o) && !!other && isActive(other) && sameSide(other, o);
+    },
+    describe: (t) => (t.whose === "ally" ? ["іншого союзника"] : []),
   },
   kill: {
     event: "kill",

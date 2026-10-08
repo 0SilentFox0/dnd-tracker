@@ -18,6 +18,8 @@ const spellFields = {
   resolution: SpellResolutionSchema,
   spellEffects: z.array(EffectSchema),
   raceModifiers: z.array(RaceModifierSchema),
+  stackable: z.boolean(),
+  maxStacks: z.number().int().min(1).max(10).nullable(),
 };
 
 export const createSpellSchema = z.object({
@@ -32,6 +34,8 @@ export const createSpellSchema = z.object({
   resolution: spellFields.resolution.default({ kind: "auto" }),
   spellEffects: spellFields.spellEffects.default([]),
   raceModifiers: spellFields.raceModifiers.default([]),
+  stackable: spellFields.stackable.default(false),
+  maxStacks: spellFields.maxStacks.optional(),
 });
 
 export type CreateSpellInput = z.infer<typeof createSpellSchema>;

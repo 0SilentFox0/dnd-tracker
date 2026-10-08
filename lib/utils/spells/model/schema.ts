@@ -12,6 +12,7 @@ export const SpellTargetingSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("ally") }),
   z.object({ kind: z.literal("enemy") }),
   z.object({ kind: z.literal("allyDead") }),
+  z.object({ kind: z.literal("allAlliesDead") }),
   z.object({ kind: z.literal("area"), side: z.enum(["ally", "enemy"]), maxTargets: z.number().int().min(1).max(20) }),
   z.object({ kind: z.literal("allAllies") }),
   z.object({ kind: z.literal("allEnemies") }),
@@ -37,6 +38,8 @@ export const SpellDefinitionSchema = z.object({
   resolution: SpellResolutionSchema,
   effects: z.array(EffectSchema),
   raceModifiers: z.array(RaceModifierSchema),
+  stackable: z.boolean().optional(),
+  maxStacks: z.number().int().min(1).max(10).optional(),
 });
 
 export type SpellCost = z.infer<typeof SpellCostSchema>;

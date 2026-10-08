@@ -26,7 +26,7 @@ export const AmountSchema = z.union([
   z.number().nonnegative(),
   z.string().regex(DICE_RE),
   FormulaSchema,
-  z.object({ spellRoll: z.number().positive().max(500) }),
+  z.object({ spellRoll: z.union([z.number().positive().max(500), FormulaSchema]) }),
   z.object({ percentOf: z.enum(["eventDamage", "maxHp", "ownerAttack"]), value: z.number().positive() }),
 ]);
 

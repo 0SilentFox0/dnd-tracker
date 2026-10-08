@@ -78,6 +78,11 @@ export function resolveSpellTargets(
       return { ok: true, targetIds: ids((p) => isActive(p) && p.basicInfo.side !== side) };
     case "everyone":
       return { ok: true, targetIds: ids(isActive) };
+    case "allAlliesDead": {
+      const fallen = ids((p) => !isActive(p) && p.basicInfo.side === side);
+
+      return fallen.length > 0 ? { ok: true, targetIds: fallen } : fail("Немає полеглих союзників");
+    }
     case "allyDead": {
       if (picked.length !== 1) return fail("Оберіть одного полеглого союзника");
 

@@ -10,6 +10,7 @@ import { SelectInput } from "./SelectInput";
 import { SpellPickerField } from "./SpellPickerField";
 import { TextField } from "./TextField";
 import { ToggleField } from "./ToggleField";
+import { UnitPickerField } from "./UnitPickerField";
 
 import { useErrorsUnder } from "@/components/abilities/editor-context";
 import { FieldErrors } from "@/components/abilities/FieldErrors";
@@ -56,6 +57,8 @@ export function FieldRenderer({ meta, value, onChange, path }: { meta: FieldMeta
         return <NumberListField {...props} />;
       case "spells":
         return <SpellPickerField {...props} />;
+      case "unit":
+        return <UnitPickerField {...props} />;
       default:
         return null;
     }

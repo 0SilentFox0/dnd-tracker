@@ -19,6 +19,7 @@ export const TARGETING_KIND_OPTIONS = [
   { value: "ally", label: "Один союзник" },
   { value: "self", label: "Заклинатель" },
   { value: "allyDead", label: "Полеглий союзник" },
+  { value: "allAlliesDead", label: "Усі полеглі союзники" },
   { value: "area", label: "Область (до N цілей)" },
   { value: "allAllies", label: "Усі союзники" },
   { value: "allEnemies", label: "Усі вороги" },

@@ -34,6 +34,7 @@ export const CONDITION_REGISTRY: Record<Condition["type"], { label: string; fiel
   attackKind: { label: "Тип атаки", fields: [{ name: "kind", label: "Тип", input: "select", options: [{ value: AttackType.MELEE, label: "ближня" }, { value: AttackType.RANGED, label: "дальня" }, { value: "magic", label: "магія" }] }] },
   targetHasCondition: { label: "Ціль має стан", fields: [{ name: "condition", label: "Стан", input: "text" }] },
   targetDead: { label: "Ціль мертва", fields: [] },
+  actorIsEnemy: { label: "Виконавець події — ворог", fields: [] },
   hasMark: {
     label: "Має мітку",
     fields: [WHO, { name: "markId", label: "Мітка", input: "text" }, { name: "bySelf", label: "Лише моя мітка", input: "toggle", optional: true }],
@@ -81,6 +82,8 @@ export function evaluateCondition(c: Condition, ctx: ConditionContext): boolean 
       );
     case "targetDead":
       return subjects("eventTarget", ctx).some((p) => !isActive(p));
+    case "actorIsEnemy":
+      return subjects("eventActor", ctx).some((p) => p.basicInfo.side !== ctx.owner.basicInfo.side);
     case "hasMark":
       return subjects(c.who, ctx).some((p) => (c.bySelf ? countMarks(p, c.markId, ctx.owner.basicInfo.id) > 0 : p.battleData.activeEffects.some((e) => e.abilityKey === markKey(c.markId))));
     case "not":

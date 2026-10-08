@@ -17,6 +17,8 @@ export interface Spell {
   resolution: unknown;
   spellEffects: unknown;
   raceModifiers: unknown;
+  stackable?: boolean;
+  maxStacks?: number | null;
   spellGroup?: {
     id: string;
     name: string;
@@ -43,6 +45,8 @@ export interface SpellFormData {
   resolution: SpellResolution;
   spellEffects: Effect[];
   raceModifiers: RaceModifier[];
+  stackable: boolean;
+  maxStacks: number | null;
 }
 
 export type BookSpell = {

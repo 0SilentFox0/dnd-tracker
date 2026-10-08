@@ -42,7 +42,7 @@ export async function POST(
         // старі колонки NOT NULL до пізнішої міграції; нова модель їх не читає
         type: "target",
         damageType: "damage",
-        ...spellDefinitionColumns({ dice: data.dice, cost: data.cost, targeting: data.targeting, resolution: data.resolution, effects: data.spellEffects, raceModifiers: data.raceModifiers }),
+        ...spellDefinitionColumns({ dice: data.dice, cost: data.cost, targeting: data.targeting, resolution: data.resolution, effects: data.spellEffects, raceModifiers: data.raceModifiers, stackable: data.stackable, maxStacks: data.maxStacks ?? undefined }),
       },
       include: {
         spellGroup: true,

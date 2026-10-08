@@ -16,7 +16,7 @@ export const TriggerSchema = z.discriminatedUnion("event", [
   z.object({ event: z.literal("turnStart") }),
   z.object({ event: z.literal("turnEnd") }),
   z.object({ event: z.literal("attack"), phase, role: attackRole, attackKind: z.enum(ATTACK_KINDS).optional() }),
-  z.object({ event: z.literal("hit"), role: attackRole, attackKind: z.enum(ATTACK_KINDS).optional() }),
+  z.object({ event: z.literal("hit"), role: attackRole, whose: z.enum(["self", "ally"]).optional(), attackKind: z.enum(ATTACK_KINDS).optional() }),
   z.object({ event: z.literal("kill"), role: z.enum(["killer", "killerSide", "victimSide"]) }),
   z.object({ event: z.literal("lethalDamage") }),
   z.object({

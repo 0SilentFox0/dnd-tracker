@@ -23,6 +23,8 @@ type SpellRow = {
   resolution?: unknown;
   spellEffects?: unknown;
   raceModifiers?: unknown;
+  stackable?: boolean | null;
+  maxStacks?: number | null;
 };
 
 const DEFAULT_TARGETING: SpellTargeting = { kind: "enemy" };
@@ -73,6 +75,8 @@ export const spellEffects = (row: SpellRow): Effect[] => readList<Effect>(Effect
 
 export const spellRaceModifiers = (row: SpellRow): RaceModifier[] => readList<RaceModifier>(RaceModifierSchema, row.raceModifiers, "raceModifiers", row.id);
 
+const readMaxStacks = (v: number | null | undefined) => (Number.isInteger(v) && (v as number) >= 1 && (v as number) <= 10 ? (v as number) : undefined);
+
 export function readSpellDefinition(row: SpellRow): SpellDefinition {
   return {
     dice: spellDiceCount(row),
@@ -81,6 +85,8 @@ export function readSpellDefinition(row: SpellRow): SpellDefinition {
     resolution: spellResolution(row),
     effects: spellEffects(row),
     raceModifiers: spellRaceModifiers(row),
+    stackable: row.stackable === true,
+    maxStacks: row.stackable === true ? readMaxStacks(row.maxStacks) : undefined,
   };
 }
 
@@ -92,5 +98,7 @@ export function spellDefinitionColumns(def: SpellDefinition) {
     resolution: def.resolution as unknown as Prisma.InputJsonValue,
     spellEffects: def.effects as unknown as Prisma.InputJsonValue,
     raceModifiers: def.raceModifiers as unknown as Prisma.InputJsonValue,
+    stackable: def.stackable === true,
+    maxStacks: def.stackable ? (def.maxStacks ?? null) : null,
   };
 }

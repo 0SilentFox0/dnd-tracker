@@ -12,6 +12,8 @@ export function targetingLabel(t: SpellTargeting): string {
       return "ворог";
     case "allyDead":
       return "полеглий союзник";
+    case "allAlliesDead":
+      return "усі полеглі союзники";
     case "area":
       return `до ${t.maxTargets} ${t.side === "enemy" ? "ворогів" : "союзників"}`;
     case "allAllies":

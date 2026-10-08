@@ -81,7 +81,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
     const skill = caster && (targeting.kind === "ally" || targeting.kind === "enemy") ? spellTargetingFor(order, caster.basicInfo.id, specOf(s)) : { mode: "single" as const, maxTargets: 1 };
 
-    const auto = ["self", "allAllies", "allEnemies", "everyone"].includes(targeting.kind);
+    const auto = ["self", "allAllies", "allAlliesDead", "allEnemies", "everyone"].includes(targeting.kind);
 
     const targetMode: SpellPick["targetMode"] = auto ? "none" : targeting.kind === "area" ? "multi" : skill.mode === "all" ? "all" : skill.mode === "area" ? "multi" : "single";
 

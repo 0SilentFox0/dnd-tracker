@@ -18,11 +18,13 @@ export function defaultSpellForm(): SpellFormData {
     resolution: { kind: "auto" },
     spellEffects: [],
     raceModifiers: [],
+    stackable: false,
+    maxStacks: null,
   };
 }
 
 export function spellToForm(spell: Spell): SpellFormData {
-  const def = readSpellDefinition({ id: spell.id, dice: spell.dice, cost: spell.cost, targeting: spell.targeting, resolution: spell.resolution, spellEffects: spell.spellEffects, raceModifiers: spell.raceModifiers });
+  const def = readSpellDefinition({ id: spell.id, dice: spell.dice, cost: spell.cost, targeting: spell.targeting, resolution: spell.resolution, spellEffects: spell.spellEffects, raceModifiers: spell.raceModifiers, stackable: spell.stackable, maxStacks: spell.maxStacks });
 
   return {
     name: spell.name,
@@ -37,18 +39,20 @@ export function spellToForm(spell: Spell): SpellFormData {
     resolution: def.resolution,
     spellEffects: def.effects,
     raceModifiers: def.raceModifiers,
+    stackable: def.stackable === true,
+    maxStacks: def.maxStacks ?? null,
   };
 }
 
 export function formToPayload(form: SpellFormData) {
-  return createSpellSchema.parse({ ...form, icon: form.icon || null, groupId: form.groupId || null });
+  return createSpellSchema.parse({ ...form, icon: form.icon || null, groupId: form.groupId || null, maxStacks: form.stackable ? form.maxStacks : null });
 }
 
 /** Перший зрозумілий опис помилки для DM або null, якщо форма валідна. */
 export function spellFormError(form: SpellFormData): string | null {
   if (!form.name.trim()) return "Вкажіть назву заклинання";
 
-  const parsed = SpellDefinitionSchema.safeParse({ dice: form.dice, cost: form.cost, targeting: form.targeting, resolution: form.resolution, effects: form.spellEffects, raceModifiers: form.raceModifiers });
+  const parsed = SpellDefinitionSchema.safeParse({ dice: form.dice, cost: form.cost, targeting: form.targeting, resolution: form.resolution, effects: form.spellEffects, raceModifiers: form.raceModifiers, stackable: form.stackable, maxStacks: form.stackable ? (form.maxStacks ?? undefined) : undefined });
 
   if (parsed.success) return null;
 

@@ -57,3 +57,19 @@ describe("summon schema", () => {
     expect(EffectSchema.safeParse({ kind: "summon" }).success).toBe(false);
   });
 });
+
+describe("spellRoll amount", () => {
+  it("відсоток — число або формула; нуль і зайве відхиляються", () => {
+    const dmg = (spellRoll: unknown) => EffectSchema.safeParse({ kind: "dealDamage", amount: { spellRoll } }).success;
+
+    expect(dmg(100)).toBe(true);
+    expect(dmg({ formula: "100 + lost_hp_percent" })).toBe(true);
+    expect(dmg(0)).toBe(false);
+    expect(dmg(501)).toBe(false);
+    expect(dmg("100")).toBe(false);
+  });
+
+  it("опис показує формулу", () => {
+    expect(describeEffect({ kind: "dealDamage", amount: { spellRoll: { formula: "100 + lost_hp_percent" } } })).toContain("100 + lost_hp_percent");
+  });
+});

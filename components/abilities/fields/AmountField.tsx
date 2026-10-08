@@ -36,7 +36,9 @@ function textOf(v: Amount | undefined): string {
 
   if ("formula" in v) return v.formula;
 
-  return "spellRoll" in v ? String(v.spellRoll) : String(v.value);
+  if ("spellRoll" in v) return typeof v.spellRoll === "number" ? String(v.spellRoll) : v.spellRoll.formula;
+
+  return String(v.value);
 }
 
 /** `null` means "not a number yet" (e.g. a lone "-") — keep the previous value. */
@@ -51,7 +53,9 @@ function build(mode: Mode, text: string): Amount | undefined | null {
     case "formula":
       return { formula: text };
     case "spellRoll":
-      return Number.isFinite(Number(text)) && Number(text) > 0 ? { spellRoll: Number(text) } : null;
+      if (!Number.isFinite(Number(text))) return { spellRoll: { formula: text } };
+
+      return Number(text) > 0 ? { spellRoll: Number(text) } : null;
     default:
       return Number.isFinite(Number(text)) ? { percentOf: mode, value: Number(text) } : null;
   }
