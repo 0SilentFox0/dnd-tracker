@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { spellLevelOptions } from "@/app/campaigns/[id]/dm/spells/spell-form-defaults";
 import { defaultSpellForm, formToPayload, spellFormError, spellToForm } from "@/lib/utils/spells/model/form";
 import type { Spell } from "@/types/spells";
 
@@ -59,5 +60,12 @@ describe("форма заклинання", () => {
     const form = spellToForm({ ...row, targeting: { kind: "area" }, spellEffects: "oops", raceModifiers: null });
 
     expect(form).toMatchObject({ targeting: { kind: "enemy" }, spellEffects: [], raceModifiers: [] });
+  });
+
+  it("рівень 0 лишається лише у старого заклинання; у списку для нового — 1–5", () => {
+    expect(formToPayload(spellToForm({ ...row, level: 0 })).level).toBe(0);
+    expect(spellLevelOptions().map((o) => o.value)).toEqual(["1", "2", "3", "4", "5"]);
+    expect(spellLevelOptions(0).map((o) => o.value)).toEqual(["0", "1", "2", "3", "4", "5"]);
+    expect(spellLevelOptions(3).map((o) => o.value)).toEqual(["1", "2", "3", "4", "5"]);
   });
 });

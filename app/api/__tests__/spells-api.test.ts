@@ -120,6 +120,16 @@ describe("spells API", () => {
     expect(db.spell.create).not.toHaveBeenCalled();
   });
 
+  it("POST: нове заклинання лише 1–5 рівня", async () => {
+    for (const level of [0, 6]) expect((await list.POST(req("POST", { ...spellBody, level }), ctx)).status).toBe(400);
+
+    expect(db.spell.create).not.toHaveBeenCalled();
+  });
+
+  it("PATCH дозволяє лишити старий 0-й рівень", async () => {
+    expect((await one.PATCH(req("PATCH", { level: 0 }), ctxSpell)).status).toBe(200);
+  });
+
   it("PATCH оновлює лише передані поля нової моделі", async () => {
     await one.PATCH(req("PATCH", { dice: 5, resolution: { kind: "auto" } }), ctxSpell);
 

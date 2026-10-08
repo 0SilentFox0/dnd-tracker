@@ -1,6 +1,6 @@
 "use client";
 
-import { SPELL_COST_OPTIONS, SPELL_LEVEL_OPTIONS, type SpellFormData } from "./spell-form-defaults";
+import { SPELL_COST_OPTIONS, type SpellFormData,spellLevelOptions } from "./spell-form-defaults";
 
 import { IconUrlField } from "@/components/common/IconUrlField";
 import { Label } from "@/components/ui/label";
@@ -20,7 +20,7 @@ export function SpellFormBasicFields({ formData, setFormData, spellGroups }: Spe
       <LabeledInput containerClassName="col-span-2" id="name" label="Назва заклинання" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required placeholder="Назва заклинання" />
       <div>
         <Label htmlFor="level">Рівень (слот) *</Label>
-        <SelectField id="level" value={String(formData.level)} onValueChange={(value) => setFormData({ ...formData, level: parseInt(value) })} placeholder="Виберіть рівень" options={SPELL_LEVEL_OPTIONS.map((o) => ({ value: o.value, label: o.label }))} />
+        <SelectField id="level" value={String(formData.level)} onValueChange={(value) => setFormData({ ...formData, level: parseInt(value) })} placeholder="Виберіть рівень" options={spellLevelOptions(formData.level)} />
       </div>
       <div>
         <Label htmlFor="cost">Вартість</Label>

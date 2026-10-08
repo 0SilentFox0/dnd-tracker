@@ -7,7 +7,7 @@ const nullableString = z.preprocess((val) => (val === "" ? null : val), z.string
 
 const spellFields = {
   name: z.string().min(1).max(100),
-  level: z.number().int().min(0).max(9),
+  level: z.number().int().min(0).max(5),
   groupId: z.string().nullable(),
   icon: nullableString,
   description: z.string().nullable(),
@@ -24,7 +24,7 @@ const spellFields = {
 
 export const createSpellSchema = z.object({
   ...spellFields,
-  level: spellFields.level.default(0),
+  level: z.number().int().min(1).max(5).default(1),
   groupId: spellFields.groupId.optional(),
   description: spellFields.description.optional(),
   appearanceDescription: spellFields.appearanceDescription.optional(),
