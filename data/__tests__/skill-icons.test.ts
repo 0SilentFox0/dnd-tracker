@@ -11,7 +11,7 @@ describe("skill icons map", () => {
 
   it("uses only H5 wiki source files", () => {
     for (const file of [...Object.values(SKILL_ICONS), ...Object.values(BRANCH_ICONS)]) {
-      expect(file).toMatch(/^H5[A-Za-z]+\.(png|PNG)$/);
+      expect(file).toMatch(/^H5(Icon-)?[A-Za-z]+\.(png|PNG)$/);
     }
   });
 

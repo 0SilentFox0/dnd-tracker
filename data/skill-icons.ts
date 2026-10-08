@@ -46,13 +46,13 @@ const RACIAL_ICONS: [string, string][] = Object.entries(H5_RACIAL).flatMap(([rac
 );
 
 const RACE_FLAGS: Record<string, string> = {
-  humans: "H5FlagHaven.png",
-  demons: "H5FlagInferno.png",
-  elves: "H5FlagSylvan.png",
-  necromancers: "H5FlagNecropolis.png",
-  mages: "H5FlagAcademy.png",
-  "dark-elves": "H5FlagDungeon.png",
-  dwarves: "H5FlagFortress.png",
+  humans: "H5Icon-Paladin.png",
+  demons: "H5Icon-ArchDevil.png",
+  elves: "H5Icon-MasterHunter.png",
+  necromancers: "H5Icon-Archlich.png",
+  mages: "H5Icon-Archmage.png",
+  "dark-elves": "H5Icon-ShadowMatriarch.png",
+  dwarves: "H5Icon-Defender.png",
 };
 
 export const SKILL_ICONS: Record<string, string> = {
