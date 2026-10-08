@@ -1,5 +1,5 @@
 import type { LibraryUnit } from "../types";
-import { alliesAura, charmOnHit, critRange, deathBlow, dot, drainMana, elementResist, extraDamage, falloff, fearAura, finisher, firstStrike, magicResist, noRetaliation, rage, summonGroupOnce } from "../unit-abilities";
+import { alliesAura, charmOnHit, critRange, dot, drainMana, elementResist, extraDamage, falloff, fearAura, finisher, firstStrike, magicResist, noRetaliation, rage, stun, summonGroupOnce } from "../unit-abilities";
 
 const base = { raceKey: "demons" } as const;
 
@@ -21,7 +21,7 @@ export const DEMON_UNITS: LibraryUnit[] = [
   { ...base, key: "demons-demoness", name: "Демониця", tier: 4, role: "upgrade", hp: 56, ac: 14, attackBonus: 7, initiative: 10, attacks: [{ name: "Ланцюговий постріл", type: "ranged", dice: "2d6+6", damageType: "necrotic", targets: 3 }], abilities: [falloff("Ланцюговий постріл")] },
   { ...base, key: "demons-temptress", name: "Спокусниця", tier: 4, role: "alt", hp: 55, ac: 14, attackBonus: 7, initiative: 10, attacks: [{ name: "Темний постріл", type: "ranged", dice: "2d6+6", damageType: "necrotic" }], abilities: [charmOnHit("Спокуса", 15)] },
   { ...base, key: "demons-nightmare", name: "Кошмар", tier: 5, role: "base", hp: 90, ac: 15, attackBonus: 7, initiative: 12, attacks: [{ name: "Копита", type: "melee", dice: "3d8+7", damageType: "bludgeoning" }], abilities: [fearAura()] },
-  { ...base, key: "demons-hell-nightmare", name: "Пекельний кошмар", tier: 5, role: "upgrade", hp: 100, ac: 16, attackBonus: 8, initiative: 12, attacks: [{ name: "Копита", type: "melee", dice: "3d8+9", damageType: "bludgeoning" }], abilities: [fearAura(), deathBlow("Жахливий удар", 25)] },
+  { ...base, key: "demons-hell-nightmare", name: "Пекельний кошмар", tier: 5, role: "upgrade", hp: 100, ac: 16, attackBonus: 8, initiative: 12, attacks: [{ name: "Копита", type: "melee", dice: "3d8+9", damageType: "bludgeoning" }], abilities: [fearAura(), stun("Жахливий удар", 25)] },
   { ...base, key: "demons-gloom", name: "Морок", tier: 5, role: "alt", hp: 98, ac: 16, attackBonus: 8, initiative: 12, attacks: [{ name: "Копита", type: "melee", dice: "3d8+9", damageType: "bludgeoning" }], abilities: [fearAura(), fireImmunity(), finisher("Добивання", { type: "targetHasCondition", condition: "skip_action" }, { percent: 50 })] },
   { ...base, key: "demons-cave-demon", name: "Печерний демон", tier: 6, role: "base", hp: 120, ac: 16, attackBonus: 8, initiative: 8, attacks: [{ name: "Кам'яна лапа", type: "melee", dice: "3d8+10", damageType: "bludgeoning" }], abilities: [], spellKeys: ["fireball", "fire-wall"] },
   { ...base, key: "demons-cave-lord", name: "Печерний владика", tier: 6, role: "upgrade", hp: 135, ac: 17, attackBonus: 9, initiative: 8, attacks: [{ name: "Кам'яна лапа", type: "melee", dice: "3d8+12", damageType: "bludgeoning" }], abilities: [magicResist(25)], spellKeys: ["fireball", "fire-wall", "meteor-shower"] },

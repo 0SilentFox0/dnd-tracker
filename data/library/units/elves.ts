@@ -1,5 +1,5 @@
 import type { LibraryUnit } from "../types";
-import { alliesAura, buffAlly, disable, doubleStrike, falloff, fearAura, hatred, healAlly, magicResist, rage, regeneration, restoreSlotOnce, stun } from "../unit-abilities";
+import { alliesAura, buffAlly, doubleStrike, falloff, fearAura, hatred, healAlly, magicResist, rage, regeneration, restoreSlotOnce, stun } from "../unit-abilities";
 
 import type { Ability } from "@/lib/utils/abilities/schema";
 
@@ -42,7 +42,7 @@ export const ELF_UNITS: LibraryUnit[] = [
   { ...base, key: "elves-elder-druid", name: "Старший друїд", tier: 4, role: "upgrade", hp: 56, ac: 14, attackBonus: 7, initiative: 10, attacks: [{ name: "Терновий постріл", type: "ranged", dice: "2d6+6", damageType: "piercing" }], abilities: [alliesAura("Аура тайної сили", { kind: "modifyStat", stat: "attackBonus", flat: 1 })], spellKeys: ["thorny-vines", "healing-word", "entangle"] },
   { ...base, key: "elves-high-druid", name: "Верховний друїд", tier: 4, role: "alt", hp: 55, ac: 14, attackBonus: 7, initiative: 10, attacks: [{ name: "Терновий постріл", type: "ranged", dice: "2d6+6", damageType: "piercing" }], abilities: [restoreSlotOnce("Передача мани")], spellKeys: ["healing-word", "moonbeam"] },
   { ...base, key: "elves-unicorn", name: "Єдиноріг", tier: 5, role: "base", hp: 90, ac: 15, attackBonus: 7, initiative: 12, attacks: [{ name: "Ріг", type: "melee", dice: "3d8+7", damageType: "piercing" }], abilities: [unicornAura()] },
-  { ...base, key: "elves-war-unicorn", name: "Бойовий єдиноріг", tier: 5, role: "upgrade", hp: 100, ac: 16, attackBonus: 8, initiative: 12, attacks: [{ name: "Ріг", type: "melee", dice: "3d8+9", damageType: "piercing" }], abilities: [unicornAura(), disable("Осліплюючий ріг", "disable_ranged_attacks", 20)] },
+  { ...base, key: "elves-war-unicorn", name: "Бойовий єдиноріг", tier: 5, role: "upgrade", hp: 100, ac: 16, attackBonus: 8, initiative: 12, attacks: [{ name: "Ріг", type: "melee", dice: "3d8+9", damageType: "piercing" }], abilities: [unicornAura(), stun("Осліплюючий ріг", 20)] },
   { ...base, key: "elves-light-unicorn", name: "Світлий єдиноріг", tier: 5, role: "alt", hp: 98, ac: 16, attackBonus: 8, initiative: 12, attacks: [{ name: "Ріг", type: "melee", dice: "3d8+9", damageType: "radiant" }], abilities: [unicornAura(), radiance()] },
   { ...base, key: "elves-ent", name: "Ент", tier: 6, role: "base", hp: 145, ac: 17, attackBonus: 8, initiative: 7, attacks: [{ name: "Кулак", type: "melee", dice: "3d8+12", damageType: "bludgeoning" }], abilities: ent() },
   { ...base, key: "elves-ancient-ent", name: "Древній ент", tier: 6, role: "upgrade", hp: 160, ac: 18, attackBonus: 9, initiative: 7, attacks: [{ name: "Кулак", type: "melee", dice: "3d8+14", damageType: "bludgeoning" }], abilities: [...ent(), buffAlly("Вкорінення", [{ stat: "armor", flat: 3 }], 1, { bonus: true, self: true })] },
