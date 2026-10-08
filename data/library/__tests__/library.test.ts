@@ -113,6 +113,11 @@ describe("buildLibrary validation", () => {
     };
 
     expect(() => buildLibrary(source({ personal: [skill("p", { abilities: [flag] })] }))).toThrow(/заклинання «missing» не знайдено/);
+
+    const trigger = { id: "t", name: "t", trigger: { event: "spellCast" as const, phase: "after" as const, role: "caster" as const, spellIds: ["missing"], school: "Нема" }, effects: [{ kind: "note" as const, text: "x" }] };
+
+    expect(() => buildLibrary(source({ personal: [skill("p", { abilities: [trigger] })] }))).toThrow(/заклинання «missing» не знайдено/);
+    expect(() => buildLibrary(source({ personal: [skill("p", { abilities: [trigger] })] }))).toThrow(/невідома школа «Нема»/);
     expect(() => buildLibrary(source({ personal: [skill("p", { newSpellKey: "missing" })] }))).toThrow(/newSpellKey/);
     expect(() => buildLibrary(source({ personal: [skill("p", { grantedSpellKey: "s" })], spells: [spell("s")] }))).not.toThrow();
     expect(() => buildLibrary(source({ spells: [spell("s", { raceModifiers: [{ raceKey: "none", percent: 10 }] })] }))).toThrow(/невідома раса/);
@@ -164,5 +169,19 @@ describe("library content", () => {
 
       if (e.iconKey) expect(icons.has(e.iconKey), e.key).toBe(true);
     }
+  });
+
+  content("branch levels are absolute: the highest level replaces lower ones", () => {
+    const value = (b: string, i: number) => {
+      const effect = BRANCHES.find((x) => x.key === b)?.levels[i].abilities[0].effects[0] as { percent?: number; flat?: number };
+
+      return effect.percent ?? effect.flat;
+    };
+
+    for (const b of ["attack", "ranged", "defense"]) expect([0, 1, 2].map((i) => value(b, i))).toEqual([10, 20, 30]);
+
+    expect([0, 1, 2].map((i) => value("leadership", i))).toEqual([1, 2, 3]);
+
+    for (const e of [...BRANCHES, ...RACES]) expect(`${e.description} ${[...e.levels].map((l) => l.description).join(" ")}`, e.key).not.toMatch(/разом із|ще \+/);
   });
 });

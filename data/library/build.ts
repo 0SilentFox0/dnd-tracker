@@ -14,17 +14,23 @@ export const MIN_APPEARANCE_LENGTH = 80;
 
 export const LIBRARY_SOURCE: LibrarySource = { spells: SPELLS, branches: BRANCHES, races: RACES, personal: PERSONAL };
 
-const SPELL_REF_FLAGS = new Set(["spellTargeting", "spellImmunity"]);
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
-function* flagEffects(skill: LibrarySkill): Generator<Record<string, unknown>> {
-  for (const ability of skill.abilities) {
-    for (const effect of ability.effects) {
-      if (isRecord(effect) && effect.kind === "flag" && SPELL_REF_FLAGS.has(String(effect.flag))) yield effect;
-    }
+function* refs(value: unknown): Generator<{ kind: "spellIds" | "school"; value: unknown }> {
+  if (Array.isArray(value)) {
+    for (const v of value) yield* refs(v);
+
+    return;
+  }
+
+  if (!isRecord(value)) return;
+
+  for (const [k, v] of Object.entries(value)) {
+    if (k === "spellIds" && Array.isArray(v)) for (const id of v) yield { kind: "spellIds", value: id };
+    else if (k === "school") yield { kind: "school", value: v };
+    else yield* refs(v);
   }
 }
 
@@ -117,16 +123,10 @@ export function buildLibrary(source: LibrarySource = LIBRARY_SOURCE): Library {
       if (ref !== undefined && !spellByKey.has(ref)) issues.push(`Скіл «${skill.key}»: ${field} «${ref}» не знайдено`);
     }
 
-    for (const effect of flagEffects(skill)) {
-      const spellIds = Array.isArray(effect.spellIds) ? effect.spellIds : [];
+    for (const ref of refs(skill.abilities)) {
+      if (ref.kind === "spellIds" && !spellByKey.has(String(ref.value))) issues.push(`Скіл «${skill.key}»: заклинання «${String(ref.value)}» не знайдено`);
 
-      for (const ref of spellIds) {
-        if (!spellByKey.has(String(ref))) issues.push(`Скіл «${skill.key}»: заклинання «${String(ref)}» не знайдено`);
-      }
-
-      if (typeof effect.school === "string" && !schools.includes(effect.school)) {
-        issues.push(`Скіл «${skill.key}»: невідома школа «${effect.school}»`);
-      }
+      if (ref.kind === "school" && !schools.includes(String(ref.value))) issues.push(`Скіл «${skill.key}»: невідома школа «${String(ref.value)}»`);
     }
   }
 
