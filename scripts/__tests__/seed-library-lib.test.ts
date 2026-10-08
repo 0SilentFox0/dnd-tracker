@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { buildLibrary } from "../../data/library/build";
-import { assertSeedTarget, findByName, mapRaceModifiers, parseArgs, racePassiveData, remapRefs, treeInput } from "../seed-library-lib";
+import { artifactRows, assertSeedTarget, findByName, mapRaceModifiers, parseArgs, racePassiveData, remapRefs, treeInput } from "../seed-library-lib";
 
 import { AbilitySchema } from "@/lib/utils/abilities/schema";
 
@@ -101,5 +101,23 @@ describe("seed-library-lib", () => {
     for (const skill of lib.skills) walk(remapRefs(skill.abilities, maps), skill.key);
 
     expect(bad).toEqual([]);
+  });
+  it("artifactRows remaps spell keys and schools and joins lore", () => {
+    const maps = { spells: new Map([["blindness", "sp1"], ["slow", "sp2"]]), groups: new Map([["Світло", "g1"]]) } as never;
+
+    const set = {
+      key: "s", name: "Сет", description: "Механіка сету.", appearanceDescription: "Лор сету.", iconKey: "sar-issus", heroName: "Зехір",
+      abilities: [{ id: "a", name: "a", trigger: { event: "spellCast", phase: "after", role: "caster", school: "Світло" }, effects: [{ kind: "heal", amount: 1, target: "allAllies" }] }],
+      artifacts: [{ key: "h", name: "Шолом", description: "Механіка.", appearanceDescription: "Лор.", iconKey: "helm-of-the-dwarven-kings", slot: "helmet", rarity: "epic",
+        abilities: [{ id: "b", name: "b", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "spellImmunity", spellIds: ["blindness", "slow"], target: "allAllies" }] }] }],
+    } as never;
+
+    const rows = artifactRows(set, maps, (k) => (k ? `url/${k}` : undefined));
+
+    expect(rows.set.description).toBe("Механіка сету.\n\nЛор сету.");
+    expect(rows.set.abilities[0].trigger).toMatchObject({ school: "g1" });
+    expect(rows.artifacts[0]).toMatchObject({ name: "Шолом", slot: "helmet", icon: "url/helm-of-the-dwarven-kings" });
+    expect(artifactRows({ ...(set as object), artifacts: [{ ...(set as { artifacts: object[] }).artifacts[0], slot: "cape" }] } as never, maps, () => undefined).artifacts[0].slot).toBe("cloak");
+    expect(rows.artifacts[0].abilities[0].effects[0]).toMatchObject({ spellIds: ["sp1", "sp2"] });
   });
 });
