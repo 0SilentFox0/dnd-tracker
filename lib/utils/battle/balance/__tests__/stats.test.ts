@@ -2,10 +2,14 @@ import { describe, expect, it } from "vitest";
 
 import { AttackType } from "@/lib/constants/battle";
 import { MIN_UNIT_STAT, TYPICAL_TARGETS } from "@/lib/constants/battle-balance";
+import { DPR_BY_LEVEL_NON_MAGIC } from "@/lib/constants/dpr-by-main-skill";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
+import { calculateAttackBonus } from "@/lib/utils/battle/attack/bonus";
 import { getCharacterStats, getUnitStats } from "@/lib/utils/battle/balance";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
+import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
+import { SkillLevel } from "@/types/skill-tree";
 
 const sword = { id: "s", name: "Меч", type: AttackType.MELEE, attackBonus: 0, damageDice: "1d8", damageType: "slashing" } as BattleAttack;
 
@@ -33,6 +37,18 @@ describe("getCharacterStats з учасника бою", () => {
     const rage = resolved({ trigger: { event: "passive" }, effects: [{ kind: "damageBonus", filter: { kind: "melee" }, percent: 50 }] });
 
     expect(getCharacterStats({ participant: hero([sword], [rage]) }).dprBreakdown.meleeAvg).toBeGreaterThan(getCharacterStats({ participant: hero([sword]) }).dprBreakdown.meleeAvg);
+  });
+
+  it("влучання — рушій для кращої атаки, КД — ефективний, шкода зброєю без гілок шкіл магії", () => {
+    const p = hero([sword, bow]);
+
+    const s = getCharacterStats({ participant: p, branchLevels: { attack: SkillLevel.BASIC, chaos: SkillLevel.BASIC }, spellSchoolIds: new Set(["chaos"]) });
+
+    const best = s.dprBreakdown.rangedAvg > s.dprBreakdown.meleeAvg ? bow : sword;
+
+    expect(s.toHit).toBe(calculateAttackBonus(p, best, [p]));
+    expect(s.ac).toBe(getEffectiveArmorClass(p));
+    expect(s.weaponDpr).toBe(s.dprBreakdown.physicalDpr + DPR_BY_LEVEL_NON_MAGIC[SkillLevel.BASIC]);
   });
 
   it("без зброї — удар героя без кубиків зброї", () => {

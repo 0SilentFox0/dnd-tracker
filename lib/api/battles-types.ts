@@ -1,4 +1,5 @@
 import { ParticipantSide,type ParticipantSourceTypeValue } from "@/lib/constants/battle";
+import type { EntityStats, UnitEntityStats } from "@/types/battle-setup";
 
 /**
  * Типи для API битв (request/response)
@@ -28,8 +29,8 @@ export interface BattleBalanceBody {
 export interface BattleBalanceResponse {
   allyStats?: unknown;
   suggestedEnemies?: unknown[];
-  characterStats?: Record<string, { dpr: number; hp: number; kpi: number }>;
-  unitStats?: Record<string, { dpr: number; hp: number; kpi: number; name: string; level: number; raceId: string | null }>;
+  characterStats?: Record<string, EntityStats>;
+  unitStats?: Record<string, UnitEntityStats>;
   _debug?: { mainSkills?: unknown; characterSkillProgress?: unknown };
 }
 

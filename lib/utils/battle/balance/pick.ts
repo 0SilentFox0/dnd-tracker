@@ -1,4 +1,4 @@
-import { type Entry, type PartyPower, type RosterEntry, scaleEntries, targetEnemyPower, weakestPerTier } from "./fair";
+import { effectiveUnit, type Entry, type PartyPower, type RosterEntry, scaleEntries, targetEnemyPower, weakestPerTier } from "./fair";
 import type { UnitStats } from "./stats";
 
 import { MAX_PICK_TOTAL, PICK_CANDIDATE_UNITS, PICK_MAX_DISTINCT_UNITS, PICK_TOLERANCE, SCALE_MAX, SCALE_MIN } from "@/lib/constants/battle-balance";
@@ -44,7 +44,9 @@ function* combinations<T>(items: T[], size: number, start = 0): Generator<T[]> {
  * Склад, для якого hpScale і dmgScale найближчі до 1 (±PICK_TOLERANCE).
  * Пріоритет: юніти тіру, близького до сили одного героя → кількість у [⌈N/2⌉, 2N] → менше різних юнітів.
  */
-export function pickEnemyRoster(party: PartyPower, library: UnitStats[], raceId?: string | null): PickResult | null {
+export function pickEnemyRoster(party: PartyPower, rawLibrary: UnitStats[], raceId?: string | null): PickResult | null {
+  const library = rawLibrary.map((u) => effectiveUnit(u, party));
+
   const pool = (raceId ? library.filter((u) => u.raceId === raceId) : library).filter((u) => u.hp > 0 && u.dpr > 0);
 
   const heroes = Math.max(1, party.heroCount);
@@ -90,7 +92,9 @@ export function pickEnemyRoster(party: PartyPower, library: UnitStats[], raceId?
 
     const weighted = units.reduce((a, u, i) => a + closeness(u) * quantities[i], 0) / total;
 
-    const deviation = lnDistance(hpScale, 1) + lnDistance(dmgScale, 1);
+    const beyondClamp = lnDistance(rawHp, Math.min(SCALE_MAX, Math.max(SCALE_MIN, rawHp))) + lnDistance(rawDmg, Math.min(SCALE_MAX, Math.max(SCALE_MIN, rawDmg)));
+
+    const deviation = lnDistance(hpScale, 1) + lnDistance(dmgScale, 1) + beyondClamp;
 
     const score: [number, number, number, number] = [within ? 0 : inRange ? 1 : 2, within ? Math.round(weighted * 4) : 0, units.length, within ? deviation : deviation + weighted / 100];
 

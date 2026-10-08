@@ -1,5 +1,5 @@
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
-import { computeFairScaling, type PartyPower, type Power } from "@/lib/utils/battle/balance";
+import { buildPartyPower, computeFairScaling, heroMember, type Power, unitMember } from "@/lib/utils/battle/balance";
 import { heroPower } from "@/lib/utils/battle/balance/hero-power";
 import { loadUnitLibraryStats } from "@/lib/utils/battle/balance/unit-library";
 import type { CampaignSpellContext } from "@/lib/utils/battle/types/participant";
@@ -19,7 +19,7 @@ export async function scaleEnemiesForFairBattle(campaignId: string, slots: Start
 
   const byId = new Map(library.map((u) => [u.unitId, u]));
 
-  const party: PartyPower = { dpr: 0, hp: 0, heroCount: 0 };
+  const members: Parameters<typeof buildPartyPower>[0] = [];
 
   const fixed: Power = { hp: 0, dpr: 0 };
 
@@ -43,15 +43,18 @@ export async function scaleEnemiesForFairBattle(campaignId: string, slots: Start
       return;
     }
 
-    const stats = slot.type === ParticipantSourceType.CHARACTER ? heroPower(built[i], slot.character, campaignContext).stats : byId.get(slot.unit.id);
+    if (slot.type === ParticipantSourceType.CHARACTER) {
+      members.push({ stats: heroMember(heroPower(built[i], slot.character, campaignContext).stats), hero: true });
 
-    if (stats) {
-      party.dpr += stats.dpr;
-      party.hp += "hp" in stats ? stats.hp : 0;
-
-      if (slot.type === ParticipantSourceType.CHARACTER) party.heroCount += 1;
+      return;
     }
+
+    const unit = byId.get(slot.unit.id);
+
+    if (unit) members.push({ stats: unitMember(unit), hero: false });
   });
+
+  const party = buildPartyPower(members);
 
   const scaling = computeFairScaling(party, [...roster].map(([unitId, quantity]) => ({ unitId, quantity })), library, library, fixed);
 

@@ -1,4 +1,4 @@
-import { computeFairScaling, type FairScaling, type PartyPower, type Power } from "./fair";
+import { buildPartyPower, computeFairScaling, type FairScaling, type PartyMember, type PartyPower, type Power, unitMember } from "./fair";
 import type { UnitStats } from "./stats";
 
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
@@ -11,33 +11,44 @@ export interface SetupBalanceParticipant {
 }
 
 export interface SetupBalanceStats {
-  characterStats: Record<string, { dpr: number; hp: number }>;
-  unitStats: Record<string, { dpr: number; hp: number; kpi: number; name: string; level: number; raceId: string | null }>;
+  characterStats: Record<string, PartyMember>;
+  unitStats: Record<string, { dpr: number; hp: number; kpi: number; name: string; level: number; raceId: string | null; ac?: number; attackBonus?: number; damageKey?: string; resist?: Record<string, number> }>;
 }
 
 export function unitLibraryFromStats(unitStats: SetupBalanceStats["unitStats"]): UnitStats[] {
-  return Object.entries(unitStats).map(([unitId, u]) => ({ unitId, name: u.name, dpr: u.dpr, hp: u.hp, kpi: u.kpi, level: u.level, raceId: u.raceId }));
+  return Object.entries(unitStats).map(([unitId, u]) => ({
+    unitId,
+    name: u.name,
+    dpr: u.dpr,
+    hp: u.hp,
+    kpi: u.kpi,
+    level: u.level,
+    raceId: u.raceId,
+    ...(u.ac !== undefined && { ac: u.ac }),
+    ...(u.attackBonus !== undefined && { attackBonus: u.attackBonus }),
+    ...(u.damageKey !== undefined && { damageKey: u.damageKey }),
+    ...(u.resist !== undefined && { resist: u.resist }),
+  }));
 }
 
 export function setupPartyPower(participants: SetupBalanceParticipant[], stats: SetupBalanceStats): PartyPower {
-  const party: PartyPower = { dpr: 0, hp: 0, heroCount: 0 };
+  const members: Parameters<typeof buildPartyPower>[0] = [];
 
   for (const p of participants) {
     if (p.side !== ParticipantSide.ALLY) continue;
 
-    const quantity = p.type === ParticipantSourceType.UNIT ? (p.quantity ?? 1) : 1;
+    if (p.type === ParticipantSourceType.UNIT) {
+      const u = stats.unitStats[p.id];
 
-    const s = p.type === ParticipantSourceType.UNIT ? stats.unitStats[p.id] : stats.characterStats[p.id];
+      if (u) members.push({ stats: unitMember(u), quantity: p.quantity ?? 1, hero: false });
+    } else {
+      const c = stats.characterStats[p.id];
 
-    if (!s) continue;
-
-    party.dpr += s.dpr * quantity;
-    party.hp += s.hp * quantity;
-
-    if (p.type !== ParticipantSourceType.UNIT) party.heroCount += 1;
+      if (c) members.push({ stats: c, hero: true });
+    }
   }
 
-  return party;
+  return buildPartyPower(members);
 }
 
 /** The same function the battle start runs, over the lobby roster. */

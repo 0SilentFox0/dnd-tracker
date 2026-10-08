@@ -1,29 +1,22 @@
 import { loadCharacterBalanceStats } from "./character-stats";
 
+import { heroMember } from "@/lib/utils/battle/balance";
 import { loadUnitLibraryStats } from "@/lib/utils/battle/balance/unit-library";
-import type { CharacterDprBreakdown } from "@/types/battle-setup";
+import type { EntityStats, UnitEntityStats } from "@/types/battle-setup";
 
 export async function getBalancePayload(campaignId: string) {
   const characters = await loadCharacterBalanceStats(campaignId);
 
-  const characterStats: Record<
-    string,
-    { dpr: number; hp: number; kpi: number; dprBreakdown?: CharacterDprBreakdown }
-  > = {};
+  const characterStats: Record<string, EntityStats> = {};
 
   for (const { character, stats } of characters) {
-    characterStats[character.id] = {
-      dpr: stats.dpr,
-      hp: stats.hp,
-      kpi: Math.round(stats.kpi * 100) / 100,
-      dprBreakdown: stats.dprBreakdown,
-    };
+    characterStats[character.id] = { ...heroMember(stats), kpi: Math.round(stats.kpi * 100) / 100, dprBreakdown: stats.dprBreakdown };
   }
 
-  const unitStats: Record<string, { dpr: number; hp: number; kpi: number; name: string; level: number; raceId: string | null }> = {};
+  const unitStats: Record<string, UnitEntityStats> = {};
 
   for (const u of await loadUnitLibraryStats(campaignId)) {
-    unitStats[u.unitId] = { dpr: u.dpr, hp: u.hp, kpi: Math.round(u.kpi * 100) / 100, name: u.name, level: u.level, raceId: u.raceId };
+    unitStats[u.unitId] = { dpr: u.dpr, hp: u.hp, kpi: Math.round(u.kpi * 100) / 100, name: u.name, level: u.level, raceId: u.raceId, ac: u.ac, attackBonus: u.attackBonus, damageKey: u.damageKey, resist: u.resist };
   }
 
   const payload: Record<string, unknown> = { characterStats, unitStats };
