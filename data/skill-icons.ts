@@ -104,6 +104,9 @@ export const SKILL_ICONS: Record<string, string> = {
   inspiration: "H5BattleCommander.png",
   vengeance: "H5HeraldOfDeath.PNG",
   success: "H5BattleElation.PNG",
+  "dark-elves-dark-ritual": "H5DarkRitual.png",
+  "dark-elves-elemental-vision": "H5ElementalVision.png",
+  "dark-elves-rage-of-the-elements": "H5RageoftheElements.png",
   ...Object.fromEntries(RACIAL_ICONS),
 };
 

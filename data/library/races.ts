@@ -23,11 +23,19 @@ interface RacialLevel {
   abilities: Ability[];
 }
 
+const LEVEL_ICON_OVERRIDES: Partial<Record<string, Record<Level, string>>> = {
+  "dark-elves": {
+    basic: "dark-elves-dark-ritual",
+    advanced: "dark-elves-elemental-vision",
+    expert: "dark-elves-rage-of-the-elements",
+  },
+};
+
 function racialLevels(race: string, skillName: string, build: (level: Level, i: number) => RacialLevel): LibrarySkill[] {
   return LEVELS.map((level, i) => ({
     key: `racial-${race}-${level}`,
     name: `${skillName} (${LEVEL_NAMES[level]})`,
-    iconKey: `racial-${race}-${level}`,
+    iconKey: LEVEL_ICON_OVERRIDES[race]?.[level] ?? `racial-${race}-${level}`,
     ...build(level, i),
   }));
 }
