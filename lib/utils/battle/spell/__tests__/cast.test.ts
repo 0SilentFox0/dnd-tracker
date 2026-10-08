@@ -9,6 +9,8 @@ import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { SpellDefinition } from "@/lib/utils/spells/model/schema";
 import type { BattleParticipant } from "@/types/battle";
 
+const dmg = (damageType: string): Effect => ({ kind: "dealDamage", amount: { spellRoll: 100 }, damageType });
+
 const fire: Effect = { kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" };
 
 const spellOf = (over: Partial<SpellDefinition> = {}, extra: Partial<CastableSpell> = {}): CastableSpell => ({
@@ -292,5 +294,54 @@ describe("castSpell", () => {
       expect(r.battleAction.resultText).toContain("⛔");
       expect(r.casterUpdated.spellcasting.spellSlots["1"].current).toBe(1);
     }
+  });
+
+  describe("ефекти поза циклом по цілях", () => {
+    const poison: Effect = { kind: "dot", damagePerRound: 3, damageType: "poison", duration: { rounds: 2 }, target: "allEnemies" };
+
+    const dotOf = (r: { allParticipantsUpdated: BattleParticipant[] }, id: string) => r.allParticipantsUpdated.find((p) => p.basicInfo.id === id)?.battleData.activeEffects.length;
+
+    it("расовий імунітет і імунітет до заклинання діють на ворогів, що не є ціллю каста", () => {
+      const warded = enemy("w");
+
+      warded.battleData.resolvedAbilities = [resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "spellImmunity", spellIds: ["sp"] }] })];
+
+      const spell = spellOf({ dice: 0, targeting: { kind: "enemy" }, effects: [poison], raceModifiers: [{ raceId: "human", percent: -100 }] });
+
+      const r = cast(spell, ["g"], [enemy("g"), enemy("h", "human"), warded], { diceRolls: [] });
+
+      expect([dotOf(r, "g"), dotOf(r, "h"), dotOf(r, "w")]).toEqual([1, 0, 0]);
+    });
+
+    it("збереження цілі каста скасовує й її ефекти з іншою ціллю", () => {
+      const spell = spellOf({ dice: 0, resolution: { kind: "save", ability: "dexterity", onSuccess: "none" }, effects: [poison] });
+
+      const r = cast(spell, ["g"], [enemy("g"), enemy("o")], { diceRolls: [], saveRolls: [{ participantId: "g", roll: 20 }] });
+
+      expect(dotOf(r, "g")).toBe(0);
+      expect(dotOf(r, "o")).toBe(1);
+    });
+
+    it("randomOf застосовується до цілей каста з урахуванням імунітету раси", () => {
+      const rnd: Effect = { kind: "randomOf", options: [{ kind: "changeMorale", delta: -1 }, { kind: "changeMorale", delta: -1 }] };
+
+      const spell = spellOf({ dice: 0, targeting: { kind: "allEnemies" }, effects: [rnd], raceModifiers: [{ raceId: "human", percent: -100 }] });
+
+      const r = cast(spell, ["g", "h"], [enemy("g"), enemy("h", "human")], { diceRolls: [] });
+
+      const morale = (id: string) => r.allParticipantsUpdated.find((p) => p.basicInfo.id === id)?.combatStats.morale;
+
+      expect([morale("g"), morale("h")]).toEqual([-1, 0]);
+    });
+  });
+
+  it("кілька dealDamage на одній цілі зливають кроки шкоди", () => {
+    const resistant = enemy("e1");
+
+    resistant.battleData.resolvedAbilities = [resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "resistance", damageType: "all", percent: 50 }] })];
+
+    const r = cast(spellOf({ effects: [dmg("fire"), dmg("cold")] }), ["e1"], [resistant]);
+
+    expect(r.battleAction.actionDetails.damageSteps?.e1).toHaveLength(2);
   });
 });
