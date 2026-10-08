@@ -46,9 +46,7 @@ export function getDefenderResistanceBreakdown(
   const resistanceSkills = getResistanceSkillsHighestOnly(target, damageType, participants, attackKind);
 
   for (const s of resistanceSkills) {
-    targetBreakdown.push(
-      `${targetName}: ${s.name} = ${s.percent}% резисту`,
-    );
+    targetBreakdown.push(`${targetName}: ${s.name} = ${s.percent < 0 ? `вразливість ${-s.percent}%` : `${s.percent}% резисту`}`);
   }
 
   const resistanceResult = applyResistance(target, incomingDamage, damageType, { participants, attackKind });
