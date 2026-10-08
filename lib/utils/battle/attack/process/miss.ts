@@ -22,7 +22,7 @@ export interface HandleMissParams {
   battleId: string;
 }
 
-export function handleMiss(params: HandleMissParams): ProcessAttackResult {
+export function handleMiss(params: HandleMissParams): Omit<ProcessAttackResult, "summons"> {
   const { flow, attackerId, targetId, attack, d20Roll, attackRoll, targetAC, currentRound, battleId } = params;
 
   const target = getP(flow, targetId);

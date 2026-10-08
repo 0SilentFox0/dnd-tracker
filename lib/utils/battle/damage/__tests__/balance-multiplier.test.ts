@@ -180,7 +180,7 @@ describe("множник застосовується рівно раз на к�
   });
 
   describe("гарантована шкода при промаху", () => {
-    const flow = (a: BattleParticipant, t: BattleParticipant) => ({ ps: [a, t], messages: [], ctx: { round: 1, rng: Math.random } });
+    const flow = (a: BattleParticipant, t: BattleParticipant) => ({ ps: [a, t], messages: [], summons: [], ctx: { round: 1, rng: Math.random } });
 
     const miss = (a: BattleParticipant, t: BattleParticipant) =>
       handleMiss({

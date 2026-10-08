@@ -81,7 +81,7 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
 
   const existedBefore = activeEffectIds(participants);
 
-  const flow: AttackFlow = { ps: participants, messages: [], ctx: { round, rng } };
+  const flow: AttackFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng } };
 
   if (!provoked && !unlimited) put(flow, { ...defender, actionFlags: { ...defender.actionFlags, hasUsedReaction: true } });
 

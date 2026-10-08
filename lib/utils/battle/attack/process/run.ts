@@ -44,14 +44,14 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   const before = withSelf(withSelf(allParticipants, target), attacker);
 
-  const flow: AttackFlow = { ps: before, messages: [], ctx: { round: currentRound, rng: params.rng ?? Math.random } };
+  const flow: AttackFlow = { ps: before, messages: [], summons: [], ctx: { round: currentRound, rng: params.rng ?? Math.random } };
 
   const existedBefore = activeEffectIds(flow.ps);
 
-  const consume = (r: ProcessAttackResult, hit: boolean): ProcessAttackResult => {
+  const consume = (r: Omit<ProcessAttackResult, "summons">, hit: boolean): ProcessAttackResult => {
     flow.ps = consumeAttackEffects(flow.ps, { attackerId, targetId, hit, existedBefore });
 
-    return { ...r, allParticipantsUpdated: flow.ps, attackerUpdated: getP(flow, attackerId), targetUpdated: getP(flow, targetId) };
+    return { ...r, summons: flow.summons, allParticipantsUpdated: flow.ps, attackerUpdated: getP(flow, attackerId), targetUpdated: getP(flow, targetId) };
   };
 
   const { actionModifiers } = fire(flow, { type: "attack", phase: "before", actorId: attackerId, targetId, attackKind });
@@ -65,6 +65,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
     return {
       success: false,
+      summons: flow.summons,
       attackRoll: calculateAttackRoll(getP(flow, attackerId), attack, d20Roll, advantageRoll, disadvantageRoll, { participants: flow.ps, rng: flow.ctx.rng }),
       targetUpdated: getP(flow, targetId),
       attackerUpdated: getP(flow, attackerId),

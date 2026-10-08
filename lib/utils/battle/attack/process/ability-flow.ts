@@ -1,6 +1,6 @@
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/participants";
 import { resolveDowned, runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
-import type { AbilityRunContext, AbilityRunResult } from "@/lib/utils/abilities/engine/types";
+import type { AbilityRunContext, AbilityRunResult, SummonRequest } from "@/lib/utils/abilities/engine/types";
 import type { AbilityEvent } from "@/types/abilities";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -8,6 +8,7 @@ import type { BattleAction, BattleParticipant } from "@/types/battle";
 export interface AttackFlow {
   ps: BattleParticipant[];
   messages: string[];
+  summons: SummonRequest[];
   ctx: AbilityRunContext;
 }
 
@@ -28,6 +29,7 @@ export function fire(flow: AttackFlow, event: AbilityEvent): AbilityRunResult {
 
   flow.ps = r.participants;
   flow.messages.push(...r.messages);
+  flow.summons.push(...r.summons);
 
   return r;
 }
@@ -42,6 +44,7 @@ export function settleDowned(flow: AttackFlow, victimId: string, actorId: string
 
   flow.ps = r.participants;
   flow.messages.push(...r.messages);
+  flow.summons.push(...r.summons);
 }
 
 /** Дописує в дію зміни HP, які зробили вміння іншим учасникам. */

@@ -95,7 +95,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   const casterId = caster.basicInfo.id;
 
-  const flow: AttackFlow = { ps: withSelf(allParticipants, caster), messages: [], ctx: { round: currentRound, rng } };
+  const flow: AttackFlow = { ps: withSelf(allParticipants, caster), messages: [], summons: [], ctx: { round: currentRound, rng } };
 
   const before = flow.ps;
 
@@ -292,5 +292,5 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
   });
   appendHpChanges(action, before, flow.ps);
 
-  return { success: true, casterUpdated: getP(flow, casterId), allParticipantsUpdated: flow.ps, battleAction: action, summons };
+  return { success: true, casterUpdated: getP(flow, casterId), allParticipantsUpdated: flow.ps, battleAction: action, summons: [...summons, ...flow.summons] };
 }
