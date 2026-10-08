@@ -1,7 +1,9 @@
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
+const effectKey = (participantId: string, effectId: string) => `${participantId}:${effectId}`;
+
 export function activeEffectIds(ps: BattleParticipant[]): Set<string> {
-  return new Set(ps.flatMap((p) => p.battleData.activeEffects.map((e) => e.id)));
+  return new Set(ps.flatMap((p) => p.battleData.activeEffects.map((e) => effectKey(p.basicInfo.id, e.id))));
 }
 
 const withoutEffects = (p: BattleParticipant, drop: (e: ActiveEffect) => boolean): BattleParticipant => {
@@ -18,10 +20,10 @@ export function consumeAttackEffects(
     const id = p.basicInfo.id;
 
     if (id === a.attackerId) {
-      return withoutEffects(p, (e) => a.existedBefore.has(e.id) && (e.consumeOn === "ownAttack" || (a.hit && e.consumeOn === "ownHit")));
+      return withoutEffects(p, (e) => a.existedBefore.has(effectKey(id, e.id)) && (e.consumeOn === "ownAttack" || (a.hit && e.consumeOn === "ownHit")));
     }
 
-    if (id === a.targetId) return withoutEffects(p, (e) => a.existedBefore.has(e.id) && e.consumeOn === "attackAgainst");
+    if (id === a.targetId) return withoutEffects(p, (e) => a.existedBefore.has(effectKey(id, e.id)) && e.consumeOn === "attackAgainst");
 
     return p;
   });

@@ -35,9 +35,21 @@ describe("consumeAttackEffects", () => {
   });
 
   it("keeps effects applied during this attack", () => {
-    const ps = consumeAttackEffects([a, t], { attackerId: "a", targetId: "t", hit: true, existedBefore: new Set(["keep"]) });
+    const ps = consumeAttackEffects([a, t], { attackerId: "a", targetId: "t", hit: true, existedBefore: new Set(["a:keep"]) });
 
     expect(ids(ps[0])).toEqual(["adv", "weak", "keep"]);
+  });
+});
+
+describe("existedBefore keys", () => {
+  it("an effect id that exists on another participant does not make a new one count as old", () => {
+    const attacker = withEffects("a", [eff("shared", { consumeOn: "ownAttack" })]);
+
+    const other = withEffects("t", [eff("shared")]);
+
+    const ps = consumeAttackEffects([attacker, other], { attackerId: "a", targetId: "t", hit: true, existedBefore: activeEffectIds([other]) });
+
+    expect(ids(ps[0])).toEqual(["shared"]);
   });
 });
 
