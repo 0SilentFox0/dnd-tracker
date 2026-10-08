@@ -170,13 +170,7 @@ export function buildLibrary(source: LibrarySource = LIBRARY_SOURCE): Library {
 
     if (race.passive.trait.length === 0) issues.push(`Раса «${race.key}»: порожній passive.trait`);
 
-    racePassiveAbilities(race).forEach((ability, i) => {
-      const parsed = AbilitySchema.safeParse(ability);
-
-      if (!parsed.success) {
-        for (const issue of parsed.error.issues) issues.push(`Раса «${race.key}» пасивка [${i}]: ${issue.path.join(".")} ${issue.message}`);
-      }
-    });
+    checkAbilities(`Раса «${race.key}» пасивка`, racePassiveAbilities(race));
 
     if (race.branchKeys.length === 0) issues.push(`Раса «${race.key}»: порожній список гілок`);
 
@@ -190,13 +184,7 @@ export function buildLibrary(source: LibrarySource = LIBRARY_SOURCE): Library {
   for (const skill of skills) {
     checkEntry("Скіл", skill);
 
-    skill.abilities.forEach((ability, i) => {
-      const parsed = AbilitySchema.safeParse(ability);
-
-      if (!parsed.success) {
-        for (const issue of parsed.error.issues) issues.push(`Скіл «${skill.key}» [${i}]: ${issue.path.join(".")} ${issue.message}`);
-      }
-    });
+    checkAbilities(`Скіл «${skill.key}»`, skill.abilities);
 
     for (const [field, ref] of [["newSpellKey", skill.newSpellKey], ["grantedSpellKey", skill.grantedSpellKey]] as const) {
       if (ref !== undefined && !spellByKey.has(ref)) issues.push(`Скіл «${skill.key}»: ${field} «${ref}» не знайдено`);
