@@ -17,7 +17,7 @@ const create = async (level: number) => {
   return createCharacter(new Request("http://x", { method: "POST", body: JSON.stringify(body) }), "camp") as Promise<NextResponse>;
 };
 
-const slots = () => (vi.mocked(prisma.character.create).mock.calls[0][0].data as { spellSlots: Record<string, { max: number }> }).spellSlots;
+const slots = () => (vi.mocked(prisma.character.create).mock.calls[0][0].data as unknown as { spellSlots: Record<string, { max: number }> }).spellSlots;
 
 describe("створення персонажа: слоти за прогресією раси", () => {
   beforeEach(() => {
