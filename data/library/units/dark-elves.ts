@@ -6,7 +6,7 @@ const base = { raceKey: "dark-elves" } as const;
 const hydra = (name: string) => [noRetaliation(), falloff(name)];
 
 export const DARK_ELF_UNITS: LibraryUnit[] = [
-  { ...base, key: "dark-elves-scout", name: "Розвідник", tier: 1, role: "base", hp: 25, ac: 12, attackBonus: 5, initiative: 10, attacks: [{ name: "Короткий лук", type: "ranged", dice: "1d6", damageType: "piercing" }], abilities: [] },
+  { ...base, key: "dark-elves-scout", name: "Розвідник", tier: 1, role: "base", hp: 25, ac: 11, attackBonus: 5, initiative: 8, attacks: [{ name: "Короткий лук", type: "ranged", dice: "1d6", damageType: "piercing" }], abilities: [] },
   { ...base, key: "dark-elves-assassin", name: "Асасин", tier: 1, role: "upgrade", hp: 31, ac: 13, attackBonus: 6, initiative: 10, attacks: [{ name: "Отруйний дротик", type: "ranged", dice: "1d6+1", damageType: "piercing" }], abilities: [dot("Отрута", "1d4", "poison", 2)] },
   { ...base, key: "dark-elves-stalker", name: "Переслідувач", tier: 1, role: "alt", hp: 34, ac: 13, attackBonus: 6, initiative: 11, attacks: [{ name: "Кинджал", type: "melee", dice: "1d8+1", damageType: "piercing" }], abilities: [dot("Отрута", "1d4", "poison", 2), firstStrike("Засідка")] },
   { ...base, key: "dark-elves-blood-maiden", name: "Діва крові", tier: 2, role: "base", hp: 37, ac: 13, attackBonus: 5, initiative: 14, attacks: [{ name: "Клинки", type: "melee", dice: "1d8+2", damageType: "slashing" }], abilities: [noRetaliation()] },
