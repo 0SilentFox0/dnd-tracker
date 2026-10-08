@@ -15,6 +15,8 @@ type EffectSpec = {
   expireAtTurnEnd?: boolean;
 };
 
+let effectSeq = 0;
+
 const DISADVANTAGE: StaticEffect = { kind: "flag", flag: "disadvantage" };
 
 const MARK: StaticEffect = { kind: "flag", flag: "advantageForAttackers" };
@@ -84,7 +86,7 @@ export function applyCriticalEffect(
       activeEffects: addActiveEffect(
         base,
         {
-          id: `critical-${spec.idPart}-${Date.now()}-${base.battleData.activeEffects.length}`,
+          id: `critical-${spec.idPart}-${Date.now()}-${effectSeq++}`,
           name: effect.name,
           type: spec.type,
           description: effect.description,

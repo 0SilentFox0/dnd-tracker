@@ -163,3 +163,41 @@ describe("crit effects on the attacker are for the next attack", () => {
     expect(r.finalInitiativeOrder.find((p) => p.basicInfo.id === "a")?.actionFlags.hasUsedAction).toBe(false);
   });
 });
+
+describe("effects from the attacker's own abilities stay active during the volley", () => {
+  const rage = resolved({
+    trigger: { event: "hit", role: "attacker" },
+    effects: [{ kind: "damageBonus", filter: { kind: "all" }, flat: 10, target: "self", duration: { rounds: 1 } }],
+  });
+
+  const buffed = (() => {
+    const p = makeParticipant({ id: "a", abilities: [rage] });
+
+    return { ...p, combatStats: { ...p.combatStats, maxTargets: 2 }, battleData: { ...p.battleData, attacks: [sword] } };
+  })();
+
+  const damageDone = (r: ReturnType<typeof run>, id: string) => 50 - (r.finalInitiativeOrder.find((p) => p.basicInfo.id === id)?.combatStats.currentHp ?? 50);
+
+  it("an on-hit self buff from target 1 empowers the hit on target 2", () => {
+    const r = run([buffed, foe("t1"), foe("t2")], { targetIds: ["t1", "t2"], attackRolls: [15, 15] });
+
+    expect(damageDone(r, "t2")).toBeGreaterThan(damageDone(r, "t1"));
+    expect(r.finalInitiativeOrder.find((p) => p.basicInfo.id === "a")?.battleData.activeEffects.length).toBeGreaterThan(0);
+  });
+
+  it("two crits in one volley get distinct effect ids", () => {
+    const r = runAttackPhase({
+      battle: { initiativeOrder: [attacker, foe("t1"), foe("t2")], battleLog: [], currentRound: 1, currentTurnIndex: 0 },
+      data: { attackerId: "a", damageRolls: [4, 4], targetIds: ["t1", "t2"], attackRolls: [20, 20] } as never,
+      battleId: "b",
+      userId: "u",
+      isDM: true,
+      rng: seq(0.25),
+    });
+
+    const ids = r.finalInitiativeOrder.find((p) => p.basicInfo.id === "a")?.battleData.activeEffects.map((e) => e.id) ?? [];
+
+    expect(ids.length).toBe(2);
+    expect(new Set(ids).size).toBe(2);
+  });
+});

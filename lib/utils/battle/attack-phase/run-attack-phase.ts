@@ -296,7 +296,9 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       }
     }
 
-    const created = currentAttacker.battleData.activeEffects.filter((e) => !effectsBeforeVolley.has(e.id) && !heldBack.includes(e));
+    const created = currentAttacker.battleData.activeEffects.filter(
+      (e) => !effectsBeforeVolley.has(e.id) && !heldBack.includes(e) && e.id.startsWith("critical-") && e.consumeOn,
+    );
 
     if (created.length > 0) {
       heldBack.push(...created);
