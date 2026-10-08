@@ -141,6 +141,10 @@ export function describeFlag(e: Extract<Effect, { kind: "flag" }>): string {
       return `додаткові цілі дальньої атаки отримують ${e.percent}% шкоди`;
     case "seeEnemyHp":
       return "бачить HP ворогів";
+    case "noRetaliation":
+      return "атаки без відсічі";
+    case "unlimitedRetaliation":
+      return "відповідає на кожну атаку";
     case "noNegativeMorale":
       return "від'ємна мораль = 0";
     case "ignoreMorale":
@@ -167,6 +171,8 @@ export const FLAG_LABELS: Record<FlagKey, string> = {
   multiTargetFalloff: "Шкода додаткових цілей дальньої атаки",
   lifesteal: "Вампіризм (лікування від шкоди атак)",
   moraleChance: "Шанс додаткового ходу від моралі",
+  noRetaliation: "Без відповіді",
+  unlimitedRetaliation: "Безмежна відсіч",
   noNegativeMorale: "Мораль не нижче 0",
   ignoreMorale: "Мораль не діє",
   minMorale: "Мінімальна мораль",
@@ -212,6 +218,8 @@ export const FLAG_FIELDS: Record<FlagKey, readonly FieldMeta[]> = {
   multiTargetFalloff: [{ name: "percent", label: "% шкоди додаткових цілей", input: "number" }],
   lifesteal: [{ name: "percent", label: "% завданої шкоди", input: "number" }],
   moraleChance: [{ name: "percent", label: "+% до шансу додаткового ходу", input: "number" }],
+  noRetaliation: [],
+  unlimitedRetaliation: [],
   noNegativeMorale: [],
   ignoreMorale: [],
   minMorale: [{ name: "value", label: "Мінімум (−3…3)", input: "number" }],

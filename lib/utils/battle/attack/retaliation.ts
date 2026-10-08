@@ -69,7 +69,11 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
 
   if (!defender || !attacker || !isActive(defender) || !isActive(attacker)) return null;
 
-  if (provoked ? hasEffectMarker(defender, "no_reaction") : defender.actionFlags.hasUsedReaction) return null;
+  if (findFlags(withSelf(participants, attacker), attackerId, "noRetaliation").length > 0) return null;
+
+  const unlimited = findFlags(withSelf(participants, defender), defenderId, "unlimitedRetaliation").length > 0;
+
+  if (provoked ? hasEffectMarker(defender, "no_reaction") : defender.actionFlags.hasUsedReaction && !unlimited) return null;
 
   const weapon = weaponFor(defender, participants, kindOf(input.attack));
 
@@ -79,7 +83,7 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
 
   const flow: AttackFlow = { ps: participants, messages: [], ctx: { round, rng } };
 
-  if (!provoked) put(flow, { ...defender, actionFlags: { ...defender.actionFlags, hasUsedReaction: true } });
+  if (!provoked && !unlimited) put(flow, { ...defender, actionFlags: { ...defender.actionFlags, hasUsedReaction: true } });
 
   const first = rollD20(rng);
 

@@ -22,6 +22,8 @@ const DEFAULTS: Record<FlagKey, Record<string, unknown>> = {
   multiTargetFalloff: { percent: 50 },
   lifesteal: { percent: 50 },
   moraleChance: { percent: 10 },
+  noRetaliation: {},
+  unlimitedRetaliation: {},
   noNegativeMorale: {},
   ignoreMorale: {},
   minMorale: { value: 1 },
