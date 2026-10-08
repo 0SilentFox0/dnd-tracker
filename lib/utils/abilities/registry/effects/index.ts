@@ -1,3 +1,4 @@
+import { resolveTargetIds } from "../../engine/targets";
 import { DURATION_FIELD, type FieldMeta, TARGET_FIELD } from "../fields";
 import { limitsLabel } from "../labels";
 import { describeTrigger } from "../triggers";
@@ -115,7 +116,11 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
     apply: (i) => {
       const index = Math.min(i.effect.options.length - 1, Math.floor(i.ctx.rng() * i.effect.options.length));
 
-      return applyEffect({ ...i, effect: i.effect.options[index] });
+      const option = i.effect.options[index];
+
+      const targetIds = "target" in option && option.target ? resolveTargetIds(option.target, i.ownerId, i.event, i.participants) : i.targetIds;
+
+      return applyEffect({ ...i, effect: option, targetIds });
     },
   },
 };

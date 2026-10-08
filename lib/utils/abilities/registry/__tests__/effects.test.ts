@@ -99,3 +99,23 @@ describe("прапорці моралі", () => {
     expect(FLAG_FIELDS.ignoreMorale).toEqual([]);
   });
 });
+
+describe("randomOf", () => {
+  const ps = [makeParticipant({ id: "o" }), makeParticipant({ id: "a" }), makeParticipant({ id: "t", side: ParticipantSide.ENEMY })];
+
+  it("варіант з власним target перераховує цілі", () => {
+    const effect: Effect = { kind: "randomOf", options: [{ kind: "modifyStat", stat: "armor", flat: 1, duration: { rounds: 1 }, target: "allAllies" }] };
+
+    const r = run(effect, ["t"], ps);
+
+    expect(r.participants.map((p) => p.battleData.activeEffects.length)).toEqual([1, 1, 0]);
+  });
+
+  it("варіант без target лишає цілі правила", () => {
+    const effect: Effect = { kind: "randomOf", options: [{ kind: "modifyStat", stat: "armor", flat: 1, duration: { rounds: 1 } }] };
+
+    const r = run(effect, ["t"], ps);
+
+    expect(r.participants.map((p) => p.battleData.activeEffects.length)).toEqual([0, 0, 1]);
+  });
+});
