@@ -281,9 +281,9 @@ export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
     description: "Провокує Opportunity Attack",
     type: "fail",
     flavor: [
-      "{attacker} спотикається просто перед {target} — і такого подарунка не пропускають!",
-      "Невдалий випад відкриває {attacker} — {target} б'є у відповідь!",
-      "{target} бачить помилку {attacker} і карає миттєво.",
+      "{attacker} спотикається просто перед {target} і відкривається для удару.",
+      "Невдалий випад залишає {attacker} без прикриття перед {target}.",
+      "{target} помічає помилку {attacker}: захист відкрито.",
     ],
     effect: {
       type: "provoke_opportunity_attack",

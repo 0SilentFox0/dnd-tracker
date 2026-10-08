@@ -140,8 +140,8 @@ export const LIBRARY_ARTIFACT_SETS: LibraryArtifactSet[] = [
 },
 {
   key: "set-yggshail-claws", name: "Кігті Ігг-Шайла", heroName: "Раїлаг", iconKey: "yggshail-claws",
-  description: "Повний комплект: влучання з шансом 25 % паралізує ціль — вона втрачає реакцію на 1 раунд і не може відповісти відсіччю.",
-  appearanceDescription: "Жерці Малассы кажуть, що Ігг-Шайл, отруйна прадраконеса глибин, лишила по собі три кігті. З них викували клинок, намисто й перстень — і кожна рана від їхнього власника ще довго пам'ятає дотик отрути.",
+  description: "Повний комплект: влучання з шансом 25 % забирає в цілі реакцію на 1 раунд — вона не може відповісти відсіччю.",
+  appearanceDescription: "Жерці Маласси кажуть, що Ігг-Шайл, отруйна прадраконеса глибин, лишила по собі три кігті. З них викували клинок, намисто й перстень — і кожна рана від їхнього власника ще довго пам'ятає дотик отрути.",
   abilities: [{ id: "yggshail-claws-paralysis", name: "Паралізуюча отрута", trigger: { event: "hit", role: "attacker" }, limits: { chance: 25 }, effects: [{ kind: "applyCondition", condition: "no_reaction", duration: { rounds: 1 }, target: "eventTarget" }] }],
   artifacts: [
     { key: "moonblade", name: "Місячний клинок", slot: "shield", rarity: "legendary", iconKey: "moonblade",

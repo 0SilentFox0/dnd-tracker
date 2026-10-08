@@ -19,6 +19,12 @@ describe("critical effect flavor", () => {
     }
   });
 
+  it("provoke phrases do not promise a retaliation", () => {
+    const provoke = CRITICAL_FAIL_EFFECTS.find((e) => e.effect.type === "provoke_opportunity_attack") as CriticalEffect;
+
+    for (const f of provoke.flavor) expect(f).not.toMatch(/відповід|карає|б'є/);
+  });
+
   it("substitutes names and is deterministic for a seed", () => {
     const e = getCriticalEffect(6, "success") as CriticalEffect;
 
