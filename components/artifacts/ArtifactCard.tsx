@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Pencil } from "lucide-react";
 
 import { AbilitySummary } from "@/components/abilities";
 import { ArtifactDeleteButton } from "@/components/artifacts/ArtifactDeleteButton";
@@ -98,15 +99,15 @@ export function ArtifactCard({
         <div className="flex items-start gap-3">
           <EntityIcon src={artifact.icon} name={artifact.name} size={64} className="size-16 rounded-lg text-xl" />
           <div className="min-w-0 flex-1">
-            <div className="flex items-start justify-between gap-2">
-              <p className="min-w-0 flex-1 truncate text-sm font-semibold leading-8 text-hud-ink">{artifact.name}</p>
-              <div className="flex shrink-0 items-center gap-1">
-                <Link href={`/campaigns/${campaignId}/dm/artifacts/${artifact.id}`}>
-                  <Button variant="ghost" size="sm">
-                    Редагувати
-                  </Button>
-                </Link>
-                <ArtifactDeleteButton campaignId={campaignId} artifactId={artifact.id} />
+            <div className="flex items-start gap-1">
+              <p className="min-w-0 flex-1 text-sm font-semibold leading-snug text-hud-ink [overflow-wrap:anywhere]">{artifact.name}</p>
+              <div className="-mr-1 -mt-1 flex shrink-0">
+                <Button variant="ghost" size="icon" className="size-7 text-hud-muted hover:text-hud-ink" asChild>
+                  <Link href={`/campaigns/${campaignId}/dm/artifacts/${artifact.id}`} aria-label="Редагувати" title="Редагувати">
+                    <Pencil className="size-3.5" />
+                  </Link>
+                </Button>
+                <ArtifactDeleteButton campaignId={campaignId} artifactId={artifact.id} className="size-7" />
               </div>
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-2">
