@@ -12,6 +12,7 @@ type EffectSpec = {
   duration?: number;
   modifiers?: StaticEffect[];
   consumeOn?: ActiveEffect["consumeOn"];
+  expireAtTurnEnd?: boolean;
 };
 
 const DISADVANTAGE: StaticEffect = { kind: "flag", flag: "disadvantage" };
@@ -22,9 +23,9 @@ const MARK: StaticEffect = { kind: "flag", flag: "advantageForAttackers" };
 function specFor(effect: CriticalEffect): EffectSpec | null {
   switch (effect.effect.type) {
     case "advantage_next_attack":
-      return { idPart: "advantage", type: "buff", modifiers: [{ kind: "flag", flag: "advantage", attackKind: "all" }], consumeOn: "ownAttack" };
+      return { idPart: "advantage", type: "buff", modifiers: [{ kind: "flag", flag: "advantage", attackKind: "all" }], consumeOn: "ownAttack", expireAtTurnEnd: true };
     case "disadvantage_next_attack":
-      return { idPart: "disadvantage", type: "debuff", modifiers: [DISADVANTAGE], consumeOn: "ownAttack" };
+      return { idPart: "disadvantage", type: "debuff", modifiers: [DISADVANTAGE], consumeOn: "ownAttack", expireAtTurnEnd: true };
     case "ac_debuff":
       return {
         idPart: "ac-debuff",
@@ -36,13 +37,13 @@ function specFor(effect: CriticalEffect): EffectSpec | null {
     case "block_bonus_action":
       return { idPart: "block-bonus", type: "debuff", legacy: "no_bonus_action" };
     case "advantage_on_target":
-      return { idPart: "advantage-on-target", type: "debuff", modifiers: [MARK], consumeOn: "attackAgainst" };
+      return { idPart: "advantage-on-target", type: "debuff", modifiers: [MARK], consumeOn: "attackAgainst", expireAtTurnEnd: true };
     case "advantage_on_self":
-      return { idPart: "advantage-on-self", type: "debuff", modifiers: [MARK], consumeOn: "attackAgainst" };
+      return { idPart: "advantage-on-self", type: "debuff", modifiers: [MARK], consumeOn: "attackAgainst", expireAtTurnEnd: true };
     case "prone":
-      return { idPart: "prone", type: "condition", modifiers: [MARK, DISADVANTAGE] };
+      return { idPart: "prone", type: "condition", modifiers: [MARK, DISADVANTAGE], expireAtTurnEnd: true };
     case "weakened_next_hit":
-      return { idPart: "weakened", type: "debuff", legacy: "weakened_next_hit", legacyValue: 0.5, consumeOn: "ownHit" };
+      return { idPart: "weakened", type: "debuff", legacy: "weakened_next_hit", legacyValue: 0.5, consumeOn: "ownHit", expireAtTurnEnd: true };
     case "lose_action":
       return { idPart: "no-action", type: "debuff", legacy: "skip_action", legacyValue: 100, duration: 1 };
     default:
@@ -91,7 +92,7 @@ export function applyCriticalEffect(
           effects: spec.legacy ? [{ type: spec.legacy, value: spec.legacyValue ?? 1 }] : [],
           ...(spec.modifiers && { abilityEffects: spec.modifiers }),
           ...(spec.consumeOn && { consumeOn: spec.consumeOn }),
-          ...(duration === 2 && { expireAtTurnEnd: true }),
+          ...(spec.expireAtTurnEnd && { expireAtTurnEnd: true }),
         },
         currentRound,
       ),
