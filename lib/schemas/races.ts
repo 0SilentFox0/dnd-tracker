@@ -4,7 +4,9 @@ import { AbilitiesSchema } from "@/lib/utils/abilities/schema";
 
 const passiveAbilitySchema = z
   .object({
+    name: z.string().optional(),
     description: z.string(),
+    appearanceDescription: z.string().optional(),
     statImprovements: z.string().optional(),
     statModifiers: z
       .record(

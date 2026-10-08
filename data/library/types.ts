@@ -37,7 +37,18 @@ export interface LibraryBranch extends LibraryEntry {
   spares: LibrarySkill[];
 }
 
+export type AbilityScoreKey = "strength" | "dexterity" | "constitution" | "intelligence" | "wisdom" | "charisma";
+
+export interface LibraryRacePassive {
+  name: string;
+  description: string;
+  appearanceDescription: string;
+  stats: Partial<Record<AbilityScoreKey, number>>;
+  trait: Ability[];
+}
+
 export interface LibraryRace extends LibraryEntry {
+  passive: LibraryRacePassive;
   color?: string;
   branchKeys: string[];
   spellSlotProgression: Array<{ level: number; slots: number }>;

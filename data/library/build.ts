@@ -2,10 +2,10 @@ import { BRANCHES } from "./branches";
 import { PERSONAL } from "./personal";
 import { RACES } from "./races";
 import { SPELLS } from "./spells";
-import type { Library, LibraryEntry, LibrarySkill, LibrarySource } from "./types";
+import type { AbilityScoreKey, Library, LibraryEntry, LibraryRace, LibrarySkill, LibrarySource } from "./types";
 
 import { BRANCH_ICONS, SKILL_ICONS, SPELL_ICONS } from "@/data/skill-icons";
-import { AbilitySchema } from "@/lib/utils/abilities/schema";
+import { type Ability, AbilitySchema } from "@/lib/utils/abilities/schema";
 import { SpellDefinitionSchema } from "@/lib/utils/spells/model/schema";
 
 export const LIBRARY_COMPLETE = true;
@@ -40,6 +40,28 @@ export function branchSkills(branch: LibrarySource["branches"][number]): Library
 
 export function raceSkills(race: LibrarySource["races"][number]): LibrarySkill[] {
   return [...race.levels, race.ultimate];
+}
+
+export function racePassiveAbilities(race: LibraryRace): Ability[] {
+  const entries = Object.entries(race.passive.stats) as Array<[AbilityScoreKey, number]>;
+
+  const stats: Ability[] =
+    entries.length === 0
+      ? []
+      : [
+          {
+            id: `${race.key}-stats`,
+            name: `${race.name}: характеристики`,
+            trigger: { event: "passive" },
+            effects: entries.map(([stat, flat]) => ({ kind: "modifyStat", stat, flat })),
+          },
+        ];
+
+  return [...stats, ...race.passive.trait];
+}
+
+export function racePassiveStatModifiers(race: LibraryRace): Record<string, { bonus: true }> {
+  return Object.fromEntries(Object.keys(race.passive.stats).map((key) => [key, { bonus: true as const }]));
 }
 
 export function buildLibrary(source: LibrarySource = LIBRARY_SOURCE): Library {
@@ -112,6 +134,24 @@ export function buildLibrary(source: LibrarySource = LIBRARY_SOURCE): Library {
 
   for (const race of source.races) {
     checkEntry("Раса", race);
+
+    for (const [field, text] of [["name", race.passive.name], ["description", race.passive.description]] as const) {
+      if (text.trim() === "") issues.push(`Раса «${race.key}»: порожнє passive.${field}`);
+    }
+
+    if (race.passive.appearanceDescription.trim().length < MIN_APPEARANCE_LENGTH) {
+      issues.push(`Раса «${race.key}»: опис вигляду пасивки коротший за ${MIN_APPEARANCE_LENGTH} символів`);
+    }
+
+    if (race.passive.trait.length === 0) issues.push(`Раса «${race.key}»: порожній passive.trait`);
+
+    racePassiveAbilities(race).forEach((ability, i) => {
+      const parsed = AbilitySchema.safeParse(ability);
+
+      if (!parsed.success) {
+        for (const issue of parsed.error.issues) issues.push(`Раса «${race.key}» пасивка [${i}]: ${issue.path.join(".")} ${issue.message}`);
+      }
+    });
 
     if (race.branchKeys.length === 0) issues.push(`Раса «${race.key}»: порожній список гілок`);
 
