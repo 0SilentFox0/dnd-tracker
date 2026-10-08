@@ -35,12 +35,14 @@ export async function applyAbilitySummons(
   for (const req of requests) {
     const owner = next.find((p) => p.basicInfo.id === req.ownerId);
 
-    const group = req.group.trim().toLowerCase();
+    const group = (req.group ?? "").trim().toLowerCase();
 
-    const candidates = pool.units.filter((u) => u.level === req.tier && (racesById[u.raceId ?? ""]?.name ?? "").trim().toLowerCase() === group);
+    const candidates = req.unitId
+      ? pool.units.filter((u) => u.id === req.unitId)
+      : pool.units.filter((u) => u.level === req.tier && (racesById[u.raceId ?? ""]?.name ?? "").trim().toLowerCase() === group);
 
     if (!owner || candidates.length === 0) {
-      messages.push(`немає юніта групи ${req.group} Tier ${req.tier}`);
+      messages.push(req.unitId ? "обраного юніта не знайдено" : `немає юніта групи ${req.group} Tier ${req.tier}`);
       continue;
     }
 

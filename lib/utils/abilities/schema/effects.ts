@@ -107,6 +107,7 @@ const DealDamageSchema = z.object({
   kind: z.literal("dealDamage"),
   amount: AmountSchema,
   damageType: z.string().min(1).optional(),
+  falloff: z.array(z.number().min(0).max(100)).min(1).optional(),
   ...target,
 });
 
@@ -148,7 +149,15 @@ const CleanseSchema = z.object({ kind: z.literal("cleanse"), includeConditions: 
 
 const GuardSchema = z.object({ kind: z.literal("guard"), percent: z.number().int().min(1).max(100), duration: DurationSchema, ...target });
 
-const SummonSchema = z.object({ kind: z.literal("summon"), group: z.string().min(1), tier: z.number().int().min(1).max(7), count: z.number().int().min(1).max(10).optional() });
+const SummonSchema = z
+  .object({
+    kind: z.literal("summon"),
+    group: z.string().min(1).optional(),
+    tier: z.number().int().min(1).max(7).optional(),
+    unitId: z.string().min(1).optional(),
+    count: z.number().int().min(1).max(10).optional(),
+  })
+  .refine((e) => !!e.unitId || (!!e.group && e.tier !== undefined), { message: "Потрібен unitId або group і tier" });
 
 const RaiseDeadSchema = z.object({ kind: z.literal("raiseDead"), hpPercent: z.number().int().min(1).max(100), ...target });
 

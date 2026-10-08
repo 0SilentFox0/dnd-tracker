@@ -11,8 +11,9 @@ export interface AbilityRunContext {
 
 export interface SummonRequest {
   ownerId: string;
-  group: string;
-  tier: number;
+  group?: string;
+  tier?: number;
+  unitId?: string;
   count: number;
 }
 

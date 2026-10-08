@@ -33,6 +33,10 @@ const missing = resolved({ id: "none", name: "Поклик", trigger: { event: "
 
 const legion = resolved({ id: "legion", name: "Легіон", trigger: { event: "bonusAction" }, effects: [{ kind: "summon", group: "дЕмОни", tier: 5, count: 2 }] });
 
+const byUnit = resolved({ id: "byUnit", name: "Поклик звіра", trigger: { event: "bonusAction" }, effects: [{ kind: "summon", unitId: "u-rat" }] });
+
+const gone = resolved({ id: "gone", name: "Поклик нікого", trigger: { event: "bonusAction" }, effects: [{ kind: "summon", unitId: "u-missing" }] });
+
 const raise = resolved({
   id: "raise",
   name: "Підняття мертвих",
@@ -45,7 +49,7 @@ const raise = resolved({
 
 const base = participant("hero", { controlledBy: "user-1" }, {});
 
-const caster: BattleParticipant = { ...base, battleData: { ...base.battleData, resolvedAbilities: [gate, missing, legion, raise] } };
+const caster: BattleParticipant = { ...base, battleData: { ...base.battleData, resolvedAbilities: [gate, missing, legion, byUnit, gone, raise] } };
 
 const dead = (id: string, sourceType: ParticipantSourceTypeValue = ParticipantSourceType.UNIT): BattleParticipant => {
   const p = participant(id, { side: ParticipantSide.ENEMY, controlledBy: "dm", sourceType }, {});
@@ -82,6 +86,22 @@ describe("summon", () => {
     const imps = out.participants.filter((p) => p.basicInfo.sourceId === "u-imp");
 
     expect(imps.map((p) => p.basicInfo.name)).toEqual(["Біс #1", "Біс #2"]);
+  });
+
+  it("summon by unitId ignores group and tier", async () => {
+    const out = await bonus(context({ participants: [caster, goblin] }), { participantId: "hero", abilityKey: byUnit.key });
+
+    const added = out.participants.find((p) => p.basicInfo.sourceId === "u-rat") as BattleParticipant;
+
+    expect(added.battleData.summonedBy).toBe("hero");
+    expect(added.basicInfo.side).toBe(caster.basicInfo.side);
+  });
+
+  it("unknown unitId: a message and nothing added", async () => {
+    const out = await bonus(context({ participants: [caster, goblin] }), { participantId: "hero", abilityKey: gone.key });
+
+    expect(out.participants).toHaveLength(2);
+    expect(out.events[0].resultText).toContain("обраного юніта не знайдено");
   });
 
   it("no matching unit: a message and nothing added", async () => {

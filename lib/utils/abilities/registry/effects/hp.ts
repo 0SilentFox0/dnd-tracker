@@ -25,12 +25,14 @@ export function applyDealDamage(input: EffectApplyInput<Of<"dealDamage">>): Effe
 
   const downed: EffectApplyResult["downed"] = [];
 
-  for (const id of input.targetIds) {
+  for (const [index, id] of input.targetIds.entries()) {
     const t = findParticipant(ps, id);
 
     if (!t || !isActive(t)) continue;
 
-    const amount = resolveAmount(effect.amount, { owner, target: t, eventDamage: eventDamage(input.event), rng: ctx.rng, participants: input.participants });
+    const rolled = resolveAmount(effect.amount, { owner, target: t, eventDamage: eventDamage(input.event), rng: ctx.rng, participants: input.participants });
+
+    const amount = effect.falloff ? Math.floor((rolled * effect.falloff[Math.min(index, effect.falloff.length - 1)]) / 100) : rolled;
 
     if (amount <= 0) continue;
 
@@ -174,7 +176,7 @@ export function applyHot(input: EffectApplyInput<Of<"hot">>): EffectApplyResult 
   return { participants: ps, messages };
 }
 
-export const describeDealDamage = (e: Of<"dealDamage">) => `шкода ${amountLabel(e.amount)}${e.damageType ? ` ${e.damageType}` : ""}`;
+export const describeDealDamage = (e: Of<"dealDamage">) => `шкода ${amountLabel(e.amount)}${e.damageType ? ` ${e.damageType}` : ""}${e.falloff ? ` (${e.falloff.join("% → ")}%)` : ""}`;
 
 export const describeHeal = (e: Of<"heal">) => `${e.revive ? "воскресіння" : "лікування"} ${amountLabel(e.amount)}`;
 

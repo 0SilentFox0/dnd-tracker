@@ -46,6 +46,7 @@ export const TARGET_LABELS: Record<AbilityTarget, string> = {
   eventActor: "виконавець події",
   allAllies: "усі союзники",
   allEnemies: "усі вороги",
+  everyone: "усі учасники",
 };
 
 export const CONDITION_LABELS: Record<(typeof CONDITION_KEYS)[number], string> = {

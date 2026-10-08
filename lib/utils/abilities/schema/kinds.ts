@@ -6,7 +6,7 @@ import { AttackType } from "@/lib/constants/battle";
 
 export const DICE_RE = /^(\d+)d(\d+)([+-]\d+)?$/;
 
-export const ABILITY_TARGETS = ["self", "eventTarget", "eventActor", "allAllies", "allEnemies"] as const;
+export const ABILITY_TARGETS = ["self", "eventTarget", "eventActor", "allAllies", "allEnemies", "everyone"] as const;
 
 export const ATTACK_KINDS = [AttackType.MELEE, AttackType.RANGED] as const;
 
