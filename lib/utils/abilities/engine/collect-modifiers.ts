@@ -6,7 +6,7 @@ import { findParticipant, isActive, resolvedAbilitiesOf } from "./participants";
 import { evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
 import type { AttackKind, DamageKind, FlagEffect, FlagKey, StaticEffect, StatKey } from "@/lib/utils/abilities/schema";
 import { isBakedStat, isStaticEffect } from "@/lib/utils/abilities/schema/kinds";
-import type { AbilitySource } from "@/types/abilities";
+import type { AbilitySource, ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
 
 export type ModifierQuery =
@@ -67,6 +67,23 @@ function appliesTo(target: StaticEffect["target"], source: BattleParticipant, su
   }
 }
 
+function isAuraTarget(target: StaticEffect["target"]): boolean {
+  return target === "allAllies" || target === "allEnemies";
+}
+
+// Editor-made ids ("a1", "a2"…) repeat across owners, so they only dedupe within one source; library ids are global.
+function auraKey(ability: ResolvedAbility): string {
+  return /^a\d+$/.test(ability.id) ? ability.key : ability.id;
+}
+
+function strength(entries: ModifierEntry[]): number {
+  return entries.reduce((sum, e) => {
+    const flag = e.flag ? Math.abs("percent" in e.flag ? e.flag.percent : "value" in e.flag ? e.flag.value : 1) : 0;
+
+    return sum + Math.abs(e.flat) + Math.abs(e.percent) + flag;
+  }, 0);
+}
+
 export function collectModifiers(
   participants: BattleParticipant[],
   participantId: string,
@@ -79,15 +96,24 @@ export function collectModifiers(
 
   if (!subject) return result;
 
-  const add = (effect: StaticEffect, owner: BattleParticipant, label: string, sourceType: ModifierEntry["sourceType"], icon?: string | null) => {
-    if (!matchesQuery(effect, query)) return;
+  const push = (entry: ModifierEntry) => {
+    if (entry.flag) result.flags.push(entry.flag);
 
-    if (effect.kind === "flag") {
-      result.flags.push(effect);
-      result.entries.push({ label, sourceType, flat: 0, percent: 0, flag: effect, icon });
+    result.flat += entry.flat;
+    result.percent += entry.percent;
+    result.entries.push(entry);
+  };
 
-      return;
-    }
+  const entryOf = (
+    effect: StaticEffect,
+    owner: BattleParticipant,
+    label: string,
+    sourceType: ModifierEntry["sourceType"],
+    icon?: string | null,
+  ): ModifierEntry | null => {
+    if (!matchesQuery(effect, query)) return null;
+
+    if (effect.kind === "flag") return { label, sourceType, flat: 0, percent: 0, flag: effect, icon };
 
     let multiplier = 1;
 
@@ -96,21 +122,27 @@ export function collectModifiers(
 
       multiplier = targetId ? countMarks(findParticipant(participants, targetId), effect.perMark, owner.basicInfo.id) : 0;
 
-      if (multiplier === 0) return;
+      if (multiplier === 0) return null;
     }
 
     const flat = (effect.flat !== undefined ? resolveFlat(effect.flat, owner) : 0) * multiplier;
 
     const percent = (effect.percent !== undefined ? resolveFlat(effect.percent, owner) : 0) * multiplier;
 
-    result.flat += flat;
-    result.percent += percent;
-    result.entries.push({ label, sourceType, flat, percent, icon });
+    return { label, sourceType, flat, percent, icon };
+  };
+
+  const add = (effect: StaticEffect, owner: BattleParticipant, label: string, sourceType: ModifierEntry["sourceType"], icon?: string | null) => {
+    const entry = entryOf(effect, owner, label, sourceType, icon);
+
+    if (entry) push(entry);
   };
 
   const skipPassive = "stat" in query && isBakedStat(query.stat);
 
   if (!skipPassive) {
+    const auras = new Map<string, ModifierEntry[]>();
+
     for (const source of participants) {
       if (source !== subject && !isActive(source)) continue;
 
@@ -119,13 +151,30 @@ export function collectModifiers(
 
         if (ability.condition && !evaluateCondition(ability.condition, { owner: source, event: null, participants })) continue;
 
+        const auraEntries: ModifierEntry[] = [];
+
         for (const effect of ability.effects) {
-          if (isStaticEffect(effect) && appliesTo(effect.target, source, subject)) {
-            add(effect, source, ability.name, ability.source.type, ability.source.icon);
-          }
+          if (!isStaticEffect(effect) || !appliesTo(effect.target, source, subject)) continue;
+
+          const entry = entryOf(effect, source, ability.name, ability.source.type, ability.source.icon);
+
+          if (!entry) continue;
+
+          if (isAuraTarget(effect.target)) auraEntries.push(entry);
+          else push(entry);
         }
+
+        if (auraEntries.length === 0) continue;
+
+        const key = auraKey(ability);
+
+        const kept = auras.get(key);
+
+        if (!kept || strength(auraEntries) > strength(kept)) auras.set(key, auraEntries);
       }
     }
+
+    for (const entries of auras.values()) entries.forEach(push);
   }
 
   for (const ae of subject.battleData.activeEffects) {
