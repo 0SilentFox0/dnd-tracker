@@ -253,7 +253,7 @@ describe("Дух лева", () => {
 
     const hitAlly = { type: "hit", actorId: "e", targetId: "a", attackKind: AttackType.MELEE, damage: 5 } as const;
 
-    it("Кривдник отримує +15 % без стакання", () => {
+    it("Кривдник отримує +10 % без стакання", () => {
       let ps = [godric(cape), makeParticipant({ id: "a" }), foe("e")];
 
       expect(bonus(ps)).toBe(0);
@@ -261,7 +261,7 @@ describe("Дух лева", () => {
       for (let i = 0; i < 3; i++) ps = runAbilities(ps, hitAlly, ctx).participants;
 
       expect(ps[2].battleData.activeEffects.length).toBeGreaterThan(0);
-      expect(bonus(ps)).toBe(15);
+      expect(bonus(ps)).toBe(10);
     });
 
     it("влучання по самому Годрику мітки не ставить", () => {
@@ -273,10 +273,10 @@ describe("Дух лева", () => {
     });
   });
 
-  it("корона: +10 % до шансу додаткового ходу", () => {
+  it("корона: +5 % до шансу додаткового ходу", () => {
     const ps = [godric(pieces["lion-crown"])];
 
-    expect(findFlags(ps, "godric", "moraleChance").map((f) => f.percent)).toEqual([10]);
+    expect(findFlags(ps, "godric", "moraleChance").map((f) => f.percent)).toEqual([5]);
   });
 
   it("намисто: смертельний удар раз за бій, 25 %", () => {
