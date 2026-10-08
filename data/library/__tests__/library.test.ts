@@ -6,7 +6,7 @@ import { PERSONAL } from "../personal";
 import { RACES } from "../races";
 import { SPELLS } from "../spells";
 import type { LibraryArtifact, LibraryArtifactSet, LibraryBranch, LibraryRace, LibrarySkill, LibrarySource, LibrarySpell, LibraryUnit } from "../types";
-import { falloff, raiseOnKill } from "../unit-abilities";
+import { falloff, hatred, raiseOnKill } from "../unit-abilities";
 import { UNITS } from "../units";
 
 import { BRANCH_ICONS, SKILL_ICONS, SPELL_ICONS } from "@/data/skill-icons";
@@ -264,6 +264,10 @@ describe("buildLibrary unit validation", () => {
     expect(() => buildLibrary(withUnits([unit("u", { spellKeys: ["nope"] })]))).toThrow(/закляття «nope»/);
     expect(() => buildLibrary(withUnits([unit("u", { abilities: [{ id: "x", name: "x", trigger: { event: "passive" }, effects: [] }] })]))).toThrow(/Юніт «u»/);
     expect(() => buildLibrary(withUnits([unit("u", { abilities: [{ id: "x", name: "x", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "spellImmunity", spellIds: ["nope"] }] }] })]))).toThrow(/«nope»/);
+  });
+
+  it("rejects unknown race names in targetRace", () => {
+    expect(() => buildLibrary(withUnits([unit("u", { abilities: [hatred("Кара", ["Нікого"])] })]))).toThrow(/невідома раса «Нікого»/);
   });
 
   it("requires falloff for multi-target attacks", () => {

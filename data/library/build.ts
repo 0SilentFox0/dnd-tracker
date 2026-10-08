@@ -9,7 +9,7 @@ import { UNITS } from "./units";
 import { ARTIFACT_ICON_FILES } from "@/data/artifact-icons-map";
 import { BRANCH_ICONS, SKILL_ICONS, SPELL_ICONS } from "@/data/skill-icons";
 import { ARTIFACT_GRID_9 } from "@/lib/constants/artifacts";
-import { type Ability, AbilitySchema } from "@/lib/utils/abilities/schema";
+import { type Ability, AbilitySchema, type Condition } from "@/lib/utils/abilities/schema";
 import { SpellDefinitionSchema } from "@/lib/utils/spells/model/schema";
 
 export const LIBRARY_COMPLETE = true;
@@ -86,6 +86,16 @@ export function racePassiveStatModifiers(race: LibraryRace): Record<string, { bo
   return Object.fromEntries(Object.keys(race.passive.stats).map((key) => [key, { bonus: true as const }]));
 }
 
+function conditionRaces(c: Condition | undefined): string[] {
+  if (!c) return [];
+
+  if (c.type === "targetRace") return c.races;
+
+  if (c.type === "not") return conditionRaces(c.condition);
+
+  return c.type === "all" || c.type === "any" ? c.conditions.flatMap(conditionRaces) : [];
+}
+
 export function buildLibrary(source: LibrarySource = LIBRARY_SOURCE): Library {
   const issues: string[] = [];
 
@@ -129,7 +139,13 @@ export function buildLibrary(source: LibrarySource = LIBRARY_SOURCE): Library {
 
   const schools = [...new Set(source.spells.map((s) => s.school))];
 
+  const raceNames = new Set(source.races.map((r) => r.name));
+
   const checkRefs = (label: string, abilities: Ability[]) => {
+    for (const name of abilities.flatMap((a) => conditionRaces(a.condition))) {
+      if (!raceNames.has(name)) issues.push(`${label}: невідома раса «${name}» у targetRace`);
+    }
+
     for (const ref of refs(abilities)) {
       if (ref.kind === "spellIds" && !spellByKey.has(String(ref.value))) issues.push(`${label}: заклинання «${String(ref.value)}» не знайдено`);
 
