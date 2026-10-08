@@ -49,34 +49,6 @@ const spellAccess = (school: string) => (i: number): Ability["effects"] => [{ ki
 
 const HOSTILE_NATURE_SPELLS = ["roots", "thorny-vines", "moonbeam", "wasp-swarm", "entangle", "earthquake", "nature-storm"];
 
-const HOSTILE_SPELLS = [
-  "divine-retribution",
-  "word-of-light",
-  "weakness",
-  "slow",
-  "frailty",
-  "plague",
-  "confusion",
-  "suffering",
-  "sorrow",
-  "blindness",
-  "berserk",
-  "puppet-master",
-  "curse-of-the-netherworld",
-  "eldritch-arrow",
-  "stone-spikes",
-  "ice-bolt",
-  "lightning-bolt",
-  "fireball",
-  "fire-wall",
-  "circle-of-winter",
-  "chain-lightning",
-  "meteor-shower",
-  "deep-freeze",
-  "armageddon",
-  "implosion",
-  ...HOSTILE_NATURE_SPELLS,
-];
 
 const attack: LibraryBranch = {
   key: "attack",
@@ -951,12 +923,13 @@ const chaos: LibraryBranch = {
         name: "Вибух мани",
         iconKey: "mana-burst",
         description:
-          "Коли ворог націлює на вас шкідливе закляття, з шансом 50 % (до 2 разів за бій) заклинатель отримує 50 % середньої шкоди вашої атаки (силова).",
+          "Коли ворог чаклує закляття, ціллю якого є ви, з шансом 50 % (до 2 разів за бій) заклинатель отримує 50 % середньої шкоди вашої атаки (силова).",
         appearanceDescription:
           "Чуже закляття врізається в героя й розколюється, як скло, — а уламки летять назад у того, хто його кинув. Ворожий маг відсахується, витираючи кров із носа.",
         abilities: [
           ability("mana-burst", "Вибух мани", {
-            trigger: { event: "spellCast", phase: "after", role: "target", spellIds: HOSTILE_SPELLS },
+            trigger: { event: "spellCast", phase: "after", role: "target" },
+            condition: { type: "actorIsEnemy" },
             limits: { perBattle: 2, chance: 50 },
             effects: [{ kind: "dealDamage", amount: { percentOf: "ownerAttack", value: 50 }, damageType: "force", target: "eventActor" }],
           }),
@@ -1074,12 +1047,16 @@ const nature: LibraryBranch = {
         key: "thorns",
         name: "Шипи",
         iconKey: "thorns",
-        description: "Коли вас вражає атака ближнього бою, нападник отримує 15 % завданої вам шкоди (колюча).",
+        description: "Коли вас або будь-якого вашого союзника вражає атака ближнього бою, нападник отримує 15 % завданої цілі шкоди (колюча).",
         appearanceDescription:
-          "Шкіра друїда вкривається тонкою корою з гострими, як терен, колючками. Кожен, хто б'є впритул, відсмикує руку, закривавлену до ліктя.",
+          "Шкіра друїда і його побратимів вкривається тонкою корою з гострими, як терен, колючками. Кожен, хто б'є впритул, відсмикує руку, закривавлену до ліктя.",
         abilities: [
           ability("thorns", "Шипи", {
             trigger: { event: "hit", role: "target", attackKind: "melee" },
+            effects: [{ kind: "dealDamage", amount: { percentOf: "eventDamage", value: 15 }, damageType: "piercing", target: "eventActor" }],
+          }),
+          ability("thorns-allies", "Шипи", {
+            trigger: { event: "hit", role: "target", whose: "ally", attackKind: "melee" },
             effects: [{ kind: "dealDamage", amount: { percentOf: "eventDamage", value: 15 }, damageType: "piercing", target: "eventActor" }],
           }),
         ],
@@ -1176,22 +1153,27 @@ const nature: LibraryBranch = {
 export const BRANCHES: LibraryBranch[] = [attack, ranged, defense, leadership, light, dark, chaos, nature];
 
 export const REFERENCED_SPELL_KEYS = [
-  ...new Set([
-    "righteous-might",
-    "haste",
-    "evasion",
-    "stoneskin",
-    "divine-strength",
-    "cleansing",
-    "eternal-light",
-    "plague",
-    "suffering",
-    "slow",
-    "confusion",
-    "weakness",
-    "frailty",
-    "entangle",
-    "call-of-the-beast",
-    ...HOSTILE_SPELLS,
-  ]),
+  "righteous-might",
+  "haste",
+  "evasion",
+  "stoneskin",
+  "divine-strength",
+  "cleansing",
+  "eternal-light",
+  "plague",
+  "suffering",
+  "slow",
+  "confusion",
+  "weakness",
+  "frailty",
+  "lightning-bolt",
+  "chain-lightning",
+  "fireball",
+  "fire-wall",
+  "armageddon",
+  "ice-bolt",
+  "circle-of-winter",
+  "deep-freeze",
+  "call-of-the-beast",
+  ...HOSTILE_NATURE_SPELLS,
 ];
