@@ -133,6 +133,8 @@ export function describeFlag(e: Extract<Effect, { kind: "flag" }>): string {
       return `відсіч${e.attackKinds.includes(AttackType.RANGED) ? " (і на дальні)" : ""} +${e.bonusPercent}%`;
     case "attackHitsAllEnemies":
       return "кожна атака б'є всіх ворогів";
+    case "lifesteal":
+      return `атаки лікують на ${e.percent}% завданої шкоди`;
     case "seeEnemyHp":
       return "бачить HP ворогів";
     case "noNegativeMorale":
@@ -158,6 +160,7 @@ export const FLAG_LABELS: Record<FlagKey, string> = {
   counterAttack: "Контратака",
   attackHitsAllEnemies: "Атака б'є всіх ворогів",
   seeEnemyHp: "Бачить HP ворогів",
+  lifesteal: "Вампіризм (лікування від шкоди атак)",
   noNegativeMorale: "Мораль не нижче 0",
   ignoreMorale: "Мораль не діє",
   minMorale: "Мінімальна мораль",
@@ -200,6 +203,7 @@ export const FLAG_FIELDS: Record<FlagKey, readonly FieldMeta[]> = {
   ],
   attackHitsAllEnemies: [],
   seeEnemyHp: [],
+  lifesteal: [{ name: "percent", label: "% завданої шкоди", input: "number" }],
   noNegativeMorale: [],
   ignoreMorale: [],
   minMorale: [{ name: "value", label: "Мінімум (−3…3)", input: "number" }],

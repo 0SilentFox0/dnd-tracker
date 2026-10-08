@@ -66,9 +66,9 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
     damage: hitDamage.resistanceResult.finalDamage,
   });
 
-  const vampirism = applyVampirism(getP(flow, attackerId), hitDamage.totalFinalDamage, attack.type);
+  const vampirism = applyVampirism(flow.ps, attackerId, hitDamage.totalFinalDamage, attack.type);
 
-  put(flow, vampirism.updatedAttacker);
+  if (vampirism.updatedAttacker) put(flow, vampirism.updatedAttacker);
 
   return { hitDamage, vampirismHeal: vampirism.vampirismHeal };
 }
