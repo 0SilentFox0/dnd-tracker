@@ -3,13 +3,21 @@ import type { LibraryRacePassive } from "./types";
 export const RACE_PASSIVES: Record<string, LibraryRacePassive> = {
   humans: {
     iconKey: "race-flag-humans",
-    name: "Відвага",
-    description: "+1 до всіх шести характеристик. Мораль героя ніколи не падає нижче 0.",
+    name: "Вишкіл війська",
+    description: "+2 до Сили, +1 до Харизми. На початку бою герой і всі союзники отримують +1 до моралі на 2 раунди.",
     appearanceDescription:
-      "Воїн Імперії ставить ногу в стремено, і в його погляді немає ані тіні сумніву. Навіть коли навколо падають стяги й чути крики відступу, він тримає стрій, ніби тримається за невидимий щит. Страх ковзає по його кірасі, як дощ по бронзовому дзвону.",
-    stats: { strength: 1, dexterity: 1, constitution: 1, intelligence: 1, wisdom: 1, charisma: 1 },
-    trait: [{ id: "humans-courage", name: "Відвага", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "noNegativeMorale" }] }],
+      "Перед першою сутичкою лунає короткий сигнал сурми, і ряди імперських воїнів вирівнюються, наче по шнурку. Командир кидає один погляд на стрій, і навіть новобранці відчувають, що за плечима в них стоїть уся армія. Шоломи піднімаються, щити змикаються, і страх відступає перед спільним ритмом кроків.",
+    stats: { strength: 2, charisma: 1 },
+    trait: [
+      {
+        id: "humans-army-drill",
+        name: "Вишкіл війська",
+        trigger: { event: "battleStart" },
+        effects: [{ kind: "modifyStat", stat: "morale", flat: 1, duration: { rounds: 2 }, target: "allAllies" }],
+      },
+    ],
   },
+
   demons: {
     iconKey: "race-flag-demons",
     name: "Пекельна кров",
@@ -24,18 +32,19 @@ export const RACE_PASSIVES: Record<string, LibraryRacePassive> = {
   elves: {
     iconKey: "race-flag-elves",
     name: "Око лісу",
-    description: "+2 до Спритності, +1 до Мудрості. Дальні атаки героя отримують +1 до кидка атаки.",
+    description: "+2 до Спритності, +1 до Мудрості. Усі атаки героя отримують +1 до кидка влучання.",
     appearanceDescription:
-      "Ельф примружується, і ліс ніби підказує йому, де гойднеться гілка, а де промайне тінь. Тятива співає тихо, а стріла вже летить туди, де ворог лише збирається ступити. Птахи не змовкають поруч із ним — вони знають, що він свій.",
+      "Ельф примружується, і ліс ніби підказує йому, де гойднеться гілка, а де промайне тінь. Його погляд ловить найменшу прогалину в обороні ворога, чи то між пластинами лат, чи між ударами мечів. Птахи не змовкають поруч із ним — вони знають, що він свій.",
     stats: { dexterity: 2, wisdom: 1 },
-    trait: [{ id: "elves-forest-eye", name: "Око лісу", trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "attackBonus", flat: 1, attackKind: "ranged" }] }],
+    trait: [{ id: "elves-forest-eye", name: "Око лісу", trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "attackBonus", flat: 1 }] }],
   },
+
   necromancers: {
     iconKey: "race-flag-necromancers",
     name: "Неживе тіло",
-    description: "+2 до Інтелекту, +1 до Статури. Імунітет до шкоди отрутою та до страху.",
+    description: "+2 до Інтелекту, +1 до Статури. Мораль героя завжди 0. Імунітет до шкоди отрутою.",
     appearanceDescription:
-      "Шкіра некроманта холодна, як могильна плита, а в грудях давно не б'ється серце. Отрута стікає по ньому, не знаходячи живої плоті, а жах, що змушує інших кидати зброю, лише викликає в нього глуху усмішку. Він давно переступив межу, за якою страшно.",
+      "Шкіра некроманта холодна, як могильна плита, а в грудях давно не б'ється серце. Отрута стікає по ньому, не знаходячи живої плоті, а ні відвага, ні жах не торкаються його порожнього погляду. Він давно переступив межу, за якою щось відчувають.",
     stats: { intelligence: 2, constitution: 1 },
     trait: [
       {
@@ -43,21 +52,23 @@ export const RACE_PASSIVES: Record<string, LibraryRacePassive> = {
         name: "Неживе тіло",
         trigger: { event: "passive" },
         effects: [
+          { kind: "flag", flag: "ignoreMorale" },
           { kind: "flag", flag: "resistance", damageType: "poison", percent: 100 },
-          { kind: "flag", flag: "conditionImmunity", conditions: ["fear"] },
         ],
       },
     ],
   },
+
   mages: {
     iconKey: "race-flag-mages",
-    name: "Магічна освіта",
-    description: "+2 до Інтелекту, +1 до Мудрості. +1 слот заклинань 1 рівня.",
+    name: "Магічний захист",
+    description: "+2 до Інтелекту, +1 до Мудрості. Опір шкоді від заклинань 15 %.",
     appearanceDescription:
-      "Роки в бібліотеках Академії залишили на пальцях чорнильні плями, а в пам'яті — сотні формул, що тихо шепочуться в тиші. Коли маг відкриває долоню, повітря над нею тремтить, ніби сторінка, яку ось-ось перегорне невидима рука. Магія для нього — не дар, а ремесло, відточене до досконалості.",
+      "Роки в бібліотеках Академії залишили на пальцях чорнильні плями, а на плечах — невидиму оболонку з вивірених формул. Ворожі чари ковзають по ній, як дощ по склу, і втрачають частину сили ще до удару. Маг навіть не здригається: він знає цю магію краще за тих, хто її кличе.",
     stats: { intelligence: 2, wisdom: 1 },
-    trait: [{ id: "mages-education", name: "Магічна освіта", trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "spellSlots", flat: 1, spellLevels: [1] }] }],
+    trait: [{ id: "mages-ward", name: "Магічний захист", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "resistance", damageType: "spell", percent: 15 }] }],
   },
+
   "dark-elves": {
     iconKey: "race-flag-dark-elves",
     name: "Підземний зір",

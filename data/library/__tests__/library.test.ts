@@ -173,7 +173,7 @@ describe("library content", () => {
 
   content("gives every race a passive with stat bonuses and one trait", () => {
     const expected: Record<string, Record<string, number>> = {
-      humans: { strength: 1, dexterity: 1, constitution: 1, intelligence: 1, wisdom: 1, charisma: 1 },
+      humans: { strength: 2, charisma: 1 },
       demons: { strength: 2, charisma: 1 },
       elves: { dexterity: 2, wisdom: 1 },
       necromancers: { intelligence: 2, constitution: 1 },

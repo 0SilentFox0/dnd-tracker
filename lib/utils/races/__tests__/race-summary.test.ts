@@ -18,6 +18,11 @@ describe("race summary", () => {
     expect(countRaceSkills({ ...race, availableSkills: [] } as unknown as Race, [skill("ms1"), skill("ms2")])).toBe(2);
   });
 
+  it("uses the tree skill count when the race has a tree", () => {
+    expect(countRaceSkills(race, [skill("ms1"), skill("ms2")], 49)).toBe(49);
+    expect(countRaceSkills(race, [skill("ms1"), skill("ms2")], null)).toBe(1);
+  });
+
   it("shows all regular main skills when the race has no limits, else the listed ones", () => {
     const ms = [{ id: "ms1" }, { id: "ms2" }, { id: "racial" }, { id: "ultimate" }] as MainSkill[];
 

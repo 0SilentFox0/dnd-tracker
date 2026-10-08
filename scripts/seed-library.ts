@@ -185,6 +185,12 @@ async function main() {
     mainSkills.set(b.key, await mainSkill("гілки", b.name, b.color, { icon: icon(b.iconKey), spellGroupId: b.spellSchool ? groups.get(b.spellSchool) : undefined }));
   }
 
+  for (const race of library.races) {
+    const ids = race.branchKeys.map((k) => mainSkills.get(k)).filter((id): id is string => !!id && !id.startsWith("new:"));
+
+    if (!dryRun) await prisma.race.update({ where: { id: races.get(race.key) ?? "" }, data: { availableSkills: json(ids) } });
+  }
+
   const raceMain = await mainSkill("гілки", RACE_BRANCH.name, RACE_BRANCH.color, {});
 
   const ultimateMain = await mainSkill("гілки", ULTIMATE_BRANCH.name, ULTIMATE_BRANCH.color, {});

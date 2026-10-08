@@ -13,7 +13,9 @@ export interface RacePassiveAbility {
   statModifiers?: Record<string, StatModifier>;
 }
 
-export function countRaceSkills(race: Race, skills: Skill[]): number {
+export function countRaceSkills(race: Race, skills: Skill[], treeSkillCount?: number | null): number {
+  if (treeSkillCount != null) return treeSkillCount;
+
   const allowedMainSkills = Array.isArray(race.availableSkills) ? race.availableSkills : [];
 
   if (allowedMainSkills.length === 0) return skills.length;
