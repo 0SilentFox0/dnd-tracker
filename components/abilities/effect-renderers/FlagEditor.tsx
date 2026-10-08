@@ -20,6 +20,7 @@ const DEFAULTS: Record<FlagKey, Record<string, unknown>> = {
   attackHitsAllEnemies: {},
   seeEnemyHp: {},
   lifesteal: { percent: 50 },
+  moraleChance: { percent: 10 },
   noNegativeMorale: {},
   ignoreMorale: {},
   minMorale: { value: 1 },

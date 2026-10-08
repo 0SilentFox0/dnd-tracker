@@ -9,6 +9,7 @@ import type { Prisma } from "@prisma/client";
 import { execFileSync } from "node:child_process";
 
 import { attackBodySchema, attackMutation } from "../app/api/campaigns/[id]/battles/[battleId]/attack/attack-mutation";
+import { moraleCheckMutation } from "../app/api/campaigns/[id]/battles/[battleId]/morale-check/morale-check-mutation";
 import { nextTurnMutation } from "../app/api/campaigns/[id]/battles/[battleId]/next-turn/next-turn-mutation";
 import { spellSchema } from "../app/api/campaigns/[id]/battles/[battleId]/spell/cast-spell-schema";
 import { createSpellMutation } from "../app/api/campaigns/[id]/battles/[battleId]/spell/spell-mutation";
@@ -17,6 +18,7 @@ import { loadCharacterBalanceStats } from "../app/api/campaigns/[id]/battles/bal
 import { BATTLE_LOG_RECENT_EVENTS, ParticipantSourceType } from "../lib/constants/battle";
 import { CampaignRole } from "../lib/constants/campaigns";
 import { prisma } from "../lib/db";
+import { moraleCheckSchema } from "../lib/schemas";
 import { computeFairScaling, pickEnemyRoster } from "../lib/utils/battle/balance";
 import { loadUnitLibraryStats } from "../lib/utils/battle/balance/unit-library";
 import { applyBattleDelta } from "../lib/utils/battle/client/apply-delta";
@@ -24,6 +26,7 @@ import { heroAttackDamageParts } from "../lib/utils/battle/damage/hero-damage";
 import { type PipelineDeps, runBattleMutation, type RunBattleMutationOptions } from "../lib/utils/battle/pipeline/run-battle-mutation";
 import { casterSpellDice } from "../lib/utils/battle/spell/caster-dice";
 import { loadBattle, loadRecentEvents, saveBattle } from "../lib/utils/battle/store";
+import { needsMoraleCheck } from "../lib/utils/battle/view";
 import { rollDiceList } from "../lib/utils/common/dice";
 import { branchLevelNodeId, canLearn, normalizeTree, racialNodeId, type TreeNodes } from "../lib/utils/skills/progression";
 import type { BattleMutationResponse, BattleScene } from "../types/api";
@@ -91,6 +94,10 @@ let rng: () => number = Math.random;
 
 let casts = 0;
 
+let lastBody: Record<string, unknown> = {};
+
+let moraleExtra = 0;
+
 const castLog: Record<string, number> = {};
 
 let dealt: Record<string, { dmg: number; turns: number }> = {};
@@ -128,6 +135,8 @@ async function call<T>(label: string, options: Omit<RunBattleMutationOptions<T>,
 
   const json = (await res.json()) as Record<string, unknown>;
 
+  lastBody = json;
+
   if (res.status === 200 && "delta" in json) {
     const applied = applyBattleDelta(state, (json as unknown as BattleMutationResponse).delta);
 
@@ -140,6 +149,8 @@ async function call<T>(label: string, options: Omit<RunBattleMutationOptions<T>,
 }
 
 const START = { access: "dm" as const, requireStatus: "prepared" as const, mutate: createStartMutation() };
+
+const MORALE = { access: "member" as const, requireStatus: "active" as const, schema: moraleCheckSchema, respond: "wrapped" as const, mutate: moraleCheckMutation };
 
 const ATTACK = { access: "member" as const, requireStatus: "active" as const, schema: attackBodySchema, mutate: attackMutation };
 
@@ -195,6 +206,20 @@ function pickSpell(actor: BattleParticipant, foes: BattleParticipant[]): { spell
 }
 
 async function playTurn(actor: BattleParticipant, foes: BattleParticipant[]) {
+  if (needsMoraleCheck(actor, state.initiativeOrder, state.pendingMoraleCheck)) {
+    const status = await call("morale-check", MORALE, { participantId: actor.basicInfo.id, d10Roll: 1 + Math.floor(rng() * 10) });
+
+    const result = (lastBody.moraleResult ?? (lastBody.response as { moraleResult?: { hasExtraTurn: boolean; shouldSkipTurn: boolean } } | undefined)?.moraleResult) as { hasExtraTurn: boolean; shouldSkipTurn: boolean } | undefined;
+
+    if (status === 200 && result?.hasExtraTurn && actor.basicInfo.side === "ally") moraleExtra++;
+
+    if (status === 200 && result?.shouldSkipTurn) {
+      await call("next-turn", NEXT);
+
+      return;
+    }
+  }
+
   const weapon = actor.battleData.attacks[0];
 
   if (actor.basicInfo.sourceType === ParticipantSourceType.CHARACTER) {
@@ -239,12 +264,14 @@ export interface FightResult {
   deaths: number;
   hpLeft: number;
   casts: number;
+  extras: number;
   dealt: Record<string, { dmg: number; turns: number }>;
 }
 
 async function fight(seed: number, setup: Array<Record<string, unknown>>): Promise<FightResult> {
   rng = mulberry32(seed);
   casts = 0;
+  moraleExtra = 0;
   dealt = {};
 
   const battle = await prisma.battleScene.create({ data: { campaignId, name: `Баланс ${seed}`, status: "prepared", participants: setup as Prisma.InputJsonValue, currentRound: 1, currentTurnIndex: 0 } });
@@ -286,6 +313,7 @@ async function fight(seed: number, setup: Array<Record<string, unknown>>): Promi
 
   return {
     casts,
+    extras: moraleExtra,
     dealt,
     rounds: state.currentRound,
     completed: state.status === "completed",
@@ -480,7 +508,7 @@ async function main() {
         .map(([k, v]) => `${k} ${(v.dmg / Math.max(1, v.turns)).toFixed(1)}/хід`)
         .join(" ");
 
-      const row = `${partyKey} | L${level} | T${tier} | ${rosterText} (hp/дмг ${mults}) | ${avg(results.map((r) => r.rounds))} | ${results.filter((r) => r.completed && r.heroesWon).length}/${RUNS} | ${avg(results.map((r) => r.deaths))} | ${avg(results.map((r) => r.hpLeft))}% | ${results.filter((r) => !r.completed).length} | casts ${avg(results.map((r) => r.casts))} | ${perBuild}`;
+      const row = `${partyKey} | L${level} | T${tier} | ${rosterText} (hp/дмг ${mults}) | ${avg(results.map((r) => r.rounds))} | ${results.filter((r) => r.completed && r.heroesWon).length}/${RUNS} | ${avg(results.map((r) => r.deaths))} | ${avg(results.map((r) => r.hpLeft))}% | ${results.filter((r) => !r.completed).length} | casts ${avg(results.map((r) => r.casts))} | extra ${avg(results.map((r) => r.extras))} | ${perBuild}`;
 
       rows.push(row);
       console.info(row);

@@ -3,6 +3,11 @@ import { combineMorale, ownTimedMoraleFlat } from "@/lib/utils/abilities/engine/
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
 import type { BattleParticipant } from "@/types/battle";
 
+/** Лідерські бонуси до шансу додаткового ходу (прапорець moraleChance), %. */
+export function moraleChanceBonus(p: BattleParticipant, participants: BattleParticipant[]): number {
+  return findFlags(withSelf(participants, p), p.basicInfo.id, "moraleChance").reduce((sum, f) => sum + f.percent, 0);
+}
+
 export function effectiveMorale(p: BattleParticipant, participants: BattleParticipant[]): { value: number; ignored: boolean } {
   const all = withSelf(participants, p);
 

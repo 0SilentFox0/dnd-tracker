@@ -482,7 +482,7 @@ const leadership: LibraryBranch = {
   name: "Лідерство",
   iconKey: "leadership",
   color: "#c9a227",
-  description: "Мистецтво вести за собою: рівні гілки дають мораль +1 / +2 / +3 (найвищий вивчений рівень замінює нижчі), а вміння перетворюють бойовий дух загону на ініціативу й шкоду.",
+  description: "Мистецтво вести за собою: рівні гілки дають мораль +1 / +2 / +3 і всім союзникам +5 / +10 / +15 % до шансу додаткового ходу від моралі (найвищий вивчений рівень замінює нижчі), а вміння перетворюють бойовий дух загону на ініціативу й шкоду.",
   appearanceDescription:
     "Прапор над головою, голос, що перекриває гул битви, і погляд, під яким утомлені солдати знову стають у стрій. Лідер не завжди б'є першим — але за ним завжди йдуть.",
   levels: levels(
@@ -490,24 +490,27 @@ const leadership: LibraryBranch = {
     [
       {
         name: "Базове лідерство",
-        description: "Мораль +1.",
+        description: "Мораль +1; ви і союзники отримуєте +5 % до шансу додаткового ходу від моралі.",
         appearanceDescription:
           "Кілька влучних слів біля вогнища — і загін сміється вперше за тиждень. Наступного ранку вони марширують бадьоріше, ніж учора.",
       },
       {
         name: "Просунуте лідерство",
-        description: "Мораль +2 (замінює Базове лідерство).",
+        description: "Мораль +2; ви і союзники отримуєте +10 % до шансу додаткового ходу від моралі (замінює Базове лідерство).",
         appearanceDescription:
           "Солдати шукають командира очима посеред сутички й заспокоюються, побачивши його прапор. Стрій тримається там, де інший давно розсипався б.",
       },
       {
         name: "Експертне лідерство",
-        description: "Мораль +3 (замінює Просунуте лідерство).",
+        description: "Мораль +3; ви і союзники отримуєте +15 % до шансу додаткового ходу від моралі (замінює Просунуте лідерство).",
         appearanceDescription:
           "Його ім'я вигукують, ідучи в атаку, і шепочуть, перев'язуючи рани. За таким полководцем ідуть навіть у безнадійний бій — і часом його виграють.",
       },
     ],
-    (i) => [{ kind: "modifyStat", stat: "morale", flat: i + 1 }],
+    (i) => [
+      { kind: "modifyStat", stat: "morale", flat: i + 1 },
+      { kind: "flag", flag: "moraleChance", percent: 5 * (i + 1), target: "allAllies" },
+    ],
   ),
   slots: [
     [
@@ -539,10 +542,10 @@ const leadership: LibraryBranch = {
         key: "retribution",
         name: "Відплата",
         iconKey: "retribution",
-        description: "Фізична шкода +3 % за кожне очко вашої моралі.",
+        description: "Фізична шкода +5 % за кожне очко вашої моралі.",
         appearanceDescription:
           "Що вище дух загону, то важче падає його меч. Бойовий клич перетворюється на силу в руках, і кожен удар несе в собі гнів усіх, хто стоїть поруч.",
-        abilities: [passive("retribution", "Відплата", [{ kind: "damageBonus", filter: { kind: "physical" }, percent: { formula: "3*morale" } }])],
+        abilities: [passive("retribution", "Відплата", [{ kind: "damageBonus", filter: { kind: "physical" }, percent: { formula: "5*morale" } }])],
       },
     ],
     [
@@ -585,14 +588,14 @@ const leadership: LibraryBranch = {
         key: "success",
         name: "Успіх",
         iconKey: "success",
-        description: "Кожна ваша успішна перевірка моралі дає +5 % до всієї шкоди на 3 раунди (ефект стакається).",
+        description: "Кожна ваша успішна перевірка моралі дає +8 % до всієї шкоди на 3 раунди (ефект стакається).",
         appearanceDescription:
           "Удача любить сміливих, і герой відчуває її подих на потилиці. Кожен вдалий порив додає йому сили, і він мчить уперед на хвилі власного запалу.",
         abilities: [
           ability("success", "Успіх", {
             trigger: { event: "moraleCheck", result: "success", whose: "self" },
             stackable: true,
-            effects: [{ kind: "damageBonus", filter: { kind: "all" }, percent: 5, duration: { rounds: 3 } }],
+            effects: [{ kind: "damageBonus", filter: { kind: "all" }, percent: 8, duration: { rounds: 3 } }],
           }),
         ],
       },

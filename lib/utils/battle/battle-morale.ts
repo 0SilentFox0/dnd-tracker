@@ -1,4 +1,4 @@
-import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
+import { effectiveMorale, moraleChanceBonus } from "@/lib/utils/battle/morale/effective-morale";
 import type { BattleParticipant } from "@/types/battle";
 
 /**
@@ -16,6 +16,7 @@ export function checkMorale(
   participant: BattleParticipant,
   d10Roll: number,
   participants: BattleParticipant[] = [participant],
+  rng: () => number = Math.random,
 ): MoraleCheckResult {
   const { value: currentMorale, ignored } = effectiveMorale(participant, participants);
 
@@ -47,9 +48,14 @@ export function checkMorale(
   const minRoll = 11 - (chance / 10); // Для 10% = 11 - 1 = 10, для 20% = 11 - 2 = 9, тощо
 
   if (currentMorale > 0) {
-    if (d10Roll >= minRoll) {
+    const bonus = moraleChanceBonus(participant, participants);
+
+    // d10 дає кроки по 10 %; бонус лідерства добирається другим кидком серед невдач, тож сумарний шанс = мораль·10 % + бонус
+    const bonusHit = d10Roll < minRoll && bonus > 0 && chance < 100 && rng() < Math.min(1, bonus / (100 - chance));
+
+    if (d10Roll >= minRoll || bonusHit) {
       result.hasExtraTurn = true;
-      result.message = `⭐ ${participant.basicInfo.name} отримав додатковий хід! (Мораль +${currentMorale}, кидок: ${d10Roll}, потрібно: >=${Math.ceil(minRoll)})`;
+      result.message = `⭐ ${participant.basicInfo.name} отримав додатковий хід! (Мораль +${currentMorale}, кидок: ${d10Roll}, потрібно: >=${Math.ceil(minRoll)}${bonusHit ? `, бонус лідерства +${bonus}%` : ""})`;
     } else {
       result.message = `${participant.basicInfo.name} не отримав додатковий хід (Мораль +${currentMorale}, кидок: ${d10Roll}, потрібно: >=${Math.ceil(minRoll)})`;
     }
