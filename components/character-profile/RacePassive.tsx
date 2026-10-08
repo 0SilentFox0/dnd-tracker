@@ -11,7 +11,7 @@ export function RacePassive() {
 
   const { data: races = [] } = useRaces(campaignId);
 
-  const race = races.find((r) => r.name.toLowerCase() === sheet.identity.race.toLowerCase());
+  const race = races.find((r) => r.name.trim() === sheet.identity.race.trim());
 
   const passive = race ? normalizePassiveAbility(race) : null;
 

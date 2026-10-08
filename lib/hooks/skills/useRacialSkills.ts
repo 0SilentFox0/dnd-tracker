@@ -12,7 +12,7 @@ export function useRacialSkills(campaignId: string, raceName: string): RaceRacia
 
   const { data: skills = [] } = useSkills(campaignId);
 
-  const tree = trees.data?.find((t) => t.race.toLowerCase() === raceName.toLowerCase());
+  const tree = trees.data?.find((t) => t.race.trim() === raceName.trim());
 
   return useMemo(() => raceRacialSkills(tree?.skills, skills), [tree, skills]);
 }
