@@ -127,6 +127,42 @@ export function applyRestoreSpellSlot(input: EffectApplyInput<Of<"restoreSpellSl
   );
 }
 
+export function applyDrainSpellSlot(input: EffectApplyInput<Of<"drainSpellSlot">>): EffectApplyResult {
+  const { effect } = input;
+
+  let ps = input.participants;
+
+  const messages: string[] = [];
+
+  for (const id of input.targetIds) {
+    const p = findParticipant(ps, id);
+
+    if (!p) continue;
+
+    const slots = { ...p.spellcasting.spellSlots };
+
+    const lost: string[] = [];
+
+    for (let i = 0; i < effect.count; i++) {
+      const level = Object.keys(slots)
+        .filter((l) => slots[l].current > 0)
+        .sort((a, b) => (Number(b) || 0) - (Number(a) || 0))[0];
+
+      if (!level) break;
+
+      slots[level] = { ...slots[level], current: slots[level].current - 1 };
+      lost.push(level);
+    }
+
+    if (!lost.length) continue;
+
+    ps = updateParticipant(ps, id, (t) => ({ ...t, spellcasting: { ...t.spellcasting, spellSlots: slots } }));
+    messages.push(...lost.map((l) => `🔮 ${p.basicInfo.name} втрачає слот${Number.isNaN(Number(l)) ? "" : ` ${l}-го рівня`}`));
+  }
+
+  return { participants: ps, messages };
+}
+
 export function applyChangeMorale(input: EffectApplyInput<Of<"changeMorale">>): EffectApplyResult {
   const { ability, effect } = input;
 

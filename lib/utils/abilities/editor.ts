@@ -41,6 +41,8 @@ function baseEffect(kind: EffectKind): Effect {
       return { kind, condition: "no_reaction", duration: { rounds: 1 }, target: "eventTarget" };
     case "restoreSpellSlot":
       return { kind, count: 1 };
+    case "drainSpellSlot":
+      return { kind, count: 1, target: "eventTarget" };
     case "changeMorale":
       return { kind, delta: 1 };
     case "cleanse":

@@ -153,6 +153,8 @@ const ApplyConditionSchema = z.object({
 
 const RestoreSpellSlotSchema = z.object({ kind: z.literal("restoreSpellSlot"), count: z.number().int().min(1), ...target });
 
+const DrainSpellSlotSchema = z.object({ kind: z.literal("drainSpellSlot"), count: z.number().int().min(1), ...target });
+
 const ChangeMoraleSchema = z.object({
   kind: z.literal("changeMorale"),
   delta: z.number().int().refine((d) => d !== 0),
@@ -191,6 +193,7 @@ const BASE_EFFECTS = [
   CharmSchema,
   ApplyConditionSchema,
   RestoreSpellSlotSchema,
+  DrainSpellSlotSchema,
   ChangeMoraleSchema,
   CleanseSchema,
   MarkSchema,
