@@ -12,10 +12,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AttackType } from "@/lib/constants/battle";
 import { useConfirm } from "@/lib/hooks/common";
-import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
-import { diceAverage } from "@/lib/utils/common/dice";
 import { pluralUk } from "@/lib/utils/plural";
 import { getUnitImmunities } from "@/lib/utils/races/race-effects";
+import { unitDamageSummary } from "@/lib/utils/units/damage-summary";
 import { UNIT_DRAG_TYPE, unitDragPayload } from "@/lib/utils/units/drag";
 import type { Race } from "@/types/races";
 import type { Unit } from "@/types/units";
@@ -54,16 +53,7 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
 
   const allImmunities = getUnitImmunities(unit, race);
 
-  const avgDamage =
-    attacks.length > 0
-      ? Math.round(
-          Math.max(
-            ...attacks.map(
-              (a) => diceAverage(a.damageDice || "1d6") + getAttackAbilityModifier(unit, a.type ?? AttackType.MELEE),
-            ),
-          ),
-        )
-      : null;
+  const damage = unitDamageSummary(unit, attacks);
 
   const primaryIdx = primaryAttackIndex(attacks);
 
@@ -87,7 +77,12 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
             <div className="text-sm text-muted-foreground space-y-1">
               <div>
                 Рівень {unit.level} • HP {unit.maxHp}
-                {avgDamage !== null && ` • Урон ~${avgDamage}`}
+                {damage && (
+                  <>
+                    {` • Урон ~${damage.average} `}
+                    <span className="whitespace-nowrap text-xs">({damage.formula})</span>
+                  </>
+                )}
               </div>
             </div>
           </div>

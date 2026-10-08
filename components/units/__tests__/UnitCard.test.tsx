@@ -73,5 +73,6 @@ describe("UnitCard середня шкода", () => {
     render(<UnitCard unit={archer} campaignId="c1" onDelete={vi.fn()} />);
 
     expect(screen.getByText(/Урон ~8/)).toBeInTheDocument();
+    expect(screen.getByText("(1d8 +3 СПР)")).toBeInTheDocument();
   });
 });
