@@ -22,6 +22,7 @@
     "import-units": "tsx scripts/import-units.ts",
     "seed-artifacts": "tsx scripts/seed-artifacts.ts",
     "import-skills-library": "tsx scripts/import-skills-library.ts",
+    "import-artifact-icons": "tsx scripts/import-artifact-icons.ts",
     "import-wiki-icons": "tsx scripts/import-wiki-icon-bundle.ts",
     "seed-library": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/seed-library.ts",
     "balance-library": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/balance-library.ts",

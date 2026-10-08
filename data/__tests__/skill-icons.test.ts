@@ -45,3 +45,10 @@ describe("skill icons map", () => {
     expect(Object.keys(SPELL_ICONS)).toHaveLength(50);
   });
 });
+
+describe("artifact icons", () => {
+  it("uses the artifact-icons bucket", () => {
+    expect(iconBucket("moonblade", "artifact")).toBe("artifact-icons");
+    expect(iconPublicUrl("https://x.supabase.co", "moonblade", "artifact")).toBe("https://x.supabase.co/storage/v1/object/public/artifact-icons/moonblade.webp");
+  });
+});
