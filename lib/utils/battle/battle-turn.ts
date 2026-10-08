@@ -1,4 +1,4 @@
-import { applyDOTEffects, decreaseEffectDurations } from "./battle-effects";
+import { applyDOTEffects, applyHOTEffects, decreaseEffectDurations } from "./battle-effects";
 import { calculateInitiative, sortByInitiative } from "./battle-start";
 
 import { CombatStatus } from "@/lib/constants/battle";
@@ -49,6 +49,8 @@ export function processStartOfTurn(
 
   let expiredEffects: string[] = [];
 
+  const healMessages: string[] = [];
+
   // DoT і зменшення тривалості ефектів — на початку ходу цієї цілі (Decay тощо)
   if (
     updatedParticipant.combatStats.status !== CombatStatus.DEAD &&
@@ -64,6 +66,11 @@ export function processStartOfTurn(
       },
     };
     damageMessages.push(...dotResult.damageMessages);
+
+    const hotResult = applyHOTEffects(updatedParticipant);
+
+    updatedParticipant = { ...updatedParticipant, combatStats: { ...updatedParticipant.combatStats, currentHp: hotResult.newHp } };
+    healMessages.push(...hotResult.healMessages);
 
     const durationResult = decreaseEffectDurations(updatedParticipant);
 
@@ -121,7 +128,7 @@ export function processStartOfTurn(
     ? replaceParticipant(allParticipants, updatedParticipant)
     : [updatedParticipant];
 
-  const abilityMessages: string[] = [];
+  const abilityMessages: string[] = [...healMessages];
 
   if (statusChanged) {
     const r = resolveDowned(participants, { victimId: id, actorId: null }, ctx);

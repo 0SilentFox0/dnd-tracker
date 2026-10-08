@@ -1,7 +1,7 @@
 import { DURATION_FIELD, type FieldMeta, TARGET_FIELD } from "../fields";
 import { limitsLabel } from "../labels";
 import { describeTrigger } from "../triggers";
-import { applyDealDamage, applyDot, applyHeal, describeDealDamage, describeDot, describeHeal } from "./hp";
+import { applyDealDamage, applyDot, applyHeal, applyHot, describeDealDamage, describeDot, describeHeal, describeHot } from "./hp";
 import {
   applyChangeMorale,
   applyCleanse,
@@ -66,6 +66,7 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
   dealDamage: { kind: "dealDamage", label: "Завдати шкоди", static: false, fields: [AMOUNT, { name: "damageType", label: "Тип", input: "text", optional: true }, TARGET_FIELD], describe: describeDealDamage, apply: applyDealDamage },
   heal: { kind: "heal", label: "Лікування", static: false, fields: [AMOUNT, { name: "revive", label: "Воскрешає", input: "toggle", optional: true }, TARGET_FIELD], describe: describeHeal, apply: applyHeal },
   dot: { kind: "dot", label: "Шкода щораунду (DOT)", static: false, fields: [{ ...AMOUNT, name: "damagePerRound", label: "Шкода/раунд (число, кубики, формула)" }, { name: "damageType", label: "Тип", input: "text" }, TARGET_FIELD, REQUIRED_DURATION], describe: describeDot, apply: applyDot },
+  hot: { kind: "hot", label: "Лікування щораунду (HOT)", static: false, fields: [{ ...AMOUNT, name: "healPerRound", label: "Лікування/раунд (число, кубики, формула)" }, TARGET_FIELD, REQUIRED_DURATION], describe: describeHot, apply: applyHot },
   applyCondition: {
     kind: "applyCondition",
     label: "Накласти стан",

@@ -131,8 +131,53 @@ export function applyDot(input: EffectApplyInput<Of<"dot">>): EffectApplyResult 
   return { participants: ps, messages };
 }
 
+export function applyHot(input: EffectApplyInput<Of<"hot">>): EffectApplyResult {
+  const { ability, effect, ctx } = input;
+
+  let ps = input.participants;
+
+  const owner = findParticipant(ps, input.ownerId);
+
+  if (!owner) return { participants: ps, messages: [] };
+
+  const messages: string[] = [];
+
+  for (const id of input.targetIds) {
+    const t = findParticipant(ps, id);
+
+    if (!t || !isActive(t)) continue;
+
+    const heal = resolveAmount(effect.healPerRound, { owner, target: t, eventDamage: eventDamage(input.event), rng: ctx.rng, participants: input.participants });
+
+    if (heal <= 0) continue;
+
+    ps = replaceParticipant(
+      ps,
+      upsertTimedEffect(
+        t,
+        {
+          timedKey: `${ability.key}#${input.effectIndex}`,
+          source: effectSource(owner, ability),
+          name: ability.name,
+          type: "buff",
+          rounds: effect.duration.rounds,
+          stackable: ability.stackable === true,
+          maxStacks: ability.maxStacks,
+          hotHeal: { healPerRound: heal },
+        },
+        ctx.round,
+      ),
+    );
+    messages.push(`💚 ${ability.name}: +${heal} HP/раунд → ${t.basicInfo.name} (${effect.duration.rounds} р.)`);
+  }
+
+  return { participants: ps, messages };
+}
+
 export const describeDealDamage = (e: Of<"dealDamage">) => `шкода ${amountLabel(e.amount)}${e.damageType ? ` ${e.damageType}` : ""}`;
 
 export const describeHeal = (e: Of<"heal">) => `${e.revive ? "воскресіння" : "лікування"} ${amountLabel(e.amount)}`;
 
 export const describeDot = (e: Of<"dot">) => `${e.damageType} ${amountLabel(e.damagePerRound)}/раунд × ${e.duration?.rounds ?? "?"} р.`;
+
+export const describeHot = (e: Of<"hot">) => `лікування ${amountLabel(e.healPerRound)}/раунд × ${e.duration?.rounds ?? "?"} р.`;

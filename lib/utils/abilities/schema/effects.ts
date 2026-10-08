@@ -119,6 +119,13 @@ const DotSchema = z.object({
   ...target,
 });
 
+const HotSchema = z.object({
+  kind: z.literal("hot"),
+  healPerRound: AmountSchema,
+  duration: DurationSchema,
+  ...target,
+});
+
 const ApplyConditionSchema = z.object({
   kind: z.literal("applyCondition"),
   condition: z.enum(CONDITION_KEYS),
@@ -153,6 +160,7 @@ const BASE_EFFECTS = [
   DealDamageSchema,
   HealSchema,
   DotSchema,
+  HotSchema,
   ApplyConditionSchema,
   RestoreSpellSlotSchema,
   ChangeMoraleSchema,

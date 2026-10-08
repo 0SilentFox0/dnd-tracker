@@ -31,6 +31,8 @@ function baseEffect(kind: EffectKind): Effect {
       return { kind, amount: "1d8" };
     case "dot":
       return { kind, damagePerRound: "1d4", damageType: "bleed", duration: { rounds: 2 }, target: "eventTarget" };
+    case "hot":
+      return { kind, healPerRound: "1d4", duration: { rounds: 2 }, target: "eventTarget" };
     case "applyCondition":
       return { kind, condition: "no_reaction", duration: { rounds: 1 }, target: "eventTarget" };
     case "restoreSpellSlot":

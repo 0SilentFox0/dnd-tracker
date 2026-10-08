@@ -29,6 +29,26 @@ export function applyDOTEffects(
   };
 }
 
+export function applyHOTEffects(participant: BattleParticipant): { newHp: number; healMessages: string[] } {
+  let currentHp = participant.combatStats.currentHp;
+
+  const healMessages: string[] = [];
+
+  if (currentHp <= 0) return { newHp: currentHp, healMessages };
+
+  for (const effect of participant.battleData.activeEffects) {
+    if (!effect.hotHeal) continue;
+
+    const healed = Math.min(participant.combatStats.maxHp, currentHp + effect.hotHeal.healPerRound);
+
+    if (healed > currentHp) healMessages.push(`${participant.basicInfo.name} відновив ${healed - currentHp} HP від ${effect.name}`);
+
+    currentHp = healed;
+  }
+
+  return { newHp: currentHp, healMessages };
+}
+
 /**
  * Зменшує тривалість всіх активних ефектів на 1 раунд
  * Видаляє ефекти з duration <= 0
