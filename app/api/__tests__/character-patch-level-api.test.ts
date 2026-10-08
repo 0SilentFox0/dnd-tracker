@@ -42,7 +42,7 @@ describe("PATCH персонажа: рівень і слоти", () => {
     random.mockReturnValue(0);
     vi.mocked(prisma.character.findUnique).mockResolvedValue(CHARACTER as never);
     vi.mocked(prisma.campaign.findUnique).mockResolvedValue({ allowPlayerEdit: true } as never);
-    vi.mocked(prisma.race.findFirst).mockResolvedValue({ spellSlotProgression: [{ level: 1, slots: 20 }] } as never);
+    vi.mocked(prisma.race.findFirst).mockResolvedValue({ spellSlotProgression: [{ level: 1, slots: 4 }, { level: 2, slots: 3 }, { level: 3, slots: 3 }] } as never);
     vi.mocked(prisma.character.update).mockImplementation(((args: { data: object }) => Promise.resolve(args.data)) as never);
   });
 
@@ -108,7 +108,7 @@ describe("PATCH персонажа: рівень і слоти", () => {
     expect(written()).toMatchObject({
       level: 5,
       strength: 14,
-      spellSlots: { "1": { max: 4, current: 2 }, "4": { max: 1, current: 1 }, universal: { max: 2, current: 2 } },
+      spellSlots: { "1": { max: 3, current: 1 }, "2": { max: 1, current: 1 }, "3": { max: 2, current: 2 }, universal: { max: 2, current: 2 } },
     });
     expect(written()).not.toHaveProperty("maxHp");
     expect(written()).not.toHaveProperty("currentHp");

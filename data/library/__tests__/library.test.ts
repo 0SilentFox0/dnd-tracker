@@ -43,6 +43,7 @@ function race(key: string): LibraryRace {
     description: "Опис раси.",
     appearanceDescription: APPEARANCE,
     branchKeys: ["b"],
+    spellSlotProgression: [],
     levels: [skill(`${key}-1`), skill(`${key}-2`), skill(`${key}-3`)],
     ultimate: skill(`${key}-u`),
   };

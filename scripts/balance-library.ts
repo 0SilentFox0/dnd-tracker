@@ -26,7 +26,6 @@ import { casterSpellDice } from "../lib/utils/battle/spell/caster-dice";
 import { loadBattle, loadRecentEvents, saveBattle } from "../lib/utils/battle/store";
 import { rollDiceList } from "../lib/utils/common/dice";
 import { branchLevelNodeId, canLearn, normalizeTree, racialNodeId, type TreeNodes } from "../lib/utils/skills/progression";
-import { calculateCharacterSpellSlots } from "../lib/utils/spells/spell-slots";
 import type { BattleMutationResponse, BattleScene } from "../types/api";
 import type { BattleParticipant } from "../types/battle";
 import { SIM_PLAYER, SIM_USER } from "./simulate-battle-scenario";
@@ -389,7 +388,7 @@ async function createParty(partyKey: string, level: number, trees: Map<string, T
         level,
         initiative: 1,
         spellcastingAbility: b.caster ? "intelligence" : null,
-        spellSlots: b.caster ? (Object.fromEntries(Object.entries(calculateCharacterSpellSlots(level)).filter(([, v]) => v.max > 0)) as Prisma.InputJsonValue) : {},
+        spellSlots: {},
         skillTreeProgress: { [tree.treeId]: { unlockedSkills: unlocked } },
         ...stats,
       },

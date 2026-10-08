@@ -2,6 +2,15 @@ import type { LibraryRace, LibrarySkill } from "./types";
 
 import type { Ability } from "@/lib/utils/abilities/schema";
 
+/** Максимум слотів рівнів магії 1–5; відкриваються за кривою заклинача 5e (див. calculateSpellSlotsForLevel). */
+const STANDARD_SLOTS = [
+  { level: 1, slots: 4 },
+  { level: 2, slots: 3 },
+  { level: 3, slots: 3 },
+  { level: 4, slots: 2 },
+  { level: 5, slots: 1 },
+];
+
 const LEVELS = ["basic", "advanced", "expert"] as const;
 
 const LEVEL_NAMES = { basic: "Базовий", advanced: "Просунутий", expert: "Експерт" } as const;
@@ -44,6 +53,7 @@ const RUNE_ARMOR = [10, 15, 20];
 const humans: LibraryRace = {
   key: "humans",
   branchKeys: ["leadership", "ranged", "attack", "defense", "light"],
+  spellSlotProgression: STANDARD_SLOTS,
   name: "Люди",
   color: "#c9a227",
   iconKey: "racial-humans-basic",
@@ -88,6 +98,7 @@ const humans: LibraryRace = {
 const demons: LibraryRace = {
   key: "demons",
   branchKeys: ["attack", "defense", "ranged", "dark", "leadership", "chaos"],
+  spellSlotProgression: STANDARD_SLOTS,
   name: "Демони",
   color: "#b3261e",
   iconKey: "racial-demons-basic",
@@ -132,6 +143,7 @@ const demons: LibraryRace = {
 const elves: LibraryRace = {
   key: "elves",
   branchKeys: ["leadership", "ranged", "attack", "defense", "nature"],
+  spellSlotProgression: STANDARD_SLOTS,
   name: "Ельфи",
   color: "#3f8f3a",
   iconKey: "racial-elves-basic",
@@ -175,6 +187,7 @@ const elves: LibraryRace = {
 const necromancers: LibraryRace = {
   key: "necromancers",
   branchKeys: ["ranged", "attack", "defense", "dark"],
+  spellSlotProgression: STANDARD_SLOTS,
   name: "Некроманти",
   color: "#5b3f8c",
   iconKey: "racial-necromancers-basic",
@@ -221,6 +234,7 @@ const necromancers: LibraryRace = {
 const mages: LibraryRace = {
   key: "mages",
   branchKeys: ["light", "dark", "chaos", "nature", "defense", "leadership"],
+  spellSlotProgression: STANDARD_SLOTS,
   name: "Маги",
   color: "#2f6fb3",
   iconKey: "racial-mages-basic",
@@ -264,6 +278,7 @@ const mages: LibraryRace = {
 const darkElves: LibraryRace = {
   key: "dark-elves",
   branchKeys: ["attack", "defense", "ranged", "dark", "chaos"],
+  spellSlotProgression: STANDARD_SLOTS,
   name: "Темні ельфи",
   color: "#6b2d5c",
   iconKey: "racial-dark-elves-basic",
@@ -318,6 +333,7 @@ const darkElves: LibraryRace = {
 const dwarves: LibraryRace = {
   key: "dwarves",
   branchKeys: ["leadership", "ranged", "attack", "defense", "light"],
+  spellSlotProgression: STANDARD_SLOTS,
   name: "Гноми",
   color: "#8a6a3b",
   iconKey: "racial-dwarves-basic",

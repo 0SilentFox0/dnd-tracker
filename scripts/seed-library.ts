@@ -111,7 +111,7 @@ async function main() {
   const races = new Map<string, string>();
 
   for (const race of library.races) {
-    const data = { name: race.name, icon: icon(race.iconKey ?? race.levels[0].iconKey), color: race.color };
+    const data = { name: race.name, icon: icon(race.iconKey ?? race.levels[0].iconKey), color: race.color, spellSlotProgression: json(race.spellSlotProgression) };
 
     races.set(race.key, await upsert("раси", raceRows, race.name, {
       create: () => prisma.race.create({ data: { campaignId, ...data }, select: { id: true, name: true } }),

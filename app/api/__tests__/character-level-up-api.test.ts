@@ -31,7 +31,7 @@ describe("POST level-up", () => {
     random.mockReturnValue(0);
     vi.mocked(apiAuth.requireDM).mockResolvedValue(dm());
     vi.mocked(prisma.character.findUnique).mockResolvedValue(CHARACTER as never);
-    vi.mocked(prisma.race.findFirst).mockResolvedValue({ spellSlotProgression: [{ level: 1, slots: 20 }] } as never);
+    vi.mocked(prisma.race.findFirst).mockResolvedValue({ spellSlotProgression: [{ level: 2, slots: 3 }] } as never);
     vi.mocked(prisma.character.update).mockImplementation(((args: { data: object }) => Promise.resolve({ ...CHARACTER, ...args.data })) as never);
   });
 
@@ -44,7 +44,7 @@ describe("POST level-up", () => {
 
     const data = vi.mocked(prisma.character.update).mock.calls[0][0].data as Record<string, unknown>;
 
-    expect(data).toMatchObject({ level: 4, strength: 30, dexterity: 11, spellSlots: { "1": { max: 4, current: 2 } } });
+    expect(data).toMatchObject({ level: 4, strength: 30, dexterity: 11, spellSlots: { "1": { max: 3, current: 1 }, "2": { max: 1, current: 1 } } });
     expect(data).not.toHaveProperty("maxHp");
     expect(data).not.toHaveProperty("currentHp");
     expect(await getResponseJson(res)).toMatchObject({ levelUpDetails: { abilityIncreased: "dexterity" } });

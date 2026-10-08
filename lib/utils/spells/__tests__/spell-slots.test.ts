@@ -5,6 +5,7 @@ import {
   calculateSpellSlotsForLevel,
 } from "../spell-slots";
 
+import { RACES } from "@/data/library/races";
 import type { SpellSlotProgression } from "@/types/races";
 
 describe("calculateCharacterSpellSlots", () => {
@@ -74,5 +75,24 @@ describe("calculateSpellSlotsForLevel", () => {
     expect(result["1"].max).toBeGreaterThanOrEqual(0);
     expect(result["2"].max).toBeGreaterThanOrEqual(0);
     expect(result["3"].max).toBeGreaterThanOrEqual(0);
+  });
+});
+
+describe("бібліотечна програмація рас 4/3/3/2/1", () => {
+  const slotsAt = (level: number) =>
+    Object.fromEntries(Object.entries(calculateSpellSlotsForLevel(level, 20, RACES[0].spellSlotProgression)).map(([k, v]) => [k, v.max]));
+
+  it("кожна раса бібліотеки має однакову програмацію", () => {
+    for (const race of RACES) expect(race.spellSlotProgression).toEqual(RACES[0].spellSlotProgression);
+  });
+
+  it.each([
+    [1, { "1": 2, "2": 0, "3": 0, "4": 0, "5": 0 }],
+    [5, { "1": 4, "2": 3, "3": 2, "4": 0, "5": 0 }],
+    [9, { "1": 4, "2": 3, "3": 3, "4": 2, "5": 1 }],
+    [13, { "1": 4, "2": 3, "3": 3, "4": 2, "5": 1 }],
+    [17, { "1": 4, "2": 3, "3": 3, "4": 2, "5": 1 }],
+  ])("герой рівня %i", (level, expected) => {
+    expect(slotsAt(level)).toEqual(expected);
   });
 });

@@ -8,7 +8,7 @@ const scores = { strength: 10, dexterity: 10, constitution: 10, intelligence: 10
 
 const campaign = { maxLevel: 20 };
 
-const progression = { spellSlotProgression: [{ level: 1, slots: 20 }] };
+const progression = { spellSlotProgression: [{ level: 2, slots: 3 }] };
 
 describe("applyLevelGain", () => {
   it("+1 до випадкової характеристики за кожен отриманий рівень", () => {
@@ -42,7 +42,7 @@ describe("applyLevelGain", () => {
       rng: () => 0,
     });
 
-    expect(r.spellSlots).toEqual({ "1": { max: 4, current: 2 }, universal: { max: 2, current: 2 } });
+    expect(r.spellSlots).toEqual({ "1": { max: 3, current: 1 }, "2": { max: 1, current: 1 }, universal: { max: 2, current: 2 } });
   });
 
   it("без прогресії раси — фіксована таблиця, з 1-го рівня не падає", () => {

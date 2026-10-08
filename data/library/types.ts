@@ -40,6 +40,7 @@ export interface LibraryBranch extends LibraryEntry {
 export interface LibraryRace extends LibraryEntry {
   color?: string;
   branchKeys: string[];
+  spellSlotProgression: Array<{ level: number; slots: number }>;
   levels: LibrarySkill[];
   ultimate: LibrarySkill;
 }

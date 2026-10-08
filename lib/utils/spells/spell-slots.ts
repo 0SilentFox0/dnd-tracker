@@ -66,15 +66,29 @@ export function calculateCharacterSpellSlots(level: number): SpellSlots {
   return Object.fromEntries(entries) as SpellSlots;
 }
 
+/** Слоти повного заклинача 5e за рівнем героя (рівні заклять 1–5); програмація раси обмежує кожен рівень зверху. */
+const FULL_CASTER_CURVE: number[][] = [
+  [2],
+  [3],
+  [4, 2],
+  [4, 3],
+  [4, 3, 2],
+  [4, 3, 3],
+  [4, 3, 3, 1],
+  [4, 3, 3, 2],
+  [4, 3, 3, 3, 1],
+  [4, 3, 3, 3, 2],
+];
+
 /**
  * Обчислює магічні слоти для рівня (з програмації раси)
  *
- * Використовується для рас з spellSlotProgression.
+ * Використовується для рас з spellSlotProgression: кожен запис — максимум слотів цього рівня магії, а відкриваються вони за кривою заклинача 5e (рівень героя).
  * Для персонажів без програмації – використовуй calculateCharacterSpellSlots.
  */
 export function calculateSpellSlotsForLevel(
   level: number,
-  maxLevel: number,
+  _maxLevel: number,
   spellSlotProgression: SpellSlotProgression[]
 ): SpellSlots {
   const slots: SpellSlots = {
@@ -92,34 +106,12 @@ export function calculateSpellSlotsForLevel(
 
   if (level === 0) return slots;
 
-  const totalSlotsFromProgression = spellSlotProgression.reduce(
-    (sum, p) => sum + p.slots,
-    0
-  );
+  const curve = FULL_CASTER_CURVE[Math.min(level, FULL_CASTER_CURVE.length) - 1];
 
-  const baseSlotsForLevel = Math.floor(
-    (totalSlotsFromProgression / maxLevel) * level
-  );
+  for (const { level: spellLevel, slots: cap } of spellSlotProgression) {
+    const key = String(spellLevel);
 
-  const specialLevels = Math.floor(level / 5);
-
-  const getSpecialSlotLevel = (specialCount: number): number =>
-    specialCount % 2 === 1 ? 4 : 5;
-
-  for (let i = 1; i <= specialLevels; i++) {
-    slots[getSpecialSlotLevel(i).toString()].max += 1;
-  }
-
-  const remainingSlots = baseSlotsForLevel - specialLevels;
-
-  if (remainingSlots > 0) {
-    const slotsPerLevel = Math.floor(remainingSlots / 3);
-
-    const remainder = remainingSlots % 3;
-
-    slots["1"].max = slotsPerLevel + (remainder >= 1 ? 1 : 0);
-    slots["2"].max = slotsPerLevel + (remainder >= 2 ? 1 : 0);
-    slots["3"].max = slotsPerLevel;
+    if (key in slots) slots[key].max = Math.min(Math.max(0, Math.floor(cap)), curve[spellLevel - 1] ?? 0);
   }
 
   return slots;
