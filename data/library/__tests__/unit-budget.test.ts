@@ -22,6 +22,8 @@ const BUDGET_EXCEPTIONS: Record<string, string> = {
   "mages-senior-gremlin": "1d6+2 (5.5) трохи вище порога T1-upgrade ranged: малі числа; сила в Ремонті",
   "mages-gremlin-saboteur": "1d6+2 (5.5) трохи вище порога T1-alt ranged: малі числа; сила в Саботажі",
   "humans-brute": "1d8+2 (6.5) на 3 % вище порога T1-alt: вузький допуск на малих числах, сила в Броньобійності",
+  "demons-fire-demon": "1d6+3 + 1d6 вогнем (10) на 2 % вище порога T2-upgrade: числа таблиці 4.4; сила в імунітеті до вогню",
+  "demons-elder-demon": "1d8+3 + 1d4 вогнем (10) на 2 % вище порога T2-alt: числа таблиці 4.4; ціна — Лють",
 };
 
 function averageHit(unit: (typeof UNITS)[number]): number {
