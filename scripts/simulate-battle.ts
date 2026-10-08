@@ -1051,7 +1051,7 @@ async function spellModel() {
   const dealt = (g: string) => (before.get(g) ?? 0) - hpOf(g);
 
   quiet = false;
-  check("Вогняна куля: два провалені збереження — повна шкода 22, успішне — половина", fire.status === 200 && dealt("Гоблін А") === 22 && dealt("Гоблін В") === 22 && dealt("Гоблін Б") === 11, `${goblins.map((g) => `${g} −${dealt(g)}`).join(", ")}`);
+  check("Вогняна куля: два провалені збереження — повна шкода 16, успішне — половина", fire.status === 200 && dealt("Гоблін А") === 16 && dealt("Гоблін В") === 16 && dealt("Гоблін Б") === 8, `${goblins.map((g) => `${g} −${dealt(g)}`).join(", ")}`);
   quiet = true;
 
   const enemyHp = new Map(["Гоблін А", "Гоблін Б", "Воїн"].map((g) => [g, hpOf(g)]));
@@ -1059,7 +1059,7 @@ async function spellModel() {
   const word = await cast("Жрець", spells.wordOfLight.id, [], [3, 3, 3]);
 
   quiet = false;
-  check("Слово світла: людина має імунітет, гобліни отримують шкоду", word.status === 200 && hpOf("Воїн") === enemyHp.get("Воїн") && hpOf("Гоблін А") === (enemyHp.get("Гоблін А") ?? 0) - 14, `Воїн ${enemyHp.get("Воїн")} → ${hpOf("Воїн")}, Гоблін А ${enemyHp.get("Гоблін А")} → ${hpOf("Гоблін А")}`);
+  check("Слово світла: людина має імунітет, гобліни отримують шкоду", word.status === 200 && hpOf("Воїн") === enemyHp.get("Воїн") && hpOf("Гоблін А") === (enemyHp.get("Гоблін А") ?? 0) - 9, `Воїн ${enemyHp.get("Воїн")} → ${hpOf("Воїн")}, Гоблін А ${enemyHp.get("Гоблін А")} → ${hpOf("Гоблін А")}`);
   check("Слово світла: у логу видно імунітет раси", log.some((e) => /імунітет раси/.test(e.resultText)), log.find((e) => e.actionType === "spell" && /Слово світла/.test(e.resultText))?.resultText ?? "");
   quiet = true;
 
@@ -1068,7 +1068,7 @@ async function spellModel() {
   const armageddon = await cast("Хаотик", spells.armageddon.id, [], [3, 3, 3, 3, 3]);
 
   quiet = false;
-  check("Армагеддон б'є всіх учасників, включно із заклинателем і його стороною", armageddon.status === 200 && sides.every(([n, h]) => hpOf(n) === h - 20), sides.map(([n, h]) => `${n} ${h} → ${hpOf(n)}`).join(", "));
+  check("Армагеддон б'є всіх учасників, включно із заклинателем і його стороною", armageddon.status === 200 && sides.every(([n, h]) => hpOf(n) === h - 15), sides.map(([n, h]) => `${n} ${h} → ${hpOf(n)}`).join(", "));
   quiet = true;
 
   await setHp("Паладин #1", 10);

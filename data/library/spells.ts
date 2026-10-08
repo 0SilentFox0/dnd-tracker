@@ -70,9 +70,9 @@ function diceWord(n: number): string {
   return n < 5 ? "кубики" : "кубиків";
 }
 
-// spec §1: (N + ⌊hero level / 3⌋)d{school die} + hero level + caster modifier
+// spec §1: (N + ⌊hero level / 3⌋)d{school die}, no flat bonus
 const power = (n: number, what: string) =>
-  `${n} ${diceWord(n)} ${what} (к6/к8/к10 залежно від майстерності школи; +1 кубик за кожні 3 рівні героя) + рівень героя + модифікатор заклинателя`;
+  `${n} ${diceWord(n)} ${what} (к6/к8/к10 залежно від майстерності школи; +1 кубик за кожні 3 рівні героя)`;
 
 const NOT_HEROES = "Не діє на героїв.";
 
@@ -236,10 +236,10 @@ export const SPELLS: LibrarySpell[] = [
     name: "Вічне світло",
     school: LIGHT,
     level: 4,
-    description: `Союзник відновлює ${power(3, "лікування")} HP, а потім ще 2 раунди лікується на 10 % максимального HP на початку кожного свого ходу. Дає скіл гілки Світла.`,
+    description: `Союзник відновлює ${power(4, "лікування")} HP, а потім ще 2 раунди лікується на 10 % максимального HP на початку кожного свого ходу. Дає скіл гілки Світла.`,
     appearanceDescription:
       "Над союзником розквітає маленьке сонце, і його промені проникають крізь обладунки просто до серця. Рани світяться зсередини і зникають, а сяйво ще довго не згасає, тихо зігріваючи плоть.",
-    definition: def(3, ALLY, [heal(), regen(2)]),
+    definition: def(4, ALLY, [heal(), regen(2)]),
     raceModifiers: [],
   },
 
@@ -406,10 +406,10 @@ export const SPELLS: LibrarySpell[] = [
     name: "Потойбічна стріла",
     school: CHAOS,
     level: 1,
-    description: `Завдає ворогу ${power(2, "шкоди вогнем")}.`,
+    description: `Завдає ворогу ${power(3, "шкоди вогнем")}.`,
     appearanceDescription:
       "З долоні заклинателя зривається стріла фіолетового полум'я, що лишає по собі запах сірки. Вона ніколи не промахується — лише впивається в ціль і вибухає снопом іскор.",
-    definition: def(2, ENEMY, [damage("fire")]),
+    definition: def(3, ENEMY, [damage("fire")]),
     raceModifiers: [],
   },
   {
@@ -418,10 +418,10 @@ export const SPELLS: LibrarySpell[] = [
     name: "Кам'яні шипи",
     school: CHAOS,
     level: 1,
-    description: `До 2 ворогів отримують по ${power(1, "дробильної шкоди")}.`,
+    description: `До 2 ворогів отримують по ${power(2, "дробильної шкоди")}.`,
     appearanceDescription:
       "Земля під ворогами здригається, і з неї вистрибують гострі кам'яні шпилі, мов зуби величезного звіра. Уламки скель розлітаються, лишаючи по собі хмари пилу.",
-    definition: def(1, enemies(2), [damage("bludgeoning")]),
+    definition: def(2, enemies(2), [damage("bludgeoning")]),
     raceModifiers: [],
   },
   {
@@ -430,10 +430,10 @@ export const SPELLS: LibrarySpell[] = [
     name: "Крижаний болт",
     school: CHAOS,
     level: 2,
-    description: `Завдає ворогу ${power(2, "шкоди холодом")}; ворог 1 раунд атакує з невигідністю.`,
+    description: `Завдає ворогу ${power(3, "шкоди холодом")}; ворог 1 раунд атакує з невигідністю.`,
     appearanceDescription:
       "Повітря тріщить від морозу, і в руці заклинателя виростає синій крижаний спис. Він летить зі свистом і розбивається об ціль, вкриваючи її інеєм і скуваючи суглоби.",
-    definition: def(2, ENEMY, [damage("cold"), { kind: "flag", flag: "disadvantage", duration: rounds(1) }]),
+    definition: def(3, ENEMY, [damage("cold"), { kind: "flag", flag: "disadvantage", duration: rounds(1) }]),
     raceModifiers: [],
   },
   {
@@ -442,10 +442,10 @@ export const SPELLS: LibrarySpell[] = [
     name: "Блискавка",
     school: CHAOS,
     level: 2,
-    description: `Завдає ворогу ${power(2, "шкоди блискавкою")}; ворог отримує −2 до ініціативи на 2 раунди.`,
+    description: `Завдає ворогу ${power(3, "шкоди блискавкою")}; ворог отримує −2 до ініціативи на 2 раунди.`,
     appearanceDescription:
       "Небо розколюється сліпучою гілкою, і грім б'є просто у ворога. Від нього валить дим, волосся стоїть дибки, а м'язи ще довго сіпаються в судомах.",
-    definition: def(2, ENEMY, [damage("lightning"), stat("initiative", -2, 2)]),
+    definition: def(3, ENEMY, [damage("lightning"), stat("initiative", -2, 2)]),
     raceModifiers: [],
   },
   {
@@ -454,10 +454,10 @@ export const SPELLS: LibrarySpell[] = [
     name: "Вогняна куля",
     school: CHAOS,
     level: 3,
-    description: `До 3 ворогів роблять рятівний кидок Спритності; кожен отримує ${power(2, "шкоди вогнем")}, при успіху — половину.`,
+    description: `До 3 ворогів роблять рятівний кидок Спритності; кожен отримує ${power(3, "шкоди вогнем")}, при успіху — половину.`,
     appearanceDescription:
       "Між долонями заклинателя набухає гаряча помаранчева куля, що гуде, мов розпечена кузня. Вона вибухає посеред ворогів, і полум'я розкочується колом, пожираючи траву й плащі.",
-    definition: def(2, enemies(3), [damage("fire")], { resolution: save("dexterity", "half") }),
+    definition: def(3, enemies(3), [damage("fire")], { resolution: save("dexterity", "half") }),
     raceModifiers: [],
   },
   {
@@ -478,10 +478,10 @@ export const SPELLS: LibrarySpell[] = [
     name: "Коло зими",
     school: CHAOS,
     level: 3,
-    description: `До 3 ворогів роблять рятівний кидок Статури; кожен отримує ${power(2, "шкоди холодом")} і −2 до ініціативи на 1 раунд. При успіху — половина шкоди без штрафу ініціативи.`,
+    description: `До 3 ворогів роблять рятівний кидок Статури; кожен отримує ${power(3, "шкоди холодом")} і −2 до ініціативи на 1 раунд. При успіху — половина шкоди без штрафу ініціативи.`,
     appearanceDescription:
       "Від заклинателя розходиться крижане кільце, і трава на його шляху вкривається памороззю. Вороги застигають у хрусткому інеї, видихаючи хмарки білої пари.",
-    definition: def(2, enemies(3), [damage("cold"), stat("initiative", -2, 1)], { resolution: save("constitution", "half") }),
+    definition: def(3, enemies(3), [damage("cold"), stat("initiative", -2, 1)], { resolution: save("constitution", "half") }),
     raceModifiers: [],
   },
   {
@@ -490,10 +490,10 @@ export const SPELLS: LibrarySpell[] = [
     name: "Ланцюгова блискавка",
     school: CHAOS,
     level: 4,
-    description: `Блискавка стрибає між ворогами (до 4): перша ціль отримує ${power(2, "шкоди блискавкою")}, кожна наступна — менше за попередню (100 % → 40 % → 20 % → 10 %).`,
+    description: `Блискавка стрибає між ворогами (до 4): перша ціль отримує ${power(2, "шкоди блискавкою")}, кожна наступна — половину від попередньої (100 % → 50 % → 25 % → 13 %).`,
     appearanceDescription:
       "Сліпучий розряд вистрибує з пальців заклинателя і, вдаривши першого ворога, перескакує на наступного, і далі, і далі. Повітря тріщить і пахне грозою, а кожен стрибок трохи тьмяніший за попередній.",
-    definition: def(2, enemies(4), [damage("lightning", { falloff: [100, 40, 20, 10] })]),
+    definition: def(2, enemies(4), [damage("lightning", { falloff: [100, 50, 25, 13] })]),
     raceModifiers: [],
   },
   {
@@ -564,10 +564,10 @@ export const SPELLS: LibrarySpell[] = [
     name: "Слово лікування",
     school: NATURE,
     level: 1,
-    description: `Бонусною дією союзник відновлює ${power(2, "лікування")} HP.`,
+    description: `Бонусною дією союзник відновлює ${power(3, "лікування")} HP.`,
     appearanceDescription:
       "Заклинатель шепоче коротке слово, і союзника огортає запах свіжої трави після дощу. Рани затягуються зеленкуватим світлом, мов молодою корою.",
-    definition: def(2, ALLY, [heal()], { cost: "bonusAction" }),
+    definition: def(3, ALLY, [heal()], { cost: "bonusAction" }),
     raceModifiers: [],
   },
   {
@@ -648,10 +648,10 @@ export const SPELLS: LibrarySpell[] = [
     name: "Хвиля зцілення",
     school: NATURE,
     level: 4,
-    description: `Кожен союзник відновлює ${power(2, "лікування")} HP.`,
+    description: `Кожен союзник відновлює ${power(3, "лікування")} HP.`,
     appearanceDescription:
       "Від друїда котиться зелена хвиля, і там, де вона проходить, розквітають польові квіти. Союзники вдихають запах весняного лісу, і втома та рани відступають.",
-    definition: def(2, { kind: "allAllies" }, [heal()]),
+    definition: def(3, { kind: "allAllies" }, [heal()]),
     raceModifiers: [],
   },
   {
