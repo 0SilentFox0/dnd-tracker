@@ -17,6 +17,8 @@ const BUDGET: Record<number, { hp: number; damage: number }> = {
 const TOLERANCE = 0.25;
 
 const BUDGET_EXCEPTIONS: Record<string, string> = {
+  "dark-elves-assassin": "1d6+2 (5.5) трохи вище порога T1-upgrade ranged: малі числа; сила в отруті (DoT не рахується)",
+  "dark-elves-stalker": "1d8+2 (6.5) трохи вище порога T1-alt: малі числа, ще й Отрута та Засідка",
   "humans-brute": "1d8+2 (6.5) на 3 % вище порога T1-alt: вузький допуск на малих числах, сила в Броньобійності",
 };
 
