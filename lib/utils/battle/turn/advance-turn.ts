@@ -1,11 +1,10 @@
-import { expireTurnEndEffects } from "../attack/consume-effects";
 import { applyPendingMoraleCheck } from "./apply-pending-morale";
+import { endTurnCleanup } from "./end-turn-cleanup";
 import type { PendingMoraleCheckPayload } from "./pending-morale";
 import { runAdvanceTurnLoop } from "./run-advance-turn-loop";
 import { applyVictoryCompletion } from "./turn-helpers";
 
-import { restoreCharm } from "@/lib/utils/abilities/engine/charm";
-import { isActive } from "@/lib/utils/abilities/engine/participants";
+import { isActive, updateParticipant } from "@/lib/utils/abilities/engine/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import type { BattleSceneState, ScenePatch } from "@/lib/utils/battle/store";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
@@ -46,13 +45,7 @@ export function advanceTurn({ participants, pending, scene, rng }: AdvanceTurnIn
 
     if (ended.messages.length > 0) actions.push(turnEndAction(ending, scene, ended.messages));
 
-    order = order.map((p) => {
-      if (p.basicInfo.id !== ending.basicInfo.id) return p;
-
-      const expired = expireTurnEndEffects(p);
-
-      return expired.battleData.charmReturn ? restoreCharm(expired) : expired;
-    });
+    order = updateParticipant(order, ending.basicInfo.id, endTurnCleanup);
   }
 
   const current = order[scene.turnIndex];

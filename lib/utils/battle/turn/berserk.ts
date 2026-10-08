@@ -1,11 +1,10 @@
 import { AttackType } from "@/lib/constants/battle";
-import { restoreCharm } from "@/lib/utils/abilities/engine/charm";
-import { isActive } from "@/lib/utils/abilities/engine/participants";
+import { isActive, updateParticipant } from "@/lib/utils/abilities/engine/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import { processAttack } from "@/lib/utils/battle/attack";
-import { expireTurnEndEffects } from "@/lib/utils/battle/attack/consume-effects";
 import { getDisabledAttackKinds } from "@/lib/utils/battle/attack/disabled-attacks";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
+import { endTurnCleanup } from "@/lib/utils/battle/turn/end-turn-cleanup";
 import { rollDiceList } from "@/lib/utils/common/dice";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -50,13 +49,7 @@ function finishTurn(participants: BattleParticipant[], actions: BattleAction[], 
 
   const ended = runAbilities(participants, { type: "turnEnd", actorId: id }, { round: params.round, rng: params.rng });
 
-  const order = ended.participants.map((p) => {
-    if (p.basicInfo.id !== id) return p;
-
-    const expired = expireTurnEndEffects(p);
-
-    return expired.battleData.charmReturn ? restoreCharm(expired) : expired;
-  });
+  const order = updateParticipant(ended.participants, id, endTurnCleanup);
 
   const turnEnd = ended.messages.length > 0 ? [{ ...note(order.find((p) => p.basicInfo.id === id) as BattleParticipant, { ...params, actionIndex: params.actionIndex + actions.length }, `Кінець ходу: ${ended.messages.join("; ")}`) }] : [];
 

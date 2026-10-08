@@ -3,7 +3,7 @@ import type { Rng } from "@/lib/utils/abilities/engine/types";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 import type { AbilitySource, ResolvedAbility } from "@/types/abilities";
-import type { BattleParticipant } from "@/types/battle";
+import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
 export function makeParticipant(opts: {
   id: string;
@@ -22,6 +22,10 @@ export function makeParticipant(opts: {
     combatStats: { ...base.combatStats, currentHp: opts.hp ?? 20, maxHp: opts.maxHp ?? 20 },
     battleData: { ...base.battleData, resolvedAbilities: opts.abilities ?? [] },
   };
+}
+
+export function makeEffect(id: string, over: Partial<ActiveEffect> = {}): ActiveEffect {
+  return { id, name: id, type: "buff", duration: 2, appliedAt: { round: 1, timestamp: new Date(0) }, effects: [], ...over };
 }
 
 export function resolved(ability: Omit<Ability, "id" | "name"> & Partial<Ability>, source: Partial<AbilitySource> = {}): ResolvedAbility {

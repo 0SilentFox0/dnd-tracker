@@ -1,12 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { activeEffectIds, consumeAttackEffects, expireTurnEndEffects } from "../consume-effects";
+import { activeEffectIds, consumeAttackEffects } from "../consume-effects";
 
+import { makeEffect } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
-
-const eff = (id: string, over: Partial<ActiveEffect> = {}): ActiveEffect =>
-  ({ id, name: id, type: "buff", duration: 2, appliedAt: { round: 1, timestamp: new Date(0) }, effects: [], ...over }) as ActiveEffect;
 
 const withEffects = (id: string, effects: ActiveEffect[]): BattleParticipant => {
   const p = createMockParticipant();
@@ -17,9 +15,9 @@ const withEffects = (id: string, effects: ActiveEffect[]): BattleParticipant => 
 const ids = (p: BattleParticipant) => p.battleData.activeEffects.map((e) => e.id);
 
 describe("consumeAttackEffects", () => {
-  const a = withEffects("a", [eff("adv", { consumeOn: "ownAttack" }), eff("weak", { consumeOn: "ownHit" }), eff("keep")]);
+  const a = withEffects("a", [makeEffect("adv", { consumeOn: "ownAttack" }), makeEffect("weak", { consumeOn: "ownHit" }), makeEffect("keep")]);
 
-  const t = withEffects("t", [eff("mark", { consumeOn: "attackAgainst" })]);
+  const t = withEffects("t", [makeEffect("mark", { consumeOn: "attackAgainst" })]);
 
   it("consumes attacker ownAttack and target attackAgainst on a miss, keeps ownHit", () => {
     const ps = consumeAttackEffects([a, t], { attackerId: "a", targetId: "t", hit: false, existedBefore: activeEffectIds([a, t]) });
@@ -43,20 +41,12 @@ describe("consumeAttackEffects", () => {
 
 describe("existedBefore keys", () => {
   it("an effect id that exists on another participant does not make a new one count as old", () => {
-    const attacker = withEffects("a", [eff("shared", { consumeOn: "ownAttack" })]);
+    const attacker = withEffects("a", [makeEffect("shared", { consumeOn: "ownAttack" })]);
 
-    const other = withEffects("t", [eff("shared")]);
+    const other = withEffects("t", [makeEffect("shared")]);
 
     const ps = consumeAttackEffects([attacker, other], { attackerId: "a", targetId: "t", hit: true, existedBefore: activeEffectIds([other]) });
 
     expect(ids(ps[0])).toEqual(["shared"]);
-  });
-});
-
-describe("expireTurnEndEffects", () => {
-  it("drops turn-end effects only on their last turn", () => {
-    const p = withEffects("a", [eff("fresh", { expireAtTurnEnd: true, duration: 2 }), eff("last", { expireAtTurnEnd: true, duration: 1 }), eff("plain", { duration: 1 })]);
-
-    expect(ids(expireTurnEndEffects(p))).toEqual(["fresh", "plain"]);
   });
 });

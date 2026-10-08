@@ -28,7 +28,3 @@ export function consumeAttackEffects(
     return p;
   });
 }
-
-export function expireTurnEndEffects(p: BattleParticipant): BattleParticipant {
-  return withoutEffects(p, (e) => e.expireAtTurnEnd === true && e.duration === 1);
-}
