@@ -58,7 +58,7 @@ describe("applyCriticalEffect", () => {
   });
 
   it("free attack off turn grants nothing", () => {
-    const p = applyCriticalEffect(createMockParticipant(), crit("free_attack"), 3, undefined, { offTurn: true });
+    const p = applyCriticalEffect(createMockParticipant(), crit("free_attack"), 3, { offTurn: true });
 
     expect(p.battleData.pendingExtraActions ?? 0).toBe(0);
   });
@@ -118,12 +118,12 @@ describe("applyCriticalEffect", () => {
     }
   });
 
-  it("target: ефект лягає на ціль, а не на того, хто б'є", () => {
-    const attacker = createMockParticipant();
+  it("ефект лягає на переданого одержувача", () => {
+    const base = createMockParticipant();
 
-    const target = createMockParticipant({ basicInfo: { ...attacker.basicInfo, id: "t1" } });
+    const recipient = createMockParticipant({ basicInfo: { ...base.basicInfo, id: "t1" } });
 
-    const out = applyCriticalEffect(attacker, crit("ac_debuff", { value: -2 }), 1, target);
+    const out = applyCriticalEffect(recipient, crit("ac_debuff", { value: -2 }), 1);
 
     expect(out.basicInfo.id).toBe("t1");
     expect(collectModifiers([out], "t1", { stat: "armor" }).flat).toBe(-2);

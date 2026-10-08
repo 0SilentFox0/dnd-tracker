@@ -89,7 +89,7 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
 
   if (roll.secondRoll) flow.messages.push(`🎲 відсіч, ${roll.secondRoll.mode === "advantage" ? "перевага" : "недолік"}: другий d20 = ${roll.secondRoll.value}`);
 
-  if (roll.isCriticalFail && roll.criticalEffect) put(flow, applyCriticalEffect(getP(flow, defenderId), roll.criticalEffect, round, undefined, { offTurn: true }));
+  if (roll.isCriticalFail && roll.criticalEffect) put(flow, applyCriticalEffect(getP(flow, defenderId), roll.criticalEffect, round, { offTurn: true }));
 
   const targetAC = getEffectiveArmorClass(getP(flow, attackerId), flow.ps);
 

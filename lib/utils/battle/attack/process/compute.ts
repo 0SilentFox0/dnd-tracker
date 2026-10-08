@@ -92,21 +92,9 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
     criticalEffectApplied = attackRoll.criticalEffect;
 
     if (criticalEffectApplied.effect.target === "target") {
-      updatedTarget = applyCriticalEffect(
-        updatedTarget,
-        criticalEffectApplied,
-        currentRound,
-        updatedTarget,
-        { offTurn: params.offTurn },
-      );
+      updatedTarget = applyCriticalEffect(updatedTarget, criticalEffectApplied, currentRound, { offTurn: params.offTurn });
     } else if (criticalEffectApplied.effect.target === "self") {
-      updatedAttacker = applyCriticalEffect(
-        updatedAttacker,
-        criticalEffectApplied,
-        currentRound,
-        undefined,
-        { offTurn: params.offTurn },
-      );
+      updatedAttacker = applyCriticalEffect(updatedAttacker, criticalEffectApplied, currentRound, { offTurn: params.offTurn });
     }
   }
 

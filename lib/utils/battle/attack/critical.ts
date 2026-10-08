@@ -84,10 +84,9 @@ export function applyCriticalEffect(
   participant: BattleParticipant,
   effect: CriticalEffect,
   currentRound: number,
-  target?: BattleParticipant,
   opts: { offTurn?: boolean } = {},
 ): BattleParticipant {
-  const updated = { ...(target || participant) };
+  const updated = { ...participant };
 
   switch (effect.effect.type) {
     case "lose_bonus_action":
