@@ -10,6 +10,7 @@ import { applyResistanceForAdditional } from "./damage";
 import { AttackType, ParticipantSourceType } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
+import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { attackAbilityLabel, getAttackAbilityModifier } from "@/lib/utils/common/calculations";
 import { maxOf, parseDice, parseDiceLenient, rollGroups } from "@/lib/utils/common/dice";
 import type { BattleParticipant, DamageStep } from "@/types/battle";
@@ -169,7 +170,7 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
     updatedTarget,
     physicalDamageForTarget,
     attack.damageType ?? "physical",
-    { participants: allParticipants },
+    { participants: allParticipants, attackKind: attackKindOf(attack.type) },
   );
 
   const { totalAdditionalDamage, additionalDamageBreakdown } = applyResistanceForAdditional(
@@ -177,6 +178,7 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
     scaleAdditionalDamage(updatedAttacker, damageCalculation.additionalDamage),
     dmgMult,
     allParticipants,
+    attackKindOf(attack.type),
   );
 
   const totalFinalDamage = resistanceResult.finalDamage + totalAdditionalDamage;

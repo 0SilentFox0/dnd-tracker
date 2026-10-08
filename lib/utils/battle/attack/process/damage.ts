@@ -1,6 +1,7 @@
 import { applyResistance } from "../../resistance";
 
 import { BATTLE_CONSTANTS, CombatStatus } from "@/lib/constants/battle";
+import type { AttackKind } from "@/lib/utils/abilities/schema";
 import type { BattleParticipant } from "@/types/battle";
 
 export interface ApplyDamageToTargetResult {
@@ -39,6 +40,7 @@ export function applyResistanceForAdditional(
   additionalDamageList: Array<{ type: string; value: number }>,
   dmgMult: number,
   participants: BattleParticipant[] = [target],
+  attackKind?: AttackKind,
 ): ApplyResistanceForAdditionalResult {
   let totalAdditionalDamage = 0;
 
@@ -51,7 +53,7 @@ export function applyResistanceForAdditional(
       target,
       additionalValue,
       additionalDamage.type,
-      { participants },
+      { participants, attackKind },
     );
 
     totalAdditionalDamage += additionalResistance.finalDamage;

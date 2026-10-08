@@ -57,6 +57,7 @@ const FlagSchema = z.discriminatedUnion("flag", [
     flag: z.literal("resistance"),
     damageType: z.string().min(1),
     percent: z.number().min(1).max(100),
+    attackKind: z.enum(ATTACK_KINDS).optional(),
   }),
   z.object({ ...flagBase, flag: z.literal("spellImmunity"), spellIds: z.array(z.string().min(1)).min(1) }),
   z.object({

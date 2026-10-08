@@ -9,6 +9,7 @@ import { applyHeroDmDamageMultiplier } from "./hero-dm-multiplier";
 import { calculateDamageWithModifiersImpl } from "./impl";
 
 import { AttackType } from "@/lib/constants/battle";
+import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
 import type { DamageStep } from "@/types/battle";
 
@@ -98,6 +99,8 @@ export function computeDamageBreakdown(
     target,
     damageType,
     totalDamage,
+    undefined,
+    attackKindOf(attack.type),
   );
 
   steps.push(...targetSteps);
