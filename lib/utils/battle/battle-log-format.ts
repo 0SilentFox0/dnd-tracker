@@ -137,8 +137,6 @@ export function getLogEntryDetailLines(action: BattleAction): string[] {
         " — " +
         d.criticalEffect.description,
     );
-
-    if (d.criticalEffect.flavor) lines.push(d.criticalEffect.flavor);
   }
 
   if (d?.damageBreakdown) lines.push("Урон: " + d.damageBreakdown);

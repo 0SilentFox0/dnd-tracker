@@ -19,7 +19,7 @@ describe("лог: фраза криту", () => {
     expect(getLogEntryDetailLines(entry())).toEqual(["Ефект [d10: 3]: Ефект — опис"]);
   });
 
-  it("з фразою — додатковий рядок", () => {
-    expect(getLogEntryDetailLines(entry("Фраза."))).toEqual(["Ефект [d10: 3]: Ефект — опис", "Фраза."]);
+  it("фраза не дублюється в деталях — вона вже в resultText", () => {
+    expect(getLogEntryDetailLines(entry("Фраза."))).toEqual(["Ефект [d10: 3]: Ефект — опис"]);
   });
 });
