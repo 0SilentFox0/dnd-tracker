@@ -1,5 +1,7 @@
 import type { LibraryArtifactSet } from "./types";
 
+const GODRIC_OFFENDER = "godric-offender";
+
 const IVAN_PREY = "ivan-prey";
 
 export const LIBRARY_ARTIFACT_SETS: LibraryArtifactSet[] = [
@@ -57,6 +59,57 @@ export const LIBRARY_ARTIFACT_SETS: LibraryArtifactSet[] = [
       appearanceDescription: "Кажуть, гномські королі ніколи не падали — їх виносили з поля, ще живих і лайливих. Ці поножі вросли в камінь під ногами, і жоден удар не може збити їхнього власника з ніг з першого разу.",
       abilities: [{ id: "greaves-of-the-dwarven-kings-stand", name: "Королі не падають", trigger: { event: "lethalDamage" }, limits: { perBattle: 1 }, effects: [
         { kind: "heal", amount: { percentOf: "maxHp", value: 30 }, revive: true, target: "self" },
+        { kind: "changeMorale", delta: 1, target: "allAllies" },
+      ] }] },
+  ],
+},
+{
+  key: "set-sar-issus", name: "Регалії Сар-Іссуса", heroName: "Зехір", iconKey: "sar-issus",
+  description: "Повний комплект: закляття 1–2 рівня б'ють до 2 цілей.",
+  appearanceDescription: "Архімаг Сар-Іссус залишив Срібній лізі не книги, а речі: корону, мантію, посох і перстень, кожен напоєний однією з шкіл. Хто збере всі чотири, почує, як вони гудуть в унісон, і найпростіше закляття розщепиться надвоє.",
+  abilities: [{ id: "sar-issus-split", name: "Розщеплення чар", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "spellTargeting", mode: "area", maxTargets: 2, maxLevel: 2 }] }],
+  artifacts: [
+    { key: "crown-of-sar-issus", name: "Корона Сар-Іссуса", slot: "helmet", rarity: "epic", iconKey: "crown-of-sar-issus",
+      description: "Закляття Світла лікують усіх союзників на 5 % max HP (2 рази за бій).",
+      appearanceDescription: "Тонкий срібний обруч світиться м'яким ранковим світлом, коли власник торкається магії Світла. Це світло не сліпить — воно лягає на плечі союзників, як тепла долоня.",
+      abilities: [{ id: "crown-of-sar-issus-light", name: "Світло корони", trigger: { event: "spellCast", phase: "after", role: "caster", school: "Світло" }, limits: { perBattle: 2 }, effects: [{ kind: "heal", amount: { percentOf: "maxHp", value: 5 }, target: "allAllies" }] }] },
+    { key: "robe-of-sar-issus", name: "Мантія Сар-Іссуса", slot: "armor", rarity: "epic", iconKey: "robe-of-sar-issus",
+      description: "Закляття Темряви знижують мораль усіх ворогів на 1 (1 раз за бій).",
+      appearanceDescription: "Синьо-золотий шовк мантії архімага ховає в собі частку його сили. Коли з вуст власника злітає темне слово, тінь мантії розповзається полем, і вороги раптом відчувають себе дуже малими.",
+      abilities: [{ id: "robe-of-sar-issus-dark", name: "Тінь мантії", trigger: { event: "spellCast", phase: "after", role: "caster", school: "Темрява" }, limits: { perBattle: 1 }, effects: [{ kind: "changeMorale", delta: -1, target: "allEnemies" }] }] },
+    { key: "staff-of-sar-issus", name: "Посох Сар-Іссуса", slot: "weapon", rarity: "legendary", iconKey: "staff-of-sar-issus",
+      description: "Закляття Хаосу підпалюють усіх ворогів: 1d6 вогнем щораунду, 2 раунди (1 раз за раунд).",
+      appearanceDescription: "Навершя посоху — кристал, у якому застигла іскра первісного вогню. Кожне закляття Хаосу розбурхує її, і тоді полум'я зісковзує з кристала й шукає ворогів саме.",
+      modifiers: [{ type: "damageDice", value: "1d6" }, { type: "damageType", value: "bludgeoning" }, { type: "attackType", value: "melee" }],
+      abilities: [{ id: "staff-of-sar-issus-chaos", name: "Іскра Хаосу", trigger: { event: "spellCast", phase: "after", role: "caster", school: "Хаос" }, limits: { perRound: 1 }, effects: [{ kind: "dot", damagePerRound: "1d6", damageType: "fire", duration: { rounds: 2 }, target: "allEnemies" }] }] },
+    { key: "ring-of-sar-issus", name: "Перстень Сар-Іссуса", slot: "ring1", rarity: "epic", iconKey: "ring-of-sar-issus",
+      description: "Закляття Природи повертає 1 слот закляття (1 раз за бій).",
+      appearanceDescription: "Перстень обвитий живим пагоном, що не в'яне вже кілька століть. Магія Природи не витрачається з ним — вона повертається, як вода в річку після дощу.",
+      abilities: [{ id: "ring-of-sar-issus-nature", name: "Кругообіг", trigger: { event: "spellCast", phase: "after", role: "caster", school: "Природа" }, limits: { perBattle: 1 }, effects: [{ kind: "restoreSpellSlot", count: 1, target: "self" }] }] },
+  ],
+},
+{
+  key: "set-lions-spirit", name: "Дух лева", heroName: "Годрик", iconKey: "lions-spirit",
+  description: "Повний комплект: влучання знижує мораль цілі на 1 (1 раз за раунд).",
+  appearanceDescription: "Регалії Ордену Лева носили лише ті лицарі Грифонової імперії, що жодного разу не показали ворогові спину. Коли такий лицар б'є, ворог чує не дзвін сталі, а лев'ячий рик — і відчуває, як слабнуть його коліна.",
+  abilities: [{ id: "lions-spirit-roar", name: "Лев'ячий рик", trigger: { event: "hit", role: "attacker" }, limits: { perRound: 1 }, effects: [{ kind: "changeMorale", delta: -1, target: "eventTarget" }] }],
+  artifacts: [
+    { key: "cape-of-the-lions-mane", name: "Плащ левової гриви", slot: "cape", rarity: "epic", iconKey: "cape-of-the-lions-mane",
+      description: "Хто влучив союзника, стає «Кривдником» на 2 раунди; атаки Годрика по «Кривднику» завдають +15 % шкоди.",
+      appearanceDescription: "Плащ пошитий з гриви лева, що загинув, захищаючи свій прайд. Кожного разу, коли когось із побратимів поранено, грива на плечах власника настовбурчується — і він уже знає, кого карати.",
+      abilities: [
+        { id: "cape-of-the-lions-mane-mark", name: "Кривдник", trigger: { event: "hit", role: "target", whose: "ally" }, effects: [{ kind: "mark", markId: GODRIC_OFFENDER, duration: { rounds: 2 }, target: "eventActor" }] },
+        { id: "cape-of-the-lions-mane-bonus", name: "Кривдник: шкода", trigger: { event: "attack", phase: "before", role: "attacker" }, condition: { type: "hasMark", who: "eventTarget", markId: GODRIC_OFFENDER, bySelf: true }, effects: [{ kind: "damageBonus", filter: { kind: "all" }, percent: 15 }] },
+      ] },
+    { key: "lion-crown", name: "Левова корона", slot: "helmet", rarity: "epic", iconKey: "lion-crown",
+      description: "+10 % до шансу додаткового ходу від моралі.",
+      appearanceDescription: "Золота корона з левовою пащею на чолі не прикрашає — вона надихає. Лицар у ній відчуває, як у грудях прокидається лев, і кидається в бій раніше, ніж ворог устигає підняти щит.",
+      abilities: [{ id: "lion-crown-courage", name: "Відвага лева", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "moraleChance", percent: 10 }] }] },
+    { key: "necklace-of-the-lion", name: "Намисто лева", slot: "necklace", rarity: "epic", iconKey: "necklace-of-the-lion",
+      description: "Смертельний удар (1 раз за бій): Годрик встає з 25 % HP, мораль союзників +1.",
+      appearanceDescription: "Ікло лева на важкому ланцюзі гріє груди, як друге серце. Коли перше серце вже готове зупинитися, друге б'є за нього — і лицар підводиться, на подив і жах ворогів.",
+      abilities: [{ id: "necklace-of-the-lion-rise", name: "Друге серце", trigger: { event: "lethalDamage" }, limits: { perBattle: 1 }, effects: [
+        { kind: "heal", amount: { percentOf: "maxHp", value: 25 }, revive: true, target: "self" },
         { kind: "changeMorale", delta: 1, target: "allAllies" },
       ] }] },
   ],
