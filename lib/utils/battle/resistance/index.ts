@@ -25,6 +25,8 @@ export interface ResistanceResult {
   steps: DamageStep[];
 }
 
+const clampPercent = (n: number) => Math.max(-BATTLE_CONSTANTS.RESISTANCE_PERCENT_CAP, Math.min(BATTLE_CONSTANTS.RESISTANCE_PERCENT_CAP, n));
+
 function matchesDamageType(flagType: string, damageType: string, fromSpell: boolean): boolean {
   const t = damageType.toLowerCase();
 
@@ -49,11 +51,11 @@ export function hasImmunity(target: BattleParticipant, damageType: string, opts?
   return matchingResistances(target, damageType, opts).some((f) => f.percent >= 100);
 }
 
-/** Сумарний відсоток опору (0–100) з прапорців resistance. */
+/** Сумарний відсоток опору (−100…100; від'ємний = вразливість) з прапорців resistance. */
 export function getCombinedResistancePercent(target: BattleParticipant, damageType: string, opts?: ResistanceOptions): number {
   const total = matchingResistances(target, damageType, opts).reduce((sum, f) => sum + f.percent, 0);
 
-  return Math.min(BATTLE_CONSTANTS.RESISTANCE_PERCENT_CAP, total);
+  return clampPercent(total);
 }
 
 /**
@@ -91,11 +93,13 @@ export function applyResistance(
     };
   }
 
-  const resistancePercent = Math.min(BATTLE_CONSTANTS.RESISTANCE_PERCENT_CAP, matches.reduce((sum, m) => sum + m.percent, 0));
+  const resistancePercent = clampPercent(matches.reduce((sum, m) => sum + m.percent, 0));
 
-  if (resistancePercent > 0) {
+  if (resistancePercent !== 0) {
     finalDamage = Math.floor(damage * (1 - resistancePercent / BATTLE_CONSTANTS.PERCENT_DIVISOR));
-    breakdown.push(`${damage} ${damageType} → -${resistancePercent}% опір (${finalDamage} урону)`);
+    breakdown.push(
+      resistancePercent > 0 ? `${damage} ${damageType} → -${resistancePercent}% опір (${finalDamage} урону)` : `${damage} ${damageType} → +${-resistancePercent}% вразливість (${finalDamage} урону)`,
+    );
 
     let used = 0;
 

@@ -9,5 +9,5 @@ export function participantImmuneToSpell(
   participants: BattleParticipant[] = [participant],
   extra?: StaticEffect[],
 ): boolean {
-  return findFlags(withSelf(participants, participant), participant.basicInfo.id, "spellImmunity", extra).some((f) => f.spellIds.includes(spellId));
+  return findFlags(withSelf(participants, participant), participant.basicInfo.id, "spellImmunity", extra).some((f) => !f.spellIds || f.spellIds.includes(spellId));
 }

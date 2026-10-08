@@ -3,7 +3,7 @@ import { holdBackNewEffects, restoreHeldBack } from "./hold-back";
 import { AttackType } from "@/lib/constants/battle";
 import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { isActive, mergeParticipants, updateParticipant, withSelf } from "@/lib/utils/abilities/engine/participants";
-import type { Rng } from "@/lib/utils/abilities/engine/types";
+import type { Rng, SummonRequest } from "@/lib/utils/abilities/engine/types";
 import { processAttack } from "@/lib/utils/battle/attack";
 import { activeEffectIds } from "@/lib/utils/battle/attack/consume-effects";
 import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
@@ -44,6 +44,7 @@ export type AttackPhaseResult = {
   finalInitiativeOrder: BattleParticipant[];
   allBattleActions: BattleAction[];
   baseBattleLog: BattleAction[];
+  summons: SummonRequest[];
 };
 
 // Фаза атаки: валідація, processAttack на ціль, відповідний удар по основній цілі.
@@ -185,6 +186,8 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const allBattleActions: BattleAction[] = [];
 
+  const summons: SummonRequest[] = [];
+
   const dicePerTarget =
     isMultiTargetRanged && (targets.length > 1 || hitsAllEnemies)
       ? diceCount(hitsAllEnemies ? heroAttackDamageParts(attacker, attack).formula : (attack.damageDice ?? ""))
@@ -254,6 +257,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
     currentInitiativeOrder = mergeParticipants(currentInitiativeOrder, attackResult.allParticipantsUpdated ?? []);
     currentAttacker = attackResult.attackerUpdated;
+    summons.push(...attackResult.summons);
 
     const critType = attackResult.criticalEffectApplied?.effect.type;
 
@@ -315,5 +319,6 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
     finalInitiativeOrder,
     allBattleActions,
     baseBattleLog,
+    summons,
   };
 }

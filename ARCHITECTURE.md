@@ -15,7 +15,6 @@
 | **`prisma/`** | Схема БД та міграції |
 | **`scripts/`** | CLI/одноразові скрипти (імпорт, міграції, seed) |
 | **`docs/`** | Документація (ТЗ, опис юнітів тощо) |
-| **`imports/`** | Вхідні дані для імпорту (CSV, JSON) |
 | **`public/`** | Статичні файли (зображення, фони) |
 
 **Аліас імпортів:** у `tsconfig.json` задано `"@/*": ["./*"]` — імпорт з кореня: `import { x } from "@/lib/api/campaigns"`.
@@ -234,7 +233,7 @@ React-провайдери: **`query-provider.tsx`** (TanStack Query), можл�
 
 Скрипти для CLI та одноразових операцій (запуск: `pnpm run <script>` або `tsx scripts/імʼя.ts`).
 
-- **Імпорт:** `import-docs-spells.ts`, `import-units.ts`, `import-skills-library.ts` (та допоміжні parse/triggers/types).
+- **Імпорт:** `import-docs-spells.ts`, `import-units.ts` (ручний імпорт CSV DM; бібліотечні юніти — `data/library/units` через `seed-library`), `import-skills-library.ts` (та допоміжні parse/triggers/types).
 - **Дані:** `seed-artifacts.ts`, `seed-mock-battle-data.ts`, `reset-mock-battle-data.ts`, `delete-mock-battle-data.ts`, `redistribute-character-spell-slots.ts`.
 - **Тести/симуляції:** `simulate-battle.ts`.
 - **Симуляція бою:** `pnpm simulate-battle` — лише на локальній БД: створює окрему кампанію (персонажі з різними прокачками й артефактами, юніти з уміннями) і проганяє бій через ті самі mutation-функції, що й API, з перевірками ефектів.

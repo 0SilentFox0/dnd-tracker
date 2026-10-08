@@ -56,10 +56,10 @@ const FlagSchema = z.discriminatedUnion("flag", [
     ...flagBase,
     flag: z.literal("resistance"),
     damageType: z.string().min(1),
-    percent: z.number().min(1).max(100),
+    percent: z.number().min(-100).max(100).refine((n) => n !== 0),
     attackKind: z.enum(ATTACK_KINDS).optional(),
   }),
-  z.object({ ...flagBase, flag: z.literal("spellImmunity"), spellIds: z.array(z.string().min(1)).min(1) }),
+  z.object({ ...flagBase, flag: z.literal("spellImmunity"), spellIds: z.array(z.string().min(1)).min(1).optional() }),
   z.object({
     ...flagBase,
     flag: z.literal("counterAttack"),
@@ -81,6 +81,8 @@ const FlagSchema = z.discriminatedUnion("flag", [
   z.object({ ...flagBase, flag: z.literal("moraleChance"), percent: z.number().int().min(1).max(100) }),
   z.object({ ...flagBase, flag: z.literal("lifesteal"), percent: z.number().int().min(1).max(100) }),
   z.object({ ...flagBase, flag: z.literal("multiTargetFalloff"), percent: z.number().int().min(1).max(100) }),
+  z.object({ ...flagBase, flag: z.literal("noRetaliation") }),
+  z.object({ ...flagBase, flag: z.literal("unlimitedRetaliation") }),
   z.object({ ...flagBase, flag: z.literal("noNegativeMorale") }),
   z.object({ ...flagBase, flag: z.literal("ignoreMorale") }),
   z.object({ ...flagBase, flag: z.literal("minMorale"), value: z.number().int().min(-3).max(3) }),
@@ -151,6 +153,8 @@ const ApplyConditionSchema = z.object({
 
 const RestoreSpellSlotSchema = z.object({ kind: z.literal("restoreSpellSlot"), count: z.number().int().min(1), ...target });
 
+const DrainSpellSlotSchema = z.object({ kind: z.literal("drainSpellSlot"), count: z.number().int().min(1), ...target });
+
 const ChangeMoraleSchema = z.object({
   kind: z.literal("changeMorale"),
   delta: z.number().int().refine((d) => d !== 0),
@@ -189,6 +193,7 @@ const BASE_EFFECTS = [
   CharmSchema,
   ApplyConditionSchema,
   RestoreSpellSlotSchema,
+  DrainSpellSlotSchema,
   ChangeMoraleSchema,
   CleanseSchema,
   MarkSchema,

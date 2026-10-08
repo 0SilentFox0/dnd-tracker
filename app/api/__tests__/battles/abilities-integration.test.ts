@@ -44,7 +44,7 @@ describe("abilities through mutations", () => {
   it("DOT на влучання тікає на початку ходу цілі", async () => {
     const bleed = resolved({ trigger: { event: "hit", role: "attacker" }, effects: [{ kind: "dot", damagePerRound: 3, damageType: "bleed", duration: { rounds: 2 }, target: "eventTarget" }] });
 
-    const hit = attack(context({ participants: [makeHero([bleed]), makeGoblin("gob", 100)] }));
+    const hit = await attack(context({ participants: [makeHero([bleed]), makeGoblin("gob", 100)] }));
 
     const hpAfterHit = find(hit.participants, "gob").combatStats.currentHp;
 
@@ -61,7 +61,7 @@ describe("abilities through mutations", () => {
 
     const gob = { ...base, battleData: { ...base.battleData, attacks: [sword] } };
 
-    const first = attack(context({ participants: [makeHero(), gob], rng: seq(0.85) }));
+    const first = await attack(context({ participants: [makeHero(), gob], rng: seq(0.85) }));
 
     const heroHp = find(first.participants, "hero").combatStats.currentHp;
 
@@ -70,7 +70,7 @@ describe("abilities through mutations", () => {
 
     const refreshed = first.participants.map((p) => (p.basicInfo.id === "hero" ? { ...p, actionFlags: { ...p.actionFlags, hasUsedAction: false } } : p));
 
-    const second = attack(context({ participants: refreshed, rng: seq(0.85) }));
+    const second = await attack(context({ participants: refreshed, rng: seq(0.85) }));
 
     expect(find(second.participants, "hero").combatStats.currentHp).toBe(heroHp);
   });
@@ -78,13 +78,13 @@ describe("abilities through mutations", () => {
   it("виживання з 1 HP один раз за бій", async () => {
     const survive = resolved({ trigger: { event: "lethalDamage" }, limits: { perBattle: 1 }, effects: [{ kind: "heal", amount: 1, revive: true }] });
 
-    const first = attack(context({ participants: [makeHero(), makeGoblin("gob", 2, [survive])] }));
+    const first = await attack(context({ participants: [makeHero(), makeGoblin("gob", 2, [survive])] }));
 
     expect(find(first.participants, "gob").combatStats).toMatchObject({ currentHp: 1, status: "active" });
 
     const refreshed = first.participants.map((p) => (p.basicInfo.id === "hero" ? { ...p, actionFlags: { ...p.actionFlags, hasUsedAction: false } } : p));
 
-    const second = attack(context({ participants: refreshed }));
+    const second = await attack(context({ participants: refreshed }));
 
     expect(find(second.participants, "gob").combatStats.status).not.toBe("active");
   });
@@ -92,7 +92,7 @@ describe("abilities through mutations", () => {
   it("смерть ворога знижує мораль його союзників рівно раз", async () => {
     const mourn = resolved({ trigger: { event: "kill", role: "victimSide" }, effects: [{ kind: "changeMorale", delta: -1 }] });
 
-    const out = attack(context({ participants: [makeHero(), makeGoblin("gob", 2), makeGoblin("gob2", 20, [mourn])] }));
+    const out = await attack(context({ participants: [makeHero(), makeGoblin("gob", 2), makeGoblin("gob2", 20, [mourn])] }));
 
     expect(find(out.participants, "gob2").combatStats.morale).toBe(-1);
   });

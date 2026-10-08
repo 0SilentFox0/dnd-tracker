@@ -4,6 +4,7 @@ import type { SummonRequest } from "@/lib/utils/abilities/engine/types";
 import { createBattleParticipantFromUnit } from "@/lib/utils/battle/participant";
 import { appendToInitiativeEnd, nextInstanceNumber } from "@/lib/utils/battle/spell/append-summoned-unit";
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
+import { scaleSummon } from "@/lib/utils/units/level-scaling";
 import type { BattleParticipant } from "@/types/battle";
 
 type RaceRow = Prisma.RaceGetPayload<object>;
@@ -53,7 +54,9 @@ export async function applyAbilitySummons(
 
       const built = await createBattleParticipantFromUnit(unit as UnitFromPrisma, opts.battleId, owner.basicInfo.side, nextInstanceNumber(next, unit.id), racesById as Record<string, RaceRow>);
 
-      const withOwner = { ...built, basicInfo: { ...built.basicInfo, controlledBy: owner.basicInfo.controlledBy }, battleData: { ...built.battleData, summonedBy: req.ownerId } };
+      const scaled = scaleSummon(built, unit.levelScaling, req.casterLevel);
+
+      const withOwner = { ...scaled, basicInfo: { ...scaled.basicInfo, controlledBy: owner.basicInfo.controlledBy }, battleData: { ...scaled.battleData, summonedBy: req.ownerId } };
 
       const { finalOrder, added } = appendToInitiativeEnd(next, withOwner);
 

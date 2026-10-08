@@ -23,7 +23,7 @@ describe("EffectCard", () => {
     renderCard({ kind: "dot", damagePerRound: "1d4", damageType: "bleed", duration: { rounds: 2 }, target: "eventTarget" });
 
     expect(screen.getByLabelText("Шкода/раунд (число, кубики, формула)")).toHaveValue("1d4");
-    expect(screen.getByText("bleed 1d4/раунд × 2 р.")).toBeInTheDocument();
+    expect(screen.getByText("Кровотеча 1d4/раунд × 2 р.")).toBeInTheDocument();
   });
 
   it("зміна поля → onChange з оновленим ефектом", () => {

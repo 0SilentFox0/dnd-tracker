@@ -13,8 +13,12 @@ const prisma = new PrismaClient();
 async function main() {
   const args = process.argv.slice(2);
 
-  // Використовуємо дефолтні значення якщо не вказано
-  const csvFilePath = args[0] || "imports/units-import.csv";
+  const csvFilePath = args[0];
+
+  if (!csvFilePath) {
+    console.error("Використання: pnpm import-units <шлях до CSV> [campaignId]. Бібліотечні юніти сідяться через pnpm seed-library.");
+    process.exit(1);
+  }
 
   const campaignId = args[1] || DEFAULT_CAMPAIGN_ID;
 

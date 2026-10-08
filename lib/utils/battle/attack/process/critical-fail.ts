@@ -21,7 +21,7 @@ export interface HandleCriticalFailParams {
   critFlavorText?: string;
 }
 
-export function handleCriticalFail(params: HandleCriticalFailParams): ProcessAttackResult {
+export function handleCriticalFail(params: HandleCriticalFailParams): Omit<ProcessAttackResult, "summons"> {
   const { flow, attackerId, targetId, attack, d20Roll, attackRoll, targetAC, currentRound, battleId, critFlavorText } = params;
 
   const criticalEffectApplied = attackRoll.criticalEffect;

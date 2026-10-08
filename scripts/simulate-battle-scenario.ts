@@ -4,8 +4,10 @@
  */
 import type { Prisma } from "@prisma/client";
 
+import { LIBRARY_SOURCE } from "../data/library/build";
 import type { Ability } from "../lib/utils/abilities/schema";
 import { weaponStatsColumns } from "../lib/utils/artifacts/weapon-stats";
+import { unitRow } from "./seed-library-lib";
 
 export const SIM_USER = { id: "sim-dm-user", email: "sim-dm@local.test", displayName: "SIM DM" };
 
@@ -110,15 +112,19 @@ export const UNITS = {
 
 export const FAIR_CAMPAIGN_NAME = "SIM: рівні бої";
 
-/** Бібліотека юнітів кількох тірів без особливих умінь: масштабування видно в чистому вигляді. */
-export const FAIR_UNITS = [
-  { name: "Щур-мутант", level: 1, maxHp: 6, armorClass: 11, attacks: json([{ name: "Укус", type: "melee", attackBonus: 3, damageType: "piercing", damageDice: "1d6" }]) },
-  { name: "Гоблін", level: 1, maxHp: 12, armorClass: 12, attacks: json([{ name: "Ніж", type: "melee", attackBonus: 3, damageType: "piercing", damageDice: "1d8" }]) },
-  { name: "Вовк", level: 2, maxHp: 22, armorClass: 12, attacks: json([{ name: "Укус", type: "melee", attackBonus: 4, damageType: "piercing", damageDice: "2d6" }]) },
-  { name: "Орк-воїн", level: 3, maxHp: 32, armorClass: 13, attacks: json([{ name: "Сокира", type: "melee", attackBonus: 5, damageType: "slashing", damageDice: "2d8" }]) },
-  { name: "Огр", level: 4, maxHp: 60, armorClass: 11, attacks: json([{ name: "Дубина", type: "melee", attackBonus: 6, damageType: "bludgeoning", damageDice: "3d8" }]) },
-  { name: "Троль", level: 5, maxHp: 90, armorClass: 14, attacks: json([{ name: "Кігті", type: "melee", attackBonus: 7, damageType: "slashing", damageDice: "4d8" }]) },
-];
+const noRefs = { groups: new Map<string, string>(), spells: new Map<string, string>() };
+
+// Без раси: сценарії самі вирішують, чи потрібна раса Демонів.
+function libraryDemon(key: string) {
+  const unit = LIBRARY_SOURCE.units.find((u) => u.key === key);
+
+  if (!unit) throw new Error(`Юніта «${key}» немає в бібліотеці`);
+
+  return unitRow({ ...unit, raceKey: null }, noRefs, new Map());
+}
+
+/** Базові Демони Tier 1/4/7 з бібліотеки: масштабування видно майже в чистому вигляді. */
+export const FAIR_UNITS = ["demons-imp", "demons-succubus", "demons-devil"].map(libraryDemon);
 
 export const FAIR_HEROES = [
   { name: "Гарольд", class: "Fighter", strength: 16, dexterity: 12, constitution: 14, armorClass: 16, weapon: "sword" },
@@ -189,7 +195,7 @@ export const RACIAL_CAMPAIGN_NAME = "SIM: расові механіки";
 
 export const DEMON_RACE = { name: "Демони", abilities: json([]) };
 
-export const DEMON_UNIT = { name: "Біс", level: 5, maxHp: 30, armorClass: 12, initiative: 3, attacks: melee("Кіготь"), abilities: json([]) };
+export const DEMON_UNIT = libraryDemon("demons-imp");
 
 export const RACIAL_UNITS = [
   {
@@ -201,7 +207,7 @@ export const RACIAL_UNITS = [
     attacks: melee("Посох"),
     abilities: json([
       ab("nec-raise", "Підняття мертвих", { trigger: { event: "action" }, condition: { type: "targetDead" }, limits: { perBattle: 1 }, maxTargets: 2, effects: [{ kind: "raiseDead", hpPercent: 90, target: "eventTarget" }] }),
-      ab("nec-gate", "Відкриття воріт", { trigger: { event: "bonusAction" }, limits: { perBattle: 1 }, effects: [{ kind: "summon", group: "Демони", tier: 5 }] }),
+      ab("nec-gate", "Відкриття воріт", { trigger: { event: "bonusAction" }, limits: { perBattle: 1 }, effects: [{ kind: "summon", group: "Демони", tier: 1 }] }),
       ab("nec-angel", "Ангел Хранитель", { trigger: { event: "action" }, condition: { type: "targetDead" }, limits: { perBattle: 1 }, effects: [{ kind: "heal", amount: { percentOf: "maxHp", value: 50 }, revive: true, target: "eventTarget" }] }),
       ab("nec-armor", "Рунна броня", { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "resistance", damageType: "all", percent: 25 }] }),
     ]),

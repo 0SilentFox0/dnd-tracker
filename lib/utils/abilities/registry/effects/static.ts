@@ -121,9 +121,9 @@ export function describeFlag(e: Extract<Effect, { kind: "flag" }>): string {
     case "guaranteedHit":
       return "гарантоване влучання";
     case "resistance":
-      return `${e.percent >= 100 ? `імунітет: ${e.damageType}` : `опір ${e.damageType} ${e.percent}%`}${e.attackKind ? ` (${e.attackKind === "ranged" ? "дальні атаки" : "ближні атаки"})` : ""}`;
+      return `${e.percent >= 100 ? `імунітет: ${e.damageType}` : e.percent < 0 ? `вразливість ${e.damageType} ${-e.percent}%` : `опір ${e.damageType} ${e.percent}%`}${e.attackKind ? ` (${e.attackKind === "ranged" ? "дальні атаки" : "ближні атаки"})` : ""}`;
     case "spellImmunity":
-      return `імунітет до заклинань (${e.spellIds.length})`;
+      return e.spellIds ? `імунітет до заклинань (${e.spellIds.length})` : "імунітет до всіх заклинань";
     case "spellTargeting": {
       const scope = e.school ? `закляття школи ${e.school}` : e.spellIds ? `закляття (${e.spellIds.length})` : "закляття";
 
@@ -141,6 +141,10 @@ export function describeFlag(e: Extract<Effect, { kind: "flag" }>): string {
       return `додаткові цілі дальньої атаки отримують ${e.percent}% шкоди`;
     case "seeEnemyHp":
       return "бачить HP ворогів";
+    case "noRetaliation":
+      return "атаки без відсічі";
+    case "unlimitedRetaliation":
+      return "відповідає на кожну атаку";
     case "noNegativeMorale":
       return "від'ємна мораль = 0";
     case "ignoreMorale":
@@ -167,6 +171,8 @@ export const FLAG_LABELS: Record<FlagKey, string> = {
   multiTargetFalloff: "Шкода додаткових цілей дальньої атаки",
   lifesteal: "Вампіризм (лікування від шкоди атак)",
   moraleChance: "Шанс додаткового ходу від моралі",
+  noRetaliation: "Без відповіді",
+  unlimitedRetaliation: "Безмежна відсіч",
   noNegativeMorale: "Мораль не нижче 0",
   ignoreMorale: "Мораль не діє",
   minMorale: "Мінімальна мораль",
@@ -192,10 +198,10 @@ export const FLAG_FIELDS: Record<FlagKey, readonly FieldMeta[]> = {
   guaranteedHit: [],
   resistance: [
     { name: "damageType", label: "Тип шкоди (all, physical, spell, fire…)", input: "text" },
-    { name: "percent", label: "%, 100 = імунітет", input: "number" },
+    { name: "percent", label: "%, 100 = імунітет, від'ємне = вразливість", input: "number" },
     { name: "attackKind", label: "Лише проти атак", input: "select", options: [{ value: "melee", label: "ближніх" }, { value: "ranged", label: "дальніх" }], optional: true },
   ],
-  spellImmunity: [{ name: "spellIds", label: "Заклинання", input: "spells" }],
+  spellImmunity: [{ name: "spellIds", label: "Заклинання (порожньо = усі)", input: "spells", optional: true }],
   spellTargeting: [
     { name: "mode", label: "Режим", input: "select", options: [{ value: "area", label: "по області" }, { value: "all", label: "на всіх" }] },
     { name: "spellIds", label: "Заклинання", input: "spells", optional: true },
@@ -212,6 +218,8 @@ export const FLAG_FIELDS: Record<FlagKey, readonly FieldMeta[]> = {
   multiTargetFalloff: [{ name: "percent", label: "% шкоди додаткових цілей", input: "number" }],
   lifesteal: [{ name: "percent", label: "% завданої шкоди", input: "number" }],
   moraleChance: [{ name: "percent", label: "+% до шансу додаткового ходу", input: "number" }],
+  noRetaliation: [],
+  unlimitedRetaliation: [],
   noNegativeMorale: [],
   ignoreMorale: [],
   minMorale: [{ name: "value", label: "Мінімум (−3…3)", input: "number" }],

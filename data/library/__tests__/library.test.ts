@@ -5,9 +5,13 @@ import { buildLibrary, LIBRARY_COMPLETE, LIBRARY_SOURCE, MIN_APPEARANCE_LENGTH, 
 import { PERSONAL } from "../personal";
 import { RACES } from "../races";
 import { SPELLS } from "../spells";
-import type { LibraryArtifact, LibraryArtifactSet, LibraryBranch, LibraryRace, LibrarySkill, LibrarySource, LibrarySpell } from "../types";
+import type { LibraryArtifact, LibraryArtifactSet, LibraryBranch, LibraryRace, LibrarySkill, LibrarySource, LibrarySpell, LibraryUnit } from "../types";
+import { falloff, hatred, raiseOnKill } from "../unit-abilities";
+import { UNITS } from "../units";
 
 import { BRANCH_ICONS, SKILL_ICONS, SPELL_ICONS } from "@/data/skill-icons";
+import { scaleSummon } from "@/lib/utils/units/level-scaling";
+import type { BattleParticipant } from "@/types/battle";
 
 const APPEARANCE = "Світло розгортається над полем бою золотим куполом, і навіть найстаміший воїн відчуває, як повертаються сили.";
 
@@ -90,8 +94,31 @@ function set(key: string, over: Partial<LibraryArtifactSet> = {}): LibraryArtifa
   };
 }
 
+function unit(key: string, over: Partial<LibraryUnit> = {}): LibraryUnit {
+  return {
+    key,
+    name: `Юніт ${key}`,
+    raceKey: null,
+    tier: 1,
+    role: "base",
+    hp: 12,
+    ac: 11,
+    attackBonus: 3,
+    initiative: 8,
+    attacks: [{ name: "Удар", type: "melee", dice: "1d6", damageType: "slashing" }],
+    abilities: [],
+    ...over,
+  };
+}
+
+function raceUnits(raceKey: string): LibraryUnit[] {
+  const roles = ["base", "upgrade", "alt"] as const;
+
+  return Array.from({ length: 21 }, (_, i) => unit(`${raceKey}-${i}`, { raceKey, tier: Math.floor(i / 3) + 1, role: roles[i % 3] }));
+}
+
 function source(over: Partial<LibrarySource> = {}): LibrarySource {
-  return { spells: [], branches: [], races: [], personal: [], artifactSets: [], ...over };
+  return { spells: [], branches: [], races: [], personal: [], artifactSets: [], units: [], ...over };
 }
 
 describe("buildLibrary validation", () => {
@@ -209,6 +236,75 @@ describe("buildLibrary validation", () => {
   });
 });
 
+describe("buildLibrary unit validation", () => {
+  it("unit ability descriptions have no raw damage-type ids", () => {
+    const raw = UNITS.flatMap((u) => u.abilities.map((a) => a.description ?? "")).filter((d) => /\([a-z]+(, [a-z]+)*\)/.test(d));
+
+    expect(raw).toEqual([]);
+  });
+
+  const withUnits = (units: LibraryUnit[], over: Partial<LibrarySource> = {}) => source({ units, ...over });
+
+  it("accepts valid units and indexes them", () => {
+    expect(buildLibrary(withUnits([unit("u")])).unitByKey.get("u")?.name).toBe("Юніт u");
+  });
+
+  it("rejects duplicate keys and names", () => {
+    expect(() => buildLibrary(withUnits([unit("u"), unit("u", { name: "Інший" })]))).toThrow(/дублікат key «u»/);
+    expect(() => buildLibrary(withUnits([unit("a", { name: "Х" }), unit("b", { name: "Х" })]))).toThrow(/дублікат name «Х»/);
+  });
+
+  it("rejects unknown races and tiers out of range", () => {
+    expect(() => buildLibrary(withUnits([unit("u", { raceKey: "nope" })]))).toThrow(/невідома раса «nope»/);
+    expect(() => buildLibrary(withUnits([unit("u", { tier: 8 })]))).toThrow(/тір/);
+    expect(() => buildLibrary(withUnits([unit("u", { tier: 0 })]))).toThrow(/тір/);
+  });
+
+  it("rejects unknown spell keys and broken abilities", () => {
+    expect(() => buildLibrary(withUnits([unit("u", { spellKeys: ["nope"] })]))).toThrow(/закляття «nope»/);
+    expect(() => buildLibrary(withUnits([unit("u", { abilities: [{ id: "x", name: "x", trigger: { event: "passive" }, effects: [] }] })]))).toThrow(/Юніт «u»/);
+    expect(() => buildLibrary(withUnits([unit("u", { abilities: [{ id: "x", name: "x", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "spellImmunity", spellIds: ["nope"] }] }] })]))).toThrow(/«nope»/);
+  });
+
+  it("rejects unknown race names in targetRace", () => {
+    expect(() => buildLibrary(withUnits([unit("u", { abilities: [hatred("Кара", ["Нікого"])] })]))).toThrow(/невідома раса «Нікого»/);
+  });
+
+  it("requires falloff for multi-target attacks", () => {
+    const attacks: LibraryUnit["attacks"] = [{ name: "Залп", type: "ranged", dice: "1d6", damageType: "piercing", targets: 2 }];
+
+    expect(() => buildLibrary(withUnits([unit("u", { attacks })]))).toThrow(/multiTargetFalloff/);
+    expect(() => buildLibrary(withUnits([unit("u", { attacks, abilities: [falloff("Залп")] })]))).not.toThrow();
+  });
+
+  it("requires unique ability ids within a unit", () => {
+    expect(() => buildLibrary(withUnits([unit("u", { abilities: [falloff("a"), falloff("b")] })]))).toThrow(/id «unit-falloff» повторюється/);
+  });
+
+  it("requires summoned unit keys to exist", () => {
+    expect(() => buildLibrary(withUnits([unit("u", { abilities: [raiseOnKill("ghost")] })]))).toThrow(/юніт «ghost»/);
+    expect(() => buildLibrary(withUnits([unit("u", { abilities: [raiseOnKill("u2")] }), unit("u2")]))).not.toThrow();
+
+    const summoning = spell("s", { definition: { ...spell("s").definition, effects: [{ kind: "summon", unitId: "ghost" }] } });
+
+    expect(() => buildLibrary(withUnits([], { spells: [summoning] }))).toThrow(/юніт «ghost»/);
+    expect(() => buildLibrary(withUnits([unit("ghost")], { spells: [summoning] }))).not.toThrow();
+  });
+
+  it("requires exactly 21 units per race, 3 per tier with distinct roles", () => {
+    const r = race("r");
+
+    const full = raceUnits("r");
+
+    expect(() => buildLibrary(withUnits(full, { branches: [branch("b")], races: [r] }))).not.toThrow();
+    expect(() => buildLibrary(withUnits(full.slice(1), { branches: [branch("b")], races: [r] }))).toThrow(/21 юніт/);
+
+    const skewed = full.map((u, i) => (i === 1 ? { ...u, role: "base" as const } : u));
+
+    expect(() => buildLibrary(withUnits(skewed, { branches: [branch("b")], races: [r] }))).toThrow(/ролі/);
+  });
+});
+
 describe("library content", () => {
   it("builds without issues", () => {
     expect(() => buildLibrary(LIBRARY_SOURCE)).not.toThrow();
@@ -242,6 +338,30 @@ describe("library content", () => {
       expect(racePassiveAbilities(r)[0].id, r.key).toBe(`${r.key}-stats`);
       expect(Object.keys(racePassiveStatModifiers(r)), r.key).toEqual(Object.keys(expected[r.key]));
     }
+  });
+
+  content("has 4 elemental summon spells pointing at scaling neutral units", () => {
+    const spells = SPELLS.filter((sp) => sp.name.startsWith("Прикликання елементаля"));
+
+    expect(spells).toHaveLength(4);
+
+    for (const sp of spells) {
+      const summon = sp.definition.effects.find((e) => e.kind === "summon");
+
+      const unit = UNITS.find((u) => summon?.kind === "summon" && u.key === summon.unitId);
+
+      expect(unit?.raceKey, sp.key).toBeNull();
+      expect(unit?.levelScaling, sp.key).toBeDefined();
+      expect(sp.level, sp.key).toBe(3);
+    }
+  });
+
+  content("scales the earth elemental to 73 HP at level 6", () => {
+    const earth = UNITS.find((u) => u.key === "neutral-earth-elemental")!;
+
+    const p = { combatStats: { maxHp: earth.hp, currentHp: earth.hp }, battleData: { attacks: [{ damageDice: "2d8", attackBonus: 3 }] } } as unknown as BattleParticipant;
+
+    expect(scaleSummon(p, earth.levelScaling, 6).combatStats.maxHp).toBe(73);
   });
 
   content("has 7 races with 4 skills each", () => {

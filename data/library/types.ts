@@ -1,6 +1,7 @@
 import type { ArtifactGridSlotKey } from "@/lib/constants/artifacts";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import type { SpellDefinition } from "@/lib/utils/spells/model/schema";
+import type { LevelScaling } from "@/lib/utils/units/level-scaling";
 
 export interface LibraryEntry {
   key: string;
@@ -71,12 +72,40 @@ export interface LibraryArtifactSet extends LibraryEntry {
   abilities: Ability[];
 }
 
+export type UnitRole = "base" | "upgrade" | "alt";
+
+export interface LibraryUnitAttack {
+  name: string;
+  type: "melee" | "ranged";
+  dice: string;
+  damageType: string;
+  targets?: number;
+}
+
+export interface LibraryUnit {
+  key: string;
+  name: string;
+  raceKey: string | null;
+  tier: number;
+  role: UnitRole;
+  hp: number;
+  ac: number;
+  attackBonus: number;
+  initiative: number;
+  attacks: LibraryUnitAttack[];
+  abilities: Ability[];
+  spellKeys?: string[];
+  flying?: boolean;
+  levelScaling?: LevelScaling;
+}
+
 export interface LibrarySource {
   spells: LibrarySpell[];
   branches: LibraryBranch[];
   races: LibraryRace[];
   personal: LibraryPersonal[];
   artifactSets: LibraryArtifactSet[];
+  units: LibraryUnit[];
 }
 
 export interface Library extends LibrarySource {
@@ -84,4 +113,5 @@ export interface Library extends LibrarySource {
   skills: LibrarySkill[];
   spellByKey: Map<string, LibrarySpell>;
   raceByKey: Map<string, LibraryRace>;
+  unitByKey: Map<string, LibraryUnit>;
 }

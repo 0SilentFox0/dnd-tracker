@@ -1,9 +1,11 @@
 import { z } from "zod";
 
+import { getCachedSummonPool } from "@/lib/cache/reference-data";
 import { runAttackPhase } from "@/lib/utils/battle/attack-phase/run-attack-phase";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { battleActionToEvent } from "@/lib/utils/battle/store";
+import { applyAbilitySummons, type SummonDeps } from "@/lib/utils/battle/summon/ability-summons";
 import { advanceTurn, assertNotPanicking } from "@/lib/utils/battle/turn";
 import { assertAttackRolls } from "@/lib/utils/battle/validation/dice-checks";
 
@@ -49,33 +51,43 @@ function assertAttackInput(ctx: BattleMutationContext, data: Omit<AttackBody, "e
   assertAttackRolls(heroAttackDamageParts(attacker, attack).formula, { damageRolls: data.damageRolls, targetCount: targetIds.length });
 }
 
-export function attackMutation(ctx: BattleMutationContext, body: AttackBody): MutationResult {
-  const { endTurn, ...data } = body;
+const defaultDeps: SummonDeps = { loadPool: getCachedSummonPool };
 
-  assertAttackInput(ctx, data);
-  assertNotPanicking(ctx.scene.pendingMoraleCheck, data.attackerId);
+export function createAttackMutation(deps: SummonDeps = defaultDeps) {
+  return async (ctx: BattleMutationContext, body: AttackBody): Promise<MutationResult> => {
+    const { endTurn, ...data } = body;
 
-  const phase = runAttackPhase({
-    battle: { initiativeOrder: ctx.participants, battleLog: [], currentRound: ctx.scene.round, currentTurnIndex: ctx.scene.turnIndex },
-    data,
-    battleId: ctx.scene.id,
-    userId: ctx.userId,
-    isDM: ctx.isDM,
-    rng: ctx.rng,
-  });
+    assertAttackInput(ctx, data);
+    assertNotPanicking(ctx.scene.pendingMoraleCheck, data.attackerId);
 
-  const order = phase.finalInitiativeOrder;
+    const phase = runAttackPhase({
+      battle: { initiativeOrder: ctx.participants, battleLog: [], currentRound: ctx.scene.round, currentTurnIndex: ctx.scene.turnIndex },
+      data,
+      battleId: ctx.scene.id,
+      userId: ctx.userId,
+      isDM: ctx.isDM,
+      rng: ctx.rng,
+    });
 
-  const events = phase.allBattleActions.map(battleActionToEvent);
+    const summoned = await applyAbilitySummons(phase.summons, phase.finalInitiativeOrder, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng: ctx.rng ?? Math.random, deps });
 
-  if (!endTurn) return { participants: order, pending: ctx.pending, events };
+    const order = summoned.order;
 
-  const advanced = advanceTurn({ participants: order, pending: ctx.pending, scene: ctx.scene, rng: ctx.rng });
+    const actions = phase.allBattleActions.map((a, i, all) => (i === all.length - 1 && summoned.messages.length > 0 ? { ...a, resultText: [a.resultText, ...summoned.messages].join(" | ") } : a));
 
-  return {
-    participants: advanced.participants,
-    pending: advanced.pending,
-    scene: advanced.scene,
-    events: [...events, ...advanced.actions.map(battleActionToEvent)],
+    const events = actions.map(battleActionToEvent);
+
+    if (!endTurn) return { participants: order, pending: ctx.pending, events };
+
+    const advanced = advanceTurn({ participants: order, pending: ctx.pending, scene: ctx.scene, rng: ctx.rng });
+
+    return {
+      participants: advanced.participants,
+      pending: advanced.pending,
+      scene: advanced.scene,
+      events: [...events, ...advanced.actions.map(battleActionToEvent)],
+    };
   };
 }
+
+export const attackMutation = createAttackMutation();

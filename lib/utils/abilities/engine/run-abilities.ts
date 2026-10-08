@@ -79,6 +79,7 @@ export function runAbilities(participants: BattleParticipant[], event: AbilityEv
 
       ps = r.participants;
       messages.push(...r.messages);
+      summons.push(...r.summons);
     }
   }
 
@@ -90,10 +91,10 @@ export function resolveDowned(
   downed: Downed,
   ctx: AbilityRunContext,
   opts: { allowSurvive?: boolean } = {},
-): { participants: BattleParticipant[]; messages: string[]; survived: boolean } {
+): { participants: BattleParticipant[]; messages: string[]; survived: boolean; summons: SummonRequest[] } {
   const victim = findParticipant(participants, downed.victimId);
 
-  if (!victim || isActive(victim)) return { participants, messages: [], survived: true };
+  if (!victim || isActive(victim)) return { participants, messages: [], survived: true, summons: [] };
 
   const deep = { ...ctx, depth: 1 };
 
@@ -101,18 +102,21 @@ export function resolveDowned(
 
   const messages: string[] = [];
 
+  const summons: SummonRequest[] = [];
+
   if (opts.allowSurvive !== false) {
     const lethal = runAbilities(ps, { type: "lethalDamage", actorId: downed.actorId, targetId: downed.victimId }, deep);
 
     ps = lethal.participants;
     messages.push(...lethal.messages);
+    summons.push(...lethal.summons);
 
     const after = findParticipant(ps, downed.victimId);
 
-    if (after && isActive(after)) return { participants: ps, messages, survived: true };
+    if (after && isActive(after)) return { participants: ps, messages, survived: true, summons };
   }
 
   const kill = runAbilities(ps, { type: "kill", actorId: downed.actorId, targetId: downed.victimId }, deep);
 
-  return { participants: kill.participants, messages: [...messages, ...kill.messages], survived: false };
+  return { participants: kill.participants, messages: [...messages, ...kill.messages], survived: false, summons: [...summons, ...kill.summons] };
 }

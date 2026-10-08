@@ -9,7 +9,7 @@
 import type { Prisma } from "@prisma/client";
 
 import { abilityActionSchema, createAbilityActionMutation } from "../app/api/campaigns/[id]/battles/[battleId]/ability-action/ability-action-mutation";
-import { attackBodySchema, attackMutation } from "../app/api/campaigns/[id]/battles/[battleId]/attack/attack-mutation";
+import { attackBodySchema, createAttackMutation } from "../app/api/campaigns/[id]/battles/[battleId]/attack/attack-mutation";
 import { bonusActionSchema, createBonusActionMutation } from "../app/api/campaigns/[id]/battles/[battleId]/bonus-action/bonus-action-mutation";
 import { moraleCheckMutation } from "../app/api/campaigns/[id]/battles/[battleId]/morale-check/morale-check-mutation";
 import { nextTurnMutation } from "../app/api/campaigns/[id]/battles/[battleId]/next-turn/next-turn-mutation";
@@ -283,11 +283,11 @@ function printState(title: string) {
 
 const START = { access: "dm" as const, requireStatus: "prepared" as const, mutate: createStartMutation() };
 
-const ATTACK = { access: "member" as const, requireStatus: "active" as const, schema: attackBodySchema, mutate: attackMutation };
-
 const NEXT = { access: "currentController" as const, requireStatus: "active" as const, mutate: nextTurnMutation };
 
 const summonDeps = { loadPool: async (campaignId: string) => ({ units: await prisma.unit.findMany({ where: { campaignId } }), races: await prisma.race.findMany({ where: { campaignId } }) }) };
+
+const ATTACK = { access: "member" as const, requireStatus: "active" as const, schema: attackBodySchema, mutate: createAttackMutation(summonDeps) };
 
 const BONUS = { access: "member" as const, requireStatus: "active" as const, schema: bonusActionSchema, mutate: createBonusActionMutation(summonDeps) };
 
@@ -575,7 +575,7 @@ async function scenario() {
 
   const secondBattleUse = await call("bonus-action", BONUS, { participantId: by("Ліра").basicInfo.id, abilityKey: key });
 
-  check("DOT шамана: 2 тики, потім ефект знято", shamanFx >= 0 && log.filter((e) => /bleed урону від Кровопускання/.test(e.resultText) && /Орк-шаман/.test(e.resultText)).length === 2 && !effectNames(by("Орк-шаман #1")).includes("Кровопускання"), log.filter((e) => /Кровопускання/.test(e.resultText)).map((e) => `р${e.round}: ${e.resultText}`).join(" | "));
+  check("DOT шамана: 2 тики, потім ефект знято", shamanFx >= 0 && log.filter((e) => /bleed шкоди від Кровопускання/.test(e.resultText) && /Орк-шаман/.test(e.resultText)).length === 2 && !effectNames(by("Орк-шаман #1")).includes("Кровопускання"), log.filter((e) => /Кровопускання/.test(e.resultText)).map((e) => `р${e.round}: ${e.resultText}`).join(" | "));
   check("Друге дихання вдруге за бій не лікує (perBattle 1)", secondBattleUse.status !== 200 || hp(by("Ліра")) === lyraHp2, `status ${secondBattleUse.status} ${JSON.stringify(secondBattleUse.body).slice(0, 120)}, HP ${lyraHp2} → ${hp(by("Ліра"))}`);
 
   console.info("\n🏁 Добиваємо ворогів");
@@ -889,7 +889,7 @@ async function racialMechanics() {
 
   const demons = await prisma.race.create({ data: { campaignId, ...DEMON_RACE } as Prisma.RaceUncheckedCreateInput });
 
-  await prisma.unit.create({ data: { campaignId, raceId: demons.id, ...DEMON_UNIT } as Prisma.UnitUncheckedCreateInput });
+  await prisma.unit.create({ data: { campaignId, ...DEMON_UNIT, raceId: demons.id } as Prisma.UnitUncheckedCreateInput });
 
   const setup: Array<Record<string, unknown>> = [];
 
