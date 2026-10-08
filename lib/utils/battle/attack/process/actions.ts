@@ -18,6 +18,7 @@ export function buildBattleActionForCriticalFail(
   afterMessages: string[],
   battleId: string,
   currentRound: number,
+  critFlavorText?: string,
 ): BattleAction {
   const action: BattleAction = {
     id: `attack-${attacker.basicInfo.id}-${Date.now()}`,
@@ -50,10 +51,11 @@ export function buildBattleActionForCriticalFail(
         name: criticalEffectApplied.name,
         description: criticalEffectApplied.description,
         type: criticalEffectApplied.type,
+        flavor: critFlavorText,
       },
     },
     resultText: [
-      `${attacker.basicInfo.name} критично промахнувся! [d10: ${criticalEffectApplied.id}] ${criticalEffectApplied.name}: ${criticalEffectApplied.description}`,
+      `${attacker.basicInfo.name}: критична невдача — ${criticalEffectApplied.name}.${critFlavorText ? ` ${critFlavorText}` : ""}`,
       ...beforeMessages,
       ...afterMessages,
     ].filter(Boolean).join(" | "),
@@ -151,6 +153,7 @@ export interface BuildHitActionParams {
   oldHp: number;
   battleId: string;
   currentRound: number;
+  critFlavorText?: string;
 }
 
 export function buildBattleActionForHit(params: BuildHitActionParams): BattleAction {
@@ -173,6 +176,7 @@ export function buildBattleActionForHit(params: BuildHitActionParams): BattleAct
     oldHp,
     battleId,
     currentRound,
+    critFlavorText,
   } = params;
 
   return {
@@ -207,6 +211,7 @@ export function buildBattleActionForHit(params: BuildHitActionParams): BattleAct
             name: criticalEffectApplied.name,
             description: criticalEffectApplied.description,
             type: criticalEffectApplied.type,
+            flavor: critFlavorText,
           }
         : undefined,
       damageRolls: damageRolls.map((roll) => ({
@@ -220,7 +225,7 @@ export function buildBattleActionForHit(params: BuildHitActionParams): BattleAct
       damageSteps: { [target.basicInfo.id]: damageSteps },
     },
     resultText: [
-      `${attacker.basicInfo.name} завдав ${totalFinalDamage} урону ${target.basicInfo.name}${attackRoll.isCritical ? " (КРИТИЧНЕ ПОПАДАННЯ!)" : ""}${criticalEffectApplied ? ` [d10: ${criticalEffectApplied.id}] ${criticalEffectApplied.name}` : ""}${vampirismHeal > 0 ? ` | Вампіризм: ${attacker.basicInfo.name} відновив ${vampirismHeal} HP` : ""}`,
+      `${attacker.basicInfo.name} завдав ${totalFinalDamage} урону ${target.basicInfo.name}${criticalEffectApplied ? `. Критичне влучання — ${criticalEffectApplied.name}!${critFlavorText ? ` ${critFlavorText}` : ""}` : attackRoll.isCritical ? " (КРИТИЧНЕ ПОПАДАННЯ!)" : ""}${vampirismHeal > 0 ? ` | Вампіризм: ${attacker.basicInfo.name} відновив ${vampirismHeal} HP` : ""}`,
       ...beforeMessages,
       ...afterMessages,
     ].filter(Boolean).join(" | "),
@@ -285,6 +290,7 @@ export interface BuildRetaliationParams {
   messages: string[];
   battleId: string;
   currentRound: number;
+  critFlavorText?: string;
 }
 
 export function buildRetaliationAction(p: BuildRetaliationParams): BattleAction {
@@ -294,9 +300,17 @@ export function buildRetaliationAction(p: BuildRetaliationParams): BattleAction 
 
   const crit = attackRoll.isCriticalFail ? attackRoll.criticalEffect : hit?.hitDamage.criticalEffectApplied;
 
+  const flavorText = p.critFlavorText ? ` ${p.critFlavorText}` : "";
+
+  const critText = !crit
+    ? ""
+    : attackRoll.isCriticalFail
+      ? `. Критична невдача — ${crit.name}.${flavorText}`
+      : `. Критичне влучання — ${crit.name}!${flavorText}`;
+
   const summary = `Відсіч: ${retaliator.basicInfo.name} → ${target.basicInfo.name}: d20 ${d20}, ${
-    hit ? `${hit.hitDamage.totalFinalDamage} урону${attackRoll.isCritical ? " (КРИТИЧНЕ ПОПАДАННЯ!)" : ""}` : "промах"
-  }`;
+    hit ? `${hit.hitDamage.totalFinalDamage} урону${!crit && attackRoll.isCritical ? " (КРИТИЧНЕ ПОПАДАННЯ!)" : ""}` : "промах"
+  }${critText}`;
 
   return {
     id: `retaliation-${retaliator.basicInfo.id}-${Date.now()}`,
@@ -319,7 +333,7 @@ export function buildRetaliationAction(p: BuildRetaliationParams): BattleAction 
       isHit: !!hit,
       isCritical: !!hit && attackRoll.isCritical,
       isCriticalFail: attackRoll.isCriticalFail,
-      ...(crit && { criticalEffect: { id: crit.id, name: crit.name, description: crit.description, type: crit.type } }),
+      ...(crit && { criticalEffect: { id: crit.id, name: crit.name, description: crit.description, type: crit.type, flavor: p.critFlavorText } }),
       ...(hit && {
         damageRolls: hit.damageRolls.map((roll) => ({ dice: attack.damageDice, results: [roll], total: roll, damageType: attack.damageType })),
         totalDamage: hit.hitDamage.physicalDamage,

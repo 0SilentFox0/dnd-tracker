@@ -9,7 +9,7 @@ import { getDisabledAttackKinds } from "./disabled-attacks";
 import { calculateAttackRoll } from "./roll";
 
 import { AttackType } from "@/lib/constants/battle";
-import type { CriticalEffect } from "@/lib/constants/critical-effects";
+import { critFlavor, type CriticalEffect } from "@/lib/constants/critical-effects";
 import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { findParticipant, isActive, withSelf } from "@/lib/utils/abilities/engine/participants";
 import type { Rng } from "@/lib/utils/abilities/engine/types";
@@ -116,6 +116,16 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
     hit = { damageRolls, hitDamage };
   }
 
+  const retaliationCrit = roll.isCriticalFail ? roll.criticalEffect : hit?.hitDamage.criticalEffectApplied;
+
+  const critFlavorText = retaliationCrit
+    ? critFlavor(
+        retaliationCrit,
+        { attacker: getP(flow, defenderId).basicInfo.name, target: getP(flow, attackerId).basicInfo.name },
+        `${battleId}:${round}:${defenderId}:${attackerId}:r`,
+      )
+    : undefined;
+
   const battleAction = buildRetaliationAction({
     retaliator: getP(flow, defenderId),
     target: getP(flow, attackerId),
@@ -126,6 +136,7 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
     messages: flow.messages,
     battleId,
     currentRound: round,
+    critFlavorText,
   });
 
   appendHpChanges(battleAction, participants, flow.ps);

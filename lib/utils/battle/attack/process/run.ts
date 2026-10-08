@@ -14,6 +14,7 @@ import { handleCriticalFail } from "./critical-fail";
 import { resolveHit } from "./hit";
 import { handleMiss } from "./miss";
 
+import { critFlavor } from "@/lib/constants/critical-effects";
 import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { isActive, withSelf } from "@/lib/utils/abilities/engine/participants";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
@@ -98,7 +99,15 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   const isHit = !attackRoll.isCriticalFail && (attackRoll.isCritical || guaranteedHit || attackRoll.totalAttackValue >= targetAC);
 
-  const branch = { flow, attackerId, targetId, attack, d20Roll, attackRoll, targetAC, currentRound, battleId };
+  const critFlavorText = attackRoll.criticalEffect
+    ? critFlavor(
+        attackRoll.criticalEffect,
+        { attacker: getP(flow, attackerId).basicInfo.name, target: getP(flow, targetId).basicInfo.name },
+        `${battleId}:${currentRound}:${attackerId}:${targetId}`,
+      )
+    : undefined;
+
+  const branch = { critFlavorText, flow, attackerId, targetId, attack, d20Roll, attackRoll, targetAC, currentRound, battleId };
 
   if (attackRoll.isCriticalFail && attackRoll.criticalEffect) {
     const r = handleCriticalFail(branch);
@@ -167,6 +176,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     oldHp,
     battleId,
     currentRound,
+    critFlavorText,
   });
 
   withRollDetails(battleAction);

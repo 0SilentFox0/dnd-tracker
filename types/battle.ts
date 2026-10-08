@@ -347,6 +347,7 @@ export interface BattleAction {
       name: string;
       description: string;
       type: "success" | "fail";
+      flavor?: string;
     };
   };
   resultText: string; // текстовий опис для лога
