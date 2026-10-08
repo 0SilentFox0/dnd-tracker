@@ -1,4 +1,5 @@
 import { realSkillId } from "@/lib/utils/skills/progression/ids";
+import { normalizeTree } from "@/lib/utils/skills/progression/normalize";
 import { readTreeJson } from "@/lib/utils/skills/progression/tree-json";
 import { BRANCH_LEVELS, type BranchLevel, RACIAL_BRANCH_ID } from "@/lib/utils/skills/progression/types";
 
@@ -13,6 +14,7 @@ export interface RacialSkillView {
 export interface RaceRacialSkills {
   levels: RacialSkillView[];
   ultimate: RacialSkillView | null;
+  treeSkillCount: number | null;
 }
 
 const text = (v: unknown) => (typeof v === "string" ? v : "");
@@ -25,6 +27,12 @@ function toView(skill: unknown, level: RacialSkillView["level"]): RacialSkillVie
   const info = (s.basicInfo && typeof s.basicInfo === "object" ? s.basicInfo : s) as Record<string, unknown>;
 
   return { id: text(s.id), name: text(info.name), description: text(info.description), appearanceDescription: text(s.appearanceDescription), level };
+}
+
+export function countTreeSkills(rawTree: unknown): number {
+  const { nodes } = normalizeTree({ id: "", skills: rawTree });
+
+  return new Set([...nodes.values()].flatMap((n) => (n.skillId ? [n.skillId] : []))).size;
 }
 
 export function raceRacialSkills(rawTree: unknown, skills: readonly unknown[]): RaceRacialSkills {
@@ -43,5 +51,6 @@ export function raceRacialSkills(rawTree: unknown, skills: readonly unknown[]): 
   return {
     levels: BRANCH_LEVELS.flatMap((level) => find(racial?.levelSkillIds?.[level], level) ?? []),
     ultimate: find(tree.ultimateSkill?.id, "ultimate"),
+    treeSkillCount: rawTree ? countTreeSkills(rawTree) : null,
   };
 }

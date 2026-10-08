@@ -15,7 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useMainSkills, useSkills } from "@/lib/hooks/skills";
+import { useMainSkills, useRacialSkills, useSkills } from "@/lib/hooks/skills";
 import {
   countRaceSkills,
   modifiedAbilityScores,
@@ -35,7 +35,9 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
 
   const { data: mainSkills = [] } = useMainSkills(campaignId);
 
-  const availableSkillsCount = useMemo(() => countRaceSkills(race, allSkills), [race, allSkills]);
+  const { treeSkillCount } = useRacialSkills(campaignId, race.name);
+
+  const availableSkillsCount = useMemo(() => countRaceSkills(race, allSkills, treeSkillCount), [race, allSkills, treeSkillCount]);
 
   const disabledSkillsCount = Array.isArray(race.disabledSkills) ? race.disabledSkills.length : 0;
 
