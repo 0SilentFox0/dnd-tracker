@@ -284,7 +284,8 @@ IrresistibleMagic · Гноми — Runelore (`H5{Basic,Advanced,Expert,Ultimate
 
 - `data/skills-library.ts`: гілки (`key`, `name`, `color`, `iconKey`, `spellSchool?`) і скіли (`key`, `branch`,
   `slot: "basic" | "advanced" | "expert" | "outer" | "middle" | "inner" | "spare"`, `name`, `abilities: Ability[]`,
-  spell-поля, `iconKey`). Опис скіла генерується з абілок (registry-лейбли), щоб текст збігався з механікою.
+  spell-поля, `iconKey`). Опис скіла — два тексти: «Що робить» (генерується з абілок через registry-лейбли, тож збігається з механікою) і «Як це
+  виглядає» (`appearanceDescription`, атмосферний фентезійний абзац 2–4 речення).
 - `data/__tests__/skills-library.test.ts`: Zod-схема абілок для кожного скіла, унікальні ключі, 3 рівні + слоти
   3/2/1 на гілку, кожен `iconKey` є в `skill-icons.ts`.
 - `scripts/seed-skills-library.ts <campaignId>` + скрипт у `package.json`: upsert `MainSkill`/`Skill` за назвою в
