@@ -1,3 +1,4 @@
+import { immuneTo } from "./state";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { ParticipantSourceType } from "@/lib/constants/battle";
@@ -23,6 +24,11 @@ export function applyBerserk(input: EffectApplyInput<Of<"berserk">>): EffectAppl
 
     if (t.basicInfo.sourceType === ParticipantSourceType.CHARACTER) {
       messages.push(`⛔ ${ability.name}: ${t.basicInfo.name} — не діє на героїв`);
+      continue;
+    }
+
+    if (immuneTo(ps, id, "berserk")) {
+      messages.push(`⛔ ${ability.name}: ${t.basicInfo.name} — імунітет`);
       continue;
     }
 
@@ -66,6 +72,11 @@ export function applyCharm(input: EffectApplyInput<Of<"charm">>): EffectApplyRes
 
     if (t.basicInfo.sourceType === ParticipantSourceType.CHARACTER) {
       messages.push(`⛔ ${ability.name}: ${t.basicInfo.name} — не діє на героїв`);
+      continue;
+    }
+
+    if (immuneTo(ps, id, "charm")) {
+      messages.push(`⛔ ${ability.name}: ${t.basicInfo.name} — імунітет`);
       continue;
     }
 

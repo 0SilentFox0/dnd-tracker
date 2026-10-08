@@ -54,7 +54,7 @@ export type ConditionSubject = (typeof CONDITION_SUBJECTS)[number];
 
 export type StatKey = (typeof STAT_KEYS)[number];
 
-export type ConditionImmunityKey = (typeof CONDITION_KEYS)[number] | "fear";
+export type ConditionImmunityKey = (typeof CONDITION_KEYS)[number] | "fear" | "berserk" | "charm";
 
 export function isStaticEffect(e: Effect): e is StaticEffect {
   return e.kind === "modifyStat" || e.kind === "damageBonus" || e.kind === "flag";

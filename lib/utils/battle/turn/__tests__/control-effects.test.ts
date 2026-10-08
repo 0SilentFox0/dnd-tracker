@@ -155,3 +155,33 @@ describe("charm", () => {
     expect(out.participants[1].basicInfo.side).toBe(ParticipantSide.ENEMY);
   });
 });
+
+describe("імунітет до станів", () => {
+  const immune = (conditions: "all" | Array<"berserk" | "charm">) => {
+    const p = unitOf("ogre", ParticipantSide.ENEMY);
+
+    p.battleData.resolvedAbilities = [resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "conditionImmunity", conditions }] })];
+
+    return p;
+  };
+
+  it.each([
+    ["berserk", { kind: "berserk", damageBonusPercent: 50, duration: { rounds: 1 } }],
+    ["charm", { kind: "charm", duration: { rounds: 1 } }],
+  ] as const)("%s не діє на імунну ціль (усі або свій ключ)", (key, effect) => {
+    for (const conditions of ["all", [key]] as const) {
+      const target = immune(conditions as never);
+
+      const t = cast(effect as Effect, target).participants[1];
+
+      expect(t.battleData.activeEffects).toHaveLength(0);
+      expect(t.basicInfo.side).toBe(ParticipantSide.ENEMY);
+    }
+  });
+
+  it("імунітет до іншого ключа не заважає", () => {
+    const t = cast({ kind: "charm", duration: { rounds: 1 } }, immune(["berserk"])).participants[1];
+
+    expect(t.basicInfo.side).toBe(ParticipantSide.ALLY);
+  });
+});

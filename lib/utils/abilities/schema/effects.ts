@@ -85,7 +85,7 @@ const FlagSchema = z.discriminatedUnion("flag", [
   z.object({
     ...flagBase,
     flag: z.literal("conditionImmunity"),
-    conditions: z.union([z.literal("all"), z.array(z.enum([...CONDITION_KEYS, "fear"])).min(1)]),
+    conditions: z.union([z.literal("all"), z.array(z.enum([...CONDITION_KEYS, "fear", "berserk", "charm"])).min(1)]),
   }),
 ]);
 
