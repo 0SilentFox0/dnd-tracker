@@ -121,9 +121,9 @@ export function describeFlag(e: Extract<Effect, { kind: "flag" }>): string {
     case "guaranteedHit":
       return "гарантоване влучання";
     case "resistance":
-      return `${e.percent >= 100 ? `імунітет: ${e.damageType}` : `опір ${e.damageType} ${e.percent}%`}${e.attackKind ? ` (${e.attackKind === "ranged" ? "дальні атаки" : "ближні атаки"})` : ""}`;
+      return `${e.percent >= 100 ? `імунітет: ${e.damageType}` : e.percent < 0 ? `вразливість ${e.damageType} ${-e.percent}%` : `опір ${e.damageType} ${e.percent}%`}${e.attackKind ? ` (${e.attackKind === "ranged" ? "дальні атаки" : "ближні атаки"})` : ""}`;
     case "spellImmunity":
-      return `імунітет до заклинань (${e.spellIds.length})`;
+      return e.spellIds ? `імунітет до заклинань (${e.spellIds.length})` : "імунітет до всіх заклинань";
     case "spellTargeting": {
       const scope = e.school ? `закляття школи ${e.school}` : e.spellIds ? `закляття (${e.spellIds.length})` : "закляття";
 
@@ -198,10 +198,10 @@ export const FLAG_FIELDS: Record<FlagKey, readonly FieldMeta[]> = {
   guaranteedHit: [],
   resistance: [
     { name: "damageType", label: "Тип шкоди (all, physical, spell, fire…)", input: "text" },
-    { name: "percent", label: "%, 100 = імунітет", input: "number" },
+    { name: "percent", label: "%, 100 = імунітет, від'ємне = вразливість", input: "number" },
     { name: "attackKind", label: "Лише проти атак", input: "select", options: [{ value: "melee", label: "ближніх" }, { value: "ranged", label: "дальніх" }], optional: true },
   ],
-  spellImmunity: [{ name: "spellIds", label: "Заклинання", input: "spells" }],
+  spellImmunity: [{ name: "spellIds", label: "Заклинання (порожньо = усі)", input: "spells", optional: true }],
   spellTargeting: [
     { name: "mode", label: "Режим", input: "select", options: [{ value: "area", label: "по області" }, { value: "all", label: "на всіх" }] },
     { name: "spellIds", label: "Заклинання", input: "spells", optional: true },

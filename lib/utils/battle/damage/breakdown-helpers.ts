@@ -57,9 +57,9 @@ export function getDefenderResistanceBreakdown(
 
   const resistPercent = getCombinedResistancePercent(target, damageType, { participants, attackKind });
 
-  if (resistPercent > 0) {
+  if (resistPercent !== 0) {
     targetBreakdown.push(
-      `Сумарна шкода (${targetName}): ${incomingDamage} − ${resistPercent}% = ${finalDamage}`,
+      `Сумарна шкода (${targetName}): ${incomingDamage} ${resistPercent > 0 ? "−" : "+"} ${Math.abs(resistPercent)}% = ${finalDamage}`,
     );
   } else {
     targetBreakdown.push(`Сумарна шкода (${targetName}): ${finalDamage}`);
