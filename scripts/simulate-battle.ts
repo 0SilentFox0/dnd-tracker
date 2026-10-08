@@ -35,10 +35,11 @@ import { artifactRows, DEMON_RACE, DEMON_UNIT, DRAGON_SET, FAIR_CAMPAIGN_NAME, F
 
 import { BATTLE_LOG_RECENT_EVENTS, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { CampaignRole } from "@/lib/constants/campaigns";
-import { statWithModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
+import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { countMarks } from "@/lib/utils/abilities/engine/marks";
-import { immuneTo } from "@/lib/utils/abilities/registry/effects/state";
+import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
+import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import { createBattleParticipantFromCharacter } from "@/lib/utils/battle/participant/from-character";
 import { PUSHER_DELTA_LIMIT_BYTES } from "@/lib/utils/battle/pipeline/limits";
 import { applyResistance, hasImmunity } from "@/lib/utils/battle/resistance";
@@ -333,9 +334,13 @@ async function racePassivesCheck() {
 
     if (race.key === "demons") check("Демони: опір вогню 50 %", applyResistance(p, 20, "fire").finalDamage === 10);
 
-    if (race.key === "necromancers") check("Некроманти: імунітет до отрути й страху", hasImmunity(p, "poison") && immuneTo([p], p.basicInfo.id, "fear"));
+    if (race.key === "necromancers") check("Некроманти: мораль завжди 0, імунітет до отрути", hasImmunity(p, "poison") && effectiveMorale({ ...p, combatStats: { ...p.combatStats, morale: -2 } }, [p]).value === 0);
 
-    if (race.key === "mages") check("Маги: +1 слот 1 рівня", (p.spellcasting.spellSlots["1"]?.max ?? 0) - (base.spellcasting.spellSlots["1"]?.max ?? 0) === 1);
+    if (race.key === "mages") check("Маги: опір шкоді заклять 15 %", applyResistance(p, 20, "magic", { fromSpell: true }).finalDamage === 17);
+
+    if (race.key === "elves") check("Ельфи: +1 до влучання всіх атак", collectModifiers([p], p.basicInfo.id, { stat: "attackBonus" }).flat === 1);
+
+    if (race.key === "humans") check("Люди: +1 мораль союзникам на 2 раунди на старті", effectiveMorale(runAbilities([p], { type: "battleStart" }, { round: 1, rng: () => 0.5 }).participants[0], [p]).value === 1);
   }
 }
 

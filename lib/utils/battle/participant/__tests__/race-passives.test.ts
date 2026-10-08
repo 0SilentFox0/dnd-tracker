@@ -7,7 +7,6 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
-import { immuneTo } from "@/lib/utils/abilities/registry/effects/state";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import { applyResistance, hasImmunity } from "@/lib/utils/battle/resistance";
 import { racePassiveData } from "@/scripts/seed-library-lib";
@@ -93,13 +92,16 @@ describe("race innate passives reach the battle participant", () => {
     expect(statWithModifiers([dwarf], dwarf.basicInfo.id, "armor", dwarf.combatStats.armorClass)).toBe(statWithModifiers([base], base.basicInfo.id, "armor", base.combatStats.armorClass) + 1);
   });
 
-  it("Ельфи: +1 to ranged attack bonus only", async () => {
+  it("Ельфи: +1 to the attack roll for every attack kind", async () => {
     const elf = await build("elves");
 
     const id = elf.basicInfo.id;
 
-    expect(collectModifiers([elf], id, { stat: "attackBonus", attackKind: "ranged" }).flat).toBe(1);
-    expect(collectModifiers([elf], id, { stat: "attackBonus", attackKind: "melee" }).flat).toBe(0);
+    for (const attackKind of ["ranged", "melee"] as const) {
+      expect(collectModifiers([elf], id, { stat: "attackBonus", attackKind }).flat, attackKind).toBe(1);
+    }
+
+    expect(collectModifiers([elf], id, { stat: "attackBonus" }).flat).toBe(1);
   });
 
   it("Демони: fire resistance 50 % in a damage calculation", async () => {
@@ -109,38 +111,43 @@ describe("race innate passives reach the battle participant", () => {
     expect(applyResistance(demon, 20, "cold").finalDamage).toBe(20);
   });
 
-  it("Некроманти: immune to poison and fear", async () => {
-    const necro = await build("necromancers");
+  it("Некроманти: morale always 0, immune to poison", async () => {
+    const necro = await build("necromancers", -2);
 
+    expect(effectiveMorale(necro, [necro])).toEqual({ value: 0, ignored: true });
     expect(hasImmunity(necro, "poison")).toBe(true);
     expect(applyResistance(necro, 20, "poison").finalDamage).toBe(0);
-    expect(immuneTo([necro], necro.basicInfo.id, "fear")).toBe(true);
-    expect(immuneTo([necro], necro.basicInfo.id, "charm")).toBe(false);
 
     const human = await build("humans");
 
     expect(hasImmunity(human, "poison")).toBe(false);
   });
 
-  it("Люди: morale never below 0", async () => {
+  it("Люди: +1 morale for 2 rounds to the hero and allies at battle start; morale may stay below 0", async () => {
     const human = await build("humans", -2);
 
-    const dwarf = await build("dwarves", -2);
+    const ally = { ...(await build(null)), basicInfo: { ...(await build(null)).basicInfo, id: "ally" } };
 
-    expect(effectiveMorale(human, [human]).value).toBe(0);
-    expect(effectiveMorale(dwarf, [dwarf]).value).toBe(-2);
+    const foe = { ...(await build(null)), basicInfo: { ...(await build(null)).basicInfo, id: "foe", side: ParticipantSide.ENEMY } };
+
+    const { participants } = runAbilities([human, ally, foe], { type: "battleStart" }, { round: 1, rng: seq(0.5) });
+
+    const [h, a, f] = participants;
+
+    expect(effectiveMorale(h, participants).value).toBe(-1);
+    expect(effectiveMorale(a, participants).value).toBe(1);
+    expect(effectiveMorale(f, participants).value).toBe(0);
+    expect(h.battleData.activeEffects[0].duration).toBe(2);
   });
 
-  it("Маги: +1 slot of level 1", async () => {
+  it("Маги: 15 % resistance to spell damage, no extra slot", async () => {
     const base = await build(null);
 
     const mage = await build("mages");
 
-    const slots = (p: BattleParticipant) => p.spellcasting.spellSlots["1"] ?? { max: 0, current: 0 };
-
-    expect(slots(mage).max - slots(base).max).toBe(1);
-    expect(slots(mage).current - slots(base).current).toBe(1);
-    expect(mage.spellcasting.spellSlots["2"]).toEqual(base.spellcasting.spellSlots["2"]);
+    expect(applyResistance(mage, 20, "magic", { fromSpell: true }).finalDamage).toBe(17);
+    expect(applyResistance(mage, 20, "fire").finalDamage).toBe(20);
+    expect(mage.spellcasting.spellSlots).toEqual(base.spellcasting.spellSlots);
   });
 
   it("Темні ельфи: advantage on the first attack of the battle only", async () => {
