@@ -12,7 +12,7 @@ const rotAura = resolved({ id: "unit-rot-aura", trigger: { event: "passive" }, e
 
 const warlord = resolved({ id: "unit-allies-aura-damageBonus", trigger: { event: "passive" }, effects: [{ kind: "damageBonus", filter: { kind: "all" }, percent: 15, target: "allAllies" }] }, unit);
 
-const copies = (ability: typeof spellAura, n: number, side = ParticipantSide.ENEMY) =>
+const copies = (ability: typeof spellAura, n: number, side: ParticipantSide = ParticipantSide.ENEMY) =>
   Array.from({ length: n }, (_, i) => makeParticipant({ id: `u${i}`, side, abilities: [ability] }));
 
 describe("аури не стакаються з копій одного юніта", () => {
