@@ -72,3 +72,37 @@ leader | L10 | T7 | Диявол×3 (hp/дмг 0.89/1.56) | 4.4 | 12/12 | 0 | 79
 Касти: Ланцюгова блискавка 181, Кам'яні шипи 158, Крижаний болт 63, Вогняна куля 36
 
 Reading: leader parties went from 2/12 to 11/12 wins at L6 (8.6 morale extra turns per fight, rounds 9.9 to 5.7) and L10 now ends in 4.4 rounds. Caster parties end in 2.9-3.5 rounds at L6/L10 (4.8 at L3) and still do about 2.1x martial damage per hero-turn at L6/L10 (46 vs 21). The remaining gap is structural: every damaging spell adds hero level + casting modifier per target on top of its dice (about +10 at L6), so cheap AoE spells (Кам'яні шипи 1 die) stay strong; getting to 1.5x would need either that flat part reduced (engine rule) or AoE spells limited to 1-2 targets. Mixed parties run 6.3-8.2 rounds and lose some fights at L3/L6 now that casters respect slots (7/12 and 8/12 wins), so the realistic party is currently on the hard side at low level.
+
+## Round 4: no flat part in spell dice
+Engine: spell dice are `(dice + floor(casterLevel / 3)) d{sides}` with no `+ level + casting modifier` (damage, heal, DoT/HoT, units too). `SpellDice.flat` is gone; the cast power, spell-book label («6к10»), the balance DPR estimate and the spec (§1) follow. The casting modifier remains only in the save DC.
+
+Spell number changes (data/library/spells.ts, dice are base `N`, final value is N + floor(level / 3)):
+- Ланцюгова блискавка 5 to 2 (falloff stays 100/50/25/13)
+- Кам'яні шипи 1 to 2 dice, 3 to 2 targets
+- Потойбічна стріла 2 to 3
+- Метеоритний дощ 3 to 2
+- Вогняна куля and Коло зими: 3 dice kept, targets 4 to 3
+- Слово світла 4 to 3
+- Крижаний болт, Блискавка: 3 (unchanged from the original)
+- Heals: Слово лікування 2 to 3, Хвиля зцілення 2 to 3, Вічне світло 3 to 4
+- Descriptions no longer mention hero level or the caster modifier.
+(Round 3 trims to Ланцюгова блискавка falloff, Крижаний болт/Блискавка/Коло зими/Вогняна куля dice were reverted to the original dice; only the targets and the entries above differ from the pre-round-3 library.)
+
+Heal check at L6 (5 dice for a 3-base heal): d6 about 17 HP, d8 about 22 HP, i.e. 25-33 % of a 69-HP caster/ranger but 16-21 % of a 108-HP martial. Regeneration (hot 10 % max HP x3) is unchanged.
+
+Results (12 fights each):
+mixed | L3 | T1 | Дияволя×6 (hp/дмг 1.93/1.90) | 7.9 | 6/12 | 1.5 | 37.6% | 0 | casts 3.3 | extra 0.2 | leader 10.6/хід martial 10.6/хід caster 17.6/хід
+mixed | L6 | T4 | Суккуб×5 (hp/дмг 0.50/1.00) | 6.7 | 6/12 | 1.5 | 33.7% | 0 | casts 2.4 | extra 0.3 | leader 19.4/хід martial 17.6/хід caster 42.2/хід
+mixed | L10 | T7 | Диявол×5 (hp/дмг 0.52/1.15) | 7.1 | 12/12 | 0 | 82.3% | 0 | casts 6.5 | extra 1.8 | leader 24.8/хід martial 18.5/хід caster 36.0/хід
+martial | L3 | T1 | Дияволя×6 (hp/дмг 2.01/2.21) | 9 | 9/12 | 0.8 | 61.7% | 0 | casts 0 | extra 0 | martial 10.9/хід
+martial | L6 | T4 | Суккуб×4 (hp/дмг 0.67/1.00) | 5.3 | 12/12 | 0 | 81.7% | 0 | casts 0 | extra 0 | martial 21.5/хід
+martial | L10 | T7 | Диявол×3 (hp/дмг 0.91/2.64) | 6.2 | 12/12 | 0 | 84.6% | 0 | casts 0 | extra 0 | martial 24.7/хід
+caster | L3 | T1 | Дияволя×6 (hp/дмг 1.79/1.75) | 7.9 | 7/12 | 1.3 | 45.3% | 0 | casts 10.7 | extra 0 | caster 16.1/хід
+caster | L6 | T4 | Суккуб×4 (hp/дмг 0.58/1.00) | 3.8 | 12/12 | 0 | 85.8% | 0 | casts 7.9 | extra 0 | caster 36.3/хід
+caster | L10 | T7 | Диявол×4 (hp/дмг 0.59/1.17) | 4.9 | 12/12 | 0 | 76.9% | 0 | casts 13 | extra 0 | caster 32.3/хід
+leader | L3 | T1 | Дияволя×6 (hp/дмг 1.97/1.75) | 9.2 | 4/12 | 2 | 26.1% | 0 | casts 0 | extra 4.5 | leader 9.7/хід
+leader | L6 | T4 | Суккуб×3 (hp/дмг 0.85/1.00) | 5.7 | 11/12 | 0.3 | 75.3% | 0 | casts 0 | extra 8.6 | leader 17.9/хід
+leader | L10 | T7 | Диявол×3 (hp/дмг 0.89/1.56) | 4.4 | 12/12 | 0 | 79.2% | 0 | casts 0 | extra 12.7 | leader 22.3/хід
+Касти: Ланцюгова блискавка 222, Кам'яні шипи 159, Коло зими 60, Потойбічна стріла 53, Крижаний болт 32
+
+Reading: caster damage per hero-turn is now 1.5x martial at L3 (16 vs 11), 1.7x at L6 (36 vs 21.5) and 1.3x at L10 (32 vs 25); caster party rounds are 3.8 (L6) and 4.9 (L10), inside 3-5. Mixed parties win 12/12 at L10 but only 6/12 at L6 (and 6/12 at L3), missing the 10/12 target. The cause is not spell dice: at L6 the picker builds 5 enemies at 0.5x HP and 1.0x damage for a party whose caster and ranger have about 69 HP, so squishy heroes die (1.5 deaths per fight) while the all-martial party (324 HP total) wins 12/12. Raising caster damage further would break the 1.3-1.5x target, so this needs either picker/estimator work (weight party HP spread) or autoplay with healing/control, not more dice tuning. simulate-battle numeric checks were updated for the no-flat formula (72/72 pass).
