@@ -2,6 +2,7 @@ import { AttackType } from "@/lib/constants/battle";
 import { restoreCharm } from "@/lib/utils/abilities/engine/charm";
 import { isActive } from "@/lib/utils/abilities/engine/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
+import { expireTurnEndEffects } from "@/lib/utils/battle/attack/consume-effects";
 import { processAttack } from "@/lib/utils/battle/attack";
 import { getDisabledAttackKinds } from "@/lib/utils/battle/attack/disabled-attacks";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
@@ -49,7 +50,13 @@ function finishTurn(participants: BattleParticipant[], actions: BattleAction[], 
 
   const ended = runAbilities(participants, { type: "turnEnd", actorId: id }, { round: params.round, rng: params.rng });
 
-  const order = ended.participants.map((p) => (p.basicInfo.id === id && p.battleData.charmReturn ? restoreCharm(p) : p));
+  const order = ended.participants.map((p) => {
+    if (p.basicInfo.id !== id) return p;
+
+    const expired = expireTurnEndEffects(p);
+
+    return expired.battleData.charmReturn ? restoreCharm(expired) : expired;
+  });
 
   const turnEnd = ended.messages.length > 0 ? [{ ...note(order.find((p) => p.basicInfo.id === id) as BattleParticipant, { ...params, actionIndex: params.actionIndex + actions.length }, `Кінець ходу: ${ended.messages.join("; ")}`) }] : [];
 
