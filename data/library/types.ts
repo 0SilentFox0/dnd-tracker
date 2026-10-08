@@ -105,6 +105,7 @@ export interface LibrarySource {
   races: LibraryRace[];
   personal: LibraryPersonal[];
   artifactSets: LibraryArtifactSet[];
+  units: LibraryUnit[];
 }
 
 export interface Library extends LibrarySource {
@@ -112,4 +113,5 @@ export interface Library extends LibrarySource {
   skills: LibrarySkill[];
   spellByKey: Map<string, LibrarySpell>;
   raceByKey: Map<string, LibraryRace>;
+  unitByKey: Map<string, LibraryUnit>;
 }

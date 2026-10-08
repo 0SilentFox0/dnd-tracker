@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import { buildLibrary } from "../../data/library/build";
-import { artifactRows, assertSeedTarget, findByName, mapRaceModifiers, parseArgs, racePassiveData, remapRefs, treeInput } from "../seed-library-lib";
+import type { LibraryUnit } from "../../data/library/types";
+import { falloff, raiseOnKill } from "../../data/library/unit-abilities";
+import { artifactRows, assertSeedTarget, findByName, mapRaceModifiers, parseArgs, racePassiveData, remapRefs, remapSummonUnits, treeInput, unitRow } from "../seed-library-lib";
 
 import { AbilitySchema } from "@/lib/utils/abilities/schema";
 
@@ -119,5 +121,60 @@ describe("seed-library-lib", () => {
     expect(rows.artifacts[0]).toMatchObject({ name: "Шолом", slot: "helmet", icon: "url/helm-of-the-dwarven-kings" });
     expect(artifactRows({ ...(set as object), artifacts: [{ ...(set as { artifacts: object[] }).artifacts[0], slot: "cape" }] } as never, maps, () => undefined).artifacts[0].slot).toBe("cloak");
     expect(rows.artifacts[0].abilities[0].effects[0]).toMatchObject({ spellIds: ["sp1", "sp2"] });
+  });
+
+  describe("unitRow", () => {
+    const maps = { groups: new Map<string, string>(), spells: new Map([["fireball", "sp1"], ["slow", "sp2"]]) };
+
+    const races = new Map([["humans", "r1"]]);
+
+    const base: LibraryUnit = {
+      key: "humans-marksman",
+      name: "Стрілець",
+      raceKey: "humans",
+      tier: 2,
+      role: "alt",
+      hp: 80,
+      ac: 12,
+      attackBonus: 5,
+      initiative: 8,
+      attacks: [{ name: "Залп", type: "ranged", dice: "1d8+2", damageType: "piercing", targets: 3 }, { name: "Ніж", type: "melee", dice: "1d4", damageType: "piercing" }],
+      abilities: [falloff("Залп")],
+      spellKeys: ["fireball", "slow"],
+    };
+
+    it("maps stats, attacks, spells and race", () => {
+      const row = unitRow(base, maps, races);
+
+      expect(row).toMatchObject({ name: "Стрілець", raceId: "r1", level: 2, armorClass: 12, initiative: 8, speed: 30, maxHp: 80, proficiencyBonus: 2, morale: 1, maxTargets: 3 });
+      expect(row.dexterity).toBe(16);
+      expect(row.strength).toBe(10);
+      expect(row.constitution).toBe(14);
+      expect(row.knownSpells).toEqual(["sp1", "sp2"]);
+      expect(row.attacks).toEqual([
+        { name: "Залп", type: "ranged", attackBonus: 5, damageDice: "1d8+2", damageType: "piercing", maxTargets: 3 },
+        { name: "Ніж", type: "melee", attackBonus: 5, damageDice: "1d4", damageType: "piercing", maxTargets: undefined },
+      ]);
+      expect(row).not.toHaveProperty("avatar");
+    });
+
+    it("defaults for a plain neutral unit and adds flavor for flying", () => {
+      const row = unitRow({ ...base, raceKey: null, spellKeys: undefined, attacks: [base.attacks[1]], abilities: [], flying: true }, maps, races);
+
+      expect(row).toMatchObject({ raceId: null, knownSpells: [], maxTargets: 1 });
+      expect(row.abilities).toEqual([expect.objectContaining({ trigger: { event: "passive" }, effects: [{ kind: "note", text: "Літає" }] })]);
+    });
+
+    it("fails on an unknown race", () => {
+      expect(() => unitRow({ ...base, raceKey: "elves" }, maps, races)).toThrow(/elves/);
+    });
+  });
+
+  it("remapSummonUnits swaps library unit keys for database ids in abilities and spell effects", () => {
+    const ids = new Map([["necro-skeleton", "u1"]]);
+
+    expect(remapSummonUnits([raiseOnKill("necro-skeleton")], ids)[0].effects).toEqual([{ kind: "summon", unitId: "u1", count: 1 }]);
+    expect(remapSummonUnits([{ kind: "summon", group: "Демони", tier: 6 }], ids)).toEqual([{ kind: "summon", group: "Демони", tier: 6 }]);
+    expect(() => remapSummonUnits([{ kind: "summon", unitId: "zz" }], ids)).toThrow(/zz/);
   });
 });

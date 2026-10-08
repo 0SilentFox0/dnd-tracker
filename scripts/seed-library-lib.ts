@@ -1,5 +1,9 @@
+import { Prisma } from "@prisma/client";
+
 import { racePassiveAbilities, racePassiveStatModifiers } from "../data/library/build";
-import type { LibraryArtifactSet, LibraryBranch, LibraryRace } from "../data/library/types";
+import type { LibraryArtifactSet, LibraryBranch, LibraryRace, LibraryUnit } from "../data/library/types";
+import { flavor } from "../data/library/unit-abilities";
+import { abilityScores, proficiencyForTier } from "../data/library/unit-stats";
 import { ARTIFACT_GRID_9 } from "../lib/constants/artifacts";
 import type { Ability } from "../lib/utils/abilities/schema";
 import { type BuildTreeInput } from "../lib/utils/skills/progression/tree-json";
@@ -88,6 +92,42 @@ export function remapRefs<T>(value: T, maps: Pick<IdMaps, "groups" | "spells">):
   }
 
   return out as T;
+}
+
+export function remapSummonUnits<T>(value: T, unitIds: ReadonlyMap<string, string>): T {
+  if (Array.isArray(value)) return value.map((v) => remapSummonUnits(v, unitIds)) as T;
+
+  if (typeof value !== "object" || value === null) return value;
+
+  const out: Record<string, unknown> = {};
+
+  for (const [k, v] of Object.entries(value)) {
+    out[k] = k === "unitId" && typeof v === "string" && (value as { kind?: unknown }).kind === "summon" ? lookup(unitIds, v, "юніта") : remapSummonUnits(v, unitIds);
+  }
+
+  return out as T;
+}
+
+export const unitAbilities = (unit: LibraryUnit) => [...unit.abilities, ...(unit.flying ? [flavor("Літає")] : [])];
+
+export function unitRow(unit: LibraryUnit, maps: Pick<IdMaps, "groups" | "spells">, races: ReadonlyMap<string, string>): Omit<Prisma.UnitUncheckedCreateInput, "campaignId"> {
+  return {
+    name: unit.name,
+    raceId: unit.raceKey === null ? null : lookup(races, unit.raceKey, "расу"),
+    level: unit.tier,
+    ...abilityScores(unit),
+    armorClass: unit.ac,
+    initiative: unit.initiative,
+    speed: 30,
+    maxHp: unit.hp,
+    proficiencyBonus: proficiencyForTier(unit.tier),
+    attacks: unit.attacks.map((a) => ({ name: a.name, type: a.type, attackBonus: unit.attackBonus, damageDice: a.dice, damageType: a.damageType, maxTargets: a.targets })),
+    knownSpells: (unit.spellKeys ?? []).map((key) => lookup(maps.spells, key, "заклинання")),
+    abilities: remapRefs(unitAbilities(unit), maps) as unknown as Prisma.InputJsonValue,
+    morale: 1,
+    maxTargets: Math.max(1, ...unit.attacks.map((a) => a.targets ?? 1)),
+    levelScaling: unit.levelScaling ? { ...unit.levelScaling } : Prisma.DbNull,
+  };
 }
 
 export function mapRaceModifiers(modifiers: { raceKey: string; percent: number }[], races: ReadonlyMap<string, string>) {

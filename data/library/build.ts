@@ -4,6 +4,7 @@ import { PERSONAL } from "./personal";
 import { RACES } from "./races";
 import { SPELLS } from "./spells";
 import type { AbilityScoreKey, Library, LibraryEntry, LibraryRace, LibrarySkill, LibrarySource } from "./types";
+import { UNITS } from "./units";
 
 import { ARTIFACT_ICON_FILES } from "@/data/artifact-icons-map";
 import { BRANCH_ICONS, SKILL_ICONS, SPELL_ICONS } from "@/data/skill-icons";
@@ -15,7 +16,7 @@ export const LIBRARY_COMPLETE = true;
 
 export const MIN_APPEARANCE_LENGTH = 80;
 
-export const LIBRARY_SOURCE: LibrarySource = { spells: SPELLS, branches: BRANCHES, races: RACES, personal: PERSONAL, artifactSets: LIBRARY_ARTIFACT_SETS };
+export const LIBRARY_SOURCE: LibrarySource = { spells: SPELLS, branches: BRANCHES, races: RACES, personal: PERSONAL, artifactSets: LIBRARY_ARTIFACT_SETS, units: UNITS };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -36,6 +37,24 @@ function* refs(value: unknown): Generator<{ kind: "spellIds" | "school"; value: 
     else yield* refs(v);
   }
 }
+
+export function* summonUnitKeys(value: unknown): Generator<string> {
+  if (Array.isArray(value)) {
+    for (const v of value) yield* summonUnitKeys(v);
+
+    return;
+  }
+
+  if (!isRecord(value)) return;
+
+  if (value.kind === "summon" && typeof value.unitId === "string") yield value.unitId;
+
+  for (const v of Object.values(value)) yield* summonUnitKeys(v);
+}
+
+const UNITS_PER_RACE = 21;
+
+const UNIT_ROLES = ["base", "upgrade", "alt"] as const;
 
 export function branchSkills(branch: LibrarySource["branches"][number]): LibrarySkill[] {
   return [...branch.levels, ...branch.slots.flat(), ...branch.spares];
@@ -94,7 +113,7 @@ export function buildLibrary(source: LibrarySource = LIBRARY_SOURCE): Library {
     if (entry.iconKey !== undefined && !iconSet.has(entry.iconKey)) issues.push(`${label}: невідомий iconKey «${entry.iconKey}»`);
   };
 
-  const checkUnique = (kind: string, field: "key" | "name", items: LibraryEntry[]) => {
+  const checkUnique = (kind: string, field: "key" | "name", items: Array<{ key: string; name: string }>) => {
     const seen = new Set<string>();
 
     for (const item of items) {
@@ -217,6 +236,60 @@ export function buildLibrary(source: LibrarySource = LIBRARY_SOURCE): Library {
     checkRefs(`Сет «${set.key}»`, set.abilities);
   }
 
+  const unitByKey = new Map(source.units.map((u) => [u.key, u]));
+
+  const checkSummons = (label: string, value: unknown) => {
+    for (const key of summonUnitKeys(value)) if (!unitByKey.has(key)) issues.push(`${label}: юніт «${key}» не знайдено`);
+  };
+
+  for (const spell of source.spells) checkSummons(`Заклинання «${spell.key}»`, spell.definition.effects);
+
+  for (const unit of source.units) {
+    const label = `Юніт «${unit.key}»`;
+
+    if (!unit.key.trim()) issues.push(`Юніт: порожній key (${unit.name})`);
+
+    if (!unit.name.trim()) issues.push(`${label}: порожня назва`);
+
+    if (unit.raceKey !== null && !raceByKey.has(unit.raceKey)) issues.push(`${label}: невідома раса «${unit.raceKey}»`);
+
+    if (!Number.isInteger(unit.tier) || unit.tier < 1 || unit.tier > 7) issues.push(`${label}: тір ${unit.tier} поза межами 1–7`);
+
+    if (unit.attacks.length === 0) issues.push(`${label}: немає атак`);
+
+    for (const key of unit.spellKeys ?? []) if (!spellByKey.has(key)) issues.push(`${label}: закляття «${key}» не знайдено`);
+
+    checkAbilities(label, unit.abilities);
+    checkRefs(label, unit.abilities);
+    checkSummons(label, unit.abilities);
+
+    const ids = new Set<string>();
+
+    for (const ability of unit.abilities) {
+      if (ids.has(ability.id)) issues.push(`${label}: id «${ability.id}» повторюється`);
+
+      ids.add(ability.id);
+    }
+
+    const hasFalloff = unit.abilities.some((a) => a.effects.some((e) => e.kind === "flag" && e.flag === "multiTargetFalloff"));
+
+    if (!hasFalloff && unit.attacks.some((a) => (a.targets ?? 1) > 1)) issues.push(`${label}: атака по кількох цілях потребує здібності з прапором multiTargetFalloff`);
+  }
+
+  for (const race of source.races) {
+    const units = source.units.filter((u) => u.raceKey === race.key);
+
+    if (units.length === 0) continue;
+
+    if (units.length !== UNITS_PER_RACE) issues.push(`Раса «${race.key}»: має бути ${UNITS_PER_RACE} юнітів, є ${units.length}`);
+
+    for (let tier = 1; tier <= 7; tier++) {
+      const roles = units.filter((u) => u.tier === tier).map((u) => u.role).sort();
+
+      if (roles.join() !== [...UNIT_ROLES].sort().join()) issues.push(`Раса «${race.key}», тір ${tier}: потрібні ролі base, upgrade, alt (є ${roles.join(", ") || "жодної"})`);
+    }
+  }
+
   const allArtifacts = source.artifactSets.flatMap((set) => set.artifacts);
 
   checkUnique("Заклинання", "key", source.spells);
@@ -231,8 +304,10 @@ export function buildLibrary(source: LibrarySource = LIBRARY_SOURCE): Library {
   checkUnique("Артефакти", "name", allArtifacts);
   checkUnique("Сети артефактів", "key", source.artifactSets);
   checkUnique("Сети артефактів", "name", source.artifactSets);
+  checkUnique("Юніти", "key", source.units);
+  checkUnique("Юніти", "name", source.units);
 
   if (issues.length > 0) throw new Error(`Бібліотека невалідна:\n${issues.map((i) => `- ${i}`).join("\n")}`);
 
-  return { ...source, schools, skills, spellByKey, raceByKey };
+  return { ...source, schools, skills, spellByKey, raceByKey, unitByKey };
 }

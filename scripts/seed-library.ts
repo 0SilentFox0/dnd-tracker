@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * Заповнює кампанію бібліотекою скілів і заклять (data/library): школи, закляття, раси, гілки, скіли, дерева рас.
+ * Заповнює кампанію бібліотекою (data/library): школи, закляття, раси, юніти, гілки, скіли, артефакти, дерева рас.
  * Ідемпотентно: знаходить за назвою в кампанії → оновлює, інакше створює. Лише локальна БД без --allow-remote.
  *
  *   pnpm seed-library <campaignId> [--dry-run] [--replace-trees] [--allow-remote]
@@ -9,7 +9,7 @@
  */
 import type { Prisma } from "@prisma/client";
 
-import { branchSkills, buildLibrary } from "../data/library/build";
+import { branchSkills, buildLibrary, summonUnitKeys } from "../data/library/build";
 import type { LibraryBranch, LibraryRace, LibrarySkill } from "../data/library/types";
 import { iconPublicUrl } from "../data/skill-icons";
 import { prisma } from "../lib/db";
@@ -25,8 +25,11 @@ import {
   parseArgs,
   racePassiveData,
   remapRefs,
+  remapSummonUnits,
   type Tally,
   treeInput,
+  unitAbilities,
+  unitRow,
 } from "./seed-library-lib";
 
 const RACE_BRANCH = { name: "Раса", color: "#c9a227" };
@@ -44,6 +47,8 @@ const passiveJson = (race: LibraryRace, iconUrl?: string) => {
 };
 
 const hasSummon = (effects: unknown) => Array.isArray(effects) && effects.some((e) => typeof e === "object" && e !== null && (e as { kind?: string }).kind === "summon");
+
+const hasLibrarySummon = (effects: unknown) => [...summonUnitKeys(effects)].length > 0;
 
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
@@ -68,6 +73,7 @@ async function main() {
   const tallies: Record<string, Tally> = {
     школи: emptyTally(),
     закляття: emptyTally(),
+    юніти: emptyTally(),
     раси: emptyTally(),
     гілки: emptyTally(),
     скіли: emptyTally(),
@@ -159,9 +165,11 @@ async function main() {
 
     const existing = findByName(spellRows, spell.name);
 
-    const keepEffects = hasSummon(existing?.spellEffects);
+    const deferEffects = hasLibrarySummon(d.effects);
 
-    const created = () => prisma.spell.create({ data: { campaignId, type: "target", damageType: "damage", ...data }, select: { id: true, name: true, spellEffects: true } });
+    const keepEffects = deferEffects || hasSummon(existing?.spellEffects);
+
+    const created = () => prisma.spell.create({ data: { campaignId, type: "target", damageType: "damage", ...data, spellEffects: deferEffects ? [] : data.spellEffects }, select: { id: true, name: true, spellEffects: true } });
 
     spells.set(spell.key, await upsert("закляття", spellRows, spell.name, {
       create: created,
@@ -170,6 +178,35 @@ async function main() {
   }
 
   const maps: IdMaps = { groups, spells, races };
+
+  const unitRows = await prisma.unit.findMany({ where: { campaignId }, select: { id: true, name: true } });
+
+  const units = new Map<string, string>();
+
+  for (const unit of library.units) {
+    const data = unitRow(unit, maps, races);
+
+    units.set(unit.key, await upsert("юніти", unitRows, unit.name, {
+      create: () => prisma.unit.create({ data: { campaignId, ...data }, select: { id: true, name: true } }),
+      update: (id) => prisma.unit.update({ where: { id }, data, select: { id: true, name: true } }),
+    }));
+  }
+
+  if (!dryRun) {
+    for (const unit of library.units) {
+      if (![...summonUnitKeys(unit.abilities)].length) continue;
+
+      const abilities = remapSummonUnits(remapRefs(unitAbilities(unit), maps), units);
+
+      await prisma.unit.update({ where: { id: units.get(unit.key) ?? "" }, data: { abilities: json(abilities) } });
+    }
+
+    for (const spell of library.spells) {
+      if (!hasLibrarySummon(spell.definition.effects)) continue;
+
+      await prisma.spell.update({ where: { id: spells.get(spell.key) ?? "" }, data: { spellEffects: json(remapSummonUnits(spell.definition.effects, units)) } });
+    }
+  }
 
   const mainRows = await prisma.mainSkill.findMany({ where: { campaignId }, select: { id: true, name: true } });
 

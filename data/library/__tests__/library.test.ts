@@ -5,7 +5,8 @@ import { buildLibrary, LIBRARY_COMPLETE, LIBRARY_SOURCE, MIN_APPEARANCE_LENGTH, 
 import { PERSONAL } from "../personal";
 import { RACES } from "../races";
 import { SPELLS } from "../spells";
-import type { LibraryArtifact, LibraryArtifactSet, LibraryBranch, LibraryRace, LibrarySkill, LibrarySource, LibrarySpell } from "../types";
+import type { LibraryArtifact, LibraryArtifactSet, LibraryBranch, LibraryRace, LibrarySkill, LibrarySource, LibrarySpell, LibraryUnit } from "../types";
+import { falloff, raiseOnKill } from "../unit-abilities";
 
 import { BRANCH_ICONS, SKILL_ICONS, SPELL_ICONS } from "@/data/skill-icons";
 
@@ -90,8 +91,31 @@ function set(key: string, over: Partial<LibraryArtifactSet> = {}): LibraryArtifa
   };
 }
 
+function unit(key: string, over: Partial<LibraryUnit> = {}): LibraryUnit {
+  return {
+    key,
+    name: `Юніт ${key}`,
+    raceKey: null,
+    tier: 1,
+    role: "base",
+    hp: 12,
+    ac: 11,
+    attackBonus: 3,
+    initiative: 8,
+    attacks: [{ name: "Удар", type: "melee", dice: "1d6", damageType: "slashing" }],
+    abilities: [],
+    ...over,
+  };
+}
+
+function raceUnits(raceKey: string): LibraryUnit[] {
+  const roles = ["base", "upgrade", "alt"] as const;
+
+  return Array.from({ length: 21 }, (_, i) => unit(`${raceKey}-${i}`, { raceKey, tier: Math.floor(i / 3) + 1, role: roles[i % 3] }));
+}
+
 function source(over: Partial<LibrarySource> = {}): LibrarySource {
-  return { spells: [], branches: [], races: [], personal: [], artifactSets: [], ...over };
+  return { spells: [], branches: [], races: [], personal: [], artifactSets: [], units: [], ...over };
 }
 
 describe("buildLibrary validation", () => {
@@ -206,6 +230,65 @@ describe("buildLibrary validation", () => {
     expect(() => buildLibrary(source({ personal: [skill("p", { grantedSpellKey: "s" })], spells: [spell("s")] }))).not.toThrow();
     expect(() => buildLibrary(source({ spells: [spell("s", { raceModifiers: [{ raceKey: "none", percent: 10 }] })] }))).toThrow(/невідома раса/);
     expect(() => buildLibrary(source({ branches: [branch("b", { spellSchool: "Хаос" })] }))).toThrow(/невідома школа/);
+  });
+});
+
+describe("buildLibrary unit validation", () => {
+  const withUnits = (units: LibraryUnit[], over: Partial<LibrarySource> = {}) => source({ units, ...over });
+
+  it("accepts valid units and indexes them", () => {
+    expect(buildLibrary(withUnits([unit("u")])).unitByKey.get("u")?.name).toBe("Юніт u");
+  });
+
+  it("rejects duplicate keys and names", () => {
+    expect(() => buildLibrary(withUnits([unit("u"), unit("u", { name: "Інший" })]))).toThrow(/дублікат key «u»/);
+    expect(() => buildLibrary(withUnits([unit("a", { name: "Х" }), unit("b", { name: "Х" })]))).toThrow(/дублікат name «Х»/);
+  });
+
+  it("rejects unknown races and tiers out of range", () => {
+    expect(() => buildLibrary(withUnits([unit("u", { raceKey: "nope" })]))).toThrow(/невідома раса «nope»/);
+    expect(() => buildLibrary(withUnits([unit("u", { tier: 8 })]))).toThrow(/тір/);
+    expect(() => buildLibrary(withUnits([unit("u", { tier: 0 })]))).toThrow(/тір/);
+  });
+
+  it("rejects unknown spell keys and broken abilities", () => {
+    expect(() => buildLibrary(withUnits([unit("u", { spellKeys: ["nope"] })]))).toThrow(/закляття «nope»/);
+    expect(() => buildLibrary(withUnits([unit("u", { abilities: [{ id: "x", name: "x", trigger: { event: "passive" }, effects: [] }] })]))).toThrow(/Юніт «u»/);
+    expect(() => buildLibrary(withUnits([unit("u", { abilities: [{ id: "x", name: "x", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "spellImmunity", spellIds: ["nope"] }] }] })]))).toThrow(/«nope»/);
+  });
+
+  it("requires falloff for multi-target attacks", () => {
+    const attacks: LibraryUnit["attacks"] = [{ name: "Залп", type: "ranged", dice: "1d6", damageType: "piercing", targets: 2 }];
+
+    expect(() => buildLibrary(withUnits([unit("u", { attacks })]))).toThrow(/multiTargetFalloff/);
+    expect(() => buildLibrary(withUnits([unit("u", { attacks, abilities: [falloff("Залп")] })]))).not.toThrow();
+  });
+
+  it("requires unique ability ids within a unit", () => {
+    expect(() => buildLibrary(withUnits([unit("u", { abilities: [falloff("a"), falloff("b")] })]))).toThrow(/id «unit-falloff» повторюється/);
+  });
+
+  it("requires summoned unit keys to exist", () => {
+    expect(() => buildLibrary(withUnits([unit("u", { abilities: [raiseOnKill("ghost")] })]))).toThrow(/юніт «ghost»/);
+    expect(() => buildLibrary(withUnits([unit("u", { abilities: [raiseOnKill("u2")] }), unit("u2")]))).not.toThrow();
+
+    const summoning = spell("s", { definition: { ...spell("s").definition, effects: [{ kind: "summon", unitId: "ghost" }] } });
+
+    expect(() => buildLibrary(withUnits([], { spells: [summoning] }))).toThrow(/юніт «ghost»/);
+    expect(() => buildLibrary(withUnits([unit("ghost")], { spells: [summoning] }))).not.toThrow();
+  });
+
+  it("requires exactly 21 units per race, 3 per tier with distinct roles", () => {
+    const r = race("r");
+
+    const full = raceUnits("r");
+
+    expect(() => buildLibrary(withUnits(full, { branches: [branch("b")], races: [r] }))).not.toThrow();
+    expect(() => buildLibrary(withUnits(full.slice(1), { branches: [branch("b")], races: [r] }))).toThrow(/21 юніт/);
+
+    const skewed = full.map((u, i) => (i === 1 ? { ...u, role: "base" as const } : u));
+
+    expect(() => buildLibrary(withUnits(skewed, { branches: [branch("b")], races: [r] }))).toThrow(/ролі/);
   });
 });
 
