@@ -6,6 +6,13 @@ import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import type { BattleAction, BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
 
+const critDetails = (effect: CriticalEffect, flavor?: string) => ({ id: effect.id, name: effect.name, description: effect.description, type: effect.type, flavor });
+
+const critSummary = (effect: CriticalEffect, flavor: string | undefined, isFail: boolean) =>
+  `${isFail ? `Критична невдача — ${effect.name}.` : `Критичне влучання — ${effect.name}!`}${flavor ? ` ${flavor}` : ""}`;
+
+const lowerFirst = (text: string) => text.charAt(0).toLowerCase() + text.slice(1);
+
 export function buildBattleActionForCriticalFail(
   attacker: BattleParticipant,
   target: BattleParticipant,
@@ -46,16 +53,10 @@ export function buildBattleActionForCriticalFail(
       isHit: false,
       isCritical: false,
       isCriticalFail: true,
-      criticalEffect: {
-        id: criticalEffectApplied.id,
-        name: criticalEffectApplied.name,
-        description: criticalEffectApplied.description,
-        type: criticalEffectApplied.type,
-        flavor: critFlavorText,
-      },
+      criticalEffect: critDetails(criticalEffectApplied, critFlavorText),
     },
     resultText: [
-      `${attacker.basicInfo.name}: критична невдача — ${criticalEffectApplied.name}.${critFlavorText ? ` ${critFlavorText}` : ""}`,
+      `${attacker.basicInfo.name}: ${lowerFirst(critSummary(criticalEffectApplied, critFlavorText, true))}`,
       ...beforeMessages,
       ...afterMessages,
     ].filter(Boolean).join(" | "),
@@ -205,15 +206,7 @@ export function buildBattleActionForHit(params: BuildHitActionParams): BattleAct
       isHit: true,
       isCritical: attackRoll.isCritical,
       isCriticalFail: false,
-      criticalEffect: criticalEffectApplied
-        ? {
-            id: criticalEffectApplied.id,
-            name: criticalEffectApplied.name,
-            description: criticalEffectApplied.description,
-            type: criticalEffectApplied.type,
-            flavor: critFlavorText,
-          }
-        : undefined,
+      criticalEffect: criticalEffectApplied ? critDetails(criticalEffectApplied, critFlavorText) : undefined,
       damageRolls: damageRolls.map((roll) => ({
         dice: attack.damageDice,
         results: [roll],
@@ -225,7 +218,7 @@ export function buildBattleActionForHit(params: BuildHitActionParams): BattleAct
       damageSteps: { [target.basicInfo.id]: damageSteps },
     },
     resultText: [
-      `${attacker.basicInfo.name} завдав ${totalFinalDamage} урону ${target.basicInfo.name}${criticalEffectApplied ? `. Критичне влучання — ${criticalEffectApplied.name}!${critFlavorText ? ` ${critFlavorText}` : ""}` : attackRoll.isCritical ? " (КРИТИЧНЕ ПОПАДАННЯ!)" : ""}${vampirismHeal > 0 ? ` | Вампіризм: ${attacker.basicInfo.name} відновив ${vampirismHeal} HP` : ""}`,
+      `${attacker.basicInfo.name} завдав ${totalFinalDamage} урону ${target.basicInfo.name}${criticalEffectApplied ? `. ${critSummary(criticalEffectApplied, critFlavorText, false)}` : attackRoll.isCritical ? " (КРИТИЧНЕ ПОПАДАННЯ!)" : ""}${vampirismHeal > 0 ? ` | Вампіризм: ${attacker.basicInfo.name} відновив ${vampirismHeal} HP` : ""}`,
       ...beforeMessages,
       ...afterMessages,
     ].filter(Boolean).join(" | "),
@@ -300,13 +293,7 @@ export function buildRetaliationAction(p: BuildRetaliationParams): BattleAction 
 
   const crit = attackRoll.isCriticalFail ? attackRoll.criticalEffect : hit?.hitDamage.criticalEffectApplied;
 
-  const flavorText = p.critFlavorText ? ` ${p.critFlavorText}` : "";
-
-  const critText = !crit
-    ? ""
-    : attackRoll.isCriticalFail
-      ? `. Критична невдача — ${crit.name}.${flavorText}`
-      : `. Критичне влучання — ${crit.name}!${flavorText}`;
+  const critText = crit ? `. ${critSummary(crit, p.critFlavorText, attackRoll.isCriticalFail)}` : "";
 
   const summary = `Відсіч: ${retaliator.basicInfo.name} → ${target.basicInfo.name}: d20 ${d20}, ${
     hit ? `${hit.hitDamage.totalFinalDamage} урону${!crit && attackRoll.isCritical ? " (КРИТИЧНЕ ПОПАДАННЯ!)" : ""}` : "промах"
@@ -333,7 +320,7 @@ export function buildRetaliationAction(p: BuildRetaliationParams): BattleAction 
       isHit: !!hit,
       isCritical: !!hit && attackRoll.isCritical,
       isCriticalFail: attackRoll.isCriticalFail,
-      ...(crit && { criticalEffect: { id: crit.id, name: crit.name, description: crit.description, type: crit.type, flavor: p.critFlavorText } }),
+      ...(crit && { criticalEffect: critDetails(crit, p.critFlavorText) }),
       ...(hit && {
         damageRolls: hit.damageRolls.map((roll) => ({ dice: attack.damageDice, results: [roll], total: roll, damageType: attack.damageType })),
         totalDamage: hit.hitDamage.physicalDamage,
