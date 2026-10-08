@@ -26,7 +26,7 @@ function strike(targetHp: number) {
 
 describe("summon on kill trigger", () => {
   it("kill returns a summon request for the killer", () => {
-    expect(strike(1).summons).toEqual([{ ownerId: "a", unitId: "skeleton", count: 1 }]);
+    expect(strike(1).summons).toEqual([{ ownerId: "a", unitId: "skeleton", count: 1, casterLevel: expect.any(Number) }]);
   });
 
   it("no kill, no summon", () => {

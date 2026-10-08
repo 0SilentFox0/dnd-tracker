@@ -147,6 +147,7 @@ model Unit {
   maxTargets       Int      @default(1)
   minTargets       Int      @default(1)
   abilities        Json   @default("[]")
+  levelScaling     Json?
   campaign         Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   race             Race?    @relation(fields: [raceId], references: [id], onDelete: SetNull)
   spellsSummoning  Spell[]  @relation("SpellSummonUnit")

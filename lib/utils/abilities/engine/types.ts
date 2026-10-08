@@ -15,6 +15,7 @@ export interface SummonRequest {
   tier?: number;
   unitId?: string;
   count: number;
+  casterLevel?: number;
 }
 
 export interface AbilityRunResult {
