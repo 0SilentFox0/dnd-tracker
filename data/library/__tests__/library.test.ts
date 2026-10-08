@@ -7,8 +7,11 @@ import { RACES } from "../races";
 import { SPELLS } from "../spells";
 import type { LibraryArtifact, LibraryArtifactSet, LibraryBranch, LibraryRace, LibrarySkill, LibrarySource, LibrarySpell, LibraryUnit } from "../types";
 import { falloff, raiseOnKill } from "../unit-abilities";
+import { UNITS } from "../units";
 
 import { BRANCH_ICONS, SKILL_ICONS, SPELL_ICONS } from "@/data/skill-icons";
+import { scaleSummon } from "@/lib/utils/units/level-scaling";
+import type { BattleParticipant } from "@/types/battle";
 
 const APPEARANCE = "Світло розгортається над полем бою золотим куполом, і навіть найстаміший воїн відчуває, як повертаються сили.";
 
@@ -325,6 +328,30 @@ describe("library content", () => {
       expect(racePassiveAbilities(r)[0].id, r.key).toBe(`${r.key}-stats`);
       expect(Object.keys(racePassiveStatModifiers(r)), r.key).toEqual(Object.keys(expected[r.key]));
     }
+  });
+
+  content("has 4 elemental summon spells pointing at scaling neutral units", () => {
+    const spells = SPELLS.filter((sp) => sp.name.startsWith("Прикликання елементаля"));
+
+    expect(spells).toHaveLength(4);
+
+    for (const sp of spells) {
+      const summon = sp.definition.effects.find((e) => e.kind === "summon");
+
+      const unit = UNITS.find((u) => summon?.kind === "summon" && u.key === summon.unitId);
+
+      expect(unit?.raceKey, sp.key).toBeNull();
+      expect(unit?.levelScaling, sp.key).toBeDefined();
+      expect(sp.level, sp.key).toBe(3);
+    }
+  });
+
+  content("scales the earth elemental to 73 HP at level 6", () => {
+    const earth = UNITS.find((u) => u.key === "neutral-earth-elemental")!;
+
+    const p = { combatStats: { maxHp: earth.hp, currentHp: earth.hp }, battleData: { attacks: [{ damageDice: "2d8", attackBonus: 3 }] } } as unknown as BattleParticipant;
+
+    expect(scaleSummon(p, earth.levelScaling, 6).combatStats.maxHp).toBe(73);
   });
 
   content("has 7 races with 4 skills each", () => {
