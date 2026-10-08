@@ -421,17 +421,17 @@ export const oncePerBattleAoe = (name: string, opts: { percentOfAttack: number; 
 export const wheelOfFortune = (): Ability => ({
   id: "unit-wheel-of-fortune",
   name: "Колесо фортуни",
-  description: "Раз за раунд: випадковий баф союзникам або дебаф ворогам на 1 раунд.",
-  trigger: { event: "roundStart" },
+  description: "Влучання, раз за раунд: випадково або баф собі, або дебаф цілі на 1 раунд.",
+  trigger: onHit,
   limits: { perRound: 1 },
   effects: [
     {
       kind: "randomOf",
       options: [
-        { kind: "modifyStat", stat: "attackBonus", flat: 2, duration: { rounds: 1 }, target: "allAllies" },
-        { kind: "modifyStat", stat: "morale", flat: 1, duration: { rounds: 1 }, target: "allAllies" },
-        { kind: "modifyStat", stat: "armor", flat: -2, duration: { rounds: 1 }, target: "allEnemies" },
-        { kind: "modifyStat", stat: "initiative", flat: -3, duration: { rounds: 1 }, target: "allEnemies" },
+        { kind: "modifyStat", stat: "attackBonus", flat: 2, duration: { rounds: 1 }, target: "self" },
+        { kind: "modifyStat", stat: "morale", flat: 1, duration: { rounds: 1 }, target: "self" },
+        { kind: "modifyStat", stat: "armor", flat: -2, duration: { rounds: 1 }, target: "eventTarget" },
+        { kind: "modifyStat", stat: "initiative", flat: -3, duration: { rounds: 1 }, target: "eventTarget" },
       ],
     },
   ],
