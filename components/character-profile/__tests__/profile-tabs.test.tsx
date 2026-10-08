@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { sheetFixture, withSheet } from "./sheet-fixture";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "", HUD_SURFACE: "hud-surface" }));
+vi.mock("@/lib/hooks/races", () => ({ useRaces: () => ({ data: [] }) }));
 vi.mock("@/components/skill-tree/progression", () => ({ ProgressionPanel: () => <div>прокачка</div> }));
 
 import { ItemsTab, MagicTab, SkillsTab } from "@/components/character-profile";

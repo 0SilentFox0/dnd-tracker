@@ -49,11 +49,11 @@ export function assertSeedTarget(url: string | undefined, allowRemote: boolean):
   return host;
 }
 
-export function racePassiveData(race: LibraryRace) {
+export function racePassiveData(race: LibraryRace, iconUrl?: string) {
   const { name, description, appearanceDescription } = race.passive;
 
   return {
-    passiveAbility: { name, description, appearanceDescription, statModifiers: racePassiveStatModifiers(race) },
+    passiveAbility: { name, ...(iconUrl && { icon: iconUrl }), description, appearanceDescription, statModifiers: racePassiveStatModifiers(race) },
     abilities: racePassiveAbilities(race),
   };
 }

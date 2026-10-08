@@ -20,6 +20,7 @@ import { spellSchema } from "../app/api/campaigns/[id]/battles/[battleId]/spell/
 import { createSpellMutation } from "../app/api/campaigns/[id]/battles/[battleId]/spell/spell-mutation";
 import { createStartMutation } from "../app/api/campaigns/[id]/battles/[battleId]/start/start-mutation";
 import { postBalanceResponse } from "../app/api/campaigns/[id]/battles/balance/balance-post";
+import { buildLibrary } from "../data/library/build";
 import { prisma } from "../lib/db";
 import { moraleCheckSchema } from "../lib/schemas";
 import { applyBattleDelta } from "../lib/utils/battle/client/apply-delta";
@@ -29,13 +30,18 @@ import { needsMoraleCheck } from "../lib/utils/battle/view";
 import { branchLevelNodeId, buildTreeJson, racialNodeId } from "../lib/utils/skills/progression";
 import type { BattleMutationResponse, BattleScene } from "../types/api";
 import type { BattleAction, BattleParticipant } from "../types/battle";
+import { racePassiveData } from "./seed-library-lib";
 import { artifactRows, DEMON_RACE, DEMON_UNIT, DRAGON_SET, FAIR_CAMPAIGN_NAME, FAIR_HEROES, FAIR_UNITS, FAIR_WEAPONS, MECHANICS_CAMPAIGN_NAME, MECHANICS_UNITS, RACES, RACIAL_CAMPAIGN_NAME, RACIAL_UNITS, SIM_CAMPAIGN_NAME, SIM_PLAYER, SIM_USER, SKILLS, SPELL_MODEL_CAMPAIGN_NAME, SPELL_MODEL_UNITS, UNITS } from "./simulate-battle-scenario";
 
-import { BATTLE_LOG_RECENT_EVENTS, ParticipantSourceType } from "@/lib/constants/battle";
+import { BATTLE_LOG_RECENT_EVENTS, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { CampaignRole } from "@/lib/constants/campaigns";
+import { statWithModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { countMarks } from "@/lib/utils/abilities/engine/marks";
+import { immuneTo } from "@/lib/utils/abilities/registry/effects/state";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
+import { createBattleParticipantFromCharacter } from "@/lib/utils/battle/participant/from-character";
 import { PUSHER_DELTA_LIMIT_BYTES } from "@/lib/utils/battle/pipeline/limits";
+import { applyResistance, hasImmunity } from "@/lib/utils/battle/resistance";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { PATCHABLE_PARTICIPANT_FIELDS } from "@/lib/utils/battle/store/participant-patch";
 import { stableStringify } from "@/lib/utils/battle/store/stable-json";
@@ -292,6 +298,47 @@ const ROLLBACK = { access: "dm" as const, schema: rollbackSchema, mutate: create
 
 const MORALE = { access: "member" as const, requireStatus: "active" as const, schema: moraleCheckSchema, respond: "wrapped" as const, mutate: moraleCheckMutation };
 
+const RACE_PASSIVES_CAMPAIGN_NAME = "SIM: расові пасивки";
+
+async function racePassivesCheck() {
+  console.info("\n🧬 Расові пасивки: учасник з персонажа кожної раси");
+  await prisma.campaign.deleteMany({ where: { name: RACE_PASSIVES_CAMPAIGN_NAME, dmUserId: SIM_USER.id } });
+
+  const campaign = await prisma.campaign.create({ data: { name: RACE_PASSIVES_CAMPAIGN_NAME, inviteCode: `SIMR-${Date.now()}`, dmUserId: SIM_USER.id } });
+
+  const campaignId = campaign.id;
+
+  const build = async (name: string, data: Record<string, unknown>) => {
+    await prisma.race.create({ data: { campaignId, name, ...data } as Prisma.RaceUncheckedCreateInput });
+
+    const hero = await prisma.character.create({ data: { campaignId, type: "player", controlledBy: SIM_PLAYER.id, name, class: "Воїн", race: name, level: 5, strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10, armorClass: 12, initiative: 0 } });
+
+    return createBattleParticipantFromCharacter({ ...hero, inventory: null }, "b1", ParticipantSide.ALLY);
+  };
+
+  const base = await build("Без раси", {});
+
+  const armor = (p: BattleParticipant) => statWithModifiers([p], p.basicInfo.id, "armor", p.combatStats.armorClass);
+
+  for (const race of buildLibrary().races) {
+    const data = racePassiveData(race);
+
+    const p = await build(race.name, { passiveAbility: data.passiveAbility as Prisma.InputJsonValue, abilities: data.abilities as unknown as Prisma.InputJsonValue });
+
+    const keys = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"] as const;
+
+    check(`${race.name}: бонуси характеристик у учаснику`, keys.every((k) => p.abilities[k] - base.abilities[k] === (race.passive.stats[k] ?? 0)), keys.map((k) => p.abilities[k] - base.abilities[k]).join("/"));
+
+    if (race.key === "dwarves") check("Гноми: AC +1", armor(p) === armor(base) + 1, `${armor(base)} → ${armor(p)}`);
+
+    if (race.key === "demons") check("Демони: опір вогню 50 %", applyResistance(p, 20, "fire").finalDamage === 10);
+
+    if (race.key === "necromancers") check("Некроманти: імунітет до отрути й страху", hasImmunity(p, "poison") && immuneTo([p], p.basicInfo.id, "fear"));
+
+    if (race.key === "mages") check("Маги: +1 слот 1 рівня", (p.spellcasting.spellSlots["1"]?.max ?? 0) - (base.spellcasting.spellSlots["1"]?.max ?? 0) === 1);
+  }
+}
+
 async function main() {
   console.info("🌱 Створюю тестову кампанію…");
   ctx = await seed();
@@ -312,6 +359,8 @@ async function main() {
   await racialMechanics();
 
   await spellModel();
+
+  await racePassivesCheck();
 
   const failed = results.filter((r) => !r.ok);
 

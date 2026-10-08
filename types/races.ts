@@ -27,6 +27,7 @@ export interface Race {
   disabledSkills: string[];
   passiveAbility?: {
     name?: string;
+    icon?: string;
     description: string;
     appearanceDescription?: string;
     statImprovements?: string;
@@ -45,6 +46,7 @@ export interface RaceFormData {
   disabledSkills: string[];
   passiveAbility?: {
     name?: string;
+    icon?: string;
     description: string;
     appearanceDescription?: string;
     statImprovements?: string;

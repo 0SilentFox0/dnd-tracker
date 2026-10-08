@@ -2,6 +2,7 @@ import type { LibraryRacePassive } from "./types";
 
 export const RACE_PASSIVES: Record<string, LibraryRacePassive> = {
   humans: {
+    iconKey: "race-flag-humans",
     name: "Відвага",
     description: "+1 до всіх шести характеристик. Мораль героя ніколи не падає нижче 0.",
     appearanceDescription:
@@ -10,6 +11,7 @@ export const RACE_PASSIVES: Record<string, LibraryRacePassive> = {
     trait: [{ id: "humans-courage", name: "Відвага", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "noNegativeMorale" }] }],
   },
   demons: {
+    iconKey: "race-flag-demons",
     name: "Пекельна кров",
     description: "+2 до Сили, +1 до Харизми. Опір вогню 50 %.",
     appearanceDescription:
@@ -20,6 +22,7 @@ export const RACE_PASSIVES: Record<string, LibraryRacePassive> = {
     ],
   },
   elves: {
+    iconKey: "race-flag-elves",
     name: "Око лісу",
     description: "+2 до Спритності, +1 до Мудрості. Дальні атаки героя отримують +1 до атаки.",
     appearanceDescription:
@@ -28,6 +31,7 @@ export const RACE_PASSIVES: Record<string, LibraryRacePassive> = {
     trait: [{ id: "elves-forest-eye", name: "Око лісу", trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "attackBonus", flat: 1, attackKind: "ranged" }] }],
   },
   necromancers: {
+    iconKey: "race-flag-necromancers",
     name: "Неживе тіло",
     description: "+2 до Інтелекту, +1 до Статури. Імунітет до шкоди отрутою та до страху.",
     appearanceDescription:
@@ -46,6 +50,7 @@ export const RACE_PASSIVES: Record<string, LibraryRacePassive> = {
     ],
   },
   mages: {
+    iconKey: "race-flag-mages",
     name: "Магічна освіта",
     description: "+2 до Інтелекту, +1 до Мудрості. +1 слот заклинань 1 рівня.",
     appearanceDescription:
@@ -54,6 +59,7 @@ export const RACE_PASSIVES: Record<string, LibraryRacePassive> = {
     trait: [{ id: "mages-education", name: "Магічна освіта", trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "spellSlots", flat: 1, spellLevels: [1] }] }],
   },
   "dark-elves": {
+    iconKey: "race-flag-dark-elves",
     name: "Підземний зір",
     description: "+2 до Спритності, +1 до Харизми. Перша атака героя в бою — з перевагою.",
     appearanceDescription:
@@ -70,6 +76,7 @@ export const RACE_PASSIVES: Record<string, LibraryRacePassive> = {
     ],
   },
   dwarves: {
+    iconKey: "race-flag-dwarves",
     name: "Кам'яна шкіра роду",
     description: "+2 до Статури, +1 до Сили. +1 до класу броні.",
     appearanceDescription:

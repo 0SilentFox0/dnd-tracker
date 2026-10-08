@@ -6,6 +6,7 @@ import type { Skill } from "@/types/skills";
 
 export interface RacePassiveAbility {
   name?: string;
+  icon?: string;
   description: string;
   appearanceDescription?: string;
   statImprovements?: string;
@@ -49,6 +50,7 @@ export function normalizePassiveAbility(race: { passiveAbility?: unknown }): Rac
 
   return {
     ...(text(obj.name) && { name: text(obj.name) }),
+    ...(text(obj.icon) && { icon: text(obj.icon) }),
     ...(text(obj.appearanceDescription) && { appearanceDescription: text(obj.appearanceDescription) }),
     description: String(obj.description || ""),
     statImprovements: "statImprovements" in obj ? String(obj.statImprovements || "") : undefined,

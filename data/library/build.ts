@@ -143,6 +143,8 @@ export function buildLibrary(source: LibrarySource = LIBRARY_SOURCE): Library {
       issues.push(`Раса «${race.key}»: опис вигляду пасивки коротший за ${MIN_APPEARANCE_LENGTH} символів`);
     }
 
+    if (!icons.has(race.passive.iconKey)) issues.push(`Раса «${race.key}»: невідома іконка пасивки «${race.passive.iconKey}»`);
+
     if (race.passive.trait.length === 0) issues.push(`Раса «${race.key}»: порожній passive.trait`);
 
     racePassiveAbilities(race).forEach((ability, i) => {

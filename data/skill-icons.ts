@@ -45,6 +45,16 @@ const RACIAL_ICONS: [string, string][] = Object.entries(H5_RACIAL).flatMap(([rac
   RACIAL_LEVELS.map((level): [string, string] => [`racial-${race}-${level}`, `H5${level[0].toUpperCase()}${level.slice(1)}${h5}.png`]),
 );
 
+const RACE_FLAGS: Record<string, string> = {
+  humans: "H5FlagHaven.png",
+  demons: "H5FlagInferno.png",
+  elves: "H5FlagSylvan.png",
+  necromancers: "H5FlagNecropolis.png",
+  mages: "H5FlagAcademy.png",
+  "dark-elves": "H5FlagDungeon.png",
+  dwarves: "H5FlagFortress.png",
+};
+
 export const SKILL_ICONS: Record<string, string> = {
   "cleaving-strike": "H5ExcruciatingStrike.png",
   "stunning-strike": "H5StunningBlow.PNG",
@@ -109,6 +119,7 @@ export const SKILL_ICONS: Record<string, string> = {
   "dark-elves-rage-of-the-elements": "H5RageoftheElements.png",
   "dark-elves-empowered-spells": "H5EmpoweredSpells.png",
   ...Object.fromEntries(RACIAL_ICONS),
+  ...Object.fromEntries(Object.entries(RACE_FLAGS).map(([race, file]) => [`race-flag-${race}`, file])),
 };
 
 export type IconKind = "skill" | "spell";

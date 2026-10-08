@@ -44,6 +44,7 @@ function race(key: string): LibraryRace {
     description: "Опис раси.",
     appearanceDescription: APPEARANCE,
     passive: {
+      iconKey: "race-flag-humans",
       name: "Пасивка",
       description: "+1 до Сили.",
       appearanceDescription: APPEARANCE,

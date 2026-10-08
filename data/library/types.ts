@@ -41,6 +41,7 @@ export type AbilityScoreKey = "strength" | "dexterity" | "constitution" | "intel
 
 export interface LibraryRacePassive {
   name: string;
+  iconKey: string;
   description: string;
   appearanceDescription: string;
   stats: Partial<Record<AbilityScoreKey, number>>;

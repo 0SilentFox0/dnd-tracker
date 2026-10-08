@@ -36,8 +36,8 @@ const PERSONAL_BRANCH = { name: "Персональні", color: "#8e6bbf" };
 
 const json = (v: unknown) => v as Prisma.InputJsonValue;
 
-const passiveJson = (race: LibraryRace) => {
-  const p = racePassiveData(race);
+const passiveJson = (race: LibraryRace, iconUrl?: string) => {
+  const p = racePassiveData(race, iconUrl);
 
   return { passiveAbility: json(p.passiveAbility), abilities: json(p.abilities) };
 };
@@ -118,7 +118,7 @@ async function main() {
   const races = new Map<string, string>();
 
   for (const race of library.races) {
-    const data = { name: race.name, icon: icon(race.iconKey ?? race.levels[0].iconKey), color: race.color, spellSlotProgression: json(race.spellSlotProgression), ...passiveJson(race) };
+    const data = { name: race.name, icon: icon(race.iconKey ?? race.levels[0].iconKey), color: race.color, spellSlotProgression: json(race.spellSlotProgression), ...passiveJson(race, icon(race.passive.iconKey)) };
 
     races.set(race.key, await upsert("раси", raceRows, race.name, {
       create: () => prisma.race.create({ data: { campaignId, ...data }, select: { id: true, name: true } }),
