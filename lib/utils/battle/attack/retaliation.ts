@@ -102,6 +102,7 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
       attackRoll: roll,
       currentRound: round,
       bonusPercent: weapon.bonusPercent,
+      offTurn: true,
     });
 
     hit = { damageRolls, hitDamage };

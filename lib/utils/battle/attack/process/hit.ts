@@ -21,6 +21,7 @@ export interface ResolveHitParams {
   actionModifiers?: StaticEffect[];
   bonusPercent?: number;
   bonusLabel?: string;
+  offTurn?: boolean;
 }
 
 export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageResult; vampirismHeal: number } {
@@ -38,6 +39,7 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
     actionModifiers: p.actionModifiers,
     bonusPercent: p.bonusPercent,
     bonusLabel: p.bonusLabel,
+    offTurn: p.offTurn,
     rng: flow.ctx.rng,
   });
 

@@ -118,3 +118,18 @@ describe("multi-target advantage resolution", () => {
     expect(r.finalInitiativeOrder.find((p) => p.basicInfo.id === "a")?.battleData.activeEffects).toEqual([]);
   });
 });
+
+describe("free attack crit on a multi-target attack", () => {
+  it("critical effect 6 on the first target leaves the attacker an action", () => {
+    const r = runAttackPhase({
+      battle: { initiativeOrder: [attacker, foe("t1"), foe("t2")], battleLog: [], currentRound: 1, currentTurnIndex: 0 },
+      data: { attackerId: "a", damageRolls: [4, 4], targetIds: ["t1", "t2"], attackRolls: [20, 5] } as never,
+      battleId: "b",
+      userId: "u",
+      isDM: true,
+      rng: seq(0.55),
+    });
+
+    expect(r.finalInitiativeOrder.find((p) => p.basicInfo.id === "a")?.actionFlags.hasUsedAction).toBe(false);
+  });
+});

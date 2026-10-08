@@ -38,4 +38,27 @@ describe("крок влучання", () => {
     expect(boosted.physicalDamage).toBe(Math.floor(plain.physicalDamage * 1.5));
     expect(boosted.damageSteps).toContainEqual(expect.objectContaining({ label: "Контратака", kind: "multiplier", value: 1.5 }));
   });
+
+  it("slipping weapon halves physical damage and adds a multiplier step", () => {
+    const a = makeParticipant({ id: "a" });
+
+    const weak = {
+      ...a,
+      battleData: {
+        ...a.battleData,
+        activeEffects: [{ id: "w", name: "Зброя вислизає", type: "debuff" as const, duration: 2, appliedAt: { round: 1, timestamp: new Date() }, effects: [{ type: "weakened_next_hit", value: 0.5 }], consumeOn: "ownHit" as const }],
+      },
+    };
+
+    const t = makeParticipant({ id: "e", side: ParticipantSide.ENEMY, hp: 50, maxHp: 50 });
+
+    const input = { target: t, attack: sword, damageRolls: [8], attackRoll: { isCritical: false }, currentRound: 1 };
+
+    const plain = computeHitDamage({ ...input, attacker: a, allParticipants: [a, t] });
+
+    const halved = computeHitDamage({ ...input, attacker: weak, allParticipants: [weak, t] });
+
+    expect(halved.physicalDamage).toBe(Math.floor(plain.physicalDamage * 0.5));
+    expect(halved.damageSteps).toContainEqual(expect.objectContaining({ label: "Зброя вислизає", kind: "multiplier", value: 0.5 }));
+  });
 });

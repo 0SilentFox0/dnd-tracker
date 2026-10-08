@@ -46,30 +46,68 @@ describe("applyCriticalEffect", () => {
     expect(collectModifiers([p], "p1", { flag: "advantage" }).flags).toHaveLength(0);
   });
 
-  it.each([
-    ["stun", "stun", "debuff"],
-    ["free_attack", "extra_attack", "buff"],
-    ["block_bonus_action", "no_bonus_action", "debuff"],
-    ["advantage_on_target", "advantage_against_me", "debuff"],
-    ["advantage_on_self", "advantage_against_me", "debuff"],
-    ["combo_attack", "combo_attack_disadvantage", "buff"],
-    ["prone", "prone", "condition"],
-    ["lose_reaction", "no_reaction", "debuff"],
-  ])("%s додає активний ефект з обмеженням %s (читають battle-turn і disabled-attacks)", (type, marker, kind) => {
-    const p = apply(type);
+  it("advantage for the next attack is consumable", () => {
+    const p = apply("advantage_next_attack", { duration: 2 });
 
-    expect(effectTypes(p)).toEqual([marker]);
-    expect(p.battleData.activeEffects[0].type).toBe(kind);
+    expect(p.battleData.activeEffects[0]).toMatchObject({ duration: 2, consumeOn: "ownAttack", expireAtTurnEnd: true });
+    expect(collectModifiers([p], "p1", { flag: "advantage" }).flags.length).toBeGreaterThan(0);
   });
 
-  it("lose_bonus_action / lose_action ставлять прапорці без ефекту", () => {
-    const bonus = apply("lose_bonus_action");
+  it("free attack grants an extra action", () => {
+    expect(apply("free_attack").battleData.pendingExtraActions).toBe(1);
+  });
 
-    const action = apply("lose_action");
+  it("free attack off turn grants nothing", () => {
+    const p = applyCriticalEffect(createMockParticipant(), crit("free_attack"), 3, undefined, { offTurn: true });
+
+    expect(p.battleData.pendingExtraActions ?? 0).toBe(0);
+  });
+
+  it("combo grants an extra action with a consumable disadvantage", () => {
+    const p = apply("combo_attack");
+
+    expect(p.battleData.pendingExtraActions).toBe(1);
+    expect(p.battleData.activeEffects[0]).toMatchObject({ consumeOn: "ownAttack" });
+  });
+
+  it("marks on target and self make attackers roll with advantage", () => {
+    for (const type of ["advantage_on_target", "advantage_on_self"]) {
+      expect(collectModifiers([apply(type)], "p1", { flag: "advantageForAttackers" }).flags.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("prone gives attackers advantage and the owner disadvantage", () => {
+    const p = apply("prone", { duration: 2 });
+
+    expect(collectModifiers([p], "p1", { flag: "advantageForAttackers" }).flags.length).toBeGreaterThan(0);
+    expect(collectModifiers([p], "p1", { flag: "disadvantage" }).flags.length).toBeGreaterThan(0);
+  });
+
+  it("losing the reaction is immediate", () => {
+    const p = apply("lose_reaction");
+
+    expect(p.actionFlags.hasUsedReaction).toBe(true);
+    expect(p.battleData.activeEffects).toHaveLength(0);
+  });
+
+  it("losing the action skips the next turn's action", () => {
+    const p = apply("lose_action");
+
+    expect(effectTypes(p)).toEqual(["skip_action"]);
+    expect(p.battleData.activeEffects[0].effects[0].value).toBe(100);
+  });
+
+  it("weakened_next_hit is consumed by the owner's hit", () => {
+    const p = apply("weakened_next_hit", { duration: 2 });
+
+    expect(p.battleData.activeEffects[0]).toMatchObject({ consumeOn: "ownHit", effects: [{ type: "weakened_next_hit", value: 0.5 }] });
+  });
+
+  it("lose_bonus_action sets the flag without an effect", () => {
+    const bonus = apply("lose_bonus_action");
 
     expect(bonus.actionFlags.hasUsedBonusAction).toBe(true);
     expect(bonus.battleData.activeEffects).toHaveLength(0);
-    expect(action.actionFlags.hasUsedAction).toBe(true);
   });
 
   it("ефекти урону й побічні (double_damage, simple_miss…) не змінюють учасника", () => {

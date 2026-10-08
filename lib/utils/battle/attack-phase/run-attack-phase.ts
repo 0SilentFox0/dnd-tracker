@@ -188,6 +188,8 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   let damageCursor = 0;
 
+  let grantedExtra = false;
+
   for (let i = 0; i < targets.length; i++) {
     const target = targets[i];
 
@@ -245,6 +247,8 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
     currentInitiativeOrder = currentInitiativeOrder.map((p) => updatedMap.get(p.basicInfo.id) ?? p);
     currentAttacker = attackResult.attackerUpdated;
 
+    if (["free_attack", "combo_attack"].includes(attackResult.criticalEffectApplied?.effect.type ?? "")) grantedExtra = true;
+
     if (rolledByServer && attackResult.success) {
       attackResult.battleAction.resultText = `${attackResult.battleAction.resultText} | 🎲 кубики шкоди кинув сервер: ${damageRollsForTarget.slice(sentRolls.length).join(", ")}`;
     }
@@ -280,6 +284,12 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
     }
 
     if (!isActive(currentAttacker)) break;
+  }
+
+  if (grantedExtra) {
+    currentInitiativeOrder = currentInitiativeOrder.map((p) =>
+      p.basicInfo.id === attacker.basicInfo.id ? { ...p, actionFlags: { ...p.actionFlags, hasUsedAction: false } } : p,
+    );
   }
 
   const finalInitiativeOrder = currentInitiativeOrder;
