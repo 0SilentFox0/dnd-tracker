@@ -29,6 +29,7 @@ import {
   type Tally,
   treeInput,
   unitAbilities,
+  unitAvatar,
   unitRow,
 } from "./seed-library-lib";
 
@@ -180,16 +181,20 @@ async function main() {
 
   const maps: IdMaps = { groups, spells, races };
 
-  const unitRows = await prisma.unit.findMany({ where: { campaignId }, select: { id: true, name: true } });
+  const unitRows = await prisma.unit.findMany({ where: { campaignId }, select: { id: true, name: true, avatar: true } });
 
   const units = new Map<string, string>();
 
   for (const unit of library.units) {
     const data = unitRow(unit, maps, races);
 
+    const iconUrl = iconPublicUrl(supabaseUrl, unit.key, "unit");
+
+    const unitSelect = { id: true, name: true, avatar: true } as const;
+
     units.set(unit.key, await upsert("юніти", unitRows, unit.name, {
-      create: () => prisma.unit.create({ data: { campaignId, ...data }, select: { id: true, name: true } }),
-      update: (id) => prisma.unit.update({ where: { id }, data, select: { id: true, name: true } }),
+      create: () => prisma.unit.create({ data: { campaignId, ...data, ...unitAvatar(iconUrl) }, select: unitSelect }),
+      update: (id) => prisma.unit.update({ where: { id }, data: { ...data, ...unitAvatar(iconUrl, unitRows.find((r) => r.id === id)?.avatar) }, select: unitSelect }),
     }));
   }
 

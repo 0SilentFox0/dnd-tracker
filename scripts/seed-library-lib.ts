@@ -145,6 +145,11 @@ export function unitRow(unit: LibraryUnit, maps: Pick<IdMaps, "groups" | "spells
   };
 }
 
+/** Library icon on create; on update only fills an empty avatar so a DM-set one survives. */
+export function unitAvatar(iconUrl: string, existingAvatar?: string | null): { avatar?: string } {
+  return existingAvatar ? {} : { avatar: iconUrl };
+}
+
 export function mapRaceModifiers(modifiers: { raceKey: string; percent: number }[], races: ReadonlyMap<string, string>) {
   return modifiers.map((m) => ({ raceId: lookup(races, m.raceKey, "расу"), percent: m.percent }));
 }

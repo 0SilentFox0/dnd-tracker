@@ -24,6 +24,7 @@
     "import-skills-library": "tsx scripts/import-skills-library.ts",
     "import-artifact-icons": "tsx scripts/import-artifact-icons.ts",
     "import-wiki-icons": "tsx scripts/import-wiki-icon-bundle.ts",
+    "import-unit-icons": "tsx scripts/import-unit-icon-bundle.ts",
     "seed-library": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/seed-library.ts",
     "balance-library": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/balance-library.ts",
     "simulate-battle": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/simulate-battle.ts",
