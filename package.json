@@ -15,7 +15,6 @@
     "deploy:preview": "vercel",
     "deploy:dev": "vercel --dev",
     "sync-env:vercel": "node scripts/sync-env-to-vercel.mjs",
-    "import-docs-spells": "tsx scripts/import-docs-spells.ts",
     "migrate-spell-icons-to-supabase": "tsx scripts/migrate-spell-icons-to-supabase.ts",
     "redistribute-character-spell-slots": "tsx scripts/redistribute-character-spell-slots.ts",
     "migrate-unit-icons-to-supabase": "tsx scripts/migrate-unit-icons-to-supabase.ts",

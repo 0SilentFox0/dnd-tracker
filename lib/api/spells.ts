@@ -6,6 +6,7 @@ import {
   campaignRequest,
 } from "@/lib/api/client";
 import { SPELL_IDS_QUERY_MAX } from "@/lib/constants/spells";
+import type { CreateSpellInput, UpdateSpellInput } from "@/lib/schemas/spells";
 import type { BookSpell, Spell, SpellGroup } from "@/types/spells";
 
 export async function updateSpellAppearance(
@@ -98,12 +99,7 @@ export async function deleteAllSpells(
 
 export async function createSpell(
   campaignId: string,
-  data: Partial<Spell> & {
-    name: string;
-    description: string;
-    type: string;
-    damageType: string;
-  },
+  data: CreateSpellInput,
 ): Promise<Spell> {
   return campaignPost<Spell>(campaignId, "/spells", data);
 }
@@ -118,7 +114,7 @@ export async function getSpell(
 export async function updateSpell(
   campaignId: string,
   spellId: string,
-  data: Partial<Spell>,
+  data: UpdateSpellInput,
 ): Promise<Spell> {
   return campaignPatch<Spell>(campaignId, `/spells/${spellId}`, data);
 }
@@ -141,16 +137,5 @@ export async function deleteSpellsByLevel(
     campaignId,
     "/spells/delete-by-level",
     { method: "DELETE", body: { level } },
-  );
-}
-
-export async function importSpells(
-  campaignId: string,
-  body: { spells: unknown[]; groupId?: string },
-): Promise<{ imported: number }> {
-  return campaignPost<{ imported: number }>(
-    campaignId,
-    "/spells/import",
-    body,
   );
 }

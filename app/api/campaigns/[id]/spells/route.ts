@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
 
 import { listSpellsQuerySchema } from "./list-spells-query";
 
@@ -12,6 +11,7 @@ import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { loadBookSpellsByIds } from "@/lib/utils/spells/book-spells-by-ids";
+import { spellDefinitionColumns } from "@/lib/utils/spells/model/read";
 
 export async function POST(
   request: Request,
@@ -35,32 +35,14 @@ export async function POST(
         campaignId: id,
         name: data.name,
         level: data.level,
-        type: data.type,
-        target: data.target || null,
-        damageType: data.damageType,
-        damageElement: data.damageElement || null,
-        damageModifier: data.damageModifier || null,
-        healModifier: data.healModifier || null,
-        castingTime: data.castingTime || null,
-        range: data.range || null,
-        duration: data.duration || null,
-        diceCount: data.diceCount || null,
-        diceType: data.diceType || null,
-        savingThrow: data.savingThrow
-          ? (data.savingThrow as unknown as Prisma.InputJsonValue)
-          : undefined,
-        description: data.description ?? null,
-        effects: data.effects ? (data.effects as unknown as Prisma.InputJsonValue) : undefined,
         groupId: data.groupId || null,
         icon: data.icon || null,
-        summonUnitId:
-          data.summonUnitId && data.summonUnitId.length > 0
-            ? data.summonUnitId
-            : null,
-        damageDistribution:
-          data.damageDistribution && data.damageDistribution.length > 0
-            ? (data.damageDistribution as unknown as Prisma.InputJsonValue)
-            : undefined,
+        description: data.description ?? null,
+        appearanceDescription: data.appearanceDescription ?? null,
+        // старі колонки NOT NULL до пізнішої міграції; нова модель їх не читає
+        type: "target",
+        damageType: "damage",
+        ...spellDefinitionColumns({ dice: data.dice, cost: data.cost, targeting: data.targeting, resolution: data.resolution, effects: data.spellEffects, raceModifiers: data.raceModifiers }),
       },
       include: {
         spellGroup: true,

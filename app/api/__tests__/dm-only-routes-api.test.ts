@@ -41,7 +41,6 @@ import * as member from "@/app/api/campaigns/[id]/members/[memberId]/route";
 import * as races from "@/app/api/campaigns/[id]/races/route";
 import * as duplicateSkill from "@/app/api/campaigns/[id]/skills/[skillId]/duplicate/route";
 import * as spellOne from "@/app/api/campaigns/[id]/spells/[spellId]/route";
-import * as importSpells from "@/app/api/campaigns/[id]/spells/import/route";
 import * as spells from "@/app/api/campaigns/[id]/spells/route";
 import * as units from "@/app/api/campaigns/[id]/units/route";
 import { API_ERRORS } from "@/lib/constants/api-errors";
@@ -59,7 +58,6 @@ const cases: Array<[string, Handler]> = [
   ["POST spells", spells.POST],
   ["PATCH spells/:spellId", spellOne.PATCH],
   ["DELETE spells/:spellId", spellOne.DELETE],
-  ["POST spells/import", importSpells.POST],
   ["POST artifact-sets", artifactSets.POST],
   ["PATCH artifact-sets/:setId", artifactSetOne.PATCH],
   ["DELETE artifact-sets/:setId", artifactSetOne.DELETE],

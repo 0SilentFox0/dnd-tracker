@@ -11,8 +11,8 @@ import { ProfileSpellBook } from "@/components/character-profile/ProfileSpellBoo
 import type { BookSpell } from "@/types/spells";
 
 const spells: BookSpell[] = [
-  { id: "m", name: "Мітка мисливця", level: 1, type: "target", damageType: "damage", diceCount: 1, diceType: "d6", concentration: true },
-  { id: "c", name: "Туманна хмара", level: 1, type: "aoe", damageType: "all" },
+  { id: "m", name: "Мітка мисливця", level: 1, dice: 1, targeting: { kind: "enemy" } },
+  { id: "c", name: "Туманна хмара", level: 1, dice: 0, targeting: { kind: "allEnemies" } },
 ];
 
 function Harness() {
