@@ -80,6 +80,19 @@ const FULL_CASTER_CURVE: number[][] = [
   [4, 3, 3, 3, 2],
 ];
 
+export function hasSpellSlotProgression(progression: SpellSlotProgression[] | null | undefined): progression is SpellSlotProgression[] {
+  return Array.isArray(progression) && progression.some((p) => p.slots > 0);
+}
+
+/** Слоти героя рівня level у вигляді { max, current = max } без нульових рівнів. */
+export function fullSpellSlots(level: number, progression: SpellSlotProgression[] | null | undefined, maxLevel = 20): SpellSlots {
+  return Object.fromEntries(
+    Object.entries(calculateSpellSlotsForLevel(level, maxLevel, progression ?? []))
+      .filter(([, v]) => v.max > 0)
+      .map(([k, v]) => [k, { max: v.max, current: v.max }]),
+  );
+}
+
 /**
  * Обчислює магічні слоти для рівня (з програмації раси)
  *
@@ -99,12 +112,12 @@ export function calculateSpellSlotsForLevel(
     "5": { max: 0, current: 0 },
   };
 
-  // Якщо немає програмації — використовуємо фіксовану програмацію для персонажів
-  if (!spellSlotProgression || spellSlotProgression.length === 0) {
+  if (level < 1) return slots;
+
+  // Немає програмації (або всі нулі — типове значення форми раси) — фіксована таблиця персонажів
+  if (!hasSpellSlotProgression(spellSlotProgression)) {
     return calculateCharacterSpellSlots(level);
   }
-
-  if (level === 0) return slots;
 
   const curve = FULL_CASTER_CURVE[Math.min(level, FULL_CASTER_CURVE.length) - 1];
 

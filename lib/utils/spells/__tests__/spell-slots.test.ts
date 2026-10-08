@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
   calculateCharacterSpellSlots,
   calculateSpellSlotsForLevel,
+  fullSpellSlots,
+  hasSpellSlotProgression,
 } from "../spell-slots";
 
 import { RACES } from "@/data/library/races";
@@ -94,5 +96,29 @@ describe("бібліотечна програмація рас 4/3/3/2/1", () =>
     [17, { "1": 4, "2": 3, "3": 3, "4": 2, "5": 1 }],
   ])("герой рівня %i", (level, expected) => {
     expect(slotsAt(level)).toEqual(expected);
+  });
+});
+
+describe("calculateSpellSlotsForLevel: крайні випадки", () => {
+  it("рівень нижче 1 — порожні слоти і з програмацією, і без", () => {
+    const progression = RACES[0].spellSlotProgression;
+
+    for (const level of [0, -1]) {
+      for (const p of [progression, []]) {
+        expect(Object.values(calculateSpellSlotsForLevel(level, 20, p)).every((v) => v.max === 0)).toBe(true);
+      }
+    }
+  });
+
+  it("програмація з самих нулів (типова з форми раси) — як без програмації", () => {
+    const zeros = [1, 2, 3, 4, 5].map((level) => ({ level, slots: 0 }));
+
+    expect(calculateSpellSlotsForLevel(9, 20, zeros)).toEqual(calculateSpellSlotsForLevel(9, 20, []));
+    expect(hasSpellSlotProgression(zeros)).toBe(false);
+    expect(hasSpellSlotProgression(RACES[0].spellSlotProgression)).toBe(true);
+  });
+
+  it("fullSpellSlots: без нульових рівнів, current = max", () => {
+    expect(fullSpellSlots(5, RACES[0].spellSlotProgression)).toEqual({ "1": { max: 4, current: 4 }, "2": { max: 3, current: 3 }, "3": { max: 2, current: 2 } });
   });
 });
