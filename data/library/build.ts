@@ -8,7 +8,7 @@ import { BRANCH_ICONS, SKILL_ICONS } from "@/data/skill-icons";
 import { AbilitySchema } from "@/lib/utils/abilities/schema";
 import { SpellDefinitionSchema } from "@/lib/utils/spells/model/schema";
 
-export const LIBRARY_COMPLETE = false;
+export const LIBRARY_COMPLETE = true;
 
 export const MIN_APPEARANCE_LENGTH = 80;
 
