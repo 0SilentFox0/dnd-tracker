@@ -39,6 +39,7 @@ export interface LibraryBranch extends LibraryEntry {
 
 export interface LibraryRace extends LibraryEntry {
   color?: string;
+  branchKeys: string[];
   levels: LibrarySkill[];
   ultimate: LibrarySkill;
 }

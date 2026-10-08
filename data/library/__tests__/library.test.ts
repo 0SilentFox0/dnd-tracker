@@ -42,6 +42,7 @@ function race(key: string): LibraryRace {
     name: `Раса ${key}`,
     description: "Опис раси.",
     appearanceDescription: APPEARANCE,
+    branchKeys: ["b"],
     levels: [skill(`${key}-1`), skill(`${key}-2`), skill(`${key}-3`)],
     ultimate: skill(`${key}-u`),
   };
@@ -71,6 +72,9 @@ describe("buildLibrary validation", () => {
 
     expect(lib.schools).toEqual(["Світло"]);
     expect(lib.skills).toHaveLength(6);
+
+    expect(() => buildLibrary(source({ branches: [branch("b")], races: [{ ...race("r"), branchKeys: ["x"] }] }))).toThrow(/невідома гілка «x»/);
+    expect(() => buildLibrary(source({ branches: [branch("b")], races: [{ ...race("r"), branchKeys: [] }] }))).toThrow(/порожній список/);
     expect(lib.spellByKey.has("s")).toBe(true);
   });
 
@@ -145,6 +149,20 @@ describe("library content", () => {
     expect(RACES).toHaveLength(7);
 
     for (const r of RACES) expect(raceSkills(r), r.key).toHaveLength(4);
+  });
+
+  content("race trees use the agreed branch sets", () => {
+    const keys = Object.fromEntries(RACES.map((r) => [r.key, r.branchKeys]));
+
+    expect(keys).toEqual({
+      humans: ["leadership", "ranged", "attack", "defense", "light"],
+      necromancers: ["ranged", "attack", "defense", "dark"],
+      demons: ["attack", "defense", "ranged", "dark", "leadership", "chaos"],
+      elves: ["leadership", "ranged", "attack", "defense", "nature"],
+      dwarves: ["leadership", "ranged", "attack", "defense", "light"],
+      mages: ["light", "dark", "chaos", "nature", "defense", "leadership"],
+      "dark-elves": ["attack", "defense", "ranged", "dark", "chaos"],
+    });
   });
 
   content("has 10 personal abilities", () => {

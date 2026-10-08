@@ -43,6 +43,7 @@ const RUNE_ARMOR = [10, 15, 20];
 
 const humans: LibraryRace = {
   key: "humans",
+  branchKeys: ["leadership", "ranged", "attack", "defense", "light"],
   name: "Люди",
   color: "#c9a227",
   iconKey: "racial-humans-basic",
@@ -86,6 +87,7 @@ const humans: LibraryRace = {
 
 const demons: LibraryRace = {
   key: "demons",
+  branchKeys: ["attack", "defense", "ranged", "dark", "leadership", "chaos"],
   name: "Демони",
   color: "#b3261e",
   iconKey: "racial-demons-basic",
@@ -129,6 +131,7 @@ const demons: LibraryRace = {
 
 const elves: LibraryRace = {
   key: "elves",
+  branchKeys: ["leadership", "ranged", "attack", "defense", "nature"],
   name: "Ельфи",
   color: "#3f8f3a",
   iconKey: "racial-elves-basic",
@@ -171,6 +174,7 @@ const elves: LibraryRace = {
 
 const necromancers: LibraryRace = {
   key: "necromancers",
+  branchKeys: ["ranged", "attack", "defense", "dark"],
   name: "Некроманти",
   color: "#5b3f8c",
   iconKey: "racial-necromancers-basic",
@@ -216,6 +220,7 @@ const necromancers: LibraryRace = {
 
 const mages: LibraryRace = {
   key: "mages",
+  branchKeys: ["light", "dark", "chaos", "nature", "defense", "leadership"],
   name: "Маги",
   color: "#2f6fb3",
   iconKey: "racial-mages-basic",
@@ -258,6 +263,7 @@ const mages: LibraryRace = {
 
 const darkElves: LibraryRace = {
   key: "dark-elves",
+  branchKeys: ["attack", "defense", "ranged", "dark", "chaos"],
   name: "Темні ельфи",
   color: "#6b2d5c",
   iconKey: "racial-dark-elves-basic",
@@ -311,6 +317,7 @@ const darkElves: LibraryRace = {
 
 const dwarves: LibraryRace = {
   key: "dwarves",
+  branchKeys: ["leadership", "ranged", "attack", "defense", "light"],
   name: "Гноми",
   color: "#8a6a3b",
   iconKey: "racial-dwarves-basic",

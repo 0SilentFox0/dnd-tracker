@@ -106,7 +106,17 @@ export function buildLibrary(source: LibrarySource = LIBRARY_SOURCE): Library {
     }
   }
 
-  for (const race of source.races) checkEntry("Раса", race);
+  for (const race of source.races) {
+    checkEntry("Раса", race);
+
+    if (race.branchKeys.length === 0) issues.push(`Раса «${race.key}»: порожній список гілок`);
+
+    if (new Set(race.branchKeys).size !== race.branchKeys.length) issues.push(`Раса «${race.key}»: гілка повторюється`);
+
+    for (const key of race.branchKeys) {
+      if (!source.branches.some((b) => b.key === key)) issues.push(`Раса «${race.key}»: невідома гілка «${key}»`);
+    }
+  }
 
   for (const skill of skills) {
     checkEntry("Скіл", skill);

@@ -82,6 +82,10 @@ export function mapRaceModifiers(modifiers: { raceKey: string; percent: number }
   return modifiers.map((m) => ({ raceId: lookup(races, m.raceKey, "расу"), percent: m.percent }));
 }
 
+function failBranch(key: string): never {
+  throw new Error(`Невідома гілка «${key}» у складі раси`);
+}
+
 export function treeInput(
   race: LibraryRace,
   branches: LibraryBranch[],
@@ -93,7 +97,7 @@ export function treeInput(
 
   return {
     race: race.name,
-    branches: branches.map((b) => ({
+    branches: race.branchKeys.map((key) => branches.find((b) => b.key === key) ?? failBranch(key)).map((b) => ({
       id: lookup(ids.mainSkills, b.key, "гілку"),
       name: b.name,
       color: b.color,

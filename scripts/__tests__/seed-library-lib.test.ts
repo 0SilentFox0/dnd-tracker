@@ -52,7 +52,7 @@ describe("seed-library-lib", () => {
         input.ultimate,
       ];
 
-      expect(input.branches).toHaveLength(8);
+      expect(input.branches.map((b) => b.name)).toEqual(race.branchKeys.map((k) => lib.branches.find((b) => b.key === k)?.name));
       expect(new Set(ids).size).toBe(ids.length);
       expect(input.race).toBe(race.name);
     }
