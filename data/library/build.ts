@@ -4,7 +4,7 @@ import { RACES } from "./races";
 import { SPELLS } from "./spells";
 import type { Library, LibraryEntry, LibrarySkill, LibrarySource } from "./types";
 
-import { BRANCH_ICONS, SKILL_ICONS } from "@/data/skill-icons";
+import { BRANCH_ICONS, SKILL_ICONS, SPELL_ICONS } from "@/data/skill-icons";
 import { AbilitySchema } from "@/lib/utils/abilities/schema";
 import { SpellDefinitionSchema } from "@/lib/utils/spells/model/schema";
 
@@ -49,7 +49,9 @@ export function buildLibrary(source: LibrarySource = LIBRARY_SOURCE): Library {
 
   const icons = new Set([...Object.keys(SKILL_ICONS), ...Object.keys(BRANCH_ICONS)]);
 
-  const checkEntry = (kind: string, entry: LibraryEntry) => {
+  const spellIcons = new Set(Object.keys(SPELL_ICONS));
+
+  const checkEntry = (kind: string, entry: LibraryEntry, iconSet: Set<string> = icons) => {
     const label = `${kind} «${entry.key}»`;
 
     if (!entry.key.trim()) issues.push(`${kind}: порожній key (${entry.name})`);
@@ -62,7 +64,7 @@ export function buildLibrary(source: LibrarySource = LIBRARY_SOURCE): Library {
       issues.push(`${label}: опис вигляду коротший за ${MIN_APPEARANCE_LENGTH} символів`);
     }
 
-    if (entry.iconKey !== undefined && !icons.has(entry.iconKey)) issues.push(`${label}: невідомий iconKey «${entry.iconKey}»`);
+    if (entry.iconKey !== undefined && !iconSet.has(entry.iconKey)) issues.push(`${label}: невідомий iconKey «${entry.iconKey}»`);
   };
 
   const checkUnique = (kind: string, field: "key" | "name", items: LibraryEntry[]) => {
@@ -82,7 +84,9 @@ export function buildLibrary(source: LibrarySource = LIBRARY_SOURCE): Library {
   const schools = [...new Set(source.spells.map((s) => s.school))];
 
   for (const spell of source.spells) {
-    checkEntry("Заклинання", spell);
+    checkEntry("Заклинання", spell, spellIcons);
+
+    if (spell.iconKey === undefined) issues.push(`Заклинання «${spell.key}»: немає iconKey`);
 
     const parsed = SpellDefinitionSchema.safeParse({
       ...spell.definition,

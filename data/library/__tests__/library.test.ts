@@ -7,7 +7,7 @@ import { RACES } from "../races";
 import { SPELLS } from "../spells";
 import type { LibraryBranch, LibraryRace, LibrarySkill, LibrarySource, LibrarySpell } from "../types";
 
-import { BRANCH_ICONS, SKILL_ICONS } from "@/data/skill-icons";
+import { BRANCH_ICONS, SKILL_ICONS, SPELL_ICONS } from "@/data/skill-icons";
 
 const APPEARANCE = "Світло розгортається над полем бою золотим куполом, і навіть найстаміший воїн відчуває, як повертаються сили.";
 
@@ -25,6 +25,7 @@ function skill(key: string, over: Partial<LibrarySkill> = {}): LibrarySkill {
 function spell(key: string, over: Partial<LibrarySpell> = {}): LibrarySpell {
   return {
     key,
+    iconKey: "haste",
     name: `Заклинання ${key}`,
     description: "Завдає шкоди.",
     appearanceDescription: APPEARANCE,
@@ -102,6 +103,11 @@ describe("buildLibrary validation", () => {
   it("rejects unknown icon keys", () => {
     expect(() => buildLibrary(source({ personal: [skill("p", { iconKey: "nope" })] }))).toThrow(/невідомий iconKey/);
     expect(() => buildLibrary(source({ personal: [skill("p", { iconKey: "brutality" })] }))).not.toThrow();
+  });
+
+  it("requires known spell icons", () => {
+    expect(() => buildLibrary(source({ spells: [spell("s", { iconKey: undefined })] }))).toThrow(/немає iconKey/);
+    expect(() => buildLibrary(source({ spells: [spell("s", { iconKey: "brutality" })] }))).toThrow(/невідомий iconKey/);
   });
 
   it("rejects short or empty descriptions", () => {
@@ -186,7 +192,7 @@ describe("library content", () => {
       expect(e.description.trim(), e.key).not.toBe("");
       expect(e.appearanceDescription.length, e.key).toBeGreaterThanOrEqual(MIN_APPEARANCE_LENGTH);
 
-      if (e.iconKey) expect(icons.has(e.iconKey), e.key).toBe(true);
+      if (e.iconKey) expect((SPELLS.includes(e as never) ? Object.keys(SPELL_ICONS) : [...icons]).includes(e.iconKey), e.key).toBe(true);
     }
   });
 

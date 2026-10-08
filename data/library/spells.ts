@@ -80,6 +80,7 @@ export const SPELLS: LibrarySpell[] = [
   // ── Світло ─────────────────────────────────────────────────────────────
   {
     key: "divine-strength",
+    iconKey: "divine-strength",
     name: "Божественна сила",
     school: LIGHT,
     level: 1,
@@ -91,6 +92,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "haste",
+    iconKey: "haste",
     name: "Поспіх",
     school: LIGHT,
     level: 1,
@@ -102,6 +104,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "regeneration",
+    iconKey: "regeneration",
     name: "Регенерація",
     school: LIGHT,
     level: 2,
@@ -113,6 +116,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "cleansing",
+    iconKey: "cleansing",
     name: "Очищення",
     school: LIGHT,
     level: 2,
@@ -124,6 +128,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "stoneskin",
+    iconKey: "stoneskin",
     name: "Кам'яна шкіра",
     school: LIGHT,
     level: 3,
@@ -135,6 +140,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "righteous-might",
+    iconKey: "righteous-might",
     name: "Праведна міць",
     school: LIGHT,
     level: 3,
@@ -146,6 +152,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "evasion",
+    iconKey: "evasion",
     name: "Ухилення",
     school: LIGHT,
     level: 3,
@@ -157,6 +164,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "magic-immunity",
+    iconKey: "magic-immunity",
     name: "Магічний імунітет",
     school: LIGHT,
     level: 4,
@@ -171,6 +179,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "teleportation",
+    iconKey: "teleportation",
     name: "Телепортація",
     school: LIGHT,
     level: 4,
@@ -182,6 +191,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "divine-retribution",
+    iconKey: "divine-retribution",
     name: "Божественна відплата",
     school: LIGHT,
     level: 5,
@@ -193,6 +203,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "word-of-light",
+    iconKey: "word-of-light",
     name: "Слово світла",
     school: LIGHT,
     level: 5,
@@ -209,6 +220,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "resurrection",
+    iconKey: "resurrection",
     name: "Воскресіння",
     school: LIGHT,
     level: 5,
@@ -220,6 +232,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "eternal-light",
+    iconKey: "eternal-light",
     name: "Вічне світло",
     school: LIGHT,
     level: 4,
@@ -233,6 +246,7 @@ export const SPELLS: LibrarySpell[] = [
   // ── Темрява ────────────────────────────────────────────────────────────
   {
     key: "weakness",
+    iconKey: "weakness",
     name: "Ослаблення",
     school: DARK,
     level: 1,
@@ -244,6 +258,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "slow",
+    iconKey: "slow",
     name: "Сповільнення",
     school: DARK,
     level: 1,
@@ -255,6 +270,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "frailty",
+    iconKey: "frailty",
     name: "Немічність",
     school: DARK,
     level: 2,
@@ -266,6 +282,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "plague",
+    iconKey: "plague",
     name: "Чума",
     school: DARK,
     level: 2,
@@ -277,6 +294,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "confusion",
+    iconKey: "confusion",
     name: "Розсіяність",
     school: DARK,
     level: 3,
@@ -288,6 +306,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "suffering",
+    iconKey: "suffering",
     name: "Страждання",
     school: DARK,
     level: 3,
@@ -299,6 +318,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "sorrow",
+    iconKey: "sorrow",
     name: "Смуток",
     school: DARK,
     level: 3,
@@ -310,6 +330,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "blindness",
+    iconKey: "blindness",
     name: "Сліпота",
     school: DARK,
     level: 4,
@@ -331,6 +352,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "berserk",
+    iconKey: "berserk",
     name: "Шал",
     school: DARK,
     level: 4,
@@ -342,6 +364,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "puppet-master",
+    iconKey: "puppet-master",
     name: "Ляльковод",
     school: DARK,
     level: 5,
@@ -353,6 +376,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "vampirism",
+    iconKey: "vampirism",
     name: "Вампіризм",
     school: DARK,
     level: 5,
@@ -364,6 +388,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "curse-of-the-netherworld",
+    iconKey: "curse-of-the-netherworld",
     name: "Прокляття Потойбіччя",
     school: DARK,
     level: 5,
@@ -377,6 +402,7 @@ export const SPELLS: LibrarySpell[] = [
   // ── Хаос ───────────────────────────────────────────────────────────────
   {
     key: "eldritch-arrow",
+    iconKey: "eldritch-arrow",
     name: "Потойбічна стріла",
     school: CHAOS,
     level: 1,
@@ -388,6 +414,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "stone-spikes",
+    iconKey: "stone-spikes",
     name: "Кам'яні шипи",
     school: CHAOS,
     level: 1,
@@ -399,6 +426,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "ice-bolt",
+    iconKey: "ice-bolt",
     name: "Крижаний болт",
     school: CHAOS,
     level: 2,
@@ -410,6 +438,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "lightning-bolt",
+    iconKey: "lightning-bolt",
     name: "Блискавка",
     school: CHAOS,
     level: 2,
@@ -421,6 +450,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "fireball",
+    iconKey: "fireball",
     name: "Вогняна куля",
     school: CHAOS,
     level: 3,
@@ -432,6 +462,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "fire-wall",
+    iconKey: "fire-wall",
     name: "Вогняна стіна",
     school: CHAOS,
     level: 3,
@@ -443,6 +474,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "circle-of-winter",
+    iconKey: "circle-of-winter",
     name: "Коло зими",
     school: CHAOS,
     level: 3,
@@ -454,6 +486,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "chain-lightning",
+    iconKey: "chain-lightning",
     name: "Ланцюгова блискавка",
     school: CHAOS,
     level: 4,
@@ -465,6 +498,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "meteor-shower",
+    iconKey: "meteor-shower",
     name: "Метеоритний дощ",
     school: CHAOS,
     level: 4,
@@ -476,6 +510,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "deep-freeze",
+    iconKey: "deep-freeze",
     name: "Глибока заморозка",
     school: CHAOS,
     level: 5,
@@ -487,6 +522,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "armageddon",
+    iconKey: "armageddon",
     name: "Армагеддон",
     school: CHAOS,
     level: 5,
@@ -498,6 +534,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "implosion",
+    iconKey: "implosion",
     name: "Імплозія",
     school: CHAOS,
     level: 5,
@@ -511,6 +548,7 @@ export const SPELLS: LibrarySpell[] = [
   // ── Природа ────────────────────────────────────────────────────────────
   {
     key: "roots",
+    iconKey: "roots",
     name: "Корені",
     school: NATURE,
     level: 1,
@@ -522,6 +560,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "healing-word",
+    iconKey: "healing-word",
     name: "Слово лікування",
     school: NATURE,
     level: 1,
@@ -533,6 +572,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "thorny-vines",
+    iconKey: "thorny-vines",
     name: "Колючі лози",
     school: NATURE,
     level: 2,
@@ -544,6 +584,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "moonbeam",
+    iconKey: "moonbeam",
     name: "Місячний промінь",
     school: NATURE,
     level: 2,
@@ -555,6 +596,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "wasp-swarm",
+    iconKey: "wasp-swarm",
     name: "Рій ос",
     school: NATURE,
     level: 3,
@@ -566,6 +608,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "forest-spirit",
+    iconKey: "forest-spirit",
     name: "Дух лісу",
     school: NATURE,
     level: 3,
@@ -577,6 +620,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "entangle",
+    iconKey: "entangle",
     name: "Сплутування",
     school: NATURE,
     level: 3,
@@ -588,6 +632,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "earthquake",
+    iconKey: "earthquake",
     name: "Землетрус",
     school: NATURE,
     level: 4,
@@ -599,6 +644,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "healing-wave",
+    iconKey: "healing-wave",
     name: "Хвиля зцілення",
     school: NATURE,
     level: 4,
@@ -610,6 +656,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "nature-storm",
+    iconKey: "nature-storm",
     name: "Шторм природи",
     school: NATURE,
     level: 5,
@@ -621,6 +668,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "forest-rebirth",
+    iconKey: "forest-rebirth",
     name: "Відродження лісу",
     school: NATURE,
     level: 5,
@@ -632,6 +680,7 @@ export const SPELLS: LibrarySpell[] = [
   },
   {
     key: "call-of-the-beast",
+    iconKey: "call-of-the-beast",
     name: "Поклик звіра",
     school: NATURE,
     level: 5,
@@ -645,6 +694,7 @@ export const SPELLS: LibrarySpell[] = [
   // ── Спеціальні ─────────────────────────────────────────────────────────
   {
     key: "avatar",
+    iconKey: "avatar",
     name: "Аватар",
     school: NATURE,
     level: 4,

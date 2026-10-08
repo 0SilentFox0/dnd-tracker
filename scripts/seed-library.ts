@@ -130,7 +130,7 @@ async function main() {
       name: spell.name,
       level: spell.level,
       groupId: groups.get(spell.school),
-      icon: icon(spell.iconKey),
+      icon: spell.iconKey ? iconPublicUrl(supabaseUrl, spell.iconKey, "spell") : undefined,
       description: spell.description,
       appearanceDescription: spell.appearanceDescription,
       dice: d.dice,

@@ -9,7 +9,7 @@ const ASSETS = path.join(process.cwd(), "assets");
 function existingFiles(): Set<string> {
   const set = new Set<string>();
 
-  for (const dir of ["skill-icons", "main-skill-icons"]) {
+  for (const dir of ["skill-icons", "main-skill-icons", "spell-icons"]) {
     const full = path.join(ASSETS, dir);
 
     if (fs.existsSync(full)) for (const f of fs.readdirSync(full)) set.add(`${dir}/${f}`);

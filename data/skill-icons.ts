@@ -1,3 +1,5 @@
+export { SPELL_ICONS } from "./spell-icons-map";
+
 const LEVELS = ["basic", "advanced", "expert"] as const;
 
 const H5_BRANCH: Record<string, string> = {
@@ -105,10 +107,14 @@ export const SKILL_ICONS: Record<string, string> = {
   ...Object.fromEntries(RACIAL_ICONS),
 };
 
-export function iconBucket(key: string): "skill-icons" | "main-skill-icons" {
+export type IconKind = "skill" | "spell";
+
+export function iconBucket(key: string, kind: IconKind = "skill"): "skill-icons" | "main-skill-icons" | "spell-icons" {
+  if (kind === "spell") return "spell-icons";
+
   return key in BRANCH_ICONS ? "main-skill-icons" : "skill-icons";
 }
 
-export function iconPublicUrl(supabaseUrl: string, key: string): string {
-  return `${supabaseUrl}/storage/v1/object/public/${iconBucket(key)}/${key}.webp`;
+export function iconPublicUrl(supabaseUrl: string, key: string, kind: IconKind = "skill"): string {
+  return `${supabaseUrl}/storage/v1/object/public/${iconBucket(key, kind)}/${key}.webp`;
 }
