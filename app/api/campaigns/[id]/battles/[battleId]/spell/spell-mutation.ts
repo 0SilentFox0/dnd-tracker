@@ -81,9 +81,11 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
     assertSpellRolls(expected, diceRolls);
 
     // клієнтські рятівні кидки приймаються лише від DM або за цілі, якими керує користувач; решту кидає сервер
-    const trusted = (data.saveRolls ?? []).filter((s) => ctx.isDM || order.find((p) => p.basicInfo.id === s.participantId)?.basicInfo.controlledBy === ctx.userId);
+    const sent = data.saveRolls ?? [];
 
-    const serverRolled = definition.resolution.kind === "save" ? resolution.targetIds.filter((id) => !trusted.some((s) => s.participantId === id)) : [];
+    const trusted = sent.filter((s) => ctx.isDM || order.find((p) => p.basicInfo.id === s.participantId)?.basicInfo.controlledBy === ctx.userId);
+
+    const serverRolled = sent.filter((s) => !trusted.includes(s)).map((s) => s.participantId);
 
     const result = castSpell({
       caster,

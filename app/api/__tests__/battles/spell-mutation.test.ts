@@ -81,6 +81,12 @@ describe("spell mutation", () => {
       expect(out.events[0].resultText).toContain("рятівні кидки кинув сервер");
     });
 
+    it("без клієнтських кидків нотатки про сервер немає", async () => {
+      const out = await mutation(save)(context({ participants: [caster, goblin], rng: () => 0.99 }), body() as never);
+
+      expect(out.events[0].resultText).not.toContain("кинув сервер");
+    });
+
     it("DM може передати кидок цілі", async () => {
       const out = await mutation(save)(context({ participants: [caster, goblin], isDM: true, userId: "dm", rng: () => 0.99 }), saveBody(1) as never);
 

@@ -96,6 +96,19 @@ describe("SpellBook", () => {
 
     expect(screen.getByLabelText("Кубик 6 (d10)")).toBeTruthy();
     expect(screen.queryByLabelText("Кубик 7 (d10)")).toBeNull();
+    expect(screen.queryByLabelText("Рятівний кидок Гоблін")).toBeNull();
+  });
+
+  it("DM вводить рятівні кидки за всі цілі", async () => {
+    const { wrapper, caster } = fakeScene({ knownSpells: ["ball"], slots: { "2": { max: 3, current: 3 } }, isDM: true });
+
+    render(<Harness caster={caster} />, { wrapper });
+
+    fireEvent.click(await screen.findByText("Вогняна куля"));
+    fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Гоблін/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Далі · кидки" }));
+
     expect(screen.getByLabelText("Рятівний кидок Гоблін")).toBeTruthy();
   });
 
