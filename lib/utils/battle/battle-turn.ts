@@ -4,6 +4,7 @@ import { calculateInitiative, sortByInitiative } from "./battle-start";
 import { CombatStatus } from "@/lib/constants/battle";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
+import { dropBreakOnDamage } from "@/lib/utils/abilities/engine/hp";
 import { findParticipant, isActive, replaceParticipant, withSelf } from "@/lib/utils/abilities/engine/participants";
 import { resolveDowned, runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import type { Rng } from "@/lib/utils/abilities/engine/types";
@@ -60,13 +61,16 @@ export function processStartOfTurn(
   ) {
     const dotResult = applyDOTEffects(updatedParticipant);
 
-    updatedParticipant = {
-      ...updatedParticipant,
-      combatStats: {
-        ...updatedParticipant.combatStats,
-        currentHp: dotResult.newHp,
+    updatedParticipant = dropBreakOnDamage(
+      {
+        ...updatedParticipant,
+        combatStats: {
+          ...updatedParticipant.combatStats,
+          currentHp: dotResult.newHp,
+        },
       },
-    };
+      updatedParticipant.combatStats.currentHp - dotResult.newHp,
+    );
     damageMessages.push(...dotResult.damageMessages);
 
     const hotResult = applyHOTEffects(updatedParticipant);
