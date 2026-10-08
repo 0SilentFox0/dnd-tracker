@@ -11,6 +11,7 @@ import { AttackType, ParticipantSourceType } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
+import { findEffectMarker } from "@/lib/utils/battle/participant/state";
 import { attackAbilityLabel, getAttackAbilityModifier } from "@/lib/utils/common/calculations";
 import { maxOf, parseDice, parseDiceLenient, rollGroups } from "@/lib/utils/common/dice";
 import type { BattleParticipant, DamageStep } from "@/types/battle";
@@ -136,11 +137,11 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
     damageSteps.push({ label: criticalEffectApplied.name, side: "attacker", kind: "flat", value: extra, after: physicalDamage });
   }
 
-  const weakened = attacker.battleData.activeEffects.find((e) => e.effects.some((d) => d.type === "weakened_next_hit"));
+  const weakened = findEffectMarker(attacker, "weakened_next_hit");
 
   if (weakened) {
-    physicalDamage = Math.floor(physicalDamage * 0.5);
-    damageSteps.push({ label: weakened.name, side: "attacker", kind: "multiplier", value: 0.5, after: physicalDamage });
+    physicalDamage = Math.floor(physicalDamage * weakened.value);
+    damageSteps.push({ label: weakened.effect.name, side: "attacker", kind: "multiplier", value: weakened.value, after: physicalDamage });
   }
 
   const heroDm = applyHeroDmDamageMultiplier(

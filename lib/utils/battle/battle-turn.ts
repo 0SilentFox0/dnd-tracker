@@ -8,6 +8,7 @@ import { dropBreakOnDamage } from "@/lib/utils/abilities/engine/hp";
 import { findParticipant, isActive, replaceParticipant, withSelf } from "@/lib/utils/abilities/engine/participants";
 import { resolveDowned, runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import type { Rng } from "@/lib/utils/abilities/engine/types";
+import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import { BattleParticipant } from "@/types/battle";
 
 /**
@@ -39,12 +40,9 @@ export function processStartOfTurn(
   let updatedParticipant = { ...participant };
 
   // до зменшення тривалостей: обмеження на 1 раунд має подіяти в цей хід
-  const restrictedBy = (type: string) =>
-    participant.battleData.activeEffects.some((e) => e.effects.some((d) => d.type === type));
+  const hasNoBonusAction = hasEffectMarker(participant, "no_bonus_action");
 
-  const hasNoBonusAction = restrictedBy("no_bonus_action");
-
-  const hasNoReaction = restrictedBy("no_reaction");
+  const hasNoReaction = hasEffectMarker(participant, "no_reaction");
 
   const skipChances = participant.battleData.activeEffects.flatMap((e) => e.effects.filter((d) => d.type === "skip_action").map((d) => ({ name: e.name, percent: d.value })));
 

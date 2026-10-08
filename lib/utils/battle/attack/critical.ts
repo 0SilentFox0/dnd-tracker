@@ -15,6 +15,8 @@ type EffectSpec = {
   expireAtTurnEnd?: boolean;
 };
 
+const SKIP_ACTION_CERTAIN = 100;
+
 let effectSeq = 0;
 
 const DISADVANTAGE: StaticEffect = { kind: "flag", flag: "disadvantage" };
@@ -47,7 +49,7 @@ function specFor(effect: CriticalEffect): EffectSpec | null {
     case "weakened_next_hit":
       return { idPart: "weakened", type: "debuff", legacy: "weakened_next_hit", legacyValue: 0.5, consumeOn: "ownHit", expireAtTurnEnd: true };
     case "lose_action":
-      return { idPart: "no-action", type: "debuff", legacy: "skip_action", legacyValue: 100, duration: 1 };
+      return { idPart: "no-action", type: "debuff", legacy: "skip_action", legacyValue: SKIP_ACTION_CERTAIN, duration: 1 };
     case "double_damage":
     case "max_damage":
     case "additional_damage":

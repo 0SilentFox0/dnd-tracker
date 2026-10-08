@@ -15,6 +15,7 @@ import { findParticipant, isActive, withSelf } from "@/lib/utils/abilities/engin
 import type { Rng } from "@/lib/utils/abilities/engine/types";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
+import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import { parseDiceLenient, rollGroups } from "@/lib/utils/common/dice";
 import type { BattleAction, BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -68,7 +69,7 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
 
   if (!defender || !attacker || !isActive(defender) || !isActive(attacker)) return null;
 
-  if (provoked ? defender.battleData.activeEffects.some((e) => e.effects.some((d) => d.type === "no_reaction")) : defender.actionFlags.hasUsedReaction) return null;
+  if (provoked ? hasEffectMarker(defender, "no_reaction") : defender.actionFlags.hasUsedReaction) return null;
 
   const weapon = weaponFor(defender, participants, kindOf(input.attack));
 
