@@ -7,6 +7,7 @@ import { bakePassives } from "@/lib/utils/abilities/build/bake";
 import { collectModifiers, findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import type { Ability } from "@/lib/utils/abilities/schema";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 import { splitGuardedDamage } from "@/lib/utils/battle/attack/process/guard";
 import { runAttackPhase } from "@/lib/utils/battle/attack-phase/run-attack-phase";
 import { participantImmuneToSpell } from "@/lib/utils/battle/spell/spell-immunity";
@@ -300,5 +301,162 @@ describe("Дух лева", () => {
     ps = runAbilities(ps, hit, ctx).participants;
 
     expect(ps[1].combatStats.morale).toBe(base - 1);
+  });
+});
+
+describe("Регалії світанку", () => {
+  const { pieces, set } = abilitiesOf("set-dawn-regalia");
+
+  const isabel = (list: Ability[], hp = 100) => makeParticipant({ id: "isabel", abilities: asArtifact(list), hp, maxHp: 100 });
+
+  const ally = (hp = 100) => makeParticipant({ id: "ally", hp, maxHp: 100 });
+
+  const roundStart = { type: "roundStart" } as const;
+
+  it("корона: союзники +5 % до шансу додаткового ходу", () => {
+    const ps = [isabel(pieces["crown-of-leadership"]), ally()];
+
+    expect(findFlags(ps, "ally", "moraleChance").map((f) => f.percent)).toEqual([5]);
+    expect(findFlags(ps, "isabel", "moraleChance").map((f) => f.percent)).toEqual([5]);
+  });
+
+  it("намисто: вбивство союзником дає мораль усім, раз за раунд", () => {
+    const ps = [isabel(pieces["necklace-of-victory"]), ally(), foe("e")];
+
+    const kill = { type: "kill", actorId: "ally", targetId: "e" } as const;
+
+    const first = runAbilities(ps, kill, ctx);
+
+    expect(first.participants[0].combatStats.morale).toBe(ps[0].combatStats.morale + 1);
+    expect(first.participants[1].combatStats.morale).toBe(ps[1].combatStats.morale + 1);
+
+    const second = runAbilities(first.participants, kill, ctx);
+
+    expect(second.participants[1].combatStats.morale).toBe(first.participants[1].combatStats.morale);
+  });
+
+  describe("обладунок", () => {
+    const armor = pieces["armor-of-valor"];
+
+    it("союзник нижче 30 %: усі отримують лікування в часі, раз за бій", () => {
+      const first = runAbilities([isabel(armor), ally(20)], roundStart, ctx);
+
+      for (const p of first.participants) expect(p.battleData.activeEffects.some((e) => e.hotHeal)).toBe(true);
+
+      const cleared = first.participants.map((p) => ({ ...p, battleData: { ...p.battleData, activeEffects: [] } }));
+
+      const second = runAbilities(cleared, roundStart, { ...ctx, round: 2 });
+
+      expect(second.participants[1].battleData.activeEffects).toHaveLength(0);
+    });
+
+    it("сама Ізабель нижче 30 % теж запускає", () => {
+      const r = runAbilities([isabel(armor, 20), ally()], roundStart, ctx);
+
+      expect(r.participants[1].battleData.activeEffects.some((e) => e.hotHeal)).toBe(true);
+    });
+  });
+
+  it("сет: союзник нижче 50 % — ініціатива +2 і шкода +10 %, раз за бій", () => {
+    const first = runAbilities([isabel(set), ally(40)], roundStart, ctx);
+
+    const mods = (ps: BattleParticipant[]) => collectModifiers(ps, "ally", { damage: { kind: "melee" } });
+
+    expect(mods(first.participants).percent).toBe(10);
+    expect(collectModifiers(first.participants, "ally", { stat: "initiative" }).flat).toBe(2);
+
+    const cleared = first.participants.map((p) => ({ ...p, battleData: { ...p.battleData, activeEffects: [] } }));
+
+    const second = runAbilities(cleared, roundStart, { ...ctx, round: 2 });
+
+    expect(mods(second.participants).percent).toBe(0);
+  });
+});
+
+describe("Кігті Ігг-Шайла", () => {
+  const { pieces, set } = abilitiesOf("set-yggshail-claws");
+
+  const raelag = (list: Ability[]) => makeParticipant({ id: "raelag", abilities: asArtifact(list), hp: 50, maxHp: 100 });
+
+  it("клинок: +15 % по цілі нижче 50 % HP", () => {
+    const bonus = (target: BattleParticipant) => {
+      const run = runAbilities([raelag(pieces["moonblade"]), target], { type: "attack", phase: "before", actorId: "raelag", targetId: "e", attackKind: AttackType.MELEE }, ctx);
+
+      return collectModifiers(run.participants, "raelag", { damage: { kind: "melee", targetId: "e" } }, run.actionModifiers.raelag).percent;
+    };
+
+    expect(bonus(foe("e", 40, 100))).toBe(15);
+    expect(bonus(foe("e", 60, 100))).toBe(0);
+  });
+
+  it("намисто: вбивство лікує Раїлага на 15 % max HP", () => {
+    const r = runAbilities([raelag(pieces["necklace-of-the-bloody-claw"]), foe("e")], { type: "kill", actorId: "raelag", targetId: "e" }, ctx);
+
+    expect(r.participants[0].combatStats.currentHp).toBe(65);
+  });
+
+  it("перстень: вбивство отруює всіх живих ворогів", () => {
+    const ring = raelag(pieces["cursed-ring"]);
+
+    const strong = { ...ring, battleData: { ...ring.battleData, attacks: [{ id: "a", name: "Удар", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d1+19", damageType: "slashing" } as BattleAttack] } };
+
+    const r = runAbilities([strong, foe("e1"), foe("e2"), { ...foe("dead", 0), combatStats: { ...foe("dead", 0).combatStats, status: "dead" as const } }], { type: "kill", actorId: "raelag", targetId: "dead" }, ctx);
+
+    for (const i of [1, 2]) {
+      const dot = r.participants[i].battleData.activeEffects.find((e) => e.dotDamage);
+
+      expect(dot?.dotDamage?.damagePerRound).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  describe("сет", () => {
+    const hit = { type: "hit", actorId: "raelag", targetId: "e", attackKind: AttackType.MELEE, damage: 5 } as const;
+
+    it("шанс 25 %: ціль без реакції", () => {
+      const r = runAbilities([raelag(set), foe("e")], hit, { round: 1, rng: seq(0) });
+
+      expect(r.participants[1].battleData.activeEffects.some((e) => e.effects.some((x) => x.type === "no_reaction"))).toBe(true);
+      expect(r.participants[1].actionFlags.hasUsedReaction).toBe(true);
+    });
+
+    it("невдалий кидок: без ефекту", () => {
+      const r = runAbilities([raelag(set), foe("e")], hit, { round: 1, rng: seq(0.99) });
+
+      expect(r.participants[1].battleData.activeEffects).toHaveLength(0);
+      expect(r.participants[1].actionFlags.hasUsedReaction).toBe(false);
+    });
+  });
+
+  describe("сет і відсіч", () => {
+    const sword = { id: "sw", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d6", damageType: "slashing", targetType: "single" } as unknown as BattleAttack;
+
+    const counter = resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "counterAttack", attackKinds: ["melee"], bonusPercent: 0 }] });
+
+    const duel = (rng: ReturnType<typeof seq>) => {
+      const base = raelag(set);
+
+      const attacker = { ...base, basicInfo: { ...base.basicInfo, controlledBy: "user-1" }, battleData: { ...base.battleData, attacks: [sword] } };
+
+      const t = createMockParticipant({ basicInfo: { ...createMockParticipant().basicInfo, id: "tgt", name: "tgt", side: ParticipantSide.ENEMY } });
+
+      const target = { ...t, battleData: { ...t.battleData, attacks: [sword], resolvedAbilities: [counter] } };
+
+      return runAttackPhase({
+        battle: { initiativeOrder: [attacker, target], battleLog: [], currentRound: 1, currentTurnIndex: 0 },
+        data: { attackerId: "raelag", targetIds: ["tgt"], d20Roll: 15, damageRolls: [3] },
+        battleId: "b",
+        userId: "user-1",
+        isDM: false,
+        rng,
+      }).allBattleActions.map((a) => a.actionType);
+    };
+
+    it("паралізована ціль не відповідає відсіччю", () => {
+      expect(duel(seq(0))).toEqual(["attack"]);
+    });
+
+    it("без паралічу відсіч є", () => {
+      expect(duel(seq(0.99))).toContain("retaliation");
+    });
   });
 });
