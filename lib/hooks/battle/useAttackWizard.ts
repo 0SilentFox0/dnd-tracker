@@ -74,6 +74,8 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
   const hitsAll = !!attacker && findFlags(withSelf(order, attacker), attacker.basicInfo.id, "attackHitsAllEnemies").length > 0;
 
+  const hasFalloff = !!attacker && findFlags(withSelf(order, attacker), attacker.basicInfo.id, "multiTargetFalloff").length > 0;
+
   const describe = (a: BattleAttack) => {
     const maxTargets = Math.max(1, a.maxTargets ?? attacker?.combatStats.maxTargets ?? 1);
 
@@ -106,7 +108,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     const seen = new Set((scene.battle.battleLog ?? []).map((e) => e.actionIndex));
 
     try {
-      const res = await scene.actions.attack.mutateAsync(attackPayload(state, attacker.basicInfo.id, { allStrikes: hitsAll }));
+      const res = await scene.actions.attack.mutateAsync(attackPayload(state, attacker.basicInfo.id, { allStrikes: hitsAll || hasFalloff }));
 
       const hpChanges = res?.hpChanges ?? [];
 

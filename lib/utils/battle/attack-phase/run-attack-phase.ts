@@ -3,10 +3,6 @@ import { holdBackNewEffects, restoreHeldBack } from "./hold-back";
 import { AttackType } from "@/lib/constants/battle";
 import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { isActive, mergeParticipants, updateParticipant, withSelf } from "@/lib/utils/abilities/engine/participants";
-/**
- * Runs the attack phase: validation, processAttack per target, primary-target retaliation.
- * Used by the attack route.
- */
 import type { Rng } from "@/lib/utils/abilities/engine/types";
 import { processAttack } from "@/lib/utils/battle/attack";
 import { activeEffectIds } from "@/lib/utils/battle/attack/consume-effects";
@@ -50,6 +46,7 @@ export type AttackPhaseResult = {
   baseBattleLog: BattleAction[];
 };
 
+// Фаза атаки: валідація, processAttack на ціль, відповідний удар по основній цілі.
 export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
   const { battle, data, battleId, userId, isDM } = input;
 
@@ -63,9 +60,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const targetIds = data.targetIds || (data.targetId ? [data.targetId] : []);
 
-  const chosenTargets = initiativeOrder.filter((p) =>
-    targetIds.includes(p.basicInfo.id),
-  );
+  const chosenTargets = [...new Set(targetIds)].flatMap((id) => initiativeOrder.find((p) => p.basicInfo.id === id) ?? []);
 
   const usePerTargetRolls =
     Array.isArray(data.attackRolls) &&
@@ -166,6 +161,8 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const falloff = falloffPercents.length > 0 ? Math.min(...falloffPercents) / 100 : 1;
 
+  const sequentialDice = falloffPercents.length > 0 && isMultiTargetRanged;
+
   // Для multi-target ranged: окремий кидок на ціль; основна ціль — повна шкода, додаткові — за falloff
   const damageFractions: number[] =
     isMultiTargetRanged
@@ -230,8 +227,10 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       : isMultiTargetRanged &&
           targets.length > 1 &&
           dicePerTarget > 0 &&
-          data.damageRolls.length >= (i + 1) * dicePerTarget
-        ? data.damageRolls.slice(i * dicePerTarget, (i + 1) * dicePerTarget)
+          data.damageRolls.length >= (sequentialDice ? damageCursor + dicePerTarget : (i + 1) * dicePerTarget)
+        ? sequentialDice
+          ? data.damageRolls.slice(damageCursor, damageCursor + dicePerTarget)
+          : data.damageRolls.slice(i * dicePerTarget, (i + 1) * dicePerTarget)
         : data.damageRolls;
 
     const freshTarget = currentInitiativeOrder.find((p) => p.basicInfo.id === target.basicInfo.id) ?? target;
@@ -251,7 +250,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       rng,
     });
 
-    if (hitsAllEnemies && attackResult.success) damageCursor += dicePerTarget;
+    if ((hitsAllEnemies || sequentialDice) && attackResult.success) damageCursor += dicePerTarget;
 
     currentInitiativeOrder = mergeParticipants(currentInitiativeOrder, attackResult.allParticipantsUpdated ?? []);
     currentAttacker = attackResult.attackerUpdated;

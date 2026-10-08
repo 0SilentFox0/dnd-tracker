@@ -201,3 +201,56 @@ describe("effects from the attacker's own abilities stay active during the volle
     expect(new Set(ids).size).toBe(2);
   });
 });
+
+describe("pick order and multiTargetFalloff", () => {
+  const bow = (maxTargets: number) => {
+    const p = makeParticipant({ id: "a", abilities: [resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "multiTargetFalloff", percent: 50 }] })] });
+
+    return { ...p, combatStats: { ...p.combatStats, maxTargets }, battleData: { ...p.battleData, attacks: [sword] } };
+  };
+
+  const plain = (maxTargets: number) => ({ ...attacker, combatStats: { ...attacker.combatStats, maxTargets } });
+
+  const lost = (r: ReturnType<typeof run>, id: string) => 50 - (r.finalInitiativeOrder.find((p) => p.basicInfo.id === id)?.combatStats.currentHp ?? 50);
+
+  it("rolls and damage dice follow the pick order, not the initiative order", () => {
+    const r = run([plain(2), foe("t1"), foe("t2")], { targetIds: ["t2", "t1"], attackRolls: [2, 17], damageRolls: [6, 1] });
+
+    expect(lost(r, "t2")).toBe(0);
+    expect(lost(r, "t1")).toBeGreaterThan(0);
+
+    const r2 = run([plain(2), foe("t1"), foe("t2")], { targetIds: ["t2", "t1"], attackRolls: [17, 17], damageRolls: [6, 1] });
+
+    expect(lost(r2, "t2") - lost(r2, "t1")).toBe(5);
+  });
+
+  it("the first picked target takes full damage even when it is later in initiative", () => {
+    const r = run([bow(2), foe("t1"), foe("t2")], { targetIds: ["t2", "t1"], attackRolls: [17, 17], damageRolls: [6, 6] });
+
+    expect(lost(r, "t2")).toBeGreaterThan(lost(r, "t1"));
+    expect(lost(r, "t1")).toBe(lost(r, "t2") / 2);
+  });
+
+  it("three targets take 100 / 50 / 50 percent", () => {
+    const r = run([bow(3), foe("t1"), foe("t2"), foe("t3")], { targetIds: ["t1", "t2", "t3"], attackRolls: [17, 17, 17], damageRolls: [6, 6, 6] });
+
+    expect(lost(r, "t2")).toBe(lost(r, "t1") / 2);
+    expect(lost(r, "t3")).toBe(lost(r, "t1") / 2);
+    expect(lost(r, "t1")).toBeGreaterThan(0);
+  });
+
+  it("a missed primary stays primary: the next hit takes 50 %", () => {
+    const full = run([bow(2), foe("t1")], { targetId: "t1", attackRoll: 17, damageRolls: [6] });
+
+    const r = run([bow(2), foe("t1"), foe("t2")], { targetIds: ["t1", "t2"], attackRolls: [2, 17], damageRolls: [6] });
+
+    expect(lost(r, "t1")).toBe(0);
+    expect(lost(r, "t2")).toBe(lost(full, "t1") / 2);
+  });
+
+  it("dice of a later hit are not shifted by an earlier miss", () => {
+    const r = run([bow(3), foe("t1"), foe("t2"), foe("t3")], { targetIds: ["t1", "t2", "t3"], attackRolls: [2, 17, 17], damageRolls: [6, 2] });
+
+    expect(lost(r, "t2")).toBeGreaterThan(lost(r, "t3"));
+  });
+});
