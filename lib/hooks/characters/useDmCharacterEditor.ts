@@ -24,7 +24,7 @@ export function useDmCharacterEditor({ campaignId, characterId, onSaved }: { cam
 
   const remove = () =>
     confirm({
-      title: `Видалити персонажа ${editor.form.basicInfo.name}?`,
+      title: `Видалити персонажа: ${editor.form.basicInfo.name}?`,
       description: "Персонаж, його інвентар і прогрес зникнуть назавжди.",
       confirmLabel: "Видалити",
       onConfirm: () => deleteMutation.mutateAsync(characterId),
@@ -36,7 +36,7 @@ export function useDmCharacterEditor({ campaignId, characterId, onSaved }: { cam
     let details: { abilityIncreased?: string | null } | undefined;
 
     const ok = await confirm({
-      title: `Підняти рівень персонажа ${name}? (Рівень ${level} → ${level + 1})`,
+      title: `Підняти рівень: ${name}? (Рівень ${level} → ${level + 1})`,
       confirmLabel: "Підняти",
       onConfirm: async () => {
         const updated = await levelUpMutation.mutateAsync(characterId);

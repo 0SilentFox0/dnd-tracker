@@ -87,7 +87,7 @@ describe("крок влучання", () => {
       expect(phrases("success", names(attacker, target))).toContain(flavor);
       expect(r.battleAction.resultText).toContain("Критичне влучання — Безкоштовна атака!");
       expect(r.battleAction.resultText).toContain(flavor);
-      expect(r.battleAction.resultText).toContain(`${attacker.basicInfo.name} завдав`);
+      expect(r.battleAction.resultText).toContain(`${attacker.basicInfo.name} → `);
     });
 
     it("крит-невдача: фраза в деталях і в тексті", () => {

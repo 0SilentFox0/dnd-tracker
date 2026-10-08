@@ -59,10 +59,10 @@ export function getDefenderResistanceBreakdown(
 
   if (resistPercent > 0) {
     targetBreakdown.push(
-      `Сумарна шкода по ${targetName}: ${incomingDamage} − ${resistPercent}% = ${finalDamage}`,
+      `Сумарна шкода (${targetName}): ${incomingDamage} − ${resistPercent}% = ${finalDamage}`,
     );
   } else {
-    targetBreakdown.push(`Сумарна шкода по ${targetName}: ${finalDamage}`);
+    targetBreakdown.push(`Сумарна шкода (${targetName}): ${finalDamage}`);
   }
 
   return { targetBreakdown, finalDamage, targetSteps: resistanceResult.steps };

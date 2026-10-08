@@ -55,16 +55,16 @@ export function checkMorale(
 
     if (d10Roll >= minRoll || bonusHit) {
       result.hasExtraTurn = true;
-      result.message = `⭐ ${participant.basicInfo.name} отримав додатковий хід! (Мораль +${currentMorale}, кидок: ${d10Roll}, потрібно: >=${Math.ceil(minRoll)}${bonusHit ? `, бонус лідерства +${bonus}%` : ""})`;
+      result.message = `⭐ ${participant.basicInfo.name}: додатковий хід! (Мораль +${currentMorale}, кидок: ${d10Roll}, потрібно: >=${Math.ceil(minRoll)}${bonusHit ? `, бонус лідерства +${bonus}%` : ""})`;
     } else {
-      result.message = `${participant.basicInfo.name} не отримав додатковий хід (Мораль +${currentMorale}, кидок: ${d10Roll}, потрібно: >=${Math.ceil(minRoll)}${bonus > 0 ? `; бонус лідерства +${bonus}% не спрацював` : ""})`;
+      result.message = `${participant.basicInfo.name}: без додаткового ходу (Мораль +${currentMorale}, кидок: ${d10Roll}, потрібно: >=${Math.ceil(minRoll)}${bonus > 0 ? `; бонус лідерства +${bonus}% не спрацював` : ""})`;
     }
   } else {
     if (d10Roll >= minRoll) {
       result.shouldSkipTurn = true;
-      result.message = `😔 ${participant.basicInfo.name} пропустив хід через низьку мораль (Мораль ${currentMorale}, кидок: ${d10Roll}, потрібно: >=${Math.ceil(minRoll)})`;
+      result.message = `😔 ${participant.basicInfo.name}: пропуск ходу через низьку мораль (Мораль ${currentMorale}, кидок: ${d10Roll}, потрібно: >=${Math.ceil(minRoll)})`;
     } else {
-      result.message = `${participant.basicInfo.name} не пропустив хід (Мораль ${currentMorale}, кидок: ${d10Roll}, потрібно: >=${Math.ceil(minRoll)})`;
+      result.message = `${participant.basicInfo.name}: хід не пропущено (Мораль ${currentMorale}, кидок: ${d10Roll}, потрібно: >=${Math.ceil(minRoll)})`;
     }
   }
 

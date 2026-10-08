@@ -34,7 +34,7 @@ function removeParticipant(ctx: BattleMutationContext, participantId: string): M
     type: "ability",
     round: ctx.scene.round,
     actorId: DM_ACTOR.actorId,
-    resultText: `DM видалив з бою: ${removed.basicInfo.name}`,
+    resultText: `Видалено з бою (DM): ${removed.basicInfo.name}`,
     details: DM_DETAILS,
   };
 
@@ -118,7 +118,7 @@ function updateHp(ctx: BattleMutationContext, participantId: string, requestedHp
       actorId: DM_ACTOR.actorId,
       targets: [{ participantId, participantName: name }],
       hpChanges: [{ participantId, participantName: name, oldHp, newHp, change: oldHp - newHp }],
-      resultText: `DM змінив HP ${name}: ${oldHp} → ${newHp}`,
+      resultText: `Зміна HP (DM): ${name}, ${oldHp} → ${newHp}`,
       details: DM_DETAILS,
     },
   ];

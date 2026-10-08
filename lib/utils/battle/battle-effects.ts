@@ -18,7 +18,7 @@ export function applyDOTEffects(
 
       currentHp = Math.max(0, currentHp - damagePerRound);
       damageMessages.push(
-        `${participant.basicInfo.name} отримав ${damagePerRound} ${damageType} урону від ${effect.name}`
+        `${participant.basicInfo.name}: ${damagePerRound} ${damageType} шкоди від ${effect.name}`
       );
     }
   }
@@ -41,7 +41,7 @@ export function applyHOTEffects(participant: BattleParticipant): { newHp: number
 
     const healed = Math.min(participant.combatStats.maxHp, currentHp + effect.hotHeal.healPerRound);
 
-    if (healed > currentHp) healMessages.push(`${participant.basicInfo.name} відновив ${healed - currentHp} HP від ${effect.name}`);
+    if (healed > currentHp) healMessages.push(`${participant.basicInfo.name}: +${healed - currentHp} HP від ${effect.name}`);
 
     currentHp = healed;
   }

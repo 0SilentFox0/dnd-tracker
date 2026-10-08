@@ -98,7 +98,7 @@ export function applyCharm(input: EffectApplyInput<Of<"charm">>): EffectApplyRes
     );
 
     ps = replaceParticipant(ps, { ...charmed, basicInfo: { ...charmed.basicInfo, side: owner.basicInfo.side, controlledBy: owner.basicInfo.controlledBy } });
-    messages.push(`🪄 ${ability.name}: ${t.basicInfo.name} переходить на бік ${owner.basicInfo.name} (${effect.duration.rounds} р.)`);
+    messages.push(`🪄 ${ability.name}: ${t.basicInfo.name} переходить під контроль — ${owner.basicInfo.name} (${effect.duration.rounds} р.)`);
   }
 
   return { participants: ps, messages };

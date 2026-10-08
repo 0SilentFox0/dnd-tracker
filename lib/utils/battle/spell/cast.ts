@@ -116,7 +116,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
       success: false,
       casterUpdated: updatedCaster,
       allParticipantsUpdated: flow.ps,
-      battleAction: actionOf(updatedCaster, spell, targetsBefore, battleId, currentRound, `${updatedCaster.basicInfo.name} намагався використати ${spell.name}, але немає доступних spell slots`),
+      battleAction: actionOf(updatedCaster, spell, targetsBefore, battleId, currentRound, `${updatedCaster.basicInfo.name}: ${spell.name} недоступне — немає spell slots`),
       summons: [],
     };
   }
@@ -278,9 +278,9 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   const healed = targetsBefore.reduce((sum, t) => sum + Math.max(0, (findParticipant(flow.ps, t.basicInfo.id)?.combatStats.currentHp ?? 0) - t.combatStats.currentHp), 0);
 
-  const caption = [dealt > 0 ? `завдавши ${dealt} урону` : "", healed > 0 ? `вилікувавши ${healed} HP` : ""].filter(Boolean).join(", ");
+  const caption = [dealt > 0 ? `шкода: ${dealt}` : "", healed > 0 ? `лікування: ${healed} HP` : ""].filter(Boolean).join(", ");
 
-  const action = actionOf(getP(flow, casterId), spell, targetsBefore, battleId, currentRound, [`${caster.basicInfo.name} використав ${spell.name}${caption ? ` ${caption}` : ""}`, ...flow.messages].join(" | "));
+  const action = actionOf(getP(flow, casterId), spell, targetsBefore, battleId, currentRound, [`${caster.basicInfo.name} застосовує ${spell.name}${caption ? ` (${caption})` : ""}`, ...flow.messages].join(" | "));
 
   Object.assign(action.actionDetails, {
     spellSlotUsed: spell.level,
