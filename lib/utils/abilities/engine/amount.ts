@@ -44,7 +44,11 @@ export function resolveAmount(
 
   if ("formula" in amount) return Math.max(0, Math.floor(evaluateFormula(amount.formula, formulaContext(input.owner))));
 
-  if ("spellRoll" in amount) return Math.floor(((input.spellRoll ?? 0) * amount.spellRoll) / 100);
+  if ("spellRoll" in amount) {
+    const percent = typeof amount.spellRoll === "number" ? amount.spellRoll : Math.max(0, Math.min(500, resolveFlat(amount.spellRoll, input.owner)));
+
+    return Math.floor(((input.spellRoll ?? 0) * percent) / 100);
+  }
 
   const base = percentBase(amount.percentOf, input);
 

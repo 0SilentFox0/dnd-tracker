@@ -265,4 +265,32 @@ describe("castSpell", () => {
 
     expect(target.battleData.activeEffects).toHaveLength(1);
   });
+
+  it("Божественна відплата: відсоток кидка — формула від втраченого HP заклинателя", () => {
+    const retribution = spellOf({ dice: 2, effects: [{ kind: "dealDamage", amount: { spellRoll: { formula: "100 + lost_hp_percent" } }, damageType: "radiant" }] });
+
+    const full = caster();
+
+    const wounded = { ...caster(), combatStats: { ...caster().combatStats, currentHp: 10 } };
+
+    const hit = (c: BattleParticipant) => 200 - hp(castSpell({ caster: c, spell: retribution, targetIds: ["e1"], allParticipants: [c, enemy("e1")], currentRound: 1, battleId: "b", diceRolls: [3, 3], rng: seq(0.5) }), "e1");
+
+    expect(hit(full)).toBe(7);
+    expect(hit(wounded)).toBe(Math.floor((7 * 150) / 100));
+  });
+
+  it("Шал і Ляльковод не діють на героїв, але слот витрачено", () => {
+    const hero = makeParticipant({ id: "h", side: ParticipantSide.ENEMY });
+
+    for (const effect of [{ kind: "berserk" as const, damageBonusPercent: 50, duration: { rounds: 1 } }, { kind: "charm" as const, duration: { rounds: 1 } }]) {
+      const r = cast(spellOf({ dice: 0, effects: [effect] }), ["h"], [hero], { diceRolls: [] });
+
+      const target = r.allParticipantsUpdated.find((p) => p.basicInfo.id === "h") as BattleParticipant;
+
+      expect(target.battleData.activeEffects).toHaveLength(0);
+      expect(target.basicInfo.side).toBe(ParticipantSide.ENEMY);
+      expect(r.battleAction.resultText).toContain("⛔");
+      expect(r.casterUpdated.spellcasting.spellSlots["1"].current).toBe(1);
+    }
+  });
 });
