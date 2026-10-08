@@ -25,6 +25,7 @@ function defaultFor(type: Condition["type"]): Condition {
     case "targetHasCondition":
       return { type, condition: "no_reaction" };
     case "targetDead":
+    case "actorIsEnemy":
       return { type };
     case "hasMark":
       return { type, who: "eventActor", markId: "mark" };

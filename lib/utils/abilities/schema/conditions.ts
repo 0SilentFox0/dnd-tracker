@@ -10,6 +10,7 @@ export type Condition =
   | { type: "attackKind"; kind: DamageKind }
   | { type: "targetHasCondition"; condition: string }
   | { type: "targetDead" }
+  | { type: "actorIsEnemy" }
   | { type: "hasMark"; who: ConditionSubject; markId: string; bySelf?: boolean }
   | { type: "not"; condition: Condition }
   | { type: "all"; conditions: Condition[] }
@@ -26,6 +27,7 @@ export const ConditionSchema: z.ZodType<Condition> = z.lazy(() =>
     z.object({ type: z.literal("attackKind"), kind: z.enum(DAMAGE_KINDS) }),
     z.object({ type: z.literal("targetHasCondition"), condition: z.string().min(1) }),
     z.object({ type: z.literal("targetDead") }),
+    z.object({ type: z.literal("actorIsEnemy") }),
     z.object({ type: z.literal("hasMark"), who: subject, markId: z.string().min(1), bySelf: z.boolean().optional() }),
     z.object({ type: z.literal("not"), condition: ConditionSchema }),
     z.object({ type: z.literal("all"), conditions: z.array(ConditionSchema).min(1) }),
