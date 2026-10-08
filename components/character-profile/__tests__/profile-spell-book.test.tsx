@@ -28,7 +28,7 @@ describe("ProfileSpellBook", () => {
 
     expect(screen.getByRole("button", { name: /I коло, слотів 4/ })).toBeTruthy();
     fireEvent.click(screen.getByText("Мітка мисливця"));
-    expect(screen.getByText(/концентрація/)).toBeTruthy();
+    expect(screen.getByText("Вартість")).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Обрати цілі/ })).toBeNull();
   });
 

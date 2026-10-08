@@ -6,8 +6,9 @@ export interface SpellPick {
   spellId: string;
   level: number;
   targetMode: SpellTargetMode;
+  /** кого можна обирати: союзник, ворог або полеглий союзник */
+  targetSide?: "ally" | "enemy" | "dead";
   maxTargets?: number;
-  needsHit: boolean;
   needsSaves: boolean;
   diceSlots: number[];
 }
@@ -18,7 +19,6 @@ export interface SpellFlowState {
   level: number;
   pick?: SpellPick;
   targetIds: string[];
-  hitRoll?: number;
   saves: Record<string, number>;
   damage: (number | undefined)[];
   error?: string;
@@ -31,7 +31,6 @@ export type SpellFlowAction =
   | { type: "TO_TARGETS" }
   | { type: "TOGGLE_TARGET"; id: string; expanded?: string[] }
   | { type: "CONFIRM_TARGETS" }
-  | { type: "SET_HIT"; value: number }
   | { type: "SET_SAVE"; id: string; value: number }
   | { type: "SET_DAMAGE"; index: number; value: number }
   | { type: "TO_SUMMARY" }
@@ -43,12 +42,10 @@ export type SpellFlowAction =
 
 export const initialSpellFlow: SpellFlowState = { step: "closed", level: 0, targetIds: [], saves: {}, damage: [] };
 
-const needsRolls = (p: SpellPick) => p.needsHit || p.needsSaves || p.diceSlots.length > 0;
+const needsRolls = (p: SpellPick) => p.needsSaves || p.diceSlots.length > 0;
 
 export function rollsComplete(s: SpellFlowState): boolean {
   if (!s.pick) return false;
-
-  if (s.pick.needsHit && !(s.hitRoll && s.hitRoll >= 1 && s.hitRoll <= 20)) return false;
 
   return s.pick.diceSlots.every((_, i) => typeof s.damage[i] === "number");
 }
@@ -63,7 +60,7 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
     case "SET_LEVEL":
       return { ...initialSpellFlow, step: "book", casterId: s.casterId, level: a.level };
     case "PICK":
-      return { ...s, step: "spell", pick: a.pick, targetIds: [], saves: {}, hitRoll: undefined, damage: a.pick.diceSlots.map(() => undefined), error: undefined };
+      return { ...s, step: "spell", pick: a.pick, targetIds: [], saves: {}, damage: a.pick.diceSlots.map(() => undefined), error: undefined };
     case "TO_TARGETS":
       if (!s.pick) return s;
 
@@ -85,8 +82,6 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
     }
     case "CONFIRM_TARGETS":
       return s.targetIds.length === 0 ? s : afterTargets(s);
-    case "SET_HIT":
-      return { ...s, hitRoll: a.value };
     case "SET_SAVE":
       return { ...s, saves: { ...s.saves, [a.id]: a.value } };
     case "SET_DAMAGE":

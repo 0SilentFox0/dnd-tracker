@@ -20,6 +20,10 @@ export const BOOK_SPELL_SELECT = {
   duration: true,
   concentration: true,
   damageElement: true,
+  dice: true,
+  cost: true,
+  targeting: true,
+  resolution: true,
   spellGroup: { select: { id: true, name: true } },
 } satisfies Prisma.SpellSelect;
 

@@ -1,4 +1,4 @@
-import type { SpellDefinition } from "@/lib/utils/spells/model/schema";
+import type { SpellCost, SpellDefinition, SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
 
 export type { RaceModifier, SpellCost, SpellDefinition, SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
 
@@ -72,4 +72,8 @@ export type BookSpell = {
   concentration?: boolean;
   damageElement?: string | null;
   spellGroup?: { id: string; name: string } | null;
+  dice?: number;
+  cost?: SpellCost;
+  targeting?: SpellTargeting;
+  resolution?: SpellResolution;
 };

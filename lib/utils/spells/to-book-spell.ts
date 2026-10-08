@@ -1,3 +1,4 @@
+import { readSpellDefinition } from "@/lib/utils/spells/model/read";
 import type { BookSpell } from "@/types/spells";
 
 export interface SpellRow {
@@ -17,6 +18,10 @@ export interface SpellRow {
   concentration: boolean;
   damageElement: string | null;
   spellGroup: { id: string; name: string } | null;
+  dice?: number;
+  cost?: string;
+  targeting?: unknown;
+  resolution?: unknown;
 }
 
 const TYPES = ["target", "aoe", "no_target"] as const;
@@ -40,8 +45,14 @@ function hitCheckOf(raw: unknown): BookSpell["hitCheck"] {
 }
 
 export function toBookSpell(row: SpellRow): BookSpell {
+  const { dice, cost, targeting, resolution } = readSpellDefinition(row);
+
   return {
     ...row,
+    dice,
+    cost,
+    targeting,
+    resolution,
     type: (TYPES as readonly string[]).includes(row.type) ? (row.type as BookSpell["type"]) : "target",
     damageType: (DAMAGE_TYPES as readonly string[]).includes(row.damageType) ? (row.damageType as BookSpell["damageType"]) : "damage",
     savingThrow: savingThrowOf(row.savingThrow),
