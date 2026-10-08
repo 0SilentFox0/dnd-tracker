@@ -6,15 +6,18 @@ import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDeleteArtifact } from "@/lib/hooks/artifacts";
 import { useConfirm } from "@/lib/hooks/common";
+import { cn } from "@/lib/utils";
 
 interface ArtifactDeleteButtonProps {
   campaignId: string;
   artifactId: string;
+  className?: string;
 }
 
 export function ArtifactDeleteButton({
   campaignId,
   artifactId,
+  className,
 }: ArtifactDeleteButtonProps) {
   const router = useRouter();
 
@@ -39,10 +42,10 @@ export function ArtifactDeleteButton({
       size="icon"
       onClick={() => void handleDelete()}
       disabled={remove.isPending}
-      className="text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
+      className={cn("text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0", className)}
       title="Видалити артефакт"
     >
-      <Trash2 className="h-4 w-4" />
+      <Trash2 className="size-3.5" />
     </Button>
   );
 }
