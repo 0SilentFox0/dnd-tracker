@@ -47,7 +47,7 @@ describe("Мрія лучника", () => {
 
     const r = runAttackPhase({
       battle: { initiativeOrder: [attacker, foe("t1"), foe("t2")], battleLog: [], currentRound: 1, currentTurnIndex: 0 },
-      data: { attackerId: "ivan", targetIds: ["t1", "t2"], attackRolls: [15, 2], damageRolls: [4, 4] } as never,
+      data: { attackerId: "ivan", targetIds: ["t1", "t2"], attackRolls: [15, 2], damageRolls: [4, 4] },
       battleId: "b",
       userId: "u",
       isDM: true,
@@ -67,7 +67,7 @@ describe("Мрія лучника", () => {
 
       const r = runAttackPhase({
         battle: { initiativeOrder: [attacker, foe("t1"), foe("t2")], battleLog: [], currentRound: 1, currentTurnIndex: 0 },
-        data: { attackerId: "ivan", targetIds: ["t1", "t2"], attackRolls: [15, 15], damageRolls: [8, 8] } as never,
+        data: { attackerId: "ivan", targetIds: ["t1", "t2"], attackRolls: [15, 15], damageRolls: [8, 8] },
         battleId: "b",
         userId: "u",
         isDM: true,

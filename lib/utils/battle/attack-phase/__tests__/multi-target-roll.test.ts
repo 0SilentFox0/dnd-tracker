@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { runAttackPhase } from "../run-attack-phase";
+import { type AttackPhaseInput, runAttackPhase } from "../run-attack-phase";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
@@ -18,8 +18,8 @@ const hindering = resolved({ trigger: { event: "passive" }, effects: [{ kind: "f
 
 const foe = (id: string, abilities: ReturnType<typeof resolved>[] = []) => makeParticipant({ id, side: ParticipantSide.ENEMY, abilities, hp: 50, maxHp: 50 });
 
-const run = (order: BattleParticipant[], data: Record<string, unknown>) =>
-  runAttackPhase({ battle: { initiativeOrder: order, battleLog: [], currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", damageRolls: [4, 4], ...data } as never, battleId: "b", userId: "u", isDM: true, rng: seq(0.5) });
+const run = (order: BattleParticipant[], data: Partial<AttackPhaseInput["data"]>) =>
+  runAttackPhase({ battle: { initiativeOrder: order, battleLog: [], currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", damageRolls: [4, 4], ...data }, battleId: "b", userId: "u", isDM: true, rng: seq(0.5) });
 
 const hits = (r: ReturnType<typeof run>) => r.allBattleActions.filter((e) => e.actionType === "attack").map((e) => e.actionDetails.isHit);
 
@@ -123,7 +123,7 @@ describe("free attack crit on a multi-target attack", () => {
   it("critical effect 6 on the first target leaves the attacker an action", () => {
     const r = runAttackPhase({
       battle: { initiativeOrder: [attacker, foe("t1"), foe("t2")], battleLog: [], currentRound: 1, currentTurnIndex: 0 },
-      data: { attackerId: "a", damageRolls: [4, 4], targetIds: ["t1", "t2"], attackRolls: [20, 5] } as never,
+      data: { attackerId: "a", damageRolls: [4, 4], targetIds: ["t1", "t2"], attackRolls: [20, 5] },
       battleId: "b",
       userId: "u",
       isDM: true,
@@ -140,7 +140,7 @@ describe("crit effects on the attacker are for the next attack", () => {
   const volley = (critRng: number) =>
     runAttackPhase({
       battle: { initiativeOrder: [attacker, foe("t1"), foe("t2")], battleLog: [], currentRound: 1, currentTurnIndex: 0 },
-      data: { attackerId: "a", damageRolls: [4, 4], targetIds: ["t1", "t2"], attackRolls: [20, 15] } as never,
+      data: { attackerId: "a", damageRolls: [4, 4], targetIds: ["t1", "t2"], attackRolls: [20, 15] },
       battleId: "b",
       userId: "u",
       isDM: true,
@@ -188,7 +188,7 @@ describe("effects from the attacker's own abilities stay active during the volle
   it("two crits in one volley get distinct effect ids", () => {
     const r = runAttackPhase({
       battle: { initiativeOrder: [attacker, foe("t1"), foe("t2")], battleLog: [], currentRound: 1, currentTurnIndex: 0 },
-      data: { attackerId: "a", damageRolls: [4, 4], targetIds: ["t1", "t2"], attackRolls: [20, 20] } as never,
+      data: { attackerId: "a", damageRolls: [4, 4], targetIds: ["t1", "t2"], attackRolls: [20, 20] },
       battleId: "b",
       userId: "u",
       isDM: true,

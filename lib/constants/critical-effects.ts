@@ -78,7 +78,7 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
     ],
     effect: {
       type: "advantage_next_attack",
-      duration: 2, // 1 атака
+      duration: 2,
       target: "self",
     },
   },
@@ -226,7 +226,7 @@ export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
     ],
     effect: {
       type: "prone",
-      duration: 2, // до кінця наступного ходу
+      duration: 2,
       target: "self",
     },
   },
