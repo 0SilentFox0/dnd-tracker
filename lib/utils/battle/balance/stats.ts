@@ -85,7 +85,7 @@ function bestSpellDpr(spells: UnitSpellInput[], level: number): number {
 
     const share = damage.falloff ? damage.falloff.slice(0, targets).reduce((a, b) => a + b, 0) / 100 : targets;
 
-    best = Math.max(best, (dice.count * 3.5 + dice.flat) * share);
+    best = Math.max(best, dice.count * 3.5 * share);
   }
 
   return best;

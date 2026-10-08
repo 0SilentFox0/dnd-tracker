@@ -82,7 +82,7 @@ describe("getUnitStats: модель DPR юніта", () => {
 
   const fire = { kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" };
 
-  it("DPR із заклинання: формула кубиків (база + ⌊рівень/3⌋, d6) + рівень × цілі, якщо воно сильніше за зброю", () => {
+  it("DPR із заклинання: формула кубиків (база + ⌊рівень/3⌋, d6) × цілі, якщо воно сильніше за зброю", () => {
     const stats = getUnitStats({
       ...base,
       level: 3,
@@ -94,13 +94,13 @@ describe("getUnitStats: модель DPR юніта", () => {
       ],
     });
 
-    expect(stats.dpr).toBe((8 * 3.5 + 3) * TYPICAL_TARGETS);
+    expect(stats.dpr).toBe(8 * 3.5 * TYPICAL_TARGETS);
   });
 
   it("спад шкоди по цілях зменшує очікувані цілі", () => {
     const spells = [{ dice: 2, targeting: { kind: "area", side: "enemy", maxTargets: 3 }, spellEffects: [{ ...fire, falloff: [100, 50, 25] }] }];
 
-    expect(getUnitStats({ ...base, attacks: [], spells }).dpr).toBe((7 + 1) * 1.5);
+    expect(getUnitStats({ ...base, attacks: [], spells }).dpr).toBe(7 * 1.5);
   });
 
   it("слабке заклинання не знижує DPR зброї", () => {

@@ -6,7 +6,7 @@ export type SpellDiceSource = { dice: number; groupId?: string | null };
 
 export type MasteryOf = (groupId: string | null | undefined) => BranchLevel | null;
 
-export type SpellDice = { count: number; sides: number; flat: number };
+export type SpellDice = { count: number; sides: number };
 
 const SIDES_BY_MASTERY: Record<BranchLevel, number> = { basic: 6, advanced: 8, expert: 10 };
 
@@ -40,7 +40,6 @@ export function spellDice(caster: SpellCaster, spell: SpellDiceSource, masteryOf
   return {
     count,
     sides: mastery ? SIDES_BY_MASTERY[mastery] : 6,
-    flat: count > 0 ? level : 0,
   };
 }
 

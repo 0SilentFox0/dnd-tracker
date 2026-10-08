@@ -104,11 +104,11 @@ describe("targeting kinds", () => {
 });
 
 describe("castSpell", () => {
-  it("шкода = кубики + рівень, один кидок на всі цілі", () => {
+  it("шкода = сума кубиків, один кидок на всі цілі", () => {
     const r = cast(spellOf({ targeting: { kind: "area", side: "enemy", maxTargets: 2 } }), ["e1", "e2"], [enemy("e1"), enemy("e2")]);
 
-    expect(hp(r, "e1")).toBe(200 - 7);
-    expect(hp(r, "e2")).toBe(200 - 7);
+    expect(hp(r, "e1")).toBe(200 - 6);
+    expect(hp(r, "e2")).toBe(200 - 6);
   });
 
   it("рятівний кидок half: успішний кидок ділить шкоду навпіл", () => {
@@ -118,7 +118,7 @@ describe("castSpell", () => {
       saveRolls: [{ participantId: "e1", roll: 1 }, { participantId: "e2", roll: 9 }, { participantId: "e3", roll: 1 }],
     });
 
-    expect([hp(r, "e1"), hp(r, "e2"), hp(r, "e3")]).toEqual([193, 197, 193]);
+    expect([hp(r, "e1"), hp(r, "e2"), hp(r, "e3")]).toEqual([194, 197, 194]);
     expect(r.battleAction.actionDetails.savingThrows?.map((s) => s.result)).toEqual(["fail", "success", "fail"]);
   });
 
@@ -145,7 +145,7 @@ describe("castSpell", () => {
 
     const r = cast(spell, ["h", "o", "g"], [enemy("h", "human"), enemy("o", "orc"), enemy("g", "goblin")]);
 
-    expect([hp(r, "h"), hp(r, "o"), hp(r, "g")]).toEqual([200, 200 - 14, 200 - 7]);
+    expect([hp(r, "h"), hp(r, "o"), hp(r, "g")]).toEqual([200, 200 - 12, 200 - 6]);
     expect(r.battleAction.resultText).toContain("імунітет раси");
   });
 
@@ -154,9 +154,9 @@ describe("castSpell", () => {
 
     const r = cast(spellOf({ targeting: { kind: "everyone" } }), ["c", "a", "e1"], [ally, enemy("e1")]);
 
-    expect(hp(r, "a")).toBe(43);
-    expect(hp(r, "c")).toBe(13);
-    expect(hp(r, "e1")).toBe(193);
+    expect(hp(r, "a")).toBe(44);
+    expect(hp(r, "c")).toBe(14);
+    expect(hp(r, "e1")).toBe(194);
   });
 
   it("DoT з кубиками кидається один раз на каст", () => {
@@ -166,7 +166,7 @@ describe("castSpell", () => {
 
     const dots = ["e1", "e2"].map((id) => r.allParticipantsUpdated.find((p) => p.basicInfo.id === id)?.battleData.activeEffects[0].dotDamage?.damagePerRound);
 
-    expect(dots).toEqual([6, 6]);
+    expect(dots).toEqual([5, 5]);
   });
 
   it("Ланцюгова блискавка: шкода спадає по цілях", () => {
@@ -174,7 +174,7 @@ describe("castSpell", () => {
 
     const r = cast(spellOf({ targeting: { kind: "area", side: "enemy", maxTargets: 3 }, effects: [chain] }), ["e1", "e2", "e3"], [enemy("e1"), enemy("e2"), enemy("e3")], { diceRolls: [10, 9] });
 
-    expect([hp(r, "e1"), hp(r, "e2"), hp(r, "e3")]).toEqual([200 - 20, 200 - 10, 200 - 5]);
+    expect([hp(r, "e1"), hp(r, "e2"), hp(r, "e3")]).toEqual([200 - 19, 200 - 9, 200 - 4]);
   });
 
   it("опір і імунітет до стихії застосовуються до шкоди заклинання", () => {
@@ -212,7 +212,7 @@ describe("castSpell", () => {
 
     const r = cast(regen, ["a"], [makeParticipant({ id: "a" })], { diceRolls: [4] });
 
-    expect(r.allParticipantsUpdated.find((p) => p.basicInfo.id === "a")?.battleData.activeEffects[0].hotHeal).toEqual({ healPerRound: 5 });
+    expect(r.allParticipantsUpdated.find((p) => p.basicInfo.id === "a")?.battleData.activeEffects[0].hotHeal).toEqual({ healPerRound: 4 });
   });
 
   it("ефект self діє на заклинателя, а не на ціль; summon повертає запит", () => {
@@ -277,8 +277,8 @@ describe("castSpell", () => {
 
     const hit = (c: BattleParticipant) => 200 - hp(castSpell({ caster: c, spell: retribution, targetIds: ["e1"], allParticipants: [c, enemy("e1")], currentRound: 1, battleId: "b", diceRolls: [3, 3], rng: seq(0.5) }), "e1");
 
-    expect(hit(full)).toBe(7);
-    expect(hit(wounded)).toBe(Math.floor((7 * 150) / 100));
+    expect(hit(full)).toBe(6);
+    expect(hit(wounded)).toBe(Math.floor((6 * 150) / 100));
   });
 
   it("Шал і Ляльковод не діють на героїв, але слот витрачено", () => {

@@ -47,7 +47,7 @@ describe("SpellBook", () => {
     expect(screen.queryByText("Крижаний спис")).toBeNull();
 
     fireEvent.click(screen.getByText("Палаючий промінь"));
-    expect(screen.getAllByText("2к6 + 1").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("2к6").length).toBeGreaterThan(0);
     fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
     fireEvent.click(screen.getByRole("button", { name: /Гоблін/ }));
     fireEvent.click(screen.getByRole("button", { name: "Далі · кидки" }));
@@ -81,7 +81,7 @@ describe("SpellBook", () => {
     expect(useSpells).toHaveBeenLastCalledWith(expect.any(String), { enabled: false });
   });
 
-  it("герой: формула «6к10 + рівень» і слоти кубиків за майстерністю та рівнем", async () => {
+  it("герой: формула «6к10» і слоти кубиків за майстерністю та рівнем", async () => {
     const { wrapper, caster } = fakeScene({ knownSpells: ["ball"], slots: { "2": { max: 3, current: 3 } } });
 
     const hero = { ...caster, basicInfo: { ...caster.basicInfo, sourceType: "character" as const }, abilities: { ...caster.abilities, level: 6 }, battleData: { ...caster.battleData, schoolMastery: { chaos: "expert" as const } } };
@@ -89,7 +89,7 @@ describe("SpellBook", () => {
     render(<Harness caster={hero} />, { wrapper });
 
     fireEvent.click(await screen.findByText("Вогняна куля"));
-    expect(screen.getAllByText("6к10 + 6").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("6к10").length).toBeGreaterThan(0);
     fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
     fireEvent.click(screen.getByRole("button", { name: /Гоблін/ }));
     fireEvent.click(screen.getByRole("button", { name: "Далі · кидки" }));

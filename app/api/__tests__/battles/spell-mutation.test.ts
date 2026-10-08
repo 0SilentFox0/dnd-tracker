@@ -50,11 +50,11 @@ const body = (over: Record<string, unknown> = {}) => ({ casterId: "hero", spellI
 const hpOf = (out: { participants: BattleParticipant[] }, id: string) => out.participants.find((p) => p.basicInfo.id === id)?.combatStats.currentHp;
 
 describe("spell mutation", () => {
-  it("каст: кубики + рівень, одна подія, слот витрачено", async () => {
+  it("каст: сума кубиків, одна подія, слот витрачено", async () => {
     const out = await mutation()(context({ participants: [caster, goblin] }), body() as never);
 
     expect(out.events).toHaveLength(1);
-    expect(hpOf(out, "gob")).toBe(goblin.combatStats.currentHp - 5);
+    expect(hpOf(out, "gob")).toBe(goblin.combatStats.currentHp - 4);
 
     const slots = out.participants.find((p) => p.basicInfo.id === "hero")?.spellcasting.spellSlots;
 
@@ -90,7 +90,7 @@ describe("spell mutation", () => {
     it("DM може передати кидок цілі", async () => {
       const out = await mutation(save)(context({ participants: [caster, goblin], isDM: true, userId: "dm", rng: () => 0.99 }), saveBody(1) as never);
 
-      expect(dealt(out)).toBe(5);
+      expect(dealt(out)).toBe(4);
     });
 
     it("нецілий кидок відхиляє схема", async () => {

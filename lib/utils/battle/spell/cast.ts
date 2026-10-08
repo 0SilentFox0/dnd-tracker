@@ -3,7 +3,6 @@ import { applyBalanceDamageMultiplier } from "../damage/balance-multiplier";
 import { applyMainActionUsed } from "../participant";
 import { applyResistance } from "../resistance";
 import type { CastableSpell, CastSpellParams, CastSpellResult } from "../types/spell-process";
-import { casterSpellDice } from "./caster-dice";
 import { computeSpellPower, spellSaveDc } from "./power";
 import { participantImmuneToSpell } from "./spell-immunity";
 
@@ -122,9 +121,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     };
   }
 
-  const dice = casterSpellDice(updatedCaster, { dice: def.dice, groupId: spell.groupId });
-
-  const power = computeSpellPower({ caster: updatedCaster, groupId: spell.groupId, rolls: diceRolls, flat: dice.flat, participants: flow.ps, extra: actionModifiers[casterId] });
+  const power = computeSpellPower({ caster: updatedCaster, groupId: spell.groupId, rolls: diceRolls, participants: flow.ps, extra: actionModifiers[casterId] });
 
   const ability = abilityOf(spell);
 

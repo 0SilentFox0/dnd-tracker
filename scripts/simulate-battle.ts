@@ -1039,7 +1039,7 @@ async function spellModel() {
   quiet = false;
   check("Кубики заклинання: неправильна кількість відхиляється (422 invalid_dice)", wrongCount.status === 422 && wrongCount.body.code === "invalid_dice", JSON.stringify(wrongCount.body));
   check("Кубики заклинання: невірні грані відхиляються (422 invalid_dice)", wrongSides.status === 422 && wrongSides.body.code === "invalid_dice", JSON.stringify(wrongSides.body));
-  check("Формула кубиків Архімага L6: 4к6 + 6", fireDice.count === 4 && fireDice.sides === 6 && fireDice.flat === 6, JSON.stringify(fireDice));
+  check("Формула кубиків Архімага L6: 4к6", fireDice.count === 4 && fireDice.sides === 6, JSON.stringify(fireDice));
   quiet = true;
 
   const goblins = ["Гоблін А", "Гоблін Б", "Гоблін В"];

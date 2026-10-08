@@ -35,7 +35,7 @@ describe("loadUnitLibraryStats: заклинання юнітів", () => {
 
     const mage = library.find((u) => u.unitId === "mage");
 
-    expect(mage?.dpr).toBe((8 * 3.5 + 3) * 2);
+    expect(mage?.dpr).toBe(8 * 3.5 * 2);
 
     const party = { dpr: 4 * 12, hp: 4 * 40, heroCount: 4 };
 

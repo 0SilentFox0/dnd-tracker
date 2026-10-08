@@ -28,23 +28,18 @@ export function computeSpellPower(input: {
   caster: BattleParticipant;
   groupId: string | null;
   rolls: number[];
-  flat: number;
   participants: BattleParticipant[];
   extra?: StaticEffect[];
 }): SpellPower {
-  const { caster, rolls, flat } = input;
+  const { caster, rolls } = input;
 
   if (rolls.length === 0) return { heal: 0, damage: 0, breakdown: [] };
 
   const sum = rolls.reduce((a, b) => a + b, 0);
 
-  const { mod, label } = spellcastingModifier(caster);
+  const breakdown = [`+ сума кубиків (${sum})`];
 
-  const breakdown = [`+ сума кубиків (${sum})`, `+ рівень (${flat})`];
-
-  if (mod !== 0 && label) breakdown.push(`+ модифікатор ${label} (${signed(mod)})`);
-
-  const heal = sum + flat + mod;
+  const heal = sum;
 
   const mods = collectModifiers(withSelf(input.participants, caster), caster.basicInfo.id, { damage: { kind: "magic", school: input.groupId } }, input.extra);
 
