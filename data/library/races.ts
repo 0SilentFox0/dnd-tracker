@@ -31,6 +31,8 @@ const LEVEL_ICON_OVERRIDES: Partial<Record<string, Record<Level, string>>> = {
   },
 };
 
+const ULTIMATE_ICON_OVERRIDES: Partial<Record<string, string>> = { "dark-elves": "dark-elves-empowered-spells" };
+
 function racialLevels(race: string, skillName: string, build: (level: Level, i: number) => RacialLevel): LibrarySkill[] {
   return LEVELS.map((level, i) => ({
     key: `racial-${race}-${level}`,
@@ -41,7 +43,7 @@ function racialLevels(race: string, skillName: string, build: (level: Level, i: 
 }
 
 function ultimate(race: string, skill: Omit<LibrarySkill, "key" | "iconKey">): LibrarySkill {
-  return { key: `racial-${race}-ultimate`, iconKey: `racial-${race}-ultimate`, ...skill };
+  return { key: `racial-${race}-ultimate`, iconKey: ULTIMATE_ICON_OVERRIDES[race] ?? `racial-${race}-ultimate`, ...skill };
 }
 
 const COUNTER_BONUS = [15, 25, 40];
