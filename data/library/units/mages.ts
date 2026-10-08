@@ -3,7 +3,7 @@ import { alliesAura, armorBreak, bravery, buffAlly, construct, debuff, disable, 
 
 const base = { raceKey: "mages" } as const;
 
-const spellSuppression = () => alliesAura("Аура пригнічення магії", { kind: "flag", flag: "resistance", damageType: "spell", percent: 10 });
+const spellSuppression = () => alliesAura("Аура пригнічення магії", { kind: "flag", flag: "resistance", damageType: "spell", percent: 20 });
 
 export const MAGE_UNITS: LibraryUnit[] = [
   { ...base, key: "mages-gremlin", name: "Гремлін", tier: 1, role: "base", hp: 25, ac: 12, attackBonus: 5, initiative: 7, attacks: [{ name: "Гайковий пістолет", type: "ranged", dice: "1d6", damageType: "piercing" }], abilities: [] },
