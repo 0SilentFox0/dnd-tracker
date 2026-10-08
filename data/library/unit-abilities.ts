@@ -1,3 +1,4 @@
+import { getDamageElementLabel } from "@/lib/constants/damage";
 import { type Ability, type Amount, type Condition, type Effect } from "@/lib/utils/abilities/schema";
 
 type ModStat = "attackBonus" | "initiative" | "armor" | "morale";
@@ -7,6 +8,10 @@ const STAT_LABELS: Record<ModStat, string> = { attackBonus: "атаку", initia
 const CONDITION_LABELS = { disable_ranged_attacks: "дальні атаки", disable_spell_casting: "закляття" } as const;
 
 const ELEMENT_LABELS: Record<string, string> = { fire: "вогню", cold: "холоду", lightning: "блискавки" };
+
+function typeLabel(type: string): string {
+  return type === "physical" ? "фізична" : getDamageElementLabel(type).toLowerCase();
+}
 
 function hash(text: string): string {
   let h = 0;
@@ -114,7 +119,7 @@ export const stun = (name: string, chance: number): Ability => ({
 export const dot = (name: string, dice: string, damageType: string, roundCount: number, chance?: number): Ability => ({
   id: `unit-dot-${damageType}`,
   name,
-  description: `Влучання${chanceText(chance)} завдає ${dice} шкоди (${damageType}) щораунду протягом ${rounds(roundCount)}.`,
+  description: `Влучання${chanceText(chance)} завдає ${dice} шкоди (${typeLabel(damageType)}) щораунду протягом ${rounds(roundCount)}.`,
   trigger: onHit,
   ...chanceLimit(chance),
   effects: [{ kind: "dot", damagePerRound: dice, damageType, duration: { rounds: roundCount }, target: "eventTarget" }],
@@ -202,7 +207,7 @@ export const magicImmunity = (): Ability => ({
 export const elementResist = (types: string[], percent: number, name: string): Ability => ({
   id: `unit-resist-${types.join("-")}`,
   name,
-  description: `Опір шкоді (${types.join(", ")}) ${percent} %.`,
+  description: `Опір шкоді (${types.map(typeLabel).join(", ")}) ${percent} %.`,
   trigger: passive,
   effects: types.map((damageType): Effect => ({ kind: "flag", flag: "resistance", damageType, percent })),
 });
@@ -210,7 +215,7 @@ export const elementResist = (types: string[], percent: number, name: string): A
 export const physicalResist = (percent: number, types: string[] = ["physical"], name = "Опір фізичній шкоді"): Ability => ({
   id: `unit-physical-resist-${types.join("-")}`,
   name,
-  description: `Фізична шкода (${types.join(", ")}) зменшена на ${percent} %.`,
+  description: types.length === 1 && types[0] === "physical" ? `Фізична шкода зменшена на ${percent} %.` : `Фізична шкода (${types.map(typeLabel).join(", ")}) зменшена на ${percent} %.`,
   trigger: passive,
   effects: types.map((damageType): Effect => ({ kind: "flag", flag: "resistance", damageType, percent })),
 });
@@ -242,7 +247,7 @@ export const lifeDrain = (percent = 50): Ability => ({
 export const retaliateAura = (name: string, percent = 25, damageType = "fire"): Ability => ({
   id: `unit-retaliate-${damageType}`,
   name,
-  description: `Атакувальник у ближньому бою отримує ${percent} % завданої шкоди (${damageType}).`,
+  description: `Атакувальник у ближньому бою отримує ${percent} % завданої шкоди (${typeLabel(damageType)}).`,
   trigger: { event: "hit", role: "target", attackKind: "melee" },
   effects: [{ kind: "dealDamage", amount: { percentOf: "eventDamage", value: percent }, damageType, target: "eventActor" }],
 });
@@ -350,7 +355,7 @@ export const raiseOnKill = (unitKey: string): Ability => ({
 export const extraDamage = (name: string, dice: string, damageType: string): Ability => ({
   id: `unit-extra-damage-${damageType}`,
   name,
-  description: `Влучання завдає додатково ${dice} шкоди (${damageType}).`,
+  description: `Влучання завдає додатково ${dice} шкоди (${typeLabel(damageType)}).`,
   trigger: onHit,
   effects: [{ kind: "dealDamage", amount: dice, damageType, target: "eventTarget" }],
 });

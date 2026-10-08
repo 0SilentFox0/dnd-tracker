@@ -237,6 +237,12 @@ describe("buildLibrary validation", () => {
 });
 
 describe("buildLibrary unit validation", () => {
+  it("unit ability descriptions have no raw damage-type ids", () => {
+    const raw = UNITS.flatMap((u) => u.abilities.map((a) => a.description ?? "")).filter((d) => /\([a-z]+(, [a-z]+)*\)/.test(d));
+
+    expect(raw).toEqual([]);
+  });
+
   const withUnits = (units: LibraryUnit[], over: Partial<LibrarySource> = {}) => source({ units, ...over });
 
   it("accepts valid units and indexes them", () => {

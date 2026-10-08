@@ -14,7 +14,7 @@ const ent = () => [regeneration(10), stun("Сплутування", 25)];
 const waspSwarm = (): Ability => ({
   id: "unit-wasp-swarm",
   name: "Рій ос",
-  description: "Бонусна дія, раз за бій: ціль отримує 1d6 шкоди (poison) щораунду протягом 3 раундів.",
+  description: "Бонусна дія, раз за бій: ціль отримує 1d6 шкоди (отрута) щораунду протягом 3 раундів.",
   trigger: { event: "bonusAction" },
   limits: { perBattle: 1 },
   effects: [{ kind: "dot", damagePerRound: "1d6", damageType: "poison", duration: { rounds: 3 }, target: "eventTarget" }],

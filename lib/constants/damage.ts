@@ -12,6 +12,7 @@ export const DAMAGE_ELEMENT_OPTIONS = [
   { value: "bludgeoning", label: "Дробляча" },
   { value: "piercing", label: "Колюча" },
   { value: "slashing", label: "Рубляча" },
+  { value: "bleed", label: "Кровотеча" },
 ] as const;
 
 export const DAMAGE_ELEMENT_LABELS = DAMAGE_ELEMENT_OPTIONS.reduce<
