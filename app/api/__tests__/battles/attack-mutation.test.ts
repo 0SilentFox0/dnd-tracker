@@ -79,9 +79,7 @@ describe("attack mutation", () => {
 
     const rolls = (parseDice(formula)?.groups ?? []).flatMap((g) => Array.from({ length: g.count }, () => g.size));
 
-    await expect(attackMutation({ ...ctx, participants: [heroAttacker, goblin] } as never, body({ damageRolls: rolls }))).not.toThrow(
-      expect.objectContaining({ code: "invalid_dice" }),
-    );
+    expect(await errorCode(attackMutation({ ...ctx, participants: [heroAttacker, goblin] } as never, body({ damageRolls: rolls })))).not.toBe("invalid_dice");
   });
 
   it("нестандартний запис кубиків зброї (\"1d8 piercing\") не блокує атаку", async () => {
