@@ -92,6 +92,8 @@ const mulberry32 = (seed: number) => () => {
 
 let rng: () => number = Math.random;
 
+let actingUser = SIM_USER.id;
+
 let casts = 0;
 
 let lastBody: Record<string, unknown> = {};
@@ -103,7 +105,7 @@ const castLog: Record<string, number> = {};
 let dealt: Record<string, { dmg: number; turns: number }> = {};
 
 const deps: PipelineDeps = {
-  getUserId: async () => SIM_USER.id,
+  getUserId: async () => actingUser,
   rateLimit: async () => ({ allowed: true, count: 0, limit: 1_000_000, resetInSeconds: 0 }) as never,
   loadBattle: (args) => loadBattle(prisma, args),
   saveBattle: (before, outcome) => saveBattle(prisma, before, outcome),
@@ -197,6 +199,8 @@ function pickSpell(actor: BattleParticipant, foes: BattleParticipant[]): { spell
 
     const save = (spell.resolution as { kind: string }).kind === "save" ? 0.75 : 1;
 
+    if (process.argv.includes("--debug")) console.info(`   cand ${spell.name} dice ${dice.count}d${dice.sides} targets ${targets.length}`);
+
     const score = dice.count * ((dice.sides + 1) / 2) * targets.length * save;
 
     if (!best || score > best.score) best = { spell, targets, score };
@@ -226,11 +230,15 @@ async function playTurn(actor: BattleParticipant, foes: BattleParticipant[]) {
     const pick = pickSpell(actor, foes);
 
     if (pick) {
+      if (process.argv.includes("--debug")) console.info(`   pick ${pick.spell.name} by ${actor.basicInfo.name} slots ${JSON.stringify(actor.spellcasting.spellSlots)}`);
+
       const dice = casterSpellDice(actor, { dice: pick.spell.dice, groupId: pick.spell.groupId });
 
       const rolls = Array.from({ length: dice.count }, () => 1 + Math.floor(rng() * dice.sides));
 
       const status = await call("spell", SPELL, { casterId: actor.basicInfo.id, spellId: pick.spell.id, targetIds: pick.targets.map((t) => t.basicInfo.id), diceRolls: rolls });
+
+      if (status !== 200 && process.argv.includes("--debug")) console.info(`   cast ${pick.spell.name} -> ${status} ${JSON.stringify(lastBody).slice(0, 200)}`);
 
       if (status === 200) {
         casts++;
@@ -277,15 +285,18 @@ async function fight(seed: number, setup: Array<Record<string, unknown>>): Promi
   const battle = await prisma.battleScene.create({ data: { campaignId, name: `Баланс ${seed}`, status: "prepared", participants: setup as Prisma.InputJsonValue, currentRound: 1, currentTurnIndex: 0 } });
 
   battleId = battle.id;
+  actingUser = SIM_USER.id;
   state = await readState();
   await call("start", START);
 
   if (process.argv.includes("--dump") && seed < 200) {
-    for (const p of state.initiativeOrder) console.info(`   ${p.basicInfo.name}: HP ${p.combatStats.maxHp} AC ${p.combatStats.armorClass} init ${p.abilities.initiative}`);
+    for (const p of state.initiativeOrder) console.info(`   ${p.basicInfo.name}: HP ${p.combatStats.maxHp} AC ${p.combatStats.armorClass} init ${p.abilities.initiative} slots ${JSON.stringify(p.spellcasting.spellSlots)} spells ${p.spellcasting.knownSpells.map((id) => `${spellById.get(id)?.name}(${spellById.get(id)?.level})`).join(",")}`);
   }
 
   for (let step = 0; step < STEP_LIMIT && state.status === "active"; step++) {
     const actor = state.initiativeOrder[state.currentTurnIndex];
+
+    actingUser = actor.basicInfo.side === "ally" ? SIM_PLAYER.id : SIM_USER.id;
 
     const foes = state.initiativeOrder.filter((p) => p.basicInfo.side !== actor.basicInfo.side && alive(p));
 

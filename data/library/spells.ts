@@ -196,10 +196,10 @@ export const SPELLS: LibrarySpell[] = [
     name: "Слово світла",
     school: LIGHT,
     level: 5,
-    description: `Усі вороги отримують ${power(4, "шкоди світлом")}. Люди, Ельфи, Гноми й Маги мають до нього імунітет — світло не карає добрих.`,
+    description: `Усі вороги отримують ${power(3, "шкоди світлом")}. Люди, Ельфи, Гноми й Маги мають до нього імунітет — світло не карає добрих.`,
     appearanceDescription:
       "Заклинатель вимовляє одне-єдине слово, і воно гримить, як тисяча дзвонів. Поле бою заливає біле сяйво: темні створіння горять і корчаться, а добрі серця лише відчувають теплий подих світанку.",
-    definition: def(4, ALL_ENEMIES, [damage("radiant")]),
+    definition: def(3, ALL_ENEMIES, [damage("radiant")]),
     raceModifiers: [
       { raceKey: "humans", percent: -100 },
       { raceKey: "elves", percent: -100 },
@@ -391,10 +391,10 @@ export const SPELLS: LibrarySpell[] = [
     name: "Кам'яні шипи",
     school: CHAOS,
     level: 1,
-    description: `До 3 ворогів отримують по ${power(1, "дробильної шкоди")}.`,
+    description: `До 2 ворогів отримують по ${power(1, "дробильної шкоди")}.`,
     appearanceDescription:
       "Земля під ворогами здригається, і з неї вистрибують гострі кам'яні шпилі, мов зуби величезного звіра. Уламки скель розлітаються, лишаючи по собі хмари пилу.",
-    definition: def(1, enemies(3), [damage("bludgeoning")]),
+    definition: def(1, enemies(2), [damage("bludgeoning")]),
     raceModifiers: [],
   },
   {
@@ -402,10 +402,10 @@ export const SPELLS: LibrarySpell[] = [
     name: "Крижаний болт",
     school: CHAOS,
     level: 2,
-    description: `Завдає ворогу ${power(3, "шкоди холодом")}; ворог 1 раунд атакує з невигідністю.`,
+    description: `Завдає ворогу ${power(2, "шкоди холодом")}; ворог 1 раунд атакує з невигідністю.`,
     appearanceDescription:
       "Повітря тріщить від морозу, і в руці заклинателя виростає синій крижаний спис. Він летить зі свистом і розбивається об ціль, вкриваючи її інеєм і скуваючи суглоби.",
-    definition: def(3, ENEMY, [damage("cold"), { kind: "flag", flag: "disadvantage", duration: rounds(1) }]),
+    definition: def(2, ENEMY, [damage("cold"), { kind: "flag", flag: "disadvantage", duration: rounds(1) }]),
     raceModifiers: [],
   },
   {
@@ -413,10 +413,10 @@ export const SPELLS: LibrarySpell[] = [
     name: "Блискавка",
     school: CHAOS,
     level: 2,
-    description: `Завдає ворогу ${power(3, "шкоди блискавкою")}; ворог отримує −2 до ініціативи на 2 раунди.`,
+    description: `Завдає ворогу ${power(2, "шкоди блискавкою")}; ворог отримує −2 до ініціативи на 2 раунди.`,
     appearanceDescription:
       "Небо розколюється сліпучою гілкою, і грім б'є просто у ворога. Від нього валить дим, волосся стоїть дибки, а м'язи ще довго сіпаються в судомах.",
-    definition: def(3, ENEMY, [damage("lightning"), stat("initiative", -2, 2)]),
+    definition: def(2, ENEMY, [damage("lightning"), stat("initiative", -2, 2)]),
     raceModifiers: [],
   },
   {
@@ -424,10 +424,10 @@ export const SPELLS: LibrarySpell[] = [
     name: "Вогняна куля",
     school: CHAOS,
     level: 3,
-    description: `До 4 ворогів роблять рятівний кидок Спритності; кожен отримує ${power(3, "шкоди вогнем")}, при успіху — половину.`,
+    description: `До 3 ворогів роблять рятівний кидок Спритності; кожен отримує ${power(2, "шкоди вогнем")}, при успіху — половину.`,
     appearanceDescription:
       "Між долонями заклинателя набухає гаряча помаранчева куля, що гуде, мов розпечена кузня. Вона вибухає посеред ворогів, і полум'я розкочується колом, пожираючи траву й плащі.",
-    definition: def(3, enemies(4), [damage("fire")], { resolution: save("dexterity", "half") }),
+    definition: def(2, enemies(3), [damage("fire")], { resolution: save("dexterity", "half") }),
     raceModifiers: [],
   },
   {
@@ -446,10 +446,10 @@ export const SPELLS: LibrarySpell[] = [
     name: "Коло зими",
     school: CHAOS,
     level: 3,
-    description: `До 4 ворогів роблять рятівний кидок Статури; кожен отримує ${power(3, "шкоди холодом")} і −2 до ініціативи на 1 раунд. При успіху — половина шкоди без штрафу ініціативи.`,
+    description: `До 3 ворогів роблять рятівний кидок Статури; кожен отримує ${power(2, "шкоди холодом")} і −2 до ініціативи на 1 раунд. При успіху — половина шкоди без штрафу ініціативи.`,
     appearanceDescription:
       "Від заклинателя розходиться крижане кільце, і трава на його шляху вкривається памороззю. Вороги застигають у хрусткому інеї, видихаючи хмарки білої пари.",
-    definition: def(3, enemies(4), [damage("cold"), stat("initiative", -2, 1)], { resolution: save("constitution", "half") }),
+    definition: def(2, enemies(3), [damage("cold"), stat("initiative", -2, 1)], { resolution: save("constitution", "half") }),
     raceModifiers: [],
   },
   {
@@ -457,10 +457,10 @@ export const SPELLS: LibrarySpell[] = [
     name: "Ланцюгова блискавка",
     school: CHAOS,
     level: 4,
-    description: `Блискавка стрибає між ворогами (до 4): перша ціль отримує ${power(5, "шкоди блискавкою")}, кожна наступна — половину від попередньої (100 % → 50 % → 25 % → 13 %).`,
+    description: `Блискавка стрибає між ворогами (до 4): перша ціль отримує ${power(2, "шкоди блискавкою")}, кожна наступна — менше за попередню (100 % → 40 % → 20 % → 10 %).`,
     appearanceDescription:
       "Сліпучий розряд вистрибує з пальців заклинателя і, вдаривши першого ворога, перескакує на наступного, і далі, і далі. Повітря тріщить і пахне грозою, а кожен стрибок трохи тьмяніший за попередній.",
-    definition: def(5, enemies(4), [damage("lightning", { falloff: [100, 50, 25, 13] })]),
+    definition: def(2, enemies(4), [damage("lightning", { falloff: [100, 40, 20, 10] })]),
     raceModifiers: [],
   },
   {
@@ -468,10 +468,10 @@ export const SPELLS: LibrarySpell[] = [
     name: "Метеоритний дощ",
     school: CHAOS,
     level: 4,
-    description: `Усі вороги роблять рятівний кидок Спритності; кожен отримує ${power(3, "дробильної шкоди")}, при успіху — половину.`,
+    description: `Усі вороги роблять рятівний кидок Спритності; кожен отримує ${power(2, "дробильної шкоди")}, при успіху — половину.`,
     appearanceDescription:
       "Небо темніє, і з нього падають розпечені брили, лишаючи по собі вогняні хвости. Земля здригається від ударів, вирви димлять, а уламки каміння свистять над головами.",
-    definition: def(3, ALL_ENEMIES, [damage("bludgeoning")], { resolution: save("dexterity", "half") }),
+    definition: def(2, ALL_ENEMIES, [damage("bludgeoning")], { resolution: save("dexterity", "half") }),
     raceModifiers: [],
   },
   {
