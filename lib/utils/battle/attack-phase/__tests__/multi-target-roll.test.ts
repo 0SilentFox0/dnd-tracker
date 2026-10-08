@@ -99,4 +99,37 @@ describe("multi-target advantage resolution", () => {
       expect(["t2", "t3"].every((id) => lost(r, id) === 0)).toBe(true);
     });
   });
+
+  it("a consumable advantage effect applies to the first target only and is spent", () => {
+    const buffed = {
+      ...attacker,
+      battleData: {
+        ...attacker.battleData,
+        activeEffects: [
+          { id: "adv", name: "adv", type: "buff", duration: 2, appliedAt: { round: 1, timestamp: new Date(0) }, effects: [], abilityEffects: [{ kind: "flag", flag: "advantage", attackKind: "all" }], consumeOn: "ownAttack" },
+        ],
+      },
+    } as BattleParticipant;
+
+    const r = run([buffed, foe("t1"), foe("t2")], { targetIds: ["t1", "t2"], attackRolls: [17, 17] });
+
+    expect(r.allBattleActions[0].actionDetails.secondRoll).toMatchObject({ mode: "advantage" });
+    expect(r.allBattleActions[1].actionDetails.secondRoll).toBeUndefined();
+    expect(r.finalInitiativeOrder.find((p) => p.basicInfo.id === "a")?.battleData.activeEffects).toEqual([]);
+  });
+});
+
+describe("free attack crit on a multi-target attack", () => {
+  it("critical effect 6 on the first target leaves the attacker an action", () => {
+    const r = runAttackPhase({
+      battle: { initiativeOrder: [attacker, foe("t1"), foe("t2")], battleLog: [], currentRound: 1, currentTurnIndex: 0 },
+      data: { attackerId: "a", damageRolls: [4, 4], targetIds: ["t1", "t2"], attackRolls: [20, 5] } as never,
+      battleId: "b",
+      userId: "u",
+      isDM: true,
+      rng: seq(0.55),
+    });
+
+    expect(r.finalInitiativeOrder.find((p) => p.basicInfo.id === "a")?.actionFlags.hasUsedAction).toBe(false);
+  });
 });

@@ -6,6 +6,7 @@ import type {
   ProcessAttackParams,
   ProcessAttackResult,
 } from "../../types/attack-process";
+import { activeEffectIds, consumeAttackEffects } from "../consume-effects";
 import { calculateAttackRoll } from "..";
 import { appendHpChanges, type AttackFlow, fire, getP, put } from "./ability-flow";
 import { buildAbortedAttackAction, buildBattleActionForHit } from "./actions";
@@ -13,6 +14,7 @@ import { handleCriticalFail } from "./critical-fail";
 import { resolveHit } from "./hit";
 import { handleMiss } from "./miss";
 
+import { critFlavor } from "@/lib/constants/critical-effects";
 import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { isActive, withSelf } from "@/lib/utils/abilities/engine/participants";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
@@ -43,6 +45,14 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
   const before = withSelf(withSelf(allParticipants, target), attacker);
 
   const flow: AttackFlow = { ps: before, messages: [], ctx: { round: currentRound, rng: params.rng ?? Math.random } };
+
+  const existedBefore = activeEffectIds(flow.ps);
+
+  const consume = (r: ProcessAttackResult, hit: boolean): ProcessAttackResult => {
+    flow.ps = consumeAttackEffects(flow.ps, { attackerId, targetId, hit, existedBefore });
+
+    return { ...r, allParticipantsUpdated: flow.ps, attackerUpdated: getP(flow, attackerId), targetUpdated: getP(flow, targetId) };
+  };
 
   const { actionModifiers } = fire(flow, { type: "attack", phase: "before", actorId: attackerId, targetId, attackKind });
 
@@ -89,7 +99,15 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   const isHit = !attackRoll.isCriticalFail && (attackRoll.isCritical || guaranteedHit || attackRoll.totalAttackValue >= targetAC);
 
-  const branch = { flow, attackerId, targetId, attack, d20Roll, attackRoll, targetAC, currentRound, battleId };
+  const critFlavorText = attackRoll.criticalEffect
+    ? critFlavor(
+        attackRoll.criticalEffect,
+        { attacker: getP(flow, attackerId).basicInfo.name, target: getP(flow, targetId).basicInfo.name },
+        `${battleId}:${currentRound}:${attackerId}:${targetId}`,
+      )
+    : undefined;
+
+  const branch = { critFlavorText, flow, attackerId, targetId, attack, d20Roll, attackRoll, targetAC, currentRound, battleId };
 
   if (attackRoll.isCriticalFail && attackRoll.criticalEffect) {
     const r = handleCriticalFail(branch);
@@ -97,7 +115,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     withRollDetails(r.battleAction);
     appendHpChanges(r.battleAction, before, flow.ps);
 
-    return r;
+    return consume(r, false);
   }
 
   if (!isHit) {
@@ -106,7 +124,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     withRollDetails(r.battleAction);
     appendHpChanges(r.battleAction, before, flow.ps);
 
-    return r;
+    return consume(r, false);
   }
 
   const { hitDamage, vampirismHeal } = resolveHit({
@@ -158,12 +176,13 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     oldHp,
     battleId,
     currentRound,
+    critFlavorText,
   });
 
   withRollDetails(battleAction);
   appendHpChanges(battleAction, before, flow.ps);
 
-  return {
+  return consume({
     success: true,
     attackRoll,
     damage: {
@@ -178,5 +197,5 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     allParticipantsUpdated: flow.ps,
     criticalEffectApplied,
     battleAction,
-  };
+  }, true);
 }

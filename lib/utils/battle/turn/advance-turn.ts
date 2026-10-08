@@ -1,3 +1,4 @@
+import { expireTurnEndEffects } from "../attack/consume-effects";
 import { applyPendingMoraleCheck } from "./apply-pending-morale";
 import type { PendingMoraleCheckPayload } from "./pending-morale";
 import { runAdvanceTurnLoop } from "./run-advance-turn-loop";
@@ -45,7 +46,13 @@ export function advanceTurn({ participants, pending, scene, rng }: AdvanceTurnIn
 
     if (ended.messages.length > 0) actions.push(turnEndAction(ending, scene, ended.messages));
 
-    order = order.map((p) => (p.basicInfo.id === ending.basicInfo.id && p.battleData.charmReturn ? restoreCharm(p) : p));
+    order = order.map((p) => {
+      if (p.basicInfo.id !== ending.basicInfo.id) return p;
+
+      const expired = expireTurnEndEffects(p);
+
+      return expired.battleData.charmReturn ? restoreCharm(expired) : expired;
+    });
   }
 
   const current = order[scene.turnIndex];

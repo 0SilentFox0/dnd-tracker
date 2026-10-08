@@ -4,6 +4,7 @@ export {
   BattleSceneContext,
   BattleSceneDataContext,
   type BattleSceneValue,
+  type CritEffectFx,
   useBattleScene,
   useBattleSceneData,
   useBattleSceneDataValue,

@@ -11,7 +11,7 @@ import { resolveAttackRoll } from "@/lib/utils/battle/common/attack-roll-helpers
 import { computeDamageBreakdown } from "@/lib/utils/battle/damage";
 import { attackFlow, type AttackMode, attackPayload, effectiveD20, initialAttackFlow, type RollOutcome } from "@/lib/utils/battle/flows";
 import { isUp } from "@/lib/utils/battle/participant/state";
-import { canSeeExactStats, damageDiceSlots, formatKnownArmorClass, hiddenTargetSteps, resolveKnownArmorClass, retaliationOutcome, weaponPreview } from "@/lib/utils/battle/view";
+import { canSeeExactStats, critOutcome, damageDiceSlots, formatKnownArmorClass, hiddenTargetSteps, resolveKnownArmorClass, retaliationOutcome, weaponPreview } from "@/lib/utils/battle/view";
 import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
 
 export function rollDie(sides: number): number {
@@ -135,14 +135,18 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
       const retaliation = retaliationOutcome(scene.readBattle()?.battleLog ?? [], seen);
 
-      if (first.kind === "miss") {
+      const crit = critOutcome(scene.readBattle()?.battleLog ?? [], seen, attacker.basicInfo.id, first.targetId);
+
+      const critFx = crit && { name: crit.name, ...(crit.flavor && { flavor: crit.flavor }) };
+
+      if (first.kind === "miss" || crit?.type === "fail") {
         const current = scene.readBattle();
 
         const log = current?.battleLog ?? [];
 
-        scene.showResult({ kind: "miss", targetName: target?.basicInfo.name ?? "", d20: effectiveD20(strike, state.mode), known: formatKnownArmorClass(resolveKnownArmorClass(log, first.targetId, current?.knowledge)), ...(retaliation && { retaliation }) });
+        scene.showResult({ kind: "miss", targetName: target?.basicInfo.name ?? "", d20: effectiveD20(strike, state.mode), known: formatKnownArmorClass(resolveKnownArmorClass(log, first.targetId, current?.knowledge)), ...(retaliation && { retaliation }), ...(crit?.type === "fail" && { critFail: critFx }) });
       } else {
-        scene.showResult({ kind: first.kind, targetName: target?.basicInfo.name ?? "", damage: results.reduce((s, r) => s + r.damage, 0), downed: first.downed, d20: effectiveD20(strike, state.mode), weapon: attack?.name, ...(retaliation && { retaliation }) });
+        scene.showResult({ kind: first.kind, targetName: target?.basicInfo.name ?? "", damage: results.reduce((s, r) => s + r.damage, 0), downed: first.downed, d20: effectiveD20(strike, state.mode), weapon: attack?.name, ...(retaliation && { retaliation }), ...(crit?.type === "success" && { critEffect: critFx }) });
       }
 
       onDone?.();

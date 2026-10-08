@@ -8,40 +8,43 @@ type EffectSpec = {
   idPart: string;
   type: ActiveEffect["type"];
   legacy?: string;
+  legacyValue?: number;
+  duration?: number;
   modifiers?: StaticEffect[];
+  consumeOn?: ActiveEffect["consumeOn"];
 };
 
-const LEGACY = (idPart: string, type: ActiveEffect["type"], legacy: string): EffectSpec => ({ idPart, type, legacy });
+const DISADVANTAGE: StaticEffect = { kind: "flag", flag: "disadvantage" };
+
+const MARK: StaticEffect = { kind: "flag", flag: "advantageForAttackers" };
 
 /** Modifier-like crit effects are StaticEffects; condition markers stay in `effects`, where battle-turn and disabled-attacks read them. */
 function specFor(effect: CriticalEffect): EffectSpec | null {
   switch (effect.effect.type) {
-    case "stun":
-      return LEGACY(String(effect.id), "debuff", "stun");
     case "advantage_next_attack":
-      return { idPart: "advantage", type: "buff", modifiers: [{ kind: "flag", flag: "advantage", attackKind: "all" }] };
+      return { idPart: "advantage", type: "buff", modifiers: [{ kind: "flag", flag: "advantage", attackKind: "all" }], consumeOn: "ownAttack" };
+    case "disadvantage_next_attack":
+      return { idPart: "disadvantage", type: "debuff", modifiers: [DISADVANTAGE], consumeOn: "ownAttack" };
     case "ac_debuff":
       return {
         idPart: "ac-debuff",
         type: "debuff",
         modifiers: [{ kind: "modifyStat", stat: "armor", flat: typeof effect.effect.value === "number" ? effect.effect.value : -2 }],
       };
-    case "free_attack":
-      return LEGACY("free-attack", "buff", "extra_attack");
-    case "block_bonus_action":
-      return LEGACY("block-bonus", "debuff", "no_bonus_action");
-    case "advantage_on_target":
-      return LEGACY("advantage-on-target", "debuff", "advantage_against_me");
     case "combo_attack":
-      return LEGACY("combo", "buff", "combo_attack_disadvantage");
-    case "prone":
-      return LEGACY("prone", "condition", "prone");
-    case "disadvantage_next_attack":
-      return { idPart: "disadvantage", type: "debuff", modifiers: [{ kind: "flag", flag: "disadvantage" }] };
-    case "lose_reaction":
-      return LEGACY("no-reaction", "debuff", "no_reaction");
+      return { idPart: "combo", type: "debuff", modifiers: [DISADVANTAGE], consumeOn: "ownAttack" };
+    case "block_bonus_action":
+      return { idPart: "block-bonus", type: "debuff", legacy: "no_bonus_action" };
+    case "advantage_on_target":
+      return { idPart: "advantage-on-target", type: "debuff", modifiers: [MARK], consumeOn: "attackAgainst" };
     case "advantage_on_self":
-      return LEGACY("advantage-on-self", "debuff", "advantage_against_me");
+      return { idPart: "advantage-on-self", type: "debuff", modifiers: [MARK], consumeOn: "attackAgainst" };
+    case "prone":
+      return { idPart: "prone", type: "condition", modifiers: [MARK, DISADVANTAGE] };
+    case "weakened_next_hit":
+      return { idPart: "weakened", type: "debuff", legacy: "weakened_next_hit", legacyValue: 0.5, consumeOn: "ownHit" };
+    case "lose_action":
+      return { idPart: "no-action", type: "debuff", legacy: "skip_action", legacyValue: 100, duration: 1 };
     default:
       return null;
   }
@@ -52,37 +55,50 @@ export function applyCriticalEffect(
   effect: CriticalEffect,
   currentRound: number,
   target?: BattleParticipant,
+  opts: { offTurn?: boolean } = {},
 ): BattleParticipant {
   const updated = { ...(target || participant) };
 
   switch (effect.effect.type) {
     case "lose_bonus_action":
       return { ...updated, actionFlags: { ...updated.actionFlags, hasUsedBonusAction: true } };
-    case "lose_action":
-      return { ...updated, actionFlags: { ...updated.actionFlags, hasUsedAction: true } };
+    case "lose_reaction":
+      return { ...updated, actionFlags: { ...updated.actionFlags, hasUsedReaction: true } };
+    case "free_attack":
+      return opts.offTurn ? updated : withExtraAction(updated);
   }
 
   const spec = specFor(effect);
 
   if (!spec) return updated;
 
+  const base = effect.effect.type === "combo_attack" && !opts.offTurn ? withExtraAction(updated) : updated;
+
+  const duration = spec.duration ?? effect.effect.duration ?? 1;
+
   return {
-    ...updated,
+    ...base,
     battleData: {
-      ...updated.battleData,
+      ...base.battleData,
       activeEffects: addActiveEffect(
-        updated,
+        base,
         {
-          id: `critical-${spec.idPart}-${Date.now()}`,
+          id: `critical-${spec.idPart}-${Date.now()}-${base.battleData.activeEffects.length}`,
           name: effect.name,
           type: spec.type,
           description: effect.description,
-          duration: effect.effect.duration ?? 1,
-          effects: spec.legacy ? [{ type: spec.legacy, value: 1 }] : [],
+          duration,
+          effects: spec.legacy ? [{ type: spec.legacy, value: spec.legacyValue ?? 1 }] : [],
           ...(spec.modifiers && { abilityEffects: spec.modifiers }),
+          ...(spec.consumeOn && { consumeOn: spec.consumeOn }),
+          ...(duration === 2 && { expireAtTurnEnd: true }),
         },
         currentRound,
       ),
     },
   };
+}
+
+function withExtraAction(p: BattleParticipant): BattleParticipant {
+  return { ...p, battleData: { ...p.battleData, pendingExtraActions: (p.battleData.pendingExtraActions ?? 0) + 1 } };
 }

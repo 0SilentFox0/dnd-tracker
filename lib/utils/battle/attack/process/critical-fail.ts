@@ -18,10 +18,11 @@ export interface HandleCriticalFailParams {
   targetAC: number;
   currentRound: number;
   battleId: string;
+  critFlavorText?: string;
 }
 
 export function handleCriticalFail(params: HandleCriticalFailParams): ProcessAttackResult {
-  const { flow, attackerId, targetId, attack, d20Roll, attackRoll, targetAC, currentRound, battleId } = params;
+  const { flow, attackerId, targetId, attack, d20Roll, attackRoll, targetAC, currentRound, battleId, critFlavorText } = params;
 
   const criticalEffectApplied = attackRoll.criticalEffect;
 
@@ -55,6 +56,7 @@ export function handleCriticalFail(params: HandleCriticalFailParams): ProcessAtt
     [],
     battleId,
     currentRound,
+    critFlavorText,
   );
 
   return {

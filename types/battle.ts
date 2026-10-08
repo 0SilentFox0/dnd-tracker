@@ -49,6 +49,8 @@ export interface ActiveEffect {
     healPerRound: number;
   };
   breakOnDamage?: boolean;
+  consumeOn?: "ownAttack" | "ownHit" | "attackAgainst";
+  expireAtTurnEnd?: boolean;
   charmOrigin?: { side: ParticipantSide; controlledBy: string };
   abilityKey?: string;
   abilityEffects?: StaticEffect[];
@@ -345,6 +347,7 @@ export interface BattleAction {
       name: string;
       description: string;
       type: "success" | "fail";
+      flavor?: string;
     };
   };
   resultText: string; // текстовий опис для лога

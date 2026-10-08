@@ -28,6 +28,7 @@ export interface ComputeHitDamageParams {
   actionModifiers?: StaticEffect[];
   bonusPercent?: number;
   bonusLabel?: string;
+  offTurn?: boolean;
   rng?: () => number;
 }
 
@@ -95,12 +96,15 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
         criticalEffectApplied,
         currentRound,
         updatedTarget,
+        { offTurn: params.offTurn },
       );
     } else if (criticalEffectApplied.effect.target === "self") {
       updatedAttacker = applyCriticalEffect(
         updatedAttacker,
         criticalEffectApplied,
         currentRound,
+        undefined,
+        { offTurn: params.offTurn },
       );
     }
   }
@@ -130,6 +134,13 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
 
     physicalDamage += extra;
     damageSteps.push({ label: criticalEffectApplied.name, side: "attacker", kind: "flat", value: extra, after: physicalDamage });
+  }
+
+  const weakened = attacker.battleData.activeEffects.find((e) => e.effects.some((d) => d.type === "weakened_next_hit"));
+
+  if (weakened) {
+    physicalDamage = Math.floor(physicalDamage * 0.5);
+    damageSteps.push({ label: weakened.name, side: "attacker", kind: "multiplier", value: 0.5, after: physicalDamage });
   }
 
   const heroDm = applyHeroDmDamageMultiplier(
