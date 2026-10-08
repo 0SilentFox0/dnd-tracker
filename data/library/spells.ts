@@ -33,7 +33,7 @@ const enemies = (maxTargets: number): Targeting => ({ kind: "area", side: "enemy
 
 const rounds = (n: number) => ({ rounds: n });
 
-const damage = (damageType: string, extra: { falloff?: number[] } = {}): Effect => ({
+const damage = (damageType: string, extra: { falloff?: number[]; amount?: Extract<Effect, { kind: "dealDamage" }>["amount"] } = {}): Effect => ({
   kind: "dealDamage",
   amount: { spellRoll: 100 },
   damageType,
@@ -74,7 +74,7 @@ function diceWord(n: number): string {
 const power = (n: number, what: string) =>
   `${n} ${diceWord(n)} ${what} (к6/к8/к10 залежно від майстерності школи; +1 кубик за кожні 3 рівні героя) + рівень героя + модифікатор заклинателя`;
 
-const NOT_HEROES = "Не діє на героїв — DM не дозволяє обрати героя ціллю.";
+const NOT_HEROES = "Не діє на героїв.";
 
 export const SPELLS: LibrarySpell[] = [
   // ── Світло ─────────────────────────────────────────────────────────────
@@ -185,13 +185,10 @@ export const SPELLS: LibrarySpell[] = [
     name: "Божественна відплата",
     school: LIGHT,
     level: 5,
-    description: `Завдає ворогу ${power(6, "шкоди світлом")}. Що більше поранений заклинатель, то сильніша відплата: +10 % шкоди за кожні 10 % втраченого HP заклинателя — цю надбавку DM додає вручну.`,
+    description: `Завдає ворогу ${power(6, "шкоди світлом")}. Що більше поранений заклинатель, то сильніша відплата: шкода зростає на 1 % за кожен 1 % втраченого HP заклинателя (на половині HP — ×1,5).`,
     appearanceDescription:
       "Кров заклинателя, що стікає на землю, спалахує білим полум'ям. Із неба б'є стовп сліпучого світла, і що глибші рани праведника, то нещадніше палає кара, що падає на кривдника.",
-    definition: def(6, ENEMY, [
-      damage("radiant"),
-      { kind: "note", text: "Божественна відплата: +10 % шкоди за кожні 10 % втраченого HP заклинателя (DM додає вручну)." },
-    ]),
+    definition: def(6, ENEMY, [damage("radiant", { amount: { spellRoll: { formula: "100 + lost_hp_percent" } } })]),
     raceModifiers: [],
   },
   {
@@ -261,10 +258,10 @@ export const SPELLS: LibrarySpell[] = [
     name: "Немічність",
     school: DARK,
     level: 2,
-    description: "Ворог отримує −2 до AC на 3 раунди. Повторні накладання складаються, до трьох разів (−6 AC).",
+    description: "Ворог отримує −2 до AC на 3 раунди. Повторні накладання складаються, до трьох разів (−6 AC); кожне накладання триває 3 раунди окремо, а четверте оновлює тривалість найстарішого.",
     appearanceDescription:
       "По обладунках ворога розповзається чорна іржа, а шкіра під ними сіріє й тріскається, мов старий пергамент. Сталь, що вчора тримала удар сокири, тепер м'якне під пальцями.",
-    definition: def(0, ENEMY, [stat("armor", -2, 3)]),
+    definition: def(0, ENEMY, [stat("armor", -2, 3)], { stackable: true, maxStacks: 3 }),
     raceModifiers: [],
   },
   {
@@ -359,10 +356,10 @@ export const SPELLS: LibrarySpell[] = [
     name: "Вампіризм",
     school: DARK,
     level: 5,
-    description: "Протягом 3 раундів атаки союзника лікують його на 50 % завданої шкоди. Лікування після кожної атаки DM застосовує вручну.",
+    description: "Протягом 3 раундів атаки союзника лікують його на 50 % завданої шкоди.",
     appearanceDescription:
       "Зуби союзника видовжуються, а шкіра набуває мертвотної блідості. Кожна рана, яку він завдає, сочиться червоним туманом, що тягнеться до його вуст і повертає йому сили.",
-    definition: def(0, ALLY, [{ kind: "note", text: "Вампіризм: 3 раунди атаки цілі лікують її на 50 % завданої шкоди (DM застосовує вручну)." }]),
+    definition: def(0, ALLY, [{ kind: "flag", flag: "lifesteal", percent: 50, duration: rounds(3) }]),
     raceModifiers: [],
   },
   {
@@ -630,7 +627,7 @@ export const SPELLS: LibrarySpell[] = [
     description: "Повертає до бою полеглих союзників з 30 % максимального HP.",
     appearanceDescription:
       "Над полеглими проростають молоді паростки, що за мить стають квітучими кущами. Коли пелюстки опадають, на їхньому місці підводяться воїни, з волоссям, у якому заплуталося листя.",
-    definition: def(0, { kind: "allyDead" }, [{ kind: "raiseDead", hpPercent: 30 }]),
+    definition: def(0, { kind: "allAlliesDead" }, [{ kind: "raiseDead", hpPercent: 30 }]),
     raceModifiers: [],
   },
   {
