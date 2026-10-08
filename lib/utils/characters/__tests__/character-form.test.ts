@@ -23,6 +23,6 @@ describe("characterToFormData: слоти за прогресією раси", (
   it("порожня таблиця слотів добудовується з прогресії раси, а не з таблиці персонажів", () => {
     const form = characterToFormData({ level: 9, spellSlots: {} }, RACES[0].spellSlotProgression);
 
-    expect(Object.fromEntries(Object.entries(form.spellcasting.spellSlots).map(([k, v]) => [k, v.max]))).toEqual({ "1": 4, "2": 3, "3": 3, "4": 2, "5": 1 });
+    expect(Object.fromEntries(Object.entries(form.spellcasting.spellSlots ?? {}).map(([k, v]) => [k, v.max]))).toEqual({ "1": 4, "2": 3, "3": 3, "4": 2, "5": 1 });
   });
 });
