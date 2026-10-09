@@ -199,7 +199,7 @@ export function CharacterBasicInfo({
       </div>
       {!isPlayerView && (
         <div className="w-full min-w-0 md:col-span-2">
-          <ImageUpload label="Картинка персонажа" value={avatar || ""} onChange={setters.setAvatar} fallbackText={name} />
+          <ImageUpload label="Фото персонажа" value={avatar || ""} onChange={setters.setAvatar} fallbackText={name} maxSide={1200} />
         </div>
       )}
     </div>
