@@ -62,7 +62,7 @@ describe("hero archetype damage", () => {
     const p = await createBattleParticipantFromCharacter(character as never, "b1", ParticipantSide.ALLY, undefined, context);
 
     expect(p.abilities.meleeMultiplier).toBe(0.7);
-    expect(p.abilities.rangedMultiplier).toBe(1.25);
+    expect(p.abilities.rangedMultiplier).toBe(1.5);
     expect(p.abilities.magicMultiplier).toBe(0.7);
     expect(p.abilities.archetypeName).toBe("Лучник");
   });

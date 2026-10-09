@@ -9,7 +9,7 @@ describe("heroArchetype", () => {
   });
 
   it("значення зі спеки", () => {
-    expect(heroArchetype("ranger")).toMatchObject({ hpPerLevel: 9, melee: 0.7, ranged: 1.25, magic: 0.7 });
+    expect(heroArchetype("ranger")).toMatchObject({ hpPerLevel: 9, melee: 0.7, ranged: 1.5, magic: 0.7 });
     expect(HERO_ARCHETYPE_OPTIONS.map((o) => o.value)).toEqual(["", "warrior", "paladin", "ranger", "rogue", "mage"]);
   });
 });

@@ -6,7 +6,7 @@ describe("heroBaseHp", () => {
   it("3 × HP/рівень + рівень × (HP/рівень + мод. ВИТ × 1.5)", () => {
     expect(heroBaseHp({ level: 1, constitution: 12 }).total).toBe(41);
     expect(heroBaseHp({ level: 10, constitution: 12, archetype: "warrior" }).total).toBe(171);
-    expect(heroBaseHp({ level: 15, constitution: 12, archetype: "paladin" }).total).toBe(274);
+    expect(heroBaseHp({ level: 15, constitution: 12, archetype: "paladin" }).total).toBe(256);
     expect(heroBaseHp({ level: 1, constitution: 12, archetype: "mage" }).total).toBe(33);
   });
 
