@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { updateCharacterSchema } from "@/app/api/campaigns/[id]/characters/[characterId]/update-character-schema";
 import { createCharacterSchema } from "@/app/api/campaigns/[id]/characters/create-character-schema";
 import { prisma } from "@/lib/db";
+import { resolveAvatarForPersistence } from "@/lib/supabase/avatar-storage";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireCampaignAccess: vi.fn(), requireAuth: vi.fn(), requireDM: vi.fn() }));
@@ -94,5 +95,13 @@ describe("PATCH archetype", () => {
 
     expect(data.name).toBe("Нове");
     expect(data.archetype).toBeUndefined();
+  });
+
+  it("власник не міняє аватар: зовнішній URL не доходить до збереження", async () => {
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("owner", false));
+
+    expect((await patch({ avatar: "http://169.254.169.254/x", name: "Нове" })).status).toBe(200);
+    expect(resolveAvatarForPersistence).toHaveBeenCalledWith(undefined, expect.anything());
+    expect(vi.mocked(prisma.character.update).mock.calls[0][0].data.avatar).toBeUndefined();
   });
 });

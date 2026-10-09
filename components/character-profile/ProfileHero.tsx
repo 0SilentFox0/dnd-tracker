@@ -11,7 +11,7 @@ import { HudStatChip } from "@/components/hud/page";
 import { signed } from "@/lib/utils/format";
 
 export function ProfileHero({ actions, badge, ref }: { actions?: ReactNode; badge?: ReactNode; ref?: Ref<HTMLElement> }) {
-  const { sheet } = useProfile();
+  const { sheet, canEdit } = useProfile();
 
   const [hpOpen, setHpOpen] = useState(false);
 
@@ -20,7 +20,7 @@ export function ProfileHero({ actions, badge, ref }: { actions?: ReactNode; badg
   return (
     <header ref={ref} className="px-4 pt-4 pb-3">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start">
-        <HeroPortrait src={id.avatar} name={id.name} className="lg:w-80 lg:shrink-0" />
+        <HeroPortrait src={id.avatar} name={id.name} canEdit={canEdit} className="lg:w-80 lg:shrink-0" />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-3">
             <div className="min-w-0 flex-1">

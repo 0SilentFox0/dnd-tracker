@@ -23,4 +23,12 @@ describe("HeroPortrait", () => {
     expect(screen.getByText("А")).toBeTruthy();
     expect(screen.queryByRole("button")).toBeNull();
   });
+
+  it("без фото підказка «Додати фото» лише тому, хто може редагувати", () => {
+    const { rerender } = render(<HeroPortrait src={null} name="Арвен" />);
+
+    expect(screen.queryByText("Додати фото")).toBeNull();
+    rerender(<HeroPortrait src={null} name="Арвен" canEdit />);
+    expect(screen.getByText("Додати фото")).toBeTruthy();
+  });
 });

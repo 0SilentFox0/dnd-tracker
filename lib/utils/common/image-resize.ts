@@ -16,5 +16,8 @@ export async function resizeImageToDataUrl(file: File, maxSide: number, quality 
   canvas.getContext("2d")?.drawImage(bitmap, 0, 0, width, height);
   bitmap.close();
 
-  return canvas.toDataURL("image/webp", quality);
+  const webp = canvas.toDataURL("image/webp", quality);
+
+  // Safari silently returns PNG for webp, which can blow past the request body limit
+  return webp.startsWith("data:image/webp") ? webp : canvas.toDataURL("image/jpeg", quality);
 }

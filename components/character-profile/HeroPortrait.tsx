@@ -10,15 +10,21 @@ interface HeroPortraitProps {
   src: string | null | undefined;
   name: string;
   className?: string;
+  canEdit?: boolean;
 }
 
-export function HeroPortrait({ src, name, className }: HeroPortraitProps) {
+export function HeroPortrait({ src, name, className, canEdit }: HeroPortraitProps) {
   const [open, setOpen] = useState(false);
 
   const frame = cn("relative aspect-[3/4] w-full overflow-hidden rounded-xl border-2 border-hud-gold bg-[#2a2016]", className);
 
   if (!src) {
-    return <div className={cn(frame, "hud-sc flex items-center justify-center text-6xl text-hud-gold")}>{name.trim().charAt(0).toUpperCase() || "?"}</div>;
+    return (
+      <div className={cn(frame, "hud-sc flex h-48 flex-col items-center justify-center gap-1 text-6xl text-hud-gold lg:aspect-[3/4] lg:h-auto")}>
+        {name.trim().charAt(0).toUpperCase() || "?"}
+        {canEdit && <span className="text-xs text-hud-muted">Додати фото</span>}
+      </div>
+    );
   }
 
   return (

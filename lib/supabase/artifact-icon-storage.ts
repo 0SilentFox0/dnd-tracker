@@ -68,7 +68,17 @@ async function ensureBucket(
 
 /** Вже на нашему Storage — не дзеркалимо повторно. */
 export function isArtifactIconHostedOnProjectStorage(url: string): boolean {
-  return url.includes("supabase.co/storage");
+  const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+  if (!base) return false;
+
+  try {
+    const u = new URL(url);
+
+    return u.protocol === "https:" && u.host === new URL(base).host && u.pathname.startsWith("/storage/v1/object/public/");
+  } catch {
+    return false;
+  }
 }
 
 /** Потрібно завантажити з зовнішнього URL у бакет. */
