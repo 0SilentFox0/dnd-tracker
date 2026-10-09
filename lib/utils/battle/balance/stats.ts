@@ -3,10 +3,11 @@ import { damageKey } from "./resist";
 
 import { AttackType } from "@/lib/constants/battle";
 import { MIN_UNIT_STAT, TYPICAL_TARGETS } from "@/lib/constants/battle-balance";
+import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { calculateAttackBonus } from "@/lib/utils/battle/attack/bonus";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
-import { heroMagicMultiplier } from "@/lib/utils/battle/damage/hero-dm-multiplier";
+import { applyHeroDmDamageMultiplier, heroMagicMultiplier } from "@/lib/utils/battle/damage/hero-dm-multiplier";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { averageOf, diceAverage, parseDiceLenient } from "@/lib/utils/common/dice";
@@ -192,15 +193,21 @@ export function getCharacterStats({ participant, branchLevels, magicMainSkillIds
 
   const toHit = calculateAttackBonus(participant, best, [participant]);
 
-  const spellDpr = getSpellDprFromBranchLevels(branchLevels ?? {}, magicMainSkillIds) * heroMagicMultiplier(participant);
+  const magicIds = new Set([...(magicMainSkillIds ?? []), ...(spellSchoolIds ?? [])]);
 
-  const nonMagicDpr = getNonMagicBranchDpr(branchLevels ?? {}, magicMainSkillIds);
+  const racialMagicPercent = collectModifiers([participant], participant.basicInfo.id, { damage: { kind: "magic" } }).percent;
+
+  const spellDpr = getSpellDprFromBranchLevels(branchLevels ?? {}, magicIds) * heroMagicMultiplier(participant) * (1 + racialMagicPercent / 100);
+
+  const bestKindMultiplier = applyHeroDmDamageMultiplier(participant, attackKindOf(best.type), 1).multiplier;
+
+  const nonMagicDpr = getNonMagicBranchDpr(branchLevels ?? {}, magicIds) * bestKindMultiplier;
 
   const dpr = physicalDpr + spellDpr + nonMagicDpr;
 
   const weaponBranches = Object.fromEntries(Object.entries(branchLevels ?? {}).filter(([id]) => !spellSchoolIds?.has(id)));
 
-  const weaponDpr = physicalDpr + getNonMagicBranchDpr(weaponBranches, magicMainSkillIds);
+  const weaponDpr = physicalDpr + getNonMagicBranchDpr(weaponBranches, magicIds) * bestKindMultiplier;
 
   const hp = participant.combatStats.maxHp;
 
@@ -222,8 +229,8 @@ export function getCharacterStats({ participant, branchLevels, magicMainSkillIds
       logLines: [
         `Ближній бій ${round1(meleeAvg)}, дальній ${round1(rangedAvg)} → фізичний DPR = ${round1(physicalDpr)}`,
         `Школа магії (найвищий рівень): +${round1(spellDpr)} DPR`,
-        `Немагічні основні навички (сума): +${nonMagicDpr} DPR`,
-        `Разом DPR = ${round1(physicalDpr)} + ${round1(spellDpr)} + ${nonMagicDpr} = ${round1(dpr)}`,
+        `Немагічні основні навички (сума): +${round1(nonMagicDpr)} DPR`,
+        `Разом DPR = ${round1(physicalDpr)} + ${round1(spellDpr)} + ${round1(nonMagicDpr)} = ${round1(dpr)}`,
       ],
     },
   };
