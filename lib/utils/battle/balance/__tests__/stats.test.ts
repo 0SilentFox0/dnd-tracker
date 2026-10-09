@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { AttackType } from "@/lib/constants/battle";
+import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { MIN_UNIT_STAT, TYPICAL_TARGETS } from "@/lib/constants/battle-balance";
 import { DPR_BY_LEVEL_NON_MAGIC } from "@/lib/constants/dpr-by-main-skill";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { calculateAttackBonus } from "@/lib/utils/battle/attack/bonus";
+import { computeHitDamage } from "@/lib/utils/battle/attack/process/compute";
 import { getCharacterStats, getUnitStats } from "@/lib/utils/battle/balance";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
@@ -112,8 +113,30 @@ const unit = (attacks: Array<{ damageDice: string; type: string }>) =>
   getUnitStats({ id: "u", name: "u", maxHp: 20, level: 1, strength: 14, dexterity: 12, attacks });
 
 describe("баланс: середня шкода з кубиків", () => {
-  it("юніт: кубики зброї + модифікатор характеристики", () => {
-    expect(unit([{ damageDice: "1d8+2", type: "melee" }]).dpr).toBe(8.5);
+  it("юніт: кубики зброї + модифікатор характеристики; «+N» з кубиків не рахується", () => {
+    expect(unit([{ damageDice: "1d8+2", type: "melee" }]).dpr).toBe(6.5);
+  });
+
+  it("оцінка юніта = влучання рушія із середніми кидками: «+16» з «4d10+16» шкоди не дає", () => {
+    const base = makeParticipant({ id: "u" });
+
+    const attack = { ...sword, damageDice: "4d10+16" } as BattleAttack;
+
+    const p: BattleParticipant = {
+      ...base,
+      basicInfo: { ...base.basicInfo, sourceType: "unit" },
+      abilities: { ...base.abilities, strength: 16, dexterity: 10 },
+      battleData: { ...base.battleData, attacks: [attack], resolvedAbilities: [] },
+    };
+
+    const target = makeParticipant({ id: "t", side: ParticipantSide.ENEMY, hp: 999, maxHp: 999 });
+
+    const hit = computeHitDamage({ attacker: p, target, attack, damageRolls: [5, 6, 5, 6], allParticipants: [p, target], attackRoll: { isCritical: false }, currentRound: 1 });
+
+    const estimate = getUnitStats({ id: "u", name: "u", maxHp: 20, level: 7, strength: 16, dexterity: 10, attacks: [attack] }).dpr;
+
+    expect(estimate).toBe(25);
+    expect(hit.physicalDamage).toBe(estimate);
   });
 
   it("оцінка юніта збігається з рушієм: бій теж додає модифікатор Сили/Спритності юнітам", () => {
