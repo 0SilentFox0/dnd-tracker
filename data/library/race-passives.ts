@@ -15,6 +15,13 @@ export const RACE_PASSIVES: Record<string, LibraryRacePassive> = {
         trigger: { event: "battleStart" },
         effects: [{ kind: "modifyStat", stat: "morale", flat: 1, duration: { rounds: 2 }, target: "allAllies" }],
       },
+      {
+        id: "humans-fighting-style",
+        name: "Стиль бою",
+        description: "Ближня шкода +10 %.",
+        trigger: { event: "passive" },
+        effects: [{ kind: "damageBonus", filter: { kind: "melee" }, percent: 10 }],
+      },
     ],
   },
 
@@ -27,6 +34,16 @@ export const RACE_PASSIVES: Record<string, LibraryRacePassive> = {
     stats: { strength: 2, charisma: 1 },
     trait: [
       { id: "demons-hellblood", name: "Пекельна кров", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "resistance", damageType: "fire", percent: 50 }] },
+      {
+        id: "demons-fighting-style",
+        name: "Стиль бою",
+        description: "Ближня шкода +15 %, дальня −10 %.",
+        trigger: { event: "passive" },
+        effects: [
+          { kind: "damageBonus", filter: { kind: "melee" }, percent: 15 },
+          { kind: "damageBonus", filter: { kind: "ranged" }, percent: -10 },
+        ],
+      },
     ],
   },
   elves: {
@@ -36,7 +53,19 @@ export const RACE_PASSIVES: Record<string, LibraryRacePassive> = {
     appearanceDescription:
       "Ельф примружується, і ліс ніби підказує йому, де гойднеться гілка, а де промайне тінь. Його погляд ловить найменшу прогалину в обороні ворога, чи то між пластинами лат, чи між ударами мечів. Птахи не змовкають поруч із ним — вони знають, що він свій.",
     stats: { dexterity: 2, wisdom: 1 },
-    trait: [{ id: "elves-forest-eye", name: "Око лісу", trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "attackBonus", flat: 1 }] }],
+    trait: [
+      { id: "elves-forest-eye", name: "Око лісу", trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "attackBonus", flat: 1 }] },
+      {
+        id: "elves-fighting-style",
+        name: "Стиль бою",
+        description: "Дальня шкода +20 %, ближня −15 %.",
+        trigger: { event: "passive" },
+        effects: [
+          { kind: "damageBonus", filter: { kind: "ranged" }, percent: 20 },
+          { kind: "damageBonus", filter: { kind: "melee" }, percent: -15 },
+        ],
+      },
+    ],
   },
 
   necromancers: {
@@ -56,6 +85,16 @@ export const RACE_PASSIVES: Record<string, LibraryRacePassive> = {
           { kind: "flag", flag: "resistance", damageType: "poison", percent: 100 },
         ],
       },
+      {
+        id: "necromancers-fighting-style",
+        name: "Стиль бою",
+        description: "Шкода заклинань +10 %, ближня −10 %.",
+        trigger: { event: "passive" },
+        effects: [
+          { kind: "damageBonus", filter: { kind: "magic" }, percent: 10 },
+          { kind: "damageBonus", filter: { kind: "melee" }, percent: -10 },
+        ],
+      },
     ],
   },
 
@@ -66,7 +105,19 @@ export const RACE_PASSIVES: Record<string, LibraryRacePassive> = {
     appearanceDescription:
       "Роки в бібліотеках Академії залишили на пальцях чорнильні плями, а на плечах — невидиму оболонку з вивірених формул. Ворожі чари ковзають по ній, як дощ по склу, і втрачають частину сили ще до удару. Маг навіть не здригається: він знає цю магію краще за тих, хто її кличе.",
     stats: { intelligence: 2, wisdom: 1 },
-    trait: [{ id: "mages-ward", name: "Магічний захист", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "resistance", damageType: "spell", percent: 15 }] }],
+    trait: [
+      { id: "mages-ward", name: "Магічний захист", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "resistance", damageType: "spell", percent: 15 }] },
+      {
+        id: "mages-fighting-style",
+        name: "Стиль бою",
+        description: "Шкода заклинань +15 %, ближня −20 %.",
+        trigger: { event: "passive" },
+        effects: [
+          { kind: "damageBonus", filter: { kind: "magic" }, percent: 15 },
+          { kind: "damageBonus", filter: { kind: "melee" }, percent: -20 },
+        ],
+      },
+    ],
   },
 
   "dark-elves": {
@@ -84,6 +135,16 @@ export const RACE_PASSIVES: Record<string, LibraryRacePassive> = {
         limits: { perBattle: 1 },
         effects: [{ kind: "flag", flag: "advantage", attackKind: "all" }],
       },
+      {
+        id: "dark-elves-fighting-style",
+        name: "Стиль бою",
+        description: "Ближня шкода +15 %, шкода заклинань −10 %.",
+        trigger: { event: "passive" },
+        effects: [
+          { kind: "damageBonus", filter: { kind: "melee" }, percent: 15 },
+          { kind: "damageBonus", filter: { kind: "magic" }, percent: -10 },
+        ],
+      },
     ],
   },
   dwarves: {
@@ -93,6 +154,18 @@ export const RACE_PASSIVES: Record<string, LibraryRacePassive> = {
     appearanceDescription:
       "Гном стоїть, ніби виріс із самої скелі: широкі плечі, борода, заплетена в залізні кільця, і шкіра, що темніє й твердне, наче граніт. Клинки скрегочуть по ній і відскакують, залишаючи лише іскри. Предки гір немов вклали в нього частку своєї міцності.",
     stats: { constitution: 2, strength: 1 },
-    trait: [{ id: "dwarves-stoneskin", name: "Кам'яна шкіра роду", trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "armor", flat: 1 }] }],
+    trait: [
+      { id: "dwarves-stoneskin", name: "Кам'яна шкіра роду", trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "armor", flat: 1 }] },
+      {
+        id: "dwarves-fighting-style",
+        name: "Стиль бою",
+        description: "Ближня шкода +10 %, дальня −10 %.",
+        trigger: { event: "passive" },
+        effects: [
+          { kind: "damageBonus", filter: { kind: "melee" }, percent: 10 },
+          { kind: "damageBonus", filter: { kind: "ranged" }, percent: -10 },
+        ],
+      },
+    ],
   },
 };
