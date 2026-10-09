@@ -50,6 +50,7 @@ export async function createCharacter(request: Request, campaignId: string): Pro
         level: data.level,
         class: data.class,
         subclass: data.subclass,
+        archetype: data.archetype ?? null,
         race: data.race,
         subrace: data.subrace,
         alignment: data.alignment,

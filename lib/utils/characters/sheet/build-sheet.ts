@@ -3,6 +3,7 @@ import { abilityLabel, abilityLines, armorTotal, attackSheet, checkBonus } from 
 import { DND_SKILL_META, DND_SKILLS } from "@/lib/constants";
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { ARTIFACT_GRID_9 } from "@/lib/constants/artifacts";
+import { heroArchetype } from "@/lib/constants/hero-archetypes";
 import { parseGoals } from "@/lib/schemas/character-goals";
 import { slotLevels } from "@/lib/utils/battle/view";
 import { heroBaseHp } from "@/lib/utils/characters/hero-hp";
@@ -86,7 +87,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
   return {
     viewer: input.viewer,
     maxLevel: input.maxLevel,
-    identity: { id: c.id, name: c.name, avatar: c.avatar, level: c.level, className: c.class, subclass: c.subclass, race: c.race, raceIcon: input.raceIcon, alignment: c.alignment },
+    identity: { id: c.id, name: c.name, avatar: c.avatar, level: c.level, className: c.class, archetype: heroArchetype(c.archetype).name, subclass: c.subclass, race: c.race, raceIcon: input.raceIcon, alignment: c.alignment },
     abilities: ABILITY_KEYS.map((key) => ({ key, score: scores[key], mod: getAbilityModifier(scores[key]), isPrimary: primary === key, lines: abilityLines(p, key, c[key]) })),
     primaryAbility: primary,
     proficiency: prof,

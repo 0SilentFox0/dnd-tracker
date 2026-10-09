@@ -27,7 +27,7 @@ export function ProfileHero({ actions, badge, ref }: { actions?: ReactNode; badg
               <h1 className="hud-sc truncate text-xl leading-7 text-hud-ink">{id.name}</h1>
               <p className="flex min-w-0 items-center gap-1.5 text-xs text-hud-muted">
                 <span className="truncate">
-                  {id.level} рів. · {id.className}
+                  {id.level} рів. · {id.archetype} · {id.className}
                   {id.subclass ? ` (${id.subclass})` : ""} ·
                 </span>
                 {badge}

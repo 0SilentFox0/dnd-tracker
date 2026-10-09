@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { RACES } from "@/data/library/races";
-import { characterToFormData, mergeLevelUpIntoForm } from "@/lib/utils/characters/character-form";
+import { characterToFormData, formDataToCharacter, mergeLevelUpIntoForm } from "@/lib/utils/characters/character-form";
 import type { Character } from "@/types/characters";
 
 describe("mergeLevelUpIntoForm", () => {
@@ -24,5 +24,20 @@ describe("characterToFormData: слоти за прогресією раси", (
     const form = characterToFormData({ level: 9, spellSlots: {} }, RACES[0].spellSlotProgression);
 
     expect(Object.fromEntries(Object.entries(form.spellcasting.spellSlots ?? {}).map(([k, v]) => [k, v.max]))).toEqual({ "1": 4, "2": 3, "3": 3, "4": 2, "5": 1 });
+  });
+});
+
+describe("архетип у формі", () => {
+  it("читається з персонажа й пишеться назад; порожній → null; множників немає", () => {
+    const form = characterToFormData({ name: "Лук", archetype: "rogue" } as Partial<Character>);
+
+    expect(form.basicInfo.archetype).toBe("rogue");
+
+    const payload = formDataToCharacter(form) as Record<string, unknown>;
+
+    expect(payload.archetype).toBe("rogue");
+    expect(formDataToCharacter(characterToFormData({ archetype: null } as Partial<Character>)).archetype).toBeNull();
+
+    for (const key of ["hpMultiplier", "meleeMultiplier", "rangedMultiplier"]) expect(payload[key]).toBeUndefined();
   });
 });

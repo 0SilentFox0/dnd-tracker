@@ -26,6 +26,7 @@ export function characterToFormData(
       level: character.level || 1,
       class: character.class || "",
       subclass: character.subclass,
+      archetype: character.archetype ?? "",
       race: character.race || "",
       subrace: character.subrace,
       alignment: character.alignment,
@@ -76,11 +77,6 @@ export function characterToFormData(
     abilities: {
       personalSkillId: (character as { personalSkillId?: string | null }).personalSkillId ?? "",
     },
-    scalingCoefficients: {
-      hpMultiplier: (character as { hpMultiplier?: number | null }).hpMultiplier ?? 1,
-      meleeMultiplier: (character as { meleeMultiplier?: number | null }).meleeMultiplier ?? 1,
-      rangedMultiplier: (character as { rangedMultiplier?: number | null }).rangedMultiplier ?? 1,
-    },
   };
 }
 
@@ -113,6 +109,7 @@ export function formDataToCharacter(
     level: formData.basicInfo.level,
     class: formData.basicInfo.class,
     subclass: formData.basicInfo.subclass,
+    archetype: formData.basicInfo.archetype || null,
     race: formData.basicInfo.race,
     subrace: formData.basicInfo.subrace,
     alignment: formData.basicInfo.alignment,
@@ -141,10 +138,5 @@ export function formDataToCharacter(
     immunities: formData.roleplay.immunities,
     morale: formData.combatStats.morale,
     personalSkillId: formData.abilities.personalSkillId?.trim() || null,
-    ...(formData.scalingCoefficients != null && {
-      hpMultiplier: formData.scalingCoefficients.hpMultiplier,
-      meleeMultiplier: formData.scalingCoefficients.meleeMultiplier,
-      rangedMultiplier: formData.scalingCoefficients.rangedMultiplier,
-    }),
   };
 }

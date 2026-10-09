@@ -36,6 +36,7 @@ export interface CharacterFormData {
     level: number;
     class: string;
     subclass?: string;
+    archetype?: string;
     race: string;
     subrace?: string;
     alignment?: string;
@@ -77,12 +78,6 @@ export interface CharacterFormData {
   /** Уміння: скіл з групи «Персональні» */
   abilities: {
     personalSkillId: string;
-  };
-  /** Коефіцієнти масштабування (HP, melee, ranged) — окремі для кожного героя */
-  scalingCoefficients?: {
-    hpMultiplier: number;
-    meleeMultiplier: number;
-    rangedMultiplier: number;
   };
 }
 
@@ -127,13 +122,7 @@ export interface Character {
   personalSkillId?: string | null;
   primaryAbility?: AbilityKey | null;
   goals?: CharacterGoal[];
-  /** Коефіцієнт HP (×). За замовчуванням 1. */
-  hpMultiplier?: number | null;
   archetype?: string | null;
-  /** Коефіцієнт урону ближнього бою (×). За замовчуванням 1. */
-  meleeMultiplier?: number | null;
-  /** Коефіцієнт урону дальнього бою (×). За замовчуванням 1. */
-  rangedMultiplier?: number | null;
   /** Прогрес по деревах прокачки: skillTreeId → { unlockedSkills } */
   skillTreeProgress?: Record<
     string,
@@ -223,7 +212,7 @@ export interface SetProgress {
 export interface CharacterSheet {
   viewer: { isDM: boolean; isOwner: boolean };
   maxLevel: number;
-  identity: { id: string; name: string; avatar: string | null; level: number; className: string; subclass: string | null; race: string; raceIcon: string | null; alignment: string | null };
+  identity: { id: string; name: string; avatar: string | null; level: number; className: string; archetype: string; subclass: string | null; race: string; raceIcon: string | null; alignment: string | null };
   abilities: SheetAbility[];
   primaryAbility: AbilityKey | null;
   proficiency: number;

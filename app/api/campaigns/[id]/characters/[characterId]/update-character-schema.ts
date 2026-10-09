@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { ABILITY_KEYS, SPELLCASTING_ABILITIES } from "@/lib/constants/abilities";
+import { HERO_ARCHETYPE_KEYS } from "@/lib/constants/hero-archetypes";
 
 export const updateCharacterSchema = z.object({
   name: z.string().min(1).max(100).optional(),
@@ -59,8 +60,5 @@ export const updateCharacterSchema = z.object({
 
   primaryAbility: z.enum(ABILITY_KEYS).nullable().optional(),
 
-  // Коефіцієнти масштабування (HP, melee, ranged) — окремі для кожного героя
-  hpMultiplier: z.number().min(0.1).max(3).optional(),
-  meleeMultiplier: z.number().min(0.1).max(3).optional(),
-  rangedMultiplier: z.number().min(0.1).max(3).optional(),
+  archetype: z.enum(HERO_ARCHETYPE_KEYS).nullable().optional(),
 });
