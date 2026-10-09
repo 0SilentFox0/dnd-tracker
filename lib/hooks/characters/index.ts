@@ -4,6 +4,7 @@ export { useCharacterForm } from "./useCharacterForm";
 export { useCharacterGoals } from "./useCharacterGoals";
 export { useCharacters, useCreateCharacter, useLevelUpCharacter, useUpdateCharacter } from "./useCharacters";
 export { useCharacterSheet } from "./useCharacterSheet";
+export { useCharacterTokens } from "./useCharacterTokens";
 export { type DmCharacterEditor, useDmCharacterEditor } from "./useDmCharacterEditor";
 export { useDmCharactersPage } from "./useDmCharactersPage";
 export { useEquipArtifact } from "./useEquipArtifact";
