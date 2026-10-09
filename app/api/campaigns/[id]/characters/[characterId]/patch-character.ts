@@ -7,6 +7,7 @@ import { updateCharacterSchema } from "./update-character-schema";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import { resolveAvatarForPersistence } from "@/lib/supabase/avatar-storage";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { loadOwned } from "@/lib/utils/api/load-owned";
@@ -39,6 +40,10 @@ export async function patchCharacter(request: Request, campaignId: string, chara
     ? parsed
     : ({ ...parsed, level: undefined, experience: undefined, controlledBy: character.controlledBy, type: character.type } as typeof parsed);
 
+  const avatar = await resolveAvatarForPersistence(data.avatar, { campaignId });
+
+  if (!avatar.ok) return errorResponse(avatar.message, 400);
+
   const xpMultiplier = campaign.xpMultiplier ?? 1;
 
   const finalLevel = resolveFinalLevel(character, data, xpMultiplier, campaign.maxLevel);
@@ -55,6 +60,7 @@ export async function patchCharacter(request: Request, campaignId: string, chara
     where: { id: characterId },
     data: {
       ...data,
+      avatar: avatar.avatar,
       level: computed.finalLevel,
       ...computed.abilityScores,
       ...(computed.spellSlots && { spellSlots: computed.spellSlots as Prisma.InputJsonValue }),
