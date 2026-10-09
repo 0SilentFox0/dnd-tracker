@@ -144,10 +144,11 @@ export interface BattleParticipantAbilities {
   /** Race.id для расових модифікаторів заклинань */
   raceId?: string;
   primaryAbility?: AbilityKey;
-  /** Коеф. DM для фіз. шкоди ближнього бою (лише character); як у калькуляторі персонажа */
+  /** Множник шкоди ближнього бою від архетипу (лише character) */
   meleeMultiplier?: number;
-  /** Коеф. DM для дальнього бою */
   rangedMultiplier?: number;
+  magicMultiplier?: number;
+  archetypeName?: string;
 }
 
 /**

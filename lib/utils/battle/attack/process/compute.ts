@@ -143,7 +143,7 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
   if (heroDm.breakdownLine) {
     damageCalculation.breakdown.push("──────────");
     damageCalculation.breakdown.push(heroDm.breakdownLine);
-    damageSteps.push({ label: "Коефіцієнт DM", side: "attacker", kind: "multiplier", value: heroDm.multiplier, after: physicalDamage });
+    damageSteps.push({ label: "Архетип", side: "attacker", kind: "multiplier", value: heroDm.multiplier, after: physicalDamage });
   }
 
   const balance = applyBalanceDamageMultiplier(updatedAttacker, physicalDamage);

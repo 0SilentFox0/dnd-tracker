@@ -6,6 +6,7 @@ import { MIN_UNIT_STAT, TYPICAL_TARGETS } from "@/lib/constants/battle-balance";
 import { calculateAttackBonus } from "@/lib/utils/battle/attack/bonus";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
+import { heroMagicMultiplier } from "@/lib/utils/battle/damage/hero-dm-multiplier";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { averageOf, diceAverage, parseDiceLenient } from "@/lib/utils/common/dice";
@@ -191,7 +192,7 @@ export function getCharacterStats({ participant, branchLevels, magicMainSkillIds
 
   const toHit = calculateAttackBonus(participant, best, [participant]);
 
-  const spellDpr = getSpellDprFromBranchLevels(branchLevels ?? {}, magicMainSkillIds);
+  const spellDpr = getSpellDprFromBranchLevels(branchLevels ?? {}, magicMainSkillIds) * heroMagicMultiplier(participant);
 
   const nonMagicDpr = getNonMagicBranchDpr(branchLevels ?? {}, magicMainSkillIds);
 
@@ -220,9 +221,9 @@ export function getCharacterStats({ participant, branchLevels, magicMainSkillIds
       nonMagicDpr,
       logLines: [
         `Ближній бій ${round1(meleeAvg)}, дальній ${round1(rangedAvg)} → фізичний DPR = ${round1(physicalDpr)}`,
-        `Школа магії (найвищий рівень): +${spellDpr} DPR`,
+        `Школа магії (найвищий рівень): +${round1(spellDpr)} DPR`,
         `Немагічні основні навички (сума): +${nonMagicDpr} DPR`,
-        `Разом DPR = ${round1(physicalDpr)} + ${spellDpr} + ${nonMagicDpr} = ${round1(dpr)}`,
+        `Разом DPR = ${round1(physicalDpr)} + ${round1(spellDpr)} + ${nonMagicDpr} = ${round1(dpr)}`,
       ],
     },
   };

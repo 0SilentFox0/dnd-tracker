@@ -81,7 +81,7 @@ export function computeDamageBreakdown(
   if (heroDm.breakdownLine) {
     breakdown.push(`──────────`);
     breakdown.push(heroDm.breakdownLine);
-    steps.push({ label: "Коефіцієнт DM", side: "attacker", kind: "multiplier", value: heroDm.multiplier, after: totalDamage });
+    steps.push({ label: "Архетип", side: "attacker", kind: "multiplier", value: heroDm.multiplier, after: totalDamage });
   }
 
   const balance = applyBalanceDamageMultiplier(attacker, totalDamage);

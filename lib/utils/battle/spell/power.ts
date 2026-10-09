@@ -1,6 +1,7 @@
 import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
+import { archetypeLabel, heroMagicMultiplier } from "@/lib/utils/battle/damage/hero-dm-multiplier";
 import { signed } from "@/lib/utils/format";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -51,5 +52,13 @@ export function computeSpellPower(input: {
     if (e.percent) breakdown.push(`+ бонус ${e.label}: ${e.percent}% від ${sum} (${signed(Math.floor((sum * e.percent) / 100))})`);
   }
 
-  return { heal, damage: heal + mods.flat + percentBonus, breakdown };
+  const raw = heal + mods.flat + percentBonus;
+
+  const mult = heroMagicMultiplier(caster);
+
+  const damage = mult === 1 ? raw : Math.floor(raw * mult);
+
+  if (mult !== 1) breakdown.push(`× ${mult} (${archetypeLabel(caster)}) = ${damage}`);
+
+  return { heal, damage, breakdown };
 }

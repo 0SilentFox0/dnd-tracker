@@ -9,6 +9,16 @@ export function clampHeroDamageMultiplier(raw: number | undefined | null): numbe
   return Math.max(0.1, Math.min(3, x));
 }
 
+export function archetypeLabel(p: BattleParticipant): string {
+  return p.abilities.archetypeName ? `архетип: ${p.abilities.archetypeName}` : "архетип";
+}
+
+export function heroMagicMultiplier(p: BattleParticipant): number {
+  if (p.basicInfo.sourceType !== ParticipantSourceType.CHARACTER) return 1;
+
+  return clampHeroDamageMultiplier(p.abilities.magicMultiplier);
+}
+
 /**
  * Після модифікаторів скілів/артефактів; перед дробленням по цілях / опором.
  */
@@ -34,7 +44,7 @@ export function applyHeroDmDamageMultiplier(
 
   return {
     damage,
-    breakdownLine: `× ${mult} (коеф. DM) = ${damage}`,
+    breakdownLine: `× ${mult} (${archetypeLabel(attacker)}) = ${damage}`,
     multiplier: mult,
   };
 }
