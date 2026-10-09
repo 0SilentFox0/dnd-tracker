@@ -3,13 +3,14 @@ import { abilityLabel, abilityLines, armorTotal, attackSheet, checkBonus } from 
 import { DND_SKILL_META, DND_SKILLS } from "@/lib/constants";
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { ARTIFACT_GRID_9 } from "@/lib/constants/artifacts";
+import { heroArchetype } from "@/lib/constants/hero-archetypes";
 import { parseGoals } from "@/lib/schemas/character-goals";
 import { slotLevels } from "@/lib/utils/battle/view";
 import { heroBaseHp } from "@/lib/utils/characters/hero-hp";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { signed } from "@/lib/utils/format";
 import type { BattleParticipant } from "@/types/battle";
-import type { CharacterSheet, SheetArtifact } from "@/types/characters";
+import type { CharacterSheet, SheetArtifact, TokenColor } from "@/types/characters";
 import type { BookSpell } from "@/types/spells";
 
 export interface SheetInput {
@@ -31,10 +32,11 @@ export interface SheetInput {
     languages: unknown;
     proficiencies: unknown;
     spellcastingAbility: string | null;
-    hpMultiplier: number | null;
+    archetype: string | null;
     primaryAbility: string | null;
     background: string | null;
     goals: unknown;
+    tokens?: { id: string; color: string; label: string; createdAt: Date }[];
   };
   raceIcon: string | null;
   immunities: string[];
@@ -85,7 +87,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
   return {
     viewer: input.viewer,
     maxLevel: input.maxLevel,
-    identity: { id: c.id, name: c.name, avatar: c.avatar, level: c.level, className: c.class, subclass: c.subclass, race: c.race, raceIcon: input.raceIcon, alignment: c.alignment },
+    identity: { id: c.id, name: c.name, avatar: c.avatar, level: c.level, className: c.class, archetype: heroArchetype(c.archetype).name, subclass: c.subclass, race: c.race, raceIcon: input.raceIcon, alignment: c.alignment },
     abilities: ABILITY_KEYS.map((key) => ({ key, score: scores[key], mod: getAbilityModifier(scores[key]), isPrimary: primary === key, lines: abilityLines(p, key, c[key]) })),
     primaryAbility: primary,
     proficiency: prof,
@@ -112,6 +114,8 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
     items: { grid, artifacts: input.artifacts, sets: p.battleData.artifactSets ?? [] },
     personalSkill: input.personalSkill,
     progression: input.progression,
-    story: { biography: c.background?.trim() ? c.background : null, goals: parseGoals(c.goals) },
+    story: { biography: c.background?.trim() ? c.background : null, goals: parseGoals(c.goals),
+      tokens: (c.tokens ?? []).map((t) => ({ id: t.id, color: t.color as TokenColor, label: t.label, createdAt: t.createdAt.toISOString() })),
+    },
   };
 }

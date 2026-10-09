@@ -9,6 +9,7 @@ export const defaultCharacterFormData: CharacterFormData = {
     level: 1,
     class: "",
     subclass: "",
+    archetype: "",
     race: "",
     subrace: "",
     alignment: "",

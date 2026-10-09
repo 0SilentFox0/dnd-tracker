@@ -10,6 +10,7 @@ import { LabeledInput } from "@/components/ui/labeled-input";
 import { SelectField } from "@/components/ui/select-field";
 import { ALIGNMENTS } from "@/lib/constants";
 import { CharacterType, type CharacterTypeValue } from "@/lib/constants/characters";
+import { HERO_ARCHETYPE_OPTIONS } from "@/lib/constants/hero-archetypes";
 import { CampaignMember } from "@/types/campaigns";
 import type { Race } from "@/types/races";
 
@@ -21,6 +22,7 @@ interface CharacterBasicInfoProps {
     level: number;
     class: string;
     subclass?: string;
+    archetype?: string;
     race: string;
     subrace?: string;
     alignment?: string;
@@ -34,6 +36,7 @@ interface CharacterBasicInfoProps {
       setLevel: (value: number) => void;
       setClass: (value: string) => void;
       setSubclass: (value: string) => void;
+      setArchetype: (value: string) => void;
       setRace: (value: string) => void;
       setSubrace: (value: string) => void;
       setAlignment: (value: string) => void;
@@ -60,6 +63,7 @@ export function CharacterBasicInfo({
     level,
     class: className,
     subclass,
+    archetype,
     race,
     subrace,
     alignment,
@@ -158,6 +162,20 @@ export function CharacterBasicInfo({
         containerClassName="w-full min-w-0"
         className="w-full"
       />
+      {!isPlayerView && (
+        <div className="w-full min-w-0">
+          <Label htmlFor="archetype">Архетип</Label>
+          <SelectField
+            id="archetype"
+            value={archetype || ""}
+            onValueChange={(value) => setters.setArchetype(value)}
+            options={HERO_ARCHETYPE_OPTIONS.filter((o) => o.value)}
+            allowNone
+            noneLabel={HERO_ARCHETYPE_OPTIONS[0].label}
+            triggerClassName="w-full"
+          />
+        </div>
+      )}
 
       <div className="w-full min-w-0">
         <Label htmlFor="alignment">Світогляд</Label>
@@ -199,7 +217,7 @@ export function CharacterBasicInfo({
       </div>
       {!isPlayerView && (
         <div className="w-full min-w-0 md:col-span-2">
-          <ImageUpload label="Картинка персонажа" value={avatar || ""} onChange={setters.setAvatar} fallbackText={name} />
+          <ImageUpload label="Фото персонажа" value={avatar || ""} onChange={setters.setAvatar} fallbackText={name} maxSide={1200} />
         </div>
       )}
     </div>

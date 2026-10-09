@@ -2,6 +2,13 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 export const ARTIFACT_ICONS_BUCKET = "artifact-icons" as const;
 
+type StorageOptions = {
+  campaignId: string;
+  objectBaseName: string;
+  bucket?: string;
+  cacheControl?: string;
+};
+
 const MAX_BYTES = 5 * 1024 * 1024;
 
 /** Макс. довжина рядка data URL (base64 роздуває файл ~на 33%). */
@@ -36,6 +43,7 @@ function getExtensionFromContentType(contentType: string | null): string {
 
 async function ensureBucket(
   supabase: ReturnType<typeof createAdminClient>,
+  bucket: string = ARTIFACT_ICONS_BUCKET,
 ): Promise<{ ok: true } | { ok: false; message: string }> {
   const { data: buckets, error: listErr } = await supabase.storage.listBuckets();
 
@@ -43,11 +51,11 @@ async function ensureBucket(
     return { ok: false, message: listErr.message };
   }
 
-  if (buckets?.some((b) => b.name === ARTIFACT_ICONS_BUCKET)) {
+  if (buckets?.some((b) => b.name === bucket)) {
     return { ok: true };
   }
 
-  const { error } = await supabase.storage.createBucket(ARTIFACT_ICONS_BUCKET, {
+  const { error } = await supabase.storage.createBucket(bucket, {
     public: true,
   });
 
@@ -60,7 +68,17 @@ async function ensureBucket(
 
 /** Вже на нашему Storage — не дзеркалимо повторно. */
 export function isArtifactIconHostedOnProjectStorage(url: string): boolean {
-  return url.includes("supabase.co/storage");
+  const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+  if (!base) return false;
+
+  try {
+    const u = new URL(url);
+
+    return u.protocol === "https:" && u.host === new URL(base).host && u.pathname.startsWith("/storage/v1/object/public/");
+  } catch {
+    return false;
+  }
 }
 
 /** Потрібно завантажити з зовнішнього URL у бакет. */
@@ -104,7 +122,7 @@ export function isArtifactIconDataUrl(
  */
 export async function uploadArtifactIconDataUrlToSupabase(
   dataUrl: string,
-  options: { campaignId: string; objectBaseName: string },
+  options: StorageOptions,
 ): Promise<
   { ok: true; publicUrl: string } | { ok: false; message: string }
 > {
@@ -166,7 +184,7 @@ export async function uploadArtifactIconDataUrlToSupabase(
     };
   }
 
-  const ensured = await ensureBucket(supabase);
+  const ensured = await ensureBucket(supabase, options.bucket);
 
   if (!ensured.ok) {
     return { ok: false, message: ensured.message };
@@ -180,13 +198,16 @@ export async function uploadArtifactIconDataUrlToSupabase(
     return { ok: false, message: "Невалідне ім'я файлу" };
   }
 
+  const { bucket = ARTIFACT_ICONS_BUCKET, cacheControl } = options;
+
   const fullPath = `${options.campaignId}/${safeBase}${ext}`;
 
   const { error: uploadError } = await supabase.storage
-    .from(ARTIFACT_ICONS_BUCKET)
+    .from(bucket)
     .upload(fullPath, buffer, {
       contentType: mime,
       upsert: true,
+      cacheControl,
     });
 
   if (uploadError) {
@@ -195,7 +216,7 @@ export async function uploadArtifactIconDataUrlToSupabase(
 
   const {
     data: { publicUrl },
-  } = supabase.storage.from(ARTIFACT_ICONS_BUCKET).getPublicUrl(fullPath);
+  } = supabase.storage.from(bucket).getPublicUrl(fullPath);
 
   return { ok: true, publicUrl };
 }
@@ -208,7 +229,7 @@ const STORED_ICON_URL_MAX_LEN = 2000;
  */
 export async function resolveArtifactIconForPersistence(
   icon: string | null,
-  options: { campaignId: string; objectBaseName: string },
+  options: StorageOptions,
 ): Promise<
   { ok: true; icon: string | null } | { ok: false; message: string }
 > {
@@ -254,7 +275,7 @@ export async function resolveArtifactIconForPersistence(
  */
 export async function mirrorArtifactIconToSupabase(
   sourceUrl: string,
-  options: { campaignId: string; objectBaseName: string },
+  options: StorageOptions,
 ): Promise<
   { ok: true; publicUrl: string } | { ok: false; message: string }
 > {
@@ -272,7 +293,7 @@ export async function mirrorArtifactIconToSupabase(
     };
   }
 
-  const ensured = await ensureBucket(supabase);
+  const ensured = await ensureBucket(supabase, options.bucket);
 
   if (!ensured.ok) {
     return { ok: false, message: ensured.message };
@@ -321,13 +342,16 @@ export async function mirrorArtifactIconToSupabase(
     return { ok: false, message: "Невалідне ім'я файлу" };
   }
 
+  const { bucket = ARTIFACT_ICONS_BUCKET, cacheControl } = options;
+
   const fullPath = `${options.campaignId}/${safeBase}${ext}`;
 
   const { error: uploadError } = await supabase.storage
-    .from(ARTIFACT_ICONS_BUCKET)
+    .from(bucket)
     .upload(fullPath, buffer, {
       contentType: contentType ?? "image/png",
       upsert: true,
+      cacheControl,
     });
 
   if (uploadError) {
@@ -336,7 +360,7 @@ export async function mirrorArtifactIconToSupabase(
 
   const {
     data: { publicUrl },
-  } = supabase.storage.from(ARTIFACT_ICONS_BUCKET).getPublicUrl(fullPath);
+  } = supabase.storage.from(bucket).getPublicUrl(fullPath);
 
   return { ok: true, publicUrl };
 }

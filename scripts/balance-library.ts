@@ -79,14 +79,15 @@ interface Build {
   weapon: keyof typeof FAIR_WEAPONS;
   stats: (level: number) => Record<string, number>;
   caster?: boolean;
+  archetype: string;
 }
 
 const prime = (level: number) => (level >= 10 ? 20 : level >= 6 ? 18 : 16);
 
 const BUILDS: Record<string, Build> = {
-  martial: { key: "martial", race: "Люди", class: "Fighter", branches: ["Напад", "Захист"], weapon: "sword", stats: (l) => ({ strength: prime(l), dexterity: 12, constitution: 15, armorClass: 15 + Math.floor(l / 4) }) },
-  caster: { key: "caster", race: "Маги", class: "Wizard", branches: ["Хаос", "Світло"], weapon: "dagger", caster: true, stats: (l) => ({ intelligence: prime(l), strength: 12, dexterity: 12, constitution: 12, armorClass: 12 + Math.floor(l / 5), spellcastingAbilityScore: 0 }) },
-  leader: { key: "leader", race: "Ельфи", class: "Ranger", branches: ["Лідерство", "Стрільба"], weapon: "bow", stats: (l) => ({ strength: 12, dexterity: prime(l), charisma: 14, constitution: 13, armorClass: 14 + Math.floor(l / 5) }) },
+  martial: { key: "martial", race: "Люди", class: "Fighter", archetype: "warrior", branches: ["Напад", "Захист"], weapon: "sword", stats: (l) => ({ strength: prime(l), dexterity: 12, constitution: 15, armorClass: 15 + Math.floor(l / 4) }) },
+  caster: { key: "caster", race: "Маги", class: "Wizard", archetype: "mage", branches: ["Хаос", "Світло"], weapon: "dagger", caster: true, stats: (l) => ({ intelligence: prime(l), strength: 12, dexterity: 12, constitution: 12, armorClass: 12 + Math.floor(l / 5), spellcastingAbilityScore: 0 }) },
+  leader: { key: "leader", race: "Ельфи", class: "Ranger", archetype: "ranger", branches: ["Лідерство", "Стрільба"], weapon: "bow", stats: (l) => ({ strength: 12, dexterity: prime(l), charisma: 14, constitution: 13, armorClass: 14 + Math.floor(l / 5) }) },
 };
 
 const PARTIES: Record<string, string[]> = {
@@ -506,6 +507,7 @@ async function createParty(partyKey: string, level: number, trees: Map<string, T
         class: b.class,
         race: b.race,
         level,
+        archetype: b.archetype,
         initiative: 1,
         spellcastingAbility: b.caster ? "intelligence" : null,
         spellSlots: {},

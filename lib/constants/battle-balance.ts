@@ -2,7 +2,8 @@
 
 export const TARGET_ROUNDS = 3.5;
 
-export const HERO_EDGE = 0.9;
+/** Частка HP партії, яку вороги мають зняти за `TARGET_ROUNDS`; 0.9 → 0.7, коли DPR юнітів перестав рахувати «+N» з кубиків (≈ 25 % на T4), — щоб L6 лишився на рівні. */
+export const HERO_EDGE = 0.7;
 
 /** Частка номінального DPR героїв, що реально долітає (промахи, перевбивство); підібрано за `pnpm simulate-battle`. */
 export const HIT_RATE = 0.55;

@@ -5,6 +5,7 @@ import { createCharacterSchema } from "./create-character-schema";
 import { resolveCharacterOwner } from "./resolve-character-owner";
 
 import { prisma } from "@/lib/db";
+import { resolveAvatarForPersistence } from "@/lib/supabase/avatar-storage";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { parseBody } from "@/lib/utils/api/parse-body";
@@ -27,6 +28,10 @@ export async function createCharacter(request: Request, campaignId: string): Pro
 
   if ("error" in owner) return owner.error;
 
+  const avatar = await resolveAvatarForPersistence(data.avatar, { campaignId });
+
+  if (!avatar.ok) return errorResponse(avatar.message, 400);
+
   let spellSlots = data.spellSlots;
 
   if (!spellSlots || typeof spellSlots !== "object" || Object.keys(spellSlots).length === 0) {
@@ -45,12 +50,13 @@ export async function createCharacter(request: Request, campaignId: string): Pro
         level: data.level,
         class: data.class,
         subclass: data.subclass,
+        archetype: data.archetype ?? null,
         race: data.race,
         subrace: data.subrace,
         alignment: data.alignment,
         background: data.background,
         experience: data.experience,
-        avatar: data.avatar,
+        avatar: avatar.avatar ?? undefined,
 
         strength: data.strength,
         dexterity: data.dexterity,

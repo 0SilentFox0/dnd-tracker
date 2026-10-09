@@ -26,7 +26,7 @@ function lira(over: Partial<SheetInput["character"]> = {}, attacks: BattleAttack
       id: "lira", name: "Ліра", avatar: null, level: 30, class: "Ranger", subclass: null, race: "Ельф", alignment: null,
       strength: 10, dexterity: 18, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10,
       armorClass: 14, savingThrows: { dexterity: true }, skills: { stealth: true, perception: true },
-      languages: ["Ельфійська"], proficiencies: {}, spellcastingAbility: null, hpMultiplier: null,
+      languages: ["Ельфійська"], proficiencies: {}, spellcastingAbility: null, archetype: null,
       primaryAbility: null, background: "Вона ==вірить== у брата", goals: [{ id: "g", text: "Знайти брата", status: "active", author: "dm" }],
       ...over,
     },
@@ -100,6 +100,15 @@ describe("buildCharacterSheet", () => {
     expect(s.story.goals).toHaveLength(1);
     expect(s.items.artifacts[0].effects).toEqual(["AC +2"]);
     expect(s.items.grid.armor?.id).toBe("a1");
+  });
+
+  it("жетони проходять із датою рядком; без жетонів — порожньо", () => {
+    const createdAt = new Date("2026-10-09T10:00:00Z");
+
+    expect(buildCharacterSheet(lira({ tokens: [{ id: "t1", color: "green", label: "Врятував селян", createdAt }] })).story.tokens).toEqual([
+      { id: "t1", color: "green", label: "Врятував селян", createdAt: "2026-10-09T10:00:00.000Z" },
+    ]);
+    expect(buildCharacterSheet(lira()).story.tokens).toEqual([]);
   });
 
   it("СЛ і атака заклинанням — ті самі, що в бою (з учасника, а не з бонусних характеристик)", () => {

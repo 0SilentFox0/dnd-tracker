@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { ABILITY_KEYS, SPELLCASTING_ABILITIES } from "@/lib/constants/abilities";
 import { CharacterType } from "@/lib/constants/characters";
+import { HERO_ARCHETYPE_KEYS } from "@/lib/constants/hero-archetypes";
 
 export const createCharacterSchema = z.object({
   name: z.string().min(1).max(100),
@@ -10,6 +11,7 @@ export const createCharacterSchema = z.object({
   level: z.number().min(1).max(30).default(1),
   class: z.string().min(1),
   subclass: z.string().optional(),
+  archetype: z.enum(HERO_ARCHETYPE_KEYS).nullable().optional(),
   race: z.string().min(1),
   subrace: z.string().optional(),
   alignment: z.string().optional(),

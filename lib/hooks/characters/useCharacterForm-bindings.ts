@@ -47,6 +47,11 @@ export function buildCharacterFormBindings(
           ...prev,
           basicInfo: { ...prev.basicInfo, subclass: value },
         })),
+      setArchetype: (value: string) =>
+        setFormData((prev) => ({
+          ...prev,
+          basicInfo: { ...prev.basicInfo, archetype: value },
+        })),
       setRace: (value: string) =>
         setFormData((prev) => ({
           ...prev,

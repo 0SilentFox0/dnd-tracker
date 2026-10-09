@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { AttackType } from "@/lib/constants/battle";
+import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { MIN_UNIT_STAT, TYPICAL_TARGETS } from "@/lib/constants/battle-balance";
 import { DPR_BY_LEVEL_NON_MAGIC } from "@/lib/constants/dpr-by-main-skill";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { calculateAttackBonus } from "@/lib/utils/battle/attack/bonus";
+import { computeHitDamage } from "@/lib/utils/battle/attack/process/compute";
 import { getCharacterStats, getUnitStats } from "@/lib/utils/battle/balance";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
@@ -60,12 +61,82 @@ describe("getCharacterStats з учасника бою", () => {
   });
 });
 
+describe("getCharacterStats: архетип і раса в оцінці сили героя", () => {
+  const asCharacter = (p: BattleParticipant, extra: Record<string, unknown>, abilities?: BattleParticipant["battleData"]["resolvedAbilities"]): BattleParticipant => ({
+    ...p,
+    basicInfo: { ...p.basicInfo, sourceType: "character" },
+    abilities: { ...p.abilities, ...extra },
+    battleData: { ...p.battleData, ...(abilities && { resolvedAbilities: abilities }) },
+  });
+
+  it("школа із spellGroupId рахується магією, навіть без збігу назви", () => {
+    const levels = { chaos: SkillLevel.BASIC };
+
+    const plain = getCharacterStats({ participant: hero([sword]), branchLevels: levels });
+
+    const school = getCharacterStats({ participant: hero([sword]), branchLevels: levels, spellSchoolIds: new Set(["chaos"]) });
+
+    expect(plain.spellDpr).toBe(0);
+    expect(plain.dprBreakdown.nonMagicDpr).toBe(DPR_BY_LEVEL_NON_MAGIC[SkillLevel.BASIC]);
+    expect(school.spellDpr).toBeGreaterThan(0);
+    expect(school.dprBreakdown.nonMagicDpr).toBe(0);
+  });
+
+  it("множник архетипу найкращої зброї множить і табличний немагічний DPR", () => {
+    const levels = { attack: SkillLevel.BASIC };
+
+    const base = getCharacterStats({ participant: asCharacter(hero([sword]), { meleeMultiplier: 1 }), branchLevels: levels });
+
+    const boosted = getCharacterStats({ participant: asCharacter(hero([sword]), { meleeMultiplier: 1.5 }), branchLevels: levels });
+
+    expect(boosted.dprBreakdown.nonMagicDpr).toBeCloseTo(base.dprBreakdown.nonMagicDpr * 1.5);
+    expect(boosted.weaponDpr - boosted.dprBreakdown.physicalDpr).toBeCloseTo(base.dprBreakdown.nonMagicDpr * 1.5);
+  });
+
+  it("spell DPR множиться на magicMultiplier архетипу й на расовий % шкоди магії", () => {
+    const params = { branchLevels: { chaos: SkillLevel.BASIC }, spellSchoolIds: new Set(["chaos"]) };
+
+    const base = getCharacterStats({ participant: asCharacter(hero([sword]), { magicMultiplier: 1 }), ...params }).spellDpr;
+
+    const arche = getCharacterStats({ participant: asCharacter(hero([sword]), { magicMultiplier: 1.2 }), ...params }).spellDpr;
+
+    const racial = resolved({ trigger: { event: "passive" }, effects: [{ kind: "damageBonus", filter: { kind: "magic" }, percent: 15 }] });
+
+    const race = getCharacterStats({ participant: asCharacter(hero([sword]), { magicMultiplier: 1 }, [racial]), ...params }).spellDpr;
+
+    expect(arche).toBeCloseTo(base * 1.2);
+    expect(race).toBeCloseTo(base * 1.15);
+  });
+});
+
 const unit = (attacks: Array<{ damageDice: string; type: string }>) =>
   getUnitStats({ id: "u", name: "u", maxHp: 20, level: 1, strength: 14, dexterity: 12, attacks });
 
 describe("баланс: середня шкода з кубиків", () => {
-  it("юніт: кубики зброї + модифікатор характеристики", () => {
-    expect(unit([{ damageDice: "1d8+2", type: "melee" }]).dpr).toBe(8.5);
+  it("юніт: кубики зброї + модифікатор характеристики; «+N» з кубиків не рахується", () => {
+    expect(unit([{ damageDice: "1d8+2", type: "melee" }]).dpr).toBe(6.5);
+  });
+
+  it("оцінка юніта = влучання рушія із середніми кидками: «+16» з «4d10+16» шкоди не дає", () => {
+    const base = makeParticipant({ id: "u" });
+
+    const attack = { ...sword, damageDice: "4d10+16" } as BattleAttack;
+
+    const p: BattleParticipant = {
+      ...base,
+      basicInfo: { ...base.basicInfo, sourceType: "unit" },
+      abilities: { ...base.abilities, strength: 16, dexterity: 10 },
+      battleData: { ...base.battleData, attacks: [attack], resolvedAbilities: [] },
+    };
+
+    const target = makeParticipant({ id: "t", side: ParticipantSide.ENEMY, hp: 999, maxHp: 999 });
+
+    const hit = computeHitDamage({ attacker: p, target, attack, damageRolls: [5, 6, 5, 6], allParticipants: [p, target], attackRoll: { isCritical: false }, currentRound: 1 });
+
+    const estimate = getUnitStats({ id: "u", name: "u", maxHp: 20, level: 7, strength: 16, dexterity: 10, attacks: [attack] }).dpr;
+
+    expect(estimate).toBe(25);
+    expect(hit.physicalDamage).toBe(estimate);
   });
 
   it("оцінка юніта збігається з рушієм: бій теж додає модифікатор Сили/Спритності юнітам", () => {

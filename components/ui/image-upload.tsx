@@ -5,8 +5,11 @@ import { useRef } from "react";
 import { IconUrlField } from "@/components/common/IconUrlField";
 import { Button } from "@/components/ui/button";
 import { useNotify } from "@/lib/hooks/common";
+import { resizeImageToDataUrl } from "@/lib/utils/common/image-resize";
 
 const MAX_SIZE_BYTES = 3 * 1024 * 1024;
+
+const MAX_RESIZABLE_SIZE_BYTES = 15 * 1024 * 1024;
 
 const ACCEPT = "image/jpeg,image/png,image/webp,image/gif";
 
@@ -16,9 +19,10 @@ export interface ImageUploadProps {
   label?: string;
   fallbackText?: string;
   allowFile?: boolean;
+  maxSide?: number;
 }
 
-export function ImageUpload({ value, onChange, label = "Картинка", fallbackText = "?", allowFile = true }: ImageUploadProps) {
+export function ImageUpload({ value, onChange, label = "Картинка", fallbackText = "?", allowFile = true, maxSide }: ImageUploadProps) {
   const notify = useNotify();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -28,17 +32,24 @@ export function ImageUpload({ value, onChange, label = "Картинка", fallb
 
     if (!file) return;
 
-    if (file.size > MAX_SIZE_BYTES) {
-      void notify(`Файл завеликий. Максимум ${MAX_SIZE_BYTES / 1024 / 1024} МБ.`);
+    const limit = maxSide ? MAX_RESIZABLE_SIZE_BYTES : MAX_SIZE_BYTES;
+
+    if (file.size > limit) {
+      void notify(`Файл завеликий. Максимум ${limit / 1024 / 1024} МБ.`);
       e.target.value = "";
 
       return;
     }
 
-    const reader = new FileReader();
+    if (maxSide) {
+      resizeImageToDataUrl(file, maxSide).then(onChange, () => void notify("Не вдалося обробити зображення"));
+    } else {
+      const reader = new FileReader();
 
-    reader.onload = () => onChange(reader.result as string);
-    reader.readAsDataURL(file);
+      reader.onload = () => onChange(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+
     e.target.value = "";
   };
 

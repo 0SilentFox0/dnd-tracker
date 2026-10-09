@@ -4,10 +4,19 @@ import type { BookSpell } from "./spells";
 import type { AbilityKey } from "@/lib/constants/abilities";
 import { type SpellcastingAbility } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
-import { type CharacterTypeValue, type GoalAuthorValue, type GoalStatus } from "@/lib/constants/characters";
+import { type CharacterTypeValue, type GoalAuthorValue, type GoalStatus, type TOKEN_COLORS } from "@/lib/constants/characters";
 
 export type { AbilityKey };
 
+
+export type TokenColor = (typeof TOKEN_COLORS)[number];
+
+export interface CharacterToken {
+  id: string;
+  color: TokenColor;
+  label: string;
+  createdAt: string;
+}
 
 export interface CharacterGoal {
   id: string;
@@ -27,6 +36,7 @@ export interface CharacterFormData {
     level: number;
     class: string;
     subclass?: string;
+    archetype?: string;
     race: string;
     subrace?: string;
     alignment?: string;
@@ -68,12 +78,6 @@ export interface CharacterFormData {
   /** Уміння: скіл з групи «Персональні» */
   abilities: {
     personalSkillId: string;
-  };
-  /** Коефіцієнти масштабування (HP, melee, ranged) — окремі для кожного героя */
-  scalingCoefficients?: {
-    hpMultiplier: number;
-    meleeMultiplier: number;
-    rangedMultiplier: number;
   };
 }
 
@@ -118,12 +122,7 @@ export interface Character {
   personalSkillId?: string | null;
   primaryAbility?: AbilityKey | null;
   goals?: CharacterGoal[];
-  /** Коефіцієнт HP (×). За замовчуванням 1. */
-  hpMultiplier?: number | null;
-  /** Коефіцієнт урону ближнього бою (×). За замовчуванням 1. */
-  meleeMultiplier?: number | null;
-  /** Коефіцієнт урону дальнього бою (×). За замовчуванням 1. */
-  rangedMultiplier?: number | null;
+  archetype?: string | null;
   /** Прогрес по деревах прокачки: skillTreeId → { unlockedSkills } */
   skillTreeProgress?: Record<
     string,
@@ -151,7 +150,7 @@ export interface Character {
 /** Рядок списку персонажів кампанії (GET /characters). */
 export type CharacterListItem = Pick<
   Character,
-  "id" | "campaignId" | "type" | "controlledBy" | "name" | "level" | "class" | "race" | "subrace" | "avatar" | "strength" | "hpMultiplier" | "armorClass" | "initiative" | "experience"
+  "id" | "campaignId" | "type" | "controlledBy" | "name" | "level" | "class" | "race" | "subrace" | "avatar" | "constitution" | "archetype" | "armorClass" | "initiative" | "experience"
 > & { user?: { displayName: string } | null };
 
 export type SheetLineSource = "base" | "ability" | "proficiency" | "weapon" | "level" | "dice" | "skill" | "race" | "artifact" | "artifactSet" | "unit" | "character" | "effect" | "action" | "multiplier";
@@ -213,7 +212,7 @@ export interface SetProgress {
 export interface CharacterSheet {
   viewer: { isDM: boolean; isOwner: boolean };
   maxLevel: number;
-  identity: { id: string; name: string; avatar: string | null; level: number; className: string; subclass: string | null; race: string; raceIcon: string | null; alignment: string | null };
+  identity: { id: string; name: string; avatar: string | null; level: number; className: string; archetype: string; subclass: string | null; race: string; raceIcon: string | null; alignment: string | null };
   abilities: SheetAbility[];
   primaryAbility: AbilityKey | null;
   proficiency: number;
@@ -236,6 +235,6 @@ export interface CharacterSheet {
   spells: BookSpell[];
   items: { grid: Record<string, SheetArtifact | null>; artifacts: SheetArtifact[]; sets: SetProgress[] };
   personalSkill: { id: string; name: string; icon: string | null; description: string | null } | null;
-  story: { biography: string | null; goals: CharacterGoal[] };
+  story: { biography: string | null; goals: CharacterGoal[]; tokens: CharacterToken[] };
   progression: { freePoints: number; level: number; seenLevel: number | null };
 }

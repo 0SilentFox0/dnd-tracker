@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { MoreVertical, Pencil, Trash2, TrendingUp } from "lucide-react";
 
-import { EntityIcon } from "@/components/common/EntityIcon";
+import { HeroPortrait } from "@/components/character-profile/HeroPortrait";
 import { HudCard, HudPill, HudStatChip } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,8 +29,8 @@ export function DmCharacterCard({ character, campaignId, busy, actions }: DmChar
 
   return (
     <HudCard className="space-y-3 p-3">
+      <HeroPortrait src={character.avatar} name={character.name} className="max-h-72" />
       <div className="flex items-start gap-3">
-        <EntityIcon src={character.avatar} name={character.name} size={56} className="hud-sc size-14 shrink-0 rounded-full border-2 border-hud-gold bg-[#2a2016] text-2xl text-inherit" />
         <div className="min-w-0 flex-1 space-y-1">
           <p className="hud-sc truncate text-lg leading-6 text-hud-ink">{character.name}</p>
           <p className="truncate text-xs text-hud-muted">

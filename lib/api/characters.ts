@@ -7,8 +7,9 @@ import {
 } from "@/lib/api/client";
 import { type CharacterTypeValue } from "@/lib/constants/characters";
 import type { GoalInput } from "@/lib/schemas/character-goals";
+import type { CreateTokenInput } from "@/lib/schemas/character-tokens";
 import { formDataToCharacter } from "@/lib/utils/characters/character-form";
-import type { Character, CharacterFormData, CharacterGoal, CharacterListItem, CharacterSheet } from "@/types/characters";
+import type { Character, CharacterFormData, CharacterGoal, CharacterListItem, CharacterSheet, CharacterToken } from "@/types/characters";
 
 /**
  * Отримує персонажа за ID
@@ -25,6 +26,12 @@ export async function getCharacter(
 
 export const putCharacterGoals = (campaignId: string, characterId: string, goals: GoalInput[], seen?: string[]) =>
   campaignPut<{ goals: CharacterGoal[] }>(campaignId, `/characters/${characterId}/goals`, { goals, seen });
+
+export const createCharacterToken = (campaignId: string, characterId: string, body: CreateTokenInput) =>
+  campaignPost<{ token: CharacterToken }>(campaignId, `/characters/${characterId}/tokens`, body);
+
+export const deleteCharacterToken = (campaignId: string, characterId: string, tokenId: string) =>
+  campaignDelete<{ ok: true }>(campaignId, `/characters/${characterId}/tokens/${tokenId}`);
 
 export const getCharacterSheet = (campaignId: string, characterId: string) => campaignGet<CharacterSheet>(campaignId, `/characters/${characterId}/sheet`);
 

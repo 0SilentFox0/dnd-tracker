@@ -334,7 +334,7 @@ describe("library content", () => {
 
     for (const r of RACES) {
       expect(r.passive.stats, r.key).toEqual(expected[r.key]);
-      expect(r.passive.trait, r.key).toHaveLength(1);
+      expect(r.passive.trait, r.key).toHaveLength(2);
       expect(racePassiveAbilities(r)[0].id, r.key).toBe(`${r.key}-stats`);
       expect(Object.keys(racePassiveStatModifiers(r)), r.key).toEqual(Object.keys(expected[r.key]));
     }

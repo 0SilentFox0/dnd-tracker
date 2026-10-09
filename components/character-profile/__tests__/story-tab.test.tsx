@@ -7,7 +7,7 @@ import { sheetFixture, withSheet } from "./sheet-fixture";
 const { save } = vi.hoisted(() => ({ save: vi.fn().mockResolvedValue(true) }));
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "", HUD_SURFACE: "hud-surface" }));
-vi.mock("@/lib/hooks/characters", async (orig) => ({ ...(await orig<object>()), useCharacterGoals: () => ({ save, isPending: false }) }));
+vi.mock("@/lib/hooks/characters", async (orig) => ({ ...(await orig<object>()), useCharacterGoals: () => ({ save, isPending: false }), useCharacterTokens: () => ({ add: vi.fn(), remove: vi.fn(), isPending: false }) }));
 
 import { BiographyText, StoryTab } from "@/components/character-profile";
 import { ProfileContext } from "@/components/character-profile/ProfileContext";
@@ -67,7 +67,7 @@ describe("Історія", () => {
   });
 
   it("порожня біографія — підказка", () => {
-    inProfile(withSheet({ story: { biography: null, goals: [] } }));
+    inProfile(withSheet({ story: { biography: null, goals: [], tokens: [] } }));
 
     expect(screen.getByText("Біографію ще не написано")).toBeTruthy();
   });

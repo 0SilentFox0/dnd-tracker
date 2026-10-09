@@ -1,21 +1,20 @@
 import { describe, expect, it } from "vitest";
 
-import { getHeroMaxHp } from "@/lib/constants/hero-scaling";
 import { heroBaseHp } from "@/lib/utils/characters/hero-hp";
 
 describe("heroBaseHp", () => {
-  it("рівень × (10 + мод. сили × 1.5) × коефіцієнт, null-коефіцієнт = 1", () => {
-    expect(heroBaseHp({ level: 30, strength: 10, hpMultiplier: null }).total).toBe(300);
-    expect(heroBaseHp({ level: 5, strength: 16, hpMultiplier: 1.5 }).total).toBe(108);
+  it("3 × HP/рівень + рівень × (HP/рівень + мод. ВИТ × 1.5)", () => {
+    expect(heroBaseHp({ level: 1, constitution: 12 }).total).toBe(41);
+    expect(heroBaseHp({ level: 10, constitution: 12, archetype: "warrior" }).total).toBe(171);
+    expect(heroBaseHp({ level: 15, constitution: 12, archetype: "paladin" }).total).toBe(256);
+    expect(heroBaseHp({ level: 1, constitution: 12, archetype: "mage" }).total).toBe(33);
   });
 
-  it("збігається з getHeroMaxHp, яким рахувались бій і картка ДМа", () => {
-    for (const c of [{ level: 1, strength: 8, hpMultiplier: 1 }, { level: 12, strength: 18, hpMultiplier: 0.5 }, { level: 20, strength: 30 }]) {
-      expect(heroBaseHp(c).total).toBe(getHeroMaxHp(c.level, c.strength, { hpMultiplier: c.hpMultiplier ?? 1 }));
-    }
+  it("невідомий архетип = Універсал", () => {
+    expect(heroBaseHp({ level: 5, constitution: 10, archetype: "bogus" }).total).toBe(80);
   });
 
-  it("розкладка для листа", () => {
-    expect(heroBaseHp({ level: 30, strength: 10 }).breakdown.at(-1)).toBe("= 30 × 10 × 1 = 300");
-  });
+  it("мінімум 1", () => expect(heroBaseHp({ level: 1, constitution: 1, archetype: "mage" }).total).toBeGreaterThanOrEqual(1));
+
+  it("розкладка", () => expect(heroBaseHp({ level: 1, constitution: 12 }).breakdown.at(-1)).toBe("= 30 + 1 × 11.5 = 41"));
 });

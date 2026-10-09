@@ -26,6 +26,7 @@
     "import-wiki-icons": "tsx scripts/import-wiki-icon-bundle.ts",
     "import-unit-icons": "tsx scripts/import-unit-icon-bundle.ts",
     "seed-library": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/seed-library.ts",
+    "hero-growth-report": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/hero-growth-report.ts",
     "balance-library": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/balance-library.ts",
     "simulate-battle": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/simulate-battle.ts",
     "seed-mock-battle": "tsx scripts/seed-mock-battle-data.ts",

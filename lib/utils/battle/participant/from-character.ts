@@ -9,6 +9,7 @@ import { loadRace } from "./load-race";
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { CombatStatus,ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
+import { heroArchetype } from "@/lib/constants/hero-archetypes";
 import { bakePassives } from "@/lib/utils/abilities/build/bake";
 import { collectCharacterAbilities } from "@/lib/utils/abilities/build/collect";
 import { immunityAbilities } from "@/lib/utils/abilities/build/immunities";
@@ -74,11 +75,7 @@ export async function createBattleParticipantFromCharacter(
 
   const resolvedSpellSlots = await resolveSpellSlotsFromCharacter(character, context);
 
-  const meleeMult =
-    (character as { meleeMultiplier?: number | null }).meleeMultiplier ?? 1;
-
-  const rangedMult =
-    (character as { rangedMultiplier?: number | null }).rangedMultiplier ?? 1;
+  const archetype = heroArchetype((character as { archetype?: string | null }).archetype);
 
   const proficiencyBonus = getProficiencyBonus(character.level);
 
@@ -128,8 +125,10 @@ export async function createBattleParticipantFromCharacter(
       race: character.race,
       raceId: (race as { id?: string } | null)?.id,
       primaryAbility,
-      meleeMultiplier: meleeMult,
-      rangedMultiplier: rangedMult,
+      meleeMultiplier: archetype.melee,
+      rangedMultiplier: archetype.ranged,
+      magicMultiplier: archetype.magic,
+      archetypeName: archetype.name,
     },
     combatStats: {
       maxHp: computedMaxHp,
