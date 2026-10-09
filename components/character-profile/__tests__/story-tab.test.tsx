@@ -67,7 +67,7 @@ describe("Історія", () => {
   });
 
   it("порожня біографія — підказка", () => {
-    inProfile(withSheet({ story: { biography: null, goals: [] } }));
+    inProfile(withSheet({ story: { biography: null, goals: [], tokens: [] } }));
 
     expect(screen.getByText("Біографію ще не написано")).toBeTruthy();
   });

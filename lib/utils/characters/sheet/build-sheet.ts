@@ -9,7 +9,7 @@ import { heroBaseHp } from "@/lib/utils/characters/hero-hp";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { signed } from "@/lib/utils/format";
 import type { BattleParticipant } from "@/types/battle";
-import type { CharacterSheet, SheetArtifact } from "@/types/characters";
+import type { CharacterSheet, SheetArtifact, TokenColor } from "@/types/characters";
 import type { BookSpell } from "@/types/spells";
 
 export interface SheetInput {
@@ -35,6 +35,7 @@ export interface SheetInput {
     primaryAbility: string | null;
     background: string | null;
     goals: unknown;
+    tokens?: { id: string; color: string; label: string; createdAt: Date }[];
   };
   raceIcon: string | null;
   immunities: string[];
@@ -112,6 +113,8 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
     items: { grid, artifacts: input.artifacts, sets: p.battleData.artifactSets ?? [] },
     personalSkill: input.personalSkill,
     progression: input.progression,
-    story: { biography: c.background?.trim() ? c.background : null, goals: parseGoals(c.goals) },
+    story: { biography: c.background?.trim() ? c.background : null, goals: parseGoals(c.goals),
+      tokens: (c.tokens ?? []).map((t) => ({ id: t.id, color: t.color as TokenColor, label: t.label, createdAt: t.createdAt.toISOString() })),
+    },
   };
 }

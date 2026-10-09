@@ -102,6 +102,15 @@ describe("buildCharacterSheet", () => {
     expect(s.items.grid.armor?.id).toBe("a1");
   });
 
+  it("жетони проходять із датою рядком; без жетонів — порожньо", () => {
+    const createdAt = new Date("2026-10-09T10:00:00Z");
+
+    expect(buildCharacterSheet(lira({ tokens: [{ id: "t1", color: "green", label: "Врятував селян", createdAt }] })).story.tokens).toEqual([
+      { id: "t1", color: "green", label: "Врятував селян", createdAt: "2026-10-09T10:00:00.000Z" },
+    ]);
+    expect(buildCharacterSheet(lira()).story.tokens).toEqual([]);
+  });
+
   it("СЛ і атака заклинанням — ті самі, що в бою (з учасника, а не з бонусних характеристик)", () => {
     const input = lira({ spellcastingAbility: "intelligence" });
 

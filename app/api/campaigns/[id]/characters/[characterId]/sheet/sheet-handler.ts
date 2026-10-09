@@ -11,7 +11,7 @@ import { normalizeTree, readUnlocked, skillPoints } from "@/lib/utils/skills/pro
 import { loadBookSpellsByIds } from "@/lib/utils/spells/book-spells-by-ids";
 import type { CharacterSheet, SheetArtifact } from "@/types/characters";
 
-export const loadSheetCharacter = (characterId: string) => prisma.character.findUnique({ where: { id: characterId }, include: { inventory: true } });
+export const loadSheetCharacter = (characterId: string) => prisma.character.findUnique({ where: { id: characterId }, include: { inventory: true, tokens: { orderBy: { createdAt: "desc" } } } });
 
 export type SheetCharacter = NonNullable<Awaited<ReturnType<typeof loadSheetCharacter>>>;
 

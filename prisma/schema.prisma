@@ -113,6 +113,7 @@ model Character {
   rangedMultiplier    Float?
   inventory           CharacterInventory?
   characterSkills     CharacterSkills[]
+  tokens              CharacterToken[]
   campaign            Campaign            @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   user                User                @relation(fields: [controlledBy], references: [id], onDelete: SetNull)
 
@@ -459,4 +460,17 @@ model MainSkill {
 
   @@index([campaignId])
   @@map("main_skills")
+}
+
+model CharacterToken {
+  id          String    @id @default(cuid())
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  color       String
+  label       String
+  createdBy   String
+  createdAt   DateTime  @default(now())
+
+  @@index([characterId])
+  @@map("character_tokens")
 }

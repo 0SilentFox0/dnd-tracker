@@ -13,3 +13,7 @@ export const MAX_GOALS = 30;
 export const GoalStatus = { ACTIVE: "active", DONE: "done", FAILED: "failed" } as const;
 
 export type GoalStatus = (typeof GoalStatus)[keyof typeof GoalStatus];
+
+export const TOKEN_COLORS = ["red", "green"] as const;
+
+export const TOKEN_LABEL_MAX = 120;

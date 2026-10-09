@@ -4,10 +4,19 @@ import type { BookSpell } from "./spells";
 import type { AbilityKey } from "@/lib/constants/abilities";
 import { type SpellcastingAbility } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
-import { type CharacterTypeValue, type GoalAuthorValue, type GoalStatus } from "@/lib/constants/characters";
+import { type CharacterTypeValue, type GoalAuthorValue, type GoalStatus, type TOKEN_COLORS } from "@/lib/constants/characters";
 
 export type { AbilityKey };
 
+
+export type TokenColor = (typeof TOKEN_COLORS)[number];
+
+export interface CharacterToken {
+  id: string;
+  color: TokenColor;
+  label: string;
+  createdAt: string;
+}
 
 export interface CharacterGoal {
   id: string;
@@ -236,6 +245,6 @@ export interface CharacterSheet {
   spells: BookSpell[];
   items: { grid: Record<string, SheetArtifact | null>; artifacts: SheetArtifact[]; sets: SetProgress[] };
   personalSkill: { id: string; name: string; icon: string | null; description: string | null } | null;
-  story: { biography: string | null; goals: CharacterGoal[] };
+  story: { biography: string | null; goals: CharacterGoal[]; tokens: CharacterToken[] };
   progression: { freePoints: number; level: number; seenLevel: number | null };
 }

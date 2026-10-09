@@ -49,6 +49,7 @@ export const sheetFixture: CharacterSheet = {
       { id: "d1", text: "Знайти брата", status: "active", author: "dm" },
       { id: "p1", text: "Повернути лук", status: "active", author: "player" },
     ],
+    tokens: [],
   },
 };
 
