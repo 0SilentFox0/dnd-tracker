@@ -1,17 +1,14 @@
 /**
- * Масштабування героя: HP від рівня та сили; шкода = рівень + модифікатор + кубики (d4/d6/d8).
+ * Масштабування героя: HP від рівня, ВИТ і архетипу; шкода = рівень + модифікатор + кубики (d4/d6/d8).
  * Рівномірна прогресія: d4 для проміжних етапів, щоб уникнути стрибків (напр. 1→2 не ×2, 11–20 не однаково).
  */
 
 import { AttackType } from "@/lib/constants/battle";
+import { heroArchetype } from "@/lib/constants/hero-archetypes";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 
 /** Коефіцієнти масштабування (можна перевизначити на рівні кампанії) */
 export interface HeroScalingOptions {
-  /** HP: level * (hpBasePerLevel + strMod * hpStrCoefficient) * hpMultiplier */
-  hpBasePerLevel?: number;
-  hpStrCoefficient?: number;
-  hpMultiplier?: number;
   /**
    * Таблиця рівень → нотація кубиків для melee (d4/d6/d8, можна 2d8+1d6).
    * Якщо не задано, використовується дефолтна рівномірна прогресія.
@@ -21,11 +18,9 @@ export interface HeroScalingOptions {
   rangedDiceByLevel?: Record<number, string>;
 }
 
-const DEFAULTS: Required<Pick<HeroScalingOptions, "hpBasePerLevel" | "hpStrCoefficient" | "hpMultiplier">> = {
-  hpBasePerLevel: 10,
-  hpStrCoefficient: 1.5,
-  hpMultiplier: 1,
-};
+const HP_CON_COEFFICIENT = 1.5;
+
+const HP_BASE_LEVELS = 3;
 
 /**
  * Рівномірна прогресія кубиків за рівнем (d4, d6, d8).
@@ -64,58 +59,25 @@ function getDiceForLevel(level: number, attackType: AttackType, opts?: HeroScali
   return resolved[clamped] ?? resolved[20] ?? "1d4";
 }
 
-function withDefaults(opts?: HeroScalingOptions | null) {
-  if (!opts) return DEFAULTS;
+export function getHeroMaxHpBreakdown(level: number, constitution: number, archetype: string | null | undefined): { total: number; breakdown: string[] } {
+  const a = heroArchetype(archetype);
+
+  const conMod = getAbilityModifier(constitution);
+
+  const base = HP_BASE_LEVELS * a.hpPerLevel;
+
+  const perLevel = a.hpPerLevel + conMod * HP_CON_COEFFICIENT;
+
+  const total = Math.max(1, Math.floor(base + level * perLevel));
 
   return {
-    hpBasePerLevel: opts.hpBasePerLevel ?? DEFAULTS.hpBasePerLevel,
-    hpStrCoefficient: opts.hpStrCoefficient ?? DEFAULTS.hpStrCoefficient,
-    hpMultiplier: opts.hpMultiplier ?? DEFAULTS.hpMultiplier,
+    total,
+    breakdown: [`${a.name}: ${HP_BASE_LEVELS} × ${a.hpPerLevel} + рівень × (${a.hpPerLevel} + мод. ВИТ ${conMod} × ${HP_CON_COEFFICIENT})`, `= ${base} + ${level} × ${perLevel} = ${total}`],
   };
 }
 
-/**
- * Максимальне HP героя за рівнем та силою.
- * Формула: level * (hpBasePerLevel + strMod * hpStrCoefficient) * hpMultiplier
- */
-export function getHeroMaxHp(
-  level: number,
-  strength: number,
-  options?: HeroScalingOptions | null
-): number {
-  const o = withDefaults(options);
-
-  const strMod = getAbilityModifier(strength);
-
-  const perLevel = o.hpBasePerLevel + strMod * o.hpStrCoefficient;
-
-  return Math.max(1, Math.floor(level * perLevel * o.hpMultiplier));
-}
-
-/**
- * Розбивка обрахунку HP для відображення (як у damage breakdown).
- */
-export function getHeroMaxHpBreakdown(
-  level: number,
-  strength: number,
-  options?: HeroScalingOptions | null
-): { total: number; breakdown: string[] } {
-  const o = withDefaults(options);
-
-  const strMod = getAbilityModifier(strength);
-
-  const perLevel = o.hpBasePerLevel + strMod * o.hpStrCoefficient;
-
-  const total = Math.max(1, Math.floor(level * perLevel * o.hpMultiplier));
-
-  const breakdown: string[] = [];
-
-  breakdown.push(
-    `рівень × (база за рівень + мод. сили × коеф.) × множ. = ${level} × (${o.hpBasePerLevel} + ${strMod} × ${o.hpStrCoefficient}) × ${o.hpMultiplier}`
-  );
-  breakdown.push(`= ${level} × ${perLevel} × ${o.hpMultiplier} = ${total}`);
-
-  return { total, breakdown };
+export function getHeroMaxHp(level: number, constitution: number, archetype: string | null | undefined): number {
+  return getHeroMaxHpBreakdown(level, constitution, archetype).total;
 }
 
 /**
@@ -129,5 +91,3 @@ export function getHeroDamageDiceForLevel(
 ): string {
   return getDiceForLevel(level, attackType, options);
 }
-
-export { DEFAULTS as HERO_SCALING_DEFAULTS };

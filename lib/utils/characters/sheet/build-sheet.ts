@@ -31,7 +31,7 @@ export interface SheetInput {
     languages: unknown;
     proficiencies: unknown;
     spellcastingAbility: string | null;
-    hpMultiplier: number | null;
+    archetype: string | null;
     primaryAbility: string | null;
     background: string | null;
     goals: unknown;

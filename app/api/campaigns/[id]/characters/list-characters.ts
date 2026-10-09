@@ -19,8 +19,8 @@ const COMPACT_SELECT = {
 const LIST_SELECT = {
   ...COMPACT_SELECT,
   subrace: true,
-  strength: true,
-  hpMultiplier: true,
+  constitution: true,
+  archetype: true,
   armorClass: true,
   initiative: true,
   experience: true,

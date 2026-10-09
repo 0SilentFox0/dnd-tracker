@@ -109,6 +109,7 @@ model Character {
   primaryAbility      String?
   goals               Json                @default("[]")
   hpMultiplier        Float?
+  archetype           String?
   meleeMultiplier     Float?
   rangedMultiplier    Float?
   inventory           CharacterInventory?

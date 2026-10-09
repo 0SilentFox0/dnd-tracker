@@ -1,5 +1,5 @@
 import { getHeroMaxHpBreakdown } from "@/lib/constants/hero-scaling";
 
-export function heroBaseHp(c: { level: number; strength: number; hpMultiplier?: number | null }) {
-  return getHeroMaxHpBreakdown(c.level, c.strength, { hpMultiplier: c.hpMultiplier ?? 1 });
+export function heroBaseHp(c: { level: number; constitution: number; archetype?: string | null }) {
+  return getHeroMaxHpBreakdown(c.level, c.constitution, c.archetype);
 }

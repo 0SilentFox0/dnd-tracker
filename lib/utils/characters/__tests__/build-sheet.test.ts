@@ -26,7 +26,7 @@ function lira(over: Partial<SheetInput["character"]> = {}, attacks: BattleAttack
       id: "lira", name: "Ліра", avatar: null, level: 30, class: "Ranger", subclass: null, race: "Ельф", alignment: null,
       strength: 10, dexterity: 18, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10,
       armorClass: 14, savingThrows: { dexterity: true }, skills: { stealth: true, perception: true },
-      languages: ["Ельфійська"], proficiencies: {}, spellcastingAbility: null, hpMultiplier: null,
+      languages: ["Ельфійська"], proficiencies: {}, spellcastingAbility: null, archetype: null,
       primaryAbility: null, background: "Вона ==вірить== у брата", goals: [{ id: "g", text: "Знайти брата", status: "active", author: "dm" }],
       ...over,
     },
