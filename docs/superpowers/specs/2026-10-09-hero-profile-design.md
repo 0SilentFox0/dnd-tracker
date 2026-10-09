@@ -19,8 +19,8 @@
 ### Рішення
 
 - **Storage.** Новий публічний бакет `avatars` (за зразком `lib/supabase/artifact-icon-storage.ts`, admin-клієнт, `ensureBucket`). Файл — `<campaignId>/<characterId>/<uuid>.webp`, `cacheControl` рік (файли незмінні, нове фото = новий шлях).
-- **Завантаження.** `POST /api/campaigns/[id]/characters/[characterId]/avatar` (multipart, поле `file`; jpeg/png/webp, ≤ 5 МБ). Доступ — як у PATCH героя (ДМ або власник при `allowPlayerEdit`). Сервер кладе файл у бакет, записує публічний URL у `Character.avatar`, повертає `{ avatar }`. Старий файл з нашого бакета видаляється (best-effort).
-- **Клієнт.** Перед завантаженням фото стискається в браузері до ≤ 1200 px по довшій стороні, webp ~0.85 (canvas). `lib/api/characters.ts` → `uploadAvatar`; хук `useUploadAvatar` у `lib/hooks/characters` інвалідовує лист героя. `CharacterBasicInfo` для героя з `id` використовує завантаження в Storage замість data URL; для нового (ще не створеного) героя — фото вантажиться одразу після створення. Поле URL (`IconUrlField`) лишається.
+- **Завантаження.** Як для іконок артефактів: форма надсилає data URL у `avatar` при створенні/PATCH героя, сервер (`resolveAvatarForPersistence`) кладе файл у бакет і зберігає публічний URL; URL нашого Storage зберігається як є. Доступ — як у PATCH героя. Старі файли не видаляються (дрібниця для free tier).
+- **Клієнт.** `ImageUpload` з `maxSide={1200}` стискає фото в браузері до ≤ 1200 px webp ~0.85 (canvas) перед тим, як покласти data URL у форму. Поле URL (`IconUrlField`) лишається.
 - **Сумісність.** Наявні base64-аватари далі показуються (`EntityIcon` їх підтримує). Скрипта міграції немає — прод порожній.
 
 ### UI
@@ -63,12 +63,12 @@ model CharacterToken {
 
 `app/api/campaigns/[id]/characters/[characterId]/tokens/`:
 
-- `GET` — ДМ або власник героя (`controlledBy`); інші учасники → 403. Відповідь `{ tokens: CharacterToken[] }`, новіші першими.
+- Читання — разом з листом героя: `GET …/sheet` (уже пускає лише ДМа й власника) віддає `story.tokens`, новіші першими. Окремого `GET` немає.
 - `POST` — лише `requireDM`. Тіло `{ color: "red" | "green", label: string }` (Zod, trim, 1–120).
 - `DELETE …/tokens/[tokenId]` — лише `requireDM`; `loadOwned` перевіряє належність кампанії/герою.
 - Помилки — тексти з `lib/constants/api-errors.ts`.
 
-Клієнт: `lib/api/character-tokens.ts`, хуки `useCharacterTokens`, `useCreateCharacterToken`, `useDeleteCharacterToken` у `lib/hooks/characters` (ключі в `keys.ts`). Тип — `types/characters.ts`.
+Клієнт: `createCharacterToken`/`deleteCharacterToken` у `lib/api/characters.ts`, хук `useCharacterTokens` у `lib/hooks/characters` оновлює кеш листа героя. Тип — `types/characters.ts`.
 
 ### UI
 
@@ -116,7 +116,7 @@ model CharacterToken {
 - Ручні `Character.meleeMultiplier` / `rangedMultiplier` / `hpMultiplier` не читаються рушієм і прибираються з форми (`scalingCoefficients` у `character-form.ts`). Колонки лишаються в БД (expand-only).
 - `from-character.ts` заповнює `abilities.meleeMultiplier` / `rangedMultiplier` з архетипу (+ нове `abilities.magicMultiplier`). Завдяки цьому `applyHeroDmDamageMultiplier` (`compute.ts`), `breakdown.ts`, `average.ts` і оцінка сили партії в чесному балансі працюють без змін логіки.
 - Рядок розбору шкоди: `× 1.2 (архетип: Воїн) = …` замість «коеф. DM».
-- Магія: у `spell/cast.ts` (`dealDamage`) для героя-заклинателя застосувати `magicMultiplier` перед `applyBalanceDamageMultiplier`; оцінка spell DPR героя в `balance` теж множиться на нього.
+- Магія: у `spell/power.ts` (`computeSpellPower`, там же діє расовий `damageBonus` magic) шкода героя множиться на `magicMultiplier`, лікування — ні; оцінка spell DPR героя в `balance` теж множиться на нього.
 - Кубики рівня і `+рівень` — без змін.
 - Ворожий множник чесного балансу (`battleData.damageMultiplier`/`hpMultiplier`) — без змін.
 - Бої, що вже йдуть, зберігають старі значення у знімках.
