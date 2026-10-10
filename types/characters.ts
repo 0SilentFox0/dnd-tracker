@@ -238,3 +238,11 @@ export interface CharacterSheet {
   story: { biography: string | null; goals: CharacterGoal[]; tokens: CharacterToken[] };
   progression: { freePoints: number; level: number; seenLevel: number | null };
 }
+
+export interface RosterHero {
+  id: string;
+  name: string;
+  avatar: string | null;
+  type: CharacterTypeValue;
+  equipped: Record<string, { id: string; name: string }>;
+}

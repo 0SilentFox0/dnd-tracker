@@ -9,7 +9,7 @@ import { type CharacterTypeValue } from "@/lib/constants/characters";
 import type { GoalInput } from "@/lib/schemas/character-goals";
 import type { CreateTokenInput } from "@/lib/schemas/character-tokens";
 import { formDataToCharacter } from "@/lib/utils/characters/character-form";
-import type { Character, CharacterFormData, CharacterGoal, CharacterListItem, CharacterSheet, CharacterToken } from "@/types/characters";
+import type { Character, CharacterFormData, CharacterGoal, CharacterListItem, CharacterSheet, CharacterToken, RosterHero } from "@/types/characters";
 
 /**
  * Отримує персонажа за ID
@@ -122,3 +122,5 @@ export async function deleteAllCharacters(
     "/characters",
   );
 }
+
+export const getCharacterRoster = (campaignId: string) => campaignGet<RosterHero[]>(campaignId, "/characters/roster");
