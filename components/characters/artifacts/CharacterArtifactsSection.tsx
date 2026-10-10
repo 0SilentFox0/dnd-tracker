@@ -23,13 +23,14 @@ interface CharacterArtifactsSectionProps {
   characterId: string;
   equipped: EquippedItems;
   artifacts: ArtifactOption[];
+  holders?: Record<string, string>;
   onEquippedChange: (equipped: EquippedItems) => void;
 }
 
 const CELL =
   "relative flex aspect-square cursor-pointer flex-col items-center justify-center overflow-hidden rounded border-2 border-amber-700/80 bg-stone-900/60 p-1 text-center shadow-inner transition-colors hover:border-amber-600/90 hover:bg-stone-800/80 disabled:opacity-50";
 
-export function CharacterArtifactsSection({ campaignId, characterId, equipped, artifacts, onEquippedChange }: CharacterArtifactsSectionProps) {
+export function CharacterArtifactsSection({ campaignId, characterId, equipped, artifacts, holders, onEquippedChange }: CharacterArtifactsSectionProps) {
   const notify = useNotify();
 
   const equip = useEquipArtifact(campaignId, characterId);
@@ -42,7 +43,7 @@ export function CharacterArtifactsSection({ campaignId, characterId, equipped, a
     setUpdatingSlot(slotKey);
     equip.mutate(next, {
       onSuccess: () => onEquippedChange(next),
-      onError: () => void notify("Не вдалося змінити спорядження"),
+      onError: (e) => void notify(e.message || "Не вдалося змінити спорядження"),
       onSettled: () => setUpdatingSlot(null),
     });
   };
@@ -84,12 +85,17 @@ export function CharacterArtifactsSection({ campaignId, characterId, equipped, a
                   {available.length === 0 ? (
                     <DropdownMenuItem disabled>Немає артефактів для цього слоту</DropdownMenuItem>
                   ) : (
-                    available.map((a) => (
-                      <DropdownMenuItem key={a.id} onClick={() => handleSlotChange(cell.key, a.id)} className="flex items-center gap-2">
-                        <EntityIcon src={a.icon} name={a.name} size={20} className="size-5 rounded text-[10px] font-medium" />
-                        <span className="truncate">{a.name}</span>
-                      </DropdownMenuItem>
-                    ))
+                    available.map((a) => {
+                      const holder = holders?.[a.id];
+
+                      return (
+                        <DropdownMenuItem key={a.id} disabled={Boolean(holder)} onClick={() => handleSlotChange(cell.key, a.id)} className="flex items-center gap-2">
+                          <EntityIcon src={a.icon} name={a.name} size={20} className="size-5 rounded text-[10px] font-medium" />
+                          <span className="truncate">{a.name}</span>
+                          {holder && <span className="ml-auto text-xs text-muted-foreground">у {holder}</span>}
+                        </DropdownMenuItem>
+                      );
+                    })
                   )}
                 </DropdownMenuContent>
               </DropdownMenu>
