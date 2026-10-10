@@ -3,11 +3,13 @@ import type { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { ARTIFACT_GRID_9 } from "@/lib/constants/artifacts";
 import { prisma } from "@/lib/db";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { loadOwned } from "@/lib/utils/api/load-owned";
 import { parseBody } from "@/lib/utils/api/parse-body";
+import { buildEquipped } from "@/lib/utils/artifacts/equipment";
 import { lockCampaignArtifacts } from "@/lib/utils/artifacts/lock";
 import { findHolder } from "@/lib/utils/artifacts/ownership";
 import type { EquippedItems } from "@/types/inventory";
@@ -19,6 +21,7 @@ const updateInventorySchema = z.object({
   silver: z.number().min(0).optional(),
   copper: z.number().min(0).optional(),
   equipped: z.record(z.string(), z.string().optional()).optional(),
+  equipSlot: z.object({ slot: z.string(), artifactId: z.string().nullable() }).optional(),
   backpack: z.array(inventoryItemSchema).optional(),
   items: z.array(inventoryItemSchema).optional(),
 });
@@ -28,7 +31,7 @@ export async function updateInventory(request: Request, campaignId: string, char
 
   if (accessResult instanceof NextResponse) return accessResult;
 
-  const character = await loadOwned(prisma.character.findUnique({ where: { id: characterId }, include: { inventory: true } }), campaignId);
+  const character = await loadOwned(prisma.character.findUnique({ where: { id: characterId } }), campaignId);
 
   if (character instanceof NextResponse) return character;
 
@@ -36,59 +39,62 @@ export async function updateInventory(request: Request, campaignId: string, char
 
   if (data instanceof NextResponse) return data;
 
-  const current = character.inventory;
-
-  const equipped = (data.equipped ?? current?.equipped ?? {}) as Prisma.InputJsonValue;
-
-  const backpack = (data.backpack ?? current?.backpack ?? []) as Prisma.InputJsonValue;
-
-  const items = (data.items ?? current?.items ?? []) as Prisma.InputJsonValue;
+  if (data.equipSlot && !ARTIFACT_GRID_9.some((cell) => cell.key === data.equipSlot?.slot)) {
+    return errorResponse(API_ERRORS.ARTIFACT_UNKNOWN_SLOT, 400);
+  }
 
   return prisma.$transaction(async (tx) => {
     await lockCampaignArtifacts(tx, campaignId);
 
-    if (data.equipped) {
-      const others = await tx.characterInventory.findMany({
-        where: { character: { campaignId }, characterId: { not: characterId } },
-        select: { characterId: true, equipped: true, character: { select: { name: true } } },
-      });
+    const current = await tx.characterInventory.findUnique({ where: { characterId } });
 
-      const held = others.map((o) => ({ characterId: o.characterId, equipped: o.equipped as EquippedItems }));
+    let nextEquipped: EquippedItems | undefined = data.equipped as EquippedItems | undefined;
 
-      for (const artifactId of Object.values(data.equipped).filter((v): v is string => !!v)) {
-        const holderId = findHolder(held, artifactId);
+    if (data.equipSlot) {
+      nextEquipped = buildEquipped((current?.equipped ?? {}) as EquippedItems, data.equipSlot.slot, data.equipSlot.artifactId);
+    }
 
-        if (holderId) {
-          const holderName = others.find((o) => o.characterId === holderId)?.character.name ?? "";
+    if (nextEquipped) {
+      const ids = Object.values(nextEquipped).filter((v): v is string => !!v);
 
-          return errorResponse(`${API_ERRORS.ARTIFACT_HELD_BY_OTHER}: ${holderName}`, 409);
+      if (new Set(ids).size !== ids.length) return errorResponse(API_ERRORS.ARTIFACT_ALREADY_EQUIPPED, 409);
+
+      const checkIds = data.equipSlot ? (data.equipSlot.artifactId ? [data.equipSlot.artifactId] : []) : ids;
+
+      if (checkIds.length > 0) {
+        const others = await tx.characterInventory.findMany({
+          where: { character: { campaignId }, characterId: { not: characterId } },
+          select: { characterId: true, equipped: true, character: { select: { name: true } } },
+        });
+
+        const held = others.map((o) => ({ characterId: o.characterId, equipped: o.equipped as EquippedItems }));
+
+        for (const artifactId of checkIds) {
+          const holderId = findHolder(held, artifactId);
+
+          if (holderId) {
+            const holderName = others.find((o) => o.characterId === holderId)?.character.name ?? "";
+
+            return errorResponse(`${API_ERRORS.ARTIFACT_HELD_BY_OTHER}: ${holderName}`, 409);
+          }
         }
       }
     }
 
-    const inventory = current
-      ? await tx.characterInventory.update({
-          where: { characterId },
-          data: {
-            gold: data.gold ?? current.gold,
-            silver: data.silver ?? current.silver,
-            copper: data.copper ?? current.copper,
-            equipped,
-            backpack,
-            items,
-          },
-        })
-      : await tx.characterInventory.create({
-          data: {
-            characterId,
-            gold: data.gold ?? 0,
-            silver: data.silver ?? 0,
-            copper: data.copper ?? 0,
-            equipped,
-            backpack,
-            items,
-          },
-        });
+    const scalars = {
+      ...(data.gold !== undefined && { gold: data.gold }),
+      ...(data.silver !== undefined && { silver: data.silver }),
+      ...(data.copper !== undefined && { copper: data.copper }),
+      ...(nextEquipped && { equipped: nextEquipped as Prisma.InputJsonValue }),
+      ...(data.backpack && { backpack: data.backpack as Prisma.InputJsonValue }),
+      ...(data.items && { items: data.items as Prisma.InputJsonValue }),
+    };
+
+    const inventory = await tx.characterInventory.upsert({
+      where: { characterId },
+      update: scalars,
+      create: { characterId, equipped: {}, backpack: [], items: [], ...scalars },
+    });
 
     return NextResponse.json(inventory);
   });

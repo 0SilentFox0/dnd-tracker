@@ -7,7 +7,7 @@ import type { Inventory, InventoryFormData } from "@/types/inventory";
 export async function updateInventory(
   campaignId: string,
   characterId: string,
-  data: Partial<InventoryFormData>,
+  data: Partial<InventoryFormData> & { equipSlot?: { slot: string; artifactId: string | null } },
 ): Promise<Inventory> {
   return campaignPatch<Inventory>(
     campaignId,

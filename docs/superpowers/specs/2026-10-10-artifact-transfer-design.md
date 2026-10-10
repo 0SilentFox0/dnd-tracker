@@ -36,7 +36,7 @@
 
 `POST /api/campaigns/[id]/characters/[characterId]/artifacts/transfer`, тіло `{ slot: string, toCharacterId: string }` (Zod). `route.ts` тонкий, логіка в `transfer-artifact.ts` поруч.
 
-1. `requireCampaignAccess(id)`; відправник і отримувач — `loadOwned` (404/403 для чужої кампанії); отримувач — персонаж кампанії (`player` або `npc_hero`).
+1. `requireCampaignAccess(id)`; відправник і отримувач — `loadOwned` (404 для відсутнього, 403 для чужої кампанії); отримувач — персонаж кампанії (`player` або `npc_hero`).
 2. Доступ: `isDM` або `from.controlledBy === userId`, інакше 403.
 3. Транзакція з advisory lock: читає обидва інвентарі (створює порожній, якщо нема), `planTransfer`, пише обидва.
 4. Відповідь: `{ from: Inventory, to: Inventory }`.
@@ -66,7 +66,7 @@
 
 ### Тести
 
-- Маршрут transfer (`app/api/__tests__`): ДМ передає; гравець передає свій; гравець — чужий → 403; отримувач з іншої кампанії → 404; порожній слот → 400; обмін записує обидва інвентарі.
+- Маршрут transfer (`app/api/__tests__`): ДМ передає; гравець передає свій; гравець — чужий → 403; отримувач з іншої кампанії → 403; порожній слот → 400; обмін записує обидва інвентарі.
 - PATCH inventory: чужий артефакт → 409.
 - `TransferArtifactDialog` (happy-dom, `ConfirmProvider`): список без поточного героя, підпис обміну, виклик мутації.
 

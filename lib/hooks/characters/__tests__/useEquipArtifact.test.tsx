@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/api/inventory", () => ({ updateInventory: vi.fn().mockResolvedValue({}) }));
 
+import { updateInventory } from "@/lib/api/inventory";
 import { useEquipArtifact } from "@/lib/hooks/characters";
 
 describe("useEquipArtifact", () => {
@@ -18,8 +19,10 @@ describe("useEquipArtifact", () => {
 
     const { result } = renderHook(() => useEquipArtifact("c", "ch"), { wrapper });
 
-    await act(() => result.current.mutateAsync({ armor: "a1" }));
+    await act(() => result.current.mutateAsync({ slot: "armor", artifactId: "a1" }));
 
+    expect(updateInventory).toHaveBeenCalledWith("c", "ch", { equipSlot: { slot: "armor", artifactId: "a1" } });
     expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ queryKey: ["character-sheet", "c", "ch"] }));
+    expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ queryKey: ["character-roster", "c"] }));
   });
 });
