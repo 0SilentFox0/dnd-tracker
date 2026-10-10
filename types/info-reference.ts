@@ -30,4 +30,26 @@ export interface SpellForReference {
   icon: string | null;
 }
 
-export type SectionTab = "all" | "skills" | "spells";
+export interface ArtifactForReference {
+  id: string;
+  name: string;
+  icon: string | null;
+  rarity: string | null;
+  slot: string;
+  slotLabel: string;
+  description: string | null;
+  effects: string[];
+  setName: string | null;
+  holderName: string | null;
+}
+
+export interface ArtifactSetForReference {
+  id: string;
+  name: string;
+  icon: string | null;
+  description: string | null;
+  bonuses: string[];
+  artifactNames: string[];
+}
+
+export type SectionTab = "all" | "skills" | "spells" | "artifacts";

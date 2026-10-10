@@ -2,28 +2,36 @@
 
 import { useMemo } from "react";
 
+import { ArtifactReferenceCard } from "./ArtifactReferenceCard";
+import { ArtifactSetReferenceCard } from "./ArtifactSetReferenceCard";
 import { ReferenceGroupSection } from "./ReferenceGroupSection";
 import { SkillReferenceCard } from "./SkillReferenceCard";
 import { SpellReferenceCard } from "./SpellReferenceCard";
 
 import { HudPanel } from "@/components/hud/page";
 import { Accordion } from "@/components/ui/accordion";
-import type { SkillForReference, SpellForReference } from "@/types/info-reference";
+import type { ArtifactForReference, ArtifactSetForReference, SkillForReference, SpellForReference } from "@/types/info-reference";
 
 const NO_MAIN_SKILL_LABEL = "Без гілки";
 
 const NO_SPELL_GROUP_LABEL = "Без групи";
+
+const NO_ARTIFACT_SET_LABEL = "Без сету";
 
 interface ReferenceSectionAccordionProps {
   campaignId: string;
   isDM: boolean;
   showSkills: boolean;
   showSpells: boolean;
+  showArtifacts: boolean;
   skillsEmpty: boolean;
   spellsEmpty: boolean;
+  artifactsEmpty: boolean;
   nothingFound: boolean;
   filteredSkills: SkillForReference[];
   filteredSpells: SpellForReference[];
+  filteredArtifacts: ArtifactForReference[];
+  artifactSets: ArtifactSetForReference[];
 }
 
 export function ReferenceSectionAccordion({
@@ -31,11 +39,15 @@ export function ReferenceSectionAccordion({
   isDM,
   showSkills,
   showSpells,
+  showArtifacts,
   skillsEmpty,
   spellsEmpty,
+  artifactsEmpty,
   nothingFound,
   filteredSkills,
   filteredSpells,
+  filteredArtifacts,
+  artifactSets,
 }: ReferenceSectionAccordionProps) {
   const skillsByMain = useMemo(() => {
     const map = new Map<string, SkillForReference[]>();
@@ -67,17 +79,36 @@ export function ReferenceSectionAccordion({
     return map;
   }, [filteredSpells]);
 
-  const hasContent =
-    (!nothingFound && showSkills && !skillsEmpty) ||
-    (showSpells && !spellsEmpty);
+  const artifactsBySet = useMemo(() => {
+    const map = new Map<string, ArtifactForReference[]>();
+
+    for (const a of filteredArtifacts) {
+      const key = a.setName ?? NO_ARTIFACT_SET_LABEL;
+
+      const list = map.get(key) ?? [];
+
+      list.push(a);
+      map.set(key, list);
+    }
+
+    return map;
+  }, [filteredArtifacts]);
+
+  const skillsVisible = showSkills && !skillsEmpty;
+
+  const spellsVisible = showSpells && !spellsEmpty;
+
+  const artifactsVisible = showArtifacts && !artifactsEmpty;
+
+  const hasContent = !nothingFound && (skillsVisible || spellsVisible || artifactsVisible);
 
   if (!hasContent) return null;
 
-  const showBoth = showSkills && !skillsEmpty && showSpells && !spellsEmpty;
+  const showBoth = [skillsVisible, spellsVisible, artifactsVisible].filter(Boolean).length > 1;
 
   return (
     <div className="space-y-3">
-      {showSkills && !skillsEmpty && (
+      {skillsVisible && (
         <HudPanel className="space-y-3">
           {showBoth && (
             <h2 className="hud-sc scroll-mt-4 text-lg text-hud-gold" id="ref-skills">
@@ -133,7 +164,7 @@ export function ReferenceSectionAccordion({
         </HudPanel>
       )}
 
-      {showSpells && !spellsEmpty && (
+      {spellsVisible && (
         <HudPanel className="space-y-3">
           {showBoth && (
             <h2 className="hud-sc scroll-mt-4 text-lg text-hud-gold" id="ref-spells">
@@ -180,6 +211,64 @@ export function ReferenceSectionAccordion({
                 </ReferenceGroupSection>
               ))}
           </Accordion>
+        </HudPanel>
+      )}
+
+      {artifactsVisible && (
+        <HudPanel className="space-y-3">
+          {showBoth && (
+            <h2 className="hud-sc scroll-mt-4 text-lg text-hud-gold" id="ref-artifacts">
+              Артефакти
+            </h2>
+          )}
+          <p className="text-sm text-hud-muted">
+            Артефакти кампанії: що дають і хто їх носить. Кожен артефакт
+            унікальний і належить одному герою.
+          </p>
+          <Accordion
+            type="multiple"
+            defaultValue={[]}
+            className="grid grid-cols-1 gap-3 w-full"
+          >
+            {Array.from(artifactsBySet.entries())
+              .sort(([a], [b]) => {
+                if (a === NO_ARTIFACT_SET_LABEL) return 1;
+
+                if (b === NO_ARTIFACT_SET_LABEL) return -1;
+
+                return a.localeCompare(b);
+              })
+              .map(([setName, list]) => (
+                <ReferenceGroupSection
+                  key={setName}
+                  accordionValue={setName}
+                  title={setName}
+                  count={list.length}
+                >
+                  <Accordion
+                    type="multiple"
+                    className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full"
+                  >
+                    {list.map((artifact) => (
+                      <ArtifactReferenceCard key={artifact.id} artifact={artifact} />
+                    ))}
+                  </Accordion>
+                </ReferenceGroupSection>
+              ))}
+          </Accordion>
+          {artifactSets.length > 0 && (
+            <div className="space-y-2">
+              <h3 className="hud-sc text-base text-hud-gold">Сети</h3>
+              <Accordion
+                type="multiple"
+                className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full"
+              >
+                {artifactSets.map((set) => (
+                  <ArtifactSetReferenceCard key={set.id} set={set} />
+                ))}
+              </Accordion>
+            </div>
+          )}
         </HudPanel>
       )}
     </div>

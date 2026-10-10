@@ -5,6 +5,7 @@ import {
   ChevronDown,
   ChevronUp,
   Filter,
+  Gem,
   Search,
   Sparkles,
   X,
@@ -22,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ARTIFACT_RARITY_OPTIONS } from "@/lib/constants/artifacts";
 import { cn } from "@/lib/utils";
 import type { SectionTab } from "@/types/info-reference";
 
@@ -46,8 +48,53 @@ interface ReferenceSearchBarProps {
   spellLevelOptions: number[];
   spellGroupOptions: string[];
   spellTypeOptions: string[];
+  artifactRarityFilter: string | null;
+  setArtifactRarityFilter: (v: string | null) => void;
+  artifactSlotFilter: string | null;
+  setArtifactSlotFilter: (v: string | null) => void;
+  artifactSetFilter: string | null;
+  setArtifactSetFilter: (v: string | null) => void;
+  artifactRarityOptions: string[];
+  artifactSlotOptions: { value: string; label: string }[];
+  artifactSetOptions: string[];
   showSkillsFilter: boolean;
   showSpellsFilter: boolean;
+  showArtifactsFilter: boolean;
+}
+
+const rarityLabel = (rarity: string) => ARTIFACT_RARITY_OPTIONS.find((o) => o.value === rarity)?.label ?? rarity;
+
+function FilterSelect({
+  label,
+  allLabel,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  allLabel: string;
+  value: string | null;
+  onChange: (v: string | null) => void;
+  options: { value: string; label: string }[];
+}) {
+  return (
+    <div className="space-y-1.5 w-full min-w-0">
+      <Label className="text-xs text-hud-muted">{label}</Label>
+      <Select value={value ?? "all"} onValueChange={(v) => onChange(v === "all" ? null : v)}>
+        <SelectTrigger className="w-full h-10">
+          <SelectValue placeholder={allLabel} />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">{allLabel}</SelectItem>
+          {options.map((o) => (
+            <SelectItem key={o.value} value={o.value}>
+              {o.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
 }
 
 const SECTION_TABS: {
@@ -58,6 +105,7 @@ const SECTION_TABS: {
   { value: "all", label: "Усі", icon: BookOpen },
   { value: "skills", label: "Скіли", icon: Sparkles },
   { value: "spells", label: "Заклинання", icon: Sparkles },
+  { value: "artifacts", label: "Артефакти", icon: Gem },
 ];
 
 export function ReferenceSearchBar({
@@ -81,8 +129,18 @@ export function ReferenceSearchBar({
   spellLevelOptions,
   spellGroupOptions,
   spellTypeOptions,
+  artifactRarityFilter,
+  setArtifactRarityFilter,
+  artifactSlotFilter,
+  setArtifactSlotFilter,
+  artifactSetFilter,
+  setArtifactSetFilter,
+  artifactRarityOptions,
+  artifactSlotOptions,
+  artifactSetOptions,
   showSkillsFilter,
   showSpellsFilter,
+  showArtifactsFilter,
 }: ReferenceSearchBarProps) {
   return (
     <HudPanel as="div" className="sticky top-0 z-10 bg-[rgba(17,14,11,.97)]">
@@ -95,7 +153,7 @@ export function ReferenceSearchBar({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9 min-h-11 md:min-h-10"
-            aria-label="Пошук по скілах та заклинаннях"
+            aria-label="Пошук по скілах, заклинаннях та артефактах"
           />
           {searchQuery && (
             <button
@@ -267,6 +325,33 @@ export function ReferenceSearchBar({
                   </SelectContent>
                 </Select>
               </div>
+            )}
+            {showArtifactsFilter && artifactRarityOptions.length > 0 && (
+              <FilterSelect
+                label="Рідкість артефакту"
+                allLabel="Будь-яка"
+                value={artifactRarityFilter}
+                onChange={setArtifactRarityFilter}
+                options={artifactRarityOptions.map((r) => ({ value: r, label: rarityLabel(r) }))}
+              />
+            )}
+            {showArtifactsFilter && artifactSlotOptions.length > 0 && (
+              <FilterSelect
+                label="Слот артефакту"
+                allLabel="Усі слоти"
+                value={artifactSlotFilter}
+                onChange={setArtifactSlotFilter}
+                options={artifactSlotOptions}
+              />
+            )}
+            {showArtifactsFilter && artifactSetOptions.length > 0 && (
+              <FilterSelect
+                label="Сет артефакту"
+                allLabel="Усі сети"
+                value={artifactSetFilter}
+                onChange={setArtifactSetFilter}
+                options={artifactSetOptions.map((n) => ({ value: n, label: n }))}
+              />
             )}
           </div>
         </div>

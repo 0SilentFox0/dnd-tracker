@@ -3,6 +3,7 @@ import Link from "next/link";
 import { InfoReferenceClient } from "@/components/campaigns/info/InfoReferenceClient";
 import { HudPage, HudPageHeader } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
+import { loadArtifactReference } from "@/lib/cache/artifact-reference";
 import { getCachedInfoReference } from "@/lib/cache/info-reference";
 import { requireCampaignMember } from "@/lib/campaigns/access";
 
@@ -15,13 +16,13 @@ export default async function CampaignInfoPage({
 
   const { isDM } = await requireCampaignMember(campaignId);
 
-  const { skills, spells } = await getCachedInfoReference(campaignId);
+  const [{ skills, spells }, { artifacts, sets }] = await Promise.all([getCachedInfoReference(campaignId), loadArtifactReference(campaignId)]);
 
   return (
     <HudPage width="md">
       <HudPageHeader
         title="Інформація — Довідник"
-        subtitle="Усі скіли та заклинання кампанії: як діють, опис вигляду. Для гравців — ознайомлення з механіками."
+        subtitle="Скіли, заклинання та артефакти кампанії: як діють, опис вигляду, у кого артефакти."
         actions={
           <Link href={`/campaigns/${campaignId}`} className="shrink-0">
             <Button variant="outline" className="min-h-11 touch-manipulation sm:min-h-9">
@@ -35,6 +36,8 @@ export default async function CampaignInfoPage({
         campaignId={campaignId}
         skills={skills}
         spells={spells}
+        artifacts={artifacts}
+        artifactSets={sets}
         isDM={isDM}
       />
     </HudPage>
