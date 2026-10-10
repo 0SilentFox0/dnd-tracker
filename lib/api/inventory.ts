@@ -1,4 +1,4 @@
-import { campaignPatch } from "@/lib/api/client";
+import { campaignPatch, campaignPost } from "@/lib/api/client";
 import type { Inventory, InventoryFormData } from "@/types/inventory";
 
 /**
@@ -7,7 +7,7 @@ import type { Inventory, InventoryFormData } from "@/types/inventory";
 export async function updateInventory(
   campaignId: string,
   characterId: string,
-  data: Partial<InventoryFormData>,
+  data: Partial<InventoryFormData> & { equipSlot?: { slot: string; artifactId: string | null } },
 ): Promise<Inventory> {
   return campaignPatch<Inventory>(
     campaignId,
@@ -15,3 +15,6 @@ export async function updateInventory(
     data,
   );
 }
+
+export const transferArtifact = (campaignId: string, characterId: string, body: { slot: string; toCharacterId: string }) =>
+  campaignPost<{ from: Inventory; to: Inventory }>(campaignId, `/characters/${characterId}/artifacts/transfer`, body);

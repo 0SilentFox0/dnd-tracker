@@ -101,7 +101,7 @@ export default async function CampaignDetailPage({
           href={`/campaigns/${id}/info`}
           icon={<BookOpen className="size-5" />}
           title="Інформація — Довідник"
-          subtitle="Скіли та заклинання: як діють, опис вигляду. Для ознайомлення з механіками."
+          subtitle="Скіли, заклинання й артефакти: як діють і в кого що."
         />
         {isDM &&
           dmTiles.map(({ path, icon: Icon, title, subtitle }) => (

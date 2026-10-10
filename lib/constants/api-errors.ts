@@ -23,4 +23,9 @@ export const API_ERRORS = {
   CANNOT_REMOVE_DM: "DM не можна видалити з кампанії",
   UNKNOWN_OWNER_KIND: "Невідомий тип власника",
   MISSING_PUSHER_PARAMS: "Потрібні socket_id і channel_name",
+  ARTIFACT_SLOT_EMPTY: "У цьому слоті немає артефакта",
+  ARTIFACT_TRANSFER_SELF: "Не можна передати артефакт самому собі",
+  ARTIFACT_UNKNOWN_SLOT: "Невідомий слот",
+  ARTIFACT_ALREADY_EQUIPPED: "Цей артефакт уже вдягнено в інший слот",
+  ARTIFACT_HELD_BY_OTHER: "Артефакт уже носить інший герой",
 } as const;

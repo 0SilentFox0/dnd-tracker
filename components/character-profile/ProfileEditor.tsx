@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { BasicEditTab } from "./BasicEditTab";
@@ -26,7 +26,7 @@ import { LoadingState } from "@/components/common/states";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
-import { useDmCharacterEditor } from "@/lib/hooks/characters";
+import { useCharacterRoster, useDmCharacterEditor } from "@/lib/hooks/characters";
 
 export function ProfileEditor({ onDone }: { onDone: () => void }) {
   const { campaignId, characterId, sheet } = useProfile();
@@ -36,6 +36,20 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
   const editor = useDmCharacterEditor({ campaignId, characterId, onSaved: onDone });
 
   const [tab, setTab] = useState<ProfileTabId>("basic");
+
+  const roster = useCharacterRoster(campaignId);
+
+  const holders = useMemo(() => {
+    const map: Record<string, string> = {};
+
+    for (const hero of roster.data ?? []) {
+      if (hero.id === characterId) continue;
+
+      for (const item of Object.values(hero.equipped)) map[item.id] = hero.name;
+    }
+
+    return map;
+  }, [roster.data, characterId]);
 
   if (!editor.ready) return <LoadingState rows={6} label="Завантаження редактора…" />;
 
@@ -110,6 +124,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
                   characterId={characterId}
                   equipped={equipped}
                   artifacts={artifacts.map((a) => ({ id: a.id, name: a.name, slot: a.slot ?? "item", icon: a.icon ?? null }))}
+                  holders={holders}
                   onEquippedChange={setEquipped}
                 />
                 {sheet.items.sets.length > 0 && (

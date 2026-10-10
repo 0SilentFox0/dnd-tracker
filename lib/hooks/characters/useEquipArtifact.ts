@@ -1,19 +1,27 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { characterSheetKey } from "./keys";
+import { characterKeys, characterSheetKey } from "./keys";
 
 import { updateInventory } from "@/lib/api/inventory";
-import type { EquippedItems } from "@/types/inventory";
+
+export interface EquipSlotChange {
+  slot: string;
+  artifactId: string | null;
+}
 
 export function useEquipArtifact(campaignId: string, characterId?: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (equipped: EquippedItems) => {
+    mutationFn: (equipSlot: EquipSlotChange) => {
       if (!characterId) throw new Error("Немає персонажа");
 
-      return updateInventory(campaignId, characterId, { equipped });
+      return updateInventory(campaignId, characterId, { equipSlot });
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: characterSheetKey(campaignId, characterId) }),
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: characterSheetKey(campaignId, characterId) }),
+        queryClient.invalidateQueries({ queryKey: characterKeys.roster(campaignId) }),
+      ]),
   });
 }

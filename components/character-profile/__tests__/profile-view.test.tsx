@@ -12,6 +12,8 @@ vi.mock("@/components/skill-tree/progression", () => ({ ProgressionPanel: () => 
 vi.mock("@/lib/hooks/skills", () => ({ useCharacterProgression: () => ({ view: null }) }));
 vi.mock("@/lib/hooks/characters", async (orig) => ({
   ...(await orig<object>()),
+  useCharacterRoster: () => ({ data: [], isLoading: false }),
+  useTransferArtifact: () => ({ mutateAsync: vi.fn(), isPending: false }),
   useCharacterSheet: () => h.sheetQuery,
   useCharacterGoals: () => ({ save: vi.fn(), isPending: false }),
   useDmCharacterEditor: () => {

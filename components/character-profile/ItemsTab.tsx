@@ -5,8 +5,10 @@ import { useState } from "react";
 import { useProfile } from "./ProfileContext";
 import { Section } from "./Section";
 import { SetList } from "./SetList";
+import { TransferArtifactDialog } from "./TransferArtifactDialog";
 
 import { EntityIcon } from "@/components/common/EntityIcon";
+import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { ARTIFACT_GRID_9, ArtifactRarity } from "@/lib/constants/artifacts";
 import { cn } from "@/lib/utils";
@@ -25,6 +27,8 @@ export function ItemsTab() {
   const [shown, setShown] = useState<SheetArtifact | null>(null);
 
   const [open, setOpen] = useState(false);
+
+  const [transferOpen, setTransferOpen] = useState(false);
 
   const show = (a: SheetArtifact) => {
     setShown(a);
@@ -65,7 +69,22 @@ export function ItemsTab() {
         </ul>
         <SetList sets={sheet.items.sets} />
       </Section>
-      <ResponsiveDialog open={open} onOpenChange={setOpen} title={shown?.name ?? ""}>
+      <ResponsiveDialog
+        open={open}
+        onOpenChange={setOpen}
+        title={shown?.name ?? ""}
+        footer={
+          <Button
+            variant="outline"
+            onClick={() => {
+              setOpen(false);
+              setTransferOpen(true);
+            }}
+          >
+            Передати
+          </Button>
+        }
+      >
         {shown?.description && <p className="text-sm">{shown.description}</p>}
         {shown && shown.effects.length > 0 ? (
           <ul className="mt-2 list-disc pl-5 text-sm">
@@ -77,6 +96,7 @@ export function ItemsTab() {
           <p className="mt-2 text-sm text-muted-foreground">Без ефектів.</p>
         )}
       </ResponsiveDialog>
+      <TransferArtifactDialog artifact={shown} open={transferOpen} onOpenChange={setTransferOpen} />
     </>
   );
 }

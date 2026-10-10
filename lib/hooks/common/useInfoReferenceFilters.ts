@@ -3,13 +3,14 @@
 import { useDeferredValue, useMemo, useState } from "react";
 
 import {
+  artifactSearchText,
   matchSearch,
   skillSearchText,
   spellSearchText,
 } from "@/lib/utils/info-reference";
-import type { SectionTab, SkillForReference, SpellForReference } from "@/types/info-reference";
+import type { ArtifactForReference, SectionTab, SkillForReference, SpellForReference } from "@/types/info-reference";
 
-export function useInfoReferenceFilters(skills: SkillForReference[], spells: SpellForReference[]) {
+export function useInfoReferenceFilters(skills: SkillForReference[], spells: SpellForReference[], artifacts: ArtifactForReference[] = []) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const [section, setSection] = useState<SectionTab>("all");
@@ -21,6 +22,12 @@ export function useInfoReferenceFilters(skills: SkillForReference[], spells: Spe
   const [spellGroupFilter, setSpellGroupFilter] = useState<string | null>(null);
 
   const [spellTypeFilter, setSpellTypeFilter] = useState<string | null>(null);
+
+  const [artifactRarityFilter, setArtifactRarityFilter] = useState<string | null>(null);
+
+  const [artifactSlotFilter, setArtifactSlotFilter] = useState<string | null>(null);
+
+  const [artifactSetFilter, setArtifactSetFilter] = useState<string | null>(null);
 
   const [filtersOpen, setFiltersOpen] = useState(false);
 
@@ -62,6 +69,34 @@ export function useInfoReferenceFilters(skills: SkillForReference[], spells: Spe
     return Array.from(set).sort();
   }, [spells]);
 
+  const artifactRarityOptions = useMemo(() => {
+    const set = new Set<string>();
+
+    artifacts.forEach((a) => {
+      if (a.rarity) set.add(a.rarity);
+    });
+
+    return Array.from(set).sort();
+  }, [artifacts]);
+
+  const artifactSlotOptions = useMemo(() => {
+    const map = new Map<string, string>();
+
+    artifacts.forEach((a) => map.set(a.slot, a.slotLabel));
+
+    return Array.from(map, ([value, label]) => ({ value, label })).sort((a, b) => a.label.localeCompare(b.label));
+  }, [artifacts]);
+
+  const artifactSetOptions = useMemo(() => {
+    const set = new Set<string>();
+
+    artifacts.forEach((a) => {
+      if (a.setName) set.add(a.setName);
+    });
+
+    return Array.from(set).sort();
+  }, [artifacts]);
+
   const filteredSkills = useMemo(() => {
     return skills.filter((s) => {
       if (!matchSearch(skillSearchText(s), deferredSearch)) return false;
@@ -92,12 +127,29 @@ export function useInfoReferenceFilters(skills: SkillForReference[], spells: Spe
     spellTypeFilter,
   ]);
 
+  const filteredArtifacts = useMemo(() => {
+    return artifacts.filter((a) => {
+      if (!matchSearch(artifactSearchText(a), deferredSearch)) return false;
+
+      if (artifactRarityFilter && a.rarity !== artifactRarityFilter) return false;
+
+      if (artifactSlotFilter && a.slot !== artifactSlotFilter) return false;
+
+      if (artifactSetFilter && a.setName !== artifactSetFilter) return false;
+
+      return true;
+    });
+  }, [artifacts, deferredSearch, artifactRarityFilter, artifactSlotFilter, artifactSetFilter]);
+
   const hasActiveFilters =
     deferredSearch.trim() !== "" ||
     mainSkillFilter != null ||
     spellLevelFilter != null ||
     spellGroupFilter != null ||
-    spellTypeFilter != null;
+    spellTypeFilter != null ||
+    artifactRarityFilter != null ||
+    artifactSlotFilter != null ||
+    artifactSetFilter != null;
 
   const clearAllFilters = () => {
     setSearchQuery("");
@@ -105,17 +157,24 @@ export function useInfoReferenceFilters(skills: SkillForReference[], spells: Spe
     setSpellLevelFilter(null);
     setSpellGroupFilter(null);
     setSpellTypeFilter(null);
+    setArtifactRarityFilter(null);
+    setArtifactSlotFilter(null);
+    setArtifactSetFilter(null);
   };
 
   const showSkills = section === "all" || section === "skills";
 
   const showSpells = section === "all" || section === "spells";
 
+  const showArtifacts = section === "all" || section === "artifacts";
+
   const skillsEmpty = showSkills && filteredSkills.length === 0;
 
   const spellsEmpty = showSpells && filteredSpells.length === 0;
 
-  const nothingFound = skillsEmpty && spellsEmpty;
+  const artifactsEmpty = showArtifacts && filteredArtifacts.length === 0;
+
+  const nothingFound = skillsEmpty && spellsEmpty && artifactsEmpty;
 
   return {
     filters: {
@@ -131,6 +190,12 @@ export function useInfoReferenceFilters(skills: SkillForReference[], spells: Spe
       setSpellGroupFilter,
       spellTypeFilter,
       setSpellTypeFilter,
+      artifactRarityFilter,
+      setArtifactRarityFilter,
+      artifactSlotFilter,
+      setArtifactSlotFilter,
+      artifactSetFilter,
+      setArtifactSetFilter,
       open: filtersOpen,
       setOpen: setFiltersOpen,
     },
@@ -139,18 +204,24 @@ export function useInfoReferenceFilters(skills: SkillForReference[], spells: Spe
       spellLevel: spellLevelOptions,
       spellGroup: spellGroupOptions,
       spellType: spellTypeOptions,
+      artifactRarity: artifactRarityOptions,
+      artifactSlot: artifactSlotOptions,
+      artifactSet: artifactSetOptions,
     },
     results: {
       filteredSkills,
       filteredSpells,
+      filteredArtifacts,
       hasActiveFilters,
       clearAllFilters,
     },
     ui: {
       showSkills,
       showSpells,
+      showArtifacts,
       skillsEmpty,
       spellsEmpty,
+      artifactsEmpty,
       nothingFound,
     },
   };

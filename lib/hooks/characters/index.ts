@@ -2,6 +2,7 @@ export { characterSheetKey } from "./keys";
 export { useCharacterEditor } from "./useCharacterEditor";
 export { useCharacterForm } from "./useCharacterForm";
 export { useCharacterGoals } from "./useCharacterGoals";
+export { useCharacterRoster } from "./useCharacterRoster";
 export { useCharacters, useCreateCharacter, useLevelUpCharacter, useUpdateCharacter } from "./useCharacters";
 export { useCharacterSheet } from "./useCharacterSheet";
 export { useCharacterTokens } from "./useCharacterTokens";
@@ -9,3 +10,4 @@ export { type DmCharacterEditor, useDmCharacterEditor } from "./useDmCharacterEd
 export { useDmCharactersPage } from "./useDmCharactersPage";
 export { useEquipArtifact } from "./useEquipArtifact";
 export { useSpellBrowser } from "./useSpellBrowser";
+export { useTransferArtifact } from "./useTransferArtifact";

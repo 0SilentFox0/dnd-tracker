@@ -1,5 +1,5 @@
 import { spellLevelName } from "@/lib/constants/spells";
-import type { SkillForReference, SpellForReference } from "@/types/info-reference";
+import type { ArtifactForReference, SkillForReference, SpellForReference } from "@/types/info-reference";
 
 export function formatMechanicsSkill(s: SkillForReference): string {
   const parts: string[] = [];
@@ -48,6 +48,10 @@ export function spellSearchText(s: SpellForReference): string {
   ]
     .join(" ")
     .toLowerCase();
+}
+
+export function artifactSearchText(a: ArtifactForReference): string {
+  return [a.name, a.description, a.setName, a.holderName, ...a.effects].filter(Boolean).join(" ").toLowerCase();
 }
 
 export function matchSearch(text: string, query: string): boolean {
