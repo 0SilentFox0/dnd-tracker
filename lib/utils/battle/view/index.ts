@@ -1,4 +1,5 @@
 export * from "./crit-outcome";
+export * from "./downed-heroes";
 export * from "./health";
 export * from "./hero";
 export * from "./knowledge";

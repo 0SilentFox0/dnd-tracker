@@ -58,4 +58,17 @@ describe("patch-participant mutation", () => {
     expect(out.participants.find((p) => p.basicInfo.id === "gob")?.combatStats).toMatchObject({ currentHp: 0, status: "dead" });
     expect(out.events[0].resultText).toContain("Вбито (DM)");
   });
+
+  it("revive — мертвий герой повертається з 1 HP і статусом active", () => {
+    const fallen = { ...hero, combatStats: { ...hero.combatStats, currentHp: 0, status: "dead" as const } };
+
+    const out = patchParticipantMutation(context({ participants: [fallen, goblin] }), "hero", { revive: true });
+
+    expect(out.participants.find((p) => p.basicInfo.id === "hero")?.combatStats).toMatchObject({ currentHp: 1, status: "active" });
+    expect(out.events[0].resultText).toContain("Повернуто до життя (DM)");
+  });
+
+  it("revive живого — помилка", () => {
+    expect(() => patchParticipantMutation(context(), "hero", { revive: true })).toThrow("Учасник і так живий");
+  });
 });

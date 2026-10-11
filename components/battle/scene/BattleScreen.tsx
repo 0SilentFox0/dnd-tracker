@@ -43,6 +43,8 @@ const CompleteBattleDialog = dynamic(() => import("./CompleteBattleDialog").then
 
 const ResultOverlay = dynamic(() => import("@/components/battle/fx/ResultOverlay").then((m) => m.ResultOverlay), { ssr: false });
 
+const DmRevivePrompt = dynamic(() => import("./DmRevivePrompt").then((m) => m.DmRevivePrompt), { ssr: false });
+
 const BattlePreparationView = dynamic(() => import("@/components/battle/views/BattlePreparationView").then((m) => m.BattlePreparationView));
 
 export function BattleScreen() {
@@ -72,6 +74,7 @@ export function BattleScreen() {
       {Desktop ? <Desktop onComplete={() => setCompleteOpen(true)} /> : <MobileBattleLayout />}
       <ResultOverlay />
       <BattleToast />
+      {isDM && <DmRevivePrompt />}
       {Desktop && <CompleteBattleDialog open={completeOpen} onOpenChange={setCompleteOpen} />}
     </div>
   );

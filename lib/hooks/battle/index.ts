@@ -10,6 +10,7 @@ export {
   useBattleSceneDataValue,
   useBattleSceneValue,
 } from "./useBattleScene";
+export { type DownedHeroPrompt, useDownedHeroPrompt } from "./useDownedHeroPrompt";
 export { useHpChange } from "./useHpChange";
 export { usePlayerTurn } from "./usePlayerTurn";
 export { useSpellBook, useSpellBookPrefetch } from "./useSpellBook";

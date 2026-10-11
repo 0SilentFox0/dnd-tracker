@@ -2,6 +2,7 @@ import type { PatchParticipantData } from "./patch-participant-schema";
 
 import { CombatStatus, DM_ACTOR } from "@/lib/constants/battle";
 import { resolveDowned } from "@/lib/utils/abilities/engine/run-abilities";
+import { isUp } from "@/lib/utils/battle/participant/state";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, battleActionToEvent, BattleRuleError, systemEvent } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";
@@ -18,9 +19,11 @@ export function patchParticipantMutation(
 
   if (data.kill === true) return updateHp(ctx, participantId, 0, true);
 
+  if (data.revive === true) return revive(ctx, participantId);
+
   if (data.currentHp !== undefined) return updateHp(ctx, participantId, data.currentHp);
 
-  throw new BattleRuleError("action_rejected", "Вкажіть currentHp, kill або removeFromBattle");
+  throw new BattleRuleError("action_rejected", "Вкажіть currentHp, kill, revive або removeFromBattle");
 }
 
 function removeParticipant(ctx: BattleMutationContext, participantId: string): MutationResult {
@@ -131,4 +134,40 @@ function updateHp(ctx: BattleMutationContext, participantId: string, requestedHp
   }
 
   return { participants: downed.participants, pending: ctx.pending, events };
+}
+
+function revive(ctx: BattleMutationContext, participantId: string): MutationResult {
+  const idx = ctx.participants.findIndex((p) => p.basicInfo.id === participantId);
+
+  if (idx === -1) throw new BattleAccessError(404, "Учасника не знайдено");
+
+  const participant = ctx.participants[idx];
+
+  if (isUp(participant)) throw new BattleRuleError("action_rejected", "Учасник і так живий");
+
+  const oldHp = participant.combatStats.currentHp;
+
+  const newHp = Math.min(1, participant.combatStats.maxHp);
+
+  const participants = [...ctx.participants];
+
+  participants[idx] = { ...participant, combatStats: { ...participant.combatStats, currentHp: newHp, status: CombatStatus.ACTIVE } };
+
+  const name = participant.basicInfo.name;
+
+  return {
+    participants,
+    pending: ctx.pending,
+    events: [
+      {
+        type: "ability",
+        round: ctx.scene.round,
+        actorId: DM_ACTOR.actorId,
+        targets: [{ participantId, participantName: name }],
+        hpChanges: [{ participantId, participantName: name, oldHp, newHp, change: oldHp - newHp }],
+        resultText: `Повернуто до життя (DM): ${name}, ${newHp} HP`,
+        details: DM_DETAILS,
+      },
+    ],
+  };
 }

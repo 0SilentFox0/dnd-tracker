@@ -178,7 +178,7 @@ export const useAddBattleParticipant = (c: string, b: string, o: ActionOpts = {}
   useBattleAction<AddParticipantData>(c, b, (data) => addBattleParticipant(c, b, data), o);
 
 export const useUpdateBattleParticipant = (c: string, b: string, o: ActionOpts = {}) =>
-  useBattleAction<{ participantId: string; data: { currentHp?: number; removeFromBattle?: boolean; kill?: boolean } }>(
+  useBattleAction<{ participantId: string; data: { currentHp?: number; removeFromBattle?: boolean; kill?: boolean; revive?: boolean } }>(
     c,
     b,
     ({ participantId, data, expectedVersion }) => updateBattleParticipant(c, b, participantId, { ...data, expectedVersion }),
