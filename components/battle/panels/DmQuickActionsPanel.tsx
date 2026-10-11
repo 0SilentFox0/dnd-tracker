@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronLeft, ScrollText, Sparkles, Trophy, UserPlus } from "lucide-react";
+import { ChevronLeft, ChevronsDown, ChevronsUp, ScrollText, Sparkles, Trophy, UserPlus } from "lucide-react";
 
 import { BattleLogPanel } from "./BattleLogPanel";
 import { DmParticipantRow } from "./DmParticipantRow";
@@ -9,6 +9,7 @@ import { DmParticipantRow } from "./DmParticipantRow";
 import { HUD_SURFACE } from "@/components/hud";
 import { BattleStatus } from "@/lib/constants/battle";
 import { cn } from "@/lib/utils";
+import { isLiveScalable, type LiveScaleDirection } from "@/lib/utils/battle/balance/live-scale";
 import type { BattleScene } from "@/types/api";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -23,6 +24,9 @@ export interface DmQuickActionsPanelProps {
   onAddParticipant: () => void;
   onIncreaseHp: (participant: BattleParticipant) => void;
   onRemoveFromBattle: (participant: BattleParticipant) => void;
+  onKill?: (participant: BattleParticipant) => void;
+  /** Живе підсилення/послаблення ворожих юнітів лише в цьому бою (стакається) */
+  onScaleUnits?: (direction: LiveScaleDirection) => void;
   onCompleteBattle: (result?: "victory" | "defeat") => void;
   onTakeControl: (participant: BattleParticipant | null) => void;
   dmControlledParticipantId: string | null;
@@ -41,6 +45,8 @@ export function DmQuickActionsPanel({
   onAddParticipant,
   onIncreaseHp,
   onRemoveFromBattle,
+  onKill,
+  onScaleUnits,
   onCompleteBattle,
   onTakeControl,
   dmControlledParticipantId,
@@ -56,6 +62,8 @@ export function DmQuickActionsPanel({
   const participants = (battle.initiativeOrder ?? []) as BattleParticipant[];
 
   const closePanel = () => setOpen(false);
+
+  const canScale = onScaleUnits && battle.status === BattleStatus.ACTIVE && participants.some(isLiveScalable);
 
   return (
     <>
@@ -142,6 +150,24 @@ export function DmQuickActionsPanel({
             </button>
           )}
 
+          {canScale && (
+            <section className="pt-2">
+              <h4 className="hud-sc flex h-7 items-center border-b border-white/[.14] text-[13px] tracking-[.08em] text-[var(--hud-muted)]">
+                Ворожі юніти (лише цей бій)
+              </h4>
+              <div className="grid grid-cols-2 gap-2 pt-2">
+                <button type="button" className={ACTION} title="HP і шкода ×1.1, стакається" onClick={() => onScaleUnits("buff")}>
+                  <ChevronsUp className="size-4 shrink-0 text-hud-danger" />
+                  Підсилити
+                </button>
+                <button type="button" className={ACTION} title="HP і шкода ÷1.1, стакається" onClick={() => onScaleUnits("debuff")}>
+                  <ChevronsDown className="size-4 shrink-0 text-[#9fc48a]" />
+                  Послабити
+                </button>
+              </div>
+            </section>
+          )}
+
           <section className="pt-2">
             <h4 className="hud-sc flex h-7 items-center border-b border-white/[.14] text-[13px] tracking-[.08em] text-[var(--hud-muted)]">
               Учасники бою
@@ -160,6 +186,7 @@ export function DmQuickActionsPanel({
                     onIncreaseHp={onIncreaseHp}
                     onTakeControl={onTakeControl}
                     onRemove={onRemoveFromBattle}
+                    onKill={battle.status === BattleStatus.ACTIVE ? onKill : undefined}
                     onActionDone={closePanel}
                   />
                 ))

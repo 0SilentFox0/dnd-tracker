@@ -16,9 +16,11 @@ export function patchParticipantMutation(
 ): MutationResult {
   if (data.removeFromBattle === true) return removeParticipant(ctx, participantId);
 
+  if (data.kill === true) return updateHp(ctx, participantId, 0, true);
+
   if (data.currentHp !== undefined) return updateHp(ctx, participantId, data.currentHp);
 
-  throw new BattleRuleError("action_rejected", "Вкажіть currentHp або removeFromBattle");
+  throw new BattleRuleError("action_rejected", "Вкажіть currentHp, kill або removeFromBattle");
 }
 
 function removeParticipant(ctx: BattleMutationContext, participantId: string): MutationResult {
@@ -74,7 +76,7 @@ function removeParticipant(ctx: BattleMutationContext, participantId: string): M
   };
 }
 
-function updateHp(ctx: BattleMutationContext, participantId: string, requestedHp: number): MutationResult {
+function updateHp(ctx: BattleMutationContext, participantId: string, requestedHp: number, kill = false): MutationResult {
   const idx = ctx.participants.findIndex((p) => p.basicInfo.id === participantId);
 
   if (idx === -1) throw new BattleAccessError(404, "Учасника не знайдено");
@@ -90,8 +92,9 @@ function updateHp(ctx: BattleMutationContext, participantId: string, requestedHp
     combatStats: {
       ...participant.combatStats,
       currentHp: newHp,
-      status:
-        newHp <= 0
+      status: kill
+        ? CombatStatus.DEAD
+        : newHp <= 0
           ? participant.combatStats.status === CombatStatus.DEAD
             ? CombatStatus.DEAD
             : CombatStatus.UNCONSCIOUS
@@ -118,7 +121,7 @@ function updateHp(ctx: BattleMutationContext, participantId: string, requestedHp
       actorId: DM_ACTOR.actorId,
       targets: [{ participantId, participantName: name }],
       hpChanges: [{ participantId, participantName: name, oldHp, newHp, change: oldHp - newHp }],
-      resultText: `Зміна HP (DM): ${name}, ${oldHp} → ${newHp}`,
+      resultText: kill ? `Вбито (DM): ${name}` : `Зміна HP (DM): ${name}, ${oldHp} → ${newHp}`,
       details: DM_DETAILS,
     },
   ];

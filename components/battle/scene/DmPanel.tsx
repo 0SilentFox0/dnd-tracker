@@ -30,6 +30,8 @@ export function DmPanel() {
         onAddParticipant={dialogs.openAddParticipant}
         onIncreaseHp={dialogs.openHpDialog}
         onRemoveFromBattle={(p) => actions.updateParticipant.mutate({ participantId: p.basicInfo.id, data: { removeFromBattle: true } })}
+        onKill={(p) => actions.updateParticipant.mutate({ participantId: p.basicInfo.id, data: { kill: true } })}
+        onScaleUnits={(direction) => actions.scaleUnits.mutate({ direction })}
         onCompleteBattle={(result) => actions.complete.mutate({ result })}
         onTakeControl={(p) => setDmControlledId(p?.basicInfo.id ?? null)}
         dmControlledParticipantId={dmControlledId}

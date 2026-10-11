@@ -82,6 +82,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
     rollback: mutation(),
     addParticipant: mutation(),
     updateParticipant: mutation(),
+    scaleUnits: mutation(),
   };
 
   const showResult = vi.fn();

@@ -14,6 +14,7 @@ export {
   useNextTurn,
   useResetBattle,
   useRollbackBattleAction,
+  useScaleBattleUnits,
   useStartBattle,
   useUpdateBattleParticipant,
 } from "./useBattles";

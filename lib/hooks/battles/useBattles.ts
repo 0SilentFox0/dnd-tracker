@@ -21,6 +21,7 @@ import {
   nextTurn,
   resetBattle,
   rollbackBattleAction,
+  scaleBattleUnits,
   startBattle,
   updateBattle,
   updateBattleParticipant,
@@ -177,9 +178,12 @@ export const useAddBattleParticipant = (c: string, b: string, o: ActionOpts = {}
   useBattleAction<AddParticipantData>(c, b, (data) => addBattleParticipant(c, b, data), o);
 
 export const useUpdateBattleParticipant = (c: string, b: string, o: ActionOpts = {}) =>
-  useBattleAction<{ participantId: string; data: { currentHp?: number; removeFromBattle?: boolean } }>(
+  useBattleAction<{ participantId: string; data: { currentHp?: number; removeFromBattle?: boolean; kill?: boolean } }>(
     c,
     b,
     ({ participantId, data, expectedVersion }) => updateBattleParticipant(c, b, participantId, { ...data, expectedVersion }),
     o,
   );
+
+export const useScaleBattleUnits = (c: string, b: string, o: ActionOpts = {}) =>
+  useBattleAction<{ direction: "buff" | "debuff" }>(c, b, (body) => scaleBattleUnits(c, b, body), o);

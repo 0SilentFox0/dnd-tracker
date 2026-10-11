@@ -51,4 +51,11 @@ describe("patch-participant mutation", () => {
 
     expect(out.participants.find((p) => p.basicInfo.id === "gob")?.combatStats.status).toBe("active");
   });
+
+  it("kill — HP 0, статус dead і подія «Вбито»", () => {
+    const out = patchParticipantMutation(context(), "gob", { kill: true });
+
+    expect(out.participants.find((p) => p.basicInfo.id === "gob")?.combatStats).toMatchObject({ currentHp: 0, status: "dead" });
+    expect(out.events[0].resultText).toContain("Вбито (DM)");
+  });
 });

@@ -22,6 +22,7 @@ import {
   useNextTurn,
   useResetBattle,
   useRollbackBattleAction,
+  useScaleBattleUnits,
   useStartBattle,
   useUpdateBattleParticipant,
 } from "@/lib/hooks/battles";
@@ -54,6 +55,7 @@ export interface BattleSceneActions {
   rollback: ReturnType<typeof useRollbackBattleAction>;
   addParticipant: ReturnType<typeof useAddBattleParticipant>;
   updateParticipant: ReturnType<typeof useUpdateBattleParticipant>;
+  scaleUnits: ReturnType<typeof useScaleBattleUnits>;
 }
 
 /** Змінюється лише разом з даними бою — список учасників, черга, герой. */
@@ -218,6 +220,7 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
     rollback: useRollbackBattleAction(campaignId, battleId, o),
     addParticipant: useAddBattleParticipant(campaignId, battleId, o),
     updateParticipant: useUpdateBattleParticipant(campaignId, battleId, o),
+    scaleUnits: useScaleBattleUnits(campaignId, battleId, o),
   };
 
   const readBattle = useCallback(

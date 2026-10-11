@@ -1,8 +1,8 @@
 "use client";
 
-import { Heart, LogIn, Trash2 } from "lucide-react";
+import { Heart, LogIn, Skull, Trash2 } from "lucide-react";
 
-import { ParticipantSide } from "@/lib/constants/battle";
+import { CombatStatus, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { useConfirm } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 import type { BattleParticipant } from "@/types/battle";
@@ -25,6 +25,7 @@ interface DmParticipantRowProps {
   onIncreaseHp: (p: BattleParticipant) => void;
   onTakeControl: (p: BattleParticipant | null) => void;
   onRemove: (p: BattleParticipant) => void;
+  onKill?: (p: BattleParticipant) => void;
   onActionDone?: () => void;
 }
 
@@ -34,6 +35,7 @@ export function DmParticipantRow({
   onIncreaseHp,
   onTakeControl,
   onRemove,
+  onKill,
   onActionDone,
 }: DmParticipantRowProps) {
   const confirm = useConfirm();
@@ -43,6 +45,8 @@ export function DmParticipantRow({
   const controlled = dmControlledParticipantId === participant.basicInfo.id;
 
   const label = scaleLabel(participant);
+
+  const canKill = onKill && participant.basicInfo.sourceType === ParticipantSourceType.UNIT && participant.combatStats.status !== CombatStatus.DEAD;
 
   return (
     <div className={cn("flex min-h-10 items-center gap-2 border-b border-white/[.08] py-1", controlled && "bg-[var(--gold)]/[.08]")}>
@@ -72,6 +76,21 @@ export function DmParticipantRow({
         >
           <LogIn className="size-3.5" />
         </button>
+        {canKill && (
+          <button
+            type="button"
+            className={cn(ICON, "text-hud-danger hover:border-hud-danger/40")}
+            title="Вбити"
+            onClick={async () => {
+              if (await confirm({ title: "Вбити " + participant.basicInfo.name + "?", confirmLabel: "Вбити", destructive: true })) {
+                onKill(participant);
+                close();
+              }
+            }}
+          >
+            <Skull className="size-3.5" />
+          </button>
+        )}
         <button
           type="button"
           className={cn(ICON, "text-hud-danger hover:border-hud-danger/40")}
