@@ -56,7 +56,7 @@ function useScrolledPast() {
 }
 
 export function ProfileShell({ children }: { children: ReactNode }) {
-  return <div className={cn(HUD_SURFACE, "mx-auto min-h-dvh max-w-3xl bg-[radial-gradient(120%_60%_at_50%_0%,#2a221a,#110e0b_70%)]")}>{children}</div>;
+  return <div className={cn(HUD_SURFACE, "mx-auto min-h-dvh max-w-3xl pb-[calc(env(safe-area-inset-bottom,0px)+3rem)] lg:max-w-5xl bg-[radial-gradient(120%_60%_at_50%_0%,#2a221a,#110e0b_70%)]")}>{children}</div>;
 }
 
 const asTab = (v: string | undefined): ProfileTabId => (v && (VIEW_TABS as string[]).includes(v) ? (v as ProfileTabId) : "combat");

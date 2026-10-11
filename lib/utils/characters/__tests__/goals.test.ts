@@ -59,3 +59,13 @@ describe("goal ids are unique", () => {
     expect(out.map((g) => g.text)).toEqual(["Перша"]);
   });
 });
+
+describe("goal title and kind", () => {
+  it("DM and player merges keep title and kind", () => {
+    const titled = { id: "t1", title: "Корона по праву", kind: "main" as const, text: "Довести, що можеш правити", status: "active" as const };
+
+    expect(mergeDmGoals([], [titled])).toEqual([{ ...titled, author: "dm" }]);
+    expect(mergePlayerGoals([], [titled])).toEqual([{ ...titled, author: "player" }]);
+    expect(parseGoals([{ ...titled, author: "dm" }])).toEqual([{ ...titled, author: "dm" }]);
+  });
+});

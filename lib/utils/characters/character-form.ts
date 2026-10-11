@@ -1,5 +1,5 @@
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
-import { CharacterType, type CharacterTypeValue } from "@/lib/constants/characters";
+import { CharacterType, type CharacterTypeValue, clampHeroInitiative } from "@/lib/constants/characters";
 import { fullSpellSlots } from "@/lib/utils/spells/spell-slots";
 import type { Character, CharacterFormData } from "@/types/characters";
 import type { SpellSlotProgression } from "@/types/races";
@@ -45,7 +45,7 @@ export function characterToFormData(
     },
     combatStats: {
       armorClass: character.armorClass || 10,
-      initiative: character.initiative || 0,
+      initiative: clampHeroInitiative(character.initiative),
       speed: character.speed || 30,
       minTargets: character.minTargets || 1,
       maxTargets: character.maxTargets || 1,

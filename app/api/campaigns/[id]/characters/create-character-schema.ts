@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { ABILITY_KEYS, SPELLCASTING_ABILITIES } from "@/lib/constants/abilities";
-import { CharacterType } from "@/lib/constants/characters";
+import { CharacterType, HERO_INITIATIVE } from "@/lib/constants/characters";
 import { HERO_ARCHETYPE_KEYS } from "@/lib/constants/hero-archetypes";
 
 export const createCharacterSchema = z.object({
@@ -27,7 +27,7 @@ export const createCharacterSchema = z.object({
   charisma: z.number().min(1).max(30).default(10),
 
   armorClass: z.number().min(0).default(10),
-  initiative: z.number().default(0),
+  initiative: z.number().int().min(HERO_INITIATIVE.MIN).max(HERO_INITIATIVE.MAX).default(HERO_INITIATIVE.DEFAULT),
   speed: z.number().min(0).default(30),
 
   savingThrows: z.record(z.string(), z.boolean()).default({}),

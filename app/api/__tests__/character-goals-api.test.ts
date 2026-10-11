@@ -48,9 +48,9 @@ describe("PUT goals", () => {
     expect(await getResponseJson(res)).toEqual({ goals: [{ id: "n", text: "Нова", status: "done", author: "dm" }] });
   });
 
-  it("текст понад 300 символів — 400", async () => {
+  it("текст понад 600 символів — 400", async () => {
     vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("owner", "player"));
-    expect((await put([{ id: "x", text: "a".repeat(301), status: "active" }])).status).toBe(400);
+    expect((await put([{ id: "x", text: "a".repeat(601), status: "active" }])).status).toBe(400);
   });
 
   it("ДМ зі старим кешем не стирає ціль гравця, якої ще не бачив", async () => {

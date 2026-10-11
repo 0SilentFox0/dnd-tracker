@@ -5,6 +5,7 @@ import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { ARTIFACT_GRID_9 } from "@/lib/constants/artifacts";
 import { heroArchetype } from "@/lib/constants/hero-archetypes";
 import { parseGoals } from "@/lib/schemas/character-goals";
+import { calculateInitiative } from "@/lib/utils/battle/battle-start";
 import { slotLevels } from "@/lib/utils/battle/view";
 import { heroBaseHp } from "@/lib/utils/characters/hero-hp";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
@@ -96,7 +97,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
       lines: [...hp.breakdown.map((b) => ({ label: b, value: "", source: "level" as const })), ...(hpBonus ? [{ label: "Бонуси", value: signed(hpBonus) }] : [])],
     },
     armorClass: armorTotal(p),
-    initiative: p.abilities.initiative,
+    initiative: calculateInitiative(p),
     speed: p.combatStats.speed,
     morale: p.combatStats.morale,
     targets: { min: p.combatStats.minTargets ?? 1, max: p.combatStats.maxTargets ?? 1 },

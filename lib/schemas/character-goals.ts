@@ -1,12 +1,14 @@
 import { z } from "zod";
 
 import { GoalStatus } from "@/lib/constants/characters";
-import { GoalAuthor, MAX_GOALS } from "@/lib/constants/characters";
+import { GOAL_TEXT_MAX, GOAL_TITLE_MAX, GoalAuthor, GoalKind, MAX_GOALS } from "@/lib/constants/characters";
 import type { CharacterGoal } from "@/types/characters";
 
 export const goalInputSchema = z.object({
   id: z.string().min(1).max(40),
-  text: z.string().trim().min(1).max(300),
+  text: z.string().trim().min(1).max(GOAL_TEXT_MAX),
+  title: z.string().trim().max(GOAL_TITLE_MAX).optional(),
+  kind: z.enum([GoalKind.MAIN, GoalKind.PERSONAL, GoalKind.INNER, GoalKind.SECRET]).optional(),
   status: z.enum([GoalStatus.ACTIVE, GoalStatus.DONE, GoalStatus.FAILED]),
   author: z.nativeEnum(GoalAuthor).optional(),
 });

@@ -4,7 +4,7 @@ import type { BookSpell } from "./spells";
 import type { AbilityKey } from "@/lib/constants/abilities";
 import { type SpellcastingAbility } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
-import { type CharacterTypeValue, type GoalAuthorValue, type GoalStatus, type TOKEN_COLORS } from "@/lib/constants/characters";
+import { type CharacterTypeValue, type GoalAuthorValue, type GoalKind, type GoalStatus, type TOKEN_COLORS } from "@/lib/constants/characters";
 
 export type { AbilityKey };
 
@@ -21,6 +21,8 @@ export interface CharacterToken {
 export interface CharacterGoal {
   id: string;
   text: string;
+  title?: string;
+  kind?: GoalKind;
   status: GoalStatus;
   author: GoalAuthorValue;
 }
