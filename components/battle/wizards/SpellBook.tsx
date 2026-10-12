@@ -32,7 +32,7 @@ export function SpellBook({ book }: { book: Book }) {
     <div className="relative flex h-full flex-col px-5 pb-5 pt-6">
       {state.step === "spell" && (
         <SpellDetail spell={selected} formula={book.formulaOf(selected)}>
-          <button type="button" disabled={selected.level > 0 && slotOf(selected.level) === 0} onClick={book.toTargets} className={cn(seal, "mt-auto")}>
+          <button type="button" disabled={(selected.level > 0 && slotOf(selected.level) === 0) || book.costUsed(selected)} onClick={book.toTargets} className={cn(seal, "mt-auto")}>
             <Swords className="size-5" />{state.pick?.targetMode === "none" ? "Далі" : "Обрати цілі"}
           </button>
         </SpellDetail>

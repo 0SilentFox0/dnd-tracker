@@ -5,12 +5,13 @@ import { makeEffect } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 import { applyCriticalEffect } from "@/lib/utils/battle/attack";
 import { processStartOfRound, processStartOfTurn } from "@/lib/utils/battle/battle-turn";
+import { endTurnCleanup } from "@/lib/utils/battle/turn/end-turn-cleanup";
 import type { ActiveEffect } from "@/types/battle";
 
 const debuff = (type: string, duration: number): ActiveEffect => makeEffect(`e-${type}`, { name: type, type: "debuff", duration, effects: [{ type, value: 0 }] });
 
 describe("processStartOfTurn", () => {
-  it("дебаф на 1 раунд діє в цей хід і лише потім спливає", () => {
+  it("дебаф на 1 раунд діє в цей хід і спливає наприкінці ходу", () => {
     const base = createMockParticipant();
 
     const p = createMockParticipant({
@@ -21,7 +22,8 @@ describe("processStartOfTurn", () => {
 
     expect(out.participant.actionFlags.hasUsedBonusAction).toBe(true);
     expect(out.participant.actionFlags.hasUsedReaction).toBe(true);
-    expect(out.expiredEffects).toEqual(expect.arrayContaining(["no_bonus_action", "no_reaction"]));
+    expect(out.expiredEffects).toEqual([]);
+    expect(endTurnCleanup(out.participant).battleData.activeEffects).toEqual([]);
   });
 
   it("без обмежень — дії доступні", () => {

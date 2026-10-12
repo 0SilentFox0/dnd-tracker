@@ -120,7 +120,7 @@ export function applyCriticalEffect(
           effects: spec.legacy ? [{ type: spec.legacy, value: spec.legacyValue ?? 1 }] : [],
           ...(spec.modifiers && { abilityEffects: spec.modifiers }),
           ...(spec.consumeOn && { consumeOn: spec.consumeOn }),
-          ...(spec.expireAtTurnEnd && { expireAtTurnEnd: true }),
+          ...(spec.expireAtTurnEnd ? { expireAtTurnEnd: true } : { countdownAtTurnStart: true }),
         },
         currentRound,
       ),

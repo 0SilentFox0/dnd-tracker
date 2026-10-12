@@ -9,16 +9,18 @@ import { useConfirm } from "@/lib/hooks/common";
 import { initialTurnFlow, MORALE_SKIP_MS, moraleOutcome, turnFlow } from "@/lib/utils/battle/flows";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import type { PendingMoraleCheckPayload } from "@/lib/utils/battle/turn";
-import { needsMoraleCheck } from "@/lib/utils/battle/view";
+import { canCastBonusSpell, needsMoraleCheck } from "@/lib/utils/battle/view";
 import type { BattleParticipant } from "@/types/battle";
 
-const exhausted = (p: BattleParticipant) => {
+type BonusSpell = Parameters<typeof canCastBonusSpell>[1][number];
+
+const exhausted = (p: BattleParticipant, bonusSpells: BonusSpell[]) => {
   const bonusLeft = (p.battleData.resolvedAbilities ?? []).some((a) => a.trigger.event === "bonusAction") && !p.actionFlags.hasUsedBonusAction;
 
-  return p.actionFlags.hasUsedAction && !bonusLeft;
+  return p.actionFlags.hasUsedAction && !bonusLeft && !canCastBonusSpell(p, bonusSpells);
 };
 
-export function usePlayerTurn(participant: BattleParticipant) {
+export function usePlayerTurn(participant: BattleParticipant, bonusSpells: BonusSpell[] = []) {
   const scene = useBattleScene();
 
   const confirm = useConfirm();
@@ -64,12 +66,13 @@ export function usePlayerTurn(participant: BattleParticipant) {
     phase: state.phase,
     actionUsed: participant.actionFlags.hasUsedAction,
     bonusAvailable: !participant.actionFlags.hasUsedBonusAction,
+    bonusSpellReady: canCastBonusSpell(participant, bonusSpells),
     skipped: moraleResult === "skip",
     moraleResult,
     afterAction: () => {
       if (scene.readBattle()?.status !== BattleStatus.ACTIVE) return;
 
-      if (exhausted(fresh())) dispatch({ type: "EXHAUSTED" });
+      if (exhausted(fresh(), bonusSpells)) dispatch({ type: "EXHAUSTED" });
     },
     rollMorale: async (d10: number) => {
       let res;

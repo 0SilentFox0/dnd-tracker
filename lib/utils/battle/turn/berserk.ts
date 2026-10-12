@@ -14,7 +14,7 @@ export function berserkBonusOf(p: BattleParticipant): number | undefined {
 
 interface BerserkTurnParams {
   participants: BattleParticipant[];
-  /** стан учасника до зменшення тривалостей на початку ходу: з нього читаються заборони */
+  /** стан учасника на початку ходу: з нього читаються заборони */
   restrictedBy: BattleParticipant;
   participantId: string;
   bonusPercent: number;

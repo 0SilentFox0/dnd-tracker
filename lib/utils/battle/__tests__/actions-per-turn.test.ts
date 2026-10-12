@@ -4,6 +4,7 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import { processStartOfTurn } from "@/lib/utils/battle/battle-turn";
+import { endTurnCleanup } from "@/lib/utils/battle/turn/end-turn-cleanup";
 import type { AbilityEvent } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -52,6 +53,12 @@ describe("actionsPerTurn", () => {
 
     const short = { ...ps[0], battleData: { ...ps[0].battleData, activeEffects: ps[0].battleData.activeEffects.map((e) => ({ ...e, duration: 1 })) } };
 
-    expect(processStartOfTurn(short, 2, [short, foe()]).participant.battleData.pendingExtraActions ?? 0).toBe(0);
+    const last = processStartOfTurn(short, 2, [short, foe()]).participant;
+
+    expect(last.battleData.pendingExtraActions).toBe(1);
+
+    const spent = { ...endTurnCleanup(last), battleData: { ...endTurnCleanup(last).battleData, pendingExtraActions: 0 } };
+
+    expect(processStartOfTurn(spent, 3, [spent, foe()]).participant.battleData.pendingExtraActions ?? 0).toBe(0);
   });
 });

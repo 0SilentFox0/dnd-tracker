@@ -97,12 +97,14 @@ export function applyDot(input: EffectApplyInput<Of<"dot">>): EffectApplyResult 
 
   const messages: string[] = [];
 
+  const fromSpell = input.event.type === "spellCast";
+
   for (const id of input.targetIds) {
     const t = findParticipant(ps, id);
 
     if (!t || !isActive(t)) continue;
 
-    if (hasImmunity(t, effect.damageType, { participants: ps })) {
+    if (hasImmunity(t, effect.damageType, { participants: ps, fromSpell })) {
       messages.push(`⛔ ${ability.name}: ${t.basicInfo.name} — імунітет до ${effect.damageType}`);
       continue;
     }
@@ -123,7 +125,7 @@ export function applyDot(input: EffectApplyInput<Of<"dot">>): EffectApplyResult 
           rounds: effect.duration.rounds,
           stackable: ability.stackable === true,
           maxStacks: ability.maxStacks,
-          dotDamage: { damagePerRound: dmg, damageType: effect.damageType },
+          dotDamage: { damagePerRound: dmg, damageType: effect.damageType, ...(fromSpell && { fromSpell: true }) },
         },
         ctx.round,
       ),

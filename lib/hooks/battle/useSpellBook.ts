@@ -26,6 +26,17 @@ export function useSpellBookPrefetch() {
   usePrefetchSpellsByIds(campaignId, isDM ? NO_SPELLS : (hero?.spellcasting.knownSpells ?? NO_SPELLS));
 }
 
+const BONUS_NONE: BookSpell[] = [];
+
+/** Відомі гравцеві заклинання за бонусну дію (з кешу книги, яку прогріває useSpellBookPrefetch). */
+export function useBonusSpells(hero: BattleParticipant): BookSpell[] {
+  const { campaignId, isDM } = useBattleScene();
+
+  const known = useSpellsByIds(campaignId, isDM ? NO_SPELLS : hero.spellcasting.knownSpells);
+
+  return useMemo(() => known.data?.filter((s) => s.cost === "bonusAction") ?? BONUS_NONE, [known.data]);
+}
+
 export function useSpellBook(caster: BattleParticipant | null, options: { allSpells?: boolean; onDone?: () => void } = {}) {
   const scene = useBattleScene();
 
@@ -126,6 +137,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
   return {
     state, spells, byLevel, selected, targets, saveTargets, allCount, formulaOf, definitionOf, slots: caster ? slotLevels(caster) : [],
+    costUsed: (s: BookSpell) => !!caster && (definitionOf(s).cost === "bonusAction" ? caster.actionFlags.hasUsedBonusAction : caster.actionFlags.hasUsedAction),
     open: (level?: number, casterOverride?: BattleParticipant) => {
       const who = casterOverride ?? caster;
 

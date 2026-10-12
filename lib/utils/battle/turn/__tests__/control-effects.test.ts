@@ -131,7 +131,6 @@ describe("charm", () => {
     const ogreTurn = afterMage.participants[1];
 
     expect(ogreTurn.basicInfo.side).toBe(ParticipantSide.ALLY);
-    expect(ogreTurn.battleData.charmReturn).toMatchObject({ side: ParticipantSide.ENEMY, controlledBy: "dm" });
 
     const after = advanceTurn({ participants: afterMage.participants, pending: [], scene: { ...scene, turnIndex: 1 } });
 

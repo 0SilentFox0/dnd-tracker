@@ -1,4 +1,4 @@
-import { ParticipantSide } from "@/lib/constants/battle";
+import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
 import { withinLimits } from "@/lib/utils/abilities/engine/usage";
@@ -26,6 +26,15 @@ export function slotLevels(p: BattleParticipant): { level: 1 | 2 | 3 | 4 | 5; ma
 
     return { level, max: s?.max ?? 0, current: s?.current ?? 0 };
   });
+}
+
+/** Чи лишилося заклинання за бонусну дію з вільним слотом (слоти — як у castSpell). */
+export function canCastBonusSpell(p: BattleParticipant, spells: { level: number; cost?: string | null }[]): boolean {
+  if (p.actionFlags.hasUsedBonusAction) return false;
+
+  const slotOf = (level: number) => p.spellcasting?.spellSlots?.[p.basicInfo.sourceType === ParticipantSourceType.UNIT ? "universal" : String(level)]?.current ?? 0;
+
+  return spells.some((s) => s.cost === "bonusAction" && slotOf(s.level) > 0);
 }
 
 export interface AbilityCharge {

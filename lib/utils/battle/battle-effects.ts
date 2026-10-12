@@ -1,12 +1,10 @@
+import { applyResistance } from "./resistance";
+
 import { ActiveEffect, BattleParticipant } from "@/types/battle";
 
-/**
- * Застосовує DOT (Damage Over Time) ефекти на початку ходу
- * @param participant - учасник бою
- * @returns об'єкт зі зміненим HP та масивом повідомлень про урон
- */
 export function applyDOTEffects(
-  participant: BattleParticipant
+  participant: BattleParticipant,
+  participants: BattleParticipant[] = [participant],
 ): { newHp: number; damageMessages: string[] } {
   let currentHp = participant.combatStats.currentHp;
 
@@ -14,11 +12,15 @@ export function applyDOTEffects(
 
   for (const effect of participant.battleData.activeEffects) {
     if (effect.dotDamage) {
-      const { damagePerRound, damageType } = effect.dotDamage;
+      const { damagePerRound, damageType, fromSpell } = effect.dotDamage;
 
-      currentHp = Math.max(0, currentHp - damagePerRound);
+      const { finalDamage } = applyResistance(participant, damagePerRound, damageType, { participants, fromSpell });
+
+      currentHp = Math.max(0, currentHp - finalDamage);
       damageMessages.push(
-        `${participant.basicInfo.name}: ${damagePerRound} ${damageType} шкоди від ${effect.name}`
+        finalDamage === damagePerRound
+          ? `${participant.basicInfo.name}: ${finalDamage} ${damageType} шкоди від ${effect.name}`
+          : `${participant.basicInfo.name}: ${finalDamage} (з ${damagePerRound}) ${damageType} шкоди від ${effect.name}`,
       );
     }
   }
@@ -49,11 +51,42 @@ export function applyHOTEffects(participant: BattleParticipant): { newHp: number
   return { newHp: currentHp, healMessages };
 }
 
+/** Позначає ефекти, що вже є на учаснику на початку його ходу: саме їм цей хід зараховується. */
+// ініціатива впливає лише на чергу: «N раундів» = N наступних сортувань на початку раунду
+export const isInitiativeOnly = (e: ActiveEffect) =>
+  !!e.abilityEffects?.length && e.effects.length === 0 && e.abilityEffects.every((s) => s.kind === "modifyStat" && s.stat === "initiative");
+
+export function armEffects(effects: ActiveEffect[]): ActiveEffect[] {
+  return effects.map((e) => (e.armed || e.countdownAtTurnStart || isInitiativeOnly(e) ? e : { ...e, armed: true }));
+}
+
+/** Після сортування черги на початку раунду: відлік для ефектів ініціативи. */
+export function countDownInitiativeEffects(p: BattleParticipant): BattleParticipant {
+  if (!p.battleData.activeEffects.some(isInitiativeOnly)) return p;
+
+  const activeEffects = p.battleData.activeEffects.flatMap((e) => (!isInitiativeOnly(e) ? [e] : e.duration <= 1 ? [] : [{ ...e, duration: e.duration - 1 }]));
+
+  return { ...p, battleData: { ...p.battleData, activeEffects } };
+}
+
+/** Початок ходу власника: відлік для countdownAtTurnStart. */
+export function countDownAtTurnStart(effects: ActiveEffect[]): { kept: ActiveEffect[]; expired: string[] } {
+  const kept: ActiveEffect[] = [];
+
+  const expired: string[] = [];
+
+  for (const e of effects) {
+    if (!e.countdownAtTurnStart) kept.push(e);
+    else if (e.duration <= 1) expired.push(e.name);
+    else kept.push({ ...e, duration: e.duration - 1 });
+  }
+
+  return { kept, expired };
+}
+
 /**
- * Зменшує тривалість всіх активних ефектів на 1 раунд
- * Видаляє ефекти з duration <= 0
- * @param participant - учасник бою
- * @returns оновлені активні ефекти та масив назв завершених ефектів
+ * Кінець ходу власника: «N раундів» = N його ходів. Накладені під час цього ходу ефекти (не armed)
+ * не втрачають тривалість, expireAtTurnEnd знімається після першого повного ходу.
  */
 export function decreaseEffectDurations(
   participant: BattleParticipant
@@ -66,15 +99,19 @@ export function decreaseEffectDurations(
   const expiredEffects: string[] = [];
 
   for (const effect of participant.battleData.activeEffects) {
+    if (!effect.armed) {
+      updatedEffects.push(effect);
+      continue;
+    }
+
     const newDuration = effect.duration - 1;
 
-    if (newDuration <= 0) {
+    if (newDuration <= 0 || effect.expireAtTurnEnd) {
       expiredEffects.push(effect.name);
     } else {
-      updatedEffects.push({
-        ...effect,
-        duration: newDuration,
-      });
+      const { armed: _armed, ...rest } = effect;
+
+      updatedEffects.push({ ...rest, duration: newDuration });
     }
   }
 

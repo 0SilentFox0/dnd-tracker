@@ -44,6 +44,7 @@ export interface ActiveEffect {
   dotDamage?: {
     damagePerRound: number;
     damageType: string;
+    fromSpell?: boolean;
   };
   hotHeal?: {
     healPerRound: number;
@@ -51,6 +52,10 @@ export interface ActiveEffect {
   breakOnDamage?: boolean;
   consumeOn?: "ownAttack" | "ownHit" | "attackAgainst";
   expireAtTurnEnd?: boolean;
+  /** Старий відлік: тривалість зменшується на початку ходу власника (мітки «раз за раунд», ефекти критів «до наступного ходу цілі») */
+  countdownAtTurnStart?: boolean;
+  /** Був на власнику на початку його поточного ходу: наприкінці ходу тривалість зменшується */
+  armed?: boolean;
   charmOrigin?: { side: ParticipantSide; controlledBy: string };
   abilityKey?: string;
   abilityEffects?: StaticEffect[];

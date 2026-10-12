@@ -14,6 +14,7 @@ export interface TimedEffectInput {
   hotHeal?: ActiveEffect["hotHeal"];
   breakOnDamage?: boolean;
   charmOrigin?: ActiveEffect["charmOrigin"];
+  countdownAtTurnStart?: boolean;
   source?: ActiveEffect["source"];
 }
 
@@ -44,6 +45,7 @@ export function upsertTimedEffect(p: BattleParticipant, input: TimedEffectInput,
     ...(input.hotHeal && { hotHeal: input.hotHeal }),
     ...(input.breakOnDamage && { breakOnDamage: true }),
     ...(input.charmOrigin && { charmOrigin: input.charmOrigin }),
+    ...(input.countdownAtTurnStart && { countdownAtTurnStart: true }),
     ...(input.source && { source: input.source }),
   };
 
@@ -54,7 +56,7 @@ export function upsertTimedEffect(p: BattleParticipant, input: TimedEffectInput,
 
     return {
       ...p,
-      battleData: { ...p.battleData, activeEffects: current.map((e) => (e === oldest ? { ...e, duration: input.rounds, appliedAt: effect.appliedAt } : e)) },
+      battleData: { ...p.battleData, activeEffects: current.map((e) => (e === oldest ? { ...e, duration: input.rounds, appliedAt: effect.appliedAt, armed: undefined } : e)) },
     };
   }
 

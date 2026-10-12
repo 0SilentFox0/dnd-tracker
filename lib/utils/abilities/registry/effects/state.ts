@@ -1,6 +1,7 @@
 import { CONDITION_LABELS } from "../labels";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
+import { restoreCharm } from "@/lib/utils/abilities/engine/charm";
 import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { countMarks, GUARD_KEY, markKey } from "@/lib/utils/abilities/engine/marks";
 import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/participants";
@@ -186,7 +187,14 @@ export function applyCleanse(input: EffectApplyInput<Of<"cleanse">>): EffectAppl
     (p) => {
       const kept = p.battleData.activeEffects.filter((e) => e.type !== "debuff" && !(effect.includeConditions && e.type === "condition"));
 
-      return kept.length === p.battleData.activeEffects.length ? null : { ...p, battleData: { ...p.battleData, activeEffects: kept } };
+      if (kept.length === p.battleData.activeEffects.length) return null;
+
+      // знятий чарм більше не поверне учасника наприкінці ходу — повертаємо одразу
+      const charm = p.battleData.activeEffects.find((e) => e.charmOrigin && !kept.includes(e));
+
+      const cleaned = { ...p, battleData: { ...p.battleData, activeEffects: kept } };
+
+      return charm ? restoreCharm({ ...cleaned, battleData: { ...cleaned.battleData, charmReturn: charm.charmOrigin } }) : cleaned;
     },
     (names) => `✨ ${ability.name}: з ${names} знято ${effect.includeConditions ? "дебафи та стани" : "дебафи"}`,
   );
@@ -215,7 +223,7 @@ export function applyMark(input: EffectApplyInput<Of<"mark">>): EffectApplyResul
     (p) => {
       const next = upsertTimedEffect(
         p,
-        { timedKey: markKey(effect.markId), source: effectSource(owner, ability), name: ability.name, type: "debuff", rounds: effect.duration.rounds, stackable: true },
+        { timedKey: markKey(effect.markId), source: effectSource(owner, ability), name: ability.name, type: "debuff", rounds: effect.duration.rounds, stackable: true, countdownAtTurnStart: true },
         ctx.round,
       );
 

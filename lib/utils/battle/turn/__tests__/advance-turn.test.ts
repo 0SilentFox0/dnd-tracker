@@ -135,12 +135,19 @@ describe("advanceTurn", () => {
     });
   });
 
-  it("expireAtTurnEnd effects end with the owner's last turn", () => {
-    const e = (duration: number) => makeEffect("x", { type: "debuff", duration, expireAtTurnEnd: true });
+  it("expireAtTurnEnd effects end with the owner's first full turn, not the turn they were applied in", () => {
+    const withE = (armed: boolean) => ({ ...hero, battleData: { ...hero.battleData, activeEffects: [makeEffect("x", { type: "debuff", duration: 2, expireAtTurnEnd: true, armed })] } });
 
-    const withE = (duration: number) => ({ ...hero, battleData: { ...hero.battleData, activeEffects: [e(duration)] } });
+    expect(advanceTurn({ participants: [withE(true), goblin], pending: [], scene }).participants[0].battleData.activeEffects).toEqual([]);
+    expect(advanceTurn({ participants: [withE(false), goblin], pending: [], scene }).participants[0].battleData.activeEffects).toHaveLength(1);
+  });
 
-    expect(advanceTurn({ participants: [withE(1), goblin], pending: [], scene }).participants[0].battleData.activeEffects).toEqual([]);
-    expect(advanceTurn({ participants: [withE(2), goblin], pending: [], scene }).participants[0].battleData.activeEffects).toHaveLength(1);
+  it("timed effects count down at the end of the owner's turn and log the expiry", () => {
+    const withE = { ...hero, battleData: { ...hero.battleData, activeEffects: [makeEffect("a", { name: "Кам'яна шкіра", duration: 1, armed: true }), makeEffect("b", { duration: 2, armed: true })] } };
+
+    const out = advanceTurn({ participants: [withE, goblin], pending: [], scene });
+
+    expect(out.participants[0].battleData.activeEffects.map((e) => [e.id, e.duration])).toEqual([["b", 1]]);
+    expect(out.actions.some((a) => a.resultText.includes("Кам'яна шкіра"))).toBe(true);
   });
 });

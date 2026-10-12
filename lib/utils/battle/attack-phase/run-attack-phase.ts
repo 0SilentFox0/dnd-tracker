@@ -6,7 +6,9 @@ import { isActive, mergeParticipants, updateParticipant, withSelf } from "@/lib/
 import type { Rng, SummonRequest } from "@/lib/utils/abilities/engine/types";
 import { processAttack } from "@/lib/utils/battle/attack";
 import { activeEffectIds } from "@/lib/utils/battle/attack/consume-effects";
+import { getDisabledAttackKinds } from "@/lib/utils/battle/attack/disabled-attacks";
 import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
+import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
 import { diceCount, rollDiceList } from "@/lib/utils/common/dice";
@@ -119,6 +121,12 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   if (!attack) {
     throw new BattleRuleError("action_rejected", "У атакуючого немає доступної атаки");
+  }
+
+  const attackKind = attackKindOf(attack.type);
+
+  if (getDisabledAttackKinds(attacker)[attackKind]) {
+    throw new BattleRuleError("action_rejected", attackKind === AttackType.RANGED ? "Атакуючий не може атакувати здалеку" : "Атакуючий не може атакувати в ближньому бою");
   }
 
   const isAoe = attack.targetType === "aoe";

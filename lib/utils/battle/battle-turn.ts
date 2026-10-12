@@ -1,4 +1,4 @@
-import { applyDOTEffects, applyHOTEffects, decreaseEffectDurations } from "./battle-effects";
+import { applyDOTEffects, applyHOTEffects, armEffects, countDownAtTurnStart, countDownInitiativeEffects } from "./battle-effects";
 import { calculateInitiative, sortByInitiative } from "./battle-start";
 
 import { CombatStatus } from "@/lib/constants/battle";
@@ -39,7 +39,6 @@ export function processStartOfTurn(
 ): StartOfTurnResult {
   let updatedParticipant = { ...participant };
 
-  // до зменшення тривалостей: обмеження на 1 раунд має подіяти в цей хід
   const hasNoBonusAction = hasEffectMarker(participant, "no_bonus_action");
 
   const hasNoReaction = hasEffectMarker(participant, "no_reaction");
@@ -52,12 +51,12 @@ export function processStartOfTurn(
 
   const healMessages: string[] = [];
 
-  // DoT і зменшення тривалості ефектів — на початку ходу цієї цілі (Decay тощо)
+  // DoT/HoT — на початку ходу цілі; тривалості зменшуються наприкінці ходу (endTurnCleanup)
   if (
     updatedParticipant.combatStats.status !== CombatStatus.DEAD &&
     updatedParticipant.combatStats.status !== CombatStatus.UNCONSCIOUS
   ) {
-    const dotResult = applyDOTEffects(updatedParticipant);
+    const dotResult = applyDOTEffects(updatedParticipant, allParticipants);
 
     updatedParticipant = dropBreakOnDamage(
       {
@@ -76,18 +75,15 @@ export function processStartOfTurn(
     updatedParticipant = { ...updatedParticipant, combatStats: { ...updatedParticipant.combatStats, currentHp: hotResult.newHp } };
     healMessages.push(...hotResult.healMessages);
 
-    const durationResult = decreaseEffectDurations(updatedParticipant);
+    const { kept, expired } = countDownAtTurnStart(updatedParticipant.battleData.activeEffects);
 
-    expiredEffects = durationResult.expiredEffects;
-
-    const charmEnded = updatedParticipant.battleData.activeEffects.find((e) => e.charmOrigin && !durationResult.updatedEffects.some((u) => u.id === e.id));
+    expiredEffects = expired;
 
     updatedParticipant = {
       ...updatedParticipant,
       battleData: {
         ...updatedParticipant.battleData,
-        activeEffects: durationResult.updatedEffects,
-        ...(charmEnded?.charmOrigin && { charmReturn: charmEnded.charmOrigin }),
+        activeEffects: armEffects(kept),
       },
     };
   }
@@ -261,7 +257,7 @@ export function processStartOfRound(
   );
 
   return {
-    updatedInitiativeOrder: sortedOrder,
+    updatedInitiativeOrder: sortedOrder.map(countDownInitiativeEffects),
     message: `🔁 Початок Раунду ${currentRound}`,
     triggerMessages: messages,
   };

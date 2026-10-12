@@ -24,6 +24,17 @@ describe("ActionGrid", () => {
     expect((screen.getByRole("button", { name: "Завершити хід" }) as HTMLButtonElement).disabled).toBe(false);
   });
 
+  it("після дії «Магія» лишається доступною, якщо є заклинання за бонусну дію", () => {
+    const used = (bonusSpellReady: boolean) => ({ ...(turn(false) as object), actionUsed: true, bonusSpellReady }) as never;
+
+    render(<ActionGrid turn={used(true)} {...props} />);
+    expect((screen.getByRole("button", { name: /Магія/ }) as HTMLButtonElement).disabled).toBe(false);
+    cleanup();
+
+    render(<ActionGrid turn={used(false)} {...props} />);
+    expect((screen.getByRole("button", { name: /Магія/ }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
   it.each([
     [undefined, "не потрібна"],
     ["none", "без змін"],

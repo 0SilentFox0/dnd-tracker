@@ -4,7 +4,7 @@ import { runBerserkTurn } from "../berserk";
 
 import { makeEffect, makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 
-const lastTurnEffect = makeEffect("adv", { duration: 1, expireAtTurnEnd: true });
+const lastTurnEffect = makeEffect("adv", { duration: 1, expireAtTurnEnd: true, armed: true });
 
 describe("berserk turn end", () => {
   it("expires turn-end effects of the berserker like a normal turn end", () => {

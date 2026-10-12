@@ -258,7 +258,7 @@ describe("інваріант: GET(до) + дельта = GET(після)", () =>
 
     expect(applied.currentTurnIndex).toBe(1);
     expect(gob.combatStats.currentHp).toBe(37);
-    expect(gob.battleData.activeEffects.map((e) => [e.id, e.duration])).toEqual([["burn", 1]]);
+    expect(gob.battleData.activeEffects.map((e) => [e.id, e.duration, e.armed])).toEqual([["burn", 2, true], ["bless", 1, true]]);
   });
 
   it("відкат атаки повертає HP і приносить перераховане знання", async () => {

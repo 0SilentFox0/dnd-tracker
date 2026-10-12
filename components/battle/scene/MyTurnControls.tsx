@@ -7,7 +7,7 @@ import { ActionGrid } from "./ActionGrid";
 import { TurnCountdown } from "./TurnCountdown";
 
 import { AiRollButton, DiceGrid } from "@/components/battle/wizards/DiceInput";
-import { rollDie, useAttackWizard, useBattleScene, usePlayerTurn, useSpellBook } from "@/lib/hooks/battle";
+import { rollDie, useAttackWizard, useBattleScene, useBonusSpells, usePlayerTurn, useSpellBook } from "@/lib/hooks/battle";
 import { COUNTDOWN_SECONDS } from "@/lib/utils/battle/flows";
 import { usableAbilities } from "@/lib/utils/battle/view";
 import type { BattleParticipant } from "@/types/battle";
@@ -21,7 +21,7 @@ const BonusActionPicker = dynamic(() => import("@/components/battle/wizards/Bonu
 export function MyTurnControls({ hero }: { hero: BattleParticipant }) {
   const { anyPending, isDM } = useBattleScene();
 
-  const turn = usePlayerTurn(hero);
+  const turn = usePlayerTurn(hero, useBonusSpells(hero));
 
   const attack = useAttackWizard(hero, turn.afterAction);
 

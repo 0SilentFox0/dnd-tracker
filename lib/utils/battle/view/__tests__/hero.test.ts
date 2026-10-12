@@ -5,7 +5,7 @@ import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { FlagEffect } from "@/lib/utils/abilities/schema";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
-import { abilityCharges, bonusTargetSide, lastAction, needsMoraleCheck, slotLevels, spellTier, weaponPreview } from "@/lib/utils/battle/view";
+import { abilityCharges, bonusTargetSide, canCastBonusSpell, lastAction, needsMoraleCheck, slotLevels, spellTier, weaponPreview } from "@/lib/utils/battle/view";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleAction } from "@/types/battle";
 
@@ -109,5 +109,22 @@ describe("мій герой", () => {
   it("сторона з ParticipantSide лишається рядком", () => {
     expect(ParticipantSide.ALLY).toBe("ally");
     expect(AttackType.MELEE).toBeDefined();
+  });
+});
+
+describe("canCastBonusSpell", () => {
+  const healingWord = { level: 1, cost: "bonusAction" };
+
+  const hero = (current: number, hasUsedBonusAction = false) => {
+    const p = createMockParticipant();
+
+    return { ...p, actionFlags: { ...p.actionFlags, hasUsedBonusAction }, spellcasting: { ...p.spellcasting, spellSlots: { "1": { max: 2, current } } } };
+  };
+
+  it("потрібні бонусна дія, заклинання за бонусну дію і слот його кола", () => {
+    expect(canCastBonusSpell(hero(1), [healingWord])).toBe(true);
+    expect(canCastBonusSpell(hero(0), [healingWord])).toBe(false);
+    expect(canCastBonusSpell(hero(1, true), [healingWord])).toBe(false);
+    expect(canCastBonusSpell(hero(1), [{ level: 1, cost: "action" }])).toBe(false);
   });
 });

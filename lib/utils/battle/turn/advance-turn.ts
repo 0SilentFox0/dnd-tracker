@@ -1,10 +1,10 @@
 import { applyPendingMoraleCheck } from "./apply-pending-morale";
-import { endTurnCleanup } from "./end-turn-cleanup";
+import { finishTurnEffects } from "./end-turn-cleanup";
 import type { PendingMoraleCheckPayload } from "./pending-morale";
 import { runAdvanceTurnLoop } from "./run-advance-turn-loop";
 import { applyVictoryCompletion } from "./turn-helpers";
 
-import { isActive, updateParticipant } from "@/lib/utils/abilities/engine/participants";
+import { isActive, replaceParticipant } from "@/lib/utils/abilities/engine/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import type { BattleSceneState, ScenePatch } from "@/lib/utils/battle/store";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
@@ -45,7 +45,11 @@ export function advanceTurn({ participants, pending, scene, rng }: AdvanceTurnIn
 
     if (ended.messages.length > 0) actions.push(turnEndAction(ending, scene, ended.messages));
 
-    order = updateParticipant(order, ending.basicInfo.id, endTurnCleanup);
+    const finished = finishTurnEffects(order.find((p) => p.basicInfo.id === ending.basicInfo.id) ?? ending);
+
+    order = replaceParticipant(order, finished.participant);
+
+    if (finished.expired.length > 0) actions.push(turnEndAction(ending, scene, [`ефекти завершилися: ${finished.expired.join(", ")}`]));
   }
 
   const current = order[scene.turnIndex];
@@ -65,7 +69,7 @@ export function advanceTurn({ participants, pending, scene, rng }: AdvanceTurnIn
   if (extraIndex >= 0) {
     const taker = order[extraIndex];
 
-    // без processStartOfTurn: DoT і тривалості вже спрацювали на початку звичайного ходу
+    // без processStartOfTurn: DoT уже спрацював, а тривалості зменшилися наприкінці звичайного ходу
     order = order.map((p, i) =>
       i === extraIndex
         ? {

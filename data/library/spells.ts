@@ -588,10 +588,10 @@ export const SPELLS: LibrarySpell[] = [
     name: "Місячний промінь",
     school: NATURE,
     level: 2,
-    description: `Завдає ворогу ${power(3, "променевої шкоди")}, а наступні 2 раунди він на початку свого ходу отримує ще 14 % від цього кидка.`,
+    description: `Завдає ворогу ${power(3, "променевої шкоди")}, а місячне світло підсвічує його: наступні 2 його ходи всі атаки по ньому мають перевагу.`,
     appearanceDescription:
-      "Навіть серед білого дня з неба падає срібний місячний стовп і пришпилює ворога до землі. Його шкіра світиться холодним сяйвом, що пече зсередини.",
-    definition: def(3, ENEMY, [damage("radiant"), { kind: "dot", damagePerRound: { spellRoll: 14 }, damageType: "radiant", duration: rounds(2) }]),
+      "Навіть серед білого дня з неба падає срібний місячний стовп і пришпилює ворога до землі. Холодне сяйво не гасне й після удару: ворог світиться, мов мішень, і жодна тінь не може його сховати.",
+    definition: def(3, ENEMY, [damage("radiant"), { kind: "flag", flag: "advantageForAttackers", duration: rounds(2) }]),
     raceModifiers: [],
   },
   {

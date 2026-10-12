@@ -5,6 +5,7 @@ import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/
 import { applyEffect, describeEffect } from "@/lib/utils/abilities/registry/effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import { processStartOfTurn } from "@/lib/utils/battle/battle-turn";
+import { endTurnCleanup } from "@/lib/utils/battle/turn/end-turn-cleanup";
 
 const hot: Effect = { kind: "hot", healPerRound: "1d4", duration: { rounds: 3 }, target: "eventTarget" };
 
@@ -38,7 +39,8 @@ describe("hot", () => {
 
     expect(out.participant.combatStats.currentHp).toBe(20);
     expect(out.abilityMessages.some((m) => m.includes("+1 HP"))).toBe(true);
-    expect(out.participant.battleData.activeEffects[0].duration).toBe(2);
+    expect(out.participant.battleData.activeEffects[0].duration).toBe(3);
+    expect(endTurnCleanup(out.participant).battleData.activeEffects[0].duration).toBe(2);
   });
 
   it("повне лікування за раунд", () => {

@@ -28,7 +28,7 @@ export function ActionGrid({ turn, pending, labels, available, actions }: {
     <>
       <div className="grid grid-cols-2 gap-2 pt-3">
         <Tile icon={Swords} label="Атака" sub={turn.actionUsed ? "використано" : labels.attack} used={turn.actionUsed || turn.skipped || pending} primary onClick={actions.attack} />
-        <Tile icon={BookOpen} label="Магія" sub={turn.actionUsed ? "дію використано" : labels.magic} used={turn.actionUsed || turn.skipped || !available.magic || pending} onClick={actions.magic} />
+        <Tile icon={BookOpen} label="Магія" sub={turn.actionUsed ? (turn.bonusSpellReady ? "бонусною дією" : "дію використано") : labels.magic} used={(turn.actionUsed && !turn.bonusSpellReady) || turn.skipped || !available.magic || pending} onClick={actions.magic} />
         {available.ability && <Tile icon={Zap} label="Вміння" sub={turn.actionUsed ? "дію використано" : (labels.ability ?? "")} used={turn.actionUsed || turn.skipped || pending} onClick={actions.ability} />}
         <Tile icon={Sparkles} label="Бонус" sub={labels.bonus} used={!turn.bonusAvailable || turn.skipped || !available.bonus || pending} onClick={actions.bonus} />
         <Tile icon={Hourglass} label="Мораль" sub={turn.moraleResult ? MORALE_SUB[turn.moraleResult] : "не потрібна"} used />
