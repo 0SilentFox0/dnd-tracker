@@ -104,6 +104,16 @@ describe("targeting kinds", () => {
 });
 
 describe("castSpell", () => {
+  it("зберігає порядок ініціативи: кастер не переміщується на початок", () => {
+    const c = caster();
+
+    const first = makeParticipant({ id: "a" });
+
+    const r = castSpell({ caster: c, spell: spellOf(), targetIds: ["e1"], allParticipants: [first, enemy("e1"), c], currentRound: 1, battleId: "b", diceRolls: [3, 3], rng: seq(0.5) });
+
+    expect(r.allParticipantsUpdated.map((p) => p.basicInfo.id)).toEqual(["a", "e1", "c"]);
+  });
+
   it("шкода = сума кубиків, один кидок на всі цілі", () => {
     const r = cast(spellOf({ targeting: { kind: "area", side: "enemy", maxTargets: 2 } }), ["e1", "e2"], [enemy("e1"), enemy("e2")]);
 

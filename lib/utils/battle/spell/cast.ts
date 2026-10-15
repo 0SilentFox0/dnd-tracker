@@ -9,7 +9,7 @@ import { participantImmuneToSpell } from "./spell-immunity";
 import { ParticipantSourceType } from "@/lib/constants/battle";
 import { resolveAmount } from "@/lib/utils/abilities/engine/amount";
 import { applyRawDamage } from "@/lib/utils/abilities/engine/hp";
-import { findParticipant, isActive, withSelf } from "@/lib/utils/abilities/engine/participants";
+import { findParticipant, isActive, mergeParticipants, withSelf } from "@/lib/utils/abilities/engine/participants";
 import { resolveTargetIds } from "@/lib/utils/abilities/engine/targets";
 import type { SummonRequest } from "@/lib/utils/abilities/engine/types";
 import { applyEffect } from "@/lib/utils/abilities/registry/effects";
@@ -115,7 +115,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     return {
       success: false,
       casterUpdated: updatedCaster,
-      allParticipantsUpdated: flow.ps,
+      allParticipantsUpdated: mergeParticipants(allParticipants, flow.ps),
       battleAction: actionOf(updatedCaster, spell, targetsBefore, battleId, currentRound, `${updatedCaster.basicInfo.name}: ${spell.name} недоступне — немає spell slots`),
       summons: [],
     };
@@ -292,5 +292,6 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
   });
   appendHpChanges(action, before, flow.ps);
 
-  return { success: true, casterUpdated: getP(flow, casterId), allParticipantsUpdated: flow.ps, battleAction: action, summons: [...summons, ...flow.summons] };
+  // withSelf ставить кастера першим — повертаємо вихідний порядок ініціативи
+  return { success: true, casterUpdated: getP(flow, casterId), allParticipantsUpdated: mergeParticipants(allParticipants, flow.ps), battleAction: action, summons: [...summons, ...flow.summons] };
 }

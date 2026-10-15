@@ -15,10 +15,22 @@ import {
 import { AttackType } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 
-/**
- * Витягує атаки з екіпірованої зброї (артефактів зі слота weapon)
- */
+// Без зброї свого виду герой б'є лише кубиками рівня — так само рахує баланс (bestAttack у balance/stats.ts)
+const DEFAULT_ATTACKS: ExtractedAttack[] = [
+  { id: "default-melee", name: "Ближня атака", type: AttackType.MELEE as ExtractedAttack["type"], attackBonus: 0, damageDice: "", damageType: "physical" },
+  { id: "default-ranged", name: "Дальня атака", type: AttackType.RANGED as ExtractedAttack["type"], attackBonus: 0, damageDice: "", damageType: "physical" },
+];
+
 export async function extractAttacksFromCharacter(
+  character: CharacterFromPrisma,
+  preloadedArtifactsById?: Record<string, Prisma.ArtifactGetPayload<object>>,
+): Promise<ExtractedAttack[]> {
+  const weapons = await extractWeaponAttacks(character, preloadedArtifactsById);
+
+  return [...weapons, ...DEFAULT_ATTACKS.filter((d) => !weapons.some((w) => w.type === d.type))];
+}
+
+async function extractWeaponAttacks(
   character: CharacterFromPrisma,
   preloadedArtifactsById?: Record<string, Prisma.ArtifactGetPayload<object>>,
 ): Promise<ExtractedAttack[]> {
@@ -80,10 +92,6 @@ export async function extractAttacksFromCharacter(
         range: typeof inv.range === "string" ? inv.range : undefined,
       });
     }
-  }
-
-  if (weaponIds.length === 0 && attacks.length === 0) {
-    return attacks;
   }
 
   if (weaponIds.length === 0) {
