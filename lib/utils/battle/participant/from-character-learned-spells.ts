@@ -10,23 +10,40 @@ export async function resolveLearnedSpellsFromCharacter(character: CharacterFrom
   return (await resolveLearnedSpellsAndMastery(character, baseKnownSpells, context)).knownSpells;
 }
 
+// персональне вміння не лежить у дереві, тож його закляття додаємо окремо
+async function personalSpellIds(character: CharacterFromPrisma, context?: CampaignSpellContext): Promise<string[]> {
+  const id = character.personalSkillId?.trim();
+
+  if (!id) return [];
+
+  const skill = context ? context.allSkills.find((s) => s.id === id) : await prisma.skill.findUnique({ where: { id } });
+
+  const spellId = skill ? toSpellSkillInfo(skill as never).newSpellId : null;
+
+  return spellId ? [spellId] : [];
+}
+
 export async function resolveLearnedSpellsAndMastery(
   character: CharacterFromPrisma,
-  baseKnownSpells: string[],
+  knownSpells: string[],
   context?: CampaignSpellContext,
 ): Promise<{ knownSpells: string[]; schoolMastery: Record<string, BranchLevel> }> {
-  const none = { knownSpells: baseKnownSpells, schoolMastery: {} };
+  let baseKnownSpells = knownSpells;
+
+  const none = () => ({ knownSpells: baseKnownSpells, schoolMastery: {} });
 
   try {
+    baseKnownSpells = [...new Set([...knownSpells, ...(await personalSpellIds(character, context))])];
+
     const treeRow = context ? (context.skillTreeByRace[character.race] ?? null) : await prisma.skillTree.findFirst({ where: { campaignId: character.campaignId, race: character.race } });
 
-    if (!treeRow) return none;
+    if (!treeRow) return none();
 
     const tree = normalizeTree(treeRow);
 
     const learned = resolveLearned(tree, character.skillTreeProgress);
 
-    if (learned.length === 0) return none;
+    if (learned.length === 0) return none();
 
     const skillIds = learned.map((n) => n.skillId).filter((id): id is string => !!id);
 
@@ -62,6 +79,6 @@ export async function resolveLearnedSpellsAndMastery(
   } catch (e) {
     logger.error("[battle/learned-spells] load from tree failed", { characterId: character.id, race: character.race }, e);
 
-    return none;
+    return none();
   }
 }

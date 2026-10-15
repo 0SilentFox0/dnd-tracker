@@ -429,10 +429,10 @@ describe("Прикликання (Фенікс, елементалі)", () => {
 });
 
 describe("Аватар (avatar)", () => {
-  it("за замовчуванням — лише нотатка: слот витрачено, прикликання немає", () => {
+  it("прикликає Аватара Смерті й витрачає слот", () => {
     const r = cast("avatar", [mage(), unit("e1")], []);
 
-    expect(r.summons).toHaveLength(0);
+    expect(r.summons.map((s) => s.unitId)).toEqual(["neutral-death-avatar"]);
     expect(r.casterUpdated.spellcasting.spellSlots["4"].current).toBe(2);
   });
 

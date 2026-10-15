@@ -197,6 +197,17 @@ describe("castSpell", () => {
     expect(hp(r, "e1")).toBe(200 - 3);
   });
 
+  it("імунітет до стихії: шкода 0 і позначка ⛔ у лозі", () => {
+    const immune = enemy("e1");
+
+    immune.battleData.resolvedAbilities = [resolved({ name: "Вогнетривкість", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "resistance", damageType: "fire", percent: 100 }] })];
+
+    const r = cast(spellOf(), ["e1"], [immune]);
+
+    expect(hp(r, "e1")).toBe(200);
+    expect(r.battleAction.resultText).toContain("⛔ e1:");
+  });
+
   it("Відродження лісу: усі полеглі союзники повертаються з 30 % HP", () => {
     const fallen = (id: string) => ({ ...makeParticipant({ id, hp: 0, maxHp: 50 }), combatStats: { ...makeParticipant({ id, maxHp: 50 }).combatStats, currentHp: 0, maxHp: 50, status: "dead" as const } });
 

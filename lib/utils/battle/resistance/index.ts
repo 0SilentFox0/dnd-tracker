@@ -25,6 +25,13 @@ export interface ResistanceResult {
   steps: DamageStep[];
 }
 
+/** Текст для логу, коли шкоду повністю зняв імунітет: «⛔ Дракон: Імунітет до вогню». */
+export function immunityNote(targetName: string, steps: DamageStep[]): string {
+  const step = steps.find((s) => s.kind === "immunity");
+
+  return step ? `⛔ ${targetName}: ${step.label}` : "";
+}
+
 const clampPercent = (n: number) => Math.max(-BATTLE_CONSTANTS.RESISTANCE_PERCENT_CAP, Math.min(BATTLE_CONSTANTS.RESISTANCE_PERCENT_CAP, n));
 
 function matchesDamageType(flagType: string, damageType: string, fromSpell: boolean): boolean {

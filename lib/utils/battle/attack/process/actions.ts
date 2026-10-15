@@ -4,6 +4,7 @@ import type { ComputeHitDamageResult } from "./compute";
 
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
+import { immunityNote } from "@/lib/utils/battle/resistance";
 import type { BattleAction, BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
 
 const critDetails = (effect: CriticalEffect, flavor?: string) => ({ id: effect.id, name: effect.name, description: effect.description, type: effect.type, flavor });
@@ -219,6 +220,7 @@ export function buildBattleActionForHit(params: BuildHitActionParams): BattleAct
     },
     resultText: [
       `${attacker.basicInfo.name} → ${target.basicInfo.name}: ${totalFinalDamage} шкоди${criticalEffectApplied ? `. ${critSummary(criticalEffectApplied, critFlavorText, false)}` : attackRoll.isCritical ? " (КРИТИЧНЕ ПОПАДАННЯ!)" : ""}${vampirismHeal > 0 ? ` | Вампіризм: ${attacker.basicInfo.name} +${vampirismHeal} HP` : ""}`,
+      totalFinalDamage === 0 ? immunityNote(target.basicInfo.name, damageSteps) : "",
       ...beforeMessages,
       ...afterMessages,
     ].filter(Boolean).join(" | "),
@@ -299,6 +301,8 @@ export function buildRetaliationAction(p: BuildRetaliationParams): BattleAction 
     hit ? `${hit.hitDamage.totalFinalDamage} шкоди${!crit && attackRoll.isCritical ? " (КРИТИЧНЕ ПОПАДАННЯ!)" : ""}` : "промах"
   }${critText}`;
 
+  const immune = hit && hit.hitDamage.totalFinalDamage === 0 ? immunityNote(target.basicInfo.name, hit.hitDamage.damageSteps) : "";
+
   return {
     id: `retaliation-${retaliator.basicInfo.id}-${Date.now()}`,
     battleId: p.battleId,
@@ -328,7 +332,7 @@ export function buildRetaliationAction(p: BuildRetaliationParams): BattleAction 
         damageSteps: { [target.basicInfo.id]: hit.hitDamage.damageSteps },
       }),
     },
-    resultText: [summary, ...p.messages].filter(Boolean).join(" | "),
+    resultText: [summary, immune, ...p.messages].filter(Boolean).join(" | "),
     hpChanges: [],
     isCancelled: false,
   };

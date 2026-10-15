@@ -27,4 +27,12 @@ describe("resolveLearnedSpellsFromCharacter", () => {
 
     expect(await resolveLearnedSpellsFromCharacter(character, ["k"], { ...(context as object), skillTreeByRace: {} } as never)).toEqual(["k"]);
   });
+
+  it("персональне вміння додає своє закляття навіть без дерева", async () => {
+    const character = { id: "c", race: "Гном", campaignId: "camp", skillTreeProgress: {}, personalSkillId: "ps" } as never;
+
+    const ctx = { ...(context as object), skillTreeByRace: {}, allSkills: [{ id: "ps", grantedSpellId: "avatar" }] } as never;
+
+    expect(await resolveLearnedSpellsFromCharacter(character, ["k"], ctx)).toEqual(["k", "avatar"]);
+  });
 });

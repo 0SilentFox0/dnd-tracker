@@ -1,7 +1,7 @@
 import { appendHpChanges, type AttackFlow, fire, getP, put, settleDowned } from "../attack/process/ability-flow";
 import { applyBalanceDamageMultiplier } from "../damage/balance-multiplier";
 import { applyMainActionUsed } from "../participant";
-import { applyResistance } from "../resistance";
+import { applyResistance, immunityNote } from "../resistance";
 import type { CastableSpell, CastSpellParams, CastSpellResult } from "../types/spell-process";
 import { computeSpellPower, spellSaveDc } from "./power";
 import { participantImmuneToSpell } from "./spell-immunity";
@@ -158,6 +158,8 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
     put(flow, applyRawDamage(target, resisted.finalDamage));
     damageSteps[id] = [...(damageSteps[id] ?? []), ...resisted.steps];
+
+    if (resisted.finalDamage === 0 && resisted.immunityApplied) flow.messages.push(immunityNote(target.basicInfo.name, resisted.steps));
   };
 
   interface Outcome {

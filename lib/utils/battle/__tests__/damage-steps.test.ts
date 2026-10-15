@@ -105,6 +105,18 @@ describe("кроки шкоди в подіях", () => {
     expect(steps.at(-1)?.after).toBe(r.damage?.finalDamage);
   });
 
+  it("атака по цілі з імунітетом: 0 шкоди і позначка ⛔ у тексті логу", () => {
+    const sword = { id: "sw", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d6", damageType: "slashing" };
+
+    const a = makeParticipant({ id: "a" });
+
+    const t = wall("e", "physical", 100);
+
+    const r = processAttack({ attacker: { ...a, battleData: { ...a.battleData, attacks: [sword] } }, target: t, attack: sword, d20Roll: 15, damageRolls: [4], allParticipants: [a, t], currentRound: 1, battleId: "b1", rng: seq(0) });
+
+    expect(r.battleAction.resultText).toContain("a → e: 0 шкоди | ⛔ e: Кам'яна шкіра");
+  });
+
   it("спел: damageSteps[ціль] містить опір цілі", () => {
     const c = makeParticipant({ id: "c" });
 
