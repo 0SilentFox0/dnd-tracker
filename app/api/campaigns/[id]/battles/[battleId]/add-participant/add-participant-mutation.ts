@@ -8,6 +8,7 @@ import {
   createBattleParticipantFromCharacter,
   createBattleParticipantFromUnit,
 } from "@/lib/utils/battle/participant";
+import { assignUnitControl } from "@/lib/utils/battle/participant/unit-control";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError } from "@/lib/utils/battle/store";
 import type { BattleParticipant } from "@/types/battle";
@@ -108,7 +109,7 @@ export function createAddParticipantMutation(deps: AddParticipantDeps = defaultD
     }
 
     return {
-      participants,
+      participants: assignUnitControl(participants, ctx.userId),
       pending: ctx.pending,
       events: [
         {

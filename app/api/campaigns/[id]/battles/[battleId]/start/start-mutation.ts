@@ -1,6 +1,7 @@
 import { buildStartOrder } from "./start-battle-handler";
 
 import { BattleStatus } from "@/lib/constants/battle";
+import { assignUnitControl } from "@/lib/utils/battle/participant/unit-control";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { battleActionToEvent, BattleRuleError } from "@/lib/utils/battle/store";
 
@@ -13,7 +14,7 @@ export function createStartMutation(build = buildStartOrder) {
     const { order, triggerLogEntries } = await build(ctx.scene.id, ctx.scene.campaignId, ctx.meta.setup);
 
     return {
-      participants: order,
+      participants: assignUnitControl(order, ctx.userId),
       pending: [],
       scene: { status: BattleStatus.ACTIVE, startedAt: new Date(), completedAt: null, round: 1, turnIndex: 0, pendingMoraleCheck: null },
       events: triggerLogEntries.map(battleActionToEvent),
