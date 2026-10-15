@@ -519,13 +519,15 @@ async function createParty(partyKey: string, level: number, trees: Map<string, T
     let equipped: Record<string, string> = { mainHand: weapons[b.weapon] };
 
     if (withSets) {
-      const librarySet = LIBRARY_ARTIFACT_SETS.find((s) => s.name === BUILD_SET[b.key])!;
+      const librarySet = LIBRARY_ARTIFACT_SETS.find((s) => s.name === BUILD_SET[b.key]);
+
+      if (!librarySet) throw new Error(`Сет «${BUILD_SET[b.key]}» не знайдено в бібліотеці`);
 
       const rows = await prisma.artifact.findMany({ where: { campaignId, name: { in: librarySet.artifacts.map((a) => a.name) } }, select: { id: true, name: true } });
 
       const idByName = new Map(rows.map((r) => [r.name, r.id]));
 
-      const setSlots = Object.fromEntries(librarySet.artifacts.map((a) => [a.slot, idByName.get(a.name)!]));
+      const setSlots = Object.fromEntries(librarySet.artifacts.flatMap((a) => (idByName.has(a.name) ? [[a.slot, idByName.get(a.name) as string]] : [])));
 
       equipped = b.key === "leader" ? setSlots : { ...equipped, ...setSlots };
     }

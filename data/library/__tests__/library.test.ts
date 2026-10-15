@@ -13,6 +13,12 @@ import { BRANCH_ICONS, SKILL_ICONS, SPELL_ICONS } from "@/data/skill-icons";
 import { scaleSummon } from "@/lib/utils/units/level-scaling";
 import type { BattleParticipant } from "@/types/battle";
 
+function must<T>(value: T | undefined): T {
+  if (value === undefined) throw new Error("не знайдено в бібліотеці");
+
+  return value;
+}
+
 const APPEARANCE = "Світло розгортається над полем бою золотим куполом, і навіть найстаміший воїн відчуває, як повертаються сили.";
 
 function skill(key: string, over: Partial<LibrarySkill> = {}): LibrarySkill {
@@ -357,14 +363,14 @@ describe("library content", () => {
   });
 
   content("«Призив Фенікса» summons the scaling Phoenix that is reborn once at half HP", () => {
-    const spell = SPELLS.find((sp) => sp.key === "call-of-the-beast")!;
+    const spell = must(SPELLS.find((sp) => sp.key === "call-of-the-beast"));
 
     expect(spell.name).toBe("Призив Фенікса");
     expect(spell.formerNames).toEqual(["Поклик звіра"]);
     expect(spell.level).toBe(5);
     expect(spell.definition.effects).toEqual([{ kind: "summon", unitId: "neutral-phoenix" }]);
 
-    const phoenix = UNITS.find((u) => u.key === "neutral-phoenix")!;
+    const phoenix = must(UNITS.find((u) => u.key === "neutral-phoenix"));
 
     expect(phoenix).toMatchObject({ name: "Фенікс", raceKey: null, tier: 7, flying: true, levelScaling: { hpPerLevel: 10, damagePerLevel: 1, attackPerTwoLevels: 1 } });
 
@@ -375,7 +381,7 @@ describe("library content", () => {
   });
 
   content("scales the earth elemental to 73 HP at level 6", () => {
-    const earth = UNITS.find((u) => u.key === "neutral-earth-elemental")!;
+    const earth = must(UNITS.find((u) => u.key === "neutral-earth-elemental"));
 
     const p = { combatStats: { maxHp: earth.hp, currentHp: earth.hp }, battleData: { attacks: [{ damageDice: "2d8", attackBonus: 3 }] } } as unknown as BattleParticipant;
 

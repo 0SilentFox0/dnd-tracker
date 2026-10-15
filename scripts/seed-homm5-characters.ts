@@ -99,6 +99,9 @@ function arg(name: string): string | undefined {
 
 const flag = (name: string) => process.argv.includes(`--${name}`);
 
+// у json «Раілаг», у кампанії й бібліотеці — «Раїлаг» (після голосної — ї)
+const fixNames = (raw: string) => raw.replaceAll("Раілаг", "Раїлаг");
+
 // Розмітка BiographyText: «# заголовок», «> цитата», «• пункт», **жирне**
 const section = (title: string, lines: string[]) => (lines.length ? [`# ${title}\n${lines.join("\n")}`] : []);
 
@@ -141,7 +144,7 @@ const KINDS = new Set<string>(Object.values(GoalKind));
 
 const STATUSES = new Set<string>(Object.values(GoalStatus));
 
-// heroes.json v2 має goals; Раілаг у npcs.json досі у форматі quests — одна мета на квест
+// heroes.json v2 має goals; Раїлаг у npcs.json досі у форматі quests — одна мета на квест
 function heroGoals(h: Hero): CharacterGoal[] {
   const source = h.goals ?? (h.quests ?? []).map((q) => ({ id: q.id, title: q.title, type: q.type, text: `${q.hook} ${q.motivation}`, status: "active" }));
 
@@ -202,9 +205,9 @@ async function main() {
 
   const dryRun = flag("dry-run");
 
-  const heroesFile = JSON.parse(readFileSync(arg("heroes") ?? "/Users/silentfox/Downloads/heroes (1).json", "utf8"));
+  const heroesFile = JSON.parse(fixNames(readFileSync(arg("heroes") ?? "/Users/silentfox/Downloads/heroes (1).json", "utf8")));
 
-  const npcsFile = JSON.parse(readFileSync(arg("npcs") ?? "/Users/silentfox/Downloads/npcs.json", "utf8"));
+  const npcsFile = JSON.parse(fixNames(readFileSync(arg("npcs") ?? "/Users/silentfox/Downloads/npcs.json", "utf8")));
 
   const photos = arg("photos") ?? "/Users/silentfox/Desktop/Heroes";
 

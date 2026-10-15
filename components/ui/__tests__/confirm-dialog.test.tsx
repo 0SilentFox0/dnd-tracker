@@ -10,7 +10,11 @@ import { type ConfirmFn, useConfirm, useNotify } from "@/lib/hooks/common";
 
 const holder: { confirm?: ConfirmFn } = {};
 
-const confirm: ConfirmFn = (o) => holder.confirm!(o);
+const confirm: ConfirmFn = (o) => {
+  if (!holder.confirm) throw new Error("ConfirmProvider не віддав confirm");
+
+  return holder.confirm(o);
+};
 
 function Grab() {
   const c = useConfirm();

@@ -19,6 +19,6 @@ describe("расові бонуси до шкоди", () => {
 
     expect(style).toBeTruthy();
     expect(AbilitySchema.safeParse(style).success).toBe(true);
-    expect(Object.fromEntries(style!.effects.map((e) => [(e as { filter: { kind: string } }).filter.kind, (e as { percent: number }).percent]))).toEqual(expected);
+    expect(Object.fromEntries((style?.effects ?? []).map((e) => [(e as { filter: { kind: string } }).filter.kind, (e as { percent: number }).percent]))).toEqual(expected);
   });
 });

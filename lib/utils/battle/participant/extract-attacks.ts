@@ -77,7 +77,7 @@ async function extractWeaponAttacks(
 
       const isRanged =
         inv.weaponType?.toLowerCase() === AttackType.RANGED ||
-        /лук|bow|арбалет|crossbow/i.test((inv.name as string) ?? "") ||
+        key === "range_weapon" ||
         (typeof inv.range === "string" &&
           inv.range.trim() !== "" &&
           inv.range !== "5 ft");
@@ -149,7 +149,7 @@ async function extractWeaponAttacks(
     if (
       attackType !== AttackType.RANGED &&
       (attackType?.toLowerCase() === AttackType.RANGED ||
-        /лук|bow|арбалет|crossbow/i.test(weapon.name) ||
+        weapon.slot === "range_weapon" ||
         (rangeVal && rangeVal.trim() !== "" && rangeVal !== "5 ft"))
     ) {
       attackType = AttackType.RANGED;

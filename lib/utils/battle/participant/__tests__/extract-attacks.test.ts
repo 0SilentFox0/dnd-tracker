@@ -24,4 +24,14 @@ describe("extractAttacksFromCharacter", () => {
 
     expect(attacks.map((a) => a.id)).toEqual(["bow", "default-melee"]);
   });
+
+  it("дальність визначає слот або тип атаки, а не назва", async () => {
+    const sling = { id: "sling", campaignId: "c", name: "Праща", slot: "range_weapon", ...weaponStatsColumns({ damageDice: "1d4", damageType: "bludgeoning" }) } as unknown as Prisma.ArtifactGetPayload<object>;
+
+    const bowSword = { id: "bs", campaignId: "c", name: "Лук-меч", slot: "weapon", ...weaponStatsColumns({ damageDice: "1d6", damageType: "slashing", attackType: "melee" }) } as unknown as Prisma.ArtifactGetPayload<object>;
+
+    const attacks = await extractAttacksFromCharacter(hero({ range_weapon: "sling", weapon: "bs" }), { sling, bs: bowSword });
+
+    expect(Object.fromEntries(attacks.map((a) => [a.id, a.type]))).toEqual({ sling: "ranged", bs: "melee" });
+  });
 });

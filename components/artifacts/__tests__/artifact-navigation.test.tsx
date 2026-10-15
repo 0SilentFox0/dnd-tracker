@@ -9,6 +9,12 @@ const nav = vi.hoisted(() => ({
   form: null as null | { onSubmit: (payload: unknown) => Promise<void>; onDelete?: () => Promise<void> },
 }));
 
+function form() {
+  if (!nav.form) throw new Error("форма не відрендерилась");
+
+  return nav.form;
+}
+
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: (href: string) => nav.calls.push(`push ${href}`), refresh: () => nav.calls.push("refresh") }),
 }));
@@ -51,7 +57,7 @@ describe("навігація артефактів", () => {
   it("створення: спершу перехід до списку, потім refresh", async () => {
     render(<ArtifactCreateForm campaignId="c1" artifactSets={[]} />, { wrapper });
 
-    await act(() => nav.form!.onSubmit({ name: "Кільце", description: null, setId: null }));
+    await act(() => form().onSubmit({ name: "Кільце", description: null, setId: null }));
 
     expect(nav.calls).toEqual(["push /campaigns/c1/dm/artifacts", "refresh"]);
   });
@@ -59,11 +65,11 @@ describe("навігація артефактів", () => {
   it("редагування і видалення з форми: перехід, потім refresh", async () => {
     render(<ArtifactEditForm campaignId="c1" artifact={artifact} artifactSets={[]} />, { wrapper });
 
-    await act(() => nav.form!.onSubmit({ name: "Кільце" }));
+    await act(() => form().onSubmit({ name: "Кільце" }));
     expect(nav.calls).toEqual(["push /campaigns/c1/dm/artifacts", "refresh"]);
 
     nav.calls.length = 0;
-    await act(() => nav.form!.onDelete!());
+    await act(() => form().onDelete?.());
     expect(nav.calls).toEqual(["push /campaigns/c1/dm/artifacts", "refresh"]);
   });
 
