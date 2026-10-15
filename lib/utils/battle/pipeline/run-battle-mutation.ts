@@ -5,6 +5,7 @@ import type { PusherMessage } from "./battle-response";
 import { buildPusherMessages, toBattleResponse } from "./battle-response";
 import { buildClientDelta } from "./client-delta";
 import { defaultPipelineDeps } from "./default-deps";
+import { guardTurnOrder } from "./turn-order-guard";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BattleStatus } from "@/lib/constants/battle";
@@ -223,7 +224,7 @@ export async function runBattleMutation<TBody>(
       throw new BattleConflictError(loaded.scene.version);
     }
 
-    const result = withVictory(loaded.scene, await options.mutate(ctx, parsed.body));
+    const result = withVictory(loaded.scene, guardTurnOrder(loaded.scene, loaded.participants, await options.mutate(ctx, parsed.body), new URL(req.url).pathname.split("/").pop()));
 
     if (options.dryRun?.(parsed.body)) {
       const needsKnowledge = options.includeKnowledge && !loaded.isDM && !alwaysSeesEnemyStats(loaded.participants, userId);
