@@ -9,6 +9,7 @@ import { activeEffectIds } from "@/lib/utils/battle/attack/consume-effects";
 import { getDisabledAttackKinds } from "@/lib/utils/battle/attack/disabled-attacks";
 import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
+import { canActNow } from "@/lib/utils/battle/common/control";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
 import { diceCount, rollDiceList } from "@/lib/utils/common/dice";
@@ -83,12 +84,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const currentParticipant = initiativeOrder[battle.currentTurnIndex];
 
-  const canAttack =
-    isDM ||
-    (currentParticipant?.basicInfo.id === attacker.basicInfo.id &&
-      attacker.basicInfo.controlledBy === userId);
-
-  if (!canAttack) {
+  if (!canActNow({ isDM, userId }, attacker, currentParticipant)) {
     throw new BattleAccessError(403, "Атакувати може лише DM або той, хто зараз ходить");
   }
 

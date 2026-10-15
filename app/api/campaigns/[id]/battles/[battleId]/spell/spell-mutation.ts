@@ -5,6 +5,7 @@ import type { SpellRequestData } from "./cast-spell-schema";
 import { getCachedSummonPool } from "@/lib/cache/reference-data";
 import { prisma } from "@/lib/db";
 import { isActive } from "@/lib/utils/abilities/engine/participants";
+import { canActNow, controls } from "@/lib/utils/battle/common/control";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
@@ -35,9 +36,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
 
     const current = order[ctx.scene.turnIndex];
 
-    const canCast = ctx.isDM || (current?.basicInfo.id === caster.basicInfo.id && caster.basicInfo.controlledBy === ctx.userId);
-
-    if (!canCast) throw new BattleAccessError(403, "Заклинання може кастувати лише DM або контролер поточного ходу");
+    if (!canActNow(ctx, caster, current)) throw new BattleAccessError(403, "Заклинання може кастувати лише DM або контролер поточного ходу");
 
     if (!isActive(caster)) throw new BattleRuleError("participant_dead", "Кастер непритомний або мертвий");
 
@@ -83,7 +82,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
     // клієнтські рятівні кидки приймаються лише від DM або за цілі, якими керує користувач; решту кидає сервер
     const sent = data.saveRolls ?? [];
 
-    const trusted = sent.filter((s) => ctx.isDM || order.find((p) => p.basicInfo.id === s.participantId)?.basicInfo.controlledBy === ctx.userId);
+    const trusted = sent.filter((s) => controls(ctx, order.find((p) => p.basicInfo.id === s.participantId)));
 
     const serverRolled = sent.filter((s) => !trusted.includes(s)).map((s) => s.participantId);
 

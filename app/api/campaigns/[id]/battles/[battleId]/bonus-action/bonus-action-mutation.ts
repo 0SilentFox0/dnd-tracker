@@ -5,6 +5,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { isActive, updateParticipant } from "@/lib/utils/abilities/engine/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import { withinLimits } from "@/lib/utils/abilities/engine/usage";
+import { canActNow } from "@/lib/utils/battle/common/control";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
 import { applyAbilitySummons, type SummonDeps } from "@/lib/utils/battle/summon/ability-summons";
@@ -28,7 +29,7 @@ export function createBonusActionMutation(deps: SummonDeps = defaultDeps) {
 
     if (!participant) throw new BattleAccessError(404, "Учасника немає в бою");
 
-    if (!ctx.isDM && participant.basicInfo.controlledBy !== ctx.userId) throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
+    if (!canActNow(ctx, participant, ctx.participants[ctx.scene.turnIndex])) throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
 
     if (!isActive(participant)) throw new BattleRuleError("participant_dead", "Учасник не може діяти");
 

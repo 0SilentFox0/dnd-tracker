@@ -89,4 +89,13 @@ describe("abilityActionMutation", () => {
     await expect(abilityActionMutation({ ...ctx, scene: { ...ctx.scene, pendingMoraleCheck: panic } }, body)).rejects.toThrow(expect.objectContaining({ code: "action_used" }));
     await expect(abilityActionMutation(context({ participants: [hero, goblin], userId: "someone" }), body)).rejects.toThrow(expect.objectContaining({ status: 403 }));
   });
+
+  it("власник не може діяти поза своїм ходом, DM — може", async () => {
+    const body = { participantId: "hero", abilityKey: strike.key };
+
+    const offTurn = context({ participants: [goblin, hero] });
+
+    await expect(abilityActionMutation(offTurn, body)).rejects.toThrow(expect.objectContaining({ status: 403 }));
+    await expect(abilityActionMutation({ ...offTurn, isDM: true }, body)).resolves.toBeDefined();
+  });
 });

@@ -1,6 +1,7 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import type { MoraleCheckInput } from "@/lib/schemas";
 import { checkMorale } from "@/lib/utils/battle/battle-morale";
+import { canActNow } from "@/lib/utils/battle/common/control";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
 import type { PendingMoraleCheckPayload } from "@/lib/utils/battle/turn";
@@ -10,7 +11,7 @@ export function moraleCheckMutation(ctx: BattleMutationContext, data: MoraleChec
 
   if (!participant) throw new BattleAccessError(404, "Учасника немає в бою");
 
-  if (!ctx.isDM && participant.basicInfo.controlledBy !== ctx.userId) {
+  if (!canActNow(ctx, participant, ctx.participants[ctx.scene.turnIndex])) {
     throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
   }
 

@@ -14,6 +14,7 @@ import type { Rng } from "@/lib/utils/abilities/engine/types";
 import type { BATTLE_RATE_LIMITS, RateLimitResult } from "@/lib/utils/api/rate-limit";
 import { rateLimitResponse } from "@/lib/utils/api/rate-limit";
 import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/battle-victory";
+import { controls } from "@/lib/utils/battle/common/control";
 import type {
   BattleDelta,
   BattleMeta,
@@ -85,14 +86,14 @@ export function assertAccess(access: BattleAccess, ctx: BattleMutationContext): 
   const current = ctx.participants[ctx.scene.turnIndex];
 
   if (access === BattleAccess.CURRENT_CONTROLLER) {
-    if (!current || current.basicInfo.controlledBy !== ctx.userId) {
+    if (!controls(ctx, current)) {
       throw new BattleRuleError("not_your_turn", "Зараз не ваш хід");
     }
 
     return;
   }
 
-  if (!current || current.basicInfo.controlledBy !== ctx.userId) {
+  if (!controls(ctx, current)) {
     throw new BattleRuleError("not_your_turn", "Зараз не ваш хід");
   }
 
