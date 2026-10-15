@@ -11,7 +11,6 @@ export interface SkillRowForResponse {
   spellId: string | null;
   spellGroupId: string | null;
   mainSkillId: string | null;
-  spellNewSpellId: string | null;
   grantedSpellId?: string | null;
   abilities?: unknown;
   image: string | null;
@@ -32,7 +31,7 @@ export function groupSkillRow(skill: SkillRowForResponse) {
     spellData: {
       spellId: skill.spellId || undefined,
       spellGroupId: skill.spellGroupId || undefined,
-      grantedSpellId: skill.grantedSpellId || skill.spellNewSpellId || undefined,
+      grantedSpellId: skill.grantedSpellId || undefined,
     },
     mainSkillData: { mainSkillId: skill.mainSkillId || undefined },
     createdAt: skill.createdAt,

@@ -258,8 +258,9 @@ async function main() {
       image: iconUrl,
       mainSkillId: mainSkillId.startsWith("new:") ? undefined : mainSkillId,
       abilities: json(remapRefs(skill.abilities, maps)),
-      spellNewSpellId: skill.newSpellKey ? spells.get(skill.newSpellKey) : undefined,
       grantedSpellId: skill.grantedSpellKey ? spells.get(skill.grantedSpellKey) : undefined,
+      // старий стовпець дзеркалимо до його видалення, щоб відкат деплою бачив закляття
+      spellNewSpellId: skill.grantedSpellKey ? spells.get(skill.grantedSpellKey) : undefined,
     };
 
     skills.set(skill.key, await upsert("скіли", skillRows, skill.name, {

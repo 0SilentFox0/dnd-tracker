@@ -7,7 +7,7 @@ export interface ProgressionSkillDto {
   summary: string[];
   description: string;
   spellGroupId: string | null;
-  newSpellId: string | null;
+  grantedSpellId: string | null;
   damageAffinity: { affectsDamage: boolean; damageType: AttackType | "magic" | null };
 }
 export interface ProgressionBranchDto { name: string; color: string; icon: string | null; spellGroupId: string | null }

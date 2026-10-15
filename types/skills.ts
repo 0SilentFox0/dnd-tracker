@@ -14,7 +14,7 @@ export interface Skill {
   spellId: string | null;
   spellGroupId: string | null;
   mainSkillId?: string | null;
-  spellNewSpellId?: string | null;
+  grantedSpellId?: string | null;
   createdAt: Date;
   spell?: {
     id: string;

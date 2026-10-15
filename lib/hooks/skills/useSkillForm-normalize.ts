@@ -20,7 +20,6 @@ export interface NormalizedSkillFormData {
   spellGroupId: string | null;
   grantedSpellId?: string | null;
   mainSkillId: string | null;
-  spellNewSpellId?: string | null;
 }
 
 export function normalizeInitialSkillData(

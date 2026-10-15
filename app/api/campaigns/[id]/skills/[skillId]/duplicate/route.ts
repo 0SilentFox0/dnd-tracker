@@ -45,7 +45,7 @@ export async function POST(
         spellGroupId: source.spellGroupId,
         grantedSpellId: source.grantedSpellId,
         mainSkillId: source.mainSkillId,
-        spellNewSpellId: source.spellNewSpellId ?? null,
+        spellNewSpellId: source.grantedSpellId,
         abilities: abilitiesJson(skillAbilities(source)),
       },
       include: {

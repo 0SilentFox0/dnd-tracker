@@ -9,13 +9,13 @@ const spells = [
 ];
 
 describe("learnedSpellIdsFromNodes", () => {
-  it("рівень гілки зі школою магії відкриває заклинання рівня; скіл зі школою — basic; newSpellId додається", () => {
+  it("рівень гілки зі школою магії відкриває заклинання рівня; скіл зі школою — basic; grantedSpellId додається", () => {
     const ids = learnedSpellIdsFromNodes(
       [
         { nodeId: "light_advanced_level", kind: "branchLevel", skillId: null, branchId: "light", level: "advanced", circle: null },
         { nodeId: "x", kind: "slot", skillId: "x", branchId: "attack", level: null, circle: "outer" },
       ],
-      { branchSpellGroup: { light: "sg" }, skills: { x: { spellGroupId: "other", newSpellId: "bonus" } }, spells },
+      { branchSpellGroup: { light: "sg" }, skills: { x: { spellGroupId: "other", grantedSpellId: "bonus" } }, spells },
     );
 
     expect(ids.sort()).toEqual(["bonus", "o1", "s1", "s3"].sort());

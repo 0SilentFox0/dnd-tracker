@@ -221,9 +221,7 @@ export function buildLibrary(source: LibrarySource = LIBRARY_SOURCE): Library {
 
     checkAbilities(`Скіл «${skill.key}»`, skill.abilities);
 
-    for (const [field, ref] of [["newSpellKey", skill.newSpellKey], ["grantedSpellKey", skill.grantedSpellKey]] as const) {
-      if (ref !== undefined && !spellByKey.has(ref)) issues.push(`Скіл «${skill.key}»: ${field} «${ref}» не знайдено`);
-    }
+    if (skill.grantedSpellKey !== undefined && !spellByKey.has(skill.grantedSpellKey)) issues.push(`Скіл «${skill.key}»: grantedSpellKey «${skill.grantedSpellKey}» не знайдено`);
 
     checkRefs(`Скіл «${skill.key}»`, skill.abilities);
   }

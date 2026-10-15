@@ -229,7 +229,7 @@ describe("buildLibrary validation", () => {
 
     expect(() => buildLibrary(source({ personal: [skill("p", { abilities: [trigger] })] }))).toThrow(/заклинання «missing» не знайдено/);
     expect(() => buildLibrary(source({ personal: [skill("p", { abilities: [trigger] })] }))).toThrow(/невідома школа «Нема»/);
-    expect(() => buildLibrary(source({ personal: [skill("p", { newSpellKey: "missing" })] }))).toThrow(/newSpellKey/);
+    expect(() => buildLibrary(source({ personal: [skill("p", { grantedSpellKey: "missing" })] }))).toThrow(/grantedSpellKey/);
     expect(() => buildLibrary(source({ personal: [skill("p", { grantedSpellKey: "s" })], spells: [spell("s")] }))).not.toThrow();
     expect(() => buildLibrary(source({ spells: [spell("s", { raceModifiers: [{ raceKey: "none", percent: 10 }] })] }))).toThrow(/невідома раса/);
     expect(() => buildLibrary(source({ branches: [branch("b", { spellSchool: "Хаос" })] }))).toThrow(/невідома школа/);

@@ -684,7 +684,7 @@ const light: LibraryBranch = {
         key: "eternal-light",
         name: "Вічне світло",
         iconKey: "eternal-light",
-        newSpellKey: "eternal-light",
+        grantedSpellKey: "eternal-light",
         description: "Відкриває нове закляття «Вічне світло» — сильне лікування союзника з подальшою регенерацією.",
         appearanceDescription:
           "Маг пізнає світло, що горить не в небі, а глибоко в кожній живій істоті. Тепер він уміє роздмухати цей вогник навіть у тому, хто вже ледь дихає.",
@@ -1071,7 +1071,7 @@ const nature: LibraryBranch = {
         name: "Призив Фенікса",
         formerNames: ["Поклик звіра"],
         iconKey: "call-of-the-beast",
-        newSpellKey: "call-of-the-beast",
+        grantedSpellKey: "call-of-the-beast",
         description: "Відкриває нове закляття «Призив Фенікса» — призив Фенікса, що зростає з рівнем заклинателя й раз за бій відроджується.",
         appearanceDescription:
           "Друїд сурмить у ріг, вирізаний з оленячого рогу, і ліс відповідає не ревом, а тріском полум'я. Над деревами здіймається вогняний птах, що пам'ятає ще стародавні присяги.",

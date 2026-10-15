@@ -28,7 +28,6 @@ export interface LibrarySpell extends LibraryEntry {
 export interface LibrarySkill extends LibraryEntry {
   abilities: Ability[];
   formerNames?: string[];
-  newSpellKey?: string;
   grantedSpellKey?: string;
 }
 

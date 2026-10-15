@@ -31,7 +31,7 @@ export function learnedSpellIdsFromNodes(
     if (skill) {
       raise(skill.spellGroupId, "basic");
 
-      if (skill.newSpellId) extra.add(skill.newSpellId);
+      if (skill.grantedSpellId) extra.add(skill.grantedSpellId);
     }
   }
 

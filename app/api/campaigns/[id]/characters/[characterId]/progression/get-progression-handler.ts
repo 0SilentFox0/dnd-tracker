@@ -17,7 +17,7 @@ export const PROGRESSION_SKILL_SELECT = {
   description: true,
   abilities: true,
   spellGroupId: true,
-  spellNewSpellId: true,
+  grantedSpellId: true,
 } satisfies Prisma.SkillSelect;
 
 export async function buildProgressionDto(campaignId: string, ctx: ProgressionContext): Promise<CharacterProgressionDto> {

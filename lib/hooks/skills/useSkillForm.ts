@@ -66,7 +66,7 @@ export function useSkillForm(
   );
 
   const [grantedSpellId, setGrantedSpellId] = useState<string | null>(
-    normalizedData?.grantedSpellId ?? normalizedData?.spellNewSpellId ?? null,
+    normalizedData?.grantedSpellId ?? null,
   );
 
   const [mainSkillId, setMainSkillId] = useState<string | null>(
