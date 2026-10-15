@@ -29,6 +29,8 @@ pnpm migrate:deploy                    # apply migrations against DIRECT_URL fro
 pnpm exec prisma studio
 ```
 
+End-to-end battle check on a copy of prod: `./scripts/prodcopy-db.sh` (reads prod, recreates local DB `prodcopy`), then `DATABASE_URL=postgresql://postgres:postgres@localhost:54322/prodcopy pnpm battle-sweep` — 5-round battles through the real mutations, targeted triggers, unit control and 5th-level spells; report in `<tmp>/battle-sweep/battle-sweep.md`, exit 1 on errors.
+
 Many one-off ops live in `scripts/` and run via `tsx` (e.g. `pnpm import-docs-spells`, `pnpm seed-mock-battle`, `pnpm upload-assets-to-supabase`). Check `package.json` scripts before writing new tooling.
 
 ## Architecture

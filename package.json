@@ -2,7 +2,9 @@
   "name": "dnd-combat-tracker",
   "version": "0.1.0",
   "private": true,
-  "sideEffects": ["*.css"],
+  "sideEffects": [
+    "*.css"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
@@ -29,6 +31,7 @@
     "hero-growth-report": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/hero-growth-report.ts",
     "balance-library": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/balance-library.ts",
     "simulate-battle": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/simulate-battle.ts",
+    "battle-sweep": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/battle-sweep.ts",
     "seed-mock-battle": "tsx scripts/seed-mock-battle-data.ts",
     "delete-mock-battle": "tsx scripts/delete-mock-battle-data.ts",
     "reset-mock-battle": "tsx scripts/reset-mock-battle-data.ts",
