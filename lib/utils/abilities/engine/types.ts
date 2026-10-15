@@ -16,6 +16,8 @@ export interface SummonRequest {
   unitId?: string;
   count: number;
   casterLevel?: number;
+  /** закляття, яким прикликано (для extraSummons) */
+  spellId?: string;
 }
 
 export interface AbilityRunResult {

@@ -330,10 +330,17 @@ const ranged: LibraryBranch = {
       key: "force-arrow",
       name: "Стріла сили",
       iconKey: "force-arrow",
-      description: "Стріла прошиває ціль наскрізь і зачіпає ворога за нею (50 % шкоди). Без сітки поля механіки немає — ефект відіграє DM.",
+      description: "Стріла прошиває ціль наскрізь і зачіпає ще одного ворога — 50 % завданої шкоди.",
       appearanceDescription:
         "Стріла, пущена з такою силою, що тятива гуде ще кілька секунд, проходить крізь першого ворога, не сповільнюючись. Другий навіть не встигає зрозуміти, звідки вона взялася.",
-      abilities: [passive("force-arrow", "Стріла сили", [{ kind: "note", text: "Стріла вражає й ворога позаду цілі (50 % шкоди) — відіграє DM." }])],
+      abilities: [
+        {
+          id: "force-arrow",
+          name: "Стріла сили",
+          trigger: { event: "hit", role: "attacker", attackKind: "ranged" },
+          effects: [{ kind: "dealDamage", amount: { percentOf: "eventDamage", value: 50 }, damageType: "piercing", target: "otherEnemy" }],
+        },
+      ],
     },
   ],
 };
@@ -1109,10 +1116,10 @@ const nature: LibraryBranch = {
       key: "banish",
       name: "Вигнання",
       iconKey: "banish",
-      description: "Призвані ворогом істоти слабшають: DM знімає їм 50 % HP. Рушій не розрізняє призваних істот — ефект відіграє DM.",
+      description: "Істоти, яких прикликав ворог, з'являються ослабленими — втрачають 50 % HP.",
       appearanceDescription:
         "Друїд промовляє старе слово, і чужі, прикликані з інших світів істоти починають мерехтіти й блякнути. Їхні обриси пливуть, як дим над вогнищем.",
-      abilities: [passive("banish", "Вигнання", [{ kind: "note", text: "Ворожі призвані істоти втрачають 50 % HP — відіграє DM." }])],
+      abilities: [passive("banish", "Вигнання", [{ kind: "flag", flag: "banishSummons", percent: 50 }])],
     },
     {
       key: "chosen-elemental",
@@ -1137,10 +1144,14 @@ const nature: LibraryBranch = {
       key: "eternal-warriors",
       name: "Вічні воїни",
       iconKey: "eternal-warriors",
-      description: "Закляття призиву елементалів прикликають по 2 істоти. Рушій не змінює кількість призваних — ефект відіграє DM.",
+      description: "Закляття призиву елементалів прикликають по 2 істоти.",
       appearanceDescription:
         "Замість одного вартового з полум'я чи каменю з'являються двоє — близнюки, що рухаються в одному ритмі. Вони не знають утоми й не знають страху.",
-      abilities: [passive("eternal-warriors", "Вічні воїни", [{ kind: "note", text: "Призив елементалів дає по 2 істоти — відіграє DM." }])],
+      abilities: [
+        passive("eternal-warriors", "Вічні воїни", [
+          { kind: "flag", flag: "extraSummons", count: 1, spellIds: ["summon-fire-elemental", "summon-water-elemental", "summon-air-elemental", "summon-earth-elemental"] },
+        ]),
+      ],
     },
     {
       key: "life-lord",

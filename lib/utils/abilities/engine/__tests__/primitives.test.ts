@@ -47,6 +47,15 @@ describe("targets", () => {
     expect(resolveTargetIds("eventTarget", "a", ev, ps)).toEqual(["a"]);
   });
 
+  it("otherEnemy — перший живий ворог, окрім цілі події", () => {
+    const e2 = makeParticipant({ id: "e2", side: ParticipantSide.ENEMY });
+
+    const ev = { type: "hit" as const, actorId: "a", targetId: "e", attackKind: "ranged" as const, damage: 10 };
+
+    expect(resolveTargetIds("otherEnemy", "a", ev, [...ps, e2])).toEqual(["e2"]);
+    expect(resolveTargetIds("otherEnemy", "a", ev, ps)).toEqual([]);
+  });
+
   it("бонусна дія без цілі → власник", () => {
     expect(resolveTargetIds("eventTarget", "a", { type: "bonusAction", actorId: "a", abilityKey: "k" }, ps)).toEqual(["a"]);
   });

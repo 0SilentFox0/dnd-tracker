@@ -151,6 +151,10 @@ export function describeFlag(e: Extract<Effect, { kind: "flag" }>): string {
       return "мораль не діє";
     case "minMorale":
       return `мораль не нижче ${signed(e.value)}`;
+    case "extraSummons":
+      return `прикликання${e.spellIds ? ` заклять (${e.spellIds.length})` : ""} дають +${e.count} істот`;
+    case "banishSummons":
+      return `прикликані ворогом істоти втрачають ${e.percent}% HP`;
     case "conditionImmunity":
       return e.conditions === "all" ? "імунітет до контролю" : `імунітет: ${e.conditions.map((c) => (c === "fear" ? "страх" : c === "berserk" ? "шал" : c === "charm" ? "чарування" : c)).join(", ")}`;
   }
@@ -176,6 +180,8 @@ export const FLAG_LABELS: Record<FlagKey, string> = {
   noNegativeMorale: "Мораль не нижче 0",
   ignoreMorale: "Мораль не діє",
   minMorale: "Мінімальна мораль",
+  extraSummons: "Додаткові прикликані істоти",
+  banishSummons: "Вигнання прикликаних ворогом",
   conditionImmunity: "Імунітет до станів",
 };
 
@@ -223,6 +229,11 @@ export const FLAG_FIELDS: Record<FlagKey, readonly FieldMeta[]> = {
   noNegativeMorale: [],
   ignoreMorale: [],
   minMorale: [{ name: "value", label: "Мінімум (−3…3)", input: "number" }],
+  extraSummons: [
+    { name: "count", label: "Додаткових істот", input: "number" },
+    { name: "spellIds", label: "Заклинання (порожньо = усі прикликання заклять)", input: "spells", optional: true },
+  ],
+  banishSummons: [{ name: "percent", label: "% HP, які втрачають", input: "number" }],
   conditionImmunity: [
     {
       name: "conditions",

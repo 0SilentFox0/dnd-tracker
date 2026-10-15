@@ -1,5 +1,7 @@
 import type { Prisma } from "@prisma/client";
 
+import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
+import { isActive, withSelf } from "@/lib/utils/abilities/engine/participants";
 import type { SummonRequest } from "@/lib/utils/abilities/engine/types";
 import { createBattleParticipantFromUnit } from "@/lib/utils/battle/participant";
 import { appendToInitiativeEnd, nextInstanceNumber } from "@/lib/utils/battle/spell/append-summoned-unit";
@@ -16,6 +18,30 @@ export interface SummonPool {
 
 export interface SummonDeps {
   loadPool(campaignId: string): Promise<SummonPool>;
+}
+
+function extraSummons(order: BattleParticipant[], owner: BattleParticipant, spellId: string | undefined): number {
+  if (!spellId) return 0;
+
+  return findFlags(withSelf(order, owner), owner.basicInfo.id, "extraSummons")
+    .filter((f) => !f.spellIds || f.spellIds.includes(spellId))
+    .reduce((n, f) => n + f.count, 0);
+}
+
+/** Найсильніше «Вигнання» серед живих ворогів власника: прикликана істота втрачає частку HP. */
+function banish(order: BattleParticipant[], summoned: BattleParticipant): { participant: BattleParticipant; message?: string } {
+  const banishers = order.filter((p) => isActive(p) && p.basicInfo.side !== summoned.basicInfo.side);
+
+  const percent = Math.max(0, ...banishers.flatMap((p) => findFlags(order, p.basicInfo.id, "banishSummons").map((f) => f.percent)));
+
+  if (percent === 0) return { participant: summoned };
+
+  const currentHp = Math.max(1, Math.ceil((summoned.combatStats.currentHp * (100 - percent)) / 100));
+
+  return {
+    participant: { ...summoned, combatStats: { ...summoned.combatStats, currentHp } },
+    message: `🚫 Вигнання: ${summoned.basicInfo.name} −${percent}% HP (${currentHp}/${summoned.combatStats.maxHp})`,
+  };
 }
 
 export async function applyAbilitySummons(
@@ -49,7 +75,11 @@ export async function applyAbilitySummons(
 
     const names: string[] = [];
 
-    for (let i = 0; i < req.count; i++) {
+    const count = req.count + extraSummons(next, owner, req.spellId);
+
+    const banished: string[] = [];
+
+    for (let i = 0; i < count; i++) {
       const unit = candidates[Math.min(candidates.length - 1, Math.floor(opts.rng() * candidates.length))];
 
       const built = await createBattleParticipantFromUnit(unit as UnitFromPrisma, opts.battleId, owner.basicInfo.side, nextInstanceNumber(next, unit.id), racesById as Record<string, RaceRow>);
@@ -58,13 +88,17 @@ export async function applyAbilitySummons(
 
       const withOwner = { ...scaled, basicInfo: { ...scaled.basicInfo, controlledBy: owner.basicInfo.controlledBy }, battleData: { ...scaled.battleData, summonedBy: req.ownerId } };
 
-      const { finalOrder, added } = appendToInitiativeEnd(next, withOwner);
+      const weakened = banish(next, withOwner);
+
+      if (weakened.message) banished.push(weakened.message);
+
+      const { finalOrder, added } = appendToInitiativeEnd(next, weakened.participant);
 
       next = finalOrder;
       names.push(added.basicInfo.name);
     }
 
-    messages.push(`🌀 прикликано: ${names.join(", ")}`);
+    messages.push(`🌀 прикликано: ${names.join(", ")}`, ...banished);
   }
 
   return { order: next, messages };

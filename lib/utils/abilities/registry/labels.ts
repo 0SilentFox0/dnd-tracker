@@ -50,6 +50,7 @@ export const TARGET_LABELS: Record<AbilityTarget, string> = {
   self: "я",
   eventTarget: "ціль події",
   eventActor: "виконавець події",
+  otherEnemy: "інший ворог (не ціль)",
   allAllies: "усі союзники",
   allEnemies: "усі вороги",
   everyone: "усі учасники",

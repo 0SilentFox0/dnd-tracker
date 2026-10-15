@@ -27,6 +27,8 @@ const DEFAULTS: Record<FlagKey, Record<string, unknown>> = {
   noNegativeMorale: {},
   ignoreMorale: {},
   minMorale: { value: 1 },
+  extraSummons: { count: 1 },
+  banishSummons: { percent: 50 },
   conditionImmunity: { conditions: "all" },
 };
 

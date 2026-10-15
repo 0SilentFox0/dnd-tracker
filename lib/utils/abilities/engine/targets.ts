@@ -27,6 +27,14 @@ export function resolveTargetIds(
 
       return actor ? [actor] : [];
     }
+    case "otherEnemy": {
+      // без сітки поля «ворог за ціллю» — перший за ініціативою живий ворог, окрім цілі події
+      const taken = new Set(eventTargetIds(event));
+
+      const other = ps.find((p) => isActive(p) && p.basicInfo.side !== side && !taken.has(p.basicInfo.id));
+
+      return other ? [other.basicInfo.id] : [];
+    }
     case "allAllies":
       return ps.filter((p) => isActive(p) && p.basicInfo.side === side).map((p) => p.basicInfo.id);
     case "allEnemies":

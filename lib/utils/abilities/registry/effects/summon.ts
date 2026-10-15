@@ -12,7 +12,9 @@ export function applySummon(input: EffectApplyInput<Of<"summon">>): EffectApplyR
 
   const casterLevel = findParticipant(input.participants, ownerId)?.abilities.level;
 
-  return { participants: input.participants, messages: [], summons: [{ ownerId, group: effect.group, tier: effect.tier, unitId: effect.unitId, count: effect.count ?? 1, casterLevel }] };
+  const spellId = input.event.type === "spellCast" ? input.event.spellId : undefined;
+
+  return { participants: input.participants, messages: [], summons: [{ ownerId, group: effect.group, tier: effect.tier, unitId: effect.unitId, count: effect.count ?? 1, casterLevel, spellId }] };
 }
 
 export const describeSummon = (e: Of<"summon">) => (e.unitId ? `прикликати ${e.count ?? 1}× обраного юніта` : `прикликати ${e.count ?? 1}× юніта «${e.group}», Tier ${e.tier}`);

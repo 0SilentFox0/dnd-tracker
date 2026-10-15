@@ -63,7 +63,8 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
     label: "Нотатка для DM",
     static: true,
     fields: [{ name: "text", label: "Текст", input: "text" }],
-    describe: (e) => e.text,
+    // ✋ — механіку відпрацьовує DM вручну (рушій її не автоматизує)
+    describe: (e) => (/\bDM\b/.test(e.text) ? `✋ ${e.text}` : e.text),
     apply: (i) => ({ participants: i.participants, messages: [`📜 ${i.ability.name}: ${i.effect.text}`] }),
   },
   dealDamage: { kind: "dealDamage", label: "Завдати шкоди", static: false, fields: [AMOUNT, { name: "damageType", label: "Тип", input: "text", optional: true }, { name: "falloff", label: "% шкоди по цілях по черзі (100, 50, 25…)", input: "numberList", optional: true }, TARGET_FIELD], describe: describeDealDamage, apply: applyDealDamage },
