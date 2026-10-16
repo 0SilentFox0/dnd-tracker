@@ -5,7 +5,7 @@ import { memo, useMemo } from "react";
 import { ParticipantRow } from "./ParticipantRow";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import { useBattleSceneData } from "@/lib/hooks/battle";
+import { useBattleSceneData, usePersonalEffects } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
 import { canSeeExactStats, formatKnownArmorClass, resolveKnownArmorClass } from "@/lib/utils/battle/view";
@@ -16,6 +16,8 @@ export const ParticipantList = memo(function ParticipantList({ side, className }
   const list = side === ParticipantSide.ALLY ? allies : enemies;
 
   const { initiativeOrder: order, battleLog, knowledge } = battle;
+
+  const personal = usePersonalEffects(order);
 
   const rows = useMemo(
     () =>
@@ -32,7 +34,7 @@ export const ParticipantList = memo(function ParticipantList({ side, className }
   return (
     <div className={cn("px-4", className)}>
       {rows.map(({ participant, exact, acText }) => (
-        <ParticipantRow key={participant.basicInfo.id} participant={participant} exact={exact} acText={acText} current={current?.basicInfo.id === participant.basicInfo.id} onSelect={select} />
+        <ParticipantRow key={participant.basicInfo.id} participant={participant} personal={personal.get(participant.basicInfo.id)} exact={exact} acText={acText} current={current?.basicInfo.id === participant.basicInfo.id} onSelect={select} />
       ))}
     </div>
   );

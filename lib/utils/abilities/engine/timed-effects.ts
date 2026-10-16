@@ -20,11 +20,11 @@ export interface TimedEffectInput {
 
 export function effectSource(
   owner: BattleParticipant | undefined,
-  ability: { name: string; source?: { icon?: string | null } },
+  ability: { name: string; source?: { icon?: string | null; personal?: boolean } },
 ): ActiveEffect["source"] {
   if (!owner) return undefined;
 
-  return { participantId: owner.basicInfo.id, name: owner.basicInfo.name, abilityName: ability.name, icon: ability.source?.icon };
+  return { participantId: owner.basicInfo.id, name: owner.basicInfo.name, abilityName: ability.name, icon: ability.source?.icon, ...(ability.source?.personal && { personal: true }) };
 }
 
 export function upsertTimedEffect(p: BattleParticipant, input: TimedEffectInput, round: number): BattleParticipant {

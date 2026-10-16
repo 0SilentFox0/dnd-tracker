@@ -19,11 +19,28 @@ export type { BookSpell };
 
 const NO_SPELLS: string[] = [];
 
-/** Прогріває книгу заклинань героя гравця, поки бій простоює. */
-export function useSpellBookPrefetch() {
-  const { campaignId, hero, isDM } = useBattleScene();
+/** Усі відомі закляття учасників бою одним набором: один запит і один кеш на бій, кожен кастер фільтрує свої. */
+function useBattleSpellIds(): string[] {
+  const { battle } = useBattleScene();
 
-  usePrefetchSpellsByIds(campaignId, isDM ? NO_SPELLS : (hero?.spellcasting.knownSpells ?? NO_SPELLS));
+  const key = [...new Set(battle.initiativeOrder.flatMap((p) => p.spellcasting?.knownSpells ?? []))].sort().join(",");
+
+  return useMemo(() => (key ? key.split(",") : NO_SPELLS), [key]);
+}
+
+const knownBy = (spells: BookSpell[] | undefined, who: BattleParticipant | null) => {
+  const ids = new Set(who?.spellcasting.knownSpells ?? []);
+
+  return (spells ?? []).filter((s) => ids.has(s.id));
+};
+
+/** Прогріває закляття бою, поки він простоює. */
+export function useSpellBookPrefetch() {
+  const { campaignId, isDM } = useBattleScene();
+
+  const ids = useBattleSpellIds();
+
+  usePrefetchSpellsByIds(campaignId, isDM ? NO_SPELLS : ids);
 }
 
 const BONUS_NONE: BookSpell[] = [];
@@ -32,9 +49,15 @@ const BONUS_NONE: BookSpell[] = [];
 export function useBonusSpells(hero: BattleParticipant): BookSpell[] {
   const { campaignId, isDM } = useBattleScene();
 
-  const known = useSpellsByIds(campaignId, isDM ? NO_SPELLS : hero.spellcasting.knownSpells);
+  const ids = useBattleSpellIds();
 
-  return useMemo(() => known.data?.filter((s) => s.cost === "bonusAction") ?? BONUS_NONE, [known.data]);
+  const known = useSpellsByIds(campaignId, isDM ? NO_SPELLS : ids);
+
+  return useMemo(() => {
+    const bonus = knownBy(known.data, hero).filter((s) => s.cost === "bonusAction");
+
+    return bonus.length ? bonus : BONUS_NONE;
+  }, [known.data, hero]);
 }
 
 export function useSpellBook(caster: BattleParticipant | null, options: { allSpells?: boolean; onDone?: () => void } = {}) {
@@ -46,9 +69,9 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
   const library = useSpells(scene.campaignId, { enabled: isOpen && !!options.allSpells });
 
-  const known = useSpellsByIds(scene.campaignId, caster?.spellcasting.knownSpells ?? [], { enabled: isOpen && !options.allSpells });
+  const known = useSpellsByIds(scene.campaignId, useBattleSpellIds(), { enabled: isOpen && !options.allSpells });
 
-  const spells = useMemo(() => (options.allSpells ? ((library.data ?? []) as BookSpell[]) : (known.data ?? [])), [options.allSpells, library.data, known.data]);
+  const spells = useMemo(() => (options.allSpells ? ((library.data ?? []) as BookSpell[]) : knownBy(known.data, caster)), [options.allSpells, library.data, known.data, caster]);
 
   const byLevel = useMemo(() => groupSpellsByLevel(spells), [spells]);
 

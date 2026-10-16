@@ -4,6 +4,7 @@ export * from "./effect-summary";
 export * from "./health";
 export * from "./hero";
 export * from "./knowledge";
+export * from "./personal-effects";
 export * from "./queue";
 export * from "./retaliation";
 export * from "./rollback";

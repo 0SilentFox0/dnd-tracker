@@ -2,12 +2,10 @@
 
 import type { ReactNode } from "react";
 
-import { HealthBar, HealthLabel, Portrait } from "@/components/battle/hud";
-import { OptimizedImage } from "@/components/common/OptimizedImage";
+import { EffectIcon, HealthBar, HealthLabel, Portrait } from "@/components/battle/hud";
 import { useBattleSceneData } from "@/lib/hooks/battle";
-import { cn } from "@/lib/utils";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
-import { canSeeExactStats, formatKnownArmorClass, resolveKnownArmorClass, resolveObservedTraits } from "@/lib/utils/battle/view";
+import { canSeeExactStats, effectSummary, formatKnownArmorClass, personalPassiveEffects, resolveKnownArmorClass, resolveObservedTraits } from "@/lib/utils/battle/view";
 import type { BattleParticipant } from "@/types/battle";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
@@ -25,6 +23,8 @@ export function ParticipantDetails({ participant }: { participant: BattlePartici
   const exact = canSeeExactStats(participant, viewer);
 
   const log = battle.battleLog ?? [];
+
+  const effects = [...personalPassiveEffects(participant, battle.initiativeOrder), ...participant.battleData.activeEffects];
 
   const known = resolveKnownArmorClass(log, participant.basicInfo.id, battle.knowledge);
 
@@ -52,18 +52,16 @@ export function ParticipantDetails({ participant }: { participant: BattlePartici
         ))}
       </Section>
       <Section title="Ефекти">
-        {participant.battleData.activeEffects.length === 0 && <div className="py-2 text-sm text-[var(--hud-muted)]">немає</div>}
-        {participant.battleData.activeEffects.map((e) => {
-          const icon = e.icon ?? e.source?.icon;
-
+        {effects.length === 0 && <div className="py-2 text-sm text-[var(--hud-muted)]">немає</div>}
+        {effects.map((e) => {
           return (
             <div key={e.id} className="flex gap-3 border-b border-white/[.08] py-2.5">
-              <span className={cn("flex size-9 shrink-0 items-center justify-center border", e.type === "buff" ? "border-[#cdb87e]" : "border-hud-danger")}>
-                {icon && <OptimizedImage src={icon} alt="" width={24} height={24} className="size-6 object-contain" />}
+              <span className={e.type === "buff" ? "text-[#cdb87e]" : "text-hud-danger"}>
+                <EffectIcon effect={e} size={36} />
               </span>
               <div className="min-w-0 flex-1">
-                <div className="flex justify-between text-[15px] font-medium text-[var(--ink)]"><span>{e.name}</span><span className="text-[13px] font-normal text-[var(--hud-muted)]">{e.duration} р.</span></div>
-                {e.description && <p className="mt-0.5 text-[13px] leading-[18px] text-[#a89c88]">{e.description}</p>}
+                <div className="flex justify-between text-[15px] font-medium text-[var(--ink)]"><span>{e.name}</span><span className="text-[13px] font-normal text-[var(--hud-muted)]">{e.permanent ? "постійно" : `${e.duration} р.`}</span></div>
+                {e.description ? <p className="mt-0.5 text-[13px] leading-[18px] text-[#a89c88]">{e.description}</p> : e.permanent && <p className="mt-0.5 text-[13px] leading-[18px] text-[#a89c88]">{effectSummary(e)[0]}</p>}
                 {e.source && <p className="text-[13px] leading-[18px] text-[#a89c88]">Від: {e.source.abilityName ? `${e.source.abilityName} (${e.source.name})` : e.source.name}</p>}
               </div>
             </div>

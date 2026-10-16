@@ -14,7 +14,7 @@ export function effectSummary(e: ActiveEffect): string[] {
     ...what,
     ...(e.dotDamage ? [`${e.dotDamage.damagePerRound} шкоди (${e.dotDamage.damageType}) щораунду`] : []),
     ...(e.hotHeal ? [`+${e.hotHeal.healPerRound} HP щораунду`] : []),
-    `ще ${rounds(e.duration)}`,
+    e.permanent ? "діє постійно" : `ще ${rounds(e.duration)}`,
     ...(e.source ? [`від: ${e.source.abilityName ? `${e.source.abilityName} (${e.source.name})` : e.source.name}`] : []),
   ].filter(Boolean);
 }

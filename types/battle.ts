@@ -59,7 +59,9 @@ export interface ActiveEffect {
   charmOrigin?: { side: ParticipantSide; controlledBy: string };
   abilityKey?: string;
   abilityEffects?: StaticEffect[];
-  source?: { participantId: string; name: string; abilityName?: string; icon?: string | null };
+  source?: { participantId: string; name: string; abilityName?: string; icon?: string | null; personal?: boolean };
+  /** постійний ефект (пасивне персональне вміння) — без відліку раундів */
+  permanent?: boolean;
 }
 
 /**

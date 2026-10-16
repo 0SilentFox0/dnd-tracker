@@ -18,6 +18,7 @@ export interface SkillEntry {
   level: string | null;
   levelNode?: boolean;
   mainSkillSpellGroupId: string | null;
+  personal?: boolean;
 }
 
 export interface RaceRowLike {
@@ -68,6 +69,7 @@ export function skillSource(entry: SkillEntry): AbilitySource {
     name: row.name,
     icon: row.icon ?? null,
     ...(mainSkillId && level && { line: { mainSkillId, level, ...(entry.levelNode !== undefined && { levelNode: entry.levelNode }) } }),
+    ...(entry.personal && { personal: true }),
   };
 }
 

@@ -78,7 +78,7 @@ export async function resolveCharacterSkillEntries(
 
   const personal = personalSkillId && !learned.some((n) => n.skillId === personalSkillId) ? byId.get(personalSkillId) : undefined;
 
-  if (personal) entries.push({ row: personal, mainSkillId: null, level: "basic", levelNode: false, mainSkillSpellGroupId: null });
+  if (personal) entries.push({ row: personal, mainSkillId: null, level: "basic", levelNode: false, mainSkillSpellGroupId: null, personal: true });
 
   return entries;
 }
