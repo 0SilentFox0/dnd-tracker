@@ -47,6 +47,7 @@
 @keyframes hud-dropin { from { opacity: 0; transform: translateY(-60px) rotate(-200deg) scale(0.6); } }
 @keyframes hud-rise { from { opacity: 0; transform: translateY(16px) scale(0.94); letter-spacing: 0.3em; } }
 @keyframes hud-fade { from { opacity: 0; } }
+@keyframes hud-turn { 0% { transform: scale(.7); filter: brightness(.6); } 55% { transform: scale(1.12); box-shadow: 0 0 0 2px #e6c25a, 0 0 22px 6px rgba(230, 194, 90, .65); filter: brightness(1.35); } 100% { transform: none; } }
 @keyframes hud-pop { from { opacity: 0; transform: scale(2); } }
 @keyframes hud-slash { from { transform: rotate(-20deg) scaleX(0); } }
 @keyframes hud-whoosh { from { transform: translateX(-160px); opacity: 0; } 60% { opacity: 1; } to { transform: translateX(120px); opacity: 0; } }

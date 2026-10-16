@@ -18,7 +18,11 @@ export function turnQueue(order: BattleParticipant[], turnIndex: number, round: 
 
   const rest = extraActive ? [item("extra", current, true)] : order.slice(turnIndex).map((p, i) => item("turn", p, i === 0));
 
-  return [...rest, ...extras, { kind: "round", round: round + 1 }, ...order.map((p) => item("turn", p))];
+  const live = (e: QueueEntry) => e.kind === "round" || e.current || !e.down;
+
+  const all: QueueEntry[] = [...rest, ...extras, { kind: "round", round: round + 1 }, ...order.map((p) => item("turn", p))];
+
+  return all.filter(live);
 }
 
 export function turnsUntil(queue: QueueEntry[], myIds: string[]): number | null {
@@ -33,4 +37,21 @@ export function turnsUntil(queue: QueueEntry[], myIds: string[]): number | null 
   }
 
   return null;
+}
+
+/** Стабільні ключі для анімації: учасник + номер його появи в черзі, межа раунду — одна. */
+export function queueKeys(queue: QueueEntry[]): string[] {
+  const seen = new Map<string, number>();
+
+  return queue.map((e) => {
+    if (e.kind === "round") return "round";
+
+    const id = e.participant.basicInfo.id;
+
+    const n = seen.get(id) ?? 0;
+
+    seen.set(id, n + 1);
+
+    return `${id}#${n}`;
+  });
 }

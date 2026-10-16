@@ -36,22 +36,18 @@ const knownBy = (spells: BookSpell[] | undefined, who: BattleParticipant | null)
 
 /** Прогріває закляття бою, поки він простоює. */
 export function useSpellBookPrefetch() {
-  const { campaignId, isDM } = useBattleScene();
+  const { campaignId } = useBattleScene();
 
-  const ids = useBattleSpellIds();
-
-  usePrefetchSpellsByIds(campaignId, isDM ? NO_SPELLS : ids);
+  usePrefetchSpellsByIds(campaignId, useBattleSpellIds());
 }
 
 const BONUS_NONE: BookSpell[] = [];
 
 /** Відомі гравцеві заклинання за бонусну дію (з кешу книги, яку прогріває useSpellBookPrefetch). */
 export function useBonusSpells(hero: BattleParticipant): BookSpell[] {
-  const { campaignId, isDM } = useBattleScene();
+  const { campaignId } = useBattleScene();
 
-  const ids = useBattleSpellIds();
-
-  const known = useSpellsByIds(campaignId, isDM ? NO_SPELLS : ids);
+  const known = useSpellsByIds(campaignId, useBattleSpellIds());
 
   return useMemo(() => {
     const bonus = knownBy(known.data, hero).filter((s) => s.cost === "bonusAction");

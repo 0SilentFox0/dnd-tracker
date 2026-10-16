@@ -4,6 +4,7 @@ export { useConfirm } from "./useConfirm";
 export { useCrudMutation } from "./useCrudMutation";
 export type { UseFileImportReturn } from "./useFileImport";
 export { useFileImport } from "./useFileImport";
+export { useFlip } from "./useFlip";
 export { useInfoReferenceFilters } from "./useInfoReferenceFilters";
 export { useMediaQuery } from "./useMediaQuery";
 export { useNotify } from "./useNotify";

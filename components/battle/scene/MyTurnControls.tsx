@@ -22,13 +22,13 @@ const SpellBook = dynamic(() => import("@/components/battle/wizards/SpellBook").
 const BonusActionPicker = dynamic(() => import("@/components/battle/wizards/BonusActionPicker").then((m) => m.BonusActionPicker), { ssr: false });
 
 export function MyTurnControls({ hero }: { hero: BattleParticipant }) {
-  const { anyPending, isDM, battle } = useBattleScene();
+  const { anyPending, battle } = useBattleScene();
 
   const turn = usePlayerTurn(hero, useBonusSpells(hero));
 
   const attack = useAttackWizard(hero, turn.afterAction);
 
-  const book = useSpellBook(hero, { allSpells: isDM, onDone: turn.afterAction });
+  const book = useSpellBook(hero, { onDone: turn.afterAction });
 
   const zone = useAuraZones(hero);
 
