@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useEffectEvent, useMemo, useReducer } from "react";
+import { useEffect, useEffectEvent, useMemo, useReducer, useRef } from "react";
 
 import { rollDie } from "./useAttackWizard";
 import { useBattleScene } from "./useBattleScene";
@@ -51,6 +51,27 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
   const spells = useMemo(() => (options.allSpells ? ((library.data ?? []) as BookSpell[]) : (known.data ?? [])), [options.allSpells, library.data, known.data]);
 
   const byLevel = useMemo(() => groupSpellsByLevel(spells), [spells]);
+
+  // закляття юніта вантажаться вже після відкриття: раз за відкриття переходимо з порожнього кола на перше, де вони є
+  const leveled = useRef(false);
+
+  useEffect(() => {
+    if (state.step === "closed") {
+      leveled.current = false;
+
+      return;
+    }
+
+    if (state.step !== "book" || leveled.current || spells.length === 0) return;
+
+    leveled.current = true;
+
+    if (byLevel[state.level]?.length) return;
+
+    const first = Object.keys(byLevel).map(Number).sort((a, b) => a - b).find((l) => byLevel[l].length > 0);
+
+    if (first !== undefined) dispatch({ type: "SET_LEVEL", level: first });
+  }, [state.step, state.level, spells, byLevel]);
 
   const selected = spells.find((s) => s.id === state.pick?.spellId) ?? null;
 
