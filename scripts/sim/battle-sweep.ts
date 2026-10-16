@@ -27,6 +27,7 @@ import { spellSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/spell/c
 import { createSpellMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/spell/spell-mutation";
 import { createStartMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/start/start-mutation";
 import { BATTLE_LOG_RECENT_EVENTS, ParticipantSourceType } from "@/lib/constants/battle";
+import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import { moraleCheckSchema } from "@/lib/schemas";
 import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
@@ -596,7 +597,7 @@ async function takeTurn(spells: Map<string, any>) {
     for (const aura of pendingAreaAuras(P(), id, state.currentRound)) {
       const pool = zoneCandidates(P(), me(), aura.target).filter(() => rng() < 0.6);
 
-      await call("aura-zone", AURA_ZONE, { participantId: id, auraId: aura.id, targetIds: pool.map((x: any) => x.basicInfo.id) }, me().basicInfo.controlledBy);
+      await call("aura-zone", AURA_ZONE, { participantId: id, auraId: aura.id, targetIds: pool.map((x: any) => x.basicInfo.id) }, me().basicInfo.controlledBy === CONTROLLED_BY_DM ? undefined : me().basicInfo.controlledBy);
     }
   }
 
