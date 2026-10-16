@@ -99,9 +99,21 @@ describe("поле бою", () => {
 
     expect(screen.queryByText("Попадання")).toBeNull();
 
-    fireEvent.click(screen.getByRole("button", { name: "Годрік завдав 6" }));
+    fireEvent.click(screen.getByRole("button", { name: "Деталі" }));
 
     expect(screen.getByText("Попадання")).toBeTruthy();
+  });
+
+  it("раунд у журналі згортається дотиком по заголовку", () => {
+    render(<BattleLog />, { wrapper: wrap(scene()) });
+
+    fireEvent.click(screen.getByRole("button", { name: /Раунд 1/ }));
+
+    expect(screen.queryByText("Годрік завдав 6")).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: /Раунд 1/ }));
+
+    expect(screen.getByText("Годрік завдав 6")).toBeTruthy();
   });
 
   it("журнал із неповною історією показує «Показати раніші», дотик підвантажує сторінку", () => {

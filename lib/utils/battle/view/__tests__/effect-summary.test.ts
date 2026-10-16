@@ -31,5 +31,11 @@ describe("effectSummary", () => {
     expect(merged[0].abilityEffects).toHaveLength(2);
     expect(mergeEffectsForDisplay([init, { ...dmg, duration: 1 }])).toHaveLength(2);
   });
+
+  it("захист (guard) описаний: хто бере на себе шкоду", () => {
+    const e = makeEffect("guard", { name: "Клятва щита", duration: 99, effects: [{ type: "guard", value: 20 }], source: { participantId: "s", name: "Семгрун", abilityName: "Клятва щита" } });
+
+    expect(effectSummary(e)[0]).toBe("Семгрун бере на себе 20% шкоди від атак");
+  });
 });
 

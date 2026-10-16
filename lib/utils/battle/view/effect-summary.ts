@@ -9,7 +9,11 @@ const capitalize = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
 /** Що робить активний ефект — для підказки на чипі: опис або описи його модифікаторів, DoT/HoT, залишок і джерело. */
 /** Що саме робить ефект: опис або описи його модифікаторів. */
 export function effectLines(e: ActiveEffect): string[] {
-  return e.description ? [e.description] : (e.abilityEffects ?? legacyActiveEffectModifiers(e)).map((x) => capitalize(describeEffect(x)));
+  if (e.description) return [e.description];
+
+  const guards = e.effects.filter((d) => d.type === "guard").map((d) => `${e.source?.name ?? "Захисник"} бере на себе ${d.value}% шкоди від атак`);
+
+  return [...(e.abilityEffects ?? legacyActiveEffectModifiers(e)).map((x) => capitalize(describeEffect(x))), ...guards];
 }
 
 export function effectSummary(e: ActiveEffect): string[] {

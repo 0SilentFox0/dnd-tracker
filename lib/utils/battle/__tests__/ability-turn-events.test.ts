@@ -17,6 +17,7 @@ describe("turn events", () => {
 
     expect(r.participants[0].combatStats.currentHp).toBe(13);
     expect(r.abilityMessages[0]).toContain("💚");
+    expect(r.abilityMessages[0]).not.toContain("(a)");
   });
 
   it("смерть від DOT дає kill-подію союзникам", () => {

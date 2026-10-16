@@ -59,6 +59,8 @@ export function applyHeal(input: EffectApplyInput<Of<"heal">>): EffectApplyResul
 
   const messages: string[] = [];
 
+  const label = owner && !input.targetIds.every((id) => id === owner.basicInfo.id) ? `${ability.name} (${owner.basicInfo.name})` : ability.name;
+
   for (const id of input.targetIds) {
     const t = findParticipant(ps, id);
 
@@ -78,8 +80,8 @@ export function applyHeal(input: EffectApplyInput<Of<"heal">>): EffectApplyResul
     });
     messages.push(
       isActive(t)
-        ? `💚 ${ability.name}: ${t.basicInfo.name} +${hp - before} HP`
-        : `✝️ ${ability.name}: ${t.basicInfo.name} повертається з ${hp} HP`,
+        ? `💚 ${label}: ${t.basicInfo.name} +${hp - before} HP`
+        : `✝️ ${label}: ${t.basicInfo.name} повертається з ${hp} HP`,
     );
   }
 
