@@ -21,4 +21,19 @@ describe("personalPassiveEffects", () => {
     expect(personalPassiveEffects(friend, order)[0]).toMatchObject({ permanent: true, type: "buff", source: { participantId: "ag", personal: true } });
     expect(personalPassiveEffects(foe, order)).toHaveLength(0);
   });
+
+  it("умовна пасивка показується лише коли умова виконана", () => {
+    const wrath = resolved({ id: "w", name: "Гнів за своїх", trigger: { event: "passive" }, condition: { type: "hpBelow", who: "anyAlly", percent: 15 }, effects: [{ kind: "damageBonus", filter: { kind: "all" }, percent: 20 }] }, { personal: true, name: "Годрик" });
+
+    const godric = makeParticipant({ id: "g", abilities: [wrath] });
+
+    const friend = makeParticipant({ id: "fr" });
+
+    expect(personalPassiveEffects(godric, [godric, friend])).toHaveLength(0);
+
+    const hurt = { ...friend, combatStats: { ...friend.combatStats, currentHp: 1 } };
+
+    expect(personalPassiveEffects(godric, [godric, hurt])).toHaveLength(1);
+  });
 });
+

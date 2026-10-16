@@ -4,7 +4,7 @@ import { EffectIcon } from "./EffectIcon";
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { effectSummary } from "@/lib/utils/battle/view";
+import { effectSummary, mergeEffectsForDisplay } from "@/lib/utils/battle/view";
 import type { ActiveEffect } from "@/types/battle";
 
 const tone = (e: ActiveEffect) => (e.type === "buff" ? "text-[#cdb87e]" : "text-hud-danger");
@@ -29,7 +29,9 @@ function EffectChip({ effect }: { effect: ActiveEffect }) {
   );
 }
 
-export function EffectLine({ effects, max = 2 }: { effects: ActiveEffect[]; max?: number }) {
+export function EffectLine({ effects: raw, max = 2 }: { effects: ActiveEffect[]; max?: number }) {
+  const effects = mergeEffectsForDisplay(raw);
+
   const [expanded, setExpanded] = useState(false);
 
   const overflow = effects.length > max;

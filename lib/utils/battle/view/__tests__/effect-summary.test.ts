@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { makeEffect } from "@/lib/utils/abilities/__tests__/fixtures";
-import { effectSummary } from "@/lib/utils/battle/view";
+import { effectSummary, mergeEffectsForDisplay } from "@/lib/utils/battle/view";
 
 describe("effectSummary", () => {
   it("без опису — описує модифікатори, залишок і джерело", () => {
@@ -15,4 +15,21 @@ describe("effectSummary", () => {
 
     expect(effectSummary(e)).toEqual(["Горить", "4 шкоди (fire) щораунду", "ще 1 раунд"]);
   });
+
+  it("ефекти одного вміння з однаковою тривалістю зливаються в один запис", () => {
+    const source = { participantId: "i", name: "Ізабель", abilityName: "Сурми світанку" };
+
+    const init = makeEffect("horns#0", { name: "Сурми світанку", duration: 2, abilityEffects: [{ kind: "modifyStat", stat: "initiative", flat: 2 }], source });
+
+    const dmg = makeEffect("horns#1", { name: "Сурми світанку", duration: 2, abilityEffects: [{ kind: "damageBonus", filter: { kind: "all" }, percent: 10 }], source });
+
+    const drill = makeEffect("drill", { name: "Вишкіл війська", duration: 2, abilityEffects: [{ kind: "modifyStat", stat: "morale", flat: 1 }], source: { ...source, abilityName: "Люди: Вишкіл війська" } });
+
+    const merged = mergeEffectsForDisplay([init, drill, dmg]);
+
+    expect(merged.map((e) => e.name)).toEqual(["Сурми світанку", "Вишкіл війська"]);
+    expect(merged[0].abilityEffects).toHaveLength(2);
+    expect(mergeEffectsForDisplay([init, { ...dmg, duration: 1 }])).toHaveLength(2);
+  });
 });
+

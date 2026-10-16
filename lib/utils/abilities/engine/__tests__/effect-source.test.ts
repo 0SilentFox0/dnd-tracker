@@ -19,6 +19,10 @@ describe("джерело ефекту", () => {
     });
   });
 
+  it("расове вміння підписане назвою раси", () => {
+    expect(effectSource(owner, { name: "Вишкіл війська", source: { type: "race", name: "Люди" } })?.abilityName).toBe("Люди: Вишкіл війська");
+  });
+
   it("upsertTimedEffect записує source у ActiveEffect", () => {
     const target = createMockParticipant();
 

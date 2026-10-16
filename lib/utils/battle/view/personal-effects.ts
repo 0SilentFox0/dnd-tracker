@@ -1,4 +1,5 @@
 import { isActive, resolvedAbilitiesOf } from "@/lib/utils/abilities/engine/participants";
+import { evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
 import { isStaticEffect } from "@/lib/utils/abilities/schema/kinds";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
@@ -16,6 +17,8 @@ export function personalPassiveEffects(p: BattleParticipant, order: BattlePartic
 
     for (const a of resolvedAbilitiesOf(owner)) {
       if (!a.source.personal || a.trigger.event !== "passive") continue;
+
+      if (a.condition && !evaluateCondition(a.condition, { owner, event: null, participants: order })) continue;
 
       const hits = a.effects.filter(isStaticEffect).filter((e) => {
         const target = "target" in e ? (e.target ?? "self") : "self";

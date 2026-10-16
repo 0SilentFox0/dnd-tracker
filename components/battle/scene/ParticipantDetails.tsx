@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { EffectIcon, HealthBar, HealthLabel, Portrait } from "@/components/battle/hud";
 import { useBattleSceneData } from "@/lib/hooks/battle";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
-import { canSeeExactStats, effectSummary, formatKnownArmorClass, personalPassiveEffects, resolveKnownArmorClass, resolveObservedTraits } from "@/lib/utils/battle/view";
+import { canSeeExactStats, effectLines, formatKnownArmorClass, mergeEffectsForDisplay, personalPassiveEffects, resolveKnownArmorClass, resolveObservedTraits } from "@/lib/utils/battle/view";
 import type { BattleParticipant } from "@/types/battle";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
@@ -24,7 +24,7 @@ export function ParticipantDetails({ participant }: { participant: BattlePartici
 
   const log = battle.battleLog ?? [];
 
-  const effects = [...personalPassiveEffects(participant, battle.initiativeOrder), ...participant.battleData.activeEffects];
+  const effects = mergeEffectsForDisplay([...personalPassiveEffects(participant, battle.initiativeOrder), ...participant.battleData.activeEffects]);
 
   const known = resolveKnownArmorClass(log, participant.basicInfo.id, battle.knowledge);
 
@@ -61,7 +61,7 @@ export function ParticipantDetails({ participant }: { participant: BattlePartici
               </span>
               <div className="min-w-0 flex-1">
                 <div className="flex justify-between text-[15px] font-medium text-[var(--ink)]"><span>{e.name}</span><span className="text-[13px] font-normal text-[var(--hud-muted)]">{e.zone ? "зона" : e.permanent ? "постійно" : `${e.duration} р.`}</span></div>
-                {e.description ? <p className="mt-0.5 text-[13px] leading-[18px] text-[#a89c88]">{e.description}</p> : e.permanent && <p className="mt-0.5 text-[13px] leading-[18px] text-[#a89c88]">{effectSummary(e)[0]}</p>}
+                {effectLines(e).map((line) => <p key={line} className="mt-0.5 text-[13px] leading-[18px] text-[#a89c88]">{line}</p>)}
                 {e.source && <p className="text-[13px] leading-[18px] text-[#a89c88]">Від: {e.source.abilityName ? `${e.source.abilityName} (${e.source.name})` : e.source.name}</p>}
               </div>
             </div>
