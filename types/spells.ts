@@ -54,6 +54,7 @@ export type BookSpell = {
   name: string;
   level: number;
   description?: string | null;
+  appearanceDescription?: string | null;
   icon?: string | null;
   spellGroup?: { id: string; name: string } | null;
   dice?: number;

@@ -31,10 +31,10 @@ export function spellLevelRoman(level: number): string {
 }
 
 const SPELL_SCHOOL_COLORS: Record<string, string> = {
-  Природа: "#3f7a2c",
-  Світло: "#a8801c",
-  Темрява: "#5e3d91",
-  Хаос: "#a8321c",
+  Природа: "#12a52b",
+  Світло: "#f2b300",
+  Темрява: "#7a1fe6",
+  Хаос: "#ec1c0c",
 };
 
 export function spellSchoolColor(name: string | null | undefined): string {

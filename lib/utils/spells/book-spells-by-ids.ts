@@ -9,6 +9,7 @@ export const BOOK_SPELL_SELECT = {
   name: true,
   level: true,
   description: true,
+  appearanceDescription: true,
   icon: true,
   dice: true,
   cost: true,

@@ -1,10 +1,10 @@
-import { type SpellTier, spellTier } from "@/lib/utils/battle/view";
+import type { SpellTier } from "@/lib/utils/battle/view";
 
 export type { SpellTier };
 
 export const metalClass = (tier: SpellTier) => `metal-${tier}`;
 
-export const spellLevelMetal = (level: number) => metalClass(spellTier(level));
+export const spellLevelMetal = (level: number) => `circle-${Math.max(0, Math.min(5, level))}`;
 
 export const BRANCH_LEVEL_METAL = { basic: "metal-bronze", advanced: "metal-silver", expert: "metal-gold" } as const;
 

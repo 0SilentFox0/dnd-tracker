@@ -15,8 +15,6 @@ const LEVELS = [0, 1, 2, 3, 4, 5] as const;
 
 const PAPER = "hud-book relative bg-[#e9dec5] text-[#2a2018] shadow-[inset_14px_0_18px_-10px_rgba(60,40,20,.55)]";
 
-const METAL = ["залізне", "бронзове", "срібне", "золоте", "міфрилове", "платинове"];
-
 export interface SpellBookPagesProps {
   byLevel: Record<number, BookSpell[]>;
   slotOf: (level: number) => number;
@@ -36,7 +34,7 @@ function SchoolTabs({ schools, active, countOf, onPick }: { schools: string[]; a
   const tabs = [{ name: ALL, label: "Усі", color: "#2a2018" }, ...schools.map((name) => ({ name, label: name, color: spellSchoolColor(name) }))];
 
   return (
-    <div role="tablist" aria-label="Школи магії" className="-mt-4 mb-2 flex flex-wrap items-start gap-1.5">
+    <div role="tablist" aria-label="Школи магії" className="sticky top-0 z-10 -mx-5 -mt-4 mb-2 flex flex-wrap items-start gap-1.5 bg-[#e9dec5] px-5 pb-1">
       {tabs.map((t) => {
         const count = t.name === ALL ? undefined : countOf(t.name);
 
@@ -49,8 +47,8 @@ function SchoolTabs({ schools, active, countOf, onPick }: { schools: string[]; a
             onClick={() => onPick(t.name)}
             style={{ backgroundColor: t.color }}
             className={cn(
-              "hud-sc flex items-start justify-center px-3 pt-1 text-[13px] text-[#f3e7cc] shadow-[inset_0_0_0_1px_rgba(243,231,204,.25)] [clip-path:polygon(0_0,100%_0,100%_100%,50%_82%,0_100%)]",
-              active === t.name ? "h-11" : "h-8 opacity-80 hover:opacity-100",
+              "hud-sc flex items-start justify-center px-3 pt-1 text-[13px] font-bold text-white [clip-path:polygon(0_0,100%_0,100%_100%,50%_82%,0_100%)] [text-shadow:0_1px_2px_rgba(0,0,0,.6)]",
+              active === t.name ? "h-11" : "h-8 hover:h-9",
               count === 0 && "opacity-40",
             )}
           >
@@ -73,19 +71,21 @@ export function SpellBookPages({ byLevel, slotOf, level, pickedId, wide, showDet
 
   return (
     <div className="relative pr-11">
-      <div className="absolute right-1.5 top-6 z-10 flex flex-col gap-1.5">
-        {LEVELS.map((l) => (
-          <button
-            key={l}
-            type="button"
-            aria-label={`${spellLevelRoman(l)} коло, слотів ${l === 0 ? "∞" : slotOf(l)}`}
-            onClick={() => onLevel(l)}
-            className={cn("hud-sc flex h-14 flex-col items-center justify-center gap-1 pb-1.5 text-[13px] [clip-path:polygon(0_0,100%_0,100%_100%,50%_86%,0_100%)]", spellLevelMetal(l), "metal-fill", level === l ? "-ml-2 w-10" : "w-8", l > 0 && slotOf(l) === 0 && "opacity-55 grayscale")}
-          >
-            {spellLevelRoman(l)}
-            <span className="font-sans text-[11px] opacity-85">{l === 0 ? "∞" : slotOf(l)}</span>
-          </button>
-        ))}
+      <div className="absolute bottom-0 right-1.5 top-6 z-10">
+        <div className="sticky top-6 flex flex-col gap-1.5">
+          {LEVELS.map((l) => (
+            <button
+              key={l}
+              type="button"
+              aria-label={`${spellLevelRoman(l)} коло, слотів ${l === 0 ? "∞" : slotOf(l)}`}
+              onClick={() => onLevel(l)}
+              className={cn("hud-sc flex h-14 flex-col items-center justify-center gap-1 pb-1.5 text-[13px] [clip-path:polygon(0_0,100%_0,100%_100%,50%_86%,0_100%)]", spellLevelMetal(l), "metal-fill", level === l ? "-ml-2 w-10" : "w-8", l > 0 && slotOf(l) === 0 && "opacity-55 grayscale")}
+            >
+              {spellLevelRoman(l)}
+              <span className="font-sans text-[11px] opacity-85">{l === 0 ? "∞" : slotOf(l)}</span>
+            </button>
+          ))}
+        </div>
       </div>
       <div className={cn(PAPER, "min-h-[70dvh]", wide && "grid grid-cols-2")}>
         {(wide || !showDetail) && (
@@ -94,7 +94,6 @@ export function SpellBookPages({ byLevel, slotOf, level, pickedId, wide, showDet
             <div className="text-[13px] italic text-[#7a6650]">Книга заклинань</div>
             <div className="hud-sc flex items-center gap-3 text-2xl font-bold leading-8">
               {spellLevelName(level)}
-              <span className="font-sans text-[13px] font-normal italic tracking-normal text-[#6d7177]">{METAL[level]} коло</span>
             </div>
             <div className="my-1 h-px bg-[#2a2018]/35" />
             {shown.length === 0 && <p className="py-6 text-center italic text-[#7a6650]">{school === ALL ? "На цьому колі заклинань немає" : "На цьому колі заклинань цієї школи немає"}</p>}
@@ -154,7 +153,11 @@ export function SpellDetail({ spell, formula, children }: { spell: BookSpell; fo
           <div className="text-sm italic text-[#7a6650]">{spell.spellGroup?.name ?? "Без школи"} · {spellLevelName(spell.level).toLowerCase()}</div>
         </div>
       </div>
-      {spell.description && <p className="mt-4 text-[17px] leading-6 first-letter:float-left first-letter:pr-1.5 first-letter:pt-1 first-letter:font-[family-name:var(--font-hud-sc)] first-letter:text-[52px] first-letter:leading-[44px] first-letter:text-[#7a2a1f]">{spell.description}</p>}
+      {spell.description && (
+        <p className="mt-4 border-l-4 pl-4 text-[19px] font-medium italic leading-7 text-[#3b2716]" style={{ borderColor: spellSchoolColor(spell.spellGroup?.name) }}>
+          {spell.description}
+        </p>
+      )}
       <div className="mt-4 grid grid-cols-2 border-t border-[#2a2018]/25">
         {[["Сила", formula ?? (spell.dice ? `${spell.dice} баз. кубиків` : "—")], ["Ціль", spell.targeting ? targetingLabel(spell.targeting) : "—"], ["Перевірка", spell.resolution ? resolutionLabel(spell.resolution) : "автоматично"], ["Вартість", costLabel(spell.cost ?? "action")]].map(([a, b]) => (
           <div key={a} className="flex h-12 flex-col justify-center border-b border-[#2a2018]/15 odd:border-r odd:pr-3 even:pl-3">
@@ -163,6 +166,7 @@ export function SpellDetail({ spell, formula, children }: { spell: BookSpell; fo
           </div>
         ))}
       </div>
+      {spell.appearanceDescription && <p className="mt-5 text-[17px] leading-6 first-letter:float-left first-letter:pr-1.5 first-letter:pt-1 first-letter:font-[family-name:var(--font-hud-sc)] first-letter:text-[52px] first-letter:leading-[44px] first-letter:text-[#7a2a1f]">{spell.appearanceDescription}</p>}
       {children}
     </>
   );
