@@ -1,5 +1,3 @@
-"use client";
-
 import { getLogEntryDetailLines } from "@/lib/utils/battle/view/log-format";
 import type { BattleAction } from "@/types/battle";
 

@@ -1,5 +1,3 @@
-"use client";
-
 import { HudPanel } from "@/components/hud/page";
 import type { SheetTotal } from "@/types/characters";
 

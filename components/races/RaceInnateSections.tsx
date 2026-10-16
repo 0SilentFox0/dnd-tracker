@@ -1,5 +1,3 @@
-"use client";
-
 import { EntityIcon } from "@/components/common/EntityIcon";
 import type { RacePassiveAbility } from "@/lib/utils/races/race-summary";
 

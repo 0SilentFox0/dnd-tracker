@@ -1,5 +1,3 @@
-"use client";
-
 import { HudSection } from "@/components/hud/form";
 import { HudCard } from "@/components/hud/page";
 import type { BalanceHint, FairScaling, PartyPower } from "@/lib/utils/battle/balance";

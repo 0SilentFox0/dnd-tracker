@@ -1,5 +1,3 @@
-"use client";
-
 import { HudPage } from "@/components/hud/page";
 import { SkillTreeEditor } from "@/components/skill-tree/editor";
 

@@ -1,5 +1,3 @@
-"use client";
-
 import { Layers } from "lucide-react";
 
 import { EntityIcon } from "@/components/common/EntityIcon";
