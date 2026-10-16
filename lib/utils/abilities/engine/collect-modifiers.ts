@@ -72,7 +72,7 @@ function isAuraTarget(target: StaticEffect["target"]): boolean {
 }
 
 // Editor-made ids ("a1", "a2"…) repeat across owners, so they only dedupe within one source; library ids are global.
-function auraKey(ability: ResolvedAbility): string {
+export function auraKey(ability: ResolvedAbility): string {
   return /^a\d+$/.test(ability.id) ? ability.key : ability.id;
 }
 

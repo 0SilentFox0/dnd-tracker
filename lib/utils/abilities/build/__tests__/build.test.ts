@@ -39,6 +39,22 @@ describe("bake", () => {
 
     expect(withNew.map((p) => p.combatStats.maxHp)).toEqual([23, 23, 20, 23]);
   });
+
+  it("однакова аура від кількох власників запікається один раз (найсильніша)", () => {
+    const fear = (flat: number) => resolved({ id: "unit-fear-aura", name: "Аура страху", trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "morale", flat, target: "allEnemies" }] });
+
+    const enemies = [1, 2, 3].map((i) => makeParticipant({ id: `m${i}`, side: ParticipantSide.ENEMY, abilities: [fear(i === 3 ? -2 : -1)] }));
+
+    const hero = makeParticipant({ id: "h" });
+
+    const baked = applyBakedAuras([hero, ...enemies], new Set(["h", "m1", "m2", "m3"]));
+
+    expect(baked[0].combatStats.morale).toBe(-2);
+
+    const another = makeParticipant({ id: "m4", side: ParticipantSide.ENEMY, abilities: [fear(-1)] });
+
+    expect(applyBakedAuras([...baked, another], new Set(["m4"]))[0].combatStats.morale).toBe(-2);
+  });
 });
 
 describe("collectCharacterAbilities", () => {

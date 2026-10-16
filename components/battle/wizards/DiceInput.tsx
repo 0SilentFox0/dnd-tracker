@@ -50,9 +50,9 @@ export function DamageDice({ slots, values, onChange }: { slots: number[]; value
   );
 }
 
-export function AiRollButton({ onClick, label = "AI ROLL" }: { onClick: () => void; label?: string }) {
+export function AiRollButton({ onClick, label = "Авто-кидок" }: { onClick: () => void; label?: string }) {
   return (
-    <button type="button" onClick={onClick} className="hud-sc flex h-[52px] items-center justify-center gap-2.5 whitespace-nowrap border border-white/25 text-[15px] font-bold tracking-[.04em] text-[var(--bone)]">
+    <button type="button" onClick={onClick} className="hud-sc flex h-[52px] w-full items-center justify-center gap-2.5 whitespace-nowrap border border-white/25 text-[15px] font-bold tracking-[.04em] text-[var(--bone)]">
       <Dices className="size-5" />
       {label}
     </button>

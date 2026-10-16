@@ -24,10 +24,10 @@ export const LastActionTicker = memo(function LastActionTicker({ onOpenLog }: { 
   return (
     <button type="button" onClick={onOpenLog} className="mx-4 flex h-10 w-[calc(100%-2rem)] items-center gap-2 border-y border-white/10 text-left text-sm text-[#d9cfbd]">
       {actor && <Portrait participant={actor} size={24} />}
-      <span className="truncate">{last.actorName}</span>
+      <span className="max-w-[45%] shrink-0 truncate">{last.actorName}</span>
       {target && <><span className="text-[var(--hud-muted)]">→</span><Portrait participant={target} size={24} /><span className="truncate">{target.basicInfo.name}</span></>}
       {change !== 0 && <b className={change > 0 ? "text-[#e9a08f]" : "text-[#8fd07a]"}>{change > 0 ? `−${change}` : `+${-change}`}</b>}
-      {!target && change === 0 && <span className="truncate text-[var(--hud-muted)]">{last.resultText}</span>}
+      {!target && change === 0 && <span className="min-w-0 truncate text-[var(--hud-muted)]">{last.resultText}</span>}
       {onOpenLog && <span className="ml-auto shrink-0 text-[13px] text-[var(--hud-muted)]">журнал ›</span>}
     </button>
   );

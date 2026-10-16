@@ -36,14 +36,14 @@ describe("AttackWizard", () => {
     await waitFor(() => expect(mutateAsync).toHaveBeenCalledWith(expect.objectContaining({ attackRoll: 14, damageRolls: [6] })));
   });
 
-  it("AI ROLL ставить кидок і переходить далі", async () => {
+  it("Авто-кидок ставить кидок і переходить далі", async () => {
     const { wrapper, me } = fakeScene();
 
     render(<Harness attacker={me} />, { wrapper });
 
     fireEvent.click(await screen.findByRole("button", { name: /Гоблін/ }));
     fireEvent.click(screen.getByRole("button", { name: "Далі · кидок" }));
-    fireEvent.click(screen.getByRole("button", { name: /AI ROLL/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Авто-кидок/ }));
 
     await waitFor(() => expect(screen.queryByText("Кидок атаки · d20")).toBeNull());
   });
