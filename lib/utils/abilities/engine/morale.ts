@@ -18,10 +18,11 @@ export function ownTimedMoraleFlat(p: BattleParticipant, ps?: BattleParticipant[
   return sum;
 }
 
+// Без ps (формули, рекурсія) зони мертвих власників відфільтрувати не можна — лише дедуп однакових аур.
 function ownMinMorale(p: BattleParticipant): number | undefined {
   const values = [
     ...resolvedAbilitiesOf(p).flatMap((a) => (a.trigger.event === "passive" ? a.effects : [])),
-    ...p.battleData.activeEffects.flatMap((ae) => ae.abilityEffects ?? []),
+    ...liveActiveEffects(p).flatMap((ae) => ae.abilityEffects ?? []),
   ].flatMap((e) => (e.kind === "flag" && e.flag === "minMorale" && (e.target ?? "self") === "self" ? [e.value] : []));
 
   return values.length ? Math.max(...values) : undefined;
@@ -33,7 +34,7 @@ function ownHasFlag(p: BattleParticipant, flag: FlagKey): boolean {
     (a) => a.trigger.event === "passive" && a.effects.some((e) => e.kind === "flag" && e.flag === flag && (e.target ?? "self") === "self"),
   );
 
-  return passive || p.battleData.activeEffects.some((ae) => (ae.abilityEffects ?? []).some((e) => e.kind === "flag" && e.flag === flag));
+  return passive || liveActiveEffects(p).some((ae) => (ae.abilityEffects ?? []).some((e) => e.kind === "flag" && e.flag === flag));
 }
 
 export function combineMorale(base: number, timedFlat: number, flags: { ignored: boolean; noNegative: boolean; min?: number }): { value: number; ignored: boolean } {

@@ -60,7 +60,7 @@ export interface ActiveEffect {
   abilityKey?: string;
   abilityEffects?: StaticEffect[];
   source?: { participantId: string; name: string; abilityName?: string; icon?: string | null; personal?: boolean };
-  /** постійний ефект (пасивне персональне вміння) — без відліку раундів */
+  /** постійний ефект (пасивне персональне вміння, зона аури) — без відліку раундів */
   permanent?: boolean;
   /** ефект зони аури: діє, поки власник живий; key — спільний для однакових аур різних власників */
   zone?: { ownerId: string; key: string };
@@ -208,6 +208,8 @@ export interface BattleParticipantBattleData {
   charmReturn?: { side: ParticipantSide; controlledBy: string };
   /** Рівень майстерності героя у гілці кожної школи заклинань (groupId → рівень) */
   schoolMastery?: Record<string, "basic" | "advanced" | "expert">;
+  /** Раунд, у якому власник востаннє вказав зону кожної аури в області (auraId → раунд), навіть порожню */
+  auraZones?: Record<string, number>;
   /** Масштаб шкоди ворога-юніта для рівного бою (старт бою); немає = ×1 */
   damageMultiplier?: number;
   /** Масштаб HP ворога-юніта для рівного бою; лише для показу ДМу */

@@ -1,11 +1,12 @@
 import { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { applyAuraZone, areaAuras, AuraZoneError } from "@/lib/utils/abilities/engine/area-aura";
+import { applyAuraZone, areaAuras, zoneCandidates } from "@/lib/utils/abilities/engine/area-aura";
 import { findParticipant, isActive, participantNames } from "@/lib/utils/abilities/engine/participants";
 import { canActNow } from "@/lib/utils/battle/common/control";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
+import { assertNotPanicking } from "@/lib/utils/battle/turn";
 
 export const auraZoneSchema = z.object({
   participantId: z.string(),
@@ -28,17 +29,17 @@ export function auraZoneMutation(ctx: BattleMutationContext, data: AuraZoneBody)
 
   if (!aura) throw new BattleRuleError("action_rejected", "У учасника немає такої аури");
 
+  assertNotPanicking(ctx.scene.pendingMoraleCheck, owner.basicInfo.id);
+
+  if (!ctx.isDM && owner.battleData.auraZones?.[aura.id] === ctx.scene.round) throw new BattleRuleError("action_used", "Зону цієї аури вже обрано в цьому раунді");
+
   const targetIds = [...new Set(data.targetIds)];
 
-  let participants;
+  const allowed = new Set(zoneCandidates(ctx.participants, owner, aura.target).map((p) => p.basicInfo.id));
 
-  try {
-    participants = applyAuraZone(ctx.participants, owner.basicInfo.id, aura.id, targetIds, ctx.scene.round);
-  } catch (e) {
-    if (e instanceof AuraZoneError) throw new BattleRuleError("action_rejected", e.message);
+  if (targetIds.some((id) => !allowed.has(id))) throw new BattleRuleError("action_rejected", "Ціль поза доступною стороною");
 
-    throw e;
-  }
+  const participants = applyAuraZone(ctx.participants, owner, aura, targetIds, ctx.scene.round);
 
   const who = targetIds.length ? participantNames(ctx.participants, targetIds) : "нікого";
 

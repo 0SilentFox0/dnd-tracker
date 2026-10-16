@@ -12,6 +12,11 @@
   --color-hud-field: #1a140f;
   --color-hud-rule: #3a2e22;
   --color-hud-danger: #d0705c;
+  --color-hud-bad: #ff8a7a;
+  --color-hud-good: #a8d48f;
+  --color-hud-good-dim: #7fa86a;
+  --color-hud-gold-bright: #ffe08a;
+  --color-hud-gold-strong: #e6c25a;
   --color-hud-panel: rgba(17, 14, 11, 0.82);
 }
 

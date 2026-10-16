@@ -24,4 +24,21 @@ describe("aura-zone mutation", () => {
     expect(() => auraZoneMutation(context({ participants: [owner, goblin] }), { participantId: "hero", auraId, targetIds: ["gob"] })).toThrow(expect.objectContaining({ code: "action_rejected" }));
     expect(() => auraZoneMutation(context({ participants: [owner, goblin], scene: { ...context().scene, turnIndex: 1 } }), { participantId: "hero", auraId, targetIds: [] })).toThrow(BattleAccessError);
   });
+
+  it("гравець обирає зону раз на раунд, ДМ може змінити", () => {
+    const first = auraZoneMutation(context({ participants: [owner, goblin] }), { participantId: "hero", auraId, targetIds: [] });
+
+    const again = context({ participants: first.participants });
+
+    expect(() => auraZoneMutation(again, { participantId: "hero", auraId, targetIds: ["hero"] })).toThrow(expect.objectContaining({ code: "action_used" }));
+    expect(() => auraZoneMutation({ ...again, isDM: true }, { participantId: "hero", auraId, targetIds: ["hero"] })).not.toThrow();
+  });
+
+  it("у паніці зону не обрати", () => {
+    const pendingMoraleCheck = { participantId: "hero", d10Roll: 1, moraleResult: { shouldSkipTurn: true } };
+
+    const ctx = context({ participants: [owner, goblin] });
+
+    expect(() => auraZoneMutation({ ...ctx, scene: { ...ctx.scene, pendingMoraleCheck } }, { participantId: "hero", auraId, targetIds: [] })).toThrow(expect.objectContaining({ code: "action_used" }));
+  });
 });

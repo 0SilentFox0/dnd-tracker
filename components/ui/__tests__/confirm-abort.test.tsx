@@ -37,4 +37,60 @@ describe("ConfirmProvider", () => {
     await expect(answer).resolves.toBe(false);
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   });
+
+  it("вже скасований signal не відкриває діалог", async () => {
+    const got: { confirm?: ConfirmFn | null } = {};
+
+    function Grab({ onReady }: { onReady: (c: ConfirmFn | null) => void }) {
+      const confirm = useContext(ConfirmContext);
+
+      useEffect(() => onReady(confirm), [confirm, onReady]);
+
+      return null;
+    }
+
+    render(<ConfirmProvider><Grab onReady={(c) => { got.confirm = c; }} /></ConfirmProvider>);
+
+    const controller = new AbortController();
+
+    controller.abort();
+
+    let answer: Promise<boolean> = Promise.resolve(true);
+
+    act(() => {
+      answer = got.confirm?.({ title: "Завершити хід?", signal: controller.signal }) ?? answer;
+    });
+
+    await expect(answer).resolves.toBe(false);
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("слухач abort знімається після рішення", async () => {
+    const got: { confirm?: ConfirmFn | null } = {};
+
+    function Grab({ onReady }: { onReady: (c: ConfirmFn | null) => void }) {
+      const confirm = useContext(ConfirmContext);
+
+      useEffect(() => onReady(confirm), [confirm, onReady]);
+
+      return null;
+    }
+
+    render(<ConfirmProvider><Grab onReady={(c) => { got.confirm = c; }} /></ConfirmProvider>);
+
+    const controller = new AbortController();
+
+    const remove = vi.spyOn(controller.signal, "removeEventListener");
+
+    let answer: Promise<boolean> = Promise.resolve(true);
+
+    act(() => {
+      answer = got.confirm?.({ title: "Завершити хід?", signal: controller.signal }) ?? answer;
+    });
+
+    act(() => screen.getByRole("button", { name: "Скасувати" }).click());
+
+    await expect(answer).resolves.toBe(false);
+    expect(remove).toHaveBeenCalledWith("abort", expect.any(Function));
+  });
 });

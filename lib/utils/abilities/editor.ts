@@ -1,11 +1,10 @@
 import { EFFECT_REGISTRY } from "@/lib/utils/abilities/registry/effects";
 import { AbilitiesSchema, type Ability, type Effect, type EffectKind, isActionScopedTrigger, isStaticEffect, type Trigger, type TriggerEvent } from "@/lib/utils/abilities/schema";
+import { PASSIVE_TARGETS } from "@/lib/utils/abilities/schema/kinds";
 
 const STATIC_KINDS: EffectKind[] = ["modifyStat", "damageBonus", "flag", "note"];
 
 const ALL_KINDS = Object.keys(EFFECT_REGISTRY) as EffectKind[];
-
-const PASSIVE_TARGETS = new Set(["self", "allAllies", "allEnemies", "nearbyAllies", "nearbyEnemies"]);
 
 export function allowedEffectKinds(trigger: Trigger): EffectKind[] {
   if (trigger.event === "passive") return STATIC_KINDS;

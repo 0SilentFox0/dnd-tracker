@@ -97,9 +97,7 @@ export function pickEnemyRoster(party: PartyPower, rawLibrary: UnitStats[], race
 
     const weighted = units.reduce((a, u, i) => a + closeness(u) * quantities[i], 0) / total;
 
-    const beyondClamp = lnDistance(rawHp, Math.min(SCALE_MAX, Math.max(SCALE_MIN, rawHp))) + lnDistance(rawDmg, Math.min(SCALE_MAX, Math.max(SCALE_MIN, rawDmg)));
-
-    const deviation = lnDistance(hpScale, 1) + lnDistance(dmgScale, 1) + beyondClamp + shortfall;
+    const deviation = lnDistance(hpScale, 1) + lnDistance(dmgScale, 1) + shortfall;
 
     const score: [number, number, number, number] = [within ? 0 : reaches ? 1 : inRange ? 2 : 3, within ? Math.round(weighted * 4) : 0, units.length, within ? deviation : deviation + weighted / 100];
 

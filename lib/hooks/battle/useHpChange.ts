@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export function useHpChange(hp: number): { delta: number; id: number } | null {
   const [prev, setPrev] = useState(hp);
@@ -13,4 +13,19 @@ export function useHpChange(hp: number): { delta: number; id: number } | null {
   }
 
   return change;
+}
+
+const SHAKE = [{ transform: "none" }, { transform: "translateX(-6px)" }, { transform: "translateX(5px)" }, { transform: "translateX(-3px)" }, { transform: "none" }];
+
+/** Тремтіння без перемонтування піддерева: Web Animations перезапускається на кожну втрату HP. */
+export function useDamageShake<T extends HTMLElement>(change: { delta: number; id: number } | null) {
+  const ref = useRef<T>(null);
+
+  const id = change && change.delta < 0 ? change.id : null;
+
+  useEffect(() => {
+    if (id !== null) ref.current?.animate?.(SHAKE, { duration: 350 });
+  }, [id]);
+
+  return ref;
 }

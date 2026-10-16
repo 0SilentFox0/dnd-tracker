@@ -4,8 +4,11 @@ import { BookOpen, Hourglass, Sparkles, Swords, Zap } from "lucide-react";
 
 import type { usePlayerTurn } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
+import type { MoraleOutcome } from "@/lib/utils/battle/flows";
 
 type Turn = ReturnType<typeof usePlayerTurn>;
+
+const MORALE_LABEL: Record<MoraleOutcome, string> = { none: "Мораль: без змін", extra: "Бойовий дух", skip: "Паніка" };
 
 const Tile = ({ icon: Icon, label, used, primary, onClick }: { icon: typeof Swords; label: string; used?: boolean; primary?: boolean; onClick?: () => void }) => (
   <button type="button" disabled={used} onClick={onClick} className={cn("flex h-16 min-w-0 items-center gap-3 border px-3.5 text-left text-[var(--ink)] disabled:opacity-40", primary ? "border-[var(--enemy)] bg-[var(--enemy)]/25" : "border-white/25 bg-black/55")}>
@@ -27,7 +30,7 @@ export function ActionGrid({ turn, pending, available, actions }: {
         <Tile icon={BookOpen} label="Магія" used={(turn.actionUsed && !turn.bonusSpellReady) || turn.skipped || !available.magic || pending} onClick={actions.magic} />
         {available.ability && <Tile icon={Zap} label="Вміння" used={turn.actionUsed || turn.skipped || pending} onClick={actions.ability} />}
         <Tile icon={Sparkles} label="Бонус" used={!turn.bonusAvailable || turn.skipped || !available.bonus || pending} onClick={actions.bonus} />
-        <Tile icon={Hourglass} label="Мораль" used />
+        {turn.moraleResult && <Tile icon={Hourglass} label={MORALE_LABEL[turn.moraleResult]} used />}
       </div>
       {turn.phase !== "countdown" && (
         <button type="button" disabled={pending} onClick={() => void turn.endTurn()} className="hud-sc mt-2 flex h-11 w-full items-center justify-center border border-white/15 text-[15px] tracking-[.08em] text-[#b8ab95] disabled:opacity-50">

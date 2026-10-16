@@ -191,7 +191,9 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
   const summons: SummonRequest[] = [];
 
   // кожне влучання мультицільової атаки — свій блок кубиків повної формули (зброя + рівень героя), по черзі влучань
-  const dicePerTarget = isMultiTargetRanged && (targets.length > 1 || hitsAllEnemies) ? diceCount(heroAttackDamageParts(attacker, attack).formula) : 0;
+  const damageFormula = isMultiTargetRanged && (targets.length > 1 || hitsAllEnemies) ? heroAttackDamageParts(attacker, attack).formula : null;
+
+  const dicePerTarget = damageFormula ? diceCount(damageFormula) : 0;
 
   let damageCursor = 0;
 
@@ -227,7 +229,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
     const damageRollsForTarget = perStrike
       ? rolledByServer
-        ? [...sentRolls, ...rollDiceList(heroAttackDamageParts(attacker, attack).formula, rng).slice(sentRolls.length)]
+        ? [...sentRolls, ...rollDiceList(damageFormula ?? "", rng).slice(sentRolls.length)]
         : sentRolls
       : data.damageRolls;
 

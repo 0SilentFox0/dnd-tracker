@@ -11,6 +11,12 @@ export const ABILITY_TARGETS = ["self", "eventTarget", "eventActor", "otherEnemy
 /** Аури в області: без позицій на полі ціль обирає власник на початку свого ходу. */
 export const AREA_TARGETS = ["nearbyAllies", "nearbyEnemies"] as const;
 
+export type AreaTarget = (typeof AREA_TARGETS)[number];
+
+export const isAreaTarget = (t: string | undefined): t is AreaTarget => (AREA_TARGETS as readonly string[]).includes(t ?? "");
+
+export const PASSIVE_TARGETS: ReadonlySet<string> = new Set(["self", "allAllies", "allEnemies", ...AREA_TARGETS]);
+
 export const ATTACK_KINDS = [AttackType.MELEE, AttackType.RANGED] as const;
 
 export const DAMAGE_KINDS = [AttackType.MELEE, AttackType.RANGED, "magic"] as const;

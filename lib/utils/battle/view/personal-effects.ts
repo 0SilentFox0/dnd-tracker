@@ -1,5 +1,7 @@
 import { mergeEffectsForDisplay } from "./effect-summary";
 
+import { appliesTo, auraKey, isAuraTarget } from "@/lib/utils/abilities/engine/collect-modifiers";
+import { staticEffectStrength } from "@/lib/utils/abilities/engine/effect-strength";
 import { isActive, resolvedAbilitiesOf } from "@/lib/utils/abilities/engine/participants";
 import { liveActiveEffects } from "@/lib/utils/abilities/engine/zone-effects";
 import { evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
@@ -13,6 +15,8 @@ import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 export function personalPassiveEffects(p: BattleParticipant, order: BattleParticipant[]): ActiveEffect[] {
   const out: ActiveEffect[] = [];
 
+  const auras = new Map<string, { effect: ActiveEffect; strength: number }>();
+
   for (const owner of order) {
     if (!isActive(owner)) continue;
 
@@ -23,15 +27,11 @@ export function personalPassiveEffects(p: BattleParticipant, order: BattlePartic
 
       if (a.condition && !evaluateCondition(a.condition, { owner, event: null, participants: order })) continue;
 
-      const hits = a.effects.filter(isStaticEffect).filter((e) => {
-        const target = "target" in e ? (e.target ?? "self") : "self";
-
-        return target === "self" ? owner.basicInfo.id === p.basicInfo.id : target === "allAllies" ? ally : target === "allEnemies" ? !ally : false;
-      });
+      const hits = a.effects.filter(isStaticEffect).filter((e) => appliesTo(e.target, owner, p));
 
       if (hits.length === 0) continue;
 
-      out.push({
+      const effect: ActiveEffect = {
         id: `personal:${owner.basicInfo.id}:${a.key}`,
         name: a.name,
         type: ally ? "buff" : "debuff",
@@ -41,11 +41,23 @@ export function personalPassiveEffects(p: BattleParticipant, order: BattlePartic
         effects: [],
         abilityEffects: hits,
         source: { participantId: owner.basicInfo.id, name: owner.basicInfo.name, abilityName: a.source.name, personal: true },
-      });
+      };
+
+      if (!hits.some((e) => isAuraTarget(e.target))) {
+        out.push(effect);
+
+        continue;
+      }
+
+      const key = auraKey(a);
+
+      const strength = hits.reduce((sum, e) => sum + staticEffectStrength(e, owner), 0);
+
+      if (strength > (auras.get(key)?.strength ?? -1)) auras.set(key, { effect, strength });
     }
   }
 
-  return out;
+  return [...out, ...[...auras.values()].map((x) => x.effect)];
 }
 
 /** Ефекти для показу: персональні пасивки + ті, що діють (без зон мертвих власників), злиті по вміннях. */

@@ -50,7 +50,7 @@ export function MyTurnControls({ hero }: { hero: BattleParticipant }) {
         <div className="pt-3">
           <div className="hud-sc text-lg font-bold">Перевірка моралі · d10</div>
           {morale.kind && (
-            <div className={cn("mt-1 text-sm", morale.kind === "extra" ? "text-[#ffe08a]" : "text-[#ff8a7a]")}>
+            <div className={cn("mt-1 text-sm", morale.kind === "extra" ? "text-hud-gold-bright" : "text-hud-bad")}>
               {morale.kind === "extra" ? `Додатковий хід на ${morale.rolls.join(", ")}` : `Пропуск ходу на ${morale.rolls.join(", ")}`}
             </div>
           )}

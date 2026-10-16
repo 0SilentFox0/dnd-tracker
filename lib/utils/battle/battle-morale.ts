@@ -12,6 +12,13 @@ export interface MoraleCheckResult {
   moralePositive: boolean;
 }
 
+/** Межа d10: позитивна мораль +N — додатковий хід на ≥ 11−N, негативна −N — пропуск на ≤ N. */
+export function moraleThreshold(value: number): { kind: "extra" | "skip"; threshold: number } {
+  const n = Math.min(10, Math.abs(value));
+
+  return value > 0 ? { kind: "extra", threshold: 11 - n } : { kind: "skip", threshold: n };
+}
+
 export function checkMorale(
   participant: BattleParticipant,
   d10Roll: number,
@@ -38,34 +45,28 @@ export function checkMorale(
     };
   }
 
-  // Шанс 10% означає що потрібно викинути рівно 10 на d10
-  // Шанс 20% означає що потрібно викинути 10 або 9
-  // Шанс 30% означає що потрібно викинути 10, 9 або 8
-  const moraleValue = Math.abs(currentMorale);
+  const { threshold } = moraleThreshold(currentMorale);
 
-  const chance = moraleValue * 10; // 1 мораль = 10%, 2 = 20%, тощо
-
-  const minRoll = 11 - (chance / 10); // Для 10% = 11 - 1 = 10, для 20% = 11 - 2 = 9, тощо
+  const chance = Math.abs(currentMorale) * 10;
 
   if (currentMorale > 0) {
     const bonus = moraleChanceBonus(participant, participants);
 
     // d10 дає кроки по 10 %; бонус лідерства добирається другим кидком серед невдач, тож сумарний шанс = мораль·10 % + бонус
-    const bonusHit = d10Roll < minRoll && bonus > 0 && chance < 100 && rng() < Math.min(1, bonus / (100 - chance));
+    const bonusHit = d10Roll < threshold && bonus > 0 && chance < 100 && rng() < Math.min(1, bonus / (100 - chance));
 
-    if (d10Roll >= minRoll || bonusHit) {
+    if (d10Roll >= threshold || bonusHit) {
       result.hasExtraTurn = true;
-      result.message = `⭐ ${participant.basicInfo.name}: додатковий хід! (Мораль +${currentMorale}, кидок: ${d10Roll}, потрібно: >=${Math.ceil(minRoll)}${bonusHit ? `, бонус лідерства +${bonus}%` : ""})`;
+      result.message = `⭐ ${participant.basicInfo.name}: додатковий хід! (Мораль +${currentMorale}, кидок: ${d10Roll}, потрібно: >=${threshold}${bonusHit ? `, бонус лідерства +${bonus}%` : ""})`;
     } else {
-      result.message = `${participant.basicInfo.name}: без додаткового ходу (Мораль +${currentMorale}, кидок: ${d10Roll}, потрібно: >=${Math.ceil(minRoll)}${bonus > 0 ? `; бонус лідерства +${bonus}% не спрацював` : ""})`;
+      result.message = `${participant.basicInfo.name}: без додаткового ходу (Мораль +${currentMorale}, кидок: ${d10Roll}, потрібно: >=${threshold}${bonus > 0 ? `; бонус лідерства +${bonus}% не спрацював` : ""})`;
     }
   } else {
-    // негативна мораль провалюється на низьких кидках: −2 → 1 і 2
-    if (d10Roll <= moraleValue) {
+    if (d10Roll <= threshold) {
       result.shouldSkipTurn = true;
-      result.message = `😔 ${participant.basicInfo.name}: пропуск ходу через низьку мораль (Мораль ${currentMorale}, кидок: ${d10Roll}, пропуск на: <=${moraleValue})`;
+      result.message = `😔 ${participant.basicInfo.name}: пропуск ходу через низьку мораль (Мораль ${currentMorale}, кидок: ${d10Roll}, пропуск на: <=${threshold})`;
     } else {
-      result.message = `${participant.basicInfo.name}: хід не пропущено (Мораль ${currentMorale}, кидок: ${d10Roll}, пропуск на: <=${moraleValue})`;
+      result.message = `${participant.basicInfo.name}: хід не пропущено (Мораль ${currentMorale}, кидок: ${d10Roll}, пропуск на: <=${threshold})`;
     }
   }
 
@@ -78,7 +79,7 @@ export function moraleTriggerRolls(participant: BattleParticipant, participants:
 
   if (ignored || value === 0) return { kind: null, rolls: [] };
 
-  const n = Math.min(10, Math.abs(value));
+  const { kind, threshold } = moraleThreshold(value);
 
-  return value > 0 ? { kind: "extra", rolls: Array.from({ length: n }, (_, i) => 11 - n + i) } : { kind: "skip", rolls: Array.from({ length: n }, (_, i) => i + 1) };
+  return { kind, rolls: kind === "extra" ? Array.from({ length: 11 - threshold }, (_, i) => threshold + i) : Array.from({ length: threshold }, (_, i) => i + 1) };
 }

@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { type BattleLogHistory, useBattleLogHistory } from "./useBattleLogHistory";
 import { type BattleToastApi, useBattleToast } from "./useBattleToast";
+import { useDisplayEffectMap } from "./useDisplayEffectMap";
 import { type PusherConnectionState, usePusherBattleSync } from "./usePusherBattleSync";
 
 import { BattleStatus,ParticipantSide } from "@/lib/constants/battle";
@@ -27,11 +28,13 @@ import {
   useStartBattle,
   useUpdateBattleParticipant,
 } from "@/lib/hooks/battles";
-import { canSeeEnemyHp, type CritEffectFx, type QueueEntry, type RetaliationOutcome, turnQueue, type Viewer } from "@/lib/utils/battle/view";
+import { buildParticipantFaces, canSeeEnemyHp, type CritEffectFx, type ParticipantFace, type QueueEntry, type RetaliationOutcome, turnQueue, type Viewer } from "@/lib/utils/battle/view";
 import type { BattleScene } from "@/types/api";
-import type { BattleParticipant } from "@/types/battle";
+import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
-export type { CritEffectFx };
+export type { CritEffectFx, ParticipantFace };
+
+const NO_ORDER: BattleParticipant[] = [];
 
 export type ResultFx =
   | { kind: "hit" | "crit"; targetName: string; damage: number; downed: boolean; d20: number; weapon?: string; retaliation?: RetaliationOutcome; critEffect?: CritEffectFx }
@@ -75,6 +78,8 @@ export interface BattleSceneData {
   queue: QueueEntry[];
   allies: BattleParticipant[];
   enemies: BattleParticipant[];
+  effects: Map<string, ActiveEffect[]>;
+  faces: Map<string, ParticipantFace>;
   dmControlledId: string | null;
   setDmControlledId(id: string | null): void;
   select(id: string | null): void;
@@ -117,11 +122,11 @@ export function useBattleSceneData(): BattleSceneData {
 }
 
 export function useBattleSceneDataValue(value: BattleSceneValue): BattleSceneData {
-  const { campaignId, battleId, battle, userId, isDM, viewer, current, myParticipants, hero, isMyTurn, queue, allies, enemies, dmControlledId, setDmControlledId, select, readBattle } = value;
+  const { campaignId, battleId, battle, userId, isDM, viewer, current, myParticipants, hero, isMyTurn, queue, allies, enemies, effects, faces, dmControlledId, setDmControlledId, select, readBattle } = value;
 
   return useMemo(
-    () => ({ campaignId, battleId, battle, userId, isDM, viewer, current, myParticipants, hero, isMyTurn, queue, allies, enemies, dmControlledId, setDmControlledId, select, readBattle }),
-    [campaignId, battleId, battle, userId, isDM, viewer, current, myParticipants, hero, isMyTurn, queue, allies, enemies, dmControlledId, setDmControlledId, select, readBattle],
+    () => ({ campaignId, battleId, battle, userId, isDM, viewer, current, myParticipants, hero, isMyTurn, queue, allies, enemies, effects, faces, dmControlledId, setDmControlledId, select, readBattle }),
+    [campaignId, battleId, battle, userId, isDM, viewer, current, myParticipants, hero, isMyTurn, queue, allies, enemies, effects, faces, dmControlledId, setDmControlledId, select, readBattle],
   );
 }
 
@@ -235,6 +240,12 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
 
   const derived = useMemo(() => (battle ? deriveScene(battle, userId, dmControlledId) : null), [battle, userId, dmControlledId]);
 
+  const order = battle?.initiativeOrder;
+
+  const effects = useDisplayEffectMap(order ?? NO_ORDER);
+
+  const faces = useMemo(() => buildParticipantFaces(order ?? NO_ORDER), [order]);
+
   if (!battle || !derived) return { value: null, loading: isLoading };
 
   const value: BattleSceneValue = {
@@ -243,6 +254,8 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
     battle,
     userId,
     ...derived,
+    effects,
+    faces,
     connection: connectionState,
     dmControlledId,
     setDmControlledId,

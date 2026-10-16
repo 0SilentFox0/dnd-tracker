@@ -10,7 +10,7 @@ import { SpellBook } from "@/components/battle/wizards/SpellBook";
 import { useBattlePageDialogs, useBattleScene, useSpellBook } from "@/lib/hooks/battle";
 import type { BattleParticipant } from "@/types/battle";
 
-export function DmPanel() {
+export function DmPanel({ panel }: { panel?: { open: boolean; onOpenChange: (open: boolean) => void } }) {
   const { battle, campaignId, dmControlledId, setDmControlledId, actions } = useBattleScene();
 
   const dialogs = useBattlePageDialogs();
@@ -26,9 +26,10 @@ export function DmPanel() {
       <DmQuickActionsPanel
         battle={battle}
         isDM
+        panel={panel}
         onOpenLog={dialogs.openLog}
         onAddParticipant={dialogs.openAddParticipant}
-        onIncreaseHp={dialogs.openHpDialog}
+        onChangeHp={dialogs.openHpDialog}
         onRemoveFromBattle={(p) => actions.updateParticipant.mutate({ participantId: p.basicInfo.id, data: { removeFromBattle: true } })}
         onKill={(p) => actions.updateParticipant.mutate({ participantId: p.basicInfo.id, data: { kill: true } })}
         onScaleUnits={(direction) => actions.scaleUnits.mutate({ direction })}

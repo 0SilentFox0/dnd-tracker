@@ -6,16 +6,16 @@ const rounds = (n: number) => `${n} ${n % 10 === 1 && n % 100 !== 11 ? "раун
 
 const capitalize = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
 
-/** Що робить активний ефект — для підказки на чипі: опис або описи його модифікаторів, DoT/HoT, залишок і джерело. */
-/** Що саме робить ефект: опис або описи його модифікаторів. */
+/** Що саме робить ефект: опис або описи його модифікаторів (без повторів). */
 export function effectLines(e: ActiveEffect): string[] {
   if (e.description) return [e.description];
 
   const guards = e.effects.filter((d) => d.type === "guard").map((d) => `${e.source?.name ?? "Захисник"} бере на себе ${d.value}% шкоди від атак`);
 
-  return [...(e.abilityEffects ?? legacyActiveEffectModifiers(e)).map((x) => capitalize(describeEffect(x))), ...guards];
+  return [...new Set([...(e.abilityEffects ?? legacyActiveEffectModifiers(e)).map((x) => capitalize(describeEffect(x))), ...guards])];
 }
 
+/** Що робить активний ефект — для підказки на чипі: опис або описи його модифікаторів, DoT/HoT, залишок і джерело. */
 export function effectSummary(e: ActiveEffect): string[] {
   const what = effectLines(e);
 
@@ -25,7 +25,7 @@ export function effectSummary(e: ActiveEffect): string[] {
     ...(e.hotHeal ? [`+${e.hotHeal.healPerRound} HP щораунду`] : []),
     e.zone ? `у зоні аури до наступного ходу ${e.source?.name ?? "власника"}` : e.permanent ? "діє постійно" : `ще ${rounds(e.duration)}`,
     ...(e.source ? [`від: ${e.source.abilityName ? `${e.source.abilityName} (${e.source.name})` : e.source.name}`] : []),
-  ].filter(Boolean);
+  ].filter(Boolean).filter((line, i, all) => all.indexOf(line) === i);
 }
 
 const displayKey = (e: ActiveEffect) =>

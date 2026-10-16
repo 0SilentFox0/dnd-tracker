@@ -1,4 +1,5 @@
 import { resolveFlat } from "./amount";
+import { staticEffectStrength } from "./effect-strength";
 import { legacyActiveEffectModifiers } from "./legacy-active-effects";
 import { countMarks } from "./marks";
 import { findParticipant, isActive, resolvedAbilitiesOf } from "./participants";
@@ -55,7 +56,7 @@ function matchesQuery(effect: StaticEffect, query: ModifierQuery): boolean {
   return effect.kind === "flag" && effect.flag === query.flag;
 }
 
-function appliesTo(target: StaticEffect["target"], source: BattleParticipant, subject: BattleParticipant): boolean {
+export function appliesTo(target: StaticEffect["target"], source: BattleParticipant, subject: BattleParticipant): boolean {
   switch (target ?? "self") {
     case "self":
       return source.basicInfo.id === subject.basicInfo.id;
@@ -68,21 +69,13 @@ function appliesTo(target: StaticEffect["target"], source: BattleParticipant, su
   }
 }
 
-function isAuraTarget(target: StaticEffect["target"]): boolean {
+export function isAuraTarget(target: StaticEffect["target"]): boolean {
   return target === "allAllies" || target === "allEnemies";
 }
 
 // Editor-made ids ("a1", "a2"…) repeat across owners, so they only dedupe within one source; library ids are global.
 export function auraKey(ability: ResolvedAbility): string {
   return /^a\d+$/.test(ability.id) ? ability.key : ability.id;
-}
-
-function strength(entries: ModifierEntry[]): number {
-  return entries.reduce((sum, e) => {
-    const flag = e.flag ? Math.abs("percent" in e.flag ? e.flag.percent : "value" in e.flag ? e.flag.value : 1) : 0;
-
-    return sum + Math.abs(e.flat) + Math.abs(e.percent) + flag;
-  }, 0);
 }
 
 export function collectModifiers(
@@ -142,7 +135,7 @@ export function collectModifiers(
   const skipPassive = "stat" in query && isBakedStat(query.stat);
 
   if (!skipPassive) {
-    const auras = new Map<string, ModifierEntry[]>();
+    const auras = new Map<string, { entries: ModifierEntry[]; strength: number }>();
 
     for (const source of participants) {
       if (source !== subject && !isActive(source)) continue;
@@ -154,6 +147,8 @@ export function collectModifiers(
 
         const auraEntries: ModifierEntry[] = [];
 
+        let auraStrength = 0;
+
         for (const effect of ability.effects) {
           if (!isStaticEffect(effect) || !appliesTo(effect.target, source, subject)) continue;
 
@@ -161,8 +156,12 @@ export function collectModifiers(
 
           if (!entry) continue;
 
-          if (isAuraTarget(effect.target)) auraEntries.push(entry);
-          else push(entry);
+          if (isAuraTarget(effect.target)) {
+            auraEntries.push(entry);
+            auraStrength += staticEffectStrength(effect, source);
+          } else {
+            push(entry);
+          }
         }
 
         if (auraEntries.length === 0) continue;
@@ -171,11 +170,11 @@ export function collectModifiers(
 
         const kept = auras.get(key);
 
-        if (!kept || strength(auraEntries) > strength(kept)) auras.set(key, auraEntries);
+        if (!kept || auraStrength > kept.strength) auras.set(key, { entries: auraEntries, strength: auraStrength });
       }
     }
 
-    for (const entries of auras.values()) entries.forEach(push);
+    for (const { entries } of auras.values()) entries.forEach(push);
   }
 
   for (const ae of liveActiveEffects(subject, participants)) {

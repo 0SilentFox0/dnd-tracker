@@ -4,7 +4,7 @@ import { memo } from "react";
 import { Shield } from "lucide-react";
 
 import { EffectLine, HealthBar, HealthLabel, Portrait } from "@/components/battle/hud";
-import { useHpChange } from "@/lib/hooks/battle";
+import { useDamageShake, useHpChange } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { isDown } from "@/lib/utils/battle/participant/state";
 import { hpRatio } from "@/lib/utils/battle/view";
@@ -22,21 +22,19 @@ export const ParticipantRow = memo(function ParticipantRow({ participant, effect
 
   const change = useHpChange(currentHp);
 
+  const shake = useDamageShake<HTMLDivElement>(change);
+
   const down = isDown(participant);
 
   return (
-    <button
-      key={change?.id}
-      type="button"
-      onClick={() => onSelect(participant.basicInfo.id)}
-      className={cn("relative flex min-h-[76px] w-full items-center gap-3 py-2 border-b border-white/[.08] text-left", change && change.delta < 0 && "animate-[hud-shake_.35s]", down && "opacity-40")}
-    >
+    <div ref={shake} className={cn("relative flex min-h-[76px] w-full items-center gap-3 border-b border-white/[.08] py-2", down && "opacity-40")}>
+      <button type="button" aria-label={participant.basicInfo.name} onClick={() => onSelect(participant.basicInfo.id)} className="absolute inset-0" />
       {change && (
-        <span className={cn("hud-sc pointer-events-none absolute left-6 top-2 text-[26px] font-extrabold opacity-0 [text-shadow:0_2px_6px_#000] animate-[hud-float_1.1s_ease-out]", change.delta < 0 ? "text-[#ff6a4d]" : "text-[#8fd07a]")}>
+        <span key={change.id} className={cn("hud-sc pointer-events-none absolute left-6 top-2 z-10 text-[26px] font-extrabold opacity-0 [text-shadow:0_2px_6px_#000] animate-[hud-float_1.1s_ease-out]", change.delta < 0 ? "text-[#ff6a4d]" : "text-[#8fd07a]")}>
           {change.delta < 0 ? `−${-change.delta}` : `+${change.delta}`}
         </span>
       )}
-      <Portrait participant={participant} size={48} current={current} zoomable className={cn(change && (change.delta < 0 ? "animate-[hud-flash-red_.5s]" : "animate-[hud-flash-green_.7s]"))} />
+      <Portrait key={change?.id} participant={participant} size={48} current={current} className={cn(change && (change.delta < 0 ? "animate-[hud-flash-red_.5s]" : "animate-[hud-flash-green_.7s]"))} />
       <div className="min-w-0 flex-1">
         <div className={cn("hud-sc flex h-5 items-center whitespace-nowrap text-base font-bold text-[var(--ink)]", down && "line-through")}>
           <span className="truncate">{participant.basicInfo.name}</span>
@@ -49,6 +47,6 @@ export const ParticipantRow = memo(function ParticipantRow({ participant, effect
         {acText}
         <Shield className="size-4 text-[var(--hud-muted)]" />
       </span>
-    </button>
+    </div>
   );
 });

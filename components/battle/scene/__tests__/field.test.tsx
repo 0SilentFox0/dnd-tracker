@@ -11,7 +11,7 @@ import { ParticipantList } from "@/components/battle/scene/ParticipantList";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { BattleSceneContext, BattleSceneDataContext, type BattleSceneValue } from "@/lib/hooks/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
-import { turnQueue } from "@/lib/utils/battle/view";
+import { buildDisplayEffects, buildParticipantFaces, turnQueue } from "@/lib/utils/battle/view";
 import type { BattleScene } from "@/types/api";
 import type { BattleAction } from "@/types/battle";
 
@@ -39,7 +39,7 @@ function scene(isDM = false) {
 
   return {
     battle, isDM, viewer: { userId: "u", isDM, canSeeEnemyHp: false }, hero, myParticipants: [hero],
-    queue: turnQueue([gob, hero], 0, 3), allies: [hero], enemies: [gob], select: vi.fn(), selectedId: null, log: { open: false, focus: null },
+    queue: turnQueue([gob, hero], 0, 3), allies: [hero], enemies: [gob], effects: buildDisplayEffects([gob, hero]), faces: buildParticipantFaces([gob, hero]), select: vi.fn(), selectedId: null, log: { open: false, focus: null },
     logHistory: { canLoadEarlier: false, isLoading: false, loadEarlier: vi.fn() },
   } as unknown as BattleSceneValue;
 }
@@ -92,6 +92,34 @@ describe("поле бою", () => {
     expect(screen.getByText("Попадання")).toBeTruthy();
     expect(screen.queryByText(/КЛ цілі/)).toBeNull();
     expect(screen.queryByText(/секрет/)).toBeNull();
+  });
+
+  describe("журнал не видає гравцям справжню броню ворога", () => {
+    const withEntries = (isDM: boolean) => {
+      const value = scene(isDM);
+
+      const entry = (actionIndex: number) => ({ actionIndex, round: 1, actorName: "Годрік", actionType: "attack", targets: [{ participantId: "gob", participantName: "Гоблін" }], resultText: `Удар ${actionIndex}`, actionDetails: { attackRoll: 12, totalAttackValue: 17, isHit: true, targetAC: 17, damageBreakdown: "d8+3 = 9" } }) as unknown as BattleAction;
+
+      return { ...value, battle: { ...value.battle, battleLog: [entry(0), entry(1)] }, log: { open: true, focus: 0 } } as BattleSceneValue;
+    };
+
+    it("гравець: ні КЛ цілі, ні розбивки шкоди, включно зі старішою сторінкою", () => {
+      render(<BattleLog />, { wrapper: wrap(withEntries(false)) });
+
+      fireEvent.click(screen.getAllByRole("button", { name: /Деталі|Сховати деталі/ })[0]);
+
+      expect(screen.getAllByText(/Кидок атаки/).length).toBeGreaterThan(0);
+      expect(screen.queryByText(/КЛ цілі/)).toBeNull();
+      expect(screen.queryByText(/Урон:/)).toBeNull();
+      expect(screen.queryByText(/d8\+3/)).toBeNull();
+    });
+
+    it("DM бачить КЛ цілі й розбивку", () => {
+      render(<BattleLog />, { wrapper: wrap(withEntries(true)) });
+
+      expect(screen.getAllByText("КЛ цілі: 17").length).toBeGreaterThan(0);
+      expect(screen.getAllByText("Урон: d8+3 = 9").length).toBeGreaterThan(0);
+    });
   });
 
   it("без фокуса деталі згорнуті й розгортаються дотиком", () => {

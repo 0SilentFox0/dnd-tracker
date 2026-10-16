@@ -3,20 +3,22 @@
 import { memo } from "react";
 import { Heart, Shield } from "lucide-react";
 
-import { EffectLine, HealthBar, Portrait, SlotGrid } from "@/components/battle/hud";
+import { EffectLine, HealthBar, SlotGrid, ZoomablePortrait } from "@/components/battle/hud";
 import { BattleStatus } from "@/lib/constants/battle";
-import { useBattleSceneData, useHpChange } from "@/lib/hooks/battle";
+import { useBattleSceneData, useDamageShake, useHpChange } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
-import { abilityCharges, displayEffects, turnsUntil } from "@/lib/utils/battle/view";
+import { abilityCharges, turnsUntil } from "@/lib/utils/battle/view";
 import { signed } from "@/lib/utils/format";
 import type { BattleParticipant } from "@/types/battle";
 
 export const MyHeroPanel = memo(function MyHeroPanel({ hero, compact = false }: { hero: BattleParticipant; compact?: boolean }) {
-  const { battle, queue, isMyTurn } = useBattleSceneData();
+  const { battle, queue, isMyTurn, effects } = useBattleSceneData();
 
   const change = useHpChange(hero.combatStats.currentHp);
+
+  const shake = useDamageShake<HTMLDivElement>(change);
 
   const until = turnsUntil(queue, [hero.basicInfo.id]);
 
@@ -25,15 +27,15 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero, compact = false }: 
   const morale = effectiveMorale(hero, battle.initiativeOrder).value;
 
   return (
-    <div key={change?.id} className={cn("relative", change && change.delta < 0 && "animate-[hud-shake_.35s]")}>
-      {change && change.delta < 0 && <div className="pointer-events-none fixed inset-0 z-40 animate-[hud-vignette_1s]" />}
+    <div ref={shake} className="relative">
+      {change && change.delta < 0 && <div key={change.id} className="pointer-events-none fixed inset-0 z-40 animate-[hud-vignette_1s]" />}
       <div className="flex items-center gap-3">
-        <Portrait participant={hero} size={compact ? 48 : 64} me zoomable />
+        <ZoomablePortrait participant={hero} size={compact ? 48 : 64} me />
         <div className="min-w-0 flex-1">
           <div className="hud-sc flex h-6 items-center justify-between text-[19px] font-bold text-[var(--ink)]">
             <span className="flex min-w-0 items-baseline gap-2">
               <span className="truncate">{hero.basicInfo.name}</span>
-              {morale !== 0 && <span className={cn("shrink-0 font-sans text-sm font-medium tracking-normal", morale > 0 ? "text-[#9fc48a]" : "text-hud-danger")}>Мораль {signed(morale)}</span>}
+              {morale !== 0 && <span className={cn("shrink-0 font-sans text-sm font-medium tracking-normal", morale > 0 ? "text-hud-good" : "text-hud-danger")}>Мораль {signed(morale)}</span>}
             </span>
             <span className="shrink-0 whitespace-nowrap pl-2 font-sans text-sm font-normal italic tracking-normal text-[#b8ab95]">
               {compact ? `${hero.combatStats.currentHp} / ${hero.combatStats.maxHp} · AC ${getEffectiveArmorClass(hero, battle.initiativeOrder)}` : battle.status !== BattleStatus.ACTIVE ? "" : isMyTurn ? "твій хід" : until === 0 ? "ходить" : until !== null ? `хід через ${until}` : ""}
@@ -54,7 +56,7 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero, compact = false }: 
           {charges.map((c) => <span key={c.key}>{c.name} {c.left}/{c.limit}</span>)}
         </div>
       )}
-      {!compact && <EffectLine effects={displayEffects(hero, battle.initiativeOrder)} />}
+      {!compact && <EffectLine effects={effects.get(hero.basicInfo.id) ?? []} />}
     </div>
   );
 });

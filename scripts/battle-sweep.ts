@@ -1064,7 +1064,7 @@ async function level5Check(spells: Map<string, any>) {
 
       const after = snap(P().map((p: any) => p.basicInfo.id));
 
-      const saved = r.log.some((e: any) => /уникає/.test(e.resultText));
+      const saved = r.log.some((e: any) => /рятівний кидок [^|]*— успіх(\s\||$)/.test(e.resultText));
 
       const changed = [...before.keys()].some((id) => before.get(id) !== after.get(id)) || P().length !== n0 || saved;
 

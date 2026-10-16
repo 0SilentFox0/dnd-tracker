@@ -2,18 +2,18 @@
 
 import { Loader2, Sparkles, Swords } from "lucide-react";
 
-import { AiRollButton, DamageDice, DieInput } from "./DiceInput";
+import { SaveRolls } from "./spellbook/SaveRolls";
+import { SpellSummary } from "./spellbook/SpellSummary";
+import { AiRollButton, DamageDice } from "./DiceInput";
 import { SpellBookPages, SpellDetail } from "./SpellBookPages";
 
 import { Portrait } from "@/components/battle/hud";
 import { HUD_SURFACE } from "@/components/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { spellLevelRoman } from "@/lib/constants/spells";
 import type { useSpellBook } from "@/lib/hooks/battle";
 import { useMediaQuery } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 import { rollsComplete } from "@/lib/utils/battle/flows";
-import { targetingLabel } from "@/lib/utils/spells/model/labels";
 
 type Book = ReturnType<typeof useSpellBook>;
 
@@ -26,13 +26,11 @@ export function SpellBook({ book }: { book: Book }) {
 
   const open = state.step !== "closed" && state.step !== "result";
 
-  const slotOf = book.slotLeft;
-
   const detailPage = selected && (
     <div className="relative flex h-full flex-1 flex-col px-5 pb-5 pt-6">
       {state.step === "spell" && (
         <SpellDetail spell={selected} formula={book.formulaOf(selected)}>
-          <button type="button" disabled={(selected.level > 0 && slotOf(selected.level) === 0) || book.costUsed(selected)} onClick={book.toTargets} className={cn(seal, "mt-auto")}>
+          <button type="button" disabled={(selected.level > 0 && book.slotLeft(selected.level) === 0) || book.costUsed(selected)} onClick={book.toTargets} className={cn(seal, "mt-auto")}>
             <Swords className="size-5" />{state.pick?.targetMode === "none" ? "Далі" : "Обрати цілі"}
           </button>
         </SpellDetail>
@@ -54,16 +52,7 @@ export function SpellBook({ book }: { book: Book }) {
       )}
       {state.step === "rolls" && state.pick && (
         <>
-          {book.saveTargets.map((t) => {
-            const id = t.basicInfo.id;
-
-            return (
-              <label key={id} className="mt-3 flex items-center justify-between gap-3 text-sm">
-                Рятівний кидок · {t.basicInfo.name}
-                <DieInput label={`Рятівний кидок: ${t.basicInfo.name}`} sides={20} value={state.saves[id]} onChange={(v) => book.setSave(id, v)} className="h-10 w-16 border border-[#2a2018]/30 bg-transparent text-center" />
-              </label>
-            );
-          })}
+          <SaveRolls targets={book.saveTargets} saves={state.saves} onChange={book.setSave} />
           {state.pick.diceSlots.length > 0 && (
             <>
               <div className="hud-sc mt-4 text-lg font-bold">Кубики · {book.formulaOf(selected)}</div>
@@ -78,15 +67,7 @@ export function SpellBook({ book }: { book: Book }) {
       )}
       {(state.step === "summary" || state.step === "submitting") && (
         <>
-          <div className="hud-sc text-xl font-bold">{selected.name}</div>
-          <div className="mt-2 text-[15px]">
-            {state.targetIds.length > 0 && <p>Цілі: {state.targetIds.map((id) => targets.find((t) => t.basicInfo.id === id)?.basicInfo.name).join(", ")}</p>}
-            {state.pick?.targetMode === "none" && <p>Цілі: {targetingLabel(book.definitionOf(selected).targeting)}</p>}
-            {state.damage.length > 0 && <p>Кубики: {state.damage.join(" + ")} = {state.damage.reduce<number>((a, b) => a + (b ?? 0), 0)} ({book.formulaOf(selected)})</p>}
-            <p className="mt-2 text-sm italic text-[#7a6650]">Остаточний результат порахує бій з урахуванням захисту цілей.</p>
-            {selected.level > 0 && <p className="text-sm italic text-[#7a6650]">{book.free ? "Вільний каст DM — слот не витрачається." : book.universalSlot ? "Витратить універсальний слот." : `Витратить слот ${spellLevelRoman(selected.level)} кола.`}</p>}
-          </div>
-          {state.error && <p className="mt-2 text-sm text-[#9c2a1d]">{state.error}</p>}
+          <SpellSummary spell={selected} state={state} targets={targets} formula={book.formulaOf(selected)} targeting={book.definitionOf(selected).targeting} slotCost={book.slotCostLabel(selected)} />
           <button type="button" disabled={state.step === "submitting"} onClick={book.submit} className={cn(seal, "mt-auto")}>
             {state.step === "submitting" ? <Loader2 className="size-5 animate-spin" /> : <><Sparkles className="size-5" />Застосувати</>}
           </button>
@@ -99,7 +80,7 @@ export function SpellBook({ book }: { book: Book }) {
 
   return (
     <ResponsiveDialog open={open} onOpenChange={(o) => !o && book.close()} title={showDetail && !wide ? "← До списку" : "Книга заклинань"} size="lg" className={cn(HUD_SURFACE, "max-w-[980px] border-none bg-[#3a2016] p-2.5 text-[#2a2018] shadow-[0_30px_80px_rgba(0,0,0,.9),inset_0_0_0_2px_#2a160f]")}>
-      <SpellBookPages byLevel={byLevel} slotOf={slotOf} level={state.level} pickedId={state.pick?.spellId ?? null} wide={wide} showDetail={showDetail} onLevel={book.setLevel} onPick={book.pick} detail={detailPage || null} formulaOf={book.formulaOf} />
+      <SpellBookPages byLevel={byLevel} slotOf={book.slotLeft} level={state.level} pickedId={state.pick?.spellId ?? null} wide={wide} showDetail={showDetail} onLevel={book.setLevel} onPick={book.pick} detail={detailPage || null} formulaOf={book.formulaOf} />
       {showDetail && !wide && <button type="button" onClick={book.back} className="hud-sc mt-2 h-10 w-full text-sm text-hud-bone">← Назад</button>}
     </ResponsiveDialog>
   );

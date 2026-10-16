@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { groupSpellsBySchool } from "@/lib/utils/spells/group-by-level";
+import { groupSpellsBySchool } from "@/lib/utils/spells/group-by-school";
 import type { BookSpell } from "@/types/spells";
 
 const spell = (id: string, school?: string) => ({ id, name: id, level: 1, ...(school && { spellGroup: { id: school, name: school } }) }) as BookSpell;

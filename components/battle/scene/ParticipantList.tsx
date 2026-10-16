@@ -5,19 +5,17 @@ import { memo, useMemo } from "react";
 import { ParticipantRow } from "./ParticipantRow";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import { useBattleSceneData, useDisplayEffects } from "@/lib/hooks/battle";
+import { useBattleSceneData } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
 import { canSeeExactStats, formatKnownArmorClass, resolveKnownArmorClass } from "@/lib/utils/battle/view";
 
 export const ParticipantList = memo(function ParticipantList({ side, className }: { side: ParticipantSide; className?: string }) {
-  const { allies, enemies, battle, viewer, current, select } = useBattleSceneData();
+  const { allies, enemies, battle, viewer, current, select, effects } = useBattleSceneData();
 
   const list = side === ParticipantSide.ALLY ? allies : enemies;
 
   const { initiativeOrder: order, battleLog, knowledge } = battle;
-
-  const effects = useDisplayEffects(order);
 
   const rows = useMemo(
     () =>

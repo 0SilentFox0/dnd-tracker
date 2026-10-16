@@ -1,4 +1,11 @@
+import { spellLevelRoman } from "@/lib/constants/spells";
+import { isUp } from "@/lib/utils/battle/participant/state";
+import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
+import { spellSlotKey, spellSlotLeft } from "@/lib/utils/battle/spell/slot";
+import { spellTargetingFor } from "@/lib/utils/battle/spell/spell-targeting";
 import type { SpellCastData } from "@/types/api";
+import type { BattleParticipant } from "@/types/battle";
+import type { BookSpell } from "@/types/spells";
 
 export type SpellTargetMode = "none" | "single" | "multi" | "all";
 
@@ -17,6 +24,7 @@ export interface SpellFlowState {
   step: "closed" | "book" | "spell" | "targets" | "rolls" | "summary" | "submitting" | "result";
   casterId?: string;
   level: number;
+  levelPinned?: boolean;
   pick?: SpellPick;
   targetIds: string[];
   saves: Record<string, number>;
@@ -25,7 +33,8 @@ export interface SpellFlowState {
 }
 
 export type SpellFlowAction =
-  | { type: "OPEN"; casterId: string; level: number }
+  | { type: "OPEN"; casterId: string; level: number; levels?: number[] }
+  | { type: "SPELLS_LOADED"; levels: number[] }
   | { type: "SET_LEVEL"; level: number }
   | { type: "PICK"; pick: SpellPick }
   | { type: "TO_TARGETS" }
@@ -53,12 +62,17 @@ export function rollsComplete(s: SpellFlowState): boolean {
 const afterTargets = (s: SpellFlowState): SpellFlowState =>
   s.pick && needsRolls(s.pick) ? { ...s, step: "rolls" } : { ...s, step: "summary" };
 
+const firstLevelWithSpells = (current: number, levels: number[]): number =>
+  levels.length === 0 || levels.includes(current) ? current : Math.min(...levels);
+
 export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState {
   switch (a.type) {
     case "OPEN":
-      return { ...initialSpellFlow, step: "book", casterId: a.casterId, level: a.level };
+      return { ...initialSpellFlow, step: "book", casterId: a.casterId, level: firstLevelWithSpells(a.level, a.levels ?? []) };
+    case "SPELLS_LOADED":
+      return s.step !== "book" || s.levelPinned ? s : { ...s, level: firstLevelWithSpells(s.level, a.levels) };
     case "SET_LEVEL":
-      return { ...initialSpellFlow, step: "book", casterId: s.casterId, level: a.level };
+      return { ...initialSpellFlow, step: "book", casterId: s.casterId, level: a.level, levelPinned: true };
     case "PICK":
       return { ...s, step: "spell", pick: a.pick, targetIds: [], saves: {}, damage: a.pick.diceSlots.map(() => undefined), error: undefined };
     case "TO_TARGETS":
@@ -123,4 +137,84 @@ export function spellPayload(s: SpellFlowState): SpellCastData {
     diceRolls: s.damage.filter((v): v is number => typeof v === "number"),
     ...(saves.length > 0 && { saveRolls: saves }),
   };
+}
+
+export const spellDefinition = (s: BookSpell) => ({
+  dice: s.dice ?? 0,
+  cost: s.cost ?? "action",
+  targeting: s.targeting ?? ({ kind: "enemy" } as const),
+  resolution: s.resolution ?? ({ kind: "auto" } as const),
+});
+
+export const spellSpec = (s: BookSpell) => ({ id: s.id, groupId: s.spellGroup?.id ?? null, level: s.level });
+
+export function spellTargetSide(s: BookSpell | null): SpellPick["targetSide"] {
+  const t = s ? spellDefinition(s).targeting : null;
+
+  if (!t) return undefined;
+
+  if (t.kind === "allyDead") return "dead";
+
+  if (t.kind === "ally" || t.kind === "enemy") return t.kind;
+
+  return t.kind === "area" ? t.side : undefined;
+}
+
+const AUTO_TARGETING = ["self", "allAllies", "allAlliesDead", "allEnemies", "everyone"];
+
+export function buildSpellPick(order: BattleParticipant[], caster: BattleParticipant | null, s: BookSpell): SpellPick {
+  const def = spellDefinition(s);
+
+  const { targeting } = def;
+
+  const skill = caster && (targeting.kind === "ally" || targeting.kind === "enemy") ? spellTargetingFor(order, caster.basicInfo.id, spellSpec(s)) : { mode: "single" as const, maxTargets: 1 };
+
+  const auto = AUTO_TARGETING.includes(targeting.kind);
+
+  const targetMode: SpellPick["targetMode"] = auto ? "none" : targeting.kind === "area" ? "multi" : skill.mode === "all" ? "all" : skill.mode === "area" ? "multi" : "single";
+
+  const maxTargets = targeting.kind === "area" ? targeting.maxTargets : skill.mode === "area" ? skill.maxTargets : undefined;
+
+  const dice = caster ? casterSpellDice(caster, { dice: def.dice, groupId: s.spellGroup?.id ?? null }) : { count: def.dice, sides: 6 };
+
+  return {
+    spellId: s.id,
+    level: s.level,
+    targetMode,
+    targetSide: spellTargetSide(s),
+    maxTargets,
+    needsSaves: def.resolution.kind === "save" && !auto,
+    diceSlots: Array.from({ length: dice.count }, () => dice.sides),
+  };
+}
+
+export function spellTargetCandidates(order: BattleParticipant[], caster: BattleParticipant | null, side: SpellPick["targetSide"]): BattleParticipant[] {
+  return order.filter((p) => {
+    if (!side || !caster) return isUp(p);
+
+    const mine = p.basicInfo.side === caster.basicInfo.side;
+
+    return side === "dead" ? mine && !isUp(p) : isUp(p) && (side === "ally" ? mine : !mine);
+  });
+}
+
+export function spellSaveTargets(targets: BattleParticipant[], s: SpellFlowState, viewer: { isDM: boolean; userId: string | null }): BattleParticipant[] {
+  if (!s.pick?.needsSaves) return [];
+
+  return targets.filter((t) => s.targetIds.includes(t.basicInfo.id) && (viewer.isDM || t.basicInfo.controlledBy === viewer.userId));
+}
+
+/** Скільки разів ще можна кастувати коло; кантрипи та вільний каст DM безлімітні. */
+export function spellSlotsLeft(caster: BattleParticipant | null, level: number, free: boolean): number {
+  return level === 0 || !caster || free ? Infinity : spellSlotLeft(caster, level);
+}
+
+export const casterUsesUniversalSlot = (caster: BattleParticipant | null): boolean => !!caster && spellSlotKey(caster, 1) === "universal";
+
+export function spellSlotCostLabel(spell: BookSpell, opts: { free: boolean; universal: boolean }): string | null {
+  if (spell.level === 0) return null;
+
+  if (opts.free) return "Вільний каст DM — слот не витрачається.";
+
+  return opts.universal ? "Витратить універсальний слот." : `Витратить слот ${spellLevelRoman(spell.level)} кола.`;
 }

@@ -37,12 +37,12 @@ export function usePlayerTurn(participant: BattleParticipant, bonusSpells: Bonus
 
   const skipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const unmounted = useRef<AbortController | null>(null);
+  const lifetime = useRef<AbortController | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
 
-    unmounted.current = controller;
+    lifetime.current = controller;
 
     return () => {
       if (skipTimer.current) clearTimeout(skipTimer.current);
@@ -55,7 +55,7 @@ export function usePlayerTurn(participant: BattleParticipant, bonusSpells: Bonus
 
   const endTurn = async () => {
     if (!participant.actionFlags.hasUsedAction && moraleResult !== "skip") {
-      const ok = await confirm({ title: "Завершити хід?", description: "Дію ще не використано.", confirmLabel: "Завершити", signal: unmounted.current?.signal });
+      const ok = await confirm({ title: "Завершити хід?", description: "Дію ще не використано.", confirmLabel: "Завершити", signal: lifetime.current?.signal });
 
       if (!ok) return;
     }

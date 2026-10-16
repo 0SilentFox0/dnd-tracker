@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { ConditionSchema } from "./conditions";
 import { type Effect, EffectSchema, isBakedStat, isStaticEffect, TIMED_STATS } from "./effects";
+import { isAreaTarget, PASSIVE_TARGETS } from "./kinds";
 import { isActionScopedTrigger, type Trigger, TriggerSchema } from "./triggers";
 
 export const LimitsSchema = z.object({
@@ -10,8 +11,6 @@ export const LimitsSchema = z.object({
   perTurn: z.number().int().min(1).optional(),
   chance: z.number().min(1).max(100).optional(),
 });
-
-const PASSIVE_TARGETS = new Set(["self", "allAllies", "allEnemies", "nearbyAllies", "nearbyEnemies"]);
 
 function effectIssues(effect: Effect, trigger: Trigger, hasCondition: boolean): string[] {
   const issues: string[] = [];
@@ -27,7 +26,7 @@ function effectIssues(effect: Effect, trigger: Trigger, hasCondition: boolean): 
       issues.push("Ціль пасивки: self, allAllies, allEnemies, nearbyAllies або nearbyEnemies");
     }
 
-    if (effect.kind === "modifyStat" && isBakedStat(effect.stat) && effect.stat !== "morale" && (effect.target === "nearbyAllies" || effect.target === "nearbyEnemies")) {
+    if (effect.kind === "modifyStat" && isBakedStat(effect.stat) && effect.stat !== "morale" && isAreaTarget(effect.target)) {
       issues.push(`${effect.stat} не діє через зону аури`);
     }
 
@@ -36,6 +35,10 @@ function effectIssues(effect: Effect, trigger: Trigger, hasCondition: boolean): 
     }
 
     return issues;
+  }
+
+  if ("target" in effect && isAreaTarget(effect.target)) {
+    issues.push("Зона (поруч) — лише для пасивних");
   }
 
   if (effect.kind === "modifyStat" && !(TIMED_STATS as readonly string[]).includes(effect.stat)) {

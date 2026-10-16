@@ -17,6 +17,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { HudPortalClassProvider } from "@/components/ui/portal-class";
+import { cn } from "@/lib/utils";
+
+const BATTLE_PATH = /^\/campaigns\/[^/]+\/battles\/[^/]+$/;
 
 export function Header({ email }: { email: string | null }) {
   const pathname = usePathname();
@@ -41,14 +44,14 @@ export function Header({ email }: { email: string | null }) {
 
   const isPlayerPage = !isDMPage && isCampaignPage;
 
-  const isBattlePage = /^\/campaigns\/[^/]+\/battles\/[^/]+$/.test(pathname ?? "");
+  const isBattlePage = BATTLE_PATH.test(pathname ?? "");
 
   const width = isBattlePage ? "w-full px-6" : "container mx-auto px-4";
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-hud-rule bg-[#0b0908]/[.97]">
       <HudPortalClassProvider value={HUD_SURFACE}>
-      <div className={`${width} flex h-14 items-center justify-between`}>
+      <div className={cn(width, "flex h-14 items-center justify-between")}>
         <div className="flex items-center gap-2">
           <Link href="/campaigns">
             <Button variant="ghost" size="icon" className="h-9 w-9 text-hud-gold hover:bg-transparent hover:text-[#e6c25a]">

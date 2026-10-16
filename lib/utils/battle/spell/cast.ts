@@ -4,9 +4,9 @@ import { applyMainActionUsed } from "../participant";
 import { applyResistance, immunityNote } from "../resistance";
 import type { CastableSpell, CastSpellParams, CastSpellResult } from "../types/spell-process";
 import { computeSpellPower, spellSaveDc } from "./power";
+import { spellSlotKey } from "./slot";
 import { participantImmuneToSpell } from "./spell-immunity";
 
-import { ParticipantSourceType } from "@/lib/constants/battle";
 import { resolveAmount } from "@/lib/utils/abilities/engine/amount";
 import { applyRawDamage } from "@/lib/utils/abilities/engine/hp";
 import { findParticipant, isActive, mergeParticipants, withSelf } from "@/lib/utils/abilities/engine/participants";
@@ -107,7 +107,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   let updatedCaster = getP(flow, casterId);
 
-  const slotKey = updatedCaster.basicInfo.sourceType === ParticipantSourceType.UNIT ? "universal" : String(spell.level);
+  const slotKey = spellSlotKey(updatedCaster, spell.level);
 
   const slot = updatedCaster.spellcasting.spellSlots[slotKey];
 
@@ -198,19 +198,19 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
       const dc = spellSaveDc(updatedCaster);
 
-      const success = roll + target.abilities.modifiers[saveAbility] >= dc;
+      const mod = target.abilities.modifiers[saveAbility];
+
+      const total = roll + mod;
+
+      const success = total >= dc;
 
       saves.push({ participantId: id, ability: saveAbility, roll, result: success ? "success" : "fail" });
 
       if (success) factor = onSuccess === "half" ? 0.5 : 0;
 
-      flow.messages.push(`🎲 ${target.basicInfo.name}: рятівний кидок ${roll} проти СК ${dc} — ${success ? (factor > 0 ? "успіх, половина шкоди" : "успіх") : "провал"}`);
+      flow.messages.push(`🎲 ${target.basicInfo.name}: рятівний кидок ${roll}${mod < 0 ? "-" : "+"}${Math.abs(mod)}=${total} проти СК ${dc} — ${success ? (factor > 0 ? "успіх, половина шкоди" : "успіх") : "провал"}`);
 
-      if (factor === 0) {
-        flow.messages.push(`🛡 ${target.basicInfo.name} уникає ${spell.name}`);
-
-        return SKIPPED;
-      }
+      if (factor === 0) return SKIPPED;
     }
 
     return { skip: false, factor, raceMultiplier: race.multiplier };

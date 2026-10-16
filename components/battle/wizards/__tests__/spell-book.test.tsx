@@ -26,8 +26,10 @@ import { useSpellBook } from "@/lib/hooks/battle";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
 import { useSpells, useSpellsByIds } from "@/lib/hooks/spells";
 
+const asHero = <T extends NonNullable<Parameters<typeof useSpellBook>[0]>>(p: T): T => ({ ...p, basicInfo: { ...p.basicInfo, sourceType: "character" as const } });
+
 function Harness({ caster }: { caster: Parameters<typeof useSpellBook>[0] }) {
-  const book = useSpellBook(caster, {});
+  const book = useSpellBook(caster && asHero(caster), {});
 
   useEffect(() => book.open(2), []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -64,15 +66,15 @@ describe("SpellBook", () => {
 
     render(<Harness caster={caster} />, { wrapper });
 
-    expect(await screen.findByRole("tab", { name: /Хаос/ })).toBeTruthy();
+    expect(await screen.findByRole("button", { name: /Хаос/ })).toBeTruthy();
     expect(screen.getByText("Палаючий промінь")).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("tab", { name: /Хаос/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Хаос/ }));
 
     expect(screen.getByText("Вогняна куля")).toBeTruthy();
     expect(screen.queryByText("Палаючий промінь")).toBeNull();
 
-    fireEvent.click(screen.getByRole("tab", { name: "Усі" }));
+    fireEvent.click(screen.getByRole("button", { name: "Усі" }));
 
     expect(screen.getByText("Палаючий промінь")).toBeTruthy();
   });
@@ -102,7 +104,7 @@ describe("SpellBook", () => {
   it("герой: формула «6к10» і слоти кубиків за майстерністю та рівнем", async () => {
     const { wrapper, caster } = fakeScene({ knownSpells: ["ball"], slots: { "2": { max: 3, current: 3 } } });
 
-    const hero = { ...caster, basicInfo: { ...caster.basicInfo, sourceType: "character" as const }, abilities: { ...caster.abilities, level: 6 }, battleData: { ...caster.battleData, schoolMastery: { chaos: "expert" as const } } };
+    const hero = { ...caster, abilities: { ...caster.abilities, level: 6 }, battleData: { ...caster.battleData, schoolMastery: { chaos: "expert" as const } } };
 
     render(<Harness caster={hero} />, { wrapper });
 

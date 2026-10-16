@@ -22,7 +22,7 @@ const ICON = "flex size-8 items-center justify-center border border-transparent 
 interface DmParticipantRowProps {
   participant: BattleParticipant;
   dmControlledParticipantId: string | null;
-  onIncreaseHp: (p: BattleParticipant) => void;
+  onChangeHp: (p: BattleParticipant) => void;
   onTakeControl: (p: BattleParticipant | null) => void;
   onRemove: (p: BattleParticipant) => void;
   onKill?: (p: BattleParticipant) => void;
@@ -32,7 +32,7 @@ interface DmParticipantRowProps {
 export function DmParticipantRow({
   participant,
   dmControlledParticipantId,
-  onIncreaseHp,
+  onChangeHp,
   onTakeControl,
   onRemove,
   onKill,
@@ -58,10 +58,10 @@ export function DmParticipantRow({
       <div className="flex shrink-0 items-center gap-0.5">
         <button
           type="button"
-          className={cn(ICON, "text-[#9fc48a] hover:border-[#9fc48a]/40")}
+          className={cn(ICON, "text-hud-good hover:border-hud-good/40")}
           title="Змінити HP"
           onClick={() => {
-            onIncreaseHp(participant);
+            onChangeHp(participant);
             close();
           }}
         >

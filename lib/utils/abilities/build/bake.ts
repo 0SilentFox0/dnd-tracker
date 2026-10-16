@@ -1,6 +1,7 @@
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { resolveFlat } from "@/lib/utils/abilities/engine/amount";
 import { auraKey } from "@/lib/utils/abilities/engine/collect-modifiers";
+import { staticEffectStrength } from "@/lib/utils/abilities/engine/effect-strength";
 import { resolvedAbilitiesOf } from "@/lib/utils/abilities/engine/participants";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import { isBakedStat } from "@/lib/utils/abilities/schema/kinds";
@@ -61,8 +62,6 @@ function bakedEffects(p: BattleParticipant): { ability: ResolvedAbility; effect:
     .flatMap((ability) => ability.effects.filter((e): e is ModifyStat => e.kind === "modifyStat" && isBakedStat(e.stat)).map((effect) => ({ ability, effect, target: effect.target ?? "self" })));
 }
 
-const strength = (e: ModifyStat, owner: BattleParticipant) => Math.abs(e.flat !== undefined ? resolveFlat(e.flat, owner) : 0) + Math.abs(e.percent !== undefined ? resolveFlat(e.percent, owner) : 0);
-
 export function bakePassives(p: BattleParticipant): BattleParticipant {
   return bakedEffects(p)
     .filter((x) => x.target === "self")
@@ -74,20 +73,23 @@ export function bakePassives(p: BattleParticipant): BattleParticipant {
  * та сама аура кількох власників діє лише найсильнішою; уже запечену (стара пара власник–ціль) не дублюємо.
  */
 export function applyBakedAuras(ps: BattleParticipant[], newIds: Set<string>): BattleParticipant[] {
+  const sources = ps.map((source) => ({ source, baked: bakedEffects(source).filter((x) => x.target === "allAllies" || x.target === "allEnemies") }));
+
   return ps.map((r) => {
     const groups = new Map<string, { effect: ModifyStat; source: BattleParticipant; fresh: boolean }[]>();
 
-    for (const source of ps) {
-      for (const { ability, effect, target } of bakedEffects(source)) {
-        if (target !== "allAllies" && target !== "allEnemies") continue;
-
+    for (const { source, baked } of sources) {
+      for (const { ability, effect, target } of baked) {
         const sameSide = r.basicInfo.side === source.basicInfo.side;
 
         if (target === "allAllies" ? !sameSide : sameSide) continue;
 
         const key = `${auraKey(ability)}:${effect.stat}`;
 
-        groups.set(key, [...(groups.get(key) ?? []), { effect, source, fresh: newIds.has(source.basicInfo.id) || newIds.has(r.basicInfo.id) }]);
+        const list = groups.get(key) ?? [];
+
+        list.push({ effect, source, fresh: newIds.has(source.basicInfo.id) || newIds.has(r.basicInfo.id) });
+        groups.set(key, list);
       }
     }
 
@@ -96,7 +98,7 @@ export function applyBakedAuras(ps: BattleParticipant[], newIds: Set<string>): B
     for (const list of groups.values()) {
       if (list.some((x) => !x.fresh)) continue;
 
-      const best = list.reduce((a, b) => (strength(b.effect, b.source) > strength(a.effect, a.source) ? b : a));
+      const best = list.reduce((a, b) => (staticEffectStrength(b.effect, b.source) > staticEffectStrength(a.effect, a.source) ? b : a));
 
       out = bakeOne(out, best.effect, best.source);
     }

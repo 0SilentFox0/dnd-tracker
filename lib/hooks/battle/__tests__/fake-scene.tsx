@@ -7,7 +7,7 @@ import { BattleSceneContext, BattleSceneDataContext, type BattleSceneValue, type
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { ConfirmContext } from "@/lib/hooks/common";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
-import { turnQueue } from "@/lib/utils/battle/view";
+import { buildDisplayEffects, buildParticipantFaces, turnQueue } from "@/lib/utils/battle/view";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleScene } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
@@ -107,6 +107,8 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
     queue: turnQueue(order, battle.currentTurnIndex, battle.currentRound),
     allies: [me, ally],
     enemies: [gob],
+    effects: buildDisplayEffects(order),
+    faces: buildParticipantFaces(order),
     connection: "connected",
     dmControlledId: null,
     setDmControlledId: vi.fn(),

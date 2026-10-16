@@ -22,7 +22,7 @@ export interface DmQuickActionsPanelProps {
   isDM: boolean;
   onOpenLog: () => void;
   onAddParticipant: () => void;
-  onIncreaseHp: (participant: BattleParticipant) => void;
+  onChangeHp: (participant: BattleParticipant) => void;
   onRemoveFromBattle: (participant: BattleParticipant) => void;
   onKill?: (participant: BattleParticipant) => void;
   /** Живе підсилення/послаблення ворожих юнітів лише в цьому бою (стакається) */
@@ -36,6 +36,8 @@ export interface DmQuickActionsPanelProps {
   onRollback?: (actionIndex: number) => void;
   /** Відкрити діалог накладання заклинання (будь-яке заклинання на будь-кого) */
   onOpenCastSpell?: () => void;
+  /** Керований режим (мобільний): панель відкривається ззовні, бічної вкладки немає */
+  panel?: { open: boolean; onOpenChange: (open: boolean) => void };
 }
 
 export function DmQuickActionsPanel({
@@ -43,7 +45,7 @@ export function DmQuickActionsPanel({
   isDM,
   onOpenLog,
   onAddParticipant,
-  onIncreaseHp,
+  onChangeHp,
   onRemoveFromBattle,
   onKill,
   onScaleUnits,
@@ -54,8 +56,13 @@ export function DmQuickActionsPanel({
   setLogPanelOpen,
   onRollback,
   onOpenCastSpell,
+  panel,
 }: DmQuickActionsPanelProps) {
-  const [open, setOpen] = useState(false);
+  const [ownOpen, setOwnOpen] = useState(false);
+
+  const open = panel ? panel.open : ownOpen;
+
+  const setOpen = panel ? panel.onOpenChange : setOwnOpen;
 
   if (!isDM || battle.status === BattleStatus.PREPARED) return null;
 
@@ -67,7 +74,7 @@ export function DmQuickActionsPanel({
 
   return (
     <>
-      <button
+      {!panel && <button
         type="button"
         onClick={() => setOpen(true)}
         className={cn(
@@ -79,7 +86,7 @@ export function DmQuickActionsPanel({
         aria-label="Відкрити швидкі дії DM"
       >
         <ChevronLeft className="size-6" />
-      </button>
+      </button>}
 
       <div
         className={cn(
@@ -161,7 +168,7 @@ export function DmQuickActionsPanel({
                   Підсилити
                 </button>
                 <button type="button" className={ACTION} title="HP і шкода ÷1.1, стакається" onClick={() => onScaleUnits("debuff")}>
-                  <ChevronsDown className="size-4 shrink-0 text-[#9fc48a]" />
+                  <ChevronsDown className="size-4 shrink-0 text-hud-good" />
                   Послабити
                 </button>
               </div>
@@ -183,7 +190,7 @@ export function DmQuickActionsPanel({
                     key={p.basicInfo.id}
                     participant={p}
                     dmControlledParticipantId={dmControlledParticipantId}
-                    onIncreaseHp={onIncreaseHp}
+                    onChangeHp={onChangeHp}
                     onTakeControl={onTakeControl}
                     onRemove={onRemoveFromBattle}
                     onKill={battle.status === BattleStatus.ACTIVE ? onKill : undefined}

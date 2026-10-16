@@ -38,7 +38,7 @@ describe("аури в області", () => {
 
     const [aura] = areaAuras(ps[0]);
 
-    const zoned = applyAuraZone(ps, "n", aura.id, ["a"], 1);
+    const zoned = applyAuraZone(ps, ps[0], aura, ["a"], 1);
 
     expect(statWithModifiers(zoned, "a", "armor", 14)).toBe(12);
     expect(statWithModifiers(zoned, "b", "armor", 14)).toBe(14);
@@ -46,7 +46,7 @@ describe("аури в області", () => {
     expect(pendingAreaAuras(zoned, "n", 1)).toEqual([]);
     expect(pendingAreaAuras(zoned, "n", 2)).toHaveLength(1);
 
-    const moved = applyAuraZone(zoned, "n", aura.id, ["b"], 2);
+    const moved = applyAuraZone(zoned, zoned[0], aura, ["b"], 2);
 
     expect(zoneMembers(moved, "n", aura.id)).toEqual({ ids: ["b"], round: 2 });
     expect(statWithModifiers(moved, "a", "armor", 14)).toBe(14);
@@ -55,7 +55,7 @@ describe("аури в області", () => {
   it("зона не згасає з кінцем ходу цілі", () => {
     const { ps } = setup();
 
-    const zoned = applyAuraZone(ps, "n", areaAuras(ps[0])[0].id, ["a"], 1);
+    const zoned = applyAuraZone(ps, ps[0], areaAuras(ps[0])[0], ["a"], 1);
 
     const armed = { ...zoned[1], battleData: { ...zoned[1].battleData, activeEffects: zoned[1].battleData.activeEffects.map((e) => ({ ...e, armed: !e.permanent })) } };
 
@@ -67,9 +67,11 @@ describe("аури в області", () => {
 
     const twin = makeParticipant({ id: "n2", side: ParticipantSide.ENEMY, abilities: [fear()] });
 
-    const id = areaAuras(nightmare)[0].id;
+    const aura = areaAuras(nightmare)[0];
 
-    const both = applyAuraZone(applyAuraZone([...ps, twin], "n", id, ["a"], 1), "n2", id, ["a"], 1);
+    const zoned = applyAuraZone([...ps, twin], nightmare, aura, ["a"], 1);
+
+    const both = applyAuraZone(zoned, twin, areaAuras(twin)[0], ["a"], 1);
 
     expect(statWithModifiers(both, "a", "armor", 14)).toBe(12);
     expect(ownTimedMoraleFlat(both[1], both)).toBe(-1);
@@ -79,9 +81,13 @@ describe("аури в області", () => {
     expect(statWithModifiers(killed, "a", "armor", 14)).toBe(14);
   });
 
-  it("ціль поза стороною аури відхиляється", () => {
+  it("порожня зона теж знімає очікування в цьому раунді", () => {
     const { ps } = setup();
 
-    expect(() => applyAuraZone(ps, "n", areaAuras(ps[0])[0].id, ["n"], 1)).toThrow();
+    const empty = applyAuraZone(ps, ps[0], areaAuras(ps[0])[0], [], 1);
+
+    expect(pendingAreaAuras(empty, "n", 1)).toEqual([]);
+    expect(pendingAreaAuras(empty, "n", 2)).toHaveLength(1);
+    expect(statWithModifiers(empty, "a", "armor", 14)).toBe(14);
   });
 });

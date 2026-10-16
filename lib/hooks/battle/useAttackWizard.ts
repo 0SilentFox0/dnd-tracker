@@ -6,7 +6,7 @@ import { useBattleScene } from "./useBattleScene";
 
 import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
-import { predictAttackNumbers, predictRollMode } from "@/lib/utils/battle/attack/bonus";
+import { predictAttack } from "@/lib/utils/battle/attack/bonus";
 import { resolveAttackRoll } from "@/lib/utils/battle/common/attack-roll-helpers";
 import { computeDamageBreakdown } from "@/lib/utils/battle/damage";
 import { attackFlow, type AttackMode, attackPayload, effectiveD20, initialAttackFlow, type RollOutcome } from "@/lib/utils/battle/flows";
@@ -61,9 +61,11 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
   const estimate = steps.reduce((sum, list) => sum + (list.at(-1)?.after ?? 0), 0);
 
+  const isOpen = state.step !== "closed";
+
   const previews = useMemo(
-    () => (attacker ? Object.fromEntries(attacks.map((a) => [a.id ?? a.name, weaponPreview(attacker, a, order)])) : {}),
-    [attacker, attacks, order],
+    () => (attacker && isOpen ? Object.fromEntries(attacks.map((a) => [a.id ?? a.name, weaponPreview(attacker, a, order)])) : {}),
+    [attacker, attacks, order, isOpen],
   );
 
   const unknownDefense = state.strikes.some((s) => {
@@ -89,7 +91,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
     if (!attacker || !attack || !target) return "miss";
 
-    const { totalBonus, targetAC } = predictAttackNumbers(attacker, target, attack, order, scene.battle.currentRound);
+    const { totalBonus, targetAC } = predictAttack(attacker, target, attack, order, scene.battle.currentRound);
 
     const r = resolveAttackRoll(
       { attackRoll: d20, ...(state.mode === "advantage" && second !== undefined && { advantageRoll: second }), ...(state.mode === "disadvantage" && second !== undefined && { disadvantageRoll: second }) },
@@ -197,7 +199,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     confirmTargets: () => {
       const first = byId(state.targetIds[0]);
 
-      if (attacker && attack && first) dispatch({ type: "SET_MODE", mode: predictRollMode(attacker, first, attack, order, scene.battle.currentRound) });
+      if (attacker && attack && first) dispatch({ type: "SET_MODE", mode: predictAttack(attacker, first, attack, order, scene.battle.currentRound).mode });
 
       dispatch({ type: "CONFIRM_TARGETS" });
     },

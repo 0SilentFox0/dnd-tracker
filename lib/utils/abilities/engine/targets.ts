@@ -35,6 +35,7 @@ export function resolveTargetIds(
 
       return other ? [other.basicInfo.id] : [];
     }
+    // nearby* дозволені лише пасивкам (схема) — тут безпечний запасний варіант
     case "allAllies":
     case "nearbyAllies":
       return ps.filter((p) => isActive(p) && p.basicInfo.side === side).map((p) => p.basicInfo.id);

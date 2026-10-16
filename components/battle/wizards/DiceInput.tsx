@@ -18,7 +18,7 @@ export function DiceGrid({ sides, value, onPick, highlight }: { sides: number; v
             n === value ? "border-[#c0392b] bg-[var(--enemy)] font-bold text-white" : "border-white/15 bg-black/25 text-[var(--bone)]",
             n !== value && n === sides && sides === 20 && "text-[#e8c77a]",
             n !== value && n === 1 && "text-[#c98a7c]",
-            n !== value && highlight?.rolls.includes(n) && (highlight.tone === "gold" ? "border-[#e6c25a] bg-[#e6c25a]/20 font-bold text-[#ffe08a]" : "border-[#c0392b] bg-[#c0392b]/25 font-bold text-[#ff8a7a]"),
+            n !== value && highlight?.rolls.includes(n) && (highlight.tone === "gold" ? "border-hud-gold-strong bg-hud-gold-strong/20 font-bold text-hud-gold-bright" : "border-[#c0392b] bg-[#c0392b]/25 font-bold text-hud-bad"),
           )}
         >
           {n}

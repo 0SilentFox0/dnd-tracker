@@ -114,7 +114,7 @@ export function ResultOverlay() {
   const crit = result.kind === "crit";
 
   return (
-    <div onClick={close} className={cn(shell, "backdrop-blur-[3px]", crit ? "bg-[radial-gradient(circle_at_50%_40%,rgba(92,70,30,.9),rgba(10,8,6,.95)_60%)]" : "bg-[radial-gradient(circle_at_50%_42%,rgba(62,20,14,.9),rgba(8,6,5,.95)_58%)]")}>
+    <div onClick={close} className={cn(shell, crit ? "bg-[radial-gradient(circle_at_50%_40%,rgba(92,70,30,.9),rgba(10,8,6,.95)_60%)]" : "bg-[radial-gradient(circle_at_50%_42%,rgba(62,20,14,.9),rgba(8,6,5,.95)_58%)]")}>
       {crit && <div className="pointer-events-none absolute left-1/2 top-[40%] size-[1100px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[repeating-conic-gradient(rgba(232,199,122,.18)_0_6deg,transparent_6deg_20deg)] [mask:radial-gradient(circle,#000_20%,transparent_65%)] animate-[hud-spin_8s_linear_infinite]" />}
       {crit && <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(255,236,190,.6),transparent_60%)] animate-[hud-fade_.6s_.6s_reverse_both]" />}
       {crit && <div className={cn(die, "relative mb-4 size-[88px] bg-[#e8c77a] text-[40px] text-[#2a1d05] shadow-[0_0_28px_rgba(232,199,122,.7)]")}>{result.d20}</div>}

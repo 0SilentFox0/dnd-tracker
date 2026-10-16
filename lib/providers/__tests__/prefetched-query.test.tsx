@@ -71,4 +71,22 @@ describe("PrefetchedQuery", () => {
 
     expect(client.getQueryData(KEY)).toEqual({ version: 7 });
   });
+
+  it("та сама версія при повторному монтуванні не перезаписує кеш", () => {
+    const client = new QueryClient();
+
+    const cached = { version: 4, tag: "cache" };
+
+    client.setQueryData(KEY, cached);
+
+    render(
+      <QueryClientProvider client={client}>
+        <PrefetchedQuery queryKey={KEY} data={{ version: 4, tag: "html" }}>
+          <span />
+        </PrefetchedQuery>
+      </QueryClientProvider>,
+    );
+
+    expect(client.getQueryData(KEY)).toBe(cached);
+  });
 });

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { logEntryView } from "@/lib/utils/battle/view";
+import { groupLogByRound, logEntryView } from "@/lib/utils/battle/view";
 import type { BattleAction } from "@/types/battle";
 
 const entry = (resultText: string, hpChanges: BattleAction["hpChanges"] = []) => ({ resultText, hpChanges }) as BattleAction;
@@ -23,5 +23,27 @@ describe("logEntryView", () => {
     expect(v.headline).toBe("Тригери початку раунду 7");
     expect(v.lines).toEqual(["💚 Сила життя (Айвен): Аграїл +5 HP", "🛡 Клятва щита: Аграїл"]);
   });
+
+  it("мітка дії, ознака тригера й відсутність деталей", () => {
+    const attack = logEntryView({ ...entry("Гоблін б'є"), actionType: "attack" } as BattleAction);
+
+    expect(attack.kindLabel).toBe("атака");
+    expect(attack.isTrigger).toBe(false);
+    expect(logEntryView(entry("Тригери початку раунду 2: a")).isTrigger).toBe(true);
+  });
 });
 
+describe("groupLogByRound", () => {
+  const at = (round: number, actionIndex: number) => ({ round, actionIndex }) as BattleAction;
+
+  it("групує послідовні записи раунду зі збереженням порядку", () => {
+    const groups = groupLogByRound([at(3, 9), at(3, 8), at(2, 7), at(1, 2), at(1, 1)]);
+
+    expect(groups.map((g) => [g.round, g.entries.length])).toEqual([[3, 2], [2, 1], [1, 2]]);
+    expect(groups[0].entries.map((e) => e.actionIndex)).toEqual([9, 8]);
+  });
+
+  it("порожній журнал — без груп", () => {
+    expect(groupLogByRound([])).toEqual([]);
+  });
+});

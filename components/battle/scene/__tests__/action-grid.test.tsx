@@ -34,10 +34,18 @@ describe("ActionGrid", () => {
     expect((screen.getByRole("button", { name: /Магія/ }) as HTMLButtonElement).disabled).toBe(true);
   });
 
-  it("плитки без підписів — лише назви дій", () => {
+  it("плитка моралі з'являється лише з результатом і називає його", () => {
     render(<ActionGrid turn={turn(false, "extra")} {...props} />);
 
-    expect(screen.getByRole("button", { name: /^Мораль$/ })).toBeTruthy();
+    expect((screen.getByRole("button", { name: "Бойовий дух" }) as HTMLButtonElement).disabled).toBe(true);
     expect(screen.getByRole("button", { name: /^Атака$/ })).toBeTruthy();
+    cleanup();
+
+    render(<ActionGrid turn={turn(true, "skip")} {...props} />);
+    expect(screen.getByRole("button", { name: "Паніка" })).toBeTruthy();
+    cleanup();
+
+    render(<ActionGrid turn={turn(false)} {...props} />);
+    expect(screen.queryByRole("button", { name: /Мораль|Паніка|Бойовий/ })).toBeNull();
   });
 });

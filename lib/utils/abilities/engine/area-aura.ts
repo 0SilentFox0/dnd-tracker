@@ -4,13 +4,9 @@ import { findParticipant, isActive, resolvedAbilitiesOf } from "./participants";
 import { effectSource } from "./timed-effects";
 
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
-import { AREA_TARGETS, isStaticEffect } from "@/lib/utils/abilities/schema/kinds";
+import { AREA_TARGETS, type AreaTarget, isStaticEffect } from "@/lib/utils/abilities/schema/kinds";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
-
-export type AreaTarget = (typeof AREA_TARGETS)[number];
-
-export const isAreaTarget = (t: string | undefined): t is AreaTarget => (AREA_TARGETS as readonly string[]).includes(t ?? "");
 
 export interface AreaAura {
   /** ключ зони в межах власника: ability.key + сторона */
@@ -66,34 +62,23 @@ export function pendingAreaAuras(ps: BattleParticipant[], ownerId: string, round
 
   if (!owner || !isActive(owner)) return [];
 
-  return areaAuras(owner).filter((a) => zoneMembers(ps, ownerId, a.id).round !== round);
+  return areaAuras(owner).filter((a) => owner.battleData.auraZones?.[a.id] !== round);
 }
 
 function resolvedEffect(e: StaticEffect, owner: BattleParticipant): StaticEffect {
-  const out = { ...e, target: "self" } as StaticEffect;
-
-  if ("flat" in out && out.flat !== undefined) (out as { flat: number }).flat = resolveFlat(out.flat, owner);
-
-  if ("percent" in out && out.percent !== undefined) (out as { percent: number }).percent = resolveFlat(out.percent, owner);
-
-  return out;
+  return {
+    ...e,
+    target: "self",
+    ...("flat" in e && e.flat !== undefined && { flat: resolveFlat(e.flat, owner) }),
+    ...("percent" in e && e.percent !== undefined && { percent: resolveFlat(e.percent, owner) }),
+  };
 }
 
-export class AuraZoneError extends Error {}
+/** Нова зона аури: знімає попередню цього власника, накладає ефект на обраних і записує раунд вибору на власнику. */
+export function applyAuraZone(ps: BattleParticipant[], owner: BattleParticipant, aura: AreaAura, targetIds: string[], round: number): BattleParticipant[] {
+  const ownerId = owner.basicInfo.id;
 
-/** Нова зона аури: знімає попередню цього власника й накладає ефект на обраних. */
-export function applyAuraZone(ps: BattleParticipant[], ownerId: string, auraId: string, targetIds: string[], round: number): BattleParticipant[] {
-  const owner = findParticipant(ps, ownerId);
-
-  const aura = owner && areaAuras(owner).find((a) => a.id === auraId);
-
-  if (!owner || !aura) throw new AuraZoneError("Аура не знайдена");
-
-  const allowed = new Set(zoneCandidates(ps, owner, aura.target).map((p) => p.basicInfo.id));
-
-  if (targetIds.some((id) => !allowed.has(id))) throw new AuraZoneError("Ціль поза доступною стороною");
-
-  const id = zoneEffectId(ownerId, auraId);
+  const id = zoneEffectId(ownerId, aura.id);
 
   const chosen = new Set(targetIds);
 
@@ -116,6 +101,10 @@ export function applyAuraZone(ps: BattleParticipant[], ownerId: string, auraId: 
 
     const activeEffects = chosen.has(p.basicInfo.id) ? [...rest, effect] : rest;
 
-    return activeEffects.length === p.battleData.activeEffects.length && !chosen.has(p.basicInfo.id) ? p : { ...p, battleData: { ...p.battleData, activeEffects } };
+    const auraZones = p.basicInfo.id === ownerId ? { ...p.battleData.auraZones, [aura.id]: round } : p.battleData.auraZones;
+
+    if (p.basicInfo.id !== ownerId && activeEffects.length === p.battleData.activeEffects.length && !chosen.has(p.basicInfo.id)) return p;
+
+    return { ...p, battleData: { ...p.battleData, activeEffects, auraZones } };
   });
 }
