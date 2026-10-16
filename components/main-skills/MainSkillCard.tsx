@@ -1,17 +1,10 @@
 "use client";
 
-import Link from "next/link";
-import { Edit,MoreVertical, Trash2 } from "lucide-react";
+import { Edit, Trash2 } from "lucide-react";
 
+import { ActionsMenu } from "@/components/common/ActionsMenu";
 import { EntityIcon } from "@/components/common/EntityIcon";
 import { HudCard } from "@/components/hud/page";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import type { MainSkill } from "@/types/main-skills";
 
 interface MainSkillCardProps {
@@ -39,28 +32,13 @@ export function MainSkillCard({
             </h3>
             <p className="mt-2 break-all text-sm text-hud-muted">ID: {mainSkill.id}</p>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem asChild>
-                <Link href={`/campaigns/${campaignId}/dm/main-skills/${mainSkill.id}`}>
-                  <Edit className="mr-2 h-4 w-4" />
-                  Редагувати
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => onDelete(mainSkill.id)}
-                className="text-destructive"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Видалити
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <ActionsMenu
+            triggerSize="sm"
+            actions={[
+              { label: "Редагувати", icon: Edit, href: `/campaigns/${campaignId}/dm/main-skills/${mainSkill.id}` },
+              { label: "Видалити", icon: Trash2, onSelect: () => onDelete(mainSkill.id), destructive: true },
+            ]}
+          />
         </div>
       </div>
       <div>

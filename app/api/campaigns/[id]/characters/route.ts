@@ -7,10 +7,9 @@ import { CharacterType } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import type { CampaignRouteContext } from "@/types/api";
 
-type RouteContext = { params: Promise<{ id: string }> };
-
-export async function POST(request: Request, { params }: RouteContext) {
+export async function POST(request: Request, { params }: CampaignRouteContext) {
   try {
     const { id } = await params;
 
@@ -20,7 +19,7 @@ export async function POST(request: Request, { params }: RouteContext) {
   }
 }
 
-export async function GET(request: Request, { params }: RouteContext) {
+export async function GET(request: Request, { params }: CampaignRouteContext) {
   try {
     const { id } = await params;
 
@@ -30,7 +29,7 @@ export async function GET(request: Request, { params }: RouteContext) {
   }
 }
 
-export async function DELETE(_request: Request, { params }: RouteContext) {
+export async function DELETE(_request: Request, { params }: CampaignRouteContext) {
   try {
     const { id } = await params;
 

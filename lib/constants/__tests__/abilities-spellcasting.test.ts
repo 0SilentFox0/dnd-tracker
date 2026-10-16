@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { toSpellcastingAbility } from "@/components/character-profile/spellcasting-ability";
+import { toSpellcastingAbility } from "@/lib/constants/abilities";
 
 describe("toSpellcastingAbility", () => {
   it("порожнє значення селекта («Немає») знімає характеристику", () => {

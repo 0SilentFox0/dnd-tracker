@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { SelectField } from "@/components/ui/select-field";
 import { Textarea } from "@/components/ui/textarea";
+import type { IdName } from "@/types/common";
 import type { SpellCost } from "@/types/spells";
 
 export interface SpellFormFieldsProps {
@@ -14,7 +15,7 @@ export interface SpellFormFieldsProps {
   setFormData: (data: SpellFormData) => void;
 }
 
-export function SpellFormBasicFields({ formData, setFormData, spellGroups }: SpellFormFieldsProps & { spellGroups: { id: string; name: string }[] }) {
+export function SpellFormBasicFields({ formData, setFormData, spellGroups }: SpellFormFieldsProps & { spellGroups: IdName[] }) {
   return (
     <div className="grid grid-cols-2 gap-4 [&>*]:min-w-0">
       <LabeledInput containerClassName="col-span-2" id="name" label="Назва заклинання" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required placeholder="Назва заклинання" />

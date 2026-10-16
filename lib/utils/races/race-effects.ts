@@ -1,13 +1,6 @@
 import { COMMON_IMMUNITIES, IMMUNITY_PATTERNS } from "@/lib/constants/immunities";
-import type { Race } from "@/types/races";
+import type { Race, RaceFromPrisma } from "@/types/races";
 import type { Unit } from "@/types/units";
-
-type RaceFromPrisma = Omit<Race, "availableSkills" | "disabledSkills" | "spellSlotProgression" | "passiveAbility"> & {
-  availableSkills?: unknown;
-  disabledSkills?: unknown;
-  spellSlotProgression?: unknown;
-  passiveAbility?: unknown;
-};
 
 /**
  * Парсить пасивну здібність раси та витягує імунітети

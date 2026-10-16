@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getInitialRaceFormData } from "../RaceEditFormUtils";
+import { getInitialRaceFormData } from "../race-form";
 
 describe("getInitialRaceFormData", () => {
   it("keeps passive display fields so a DM save does not drop them", () => {

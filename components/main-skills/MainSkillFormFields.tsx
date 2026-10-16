@@ -6,12 +6,13 @@ import { HudSection } from "@/components/hud/form";
 import { Input } from "@/components/ui/input";
 import { FormField } from "@/components/ui/labeled-input";
 import { SelectField } from "@/components/ui/select-field";
+import type { IdName } from "@/types/common";
 import type { MainSkillFormData } from "@/types/main-skills";
 
 interface MainSkillFormFieldsProps {
   form: MainSkillFormData;
   onChange: (patch: Partial<MainSkillFormData>) => void;
-  spellGroups: { id: string; name: string }[];
+  spellGroups: IdName[];
 }
 
 export function MainSkillFormFields({ form, onChange, spellGroups }: MainSkillFormFieldsProps) {

@@ -1,20 +1,13 @@
 "use client";
 
 import { useMemo } from "react";
-import Link from "next/link";
-import { Circle, Edit, MoreVertical, Plus, Shield, Trash2 } from "lucide-react";
+import { Circle, Edit, Plus, Shield, Trash2 } from "lucide-react";
 
 import { RacePassiveBlock } from "./RaceInnateSections";
 
+import { ActionsMenu } from "@/components/common/ActionsMenu";
 import { HudCard } from "@/components/hud/page";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useMainSkills, useRacialSkills, useSkills } from "@/lib/hooks/skills";
 import {
   countRaceSkills,
@@ -54,28 +47,14 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
           <div className="flex-1 min-w-0">
             <h3 className="hud-sc truncate text-lg text-hud-ink">{race.name}</h3>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem asChild>
-                <Link href={`/campaigns/${campaignId}/dm/races/${race.id}`}>
-                  <Edit className="mr-2 h-4 w-4" />
-                  Редагувати
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => onDelete(race.id)}
-                className="text-destructive"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Видалити
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <ActionsMenu
+            triggerSize="sm"
+            triggerClassName="h-8 w-8 p-0"
+            actions={[
+              { label: "Редагувати", icon: Edit, href: `/campaigns/${campaignId}/dm/races/${race.id}` },
+              { label: "Видалити", icon: Trash2, onSelect: () => onDelete(race.id), destructive: true },
+            ]}
+          />
         </div>
       </div>
       <div className="flex flex-1 flex-col gap-3">

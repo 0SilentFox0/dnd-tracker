@@ -1,5 +1,5 @@
 import { spellSchoolColor } from "@/lib/constants/spells";
-import { ALL_SCHOOLS } from "@/lib/hooks/battle";
+import { ALL_SCHOOLS } from "@/lib/hooks/spells";
 import { cn } from "@/lib/utils";
 
 export function SchoolTabs({ schools, active, countOf, onPick }: { schools: string[]; active: string; countOf: (name: string) => number; onPick: (name: string) => void }) {

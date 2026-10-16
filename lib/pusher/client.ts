@@ -1,7 +1,7 @@
 import PusherClient from "pusher-js";
 
-import { PUSHER_AUTH_ENDPOINT } from "@/lib/pusher-channels";
-import { getPusherCluster } from "@/lib/pusher-config";
+import { PUSHER_AUTH_ENDPOINT } from "@/lib/pusher/channels";
+import { getPusherCluster } from "@/lib/pusher/config";
 
 let clientInstance: PusherClient | null = null;
 

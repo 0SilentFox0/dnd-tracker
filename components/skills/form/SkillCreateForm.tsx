@@ -11,24 +11,14 @@ import { SkillMainSkillSection } from "@/components/skills/form/main-skill";
 import { SkillSpellSection } from "@/components/skills/form/spell";
 import { Button } from "@/components/ui/button";
 import { useSkillForm } from "@/lib/hooks/skills";
-
-interface SpellOption {
-  id: string;
-  name: string;
-}
-
-interface SpellGroupOption {
-  id: string;
-  name: string;
-}
-
+import type { IdName } from "@/types/common";
 import type { MainSkill } from "@/types/main-skills";
 import type { GroupedSkill, Skill } from "@/types/skills";
 
 interface SkillCreateFormProps {
   campaignId: string;
-  spells: SpellOption[];
-  spellGroups?: SpellGroupOption[];
+  spells: IdName[];
+  spellGroups?: IdName[];
   initialMainSkills?: MainSkill[];
   initialData?: Skill | GroupedSkill;
 }

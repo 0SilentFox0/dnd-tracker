@@ -1,12 +1,12 @@
 "use client";
 
-import { getInitialRaceFormData } from "./RaceEditFormUtils";
 import { RaceFormFields } from "./RaceFormFields";
 
 import { withAbilityErrors } from "@/components/abilities";
 import { HudForm, HudFormPage } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { useRaceForm } from "@/lib/hooks/races";
+import { getInitialRaceFormData } from "@/lib/utils/races/race-form";
 import type { Race } from "@/types/races";
 
 interface RaceEditFormProps {

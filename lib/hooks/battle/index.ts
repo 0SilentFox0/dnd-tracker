@@ -13,7 +13,6 @@ export {
 } from "./useBattleScene";
 export { type DownedHeroPrompt, useDownedHeroPrompt } from "./useDownedHeroPrompt";
 export { useDamageShake, useHpChange } from "./useHpChange";
-export { useParticipantFace } from "./useParticipantFace";
+export { ParticipantFacesContext, useParticipantFace, useParticipantFacesValue } from "./useParticipantFace";
 export { usePlayerTurn } from "./usePlayerTurn";
-export { ALL_SCHOOLS, useSchoolFilter } from "./useSchoolFilter";
 export { useBonusSpells, useSpellBook, useSpellBookPrefetch } from "./useSpellBook";

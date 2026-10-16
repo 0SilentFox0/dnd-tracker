@@ -3,11 +3,7 @@
 import { SkillSpellSelector } from "./SkillSpellSelector";
 
 import { HudSection } from "@/components/hud/form";
-
-interface SpellOption {
-  id: string;
-  name: string;
-}
+import type { IdName } from "@/types/common";
 
 interface SkillSpellSectionProps {
   spell: {
@@ -18,7 +14,7 @@ interface SkillSpellSectionProps {
       setGrantedSpellId: (value: string | null) => void;
     };
   };
-  spells: SpellOption[];
+  spells: IdName[];
 }
 
 export function SkillSpellSection({ spell, spells }: SkillSpellSectionProps) {

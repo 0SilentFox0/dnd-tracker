@@ -160,3 +160,7 @@ export interface SpellCastData {
 
 // Skill Trees API
 
+
+export type CampaignRouteContext = { params: Promise<{ id: string }> };
+
+export type CharacterRouteContext = { params: Promise<{ id: string; characterId: string }> };

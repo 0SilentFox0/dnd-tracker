@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 
 import { toArtifactSetErrorResponse } from "../route-errors";
-import { patchArtifactSetSchema } from "../schemas";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { patchArtifactSetSchema } from "@/lib/schemas/artifact-sets";
 import { resolveArtifactIconForPersistence } from "@/lib/supabase/artifact-icon-storage";
 import { readAbilities } from "@/lib/utils/abilities/read";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";

@@ -31,29 +31,35 @@ export function personalPassiveEffects(p: BattleParticipant, order: BattlePartic
 
       if (hits.length === 0) continue;
 
-      const effect: ActiveEffect = {
-        id: `personal:${owner.basicInfo.id}:${a.key}`,
+      const build = (abilityEffects: typeof hits, suffix = ""): ActiveEffect => ({
+        id: `personal:${owner.basicInfo.id}:${a.key}${suffix}`,
         name: a.name,
         type: ally ? "buff" : "debuff",
         duration: 0,
         permanent: true,
         appliedAt: { round: 0, timestamp: new Date(0) },
         effects: [],
-        abilityEffects: hits,
+        abilityEffects,
         source: { participantId: owner.basicInfo.id, name: owner.basicInfo.name, abilityName: a.source.name, personal: true },
-      };
+      });
 
-      if (!hits.some((e) => isAuraTarget(e.target))) {
-        out.push(effect);
+      const auraHits = hits.filter((e) => isAuraTarget(e.target));
+
+      const ownHits = hits.filter((e) => !isAuraTarget(e.target));
+
+      if (auraHits.length === 0) {
+        out.push(build(hits));
 
         continue;
       }
 
+      if (ownHits.length > 0) out.push(build(ownHits, ":own"));
+
       const key = auraKey(a);
 
-      const strength = hits.reduce((sum, e) => sum + staticEffectStrength(e, owner), 0);
+      const strength = auraHits.reduce((sum, e) => sum + staticEffectStrength(e, owner), 0);
 
-      if (strength > (auras.get(key)?.strength ?? -1)) auras.set(key, { effect, strength });
+      if (strength > (auras.get(key)?.strength ?? -1)) auras.set(key, { effect: build(auraHits), strength });
     }
   }
 

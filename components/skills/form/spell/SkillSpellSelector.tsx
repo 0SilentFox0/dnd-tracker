@@ -2,15 +2,11 @@
 
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
-
-interface SpellOption {
-  id: string;
-  name: string;
-}
+import type { IdName } from "@/types/common";
 
 interface SkillSpellSelectorProps {
   spellId: string | null;
-  spells: SpellOption[];
+  spells: IdName[];
   onSpellIdChange: (value: string | null) => void;
   label?: string;
   placeholder?: string;

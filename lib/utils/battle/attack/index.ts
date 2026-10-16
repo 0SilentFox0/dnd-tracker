@@ -1,5 +1,5 @@
 export type { AttackResult, AttackRollResult } from "../types/attack";
-export { calculateAttackBonus, hasAdvantage, hasDisadvantage, predictAttack, predictAttackNumbers, predictRollMode } from "./bonus";
+export { calculateAttackBonus, hasAdvantage, hasDisadvantage, predictAttack } from "./bonus";
 export { applyCriticalEffect } from "./critical";
 export type { ProcessAttackParams, ProcessAttackResult } from "./process";
 export { processAttack } from "./process";

@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, fireEvent, render as rtlRender, screen } from "@testing-library/react";
 import { afterEach, beforeEach,describe, expect, it, vi } from "vitest";
 
-import { CreateSpellGroupDialog } from "@/components/skills/dialogs/CreateSpellGroupDialog";
+import { CreateSpellGroupDialog } from "@/components/spells/dialogs/CreateSpellGroupDialog";
 
 const mockRefresh = vi.fn();
 

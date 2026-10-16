@@ -3,12 +3,11 @@
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import type { SpellFormData } from "../spell-form-defaults";
-import { getDefaultSpellFormData } from "../spell-form-defaults";
-import { SpellFormBody } from "../SpellFormBody";
-
 import { LoadingState } from "@/components/common/states";
 import { HudFormPage } from "@/components/hud/form";
+import type { SpellFormData } from "@/components/spells/form/spell-form-defaults";
+import { getDefaultSpellFormData } from "@/components/spells/form/spell-form-defaults";
+import { SpellFormBody } from "@/components/spells/form/SpellFormBody";
 import { useConfirm, useNotify } from "@/lib/hooks/common";
 import {
   useDeleteSpell,

@@ -1,3 +1,4 @@
+import { groupBy } from "@/lib/utils/common/collections";
 import type { BookSpell } from "@/types/spells";
 
 export interface SchoolGroup {
@@ -8,16 +9,7 @@ export interface SchoolGroup {
 const NO_SCHOOL = "Без школи";
 
 export function groupSpellsBySchool(spells: BookSpell[]): SchoolGroup[] {
-  const map = new Map<string, BookSpell[]>();
-
-  for (const s of spells) {
-    const name = s.spellGroup?.name ?? NO_SCHOOL;
-
-    const list = map.get(name);
-
-    if (list) list.push(s);
-    else map.set(name, [s]);
-  }
+  const map = groupBy(spells, (s) => s.spellGroup?.name ?? NO_SCHOOL);
 
   return [...map.entries()]
     .sort(([a], [b]) => (a === NO_SCHOOL ? 1 : b === NO_SCHOOL ? -1 : a.localeCompare(b, "uk")))

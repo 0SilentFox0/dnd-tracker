@@ -35,7 +35,7 @@ export const ParticipantRow = memo(function ParticipantRow({ participant, effect
           {signedDelta(change.delta)}
         </span>
       )}
-      <Portrait key={change?.id} participant={participant} size={48} current={current} className={cn(change && (change.delta < 0 ? "animate-[hud-flash-red_.5s]" : "animate-[hud-flash-green_.7s]"))} />
+      <Portrait key={change?.id} participant={participant} size={48} current={current} className={cn("pointer-events-none", change && (change.delta < 0 ? "animate-[hud-flash-red_.5s]" : "animate-[hud-flash-green_.7s]"))} />
       <div className="min-w-0 flex-1">
         <div className={cn("hud-sc flex h-5 items-center whitespace-nowrap text-base font-bold text-[var(--ink)]", down && "line-through")}>
           <span className="truncate">{participant.basicInfo.name}</span>

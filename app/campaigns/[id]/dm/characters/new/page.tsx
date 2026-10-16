@@ -4,10 +4,9 @@ import { use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { CHARACTER_FORM_TAB, type CharacterFormTabId } from "./character-form-tabs";
-
 import { CharacterAbilitiesSection } from "@/components/characters/abilities/CharacterAbilitiesSection";
 import { CharacterBasicInfo } from "@/components/characters/basic/CharacterBasicInfo";
+import { CHARACTER_FORM_TAB, type CharacterFormTabId } from "@/components/characters/character-form-tabs";
 import { CharacterSkillsSection } from "@/components/characters/skills/CharacterSkillsSection";
 import { CharacterAbilityScores } from "@/components/characters/stats/CharacterAbilityScores";
 import { CharacterCombatParams } from "@/components/characters/stats/CharacterCombatParams";

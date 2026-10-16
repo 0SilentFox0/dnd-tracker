@@ -55,3 +55,10 @@ export interface RaceFormData {
   spellSlotProgression?: SpellSlotProgression[];
   abilities: Ability[];
 }
+
+export type RaceFromPrisma = Omit<Race, "availableSkills" | "disabledSkills" | "spellSlotProgression" | "passiveAbility"> & {
+  availableSkills?: unknown;
+  disabledSkills?: unknown;
+  spellSlotProgression?: unknown;
+  passiveAbility?: unknown;
+};

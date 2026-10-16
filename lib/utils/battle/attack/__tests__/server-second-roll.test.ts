@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import { predictRollMode } from "@/lib/utils/battle/attack/bonus";
+import { predictAttack } from "@/lib/utils/battle/attack/bonus";
 import { processAttack } from "@/lib/utils/battle/attack/process";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -44,14 +44,14 @@ describe("server-rolled second d20", () => {
     expect(r.success).toBe(true);
   });
 
-  it("predictRollMode reads advantage/disadvantage flags for the wizard", () => {
+  it("predictAttack mode reads advantage/disadvantage flags for the wizard", () => {
     const target = makeParticipant({ id: "s", side: ParticipantSide.ENEMY, abilities: [marked] });
 
-    expect(predictRollMode(attacker(), target, sword, [attacker(), target])).toBe("advantage");
-    expect(predictRollMode(attacker(), makeParticipant({ id: "p", side: ParticipantSide.ENEMY }), sword, [attacker()])).toBe("normal");
+    expect(predictAttack(attacker(), target, sword, [attacker(), target]).mode).toBe("advantage");
+    expect(predictAttack(attacker(), makeParticipant({ id: "p", side: ParticipantSide.ENEMY }), sword, [attacker()]).mode).toBe("normal");
   });
 
-  it("predictRollMode includes certain before-phase triggers, but not chance-based ones", () => {
+  it("predictAttack mode includes certain before-phase triggers, but not chance-based ones", () => {
     const target = makeParticipant({ id: "s", side: ParticipantSide.ENEMY });
 
     const firstShot = resolved({ trigger: { event: "attack", phase: "before", role: "attacker" }, limits: { perBattle: 1 }, effects: [{ kind: "flag", flag: "advantage", attackKind: "all" }] });
@@ -64,8 +64,8 @@ describe("server-rolled second d20", () => {
       return { ...p, battleData: { ...p.battleData, attacks: [sword] } };
     };
 
-    expect(predictRollMode(withAbility(firstShot), target, sword, [withAbility(firstShot), target])).toBe("advantage");
-    expect(predictRollMode(withAbility(lucky), target, sword, [withAbility(lucky), target])).toBe("normal");
-    expect(predictRollMode(attacker(), makeParticipant({ id: "s", side: ParticipantSide.ENEMY, abilities: [semgrun] }), sword, [attacker()])).toBe("disadvantage");
+    expect(predictAttack(withAbility(firstShot), target, sword, [withAbility(firstShot), target]).mode).toBe("advantage");
+    expect(predictAttack(withAbility(lucky), target, sword, [withAbility(lucky), target]).mode).toBe("normal");
+    expect(predictAttack(attacker(), makeParticipant({ id: "s", side: ParticipantSide.ENEMY, abilities: [semgrun] }), sword, [attacker()]).mode).toBe("disadvantage");
   });
 });

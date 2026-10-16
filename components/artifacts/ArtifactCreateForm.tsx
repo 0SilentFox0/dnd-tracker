@@ -2,11 +2,11 @@
 
 import { useRouter } from "next/navigation";
 
-import type { ArtifactSetOption } from "./ArtifactEditForm-types";
 import { ArtifactForm } from "./ArtifactForm";
 
 import { ArtifactRarity, ArtifactSlot } from "@/lib/constants/artifacts";
 import { useCreateArtifact } from "@/lib/hooks/artifacts";
+import type { ArtifactSetOption } from "@/types/artifacts";
 
 interface ArtifactCreateFormProps {
   campaignId: string;

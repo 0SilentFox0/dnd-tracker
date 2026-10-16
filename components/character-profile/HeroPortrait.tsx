@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 
+import { ImageZoomDialog } from "@/components/common/ImageZoomDialog";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
-import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { cn } from "@/lib/utils";
 
 interface HeroPortraitProps {
@@ -32,9 +32,7 @@ export function HeroPortrait({ src, name, className, canEdit }: HeroPortraitProp
       <button type="button" aria-label="Відкрити фото" onClick={() => setOpen(true)} className={frame}>
         <OptimizedImage src={src} alt={name} width={640} height={853} className="size-full object-cover" />
       </button>
-      <ResponsiveDialog open={open} onOpenChange={setOpen} title={name} hud>
-        <OptimizedImage src={src} alt={name} width={1200} height={1600} className="mx-auto max-h-[75vh] w-auto max-w-full object-contain" />
-      </ResponsiveDialog>
+      <ImageZoomDialog src={src} name={name} open={open} onOpenChange={setOpen} />
     </>
   );
 }

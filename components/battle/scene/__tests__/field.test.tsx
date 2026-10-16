@@ -8,12 +8,14 @@ vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 import { BattleLog } from "@/components/battle/scene/BattleLog";
 import { InitiativeTrack } from "@/components/battle/scene/InitiativeTrack";
 import { ParticipantList } from "@/components/battle/scene/ParticipantList";
+import { ParticipantRow } from "@/components/battle/scene/ParticipantRow";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { BattleSceneContext, BattleSceneDataContext, type BattleSceneValue } from "@/lib/hooks/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
-import { buildDisplayEffects, buildParticipantFaces, turnQueue } from "@/lib/utils/battle/view";
+import { buildDisplayEffects, turnQueue } from "@/lib/utils/battle/view";
 import type { BattleScene } from "@/types/api";
-import type { BattleAction } from "@/types/battle";
+import type { ActiveEffect, BattleAction } from "@/types/battle";
 
 const p = (id: string, name: string, side: ParticipantSide, hp = 20, extra = false) => {
   const b = createMockParticipant();
@@ -39,7 +41,7 @@ function scene(isDM = false) {
 
   return {
     battle, isDM, viewer: { userId: "u", isDM, canSeeEnemyHp: false }, hero, myParticipants: [hero],
-    queue: turnQueue([gob, hero], 0, 3), allies: [hero], enemies: [gob], effects: buildDisplayEffects([gob, hero]), faces: buildParticipantFaces([gob, hero]), select: vi.fn(), selectedId: null, log: { open: false, focus: null },
+    queue: turnQueue([gob, hero], 0, 3), allies: [hero], enemies: [gob], effects: buildDisplayEffects([gob, hero]), select: vi.fn(), selectedId: null, log: { open: false, focus: null },
     logHistory: { canLoadEarlier: false, isLoading: false, loadEarlier: vi.fn() },
   } as unknown as BattleSceneValue;
 }
@@ -160,5 +162,34 @@ describe("поле бою", () => {
     render(<BattleLog />, { wrapper: wrap(scene()) });
 
     expect(screen.queryByRole("button", { name: "Показати раніші" })).toBeNull();
+  });
+
+  describe("рядок учасника", () => {
+    const effect = (id: string) => ({ id, name: `Ефект ${id}`, type: "buff", duration: 2, permanent: false, appliedAt: { round: 1, timestamp: new Date(0) }, effects: [] }) as unknown as ActiveEffect;
+
+    const renderRow = () => {
+      const onSelect = vi.fn();
+
+      render(<TooltipProvider><ParticipantRow participant={p("gob", "Гоблін", ParticipantSide.ENEMY)} effects={[effect("a"), effect("b"), effect("c")]} exact acText="15" current={false} onSelect={onSelect} /></TooltipProvider>, { wrapper: wrap(scene()) });
+
+      return onSelect;
+    };
+
+    it("дотик по кнопці рядка вибирає учасника", () => {
+      const onSelect = renderRow();
+
+      fireEvent.click(screen.getByRole("button", { name: "Гоблін" }));
+
+      expect(onSelect).toHaveBeenCalledWith("gob");
+    });
+
+    it("«+N» і чип ефекту не вибирають учасника", () => {
+      const onSelect = renderRow();
+
+      fireEvent.click(screen.getByRole("button", { name: /Показати всі ефекти/ }));
+      fireEvent.click(screen.getByLabelText(/Ефект a/));
+
+      expect(onSelect).not.toHaveBeenCalled();
+    });
   });
 });

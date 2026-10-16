@@ -1,4 +1,5 @@
 import { UNGROUPED_KEY, UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
+import { groupBy } from "@/lib/utils/common/collections";
 import type { Race } from "@/types/races";
 import type { Unit } from "@/types/units";
 
@@ -28,11 +29,7 @@ export interface UnitRaceChip {
 const byName = (a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name, "uk");
 
 function toTiers(units: Unit[]): UnitTier[] {
-  const byLevel = new Map<number, Unit[]>();
-
-  for (const unit of units) byLevel.set(unit.level, [...(byLevel.get(unit.level) ?? []), unit]);
-
-  return [...byLevel.entries()].sort(([a], [b]) => a - b).map(([level, list]) => ({ level, units: list.sort(byName) }));
+  return [...groupBy(units, (unit) => unit.level).entries()].sort(([a], [b]) => a - b).map(([level, list]) => ({ level, units: list.sort(byName) }));
 }
 
 export function groupUnitsByRace<R extends UnitGroupRace>(units: Unit[], races: R[], query = ""): UnitRaceGroup<R>[] {
@@ -61,13 +58,8 @@ export function raceChips(groups: UnitRaceGroup[]): UnitRaceChip[] {
 }
 
 export function groupUnitsByRaceName<U extends { raceName: string | null; level: number }>(units: U[]): Map<string, U[]> {
-  const byRace = new Map<string, U[]>();
+  const byRace = groupBy(units, (unit) => unit.raceName?.trim() || UNGROUPED_KEY);
 
-  for (const unit of units) {
-    const key = unit.raceName?.trim() || UNGROUPED_KEY;
-
-    byRace.set(key, [...(byRace.get(key) ?? []), unit]);
-  }
   for (const list of byRace.values()) list.sort((a, b) => a.level - b.level);
 
   return byRace;

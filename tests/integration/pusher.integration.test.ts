@@ -13,9 +13,9 @@ import { describe, expect, it } from "vitest";
 
 import { findMissing, TEST_RUN_ID } from "./_helpers";
 
-import { battleChannelName, userChannelName } from "@/lib/pusher-channels";
-import { pusherServer } from "@/lib/pusher-server";
-import { safePusherTrigger } from "@/lib/utils/pusher/safe-trigger";
+import { battleChannelName, userChannelName } from "@/lib/pusher/channels";
+import { safePusherTrigger } from "@/lib/pusher/safe-trigger";
+import { pusherServer } from "@/lib/pusher/server";
 
 const missing = findMissing(
   "PUSHER_APP_ID",

@@ -5,9 +5,9 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { battleKeys } from "./keys";
 
 import { getBattleBalance, getBattleBalanceStats } from "@/lib/api/battles";
-import type { BattleBalanceBody } from "@/lib/api/battles-types";
 import { useCharacters } from "@/lib/hooks/characters";
 import { useUnits } from "@/lib/hooks/units";
+import type { BattleBalanceBody } from "@/types/battle-setup";
 import type { EntityStats, SetupCharacter, UnitEntityStats } from "@/types/battle-setup";
 
 export function useSetupRoster(campaignId: string) {

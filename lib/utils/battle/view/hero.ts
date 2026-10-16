@@ -9,7 +9,7 @@ import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import { isUp } from "@/lib/utils/battle/participant/state";
-import { spellSlotLeft } from "@/lib/utils/battle/spell/slot";
+import { spellNeedsSlot, spellSlotLeft } from "@/lib/utils/battle/spell/slot";
 import { diceSlots } from "@/lib/utils/common/dice";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleAction, BattleAttack, BattleParticipant } from "@/types/battle";
@@ -34,7 +34,7 @@ export function slotLevels(p: BattleParticipant): { level: 1 | 2 | 3 | 4 | 5; ma
 export function canCastBonusSpell(p: BattleParticipant, spells: { level: number; cost?: string | null }[]): boolean {
   if (p.actionFlags.hasUsedBonusAction) return false;
 
-  return spells.some((s) => s.cost === "bonusAction" && spellSlotLeft(p, s.level) > 0);
+  return spells.some((s) => s.cost === "bonusAction" && (!spellNeedsSlot(s.level) || spellSlotLeft(p, s.level) > 0));
 }
 
 export interface AbilityCharge {

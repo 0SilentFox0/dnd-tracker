@@ -40,6 +40,23 @@ function cast(spell: CastableSpell, targetIds: string[], others: BattleParticipa
   return castSpell({ caster: c, spell, targetIds, allParticipants: [c, ...others], currentRound: 1, battleId: "b", diceRolls: over.diceRolls ?? [3, 3], saveRolls: over.saveRolls, rng: seq(0.5) });
 }
 
+describe("кантрипи", () => {
+  it("коло 0 кастується без слота й нічого не витрачає", () => {
+    const c = makeParticipant({ id: "c" });
+
+    const r = cast(spellOf({}, { level: 0 }), ["e1"], [enemy("e1")], { caster: c });
+
+    expect(r.success).toBe(true);
+    expect(r.casterUpdated.spellcasting.spellSlots).toEqual(c.spellcasting.spellSlots);
+  });
+
+  it("коло 1 без слота не кастується", () => {
+    const r = cast(spellOf(), ["e1"], [enemy("e1")], { caster: makeParticipant({ id: "c" }) });
+
+    expect(r.success).toBe(false);
+  });
+});
+
 describe("targeting kinds", () => {
   const c = caster();
 

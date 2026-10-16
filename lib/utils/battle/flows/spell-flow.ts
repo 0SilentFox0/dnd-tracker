@@ -1,7 +1,7 @@
 import { spellLevelRoman } from "@/lib/constants/spells";
 import { isUp } from "@/lib/utils/battle/participant/state";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
-import { spellSlotKey, spellSlotLeft } from "@/lib/utils/battle/spell/slot";
+import { spellNeedsSlot, spellSlotKey, spellSlotLeft } from "@/lib/utils/battle/spell/slot";
 import { spellTargetingFor } from "@/lib/utils/battle/spell/spell-targeting";
 import type { SpellCastData } from "@/types/api";
 import type { BattleParticipant } from "@/types/battle";
@@ -206,13 +206,13 @@ export function spellSaveTargets(targets: BattleParticipant[], s: SpellFlowState
 
 /** Скільки разів ще можна кастувати коло; кантрипи та вільний каст DM безлімітні. */
 export function spellSlotsLeft(caster: BattleParticipant | null, level: number, free: boolean): number {
-  return level === 0 || !caster || free ? Infinity : spellSlotLeft(caster, level);
+  return !spellNeedsSlot(level) || !caster || free ? Infinity : spellSlotLeft(caster, level);
 }
 
 export const casterUsesUniversalSlot = (caster: BattleParticipant | null): boolean => !!caster && spellSlotKey(caster, 1) === "universal";
 
 export function spellSlotCostLabel(spell: BookSpell, opts: { free: boolean; universal: boolean }): string | null {
-  if (spell.level === 0) return null;
+  if (!spellNeedsSlot(spell.level)) return null;
 
   if (opts.free) return "Вільний каст DM — слот не витрачається.";
 

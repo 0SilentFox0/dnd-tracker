@@ -1,18 +1,10 @@
 "use client";
 
-import Link from "next/link";
-import { MoreVertical, Pencil, Trash2, TrendingUp } from "lucide-react";
+import { Pencil, Trash2, TrendingUp } from "lucide-react";
 
 import { HeroPortrait } from "@/components/character-profile/HeroPortrait";
+import { ActionsMenu } from "@/components/common/ActionsMenu";
 import { HudCard, HudPill, HudStatChip } from "@/components/hud/page";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { CharacterType } from "@/lib/constants/characters";
 import { heroBaseHp } from "@/lib/utils/characters/hero-hp";
 import type { CharacterListItem } from "@/types/characters";
@@ -42,38 +34,18 @@ export function DmCharacterCard({ character, campaignId, busy, actions }: DmChar
             {!isNpc && <span className="truncate text-xs text-hud-muted">{character.user?.displayName || "Не призначено"}</span>}
           </div>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 shrink-0 rounded-full text-hud-gold hover:bg-transparent hover:text-hud-gold-strong"
-              aria-label="Дії персонажа"
-              onClick={(e) => e.preventDefault()}
-            >
-              <MoreVertical className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem asChild>
-              <Link href={`/campaigns/${campaignId}/dm/characters/${character.id}`}>
-                <Pencil className="mr-2 h-4 w-4" />
-                Редагувати
-              </Link>
-            </DropdownMenuItem>
-            {actions.onLevelUp && (
-              <DropdownMenuItem onClick={actions.onLevelUp} disabled={busy}>
-                <TrendingUp className="mr-2 h-4 w-4" />
-                Підняти рівень
-              </DropdownMenuItem>
-            )}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive" onClick={actions.onDelete}>
-              <Trash2 className="mr-2 h-4 w-4" />
-              Видалити
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <ActionsMenu
+          label="Дії персонажа"
+          triggerClassName="h-8 w-8 shrink-0 rounded-full text-hud-gold hover:bg-transparent hover:text-hud-gold-strong"
+          onTriggerClick={(e) => e.preventDefault()}
+          actions={[
+            { label: "Редагувати", icon: Pencil, href: `/campaigns/${campaignId}/dm/characters/${character.id}` },
+            ...(actions.onLevelUp
+              ? [{ label: "Підняти рівень", icon: TrendingUp, onSelect: actions.onLevelUp, disabled: busy }]
+              : []),
+            { label: "Видалити", icon: Trash2, onSelect: actions.onDelete, destructive: true, separatorBefore: true },
+          ]}
+        />
       </div>
       <div className="flex gap-1.5">
         <HudStatChip short="Рів" value={character.level} />

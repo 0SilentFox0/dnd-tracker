@@ -83,11 +83,3 @@ export function predictAttack(attacker: BattleParticipant, target: BattlePartici
     mode: adv === dis ? "normal" : adv ? "advantage" : "disadvantage",
   };
 }
-
-export const predictAttackNumbers = (...args: Parameters<typeof predictAttack>) => {
-  const { totalBonus, targetAC } = predictAttack(...args);
-
-  return { totalBonus, targetAC };
-};
-
-export const predictRollMode = (...args: Parameters<typeof predictAttack>) => predictAttack(...args).mode;

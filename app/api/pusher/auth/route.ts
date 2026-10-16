@@ -5,7 +5,7 @@ import { readAuthParams } from "./read-auth-params";
 
 import { getSessionUserId } from "@/lib/auth";
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { pusherServer } from "@/lib/pusher-server";
+import { pusherServer } from "@/lib/pusher/server";
 import { errorResponse } from "@/lib/utils/api/api-response";
 
 /** Subscription is allowed only to the user's own channel or to a battle channel of a campaign they belong to. */

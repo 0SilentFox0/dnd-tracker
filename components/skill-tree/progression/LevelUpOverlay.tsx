@@ -2,12 +2,11 @@
 
 import { createPortal } from "react-dom";
 
-import { pointsText } from "./node-labels";
-
 import "./level-up.css";
 import { HUD_SURFACE } from "@/components/hud";
 import { Button } from "@/components/ui/button";
 import { useLevelUpCelebration } from "@/lib/hooks/skills";
+import { pointsText } from "@/lib/utils/skills/progression/labels";
 
 export function LevelUpOverlay({ campaignId, characterId, name }: { campaignId: string; characterId: string; name: string }) {
   const { celebration, dismiss } = useLevelUpCelebration(campaignId, characterId);

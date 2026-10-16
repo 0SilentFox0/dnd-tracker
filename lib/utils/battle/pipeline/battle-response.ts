@@ -3,7 +3,7 @@ import { PUSHER_DELTA_LIMIT_BYTES } from "./limits";
 import { BattleStatus } from "@/lib/constants/battle";
 import { CampaignRole } from "@/lib/constants/campaigns";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
-import { battleChannelName, userChannelName } from "@/lib/pusher-channels";
+import { battleChannelName, userChannelName } from "@/lib/pusher/channels";
 import type { BattleSceneState, LoadedBattle } from "@/lib/utils/battle/store";
 import type { BattleRefetchSignal, BattleScene, ClientBattleDelta } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";

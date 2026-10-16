@@ -13,7 +13,6 @@ import { ProfileHero } from "./ProfileHero";
 import { type ProfileTabId, ProfileTabs } from "./ProfileTabs";
 import { SetList } from "./SetList";
 import { SkillsTab } from "./SkillsTab";
-import { SPELL_ABILITY_OPTIONS, toSpellcastingAbility } from "./spellcasting-ability";
 
 import { CharacterAbilitiesSection } from "@/components/characters/abilities/CharacterAbilitiesSection";
 import { CharacterArtifactsSection } from "@/components/characters/artifacts/CharacterArtifactsSection";
@@ -26,6 +25,7 @@ import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
+import { SPELL_ABILITY_OPTIONS, toSpellcastingAbility } from "@/lib/constants/abilities";
 import { useCharacterRoster, useDmCharacterEditor } from "@/lib/hooks/characters";
 
 export function ProfileEditor({ onDone }: { onDone: () => void }) {

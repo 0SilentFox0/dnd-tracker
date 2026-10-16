@@ -1,4 +1,4 @@
-import { memo, useMemo } from "react";
+import { memo, type ReactNode, useMemo } from "react";
 import { ChevronDown, Frown, Hourglass, type LucideIcon, ScrollText, Shield, Sparkles, Star, Swords, Zap } from "lucide-react";
 
 import { HpChips } from "./HpChips";
@@ -21,11 +21,12 @@ const ICON: Record<BattleAction["actionType"], LucideIcon> = {
   retaliation: Shield,
 };
 
-export const LogEntryCard = memo(function LogEntryCard({ entry, actor, open, onToggle }: {
+export const LogEntryCard = memo(function LogEntryCard({ entry, actor, open, onToggle, actions }: {
   entry: BattleAction;
   actor: BattleParticipant | undefined;
   open: boolean;
   onToggle: (actionIndex: number) => void;
+  actions?: ReactNode;
 }) {
   const view = useMemo(() => logEntryView(entry), [entry]);
 
@@ -59,6 +60,7 @@ export const LogEntryCard = memo(function LogEntryCard({ entry, actor, open, onT
         )}
         {open && <LogEntryDetails action={entry} />}
       </div>
+      {actions && <div className="shrink-0 self-start">{actions}</div>}
     </div>
   );
 });

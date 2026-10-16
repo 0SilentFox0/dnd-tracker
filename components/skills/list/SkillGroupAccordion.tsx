@@ -1,7 +1,7 @@
 "use client";
 
+import { RenameGroupDialog } from "@/components/common/RenameGroupDialog";
 import { SkillGroupAccordionItem } from "@/components/skills/list/SkillGroupAccordionItem";
-import { RenameGroupDialog } from "@/components/spells/dialogs/RenameGroupDialog";
 import { isUngroupedKey } from "@/lib/constants/ungrouped";
 import { useSpellGroupActions } from "@/lib/hooks/spells";
 import { calculateTotalSkillsInGroup } from "@/lib/utils/skills/skills";

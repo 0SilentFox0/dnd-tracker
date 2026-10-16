@@ -1,4 +1,4 @@
-import { pointsText } from "./node-labels";
+import { pointsText } from "@/lib/utils/skills/progression/labels";
 
 export function PointsHeader({ level, spent, free }: { level: number; spent: number; free: number }) {
   return (

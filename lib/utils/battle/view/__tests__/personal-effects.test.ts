@@ -22,6 +22,20 @@ describe("personalPassiveEffects", () => {
     expect(personalPassiveEffects(foe, order)).toHaveLength(0);
   });
 
+  it("дедуп аур рахує силу лише по ефектах-аурах; власні ефекти лишаються окремим записом", () => {
+    const mixed = (id: string, own: number) => makeParticipant({ id, abilities: [personal([{ kind: "modifyStat", stat: "armor", flat: own, target: "self" }, { kind: "modifyStat", stat: "armor", flat: 1, target: "allAllies" }], "shared")] });
+
+    const a = mixed("a", 5);
+
+    const b = mixed("b", 0);
+
+    const effects = personalPassiveEffects(a, [a, b]);
+
+    expect(effects.filter((e) => e.source?.participantId === "a")).toHaveLength(2);
+    expect(effects.filter((e) => e.source?.participantId === "b")).toHaveLength(0);
+    expect(effects.find((e) => e.id.endsWith(":own"))?.abilityEffects).toHaveLength(1);
+  });
+
   it("умовна пасивка показується лише коли умова виконана", () => {
     const wrath = resolved({ id: "w", name: "Гнів за своїх", trigger: { event: "passive" }, condition: { type: "hpBelow", who: "anyAlly", percent: 15 }, effects: [{ kind: "damageBonus", filter: { kind: "all" }, percent: 20 }] }, { personal: true, name: "Годрик" });
 

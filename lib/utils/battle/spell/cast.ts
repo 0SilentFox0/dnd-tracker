@@ -4,7 +4,7 @@ import { applyMainActionUsed } from "../participant";
 import { applyResistance, immunityNote } from "../resistance";
 import type { CastableSpell, CastSpellParams, CastSpellResult } from "../types/spell-process";
 import { computeSpellPower, spellSaveDc } from "./power";
-import { spellSlotKey } from "./slot";
+import { spellNeedsSlot, spellSlotKey } from "./slot";
 import { participantImmuneToSpell } from "./spell-immunity";
 
 import { resolveAmount } from "@/lib/utils/abilities/engine/amount";
@@ -112,7 +112,9 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   const slot = updatedCaster.spellcasting.spellSlots[slotKey];
 
-  if (!isDMCast && (!slot || slot.current <= 0)) {
+  const usesSlot = !isDMCast && spellNeedsSlot(spell.level);
+
+  if (usesSlot && (!slot || slot.current <= 0)) {
     return {
       success: false,
       casterUpdated: updatedCaster,
@@ -267,7 +269,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   const spent = updatedCaster.spellcasting.spellSlots[slotKey];
 
-  if (!isDMCast && spent) {
+  if (usesSlot && spent) {
     updatedCaster = { ...updatedCaster, spellcasting: { ...updatedCaster.spellcasting, spellSlots: { ...updatedCaster.spellcasting.spellSlots, [slotKey]: { ...spent, current: spent.current - 1 } } } };
   }
 

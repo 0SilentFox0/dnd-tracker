@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 
 import { toArtifactSetErrorResponse } from "./route-errors";
-import { createArtifactSetSchema } from "./schemas";
 
+import { createArtifactSetSchema } from "@/lib/schemas/artifact-sets";
 import { resolveArtifactIconForPersistence } from "@/lib/supabase/artifact-icon-storage";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { battleChannelName, userChannelName } from "@/lib/pusher-channels";
+import { battleChannelName, userChannelName } from "@/lib/pusher/channels";
 
 const authorizeChannel = vi.hoisted(() => vi.fn(() => ({ auth: "signed" })));
 
@@ -8,7 +8,7 @@ const getClaims = vi.hoisted(() => vi.fn());
 
 const findBattle = vi.hoisted(() => vi.fn());
 
-vi.mock("@/lib/pusher-server", () => ({ pusherServer: { authorizeChannel } }));
+vi.mock("@/lib/pusher/server", () => ({ pusherServer: { authorizeChannel } }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({ auth: { getClaims } }) }));
 vi.mock("@/lib/db", () => ({ prisma: { battleScene: { findUnique: findBattle } } }));
 

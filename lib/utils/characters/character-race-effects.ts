@@ -1,13 +1,6 @@
 import { extractRaceImmunities } from "@/lib/utils/races/race-effects";
 import type { Character } from "@/types/characters";
-import type { Race } from "@/types/races";
-
-type RaceFromPrisma = Omit<Race, "availableSkills" | "disabledSkills" | "spellSlotProgression" | "passiveAbility"> & {
-  availableSkills?: unknown;
-  disabledSkills?: unknown;
-  spellSlotProgression?: unknown;
-  passiveAbility?: unknown;
-};
+import type { Race, RaceFromPrisma } from "@/types/races";
 
 /**
  * Отримує всі імунітети персонажа, включаючи імунітети з раси

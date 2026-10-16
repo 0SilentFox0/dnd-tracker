@@ -1,6 +1,7 @@
 import { getSkillMainSkillId } from "./skill-helpers";
 
 import { isUngroupedKey, UNGROUPED_KEY } from "@/lib/constants/ungrouped";
+import { groupBy } from "@/lib/utils/common/collections";
 import type { MainSkill } from "@/types/main-skills";
 import type { GroupedSkill, Skill } from "@/types/skills";
 
@@ -20,30 +21,10 @@ export function groupSkillsByMainSkill(
   skills: (Skill | GroupedSkill)[],
   mainSkills: MainSkill[]
 ): Map<string, (Skill | GroupedSkill)[]> {
-  const grouped = new Map<string, (Skill | GroupedSkill)[]>();
-
-  skills.forEach((skill) => {
-    let groupName = UNGROUPED_KEY;
-
+  const grouped = groupBy(skills, (skill) => {
     const mainSkillId = getMainSkillId(skill);
 
-    if (mainSkillId) {
-      const mainSkill = mainSkills.find((ms) => ms.id === mainSkillId);
-
-      if (mainSkill) {
-        groupName = mainSkill.name;
-      }
-    }
-    
-    if (!grouped.has(groupName)) {
-      grouped.set(groupName, []);
-    }
-
-    const group = grouped.get(groupName);
-
-    if (group) {
-      group.push(skill);
-    }
+    return (mainSkillId && mainSkills.find((ms) => ms.id === mainSkillId)?.name) || UNGROUPED_KEY;
   });
 
   grouped.forEach((groupSkills) => {

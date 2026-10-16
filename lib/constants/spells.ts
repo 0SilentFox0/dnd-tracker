@@ -40,3 +40,28 @@ const SPELL_SCHOOL_COLORS: Record<string, string> = {
 export function spellSchoolColor(name: string | null | undefined): string {
   return (name && SPELL_SCHOOL_COLORS[name]) || "#6d7177";
 }
+
+export const SPELL_COST_LABELS = {
+  action: "Дія",
+  bonusAction: "Бонусна дія",
+} as const;
+
+export const SPELL_TARGETING_LABELS = {
+  enemy: "Один ворог",
+  ally: "Один союзник",
+  self: "Заклинатель",
+  allyDead: "Полеглий союзник",
+  allAlliesDead: "Усі полеглі союзники",
+  area: "Область (до N цілей)",
+  allAllies: "Усі союзники",
+  allEnemies: "Усі вороги",
+  everyone: "Усі учасники",
+} as const;
+
+export const SPELL_SAVE_ON_SUCCESS_LABELS = {
+  half: "Половина шкоди",
+  none: "Без ефекту",
+} as const;
+
+export const labelOptions = <K extends string>(labels: Record<K, string>) =>
+  (Object.entries(labels) as [K, string][]).map(([value, label]) => ({ value, label }));

@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { ARTIFACT_FORM_TAB, type ArtifactFormTabId } from "./artifact-form-tabs";
-import type { ArtifactSetOption } from "./ArtifactEditForm-types";
 import { ArtifactWeaponFields } from "./ArtifactWeaponFields";
 
 import { AbilityListEditor, withAbilityErrors } from "@/components/abilities";
@@ -25,6 +24,7 @@ import type { Ability } from "@/lib/utils/abilities/schema";
 import type { ArtifactFormSubmitPayload } from "@/lib/utils/artifacts/artifact-form";
 import { isWeaponSlot } from "@/lib/utils/artifacts/weapon-slot";
 import type { WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
+import type { ArtifactSetOption } from "@/types/artifacts";
 
 export type { ArtifactFormSubmitPayload };
 

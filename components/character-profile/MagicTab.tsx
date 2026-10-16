@@ -6,9 +6,9 @@ import { BookOpen } from "lucide-react";
 import { useProfile } from "./ProfileContext";
 import { ProfileSpellBook } from "./ProfileSpellBook";
 
-import { EmptySpellBook } from "@/components/battle/wizards/SpellBookPages";
 import { spellLevelMetal } from "@/components/hud";
 import { HudSection } from "@/components/hud/form";
+import { EmptySpellBook } from "@/components/spells/book/SpellBookPages";
 import { Button } from "@/components/ui/button";
 import { spellLevelRoman } from "@/lib/constants/spells";
 import { cn } from "@/lib/utils";

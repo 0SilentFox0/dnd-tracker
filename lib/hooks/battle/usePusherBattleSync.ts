@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { getBattleVersion } from "@/lib/api/battles";
 import { battleQueryKey } from "@/lib/hooks/battles";
-import { battleChannelName, userChannelName } from "@/lib/pusher-channels";
+import { battleChannelName, userChannelName } from "@/lib/pusher/channels";
 import { applyBattleDelta } from "@/lib/utils/battle/client/apply-delta";
 import type { BattleRefetchSignal, BattleScene, ClientBattleDelta } from "@/types/api";
 
@@ -33,7 +33,7 @@ export function usePusherBattleSync(
   const [connectionState, setConnectionState] = useState<PusherConnectionState>(null);
 
   const pusherRef = useRef<ReturnType<
-    typeof import("@/lib/pusher-client").getPusherClient
+    typeof import("@/lib/pusher/client").getPusherClient
   > | null>(null);
 
   const userChannelRef = useRef<string | null>(null);
@@ -100,7 +100,7 @@ export function usePusherBattleSync(
 
     let mounted = true;
 
-    import("@/lib/pusher-client").then(({ getPusherClient }) => {
+    import("@/lib/pusher/client").then(({ getPusherClient }) => {
       if (!mounted) return;
 
       const pusher = getPusherClient();
@@ -256,7 +256,7 @@ export function usePusherBattleSync(
 
     let mounted = true;
 
-    import("@/lib/pusher-client").then(({ getPusherClient }) => {
+    import("@/lib/pusher/client").then(({ getPusherClient }) => {
       if (!mounted) return;
 
       const pusher = getPusherClient();

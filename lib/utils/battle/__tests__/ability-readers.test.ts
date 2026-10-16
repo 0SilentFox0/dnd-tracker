@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { immunityAbilities } from "@/lib/utils/abilities/build/immunities";
-import { calculateAttackBonus, calculateAttackRoll, hasAdvantage, hasDisadvantage, predictAttackNumbers } from "@/lib/utils/battle/attack";
+import { calculateAttackBonus, calculateAttackRoll, hasAdvantage, hasDisadvantage, predictAttack } from "@/lib/utils/battle/attack";
 import { calculateDamageWithModifiers } from "@/lib/utils/battle/damage";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant";
 import { applyResistance } from "@/lib/utils/battle/resistance";
@@ -82,7 +82,7 @@ describe("readers", () => {
 
     const archer = makeParticipant({ id: "a", abilities: [resolved({ trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "attackBonus", flat: 1 }] })] });
 
-    const r = predictAttackNumbers(archer, target, bow, [archer, target]);
+    const r = predictAttack(archer, target, bow, [archer, target]);
 
     expect(r.targetAC).toBe(16);
     expect(r.totalBonus).toBe(calculateAttackBonus(makeParticipant({ id: "z" }), bow) + 1);

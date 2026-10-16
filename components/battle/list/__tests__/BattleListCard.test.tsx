@@ -2,7 +2,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { BattleListCard } from "@/app/campaigns/[id]/dm/battles/BattleListCard";
+import { BattleListCard } from "@/components/battle/list/BattleListCard";
 
 afterEach(cleanup);
 

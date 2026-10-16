@@ -5,10 +5,10 @@ import { Loader2, Sparkles, Swords } from "lucide-react";
 import { SaveRolls } from "./spellbook/SaveRolls";
 import { SpellSummary } from "./spellbook/SpellSummary";
 import { AiRollButton, DamageDice } from "./DiceInput";
-import { SpellBookPages, SpellDetail } from "./SpellBookPages";
 
 import { Portrait } from "@/components/battle/hud";
 import { HUD_SURFACE } from "@/components/hud";
+import { SpellBookPages, SpellDetail } from "@/components/spells/book/SpellBookPages";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import type { useSpellBook } from "@/lib/hooks/battle";
 import { useMediaQuery } from "@/lib/hooks/common";

@@ -16,7 +16,8 @@ const lib = vi.hoisted(() => ({
   ],
 }));
 
-vi.mock("@/lib/hooks/spells", () => ({
+vi.mock("@/lib/hooks/spells", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/hooks/spells")>()),
   useSpells: vi.fn(() => ({ data: undefined })),
   useSpellsByIds: vi.fn((_campaignId: string, ids: string[]) => ({ data: lib.spells.filter((s) => ids.includes(s.id)) })),
 }));

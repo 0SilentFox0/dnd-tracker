@@ -2,11 +2,7 @@
 
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
-
-interface MainSkill {
-  id: string;
-  name: string;
-}
+import type { MainSkill } from "@/types/main-skills";
 
 interface SkillMainSkillSectionProps {
   mainSkill: {
@@ -15,7 +11,7 @@ interface SkillMainSkillSectionProps {
       setMainSkillId: (value: string | null) => void;
     };
   };
-  mainSkills: MainSkill[];
+  mainSkills: Pick<MainSkill, "id" | "name">[];
 }
 
 export function SkillMainSkillSection({

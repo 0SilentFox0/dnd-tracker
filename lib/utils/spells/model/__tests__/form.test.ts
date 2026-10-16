@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { spellLevelOptions } from "@/app/campaigns/[id]/dm/spells/spell-form-defaults";
+import { spellLevelOptions } from "@/components/spells/form/spell-form-defaults";
 import { defaultSpellForm, formToPayload, spellFormError, spellToForm } from "@/lib/utils/spells/model/form";
 import type { Spell } from "@/types/spells";
 

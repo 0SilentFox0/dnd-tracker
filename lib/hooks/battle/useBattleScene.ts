@@ -28,7 +28,7 @@ import {
   useStartBattle,
   useUpdateBattleParticipant,
 } from "@/lib/hooks/battles";
-import { buildParticipantFaces, canSeeEnemyHp, type CritEffectFx, type ParticipantFace, type QueueEntry, type RetaliationOutcome, turnQueue, type Viewer } from "@/lib/utils/battle/view";
+import { canSeeEnemyHp, type CritEffectFx, type ParticipantFace, type QueueEntry, type RetaliationOutcome, turnQueue, type Viewer } from "@/lib/utils/battle/view";
 import type { BattleScene } from "@/types/api";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
@@ -79,7 +79,6 @@ export interface BattleSceneData {
   allies: BattleParticipant[];
   enemies: BattleParticipant[];
   effects: Map<string, ActiveEffect[]>;
-  faces: Map<string, ParticipantFace>;
   dmControlledId: string | null;
   setDmControlledId(id: string | null): void;
   select(id: string | null): void;
@@ -122,11 +121,11 @@ export function useBattleSceneData(): BattleSceneData {
 }
 
 export function useBattleSceneDataValue(value: BattleSceneValue): BattleSceneData {
-  const { campaignId, battleId, battle, userId, isDM, viewer, current, myParticipants, hero, isMyTurn, queue, allies, enemies, effects, faces, dmControlledId, setDmControlledId, select, readBattle } = value;
+  const { campaignId, battleId, battle, userId, isDM, viewer, current, myParticipants, hero, isMyTurn, queue, allies, enemies, effects, dmControlledId, setDmControlledId, select, readBattle } = value;
 
   return useMemo(
-    () => ({ campaignId, battleId, battle, userId, isDM, viewer, current, myParticipants, hero, isMyTurn, queue, allies, enemies, effects, faces, dmControlledId, setDmControlledId, select, readBattle }),
-    [campaignId, battleId, battle, userId, isDM, viewer, current, myParticipants, hero, isMyTurn, queue, allies, enemies, effects, faces, dmControlledId, setDmControlledId, select, readBattle],
+    () => ({ campaignId, battleId, battle, userId, isDM, viewer, current, myParticipants, hero, isMyTurn, queue, allies, enemies, effects, dmControlledId, setDmControlledId, select, readBattle }),
+    [campaignId, battleId, battle, userId, isDM, viewer, current, myParticipants, hero, isMyTurn, queue, allies, enemies, effects, dmControlledId, setDmControlledId, select, readBattle],
   );
 }
 
@@ -244,8 +243,6 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
 
   const effects = useDisplayEffectMap(order ?? NO_ORDER);
 
-  const faces = useMemo(() => buildParticipantFaces(order ?? NO_ORDER), [order]);
-
   if (!battle || !derived) return { value: null, loading: isLoading };
 
   const value: BattleSceneValue = {
@@ -255,7 +252,6 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
     userId,
     ...derived,
     effects,
-    faces,
     connection: connectionState,
     dmControlledId,
     setDmControlledId,

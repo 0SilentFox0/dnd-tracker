@@ -2,11 +2,6 @@ import type { ConversionIssue } from "@/lib/utils/abilities/schema";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import type { GroupedSkill, Skill } from "@/types/skills";
 
-export interface SpellOption {
-  id: string;
-  name: string;
-}
-
 export type InitialSkillFormData = Skill | GroupedSkill;
 
 export interface NormalizedSkillFormData {

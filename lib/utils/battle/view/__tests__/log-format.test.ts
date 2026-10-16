@@ -1,15 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { formatLogEntry, getLogEntryDetailLines } from "@/lib/utils/battle/view/log-format";
+import { getLogEntryDetailLines } from "@/lib/utils/battle/view/log-format";
 import type { BattleAction } from "@/types/battle";
-
-describe("лог: відсіч", () => {
-  it("мітка і рядок превʼю — текст події", () => {
-    const e = { actionType: "retaliation", actorName: "Гоблін", targets: [{ participantId: "me", participantName: "Фрейда" }], actionDetails: { totalDamage: 4 }, hpChanges: [], resultText: "Відсіч: Гоблін → Фрейда: d20 17, 4 урону" } as unknown as BattleAction;
-
-    expect(formatLogEntry(e)).toBe("Відсіч: Гоблін → Фрейда: d20 17, 4 урону");
-  });
-});
 
 describe("лог: фраза криту", () => {
   const entry = (flavor?: string) => ({ actionType: "attack", actorName: "A", targets: [], actionDetails: { criticalEffect: { id: 3, name: "Ефект", description: "опис", type: "success", flavor } }, hpChanges: [], resultText: "" }) as unknown as BattleAction;

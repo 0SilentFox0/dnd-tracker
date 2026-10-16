@@ -10,12 +10,13 @@ import { SpellFormPowerFields } from "./SpellFormPowerFields";
 
 import { HudForm, type HudTab } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
+import type { IdName } from "@/types/common";
 
 export interface SpellFormBodyProps {
   campaignId: string;
   formData: SpellFormData;
   setFormData: (data: SpellFormData) => void;
-  spellGroups: { id: string; name: string }[];
+  spellGroups: IdName[];
   onSubmit: (e: React.FormEvent) => void;
   isSubmitting: boolean;
   submitLabel: string;

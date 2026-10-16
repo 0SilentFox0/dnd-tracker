@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { getPusherCluster } from "@/lib/pusher-config";
+import { getPusherCluster } from "@/lib/pusher/config";
 
 describe("getPusherCluster", () => {
   afterEach(() => {

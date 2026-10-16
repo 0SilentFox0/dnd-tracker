@@ -7,14 +7,15 @@ import { HudFormPage } from "@/components/hud/form";
 import { SkillCreateForm } from "@/components/skills/form/SkillCreateForm";
 import { Button } from "@/components/ui/button";
 import { useSkill } from "@/lib/hooks/skills";
+import type { IdName } from "@/types/common";
 import type { MainSkill } from "@/types/main-skills";
 import type { GroupedSkill } from "@/types/skills";
 
 interface EditSkillClientProps {
   campaignId: string;
   skillId: string;
-  spells: { id: string; name: string }[];
-  spellGroups: { id: string; name: string }[];
+  spells: IdName[];
+  spellGroups: IdName[];
   initialMainSkills: MainSkill[];
 }
 

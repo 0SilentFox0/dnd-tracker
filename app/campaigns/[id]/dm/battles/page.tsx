@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { Swords } from "lucide-react";
 
-import { BattleListCard, type BattleListKind } from "./BattleListCard";
 import { DeleteAllBattlesButton } from "./page-client";
 
+import { BattleListCard, type BattleListKind } from "@/components/battle/list/BattleListCard";
 import { EmptyState } from "@/components/common/states";
 import { HudSection } from "@/components/hud/form";
 import { HudPage, HudPageHeader, HudPanel } from "@/components/hud/page";

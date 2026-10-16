@@ -1,11 +1,10 @@
 import { useState } from "react";
 
-import { nodeLabel } from "./node-labels";
-
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { Button } from "@/components/ui/button";
 import { pluralUk } from "@/lib/utils/common/plural";
 import type { ProgressionNode } from "@/lib/utils/skills/progression";
+import { nodeLabel } from "@/lib/utils/skills/progression/labels";
 import type { CharacterProgressionDto } from "@/types/progression";
 
 export function OfferList({ offers, dto, filter, onClearFilter, onSelect }: { offers: ProgressionNode[]; dto: CharacterProgressionDto; filter: { label: string; match: (n: ProgressionNode) => boolean } | null; onClearFilter: () => void; onSelect: (node: ProgressionNode) => void }) {

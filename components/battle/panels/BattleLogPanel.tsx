@@ -1,22 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import {
-  ChevronDown,
-  ChevronRight,
-  ChevronUp,
-  ScrollText,
-  Trash2,
-} from "lucide-react";
+import { useMemo, useState } from "react";
+import { ChevronDown, ChevronUp, ScrollText, Trash2 } from "lucide-react";
 
 import { BattleLogLoadEarlier } from "./BattleLogLoadEarlier";
-import { LogEntryDetails } from "./LogEntryDetails";
 
-import { ParticipantSide } from "@/lib/constants/battle";
+import { LogTimeline } from "@/components/battle/scene/log/LogTimeline";
 import { useConfirm } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 import { canRollbackEntry } from "@/lib/utils/battle/view";
-import { formatLogEntry } from "@/lib/utils/battle/view/log-format";
 import type { BattleScene } from "@/types/api";
 import type { BattleAction } from "@/types/battle";
 
@@ -47,10 +39,6 @@ export function BattleLogPanel({
 
   const open = controlledOpen ?? internalOpen;
 
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-
-  const log = (battle.battleLog ?? []) as BattleAction[];
-
   const handleToggle = () => {
     if (onOpenChange) {
       onOpenChange(!open);
@@ -59,97 +47,32 @@ export function BattleLogPanel({
     }
   };
 
+  const entries = useMemo(() => [...((battle.battleLog ?? []) as BattleAction[])].reverse(), [battle.battleLog]);
+
+  const renderActions = (entry: BattleAction) =>
+    isDM && onRollback && canRollbackEntry(battle, entry) ? (
+      <button
+        type="button"
+        className="flex size-8 items-center justify-center text-hud-danger transition-colors hover:bg-hud-danger/15"
+        title="Відмінити дію (відкотити до стану перед нею)"
+        onClick={async () => {
+          if (await confirm({ title: "Відкотити бій до стану перед цією дією? Ця та всі наступні дії будуть видалені.", confirmLabel: "Підтвердити" })) {
+            onRollback(entry.actionIndex);
+          }
+        }}
+      >
+        <Trash2 className="size-3.5" />
+      </button>
+    ) : null;
+
   const logContent = (
-    <div
-      className={cn(
-        "overflow-y-auto custom-scrollbar",
-        embedInSidebar ? "h-[min(50vh,400px)] border border-hud-rule bg-black/40" : "max-h-48 border-t border-hud-rule",
+    <div className={cn("overflow-y-auto px-2 custom-scrollbar", embedInSidebar ? "h-[min(50vh,400px)] border border-hud-rule bg-black/40" : "max-h-48 border-t border-hud-rule")}>
+      {entries.length === 0 ? (
+        <p className="py-2 text-sm italic text-[var(--hud-muted)]">Записів поки немає.</p>
+      ) : (
+        <LogTimeline entries={entries} participants={battle.initiativeOrder ?? []} renderActions={renderActions} />
       )}
-    >
-          <ul className="px-2 py-1 text-sm text-[#cfc5b2]">
-            {log.length === 0 ? (
-              <li className="py-2 italic text-[var(--hud-muted)]">Записів поки немає.</li>
-            ) : (
-              [...log].reverse().map((entry) => {
-                const isExpanded = expandedId === entry.id;
-
-                const hasDetails =
-                  entry.actionDetails &&
-                  (Object.keys(entry.actionDetails).length > 0 ||
-                    (entry.hpChanges?.length ?? 0) > 0);
-
-                return (
-                  <li
-                    key={entry.id}
-                    className="border-b border-white/[.06] last:border-b-0"
-                  >
-                    <div className="flex items-center gap-0.5">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          hasDetails &&
-                          setExpandedId(isExpanded ? null : entry.id)
-                        }
-                        className={cn(
-                          "flex-1 min-w-0 flex gap-2 py-1.5 px-2 text-left text-sm",
-                          hasDetails && "cursor-pointer hover:bg-[var(--gold)]/[.06]",
-                        )}
-                      >
-                        {hasDetails ? (
-                          isExpanded ? (
-                            <ChevronDown className="size-4 shrink-0 text-[var(--hud-muted)]" />
-                          ) : (
-                            <ChevronRight className="size-4 shrink-0 text-[var(--hud-muted)]" />
-                          )
-                        ) : (
-                          <span className="w-4 shrink-0" />
-                        )}
-                        <span className="shrink-0 pt-0.5 text-xs text-[var(--hud-muted)]">
-                          Р{entry.round}
-                        </span>
-                        <span
-                          className={cn(
-                            "shrink-0 font-medium",
-                            entry.actorSide === ParticipantSide.ALLY
-                              ? "text-[#8fb0d0]"
-                              : "text-hud-danger",
-                          )}
-                        >
-                          {entry.actorName}
-                        </span>
-                        <span className="min-w-0 truncate">
-                          {formatLogEntry(entry)}
-                        </span>
-                      </button>
-                      {isDM && onRollback && canRollbackEntry(battle, entry) && (
-                        <button
-                          type="button"
-                          className="flex size-8 shrink-0 items-center justify-center text-hud-danger transition-colors hover:bg-hud-danger/15"
-                          title="Відмінити дію (відкотити до стану перед нею)"
-                          onClick={async () => {
-                            if (
-                              typeof window !== "undefined" &&
-                              (await confirm({ title: "Відкотити бій до стану перед цією дією? Ця та всі наступні дії будуть видалені.", confirmLabel: "Підтвердити" }))
-                            ) {
-                              onRollback(entry.actionIndex);
-                            }
-                          }}
-                        >
-                          <Trash2 className="size-3.5" />
-                        </button>
-                      )}
-                    </div>
-                    {isExpanded && hasDetails && (
-                      <div className="px-2 pb-2">
-                        <LogEntryDetails action={entry} />
-                      </div>
-                    )}
-                  </li>
-                );
-              })
-            )}
-          </ul>
-          <BattleLogLoadEarlier />
+      <BattleLogLoadEarlier />
     </div>
   );
 
@@ -160,8 +83,8 @@ export function BattleLogPanel({
           <span className="hud-sc flex items-center gap-2 text-[15px] tracking-[.08em] text-[var(--gold)]">
             <ScrollText className="size-4" />
             Лог бою
-            {log.length > 0 && (
-              <span className="font-sans text-xs tracking-normal text-[var(--hud-muted)]">({log.length})</span>
+            {entries.length > 0 && (
+              <span className="font-sans text-xs tracking-normal text-[var(--hud-muted)]">({entries.length})</span>
             )}
           </span>
           {onOpenChange && (
@@ -194,8 +117,8 @@ export function BattleLogPanel({
         <span className="flex items-center gap-2">
           <ScrollText className="size-4" />
           Лог бою
-          {log.length > 0 && (
-            <span className="font-sans text-xs tracking-normal text-[var(--hud-muted)]">({log.length})</span>
+          {entries.length > 0 && (
+            <span className="font-sans text-xs tracking-normal text-[var(--hud-muted)]">({entries.length})</span>
           )}
         </span>
         {open ? (

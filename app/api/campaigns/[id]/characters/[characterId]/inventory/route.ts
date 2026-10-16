@@ -2,10 +2,9 @@ import { readInventory } from "./read-inventory";
 import { updateInventory } from "./update-inventory";
 
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import type { CharacterRouteContext } from "@/types/api";
 
-type RouteContext = { params: Promise<{ id: string; characterId: string }> };
-
-export async function PATCH(request: Request, { params }: RouteContext) {
+export async function PATCH(request: Request, { params }: CharacterRouteContext) {
   try {
     const { id, characterId } = await params;
 
@@ -15,7 +14,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
   }
 }
 
-export async function GET(_request: Request, { params }: RouteContext) {
+export async function GET(_request: Request, { params }: CharacterRouteContext) {
   try {
     const { id, characterId } = await params;
 

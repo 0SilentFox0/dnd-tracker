@@ -5,7 +5,8 @@ import type { PipelineDeps } from "./run-battle-mutation";
 
 import { getSessionUserId } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { pusherServer } from "@/lib/pusher-server";
+import { safePusherTrigger } from "@/lib/pusher/safe-trigger";
+import { pusherServer } from "@/lib/pusher/server";
 import { BATTLE_RATE_LIMITS, checkRateLimit } from "@/lib/utils/api/rate-limit";
 import {
   loadBattle,
@@ -16,7 +17,6 @@ import {
   saveBattle,
 } from "@/lib/utils/battle/store";
 import { summarizeKnowledge } from "@/lib/utils/battle/view/knowledge";
-import { safePusherTrigger } from "@/lib/utils/pusher/safe-trigger";
 
 export const defaultPipelineDeps: PipelineDeps = {
   getUserId: getSessionUserId,

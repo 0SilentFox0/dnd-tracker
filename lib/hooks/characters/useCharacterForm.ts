@@ -1,10 +1,9 @@
 import { useCallback, useMemo, useState } from "react";
 
-import { buildCharacterFormBindings } from "./useCharacterForm-bindings";
-import { defaultCharacterFormData } from "./useCharacterForm-defaults";
-
 import { CharacterType, type CharacterTypeValue } from "@/lib/constants/characters";
 import { characterToFormData } from "@/lib/utils/characters/character-form";
+import { buildCharacterFormBindings } from "@/lib/utils/characters/form/bindings";
+import { defaultCharacterFormData } from "@/lib/utils/characters/form/defaults";
 import type { Character } from "@/types/characters";
 import { CharacterFormData } from "@/types/characters";
 

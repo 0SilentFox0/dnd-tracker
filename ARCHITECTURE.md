@@ -90,7 +90,7 @@
 | **`characters/`** | Персонаж: basic info, ability scores, combat params, skills, spells, artifacts, stats (damage calculator, HP preview). |
 | **`campaigns/`** | Кампанія: join, members, info, settings. |
 | **`abilities/`** | Редактор умінь для всіх власників: акордеон (`AbilityListEditor`), секції «Коли / Умова / Ліміти / Що робить», поля з реєстру (`fields/`), шаблони й «Скопіювати з…», `AbilitySummary` для карток. |
-| **`skills/`** | Скіли: форми створення/редагування (`form/`), списки, картки, діалоги (наприклад CreateSpellGroupDialog). |
+| **`skills/`** | Скіли: форми створення/редагування (`form/`), списки, картки, діалоги (діалоги). |
 | **`skill-tree/`** | Прокачка: `progression/` (панель гравця — рядки гілок, пропозиції, шторка вузла, анімація нового рівня), `editor/` (таблиця-редактор дерева для DM). |
 | **`spells/`** | Заклинання: списки, групи, діалоги, форми. |
 | **`races/`** | Раси: форми редагування, стати, слоти заклинань. |
@@ -111,7 +111,7 @@
 
 - **`client.ts`** — базові функції (campaignGet, campaignPatch, campaignPost тощо) та можливо базовий URL.
 - **`campaigns.ts`**, **`characters.ts`**, **`battles.ts`**, **`skills.ts`**, **`spells.ts`**, **`races.ts`**, **`units.ts`**, **`artifacts.ts`**, **`inventory.ts`**, **`main-skills.ts`**, **`skill-trees.ts`** — методи типу get/create/update/delete для відповідних сутностей.
-- **`battles-types.ts`** — типи для battles API.
+- Типи для battles API лежать у `types/battle-setup.ts`.
 
 Виклики йдуть лише з хуків (`lib/hooks/<domain>`); компоненти й сторінки імпортувати `@/lib/api/*` не можуть — це перевіряє ESLint (`no-restricted-imports`). Типи, потрібні компонентам, лежать у `types/`. Серверні route в `app/api/` обробляють запити і використовують Prisma.
 

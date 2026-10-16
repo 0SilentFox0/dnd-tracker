@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { Trash2, Users } from "lucide-react";
 
-import { DmCharacterCard } from "./DmCharacterCard";
-
+import { DmCharacterCard } from "@/components/characters/list/DmCharacterCard";
 import { DeleteAllButton } from "@/components/common/DeleteAllButton";
 import { EmptyState, LoadingState, QueryState } from "@/components/common/states";
 import { HudChipTabs, HudPage, HudPageHeader } from "@/components/hud/page";

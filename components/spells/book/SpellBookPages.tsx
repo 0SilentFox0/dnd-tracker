@@ -3,14 +3,13 @@
 import type { ReactNode } from "react";
 import { Sparkles } from "lucide-react";
 
-import { LevelBookmarks } from "./spellbook/LevelBookmarks";
-import { SchoolHeading } from "./spellbook/SchoolHeading";
-import { SchoolTabs } from "./spellbook/SchoolTabs";
-import { SpellRow } from "./spellbook/SpellRow";
-
 import { OptimizedImage } from "@/components/common/OptimizedImage";
+import { LevelBookmarks } from "@/components/spells/book/LevelBookmarks";
+import { SchoolHeading } from "@/components/spells/book/SchoolHeading";
+import { SchoolTabs } from "@/components/spells/book/SchoolTabs";
+import { SpellRow } from "@/components/spells/book/SpellRow";
 import { spellLevelName, spellSchoolColor } from "@/lib/constants/spells";
-import { useSchoolFilter } from "@/lib/hooks/battle";
+import { useSchoolFilter } from "@/lib/hooks/spells";
 import { cn } from "@/lib/utils";
 import { costLabel, resolutionLabel, targetingLabel } from "@/lib/utils/spells/model/labels";
 import type { BookSpell } from "@/types/spells";

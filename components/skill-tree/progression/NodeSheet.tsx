@@ -1,10 +1,9 @@
-import { nodeLabel } from "./node-labels";
-
 import { HUD_SURFACE } from "@/components/hud";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import type { NodeState, ProgressionNode } from "@/lib/utils/skills/progression";
 import { LEARN_BLOCK_TEXT } from "@/lib/utils/skills/progression";
+import { nodeLabel } from "@/lib/utils/skills/progression/labels";
 import type { CharacterProgressionDto } from "@/types/progression";
 
 export interface SheetTarget { node: ProgressionNode; state: NodeState["state"]; reason?: NodeState["reason"] }

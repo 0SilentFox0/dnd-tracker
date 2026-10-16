@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 
-import { patchArtifactSchema } from "@/app/api/campaigns/[id]/artifacts/schemas";
 import { prisma } from "@/lib/db";
+import { patchArtifactSchema } from "@/lib/schemas/artifacts";
 import {
   mirrorArtifactIconToSupabase,
   shouldMirrorArtifactIconUrl,

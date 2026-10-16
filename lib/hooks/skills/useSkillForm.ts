@@ -4,23 +4,23 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { skillKeys } from "./keys";
 import { useMainSkills } from "./useMainSkills";
-import {
-  type InitialSkillFormData,
-  normalizeInitialSkillData,
-  type SpellOption,
-} from "./useSkillForm-normalize";
-import { buildSkillFormPayload } from "./useSkillForm-payload";
-import { buildSkillFormReturn } from "./useSkillForm-return";
 
 import { createSkill, updateSkill } from "@/lib/api/skills";
 import { abilitySaveError } from "@/lib/hooks/abilities";
 import type { Ability } from "@/lib/utils/abilities/schema";
+import {
+  type InitialSkillFormData,
+  normalizeInitialSkillData,
+} from "@/lib/utils/skills/form/normalize";
+import { buildSkillFormPayload } from "@/lib/utils/skills/form/payload";
+import { buildSkillFormReturn } from "@/lib/utils/skills/form/return";
+import type { IdName } from "@/types/common";
 import type { GroupedSkillPayload } from "@/types/hooks";
 import type { MainSkill } from "@/types/main-skills";
 
 export function useSkillForm(
   campaignId: string,
-  spells: SpellOption[],
+  spells: IdName[],
   initialData?: InitialSkillFormData,
   /** Якщо передано, не робимо GET /main-skills (дані вже з сервера) */
   initialMainSkills?: MainSkill[],

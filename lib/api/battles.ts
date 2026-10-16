@@ -1,9 +1,3 @@
-import type {
-  AddParticipantData,
-  BattleBalanceBody,
-  BattleBalanceResponse,
-  CreateBattleData,
-} from "./battles-types";
 import {
   campaignDelete,
   campaignGet,
@@ -25,13 +19,19 @@ import type {
   MoraleCheckData,
   SpellCastData,
 } from "@/types/api";
+import type {
+  AddParticipantData,
+  BattleBalanceBody,
+  BattleBalanceResponse,
+  CreateBattleData,
+} from "@/types/battle-setup";
 
 export type {
   AddParticipantData,
   BattleBalanceBody,
   BattleBalanceResponse,
   CreateBattleData,
-} from "./battles-types";
+} from "@/types/battle-setup";
 
 export type WithVersion<T> = T & { expectedVersion?: number };
 
