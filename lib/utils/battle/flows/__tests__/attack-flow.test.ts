@@ -50,7 +50,7 @@ describe("attackFlow", () => {
     expect(attackFlow(s, { type: "SUBMIT" }).step).toBe("submitting");
   });
 
-  it("дві цілі: кидок на кожну; шкода лише для влучених; payload лише з влучених", () => {
+  it("дві цілі: кидок на кожну; шкода лише для влучених; промахи теж у payload", () => {
     const s = run(
       open(1, 2),
       { type: "TOGGLE_TARGET", id: "a" },
@@ -70,7 +70,7 @@ describe("attackFlow", () => {
 
     const u = attackFlow(t, { type: "DAMAGE", values: [5] });
 
-    expect(attackPayload(u, "me")).toEqual({ attackerId: "me", attackId: "rapier", targetIds: ["b"], attackRolls: [17], damageRolls: [5], endTurn: false });
+    expect(attackPayload(u, "me")).toEqual({ attackerId: "me", attackId: "rapier", targetIds: ["a", "b"], attackRolls: [4, 17], damageRolls: [5], endTurn: false });
   });
 
   it("BACK із підсумку — до шкоди, з кидка першої цілі — до вибору цілі", () => {
@@ -110,10 +110,10 @@ describe("attackFlow", () => {
       { type: "DAMAGE", values: [5] },
     );
 
-    expect(attackPayload(s, "me")).toMatchObject({ targetIds: ["b"], attackRolls: [15], secondRolls: [18] });
+    expect(attackPayload(s, "me")).toMatchObject({ targetIds: ["a", "b"], attackRolls: [17, 15], secondRolls: [3, 18] });
   });
 
-  it("allStrikes: payload carries misses too, so the server never rerolls them", () => {
+  it("payload carries misses too, so the server logs them and never rerolls", () => {
     const s = run(
       open(1, 2),
       { type: "TOGGLE_TARGET", id: "a" },
@@ -124,6 +124,6 @@ describe("attackFlow", () => {
       { type: "DAMAGE", values: [5] },
     );
 
-    expect(attackPayload(s, "me", { allStrikes: true })).toMatchObject({ targetIds: ["a", "b"], attackRolls: [4, 17], damageRolls: [5] });
+    expect(attackPayload(s, "me")).toMatchObject({ targetIds: ["a", "b"], attackRolls: [4, 17], damageRolls: [5] });
   });
 });

@@ -166,8 +166,6 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const falloff = falloffPercents.length > 0 ? Math.min(...falloffPercents) / 100 : 1;
 
-  const sequentialDice = falloffPercents.length > 0 && isMultiTargetRanged;
-
   // Для multi-target ranged: окремий кидок на ціль; основна ціль — повна шкода, додаткові — за falloff
   const damageFractions: number[] =
     isMultiTargetRanged
@@ -192,10 +190,8 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const summons: SummonRequest[] = [];
 
-  const dicePerTarget =
-    isMultiTargetRanged && (targets.length > 1 || hitsAllEnemies)
-      ? diceCount(hitsAllEnemies ? heroAttackDamageParts(attacker, attack).formula : (attack.damageDice ?? ""))
-      : 0;
+  // кожне влучання мультицільової атаки — свій блок кубиків повної формули (зброя + рівень героя), по черзі влучань
+  const dicePerTarget = isMultiTargetRanged && (targets.length > 1 || hitsAllEnemies) ? diceCount(heroAttackDamageParts(attacker, attack).formula) : 0;
 
   let damageCursor = 0;
 
@@ -223,22 +219,17 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
     const damageMultiplier =
       targets.length > 1 ? damageFractions[i] : undefined;
 
-    const sentRolls = hitsAllEnemies ? data.damageRolls.slice(damageCursor, damageCursor + dicePerTarget) : [];
+    const perStrike = dicePerTarget > 0;
 
-    const rolledByServer = hitsAllEnemies && sentRolls.length < dicePerTarget;
+    const sentRolls = perStrike ? data.damageRolls.slice(damageCursor, damageCursor + dicePerTarget) : [];
 
-    const damageRollsForTarget = hitsAllEnemies
+    const rolledByServer = perStrike && sentRolls.length < dicePerTarget;
+
+    const damageRollsForTarget = perStrike
       ? rolledByServer
         ? [...sentRolls, ...rollDiceList(heroAttackDamageParts(attacker, attack).formula, rng).slice(sentRolls.length)]
         : sentRolls
-      : isMultiTargetRanged &&
-          targets.length > 1 &&
-          dicePerTarget > 0 &&
-          data.damageRolls.length >= (sequentialDice ? damageCursor + dicePerTarget : (i + 1) * dicePerTarget)
-        ? sequentialDice
-          ? data.damageRolls.slice(damageCursor, damageCursor + dicePerTarget)
-          : data.damageRolls.slice(i * dicePerTarget, (i + 1) * dicePerTarget)
-        : data.damageRolls;
+      : data.damageRolls;
 
     const freshTarget = currentInitiativeOrder.find((p) => p.basicInfo.id === target.basicInfo.id) ?? target;
 
@@ -257,7 +248,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       rng,
     });
 
-    if ((hitsAllEnemies || sequentialDice) && attackResult.success) damageCursor += dicePerTarget;
+    if (perStrike && attackResult.success) damageCursor += dicePerTarget;
 
     currentInitiativeOrder = mergeParticipants(currentInitiativeOrder, attackResult.allParticipantsUpdated ?? []);
     currentAttacker = attackResult.attackerUpdated;

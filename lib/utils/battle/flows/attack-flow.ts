@@ -133,7 +133,7 @@ export function effectiveD20(strike: Strike, mode: AttackMode): number {
   return mode === "advantage" ? Math.max(d, strike.second) : Math.min(d, strike.second);
 }
 
-export function attackPayload(s: AttackFlowState, attackerId: string, opts: { allStrikes?: boolean } = {}): AttackData & { endTurn: boolean } {
+export function attackPayload(s: AttackFlowState, attackerId: string): AttackData & { endTurn: boolean } {
   const base = { attackerId, attackId: s.attackId, endTurn: false };
 
   if (s.strikes.length === 1) {
@@ -151,13 +151,12 @@ export function attackPayload(s: AttackFlowState, attackerId: string, opts: { al
 
   const hits = s.strikes.filter(isHit);
 
-  const used = hits.length && !opts.allStrikes ? hits : s.strikes;
-
+  // промахи теж ідуть на сервер з кидками: їх видно в журналі й спрацьовують реакції цілей
   return {
     ...base,
-    targetIds: used.map((st) => st.targetId),
-    attackRolls: used.map((st) => st.d20 ?? 0),
-    ...(s.mode !== "normal" && used.every((st) => st.second !== undefined) && { secondRolls: used.map((st) => st.second as number) }),
+    targetIds: s.strikes.map((st) => st.targetId),
+    attackRolls: s.strikes.map((st) => st.d20 ?? 0),
+    ...(s.mode !== "normal" && s.strikes.every((st) => st.second !== undefined) && { secondRolls: s.strikes.map((st) => st.second as number) }),
     damageRolls: hits.flatMap((st) => st.damage),
   } as AttackData & { endTurn: boolean };
 }
