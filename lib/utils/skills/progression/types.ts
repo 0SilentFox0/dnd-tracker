@@ -18,6 +18,9 @@ export const ULTIMATE_BRANCH_ID = "ultimate";
 
 export const RACIAL_MIN_LEVEL: Record<BranchLevel, number> = { basic: 5, advanced: 10, expert: 15 };
 
+/** Експертом будь-якої гілки можна стати не раніше 9 рівня (тоді ж з'являються слоти 5-го кола). */
+export const BRANCH_MIN_LEVEL: Record<BranchLevel, number> = { basic: 1, advanced: 1, expert: 9 };
+
 export interface BranchLevelNode { kind: "branchLevel"; nodeId: string; branchId: string; level: BranchLevel; skillId: string | null }
 
 export interface RacialNode { kind: "racial"; nodeId: string; level: BranchLevel; skillId: string | null }
@@ -42,7 +45,7 @@ export interface TreeNodes {
   ultimateId: string | null;
 }
 
-export type LearnBlockReason = "noPoints" | "alreadyLearned" | "notInTree" | "branchOrder" | "outerLimit" | "needOuter" | "needMiddleAndExpert" | "racialLevel" | "needInner";
+export type LearnBlockReason = "noPoints" | "alreadyLearned" | "notInTree" | "branchOrder" | "outerLimit" | "needOuter" | "needMiddleAndExpert" | "racialLevel" | "expertLevel" | "needInner";
 
 export type UnlearnBlockReason = "notLearned" | "hasDependents";
 

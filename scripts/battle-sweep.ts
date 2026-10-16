@@ -1,8 +1,8 @@
 #!/usr/bin/env tsx
 /* eslint-disable @typescript-eslint/no-explicit-any -- сценарій ганяє сирі JSON-відповіді API */
 /**
- * Наскрізна перевірка бою на копії прод-БД кампанії HoMM5: усі герої на 7 рівні, три ротації білдів дерев
- * (дві легальні для L7 і одна примусова — расові «Просунутий/Експерт» та ультимати), сети артефактів,
+ * Наскрізна перевірка бою на копії прод-БД кампанії HoMM5: усі герої на 9 рівні (з 9-го можна стати Експертом гілки), три ротації білдів дерев
+ * (дві легальні для L9 і одна примусова — расові «Просунутий/Експерт» та ультимати), сети артефактів,
  * 5-раундові бої проти всіх юнітів через справжні мутації API (runBattleMutation), цільові сценарії
  * (рідкісні тригери), контроль юнітів і закляття 5-го рівня від імені гравця.
  * Змінює героїв і створює бої в БД — лише локальна копія (`scripts/prodcopy-db.sh`).
@@ -59,6 +59,8 @@ const OUT = arg("out") ?? join(tmpdir(), "battle-sweep");
 const CONSISTENCY = argv.includes("--consistency");
 
 const ROUNDS = 5;
+
+const HERO_LEVEL = 9;
 
 function mulberry32(a: number) {
   return () => {
@@ -331,7 +333,7 @@ async function prepare() {
 
     if (!personal) issue("warn", `${name}: персональне вміння «${PERSONAL[name]}…» не знайдено`);
 
-    const slots = fullSpellSlots(7, (race?.spellSlotProgression as any) ?? [], campaign.maxLevel ?? 20);
+    const slots = fullSpellSlots(HERO_LEVEL, (race?.spellSlotProgression as any) ?? [], campaign.maxLevel ?? 20);
 
     const setName = SETS[name];
 
@@ -343,7 +345,7 @@ async function prepare() {
       for (const a of await prisma.artifact.findMany({ where: { setId: set.id } })) equipped[a.slot === "ring" ? "ring1" : a.slot] = a.id;
     }
 
-    await prisma.character.update({ where: { id: h.id }, data: { level: 7, spellSlots: slots as any, personalSkillId: personal?.id ?? h.personalSkillId } });
+    await prisma.character.update({ where: { id: h.id }, data: { level: HERO_LEVEL, spellSlots: slots as any, personalSkillId: personal?.id ?? h.personalSkillId } });
     await prisma.characterInventory.upsert({ where: { characterId: h.id }, update: { equipped }, create: { characterId: h.id, equipped } });
     heroRows.push({ ...h, slots });
   }
@@ -361,10 +363,10 @@ async function applyRotation(r: number) {
 
     const { order, forced } = buildNodes(tree, b.branch, b.kind);
 
-    const unlocked = forced ? order : learnLegally(tree, order, 7, h.name);
+    const unlocked = forced ? order : learnLegally(tree, order, HERO_LEVEL, h.name);
 
     await prisma.character.update({ where: { id: h.id }, data: { skillTreeProgress: writeUnlocked(tree, {}, unlocked) as any } });
-    lines.push(`${h.name} (${h.race}): ${b.branch} ${b.kind === "F" ? "+ раса просунутий/експерт + ультимат (ПРИМУСОВО, поза правилами L7)" : b.kind} — ${unlocked.length} вузлів`);
+    lines.push(`${h.name} (${h.race}): ${b.branch} ${b.kind === "F" ? "+ раса просунутий/експерт + ультимат (ПРИМУСОВО, поза правилами рівня)" : b.kind} — ${unlocked.length} вузлів`);
   }
 
   return lines;
@@ -913,7 +915,7 @@ async function controlCheck(spells: Map<string, any>) {
 
   const top = realPlayers[2];
 
-  await prisma.character.update({ where: { id: top.id }, data: { level: 8 } });
+  await prisma.character.update({ where: { id: top.id }, data: { level: HERO_LEVEL + 1 } });
 
   const units = (await prisma.unit.findMany({ where: { campaignId: ctx.campaignId } })).filter((u: any) => !/дракон|титан|архангел/i.test(u.name));
 
@@ -933,7 +935,7 @@ async function controlCheck(spells: Map<string, any>) {
 
   const enemyUnits = P().filter((p) => p.basicInfo.side === "enemy");
 
-  tcheck("Союзні юніти отримує гравець із найвищим рівнем", allyUnits.length === 2 && allyUnits.every((u) => u.basicInfo.controlledBy === top.controlledBy), `${top.name} (L8, ${top.controlledBy.slice(0, 8)}): ${allyUnits.map((u) => `${u.basicInfo.name}→${u.basicInfo.controlledBy.slice(0, 8)}`).join(", ")}`);
+  tcheck("Союзні юніти отримує гравець із найвищим рівнем", allyUnits.length === 2 && allyUnits.every((u) => u.basicInfo.controlledBy === top.controlledBy), `${top.name} (L${HERO_LEVEL + 1}, ${top.controlledBy.slice(0, 8)}): ${allyUnits.map((u) => `${u.basicInfo.name}→${u.basicInfo.controlledBy.slice(0, 8)}`).join(", ")}`);
   tcheck("Ворожі юніти без гравців — під DM", enemyUnits.every((u) => u.basicInfo.controlledBy === "dm"), enemyUnits.map((u) => `${u.basicInfo.name}→${u.basicInfo.controlledBy}`).join(", "));
 
   // хід союзного юніта: інший гравець — 403, власник — 200
@@ -987,7 +989,7 @@ async function controlCheck(spells: Map<string, any>) {
   const au = P().filter((p) => p.basicInfo.side === "ally" && p.basicInfo.sourceType === "unit");
 
   tcheck("Сторона лише з героями DM: союзні юніти під DM", au.length > 0 && au.every((x) => x.basicInfo.controlledBy === "dm"), au.map((x) => `${x.basicInfo.name}→${x.basicInfo.controlledBy}`).join(", "));
-  await prisma.character.update({ where: { id: top.id }, data: { level: 7 } });
+  await prisma.character.update({ where: { id: top.id }, data: { level: HERO_LEVEL } });
 }
 
 async function level5Check(spells: Map<string, any>) {
@@ -1091,7 +1093,7 @@ async function level5Check(spells: Map<string, any>) {
   const fresh = P().filter((p: any) => !ids0.has(p.basicInfo.id));
 
   tcheck("Аватар: Маркел знає закляття і прикликає Аватара Смерті під своїм контролером", knowsAv && ra.status === 200 && fresh.some((p: any) => /Аватар Смерті/.test(p.basicInfo.name) && p.basicInfo.controlledBy === mk.basicInfo.controlledBy && p.basicInfo.side === "ally"), `знає=${knowsAv} ${ra.status} нові: ${fresh.map((p: any) => `${p.basicInfo.name} (${p.basicInfo.side}, ${p.basicInfo.controlledBy.slice(0, 8)}) HP ${p.combatStats.maxHp}`).join(", ")}; ${ra.log.map((e: any) => e.resultText).join(" | ").slice(0, 200)}`);
-  for (const h of heroRows) await prisma.character.update({ where: { id: h.id }, data: { level: 7, spellSlots: fullSpellSlots(7, ((await prisma.race.findFirst({ where: { campaignId: ctx.campaignId, name: h.race } }))?.spellSlotProgression as any) ?? [], campaign.maxLevel ?? 20) as any } });
+  for (const h of heroRows) await prisma.character.update({ where: { id: h.id }, data: { level: HERO_LEVEL, spellSlots: fullSpellSlots(HERO_LEVEL, ((await prisma.race.findFirst({ where: { campaignId: ctx.campaignId, name: h.race } }))?.spellSlotProgression as any) ?? [], campaign.maxLevel ?? 20) as any } });
 }
 
 main().catch(async (e) => { console.error(e); await prisma.$disconnect(); process.exit(1); });

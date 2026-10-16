@@ -1,6 +1,6 @@
 import { branchLevelNodeId, racialNodeId } from "./ids";
 import type { Check, LearnBlockReason, ProgressionNode, TreeNodes, UnlearnBlockReason } from "./types";
-import { BRANCH_LEVELS, RACIAL_MIN_LEVEL } from "./types";
+import { BRANCH_LEVELS, BRANCH_MIN_LEVEL, RACIAL_MIN_LEVEL } from "./types";
 
 export const LEARN_BLOCK_TEXT: Record<LearnBlockReason, string> = {
   noPoints: "Немає вільних очок — підніміть рівень",
@@ -11,6 +11,7 @@ export const LEARN_BLOCK_TEXT: Record<LearnBlockReason, string> = {
   needOuter: "Потрібне хоча б одне вміння зовнішнього кола цієї гілки",
   needMiddleAndExpert: "Потрібні вміння середнього кола й рівень Експерт цієї гілки",
   racialLevel: "Доступно з вищого рівня персонажа",
+  expertLevel: `Експертом гілки можна стати з ${BRANCH_MIN_LEVEL.expert} рівня персонажа`,
   needInner: "Потрібні 3 вміння внутрішнього кола",
 };
 
@@ -49,13 +50,13 @@ function nodeRules(tree: TreeNodes, learned: Set<string>, characterLevel: number
 
       const index = BRANCH_LEVELS.indexOf(node.level);
 
-      if (index === 0) return OK;
+      if (index > 0) {
+        const prev = BRANCH_LEVELS[index - 1];
 
-      const prev = BRANCH_LEVELS[index - 1];
+        if (!learned.has(node.kind === "racial" ? racialNodeId(prev) : branchLevelNodeId(node.branchId, prev))) return no("branchOrder");
+      }
 
-      const prevId = node.kind === "racial" ? racialNodeId(prev) : branchLevelNodeId(node.branchId, prev);
-
-      return learned.has(prevId) ? OK : no("branchOrder");
+      return node.kind === "branchLevel" && characterLevel < BRANCH_MIN_LEVEL[node.level] ? no("expertLevel") : OK;
     }
 
     case "slot": {
