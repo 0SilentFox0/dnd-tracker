@@ -123,6 +123,18 @@ describe("pickEnemyRoster", () => {
     });
   }
 
+  it("склад, якому стеля тіру не дає дотягнути до цілі, не вважається рівним", () => {
+    // brute ближчий до сили героя, але вищий тір слабший за нього — масштаб brute обрізано до ×1
+    const lib = [unit("brute", 3, 130, 35), unit("imp", 4, 60, 15), unit("orc", 3, 50, 22)];
+
+    const p: PartyPower = { dpr: 380, hp: 490, heroCount: 4 };
+
+    const pick = pickEnemyRoster(p, lib);
+
+    expect(pick).not.toBeNull();
+    expect(computeFairScaling(p, pick?.roster ?? [], lib).verdict).not.toBe("weak");
+  });
+
   it("обмежується обраною расою", () => {
     const lib = [...LIBRARY, unit("skel", 2, 28, 7, "undead"), unit("zombie", 3, 50, 10, "undead")];
 
@@ -187,7 +199,11 @@ describe("pickEnemyRoster: межі та чесність", () => {
     const pick = pickEnemyRoster({ dpr: 200, hp: 800, heroCount: 4 }, lib);
 
     expect(pick).not.toBeNull();
-    expect(Math.abs((pick?.hpScale ?? 0) - 1) <= 0.25 && Math.abs((pick?.dmgScale ?? 0) - 1) <= 0.25).toBe(pick?.withinTolerance);
+
+    if (pick?.withinTolerance) {
+      expect(Math.abs(pick.hpScale - 1) <= 0.25 && Math.abs(pick.dmgScale - 1) <= 0.25).toBe(true);
+      expect(computeFairScaling({ dpr: 200, hp: 800, heroCount: 4 }, pick.roster, lib).verdict).toBe("even");
+    }
   });
 });
 

@@ -1,7 +1,7 @@
 import { effectiveUnit, type Entry, type PartyPower, type RosterEntry, scaleEntries, targetEnemyPower, weakestPerTier } from "./fair";
 import type { UnitStats } from "./stats";
 
-import { MAX_PICK_TOTAL, PICK_CANDIDATE_UNITS, PICK_MAX_DISTINCT_UNITS, PICK_TOLERANCE, SCALE_MAX, SCALE_MIN } from "@/lib/constants/battle-balance";
+import { BALANCE_TOLERANCE, MAX_PICK_TOTAL, PICK_CANDIDATE_UNITS, PICK_MAX_DISTINCT_UNITS, PICK_TOLERANCE, SCALE_MAX, SCALE_MIN } from "@/lib/constants/battle-balance";
 
 export interface PickedEnemy extends RosterEntry {
   name: string;
@@ -84,7 +84,12 @@ export function pickEnemyRoster(party: PartyPower, rawLibrary: UnitStats[], race
 
     const dmgScale = reached.dpr / base.dpr;
 
-    const within = Math.abs(hpScale - 1) <= PICK_TOLERANCE && Math.abs(dmgScale - 1) <= PICK_TOLERANCE;
+    // стеля тіру може обрізати множник — тоді склад не дотягує до цілі, хоч масштаб і «≈1»
+    const reaches = Math.abs(reached.hp / target.hp - 1) <= BALANCE_TOLERANCE && Math.abs(reached.dpr / target.dpr - 1) <= BALANCE_TOLERANCE;
+
+    const shortfall = lnDistance(reached.hp, target.hp) + lnDistance(reached.dpr, target.dpr);
+
+    const within = reaches && Math.abs(hpScale - 1) <= PICK_TOLERANCE && Math.abs(dmgScale - 1) <= PICK_TOLERANCE;
 
     const inRange = rawHp >= SCALE_MIN && rawHp <= SCALE_MAX && rawDmg >= SCALE_MIN && rawDmg <= SCALE_MAX;
 
@@ -94,9 +99,9 @@ export function pickEnemyRoster(party: PartyPower, rawLibrary: UnitStats[], race
 
     const beyondClamp = lnDistance(rawHp, Math.min(SCALE_MAX, Math.max(SCALE_MIN, rawHp))) + lnDistance(rawDmg, Math.min(SCALE_MAX, Math.max(SCALE_MIN, rawDmg)));
 
-    const deviation = lnDistance(hpScale, 1) + lnDistance(dmgScale, 1) + beyondClamp;
+    const deviation = lnDistance(hpScale, 1) + lnDistance(dmgScale, 1) + beyondClamp + shortfall;
 
-    const score: [number, number, number, number] = [within ? 0 : inRange ? 1 : 2, within ? Math.round(weighted * 4) : 0, units.length, within ? deviation : deviation + weighted / 100];
+    const score: [number, number, number, number] = [within ? 0 : reaches ? 1 : inRange ? 2 : 3, within ? Math.round(weighted * 4) : 0, units.length, within ? deviation : deviation + weighted / 100];
 
     if (found.best && compareScore(score, found.best.score) >= 0) return;
 
