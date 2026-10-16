@@ -50,7 +50,6 @@ export function MyTurnControls({ hero }: { hero: BattleParticipant }) {
         <ActionGrid
           turn={turn}
           pending={anyPending}
-          labels={{ attack: hero.battleData.attacks.map((a) => a.name).join(" · ") || "без зброї", magic: hasMagic ? "книга заклинань" : "немає", bonus: bonusAbilities[0]?.name ?? "немає", ability: actionAbilities.map((a) => a.name).join(" · ") }}
           available={{ magic: hasMagic, bonus: bonusAbilities.length > 0, ability: actionAbilities.length > 0 }}
           actions={{ attack: attack.open, magic: () => book.open(), bonus: () => setBonusOpen(true), ability: () => setAbilityOpen(true) }}
         />
