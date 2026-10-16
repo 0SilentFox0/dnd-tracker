@@ -33,7 +33,7 @@ export function ParticipantDetails({ participant }: { participant: BattlePartici
   return (
     <div className="text-[var(--bone)]">
       <div className="flex items-center gap-4">
-        <Portrait participant={participant} size={64} />
+        <Portrait participant={participant} size={64} zoomable />
         <div>
           <div className="hud-sc text-[22px] font-bold leading-7">{participant.basicInfo.name}</div>
           {exact ? <div className="text-sm text-[#d6cbb7]">{participant.combatStats.currentHp} / {participant.combatStats.maxHp}</div> : <HealthLabel participant={participant} />}

@@ -28,7 +28,7 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero, compact = false }: 
     <div key={change?.id} className={cn("relative", change && change.delta < 0 && "animate-[hud-shake_.35s]")}>
       {change && change.delta < 0 && <div className="pointer-events-none fixed inset-0 z-40 animate-[hud-vignette_1s]" />}
       <div className="flex items-center gap-3">
-        <Portrait participant={hero} size={compact ? 48 : 64} me />
+        <Portrait participant={hero} size={compact ? 48 : 64} me zoomable />
         <div className="min-w-0 flex-1">
           <div className="hud-sc flex h-6 items-center justify-between text-[19px] font-bold text-[var(--ink)]">
             <span className="truncate">{hero.basicInfo.name}</span>
