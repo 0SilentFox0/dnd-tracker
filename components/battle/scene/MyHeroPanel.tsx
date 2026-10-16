@@ -9,7 +9,7 @@ import { useBattleSceneData, useHpChange } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
-import { abilityCharges, personalPassiveEffects, turnsUntil } from "@/lib/utils/battle/view";
+import { abilityCharges, displayEffects, turnsUntil } from "@/lib/utils/battle/view";
 import { signed } from "@/lib/utils/format";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -54,7 +54,7 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero, compact = false }: 
           {charges.map((c) => <span key={c.key}>{c.name} {c.left}/{c.limit}</span>)}
         </div>
       )}
-      {!compact && <EffectLine effects={[...personalPassiveEffects(hero, battle.initiativeOrder), ...hero.battleData.activeEffects]} />}
+      {!compact && <EffectLine effects={displayEffects(hero, battle.initiativeOrder)} />}
     </div>
   );
 });

@@ -59,7 +59,7 @@ export function DmParticipantRow({
         <button
           type="button"
           className={cn(ICON, "text-[#9fc48a] hover:border-[#9fc48a]/40")}
-          title="Збільшити HP"
+          title="Змінити HP"
           onClick={() => {
             onIncreaseHp(participant);
             close();

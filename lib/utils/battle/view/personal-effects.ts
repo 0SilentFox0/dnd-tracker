@@ -1,4 +1,7 @@
+import { mergeEffectsForDisplay } from "./effect-summary";
+
 import { isActive, resolvedAbilitiesOf } from "@/lib/utils/abilities/engine/participants";
+import { liveActiveEffects } from "@/lib/utils/abilities/engine/zone-effects";
 import { evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
 import { isStaticEffect } from "@/lib/utils/abilities/schema/kinds";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
@@ -43,4 +46,9 @@ export function personalPassiveEffects(p: BattleParticipant, order: BattlePartic
   }
 
   return out;
+}
+
+/** Ефекти для показу: персональні пасивки + ті, що діють (без зон мертвих власників), злиті по вміннях. */
+export function displayEffects(p: BattleParticipant, order: BattleParticipant[]): ActiveEffect[] {
+  return mergeEffectsForDisplay([...personalPassiveEffects(p, order), ...liveActiveEffects(p, order)]);
 }

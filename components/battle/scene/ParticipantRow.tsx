@@ -10,9 +10,9 @@ import { isDown } from "@/lib/utils/battle/participant/state";
 import { hpRatio } from "@/lib/utils/battle/view";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
-export const ParticipantRow = memo(function ParticipantRow({ participant, personal, exact, acText, current, onSelect }: {
+export const ParticipantRow = memo(function ParticipantRow({ participant, effects, exact, acText, current, onSelect }: {
   participant: BattleParticipant;
-  personal?: ActiveEffect[];
+  effects: ActiveEffect[];
   exact: boolean;
   acText: string;
   current: boolean;
@@ -43,7 +43,7 @@ export const ParticipantRow = memo(function ParticipantRow({ participant, person
           {exact ? <span className={cn("ml-auto pl-2 font-sans text-sm font-medium tracking-normal", hpRatio(participant) <= 0.25 ? "text-[#e04a35]" : "text-[#d6cbb7]")}>{currentHp} / {maxHp}</span> : <HealthLabel participant={participant} />}
         </div>
         <HealthBar participant={participant} exact={exact} />
-        <EffectLine effects={personal?.length ? [...personal, ...participant.battleData.activeEffects] : participant.battleData.activeEffects} />
+        <EffectLine effects={effects} />
       </div>
       <span className="mt-3.5 flex w-16 shrink-0 items-center justify-end gap-1.5 self-start text-sm text-[#b8ab95]">
         {acText}

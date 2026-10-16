@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { EffectIcon, HealthBar, HealthLabel, Portrait } from "@/components/battle/hud";
 import { useBattleSceneData } from "@/lib/hooks/battle";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
-import { canSeeExactStats, effectLines, formatKnownArmorClass, mergeEffectsForDisplay, personalPassiveEffects, resolveKnownArmorClass, resolveObservedTraits } from "@/lib/utils/battle/view";
+import { canSeeExactStats, displayEffects, effectLines, formatKnownArmorClass, resolveKnownArmorClass, resolveObservedTraits } from "@/lib/utils/battle/view";
 import type { BattleParticipant } from "@/types/battle";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
@@ -24,7 +24,7 @@ export function ParticipantDetails({ participant }: { participant: BattlePartici
 
   const log = battle.battleLog ?? [];
 
-  const effects = mergeEffectsForDisplay([...personalPassiveEffects(participant, battle.initiativeOrder), ...participant.battleData.activeEffects]);
+  const effects = displayEffects(participant, battle.initiativeOrder);
 
   const known = resolveKnownArmorClass(log, participant.basicInfo.id, battle.knowledge);
 

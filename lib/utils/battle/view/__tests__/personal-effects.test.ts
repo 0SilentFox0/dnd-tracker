@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { ParticipantSide } from "@/lib/constants/battle";
-import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
-import { personalPassiveEffects } from "@/lib/utils/battle/view";
+import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
+import { makeEffect, makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
+import { displayEffects, personalPassiveEffects } from "@/lib/utils/battle/view";
 
 const personal = (effects: Parameters<typeof resolved>[0]["effects"], id = "p") => resolved({ id, name: "Полум'яна аура", trigger: { event: "passive" }, effects }, { personal: true, name: "Аграїл: Полум'яна аура" });
 
@@ -35,5 +35,18 @@ describe("personalPassiveEffects", () => {
 
     expect(personalPassiveEffects(godric, [godric, hurt])).toHaveLength(1);
   });
-});
 
+  it("displayEffects не показує зону мертвого власника", () => {
+    const fear = makeEffect("fear", { name: "Аура страху", zone: { ownerId: "n", key: "fear" }, abilityEffects: [{ kind: "modifyStat", stat: "morale", flat: -1 }] });
+
+    const base = makeParticipant({ id: "h" });
+
+    const hero = { ...base, battleData: { ...base.battleData, activeEffects: [fear] } };
+
+    expect(displayEffects(hero, [hero, makeParticipant({ id: "n", side: ParticipantSide.ENEMY })]).map((e) => e.name)).toEqual(["Аура страху"]);
+
+    const owner = makeParticipant({ id: "n", side: ParticipantSide.ENEMY, hp: 0 });
+
+    expect(displayEffects(hero, [hero, { ...owner, combatStats: { ...owner.combatStats, status: CombatStatus.DEAD } }])).toHaveLength(0);
+  });
+});

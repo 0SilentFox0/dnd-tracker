@@ -11,8 +11,8 @@ export {
   useBattleSceneDataValue,
   useBattleSceneValue,
 } from "./useBattleScene";
+export { useDisplayEffects } from "./useDisplayEffects";
 export { type DownedHeroPrompt, useDownedHeroPrompt } from "./useDownedHeroPrompt";
 export { useHpChange } from "./useHpChange";
-export { usePersonalEffects } from "./usePersonalEffects";
 export { usePlayerTurn } from "./usePlayerTurn";
 export { useBonusSpells, useSpellBook, useSpellBookPrefetch } from "./useSpellBook";
