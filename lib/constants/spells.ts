@@ -29,3 +29,14 @@ export function spellLevelFromName(name: string): number {
 export function spellLevelRoman(level: number): string {
   return ROMAN_NUMERALS[Math.max(0, level)] ?? String(level);
 }
+
+const SPELL_SCHOOL_COLORS: Record<string, string> = {
+  Природа: "#3f7a2c",
+  Світло: "#a8801c",
+  Темрява: "#5e3d91",
+  Хаос: "#a8321c",
+};
+
+export function spellSchoolColor(name: string | null | undefined): string {
+  return (name && SPELL_SCHOOL_COLORS[name]) || "#6d7177";
+}

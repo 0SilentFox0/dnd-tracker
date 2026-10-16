@@ -59,6 +59,24 @@ describe("SpellBook", () => {
     await waitFor(() => expect(castSpell).toHaveBeenCalledWith(expect.objectContaining({ spellId: "ray", targetIds: ["gob"], diceRolls: [4, 5] })));
   });
 
+  it("закладки шкіл фільтрують сторінку кола; «Усі» групує за школами", async () => {
+    const { wrapper, caster } = fakeScene({ knownSpells: ["ray", "ball"], slots: { "2": { max: 1, current: 1 } } });
+
+    render(<Harness caster={caster} />, { wrapper });
+
+    expect(await screen.findByRole("tab", { name: /Хаос/ })).toBeTruthy();
+    expect(screen.getByText("Палаючий промінь")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("tab", { name: /Хаос/ }));
+
+    expect(screen.getByText("Вогняна куля")).toBeTruthy();
+    expect(screen.queryByText("Палаючий промінь")).toBeNull();
+
+    fireEvent.click(screen.getByRole("tab", { name: "Усі" }));
+
+    expect(screen.getByText("Палаючий промінь")).toBeTruthy();
+  });
+
   it("гортання на I коло показує його заклинання", async () => {
     const { wrapper, caster } = fakeScene({ knownSpells: ["ray", "bolt"], slots: { "1": { max: 3, current: 3 } } });
 

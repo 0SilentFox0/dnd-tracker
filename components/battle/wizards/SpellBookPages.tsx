@@ -1,12 +1,13 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 import { Sparkles } from "lucide-react";
 
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { spellLevelMetal } from "@/components/hud";
-import { spellLevelName, spellLevelRoman } from "@/lib/constants/spells";
+import { spellLevelName, spellLevelRoman, spellSchoolColor } from "@/lib/constants/spells";
 import { cn } from "@/lib/utils";
+import { groupSpellsBySchool } from "@/lib/utils/spells/group-by-level";
 import { costLabel, resolutionLabel, targetingLabel } from "@/lib/utils/spells/model/labels";
 import type { BookSpell } from "@/types/spells";
 
@@ -29,7 +30,47 @@ export interface SpellBookPagesProps {
   formulaOf?: (spell: BookSpell) => string;
 }
 
+const ALL = "__all";
+
+function SchoolTabs({ schools, active, countOf, onPick }: { schools: string[]; active: string; countOf: (name: string) => number; onPick: (name: string) => void }) {
+  const tabs = [{ name: ALL, label: "Усі", color: "#2a2018" }, ...schools.map((name) => ({ name, label: name, color: spellSchoolColor(name) }))];
+
+  return (
+    <div role="tablist" aria-label="Школи магії" className="-mt-4 mb-2 flex flex-wrap items-start gap-1.5">
+      {tabs.map((t) => {
+        const count = t.name === ALL ? undefined : countOf(t.name);
+
+        return (
+          <button
+            key={t.name}
+            type="button"
+            role="tab"
+            aria-selected={active === t.name}
+            onClick={() => onPick(t.name)}
+            style={{ backgroundColor: t.color }}
+            className={cn(
+              "hud-sc flex items-start justify-center px-3 pt-1 text-[13px] text-[#f3e7cc] shadow-[inset_0_0_0_1px_rgba(243,231,204,.25)] [clip-path:polygon(0_0,100%_0,100%_100%,50%_82%,0_100%)]",
+              active === t.name ? "h-11" : "h-8 opacity-80 hover:opacity-100",
+              count === 0 && "opacity-40",
+            )}
+          >
+            {t.label}{count !== undefined && <span className="ml-1 font-sans text-[11px] opacity-85">{count}</span>}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export function SpellBookPages({ byLevel, slotOf, level, pickedId, wide, showDetail, onLevel, onPick, detail, formulaOf }: SpellBookPagesProps) {
+  const [school, setSchool] = useState(ALL);
+
+  const schools = groupSpellsBySchool(Object.values(byLevel).flat()).map((g) => g.name);
+
+  const groups = groupSpellsBySchool(byLevel[level] ?? []);
+
+  const shown = school === ALL ? groups : groups.filter((g) => g.name === school);
+
   return (
     <div className="relative pr-11">
       <div className="absolute right-1.5 top-6 z-10 flex flex-col gap-1.5">
@@ -49,28 +90,44 @@ export function SpellBookPages({ byLevel, slotOf, level, pickedId, wide, showDet
       <div className={cn(PAPER, "min-h-[70dvh]", wide && "grid grid-cols-2")}>
         {(wide || !showDetail) && (
           <div className="px-5 pb-12 pt-4">
+            {schools.length > 1 && <SchoolTabs schools={schools} active={school} countOf={(name) => groups.find((g) => g.name === name)?.spells.length ?? 0} onPick={setSchool} />}
             <div className="text-[13px] italic text-[#7a6650]">Книга заклинань</div>
             <div className="hud-sc flex items-center gap-3 text-2xl font-bold leading-8">
               {spellLevelName(level)}
               <span className="font-sans text-[13px] font-normal italic tracking-normal text-[#6d7177]">{METAL[level]} коло</span>
             </div>
             <div className="my-1 h-px bg-[#2a2018]/35" />
-            {(byLevel[level] ?? []).length === 0 && <p className="py-6 text-center italic text-[#7a6650]">На цьому колі заклинань немає</p>}
-            {(byLevel[level] ?? []).map((s) => (
-              <button key={s.id} type="button" onClick={() => onPick(s)} className={cn("flex h-[72px] w-full items-center gap-3 border-b border-[#2a2018]/15 text-left", pickedId === s.id && "-mx-3 w-[calc(100%+1.5rem)] bg-[#9c2a1d]/10 px-3 shadow-[inset_3px_0_0_#9c2a1d]")}>
-                <span className="flex size-10 shrink-0 items-center justify-center border border-[#2a2018] bg-[#2a2018]/5">
-                  {s.icon ? <OptimizedImage src={s.icon} alt="" width={26} height={26} className="size-[26px] object-contain" /> : <Sparkles className="size-5" />}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="hud-sc block truncate text-[17px] font-bold">{s.name}</span>
-                  <span className="block truncate text-sm italic text-[#6b5a45]">{[s.resolution?.kind === "save" && "рятівний кидок", s.targeting && targetingLabel(s.targeting), s.cost === "bonusAction" && "бонусна дія"].filter(Boolean).join(" · ")}</span>
-                </span>
-                {formulaOf && s.dice ? <span className="w-20 text-right text-[15px] text-[#7a2a1f]">{formulaOf(s)}</span> : null}
-              </button>
+            {shown.length === 0 && <p className="py-6 text-center italic text-[#7a6650]">{school === ALL ? "На цьому колі заклинань немає" : "На цьому колі заклинань цієї школи немає"}</p>}
+            {shown.map((g) => (
+              <section key={g.name} className="mt-3 first:mt-1">
+                {school === ALL && <div className="hud-sc flex items-center gap-2 text-sm font-bold tracking-[.06em]" style={{ color: spellSchoolColor(g.name) }}>
+                  <span className="size-2.5 rotate-45" style={{ backgroundColor: spellSchoolColor(g.name) }} />
+                  {g.name}
+                  <span className="h-px flex-1 opacity-40" style={{ backgroundColor: spellSchoolColor(g.name) }} />
+                </div>}
+                {g.spells.map((s) => (
+                  <button key={s.id} type="button" onClick={() => onPick(s)} className={cn("flex w-full items-center gap-3 border-b border-[#2a2018]/15 text-left", wide ? "h-[84px]" : "h-[72px]", pickedId === s.id && "-mx-3 w-[calc(100%+1.5rem)] bg-[#9c2a1d]/10 px-3 shadow-[inset_3px_0_0_#9c2a1d]")}>
+                    <span className={cn("flex shrink-0 items-center justify-center border-2 bg-[#2a2018]/5", wide ? "size-16" : "size-11")} style={{ borderColor: spellSchoolColor(g.name) }}>
+                      {s.icon ? <OptimizedImage src={s.icon} alt="" width={wide ? 52 : 30} height={wide ? 52 : 30} className={cn("object-contain", wide ? "size-[52px]" : "size-[30px]")} /> : <Sparkles className="size-5" />}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="hud-sc block truncate text-[17px] font-bold">{s.name}</span>
+                      <span className="block truncate text-sm italic text-[#6b5a45]">{[s.resolution?.kind === "save" && "рятівний кидок", s.targeting && targetingLabel(s.targeting), s.cost === "bonusAction" && "бонусна дія"].filter(Boolean).join(" · ")}</span>
+                    </span>
+                    {formulaOf && s.dice ? <span className="w-20 text-right text-[15px] text-[#7a2a1f]">{formulaOf(s)}</span> : null}
+                  </button>
+                ))}
+              </section>
             ))}
           </div>
         )}
-        {(wide || showDetail) && (detail ?? (wide && <div className="flex items-center justify-center italic text-[#7a6650]">Оберіть заклинання</div>))}
+        {wide ? (
+          <div className="sticky top-0 flex min-h-[70dvh] flex-col self-start">
+            {detail ?? <div className="flex flex-1 items-center justify-center italic text-[#7a6650]">Оберіть заклинання</div>}
+          </div>
+        ) : (
+          showDetail && detail
+        )}
       </div>
     </div>
   );
