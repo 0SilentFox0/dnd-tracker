@@ -8,6 +8,8 @@ export interface ConfirmOptions {
   cancelLabel?: string | null;
   destructive?: boolean;
   onConfirm?: () => Promise<unknown>;
+  /** Aborting closes the dialog as cancelled (e.g. the owner unmounted). */
+  signal?: AbortSignal;
 }
 
 export type ConfirmFn = (options: ConfirmOptions) => Promise<boolean>;

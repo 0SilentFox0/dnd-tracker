@@ -87,7 +87,7 @@ export function SpellBookPages({ byLevel, slotOf, level, pickedId, wide, showDet
           ))}
         </div>
       </div>
-      <div className={cn(PAPER, "min-h-[70dvh]", wide && "grid grid-cols-2")}>
+      <div className={cn(PAPER, "min-h-[70dvh]", wide ? "grid grid-cols-2" : "flex flex-col")}>
         {(wide || !showDetail) && (
           <div className="px-5 pb-12 pt-4">
             {schools.length > 1 && <SchoolTabs schools={schools} active={school} countOf={(name) => groups.find((g) => g.name === name)?.spells.length ?? 0} onPick={setSchool} />}

@@ -40,8 +40,9 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
         setError(null);
         setPending(next);
         setShown(options);
+        options.signal?.addEventListener("abort", () => current.current === next && settle(false), { once: true });
       }),
-    [],
+    [settle],
   );
 
   useEffect(() => () => current.current?.resolve(false), []);

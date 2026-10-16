@@ -37,18 +37,25 @@ export function usePlayerTurn(participant: BattleParticipant, bonusSpells: Bonus
 
   const skipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(
-    () => () => {
+  const unmounted = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    unmounted.current = controller;
+
+    return () => {
       if (skipTimer.current) clearTimeout(skipTimer.current);
-    },
-    [],
-  );
+
+      controller.abort();
+    };
+  }, []);
 
   const fresh = () => scene.readBattle()?.initiativeOrder.find((p) => p.basicInfo.id === id) ?? participant;
 
   const endTurn = async () => {
     if (!participant.actionFlags.hasUsedAction && moraleResult !== "skip") {
-      const ok = await confirm({ title: "Завершити хід?", description: "Дію ще не використано.", confirmLabel: "Завершити" });
+      const ok = await confirm({ title: "Завершити хід?", description: "Дію ще не використано.", confirmLabel: "Завершити", signal: unmounted.current?.signal });
 
       if (!ok) return;
     }
