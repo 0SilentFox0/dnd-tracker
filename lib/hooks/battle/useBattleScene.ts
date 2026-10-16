@@ -14,6 +14,7 @@ import {
   useAbilityAction,
   useAddBattleParticipant,
   useAttack,
+  useAuraZone,
   useBattle,
   useBonusAction,
   useCastSpell,
@@ -48,6 +49,7 @@ export interface BattleSceneActions {
   moraleCheck: ReturnType<typeof useMoraleCheck>;
   bonusAction: ReturnType<typeof useBonusAction>;
   abilityAction: ReturnType<typeof useAbilityAction>;
+  auraZone: ReturnType<typeof useAuraZone>;
   castSpell: ReturnType<typeof useCastSpell>;
   start: ReturnType<typeof useStartBattle>;
   reset: ReturnType<typeof useResetBattle>;
@@ -213,6 +215,7 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
     moraleCheck: useMoraleCheck(campaignId, battleId, o),
     bonusAction: useBonusAction(campaignId, battleId, o),
     abilityAction: useAbilityAction(campaignId, battleId, o),
+    auraZone: useAuraZone(campaignId, battleId, o),
     castSpell: useCastSpell(campaignId, battleId, o),
     start: useStartBattle(campaignId, battleId, o),
     reset: useResetBattle(campaignId, battleId, o),

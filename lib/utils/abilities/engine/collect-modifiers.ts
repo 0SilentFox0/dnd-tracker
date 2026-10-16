@@ -2,6 +2,7 @@ import { resolveFlat } from "./amount";
 import { legacyActiveEffectModifiers } from "./legacy-active-effects";
 import { countMarks } from "./marks";
 import { findParticipant, isActive, resolvedAbilitiesOf } from "./participants";
+import { liveActiveEffects } from "./zone-effects";
 
 import { evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
 import type { AttackKind, DamageKind, FlagEffect, FlagKey, StaticEffect, StatKey } from "@/lib/utils/abilities/schema";
@@ -177,8 +178,10 @@ export function collectModifiers(
     for (const entries of auras.values()) entries.forEach(push);
   }
 
-  for (const ae of subject.battleData.activeEffects) {
-    for (const effect of ae.abilityEffects ?? legacyActiveEffectModifiers(ae)) add(effect, subject, ae.name, "effect", ae.icon ?? ae.source?.icon);
+  for (const ae of liveActiveEffects(subject, participants)) {
+    const owner = (ae.zone && findParticipant(participants, ae.zone.ownerId)) || subject;
+
+    for (const effect of ae.abilityEffects ?? legacyActiveEffectModifiers(ae)) add(effect, owner, ae.name, "effect", ae.icon ?? ae.source?.icon);
   }
 
   for (const effect of extra) add(effect, subject, "Ця дія", "action");

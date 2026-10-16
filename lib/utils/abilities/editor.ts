@@ -5,7 +5,7 @@ const STATIC_KINDS: EffectKind[] = ["modifyStat", "damageBonus", "flag", "note"]
 
 const ALL_KINDS = Object.keys(EFFECT_REGISTRY) as EffectKind[];
 
-const PASSIVE_TARGETS = new Set(["self", "allAllies", "allEnemies"]);
+const PASSIVE_TARGETS = new Set(["self", "allAllies", "allEnemies", "nearbyAllies", "nearbyEnemies"]);
 
 export function allowedEffectKinds(trigger: Trigger): EffectKind[] {
   if (trigger.event === "passive") return STATIC_KINDS;

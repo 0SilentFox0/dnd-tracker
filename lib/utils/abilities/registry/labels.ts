@@ -54,6 +54,8 @@ export const TARGET_LABELS: Record<AbilityTarget, string> = {
   allAllies: "усі союзники",
   allEnemies: "усі вороги",
   everyone: "усі учасники",
+  nearbyAllies: "союзники поруч (зона)",
+  nearbyEnemies: "вороги поруч (зона)",
 };
 
 export const CONDITION_LABELS: Record<(typeof CONDITION_KEYS)[number], string> = {

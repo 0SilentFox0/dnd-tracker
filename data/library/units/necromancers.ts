@@ -19,9 +19,9 @@ const boneBody = (): Ability => ({
 const rotAura = (): Ability => ({
   id: "unit-rot-aura",
   name: "Аура гнилі",
-  description: "Вороги отримують −1 до атаки.",
+  description: "Аура: вороги поруч (зону обирають на початку ходу) отримують −1 до атаки.",
   trigger: { event: "passive" },
-  effects: [{ kind: "modifyStat", stat: "attackBonus", flat: -1, target: "allEnemies" }],
+  effects: [{ kind: "modifyStat", stat: "attackBonus", flat: -1, target: "nearbyEnemies" }],
 });
 
 const fingerOfDeath = (): Ability => ({

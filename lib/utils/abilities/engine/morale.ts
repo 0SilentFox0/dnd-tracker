@@ -1,14 +1,15 @@
 import { resolvedAbilitiesOf } from "./participants";
+import { liveActiveEffects } from "./zone-effects";
 
 import type { FlagKey } from "@/lib/utils/abilities/schema";
 import type { BattleParticipant } from "@/types/battle";
 
 export const clampMorale = (v: number) => Math.max(-3, Math.min(3, v));
 
-export function ownTimedMoraleFlat(p: BattleParticipant): number {
+export function ownTimedMoraleFlat(p: BattleParticipant, ps?: BattleParticipant[]): number {
   let sum = 0;
 
-  for (const ae of p.battleData.activeEffects) {
+  for (const ae of liveActiveEffects(p, ps)) {
     for (const e of ae.abilityEffects ?? []) {
       if (e.kind === "modifyStat" && e.stat === "morale" && typeof e.flat === "number") sum += e.flat;
     }

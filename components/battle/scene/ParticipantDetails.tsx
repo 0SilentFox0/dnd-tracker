@@ -60,7 +60,7 @@ export function ParticipantDetails({ participant }: { participant: BattlePartici
                 <EffectIcon effect={e} size={36} />
               </span>
               <div className="min-w-0 flex-1">
-                <div className="flex justify-between text-[15px] font-medium text-[var(--ink)]"><span>{e.name}</span><span className="text-[13px] font-normal text-[var(--hud-muted)]">{e.permanent ? "постійно" : `${e.duration} р.`}</span></div>
+                <div className="flex justify-between text-[15px] font-medium text-[var(--ink)]"><span>{e.name}</span><span className="text-[13px] font-normal text-[var(--hud-muted)]">{e.zone ? "зона" : e.permanent ? "постійно" : `${e.duration} р.`}</span></div>
                 {e.description ? <p className="mt-0.5 text-[13px] leading-[18px] text-[#a89c88]">{e.description}</p> : e.permanent && <p className="mt-0.5 text-[13px] leading-[18px] text-[#a89c88]">{effectSummary(e)[0]}</p>}
                 {e.source && <p className="text-[13px] leading-[18px] text-[#a89c88]">Від: {e.source.abilityName ? `${e.source.abilityName} (${e.source.name})` : e.source.name}</p>}
               </div>

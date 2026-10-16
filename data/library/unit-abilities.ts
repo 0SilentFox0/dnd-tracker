@@ -137,9 +137,9 @@ export const debuff = (name: string, stat: ModStat, flat: number, roundCount: nu
 export const fearAura = (name = "Аура страху", flat = 1): Ability => ({
   id: "unit-fear-aura",
   name,
-  description: `Вороги отримують −${flat} до моралі.`,
+  description: `Аура: вороги поруч (зону обирають на початку ходу) отримують −${flat} до моралі.`,
   trigger: passive,
-  effects: [{ kind: "modifyStat", stat: "morale", flat: -flat, target: "allEnemies" }],
+  effects: [{ kind: "modifyStat", stat: "morale", flat: -flat, target: "nearbyEnemies" }],
 });
 
 export const disable = (name: string, condition: keyof typeof CONDITION_LABELS, chance: number): Ability => ({
@@ -390,9 +390,9 @@ function effectSlug(effect: Effect): string {
 export const alliesAura = (name: string, effect: Effect): Ability => ({
   id: `unit-allies-aura-${effectSlug(effect)}`,
   name,
-  description: "Постійна аура: діє на всіх союзників.",
+  description: "Аура: діє на союзників поруч (зону обирають на початку ходу).",
   trigger: passive,
-  effects: [{ ...effect, target: "allAllies" } as Effect],
+  effects: [{ ...effect, target: "nearbyAllies" } as Effect],
 });
 
 export const enemiesRoundDamage = (name: string, percentOfAttack: number): Ability => ({

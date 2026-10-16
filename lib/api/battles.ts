@@ -16,6 +16,7 @@ import type { MoraleCheckResult } from "@/lib/utils/battle/battle-morale";
 import type {
   AbilityActionData,
   AttackData,
+  AuraZoneData,
   BattleEventsPage,
   BattleMutationResponse,
   BattleScene,
@@ -102,6 +103,10 @@ export async function attack(
 
 export async function abilityAction(campaignId: string, battleId: string, data: WithVersion<AbilityActionData>): Promise<BattleMutationResponse> {
   return campaignPost<BattleMutationResponse>(campaignId, `/battles/${battleId}/ability-action`, data);
+}
+
+export async function setAuraZone(campaignId: string, battleId: string, data: WithVersion<AuraZoneData>): Promise<BattleMutationResponse> {
+  return campaignPost<BattleMutationResponse>(campaignId, `/battles/${battleId}/aura-zone`, data);
 }
 
 export async function bonusAction(campaignId: string, battleId: string, data: WithVersion<BonusActionData>): Promise<BattleMutationResponse> {

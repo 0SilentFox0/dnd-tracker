@@ -15,6 +15,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
+import { auraZoneMutation, auraZoneSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/aura-zone/aura-zone-mutation";
 import { abilityActionSchema, createAbilityActionMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/ability-action/ability-action-mutation";
 import { attackBodySchema, createAttackMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/attack/attack-mutation";
 import { bonusActionSchema, createBonusActionMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/bonus-action/bonus-action-mutation";
@@ -28,7 +29,8 @@ import { createStartMutation } from "@/app/api/campaigns/[id]/battles/[battleId]
 import { BATTLE_LOG_RECENT_EVENTS, ParticipantSourceType } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { moraleCheckSchema } from "@/lib/schemas";
-import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
+import { pendingAreaAuras, zoneCandidates, zoneMembers } from "@/lib/utils/abilities/engine/area-aura";
+import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { applyBattleDelta } from "@/lib/utils/battle/client/apply-delta";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
@@ -231,6 +233,8 @@ const BONUS = { access: "member", requireStatus: "active", schema: bonusActionSc
 const ABILITY = { access: "member", requireStatus: "active", schema: abilityActionSchema, mutate: createAbilityActionMutation(summonDeps) };
 
 const SPELL = { access: "member", requireStatus: "active", schema: spellSchema, dryRun: (b: any) => b.preview === true, mutate: createSpellMutation({ loadSpell: (id: string) => prisma.spell.findUnique({ where: { id } }), ...summonDeps } as any) };
+
+const AURA_ZONE = { access: "member", requireStatus: "active", schema: auraZoneSchema, mutate: auraZoneMutation };
 
 const MORALE = { access: "member", requireStatus: "active", schema: moraleCheckSchema, respond: "wrapped", mutate: moraleCheckMutation };
 
@@ -588,6 +592,14 @@ async function takeTurn(spells: Map<string, any>) {
 
   const me = () => byId(id);
 
+  if (me() && alive(me())) {
+    for (const aura of pendingAreaAuras(P(), id, state.currentRound)) {
+      const pool = zoneCandidates(P(), me(), aura.target).filter(() => rng() < 0.6);
+
+      await call("aura-zone", AURA_ZONE, { participantId: id, auraId: aura.id, targetIds: pool.map((x: any) => x.basicInfo.id) }, me().basicInfo.controlledBy);
+    }
+  }
+
   if (!me() || !alive(me()) || current()?.basicInfo.id !== id) { if (current()?.basicInfo.id === id) await call("next-turn", NEXT);
 
  return; }
@@ -726,6 +738,8 @@ async function main() {
   if (MODE === "all" || MODE === "control") await controlCheck(spells);
 
   if (MODE === "all" || MODE === "level5") await level5Check(spells);
+
+  if (MODE === "all" || MODE === "targeted" || MODE === "aura") await auraZoneCheck();
 
   if (targetedResults.length) report.push("\n## Цільові перевірки", ...targetedResults.map((t) => `- ${t}`));
 
@@ -1094,6 +1108,48 @@ async function level5Check(spells: Map<string, any>) {
 
   tcheck("Аватар: Маркел знає закляття і прикликає Аватара Смерті під своїм контролером", knowsAv && ra.status === 200 && fresh.some((p: any) => /Аватар Смерті/.test(p.basicInfo.name) && p.basicInfo.controlledBy === mk.basicInfo.controlledBy && p.basicInfo.side === "ally"), `знає=${knowsAv} ${ra.status} нові: ${fresh.map((p: any) => `${p.basicInfo.name} (${p.basicInfo.side}, ${p.basicInfo.controlledBy.slice(0, 8)}) HP ${p.combatStats.maxHp}`).join(", ")}; ${ra.log.map((e: any) => e.resultText).join(" | ").slice(0, 200)}`);
   for (const h of heroRows) await prisma.character.update({ where: { id: h.id }, data: { level: HERO_LEVEL, spellSlots: fullSpellSlots(HERO_LEVEL, ((await prisma.race.findFirst({ where: { campaignId: ctx.campaignId, name: h.race } }))?.spellSlotProgression as any) ?? [], campaign.maxLevel ?? 20) as any } });
+}
+
+// Аура страху Кошмару: зона на двох героях, решта без штрафу; гравець не може задати зону ворожому юніту
+async function auraZoneCheck() {
+  await applyRotation(0);
+  battleLabel = "Зона аури";
+
+  const nightmare = await prisma.unit.findFirst({ where: { campaignId: ctx.campaignId, name: "Кошмар" } });
+
+  if (!nightmare) return tcheck("Зона аури", false, "немає юніта Кошмар");
+
+  const setup = [...heroRows.map((h) => ({ id: h.id, type: ParticipantSourceType.CHARACTER, side: "ally" })), { id: nightmare.id, type: ParticipantSourceType.UNIT, side: "enemy", quantity: 1 }];
+
+  const b = await prisma.battleScene.create({ data: { campaignId: ctx.campaignId, name: "ТЕСТ Зона аури", status: "prepared", participants: setup as any, currentRound: 1, currentTurnIndex: 0 } });
+
+  ctx.battleId = b.id; state = await readState(); await call("start", START);
+
+  const heroes = P().filter((p) => p.basicInfo.side === "ally");
+
+  const armorBefore = heroes.map((h) => statWithModifiers(P(), h.basicInfo.id, "armor", 10));
+
+  await untilTurnOf((p) => p.basicInfo.name.startsWith("Кошмар"));
+
+  const nm = current();
+
+  const pending = pendingAreaAuras(P(), nm.basicInfo.id, state.currentRound);
+
+  const zone = heroes.slice(0, 2).map((h) => h.basicInfo.id);
+
+  const asPlayer = await call("aura-zone", AURA_ZONE, { participantId: nm.basicInfo.id, auraId: pending[0]?.id, targetIds: zone }, heroRows.find((h) => h.controlledBy !== dmId)?.controlledBy ?? "nobody");
+
+  const r = await call("aura-zone", AURA_ZONE, { participantId: nm.basicInfo.id, auraId: pending[0]?.id, targetIds: zone });
+
+  const members = zoneMembers(P(), nm.basicInfo.id, pending[0]?.id ?? "").ids;
+
+  const inZone = (id: string) => (byId(id).battleData.activeEffects ?? []).some((e: any) => e.zone?.ownerId === nm.basicInfo.id && e.abilityEffects?.some((x: any) => x.stat === "morale"));
+
+  const outside = heroes.slice(2).every((h) => !inZone(h.basicInfo.id));
+
+  const armorSame = heroes.every((h, i) => statWithModifiers(P(), h.basicInfo.id, "armor", 10) === armorBefore[i]);
+
+  tcheck("Зона аури: Кошмар задає зону, штраф моралі лише на обраних", pending.length === 1 && asPlayer.status === 403 && r.status === 200 && members.join() === zone.join() && zone.every(inZone) && outside && armorSame && pendingAreaAuras(P(), nm.basicInfo.id, state.currentRound).length === 0, `аур=${pending.length} гравець=${asPlayer.status} DM=${r.status} у зоні: ${members.map((id) => byId(id).basicInfo.name).join(", ")}; ${r.log.map((e: any) => e.resultText).join(" | ")}`);
 }
 
 main().catch(async (e) => { console.error(e); await prisma.$disconnect(); process.exit(1); });

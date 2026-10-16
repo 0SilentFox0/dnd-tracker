@@ -6,7 +6,10 @@ import { AttackType } from "@/lib/constants/battle";
 
 export const DICE_RE = /^(\d+)d(\d+)([+-]\d+)?$/;
 
-export const ABILITY_TARGETS = ["self", "eventTarget", "eventActor", "otherEnemy", "allAllies", "allEnemies", "everyone"] as const;
+export const ABILITY_TARGETS = ["self", "eventTarget", "eventActor", "otherEnemy", "allAllies", "allEnemies", "everyone", "nearbyAllies", "nearbyEnemies"] as const;
+
+/** Аури в області: без позицій на полі ціль обирає власник на початку свого ходу. */
+export const AREA_TARGETS = ["nearbyAllies", "nearbyEnemies"] as const;
 
 export const ATTACK_KINDS = [AttackType.MELEE, AttackType.RANGED] as const;
 

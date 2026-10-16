@@ -137,6 +137,12 @@ export interface BonusActionData {
   targetParticipantIds?: string[];
 }
 
+export interface AuraZoneData {
+  participantId: string;
+  auraId: string;
+  targetIds: string[];
+}
+
 export interface AbilityActionData {
   participantId: string;
   abilityKey: string;

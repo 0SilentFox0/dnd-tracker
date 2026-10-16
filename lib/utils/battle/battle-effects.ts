@@ -57,7 +57,7 @@ export const isInitiativeOnly = (e: ActiveEffect) =>
   !!e.abilityEffects?.length && e.effects.length === 0 && e.abilityEffects.every((s) => s.kind === "modifyStat" && s.stat === "initiative");
 
 export function armEffects(effects: ActiveEffect[]): ActiveEffect[] {
-  return effects.map((e) => (e.armed || e.countdownAtTurnStart || isInitiativeOnly(e) ? e : { ...e, armed: true }));
+  return effects.map((e) => (e.armed || e.permanent || e.countdownAtTurnStart || isInitiativeOnly(e) ? e : { ...e, armed: true }));
 }
 
 /** Після сортування черги на початку раунду: відлік для ефектів ініціативи. */

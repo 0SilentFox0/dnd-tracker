@@ -6,8 +6,9 @@ import dynamic from "next/dynamic";
 import { ActionGrid } from "./ActionGrid";
 import { TurnCountdown } from "./TurnCountdown";
 
+import { AuraZonePicker } from "@/components/battle/wizards/AuraZonePicker";
 import { AiRollButton, DiceGrid } from "@/components/battle/wizards/DiceInput";
-import { rollDie, useAttackWizard, useBattleScene, useBonusSpells, usePlayerTurn, useSpellBook } from "@/lib/hooks/battle";
+import { rollDie, useAttackWizard, useAuraZones, useBattleScene, useBonusSpells, usePlayerTurn, useSpellBook } from "@/lib/hooks/battle";
 import { COUNTDOWN_SECONDS } from "@/lib/utils/battle/flows";
 import { usableAbilities } from "@/lib/utils/battle/view";
 import type { BattleParticipant } from "@/types/battle";
@@ -26,6 +27,8 @@ export function MyTurnControls({ hero }: { hero: BattleParticipant }) {
   const attack = useAttackWizard(hero, turn.afterAction);
 
   const book = useSpellBook(hero, { allSpells: isDM, onDone: turn.afterAction });
+
+  const zone = useAuraZones(hero);
 
   const [bonusOpen, setBonusOpen] = useState(false);
 
@@ -46,6 +49,7 @@ export function MyTurnControls({ hero }: { hero: BattleParticipant }) {
           <div className="mt-2"><AiRollButton onClick={() => void turn.rollMorale(rollDie(10))} /></div>
         </div>
       )}
+      {turn.phase === "acting" && zone && <div className="pt-3"><AuraZonePicker step={zone} /></div>}
       {(turn.phase === "acting" || turn.phase === "countdown") && (
         <ActionGrid
           turn={turn}

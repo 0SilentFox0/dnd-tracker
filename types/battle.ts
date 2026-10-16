@@ -62,6 +62,8 @@ export interface ActiveEffect {
   source?: { participantId: string; name: string; abilityName?: string; icon?: string | null; personal?: boolean };
   /** постійний ефект (пасивне персональне вміння) — без відліку раундів */
   permanent?: boolean;
+  /** ефект зони аури: діє, поки власник живий; key — спільний для однакових аур різних власників */
+  zone?: { ownerId: string; key: string };
 }
 
 /**

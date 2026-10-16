@@ -11,7 +11,7 @@ export const LimitsSchema = z.object({
   chance: z.number().min(1).max(100).optional(),
 });
 
-const PASSIVE_TARGETS = new Set(["self", "allAllies", "allEnemies"]);
+const PASSIVE_TARGETS = new Set(["self", "allAllies", "allEnemies", "nearbyAllies", "nearbyEnemies"]);
 
 function effectIssues(effect: Effect, trigger: Trigger, hasCondition: boolean): string[] {
   const issues: string[] = [];
@@ -24,7 +24,11 @@ function effectIssues(effect: Effect, trigger: Trigger, hasCondition: boolean): 
     if ("duration" in effect && effect.duration) issues.push("Пасивка діє постійно — без duration");
 
     if ("target" in effect && effect.target && !PASSIVE_TARGETS.has(effect.target)) {
-      issues.push("Ціль пасивки: self, allAllies або allEnemies");
+      issues.push("Ціль пасивки: self, allAllies, allEnemies, nearbyAllies або nearbyEnemies");
+    }
+
+    if (effect.kind === "modifyStat" && isBakedStat(effect.stat) && effect.stat !== "morale" && (effect.target === "nearbyAllies" || effect.target === "nearbyEnemies")) {
+      issues.push(`${effect.stat} не діє через зону аури`);
     }
 
     if (effect.kind === "modifyStat" && isBakedStat(effect.stat) && hasCondition) {

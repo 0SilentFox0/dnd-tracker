@@ -22,6 +22,7 @@ import {
   resetBattle,
   rollbackBattleAction,
   scaleBattleUnits,
+  setAuraZone,
   startBattle,
   updateBattle,
   updateBattleParticipant,
@@ -32,6 +33,7 @@ import { acceptFullBattle } from "@/lib/utils/battle/client/apply-delta";
 import type {
   AbilityActionData,
   AttackData,
+  AuraZoneData,
   BattleScene,
   BonusActionData,
   MoraleCheckData,
@@ -152,6 +154,9 @@ export const useMoraleCheck = (c: string, b: string, o: ActionOpts = {}) =>
 
 export const useAbilityAction = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<AbilityActionData>(c, b, (data) => abilityAction(c, b, data), o);
+
+export const useAuraZone = (c: string, b: string, o: ActionOpts = {}) =>
+  useBattleAction<AuraZoneData>(c, b, (data) => setAuraZone(c, b, data), o);
 
 export const useBonusAction = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<BonusActionData>(c, b, (data) => bonusAction(c, b, data), o);

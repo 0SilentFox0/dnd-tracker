@@ -5,6 +5,7 @@ export {
   useAbilityAction,
   useAddBattleParticipant,
   useAttack,
+  useAuraZone,
   useBattle,
   useBonusAction,
   useCastSpell,
