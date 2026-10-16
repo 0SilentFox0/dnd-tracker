@@ -24,7 +24,7 @@
 .circle-2 { --m1: #5d6670; --m2: #eef3f8; --mt: #1d2026; }
 .circle-3 { --m1: #7a5408; --m2: #ffd75a; --mt: #2a1d05; }
 .circle-4 { --m1: #1d5b78; --m2: #9ff0ff; --mt: #06202c; }
-.circle-5 { --m1: #8d93a0; --m2: #ffffff; --mt: #2b2f3a; }
+.circle-5 { --m1: #121217; --m2: #5b5e6e; --mt: #f5cf55; }
 :is(.circle-0, .circle-1, .circle-2, .circle-3, .circle-4, .circle-5).metal-fill {
   background: linear-gradient(160deg, var(--m1) 0%, var(--m2) 32%, #ffffff 46%, var(--m2) 58%, var(--m1) 100%);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7), inset 0 -2px 3px rgba(0, 0, 0, .35);
