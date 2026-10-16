@@ -114,11 +114,11 @@ export function ResultOverlay() {
   const crit = result.kind === "crit";
 
   return (
-    <div onClick={close} className={cn(shell, crit ? "bg-[radial-gradient(circle_at_50%_40%,rgba(232,199,122,.38),rgba(10,8,6,.94)_60%)]" : "bg-[radial-gradient(circle_at_50%_42%,rgba(156,42,29,.32),rgba(8,6,5,.93)_58%)]")}>
+    <div onClick={close} className={cn(shell, "backdrop-blur-[3px]", crit ? "bg-[radial-gradient(circle_at_50%_40%,rgba(92,70,30,.9),rgba(10,8,6,.95)_60%)]" : "bg-[radial-gradient(circle_at_50%_42%,rgba(62,20,14,.9),rgba(8,6,5,.95)_58%)]")}>
       {crit && <div className="pointer-events-none absolute left-1/2 top-[40%] size-[1100px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[repeating-conic-gradient(rgba(232,199,122,.18)_0_6deg,transparent_6deg_20deg)] [mask:radial-gradient(circle,#000_20%,transparent_65%)] animate-[hud-spin_8s_linear_infinite]" />}
       {crit && <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(255,236,190,.6),transparent_60%)] animate-[hud-fade_.6s_.6s_reverse_both]" />}
       {crit && <div className={cn(die, "relative mb-4 size-[88px] bg-[#e8c77a] text-[40px] text-[#2a1d05] shadow-[0_0_28px_rgba(232,199,122,.7)]")}>{result.d20}</div>}
-      <div className={cn("absolute left-[-10%] right-[-10%] top-[40%] animate-[hud-slash_.3s_ease-out_both]", crit ? "[animation-delay:.6s] h-1.5 rotate-[-24deg] bg-gradient-to-r from-transparent via-[#fff6dc] to-transparent shadow-[0_0_24px_#e8c77a]" : "h-[3px] rotate-[-18deg] bg-gradient-to-r from-transparent via-hud-bone to-transparent opacity-80")} />
+      <div className={cn("absolute left-1/2 top-[40%] w-[min(120%,560px)] -translate-x-1/2 animate-[hud-slash_.3s_ease-out_both]", crit ? "[animation-delay:.6s] h-1.5 rotate-[-24deg] bg-gradient-to-r from-transparent via-[#fff6dc] to-transparent shadow-[0_0_24px_#e8c77a]" : "h-[3px] rotate-[-18deg] bg-gradient-to-r from-transparent via-hud-bone to-transparent opacity-80")} />
       <div className={cn("hud-sc relative font-extrabold tracking-[.12em] animate-[hud-rise_.5s_both]", crit ? "text-[34px] leading-10 text-[#f3dc9a] [text-shadow:0_0_24px_rgba(232,199,122,.6)]" : "text-[34px] text-[var(--ink)]")}>{crit ? "Критичне влучання" : "Влучання"}</div>
       <div className={cn("hud-sc relative mt-4 font-extrabold animate-[hud-pop_.45s_.65s_cubic-bezier(.16,1,.3,1)_both]", crit ? "text-[64px] text-[#ffd36a] [text-shadow:0_0_30px_rgba(232,199,122,.8)]" : "text-[52px] text-[#e9705a]")}>−{result.damage}</div>
       {crit && <CritEffectLine effect={result.critEffect} tone="text-[#f3dc9a]" />}
