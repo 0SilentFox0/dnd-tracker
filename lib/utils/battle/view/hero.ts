@@ -3,6 +3,7 @@ import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
 import { withinLimits } from "@/lib/utils/abilities/engine/usage";
 import { deadTargetRules, isEligibleDeadTarget } from "@/lib/utils/abilities/target-rules";
+import { calculateAttackBonus } from "@/lib/utils/battle/attack/bonus";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
@@ -117,7 +118,7 @@ export function weaponPreview(p: BattleParticipant, attack: BattleAttack, all: B
 
   const estimate = averageAttackDamage(p, attack, all).total;
 
-  return { bonuses, estimate };
+  return { bonuses, estimate, toHit: calculateAttackBonus(p, attack, all), formula: heroAttackDamageParts(p, attack).formula };
 }
 
 export function damageDiceSlots(p: BattleParticipant, attack: BattleAttack): number[] {

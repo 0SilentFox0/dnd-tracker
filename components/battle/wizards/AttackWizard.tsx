@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, Swords } from "lucide-react";
+import { Crosshair, Loader2, Swords } from "lucide-react";
 
 import { AiRollButton, DamageDice, DiceGrid } from "./DiceInput";
 
@@ -60,15 +60,15 @@ export function AttackWizard({ wizard }: { wizard: Wizard }) {
         <div className="space-y-2">
           {attacks.map((a) => (
             <button key={a.id ?? a.name} type="button" onClick={() => wizard.selectWeapon(a)} className={cn("flex h-[76px] w-full items-center gap-3 border px-3 text-left", (a.id ?? a.name) === state.attackId ? "border-[var(--enemy)] bg-[var(--enemy)]/15" : "border-white/15")}>
-              <Swords className="size-7 text-[var(--gold)]" />
+              {a.type === AttackType.RANGED ? <Crosshair className="size-7 shrink-0 text-[var(--gold)]" /> : <Swords className="size-7 shrink-0 text-[var(--gold)]" />}
               <span className="min-w-0 flex-1">
                 <span className="hud-sc block text-[17px] font-bold">{a.name}</span>
-                <span className="block text-[13px] text-[#a89c88]">{a.type === AttackType.MELEE ? "ближній" : "дальній"} · +{a.attackBonus} до влучання</span>
+                <span className="block text-[13px] text-[#a89c88]">{a.type === AttackType.MELEE ? "ближній" : "дальній"} · {signed(wizard.previews[a.id ?? a.name]?.toHit ?? a.attackBonus)} до влучання</span>
                 <span className="mt-1 flex flex-wrap gap-x-2.5 text-xs text-[#cdb87e]">
                   {wizard.previews[a.id ?? a.name]?.bonuses.map((b) => <span key={b.label}>{b.label} {b.percent ? `${signed(b.percent)}%` : signed(b.flat)}</span>)}
                 </span>
               </span>
-              <span className="w-[72px] text-right text-[15px]">{a.damageDice}<small className="block text-xs text-[var(--hud-muted)]">≈ {wizard.previews[a.id ?? a.name]?.estimate}</small></span>
+              <span className="w-[72px] text-right text-[15px]">{wizard.previews[a.id ?? a.name]?.formula || a.damageDice}<small className="block text-xs text-[var(--hud-muted)]">≈ {wizard.previews[a.id ?? a.name]?.estimate}</small></span>
             </button>
           ))}
         </div>
