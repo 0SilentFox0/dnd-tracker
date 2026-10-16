@@ -50,4 +50,22 @@ describe("server-rolled second d20", () => {
     expect(predictRollMode(attacker(), target, sword, [attacker(), target])).toBe("advantage");
     expect(predictRollMode(attacker(), makeParticipant({ id: "p", side: ParticipantSide.ENEMY }), sword, [attacker()])).toBe("normal");
   });
+
+  it("predictRollMode includes certain before-phase triggers, but not chance-based ones", () => {
+    const target = makeParticipant({ id: "s", side: ParticipantSide.ENEMY });
+
+    const firstShot = resolved({ trigger: { event: "attack", phase: "before", role: "attacker" }, limits: { perBattle: 1 }, effects: [{ kind: "flag", flag: "advantage", attackKind: "all" }] });
+
+    const lucky = resolved({ trigger: { event: "attack", phase: "before", role: "attacker" }, limits: { chance: 50 }, effects: [{ kind: "flag", flag: "advantage", attackKind: "all" }] });
+
+    const withAbility = (a: typeof firstShot) => {
+      const p = makeParticipant({ id: "a", abilities: [a] });
+
+      return { ...p, battleData: { ...p.battleData, attacks: [sword] } };
+    };
+
+    expect(predictRollMode(withAbility(firstShot), target, sword, [withAbility(firstShot), target])).toBe("advantage");
+    expect(predictRollMode(withAbility(lucky), target, sword, [withAbility(lucky), target])).toBe("normal");
+    expect(predictRollMode(attacker(), makeParticipant({ id: "s", side: ParticipantSide.ENEMY, abilities: [semgrun] }), sword, [attacker()])).toBe("disadvantage");
+  });
 });

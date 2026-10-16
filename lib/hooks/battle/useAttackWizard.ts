@@ -89,7 +89,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
     if (!attacker || !attack || !target) return "miss";
 
-    const { totalBonus, targetAC } = predictAttackNumbers(attacker, target, attack, order);
+    const { totalBonus, targetAC } = predictAttackNumbers(attacker, target, attack, order, scene.battle.currentRound);
 
     const r = resolveAttackRoll(
       { attackRoll: d20, ...(state.mode === "advantage" && second !== undefined && { advantageRoll: second }), ...(state.mode === "disadvantage" && second !== undefined && { disadvantageRoll: second }) },
@@ -197,7 +197,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     confirmTargets: () => {
       const first = byId(state.targetIds[0]);
 
-      if (attacker && attack && first) dispatch({ type: "SET_MODE", mode: predictRollMode(attacker, first, attack, order) });
+      if (attacker && attack && first) dispatch({ type: "SET_MODE", mode: predictRollMode(attacker, first, attack, order, scene.battle.currentRound) });
 
       dispatch({ type: "CONFIRM_TARGETS" });
     },

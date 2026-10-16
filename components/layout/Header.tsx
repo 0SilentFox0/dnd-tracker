@@ -41,12 +41,15 @@ export function Header({ email }: { email: string | null }) {
 
   const isPlayerPage = !isDMPage && isCampaignPage;
 
+  const isBattlePage = /^\/campaigns\/[^/]+\/battles\/[^/]+$/.test(pathname ?? "");
+
+  const width = isBattlePage ? "w-full px-6" : "container mx-auto px-4";
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-hud-rule bg-[#0b0908]/[.97]">
       <HudPortalClassProvider value={HUD_SURFACE}>
-      <div className="container mx-auto flex h-14 items-center justify-between px-4">
+      <div className={`${width} flex h-14 items-center justify-between`}>
         <div className="flex items-center gap-2">
-          {/* Кнопка "На головну" */}
           <Link href="/campaigns">
             <Button variant="ghost" size="icon" className="h-9 w-9 text-hud-gold hover:bg-transparent hover:text-[#e6c25a]">
               <Home className="h-4 w-4" />
@@ -54,7 +57,6 @@ export function Header({ email }: { email: string | null }) {
             </Button>
           </Link>
 
-          {/* Меню навігації для кампанії */}
           {isCampaignPage && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -124,7 +126,6 @@ export function Header({ email }: { email: string | null }) {
           )}
         </div>
 
-        {/* Інформація про користувача та вихід */}
         <div className="flex items-center gap-2">
           <AbbreviationsInfoDialog />
           {email && (
@@ -156,7 +157,7 @@ export function Header({ email }: { email: string | null }) {
           </DropdownMenu>
         </div>
       </div>
-      <div className="container mx-auto px-4 pb-2">
+      <div className={`${width} pb-2`}>
         <Breadcrumbs />
       </div>
       <form ref={signOutForm} action="/auth/signout" method="post" hidden />

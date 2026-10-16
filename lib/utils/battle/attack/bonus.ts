@@ -1,6 +1,7 @@
 import { AttackType } from "@/lib/constants/battle";
 import { collectModifiers, findFlags, statWithModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
+import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
@@ -51,27 +52,43 @@ export function hasDisadvantage(
   return !!opts.targetId && findFlags(ps, opts.targetId, "disadvantageForAttackers", opts.targetExtra).length > 0;
 }
 
-/** Числа для прогнозу влучання на клієнті — ті самі, що рахує сервер (без модифікаторів фази before). */
+// Тригери з шансом < 100 % не передбачаємо — їх кидає сервер.
+const CERTAIN_ONLY = () => 0.9999;
+
+function previewBefore(attacker: BattleParticipant, target: BattleParticipant, attack: BattleAttack, participants: BattleParticipant[], round: number) {
+  const ps = withSelf(withSelf(participants, target), attacker);
+
+  const r = runAbilities(ps, { type: "attack", phase: "before", actorId: attacker.basicInfo.id, targetId: target.basicInfo.id, attackKind: attackKindOf(attack.type) }, { round, rng: CERTAIN_ONLY });
+
+  const self = r.participants.find((p) => p.basicInfo.id === attacker.basicInfo.id) ?? attacker;
+
+  return { ps: r.participants, self, extra: r.actionModifiers[attacker.basicInfo.id], targetExtra: r.actionModifiers[target.basicInfo.id] };
+}
+
+/** Числа для прогнозу влучання на клієнті — ті самі, що рахує сервер (тригери фази before — лише гарантовані). */
 export function predictAttackNumbers(
   attacker: BattleParticipant,
   target: BattleParticipant,
   attack: BattleAttack,
   participants: BattleParticipant[],
+  round = 1,
 ): { totalBonus: number; targetAC: number } {
-  const ps = withSelf(withSelf(participants, target), attacker);
+  const { ps, self, extra, targetExtra } = previewBefore(attacker, target, attack, participants, round);
 
   return {
-    totalBonus: calculateAttackBonus(attacker, attack, ps),
-    targetAC: statWithModifiers(ps, target.basicInfo.id, "armor", target.combatStats.armorClass),
+    totalBonus: calculateAttackBonus(self, attack, ps, extra),
+    targetAC: statWithModifiers(ps, target.basicInfo.id, "armor", target.combatStats.armorClass, { extra: targetExtra }),
   };
 }
 
-export function predictRollMode(attacker: BattleParticipant, target: BattleParticipant, attack: BattleAttack, participants: BattleParticipant[]): "advantage" | "disadvantage" | "normal" {
-  const ps = withSelf(withSelf(participants, target), attacker);
+export function predictRollMode(attacker: BattleParticipant, target: BattleParticipant, attack: BattleAttack, participants: BattleParticipant[], round = 1): "advantage" | "disadvantage" | "normal" {
+  const { ps, self, extra, targetExtra } = previewBefore(attacker, target, attack, participants, round);
 
-  const adv = hasAdvantage(attacker, attack, ps, undefined, { targetId: target.basicInfo.id });
+  const opts = { targetId: target.basicInfo.id, targetExtra };
 
-  const dis = hasDisadvantage(attacker, attack, ps, { targetId: target.basicInfo.id });
+  const adv = hasAdvantage(self, attack, ps, extra, opts);
+
+  const dis = hasDisadvantage(self, attack, ps, { ...opts, extra });
 
   return adv === dis ? "normal" : adv ? "advantage" : "disadvantage";
 }
