@@ -1,7 +1,7 @@
 import { ABILITY_LABELS } from "@/lib/constants/abilities";
 import type { AbilityTarget, Amount, CONDITION_KEYS, DamageFilterKind, Flat, Limits, StatKey } from "@/lib/utils/abilities/schema";
-import { signed } from "@/lib/utils/format";
-import { pluralUk } from "@/lib/utils/plural";
+import { signed } from "@/lib/utils/common/format";
+import { pluralUk } from "@/lib/utils/common/plural";
 
 export const STAT_LABELS: Record<StatKey, string> = {
   armor: "AC",

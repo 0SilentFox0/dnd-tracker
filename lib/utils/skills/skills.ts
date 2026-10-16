@@ -1,5 +1,6 @@
 import { getSkillMainSkillId } from "./skill-helpers";
 
+import { isUngroupedKey, UNGROUPED_KEY } from "@/lib/constants/ungrouped";
 import type { MainSkill } from "@/types/main-skills";
 import type { GroupedSkill, Skill } from "@/types/skills";
 
@@ -22,7 +23,7 @@ export function groupSkillsByMainSkill(
   const grouped = new Map<string, (Skill | GroupedSkill)[]>();
 
   skills.forEach((skill) => {
-    let groupName = "Без основного навику";
+    let groupName = UNGROUPED_KEY;
 
     const mainSkillId = getMainSkillId(skill);
 
@@ -69,10 +70,9 @@ export function convertGroupedSkillsToArray(
 
     const nameBSafe = nameB || "";
     
-    // "Без групи" або "Без основного навику" завжди останній
-    if (nameASafe === "Без групи" || nameASafe === "Без основного навику") return 1;
+    if (isUngroupedKey(nameASafe)) return 1;
 
-    if (nameBSafe === "Без групи" || nameBSafe === "Без основного навику") return -1;
+    if (isUngroupedKey(nameBSafe)) return -1;
 
     return nameASafe.localeCompare(nameBSafe);
   });

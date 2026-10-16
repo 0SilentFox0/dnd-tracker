@@ -6,7 +6,7 @@ import { applyRawDamage } from "@/lib/utils/abilities/engine/hp";
 import { applyEffect } from "@/lib/utils/abilities/registry/effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import { applyDamageToTarget } from "@/lib/utils/battle/attack/process/damage";
-import { processStartOfTurn } from "@/lib/utils/battle/battle-turn";
+import { processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
 
 function cast(effect: Effect) {
   const ps = [makeParticipant({ id: "o" }), makeParticipant({ id: "t", side: ParticipantSide.ENEMY })];

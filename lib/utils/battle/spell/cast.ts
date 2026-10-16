@@ -14,6 +14,7 @@ import { resolveTargetIds } from "@/lib/utils/abilities/engine/targets";
 import type { SummonRequest } from "@/lib/utils/abilities/engine/types";
 import { applyEffect } from "@/lib/utils/abilities/registry/effects";
 import type { Amount, Effect } from "@/lib/utils/abilities/schema";
+import { rollDie } from "@/lib/utils/common/dice";
 import type { RaceModifier } from "@/lib/utils/spells/model/schema";
 import type { AbilityEvent, ResolvedAbility } from "@/types/abilities";
 import type { BattleAction, BattleParticipant, DamageStep } from "@/types/battle";
@@ -194,7 +195,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     if (withSave && def.resolution.kind === "save") {
       const { ability: saveAbility, onSuccess } = def.resolution;
 
-      const roll = saveRolls.find((s) => s.participantId === id)?.roll ?? Math.floor(rng() * 20) + 1;
+      const roll = saveRolls.find((s) => s.participantId === id)?.roll ?? rollDie(20, rng);
 
       const dc = spellSaveDc(updatedCaster);
 

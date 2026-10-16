@@ -5,6 +5,7 @@ import { useState } from "react";
 import { EntityIcon } from "@/components/common/EntityIcon";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { UnitCard } from "@/components/units/list/UnitCard";
+import { UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
 import { parseUnitDragPayload, planUnitDrop, UNIT_DRAG_TYPE, type UnitDropTarget } from "@/lib/utils/units/drag";
 import { raceIdOfGroup, type UnitRaceGroup } from "@/lib/utils/units/group-units";
 import type { Race } from "@/types/races";
@@ -22,7 +23,7 @@ const carriesUnit = (e: React.DragEvent) => e.dataTransfer.types.includes(UNIT_D
 export function UnitGroupAccordion({ group, campaignId, onDeleteUnit, onDrop }: UnitGroupAccordionProps) {
   const [over, setOver] = useState<string | null>(null);
 
-  const title = group.race?.name ?? "Без раси";
+  const title = group.race?.name ?? UNGROUPED_LABELS.race;
 
   const allowDrop = (e: React.DragEvent) => {
     if (!carriesUnit(e)) return;
@@ -44,7 +45,7 @@ export function UnitGroupAccordion({ group, campaignId, onDeleteUnit, onDrop }: 
     onDrop(payload.unitId, data);
   };
 
-  const highlight = (key: string) => (over === key ? "bg-[rgba(230,194,90,.08)] ring-1 ring-[#e6c25a]/60" : "");
+  const highlight = (key: string) => (over === key ? "bg-[rgba(230,194,90,.08)] ring-1 ring-hud-gold-strong/60" : "");
 
   return (
     <AccordionItem value={group.key} className="border-l-4" style={group.race?.color ? { borderLeftColor: group.race.color } : undefined}>

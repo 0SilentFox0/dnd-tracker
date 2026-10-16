@@ -1,5 +1,4 @@
-import { applyResistance } from "./resistance";
-
+import { applyResistance } from "@/lib/utils/battle/resistance";
 import { ActiveEffect, BattleParticipant } from "@/types/battle";
 
 export function applyDOTEffects(

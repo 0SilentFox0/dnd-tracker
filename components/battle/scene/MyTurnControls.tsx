@@ -8,11 +8,12 @@ import { TurnCountdown } from "./TurnCountdown";
 
 import { AuraZonePicker } from "@/components/battle/wizards/AuraZonePicker";
 import { AiRollButton, DiceGrid } from "@/components/battle/wizards/DiceInput";
-import { rollDie, useAttackWizard, useAuraZones, useBattleScene, useBonusSpells, usePlayerTurn, useSpellBook } from "@/lib/hooks/battle";
+import { useAttackWizard, useAuraZones, useBattleScene, useBonusSpells, usePlayerTurn, useSpellBook } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
-import { moraleTriggerRolls } from "@/lib/utils/battle/battle-morale";
 import { COUNTDOWN_SECONDS } from "@/lib/utils/battle/flows";
+import { moraleTriggerRolls } from "@/lib/utils/battle/morale/check";
 import { usableAbilities } from "@/lib/utils/battle/view";
+import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
 import type { BattleParticipant } from "@/types/battle";
 
 const AttackWizard = dynamic(() => import("@/components/battle/wizards/AttackWizard").then((m) => m.AttackWizard), { ssr: false });
@@ -55,7 +56,7 @@ export function MyTurnControls({ hero }: { hero: BattleParticipant }) {
             </div>
           )}
           <DiceGrid sides={10} onPick={(v) => void turn.rollMorale(v)} highlight={morale.kind ? { rolls: morale.rolls, tone: morale.kind === "extra" ? "gold" : "danger" } : undefined} />
-          <div className="mt-2"><AiRollButton onClick={() => void turn.rollMorale(rollDie(10))} /></div>
+          <div className="mt-2"><AiRollButton onClick={() => void turn.rollMorale(rollDie(10, cryptoRandom))} /></div>
         </div>
       )}
       {turn.phase === "acting" && zone && <div className="pt-3"><AuraZonePicker step={zone} /></div>}

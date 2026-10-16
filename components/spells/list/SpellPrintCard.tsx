@@ -4,12 +4,13 @@ import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { spellLevelName, spellLevelRoman } from "@/lib/constants/spells";
+import { UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
 import { spellMechanicsLabels } from "@/lib/utils/spells/model/summary";
 import { getSpellGroupIcon } from "@/lib/utils/spells/spell-icons";
 import type { Spell } from "@/types/spells";
 
 export function SpellPrintCard({ spell }: { spell: Spell }) {
-  const SpellGroupIcon = getSpellGroupIcon(spell.spellGroup?.name || "Без групи");
+  const SpellGroupIcon = getSpellGroupIcon(spell.spellGroup?.name || UNGROUPED_LABELS.spellGroup);
 
   return (
     <Card className="hover:shadow-md transition-shadow h-full flex flex-col">
@@ -49,7 +50,7 @@ export function SpellPrintCard({ spell }: { spell: Spell }) {
         <CardDescription className="flex flex-wrap gap-1 sm:gap-2 mt-2">
           <Badge variant="outline" className="flex items-center gap-1 text-xs">
             <SpellGroupIcon className="h-3 w-3" />
-            <span className="hidden sm:inline">{spell.spellGroup?.name || "Без групи"}</span>
+            <span className="hidden sm:inline">{spell.spellGroup?.name || UNGROUPED_LABELS.spellGroup}</span>
             <span className="sm:hidden truncate max-w-[60px]">{spell.spellGroup?.name?.[0] || "-"}</span>
           </Badge>
           {spellMechanicsLabels(spell).map((label) => (

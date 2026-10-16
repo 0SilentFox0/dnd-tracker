@@ -14,8 +14,6 @@ export const createMainSkillSchema = z.object({
   spellGroupId: z.string().nullable().optional(),
 });
 
-export type CreateMainSkillInput = z.infer<typeof createMainSkillSchema>;
-
 export const updateMainSkillSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   color: z.string().min(1).optional(),
@@ -23,5 +21,3 @@ export const updateMainSkillSchema = z.object({
   isEnableInSkillTree: z.boolean().optional(),
   spellGroupId: z.string().nullable().optional(),
 });
-
-export type UpdateMainSkillInput = z.infer<typeof updateMainSkillSchema>;

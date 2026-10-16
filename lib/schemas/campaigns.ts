@@ -10,8 +10,6 @@ export const createCampaignSchema = z.object({
   allowPlayerEdit: z.boolean().default(true),
 });
 
-export type CreateCampaignInput = z.infer<typeof createCampaignSchema>;
-
 export const updateCampaignSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   description: z.string().optional().nullable(),
@@ -21,10 +19,6 @@ export const updateCampaignSchema = z.object({
   status: z.enum([CampaignStatus.ACTIVE, CampaignStatus.ARCHIVED]).optional(),
 });
 
-export type UpdateCampaignInput = z.infer<typeof updateCampaignSchema>;
-
 export const joinCampaignSchema = z.object({
   inviteCode: z.string().min(1),
 });
-
-export type JoinCampaignInput = z.infer<typeof joinCampaignSchema>;

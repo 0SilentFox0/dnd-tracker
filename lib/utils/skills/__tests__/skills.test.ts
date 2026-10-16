@@ -6,6 +6,7 @@ import {
   groupSkillsByMainSkill,
 } from "../skills";
 
+import { UNGROUPED_KEY } from "@/lib/constants/ungrouped";
 import type { MainSkill } from "@/types/main-skills";
 import type { GroupedSkill, Skill } from "@/types/skills";
 
@@ -48,7 +49,7 @@ describe("skills utils", () => {
 
       const result = groupSkillsByMainSkill(skills, mainSkills);
 
-      expect(result.get("Без основного навику")).toHaveLength(1);
+      expect(result.get(UNGROUPED_KEY)).toHaveLength(1);
     });
   });
 
@@ -76,15 +77,26 @@ describe("skills utils", () => {
       expect(arr[0][0]).toBe("Бойові");
       expect(arr[1][0]).toBe("Магія");
     });
+    it("основний навик з назвою «Без основного навику» не вважається нерозподіленим", () => {
+      const map = new Map<string, (Skill | GroupedSkill)[]>();
+
+      map.set(UNGROUPED_KEY, [grouped("s1", "X")]);
+      map.set("Без основного навику", [grouped("s2", "Y")]);
+
+      const arr = convertGroupedSkillsToArray(map);
+
+      expect(arr.map(([k]) => k)).toEqual(["Без основного навику", UNGROUPED_KEY]);
+    });
+
     it("ставить «Без основного навику» в кінець", () => {
       const map = new Map<string, (Skill | GroupedSkill)[]>();
 
-      map.set("Без основного навику", [grouped("s1", "X")]);
+      map.set(UNGROUPED_KEY, [grouped("s1", "X")]);
       map.set("А", [grouped("s2", "Y")]);
 
       const arr = convertGroupedSkillsToArray(map);
 
-      expect(arr[arr.length - 1][0]).toBe("Без основного навику");
+      expect(arr[arr.length - 1][0]).toBe(UNGROUPED_KEY);
     });
   });
 });

@@ -123,3 +123,16 @@ export function rollDice(formula: string, rng: () => number = Math.random): numb
 
   return Math.max(0, rollDiceList(formula, rng).reduce((sum, roll) => sum + roll, parsed.flat));
 }
+
+export function rollDie(sides: number, rng: () => number = Math.random): number {
+  return Math.floor(rng() * sides) + 1;
+}
+
+/** Кидки гравця в браузері — криптографічний генератор. */
+export function cryptoRandom(): number {
+  const buf = new Uint32Array(1);
+
+  crypto.getRandomValues(buf);
+
+  return buf[0] / 2 ** 32;
+}

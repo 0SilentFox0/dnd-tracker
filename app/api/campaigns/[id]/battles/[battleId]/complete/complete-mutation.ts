@@ -1,9 +1,9 @@
 import { z } from "zod";
 
 import { BattleStatus } from "@/lib/constants/battle";
-import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/battle-victory";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { battleActionToEvent } from "@/lib/utils/battle/store";
+import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/turn/victory";
 
 export const completeBattleSchema = z.object({ result: z.enum(["victory", "defeat"]).optional() });
 

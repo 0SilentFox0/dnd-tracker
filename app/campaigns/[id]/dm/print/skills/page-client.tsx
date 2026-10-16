@@ -5,6 +5,7 @@ import { Printer } from "lucide-react";
 
 import { SkillCard } from "@/components/skills/list/SkillCard";
 import { Button } from "@/components/ui/button";
+import { groupDisplayName, UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
 import { PLACEMENT_UNPLACED, skillPlacements } from "@/lib/utils/skills/progression";
 import {
   convertGroupedSkillsToArray,
@@ -101,7 +102,7 @@ export function PrintSkillsPageClient({
             >
               <div className="flex items-center gap-2 py-1.5">
                 <div className="leading-tight">
-                  <h2 className="text-base font-semibold">{groupName}</h2>
+                  <h2 className="text-base font-semibold">{groupDisplayName(groupName, UNGROUPED_LABELS.mainSkill)}</h2>
                   {mainSkill?.spellGroupName && (
                     <p className="text-xs text-muted-foreground">
                       Школа магії: {mainSkill.spellGroupName}

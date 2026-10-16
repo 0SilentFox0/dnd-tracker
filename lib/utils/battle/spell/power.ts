@@ -2,7 +2,7 @@ import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { archetypeLabel, heroMagicMultiplier } from "@/lib/utils/battle/damage/hero-dm-multiplier";
-import { signed } from "@/lib/utils/format";
+import { signed } from "@/lib/utils/common/format";
 import type { BattleParticipant } from "@/types/battle";
 
 export function spellcastingModifier(p: BattleParticipant): { mod: number; label: string } {

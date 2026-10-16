@@ -1,20 +1,6 @@
+import { ATTACK_KIND_LABELS, type AttackType, BATTLE_ACTION_LABELS } from "@/lib/constants/battle";
+import { capitalize } from "@/lib/utils/common/text";
 import type { BattleAction } from "@/types/battle";
-
-export const BATTLE_ACTION_LABELS: Record<string, string> = {
-  attack: "Атака",
-  spell: "Заклинання",
-  bonus_action: "Бонусна дія",
-  ability: "Здібність",
-  end_turn: "Кінець ходу",
-  skip_turn: "Пропуск ходу",
-  morale_skip: "Пропуск (мораль)",
-  retaliation: "Відсіч",
-};
-
-const ATTACK_KIND_LABELS: Record<string, string> = {
-  melee: "Ближня",
-  ranged: "Дальня",
-};
 
 /**
  * Отримує деталізований ярлик для атаки/заклинання
@@ -23,7 +9,7 @@ function getActionSubLabel(action: BattleAction): string {
   const d = action.actionDetails;
 
   if (action.actionType === "attack" && d?.attackKind) {
-    return ATTACK_KIND_LABELS[d.attackKind] ?? d.attackKind;
+    return ATTACK_KIND_LABELS[d.attackKind as AttackType] ?? d.attackKind;
   }
 
   if (action.actionType === "spell" && d?.spellName) {
@@ -81,7 +67,7 @@ export function formatLogEntry(action: BattleAction): string {
     }
   }
 
-  const label = BATTLE_ACTION_LABELS[action.actionType] ?? action.actionType;
+  const label = capitalize(BATTLE_ACTION_LABELS[action.actionType as keyof typeof BATTLE_ACTION_LABELS] ?? action.actionType);
 
   const prefix = targets ? label + " → " + targets + ": " : label + ": ";
 
@@ -103,7 +89,7 @@ export function getLogEntryDetailLines(action: BattleAction): string[] {
   const lines: string[] = [];
 
   if (action.actionType === "attack" && d?.attackKind) {
-    lines.push("Тип: " + (ATTACK_KIND_LABELS[d.attackKind] ?? d.attackKind) + " атака");
+    lines.push("Тип: " + (ATTACK_KIND_LABELS[d.attackKind as AttackType] ?? d.attackKind) + " атака");
   }
 
   if (d?.weaponName) lines.push("Зброя: " + d.weaponName);

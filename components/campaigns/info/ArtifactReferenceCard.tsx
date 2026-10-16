@@ -9,13 +9,11 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Label } from "@/components/ui/label";
-import { ARTIFACT_RARITY_OPTIONS } from "@/lib/constants/artifacts";
+import { artifactRarityLabel } from "@/lib/constants/artifacts";
 import type { ArtifactForReference } from "@/types/info-reference";
 
-const rarityLabel = (rarity: string) => ARTIFACT_RARITY_OPTIONS.find((o) => o.value === rarity)?.label ?? rarity;
-
 export function ArtifactReferenceCard({ artifact }: { artifact: ArtifactForReference }) {
-  const meta = [artifact.rarity ? rarityLabel(artifact.rarity) : null, artifact.slotLabel].filter(Boolean).join(" · ");
+  const meta = [artifact.rarity ? artifactRarityLabel(artifact.rarity) : null, artifact.slotLabel].filter(Boolean).join(" · ");
 
   return (
     <AccordionItem

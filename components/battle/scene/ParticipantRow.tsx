@@ -8,6 +8,7 @@ import { useDamageShake, useHpChange } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { isDown } from "@/lib/utils/battle/participant/state";
 import { hpRatio } from "@/lib/utils/battle/view";
+import { signedDelta } from "@/lib/utils/common/format";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
 export const ParticipantRow = memo(function ParticipantRow({ participant, effects, exact, acText, current, onSelect }: {
@@ -31,7 +32,7 @@ export const ParticipantRow = memo(function ParticipantRow({ participant, effect
       <button type="button" aria-label={participant.basicInfo.name} onClick={() => onSelect(participant.basicInfo.id)} className="absolute inset-0" />
       {change && (
         <span key={change.id} className={cn("hud-sc pointer-events-none absolute left-6 top-2 z-10 text-[26px] font-extrabold opacity-0 [text-shadow:0_2px_6px_#000] animate-[hud-float_1.1s_ease-out]", change.delta < 0 ? "text-[#ff6a4d]" : "text-[#8fd07a]")}>
-          {change.delta < 0 ? `−${-change.delta}` : `+${change.delta}`}
+          {signedDelta(change.delta)}
         </span>
       )}
       <Portrait key={change?.id} participant={participant} size={48} current={current} className={cn(change && (change.delta < 0 ? "animate-[hud-flash-red_.5s]" : "animate-[hud-flash-green_.7s]"))} />

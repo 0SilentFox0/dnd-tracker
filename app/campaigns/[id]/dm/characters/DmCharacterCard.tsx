@@ -47,7 +47,7 @@ export function DmCharacterCard({ character, campaignId, busy, actions }: DmChar
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 shrink-0 rounded-full text-hud-gold hover:bg-transparent hover:text-[#e6c25a]"
+              className="h-8 w-8 shrink-0 rounded-full text-hud-gold hover:bg-transparent hover:text-hud-gold-strong"
               aria-label="Дії персонажа"
               onClick={(e) => e.preventDefault()}
             >

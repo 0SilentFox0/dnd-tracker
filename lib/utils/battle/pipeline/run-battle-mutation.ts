@@ -13,7 +13,6 @@ import { isActive } from "@/lib/utils/abilities/engine/participants";
 import type { Rng } from "@/lib/utils/abilities/engine/types";
 import type { BATTLE_RATE_LIMITS, RateLimitResult } from "@/lib/utils/api/rate-limit";
 import { rateLimitResponse } from "@/lib/utils/api/rate-limit";
-import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/battle-victory";
 import { controls } from "@/lib/utils/battle/common/control";
 import type {
   BattleDelta,
@@ -29,6 +28,7 @@ import {
   BattleRuleError,
   eventToBattleAction,
 } from "@/lib/utils/battle/store";
+import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/turn/victory";
 import type { BattleKnowledge } from "@/lib/utils/battle/view/knowledge";
 import { alwaysSeesEnemyStats } from "@/lib/utils/battle/view/visibility";
 import type { BattleScene } from "@/types/api";

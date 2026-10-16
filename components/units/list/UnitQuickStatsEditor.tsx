@@ -62,7 +62,7 @@ function QuickStatInput({
           variant="ghost"
           size="icon"
           aria-label="Зберегти"
-          className="size-7 shrink-0 text-hud-gold hover:text-[#e6c25a]"
+          className="size-7 shrink-0 text-hud-gold hover:text-hud-gold-strong"
           disabled={disabled}
           onClick={(e) => {
             e.preventDefault();

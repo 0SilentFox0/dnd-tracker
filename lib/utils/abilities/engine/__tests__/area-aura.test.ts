@@ -5,8 +5,8 @@ import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtu
 import { applyAuraZone, areaAuras, pendingAreaAuras, zoneMembers } from "@/lib/utils/abilities/engine/area-aura";
 import { statWithModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { ownTimedMoraleFlat } from "@/lib/utils/abilities/engine/morale";
-import { decreaseEffectDurations } from "@/lib/utils/battle/battle-effects";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
+import { decreaseEffectDurations } from "@/lib/utils/battle/turn/effects";
 import type { BattleParticipant } from "@/types/battle";
 
 const fear = (id = "unit-fear-aura") =>

@@ -6,12 +6,12 @@ import { seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { findParticipant, isActive } from "@/lib/utils/abilities/engine/participants";
 import { createMockParticipant, grantPassive } from "@/lib/utils/battle/__tests__/mock-participant";
 import { hasDisadvantage } from "@/lib/utils/battle/attack/bonus";
-import { checkVictoryConditions } from "@/lib/utils/battle/battle-victory";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";
+import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 

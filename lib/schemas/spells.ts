@@ -48,18 +48,10 @@ export const createSpellGroupSchema = z.object({
   name: z.string().min(1).max(100),
 });
 
-export type CreateSpellGroupInput = z.infer<typeof createSpellGroupSchema>;
-
 export const updateSpellGroupSchema = z.object({
   name: z.string().min(1).max(100).optional(),
 });
 
-export type UpdateSpellGroupInput = z.infer<typeof updateSpellGroupSchema>;
-
 export const deleteSpellsByLevelSchema = z.object({
   level: z.number().int().min(0).max(9),
 });
-
-export type DeleteSpellsByLevelInput = z.infer<
-  typeof deleteSpellsByLevelSchema
->;

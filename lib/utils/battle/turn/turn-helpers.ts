@@ -3,7 +3,7 @@ import { restoreCharm } from "@/lib/utils/abilities/engine/charm";
 import {
   calculateAllyHpChangesOnVictory,
   checkVictoryConditions,
-} from "@/lib/utils/battle/battle-victory";
+} from "@/lib/utils/battle/turn/victory";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 export interface ApplyVictoryParams {

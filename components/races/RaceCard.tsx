@@ -154,7 +154,7 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
                             }
                           >
                             {iconToShow === "bonus" && (
-                              <Plus className="h-3 w-3 text-[#e6c25a]" />
+                              <Plus className="h-3 w-3 text-hud-gold-strong" />
                             )}
                             {iconToShow === "nonNegative" && (
                               <Shield className="h-3 w-3 text-[#8fd0e8]" />

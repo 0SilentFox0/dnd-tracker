@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
-import { moraleTriggerRolls } from "@/lib/utils/battle/battle-morale";
+import { moraleTriggerRolls } from "@/lib/utils/battle/morale/check";
 
 const withMorale = (morale: number) => {
   const p = createMockParticipant();

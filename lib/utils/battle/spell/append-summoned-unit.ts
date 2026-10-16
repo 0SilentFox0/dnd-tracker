@@ -1,6 +1,6 @@
 import { ParticipantSourceType } from "@/lib/constants/battle";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
-import { calculateInitiative } from "@/lib/utils/battle/battle-start";
+import { calculateInitiative } from "@/lib/utils/battle/turn/initiative";
 import type { BattleParticipant } from "@/types/battle";
 
 export function nextInstanceNumber(order: BattleParticipant[], unitId: string): number {

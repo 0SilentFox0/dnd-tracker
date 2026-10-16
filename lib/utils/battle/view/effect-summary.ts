@@ -1,10 +1,10 @@
 import { legacyActiveEffectModifiers } from "@/lib/utils/abilities/engine/legacy-active-effects";
 import { describeEffect } from "@/lib/utils/abilities/registry/effects";
+import { capitalize } from "@/lib/utils/common/text";
 import type { ActiveEffect } from "@/types/battle";
 
 const rounds = (n: number) => `${n} ${n % 10 === 1 && n % 100 !== 11 ? "раунд" : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? "раунди" : "раундів"}`;
 
-const capitalize = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
 
 /** Що саме робить ефект: опис або описи його модифікаторів (без повторів). */
 export function effectLines(e: ActiveEffect): string[] {

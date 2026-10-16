@@ -2,6 +2,7 @@
 
 import { SkillGroupAccordionItem } from "@/components/skills/list/SkillGroupAccordionItem";
 import { RenameGroupDialog } from "@/components/spells/dialogs/RenameGroupDialog";
+import { isUngroupedKey } from "@/lib/constants/ungrouped";
 import { useSpellGroupActions } from "@/lib/hooks/spells";
 import { calculateTotalSkillsInGroup } from "@/lib/utils/skills/skills";
 import type { GroupedSkill, Skill } from "@/types/skills";
@@ -28,8 +29,7 @@ export function SkillGroupAccordion({
 }: SkillGroupAccordionProps) {
   const groupId = spellGroups.find((g) => g.name === groupName)?.id;
 
-  const isUngrouped =
-    groupName === "Без групи" || groupName === "Без основного навику";
+  const isUngrouped = isUngroupedKey(groupName);
 
   const totalSkills = calculateTotalSkillsInGroup(skills);
 

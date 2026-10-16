@@ -52,8 +52,6 @@ export const createRaceSchema = z.object({
   spellSlotProgression: spellSlotProgressionSchema,
 });
 
-export type CreateRaceInput = z.infer<typeof createRaceSchema>;
-
 export const updateRaceSchema = z.object({
   name: z.string().trim().min(1).max(100).optional(),
   icon: raceIconSchema,

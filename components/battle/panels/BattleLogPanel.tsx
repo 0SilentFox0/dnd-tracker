@@ -15,8 +15,8 @@ import { LogEntryDetails } from "./LogEntryDetails";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { useConfirm } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
-import { formatLogEntry } from "@/lib/utils/battle/battle-log-format";
 import { canRollbackEntry } from "@/lib/utils/battle/view";
+import { formatLogEntry } from "@/lib/utils/battle/view/log-format";
 import type { BattleScene } from "@/types/api";
 import type { BattleAction } from "@/types/battle";
 

@@ -30,6 +30,3 @@ export const patchArtifactSetSchema = z.object({
     z.string().max(ARTIFACT_SET_ICON_INCOMING_MAX).nullable().optional(),
   ),
 });
-
-export type CreateArtifactSetBody = z.infer<typeof createArtifactSetSchema>;
-export type PatchArtifactSetBody = z.infer<typeof patchArtifactSetSchema>;

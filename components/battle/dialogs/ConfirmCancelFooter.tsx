@@ -1,31 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
-
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
-const FOOTER_CLASS =
-  "flex gap-2 flex-wrap [&>*]:min-h-[44px] [&>*]:touch-manipulation";
-
-export interface BattleDialogFooterProps {
-  className?: string;
-  children: ReactNode;
-}
-
-/**
- * Consistent footer layout for battle dialogs (flex gap, touch-friendly buttons).
- */
-export function BattleDialogFooter({
-  className,
-  children,
-}: BattleDialogFooterProps) {
-  return (
-    <div className={cn(FOOTER_CLASS, className)}>
-      {children}
-    </div>
-  );
-}
 
 export interface ConfirmCancelFooterProps {
   cancelLabel?: string;
@@ -34,14 +10,10 @@ export interface ConfirmCancelFooterProps {
   onConfirm: () => void;
   confirmDisabled?: boolean;
   confirmLoading?: boolean;
-  /** Shown when confirmLoading is true; defaults to confirmLabel + "…" */
   confirmLoadingLabel?: string;
   className?: string;
 }
 
-/**
- * Standard Cancel + Confirm button row for battle dialogs.
- */
 export function ConfirmCancelFooter({
   cancelLabel = "Скасувати",
   onCancel,
@@ -53,7 +25,7 @@ export function ConfirmCancelFooter({
   className,
 }: ConfirmCancelFooterProps) {
   return (
-    <BattleDialogFooter className={className}>
+    <div className={cn("flex flex-wrap gap-2 [&>*]:min-h-[44px] [&>*]:touch-manipulation", className)}>
       <Button
         type="button"
         variant="outline"
@@ -70,6 +42,6 @@ export function ConfirmCancelFooter({
       >
         {confirmLoading ? (confirmLoadingLabel ?? `${confirmLabel}…`) : confirmLabel}
       </Button>
-    </BattleDialogFooter>
+    </div>
   );
 }

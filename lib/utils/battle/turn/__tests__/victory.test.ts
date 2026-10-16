@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
-import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/battle-victory";
 import { applyVictoryCompletion } from "@/lib/utils/battle/turn/turn-helpers";
+import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/turn/victory";
 
 describe("completeBattle", () => {
   it("перемога: hpChanges містять відроджених союзників", () => {

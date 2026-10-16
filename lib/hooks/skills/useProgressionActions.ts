@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
-import { progressionKey } from "./progression-keys";
+import { skillKeys } from "./keys";
 
 import { learnNode, resetProgression, unlearnNodes } from "@/lib/api/character-progression";
 import { ApiError } from "@/lib/api/client";
@@ -29,7 +29,7 @@ export function useProgressionActions(campaignId: string, characterId: string) {
 
   const sheetRefresh = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const key = progressionKey(campaignId, characterId);
+  const key = skillKeys.progression(campaignId, characterId);
 
   const sheetKey = characterSheetKey(campaignId, characterId);
 

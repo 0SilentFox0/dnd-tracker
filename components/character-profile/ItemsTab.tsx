@@ -3,23 +3,16 @@
 import { useState } from "react";
 
 import { useProfile } from "./ProfileContext";
-import { Section } from "./Section";
 import { SetList } from "./SetList";
 import { TransferArtifactDialog } from "./TransferArtifactDialog";
 
 import { EntityIcon } from "@/components/common/EntityIcon";
+import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { ARTIFACT_GRID_9, ArtifactRarity } from "@/lib/constants/artifacts";
+import { ARTIFACT_GRID_9, ARTIFACT_RARITY_COLOR } from "@/lib/constants/artifacts";
 import { cn } from "@/lib/utils";
 import type { SheetArtifact } from "@/types/characters";
-
-const RARITY_RING: Record<string, string> = {
-  [ArtifactRarity.UNCOMMON]: "border-[#7cbf5a]",
-  [ArtifactRarity.RARE]: "border-[#8fd0e8]",
-  [ArtifactRarity.EPIC]: "border-[#c08ff0]",
-  [ArtifactRarity.LEGENDARY]: "border-[#e6c25a]",
-};
 
 export function ItemsTab() {
   const { sheet } = useProfile();
@@ -42,7 +35,7 @@ export function ItemsTab() {
           const a = sheet.items.grid[cell.key];
 
           return a ? (
-            <button key={cell.key} type="button" aria-label={`${cell.label}: ${a.name}`} onClick={() => show(a)} className={cn("flex aspect-square items-center justify-center overflow-hidden rounded-lg border-2 bg-hud-field", RARITY_RING[a.rarity ?? ""] ?? "border-hud-line")}>
+            <button key={cell.key} type="button" aria-label={`${cell.label}: ${a.name}`} onClick={() => show(a)} className={cn("flex aspect-square items-center justify-center overflow-hidden rounded-lg border-2 bg-hud-field", ARTIFACT_RARITY_COLOR[a.rarity ?? ""] ?? "border-hud-line")}>
               <EntityIcon src={a.icon} name={a.name} size={68} className="hud-sc size-full rounded-none bg-transparent text-inherit" />
             </button>
           ) : (
@@ -52,7 +45,7 @@ export function ItemsTab() {
           );
         })}
       </div>
-      <Section title="ЩО ДАЮТЬ РЕЧІ">
+      <HudSection title="ЩО ДАЮТЬ РЕЧІ">
         {sheet.items.artifacts.length === 0 && <p className="text-sm text-hud-muted">Нічого не вдягнено.</p>}
         <ul>
           {sheet.items.artifacts.map((a) => (
@@ -68,7 +61,7 @@ export function ItemsTab() {
           ))}
         </ul>
         <SetList sets={sheet.items.sets} />
-      </Section>
+      </HudSection>
       <ResponsiveDialog
         open={open}
         onOpenChange={setOpen}

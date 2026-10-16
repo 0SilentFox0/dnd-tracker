@@ -6,6 +6,7 @@ import { getRandomCriticalEffect } from "@/lib/constants/critical-effects";
 import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
+import { rollDie } from "@/lib/utils/common/dice";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 export function calculateAttackRoll(
@@ -32,7 +33,7 @@ export function calculateAttackRoll(
 
   let secondRoll: AttackRollResult["secondRoll"];
 
-  const rollSecond = () => Math.floor((opts.rng ?? Math.random)() * 20) + 1;
+  const rollSecond = () => rollDie(20, opts.rng);
 
   if (hasAdv && !hasDisadv) {
     const value = advantageRoll ?? rollSecond();

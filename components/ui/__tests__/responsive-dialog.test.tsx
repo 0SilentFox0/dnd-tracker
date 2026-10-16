@@ -201,15 +201,13 @@ describe("ResponsiveDialog portal class", () => {
   });
 });
 
-describe("BattleDialog", () => {
+describe("ResponsiveDialog size md", () => {
   afterEach(cleanup);
 
   it("на десктопі лишається шириною md, як до міграції", async () => {
     mockMatchMedia(false);
 
-    const { BattleDialog } = await import("@/components/battle/dialogs/shared/BattleDialog");
-
-    render(<BattleDialog open onOpenChange={vi.fn()} title="Атака">x</BattleDialog>);
+    render(<ResponsiveDialog open onOpenChange={vi.fn()} title="Атака" size="md" hud>x</ResponsiveDialog>);
     expect(screen.getByRole("dialog").className).toContain("sm:max-w-lg");
   });
 });

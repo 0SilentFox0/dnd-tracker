@@ -15,7 +15,7 @@ import { useAppearanceSave } from "@/lib/hooks/common";
 import {
   formatMechanicsSkill,
   getShortSkillSummary,
-} from "@/lib/utils/info-reference";
+} from "@/lib/utils/campaigns/info-reference";
 import type { SkillForReference } from "@/types/info-reference";
 
 interface SkillReferenceCardProps {

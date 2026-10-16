@@ -10,7 +10,7 @@ import { bakePassives } from "@/lib/utils/abilities/build/bake";
 import { collectUnitAbilities } from "@/lib/utils/abilities/build/collect";
 import { immunityAbilities } from "@/lib/utils/abilities/build/immunities";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
-import { logger } from "@/lib/utils/logger";
+import { logger } from "@/lib/utils/common/logger";
 import { getUnitImmunities } from "@/lib/utils/races/race-effects";
 import type { BattleParticipant } from "@/types/battle";
 import type { Race } from "@/types/races";

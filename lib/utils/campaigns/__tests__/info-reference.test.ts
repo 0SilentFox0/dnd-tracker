@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatMechanicsSkill, skillSearchText } from "@/lib/utils/info-reference";
+import { formatMechanicsSkill, skillSearchText } from "@/lib/utils/campaigns/info-reference";
 import type { SkillForReference } from "@/types/info-reference";
 
 const skill = (abilitySummary: string[]): SkillForReference => ({

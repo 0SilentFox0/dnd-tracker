@@ -1,4 +1,4 @@
-import { pluralUk } from "@/lib/utils/plural";
+import { pluralUk } from "@/lib/utils/common/plural";
 import type { ProgressionNode } from "@/lib/utils/skills/progression";
 import { BRANCH_LEVEL_LABEL, CIRCLE_LABEL } from "@/lib/utils/skills/progression";
 import type { CharacterProgressionDto } from "@/types/progression";

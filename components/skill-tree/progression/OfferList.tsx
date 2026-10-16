@@ -4,7 +4,7 @@ import { nodeLabel } from "./node-labels";
 
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { Button } from "@/components/ui/button";
-import { pluralUk } from "@/lib/utils/plural";
+import { pluralUk } from "@/lib/utils/common/plural";
 import type { ProgressionNode } from "@/lib/utils/skills/progression";
 import type { CharacterProgressionDto } from "@/types/progression";
 

@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { requireCampaignDM } from "@/lib/campaigns/access";
 import { BattleStatus } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
-import { battleSceneListSelect } from "@/lib/utils/battle/battle-scene-list-select";
+import { battleSceneListSelect } from "@/lib/utils/battle/store/scene-list-select";
 
 const SECTIONS: { kind: BattleListKind; title: string }[] = [
   { kind: BattleStatus.ACTIVE, title: "Активні бої" },

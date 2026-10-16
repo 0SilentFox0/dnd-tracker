@@ -5,13 +5,13 @@ import { Crosshair, Swords } from "lucide-react";
 
 import { Breakdown } from "./Breakdown";
 import { useProfile } from "./ProfileContext";
-import { Section } from "./Section";
 
 import { EmptyState } from "@/components/common/states";
+import { HudSection } from "@/components/hud/form";
 import { ABILITY_SHORT_LABELS } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
 import { cn } from "@/lib/utils";
-import { signed } from "@/lib/utils/format";
+import { signed } from "@/lib/utils/common/format";
 import type { SheetLine } from "@/types/characters";
 
 function Row({ label, value, lines }: { label: string; value: string; lines?: SheetLine[] }) {
@@ -37,7 +37,7 @@ export function CombatTab() {
 
   return (
     <>
-      <Section title="ХАРАКТЕРИСТИКИ">
+      <HudSection title="ХАРАКТЕРИСТИКИ">
         <div className="grid grid-cols-6 gap-1">
           {sheet.abilities.map((a) => (
             <div key={a.key} className={cn("min-w-0 rounded-lg border bg-hud-field py-1 text-center", a.isPrimary ? "border-hud-gold shadow-[inset_0_0_0_1px_var(--color-hud-gold)]" : "border-hud-line")}>
@@ -51,8 +51,8 @@ export function CombatTab() {
           ))}
         </div>
         {sheet.primaryAbility && <p className="mt-1.5 text-xs text-hud-muted">★ основна характеристика: від неї влучання і шкода всіх атак</p>}
-      </Section>
-      <Section title="АТАКИ">
+      </HudSection>
+      <HudSection title="АТАКИ">
         {sheet.attacks.length === 0 ? (
           <EmptyState title="Немає зброї — атак поки немає" className="border-hud-rule py-6 text-hud-muted" />
         ) : (
@@ -78,16 +78,16 @@ export function CombatTab() {
             </div>
           ))
         )}
-      </Section>
-      <Section title="ЗАХИСТ І ПАРАМЕТРИ">
+      </HudSection>
+      <HudSection title="ЗАХИСТ І ПАРАМЕТРИ">
         <Row label="AC" value={String(sheet.armorClass.total)} lines={sheet.armorClass.lines} />
         <Row label="Ініціатива" value={String(sheet.initiative)} />
         <Row label="Швидкість" value={String(sheet.speed)} />
         <Row label="Мораль" value={signed(sheet.morale)} />
         <Row label="Цілей за атаку" value={sheet.targets.min === sheet.targets.max ? String(sheet.targets.max) : `${sheet.targets.min}–${sheet.targets.max}`} />
         {sheet.immunities.length > 0 && <Row label="Імунітети" value={sheet.immunities.join(", ")} />}
-      </Section>
-      <Section title="РЯТІВНІ КИДКИ">
+      </HudSection>
+      <HudSection title="РЯТІВНІ КИДКИ">
         <ul className="grid grid-cols-2 gap-x-4 text-sm">
           {sheet.saves.map((s) => (
             <li key={s.key} className="flex justify-between gap-2 border-b border-[#2a2218] py-1">
@@ -99,8 +99,8 @@ export function CombatTab() {
             </li>
           ))}
         </ul>
-      </Section>
-      <Section title="НАВИЧКИ">
+      </HudSection>
+      <HudSection title="НАВИЧКИ">
         <ul className="grid grid-cols-2 gap-x-4 text-sm">
           {sheet.skills.map((s) => (
             <li key={s.key} className="flex justify-between gap-2 border-b border-[#2a2218] py-1">
@@ -120,7 +120,7 @@ export function CombatTab() {
             {[sheet.languages.length ? `Мови: ${sheet.languages.join(", ")}` : null, sheet.proficiencies.length ? `Володіння: ${sheet.proficiencies.join(", ")}` : null].filter(Boolean).join(" · ")}
           </p>
         )}
-      </Section>
+      </HudSection>
     </>
   );
 }

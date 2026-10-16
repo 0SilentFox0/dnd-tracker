@@ -4,8 +4,8 @@ import type { CriticalEffect, CriticalEffectType } from "@/lib/constants/critica
 import { makeEffect } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
 import { applyCriticalEffect } from "@/lib/utils/battle/attack";
-import { processStartOfRound, processStartOfTurn } from "@/lib/utils/battle/battle-turn";
 import { endTurnCleanup } from "@/lib/utils/battle/turn/end-turn-cleanup";
+import { processStartOfRound, processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
 import type { ActiveEffect } from "@/types/battle";
 
 const debuff = (type: string, duration: number): ActiveEffect => makeEffect(`e-${type}`, { name: type, type: "debuff", duration, effects: [{ type, value: 0 }] });

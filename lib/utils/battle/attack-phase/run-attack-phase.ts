@@ -13,6 +13,7 @@ import { canActNow } from "@/lib/utils/battle/common/control";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
 import { diceCount, rollDiceList } from "@/lib/utils/common/dice";
+import { rollDie } from "@/lib/utils/common/dice";
 import type { ActiveEffect, BattleAction, BattleParticipant } from "@/types/battle";
 
 export type AttackPhaseInput = {
@@ -209,7 +210,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
     const chosenAt = hitsAllEnemies ? chosenIndex(target.basicInfo.id) : i;
 
     const d20Roll = hitsAllEnemies
-      ? ((usePerTargetRolls && chosenAt >= 0 ? data.attackRolls?.[chosenAt] : singleRoll) ?? Math.floor(rng() * 20) + 1)
+      ? ((usePerTargetRolls && chosenAt >= 0 ? data.attackRolls?.[chosenAt] : singleRoll) ?? rollDie(20, rng))
       : usePerTargetRolls && data.attackRolls
         ? data.attackRolls[i]
         : singleRoll;

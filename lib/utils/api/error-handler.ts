@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { errorResponse } from "@/lib/utils/api/api-response";
-import { logger } from "@/lib/utils/logger";
+import { logger } from "@/lib/utils/common/logger";
 
 export interface ApiErrorContext {
   action: string;

@@ -1,8 +1,7 @@
 "use client";
 
-import { BattleDialog } from "./shared";
-
 import { Button } from "@/components/ui/button";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { isActive } from "@/lib/utils/abilities/engine/participants";
 import type { BattleParticipant } from "@/types/battle";
@@ -25,12 +24,14 @@ export function DmCasterPickerDialog({
   );
 
   return (
-    <BattleDialog
+    <ResponsiveDialog
       open={open}
       onOpenChange={onOpenChange}
+      size="md"
+      hud
       title="Накласти заклинання"
       description="Оберіть учасника, від імені якого буде накладено заклинання"
-      contentClassName="max-w-sm"
+      className="max-w-sm"
     >
       <div className="space-y-2 pt-2">
         {activeParticipants.length === 0 ? (
@@ -59,6 +60,6 @@ export function DmCasterPickerDialog({
           ))
         )}
       </div>
-    </BattleDialog>
+    </ResponsiveDialog>
   );
 }

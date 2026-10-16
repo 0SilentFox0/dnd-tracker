@@ -2,12 +2,10 @@
 
 import { useState } from "react";
 
-import {
-  BattleDialog,
-  ConfirmCancelFooter,
-} from "@/components/battle/dialogs/shared";
+import { ConfirmCancelFooter } from "@/components/battle/dialogs/ConfirmCancelFooter";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import {
   Select,
   SelectContent,
@@ -71,9 +69,11 @@ export function AddParticipantDialog({
     type === ParticipantSourceType.CHARACTER ? Boolean(characterId) : Boolean(unitId);
 
   return (
-    <BattleDialog
+    <ResponsiveDialog
       open={open}
       onOpenChange={onOpenChange}
+      size="md"
+      hud
       title="Додати учасника на поле"
       description="Обраний герой або юніт з'явиться одразу після завершення ходу поточного активного гравця."
     >
@@ -167,6 +167,6 @@ export function AddParticipantDialog({
           confirmLoadingLabel="Додаємо…"
         />
       </div>
-    </BattleDialog>
+    </ResponsiveDialog>
   );
 }

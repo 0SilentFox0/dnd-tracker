@@ -31,7 +31,7 @@ pnpm exec prisma studio
 
 End-to-end battle check on a copy of prod: `./scripts/prodcopy-db.sh` (reads prod, recreates local DB `prodcopy`), then `DATABASE_URL=postgresql://postgres:postgres@localhost:54322/prodcopy pnpm battle-sweep` — 5-round battles through the real mutations, targeted triggers, unit control and 5th-level spells; report in `<tmp>/battle-sweep/battle-sweep.md`, exit 1 on errors.
 
-Many one-off ops live in `scripts/` and run via `tsx` (e.g. `pnpm import-docs-spells`, `pnpm seed-mock-battle`, `pnpm upload-assets-to-supabase`). Check `package.json` scripts before writing new tooling.
+Many one-off ops live in `scripts/` and run via `tsx` (e.g. `pnpm import-units`, `pnpm seed-mock-battle`, `pnpm upload-assets-to-supabase`). Check `package.json` scripts before writing new tooling.
 
 ## Architecture
 
@@ -52,7 +52,7 @@ Many one-off ops live in `scripts/` and run via `tsx` (e.g. `pnpm import-docs-sp
 - **`lib/pusher-server.ts`** (`server-only`, routes/pipeline) / **`lib/pusher-client.ts`** (`pusher-js`, lazy-imported by `usePusherBattleSync`) / `lib/pusher-channels.ts` (names, safe for both) + **`app/api/pusher/auth/route.ts`** — Pusher channels for real-time battle sync. Battle pages fall back to polling if Pusher env vars are missing; in production the server-side env vars (`PUSHER_APP_ID`, `PUSHER_SECRET`) must be set or events silently no-op.
 - **`lib/providers/query-provider.tsx`** — TanStack Query provider; wired into `app/layout.tsx`.
 - **Data in the first HTML:** server pages call the GET handler's own function (`readBattleScene`, `readCharacterSheet`), take the body with `readOkJson` (identical JSON to what the client would GET, access rules included) and wrap the client tree in `PrefetchedQuery` (`lib/providers/prefetched-query.tsx`) under the hook's query key; an error status just leaves the client to load as before. Query keys used on the server live in hook `keys.ts` files without `"use client"`.
-- **`types/index.ts`** — single barrel for cross-domain TS types. Prefer adding to an existing domain file in `types/` over creating new top-level types.
+- **`types/<domain>.ts`** — cross-domain TS types; import from `@/types/<domain>` (there is no barrel). Prefer adding to an existing domain file in `types/` over creating new top-level types.
 
 ### Battle data flow (the most complex part)
 

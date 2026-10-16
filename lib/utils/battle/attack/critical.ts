@@ -1,7 +1,6 @@
-import { addActiveEffect } from "../battle-effects";
-
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
+import { addActiveEffect } from "@/lib/utils/battle/turn/effects";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
 type EffectSpec = {

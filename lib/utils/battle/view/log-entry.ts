@@ -1,16 +1,6 @@
-import { getLogEntryDetailLines } from "@/lib/utils/battle/battle-log-format";
+import { BATTLE_ACTION_LABELS } from "@/lib/constants/battle";
+import { getLogEntryDetailLines } from "@/lib/utils/battle/view/log-format";
 import type { BattleAction } from "@/types/battle";
-
-const KIND_LABEL: Record<BattleAction["actionType"], string> = {
-  attack: "атака",
-  spell: "заклинання",
-  bonus_action: "бонусна дія",
-  ability: "вміння",
-  end_turn: "кінець ходу",
-  skip_turn: "пропуск ходу",
-  morale_skip: "мораль",
-  retaliation: "відповідь",
-};
 
 export interface LogEntryView {
   headline: string;
@@ -62,7 +52,7 @@ export function logEntryView(e: BattleAction): LogEntryView {
     headline,
     lines,
     hp: [...byId.values()].filter((h) => h.delta !== 0),
-    kindLabel: KIND_LABEL[e.actionType] ?? "подія",
+    kindLabel: BATTLE_ACTION_LABELS[e.actionType] ?? "подія",
     hasDetails: getLogEntryDetailLines(e).length > 0,
     isTrigger: !!triggers,
   };

@@ -3,7 +3,6 @@ import { z } from "zod";
 import { DM_ACTOR,ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
-import { calculateInitiative } from "@/lib/utils/battle/battle-start";
 import {
   createBattleParticipantFromCharacter,
   createBattleParticipantFromUnit,
@@ -11,6 +10,7 @@ import {
 import { assignUnitControl } from "@/lib/utils/battle/participant/unit-control";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError } from "@/lib/utils/battle/store";
+import { calculateInitiative } from "@/lib/utils/battle/turn/initiative";
 import type { BattleParticipant } from "@/types/battle";
 
 export const addParticipantSchema = z.object({

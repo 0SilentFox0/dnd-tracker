@@ -53,8 +53,6 @@ export const createUnitSchema = z.object({
   avatar: unitAvatarSchema,
 });
 
-export type CreateUnitInput = z.infer<typeof createUnitSchema>;
-
 export const updateUnitSchema = z.object({
   name: z.string().trim().min(1).max(100).optional(),
   raceId: z.string().min(1).nullable().optional(),
@@ -79,11 +77,6 @@ export const updateUnitSchema = z.object({
   morale: z.number().min(-3).max(3).optional(),
   avatar: unitAvatarSchema,
 });
-
-export type UpdateUnitInput = z.infer<typeof updateUnitSchema>;
-
-
-
 
 export const importUnitSchema = z.object({
   name: z.string().trim().min(1),

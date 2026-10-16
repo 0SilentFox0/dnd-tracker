@@ -5,15 +5,15 @@ import { BookOpen } from "lucide-react";
 
 import { useProfile } from "./ProfileContext";
 import { ProfileSpellBook } from "./ProfileSpellBook";
-import { Section } from "./Section";
 
 import { EmptySpellBook } from "@/components/battle/wizards/SpellBookPages";
 import { spellLevelMetal } from "@/components/hud";
+import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { spellLevelRoman } from "@/lib/constants/spells";
 import { cn } from "@/lib/utils";
-import { signed } from "@/lib/utils/format";
-import { pluralUk } from "@/lib/utils/plural";
+import { signed } from "@/lib/utils/common/format";
+import { pluralUk } from "@/lib/utils/common/plural";
 
 export function MagicTab() {
   const { sheet } = useProfile();
@@ -34,7 +34,7 @@ export function MagicTab() {
         </div>
       )}
       {sheet.slots.length > 0 && (
-        <Section title="СЛОТИ">
+        <HudSection title="СЛОТИ">
           <div className="flex flex-wrap gap-1.5">
             {sheet.slots.map((s) => (
               <span key={s.level} aria-label={`${spellLevelRoman(s.level)} коло: ${s.count} ${pluralUk(s.count, ["слот", "слоти", "слотів"])}`} className={cn("hud-sc metal-fill rounded-md px-3 py-1.5 text-sm", spellLevelMetal(s.level))}>
@@ -42,7 +42,7 @@ export function MagicTab() {
               </span>
             ))}
           </div>
-        </Section>
+        </HudSection>
       )}
       {sheet.spells.length > 0 ? (
         <>

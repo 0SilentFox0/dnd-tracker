@@ -6,6 +6,7 @@ import {
   sortSpellLevels,
 } from "../spells";
 
+import { UNGROUPED_KEY } from "@/lib/constants/ungrouped";
 import type { Spell } from "@/types/spells";
 
 function makeSpell(overrides: Partial<Spell> = {}): Spell {
@@ -40,7 +41,19 @@ describe("spells", () => {
 
       const grouped = groupSpellsByGroup(spells);
 
-      expect(grouped.get("Без групи")).toHaveLength(1);
+      expect(grouped.get(UNGROUPED_KEY)).toHaveLength(1);
+    });
+
+    it("група з назвою «Без групи» не змішується з відсутньою групою", () => {
+      const spells: Spell[] = [
+        makeSpell({ id: "a", spellGroup: { id: "g1", name: "Без групи" } }),
+        makeSpell({ id: "b", spellGroup: null }),
+      ];
+
+      const grouped = groupSpellsByGroup(spells);
+
+      expect(grouped.get("Без групи")?.map((s) => s.id)).toEqual(["a"]);
+      expect(grouped.get(UNGROUPED_KEY)?.map((s) => s.id)).toEqual(["b"]);
     });
   });
 

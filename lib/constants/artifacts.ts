@@ -1,4 +1,3 @@
-import { CORE_ABILITY_SCORES } from "./abilities";
 /**
  * Єдині константи, типи та enum для артефактів.
  * Використовувати цей файл у формах, API та сітці слотів.
@@ -32,6 +31,15 @@ export const ARTIFACT_RARITY_OPTIONS: ReadonlyArray<{
   { value: ArtifactRarity.EPIC, label: "Епічний" },
   { value: ArtifactRarity.LEGENDARY, label: "Легендарний" },
 ];
+
+export const artifactRarityLabel = (rarity: string): string => ARTIFACT_RARITY_OPTIONS.find((o) => o.value === rarity)?.label ?? rarity;
+
+export const ARTIFACT_RARITY_COLOR: Partial<Record<string, string>> = {
+  [ArtifactRarity.UNCOMMON]: "border-[#7cbf5a]",
+  [ArtifactRarity.RARE]: "border-[#8fd0e8]",
+  [ArtifactRarity.EPIC]: "border-[#c08ff0]",
+  [ArtifactRarity.LEGENDARY]: "border-hud-gold-strong",
+};
 
 // ─── Слот артефакта (тип обладнання) ───────────────────────────────────────
 
@@ -77,6 +85,8 @@ export const ARTIFACT_SLOT_OPTIONS: ReadonlyArray<{
   { value: ArtifactSlot.ITEM, label: "Артефакт" },
 ];
 
+export const artifactSlotLabel = (slot: string): string => ARTIFACT_SLOT_OPTIONS.find((o) => o.value === slot)?.label ?? slot;
+
 // ─── Сітка 3×3 слотів на персонажі (ключ у equipped + тип артефакта) ───────
 
 export const ARTIFACT_GRID_9 = [
@@ -119,18 +129,3 @@ export const DEFAULT_ARTIFACT_MODIFIERS = {
   DAMAGE_TYPE: "slashing",
 } as const;
 
-/** Плоскі числові бонуси артефакта (застосовуються в бою з екіпіровки). */
-export const ARTIFACT_COMBAT_BONUS_OPTIONS: ReadonlyArray<{
-  key: string;
-  label: string;
-}> = [
-  ...CORE_ABILITY_SCORES.map(({ key, label }) => ({ key, label })),
-  { key: "armorClass", label: "Клас броні" },
-  { key: "speed", label: "Швидкість" },
-  { key: "initiative", label: "Ініціатива" },
-  { key: "morale", label: "Мораль" },
-  { key: "minTargets", label: "Мін. цілей (плоско)" },
-  { key: "maxTargets", label: "Макс. цілей (плоско)" },
-  { key: "attackBonus", label: "Бонус атаки (attackBonus)" },
-  { key: "attack", label: "Бонус атаки (attack)" },
-];

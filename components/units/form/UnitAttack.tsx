@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { SelectField } from "@/components/ui/select-field";
-import { AttackType } from "@/lib/constants/battle";
+import { ATTACK_KIND_LABELS, AttackType } from "@/lib/constants/battle";
 import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 
@@ -66,8 +66,8 @@ export function UnitAttack({
               }
               placeholder="Виберіть вид"
               options={[
-                { value: AttackType.MELEE, label: "Ближня (melee)" },
-                { value: AttackType.RANGED, label: "Дальня (ranged)" },
+                { value: AttackType.MELEE, label: `${ATTACK_KIND_LABELS.melee} (melee)` },
+                { value: AttackType.RANGED, label: `${ATTACK_KIND_LABELS.ranged} (ranged)` },
               ]}
             />
           </div>

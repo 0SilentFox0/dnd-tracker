@@ -5,6 +5,7 @@ import { Printer } from "lucide-react";
 
 import { SpellCard } from "@/components/spells/list/SpellCard";
 import { Button } from "@/components/ui/button";
+import { groupDisplayName, UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
 import {
   convertGroupedSpellsToArray,
   groupSpellsByGroupAndLevel,
@@ -75,7 +76,7 @@ export function PrintSpellsPageClient({
           return (
             <section key={groupName} className="print-section mb-8">
               <div className="flex items-baseline gap-3 py-3 border-b mb-4">
-                <h2 className="text-xl font-semibold">{groupName}</h2>
+                <h2 className="text-xl font-semibold">{groupDisplayName(groupName, UNGROUPED_LABELS.spellGroup)}</h2>
                 <span className="text-sm text-muted-foreground">
                   {totalSpells} закл.
                 </span>

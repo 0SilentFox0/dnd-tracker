@@ -1,4 +1,4 @@
-export { progressionKey } from "./progression-keys";
+export { skillKeys } from "./keys";
 export { useCharacterProgression } from "./useCharacterProgression";
 export { useLevelUpCelebration } from "./useLevelUpCelebration";
 export { useMainSkillForm } from "./useMainSkillForm";

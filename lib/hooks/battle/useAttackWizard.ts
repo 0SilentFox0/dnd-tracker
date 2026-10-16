@@ -12,15 +12,8 @@ import { computeDamageBreakdown } from "@/lib/utils/battle/damage";
 import { attackFlow, type AttackMode, attackPayload, effectiveD20, initialAttackFlow, type RollOutcome } from "@/lib/utils/battle/flows";
 import { isUp } from "@/lib/utils/battle/participant/state";
 import { canSeeExactStats, critOutcome, damageDiceSlots, formatKnownArmorClass, hiddenTargetSteps, resolveKnownArmorClass, retaliationOutcome, weaponPreview } from "@/lib/utils/battle/view";
+import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
 import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
-
-export function rollDie(sides: number): number {
-  const buf = new Uint32Array(1);
-
-  crypto.getRandomValues(buf);
-
-  return (buf[0] % sides) + 1;
-}
 
 export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () => void) {
   const scene = useBattleScene();
@@ -208,9 +201,9 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     setMode: (mode: AttackMode) => dispatch({ type: "SET_MODE", mode }),
     roll: (d20: number, second?: number) => dispatch({ type: "ROLL", d20, second, outcome: outcomeOf(d20, second) }),
     aiRoll: () => {
-      const d20 = rollDie(20);
+      const d20 = rollDie(20, cryptoRandom);
 
-      const second = state.mode === "normal" ? undefined : rollDie(20);
+      const second = state.mode === "normal" ? undefined : rollDie(20, cryptoRandom);
 
       dispatch({ type: "ROLL", d20, second, outcome: outcomeOf(d20, second) });
     },

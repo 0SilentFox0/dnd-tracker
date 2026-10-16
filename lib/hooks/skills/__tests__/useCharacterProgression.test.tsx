@@ -5,7 +5,7 @@ import { cleanup, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import * as api from "@/lib/api/character-progression";
-import { progressionKey, useCharacterProgression } from "@/lib/hooks/skills";
+import { skillKeys, useCharacterProgression } from "@/lib/hooks/skills";
 
 vi.mock("@/lib/api/character-progression");
 
@@ -21,7 +21,7 @@ describe("useCharacterProgression", () => {
 
     const qc = new QueryClient();
 
-    qc.setQueryData(progressionKey("c", "ch"), dto);
+    qc.setQueryData(skillKeys.progression("c", "ch"), dto);
 
     const wrapper = ({ children }: { children: ReactNode }) => <QueryClientProvider client={qc}>{children}</QueryClientProvider>;
 

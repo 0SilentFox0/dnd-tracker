@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import { processStartOfRound, processStartOfTurn } from "@/lib/utils/battle/battle-turn";
 import { advanceTurn } from "@/lib/utils/battle/turn/advance-turn";
 import { applyPendingMoraleCheck } from "@/lib/utils/battle/turn/apply-pending-morale";
 import { runAdvanceTurnLoop } from "@/lib/utils/battle/turn/run-advance-turn-loop";
+import { processStartOfRound, processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
 
 describe("turn events", () => {
   it("turnStart лікує, perTurn скидається", () => {

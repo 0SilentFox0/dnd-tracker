@@ -28,8 +28,8 @@ import {
   updateBattleParticipant,
 } from "@/lib/api/battles";
 import { BattleStatus } from "@/lib/constants/battle";
-import type { MoraleCheckResult } from "@/lib/utils/battle/battle-morale";
 import { acceptFullBattle } from "@/lib/utils/battle/client/apply-delta";
+import type { MoraleCheckResult } from "@/lib/utils/battle/morale/check";
 import type {
   AbilityActionData,
   AttackData,

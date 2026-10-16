@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
-import { processStartOfTurn } from "@/lib/utils/battle/battle-turn";
 import { endTurnCleanup } from "@/lib/utils/battle/turn/end-turn-cleanup";
+import { processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
 import type { AbilityEvent } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
 

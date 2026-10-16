@@ -1,5 +1,5 @@
 import type { BattleMutationOutcome, BattleSceneState } from "@/lib/utils/battle/store";
-import { logger } from "@/lib/utils/logger";
+import { logger } from "@/lib/utils/common/logger";
 import type { BattleParticipant } from "@/types/battle";
 
 const ids = (ps: BattleParticipant[]) => ps.map((p) => p.basicInfo.id);

@@ -6,6 +6,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { groupDisplayName, UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
 import { getSpellGroupIcon } from "@/lib/utils/spells/spell-icons";
 import type { Spell } from "@/types/spells";
 
@@ -55,13 +56,15 @@ export function SpellDropdownContent({
       sideOffset={4}
     >
       {groupedSpells.map(([groupName, groupSpells]) => {
-        const GroupIcon = getSpellGroupIcon(groupName);
+        const displayName = groupDisplayName(groupName, UNGROUPED_LABELS.spellGroup);
+
+        const GroupIcon = getSpellGroupIcon(displayName);
 
         return (
           <div key={groupName}>
             <DropdownMenuLabel className="flex items-center gap-2 sticky top-0 bg-background z-10 py-2 min-w-0">
               <GroupIcon className="h-4 w-4 shrink-0" />
-              <span className="truncate">{groupName}</span>
+              <span className="truncate">{displayName}</span>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             {groupSpells.map((spell) => {

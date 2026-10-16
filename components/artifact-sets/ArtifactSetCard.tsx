@@ -5,7 +5,7 @@ import { ArtifactSetCardIcon } from "@/components/artifact-sets/ArtifactSetCardI
 import { ArtifactCard, type ArtifactCardData } from "@/components/artifacts/ArtifactCard";
 import { HudCard } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
-import { pluralUk } from "@/lib/utils/plural";
+import { pluralUk } from "@/lib/utils/common/plural";
 
 export interface ArtifactSetCardData {
   id: string;

@@ -2,12 +2,10 @@
 
 import { useState } from "react";
 
-import {
-  BattleDialog,
-  ConfirmCancelFooter,
-} from "@/components/battle/dialogs/shared";
+import { ConfirmCancelFooter } from "@/components/battle/dialogs/ConfirmCancelFooter";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import type { BattleParticipant } from "@/types/battle";
 
 interface ChangeHpDialogProps {
@@ -87,9 +85,11 @@ export function ChangeHpDialog({
   if (!participant) return null;
 
   return (
-    <BattleDialog
+    <ResponsiveDialog
       open={open}
       onOpenChange={onOpenChange}
+      size="md"
+      hud
       title="Змінити HP"
       description={
         <>
@@ -105,6 +105,6 @@ export function ChangeHpDialog({
         onOpenChange={onOpenChange}
         isPending={isPending}
       />
-    </BattleDialog>
+    </ResponsiveDialog>
   );
 }

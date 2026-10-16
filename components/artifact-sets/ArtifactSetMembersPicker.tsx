@@ -2,7 +2,7 @@
 
 import { HudSection } from "@/components/hud/form";
 import { Checkbox } from "@/components/ui/checkbox";
-import { formatArtifactSlotLabel } from "@/lib/utils/artifacts/artifact-set-form";
+import { artifactSlotLabel } from "@/lib/constants/artifacts";
 import type { ArtifactListItem } from "@/types/artifacts";
 
 export interface ArtifactSetMembersPickerProps {
@@ -41,7 +41,7 @@ export function ArtifactSetMembersPicker({
                 <span className="font-medium">{a.name}</span>
                 <span className="text-muted-foreground">
                   {" "}
-                  — {formatArtifactSlotLabel(a.slot)}
+                  — {artifactSlotLabel(a.slot)}
                 </span>
               </span>
             </label>

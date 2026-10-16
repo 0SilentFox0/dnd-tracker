@@ -12,7 +12,7 @@ import {
 } from "./client";
 
 import { BATTLE_LOG_PAGE_SIZE, BATTLE_VERSION_ONLY_PARAM } from "@/lib/constants/battle";
-import type { MoraleCheckResult } from "@/lib/utils/battle/battle-morale";
+import type { MoraleCheckResult } from "@/lib/utils/battle/morale/check";
 import type {
   AbilityActionData,
   AttackData,

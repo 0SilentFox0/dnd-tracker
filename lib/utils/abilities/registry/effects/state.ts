@@ -7,8 +7,8 @@ import { countMarks, GUARD_KEY, markKey } from "@/lib/utils/abilities/engine/mar
 import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/participants";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/timed-effects";
 import type { ConditionImmunityKey, Effect } from "@/lib/utils/abilities/schema";
-import { signed } from "@/lib/utils/format";
-import { pluralUk } from "@/lib/utils/plural";
+import { signed } from "@/lib/utils/common/format";
+import { pluralUk } from "@/lib/utils/common/plural";
 import type { BattleParticipant } from "@/types/battle";
 
 type Of<K extends Effect["kind"]> = Extract<Effect, { kind: K }>;

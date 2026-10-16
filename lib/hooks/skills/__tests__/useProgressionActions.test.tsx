@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import * as api from "@/lib/api/character-progression";
 import { ApiError } from "@/lib/api/client";
 import { characterSheetKey } from "@/lib/hooks/characters";
-import { progressionKey, useProgressionActions } from "@/lib/hooks/skills";
+import { skillKeys, useProgressionActions } from "@/lib/hooks/skills";
 import { buildTreeJson } from "@/lib/utils/skills/progression";
 import type { CharacterSheet } from "@/types/characters";
 
@@ -24,7 +24,7 @@ const TREE_JSON = buildTreeJson({ id: "json-tree", race: "Ельф", branches: [
 function setup() {
   const qc = new QueryClient();
 
-  qc.setQueryData(progressionKey("camp", "ch"), { unlocked: ["a"], level: 3 });
+  qc.setQueryData(skillKeys.progression("camp", "ch"), { unlocked: ["a"], level: 3 });
   qc.setQueryData(["character", "camp", "ch"], { id: "ch", skillTreeProgress: {} });
 
   const invalidate = vi.spyOn(qc, "invalidateQueries");
@@ -40,14 +40,14 @@ describe("useProgressionActions", () => {
 
     const { qc, invalidate, result } = setup();
 
-    qc.setQueryData(progressionKey("camp", "ch"), { treeId: "t1", race: "Ельф", tree: TREE_JSON, unlocked: ["attack_basic_level"], level: 3 });
+    qc.setQueryData(skillKeys.progression("camp", "ch"), { treeId: "t1", race: "Ельф", tree: TREE_JSON, unlocked: ["attack_basic_level"], level: 3 });
     qc.setQueryData(characterSheetKey("camp", "ch"), { progression: { freePoints: 2, level: 3, seenLevel: null } });
 
     await act(() => result.current.learn("o1"));
 
-    expect(qc.getQueryData<{ unlocked: string[] }>(progressionKey("camp", "ch"))?.unlocked).toEqual(["attack_basic_level", "o1"]);
+    expect(qc.getQueryData<{ unlocked: string[] }>(skillKeys.progression("camp", "ch"))?.unlocked).toEqual(["attack_basic_level", "o1"]);
     expect(qc.getQueryData<CharacterSheet>(characterSheetKey("camp", "ch"))?.progression).toEqual({ freePoints: 1, level: 3, seenLevel: null });
-    expect(invalidate).not.toHaveBeenCalledWith(expect.objectContaining({ queryKey: progressionKey("camp", "ch") }));
+    expect(invalidate).not.toHaveBeenCalledWith(expect.objectContaining({ queryKey: skillKeys.progression("camp", "ch") }));
   });
 
   it("серія дій інвалідує лист один раз — через 1 с після останньої", async () => {
@@ -76,7 +76,7 @@ describe("useProgressionActions", () => {
 
     const { qc, result } = setup();
 
-    qc.setQueryData(progressionKey("camp", "ch"), { treeId: "t1", unlocked: ["a"], level: 3 });
+    qc.setQueryData(skillKeys.progression("camp", "ch"), { treeId: "t1", unlocked: ["a"], level: 3 });
     qc.setQueryData(["character", "camp", "ch"], { id: "ch", skillTreeProgress: { other: { unlockedSkills: ["x"] }, t1: { level: "basic", unlockedSkills: ["a"] } } });
 
     await act(() => result.current.learn("b"));
@@ -104,7 +104,7 @@ describe("useProgressionActions", () => {
 
     await act(() => result.current.learn("b"));
 
-    expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ queryKey: progressionKey("camp", "ch") }));
+    expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ queryKey: skillKeys.progression("camp", "ch") }));
     expect(notify).toHaveBeenCalledWith("Прогрес змінився — оновлено");
   });
 

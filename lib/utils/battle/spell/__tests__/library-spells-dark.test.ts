@@ -9,8 +9,6 @@ import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers
 import { updateParticipant } from "@/lib/utils/abilities/engine/participants";
 import { processAttack } from "@/lib/utils/battle/attack";
 import { runAttackPhase } from "@/lib/utils/battle/attack-phase/run-attack-phase";
-import { calculateInitiative } from "@/lib/utils/battle/battle-start";
-import { processStartOfTurn } from "@/lib/utils/battle/battle-turn";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { applyResistance } from "@/lib/utils/battle/resistance";
@@ -19,7 +17,9 @@ import { computeSpellPower } from "@/lib/utils/battle/spell/power";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 import { BattleRuleError } from "@/lib/utils/battle/store";
 import { endTurnCleanup } from "@/lib/utils/battle/turn/end-turn-cleanup";
+import { calculateInitiative } from "@/lib/utils/battle/turn/initiative";
 import { runAdvanceTurnLoop } from "@/lib/utils/battle/turn/run-advance-turn-loop";
+import { processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 

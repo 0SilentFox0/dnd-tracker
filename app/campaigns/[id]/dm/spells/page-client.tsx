@@ -18,7 +18,7 @@ import {
   useSpellGroups,
   useSpells,
 } from "@/lib/hooks/spells";
-import { pluralUk } from "@/lib/utils/plural";
+import { pluralUk } from "@/lib/utils/common/plural";
 import {
   convertGroupedSpellsToArray,
   groupSpellsByGroupAndLevel,

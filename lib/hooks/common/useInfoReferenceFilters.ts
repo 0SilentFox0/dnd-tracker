@@ -7,7 +7,7 @@ import {
   matchSearch,
   skillSearchText,
   spellSearchText,
-} from "@/lib/utils/info-reference";
+} from "@/lib/utils/campaigns/info-reference";
 import type { ArtifactForReference, SectionTab, SkillForReference, SpellForReference } from "@/types/info-reference";
 
 export function useInfoReferenceFilters(skills: SkillForReference[], spells: SpellForReference[], artifacts: ArtifactForReference[] = []) {

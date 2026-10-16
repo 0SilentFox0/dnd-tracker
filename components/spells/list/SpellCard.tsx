@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { spellLevelName } from "@/lib/constants/spells";
+import { UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
 import { spellMechanicsLabels } from "@/lib/utils/spells/model/summary";
 import { getSpellGroupIcon } from "@/lib/utils/spells/spell-icons";
 import type { Spell, SpellGroup } from "@/types/spells";
@@ -37,7 +38,7 @@ export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, o
 
   if (printMode) return <SpellPrintCard spell={spell} />;
 
-  const groupName = spell.spellGroup?.name || "Без групи";
+  const groupName = spell.spellGroup?.name || UNGROUPED_LABELS.spellGroup;
 
   const GroupIcon = getSpellGroupIcon(groupName);
 

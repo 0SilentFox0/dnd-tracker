@@ -19,7 +19,7 @@ describe("SetList", () => {
 
     expect(screen.getByText(/«Мисливець» 2\/3/)).toBeTruthy();
     expect(screen.getByText("З повним сетом: Ініціатива +1")).toBeTruthy();
-    expect(screen.getByText(/«Дракон» 2\/2/).className).toContain("text-[#e6c25a]");
+    expect(screen.getByText(/«Дракон» 2\/2/).className).toContain("text-hud-gold-strong");
     expect(screen.getByText("AC +1 · Сила +2")).toBeTruthy();
   });
 

@@ -1,5 +1,5 @@
 import type { Effect } from "@/lib/utils/abilities/schema";
-import type { RaceModifier, SpellCost, SpellDefinition, SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
+import type { RaceModifier, SpellCost, SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
 
 export type { RaceModifier, SpellCost, SpellDefinition, SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
 
@@ -24,8 +24,6 @@ export interface Spell {
     name: string;
   } | null;
 }
-
-export type SpellWithDefinition = Spell & { definition: SpellDefinition };
 
 export interface SpellGroup {
   id: string;

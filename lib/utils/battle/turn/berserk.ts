@@ -6,6 +6,7 @@ import { getDisabledAttackKinds } from "@/lib/utils/battle/attack/disabled-attac
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { endTurnCleanup } from "@/lib/utils/battle/turn/end-turn-cleanup";
 import { rollDiceList } from "@/lib/utils/common/dice";
+import { rollDie } from "@/lib/utils/common/dice";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 export function berserkBonusOf(p: BattleParticipant): number | undefined {
@@ -85,7 +86,7 @@ export function runBerserkTurn(params: BerserkTurnParams): { participants: Battl
     attacker: berserker,
     target,
     attack,
-    d20Roll: Math.floor(rng() * 20) + 1,
+    d20Roll: rollDie(20, rng),
     damageRolls: rollDiceList(heroAttackDamageParts(berserker, attack).formula, rng),
     allParticipants: participants,
     currentRound: params.round,

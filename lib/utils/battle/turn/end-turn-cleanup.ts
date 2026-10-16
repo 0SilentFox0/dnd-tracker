@@ -1,5 +1,5 @@
 import { restoreCharm } from "@/lib/utils/abilities/engine/charm";
-import { decreaseEffectDurations } from "@/lib/utils/battle/battle-effects";
+import { decreaseEffectDurations } from "@/lib/utils/battle/turn/effects";
 import type { BattleParticipant } from "@/types/battle";
 
 export function finishTurnEffects(p: BattleParticipant): { participant: BattleParticipant; expired: string[] } {

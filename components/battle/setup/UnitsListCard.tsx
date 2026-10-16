@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { groupDisplayName, UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
 import { groupUnitsByRaceName } from "@/lib/utils/units/group-units";
 import type { EntityStats, SetupUnit } from "@/types/battle-setup";
 
@@ -176,8 +177,10 @@ export function UnitsListCard({
 
   const byRace = groupUnitsByRaceName(units);
 
+  const raceLabel = (key: string) => groupDisplayName(key, UNGROUPED_LABELS.race);
+
   const raceOrder = [...byRace.keys()].sort((a, b) =>
-    a.localeCompare(b, "uk"),
+    raceLabel(a).localeCompare(raceLabel(b), "uk"),
   );
 
   return (
@@ -196,7 +199,7 @@ export function UnitsListCard({
             return (
               <AccordionItem key={raceKey} value={raceKey}>
                 <AccordionTrigger className="py-3 text-sm">
-                  {raceKey} ({raceUnits.length})
+                  {raceLabel(raceKey)} ({raceUnits.length})
                 </AccordionTrigger>
                 <AccordionContent className="space-y-3">
                   {raceUnits.map((unit) => {

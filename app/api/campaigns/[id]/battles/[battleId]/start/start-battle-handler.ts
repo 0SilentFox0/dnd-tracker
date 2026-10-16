@@ -10,13 +10,13 @@ import { prisma } from "@/lib/db";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import {
-  calculateInitiative,
-  sortByInitiative,
-} from "@/lib/utils/battle/battle-start";
-import {
   createBattleParticipantFromCharacter,
   createBattleParticipantFromUnit,
 } from "@/lib/utils/battle/participant";
+import {
+  calculateInitiative,
+  sortByInitiative,
+} from "@/lib/utils/battle/turn/initiative";
 import type { BattleAction, BattleParticipant, BattlePreparationParticipant } from "@/types/battle";
 
 export async function buildStartOrder(

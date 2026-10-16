@@ -5,6 +5,7 @@ import { memo } from "react";
 import { Portrait } from "@/components/battle/hud";
 import { useBattleSceneData } from "@/lib/hooks/battle";
 import { lastAction } from "@/lib/utils/battle/view";
+import { signedDelta } from "@/lib/utils/common/format";
 
 export const LastActionTicker = memo(function LastActionTicker({ onOpenLog }: { onOpenLog?: () => void }) {
   const { battle } = useBattleSceneData();
@@ -26,7 +27,7 @@ export const LastActionTicker = memo(function LastActionTicker({ onOpenLog }: { 
       {actor && <Portrait participant={actor} size={24} />}
       <span className="max-w-[45%] shrink-0 truncate">{last.actorName}</span>
       {target && <><span className="text-[var(--hud-muted)]">→</span><Portrait participant={target} size={24} /><span className="truncate">{target.basicInfo.name}</span></>}
-      {change !== 0 && <b className={change > 0 ? "text-[#e9a08f]" : "text-[#8fd07a]"}>{change > 0 ? `−${change}` : `+${-change}`}</b>}
+      {change !== 0 && <b className={change > 0 ? "text-[#e9a08f]" : "text-[#8fd07a]"}>{signedDelta(-change)}</b>}
       {!target && change === 0 && <span className="min-w-0 truncate text-[var(--hud-muted)]">{last.resultText}</span>}
       {onOpenLog && <span className="ml-auto shrink-0 text-[13px] text-[var(--hud-muted)]">журнал ›</span>}
     </button>

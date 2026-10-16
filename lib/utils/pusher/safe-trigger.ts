@@ -5,7 +5,7 @@
 
 import type Pusher from "pusher";
 
-import { logger } from "@/lib/utils/logger";
+import { logger } from "@/lib/utils/common/logger";
 
 export interface PusherTriggerContext {
   /** Що зараз робив handler (для structured логу). */

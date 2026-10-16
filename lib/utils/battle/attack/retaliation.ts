@@ -17,13 +17,12 @@ import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import { parseDiceLenient, rollGroups } from "@/lib/utils/common/dice";
+import { rollDie } from "@/lib/utils/common/dice";
 import type { BattleAction, BattleAttack, BattleParticipant } from "@/types/battle";
 
 type Kind = AttackType;
 
 const kindOf = (a: Pick<BattleAttack, "type">): Kind => attackKindOf(a.type);
-
-const rollD20 = (rng: Rng) => 1 + Math.floor(rng() * 20);
 
 export interface RetaliationInput {
   participants: BattleParticipant[];
@@ -85,9 +84,9 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
 
   if (!provoked && !unlimited) put(flow, { ...defender, actionFlags: { ...defender.actionFlags, hasUsedReaction: true } });
 
-  const first = rollD20(rng);
+  const first = rollDie(20, rng);
 
-  const second = rollD20(rng);
+  const second = rollDie(20, rng);
 
   const roll = calculateAttackRoll(getP(flow, defenderId), weapon.attack, first, second, second, { participants: flow.ps, targetId: attackerId, rng });
 

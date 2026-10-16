@@ -1,6 +1,6 @@
 "use client";
 
-import { getLogEntryDetailLines } from "@/lib/utils/battle/battle-log-format";
+import { getLogEntryDetailLines } from "@/lib/utils/battle/view/log-format";
 import type { BattleAction } from "@/types/battle";
 
 interface LogEntryDetailsProps {

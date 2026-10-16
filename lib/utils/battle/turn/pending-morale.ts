@@ -1,4 +1,4 @@
-import type { MoraleCheckResult } from "@/lib/utils/battle/battle-morale";
+import type { MoraleCheckResult } from "@/lib/utils/battle/morale/check";
 import { BattleRuleError } from "@/lib/utils/battle/store/errors";
 
 export interface PendingMoraleCheckPayload {

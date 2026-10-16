@@ -1,7 +1,7 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import type { MoraleCheckInput } from "@/lib/schemas";
-import { checkMorale } from "@/lib/utils/battle/battle-morale";
 import { canActNow } from "@/lib/utils/battle/common/control";
+import { checkMorale } from "@/lib/utils/battle/morale/check";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
 import type { PendingMoraleCheckPayload } from "@/lib/utils/battle/turn";

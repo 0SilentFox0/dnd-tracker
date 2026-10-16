@@ -6,7 +6,7 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
 import { evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
 import { AbilitySchema } from "@/lib/utils/abilities/schema";
-import { processStartOfTurn } from "@/lib/utils/battle/battle-turn";
+import { processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
 import type { AbilityEvent } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
 

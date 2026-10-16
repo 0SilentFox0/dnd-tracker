@@ -9,10 +9,11 @@ import { HealthLabel, Portrait } from "@/components/battle/hud";
 import { HUD_SURFACE } from "@/components/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { AttackType } from "@/lib/constants/battle";
-import { rollDie, type useAttackWizard } from "@/lib/hooks/battle";
+import { type useAttackWizard } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import type { AttackMode } from "@/lib/utils/battle/flows";
-import { signed } from "@/lib/utils/format";
+import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
+import { signed } from "@/lib/utils/common/format";
 
 type Wizard = ReturnType<typeof useAttackWizard>;
 
@@ -129,7 +130,7 @@ export function AttackWizard({ wizard }: { wizard: Wizard }) {
 
  return n; })} />
           <div className="mt-3 grid grid-cols-[1.25fr_1fr] gap-2">
-            <AiRollButton onClick={() => setDraft(state.diceSlots.map((sides) => rollDie(sides)))} />
+            <AiRollButton onClick={() => setDraft(state.diceSlots.map((sides) => rollDie(sides, cryptoRandom)))} />
             <button
               type="button"
               disabled={state.diceSlots.some((_, i) => draft[i] === undefined)}

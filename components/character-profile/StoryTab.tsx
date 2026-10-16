@@ -3,8 +3,9 @@
 import { BiographyText } from "./BiographyText";
 import { GoalList } from "./GoalList";
 import { useProfile } from "./ProfileContext";
-import { Section } from "./Section";
 import { TokenList } from "./TokenList";
+
+import { HudSection } from "@/components/hud/form";
 
 export function StoryTab() {
   const { sheet } = useProfile();
@@ -16,7 +17,7 @@ export function StoryTab() {
         <TokenList />
       </div>
       <div className="lg:order-1">
-        <Section title="БІОГРАФІЯ">{sheet.story.biography ? <BiographyText text={sheet.story.biography} /> : <p className="text-sm text-hud-muted">Біографію ще не написано</p>}</Section>
+        <HudSection title="БІОГРАФІЯ">{sheet.story.biography ? <BiographyText text={sheet.story.biography} /> : <p className="text-sm text-hud-muted">Біографію ще не написано</p>}</HudSection>
       </div>
     </div>
   );

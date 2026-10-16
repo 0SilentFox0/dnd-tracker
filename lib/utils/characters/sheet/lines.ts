@@ -5,7 +5,7 @@ import { calculateAttackBonus } from "@/lib/utils/battle/attack";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
 import { getAbilityModifier, getAttackAbilityModifier } from "@/lib/utils/common/calculations";
-import { signed } from "@/lib/utils/format";
+import { signed } from "@/lib/utils/common/format";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 import type { AbilityKey, SheetAttack, SheetLine, SheetLineSource, SheetTotal } from "@/types/characters";
 

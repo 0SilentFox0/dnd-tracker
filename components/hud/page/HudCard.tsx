@@ -4,8 +4,8 @@ import { Slot } from "@radix-ui/react-slot";
 import { cn } from "@/lib/utils";
 
 const TONE = {
-  default: "shadow-[inset_0_0_0_1px_rgba(230,194,90,.25)] hover:shadow-[inset_0_0_0_1px_#e6c25a]",
-  active: "shadow-[inset_0_0_0_1px_#e6c25a,0_0_12px_rgba(230,194,90,.18)]",
+  default: "shadow-[inset_0_0_0_1px_rgba(230,194,90,.25)] hover:shadow-[inset_0_0_0_1px_var(--color-hud-gold-strong)]",
+  active: "shadow-[inset_0_0_0_1px_var(--color-hud-gold-strong),0_0_12px_rgba(230,194,90,.18)]",
   muted: "opacity-70 shadow-[inset_0_0_0_1px_rgba(230,194,90,.15)]",
 } as const;
 

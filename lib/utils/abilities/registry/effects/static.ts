@@ -8,7 +8,7 @@ import { AttackType } from "@/lib/constants/battle";
 import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/participants";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/timed-effects";
 import type { Effect, FlagKey, StaticEffect } from "@/lib/utils/abilities/schema";
-import { signed } from "@/lib/utils/format";
+import { signed } from "@/lib/utils/common/format";
 
 export function stripTiming(effect: StaticEffect): StaticEffect {
   const { duration: _d, target: _t, ...rest } = effect;

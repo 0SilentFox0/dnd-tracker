@@ -1,5 +1,5 @@
-import { applyDOTEffects, applyHOTEffects, armEffects, countDownAtTurnStart, countDownInitiativeEffects } from "./battle-effects";
-import { calculateInitiative, sortByInitiative } from "./battle-start";
+import { applyDOTEffects, applyHOTEffects, armEffects, countDownAtTurnStart, countDownInitiativeEffects } from "./effects";
+import { calculateInitiative, sortByInitiative } from "./initiative";
 
 import { CombatStatus } from "@/lib/constants/battle";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";

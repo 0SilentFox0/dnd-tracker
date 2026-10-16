@@ -15,7 +15,7 @@ interface ChipItem {
 
 const CHIP = "flex h-8 shrink-0 items-center rounded-full px-3 text-[13px] text-hud-muted shadow-[inset_0_0_0_1px_var(--color-hud-line)]";
 
-const ACTIVE = "text-[#ffd9a8] shadow-[inset_0_0_0_1px_#e6c25a,0_0_8px_rgba(230,194,90,.3)]";
+const ACTIVE = "text-[#ffd9a8] shadow-[inset_0_0_0_1px_var(--color-hud-gold-strong),0_0_8px_rgba(230,194,90,.3)]";
 
 export function HudChipTabs({ items, ariaLabel }: { items: ChipItem[]; ariaLabel: string }) {
   return (

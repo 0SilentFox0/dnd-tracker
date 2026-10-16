@@ -1,4 +1,5 @@
 import { spellLevelFromName, spellLevelName } from "@/lib/constants/spells";
+import { UNGROUPED_KEY } from "@/lib/constants/ungrouped";
 import type { Spell } from "@/types/spells";
 
 /**
@@ -8,7 +9,7 @@ export function groupSpellsByGroup(spells: Spell[]): Map<string, Spell[]> {
   const grouped = new Map<string, Spell[]>();
 
   spells.forEach((spell) => {
-    const groupName = spell.spellGroup?.name || "Без групи";
+    const groupName = spell.spellGroup?.name || UNGROUPED_KEY;
 
     if (!grouped.has(groupName)) {
       grouped.set(groupName, []);
@@ -41,7 +42,7 @@ export function groupSpellsByGroupAndLevel(
   const groupedSpellsMap = new Map<string, Map<string, Spell[]>>();
 
   spells.forEach((spell) => {
-    const groupName = spell.spellGroup?.name || "Без групи";
+    const groupName = spell.spellGroup?.name || UNGROUPED_KEY;
 
     const levelKey = spellLevelName(spell.level);
 

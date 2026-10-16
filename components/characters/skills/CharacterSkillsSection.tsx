@@ -1,6 +1,6 @@
 import { HudSection } from "@/components/hud/form";
-import { DND_SAVING_THROWS, DND_SKILL_META, DND_SKILLS } from "@/lib/constants";
 import { CORE_ABILITY_SCORES } from "@/lib/constants/abilities";
+import { DND_SAVING_THROWS, DND_SKILL_META, DND_SKILLS } from "@/lib/constants/skills";
 
 interface CharacterSkillsSectionProps {
   skills: {

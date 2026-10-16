@@ -10,17 +10,6 @@ export type { CriticalEffect };
 export { AttackType, ParticipantSide };
 export { SkillLevel };
 
-export interface BattleLogEntry {
-  round: number;
-  timestamp: string;
-  actorName: string;
-  action: string;
-  target?: string;
-  result: string;
-  damage?: number;
-  healing?: number;
-}
-
 /**
  * Типи для активних ефектів
  */

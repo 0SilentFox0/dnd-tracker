@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/lib/hooks/common";
 import { useDeleteSpellsByLevel } from "@/lib/hooks/spells";
 import { cn } from "@/lib/utils";
-import { pluralUk } from "@/lib/utils/plural";
+import { pluralUk } from "@/lib/utils/common/plural";
 import type { Spell, SpellGroup } from "@/types/spells";
 
 

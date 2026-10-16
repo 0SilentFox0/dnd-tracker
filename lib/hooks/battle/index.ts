@@ -1,4 +1,4 @@
-export { rollDie, useAttackWizard } from "./useAttackWizard";
+export { useAttackWizard } from "./useAttackWizard";
 export { type AuraZoneStep, useAuraZones } from "./useAuraZones";
 export { useBattlePageDialogs } from "./useBattlePageDialogs";
 export {

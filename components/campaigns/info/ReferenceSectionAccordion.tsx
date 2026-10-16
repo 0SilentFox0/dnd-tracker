@@ -10,13 +10,8 @@ import { SpellReferenceCard } from "./SpellReferenceCard";
 
 import { HudPanel } from "@/components/hud/page";
 import { Accordion } from "@/components/ui/accordion";
+import { groupDisplayName, UNGROUPED_KEY, UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
 import type { ArtifactForReference, ArtifactSetForReference, SkillForReference, SpellForReference } from "@/types/info-reference";
-
-const NO_MAIN_SKILL_LABEL = "Без гілки";
-
-const NO_SPELL_GROUP_LABEL = "Без групи";
-
-const NO_ARTIFACT_SET_LABEL = "Без сету";
 
 interface ReferenceSectionAccordionProps {
   campaignId: string;
@@ -53,7 +48,7 @@ export function ReferenceSectionAccordion({
     const map = new Map<string, SkillForReference[]>();
 
     for (const s of filteredSkills) {
-      const key = s.mainSkillName ?? NO_MAIN_SKILL_LABEL;
+      const key = s.mainSkillName ?? UNGROUPED_KEY;
 
       const list = map.get(key) ?? [];
 
@@ -68,7 +63,7 @@ export function ReferenceSectionAccordion({
     const map = new Map<string, SpellForReference[]>();
 
     for (const s of filteredSpells) {
-      const key = s.groupName ?? NO_SPELL_GROUP_LABEL;
+      const key = s.groupName ?? UNGROUPED_KEY;
 
       const list = map.get(key) ?? [];
 
@@ -83,7 +78,7 @@ export function ReferenceSectionAccordion({
     const map = new Map<string, ArtifactForReference[]>();
 
     for (const a of filteredArtifacts) {
-      const key = a.setName ?? NO_ARTIFACT_SET_LABEL;
+      const key = a.setName ?? UNGROUPED_KEY;
 
       const list = map.get(key) ?? [];
 
@@ -126,9 +121,9 @@ export function ReferenceSectionAccordion({
           >
             {Array.from(skillsByMain.entries())
               .sort(([a], [b]) => {
-                if (a === NO_MAIN_SKILL_LABEL) return 1;
+                if (a === UNGROUPED_KEY) return 1;
 
-                if (b === NO_MAIN_SKILL_LABEL) return -1;
+                if (b === UNGROUPED_KEY) return -1;
 
                 return a.localeCompare(b);
               })
@@ -139,7 +134,7 @@ export function ReferenceSectionAccordion({
                   <ReferenceGroupSection
                     key={mainName}
                     accordionValue={mainName}
-                    title={mainName}
+                    title={groupDisplayName(mainName, UNGROUPED_LABELS.branch)}
                     icon={first?.mainSkillIcon ?? null}
                     accentColor={first?.mainSkillColor ?? null}
                     count={list.length}
@@ -182,9 +177,9 @@ export function ReferenceSectionAccordion({
           >
             {Array.from(spellsByGroup.entries())
               .sort(([a], [b]) => {
-                if (a === NO_SPELL_GROUP_LABEL) return 1;
+                if (a === UNGROUPED_KEY) return 1;
 
-                if (b === NO_SPELL_GROUP_LABEL) return -1;
+                if (b === UNGROUPED_KEY) return -1;
 
                 return a.localeCompare(b);
               })
@@ -192,7 +187,7 @@ export function ReferenceSectionAccordion({
                 <ReferenceGroupSection
                   key={groupName}
                   accordionValue={groupName}
-                  title={groupName}
+                  title={groupDisplayName(groupName, UNGROUPED_LABELS.spellGroup)}
                   count={list.length}
                 >
                   <Accordion
@@ -232,9 +227,9 @@ export function ReferenceSectionAccordion({
           >
             {Array.from(artifactsBySet.entries())
               .sort(([a], [b]) => {
-                if (a === NO_ARTIFACT_SET_LABEL) return 1;
+                if (a === UNGROUPED_KEY) return 1;
 
-                if (b === NO_ARTIFACT_SET_LABEL) return -1;
+                if (b === UNGROUPED_KEY) return -1;
 
                 return a.localeCompare(b);
               })
@@ -242,7 +237,7 @@ export function ReferenceSectionAccordion({
                 <ReferenceGroupSection
                   key={setName}
                   accordionValue={setName}
-                  title={setName}
+                  title={groupDisplayName(setName, UNGROUPED_LABELS.artifactSet)}
                   count={list.length}
                 >
                   <Accordion

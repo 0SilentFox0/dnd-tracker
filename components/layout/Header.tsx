@@ -54,7 +54,7 @@ export function Header({ email }: { email: string | null }) {
       <div className={cn(width, "flex h-14 items-center justify-between")}>
         <div className="flex items-center gap-2">
           <Link href="/campaigns">
-            <Button variant="ghost" size="icon" className="h-9 w-9 text-hud-gold hover:bg-transparent hover:text-[#e6c25a]">
+            <Button variant="ghost" size="icon" className="h-9 w-9 text-hud-gold hover:bg-transparent hover:text-hud-gold-strong">
               <Home className="h-4 w-4" />
               <span className="sr-only">На головну</span>
             </Button>
@@ -63,7 +63,7 @@ export function Header({ email }: { email: string | null }) {
           {isCampaignPage && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-9 w-9 text-hud-gold hover:bg-transparent hover:text-[#e6c25a]">
+                <Button variant="ghost" size="icon" className="h-9 w-9 text-hud-gold hover:bg-transparent hover:text-hud-gold-strong">
                   <Menu className="h-4 w-4" />
                   <span className="sr-only">Меню кампанії</span>
                 </Button>
@@ -138,7 +138,7 @@ export function Header({ email }: { email: string | null }) {
           )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-9 w-9 text-hud-gold hover:bg-transparent hover:text-[#e6c25a]">
+              <Button variant="ghost" size="icon" className="h-9 w-9 text-hud-gold hover:bg-transparent hover:text-hud-gold-strong">
                 <User className="h-4 w-4" />
                 <span className="sr-only">Профіль</span>
               </Button>

@@ -5,8 +5,8 @@ import { Trash2 } from "lucide-react";
 
 import { AddTokenDialog, TOKEN_DOT } from "./AddTokenDialog";
 import { useProfile } from "./ProfileContext";
-import { Section } from "./Section";
 
+import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { useCharacterTokens } from "@/lib/hooks/characters";
 import { useConfirm } from "@/lib/hooks/common";
@@ -36,7 +36,7 @@ export function TokenList() {
   };
 
   return (
-    <Section
+    <HudSection
       title="ЖЕТОНИ"
       action={
         isDM && (
@@ -70,6 +70,6 @@ export function TokenList() {
         ))}
       </ul>
       {isDM && <AddTokenDialog open={adding} onOpenChange={setAdding} onSubmit={add} isPending={isPending} />}
-    </Section>
+    </HudSection>
   );
 }

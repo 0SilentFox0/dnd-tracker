@@ -4,8 +4,8 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { applyEffect, describeEffect } from "@/lib/utils/abilities/registry/effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
-import { processStartOfTurn } from "@/lib/utils/battle/battle-turn";
 import { endTurnCleanup } from "@/lib/utils/battle/turn/end-turn-cleanup";
+import { processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
 
 const hot: Effect = { kind: "hot", healPerRound: "1d4", duration: { rounds: 3 }, target: "eventTarget" };
 

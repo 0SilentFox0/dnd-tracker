@@ -8,7 +8,7 @@ import { useProfile } from "./ProfileContext";
 
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { HudStatChip } from "@/components/hud/page";
-import { signed } from "@/lib/utils/format";
+import { signed } from "@/lib/utils/common/format";
 
 export function ProfileHero({ actions, badge, ref }: { actions?: ReactNode; badge?: ReactNode; ref?: Ref<HTMLElement> }) {
   const { sheet, canEdit } = useProfile();

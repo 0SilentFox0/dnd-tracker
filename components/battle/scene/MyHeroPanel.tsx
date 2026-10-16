@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
 import { abilityCharges, turnsUntil } from "@/lib/utils/battle/view";
-import { signed } from "@/lib/utils/format";
+import { signed } from "@/lib/utils/common/format";
 import type { BattleParticipant } from "@/types/battle";
 
 export const MyHeroPanel = memo(function MyHeroPanel({ hero, compact = false }: { hero: BattleParticipant; compact?: boolean }) {

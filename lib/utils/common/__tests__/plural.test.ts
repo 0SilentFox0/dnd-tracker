@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { pluralUk } from "@/lib/utils/plural";
+import { pluralUk } from "@/lib/utils/common/plural";
 
 const f: [string, string, string] = ["варіант", "варіанти", "варіантів"];
 

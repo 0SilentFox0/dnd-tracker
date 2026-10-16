@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
-import { pluralUk } from "@/lib/utils/plural";
+import { pluralUk } from "@/lib/utils/common/plural";
 
 interface DeleteAllButtonProps {
   count: number;

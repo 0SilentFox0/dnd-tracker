@@ -8,7 +8,7 @@ import { ImageUpload } from "@/components/ui/image-upload";
 import { Label } from "@/components/ui/label";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { SelectField } from "@/components/ui/select-field";
-import { ALIGNMENTS } from "@/lib/constants";
+import { ALIGNMENTS } from "@/lib/constants/alignment";
 import { CharacterType, type CharacterTypeValue } from "@/lib/constants/characters";
 import { HERO_ARCHETYPE_OPTIONS } from "@/lib/constants/hero-archetypes";
 import { CampaignMember } from "@/types/campaigns";

@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AttackType } from "@/lib/constants/battle";
 import { useConfirm } from "@/lib/hooks/common";
-import { pluralUk } from "@/lib/utils/plural";
+import { pluralUk } from "@/lib/utils/common/plural";
 import { getUnitImmunities } from "@/lib/utils/races/race-effects";
 import { unitDamageSummary } from "@/lib/utils/units/damage-summary";
 import { UNIT_DRAG_TYPE, unitDragPayload } from "@/lib/utils/units/drag";

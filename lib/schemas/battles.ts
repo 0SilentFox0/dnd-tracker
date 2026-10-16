@@ -15,8 +15,6 @@ export const createBattleSchema = z.object({
   ),
 });
 
-export type CreateBattleInput = z.infer<typeof createBattleSchema>;
-
 export const moraleCheckSchema = z.object({
   participantId: z.string(),
   d10Roll: z.number().min(1).max(10),

@@ -30,7 +30,7 @@ import { applyRaiseDead, applySummon, describeRaiseDead, describeSummon } from "
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import type { Ability, Effect, EffectKind } from "@/lib/utils/abilities/schema";
-import { signed } from "@/lib/utils/format";
+import { signed } from "@/lib/utils/common/format";
 
 export type { EffectApplyInput, EffectApplyResult };
 

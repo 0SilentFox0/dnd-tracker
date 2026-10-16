@@ -1,7 +1,7 @@
 import type { CampaignSpellContext, CharacterFromPrisma } from "../types/participant";
 
 import { prisma } from "@/lib/db";
-import { logger } from "@/lib/utils/logger";
+import { logger } from "@/lib/utils/common/logger";
 import { type BranchLevel, normalizeTree, resolveLearned } from "@/lib/utils/skills/progression";
 import { learnedSpellIdsFromNodes, toSpellSkillInfo } from "@/lib/utils/spells";
 import { schoolMasteryFromLearned } from "@/lib/utils/spells/model/dice";

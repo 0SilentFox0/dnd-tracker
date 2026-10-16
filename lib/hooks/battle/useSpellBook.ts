@@ -2,7 +2,6 @@
 
 import { useEffect, useEffectEvent, useMemo, useReducer } from "react";
 
-import { rollDie } from "./useAttackWizard";
 import { useBattleScene } from "./useBattleScene";
 
 import { usePrefetchSpellsByIds, useSpells, useSpellsByIds } from "@/lib/hooks/spells";
@@ -22,6 +21,7 @@ import {
 import { spellFormulaLabel } from "@/lib/utils/battle/spell/caster-dice";
 import { expandSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import { slotLevels } from "@/lib/utils/battle/view";
+import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
 import { groupSpellsByLevel } from "@/lib/utils/spells/group-by-level";
 import type { BattleParticipant } from "@/types/battle";
 import type { BookSpell } from "@/types/spells";
@@ -152,7 +152,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
     confirmTargets: () => dispatch({ type: "CONFIRM_TARGETS" }),
     setSave: (id: string, v: number | undefined) => dispatch({ type: "SET_SAVE", id, value: v }),
     setDamage: (i: number, v: number | undefined) => dispatch({ type: "SET_DAMAGE", index: i, value: v }),
-    aiDamage: () => state.pick?.diceSlots.forEach((sides, i) => dispatch({ type: "SET_DAMAGE", index: i, value: rollDie(sides) })),
+    aiDamage: () => state.pick?.diceSlots.forEach((sides, i) => dispatch({ type: "SET_DAMAGE", index: i, value: rollDie(sides, cryptoRandom) })),
     toSummary: () => dispatch({ type: "TO_SUMMARY" }),
     back: () => dispatch({ type: "BACK" }),
     submit: () => dispatch({ type: "SUBMIT" }),

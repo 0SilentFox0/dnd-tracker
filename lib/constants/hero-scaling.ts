@@ -76,10 +76,6 @@ export function getHeroMaxHpBreakdown(level: number, constitution: number, arche
   };
 }
 
-export function getHeroMaxHp(level: number, constitution: number, archetype: string | null | undefined): number {
-  return getHeroMaxHpBreakdown(level, constitution, archetype).total;
-}
-
 /**
  * Нотація кубиків урону за рівнем (d4/d6/d8, можливо кілька блоків через +).
  * Наприклад: 1 → "1d4", 10 → "3d8+1d4", 20 → "6d8".

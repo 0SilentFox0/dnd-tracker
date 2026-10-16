@@ -1,3 +1,4 @@
+import { UNGROUPED_KEY, UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
 import type { Race } from "@/types/races";
 import type { Unit } from "@/types/units";
 
@@ -56,14 +57,14 @@ export function raceIdOfGroup(key: string): string | null {
 }
 
 export function raceChips(groups: UnitRaceGroup[]): UnitRaceChip[] {
-  return groups.map((g) => ({ key: g.key, label: g.race?.name ?? "Без раси", color: g.race?.color ?? null, count: g.total }));
+  return groups.map((g) => ({ key: g.key, label: g.race?.name ?? UNGROUPED_LABELS.race, color: g.race?.color ?? null, count: g.total }));
 }
 
 export function groupUnitsByRaceName<U extends { raceName: string | null; level: number }>(units: U[]): Map<string, U[]> {
   const byRace = new Map<string, U[]>();
 
   for (const unit of units) {
-    const key = unit.raceName?.trim() || "Без раси";
+    const key = unit.raceName?.trim() || UNGROUPED_KEY;
 
     byRace.set(key, [...(byRace.get(key) ?? []), unit]);
   }

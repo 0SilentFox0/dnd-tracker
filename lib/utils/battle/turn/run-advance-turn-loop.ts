@@ -7,8 +7,8 @@ import {
   processEndOfTurn,
   processStartOfRound,
   processStartOfTurn,
-} from "@/lib/utils/battle/battle-turn";
-import { checkVictoryConditions } from "@/lib/utils/battle/battle-victory";
+} from "@/lib/utils/battle/turn/start-end";
+import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 export interface AdvanceTurnLoopParams {

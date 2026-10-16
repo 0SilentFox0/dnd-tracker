@@ -43,6 +43,22 @@ export const BattleActionType = {
   RETALIATION: "retaliation",
 } as const;
 
+export const BATTLE_ACTION_LABELS: Record<(typeof BattleActionType)[keyof typeof BattleActionType], string> = {
+  attack: "атака",
+  spell: "заклинання",
+  bonus_action: "бонусна дія",
+  ability: "вміння",
+  end_turn: "кінець ходу",
+  skip_turn: "пропуск ходу",
+  morale_skip: "мораль",
+  retaliation: "відсіч",
+};
+
+export const ATTACK_KIND_LABELS: Record<AttackType, string> = {
+  melee: "Ближня",
+  ranged: "Дальня",
+};
+
 /**
  * Глобальні константи бою
  */

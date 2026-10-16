@@ -14,7 +14,7 @@ import {
 import { type CharacterTypeValue } from "@/lib/constants/characters";
 import { battleKeys } from "@/lib/hooks/battles/keys";
 import { useCrudMutation } from "@/lib/hooks/common";
-import { progressionCampaignKey, progressionKey } from "@/lib/hooks/skills/progression-keys";
+import { skillKeys } from "@/lib/hooks/skills/keys";
 import { ENTITY_STALE_MS } from "@/lib/providers/query-provider";
 import type { Character, CharacterFormData, CharacterListItem } from "@/types/characters";
 
@@ -56,7 +56,7 @@ export function useUpdateCharacter(campaignId: string, characterId: string) {
     invalidateKeys: [
       characterKeys.lists(campaignId),
       characterKeys.detail(campaignId, characterId),
-      progressionKey(campaignId, characterId),
+      skillKeys.progression(campaignId, characterId),
       characterKeys.sheet(campaignId, characterId),
       battleKeys.balanceAll(),
     ],
@@ -71,7 +71,7 @@ export function useLevelUpCharacter(campaignId: string) {
       characterKeys.lists(campaignId),
       characterKeys.details(campaignId),
       characterKeys.sheet(campaignId),
-      progressionCampaignKey(campaignId),
+      skillKeys.progressionOf(campaignId),
       battleKeys.balanceAll(),
     ],
   });

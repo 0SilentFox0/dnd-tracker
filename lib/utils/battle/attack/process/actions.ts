@@ -5,6 +5,7 @@ import type { ComputeHitDamageResult } from "./compute";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { immunityNote } from "@/lib/utils/battle/resistance";
+import { lowerFirst } from "@/lib/utils/common/text";
 import type { BattleAction, BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
 
 const critDetails = (effect: CriticalEffect, flavor?: string) => ({ id: effect.id, name: effect.name, description: effect.description, type: effect.type, flavor });
@@ -12,7 +13,6 @@ const critDetails = (effect: CriticalEffect, flavor?: string) => ({ id: effect.i
 const critSummary = (effect: CriticalEffect, flavor: string | undefined, isFail: boolean) =>
   `${isFail ? `Критична невдача — ${effect.name}.` : `Критичне влучання — ${effect.name}!`}${flavor ? ` ${flavor}` : ""}`;
 
-const lowerFirst = (text: string) => text.charAt(0).toLowerCase() + text.slice(1);
 
 export function buildBattleActionForCriticalFail(
   attacker: BattleParticipant,

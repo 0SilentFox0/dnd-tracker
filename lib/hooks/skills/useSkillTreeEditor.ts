@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { skillKeys } from "./keys";
-import { progressionCampaignKey } from "./progression-keys";
 import { useMainSkills } from "./useMainSkills";
 import { useSkills } from "./useSkills";
 
@@ -88,7 +87,7 @@ export function useSkillTreeEditor(campaignId: string) {
 
       setDraft({ key: `${activeRace}:${saved.id}`, treeId: saved.id, raw: edit.readTreeJson(saved.skills) });
       await queryClient.invalidateQueries({ queryKey: skillKeys.trees(campaignId) });
-      void queryClient.invalidateQueries({ queryKey: progressionCampaignKey(campaignId) });
+      void queryClient.invalidateQueries({ queryKey: skillKeys.progressionOf(campaignId) });
     } catch (error) {
       await notify((error as Error).message);
     } finally {

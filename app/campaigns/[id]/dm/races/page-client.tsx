@@ -14,7 +14,7 @@ import {
   useDeleteRace,
   useRaces,
 } from "@/lib/hooks/races";
-import { pluralUk } from "@/lib/utils/plural";
+import { pluralUk } from "@/lib/utils/common/plural";
 import type { Race } from "@/types/races";
 
 interface DMRacesPageClientProps {

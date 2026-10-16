@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { UNGROUPED_KEY } from "@/lib/constants/ungrouped";
 import { groupUnitsByRace, groupUnitsByRaceName, NO_RACE, raceChips, raceIdOfGroup } from "@/lib/utils/units/group-units";
 import type { Unit } from "@/types/units";
 
@@ -58,8 +59,8 @@ describe("groupUnitsByRaceName", () => {
 
     const grouped = groupUnitsByRaceName(list);
 
-    expect([...grouped.keys()].sort()).toEqual(["Без раси", "Орки"]);
+    expect([...grouped.keys()].sort()).toEqual([UNGROUPED_KEY, "Орки"].sort());
     expect(grouped.get("Орки")?.map((x) => x.id)).toEqual(["b", "a"]);
-    expect(grouped.get("Без раси")?.map((x) => x.id)).toEqual(["c"]);
+    expect(grouped.get(UNGROUPED_KEY)?.map((x) => x.id)).toEqual(["c"]);
   });
 });

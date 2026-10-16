@@ -5,7 +5,7 @@ import { collectModifiers, type ModifierEntry } from "@/lib/utils/abilities/engi
 import { withSelf } from "@/lib/utils/abilities/engine/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
-import { signed } from "@/lib/utils/format";
+import { signed } from "@/lib/utils/common/format";
 import type { BattleParticipant, DamageStep } from "@/types/battle";
 
 const BONUS_PREFIX: Record<ModifierEntry["sourceType"], string> = {

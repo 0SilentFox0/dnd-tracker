@@ -18,7 +18,7 @@ import {
   useMainSkills,
   useSkills,
 } from "@/lib/hooks/skills";
-import { pluralUk } from "@/lib/utils/plural";
+import { pluralUk } from "@/lib/utils/common/plural";
 import {
   convertGroupedSkillsToArray,
   groupSkillsByMainSkill,

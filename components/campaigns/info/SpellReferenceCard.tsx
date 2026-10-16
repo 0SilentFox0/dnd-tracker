@@ -15,7 +15,7 @@ import { useAppearanceSave } from "@/lib/hooks/common";
 import {
   formatMechanicsSpell,
   getShortSpellSummary,
-} from "@/lib/utils/info-reference";
+} from "@/lib/utils/campaigns/info-reference";
 import type { SpellForReference } from "@/types/info-reference";
 
 interface SpellReferenceCardProps {

@@ -11,7 +11,6 @@ import { MagicTab } from "./MagicTab";
 import { useProfile } from "./ProfileContext";
 import { ProfileHero } from "./ProfileHero";
 import { type ProfileTabId, ProfileTabs } from "./ProfileTabs";
-import { Section } from "./Section";
 import { SetList } from "./SetList";
 import { SkillsTab } from "./SkillsTab";
 import { SPELL_ABILITY_OPTIONS, toSpellcastingAbility } from "./spellcasting-ability";
@@ -23,6 +22,7 @@ import { CharacterAbilityScores } from "@/components/characters/stats/CharacterA
 import { CharacterCombatParams } from "@/components/characters/stats/CharacterCombatParams";
 import { ActionBar } from "@/components/common/ActionBar";
 import { LoadingState } from "@/components/common/states";
+import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
@@ -128,9 +128,9 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
                   onEquippedChange={setEquipped}
                 />
                 {sheet.items.sets.length > 0 && (
-                  <Section title="СЕТИ">
+                  <HudSection title="СЕТИ">
                     <SetList sets={sheet.items.sets} />
-                  </Section>
+                  </HudSection>
                 )}
               </div>
             ),

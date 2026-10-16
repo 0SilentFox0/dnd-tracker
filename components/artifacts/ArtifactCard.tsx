@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ARTIFACT_RARITY_OPTIONS, ARTIFACT_SLOT_OPTIONS } from "@/lib/constants/artifacts";
+import { ARTIFACT_SLOT_OPTIONS, artifactRarityLabel } from "@/lib/constants/artifacts";
 import { useUpdateArtifact } from "@/lib/hooks/artifacts";
 import { useNotify } from "@/lib/hooks/common";
 
@@ -37,8 +37,6 @@ interface ArtifactCardProps {
   artifact: ArtifactCardData;
   variant?: "full" | "compact";
 }
-
-const rarityLabel = (rarity: string) => ARTIFACT_RARITY_OPTIONS.find((o) => o.value === rarity)?.label ?? rarity;
 
 export function ArtifactCard({
   campaignId,
@@ -113,7 +111,7 @@ export function ArtifactCard({
             <div className="mt-1 flex flex-wrap items-center gap-2">
               {artifact.rarity && (
                 <Badge variant="outline" className="text-xs">
-                  {rarityLabel(artifact.rarity)}
+                  {artifactRarityLabel(artifact.rarity)}
                 </Badge>
               )}
               {slotSelect}
@@ -142,7 +140,7 @@ export function ArtifactCard({
           <h3 className="hud-sc min-w-0 flex-1 truncate text-base text-hud-ink">{artifact.name}</h3>
           {artifact.rarity && (
             <Badge variant="outline" className="shrink-0">
-              {rarityLabel(artifact.rarity)}
+              {artifactRarityLabel(artifact.rarity)}
             </Badge>
           )}
         </div>

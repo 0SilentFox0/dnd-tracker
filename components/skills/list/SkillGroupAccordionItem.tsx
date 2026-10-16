@@ -15,6 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { groupDisplayName, UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
 import { cn } from "@/lib/utils";
 import { getSkillId } from "@/lib/utils/skills/skill-helpers";
 import type { GroupedSkill, Skill } from "@/types/skills";
@@ -57,7 +58,7 @@ export function SkillGroupAccordionItem({
         <AccordionTrigger className="px-4 sm:px-6">
           <div className="flex items-center gap-3 sm:gap-4 text-left w-full">
             <div className="flex-1 min-w-0">
-              <h3 className="hud-sc truncate text-lg text-hud-ink">{groupName}</h3>
+              <h3 className="hud-sc truncate text-lg text-hud-ink">{groupDisplayName(groupName, UNGROUPED_LABELS.mainSkill)}</h3>
               <p className="mt-1 text-sm text-hud-muted">{totalSkills} скілів</p>
             </div>
           </div>

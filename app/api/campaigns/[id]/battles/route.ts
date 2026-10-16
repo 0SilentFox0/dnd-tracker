@@ -9,7 +9,7 @@ import {
 } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
-import { battleSceneListSelect } from "@/lib/utils/battle/battle-scene-list-select";
+import { battleSceneListSelect } from "@/lib/utils/battle/store/scene-list-select";
 
 export async function POST(
   request: Request,

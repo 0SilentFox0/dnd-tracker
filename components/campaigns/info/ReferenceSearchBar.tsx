@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ARTIFACT_RARITY_OPTIONS } from "@/lib/constants/artifacts";
+import { artifactRarityLabel } from "@/lib/constants/artifacts";
 import { cn } from "@/lib/utils";
 import type { SectionTab } from "@/types/info-reference";
 
@@ -61,8 +61,6 @@ interface ReferenceSearchBarProps {
   showSpellsFilter: boolean;
   showArtifactsFilter: boolean;
 }
-
-const rarityLabel = (rarity: string) => ARTIFACT_RARITY_OPTIONS.find((o) => o.value === rarity)?.label ?? rarity;
 
 function FilterSelect({
   label,
@@ -332,7 +330,7 @@ export function ReferenceSearchBar({
                 allLabel="Будь-яка"
                 value={artifactRarityFilter}
                 onChange={setArtifactRarityFilter}
-                options={artifactRarityOptions.map((r) => ({ value: r, label: rarityLabel(r) }))}
+                options={artifactRarityOptions.map((r) => ({ value: r, label: artifactRarityLabel(r) }))}
               />
             )}
             {showArtifactsFilter && artifactSlotOptions.length > 0 && (

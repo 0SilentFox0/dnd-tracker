@@ -17,6 +17,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { groupDisplayName, isUngroupedKey, UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
 import { useSpellGroupActions } from "@/lib/hooks/spells";
 import { getSpellGroupIcon } from "@/lib/utils/spells/spell-icons";
 import { calculateTotalSpellsInGroup } from "@/lib/utils/spells/spells";
@@ -41,15 +42,17 @@ export function SpellGroupAccordion({
 }: SpellGroupAccordionProps) {
   const groupId = spellGroups.find((g) => g.name === groupName)?.id;
 
-  const isUngrouped = groupName === "Без групи";
+  const isUngrouped = isUngroupedKey(groupName);
+
+  const displayName = groupDisplayName(groupName, UNGROUPED_LABELS.spellGroup);
 
   const totalSpells = calculateTotalSpellsInGroup(levels);
 
-  const GroupIcon = getSpellGroupIcon(groupName);
+  const GroupIcon = getSpellGroupIcon(displayName);
 
   const actions = useSpellGroupActions({
     campaignId,
-    groupName,
+    groupName: displayName,
     groupId,
   });
 
@@ -61,7 +64,7 @@ export function SpellGroupAccordion({
             <div className="flex items-center gap-3 sm:gap-4 text-left w-full">
               <GroupIcon className="h-6 w-6 sm:h-7 sm:w-7 shrink-0 text-hud-gold" />
               <div className="flex-1 min-w-0">
-                <h3 className="hud-sc truncate text-lg text-hud-ink">{groupName}</h3>
+                <h3 className="hud-sc truncate text-lg text-hud-ink">{displayName}</h3>
                 <p className="mt-1 text-sm text-hud-muted">{totalSpells} заклинань</p>
               </div>
             </div>

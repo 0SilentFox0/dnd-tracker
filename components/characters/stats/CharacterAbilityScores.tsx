@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { type AbilityKey, CORE_ABILITY_SCORES } from "@/lib/constants/abilities";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
-import { signed } from "@/lib/utils/format";
+import { signed } from "@/lib/utils/common/format";
 
 interface CharacterAbilityScoresProps {
   primary?: { value: AbilityKey | null; onChange: (v: AbilityKey | null) => void };
