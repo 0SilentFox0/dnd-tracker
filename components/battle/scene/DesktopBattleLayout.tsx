@@ -2,21 +2,21 @@
 
 import dynamic from "next/dynamic";
 
-import { BattleLog } from "./BattleLog";
 import { BattleOverBanner } from "./BattleOverBanner";
 import { BattleTopBar } from "./BattleTopBar";
 import { ConnectionBanner } from "./ConnectionBanner";
-import { InitiativeTrack } from "./InitiativeTrack";
 import { LastActionTicker } from "./LastActionTicker";
-import { MyHeroPanel } from "./MyHeroPanel";
-import { MyTurnControls } from "./MyTurnControls";
-import { ParticipantDetails } from "./ParticipantDetails";
-import { ParticipantList } from "./ParticipantList";
 
+import { BattleLog } from "@/components/battle/log/BattleLog";
+import { InitiativeTrack } from "@/components/battle/participants/InitiativeTrack";
+import { MyHeroPanel } from "@/components/battle/participants/MyHeroPanel";
+import { ParticipantDetails } from "@/components/battle/participants/ParticipantDetails";
+import { ParticipantList } from "@/components/battle/participants/ParticipantList";
+import { MyTurnControls } from "@/components/battle/turn/MyTurnControls";
 import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
 import { useBattleScene } from "@/lib/hooks/battle";
 
-const DmPanel = dynamic(() => import("./DmPanel").then((m) => m.DmPanel), { ssr: false });
+const DmPanel = dynamic(() => import("@/components/battle/dm/DmPanel").then((m) => m.DmPanel), { ssr: false });
 
 const H3 = ({ color, children }: { color: string; children: React.ReactNode }) => (
   <h3 className="hud-sc flex h-8 items-center gap-2 border-b border-white/[.14] text-[15px] font-bold tracking-[.1em] text-[#a89c88]">

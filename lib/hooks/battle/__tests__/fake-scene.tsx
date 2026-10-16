@@ -6,7 +6,7 @@ import { BattleSceneContext, BattleSceneDataContext, type BattleSceneValue, type
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { ConfirmContext } from "@/lib/hooks/common";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { buildDisplayEffects, turnQueue } from "@/lib/utils/battle/view";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleScene } from "@/types/api";

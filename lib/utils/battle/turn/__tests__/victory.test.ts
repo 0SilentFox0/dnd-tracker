@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { applyVictoryCompletion } from "@/lib/utils/battle/turn/turn-helpers";
 import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/turn/victory";
 

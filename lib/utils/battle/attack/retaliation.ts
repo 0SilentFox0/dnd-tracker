@@ -10,9 +10,9 @@ import { calculateAttackRoll } from "./roll";
 
 import { AttackType } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
-import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { findParticipant, isActive, withSelf } from "@/lib/utils/abilities/engine/participants";
-import type { Rng } from "@/lib/utils/abilities/engine/types";
+import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { findParticipant, isActive, withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";

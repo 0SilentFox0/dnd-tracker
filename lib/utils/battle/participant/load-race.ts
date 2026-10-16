@@ -1,8 +1,5 @@
-import type { Prisma } from "@prisma/client";
-
 import { prisma } from "@/lib/db";
-
-type RaceRow = Prisma.RaceGetPayload<object>;
+import type { RaceRow } from "@/types/races";
 
 export async function loadRace(
   raceName: string | null | undefined,

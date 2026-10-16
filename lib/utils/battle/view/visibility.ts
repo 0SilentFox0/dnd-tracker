@@ -1,8 +1,8 @@
 import { type BattleKnowledge, resolveObservedTraits } from "./knowledge";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { withSelf } from "@/lib/utils/abilities/engine/participants";
+import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { BattleAction, BattleParticipant, DamageStep } from "@/types/battle";
 
 export interface Viewer {

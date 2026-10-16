@@ -5,7 +5,7 @@
 import type { PendingMoraleCheckPayload } from "./pending-morale";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
+import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { healthSegments, healthState, hpRatio } from "@/lib/utils/battle/view";
 
 const at = (currentHp: number, maxHp = 40, status: "active" | "unconscious" | "dead" = "active") => {

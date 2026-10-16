@@ -1,0 +1,133 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { ChevronDown, ChevronUp, ScrollText, Trash2 } from "lucide-react";
+
+import { BattleLogLoadEarlier } from "./BattleLogLoadEarlier";
+
+import { LogTimeline } from "@/components/battle/log/LogTimeline";
+import { useConfirm } from "@/lib/hooks/common";
+import { cn } from "@/lib/utils";
+import { canRollbackEntry } from "@/lib/utils/battle/view";
+import type { BattleScene } from "@/types/api";
+import type { BattleAction } from "@/types/battle";
+
+interface BattleLogPanelProps {
+  battle: BattleScene;
+  className?: string;
+  isDM?: boolean;
+  onRollback?: (actionIndex: number) => void;
+  /** Контроль відкриття ззовні (наприклад з панелі швидких дій DM) */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  /** Відображати лише вміст логу в сайдбарі DM (без нижньої панелі з кнопкою) */
+  embedInSidebar?: boolean;
+}
+
+export function BattleLogPanel({
+  battle,
+  className,
+  isDM = false,
+  onRollback,
+  open: controlledOpen,
+  onOpenChange,
+  embedInSidebar = false,
+}: BattleLogPanelProps) {
+  const confirm = useConfirm();
+
+  const [internalOpen, setInternalOpen] = useState(false);
+
+  const open = controlledOpen ?? internalOpen;
+
+  const handleToggle = () => {
+    if (onOpenChange) {
+      onOpenChange(!open);
+    } else {
+      setInternalOpen((o) => !o);
+    }
+  };
+
+  const entries = useMemo(() => [...((battle.battleLog ?? []) as BattleAction[])].reverse(), [battle.battleLog]);
+
+  const renderActions = (entry: BattleAction) =>
+    isDM && onRollback && canRollbackEntry(battle, entry) ? (
+      <button
+        type="button"
+        className="flex size-8 items-center justify-center text-hud-danger transition-colors hover:bg-hud-danger/15"
+        title="Відмінити дію (відкотити до стану перед нею)"
+        onClick={async () => {
+          if (await confirm({ title: "Відкотити бій до стану перед цією дією? Ця та всі наступні дії будуть видалені.", confirmLabel: "Підтвердити" })) {
+            onRollback(entry.actionIndex);
+          }
+        }}
+      >
+        <Trash2 className="size-3.5" />
+      </button>
+    ) : null;
+
+  const logContent = (
+    <div className={cn("overflow-y-auto px-2 custom-scrollbar", embedInSidebar ? "h-[min(50vh,400px)] border border-hud-rule bg-black/40" : "max-h-48 border-t border-hud-rule")}>
+      {entries.length === 0 ? (
+        <p className="py-2 text-sm italic text-[var(--hud-muted)]">Записів поки немає.</p>
+      ) : (
+        <LogTimeline entries={entries} participants={battle.initiativeOrder ?? []} renderActions={renderActions} />
+      )}
+      <BattleLogLoadEarlier />
+    </div>
+  );
+
+  if (embedInSidebar) {
+    return (
+      <div className={cn("flex flex-col gap-2", className)}>
+        <div className="flex items-center justify-between gap-2 shrink-0">
+          <span className="hud-sc flex items-center gap-2 text-[15px] tracking-[.08em] text-[var(--gold)]">
+            <ScrollText className="size-4" />
+            Лог бою
+            {entries.length > 0 && (
+              <span className="font-sans text-xs tracking-normal text-[var(--hud-muted)]">({entries.length})</span>
+            )}
+          </span>
+          {onOpenChange && (
+            <button
+              type="button"
+              className="h-8 px-2 text-[13px] text-[var(--hud-muted)] hover:text-[var(--ink)]"
+              onClick={() => onOpenChange(false)}
+            >
+              Закрити
+            </button>
+          )}
+        </div>
+        {logContent}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        "z-30 shrink-0 overflow-hidden border-t border-hud-rule bg-[#14100c]/[.97]",
+        className,
+      )}
+    >
+      <button
+        type="button"
+        className="hud-sc flex h-10 w-full items-center justify-between px-4 text-[15px] tracking-[.08em] text-[var(--gold)] hover:bg-[var(--gold)]/[.06]"
+        onClick={handleToggle}
+      >
+        <span className="flex items-center gap-2">
+          <ScrollText className="size-4" />
+          Лог бою
+          {entries.length > 0 && (
+            <span className="font-sans text-xs tracking-normal text-[var(--hud-muted)]">({entries.length})</span>
+          )}
+        </span>
+        {open ? (
+          <ChevronUp className="size-4 text-[var(--hud-muted)]" />
+        ) : (
+          <ChevronDown className="size-4 text-[var(--hud-muted)]" />
+        )}
+      </button>
+      {open && logContent}
+    </div>
+  );
+}

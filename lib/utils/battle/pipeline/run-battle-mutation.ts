@@ -9,8 +9,8 @@ import { guardTurnOrder } from "./turn-order-guard";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BattleStatus } from "@/lib/constants/battle";
-import { isActive } from "@/lib/utils/abilities/engine/participants";
-import type { Rng } from "@/lib/utils/abilities/engine/types";
+import { isActive } from "@/lib/utils/abilities/engine/core/participants";
+import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import type { BATTLE_RATE_LIMITS, RateLimitResult } from "@/lib/utils/api/rate-limit";
 import { rateLimitResponse } from "@/lib/utils/api/rate-limit";
 import { controls } from "@/lib/utils/battle/common/control";

@@ -10,7 +10,7 @@ import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { useBattleScene } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
-import { withinLimits } from "@/lib/utils/abilities/engine/usage";
+import { withinLimits } from "@/lib/utils/abilities/engine/core/usage";
 import { describeEffect } from "@/lib/utils/abilities/registry/effects";
 import { abilityMaxTargets, toggleAbilityTarget } from "@/lib/utils/battle/validation/ability-targets";
 import { bonusTargetCandidates, bonusTargetSide, needsBonusTarget } from "@/lib/utils/battle/view";

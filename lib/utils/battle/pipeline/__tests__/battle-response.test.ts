@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { buildPusherMessages, toBattleResponse } from "@/lib/utils/battle/pipeline/battle-response";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 

@@ -1,5 +1,4 @@
-import { DieInput } from "../DiceInput";
-
+import { DieInput } from "@/components/battle/hud/DiceInput";
 import type { BattleParticipant } from "@/types/battle";
 
 export function SaveRolls({ targets, saves, onChange }: { targets: BattleParticipant[]; saves: Record<string, number>; onChange: (id: string, value: number | undefined) => void }) {

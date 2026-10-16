@@ -3,9 +3,8 @@
 import { useState } from "react";
 import { Crosshair, Loader2, Swords } from "lucide-react";
 
-import { AiRollButton, DamageDice, DiceGrid } from "./DiceInput";
-
 import { HealthLabel, Portrait } from "@/components/battle/hud";
+import { AiRollButton, DamageDice, DiceGrid } from "@/components/battle/hud/DiceInput";
 import { HUD_SURFACE } from "@/components/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { AttackType } from "@/lib/constants/battle";

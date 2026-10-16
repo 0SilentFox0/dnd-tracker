@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import { applyCriticalEffect, critFlavorFor } from "../critical";
 
 import { type CriticalEffect, type CriticalEffectType, getCriticalEffect } from "@/lib/constants/critical-effects";
-import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
+import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 
 const crit = (type: CriticalEffectType, extra: Partial<CriticalEffect["effect"]> = {}): CriticalEffect => ({
   id: 1,

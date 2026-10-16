@@ -8,7 +8,7 @@ vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 import { EffectLine, HealthBar, SlotGrid } from "@/components/battle/hud";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ParticipantSide } from "@/lib/constants/battle";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { ActiveEffect } from "@/types/battle";
 
 const withTips = (ui: ReactNode) => <TooltipProvider>{ui}</TooltipProvider>;

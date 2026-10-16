@@ -29,7 +29,7 @@ pnpm migrate:deploy                    # apply migrations against DIRECT_URL fro
 pnpm exec prisma studio
 ```
 
-End-to-end battle check on a copy of prod: `./scripts/prodcopy-db.sh` (reads prod, recreates local DB `prodcopy`), then `DATABASE_URL=postgresql://postgres:postgres@localhost:54322/prodcopy pnpm battle-sweep` — 5-round battles through the real mutations, targeted triggers, unit control and 5th-level spells; report in `<tmp>/battle-sweep/battle-sweep.md`, exit 1 on errors.
+End-to-end battle check on a copy of prod: `./scripts/db/prodcopy-db.sh` (reads prod, recreates local DB `prodcopy`), then `DATABASE_URL=postgresql://postgres:postgres@localhost:54322/prodcopy pnpm battle-sweep` — 5-round battles through the real mutations, targeted triggers, unit control and 5th-level spells; report in `<tmp>/battle-sweep/battle-sweep.md`, exit 1 on errors.
 
 Many one-off ops live in `scripts/` and run via `tsx` (e.g. `pnpm import-units`, `pnpm seed-mock-battle`, `pnpm upload-assets-to-supabase`). Check `package.json` scripts before writing new tooling.
 
@@ -63,7 +63,7 @@ Page `app/campaigns/[id]/battles/[battleId]/page.tsx` (server: `userId` from `ge
 - **Turn advance** has one engine: `lib/utils/battle/turn/advanceTurn` (used by next-turn and attack with `endTurn`).
 - **Client cache:** `applyBattleDelta` (`lib/utils/battle/client`) patches the cached `BattleScene` (old version ignored, gap or patch for an unknown id → one GET). After a Pusher gap or a tab hidden > 15 s, `usePusherBattleSync` asks for the version and refetches only when it is newer. `useBattleAction` sends `expectedVersion`; 409 → refetch + battle toast. `actionIndex` in the client log is the event `seq` (rollback target).
 - **Player UI logic:** wizards (attack, spellbook, player turn) are reducers in `lib/utils/battle/flows` driven by hooks in `lib/hooks/battle`; what a player may see (health states instead of enemy HP, AC known from attacks, observed traits from `actionDetails.damageSteps`, turn queue with morale extra turns) is `lib/utils/battle/view`. Hiding is client-side.
-- **Abilities** (skills, races, artifacts, sets, units) share one model in `lib/utils/abilities/`: engine code fires typed events into `runAbilities` (limits, chance, `lethalDamage` → `kill`) and reads every stat/damage/resistance/flag bonus via `collectModifiers` — never from raw skill JSON. Owners have an `abilities JSONB` column; edit forms write `abilities` directly through `AbilityListEditor` (`components/abilities`); read them with `lib/utils/abilities/read.ts` (column is `NOT NULL DEFAULT '[]'`). Old-format converters live only in `scripts/legacy-convert/` (for `import-skills-library`).
+- **Abilities** (skills, races, artifacts, sets, units) share one model in `lib/utils/abilities/`: engine code fires typed events into `runAbilities` (limits, chance, `lethalDamage` → `kill`) and reads every stat/damage/resistance/flag bonus via `collectModifiers` — never from raw skill JSON. Owners have an `abilities JSONB` column; edit forms write `abilities` directly through `AbilityListEditor` (`components/abilities`); read them with `lib/utils/abilities/read.ts` (column is `NOT NULL DEFAULT '[]'`). Old-format converters live only in `scripts/import/legacy-convert/` (for `import-skills-library`).
 - When changing battle behavior, expect to touch the mutation, the engine util, and possibly the hook and UI under `components/battle/`.
 
 ### Path alias & imports
@@ -103,7 +103,7 @@ These trip people up repeatedly — read before touching the DB or `vercel.json`
 - **Migrations must be expand-only** (add columns/tables, backfill, drop later): `migrate deploy` runs before `next build`, and a Vercel rollback does not revert the schema.
 - **Every `CREATE TABLE` migration must also `ALTER TABLE … ENABLE ROW LEVEL SECURITY`** — Supabase exposes `public` tables to the anon key otherwise. `prisma/__tests__/migrations-rls.test.ts` enforces it.
 - **Regions:** Supabase `eu-central-1`, Vercel functions `fra1`, Pusher cluster `eu`. Don't move one without the others — every DB round trip across continents adds ~100 ms.
-- **`DATABASE_URL` for Vercel = Transaction pooler (port 6543) with `?pgbouncer=true&sslmode=require`.** The Direct connection (port 5432) is only for one-off DDL/backups (`scripts/backup-database.sh`, manual migrations).
+- **`DATABASE_URL` for Vercel = Transaction pooler (port 6543) with `?pgbouncer=true&sslmode=require`.** The Direct connection (port 5432) is only for one-off DDL/backups (`scripts/db/backup-database.sh`, manual migrations).
 - **Local dev uses a Docker Postgres** (`pnpm db:local`, port 54322) so `pnpm dev` doesn't burn the Supabase free-tier egress quota. Prod connection strings live in `.env.production-db.local`; Supabase Auth/Storage and Pusher stay cloud even in dev.
 - **Egress is a hard constraint (Supabase free tier).** Avoid re-reading large rows, prefer deltas over refetches, keep polling slow, serve Storage images through `next/image` (cached by Vercel) with long `cacheControl` on immutable uploads.
 - **Local dev pointing at the prod DB is intentional in some setups** — see `docs/DATABASE-SYNC.md` for the "one DB" vs "dev + prod" tradeoffs and the backup/restore scripts. Don't assume divergence is a bug without checking which `DATABASE_URL` is set.

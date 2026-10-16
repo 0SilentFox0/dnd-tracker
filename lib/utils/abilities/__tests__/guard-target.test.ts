@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { makeParticipant, resolved, seq } from "./fixtures";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
+import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { AbilityEvent } from "@/types/abilities";
 
 const guard = resolved({ trigger: { event: "bonusAction" }, effects: [{ kind: "guard", percent: 50, duration: { rounds: 2 }, target: "eventTarget" }] });

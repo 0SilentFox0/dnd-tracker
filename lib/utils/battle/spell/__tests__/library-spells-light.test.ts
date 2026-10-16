@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import { SPELLS } from "@/data/library/spells";
 import { AttackType, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import { findParticipant } from "@/lib/utils/abilities/engine/participants";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
+import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { processAttack } from "@/lib/utils/battle/attack/process";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
@@ -341,7 +341,7 @@ describe("Слово світла", () => {
   });
 
   it("сид мапить raceKey у id раси кампанії", async () => {
-    const { mapRaceModifiers } = await import("@/scripts/seed-library-lib");
+    const { mapRaceModifiers } = await import("@/scripts/seed/seed-library-lib");
 
     const races = new Map([["humans", "r-h"], ["elves", "r-e"], ["dwarves", "r-d"], ["mages", "r-m"]]);
 

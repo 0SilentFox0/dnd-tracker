@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { buildParticipantPatch, FULL_PARTICIPANT } from "@/lib/utils/battle/store";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 

@@ -5,8 +5,8 @@ import { createSpellMutation } from "@/app/api/campaigns/[id]/battles/[battleId]
 import { SPELLS } from "@/data/library/spells";
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { updateParticipant } from "@/lib/utils/abilities/engine/participants";
+import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { processAttack } from "@/lib/utils/battle/attack";
 import { runAttackPhase } from "@/lib/utils/battle/attack-phase/run-attack-phase";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";

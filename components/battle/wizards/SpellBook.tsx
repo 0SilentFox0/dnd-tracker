@@ -4,9 +4,9 @@ import { Loader2, Sparkles, Swords } from "lucide-react";
 
 import { SaveRolls } from "./spellbook/SaveRolls";
 import { SpellSummary } from "./spellbook/SpellSummary";
-import { AiRollButton, DamageDice } from "./DiceInput";
 
 import { Portrait } from "@/components/battle/hud";
+import { AiRollButton, DamageDice } from "@/components/battle/hud/DiceInput";
 import { HUD_SURFACE } from "@/components/hud";
 import { SpellBookPages, SpellDetail } from "@/components/spells/book/SpellBookPages";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";

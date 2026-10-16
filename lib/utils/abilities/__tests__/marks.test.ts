@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import { makeParticipant, resolved } from "./fixtures";
 
-import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { countMarks } from "@/lib/utils/abilities/engine/marks";
-import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
+import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
+import { countMarks } from "@/lib/utils/abilities/engine/effects/marks";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import { AbilitySchema } from "@/lib/utils/abilities/schema";
 import type { AbilityEvent } from "@/types/abilities";

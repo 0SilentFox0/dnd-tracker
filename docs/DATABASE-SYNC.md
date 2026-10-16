@@ -43,12 +43,12 @@ Auth, Storage і Pusher лишаються хмарними.
 2. Бекап:
    ```bash
    # Опційно .env.backup з BACKUP_DATABASE_URL=postgresql://...@db....:5432/postgres
-   ./scripts/backup-database.sh
+   ./scripts/db/backup-database.sh
    ```
 3. У **локальному** `.env.local` вкажи URL **локальної** / **dev** Supabase (pooler 6543 для додатку).
 4. Відновлення в ту БД, куди хочеш залити дані:
    ```bash
-   ./scripts/restore-backup-to-supabase.sh .migration-backup/backup_YYYYMMDD_HHMMSS.sql
+   ./scripts/db/restore-backup-to-supabase.sh .migration-backup/backup_YYYYMMDD_HHMMSS.sql
    ```
    За потреби спочатку порожні таблиці: `--clean` (див. коментарі в скрипті — **зітре дані** в цільовій БД).
 

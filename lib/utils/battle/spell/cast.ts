@@ -7,11 +7,11 @@ import { computeSpellPower, spellSaveDc } from "./power";
 import { spellNeedsSlot, spellSlotKey } from "./slot";
 import { participantImmuneToSpell } from "./spell-immunity";
 
-import { resolveAmount } from "@/lib/utils/abilities/engine/amount";
-import { applyRawDamage } from "@/lib/utils/abilities/engine/hp";
-import { findParticipant, isActive, mergeParticipants, withSelf } from "@/lib/utils/abilities/engine/participants";
-import { resolveTargetIds } from "@/lib/utils/abilities/engine/targets";
-import type { SummonRequest } from "@/lib/utils/abilities/engine/types";
+import { resolveAmount } from "@/lib/utils/abilities/engine/core/amount";
+import { findParticipant, isActive, mergeParticipants, withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
+import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
+import { applyRawDamage } from "@/lib/utils/abilities/engine/effects/hp";
 import { applyEffect } from "@/lib/utils/abilities/registry/effects";
 import type { Amount, Effect } from "@/lib/utils/abilities/schema";
 import { rollDie } from "@/lib/utils/common/dice";

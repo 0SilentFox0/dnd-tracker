@@ -1,5 +1,5 @@
-import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { withSelf } from "@/lib/utils/abilities/engine/participants";
+import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import type { BattleParticipant } from "@/types/battle";
 

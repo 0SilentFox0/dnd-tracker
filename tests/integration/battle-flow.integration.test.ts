@@ -8,7 +8,7 @@ import { nextTurnMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/ne
 import { createRollbackMutation, rollbackSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/rollback/rollback-mutation";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { PipelineDeps } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { loadBattle, loadRecentEvents, loadSnapshotsFrom, saveBattle } from "@/lib/utils/battle/store";

@@ -1,4 +1,4 @@
-import { legacyActiveEffectModifiers } from "@/lib/utils/abilities/engine/legacy-active-effects";
+import { legacyActiveEffectModifiers } from "@/lib/utils/abilities/engine/effects/legacy-active-effects";
 import { describeEffect } from "@/lib/utils/abilities/registry/effects";
 import { capitalize } from "@/lib/utils/common/text";
 import type { ActiveEffect } from "@/types/battle";

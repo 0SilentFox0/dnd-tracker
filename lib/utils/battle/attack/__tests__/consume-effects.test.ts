@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { activeEffectIds, consumeAttackEffects } from "../consume-effects";
 
 import { makeEffect } from "@/lib/utils/abilities/__tests__/fixtures";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
 const withEffects = (id: string, effects: ActiveEffect[]): BattleParticipant => {

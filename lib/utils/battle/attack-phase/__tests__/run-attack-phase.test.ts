@@ -16,7 +16,7 @@ import {
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 

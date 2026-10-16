@@ -1,7 +1,7 @@
 /** Вампіризм: відновлення HP атакувальника від завданої шкоди (прапорець lifesteal). */
 
 import { AttackType } from "@/lib/constants/battle";
-import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
+import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import type { BattleParticipant } from "@/types/battle";
 
 export function applyVampirism(

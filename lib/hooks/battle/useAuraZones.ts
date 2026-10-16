@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useBattleScene } from "./useBattleScene";
 
-import { type AreaAura, pendingAreaAuras, zoneCandidates, zoneMembers } from "@/lib/utils/abilities/engine/area-aura";
+import { type AreaAura, pendingAreaAuras, zoneCandidates, zoneMembers } from "@/lib/utils/abilities/engine/effects/area-aura";
 import type { BattleParticipant } from "@/types/battle";
 
 export interface AuraZoneStep {

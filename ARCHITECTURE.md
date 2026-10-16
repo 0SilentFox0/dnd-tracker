@@ -159,7 +159,7 @@ React-хуки згруповані по папках за доменом; ко�
 - **`registry/`** — реєстр тригерів, умов і ефектів: `matches` / `evaluate` / `apply`, `describe`, `fields` для UI.
 - **`engine/`** — `runAbilities` (один виконавець подій бою з лімітами й шансом), `resolveDowned` (летальна шкода → вбивство), `collectModifiers` (постійні модифікатори: пасивки, аури, таймові ефекти).
 - **`build/`** — збирання умінь учасника («найвищий рівень у лінії», школа магії) і запікання статів при побудові.
-- **`read.ts`** — єдине читання колонки `abilities` (`skillAbilities` / `raceAbilities` / … для бою, `readAbilities` для редакторів; колонка `NOT NULL DEFAULT '[]'`, невалідні записи відкидаються з попередженням). Форми пишуть `abilities` напряму; `summary.ts` рахує короткі описи для списків. Конвертери старих форматів — лише в `scripts/legacy-convert/` (для `import-skills-library`).
+- **`read.ts`** — єдине читання колонки `abilities` (`skillAbilities` / `raceAbilities` / … для бою, `readAbilities` для редакторів; колонка `NOT NULL DEFAULT '[]'`, невалідні записи відкидаються з попередженням). Форми пишуть `abilities` напряму; `summary.ts` рахує короткі описи для списків. Конвертери старих форматів — лише в `scripts/import/legacy-convert/` (для `import-skills-library`).
 
 #### `lib/utils/skills/`
 
@@ -231,15 +231,16 @@ React-провайдери: **`query-provider.tsx`** (TanStack Query), можл�
 
 ## 6. `scripts/`
 
-Скрипти для CLI та одноразових операцій (запуск: `pnpm run <script>` або `tsx scripts/імʼя.ts`).
+Скрипти для CLI та одноразових операцій (запуск: `pnpm run <script>` або `tsx scripts/<група>/імʼя.ts`). Групи:
 
-- **Імпорт:** `import-docs-spells.ts`, `import-units.ts` (ручний імпорт CSV DM; бібліотечні юніти — `data/library/units` через `seed-library`), `import-skills-library.ts` (та допоміжні parse/triggers/types).
-- **Дані:** `seed-artifacts.ts`, `seed-mock-battle-data.ts`, `reset-mock-battle-data.ts`, `delete-mock-battle-data.ts`, `redistribute-character-spell-slots.ts`.
-- **Тести/симуляції:** `simulate-battle.ts`.
-- **Симуляція бою:** `pnpm simulate-battle` — лише на локальній БД: створює окрему кампанію (персонажі з різними прокачками й артефактами, юніти з уміннями) і проганяє бій через ті самі mutation-функції, що й API, з перевірками ефектів.
-- **Інше:** `artifact-icon-map.ts`.
+- **`scripts/import/`** — імпорт: `import-units.ts` (ручний імпорт CSV DM; бібліотечні юніти — `data/library/units` через `seed-library`), `import-skills-library*.ts`, іконки (`import-*-icon*.ts`, `artifact-icon-map.ts`, `wiki-icons-lib.ts`), `legacy-convert/`.
+- **`scripts/seed/`** — seed і mock-дані: `seed-library.ts`, `seed-artifacts.ts`, `seed-homm5-characters.ts`, `seed-mock-battle-data.ts`, `reset-/delete-mock-battle-data.ts`.
+- **`scripts/sim/`** — симуляції й баланс: `simulate-battle.ts` (`pnpm simulate-battle` — лише на локальній БД: окрема кампанія, бій через ті самі mutation-функції, що й API, з перевірками ефектів), `battle-sweep.ts`, `balance-library.ts`, `hero-growth-report.ts`.
+- **`scripts/db/`** — бекап/відновлення/міграції (`*.sh`), `redistribute-character-spell-slots.ts`, `sync-unit-initiative.ts`.
+- **`scripts/assets/`** — `upload-assets-to-supabase.ts`; **`scripts/shared/`** — спільні константи.
+- У корені лишаються `vercel-build.mjs`, `postinstall.mjs`, `sync-env-to-vercel.mjs`.
 
-Детальніший опис mock-даних — у **`scripts/README-MOCK-DATA.md`**.
+Детальніший опис mock-даних — у **`scripts/seed/README-MOCK-DATA.md`**.
 
 ---
 
@@ -288,6 +289,6 @@ React-провайдери: **`query-provider.tsx`** (TanStack Query), можл�
 
 - **`docs/README.md`** — загальний опис проекту, стек, швидкий старт, скрипти, деплой.
 - **`docs/TECHNICAL_SPECIFICATION.md`** — технічне завдання (якщо є).
-- **`scripts/README-MOCK-DATA.md`** — робота з mock-боями та даними.
+- **`scripts/seed/README-MOCK-DATA.md`** — робота з mock-боями та даними.
 
 Якщо додаєте новий домен (наприклад, новий тип контенту кампанії), логічно додати відповідні гілки в **`app/api/campaigns/[id]/`**, **`app/campaigns/[id]/dm/`**, модуль в **`lib/api/`**, хуки в **`lib/hooks/`**, типи в **`types/`** та компоненти в **`components/`**.

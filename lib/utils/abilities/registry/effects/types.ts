@@ -1,4 +1,4 @@
-import type { AbilityRunContext, Downed, SummonRequest } from "@/lib/utils/abilities/engine/types";
+import type { AbilityRunContext, Downed, SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import type { Effect, StaticEffect } from "@/lib/utils/abilities/schema";
 import type { AbilityEvent, ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";

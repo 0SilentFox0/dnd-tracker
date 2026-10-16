@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { type QueueEntry, queueKeys, turnQueue, turnsUntil } from "@/lib/utils/battle/view";
 import type { BattleParticipant } from "@/types/battle";
 

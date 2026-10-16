@@ -1,11 +1,11 @@
 import { CONDITION_LABELS } from "../labels";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
-import { restoreCharm } from "@/lib/utils/abilities/engine/charm";
-import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { countMarks, GUARD_KEY, markKey } from "@/lib/utils/abilities/engine/marks";
-import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/participants";
-import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/timed-effects";
+import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
+import { countMarks, GUARD_KEY, markKey } from "@/lib/utils/abilities/engine/effects/marks";
+import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import type { ConditionImmunityKey, Effect } from "@/lib/utils/abilities/schema";
 import { signed } from "@/lib/utils/common/format";
 import { pluralUk } from "@/lib/utils/common/plural";

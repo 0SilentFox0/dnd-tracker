@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { AttackType } from "@/lib/constants/battle";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { calculateAttackBonus } from "@/lib/utils/battle/attack";
 import { buildCharacterSheet, type SheetInput } from "@/lib/utils/characters/sheet";
 import type { BattleAttack } from "@/types/battle";

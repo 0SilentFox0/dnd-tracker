@@ -1,4 +1,4 @@
-import { updateParticipant } from "@/lib/utils/abilities/engine/participants";
+import { updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { effectKey, withoutEffects } from "@/lib/utils/battle/attack/consume-effects";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 

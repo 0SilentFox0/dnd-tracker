@@ -5,8 +5,8 @@ import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { DEFAULT_AREA_TARGETS } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
-import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/participants";
-import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/timed-effects";
+import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import type { Effect, FlagKey, StaticEffect } from "@/lib/utils/abilities/schema";
 import { signed } from "@/lib/utils/common/format";
 

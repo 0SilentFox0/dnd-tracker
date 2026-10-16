@@ -1,5 +1,3 @@
-import type { Prisma } from "@prisma/client";
-
 import { unitResistances } from "./resist";
 import { getUnitStats, type UnitSpellInput, type UnitStats } from "./stats";
 
@@ -7,8 +5,7 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { createBattleParticipantFromUnit } from "@/lib/utils/battle/participant/from-unit";
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
-
-type RaceRow = Prisma.RaceGetPayload<object>;
+import type { RaceRow } from "@/types/races";
 
 type UnitAttacks = Array<{ damageDice?: string; type?: string; attackBonus?: number; targetType?: string; maxTargets?: number }>;
 

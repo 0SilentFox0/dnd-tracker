@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { deriveTurn } from "../useBattleScene";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { BattleScene } from "@/types/api";
 
 const p = (id: string, controlledBy: string, side: ParticipantSide = ParticipantSide.ALLY) => {

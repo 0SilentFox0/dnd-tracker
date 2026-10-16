@@ -1,4 +1,4 @@
-import { restoreCharm } from "@/lib/utils/abilities/engine/charm";
+import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
 import { decreaseEffectDurations } from "@/lib/utils/battle/turn/effects";
 import type { BattleParticipant } from "@/types/battle";
 

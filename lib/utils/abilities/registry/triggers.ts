@@ -1,7 +1,7 @@
 import type { FieldMeta } from "./fields";
 
 import { AttackType } from "@/lib/constants/battle";
-import { findParticipant, isActive } from "@/lib/utils/abilities/engine/participants";
+import { findParticipant, isActive } from "@/lib/utils/abilities/engine/core/participants";
 import type { Trigger, TriggerEvent } from "@/lib/utils/abilities/schema";
 import type { AbilityEvent } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";

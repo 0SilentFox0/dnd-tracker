@@ -1,5 +1,5 @@
 import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
-import { applyAuraZone, areaAuras } from "@/lib/utils/abilities/engine/area-aura";
+import { applyAuraZone, areaAuras } from "@/lib/utils/abilities/engine/effects/area-aura";
 import { getCombinedResistancePercent } from "@/lib/utils/battle/resistance";
 import type { BattleParticipant } from "@/types/battle";
 

@@ -1,5 +1,5 @@
-import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { withSelf } from "@/lib/utils/abilities/engine/participants";
+import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { BattleParticipant } from "@/types/battle";
 
 /**

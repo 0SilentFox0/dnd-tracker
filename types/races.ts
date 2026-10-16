@@ -1,3 +1,5 @@
+import type { Prisma } from "@prisma/client";
+
 import type { ConversionIssue } from "@/lib/utils/abilities/schema";
 import type { Ability } from "@/lib/utils/abilities/schema";
 /**
@@ -62,3 +64,5 @@ export type RaceFromPrisma = Omit<Race, "availableSkills" | "disabledSkills" | "
   spellSlotProgression?: unknown;
   passiveAbility?: unknown;
 };
+
+export type RaceRow = Prisma.RaceGetPayload<object>;

@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { applyAuraZone, areaAuras, zoneCandidates } from "@/lib/utils/abilities/engine/area-aura";
-import { findParticipant, isActive, participantNames } from "@/lib/utils/abilities/engine/participants";
+import { findParticipant, isActive, participantNames } from "@/lib/utils/abilities/engine/core/participants";
+import { applyAuraZone, areaAuras, zoneCandidates } from "@/lib/utils/abilities/engine/effects/area-aura";
 import { canActNow } from "@/lib/utils/battle/common/control";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";

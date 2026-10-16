@@ -5,7 +5,7 @@ import { clearSnapshotCache, createSnapshotCache, SNAPSHOT_CACHE_MAX } from "../
 import { splitParticipant } from "../split-participant";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 
 const base = createMockParticipant();
 

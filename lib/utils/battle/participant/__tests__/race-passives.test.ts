@@ -5,11 +5,11 @@ import { createBattleParticipantFromCharacter } from "../from-character";
 import { RACES } from "@/data/library/races";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
+import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import { applyResistance, hasImmunity } from "@/lib/utils/battle/resistance";
-import { racePassiveData } from "@/scripts/seed-library-lib";
+import { racePassiveData } from "@/scripts/seed/seed-library-lib";
 import type { BattleParticipant } from "@/types/battle";
 
 const ABILITY_KEYS = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"] as const;

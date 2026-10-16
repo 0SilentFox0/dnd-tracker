@@ -1,6 +1,6 @@
 import { DEFAULT_AREA_TARGETS } from "@/lib/constants/abilities";
-import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { findParticipant, isActive } from "@/lib/utils/abilities/engine/participants";
+import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { findParticipant, isActive } from "@/lib/utils/abilities/engine/core/participants";
 import type { SpellTargeting as SpellTargetingDef } from "@/lib/utils/spells/model/schema";
 import type { BattleParticipant } from "@/types/battle";
 

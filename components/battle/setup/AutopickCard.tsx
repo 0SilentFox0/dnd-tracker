@@ -4,12 +4,13 @@ import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import type { SuggestedEnemy } from "@/types/battle-setup";
+import type { IdName } from "@/types/common";
 
 interface AutopickCardProps {
   hasAllies: boolean;
   balanceLoading: boolean;
   balanceRace: string;
-  races: { id: string; name: string }[];
+  races: IdName[];
   suggestedEnemies: SuggestedEnemy[];
   suggestDone: boolean;
   actions: {

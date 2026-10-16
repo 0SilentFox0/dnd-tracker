@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { alwaysSeesEnemyStats, canSeeEnemyHp, canSeeExactStats, hiddenTargetSteps, sanitizeLogEntry } from "@/lib/utils/battle/view";
 import type { BattleParticipant } from "@/types/battle";
 import type { BattleAction, DamageStep } from "@/types/battle";

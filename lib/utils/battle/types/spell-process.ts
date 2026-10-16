@@ -1,4 +1,4 @@
-import type { SummonRequest } from "@/lib/utils/abilities/engine/types";
+import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import type { SpellDefinition } from "@/lib/utils/spells/model/schema";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 

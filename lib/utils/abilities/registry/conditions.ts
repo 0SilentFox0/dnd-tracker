@@ -1,9 +1,9 @@
 import type { FieldMeta } from "./fields";
 
 import { AttackType } from "@/lib/constants/battle";
-import { eventActorId, eventAttackKind, eventTargetIds } from "@/lib/utils/abilities/engine/events";
-import { countMarks, markKey } from "@/lib/utils/abilities/engine/marks";
-import { findParticipant, isActive } from "@/lib/utils/abilities/engine/participants";
+import { eventActorId, eventAttackKind, eventTargetIds } from "@/lib/utils/abilities/engine/core/events";
+import { findParticipant, isActive } from "@/lib/utils/abilities/engine/core/participants";
+import { countMarks, markKey } from "@/lib/utils/abilities/engine/effects/marks";
 import type { Condition, ConditionSubject } from "@/lib/utils/abilities/schema";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import { hpRatio } from "@/lib/utils/battle/view/health";

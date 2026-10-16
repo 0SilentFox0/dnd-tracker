@@ -1,8 +1,8 @@
 import { berserkBonusOf, runBerserkTurn } from "./berserk";
 
 import { SYSTEM_ACTOR } from "@/lib/constants/battle";
-import { isActive } from "@/lib/utils/abilities/engine/participants";
-import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
+import { isActive } from "@/lib/utils/abilities/engine/core/participants";
+import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import {
   processEndOfTurn,
   processStartOfRound,

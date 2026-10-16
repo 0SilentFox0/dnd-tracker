@@ -1,9 +1,9 @@
 import { holdBackNewEffects, restoreHeldBack } from "./hold-back";
 
 import { AttackType } from "@/lib/constants/battle";
-import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { isActive, mergeParticipants, updateParticipant, withSelf } from "@/lib/utils/abilities/engine/participants";
-import type { Rng, SummonRequest } from "@/lib/utils/abilities/engine/types";
+import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { isActive, mergeParticipants, updateParticipant, withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import type { Rng, SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import { processAttack } from "@/lib/utils/battle/attack";
 import { activeEffectIds } from "@/lib/utils/battle/attack/consume-effects";
 import { getDisabledAttackKinds } from "@/lib/utils/battle/attack/disabled-attacks";

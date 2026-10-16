@@ -1,8 +1,8 @@
 import type { DamageCalculationResult } from "../types/damage-calculations";
 
 import { AttackType, BATTLE_CONSTANTS } from "@/lib/constants/battle";
-import { collectModifiers, type ModifierEntry } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { withSelf } from "@/lib/utils/abilities/engine/participants";
+import { collectModifiers, type ModifierEntry } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { signed } from "@/lib/utils/common/format";

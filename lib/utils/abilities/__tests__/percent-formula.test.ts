@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { makeParticipant, resolved } from "./fixtures";
 
-import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
+import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { describeEffect } from "@/lib/utils/abilities/registry/effects";
 import type { BattleParticipant } from "@/types/battle";
 

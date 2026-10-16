@@ -1,7 +1,7 @@
 import { ParticipantSide } from "@/lib/constants/battle";
-import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { withSelf } from "@/lib/utils/abilities/engine/participants";
-import { withinLimits } from "@/lib/utils/abilities/engine/usage";
+import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { withinLimits } from "@/lib/utils/abilities/engine/core/usage";
 import { deadTargetRules, isEligibleDeadTarget } from "@/lib/utils/abilities/target-rules";
 import { calculateAttackBonus } from "@/lib/utils/battle/attack/bonus";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";

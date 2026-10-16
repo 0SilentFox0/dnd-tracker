@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import { resolveTargetIds } from "@/lib/utils/abilities/engine/targets";
+import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
 import { applyEffect, describeEffect } from "@/lib/utils/abilities/registry/effects";
 import { EffectSchema } from "@/lib/utils/abilities/schema";
 

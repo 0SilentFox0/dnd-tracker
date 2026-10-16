@@ -141,7 +141,7 @@ describe("charm", () => {
   });
 
   it("зачарований юніт, що помер, повертається на свій бік", async () => {
-    const { resolveDowned } = await import("@/lib/utils/abilities/engine/run-abilities");
+    const { resolveDowned } = await import("@/lib/utils/abilities/engine/core/run-abilities");
 
     const ogre = unitOf("ogre", ParticipantSide.ENEMY);
 

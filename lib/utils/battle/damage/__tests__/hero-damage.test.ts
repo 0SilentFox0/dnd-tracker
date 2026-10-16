@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { computeHitDamage } from "@/lib/utils/battle/attack/process/compute";
 import { computeDamageBreakdown } from "@/lib/utils/battle/damage";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";

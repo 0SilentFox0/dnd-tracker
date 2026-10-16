@@ -1,6 +1,6 @@
-import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/participants";
-import { resolveDowned, runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
-import type { AbilityRunContext, AbilityRunResult, SummonRequest } from "@/lib/utils/abilities/engine/types";
+import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { resolveDowned, runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
+import type { AbilityRunContext, AbilityRunResult, SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import type { AbilityEvent } from "@/types/abilities";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 

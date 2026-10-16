@@ -6,6 +6,7 @@ import { ArtifactCard, type ArtifactCardData } from "@/components/artifacts/Arti
 import { HudCard } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { pluralUk } from "@/lib/utils/common/plural";
+import type { IdName } from "@/types/common";
 
 export interface ArtifactSetCardData {
   id: string;
@@ -18,7 +19,7 @@ export interface ArtifactSetCardData {
 
 type ArtifactSetCardProps = { set: ArtifactSetCardData; campaignId: string } & (
   | { variant: "withArtifacts"; artifacts: ArtifactCardData[] }
-  | { variant: "summary"; artifacts: { id: string; name: string }[] }
+  | { variant: "summary"; artifacts: IdName[] }
 );
 
 export function ArtifactSetCard(props: ArtifactSetCardProps) {

@@ -4,8 +4,8 @@ import { useEffect, useEffectEvent, useMemo, useReducer } from "react";
 
 import { useBattleScene } from "./useBattleScene";
 
-import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { withSelf } from "@/lib/utils/abilities/engine/participants";
+import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { predictAttack } from "@/lib/utils/battle/attack/bonus";
 import { resolveAttackRoll } from "@/lib/utils/battle/common/attack-roll-helpers";
 import { computeDamageBreakdown } from "@/lib/utils/battle/damage";

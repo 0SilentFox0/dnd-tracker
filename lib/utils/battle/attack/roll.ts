@@ -3,8 +3,8 @@ import { calculateAttackBonus, hasAdvantage, hasDisadvantage } from "./bonus";
 
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import { getRandomCriticalEffect } from "@/lib/constants/critical-effects";
-import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { withSelf } from "@/lib/utils/abilities/engine/participants";
+import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { rollDie } from "@/lib/utils/common/dice";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";

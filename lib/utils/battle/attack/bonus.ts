@@ -1,7 +1,7 @@
 import { AttackType } from "@/lib/constants/battle";
-import { collectModifiers, findFlags, statWithModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { withSelf } from "@/lib/utils/abilities/engine/participants";
-import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
+import { collectModifiers, findFlags, statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";

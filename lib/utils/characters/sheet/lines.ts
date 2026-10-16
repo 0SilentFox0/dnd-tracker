@@ -1,6 +1,6 @@
 import { ABILITY_LABELS } from "@/lib/constants/abilities";
 import { bakedStatSources } from "@/lib/utils/abilities/build/bake";
-import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
+import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { calculateAttackBonus } from "@/lib/utils/battle/attack";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";

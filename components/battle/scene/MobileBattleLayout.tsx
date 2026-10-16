@@ -4,24 +4,24 @@ import { useCallback, useState } from "react";
 import dynamic from "next/dynamic";
 import { Settings2 } from "lucide-react";
 
-import { BattleLog } from "./BattleLog";
 import { BattleOverBanner } from "./BattleOverBanner";
 import { BattleTopBar } from "./BattleTopBar";
 import { ConnectionBanner } from "./ConnectionBanner";
-import { InitiativeTrack } from "./InitiativeTrack";
 import { LastActionTicker } from "./LastActionTicker";
-import { MyHeroPanel } from "./MyHeroPanel";
-import { MyTurnControls } from "./MyTurnControls";
-import { ParticipantDetails } from "./ParticipantDetails";
-import { ParticipantList } from "./ParticipantList";
 
+import { BattleLog } from "@/components/battle/log/BattleLog";
+import { InitiativeTrack } from "@/components/battle/participants/InitiativeTrack";
+import { MyHeroPanel } from "@/components/battle/participants/MyHeroPanel";
+import { ParticipantDetails } from "@/components/battle/participants/ParticipantDetails";
+import { ParticipantList } from "@/components/battle/participants/ParticipantList";
+import { MyTurnControls } from "@/components/battle/turn/MyTurnControls";
 import { HUD_SURFACE } from "@/components/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { BattleStatus,ParticipantSide } from "@/lib/constants/battle";
 import { useBattleScene } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 
-const DmPanel = dynamic(() => import("./DmPanel").then((m) => m.DmPanel), { ssr: false });
+const DmPanel = dynamic(() => import("@/components/battle/dm/DmPanel").then((m) => m.DmPanel), { ssr: false });
 
 export function MobileBattleLayout() {
   const { battle, isDM, current, hero, isMyTurn, allies, enemies, selectedId, select, log, openLog, closeLog } = useBattleScene();

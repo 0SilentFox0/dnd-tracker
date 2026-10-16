@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { makeParticipant, resolved, seq } from "./fixtures";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
+import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
 import { AbilitySchema } from "@/lib/utils/abilities/schema";
 import { processStartOfTurn } from "@/lib/utils/battle/turn/start-end";

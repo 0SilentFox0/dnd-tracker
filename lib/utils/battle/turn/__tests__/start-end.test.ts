@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { CriticalEffect, CriticalEffectType } from "@/lib/constants/critical-effects";
 import { makeEffect } from "@/lib/utils/abilities/__tests__/fixtures";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { applyCriticalEffect } from "@/lib/utils/battle/attack";
 import { endTurnCleanup } from "@/lib/utils/battle/turn/end-turn-cleanup";
 import { processStartOfRound, processStartOfTurn } from "@/lib/utils/battle/turn/start-end";

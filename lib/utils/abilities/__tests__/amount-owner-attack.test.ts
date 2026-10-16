@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import { makeParticipant, resolved, seq } from "./fixtures";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
-import { resolveAmount } from "@/lib/utils/abilities/engine/amount";
-import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
+import { resolveAmount } from "@/lib/utils/abilities/engine/core/amount";
+import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
 import type { AbilityEvent } from "@/types/abilities";
 import type { BattleAttack } from "@/types/battle";

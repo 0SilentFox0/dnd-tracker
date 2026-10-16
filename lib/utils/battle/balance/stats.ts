@@ -3,7 +3,7 @@ import { damageKey } from "./resist";
 
 import { AttackType } from "@/lib/constants/battle";
 import { MIN_UNIT_STAT, TYPICAL_TARGETS } from "@/lib/constants/battle-balance";
-import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
+import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { calculateAttackBonus } from "@/lib/utils/battle/attack/bonus";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";

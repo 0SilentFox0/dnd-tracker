@@ -2,8 +2,8 @@ import { immuneTo } from "./state";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { ParticipantSourceType } from "@/lib/constants/battle";
-import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/participants";
-import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/timed-effects";
+import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
 
 type Of<K extends Effect["kind"]> = Extract<Effect, { kind: K }>;

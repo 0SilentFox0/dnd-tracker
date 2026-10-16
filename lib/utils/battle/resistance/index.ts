@@ -1,7 +1,7 @@
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
 import { PHYSICAL_DAMAGE_TYPES } from "@/lib/constants/damage";
-import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { withSelf } from "@/lib/utils/abilities/engine/participants";
+import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { AttackKind, StaticEffect } from "@/lib/utils/abilities/schema";
 import type { BattleParticipant, DamageStep } from "@/types/battle";
 

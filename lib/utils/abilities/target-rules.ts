@@ -1,5 +1,5 @@
 import { ParticipantSourceType } from "@/lib/constants/battle";
-import { isActive } from "@/lib/utils/abilities/engine/participants";
+import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { conditionRequiresDeadTarget } from "@/lib/utils/abilities/registry/conditions";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import type { ResolvedAbility } from "@/types/abilities";

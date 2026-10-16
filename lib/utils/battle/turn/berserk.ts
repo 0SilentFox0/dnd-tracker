@@ -1,6 +1,6 @@
 import { AttackType } from "@/lib/constants/battle";
-import { isActive, updateParticipant } from "@/lib/utils/abilities/engine/participants";
-import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
+import { isActive, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { processAttack } from "@/lib/utils/battle/attack";
 import { getDisabledAttackKinds } from "@/lib/utils/battle/attack/disabled-attacks";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";

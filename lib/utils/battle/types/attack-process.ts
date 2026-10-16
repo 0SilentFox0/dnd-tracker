@@ -1,7 +1,7 @@
 import type { AttackRollResult } from "./attack";
 
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
-import type { SummonRequest } from "@/lib/utils/abilities/engine/types";
+import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import type { BattleAction, BattleAttack, BattleParticipant } from "@/types/battle";
 
 export interface ProcessAttackParams {

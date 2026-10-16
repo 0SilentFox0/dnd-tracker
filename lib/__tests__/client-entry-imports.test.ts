@@ -65,7 +65,7 @@ describe("entry-чанки гравця", () => {
   const profile = staticGraph(["components/character-profile/index.ts", "components/hud/page/index.ts", "components/common/states/index.ts"]);
 
   it("обхід бачить граф і zod", () => {
-    expect(battle.files).toContain("components/battle/scene/ParticipantList.tsx");
+    expect(battle.files).toContain("components/battle/participants/ParticipantList.tsx");
     expect(profile.files).toContain("components/character-profile/CharacterProfile.tsx");
     expect(importers(staticGraph(["lib/utils/abilities/read.ts"]), "zod").length).toBeGreaterThan(0);
   });
@@ -81,13 +81,13 @@ describe("entry-чанки гравця", () => {
   it("десктоп, DM-UI, майстри й оверлеї бою вантажаться окремо", () => {
     const lazy = [
       "components/battle/scene/DesktopBattleLayout.tsx",
-      "components/battle/scene/DmPanel.tsx",
-      "components/battle/scene/CompleteBattleDialog.tsx",
-      "components/battle/dialogs/AddParticipantDialog.tsx",
-      "components/battle/dialogs/ChangeHpDialog.tsx",
-      "components/battle/dialogs/DmCasterPickerDialog.tsx",
-      "components/battle/views/BattlePreparationView.tsx",
-      "components/battle/fx/ResultOverlay.tsx",
+      "components/battle/dm/DmPanel.tsx",
+      "components/battle/dm/CompleteBattleDialog.tsx",
+      "components/battle/dm/dialogs/AddParticipantDialog.tsx",
+      "components/battle/dm/dialogs/ChangeHpDialog.tsx",
+      "components/battle/dm/dialogs/DmCasterPickerDialog.tsx",
+      "components/battle/overlays/BattlePreparationView.tsx",
+      "components/battle/overlays/ResultOverlay.tsx",
       "components/battle/wizards/AttackWizard.tsx",
       "components/battle/wizards/SpellBook.tsx",
       "components/battle/wizards/BonusActionPicker.tsx",

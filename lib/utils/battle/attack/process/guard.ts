@@ -1,5 +1,5 @@
-import { GUARD_KEY } from "@/lib/utils/abilities/engine/marks";
-import { findParticipant, isActive } from "@/lib/utils/abilities/engine/participants";
+import { findParticipant, isActive } from "@/lib/utils/abilities/engine/core/participants";
+import { GUARD_KEY } from "@/lib/utils/abilities/engine/effects/marks";
 import type { BattleParticipant } from "@/types/battle";
 
 export interface GuardSplit {

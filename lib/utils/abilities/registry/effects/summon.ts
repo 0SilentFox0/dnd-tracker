@@ -2,7 +2,7 @@ import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { CombatStatus, ParticipantSourceType } from "@/lib/constants/battle";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
-import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/participants";
+import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import type { Effect } from "@/lib/utils/abilities/schema";
 
 type Of<K extends Effect["kind"]> = Extract<Effect, { kind: K }>;

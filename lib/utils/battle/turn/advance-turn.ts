@@ -4,8 +4,8 @@ import type { PendingMoraleCheckPayload } from "./pending-morale";
 import { runAdvanceTurnLoop } from "./run-advance-turn-loop";
 import { applyVictoryCompletion } from "./turn-helpers";
 
-import { isActive, replaceParticipant } from "@/lib/utils/abilities/engine/participants";
-import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
+import { isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { BattleSceneState, ScenePatch } from "@/lib/utils/battle/store";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 

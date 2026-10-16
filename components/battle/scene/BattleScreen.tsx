@@ -39,13 +39,13 @@ function useDesktopLayout(wide: boolean): DesktopLayout | null {
   return wide ? desktopLayout : null;
 }
 
-const CompleteBattleDialog = dynamic(() => import("./CompleteBattleDialog").then((m) => m.CompleteBattleDialog), { ssr: false });
+const CompleteBattleDialog = dynamic(() => import("@/components/battle/dm/CompleteBattleDialog").then((m) => m.CompleteBattleDialog), { ssr: false });
 
-const ResultOverlay = dynamic(() => import("@/components/battle/fx/ResultOverlay").then((m) => m.ResultOverlay), { ssr: false });
+const ResultOverlay = dynamic(() => import("@/components/battle/overlays/ResultOverlay").then((m) => m.ResultOverlay), { ssr: false });
 
-const DmRevivePrompt = dynamic(() => import("./DmRevivePrompt").then((m) => m.DmRevivePrompt), { ssr: false });
+const DmRevivePrompt = dynamic(() => import("@/components/battle/dm/DmRevivePrompt").then((m) => m.DmRevivePrompt), { ssr: false });
 
-const BattlePreparationView = dynamic(() => import("@/components/battle/views/BattlePreparationView").then((m) => m.BattlePreparationView));
+const BattlePreparationView = dynamic(() => import("@/components/battle/overlays/BattlePreparationView").then((m) => m.BattlePreparationView));
 
 export function BattleScreen() {
   const { battle, isDM, actions } = useBattleScene();

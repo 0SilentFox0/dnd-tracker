@@ -1,7 +1,7 @@
 import type { PatchParticipantData } from "./patch-participant-schema";
 
 import { CombatStatus, DM_ACTOR } from "@/lib/constants/battle";
-import { resolveDowned } from "@/lib/utils/abilities/engine/run-abilities";
+import { resolveDowned } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { isUp } from "@/lib/utils/battle/participant/state";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, battleActionToEvent, BattleRuleError, systemEvent } from "@/lib/utils/battle/store";

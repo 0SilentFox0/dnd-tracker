@@ -4,7 +4,7 @@ import type { SpellRequestData } from "./cast-spell-schema";
 
 import { getCachedSummonPool } from "@/lib/cache/reference-data";
 import { prisma } from "@/lib/db";
-import { isActive } from "@/lib/utils/abilities/engine/participants";
+import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { canActNow, controls } from "@/lib/utils/battle/common/control";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { castSpell } from "@/lib/utils/battle/spell";

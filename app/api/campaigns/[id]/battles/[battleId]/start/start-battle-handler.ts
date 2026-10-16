@@ -8,7 +8,7 @@ import { scaleEnemiesForFairBattle } from "./start-fair-scaling";
 import { ParticipantSide, ParticipantSourceType, type ParticipantSourceTypeValue, SYSTEM_ACTOR } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
-import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
+import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import {
   createBattleParticipantFromCharacter,
   createBattleParticipantFromUnit,

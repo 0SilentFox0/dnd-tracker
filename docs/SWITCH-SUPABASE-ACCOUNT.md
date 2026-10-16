@@ -12,8 +12,8 @@
   ```
 - Виконай бекап:
   ```bash
-  chmod +x scripts/backup-database.sh
-  ./scripts/backup-database.sh
+  chmod +x scripts/db/backup-database.sh
+  ./scripts/db/backup-database.sh
   ```
 - Файл з’явиться в `.migration-backup/backup_YYYYMMDD_HHMMSS.sql`. **Збережи його** (скопіюй у безпечне місце), якщо потрібно буде відновити дані в новому проєкті.
 
@@ -70,10 +70,10 @@ Pusher app має бути в кластері `eu` (поруч із Vercel `fra
 
 ```bash
 # Відновити з останнього бекапу (Session pooler, порт 5432)
-./scripts/restore-backup-to-supabase.sh
+./scripts/db/restore-backup-to-supabase.sh
 
 # Або вказати файл і спочатку очистити таблиці
-./scripts/restore-backup-to-supabase.sh --clean .migration-backup/backup_YYYYMMDD_HHMMSS.sql
+./scripts/db/restore-backup-to-supabase.sh --clean .migration-backup/backup_YYYYMMDD_HHMMSS.sql
 ```
 
 - Скрипт бере `DATABASE_URL` з `.env.local` і будує URL для імпорту (Session pooler 5432). Якщо є **Direct** connection (порт 5432 на `db.*.supabase.co`), можна задати `RESTORE_DATABASE_URL` в `.env.local`.
@@ -98,4 +98,4 @@ Pusher app має бути в кластері `eu` (поруч із Vercel `fra
 
 ---
 
-**Коротко:** зроби бекап через `scripts/backup-database.sh`, збережи файл з `.migration-backup/`, створи новий проєкт Supabase, онови `.env` і Vercel новими ключами, виконай `prisma migrate deploy`, за потреби віднови дані з бекапу, налаштуй Auth URLs і зроби redeploy.
+**Коротко:** зроби бекап через `scripts/db/backup-database.sh`, збережи файл з `.migration-backup/`, створи новий проєкт Supabase, онови `.env` і Vercel новими ключами, виконай `prisma migrate deploy`, за потреби віднови дані з бекапу, налаштуй Auth URLs і зроби redeploy.

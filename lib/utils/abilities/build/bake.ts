@@ -1,8 +1,8 @@
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
-import { resolveFlat } from "@/lib/utils/abilities/engine/amount";
-import { auraKey } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { staticEffectStrength } from "@/lib/utils/abilities/engine/effect-strength";
-import { resolvedAbilitiesOf } from "@/lib/utils/abilities/engine/participants";
+import { resolveFlat } from "@/lib/utils/abilities/engine/core/amount";
+import { auraKey } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { staticEffectStrength } from "@/lib/utils/abilities/engine/core/effect-strength";
+import { resolvedAbilitiesOf } from "@/lib/utils/abilities/engine/core/participants";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import { isBakedStat } from "@/lib/utils/abilities/schema/kinds";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";

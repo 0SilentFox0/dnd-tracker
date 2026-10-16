@@ -4,7 +4,7 @@ import { endTurnCleanup, finishTurnEffects } from "../end-turn-cleanup";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeEffect } from "@/lib/utils/abilities/__tests__/fixtures";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { ActiveEffect } from "@/types/battle";
 
 const withEffects = (effects: ActiveEffect[]) => {

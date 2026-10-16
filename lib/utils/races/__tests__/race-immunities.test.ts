@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { RACES } from "@/data/library/races";
 import { getCharacterImmunities } from "@/lib/utils/characters/character-race-effects";
 import { extractRaceImmunities } from "@/lib/utils/races/race-effects";
-import { racePassiveData } from "@/scripts/seed-library-lib";
+import { racePassiveData } from "@/scripts/seed/seed-library-lib";
 
 describe("race immunities", () => {
   it("library races (with abilities) yield no text-parsed immunities", () => {

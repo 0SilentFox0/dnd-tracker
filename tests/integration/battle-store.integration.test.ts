@@ -5,7 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE, ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import {
   BattleConflictError,
   loadBattle,

@@ -1,7 +1,7 @@
 import { ParticipantSide } from "@/lib/constants/battle";
-import type { Rng } from "@/lib/utils/abilities/engine/types";
+import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import type { Ability } from "@/lib/utils/abilities/schema";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { AbilitySource, ResolvedAbility } from "@/types/abilities";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 

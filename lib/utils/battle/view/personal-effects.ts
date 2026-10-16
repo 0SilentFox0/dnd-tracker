@@ -1,9 +1,9 @@
 import { mergeEffectsForDisplay } from "./effect-summary";
 
-import { appliesTo, auraKey, isAuraTarget } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { staticEffectStrength } from "@/lib/utils/abilities/engine/effect-strength";
-import { isActive, resolvedAbilitiesOf } from "@/lib/utils/abilities/engine/participants";
-import { liveActiveEffects } from "@/lib/utils/abilities/engine/zone-effects";
+import { appliesTo, auraKey, isAuraTarget } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { staticEffectStrength } from "@/lib/utils/abilities/engine/core/effect-strength";
+import { isActive, resolvedAbilitiesOf } from "@/lib/utils/abilities/engine/core/participants";
+import { liveActiveEffects } from "@/lib/utils/abilities/engine/effects/zone-effects";
 import { evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
 import { isStaticEffect } from "@/lib/utils/abilities/schema/kinds";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";

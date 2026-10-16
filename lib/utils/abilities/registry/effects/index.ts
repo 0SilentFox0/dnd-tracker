@@ -1,4 +1,3 @@
-import { resolveTargetIds } from "../../engine/targets";
 import { DURATION_FIELD, type FieldMeta, TARGET_FIELD } from "../fields";
 import { limitsLabel } from "../labels";
 import { describeTrigger } from "../triggers";
@@ -29,6 +28,7 @@ import {
 import { applyRaiseDead, applySummon, describeRaiseDead, describeSummon } from "./summon";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
+import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
 import type { Ability, Effect, EffectKind } from "@/lib/utils/abilities/schema";
 import { signed } from "@/lib/utils/common/format";
 

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { FlagEffect } from "@/lib/utils/abilities/schema";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
 import { abilityCharges, bonusTargetSide, canCastBonusSpell, lastAction, needsMoraleCheck, slotLevels, spellTier, weaponPreview } from "@/lib/utils/battle/view";
 import type { ResolvedAbility } from "@/types/abilities";

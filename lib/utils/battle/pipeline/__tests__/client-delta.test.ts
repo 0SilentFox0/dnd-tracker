@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { buildClientDelta } from "@/lib/utils/battle/pipeline/client-delta";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 import type { BattleParticipant } from "@/types/battle";

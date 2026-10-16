@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { makeParticipant, resolved } from "./fixtures";
 
-import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
+import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { AbilitySchema } from "@/lib/utils/abilities/schema";
 import type { AbilityEvent } from "@/types/abilities";
 

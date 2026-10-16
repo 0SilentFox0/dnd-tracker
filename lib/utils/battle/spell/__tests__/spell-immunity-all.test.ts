@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
-import { grantPassive } from "@/lib/utils/battle/__tests__/mock-participant";
+import { grantPassive } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { participantImmuneToSpell } from "@/lib/utils/battle/spell/spell-immunity";
 
 const target = (spellIds?: string[]) =>

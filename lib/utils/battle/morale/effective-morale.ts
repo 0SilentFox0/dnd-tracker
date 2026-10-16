@@ -1,6 +1,6 @@
-import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { combineMorale, ownTimedMoraleFlat } from "@/lib/utils/abilities/engine/morale";
-import { withSelf } from "@/lib/utils/abilities/engine/participants";
+import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { combineMorale, ownTimedMoraleFlat } from "@/lib/utils/abilities/engine/effects/morale";
 import type { BattleParticipant } from "@/types/battle";
 
 /** Лідерські бонуси до шансу додаткового ходу (прапорець moraleChance), %. */

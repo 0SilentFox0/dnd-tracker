@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
+import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
 import { triggerMatches } from "@/lib/utils/abilities/registry/triggers";
 import { AbilitySchema, ConditionSchema, TriggerSchema } from "@/lib/utils/abilities/schema";

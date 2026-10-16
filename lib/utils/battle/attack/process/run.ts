@@ -15,8 +15,8 @@ import { handleCriticalFail } from "./critical-fail";
 import { resolveHit } from "./hit";
 import { handleMiss } from "./miss";
 
-import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { isActive, withSelf } from "@/lib/utils/abilities/engine/participants";
+import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { isActive, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 
 export type { ProcessAttackParams, ProcessAttackResult };

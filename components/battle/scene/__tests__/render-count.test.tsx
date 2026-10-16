@@ -26,14 +26,14 @@ function counted<P extends object>(original: FunctionComponent<P> | MemoExoticCo
   return "type" in original ? memo(Counted) : Counted;
 }
 
-vi.mock("@/components/battle/scene/ParticipantList", async (orig) => {
-  const { ParticipantList } = await orig<typeof import("@/components/battle/scene/ParticipantList")>();
+vi.mock("@/components/battle/participants/ParticipantList", async (orig) => {
+  const { ParticipantList } = await orig<typeof import("@/components/battle/participants/ParticipantList")>();
 
   return { ParticipantList: counted<ComponentProps<typeof ParticipantList>>(ParticipantList, () => commits.list++) };
 });
 
-vi.mock("@/components/battle/scene/ParticipantRow", async (orig) => {
-  const { ParticipantRow } = await orig<typeof import("@/components/battle/scene/ParticipantRow")>();
+vi.mock("@/components/battle/participants/ParticipantRow", async (orig) => {
+  const { ParticipantRow } = await orig<typeof import("@/components/battle/participants/ParticipantRow")>();
 
   return {
     ParticipantRow: counted<ComponentProps<typeof ParticipantRow>>(ParticipantRow, ({ participant }) =>
@@ -49,7 +49,7 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { type BattleSceneValue, useBattleScene, useBattleSceneValue } from "@/lib/hooks/battle";
 import { battleQueryKey } from "@/lib/hooks/battles";
 import { ConfirmContext } from "@/lib/hooks/common";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { BattleScene, ClientBattleDelta } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 

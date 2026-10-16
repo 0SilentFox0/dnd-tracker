@@ -1,15 +1,12 @@
-import type { Prisma } from "@prisma/client";
-
-import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { isActive, withSelf } from "@/lib/utils/abilities/engine/participants";
-import type { SummonRequest } from "@/lib/utils/abilities/engine/types";
+import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { isActive, withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import { createBattleParticipantFromUnit } from "@/lib/utils/battle/participant";
 import { appendToInitiativeEnd, nextInstanceNumber } from "@/lib/utils/battle/spell/append-summoned-unit";
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
 import { scaleSummon } from "@/lib/utils/units/level-scaling";
 import type { BattleParticipant } from "@/types/battle";
-
-type RaceRow = Prisma.RaceGetPayload<object>;
+import type { RaceRow } from "@/types/races";
 
 export interface SummonPool {
   units: Omit<UnitFromPrisma, "createdAt">[];

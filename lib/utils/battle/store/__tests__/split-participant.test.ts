@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { joinParticipant, splitParticipant } from "@/lib/utils/battle/store/split-participant";
 import { hashJson, stableStringify } from "@/lib/utils/battle/store/stable-json";
 import type { BattleParticipant } from "@/types/battle";

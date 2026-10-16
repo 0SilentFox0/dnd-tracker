@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { makeParticipant } from "./fixtures";
 
-import { upsertTimedEffect } from "@/lib/utils/abilities/engine/timed-effects";
+import { upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import { AbilitySchema } from "@/lib/utils/abilities/schema";
 
 const apply = (p: ReturnType<typeof makeParticipant>, round: number, rounds: number) =>

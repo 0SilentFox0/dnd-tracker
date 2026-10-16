@@ -1,0 +1,262 @@
+/**
+ * Дані сценарію для `pnpm simulate-battle`: персонажі з різними прокачками й артефактами,
+ * юніти з різними вміннями.
+ */
+import type { Prisma } from "@prisma/client";
+
+import { LIBRARY_SOURCE } from "@/data/library/build";
+import type { Ability } from "@/lib/utils/abilities/schema";
+import { weaponStatsColumns } from "@/lib/utils/artifacts/weapon-stats";
+import { unitRow } from "@/scripts/seed/seed-library-lib";
+
+export const SIM_USER = { id: "sim-dm-user", email: "sim-dm@local.test", displayName: "SIM DM" };
+
+export const SIM_PLAYER = { id: "sim-player-user", email: "sim-player@local.test", displayName: "SIM Player" };
+
+export const SIM_CAMPAIGN_NAME = "SIM: перевірка вмінь (3b)";
+
+const ab = (id: string, name: string, rest: Omit<Ability, "id" | "name">): Ability => ({ id, name, ...rest });
+
+const json = (v: unknown) => v as Prisma.InputJsonValue;
+
+export const RACES = {
+  human: {
+    name: "Людина",
+    abilities: json([
+      ab("human-counter", "Контратака", { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "counterAttack", attackKinds: ["melee"], bonusPercent: 50 }] }),
+      ab("human-steady", "Незламність", { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "noNegativeMorale" }] }),
+    ]),
+  },
+  elf: {
+    name: "Ельф",
+    abilities: json([
+      ab("elf-magic", "Ельфійська стійкість", { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "resistance", damageType: "spell", percent: 25 }] }),
+      ab("elf-calm", "Ельфійський спокій", { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "ignoreMorale" }] }),
+    ]),
+  },
+  // імунітет до отрути — з опису пасивки раси (race-effects)
+  dwarf: { name: "Дварф", abilities: json([]), passiveAbility: json({ description: "Міцні як камінь. Імунітет до отруєння." }) },
+  orc: { name: "Орк", abilities: json([]) },
+};
+
+export const SKILLS = {
+  rage: { name: "Лють берсерка", abilities: [ab("rage", "Лють берсерка", { trigger: { event: "passive" }, effects: [{ kind: "damageBonus", filter: { kind: "melee" }, percent: 20 }] })] },
+  bleed: {
+    name: "Кровопускання",
+    abilities: [ab("bleed", "Кровопускання", { trigger: { event: "hit", role: "attacker" }, effects: [{ kind: "dot", damagePerRound: 3, damageType: "bleed", duration: { rounds: 2 }, target: "eventTarget" }] })],
+  },
+  undying: { name: "Невмирущий", abilities: [ab("undying", "Невмирущий", { trigger: { event: "lethalDamage" }, limits: { perBattle: 1 }, effects: [{ kind: "heal", amount: 1, revive: true }] })] },
+  secondWind: { name: "Друге дихання", abilities: [ab("second-wind", "Друге дихання", { trigger: { event: "bonusAction" }, limits: { perBattle: 1 }, effects: [{ kind: "heal", amount: 5 }] })] },
+  hunterEye: { name: "Око мисливця", abilities: [ab("hunter-eye", "Око мисливця", { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "resistance", damageType: "psychic", percent: 10 }] })] },
+  forestStep: { name: "Лісовий крок", abilities: [ab("forest-step", "Лісовий крок", { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "resistance", damageType: "necrotic", percent: 10 }] })] },
+  ironSkin: { name: "Залізна шкіра", abilities: [ab("iron-skin", "Залізна шкіра", { trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "armor", flat: 2 }] })] },
+};
+
+export function artifactRows(campaignId: string, setId: string) {
+  return {
+    sword: { campaignId, name: "Меч воїна", slot: "weapon", abilities: json([]), ...weaponStatsColumns({ damageDice: "1d8", damageType: "slashing", attackType: "melee", attackBonus: 2 }) },
+    bow: { campaignId, name: "Довгий лук", slot: "range_weapon", abilities: json([]), ...weaponStatsColumns({ damageDice: "1d6", damageType: "piercing", attackType: "ranged", range: "150 ft", attackBonus: 1 }) },
+    dagger: { campaignId, name: "Кинджал", slot: "weapon", abilities: json([]), ...weaponStatsColumns({ damageDice: "1d4", damageType: "piercing", attackType: "melee" }) },
+    ring: {
+      campaignId,
+      name: "Кільце сили",
+      slot: "ring",
+      abilities: json([ab("ring-str", "Сила кільця", { trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "strength", flat: 2 }] })]),
+    },
+    amulet: { campaignId, name: "Амулет дракона", slot: "amulet", setId, abilities: json([]) },
+    cloak: { campaignId, name: "Плащ дракона", slot: "cloak", setId, abilities: json([]) },
+  };
+}
+
+export const DRAGON_SET = {
+  name: "Драконячий комплект",
+  setBonus: json({ name: "Кров дракона", description: "Аура захисту для союзників" }),
+  abilities: json([ab("dragon-aura", "Аура дракона", { trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "armor", flat: 1, target: "allAllies" }] })]),
+};
+
+export const UNITS = {
+  goblin: {
+    name: "Гоблін-лучник",
+    raceKey: "orc",
+    maxHp: 14,
+    armorClass: 12,
+    initiative: 2,
+    attacks: json([{ name: "Короткий лук", type: "ranged", attackBonus: 4, damageType: "piercing", damageDice: "1d6" }]),
+    immunities: json(["отруєння"]),
+    abilities: json([]),
+  },
+  shaman: {
+    name: "Орк-шаман",
+    raceKey: "orc",
+    maxHp: 45,
+    armorClass: 11,
+    initiative: 1,
+    attacks: json([{ name: "Посох", type: "melee", attackBonus: 3, damageType: "bludgeoning", damageDice: "1d6" }]),
+    immunities: json([]),
+    abilities: json([
+      ab("shaman-aura", "Тотем племені", { trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "armor", flat: 1, target: "allAllies" }] }),
+      ab("shaman-heal", "Шаманське зцілення", { trigger: { event: "turnStart" }, limits: { perBattle: 2 }, effects: [{ kind: "heal", amount: 3 }] }),
+    ]),
+  },
+  golem: {
+    name: "Кам'яний голем",
+    raceKey: null,
+    maxHp: 50,
+    armorClass: 14,
+    initiative: 0,
+    attacks: json([{ name: "Кулак", type: "melee", attackBonus: 5, damageType: "bludgeoning", damageDice: "2d6" }]),
+    immunities: json(["вогню", "контролю", "страху"]),
+    abilities: json([ab("golem-stone", "Кам'яне тіло", { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "resistance", damageType: "physical", percent: 50 }] })]),
+  },
+};
+
+export const FAIR_CAMPAIGN_NAME = "SIM: рівні бої";
+
+const noRefs = { groups: new Map<string, string>(), spells: new Map<string, string>() };
+
+// Без раси: сценарії самі вирішують, чи потрібна раса Демонів.
+function libraryDemon(key: string) {
+  const unit = LIBRARY_SOURCE.units.find((u) => u.key === key);
+
+  if (!unit) throw new Error(`Юніта «${key}» немає в бібліотеці`);
+
+  return unitRow({ ...unit, raceKey: null }, noRefs, new Map());
+}
+
+/** Базові Демони Tier 1/4/7 з бібліотеки: масштабування видно майже в чистому вигляді. */
+export const FAIR_UNITS = ["demons-imp", "demons-succubus", "demons-devil"].map(libraryDemon);
+
+export const FAIR_HEROES = [
+  { name: "Гарольд", class: "Fighter", strength: 16, dexterity: 12, constitution: 14, armorClass: 16, weapon: "sword" },
+  { name: "Ельза", class: "Ranger", strength: 10, dexterity: 17, constitution: 12, armorClass: 14, weapon: "bow" },
+  { name: "Бранд", class: "Barbarian", strength: 17, dexterity: 11, constitution: 15, armorClass: 14, weapon: "sword" },
+  { name: "Мелітта", class: "Rogue", strength: 10, dexterity: 17, constitution: 11, armorClass: 14, weapon: "dagger" },
+];
+
+export const FAIR_WEAPONS = {
+  sword: { name: "Меч", slot: "weapon", ...weaponStatsColumns({ damageDice: "1d8", damageType: "slashing", attackType: "melee", attackBonus: 2 }) },
+  bow: { name: "Лук", slot: "range_weapon", ...weaponStatsColumns({ damageDice: "1d6", damageType: "piercing", attackType: "ranged", range: "150 ft", attackBonus: 1 }) },
+  dagger: { name: "Кинджал", slot: "weapon", ...weaponStatsColumns({ damageDice: "1d4", damageType: "piercing", attackType: "melee" }) },
+};
+
+export const MECHANICS_CAMPAIGN_NAME = "SIM: нові механіки вмінь";
+
+const melee = (name: string, bonus = 5, dice = "1d6") => json([{ name, type: "melee", attackBonus: bonus, damageType: "slashing", damageDice: dice }]);
+
+export const MECHANICS_UNITS = (lightGroupId: string) => [
+  {
+    name: "Мисливець",
+    side: "ally",
+    maxHp: 60,
+    armorClass: 14,
+    initiative: 10,
+    attacks: melee("Спис"),
+    abilities: json([
+      ab("hunter-mark", "Послідовний удар", { trigger: { event: "hit", role: "attacker" }, effects: [{ kind: "mark", markId: "seq", duration: { rounds: 5 }, target: "eventTarget" }] }),
+      ab("hunter-bonus", "Зосередження", { trigger: { event: "passive" }, effects: [{ kind: "damageBonus", filter: { kind: "melee" }, percent: 50, perMark: "seq" }] }),
+      ab("hunter-chance", "Азарт", { trigger: { event: "hit", role: "attacker" }, limits: { chance: 100 }, effects: [{ kind: "changeMorale", delta: 1 }] }),
+    ]),
+  },
+  {
+    name: "Страж",
+    side: "ally",
+    maxHp: 40,
+    armorClass: 16,
+    initiative: 8,
+    attacks: melee("Щит"),
+    abilities: json([ab("guard-bonus", "Прикрити", { trigger: { event: "bonusAction" }, effects: [{ kind: "guard", percent: 50, duration: { rounds: 5 }, target: "eventTarget" }] })]),
+  },
+  { name: "Підопічний", side: "ally", maxHp: 40, armorClass: 10, initiative: 6, attacks: melee("Кинджал"), abilities: json([]) },
+  {
+    name: "Жрець",
+    side: "ally",
+    maxHp: 30,
+    armorClass: 12,
+    initiative: 4,
+    attacks: melee("Булава"),
+    abilities: json([ab("priest-light", "Світло для всіх", { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "spellTargeting", mode: "all", school: lightGroupId }] })]),
+  },
+  { name: "Новачок", side: "ally", maxHp: 30, armorClass: 12, initiative: 2, attacks: melee("Меч"), abilities: json([]) },
+  { name: "Опудало", side: "enemy", maxHp: 500, armorClass: 10, initiative: 0, attacks: melee("Удар", 5, "1d8"), abilities: json([]) },
+  {
+    name: "Дуелянт",
+    side: "enemy",
+    maxHp: 40,
+    armorClass: 10,
+    initiative: 1,
+    attacks: melee("Рапіра"),
+    abilities: json([
+      ab("duelist-riposte", "Випереджальний удар", { trigger: { event: "attack", phase: "before", role: "target", attackKind: "melee" }, limits: { perRound: 1 }, effects: [{ kind: "dealDamage", amount: 1000, target: "eventActor" }] }),
+    ]),
+  },
+];
+
+export const RACIAL_CAMPAIGN_NAME = "SIM: расові механіки";
+
+export const DEMON_RACE = { name: "Демони", abilities: json([]) };
+
+export const DEMON_UNIT = libraryDemon("demons-imp");
+
+export const RACIAL_UNITS = [
+  {
+    name: "Некромант",
+    side: "ally",
+    maxHp: 50,
+    armorClass: 12,
+    initiative: 10,
+    attacks: melee("Посох"),
+    abilities: json([
+      ab("nec-raise", "Підняття мертвих", { trigger: { event: "action" }, condition: { type: "targetDead" }, limits: { perBattle: 1 }, maxTargets: 2, effects: [{ kind: "raiseDead", hpPercent: 90, target: "eventTarget" }] }),
+      ab("nec-gate", "Відкриття воріт", { trigger: { event: "bonusAction" }, limits: { perBattle: 1 }, effects: [{ kind: "summon", group: "Демони", tier: 1 }] }),
+      ab("nec-angel", "Ангел Хранитель", { trigger: { event: "action" }, condition: { type: "targetDead" }, limits: { perBattle: 1 }, effects: [{ kind: "heal", amount: { percentOf: "maxHp", value: 50 }, revive: true, target: "eventTarget" }] }),
+      ab("nec-armor", "Рунна броня", { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "resistance", damageType: "all", percent: 25 }] }),
+    ]),
+  },
+  {
+    name: "Мисливець",
+    side: "ally",
+    maxHp: 60,
+    armorClass: 14,
+    initiative: 8,
+    attacks: melee("Спис"),
+    abilities: json([
+      ab("hunt", "Полювання", { trigger: { event: "bonusAction" }, maxTargets: 3, effects: [{ kind: "flag", flag: "advantageForAttackers", duration: { rounds: 1 }, target: "eventTarget" }] }),
+      ab("bloodlust", "Жага крові", { trigger: { event: "kill", role: "killer" }, stackable: true, maxStacks: 2, effects: [{ kind: "modifyStat", stat: "actionsPerTurn", flat: 1, duration: { rounds: 99 }, target: "self" }] }),
+    ]),
+  },
+  { name: "Жертва", side: "ally", maxHp: 40, armorClass: 10, initiative: 5, attacks: melee("Кинджал"), abilities: json([]) },
+  { name: "Опудало", side: "enemy", maxHp: 500, armorClass: 10, initiative: 0, attacks: melee("Удар", 5, "1d8"), abilities: json([]) },
+  { name: "Слабак", side: "enemy", maxHp: 10, armorClass: 8, initiative: 1, attacks: melee("Укус"), abilities: json([]) },
+  { name: "Кістяк", side: "enemy", maxHp: 30, armorClass: 8, initiative: -1, attacks: melee("Кістка"), abilities: json([]) },
+  {
+    name: "Семгрун",
+    side: "enemy",
+    maxHp: 80,
+    armorClass: 10,
+    initiative: 2,
+    attacks: melee("Лапа"),
+    abilities: json([
+      ab("semgrun", "Семгрун", { trigger: { event: "attack", phase: "before", role: "target" }, condition: { type: "not", condition: { type: "hasMark", who: "eventActor", markId: "semgrun", bySelf: true } }, effects: [{ kind: "flag", flag: "disadvantage", target: "eventActor" }, { kind: "mark", markId: "semgrun", duration: { rounds: 1 }, target: "eventActor" }] }),
+    ]),
+  },
+];
+
+export const SPELL_MODEL_CAMPAIGN_NAME = "SIM: нова модель заклинань";
+
+const strike = (name: string, dice = "1d6") => melee(name, 8, dice);
+
+export const SPELL_MODEL_UNITS = (humanRaceId: string) => [
+  { name: "Архімаг", side: "ally", level: 6, maxHp: 100, armorClass: 12, initiative: 20, attacks: strike("Посох"), abilities: json([]) },
+  { name: "Паладин", side: "ally", level: 4, maxHp: 60, armorClass: 18, initiative: 18, attacks: strike("Молот"), abilities: json([]) },
+  { name: "Жрець", side: "ally", level: 5, maxHp: 80, armorClass: 12, initiative: 16, attacks: strike("Булава"), abilities: json([]) },
+  { name: "Хаотик", side: "ally", level: 5, maxHp: 100, armorClass: 12, initiative: 15, attacks: strike("Жезл"), abilities: json([]) },
+  { name: "Друїд", side: "ally", level: 3, maxHp: 60, armorClass: 12, initiative: 14, attacks: strike("Ціпок"), abilities: json([]) },
+  { name: "Чорнокнижник", side: "ally", level: 5, maxHp: 80, armorClass: 12, initiative: 13, attacks: strike("Кинджал"), abilities: json([]) },
+  { name: "Лялькар", side: "ally", level: 5, maxHp: 80, armorClass: 12, initiative: 12, attacks: strike("Нитки"), abilities: json([]) },
+  { name: "Гоблін А", side: "enemy", level: 1, maxHp: 300, armorClass: 10, initiative: 10, attacks: strike("Ніж"), abilities: json([]) },
+  { name: "Гоблін Б", side: "enemy", level: 1, maxHp: 300, armorClass: 10, initiative: 9, attacks: strike("Ніж"), abilities: json([]) },
+  { name: "Гоблін В", side: "enemy", level: 1, maxHp: 300, armorClass: 10, initiative: 8, attacks: strike("Ніж"), abilities: json([]) },
+  { name: "Воїн", side: "enemy", level: 1, maxHp: 300, armorClass: 10, initiative: 7, attacks: strike("Меч"), abilities: json([]), raceId: humanRaceId },
+  { name: "Лиходій", side: "enemy", level: 2, maxHp: 300, armorClass: 10, initiative: 5, attacks: strike("Сокира", "1d8"), abilities: json([]) },
+  { name: "Маріонетка", side: "enemy", level: 2, maxHp: 300, armorClass: 10, initiative: 3, attacks: strike("Кігті"), abilities: json([]) },
+];

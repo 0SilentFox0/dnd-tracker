@@ -3,11 +3,11 @@ import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { CombatStatus } from "@/lib/constants/battle";
 import { DAMAGE_ELEMENT_LABELS } from "@/lib/constants/damage";
-import { resolveAmount } from "@/lib/utils/abilities/engine/amount";
-import { eventDamage, eventSpellRoll } from "@/lib/utils/abilities/engine/events";
-import { applyRawDamage } from "@/lib/utils/abilities/engine/hp";
-import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/participants";
-import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/timed-effects";
+import { resolveAmount } from "@/lib/utils/abilities/engine/core/amount";
+import { eventDamage, eventSpellRoll } from "@/lib/utils/abilities/engine/core/events";
+import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { applyRawDamage } from "@/lib/utils/abilities/engine/effects/hp";
+import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import { hasImmunity } from "@/lib/utils/battle/resistance";
 

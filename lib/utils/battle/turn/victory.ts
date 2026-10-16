@@ -1,5 +1,5 @@
 import { CombatStatus, ParticipantSide, SYSTEM_ACTOR } from "@/lib/constants/battle";
-import { restoreCharm } from "@/lib/utils/abilities/engine/charm";
+import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
 import { BattleAction, BattleParticipant } from "@/types/battle";
 
 /**

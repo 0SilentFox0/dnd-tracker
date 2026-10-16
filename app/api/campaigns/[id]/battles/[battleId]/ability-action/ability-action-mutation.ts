@@ -2,9 +2,9 @@ import { z } from "zod";
 
 import { getCachedSummonPool } from "@/lib/cache/reference-data";
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { findParticipant, isActive, updateParticipant } from "@/lib/utils/abilities/engine/participants";
-import { runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
-import { withinLimits } from "@/lib/utils/abilities/engine/usage";
+import { findParticipant, isActive, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
+import { withinLimits } from "@/lib/utils/abilities/engine/core/usage";
 import { canActNow } from "@/lib/utils/battle/common/control";
 import { applyMainActionUsed } from "@/lib/utils/battle/participant";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";

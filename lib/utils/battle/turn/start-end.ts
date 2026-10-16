@@ -3,11 +3,11 @@ import { calculateInitiative, sortByInitiative } from "./initiative";
 
 import { CombatStatus } from "@/lib/constants/battle";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
-import { collectModifiers } from "@/lib/utils/abilities/engine/collect-modifiers";
-import { dropBreakOnDamage } from "@/lib/utils/abilities/engine/hp";
-import { findParticipant, isActive, replaceParticipant, withSelf } from "@/lib/utils/abilities/engine/participants";
-import { resolveDowned, runAbilities } from "@/lib/utils/abilities/engine/run-abilities";
-import type { Rng } from "@/lib/utils/abilities/engine/types";
+import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { findParticipant, isActive, replaceParticipant, withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { resolveDowned, runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
+import type { Rng } from "@/lib/utils/abilities/engine/core/types";
+import { dropBreakOnDamage } from "@/lib/utils/abilities/engine/effects/hp";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import { BattleParticipant } from "@/types/battle";
 

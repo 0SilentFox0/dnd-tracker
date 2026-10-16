@@ -7,7 +7,7 @@ import { SPELLS } from "@/data/library/spells";
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { allowedEffectKinds } from "@/lib/utils/abilities/editor";
-import { findFlags } from "@/lib/utils/abilities/engine/collect-modifiers";
+import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { hasAdvantage } from "@/lib/utils/battle/attack/bonus";
 import { runAttackPhase } from "@/lib/utils/battle/attack-phase/run-attack-phase";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";

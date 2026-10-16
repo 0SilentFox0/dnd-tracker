@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { CombatStatus, type CombatStatusType } from "@/lib/constants/battle";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/mock-participant";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { isDown, isUp } from "@/lib/utils/battle/participant/state";
 
 const withState = (status: CombatStatusType, currentHp: number) => {
