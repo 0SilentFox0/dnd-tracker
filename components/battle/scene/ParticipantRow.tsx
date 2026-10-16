@@ -29,7 +29,7 @@ export const ParticipantRow = memo(function ParticipantRow({ participant, person
       key={change?.id}
       type="button"
       onClick={() => onSelect(participant.basicInfo.id)}
-      className={cn("relative flex h-[76px] w-full items-center gap-3 border-b border-white/[.08] text-left", change && change.delta < 0 && "animate-[hud-shake_.35s]", down && "opacity-40")}
+      className={cn("relative flex min-h-[76px] w-full items-center gap-3 py-2 border-b border-white/[.08] text-left", change && change.delta < 0 && "animate-[hud-shake_.35s]", down && "opacity-40")}
     >
       {change && (
         <span className={cn("hud-sc pointer-events-none absolute left-6 top-2 text-[26px] font-extrabold opacity-0 [text-shadow:0_2px_6px_#000] animate-[hud-float_1.1s_ease-out]", change.delta < 0 ? "text-[#ff6a4d]" : "text-[#8fd07a]")}>

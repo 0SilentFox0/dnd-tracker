@@ -1,3 +1,5 @@
+import { type KeyboardEvent, type MouseEvent, useState } from "react";
+
 import { EffectIcon } from "./EffectIcon";
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -28,12 +30,39 @@ function EffectChip({ effect }: { effect: ActiveEffect }) {
 }
 
 export function EffectLine({ effects, max = 2 }: { effects: ActiveEffect[]; max?: number }) {
-  const shown = effects.slice(0, max);
+  const [expanded, setExpanded] = useState(false);
+
+  const overflow = effects.length > max;
+
+  const open = expanded && overflow;
+
+  const shown = open ? effects : effects.slice(0, max);
+
+  // Рядок учасника сам є кнопкою, тому перемикач — span, що не пропускає клік до рядка.
+  const toggle = (e: MouseEvent | KeyboardEvent) => {
+    if ("key" in e && e.key !== "Enter" && e.key !== " ") return;
+
+    e.stopPropagation();
+    e.preventDefault();
+    setExpanded((v) => !v);
+  };
 
   return (
-    <div className="mt-1.5 flex h-5 items-center gap-3 overflow-hidden">
+    <div className={cn("mt-1.5 flex items-center gap-x-3", open ? "flex-wrap gap-y-1" : "h-5 overflow-hidden")}>
       {shown.map((e) => <EffectChip key={e.id} effect={e} />)}
-      {effects.length > max && <span className="text-[13px] text-[var(--hud-muted)]">+{effects.length - max}</span>}
+      {overflow && (
+        <span
+          role="button"
+          tabIndex={0}
+          aria-expanded={open}
+          aria-label={open ? "Згорнути ефекти" : `Показати всі ефекти (${effects.length})`}
+          onClick={toggle}
+          onKeyDown={toggle}
+          className="cursor-pointer whitespace-nowrap rounded px-1 text-[13px] leading-5 text-[var(--hud-muted)] hover:bg-white/10 hover:text-[#d9cfbd]"
+        >
+          {open ? "згорнути" : `+${effects.length - max}`}
+        </span>
+      )}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
@@ -20,6 +20,21 @@ describe("примітиви HUD", () => {
     expect(screen.getByText("Щит віри")).toBeTruthy();
     expect(screen.queryByText("Лють")).toBeNull();
     expect(screen.getByText("+1")).toBeTruthy();
+  });
+
+  it("+N розгортає всі ефекти, не натискаючи батьківську кнопку", () => {
+    const onRow = vi.fn();
+
+    const { container } = render(<button type="button" onClick={onRow}><EffectLine effects={[fx("Отрута", "debuff"), fx("Щит віри", "buff", 1), fx("Лють", "buff", 3)]} /></button>);
+
+    fireEvent.click(within(container).getByText("+1"));
+
+    expect(within(container).getByText("Лють")).toBeTruthy();
+    expect(onRow).not.toHaveBeenCalled();
+
+    fireEvent.click(within(container).getByText("згорнути"));
+
+    expect(within(container).queryByText("Лють")).toBeNull();
   });
 
   it("HP ворога без точних чисел — стан словом, без «/»", () => {
