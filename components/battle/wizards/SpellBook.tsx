@@ -67,11 +67,11 @@ export function SpellBook({ book }: { book: Book }) {
           {state.pick.diceSlots.length > 0 && (
             <>
               <div className="hud-sc mt-4 text-lg font-bold">Кубики · {book.formulaOf(selected)}</div>
-              <DamageDice slots={state.pick.diceSlots} values={state.damage} onChange={book.setDamage} />
+              <DamageDice slots={state.pick.diceSlots} values={state.damage} onChange={book.setDamage} tone="parchment" />
             </>
           )}
           <div className="mt-auto grid grid-cols-[1.25fr_1fr] gap-2 pt-3">
-            <AiRollButton onClick={book.aiDamage} />
+            <AiRollButton onClick={book.aiDamage} tone="parchment" />
             <button type="button" disabled={!rollsComplete(state)} onClick={book.toSummary} className={seal}>Далі · підсумок</button>
           </div>
         </>
@@ -84,7 +84,7 @@ export function SpellBook({ book }: { book: Book }) {
             {state.pick?.targetMode === "none" && <p>Цілі: {targetingLabel(book.definitionOf(selected).targeting)}</p>}
             {state.damage.length > 0 && <p>Кубики: {state.damage.join(" + ")} = {state.damage.reduce<number>((a, b) => a + (b ?? 0), 0)} ({book.formulaOf(selected)})</p>}
             <p className="mt-2 text-sm italic text-[#7a6650]">Остаточний результат порахує бій з урахуванням захисту цілей.</p>
-            {selected.level > 0 && <p className="text-sm italic text-[#7a6650]">Витратить слот {spellLevelRoman(selected.level)} кола.</p>}
+            {selected.level > 0 && <p className="text-sm italic text-[#7a6650]">{book.universalSlot ? "Витратить універсальний слот." : `Витратить слот ${spellLevelRoman(selected.level)} кола.`}</p>}
           </div>
           {state.error && <p className="mt-2 text-sm text-[#9c2a1d]">{state.error}</p>}
           <button type="button" disabled={state.step === "submitting"} onClick={book.submit} className={cn(seal, "mt-auto")}>
