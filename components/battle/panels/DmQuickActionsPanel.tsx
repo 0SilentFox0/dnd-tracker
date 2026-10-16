@@ -172,7 +172,7 @@ export function DmQuickActionsPanel({
             <h4 className="hud-sc flex h-7 items-center border-b border-white/[.14] text-[13px] tracking-[.08em] text-[var(--hud-muted)]">
               Учасники бою
             </h4>
-            <div className="max-h-48 overflow-y-auto">
+            <div>
               {participants.length === 0 ? (
                 <p className="py-2 text-sm italic text-[var(--hud-muted)]">
                   Нікого на полі
