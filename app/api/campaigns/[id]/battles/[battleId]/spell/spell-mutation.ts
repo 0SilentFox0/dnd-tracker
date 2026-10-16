@@ -40,7 +40,10 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
 
     if (!isActive(caster)) throw new BattleRuleError("participant_dead", "Кастер непритомний або мертвий");
 
-    if (!ctx.isDM && !caster.spellcasting.knownSpells.includes(data.spellId)) {
+    // вільний каст DM (швидкі дії): будь-яке закляття без слота; хід героя під керуванням DM — за правилами героя
+    const free = ctx.isDM && data.free === true;
+
+    if (!free && !caster.spellcasting.knownSpells.includes(data.spellId)) {
       throw new BattleRuleError("action_rejected", "Кастер не знає цього заклинання");
     }
 
@@ -95,7 +98,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
       battleId: ctx.scene.id,
       diceRolls,
       saveRolls: trusted,
-      isDMCast: ctx.isDM,
+      isDMCast: free,
       rng,
     });
 

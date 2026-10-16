@@ -837,7 +837,7 @@ async function targeted(spells: Map<string, any>) {
 
   const caster = current();
 
-  await call("spell", SPELL, { casterId: caster.basicInfo.id, spellId: dark.id, targetIds: [sem.basicInfo.id], diceRolls: [], saveRolls: [{ participantId: sem.basicInfo.id, roll: 1 }] });
+  await call("spell", SPELL, { casterId: caster.basicInfo.id, spellId: dark.id, targetIds: [sem.basicInfo.id], free: true, diceRolls: [], saveRolls: [{ participantId: sem.basicInfo.id, roll: 1 }] });
 
   const fxBefore = byName("Семгрун").battleData.activeEffects.map((e: any) => e.name);
 
@@ -873,7 +873,7 @@ async function targeted(spells: Map<string, any>) {
 
   const hpB = friendsOf(zeh).reduce((n: number, p: any) => n + p.combatStats.currentHp, 0);
 
-  const lr = await call("spell", SPELL, { casterId: zeh.basicInfo.id, spellId: light.id, targetIds: [zeh.basicInfo.id], diceRolls: [] });
+  const lr = await call("spell", SPELL, { casterId: zeh.basicInfo.id, spellId: light.id, targetIds: [zeh.basicInfo.id], diceRolls: [], free: true });
 
   const hpA = friendsOf(byName("Зехір")).reduce((n: number, p: any) => n + p.combatStats.currentHp, 0);
 
@@ -893,7 +893,7 @@ async function targeted(spells: Map<string, any>) {
 
     const dice = casterSpellDice(ec, { dice: bolt.dice, groupId: bolt.groupId });
 
-    const r = await call("spell", SPELL, { casterId: ec.basicInfo.id, spellId: bolt.id, targetIds: [byName("Зехір").basicInfo.id], diceRolls: rollDiceList(`${dice.count}d${dice.sides}`, rng) });
+    const r = await call("spell", SPELL, { casterId: ec.basicInfo.id, spellId: bolt.id, targetIds: [byName("Зехір").basicInfo.id], free: true, diceRolls: rollDiceList(`${dice.count}d${dice.sides}`, rng) });
 
     burst = r.log.some((e: any) => /Вибух мани/.test(e.resultText));
 

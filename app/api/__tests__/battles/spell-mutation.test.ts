@@ -61,6 +61,20 @@ describe("spell mutation", () => {
     expect(slots?.["1"].current).toBe(1);
   });
 
+  it("DM за героя витрачає слот і кастує лише відоме; вільний каст DM — без слота і будь-яке", async () => {
+    const slotOf = (out: { participants: BattleParticipant[] }) => out.participants.find((p) => p.basicInfo.id === "hero")?.spellcasting.spellSlots["1"].current;
+
+    const dm = () => context({ participants: [caster, goblin], isDM: true, userId: "dm" });
+
+    expect(slotOf(await mutation()(dm(), body() as never))).toBe(1);
+    expect(slotOf(await mutation()(dm(), body({ free: true }) as never))).toBe(2);
+
+    const unknown = { ...caster, spellcasting: { ...caster.spellcasting, knownSpells: [] } };
+
+    await expect(mutation()(context({ participants: [unknown, goblin], isDM: true, userId: "dm" }), body() as never)).rejects.toMatchObject({ code: "action_rejected" });
+    expect(slotOf(await mutation()(context({ participants: [unknown, goblin], isDM: true, userId: "dm" }), body({ free: true }) as never))).toBe(2);
+  });
+
   it("без вільного слота — 422 і нічого не зберігається", async () => {
     const empty = { ...caster, spellcasting: { ...caster.spellcasting, spellSlots: { "1": { max: 2, current: 0 } } } };
 

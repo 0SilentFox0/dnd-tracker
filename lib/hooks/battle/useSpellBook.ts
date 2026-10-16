@@ -161,7 +161,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
     if (!caster) return;
 
     try {
-      await scene.actions.castSpell.mutateAsync(spellPayload(state));
+      await scene.actions.castSpell.mutateAsync({ ...spellPayload(state), ...(options.allSpells && { free: true }) });
       dispatch({ type: "SUCCESS" });
       options.onDone?.();
     } catch (e) {
@@ -179,8 +179,9 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
     state, spells, byLevel, selected, targets, saveTargets, allCount, formulaOf, definitionOf, slots: caster ? slotLevels(caster) : [],
     // юніт кастує з універсального слота (лише в юнітів, як у castSpell), герой — зі слота кола
     universalSlot: !!caster?.spellcasting.spellSlots.universal,
+    free: !!options.allSpells,
     slotLeft: (level: number) =>
-      level === 0 || !caster ? Infinity : (caster.spellcasting.spellSlots.universal?.current ?? slotLevels(caster).find((s) => s.level === level)?.current ?? 0),
+      level === 0 || !caster || options.allSpells ? Infinity : (caster.spellcasting.spellSlots.universal?.current ?? slotLevels(caster).find((s) => s.level === level)?.current ?? 0),
     costUsed: (s: BookSpell) => !!caster && (definitionOf(s).cost === "bonusAction" ? caster.actionFlags.hasUsedBonusAction : caster.actionFlags.hasUsedAction),
     open: (level?: number, casterOverride?: BattleParticipant) => {
       const who = casterOverride ?? caster;

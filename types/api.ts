@@ -155,6 +155,7 @@ export interface SpellCastData {
   targetIds: string[];
   diceRolls: number[];
   saveRolls?: Array<{ participantId: string; roll: number }>;
+  free?: boolean;
 }
 
 // Skill Trees API

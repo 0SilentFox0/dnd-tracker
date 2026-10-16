@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import dynamic from "next/dynamic";
 
 import { BattleLog } from "./BattleLog";
 import { BattleOverBanner } from "./BattleOverBanner";
@@ -19,8 +20,10 @@ import { BattleStatus,ParticipantSide } from "@/lib/constants/battle";
 import { useBattleScene } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 
+const DmPanel = dynamic(() => import("./DmPanel").then((m) => m.DmPanel), { ssr: false });
+
 export function MobileBattleLayout() {
-  const { battle, current, hero, isMyTurn, allies, enemies, selectedId, select, log, openLog, closeLog } = useBattleScene();
+  const { battle, isDM, current, hero, isMyTurn, allies, enemies, selectedId, select, log, openLog, closeLog } = useBattleScene();
 
   const [tab, setTab] = useState<ParticipantSide>(ParticipantSide.ENEMY);
 
@@ -60,6 +63,7 @@ export function MobileBattleLayout() {
           {isMyTurn && <MyTurnControls key={`${hero.basicInfo.id}-${battle.currentRound}-${hero.battleData.extraTurnActive ? "x" : "n"}`} hero={hero} />}
         </div>
       )}
+      {isDM && <DmPanel />}
       <ResponsiveDialog open={!!selected} onOpenChange={(o) => !o && select(null)} title="Учасник" className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
         {selected && <ParticipantDetails participant={selected} />}
       </ResponsiveDialog>
