@@ -2,7 +2,7 @@
 
 import { Loader2, Sparkles, Swords } from "lucide-react";
 
-import { AiRollButton, DamageDice } from "./DiceInput";
+import { AiRollButton, DamageDice, DieInput } from "./DiceInput";
 import { SpellBookPages, SpellDetail } from "./SpellBookPages";
 
 import { Portrait } from "@/components/battle/hud";
@@ -60,9 +60,7 @@ export function SpellBook({ book }: { book: Book }) {
             return (
               <label key={id} className="mt-3 flex items-center justify-between gap-3 text-sm">
                 Рятівний кидок · {t.basicInfo.name}
-                <input aria-label={`Рятівний кидок: ${t.basicInfo.name}`} inputMode="numeric" className="h-10 w-16 border border-[#2a2018]/30 bg-transparent text-center" value={state.saves[id] ?? ""} onChange={(e) => { const n = parseInt(e.target.value, 10);
-
- if (n >= 1 && n <= 20) book.setSave(id, n); }} />
+                <DieInput label={`Рятівний кидок: ${t.basicInfo.name}`} sides={20} value={state.saves[id]} onChange={(v) => book.setSave(id, v)} className="h-10 w-16 border border-[#2a2018]/30 bg-transparent text-center" />
               </label>
             );
           })}

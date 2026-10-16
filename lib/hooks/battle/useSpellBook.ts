@@ -155,8 +155,8 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
       dispatch({ type: "TOGGLE_TARGET", id, expanded });
     },
     confirmTargets: () => dispatch({ type: "CONFIRM_TARGETS" }),
-    setSave: (id: string, v: number) => dispatch({ type: "SET_SAVE", id, value: v }),
-    setDamage: (i: number, v: number) => dispatch({ type: "SET_DAMAGE", index: i, value: v }),
+    setSave: (id: string, v: number | undefined) => dispatch({ type: "SET_SAVE", id, value: v }),
+    setDamage: (i: number, v: number | undefined) => dispatch({ type: "SET_DAMAGE", index: i, value: v }),
     aiDamage: () => state.pick?.diceSlots.forEach((sides, i) => dispatch({ type: "SET_DAMAGE", index: i, value: rollDie(sides) })),
     toSummary: () => dispatch({ type: "TO_SUMMARY" }),
     back: () => dispatch({ type: "BACK" }),

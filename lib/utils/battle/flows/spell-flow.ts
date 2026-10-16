@@ -31,8 +31,8 @@ export type SpellFlowAction =
   | { type: "TO_TARGETS" }
   | { type: "TOGGLE_TARGET"; id: string; expanded?: string[] }
   | { type: "CONFIRM_TARGETS" }
-  | { type: "SET_SAVE"; id: string; value: number }
-  | { type: "SET_DAMAGE"; index: number; value: number }
+  | { type: "SET_SAVE"; id: string; value: number | undefined }
+  | { type: "SET_DAMAGE"; index: number; value: number | undefined }
   | { type: "TO_SUMMARY" }
   | { type: "BACK" }
   | { type: "SUBMIT" }
@@ -82,8 +82,11 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
     }
     case "CONFIRM_TARGETS":
       return s.targetIds.length === 0 ? s : afterTargets(s);
-    case "SET_SAVE":
-      return { ...s, saves: { ...s.saves, [a.id]: a.value } };
+    case "SET_SAVE": {
+      const { [a.id]: _cleared, ...rest } = s.saves;
+
+      return { ...s, saves: a.value === undefined ? rest : { ...rest, [a.id]: a.value } };
+    }
     case "SET_DAMAGE":
       return { ...s, damage: s.damage.map((v, i) => (i === a.index ? a.value : v)) };
     case "TO_SUMMARY":

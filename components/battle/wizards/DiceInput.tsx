@@ -3,6 +3,7 @@
 import { Dices } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { parseDieInput } from "@/lib/utils/battle/flows";
 
 export function DiceGrid({ sides, value, onPick }: { sides: number; value?: number; onPick: (v: number) => void }) {
   return (
@@ -26,24 +27,32 @@ export function DiceGrid({ sides, value, onPick }: { sides: number; value?: numb
   );
 }
 
-export function DamageDice({ slots, values, onChange }: { slots: number[]; values: (number | undefined)[]; onChange: (i: number, v: number) => void }) {
+/** Поле одного кубика: при фокусі вміст виділено, нова цифра замінює стару, Backspace очищає. */
+export function DieInput({ sides, value, onChange, label, className }: { sides: number; value: number | undefined; onChange: (v: number | undefined) => void; label: string; className?: string }) {
+  return (
+    <input
+      aria-label={label}
+      inputMode="numeric"
+      pattern="[0-9]*"
+      value={value ?? ""}
+      onFocus={(e) => e.target.select()}
+      onChange={(e) => {
+        const v = parseDieInput(e.target.value, sides);
+
+        if (v !== null) onChange(v);
+      }}
+      className={className}
+    />
+  );
+}
+
+export function DamageDice({ slots, values, onChange }: { slots: number[]; values: (number | undefined)[]; onChange: (i: number, v: number | undefined) => void }) {
   return (
     <div className="mt-3 grid grid-cols-4 gap-2">
       {slots.map((sides, i) => (
         <label key={i} className="flex flex-col gap-1 text-xs text-[var(--hud-muted)]">
           d{sides}
-          <input
-            aria-label={`Кубик ${i + 1} (d${sides})`}
-            inputMode="numeric"
-            pattern="[0-9]*"
-            value={values[i] ?? ""}
-            onChange={(e) => {
-              const n = parseInt(e.target.value, 10);
-
-              if (n >= 1 && n <= sides) onChange(i, n);
-            }}
-            className="h-12 border border-white/20 bg-black/30 text-center text-lg text-[var(--ink)]"
-          />
+          <DieInput label={`Кубик ${i + 1} (d${sides})`} sides={sides} value={values[i]} onChange={(v) => onChange(i, v)} className="h-12 border border-white/20 bg-black/30 text-center text-lg text-[var(--ink)]" />
         </label>
       ))}
     </div>
