@@ -157,4 +157,22 @@ describe("SpellBook", () => {
     expect(screen.getByRole("button", { name: "Далі" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Обрати цілі/ })).toBeNull();
   });
+
+  it("юніт з універсальним слотом: книга відкривається на колі з його закляттям, і його можна обрати", async () => {
+    const { wrapper, caster } = fakeScene({ knownSpells: ["ray"], slots: { universal: { max: 3, current: 3 } } });
+
+    function UnitHarness() {
+      const book = useSpellBook(caster, {});
+
+      useEffect(() => book.open(), []); // eslint-disable-line react-hooks/exhaustive-deps
+
+      return <SpellBook book={book} />;
+    }
+
+    render(<UnitHarness />, { wrapper });
+
+    fireEvent.click(await screen.findByText("Палаючий промінь"));
+
+    expect((screen.getByRole("button", { name: /Обрати цілі/ }) as HTMLButtonElement).disabled).toBe(false);
+  });
 });

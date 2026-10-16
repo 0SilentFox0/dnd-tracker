@@ -158,6 +158,9 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
   return {
     state, spells, byLevel, selected, targets, saveTargets, allCount, formulaOf, definitionOf, slots: caster ? slotLevels(caster) : [],
+    // юніт кастує з універсального слота (лише в юнітів, як у castSpell), герой — зі слота кола
+    slotLeft: (level: number) =>
+      level === 0 || !caster ? Infinity : (caster.spellcasting.spellSlots.universal?.current ?? slotLevels(caster).find((s) => s.level === level)?.current ?? 0),
     costUsed: (s: BookSpell) => !!caster && (definitionOf(s).cost === "bonusAction" ? caster.actionFlags.hasUsedBonusAction : caster.actionFlags.hasUsedAction),
     open: (level?: number, casterOverride?: BattleParticipant) => {
       const who = casterOverride ?? caster;

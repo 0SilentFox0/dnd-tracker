@@ -20,13 +20,13 @@ type Book = ReturnType<typeof useSpellBook>;
 const seal = "hud-sc flex h-[52px] w-full items-center justify-center gap-3 bg-[#7a2a1f] text-lg tracking-[.08em] text-[#f3e7cc] shadow-[inset_0_0_0_1px_#a8473a,inset_0_0_0_3px_#7a2a1f,inset_0_0_0_4px_rgba(243,231,204,.35)] disabled:opacity-50";
 
 export function SpellBook({ book }: { book: Book }) {
-  const { state, byLevel, slots, selected, targets } = book;
+  const { state, byLevel, selected, targets } = book;
 
   const wide = useMediaQuery("(min-width: 1024px)");
 
   const open = state.step !== "closed" && state.step !== "result";
 
-  const slotOf = (l: number) => (l === 0 ? Infinity : slots.find((s) => s.level === l)?.current ?? 0);
+  const slotOf = book.slotLeft;
 
   const detailPage = selected && (
     <div className="relative flex h-full flex-col px-5 pb-5 pt-6">
