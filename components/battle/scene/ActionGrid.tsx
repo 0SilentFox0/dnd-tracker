@@ -11,9 +11,9 @@ type Turn = ReturnType<typeof usePlayerTurn>;
 const MORALE_SUB: Record<MoraleOutcome, string> = { none: "без змін", extra: "бойовий дух", skip: "паніка" };
 
 const Tile = ({ icon: Icon, label, sub, used, primary, onClick }: { icon: typeof Swords; label: string; sub: string; used?: boolean; primary?: boolean; onClick?: () => void }) => (
-  <button type="button" disabled={used} onClick={onClick} className={cn("flex h-16 items-center gap-3 border px-3.5 text-left text-[var(--ink)] disabled:opacity-40", primary ? "border-[var(--enemy)] bg-[var(--enemy)]/25" : "border-white/25 bg-black/55")}>
+  <button type="button" disabled={used} onClick={onClick} title={sub} className={cn("flex min-h-16 min-w-0 items-center gap-3 border px-3.5 py-2 text-left text-[var(--ink)] disabled:opacity-40", primary ? "border-[var(--enemy)] bg-[var(--enemy)]/25" : "border-white/25 bg-black/55")}>
     <Icon className={cn("size-7 shrink-0", primary ? "text-[var(--bone)]" : "text-[var(--gold)]")} />
-    <span><span className="hud-sc block text-[17px] leading-5">{label}</span><span className="block text-xs leading-4 text-[#9a8e7b]">{sub}</span></span>
+    <span className="min-w-0"><span className="hud-sc block text-[17px] leading-5">{label}</span><span className="line-clamp-2 break-words text-xs leading-4 text-[#9a8e7b]">{sub}</span></span>
   </button>
 );
 

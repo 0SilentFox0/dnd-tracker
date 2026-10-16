@@ -17,8 +17,8 @@ import { prisma } from "@/lib/db";
 
 // Без зброї свого виду герой б'є лише кубиками рівня — так само рахує баланс (bestAttack у balance/stats.ts)
 const DEFAULT_ATTACKS: ExtractedAttack[] = [
-  { id: "default-melee", name: "Ближня атака", type: AttackType.MELEE as ExtractedAttack["type"], attackBonus: 0, damageDice: "", damageType: "physical" },
-  { id: "default-ranged", name: "Дальня атака", type: AttackType.RANGED as ExtractedAttack["type"], attackBonus: 0, damageDice: "", damageType: "physical" },
+  { id: "default-melee", name: "Звичайний удар", type: AttackType.MELEE as ExtractedAttack["type"], attackBonus: 0, damageDice: "", damageType: "physical" },
+  { id: "default-ranged", name: "Звичайний постріл", type: AttackType.RANGED as ExtractedAttack["type"], attackBonus: 0, damageDice: "", damageType: "physical" },
 ];
 
 export async function extractAttacksFromCharacter(
