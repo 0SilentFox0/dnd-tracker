@@ -130,6 +130,8 @@ describe("castSpell", () => {
 
     expect([hp(r, "e1"), hp(r, "e2"), hp(r, "e3")]).toEqual([194, 197, 194]);
     expect(r.battleAction.actionDetails.savingThrows?.map((s) => s.result)).toEqual(["fail", "success", "fail"]);
+    expect(r.battleAction.resultText).toMatch(/рятівний кидок 1 проти СК \d+ — провал/);
+    expect(r.battleAction.resultText).toMatch(/рятівний кидок 9 проти СК \d+ — успіх, половина шкоди/);
   });
 
   it("рятівний кидок none: успіх скасовує все; half пропускає недіапазонні ефекти", () => {

@@ -9,6 +9,8 @@ import { TurnCountdown } from "./TurnCountdown";
 import { AuraZonePicker } from "@/components/battle/wizards/AuraZonePicker";
 import { AiRollButton, DiceGrid } from "@/components/battle/wizards/DiceInput";
 import { rollDie, useAttackWizard, useAuraZones, useBattleScene, useBonusSpells, usePlayerTurn, useSpellBook } from "@/lib/hooks/battle";
+import { cn } from "@/lib/utils";
+import { moraleTriggerRolls } from "@/lib/utils/battle/battle-morale";
 import { COUNTDOWN_SECONDS } from "@/lib/utils/battle/flows";
 import { usableAbilities } from "@/lib/utils/battle/view";
 import type { BattleParticipant } from "@/types/battle";
@@ -20,7 +22,7 @@ const SpellBook = dynamic(() => import("@/components/battle/wizards/SpellBook").
 const BonusActionPicker = dynamic(() => import("@/components/battle/wizards/BonusActionPicker").then((m) => m.BonusActionPicker), { ssr: false });
 
 export function MyTurnControls({ hero }: { hero: BattleParticipant }) {
-  const { anyPending, isDM } = useBattleScene();
+  const { anyPending, isDM, battle } = useBattleScene();
 
   const turn = usePlayerTurn(hero, useBonusSpells(hero));
 
@@ -29,6 +31,8 @@ export function MyTurnControls({ hero }: { hero: BattleParticipant }) {
   const book = useSpellBook(hero, { allSpells: isDM, onDone: turn.afterAction });
 
   const zone = useAuraZones(hero);
+
+  const morale = moraleTriggerRolls(hero, battle.initiativeOrder);
 
   const [bonusOpen, setBonusOpen] = useState(false);
 
@@ -45,7 +49,12 @@ export function MyTurnControls({ hero }: { hero: BattleParticipant }) {
       {turn.phase === "morale" && (
         <div className="pt-3">
           <div className="hud-sc text-lg font-bold">Перевірка моралі · d10</div>
-          <DiceGrid sides={10} onPick={(v) => void turn.rollMorale(v)} />
+          {morale.kind && (
+            <div className={cn("mt-1 text-sm", morale.kind === "extra" ? "text-[#ffe08a]" : "text-[#ff8a7a]")}>
+              {morale.kind === "extra" ? `Додатковий хід на ${morale.rolls.join(", ")}` : `Пропуск ходу на ${morale.rolls.join(", ")}`}
+            </div>
+          )}
+          <DiceGrid sides={10} onPick={(v) => void turn.rollMorale(v)} highlight={morale.kind ? { rolls: morale.rolls, tone: morale.kind === "extra" ? "gold" : "danger" } : undefined} />
           <div className="mt-2"><AiRollButton onClick={() => void turn.rollMorale(rollDie(10))} /></div>
         </div>
       )}

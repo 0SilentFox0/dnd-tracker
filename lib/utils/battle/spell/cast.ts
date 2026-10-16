@@ -196,11 +196,15 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
       const roll = saveRolls.find((s) => s.participantId === id)?.roll ?? Math.floor(rng() * 20) + 1;
 
-      const success = roll + target.abilities.modifiers[saveAbility] >= spellSaveDc(updatedCaster);
+      const dc = spellSaveDc(updatedCaster);
+
+      const success = roll + target.abilities.modifiers[saveAbility] >= dc;
 
       saves.push({ participantId: id, ability: saveAbility, roll, result: success ? "success" : "fail" });
 
       if (success) factor = onSuccess === "half" ? 0.5 : 0;
+
+      flow.messages.push(`🎲 ${target.basicInfo.name}: рятівний кидок ${roll} проти СК ${dc} — ${success ? (factor > 0 ? "успіх, половина шкоди" : "успіх") : "провал"}`);
 
       if (factor === 0) {
         flow.messages.push(`🛡 ${target.basicInfo.name} уникає ${spell.name}`);

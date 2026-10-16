@@ -12,8 +12,9 @@ const p = (morale: number, flag?: FlagEffect) => {
 };
 
 describe("checkMorale з прапорцями", () => {
-  it("без прапорців: −3 і d10 = 10 → пропуск; +3 і d10 = 10 → додатковий хід", () => {
-    expect(checkMorale(p(-3), 10).shouldSkipTurn).toBe(true);
+  it("без прапорців: −3 пропускає на 1–3, не на 10; +3 і d10 = 10 → додатковий хід", () => {
+    expect(checkMorale(p(-3), 3).shouldSkipTurn).toBe(true);
+    expect(checkMorale(p(-3), 10).shouldSkipTurn).toBe(false);
     expect(checkMorale(p(3), 10).hasExtraTurn).toBe(true);
   });
 
@@ -36,8 +37,8 @@ describe("checkMorale з прапорцями", () => {
     expect(checkMorale(p(1, lead), 1, undefined, () => 0.99).message).toContain("бонус лідерства +15% не спрацював");
     expect(checkMorale(p(1), 1, undefined, () => 0.99).message).not.toContain("лідерства");
     expect(checkMorale(p(1), 1, undefined, () => 0).hasExtraTurn).toBe(false);
-    expect(checkMorale(p(-2, lead), 1, undefined, () => 0).shouldSkipTurn).toBe(false);
-    expect(checkMorale(p(-2, lead), 9, undefined, () => 0).shouldSkipTurn).toBe(true);
+    expect(checkMorale(p(-2, lead), 3, undefined, () => 0).shouldSkipTurn).toBe(false);
+    expect(checkMorale(p(-2, lead), 2, undefined, () => 0).shouldSkipTurn).toBe(true);
   });
 
   it("moraleChance: сумарний шанс = мораль·10 % + бонус", () => {

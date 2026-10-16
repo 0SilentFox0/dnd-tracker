@@ -60,13 +60,25 @@ export function checkMorale(
       result.message = `${participant.basicInfo.name}: без додаткового ходу (Мораль +${currentMorale}, кидок: ${d10Roll}, потрібно: >=${Math.ceil(minRoll)}${bonus > 0 ? `; бонус лідерства +${bonus}% не спрацював` : ""})`;
     }
   } else {
-    if (d10Roll >= minRoll) {
+    // негативна мораль провалюється на низьких кидках: −2 → 1 і 2
+    if (d10Roll <= moraleValue) {
       result.shouldSkipTurn = true;
-      result.message = `😔 ${participant.basicInfo.name}: пропуск ходу через низьку мораль (Мораль ${currentMorale}, кидок: ${d10Roll}, потрібно: >=${Math.ceil(minRoll)})`;
+      result.message = `😔 ${participant.basicInfo.name}: пропуск ходу через низьку мораль (Мораль ${currentMorale}, кидок: ${d10Roll}, пропуск на: <=${moraleValue})`;
     } else {
-      result.message = `${participant.basicInfo.name}: хід не пропущено (Мораль ${currentMorale}, кидок: ${d10Roll}, потрібно: >=${Math.ceil(minRoll)})`;
+      result.message = `${participant.basicInfo.name}: хід не пропущено (Мораль ${currentMorale}, кидок: ${d10Roll}, пропуск на: <=${moraleValue})`;
     }
   }
 
   return result;
+}
+
+/** Значення d10, на яких спрацює мораль: додатковий хід (позитивна) чи пропуск ходу (негативна). */
+export function moraleTriggerRolls(participant: BattleParticipant, participants: BattleParticipant[] = [participant]): { kind: "extra" | "skip" | null; rolls: number[] } {
+  const { value, ignored } = effectiveMorale(participant, participants);
+
+  if (ignored || value === 0) return { kind: null, rolls: [] };
+
+  const n = Math.min(10, Math.abs(value));
+
+  return value > 0 ? { kind: "extra", rolls: Array.from({ length: n }, (_, i) => 11 - n + i) } : { kind: "skip", rolls: Array.from({ length: n }, (_, i) => i + 1) };
 }

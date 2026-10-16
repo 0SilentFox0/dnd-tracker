@@ -5,7 +5,7 @@ import { Dices } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { parseDieInput } from "@/lib/utils/battle/flows";
 
-export function DiceGrid({ sides, value, onPick }: { sides: number; value?: number; onPick: (v: number) => void }) {
+export function DiceGrid({ sides, value, onPick, highlight }: { sides: number; value?: number; onPick: (v: number) => void; highlight?: { rolls: number[]; tone: "gold" | "danger" } }) {
   return (
     <div className="mt-3 grid grid-cols-5 gap-1.5">
       {Array.from({ length: sides }, (_, i) => i + 1).map((n) => (
@@ -18,6 +18,7 @@ export function DiceGrid({ sides, value, onPick }: { sides: number; value?: numb
             n === value ? "border-[#c0392b] bg-[var(--enemy)] font-bold text-white" : "border-white/15 bg-black/25 text-[var(--bone)]",
             n !== value && n === sides && sides === 20 && "text-[#e8c77a]",
             n !== value && n === 1 && "text-[#c98a7c]",
+            n !== value && highlight?.rolls.includes(n) && (highlight.tone === "gold" ? "border-[#e6c25a] bg-[#e6c25a]/20 font-bold text-[#ffe08a]" : "border-[#c0392b] bg-[#c0392b]/25 font-bold text-[#ff8a7a]"),
           )}
         >
           {n}
