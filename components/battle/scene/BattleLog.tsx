@@ -112,7 +112,7 @@ export function BattleLog() {
               <div className="min-w-0 flex-1">
                 <div className="mb-0.5 flex items-baseline gap-1.5 text-[11.5px] leading-4">
                   <span className={cn("hud-sc font-bold", enemy ? "text-[#ff8a7a]" : "text-[#a8d48f]")}>{actor?.basicInfo.name ?? (e.actorName || "Бій")}</span>
-                  <span className="text-[var(--hud-muted)]">· {KIND[e.actionType] ?? "подія"}</span>
+                  <span className="text-[var(--hud-muted)]">· {actor ? (KIND[e.actionType] ?? "подія") : "тригери"}</span>
                 </div>
                 <div className="text-[13.5px] font-medium leading-[18px] text-[var(--ink)]">{view.headline}</div>
                 {view.lines.map((line, n) => (
