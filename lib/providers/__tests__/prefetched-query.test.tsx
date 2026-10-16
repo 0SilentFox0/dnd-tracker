@@ -52,4 +52,23 @@ describe("PrefetchedQuery", () => {
     expect(await screen.findByText("client")).toBeInTheDocument();
     expect(queryFn).toHaveBeenCalledTimes(1);
   });
+
+  it("повторне монтування з даними першого HTML не затирає новішу версію з дельт", () => {
+    const client = new QueryClient();
+
+    const seed = (data: unknown) =>
+      render(
+        <QueryClientProvider client={client}>
+          <PrefetchedQuery queryKey={KEY} data={data}>
+            <span />
+          </PrefetchedQuery>
+        </QueryClientProvider>,
+      );
+
+    seed({ version: 3 }).unmount();
+    client.setQueryData(KEY, { version: 7 });
+    seed({ version: 3 });
+
+    expect(client.getQueryData(KEY)).toEqual({ version: 7 });
+  });
 });
