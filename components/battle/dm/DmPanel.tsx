@@ -34,6 +34,8 @@ export function DmPanel({ panel }: { panel?: { open: boolean; onOpenChange: (ope
         onRemoveFromBattle={(p) => actions.updateParticipant.mutate({ participantId: p.basicInfo.id, data: { removeFromBattle: true } })}
         onKill={(p) => actions.updateParticipant.mutate({ participantId: p.basicInfo.id, data: { kill: true } })}
         onScaleUnits={(direction) => actions.scaleUnits.mutate({ direction })}
+        onRefreshSources={() => actions.refreshSources.mutate({})}
+        refreshPending={actions.refreshSources.isPending}
         onCompleteBattle={(result) => actions.complete.mutate({ result })}
         onTakeControl={(p) => setDmControlledId(p?.basicInfo.id ?? null)}
         dmControlledParticipantId={dmControlledId}

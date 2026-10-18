@@ -13,6 +13,7 @@ export {
   useDeleteAllBattles,
   useMoraleCheck,
   useNextTurn,
+  useRefreshBattleSources,
   useResetBattle,
   useRevealBattleParticipants,
   useRollbackBattleAction,

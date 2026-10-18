@@ -21,6 +21,6 @@ describe("allowWhileAwaitingDm", () => {
       .map((file) => relative(ROOT, join(file, "..")))
       .sort();
 
-    expect(allowed).toEqual(["add-participant", "complete", "morale-check", "participants/[participantId]", "reset", "reveal-participant", "rollback"]);
+    expect(allowed).toEqual(["add-participant", "complete", "morale-check", "participants/[participantId]", "refresh-sources", "reset", "reveal-participant", "rollback"]);
   });
 });

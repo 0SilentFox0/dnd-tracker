@@ -22,6 +22,7 @@ import {
   useCompleteBattle,
   useMoraleCheck,
   useNextTurn,
+  useRefreshBattleSources,
   useResetBattle,
   useRevealBattleParticipants,
   useRollbackBattleAction,
@@ -65,6 +66,7 @@ export interface BattleSceneActions {
   reveal: ReturnType<typeof useRevealBattleParticipants>;
   updateParticipant: ReturnType<typeof useUpdateBattleParticipant>;
   scaleUnits: ReturnType<typeof useScaleBattleUnits>;
+  refreshSources: ReturnType<typeof useRefreshBattleSources>;
 }
 
 /** Змінюється лише разом з даними бою — список учасників, черга, герой. */
@@ -248,6 +250,7 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
     reveal: useRevealBattleParticipants(campaignId, battleId, o),
     updateParticipant: useUpdateBattleParticipant(campaignId, battleId, o),
     scaleUnits: useScaleBattleUnits(campaignId, battleId, o),
+    refreshSources: useRefreshBattleSources(campaignId, battleId, o),
   };
 
   const readBattle = useCallback(

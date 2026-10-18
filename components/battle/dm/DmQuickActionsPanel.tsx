@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronLeft, ChevronsDown, ChevronsUp, ScrollText, Sparkles, Trophy, UserPlus } from "lucide-react";
+import { ChevronLeft, ChevronsDown, ChevronsUp, RefreshCw, ScrollText, Sparkles, Trophy, UserPlus } from "lucide-react";
 
 import { DmParticipantRow } from "./DmParticipantRow";
 
 import { BattleLogPanel } from "@/components/battle/log/BattleLogPanel";
 import { HUD_SURFACE } from "@/components/hud";
 import { BattleStatus } from "@/lib/constants/battle";
+import { useConfirm } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 import { isLiveScalable, type LiveScaleDirection } from "@/lib/utils/battle/balance/live-scale";
 import type { BattleScene } from "@/types/api";
@@ -27,6 +28,9 @@ export interface DmQuickActionsPanelProps {
   onKill?: (participant: BattleParticipant) => void;
   /** Живе підсилення/послаблення ворожих юнітів лише в цьому бою (стакається) */
   onScaleUnits?: (direction: LiveScaleDirection) => void;
+  /** Оновити здібності, атаки й закляття учасників з бібліотеки кампанії */
+  onRefreshSources?: () => void;
+  refreshPending?: boolean;
   onCompleteBattle: (result?: "victory" | "defeat") => void;
   onTakeControl: (participant: BattleParticipant | null) => void;
   dmControlledParticipantId: string | null;
@@ -49,6 +53,8 @@ export function DmQuickActionsPanel({
   onRemoveFromBattle,
   onKill,
   onScaleUnits,
+  onRefreshSources,
+  refreshPending,
   onCompleteBattle,
   onTakeControl,
   dmControlledParticipantId,
@@ -60,6 +66,8 @@ export function DmQuickActionsPanel({
 }: DmQuickActionsPanelProps) {
   const [ownOpen, setOwnOpen] = useState(false);
 
+  const confirm = useConfirm();
+
   const open = panel ? panel.open : ownOpen;
 
   const setOpen = panel ? panel.onOpenChange : setOwnOpen;
@@ -69,6 +77,16 @@ export function DmQuickActionsPanel({
   const participants = (battle.initiativeOrder ?? []) as BattleParticipant[];
 
   const closePanel = () => setOpen(false);
+
+  const refreshSources = async () => {
+    const ok = await confirm({
+      title: "Оновити з бібліотеки?",
+      description: "Здібності, атаки, закляття і слоти учасників оновляться з бази кампанії. HP, ефекти й використані ліміти залишаться.",
+      confirmLabel: "Оновити",
+    });
+
+    if (ok) onRefreshSources?.();
+  };
 
   const canScale = onScaleUnits && battle.status === BattleStatus.ACTIVE && participants.some(isLiveScalable);
 
@@ -154,6 +172,13 @@ export function DmQuickActionsPanel({
             >
               <Sparkles className="size-4 shrink-0 text-[#8fd0e8]" />
               Накласти заклинання
+            </button>
+          )}
+
+          {onRefreshSources && battle.status === BattleStatus.ACTIVE && (
+            <button type="button" className={ACTION} disabled={refreshPending} onClick={refreshSources}>
+              <RefreshCw className="size-4 shrink-0 text-[var(--gold)]" />
+              Оновити з бібліотеки
             </button>
           )}
 

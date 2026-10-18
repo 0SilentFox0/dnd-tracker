@@ -19,6 +19,7 @@ import {
   getBattle,
   moraleCheck,
   nextTurn,
+  refreshBattleSources,
   resetBattle,
   revealBattleParticipants,
   rollbackBattleAction,
@@ -196,3 +197,6 @@ export const useUpdateBattleParticipant = (c: string, b: string, o: ActionOpts =
 
 export const useScaleBattleUnits = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<{ direction: "buff" | "debuff" }>(c, b, (body) => scaleBattleUnits(c, b, body), o);
+
+export const useRefreshBattleSources = (c: string, b: string, o: ActionOpts = {}) =>
+  useBattleAction<Record<string, never>>(c, b, (body) => refreshBattleSources(c, b, body), o);
