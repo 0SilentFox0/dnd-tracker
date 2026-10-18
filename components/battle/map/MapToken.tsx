@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 import { isDown } from "@/lib/utils/battle/participant/state";
 import type { BattleParticipant } from "@/types/battle";
 
+const PORTRAIT_SHARE = 0.7;
+
 export interface MapTokenProps {
   participant: BattleParticipant;
   box: { cx: number; cy: number; size: number };
@@ -27,11 +29,11 @@ function MapTokenImpl({ participant, box, mapSize, pxPerUnit, selected, current,
 
   const shake = useDamageShake<HTMLButtonElement>(change);
 
-  const portraitPx = Math.max(12, Math.round(box.size * pxPerUnit * 0.8));
+  const portraitPx = Math.max(12, Math.round(box.size * pxPerUnit * PORTRAIT_SHARE));
 
   return (
     <div
-      className="absolute flex items-center justify-center transition-[left,top] duration-[250ms] ease-out motion-reduce:transition-none"
+      className="absolute transition-[left,top] duration-[250ms] ease-out motion-reduce:transition-none"
       style={{
         left: `${((box.cx - box.size / 2) / width) * 100}%`,
         top: `${((box.cy - box.size / 2) / height) * 100}%`,
@@ -50,7 +52,8 @@ function MapTokenImpl({ participant, box, mapSize, pxPerUnit, selected, current,
           e.stopPropagation();
           onClick?.(id);
         }}
-        className={cn("flex h-full w-full flex-col items-center justify-center rounded-full", selected && "ring-2 ring-[var(--gold)]")}
+        className={cn("absolute left-1/2 top-0 flex -translate-x-1/2 items-center justify-center rounded-full", selected && "ring-2 ring-[var(--gold)]")}
+        style={{ width: `${PORTRAIT_SHARE * 100}%`, height: `${PORTRAIT_SHARE * 100}%` }}
       >
         <Portrait
           key={`portrait:${change?.id ?? ""}`}

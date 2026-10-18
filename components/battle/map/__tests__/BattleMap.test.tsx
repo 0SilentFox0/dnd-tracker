@@ -63,44 +63,69 @@ describe("BattleMap", () => {
     expect(parseFloat(clip.style.width)).toBeCloseTo(250);
   });
 
-  describe("hud placement", () => {
-    it("card sits below the token, and flips above at the bottom edge", () => {
-      avail = { width: 400, height: 300 };
+  describe("hud footprint", () => {
+    const pct = (v: string) => parseFloat(v);
+
+    function rectOf(el: HTMLElement) {
+      return { left: pct(el.style.left), top: pct(el.style.top), right: pct(el.style.left) + pct(el.style.width), bottom: pct(el.style.top) + pct(el.style.height) };
+    }
+
+    function footprintRect(x: number, y: number, size: number) {
+      return { left: (x / square.cols) * 100, top: (y / square.rows) * 100, right: ((x + size) / square.cols) * 100, bottom: ((y + size) / square.rows) * 100 };
+    }
+
+    it.each([
+      ["size 1", 3, 2, 1],
+      ["size 2", 0, 0, 2],
+    ])("%s: token, HUD and portrait stay inside the footprint", (_, x, y, size) => {
+      const unit = { ...at("u", x, y), combatStats: { ...base.combatStats, gridSize: size } };
 
       const { container } = render(
         <TooltipProvider>
-          <BattleMap map={square} participants={[at("h", 0, 0), at("e", 3, 2)]} view={{ hud: new Map([["e", { exact: true }]]) }} />
+          <BattleMap map={square} participants={[unit]} />
         </TooltipProvider>,
       );
 
-      const cards = container.querySelectorAll<HTMLElement>("[class*=backdrop-blur]");
+      const fp = footprintRect(x, y, size);
 
-      expect(cards[0].style.top).not.toBe("");
-      expect(cards[0].style.bottom).toBe("");
-      expect(cards[1].style.bottom).not.toBe("");
-      expect(cards[1].style.top).toBe("");
+      const hud = container.querySelector<HTMLElement>('[data-map-hud="u"]') as HTMLElement;
+
+      const r = rectOf(hud);
+
+      expect(r.left).toBeGreaterThanOrEqual(fp.left);
+      expect(r.top).toBeGreaterThanOrEqual(fp.top);
+      expect(r.right).toBeLessThanOrEqual(fp.right + 1e-6);
+      expect(r.bottom).toBeLessThanOrEqual(fp.bottom + 1e-6);
+
+      const strip = hud.querySelector<HTMLElement>("[data-map-hud-strip]") as HTMLElement;
+
+      expect(strip.className).toContain("bottom-0");
+      expect(strip.className).toContain("max-h-full");
+      expect(strip.className).toContain("w-[94%]");
+      expect(strip.className).not.toContain("top-");
+
+      const portrait = container.querySelector<HTMLElement>('[data-fx-participant="u"]') as HTMLElement;
+
+      expect(pct(portrait.style.width)).toBeLessThanOrEqual(72);
+      expect(pct(portrait.style.width)).toBeGreaterThanOrEqual(68);
+      expect(portrait.className).toContain("top-0");
     });
-  });
 
-  describe("hud sizing", () => {
-    it("card width does not exceed footprint width, size-1 card has no name", () => {
+    it("size-1 card has no name, size 2 shows it", () => {
       const big = { ...at("g", 0, 0), combatStats: { ...base.combatStats, gridSize: 2 } };
 
       const { container } = render(<BattleMap map={square} participants={[at("small", 3, 0), big]} />);
 
-      const cardPx = 200;
+      expect(container.querySelector('[data-map-hud="small"]')?.textContent).not.toContain("small");
+      expect(container.querySelector('[data-map-hud="g"]')?.textContent).toContain("g");
+    });
 
-      const [first, second] = [...container.querySelectorAll<HTMLElement>("[class*=backdrop-blur]")];
+    it("tiny cells show only the bar", () => {
+      avail = { width: 80, height: 60 };
 
-      const widths = [parseFloat(first.style.width), parseFloat(second.style.width)];
+      const { container } = render(<BattleMap map={square} participants={[at("h", 0, 0)]} />);
 
-      expect(Math.max(...widths)).toBeLessThanOrEqual(2 * cardPx * 1.1);
-      expect(Math.min(...widths)).toBeLessThanOrEqual(cardPx * 1.1);
-      expect(widths.sort()[0]).toBeCloseTo(cardPx);
-
-      const smallCard = [first, second].find((c) => parseFloat(c.style.width) < cardPx * 1.5) as HTMLElement;
-
-      expect(smallCard.textContent).not.toContain("small");
+      expect(container.querySelector('[data-map-hud="h"]')?.textContent).toBe("");
     });
   });
 

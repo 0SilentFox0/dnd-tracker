@@ -39,30 +39,17 @@ function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, raised }
 
   const boxPx = box.size * pxPerUnit;
 
-  const cells = sizeOf(participant);
+  const small = sizeOf(participant) === 1;
 
-  const small = cells === 1;
+  const nameFont = clamp(6, boxPx * (small ? 0.11 : 0.075), small ? 11 : 14);
 
-  const cardPx = cells * cellPx;
+  const hpFont = small ? nameFont : clamp(6, nameFont * 0.9, 12);
 
-  const gap = Math.round(boxPx * 0.1);
-
-  const nameFont = small ? clamp(7, cellPx * 0.17, 11) : clamp(9, cellPx * 0.2 / Math.sqrt(cells), 14);
-
-  const hpFont = small ? nameFont : clamp(8, cellPx * 0.17, 12);
-
-  const mapPx = mapSize.width * pxPerUnit;
-
-  const wrapperLeft = ((box.cx - box.size / 2) / mapSize.width) * mapPx;
-
-  const relLeft = clamp(-wrapperLeft, (boxPx - cardPx) / 2, mapPx - cardPx - wrapperLeft);
-
-  const cardHeight = nameFont * 1.3 + 12;
-
-  const below = (box.cy + box.size / 2) * pxPerUnit - gap + 4 + cardHeight <= mapSize.height * pxPerUnit;
+  const minStripPx = Math.ceil(nameFont * 1.25 + 7);
 
   return (
     <div
+      data-map-hud={participant.basicInfo.id}
       className="pointer-events-none absolute transition-[left,top] duration-[250ms] ease-out motion-reduce:transition-none"
       style={{
         left: `${((box.cx - box.size / 2) / mapSize.width) * 100}%`,
@@ -72,24 +59,21 @@ function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, raised }
         zIndex: raised ? 20 : 10,
       }}
     >
+      {change && showText && (
+        <span
+          key={`float:${change.id}`}
+          className={cn("hud-sc absolute bottom-[30%] left-1/2 z-10 -translate-x-1/2 font-extrabold opacity-0 [text-shadow:0_2px_6px_#000] animate-[hud-float_1.1s_ease-out]", change.delta < 0 ? "text-[#ff6a4d]" : "text-[#8fd07a]")}
+          style={{ fontSize: nameFont * 1.6 }}
+        >
+          {signedDelta(change.delta)}
+        </span>
+      )}
       <div
         ref={shake}
-        className={cn("absolute rounded-md border border-white/10 bg-black/70 backdrop-blur-[2px]", showText ? (small ? "px-1 py-0.5" : "px-1.5 py-1") : "p-0.5", down && "opacity-40")}
-        style={{
-          width: cardPx,
-          left: relLeft,
-          ...(below ? { top: `calc(100% - ${gap}px + 4px)` } : { bottom: `calc(100% - ${gap}px + 4px)` }),
-        }}
+        data-map-hud-strip
+        className={cn("absolute bottom-0 left-[3%] flex w-[94%] max-h-full flex-col justify-end overflow-hidden rounded-md border border-white/10 bg-black/70 px-1 py-0.5 backdrop-blur-[2px]", down && "opacity-40")}
+        style={showText ? { height: `max(28%, ${minStripPx}px)` } : undefined}
       >
-        {change && showText && (
-          <span
-            key={`float:${change.id}`}
-            className={cn("hud-sc absolute left-1/2 top-0 z-10 -translate-x-1/2 font-extrabold opacity-0 [text-shadow:0_2px_6px_#000] animate-[hud-float_1.1s_ease-out]", change.delta < 0 ? "text-[#ff6a4d]" : "text-[#8fd07a]")}
-            style={{ fontSize: nameFont * 1.6 }}
-          >
-            {signedDelta(change.delta)}
-          </span>
-        )}
         {showText && small && (
           <div className={cn("flex justify-center whitespace-nowrap font-sans font-medium leading-tight", down && "line-through")} style={{ fontSize: hpFont }}>
             {exact ? (
@@ -117,7 +101,7 @@ function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, raised }
             )}
           </div>
         )}
-        <HealthBar participant={participant} exact={exact} className={showText ? "mt-0.5" : "mt-0"} />
+        <HealthBar participant={participant} exact={exact} className="mt-0.5 shrink-0" />
       </div>
     </div>
   );
