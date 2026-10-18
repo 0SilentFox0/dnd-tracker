@@ -236,6 +236,8 @@ export async function runBattleMutation<TBody>(
       throw new BattleConflictError(loaded.scene.version);
     }
 
+    const awaitedBefore = loaded.scene.status === BattleStatus.ACTIVE && checkVictoryConditions(loaded.participants, reserveOf(loaded.pending)).awaiting !== null;
+
     const result = withVictory(loaded.scene, guardTurnOrder(loaded.scene, loaded.participants, await options.mutate(ctx, parsed.body), new URL(req.url).pathname.split("/").pop()));
 
     if (options.dryRun?.(parsed.body)) {
@@ -291,7 +293,7 @@ export async function runBattleMutation<TBody>(
       knowledge,
     });
 
-    deps.publish(buildPusherMessages({ before: loaded.scene, after, participants: result.participants, pending: result.pending, delta: clientDelta }));
+    deps.publish(buildPusherMessages({ before: loaded.scene, after, participants: result.participants, pending: result.pending, wasAwaiting: awaitedBefore, delta: clientDelta }));
 
     return NextResponse.json({ delta: clientDelta, ...(result.response && { response: result.response }) });
   } catch (err) {

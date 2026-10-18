@@ -28,8 +28,8 @@ describe("AwaitingDmBanner", () => {
     expect(setOpen).toHaveBeenCalledWith(true);
   });
 
-  it("поки діалог відкритий, ДМ банера не бачить", () => {
+  it("поки діалог відкритий, ДМ бачить неактивний банер", () => {
     renderBanner(true, true);
-    expect(screen.queryByText(/Бій чекає вашого рішення/)).toBeNull();
+    expect((screen.getByRole("button", { name: /Бій чекає вашого рішення/ }) as HTMLButtonElement).disabled).toBe(true);
   });
 });

@@ -19,10 +19,8 @@ export const AwaitingDmBanner = memo(function AwaitingDmBanner() {
     );
   }
 
-  if (awaitingDialog.open) return null;
-
   return (
-    <button type="button" onClick={() => awaitingDialog.setOpen(true)} className={`${BOX} w-[calc(100%-2rem)]`}>
+    <button type="button" onClick={() => awaitingDialog.setOpen(true)} disabled={awaitingDialog.open} className={`${BOX} w-[calc(100%-2rem)]`}>
       <Hourglass className="size-4 shrink-0 text-[var(--gold)]" />
       <span className="hud-sc text-[17px] tracking-[.12em] text-[var(--ink)]">Бій чекає вашого рішення — резерв</span>
     </button>

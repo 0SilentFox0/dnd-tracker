@@ -237,6 +237,15 @@ describe("резерв", () => {
       expect(out.actions.filter((a) => a.id.startsWith("berserk"))).toEqual([]);
     });
 
+    it("обидві сторони на полі полягли, у резерві хтось є — цикл не крутить раунди", () => {
+      const deadHero = { ...withInit(hero, 10), combatStats: { ...hero.combatStats, currentHp: 0, status: "dead" as const } };
+
+      const out = advanceTurn({ participants: [deadGob, deadHero], pending: [imp], scene });
+
+      expect(out.scene.round).toBeLessThanOrEqual(2);
+      expect(out.actions.filter((a) => a.id.startsWith("triggers-round"))).toEqual([]);
+    });
+
     it("перемога під час циклу зупиняє бій", () => {
       const out = advanceTurn({ participants: [hero, deadGob], pending: [], scene });
 

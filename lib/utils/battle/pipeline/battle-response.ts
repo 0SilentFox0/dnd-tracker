@@ -59,9 +59,10 @@ export function buildPusherMessages(args: {
   after: BattleSceneState;
   participants: BattleParticipant[];
   pending?: BattleParticipant[];
+  wasAwaiting?: boolean;
   delta: ClientBattleDelta;
 }): PusherMessage[] {
-  const { before, after, participants, pending = [], delta } = args;
+  const { before, after, participants, pending = [], wasAwaiting = false, delta } = args;
 
   const channel = battleChannelName(after.id);
 
@@ -71,7 +72,7 @@ export function buildPusherMessages(args: {
 
   const messages: PusherMessage[] = [{ channel, event: "battle-delta", payload }];
 
-  const turnMoved = before.round !== after.round || before.turnIndex !== after.turnIndex || before.status !== after.status;
+  const turnMoved = before.round !== after.round || before.turnIndex !== after.turnIndex || before.status !== after.status || wasAwaiting;
 
   const active = participants[after.turnIndex];
 

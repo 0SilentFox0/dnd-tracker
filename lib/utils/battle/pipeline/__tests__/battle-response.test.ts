@@ -68,6 +68,13 @@ describe("buildPusherMessages", () => {
     expect(messages.map((m) => m.event)).toEqual(["battle-delta"]);
   });
 
+  it("ДМ вирішив очікування розкриттям — гравець поточного слота отримує turn-started без зсуву ходу", () => {
+    const messages = buildPusherMessages({ before: scene, after: scene, participants: [hero, goblin], wasAwaiting: true, delta: payload });
+
+    expect(messages.map((m) => m.event)).toEqual(["battle-delta", "turn-started"]);
+    expect(messages[1]).toMatchObject({ channel: "private-user-u-player" });
+  });
+
   it("велика дельта — refetch", () => {
     const big = { ...payload, upserted: Array.from({ length: 60 }, () => hero) };
 

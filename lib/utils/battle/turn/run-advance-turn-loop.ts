@@ -239,6 +239,8 @@ export function runAdvanceTurnLoop(
 
     // у очікуванні рішення ДМ автоматичні дії не виконуються; цикл лише шукає живого поточного
     if (beforeAuto.awaiting) {
+      if (!updatedInitiativeOrder.some(isActive)) break;
+
       if (isActive(turnResult.participant)) activeParticipantFound = true;
 
       continue;
