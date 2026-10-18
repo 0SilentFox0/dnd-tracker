@@ -22,11 +22,12 @@ const raceDependentKeys = (campaignId: string) => [
   skillKeys.trees(campaignId),
 ];
 
-export function useRaces(campaignId: string, initialRaces?: Race[]) {
+export function useRaces(campaignId: string, initialRaces?: Race[], options: { enabled?: boolean } = {}) {
   return useQuery<Race[]>({
     queryKey: raceKeys.list(campaignId),
     staleTime: REFERENCE_STALE_MS,
     queryFn: () => getRaces(campaignId),
+    enabled: options.enabled ?? true,
     ...(initialRaces && initialRaces.length > 0
       ? { initialData: initialRaces }
       : {}),

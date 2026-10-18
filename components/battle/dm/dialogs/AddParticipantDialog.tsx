@@ -10,13 +10,15 @@ import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import { ParticipantSide,ParticipantSourceType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import { useCharacters } from "@/lib/hooks/characters";
-import { useUnits } from "@/lib/hooks/units";
+import { useUnitPicker } from "@/lib/hooks/units";
 import type { AddParticipantData } from "@/types/battle";
 
 interface AddParticipantDialogProps {
@@ -40,15 +42,15 @@ export function AddParticipantDialog({
 
   const [characterId, setCharacterId] = useState("");
 
-  const [unitId, setUnitId] = useState("");
-
   const [quantity, setQuantity] = useState(1);
 
   const [reserved, setReserved] = useState(false);
 
   const { data: characters = [] } = useCharacters(campaignId, { compact: true, enabled: open });
 
-  const { data: units = [] } = useUnits(campaignId, undefined, { enabled: open });
+  const picker = useUnitPicker(campaignId, open);
+
+  const { unitId } = picker;
 
   const handleSubmit = () => {
     if (type === ParticipantSourceType.CHARACTER && characterId) {
@@ -65,7 +67,7 @@ export function AddParticipantDialog({
         reserved,
       });
       onOpenChange(false);
-      setUnitId("");
+      picker.reset();
       setQuantity(1);
       setReserved(false);
     }
@@ -134,16 +136,36 @@ export function AddParticipantDialog({
         {type === ParticipantSourceType.UNIT && (
           <>
             <div className="space-y-2">
-              <Label>Юніт</Label>
-              <Select value={unitId} onValueChange={setUnitId}>
+              <Label>Раса</Label>
+              <Select value={picker.raceKey} onValueChange={picker.selectRace}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Оберіть юніта" />
+                  <SelectValue placeholder="Оберіть расу" />
                 </SelectTrigger>
                 <SelectContent>
-                  {units.map((u) => (
-                    <SelectItem key={u.id} value={u.id}>
-                      {u.name}
+                  {picker.raceOptions.map((r) => (
+                    <SelectItem key={r.key} value={r.key}>
+                      {r.label} ({r.count})
                     </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Юніт</Label>
+              <Select value={unitId} onValueChange={picker.setUnitId} disabled={!picker.raceKey}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={picker.raceKey ? "Оберіть юніта" : "Спершу оберіть расу"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {picker.tiers.map((tier) => (
+                    <SelectGroup key={tier.level}>
+                      <SelectLabel>Рівень {tier.level}</SelectLabel>
+                      {tier.units.map((u) => (
+                        <SelectItem key={u.id} value={u.id}>
+                          {u.name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
                   ))}
                 </SelectContent>
               </Select>
